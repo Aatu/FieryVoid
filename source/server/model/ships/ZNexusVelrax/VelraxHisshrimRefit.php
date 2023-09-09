@@ -5,7 +5,7 @@ class VelraxHisshrimRefit extends HeavyCombatVesselLeftRight{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 335;
-	$this->faction = "ZNexus Velrax";
+	$this->faction = "ZNexus Velrax Republic";
         $this->phpclass = "VelraxHisshrimRefit";
         $this->imagePath = "img/ships/Nexus/VelraxHisshrim.png";
         $this->shipClass = "Hisshrim Patrol Carrier (2059 Refit)";

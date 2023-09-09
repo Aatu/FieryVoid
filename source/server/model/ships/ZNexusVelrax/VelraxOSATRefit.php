@@ -5,7 +5,7 @@ class VelraxOSATRefit extends OSAT{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 200;
-		$this->faction = 'ZNexus Velrax';
+		$this->faction = 'ZNexus Velrax Republic';
         $this->phpclass = "VelraxOSATRefit";
         $this->imagePath = "img/ships/Nexus/VelraxOSAT_v2.png";
 			$this->canvasSize = 80; //img has 100px per side

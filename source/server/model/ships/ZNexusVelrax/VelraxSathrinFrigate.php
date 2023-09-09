@@ -5,7 +5,7 @@ class VelraxSathrinFrigate extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 325;
-        $this->faction = "ZNexus Velrax";
+        $this->faction = "ZNexus Velrax Republic";
         $this->phpclass = "VelraxSathrinFrigate";
         $this->imagePath = "img/ships/Nexus/VelraxSathrin.png";
         $this->shipClass = "Sathrin Border Frigate";

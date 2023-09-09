@@ -182,7 +182,7 @@ window.gamedata = {
 		  case 'ZNexus Sal-bez Coalition':
 			powerRating = 'Tier 2, custom faction';
 			break;
-		  case 'ZNexus Velrax':
+		  case 'ZNexus Velrax Republic':
 			powerRating = 'Tier 2, custom faction';
 			break;
 		  case 'ZStarTrek Federation (TOS)':

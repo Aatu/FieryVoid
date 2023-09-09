@@ -5,7 +5,7 @@ class VelraxVersissScout extends HeavyCombatVesselLeftRight{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 420;
-	$this->faction = "ZNexus Velrax";
+	$this->faction = "ZNexus Velrax Republic";
         $this->phpclass = "VelraxVersissScout";
         $this->imagePath = "img/ships/Nexus/VelraxVersiss.png";
         $this->shipClass = "Versiss Combat Scout";

@@ -5,7 +5,7 @@ class VelraxStrikeCarrier extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 525;
-	$this->faction = "ZNexus Velrax";
+	$this->faction = "ZNexus Velrax Republic";
         $this->phpclass = "VelraxStrikeCarrier";
         $this->imagePath = "img/ships/Nexus/VelraxResskar.png";
         $this->shipClass = "Resskar Strike Carrier";
