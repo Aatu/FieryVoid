@@ -64,7 +64,8 @@ class VelraxSivrinRefit extends HeavyCombatVesselLeftRight{
         				20 => "C&C",
         		),
         		3=> array(
-        				5 => "Thruster",
+        				4 => "Thruster",
+						5 => "1: Medium Plasma Cannon",
         				6 => "Twin Ion Gun",
         				8 => "Laser Spear",
 						10 => "Heavy Laser Spear",
@@ -73,7 +74,8 @@ class VelraxSivrinRefit extends HeavyCombatVesselLeftRight{
         				20 => "Primary",
         		),
         		4=> array(
-        				5 => "Thruster",
+        				4 => "Thruster",
+						5 => "1: Medium Plasma Cannon",
         				6 => "Twin Ion Gun",
         				8 => "Laser Spear",
 						10 => "Heavy Laser Spear",

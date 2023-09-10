@@ -65,7 +65,8 @@ class VelraxHisshrimRefit extends HeavyCombatVesselLeftRight{
         				20 => "C&C",
         		),
         		3=> array(
-        				5 => "Thruster",
+        				4 => "Thruster",
+						5 => "1:Plasma Wave",
         				7 => "Twin Ion Gun",
 						8 => "Dart Interceptor",
 						10 => "Heavy Laser Spear",
@@ -74,7 +75,8 @@ class VelraxHisshrimRefit extends HeavyCombatVesselLeftRight{
         				20 => "Primary",
         		),
         		4=> array(
-        				5 => "Thruster",
+        				4 => "Thruster",
+						5 => "1:Plasma Wave",
         				7 => "Twin Ion Gun",
 						8 => "Dart Interceptor",
 						10 => "Heavy Laser Spear",
