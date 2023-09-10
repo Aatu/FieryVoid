@@ -59,9 +59,9 @@ class BrixadiiBattleDestroyer2108 extends HeavyCombatVessel{
         $this->hitChart = array(
             0=> array(
                     7 => "Structure",
-                    10 => "Thruster",
+                    11 => "Thruster",
                     13 => "Scanner",
-                    16 => "Engine",
+                    15 => "Engine",
                     17 => "Hangar",
                     19 => "Reactor",
                     20 => "C&C",
