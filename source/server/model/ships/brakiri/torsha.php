@@ -5,7 +5,7 @@ class Torsha extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 800;
-	$this->faction = "Brakiri";
+	$this->faction = "Brakiri Syndicracy";
         $this->phpclass = "Torsha";
         $this->imagePath = "img/ships/torsha.png";
         $this->shipClass = "Torsha Scout Carrier";

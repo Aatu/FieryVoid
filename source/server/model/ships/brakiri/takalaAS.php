@@ -6,7 +6,7 @@ class TakalaAS extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
     	$this->pointCost = 50*6;
-    	$this->faction = "Brakiri";
+    	$this->faction = "Brakiri Syndicracy";
         $this->phpclass = "TakalaAS";
         $this->shipClass = "Takala Battle Assault Shuttles";
     	$this->imagePath = "img/ships/takala.png";

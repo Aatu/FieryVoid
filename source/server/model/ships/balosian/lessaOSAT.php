@@ -7,7 +7,7 @@ class LessaOSAT extends OSAT
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 150;
-		$this->faction = "Balosian";
+		$this->faction = "Balosian Underdwellers";
 		$this->phpclass = "LessaOSAT";
 		$this->shipClass = "Lessa Orbital Satellite";
 		$this->imagePath = "img/ships/Lessa.png";

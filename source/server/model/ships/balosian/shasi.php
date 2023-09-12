@@ -5,7 +5,7 @@ class Shasi extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 150;
-	$this->faction = "Balosian";
+	$this->faction = "Balosian Underdwellers";
 	$this->phpclass = "Shasi";
 	$this->shipClass = "Shasi Light Fighters";
 	$this->imagePath = "img/ships/shasi.png";

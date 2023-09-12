@@ -3,7 +3,7 @@ class Selatra extends StarBaseSixSections{
 	function __construct($id, $userid, $name,  $slot){
 		parent::__construct($id, $userid, $name,  $slot);
 		$this->pointCost = 3000;
-		$this->faction = "Abbai (WotCR)";
+		$this->faction = "Abbai Matriarchate (WotCR)";
 		$this->phpclass = "Selatra";
 		$this->shipClass = "Selatra Shield Base";
 		$this->shipSizeClass = 3; //Enormous is not implemented

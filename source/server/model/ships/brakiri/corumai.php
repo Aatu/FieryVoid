@@ -5,7 +5,7 @@ class Corumai extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 1050;
-	$this->faction = "Brakiri";
+	$this->faction = "Brakiri Syndicracy";
         $this->phpclass = "Corumai";
         $this->imagePath = "img/ships/corumai.png";
         $this->shipClass = "Corumai Dreadnought";

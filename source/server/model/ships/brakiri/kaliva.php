@@ -5,7 +5,7 @@ class Kaliva extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 775;
-		$this->faction = "Brakiri";
+		$this->faction = "Brakiri Syndicracy";
         $this->phpclass = "Kaliva";
         $this->imagePath = "img/ships/avioki.png";
         $this->shipClass = "Kaliva Lance Cruiser";
