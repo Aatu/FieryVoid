@@ -5,7 +5,7 @@ class Nakarsa extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 750;
-	$this->faction = "Abbai";
+	$this->faction = "Abbai Matriarchate";
         $this->phpclass = "Nakarsa";
         $this->imagePath = "img/ships/AbbaiLakara.png";
         $this->shipClass = "Nakarsa Command Cruiser";

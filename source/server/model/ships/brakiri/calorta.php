@@ -5,7 +5,7 @@ class Calorta extends HeavyCombatVesselLeftRight{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 570;
-	$this->faction = "Brakiri";
+	$this->faction = "Brakiri Syndicracy";
         $this->phpclass = "Calorta";
         $this->imagePath = "img/ships/calorta.png";
         $this->shipClass = "Calorta Elint Cruiser";

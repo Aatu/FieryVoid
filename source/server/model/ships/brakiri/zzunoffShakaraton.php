@@ -5,7 +5,7 @@ class zzunoffShakaraton extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 700;
-	$this->faction = "Brakiri";
+	$this->faction = "Brakiri Syndicracy";
         $this->phpclass = "zzunoffShakaraton";
         $this->imagePath = "img/ships/shakara.png"; 
         $this->shipClass = "Shakaraton Scout Cruiser";

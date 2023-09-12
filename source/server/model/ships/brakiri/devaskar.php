@@ -5,7 +5,7 @@ class Devaskar extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 600;
-	$this->faction = "Brakiri";
+	$this->faction = "Brakiri Syndicracy";
         $this->phpclass = "Devaskar";
         $this->imagePath = "img/ships/devaskar.png";
         $this->shipClass = "Devaskar Carrier";

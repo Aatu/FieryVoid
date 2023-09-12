@@ -321,15 +321,17 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
         
         public $boostable = true;
         public $boostEfficiency = 2;
-        public $maxBoostLevel = 3;           
+        public $maxBoostLevel = 3;  
+        
+		public $repairPriority = 5;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired                 
         
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             //maxhealth and power reqirement are fixed; left option to override with hand-written values
             if ( $maxhealth == 0 ){
-                $maxhealth = 12;
+                $maxhealth = 9;
             }
             if ( $powerReq == 0 ){
-                $powerReq = 6;
+                $powerReq = 5;
             }
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }	

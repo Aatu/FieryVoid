@@ -50,15 +50,15 @@ class ThirdspaceLanceAttackCraft extends LCV{ //Actually an LCV.
 	$this->addPrimarySystem(new Engine(5, 12, 0, 10, 2));
     $this->addPrimarySystem(new ThirdspaceSelfRepair(5, 8, 4)); //armor, structure, output 	
 
-	$this->addFrontSystem(new PsionicConcentrator(5, 0, 0, 210, 60));
-    $this->addFrontSystem(new PsionicLance(5, 0, 0, 345, 15));
-	$this->addFrontSystem(new PsionicConcentrator(5, 0, 0, 300, 150));
+	$this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 210, 60));
+    $this->addFrontSystem(new PsionicLance(5, 0, 0, 330, 30));
+	$this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 300, 150));
 			
 	$projection = new ThirdspaceShieldProjection(2, 50, 50, 0, 360, 'C');//: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R
 	$projector = new ThirdspaceShieldProjector(6, 12, 4, 3, 0, 360, 'C'); //: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R
 	$projection->addProjector($projector);
-	$this->addFrontSystem($projector);
-	$this->addFrontSystem($projection);
+	$this->addAftSystem($projector);
+	$this->addAftSystem($projection);
 				
 	$this->addPrimarySystem(new Structure( 5, 36));
 	    
@@ -67,7 +67,7 @@ class ThirdspaceLanceAttackCraft extends LCV{ //Actually an LCV.
         				9 => "Structure",
         				10 => "1:Psionic Concentrator",
         				11 => "1:Psionic Lance",    
-        				12 => "1:Shield Projector",
+        				12 => "2:Shield Projector",
 						13 => "Self Repair",        				
         				14 => "Jump Engine",
         				16 => "Engine",
@@ -76,9 +76,9 @@ class ThirdspaceLanceAttackCraft extends LCV{ //Actually an LCV.
         		),
         		1=> array( //PRIMARY hit table, effectively
         				9 => "Structure",
-        				10 => "Psionic Concentrator",
-        				11 => "Psionic Lance",      				
-        				12 => "Shield Projector",
+        				11 => "Psionic Concentrator",
+        				12 => "Psionic Lance",      				
+        			//	12 => "Shield Projector",
 						13 => "0:Self Repair",        				
         				14 => "0:Jump Engine",
         				16 => "0:Engine",
@@ -87,9 +87,8 @@ class ThirdspaceLanceAttackCraft extends LCV{ //Actually an LCV.
         		),
         		2=> array( //PRIMARY hit table, effectively
         				9 => "Structure",
-        				10 => "1:Psionic Concentrator",
-        				11 => "1:Psionic Lance",            				
-        				12 => "1:Shield Projector",
+        				11 => "1:Psionic Concentrator",
+        				12 => "Shield Projector",
 						13 => "0:Self Repair",        				
         				14 => "0:Jump Engine",
         				16 => "0:Engine",

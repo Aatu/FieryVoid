@@ -3,7 +3,7 @@ class Selatra1989 extends StarBaseSixSections{
 	function __construct($id, $userid, $name,  $slot){
 		parent::__construct($id, $userid, $name,  $slot);
 		$this->pointCost = 2750;
-		$this->faction = "Abbai (WotCR)";
+		$this->faction = "Abbai Matriarchate (WotCR)";
 		$this->phpclass = "Selatra1989";
 		$this->shipClass = "Selatra Shield Base (1989)";
 			$this->occurence = 'common'; 

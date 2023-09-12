@@ -5,7 +5,7 @@ class cidikar extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 800;
-		$this->faction = "Brakiri";
+		$this->faction = "Brakiri Syndicracy";
         $this->phpclass = "cidikar";
         $this->imagePath = "img/ships/Cidikar.png";
         $this->shipClass = "Cidikar Heavy Carrier";

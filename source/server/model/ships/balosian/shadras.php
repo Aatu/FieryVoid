@@ -6,7 +6,7 @@ class Shadras extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 300;
-        $this->faction = "Balosian";
+        $this->faction = "Balosian Underdwellers";
         $this->phpclass = "shadras";
         $this->shipClass = "Shadras Heavy Fighters";
         $this->imagePath = "img/ships/shadras.png";

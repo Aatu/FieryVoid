@@ -5,7 +5,7 @@ class Brova1970 extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 560;
-	$this->faction = "Abbai (WotCR)";
+	$this->faction = "Abbai Matriarchate (WotCR)";
         $this->phpclass = "Brova1970";
         $this->imagePath = "img/ships/AbbaiBrova.png";
         $this->shipClass = "Brova Jump Cruiser (1970)";

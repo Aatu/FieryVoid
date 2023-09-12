@@ -5,7 +5,7 @@ class Bashnar extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 300;
-	$this->faction = "Brakiri";
+	$this->faction = "Brakiri Syndicracy";
         $this->phpclass = "Bashnar";
         $this->imagePath = "img/ships/brathon.png";
         $this->shipClass = "Bashnar Auxiliary Carrier";

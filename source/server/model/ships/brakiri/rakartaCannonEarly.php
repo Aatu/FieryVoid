@@ -5,7 +5,7 @@ class RakartaCannonEarly extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 360;
-		$this->faction = "Brakiri";
+		$this->faction = "Brakiri Syndicracy";
 		$this->phpclass = "RakartaCannonEarly";
 		$this->imagePath = "img/ships/rakarta.png";
 		$this->shipClass = "Rakarta Frigate (non-Kam-Lassit - Early)";

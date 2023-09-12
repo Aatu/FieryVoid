@@ -5,7 +5,7 @@ class Halik extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 450;
-	$this->faction = "Brakiri";
+	$this->faction = "Brakiri Syndicracy";
         $this->phpclass = "Halik";
         $this->imagePath = "img/ships/halik.png";
         $this->shipClass = "Halik Fighter-Killer";
