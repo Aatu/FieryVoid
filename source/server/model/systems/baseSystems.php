@@ -2843,7 +2843,7 @@ class SelfRepair extends ShipSystem{
 class ThirdspaceSelfRepair extends SelfRepair{
 
     public $boostable = true;
-    public $maxBoostLevel = 10;
+    public $maxBoostLevel = 5;
     public $boostEfficiency = 5; 
 	
 	public function setSystemDataWindow($turn){

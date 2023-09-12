@@ -86,7 +86,15 @@ if (isset($_SESSION["user"])) {
 	    <br><b>Combat value updated</b> - because I wouldn't have been myself if I didn't tinker some more, apparently
 	    <br><b>Thirdspace updates by Douglas</b> - ones that <i>should</i> have been added by the first update... well, they're here now - sorry all!!!
 	    <br><b>Missiles ignoring jinking at range 0</b> - bug fixed
+
+		 <br><br>---------- <b>update 28th of August</b> ---------- 
+	    <br><b>Combat value updated</b> - Weapons and ElInt Sensors are considered more valuable
+	    <br><b>Thirdspace balancing</b> - by Douglas
+	    <br><b>Nexus pre-tournament balancing</b> - by Geoffrey
 	    
+		 <br><br>---------- <b>update 30th of August</b> ---------- 
+	    <br><b>pre-tournament fix</b> - Velrax Hasert fighters are available again
+	    <br><b>Tiers visible in fleet selection</b> - onmouseover You can see power rating comment
 	    
 <!--	        
 		 <br><br>---------- <b>update 20th of January</b> ---------- 
