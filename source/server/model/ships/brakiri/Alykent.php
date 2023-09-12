@@ -7,7 +7,7 @@ class Alykent extends SmallStarBaseFourSections{
 		$this->pointCost = 575;
 		$this->base = true;
 		$this->smallBase = true;
-		$this->faction = "Brakiri";
+		$this->faction = "Brakiri Syndicracy";
 		$this->phpclass = "Alykent";
 		$this->shipClass = "Alykent Guardpost";
 		$this->imagePath = "img/ships/Alykent.png";

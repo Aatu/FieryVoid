@@ -32,7 +32,7 @@ window.gamedata = {
 		  case 'Belt Alliance':
 			powerRating = 'Tier 2';
 			break;
-		  case 'Brakiri':
+		  case 'Brakiri Syndicracy':
 			powerRating = 'Tier 1; distinct Corporations can be mixed freely';
 			break;
 		  case 'Cascor':

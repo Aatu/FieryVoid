@@ -5,7 +5,7 @@ class Batrado extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 500;
-	$this->faction = "Brakiri";
+	$this->faction = "Brakiri Syndicracy";
         $this->phpclass = "Batrado";
         $this->imagePath = "img/ships/avioki.png";
         $this->shipClass = "Batrado Armed Transport";

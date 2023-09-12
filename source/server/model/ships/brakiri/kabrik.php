@@ -5,7 +5,7 @@ class Kabrik extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 350;
-	$this->faction = "Brakiri";
+	$this->faction = "Brakiri Syndicracy";
         $this->phpclass = "Kabrik";
         $this->imagePath = "img/ships/kabrik.png";
         $this->shipClass = "Kabrik Police Ship";

@@ -5,7 +5,7 @@ class Tokrana extends OSAT{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 200;
-		$this->faction = "Brakiri";
+		$this->faction = "Brakiri Syndicracy";
         $this->phpclass = "Tokrana";
         $this->imagePath = "img/ships/tokrana.png";
         $this->shipClass = "Tokrana Satellite";
