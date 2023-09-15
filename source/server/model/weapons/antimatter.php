@@ -33,6 +33,11 @@
 		protected $possibleCriticals = array(14 => "ReducedRangeAntimatter", 19 => "ReducedDamageAntimatter", 25 => array("ReducedRangeAntimatter", "ReducedDamageAntimatter"));
 		
 		
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+			$this->addTag('Weapon'); //needed to properly allocate hits on Vree ships, where most of these weapons are used
+        }
+		
         public function setSystemDataWindow($turn){
             parent::setSystemDataWindow($turn);
 			$this->data["Range brackets"] = 'No penalty up to ' . $this->rngNoPenalty . ' / Normal penalty up to ' . $this->rngNormalPenalty . ' / Double therafter ' ;
@@ -134,6 +139,8 @@
 		public $maxX = 999; //maximum value of X - UNLIMITED for this weapon
 		public $dmgEquation = '4X+2'; //to be able to automatically incorporate this into weapon description
 		
+		public $repairPriority = 6;//heavy AM weapons get a bit higher priority - this will be relevant for allocating hits by TAG, too
+		
 
 	    public $damageType = 'Flash'; 
     	public $weaponClass = "Antimatter"; 
@@ -203,6 +210,7 @@ class AntiprotonGun extends AntimatterWeapon{
 		public $iconPath = "AntimatterCannon.png";
         public $animation = "laser";
         public $animationExplosionScale = 0.5;
+		public $repairPriority = 6;//heavy AM weapons get a bit higher priority - this will be relevant for allocating hits by TAG, too
 		
         public $priority = 7; //that's heavy Raking hit!
 		public $priorityArray = array(1=>7, 2=>2); //heavy Raking in primary mode, Piercing in alternate mode
@@ -294,6 +302,7 @@ class AntiprotonGun extends AntimatterWeapon{
         //public $animationWidth = 7;
         //public $trailLength = 7;
         public $priority = 5;
+		public $repairPriority = 6;//heavy AM weapons get a bit higher priority - this will be relevant for allocating hits by TAG, too
         
         public $ballistic = true;
         public $weaponClass = "Ballistic";         
@@ -423,7 +432,9 @@ class AntiprotonGun extends AntimatterWeapon{
         //public $animationColor = array(0, 184, 230); //let's inherit from Antimatter...
         //public $animationWidth2 = 0.2;
         public $animationExplosionScale = 0.35;        
-        public $animationExplosionScaleArray = array(1=>0.35, 2=>0.5, 3=>0.5); //Shredder bolt isn't quite a heavy hit... while AM Cannon definitely is!      
+        public $animationExplosionScaleArray = array(1=>0.35, 2=>0.5, 3=>0.5); //Shredder bolt isn't quite a heavy hit... while AM Cannon definitely is!
+		
+		public $repairPriority = 6;//heavy AM weapons get a bit higher priority - this will be relevant for allocating hits by TAG, too 
 		
         public $priority = 2; 
 		public $priorityArray = array(1=>2, 2=>7, 3=>2); //Shredder affects every unit in range, while Piercing affects all sections in its path - both should be fired very early

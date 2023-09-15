@@ -2334,8 +2334,10 @@ spl_autoload_register(
 				'flyercombat' => '/server/model/ships/minbari/flyerCombat.php',
 				'genericarmedshuttle' => '/server/model/ships/civilians/genericArmedShuttle.php',
 
-				//Base Testbed
+				//Base 
                 'basetestbed' => '/server/model/ships/customs/baseTestbed.php',
+                'sivrinproposal' => '/server/model/ships/customs/SivrinProposal.php',
+				
 
 				
 				//Shadowtech

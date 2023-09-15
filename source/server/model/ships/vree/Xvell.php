@@ -56,14 +56,14 @@ class Xvell extends MediumShip{
 				20 => "C&C",
 			),
 			1=> array(
-				6 => "0:Thruster",				
-				9 => "Antiproton Gun",			
+				6 => "TAG:Thruster",				
+				9 => "TAG:Weapon",			
 				17 => "Structure",
 				20 => "Primary",
 			),
 			2=> array(
-				6 => "0:Thruster",				
-				9 => "Antiproton Gun",				
+				6 => "TAG:Thruster",				
+				9 => "TAG:Weapon",			
 				17 => "Structure",
 				20 => "Primary",
 			),

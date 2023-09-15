@@ -31,10 +31,12 @@ class Xixx extends VreeHCV{
 		$this->addPrimarySystem(new CnC(4, 12, 0, 0));
 		$this->addPrimarySystem(new Scanner(4, 14, 9, 7));
         $this->addPrimarySystem(new Engine(4, 11, 0, 7, 2));
+		
 		$this->addPrimarySystem(new AntiprotonDefender(3, 0, 0, 0, 360));
 		$this->addPrimarySystem(new AntiprotonDefender(3, 0, 0, 0, 360));
 		$this->addPrimarySystem(new AntiprotonDefender(3, 0, 0, 0, 360));				
 		$this->addPrimarySystem(new AntiprotonGun(3, 0, 0, 0, 360));
+		
 		$this->addPrimarySystem(new GraviticThruster(3, 12, 0, 7, 3));
 		$this->addPrimarySystem(new GraviticThruster(3, 12, 0, 7, 1));		
         $this->addPrimarySystem(new GraviticThruster(3, 12, 0, 7, 2));	
@@ -51,11 +53,54 @@ class Xixx extends VreeHCV{
 		$this->addAftSystem(new AntimatterTorpedo(2, 0, 0, 60, 180));	 
 		     
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
+		/*remade for Tags!
         $this->addFrontSystem(new Structure( 4, 50, true));
         $this->addAftSystem(new Structure( 4, 50, true));
+		*/
+		$structArmor = 4;
+		$structHP = 50;
+		
+		$struct = new Structure( $structArmor, $structHP, true);
+		$struct->addTag("Outer Structure");
+		$struct->startArc = 270;
+		$struct->endArc = 90;
+        $this->addFrontSystem($struct);
+		
+		$struct = new Structure( $structArmor, $structHP, true);
+		$struct->addTag("Outer Structure");
+		$struct->startArc = 90;
+		$struct->endArc = 270;
+        $this->addAftSystem($struct);		
+		
         $this->addPrimarySystem(new Structure( 4, 45));
 	    
 	//d20 hit chart
+        $this->hitChart = array(
+            0=> array(
+                    10 => "Structure",
+                    12 => "Jump Engine",
+                    14 => "Scanner",
+                    16 => "Engine",
+                    17 => "Hangar",
+                    19 => "Reactor",
+                    20 => "C&C",
+           		 ),
+            1=> array(
+                    4 => "TAG:Thruster",                        
+                    8 => "TAG:Weapon", 
+                    17 => "TAG:Outer Structure",
+                    20 => "Primary",
+           		 ),
+            2=> array(
+                    4 => "TAG:Thruster",                        
+                    8 => "TAG:Weapon", 
+                    17 => "TAG:Outer Structure",
+                    20 => "Primary",
+           		 ),
+           	);
+	
+	
+		/*remade for Tags!
         $this->hitChart = array(
             0=> array(
                     10 => "Structure",
@@ -83,6 +128,7 @@ class Xixx extends VreeHCV{
                     20 => "Primary",
            		 ),
            	);
+			*/
        		
 		}
 	}

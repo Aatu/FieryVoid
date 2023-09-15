@@ -3624,6 +3624,7 @@ class VorlonLightningCannon extends Weapon{
 		}
 		$this->iconPath = "VorlonLightningCannon".$orientation.".png";
 		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+		$this->addTag('Lightning Cannon'); //needed to properly allocate hits on Vorlon ships, where most of these weapons are used
 	}
 	
 

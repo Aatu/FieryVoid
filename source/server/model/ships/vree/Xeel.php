@@ -49,15 +49,107 @@ class Xeel extends VreeCapital{
 		$this->addRightAftSystem(new AntiprotonGun(3, 0, 0, 60, 180));
        
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
+		
+		/*outer Structures remade for Tags
         $this->addFrontSystem(new Structure( 4, 21, true));
         $this->addAftSystem(new Structure( 4, 21, true));
         $this->addLeftFrontSystem(new Structure( 4, 21, true));
         $this->addLeftAftSystem(new Structure( 4, 21, true));
         $this->addRightFrontSystem(new Structure( 4, 21, true));
-        $this->addRightAftSystem(new Structure( 4, 21, true));      
+        $this->addRightAftSystem(new Structure( 4, 21, true));  
+		*/		
+		$structArmor = 4;
+		$structHP = 21;
+		
+		$struct = new Structure( $structArmor, $structHP, true);
+		$struct->addTag("Outer Structure");
+		$struct->startArc = 300;
+		$struct->endArc = 60;
+        $this->addFrontSystem($struct);
+		
+		$struct = new Structure( $structArmor, $structHP, true);
+		$struct->addTag("Outer Structure");
+		$struct->startArc = 120;
+		$struct->endArc = 240;
+        $this->addAftSystem($struct);
+		
+		$struct = new Structure( $structArmor, $structHP, true);
+		$struct->addTag("Outer Structure");
+		$struct->startArc = 240;
+		$struct->endArc = 0;
+        $this->addLeftFrontSystem($struct);
+		
+		$struct = new Structure( $structArmor, $structHP, true);
+		$struct->addTag("Outer Structure");
+		$struct->startArc = 180;
+		$struct->endArc = 300;
+        $this->addLeftAftSystem($struct);
+		
+		$struct = new Structure( $structArmor, $structHP, true);
+		$struct->addTag("Outer Structure");
+		$struct->startArc = 0;
+		$struct->endArc = 120;
+        $this->addRightFrontSystem($struct);
+		
+		$struct = new Structure( $structArmor, $structHP, true);
+		$struct->addTag("Outer Structure");
+		$struct->startArc = 60;
+		$struct->endArc = 180;
+        $this->addRightAftSystem($struct);  
+		
         $this->addPrimarySystem(new Structure( 5, 36));
 	    
 	//d20 hit chart
+        $this->hitChart = array(
+            0=> array(
+                    9 => "Structure",
+                    11 => "Scanner",
+                    14 => "Engine",
+                    17 => "Hangar",
+                    19 => "Reactor",
+                    20 => "C&C",
+           		 ),
+            1=> array(
+                    4 => "TAG:Thruster",
+                    6 => "TAG:Weapon",  
+                    17 => "TAG:Outer Structure",
+                    20 => "Primary",
+           		 ),
+            2=> array(
+                    4 => "TAG:Thruster",
+                    6 => "TAG:Weapon",  
+                    17 => "TAG:Outer Structure",
+                    20 => "Primary",
+           		 ),
+            31=> array(
+                    4 => "TAG:Thruster",
+                    6 => "TAG:Weapon",  
+                    17 => "TAG:Outer Structure",
+                    20 => "Primary",
+           		 ),
+            32=> array(
+                    4 => "TAG:Thruster",
+                    6 => "TAG:Weapon",  
+                    17 => "TAG:Outer Structure",
+                    20 => "Primary",
+           		 ),
+            41=> array(
+                    4 => "TAG:Thruster",
+                    6 => "TAG:Weapon",  
+                    17 => "TAG:Outer Structure",
+                    20 => "Primary",
+           		 ),
+       		42=> array(
+                    4 => "TAG:Thruster",
+                    6 => "TAG:Weapon",  
+                    17 => "TAG:Outer Structure",
+                    20 => "Primary",
+           		 ),
+           	);
+       		
+		}
+	
+	/*remade for Tags
         $this->hitChart = array(
             0=> array(
                     9 => "Structure",
@@ -112,6 +204,7 @@ class Xeel extends VreeCapital{
            	);
        		
 		}
-	}
+	*/
+}
 		
 ?>		

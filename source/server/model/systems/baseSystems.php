@@ -1384,6 +1384,8 @@ class Thruster extends ShipSystem{
 				$this->endArc = 150;
 				break;
 		}
+		
+		$this->addTag('Thruster');
     }
 } //endof Thruster
 

@@ -57,6 +57,12 @@ class Tyllz extends StarBaseSixSections
 			$min = 0 + ($i*60);
 			$max = 120 + ($i*60);
 
+
+			$struct = new Structure( 4, 100, true);
+			$struct->addTag("Outer Structure");
+			$struct->startArc = $min;
+			$struct->endArc = $max;
+
 			$systems = array(
 				new CargoBay(4, 48),
 				new AntimatterTorpedo(4, 0, 0, $min, $max),
@@ -64,18 +70,16 @@ class Tyllz extends StarBaseSixSections
 				new AntiprotonGun(4, 0, 0, $min, $max),
 				new AntiprotonGun(4, 0, 0, $min, $max),
 				new SubReactorUniversal(4, 23),
-				new Structure( 4, 100)
+				$struct //new Structure( 4, 100)
 			);
 
 			$loc = $this->locations[$i];
 
-			$this->hitChart[$loc] = array(
-                    3 => "Antiproton Gun",
-                    6 => "Antiproton Torpedo",                    
-                    7 => "0:Antimatter Shredder",                    
+			$this->hitChart[$loc] = array(                 
+                    7 => "TAG:Weapon",                    
                     9 => "Cargo Bay",
                     10 => "Sub Reactor",
-                    18 => "Structure",
+                    18 => "TAG:Outer Structure",
                     20 => "Primary",
 			);
 
