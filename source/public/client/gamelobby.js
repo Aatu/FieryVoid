@@ -35,13 +35,13 @@ window.gamedata = {
 		  case 'Brakiri Syndicracy':
 			powerRating = 'Tier 1; distinct Corporations can be mixed freely';
 			break;
-		  case 'Cascor':
+		  case 'Cascor Commonwealth':
 			powerRating = 'Tier 2; can be turned to stronger custom faction by enhancement (still Tier 2)';
 			break;
-		  case 'Centauri':
+		  case 'Centauri Republic':
 			powerRating = 'Tier 1';
 			break;
-		  case 'Centauri (WotCR)':
+		  case 'Centauri Republic (WotCR)':
 			powerRating = 'Tier 2';
 			break;
 		  case "Ch'Lonas":

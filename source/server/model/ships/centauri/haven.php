@@ -5,7 +5,7 @@ class Haven extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 325;
-		$this->faction = "Centauri";
+		$this->faction = "Centauri Republic";
         $this->phpclass = "Haven";
         $this->imagePath = "img/ships/haven.png";
         $this->shipClass = "Haven Patrol Boat";

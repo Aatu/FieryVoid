@@ -5,7 +5,7 @@ class Falenna1975 extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 425;
-        $this->faction = "Centauri (WotCR)";
+        $this->faction = "Centauri Republic (WotCR)";
         $this->phpclass = "Falenna1975";
         $this->imagePath = "img/ships/falenna.png";
         $this->shipClass = "Falenna Garrison Ship (1975)";

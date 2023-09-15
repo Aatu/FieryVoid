@@ -5,7 +5,7 @@ class Talacca extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 500;
-		$this->faction = "Cascor";
+		$this->faction = "Cascor Commonwealth";
         $this->phpclass = "Talacca";
         $this->imagePath = "img/ships/CascorTaccaci.png";
         $this->shipClass = "Talacca Frigate Leader";

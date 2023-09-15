@@ -5,7 +5,7 @@ class LegionB extends OSAT{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 125;
-        $this->faction = "Centauri (WotCR)";
+        $this->faction = "Centauri Republic (WotCR)";
         $this->phpclass = "LegionB";
         $this->imagePath = "img/ships/legion.png";
         $this->shipClass = 'Legion B Satellite';

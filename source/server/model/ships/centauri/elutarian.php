@@ -5,7 +5,7 @@ class Elutarian extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 650;
-        $this->faction = "Centauri";
+        $this->faction = "Centauri Republic";
         $this->phpclass = "Elutarian";
         $this->imagePath = "img/ships/altarian.png";
         $this->shipClass = "Elutarian Bombardment Destroyer";

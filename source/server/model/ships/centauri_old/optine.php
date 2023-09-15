@@ -5,7 +5,7 @@ class Optine extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 665;
-        $this->faction = "Centauri (WotCR)";
+        $this->faction = "Centauri Republic (WotCR)";
         $this->phpclass = "Optine";
         $this->imagePath = "img/ships/optine.png";
         $this->shipClass = "Optine Battlecruiser";

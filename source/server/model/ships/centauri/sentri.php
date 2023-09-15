@@ -5,7 +5,7 @@ class Sentri extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 252;
-		$this->faction = "Centauri";
+		$this->faction = "Centauri Republic";
 		$this->phpclass = "Sentri";
 		$this->shipClass = "Sentri Interceptors";
 		$this->imagePath = "img/ships/sentri.png";

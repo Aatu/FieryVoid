@@ -5,7 +5,7 @@ class marcanos extends SmallStarBaseFourSections{
 		$this->pointCost = 1200;
 		$this->base = true;
 		$this->smallBase = true;
-		$this->faction = "Centauri";
+		$this->faction = "Centauri Republic";
 		$this->phpclass = "marcanos";
 		$this->shipClass = "Marcanos Civilian Base";
 		$this->imagePath = "img/ships/marcanos.png";

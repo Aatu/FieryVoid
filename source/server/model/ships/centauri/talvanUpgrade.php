@@ -5,7 +5,7 @@ class TalvanUpgrade extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 640;
-        $this->faction = "Centauri";
+        $this->faction = "Centauri Republic";
         $this->phpclass = "TalvanUpgrade";
         $this->imagePath = "img/ships/talvan.png";
         $this->shipClass = "Talvan Attack Cruiser (2202)";

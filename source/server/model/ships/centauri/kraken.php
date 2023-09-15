@@ -5,7 +5,7 @@ class Kraken extends StarBaseSixSections{
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 5000;
-		$this->faction = "Centauri";
+		$this->faction = "Centauri Republic";
 		$this->phpclass = "Kraken";
 		$this->shipClass = "Kraken Star Fortress";
 		$this->fighters = array("heavy"=>36); 

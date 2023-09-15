@@ -5,7 +5,7 @@ class Seltat extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $movement);
         
         $this->pointCost = 550;
-        $this->faction = "Centauri";
+        $this->faction = "Centauri Republic";
         $this->phpclass = "Seltat";
         $this->imagePath = "img/ships/kutai.png";
         $this->shipClass = "Seltat Minesweeper";
