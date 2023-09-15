@@ -74,8 +74,8 @@ class CraytanGramitha extends MediumShip{
 		2=> array(
 			6 => "Thruster",
 			8 => "Light Enhanced Plasma",
-			9 => "Advanced Close-In Defense System",
-			11 => "Hangar",
+			10 => "Advanced Close-In Defense System",
+			12 => "Hangar",
 			17 => "Structure",
 			20 => "Primary",
 		),

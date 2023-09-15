@@ -63,7 +63,7 @@ class CraytanCorvette2089 extends MediumShip{
 		1=> array(
 			6 => "Thruster",
 			8 => "Heavy Autocannon",
-			9 => "Advanced Close-In Defense System",
+			10 => "Advanced Close-In Defense System",
 			17 => "Structure",
 			20 => "Primary",
 		),
@@ -71,8 +71,8 @@ class CraytanCorvette2089 extends MediumShip{
 		2=> array(
 			6 => "Thruster",
 			8 => "Light Plasma Cannon",
-			9 => "Advanced Close-In Defense System",
-			10 => "Hangar",
+			10 => "Advanced Close-In Defense System",
+			11 => "Hangar",
 			17 => "Structure",
 			20 => "Primary",
 		),

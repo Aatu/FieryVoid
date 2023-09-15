@@ -82,7 +82,7 @@ class CraytanBrominRefit extends BaseShip{
 					5 => "Thruster",
 					8 => "Heavy Enhanced Plasma",
 					10 => "Light Enhanced Plasma",
-					11 => "Close-In Defense System",
+					12 => "Close-In Defense System",
 					18 => "Structure",
 					20 => "Primary",
 			),

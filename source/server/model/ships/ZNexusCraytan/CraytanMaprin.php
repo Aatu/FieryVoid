@@ -65,7 +65,7 @@ class CraytanMaprin extends MediumShip{
 		1=> array(
 			6 => "Thruster",
 			8 => "Medium Sentry Gun",
-			9 => "Close-In Defense System",
+			10 => "Close-In Defense System",
 			17 => "Structure",
 			20 => "Primary",
 		),
@@ -73,8 +73,8 @@ class CraytanMaprin extends MediumShip{
 		2=> array(
 			6 => "Thruster",
 			8 => "Light Sentry Gun",
-			9 => "Close-In Defense System",
-			11 => "Hangar",
+			10 => "Close-In Defense System",
+			12 => "Hangar",
 			17 => "Structure",
 			20 => "Primary",
 		),

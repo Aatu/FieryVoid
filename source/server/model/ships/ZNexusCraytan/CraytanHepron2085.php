@@ -69,7 +69,7 @@ class CraytanHepron2085 extends HeavyCombatVessel{
                     20 => "C&C",
             ),
             1=> array(
-                    3 => "Thruster",
+                    4 => "Thruster",
                     6 => "Heavy Plasma Cannon",
                     8 => "Medium Plasma Cannon",
 					10 => "Advanced Close-In Defense System",
@@ -80,7 +80,7 @@ class CraytanHepron2085 extends HeavyCombatVessel{
                     6 => "Thruster",
                     8 => "Close-In Defense System",
 					10 => "Light Sentry Gun",
-					11 => "Medium Sentry Gun",
+					12 => "Medium Sentry Gun",
                     18 => "Structure",
                     20 => "Primary",
             ),

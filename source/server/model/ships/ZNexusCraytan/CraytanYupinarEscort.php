@@ -70,7 +70,7 @@ class CraytanYupinarEscort extends HeavyCombatVessel{
                     4 => "Thruster",
                     7 => "Advanced Close-In Defense System",
                     9 => "Medium Enhanced Plasma",
-					10 => "Light Enhanced Plasma",
+					11 => "Light Enhanced Plasma",
 					18 => "Structure",
                     20 => "Primary",
             ),

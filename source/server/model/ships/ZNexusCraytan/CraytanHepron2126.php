@@ -68,7 +68,7 @@ class CraytanHepron2126 extends HeavyCombatVessel{
                     20 => "C&C",
             ),
             1=> array(
-                    3 => "Thruster",
+                    4 => "Thruster",
                     6 => "Light Assault Cannon",
                     8 => "Medium Plasma Cannon",
 					10 => "Advanced Close-In Defense System",
