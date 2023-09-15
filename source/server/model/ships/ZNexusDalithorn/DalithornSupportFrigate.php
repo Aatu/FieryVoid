@@ -66,17 +66,17 @@ class DalithornSupportFrigate extends MediumShip{
 		),
 
 		1=> array(
-			6 => "Thruster",
-			8 => "Catapult",
-			10 => "Light Gas Gun",
+			4 => "Thruster",
+			6 => "Catapult",
+			8 => "Light Gas Gun",
 			17 => "Structure",
 			20 => "Primary",
 		),
 
 		2=> array(
 			6 => "Thruster",
-			7 => "Shatter Gun",
-			9 => "Light Gas Gun",
+			8 => "Shatter Gun",
+			10 => "Light Gas Gun",
 			17 => "Structure",
 			20 => "Primary",
 		),

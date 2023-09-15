@@ -39,9 +39,9 @@ class DalithornLaserMissileOSAT extends OSAT{
 		$this->hitChart = array(
 			0=> array(
 				7 => "Structure",
-				9 => "Magazine",
+				8 => "Magazine",
 				10 => "Thruster",
-				13 => "Laser Missile",
+				12 => "Laser Missile",
 				14 => "Shatter Gun",
 				16 => "Light Gas Gun",
 				18 => "Scanner",

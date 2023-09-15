@@ -71,9 +71,9 @@ class DalithornPrototypeJumpcruiser extends HeavyCombatVessel{
             ),
             1=> array(
                     4 => "Thruster",
-                    7 => "Jump Engine",
-                    9 => "Light Gas Gun",
-					11 => "Shatter Gun",
+                    8 => "Jump Engine",
+                    10 => "Light Gas Gun",
+					12 => "Shatter Gun",
 					18 => "Structure",
                     20 => "Primary",
             ),

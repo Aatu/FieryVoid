@@ -83,7 +83,7 @@ class DalithornDreadnought extends BaseShip{
 					5 => "Thruster",
 					7 => "Light Gas Gun",
 					11 => "Coilgun",
-					12 => "Shatter Gun",
+					13 => "Shatter Gun",
 					18 => "Structure",
 					20 => "Primary",
 			),

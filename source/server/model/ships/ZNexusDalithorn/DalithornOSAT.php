@@ -41,9 +41,9 @@ class DalithornOSAT extends OSAT{
 		$this->hitChart = array(
 			0=> array(
 				7 => "Structure",
-				9 => "Magazine",
+				8 => "Magazine",
 				10 => "Thruster",
-				13 => "Heavy Coilgun",
+				12 => "Heavy Coilgun",
 				14 => "Shatter Gun",
 				16 => "Light Gas Gun",
 				18 => "Scanner",

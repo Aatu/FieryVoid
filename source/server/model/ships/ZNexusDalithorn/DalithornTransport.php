@@ -71,14 +71,14 @@ class DalithornTransport extends HeavyCombatVessel{
             1=> array(
                     4 => "Thruster",
                     6 => "Light Gas Gun",
-					7 => "Shatter Gun",
-					10 => "2:Cargo Bay",
+					8 => "Shatter Gun",
+					11 => "2:Cargo Bay",
 					18 => "Structure",
                     20 => "Primary",
             ),
             2=> array(
                     8 => "Thruster",
-                    10 => "Cargo Bay",
+                    12 => "Cargo Bay",
                     18 => "Structure",
                     20 => "Primary",
             ),

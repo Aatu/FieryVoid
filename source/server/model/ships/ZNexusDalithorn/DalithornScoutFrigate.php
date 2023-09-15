@@ -66,17 +66,17 @@ class DalithornScoutFrigate extends MediumShip{
 		),
 
 		1=> array(
-			6 => "Thruster",
-			8 => "ELINT Scanner",
-			10 => "Minigun",
+			4 => "Thruster",
+			6 => "ELINT Scanner",
+			8 => "Minigun",
 			17 => "Structure",
 			20 => "Primary",
 		),
 
 		2=> array(
 			6 => "Thruster",
-			7 => "Protector",
-			9 => "Autocannon",
+			8 => "Protector",
+			10 => "Autocannon",
 			17 => "Structure",
 			20 => "Primary",
 		),

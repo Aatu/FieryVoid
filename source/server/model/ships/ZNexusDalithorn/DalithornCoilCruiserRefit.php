@@ -72,7 +72,7 @@ class DalithornCoilCruiserRefit extends HeavyCombatVessel{
             1=> array(
                     6 => "Thruster",
                     10 => "Coilgun",
-					11 => "Shatter Gun",
+					12 => "Shatter Gun",
 					18 => "Structure",
                     20 => "Primary",
             ),

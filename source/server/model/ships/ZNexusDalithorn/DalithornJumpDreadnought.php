@@ -83,8 +83,8 @@ class DalithornJumpDreadnought extends BaseShip{
 			1=> array(
 					5 => "Thruster",
 					7 => "Light Gas Gun",
-					11 => "Jump Engine",
-					12 => "Shatter Gun",
+					9 => "Jump Engine",
+					11 => "Shatter Gun",
 					18 => "Structure",
 					20 => "Primary",
 			),

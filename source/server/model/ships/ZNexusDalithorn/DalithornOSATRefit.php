@@ -43,7 +43,7 @@ class DalithornOSATRefit extends OSAT{
 				7 => "Structure",
 				9 => "Magazine",
 				10 => "Thruster",
-				13 => "Heavy Coilgun",
+				12 => "Heavy Coilgun",
 				14 => "Minigun",
 				16 => "Autocannon",
 				18 => "Scanner",
