@@ -75,7 +75,7 @@ class BrixadiiDestroyerEscort extends HeavyCombatVessel{
                     20 => "Primary",
             ),
             2=> array(
-                    6 => "Thruster",
+                    5 => "Thruster",
 					7 => "Chaff Launcher",
 					11 => "Light Particle Beam",
                     18 => "Structure",

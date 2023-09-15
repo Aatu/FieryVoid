@@ -41,8 +41,8 @@ class BrixadiiSentinelPlatform2107 extends OSAT{
 			0=> array(
 				8 => "Structure",
 				10 => "Thruster",
-				14 => "Heavy Particle Projector",
-				15 => "Chaff Launcher",
+				13 => "Heavy Particle Projector",
+				14 => "Chaff Launcher",
 				16 => "Scatter Pulsar",
 				18 => "Scanner",
 				20 => "Reactor",

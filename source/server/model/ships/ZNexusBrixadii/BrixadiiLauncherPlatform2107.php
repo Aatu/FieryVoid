@@ -40,8 +40,8 @@ class BrixadiiLauncherPlatform2107 extends OSAT{
 			0=> array(
 				8 => "Structure",
 				10 => "Thruster",
-				14 => "Ranged Kinetic Box Launcher",
-				15 => "Chaff Launcher",
+				12 => "Ranged Kinetic Box Launcher",
+				14 => "Chaff Launcher",
 				16 => "Scatter Pulsar",
 				18 => "Scanner",
 				20 => "Reactor",

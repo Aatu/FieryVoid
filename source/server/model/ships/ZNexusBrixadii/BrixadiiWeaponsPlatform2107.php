@@ -39,10 +39,10 @@ class BrixadiiWeaponsPlatform2107 extends OSAT{
 		
 		$this->hitChart = array(
 			0=> array(
-				8 => "Structure",
-				10 => "Thruster",
-				14 => "Particle Hammer",
-				15 => "Chaff Launcher",
+				7 => "Structure",
+				9 => "Thruster",
+				13 => "Particle Hammer",
+				14 => "Chaff Launcher",
 				16 => "Scatter Pulsar",
 				18 => "Scanner",
 				20 => "Reactor",

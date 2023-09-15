@@ -62,8 +62,8 @@ class BrixadiiPursuitFrigateBase extends MediumShip{
             1=> array(
                     5 => "Thruster",
                     7 => "Particle Bolter",
-					8 => "Light Particle Beam",
-					10 => "Heavy Particle Projector",
+					9 => "Light Particle Beam",
+					11 => "Heavy Particle Projector",
 					17 => "Structure",
                     20 => "Primary",
             ),

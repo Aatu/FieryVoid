@@ -74,8 +74,8 @@ class BrixadiiSurveyor2108 extends HeavyCombatVessel{
             ),
             2=> array(
                     7 => "Thruster",
-                    8 => "Chaff Launcher",
-					10 => "Energy Pulsar",
+                    9 => "Chaff Launcher",
+					11 => "Energy Pulsar",
                     18 => "Structure",
                     20 => "Primary",
             ),
