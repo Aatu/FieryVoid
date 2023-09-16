@@ -77,7 +77,7 @@ class SalbezVaschk extends HeavyCombatVessel{
                     6 => "Thruster",
 					8 => "Swarm Torpedo",
 					10 => "Light Laser",
-					11 => "Light Particle Beam",
+					12 => "Light Particle Beam",
                     18 => "Structure",
                     20 => "Primary",
             ),

@@ -77,7 +77,7 @@ class SalbezTarskRefit extends HeavyCombatVessel{
                     6 => "Thruster",
 					8 => "Medium Laser",
 					10 => "Light Laser",
-					11 => "Improved Particle Beam",
+					12 => "Improved Particle Beam",
                     18 => "Structure",
                     20 => "Primary",
             ),

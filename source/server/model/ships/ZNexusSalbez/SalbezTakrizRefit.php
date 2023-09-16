@@ -38,9 +38,9 @@ class SalbezTakrizRefit extends OSAT{
 		
 		$this->hitChart = array(
 			0=> array(
-				10 => "Structure",
-				12 => "Thruster",
-				13 => "Ranged Bolt Torpedo",
+				8 => "Structure",
+				10 => "Thruster",
+				12 => "Ranged Bolt Torpedo",
 				14 => "Laser Cutter",
 				16 => "Light Particle Beam",
 				18 => "Scanner",

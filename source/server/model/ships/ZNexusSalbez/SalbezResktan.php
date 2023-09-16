@@ -59,7 +59,7 @@ class SalbezResktan extends MediumShip{
 		1=> array(
 			5 => "Thruster",
 			8 => "Laser Cutter",
-			9 => "Bolt Torpedo",
+			10 => "Bolt Torpedo",
 			17 => "Structure",
 			20 => "Primary",
 		),

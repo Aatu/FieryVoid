@@ -40,10 +40,10 @@ class SalbezRevTan extends OSAT{
 		
 		$this->hitChart = array(
 			0=> array(
-				9 => "Structure",
-				11 => "Thruster",
-				13 => "Ranged Swarm Torpedo",
-				15 => "Medium Laser",
+				8 => "Structure",
+				10 => "Thruster",
+				12 => "Ranged Swarm Torpedo",
+				14 => "Medium Laser",
 				16 => "Light Particle Beam",
 				18 => "Scanner",
 				20 => "Reactor",

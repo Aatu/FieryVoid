@@ -70,8 +70,8 @@ class SalbezFelriz extends BaseShipNoAft{
                     20 => "C&C",
             ),
             1=> array(
-                    6 => "Thruster",
-					8 => "Laser Cutter",
+                    5 => "Thruster",
+					7 => "Laser Cutter",
 					9 => "Bolt Torpedo",
 					11 => "Light Particle Beam",
 					18 => "Structure",

@@ -88,7 +88,7 @@ class SalbezRiktchenRefit extends BaseShip{
 					20 => "Primary",
 			),
 			2=> array(
-					8 => "Thruster",
+					7 => "Thruster",
 					10 => "Light Laser",
 					18 => "Structure",
 					20 => "Primary",

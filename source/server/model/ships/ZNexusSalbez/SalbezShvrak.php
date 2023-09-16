@@ -58,7 +58,7 @@ class SalbezShvrak extends MediumShip{
 		1=> array(
 			5 => "Thruster",
 			8 => "Industrial Laser",
-			9 => "Bolt Torpedo",
+			10 => "Bolt Torpedo",
 			17 => "Structure",
 			20 => "Primary",
 		),
