@@ -392,24 +392,24 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
 			
  			if ($target instanceof FighterFlight) return;	//To ignore fighters if I want to.				
 			
-			        	                         
+            if ($system->advancedArmor) return;
+            	 			        	                         
 	        $effectArmor = Dice::d(3,1);//strength of effect: 1d3
-	    //	$fireOrder->pubnotes .= "<br> Armor reduced by $effectArmor unless Advanced Armor.";    
+
 
 		
             foreach ($target->systems as $system){
-                if ($system->advancedArmor) return;              					
+  //              if ($system->advancedArmor) return;              					
                 if ($target->shipSizeClass<=1 || $system->location === $location){ //MCVs and smaller ships are one huge section technically
 	             	for($i=1; $i<=$effectArmor;$i++){
 	                    $crit = new ArmorReduced(-1, $target->id, $system->id, "ArmorReduced", $gamedata->turn);
 	                    $crit->updated = true;
 	                    $crit->inEffect = false;
 	                    $system->criticals[] = $crit;                 
-		                }
-	//	        	$fireOrder->pubnotes .= "<br> Armor reduced by $effectArmor.";       
-		            }
-		        	$fireOrder->pubnotes .= "<br> Armor reduced on entire ship section."; 		            
-				} 
+		                }     
+		            }	            
+				}
+		     $fireOrder->pubnotes .= "<br> Armor reduced on entire ship section."; 				 
         } //endof function doDamage	 
 
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!
