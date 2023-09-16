@@ -406,8 +406,9 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
 	                    $crit->inEffect = false;
 	                    $system->criticals[] = $crit;                 
 		                }
-		        	$fireOrder->pubnotes .= "<br> Armor reduced by $effectArmor.";       
+	//	        	$fireOrder->pubnotes .= "<br> Armor reduced by $effectArmor.";       
 		            }
+		        	$fireOrder->pubnotes .= "<br> Armor reduced on entire ship section."; 		            
 				} 
         } //endof function doDamage	 
 
