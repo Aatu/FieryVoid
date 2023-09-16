@@ -36,7 +36,7 @@ class ThirdspaceCarrier extends BaseShip{
 		/*Thirdspace use their own enhancement set */		
 		Enhancements::nonstandardEnhancementSet($this, 'ThirdspaceShip');			       
         
-        $this->addPrimarySystem(new AdvancedSingularityDrive(8, 50, 0, 144+10+4));
+        $this->addPrimarySystem(new AdvancedSingularityDrive(8, 50, 0, 152+10+4));
         $this->addPrimarySystem(new ThirdspaceCnC(8, 36, 0, 0));
         $scanner = new Scanner(7, 36, 10, 15);
 		$scanner->markThirdspace();
@@ -46,7 +46,7 @@ class ThirdspaceCarrier extends BaseShip{
         $this->addPrimarySystem(new ThirdspaceSelfRepair(7, 24, 10)); //armor, structure, output 
 		$this->addPrimarySystem(new JumpEngine(6, 24, 4, 5));//Presumably have access to hyperspace, or possess some other form of FTL travel that this system represents.          		  		
       
-		$projection = new ThirdspaceShieldProjection(2, 100, 100, 330, 30, 'F');//: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R
+		$projection = new ThirdspaceShieldProjection(3, 100, 100, 330, 30, 'F');//: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R
 		$projector = new ThirdspaceShieldProjector(6, 24, 5, 3, 330, 30, 'F'); //: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R 
 		$projection->addProjector($projector);
 		$this->addFrontSystem($projector);		
@@ -66,7 +66,7 @@ class ThirdspaceCarrier extends BaseShip{
         $this->addFrontSystem(new GraviticThruster(6, 20, 0, 8, 1));           
 			
 		
-		$projection = new ThirdspaceShieldProjection(2, 100, 100, 0, 360, 'C');//: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R
+		$projection = new ThirdspaceShieldProjection(3, 100, 100, 0, 360, 'C');//: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R
 		$projector = new ThirdspaceShieldProjector(6, 24, 5, 3, 0, 360, 'C'); //: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R 
 		$projection->addProjector($projector);
 		$this->addAftSystem($projector);
@@ -85,7 +85,7 @@ class ThirdspaceCarrier extends BaseShip{
         $this->addAftSystem(new GraviticThruster(5, 24, 0, 8, 2));       
        
        
-        $projection = new ThirdspaceShieldProjection(2, 120, 120, 210, 330, 'L');//: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R
+        $projection = new ThirdspaceShieldProjection(3, 120, 120, 210, 330, 'L');//: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R
 		$projector = new ThirdspaceShieldProjector(6, 24, 5, 3, 210, 330, 'L'); //: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R 
 		$projection->addProjector($projector);
 		$this->addLeftSystem($projector);		
@@ -107,7 +107,7 @@ class ThirdspaceCarrier extends BaseShip{
         $this->addLeftSystem($LCVRail);                              
             
             
-        $projection = new ThirdspaceShieldProjection(2, 120, 120, 30, 150, 'R');//: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R
+        $projection = new ThirdspaceShieldProjection(3, 120, 120, 30, 150, 'R');//: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R
 		$projector = new ThirdspaceShieldProjector(6, 24, 5, 3, 30, 150, 'R'); //: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R 
 		$projection->addProjector($projector);
 		$this->addRightSystem($projector);		
