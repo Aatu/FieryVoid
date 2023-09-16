@@ -62,8 +62,8 @@ class VelraxSathrinRefit2 extends MediumShip{
 		),
 
 		1=> array(
-			6 => "Thruster",
-			8 => "Laser Lance",
+			5 => "Thruster",
+			7 => "Laser Lance",
 			9 => "Dual Ion Bolter",
 			11 => "Medium Plasma Cannon",
 			17 => "Structure",

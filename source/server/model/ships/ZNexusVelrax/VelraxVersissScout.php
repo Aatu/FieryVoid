@@ -66,7 +66,7 @@ class VelraxVersissScout extends HeavyCombatVesselLeftRight{
         				5 => "Thruster",
 						7 => "Laser Spear",
         				9 => "Twin Ion Gun",
-						10 => "ELINT Scanner",
+						12 => "ELINT Scanner",
         				18 => "Structure",
         				20 => "Primary",
         		),
@@ -74,7 +74,7 @@ class VelraxVersissScout extends HeavyCombatVesselLeftRight{
         				5 => "Thruster",
 						7 => "Laser Spear",
         				9 => "Twin Ion Gun",
-						10 => "ELINT Scanner",
+						12 => "ELINT Scanner",
         				18 => "Structure",
         				20 => "Primary",        		),
         );

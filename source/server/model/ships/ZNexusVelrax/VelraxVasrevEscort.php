@@ -64,8 +64,8 @@ class VelraxVasrevEscort extends MediumShip{
 		1=> array(
 			5 => "Thruster",
 			7 => "Plasma Arc",
-			8 => "Twin Ion Gun",
-			10 => "Dart Interceptor",
+			9 => "Twin Ion Gun",
+			11 => "Dart Interceptor",
 			17 => "Structure",
 			20 => "Primary",
 		),

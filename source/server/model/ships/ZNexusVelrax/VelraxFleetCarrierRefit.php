@@ -104,7 +104,7 @@ class VelraxFleetCarrierRefit extends BaseShip{
 					20 => "Primary",
 			),
 			3=> array(
-					6 => "Thruster",
+					5 => "Thruster",
 					7 => "Dual Ion Bolter",
 					9 => "Laser Lance",
 					12 => "Hangar",
@@ -112,7 +112,7 @@ class VelraxFleetCarrierRefit extends BaseShip{
 					20 => "Primary",
 			),
 			4=> array(
-					6 => "Thruster",
+					5 => "Thruster",
 					7 => "Dual Ion Bolter",
 					9 => "Laser Lance",
 					12 => "Hangar",

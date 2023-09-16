@@ -102,7 +102,7 @@ class VelraxFleetCarrier extends BaseShip{
 					20 => "Primary",
 			),
 			3=> array(
-					6 => "Thruster",
+					5 => "Thruster",
 					7 => "Twin Ion Gun",
 					9 => "Laser Spear",
 					12 => "Hangar",
@@ -110,7 +110,7 @@ class VelraxFleetCarrier extends BaseShip{
 					20 => "Primary",
 			),
 			4=> array(
-					6 => "Thruster",
+					5 => "Thruster",
 					7 => "Twin Ion Gun",
 					9 => "Laser Spear",
 					12 => "Hangar",

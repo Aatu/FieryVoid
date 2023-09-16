@@ -60,8 +60,8 @@ class VelraxSathrinFrigate extends MediumShip{
 		),
 
 		1=> array(
-			6 => "Thruster",
-			8 => "Laser Spear",
+			5 => "Thruster",
+			7 => "Laser Spear",
 			9 => "Twin Ion Gun",
 			11 => "Medium Plasma Cannon",
 			17 => "Structure",

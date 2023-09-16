@@ -61,9 +61,9 @@ class VelraxThristenCorvetteRefit2 extends MediumShip{
 		),
 
 		1=> array(
-			6 => "Thruster",
-			8 => "Light Plasma Cannon",
-			10 => "Laser Spear",
+			5 => "Thruster",
+			7 => "Light Plasma Cannon",
+			9 => "Laser Spear",
 			11 => "Twin Ion Gun",
 			17 => "Structure",
 			20 => "Primary",

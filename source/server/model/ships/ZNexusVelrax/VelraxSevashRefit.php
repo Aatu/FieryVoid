@@ -64,7 +64,7 @@ class VelraxSevashRefit extends MediumShip{
 		1=> array(
 			6 => "Thruster",
 			8 => "Laser Lance",
-			9 => "Twin Ion Gun",
+			10 => "Twin Ion Gun",
 			17 => "Structure",
 			20 => "Primary",
 		),

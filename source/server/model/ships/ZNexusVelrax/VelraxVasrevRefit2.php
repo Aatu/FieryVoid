@@ -62,8 +62,8 @@ class VelraxVasrevRefit2 extends MediumShip{
 		),
 
 		1=> array(
-			6 => "Thruster",
-			8 => "Plasma Arc",
+			5 => "Thruster",
+			7 => "Plasma Arc",
 			9 => "Dual Ion Bolter",
 			17 => "Structure",
 			20 => "Primary",
