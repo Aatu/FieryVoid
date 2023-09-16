@@ -390,14 +390,13 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
 			if (isset($this->alreadyFlayed[$target->id])) return;         	
 			$this->alreadyFlayed[$target->id] = true;//mark engaged 
 			
- 			if ($target instanceof FighterFlight) return;	//To ignore fighters if I want to.				
+ 			if ($target instanceof FighterFlight) return;	//Fighrers armour isn't flayed'			
 			
-            if ($system->advancedArmor) return;
-            	 			        	                         
+            if ($system->advancedArmor) return; //Neither is Advanced Armour
+      
+                  	 			        	                         
 	        $effectArmor = Dice::d(3,1);//strength of effect: 1d3
-
-
-		
+	
             foreach ($target->systems as $system){
   //              if ($system->advancedArmor) return;              					
                 if ($target->shipSizeClass<=1 || $system->location === $location){ //MCVs and smaller ships are one huge section technically
