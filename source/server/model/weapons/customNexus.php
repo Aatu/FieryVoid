@@ -4547,6 +4547,25 @@ class NexusLightAssaultCannonBattery extends Weapon{
 
 
 
+	class NexusAssaultCannonBattery extends NexusAssaultCannon {
+
+        public $name = "NexusAssaultCannonBattery";
+        public $displayName = "Assault Cannon Battery";
+		public $iconPath = "NexusAssaultCannonBattery.png";
+
+        public $loadingtime = 2;
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 16;
+            if ( $powerReq == 0 ) $powerReq = 10;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+		
+		
+	} //end of class NexusAsasultCannonBattery
+
+
 
     class NexusMedAssaultCannon extends Particle{
         public $trailColor = array(190, 75, 20);

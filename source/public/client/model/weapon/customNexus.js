@@ -131,6 +131,12 @@ var NexusAssaultCannon = function NexusAssaultCannon(json, ship) {
 NexusAssaultCannon.prototype = Object.create(Weapon.prototype);
 NexusAssaultCannon.prototype.constructor = NexusAssaultCannon;
 
+var NexusAssaultCannonBattery = function NexusAssaultCannonBattery(json, ship) {
+	Weapon.call(this, json, ship);
+};
+NexusAssaultCannonBattery.prototype = Object.create(Weapon.prototype);
+NexusAssaultCannonBattery.prototype.constructor = NexusAssaultCannonBattery;
+
 var NexusHeavyAssaultCannon = function NexusHeavyAssaultCannon(json, ship) {
 	Weapon.call(this, json, ship);
 };
