@@ -1714,6 +1714,7 @@ spl_autoload_register(
                 'craytancalen' => '/server/model/ships/ZNexusCraytan/CraytanCalen.php',					
                 'craytancrimur' => '/server/model/ships/ZNexusCraytan/CraytanCrimur.php',					
                 'craytandakran' => '/server/model/ships/ZNexusCraytan/CraytanDakran.php',					
+                'craytandeprin' => '/server/model/ships/ZNexusCraytan/CraytanDeprin.php',					
                 'craytanepiron' => '/server/model/ships/ZNexusCraytan/CraytanEpiron.php',					
                 'craytanepironrefit' => '/server/model/ships/ZNexusCraytan/CraytanEpironRefit.php',					
                 'craytaneskavin' => '/server/model/ships/ZNexusCraytan/CraytanEskavin.php',					
