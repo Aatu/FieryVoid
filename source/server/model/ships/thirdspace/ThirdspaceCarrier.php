@@ -22,8 +22,8 @@ class ThirdspaceCarrier extends BaseShip{
         $this->gravitic = true;
 		$this->advancedArmor = true; 		    
 		
-        $this->forwardDefense = 19;
-        $this->sideDefense = 21;
+        $this->forwardDefense = 18;
+        $this->sideDefense = 20;
         
         $this->turncost = 1.5;
         $this->turndelaycost = 1.5;
