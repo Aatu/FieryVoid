@@ -2914,7 +2914,8 @@ spl_autoload_register(
                 		'ammomissilec' => '/server/model/systems/baseSystems.php',
                 		'ammomissilei' => '/server/model/systems/baseSystems.php',                 		                 		
                 		'ammomissiles' => '/server/model/systems/baseSystems.php',
-                		'ammomissilek' => '/server/model/systems/baseSystems.php',                		
+                		'ammomissilek' => '/server/model/systems/baseSystems.php',
+                		'ammomissilem' => '/server/model/systems/baseSystems.php',                 		                		
 						
                 		'ammomissilefb' => '/server/model/systems/baseSystems.php',
                 		'ammomissilefl' => '/server/model/systems/baseSystems.php',
@@ -2927,7 +2928,7 @@ spl_autoload_register(
                 		'ammomissileracka' => '/server/model/weapons/missile.php',
                 		'ammomissilerackb' => '/server/model/weapons/missile.php',	
 						'ammomissilerackd' => '/server/model/weapons/missile.php',					
-						'ammomissilerackf' => '/server/model/weapons/customNexus.php', 
+						'ammomissilerackf' => '/server/model/weapons/missile.php', 
                 		'ammomissilerackl' => '/server/model/weapons/missile.php',
                 		'ammomissileracklh' => '/server/model/weapons/missile.php',
                 		'ammomissileracko' => '/server/model/weapons/missile.php',
@@ -3094,7 +3095,6 @@ spl_autoload_register(
 				'thirdspacebattlescout' => '/server/model/ships/thirdspace/ThirdspaceBattleScout.php',		
 				'thirdspacecarrier' => '/server/model/ships/thirdspace/ThirdspaceCarrier.php',
 				'thirdspaceselfrepair' => '/server/model/systems/baseSystems.php',	
-		//		'thirdspacetestbed' => '/server/model/ships/thirdspace/ThirdspaceTestbed.php',
 						
 						//Development systems
 						'testgun' => '/server/model/weapons/customDevelopment.php',
