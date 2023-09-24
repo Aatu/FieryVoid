@@ -1068,7 +1068,10 @@ class AmmoMissileRackS extends Weapon{
 	public $maxpulsesArray = array();     //Adding Pulse variables for Starburst missiles	
 	public $rofArray = array();
 	public $useDieArray = array();
-	public $fixedBonusPulsesArray = array();		
+	public $fixedBonusPulsesArray = array();	
+	
+    public $guns = 1;	//Adding shots variable for Multiwarhead Missile.
+ //   public $calledShotMod = -8;    //Variable for Multiwarhead Missile.  Normal called shot modifier is -8    		
 	
 	
 	
@@ -1143,12 +1146,15 @@ class AmmoMissileRackS extends Weapon{
 		$this->maxDamageArray = array();
 		$this->ammoClassesUsed = array();
 		$this->hidetargetArray = array();
-//		$this->interceptArray = array();//Adding Intercept variables for Interceptor missiles	
-//		$this->ballisticInterceptArray = array();
+		$this->interceptArray = array();//Adding Intercept variables for Interceptor missiles	
+		$this->ballisticInterceptArray = array();
+//		$this->ballisticArray = array(); //Idea that making intercept missiles non-ballistic might help
 		$this->maxpulsesArray = array();//Adding Pulse functions for Starburst missiles	
 		$this->rofArray = array();
 		$this->useDieArray = array();
 		$this->fixedBonusPulsesArray = array();
+	    $this->guns = array();	//Adding shots variable for Multiwarhead Missile.
+//	    $this->calledShotMod = array();	//Adding calledShotMod variable for Multiwarhead Missile.	    		
 							
 		
 		//add data for all modes to arrays
@@ -1191,12 +1197,15 @@ class AmmoMissileRackS extends Weapon{
 				$this->minDamageArray[$currMode] = $currAmmo->minDamage;
 				$this->maxDamageArray[$currMode] = $currAmmo->maxDamage;
 				$this->hidetargetArray[$currMode] = $currAmmo->hidetarget;//For Stealth missiles
-//				$this->interceptArray[$currMode] = $currAmmo->intercept;//Adding Intercept variables for Interceptor missiles	
-//				$this->ballisticInterceptArray[$currMode] = $currAmmo->ballisticIntercept;				
+				$this->interceptArray[$currMode] = $currAmmo->intercept;//Adding Intercept variables for Interceptor missiles	
+				$this->ballisticInterceptArray[$currMode] = $currAmmo->ballisticIntercept;	
+//				$this->ballisticArray[$currMode] = $currAmmo->ballistic;	//Idea that making intercept missiles non-ballistic might help							
 				$this->maxpulsesArray[$currMode] = $currAmmo->maxpulses;//Adding Pulse functions for Starburst missiles	
 				$this->rofArray[$currMode] = $currAmmo->rof;
 				$this->useDieArray[$currMode] = $currAmmo->useDie;
-				$this->fixedBonusPulsesArray[$currMode] = $currAmmo->fixedBonusPulses;		
+				$this->fixedBonusPulsesArray[$currMode] = $currAmmo->fixedBonusPulses;
+			    $this->gunsArray[$currMode] = $currAmmo->guns;	//Adding shots variable for Multiwarhead Missile.
+//			    $this->calledShotModArray[$currMode] = $currAmmo->calledShotMod;	//Adding calledShotMod variable for Multiwarhead Missile.			    							
 			}
 		}
 			
@@ -1229,12 +1238,15 @@ class AmmoMissileRackS extends Weapon{
 		$strippedSystem->minDamageArray = $this->minDamageArray; 
 		$strippedSystem->maxDamageArray = $this->maxDamageArray; 
 		$strippedSystem->hidetargetArray = $this->hidetargetArray;	//For Stealth Missiles
-//		$strippedSystem->interceptArray = $this->interceptArray;//Adding Intercept variables for Interceptor missiles	
-//		$strippedSystem->ballisticInterceptArray = $this->ballisticInterceptArray;			
+		$strippedSystem->interceptArray = $this->interceptArray;//Adding Intercept variables for Interceptor missiles	
+		$strippedSystem->ballisticInterceptArray = $this->ballisticInterceptArray;
+//		$strippedSystem->ballisticArray = $this->ballisticArray;  //Idea that making intercept missiles non-ballistic might help					
 		$strippedSystem->maxpulsesArray = $this->maxpulsesArray;//Adding Pulse functions for Starburst missiles	
 		$strippedSystem->rofArray = $this->rofArray;
 		$strippedSystem->useDieArray = $this->useDieArray;
-		$strippedSystem->fixedBonusPulsesArray = $this->fixedBonusPulsesArray;		
+		$strippedSystem->fixedBonusPulsesArray = $this->fixedBonusPulsesArray;	
+		$strippedSystem->gunsArray = $this->gunsArray; //Adding shots variable for Multiwarhead Missile.
+//		$strippedSystem->calledShotModArray = $this->calledShotModArray;	//Adding calledShotMod variable for Multiwarhead Missile.						
 		return $strippedSystem;
 	} 
 	
@@ -1335,8 +1347,7 @@ class AmmoMissileRackS extends Weapon{
 		}else{
 			return 0;	
 			}
-	    }
-
+	    }	    
 	public function rollPulses($turn, $needed, $rolled)
 	    {
 			$currAmmo = null;
@@ -1351,6 +1362,18 @@ class AmmoMissileRackS extends Weapon{
 				return 0;	
 			}
 	    }
+	    
+    public function beforeFiringOrderResolution($gamedata) //For Multiwarhead missile
+    {
+		$currAmmo = null;
+        //find appropriate ammo
+		if (array_key_exists($this->firingMode,$this->ammoClassesUsed)){
+			$currAmmo = $this->ammoClassesUsed[$this->firingMode];
+		}
+		if ($currAmmo) $currAmmo->beforeFiringOrderResolution($gamedata);
+		
+        parent::beforeFiringOrderResolution($gamedata);
+    }//endof function beforeFiringOrderResolution	    
 	
 } //endof class AmmoMissileRackS
 

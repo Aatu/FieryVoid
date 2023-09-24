@@ -3847,11 +3847,14 @@ class AmmoMissileTemplate{
     //Adding Intercept variables for Interceptor missiles		
 	public $intercept = 0;
 	public $ballisticIntercept = false;	
+//    public $ballistic = true;	//Idea that making intercept missiles non-ballistic might help
     //Adding Pulse variables for Starburst missiles	
 	public $maxpulses = 0;
 	public $rof = 0;
 	public $useDie = 0; //die used for base number of hits
 	public $fixedBonusPulses = 0;//for weapons doing dX+Y pulse	
+    public $guns = 1;
+//    public $calledShotMod = -8;    //Variable for Multiwarhead Missile.  Normal called shot modifier is -8 if ballistics can even make them... 	
 
 	
     function __construct(){}
@@ -3870,25 +3873,28 @@ class AmmoMissileTemplate{
     public function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder)
     {
         return;
-    }
+    }//endof function onDamagedSystem
     
     //Adding Pulse functions for Starburst missiles
-        protected function getPulses($turn)
+    protected function getPulses($turn)
         {
             return 0;
-        }
+        }//endof function getPulses
 	
-        protected function getExtraPulses($needed, $rolled)
+    protected function getExtraPulses($needed, $rolled)
         {
             return 0;
-        }
+        }//endof function getExtraPulses
 	
-		public function rollPulses($turn, $needed, $rolled){
+	public function rollPulses($turn, $needed, $rolled)
+		{
 		return 0;
-	}
+		}//endof function rollPulses
 	
-
-					
+    public function beforeFiringOrderResolution($gamedata)
+    {
+        return;
+    }//endof function beforeFiringOrderResolution					
 	    
 } //endof class AmmoMissileTemplate
 
@@ -4183,7 +4189,8 @@ class AmmoMissileC extends AmmoMissileTemplate{
 					}
 				}
 			}
-	} //endof function onDamagedSystem   
+	} //endof function onDamagedSystem
+	
 
 } //endof class AmmoMissileC
 
@@ -4233,12 +4240,13 @@ class AmmoMissileI extends AmmoMissileTemplate{
 	public $maxDamage = 0;	
 	public $damageType = 'Standard';//mode of dealing damage
 	public $weaponClass = 'Ballistic';//weapon class
-	public $priority = 1;
-	public $priorityAF = 1;
+	public $priority = 5;
+	public $priorityAF = 5;
 	public $noOverkill = false;
 	public $hidetarget = false;
 	public $intercept = 0;
-	public $ballisticIntercept = false;
+	public $ballisticIntercept = true;
+//    public $ballistic = false;		//Idea that making intercept missiles non-ballistic might help
 		
     public function getDamage($fireOrder) //actual function to be called, as with weapon!
     {
@@ -4331,6 +4339,8 @@ class AmmoMissileM extends AmmoMissileTemplate{
 	public $noOverkill = false;
     public $useOEW = false;
 	public $hidetarget = false;
+    public $guns = 6;	
+ //   public $calledShotMod = 0;    	
 	
     public $ballistic = true;	
 
@@ -4338,6 +4348,33 @@ class AmmoMissileM extends AmmoMissileTemplate{
     {
         return 10;
     }	
+
+    public function beforeFiringOrderResolution($gamedata){ //if target is protected by EM shield, that shield is hit automatically
+            $missilesRemaining = 5;
+
+            $target = $gamedata->getShipById($firingOrder->targetid);
+           	$shooter = $gamedata->getShipById($fireOrder->shooterid);
+            $fireOrders = $this->getFireOrders($gamedata->turn);           	
+           	
+			if($target instanceOf FighterFlight){ //one attack against every fighter!
+				foreach ($target->systems as $fighter) {
+						if ($fighter == null || $fighter->isDestroyed()) {
+							continue;
+						}    
+ 	           	while ($missilesRemaining > 1) {
+ 	           		$newFireOrder = new FireOrder(
+							-1, "normal", $shooter->id, $target->id,
+							$this->id, $fighter->id, $gamedata->turn, 1, 
+							0, 0, 1, 0, 0, //needed, rolled, shots, shotshit, intercepted
+							0,0,$this->weaponClass,-1 //X, Y, damageclass, resolutionorder
+						);		
+						$newFireOrder->addToDB = true;
+						$this->fireOrders[] = $newFireOrder;
+						$missilesRemaining--;
+					}
+            }           
+		}
+	}//endof function beforeFiringOrderResolution    
     
 	
 } //endof class AmmoMissileM
