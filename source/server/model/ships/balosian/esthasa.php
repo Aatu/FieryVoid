@@ -5,7 +5,7 @@ class Esthasa extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 525;
-        $this->faction = "Balosian";
+        $this->faction = "Balosian Underdwellers";
         $this->phpclass = "Esthasa";
         $this->imagePath = "img/ships/esthasa.png";
         $this->shipClass = "Esthasa Destroyer";

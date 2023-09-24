@@ -5,7 +5,7 @@ class Motenai1980 extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 615;
-		$this->faction = "Abbai (WotCR)";
+		$this->faction = "Abbai Matriarchate (WotCR)";
         $this->phpclass = "Motenai1980";
         $this->imagePath = "img/ships/AbbaiMotenai.png";
         $this->shipClass = "Motenai Missile Cruiser (1980)";

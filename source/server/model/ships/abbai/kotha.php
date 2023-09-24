@@ -5,7 +5,7 @@ class Kotha extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
     	$this->pointCost = 210;
-        $this->faction = "Abbai";
+        $this->faction = "Abbai Matriarchate";
         $this->phpclass = "Kotha";
         $this->shipClass = "Kotha Medium Fighters";
     	$this->imagePath = "img/ships/AbbaiKotha.png";

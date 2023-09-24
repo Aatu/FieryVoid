@@ -5,7 +5,7 @@ class Tortra extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 40*6;
-        $this->faction = "Balosian";
+        $this->faction = "Balosian Underdwellers";
         $this->phpclass = "Tortra";
         $this->shipClass = "Tortra Assault Shuttles";
         $this->imagePath = "img/ships/Tortra.png";

@@ -5,7 +5,7 @@ class HalosEarly extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 740;
-	$this->faction = "Brakiri";
+	$this->faction = "Brakiri Syndicracy";
         $this->phpclass = "HalosEarly";
         $this->imagePath = "img/ships/halos.png";
         $this->shipClass = "Halos Heavy Scout (Early)";

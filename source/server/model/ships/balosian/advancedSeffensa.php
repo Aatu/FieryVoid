@@ -5,7 +5,7 @@ class AdvancedSeffensa extends BaseShip{
         parent::__construct($id, $userid, $name,  $movement);
         
         $this->pointCost = 775;
-        $this->faction = "Balosian";
+        $this->faction = "Balosian Underdwellers";
         $this->phpclass = "AdvancedSeffensa";
         $this->imagePath = "img/ships/seffensa.png";
         $this->shipClass = "Seffensa Advanced Cruiser";

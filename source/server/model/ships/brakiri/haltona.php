@@ -6,7 +6,7 @@ class Haltona extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 525;
-	$this->faction = "Brakiri";
+	$this->faction = "Brakiri Syndicracy";
         $this->phpclass = "Haltona";
         $this->imagePath = "img/ships/haltona.png";
         $this->shipClass = "Haltona Frigate";

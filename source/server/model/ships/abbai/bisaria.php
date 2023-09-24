@@ -5,7 +5,7 @@ class Bisaria extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 500;
-	$this->faction = "Abbai";
+	$this->faction = "Abbai Matriarchate";
         $this->phpclass = "Bisaria";
         $this->imagePath = "img/ships/AbbaiTiraca.png";
         $this->shipClass = "Bisaria Escort Frigate";

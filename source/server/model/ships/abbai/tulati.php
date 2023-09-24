@@ -5,7 +5,7 @@ class Tulati extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 300;
-	$this->faction = "Abbai";
+	$this->faction = "Abbai Matriarchate";
         $this->phpclass = "Tulati";
         $this->imagePath = "img/ships/AbbaiTulati.png";
         $this->shipClass = "Tulati Frigate";

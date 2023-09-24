@@ -5,7 +5,7 @@ class Falkosi extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
     	$this->pointCost = 228;
-    	$this->faction = "Brakiri";
+    	$this->faction = "Brakiri Syndicracy";
         $this->phpclass = "Falkosi";
         $this->shipClass = "Falkosi Light Fighters";
     	$this->imagePath = "img/ships/falkosi.png";

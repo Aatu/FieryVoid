@@ -5,7 +5,7 @@ class Marata extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 550;
-	$this->faction = "Abbai";
+	$this->faction = "Abbai Matriarchate";
         $this->phpclass = "Marata";
         $this->imagePath = "img/ships/AbbaiMilani.png";
         $this->shipClass = "Marata Diplomatic Transport";
