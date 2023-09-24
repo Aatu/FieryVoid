@@ -3887,10 +3887,7 @@ class AmmoMissileTemplate{
 		return 0;
 	}
 	
-	public function AOEdamage($target, $shooter, $fireOrder, $gamedata)    
-	{
-		return;
-		}	
+
 					
 	    
 } //endof class AmmoMissileTemplate
@@ -4342,21 +4339,6 @@ class AmmoMissileM extends AmmoMissileTemplate{
         return 10;
     }	
     
-	public function AOEdamage($target, $shooter, $fireOrder, $gamedata)    {
-        if ($target->isDestroyed()) return; //no point allocating
-        	
-            foreach ($target->systems as $fighter) {
-                if ($fighter == null || $fighter->isDestroyed()) {
-                    continue;
-                }
-         //roll (and modify as appropriate) damage for this particular fighter:
-        $damage = $this->getDamage($fireOrder);
-        $damage = $this->getDamageMod($damage, $shooter, $target, null, $gamedata);
-        $damage -= $target->getDamageMod($shooter, null, $gamedata->turn, $this);
-
-              $this->doDamage($target, $shooter, $fighter, $damage, $fireOrder, null, $gamedata, false);      
-			}
-		}
 	
 } //endof class AmmoMissileM
 

@@ -1269,18 +1269,8 @@ class AmmoMissileRackS extends Weapon{
         parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
     }//endof function onDamagedSystem
 
-	/*Multiwarhead missiles deal AoE damage*/
-    public function AOEdamage($ship, $system, $damage, $armour, $gamedata, $fireOrder)
-    {
-		$currAmmo = null;
-        //find appropriate ammo
-		if (array_key_exists($this->firingMode,$this->ammoClassesUsed)){
-			$currAmmo = $this->ammoClassesUsed[$this->firingMode];
-		}
-		if ($currAmmo) $currAmmo->AOEdamage($ship, $system, $damage, $armour, $gamedata, $fireOrder);
-		
-        parent::AOEdamage($ship, $system, $damage, $armour, $gamedata, $fireOrder);
-    }//endof function AOEdamage	  
+	//For Multiwarhead missiles
+ 
 	
 	public function criticalPhaseEffects($ship, $gamedata){ //add testing for ammo explosion!
 		if(!$this->isDamagedOnTurn($gamedata->turn)) return; //if there is no damage this turn, then no testing for explosion
