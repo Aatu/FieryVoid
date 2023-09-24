@@ -3787,27 +3787,33 @@ class AmmoMagazine extends ShipSystem {
  	/*act on notes just loaded - to be redefined by systems as necessary
 	 - mark rounds spent (it is possible to load more rounds than magazine capacity, but spending will be limited by it - in effect getting extra flexibility (but not magazine capacity) for very high price
 	*/
-	public function onIndividualNotesLoaded($gamedata){
-		foreach ($this->individualNotes as $currNote){ //assume ASCENDING sorting - so enact all changes as is
-			switch($currNote->notekey){
-				case 'AmmoUsed': //mode name for ammmunition type that was expended
-					///entry may not exist yet! due to when enhancements and notes are loaded - in this case initialize them - values will get negative for a moment, but it's not a problem
-					if (!array_key_exists($currNote->notevalue,$this->ammoCountArray)){	
-						$this->ammoCountArray[$currNote->notevalue] = 0;
-					}				
-					if (!array_key_exists($currNote->notevalue,$this->ammoUsedTotal)){
-						$this->ammoUsedTotal[$currNote->notevalue] = 0;
-					}	
-					$this->ammoCountArray[$currNote->notevalue] -= 1;
-					$this->ammoUsedTotal[$currNote->notevalue] += 1;
-					/*
-					$ammoSize = $this->ammoSizeArray[$currNote->notevalue];
-					$this->remainingAmmo -= $ammoSize;
-					*/
-					break;			
-			}
-		}
-	} //endof function onIndividualNotesLoaded
+public function onIndividualNotesLoaded($gamedata) {
+    foreach ($this->individualNotes as $currNote) { // Assume ASCENDING sorting - so enact all changes as is
+        switch ($currNote->notekey) {
+            case 'AmmoUsed': // Mode name for ammunition type that was expended
+                // Entry may not exist yet! Due to when enhancements and notes are loaded - in this case, initialize them - values will get negative for a moment, but it's not a problem
+                if (!array_key_exists($currNote->notevalue, $this->ammoCountArray)) {
+                    $this->ammoCountArray[$currNote->notevalue] = 0;
+                }
+                if (!array_key_exists($currNote->notevalue, $this->ammoUsedTotal)) {
+                    $this->ammoUsedTotal[$currNote->notevalue] = 0;
+                }
+
+                if ($currNote->notevalue === 'M - Multiwarhead') {
+                    $this->ammoCountArray[$currNote->notevalue] -= (1 / 6);
+                    $this->ammoUsedTotal[$currNote->notevalue] += (1 / 6);
+                } else {
+                    $this->ammoCountArray[$currNote->notevalue] -= 1;
+                    $this->ammoUsedTotal[$currNote->notevalue] += 1;
+                }
+                /*
+                $ammoSize = $this->ammoSizeArray[$currNote->notevalue];
+                $this->remainingAmmo -= $ammoSize;
+                */
+                break;
+        }
+    }
+} // End of function onIndividualNotesLoaded
 	
 	
     public function doIndividualNotesTransfer(){
@@ -4349,7 +4355,7 @@ class AmmoMissileM extends AmmoMissileTemplate{
         return 10;
     }	
 
-    public function beforeFiringOrderResolution($gamedata){ //if target is protected by EM shield, that shield is hit automatically
+ /*   public function beforeFiringOrderResolution($gamedata){ //if target is protected by EM shield, that shield is hit automatically
             $missilesRemaining = 5;
 
             $target = $gamedata->getShipById($firingOrder->targetid);
@@ -4374,7 +4380,7 @@ class AmmoMissileM extends AmmoMissileTemplate{
 					}
             }           
 		}
-	}//endof function beforeFiringOrderResolution    
+	}//endof function beforeFiringOrderResolution   */ 
     
 	
 } //endof class AmmoMissileM
