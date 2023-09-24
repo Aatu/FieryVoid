@@ -3886,6 +3886,12 @@ class AmmoMissileTemplate{
 		public function rollPulses($turn, $needed, $rolled){
 		return 0;
 	}
+	
+	public function AOEdamage($target, $shooter, $fireOrder, $gamedata)    
+	{
+		return;
+		}	
+					
 	    
 } //endof class AmmoMissileTemplate
 
@@ -4306,6 +4312,53 @@ class AmmoMissileK extends AmmoMissileTemplate{
 	
 } //endof class AmmoMissileK
 
+//ammunition for AmmoMagazine - Class MK Missile (for official Missile Racks)
+class AmmoMissileM extends AmmoMissileTemplate{	
+	public $name = 'ammoMissileM';
+	public $displayName = 'Multiwarhead Missile';
+	public $modeName = 'M - Multiwarhead';
+	public $size = 2; //how many store slots are required for a single round
+	public $enhancementName = 'AMMO_M'; //enhancement name to be enabled
+	public $enhancementDescription = '(ammo) Multiwarhead Missile (2256)';
+	public $enhancementPrice = 24; //PV per missile;
+	
+	public $rangeMod = 0; //MODIFIER for launch range
+	public $distanceRangeMod = 0; //MODIFIER for distance range
+	public $fireControlMod = array(3, null, null); //MODIFIER for weapon fire control!
+	public $minDamage = 10;
+	public $maxDamage = 10;	
+	public $damageType = 'Standard';//mode of dealing damage
+	public $weaponClass = 'Ballistic';//weapon class
+	public $priority = 5;
+	public $priorityAF = 5;
+	public $noOverkill = false;
+    public $useOEW = false;
+	public $hidetarget = false;
+	
+    public $ballistic = true;	
+
+    public function getDamage($fireOrder) //actual function to be called, as with weapon!
+    {
+        return 10;
+    }	
+    
+	public function AOEdamage($target, $shooter, $fireOrder, $gamedata)    {
+        if ($target->isDestroyed()) return; //no point allocating
+        	
+            foreach ($target->systems as $fighter) {
+                if ($fighter == null || $fighter->isDestroyed()) {
+                    continue;
+                }
+         //roll (and modify as appropriate) damage for this particular fighter:
+        $damage = $this->getDamage($fireOrder);
+        $damage = $this->getDamageMod($damage, $shooter, $target, null, $gamedata);
+        $damage -= $target->getDamageMod($shooter, null, $gamedata->turn, $this);
+
+              $this->doDamage($target, $shooter, $fighter, $damage, $fireOrder, null, $gamedata, false);      
+			}
+		}
+	
+} //endof class AmmoMissileM
 
 //ammunition for AmmoMagazine - Class FB Missile (Fighter Basic Missile)
 class AmmoMissileFB extends AmmoMissileTemplate{	

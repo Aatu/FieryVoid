@@ -296,3 +296,51 @@ AmmoFighterRack.prototype.constructor = AmmoFighterRack;
 MultiDefenseLauncher.prototype = Object.create(Weapon.prototype);
 MultiDefenseLauncher.prototype.constructor =  MultiDefenseLauncher;
 */
+
+
+var AmmoMissileRackF= function  AmmoMissileRackF(json, ship) {
+    Weapon.call(this, json, ship);
+};
+AmmoMissileRackF.prototype = Object.create(Weapon.prototype);
+AmmoMissileRackF.prototype.constructor =  AmmoMissileRackF;
+
+AmmoMissileRackF.prototype.doIndividualNotesTransfer = function () { //prepare individualNotesTransfer variable - if relevant for this particular system
+	//here: transfer information about firing in Rapid mode and Long Range modes
+	// (eg. weapon is being fired after 1 turn of arming)
+	var toReturn = false;
+
+  //Check for fire order and check Initial Orders  	
+    	if ((this.fireOrders.length > 0) && (gamedata.gamephase == 1)) {	
+	
+	   		this.individualNotesTransfer = Array();	//Clear any current notes
+	   		
+	//Check for 1 turn loaded, as this will mean it has to be fired in Rapid Mode.	
+			if (this.turnsloaded == 1) {
+				this.individualNotesTransfer.push('R');
+				toReturn = true;
+			}
+	
+	// Code below is for Long Ranged shot conditions, trying to get Rapid mode operating first.
+		
+/*				   		
+			if (this.turnsloaded == 2) {
+	//Reduce range of weapon. Check range, then reset range (if false send 'L' note), reset to normal range.			
+			    var firingShip = gamedata.getShip(this.shipid);
+			    var aFireOrder = this.fireOrders[0]; 
+			    var targetShip = gamedata.getShip(aFireOrder.targetid); 
+
+				this.weapon.range -= 15;
+				var longRanged = weaponManager.checkIsInRange(firingShip, targetShip, this);
+				this.range += 15;			
+						
+			if (longRanged == false ){
+					this.individualNotesTransfer.push('L');
+					toReturn = true;	
+				}else{
+					toReturn = false;	
+					}
+				}	*/	
+		}	
+	return toReturn;  
+};
+
