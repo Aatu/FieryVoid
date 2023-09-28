@@ -384,6 +384,18 @@ class CustomPulsarLaser extends Pulse{
             }
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
+		
+		
+        public function setSystemDataWindow($turn)
+        {
+            parent::setSystemDataWindow($turn);
+			if (!isset($this->data["Special"])) {
+				$this->data["Special"] = '';
+			}else{
+				$this->data["Special"] .= '<br>';
+			}
+			$this->data["Special"] .= "Uninterceptable.";      
+		}
         
         
         public function getDamage($fireOrder){        return 12;   }

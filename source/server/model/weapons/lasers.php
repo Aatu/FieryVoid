@@ -428,6 +428,17 @@ class CustomStrikeLaser extends Weapon{
 			}
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
+		
+        public function setSystemDataWindow($turn)
+        {
+            parent::setSystemDataWindow($turn);
+			if (!isset($this->data["Special"])) {
+				$this->data["Special"] = '';
+			}else{
+				$this->data["Special"] .= '<br>';
+			}
+			$this->data["Special"] .= "Uninterceptable.";      
+		}
 
         public function getDamage($fireOrder){ return Dice::d(10, 2)+8; }
         public function setMinDamage(){ $this->minDamage = 10 ; }
