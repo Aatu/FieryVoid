@@ -493,7 +493,7 @@ class DBManager
             if ($fire->turn != $turn)
                 continue;
 
-            if ($fire->type == "ballistic" && $phase != 1)
+  		if (($fire->type == "ballistic") && ($phase != 1) &&  ($fire->addToDB != true)) //28 Sept 2023 - Amended to enable Multimissile to shows multiple shots in Combat Log.
                 continue;
 
             if ($fire->type != "ballistic" && $phase == 1)

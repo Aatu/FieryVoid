@@ -3799,13 +3799,13 @@ public function onIndividualNotesLoaded($gamedata) {
                     $this->ammoUsedTotal[$currNote->notevalue] = 0;
                 }
 
-                if ($currNote->notevalue === 'M - Multiwarhead') {
+ /*               if ($currNote->notevalue === 'M - Multiwarhead') {
                     $this->ammoCountArray[$currNote->notevalue] -= (1 / 6);
                     $this->ammoUsedTotal[$currNote->notevalue] += (1 / 6);
-                } else {
+                } else { */
                     $this->ammoCountArray[$currNote->notevalue] -= 1;
                     $this->ammoUsedTotal[$currNote->notevalue] += 1;
-                }
+  //              }
                 /*
                 $ammoSize = $this->ammoSizeArray[$currNote->notevalue];
                 $this->remainingAmmo -= $ammoSize;
@@ -3854,13 +3854,14 @@ class AmmoMissileTemplate{
 	public $intercept = 0;
 	public $ballisticIntercept = false;	
 //    public $ballistic = true;	//Idea that making intercept missiles non-ballistic might help
+
     //Adding Pulse variables for Starburst missiles	
 	public $maxpulses = 0;
 	public $rof = 0;
 	public $useDie = 0; //die used for base number of hits
 	public $fixedBonusPulses = 0;//for weapons doing dX+Y pulse	
-    public $guns = 1;
-//    public $calledShotMod = -8;    //Variable for Multiwarhead Missile.  Normal called shot modifier is -8 if ballistics can even make them... 	
+//    public $guns = 1;
+    public $calledShotMod = -8;    //Variable for Multiwarhead Missile.  Normal called shot modifier is -8.
 
 	
     function __construct(){}
@@ -3897,12 +3898,18 @@ class AmmoMissileTemplate{
 		return 0;
 		}//endof function rollPulses
 	
-    public function beforeFiringOrderResolution($gamedata)
+	public function beforeFiringOrderResolution($gamedata, $weapon, $originalFireOrder)
     {
-        return;
-    }//endof function beforeFiringOrderResolution					
+    	return;
+    }//endof function beforeFiringOrderResolution	
+    
+    public function getCalledShotMod()
+    {
+        return $this->calledShotMod;
+    }//end of getCalledShotMod     				
 	    
 } //endof class AmmoMissileTemplate
+
 
 //ammunition for AmmoMagazine - Class B Missile (for official Missile Racks)
 class AmmoMissileB extends AmmoMissileTemplate{	
@@ -4327,7 +4334,7 @@ class AmmoMissileK extends AmmoMissileTemplate{
 class AmmoMissileM extends AmmoMissileTemplate{	
 	public $name = 'ammoMissileM';
 	public $displayName = 'Multiwarhead Missile';
-	public $modeName = 'M - Multiwarhead';
+	public $modeName = 'Multiwarhead';
 	public $size = 2; //how many store slots are required for a single round
 	public $enhancementName = 'AMMO_M'; //enhancement name to be enabled
 	public $enhancementDescription = '(ammo) Multiwarhead Missile (2256)';
@@ -4335,7 +4342,7 @@ class AmmoMissileM extends AmmoMissileTemplate{
 	
 	public $rangeMod = 0; //MODIFIER for launch range
 	public $distanceRangeMod = 0; //MODIFIER for distance range
-	public $fireControlMod = array(3, null, null); //MODIFIER for weapon fire control!
+	public $fireControlMod = array(100, null, null); //MODIFIER for weapon fire control! Should be 3
 	public $minDamage = 10;
 	public $maxDamage = 10;	
 	public $damageType = 'Standard';//mode of dealing damage
@@ -4345,8 +4352,8 @@ class AmmoMissileM extends AmmoMissileTemplate{
 	public $noOverkill = false;
     public $useOEW = false;
 	public $hidetarget = false;
-    public $guns = 6;	
- //   public $calledShotMod = 0;    	
+ //   public $guns = 6;	
+    public $calledShotMod = 0;   	
 	
     public $ballistic = true;	
 
@@ -4355,33 +4362,49 @@ class AmmoMissileM extends AmmoMissileTemplate{
         return 10;
     }	
 
- /*   public function beforeFiringOrderResolution($gamedata){ //if target is protected by EM shield, that shield is hit automatically
-            $missilesRemaining = 5;
 
-            $target = $gamedata->getShipById($firingOrder->targetid);
-           	$shooter = $gamedata->getShipById($fireOrder->shooterid);
-            $fireOrders = $this->getFireOrders($gamedata->turn);           	
-           	
-			if($target instanceOf FighterFlight){ //one attack against every fighter!
-				foreach ($target->systems as $fighter) {
-						if ($fighter == null || $fighter->isDestroyed()) {
-							continue;
-						}    
- 	           	while ($missilesRemaining > 1) {
- 	           		$newFireOrder = new FireOrder(
-							-1, "normal", $shooter->id, $target->id,
-							$this->id, $fighter->id, $gamedata->turn, 1, 
-							0, 0, 1, 0, 0, //needed, rolled, shots, shotshit, intercepted
-							0,0,$this->weaponClass,-1 //X, Y, damageclass, resolutionorder
-						);		
-						$newFireOrder->addToDB = true;
-						$this->fireOrders[] = $newFireOrder;
-						$missilesRemaining--;
-					}
-            }           
+		public function beforeFiringOrderResolution($gamedata, $weapon, $originalFireOrder)
+		{
+		    // To create 6 missiles instead of just one.
+		    $missilesTotal = 6;
+		    $currentShotNumber = 1;
+
+		    // Fetch target and shooter IDs from the current fire order
+		    $target = $gamedata->getShipById($originalFireOrder->targetid);
+		    if ($target instanceof FighterFlight) { // one attack against every fighter!
+
+		        $fighterList = array(); // Corrected the "new" keyword
+
+		        foreach ($target->systems as $fighter) { // Can only target fighters.
+		            if ($fighter->isDestroyed()) { // Ignore destroyed fighters.
+		                continue;
+		            }
+		            array_unshift($fighterList, $fighter); // array_unshift adds element at the beginning of array rather than at the end
+		        }
+
+		        foreach ($fighterList as $fighter) {
+		            if ($currentShotNumber == 1) {
+		                $originalFireOrder->calledid = $fighter->id;
+		            } else {	
+							$newFireOrder = new FireOrder(
+                                    -1, "ballistic", $originalFireOrder->shooterid, $originalFireOrder->targetid,
+                                    $weapon->id, $fighter->id, $gamedata->turn, $originalFireOrder->firingMode, 
+                                    0, 0, 1, 0, 0, //needed, rolled, shots, shotshit, intercepted
+                                    0,0,$weapon->weaponClass,-1 //X, Y, damageclass, resolutionorder
+                                );
+                            $newFireOrder->addToDB = true;
+                            $weapon->fireOrders[] = $newFireOrder;
+                         
+							}
+						
+						$currentShotNumber++;
+						if($currentShotNumber > $missilesTotal) break; //will get out of foreach loop once we're out of submissiles, even if there are still fighters unassigned	
+					
+				}
 		}
-	}//endof function beforeFiringOrderResolution   */ 
-    
+	}//endof function beforeFiringOrderResolution   
+
+            
 	
 } //endof class AmmoMissileM
 
