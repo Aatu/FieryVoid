@@ -3850,17 +3850,15 @@ class AmmoMissileTemplate{
 	public $noOverkill = false;
 	public $useOEW = false;
 	public $hidetarget = false;
-    //Adding Intercept variables for Interceptor missiles		
 	public $intercept = 0;
 	public $ballisticIntercept = false;	
-//    public $ballistic = true;	//Idea that making intercept missiles non-ballistic might help
 
     //Adding Pulse variables for Starburst missiles	
 	public $maxpulses = 0;
 	public $rof = 0;
 	public $useDie = 0; //die used for base number of hits
 	public $fixedBonusPulses = 0;//for weapons doing dX+Y pulse	
-//    public $guns = 1;
+	
     public $calledShotMod = -8;    //Variable for Multiwarhead Missile.  Normal called shot modifier is -8.
 
 	
@@ -3907,6 +3905,11 @@ class AmmoMissileTemplate{
     {
         return $this->calledShotMod;
     }//end of getCalledShotMod     				
+
+	public function fire($gamedata, $fireOrder)
+    {
+    	return;
+    }//endof function fire	
 	    
 } //endof class AmmoMissileTemplate
 
@@ -4342,7 +4345,7 @@ class AmmoMissileM extends AmmoMissileTemplate{
 	
 	public $rangeMod = 0; //MODIFIER for launch range
 	public $distanceRangeMod = 0; //MODIFIER for distance range
-	public $fireControlMod = array(100, null, null); //MODIFIER for weapon fire control! Should be 3
+	public $fireControlMod = array(3, null, null); //MODIFIER for weapon fire control! Should be 3
 	public $minDamage = 10;
 	public $maxDamage = 10;	
 	public $damageType = 'Standard';//mode of dealing damage
@@ -4352,10 +4355,11 @@ class AmmoMissileM extends AmmoMissileTemplate{
 	public $noOverkill = false;
     public $useOEW = false;
 	public $hidetarget = false;
- //   public $guns = 6;	
     public $calledShotMod = 0;   	
 	
-    public $ballistic = true;	
+    public $ballistic = true;
+    
+	protected $engagedFighters = array();  //Required to avoid mulitple M-Missiles creating fire orders for destroyed fighters and therefore reverting to a normal shot. 	
 
     public function getDamage($fireOrder) //actual function to be called, as with weapon!
     {
@@ -4404,6 +4408,44 @@ class AmmoMissileM extends AmmoMissileTemplate{
 		}
 	}//endof function beforeFiringOrderResolution   
 
+     public function fire($gamedata, $fireOrder) 	//For Multiwarhead missiles
+    {
+
+	$validTarget = true; //unless we find a reason it's not
+	$target = $gamedata->getShipById($fireOrder->targetid);
+	$fighter = $target->getSystemById($fireOrder->calledid);
+	
+	if($fighter->isDestroyed()) $validTarget = false; //shot called at destroyed fighter would have been reassigned
+	if(in_array($fireOrder->calledid,  $this->engagedFighters)) $validTarget = false; //if it was already engaged by this weapon, it cannot be engaged again
+		
+	if (!$validTarget) {//target is not valid, find another one
+		 $targetFighter = null;
+		                foreach ($target->systems as $fighter) { // Can only target fighters.
+		                    if ($fighter->isDestroyed()) { // Ignore destroyed fighters.
+		                        continue;
+		                    }
+		                    	                    
+			if(in_array($fighter->id,  $this->engagedFighters)) continue; //ignore already engaged fighters
+			 	
+			$targetFighter = $fighter; //found appropriate target! 
+			
+	//		break; //Removed so that retargetted munitions strike last fighter in flight.
+			                }                
+			                
+				if($targetFighter!=null){
+				$fireOrder->calledid = $targetFighter->id; //this redirection will be correctly handled by standard routines
+				$validTarget = true;
+				}
+			}	
+
+		 if (!$validTarget) { //target not valid and no replacement found - make the shot miss!
+			$fireOrder->needed = 0; //set hit chance as 0
+			$fireOrder->pubnotes .= '  No viable target - excess submunition lost';//inform player of situation
+		}else{ //valid target, will be engaged, note for further shots!
+				$this->engagedFighters[]= $fireOrder->calledid;
+			}
+		
+	}//end of function fire
             
 	
 } //endof class AmmoMissileM

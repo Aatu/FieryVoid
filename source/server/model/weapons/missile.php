@@ -1046,7 +1046,8 @@ class AmmoMissileRackS extends Weapon{
     public $rangeArray = array(); 
 	public $distanceRangeArray = array(); 
 
-	//F-Rack variables	
+	//F-Rack variables removing for now to prevent anything odd happening.
+	/*
 	protected $firedInRapidMode = false; //was this weapon fired in rapid mode (this turn)?
 	protected $firedInLongRangeMode = false;
 	protected $baseFireControlArray = null; //base values of fire control - copy necessary due to necessity of recalculation now and then!	
@@ -1054,7 +1055,7 @@ class AmmoMissileRackS extends Weapon{
 	protected $baseRangeArray = null; //base value of range - copy necessary due to necessity of recalculation now and then!
 	protected $baseDistance = null; //base value of range - copy necessary due to necessity of recalculation now and then!
 	protected $baseDistanceArray = null; //base value of range - copy necessary due to necessity of recalculation now and then!	
-	
+	*/
 
 	protected $ammoClassesArray = array();//FILLED IN CONSTRUCTOR! classes representing POTENTIALLY available ammo - so firing modes are always shown in the same order
 	
@@ -1070,7 +1071,6 @@ class AmmoMissileRackS extends Weapon{
 	public $useDieArray = array();
 	public $fixedBonusPulsesArray = array();	
 	
-  //  public $guns = 1;	//Adding shots variable for Multiwarhead Missile.
     public $calledShotMod = -8;    //Variable for Multiwarhead Missile.  Normal called shot modifier is -8    		
 	
 	
@@ -1091,7 +1091,7 @@ class AmmoMissileRackS extends Weapon{
 			$this->ammoClassesArray[] =  new AmmoMissileP();
 			$this->ammoClassesArray[] =  new AmmoMissileD(); //...though only Alacans use those, as simple Basic missiles are far superior
 			$this->ammoClassesArray[] =  new AmmoMissileC();
-	//		$this->ammoClassesArray[] =  new AmmoMissileI(); //Only available to Class-D launchers on Kor-Lyan ships at this time.					
+	//		$this->ammoClassesArray[] =  new AmmoMissileI(); //Only available to Class-D launchers on Kor-Lyan ships at this time, created in ship magazine.					
 			$this->ammoClassesArray[] =  new AmmoMissileS();
 			$this->ammoClassesArray[] =  new AmmoMissileK();
 			$this->ammoClassesArray[] =  new AmmoMissileM();							
@@ -1152,7 +1152,6 @@ class AmmoMissileRackS extends Weapon{
 		$this->rofArray = array();
 		$this->useDieArray = array();
 		$this->fixedBonusPulsesArray = array();
-//	    $this->guns = array();	//Adding shots variable for Multiwarhead Missile.
 		$this->calledShotMod = array();	//Adding calledShotMod variable for Multiwarhead Missile.	    		
 							
 		
@@ -1202,7 +1201,6 @@ class AmmoMissileRackS extends Weapon{
 				$this->rofArray[$currMode] = $currAmmo->rof;
 				$this->useDieArray[$currMode] = $currAmmo->useDie;
 				$this->fixedBonusPulsesArray[$currMode] = $currAmmo->fixedBonusPulses;
-//			    $this->gunsArray[$currMode] = $currAmmo->guns;	//Adding shots variable for Multiwarhead Missile.
 			    $this->calledShotModArray[$currMode] = $currAmmo->calledShotMod;	//Adding calledShotMod variable for Multiwarhead Missile.			    							
 			}
 		}
@@ -1242,7 +1240,6 @@ class AmmoMissileRackS extends Weapon{
 		$strippedSystem->rofArray = $this->rofArray;
 		$strippedSystem->useDieArray = $this->useDieArray;
 		$strippedSystem->fixedBonusPulsesArray = $this->fixedBonusPulsesArray;	
-//		$strippedSystem->gunsArray = $this->gunsArray; //Adding shots variable for Multiwarhead Missile.
 		$strippedSystem->calledShotModArray = $this->calledShotModArray;	//Adding calledShotMod variable for Multiwarhead Missile.						
 		return $strippedSystem;
 	} 
@@ -1278,8 +1275,6 @@ class AmmoMissileRackS extends Weapon{
         parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
     }//endof function onDamagedSystem
 
-	//For Multiwarhead missiles
- 
 	
 	public function criticalPhaseEffects($ship, $gamedata){ //add testing for ammo explosion!
 		if(!$this->isDamagedOnTurn($gamedata->turn)) return; //if there is no damage this turn, then no testing for explosion
@@ -1385,7 +1380,8 @@ class AmmoMissileRackS extends Weapon{
         
 	}	//endof function beforeFiringOrderResolution	
 
-    public function getCalledShotMod()
+
+    public function getCalledShotMod()  	//For Multiwarhead missiles
         {
             $currAmmo = null;
             //find appropriate ammo
@@ -1400,6 +1396,19 @@ class AmmoMissileRackS extends Weapon{
             }
         }
 
+
+     public function fire($gamedata, $fireOrder)	//For Multiwarhead missiles
+    {
+		$currAmmo = null;
+        //find appropriate ammo
+		if (array_key_exists($this->firingMode,$this->ammoClassesUsed)){
+			$currAmmo = $this->ammoClassesUsed[$this->firingMode];
+		}
+		if ($currAmmo) $currAmmo->fire($gamedata, $fireOrder);
+		
+        parent::fire($gamedata, $fireOrder);
+
+	}
 
 } //endof class AmmoMissileRackS
 
