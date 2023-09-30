@@ -3799,13 +3799,10 @@ public function onIndividualNotesLoaded($gamedata) {
                     $this->ammoUsedTotal[$currNote->notevalue] = 0;
                 }
 
- /*               if ($currNote->notevalue === 'M - Multiwarhead') {
-                    $this->ammoCountArray[$currNote->notevalue] -= (1 / 6);
-                    $this->ammoUsedTotal[$currNote->notevalue] += (1 / 6);
-                } else { */
+
                     $this->ammoCountArray[$currNote->notevalue] -= 1;
                     $this->ammoUsedTotal[$currNote->notevalue] += 1;
-  //              }
+
                 /*
                 $ammoSize = $this->ammoSizeArray[$currNote->notevalue];
                 $this->remainingAmmo -= $ammoSize;
