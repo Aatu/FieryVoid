@@ -1864,7 +1864,7 @@ class AmmoMissileRackF extends AmmoMissileRackS {
 
 //MARCIN - The below If function only works on the Turn Loaded condition, and doesn't work on just firedInRapidMode.  Suggests that recalculateFireControl function IS being called, but firedInRapidMode variable not operating as intended?
 
-		if (($this->turnsloaded == 1) || ($this->firedInRapidMode)) { //after only 1 turn of charging: Standard mode becomes Rapid with reduced Fire Control, Range and Distance Range.
+		if (($this->turnsloaded == 1) || ($this->firedInRapidMode == true)) { //after only 1 turn of charging: Standard mode becomes Rapid with reduced Fire Control, Range and Distance Range.
 		
 
 //THESE IF FUNCTIONS NO LONGER SEEM REQUIRED		
