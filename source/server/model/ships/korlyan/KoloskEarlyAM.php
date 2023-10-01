@@ -46,6 +46,7 @@ class KoloskEarlyAM extends BaseShip{
 	    $this->enhancementOptionsEnabled[] = 'AMMO_M';//add enhancement options for other missiles - Class-M	    
 		$this->enhancementOptionsEnabled[] = 'AMMO_P';//add enhancement options for other missiles - Class-P	    	    	    	    
 	    $this->enhancementOptionsEnabled[] = 'AMMO_S';//add enhancement options for other missiles - Class-S
+		//Early cruiser, but modern Kolosk doesn't appear until 2258 so this Early version could potentially have Stealth missiles from 2252.	  
         
         $this->addPrimarySystem(new Reactor(6, 25, 0, 4));
         $this->addPrimarySystem(new CnC(6, 16, 0, 0));
