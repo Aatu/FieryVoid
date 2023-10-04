@@ -38,7 +38,7 @@ class ThirdspaceCarrier extends BaseShip{
         
         $this->addPrimarySystem(new AdvancedSingularityDrive(8, 50, 0, 152+10+4));
         $this->addPrimarySystem(new ThirdspaceCnC(8, 36, 0, 0));
-        $scanner = new Scanner(7, 36, 10, 15);
+        $scanner = new Scanner(7, 36, 10, 14);
 		$scanner->markThirdspace();
 		$this->addPrimarySystem($scanner);	        
         $this->addPrimarySystem(new Engine(7, 36, 0, 18, 3));
@@ -99,10 +99,10 @@ class ThirdspaceCarrier extends BaseShip{
         $this->addLeftSystem(new PsionicConcentrator(4, 0, 0, 240, 360)); 
         $this->addLeftSystem(new PsionicConcentrator(4, 0, 0, 240, 360));  
         $this->addLeftSystem(new GraviticThruster(6, 30, 0, 10, 3)); 
-        $LCVRail = new Catapult(3, 12, 3);
+        $LCVRail = new Catapult(3, 16, 3);
         $LCVRail->displayName = "LCV Rail";        
         $this->addLeftSystem($LCVRail); 
-        $LCVRail = new Catapult(3, 12, 3);
+        $LCVRail = new Catapult(3, 16, 3);
         $LCVRail->displayName = "LCV Rail";        
         $this->addLeftSystem($LCVRail);                              
             
@@ -121,19 +121,19 @@ class ThirdspaceCarrier extends BaseShip{
         $this->addRightSystem(new PsionicConcentrator(4, 0, 0, 0, 120));
         $this->addRightSystem(new PsionicConcentrator(4, 0, 0, 0, 120));                                      
         $this->addRightSystem(new GraviticThruster(6, 30, 0, 10, 4)); 
-        $LCVRail = new Catapult(3, 12, 3);		
+        $LCVRail = new Catapult(3, 16, 3);		
         $LCVRail->displayName = "LCV Rail";							  	
         $this->addRightSystem($LCVRail);
-        $LCVRail = new Catapult(3, 12, 3);		
+        $LCVRail = new Catapult(3, 16, 3);		
         $LCVRail->displayName = "LCV Rail";							  	
         $this->addRightSystem($LCVRail);          			                      
               			          
 		//structures
-        $this->addFrontSystem(new Structure(6, 92));
-        $this->addAftSystem(new Structure(6, 108));
-        $this->addLeftSystem(new Structure(6, 112));
-        $this->addRightSystem(new Structure(6, 112));
-        $this->addPrimarySystem(new Structure(6, 86));
+        $this->addFrontSystem(new Structure(5, 92));
+        $this->addAftSystem(new Structure(5, 108));
+        $this->addLeftSystem(new Structure(5, 112));
+        $this->addRightSystem(new Structure(5, 112));
+        $this->addPrimarySystem(new Structure(5, 86));
 		
 		
 		$this->hitChart = array(

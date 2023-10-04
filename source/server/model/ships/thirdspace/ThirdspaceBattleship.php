@@ -15,7 +15,7 @@ class ThirdspaceBattleship extends BaseShip{
 		$this->unofficial = true;
 		$this->canvasSize = 350;							    
 	    
-		$this->fighters = array("LCVs" => 8);	
+		$this->fighters = array("LCVs" => 6);	
 		
         $this->gravitic = true;
 		$this->advancedArmor = true; 		    
@@ -39,13 +39,13 @@ class ThirdspaceBattleship extends BaseShip{
         $scanner = new Scanner(7, 24, 8, 15);
 		$scanner->markThirdspace();
 		$this->addPrimarySystem($scanner);	        
-        $this->addPrimarySystem(new Engine(7, 36, 0, 20, 3));
+        $this->addPrimarySystem(new Engine(7, 36, 0, 22, 3));
 		$this->addPrimarySystem(new PsychicField(6, 0, 0, 0, 360));		
         $this->addPrimarySystem(new ThirdspaceSelfRepair(7, 24, 10)); //armor, structure, output 
 		$this->addPrimarySystem(new JumpEngine(6, 24, 4, 5));//Presumably have access to hyperspace, or possess some other form of FTL travel that this system represents.          		  		
       
-		$projection = new ThirdspaceShieldProjection(3, 140, 120, 330, 30, 'F');//: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R
-		$projector = new ThirdspaceShieldProjector(6, 24, 5, 4, 330, 30, 'F'); //: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R 
+		$projection = new ThirdspaceShieldProjection(3, 150, 120, 330, 30, 'F');//: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R
+		$projector = new ThirdspaceShieldProjector(6, 24, 5, 3, 330, 30, 'F'); //: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R 
 		$projection->addProjector($projector);
 		$this->addFrontSystem($projector);		
 		$this->addFrontSystem($projection);
@@ -99,7 +99,7 @@ class ThirdspaceBattleship extends BaseShip{
         $this->addLeftSystem(new PsionicConcentrator(4, 0, 0, 240, 360));
         $this->addLeftSystem(new PsionicLance(5, 0, 0, 180, 300));                                                       
         $this->addLeftSystem(new GraviticThruster(6, 30, 0, 10, 3)); 
-        $LCVRail = new Catapult(3, 16, 3);
+        $LCVRail = new Catapult(3, 12, 3);
         $LCVRail->displayName = "LCV Rail";        
         $this->addLeftSystem($LCVRail);                      
             
@@ -121,7 +121,7 @@ class ThirdspaceBattleship extends BaseShip{
                         
 		$this->addRightSystem(new PsionicLance(5, 0, 0, 60, 180));                  
         $this->addRightSystem(new GraviticThruster(6, 30, 0, 10, 4)); 
-        $LCVRail = new Catapult(3, 16, 3);		
+        $LCVRail = new Catapult(3, 12, 3);		
         $LCVRail->displayName = "LCV Rail";							  	
         $this->addRightSystem($LCVRail); 			                      
               			          

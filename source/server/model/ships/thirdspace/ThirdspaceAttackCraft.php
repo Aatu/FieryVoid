@@ -63,8 +63,8 @@ class ThirdspaceAttackCraft extends LCV{ //Actually an LCV.
 	    
         $this->hitChart = array(
         		0=> array( //should never happen (but it will!)
-        				9 => "Structure",
-        				11 => "1:Psionic Concentrator",
+        				8 => "Structure",
+        				10 => "1:Psionic Concentrator",
         				12 => "2:Shield Projector",
 						13 => "Self Repair",        				
         				14 => "Jump Engine",
@@ -73,9 +73,8 @@ class ThirdspaceAttackCraft extends LCV{ //Actually an LCV.
         				20 => "Scanner",
         		),
         		1=> array( //PRIMARY hit table, effectively
-        				9 => "Structure",
+        				8 => "Structure",
         				12 => "Psionic Concentrator",
- //       				12 => "Shield Projector",
 						13 => "0:Self Repair",        				
         				14 => "0:Jump Engine",
         				16 => "0:Engine",
@@ -83,8 +82,8 @@ class ThirdspaceAttackCraft extends LCV{ //Actually an LCV.
         				20 => "0:Scanner",
         		),
         		2=> array( //PRIMARY hit table, effectively
-        				9 => "Structure",
-        				11 => "1:Psionic Concentrator",
+        				8 => "Structure",
+        				10 => "1:Psionic Concentrator",
         				12 => "Shield Projector",
 						13 => "0:Self Repair",        				
         				14 => "0:Jump Engine",
