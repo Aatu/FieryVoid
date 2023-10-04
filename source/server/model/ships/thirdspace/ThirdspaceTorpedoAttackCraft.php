@@ -5,7 +5,7 @@ class ThirdspaceTorpedoAttackCraft extends LCV{ //Actually an LCV.
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 525;
+	$this->pointCost = 550;
     $this->faction = "Thirdspace";
 	$this->factionAge = 4; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
 	$this->phpclass = "ThirdspaceTorpedoAttackCraft";
@@ -51,7 +51,8 @@ class ThirdspaceTorpedoAttackCraft extends LCV{ //Actually an LCV.
     $this->addPrimarySystem(new ThirdspaceSelfRepair(5, 8, 4)); //armor, structure, output 	
 
 	$this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 210, 60));
-    $this->addFrontSystem(new PsionicTorpedo(5, 0, 0, 300, 60)); 
+    $this->addFrontSystem(new PsionicTorpedo(5, 0, 0, 300, 60));
+    $this->addFrontSystem(new PsionicTorpedo(5, 0, 0, 300, 60));      
 	$this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 300, 150));
 			
 	$projection = new ThirdspaceShieldProjection(2, 50, 50, 0, 360, 'C'); //: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R

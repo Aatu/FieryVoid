@@ -5,7 +5,7 @@ class ThirdspaceAttackCraft extends LCV{ //Actually an LCV.
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 550;
+	$this->pointCost = 500;
     $this->faction = "Thirdspace";
 	$this->factionAge = 4; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
 	$this->phpclass = "ThirdspaceAttackCraft";
@@ -53,7 +53,7 @@ class ThirdspaceAttackCraft extends LCV{ //Actually an LCV.
 	$this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 300, 150));
 	$this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 300, 150));
 			
-	$projection = new ThirdspaceShieldProjection(2, 55, 55, 0, 360, 'C');//: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R
+	$projection = new ThirdspaceShieldProjection(2, 60, 55, 0, 360, 'C');//: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R
 	$projector = new ThirdspaceShieldProjector(6, 12, 4, 3, 0, 360, 'C'); //: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R
 	$projection->addProjector($projector);
 	$this->addAftSystem($projector);

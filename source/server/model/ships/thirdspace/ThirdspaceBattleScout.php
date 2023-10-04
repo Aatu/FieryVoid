@@ -4,7 +4,7 @@ class ThirdspaceBattleScout extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 6500;
+		$this->pointCost = 6400;
 		$this->faction = "Thirdspace";
         $this->phpclass = "ThirdspaceBattleScout";
         $this->imagePath = "img/ships/ThirdspaceBattleship.png";
@@ -17,7 +17,7 @@ class ThirdspaceBattleScout extends BaseShip{
 			$this->variantOf = "Eldritch Battleship";
 			$this->occurence = "rare";											    
 	    
-		$this->fighters = array("LCVs" => 6);	
+		$this->fighters = array("LCVs" => 8);	
 		
         $this->gravitic = true;
 		$this->advancedArmor = true; 		    
@@ -102,7 +102,7 @@ class ThirdspaceBattleScout extends BaseShip{
         $this->addLeftSystem(new PsionicConcentrator(4, 0, 0, 240, 360));
         $this->addLeftSystem(new PsionicTorpedo(5, 0, 0, 240, 60));                                                       
         $this->addLeftSystem(new GraviticThruster(6, 30, 0, 10, 3)); 
-        $LCVRail = new Catapult(3, 12, 3);
+        $LCVRail = new Catapult(3, 16, 3);
         $LCVRail->displayName = "LCV Rail";        
         $this->addLeftSystem($LCVRail);                      
             
@@ -124,7 +124,7 @@ class ThirdspaceBattleScout extends BaseShip{
                         
 		$this->addRightSystem(new PsionicTorpedo(5, 0, 0, 300, 120));                  
         $this->addRightSystem(new GraviticThruster(6, 30, 0, 10, 4)); 
-        $LCVRail = new Catapult(3, 12, 3);		
+        $LCVRail = new Catapult(3, 16, 3);		
         $LCVRail->displayName = "LCV Rail";							  	
         $this->addRightSystem($LCVRail); 			                      
               			          

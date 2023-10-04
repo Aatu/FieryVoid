@@ -4,7 +4,7 @@ class ThirdspaceBattleship extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 6700;
+		$this->pointCost = 6900;
 		$this->faction = "Thirdspace";
         $this->phpclass = "ThirdspaceBattleship";
         $this->imagePath = "img/ships/ThirdspaceBattleship.png";
@@ -15,7 +15,7 @@ class ThirdspaceBattleship extends BaseShip{
 		$this->unofficial = true;
 		$this->canvasSize = 350;							    
 	    
-		$this->fighters = array("LCVs" => 6);	
+		$this->fighters = array("LCVs" => 8);	
 		
         $this->gravitic = true;
 		$this->advancedArmor = true; 		    
@@ -34,7 +34,7 @@ class ThirdspaceBattleship extends BaseShip{
 		/*Thirdspace use their own enhancement set */		
 		Enhancements::nonstandardEnhancementSet($this, 'ThirdspaceShip');				     
         
-        $this->addPrimarySystem(new AdvancedSingularityDrive(8, 50, 0, 182+8+4));
+        $this->addPrimarySystem(new AdvancedSingularityDrive(8, 50, 0, 188+8+4));
         $this->addPrimarySystem(new ThirdspaceCnC(8, 36, 0, 0));
         $scanner = new Scanner(7, 24, 8, 15);
 		$scanner->markThirdspace();
@@ -44,7 +44,7 @@ class ThirdspaceBattleship extends BaseShip{
         $this->addPrimarySystem(new ThirdspaceSelfRepair(7, 24, 10)); //armor, structure, output 
 		$this->addPrimarySystem(new JumpEngine(6, 24, 4, 5));//Presumably have access to hyperspace, or possess some other form of FTL travel that this system represents.          		  		
       
-		$projection = new ThirdspaceShieldProjection(3, 120, 120, 330, 30, 'F');//: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R
+		$projection = new ThirdspaceShieldProjection(3, 140, 120, 330, 30, 'F');//: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R
 		$projector = new ThirdspaceShieldProjector(6, 24, 5, 4, 330, 30, 'F'); //: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R 
 		$projection->addProjector($projector);
 		$this->addFrontSystem($projector);		
@@ -81,7 +81,7 @@ class ThirdspaceBattleship extends BaseShip{
         $this->addAftSystem(new GraviticThruster(5, 24, 0, 8, 2));       
        
        
-        $projection = new ThirdspaceShieldProjection(3, 160, 160, 210, 330, 'L');//: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R
+        $projection = new ThirdspaceShieldProjection(3, 150, 160, 210, 330, 'L');//: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R
 		$projector = new ThirdspaceShieldProjector(6, 24, 5, 3, 210, 330, 'L'); //: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R 
 		$projection->addProjector($projector);
 		$this->addLeftSystem($projector);		
@@ -99,12 +99,12 @@ class ThirdspaceBattleship extends BaseShip{
         $this->addLeftSystem(new PsionicConcentrator(4, 0, 0, 240, 360));
         $this->addLeftSystem(new PsionicLance(5, 0, 0, 180, 300));                                                       
         $this->addLeftSystem(new GraviticThruster(6, 30, 0, 10, 3)); 
-        $LCVRail = new Catapult(3, 12, 3);
+        $LCVRail = new Catapult(3, 16, 3);
         $LCVRail->displayName = "LCV Rail";        
         $this->addLeftSystem($LCVRail);                      
             
             
-        $projection = new ThirdspaceShieldProjection(3, 160, 160, 30, 150, 'R');//: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R
+        $projection = new ThirdspaceShieldProjection(3, 150, 160, 30, 150, 'R');//: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R
 		$projector = new ThirdspaceShieldProjector(6, 24, 5, 3, 30, 150, 'R'); //: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R 
 		$projection->addProjector($projector);
 		$this->addRightSystem($projector);		
@@ -121,16 +121,16 @@ class ThirdspaceBattleship extends BaseShip{
                         
 		$this->addRightSystem(new PsionicLance(5, 0, 0, 60, 180));                  
         $this->addRightSystem(new GraviticThruster(6, 30, 0, 10, 4)); 
-        $LCVRail = new Catapult(3, 12, 3);		
+        $LCVRail = new Catapult(3, 16, 3);		
         $LCVRail->displayName = "LCV Rail";							  	
         $this->addRightSystem($LCVRail); 			                      
               			          
 		//structures
-        $this->addFrontSystem(new Structure(6, 92));
+        $this->addFrontSystem(new Structure(7, 102));
         $this->addAftSystem(new Structure(6, 108));
-        $this->addLeftSystem(new Structure(6, 112));
-        $this->addRightSystem(new Structure(6, 112));
-        $this->addPrimarySystem(new Structure(7, 86));
+        $this->addLeftSystem(new Structure(6, 120));
+        $this->addRightSystem(new Structure(6, 120));
+        $this->addPrimarySystem(new Structure(7, 92));
 		
 		
 		$this->hitChart = array(

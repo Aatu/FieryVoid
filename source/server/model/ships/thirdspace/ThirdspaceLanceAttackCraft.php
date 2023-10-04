@@ -5,7 +5,7 @@ class ThirdspaceLanceAttackCraft extends LCV{ //Actually an LCV.
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 575;
+	$this->pointCost = 550;
     $this->faction = "Thirdspace";
 	$this->factionAge = 4; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
 	$this->phpclass = "ThirdspaceLanceAttackCraft";
