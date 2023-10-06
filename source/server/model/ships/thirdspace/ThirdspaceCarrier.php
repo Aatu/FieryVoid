@@ -17,7 +17,7 @@ class ThirdspaceCarrier extends BaseShip{
 			$this->variantOf = "Eldritch Battleship";
 			$this->occurence = "uncommon";											    
 	    
-		$this->fighters = array("LCVs" => 16);	
+		$this->fighters = array("LCVs" => 20);	
 		
         $this->gravitic = true;
 		$this->advancedArmor = true; 		    
@@ -46,12 +46,11 @@ class ThirdspaceCarrier extends BaseShip{
         $this->addPrimarySystem(new ThirdspaceSelfRepair(7, 24, 10)); //armor, structure, output 
 		$this->addPrimarySystem(new JumpEngine(6, 24, 4, 5));//Presumably have access to hyperspace, or possess some other form of FTL travel that this system represents.          		  		
       
-		$projection = new ThirdspaceShieldProjection(2, 100, 100, 330, 30, 'F');//: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R
+		$projection = new ThirdspaceShieldProjection(2, 120, 120, 330, 30, 'F');//: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R
 		$projector = new ThirdspaceShieldProjector(6, 24, 5, 3, 330, 30, 'F'); //: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R 
 		$projection->addProjector($projector);
 		$this->addFrontSystem($projector);		
 		$this->addFrontSystem($projection);
-  //      $this->addFrontSystem(new HeavyPsionicLance(6, 0, 0, 330, 30));
         $this->addFrontSystem(new PsionicLance(5, 0, 0, 300, 60));
         $this->addFrontSystem(new PsionicLance(5, 0, 0, 300, 60));
         $this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 240, 60));
@@ -75,9 +74,7 @@ class ThirdspaceCarrier extends BaseShip{
         $this->addAftSystem(new PsionicConcentrator(4, 0, 0, 120, 300));
         $this->addAftSystem(new PsionicConcentrator(4, 0, 0, 60, 240));         
         $this->addAftSystem(new PsionicConcentrator(4, 0, 0, 120, 300)); 
-        $this->addAftSystem(new PsionicConcentrator(4, 0, 0, 60, 240)); 
-   //     $this->addAftSystem(new PsionicConcentrator(4, 0, 0, 120, 300));
-  //      $this->addAftSystem(new PsionicConcentrator(4, 0, 0, 60, 240));         
+        $this->addAftSystem(new PsionicConcentrator(4, 0, 0, 60, 240));         
         $this->addAftSystem(new PsionicConcentrator(4, 0, 0, 60, 240));                         
         $this->addAftSystem(new GraviticThruster(5, 24, 0, 8, 2));
         $this->addAftSystem(new GraviticThruster(5, 24, 0, 8, 2));
@@ -99,10 +96,10 @@ class ThirdspaceCarrier extends BaseShip{
         $this->addLeftSystem(new PsionicConcentrator(4, 0, 0, 240, 360)); 
         $this->addLeftSystem(new PsionicConcentrator(4, 0, 0, 240, 360));  
         $this->addLeftSystem(new GraviticThruster(6, 30, 0, 10, 3)); 
-        $LCVRail = new Catapult(3, 16, 3);
+        $LCVRail = new Catapult(3, 20, 3);
         $LCVRail->displayName = "LCV Rail";        
         $this->addLeftSystem($LCVRail); 
-        $LCVRail = new Catapult(3, 16, 3);
+        $LCVRail = new Catapult(3, 20, 3);
         $LCVRail->displayName = "LCV Rail";        
         $this->addLeftSystem($LCVRail);                              
             
@@ -121,10 +118,10 @@ class ThirdspaceCarrier extends BaseShip{
         $this->addRightSystem(new PsionicConcentrator(4, 0, 0, 0, 120));
         $this->addRightSystem(new PsionicConcentrator(4, 0, 0, 0, 120));                                      
         $this->addRightSystem(new GraviticThruster(6, 30, 0, 10, 4)); 
-        $LCVRail = new Catapult(3, 16, 3);		
+        $LCVRail = new Catapult(3, 20, 3);		
         $LCVRail->displayName = "LCV Rail";							  	
         $this->addRightSystem($LCVRail);
-        $LCVRail = new Catapult(3, 16, 3);		
+        $LCVRail = new Catapult(3, 20, 3);		
         $LCVRail->displayName = "LCV Rail";							  	
         $this->addRightSystem($LCVRail);          			                      
               			          
