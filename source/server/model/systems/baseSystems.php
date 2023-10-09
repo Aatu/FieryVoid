@@ -4456,11 +4456,11 @@ class AmmoMissileM extends AmmoMissileTemplate{
 } //endof class AmmoMissileM
 
 
-//ammunition for AmmoMagazine - Class K Missile (for official Missile Racks)
+//ammunition for AmmoMagazine - Class KK Missile (for official Missile Racks). Used by Orieni only
 class AmmoMissileKK extends AmmoMissileTemplate{	
 	public $name = 'ammoMissileKK';
 	public $displayName = 'Kinetic Missile';
-	public $modeName = 'K - Kinetic';
+	public $modeName = 'Kinetic'; //Technically means both Starburst and Kinetic will show as 'K' in mode selection, but Orieni don't have access to Starburst missiles.
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'AMMO_KK'; //enhancement name to be enabled
 	public $enhancementDescription = '(ammo) Kinetic Missile'; //enhancement description
@@ -4493,7 +4493,6 @@ class AmmoMissileKK extends AmmoMissileTemplate{
 			return $rangePenalty;
 		}
 
-	
 } //endof class AmmoMissileKK
 
 //ammunition for AmmoMagazine - Class FB Missile (Fighter Basic Missile)
