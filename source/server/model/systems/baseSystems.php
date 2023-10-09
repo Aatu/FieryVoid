@@ -3858,6 +3858,9 @@ class AmmoMissileTemplate{
 	
     public $calledShotMod = -8;    //Variable for Multiwarhead Missile.  Normal called shot modifier is -8.
 
+//Extra variables for KK Missile
+	public $specialRangeCalculation = false;
+	public $rangePenalty = 0;	
 	
     function __construct(){}
 	
@@ -3893,20 +3896,25 @@ class AmmoMissileTemplate{
 		return 0;
 		}//endof function rollPulses
 	
-	public function beforeFiringOrderResolution($gamedata, $weapon, $originalFireOrder)
+	public function beforeFiringOrderResolution($gamedata, $weapon, $originalFireOrder) //For mulitwarhead missile
     {
     	return;
     }//endof function beforeFiringOrderResolution	
     
-    public function getCalledShotMod()
+    public function getCalledShotMod() //For mulitwarhead missile
     {
         return $this->calledShotMod;
     }//end of getCalledShotMod     				
 
-	public function fire($gamedata, $fireOrder)
+	public function fire($gamedata, $fireOrder) //For mulitwarhead missile
     {
     	return;
-    }//endof function fire	
+    }//end of function fire	
+    
+	public function calculateRangePenalty($distance)
+	{
+			return;
+		}   //endof function calculateRangePenalty	 
 	    
 } //endof class AmmoMissileTemplate
 
@@ -4446,6 +4454,47 @@ class AmmoMissileM extends AmmoMissileTemplate{
             
 	
 } //endof class AmmoMissileM
+
+
+//ammunition for AmmoMagazine - Class K Missile (for official Missile Racks)
+class AmmoMissileKK extends AmmoMissileTemplate{	
+	public $name = 'ammoMissileKK';
+	public $displayName = 'Kinetic Missile';
+	public $modeName = 'K - Kinetic';
+	public $size = 1; //how many store slots are required for a single round
+	public $enhancementName = 'AMMO_KK'; //enhancement name to be enabled
+	public $enhancementDescription = '(ammo) Kinetic Missile'; //enhancement description
+	public $enhancementPrice = 8;//officially 0, but if it was 0 then there would be no reason not to load it
+	
+	public $rangeMod = 0; //MODIFIER for launch range
+	public $distanceRangeMod = 0; //MODIFIER for distance range
+	public $fireControlMod = array(3, 3, 3); //MODIFIER for weapon fire control!
+	public $minDamage = 18;
+	public $maxDamage = 18;	
+	public $damageType = 'Matter';//mode of dealing damage
+	public $weaponClass = 'Ballistic';//weapon class
+	public $priority = 6;
+	public $priorityAF = 5;
+	public $noOverkill = true;
+	public $useOEW = false;
+	public $hidetarget = false;
+
+	public $specialRangeCalculation = true;
+	public $rangePenalty = 1;	
+	
+    public function getDamage($fireOrder) //actual function to be called, as with weapon!
+    {
+        return 18;
+    }		
+
+		public function calculateRangePenalty($distance){
+			$rangePenalty = 0;//base penalty
+			$rangePenalty += $this->rangePenalty * max(0,$distance-15); //everything above 10 hexes receives range penalty
+			return $rangePenalty;
+		}
+
+	
+} //endof class AmmoMissileKK
 
 //ammunition for AmmoMagazine - Class FB Missile (Fighter Basic Missile)
 class AmmoMissileFB extends AmmoMissileTemplate{	
