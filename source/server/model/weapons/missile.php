@@ -1072,7 +1072,7 @@ class AmmoMissileRackS extends Weapon{
 	public $fixedBonusPulsesArray = array();	
 	
     public $calledShotMod = -8;    //Variable for Multiwarhead Missile.  Normal called shot modifier is -8    		
-	
+	public $calledShotModArray = array();  	
 	
 	
     /*ATYPICAL constructor: takes ammo magazine class and (optionally) information about being fitted to stable platform*/
