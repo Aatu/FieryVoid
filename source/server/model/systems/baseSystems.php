@@ -4463,7 +4463,7 @@ class AmmoMissileKK extends AmmoMissileTemplate{
 	public $modeName = 'Kinetic'; //Technically means both Starburst and Kinetic will show as 'K' in mode selection, but Orieni don't have access to Starburst missiles.
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'AMMO_KK'; //enhancement name to be enabled
-	public $enhancementDescription = '(ammo) Kinetic Missile'; //enhancement description
+	public $enhancementDescription = '(ammo) Kinetic Missile (1976)'; //enhancement description
 	public $enhancementPrice = 8;//officially 0, but if it was 0 then there would be no reason not to load it
 	
 	public $rangeMod = 0; //MODIFIER for launch range
