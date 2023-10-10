@@ -339,8 +339,8 @@ Hunter-Killer - Orieni long-range weapon of choice, and probably their most outs
 	Hunter-Killers receive penalty to their hit chance based on their own speed (the faster the worse).
 	Note that ramming attack happens before firing (in FV - in ship fire phase), so HKs that achieved ramming distance cannot be stopped before making attempt to ram.
 Light Gatling Railgun - Orieni fighter gun is Matter, which allows it to be a threat to even the biggest ships. But bulky ammunition means it's limited to 6 salvoes before running dry.	
-Strike Force - Orieni military is split into a few branches. Of interest for fleet composition rules is priority for the elite Strike Force - a few ships have different limitations when deployed as part of Strike Force detachment than when part of regular navy (Hand of the Blessed). Assume force led by Paragon to be Strike Force, while lesser command ships lead Hand of the Blessed.
-	In-game checker does not take this rule into account.
+Strike Force - Orieni military is split into a few branches. Of interest for fleet composition rules is priority for the elite Strike Force - a few ships have different limitations when deployed as part of Strike Force detachment than when part of regular navy (Hand of the Blessed). Assume force led by Paragon to be Strike Force, while lesser command ships lead Hand of the Blessed. The in-game fleet checker does not take this rule into account.
+Missiles - All Orieni ships have access to Basic, Anti-Fighter, Heavy and Kinetic missiles. Their later ships are able to use Long Range and Chaff missiles which become widely available by 2005.
 	
 
 PAK'MA'RA
