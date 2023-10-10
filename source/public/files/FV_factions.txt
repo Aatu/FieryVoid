@@ -48,6 +48,7 @@ SHIPBORNE MISSILES
  - class H - Heavy Missile - -10 range/distance range and -3 antifighter fire control, but damage 30. 
  - class L - Long Range Missile - +10 range/distance range, but damage 15.
  - class K - Starburst Missile - Deals damage in pulse mode, with each missile generating D3+3 hits.
+ - class KK - Kinetic Missile - Orieni only.  Deals 18 matter damage, and attracts a -5 per hex range penalty after 15 hexes up to it's maximum range.
  - class M - Multiwarhead Missile - Can only target fighter flights.  Splits into 6 submunitions which will each engage a separate fighter in flight.  Each submunition rolls to hit and scores damage separately, if there are fewer than 6 fighters on impact excess submunitions are lost) 
  - class P - Piercing Missile - damage 30, mode Piercing, cannot be fired at fighters.
  - class S - Stealth Missile - Kor-Lyan only.  Target of this missile is not revealed to the enemy player.
@@ -141,7 +142,7 @@ No very specific technologies (or technologies specific to base faction).
 CORILLANI THEOCRACY
 The Corillani are unusual in that they operate three independant navies, the Defenders of Corillan (DoC), the Corillani's People's Navy (CPN), and the Orillani Space Force (OSF).  Whilst these forces generally operate independently of one another they can, and will, fight alongside one another.  In practice, there is no restriction on mixing and matching ships from the three different sub-navies during fleet selection. However, when choosing fighters you must take the version of the Tillini which corresponds with the type of faction where hangar space is available i.e. DoC or OSF fighters could not be taken if the only hanger space available was on a CPN ship.
 The OSF use the unique Plasma Projector weapon which focuses plasma into tight beam, resulting in a longer range than most plasma weapons and with lower damage degradation.  It deals damage similar to a heavy plasma cannon, however this is applied in raking (8) mode rather than standard mode as with most other plasma weapons.
-
+Missiles - The Corillani are able to access all missile types except those restricted to specific factions e.g. Kor-Lyan or Orieni.
 
 CUSTOM SHIPS
 Units that, for some reason, were not fit for any faction. 
@@ -155,7 +156,7 @@ LCV Carrier - Deneth are the only official faction that have LCV carrier availab
 DESCARI COMMITTEES
 The Descari possess unique Plasma Bolter weapons which combine features from both plasma and bolter weapon types.  These weapons do a set damage amount and do not suffer the damage reduction typical in plasma weapons up to a set range (which varies depending on the type of Plasma Bolter used).  
 Aside from this the Descari field a mixed of typical missile, laser, plasma and light particle weaponry.
-
+Missiles - The Descari are able to access all missile types except those restricted to specific factions e.g. Kor-Lyan or Orieni.
 
 DILGAR IMPERIUM
 Pentacan Formation (Inverted Wedge Formation in AoG Wars) - Dilgar ships can benefit from using Pentacan formation. In FV the rules for it have been altered (mostly simplified).
@@ -168,6 +169,7 @@ Fighter formation - As long as flight leader (first craft in flight) is alive an
 Fighter pilot tenacity - Dilgar fighters have inherent -2 dropout bonus.
 Mass Driver - many Dilgar ships have Mass Driver fitted. This weapon is functional in FV, but is intended as planetary bombardment weapon of mass destruction and has limited use in space combat (can engage starbases and imobile Enormous ships). It's a Matter weapon that automatically hits Structure. It can be intercepted without degradation (like ballistic weapons are).
 Point Pulsar - dedicated weapon intended to make called shots - suffers only half of the regular penalty.
+Missiles - The Dilgar are able to access basic, antifighter, chaff, flash, heavy and long-range missiles.
 
 
 DRAKH
@@ -183,11 +185,12 @@ Hangar space - Drakh LCVs do require hangar space (like regular LCVs). They shar
 
 DRAZI FREEHOLD
 No very specific rules/technologies, although using alternate HCV layout is very notable and results in surprisingly resilient ships.
-
+Missiles - The Drazi use one missile-equipped ship, the Darkhawk, and have access all missile types except those restricted to specific factions e.g. Kor-Lyan or Orieni.
 
 DRAZI FREEHOLD (WotCR)
 Drazi fleet a few hundred years before the show era, representing Wars of the Centauri Republic period.
 No very specific rules/technologies.
+Missiles - 
 
 
 EARTH ALLIANCE
@@ -195,12 +198,14 @@ Interceptor - dedicated defensive weapon. In tabletop, it needs to be shut down 
 Energy Web - defensive system integrated with Interceptor. Active Interceptor provides (in its arc) shield-like effect of reducing hit chance of all incoming fire by its Intercept Rating. EWeb cannot be flown under by fighters, and does NOT provide damage reduction.
 Shadow Omega - official Shadow Omega conversion by AoG is marked as unofficial because that's what official deployment restrictions sum up to (not tournament legal, opponent permission required). Actual fan-made conversions are present as well!
 NOTE: defensive structures were moved out to separate directory due to presence of A LOT of designs in EA directory, which caused technical problems.
+Missiles - The Earth Alliance are able to access all missile types except those restricted to specific factions e.g. Kor-Lyan or Orieni.
 
 
 EARTH ALLIANCE (early)
 The early Earth Alliance units are composed of semi-official custom designs that all were deployed before 2200. These units generally lack the better defenses of the later Earth designs and many use blast cannons. Some official units, like the Olympus Alpha are listed in 
 both the standard Earth Alliance fleet list as well as the early EA section. This is to represent their transitional nature from being high-end units in the early EA to very old units in the Dilgar War era. Although the more famous Starfuries (Tiger, Nova, Aurora) are unavailable 
-the early examples of the Starfury lineage (Flying Fox, Aries, and Atlas) formed the foundation of the fighter-heavy EA fleet in the future. 
+the early examples of the Starfury lineage (Flying Fox, Aries, and Atlas) formed the foundation of the fighter-heavy EA fleet in the future.
+Missiles - Early Earth Alliance ships are able to access basic, antifighter, chaff, flash, heavy and long-range missiles. 
 
 
 GAIM INTELLIGENCE
@@ -232,6 +237,7 @@ Notable technologies:
 
 HURR REPUBLIC
 Low-tech faction. No very specific rules/technologies.
+Missiles - The Hurr used purely basic missiles until 2232, when experiments with captured Dilgar tech provided the materials for anti-fighter, long-range,heavy, and flash warheads. 
 
 
 IPSHA BARONIES
@@ -277,12 +283,13 @@ Shuttles - Like all Babylon 5 ships, Kor-Lyan ships receive a number of shuttles
      missiles. The only cost is the missiles. Additionally, the Kor-Lyan can replace their standard shuttles with armed shuttles. The most common one has a single fighter gun and two missile hard points. An 
 	 uncommon variant removes the gun, but allows the armed shuttle to hold up to six basic fighter missiles. The Kor-Lyan player is under no obligation to take any of these in a match, unlike fighters with 
 	 the half filled hangars requirement.
+Missiles - The Kor-Lyan's use missiles extensively, and can access all missile types except the Kientic Missile which is reserved to Orieni only.
 	 
 	 
-
 LLORT
 No very specific rules/technologies.
 It's worth noting that their ships are generally asymmetric and have atypical firing arcs and eclectic weapons sets.
+Missiles - The Llort have a couple of ships which use missiles, and are able to access all missile types except those restricted to specific factions e.g. Kor-Lyan or Orieni.
 
 
 MARKAB THEOCRACY
@@ -338,8 +345,8 @@ Hunter-Killer - Orieni long-range weapon of choice, and probably their most outs
 	Hunter-Killers receive penalty to their hit chance based on their own speed (the faster the worse).
 	Note that ramming attack happens before firing (in FV - in ship fire phase), so HKs that achieved ramming distance cannot be stopped before making attempt to ram.
 Light Gatling Railgun - Orieni fighter gun is Matter, which allows it to be a threat to even the biggest ships. But bulky ammunition means it's limited to 6 salvoes before running dry.	
-Strike Force - Orieni military is split into a few branches. Of interest for fleet composition rules is priority for the elite Strike Force - a few ships have different limitations when deployed as part of Strike Force detachment than when part of regular navy (Hand of the Blessed). Assume force led by Paragon to be Strike Force, while lesser command ships lead Hand of the Blessed.
-	In-game checker does not take this rule into account.
+Strike Force - Orieni military is split into a few branches. Of interest for fleet composition rules is priority for the elite Strike Force - a few ships have different limitations when deployed as part of Strike Force detachment than when part of regular navy (Hand of the Blessed). Assume force led by Paragon to be Strike Force, while lesser command ships lead Hand of the Blessed. The in-game fleet checker does not take this rule into account.
+Missiles - All Orieni ships have access to Basic, Anti-Fighter, Heavy and Kinetic missiles. Their later ships are able to use Long Range and Chaff missiles which become widely available by 2005.
 	
 
 PAK'MA'RA
@@ -373,7 +380,7 @@ summary of the generic units most commonly used by the faction are listed here.
 	- Independent Mercenaries League (IML): The IML formed during the Dilgar War, originally by Belt Alliance forces out of work. They have been supported since the War
 		by various Non-Aligned Worlds powers and typically have better access to technology than traditional raider groups. The IML fields three unique units, the Attack Cruiser, 
 		Armed Transport, and Missile Frigate along with variants of each. The IML may use Armed Shuttles and Delta-Vs almost exclusively, but have restricted access
-		to Star Snakes and Lellats.
+		to Star Snakes and Lellats.  IML ships ave access to basic, antifighter, flash, heavy and long-range missiles.
 		
 	- Tirrith Free State (TFS): Born out of an EA base built in the Tirrith system from the Dilgar War, the raiders that took over the base ultimately formed an independent star
 		system at the confluence of multiple powers. The TFS is now less of a raider group and more a tiny nation. The TFS has three unique hulls including the Blockade Runner, 
@@ -569,7 +576,6 @@ Raptor - The Raptor super-heavy fighter is a support unit that provides +5 initi
 zESCALATION BLOOD SWORD RAIDERS (custom, alternate universe faction)
 The Blood Swords were a pirate group active during the Circasian "Raider Wars" time period. They were a serious threat to the trade routes near the Thaline node of the Outward sector trade routes due to the size and capabilities of their warships. The raiders were eventually defeated by the Circasians, and their defeat marked the unofficial end of the Raider Wars.
 - This faction uses ships acquired from the Kastan, and have access to the same technologies as that faction
-
 
 
 zESCALATION CHOUKA (custom, alternate universe faction)
