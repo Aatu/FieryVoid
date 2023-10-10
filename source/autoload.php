@@ -3021,6 +3021,7 @@ spl_autoload_register(
 						'kaedashkadaam' => '/server/model/ships/llort/KaedashkadaAM.php',
 						'fwellgonam' => '/server/model/ships/llort/fwellgonAM.php',
 						'govallam' => '/server/model/ships/llort/govallAM.php',
+						'govallearlyam' => '/server/model/ships/llort/govallEarlyAM.php',
 				
 						//Hurr
 						'roskorbase2215am' => '/server/model/ships/hurr/Roskorbase2215AM.php',
