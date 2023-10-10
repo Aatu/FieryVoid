@@ -48,7 +48,6 @@ SHIPBORNE MISSILES
  - class H - Heavy Missile - -10 range/distance range and -3 antifighter fire control, but damage 30. 
  - class L - Long Range Missile - +10 range/distance range, but damage 15.
  - class K - Starburst Missile - Deals damage in pulse mode, with each missile generating D3+3 hits.
- - class KK - Kinetic Missile - Orieni only.  Deals 18 matter damage, and attracts a -5 per hex range penalty after 15 hexes up to it's maximum range.
  - class M - Multiwarhead Missile - Can only target fighter flights.  Splits into 6 submunitions which will each engage a separate fighter in flight.  Each submunition rolls to hit and scores damage separately, if there are fewer than 6 fighters on impact excess submunitions are lost) 
  - class P - Piercing Missile - damage 30, mode Piercing, cannot be fired at fighters.
  - class S - Stealth Missile - Kor-Lyan only.  Target of this missile is not revealed to the enemy player.
