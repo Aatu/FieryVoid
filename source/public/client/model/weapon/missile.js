@@ -60,11 +60,23 @@ var SMissileRack = function SMissileRack(json, ship) {
 SMissileRack.prototype = Object.create(MissileLauncher.prototype);
 SMissileRack.prototype.constructor = SMissileRack;
 
+SMissileRack.prototype.calculateSpecialRangePenalty = function (distance) { //Added here for Orieni KK Missile calculation only.  Not normally used.
+    var distancePenalized = Math.max(0,distance - 15); //ignore first 15 hexes
+    var rangePenalty = this.rangePenalty * distancePenalized;
+    return rangePenalty;
+};
+
 var SoMissileRack = function SoMissileRack(json, ship) {
     MissileLauncher.call(this, json, ship);
 };
 SoMissileRack.prototype = Object.create(MissileLauncher.prototype);
 SoMissileRack.prototype.constructor = SoMissileRack;
+
+SoMissileRack.prototype.calculateSpecialRangePenalty = function (distance) { //Added here for KK Missile calculation only.  Not normally used.
+    var distancePenalized = Math.max(0,distance - 15); //ignore first 15 hexes
+    var rangePenalty = this.rangePenalty * distancePenalized;
+    return rangePenalty;
+};
 
 var RMissileRack = function RMissileRack(json, ship) {
     MissileLauncher.call(this, json, ship);
