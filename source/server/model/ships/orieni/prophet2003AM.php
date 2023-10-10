@@ -32,10 +32,10 @@ class Prophet2003AM extends BaseShip{
         $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 60); //add full load of basic missiles
         $this->enhancementOptionsEnabled[] = 'AMMO_A';//add enhancement options for other missiles - Class-A
         $this->enhancementOptionsEnabled[] = 'AMMO_C';//add enhancement options for other missiles - Class-C        
-        $this->enhancementOptionsEnabled[] = 'AMMO_H';//add enhancement options for other missiles - Class-H       
+        $this->enhancementOptionsEnabled[] = 'AMMO_H';//add enhancement options for other missiles - Class-H
+        $this->enhancementOptionsEnabled[] = 'AMMO_KK';//add enhancement options for other missiles - Class-KK               
         $this->enhancementOptionsEnabled[] = 'AMMO_L';//add enhancement options for other missiles - Class-L
 		//By the Book Orieni should have access to missie types: KK, B, A, H, L, C
-		//KK missiles are not present in FV however
 		
 		
         
