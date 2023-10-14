@@ -379,7 +379,7 @@ summary of the generic units most commonly used by the faction are listed here.
 	- Independent Mercenaries League (IML): The IML formed during the Dilgar War, originally by Belt Alliance forces out of work. They have been supported since the War
 		by various Non-Aligned Worlds powers and typically have better access to technology than traditional raider groups. The IML fields three unique units, the Attack Cruiser, 
 		Armed Transport, and Missile Frigate along with variants of each. The IML may use Armed Shuttles and Delta-Vs almost exclusively, but have restricted access
-		to Star Snakes and Lellats.  IML ships ave access to basic, antifighter, flash, heavy and long-range missiles.
+		to Star Snakes and Lellats.  IML ships have access to basic, antifighter, flash, heavy and long-range missiles.
 		
 	- Tirrith Free State (TFS): Born out of an EA base built in the Tirrith system from the Dilgar War, the raiders that took over the base ultimately formed an independent star
 		system at the confluence of multiple powers. The TFS is now less of a raider group and more a tiny nation. The TFS has three unique hulls including the Blockade Runner, 
