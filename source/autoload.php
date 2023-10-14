@@ -2103,6 +2103,7 @@ spl_autoload_register(
 				//Specific Raider Groups
 				//Imperial Star Legion
                 'imlarmedtransport' => '/server/model/ships/raiders/IMLArmedTransport.php',
+                'imlarmedtransportam' => '/server/model/ships/raiders/IMLArmedTransportAM.php',                
                 'imlarmedtransporttorpedo' => '/server/model/ships/raiders/IMLArmedTransportTorpedo.php',
                 'imlattackcruiser' => '/server/model/ships/raiders/IMLAttackCruiser.php',
                 'imlattackcruiserlaser' => '/server/model/ships/raiders/IMLAttackCruiserLaser.php',
@@ -2110,6 +2111,10 @@ spl_autoload_register(
                 'imlmissilefrigatebeam' => '/server/model/ships/raiders/IMLMissileFrigateBeam.php',
                 'imlmissilefrigaterapid' => '/server/model/ships/raiders/IMLMissileFrigateRapid.php',
                 'imlmissilefrigaterapidbeam' => '/server/model/ships/raiders/IMLMissileFrigateRapidBeam.php',
+                'imlmissilefrigateam' => '/server/model/ships/raiders/IMLMissileFrigateAM.php',
+                'imlmissilefrigatebeamam' => '/server/model/ships/raiders/IMLMissileFrigateBeamAM.php',
+                'imlmissilefrigaterapidam' => '/server/model/ships/raiders/IMLMissileFrigateRapidAM.php',
+                'imlmissilefrigaterapidbeamam' => '/server/model/ships/raiders/IMLMissileFrigateRapidBeamAM.php',                
 
                 'jydkutai' => '/server/model/ships/raiders/JYDKutai.php',
                 'jydlias' => '/server/model/ships/raiders/JYDLias.php',

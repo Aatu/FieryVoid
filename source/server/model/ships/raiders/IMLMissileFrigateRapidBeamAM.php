@@ -1,15 +1,14 @@
 <?php
-class IMLMissileFrigateBeam extends MediumShip{
+class IMLMissileFrigateRapidBeamAM extends MediumShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 370;
-        $this->faction = "Custom Ships";
-	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
-        $this->phpclass = "IMLMissileFrigateBeam";
+		$this->pointCost = 390;
+		$this->faction = "Raiders";
+        $this->phpclass = "IMLMissileFrigateRapidBeamAM";
         $this->imagePath = "img/ships/RaiderIMLMissileFrigate.png";
-        $this->shipClass = "IML Missile Frigate (Beam)";
+        $this->shipClass = "IML Missile Frigate (Rapid, Beam)";
 			$this->occurence = "common";
 			$this->variantOf = "IML Missile Frigate";
         $this->agile = true;
@@ -26,7 +25,18 @@ class IMLMissileFrigateBeam extends MediumShip{
         $this->rollcost = 1;
         $this->pivotcost = 2;
 		$this->iniativebonus = 60;
-         
+
+        //ammo magazine itself (AND its missile options)
+        $ammoMagazine = new AmmoMagazine(40); //pass magazine capacity - 12 rounds per class-SO rack, 20 most other shipborne racks, 60 class-B rack and 80 Reload Rack
+        $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
+        $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 40); //add full load of basic missiles
+	    $this->enhancementOptionsEnabled[] = 'AMMO_A';//add enhancement options for other missiles - Class-A
+	    $this->enhancementOptionsEnabled[] = 'AMMO_F';//add enhancement options for other missiles - Class-F
+	    $this->enhancementOptionsEnabled[] = 'AMMO_H';//add enhancement options for other missiles - Class-H
+	    $this->enhancementOptionsEnabled[] = 'AMMO_L';//add enhancement options for other missiles - Class-L
+		//IML ships ave access to basic, antifighter, flash, heavy and long-range missiles.	
+		
+		         
         $this->addPrimarySystem(new Reactor(3, 10, 0, 0));
         $this->addPrimarySystem(new CnC(3, 8, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 14, 3, 6));
@@ -37,10 +47,10 @@ class IMLMissileFrigateBeam extends MediumShip{
 				
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
-        $this->addFrontSystem(new LMissileRack(3, 6, 0, 240, 120));
+        $this->addFrontSystem(new AmmoMissileRackR(3, 0, 0, 240, 120, $ammoMagazine, false));
 		$this->addFrontSystem(new StdParticleBeam(3, 4, 1, 240, 60));		
 		$this->addFrontSystem(new StdParticleBeam(3, 4, 1, 300, 120));		
-        $this->addFrontSystem(new LMissileRack(3, 6, 0, 240, 120));
+        $this->addFrontSystem(new AmmoMissileRackR(3, 0, 0, 240, 120, $ammoMagazine, false));
 		
         $this->addAftSystem(new Thruster(3, 10, 0, 6, 2));
         $this->addAftSystem(new Thruster(3, 10, 0, 6, 2));
@@ -60,7 +70,7 @@ class IMLMissileFrigateBeam extends MediumShip{
 			),
 			1=> array(
 				6 => "Thruster",
-				8 => "Class-L Missile Rack",
+				8 => "Class-R Missile Rack",
 				12 => "Standard Particle Beam",
 				17 => "Structure",
 				20 => "Primary",

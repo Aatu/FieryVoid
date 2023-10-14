@@ -1,13 +1,12 @@
 <?php
-class IMLArmedTransport extends HeavyCombatVesselLeftRight{
+class IMLArmedTransportAM extends HeavyCombatVesselLeftRight{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 450;
-        $this->faction = "Custom Ships";
-	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
-        $this->phpclass = "IMLArmedTransport";
+	$this->faction = "Raiders";
+        $this->phpclass = "IMLArmedTransportAM";
         $this->imagePath = "img/ships/RaiderIMLTransport.png";
         $this->shipClass = "IML Armed Transport";
         
@@ -26,6 +25,16 @@ class IMLArmedTransport extends HeavyCombatVesselLeftRight{
 
         $this->gravitic = true;
 
+        //ammo magazine itself (AND its missile options)
+        $ammoMagazine = new AmmoMagazine(80); //pass magazine capacity - 12 rounds per class-SO rack, 20 most other shipborne racks, 60 class-B rack and 80 Reload Rack
+        $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
+        $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 80); //add full load of basic missiles
+	    $this->enhancementOptionsEnabled[] = 'AMMO_A';//add enhancement options for other missiles - Class-A
+	    $this->enhancementOptionsEnabled[] = 'AMMO_F';//add enhancement options for other missiles - Class-F
+	    $this->enhancementOptionsEnabled[] = 'AMMO_H';//add enhancement options for other missiles - Class-H
+	    $this->enhancementOptionsEnabled[] = 'AMMO_L';//add enhancement options for other missiles - Class-L
+		//IML ships ave access to basic, antifighter, flash, heavy and long-range missiles.		
+		
         $this->addPrimarySystem(new Reactor(6, 15, 0, 0));
         $this->addPrimarySystem(new CnC(6, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(6, 12, 5, 6));
@@ -36,13 +45,13 @@ class IMLArmedTransport extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new GraviticCannon(4, 6, 5, 90, 270));
 
         $this->addLeftSystem(new GraviticCannon(5, 6, 5, 240, 0));
-        $this->addLeftSystem(new SMissileRack(4, 6, 0, 180, 360));
-        $this->addLeftSystem(new SMissileRack(4, 6, 0, 240, 60));
+        $this->addLeftSystem(new AmmoMissileRackS(4, 0, 0, 180, 360, $ammoMagazine, false));
+        $this->addLeftSystem(new AmmoMissileRackS(4, 0, 0, 240, 60, $ammoMagazine, false));
         $this->addLeftSystem(new GraviticThruster(5, 15, 0, 6, 3));
 
         $this->addRightSystem(new GraviticCannon(5, 6, 5, 0, 120));
-        $this->addRightSystem(new SMissileRack(4, 6, 0, 0, 180));
-        $this->addRightSystem(new SMissileRack(4, 6, 0, 300, 120));
+        $this->addRightSystem(new AmmoMissileRackS(4, 0, 0, 0, 180, $ammoMagazine, false));
+        $this->addRightSystem(new AmmoMissileRackS(4, 0, 0, 300, 120, $ammoMagazine, false));
         $this->addRightSystem(new GraviticThruster(5, 15, 0, 6, 4));
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
