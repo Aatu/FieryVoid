@@ -789,6 +789,11 @@ window.weaponManager = {
                 mod -= 1;
             }
 
+			if (weapon.specialHitChanceCalculation){ //Added for HARM missile calculation
+			    mod += weapon.calculateSpecialHitChanceMod(target);
+			}
+
+
             if (!shooter.osat) {
                 mod -= shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(shooter, "cnC"), "PenaltyToHit");
                 mod -= shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(shooter, "cnC"), "tmphitreduction");   //GTS for chaff missile

@@ -248,6 +248,13 @@ AmmoMissileRackS.prototype.calculateSpecialRangePenalty = function (distance) { 
     return rangePenalty;
 };
 
+AmmoMIssileRackS.prototype.calculateSpecialHitChanceMod = function (target) {
+	var mod = 0;
+	mod = target.getAllOffensiveEW(ship) * 5;
+	return mod; 
+};
+
+
 var AmmoMissileRackSO = function AmmoMissileRackSO(json, ship) {
     Ballistic.call(this, json, ship);
 };
@@ -317,9 +324,9 @@ MultiDefenseLauncher.prototype.constructor =  MultiDefenseLauncher;
 
 
 var AmmoMissileRackF= function  AmmoMissileRackF(json, ship) {
-    Weapon.call(this, json, ship);
+    Ballistic.call(this, json, ship);
 };
-AmmoMissileRackF.prototype = Object.create(Weapon.prototype);
+AmmoMissileRackF.prototype = Object.create(Ballistic.prototype);
 AmmoMissileRackF.prototype.constructor =  AmmoMissileRackF;
 
 AmmoMissileRackF.prototype.doIndividualNotesTransfer = function () { //prepare individualNotesTransfer variable - if relevant for this particular system
