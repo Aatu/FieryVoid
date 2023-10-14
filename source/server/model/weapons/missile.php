@@ -1060,6 +1060,9 @@ class AmmoMissileRackS extends Weapon{
 	public $rangePenalty = 0;	
 	public $specialRangeCalculationArray = array(); 
 	public $rangePenaltyArray = array(); 
+//Extra variable for HARM Missile	
+	public $specialHitChanceCalculation = false;
+	public $specialHitChanceCalculation = array();			
 	
 //F-Rack variables removing for now to prevent anything odd happening.
 	/*
@@ -1158,7 +1161,8 @@ class AmmoMissileRackS extends Weapon{
 		$this->fixedBonusPulsesArray = array();
 		$this->calledShotMod = array();	//Adding calledShotMod variable for Multiwarhead Missile.
 		$this->specialRangeCalculation = array(); //Adding variables for KK Missile
-		$this->rangePenalty = array(); 				
+		$this->rangePenalty = array(); 
+		$this->specialHitChanceCalculation = array();						
 //		$this->interceptArray = array();//Adding Intercept variables for Interceptor missiles	
 //		$this->ballisticInterceptArray = array();	    		
 							
@@ -1209,7 +1213,8 @@ class AmmoMissileRackS extends Weapon{
 				$this->fixedBonusPulsesArray[$currMode] = $currAmmo->fixedBonusPulses;
 			    $this->calledShotModArray[$currMode] = $currAmmo->calledShotMod;	//Adding calledShotMod variable for Multiwarhead Missile.
 				$this->specialRangeCalculationArray[$currMode] = $currAmmo->specialRangeCalculation; //Adding variables for KK Missile
-				$this->rangePenaltyArray[$currMode] = $currAmmo->rangePenalty;						    
+				$this->rangePenaltyArray[$currMode] = $currAmmo->rangePenalty;
+				$this->specialHitChanceCalculationArray[$currMode] = $currAmmo->specialHitChanceCalculation;							    
 //				$this->interceptArray[$currMode] = $currAmmo->intercept;//Adding Intercept variables for Interceptor missiles	
 //				$this->ballisticInterceptArray[$currMode] = $currAmmo->ballisticIntercept;			    							
 			}
@@ -1250,7 +1255,8 @@ class AmmoMissileRackS extends Weapon{
 		$strippedSystem->fixedBonusPulsesArray = $this->fixedBonusPulsesArray;	
 		$strippedSystem->calledShotModArray = $this->calledShotModArray;	//Adding calledShotMod variable for Multiwarhead Missile.
 		$strippedSystem->specialRangeCalculationArray = $this->specialRangeCalculationArray; //Adding for KK Missile
-		$strippedSystem->rangePenaltyArray = $this->rangePenaltyArray;		
+		$strippedSystem->rangePenaltyArray = $this->rangePenaltyArray;
+		$strippedSystem->specialHitChanceCalculationArray = $this->specialHitChanceCalculationArray;		
 //		$strippedSystem->interceptArray = $this->interceptArray;//Adding Intercept variables for Interceptor missiles	
 //		$strippedSystem->ballisticInterceptArray = $this->ballisticInterceptArray;							
 		return $strippedSystem;

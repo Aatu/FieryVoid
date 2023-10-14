@@ -3860,7 +3860,9 @@ class AmmoMissileTemplate{
 
 //Extra variables for KK Missile
 	public $specialRangeCalculation = false;
-	public $rangePenalty = 0;	
+	public $rangePenalty = 0;
+//Extra variable for HARM Missile	
+	public $specialHitChanceCalculation = false;		
 	
     function __construct(){}
 	
@@ -4494,6 +4496,68 @@ class AmmoMissileKK extends AmmoMissileTemplate{
 		}
 
 } //endof class AmmoMissileKK
+
+//ammunition for AmmoMagazine - Class X Missile (for official Missile Racks).
+class AmmoMissileX extends AmmoMissileTemplate{	
+	public $name = 'AmmoMissileX';
+	public $displayName = 'HARM Missile';
+	public $modeName = 'X - HARM'; //Use X in modeName so that it's not confused with Heavy.
+	public $size = 1; //how many store slots are required for a single round
+	public $enhancementName = 'AMMO_X'; //enhancement name to be enabled
+	public $enhancementDescription = '(ammo) HARM Missile (2248)'; //enhancement description
+	public $enhancementPrice = 10; //PV per missile;
+	
+	public $rangeMod = 0; //MODIFIER for launch range.  In theory it can travel up to 60 hexes as it's max distance (but the hit chances would be terrible!)
+	public $distanceRangeMod = 0; //MODIFIER for distance range
+	public $fireControlMod = array(null, 3, 3); //MODIFIER for weapon fire control!
+	public $minDamage = 0;
+	public $maxDamage = 0;	
+	public $damageType = 'Standard';//mode of dealing damage
+	public $weaponClass = 'Ballistic';//weapon class
+	public $priority = 6;
+	public $priorityAF = 5;
+	public $noOverkill = false;
+	public $useOEW = false;
+	public $hidetarget = false;
+
+	public $specialHitChanceCalculation = true;
+	
+    public function getDamage($fireOrder) //actual function to be called, as with weapon!
+    {
+        return 0;
+    }		
+
+
+	public function beforeFiringOrderResolution($gamedata, $weapon, $originalFireOrder)
+	{
+	    $target = $gamedata->getShipById($originalFireOrder->targetid); // Fix: Change $fireOrder to $originalFireOrder
+	    $targetEW = $target->getOEWTargetNum($gamedata->turn);
+
+		    $fireControlAdd = $this->fireControlMod; // Fix: Change $this-fireControlMod to $this->fireControlMod
+		    $fireControlAdd[0] = null; // Remains null for fighters
+		    $fireControlAdd[1] = $fireControlAdd[1] + $targetEW; // Medium/HCV FC // Fix: Change $this->targetEW to $targetEW
+		    $fireControlAdd[2] = $fireControlAdd[2] + $targetEW; // Capitals FC // Fix: Change $this->targetEW to $targetEW
+		    $this->fireControlMod = $fireControlAdd;
+		    
+	}// end of function beforeFiringOrderResolution  
+
+
+ 	public function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //Reduces Sensors by 1D6 next turn.
+
+			$effectSensors = Dice::d(6,1);//Strength of effect: 1d6
+			$fireOrder->pubnotes .= "<br> Sensors reduced by $effectSensors next turn.";
+
+			$CnC = $ship->getSystemByName("CnC");
+			if($CnC){
+				for($i=1; $i<=$effectSensors;$i++){
+					$crit = new tmpsensordown(-1, $ship->id, $CnC->id, 'tmpsensordown', $gamedata->turn); 
+					$crit->updated = true;
+			        	$CnC->criticals[] =  $crit;
+				}
+		}	
+	} //endof function onDamagedSystem	
+
+} //endof class AmmoMissileX
 
 //ammunition for AmmoMagazine - Class FB Missile (Fighter Basic Missile)
 class AmmoMissileFB extends AmmoMissileTemplate{	

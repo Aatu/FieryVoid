@@ -601,7 +601,18 @@ class Enhancements{
 			  $enhPrice = $ammoClass->getPrice($ship); 
 			  $enhPriceStep = 0; //flat rate
 			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
-		  }					  	  
+		  }
+		  $enhID = 'AMMO_X'; //HARM Missiles
+		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
+				$ammoClass = new AmmoMissileX();
+				$ammoSize = $ammoClass->size;
+				$actualCapacity = floor($magazineCapacity/$ammoSize);
+			  $enhName = $ammoClass->enhancementDescription;
+			  $enhLimit = $actualCapacity;		
+			  $enhPrice = $ammoClass->getPrice($ship); 
+			  $enhPriceStep = 0; //flat rate
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+		  }						  	  
 	  } //end of magazine-requiring options
 	  
 	  
@@ -1250,7 +1261,10 @@ class Enhancements{
 						break;
 					case 'AMMO_KK': //Kinetic Missile						
 						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoMissileM(), $enhCount, true); //do notify dependent weapons, too!
-						break;										
+						break;
+					case 'AMMO_X': //HARM Missile						
+						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoMissileM(), $enhCount, true); //do notify dependent weapons, too!
+						break;															
 				}
 			}
 			
