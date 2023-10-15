@@ -52,7 +52,7 @@ SHIPBORNE MISSILES
  - class M - Multiwarhead Missile - Can only target fighter flights.  Splits into 6 submunitions which will each engage a separate fighter in flight.  Each submunition rolls to hit and scores damage separately, if there are fewer than 6 fighters on impact excess submunitions are lost) 
  - class P - Piercing Missile - damage 30, mode Piercing, cannot be fired at fighters.
  - class S - Stealth Missile - Kor-Lyan only.  Target of this missile is not revealed to the enemy player.
- - class X - HARM Missile - Locks in on enemy EW and reduces scanner output by D6 points the following turn if it hits.  The hit chance for this missile is increased by 5% per point of offensive EW the target ship is using (e.g. OEW and CCEW).
+ - class X - HARM Missile - Locks in on enemy EW and reduces scanner output by D6 points the following turn if it hits (a difference from tabletop).  The hit chance for this missile is increased by 5% per point of offensive EW the target ship is using (e.g. OEW and CCEW).
  
 FIGHTERBORNE MISSILES
  - class FB - Basic Fighter Missile - all other shipborne missiles have the same data except attributes specifically indicated. Damage 10, Standard mode, launch range 10/distance range 30, built-in guidance of +3/+3/+3.
