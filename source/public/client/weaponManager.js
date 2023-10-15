@@ -789,7 +789,7 @@ window.weaponManager = {
                 mod -= 1;
             }
 
-			if (weapon.specialHitChanceCalculation){ //Added for HARM missile calculation
+			if (weapon.specialHitChanceCalculation){ //Added for HARM missile calculation, but could be used for others in future?
 			    mod += weapon.calculateSpecialHitChanceMod(target);
 			}
 
