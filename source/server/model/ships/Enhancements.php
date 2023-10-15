@@ -1260,10 +1260,10 @@ class Enhancements{
 						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoMissileM(), $enhCount, true); //do notify dependent weapons, too!
 						break;
 					case 'AMMO_KK': //Kinetic Missile						
-						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoMissileM(), $enhCount, true); //do notify dependent weapons, too!
+						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoMissileKK(), $enhCount, true); //do notify dependent weapons, too!
 						break;
 					case 'AMMO_X': //HARM Missile						
-						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoMissileM(), $enhCount, true); //do notify dependent weapons, too!
+						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoMissileX(), $enhCount, true); //do notify dependent weapons, too!
 						break;															
 				}
 			}
