@@ -8,8 +8,6 @@ class Lashassi extends OSAT
 
 		$this->pointCost = 180;
         $this->faction = "Yolu";
-	      	$this->variantOf = "Lanassa Light Disruptor Early OSAT";
-	        $this->occurence = "common";
 		$this->phpclass = "Lashassi";
 		$this->shipClass = "Lashassi Fusion OSAT";
 		$this->imagePath = "img/ships/YoluLanassa.png";
