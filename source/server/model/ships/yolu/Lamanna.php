@@ -8,11 +8,9 @@ class Lamanna extends OSAT
 
 		$this->pointCost = 250;
         $this->faction = "Yolu";
-	      	$this->variantOf = "Lashassi Fusion OSAT";
-	        $this->occurence = "rare";
 		$this->phpclass = "Lamanna";
 		$this->shipClass = "Lamanna Flayer OSAT";
-		$this->imagePath = "img/ships/YoluLashassi.png";
+		$this->imagePath = "img/ships/YoluLamanna.png";
 		$this->canvasSize = 80;
 		$this->isd = 2238;
 
