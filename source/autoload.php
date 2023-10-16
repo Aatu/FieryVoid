@@ -3084,6 +3084,9 @@ spl_autoload_register(
 						//Gaim						
 						'gaimkastafighteram' => '/server/model/ships/gaim/gaimKastaFighterAM.php',
 						
+						//Extra Yolu
+					    'lashanna' => '/server/model/ships/yolu/Lashanna.php', 
+						
 						
 				//Thirdspace
 				'psychicfield' => '/server/model/weapons/specialWeapons.php',
