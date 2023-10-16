@@ -198,6 +198,87 @@
 
 
 
+class SuperHeavyMolecularDisruptor extends Raking
+    {
+        public $name = "superHeavyMolecularDisruptor";
+        public $displayName = "Super Heavy Molecular Disruptor";
+        public $animation = "laser"; //it's Raking weapon after all
+        public $animationColor = array(30, 170, 255);
+	    /*
+        public $trailColor = array(30, 170, 255);
+        public $animationExplosionScale = 0.35;
+        public $projectilespeed = 12;
+        public $animationWidth = 10;
+        public $trailLength = 25;
+	*/
+        public $priority = 7;
+        public $priorityArray = array(1=>7, 2=>2); //Piercing shots go early, to do damage while sections aren't detroyed yet!
+
+        public $intercept = 0;
+        public $loadingtime = 6;
+
+        public $firingModes = array(
+            1 => "Raking",
+            2 => "Piercing"
+        );
+
+        public $rangePenalty = 0.5;
+
+        public $fireControlArray = array( 1=>array(null, 1, 3), 2=>array(null, -3, -1) ); //Raking and Piercing mode, respectively - Piercing adds -4!
+
+        public $damageType = "Raking"; 
+        public $damageTypeArray = array(1=>'Raking', 2=>'Piercing');
+        public $weaponClass = "Molecular"; 
+                        
+        private $alreadyReduced = false;
+        
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+			if (!isset($this->data["Special"])) {
+				$this->data["Special"] = '';
+			}else{
+				$this->data["Special"] .= '<br>';
+			}
+            $this->data["Special"] .= "Reduces armor of facing structure by 2 points.";
+        }
+
+		protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location = null){
+		    parent::doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location);
+		    
+		    if ($system->advancedArmor) return; // advanced armor prevents effect
+		    
+		    if(!$this->alreadyReduced){ 
+		        //$struct = $target->getStructureSystem($location); //this caused problems if first rake penetrated!
+		        $sectionFacing = $target->getHitSection($shooter, $fireOrder->turn);
+		        $struct = $target->getStructureSystem($sectionFacing); 
+
+		        if ($struct->advancedArmor) return; // advanced armor prevents effect 
+		        
+		        if(!$struct->isDestroyed($fireOrder->turn-1)){ // last turn Structure was still there...
+		            $this->alreadyReduced = true; // do this only for the first part of the shot that actually connects
+		            
+		            $crit1 = new ArmorReduced(-1, $target->id, $struct->id, "ArmorReduced", $gamedata->turn);
+		            $crit1->updated = true;
+		            $crit1->inEffect = false;
+		            $struct->criticals[] = $crit1;
+
+		            // Add the crit twice since Super Heavy Distruptor reduces armour by 2.
+		            $crit2 = clone $crit1;
+		            $struct->criticals[] = $crit2;
+		        }
+		    }
+		}    
+
+        public function getDamage($fireOrder){        return Dice::d(10, 4) + 32;   }
+        public function setMinDamage(){     $this->minDamage = 4+32;      }
+        public function setMaxDamage(){     $this->maxDamage = 40+32;      }
+	} //endof class SuperHeavyMolecularDisruptor
+
 
     class DestabilizerBeam extends Molecular{
         public $name = "destabilizerBeam";

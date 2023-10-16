@@ -30,6 +30,12 @@ var MolecularDisruptor = function MolecularDisruptor(json, ship) {
 MolecularDisruptor.prototype = Object.create(Molecular.prototype);
 MolecularDisruptor.prototype.constructor = MolecularDisruptor;
 
+var SuperHeavyMolecularDisruptor = function SuperHeavyMolecularDisruptor(json, ship) {
+    Molecular.call(this, json, ship);
+};
+SuperHeavyMolecularDisruptor.prototype = Object.create(Molecular.prototype);
+SuperHeavyMolecularDisruptor.prototype.constructor = SuperHeavyMolecularDisruptor;
+
 var DestabilizerBeam = function DestabilizerBeam(json, ship) {
     Molecular.call(this, json, ship);
 };
