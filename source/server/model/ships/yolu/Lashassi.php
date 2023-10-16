@@ -1,20 +1,20 @@
 <?php
-class Lashanna extends OSAT
+class Lashassi extends OSAT
 {
 
 	function __construct($id, $userid, $name,  $slot)
 	{
 		parent::__construct($id, $userid, $name,  $slot);
 
-		$this->pointCost = 220;
+		$this->pointCost = 180;
         $this->faction = "Yolu";
 //	      $this->variantOf = "";
 //        $this->occurence = "";
-		$this->phpclass = "Lashanna";
-		$this->shipClass = "Lashanna Agitator OSAT";
-		$this->imagePath = "img/ships/YoluLashanna.png";
+		$this->phpclass = "Lashassi";
+		$this->shipClass = "Lashassi Fusion OSAT";
+		$this->imagePath = "img/ships/YoluLashassi.png";
 		$this->canvasSize = 80;
-		$this->isd = 1800;
+		$this->isd = 2236;
 
 		$this->forwardDefense = 7;
 		$this->sideDefense = 8;
@@ -31,9 +31,11 @@ class Lashanna extends OSAT
 		
 		$this->addAftSystem(new Thruster(6, 7, 0, 0, 2));
 		
-		$this->addFrontSystem(new FusionAgitator(4, 10, 4, 300, 60));
-		$this->addFrontSystem(new FusionAgitator(4, 10, 4, 300, 60));
-		$this->addFrontSystem(new FusionAgitator(4, 10, 4, 300, 60));
+		$this->addFrontSystem(new FusionCannon(3, 8, 1, 270, 90));
+		$this->addFrontSystem(new FusionCannon(3, 8, 1, 300, 60));
+		$this->addFrontSystem(new FusionCannon(3, 8, 1, 300, 60));
+		$this->addFrontSystem(new FusionCannon(3, 8, 1, 300, 60));
+		$this->addFrontSystem(new FusionCannon(3, 8, 1, 300, 60));		
 
 
 		//0:primary, 1:front, 2:rear, 3:left, 4:right;
