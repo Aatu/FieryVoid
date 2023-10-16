@@ -13,7 +13,7 @@ class GarundaAM extends HeavyCombatVessel{
 		$this->notes = "Corillani People's Navy (CPN)";
 		$this->canvasSize= 200;
         $this->fighters = array("normal"=>6);			    
-        
+  		$this->unofficial = 'S'; //design released after AoG demise       
         
         $this->forwardDefense = 13;
         $this->sideDefense = 16;
