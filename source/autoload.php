@@ -3092,7 +3092,9 @@ spl_autoload_register(
 					 	'lamassa' => '/server/model/ships/yolu/Lamanna.php', 
 					 	'lanassa' => '/server/model/ships/yolu/Lanassa.php', 
 					 	'lanassarefit' => '/server/model/ships/yolu/LanassaRefit.php', 
-					 	
+					 	'lassan' => '/server/model/ships/yolu/Lassan.php', 
+					 	'lassanrefit' => '/server/model/ships/yolu/LassanRefit.php', 
+					 						 	
 					 							
 				//Thirdspace
 				'psychicfield' => '/server/model/weapons/specialWeapons.php',
