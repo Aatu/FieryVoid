@@ -8,11 +8,11 @@ class Lasolla extends OSAT
 
 		$this->pointCost = 200;
         $this->faction = "Yolu";
-	      	$this->variantOf = "Lanassa Light Disruptor Early OSAT";
+	      	$this->variantOf = "Lashanna Agitator OSAT";
 	       	$this->occurence = "common";
 		$this->phpclass = "Lasolla";
 		$this->shipClass = "Lasolla Early Agitator OSAT";
-		$this->imagePath = "img/ships/YoluLanassa.png";
+		$this->imagePath = "img/ships/YoluLashanna.png";
 		$this->canvasSize = 80;
 		$this->isd = 1800;
 
