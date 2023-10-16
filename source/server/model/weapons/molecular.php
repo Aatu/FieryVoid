@@ -539,7 +539,36 @@ class SuperHeavyMolecularDisruptor extends Raking
             $this->maxDamage = 50 + ($boost * 10) + 10;
         }  
    }
-        
+ 
+ 	class EarlyFusionAgitator extends FusionAgitator{
+ 		public $name = "earlyFusionAgitator";
+        public $displayName = "Early Fusion Agitator";
+        public $fireControl = array(null, 2, 4); // fighters, <mediums, <capitals
+
+        public $damageType = "Raking"; 
+        public $weaponClass = "Molecular"; 	
+
+        public function getDamage($fireOrder){
+            $add = $this->getExtraDicebyBoostlevel($fireOrder->turn);
+            $dmg = Dice::d(10, (4 + $add)) +10;
+            return $dmg;
+        }
+
+        public function setMinDamage(){
+            $turn = TacGamedata::$currentTurn;
+            $boost = $this->getBoostLevel($turn);
+            $this->minDamage = 4 + ($boost * 1) + 10;
+        }   
+
+        public function setMaxDamage(){
+            $turn = TacGamedata::$currentTurn;
+            $boost = $this->getBoostLevel($turn);
+            $this->maxDamage = 40 + ($boost * 10) + 10;
+        }  
+ 	
+	}//endof class EarlyFusionAgitator
+	
+	      
         //Yolu heavy fighter weapon
     class LightMolecularDisruptor extends Raking{
         public $name = "molecularDisruptor";

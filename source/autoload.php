@@ -3086,7 +3086,8 @@ spl_autoload_register(
 						
 						//Extra Yolu
 						'superheavymoleculardisruptor' => '/server/model/weapons/molecular.php',
-						'molecularpenetrator' => '/server/model/weapons/molecular.php',						
+						'molecularpenetrator' => '/server/model/weapons/molecular.php',
+						'earlyfusionagitator' => '/server/model/weapons/molecular.php',						
 					    'lashanna' => '/server/model/ships/yolu/Lashanna.php', 
 					    'lashassi' => '/server/model/ships/yolu/Lashassi.php',
 					 	'lamanna' => '/server/model/ships/yolu/Lamanna.php',   						
@@ -3095,7 +3096,8 @@ spl_autoload_register(
 					 	'lanassarefit' => '/server/model/ships/yolu/LanassaRefit.php', 
 					 	'lassan' => '/server/model/ships/yolu/Lassan.php', 
 					 	'lassanrefit' => '/server/model/ships/yolu/LassanRefit.php', 
-					 	'lasann' => '/server/model/ships/yolu/Lasann.php', 					 						 	
+					 	'lasann' => '/server/model/ships/yolu/Lasann.php',
+					 	'lasolla' => '/server/model/ships/yolu/Lasolla.php', 						 	 					 						 	
 					 							
 				//Thirdspace
 				'psychicfield' => '/server/model/weapons/specialWeapons.php',

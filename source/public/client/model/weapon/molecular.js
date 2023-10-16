@@ -111,6 +111,11 @@ FusionAgitator.prototype.initBoostableInfo = function () {
     return this;
 };
 
+var FusionAgitator = function FusionAgitator(json, ship) {
+    EarlyFusionAgitator.call(this, json, ship);
+};
+FusionAgitator.prototype = Object.create(EarlyFusionAgitator.prototype);
+FusionAgitator.prototype.constructor = FusionAgitator;
 
 
 var FtrPolarityCannon = function FtrPolarityCannon(json, ship) {
