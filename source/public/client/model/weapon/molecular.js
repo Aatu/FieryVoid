@@ -117,6 +117,11 @@ var EarlyFusionAgitator = function EarlyFusionAgitator(json, ship) {
 EarlyFusionAgitator.prototype = Object.create(FusionAgitator.prototype);
 EarlyFusionAgitator.prototype.constructor = EarlyFusionAgitator;
 
+var FusionCutter = function FusionCutter(json, ship) {
+    Molecular.call(this, json, ship);
+};
+FusionCutter.prototype = Object.create(Molecular.prototype);
+FusionCutter.prototype.constructor = FusionCutter;
 
 var FtrPolarityCannon = function FtrPolarityCannon(json, ship) {
     Weapon.call(this, json, ship);

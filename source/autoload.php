@@ -3087,7 +3087,8 @@ spl_autoload_register(
 						//Extra Yolu
 						'superheavymoleculardisruptor' => '/server/model/weapons/molecular.php',
 						'molecularpenetrator' => '/server/model/weapons/molecular.php',
-						'earlyfusionagitator' => '/server/model/weapons/molecular.php',						
+						'earlyfusionagitator' => '/server/model/weapons/molecular.php',
+						'fusiocutter' => '/server/model/weapons/molecular.php',									
 					    'lashanna' => '/server/model/ships/yolu/Lashanna.php', 
 					    'lashassi' => '/server/model/ships/yolu/Lashassi.php',
 					 	'lamanna' => '/server/model/ships/yolu/Lamanna.php',   						

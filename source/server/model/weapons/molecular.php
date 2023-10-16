@@ -567,7 +567,39 @@ class SuperHeavyMolecularDisruptor extends Raking
         }  
  	
 	}//endof class EarlyFusionAgitator
-	
+
+  class FusionCutter extends Raking{ //Even earlier version of Fusion Agitator used by Yolu on OSATs
+        public $name = "fusionCutter";
+        public $displayName = "Fusion Cutter";
+        public $animation = "laser";
+        public $animationColor = array(0, 200, 200);
+        public $animationExplosionScale = 0.35; //make it thin, despite high damage potential!
+	    /*
+        public $trailColor = array(30, 170, 255);
+        public $animationWidth = 2;
+        public $animationWidth2 = 0.3;
+        public $animationExplosionScale = 0.15;
+*/
+        public $intercept = 0;
+        public $loadingtime = 3;
+        public $raking = 6;
+        public $priority = 7; //damage dealing mode means it's not very effective as stripping systems, and should be fired late despite high damage potential
+
+        public $firingModes = array(
+            1 => "Raking"
+        );
+
+        public $rangePenalty = 0.5;
+        public $fireControl = array(null, 2, 3); // fighters, <mediums, <capitals
+
+        public $damageType = "Raking"; 
+        public $weaponClass = "Molecular"; 
+                        
+        public function getDamage($fireOrder){        return Dice::d(10, 4)+8;   }
+        public function setMinDamage(){   return  $this->minDamage = 12 ;      }
+        public function setMaxDamage(){   return  $this->maxDamage = 48 ;      }
+         
+   }//endof	class FusionCutter
 	      
         //Yolu heavy fighter weapon
     class LightMolecularDisruptor extends Raking{
