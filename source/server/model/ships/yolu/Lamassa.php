@@ -8,11 +8,11 @@ class Lamassa extends OSAT
 
 		$this->pointCost = 260;
         $this->faction = "Yolu";
-	      	$this->variantOf = "Lashanna Agitator OSAT";
-	        $this->occurence = "uncommon";
+//	      	$this->variantOf = "Lashanna Agitator OSAT";
+//	        $this->occurence = "uncommon";
 		$this->phpclass = "Lamassa";
 		$this->shipClass = "Lamassa Destabilizer OSAT";
-		$this->imagePath = "img/ships/YoluLashanna.png";
+		$this->imagePath = "img/ships/YoluLamassa.png";
 		$this->canvasSize = 80;
 		$this->isd = 1730;
 

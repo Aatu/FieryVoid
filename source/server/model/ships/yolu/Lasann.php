@@ -8,11 +8,11 @@ class Lasann extends OSAT
 
 		$this->pointCost = 235;
         $this->faction = "Yolu";
-	      	$this->variantOf = "Lanassa Light Disruptor Early OSAT";
+	      	$this->variantOf = "Lamassa Destabilizer OSAT";
 	       	$this->occurence = "uncommon";
 		$this->phpclass = "Lasann";
 		$this->shipClass = "Lasann Penetrator Early OSAT";
-		$this->imagePath = "img/ships/YoluLanassa.png";
+		$this->imagePath = "img/ships/YoluLamassa.png";
 		$this->canvasSize = 80;
 		$this->isd = 1730;
 

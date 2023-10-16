@@ -10,7 +10,7 @@ class Lashassi extends OSAT
         $this->faction = "Yolu";
 		$this->phpclass = "Lashassi";
 		$this->shipClass = "Lashassi Fusion OSAT";
-		$this->imagePath = "img/ships/YoluLanassa.png";
+		$this->imagePath = "img/ships/YoluLashassi.png";
 		$this->canvasSize = 80;
 		$this->isd = 2236;
 
