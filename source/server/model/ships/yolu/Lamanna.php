@@ -1,20 +1,20 @@
 <?php
-class Lashassi extends OSAT
+class Lamanna extends OSAT
 {
 
 	function __construct($id, $userid, $name,  $slot)
 	{
 		parent::__construct($id, $userid, $name,  $slot);
 
-		$this->pointCost = 180;
+		$this->pointCost = 250;
         $this->faction = "Yolu";
 //	      $this->variantOf = "";
 //        $this->occurence = "";
-		$this->phpclass = "Lashassi";
-		$this->shipClass = "Lashassi Fusion OSAT";
+		$this->phpclass = "Lamanna";
+		$this->shipClass = "Lamanna Flayer OSAT";
 		$this->imagePath = "img/ships/YoluLashassi.png";
 		$this->canvasSize = 80;
-		$this->isd = 2236;
+		$this->isd = 2238;
 
 		$this->forwardDefense = 7;
 		$this->sideDefense = 8;
@@ -31,9 +31,8 @@ class Lashassi extends OSAT
 		
 		$this->addAftSystem(new Thruster(6, 7, 0, 0, 2));
 		
-		$this->addFrontSystem(new FusionCannon(3, 8, 1, 270, 90));
-		$this->addFrontSystem(new FusionCannon(3, 8, 1, 270, 90));
-		$this->addFrontSystem(new FusionCannon(3, 8, 1, 270, 90));
+		$this->addFrontSystem(new MolecularFlayer(4, 8, 4, 300, 60));
+		$this->addFrontSystem(new MolecularFlayer(4, 8, 4, 300, 60));
 		$this->addFrontSystem(new FusionCannon(3, 8, 1, 270, 90));
 		$this->addFrontSystem(new FusionCannon(3, 8, 1, 270, 90));	
 
@@ -46,7 +45,8 @@ class Lashassi extends OSAT
                 0=> array(
                         8 => "Structure",
                         11 => "2:Thruster",
-						15 => "1:Fusion Agitator",
+						13 => "1:Molecular Flayer",
+						15 => "1:Fusion Cannon",
 						17 => "Scanner",
                         20 => "Reactor",
                 ),
