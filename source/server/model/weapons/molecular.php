@@ -280,6 +280,48 @@ class SuperHeavyMolecularDisruptor extends Raking
 	} //endof class SuperHeavyMolecularDisruptor
 
 
+   class MolecularPenetrator extends Raking{
+        public $name = "molecularPenetrator";
+        public $displayName = "Molecular Penetrator";
+        public $animation = "laser";
+        public $animationColor = array(100, 100, 255);
+	    /*
+        public $trailColor = array(30, 170, 255);
+        public $animationWidth = 4.5;
+        public $animationWidth2 = 0.3;
+        public $animationExplosionScale = 0.35;
+	*/
+	    
+        public $priority = 7;
+        public $priorityArray = array(1=>7, 2=>2); //Piercing shots go early, to do damage while sections aren't detroyed yet!
+
+        public $intercept = 0;
+        public $loadingtime = 4;
+
+        public $firingModes = array(
+            1 => "Raking",
+            2 => "Piercing"
+        );
+
+        public $rangePenalty = 0.33;
+
+        public $fireControlArray = array( 1=>array(null, 1, 4), 2=>array(null, -3, 0) ); //Raking and Piercing mode, respectively - Piercing adds -4!
+
+        public $damageType = "Raking"; 
+        public $damageTypeArray = array(1=>'Raking', 2=>'Piercing');
+        public $weaponClass = "Molecular"; 
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function getDamage($fireOrder){        return Dice::d(10, 4)+15;   }
+        public function setMinDamage(){     $this->minDamage = 4+15;      }
+        public function setMaxDamage(){     $this->maxDamage = 40+15;      }
+    }//endof class MolecularPenetrator
+
+
+
     class DestabilizerBeam extends Molecular{
         public $name = "destabilizerBeam";
         public $displayName = "Destabilizer Beam";
