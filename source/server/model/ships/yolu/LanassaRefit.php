@@ -12,7 +12,7 @@ class LanassaRefit extends OSAT
 	        $this->occurence = "common";
 		$this->phpclass = "LanassaRefit";
 		$this->shipClass = "Lanassa Light Disruptor Early OSAT (Refit)";
-		$this->imagePath = "img/ships/YoluLanassa.png";
+		$this->imagePath = "img/ships/YoluLashassi.png";
 		$this->canvasSize = 80;
 		$this->isd = 1800;
 
