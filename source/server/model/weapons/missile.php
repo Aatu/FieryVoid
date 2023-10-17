@@ -1098,7 +1098,7 @@ class AmmoMissileRackS extends Weapon{
 			$this->ammoClassesArray[] =  new AmmoMissileF();
 			$this->ammoClassesArray[] =  new AmmoMissileA();
 			$this->ammoClassesArray[] =  new AmmoMissileP();
-			$this->ammoClassesArray[] =  new AmmoMissileD(); //...though only Alacans use those, as simple Basic missiles are far superior
+			$this->ammoClassesArray[] =  new AmmoMissileD(); //...though only Alacans and Sorithians use those, as simple Basic missiles are far superior
 			$this->ammoClassesArray[] =  new AmmoMissileC();
 	//		$this->ammoClassesArray[] =  new AmmoMissileI(); //Only available to Class-D launchers on Kor-Lyan ships at this time, created in ship magazine.					
 			$this->ammoClassesArray[] =  new AmmoMissileS();
