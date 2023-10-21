@@ -14,6 +14,8 @@ class Ishtaka extends StarBaseSixSections
 		$this->canvasSize = 310;
 		$this->fighters = array("normal" => 24);
 		$this->isd = 2256;
+		$this->notes = 'Im-Rehsa Technologies';//Corporation producing the design
+		$this->notes .= "<br>official Ishtaka Techbase with Grav Shifters replaced by Grav Cannons"; 		
 	    $this->unofficial = 'S'; //Semi-official - added as reasonably close to official Ishtaka, while Grav Shifters are unavailable in FV
      
 		$this->shipSizeClass = 3;
