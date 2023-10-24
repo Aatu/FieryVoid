@@ -38,7 +38,7 @@ class RingBase extends StarBaseSixSections
 		);
 
 
-		$this->addPrimarySystem(new Reactor(6, 49, 0, 90));
+		$this->addPrimarySystem(new MagGravReactor(6, 49, 0, 90));
 		$this->addPrimarySystem(new Hangar(6, 16));
 		$this->addPrimarySystem(new Hangar(6, 16));		
 		$this->addPrimarySystem(new ProtectedCnC(6, 40, 0, 0));
