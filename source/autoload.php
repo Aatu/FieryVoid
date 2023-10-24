@@ -884,6 +884,7 @@ spl_autoload_register(
                 'shiptetraescort' => '/server/model/ships/ipsha/shipTetraEscort.php',
                 'shiptetraship' => '/server/model/ships/ipsha/shipTetraship.php',
                 'shipwarsphere' => '/server/model/ships/ipsha/shipWarsphere.php',
+                'ringbase' => '/server/model/ships/ipsha/RingBase.php',                
                 'shockcannon' => '/server/model/weapons/specialWeapons.php',
                 'shodromaosat' => '/server/model/ships/drazi/shodromaOSAT.php',
                 'shofab' => '/server/model/ships/markab/shofab.php',
