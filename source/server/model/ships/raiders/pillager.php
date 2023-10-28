@@ -16,7 +16,7 @@ class Pillager extends BaseShip{
 		$this->notes = "Generic raider unit.";
 		$this->notes .= "<br> ";
 
-		$this->isd = 2182;
+		$this->isd = 2001;
         
         $this->forwardDefense = 14;
         $this->sideDefense = 16;
@@ -26,12 +26,11 @@ class Pillager extends BaseShip{
         $this->accelcost = 3;
         $this->rollcost = 1;
         $this->pivotcost = 5;
-        $this->limited = 10;
+
    
         $this->addPrimarySystem(new Reactor(4, 16, 0, 3));
         $this->addPrimarySystem(new CnC(5, 15, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 12, 4, 6));
-        $this->addPrimarySystem(new Engine(5, 20, 0, 12, 2));
         $this->addPrimarySystem(new Hangar(3, 13));
         $this->addPrimarySystem(new JumpEngine(4, 16, 4, 25));
   
@@ -45,10 +44,10 @@ class Pillager extends BaseShip{
         $this->addAftSystem(new Thruster(3, 10, 0, 3, 2));
         $this->addAftSystem(new Thruster(3, 10, 0, 3, 2));
         $this->addAftSystem(new Thruster(3, 10, 0, 3, 2));
-		$this->addAftSystem(new GaussCannon(2, 10, 4, 120, 240));
 		$this->addAftSystem(new Engine(4, 14, 0, 9, 3));
 		$this->addAftSystem(new CargoBay(2, 15));
-		$this->addAftSystem(new CargoBay(2, 15));
+		$this->addAftSystem(new CargoBay(2, 15));        
+		$this->addAftSystem(new GaussCannon(2, 10, 4, 120, 240));
 		
   		$this->addLeftSystem(new Thruster(3, 15, 0, 4, 3));
 		$this->addLeftSystem(new LightParticleCannon(2, 6, 5, 180, 360));
