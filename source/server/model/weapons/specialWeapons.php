@@ -2791,7 +2791,8 @@ class IonFieldGenerator extends Weapon{
 		parent::setSystemDataWindow($turn);  
 		//some effects should originally work for current turn, but it won't work with FV handling of ballistics. Moving everything to next turn.
 		//it's Ion (not EM) weapon with no special remarks regarding advanced races and system - so works normally on AdvArmor/Ancients etc
-		$this->data["Special"] = "Every unit in affected area is subject to effects:";      
+		$this->data["Special"] = "Targets a hex and affects all units within 2 hexes of that location.";      
+		$this->data["Special"] .= "<br> Every unit in affected area is subject to following effects:"; 		
 		$this->data["Special"] .= "<br> - Roll one location, as per regular attack. If weapon is hit, it's forced to shut down."; //originally just charging cycle resets - but I opted for simpler (if stronger) effect. 
 		$this->data["Special"] .= "<br> - -2 Sensor rating (ships) or -1 OB (fighters) for a turn.";    
 		$this->data["Special"] .= "<br> - -15 Initiative for a turn."; 
