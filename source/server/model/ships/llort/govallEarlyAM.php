@@ -29,7 +29,7 @@ class govallEarlyAM extends HeavyCombatVessel{
         //ammo magazine itself (AND its missile options)
         $ammoMagazine = new AmmoMagazine(100); //pass magazine capacity - 12 rounds per class-SO rack, 20 most other shipborne racks, 60 class-B rack and 80 Reload Rack
         $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
-        $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 100); //add full load of basic missiles
+        $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 140); //add full load of basic missiles
 	    $this->enhancementOptionsEnabled[] = 'AMMO_A';//add enhancement options for other missiles - Class-A
 	    $this->enhancementOptionsEnabled[] = 'AMMO_C';//add enhancement options for other missiles - Class-C
 	    $this->enhancementOptionsEnabled[] = 'AMMO_F';//add enhancement options for other missiles - Class-F
@@ -49,8 +49,8 @@ class govallEarlyAM extends HeavyCombatVessel{
         $this->addFrontSystem(new Thruster(2, 5, 0, 2, 3));
         $this->addFrontSystem(new Thruster(3, 8, 0, 2, 1));
         $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
-	$this->addFrontSystem(new AmmoMissileRackS(4, 0, 0, 240, 60));
-	$this->addFrontSystem(new AmmoMissileRackS(4, 0, 0, 240, 60));
+	$this->addFrontSystem(new AmmoMissileRackS(4, 0, 0, 240, 60, $ammoMagazine, false));
+	$this->addFrontSystem(new AmmoMissileRackS(4, 0, 0, 240, 60, $ammoMagazine, false));
 		$this->addFrontSystem(new AmmoMissileRackL(4, 0, 0, 300, 120, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
 		$this->addFrontSystem(new AmmoMissileRackL(4, 0, 0, 300, 120, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
 		$this->addFrontSystem(new AmmoMissileRackR(4, 0, 0, 300, 60, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
