@@ -4491,7 +4491,7 @@ class AmmoMissileKK extends AmmoMissileTemplate{
 
 		public function calculateRangePenalty($distance){
 			$rangePenalty = 0;//base penalty
-			$rangePenalty += $this->rangePenalty * max(0,$distance-15); //everything above 10 hexes receives range penalty
+			$rangePenalty += $this->rangePenalty * max(0,$distance-15); //everything above 15 hexes receives range penalty
 			return $rangePenalty;
 		}
 
