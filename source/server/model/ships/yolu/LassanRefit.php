@@ -10,11 +10,11 @@ class LassanRefit extends OSAT
         $this->faction = "Yolu";
 	      	$this->variantOf = "Lamassa Destabilizer OSAT";
 	        $this->occurence = "uncommon";
-		$this->phpclass = "Lassan";
+		$this->phpclass = "LassanRefit";
 		$this->shipClass = "Lassan Super Heavy Disruptor Early OSAT (Refit)";
 		$this->imagePath = "img/ships/YoluLamassa.png";
 		$this->canvasSize = 80;
-		$this->isd = 1260;
+		$this->isd = 1800;
 
 		$this->forwardDefense = 7;
 		$this->sideDefense = 8;

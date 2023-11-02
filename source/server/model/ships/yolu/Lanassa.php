@@ -31,11 +31,11 @@ class Lanassa extends OSAT
 		
 		$this->addAftSystem(new Thruster(6, 7, 0, 0, 2));
 		
-		$this->addFrontSystem(new LightMolecularDisruptor(3, 6, 4, 300, 60));
-		$this->addFrontSystem(new LightMolecularDisruptor(3, 6, 4, 300, 60));
+		$this->addFrontSystem(new LightMolecularDisruptorShip(3, 6, 4, 300, 60));
+		$this->addFrontSystem(new LightMolecularDisruptorShip(3, 6, 4, 300, 60));
 		$this->addFrontSystem(new FusionCannon(3, 8, 1, 270, 90));		
-		$this->addFrontSystem(new LightMolecularDisruptor(3, 6, 4, 300, 60));
-		$this->addFrontSystem(new LightMolecularDisruptor(3, 6, 4, 300, 60));
+		$this->addFrontSystem(new LightMolecularDisruptorShip(3, 6, 4, 300, 60));
+		$this->addFrontSystem(new LightMolecularDisruptorShip(3, 6, 4, 300, 60));
 
 		//0:primary, 1:front, 2:rear, 3:left, 4:right;
 

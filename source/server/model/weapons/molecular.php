@@ -550,33 +550,37 @@ class SuperHeavyMolecularDisruptor extends Raking
         }  
    }
  
- 	class EarlyFusionAgitator extends FusionAgitator{
+ 	class EarlyFusionAgitator extends Raking{
  		public $name = "earlyFusionAgitator";
         public $displayName = "Early Fusion Agitator";
+        public $animation = "laser";        
+        public $intercept = 0;
+        public $loadingtime = 3;
+        public $raking = 6;
+        public $priority = 7; //damage dealing mode means it's not very effective as stripping systems, and should be fired late despite high damage potential
+
+        public $firingModes = array(
+            1 => "Raking"
+        );
+
+        public $rangePenalty = 0.33;
         public $fireControl = array(null, 2, 4); // fighters, <mediums, <capitals
 
         public $damageType = "Raking"; 
-        public $weaponClass = "Molecular"; 	
+        public $weaponClass = "Molecular"; 
 
-        public function getDamage($fireOrder){
-            $add = $this->getExtraDicebyBoostlevel($fireOrder->turn);
-            $dmg = Dice::d(10, (4 + $add)) +10;
-            return $dmg;
+        public function getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos=null){ //standard part of armor - reduce by 1!
+            $armour = parent::getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos);
+            $armour = $armour - 1;
+            $armour = max(0,$armour);
+            return $armour;
         }
-
-        public function setMinDamage(){
-            $turn = TacGamedata::$currentTurn;
-            $boost = $this->getBoostLevel($turn);
-            $this->minDamage = 4 + ($boost * 1) + 10;
-        }   
-
-        public function setMaxDamage(){
-            $turn = TacGamedata::$currentTurn;
-            $boost = $this->getBoostLevel($turn);
-            $this->maxDamage = 40 + ($boost * 10) + 10;
-        }  
- 	
-	}//endof class EarlyFusionAgitator
+                                
+        public function getDamage($fireOrder){        return Dice::d(10, 4)+10;   }
+        public function setMinDamage(){   return  $this->minDamage = 14 ;      }
+        public function setMaxDamage(){   return  $this->maxDamage = 50 ;      }
+         
+   }//endof class EarlyFusionAgitator
 
   class FusionCutter extends Raking{ //Even earlier version of Fusion Agitator used by Yolu on OSATs
         public $name = "fusionCutter";
@@ -614,7 +618,7 @@ class SuperHeavyMolecularDisruptor extends Raking
         //Yolu heavy fighter weapon
     class LightMolecularDisruptor extends Raking{
         public $name = "molecularDisruptor";
-        public $displayName = "Light Molecular Distruptor";
+        public $displayName = "Light Molecular Disruptor";
         public $animation = "laser";
         public $animationColor = array(30, 170, 255);
 	    /*
@@ -669,6 +673,61 @@ class SuperHeavyMolecularDisruptor extends Raking
         public function setMaxDamage(){   return  $this->maxDamage = 35 ;      }
     }
 
+        //Yolu heavy fighter weapon
+    class LightMolecularDisruptorShip extends Raking{
+        public $name = "molecularDisruptor";
+        public $displayName = "Light Molecular Disruptor";
+        public $animation = "laser";
+        public $animationColor = array(30, 170, 255);
+	    /*
+        public $animationExplosionScale = 0.20;
+        public $projectilespeed = 10;
+        public $animationWidth = 5;
+        public $trailLength = 12;
+        */
+        public $loadingtime = 3;
+        public $raking = 10;
+  //      public $exclusive = true;
+        public $priority = 8;//fighter Raking weapon
+        
+        public $rangePenalty = 1;
+        public $fireControl = array(-4, 0, 3); // fighters, <mediums, <capitals 
+
+        public $damageType = "Raking"; 
+        public $weaponClass = "Molecular"; 
+        private $alreadyReduced = false;
+        
+
+        
+        public function setSystemDataWindow($turn){      
+            parent::setSystemDataWindow($turn);
+            $this->data["Special"] = 'Reduces armor on facing Structure if at least 3 shots hit';
+        }
+
+        protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location = null){
+            parent::doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location);
+			if ($system->advancedArmor) return;
+            if(!$this->alreadyReduced){ 
+                $this->alreadyReduced = true; 
+                if(LightMolecularDisrupterHandler::checkArmorReduction($target, $shooter)){ //static counting!
+					$sectionFacing = $target->getHitSection($shooter, $fireOrder->turn);
+					$struct = $target->getStructureSystem($sectionFacing); 
+                    //$struct = $target->getStructureSystem($location);
+                    if ($struct->advancedArmor) return;
+                    if(!$struct->isDestroyed($fireOrder->turn-1)){ //last turn Structure was still there...
+                        $crit = new ArmorReduced(-1, $target->id, $struct->id, "ArmorReduced", $gamedata->turn);
+                        $crit->updated = true;
+                        $crit->inEffect = false;
+                        $struct->criticals[] = $crit;
+                    }
+                }
+            }
+        }
+        
+        public function getDamage($fireOrder){        return Dice::d(10, 2)+15;   }
+        public function setMinDamage(){   return  $this->minDamage = 17 ;      }
+        public function setMaxDamage(){   return  $this->maxDamage = 35 ;      }
+    }//end of LightMolecularDisruptorShip
 
 
     class LightMolecularDisrupterHandler{

@@ -34,7 +34,15 @@ var SuperHeavyMolecularDisruptor = function SuperHeavyMolecularDisruptor(json, s
     Molecular.call(this, json, ship);
 };
 SuperHeavyMolecularDisruptor.prototype = Object.create(Molecular.prototype);
-SuperHeavyMolecularDisruptor.prototype.constructor = MolecularDisruptor;
+SuperHeavyMolecularDisruptor.prototype.constructor = SuperHeavyMolecularDisruptor;
+
+
+
+var LightMolecularDisruptorShip = function LightMolecularDisruptorShip(json, ship) {
+    Molecular.call(this, json, ship);
+};
+LightMolecularDisruptorShip.prototype = Object.create(Molecular.prototype);
+LightMolecularDisruptorShip.prototype.constructor = LightMolecularDisruptorShip;
 
 var MolecularPenetrator = function MolecularPenetrator(json, ship) {
     Molecular.call(this, json, ship);
@@ -112,9 +120,9 @@ FusionAgitator.prototype.initBoostableInfo = function () {
 };
 
 var EarlyFusionAgitator = function EarlyFusionAgitator(json, ship) {
-    FusionAgitator.call(this, json, ship);
+    Molecular.call(this, json, ship);
 };
-EarlyFusionAgitator.prototype = Object.create(FusionAgitator.prototype);
+EarlyFusionAgitator.prototype = Object.create(Molecular.prototype);
 EarlyFusionAgitator.prototype.constructor = EarlyFusionAgitator;
 
 var FusionCutter = function FusionCutter(json, ship) {

@@ -1062,7 +1062,7 @@ class AmmoMissileRackS extends Weapon{
 	public $rangePenaltyArray = array(); 
 //Extra variable for HARM Missile	
 	public $specialHitChanceCalculation = false;
-	public $specialHitChanceCalculation = array();			
+			
 	
 //F-Rack variables removing for now to prevent anything odd happening.
 	/*
@@ -1103,7 +1103,9 @@ class AmmoMissileRackS extends Weapon{
 	//		$this->ammoClassesArray[] =  new AmmoMissileI(); //Only available to Class-D launchers on Kor-Lyan ships at this time, created in ship magazine.					
 			$this->ammoClassesArray[] =  new AmmoMissileS();
 			$this->ammoClassesArray[] =  new AmmoMissileK();
-			$this->ammoClassesArray[] =  new AmmoMissileM();							
+			$this->ammoClassesArray[] =  new AmmoMissileM();
+			$this->ammoClassesArray[] =  new AmmoMissileKK();
+			$this->ammoClassesArray[] =  new AmmoMissileX();													
 			$this->availableAmmoAlreadySet = true;
 		}
 	
@@ -1428,7 +1430,7 @@ class AmmoMissileRackS extends Weapon{
 
 	}
 
-    protected function calculateRangePenalty($distance)
+    public function calculateRangePenalty($distance)
     {
 		$currAmmo = null;
         //find appropriate ammo

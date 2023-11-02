@@ -3090,11 +3090,12 @@ spl_autoload_register(
 						'superheavymoleculardisruptor' => '/server/model/weapons/molecular.php',
 						'molecularpenetrator' => '/server/model/weapons/molecular.php',
 						'earlyfusionagitator' => '/server/model/weapons/molecular.php',
-						'fusiocutter' => '/server/model/weapons/molecular.php',									
+						'fusiocutter' => '/server/model/weapons/molecular.php',
+						'lightmoleculardisruptorship' => '/server/model/weapons/molecular.php',									
 					    'lashanna' => '/server/model/ships/yolu/Lashanna.php', 
 					    'lashassi' => '/server/model/ships/yolu/Lashassi.php',
 					 	'lamanna' => '/server/model/ships/yolu/Lamanna.php',   						
-					 	'lamassa' => '/server/model/ships/yolu/Lamanna.php', 
+					 	'lamassa' => '/server/model/ships/yolu/Lamassa.php', 
 					 	'lanassa' => '/server/model/ships/yolu/Lanassa.php', 
 					 	'lanassarefit' => '/server/model/ships/yolu/LanassaRefit.php', 
 					 	'lassan' => '/server/model/ships/yolu/Lassan.php', 
@@ -3105,7 +3106,7 @@ spl_autoload_register(
 					 	'lassankarefit' => '/server/model/ships/yolu/LassankaRefit.php', 	 						 	
 					 	'lacanna' => '/server/model/ships/yolu/Lacanna.php', 
 					 	'lacannarefit' => '/server/model/ships/yolu/LacannaRefit.php',
-					 	'yolufalaren' => '/server/model/ships/yolu/YoluFalaren.php',					 	 
+					 	'falaren' => '/server/model/ships/yolu/Falaren.php',					 	 
 					 							
 				//Thirdspace
 				'psychicfield' => '/server/model/weapons/specialWeapons.php',

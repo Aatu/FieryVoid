@@ -7,7 +7,7 @@ class Ishtaka extends StarBaseSixSections
 
 		$this->pointCost = 4500;
 		$this->base = true;
-		$this->faction = "Brakiri";
+		$this->faction = "Brakiri Syndicracy";
 		$this->phpclass = "Ishtaka";
 		$this->shipClass = "Ishtaka Techbase";
 		$this->imagePath = "img/ships/BrakiriIshtaka.png";
