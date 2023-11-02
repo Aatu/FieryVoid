@@ -1009,17 +1009,6 @@ class AmmoMissileRackS extends Weapon{
     public $firingMode = 1;
     public $priority = 6;
     public $loadingtime = 2;
-	public $hidetarget = false; //For Stealth missile
-
-//	public $intercept = 0;	//Adding Intercept variables for Interceptor missiles	
-//	public $ballisticIntercept = false;
-	
-	public $maxpulses = 0;    //Adding Pulse variables for Starburst missiles
-	public $rof = 0;
-	public $useDie = 0; //die used for base number of hits
-	public $fixedBonusPulses = 0;//for weapons doing dX+Y pulse	  
-	
-	
 	
 	protected $availableAmmoAlreadySet = false; //set to true if calling constructor from derived weapon that sets different ammo options
 
@@ -1046,7 +1035,36 @@ class AmmoMissileRackS extends Weapon{
     public $rangeArray = array(); 
 	public $distanceRangeArray = array(); 
 
-	//F-Rack variables removing for now to prevent anything odd happening.
+	protected $ammoClassesArray = array();//FILLED IN CONSTRUCTOR! classes representing POTENTIALLY available ammo - so firing modes are always shown in the same order
+	
+	private $ammoMagazine; //reference to ammo magazine
+	private $ammoClassesUsed = array();
+	
+//For Stealth missile
+	public $hidetarget = false;
+	public $hidetargetArray = array();
+//Adding Pulse variables for Starburst missiles	
+	public $maxpulses = 0;    
+	public $rof = 0;
+	public $useDie = 0; //die used for base number of hits
+	public $fixedBonusPulses = 0;//for weapons doing dX+Y pulse	
+	public $maxpulsesArray = array();
+	public $rofArray = array();
+	public $useDieArray = array();
+	public $fixedBonusPulsesArray = array();	
+//Extra variable Multiwarhead	
+    public $calledShotMod = -8; //Normal called shot modifier is -8
+	public $calledShotModArray = array();    		  
+//Extra variables for KK Missile
+	public $specialRangeCalculation = false;
+	public $rangePenalty = 0;	
+	public $specialRangeCalculationArray = array(); 
+	public $rangePenaltyArray = array(); 
+//Extra variable for HARM Missile	
+	public $specialHitChanceCalculation = false;
+	public $specialHitChanceCalculationArray = array();			
+	
+//F-Rack variables removing for now to prevent anything odd happening.
 	/*
 	protected $firedInRapidMode = false; //was this weapon fired in rapid mode (this turn)?
 	protected $firedInLongRangeMode = false;
@@ -1056,23 +1074,14 @@ class AmmoMissileRackS extends Weapon{
 	protected $baseDistance = null; //base value of range - copy necessary due to necessity of recalculation now and then!
 	protected $baseDistanceArray = null; //base value of range - copy necessary due to necessity of recalculation now and then!	
 	*/
-
-	protected $ammoClassesArray = array();//FILLED IN CONSTRUCTOR! classes representing POTENTIALLY available ammo - so firing modes are always shown in the same order
 	
-	private $ammoMagazine; //reference to ammo magazine
-	private $ammoClassesUsed = array();
-	public $hidetargetArray = array();//For Stealth missile
+//Adding Intercept variables for Interceptor missiles
+	//public $intercept = 0;	//Adding Intercept variables for Interceptor missiles	
+	//public $ballisticIntercept = false;	
+	//public $interceptArray = array();     	
+	//public $ballisticInterceptArray = array();	
+    		
 	
-//	public $interceptArray = array();     //Adding Intercept variables for Interceptor missiles	
-//	public $ballisticInterceptArray = array();	
-	
-	public $maxpulsesArray = array();     //Adding Pulse variables for Starburst missiles	
-	public $rofArray = array();
-	public $useDieArray = array();
-	public $fixedBonusPulsesArray = array();	
-	
-    public $calledShotMod = -8;    //Variable for Multiwarhead Missile.  Normal called shot modifier is -8    		
-	public $calledShotModArray = array();  	
 	
 	
     /*ATYPICAL constructor: takes ammo magazine class and (optionally) information about being fitted to stable platform*/
@@ -1089,12 +1098,14 @@ class AmmoMissileRackS extends Weapon{
 			$this->ammoClassesArray[] =  new AmmoMissileF();
 			$this->ammoClassesArray[] =  new AmmoMissileA();
 			$this->ammoClassesArray[] =  new AmmoMissileP();
-			$this->ammoClassesArray[] =  new AmmoMissileD(); //...though only Alacans use those, as simple Basic missiles are far superior
+			$this->ammoClassesArray[] =  new AmmoMissileD(); //...though only Alacans and Sorithians use those, as simple Basic missiles are far superior
 			$this->ammoClassesArray[] =  new AmmoMissileC();
 	//		$this->ammoClassesArray[] =  new AmmoMissileI(); //Only available to Class-D launchers on Kor-Lyan ships at this time, created in ship magazine.					
 			$this->ammoClassesArray[] =  new AmmoMissileS();
 			$this->ammoClassesArray[] =  new AmmoMissileK();
-			$this->ammoClassesArray[] =  new AmmoMissileM();							
+			$this->ammoClassesArray[] =  new AmmoMissileM();
+			$this->ammoClassesArray[] =  new AmmoMissileKK();
+			$this->ammoClassesArray[] =  new AmmoMissileX();													
 			$this->availableAmmoAlreadySet = true;
 		}
 	
@@ -1146,13 +1157,16 @@ class AmmoMissileRackS extends Weapon{
 		$this->maxDamageArray = array();
 		$this->ammoClassesUsed = array();
 		$this->hidetargetArray = array();
-//		$this->interceptArray = array();//Adding Intercept variables for Interceptor missiles	
-//		$this->ballisticInterceptArray = array();
 		$this->maxpulsesArray = array();//Adding Pulse functions for Starburst missiles	
 		$this->rofArray = array();
 		$this->useDieArray = array();
 		$this->fixedBonusPulsesArray = array();
-		$this->calledShotMod = array();	//Adding calledShotMod variable for Multiwarhead Missile.	    		
+		$this->calledShotMod = array();	//Adding calledShotMod variable for Multiwarhead Missile.
+		$this->specialRangeCalculation = array(); //Adding variables for KK Missile
+		$this->rangePenalty = array(); 
+		$this->specialHitChanceCalculation = array();						
+//		$this->interceptArray = array();//Adding Intercept variables for Interceptor missiles	
+//		$this->ballisticInterceptArray = array();	    		
 							
 		
 		//add data for all modes to arrays
@@ -1194,14 +1208,17 @@ class AmmoMissileRackS extends Weapon{
 				$this->noOverkillArray[$currMode] = $currAmmo->noOverkill;
 				$this->minDamageArray[$currMode] = $currAmmo->minDamage;
 				$this->maxDamageArray[$currMode] = $currAmmo->maxDamage;
-				$this->hidetargetArray[$currMode] = $currAmmo->hidetarget;//For Stealth missiles
-//				$this->interceptArray[$currMode] = $currAmmo->intercept;//Adding Intercept variables for Interceptor missiles	
-//				$this->ballisticInterceptArray[$currMode] = $currAmmo->ballisticIntercept;							
+				$this->hidetargetArray[$currMode] = $currAmmo->hidetarget;//For Stealth missiles							
 				$this->maxpulsesArray[$currMode] = $currAmmo->maxpulses;//Adding Pulse functions for Starburst missiles	
 				$this->rofArray[$currMode] = $currAmmo->rof;
 				$this->useDieArray[$currMode] = $currAmmo->useDie;
 				$this->fixedBonusPulsesArray[$currMode] = $currAmmo->fixedBonusPulses;
-			    $this->calledShotModArray[$currMode] = $currAmmo->calledShotMod;	//Adding calledShotMod variable for Multiwarhead Missile.			    							
+			    $this->calledShotModArray[$currMode] = $currAmmo->calledShotMod;	//Adding calledShotMod variable for Multiwarhead Missile.
+				$this->specialRangeCalculationArray[$currMode] = $currAmmo->specialRangeCalculation; //Adding variables for KK Missile
+				$this->rangePenaltyArray[$currMode] = $currAmmo->rangePenalty;
+				$this->specialHitChanceCalculationArray[$currMode] = $currAmmo->specialHitChanceCalculation;							    
+//				$this->interceptArray[$currMode] = $currAmmo->intercept;//Adding Intercept variables for Interceptor missiles	
+//				$this->ballisticInterceptArray[$currMode] = $currAmmo->ballisticIntercept;			    							
 			}
 		}
 			
@@ -1233,14 +1250,17 @@ class AmmoMissileRackS extends Weapon{
 		$strippedSystem->noOverkillArray = $this->noOverkillArray; 
 		$strippedSystem->minDamageArray = $this->minDamageArray; 
 		$strippedSystem->maxDamageArray = $this->maxDamageArray; 
-		$strippedSystem->hidetargetArray = $this->hidetargetArray;	//For Stealth Missiles
-//		$strippedSystem->interceptArray = $this->interceptArray;//Adding Intercept variables for Interceptor missiles	
-//		$strippedSystem->ballisticInterceptArray = $this->ballisticInterceptArray;				
+		$strippedSystem->hidetargetArray = $this->hidetargetArray;	//For Stealth Missiles			
 		$strippedSystem->maxpulsesArray = $this->maxpulsesArray;//Adding Pulse functions for Starburst missiles	
 		$strippedSystem->rofArray = $this->rofArray;
 		$strippedSystem->useDieArray = $this->useDieArray;
 		$strippedSystem->fixedBonusPulsesArray = $this->fixedBonusPulsesArray;	
-		$strippedSystem->calledShotModArray = $this->calledShotModArray;	//Adding calledShotMod variable for Multiwarhead Missile.						
+		$strippedSystem->calledShotModArray = $this->calledShotModArray;	//Adding calledShotMod variable for Multiwarhead Missile.
+		$strippedSystem->specialRangeCalculationArray = $this->specialRangeCalculationArray; //Adding for KK Missile
+		$strippedSystem->rangePenaltyArray = $this->rangePenaltyArray;
+		$strippedSystem->specialHitChanceCalculationArray = $this->specialHitChanceCalculationArray;		
+//		$strippedSystem->interceptArray = $this->interceptArray;//Adding Intercept variables for Interceptor missiles	
+//		$strippedSystem->ballisticInterceptArray = $this->ballisticInterceptArray;							
 		return $strippedSystem;
 	} 
 	
@@ -1409,6 +1429,18 @@ class AmmoMissileRackS extends Weapon{
         parent::fire($gamedata, $fireOrder);
 
 	}
+
+    public function calculateRangePenalty($distance)
+    {
+		$currAmmo = null;
+        //find appropriate ammo
+		if (array_key_exists($this->firingMode,$this->ammoClassesUsed)){
+			$currAmmo = $this->ammoClassesUsed[$this->firingMode];
+		}
+		if ($currAmmo) $currAmmo->calculateRangePenalty($distance);
+		
+        parent::calculateRangePenalty($distance);
+    }//endof function calculateRangePenalty
 
 } //endof class AmmoMissileRackS
 
