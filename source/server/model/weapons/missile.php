@@ -1062,7 +1062,7 @@ class AmmoMissileRackS extends Weapon{
 	public $rangePenaltyArray = array(); 
 //Extra variable for HARM Missile	
 	public $specialHitChanceCalculation = false;
-			
+	public $specialHitChanceCalculationArray = array();			
 	
 //F-Rack variables removing for now to prevent anything odd happening.
 	/*

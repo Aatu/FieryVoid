@@ -248,12 +248,13 @@ AmmoMissileRackS.prototype.calculateSpecialRangePenalty = function (distance) { 
     return rangePenalty;
 };
 
-AmmoMIssileRackS.prototype.calculateSpecialHitChanceMod = function (target) {
+/* //For HARM Missile
+AmmoMissileRackS.prototype.calculateSpecialHitChanceMod = function (target, ship) {
 	var mod = 0;
 	mod = target.getAllOffensiveEW(ship) * 5;
 	return mod; 
 };
-
+*/
 
 var AmmoMissileRackSO = function AmmoMissileRackSO(json, ship) {
     Ballistic.call(this, json, ship);
