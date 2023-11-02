@@ -157,6 +157,7 @@ class Weapon extends ShipSystem
 
     public $useOEW = true;
     public $calledShotMod = -8;
+	public $calledShotModArray = array();     
 	public $factionAge = 1; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
 
     protected $possibleCriticals = array(14 => "ReducedRange", 19 => "ReducedDamage", 25 => array("ReducedRange", "ReducedDamage"));
