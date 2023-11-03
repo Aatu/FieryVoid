@@ -3859,10 +3859,10 @@ class AmmoMissileTemplate{
     public $calledShotMod = -8;    //Variable for Multiwarhead Missile.  Normal called shot modifier is -8.
 
 //Extra variables for KK Missile
-	public $specialRangeCalculation = false;
+//	public $specialRangeCalculation = false;
 	public $rangePenalty = 0;
 //Extra variable for HARM Missile	
-	public $specialHitChanceCalculation = false;		
+//	public $specialHitChanceCalculation = false;		
 	
     function __construct(){}
 	
@@ -4482,20 +4482,20 @@ class AmmoMissileKK extends AmmoMissileTemplate{
 	public $useOEW = false;
 	public $hidetarget = false;
 
-	public $specialRangeCalculation = true;
+//	public $specialRangeCalculation = true;
 	public $rangePenalty = 1;	
 	
     public function getDamage($fireOrder) //actual function to be called, as with weapon!
     {
         return 18;
     }		
-
+/*
 		public function calculateRangePenalty($distance){
 			$rangePenalty = 0;//base penalty
 			$rangePenalty += $this->rangePenalty * max(0,$distance-15); //everything above 15 hexes receives range penalty
 			return $rangePenalty;
 		}
-
+*/
 } //endof class AmmoMissileKK
 
 //ammunition for AmmoMagazine - Class X Missile (for official Missile Racks).
@@ -4521,7 +4521,7 @@ class AmmoMissileX extends AmmoMissileTemplate{
 	public $useOEW = false;
 	public $hidetarget = false;
 
-	public $specialHitChanceCalculation = true;
+//	public $specialHitChanceCalculation = true;
 	
     public function getDamage($fireOrder) //actual function to be called, as with weapon!
     {
