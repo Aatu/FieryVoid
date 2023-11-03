@@ -475,7 +475,7 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
         
         public function getDamage($fireOrder){
             $add = $this->getExtraDamagebyBoostlevel($fireOrder->turn);
-            $dmg = Dice::d(6,1) + $add + 15;
+            $dmg = Dice::d(8,1) + $add + 15;
             return $dmg;
         }
 
@@ -498,7 +498,7 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
         public function setMaxDamage(){
             $turn = TacGamedata::$currentTurn;
             $boost = $this->getBoostLevel($turn);
-            $this->maxDamage = 21 + ($boost * 2); 
+            $this->maxDamage = 23 + ($boost * 2); 
 		}
 		    
     }//endof class PsionicTorpedo
