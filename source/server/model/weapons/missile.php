@@ -1408,11 +1408,11 @@ class AmmoMissileRackS extends Weapon{
             if (array_key_exists($this->firingMode,$this->ammoClassesUsed)){
                 $currAmmo = $this->ammoClassesUsed[$this->firingMode];
             }
-            //execute rollPulses()
+            //execute getCalledShotMod()
             if($currAmmo){
                 return $currAmmo->getCalledShotMod();
             }else{
-                return 0;
+                return $this->calledShotMod;
             }
         }
 
@@ -1429,19 +1429,32 @@ class AmmoMissileRackS extends Weapon{
         parent::fire($gamedata, $fireOrder);
 
 	}
+/*
+public function calculateRangePenalty($distance)
+{
+        // Log the type of $distance
+    error_log('Type of $distance: ' . gettype($distance));
+    
+    $currAmmo = null;
+    
+    // find appropriate ammo
+    if (array_key_exists($this->firingMode, $this->ammoClassesUsed)) {
+        $currAmmo = $this->ammoClassesUsed[$this->firingMode];
+    }
+    
+    // Check if $currAmmo is not null before calling the method
+    $rangePenalty = 0;
+    if ($currAmmo) {
+        $rangePenalty = $currAmmo->calculateRangePenalty($distance);
+    }
+    
+    // Call the parent method
+    parent::calculateRangePenalty($distance);
 
-    public function calculateRangePenalty($distance)
-    {
-		$currAmmo = null;
-        //find appropriate ammo
-		if (array_key_exists($this->firingMode,$this->ammoClassesUsed)){
-			$currAmmo = $this->ammoClassesUsed[$this->firingMode];
-		}
-		if ($currAmmo) $currAmmo->calculateRangePenalty($distance);
-		
-        parent::calculateRangePenalty($distance);
-    }//endof function calculateRangePenalty
-
+    // Return the calculated or default range penalty
+    return $rangePenalty;
+}
+*/
 } //endof class AmmoMissileRackS
 
 

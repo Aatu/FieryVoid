@@ -246,7 +246,7 @@ AmmoMissileRackS.prototype.calculateSpecialRangePenalty = function (distance) { 
     var distancePenalized = Math.max(0,distance - 15); //ignore first 15 hexes
     var rangePenalty = this.rangePenalty * distancePenalized;
     return rangePenalty;
-}; */
+}; 
 
 /* //For HARM Missile
 AmmoMissileRackS.prototype.calculateSpecialHitChanceMod = function (target, ship) {

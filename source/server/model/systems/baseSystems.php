@@ -3912,12 +3912,13 @@ class AmmoMissileTemplate{
     {
     	return;
     }//end of function fire	
-    
-	public function calculateRangePenalty($distance)
-	{
-			return;
-		}   //endof function calculateRangePenalty	 
-	    
+   /* 
+    public function calculateRangePenalty($distance)
+    {
+        $rangePenalty = $this->rangePenalty * $distance;
+        return $rangePenalty;
+    }  //endof function calculateRangePenalty	 
+	 */   
 } //endof class AmmoMissileTemplate
 
 
