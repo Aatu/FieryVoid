@@ -27,7 +27,7 @@ class govallEarlyAM extends HeavyCombatVessel{
         $this->iniativebonus = 30;
         
         //ammo magazine itself (AND its missile options)
-        $ammoMagazine = new AmmoMagazine(100); //pass magazine capacity - 12 rounds per class-SO rack, 20 most other shipborne racks, 60 class-B rack and 80 Reload Rack
+        $ammoMagazine = new AmmoMagazine(140); //pass magazine capacity - 12 rounds per class-SO rack, 20 most other shipborne racks, 60 class-B rack and 80 Reload Rack
         $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
         $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 140); //add full load of basic missiles
 	    $this->enhancementOptionsEnabled[] = 'AMMO_A';//add enhancement options for other missiles - Class-A
