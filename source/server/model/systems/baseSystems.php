@@ -3861,6 +3861,7 @@ class AmmoMissileTemplate{
 //Extra variables for KK Missile
 //	public $specialRangeCalculation = false;
 	public $rangePenalty = 0;
+	public $noLockPenalty = false;		
 //Extra variable for HARM Missile	
 //	public $specialHitChanceCalculation = false;		
 	
@@ -3912,13 +3913,12 @@ class AmmoMissileTemplate{
     {
     	return;
     }//end of function fire	
-   /* 
+    
     public function calculateRangePenalty($distance)
     {
-        $rangePenalty = $this->rangePenalty * $distance;
-        return $rangePenalty;
+        return 0;
     }  //endof function calculateRangePenalty	 
-	 */   
+	    
 } //endof class AmmoMissileTemplate
 
 
@@ -4483,19 +4483,20 @@ class AmmoMissileKK extends AmmoMissileTemplate{
 	public $hidetarget = false;
 
 //	public $specialRangeCalculation = true;
-	public $rangePenalty = 1;	
+	public $rangePenalty = 1;	//but only after 15 hexes
+	public $noLockPenalty = true;		
 	
     public function getDamage($fireOrder) //actual function to be called, as with weapon!
     {
         return 18;
     }		
-/*
+
 		public function calculateRangePenalty($distance){
 			$rangePenalty = 0;//base penalty
 			$rangePenalty += $this->rangePenalty * max(0,$distance-15); //everything above 15 hexes receives range penalty
 			return $rangePenalty;
 		}
-*/
+
 } //endof class AmmoMissileKK
 
 //ammunition for AmmoMagazine - Class X Missile (for official Missile Racks).

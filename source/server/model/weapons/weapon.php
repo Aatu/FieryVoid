@@ -1703,11 +1703,11 @@ full Advanced Armor effects (by rules) for reference:
 			if($this->ballistic){ //extra protection against ballistics
 				$returnArmour += 2;
 			}
-			if($this->weaponClass == 'Matter'){ //slight vulnerability vs Matter
+			if($this->weaponClass == 'Matter' || $this->damageType == 'Matter'){ //slight vulnerability vs Matter
 				$returnArmour += -2;
 			}
 		}else{ //NO ADVANCED ARMOR (effectively) - apply effect explicitly tied to damage type
-			if($this->weaponClass == 'Matter'){ //Matter weapons ignore armor
+			if($this->weaponClass == 'Matter' || $this->damageType == 'Matter'){ //Matter weapons ignore armor
 				$returnArmour = 0;
 			}
 			if($this->weaponClass == 'Plasma'){ //Plasma weapons ignore (better) half of armor

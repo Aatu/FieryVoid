@@ -1060,6 +1060,8 @@ class AmmoMissileRackS extends Weapon{
 //	public $specialRangeCalculationArray = array(); 	
 	public $rangePenalty = 0;	
 	public $rangePenaltyArray = array(); 
+	public $noLockPenalty = false;
+	public $noLockPenaltyArray = array();		
 //Extra variable for HARM Missile	
 //	public $specialHitChanceCalculation = false;
 //	public $specialHitChanceCalculationArray = array();			
@@ -1161,10 +1163,11 @@ class AmmoMissileRackS extends Weapon{
 		$this->rofArray = array();
 		$this->useDieArray = array();
 		$this->fixedBonusPulsesArray = array();
-		$this->calledShotMod = array();	//Adding calledShotMod variable for Multiwarhead Missile.
-//		$this->specialRangeCalculation = array(); //Adding variables for KK Missile
-		$this->rangePenalty = array(); 
-//		$this->specialHitChanceCalculation = array();						
+		$this->calledShotModArray = array();	//Adding calledShotMod variable for Multiwarhead Missile.
+//		$this->specialRangeCalculationArray = array(); //Adding variables for KK Missile
+		$this->rangePenaltyArray = array();
+		$this->noLockPenaltyArray = array();		 
+//		$this->specialHitChanceCalculationArray = array();						
 //		$this->interceptArray = array();//Adding Intercept variables for Interceptor missiles	
 //		$this->ballisticInterceptArray = array();	    		
 							
@@ -1211,11 +1214,12 @@ class AmmoMissileRackS extends Weapon{
 				$this->hidetargetArray[$currMode] = $currAmmo->hidetarget;//For Stealth missiles							
 				$this->maxpulsesArray[$currMode] = $currAmmo->maxpulses;//Adding Pulse functions for Starburst missiles	
 				$this->rofArray[$currMode] = $currAmmo->rof;
-				$this->useDieArray[$currMode] = $currAmmo->useDie;
+				$this->useDieArrayArray[$currMode] = $currAmmo->useDie;
 				$this->fixedBonusPulsesArray[$currMode] = $currAmmo->fixedBonusPulses;
 			    $this->calledShotModArray[$currMode] = $currAmmo->calledShotMod;	//Adding calledShotMod variable for Multiwarhead Missile.
 //				$this->specialRangeCalculationArray[$currMode] = $currAmmo->specialRangeCalculation; //Adding variables for KK Missile
 				$this->rangePenaltyArray[$currMode] = $currAmmo->rangePenalty;
+				$this->noLockPenaltyArray[$currMode] = $currAmmo->noLockPenalty;				
 //				$this->specialHitChanceCalculationArray[$currMode] = $currAmmo->specialHitChanceCalculation;							    
 //				$this->interceptArray[$currMode] = $currAmmo->intercept;//Adding Intercept variables for Interceptor missiles	
 //				$this->ballisticInterceptArray[$currMode] = $currAmmo->ballisticIntercept;			    							
@@ -1258,6 +1262,7 @@ class AmmoMissileRackS extends Weapon{
 		$strippedSystem->calledShotModArray = $this->calledShotModArray;	//Adding calledShotMod variable for Multiwarhead Missile.
 //		$strippedSystem->specialRangeCalculationArray = $this->specialRangeCalculationArray; //Adding for KK Missile
 		$strippedSystem->rangePenaltyArray = $this->rangePenaltyArray;
+		$strippedSystem->noLockPenaltyArray = $this->noLockPenaltyArray;		
 //		$strippedSystem->specialHitChanceCalculationArray = $this->specialHitChanceCalculationArray;		
 //		$strippedSystem->interceptArray = $this->interceptArray;//Adding Intercept variables for Interceptor missiles	
 //		$strippedSystem->ballisticInterceptArray = $this->ballisticInterceptArray;							
@@ -1429,12 +1434,9 @@ class AmmoMissileRackS extends Weapon{
         parent::fire($gamedata, $fireOrder);
 
 	}
-/*
+
 public function calculateRangePenalty($distance)
 {
-        // Log the type of $distance
-    error_log('Type of $distance: ' . gettype($distance));
-    
     $currAmmo = null;
     
     // find appropriate ammo
@@ -1443,18 +1445,14 @@ public function calculateRangePenalty($distance)
     }
     
     // Check if $currAmmo is not null before calling the method
-    $rangePenalty = 0;
-    if ($currAmmo) {
-        $rangePenalty = $currAmmo->calculateRangePenalty($distance);
-    }
-    
-    // Call the parent method
-    parent::calculateRangePenalty($distance);
+            if($currAmmo){
+                return $currAmmo->calculateRangePenalty($distance);
+            }else{
+                return 0;
+            }
+    parent::calculateRangePenalty($distance);        
+	}
 
-    // Return the calculated or default range penalty
-    return $rangePenalty;
-}
-*/
 } //endof class AmmoMissileRackS
 
 
