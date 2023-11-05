@@ -1056,8 +1056,8 @@ class AmmoMissileRackS extends Weapon{
     public $calledShotMod = -8; //Normal called shot modifier is -8
 	public $calledShotModArray = array();    		  
 //Extra variables for KK Missile
-//	public $specialRangeCalculation = false;
-//	public $specialRangeCalculationArray = array(); 	
+	public $specialRangeCalculation = true; //To allow front-end to work for KK missiles.
+	public $specialRangeCalculationArray = array(); 	
 	public $rangePenalty = 0;	
 	public $rangePenaltyArray = array(); 
 	public $noLockPenalty = false;
@@ -1164,7 +1164,7 @@ class AmmoMissileRackS extends Weapon{
 		$this->useDieArray = array();
 		$this->fixedBonusPulsesArray = array();
 		$this->calledShotModArray = array();	//Adding calledShotMod variable for Multiwarhead Missile.
-//		$this->specialRangeCalculationArray = array(); //Adding variables for KK Missile
+		$this->specialRangeCalculationArray = array(); //Adding variables for KK Missile
 		$this->rangePenaltyArray = array();
 		$this->noLockPenaltyArray = array();		 
 //		$this->specialHitChanceCalculationArray = array();						
@@ -1214,10 +1214,10 @@ class AmmoMissileRackS extends Weapon{
 				$this->hidetargetArray[$currMode] = $currAmmo->hidetarget;//For Stealth missiles							
 				$this->maxpulsesArray[$currMode] = $currAmmo->maxpulses;//Adding Pulse functions for Starburst missiles	
 				$this->rofArray[$currMode] = $currAmmo->rof;
-				$this->useDieArrayArray[$currMode] = $currAmmo->useDie;
+				$this->useDieArray[$currMode] = $currAmmo->useDie;
 				$this->fixedBonusPulsesArray[$currMode] = $currAmmo->fixedBonusPulses;
 			    $this->calledShotModArray[$currMode] = $currAmmo->calledShotMod;	//Adding calledShotMod variable for Multiwarhead Missile.
-//				$this->specialRangeCalculationArray[$currMode] = $currAmmo->specialRangeCalculation; //Adding variables for KK Missile
+				$this->specialRangeCalculationArray[$currMode] = $currAmmo->specialRangeCalculation; //Adding variables for KK Missile
 				$this->rangePenaltyArray[$currMode] = $currAmmo->rangePenalty;
 				$this->noLockPenaltyArray[$currMode] = $currAmmo->noLockPenalty;				
 //				$this->specialHitChanceCalculationArray[$currMode] = $currAmmo->specialHitChanceCalculation;							    
@@ -1260,7 +1260,7 @@ class AmmoMissileRackS extends Weapon{
 		$strippedSystem->useDieArray = $this->useDieArray;
 		$strippedSystem->fixedBonusPulsesArray = $this->fixedBonusPulsesArray;	
 		$strippedSystem->calledShotModArray = $this->calledShotModArray;	//Adding calledShotMod variable for Multiwarhead Missile.
-//		$strippedSystem->specialRangeCalculationArray = $this->specialRangeCalculationArray; //Adding for KK Missile
+		$strippedSystem->specialRangeCalculationArray = $this->specialRangeCalculationArray; //Adding for KK Missile
 		$strippedSystem->rangePenaltyArray = $this->rangePenaltyArray;
 		$strippedSystem->noLockPenaltyArray = $this->noLockPenaltyArray;		
 //		$strippedSystem->specialHitChanceCalculationArray = $this->specialHitChanceCalculationArray;		
@@ -1478,7 +1478,9 @@ class AmmoMissileRackL extends AmmoMissileRackS{
 	protected $basicDistanceRange = 70;
 
     protected $rackExplosionDamage = 75; //how much damage will this weapon do in case of catastrophic explosion
-    protected $rackExplosionThreshold = 20; //how high roll is needed for rack explosion    
+    protected $rackExplosionThreshold = 20; //how high roll is needed for rack explosion 
+    
+	public $specialRangeCalculation = false; //To prevent front-end using calculateSpecialRangePenalty sicne this launcher can't use KK missiles.       
 	
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base=false)
 	{
@@ -1509,7 +1511,9 @@ class AmmoMissileRackLH extends AmmoMissileRackS{
 	protected $basicDistanceRange = 70;
 
     protected $rackExplosionDamage = 0; //how much damage will this weapon do in case of catastrophic explosion
-    protected $rackExplosionThreshold = 21; //how high roll is needed for rack explosion    
+    protected $rackExplosionThreshold = 21; //how high roll is needed for rack explosion
+    
+	public $specialRangeCalculation = false; //To prevent front-end using calculateSpecialRangePenalty sicne this launcher can't use KK missiles.            
 	
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base=false)
 	{
@@ -1541,7 +1545,9 @@ class AmmoMissileRackB extends AmmoMissileRackS{
 	protected $basicDistanceRange = 70;
 
     protected $rackExplosionDamage = 0; //how much damage will this weapon do in case of catastrophic explosion
-    protected $rackExplosionThreshold = 21; //how high roll is needed for rack explosion    
+    protected $rackExplosionThreshold = 21; //how high roll is needed for rack explosion  
+    
+	public $specialRangeCalculation = false; //To prevent front-end using calculateSpecialRangePenalty sicne this launcher can't use KK missiles.          
 	
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base=false)
 	{
@@ -1573,7 +1579,9 @@ class AmmoMissileRackR extends AmmoMissileRackS{
 	protected $basicDistanceRange = 60;
 
     protected $rackExplosionDamage = 75; //how much damage will this weapon do in case of catastrophic explosion
-    protected $rackExplosionThreshold = 19; //how high roll is needed for rack explosion    
+    protected $rackExplosionThreshold = 19; //how high roll is needed for rack explosion 
+    
+	public $specialRangeCalculation = false; //To prevent front-end using calculateSpecialRangePenalty sicne this launcher can't use KK missiles.           
 	
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base=false)
 	{
@@ -1606,7 +1614,9 @@ class AmmoMissileRackSO extends AmmoMissileRackS{
 	protected $basicDistanceRange = 60;
 
     protected $rackExplosionDamage = 45; //how much damage will this weapon do in case of catastrophic explosion (Class-SO launcher has smaller magazine than Class-S)
-    protected $rackExplosionThreshold = 20; //how high roll is needed for rack explosion    
+    protected $rackExplosionThreshold = 20; //how high roll is needed for rack explosion  
+    
+	public $specialRangeCalculation = true; //To allow front-end to work for KK missiles.      
 	
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base=false)
 	{
@@ -1637,7 +1647,9 @@ class AmmoMissileRackO extends AmmoMissileRackS{
 	protected $basicDistanceRange = 60;
 
     protected $rackExplosionDamage = 45; //how much damage will this weapon do in case of catastrophic explosion (Class-SO launcher has smaller magazine than Class-S)
-    protected $rackExplosionThreshold = 20; //how high roll is needed for rack explosion    
+    protected $rackExplosionThreshold = 20; //how high roll is needed for rack explosion 
+    
+	public $specialRangeCalculation = false; //To prevent front-end using calculateSpecialRangePenalty sicne this launcher can't use KK missiles.           
 	
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base=false)
 	{
@@ -1671,7 +1683,9 @@ class AmmoMissileRackA extends AmmoMissileRackS{
 	protected $basicDistanceRange = 60;
 
     protected $rackExplosionDamage = 56; //how much damage will this weapon do in case of catastrophic explosion
-    protected $rackExplosionThreshold = 19; //how high roll is needed for rack explosion    
+    protected $rackExplosionThreshold = 19; //how high roll is needed for rack explosion 
+    
+	public $specialRangeCalculation = false; //To prevent front-end using calculateSpecialRangePenalty sicne this launcher can't use KK missiles.           
 	
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base=false)
 	{
@@ -1709,7 +1723,9 @@ class AmmoMissileRackD extends AmmoMissileRackS{
 	public $ballisticIntercept = true;	
 
     protected $rackExplosionDamage = 15; //how much damage will this weapon do in case of catastrophic explosion
-    protected $rackExplosionThreshold = 20; //how high roll is needed for rack explosion    
+    protected $rackExplosionThreshold = 20; //how high roll is needed for rack explosion
+    
+	public $specialRangeCalculation = false; //To prevent front-end using calculateSpecialRangePenalty sicne this launcher can't use KK missiles.            
 	
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base=false)
 	{
@@ -1761,7 +1777,9 @@ class AmmoBombRack extends AmmoMissileRackS{
 	protected $basicDistanceRange = 60;
 
     protected $rackExplosionDamage = 30; //how much damage will this weapon do in case of catastrophic explosion
-    protected $rackExplosionThreshold = 20; //how high roll is needed for rack explosion    
+    protected $rackExplosionThreshold = 20; //how high roll is needed for rack explosion
+    
+	public $specialRangeCalculation = false; //To prevent front-end using calculateSpecialRangePenalty sicne this launcher can't use KK missiles.            
 	
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base=false)
 	{
@@ -1799,7 +1817,9 @@ class AmmoFighterRack extends AmmoMissileRackS{
 	protected $basicDistanceRange = 30;
 
     protected $rackExplosionDamage = 0; //how much damage will this weapon do in case of catastrophic explosion
-    protected $rackExplosionThreshold = 22; //how high roll is needed for rack explosion    
+    protected $rackExplosionThreshold = 22; //how high roll is needed for rack explosion
+    
+	public $specialRangeCalculation = false; //To prevent front-end using calculateSpecialRangePenalty sicne this launcher can't use KK missiles.            
 	
 	function __construct($startArc, $endArc, $magazine, $base=false) //fighter-sized OSATs might benefit from being stable!
 	{		
@@ -1870,7 +1890,7 @@ class AmmoMissileRackF extends AmmoMissileRackS {
   		
 //      public $damageType = "Standard"; //Inherited from AmmoMissileRackS
 //		public $weaponClass = "Ballistic"; //Inherited from AmmoMissileRackS
-
+	public $specialRangeCalculation = false; //To prevent front-end using calculateSpecialRangePenalty sicne this launcher can't use KK missiles.    
 
 		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base=false)
 		{

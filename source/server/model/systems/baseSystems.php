@@ -3859,7 +3859,7 @@ class AmmoMissileTemplate{
     public $calledShotMod = -8;    //Variable for Multiwarhead Missile.  Normal called shot modifier is -8.
 
 //Extra variables for KK Missile
-//	public $specialRangeCalculation = false;
+	public $specialRangeCalculation = false;
 	public $rangePenalty = 0;
 	public $noLockPenalty = false;		
 //Extra variable for HARM Missile	
@@ -4482,7 +4482,7 @@ class AmmoMissileKK extends AmmoMissileTemplate{
 	public $useOEW = false;
 	public $hidetarget = false;
 
-//	public $specialRangeCalculation = true;
+	public $specialRangeCalculation = true;
 	public $rangePenalty = 1;	//but only after 15 hexes
 	public $noLockPenalty = true;		
 	

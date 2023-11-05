@@ -241,10 +241,11 @@ var AmmoMissileRackS = function AmmoMissileRackS(json, ship) {
 };
 AmmoMissileRackS.prototype = Object.create(Ballistic.prototype);
 AmmoMissileRackS.prototype.constructor = AmmoMissileRackS;
-/*
+
 AmmoMissileRackS.prototype.calculateSpecialRangePenalty = function (distance) { //Added here for Orieni KK Missile calculation only.  Not normally used.
     var distancePenalized = Math.max(0,distance - 15); //ignore first 15 hexes
     var rangePenalty = this.rangePenalty * distancePenalized;
+        
     return rangePenalty;
 }; 
 
