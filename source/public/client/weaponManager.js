@@ -537,9 +537,20 @@ window.weaponManager = {
         return mathlib.isInArc(targetCompassHeading, arcs.start, arcs.end);
     },
 
+	findFiringModeByName: function findFiringModeByName(weapon, modeName) {
+	    for (var mode in weapon.firingModes) {
+	        if (weapon.firingModes[mode] === modeName) {
+	            return mode;
+	        }
+	    }
+	    return null;
+	},
+
     calculateRangePenalty: function calculateRangePenalty(distance, weapon) {
         var rangePenalty = 0;
-		if (weapon.specialRangeCalculation){
+   		var kineticMode = this.findFiringModeByName(weapon, 'Kinetic');   
+        
+		if (kineticMode || weapon.specialRangeCalculation){
 			rangePenalty = weapon.calculateSpecialRangePenalty(distance);
 		}else{ //standard calculation
 			rangePenalty = weapon.rangePenalty * distance;
