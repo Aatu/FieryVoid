@@ -1480,7 +1480,7 @@ class AmmoMissileRackL extends AmmoMissileRackS{
     protected $rackExplosionDamage = 75; //how much damage will this weapon do in case of catastrophic explosion
     protected $rackExplosionThreshold = 20; //how high roll is needed for rack explosion 
     
-	public $specialRangeCalculation = false; //To prevent front-end using calculateSpecialRangePenalty sicne this launcher can't use KK missiles.       
+	public $specialRangeCalculation = false; //To prevent front-end using calculateSpecialRangePenalty since this launcher can't use KK missiles.       
 	
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base=false)
 	{
@@ -1513,7 +1513,7 @@ class AmmoMissileRackLH extends AmmoMissileRackS{
     protected $rackExplosionDamage = 0; //how much damage will this weapon do in case of catastrophic explosion
     protected $rackExplosionThreshold = 21; //how high roll is needed for rack explosion
     
-	public $specialRangeCalculation = false; //To prevent front-end using calculateSpecialRangePenalty sicne this launcher can't use KK missiles.            
+	public $specialRangeCalculation = false; //To prevent front-end using calculateSpecialRangePenalty since this launcher can't use KK missiles.            
 	
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base=false)
 	{
@@ -1547,7 +1547,7 @@ class AmmoMissileRackB extends AmmoMissileRackS{
     protected $rackExplosionDamage = 0; //how much damage will this weapon do in case of catastrophic explosion
     protected $rackExplosionThreshold = 21; //how high roll is needed for rack explosion  
     
-	public $specialRangeCalculation = false; //To prevent front-end using calculateSpecialRangePenalty sicne this launcher can't use KK missiles.          
+	public $specialRangeCalculation = false; //To prevent front-end using calculateSpecialRangePenalty since this launcher can't use KK missiles.          
 	
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base=false)
 	{
@@ -1581,7 +1581,7 @@ class AmmoMissileRackR extends AmmoMissileRackS{
     protected $rackExplosionDamage = 75; //how much damage will this weapon do in case of catastrophic explosion
     protected $rackExplosionThreshold = 19; //how high roll is needed for rack explosion 
     
-	public $specialRangeCalculation = false; //To prevent front-end using calculateSpecialRangePenalty sicne this launcher can't use KK missiles.           
+	public $specialRangeCalculation = false; //To prevent front-end using calculateSpecialRangePenalty since this launcher can't use KK missiles.           
 	
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base=false)
 	{
@@ -1649,7 +1649,7 @@ class AmmoMissileRackO extends AmmoMissileRackS{
     protected $rackExplosionDamage = 45; //how much damage will this weapon do in case of catastrophic explosion (Class-SO launcher has smaller magazine than Class-S)
     protected $rackExplosionThreshold = 20; //how high roll is needed for rack explosion 
     
-	public $specialRangeCalculation = false; //To prevent front-end using calculateSpecialRangePenalty sicne this launcher can't use KK missiles.           
+	public $specialRangeCalculation = false; //To prevent front-end using calculateSpecialRangePenalty since this launcher can't use KK missiles.           
 	
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base=false)
 	{
@@ -1685,7 +1685,7 @@ class AmmoMissileRackA extends AmmoMissileRackS{
     protected $rackExplosionDamage = 56; //how much damage will this weapon do in case of catastrophic explosion
     protected $rackExplosionThreshold = 19; //how high roll is needed for rack explosion 
     
-	public $specialRangeCalculation = false; //To prevent front-end using calculateSpecialRangePenalty sicne this launcher can't use KK missiles.           
+	public $specialRangeCalculation = false; //To prevent front-end using calculateSpecialRangePenalty since this launcher can't use KK missiles.           
 	
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base=false)
 	{
@@ -1725,7 +1725,7 @@ class AmmoMissileRackD extends AmmoMissileRackS{
     protected $rackExplosionDamage = 15; //how much damage will this weapon do in case of catastrophic explosion
     protected $rackExplosionThreshold = 20; //how high roll is needed for rack explosion
     
-	public $specialRangeCalculation = false; //To prevent front-end using calculateSpecialRangePenalty sicne this launcher can't use KK missiles.            
+	public $specialRangeCalculation = false; //To prevent front-end using calculateSpecialRangePenalty since this launcher can't use KK missiles.            
 	
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base=false)
 	{
@@ -1779,7 +1779,7 @@ class AmmoBombRack extends AmmoMissileRackS{
     protected $rackExplosionDamage = 30; //how much damage will this weapon do in case of catastrophic explosion
     protected $rackExplosionThreshold = 20; //how high roll is needed for rack explosion
     
-	public $specialRangeCalculation = false; //To prevent front-end using calculateSpecialRangePenalty sicne this launcher can't use KK missiles.            
+	public $specialRangeCalculation = false; //To prevent front-end using calculateSpecialRangePenalty since this launcher can't use KK missiles.            
 	
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base=false)
 	{
@@ -1819,7 +1819,7 @@ class AmmoFighterRack extends AmmoMissileRackS{
     protected $rackExplosionDamage = 0; //how much damage will this weapon do in case of catastrophic explosion
     protected $rackExplosionThreshold = 22; //how high roll is needed for rack explosion
     
-	public $specialRangeCalculation = false; //To prevent front-end using calculateSpecialRangePenalty sicne this launcher can't use KK missiles.            
+	public $specialRangeCalculation = false; //To prevent front-end using calculateSpecialRangePenalty since this launcher can't use KK missiles.            
 	
 	function __construct($startArc, $endArc, $magazine, $base=false) //fighter-sized OSATs might benefit from being stable!
 	{		
@@ -1890,7 +1890,7 @@ class AmmoMissileRackF extends AmmoMissileRackS {
   		
 //      public $damageType = "Standard"; //Inherited from AmmoMissileRackS
 //		public $weaponClass = "Ballistic"; //Inherited from AmmoMissileRackS
-	public $specialRangeCalculation = false; //To prevent front-end using calculateSpecialRangePenalty sicne this launcher can't use KK missiles.    
+	public $specialRangeCalculation = false; //To prevent front-end using calculateSpecialRangePenalty since this launcher can't use KK missiles.    
 
 		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base=false)
 		{
