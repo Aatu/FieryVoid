@@ -39,7 +39,7 @@ class penitent1782AM extends SmallStarBaseFourSections{
         $this->enhancementOptionsEnabled[] = 'AMMO_H';//add enhancement options for other missiles - Class-H
 		$this->enhancementOptionsEnabled[] = 'AMMO_KK';               
   //      $this->enhancementOptionsEnabled[] = 'AMMO_L';//add enhancement options for other missiles - Class-L
-		//By the Book Orieni should have access to missie types: KK, B, A, H, L, C, but L and C not available until 2005 so not disabled on these older ships.
+		//By the Book Orieni should have access to missie types: KK, B, A, H, L, C, but L and C not available until 2005 so disabled on these older ships.
 		
 		
 		$this->addPrimarySystem(new Reactor(5, 44, 0, 0));
