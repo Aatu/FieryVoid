@@ -258,9 +258,9 @@ AmmoMissileRackS.prototype.calculateSpecialHitChanceMod = function (target, ship
 */
 
 var AmmoMissileRackSO = function AmmoMissileRackSO(json, ship) {
-    Ballistic.call(this, json, ship);
+    AmmoMissileRackS.call(this, json, ship);
 };
-AmmoMissileRackSO.prototype = Object.create(Ballistic.prototype);
+AmmoMissileRackSO.prototype = Object.create(AmmoMissileRackS.prototype);
 AmmoMissileRackSO.prototype.constructor = AmmoMissileRackSO;
 
 var AmmoMissileRackO = function AmmoMissileRackO(json, ship) {
