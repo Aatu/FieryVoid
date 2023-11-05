@@ -242,7 +242,7 @@ var AmmoMissileRackS = function AmmoMissileRackS(json, ship) {
 AmmoMissileRackS.prototype = Object.create(Ballistic.prototype);
 AmmoMissileRackS.prototype.constructor = AmmoMissileRackS;
 
-AmmoMissileRackS.prototype.calculateSpecialRangePenalty = function (distance) { //Added here for Orieni KK Missile calculation only.  Not normally used.
+AmmoMissileRackS.prototype.calculateSpecialRangePenalty = function (distance) { //Added here for Orieni KK Missile calculation only.  All other missiles will return 0 rangePenalty.
     var distancePenalized = Math.max(0,distance - 15); //ignore first 15 hexes
     var rangePenalty = this.rangePenalty * distancePenalized;
         
@@ -250,8 +250,18 @@ AmmoMissileRackS.prototype.calculateSpecialRangePenalty = function (distance) { 
 }; 
 
 /* //For HARM Missile
-AmmoMissileRackS.prototype.calculateSpecialHitChanceMod = function (target) {
-	var mod = 0;
+AmmoMissileRackS.prototype.calculateSpecialHitChanceMod = function (order, target) {
+/* //Try without first...
+			var modeIteration = 0;
+			modeIteration = order.firingMode; //change weapons data to reflect mode actually used
+			    
+			if(modeIteration != weapon.firingMode){
+				while(modeIteration != weapon.firingMode){ //will loop until correct mode is found
+				weapon.changeFiringMode();
+					}
+			    }	
+*/
+/*	var mod = 0;
 	mod = target.getAllOffensiveEW(ship) * 5;
 	return mod; 
 };
