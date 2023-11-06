@@ -20,20 +20,20 @@ window.gamedata = {
     getPowerRating: function getPowerRating(factionName) {
 		var powerRating = '';
 		switch(factionName) {
-		  case 'Abbai':
+		  case 'Abbai Matriarchate':
 			powerRating = 'Tier 2';
 			break;
-		  case 'Abbai (WotCR)':
+		  case 'Abbai Matriarchate (WotCR)':
 			powerRating = 'Not balanced';
 			break;
-		  case 'Balosian':
+		  case 'Balosian Underdwellers':
 			powerRating = 'Tier 2';
 			break;
 		  case 'Belt Alliance':
 			powerRating = 'Tier 2';
 			break;
-		  case 'Brakiri':
-			powerRating = 'Tier 1';
+		  case 'Brakiri Syndicracy':
+			powerRating = 'Tier 1; distinct Corporations can be mixed freely';
 			break;
 		  case 'Cascor':
 			powerRating = 'Tier 2; can be turned to stronger custom faction by enhancement (still Tier 2)';
@@ -51,7 +51,7 @@ window.gamedata = {
 			powerRating = 'Generic civilian designs for scenarios, not a faction';
 			break;
 		  case 'Corillani':
-			powerRating = 'Tier 2';
+			powerRating = 'Tier 2; distinct sub-factions should not be mixed';
 			break;
 		  case 'Custom Ships':
 			powerRating = "Designs that don't fit anywhere else, not a faction";
@@ -75,7 +75,7 @@ window.gamedata = {
 			powerRating = 'Tier 2';
 			break;
 		  case 'EA':
-			powerRating = 'Tier 1';
+			powerRating = 'Tier 1 (except Warlock, which is Superior)';
 			break;
 		  case 'EA (defenses)':
 			powerRating = 'fixed tefenses for EA faction';
@@ -93,7 +93,7 @@ window.gamedata = {
 			powerRating = 'Not balanced';
 			break;
 		  case 'Ipsha':
-			powerRating = 'Tier 2 (note discinct Baronies)';
+			powerRating = 'Tier 2 (distinct Baronies cannot be mixed)';
 			break;
 		  case 'Kor-Lyan':
 			powerRating = 'Tier 1';
@@ -149,6 +149,9 @@ window.gamedata = {
 		  case 'Yolu':
 			powerRating = 'Superior';
 			break;
+		  case 'ZBSG Colonials':
+			powerRating = 'Tier 2, custom faction';
+			break;
 		  case 'ZEscalation Blood Sword Raiders':
 			powerRating = 'Tier 2, custom faction';
 			break;
@@ -170,19 +173,19 @@ window.gamedata = {
 		  case "ZEscalation Sshel'ath Alliance":
 			powerRating = 'Tier 2, custom faction';
 			break;
-		  case 'ZNexus Brixadii Clans':
+		  case 'ZNexus Brixadii':
 			powerRating = 'Tier 2, custom faction';
 			break;
-		  case 'ZNexus Craytan Union':
+		  case 'ZNexus Craytan':
 			powerRating = 'Tier 2, custom faction';
 			break;
-		  case 'ZNexus Dalithorn Commonwealth':
+		  case 'ZNexus Dalithorn':
 			powerRating = 'Tier 2, custom faction';
 			break;
-		  case 'ZNexus Sal-bez Coalition':
+		  case 'ZNexus Sal-bez':
 			powerRating = 'Tier 2, custom faction';
 			break;
-		  case 'ZNexus Velrax Republic':
+		  case 'ZNexus Velrax':
 			powerRating = 'Tier 2, custom faction';
 			break;
 		  case 'ZStarTrek Federation (TOS)':
