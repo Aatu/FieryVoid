@@ -4474,8 +4474,8 @@ class AmmoMissileKK extends AmmoMissileTemplate{
 	public $fireControlMod = array(3, 3, 3); //MODIFIER for weapon fire control!
 	public $minDamage = 18;
 	public $maxDamage = 18;	
-	public $damageType = 'Matter';//mode of dealing damage
-	public $weaponClass = 'Ballistic';//weapon class
+	public $damageType = 'Standard';//mode of dealing damage
+	public $weaponClass = 'Matter';//weapon class
 	public $priority = 6;
 	public $priorityAF = 5;
 	public $noOverkill = true;
