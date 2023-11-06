@@ -4,7 +4,7 @@ class CraytanDeprin extends OSAT{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 700;
+		$this->pointCost = 600;
 		$this->faction = "ZNexus Craytan Union";
         $this->phpclass = "CraytanDeprin";
         $this->imagePath = "img/ships/Nexus/CraytanDeprin.png";

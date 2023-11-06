@@ -971,6 +971,71 @@ var NexusLtEnhPlasmaFtr = function  NexusLtEnhPlasmaFtr(json, ship) {
 NexusLtEnhPlasmaFtr.prototype = Object.create(Weapon.prototype);
 NexusLtEnhPlasmaFtr.prototype.constructor =  NexusLtEnhPlasmaFtr;
 
+var NexusPlasmaCharge = function NexusPlasmaCharge(json, ship) {
+    Weapon.call(this, json, ship);
+};
+NexusPlasmaCharge.prototype = Object.create(Weapon.prototype);
+NexusPlasmaCharge.prototype.constructor = NexusPlasmaCharge;
+
+NexusPlasmaCharge.prototype.clearBoost = function () {
+    for (var i in system.power) {
+        var power = system.power[i];
+        if (power.turn != gamedata.turn) continue;
+
+        if (power.type == 2) {
+            system.power.splice(i, 1);
+
+            return;
+        }
+    }
+}; 
+
+NexusPlasmaCharge.prototype.hasMaxBoost = function () {
+    return true;
+};
+
+NexusPlasmaCharge.prototype.getMaxBoost = function () {
+    return this.maxBoostLevel;
+};
+
+NexusPlasmaCharge.prototype.initBoostableInfo = function () {
+    if (window.weaponManager.isLoaded(this)) {} else {
+        var count = shipManager.power.getBoost(this);
+        for (var i = 0; i < count; i++) {
+            shipManager.power.unsetBoost(null, this);
+        }
+    }	
+
+    this.data.Boostlevel = shipManager.power.getBoost(this);
+    	
+    switch (shipManager.power.getBoost(this)) {
+        case 0:
+            this.data["Damage"] = '11 - 20';
+            this.data["Boostlevel"] = '0';
+            break;
+        case 1:
+            this.data["Damage"] = '12 - 30';
+            this.data["Boostlevel"] = '1';
+            break;
+        case 2:
+            this.data["Damage"] = '13 - 40';
+            this.data["Boostlevel"] = '2';
+            break;
+        default:
+            this.data["Damage"] = '11 - 20';
+            this.data["Boostlevel"] = '0';
+            break;
+    }
+/*
+	if (this.data.Boostlevel > 0) {
+		this.outputDisplay = this.data.Boostlevel;
+	} else {
+		this.outputDisplay = '-'; //'0' is not shown!
+	}    
+    
+*/
+    return this;
+};
 
 
 

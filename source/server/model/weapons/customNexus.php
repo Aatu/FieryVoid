@@ -1160,6 +1160,119 @@ class NexusLargeEarlyRocket extends Weapon{
 
 
 
+class NexusPlasmaCharge extends Plasma{
+        public $name = "NexusPlasmaCharge";
+        public $displayName = "Plasma Charge";
+        public $iconPath = "NexusPlasmaCharge.png";         
+        public $animation = "laser";
+        public $animationColor = array(128, 0, 0);
+
+        public $intercept = 0;
+        public $loadingtime = 1;
+        public $addedDice;
+        public $priority = 4;
+
+        public $boostable = true;
+        public $boostEfficiency = 0;
+        public $maxBoostLevel = 2;
+
+        public $firingModes = array(
+            1 => "Standard"
+        );
+
+        public $rangePenalty = 0.33;
+        public $fireControl = array(-3, 4, 5); // fighters, <mediums, <capitals
+
+        public $damageType = "Standard"; 
+        public $weaponClass = "Plasma";
+        
+        public function setSystemDataWindow($turn){
+            $boost = $this->getExtraDicebyBoostlevel($turn);            
+            parent::setSystemDataWindow($turn);
+            if (!isset($this->data["Special"])) {
+                $this->data["Special"] = '';
+            }else{
+                $this->data["Special"] .= '<br>';
+            } 
+            //Raking(15) is already described in Raking class
+            $this->data["Special"] .= 'Can be boosted with thrust for increased dmg output (+1d10 per point of thrust used, up to twice).';
+            $this->data["Boostlevel"] = $boost;
+        }
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+        {
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 7;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 3;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        private function getExtraDicebyBoostlevel($turn){
+            $add = 0;
+            switch($this->getBoostLevel($turn)){
+                case 1:
+                    $add = 1;
+                    break;
+                case 2:
+                    $add = 2;
+                    break;
+
+                default:
+                    break;
+            }
+            return $add;
+        }
+
+
+         private function getBoostLevel($turn){
+            $boostLevel = 0;
+            foreach ($this->power as $i){
+                if ($i->turn != $turn){
+                   continue;
+                }
+                if ($i->type == 2){
+                    $boostLevel += $i->amount;
+                }
+            }
+            return $boostLevel;
+        }
+
+        public function getDamage($fireOrder){
+            $add = $this->getExtraDicebyBoostlevel($fireOrder->turn);
+            $dmg = Dice::d(10, (1 + $add)) + 10;
+            return $dmg;
+        }
+
+        public function getAvgDamage(){
+            $this->setMinDamage();
+            $this->setMaxDamage();
+
+            $min = $this->minDamage;
+            $max = $this->maxDamage;
+            $avg = round(($min+$max)/2);
+            return $avg;
+        }
+
+        public function setMinDamage(){
+            $turn = TacGamedata::$currentTurn;
+            $boost = $this->getBoostLevel($turn);
+            $this->minDamage = 11 + ($boost * 1);
+        }   
+
+        public function setMaxDamage(){
+            $turn = TacGamedata::$currentTurn;
+            $boost = $this->getBoostLevel($turn);
+            $this->maxDamage = 20 + ($boost * 10);
+        }  
+   }//end of Nexus Plasma Charge
+
+
+
+
 
 
 class NexusHeavyPlasmaCharge extends Torpedo{
