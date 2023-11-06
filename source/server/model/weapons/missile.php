@@ -1062,7 +1062,7 @@ class AmmoMissileRackS extends Weapon{
 	public $rangePenaltyArray = array(); 
 	public $noLockPenalty = false;
 	public $noLockPenaltyArray = array();		
-//Extra variable for HARM Missile	
+//Extra variables for HARM Missile	
 //	public $specialHitChanceCalculation = false;
 //	public $specialHitChanceCalculationArray = array();			
 	
@@ -1101,13 +1101,13 @@ class AmmoMissileRackS extends Weapon{
 			$this->ammoClassesArray[] =  new AmmoMissileA();
 			$this->ammoClassesArray[] =  new AmmoMissileP();
 			$this->ammoClassesArray[] =  new AmmoMissileD(); //...though only Alacans and Sorithians use those, as simple Basic missiles are far superior
-			$this->ammoClassesArray[] =  new AmmoMissileC();
-	//		$this->ammoClassesArray[] =  new AmmoMissileI(); //Only available to Class-D launchers on Kor-Lyan ships at this time, created in ship magazine.					
+			$this->ammoClassesArray[] =  new AmmoMissileC();				
 			$this->ammoClassesArray[] =  new AmmoMissileS();
 			$this->ammoClassesArray[] =  new AmmoMissileK();
 			$this->ammoClassesArray[] =  new AmmoMissileM();
 			$this->ammoClassesArray[] =  new AmmoMissileKK();
-	//		$this->ammoClassesArray[] =  new AmmoMissileX();													
+	//		$this->ammoClassesArray[] =  new AmmoMissileX();
+	//		$this->ammoClassesArray[] =  new AmmoMissileI(); //Only available to Class-D launchers on Kor-Lyan ships at this time, created in ship magazine.						
 			$this->availableAmmoAlreadySet = true;
 		}
 	
