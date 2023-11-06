@@ -5,7 +5,7 @@ class AntophEarly extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 400;
-        $this->faction = "Brakiri";
+        $this->faction = "Brakiri Syndicracy";
         $this->phpclass = "AntophEarly";
         $this->imagePath = "img/ships/antoph.png";
         $this->shipClass = "Antoph Light Cruiser (Early)";

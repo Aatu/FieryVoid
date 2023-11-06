@@ -5,7 +5,7 @@ class Kirva extends OSAT{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 225;
-	$this->faction = "Abbai (WotCR)";
+	$this->faction = "Abbai Matriarchate (WotCR)";
         $this->phpclass = "Kirva";
         $this->imagePath = "img/ships/AbbaiBochi.png";
         $this->shipClass = 'Kirva Jammer Satellite';

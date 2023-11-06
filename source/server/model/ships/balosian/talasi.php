@@ -5,7 +5,7 @@ class Talasi extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 400;
-		$this->faction = "Balosian";
+		$this->faction = "Balosian Underdwellers";
         $this->phpclass = "Talasi";
         $this->imagePath = "img/ships/Talasi.png";
         $this->shipClass = "Talasi Assault Ship";

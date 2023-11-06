@@ -5,7 +5,7 @@ class Lahas extends BaseShip{
         parent::__construct($id, $userid, $name,  $movement);
         
 		$this->pointCost = 765;
-		$this->faction = "Balosian";
+		$this->faction = "Balosian Underdwellers";
         $this->phpclass = "Lahas";
         $this->imagePath = "img/ships/brahassa.png";
         $this->shipClass = "Lahas Command Cruiser";

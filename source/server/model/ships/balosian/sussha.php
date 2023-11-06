@@ -6,7 +6,7 @@ class Sussha extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 450;
-		$this->faction = "Balosian";
+		$this->faction = "Balosian Underdwellers";
         $this->phpclass = "Sussha";
         $this->imagePath = "img/ships/sussha.png";
         $this->shipClass = "Sussha frigate";

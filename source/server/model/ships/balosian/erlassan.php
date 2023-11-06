@@ -5,7 +5,7 @@ class Erlassan extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 500;
-	$this->faction = "Balosian";
+	$this->faction = "Balosian Underdwellers";
         $this->phpclass = "Erlassan";
         $this->imagePath = "img/ships/kraasus.png";
         $this->shipClass = "Erlassan Scout";

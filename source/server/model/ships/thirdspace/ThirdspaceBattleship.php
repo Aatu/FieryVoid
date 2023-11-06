@@ -21,7 +21,7 @@ class ThirdspaceBattleship extends BaseShip{
 		$this->advancedArmor = true; 		    
 		
         $this->forwardDefense = 19;
-        $this->sideDefense = 20;
+        $this->sideDefense = 21;
         
         $this->turncost = 1.5;
         $this->turndelaycost = 1.5;
@@ -34,7 +34,7 @@ class ThirdspaceBattleship extends BaseShip{
 		/*Thirdspace use their own enhancement set */		
 		Enhancements::nonstandardEnhancementSet($this, 'ThirdspaceShip');				     
         
-        $this->addPrimarySystem(new AdvancedSingularityDrive(8, 50, 0, 178+8+4));
+        $this->addPrimarySystem(new AdvancedSingularityDrive(8, 50, 0, 174+8+4));
         $this->addPrimarySystem(new ThirdspaceCnC(8, 36, 0, 0));
         $scanner = new Scanner(7, 24, 8, 15);
 		$scanner->markThirdspace();
@@ -126,11 +126,11 @@ class ThirdspaceBattleship extends BaseShip{
         $this->addRightSystem($LCVRail); 			                      
               			          
 		//structures
-        $this->addFrontSystem(new Structure(6, 96));
-        $this->addAftSystem(new Structure(6, 110));
-        $this->addLeftSystem(new Structure(6, 120));
-        $this->addRightSystem(new Structure(6, 120));
-        $this->addPrimarySystem(new Structure(7, 88));
+        $this->addFrontSystem(new Structure(6, 92));
+        $this->addAftSystem(new Structure(6, 108));
+        $this->addLeftSystem(new Structure(6, 112));
+        $this->addRightSystem(new Structure(6, 112));
+        $this->addPrimarySystem(new Structure(7, 86));
 		
 		
 		$this->hitChart = array(

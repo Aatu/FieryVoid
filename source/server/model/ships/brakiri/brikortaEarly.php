@@ -5,7 +5,7 @@ class BrikortaEarly extends HeavyCombatVesselLeftRight{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 470;
-	$this->faction = "Brakiri";
+	$this->faction = "Brakiri Syndicracy";
         $this->phpclass = "BrikortaEarly";
         $this->imagePath = "img/ships/ikorta.png";
         $this->shipClass = "Brikorta Light Carrier (Early)";

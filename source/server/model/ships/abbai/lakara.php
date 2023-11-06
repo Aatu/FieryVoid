@@ -5,7 +5,7 @@ class Lakara extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 625;
-	$this->faction = "Abbai";
+	$this->faction = "Abbai Matriarchate";
         $this->phpclass = "Lakara";
         $this->imagePath = "img/ships/AbbaiLakara.png";   //How do I add pictures?
         $this->shipClass = "Lakara Cruiser";

@@ -5,7 +5,7 @@ class Fetula extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 470;
-	$this->faction = "Abbai";
+	$this->faction = "Abbai Matriarchate";
         $this->phpclass = "Fetula";
         $this->imagePath = "img/ships/AbbaiShyarie.png";
         $this->shipClass = "Fetula Warrant Cutter";

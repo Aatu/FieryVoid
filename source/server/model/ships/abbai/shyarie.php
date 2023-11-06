@@ -5,7 +5,7 @@ class Shyarie extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 540;
-	$this->faction = "Abbai";
+	$this->faction = "Abbai Matriarchate";
         $this->phpclass = "Shyarie";
         $this->imagePath = "img/ships/AbbaiShyarie.png";
         $this->shipClass = "Shyarie Jammer Frigate";

@@ -5,7 +5,7 @@ class Avioki extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 725;
-	$this->faction = "Brakiri";
+	$this->faction = "Brakiri Syndicracy";
         $this->phpclass = "Avioki";
         $this->imagePath = "img/ships/avioki.png";
         $this->shipClass = "Avioki Heavy Cruiser";

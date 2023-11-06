@@ -6,7 +6,7 @@ class Thosalsi extends BaseShip{
         parent::__construct($id, $userid, $name,  $movement);
         
 		$this->pointCost = 550;
-		$this->faction = "Balosian";
+		$this->faction = "Balosian Underdwellers";
         $this->phpclass = "Thosalsi";
         $this->imagePath = "img/ships/thosalsi.png";
         $this->shipClass = "Thosalsi Heavy Carrier";

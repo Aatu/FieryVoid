@@ -5,7 +5,7 @@ class Lokita extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 650;
-	$this->faction = "Abbai";
+	$this->faction = "Abbai Matriarchate";
         $this->phpclass = "Lokita";
         $this->imagePath = "img/ships/AbbaiLakara.png";
         $this->shipClass = "Lokita Carrier";

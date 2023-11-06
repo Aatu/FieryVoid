@@ -5,7 +5,7 @@ class Lystala1995 extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 400;
-		$this->faction = "Abbai (WotCR)";
+		$this->faction = "Abbai Matriarchate (WotCR)";
         $this->phpclass = "Lystala1995";
         $this->imagePath = "img/ships/AbbaiKastona.png";
         $this->shipClass = "Lystala Patrol Cruiser (1995)";
