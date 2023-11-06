@@ -3148,7 +3148,9 @@ spl_autoload_register(
 						//What If - Alternative design concepts
 						'dagkar_wi' => '/server/model/ships/whatif/dagkar_WI.php',	
 						'gquan_wi' => '/server/model/ships/whatif/gquan_WI.php',	
-						'vorchan_wi' => '/server/model/ships/whatif/vorchan_WI.php',	
+						'vorchan_wi' => '/server/model/ships/whatif/vorchan_WI.php',
+						
+						'kktest' => '/server/model/weapons/customs.php',	
 						
 	
 				//let's end this with unit enhancement class...		    
