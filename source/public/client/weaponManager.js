@@ -536,19 +536,9 @@ window.weaponManager = {
 		
         return mathlib.isInArc(targetCompassHeading, arcs.start, arcs.end);
     },
-/*
-	findFiringModeByName: function findFiringModeByName(weapon, modeName) { //Function which gets the ammo/modeName from weapons like missiles launchers that use ammo.
-	    for (var mode in weapon.firingModes) {
-	        if (weapon.firingModes[mode] === modeName) {
-	            return mode;
-	        }
-	    }
-	    return null;
-	},
-*/
+
     calculateRangePenalty: function calculateRangePenalty(distance, weapon) {
         var rangePenalty = 0;
-  // 		var kineticMode = this.findFiringModeByName(weapon, 'Kinetic');   //To ensure that Kinetic ammo uses calculateSpecialRangePenalty function.
         
 		if (weapon.specialRangeCalculation){
 			rangePenalty = weapon.calculateSpecialRangePenalty(distance);

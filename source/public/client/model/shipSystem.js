@@ -174,6 +174,8 @@ Weapon.prototype.changeFiringMode = function () {
 
 	if (!mathlib.arrayIsEmpty(this.hextargetArray)) this.hextarget = this.hextargetArray[this.firingMode];
 	if (!mathlib.arrayIsEmpty(this.hidetargetArray)) this.hidetarget = this.hidetargetArray[this.firingMode];
+		
+	if (!mathlib.arrayIsEmpty(this.specialRangeCalculationArray)) this.specialRangeCalculation = this.specialRangeCalculationArray[this.firingMode];	
 	
 		/*old animation-related variables - not used any more!
 	if (!mathlib.arrayIsEmpty(this.animationImgArray)) this.animationImg = this.animationImgArray[this.firingMode];
