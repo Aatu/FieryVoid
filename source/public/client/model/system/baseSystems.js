@@ -162,6 +162,12 @@ var Quarters = function Quarters(json, ship) {
 Quarters.prototype = Object.create(ShipSystem.prototype);
 Quarters.prototype.constructor = Quarters;
 
+var Magazine = function Magazine(json, ship) {
+    ShipSystem.call(this, json, ship);
+};
+Magazine.prototype = Object.create(ShipSystem.prototype);
+Magazine.prototype.constructor = Magazine;
+
 var JumpEngine = function JumpEngine(json, ship) {
     ShipSystem.call(this, json, ship);
 };
