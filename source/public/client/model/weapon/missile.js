@@ -249,23 +249,13 @@ AmmoMissileRackS.prototype.calculateSpecialRangePenalty = function (distance) { 
     return rangePenalty;
 }; 
 
-/* //For HARM Missile
-AmmoMissileRackS.prototype.calculateSpecialHitChanceMod = function (order, target) {
-/* //Try without first...
-			var modeIteration = 0;
-			modeIteration = order.firingMode; //change weapons data to reflect mode actually used
-			    
-			if(modeIteration != weapon.firingMode){
-				while(modeIteration != weapon.firingMode){ //will loop until correct mode is found
-				weapon.changeFiringMode();
-					}
-			    }	
-*/
-/*	var mod = 0;
-	mod = target.getAllOffensiveEW(ship) * 5;
+ //For HARM Missile
+AmmoMissileRackS.prototype.calculateSpecialHitChanceMod = function (target) {
+	var mod = 0;
+	mod = ew.getAllOEWandCCEW(target);
 	return mod; 
 };
-*/
+
 
 var AmmoMissileRackSO = function AmmoMissileRackSO(json, ship) {
     AmmoMissileRackS.call(this, json, ship);
@@ -274,27 +264,27 @@ AmmoMissileRackSO.prototype = Object.create(AmmoMissileRackS.prototype);
 AmmoMissileRackSO.prototype.constructor = AmmoMissileRackSO;
 
 var AmmoMissileRackO = function AmmoMissileRackO(json, ship) {
-    Ballistic.call(this, json, ship);
+    AmmoMissileRackS.call(this, json, ship);
 };
-AmmoMissileRackO.prototype = Object.create(Ballistic.prototype);
+AmmoMissileRackO.prototype = Object.create(AmmoMissileRackS.prototype);
 AmmoMissileRackO.prototype.constructor = AmmoMissileRackO;
 
 var AmmoMissileRackL = function AmmoMissileRackL(json, ship) {
-    Ballistic.call(this, json, ship);
+    AmmoMissileRackS.call(this, json, ship);
 };
-AmmoMissileRackL.prototype = Object.create(Ballistic.prototype);
+AmmoMissileRackL.prototype = Object.create(AmmoMissileRackS.prototype);
 AmmoMissileRackL.prototype.constructor = AmmoMissileRackL;
 
 var AmmoMissileRackLH = function AmmoMissileRackLH(json, ship) {
-    Ballistic.call(this, json, ship);
+    AmmoMissileRackS.call(this, json, ship);
 };
-AmmoMissileRackLH.prototype = Object.create(Ballistic.prototype);
+AmmoMissileRackLH.prototype = Object.create(AmmoMissileRackS.prototype);
 AmmoMissileRackLH.prototype.constructor = AmmoMissileRackLH;
 
 var AmmoMissileRackR = function AmmoMissileRackR(json, ship) {
-    Ballistic.call(this, json, ship);
+    AmmoMissileRackS.call(this, json, ship);
 };
-AmmoMissileRackR.prototype = Object.create(Ballistic.prototype);
+AmmoMissileRackR.prototype = Object.create(AmmoMissileRackS.prototype);
 AmmoMissileRackR.prototype.constructor = AmmoMissileRackR;
 
 var AmmoMissileRackD = function AmmoMissileRackD(json, ship) {
@@ -304,9 +294,9 @@ AmmoMissileRackD.prototype = Object.create(Ballistic.prototype);
 AmmoMissileRackD.prototype.constructor = AmmoMissileRackD;
 
 var AmmoMissileRackB = function AmmoMissileRackB(json, ship) {
-    Ballistic.call(this, json, ship);
+    AmmoMissileRackS.call(this, json, ship);
 };
-AmmoMissileRackB.prototype = Object.create(Ballistic.prototype);
+AmmoMissileRackB.prototype = Object.create(AmmoMissileRackS.prototype);
 AmmoMissileRackB.prototype.constructor = AmmoMissileRackB;
 
 var AmmoBombRack = function AmmoBombRack(json, ship) {
@@ -330,9 +320,9 @@ MultiDefenseLauncher.prototype.constructor =  MultiDefenseLauncher;
 
 
 var AmmoMissileRackF= function  AmmoMissileRackF(json, ship) {
-    Ballistic.call(this, json, ship);
+    AmmoMissileRackS.call(this, json, ship);
 };
-AmmoMissileRackF.prototype = Object.create(Ballistic.prototype);
+AmmoMissileRackF.prototype = Object.create(AmmoMissileRackS.prototype);
 AmmoMissileRackF.prototype.constructor =  AmmoMissileRackF;
 
 AmmoMissileRackF.prototype.doIndividualNotesTransfer = function () { //prepare individualNotesTransfer variable - if relevant for this particular system

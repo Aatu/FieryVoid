@@ -125,6 +125,17 @@ window.ew = {
         }
         return amount;
     },
+    
+    getAllOEWandCCEW: function getAllOffensiveEW(ship) { //Required for HARM missile hit calculations
+        var amount = 0;
+        for (var i in ship.EW) {
+            var entry = ship.EW[i];
+            if (entry.turn != gamedata.turn) continue;
+            if (entry.type == "OEW") amount += entry.amount;
+            if (entry.type == "CCEW") amount += entry.amount;            	
+        }
+        return amount;
+    },
 
     getNumOfOffensiveTargets: function getNumOfOffensiveTargets(ship) {
         var amount = 0;

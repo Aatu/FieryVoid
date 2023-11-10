@@ -3863,7 +3863,7 @@ class AmmoMissileTemplate{
 	public $rangePenalty = 0;
 	public $noLockPenalty = false;		
 //Extra variable for HARM Missile	
-//	public $specialHitChanceCalculation = false;		
+	public $specialHitChanceCalculation = false;		
 	
     function __construct(){}
 	
@@ -3918,7 +3918,12 @@ class AmmoMissileTemplate{
     {
         return 0;
     }  //endof function calculateRangePenalty	 
-	    
+
+	public function calculateHitBase($gamedata, $fireOrder)
+	{
+		return;
+	}
+		    
 } //endof class AmmoMissileTemplate
 
 
@@ -4522,7 +4527,7 @@ class AmmoMissileX extends AmmoMissileTemplate{
 	public $useOEW = false;
 	public $hidetarget = false;
 
-//	public $specialHitChanceCalculation = true;
+	public $specialHitChanceCalculation = true;
 	
     public function getDamage($fireOrder) //actual function to be called, as with weapon!
     {
@@ -4530,18 +4535,24 @@ class AmmoMissileX extends AmmoMissileTemplate{
     }		
 
 
-	public function beforeFiringOrderResolution($gamedata, $weapon, $originalFireOrder)
+	public function calculateHitBase($gamedata, $fireOrder)
 	{
-	    $target = $gamedata->getShipById($originalFireOrder->targetid); // Fix: Change $fireOrder to $originalFireOrder
-	    $targetEW = $target->getOEWTargetNum($gamedata->turn);
+        // Add a debug statement
+ //       echo 'calculateHitBase in YourAmmoClass is being called!<br>';		
+		
+		parent::calculateHitBase($gamedata, $fireOrder);
+		
+	    $target = $gamedata->getShipById($fireOrder->targetid); 
+	    $targetEW = $target->getAllOffensiveEW($gamedata->turn);
+	    $hitChanceBonus = $targetEW * 5;
 
-		    $fireControlAdd = $this->fireControlMod; // Fix: Change $this-fireControlMod to $this->fireControlMod
-		    $fireControlAdd[0] = null; // Remains null for fighters
-		    $fireControlAdd[1] = $fireControlAdd[1] + $targetEW; // Medium/HCV FC // Fix: Change $this->targetEW to $targetEW
-		    $fireControlAdd[2] = $fireControlAdd[2] + $targetEW; // Capitals FC // Fix: Change $this->targetEW to $targetEW
-		    $this->fireControlMod = $fireControlAdd;
+    // Print the values to the browser/console
+ //   echo 'Target OEW: ' . $targetEW . '<br>';
+	    
+		$fireOrder->needed +=  $hitChanceBonus;
 		    
-	}// end of function beforeFiringOrderResolution  
+		    
+	}// end of function calculateHitBase  
 
 
  	public function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //Reduces Sensors by 1D6 next turn.

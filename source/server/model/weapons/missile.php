@@ -1063,8 +1063,8 @@ class AmmoMissileRackS extends Weapon{
 	public $noLockPenalty = false;
 	public $noLockPenaltyArray = array();		
 //Extra variables for HARM Missile	
-//	public $specialHitChanceCalculation = false;
-//	public $specialHitChanceCalculationArray = array();			
+	public $specialHitChanceCalculation = false;
+	public $specialHitChanceCalculationArray = array();			
 	
 //F-Rack variables removing for now to prevent anything odd happening.
 	/*
@@ -1106,7 +1106,7 @@ class AmmoMissileRackS extends Weapon{
 			$this->ammoClassesArray[] =  new AmmoMissileK();
 			$this->ammoClassesArray[] =  new AmmoMissileM();
 			$this->ammoClassesArray[] =  new AmmoMissileKK();
-	//		$this->ammoClassesArray[] =  new AmmoMissileX();
+			$this->ammoClassesArray[] =  new AmmoMissileX();
 	//		$this->ammoClassesArray[] =  new AmmoMissileI(); //Only available to Class-D launchers on Kor-Lyan ships at this time, created in ship magazine.						
 			$this->availableAmmoAlreadySet = true;
 		}
@@ -1167,7 +1167,7 @@ class AmmoMissileRackS extends Weapon{
 		$this->specialRangeCalculationArray = array(); //Adding variables for KK Missile
 		$this->rangePenaltyArray = array();
 		$this->noLockPenaltyArray = array();		 
-//		$this->specialHitChanceCalculationArray = array();						
+		$this->specialHitChanceCalculationArray = array();						
 //		$this->interceptArray = array();//Adding Intercept variables for Interceptor missiles	
 //		$this->ballisticInterceptArray = array();	    		
 							
@@ -1220,7 +1220,7 @@ class AmmoMissileRackS extends Weapon{
 				$this->specialRangeCalculationArray[$currMode] = $currAmmo->specialRangeCalculation; //Adding variables for KK Missile
 				$this->rangePenaltyArray[$currMode] = $currAmmo->rangePenalty;
 				$this->noLockPenaltyArray[$currMode] = $currAmmo->noLockPenalty;				
-//				$this->specialHitChanceCalculationArray[$currMode] = $currAmmo->specialHitChanceCalculation;							    
+				$this->specialHitChanceCalculationArray[$currMode] = $currAmmo->specialHitChanceCalculation;							    
 //				$this->interceptArray[$currMode] = $currAmmo->intercept;//Adding Intercept variables for Interceptor missiles	
 //				$this->ballisticInterceptArray[$currMode] = $currAmmo->ballisticIntercept;			    							
 			}
@@ -1263,7 +1263,7 @@ class AmmoMissileRackS extends Weapon{
 		$strippedSystem->specialRangeCalculationArray = $this->specialRangeCalculationArray; //Adding for KK Missile
 		$strippedSystem->rangePenaltyArray = $this->rangePenaltyArray;
 		$strippedSystem->noLockPenaltyArray = $this->noLockPenaltyArray;		
-//		$strippedSystem->specialHitChanceCalculationArray = $this->specialHitChanceCalculationArray;		
+		$strippedSystem->specialHitChanceCalculationArray = $this->specialHitChanceCalculationArray;		
 //		$strippedSystem->interceptArray = $this->interceptArray;//Adding Intercept variables for Interceptor missiles	
 //		$strippedSystem->ballisticInterceptArray = $this->ballisticInterceptArray;							
 		return $strippedSystem;
@@ -1419,7 +1419,7 @@ class AmmoMissileRackS extends Weapon{
             }else{
                 return $this->calledShotMod;
             }
-        }
+        }//endof function getCalledShotMod
 
 
      public function fire($gamedata, $fireOrder)	//For Multiwarhead missiles
@@ -1433,7 +1433,8 @@ class AmmoMissileRackS extends Weapon{
 		
         parent::fire($gamedata, $fireOrder);
 
-	}
+	}//endof function fire
+
 
 public function calculateRangePenalty($distance)
 {
@@ -1451,7 +1452,28 @@ public function calculateRangePenalty($distance)
                 return 0;
             }
     parent::calculateRangePenalty($distance);        
-	}
+	}//endof function calculateRangePenalty
+
+
+    public function calculateHitBase($gamedata, $fireOrder)
+    {
+    	// Call the parent method for weapon hit calculation
+        parent::calculateHitBase($gamedata, $fireOrder);
+    	
+        $currAmmo = null;
+        
+        // Find appropriate ammo
+        if (array_key_exists($this->firingMode, $this->ammoClassesUsed)){
+            $currAmmo = $this->ammoClassesUsed[$this->firingMode];
+        }
+        
+        if ($currAmmo) {
+            $currAmmo->calculateHitBase($gamedata, $fireOrder);
+        }
+        
+
+	}//endof function calculateHitBase
+
 
 } //endof class AmmoMissileRackS
 
