@@ -46,6 +46,7 @@ class ScorotaAM extends BaseShip{
 	    $this->enhancementOptionsEnabled[] = 'AMMO_L';//add enhancement options for other missiles - Class-L
 	    $this->enhancementOptionsEnabled[] = 'AMMO_M';//add enhancement options for other missiles - Class-M	    
 		$this->enhancementOptionsEnabled[] = 'AMMO_P';//add enhancement options for other missiles - Class-P
+		$this->enhancementOptionsEnabled[] = 'AMMO_X';//add enhancement options for other missiles - Class-X			
         
         $this->addPrimarySystem(new Reactor(5, 27, 0, 0));
         $this->addPrimarySystem(new CnC(6, 20, 0, 0));
