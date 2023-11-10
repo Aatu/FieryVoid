@@ -37,6 +37,7 @@ class TethysMissileAM extends MediumShip{
 	    $this->enhancementOptionsEnabled[] = 'AMMO_L';//add enhancement options for other missiles - Class-L
 	    $this->enhancementOptionsEnabled[] = 'AMMO_M';//add enhancement options for other missiles - Class-M	    
 		$this->enhancementOptionsEnabled[] = 'AMMO_P';//add enhancement options for other missiles - Class-P
+		$this->enhancementOptionsEnabled[] = 'AMMO_X';//add enhancement options for other missiles - Class-X			
 		//frankly I don't see a glorified police ship getting full special missile selection, but... glorified police ships tend to be quite powerful in this game :)
 
 		$this->addPrimarySystem(new Reactor(4, 13, 0, 3));
