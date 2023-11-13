@@ -14,7 +14,7 @@ class govallEarlyAM extends HeavyCombatVessel{
 		$this->occurence = "common";        
  
         $this->limited = 33; 
-        $this->isd = 2241;
+        $this->isd = 2230;
         
         $this->forwardDefense = 15;
         $this->sideDefense = 15;
@@ -38,6 +38,7 @@ class govallEarlyAM extends HeavyCombatVessel{
 	    $this->enhancementOptionsEnabled[] = 'AMMO_L';//add enhancement options for other missiles - Class-L
 	    $this->enhancementOptionsEnabled[] = 'AMMO_M';//add enhancement options for other missiles - Class-M	    
 		$this->enhancementOptionsEnabled[] = 'AMMO_P';//add enhancement options for other missiles - Class-P
+		$this->enhancementOptionsEnabled[] = 'AMMO_X';//add enhancement options for other missiles - Class-X
 		
         $this->addPrimarySystem(new Reactor(4, 15, 0, 0));
         $this->addPrimarySystem(new CnC(5, 12, 0, 0));
