@@ -3787,27 +3787,30 @@ class AmmoMagazine extends ShipSystem {
  	/*act on notes just loaded - to be redefined by systems as necessary
 	 - mark rounds spent (it is possible to load more rounds than magazine capacity, but spending will be limited by it - in effect getting extra flexibility (but not magazine capacity) for very high price
 	*/
-	public function onIndividualNotesLoaded($gamedata){
-		foreach ($this->individualNotes as $currNote){ //assume ASCENDING sorting - so enact all changes as is
-			switch($currNote->notekey){
-				case 'AmmoUsed': //mode name for ammmunition type that was expended
-					///entry may not exist yet! due to when enhancements and notes are loaded - in this case initialize them - values will get negative for a moment, but it's not a problem
-					if (!array_key_exists($currNote->notevalue,$this->ammoCountArray)){	
-						$this->ammoCountArray[$currNote->notevalue] = 0;
-					}				
-					if (!array_key_exists($currNote->notevalue,$this->ammoUsedTotal)){
-						$this->ammoUsedTotal[$currNote->notevalue] = 0;
-					}	
-					$this->ammoCountArray[$currNote->notevalue] -= 1;
-					$this->ammoUsedTotal[$currNote->notevalue] += 1;
-					/*
-					$ammoSize = $this->ammoSizeArray[$currNote->notevalue];
-					$this->remainingAmmo -= $ammoSize;
-					*/
-					break;			
-			}
-		}
-	} //endof function onIndividualNotesLoaded
+public function onIndividualNotesLoaded($gamedata) {
+    foreach ($this->individualNotes as $currNote) { // Assume ASCENDING sorting - so enact all changes as is
+        switch ($currNote->notekey) {
+            case 'AmmoUsed': // Mode name for ammunition type that was expended
+                // Entry may not exist yet! Due to when enhancements and notes are loaded - in this case, initialize them - values will get negative for a moment, but it's not a problem
+                if (!array_key_exists($currNote->notevalue, $this->ammoCountArray)) {
+                    $this->ammoCountArray[$currNote->notevalue] = 0;
+                }
+                if (!array_key_exists($currNote->notevalue, $this->ammoUsedTotal)) {
+                    $this->ammoUsedTotal[$currNote->notevalue] = 0;
+                }
+
+
+                    $this->ammoCountArray[$currNote->notevalue] -= 1;
+                    $this->ammoUsedTotal[$currNote->notevalue] += 1;
+
+                /*
+                $ammoSize = $this->ammoSizeArray[$currNote->notevalue];
+                $this->remainingAmmo -= $ammoSize;
+                */
+                break;
+        }
+    }
+} // End of function onIndividualNotesLoaded
 	
 	
     public function doIndividualNotesTransfer(){
@@ -3844,15 +3847,23 @@ class AmmoMissileTemplate{
 	public $noOverkill = false;
 	public $useOEW = false;
 	public $hidetarget = false;
-    //Adding Intercept variables for Interceptor missiles		
 	public $intercept = 0;
 	public $ballisticIntercept = false;	
+
     //Adding Pulse variables for Starburst missiles	
 	public $maxpulses = 0;
 	public $rof = 0;
 	public $useDie = 0; //die used for base number of hits
 	public $fixedBonusPulses = 0;//for weapons doing dX+Y pulse	
+	
+    public $calledShotMod = -8;    //Variable for Multiwarhead Missile.  Normal called shot modifier is -8.
 
+//Extra variables for KK Missile
+	public $specialRangeCalculation = false;
+	public $rangePenalty = 0;
+	public $noLockPenalty = false;		
+//Extra variable for HARM Missile	
+	public $specialHitChanceCalculation = false;		
 	
     function __construct(){}
 	
@@ -3870,24 +3881,51 @@ class AmmoMissileTemplate{
     public function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder)
     {
         return;
-    }
+    }//endof function onDamagedSystem
     
     //Adding Pulse functions for Starburst missiles
-        protected function getPulses($turn)
+    protected function getPulses($turn)
         {
             return 0;
-        }
+        }//endof function getPulses
 	
-        protected function getExtraPulses($needed, $rolled)
+    protected function getExtraPulses($needed, $rolled)
         {
             return 0;
-        }
+        }//endof function getExtraPulses
 	
-		public function rollPulses($turn, $needed, $rolled){
+	public function rollPulses($turn, $needed, $rolled)
+		{
 		return 0;
+		}//endof function rollPulses
+	
+	public function beforeFiringOrderResolution($gamedata, $weapon, $originalFireOrder) //For mulitwarhead missile
+    {
+    	return;
+    }//endof function beforeFiringOrderResolution	
+    
+    public function getCalledShotMod() //For mulitwarhead missile
+    {
+        return $this->calledShotMod;
+    }//end of getCalledShotMod     				
+
+	public function fire($gamedata, $fireOrder) //For mulitwarhead missile
+    {
+    	return;
+    }//end of function fire	
+    
+    public function calculateRangePenalty($distance)
+    {
+        return 0;
+    }  //endof function calculateRangePenalty	 
+
+	public function calculateHitBase($gamedata, $fireOrder)
+	{
+		return;
 	}
-	    
+		    
 } //endof class AmmoMissileTemplate
+
 
 //ammunition for AmmoMagazine - Class B Missile (for official Missile Racks)
 class AmmoMissileB extends AmmoMissileTemplate{	
@@ -4180,7 +4218,8 @@ class AmmoMissileC extends AmmoMissileTemplate{
 					}
 				}
 			}
-	} //endof function onDamagedSystem   
+	} //endof function onDamagedSystem
+	
 
 } //endof class AmmoMissileC
 
@@ -4230,12 +4269,13 @@ class AmmoMissileI extends AmmoMissileTemplate{
 	public $maxDamage = 0;	
 	public $damageType = 'Standard';//mode of dealing damage
 	public $weaponClass = 'Ballistic';//weapon class
-	public $priority = 1;
-	public $priorityAF = 1;
+	public $priority = 5;
+	public $priorityAF = 5;
 	public $noOverkill = false;
 	public $hidetarget = false;
 	public $intercept = 0;
-	public $ballisticIntercept = false;
+	public $ballisticIntercept = true;
+//    public $ballistic = false;		//Idea that making intercept missiles non-ballistic might help
 		
     public function getDamage($fireOrder) //actual function to be called, as with weapon!
     {
@@ -4306,6 +4346,231 @@ class AmmoMissileK extends AmmoMissileTemplate{
 	
 } //endof class AmmoMissileK
 
+//ammunition for AmmoMagazine - Class MK Missile (for official Missile Racks)
+class AmmoMissileM extends AmmoMissileTemplate{	
+	public $name = 'ammoMissileM';
+	public $displayName = 'Multiwarhead Missile';
+	public $modeName = 'Multiwarhead';
+	public $size = 2; //how many store slots are required for a single round
+	public $enhancementName = 'AMMO_M'; //enhancement name to be enabled
+	public $enhancementDescription = '(ammo) Multiwarhead Missile (2256)';
+	public $enhancementPrice = 24; //PV per missile;
+	
+	public $rangeMod = 0; //MODIFIER for launch range
+	public $distanceRangeMod = 0; //MODIFIER for distance range
+	public $fireControlMod = array(3, null, null); //MODIFIER for weapon fire control! Should be 3
+	public $minDamage = 10;
+	public $maxDamage = 10;	
+	public $damageType = 'Standard';//mode of dealing damage
+	public $weaponClass = 'Ballistic';//weapon class
+	public $priority = 5;
+	public $priorityAF = 5;
+	public $noOverkill = false;
+    public $useOEW = false;
+	public $hidetarget = false;
+    public $calledShotMod = 0;   	
+	
+    public $ballistic = true;
+    
+	protected $engagedFighters = array();  //Required to avoid mulitple M-Missiles creating fire orders for destroyed fighters and therefore reverting to a normal shot. 	
+
+    public function getDamage($fireOrder) //actual function to be called, as with weapon!
+    {
+        return 10;
+    }	
+
+
+		public function beforeFiringOrderResolution($gamedata, $weapon, $originalFireOrder)
+		{
+		    // To create 6 missiles instead of just one.
+		    $missilesTotal = 6;
+		    $currentShotNumber = 1;
+
+		    // Fetch target and shooter IDs from the current fire order
+		    $target = $gamedata->getShipById($originalFireOrder->targetid);
+		    if ($target instanceof FighterFlight) { // one attack against every fighter!
+
+		        $fighterList = array(); // Corrected the "new" keyword
+
+		        foreach ($target->systems as $fighter) { // Can only target fighters.
+		            if ($fighter->isDestroyed()) { // Ignore destroyed fighters.
+		                continue;
+		            }
+		            array_unshift($fighterList, $fighter); // array_unshift adds element at the beginning of array rather than at the end
+		        }
+
+		        foreach ($fighterList as $fighter) {
+		            if ($currentShotNumber == 1) {
+		                $originalFireOrder->calledid = $fighter->id;
+		            } else {	
+							$newFireOrder = new FireOrder(
+                                    -1, "ballistic", $originalFireOrder->shooterid, $originalFireOrder->targetid,
+                                    $weapon->id, $fighter->id, $gamedata->turn, $originalFireOrder->firingMode, 
+                                    0, 0, 1, 0, 0, //needed, rolled, shots, shotshit, intercepted
+                                    0,0,$weapon->weaponClass,-1 //X, Y, damageclass, resolutionorder
+                                );
+                            $newFireOrder->addToDB = true;
+                            $weapon->fireOrders[] = $newFireOrder;
+                         
+							}
+						
+						$currentShotNumber++;
+						if($currentShotNumber > $missilesTotal) break; //will get out of foreach loop once we're out of submissiles, even if there are still fighters unassigned	
+					
+				}
+		}
+	}//endof function beforeFiringOrderResolution   
+
+     public function fire($gamedata, $fireOrder) 	//For Multiwarhead missiles
+    {
+
+	$validTarget = true; //unless we find a reason it's not
+	$target = $gamedata->getShipById($fireOrder->targetid);
+	$fighter = $target->getSystemById($fireOrder->calledid);
+	
+	if($fighter->isDestroyed()) $validTarget = false; //shot called at destroyed fighter would have been reassigned
+	if(in_array($fireOrder->calledid,  $this->engagedFighters)) $validTarget = false; //if it was already engaged by this weapon, it cannot be engaged again
+		
+	if (!$validTarget) {//target is not valid, find another one
+		 $targetFighter = null;
+		                foreach ($target->systems as $fighter) { // Can only target fighters.
+		                    if ($fighter->isDestroyed()) { // Ignore destroyed fighters.
+		                        continue;
+		                    }
+		                    	                    
+			if(in_array($fighter->id,  $this->engagedFighters)) continue; //ignore already engaged fighters
+			 	
+			$targetFighter = $fighter; //found appropriate target! 
+			
+	//		break; //Removed so that retargetted munitions strike last fighter in flight.
+			                }                
+			                
+				if($targetFighter!=null){
+				$fireOrder->calledid = $targetFighter->id; //this redirection will be correctly handled by standard routines
+				$validTarget = true;
+				}
+			}	
+
+		 if (!$validTarget) { //target not valid and no replacement found - make the shot miss!
+			$fireOrder->needed = 0; //set hit chance as 0
+			$fireOrder->pubnotes .= '  No viable target - excess submunition lost';//inform player of situation
+		}else{ //valid target, will be engaged, note for further shots!
+				$this->engagedFighters[]= $fireOrder->calledid;
+			}
+		
+	}//end of function fire
+            
+	
+} //endof class AmmoMissileM
+
+
+//ammunition for AmmoMagazine - Class KK Missile (for official Missile Racks). Used by Orieni only
+class AmmoMissileKK extends AmmoMissileTemplate{	
+	public $name = 'ammoMissileKK';
+	public $displayName = 'Kinetic Missile';
+	public $modeName = 'Kinetic'; //Technically means both Starburst and Kinetic will show as 'K' in mode selection, but Orieni don't have access to Starburst missiles.
+	public $size = 1; //how many store slots are required for a single round
+	public $enhancementName = 'AMMO_KK'; //enhancement name to be enabled
+	public $enhancementDescription = '(ammo) Kinetic Missile (1976)'; //enhancement description
+	public $enhancementPrice = 8; //PV per missile;
+	
+	public $rangeMod = 40; //MODIFIER for launch range.  In theory it can travel up to 60 hexes as it's max distance (but the hit chances would be terrible!)
+	public $distanceRangeMod = 0; //MODIFIER for distance range
+	public $fireControlMod = array(3, 3, 3); //MODIFIER for weapon fire control!
+	public $minDamage = 18;
+	public $maxDamage = 18;	
+	public $damageType = 'Standard';//mode of dealing damage
+	public $weaponClass = 'Matter';//weapon class
+	public $priority = 6;
+	public $priorityAF = 5;
+	public $noOverkill = true;
+	public $useOEW = false;
+	public $hidetarget = false;
+
+	public $specialRangeCalculation = true;
+	public $rangePenalty = 1;	//but only after 15 hexes
+	public $noLockPenalty = true;		
+	
+    public function getDamage($fireOrder) //actual function to be called, as with weapon!
+    {
+        return 18;
+    }		
+
+		public function calculateRangePenalty($distance){
+			$rangePenalty = 0;//base penalty
+			$rangePenalty += $this->rangePenalty * max(0,$distance-15); //everything above 15 hexes receives range penalty
+			return $rangePenalty;
+		}
+
+} //endof class AmmoMissileKK
+
+//ammunition for AmmoMagazine - Class X Missile (for official Missile Racks).
+class AmmoMissileX extends AmmoMissileTemplate{	
+	public $name = 'AmmoMissileX';
+	public $displayName = 'HARM Missile';
+	public $modeName = 'X - HARM'; //Use X in modeName so that it's not confused with Heavy.
+	public $size = 1; //how many store slots are required for a single round
+	public $enhancementName = 'AMMO_X'; //enhancement name to be enabled
+	public $enhancementDescription = '(ammo) HARM Missile (2248)'; //enhancement description
+	public $enhancementPrice = 10; //PV per missile;
+	
+	public $rangeMod = 0; //MODIFIER for launch range.  In theory it can travel up to 60 hexes as it's max distance (but the hit chances would be terrible!)
+	public $distanceRangeMod = 0; //MODIFIER for distance range
+	public $fireControlMod = array(null, 3, 3); //MODIFIER for weapon fire control!
+	public $minDamage = 0;
+	public $maxDamage = 0;	
+	public $damageType = 'Standard';//mode of dealing damage
+	public $weaponClass = 'Ballistic';//weapon class
+	public $priority = 6;
+	public $priorityAF = 5;
+	public $noOverkill = false;
+	public $useOEW = false;
+	public $hidetarget = false;
+
+	public $specialHitChanceCalculation = true;
+	
+    public function getDamage($fireOrder) //actual function to be called, as with weapon!
+    {
+        return 0;
+    }		
+
+
+	public function calculateHitBase($gamedata, $fireOrder)
+	{
+        // Add a debug statement
+ //       echo 'calculateHitBase in YourAmmoClass is being called!<br>';		
+		
+		parent::calculateHitBase($gamedata, $fireOrder);
+		
+	    $target = $gamedata->getShipById($fireOrder->targetid); 
+	    $targetEW = $target->getAllOffensiveEW($gamedata->turn);
+	    $hitChanceBonus = $targetEW * 5;
+
+    // Print the values to the browser/console
+ //   echo 'Target OEW: ' . $targetEW . '<br>';
+	    
+		$fireOrder->needed +=  $hitChanceBonus;
+		    
+		    
+	}// end of function calculateHitBase  
+
+
+ 	public function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //Reduces Sensors by 1D6 next turn.
+
+			$effectSensors = Dice::d(6,1);//Strength of effect: 1d6
+			$fireOrder->pubnotes .= "<br> Sensors reduced by $effectSensors next turn.";
+
+			$CnC = $ship->getSystemByName("CnC");
+			if($CnC){
+				for($i=1; $i<=$effectSensors;$i++){
+					$crit = new tmpsensordown(-1, $ship->id, $CnC->id, 'tmpsensordown', $gamedata->turn); 
+					$crit->updated = true;
+			        	$CnC->criticals[] =  $crit;
+				}
+		}	
+	} //endof function onDamagedSystem	
+
+} //endof class AmmoMissileX
 
 //ammunition for AmmoMagazine - Class FB Missile (Fighter Basic Missile)
 class AmmoMissileFB extends AmmoMissileTemplate{	

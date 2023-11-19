@@ -30,11 +30,12 @@ class Vigilant1704AM extends BaseShip{
         $ammoMagazine = new AmmoMagazine(96); //pass magazine capacity - 12 rounds per class-SO rack, 20 most other shipborne racks, 60 class-B rack and 80 Reload Rack
         $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
         $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 96); //add full load of basic missiles
-        $this->enhancementOptionsEnabled[] = 'AMMO_L';//add enhancement options for other missiles - Class-L
-        $this->enhancementOptionsEnabled[] = 'AMMO_H';//add enhancement options for other missiles - Class-H
         $this->enhancementOptionsEnabled[] = 'AMMO_A';//add enhancement options for other missiles - Class-A
-		//By the Book Orieni should have access to missie types: KK, B, A, H, L, C
-		//KK and C missiles are not present in FV however
+  //      $this->enhancementOptionsEnabled[] = 'AMMO_C';//add enhancement options for other missiles - Class-C        
+        $this->enhancementOptionsEnabled[] = 'AMMO_H';//add enhancement options for other missiles - Class-H
+		$this->enhancementOptionsEnabled[] = 'AMMO_KK';               
+  //      $this->enhancementOptionsEnabled[] = 'AMMO_L';//add enhancement options for other missiles - Class-L
+		//By the Book Orieni should have access to missie types: KK, B, A, H, L, C, but L and C not available until 2005 so disabled on these older ships.
 		
 		
         

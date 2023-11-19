@@ -5,7 +5,8 @@ class IMLArmedTransport extends HeavyCombatVesselLeftRight{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 450;
-	$this->faction = "Raiders";
+        $this->faction = "Custom Ships";
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
         $this->phpclass = "IMLArmedTransport";
         $this->imagePath = "img/ships/RaiderIMLTransport.png";
         $this->shipClass = "IML Armed Transport";

@@ -66,6 +66,12 @@ var SoMissileRack = function SoMissileRack(json, ship) {
 SoMissileRack.prototype = Object.create(MissileLauncher.prototype);
 SoMissileRack.prototype.constructor = SoMissileRack;
 
+SoMissileRack.prototype.calculateSpecialRangePenalty = function (distance) { //Added here for KK Missile calculation only.  Not normally used.
+    var distancePenalized = Math.max(0,distance - 15); //ignore first 15 hexes
+    var rangePenalty = this.rangePenalty * distancePenalized;
+    return rangePenalty;
+};
+
 var RMissileRack = function RMissileRack(json, ship) {
     MissileLauncher.call(this, json, ship);
 };
@@ -236,34 +242,49 @@ var AmmoMissileRackS = function AmmoMissileRackS(json, ship) {
 AmmoMissileRackS.prototype = Object.create(Ballistic.prototype);
 AmmoMissileRackS.prototype.constructor = AmmoMissileRackS;
 
-var AmmoMissileRackSO = function AmmoMissileRackSO(json, ship) {
-    Ballistic.call(this, json, ship);
+AmmoMissileRackS.prototype.calculateSpecialRangePenalty = function (distance) { //Added here for Orieni KK Missile calculation only.  
+    var distancePenalized = Math.max(0,distance - 15); //ignore first 15 hexes
+    var rangePenalty = this.rangePenalty * distancePenalized;
+        
+    return rangePenalty;
+}; 
+
+ //For HARM Missile
+AmmoMissileRackS.prototype.calculateSpecialHitChanceMod = function (target) {
+	var mod = 0;
+	mod = ew.getAllOEWandCCEW(target);
+	return mod; 
 };
-AmmoMissileRackSO.prototype = Object.create(Ballistic.prototype);
+
+
+var AmmoMissileRackSO = function AmmoMissileRackSO(json, ship) {
+    AmmoMissileRackS.call(this, json, ship);
+};
+AmmoMissileRackSO.prototype = Object.create(AmmoMissileRackS.prototype);
 AmmoMissileRackSO.prototype.constructor = AmmoMissileRackSO;
 
 var AmmoMissileRackO = function AmmoMissileRackO(json, ship) {
-    Ballistic.call(this, json, ship);
+    AmmoMissileRackS.call(this, json, ship);
 };
-AmmoMissileRackO.prototype = Object.create(Ballistic.prototype);
+AmmoMissileRackO.prototype = Object.create(AmmoMissileRackS.prototype);
 AmmoMissileRackO.prototype.constructor = AmmoMissileRackO;
 
 var AmmoMissileRackL = function AmmoMissileRackL(json, ship) {
-    Ballistic.call(this, json, ship);
+    AmmoMissileRackS.call(this, json, ship);
 };
-AmmoMissileRackL.prototype = Object.create(Ballistic.prototype);
+AmmoMissileRackL.prototype = Object.create(AmmoMissileRackS.prototype);
 AmmoMissileRackL.prototype.constructor = AmmoMissileRackL;
 
 var AmmoMissileRackLH = function AmmoMissileRackLH(json, ship) {
-    Ballistic.call(this, json, ship);
+    AmmoMissileRackS.call(this, json, ship);
 };
-AmmoMissileRackLH.prototype = Object.create(Ballistic.prototype);
+AmmoMissileRackLH.prototype = Object.create(AmmoMissileRackS.prototype);
 AmmoMissileRackLH.prototype.constructor = AmmoMissileRackLH;
 
 var AmmoMissileRackR = function AmmoMissileRackR(json, ship) {
-    Ballistic.call(this, json, ship);
+    AmmoMissileRackS.call(this, json, ship);
 };
-AmmoMissileRackR.prototype = Object.create(Ballistic.prototype);
+AmmoMissileRackR.prototype = Object.create(AmmoMissileRackS.prototype);
 AmmoMissileRackR.prototype.constructor = AmmoMissileRackR;
 
 var AmmoMissileRackD = function AmmoMissileRackD(json, ship) {
@@ -273,9 +294,9 @@ AmmoMissileRackD.prototype = Object.create(Ballistic.prototype);
 AmmoMissileRackD.prototype.constructor = AmmoMissileRackD;
 
 var AmmoMissileRackB = function AmmoMissileRackB(json, ship) {
-    Ballistic.call(this, json, ship);
+    AmmoMissileRackS.call(this, json, ship);
 };
-AmmoMissileRackB.prototype = Object.create(Ballistic.prototype);
+AmmoMissileRackB.prototype = Object.create(AmmoMissileRackS.prototype);
 AmmoMissileRackB.prototype.constructor = AmmoMissileRackB;
 
 var AmmoBombRack = function AmmoBombRack(json, ship) {
@@ -296,3 +317,51 @@ AmmoFighterRack.prototype.constructor = AmmoFighterRack;
 MultiDefenseLauncher.prototype = Object.create(Weapon.prototype);
 MultiDefenseLauncher.prototype.constructor =  MultiDefenseLauncher;
 */
+
+
+var AmmoMissileRackF= function  AmmoMissileRackF(json, ship) {
+    AmmoMissileRackS.call(this, json, ship);
+};
+AmmoMissileRackF.prototype = Object.create(AmmoMissileRackS.prototype);
+AmmoMissileRackF.prototype.constructor =  AmmoMissileRackF;
+
+AmmoMissileRackF.prototype.doIndividualNotesTransfer = function () { //prepare individualNotesTransfer variable - if relevant for this particular system
+	//here: transfer information about firing in Rapid mode and Long Range modes
+	// (eg. weapon is being fired after 1 turn of arming)
+	var toReturn = false;
+
+  //Check for fire order and check Initial Orders  	
+    	if ((this.fireOrders.length > 0) && (gamedata.gamephase == 1)) {	
+	
+	   		this.individualNotesTransfer = Array();	//Clear any current notes
+	   		
+	//Check for 1 turn loaded, as this will mean it has to be fired in Rapid Mode.	
+			if (this.turnsloaded == 1) {
+				this.individualNotesTransfer.push('R');
+				toReturn = true;
+			}
+	
+	// Code below is for Long Ranged shot conditions, trying to get Rapid mode operating first.
+		
+/*				   		
+			if (this.turnsloaded == 2) {
+	//Reduce range of weapon. Check range, then reset range (if false send 'L' note), reset to normal range.			
+			    var firingShip = gamedata.getShip(this.shipid);
+			    var aFireOrder = this.fireOrders[0]; 
+			    var targetShip = gamedata.getShip(aFireOrder.targetid); 
+
+				this.weapon.range -= 15;
+				var longRanged = weaponManager.checkIsInRange(firingShip, targetShip, this);
+				this.range += 15;			
+						
+			if (longRanged == false ){
+					this.individualNotesTransfer.push('L');
+					toReturn = true;	
+				}else{
+					toReturn = false;	
+					}
+				}	*/	
+		}	
+	return toReturn;  
+};
+

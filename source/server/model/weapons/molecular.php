@@ -198,6 +198,139 @@
 
 
 
+class SuperHeavyMolecularDisruptor extends Raking
+    {
+        public $name = "superHeavyMolecularDisruptor";
+        public $displayName = "Super Heavy Molecular Disruptor";
+        public $animation = "laser"; //it's Raking weapon after all
+        public $animationColor = array(30, 170, 255);
+	    /*
+        public $trailColor = array(30, 170, 255);
+        public $animationExplosionScale = 0.35;
+        public $projectilespeed = 12;
+        public $animationWidth = 10;
+        public $trailLength = 25;
+	*/
+        public $priority = 7;
+        public $priorityArray = array(1=>7, 2=>2); //Piercing shots go early, to do damage while sections aren't detroyed yet!
+
+        public $intercept = 0;
+        public $loadingtime = 6;
+
+        public $firingModes = array(
+            1 => "Raking",
+            2 => "Piercing"
+        );
+
+        public $rangePenalty = 0.5;
+
+        public $fireControlArray = array( 1=>array(null, 1, 3), 2=>array(null, -3, -1) ); //Raking and Piercing mode, respectively - Piercing adds -4!
+
+        public $damageType = "Raking"; 
+        public $damageTypeArray = array(1=>'Raking', 2=>'Piercing');
+        public $weaponClass = "Molecular"; 
+                        
+        private $alreadyReduced = false;
+        
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+			if (!isset($this->data["Special"])) {
+				$this->data["Special"] = '';
+			}else{
+				$this->data["Special"] .= '<br>';
+			}
+            $this->data["Special"] .= "Reduces armor of facing structure by 2 points.";
+        }
+
+		protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location = null){
+		    parent::doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location);
+		    
+		    if ($system->advancedArmor) return; // advanced armor prevents effect
+		    
+		    if(!$this->alreadyReduced){ 
+		        //$struct = $target->getStructureSystem($location); //this caused problems if first rake penetrated!
+		        $sectionFacing = $target->getHitSection($shooter, $fireOrder->turn);
+		        $struct = $target->getStructureSystem($sectionFacing); 
+
+		        if ($struct->advancedArmor) return; // advanced armor prevents effect 
+		        
+		        if(!$struct->isDestroyed($fireOrder->turn-1)){ // last turn Structure was still there...
+		            $this->alreadyReduced = true; // do this only for the first part of the shot that actually connects
+		            
+		            $crit1 = new ArmorReduced(-1, $target->id, $struct->id, "ArmorReduced", $gamedata->turn);
+		            $crit1->updated = true;
+		            $crit1->inEffect = false;
+		            $struct->criticals[] = $crit1;
+
+		            // Add the crit twice since Super Heavy Distruptor reduces armour by 2.
+		            $crit2 = clone $crit1;
+		            $struct->criticals[] = $crit2;
+		        }
+		    }
+		}    
+
+        public function getDamage($fireOrder){        return Dice::d(10, 4) + 32;   }
+        public function setMinDamage(){     $this->minDamage = 4+32;      }
+        public function setMaxDamage(){     $this->maxDamage = 40+32;      }
+	} //endof class SuperHeavyMolecularDisruptor
+
+
+   class MolecularPenetrator extends Raking{
+        public $name = "molecularPenetrator";
+        public $displayName = "Molecular Penetrator";
+        public $animation = "laser";
+        public $animationColor = array(100, 100, 255);
+	    /*
+        public $trailColor = array(30, 170, 255);
+        public $animationWidth = 4.5;
+        public $animationWidth2 = 0.3;
+        public $animationExplosionScale = 0.35;
+	*/
+	    
+        public $priority = 7;
+        public $priorityArray = array(1=>7, 2=>2); //Piercing shots go early, to do damage while sections aren't detroyed yet!
+
+        public $intercept = 0;
+        public $loadingtime = 4;
+
+        public $firingModes = array(
+            1 => "Raking",
+            2 => "Piercing"
+        );
+
+        public $rangePenalty = 0.33;
+
+        public $fireControlArray = array( 1=>array(null, 1, 4), 2=>array(null, -3, 0) ); //Raking and Piercing mode, respectively - Piercing adds -4!
+
+        public $damageType = "Raking"; 
+        public $damageTypeArray = array(1=>'Raking', 2=>'Piercing');
+        public $weaponClass = "Molecular"; 
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+			if (!isset($this->data["Special"])) {
+				$this->data["Special"] = '';
+			}else{
+				$this->data["Special"] .= '<br>';
+			}
+            $this->data["Special"] .= "Can fire in Raking or Piercing modes.";
+        }
+
+        public function getDamage($fireOrder){        return Dice::d(10, 4)+15;   }
+        public function setMinDamage(){     $this->minDamage = 4+15;      }
+        public function setMaxDamage(){     $this->maxDamage = 40+15;      }
+    }//endof class MolecularPenetrator
+
+
 
     class DestabilizerBeam extends Molecular{
         public $name = "destabilizerBeam";
@@ -416,11 +549,76 @@
             $this->maxDamage = 50 + ($boost * 10) + 10;
         }  
    }
-        
+ 
+ 	class EarlyFusionAgitator extends Raking{
+ 		public $name = "earlyFusionAgitator";
+        public $displayName = "Early Fusion Agitator";
+        public $animation = "laser";        
+        public $intercept = 0;
+        public $loadingtime = 3;
+        public $raking = 6;
+        public $priority = 7; //damage dealing mode means it's not very effective as stripping systems, and should be fired late despite high damage potential
+
+        public $firingModes = array(
+            1 => "Raking"
+        );
+
+        public $rangePenalty = 0.33;
+        public $fireControl = array(null, 2, 4); // fighters, <mediums, <capitals
+
+        public $damageType = "Raking"; 
+        public $weaponClass = "Molecular"; 
+
+        public function getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos=null){ //standard part of armor - reduce by 1!
+            $armour = parent::getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos);
+            $armour = $armour - 1;
+            $armour = max(0,$armour);
+            return $armour;
+        }
+                                
+        public function getDamage($fireOrder){        return Dice::d(10, 4)+10;   }
+        public function setMinDamage(){   return  $this->minDamage = 14 ;      }
+        public function setMaxDamage(){   return  $this->maxDamage = 50 ;      }
+         
+   }//endof class EarlyFusionAgitator
+
+  class FusionCutter extends Raking{ //Even earlier version of Fusion Agitator used by Yolu on OSATs
+        public $name = "fusionCutter";
+        public $displayName = "Fusion Cutter";
+        public $animation = "laser";
+        public $animationColor = array(0, 200, 200);
+        public $animationExplosionScale = 0.35; //make it thin, despite high damage potential!
+	    /*
+        public $trailColor = array(30, 170, 255);
+        public $animationWidth = 2;
+        public $animationWidth2 = 0.3;
+        public $animationExplosionScale = 0.15;
+*/
+        public $intercept = 0;
+        public $loadingtime = 3;
+        public $raking = 6;
+        public $priority = 7; //damage dealing mode means it's not very effective as stripping systems, and should be fired late despite high damage potential
+
+        public $firingModes = array(
+            1 => "Raking"
+        );
+
+        public $rangePenalty = 0.5;
+        public $fireControl = array(null, 2, 3); // fighters, <mediums, <capitals
+
+        public $damageType = "Raking"; 
+        public $weaponClass = "Molecular"; 
+                        
+        public function getDamage($fireOrder){        return Dice::d(10, 4)+8;   }
+        public function setMinDamage(){   return  $this->minDamage = 12 ;      }
+        public function setMaxDamage(){   return  $this->maxDamage = 48 ;      }
+         
+   }//endof	class FusionCutter
+	      
         //Yolu heavy fighter weapon
     class LightMolecularDisruptor extends Raking{
         public $name = "molecularDisruptor";
-        public $displayName = "Light Molecular Distruptor";
+        public $displayName = "Light Molecular Disruptor";
         public $animation = "laser";
         public $animationColor = array(30, 170, 255);
 	    /*
@@ -475,6 +673,61 @@
         public function setMaxDamage(){   return  $this->maxDamage = 35 ;      }
     }
 
+        //Yolu heavy fighter weapon
+    class LightMolecularDisruptorShip extends Raking{
+        public $name = "molecularDisruptor";
+        public $displayName = "Light Molecular Disruptor";
+        public $animation = "laser";
+        public $animationColor = array(30, 170, 255);
+	    /*
+        public $animationExplosionScale = 0.20;
+        public $projectilespeed = 10;
+        public $animationWidth = 5;
+        public $trailLength = 12;
+        */
+        public $loadingtime = 3;
+        public $raking = 10;
+  //      public $exclusive = true;
+        public $priority = 8;//fighter Raking weapon
+        
+        public $rangePenalty = 1;
+        public $fireControl = array(-4, 0, 3); // fighters, <mediums, <capitals 
+
+        public $damageType = "Raking"; 
+        public $weaponClass = "Molecular"; 
+        private $alreadyReduced = false;
+        
+
+        
+        public function setSystemDataWindow($turn){      
+            parent::setSystemDataWindow($turn);
+            $this->data["Special"] = 'Reduces armor on facing Structure if at least 3 shots hit';
+        }
+
+        protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location = null){
+            parent::doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location);
+			if ($system->advancedArmor) return;
+            if(!$this->alreadyReduced){ 
+                $this->alreadyReduced = true; 
+                if(LightMolecularDisrupterHandler::checkArmorReduction($target, $shooter)){ //static counting!
+					$sectionFacing = $target->getHitSection($shooter, $fireOrder->turn);
+					$struct = $target->getStructureSystem($sectionFacing); 
+                    //$struct = $target->getStructureSystem($location);
+                    if ($struct->advancedArmor) return;
+                    if(!$struct->isDestroyed($fireOrder->turn-1)){ //last turn Structure was still there...
+                        $crit = new ArmorReduced(-1, $target->id, $struct->id, "ArmorReduced", $gamedata->turn);
+                        $crit->updated = true;
+                        $crit->inEffect = false;
+                        $struct->criticals[] = $crit;
+                    }
+                }
+            }
+        }
+        
+        public function getDamage($fireOrder){        return Dice::d(10, 2)+15;   }
+        public function setMinDamage(){   return  $this->minDamage = 17 ;      }
+        public function setMaxDamage(){   return  $this->maxDamage = 35 ;      }
+    }//end of LightMolecularDisruptorShip
 
 
     class LightMolecularDisrupterHandler{

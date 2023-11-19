@@ -56,9 +56,9 @@
 
         public function setSystemDataWindow($turn){
             parent::setSystemDataWindow($turn);
-	    $this->data["Special"] = "Standard power: D2 pulses, +1/20%, max 3; intercept 1; 1/turn";
-	    $this->data["Special"] .= "<br>Double power: D3+1 pulses, +1/20%, max 4; intercept 2; cooldown 1 turns";
-	    $this->data["Special"] .= "<br>Triple power: D3+2 pulses, +1/20%, max 5; intercept 3; cooldown 2 turns and forced critical";
+	    $this->data["Special"] = "Standard power: D2 pulses, +1/20%, max 3; intercept -5; 1/turn";
+	    $this->data["Special"] .= "<br>Double power: D3+1 pulses, +1/20%, max 4; intercept -10; cooldown 1 turns";
+	    $this->data["Special"] .= "<br>Triple power: D3+2 pulses, +1/20%, max 5; intercept -15; cooldown 2 turns and forced critical";
             $this->defaultShots = $this->getMaxPulses($turn);
             $this->normalload = $this->loadingtime;
 
@@ -210,9 +210,9 @@ class GraviticBolt extends Gravitic
         }
 
         public function setSystemDataWindow($turn){
-	    $this->data["Special"] = "Standard power: 9 damage, intercept 1,  no cooldown";
-	    $this->data["Special"] .= "<br>Double power: 12 damage, intercept 2, cooldown 1 turns";
-	    $this->data["Special"] .= "<br>Triple power: 15 damage, intercept 3, cooldown 2 turns and forced critical";
+	    $this->data["Special"] = "Standard power: 9 damage, intercept -5,  no cooldown";
+	    $this->data["Special"] .= "<br>Double power: 12 damage, intercept -10, cooldown 1 turns";
+	    $this->data["Special"] .= "<br>Triple power: 15 damage, intercept -15, cooldown 2 turns and forced critical";
 
         
             switch($this->getBoostLevel($turn)){

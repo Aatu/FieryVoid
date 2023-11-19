@@ -1009,17 +1009,6 @@ class AmmoMissileRackS extends Weapon{
     public $firingMode = 1;
     public $priority = 6;
     public $loadingtime = 2;
-	public $hidetarget = false; //For Stealth missile
-
-	public $intercept = 0;	//Adding Intercept variables for Interceptor missiles	
-	public $ballisticIntercept = false;
-	
-	public $maxpulses = 0;    //Adding Pulse variables for Starburst missiles
-	public $rof = 0;
-	public $useDie = 0; //die used for base number of hits
-	public $fixedBonusPulses = 0;//for weapons doing dX+Y pulse	  
-	
-	
 	
 	protected $availableAmmoAlreadySet = false; //set to true if calling constructor from derived weapon that sets different ammo options
 
@@ -1050,15 +1039,50 @@ class AmmoMissileRackS extends Weapon{
 	
 	private $ammoMagazine; //reference to ammo magazine
 	private $ammoClassesUsed = array();
-	public $hidetargetArray = array();//For Stealth missile
 	
-	public $interceptArray = array();     //Adding Intercept variables for Interceptor missiles	
-	public $ballisticInterceptArray = array();	
-	
-	public $maxpulsesArray = array();     //Adding Pulse variables for Starburst missiles	
+//For Stealth missile
+	public $hidetarget = false;
+	public $hidetargetArray = array();
+//Adding Pulse variables for Starburst missiles	
+	public $maxpulses = 0;    
+	public $rof = 0;
+	public $useDie = 0; //die used for base number of hits
+	public $fixedBonusPulses = 0;//for weapons doing dX+Y pulse	
+	public $maxpulsesArray = array();
 	public $rofArray = array();
 	public $useDieArray = array();
-	public $fixedBonusPulsesArray = array();		
+	public $fixedBonusPulsesArray = array();	
+//Extra variable Multiwarhead	
+    public $calledShotMod = -8; //Normal called shot modifier is -8
+	public $calledShotModArray = array();    		  
+//Extra variables for KK Missile
+	public $specialRangeCalculation = false; //To allow front-end to work for KK missiles.
+	public $specialRangeCalculationArray = array(); 	
+	public $rangePenalty = 0;	
+	public $rangePenaltyArray = array(); 
+	public $noLockPenalty = false;
+	public $noLockPenaltyArray = array();		
+//Extra variables for HARM Missile	
+	public $specialHitChanceCalculation = false;
+	public $specialHitChanceCalculationArray = array();			
+	
+//F-Rack variables removing for now to prevent anything odd happening.
+	/*
+	protected $firedInRapidMode = false; //was this weapon fired in rapid mode (this turn)?
+	protected $firedInLongRangeMode = false;
+	protected $baseFireControlArray = null; //base values of fire control - copy necessary due to necessity of recalculation now and then!	
+	protected $baseRange = null; //base value of range - copy necessary due to necessity of recalculation now and then!
+	protected $baseRangeArray = null; //base value of range - copy necessary due to necessity of recalculation now and then!
+	protected $baseDistance = null; //base value of range - copy necessary due to necessity of recalculation now and then!
+	protected $baseDistanceArray = null; //base value of range - copy necessary due to necessity of recalculation now and then!	
+	*/
+	
+//Adding Intercept variables for Interceptor missiles
+	//public $intercept = 0;	//Adding Intercept variables for Interceptor missiles	
+	//public $ballisticIntercept = false;	
+	//public $interceptArray = array();     	
+	//public $ballisticInterceptArray = array();	
+    		
 	
 	
 	
@@ -1076,11 +1100,14 @@ class AmmoMissileRackS extends Weapon{
 			$this->ammoClassesArray[] =  new AmmoMissileF();
 			$this->ammoClassesArray[] =  new AmmoMissileA();
 			$this->ammoClassesArray[] =  new AmmoMissileP();
-			$this->ammoClassesArray[] =  new AmmoMissileD(); //...though only Alacans use those, as simple Basic missiles are far superior
-			$this->ammoClassesArray[] =  new AmmoMissileC();
-	//		$this->ammoClassesArray[] =  new AmmoMissileI(); //Only available to Class-D launchers on Kor-Lyan ships at this time.					
+			$this->ammoClassesArray[] =  new AmmoMissileD(); //...though only Alacans and Sorithians use those, as simple Basic missiles are far superior
+			$this->ammoClassesArray[] =  new AmmoMissileC();				
 			$this->ammoClassesArray[] =  new AmmoMissileS();
-			$this->ammoClassesArray[] =  new AmmoMissileK();				
+			$this->ammoClassesArray[] =  new AmmoMissileK();
+			$this->ammoClassesArray[] =  new AmmoMissileM();
+			$this->ammoClassesArray[] =  new AmmoMissileKK();
+			$this->ammoClassesArray[] =  new AmmoMissileX();
+	//		$this->ammoClassesArray[] =  new AmmoMissileI(); //Only available to Class-D launchers on Kor-Lyan ships at this time, created in ship magazine.						
 			$this->availableAmmoAlreadySet = true;
 		}
 	
@@ -1132,12 +1159,17 @@ class AmmoMissileRackS extends Weapon{
 		$this->maxDamageArray = array();
 		$this->ammoClassesUsed = array();
 		$this->hidetargetArray = array();
-//		$this->interceptArray = array();//Adding Intercept variables for Interceptor missiles	
-//		$this->ballisticInterceptArray = array();
 		$this->maxpulsesArray = array();//Adding Pulse functions for Starburst missiles	
 		$this->rofArray = array();
 		$this->useDieArray = array();
 		$this->fixedBonusPulsesArray = array();
+		$this->calledShotModArray = array();	//Adding calledShotMod variable for Multiwarhead Missile.
+		$this->specialRangeCalculationArray = array(); //Adding variables for KK Missile
+		$this->rangePenaltyArray = array();
+		$this->noLockPenaltyArray = array();		 
+		$this->specialHitChanceCalculationArray = array();						
+//		$this->interceptArray = array();//Adding Intercept variables for Interceptor missiles	
+//		$this->ballisticInterceptArray = array();	    		
 							
 		
 		//add data for all modes to arrays
@@ -1179,13 +1211,18 @@ class AmmoMissileRackS extends Weapon{
 				$this->noOverkillArray[$currMode] = $currAmmo->noOverkill;
 				$this->minDamageArray[$currMode] = $currAmmo->minDamage;
 				$this->maxDamageArray[$currMode] = $currAmmo->maxDamage;
-				$this->hidetargetArray[$currMode] = $currAmmo->hidetarget;//For Stealth missiles
-//				$this->interceptArray[$currMode] = $currAmmo->intercept;//Adding Intercept variables for Interceptor missiles	
-//				$this->ballisticInterceptArray[$currMode] = $currAmmo->ballisticIntercept;				
+				$this->hidetargetArray[$currMode] = $currAmmo->hidetarget;//For Stealth missiles							
 				$this->maxpulsesArray[$currMode] = $currAmmo->maxpulses;//Adding Pulse functions for Starburst missiles	
 				$this->rofArray[$currMode] = $currAmmo->rof;
 				$this->useDieArray[$currMode] = $currAmmo->useDie;
-				$this->fixedBonusPulsesArray[$currMode] = $currAmmo->fixedBonusPulses;		
+				$this->fixedBonusPulsesArray[$currMode] = $currAmmo->fixedBonusPulses;
+			    $this->calledShotModArray[$currMode] = $currAmmo->calledShotMod;	//Adding calledShotMod variable for Multiwarhead Missile.
+				$this->specialRangeCalculationArray[$currMode] = $currAmmo->specialRangeCalculation; //Adding variables for KK Missile
+				$this->rangePenaltyArray[$currMode] = $currAmmo->rangePenalty;
+				$this->noLockPenaltyArray[$currMode] = $currAmmo->noLockPenalty;				
+				$this->specialHitChanceCalculationArray[$currMode] = $currAmmo->specialHitChanceCalculation;							    
+//				$this->interceptArray[$currMode] = $currAmmo->intercept;//Adding Intercept variables for Interceptor missiles	
+//				$this->ballisticInterceptArray[$currMode] = $currAmmo->ballisticIntercept;			    							
 			}
 		}
 			
@@ -1217,13 +1254,18 @@ class AmmoMissileRackS extends Weapon{
 		$strippedSystem->noOverkillArray = $this->noOverkillArray; 
 		$strippedSystem->minDamageArray = $this->minDamageArray; 
 		$strippedSystem->maxDamageArray = $this->maxDamageArray; 
-		$strippedSystem->hidetargetArray = $this->hidetargetArray;	//For Stealth Missiles
-//		$strippedSystem->interceptArray = $this->interceptArray;//Adding Intercept variables for Interceptor missiles	
-//		$strippedSystem->ballisticInterceptArray = $this->ballisticInterceptArray;			
+		$strippedSystem->hidetargetArray = $this->hidetargetArray;	//For Stealth Missiles			
 		$strippedSystem->maxpulsesArray = $this->maxpulsesArray;//Adding Pulse functions for Starburst missiles	
 		$strippedSystem->rofArray = $this->rofArray;
 		$strippedSystem->useDieArray = $this->useDieArray;
-		$strippedSystem->fixedBonusPulsesArray = $this->fixedBonusPulsesArray;		
+		$strippedSystem->fixedBonusPulsesArray = $this->fixedBonusPulsesArray;	
+		$strippedSystem->calledShotModArray = $this->calledShotModArray;	//Adding calledShotMod variable for Multiwarhead Missile.
+		$strippedSystem->specialRangeCalculationArray = $this->specialRangeCalculationArray; //Adding for KK Missile
+		$strippedSystem->rangePenaltyArray = $this->rangePenaltyArray;
+		$strippedSystem->noLockPenaltyArray = $this->noLockPenaltyArray;		
+		$strippedSystem->specialHitChanceCalculationArray = $this->specialHitChanceCalculationArray;		
+//		$strippedSystem->interceptArray = $this->interceptArray;//Adding Intercept variables for Interceptor missiles	
+//		$strippedSystem->ballisticInterceptArray = $this->ballisticInterceptArray;							
 		return $strippedSystem;
 	} 
 	
@@ -1257,7 +1299,7 @@ class AmmoMissileRackS extends Weapon{
 		
         parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
     }//endof function onDamagedSystem
-	
+
 	
 	public function criticalPhaseEffects($ship, $gamedata){ //add testing for ammo explosion!
 		if(!$this->isDamagedOnTurn($gamedata->turn)) return; //if there is no damage this turn, then no testing for explosion
@@ -1322,8 +1364,7 @@ class AmmoMissileRackS extends Weapon{
 		}else{
 			return 0;	
 			}
-	    }
-
+	    }	    
 	public function rollPulses($turn, $needed, $rolled)
 	    {
 			$currAmmo = null;
@@ -1338,7 +1379,102 @@ class AmmoMissileRackS extends Weapon{
 				return 0;	
 			}
 	    }
-	
+	    
+    public function beforeFiringOrderResolution($gamedata) //For Multiwarhead missile
+    {
+    	$firingOrders = $this->getFireOrders($gamedata->turn);
+    	
+      $originalFireOrder = null;
+              foreach ($firingOrders as $fireOrder) { 
+              	   if ($fireOrder->type == 'ballistic') { //this was just added after succesful test
+                    $originalFireOrder = $fireOrder;
+                    break; //no need to search further
+                    }//this was just added after succesful test
+				}    
+        if($originalFireOrder==null) return; //no appropriate fire order, end of work	
+    	
+    	
+		$currAmmo = null;
+        //find appropriate ammo
+		if (array_key_exists($originalFireOrder->firingMode,$this->ammoClassesUsed)){
+			$currAmmo = $this->ammoClassesUsed[$originalFireOrder->firingMode];
+		}
+		if ($currAmmo) $currAmmo->beforeFiringOrderResolution($gamedata, $this, $originalFireOrder);
+		
+        parent::beforeFiringOrderResolution($gamedata);
+        
+	}	//endof function beforeFiringOrderResolution	
+
+
+    public function getCalledShotMod()  	//For Multiwarhead missiles
+        {
+            $currAmmo = null;
+            //find appropriate ammo
+            if (array_key_exists($this->firingMode,$this->ammoClassesUsed)){
+                $currAmmo = $this->ammoClassesUsed[$this->firingMode];
+            }
+            //execute getCalledShotMod()
+            if($currAmmo){
+                return $currAmmo->getCalledShotMod();
+            }else{
+                return $this->calledShotMod;
+            }
+        }//endof function getCalledShotMod
+
+
+     public function fire($gamedata, $fireOrder)	//For Multiwarhead missiles
+    {
+		$currAmmo = null;
+        //find appropriate ammo
+		if (array_key_exists($this->firingMode,$this->ammoClassesUsed)){
+			$currAmmo = $this->ammoClassesUsed[$this->firingMode];
+		}
+		if ($currAmmo) $currAmmo->fire($gamedata, $fireOrder);
+		
+        parent::fire($gamedata, $fireOrder);
+
+	}//endof function fire
+
+
+public function calculateRangePenalty($distance)
+{
+    $currAmmo = null;
+    
+    // find appropriate ammo
+    if (array_key_exists($this->firingMode, $this->ammoClassesUsed)) {
+        $currAmmo = $this->ammoClassesUsed[$this->firingMode];
+    }
+    
+    // Check if $currAmmo is not null before calling the method
+            if($currAmmo){
+                return $currAmmo->calculateRangePenalty($distance);
+            }else{
+                return 0;
+            }
+    parent::calculateRangePenalty($distance);        
+	}//endof function calculateRangePenalty
+
+
+    public function calculateHitBase($gamedata, $fireOrder)
+    {
+    	// Call the parent method for weapon hit calculation
+        parent::calculateHitBase($gamedata, $fireOrder);
+    	
+        $currAmmo = null;
+        
+        // Find appropriate ammo
+        if (array_key_exists($this->firingMode, $this->ammoClassesUsed)){
+            $currAmmo = $this->ammoClassesUsed[$this->firingMode];
+        }
+        
+        if ($currAmmo) {
+            $currAmmo->calculateHitBase($gamedata, $fireOrder);
+        }
+        
+
+	}//endof function calculateHitBase
+
+
 } //endof class AmmoMissileRackS
 
 
@@ -1364,7 +1500,7 @@ class AmmoMissileRackL extends AmmoMissileRackS{
 	protected $basicDistanceRange = 70;
 
     protected $rackExplosionDamage = 75; //how much damage will this weapon do in case of catastrophic explosion
-    protected $rackExplosionThreshold = 20; //how high roll is needed for rack explosion    
+    protected $rackExplosionThreshold = 20; //how high roll is needed for rack explosion   
 	
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base=false)
 	{
@@ -1395,7 +1531,7 @@ class AmmoMissileRackLH extends AmmoMissileRackS{
 	protected $basicDistanceRange = 70;
 
     protected $rackExplosionDamage = 0; //how much damage will this weapon do in case of catastrophic explosion
-    protected $rackExplosionThreshold = 21; //how high roll is needed for rack explosion    
+    protected $rackExplosionThreshold = 21; //how high roll is needed for rack explosion        
 	
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base=false)
 	{
@@ -1427,7 +1563,7 @@ class AmmoMissileRackB extends AmmoMissileRackS{
 	protected $basicDistanceRange = 70;
 
     protected $rackExplosionDamage = 0; //how much damage will this weapon do in case of catastrophic explosion
-    protected $rackExplosionThreshold = 21; //how high roll is needed for rack explosion    
+    protected $rackExplosionThreshold = 21; //how high roll is needed for rack explosion         
 	
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base=false)
 	{
@@ -1459,7 +1595,7 @@ class AmmoMissileRackR extends AmmoMissileRackS{
 	protected $basicDistanceRange = 60;
 
     protected $rackExplosionDamage = 75; //how much damage will this weapon do in case of catastrophic explosion
-    protected $rackExplosionThreshold = 19; //how high roll is needed for rack explosion    
+    protected $rackExplosionThreshold = 19; //how high roll is needed for rack explosion          
 	
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base=false)
 	{
@@ -1492,8 +1628,8 @@ class AmmoMissileRackSO extends AmmoMissileRackS{
 	protected $basicDistanceRange = 60;
 
     protected $rackExplosionDamage = 45; //how much damage will this weapon do in case of catastrophic explosion (Class-SO launcher has smaller magazine than Class-S)
-    protected $rackExplosionThreshold = 20; //how high roll is needed for rack explosion    
-	
+    protected $rackExplosionThreshold = 20; //how high roll is needed for rack explosion  
+
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base=false)
 	{
 		if ( $maxhealth == 0 ) $maxhealth = 6;
@@ -1523,7 +1659,7 @@ class AmmoMissileRackO extends AmmoMissileRackS{
 	protected $basicDistanceRange = 60;
 
     protected $rackExplosionDamage = 45; //how much damage will this weapon do in case of catastrophic explosion (Class-SO launcher has smaller magazine than Class-S)
-    protected $rackExplosionThreshold = 20; //how high roll is needed for rack explosion    
+    protected $rackExplosionThreshold = 20; //how high roll is needed for rack explosion          
 	
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base=false)
 	{
@@ -1557,7 +1693,7 @@ class AmmoMissileRackA extends AmmoMissileRackS{
 	protected $basicDistanceRange = 60;
 
     protected $rackExplosionDamage = 56; //how much damage will this weapon do in case of catastrophic explosion
-    protected $rackExplosionThreshold = 19; //how high roll is needed for rack explosion    
+    protected $rackExplosionThreshold = 19; //how high roll is needed for rack explosion            
 	
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base=false)
 	{
@@ -1595,7 +1731,7 @@ class AmmoMissileRackD extends AmmoMissileRackS{
 	public $ballisticIntercept = true;	
 
     protected $rackExplosionDamage = 15; //how much damage will this weapon do in case of catastrophic explosion
-    protected $rackExplosionThreshold = 20; //how high roll is needed for rack explosion    
+    protected $rackExplosionThreshold = 20; //how high roll is needed for rack explosion           
 	
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base=false)
 	{
@@ -1647,7 +1783,7 @@ class AmmoBombRack extends AmmoMissileRackS{
 	protected $basicDistanceRange = 60;
 
     protected $rackExplosionDamage = 30; //how much damage will this weapon do in case of catastrophic explosion
-    protected $rackExplosionThreshold = 20; //how high roll is needed for rack explosion    
+    protected $rackExplosionThreshold = 20; //how high roll is needed for rack explosion           
 	
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base=false)
 	{
@@ -1685,7 +1821,7 @@ class AmmoFighterRack extends AmmoMissileRackS{
 	protected $basicDistanceRange = 30;
 
     protected $rackExplosionDamage = 0; //how much damage will this weapon do in case of catastrophic explosion
-    protected $rackExplosionThreshold = 22; //how high roll is needed for rack explosion    
+    protected $rackExplosionThreshold = 22; //how high roll is needed for rack explosion          
 	
 	function __construct($startArc, $endArc, $magazine, $base=false) //fighter-sized OSATs might benefit from being stable!
 	{		
@@ -1705,5 +1841,298 @@ class AmmoFighterRack extends AmmoMissileRackS{
 
 
 
+class AmmoMissileRackF extends AmmoMissileRackS {
+		public $name = "FMissileRack";
+        public $displayName = "Class-F Missile Rack";
+        public $iconPath = "ClassFMissileRack.png";
+
+	    public $range = 35;
+	    public $distanceRange = 75;
+	    public $firingMode = 1;
+
+//		public $useOEW = false; //No longer required
+//		public $ballistic = true; //No longer required
+	
+//      public $animation = "trail"; //No longer required
+//		public $animationColor = array(50, 50, 50); //No longer required
+
+  //    public $intercept = 0; //Inherited from AmmoMissileRackS, if interceptor missile used in future
+		public $priority = 6; 		
+		public $loadingtime = 1;
+		public $normalload = 2;
+		
+		public $basicFC=array(3,3,3);
+		public $basicRange = 35;
+		public $basicDistanceRange = 75;				
+
+		protected $rackExplosionDamage = 38; //how much damage will this weapon do in case of catastrophic explosion
+		protected $rackExplosionThreshold = 20; //how high roll is needed for rack explosion (d20)
+//		public $range = 35; //No longer required
+//		public $distanceRange = 75;//No longer required
+//		public $rangeMod = 0;//No longer required
+//		public $hits = array(); //No longer required
+		
+//       public $rangePenalty = 0; //Inherited from AmmoMissileRackS
+//       public $fireControlArray = array(1=>array(6, 6, 6), 2=>array(4, 4, 4)); //Inherited from AmmoMissileRackS
+		protected $firedInRapidMode = false; //was this weapon fired in rapid mode (this turn)?
+		protected $firedInLongRangeMode = false;
+
+//Do I still need these variables, don't seem to be used after I modified recalculateFireControl function?				
+        protected $baseFireControlArray = null; //base values of fire control - copy necessary due to necessity of recalculation now and then!
+        protected $baseRange = null; //base value of range - copy necessary due to necessity of recalculation now and then!
+		protected $baseRangeArray = null; //base value of range - copy necessary due to necessity of recalculation now and then!
+		protected $baseDistance = null; //base value of range - copy necessary due to necessity of recalculation now and then!
+		protected $baseDistanceArray = null; //base value of range - copy necessary due to necessity of recalculation now and then!
+		
+//		public $firingModes = array(1=>'Standard', 2=>'Long-range'); //Inherited from AmmoMissileRackS
+//		public $damageTypeArray = array(1=>'Standard', 2=>'Standard'); //Inherited from AmmoMissileRackS
+
+//		public $rangeArray = array(1=>20, 2=>35); //Inherited from AmmoMissileRackS
+//		public $distanceRangeArray = array(1=>60, 2=>105); //Inherited from AmmoMissileRackS
+  		
+//      public $damageType = "Standard"; //Inherited from AmmoMissileRackS
+//		public $weaponClass = "Ballistic"; //Inherited from AmmoMissileRackS
+	public $specialRangeCalculation = false; //To prevent front-end using calculateSpecialRangePenalty since this launcher can't use KK missiles.    
+
+		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base=false)
+		{
+		if ( $maxhealth == 0 ) $maxhealth = 6;
+            	if ( $powerReq == 0 ) $powerReq = 0;					
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base); //Parent routines take care of the rest
+		}
+
+        public function setSystemDataWindow($turn){	
+			$this->recalculateFireControl(); //necessary for correct Initial data
+			$this->data["Special"] = 'This weapon can fire either as regular missile launcher, or Long Range launcher. ';
+			$this->data["Special"] .= '<br>It can also fire in Rapid mode (with reduced Fire Control values, but after only 1 turn of charging) - though not right after using Long Range mode.';
+			parent::setSystemDataWindow($turn);	
+		}
+
+	private function modifyFireControl(&$subArray) {  //An extra function needed to modify Fire Control values across ALL ammo types in recalculateFireControl function.
+  		 	 foreach ($subArray as $key => &$value) {
+    		    if (is_numeric($value)) {
+            $subArray[$key] = $value - 2;
+      				  }
+    			}
+		}
+		
+	private function nullFireControl(&$subArray) {  //An extra function needed to null Fire Control values across ALL ammo types in recalculateFireControl function.
+  		 	 foreach ($subArray as $key => &$value) {
+    		    if (is_numeric($value)) {
+            $subArray[$key] = null;
+      				  }
+    			}
+		}		
+	
+	//recalculates fire control as appropriate for current loading time!
+	private function recalculateFireControl(){
+
+//MARCIN - The below If function only works on the Turn Loaded condition, and doesn't work on just firedInRapidMode.  Suggests that recalculateFireControl function IS being called, but firedInRapidMode variable not operating as intended?
+
+		if (($this->turnsloaded == 1) || ($this->firedInRapidMode == true)) { //after only 1 turn of charging: Standard mode becomes Rapid with reduced Fire Control, Range and Distance Range.
+		
+
+//THESE IF FUNCTIONS NO LONGER SEEM REQUIRED		
+//			if ($this->baseFireControlArray === null){ //base values haven't been copied yet
+//				$this->baseFireControlArray = $this->fireControlArray;}
+
+//			if ($this->baseDistanceArray === null){ //base values haven't been copied yet
+//				$this->baseDistanceArray = $this->distanceRangeArray;}
+
+//			if ($this->baseRangeArray === null){ //base values haven't been copied yet
+//				$this->baseRangeArray = $this->rangeArray;}
+
+
+//MARCIN - When Initial Orders phase loads (or when I refresh the browser), Range and Distance are initially incorrect for Basic Missiles (Firing Mode 1), and it WILL let me fire using incorrect value (e.g. too long a range etc)!  But when I change Firing Mode it immediately amends them from Mode 2 onwards and when I come back to Mode 1 (Basic Missile) it now shows the correct info and will NOT let me target beyond 15 hexes (max range for Rapid launch).  So something happens when I change mode that causes modifications to BasicFC, BasicRange and BasicRangeDistance variables to kick in.	
+			
+			foreach ($this->fireControlArray as &$subArray) {
+ 			   $this->modifyFireControl($subArray);
+			}
+			
+			$this->basicRange = $this->basicRange -20; 		
+			foreach($this->rangeArray as &$value){
+				$value -= 20;
+			}		
+
+			foreach($this->distanceRangeArray as &$value){
+				$value -= 30;
+			}
+
+
+        				
+//MARCIN - DO I still need to changeFiringMode?  Doesn't seem to do anything, but maybe there's something I'm not considering?
+	//		$this->changeFiringMode(1);							
+		}
+			
+// Code below was for Long Ranged shot conditions, trying to get Rapid mode operating first so is out of date now.
+/*		
+		if (($this->turnsloaded == 1) && ($this->firedInLongRangeMode)){
+	
+	
+	//				if ($this->baseFireControlArray === null){ 	//THIS CODE NOT NEEDED ANYMORE?
+	//					$this->baseFireControlArray = $this->basicFC;					}
+					
+					
+			foreach ($this->fireControlArray as &$subArray) {  //To null FC on all modes so as to disabled Rapid mode after Long Range shot the previous turn.
+ 			   $this->nullFireControl($subArray);
+			}				
+		
+		if (($this->turnsloaded == 2) && ($this->firedInLongRangeMode)) { //Reduce fire control for Long Range shot.
+	
+	//			if ($this->baseFireControlArray === null){ 	//THIS CODE NOT NEEDED ANYMORE? //base values haven't been copied yet
+	//				$this->baseFireControlArray = $this->basicFC;			}
+					
+			foreach ($this->fireControlArray as &$subArray) {
+ 			   $this->modifyFireControl($subArray);
+					}			
+					
+			}	*/
+		} //end of recalculateFireControl
+
+	
+	
+// This method generates additional non-standard information in the form of individual system notes
+
+    public function generateIndividualNotes($gameData, $dbManager){ //dbManager is necessary for Initial phase only
+					$this->changeFiringMode(1);	
+		
+		$ship = $this->getUnit();
+		switch($gameData->phase){								
+				case 1: //Initial phase 
+					//if weapon is marked as firing in Rapid mode, make a note of it!
+					if($ship->userid == $gameData->forPlayer){ //only own ships, otherwise bad things may happen!
+						if($this->firedInRapidMode){
+							$notekey = 'RapidFire';
+							$noteHuman = 'fired in Rapid mode';
+							$noteValue = 'R';
+							$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
+						}
+					}
+	// Code below is for Long Ranged shot conditions, trying to get Rapid mode operating first.
+	/*					if($this->firedInLongRangeMode){
+							$notekey = 'LongRange';
+							$noteHuman = 'fired in Long Range mode';
+							$noteValue = 'L';
+							$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue	
+						
+					}  */
+				break;
+				
+				case 4: //Firing phase, you'd previously said this was required too 
+					//if weapon is marked as firing in Rapid mode, make a note of it!
+					if($ship->userid == $gameData->forPlayer){ //only own ships, otherwise bad things may happen!
+						if($this->firedInRapidMode){
+							$notekey = 'RapidFire';
+							$noteHuman = 'fired in Rapid mode';
+							$noteValue = 'R';
+							$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
+						}
+					}
+		// Code below is for Long Ranged shot conditions, trying to get Rapid mode operating first.				
+			/*	
+						if($this->firedInLongRangeMode){
+							$notekey = 'LongRange';
+							$noteHuman = 'fired in Long Range mode';
+							$noteValue = 'L';
+							$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue	
+						
+					}  
+				break; */
+						
+		} 
+	}	//endof function generateIndividualNotes
+	
+	/*act on notes just loaded - to be redefined by systems as necessary
+	 - mark $firedInRapidMode*/
+	 
+	public function onIndividualNotesLoaded($gamedata){
+	//Act on Rapid note
+		foreach ($this->individualNotes as $currNote) if($currNote->turn == $gamedata->turn) if ($currNote->notevalue == 'R'){ //only current round matters!
+			$this->firedInRapidMode = true;			
+			$this->recalculateFireControl(); //necessary for the variable to affect actual firing
+		}
+	// Code below is for Long Ranged shot conditions, trying to get Rapid mode operating first.	
+	//Act on Long Range note
+	/*		foreach ($this->individualNotes as $currNote) if($currNote->turn == $gamedata->turn) if ($currNote->notevalue == 'L'){ //only current round matters!
+				$this->firedInLongRangeMode = true;			
+				$this->recalculateFireControl(); //necessary for the variable to affect actual firing
+			}  */		
+			//and immediately delete notes themselves, they're no longer needed (this will not touch the database, just memory!)
+			$this->individualNotes = array();
+		} //endof function onIndividualNotesLoaded
+	
+	
+	public function doIndividualNotesTransfer(){
+		//data received in variable individualNotesTransfer, further functions will look for variable firedInRapidMode
+		if(is_array($this->individualNotesTransfer)) foreach($this->individualNotesTransfer as $entry) {
+			if ($entry == 'R') $this->firedInRapidMode = true;
+			// Code below is for Long Ranged shot conditions, trying to get Rapid mode operating first.			
+		//Long range
+//				if ($entry == 'L') $this->firedInLongRangeMode = true;							
+			}
+			$this->individualNotesTransfer = array(); //empty, just in case
+		}		
+/*	
+
+//No longer requirement as inherited from AmmoMissileRackS class
+
+	public function getDamage($fireOrder){
+		switch($this->firingMode){
+			case 1: //Standard
+				return 20; 
+				break;
+			case 2: //Long-Range
+				return 20; 
+				break;
+			default: //most missiles do the same damage
+				return 20; 
+				break;	
+		}
+	}
+	
+	public function setMinDamage(){ 
+		switch($this->firingMode){
+			case 1: //Standard
+				$this->minDamage = 20; 
+				break;
+			case 2: //Long-Range
+				$this->minDamage = 20; 
+				break;
+			default: //most missiles do the same damage
+				$this->minDamage = 20; 
+				break;	
+		}
+		$this->minDamageArray[$this->firingMode] = $this->minDamage;
+	}
+	
+	public function setMaxDamage(){
+		switch($this->firingMode){
+			case 1: //Standard
+				$this->maxDamage = 20; 
+				break;
+			case 2: //Long-Range
+				$this->maxDamage = 20; 
+				break;a
+			default: //most missiles do the same damage
+				$this->maxDamage = 20; 
+				break;	
+		}
+		$this->maxDamageArray[$this->firingMode] = $this->maxDamage;
+	}  */
+			
+	public function stripForJson(){
+		$strippedSystem = parent::stripForJson();
+		$strippedSystem->fireControlArray = $this->fireControlArray; 
+		$strippedSystem->rangeArray = $this->rangeArray; 
+		$strippedSystem->distanceRangeArray = $this->distanceRangeArray; 
+	
+		return $strippedSystem;
+	
+		} 
+
+}//end of class AmmoMissileRackF
+
+
 
 ?>
+
