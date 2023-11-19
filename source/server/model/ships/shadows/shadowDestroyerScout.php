@@ -5,7 +5,7 @@ class ShadowDestroyerScout extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 1300;
-		$this->faction = "Shadows";
+		$this->faction = "Shadow Association";
         $this->phpclass = "ShadowDestroyerScout";
         $this->imagePath = "img/ships/ShadowDestroyer.png";
         $this->shipClass = "Scout";

@@ -5,7 +5,7 @@ class Makar extends OSAT{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 225;
-		$this->faction = "Markab";
+		$this->faction = "Markab Theocracy";
         $this->phpclass = "Makar";
         $this->imagePath = "img/ships/MarkabOSAT.png";
         $this->shipClass = "Makar Defense Satellite";

@@ -6,7 +6,7 @@ class HkShiningStar extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 45*6;
-        $this->faction = "Orieni";
+        $this->faction = "Orieni Imperium";
         $this->phpclass = "HkShiningStar";
         $this->shipClass = "Shining Star Hunter-Killer flight";
         $this->imagePath = "img/ships/OrieniHK.png";

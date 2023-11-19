@@ -5,7 +5,7 @@ class TGan extends OSAT{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 225;
-	$this->faction = "Narn";
+	$this->faction = "Narn Regime";
         $this->phpclass = "TGan";
         $this->imagePath = "img/ships/tgan.png";
         $this->shipClass = "T'Gan Satellite";

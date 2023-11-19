@@ -6,7 +6,7 @@ class zzunoffTShon extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 600;
-		$this->faction = "Narn";
+		$this->faction = "Narn Regime";
         $this->phpclass = "zzunoffTShon";
         $this->imagePath = "img/ships/tloth.png";
         $this->shipClass = "T'Shon Early Explorer";

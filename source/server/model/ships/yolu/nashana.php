@@ -5,7 +5,7 @@ class Nashana extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 950;
-	$this->faction = "Yolu";
+	$this->faction = "Yolu Confederation";
         $this->phpclass = "Nashana";
         $this->imagePath = "img/ships/nashana.png";
         $this->shipClass = "Nashana Light Cruiser";

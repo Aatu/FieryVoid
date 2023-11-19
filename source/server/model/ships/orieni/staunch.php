@@ -5,7 +5,7 @@ class Staunch extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 400;
-	$this->faction = "Orieni";
+	$this->faction = "Orieni Imperium";
         $this->phpclass = "Staunch";
         $this->imagePath = "img/ships/steadfast.png";
         $this->shipClass = "Staunch Strike Frigate";

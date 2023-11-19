@@ -5,7 +5,7 @@ class Pariah extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 790;
-		$this->faction = "Orieni";
+		$this->faction = "Orieni Imperium";
         $this->phpclass = "Pariah";
         $this->imagePath = "img/ships/enlightenment.png";
         $this->shipClass = "Pariah Light Command Ship";

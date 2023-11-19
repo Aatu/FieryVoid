@@ -7,7 +7,7 @@ class TorataZFtrTuka extends FighterFlight
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 50 *6;
-		$this->faction = "Torata";
+		$this->faction = "Torata Regency";
 		$this->phpclass = "TorataZFtrTuka";
 		$this->shipClass = "Tuka Medium Fighters";
 		$this->imagePath = "img/ships/TorataTuka.png";

@@ -7,7 +7,7 @@ class JaStat extends StarBaseFiveSections{
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 5000;
-		$this->faction = "Narn";
+		$this->faction = "Narn Regime";
 		$this->phpclass = "JaStat";
 		$this->shipClass = "Ja'Stat Warbase";
 		$this->fighters = array("heavy"=>36); 

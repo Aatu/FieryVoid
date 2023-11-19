@@ -6,7 +6,7 @@ class TorataGoltharCC extends BaseShip{
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 600;
-		$this->faction = "Torata";
+		$this->faction = "Torata Regency";
 		$this->phpclass = "TorataGoltharCC";
 		$this->imagePath = "img/ships/TorataGolthar.png";
 		$this->shipClass = "Golthar Fast Cruiser";

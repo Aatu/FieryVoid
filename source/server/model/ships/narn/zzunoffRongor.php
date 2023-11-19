@@ -5,7 +5,7 @@ class zzunoffRongor extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 475;
-        $this->faction = "Narn";
+        $this->faction = "Narn Regime";
         $this->phpclass = "zzunoffRongor";
         $this->imagePath = "img/ships/rongoth.png";
         $this->shipClass = "Rongor Bolt Destroyer";

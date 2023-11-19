@@ -5,7 +5,7 @@ class Shobogna extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 260;
-		$this->faction = "Pak'ma'ra";
+		$this->faction = "Pak'Ma'Ra Confederacy";
         $this->phpclass = "Shobogna";
         $this->imagePath = "img/ships/PakmaraShobogna.png";
         $this->shipClass = "Sho'Bog'Na Patroller";

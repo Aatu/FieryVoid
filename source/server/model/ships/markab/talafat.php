@@ -3,7 +3,7 @@ class Talafat extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         $this->pointCost = 650;
-        $this->faction = "Markab";
+        $this->faction = "Markab Theocracy";
         $this->phpclass = "Talafat";
         $this->isd = 2015;        
         $this->imagePath = "img/ships/MarkabScout.png"; //needs to be changed

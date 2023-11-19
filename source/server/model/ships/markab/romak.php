@@ -5,7 +5,7 @@ class Romak extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 400;
-		$this->faction = "Markab";
+		$this->faction = "Markab Theocracy";
         $this->phpclass = "Romak";
         $this->imagePath = "img/ships/MarkabPoliceShip.png"; //change
         $this->shipClass = "Romak Escort Frigate";

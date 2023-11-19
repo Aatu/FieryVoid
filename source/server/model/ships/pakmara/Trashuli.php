@@ -5,7 +5,7 @@ class Trashuli extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 315;
-		$this->faction = "Pak'ma'ra";
+		$this->faction = "Pak'Ma'Ra Confederacy";
         $this->phpclass = "Trashuli";
         $this->imagePath = "img/ships/PakmaraTrashuli.png";
         $this->shipClass = "Tra'shu'li Armed Liner";

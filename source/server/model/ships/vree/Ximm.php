@@ -5,7 +5,7 @@ class Ximm extends VreeCapital{
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 550;
-		$this->faction = "Vree";
+		$this->faction = "Vree Conglomerate";
 		$this->phpclass = "Ximm";
 		$this->shipClass = "Ximm Close Escort";
 		$this->isd = 2219;

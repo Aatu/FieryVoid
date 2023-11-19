@@ -7,7 +7,7 @@ class Falaren extends StarBaseSixSections
 
 		$this->pointCost = 7000;
 		$this->base = true;
-		$this->faction = "Yolu";
+		$this->faction = "Yolu Confederation";
 		$this->phpclass = "Falaren";
 		$this->shipClass = "Falaren Starbase";
 		$this->imagePath = "img/ships/YoluFalaren.png";

@@ -5,7 +5,7 @@ class Tishat extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 510;
-		$this->faction = "Minbari";
+		$this->faction = "Minbari Federation";
 		$this->phpclass = "Tishat";
 		$this->shipClass = "Tishat medium flight";
 		// need picture

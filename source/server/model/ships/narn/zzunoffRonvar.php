@@ -5,7 +5,7 @@ class zzunoffRonvar extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 475;
-        $this->faction = "Narn";
+        $this->faction = "Narn Regime";
         $this->phpclass = "zzunoffRonvar";
         $this->imagePath = "img/ships/rongoth.png";
         $this->shipClass = "Ronvar Pulsar Destroyer";

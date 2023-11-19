@@ -7,7 +7,7 @@ class LanassaRefit extends OSAT
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 240;
-        $this->faction = "Yolu";
+        $this->faction = "Yolu Confederation";
 	      	$this->variantOf = "Lashassi Fusion OSAT";
 	        $this->occurence = "common";  
 		$this->phpclass = "LanassaRefit";

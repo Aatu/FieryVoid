@@ -5,7 +5,7 @@ class Plasalle extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 550;
-		$this->faction = "Pak'ma'ra";
+		$this->faction = "Pak'Ma'Ra Confederacy";
 		$this->phpclass = "Plasalle";
 		$this->imagePath = "img/ships/PakmaraSimsalle.png";
 		$this->shipClass = "Pla'sall'e Wave Cruiser";

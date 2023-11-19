@@ -5,7 +5,7 @@ class Crusader extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 490;
-        $this->faction = "Orieni";
+        $this->faction = "Orieni Imperium";
         $this->phpclass = "Crusader";
         $this->imagePath = "img/ships/commune.png";
         $this->shipClass = "Crusader Heavy Frigate";

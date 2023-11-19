@@ -7,7 +7,7 @@ class TorataTumalOSAT extends OSAT
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 200;
-		$this->faction = "Torata";
+		$this->faction = "Torata Regency";
 		$this->phpclass = "TorataTumalOSAT";
 		$this->shipClass = "Tumal Orbital Satellite";
 		$this->imagePath = "img/ships/TorataTumal.png";

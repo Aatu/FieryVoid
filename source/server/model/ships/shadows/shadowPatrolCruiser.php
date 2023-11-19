@@ -5,7 +5,7 @@ class ShadowPatrolCruiser extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 950;
-		$this->faction = "Shadows";
+		$this->faction = "Shadow Association";
         $this->phpclass = "ShadowPatrolCruiser";
         $this->imagePath = "img/ships/ShadowPatrolCruiser.png";
         $this->shipClass = "Patrol Cruiser";

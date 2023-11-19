@@ -5,7 +5,7 @@ class Thira extends LCV{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 90;
-        //$this->faction = "Usuuth";
+        //$this->faction = "Usuuth Coalition";
 	    $this->faction = "Civilians";
         $this->phpclass = "Thira";
         $this->shipClass = "Usuuth Thira Freighter";

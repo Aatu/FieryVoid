@@ -5,7 +5,7 @@ class Hastan extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 800;
-        $this->faction = "Yolu";
+        $this->faction = "Yolu Confederation";
         $this->phpclass = "Hastan";
         $this->imagePath = "img/ships/hastan.png";
         $this->shipClass = "Hastan Escort Frigate";

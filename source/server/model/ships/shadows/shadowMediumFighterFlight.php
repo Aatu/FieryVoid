@@ -5,7 +5,7 @@ class ShadowMediumFighterFlight extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 150*6;
-		$this->faction = "Shadows";
+		$this->faction = "Shadow Association";
 		$this->phpclass = "ShadowMediumFighterFlight";
 		$this->shipClass = "Medium Fighters";
 		$this->imagePath = "img/ships/ShadowFighter.png";

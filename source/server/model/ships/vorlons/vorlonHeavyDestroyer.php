@@ -5,7 +5,7 @@ class VorlonHeavyDestroyer extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 1500;
-		$this->faction = "Vorlons";
+		$this->faction = "Vorlon Empire";
         $this->phpclass = "VorlonHeavyDestroyer";
         $this->shipClass = "Heavy Destroyer";
         $this->variantOf = "Battle Destroyer";

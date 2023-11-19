@@ -5,7 +5,7 @@ class Shokos extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 325;
-		$this->faction = "Narn";
+		$this->faction = "Narn Regime";
         $this->phpclass = "Shokos";
         $this->imagePath = "img/ships/shokos.png";
         $this->shipClass = "Sho'Kos Patrol Cutter";

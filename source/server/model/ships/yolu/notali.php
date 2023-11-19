@@ -5,7 +5,7 @@ class Notali extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
 
         $this->pointCost = 1000;
-        $this->faction = "Yolu";
+        $this->faction = "Yolu Confederation";
         $this->phpclass = "Notali";
         $this->imagePath = "img/ships/notali.png";
         $this->shipClass = "Notali Carrier";

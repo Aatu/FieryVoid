@@ -5,7 +5,7 @@ class Vakar extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 650;
-        $this->faction = "Narn";
+        $this->faction = "Narn Regime";
         $this->phpclass = "Vakar";
         $this->imagePath = "img/ships/varkar.png";
         $this->shipClass = "Va'Kar Long-Range Scout";

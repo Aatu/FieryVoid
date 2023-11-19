@@ -5,7 +5,7 @@ class Aluin extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 1100;
-        $this->faction = "Yolu";
+        $this->faction = "Yolu Confederation";
         $this->phpclass = "Aluin";
         $this->imagePath = "img/ships/aluin.png";
         $this->shipClass = "Aluin Gunship";

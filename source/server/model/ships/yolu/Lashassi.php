@@ -7,7 +7,7 @@ class Lashassi extends OSAT
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 180;
-        $this->faction = "Yolu";
+        $this->faction = "Yolu Confederation";
 		$this->phpclass = "Lashassi";
 		$this->shipClass = "Lashassi Fusion OSAT";
 		$this->imagePath = "img/ships/YoluLashassi.png";

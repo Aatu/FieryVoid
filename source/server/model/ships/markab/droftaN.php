@@ -6,7 +6,7 @@ class DroftaN extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 46*6;
-        $this->faction = "Markab";
+        $this->faction = "Markab Theocracy";
         $this->phpclass = "DroftaN";
         $this->shipClass = "Drofta Medium Fighters";
         $this->imagePath = "img/ships/MarkabDrofta.png";

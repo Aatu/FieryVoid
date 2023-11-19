@@ -5,7 +5,7 @@ class Simsalle extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 400;
-		$this->faction = "Pak'ma'ra";
+		$this->faction = "Pak'Ma'Ra Confederacy";
 		$this->phpclass = "Simsalle";
 		$this->imagePath = "img/ships/PakmaraSimsalle.png";
 		$this->shipClass = "Sim'sall'e Transport Cruiser";

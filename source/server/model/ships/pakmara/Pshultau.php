@@ -5,7 +5,7 @@ class Pshultau extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 750;
-		$this->faction = "Pak'ma'ra";
+		$this->faction = "Pak'Ma'Ra Confederacy";
 		$this->phpclass = "Pshultau";
 		$this->imagePath = "img/ships/PakmaraPshulshi.png";
 		$this->shipClass = "Pshul'tau Heavy Carrier";

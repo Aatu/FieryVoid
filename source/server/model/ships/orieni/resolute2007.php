@@ -5,7 +5,7 @@ class resolute2007 extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 200;
-		$this->faction = "Orieni";
+		$this->faction = "Orieni Imperium";
         $this->phpclass = "Resolute2007";
         $this->imagePath = "img/ships/resolute.png";
         $this->shipClass = "Resolute Military Freighter (2007)";

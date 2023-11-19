@@ -7,7 +7,7 @@ class ThorkaOSAT extends OSAT
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 225;
-		$this->faction = "Pak'ma'ra";
+		$this->faction = "Pak'Ma'Ra Confederacy";
 		$this->phpclass = "ThorkaOSAT";
 		$this->shipClass = "Thor'ka Orbital Satellite";
 		$this->imagePath = "img/ships/PakmaraThorka.png";	

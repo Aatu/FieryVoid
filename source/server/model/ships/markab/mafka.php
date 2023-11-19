@@ -3,7 +3,7 @@ class Mafka extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         $this->pointCost = 475;
-        $this->faction = "Markab";
+        $this->faction = "Markab Theocracy";
         $this->phpclass = "Mafka";
         $this->isd = 2000;        
         $this->imagePath = "img/ships/MarkabAssaultShip.png"; 

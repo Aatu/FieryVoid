@@ -6,7 +6,7 @@ class TorataClovantScout extends BaseShip{
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 650;
-		$this->faction = "Torata";
+		$this->faction = "Torata Regency";
 		$this->phpclass = "TorataClovantScout";
 		$this->imagePath = "img/ships/TorataClovant.png";
 		$this->canvasSize = 200;

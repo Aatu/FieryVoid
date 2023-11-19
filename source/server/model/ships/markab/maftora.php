@@ -5,7 +5,7 @@ class Maftora extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 475;
-        $this->faction = "Markab";
+        $this->faction = "Markab Theocracy";
         $this->phpclass = "Maftora";
         $this->imagePath = "img/ships/MarkabPatrolShip.png"; //change
         $this->shipClass = "Maftora Police Ship";

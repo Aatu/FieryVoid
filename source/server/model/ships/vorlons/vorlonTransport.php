@@ -5,7 +5,7 @@ class VorlonTransport extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 600;
-		$this->faction = "Vorlons";
+		$this->faction = "Vorlon Empire";
         $this->phpclass = "VorlonTransport";
         $this->shipClass = "Transport";
         //$this->variantOf = "Battle Destroyer";

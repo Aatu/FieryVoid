@@ -4,7 +4,7 @@ class Dovarum extends MicroSAT{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 100*6;
-        $this->faction = "Usuuth";
+        $this->faction = "Usuuth Coalition";
         $this->phpclass = "Dovarum";
         $this->shipClass = "Dovarum MicroSAT Cluster";
         $this->imagePath = "img/ships/UsuuthDovarum.png";

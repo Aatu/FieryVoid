@@ -5,7 +5,7 @@ class Martoba extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 480;
-        $this->faction = "Markab";
+        $this->faction = "Markab Theocracy";
         $this->phpclass = "Martoba";
         $this->imagePath = "img/ships/MarkabPatrolShip.png"; //change
         $this->shipClass = "Martoba Patrol Cutter";

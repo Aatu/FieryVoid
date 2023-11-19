@@ -5,7 +5,7 @@ class GreySharlin extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 2100;
-		$this->faction = "Minbari";
+		$this->faction = "Minbari Federation";
         $this->phpclass = "GreySharlin";
         $this->imagePath = "img/ships/sharlin.png";
         $this->shipClass = "Grey Sharlin";

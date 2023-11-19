@@ -7,7 +7,7 @@ class Urshtalu extends StarBaseSixSections
 
 		$this->pointCost = 3500;
 		$this->base = true;
-		$this->faction = "Pak'ma'ra";
+		$this->faction = "Pak'Ma'Ra Confederacy";
 		$this->phpclass = "Urshtalu";
 		$this->shipClass = "Urshtalu Starbase";
 		$this->imagePath = "img/ships/PakmaraUrshtalu.png";

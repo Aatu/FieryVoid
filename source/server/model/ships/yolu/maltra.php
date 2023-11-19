@@ -5,7 +5,7 @@ class Maltra extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 900;
-        $this->faction = "Yolu";
+        $this->faction = "Yolu Confederation";
         $this->phpclass = "Maltra";
         $this->imagePath = "img/ships/maltra.png";
         $this->shipClass = "Maltra Scout";

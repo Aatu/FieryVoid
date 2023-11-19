@@ -7,7 +7,7 @@ class skywatch2003 extends OSAT
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 550;
-		$this->faction = "Orieni";
+		$this->faction = "Orieni Imperium";
 		$this->phpclass = "skywatch2003";
 		$this->shipClass = "Skywatch Heavy Orbital Satellite (2003)";
 			//$this->variantOf = "Skywatch Heavy Orbital Satellite";	

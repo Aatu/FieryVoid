@@ -5,7 +5,7 @@ class Prophet1780 extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 725;
-		$this->faction = "Orieni";
+		$this->faction = "Orieni Imperium";
         $this->phpclass = "Prophet1780";
         $this->imagePath = "img/ships/prophet.png";
         $this->canvasSize = 280;
