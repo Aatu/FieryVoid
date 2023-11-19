@@ -5,7 +5,7 @@ class EarlyWarbird extends HeavyCombatVesselLeftRight{
         parent::__construct($id, $userid, $name,  $slot);
         
     	$this->pointCost = 430;
-        $this->faction = "Drazi (WotCR)";
+        $this->faction = "Drazi Freehold (WotCR)";
         $this->phpclass = "EarlyWarbird";
         $this->imagePath = "img/ships/drazi/DraziWarbird.png";
         $this->shipClass = "Warbird Cruiser";

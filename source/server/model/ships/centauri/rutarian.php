@@ -5,7 +5,7 @@ class Rutarian extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 450;
-	$this->faction = "Centauri";
+	$this->faction = "Centauri Republic";
 	$this->phpclass = "Rutarian";
 	$this->shipClass = "Rutarian Strike Fighters";
 	$this->imagePath = "img/ships/rutarian.png";

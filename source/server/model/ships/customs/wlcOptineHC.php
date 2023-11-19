@@ -5,7 +5,7 @@ class wlcOptineHC extends BaseShip{
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 785;
-		$this->faction = "Centauri (WotCR)";
+		$this->faction = "Centauri Republic (WotCR)";
 		$this->phpclass = "wlcOptineHC";
 		$this->imagePath = "img/ships/optine.png";
 		$this->shipClass = "Optine House Cruiser";

@@ -5,7 +5,8 @@ class IMLMissileFrigate extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 350;
-		$this->faction = "Raiders";
+        $this->faction = "Custom Ships";
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
         $this->phpclass = "IMLMissileFrigate";
         $this->imagePath = "img/ships/RaiderIMLMissileFrigate.png";
         $this->shipClass = "IML Missile Frigate";

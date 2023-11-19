@@ -5,7 +5,7 @@ class Martus extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 375;
-        $this->faction = "Hurr";
+        $this->faction = "Hurr Republic";
         $this->phpclass = "Martus";
         $this->imagePath = "img/ships/hurrOrak.png";
         $this->shipClass = "Martus Tech Frigate";

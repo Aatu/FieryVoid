@@ -5,7 +5,7 @@ class Scorran extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 725;
-	$this->faction = "Descari";
+	$this->faction = "Descari Committees";
         $this->phpclass = "Scorran";
         $this->imagePath = "img/ships/DescariScorran.png";
         $this->shipClass = "Scorran New Heavy Cruiser";

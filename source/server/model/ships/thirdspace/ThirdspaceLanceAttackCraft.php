@@ -5,7 +5,7 @@ class ThirdspaceLanceAttackCraft extends LCV{ //Actually an LCV.
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 575;
+	$this->pointCost = 550;
     $this->faction = "Thirdspace";
 	$this->factionAge = 4; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
 	$this->phpclass = "ThirdspaceLanceAttackCraft";
@@ -64,7 +64,7 @@ class ThirdspaceLanceAttackCraft extends LCV{ //Actually an LCV.
 	    
         $this->hitChart = array(
         		0=> array( //should never happen (but it will!)
-        				9 => "Structure",
+        				8 => "Structure",
         				10 => "1:Psionic Concentrator",
         				11 => "1:Psionic Lance",    
         				12 => "2:Shield Projector",
@@ -75,10 +75,9 @@ class ThirdspaceLanceAttackCraft extends LCV{ //Actually an LCV.
         				20 => "Scanner",
         		),
         		1=> array( //PRIMARY hit table, effectively
-        				9 => "Structure",
-        				11 => "Psionic Concentrator",
+        				8 => "Structure",
+        				10 => "Psionic Concentrator",
         				12 => "Psionic Lance",      				
-        			//	12 => "Shield Projector",
 						13 => "0:Self Repair",        				
         				14 => "0:Jump Engine",
         				16 => "0:Engine",
@@ -86,8 +85,8 @@ class ThirdspaceLanceAttackCraft extends LCV{ //Actually an LCV.
         				20 => "0:Scanner",
         		),
         		2=> array( //PRIMARY hit table, effectively
-        				9 => "Structure",
-        				11 => "1:Psionic Concentrator",
+        				8 => "Structure",
+        				10 => "1:Psionic Concentrator",
         				12 => "Shield Projector",
 						13 => "0:Self Repair",        				
         				14 => "0:Jump Engine",

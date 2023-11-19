@@ -5,7 +5,7 @@ class gaimRafaPulse extends LCV{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 225;
-        $this->faction = "Gaim";
+        $this->faction = "Gaim Intelligence";
 	$this->phpclass = "gaimRafaPulse";
 	$this->shipClass = "Rafa Gunboat (Pulse)";
         $this->variantOf = "Rafa Gunboat (Scattergun)";		

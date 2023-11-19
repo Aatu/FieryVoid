@@ -5,7 +5,7 @@ class gaimTiac extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 720;
-		$this->faction = 'Gaim';
+		$this->faction = "Gaim Intelligence";
 		$this->phpclass = "gaimTiac";
 		$this->imagePath = "img/ships/GaimTiac.png";
 		$this->shipClass = "Tiac Long Range Explorer";

@@ -5,7 +5,7 @@ class Avenger extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 580;
-	$this->faction = "EA";
+	$this->faction = "Earth Alliance";
         $this->phpclass = "Avenger";
         $this->imagePath = "img/ships/avenger.png";
         $this->shipClass = "Avenger Heavy Carrier (Gamma)";

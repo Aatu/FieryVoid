@@ -64,9 +64,11 @@ if (isset($_SESSION["user"])) {
        
 		
 
-		---------- <b>LATEST NEWS - September 2023</b> ----------
-	    <br><b>Thirdspace updates</b> - ongoing balancing
-	    <br><b>Full faction names</b> - all the way to 'B'!
+		---------- <b>LATEST NEWS - November 2023</b> ----------
+	    <br><b>Allocating damage by tag</b> - new option, revolutionizing Vree and Vorlon hit charts (and Starbases, in the future - not fitted yet)
+	    <br><b>Faction names</b> - about two thirds of official ones are expanded
+	    <br><b>Minor fixes</b> - as usual :)
+	    <br><b>A LOT of work</b> by Douglas and Geoffrey! New missiles, faction polishing, bugfixes, there's everything!
 	    
 <!--	        
 		 <br><br>---------- <b>update 20th of January</b> ---------- 

@@ -5,7 +5,7 @@ class ThorunHeavy extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 312;
-		$this->faction = "Dilgar";
+		$this->faction = "Dilgar Imperium";
         $this->phpclass = "ThorunHeavy";
         $this->shipClass = "Thorun Heavy Dartfighters";
 		$this->imagePath = "img/ships/thorun.png";

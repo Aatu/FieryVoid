@@ -5,7 +5,7 @@ class Merlin1938 extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
     	$this->pointCost = 300;
-        $this->faction = "Drazi (WotCR)";
+        $this->faction = "Drazi Freehold (WotCR)";
         $this->phpclass = "Merlin1938";
         $this->imagePath = "img/ships/merlin.png";
         $this->shipClass = "Merlin Frigate (Early)";

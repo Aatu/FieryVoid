@@ -5,7 +5,7 @@ class Troshanthi extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
 		    $this->pointCost = 30*6;
-		    $this->faction = "Drazi";
+		    $this->faction = "Drazi Freehold";
         $this->phpclass = "Troshanthi";
         $this->shipClass = "Troshanthi Assault Shuttles";
 		    $this->imagePath = "img/ships/drazi/DraziTroshanthi.png";

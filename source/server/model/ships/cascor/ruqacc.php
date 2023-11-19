@@ -5,7 +5,7 @@ class Ruqacc extends OSAT{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 175;
-		$this->faction = 'Cascor';
+		$this->faction = "Cascor Commonwealth";
         $this->phpclass = "Ruqacc";
         $this->imagePath = "img/ships/CascorRuqaccOSAT.png";
 		$this->canvasSize = 200;

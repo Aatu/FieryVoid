@@ -5,7 +5,7 @@ class Rishekar extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 275;
-	$this->faction = "Dilgar";
+	$this->faction = "Dilgar Imperium";
         $this->phpclass = "Rishekar";
         $this->imagePath = "img/ships/rishekar.png";
         $this->shipClass = "Rishekar Early Frigate";

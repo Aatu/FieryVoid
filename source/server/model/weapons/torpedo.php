@@ -390,25 +390,25 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
 			if (isset($this->alreadyFlayed[$target->id])) return;         	
 			$this->alreadyFlayed[$target->id] = true;//mark engaged 
 			
- 			if ($target instanceof FighterFlight) return;	//To ignore fighters if I want to.				
+ 			if ($target instanceof FighterFlight) return;	//Fighrers armour isn't flayed'			
 			
-			        	                         
+            if ($system->advancedArmor) return; //Neither is Advanced Armour
+      
+                  	 			        	                         
 	        $effectArmor = Dice::d(3,1);//strength of effect: 1d3
-	    //	$fireOrder->pubnotes .= "<br> Armor reduced by $effectArmor unless Advanced Armor.";    
-
-		
+	
             foreach ($target->systems as $system){
-                if ($system->advancedArmor) return;              					
+  //              if ($system->advancedArmor) return;              					
                 if ($target->shipSizeClass<=1 || $system->location === $location){ //MCVs and smaller ships are one huge section technically
 	             	for($i=1; $i<=$effectArmor;$i++){
 	                    $crit = new ArmorReduced(-1, $target->id, $system->id, "ArmorReduced", $gamedata->turn);
 	                    $crit->updated = true;
 	                    $crit->inEffect = false;
 	                    $system->criticals[] = $crit;                 
-		                }
-		        	$fireOrder->pubnotes .= "<br> Armor reduced by $effectArmor.";       
-		            }
-				} 
+		                }     
+		            }	            
+				}
+		     $fireOrder->pubnotes .= "<br> Armor reduced on entire ship section."; 				 
         } //endof function doDamage	 
 
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!
@@ -475,7 +475,7 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
         
         public function getDamage($fireOrder){
             $add = $this->getExtraDamagebyBoostlevel($fireOrder->turn);
-            $dmg = Dice::d(10,1) + $add + 9;
+            $dmg = Dice::d(6,1) + $add + 15;
             return $dmg;
         }
 
@@ -492,13 +492,13 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
         public function setMinDamage(){
             $turn = TacGamedata::$currentTurn;
             $boost = $this->getBoostLevel($turn);
-            $this->minDamage = 10 + ($boost * 2);
+            $this->minDamage = 16 + ($boost * 2);
         }   
 
         public function setMaxDamage(){
             $turn = TacGamedata::$currentTurn;
             $boost = $this->getBoostLevel($turn);
-            $this->maxDamage = 19 + ($boost * 2); 
+            $this->maxDamage = 21 + ($boost * 2); 
 		}
 		    
     }//endof class PsionicTorpedo

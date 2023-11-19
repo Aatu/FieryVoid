@@ -6,7 +6,7 @@ class Razarik extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 210;
-	$this->faction = "Centauri";
+	$this->faction = "Centauri Republic";
         $this->phpclass = "Razarik";
         $this->shipClass = "Razarik Torpedo Fighters";
         $this->variantOf = "Razik Light Fighters";

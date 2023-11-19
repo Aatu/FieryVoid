@@ -6,7 +6,7 @@ class Abrithi extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
 
         $this->pointCost = 400;
-        $this->faction = "Dilgar";
+        $this->faction = "Dilgar Imperium";
         $this->phpclass = "Abrithi";
         $this->imagePath = "img/ships/abrithi.png";
         $this->shipClass = "Abrithi Assault Cruiser";

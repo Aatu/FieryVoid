@@ -5,7 +5,7 @@ class HyperionIota extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 725;
-	$this->faction = "EA";
+	$this->faction = "Earth Alliance";
         $this->phpclass = "HyperionIota";
         $this->imagePath = "img/ships/hyperion.png";
         $this->shipClass = "Hyperion War Cruiser (Iota)";

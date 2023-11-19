@@ -5,7 +5,7 @@ class Eyehawk extends HeavyCombatVesselLeftRight{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 600;
-	$this->faction = "Drazi";
+	$this->faction = "Drazi Freehold";
         $this->phpclass = "Eyehawk";
         $this->imagePath = "img/ships/drazi/DraziEyehawk.png";
         $this->shipClass = "Eyehawk Scout Cruiser";

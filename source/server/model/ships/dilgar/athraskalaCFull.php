@@ -3,7 +3,7 @@ class AthraskalaCFull extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         $this->pointCost = 700+7*25;
-        $this->faction = "Dilgar";
+        $this->faction = "Dilgar Imperium";
         $this->phpclass = "AthraskalaCFull";
         $this->imagePath = "img/ships/athraskala.png";
         $this->shipClass = "Athraskala-C War Bomber (full)";

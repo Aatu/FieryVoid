@@ -5,7 +5,7 @@ class orano extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 350;
-        $this->faction = "Hurr";
+        $this->faction = "Hurr Republic";
         $this->phpclass = "Orano";
         $this->imagePath = "img/ships/hurrOrak.png";
         $this->shipClass = "Orano Escort Frigate";

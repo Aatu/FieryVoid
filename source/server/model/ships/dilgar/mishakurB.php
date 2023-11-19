@@ -6,7 +6,7 @@ class MishakurB extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
 
         $this->pointCost = 1000;
-        $this->faction = "Dilgar";
+        $this->faction = "Dilgar Imperium";
         $this->phpclass = "MishakurB";
         $this->imagePath = "img/ships/mishakur.png";
         $this->shipClass = "Mishakur-B Supercarrier";

@@ -5,7 +5,7 @@ class ThunderboltStarfuryAM extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 80*6;
-        $this->faction = "EA";
+        $this->faction = "Earth Alliance";
         $this->phpclass = "ThunderboltStarfuryAM";
         $this->shipClass = "Starfury: Thunderbolt Heavy flight";
         $this->imagePath = "img/ships/thunderboltStarfury.png";

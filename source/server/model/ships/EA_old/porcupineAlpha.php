@@ -5,7 +5,7 @@ class PorcupineAlpha extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 250;
-	$this->faction = 'EA (early)';//"EA defenses";
+	$this->faction = 'Earth Alliance (early)';//"EA defenses";
         $this->phpclass = "PorcupineAlpha";
         $this->imagePath = "img/ships/porcupine.png";
         $this->shipClass = "Porcupine Light Carrier (Alpha)";

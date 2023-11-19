@@ -7,7 +7,7 @@ class ZFtrNoscha extends FighterFlight
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 55 *6;
-		$this->faction = "Descari";
+		$this->faction = "Descari Committees";
 		$this->phpclass = "ZFtrNoscha";
 		$this->shipClass = "Noscha Heavy Fighters";
 		$this->imagePath = "img/ships/Descarinoscha.png";

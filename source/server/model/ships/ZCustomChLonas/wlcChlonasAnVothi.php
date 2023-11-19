@@ -19,7 +19,7 @@ class wlcChlonasAnVothi extends BaseShipNoAft
 		$this->rollcost = 3;
 		$this->pivotcost = 3;
 
-		$this->faction = "Ch'Lonas";
+		$this->faction = "Ch'Lonas Cooperative";
 		$this->isd = 2245;
 		$this->unofficial = true;
 		$this->limited = 33;

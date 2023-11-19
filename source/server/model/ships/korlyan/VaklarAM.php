@@ -5,7 +5,7 @@ class VaklarAM extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 450;
-        $this->faction = "Kor-Lyan";
+        $this->faction = "Kor-Lyan Kingdoms";
         $this->phpclass = "VaklarAM";
         $this->imagePath = "img/ships/korlyan_vaklar2.png";
         $this->shipClass = "Vaklar Logistics Frigate";
@@ -39,8 +39,11 @@ class VaklarAM extends HeavyCombatVessel{
 	    $this->enhancementOptionsEnabled[] = 'AMMO_H';//add enhancement options for other missiles - Class-H
 	    $this->enhancementOptionsEnabled[] = 'AMMO_K';//add enhancement options for other missiles - Class-K   
 	    $this->enhancementOptionsEnabled[] = 'AMMO_L';//add enhancement options for other missiles - Class-L
-		$this->enhancementOptionsEnabled[] = 'AMMO_P';//add enhancement options for other missiles - Class-P	    	    	    	    
-	    $this->enhancementOptionsEnabled[] = 'AMMO_S';//add enhancement options for other missiles - Class-S
+	    $this->enhancementOptionsEnabled[] = 'AMMO_M';//add enhancement options for other missiles - Class-M	    
+		$this->enhancementOptionsEnabled[] = 'AMMO_P';//add enhancement options for other missiles - Class-P
+	    $this->enhancementOptionsEnabled[] = 'AMMO_X';//add enhancement options for other missiles - Class-X			    	    	    	    
+	    //$this->enhancementOptionsEnabled[] = 'AMMO_S';//add enhancement options for other missiles - Class-S
+		//Stealth missile removed from Early Kor-Lyan ships, as it's not availablee until 2252
 
         
         $this->addPrimarySystem(new Reactor(4, 13, 0, 0));

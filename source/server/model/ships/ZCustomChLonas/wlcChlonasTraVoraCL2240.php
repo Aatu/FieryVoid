@@ -18,7 +18,7 @@ class wlcChlonasTraVoraCL2240 extends BaseShipNoAft{
         $this->rollcost = 3;
         $this->pivotcost = 3;
 	    
-	$this->faction = "Ch'Lonas";
+	$this->faction = "Ch'Lonas Cooperative";
         $this->variantOf = "Tra'Vora Light Cruiser";
 	$this->isd = 2240;
 	$this->unofficial = true;

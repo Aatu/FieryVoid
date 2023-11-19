@@ -5,7 +5,7 @@ class ThirdspaceTorpedoAttackCraft extends LCV{ //Actually an LCV.
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 525;
+	$this->pointCost = 550;
     $this->faction = "Thirdspace";
 	$this->factionAge = 4; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
 	$this->phpclass = "ThirdspaceTorpedoAttackCraft";
@@ -42,7 +42,7 @@ class ThirdspaceTorpedoAttackCraft extends LCV{ //Actually an LCV.
 	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 4)); //unhittable and with unlimited thrust allowance
 	$this->addPrimarySystem(new ThirdspaceCnC(99, 1, 0, 0)); //C&C should be unhittable anyway
 		    
-    $this->addPrimarySystem(new AdvancedSingularityDrive(6, 16, 0, 20+4+3));
+    $this->addPrimarySystem(new AdvancedSingularityDrive(6, 16, 0, 25+4+3));
 	$sensors = new Scanner(5, 12, 4, 9);
 		$sensors->markThirdspace();
 		$this->addPrimarySystem($sensors);
@@ -51,7 +51,8 @@ class ThirdspaceTorpedoAttackCraft extends LCV{ //Actually an LCV.
     $this->addPrimarySystem(new ThirdspaceSelfRepair(5, 8, 4)); //armor, structure, output 	
 
 	$this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 210, 60));
-    $this->addFrontSystem(new PsionicTorpedo(5, 0, 0, 300, 60)); 
+    $this->addFrontSystem(new PsionicTorpedo(5, 0, 0, 300, 60));
+    $this->addFrontSystem(new PsionicTorpedo(5, 0, 0, 300, 60));      
 	$this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 300, 150));
 			
 	$projection = new ThirdspaceShieldProjection(2, 50, 50, 0, 360, 'C'); //: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R
@@ -64,7 +65,7 @@ class ThirdspaceTorpedoAttackCraft extends LCV{ //Actually an LCV.
 	    
         $this->hitChart = array(
         		0=> array( //should never happen (but it will!)
-        				9 => "Structure",
+        				8 => "Structure",
         				10 => "1:Psionic Concentrator",
         				11 => "1:Psionic Torpedo",    
         				12 => "2:Shield Projector",
@@ -75,10 +76,9 @@ class ThirdspaceTorpedoAttackCraft extends LCV{ //Actually an LCV.
         				20 => "Scanner",
         		),
         		1=> array( //PRIMARY hit table, effectively
-        				9 => "Structure",
-        				11 => "Psionic Concentrator",
+        				8 => "Structure",
+        				10 => "Psionic Concentrator",
         				12 => "Psionic Torpedo",      				
-        	//			12 => "Shield Projector",
 						13 => "0:Self Repair",        				
         				14 => "0:Jump Engine",
         				16 => "0:Engine",
@@ -86,8 +86,8 @@ class ThirdspaceTorpedoAttackCraft extends LCV{ //Actually an LCV.
         				20 => "0:Scanner",
         		),
         		2=> array( //PRIMARY hit table, effectively
-        				9 => "Structure",
-        				11 => "1:Psionic Concentrator",
+        				8 => "Structure",
+        				10 => "1:Psionic Concentrator",
         				12 => "Shield Projector",
 						13 => "0:Self Repair",        				
         				14 => "0:Jump Engine",

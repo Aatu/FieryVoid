@@ -5,7 +5,7 @@ class Judanna extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 490;
-        $this->faction = "Corillani";
+        $this->faction = "Corillani Theocracy";
         $this->phpclass = "Judanna";
         $this->imagePath = "img/ships/CorillaniJudanna.png";
         $this->shipClass = "Judanna Escort Frigate";
@@ -13,7 +13,7 @@ class Judanna extends HeavyCombatVessel{
 		$this->notes = 'Defenders of Corillan (DoC)';
 		$this->canvasSize= 200;
         $this->fighters = array("normal"=>6);			    
-        
+ 		$this->unofficial = 'S'; //design released after AoG demise        
         
         $this->forwardDefense = 13;
         $this->sideDefense = 14;

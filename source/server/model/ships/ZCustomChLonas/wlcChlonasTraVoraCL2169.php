@@ -5,7 +5,7 @@ class wlcChlonasTraVoraCL2169 extends BaseShipNoAft{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         $this->pointCost = 440;
-	$this->faction = "Ch'Lonas";
+	$this->faction = "Ch'Lonas Cooperative";
         $this->phpclass = "wlcChlonasTraVoraCL2169";
         $this->imagePath = "img/ships/ChlonasTraVora.png";
         $this->canvasSize = 200;

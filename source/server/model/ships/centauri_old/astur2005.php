@@ -5,7 +5,7 @@ class Astur2005 extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 455;
-        $this->faction = "Centauri (WotCR)";
+        $this->faction = "Centauri Republic (WotCR)";
         $this->phpclass = "Astur2005";
         $this->imagePath = "img/ships/astur.png"; 
 		$this->canvasSize = 200; 

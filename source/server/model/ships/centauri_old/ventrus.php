@@ -5,7 +5,7 @@ class Ventrus extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 520;
-        $this->faction = "Centauri (WotCR)";
+        $this->faction = "Centauri Republic (WotCR)";
         $this->phpclass = "Ventrus";
         $this->imagePath = "img/ships/kendari.png";
         $this->shipClass = "Ventrus Light Cruiser (1966)";

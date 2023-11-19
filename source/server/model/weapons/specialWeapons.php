@@ -2791,7 +2791,8 @@ class IonFieldGenerator extends Weapon{
 		parent::setSystemDataWindow($turn);  
 		//some effects should originally work for current turn, but it won't work with FV handling of ballistics. Moving everything to next turn.
 		//it's Ion (not EM) weapon with no special remarks regarding advanced races and system - so works normally on AdvArmor/Ancients etc
-		$this->data["Special"] = "Every unit in affected area is subject to effects:";      
+		$this->data["Special"] = "Targets a hex and affects all units within 2 hexes of that location.";      
+		$this->data["Special"] .= "<br> Every unit in affected area is subject to following effects:"; 		
 		$this->data["Special"] .= "<br> - Roll one location, as per regular attack. If weapon is hit, it's forced to shut down."; //originally just charging cycle resets - but I opted for simpler (if stronger) effect. 
 		$this->data["Special"] .= "<br> - -2 Sensor rating (ships) or -1 OB (fighters) for a turn.";    
 		$this->data["Special"] .= "<br> - -15 Initiative for a turn."; 
@@ -3624,6 +3625,7 @@ class VorlonLightningCannon extends Weapon{
 		}
 		$this->iconPath = "VorlonLightningCannon".$orientation.".png";
 		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+		$this->addTag('Lightning Cannon'); //needed to properly allocate hits on Vorlon ships, where most of these weapons are used
 	}
 	
 
@@ -4431,8 +4433,8 @@ class PsychicField extends Weapon implements DefensiveSystem{ //Thirdspace weapo
         //public $trailLength = 1;
 	
 	public $boostable = true;
-        public $boostEfficiency = 3;
-        public $maxBoostLevel = 4;
+        public $boostEfficiency = 2;
+        public $maxBoostLevel = 5;
 	
 	public $output = 0;
 	public $baseOutput = 2;//base output WITH Spark Curtain
@@ -4482,7 +4484,7 @@ class PsychicField extends Weapon implements DefensiveSystem{ //Thirdspace weapo
 		      $this->data["Special"] = "This weapons automatically affects all units (friend or foe) in area of effect.  It should not be fired manually."; 
 		      $this->data["Special"] .= "<br>Affected Fighters have their initiative reduced by 5 to 20 points, and their hit chance reduced by 5 - 15% for 1 turn.";  
 		      $this->data["Special"] .= "<br>Affected Ships have their their hit chance reduced by 5 - 15% for 1 turn if hit on structure, and suffer a potential critical hit on non-Structure systems.";  		      
-		      $this->data["Special"] .= "<br>Can be boosted at a cost 3 Power, each boost gives +2 AoE range to maximum of 10 hexes."; 
+		      $this->data["Special"] .= "<br>Can be boosted at a cost 2 Power, each boost gives +2 AoE range to maximum of 12 hexes."; 
 		      $this->data["Special"] .= "<br>Multiple overlapping Psychic Fields will only cause 1 (the strongest) attack on a particular target.";
 		      $this->data["Special"] .= "<br>Does not affect other Thirdspace units, and is only 50% effective against Advanced Armor.";  		       
 	    }	//endof function setSystemDataWindow
@@ -4579,7 +4581,7 @@ class PsychicField extends Weapon implements DefensiveSystem{ //Thirdspace weapo
 				}
 			} else { //force critical roll at +4 even on other Ancients
 				$system->forceCriticalRoll = true;
-				$system->critRollMod += 6;			
+				$system->critRollMod += 8;			
 					}			
 	} //endof function onDamagedSystem	
 		

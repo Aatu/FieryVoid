@@ -5,7 +5,7 @@ class NovaMlpa extends BaseShip{
         parent::__construct($id, $userid, $name, $movement);
         
 		$this->pointCost = 1350;
-		$this->faction = "EA";
+		$this->faction = "Earth Alliance";
         $this->phpclass = "NovaMlpa";
         $this->imagePath = "img/ships/nova.png";
         $this->shipClass = "Nova Dreadnought (Beta)";

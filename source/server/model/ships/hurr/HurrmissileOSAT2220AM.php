@@ -7,7 +7,7 @@ class HurrmissileOSAT2220AM extends OSAT
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 200;
-		$this->faction = "Hurr";
+		$this->faction = "Hurr Republic";
 		$this->phpclass = "HurrmissileOSAT2220AM";
 		$this->shipClass = "Missile Satellite (2220)";
 		$this->imagePath = "img/ships/HurrOSAT.png";

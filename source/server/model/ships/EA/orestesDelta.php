@@ -5,7 +5,7 @@ class OrestesDelta extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 625;
-		$this->faction = 'EA';//"EA defenses";
+		$this->faction = 'Earth Alliance';//"EA defenses";
 		$this->phpclass = "OrestesDelta";
 		$this->imagePath = "img/ships/orestes.png";
 		$this->shipClass = "Orestes System Monitor (Delta)";

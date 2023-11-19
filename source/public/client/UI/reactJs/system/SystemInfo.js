@@ -152,7 +152,7 @@ const getCriticals = (system) => [<InfoHeader key="criticalHeader">Damage</InfoH
             }
 					
 			if (endEffectMin>0){
-				wearsOffText = " (until turn " + endEffectMin;
+				wearsOffText = " (until end of turn " + endEffectMin;
 				if(infinitePresent){
 					wearsOffText = wearsOffText+"+";
 				} else if (endEffectMax > endEffectMin){

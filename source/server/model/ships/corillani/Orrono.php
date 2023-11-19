@@ -5,7 +5,7 @@ class Orrono extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 700;
-		$this->faction = "Corillani";
+		$this->faction = "Corillani Theocracy";
         $this->phpclass = "Orrono";
         $this->imagePath = "img/ships/CorillaniOrrono.png";
         $this->shipClass = "Orrono Watchcruiser";

@@ -5,7 +5,7 @@ class Swallow extends HeavyCombatVesselLeftRight{
         parent::__construct($id, $userid, $name,  $slot);
         
     	$this->pointCost = 325;
-        $this->faction = "Drazi (WotCR)";
+        $this->faction = "Drazi Freehold (WotCR)";
         $this->phpclass = "Swallow";
         $this->imagePath = "img/ships/shrike.png";
         $this->shipClass = "Swallow Light Carrier";

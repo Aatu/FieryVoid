@@ -7,7 +7,7 @@ class CorillaniThorkaOSAT extends OSAT
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 225;
-		$this->faction = "Corillani";
+		$this->faction = "Corillani Theocracy";
 		$this->phpclass = "CorillaniThorkaOSAT";
 		$this->shipClass = "Thor'ka Orbital Satellite";
 		$this->imagePath = "img/ships/CorillaniThorka.png";	
