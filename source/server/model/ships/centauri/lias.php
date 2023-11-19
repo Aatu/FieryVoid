@@ -13,6 +13,7 @@ class Lias extends BaseShip{
 		$this->canvasSize = 180; 
 //        $this->shipSizeClass = 3;
 		$this->isd = 2053;
+	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
         
         $this->forwardDefense = 14;
         $this->sideDefense = 15;
