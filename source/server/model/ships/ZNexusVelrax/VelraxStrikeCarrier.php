@@ -5,7 +5,7 @@ class VelraxStrikeCarrier extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 525;
-	$this->faction = "ZNexus Velrax";
+	$this->faction = "ZNexus Velrax Republic";
         $this->phpclass = "VelraxStrikeCarrier";
         $this->imagePath = "img/ships/Nexus/VelraxResskar.png";
         $this->shipClass = "Resskar Strike Carrier";
@@ -91,23 +91,23 @@ class VelraxStrikeCarrier extends BaseShip{
 			2=> array(
 					6 => "Thruster",
 					8 => "Heavy Laser Spear",
-					9 => "Twin Ion Gun",
+					10 => "Twin Ion Gun",
 					12 => "Jump Engine",
 					18 => "Structure",
 					20 => "Primary",
 			),
 			3=> array(
 					6 => "Thruster",
-					7 => "Twin Ion Gun",
-					9 => "Heavy Laser Spear",
+					8 => "Twin Ion Gun",
+					10 => "Heavy Laser Spear",
 					12 => "Hangar",
 					18 => "Structure",
 					20 => "Primary",
 			),
 			4=> array(
 					6 => "Thruster",
-					7 => "Twin Ion Gun",
-					9 => "Heavy Laser Spear",
+					8 => "Twin Ion Gun",
+					10 => "Heavy Laser Spear",
 					12 => "Hangar",
 					18 => "Structure",
 					20 => "Primary",

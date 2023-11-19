@@ -5,7 +5,7 @@ class Drikorta extends HeavyCombatVesselLeftRight{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 425;
-	$this->faction = "Brakiri";
+	$this->faction = "Brakiri Syndicracy";
         $this->phpclass = "Drikorta";
         $this->imagePath = "img/ships/ikorta.png";
         $this->shipClass = "Drikorta Power Cruiser";

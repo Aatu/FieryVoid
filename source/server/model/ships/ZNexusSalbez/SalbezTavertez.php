@@ -5,7 +5,7 @@ class SalbezTavertez extends BaseShipNoAft{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 400;
-		$this->faction = "ZNexus Sal-bez";
+		$this->faction = "ZNexus Sal-bez Coalition";
         $this->phpclass = "SalbezTavertez";
         $this->imagePath = "img/ships/Nexus/salbez_felriz.png";
 			$this->canvasSize = 135; //img has 200px per side
@@ -69,11 +69,11 @@ class SalbezTavertez extends BaseShipNoAft{
                     20 => "C&C",
             ),
             1=> array(
-                    6 => "Thruster",
-					7 => "Industrial Laser",
+                    4 => "Thruster",
+					6 => "Industrial Laser",
 					8 => "Bolt Torpedo",
-					9 => "Light Industrial Laser",
-					11 => "Cargo Bay",
+					10 => "Light Industrial Laser",
+					12 => "Cargo Bay",
 					18 => "Structure",
                     20 => "Primary",
             ),

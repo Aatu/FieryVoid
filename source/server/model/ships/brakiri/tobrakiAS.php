@@ -6,7 +6,7 @@ class TobrakiAS extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
     	$this->pointCost = 30*6;
-    	$this->faction = "Brakiri";
+    	$this->faction = "Brakiri Syndicracy";
         $this->phpclass = "tobrakias";
         $this->shipClass = "Tobraki Assault Shuttles";
     	$this->imagePath = "img/ships/falkosi.png";

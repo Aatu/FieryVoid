@@ -5,7 +5,7 @@ class CraytanForin extends HeavyCombatVesselLeftRight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 220;
-        $this->faction = "ZNexus Craytan";
+        $this->faction = "ZNexus Craytan Union";
         $this->phpclass = "CraytanForin";
         $this->imagePath = "img/ships/Nexus/CraytanDela.png";
 		$this->canvasSize = 125; //img has 200px per side
@@ -31,8 +31,8 @@ class CraytanForin extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new CnC(4, 6, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 8, 2, 4));
         $this->addPrimarySystem(new Engine(3, 7, 0, 6, 4));
-		$this->addPrimarySystem(new CargoBay(3, 9));
-        $this->addPrimarySystem(new Thruster(3, 10, 0, 4, 1));
+		$this->addPrimarySystem(new Magazine(3, 9));
+        $this->addFrontSystem(new Thruster(3, 10, 0, 4, 1));
       
         $this->addLeftSystem(new Thruster(2, 10, 0, 3, 2));
         $this->addLeftSystem(new Thruster(2, 10, 0, 3, 3));
@@ -56,8 +56,8 @@ class CraytanForin extends HeavyCombatVesselLeftRight{
         $this->hitChart = array(
             0=> array(
                     8 => "Structure",
-					10 => "Thruster",
-					11 => "Cargo Bay",
+					10 => "1:Thruster",
+					11 => "Magazine",
                     14 => "Scanner",
                     17 => "Engine",
                     19 => "Reactor",
@@ -68,7 +68,7 @@ class CraytanForin extends HeavyCombatVesselLeftRight{
                     6 => "Thruster",
                     8 => "Medium Plasma Cannon",
 					10 => "Close-In Defense System",
-					11 => "Hangar",
+					12 => "Hangar",
 					18 => "Structure",
                     20 => "Primary",
             ),
@@ -77,7 +77,7 @@ class CraytanForin extends HeavyCombatVesselLeftRight{
                     6 => "Thruster",
                     8 => "Medium Plasma Cannon",
 					10 => "Close-In Defense System",
-					11 => "Hangar",
+					12 => "Hangar",
 					18 => "Structure",
                     20 => "Primary",
             ),

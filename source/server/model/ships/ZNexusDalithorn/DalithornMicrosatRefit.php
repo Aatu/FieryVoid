@@ -4,7 +4,7 @@ class DalithornMicrosatRefit extends MicroSAT{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 125*6;
-        $this->faction = "ZNexus Dalithorn";
+        $this->faction = "ZNexus Dalithorn Commonwealth";
         $this->phpclass = "DalithornMicrosatRefit";
         $this->shipClass = "Laser MicroSAT Cluster (2132 refit)";
 			$this->variantOf = "Laser MicroSAT Cluster";

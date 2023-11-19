@@ -5,7 +5,7 @@ class CraytanSoren extends HeavyCombatVesselLeftRight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 240;
-        $this->faction = "ZNexus Craytan";
+        $this->faction = "ZNexus Craytan Union";
         $this->phpclass = "CraytanSoren";
         $this->imagePath = "img/ships/Nexus/CraytanDela.png";
 		$this->canvasSize = 125; //img has 200px per side
@@ -29,8 +29,8 @@ class CraytanSoren extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new CnC(4, 6, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 8, 2, 4));
         $this->addPrimarySystem(new Engine(3, 7, 0, 6, 4));
-		$this->addPrimarySystem(new CargoBay(3, 9));
-        $this->addPrimarySystem(new Thruster(3, 10, 0, 4, 1));
+		$this->addPrimarySystem(new Magazine(3, 9));
+        $this->addFrontSystem(new Thruster(3, 10, 0, 4, 1));
       
         $this->addLeftSystem(new Thruster(2, 10, 0, 3, 2));
         $this->addLeftSystem(new Thruster(2, 10, 0, 3, 3));
@@ -54,8 +54,8 @@ class CraytanSoren extends HeavyCombatVesselLeftRight{
         $this->hitChart = array(
             0=> array(
                     8 => "Structure",
-					10 => "Thruster",
-					11 => "Cargo Bay",
+					10 => "1:Thruster",
+					11 => "Magazine",
                     14 => "Scanner",
                     17 => "Engine",
                     19 => "Reactor",
@@ -66,8 +66,8 @@ class CraytanSoren extends HeavyCombatVesselLeftRight{
                     6 => "Thruster",
                     8 => "Light Assault Cannon",
                     10 => "Heavy Sentry Gun",
-					11 => "Close-In Defense System",
-					12 => "Hangar",
+					12 => "Close-In Defense System",
+					13 => "Hangar",
 					18 => "Structure",
                     20 => "Primary",
             ),
@@ -76,8 +76,8 @@ class CraytanSoren extends HeavyCombatVesselLeftRight{
                     6 => "Thruster",
                     8 => "Light Assault Cannon",
                     10 => "Heavy Sentry Gun",
-					11 => "Close-In Defense System",
-					12 => "Hangar",
+					12 => "Close-In Defense System",
+					13 => "Hangar",
 					18 => "Structure",
                     20 => "Primary",
             ),

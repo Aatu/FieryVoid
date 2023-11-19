@@ -5,7 +5,7 @@ class FolshotB extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 186;
-	$this->faction = "Brakiri";
+	$this->faction = "Brakiri Syndicracy";
         $this->phpclass = "FolshotB";
         $this->shipClass = "Folshot B Light Fighters";
 	$this->imagePath = "img/ships/falkosi.png";

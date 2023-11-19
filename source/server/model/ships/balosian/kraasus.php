@@ -5,7 +5,7 @@ class Kraasus extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 550;
-		$this->faction = "Balosian";
+		$this->faction = "Balosian Underdwellers";
         $this->phpclass = "Kraasus";
         $this->imagePath = "img/ships/kraasus.png";
         $this->shipClass = "Kraasus Destroyer";

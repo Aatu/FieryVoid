@@ -5,7 +5,7 @@ class SalbezAvrtz extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 675;
-		$this->faction = "ZNexus Sal-bez";
+		$this->faction = "ZNexus Sal-bez Coalition";
         $this->phpclass = "SalbezAvrtz";
         $this->imagePath = "img/ships/Nexus/salbez_bevtun.png";
         $this->shipClass = "Av'rtz Explorer";
@@ -91,33 +91,33 @@ class SalbezAvrtz extends BaseShip{
 					4 => "Thruster",
 					6 => "Laser Cutter",
 					8 => "Light Particle Beam",
-					10 => "Cargo Bay",
+					11 => "Cargo Bay",
 					18 => "Structure",
 					20 => "Primary",
 			),
 			2=> array(
-					5 => "Thruster",
-					7 => "Laser Cutter",
-					9 => "Cargo Bay",
-					11 => "Jump Engine",
+					6 => "Thruster",
+					8 => "Laser Cutter",
+					10 => "Cargo Bay",
+					12 => "Jump Engine",
 					18 => "Structure",
 					20 => "Primary",
 			),
 			3=> array(
-					3 => "Thruster",
-					5 => "Laser Cutter",
-					7 => "Light Particle Beam",
-					8 => "Bolt Torpedo",
-					10 => "Cargo Bay",
+					4 => "Thruster",
+					6 => "Laser Cutter",
+					8 => "Light Particle Beam",
+					10 => "Bolt Torpedo",
+					12 => "Cargo Bay",
 					18 => "Structure",
 					20 => "Primary",
 			),
 			4=> array(
-					3 => "Thruster",
-					5 => "Laser Cutter",
-					7 => "Light Particle Beam",
-					8 => "Bolt Torpedo",
-					10 => "Cargo Bay",
+					4 => "Thruster",
+					6 => "Laser Cutter",
+					8 => "Light Particle Beam",
+					10 => "Bolt Torpedo",
+					12 => "Cargo Bay",
 					18 => "Structure",
 					20 => "Primary",
 			),

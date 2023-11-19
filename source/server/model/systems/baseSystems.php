@@ -1347,6 +1347,17 @@ class Quarters extends ShipSystem{
     }
 }
 
+class Magazine extends ShipSystem{
+    public $name = "Magazine";
+    public $displayName = "Magazine";
+    
+	//Cargo Bay is not important at all!
+	public $repairPriority = 1;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
+    
+    function __construct($armour, $maxhealth){
+        parent::__construct($armour, $maxhealth, 0, 0);
+    }
+}
 
 
 
@@ -2843,7 +2854,7 @@ class SelfRepair extends ShipSystem{
 class ThirdspaceSelfRepair extends SelfRepair{
 
     public $boostable = true;
-    public $maxBoostLevel = 10;
+    public $maxBoostLevel = 5;
     public $boostEfficiency = 5; 
 	
 	public function setSystemDataWindow($turn){

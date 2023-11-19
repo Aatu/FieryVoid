@@ -5,7 +5,7 @@ class Lykorai extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 925;
-	$this->faction = "Brakiri";
+	$this->faction = "Brakiri Syndicracy";
         $this->phpclass = "Lykorai";
         $this->imagePath = "img/ships/corumai.png";
         $this->shipClass = "Lykorai Supercarrier";

@@ -5,7 +5,7 @@ class DalithornPrototypeJumpcruiser extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 400;
-        $this->faction = "ZNexus Dalithorn";
+        $this->faction = "ZNexus Dalithorn Commonwealth";
         $this->phpclass = "DalithornPrototypeJumpcruiser";
         $this->imagePath = "img/ships/Nexus/DalithornPrototypeJumpship.png";
 			$this->canvasSize = 115; //img has 200px per side
@@ -31,7 +31,7 @@ class DalithornPrototypeJumpcruiser extends HeavyCombatVessel{
         $this->addPrimarySystem(new Scanner(3, 14, 5, 5));
         $this->addPrimarySystem(new Engine(3, 16, 0, 8, 4));
         $this->addPrimarySystem(new Hangar(1, 2));
-		$this->addPrimarySystem(new CargoBay(2, 6));
+		$this->addPrimarySystem(new Magazine(3, 6));
 		$this->addPrimarySystem(new Catapult(1, 6));
         $this->addPrimarySystem(new Thruster(2, 10, 0, 4, 3));
         $this->addPrimarySystem(new Thruster(2, 10, 0, 4, 4));
@@ -61,7 +61,7 @@ class DalithornPrototypeJumpcruiser extends HeavyCombatVessel{
             0=> array(
                     8 => "Structure",
 					9 => "Catapult",
-					11 => "Cargo Bay",
+					11 => "Magazine",
                     13 => "Thruster",
                     15 => "Scanner",
                     17 => "Engine",
@@ -71,9 +71,9 @@ class DalithornPrototypeJumpcruiser extends HeavyCombatVessel{
             ),
             1=> array(
                     4 => "Thruster",
-                    7 => "Jump Engine",
-                    9 => "Light Gas Gun",
-					11 => "Shatter Gun",
+                    8 => "Jump Engine",
+                    10 => "Light Gas Gun",
+					12 => "Shatter Gun",
 					18 => "Structure",
                     20 => "Primary",
             ),

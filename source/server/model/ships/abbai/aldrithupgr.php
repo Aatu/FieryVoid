@@ -5,7 +5,7 @@ class Aldrithupgr extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 550;
-	$this->faction = "Abbai";
+	$this->faction = "Abbai Matriarchate";
         $this->phpclass = "Aldrithupgr";
         $this->imagePath = "img/ships/AbbaiBimith.png";
         $this->shipClass = "Aldrith Cruiser Upgraded";

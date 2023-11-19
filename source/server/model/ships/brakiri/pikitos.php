@@ -5,7 +5,7 @@ class Pikitos extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 468;
-	$this->faction = "Brakiri";
+	$this->faction = "Brakiri Syndicracy";
         $this->phpclass = "Pikitos";
         $this->shipClass = "Pikitos Heavy Fighters";
 	$this->imagePath = "img/ships/pikitos.png";

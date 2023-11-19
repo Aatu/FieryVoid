@@ -5,7 +5,7 @@ class VelraxStrikeCarrierRefit extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 605;
-	$this->faction = "ZNexus Velrax";
+	$this->faction = "ZNexus Velrax Republic";
         $this->phpclass = "VelraxStrikeCarrierRefit";
         $this->imagePath = "img/ships/Nexus/VelraxResskar.png";
         $this->shipClass = "Resskar Strike Carrier (2104 Refit)";
@@ -92,22 +92,22 @@ class VelraxStrikeCarrierRefit extends BaseShip{
 			2=> array(
 					6 => "Thruster",
 					8 => "Laser Lance",
-					9 => "Dual Ion Bolter",
+					10 => "Dual Ion Bolter",
 					12 => "Jump Engine",
 					18 => "Structure",
 					20 => "Primary",
 			),
 			3=> array(
-					5 => "Thruster",
-					6 => "Dual Ion Bolter",
+					6 => "Thruster",
+					8 => "Dual Ion Bolter",
 					10 => "Laser Lance",
 					12 => "Hangar",
 					18 => "Structure",
 					20 => "Primary",
 			),
 			4=> array(
-					5 => "Thruster",
-					6 => "Dual Ion Bolter",
+					6 => "Thruster",
+					8 => "Dual Ion Bolter",
 					10 => "Laser Lance",
 					12 => "Hangar",
 					18 => "Structure",

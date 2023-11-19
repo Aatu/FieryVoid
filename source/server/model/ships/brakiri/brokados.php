@@ -5,7 +5,7 @@ class Brokados extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 825;
-		$this->faction = "Brakiri";
+		$this->faction = "Brakiri Syndicracy";
         $this->phpclass = "Brokados";
         $this->imagePath = "img/ships/brokados.png";
         $this->shipClass = "Brokados Battle Carrier";

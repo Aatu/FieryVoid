@@ -28,8 +28,8 @@ class Vorchan_WI extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new Scanner(6, 20, 4, 8));
         $this->addPrimarySystem(new Engine(7, 11, 0, 10, 2));
 		$this->addPrimarySystem(new Hangar(6, 8));
-		$this->addPrimarySystem(new PlasmaAccelerator(4, 10, 5, 300, 60));
-		$this->addPrimarySystem(new JumpEngine(6, 16, 3, 16));
+		$this->addFrontSystem(new PlasmaAccelerator(4, 10, 5, 300, 60));
+		$this->addAftSystem(new JumpEngine(6, 16, 3, 16));
 
         $this->addLeftSystem(new HeavyArray(3, 8, 4, 240, 120));
 		$this->addLeftSystem(new Thruster(5, 10, 0, 3, 1));
@@ -49,8 +49,8 @@ class Vorchan_WI extends HeavyCombatVesselLeftRight{
             $this->hitChart = array(
         		0=> array(
                     7 => "Structure",
-					9 => "Jump Engine",
-					10 => "Plasma Accelerator",
+					9 => "2:Jump Engine",
+					10 => "1:Plasma Accelerator",
                     12 => "Scanner",
                     15 => "Engine",
                     17 => "Hangar",

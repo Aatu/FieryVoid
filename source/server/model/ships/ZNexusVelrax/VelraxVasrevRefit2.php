@@ -5,7 +5,7 @@ class VelraxVasrevRefit2 extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 365;
-        $this->faction = "ZNexus Velrax";
+        $this->faction = "ZNexus Velrax Republic";
         $this->phpclass = "VelraxVasrevRefit2";
         $this->imagePath = "img/ships/Nexus/VelraxSathrin.png";
         $this->shipClass = "Vasrev Escort Frigate (2152 refit)";
@@ -62,8 +62,8 @@ class VelraxVasrevRefit2 extends MediumShip{
 		),
 
 		1=> array(
-			6 => "Thruster",
-			8 => "Plasma Arc",
+			5 => "Thruster",
+			7 => "Plasma Arc",
 			9 => "Dual Ion Bolter",
 			17 => "Structure",
 			20 => "Primary",

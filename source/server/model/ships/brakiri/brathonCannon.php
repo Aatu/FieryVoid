@@ -5,7 +5,7 @@ class BrathonCannon extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 345;
-	$this->faction = "Brakiri";
+	$this->faction = "Brakiri Syndicracy";
         $this->phpclass = "BrathonCannon";
         $this->imagePath = "img/ships/brathon.png";
         $this->shipClass = "Brathon Auxiliary Cruiser (non-Kam-Lassit)";

@@ -4448,6 +4448,8 @@ class PsychicField extends Weapon implements DefensiveSystem{ //Thirdspace weapo
         public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals ; not relevant really!
 	
 	public $boostlevel = 0;
+	
+	public $repairPriority = 3;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired	
 		
 	public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
 	public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
@@ -4457,9 +4459,9 @@ class PsychicField extends Weapon implements DefensiveSystem{ //Thirdspace weapo
 	protected $targetList = array(); //weapon will hit units on this list rather than target from firing order; filled by PsychicField handler!
 	
 	
- /*	protected $possibleCriticals = array( //no point in range reduced crit; but reduced damage is really nasty for this weapon!
- //           14=>"ReducedDamage"
-	);  Should this have a crit? */
+ 	protected $possibleCriticals = array( //no point in range reduced crit; but reduced damage is really nasty for this weapon!
+            16=>"ForcedOfflineOneTurn"
+			);
 	
 	
 	
@@ -4478,7 +4480,6 @@ class PsychicField extends Weapon implements DefensiveSystem{ //Thirdspace weapo
 		      parent::setSystemDataWindow($turn);  
 		      //$this->data["AoE"] = $this->getAoE($turn);
 		      $this->data["Special"] = "This weapons automatically affects all units (friend or foe) in area of effect.  It should not be fired manually."; 
-	//	      $this->data["Special"] .= "<br>"; 
 		      $this->data["Special"] .= "<br>Affected Fighters have their initiative reduced by 5 to 20 points, and their hit chance reduced by 5 - 15% for 1 turn.";  
 		      $this->data["Special"] .= "<br>Affected Ships have their their hit chance reduced by 5 - 15% for 1 turn if hit on structure, and suffer a potential critical hit on non-Structure systems.";  		      
 		      $this->data["Special"] .= "<br>Can be boosted at a cost 3 Power, each boost gives +2 AoE range to maximum of 10 hexes."; 
@@ -4729,7 +4730,7 @@ class PsychicFieldHandler{
         public $loadingtime = 3;
         public $raking = 20;
         public $addedDice;
-        public $priority = 2;
+        public $priority = 7;
 
         public $boostable = true;
         public $boostEfficiency = 0;
@@ -4746,7 +4747,9 @@ class PsychicFieldHandler{
         public $damageType = "Raking"; 
         public $weaponClass = "Electromagnetic"; 
         
-        public $uninterceptable = true;        
+        public $uninterceptable = true;    
+        
+		public $repairPriority = 5;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired            
 
 
         public function setSystemDataWindow($turn){
@@ -4769,7 +4772,7 @@ class PsychicFieldHandler{
         {
             //maxhealth and power reqirement are fixed; left option to override with hand-written values
             if ( $maxhealth == 0 ){
-                $maxhealth = 20;
+                $maxhealth = 16;
             }
             if ( $powerReq == 0 ){
                 $powerReq = 12;
@@ -4866,7 +4869,7 @@ class PsionicLance extends Raking{
         public $loadingtime = 2;
         public $raking = 15;
         public $addedDice;
-        public $priority = 4;
+        public $priority = 8;
 
         public $boostable = true;
         public $boostEfficiency = 0;
@@ -4877,12 +4880,14 @@ class PsionicLance extends Raking{
         );
 
         public $rangePenalty = 0.33;
-        public $fireControl = array(-3, 4, 5); // fighters, <mediums, <capitals
+        public $fireControl = array(-4, 4, 5); // fighters, <mediums, <capitals
 
         public $damageType = "Raking"; 
         public $weaponClass = "Electromagnetic";
         
-        public $uninterceptable = true;         
+        public $uninterceptable = true; 
+       
+	public $repairPriority = 5;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired                
 
 
         public function setSystemDataWindow($turn){
@@ -4981,7 +4986,7 @@ class PsionicLance extends Raking{
         }  
    }//end of Psionic Lance
 
-class PsionicConcentrator extends Raking{
+class PsionicConcentrator extends Weapon{
     /*Psionic Concentrator - Thirdspace weapon*/
 	public $name = "PsionicConcentrator";
 	public $displayName = "Psionic Concentrator";
@@ -5001,30 +5006,37 @@ class PsionicConcentrator extends Raking{
         public $loadingtime = 1;
 	public $intercept = 2; //intercept rating -1     
 	
-        public $priority = 6;
-        public $priorityArray = array(1=>6, 2=>4);
+
+    public $priority = 6;
+    public $priorityArray = array(1=>5, 2=>6);
+
 	public $firingMode = 1;	
             public $firingModes = array(
                 1 => "Single",
                 2 => "Double"
             );
+
+    public $fireControl = array(6, 4, 2); // fighters, <mediums, <capitals 
+    public $fireControlArray = array( 1=>array(6, 4, 2), 2=>array(0, 4, 6));
+
         public $rangePenalty = 1;
-            public $rangePenaltyArray = array( 1=>1, 2=>0.66); //Standard and Raking modes
-        public $fireControl = array(8, 5, 3); // fighters, <mediums, <capitals 
-            public $fireControlArray = array( 1=>array(6, 4, 2), 2=>array(0, 4, 5));
+        public $rangePenaltyArray = array( 1=>1, 2=>0.66); //Standard and Raking modes
+
               
-	    public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
-  		public $damageTypeArray = array(1=>"Standard", 2=>"Standard");	    
-	    public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!    
+	public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+  	public $damageTypeArray = array(1=>"Standard", 2=>"Standard");	    
+	public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!    
 	
 	public $isCombined = false; //is being combined with other weapon
 	public $alreadyConsidered = false; //already considered - either being fired or combined
 	public $testRun = false;//testRun = true means hit chance is calculated nominal skipping concentration issues - for subordinate weapon to calculate average hit chance
 	
+	public $repairPriority = 4;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
 	
-	    public function setSystemDataWindow($turn){
+	
+	public function setSystemDataWindow($turn){
 		      parent::setSystemDataWindow($turn);  
-		      $this->data["Special"] = "Two Psionic Concentrators can be combined into a single standard shot in Double mode, with -3.33 per hex range penalty, 0/20/30 Fire Control and an additional 1d10+5 damage.";	      
+		      $this->data["Special"] = "Two Psionic Concentrators can be combined into a single standard shot in Double mode, with -3.33 per hex range penalty, 0/20/30 Fire Control and an additional 1d10+4 damage.";	      
 		      $this->data["Special"] .= "<br>If You allocate multiple Concentrators to the same Double mode of fire at the same target, they will be combined.";		       
 		      $this->data["Special"] .= "<br>If not enough weapons are allocated to be combined, weapons will be fired in Single mode instead.";  		  
 		      $this->data["Special"] .= "<br>Has +1 modifier to critical hits, and +2 to fighter dropout rolls.";
@@ -5099,7 +5111,7 @@ class PsionicConcentrator extends Raking{
         {
             //maxhealth and power reqirement are fixed; left option to override with hand-written values
             if ( $maxhealth == 0 ){
-                $maxhealth = 8;
+                $maxhealth = 7;
             }
             if ( $powerReq == 0 ){
                 $powerReq = 3;

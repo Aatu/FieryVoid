@@ -7,7 +7,7 @@ class VelraxCommandBase extends SmallStarBaseFourSections{
 		$this->pointCost = 660;
 		$this->base = true;
 		$this->smallBase = true;
-		$this->faction = "ZNexus Velrax";
+		$this->faction = "ZNexus Velrax Republic";
 		$this->phpclass = "VelraxCommandBase";
 		$this->shipClass = "Command Base";
 		$this->imagePath = "img/ships/Nexus/VelraxBase.png";
@@ -80,36 +80,36 @@ class VelraxCommandBase extends SmallStarBaseFourSections{
 				20 => "C&C",
 			),
 			1=> array(
-				2 => "Heavy Laser Spear",
-				4 => "Twin Ion Gun",
-				5 => "Hangar",
+				3 => "Heavy Laser Spear",
+				5 => "Twin Ion Gun",
+				7 => "Hangar",
 				9 => "Cargo Bay",
 				11 => "Ranged Plasma Wave",
 				18 => "Structure",
 				20 => "Primary",
 			),
 			2=> array(
-				2 => "Heavy Laser Spear",
-				4 => "Twin Ion Gun",
-				5 => "Hangar",
+				3 => "Heavy Laser Spear",
+				5 => "Twin Ion Gun",
+				7 => "Hangar",
 				9 => "Cargo Bay",
 				11 => "Ranged Plasma Wave",
 				18 => "Structure",
 				20 => "Primary",
 			),	
 			3=> array(
-				2 => "Heavy Laser Spear",
-				4 => "Twin Ion Gun",
-				5 => "Hangar",
+				3 => "Heavy Laser Spear",
+				5 => "Twin Ion Gun",
+				7 => "Hangar",
 				9 => "Cargo Bay",
 				11 => "Ranged Plasma Wave",
 				18 => "Structure",
 				20 => "Primary",
 			),
 			4=> array(
-				2 => "Heavy Laser Spear",
-				4 => "Twin Ion Gun",
-				5 => "Hangar",
+				3 => "Heavy Laser Spear",
+				5 => "Twin Ion Gun",
+				7 => "Hangar",
 				9 => "Cargo Bay",
 				11 => "Ranged Plasma Wave",
 				18 => "Structure",

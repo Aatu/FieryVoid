@@ -5,7 +5,7 @@ class DalithornSupportFrigate extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 240;
-        $this->faction = "ZNexus Dalithorn";
+        $this->faction = "ZNexus Dalithorn Commonwealth";
         $this->phpclass = "DalithornSupportFrigate";
         $this->imagePath = "img/ships/Nexus/DalithornSupportFrigate.png";
         $this->shipClass = "Support Frigate";
@@ -32,7 +32,7 @@ class DalithornSupportFrigate extends MediumShip{
         $this->addPrimarySystem(new Scanner(3, 10, 3, 5));
         $this->addPrimarySystem(new Engine(3, 12, 0, 6, 3));
         $this->addPrimarySystem(new Hangar(1, 1));
-		$this->addPrimarySystem(new CargoBay(2, 10));
+		$this->addPrimarySystem(new Magazine(3, 10));
         $this->addPrimarySystem(new Thruster(2, 10, 0, 4, 3));
         $this->addPrimarySystem(new Thruster(2, 10, 0, 4, 4));        
         
@@ -57,7 +57,7 @@ class DalithornSupportFrigate extends MediumShip{
 		
 		0=> array(
 			8 => "Thruster",
-			10 => "Cargo Bay",
+			10 => "Magazine",
 			12 => "Scanner",
 			16 => "Engine",
 			17 => "Hangar",
@@ -66,17 +66,17 @@ class DalithornSupportFrigate extends MediumShip{
 		),
 
 		1=> array(
-			6 => "Thruster",
-			8 => "Catapult",
-			10 => "Light Gas Gun",
+			4 => "Thruster",
+			6 => "Catapult",
+			8 => "Light Gas Gun",
 			17 => "Structure",
 			20 => "Primary",
 		),
 
 		2=> array(
 			6 => "Thruster",
-			7 => "Shatter Gun",
-			9 => "Light Gas Gun",
+			8 => "Shatter Gun",
+			10 => "Light Gas Gun",
 			17 => "Structure",
 			20 => "Primary",
 		),

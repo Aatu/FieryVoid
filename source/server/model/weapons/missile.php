@@ -555,6 +555,7 @@ class ReloadRack extends Weapon //ShipSystem
 } //endof class ReloadRack
 
 
+
 /*weapon with unlimited ammo, able to use multiple munitions (modes of fire), simulating many missile launchers in game on demand (at constructor)
 pricing proposal: standard launchers + 25/launcher, improved range additional +10, improved fire rate: double these numbers (so class-S +25, class-L +35, class-R +50, class-LH +70)
 skip -L but double that when mounted on a base, dues to Stable rule... so class-S/L on base would be alike at 50, class R/LH/B also alike at 100 

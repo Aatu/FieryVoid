@@ -33,8 +33,8 @@ class tfsblockaderunner extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new Engine(5, 20, 0, 12, 2));
         $this->addPrimarySystem(new Hangar(4, 1));
 		$this->addPrimarySystem(new CargoBay(4, 32));
-        $this->addPrimarySystem(new Thruster(4, 15, 0, 6, 1));
-        $this->addPrimarySystem(new Thruster(5, 21, 0, 12, 2));
+        $this->addAftSystem(new Thruster(4, 15, 0, 6, 1));
+        $this->addAftSystem(new Thruster(5, 21, 0, 12, 2));
 
         $this->addLeftSystem(new StdParticleBeam(3, 4, 1, 240, 60));
         $this->addLeftSystem(new StdParticleBeam(3, 4, 1, 240, 60));
@@ -52,7 +52,7 @@ class tfsblockaderunner extends HeavyCombatVesselLeftRight{
             $this->hitChart = array(
         		0=> array(
         				7 => "Structure",
-        				10 => "Thruster",
+        				10 => "2:Thruster",
 						12 => "Cargo Bay",
         				14 => "Scanner",
         				16 => "Engine",

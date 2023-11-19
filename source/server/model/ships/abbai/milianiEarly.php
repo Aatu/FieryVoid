@@ -5,7 +5,7 @@ class MilianiEarly extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 475;
-	$this->faction = "Abbai";
+	$this->faction = "Abbai Matriarchate";
         $this->phpclass = "MilianiEarly";
         $this->imagePath = "img/ships/AbbaiMilani.png";
         $this->shipClass = "Miliani Carrier (early)";
