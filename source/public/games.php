@@ -64,7 +64,7 @@ if (isset($_SESSION["user"])) {
        
 		
 
-		---------- <b>LATEST NEWS - September 2023</b> ----------
+		---------- <b>LATEST NEWS - November 2023</b> ----------
 	    <br><b>Allocating damage by tag</b> - new option, revolutionizing Vree and Vorlon hit charts (and Starbases, in the future - not fitted yet)
 	    <br><b>Faction names</b> - most official ones are expanded
 	    <br><b>Minor fixes</b> - as usual :)
