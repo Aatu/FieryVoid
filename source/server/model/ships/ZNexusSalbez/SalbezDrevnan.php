@@ -5,7 +5,7 @@ class SalbezDrevnan extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 230;
-        $this->faction = "ZNexus Sal-bez";
+        $this->faction = "ZNexus Sal-bez Coalition";
         $this->phpclass = "SalbezDrevnan";
         $this->imagePath = "img/ships/Nexus/salbez_drevnan.png";
         $this->shipClass = "Drev-nan Auxiliary Escort";

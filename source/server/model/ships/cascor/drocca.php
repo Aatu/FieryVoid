@@ -5,7 +5,7 @@ class Drocca extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 600;
-		$this->faction = "Cascor";
+		$this->faction = "Cascor Commonwealth";
         $this->phpclass = "Drocca";
         $this->imagePath = "img/ships/CascorQorric.png";
         $this->shipClass = "Drocca Torpedo Destroyer";

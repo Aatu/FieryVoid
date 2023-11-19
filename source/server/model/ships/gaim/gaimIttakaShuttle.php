@@ -5,7 +5,7 @@ class gaimIttakaShuttle extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 30*6;
-        $this->faction = "Gaim";
+        $this->faction = "Gaim Intelligence";
         $this->phpclass = "gaimIttakaShuttle";
         $this->shipClass = "It'Taka Assault Shuttles";
         $this->imagePath = "img/ships/GaimIttaka.png";

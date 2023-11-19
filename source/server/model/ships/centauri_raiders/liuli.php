@@ -27,13 +27,13 @@ class Liuli extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new Scanner(4, 12, 3, 5));
         $this->addPrimarySystem(new Engine(4, 13, 0, 9, 3));
         $this->addPrimarySystem(new Hangar(4, 2));
-        $this->addPrimarySystem(new Thruster(3, 12, 0, 5, 1));
-        $this->addPrimarySystem(new Thruster(3, 8, 0, 3, 2));
-        $this->addPrimarySystem(new Thruster(3, 8, 0, 3, 2));
-        $this->addPrimarySystem(new Thruster(3, 8, 0, 3, 2));
-		$this->addPrimarySystem(new ParticleProjector(2, 6, 1, 240, 60));
-		$this->addPrimarySystem(new ParticleProjector(2, 6, 1, 270, 90));
-		$this->addPrimarySystem(new ParticleProjector(2, 6, 1, 300, 120));
+        $this->addAftSystem(new Thruster(3, 12, 0, 5, 1));
+        $this->addAftSystem(new Thruster(3, 8, 0, 3, 2));
+        $this->addAftSystem(new Thruster(3, 8, 0, 3, 2));
+        $this->addAftSystem(new Thruster(3, 8, 0, 3, 2));
+		$this->addFrontSystem(new ParticleProjector(2, 6, 1, 240, 60));
+		$this->addFrontSystem(new ParticleProjector(2, 6, 1, 270, 90));
+		$this->addFrontSystem(new ParticleProjector(2, 6, 1, 300, 120));
 
 
         $this->addLeftSystem(new Thruster(3, 10, 0, 4, 3));
@@ -54,8 +54,8 @@ class Liuli extends HeavyCombatVesselLeftRight{
         $this->hitChart = array(
             0=> array(
                     7 => "Structure",
-                    10 => "Thruster",
-                    13 => "Particle Projector",
+                    10 => "2:Thruster",
+                    13 => "1:Particle Projector",
                     15 => "Scanner",
                     17 => "Engine",
                     18 => "Hangar",

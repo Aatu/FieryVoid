@@ -5,7 +5,7 @@ class Tacacci extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 440;
-		$this->faction = "Cascor";
+		$this->faction = "Cascor Commonwealth";
         $this->phpclass = "Tacacci";
         $this->imagePath = "img/ships/CascorTaccaci.png";
         $this->shipClass = "Tacacci Strike Frigate";

@@ -11,7 +11,7 @@ class wlcChlonasEsKashiDD2198 extends HeavyCombatVesselLeftRight{
         $this->shipClass = "Es'Kashi Destroyer";
         //$this->fighters = array("medium"=>6);
         
-	$this->faction = "Ch'Lonas";
+	$this->faction = "Ch'Lonas Cooperative";
         //$this->variantOf = "Es'Kashi Destroyer";
 	$this->isd = 2198;
 	$this->unofficial = true;

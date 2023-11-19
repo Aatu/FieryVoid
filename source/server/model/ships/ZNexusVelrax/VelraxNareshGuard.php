@@ -5,7 +5,7 @@ class VelraxNareshGuard extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 520;
-	$this->faction = "ZNexus Velrax";
+	$this->faction = "ZNexus Velrax Republic";
         $this->phpclass = "VelraxNareshGuard";
         $this->imagePath = "img/ships/Nexus/VelraxNareshGuard.png";
         $this->shipClass = "Naresh Fleet Carrier (Brissa Guard)";
@@ -96,13 +96,13 @@ class VelraxNareshGuard extends BaseShip{
 			2=> array(
 					6 => "Thruster",
 					8 => "Heavy Laser Spear",
-					9 => "Twin Ion Gun",
+					10 => "Twin Ion Gun",
 					12 => "Jump Engine",
 					18 => "Structure",
 					20 => "Primary",
 			),
 			3=> array(
-					6 => "Thruster",
+					5 => "Thruster",
 					7 => "Twin Ion Gun",
 					9 => "Laser Spear",
 					12 => "Hangar",
@@ -110,7 +110,7 @@ class VelraxNareshGuard extends BaseShip{
 					20 => "Primary",
 			),
 			4=> array(
-					6 => "Thruster",
+					5 => "Thruster",
 					7 => "Twin Ion Gun",
 					9 => "Laser Spear",
 					12 => "Hangar",

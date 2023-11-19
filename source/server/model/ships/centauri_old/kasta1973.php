@@ -5,7 +5,7 @@ class Kasta1973 extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 575;
-        $this->faction = "Centauri (WotCR)";
+        $this->faction = "Centauri Republic (WotCR)";
         $this->phpclass = "Kasta1973";
         $this->imagePath = "img/ships/celerian.png";
         $this->shipClass = "Kasta Support Carrier (1973)";

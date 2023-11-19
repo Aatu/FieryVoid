@@ -5,7 +5,7 @@ class Secundus extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 975;
-		$this->faction = "Centauri";
+		$this->faction = "Centauri Republic";
         $this->phpclass = "Secundus";
         $this->imagePath = "img/ships/primus.png";
         $this->shipClass = "Secundus Assault Cruiser";

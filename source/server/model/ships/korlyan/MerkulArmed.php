@@ -5,7 +5,7 @@ class MerkulArmed extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 25*6;
-		$this->faction = "Kor-Lyan";
+		$this->faction = "Kor-Lyan Kingdoms";
         $this->phpclass = "MerkulArmed";
         $this->shipClass = "Merkul Armed Shuttles";
 			$this->occurence = "common";

@@ -5,7 +5,7 @@ class Jumphawk extends HeavyCombatVesselLeftRight{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 500;
-	$this->faction = "Drazi";
+	$this->faction = "Drazi Freehold";
         $this->phpclass = "Jumphawk";
         $this->imagePath = "img/ships/drazi/DraziJumphawk.png";
         $this->shipClass = "Jumphawk Command Cruiser";

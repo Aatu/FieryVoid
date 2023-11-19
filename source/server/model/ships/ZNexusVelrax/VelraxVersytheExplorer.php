@@ -5,7 +5,7 @@ class VelraxVersytheExplorer extends HeavyCombatVesselLeftRight{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 400;
-	$this->faction = "ZNexus Velrax";
+	$this->faction = "ZNexus Velrax Republic";
         $this->phpclass = "VelraxVersytheExplorer";
         $this->imagePath = "img/ships/Nexus/VelraxVersythe.png";
         $this->shipClass = "Versythe Explorer";
@@ -73,8 +73,8 @@ class VelraxVersytheExplorer extends HeavyCombatVesselLeftRight{
 						5 => "Cargo Bay",
 						7 => "Medium Plasma Cannon",
         				9 => "Twin Ion Gun",
-						10 => "ELINT Scanner",
-						11 => "Hangar",
+						11 => "ELINT Scanner",
+						12 => "Hangar",
         				18 => "Structure",
         				20 => "Primary",
         		),
@@ -83,8 +83,8 @@ class VelraxVersytheExplorer extends HeavyCombatVesselLeftRight{
 						5 => "Quarters",
 						7 => "Medium Plasma Cannon",
         				9 => "Twin Ion Gun",
-						10 => "ELINT Scanner",
-						11 => "Hangar",
+						11 => "ELINT Scanner",
+						12 => "Hangar",
         				18 => "Structure",
         				20 => "Primary",
         		),

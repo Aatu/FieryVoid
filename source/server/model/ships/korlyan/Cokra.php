@@ -5,7 +5,7 @@ class Cokra extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 280;
-		$this->faction = "Kor-Lyan";
+		$this->faction = "Kor-Lyan Kingdoms";
         $this->phpclass = "Cokra";
         $this->imagePath = "img/ships/korlyan_cokra2.png";
         $this->shipClass = "Cokra Blockade Runner";

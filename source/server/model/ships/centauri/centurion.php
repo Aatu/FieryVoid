@@ -5,7 +5,7 @@ class Centurion extends BaseShip{
         parent::__construct($id, $userid, $name,  $movement);
         
         $this->pointCost = 725;
-        $this->faction = "Centauri";
+        $this->faction = "Centauri Republic";
         $this->phpclass = "Centurion";
 	    $this->isd = 2202;
         $this->imagePath = "img/ships/centurion.png";

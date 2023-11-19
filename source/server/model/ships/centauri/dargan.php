@@ -5,7 +5,7 @@ class Dargan extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 750;
-		$this->faction = "Centauri";
+		$this->faction = "Centauri Republic";
         $this->phpclass = "Dargan";
         $this->imagePath = "img/ships/dargan.png";
         $this->shipClass = "Dargan Strike Cruiser";

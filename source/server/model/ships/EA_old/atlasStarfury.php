@@ -5,7 +5,7 @@ class AtlasStarfury extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 210;
-        $this->faction = "EA (early)";
+        $this->faction = "Earth Alliance (early)";
         $this->phpclass = "AtlasStarfury";
         $this->shipClass = "Starfury: Atlas Heavy flight (2212)";
 			$this->variantOf = "Starfury: Flying Fox Heavy flight";

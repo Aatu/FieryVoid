@@ -5,7 +5,7 @@ class lupaEscort extends LCV{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 175;
-    $this->faction = "Centauri";
+    $this->faction = "Centauri Republic";
 	$this->phpclass = "lupaEscort";
 	$this->shipClass = "Lupa Attack Boat (Escort)";
 	$this->imagePath = "img/ships/lupa.png";

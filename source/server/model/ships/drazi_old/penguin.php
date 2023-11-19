@@ -5,7 +5,7 @@ class Penguin extends HeavyCombatVesselLeftRight{
         parent::__construct($id, $userid, $name,  $slot);
         
     	$this->pointCost = 360;
-        $this->faction = "Drazi (WotCR)";
+        $this->faction = "Drazi Freehold (WotCR)";
         $this->phpclass = "Penguin";
         $this->imagePath = "img/ships/drazi/DraziPenguin.png";
         $this->shipClass = "Penguin Landing Ship";

@@ -5,7 +5,7 @@ class Botral extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 425;
-        $this->faction = "Corillani";
+        $this->faction = "Corillani Theocracy";
         $this->phpclass = "Botral";
         $this->imagePath = "img/ships/CorillaniBotral.png";
         $this->shipClass = "Botral Light Cruiser";

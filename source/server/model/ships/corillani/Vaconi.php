@@ -5,7 +5,7 @@ class Vaconi extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 600;
-		$this->faction = "Corillani";
+		$this->faction = "Corillani Theocracy";
         $this->phpclass = "Vaconi";
         $this->imagePath = "img/ships/CorillaniVaconi.png";
         $this->shipClass = "Vaconi Strike Carrier";

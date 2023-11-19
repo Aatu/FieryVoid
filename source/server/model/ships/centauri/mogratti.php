@@ -5,7 +5,7 @@ class Mogratti extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 575;
-	$this->faction = "Centauri";
+	$this->faction = "Centauri Republic";
         $this->phpclass = "Mogratti";
         $this->imagePath = "img/ships/mograth.png";
         $this->shipClass = "Mogratti Battle Frigate";

@@ -4,8 +4,8 @@ class CraytanTironRefit extends FighterFlight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 45*6;
-        $this->faction = "ZNexus Craytan";
+        $this->pointCost = 41*6;
+        $this->faction = "ZNexus Craytan Union";
         $this->phpclass = "CraytanTironRefit";
         $this->shipClass = "Tiron Medium Fighter Refit";
  			$this->variantOf = "Tiron Medium Fighters";
@@ -40,10 +40,10 @@ class CraytanTironRefit extends FighterFlight{
             $fighter->addFrontSystem(new NexusLtEnhPlasmaFtr(330, 30));
 			
 			$torpedoLauncher = new NexusFighterTorpedoLauncher(1, 330, 30);
-            $torpedoLauncher->firingModes = array( 1 => "LPB" );
+            $torpedoLauncher->firingModes = array( 1 => "LPT" );
             $torpedoLauncher->iconPath = "EWLightPlasmaMine.png";
-            $torpedoLauncher->displayName = "Light Plasma Bomb"; //needed
-            $torpedoLauncher->missileArray = array(1 => new NexusLtPlasmaBomb(330, 30));            	
+            $torpedoLauncher->displayName = "Light Plasma Torpedo"; //needed
+            $torpedoLauncher->missileArray = array(1 => new NexusLtPlasmaTorpedo(330, 30));            	
             $fighter->addFrontSystem($torpedoLauncher);
 			
 			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack

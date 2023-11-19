@@ -12,7 +12,7 @@ class ShipRhombusEscort extends HeavyCombatVesselLeftRight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 385;
-        $this->faction = "Ipsha";
+        $this->faction = "Ipsha Baronies";
         $this->phpclass = "ShipRhombusEscort";
         //$this->imagePath = "img/ships/IpshaRhombus.png";    
         $this->imagePath = "img/ships/IpshaBorgRhombus.png";

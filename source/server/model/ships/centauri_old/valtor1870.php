@@ -5,7 +5,7 @@ class Valtor1870 extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 675;
-        $this->faction = "Centauri (WotCR)";
+        $this->faction = "Centauri Republic (WotCR)";
         $this->phpclass = "Valtor1870";
         $this->imagePath = "img/ships/optine.png";
         $this->shipClass = "Valtor Strike Cruiser (1870)";

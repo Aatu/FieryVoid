@@ -11,7 +11,7 @@ class ShipCarrierCube extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 800;
-	$this->faction = "Ipsha";
+	$this->faction = "Ipsha Baronies";
         $this->phpclass = "ShipCarrierCube";
         //$this->imagePath = "img/ships/IpshaCube.png";    
         $this->imagePath = "img/ships/IpshaBorgCube.png";

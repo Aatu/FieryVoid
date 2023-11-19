@@ -5,7 +5,7 @@ class Ortana extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 600;
-		$this->faction = "Corillani";
+		$this->faction = "Corillani Theocracy";
         $this->phpclass = "Ortana";
         $this->imagePath = "img/ships/CorillaniIntona.png";
         $this->shipClass = "Ortana Battle Scout";
@@ -15,6 +15,7 @@ class Ortana extends BaseShip{
         $this->occurence = "rare";
 		$this->variantOf = "Intona Strike Cruiser";
         $this->limited = 33;						    
+ 		$this->unofficial = 'S'; //design released after AoG demise
 		
         $this->forwardDefense = 13;
         $this->sideDefense = 16;

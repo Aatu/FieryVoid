@@ -5,7 +5,7 @@ class BadgerStarfuryAM extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 420;
-        $this->faction = "EA";
+        $this->faction = "Earth Alliance";
         $this->phpclass = "BadgerStarfuryAM";
         $this->shipClass = "Starfury: Badger Heavy flight";
         $this->imagePath = "img/ships/badgerStarfury.png";

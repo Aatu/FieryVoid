@@ -6,7 +6,7 @@ class GromeRegla extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 192;
-        $this->faction = "Grome";
+        $this->faction = "Grome Autocracy";
         $this->phpclass = "GromeRegla";
         $this->shipClass = "Regla Light flight";
         $this->imagePath = "img/ships/GromeRegla.png";

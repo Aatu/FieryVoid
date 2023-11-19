@@ -6,7 +6,7 @@ class LiberatorCannon extends LCV{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 220;
-        $this->faction = "Deneth";
+        $this->faction = "Deneth Tribes";
 	$this->phpclass = "LiberatorCannon";
 	$this->shipClass = "Liberator Cannon Gunboat";
 

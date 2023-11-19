@@ -5,7 +5,7 @@ class DalithornCutter extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 360;
-        $this->faction = "ZNexus Dalithorn";
+        $this->faction = "ZNexus Dalithorn Commonwealth";
         $this->phpclass = "DalithornCutter";
         $this->shipClass = "Cutter";
         $this->imagePath = "img/ships/Nexus/DalithornCutterv2.png";

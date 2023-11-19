@@ -7,7 +7,7 @@ class Traqintor extends SmallStarBaseFourSections{
 		$this->pointCost = 2500;
 		$this->base = true;
 		$this->smallBase = true;
-		$this->faction = "Cascor";
+		$this->faction = "Cascor Commonwealth";
 		$this->phpclass = "Traqintor";
 		$this->shipClass = "Traqintor Waystation";
 		$this->imagePath = "img/ships/CascorTaqintorWaystation.png";

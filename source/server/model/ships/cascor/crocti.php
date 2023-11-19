@@ -6,7 +6,7 @@ class Crocti extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 420;
-        $this->faction = "Cascor";
+        $this->faction = "Cascor Commonwealth";
         $this->phpclass = "Crocti";
         $this->imagePath = "img/ships/CascorCrocti.png";
         $this->shipClass = "Crocti Patrol Carrier";

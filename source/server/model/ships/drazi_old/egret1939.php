@@ -5,7 +5,7 @@ class Egret1939 extends HeavyCombatVesselLeftRight{
         parent::__construct($id, $userid, $name,  $slot);
         
     	$this->pointCost = 485;
-        $this->faction = "Drazi (WotCR)";
+        $this->faction = "Drazi Freehold (WotCR)";
         $this->phpclass = "Egret1939";
         $this->imagePath = "img/ships/shrike.png";
         $this->shipClass = "Egret Combat Scout (1939)";

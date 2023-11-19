@@ -5,7 +5,7 @@ class Drolla extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
 		    $this->pointCost = 35*6;
-		    $this->faction = "Corillani";
+		    $this->faction = "Corillani Theocracy";
         $this->phpclass = "Drolla";
         $this->shipClass = "Drolla Assault Shuttles";
 		    $this->imagePath = "img/ships/CorillaniDrolla.png";

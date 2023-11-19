@@ -7,7 +7,7 @@ class SalbezBevram extends SmallStarBaseFourSections{
 		$this->pointCost = 300;
 		$this->base = true;
 		$this->smallBase = true;
-		$this->faction = "ZNexus Sal-bez";
+		$this->faction = "ZNexus Sal-bez Coalition";
 		$this->phpclass = "SalbezBevram";
 		$this->shipClass = "Bev'ram Mining Center";
 		$this->imagePath = "img/ships/Nexus/salbez_civilianBase.png";
@@ -76,34 +76,34 @@ class SalbezBevram extends SmallStarBaseFourSections{
 				20 => "C&C",
 			),
 			1=> array(
-				2 => "Industrial Laser",
-				4 => "Particle Grid",
-				5 => "Industrial Grappler",
-				9 => "Cargo Bay",
+				3 => "Industrial Laser",
+				5 => "Particle Grid",
+				7 => "Industrial Grappler",
+				10 => "Cargo Bay",
 				18 => "Structure",
 				20 => "Primary",
 			),
 			2=> array(
-				2 => "Industrial Laser",
-				4 => "Particle Grid",
-				5 => "Industrial Grappler",
-				9 => "Cargo Bay",
+				3 => "Industrial Laser",
+				5 => "Particle Grid",
+				7 => "Industrial Grappler",
+				10 => "Cargo Bay",
 				18 => "Structure",
 				20 => "Primary",
 			),	
 			3=> array(
-				2 => "Industrial Laser",
-				4 => "Particle Grid",
-				5 => "Industrial Grappler",
-				9 => "Cargo Bay",
+				3 => "Industrial Laser",
+				5 => "Particle Grid",
+				7 => "Industrial Grappler",
+				10 => "Cargo Bay",
 				18 => "Structure",
 				20 => "Primary",
 			),
 			4=> array(
-				2 => "Industrial Laser",
-				4 => "Particle Grid",
-				5 => "Industrial Grappler",
-				9 => "Cargo Bay",
+				3 => "Industrial Laser",
+				5 => "Particle Grid",
+				7 => "Industrial Grappler",
+				10 => "Cargo Bay",
 				18 => "Structure",
 				20 => "Primary",
 			),

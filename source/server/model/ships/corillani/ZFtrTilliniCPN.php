@@ -7,7 +7,7 @@ class ZFtrTilliniCPN extends FighterFlight
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 52 *6;
-		$this->faction = "Corillani";
+		$this->faction = "Corillani Theocracy";
 		$this->phpclass = "ZFtrTilliniCPN";
 		$this->shipClass = "Tillini Medium Fighters [CPN]";
 		$this->imagePath = "img/ships/CorillaniTilliniCPN.png";

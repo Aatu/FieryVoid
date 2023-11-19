@@ -5,7 +5,7 @@ class BrixadiiPursuitFrigate2057 extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 330;
-        $this->faction = "ZNexus Brixadii";
+        $this->faction = "ZNexus Brixadii Clans";
         $this->phpclass = "BrixadiiPursuitFrigate2057";
         $this->imagePath = "img/ships/Nexus/BrixadiiPursuitFrigate.png";
 			$this->canvasSize = 70; //img has 200px per side
@@ -64,17 +64,17 @@ class BrixadiiPursuitFrigate2057 extends MediumShip{
             ),
             1=> array(
                     4 => "Thruster",
-					5 => "Kinetic Box Launcher",
-                    7 => "Particle Bolter",
-					8 => "Light Particle Beam",
-					10 => "Heavy Particle Projector",
+					6 => "Kinetic Box Launcher",
+                    8 => "Particle Bolter",
+					10 => "Light Particle Beam",
+					12 => "Heavy Particle Projector",
 					17 => "Structure",
                     20 => "Primary",
             ),
             2=> array(
                     7 => "Thruster",
-					8 => "Chaff Launcher",
-                    10 => "Light Particle Beam",
+					9 => "Chaff Launcher",
+                    11 => "Light Particle Beam",
                     17 => "Structure",
                     20 => "Primary",
             ),

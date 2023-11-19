@@ -6,7 +6,7 @@ class Deathfalcon2230 extends BaseShipNoAft{
         parent::__construct($id, $userid, $name,  $slot);
 
         $this->pointCost = 725;
-        $this->faction = "Drazi";
+        $this->faction = "Drazi Freehold";
         $this->phpclass = "Deathfalcon2230";
         $this->imagePath = "img/ships/drazi/DraziStormfalcon.png";
         $this->shipClass = "Deathfalcon Heavy Assault Cruiser (2230)";

@@ -50,6 +50,9 @@ class Weapon extends ShipSystem
     public $rangePenalty = 0;
     public $rangePenaltyArray = array();
     public $specialRangeCalculation = false; //set to true if weapon should use its own range calculation IN FRONT END (server side range calculation is in weapon class anyway)
+    public $specialRangeCalculationArray = array(); //set to true if weapon should use its own range calculation IN FRONT END (server side range calculation is in weapon class anyway)    
+    public $specialHitChanceCalculation = false; //set to true for HARM missiles to allow front-end to show correct hitchance.
+  	public $specialHitChanceCalculationArray = array();
     public $rangeDamagePenalty = 0;
     public $rangeDamagePenaltyArray = array();
     private $dp = 0; //damage penalty - fraction of shot that gets wasted!
@@ -154,6 +157,7 @@ class Weapon extends ShipSystem
 
     public $useOEW = true;
     public $calledShotMod = -8;
+	public $calledShotModArray = array();     
 	public $factionAge = 1; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
 
     protected $possibleCriticals = array(14 => "ReducedRange", 19 => "ReducedDamage", 25 => array("ReducedRange", "ReducedDamage"));

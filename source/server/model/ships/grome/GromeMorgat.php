@@ -5,7 +5,7 @@ class GromeMorgat extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
 
         $this->pointCost = 450;
-        $this->faction = "Grome";
+        $this->faction = "Grome Autocracy";
         $this->phpclass = "GromeMorgat";
         $this->imagePath = "img/ships/GromeMorgat.png";
         $this->shipClass = "Morgat Heavy Frigate";

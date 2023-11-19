@@ -7,7 +7,7 @@ class VelraxLogisticsBase extends SmallStarBaseFourSections{
 		$this->pointCost = 525;
 		$this->base = true;
 		$this->smallBase = true;
-		$this->faction = "ZNexus Velrax";
+		$this->faction = "ZNexus Velrax Republic";
 		$this->phpclass = "VelraxLogisticsBase";
 		$this->shipClass = "Logistics Base";
 		$this->imagePath = "img/ships/Nexus/VelraxBase.png";

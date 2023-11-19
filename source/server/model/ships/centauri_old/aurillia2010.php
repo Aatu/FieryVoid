@@ -5,7 +5,7 @@ class Aurillia2010 extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 625;
-        $this->faction = "Centauri (WotCR)";
+        $this->faction = "Centauri Republic (WotCR)";
         $this->phpclass = "Aurillia2010";
         $this->imagePath = "img/ships/astur.png"; 
 		$this->canvasSize = 200; 

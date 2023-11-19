@@ -5,7 +5,7 @@ class SalbezBevtun extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 575;
-		$this->faction = "ZNexus Sal-bez";
+		$this->faction = "ZNexus Sal-bez Coalition";
         $this->phpclass = "SalbezBevtun";
         $this->imagePath = "img/ships/Nexus/salbez_bevtun.png";
         $this->shipClass = "Bev'tun Long-Range Miner (2029)";
@@ -106,20 +106,20 @@ class SalbezBevtun extends BaseShip{
 					20 => "Primary",
 			),
 			3=> array(
-					3 => "Thruster",
-					5 => "Industrial Laser",
-					7 => "Particle Grid",
-					8 => "Industrial Grappler",
-					10 => "Cargo Bay",
+					5 => "Thruster",
+					7 => "Industrial Laser",
+					9 => "Particle Grid",
+					10 => "Industrial Grappler",
+					12 => "Cargo Bay",
 					18 => "Structure",
 					20 => "Primary",
 			),
 			4=> array(
-					3 => "Thruster",
-					5 => "Industrial Laser",
-					7 => "Particle Grid",
-					8 => "Industrial Grappler",
-					10 => "Cargo Bay",
+					5 => "Thruster",
+					7 => "Industrial Laser",
+					9 => "Particle Grid",
+					10 => "Industrial Grappler",
+					12 => "Cargo Bay",
 					18 => "Structure",
 					20 => "Primary",
 			),

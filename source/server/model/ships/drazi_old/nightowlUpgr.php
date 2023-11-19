@@ -4,7 +4,7 @@ class NightowlUpgr extends BaseShipNoAft{
         parent::__construct($id, $userid, $name,  $slot);
 
         $this->pointCost = 600;
-        $this->faction = "Drazi (WotCR)";
+        $this->faction = "Drazi Freehold (WotCR)";
         $this->phpclass = "NightowlUpgr";
         $this->imagePath = "img/ships/nightowl.png";
         $this->shipClass = "Nightowl Upgraded Explorer";

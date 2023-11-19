@@ -5,7 +5,7 @@ class VelraxHisshrimRefit2 extends HeavyCombatVesselLeftRight{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 365;
-	$this->faction = "ZNexus Velrax";
+	$this->faction = "ZNexus Velrax Republic";
         $this->phpclass = "VelraxHisshrimRefit2";
         $this->imagePath = "img/ships/Nexus/VelraxHisshrim.png";
         $this->shipClass = "Hisshrim Patrol Carrier (2105 Refit)";
@@ -31,9 +31,9 @@ class VelraxHisshrimRefit2 extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new CnC(4, 16, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 16, 5, 7));
         $this->addPrimarySystem(new Engine(4, 15, 0, 8, 4));
-		$this->addPrimarySystem(new PlasmaWaveTorpedo(3, 7, 4, 300, 60));
-        $this->addPrimarySystem(new Thruster(3, 15, 0, 4, 1));
-        $this->addPrimarySystem(new Thruster(4, 20, 0, 8, 2));
+		$this->addFrontSystem(new PlasmaWaveTorpedo(3, 7, 4, 300, 60));
+        $this->addAftSystem(new Thruster(3, 15, 0, 4, 1));
+        $this->addAftSystem(new Thruster(4, 20, 0, 8, 2));
 
         $this->addLeftSystem(new LaserLance(3, 6, 4, 240, 360));
         $this->addLeftSystem(new NexusStreakInterceptor(2, 4, 1, 180, 60));
@@ -57,27 +57,29 @@ class VelraxHisshrimRefit2 extends HeavyCombatVesselLeftRight{
             $this->hitChart = array(
         		0=> array(
         				7 => "Structure",
-        				12 => "Thruster",
-						13 => "Plasma Wave",
+        				12 => "2:Thruster",
+						13 => "1:Plasma Wave",
         				15 => "Scanner",
         				17 => "Engine",
         				19 => "Reactor",
         				20 => "C&C",
         		),
         		3=> array(
-        				5 => "Thruster",
+        				4 => "Thruster",
+						5 => "1:Plasma Wave",
         				7 => "Dual Ion Bolter",
-						8 => "Streak Interceptor",
-						10 => "Laser Lance",
+						9 => "Streak Interceptor",
+						11 => "Laser Lance",
 						12 => "Hangar",
         				18 => "Structure",
         				20 => "Primary",
         		),
         		4=> array(
-        				5 => "Thruster",
+        				4 => "Thruster",
+						5 => "1:Plasma Wave",
         				7 => "Dual Ion Bolter",
-						8 => "Streak Interceptor",
-						10 => "Laser Lance",
+						9 => "Streak Interceptor",
+						11 => "Laser Lance",
 						12 => "Hangar",
         				18 => "Structure",
         				20 => "Primary",

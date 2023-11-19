@@ -5,7 +5,7 @@ class gaimRakar extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 750;
-        $this->faction = "Gaim";
+        $this->faction = "Gaim Intelligence";
         $this->phpclass = "gaimRakar";
         $this->imagePath = "img/ships/GaimRakar.png";
 		$this->canvasSize = 200;

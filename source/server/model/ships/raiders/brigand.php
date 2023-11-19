@@ -31,8 +31,8 @@ class Brigand extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new Engine(4, 14, 0, 8, 3));
         $this->addPrimarySystem(new Hangar(3, 1));
 		$this->addPrimarySystem(new CargoBay(2, 8));
-        $this->addPrimarySystem(new Thruster(3, 12, 0, 6, 1));
-        $this->addPrimarySystem(new Thruster(3, 18, 0, 8, 2));
+        $this->addAftSystem(new Thruster(3, 12, 0, 6, 1));
+        $this->addAftSystem(new Thruster(3, 18, 0, 8, 2));
 
         $this->addLeftSystem(new MediumPlasma(2, 5, 3, 300, 360));
         $this->addLeftSystem(new LightParticleCannon(2, 6, 5, 240, 360));
@@ -52,7 +52,7 @@ class Brigand extends HeavyCombatVesselLeftRight{
         $this->hitChart = array(
         		0=> array(
         				8 => "Structure",
-        				11 => "Thruster",
+        				11 => "2:Thruster",
         				13 => "Scanner",
         				15 => "engine",
         				16 => "Cargo Bay",

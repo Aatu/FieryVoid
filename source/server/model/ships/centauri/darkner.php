@@ -5,7 +5,7 @@ class Darkner extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 525;
-        $this->faction = "Centauri";
+        $this->faction = "Centauri Republic";
         $this->phpclass = "Darkner";
         $this->imagePath = "img/ships/darkner.png";
         $this->shipClass = "Darkner Fast Attack Frigate";

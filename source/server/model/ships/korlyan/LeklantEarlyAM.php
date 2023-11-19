@@ -5,7 +5,7 @@ class LeklantEarlyAM extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 690;
-		$this->faction = "Kor-Lyan";
+		$this->faction = "Kor-Lyan Kingdoms";
 //	$this->faction = "Custom Ships";
         $this->phpclass = "LeklantEarlyAM";
         $this->imagePath = "img/ships/korlyan_leklant.png";
@@ -45,8 +45,10 @@ class LeklantEarlyAM extends BaseShip{
 	    $this->enhancementOptionsEnabled[] = 'AMMO_H';//add enhancement options for other missiles - Class-H
 	    $this->enhancementOptionsEnabled[] = 'AMMO_K';//add enhancement options for other missiles - Class-K   
 	    $this->enhancementOptionsEnabled[] = 'AMMO_L';//add enhancement options for other missiles - Class-L
+	    $this->enhancementOptionsEnabled[] = 'AMMO_M';//add enhancement options for other missiles - Class-M	    
 		$this->enhancementOptionsEnabled[] = 'AMMO_P';//add enhancement options for other missiles - Class-P	    	    	    	    
 	    $this->enhancementOptionsEnabled[] = 'AMMO_S';//add enhancement options for other missiles - Class-S
+	    $this->enhancementOptionsEnabled[] = 'AMMO_X';//add enhancement options for other missiles - Class-X	    
         
         $this->addPrimarySystem(new Reactor(5, 21, 0, 0));
         $this->addPrimarySystem(new CnC(5, 16, 0, 0));

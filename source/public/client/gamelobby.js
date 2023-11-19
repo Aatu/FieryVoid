@@ -35,67 +35,67 @@ window.gamedata = {
 		  case 'Brakiri Syndicracy':
 			powerRating = 'Tier 1; distinct Corporations can be mixed freely';
 			break;
-		  case 'Cascor':
+		  case 'Cascor Commonwealth':
 			powerRating = 'Tier 2; can be turned to stronger custom faction by enhancement (still Tier 2)';
 			break;
-		  case 'Centauri':
+		  case 'Centauri Republic':
 			powerRating = 'Tier 1';
 			break;
-		  case 'Centauri (WotCR)':
+		  case 'Centauri Republic (WotCR)':
 			powerRating = 'Tier 2';
 			break;
-		  case "Ch'Lonas":
+		  case "Ch'Lonas Cooperative":
 			powerRating = 'Tier 2, custom faction';
 			break;
 		  case 'Civilians':
 			powerRating = 'Generic civilian designs for scenarios, not a faction';
 			break;
-		  case 'Corillani':
+		  case 'Corillani Theocracy':
 			powerRating = 'Tier 2; distinct sub-factions should not be mixed';
 			break;
 		  case 'Custom Ships':
 			powerRating = "Designs that don't fit anywhere else, not a faction";
 			break;
-		  case 'Deneth':
+		  case 'Deneth Tribes':
 			powerRating = 'Tier 2';
 			break;
-		  case 'Descari':
+		  case 'Descari Committees':
 			powerRating = 'Tier 2';
 			break;
-		  case 'Dilgar':
+		  case 'Dilgar Imperium':
 			powerRating = 'Tier 1';
 			break;
 		  case 'Drakh':
 			powerRating = 'Tier 1, custom faction';
 			break;
-		  case 'Drazi':
+		  case 'Drazi Freehold':
 			powerRating = 'Tier 1';
 			break;
-		  case 'Drazi (WotCR)':
+		  case 'Drazi Freehold (WotCR)':
 			powerRating = 'Tier 2';
 			break;
-		  case 'EA':
+		  case 'Earth Alliance':
 			powerRating = 'Tier 1 (except Warlock, which is Superior)';
 			break;
-		  case 'EA (defenses)':
+		  case 'Earth Alliance (defenses)':
 			powerRating = 'fixed tefenses for EA faction';
 			break;
-		  case 'EA (early)':
+		  case 'Earth Alliance (early)':
 			powerRating = 'Not balanced';
 			break;
-		  case 'Gaim':
+		  case 'Gaim Intelligence':
 			powerRating = 'Tier 1';
 			break;
-		  case 'Grome':
+		  case 'Grome Autocracy':
 			powerRating = 'Not balanced';
 			break;
-		  case 'Hurr':
+		  case 'Hurr Republic':
 			powerRating = 'Not balanced';
 			break;
-		  case 'Ipsha':
+		  case 'Ipsha Baronies':
 			powerRating = 'Tier 2 (distinct Baronies cannot be mixed)';
 			break;
-		  case 'Kor-Lyan':
+		  case 'Kor-Lyan Kingdoms':
 			powerRating = 'Tier 1';
 			break;
 		  case 'Llort':
@@ -173,19 +173,19 @@ window.gamedata = {
 		  case "ZEscalation Sshel'ath Alliance":
 			powerRating = 'Tier 2, custom faction';
 			break;
-		  case 'ZNexus Brixadii':
+		  case 'ZNexus Brixadii Clans':
 			powerRating = 'Tier 2, custom faction';
 			break;
-		  case 'ZNexus Craytan':
+		  case 'ZNexus Craytan Union':
 			powerRating = 'Tier 2, custom faction';
 			break;
-		  case 'ZNexus Dalithorn':
+		  case 'ZNexus Dalithorn Commonwealth':
 			powerRating = 'Tier 2, custom faction';
 			break;
-		  case 'ZNexus Sal-bez':
+		  case 'ZNexus Sal-bez Coalition':
 			powerRating = 'Tier 2, custom faction';
 			break;
-		  case 'ZNexus Velrax':
+		  case 'ZNexus Velrax Republic':
 			powerRating = 'Tier 2, custom faction';
 			break;
 		  case 'ZStarTrek Federation (TOS)':

@@ -5,7 +5,7 @@ class borocaAMEarly extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 494;
-        $this->faction = "Hurr";
+        $this->faction = "Hurr Republic";
         $this->phpclass = "borocaAMEarly";
         $this->imagePath = "img/ships/hurrBoroca.png";
         $this->shipClass = "Boroca Gunship (Early)";
