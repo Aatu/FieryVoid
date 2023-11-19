@@ -12,7 +12,7 @@ class ShipBoltglobe extends HeavyCombatVesselLeftRight{ //technically a Capital 
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 750;
-        $this->faction = "Ipsha";
+        $this->faction = "Ipsha Baronies";
         $this->phpclass = "ShipBoltglobe";
         //$this->imagePath = "img/ships/IpshaBattleglobe.png";    
         $this->imagePath = "img/ships/IpshaBorgGlobe.png";

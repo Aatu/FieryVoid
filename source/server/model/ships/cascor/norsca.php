@@ -5,7 +5,7 @@ class Norsca extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 700;
-		$this->faction = "Cascor";
+		$this->faction = "Cascor Commonwealth";
         $this->phpclass = "Norsca";
         $this->imagePath = "img/ships/CascorNorsca.png";
         $this->shipClass = "Norsca Battlecruiser";

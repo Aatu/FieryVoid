@@ -5,7 +5,7 @@ class Coqari extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 750;
-		$this->faction = "Cascor";
+		$this->faction = "Cascor Commonwealth";
         $this->phpclass = "Coqari";
         $this->imagePath = "img/ships/CascorCoqari.png";
         $this->shipClass = "Coqari Scout";

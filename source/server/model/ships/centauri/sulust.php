@@ -5,7 +5,7 @@ class Sulust extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 535;
-        $this->faction = "Centauri";
+        $this->faction = "Centauri Republic";
         $this->phpclass = "Sulust";
         $this->imagePath = "img/ships/sulust.png";
         $this->shipClass = "Sulust Escort Destroyer";

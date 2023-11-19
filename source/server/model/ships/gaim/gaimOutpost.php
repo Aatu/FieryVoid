@@ -7,7 +7,7 @@ class gaimOutpost extends SmallStarBaseFourSections{
 		$this->pointCost = 600;
 		$this->base = true;
 		$this->smallBase = true;
-		$this->faction = "Gaim";
+		$this->faction = "Gaim Intelligence";
 		$this->phpclass = "gaimOutpost";
 		$this->shipClass = "Outpost";
 		$this->imagePath = "img/ships/GaimOutpost.png";

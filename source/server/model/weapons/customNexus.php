@@ -764,13 +764,13 @@ class NexusFighterTorpedoLauncher extends FighterMissileRack
     public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals 
     
     public $firingModes = array(
-        1 => "LPB"
+        1 => "LPT"
     );
     
     function __construct($maxAmount, $startArc, $endArc){
         parent::__construct($maxAmount, $startArc, $endArc);
         
-        $LPBomb = new NexusLtPlasmaBomb($startArc, $endArc, $this->fireControl);
+        $LPBomb = new NexusLtPlasmaTorpedo($startArc, $endArc, $this->fireControl);
         
         $this->missileArray = array(
             1 => $LPBomb
@@ -782,14 +782,14 @@ class NexusFighterTorpedoLauncher extends FighterMissileRack
 }
 
 
-class NexusLtPlasmaBomb extends MissileFB
+class NexusLtPlasmaTorpedo extends MissileFB
 {
-    public $name = "NexusLtPlasmaBomb";
-    public $missileClass = "LPB";
-    public $displayName = "Light Plasma Bomb";
+    public $name = "NexusLtPlasmaTorpedo";
+    public $missileClass = "LPT";
+    public $displayName = "Light Plasma Torpedo";
     public $cost = 8;
     //public $surCharge = 0;
-	public $damage = 12;
+	public $damage = 10;
     public $amount = 0;
     public $range = 15;
     public $distanceRange = 15;
@@ -807,9 +807,9 @@ class NexusLtPlasmaBomb extends MissileFB
         parent::__construct($startArc, $endArc, $fireControl);
     }
 
-    public function getDamage($fireOrder){        return 12;   }
-    public function setMinDamage(){     $this->minDamage = 12;      }
-    public function setMaxDamage(){     $this->maxDamage = 12;      }        
+    public function getDamage($fireOrder){        return 10;   }
+    public function setMinDamage(){     $this->minDamage = 10;      }
+    public function setMaxDamage(){     $this->maxDamage = 10;      }        
 } // end EWLightPlasmaMine
 
 
@@ -1156,6 +1156,119 @@ class NexusLargeEarlyRocket extends Weapon{
 		
 }//endof NexusLargeEarlyRocket
 
+
+
+
+
+class NexusPlasmaCharge extends Plasma{
+        public $name = "NexusPlasmaCharge";
+        public $displayName = "Plasma Charge";
+        public $iconPath = "NexusPlasmaCharge.png";         
+        public $animation = "laser";
+        public $animationColor = array(128, 0, 0);
+
+        public $intercept = 0;
+        public $loadingtime = 1;
+        public $addedDice;
+        public $priority = 4;
+
+        public $boostable = true;
+        public $boostEfficiency = 0;
+        public $maxBoostLevel = 2;
+
+        public $firingModes = array(
+            1 => "Standard"
+        );
+
+        public $rangePenalty = 0.33;
+        public $fireControl = array(-3, 4, 5); // fighters, <mediums, <capitals
+
+        public $damageType = "Standard"; 
+        public $weaponClass = "Plasma";
+        
+        public function setSystemDataWindow($turn){
+            $boost = $this->getExtraDicebyBoostlevel($turn);            
+            parent::setSystemDataWindow($turn);
+            if (!isset($this->data["Special"])) {
+                $this->data["Special"] = '';
+            }else{
+                $this->data["Special"] .= '<br>';
+            } 
+            //Raking(15) is already described in Raking class
+            $this->data["Special"] .= 'Can be boosted with thrust for increased dmg output (+1d10 per point of thrust used, up to twice).';
+            $this->data["Boostlevel"] = $boost;
+        }
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+        {
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 7;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 3;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        private function getExtraDicebyBoostlevel($turn){
+            $add = 0;
+            switch($this->getBoostLevel($turn)){
+                case 1:
+                    $add = 1;
+                    break;
+                case 2:
+                    $add = 2;
+                    break;
+
+                default:
+                    break;
+            }
+            return $add;
+        }
+
+
+         private function getBoostLevel($turn){
+            $boostLevel = 0;
+            foreach ($this->power as $i){
+                if ($i->turn != $turn){
+                   continue;
+                }
+                if ($i->type == 2){
+                    $boostLevel += $i->amount;
+                }
+            }
+            return $boostLevel;
+        }
+
+        public function getDamage($fireOrder){
+            $add = $this->getExtraDicebyBoostlevel($fireOrder->turn);
+            $dmg = Dice::d(10, (1 + $add)) + 10;
+            return $dmg;
+        }
+
+        public function getAvgDamage(){
+            $this->setMinDamage();
+            $this->setMaxDamage();
+
+            $min = $this->minDamage;
+            $max = $this->maxDamage;
+            $avg = round(($min+$max)/2);
+            return $avg;
+        }
+
+        public function setMinDamage(){
+            $turn = TacGamedata::$currentTurn;
+            $boost = $this->getBoostLevel($turn);
+            $this->minDamage = 11 + ($boost * 1);
+        }   
+
+        public function setMaxDamage(){
+            $turn = TacGamedata::$currentTurn;
+            $boost = $this->getBoostLevel($turn);
+            $this->maxDamage = 20 + ($boost * 10);
+        }  
+   }//end of Nexus Plasma Charge
 
 
 
@@ -3104,7 +3217,7 @@ class NexusMinigun extends Weapon{
 //		public $rof = 3;
 		public $groupingArray = array(1=>25, 2=>0);
 		public $maxpulses = 6;
-        public $priorityArray = array(1=>5, 2=>7); // Matter weapon
+        public $priorityArray = array(1=>4, 2=>7); // Matter weapon
 	public $defaultShotsArray = array(1=>6, 2=>1); //for Pulse mode it should be equal to maxpulses
         
         public $loadingtimeArray = array(1=>1, 2=>1);
@@ -3215,7 +3328,7 @@ class NexusMinigunFtr extends Weapon{
 //		public $rof = 3;
 		public $groupingArray = array(1=>0, 2=>0);
 		public $maxpulses = 3;
-        public $priorityArray = array(1=>5, 2=>7); // Matter weapon
+        public $priorityArray = array(1=>4, 2=>7); // Matter weapon
 	public $defaultShotsArray = array(1=>3, 2=>1); //for Pulse mode it should be equal to maxpulses
         
         public $loadingtimeArray = array(1=>1, 2=>1);
@@ -4203,7 +4316,7 @@ class NexusMatterGun extends Matter{
 
 
 
-    class NexusLightAssaultCannon extends Particle{
+    class NexusLightAssaultCannon extends Weapon{
         public $trailColor = array(190, 75, 20);
 
         public $name = "NexusLightAssaultCannon";
@@ -4222,6 +4335,9 @@ class NexusMatterGun extends Matter{
 
         public $rangePenalty = 0.5; 
         public $fireControl = array(null, 1, 2); // fighters, <mediums, <capitals
+
+	    public $damageType = "Standard"; 
+	    public $weaponClass = "Projectile"; 
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
 		//maxhealth and power reqirement are fixed; left option to override with hand-written values
@@ -4435,7 +4551,7 @@ class NexusLightAssaultCannonBattery extends Weapon{
             1 => "Piercing"
         );
         public $damageType = 'Piercing';
-        public $weaponClass = "Particle"; //MANDATORY (first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
+        public $weaponClass = "Projectile"; //MANDATORY (first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
 
         public $rangePenalty = 0.33; 
         public $fireControl = array(null, 1, 2); // fighters, <mediums, <capitals
@@ -4544,6 +4660,25 @@ class NexusLightAssaultCannonBattery extends Weapon{
 
 
 
+	class NexusAssaultCannonBattery extends NexusAssaultCannon {
+
+        public $name = "NexusAssaultCannonBattery";
+        public $displayName = "Assault Cannon Battery";
+		public $iconPath = "NexusAssaultCannonBattery.png";
+
+        public $loadingtime = 2;
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 16;
+            if ( $powerReq == 0 ) $powerReq = 10;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+		
+		
+	} //end of class NexusAsasultCannonBattery
+
+
 
     class NexusMedAssaultCannon extends Particle{
         public $trailColor = array(190, 75, 20);
@@ -4566,7 +4701,7 @@ class NexusLightAssaultCannonBattery extends Weapon{
             1 => "Piercing"
         );
         public $damageType = 'Piercing';
-        public $weaponClass = "Particle"; //MANDATORY (first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
+        public $weaponClass = "Projectile"; //MANDATORY (first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
 
         public $rangePenalty = 0.5; 
         public $fireControl = array(null, 1, 2); // fighters, <mediums, <capitals
@@ -4621,7 +4756,7 @@ class NexusHeavyAssaultCannon extends Weapon{
 	
 	public $firingModes = array(1=>'Standard', 2=>'Flash');
 	public $damageTypeArray = array(1=>'Standard', 2=>'Flash'); //indicates that this weapon does damage in Pulse mode
-    	public $weaponClassArray = array(1=>'Particle', 2=>'Plasma'); //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!	
+    	public $weaponClassArray = array(1=>'Projectile', 2=>'Plasma'); //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!	
 	
 	
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
@@ -4709,7 +4844,7 @@ class NexusHeavyAssaultCannonBattery extends Weapon{
 	
 	public $firingModes = array(1=>'Standard', 2=>'Flash');
 	public $damageTypeArray = array(1=>'Standard', 2=>'Flash'); //indicates that this weapon does damage in Pulse mode
-    	public $weaponClassArray = array(1=>'Particle', 2=>'Plasma'); //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!	
+    	public $weaponClassArray = array(1=>'Projectile', 2=>'Plasma'); //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!	
 	
 	
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)

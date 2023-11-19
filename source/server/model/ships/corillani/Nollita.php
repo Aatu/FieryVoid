@@ -7,7 +7,7 @@ class Nollita extends MediumShip
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 400;
-		$this->faction = "Corillani";
+		$this->faction = "Corillani Theocracy";
 		$this->phpclass = "Nollita";
 		$this->imagePath = "img/ships/CorillaniNollita.png";
 		$this->shipClass = "Nollita Tactical Frigate";

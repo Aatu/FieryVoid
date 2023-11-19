@@ -5,7 +5,7 @@ class KoloskovaAM extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 325;
-		$this->faction = "Kor-Lyan";
+		$this->faction = "Kor-Lyan Kingdoms";
         $this->phpclass = "KoloskovaAM";
         $this->imagePath = "img/ships/korlyan_koloskova.png";
         $this->shipClass = "Koloskova Auxiliary Cruiser";

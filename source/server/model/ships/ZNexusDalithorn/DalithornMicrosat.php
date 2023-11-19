@@ -4,7 +4,7 @@ class DalithornMicrosat extends MicroSAT{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 100*6;
-        $this->faction = "ZNexus Dalithorn";
+        $this->faction = "ZNexus Dalithorn Commonwealth";
         $this->phpclass = "DalithornMicrosat";
         $this->shipClass = "Laser MicroSAT Cluster";
         $this->imagePath = "img/ships/Nexus/DalithornMicrosat.png";

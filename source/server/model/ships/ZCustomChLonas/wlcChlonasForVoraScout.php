@@ -18,7 +18,7 @@ class wlcChlonasForVoraScout extends BaseShipNoAft{
         $this->rollcost = 3;
         $this->pivotcost = 3;
 	    
-	$this->faction = "Ch'Lonas";
+	$this->faction = "Ch'Lonas Cooperative";
         $this->variantOf = "Tra'Vora Light Cruiser";
 	$this->occurence = "uncommon";
 	$this->isd = 2215;

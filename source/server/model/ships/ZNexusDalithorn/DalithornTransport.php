@@ -5,7 +5,7 @@ class DalithornTransport extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 170;
-        $this->faction = "ZNexus Dalithorn";
+        $this->faction = "ZNexus Dalithorn Commonwealth";
         $this->phpclass = "DalithornTransport";
         $this->imagePath = "img/ships/Nexus/DalithornTransport.png";
 		$this->canvasSize = 115; //img has 200px per side
@@ -71,14 +71,14 @@ class DalithornTransport extends HeavyCombatVessel{
             1=> array(
                     4 => "Thruster",
                     6 => "Light Gas Gun",
-					7 => "Shatter Gun",
-					10 => "2:Cargo Bay",
+					8 => "Shatter Gun",
+					11 => "2:Cargo Bay",
 					18 => "Structure",
                     20 => "Primary",
             ),
             2=> array(
                     8 => "Thruster",
-                    10 => "Cargo Bay",
+                    12 => "Cargo Bay",
                     18 => "Structure",
                     20 => "Primary",
             ),

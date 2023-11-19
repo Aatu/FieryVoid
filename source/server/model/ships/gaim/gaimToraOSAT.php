@@ -5,7 +5,7 @@ class gaimToraOSAT extends OSAT{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 250;
-	$this->faction = "Gaim";
+	$this->faction = "Gaim Intelligence";
         $this->phpclass = "gaimToraOSAT";
         $this->imagePath = "img/ships/GaimTora.png";
         $this->canvasSize = 60;

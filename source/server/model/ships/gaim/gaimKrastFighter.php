@@ -5,7 +5,7 @@ class gaimKrastFighter extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 37*6;
-        $this->faction = "Gaim";
+        $this->faction = "Gaim Intelligence";
         $this->phpclass = "gaimKrastFighter";
         $this->shipClass = "Krast Recon flight";
         $this->variantOf = "Koist Medium flight";

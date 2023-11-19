@@ -5,7 +5,7 @@ class SalbezAvrtzRefit extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 775;
-		$this->faction = "ZNexus Sal-bez";
+		$this->faction = "ZNexus Sal-bez Coalition";
         $this->phpclass = "SalbezAvrtzRefit";
         $this->imagePath = "img/ships/Nexus/salbez_bevtun.png";
         $this->shipClass = "Av'rtz Explorer (2122 Refit)";
@@ -81,7 +81,7 @@ class SalbezAvrtzRefit extends BaseShip{
 		$this->hitChart = array(
 			0=> array(
 					9 => "Structure",
-					12 => "Scanner",
+					12 => "ELINT Scanner",
 					15 => "Engine",
 					17 => "Hangar",
 					19 => "Reactor",
@@ -96,26 +96,26 @@ class SalbezAvrtzRefit extends BaseShip{
 					20 => "Primary",
 			),
 			2=> array(
-					5 => "Thruster",
-					7 => "Medium Laser",
-					9 => "Cargo Bay",
-					11 => "Jump Engine",
+					6 => "Thruster",
+					8 => "Medium Laser",
+					10 => "Cargo Bay",
+					12 => "Jump Engine",
 					18 => "Structure",
 					20 => "Primary",
 			),
 			3=> array(
-					4 => "Thruster",
-					6 => "Medium Laser",
-					8 => "Light Particle Beam",
-					10 => "Swarm Torpedo",
+					5 => "Thruster",
+					7 => "Medium Laser",
+					9 => "Light Particle Beam",
+					11 => "Swarm Torpedo",
 					18 => "Structure",
 					20 => "Primary",
 			),
 			4=> array(
-					4 => "Thruster",
-					6 => "Medium Laser",
-					8 => "Light Particle Beam",
-					10 => "Swarm Torpedo",
+					5 => "Thruster",
+					7 => "Medium Laser",
+					9 => "Light Particle Beam",
+					11 => "Swarm Torpedo",
 					18 => "Structure",
 					20 => "Primary",
 			),

@@ -5,7 +5,7 @@ class sentryFF extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 420;
-	$this->faction = "Deneth";
+	$this->faction = "Deneth Tribes";
         $this->phpclass = "sentryFF";
         $this->imagePath = "img/ships/DenethSentry.png";
         $this->shipClass = "Sentry Frigate";

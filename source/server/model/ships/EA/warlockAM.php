@@ -5,7 +5,7 @@ class WarlockAM extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 1800;
-		$this->faction = "EA";
+		$this->faction = "Earth Alliance";
 		$this->phpclass = "WarlockAM";
 		$this->imagePath = "img/ships/warlock.png";
 		$this->shipClass = "Warlock Advanced Destroyer";

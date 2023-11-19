@@ -5,7 +5,7 @@ class SalbezShvrez extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 325;
-        $this->faction = "ZNexus Sal-bez";
+        $this->faction = "ZNexus Sal-bez Coalition";
         $this->phpclass = "SalbezShvrez";
         $this->imagePath = "img/ships/Nexus/salbez_shvrez.png";
         $this->shipClass = "Shv'rez Frigate";
@@ -63,7 +63,7 @@ class SalbezShvrez extends MediumShip{
 			5 => "Thruster",
 			7 => "Medium Laser",
 			9 => "Light Laser",
-			10 => "Light Particle Beam",
+			11 => "Light Particle Beam",
 			17 => "Structure",
 			20 => "Primary",
 		),
@@ -71,7 +71,7 @@ class SalbezShvrez extends MediumShip{
 		2=> array(
 			7 => "Thruster",
 			9 => "Light Laser",
-			10 => "Light Particle Beam",
+			11 => "Light Particle Beam",
 			17 => "Structure",
 			20 => "Primary",
 		),

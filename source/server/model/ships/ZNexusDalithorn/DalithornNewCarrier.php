@@ -5,7 +5,7 @@ class DalithornNewCarrier extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 380;
-        $this->faction = "ZNexus Dalithorn";
+        $this->faction = "ZNexus Dalithorn Commonwealth";
         $this->phpclass = "DalithornNewCarrier";
         $this->imagePath = "img/ships/Nexus/DailthornNewMissileCruiser.png";
 		$this->canvasSize = 115; //img has 200px per side
@@ -32,7 +32,7 @@ class DalithornNewCarrier extends HeavyCombatVessel{
         $this->addPrimarySystem(new Scanner(4, 14, 5, 6));
         $this->addPrimarySystem(new Engine(4, 16, 0, 8, 3));
         $this->addPrimarySystem(new Hangar(1, 2));
-		$this->addPrimarySystem(new CargoBay(2, 12));
+		$this->addPrimarySystem(new Magazine(3, 12));
 		$this->addPrimarySystem(new Catapult(1, 6));
         $this->addPrimarySystem(new Thruster(3, 10, 0, 4, 3));
         $this->addPrimarySystem(new Thruster(3, 10, 0, 4, 4));
@@ -62,7 +62,7 @@ class DalithornNewCarrier extends HeavyCombatVessel{
             0=> array(
                     8 => "Structure",
 					9 => "Catapult",
-					11 => "Cargo Bay",
+					11 => "Magazine",
                     13 => "Thruster",
                     15 => "Scanner",
                     17 => "Engine",

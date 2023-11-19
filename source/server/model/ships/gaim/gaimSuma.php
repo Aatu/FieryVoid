@@ -5,7 +5,7 @@ class gaimSuma extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 380;
-		$this->faction = "Gaim";
+		$this->faction = "Gaim Intelligence";
         $this->phpclass = "gaimSuma";
         $this->imagePath = "img/ships/GaimSuma.png";
         $this->shipClass = "Suma Laser Cutter";

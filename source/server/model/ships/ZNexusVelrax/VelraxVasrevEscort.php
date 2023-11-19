@@ -5,7 +5,7 @@ class VelraxVasrevEscort extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 325;
-        $this->faction = "ZNexus Velrax";
+        $this->faction = "ZNexus Velrax Republic";
         $this->phpclass = "VelraxVasrevEscort";
         $this->imagePath = "img/ships/Nexus/VelraxSathrin.png";
         $this->shipClass = "Vasrev Escort Frigate";
@@ -64,8 +64,8 @@ class VelraxVasrevEscort extends MediumShip{
 		1=> array(
 			5 => "Thruster",
 			7 => "Plasma Arc",
-			8 => "Twin Ion Gun",
-			10 => "Dart Interceptor",
+			9 => "Twin Ion Gun",
+			11 => "Dart Interceptor",
 			17 => "Structure",
 			20 => "Primary",
 		),

@@ -5,7 +5,7 @@ class Tantalus  extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 600;
-		$this->faction = "EA";
+		$this->faction = "Earth Alliance";
         $this->phpclass = "Tantalus";
         $this->imagePath = "img/ships/tantalus.png";
         $this->shipClass = "Tantalus Assault Transport (Alpha)";

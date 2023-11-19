@@ -6,13 +6,14 @@ class Lias extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 375;
-        $this->faction = "Centauri";
+        $this->faction = "Centauri Republic";
         $this->phpclass = "Lias";
         $this->imagePath = "img/ships/Lias.png";
         $this->shipClass = "Lias Supply Ship";
 		$this->canvasSize = 180; 
 //        $this->shipSizeClass = 3;
 		$this->isd = 2053;
+	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
         
         $this->forwardDefense = 14;
         $this->sideDefense = 15;

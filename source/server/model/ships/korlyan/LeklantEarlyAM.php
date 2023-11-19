@@ -5,7 +5,7 @@ class LeklantEarlyAM extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 690;
-		$this->faction = "Kor-Lyan";
+		$this->faction = "Kor-Lyan Kingdoms";
 //	$this->faction = "Custom Ships";
         $this->phpclass = "LeklantEarlyAM";
         $this->imagePath = "img/ships/korlyan_leklant.png";

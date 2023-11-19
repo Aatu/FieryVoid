@@ -5,7 +5,7 @@ class Altarian extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 510;
-        $this->faction = "Centauri";
+        $this->faction = "Centauri Republic";
         $this->phpclass = "Altarian";
         $this->imagePath = "img/ships/altarian.png";
         $this->shipClass = "Altarian Destroyer";

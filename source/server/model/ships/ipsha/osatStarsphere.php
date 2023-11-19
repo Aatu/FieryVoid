@@ -13,7 +13,7 @@ class OsatStarsphere extends OSAT{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 200;
-        $this->faction = "Ipsha";
+        $this->faction = "Ipsha Baronies";
         $this->phpclass = "OsatStarsphere";
         $this->imagePath = "img/ships/IpshaBorgOSAT.png";	    
         	$this->canvasSize = 100;

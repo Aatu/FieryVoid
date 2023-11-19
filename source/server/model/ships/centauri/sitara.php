@@ -5,7 +5,7 @@ class Sitara extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 270;
-		$this->faction = "Centauri";
+		$this->faction = "Centauri Republic";
         $this->phpclass = "Sitara";
         $this->shipClass = "Sitara Strike Fighters";
 	    $this->occurence = "uncommon";

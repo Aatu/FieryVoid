@@ -5,7 +5,7 @@ class wlcChlonasWyLeraA extends OSAT{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 190;
-        $this->faction = "Ch'Lonas";
+        $this->faction = "Ch'Lonas Cooperative";
         $this->phpclass = "wlcChlonasWyLeraA";
         $this->imagePath = "img/ships/ChlonasWyLera.png";
         $this->canvasSize = 70;

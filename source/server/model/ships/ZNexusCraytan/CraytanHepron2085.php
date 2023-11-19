@@ -5,7 +5,7 @@ class CraytanHepron2085 extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 380;
-        $this->faction = "ZNexus Craytan";
+        $this->faction = "ZNexus Craytan Union";
         $this->phpclass = "CraytanHepron2085";
         $this->imagePath = "img/ships/Nexus/CraytanHepron.png";
 		$this->canvasSize = 140; //img has 200px per side
@@ -32,7 +32,7 @@ class CraytanHepron2085 extends HeavyCombatVessel{
         $this->addPrimarySystem(new Scanner(3, 12, 4, 6));
         $this->addPrimarySystem(new Engine(3, 14, 0, 8, 4));
         $this->addPrimarySystem(new Hangar(2, 4));
-		$this->addPrimarySystem(new CargoBay(3, 9));
+		$this->addPrimarySystem(new Magazine(3, 9));
         $this->addPrimarySystem(new Thruster(2, 13, 0, 5, 3));
         $this->addPrimarySystem(new Thruster(2, 13, 0, 5, 4));
       
@@ -60,7 +60,7 @@ class CraytanHepron2085 extends HeavyCombatVessel{
         $this->hitChart = array(
             0=> array(
                     8 => "Structure",
-					10 => "Cargo Bay",
+					10 => "Magazine",
                     12 => "Thruster",
                     14 => "Scanner",
                     16 => "Engine",
@@ -69,7 +69,7 @@ class CraytanHepron2085 extends HeavyCombatVessel{
                     20 => "C&C",
             ),
             1=> array(
-                    3 => "Thruster",
+                    4 => "Thruster",
                     6 => "Heavy Plasma Cannon",
                     8 => "Medium Plasma Cannon",
 					10 => "Advanced Close-In Defense System",
@@ -80,7 +80,7 @@ class CraytanHepron2085 extends HeavyCombatVessel{
                     6 => "Thruster",
                     8 => "Close-In Defense System",
 					10 => "Light Sentry Gun",
-					11 => "Medium Sentry Gun",
+					12 => "Medium Sentry Gun",
                     18 => "Structure",
                     20 => "Primary",
             ),

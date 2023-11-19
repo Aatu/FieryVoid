@@ -5,7 +5,7 @@ class Oracle extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 600;
-		$this->faction = "EA";
+		$this->faction = "Earth Alliance";
 		$this->phpclass = "Oracle";
 		$this->imagePath = "img/ships/oracle.png";
 		$this->shipClass = "Oracle Light Cruiser (Delta)";

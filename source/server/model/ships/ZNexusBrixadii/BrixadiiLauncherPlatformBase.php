@@ -5,7 +5,7 @@ class BrixadiiLauncherPlatformBase extends OSAT{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 120;
-		$this->faction = 'ZNexus Brixadii';
+		$this->faction = 'ZNexus Brixadii Clans';
         $this->phpclass = "BrixadiiLauncherPlatformBase";
         $this->imagePath = "img/ships/Nexus/BrixadiiSentinelPlatform.png";
         $this->shipClass = "Brixadii Launcher Platform";
@@ -38,8 +38,8 @@ class BrixadiiLauncherPlatformBase extends OSAT{
 			0=> array(
 				8 => "Structure",
 				10 => "Thruster",
-				14 => "Ranged Kinetic Box Launcher",
-				15 => "Chaff Launcher",
+				12 => "Ranged Kinetic Box Launcher",
+				14 => "Chaff Launcher",
 				16 => "Light Particle Beam",
 				18 => "Scanner",
 				20 => "Reactor",

@@ -31,13 +31,13 @@ class LiuliRaider extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new Scanner(4, 12, 3, 5));
         $this->addPrimarySystem(new Engine(4, 13, 0, 9, 3));
         $this->addPrimarySystem(new Hangar(4, 2));
-        $this->addPrimarySystem(new Thruster(3, 12, 0, 5, 1));
-        $this->addPrimarySystem(new Thruster(3, 8, 0, 3, 2));
-        $this->addPrimarySystem(new Thruster(3, 8, 0, 3, 2));
-        $this->addPrimarySystem(new Thruster(3, 8, 0, 3, 2));
-		$this->addPrimarySystem(new LightParticleBeamShip(2, 2, 1, 240, 60));
-		$this->addPrimarySystem(new LightParticleCannon(2, 6, 5, 300, 60));
-		$this->addPrimarySystem(new LightParticleBeamShip(2, 2, 1, 300, 120));
+        $this->addAftSystem(new Thruster(3, 12, 0, 5, 1));
+        $this->addAftSystem(new Thruster(3, 8, 0, 3, 2));
+        $this->addAftSystem(new Thruster(3, 8, 0, 3, 2));
+        $this->addAftSystem(new Thruster(3, 8, 0, 3, 2));
+		$this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 240, 60));
+		$this->addFrontSystem(new LightParticleCannon(2, 6, 5, 300, 60));
+		$this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 300, 120));
 
 
         $this->addLeftSystem(new Thruster(3, 10, 0, 4, 3));
@@ -56,9 +56,9 @@ class LiuliRaider extends HeavyCombatVesselLeftRight{
         $this->hitChart = array(//hit chart slightly modified, original one has "Particle Weapon" as single location
             0=> array(
                     7 => "Structure",
-                    10 => "Thruster",
-                    11 => "Light Particle Beam",
-                    13 => "Light Particle Cannon",
+                    10 => "2:Thruster",
+                    11 => "1:Light Particle Beam",
+                    13 => "1:Light Particle Cannon",
                     15 => "Scanner",
                     17 => "Engine",
                     18 => "Hangar",

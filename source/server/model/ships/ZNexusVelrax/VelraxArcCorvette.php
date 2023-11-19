@@ -5,7 +5,7 @@ class VelraxArcCorvette extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 270;
-        $this->faction = "ZNexus Velrax";
+        $this->faction = "ZNexus Velrax Republic";
         $this->phpclass = "VelraxArcCorvette";
         $this->imagePath = "img/ships/Nexus/VelraxMassken.png";
         $this->shipClass = "Massken Arc Corvette";

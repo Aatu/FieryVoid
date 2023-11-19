@@ -7,7 +7,7 @@ class RingBase extends StarBaseSixSections
 
 		$this->pointCost = 3200;
 		$this->base = true;
-		$this->faction = "Ipsha";
+		$this->faction = "Ipsha Baronies";
 		$this->phpclass = "RingBase";
 		$this->shipClass = "Ring Base";
 		$this->imagePath = "img/ships/IpshaRingBase.png";

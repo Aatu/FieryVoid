@@ -13,7 +13,7 @@ class wlcChlonasTekKashi extends HeavyCombatVesselLeftRight
 		$this->canvasSize = 200;
 		$this->shipClass = "Tek'Kashi Destroyer Leader";
 
-		$this->faction = "Ch'Lonas";
+		$this->faction = "Ch'Lonas Cooperative";
 		$this->variantOf = "Es'Kashi Destroyer";
 		$this->occurence = "rare";
 		$this->isd = 2250;

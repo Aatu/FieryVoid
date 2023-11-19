@@ -27,24 +27,24 @@ class XotiA extends OSAT
 		$this->addPrimarySystem(new Reactor(4, 9, 0, 0));
 		$this->addPrimarySystem(new Scanner(4, 7, 2, 7));
 		$this->addPrimarySystem(new Thruster(4, 6, 0, 0, 2));
-		$this->addPrimarySystem(new AntimatterCannon(4, 9, 8, 270, 90));
-		$this->addPrimarySystem(new AntiprotonDefender(2, 4, 3, 180, 360));
-		$this->addPrimarySystem(new AntiprotonDefender(2, 4, 3, 0, 180));
-		$this->addPrimarySystem(new AntiprotonGun(3, 8, 4, 270, 90));
-		$this->addPrimarySystem(new AntiprotonGun(3, 8, 4, 270, 90));
+		$this->addFrontSystem(new AntimatterCannon(4, 9, 8, 270, 90));
+		$this->addFrontSystem(new AntiprotonDefender(2, 4, 3, 180, 360));
+		$this->addFrontSystem(new AntiprotonDefender(2, 4, 3, 0, 180));
+		$this->addFrontSystem(new AntiprotonGun(3, 8, 4, 270, 90));
+		$this->addFrontSystem(new AntiprotonGun(3, 8, 4, 270, 90));
 
 
 		//0:primary, 1:front, 2:rear, 3:left, 4:right;
 
 		$this->addPrimarySystem(new Structure(4, 33));
 
-			$this->hitChart = array(
+			$this->hitChart = array( //Vree OSATs actually do NOT use "Weapon" tag on hit chart!
                 0=> array(
                         9 => "Structure",
                         11 => "Thruster",
-						12 => "Antimatter Cannon",
-						14 => "Antiproton Gun",
-						16 => "Antiproton Defender",
+						12 => "1:Antimatter Cannon",
+						14 => "1:Antiproton Gun",
+						16 => "1:Antiproton Defender",
 						18 => "Scanner",
                         20 => "Reactor",
                 ),

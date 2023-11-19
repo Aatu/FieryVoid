@@ -5,7 +5,7 @@ class TycheAlpha extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 350;
-        $this->faction = "EA (early)";
+        $this->faction = "Earth Alliance (early)";
         $this->phpclass = "TycheAlpha";
         $this->imagePath = "img/ships/tyche_revised.png";
         $this->shipClass = "Tyche Cruiser (Alpha)";

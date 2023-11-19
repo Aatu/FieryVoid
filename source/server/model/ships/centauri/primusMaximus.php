@@ -5,7 +5,7 @@ class PrimusMaximus extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 1000;
-		$this->faction = "Centauri";
+		$this->faction = "Centauri Republic";
         $this->phpclass = "PrimusMaximus";
         $this->imagePath = "img/ships/primusMaximus.png";
         $this->shipClass = "Primus Maximus Command Cruiser";

@@ -5,7 +5,7 @@ class Fenja extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 300;
-		$this->faction = "Kor-Lyan";
+		$this->faction = "Kor-Lyan Kingdoms";
         $this->phpclass = "Fenja";
         $this->imagePath = "img/ships/korlyan_axor2.png";
         $this->shipClass = "Fenja Assault Leader";

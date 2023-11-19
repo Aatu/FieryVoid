@@ -12,7 +12,7 @@ class wlcChlonasNaKashiDDA extends HeavyCombatVesselLeftRight{
         $this->occurence = "uncommon";
         $this->fighters = array("assault shuttles"=>6);
 	    
-	$this->faction = "Ch'Lonas";
+	$this->faction = "Ch'Lonas Cooperative";
         $this->variantOf = "Es'Kashi Destroyer";
 	$this->isd = 2245;
 	$this->unofficial = true;

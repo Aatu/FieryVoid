@@ -5,7 +5,7 @@ class gaimKuach extends HeavyCombatVesselLeftRight{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 425;
-		$this->faction = "Gaim";
+		$this->faction = "Gaim Intelligence";
         $this->phpclass = "gaimKuach";
         $this->imagePath = "img/ships/GaimKuach.png";
         $this->shipClass = "Kuach Minesweeping Corvette";

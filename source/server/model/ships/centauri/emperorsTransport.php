@@ -4,7 +4,7 @@ class EmperorsTransport extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 550;
-	$this->faction = "Centauri";
+	$this->faction = "Centauri Republic";
         $this->phpclass = "EmperorsTransport";
         $this->imagePath = "img/ships/primus.png";
         $this->shipClass = "Emperor's Transport";

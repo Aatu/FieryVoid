@@ -5,7 +5,7 @@ class ScorotaAM extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 900;
-	$this->faction = "Descari";
+	$this->faction = "Descari Committees";
         $this->phpclass = "ScorotaAM";
         $this->imagePath = "img/ships/DescariScorota.png";
         $this->shipClass = "Scorota Battleship";

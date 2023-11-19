@@ -9,7 +9,7 @@ class wlcChlonasSaTrevanFlight extends FighterFlight{
         $this->shipClass = "Sa'Trevan Light flight";
 	$this->imagePath = "img/ships/ChlonasSaTrevan.png";
 	    
-        $this->faction = "Ch'Lonas";
+        $this->faction = "Ch'Lonas Cooperative";
 	$this->unofficial = true;
 	    $this->isd = 2235;
         

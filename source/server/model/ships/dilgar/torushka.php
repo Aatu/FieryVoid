@@ -6,7 +6,7 @@ class Torushka extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 37*6;
-        $this->faction = "Dilgar";
+        $this->faction = "Dilgar Imperium";
         $this->phpclass = "Torushka";
         $this->shipClass = "Torushka Stingfighters";
         $this->imagePath = "img/ships/Torushka.png";

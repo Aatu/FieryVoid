@@ -5,7 +5,7 @@ class CraytanEskavin extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 625;
-	$this->faction = "ZNexus Craytan";
+	$this->faction = "ZNexus Craytan Union";
         $this->phpclass = "CraytanEskavin";
         $this->imagePath = "img/ships/Nexus/CraytanDakran.png";
         $this->shipClass = "Eskavin Gun Cruiser";
@@ -34,7 +34,7 @@ class CraytanEskavin extends BaseShip{
         $this->addPrimarySystem(new Scanner(5, 16, 4, 7));
         $this->addPrimarySystem(new Engine(4, 20, 0, 8, 3));
 		$this->addPrimarySystem(new Hangar(4, 6));
-		$this->addPrimarySystem(new CargoBay(4, 16));
+		$this->addPrimarySystem(new Magazine(4, 16));
 		
         $this->addFrontSystem(new Thruster(4, 9, 0, 4, 1));
         $this->addFrontSystem(new Thruster(4, 9, 0, 4, 1));
@@ -70,7 +70,7 @@ class CraytanEskavin extends BaseShip{
 		$this->hitChart = array(
 			0=> array(
 					9 => "Structure",
-					10 => "Cargo Bay",
+					10 => "Magazine",
 					13 => "Scanner",
 					16 => "Engine",
 					17 => "Hangar",
@@ -79,31 +79,31 @@ class CraytanEskavin extends BaseShip{
 			),
 			1=> array(
 					5 => "Thruster",
-					6 => "Advanced Close-In Defense System",
-					9 => "Assault Cannon",
+					7 => "Advanced Close-In Defense System",
+					10 => "Assault Cannon",
 					18 => "Structure",
 					20 => "Primary",
 			),
 			2=> array(
 					6 => "Thruster",
-					7 => "Advanced Close-In Defense System",
-					9 => "Medium Enhanced Plasma",
+					8 => "Advanced Close-In Defense System",
+					10 => "Medium Enhanced Plasma",
 					18 => "Structure",
 					20 => "Primary",
 			),
 			3=> array(
 					5 => "Thruster",
-					6 => "Advanced Close-In Defense System",
-					8 => "Medium Enhanced Plasma",
-					10 => "Assault Cannon",
+					7 => "Advanced Close-In Defense System",
+					9 => "Medium Enhanced Plasma",
+					11 => "Assault Cannon",
 					18 => "Structure",
 					20 => "Primary",
 			),
 			4=> array(
 					5 => "Thruster",
-					6 => "Advanced Close-In Defense System",
-					8 => "Medium Enhanced Plasma",
-					10 => "Assault Cannon",
+					7 => "Advanced Close-In Defense System",
+					9 => "Medium Enhanced Plasma",
+					11 => "Assault Cannon",
 					18 => "Structure",
 					20 => "Primary",
 			),

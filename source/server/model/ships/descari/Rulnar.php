@@ -5,7 +5,7 @@ class Rulnar extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 625;
-        $this->faction = "Descari";
+        $this->faction = "Descari Committees";
         $this->phpclass = "Rulnar";
         $this->imagePath = "img/ships/DescariRulnar.png";
         $this->shipClass = "Rulnar Heavy Destroyer";

@@ -6,7 +6,7 @@ class SagittariusAM extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
 
         $this->pointCost = 700;
-        $this->faction = "EA";
+        $this->faction = "Earth Alliance";
         $this->phpclass = "SagittariusAM";
         $this->imagePath = "img/ships/sagittarius.png";
         $this->shipClass = "Sagittarius Missile Cruiser (Beta Model)";

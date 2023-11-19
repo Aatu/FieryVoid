@@ -5,7 +5,7 @@ class Skua extends HeavyCombatVesselLeftRight{
         parent::__construct($id, $userid, $name,  $slot);
         
     	$this->pointCost = 450;
-        $this->faction = "Drazi (WotCR)";
+        $this->faction = "Drazi Freehold (WotCR)";
         $this->phpclass = "Skua";
         $this->imagePath = "img/ships/shrike.png";
         $this->shipClass = "Skua Heavy Escort";

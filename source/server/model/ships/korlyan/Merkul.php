@@ -5,7 +5,7 @@ class Merkul extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 0;
-		$this->faction = "Kor-Lyan";
+		$this->faction = "Kor-Lyan Kingdoms";
         $this->phpclass = "Merkul";
         $this->shipClass = "Merkul Shuttles";
 		$this->imagePath = "img/ships/korlyanMerkul2.png"; 

@@ -5,7 +5,7 @@ class CraytanAvitun extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 570;
-	$this->faction = "ZNexus Craytan";
+	$this->faction = "ZNexus Craytan Union";
         $this->phpclass = "CraytanAvitun";
         $this->imagePath = "img/ships/Nexus/CraytanEpiron.png";
         $this->shipClass = "Avitun Gun Cruiser";
@@ -34,7 +34,7 @@ class CraytanAvitun extends BaseShip{
         $this->addPrimarySystem(new Scanner(4, 16, 4, 6));
         $this->addPrimarySystem(new Engine(4, 18, 0, 8, 3));
 		$this->addPrimarySystem(new Hangar(4, 6));
-		$this->addPrimarySystem(new CargoBay(4, 9));
+		$this->addPrimarySystem(new Magazine(4, 9));
 		
         $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
         $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
@@ -73,7 +73,7 @@ class CraytanAvitun extends BaseShip{
 		$this->hitChart = array(
 			0=> array(
 					9 => "Structure",
-					10 => "Cargo Bay",
+					10 => "Magazine",
 					13 => "Scanner",
 					16 => "Engine",
 					17 => "Hangar",
@@ -83,7 +83,7 @@ class CraytanAvitun extends BaseShip{
 			1=> array(
 					5 => "Thruster",
 					8 => "Assault Cannon",
-					9 => "Close-In Defense System",
+					10 => "Close-In Defense System",
 					18 => "Structure",
 					20 => "Primary",
 			),
@@ -97,18 +97,18 @@ class CraytanAvitun extends BaseShip{
 			3=> array(
 					4 => "Thruster",
 					6 => "Cargo Bay",
-					7 => "Close-In Defense System",
-					8 => "Light Plasma Cannon",
-					10 => "Assault Cannon",
+					8 => "Close-In Defense System",
+					10 => "Light Plasma Cannon",
+					12 => "Assault Cannon",
 					18 => "Structure",
 					20 => "Primary",
 			),
 			4=> array(
 					4 => "Thruster",
 					6 => "Cargo Bay",
-					7 => "Close-In Defense System",
-					8 => "Light Plasma Cannon",
-					10 => "Assault Cannon",
+					8 => "Close-In Defense System",
+					10 => "Light Plasma Cannon",
+					12 => "Assault Cannon",
 					18 => "Structure",
 					20 => "Primary",
 			),

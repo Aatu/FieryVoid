@@ -7,7 +7,7 @@ class DalithornStationEarly extends SmallStarBaseFourSections{
 		$this->pointCost = 650;
 		$this->base = true;
 		$this->smallBase = true;
-		$this->faction = "ZNexus Dalithorn";
+		$this->faction = "ZNexus Dalithorn Commonwealth";
 		$this->phpclass = "DalithornStationEarly";
 		$this->shipClass = "Early Station";
 			$this->variantOf = "Station";
@@ -32,7 +32,7 @@ class DalithornStationEarly extends SmallStarBaseFourSections{
 		$this->addPrimarySystem(new CnC(4, 25, 0, 0));
 		$this->addPrimarySystem(new Scanner(4, 14, 5, 6));
 		$this->addPrimarySystem(new Hangar(4, 6));
-		$this->addPrimarySystem(new CargoBay(4, 24));
+		$this->addPrimarySystem(new Magazine(4, 24));
 		$this->addPrimarySystem(new NexusShatterGun(4, 2, 1, 0, 360));
 		$this->addPrimarySystem(new NexusShatterGun(4, 2, 1, 0, 360));
 		$this->addPrimarySystem(new NexusShatterGun(4, 2, 1, 0, 360));
@@ -71,7 +71,7 @@ class DalithornStationEarly extends SmallStarBaseFourSections{
 		$this->hitChart = array(			
 			0=> array(
 				8 => "Structure",
-				10 => "Cargo Bay",
+				10 => "Magazine",
 				12 => "Shatter Gun",
 				14 => "Hangar",
 				16 => "Scanner",

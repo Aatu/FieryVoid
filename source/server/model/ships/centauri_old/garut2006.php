@@ -8,7 +8,7 @@ class Garut2006 extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 800;
-        $this->faction = "Centauri (WotCR)";
+        $this->faction = "Centauri Republic (WotCR)";
         $this->phpclass = "Garut2006";
         $this->shipClass = "Garut Survey Ship (2006)";
         $this->variantOf = "Garut Survey Ship";

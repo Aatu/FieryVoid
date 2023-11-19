@@ -5,7 +5,7 @@ class Varilon extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 345;
-        $this->faction = "Centauri (WotCR)";
+        $this->faction = "Centauri Republic (WotCR)";
         $this->phpclass = "Varilon";
         $this->imagePath = "img/ships/balciron.png";
         $this->shipClass = "Varilon Close Escort";

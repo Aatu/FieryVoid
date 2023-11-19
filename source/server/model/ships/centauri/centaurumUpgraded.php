@@ -5,7 +5,7 @@ class centaurumUpgraded extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 1000;
-        $this->faction = "Centauri";
+        $this->faction = "Centauri Republic";
         $this->phpclass = "centaurumUpgraded";
         $this->imagePath = "img/ships/octurion.png";
         $this->shipClass = "Centaurum Battleship (Upgraded)";

@@ -7,7 +7,7 @@ class BrixadiiSupportBaseRefit extends SmallStarBaseFourSections{
 		$this->pointCost = 650;
 		$this->base = true;
 		$this->smallBase = true;
-		$this->faction = "ZNexus Brixadii";
+		$this->faction = "ZNexus Brixadii Clans";
 		$this->phpclass = "BrixadiiSupportBaseRefit";
 		$this->shipClass = "Support Base (2048)";
 			$this->variantOf = "Support Base";
@@ -90,8 +90,8 @@ class BrixadiiSupportBaseRefit extends SmallStarBaseFourSections{
 				3 => "Heavy Particle Projector",
 				6 => "Cargo Bay",
 				8 => "Particle Bolter",
-				9 => "Ranged Kinetic Box Launcher",
-				11 => "Quarters",
+				10 => "Ranged Kinetic Box Launcher",
+				12 => "Quarters",
 				18 => "Structure",
 				20 => "Primary",
 			),
@@ -100,8 +100,8 @@ class BrixadiiSupportBaseRefit extends SmallStarBaseFourSections{
 				3 => "Heavy Particle Projector",
 				6 => "Cargo Bay",
 				8 => "Particle Bolter",
-				9 => "Ranged Kinetic Box Launcher",
-				11 => "Quarters",
+				10 => "Ranged Kinetic Box Launcher",
+				12 => "Quarters",
 				18 => "Structure",
 				20 => "Primary",
 			),	
@@ -110,8 +110,8 @@ class BrixadiiSupportBaseRefit extends SmallStarBaseFourSections{
 				3 => "Heavy Particle Projector",
 				6 => "Cargo Bay",
 				8 => "Particle Bolter",
-				9 => "Ranged Kinetic Box Launcher",
-				11 => "Quarters",
+				10 => "Ranged Kinetic Box Launcher",
+				12 => "Quarters",
 				18 => "Structure",
 				20 => "Primary",
 			),
@@ -120,8 +120,8 @@ class BrixadiiSupportBaseRefit extends SmallStarBaseFourSections{
 				3 => "Heavy Particle Projector",
 				6 => "Cargo Bay",
 				8 => "Particle Bolter",
-				9 => "Ranged Kinetic Box Launcher",
-				11 => "Quarters",
+				10 => "Ranged Kinetic Box Launcher",
+				12 => "Quarters",
 				18 => "Structure",
 				20 => "Primary",
 			),

@@ -5,7 +5,7 @@ class GromeMahkgar extends StarBaseSixSections{
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 2500;
-		$this->faction = 'Grome';
+		$this->faction = "Grome Autocracy";
 		$this->phpclass = "GromeMahkgar";
 		$this->shipClass = "Mahkgar Starbase";
 		$this->fighters = array("normal"=>36); 

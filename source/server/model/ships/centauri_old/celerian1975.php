@@ -6,7 +6,7 @@ class Celerian1975 extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 615;
-        $this->faction = "Centauri (WotCR)";
+        $this->faction = "Centauri Republic (WotCR)";
         $this->phpclass = "Celerian1975";
         $this->imagePath = "img/ships/celerian.png";
         $this->shipClass = "Celerian Warcruiser (1975)";

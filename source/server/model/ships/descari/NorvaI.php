@@ -5,7 +5,7 @@ class NorvaI extends LCV{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 150;
-        $this->faction = "Descari";
+        $this->faction = "Descari Committees";
 	$this->phpclass = "NorvaI";
 	$this->shipClass = "Norva I Gunboat";
 

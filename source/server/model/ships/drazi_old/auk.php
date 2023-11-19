@@ -5,7 +5,7 @@ class Auk extends HeavyCombatVesselLeftRight{
         parent::__construct($id, $userid, $name,  $slot);
         
     	$this->pointCost = 500;
-        $this->faction = "Drazi (WotCR)";
+        $this->faction = "Drazi Freehold (WotCR)";
         $this->phpclass = "Auk";
         $this->imagePath = "img/ships/shrike.png";
         $this->shipClass = "Auk Gunship";

@@ -5,7 +5,7 @@ class Vasachi extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 650;
-        $this->faction = "Centauri";
+        $this->faction = "Centauri Republic";
         $this->phpclass = "Vasachi";
         $this->imagePath = "img/ships/sulust.png";
         $this->shipClass = "Vasachi Escort Destroyer";

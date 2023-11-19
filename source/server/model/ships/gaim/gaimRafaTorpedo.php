@@ -5,7 +5,7 @@ class gaimRafaTorpedo extends LCV{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 225;
-        $this->faction = "Gaim";
+        $this->faction = "Gaim Intelligence";
 	$this->phpclass = "gaimRafaTorpedo";
 	$this->shipClass = "Rafa Gunboat (Torpedo)";
         $this->variantOf = "Rafa Gunboat (Scattergun)";		
@@ -33,7 +33,7 @@ class gaimRafaTorpedo extends LCV{
 	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 4)); //unhitable and with unlimited thrust allowance
 
 	$this->addPrimarySystem(new Reactor(4, 9, 0, 0));
-	$this->addPrimarySystem(new CnC(99, 99, 0, 0)); //C&C should be unhittable anyway
+	$this->addPrimarySystem(new CnC(99, 1, 0, 0)); //C&C should be unhittable anyway
 	    	$sensors = new Scanner(4, 12, 2, 4);
 		$sensors->markLCV();
 		$this->addPrimarySystem($sensors);
@@ -41,8 +41,8 @@ class gaimRafaTorpedo extends LCV{
 	$this->addPrimarySystem(new Bulkhead(0, 1));
 	$this->addPrimarySystem(new Bulkhead(0, 1));
 
-	$this->addPrimarySystem(new PacketTorpedo(3, 6, 5, 300, 60));
 	//NOT moving to front due to Bulkhead interaction!
+	$this->addPrimarySystem(new PacketTorpedo(3, 6, 5, 300, 60));
 	$this->addPrimarySystem(new StdParticleBeam(2, 4, 1, 180, 360)); 
 	$this->addPrimarySystem(new StdParticleBeam(2, 4, 1, 0, 180));
 

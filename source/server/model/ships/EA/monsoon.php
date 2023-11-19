@@ -5,7 +5,7 @@ class Monsoon extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 500;
-		$this->faction = "EA";
+		$this->faction = "Earth Alliance";
         $this->phpclass = "Monsoon";
         $this->imagePath = "img/ships/monsoon.png";
         $this->shipClass = "Monsoon Advanced Gunboat (Alpha)";

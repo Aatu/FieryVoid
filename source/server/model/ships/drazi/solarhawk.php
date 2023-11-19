@@ -5,7 +5,7 @@ class Solarhawk extends HeavyCombatVesselLeftRight{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 525;
-	$this->faction = "Drazi";
+	$this->faction = "Drazi Freehold";
         $this->phpclass = "Solarhawk";
         $this->imagePath = "img/ships/drazi/DraziSolarhawk.png";
         $this->shipClass = "Solarhawk Battlecruiser";

@@ -5,7 +5,7 @@ class LaertesEpsilon extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 250;
-	$this->faction = 'EA';//"EA defenses";
+	$this->faction = 'Earth Alliance';//"EA defenses";
         $this->phpclass = "LaertesEpsilon";
         $this->imagePath = "img/ships/laertes.png";
         $this->shipClass = "Laertes Assault Corvette (Epsilon)";

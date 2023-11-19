@@ -7,7 +7,7 @@ class BrixadiiSupportBase extends SmallStarBaseFourSections{
 		$this->pointCost = 470;
 		$this->base = true;
 		$this->smallBase = true;
-		$this->faction = "ZNexus Brixadii";
+		$this->faction = "ZNexus Brixadii Clans";
 		$this->phpclass = "BrixadiiSupportBase";
 		$this->shipClass = "Support Base";
 		$this->imagePath = "img/ships/Nexus/BrixadiiSupportBase.png";
@@ -76,7 +76,7 @@ class BrixadiiSupportBase extends SmallStarBaseFourSections{
 				20 => "C&C",
 			),
 			1=> array(
-				2 => "Heavy Particle Projector",
+				3 => "Heavy Particle Projector",
 				7 => "Cargo Bay",
 				9 => "Particle Bolter",
 				11 => "Quarters",
@@ -84,7 +84,7 @@ class BrixadiiSupportBase extends SmallStarBaseFourSections{
 				20 => "Primary",
 			),
 			2=> array(
-				2 => "Heavy Particle Projector",
+				3 => "Heavy Particle Projector",
 				7 => "Cargo Bay",
 				9 => "Particle Bolter",
 				11 => "Quarters",
@@ -92,7 +92,7 @@ class BrixadiiSupportBase extends SmallStarBaseFourSections{
 				20 => "Primary",
 			),	
 			3=> array(
-				2 => "Heavy Particle Projector",
+				3 => "Heavy Particle Projector",
 				7 => "Cargo Bay",
 				9 => "Particle Bolter",
 				11 => "Quarters",
@@ -100,7 +100,7 @@ class BrixadiiSupportBase extends SmallStarBaseFourSections{
 				20 => "Primary",
 			),
 			4=> array(
-				2 => "Heavy Particle Projector",
+				3 => "Heavy Particle Projector",
 				7 => "Cargo Bay",
 				9 => "Particle Bolter",
 				11 => "Quarters",

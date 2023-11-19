@@ -5,7 +5,7 @@ class CraytanNeprinScout extends HeavyCombatVesselLeftRight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 270;
-        $this->faction = "ZNexus Craytan";
+        $this->faction = "ZNexus Craytan Union";
         $this->phpclass = "CraytanNeprinScout";
         $this->imagePath = "img/ships/Nexus/CraytanDela.png";
 		$this->canvasSize = 125; //img has 200px per side
@@ -31,8 +31,8 @@ class CraytanNeprinScout extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new CnC(4, 6, 0, 0));
         $this->addPrimarySystem(new ElintScanner(3, 8, 4, 4));
         $this->addPrimarySystem(new Engine(3, 7, 0, 6, 4));
-		$this->addPrimarySystem(new CargoBay(3, 9));
-        $this->addPrimarySystem(new Thruster(3, 10, 0, 4, 1));
+		$this->addPrimarySystem(new Magazine(3, 9));
+        $this->addFrontSystem(new Thruster(3, 10, 0, 4, 1));
       
         $this->addLeftSystem(new Thruster(2, 10, 0, 3, 2));
         $this->addLeftSystem(new Thruster(2, 10, 0, 3, 3));
@@ -58,8 +58,8 @@ class CraytanNeprinScout extends HeavyCombatVesselLeftRight{
         $this->hitChart = array(
             0=> array(
                     8 => "Structure",
-					10 => "Thruster",
-					11 => "Cargo Bay",
+					10 => "1:Thruster",
+					11 => "Magazine",
                     14 => "ELINT Scanner",
                     17 => "Engine",
                     19 => "Reactor",
