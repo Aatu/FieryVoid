@@ -5,7 +5,7 @@ class SalbezRevTan extends OSAT{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 200;
-		$this->faction = 'ZNexus Sal-bez';
+		$this->faction = 'ZNexus Sal-bez Coalition';
         $this->phpclass = "SalbezRevTan";
         $this->imagePath = "img/ships/Nexus/salbez_revtan_v2.png";
 			$this->canvasSize = 80; //img has 100px per side
@@ -40,10 +40,10 @@ class SalbezRevTan extends OSAT{
 		
 		$this->hitChart = array(
 			0=> array(
-				9 => "Structure",
-				11 => "Thruster",
-				13 => "Ranged Swarm Torpedo",
-				15 => "Medium Laser",
+				8 => "Structure",
+				10 => "Thruster",
+				12 => "Ranged Swarm Torpedo",
+				14 => "Medium Laser",
 				16 => "Light Particle Beam",
 				18 => "Scanner",
 				20 => "Reactor",

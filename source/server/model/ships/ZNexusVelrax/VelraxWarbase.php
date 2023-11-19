@@ -7,7 +7,7 @@ class VelraxWarbase extends SmallStarBaseFourSections{
 		$this->pointCost = 750;
 		$this->base = true;
 		$this->smallBase = true;
-		$this->faction = "ZNexus Velrax";
+		$this->faction = "ZNexus Velrax Republic";
 		$this->phpclass = "VelraxWarbase";
 		$this->shipClass = "Warbase";
 			$this->variantOf = "Command Base";

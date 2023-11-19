@@ -28,13 +28,13 @@ class SshelathTakhira extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new Reactor(4, 13, 0, -4));
         $this->addPrimarySystem(new CnC(4, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 12, 3, 6));
-		$this->addPrimarySystem(new LaserCutter(3, 6, 4, 300, 60));
+		$this->addFrontSystem(new LaserCutter(3, 6, 4, 300, 60));
         $this->addPrimarySystem(new Engine(4, 14, 0, 8, 3));
 		$this->addPrimarySystem(new Hangar(3, 1));
-        $this->addPrimarySystem(new Thruster(2, 8, 0, 3, 1));
-        $this->addPrimarySystem(new Thruster(2, 8, 0, 3, 1));
-        $this->addPrimarySystem(new Thruster(2, 12, 0, 4, 2));
-        $this->addPrimarySystem(new Thruster(2, 12, 0, 4, 2));
+        $this->addAftSystem(new Thruster(2, 8, 0, 3, 1));
+        $this->addAftSystem(new Thruster(2, 8, 0, 3, 1));
+        $this->addAftSystem(new Thruster(2, 12, 0, 4, 2));
+        $this->addAftSystem(new Thruster(2, 12, 0, 4, 2));
 
         $this->addLeftSystem(new LaserCutter(2, 6, 4, 240, 360));
 		$this->addLeftSystem(new EWGatlingLaser(2, 7, 4, 180, 60));
@@ -52,8 +52,8 @@ class SshelathTakhira extends HeavyCombatVesselLeftRight{
         $this->hitChart = array(
         		0=> array(
         				7 => "Structure",
-						9 => "Laser Cutter",
-        				12 => "Thruster",
+						9 => "1:Laser Cutter",
+        				12 => "2:Thruster",
         				14 => "Scanner",
         				16 => "Engine",
 						17 => "Hangar",

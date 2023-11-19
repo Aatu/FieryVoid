@@ -5,7 +5,7 @@ class SalbezResktan extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 280;
-        $this->faction = "ZNexus Sal-bez";
+        $this->faction = "ZNexus Sal-bez Coalition";
         $this->phpclass = "SalbezResktan";
         $this->imagePath = "img/ships/Nexus/salbez_mining_frigate.png";
         $this->shipClass = "Resk'tan Frigate";
@@ -59,7 +59,7 @@ class SalbezResktan extends MediumShip{
 		1=> array(
 			5 => "Thruster",
 			8 => "Laser Cutter",
-			9 => "Bolt Torpedo",
+			10 => "Bolt Torpedo",
 			17 => "Structure",
 			20 => "Primary",
 		),

@@ -5,7 +5,7 @@ class BrixadiiBattleDestroyerLeader2051 extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 470;
-        $this->faction = "ZNexus Brixadii";
+        $this->faction = "ZNexus Brixadii Clans";
         $this->phpclass = "BrixadiiBattleDestroyerLeader2051";
         $this->imagePath = "img/ships/Nexus/BrixadiiBDDLeader.png";
 			$this->canvasSize = 120; //img has 200px per side
@@ -61,9 +61,9 @@ class BrixadiiBattleDestroyerLeader2051 extends HeavyCombatVessel{
         $this->hitChart = array(
             0=> array(
                     7 => "Structure",
-                    10 => "Thruster",
+                    11 => "Thruster",
                     13 => "Scanner",
-                    16 => "Engine",
+                    15 => "Engine",
                     17 => "Hangar",
                     19 => "Reactor",
                     20 => "C&C",
@@ -77,7 +77,7 @@ class BrixadiiBattleDestroyerLeader2051 extends HeavyCombatVessel{
                     20 => "Primary",
             ),
             2=> array(
-                    6 => "Thruster",
+                    5 => "Thruster",
 					7 => "Chaff Launcher",
 					9 => "Particle Bolter",
                     11 => "Light Particle Beam",

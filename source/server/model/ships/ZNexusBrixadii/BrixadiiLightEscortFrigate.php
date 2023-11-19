@@ -5,7 +5,7 @@ class BrixadiiLightEscortFrigate extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 385;
-        $this->faction = "ZNexus Brixadii";
+        $this->faction = "ZNexus Brixadii Clans";
         $this->phpclass = "BrixadiiLightEscortFrigate";
         $this->imagePath = "img/ships/Nexus/BrixadiiLightEscort.png";
 			$this->canvasSize = 70; //img has 100px per side
@@ -67,16 +67,16 @@ class BrixadiiLightEscortFrigate extends MediumShip{
             ),
             1=> array(
 				5 => "Thruster",
-				6 => "Anti-fighter Launcher",
-				8 => "Energy Pulsar",
-				10 => "Scatter Pulsar",
+				7 => "Anti-fighter Launcher",
+				9 => "Energy Pulsar",
+				11 => "Scatter Pulsar",
 				17 => "Structure",
 				20 => "Primary",
             ),
             2=> array(
 				7 => "Thruster",
-				8 => "Chaff Launcer",
-				10 => "Scatter Pulsar",
+				9 => "Chaff Launcer",
+				11 => "Scatter Pulsar",
 				17 => "Structure",
 				20 => "Primary",
             ),

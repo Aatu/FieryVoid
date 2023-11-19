@@ -5,7 +5,7 @@ class BrixadiiPoliceFrigate2047 extends LCV{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 120;
-        $this->faction = "ZNexus Brixadii";
+        $this->faction = "ZNexus Brixadii Clans";
         $this->phpclass = "BrixadiiPoliceFrigate2047";
         $this->imagePath = "img/ships/Nexus/BrixadiiPoliceFrigateEarly.png";
 			$this->canvasSize = 60; //img has 200px per side

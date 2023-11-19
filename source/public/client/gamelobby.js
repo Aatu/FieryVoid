@@ -173,19 +173,19 @@ window.gamedata = {
 		  case "ZEscalation Sshel'ath Alliance":
 			powerRating = 'Tier 2, custom faction';
 			break;
-		  case 'ZNexus Brixadii':
+		  case 'ZNexus Brixadii Clans':
 			powerRating = 'Tier 2, custom faction';
 			break;
-		  case 'ZNexus Craytan':
+		  case 'ZNexus Craytan Union':
 			powerRating = 'Tier 2, custom faction';
 			break;
-		  case 'ZNexus Dalithorn':
+		  case 'ZNexus Dalithorn Commonwealth':
 			powerRating = 'Tier 2, custom faction';
 			break;
-		  case 'ZNexus Sal-bez':
+		  case 'ZNexus Sal-bez Coalition':
 			powerRating = 'Tier 2, custom faction';
 			break;
-		  case 'ZNexus Velrax':
+		  case 'ZNexus Velrax Republic':
 			powerRating = 'Tier 2, custom faction';
 			break;
 		  case 'ZStarTrek Federation (TOS)':

@@ -29,9 +29,9 @@ class Hawk extends MediumShipLeftRight{
 		$this->iniativebonus = 30;
 
 		$this->addPrimarySystem(new CnC(4, 6, 0, 0));
-		$this->addPrimarySystem(new LightParticleCannon(2, 6, 5, 300, 60));
-		$this->addPrimarySystem(new Thruster(2, 8, 0, 4, 1));
-		$this->addPrimarySystem(new Thruster(2, 11, 0, 6, 2));
+		$this->addFrontSystem(new LightParticleCannon(2, 6, 5, 300, 60));
+		$this->addAftSystem(new Thruster(2, 8, 0, 4, 1));
+		$this->addAftSystem(new Thruster(2, 11, 0, 6, 2));
 		$this->addPrimarySystem(new Scanner(4, 8, 3, 4));
 		$this->addPrimarySystem(new Engine(4, 10, 0, 6, 3));
 		$this->addPrimarySystem(new Hangar(2, 1));
@@ -49,8 +49,8 @@ class Hawk extends MediumShipLeftRight{
         
         $this->hitChart = array (
         		0=> array (
-        				8=>"Thruster",
-        				10=>"Light Particle Cannon",
+        				8=>"2:Thruster",
+        				10=>"1:Light Particle Cannon",
         				13=>"Scanner",
         				15=>"Engine",
         				17=>"Hangar",

@@ -7,7 +7,7 @@ class BrixadiiBase2108 extends SmallStarBaseFourSections{
 		$this->pointCost = 750;
 		$this->base = true;
 		$this->smallBase = true;
-		$this->faction = "ZNexus Brixadii";
+		$this->faction = "ZNexus Brixadii Clans";
 		$this->phpclass = "BrixadiiBase2108";
 		$this->shipClass = "Combat Base";
 		$this->imagePath = "img/ships/Nexus/BrixadiiBase.png";
@@ -88,8 +88,8 @@ class BrixadiiBase2108 extends SmallStarBaseFourSections{
 				3 => "Heavy Particle Projector",
 				6 => "Cargo Bay",
 				8 => "Energy Pulsar",
-				9 => "Ranged Kinetic Box Launcher",
-				11 => "Quarters",
+				10 => "Ranged Kinetic Box Launcher",
+				12 => "Quarters",
 				18 => "Structure",
 				20 => "Primary",
 			),
@@ -98,8 +98,8 @@ class BrixadiiBase2108 extends SmallStarBaseFourSections{
 				3 => "Heavy Particle Projector",
 				6 => "Cargo Bay",
 				8 => "Energy Pulsar",
-				9 => "Ranged Kinetic Box Launcher",
-				11 => "Quarters",
+				10 => "Ranged Kinetic Box Launcher",
+				12 => "Quarters",
 				18 => "Structure",
 				20 => "Primary",
 			),	
@@ -108,8 +108,8 @@ class BrixadiiBase2108 extends SmallStarBaseFourSections{
 				3 => "Heavy Particle Projector",
 				6 => "Cargo Bay",
 				8 => "Energy Pulsar",
-				9 => "Ranged Kinetic Box Launcher",
-				11 => "Quarters",
+				10 => "Ranged Kinetic Box Launcher",
+				12 => "Quarters",
 				18 => "Structure",
 				20 => "Primary",
 			),
@@ -118,8 +118,8 @@ class BrixadiiBase2108 extends SmallStarBaseFourSections{
 				3 => "Heavy Particle Projector",
 				6 => "Cargo Bay",
 				8 => "Energy Pulsar",
-				9 => "Ranged Kinetic Box Launcher",
-				11 => "Quarters",
+				10 => "Ranged Kinetic Box Launcher",
+				12 => "Quarters",
 				18 => "Structure",
 				20 => "Primary",
 			),

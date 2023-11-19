@@ -5,7 +5,7 @@ class VelraxAxrinFighter extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 37*6;
-        $this->faction = "ZNexus Velrax";
+        $this->faction = "ZNexus Velrax Republic";
         $this->phpclass = "VelraxAxrinFighter";
         $this->shipClass = "Axrin Strike flight";
         $this->imagePath = "img/ships/Nexus/VelraxResterax_v2.png";

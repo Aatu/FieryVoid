@@ -5,7 +5,7 @@ class CraytanGramitha extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 330;
-        $this->faction = "ZNexus Craytan";
+        $this->faction = "ZNexus Craytan Union";
         $this->phpclass = "CraytanGramitha";
         $this->imagePath = "img/ships/Nexus/CraytanCorvette.png";
         $this->shipClass = "Gramitha Escort Frigate";
@@ -35,7 +35,7 @@ class CraytanGramitha extends MediumShip{
         $this->addPrimarySystem(new Engine(4, 11, 0, 10, 3));
         $this->addPrimarySystem(new Thruster(3, 10, 0, 5, 3));
         $this->addPrimarySystem(new Thruster(3, 10, 0, 5, 4));        
-        $this->addPrimarySystem(new CargoBay(4, 9));
+        $this->addPrimarySystem(new Magazine(4, 9));
         
 		$this->addFrontSystem(new NexusACIDS(3, 6, 2, 270, 60));
 		$this->addFrontSystem(new NexusACIDS(3, 6, 2, 240, 120));
@@ -57,7 +57,7 @@ class CraytanGramitha extends MediumShip{
 		
 		0=> array(
 			8 => "Thruster",
-			11 => "Cargo Bay",
+			11 => "Magazine",
 			14 => "Scanner",
 			17 => "Engine",
 			19 => "Reactor",
@@ -74,8 +74,8 @@ class CraytanGramitha extends MediumShip{
 		2=> array(
 			6 => "Thruster",
 			8 => "Light Enhanced Plasma",
-			9 => "Advanced Close-In Defense System",
-			11 => "Hangar",
+			10 => "Advanced Close-In Defense System",
+			12 => "Hangar",
 			17 => "Structure",
 			20 => "Primary",
 		),
