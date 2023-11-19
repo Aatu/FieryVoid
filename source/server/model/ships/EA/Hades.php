@@ -5,7 +5,7 @@ class Hades extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 30 * 6;
-        $this->faction = "EA";
+        $this->faction = "Earth Alliance";
         $this->phpclass = "Hades";
         $this->shipClass = "Hades Assault Shuttles";
         $this->imagePath = "img/ships/Hades.png";
