@@ -14,7 +14,8 @@ class Sweepmerlin extends MediumShip{
         $this->canvasSize = 100;
         $this->occurence = "common"; 
 	    $this->variantOf = "Merlin Frigate";
-	    $this->unofficial = true;  	            
+	    $this->unofficial = true; 
+ 		$this->unofficial = 'S'; //design released after AoG demise	     	            
         
         $this->forwardDefense = 11;
         $this->sideDefense = 11;

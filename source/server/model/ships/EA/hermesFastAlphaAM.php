@@ -36,7 +36,8 @@ class hermesFastAlphaAM extends HeavyCombatVessel{
         //$this->enhancementOptionsEnabled[] = 'AMMO_H';//add enhancement options for other missiles - Class-L
         //$this->enhancementOptionsEnabled[] = 'AMMO_F';//add enhancement options for other missiles - Class-L
         //$this->enhancementOptionsEnabled[] = 'AMMO_A';//add enhancement options for other missiles - Class-L
-        //$this->enhancementOptionsEnabled[] = 'AMMO_P';//add enhancement options for other missiles - Class-P		
+        //$this->enhancementOptionsEnabled[] = 'AMMO_P';//add enhancement options for other missiles - Class-P
+		//$this->enhancementOptionsEnabled[] = 'AMMO_X';//add enhancement options for other missiles - Class-X	        		
 		//Fast Transport is nice and well armed, but not really top priority (might be civilian, too) - and it's old... so no special missiles
 		
         $this->addPrimarySystem(new Reactor(3, 12, 0, 0));

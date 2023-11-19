@@ -43,8 +43,11 @@ class KoskovaEarlyAM extends BaseShip{
 	    $this->enhancementOptionsEnabled[] = 'AMMO_H';//add enhancement options for other missiles - Class-H
 	    $this->enhancementOptionsEnabled[] = 'AMMO_K';//add enhancement options for other missiles - Class-K   
 	    $this->enhancementOptionsEnabled[] = 'AMMO_L';//add enhancement options for other missiles - Class-L
+	    $this->enhancementOptionsEnabled[] = 'AMMO_M';//add enhancement options for other missiles - Class-M	    
 		$this->enhancementOptionsEnabled[] = 'AMMO_P';//add enhancement options for other missiles - Class-P	    	    	    	    
 	    $this->enhancementOptionsEnabled[] = 'AMMO_S';//add enhancement options for other missiles - Class-S
+	    $this->enhancementOptionsEnabled[] = 'AMMO_X';//add enhancement options for other missiles - Class-X	    
+		//Early cruiser, but modern Koskova doesn't appear until 2255 so this Early version could potentially have Stealth missiles from 2252.		 	    
         
         $this->addPrimarySystem(new Reactor(6, 25, 0, 1));
         $this->addPrimarySystem(new CnC(6, 16, 0, 0));

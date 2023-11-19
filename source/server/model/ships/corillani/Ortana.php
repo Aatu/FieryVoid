@@ -15,6 +15,7 @@ class Ortana extends BaseShip{
         $this->occurence = "rare";
 		$this->variantOf = "Intona Strike Cruiser";
         $this->limited = 33;						    
+ 		$this->unofficial = 'S'; //design released after AoG demise
 		
         $this->forwardDefense = 13;
         $this->sideDefense = 16;

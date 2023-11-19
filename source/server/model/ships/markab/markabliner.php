@@ -7,7 +7,7 @@ class MarkabLiner extends MediumShip{
 		$this->pointCost = 70;
 		$this->faction = "Civilians";
         $this->phpclass = "MarkabLiner";
-        $this->imagePath = "img/ships/sloop.png"; //change
+        $this->imagePath = "img/ships/Raidersloop.png"; //change
         $this->shipClass = "Markab Liner";
         $this->canvasSize = 100;
 	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup

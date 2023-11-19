@@ -1267,6 +1267,23 @@ class BaseShip {
         return $amount;
     }
 
+ public function getAllOffensiveEW($turn){
+    $amount = 0;
+    foreach ($this->EW as $EW){
+        if ($EW->type == "OEW" && $EW->turn == $turn) {
+            $amount += $EW->amount;
+        }
+        // Move this part inside the loop
+        else if ($EW->type == "CCEW" && $EW->turn == $turn) {
+            // Check range - CCEW works up to 10 hexes away!
+            $amount += $EW->amount;
+        }
+    }
+    return $amount;
+}
+
+
+
     public function getFacingAngle(){
         $movement = null;
 

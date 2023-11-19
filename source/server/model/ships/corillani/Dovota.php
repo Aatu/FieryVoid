@@ -19,7 +19,7 @@ class Dovota extends MediumShip
         $this->agile = true;	
         
         $this->minesweeperbonus = 2;        					    
-		
+ 		$this->unofficial = 'S'; //design released after AoG demise		
 
 		$this->forwardDefense = 12;
 		$this->sideDefense = 13;

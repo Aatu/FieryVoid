@@ -539,6 +539,7 @@ window.weaponManager = {
 
     calculateRangePenalty: function calculateRangePenalty(distance, weapon) {
         var rangePenalty = 0;
+        
 		if (weapon.specialRangeCalculation){
 			rangePenalty = weapon.calculateSpecialRangePenalty(distance);
 		}else{ //standard calculation
@@ -788,6 +789,11 @@ window.weaponManager = {
                 //		console.log("osat turn -1");
                 mod -= 1;
             }
+
+			if (weapon.specialHitChanceCalculation){ //Added for HARM missile calculation, but could be used for others in future?
+			    mod += weapon.calculateSpecialHitChanceMod(target);
+			}
+
 
             if (!shooter.osat) {
                 mod -= shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(shooter, "cnC"), "PenaltyToHit");

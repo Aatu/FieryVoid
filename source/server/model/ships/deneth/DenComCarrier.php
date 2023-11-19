@@ -9,7 +9,7 @@ class DenComCarrier extends BaseShip{
         $this->phpclass = "DenComCarrier";
         $this->imagePath = "img/ships/DenethDeliverer.png";
 	$this->canvasSize = 200;
-        $this->shipClass = "Command Carrier";
+        $this->shipClass = "Deneth Command Carrier";
         $this->shipSizeClass = 3;
 	    
         $this->limited = 33;

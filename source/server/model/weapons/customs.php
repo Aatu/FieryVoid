@@ -2346,4 +2346,62 @@ class GromeHvyRailgun extends Weapon{
 
 
 
+class KKTest extends Torpedo{
+        public $name = "KKTest";
+        public $displayName = "KKTest Test Weapon Torpedo";
+        public $iconPath = "KKTest.png";
+        public $range = 100;  
+        public $loadingtime = 1;
+    public $specialRangeCalculation = false; //set to true if weapon should use its own range calculation IN FRONT END (server side range calculation is in weapon class anyway)
+    public $specialRangeCalculationArray = array(1=>false, 2=>true); 
+        
+        public $weaponClass = "Ballistic"; 
+        public $damageType = "Standard"; 
+        
+        public $fireControl = array(6, 6, 6); // fighters, <mediums, <capitals 
+		public $rangePenalty = 1; //-1/2 hexes - BUT ONLY AFTER 15 HEXES
+        
+        public $animation = "torpedo";
+        public $animationColor = array(130, 170, 255);
+        public $firingModes = array(
+            1 => "Default",
+            2 => "Test"
+        );
+        
+        public $priority = 6; //heavy Standard
+        
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 99;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 0;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+            	
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}
+		$this->data["Special"] .= "This weapon solely exists to test some front end code.";
+	}
+
+		public function calculateRangePenalty($distance){
+			$rangePenalty = 0;//base penalty
+			$rangePenalty += $this->rangePenalty * max(0,$distance-15); //everything above 10 hexes receives range penalty
+			return $rangePenalty;
+		}
+        
+        public function getDamage($fireOrder){        return 10;    }
+        public function setMinDamage(){     $this->minDamage = 10;      }
+        public function setMaxDamage(){     $this->maxDamage = 10;      }
+    
+    }//endof class KKTest
+
+
 ?>

@@ -13,7 +13,7 @@ class Judanna extends HeavyCombatVessel{
 		$this->notes = 'Defenders of Corillan (DoC)';
 		$this->canvasSize= 200;
         $this->fighters = array("normal"=>6);			    
-        
+ 		$this->unofficial = 'S'; //design released after AoG demise        
         
         $this->forwardDefense = 13;
         $this->sideDefense = 14;
