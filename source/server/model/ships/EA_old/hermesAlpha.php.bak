@@ -5,7 +5,7 @@ class HermesAlpha extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 420;
-        $this->faction = "EA (early)";
+        $this->faction = "Earth Alliance (early)";
         $this->phpclass = "HermesAlpha";
         $this->imagePath = "img/ships/hermes.png";
         $this->shipClass = "Hermes Priority Transport (Alpha)";

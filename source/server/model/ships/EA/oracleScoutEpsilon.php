@@ -5,7 +5,7 @@ class OracleScoutEpsilon extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 625;
-	$this->faction = "EA";
+	$this->faction = "Earth Alliance";
         $this->phpclass = "OracleScoutEpsilon";
         $this->imagePath = "img/ships/oracle.png";
         $this->shipClass = "Oracle Scout Cruiser (Epsilon)";

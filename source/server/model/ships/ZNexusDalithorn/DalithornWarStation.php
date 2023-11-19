@@ -7,7 +7,7 @@ class DalithornWarStation extends SmallStarBaseFourSections{
 		$this->pointCost = 800;
 		$this->base = true;
 		$this->smallBase = true;
-		$this->faction = "ZNexus Dalithorn";
+		$this->faction = "ZNexus Dalithorn Commonwealth";
 		$this->phpclass = "DalithornWarStation";
 		$this->shipClass = "War Station";
 		$this->imagePath = "img/ships/Nexus/DalithornStation.png";
@@ -30,7 +30,7 @@ class DalithornWarStation extends SmallStarBaseFourSections{
 		$this->addPrimarySystem(new CnC(4, 25, 0, 0));
 		$this->addPrimarySystem(new Scanner(4, 14, 5, 7));
 		$this->addPrimarySystem(new Hangar(4, 6));
-		$this->addPrimarySystem(new CargoBay(4, 24));
+		$this->addPrimarySystem(new Magazine(4, 24));
 		$this->addPrimarySystem(new NexusProtector(4, 4, 1, 0, 360));
 		$this->addPrimarySystem(new NexusProtector(4, 4, 1, 0, 360));
 		$this->addPrimarySystem(new NexusProtector(4, 4, 1, 0, 360));
@@ -81,7 +81,7 @@ class DalithornWarStation extends SmallStarBaseFourSections{
 		$this->hitChart = array(			
 			0=> array(
 				8 => "Structure",
-				10 => "Cargo Bay",
+				10 => "Magazine",
 				12 => "Protector",
 				14 => "Hangar",
 				16 => "Scanner",
@@ -94,8 +94,8 @@ class DalithornWarStation extends SmallStarBaseFourSections{
 				7 => "Catapult",
 				9 => "Gas Gun",
 				11 => "Heavy Laser Missile",
-				12 => "Minigun",
-				13 => "Cargo Bay",
+				13 => "Minigun",
+				15 => "Cargo Bay",
 				18 => "Structure",
 				20 => "Primary",
 			),
@@ -105,8 +105,8 @@ class DalithornWarStation extends SmallStarBaseFourSections{
 				7 => "Catapult",
 				9 => "Gas Gun",
 				11 => "Heavy Laser Missile",
-				12 => "Minigun",
-				13 => "Cargo Bay",
+				13 => "Minigun",
+				15 => "Cargo Bay",
 				18 => "Structure",
 				20 => "Primary",
 			),	
@@ -116,8 +116,8 @@ class DalithornWarStation extends SmallStarBaseFourSections{
 				7 => "Catapult",
 				9 => "Gas Gun",
 				11 => "Heavy Laser Missile",
-				12 => "Minigun",
-				13 => "Cargo Bay",
+				13 => "Minigun",
+				15 => "Cargo Bay",
 				18 => "Structure",
 				20 => "Primary",
 			),
@@ -127,8 +127,8 @@ class DalithornWarStation extends SmallStarBaseFourSections{
 				7 => "Catapult",
 				9 => "Gas Gun",
 				11 => "Heavy Laser Missile",
-				12 => "Minigun",
-				13 => "Cargo Bay",
+				13 => "Minigun",
+				15 => "Cargo Bay",
 				18 => "Structure",
 				20 => "Primary",
 			),

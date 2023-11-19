@@ -5,7 +5,7 @@ class RultharAM extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 450;
-        $this->faction = "Descari";
+        $this->faction = "Descari Committees";
         $this->phpclass = "RultharAM";
         $this->imagePath = "img/ships/DescariRulpa.png";
         $this->shipClass = "Rulthar Missile Destroyer";

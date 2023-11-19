@@ -6,7 +6,7 @@ class KestrelCommon extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
     	$this->pointCost = 350;
-    	$this->faction = "Drazi";
+    	$this->faction = "Drazi Freehold";
         $this->phpclass = "kestrelcommon";
         $this->imagePath = "img/ships/drazi/DraziKestrel.png";
         $this->shipClass = "Kestrel Corvette";

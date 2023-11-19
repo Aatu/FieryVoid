@@ -7,7 +7,7 @@ class Cruscava extends MediumShip
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 375;
-		$this->faction = "Descari";
+		$this->faction = "Descari Committees";
 		$this->phpclass = "Cruscava";
 		$this->imagePath = "img/ships/DescariCruscava.png";
 		$this->shipClass = "Cruscava Escort Frigate";

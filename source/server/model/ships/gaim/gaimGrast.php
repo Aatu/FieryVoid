@@ -5,7 +5,7 @@ class gaimGrast extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 275;
-		$this->faction = "Gaim";
+		$this->faction = "Gaim Intelligence";
         $this->phpclass = "gaimGrast";
         $this->imagePath = "img/ships/GaimGrast.png";
         $this->shipClass = "Grast Support Frigate";

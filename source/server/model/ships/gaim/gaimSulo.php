@@ -5,7 +5,7 @@ class gaimSulo extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 600;
-		$this->faction = 'Gaim';
+		$this->faction = "Gaim Intelligence";
 		$this->phpclass = "gaimSulo";
 		$this->imagePath = "img/ships/GaimSulo.png";
 		$this->shipClass = "Sulo Fleet Carrier";

@@ -6,7 +6,7 @@ class TrathartiG extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
 
         $this->pointCost = 900;
-        $this->faction = "Dilgar";
+        $this->faction = "Dilgar Imperium";
         $this->phpclass = "TrathartiG";
         $this->imagePath = "img/ships/tratharti.png";
         $this->shipClass = "Tratharti-G Heavy Gunship";

@@ -5,7 +5,7 @@ class Guardhawk extends HeavyCombatVesselLeftRight{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 550;
-	$this->faction = "Drazi";
+	$this->faction = "Drazi Freehold";
         $this->phpclass = "Guardhawk";
         $this->imagePath = "img/ships/drazi/DraziSunhawk.png";
         $this->shipClass = "Guardhawk Battle Escort";

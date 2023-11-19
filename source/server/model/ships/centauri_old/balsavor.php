@@ -5,7 +5,7 @@ class Balsavor extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 430;
-        $this->faction = "Centauri (WotCR)";
+        $this->faction = "Centauri Republic (WotCR)";
         $this->phpclass = "Balsavor";
         $this->imagePath = "img/ships/balciron.png";
         $this->shipClass = "Balsavor Gunship";

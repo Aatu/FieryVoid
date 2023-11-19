@@ -6,7 +6,7 @@ class Leskrati extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
 
         $this->pointCost = 515;
-        $this->faction = "Dilgar";
+        $this->faction = "Dilgar Imperium";
         $this->phpclass = "Leskrati";
         $this->imagePath = "img/ships/leskrati.png";
         $this->shipClass = "Leskrati Jumpcruiser";

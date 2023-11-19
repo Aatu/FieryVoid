@@ -5,7 +5,7 @@ class CraytanPoltenRefit extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
 	    $this->pointCost = 18*6;
-	    $this->faction = "ZNexus Craytan";
+	    $this->faction = "ZNexus Craytan Union";
         $this->phpclass = "CraytanPoltenRefit";
         $this->shipClass = "Polten Assault Shuttles (2090 refit)";
 			$this->variantOf = "Polten Assault Shuttles";

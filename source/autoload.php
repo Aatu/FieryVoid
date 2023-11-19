@@ -566,6 +566,7 @@ spl_autoload_register(
                 'lystala1995' => '/server/model/ships/abbai_old/lystala1995.php',
                 'mafka' => '/server/model/ships/markab/mafka.php',
                 'maftora' => '/server/model/ships/markab/maftora.php',
+				'magazine' => '/server/model/systems/baseSystems.php',
                 'maggraviticthruster' => '/server/model/systems/baseSystems.php',
                 'maggravreactor' => '/server/model/systems/baseSystems.php',
                 'maggun' => '/server/model/weapons/plasma.php',
@@ -1573,6 +1574,7 @@ spl_autoload_register(
 				'nexusfighterarray' => '/server/model/weapons/customNexus.php', 
 				'nexusheavyparticlearray' => '/server/model/weapons/customNexus.php',
 				'nexusassaultcannon' => '/server/model/weapons/customNexus.php', 
+				'nexusassaultcannonbattery' => '/server/model/weapons/customNexus.php',
 				'nexuslightassaultcannon' => '/server/model/weapons/customNexus.php', 
 				'nexusmedassaultcannon' => '/server/model/weapons/customNexus.php', 
 				'nexusmauler' => '/server/model/weapons/customNexus.php', 
@@ -1614,7 +1616,7 @@ spl_autoload_register(
 				'nexusltenhplasmaftr' => '/server/model/weapons/customNexus.php',
 				'nexusheavyplasmacharge' => '/server/model/weapons/customNexus.php',
 				'nexusfightertorpedolauncher' => '/server/model/weapons/customNexus.php',
-				'nexusltplasmabomb' => '/server/model/weapons/customNexus.php',
+				'nexusltplasmatorpedo' => '/server/model/weapons/customNexus.php',
 //				'nexusheavychargedplasmagun' => '/server/model/weapons/customNexus.php',
 //				'nexuschargedplasmagun' => '/server/model/weapons/customNexus.php',
 			//Nexus laser weapons
@@ -1714,7 +1716,8 @@ spl_autoload_register(
 //                'craytancorvette2126' => '/server/model/ships/ZNexusCraytan/CraytanCorvette2126.php',					
                 'craytancalen' => '/server/model/ships/ZNexusCraytan/CraytanCalen.php',					
                 'craytancrimur' => '/server/model/ships/ZNexusCraytan/CraytanCrimur.php',					
-                'craytandakran' => '/server/model/ships/ZNexusCraytan/CraytanDakran.php',					
+                'craytandakran' => '/server/model/ships/ZNexusCraytan/CraytanDakran.php',
+				'craytandeprin' => '/server/model/ships/ZNexusCraytan/CraytanDeprin.php',
                 'craytanepiron' => '/server/model/ships/ZNexusCraytan/CraytanEpiron.php',					
                 'craytanepironrefit' => '/server/model/ships/ZNexusCraytan/CraytanEpironRefit.php',					
                 'craytaneskavin' => '/server/model/ships/ZNexusCraytan/CraytanEskavin.php',					
@@ -1728,7 +1731,10 @@ spl_autoload_register(
                 'craytanlopin' => '/server/model/ships/ZNexusCraytan/CraytanLopin.php',					
                 'craytanneprinscout' => '/server/model/ships/ZNexusCraytan/CraytanNeprinScout.php',					
                 'craytanneprinscoutrefit' => '/server/model/ships/ZNexusCraytan/CraytanNeprinScoutRefit.php',					
- //               'craytanhepron2126' => '/server/model/ships/ZNexusCraytan/CraytanHepron2126.php',					
+ //               'craytanhepron2126' => '/server/model/ships/ZNexusCraytan/CraytanHepron2126.php',		
+				'craytanolipan' => '/server/model/ships/ZNexusCraytan/CraytanOlipan.php',
+				'craytanolipancombat' => '/server/model/ships/ZNexusCraytan/CraytanOlipanCombat.php',
+				'craytanolipanrefit' => '/server/model/ships/ZNexusCraytan/CraytanOlipanRefit.php',
                 'craytanpolten' => '/server/model/ships/ZNexusCraytan/CraytanPolten.php',					
                 'craytanpoltenrefit' => '/server/model/ships/ZNexusCraytan/CraytanPoltenRefit.php',					
                 'craytanrollun' => '/server/model/ships/ZNexusCraytan/CraytanRollun.php',					
@@ -2342,8 +2348,10 @@ spl_autoload_register(
 				'flyercombat' => '/server/model/ships/minbari/flyerCombat.php',
 				'genericarmedshuttle' => '/server/model/ships/civilians/genericArmedShuttle.php',
 
-				//Base Testbed
+				//Base 
                 'basetestbed' => '/server/model/ships/customs/baseTestbed.php',
+                'sivrinproposal' => '/server/model/ships/customs/SivrinProposal.php',
+				
 
 				
 				//Shadowtech

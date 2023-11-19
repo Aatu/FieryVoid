@@ -6,7 +6,7 @@ class Mishakur extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
 
         $this->pointCost = 975;
-        $this->faction = "Dilgar";
+        $this->faction = "Dilgar Imperium";
         $this->phpclass = "Mishakur";
 	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
         $this->imagePath = "img/ships/mishakur.png";

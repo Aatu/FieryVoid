@@ -5,7 +5,7 @@ class RaklaviAM extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 600;
-		$this->faction = "Kor-Lyan";
+		$this->faction = "Kor-Lyan Kingdoms";
 //	$this->faction = "Custom Ships";
         $this->phpclass = "RaklaviAM";
         $this->imagePath = "img/ships/korlyan_raklavi.png";

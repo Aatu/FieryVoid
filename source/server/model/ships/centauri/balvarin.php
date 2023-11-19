@@ -6,7 +6,7 @@ class Balvarin extends BaseShip{
         parent::__construct($id, $userid, $name,  $movement);
         
 	$this->pointCost = 560;
-	$this->faction = "Centauri";
+	$this->faction = "Centauri Republic";
         $this->phpclass = "Balvarin";
         $this->imagePath = "img/ships/balvarin.png";
         $this->shipClass = "Balvarin Carrier";

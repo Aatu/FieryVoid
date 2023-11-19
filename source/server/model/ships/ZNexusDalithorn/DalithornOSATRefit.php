@@ -5,7 +5,7 @@ class DalithornOSATRefit extends OSAT{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 225;
-		$this->faction = 'ZNexus Dalithorn';
+		$this->faction = 'ZNexus Dalithorn Commonwealth';
         $this->phpclass = "DalithornOSATRefit";
         $this->imagePath = "img/ships/Nexus/DalithornOSAT_v2.png";
 			$this->canvasSize = 100; //img has 100px per side
@@ -32,7 +32,7 @@ class DalithornOSATRefit extends OSAT{
         $this->addPrimarySystem(new NexusHeavyCoilgun(2, 12, 5, 300, 60));
         $this->addPrimarySystem(new Reactor(4, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 10, 3, 5));
-		$this->addPrimarySystem(new CargoBay(4, 12));
+		$this->addPrimarySystem(new Magazine(4, 12));
         $this->addPrimarySystem(new Thruster(3, 8, 0, 0, 2));
                 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
@@ -41,9 +41,9 @@ class DalithornOSATRefit extends OSAT{
 		$this->hitChart = array(
 			0=> array(
 				7 => "Structure",
-				9 => "Cargo Bay",
+				9 => "Magazine",
 				10 => "Thruster",
-				13 => "Heavy Coilgun",
+				12 => "Heavy Coilgun",
 				14 => "Minigun",
 				16 => "Autocannon",
 				18 => "Scanner",

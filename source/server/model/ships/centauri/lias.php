@@ -6,7 +6,7 @@ class Lias extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 375;
-        $this->faction = "Centauri";
+        $this->faction = "Centauri Republic";
         $this->phpclass = "Lias";
         $this->imagePath = "img/ships/Lias.png";
         $this->shipClass = "Lias Supply Ship";

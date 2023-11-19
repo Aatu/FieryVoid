@@ -5,7 +5,7 @@ class BrixadiiDestroyerEscortRefit extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 470;
-        $this->faction = "ZNexus Brixadii";
+        $this->faction = "ZNexus Brixadii Clans";
         $this->phpclass = "BrixadiiDestroyerEscortRefit";
         $this->imagePath = "img/ships/Nexus/BrixadiiPlasmaDestroyer.png";
 			$this->canvasSize = 120; //img has 200px per side
@@ -59,9 +59,9 @@ class BrixadiiDestroyerEscortRefit extends HeavyCombatVessel{
         $this->hitChart = array(
             0=> array(
                     7 => "Structure",
-                    10 => "Thruster",
+                    11 => "Thruster",
                     13 => "Scanner",
-                    16 => "Engine",
+                    15 => "Engine",
                     17 => "Hangar",
                     19 => "Reactor",
                     20 => "C&C",
@@ -75,7 +75,7 @@ class BrixadiiDestroyerEscortRefit extends HeavyCombatVessel{
                     20 => "Primary",
             ),
             2=> array(
-                    6 => "Thruster",
+                    5 => "Thruster",
 					7 => "Chaff Launcher",
 					11 => "Scatter Pulsar",
                     18 => "Structure",

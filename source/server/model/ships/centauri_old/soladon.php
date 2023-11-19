@@ -5,7 +5,7 @@ class Soladon extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 475;
-        $this->faction = "Centauri (WotCR)";
+        $this->faction = "Centauri Republic (WotCR)";
         $this->phpclass = "Soladon";
         $this->imagePath = "img/ships/celerian.png";
         $this->shipClass = "Soladon Escort Cruiser";

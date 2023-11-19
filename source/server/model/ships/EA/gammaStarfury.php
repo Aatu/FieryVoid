@@ -6,7 +6,7 @@ class GammaStarfury extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 366;
-        $this->faction = "EA";
+        $this->faction = "Earth Alliance";
         $this->phpclass = "GammaStarfury";
         $this->shipClass = "Starfury: Aurora Gamma Heavy flight";
         $this->imagePath = "img/ships/auroraStarfury.png";

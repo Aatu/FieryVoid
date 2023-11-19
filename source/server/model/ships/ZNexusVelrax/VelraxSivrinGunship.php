@@ -5,7 +5,7 @@ class VelraxSivrinGunship extends HeavyCombatVesselLeftRight{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 365;
-	$this->faction = "ZNexus Velrax";
+	$this->faction = "ZNexus Velrax Republic";
         $this->phpclass = "VelraxSivrinGunship";
         $this->imagePath = "img/ships/Nexus/VelraxSivrin.png";
         $this->shipClass = "Sivrin Gunship";
@@ -29,9 +29,9 @@ class VelraxSivrinGunship extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new Scanner(4, 12, 6, 6));
         $this->addPrimarySystem(new Engine(4, 13, 0, 8, 4));
         $this->addPrimarySystem(new Hangar(1, 2));
-		$this->addPrimarySystem(new MediumPlasma(3, 5, 3, 300, 60));
-        $this->addPrimarySystem(new Thruster(3, 15, 0, 4, 1));
-        $this->addPrimarySystem(new Thruster(4, 20, 0, 8, 2));
+		$this->addFrontSystem(new MediumPlasma(3, 5, 3, 300, 60));
+        $this->addAftSystem(new Thruster(3, 15, 0, 4, 1));
+        $this->addAftSystem(new Thruster(4, 20, 0, 8, 2));
 
         $this->addLeftSystem(new NexusLaserSpear(3, 5, 3, 240, 360));
         $this->addLeftSystem(new NexusLaserSpear(3, 5, 3, 240, 360));
@@ -53,8 +53,8 @@ class VelraxSivrinGunship extends HeavyCombatVesselLeftRight{
             $this->hitChart = array(
         		0=> array(
         				6 => "Structure",
-						7 => "Medium Plasma Cannon",
-        				12 => "Thruster",
+						7 => "1:Medium Plasma Cannon",
+        				12 => "2:Thruster",
 						13 => "Hangar",
         				15 => "Scanner",
         				17 => "Engine",
@@ -62,7 +62,8 @@ class VelraxSivrinGunship extends HeavyCombatVesselLeftRight{
         				20 => "C&C",
         		),
         		3=> array(
-        				5 => "Thruster",
+        				4 => "Thruster",
+						5 => "1: Medium Plasma Cannon",
         				7 => "Twin Ion Gun",
 						10 => "Laser Spear",
 						12 => "Medium Plasma Cannon",
@@ -70,9 +71,10 @@ class VelraxSivrinGunship extends HeavyCombatVesselLeftRight{
         				20 => "Primary",
         		),
         		4=> array(
-        				5 => "Thruster",
+        				4 => "Thruster",
+						5 => "1: Medium Plasma Cannon",
         				7 => "Twin Ion Gun",
-        				8 => "Heavy Laser Spear",
+						10 => "Laser Spear",
 						12 => "Medium Plasma Cannon",
         				18 => "Structure",
         				20 => "Primary",

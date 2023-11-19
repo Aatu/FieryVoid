@@ -5,7 +5,7 @@ class SoskaAM extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 575;
-		$this->faction = "Kor-Lyan";
+		$this->faction = "Kor-Lyan Kingdoms";
 //	$this->faction = "Custom Ships";
         $this->phpclass = "SoskaAM";
         $this->imagePath = "img/ships/korlyan_soska.png";

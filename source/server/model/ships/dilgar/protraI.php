@@ -6,7 +6,7 @@ class ProtraI extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
 
         $this->pointCost = 575;
-        $this->faction = "Dilgar";
+        $this->faction = "Dilgar Imperium";
         $this->phpclass = "ProtraI";
         $this->imagePath = "img/ships/protrai.png";
         $this->shipClass = "Protra-I Improved Scoutship";

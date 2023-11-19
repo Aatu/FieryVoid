@@ -5,7 +5,7 @@ class CraytanKilten extends LCV{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 165;
-        $this->faction = "ZNexus Craytan";
+        $this->faction = "ZNexus Craytan Union";
         $this->phpclass = "CraytanKilten";
         $this->imagePath = "img/ships/Nexus/CraytanHelis.png";
 			$this->canvasSize = 55; //img has 200px per side

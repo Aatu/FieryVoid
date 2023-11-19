@@ -5,7 +5,7 @@ class Starsnake extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 240;
-        $this->faction = "Drazi";
+        $this->faction = "Drazi Freehold";
         $this->phpclass = "Starsnake";
         $this->shipClass = "Star Snake Light Fighters";
 	    $this->imagePath = "img/ships/drazi/DraziStarsnake.png";

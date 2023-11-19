@@ -5,7 +5,7 @@ class KalavarEarlyAM extends OSAT{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 240;
-		$this->faction = "Kor-Lyan";
+		$this->faction = "Kor-Lyan Kingdoms";
         $this->phpclass = "KalavarEarlyAM";
         $this->imagePath = "img/ships/korlyan_kalavar.png";
         $this->shipClass = "Kalavar Orbital Satellite (2220)";

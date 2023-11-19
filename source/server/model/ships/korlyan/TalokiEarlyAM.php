@@ -5,7 +5,7 @@ class TalokiEarlyAM extends StarBaseSixSections{
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 3400;
-		$this->faction = 'Kor-Lyan';
+		$this->faction = "Kor-Lyan Kingdoms";
 		$this->phpclass = "TalokiEarlyAM";
 		$this->shipClass = "Taloki Starbase (2220)";
 			$this->occurence = "common";

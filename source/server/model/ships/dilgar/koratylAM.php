@@ -5,7 +5,7 @@ class KoratylAM extends StarBaseSixSections{
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 2700;
-		$this->faction = "Dilgar";
+		$this->faction = "Dilgar Imperium";
 		$this->phpclass = "KoratylAM";
 		$this->shipClass = "Koratyl Defense Base";
 		$this->fighters = array("heavy"=>36); 

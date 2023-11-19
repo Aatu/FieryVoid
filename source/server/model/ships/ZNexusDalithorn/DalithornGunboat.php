@@ -5,7 +5,7 @@ class DalithornGunboat extends LCV{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 180;
-        $this->faction = "ZNexus Dalithorn";
+        $this->faction = "ZNexus Dalithorn Commonwealth";
         $this->phpclass = "DalithornGunboat";
         $this->imagePath = "img/ships/Nexus/DalithornGunboat.png";
 			$this->canvasSize = 55; //img has 200px per side

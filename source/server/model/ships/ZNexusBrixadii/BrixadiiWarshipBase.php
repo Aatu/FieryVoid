@@ -5,7 +5,7 @@ class BrixadiiWarshipBase extends BaseShipNoAft{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 490;
-		$this->faction = "ZNexus Brixadii";
+		$this->faction = "ZNexus Brixadii Clans";
         $this->phpclass = "BrixadiiWarshipBase";
         $this->imagePath = "img/ships/Nexus/BrixadiiWarship.png";
 			$this->canvasSize = 145; //img has 200px per side
@@ -83,20 +83,20 @@ class BrixadiiWarshipBase extends BaseShipNoAft{
                     20 => "Primary",
             ),
             3=> array(
-                    5 => "Thruster",
-					7 => "Heavy Particle Projector",
+                    4 => "Thruster",
+					6 => "Heavy Particle Projector",
 					8 => "Light Particle Beam",
 					10 => "Particle Bolter",
-					11 => "Chaff Launcher",
+					12 => "Chaff Launcher",
                     18 => "Structure",
                     20 => "Primary",
 			),
             4=> array(
-                    5 => "Thruster",
-					7 => "Heavy Particle Projector",
+                    4 => "Thruster",
+					6 => "Heavy Particle Projector",
 					8 => "Light Particle Beam",
 					10 => "Particle Bolter",
-					11 => "Chaff Launcher",
+					12 => "Chaff Launcher",
                     18 => "Structure",
                     20 => "Primary",
             ),

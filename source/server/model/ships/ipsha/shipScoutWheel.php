@@ -12,7 +12,7 @@ class ShipScoutWheel extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 800;
-	$this->faction = "Ipsha";
+	$this->faction = "Ipsha Baronies";
         $this->phpclass = "ShipScoutWheel";
         //$this->imagePath = "img/ships/IpshaFancy.png"; //silhouette suggests ship is laid out horizontally, I have no fitting graphics
 	$this->imagePath = "img/ships/IpshaBorgWheel.png";

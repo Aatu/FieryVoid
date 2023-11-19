@@ -5,7 +5,7 @@ class DalithornHeavyDreadnought extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 480;
-	$this->faction = "ZNexus Dalithorn";
+	$this->faction = "ZNexus Dalithorn Commonwealth";
         $this->phpclass = "DalithornHeavyDreadnought";
         $this->imagePath = "img/ships/Nexus/DalithornDreadnought.png";
         $this->shipClass = "Heavy Dreadnought";
@@ -35,7 +35,7 @@ class DalithornHeavyDreadnought extends BaseShip{
         $this->addPrimarySystem(new Scanner(3, 16, 5, 6));
         $this->addPrimarySystem(new Engine(3, 18, 0, 8, 3));
 		$this->addPrimarySystem(new Hangar(1, 2));
-		$this->addPrimarySystem(new CargoBay(4, 16));
+		$this->addPrimarySystem(new Magazine(4, 16));
 		
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
@@ -76,7 +76,7 @@ class DalithornHeavyDreadnought extends BaseShip{
 		$this->hitChart = array(
 			0=> array(
 					9 => "Structure",
-					11 => "Cargo Bay",
+					11 => "Magazine",
 					13 => "Scanner",
 					16 => "Engine",
 					17 => "Hangar",
@@ -85,7 +85,7 @@ class DalithornHeavyDreadnought extends BaseShip{
 			),
 			1=> array(
 					5 => "Thruster",
-					6 => "Minigun",
+					7 => "Minigun",
 					10 => "Coilgun",
 					12 => "Autocannon",
 					18 => "Structure",
@@ -95,7 +95,7 @@ class DalithornHeavyDreadnought extends BaseShip{
 					6 => "Thruster",
 					8 => "Catapult",
 					10 => "Autocannon",
-					11 => "Minigun",
+					12 => "Minigun",
 					18 => "Structure",
 					20 => "Primary",
 			),
@@ -103,7 +103,7 @@ class DalithornHeavyDreadnought extends BaseShip{
 					6 => "Thruster",
 					8 => "Medium Chemical Laser",
 					10 => "Gas Gun",
-					11 => "Protector",
+					12 => "Protector",
 					18 => "Structure",
 					20 => "Primary",
 			),
@@ -111,7 +111,7 @@ class DalithornHeavyDreadnought extends BaseShip{
 					6 => "Thruster",
 					8 => "Medium Chemical Laser",
 					10 => "Gas Gun",
-					11 => "Protector",
+					12 => "Protector",
 					18 => "Structure",
 					20 => "Primary",
 			),

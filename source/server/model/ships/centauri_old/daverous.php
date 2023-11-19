@@ -7,7 +7,7 @@ class daverous extends SmallStarBaseFourSections{
 		$this->pointCost = 850;
 		$this->base = true;
 		$this->smallBase = true;
-		$this->faction = "Centauri (WotCR)";
+		$this->faction = "Centauri Republic (WotCR)";
 		$this->phpclass = "daverous";
 		$this->shipClass = "Daverous Civilian Base";
 		$this->imagePath = "img/ships/daverous.png";

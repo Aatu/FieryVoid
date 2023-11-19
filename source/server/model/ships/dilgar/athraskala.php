@@ -6,7 +6,7 @@ class Athraskala extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
 
         $this->pointCost = 600;
-        $this->faction = "Dilgar";
+        $this->faction = "Dilgar Imperium";
         $this->phpclass = "Athraskala";
 	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
         $this->imagePath = "img/ships/athraskala.png";

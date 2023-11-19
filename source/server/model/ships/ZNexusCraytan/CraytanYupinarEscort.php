@@ -5,7 +5,7 @@ class CraytanYupinarEscort extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 425;
-        $this->faction = "ZNexus Craytan";
+        $this->faction = "ZNexus Craytan Union";
         $this->phpclass = "CraytanYupinarEscort";
         $this->imagePath = "img/ships/Nexus/CraytanTopren.png";
 		$this->canvasSize = 120; //img has 200px per side
@@ -70,7 +70,7 @@ class CraytanYupinarEscort extends HeavyCombatVessel{
                     4 => "Thruster",
                     7 => "Advanced Close-In Defense System",
                     9 => "Medium Enhanced Plasma",
-					10 => "Light Enhanced Plasma",
+					11 => "Light Enhanced Plasma",
 					18 => "Structure",
                     20 => "Primary",
             ),

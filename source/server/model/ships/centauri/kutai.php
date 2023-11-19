@@ -5,7 +5,7 @@ class Kutai extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $movement);
         
         $this->pointCost = 535;
-        $this->faction = "Centauri";
+        $this->faction = "Centauri Republic";
         $this->phpclass = "Kutai";
         $this->imagePath = "img/ships/kutai.png";
         $this->shipClass = "Kutai Gunship";

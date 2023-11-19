@@ -17,7 +17,7 @@ class wlcChlonasOnTainCVH extends BaseShipNoFwd{
         $this->rollcost = 3;
         $this->pivotcost = 3;
 	    
-	    $this->faction = "Ch'Lonas";
+	    $this->faction = "Ch'Lonas Cooperative";
         $this->variantOf = "On'Thari Attack Carrier";
 	    $this->occurence = "common";
         $this->limited = 33;

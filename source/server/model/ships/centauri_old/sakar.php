@@ -5,7 +5,7 @@ class Sakar extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 485;
-        $this->faction = "Centauri (WotCR)";
+        $this->faction = "Centauri Republic (WotCR)";
         $this->phpclass = "Sakar";
         $this->imagePath = "img/ships/sakar.png"; 
         $this->shipClass = "Sakar Carrier";

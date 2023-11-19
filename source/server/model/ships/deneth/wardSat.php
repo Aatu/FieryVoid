@@ -5,7 +5,7 @@ class wardsat extends OSAT{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 210;
-	$this->faction = "Deneth";
+	$this->faction = "Deneth Tribes";
         $this->phpclass = "wardsat";
         $this->imagePath = "img/ships/DenethWardOSAT.png";
         $this->canvasSize = 80;

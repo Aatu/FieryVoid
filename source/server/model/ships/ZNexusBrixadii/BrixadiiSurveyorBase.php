@@ -5,7 +5,7 @@ class BrixadiiSurveyorBase extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 400;
-        $this->faction = "ZNexus Brixadii";
+        $this->faction = "ZNexus Brixadii Clans";
         $this->phpclass = "BrixadiiSurveyorBase";
         $this->imagePath = "img/ships/Nexus/BrixadiiSurveyor.png";
 			$this->canvasSize = 120; //img has 200px per side
@@ -53,9 +53,9 @@ class BrixadiiSurveyorBase extends HeavyCombatVessel{
         $this->hitChart = array(
             0=> array(
                     7 => "Structure",
-                    10 => "Thruster",
+                    11 => "Thruster",
                     13 => "ELINT Scanner",
-                    16 => "Engine",
+                    15 => "Engine",
                     17 => "Hangar",
                     19 => "Reactor",
                     20 => "C&C",

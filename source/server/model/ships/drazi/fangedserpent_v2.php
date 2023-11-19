@@ -5,7 +5,7 @@ class FangedSerpent_v2 extends SuperHeavyFighter{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 145*6;
-        $this->faction = "Drazi";
+        $this->faction = "Drazi Freehold";
         $this->phpclass = "FangedSerpent_v2";
         $this->shipClass = "Fanged Serpent Command Fighters";
 	    $this->imagePath = "img/ships/drazi/DraziSkyserpent.png";

@@ -5,7 +5,7 @@ class CraytanAprinan extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 230;
-        $this->faction = "ZNexus Craytan";
+        $this->faction = "ZNexus Craytan Union";
         $this->phpclass = "CraytanAprinan";
         $this->imagePath = "img/ships/Nexus/CraytanAprinan.png";
         $this->shipClass = "Aprinan Patroller";
@@ -30,7 +30,7 @@ class CraytanAprinan extends MediumShip{
         $this->addPrimarySystem(new Scanner(2, 9, 3, 4));
         $this->addPrimarySystem(new Thruster(2, 8, 0, 2, 3));
         $this->addPrimarySystem(new Thruster(2, 8, 0, 2, 4));        
-        $this->addPrimarySystem(new CargoBay(3, 8));
+        $this->addPrimarySystem(new Magazine(3, 8));
         
 		$this->addFrontSystem(new NexusMedSentryGun(2, 6, 2, 300, 60));
 		$this->addFrontSystem(new NexusLightSentryGun(2, 5, 1, 240, 60));
@@ -52,7 +52,7 @@ class CraytanAprinan extends MediumShip{
 		
 		0=> array(
 			9 => "Thruster",
-			12 => "Cargo Bay",
+			12 => "Magazine",
 			16 => "Scanner",
 			19 => "Reactor",
 			20 => "C&C",

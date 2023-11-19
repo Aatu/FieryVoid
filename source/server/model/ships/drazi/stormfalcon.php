@@ -6,7 +6,7 @@ class Stormfalcon extends BaseShipNoAft{
         parent::__construct($id, $userid, $name,  $slot);
 
         $this->pointCost = 725;
-        $this->faction = "Drazi";
+        $this->faction = "Drazi Freehold";
         $this->phpclass = "Stormfalcon";
         $this->imagePath = "img/ships/drazi/DraziStormfalcon.png";
         $this->shipClass = "Stormfalcon Heavy Cruiser";

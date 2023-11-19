@@ -11,7 +11,7 @@ class ShipBattlehex extends HeavyCombatVesselLeftRight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 500;
-        $this->faction = "Ipsha";
+        $this->faction = "Ipsha Baronies";
         $this->phpclass = "ShipBattlehex";
         //$this->imagePath = "img/ships/IpshaHex.png";	    
         $this->imagePath = "img/ships/IpshaBorgHex.png";

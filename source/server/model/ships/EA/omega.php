@@ -5,7 +5,7 @@ class Omega  extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 925;
-		$this->faction = "EA";
+		$this->faction = "Earth Alliance";
         $this->phpclass = "Omega";
         $this->imagePath = "img/ships/omega.png";
         $this->shipClass = "Omega Destroyer (Alpha)";

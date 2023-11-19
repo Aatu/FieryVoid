@@ -5,7 +5,7 @@ class Orgolest extends OSAT{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 100;
-		$this->faction = "Dilgar";
+		$this->faction = "Dilgar Imperium";
         $this->phpclass = "Orgolest";
         $this->imagePath = "img/ships/orgolest.png";
         $this->shipClass = "Orgolest Satellite";

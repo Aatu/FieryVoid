@@ -11,7 +11,7 @@ class ShipWarsphere extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 1000;
-	$this->faction = "Ipsha";
+	$this->faction = "Ipsha Baronies";
         $this->phpclass = "ShipWarsphere";
         //$this->imagePath = "img/ships/IpshaWarsphere.png";    
         $this->imagePath = "img/ships/IpshaBorgSphere.png";

@@ -5,7 +5,7 @@ class Calaq extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 360;
-        $this->faction = "Cascor";
+        $this->faction = "Cascor Commonwealth";
         $this->phpclass = "Calaq";
         $this->shipClass = "Calaq Assault Fighters";
         $this->imagePath = "img/ships/CascorCalaq.png";

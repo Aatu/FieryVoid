@@ -5,7 +5,7 @@ class gaimRalla extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 425;
-		$this->faction = "Gaim";
+		$this->faction = "Gaim Intelligence";
         $this->phpclass = "gaimRalla";
         $this->imagePath = "img/ships/GaimRoka.png";
         $this->shipClass = "Ralla Escort Carrier";

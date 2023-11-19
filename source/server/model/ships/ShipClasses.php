@@ -898,13 +898,20 @@ class BaseShip {
         return null;
     }
 
-	//by display name
-    public function getSystemsByNameLoc($name, $location, $acceptDestroyed = false){ /*get list of required systems on a particular location*/
+	//get systems by display name
+	//15.09.2023 - bearing added, needed to get system by tag
+    public function getSystemsByNameLoc($name, $location, $bearing, $acceptDestroyed = false){ /*get list of required systems on a particular location*/
         /*name may indicate different location?...*/
         /*'destroyed' means either destroyed as of PREVIOUS turn, OR reduced to health 0*/
         $location_different_array = explode (':' , $name);
         if(sizeof($location_different_array)==2){ //indicated different section: exactly 2 items - first location, then name
-            return $this->getSystemsByNameLoc($location_different_array[1], $location_different_array[0], $acceptDestroyed);
+			$actualLocation = $location_different_array[0];
+			$actualSystem = $location_different_array[1];
+			if ($actualLocation == 'TAG'){ //search by tag and direction of impact, disregarding sections
+				return $this->getSystemsByTag($actualSystem, $bearing, $acceptDestroyed);
+			}else{ //standard search, just with redirected section
+				return $this->getSystemsByNameLoc($actualSystem, $actualLocation, $bearing, $acceptDestroyed);
+			}
         }else{
             $returnTab = array();
             if($name=='Structure'){ //Structure is special, as it might actually belong to a different section! (on MCVs)
@@ -927,6 +934,44 @@ class BaseShip {
         }
         return array(); //should never reach here
     } //end of function getSystemsByNameLoc
+
+
+
+	//get systems by tag - anywhere on a ship, BUT only ones with arc covering indicated direction of impact
+	//if there are differences - prioritize systems with lowest repair priority!
+    public function getSystemsByTag($tag, $bearing, $acceptDestroyed = false){ /*get list of required systems on a particular location*/
+        /*'destroyed' means either destroyed as of PREVIOUS turn, OR reduced to health 0*/
+		$minUndestroyedPriority = 99; //lowest priority of undestroyed system found
+		$undestroyedExists = false; //does an undestroyed system actually exist?
+		$name = strtoupper($tag);
+		
+		$returnTab = array();
+		
+		foreach ($this->systems as $currSystem){
+			if(
+				$currSystem->repairPriority <= $minUndestroyedPriority //priority fits
+				and $currSystem->checkTag($tag) //tag fits
+				and mathlib::isInArc($bearing, $currSystem->startArc, $currSystem->endArc) //arc fits
+			){
+				//tag fits and arc fits - is it destroyed?
+				$isDestroyed = $currSystem->isDestroyed();
+				//...but treat health 0 as destroyed here, too!
+				if(!$isDestroyed){
+					$remHealth = $currSystem->getRemainingHealth();
+					if($remHealth == 0) $isDestroyed = true;
+				}
+				if( (!$isDestroyed) || ($acceptDestroyed) ){ //either not destroyed, or destroyed systems are accepted
+					if( (!$isDestroyed) && ($currSystem->repairPriority < $minUndestroyedPriority) ){ //is not destroyed and of lower repair priority than current best fit - clear earlier findings, new one should be prioritized!
+						$returnTab = array();
+						$minUndestroyedPriority = $currSystem->repairPriority;
+					}
+					$returnTab[] = $currSystem;
+				}				
+			}
+		}
+		
+		return $returnTab;			
+    } //end of function getSystemsByTag
 
 
     public function getSystemsByName($name, $acceptDestroyed = false){ /*get list of required systems anywhere on a ship*/
@@ -1621,6 +1666,17 @@ class BaseShip {
         if ($location === null) {
             $location = $this->getHitSectionChoice($shooter, $fire, $weapon);
         }
+		
+		//15.09.2023 - moved bearing calculation here, as it will be needed earlier than previously
+		$bearing = 0;
+		//this will ignore non-standard direction of impact - like with Flash collateral damage. This information is simply not available here, and IMO not important enough to rewrite entire chain if calls to pass
+		if($weapon->ballistic){
+			$movement = $shooter->getLastTurnMovement($fire->turn);
+            $pos = mathlib::hexCoToPixel($movement->position);
+			$bearing = $this->getBearingOnPos($pos);
+		}else{
+			$bearing = $this->getBearingOnUnit($shooter);	
+		}		
 
         $hitChart = $this->hitChart[$location];
         $rngTotal = 20; //standard hit chart has 20 possible locations
@@ -1634,7 +1690,7 @@ class BaseShip {
                 if (isset($this->hitChart[$location][$roll])){
                     $name = $this->hitChart[$location][$roll];
                     if($name != 'Primary'){ //no PRIMARY penetrating hits for Flash!
-                        $systemsArray = $this->getSystemsByNameLoc($name, $location, false);//undestroyed ystems of this name
+                        $systemsArray = $this->getSystemsByNameLoc($name, $location, $bearing, false);//undestroyed ystems of this name
                         if(sizeof($systemsArray)>0){ //there actually are such systems!
                             $rngTotal+= $rngCurr;
                             $hitChart[$rngTotal] = $name;
@@ -1656,7 +1712,7 @@ class BaseShip {
                 if (isset($this->hitChart[$location][$roll])){
                     $name = $this->hitChart[$location][$roll];
                     if($name != 'Primary'){ //no PRIMARY penetrating hits
-                        $systemsArray = $this->getSystemsByNameLoc($name, $location, true);//accept destroyed systems too
+                        $systemsArray = $this->getSystemsByNameLoc($name, $location, $bearing, true);//accept destroyed systems too
                         if(sizeof($systemsArray)>0){ //there actually are such systems!
                             $rngTotal+= $rngCurr;
                             $hitChart[$rngTotal] = $name;
@@ -1695,7 +1751,7 @@ class BaseShip {
         if($name == 'Primary'){ //redirect to PRIMARY!
             return $this->getHitSystemByTable($shooter, $fire, $weapon, 0);
         }
-        $systems = $this->getSystemsByNameLoc($name, $location, false); //do NOT accept destroyed systems!
+        $systems = $this->getSystemsByNameLoc($name, $location, $bearing, false); //do NOT accept destroyed systems!
         if(sizeof($systems)==0){ //if empty, damage is done to Structure
             $struct = $this->getStructureSystem($location);
             return $struct;
@@ -1703,6 +1759,8 @@ class BaseShip {
 		
 		//prioritize in-arc systems - 13.09.2021
 		$systemsInArc = array();
+		
+		/*15.09.2023 - moved bearing calculatioon earlier, it will be needed to pass it!
 		$bearing = 0;
 		//this will ignore on-standard direction of impact - like with Flash collateral damage. This information is simply not available here, and IMO not important enough to rewrite entire chain if calls to pass
 		if($weapon->ballistic){
@@ -1712,6 +1770,7 @@ class BaseShip {
 		}else{
 			$bearing = $this->getBearingOnUnit($shooter);	
 		}		
+		*/
 		foreach($systems as $systemInArc){
 			if(mathlib::isInArc($bearing, $systemInArc->startArc, $systemInArc->endArc)){ //actually this system is in relevant arc!
 				$systemsInArc[] = $systemInArc;
@@ -1744,7 +1803,17 @@ class BaseShip {
         if ($location === null) {
             $location = $this->getHitSectionChoice($shooter, $fire, $weapon);
         }
-
+		
+		//15.09.2023 - moved bearing calculation here, as it will be needed
+		$bearing = 0;
+		//this will ignore non-standard direction of impact - like with Flash collateral damage. This information is simply not available here, and IMO not important enough to rewrite entire chain if calls to pass
+		if($weapon->ballistic){
+			$movement = $shooter->getLastTurnMovement($fire->turn);
+            $pos = mathlib::hexCoToPixel($movement->position);
+			$bearing = $this->getBearingOnPos($pos);
+		}else{
+			$bearing = $this->getBearingOnUnit($shooter);	
+		}	
           
 		$hitChart = array(); //$hitChart will contain system names, as usual!
 		//use only non-destroyed systems on section hit
@@ -1820,7 +1889,7 @@ class BaseShip {
 		if($name == 'Primary'){ //redirect to PRIMARY!
 			return $this->getHitSystemByDice($shooter, $fire, $weapon, 0);
 		}
-		$systems = $this->getSystemsByNameLoc($name, $location, false); //do NOT accept destroyed systems!
+		$systems = $this->getSystemsByNameLoc($name, $location, $bearing, false); //do NOT accept destroyed systems!
 		if(sizeof($systems)==0){ //if empty, just return Structure - whether destroyed or not
 			$struct = $this->getStructureSystem($location);
 			return $struct;

@@ -5,7 +5,7 @@ class Tiqincc extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 270;
-        $this->faction = "Cascor";
+        $this->faction = "Cascor Commonwealth";
         $this->phpclass = "Tiqincc";
         $this->shipClass = "Tiqincc Medium Fighters";
         $this->imagePath = "img/ships/CascorTiqincc.png";

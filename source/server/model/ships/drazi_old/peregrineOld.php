@@ -5,7 +5,7 @@ class PeregrineOld extends BaseShipNoAft{
         parent::__construct($id, $userid, $name,  $slot);
         
     	$this->pointCost = 475;
-        $this->faction = "Drazi (WotCR)";
+        $this->faction = "Drazi Freehold (WotCR)";
         $this->phpclass = "peregrineOld";
         $this->imagePath = "img/ships/vulture.png";
         $this->shipClass = "Peregrine Jump Ship (1938)";

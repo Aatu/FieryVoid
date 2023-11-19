@@ -5,7 +5,7 @@ class VelraxHasertAttack extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 35*6;
-        $this->faction = "ZNexus Velrax";
+        $this->faction = "ZNexus Velrax Republic";
         $this->phpclass = "VelraxHasertAttack";
         $this->shipClass = "Hasert Attack flight";
 	$this->variantOf = "Tassriv-A Interceptor flight";

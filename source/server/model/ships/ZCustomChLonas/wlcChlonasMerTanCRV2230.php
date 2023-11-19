@@ -11,7 +11,7 @@ class wlcChlonasMerTanCRV2230 extends MediumShip{
         $this->agile = true;
         $this->canvasSize = 200;
 	    
-		$this->faction = "Ch'Lonas";
+		$this->faction = "Ch'Lonas Cooperative";
         $this->variantOf = "Mer'Tan Corvette";
 		$this->isd = 2230;
 		$this->unofficial = true;

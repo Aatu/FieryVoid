@@ -5,7 +5,7 @@ class Ortana extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 600;
-		$this->faction = "Corillani";
+		$this->faction = "Corillani Theocracy";
         $this->phpclass = "Ortana";
         $this->imagePath = "img/ships/CorillaniIntona.png";
         $this->shipClass = "Ortana Battle Scout";
