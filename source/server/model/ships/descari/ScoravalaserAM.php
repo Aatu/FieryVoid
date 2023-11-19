@@ -5,7 +5,7 @@ class ScoravalaserAM extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 525;
-		$this->faction = "Descari";
+		$this->faction = "Descari Committees";
         $this->phpclass = "ScoravalaserAM";
         $this->imagePath = "img/ships/DescariScorava.png";
         $this->shipClass = "Scorava Laser Cruiser";

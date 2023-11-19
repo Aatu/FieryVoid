@@ -7,7 +7,7 @@ class HephaestusAM extends SmallStarBaseFourSections{
 		$this->pointCost = 1000;
 		$this->base = true;
 		$this->smallBase = true;
-		$this->faction = "EA (defenses)";
+		$this->faction = "Earth Alliance (defenses)";
 		$this->phpclass = "HephaestusAM";
 		$this->shipClass = "Hephaestus Small Base (Zeta)";
 		$this->imagePath = "img/ships/orion.png";

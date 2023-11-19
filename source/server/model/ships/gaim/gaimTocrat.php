@@ -5,7 +5,7 @@ class gaimTocrat extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 425;
-		$this->faction = 'Gaim';
+		$this->faction = "Gaim Intelligence";
 		$this->phpclass = "gaimTocrat";
 		$this->imagePath = "img/ships/GaimTocrat.png";
 		$this->shipClass = "Tocrat Supply Barge";

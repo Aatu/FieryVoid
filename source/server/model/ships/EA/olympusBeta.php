@@ -5,7 +5,7 @@ class OlympusBeta extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 625;
-        $this->faction = "EA";
+        $this->faction = "Earth Alliance";
         $this->phpclass = "OlympusBeta";
         $this->imagePath = "img/ships/olympus.png";
         $this->shipClass = "Olympus Gunship (Beta)";

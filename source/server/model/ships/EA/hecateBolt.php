@@ -5,7 +5,7 @@ class HecateBolt extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 650;
-	$this->faction = "EA";
+	$this->faction = "Earth Alliance";
         $this->phpclass = "HecateBolt";
         $this->imagePath = "img/ships/hyperion.png";
         $this->shipClass = "Hecate Bolt Cruiser (Beta)";

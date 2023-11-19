@@ -5,7 +5,7 @@ class ArtemisGamma extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 650;
-        $this->faction = "EA";
+        $this->faction = "Earth Alliance";
         $this->phpclass = "ArtemisGamma";
         $this->imagePath = "img/ships/artemis.png";
         $this->shipClass = "Artemis Gunship (Gamma)";

@@ -5,7 +5,7 @@ class gaimShamor extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 750;
-		$this->faction = 'Gaim';
+		$this->faction = "Gaim Intelligence";
 		$this->phpclass = "gaimShamor";
 		$this->imagePath = "img/ships/GaimShamor.png";
 		$this->shipClass = "Shamor Battle Scout";

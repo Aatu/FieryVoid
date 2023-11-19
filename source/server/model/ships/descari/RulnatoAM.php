@@ -5,7 +5,7 @@ class RulnatoAM extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 485;
-        $this->faction = "Descari";
+        $this->faction = "Descari Committees";
         $this->phpclass = "RulnatoAM";
         $this->imagePath = "img/ships/DescariRulnata.png";
         $this->shipClass = "Rulnato Jump Scout";

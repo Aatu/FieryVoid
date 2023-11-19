@@ -5,7 +5,7 @@ class Olgata extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
 	    $this->pointCost = 30*6;
-	    $this->faction = "Dilgar";
+	    $this->faction = "Dilgar Imperium";
         $this->phpclass = "Olgata";
         $this->shipClass = "Olgata Assault Shuttles";
 	    $this->imagePath = "img/ships/Torushka.png";

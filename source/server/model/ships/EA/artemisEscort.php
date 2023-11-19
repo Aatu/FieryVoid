@@ -5,7 +5,7 @@ class ArtemisEscort extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 650;
-        $this->faction = "EA";
+        $this->faction = "Earth Alliance";
         $this->phpclass = "ArtemisEscort";
         $this->imagePath = "img/ships/artemis.png";
         $this->shipClass = "Artemis Escort Frigate (Zeta)";

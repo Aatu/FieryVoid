@@ -5,7 +5,7 @@ class AriesStarfury extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 234;
-        $this->faction = "EA (early)";
+        $this->faction = "Earth Alliance (early)";
         $this->phpclass = "AriesStarfury";
         $this->shipClass = "Starfury: Aries Heavy flight";
         $this->imagePath = "img/ships/aries.png";

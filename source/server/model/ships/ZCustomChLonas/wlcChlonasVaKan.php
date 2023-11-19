@@ -11,7 +11,7 @@ class wlcChlonasVaKan extends MediumShipLeftRight{
         $this->shipClass = "Va'Kan Battle Frigate";
         $this->agile = true;
 	    $this->limited = 33;
-		$this->faction = "Ch'Lonas";
+		$this->faction = "Ch'Lonas Cooperative";
 		$this->isd = 2258;
 		$this->unofficial = true;
         

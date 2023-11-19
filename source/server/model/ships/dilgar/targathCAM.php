@@ -6,7 +6,7 @@ class TargathCAM extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
 
         $this->pointCost = 700;
-        $this->faction = "Dilgar";
+        $this->faction = "Dilgar Imperium";
         $this->phpclass = "TargathCAM";
         $this->imagePath = "img/ships/targath.png";
         $this->shipClass = "Targath-C Attack Cruiser";

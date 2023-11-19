@@ -5,7 +5,7 @@ class Protector extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 520;
-        $this->faction = "Deneth";
+        $this->faction = "Deneth Tribes";
         $this->phpclass = "protector";
         $this->imagePath = "img/ships/DenethProtector.png"; 
 		$this->canvasSize = 100;

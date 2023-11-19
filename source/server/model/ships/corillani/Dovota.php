@@ -7,7 +7,7 @@ class Dovota extends MediumShip
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 385;
-		$this->faction = "Corillani";
+		$this->faction = "Corillani Theocracy";
 		$this->phpclass = "Dovota";
 		$this->imagePath = "img/ships/CorillaniNollita.png";
 		$this->shipClass = "Dovota Minesweeper";

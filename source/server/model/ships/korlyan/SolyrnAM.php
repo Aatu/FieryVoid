@@ -6,7 +6,7 @@ class SolyrnAM extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 650;
-        $this->faction = "Kor-Lyan";
+        $this->faction = "Kor-Lyan Kingdoms";
         $this->phpclass = "SolyrnAM";
         $this->imagePath = "img/ships/korlyan_solyrn2.png";
         $this->shipClass = "Solyrn Missile Destroyer";

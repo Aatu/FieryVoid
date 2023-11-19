@@ -5,7 +5,7 @@ class Delphi extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
 
 	$this->pointCost = 825;
-	$this->faction = "EA";
+	$this->faction = "Earth Alliance";
         $this->phpclass = "Delphi";
         $this->imagePath = "img/ships/delphi.png";
         $this->shipClass = "Delphi Advanced Scout";

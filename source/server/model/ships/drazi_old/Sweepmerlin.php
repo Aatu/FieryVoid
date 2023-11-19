@@ -5,7 +5,7 @@ class Sweepmerlin extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
     	$this->pointCost = 350;
-        $this->faction = "Drazi (WotCR)";
+        $this->faction = "Drazi Freehold (WotCR)";
         $this->phpclass = "Sweepmerlin";
         $this->imagePath = "img/ships/merlin.png";
         $this->shipClass = "Sweepmerlin Minesweeper";

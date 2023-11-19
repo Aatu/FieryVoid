@@ -5,7 +5,7 @@ class VaklarAM extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 450;
-        $this->faction = "Kor-Lyan";
+        $this->faction = "Kor-Lyan Kingdoms";
         $this->phpclass = "VaklarAM";
         $this->imagePath = "img/ships/korlyan_vaklar2.png";
         $this->shipClass = "Vaklar Logistics Frigate";

@@ -9,7 +9,7 @@ class wlcChlonasVesTek extends FighterFlight{
         $this->shipClass = "Ves'Tek Assault flight";
         $this->imagePath = "img/ships/ChlonasVesTek.png";
         
-        $this->faction = "Ch'Lonas";
+        $this->faction = "Ch'Lonas Cooperative";
 	    $this->unofficial = true;
 	    $this->isd = 2247;
 

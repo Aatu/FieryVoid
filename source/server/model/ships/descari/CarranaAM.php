@@ -5,7 +5,7 @@ class CarranaAM extends SmallStarBaseThreeSections{
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 750;
-		$this->faction = "Descari";
+		$this->faction = "Descari Committees";
 		$this->phpclass = "CarranaAM";
 		$this->shipClass = "Carrana Base";
 		$this->fighters = array("heavy"=>18); 

@@ -5,7 +5,7 @@ class NovaStarfury extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 312;
-        $this->faction = "EA";
+        $this->faction = "Earth Alliance";
         $this->phpclass = "NovaStarfury";
         $this->shipClass = "Starfury: Nova Heavy flight";
         $this->imagePath = "img/ships/auroraStarfury.png";

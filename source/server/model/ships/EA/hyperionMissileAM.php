@@ -5,7 +5,7 @@ class HyperionMissileAM extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 650;
-        $this->faction = "EA";
+        $this->faction = "Earth Alliance";
         $this->phpclass = "HyperionMissileAM";
         $this->imagePath = "img/ships/hyperion.png";
         $this->shipClass = "Hyperion Missile Cruiser (Beta)";

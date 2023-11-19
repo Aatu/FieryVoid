@@ -5,7 +5,7 @@ class DenComCarrier extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 550;
-        $this->faction = "Deneth";
+        $this->faction = "Deneth Tribes";
         $this->phpclass = "DenComCarrier";
         $this->imagePath = "img/ships/DenethDeliverer.png";
 	$this->canvasSize = 200;

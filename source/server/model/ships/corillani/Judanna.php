@@ -5,7 +5,7 @@ class Judanna extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 490;
-        $this->faction = "Corillani";
+        $this->faction = "Corillani Theocracy";
         $this->phpclass = "Judanna";
         $this->imagePath = "img/ships/CorillaniJudanna.png";
         $this->shipClass = "Judanna Escort Frigate";

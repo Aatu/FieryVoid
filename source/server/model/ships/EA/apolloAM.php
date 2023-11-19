@@ -5,7 +5,7 @@ class ApolloAM extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
 
         $this->pointCost = 900;
-        $this->faction = "EA";
+        $this->faction = "Earth Alliance";
         $this->phpclass = "ApolloAM";
         $this->imagePath = "img/ships/apollo.png";
         $this->shipClass = "Apollo Bombardment Cruiser";

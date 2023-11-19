@@ -5,7 +5,7 @@ class Rulpa extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 375;
-        $this->faction = "Descari";
+        $this->faction = "Descari Committees";
         $this->phpclass = "Rulpa";
         $this->imagePath = "img/ships/DescariRulpa.png";
         $this->shipClass = "Rulpa Destroyer";

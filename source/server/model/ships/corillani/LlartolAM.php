@@ -5,7 +5,7 @@ class LlartolAM extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 750;
-		$this->faction = "Corillani";
+		$this->faction = "Corillani Theocracy";
         $this->phpclass = "LlartolAM";
         $this->imagePath = "img/ships/CorillaniMollanta.png";
         $this->shipClass = "Llartol Assault Cruiser";

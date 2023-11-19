@@ -6,7 +6,7 @@ class EskravatAM extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
 
         $this->pointCost = 460;
-        $this->faction = "Dilgar";
+        $this->faction = "Dilgar Imperium";
         $this->phpclass = "EskravatAM";
         $this->imagePath = "img/ships/athraskala.png";
         $this->shipClass = "Eskravat Refueling Barge";

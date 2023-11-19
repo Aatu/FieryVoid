@@ -5,7 +5,7 @@ class gaimKruppas extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $movement);
         
         $this->pointCost = 500;
-        $this->faction = "Gaim";
+        $this->faction = "Gaim Intelligence";
         $this->phpclass = "gaimKruppas";
         $this->imagePath = "img/ships/GaimKruppas.png";
         $this->shipClass = "Kruppas Gunship";

@@ -5,7 +5,7 @@ class Lekra extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 400;
-		$this->faction = "Kor-Lyan";
+		$this->faction = "Kor-Lyan Kingdoms";
         $this->phpclass = "Lekra";
         $this->imagePath = "img/ships/korlyan_cokra2.png";
         $this->shipClass = "Lekra Torpedo Frigate";

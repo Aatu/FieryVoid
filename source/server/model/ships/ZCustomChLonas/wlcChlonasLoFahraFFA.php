@@ -11,7 +11,7 @@ class wlcChlonasLoFahraFFA extends MediumShipLeftRight{
         $this->shipClass = "Lo'Fahra Attack Frigate";
         $this->agile = true;
 	    
-	$this->faction = "Ch'Lonas";
+	$this->faction = "Ch'Lonas Cooperative";
        // $this->variantOf = "Es'Kashi Destroyer";
 	$this->isd = 2230;
 	$this->unofficial = true;

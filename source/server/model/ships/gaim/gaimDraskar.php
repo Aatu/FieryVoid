@@ -5,7 +5,7 @@ class gaimDraskar extends HeavyCombatVesselLeftRight{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 450;
-		$this->faction = "Gaim";
+		$this->faction = "Gaim Intelligence";
         $this->phpclass = "gaimDraskar";
         $this->imagePath = "img/ships/GaimDraskar.png";
         $this->shipClass = "Draskar Cruiser";

@@ -12,7 +12,7 @@ class ShipTetraEscort extends MediumShipLeftRight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 400;
-        $this->faction = "Ipsha";
+        $this->faction = "Ipsha Baronies";
         $this->phpclass = "ShipTetraEscort";
         //$this->imagePath = "img/ships/IpshaTetra.png";    
         $this->imagePath = "img/ships/IpshaBorgTetra.png";

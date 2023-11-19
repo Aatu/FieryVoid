@@ -5,7 +5,7 @@ class FtrUrchin extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 65*6;
-        $this->faction = "Ipsha";
+        $this->faction = "Ipsha Baronies";
         $this->phpclass = "FtrUrchin";
         $this->shipClass = "Urchin Heavy flight";
         //$this->imagePath = "img/ships/IpshaUrchin.png";

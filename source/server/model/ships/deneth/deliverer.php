@@ -5,7 +5,7 @@ class Deliverer extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 480;
-        $this->faction = "Deneth";
+        $this->faction = "Deneth Tribes";
         $this->phpclass = "deliverer";
         $this->imagePath = "img/ships/DenethDeliverer.png";
 	$this->canvasSize = 200;

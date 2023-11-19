@@ -5,7 +5,7 @@ class KoshaEarlyAM extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 500;
-		$this->faction = "Kor-Lyan";
+		$this->faction = "Kor-Lyan Kingdoms";
         $this->phpclass = "KoshaEarlyAM";
         $this->imagePath = "img/ships/korlyan_koshaEarly.png";
         $this->shipClass = "Kosha Light Cruiser (early)";

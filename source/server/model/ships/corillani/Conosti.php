@@ -7,7 +7,7 @@ class Conosti extends MediumShip
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 300;
-		$this->faction = "Corillani";
+		$this->faction = "Corillani Theocracy";
 		$this->phpclass = "Conosti";
 		$this->imagePath = "img/ships/CorillaniConosti.png";
 		$this->shipClass = "Conosti Patrol Frigate";

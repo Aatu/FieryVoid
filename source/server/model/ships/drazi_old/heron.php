@@ -5,7 +5,7 @@ class Heron extends HeavyCombatVesselLeftRight{
         parent::__construct($id, $userid, $name,  $slot);
         
     	$this->pointCost = 355;
-    	$this->faction = "Drazi (WotCR)";
+    	$this->faction = "Drazi Freehold (WotCR)";
         $this->phpclass = "Heron";
         $this->imagePath = "img/ships/shrike.png";
         $this->shipClass = "Heron Minesweeper";

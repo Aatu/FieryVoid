@@ -7,7 +7,7 @@ class Hemsar extends OSAT
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 125;
-		$this->faction = "Descari";
+		$this->faction = "Descari Committees";
 		$this->phpclass = "Hemsar";
 		$this->shipClass = "Hemsar Orbital Satellite";
 		$this->imagePath = "img/ships/DescariHemsar.png";
