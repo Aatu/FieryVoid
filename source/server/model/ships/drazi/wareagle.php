@@ -5,7 +5,7 @@ class Wareagle extends MediumShipLeftRight{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 400;
-		$this->faction = "Drazi";
+		$this->faction = "Drazi Freehold";
         $this->phpclass = "Wareagle";
         $this->imagePath = "img/ships/drazi/DraziStareagle.png";
         $this->shipClass = "Wareagle Frigate Leader";

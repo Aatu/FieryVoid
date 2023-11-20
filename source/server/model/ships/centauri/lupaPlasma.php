@@ -5,7 +5,7 @@ class lupaPlasma extends LCV{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 170;
-    $this->faction = "Centauri";
+    $this->faction = "Centauri Republic";
 	$this->phpclass = "lupaPlasma";
 	$this->shipClass = "Lupa Attack Boat (Plasma)";
         $this->variantOf = "Lupa Attack Boat (Escort)";

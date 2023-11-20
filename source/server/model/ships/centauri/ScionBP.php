@@ -5,7 +5,7 @@ class scionbp extends SuperHeavyFighter{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 40;
-        $this->faction = "Centauri";
+        $this->faction = "Centauri Republic";
         $this->phpclass = "scionbp";
         $this->shipClass = "Scion Breaching Pod";
         $this->imagePath = "img/ships/phalan.png";

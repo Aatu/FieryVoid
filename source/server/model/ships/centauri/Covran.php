@@ -5,7 +5,7 @@ class Covran extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 730;
-	$this->faction = "Centauri";
+	$this->faction = "Centauri Republic";
         $this->phpclass = "Covran";
         $this->imagePath = "img/ships/covran.png";
         $this->shipClass = "Covran Scout";

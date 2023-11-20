@@ -7,7 +7,7 @@ class Dovota extends MediumShip
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 385;
-		$this->faction = "Corillani";
+		$this->faction = "Corillani Theocracy";
 		$this->phpclass = "Dovota";
 		$this->imagePath = "img/ships/CorillaniNollita.png";
 		$this->shipClass = "Dovota Minesweeper";
@@ -19,7 +19,7 @@ class Dovota extends MediumShip
         $this->agile = true;	
         
         $this->minesweeperbonus = 2;        					    
-		
+ 		$this->unofficial = 'S'; //design released after AoG demise		
 
 		$this->forwardDefense = 12;
 		$this->sideDefense = 13;

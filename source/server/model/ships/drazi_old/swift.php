@@ -5,7 +5,7 @@ class Swift extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
     	$this->pointCost = 310;
-        $this->faction = "Drazi (WotCR)";
+        $this->faction = "Drazi Freehold (WotCR)";
         $this->phpclass = "Swift";
         $this->imagePath = "img/ships/merlin.png";
         $this->shipClass = "Swift Escort Frigate";

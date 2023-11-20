@@ -7,7 +7,7 @@ class Croscotu extends MediumShip
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 225;
-		$this->faction = "Descari";
+		$this->faction = "Descari Committees";
 		$this->phpclass = "Croscotu";
 		$this->imagePath = "img/ships/DescariCroscotu.png";
 		$this->shipClass = "Croscotu Frigate";

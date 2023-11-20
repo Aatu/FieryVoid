@@ -5,7 +5,7 @@ class Maximus extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 475;
-		$this->faction = "Centauri";
+		$this->faction = "Centauri Republic";
         $this->phpclass = "Maximus";
         $this->imagePath = "img/ships/maximus.png";
         $this->shipClass = "Maximus Defense Frigate";

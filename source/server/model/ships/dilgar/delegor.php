@@ -5,7 +5,7 @@ class Delegor extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 250;
-	$this->faction = "Dilgar";
+	$this->faction = "Dilgar Imperium";
         $this->phpclass = "Delegor";
         $this->imagePath = "img/ships/Delegor.png";
         $this->shipClass = "Delegor Suicide Frigate";

@@ -5,7 +5,7 @@ class Darmoti extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 575;
-        $this->faction = "Centauri";
+        $this->faction = "Centauri Republic";
         $this->phpclass = "Darmoti";
         $this->imagePath = "img/ships/demos.png";
         $this->shipClass = "Darmoti Escort Warship";

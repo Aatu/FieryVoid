@@ -6,7 +6,7 @@ class Razik extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 180;
-	$this->faction = "Centauri";
+	$this->faction = "Centauri Republic";
         $this->phpclass = "Razik";
         $this->shipClass = "Razik Light Fighters";
 	$this->imagePath = "img/ships/razik.png";

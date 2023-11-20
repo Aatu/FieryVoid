@@ -6,7 +6,7 @@ class SolyrnAM extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 650;
-        $this->faction = "Kor-Lyan";
+        $this->faction = "Kor-Lyan Kingdoms";
         $this->phpclass = "SolyrnAM";
         $this->imagePath = "img/ships/korlyan_solyrn2.png";
         $this->shipClass = "Solyrn Missile Destroyer";
@@ -41,8 +41,10 @@ class SolyrnAM extends HeavyCombatVessel{
 	    $this->enhancementOptionsEnabled[] = 'AMMO_H';//add enhancement options for other missiles - Class-H
 	    $this->enhancementOptionsEnabled[] = 'AMMO_K';//add enhancement options for other missiles - Class-K   
 	    $this->enhancementOptionsEnabled[] = 'AMMO_L';//add enhancement options for other missiles - Class-L
+	    $this->enhancementOptionsEnabled[] = 'AMMO_M';//add enhancement options for other missiles - Class-M	    
 		$this->enhancementOptionsEnabled[] = 'AMMO_P';//add enhancement options for other missiles - Class-P	    	    	    	    
 	    $this->enhancementOptionsEnabled[] = 'AMMO_S';//add enhancement options for other missiles - Class-S
+	    $this->enhancementOptionsEnabled[] = 'AMMO_X';//add enhancement options for other missiles - Class-X	    
   
          
         $this->addPrimarySystem(new Reactor(4, 11, 0, 0));

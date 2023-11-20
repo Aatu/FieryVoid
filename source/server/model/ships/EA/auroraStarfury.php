@@ -5,7 +5,7 @@ class AuroraStarfury extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 342;
-        $this->faction = "EA";
+        $this->faction = "Earth Alliance";
         $this->phpclass = "AuroraStarfury";
         $this->shipClass = "Starfury: Aurora Heavy flight";
         $this->imagePath = "img/ships/auroraStarfury.png";

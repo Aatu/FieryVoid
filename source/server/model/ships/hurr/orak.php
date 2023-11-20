@@ -5,7 +5,7 @@ class orak extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 375;
-        $this->faction = "Hurr";
+        $this->faction = "Hurr Republic";
         $this->phpclass = "orak";
         $this->imagePath = "img/ships/hurrOrak.png";
         $this->shipClass = "Orak Frigate";

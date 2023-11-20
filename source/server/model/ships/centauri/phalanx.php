@@ -5,7 +5,7 @@ class Phalanx extends OSAT{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 250;
-	$this->faction = "Centauri";
+	$this->faction = "Centauri Republic";
         $this->phpclass = "Phalanx";
         $this->imagePath = "img/ships/phalanx.png";
         $this->shipClass = 'Phalanx OSAT';

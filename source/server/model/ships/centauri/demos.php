@@ -5,7 +5,7 @@ class Demos extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 575;
-        $this->faction = "Centauri";
+        $this->faction = "Centauri Republic";
         $this->phpclass = "Demos";
         $this->imagePath = "img/ships/demos.png";
         $this->shipClass = "Demos Heavy Warship";

@@ -5,7 +5,7 @@ class koeth extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 180;
-        $this->faction = "Hurr";
+        $this->faction = "Hurr Republic";
         $this->phpclass = "koeth";
         $this->shipClass = "Koeth Light Fighters";
         $this->imagePath = "img/ships/Hurrkoeth.png";

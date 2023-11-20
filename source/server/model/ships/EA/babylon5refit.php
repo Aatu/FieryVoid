@@ -5,7 +5,7 @@ class Babylon5Refit extends StarBaseSixSections{
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 3000;
-		$this->faction = "EA (defenses)";
+		$this->faction = "Earth Alliance (defenses)";
 		$this->phpclass = "Babylon5Refit";
 		$this->shipClass = "Babylon 5 Battle Station";
 			$this->occurence = "common";

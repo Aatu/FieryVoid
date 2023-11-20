@@ -5,7 +5,7 @@ class gaimReskaFighter extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 38*6;
-        $this->faction = "Gaim";
+        $this->faction = "Gaim Intelligence";
         $this->phpclass = "gaimReskaFighter";
         $this->shipClass = "Reska Light flight";
         $this->imagePath = "img/ships/GaimReska.png";

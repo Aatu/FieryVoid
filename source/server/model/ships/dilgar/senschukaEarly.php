@@ -5,7 +5,7 @@ class SenschukaEarly extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
     $this->pointCost = 325;
-    $this->faction = "Dilgar";
+    $this->faction = "Dilgar Imperium";
         $this->phpclass = "SenschukaEarly";
         $this->imagePath = "img/ships/senschuka.png";
         $this->shipClass = "Early Senschuka Patrol Ship";

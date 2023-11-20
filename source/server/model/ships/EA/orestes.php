@@ -5,7 +5,7 @@ class Orestes extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 650;
-		$this->faction = 'EA';//"EA defenses";
+		$this->faction = 'Earth Alliance';//"EA defenses";
 		$this->phpclass = "Orestes";
 		$this->imagePath = "img/ships/orestes.png";
 		$this->shipClass = "Orestes System Monitor (Epsilon)";

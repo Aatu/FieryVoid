@@ -5,7 +5,7 @@ class CottenAlpha extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 250;
-        $this->faction = "EA (early)";
+        $this->faction = "Earth Alliance (early)";
         $this->phpclass = "CottenAlpha";
         $this->imagePath = "img/ships/cotton.png";
         $this->shipClass = "Cotten Long-Range Tender (Alpha)";

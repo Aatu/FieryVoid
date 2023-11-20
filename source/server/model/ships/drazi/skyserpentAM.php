@@ -5,7 +5,7 @@ class SkySerpentAM extends SuperHeavyFighter{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 130*6;
-        $this->faction = "Drazi";
+        $this->faction = "Drazi Freehold";
         $this->phpclass = "SkySerpentAM";
         $this->shipClass = "Sky Serpent Heavy Assault Fighters";
         $this->imagePath = "img/ships/drazi/DraziSkyserpent.png";

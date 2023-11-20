@@ -9,7 +9,7 @@ class Roskorbase2240AM extends SmallStarBaseFourSections
 		$this->pointCost = 2000;
 		$this->base = true;
 		$this->smallBase = true; //"small" as in 4 outer sections
-		$this->faction = "Hurr";
+		$this->faction = "Hurr Republic";
 		$this->phpclass = "Roskorbase2240AM";
 		$this->shipClass = "Roskor Command Post (2240)";
 		$this->imagePath = "img/ships/HurrRoskor.png";

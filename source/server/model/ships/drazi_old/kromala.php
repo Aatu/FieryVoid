@@ -9,7 +9,7 @@ class Kromala extends SmallStarBaseFourSections
 		$this->pointCost = 1250;
 		$this->base = true;
 		$this->smallBase = true; //"small" as in 4 outer sections
-		$this->faction = "Drazi (WotCR)";
+		$this->faction = "Drazi Freehold (WotCR)";
 		$this->phpclass = "Kromala";
 		$this->shipClass = "Kromala Defense Base";
 		$this->imagePath = "img/ships/drazi/DraziKromala.png";

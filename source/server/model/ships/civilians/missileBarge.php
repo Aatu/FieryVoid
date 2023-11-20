@@ -7,7 +7,7 @@ class MissileBarge extends BaseShip{
         $this->pointCost = 550;
         $this->faction = "Civilians";
         $this->phpclass = "missilebarge";
-        $this->imagePath = "img/ships/battlewagon.png"; //need to change
+        $this->imagePath = "img/ships/RaiderBattlewagon.png"; //need to change
         $this->shipClass = "Missile Barge";
         $this->shipSizeClass = 3;
         $this->limited = 33;

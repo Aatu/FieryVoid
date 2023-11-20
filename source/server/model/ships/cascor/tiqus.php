@@ -16,7 +16,7 @@ Against ships, Cascor agility plus 1/2turns weapon will mean it will make precis
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 45 *6;
-        $this->faction = "Cascor";
+        $this->faction = "Cascor Commonwealth";
         $this->phpclass = "Tiqus";
         $this->shipClass = "Tiqus Attack Fighters";
         $this->imagePath = "img/ships/CascorTiqincc.png";

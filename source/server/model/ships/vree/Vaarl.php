@@ -49,11 +49,54 @@ class Vaarl extends VreeHCV{
 		$this->addAftSystem(new AntiprotonDefender(2, 0, 0, 60, 180));	      
        
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
+		/*remade for Tags!
         $this->addFrontSystem(new Structure( 4, 50, true));
         $this->addAftSystem(new Structure( 4, 50, true));
+		*/
+		$structArmor = 4;
+		$structHP = 50;
+		
+		$struct = new Structure( $structArmor, $structHP, true);
+		$struct->addTag("Outer Structure");
+		$struct->startArc = 270;
+		$struct->endArc = 90;
+        $this->addFrontSystem($struct);
+		
+		$struct = new Structure( $structArmor, $structHP, true);
+		$struct->addTag("Outer Structure");
+		$struct->startArc = 90;
+		$struct->endArc = 270;
+        $this->addAftSystem($struct);
+		
         $this->addPrimarySystem(new Structure( 4, 50));
 	    
 	//d20 hit chart
+        $this->hitChart = array(
+            0=> array(
+                    10 => "Structure",
+                    12 => "Jump Engine",
+                    14 => "Scanner",
+                    16 => "Engine",
+                    17 => "Hangar",
+                    19 => "Reactor",
+                    20 => "C&C",
+           		 ),
+            1=> array(
+                    4 => "TAG:Thruster",                        
+                    8 => "TAG:Weapon", 
+                    17 => "TAG:Outer Structure",
+                    20 => "Primary",
+           		 ),
+            2=> array(
+                    4 => "TAG:Thruster",                        
+                    8 => "TAG:Weapon", 
+                    17 => "TAG:Outer Structure",
+                    20 => "Primary",
+           		 ),
+           	);
+	
+	
+	/* remade for Tags!
         $this->hitChart = array(
             0=> array(
                     10 => "Structure",
@@ -79,6 +122,7 @@ class Vaarl extends VreeHCV{
                     20 => "Primary",
            		 ),
            	);
+			*/
        		
 		}
 	}

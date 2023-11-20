@@ -5,7 +5,7 @@ class tonak extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 550;
-        $this->faction = "Hurr";
+        $this->faction = "Hurr Republic";
         $this->phpclass = "tonak";
         $this->imagePath = "img/ships/hurrBoroca.png";
         $this->shipClass = "Tonak Battle Scout";

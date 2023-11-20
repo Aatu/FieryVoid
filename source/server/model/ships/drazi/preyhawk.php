@@ -5,7 +5,7 @@ class Preyhawk extends HeavyCombatVesselLeftRight{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 575;
-	$this->faction = "Drazi";
+	$this->faction = "Drazi Freehold";
         $this->phpclass = "Preyhawk";
         $this->imagePath = "img/ships/drazi/DraziPreyhawk.png";
         $this->shipClass = "Preyhawk Battlecruiser";

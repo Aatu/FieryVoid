@@ -6,7 +6,7 @@ class FtrAnemone extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 38*6;
-        $this->faction = "Ipsha";
+        $this->faction = "Ipsha Baronies";
         $this->phpclass = "FtrAnemone";
         $this->shipClass = "Anemone Medium flight";
         //$this->imagePath = "img/ships/IpshaUrchin.png";

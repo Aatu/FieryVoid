@@ -5,7 +5,7 @@ class Strikehawk extends HeavyCombatVesselLeftRight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 485;
-        $this->faction = "Drazi";
+        $this->faction = "Drazi Freehold";
         $this->phpclass = "Strikehawk";
         $this->imagePath = "img/ships/drazi/DraziSunhawk.png";
         $this->shipClass = "Strikehawk Battle Carrier";

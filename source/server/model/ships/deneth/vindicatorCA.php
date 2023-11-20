@@ -5,7 +5,7 @@ class VindicatorCA extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 745;
-        $this->faction = "Deneth";
+        $this->faction = "Deneth Tribes";
         $this->phpclass = "vindicatorca";
         $this->imagePath = "img/ships/DenethVindicator.png";
 	$this->canvasSize = 200;

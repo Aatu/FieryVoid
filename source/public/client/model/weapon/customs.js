@@ -222,3 +222,16 @@ var CustomEarlyLtParticleCutter = function CustomEarlyLtParticleCutter(json, shi
 };
 CustomEarlyLtParticleCutter.prototype = Object.create(Weapon.prototype);
 CustomEarlyLtParticleCutter.prototype.constructor = CustomEarlyLtParticleCutter;
+
+var KKTest = function KKTest(json, ship) {
+    Ballistic.call(this, json, ship);
+};
+KKTest.prototype = Object.create(Ballistic.prototype);
+KKTest.prototype.constructor = KKTest;
+
+KKTest.prototype.calculateSpecialRangePenalty = function (distance) { //Added here for Orieni KK Missile calculation only.  
+    var distancePenalized = Math.max(0,distance - 15); //ignore first 15 hexes
+    var rangePenalty = this.rangePenalty * distancePenalized;
+        
+    return rangePenalty;
+}; 

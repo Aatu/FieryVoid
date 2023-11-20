@@ -45,7 +45,7 @@ class LegionGladius extends MediumShip{
 
 		$this->addAftSystem(new Thruster(3, 10, 0, 4, 2));
 		$this->addAftSystem(new Thruster(3, 10, 0, 4, 2));
-        $this->addAftSystem(new FusionCannon(2, 8, 2, 90, 270));        
+        $this->addAftSystem(new FusionCannon(2, 8, 1, 90, 270));        
                
         $this->addPrimarySystem(new Structure(5, 50));
 		

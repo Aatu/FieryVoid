@@ -5,7 +5,7 @@ class Navask2002 extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 400;
-        $this->faction = "Centauri (WotCR)";
+        $this->faction = "Centauri Republic (WotCR)";
         $this->phpclass = "Navask2002";
         $this->imagePath = "img/ships/navask.png";
         $this->shipClass = "Navask Escort Destroyer (2002)";  

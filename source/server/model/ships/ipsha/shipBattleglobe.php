@@ -11,7 +11,7 @@ class ShipBattleglobe extends HeavyCombatVesselLeftRight{ //technically a Capita
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 700;
-        $this->faction = "Ipsha";
+        $this->faction = "Ipsha Baronies";
         $this->phpclass = "ShipBattleglobe";
         //$this->imagePath = "img/ships/IpshaBattleglobe.png";
 	$this->imagePath = "img/ships/IpshaBorgGlobe.png";

@@ -5,7 +5,7 @@ class Sweepmerlin extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
     	$this->pointCost = 350;
-        $this->faction = "Drazi (WotCR)";
+        $this->faction = "Drazi Freehold (WotCR)";
         $this->phpclass = "Sweepmerlin";
         $this->imagePath = "img/ships/merlin.png";
         $this->shipClass = "Sweepmerlin Minesweeper";
@@ -14,7 +14,8 @@ class Sweepmerlin extends MediumShip{
         $this->canvasSize = 100;
         $this->occurence = "common"; 
 	    $this->variantOf = "Merlin Frigate";
-	    $this->unofficial = true;  	            
+	    $this->unofficial = true; 
+ 		$this->unofficial = 'S'; //design released after AoG demise	     	            
         
         $this->forwardDefense = 11;
         $this->sideDefense = 11;
