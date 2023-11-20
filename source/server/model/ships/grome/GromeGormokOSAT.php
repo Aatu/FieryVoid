@@ -5,7 +5,7 @@ class GromeGormokOSAT extends OSAT{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 150;
-	$this->faction = "Grome";
+	$this->faction = "Grome Autocracy";
         $this->phpclass = "GromeGormokOSAT";
         $this->imagePath = "img/ships/GromeGormok.png";
         $this->canvasSize = 60;

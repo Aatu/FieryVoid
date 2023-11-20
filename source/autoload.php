@@ -35,6 +35,7 @@ spl_autoload_register(
                 'anroethas' => '/server/model/ships/hurr/anroethAS.php',
                 'antimatterconverter' => '/server/model/weapons/antimatter.php',
                 'alykent' => '/server/model/ships/brakiri/Alykent.php',
+                'ishtaka' => '/server/model/ships/brakiri/Ishtaka.php',
                 'antoph' => '/server/model/ships/brakiri/antoph.php',
                 'antophearly' => '/server/model/ships/brakiri/antophEarly.php',
                 'antophupgrade' => '/server/model/ships/brakiri/antophUpgrade.php',
@@ -884,6 +885,7 @@ spl_autoload_register(
                 'shiptetraescort' => '/server/model/ships/ipsha/shipTetraEscort.php',
                 'shiptetraship' => '/server/model/ships/ipsha/shipTetraship.php',
                 'shipwarsphere' => '/server/model/ships/ipsha/shipWarsphere.php',
+                'ringbase' => '/server/model/ships/ipsha/RingBase.php',                
                 'shockcannon' => '/server/model/weapons/specialWeapons.php',
                 'shodromaosat' => '/server/model/ships/drazi/shodromaOSAT.php',
                 'shofab' => '/server/model/ships/markab/shofab.php',
@@ -1023,6 +1025,7 @@ spl_autoload_register(
                 'talafat' => '/server/model/ships/markab/talafat.php',
                 'tankertug' => '/server/model/ships/civilians/tankerTug.php',
                 'tantalus' => '/server/model/ships/EA/tantalus.php',
+                'hades' => '/server/model/ships/EA/Hades.php',                
                 'taras' => '/server/model/ships/centauri_old/taras.php',
                 'targath' => '/server/model/ships/dilgar/targath.php',
                 'targathc' => '/server/model/ships/dilgar/targathC.php',
@@ -2122,6 +2125,7 @@ spl_autoload_register(
 				//Specific Raider Groups
 				//Imperial Star Legion
                 'imlarmedtransport' => '/server/model/ships/raiders/IMLArmedTransport.php',
+                'imlarmedtransportam' => '/server/model/ships/raiders/IMLArmedTransportAM.php',                
                 'imlarmedtransporttorpedo' => '/server/model/ships/raiders/IMLArmedTransportTorpedo.php',
                 'imlattackcruiser' => '/server/model/ships/raiders/IMLAttackCruiser.php',
                 'imlattackcruiserlaser' => '/server/model/ships/raiders/IMLAttackCruiserLaser.php',
@@ -2129,6 +2133,10 @@ spl_autoload_register(
                 'imlmissilefrigatebeam' => '/server/model/ships/raiders/IMLMissileFrigateBeam.php',
                 'imlmissilefrigaterapid' => '/server/model/ships/raiders/IMLMissileFrigateRapid.php',
                 'imlmissilefrigaterapidbeam' => '/server/model/ships/raiders/IMLMissileFrigateRapidBeam.php',
+                'imlmissilefrigateam' => '/server/model/ships/raiders/IMLMissileFrigateAM.php',
+                'imlmissilefrigatebeamam' => '/server/model/ships/raiders/IMLMissileFrigateBeamAM.php',
+                'imlmissilefrigaterapidam' => '/server/model/ships/raiders/IMLMissileFrigateRapidAM.php',
+                'imlmissilefrigaterapidbeamam' => '/server/model/ships/raiders/IMLMissileFrigateRapidBeamAM.php',                
 
                 'jydkutai' => '/server/model/ships/raiders/JYDKutai.php',
                 'jydlias' => '/server/model/ships/raiders/JYDLias.php',
@@ -2353,8 +2361,10 @@ spl_autoload_register(
 				'flyercombat' => '/server/model/ships/minbari/flyerCombat.php',
 				'genericarmedshuttle' => '/server/model/ships/civilians/genericArmedShuttle.php',
 
-				//Base Testbed
+				//Base 
                 'basetestbed' => '/server/model/ships/customs/baseTestbed.php',
+                'sivrinproposal' => '/server/model/ships/customs/SivrinProposal.php',
+				
 
 				
 				//Shadowtech
@@ -2933,7 +2943,10 @@ spl_autoload_register(
                 		'ammomissilec' => '/server/model/systems/baseSystems.php',
                 		'ammomissilei' => '/server/model/systems/baseSystems.php',                 		                 		
                 		'ammomissiles' => '/server/model/systems/baseSystems.php',
-                		'ammomissilek' => '/server/model/systems/baseSystems.php',                		
+                		'ammomissilek' => '/server/model/systems/baseSystems.php',
+                		'ammomissilem' => '/server/model/systems/baseSystems.php',
+                		'ammomissilekk' => '/server/model/systems/baseSystems.php',
+                		'ammomissilex' => '/server/model/systems/baseSystems.php',                		                 		                 		                		
 						
                 		'ammomissilefb' => '/server/model/systems/baseSystems.php',
                 		'ammomissilefl' => '/server/model/systems/baseSystems.php',
@@ -2946,7 +2959,7 @@ spl_autoload_register(
                 		'ammomissileracka' => '/server/model/weapons/missile.php',
                 		'ammomissilerackb' => '/server/model/weapons/missile.php',	
 						'ammomissilerackd' => '/server/model/weapons/missile.php',					
-						'ammomissilerackf' => '/server/model/weapons/customNexus.php', 
+						'ammomissilerackf' => '/server/model/weapons/missile.php', 
                 		'ammomissilerackl' => '/server/model/weapons/missile.php',
                 		'ammomissileracklh' => '/server/model/weapons/missile.php',
                 		'ammomissileracko' => '/server/model/weapons/missile.php',
@@ -3039,6 +3052,7 @@ spl_autoload_register(
 						'kaedashkadaam' => '/server/model/ships/llort/KaedashkadaAM.php',
 						'fwellgonam' => '/server/model/ships/llort/fwellgonAM.php',
 						'govallam' => '/server/model/ships/llort/govallAM.php',
+						'govallearlyam' => '/server/model/ships/llort/govallEarlyAM.php',
 				
 						//Hurr
 						'roskorbase2215am' => '/server/model/ships/hurr/Roskorbase2215AM.php',
@@ -3094,7 +3108,28 @@ spl_autoload_register(
 						//Gaim						
 						'gaimkastafighteram' => '/server/model/ships/gaim/gaimKastaFighterAM.php',
 						
-						
+						//Extra Yolu
+						'superheavymoleculardisruptor' => '/server/model/weapons/molecular.php',
+						'molecularpenetrator' => '/server/model/weapons/molecular.php',
+						'earlyfusionagitator' => '/server/model/weapons/molecular.php',
+						'fusiocutter' => '/server/model/weapons/molecular.php',
+						'lightmoleculardisruptorship' => '/server/model/weapons/molecular.php',									
+					    'lashanna' => '/server/model/ships/yolu/Lashanna.php', 
+					    'lashassi' => '/server/model/ships/yolu/Lashassi.php',
+					 	'lamanna' => '/server/model/ships/yolu/Lamanna.php',   						
+					 	'lamassa' => '/server/model/ships/yolu/Lamassa.php', 
+					 	'lanassa' => '/server/model/ships/yolu/Lanassa.php', 
+					 	'lanassarefit' => '/server/model/ships/yolu/LanassaRefit.php', 
+					 	'lassan' => '/server/model/ships/yolu/Lassan.php', 
+					 	'lassanrefit' => '/server/model/ships/yolu/LassanRefit.php', 
+					 	'lasann' => '/server/model/ships/yolu/Lasann.php',
+					 	'lasolla' => '/server/model/ships/yolu/Lasolla.php', 						 	 									 	
+					 	'lassanka' => '/server/model/ships/yolu/Lassanka.php', 
+					 	'lassankarefit' => '/server/model/ships/yolu/LassankaRefit.php', 	 						 	
+					 	'lacanna' => '/server/model/ships/yolu/Lacanna.php', 
+					 	'lacannarefit' => '/server/model/ships/yolu/LacannaRefit.php',
+					 	'falaren' => '/server/model/ships/yolu/Falaren.php',					 	 
+					 							
 				//Thirdspace
 				'psychicfield' => '/server/model/weapons/specialWeapons.php',
 				'psychicfieldhandler' => '/server/model/weapons/specialWeapons.php',
@@ -3113,7 +3148,6 @@ spl_autoload_register(
 				'thirdspacebattlescout' => '/server/model/ships/thirdspace/ThirdspaceBattleScout.php',		
 				'thirdspacecarrier' => '/server/model/ships/thirdspace/ThirdspaceCarrier.php',
 				'thirdspaceselfrepair' => '/server/model/systems/baseSystems.php',	
-		//		'thirdspacetestbed' => '/server/model/ships/thirdspace/ThirdspaceTestbed.php',
 						
 						//Development systems
 						'testgun' => '/server/model/weapons/customDevelopment.php',
@@ -3135,7 +3169,9 @@ spl_autoload_register(
 						//What If - Alternative design concepts
 						'dagkar_wi' => '/server/model/ships/whatif/dagkar_WI.php',	
 						'gquan_wi' => '/server/model/ships/whatif/gquan_WI.php',	
-						'vorchan_wi' => '/server/model/ships/whatif/vorchan_WI.php',	
+						'vorchan_wi' => '/server/model/ships/whatif/vorchan_WI.php',
+						
+						'kktest' => '/server/model/weapons/customs.php',	
 						
 	
 				//let's end this with unit enhancement class...		    

@@ -5,7 +5,7 @@ class Shrike1984 extends HeavyCombatVesselLeftRight{
         parent::__construct($id, $userid, $name,  $slot);
         
     	$this->pointCost = 400;
-        $this->faction = "Drazi (WotCR)";
+        $this->faction = "Drazi Freehold (WotCR)";
         $this->phpclass = "Shrike1984";
         $this->imagePath = "img/ships/shrike.png";
         $this->shipClass = "Shrike Heavy Destroyer (1984)";

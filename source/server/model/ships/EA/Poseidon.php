@@ -5,7 +5,7 @@ class Poseidon extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 950;
-		$this->faction = "EA";
+		$this->faction = "Earth Alliance";
 		$this->phpclass = "Poseidon";
 		$this->imagePath = "img/ships/Poseidon.png";
 		$this->shipClass = "Poseidon Supercarrier (Alpha)";

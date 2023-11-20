@@ -5,7 +5,7 @@ class DeltaFtr extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 150;
-	$this->faction = "EA (early)";
+	$this->faction = "Earth Alliance (early)";
         $this->phpclass = "DeltaFtr";
         $this->shipClass = "EA/BA Delta Multi-Role Light Fighters";
 	$this->imagePath = "img/ships/deltaV.png";

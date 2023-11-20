@@ -5,7 +5,7 @@ class kendariUpgraded extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 625;
-        $this->faction = "Centauri";
+        $this->faction = "Centauri Republic";
         $this->phpclass = "kendariUpgraded";
         $this->imagePath = "img/ships/kendari.png";
         $this->shipClass = "Kendari Fleet Scout (Upgraded)";	    

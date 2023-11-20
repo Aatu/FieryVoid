@@ -5,7 +5,7 @@ class Caltus extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 65*6;
-        $this->faction = "Cascor";
+        $this->faction = "Cascor Commonwealth";
         $this->phpclass = "Caltus";
         $this->shipClass = "Caltus Torpedo Fighters";
         $this->imagePath = "img/ships/CascorCalaq.png";

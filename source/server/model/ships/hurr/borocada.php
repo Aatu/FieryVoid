@@ -5,7 +5,7 @@ class borocada extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 525;
-        $this->faction = "Hurr";
+        $this->faction = "Hurr Republic";
         $this->phpclass = "borocada";
         $this->imagePath = "img/ships/hurrBoroca.png";
         $this->shipClass = "Borocada Particle Gunship";

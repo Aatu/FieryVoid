@@ -5,7 +5,7 @@ class Dragon extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
     	$this->pointCost = 210;
-        $this->faction = "Drazi (WotCR)";
+        $this->faction = "Drazi Freehold (WotCR)";
         $this->phpclass = "Dragon";
         $this->shipClass = "Dragon Light Fighters";
     	$this->imagePath = "img/ships/dragon.png";

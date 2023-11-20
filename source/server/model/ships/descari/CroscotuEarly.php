@@ -7,7 +7,7 @@ class CroscotuEarly extends MediumShip
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 180;
-		$this->faction = "Descari";
+		$this->faction = "Descari Committees";
 		$this->phpclass = "CroscotuEarly";
 		$this->imagePath = "img/ships/DescariCroscotu.png";
 		$this->shipClass = "Croscotu Frigate (Early)";
@@ -15,7 +15,7 @@ class CroscotuEarly extends MediumShip
 		$this->isd = 2193;
 		$this->variantOf = "Croscotu Frigate";	//Listed as separate hull in Showdowns 6 but made a variant here for tidier fleet selection.    
         $this->occurence = "common";  
-		
+ 		$this->unofficial = 'S'; //design released after AoG demise		
 
 		$this->forwardDefense = 11;
 		$this->sideDefense = 12;

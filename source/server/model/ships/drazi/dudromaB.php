@@ -5,7 +5,7 @@ class DudromaB extends OSAT{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 175;
-		$this->faction = "Drazi";
+		$this->faction = "Drazi Freehold";
         $this->phpclass = "DudromaB";
         $this->imagePath = "img/ships/dudroma.png";
         $this->shipClass = 'Dudroma B Defense Satellite';

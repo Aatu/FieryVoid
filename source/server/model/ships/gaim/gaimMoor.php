@@ -5,7 +5,7 @@ class gaimMoor extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 570;
-        $this->faction = "Gaim";
+        $this->faction = "Gaim Intelligence";
         $this->phpclass = "gaimMoor";
         $this->imagePath = "img/ships/GaimSuom.png";
         $this->shipClass = "Moor Torpedo Destroyer";

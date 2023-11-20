@@ -6,7 +6,7 @@ class larisiAS extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
 		    $this->pointCost = 30*6;
-		    $this->faction = "Centauri";
+		    $this->faction = "Centauri Republic";
         $this->phpclass = "larisias";
         $this->shipClass = "Larisi Assault Shuttles";
 		    $this->imagePath = "img/ships/sentri.png";

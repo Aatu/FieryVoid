@@ -14,7 +14,7 @@ The costs before rounding the final value are:
 			Light railgun ~12 points
 		Estimated cost is 900 + (1x36) + (8x24) = 1128 -> rounded to 1100*/        
 	$this->pointCost = 1100;
-	$this->faction = "Grome";
+	$this->faction = "Grome Autocracy";
         $this->phpclass = "GromeTrokanFull";
 		$this->variantOf = "Trokan Flagship";
         $this->imagePath = "img/ships/GromeTrokan.png";

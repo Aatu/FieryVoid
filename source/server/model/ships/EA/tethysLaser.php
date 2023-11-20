@@ -5,7 +5,7 @@ class TethysLaser extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 400;
-		$this->faction = "EA";
+		$this->faction = "Earth Alliance";
 		$this->phpclass = "TethysLaser";
 		$this->imagePath = "img/ships/tethys.png";
 		$this->shipClass = "Tethys Laser Boat (Eta)";

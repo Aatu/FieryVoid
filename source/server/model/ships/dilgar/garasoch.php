@@ -6,7 +6,7 @@ class Garasoch extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
 
         $this->pointCost = 550;
-        $this->faction = "Dilgar";
+        $this->faction = "Dilgar Imperium";
         $this->phpclass = "Garasoch";
         $this->imagePath = "img/ships/garasoch.png";
         $this->shipClass = "Garasoch Heavy Carrier";

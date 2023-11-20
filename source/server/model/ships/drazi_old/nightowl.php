@@ -6,7 +6,7 @@ class Nightowl extends BaseShipNoAft{
         parent::__construct($id, $userid, $name,  $slot);
 
         $this->pointCost = 525;
-        $this->faction = "Drazi (WotCR)";
+        $this->faction = "Drazi Freehold (WotCR)";
         $this->phpclass = "Nightowl";
         $this->imagePath = "img/ships/nightowl.png";
         $this->shipClass = "Nightowl Hyperspace Probe";

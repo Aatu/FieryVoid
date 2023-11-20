@@ -4,7 +4,7 @@ class Watchtower extends SmallStarBaseFourSections{
 	function __construct($id, $userid, $name,  $slot){
 		parent::__construct($id, $userid, $name,  $slot);
 		$this->pointCost = 925;
-		$this->faction = "Deneth";
+		$this->faction = "Deneth Tribes";
 		$this->phpclass = "Watchtower";
 		$this->shipClass = "Watchtower Base";
 		$this->fighters = array("normal"=>30, "LCVs"=>4); 

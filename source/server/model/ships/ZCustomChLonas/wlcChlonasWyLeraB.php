@@ -5,7 +5,7 @@ class wlcChlonasWyLeraB extends OSAT{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 275;
-        $this->faction = "Ch'Lonas";
+        $this->faction = "Ch'Lonas Cooperative";
         $this->variantOf = "Wy'Lera A OSAT";
 	$this->unofficial = true;
         $this->phpclass = "wlcChlonasWyLeraB";

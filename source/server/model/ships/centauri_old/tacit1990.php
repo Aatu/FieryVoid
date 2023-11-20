@@ -5,7 +5,7 @@ class Tacit1990 extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 325;
-        $this->faction = "Centauri (WotCR)";
+        $this->faction = "Centauri Republic (WotCR)";
     $this->phpclass = "Tacit1990";
     $this->imagePath = "img/ships/tacit.png";
     $this->canvasSize = 200;

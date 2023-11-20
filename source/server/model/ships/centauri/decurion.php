@@ -5,7 +5,7 @@ class Decurion extends BaseShip{
         parent::__construct($id, $userid, $name,  $movement);
         
         $this->pointCost = 700;
-        $this->faction = "Centauri";
+        $this->faction = "Centauri Republic";
         $this->phpclass = "Decurion";
         $this->imagePath = "img/ships/centurion.png";
         $this->shipClass = "Decurion Assault Cruiser";

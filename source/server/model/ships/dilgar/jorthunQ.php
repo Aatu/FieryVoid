@@ -5,7 +5,7 @@ class JorthunQ extends LCV{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 250;
-    $this->faction = "Dilgar";
+    $this->faction = "Dilgar Imperium";
 	$this->phpclass = "JorthunQ";
 	$this->shipClass = "Jorthun-Q Patrol Cutter (Bolter)";
 			$this->occurence = "common";

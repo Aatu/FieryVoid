@@ -47,6 +47,8 @@ class ShipSystem {
 	public $repairPriority = 4;//priority at which system is repaired (by self repair system); higher = sooner; 0 indicates that system cannot be repaired
 	
 	protected $doCountForCombatValue = true; //false means this system is skipped when evaluating ships' combat value!
+	
+	protected $tagList = array(); //tags for TAG hit chart entry; REMEMBER TAGS SHOULD BE MADE USING CAPITAL LETTERS!
 
     function __construct($armour, $maxhealth, $powerReq, $output){
         $this->armour = $armour;
@@ -77,6 +79,18 @@ class ShipSystem {
 	
 	public function getCountForCombatValue(){
 		return $this->doCountForCombatValue;
+	}
+	
+	public function addTag($tag){
+		$tag = strtoupper($tag);
+		$this->tagList[] = $tag;
+	}
+		
+	public function checkTag($tag){
+		$toReturn = false;
+		$tag = strtoupper($tag);
+		if(in_array($tag,$this->tagList)) $toReturn = true;		
+		return $toReturn;
 	}
 	
 	public function doIndividualNotesTransfer(){//optionally to be redefined if system can receive any private data from front endthat need immediate attention		

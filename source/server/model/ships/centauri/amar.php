@@ -5,7 +5,7 @@ class Amar extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
 
         $this->pointCost = 450;
-        $this->faction = "Centauri";
+        $this->faction = "Centauri Republic";
         $this->phpclass = "Amar";
         $this->imagePath = "img/ships/darkner.png";
         $this->shipClass = "Amar Fast Carrier";

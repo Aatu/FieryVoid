@@ -5,7 +5,7 @@ class Pelican extends HeavyCombatVesselLeftRight{
         parent::__construct($id, $userid, $name,  $slot);
         
     	$this->pointCost = 325;
-        $this->faction = "Drazi (WotCR)";
+        $this->faction = "Drazi Freehold (WotCR)";
         $this->phpclass = "Pelican";
         $this->imagePath = "img/ships/drazi/DraziPelican.png";
         $this->shipClass = "Pelican Military Freighter";

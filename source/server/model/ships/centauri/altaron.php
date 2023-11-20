@@ -4,7 +4,7 @@ class Altaron extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 510;
-        $this->faction = "Centauri";
+        $this->faction = "Centauri Republic";
         $this->phpclass = "Altaron";
         $this->imagePath = "img/ships/altarian.png";
         $this->shipClass = "Altaron Destroyer";

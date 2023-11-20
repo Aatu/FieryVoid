@@ -5,7 +5,7 @@ class Kolosk extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 850;
-		$this->faction = "Kor-Lyan";
+		$this->faction = "Kor-Lyan Kingdoms";
 //	$this->faction = "Custom Ships";
         $this->phpclass = "Kolosk";
         $this->imagePath = "img/ships/korlyan_koskova3.png";

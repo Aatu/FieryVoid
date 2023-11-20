@@ -5,7 +5,7 @@ class KaltiAM extends FighterFlight{
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 276;
-		$this->faction = "Kor-Lyan";
+		$this->faction = "Kor-Lyan Kingdoms";
 		$this->phpclass = "KaltiAM";
 		$this->shipClass = "Kalti Interceptor Flight";
 		$this->imagePath = "img/ships/korlyanKalti_v2.png";

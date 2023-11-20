@@ -7,7 +7,7 @@ class worthus extends SmallStarBaseFourSections{
 		$this->pointCost = 2000;
 		$this->base = true;
 		$this->smallBase = true;
-		$this->faction = "Centauri (WotCR)";
+		$this->faction = "Centauri Republic (WotCR)";
 		$this->phpclass = "worthus";
 		$this->shipClass = "Worthus Starbase";
 		$this->imagePath = "img/ships/worthus.png";

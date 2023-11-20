@@ -6,7 +6,7 @@ class Nitratha extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
 
         $this->pointCost = 475;
-        $this->faction = "Dilgar";
+        $this->faction = "Dilgar Imperium";
         $this->phpclass = "Nitratha";
         $this->imagePath = "img/ships/nitratha.png";
         $this->shipClass = "Ni'Tratha Jumpcruiser";

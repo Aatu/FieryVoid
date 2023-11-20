@@ -8,7 +8,7 @@ class wlcEmperorDN2090 extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 1100;
-        $this->faction = "Centauri (WotCR)";
+        $this->faction = "Centauri Republic (WotCR)";
         $this->phpclass = "wlcEmperorDN2090";
         $this->shipClass = "Emperor Dreadnought";
 		$this->variantOf = "Garut Survey Ship";

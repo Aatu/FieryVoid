@@ -5,7 +5,7 @@ class SkySerpent_v2 extends SuperHeavyFighter{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 130*6;
-        $this->faction = "Drazi";
+        $this->faction = "Drazi Freehold";
         $this->phpclass = "SkySerpent_v2";
         $this->shipClass = "Sky Serpent Heavy Assault Fighters";
 			$this->variantOf = 'OBSOLETE'; //awaiting to be deleted after it's no longer present in games

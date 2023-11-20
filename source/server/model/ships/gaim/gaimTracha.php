@@ -5,7 +5,7 @@ class gaimTracha extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 425;
-		$this->faction = 'Gaim';
+		$this->faction = "Gaim Intelligence";
 		$this->phpclass = "gaimTracha";
 		$this->imagePath = "img/ships/GaimTracha.png";
 		$this->shipClass = "Tracha Troop Transport";

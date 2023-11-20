@@ -5,7 +5,7 @@ class ThirdspaceAttackCraft extends LCV{ //Actually an LCV.
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 550;
+	$this->pointCost = 500;
     $this->faction = "Thirdspace";
 	$this->factionAge = 4; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
 	$this->phpclass = "ThirdspaceAttackCraft";
@@ -53,7 +53,7 @@ class ThirdspaceAttackCraft extends LCV{ //Actually an LCV.
 	$this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 300, 150));
 	$this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 300, 150));
 			
-	$projection = new ThirdspaceShieldProjection(2, 55, 55, 0, 360, 'C');//: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R
+	$projection = new ThirdspaceShieldProjection(2, 60, 55, 0, 360, 'C');//: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R
 	$projector = new ThirdspaceShieldProjector(6, 12, 4, 3, 0, 360, 'C'); //: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R
 	$projection->addProjector($projector);
 	$this->addAftSystem($projector);
@@ -63,8 +63,8 @@ class ThirdspaceAttackCraft extends LCV{ //Actually an LCV.
 	    
         $this->hitChart = array(
         		0=> array( //should never happen (but it will!)
-        				9 => "Structure",
-        				11 => "1:Psionic Concentrator",
+        				8 => "Structure",
+        				10 => "1:Psionic Concentrator",
         				12 => "2:Shield Projector",
 						13 => "Self Repair",        				
         				14 => "Jump Engine",
@@ -73,9 +73,8 @@ class ThirdspaceAttackCraft extends LCV{ //Actually an LCV.
         				20 => "Scanner",
         		),
         		1=> array( //PRIMARY hit table, effectively
-        				9 => "Structure",
+        				8 => "Structure",
         				12 => "Psionic Concentrator",
- //       				12 => "Shield Projector",
 						13 => "0:Self Repair",        				
         				14 => "0:Jump Engine",
         				16 => "0:Engine",
@@ -83,8 +82,8 @@ class ThirdspaceAttackCraft extends LCV{ //Actually an LCV.
         				20 => "0:Scanner",
         		),
         		2=> array( //PRIMARY hit table, effectively
-        				9 => "Structure",
-        				11 => "1:Psionic Concentrator",
+        				8 => "Structure",
+        				10 => "1:Psionic Concentrator",
         				12 => "Shield Projector",
 						13 => "0:Self Repair",        				
         				14 => "0:Jump Engine",

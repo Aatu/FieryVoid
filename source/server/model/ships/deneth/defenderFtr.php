@@ -5,7 +5,7 @@ class DefenderFtr extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 30*6;
-        $this->faction = "Deneth";
+        $this->faction = "Deneth Tribes";
         $this->phpclass = "defenderftr";
         $this->shipClass = "Defender Medium Fighters";
         $this->imagePath = "img/ships/DenethDefender.png";

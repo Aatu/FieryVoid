@@ -5,7 +5,7 @@ class PhalanM extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 150; //6*25
-        $this->faction = "Centauri (WotCR)";
+        $this->faction = "Centauri Republic (WotCR)";
         $this->phpclass = "PhalanM";
         $this->shipClass = "Phalan-M Missile Fighters";
 	    $this->variantOf = "Phalan Assault Fighters";

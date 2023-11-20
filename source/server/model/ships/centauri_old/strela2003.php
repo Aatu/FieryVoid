@@ -5,7 +5,7 @@ class Strela2003 extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 440;
-        $this->faction = "Centauri (WotCR)";
+        $this->faction = "Centauri Republic (WotCR)";
         $this->phpclass = "Strela2003";
         $this->imagePath = "img/ships/strela.png";
         $this->shipClass = "Strela Light Jump Ship (2003)";

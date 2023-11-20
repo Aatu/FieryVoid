@@ -9,7 +9,7 @@ class Brostilli extends SmallStarBaseFourSections
 		$this->pointCost = 3000;
 		$this->base = true;
 		$this->smallBase = true; //"small" as in 4 outer sections
-		$this->faction = "Drazi";
+		$this->faction = "Drazi Freehold";
 		$this->phpclass = "Brostilli";
 		$this->shipClass = "Brostilli Warbase";
 		$this->imagePath = "img/ships/Brostilli.png";

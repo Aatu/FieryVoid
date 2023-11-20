@@ -5,7 +5,7 @@ class wlcChlonasVaLothar extends SmallStarBaseThreeSections{
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 3250;
-		$this->faction = "Ch'Lonas";
+		$this->faction = "Ch'Lonas Cooperative";
 		$this->phpclass = "wlcChlonasVaLothar";
 		$this->shipClass = "Va'Lothar Battlestation";
 		$this->fighters = array("heavy"=>36); 

@@ -5,7 +5,7 @@ class Equata extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 445;
-        $this->faction = "Centauri (WotCR)";
+        $this->faction = "Centauri Republic (WotCR)";
         $this->phpclass = "Equata";
         $this->imagePath = "img/ships/strela.png";
         $this->shipClass = "Equata Intruder";

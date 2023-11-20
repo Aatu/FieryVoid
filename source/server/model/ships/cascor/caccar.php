@@ -5,7 +5,7 @@ class Caccar extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 33 *6;
-        $this->faction = "Cascor";
+        $this->faction = "Cascor Commonwealth";
         $this->phpclass = "Caccar";
         $this->shipClass = "Caccar Ultralight Fighters";
         $this->imagePath = "img/ships/CascorCaccar.png";

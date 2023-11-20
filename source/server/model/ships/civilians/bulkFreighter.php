@@ -7,7 +7,7 @@ class BulkFreighter extends HeavyCombatVessel{
         $this->pointCost = 280;
         $this->faction = "Civilians";
         $this->phpclass = "bulkfreighter";
-        $this->imagePath = "img/ships/galleon.png";
+        $this->imagePath = "img/ships/Raidergalleon.png";
         $this->shipClass = "Bulk Freighter";
         $this->isd = 2193;
 	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup    

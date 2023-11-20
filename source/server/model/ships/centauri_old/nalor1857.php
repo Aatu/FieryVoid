@@ -5,7 +5,7 @@ class Nalor1857 extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 580;
-        $this->faction = "Centauri (WotCR)";
+        $this->faction = "Centauri Republic (WotCR)";
         $this->phpclass = "Nalor1857";
         $this->imagePath = "img/ships/nalor.png";
         $this->shipClass = "Nalor Armored Cruiser (1857)";

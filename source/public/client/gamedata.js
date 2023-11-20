@@ -747,7 +747,7 @@ window.gamedata = {
 			    ammoMagError += ammoMagazineError[shipID].name + " (" + ammoMagazineError[shipID].shipClass + ")";
 			    ammoMagError += "<br>";
 			}
-                	ammoMagErro += "You need to reduce number of shots (or change mode) before you can commit the turn.";
+                	ammoMagError += "You need to reduce number of shots (or change mode) before you can commit the turn.";
 			window.confirm.error(ammoMagError, function () {});
 			return false;
 		    }  

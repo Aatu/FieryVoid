@@ -5,7 +5,7 @@ class GromeTrokanMargus extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 1200; 
-	$this->faction = "Grome";
+	$this->faction = "Grome Autocracy";
         $this->phpclass = "GromeTrokanMargus";
         $this->imagePath = "img/ships/GromeTrokan.png";
         $this->shipClass = "Trokan Margus Command Flagship";
