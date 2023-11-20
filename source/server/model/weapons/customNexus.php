@@ -4312,9 +4312,11 @@ class NexusMatterGun extends Matter{
 // END OF MATTER WEAPONS
 
 
-// DUAL-MODE WEAPONS
 
 
+
+
+// PROJECTILE WEAPONS
 
     class NexusLightAssaultCannon extends Weapon{
         public $trailColor = array(190, 75, 20);
@@ -4349,7 +4351,61 @@ class NexusMatterGun extends Matter{
         public function getDamage($fireOrder){ return Dice::d(10, 2)+7;   }
         public function setMinDamage(){     $this->minDamage = 9 ;      }
         public function setMaxDamage(){     $this->maxDamage = 27 ;      }
+		
     }
+
+
+
+
+
+
+
+
+
+
+
+
+// DUAL-MODE WEAPONS
+
+
+
+    class NexusDefenseGun extends Weapon{
+        public $trailColor = array(190, 75, 20);
+
+        public $name = "NexusDefenseGun";
+        public $displayName = "Defense Gun";
+		public $iconPath = "NexusDefenseGun.png";
+	    
+        public $animation = "trail";
+        public $animationColor = array(255, 11, 11);
+        public $animationExplosionScale = 0.3;
+        public $projectilespeed = 12;
+        public $animationWidth = 2;
+        public $trailLength = 10;
+
+        public $loadingtime = 1;
+        public $priority = 4;
+
+        public $intercept = 1;
+
+        public $rangePenalty = 2; 
+        public $fireControl = array(3, 1, 0); // fighters, <mediums, <capitals
+
+	    public $damageType = "Standard"; 
+	    public $weaponClass = "Projectile"; 
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 4;
+            if ( $powerReq == 0 ) $powerReq = 1;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function getDamage($fireOrder){ return Dice::d(6, 1)+4;   }
+        public function setMinDamage(){     $this->minDamage = 5 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 10 ;      }
+		
+    }  //endof class NexusDefenseGun
 
 
 
@@ -5114,7 +5170,7 @@ class NexusHeavyAssaultCannonBattery extends Weapon{
         public $loadingtime = 1;
 
         public $rangePenalty = 2;
-        public $fireControl = array(2, 2, 2); // fighters, <mediums, <capitals
+        public $fireControl = array(4, 2, 1); // fighters, <mediums, <capitals
 
         public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
         public $weaponClass = "Laser";
@@ -5152,7 +5208,7 @@ class NexusHeavyAssaultCannonBattery extends Weapon{
 
         public $loadingtime = 1;
 
-        public $rangePenalty = 1;
+        public $rangePenalty = 0.5;
         public $fireControl = array(-1, 1, 3); // fighters, <mediums, <capitals
 
         public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
