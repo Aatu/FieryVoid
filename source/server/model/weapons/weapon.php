@@ -164,7 +164,8 @@ class Weapon extends ShipSystem
 
     protected $firedDefensivelyAlready = 0; //marker used for weapons capable of firing multiple defensive shots, but suffering backlash once
 
-
+	protected $firedInRapidMode = false; //was this weapon fired in rapid mode (this turn)?
+	protected $firedInLongRangeMode = false;
 
 	//Weapons are repaired before "average system", but after really important things! 
 	public $repairPriority = 5;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
@@ -1867,8 +1868,14 @@ full Advanced Armor effects (by rules) for reference:
         if (isset($this->endArcArray[$i])) $this->endArc = $this->endArcArray[$i];
 		
 		if (isset($this->hidetargetArray[$i])) $this->hidetarget = $this->hidetargetArray[$i];  // GTS
+			
 		
-	    
+		if (isset($this->calledShotModArray[$i])) $this->calledShotMod = $this->calledShotModArray[$i];  // DK		
+		if (isset($this->specialRangeCalculationArray[$i])) $this->specialRangeCalculation = $this->specialRangeCalculationArray[$i];  // DK
+		if (isset($this->noLockPenaltyArray[$i])) $this->noLockPenalty = $this->noLockPenaltyArray[$i];  // DK
+		if (isset($this->specialHitChanceCalculationArray[$i])) $this->hidetarget = $this->specialHitChanceCalculationArray[$i];  // DK
+		
+													    
     }//endof function changeFiringMode
 
 
