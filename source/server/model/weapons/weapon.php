@@ -1874,7 +1874,7 @@ full Advanced Armor effects (by rules) for reference:
 		if (isset($this->specialRangeCalculationArray[$i])) $this->specialRangeCalculation = $this->specialRangeCalculationArray[$i];  // DK
 		if (isset($this->noLockPenaltyArray[$i])) $this->noLockPenalty = $this->noLockPenaltyArray[$i];  // DK
 		if (isset($this->specialHitChanceCalculationArray[$i])) $this->hidetarget = $this->specialHitChanceCalculationArray[$i];  // DK
-		
+	
 													    
     }//endof function changeFiringMode
 
