@@ -950,7 +950,7 @@ class BaseShip {
 		foreach ($this->systems as $currSystem){
 			if(
 				$currSystem->repairPriority <= $minUndestroyedPriority //priority fits
-				and $currSystem->checkTag($tag) //tag fits
+				and ( ($currSystem->displayName == $tag) || $currSystem->checkTag($tag) ) //tag fits - either directly or to system name
 				and mathlib::isInArc($bearing, $currSystem->startArc, $currSystem->endArc) //arc fits
 			){
 				//tag fits and arc fits - is it destroyed?
