@@ -1068,17 +1068,6 @@ class AmmoMissileRackS extends Weapon{
 	public $specialHitChanceCalculation = false;
 	public $specialHitChanceCalculationArray = array();			
 	
-//F-Rack variables removing for now to prevent anything odd happening.
-
-	protected $firedInRapidMode = false; //was this weapon fired in rapid mode (this turn)?
-	protected $firedInLongRangeMode = false;
-/*	protected $baseFireControlArray = null; //base values of fire control - copy necessary due to necessity of recalculation now and then!	
-	protected $baseRange = null; //base value of range - copy necessary due to necessity of recalculation now and then!
-	protected $baseRangeArray = null; //base value of range - copy necessary due to necessity of recalculation now and then!
-	protected $baseDistance = null; //base value of range - copy necessary due to necessity of recalculation now and then!
-	protected $baseDistanceArray = null; //base value of range - copy necessary due to necessity of recalculation now and then!	
-	*/
-	
 //Adding Intercept variables for Interceptor missiles
 	//public $intercept = 0;	//Adding Intercept variables for Interceptor missiles	
 	//public $ballisticIntercept = false;	
@@ -1852,13 +1841,6 @@ class AmmoMissileRackF extends AmmoMissileRackS {
 	    public $distanceRange = 75;
 	    public $firingMode = 1;
 
-//		public $useOEW = false; //No longer required
-//		public $ballistic = true; //No longer required
-	
-//      public $animation = "trail"; //No longer required
-//		public $animationColor = array(50, 50, 50); //No longer required
-
-  //    public $intercept = 0; //Inherited from AmmoMissileRackS, if interceptor missile used in future
 		public $priority = 6; 		
 		public $loadingtime = 1;
 		public $normalload = 2;
@@ -1870,29 +1852,8 @@ class AmmoMissileRackF extends AmmoMissileRackS {
 		protected $rackExplosionDamage = 38; //how much damage will this weapon do in case of catastrophic explosion
 		protected $rackExplosionThreshold = 20; //how high roll is needed for rack explosion (d20)
 
-//		public $hits = array(); //No longer required
-		
-//       public $rangePenalty = 0; //Inherited from AmmoMissileRackS
-//       public $fireControlArray = array(1=>array(6, 6, 6), 2=>array(4, 4, 4)); //Inherited from AmmoMissileRackS
-		protected $firedInRapidMode = false; //was this weapon fired in rapid mode (this turn)?
-		protected $firedInLongRangeMode = false;
-
-//Do I still need these variables, don't seem to be used after I modified recalculateFireControl function?				
- //       protected $baseFireControlArray = null; //base values of fire control - copy necessary due to necessity of recalculation now and then!
- //       protected $baseRange = null; //base value of range - copy necessary due to necessity of recalculation now and then!
-//		protected $baseRangeArray = null; //base value of range - copy necessary due to necessity of recalculation now and then!
-//		protected $baseDistance = null; //base value of range - copy necessary due to necessity of recalculation now and then!
-//		protected $baseDistanceArray = null; //base value of range - copy necessary due to necessity of recalculation now and then!
-		
-//		public $firingModes = array(1=>'Standard', 2=>'Long-range'); //Inherited from AmmoMissileRackS
-//		public $damageTypeArray = array(1=>'Standard', 2=>'Standard'); //Inherited from AmmoMissileRackS
-
-//		public $rangeArray = array(1=>20, 2=>35); //Inherited from AmmoMissileRackS
-//		public $distanceRangeArray = array(1=>60, 2=>105); //Inherited from AmmoMissileRackS
-  		
-//      public $damageType = "Standard"; //Inherited from AmmoMissileRackS
-//		public $weaponClass = "Ballistic"; //Inherited from AmmoMissileRackS
-	public $specialRangeCalculation = false; //To prevent front-end using calculateSpecialRangePenalty since this launcher can't use KK missiles.    
+		private $firedInRapidMode = false; //was this weapon fired in rapid mode (this turn)?
+		private $firedInLongRangeMode = false;//was this weapon fired in Long Range mode this turn?
 
 		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base=false)
 		{
@@ -2016,9 +1977,8 @@ class AmmoMissileRackF extends AmmoMissileRackS {
 		}
 	} //endof function generateIndividualNotes
 	
-	/*act on notes just loaded - to be redefined by systems as necessary
-	 - mark $firedInRapidMode
-	*/
+	//act on notes just loaded - to be redefined by systems as necessary
+
 	public function onIndividualNotesLoaded($gamedata){
 		foreach ($this->individualNotes as $currNote) 
 			if($currNote->turn == $gamedata->turn) if ($currNote->notevalue == 'R'){ //only current round matters!
