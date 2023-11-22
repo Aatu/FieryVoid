@@ -4196,7 +4196,7 @@ class AmmoMissileC extends AmmoMissileTemplate{
 
 			$effectHit = 3; 
 			$effectHit5 = $effectHit * 5;
-			$fireOrder->pubnotes .= "<br> All non-ballistic weapon's fire by target reduced by $effectHit5 percent.";
+			$fireOrder->pubnotes .= "<br> All non-ballistic weapon fire by target reduced by $effectHit5 percent.";
 
 			$allFire = $ship->getAllFireOrders($gamedata->turn);
 			foreach($allFire as $fireOrder) {
