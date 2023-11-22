@@ -43,7 +43,7 @@ class Kraken extends StarBaseSixSections{
 		/* let's replace this with appropriate two C&Cs!
 		$this->addPrimarySystem(new ProtectedCnC(8, 60, 0, 0)); //originally 2 systems with sructure 30, armor 7 each
 		*/
-		$cnc = new CnC(7, 10, 0, 0);
+		$cnc = new CnC(7, 30, 0, 0);
 		$cnc->startArc = 0;
 		$cnc->endArc = 360;
         $this->addPrimarySystem($cnc);
