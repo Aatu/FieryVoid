@@ -1297,8 +1297,7 @@ class ThirdspaceCnC extends CnC{
 	
 }//endof class ThirdspaceCnC
 	
-class PakmaraCnC extends CnC{
-	
+class PakmaraCnC extends CnC{	
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);     
 		if (!isset($this->data["Special"])) {
@@ -1318,9 +1317,61 @@ class PakmaraCnC extends CnC{
 				32=>array("RestrictedEW","ReducedIniativeOneTurn","ReducedIniative","ReducedIniativeOneTurn","ReducedIniative"), 
 				40=>array("RestrictedEW","ReducedIniative","ReducedIniative","ShipDisabledOneTurn")
 		    );	
+}//endof class PakmaraCnC
 
 
-}
+class SecondaryCnC extends ShipSystem{	
+    public $name = "SecondaryCnC";
+    public $displayName = "Secondary C&C";
+    public $primary = true;
+	public $iconPath = "CnCSecondary.png";
+	
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);     
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}
+		$this->data["Special"] .= "Secondary C&C: May take damage on C&C hits (instead of actual C&C).";
+		$this->data["Special"] .= '<br>If primary C&C is destroyed while secondary C&C is still alive, primary C&C will be revived with as much health as secondary C&C had.';
+	}
+	
+	
+    function __construct($armour, $maxhealth, $powerReq, $output ){
+        parent::__construct($armour, $maxhealth, $powerReq, $output );
+		$this->addTag('C&C');
+    }
+	
+	//if primary C&C is destroyed while secondary is still alive - revive primary and destroy secondary!
+	public function criticalPhaseEffects($ship, $gamedata)
+    { 
+		if($this->isDestroyed()) return;
+		
+		//find primary C&C
+		$primaryCnC = $ship->getSystemByName("C&C");
+		
+		if(!$primaryCnC->isDestroyed()) return; //primary C&C is not destroyed, no need to act
+		
+		//revive primary C&C, kill Secondary
+		
+		//find the killing shot...
+		foreach ($primaryCnC->damage as $damage ) if(($damage->turn == $gamedata->turn) && ($damage->destroyed)){ 
+			$healthRemaining = $this->getRemainingHealth();
+			$damage->destroyed = false; //not a killing shot after all!
+			//add revival of HP - as separate entry so damage from shot is not changed!
+			$damageEntry = new DamageEntry(-1, $damage->shipid, -1, $damage->turn, $primaryCnC->id, -$healthRemaining, 0, 0, 0/*no fire order to tie this damage to actually*/, false, false, "Secondary C&C - reviving command", $damage->damageclass, 0/*no shooter*/, 0/*no firing weapon*/);
+			$damageEntry->updated = true;
+			$primaryCnC->damage[] = $damageEntry;
+			//add Secondary C&C destruction - without actual damage, just desstruction, so it can be tied to original weapon impact without affecting damage done numbers
+			$damageEntry = new DamageEntry(-1, $damage->shipid, -1, $damage->turn, $this->id, 0, 0, 0, $damage->fireorderid, true, false, "Secondary C&C - marking destroyed", $damage->damageclass, $damage->shooterid, $damage->weaponid);
+			$damageEntry->updated = true;
+			$struct->damage[] = $damageEntry;
+		}
+    } //endof function criticalPhaseEffects	
+	
+}//endof class SecondaryCnC
+
 
 class CargoBay extends ShipSystem{
     public $name = "cargoBay";
@@ -1396,7 +1447,7 @@ class Thruster extends ShipSystem{
 				break;
 		}
 		
-		$this->addTag('Thruster');
+		//$this->addTag('Thruster'); //no need, as now system name is considered a tag as well
     }
 } //endof Thruster
 

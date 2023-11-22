@@ -167,6 +167,7 @@ spl_autoload_register(
                 'civilianfreighter' => '/server/model/ships/civilians/civilianFreighter.php',
                 'civiliantanker' => '/server/model/ships/civilians/civilianTanker.php',
                 'cnc' => '/server/model/systems/baseSystems.php',
+				'secondarycnc' => '/server/model/systems/baseSystems.php',
                 'protectedcnc' => '/server/model/systems/baseSystems.php',
                 'cobra' => '/server/model/ships/raiders/cobra.php',
                 'adjudicator' => '/server/model/ships/streib/adjudicator.php',
