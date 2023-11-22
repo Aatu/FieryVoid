@@ -148,32 +148,76 @@ class marcanos extends SmallStarBaseFourSections{
         	$this->addFrontSystem(new TwinArray(4, 6, 2, 270, 90));
         	$this->addFrontSystem(new TwinArray(4, 6, 2, 270, 90));
         	$this->addFrontSystem(new TwinArray(4, 6, 2, 270, 90));
-		$this->addFrontSystem(new CargoBay(4, 24));
-		$this->addFrontSystem(new SubReactorUniversal(4, 20, 0, 0));
+			/*Cargo Bays and SubReactors need to have arc defined for TAG to work*/
+			/*
+			$this->addFrontSystem(new CargoBay(4, 24));
+			$this->addFrontSystem(new SubReactorUniversal(4, 20, 0, 0));
+			*/
+			$cargoBay = new CargoBay(4, 24);
+			$cargoBay->startArc = 270;
+			$cargoBay->endArc = 90;
+			$this->addFrontSystem($cargoBay);
+			$subReactor = new SubReactorUniversal(4, 20, 0, 0);
+			$subReactor->startArc = 270;
+			$subReactor->endArc = 90;
+			$this->addFrontSystem($subReactor);
 
 		$this->addAftSystem(new PlasmaAccelerator(4, 10, 5, 90, 270));
         	$this->addAftSystem(new TwinArray(4, 6, 2, 90, 270));
         	$this->addAftSystem(new TwinArray(4, 6, 2, 90, 270));
         	$this->addAftSystem(new TwinArray(4, 6, 2, 90, 270));
             	$this->addAftSystem(new TwinArray(4, 6, 2, 90, 270));
+			/*Cargo Bays and SubReactors need to have arc defined for TAG to work*/
+			/*
 		$this->addAftSystem(new CargoBay(4, 24));
 		$this->addAftSystem(new SubReactorUniversal(4, 20, 0, 0));
+			*/
+			$cargoBay = new CargoBay(4, 24);
+			$cargoBay->startArc = 90;
+			$cargoBay->endArc = 270;
+			$this->addAftSystem($cargoBay);
+			$subReactor = new SubReactorUniversal(4, 20, 0, 0);
+			$subReactor->startArc = 90;
+			$subReactor->endArc = 270;
+			$this->addAftSystem($subReactor);
 		
 		$this->addRightSystem(new PlasmaAccelerator(4, 10, 5, 0, 180));
         	$this->addRightSystem(new TwinArray(4, 6, 2, 0, 180));
         	$this->addRightSystem(new TwinArray(4, 6, 2, 0, 180));
         	$this->addRightSystem(new TwinArray(4, 6, 2, 0, 180));
         	$this->addRightSystem(new TwinArray(4, 6, 2, 0, 180));
+			/*Cargo Bays and SubReactors need to have arc defined for TAG to work*/
+			/*
 		$this->addRightSystem(new CargoBay(4, 24));
 		$this->addRightSystem(new SubReactorUniversal(4, 20, 0, 0));
+			*/
+			$cargoBay = new CargoBay(4, 24);
+			$cargoBay->startArc = 0;
+			$cargoBay->endArc = 180;
+			$this->addRightSystem($cargoBay);
+			$subReactor = new SubReactorUniversal(4, 20, 0, 0);
+			$subReactor->startArc = 0;
+			$subReactor->endArc = 180;
+			$this->addRightSystem($subReactor);
 		
 		$this->addLeftSystem(new PlasmaAccelerator(4, 10, 5, 180, 360));
         	$this->addLeftSystem(new TwinArray(4, 6, 2, 180, 360));
         	$this->addLeftSystem(new TwinArray(4, 6, 2, 180, 360));
         	$this->addLeftSystem(new TwinArray(4, 6, 2, 180, 360));
         	$this->addLeftSystem(new TwinArray(4, 6, 2, 180, 360));
+			/*Cargo Bays and SubReactors need to have arc defined for TAG to work*/
+			/*
 		$this->addLeftSystem(new CargoBay(4, 24));
 		$this->addLeftSystem(new SubReactorUniversal(4, 20, 0, 0));
+			*/
+			$cargoBay = new CargoBay(4, 24);
+			$cargoBay->startArc = 180;
+			$cargoBay->endArc = 360;
+			$this->addLeftSystem($cargoBay);
+			$subReactor = new SubReactorUniversal(4, 20, 0, 0);
+			$subReactor->startArc = 180;
+			$subReactor->endArc = 360;
+			$this->addLeftSystem($subReactor);
 		
 		
     }
