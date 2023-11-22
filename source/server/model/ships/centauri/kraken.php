@@ -58,6 +58,11 @@ class Kraken extends StarBaseSixSections{
 			$min = 0 + ($i*60);
 			$max = 120 + ($i*60);
 
+			$struct = new Structure(5, 115);
+			$struct->addTag("Outer Structure");
+			$struct->startArc = $min;
+			$struct->endArc = $max;
+		
 			$systems = array(
 				new MatterCannon(5, 7, 4, $min, $max),
 				new BattleLaser(5, 6, 6, $min, $max),
@@ -68,11 +73,12 @@ class Kraken extends StarBaseSixSections{
 				new TwinArray(5, 6, 2, $min, $max),
 				new CargoBay(5, 30),
 				new SubReactorUniversal(5, 30, 0, 0),
-				new Structure(5, 115)
+				$struct /*new Structure(5, 115)*/
 			);
 
 			$loc = $this->locations[$i];
 
+			/* replaced with TAG system!
 			$this->hitChart[$loc] = array(
 				3 => "Twin Array",
 				5 => "Matter Cannon",
@@ -80,6 +86,16 @@ class Kraken extends StarBaseSixSections{
 				8 => "Cargo Bay",
 				9 => "Sub Reactor",
 				18 => "Structure",
+				20 => "Primary",
+			);
+			*/			
+			$this->hitChart[$loc] = array(
+				3 => "TAG:Twin Array",
+				5 => "TAG:Matter Cannon",
+				6 => "TAG:Battle Laser",
+				8 => "TAG:Cargo Bay",
+				9 => "TAG:Sub Reactor",
+				18 => "TAG:Outer Structure",
 				20 => "Primary",
 			);
 

@@ -19,12 +19,41 @@ class marcanos extends SmallStarBaseFourSections{
 		$this->sideDefense = 18;
 		$this->canvasSize = 200; 
 		
-		
+		/*replace outer Structures with tagged ones
 		$this->addFrontSystem(new Structure( 4, 90));
 		$this->addAftSystem(new Structure( 4, 90));
 		$this->addLeftSystem(new Structure( 4, 90));
 		$this->addRightSystem(new Structure( 4, 90));
+		*/		
+		$structArmor = 4;
+		$structHP = 90;
+		
+		$struct = new Structure( $structArmor, $structHP);
+		$struct->addTag("Outer Structure");
+		$struct->startArc = 270;
+		$struct->endArc = 90;
+        $this->addFrontSystem($struct);
+		
+		$struct = new Structure( $structArmor, $structHP);
+		$struct->addTag("Outer Structure");
+		$struct->startArc = 90;
+		$struct->endArc = 270;
+        $this->addAftSystem($struct);
+		
+		$struct = new Structure( $structArmor, $structHP);
+		$struct->addTag("Outer Structure");
+		$struct->startArc = 180;
+		$struct->endArc = 0;
+        $this->addLeftSystem($struct);
+		
+		$struct = new Structure( $structArmor, $structHP);
+		$struct->addTag("Outer Structure");
+		$struct->startArc = 0;
+		$struct->endArc = 180;
+        $this->addRightSystem($struct);
+		
 		$this->addPrimarySystem(new Structure( 5, 100));
+		
 		
 		$this->hitChart = array(			
 			0=> array(
@@ -35,6 +64,40 @@ class marcanos extends SmallStarBaseFourSections{
 				18 => "Reactor",
 				20 => "C&C",
 			),
+			1=> array(
+				4 => "TAG:Twin Array",
+				6 => "TAG:Plasma Accelerator",
+				8 => "TAG:Cargo Bay",
+				9 => "TAG:Sub Reactor",
+				18 => "TAG:Outer Structure",
+				20 => "Primary",
+			),
+			2=> array(
+				4 => "TAG:Twin Array",
+				6 => "TAG:Plasma Accelerator",
+				8 => "TAG:Cargo Bay",
+				9 => "TAG:Sub Reactor",
+				18 => "TAG:Outer Structure",
+				20 => "Primary",
+			),	
+			3=> array(
+				4 => "TAG:Twin Array",
+				6 => "TAG:Plasma Accelerator",
+				8 => "TAG:Cargo Bay",
+				9 => "TAG:Sub Reactor",
+				18 => "TAG:Outer Structure",
+				20 => "Primary",
+			),
+			4=> array(
+				4 => "TAG:Twin Array",
+				6 => "TAG:Plasma Accelerator",
+				8 => "TAG:Cargo Bay",
+				9 => "TAG:Sub Reactor",
+				18 => "TAG:Outer Structure",
+				20 => "Primary",
+			),
+			
+			/* replaced with TAG system!
 			1=> array(
 				4 => "Twin Array",
 				6 => "Plasma Accelerator",
@@ -67,6 +130,7 @@ class marcanos extends SmallStarBaseFourSections{
 				18 => "Structure",
 				20 => "Primary",
 			),
+			*/
 		);
 		$this->addPrimarySystem(new Reactor(5, 28, 0, 0));
 		$this->addPrimarySystem(new CnC(5, 25, 0, 0)); 
