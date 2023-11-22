@@ -64,6 +64,22 @@ class marcanos extends SmallStarBaseFourSections{
 				18 => "Reactor",
 				20 => "C&C",
 			),
+			
+			//just a test:			
+			1=> array(
+				20 => "TAG:Cargo Bay",
+			),
+			2=> array(
+				20 => "TAG:Cargo Bay",
+			),	
+			3=> array(
+				20 => "TAG:Cargo Bay",
+			),
+			4=> array(
+				20 => "TAG:Cargo Bay",
+			),
+			
+			/*
 			1=> array(
 				4 => "TAG:Twin Array", //this will catch PRIMARY TAs as well, but I don't think it's a problem
 				6 => "TAG:Plasma Accelerator",
@@ -96,6 +112,7 @@ class marcanos extends SmallStarBaseFourSections{
 				18 => "TAG:Outer Structure",
 				20 => "Primary",
 			),
+			*/
 			
 			/* replaced with TAG system!
 			1=> array(

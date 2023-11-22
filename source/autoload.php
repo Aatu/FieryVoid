@@ -2758,7 +2758,9 @@ spl_autoload_register(
 				'treknausicaanheavyglider' => '/server/model/ships/ZTrekOther/TrekNausicaanHeavyGlider.php',
 				'treknausicaanvandal' => '/server/model/ships/ZTrekOther/TrekNausicaanVandal.php',
 				'treknausicaanscourge' => '/server/model/ships/ZTrekOther/TrekNausicaanScourge.php',
-				'treknausicaanguramba' => '/server/model/ships/ZTrekOther/TrekNausicaanGuramba.php',
+				'treknausicaanguramba' => '/server/model/ships/ZTrekOther/TrekNausicaanGuramba.php',				
+				'treknausicaanshefafighter' => '/server/model/ships/ZTrekOther/TrekNausicaanShefaFighter.php',
+				'treknausicaanshefalitayalfighter' => '/server/model/ships/ZTrekOther/TrekNausicaanShefalitayalFighter.php',
 				
 				//Pak'ma'ra
 				'plasmabattery' => '/server/model/systems/baseSystems.php',
