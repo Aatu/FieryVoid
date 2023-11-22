@@ -1869,7 +1869,7 @@ full Advanced Armor effects (by rules) for reference:
 		
 		if (isset($this->hidetargetArray[$i])) $this->hidetarget = $this->hidetargetArray[$i];  // GTS
 			
-/*		
+/*		/I don't think I need these for new missiles, as AmmoRackS know to looks at mode values anyhow
 		if (isset($this->calledShotModArray[$i])) $this->calledShotMod = $this->calledShotModArray[$i];  // DK		
 		if (isset($this->specialRangeCalculationArray[$i])) $this->specialRangeCalculation = $this->specialRangeCalculationArray[$i];  // DK
 		if (isset($this->noLockPenaltyArray[$i])) $this->noLockPenalty = $this->noLockPenaltyArray[$i];  // DK
