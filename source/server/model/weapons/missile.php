@@ -1834,7 +1834,7 @@ class AmmoFighterRack extends AmmoMissileRackS{
 
 class AmmoMissileRackF extends AmmoMissileRackS {
 		public $name = "AmmoMissileRackF";
-        public $displayName = "Class-F Missile Rack (Ammo)";
+        public $displayName = "Class-F Missile Rack";
         public $iconPath = "ClassFMissileRack.png";
 
 	    public $range = 35;
@@ -1863,29 +1863,30 @@ class AmmoMissileRackF extends AmmoMissileRackS {
 		}
 
         public function setSystemDataWindow($turn){	
-//			$this->recalculateFireControl(); //necessary for correct Initial data
+			$this->recalculateFireControl(); //necessary for correct  data outside of firing.
 			$this->data["Special"] = 'This weapon can fire either as regular missile launcher, or Long Range launcher. ';
 			$this->data["Special"] .= '<br>It can also fire in Rapid mode (with reduced Fire Control values, but after only 1 turn of charging) - though not right after using Long Range mode.';
 			parent::setSystemDataWindow($turn);	
 		}
 
-	private function modifyFireControl(&$subArray) {//Extra function needed to modify Fire Control values across ALL ammo types in recalculateFireControl function.
-  		 	 foreach ($subArray as $key => &$value) {
-    		    if (is_numeric($value)) {
-            $subArray[$key] = $value - 2;
-      				  }
-    			}
-		}
-		
-	private function nullFireControl(&$subArray) {//Extra function needed to null Fire Control values across ALL ammo types in recalculateFireControl function.
+/*		
+	private function nullFireControl(&$subArray) {//Extra function needed to null Fire Control values across ALL ammo types in recalculateFireControl.
   		 	 foreach ($subArray as $key => &$value) {
     		    if (is_numeric($value)) {
             $subArray[$key] = null;
       				  }
     			}
 		}		
+*/
+	private function modifyFireControl(&$subArray) {//Extra function needed to modify Fire Control values across ALL ammo types in recalculateFireControl.
+  		 	 foreach ($subArray as $key => &$value) {
+    		    if (is_numeric($value)) {
+            $subArray[$key] = $value - 2;
+      				  }
+    			}
+		}
 
-	private function modifyRange(&$subArray) {//Extra function needed to modify Range values across ALL ammo types in recalculateFireControl function.
+	private function modifyRange(&$subArray) {//Extra function needed to modify Range values across ALL ammo types in recalculateFireControl.
   		 	 foreach ($subArray as $key => &$value) {
     		    if (is_numeric($value)) {
             $subArray[$key] = $value - 20;
@@ -1893,7 +1894,7 @@ class AmmoMissileRackF extends AmmoMissileRackS {
     			}
 		}		
 
-	private function modifyDistanceRange(&$subArray) {//Extra function needed to modify Distance Range values across ALL ammo types in recalculateFireControl function.
+	private function modifyDistanceRange(&$subArray) {//Extra function needed to modify Distance Range values across ALL ammo types in recalculateFireControl.
   		 	 foreach ($subArray as $key => &$value) {
     		    if (is_numeric($value)) {
             $subArray[$key] = $value - 30;
@@ -1901,10 +1902,12 @@ class AmmoMissileRackF extends AmmoMissileRackS {
     			}
 		}	
 
-	public function recompileFiringModes(){ //Necessary for recalculateFireControl to apply to actual firing.
-		parent::recompileFiringModes();
-		$this->recalculateFireControl();
-		}	
+    public function beforeFiringOrderResolution($gamedata) //Necessary for recalculateFireControl to apply to actual firing results.
+	    {		
+	        parent::beforeFiringOrderResolution($gamedata);
+			$this->recalculateFireControl();        
+		}	//endof function beforeFiringOrderResolution	
+	
 	
 	//recalculates fire control as appropriate for current loading time!
 	private function recalculateFireControl(){
@@ -1932,10 +1935,10 @@ class AmmoMissileRackF extends AmmoMissileRackS {
 } // end of recalculateFireControl
 
 	
-// This method generates additional non-standard information in the form of individual system notes
- public function generateIndividualNotes($gameData, $dbManager){ //dbManager is necessary for Initial phase only
-		$ship = $this->getUnit();
-		switch($gameData->phase){								
+	// This method generates additional non-standard information in the form of individual system notes
+	 public function generateIndividualNotes($gameData, $dbManager){ //dbManager is necessary for Initial phase only
+			$ship = $this->getUnit();
+			switch($gameData->phase){								
 				case 1: //Initial phase 
 					//if weapon is marked as firing in Rapid mode, make a note of it!
 					if($ship->userid == $gameData->forPlayer){ //only own ships, otherwise bad things may happen!
@@ -1978,7 +1981,6 @@ class AmmoMissileRackF extends AmmoMissileRackS {
 	} //endof function generateIndividualNotes
 	
 	//act on notes just loaded - to be redefined by systems as necessary
-
 	public function onIndividualNotesLoaded($gamedata){
 		foreach ($this->individualNotes as $currNote) 
 			if($currNote->turn == $gamedata->turn) if ($currNote->notevalue == 'R'){ //only current round matters!
@@ -1992,10 +1994,13 @@ class AmmoMissileRackF extends AmmoMissileRackS {
 		
 		foreach ($this->individualNotes as $currNote) //To null firecontrol if fired long range PREVIOUS turn, Rapid not available.
 			if($currNote->turn == $gamedata->turn-1) if ($currNote->notevalue == 'L'){ //only current round matters!
-			$nullFC = array(null, null, null);
-			$this->basicFC = $nullFC; //long-range mode unavailable after 1 turn of charging
-//			foreach ($this->fireControlArray as &$subArray) {  //To null FC on all modes so as to disabled Rapid mode after Long Range shot the previous turn.
-// 			   $this->nullFireControl($subArray);		
+				
+			$this->fireControl = array(null,null,null);//I need this method if launched has NO ammo modes.
+			$this->fireControlArray = array();
+	
+			$nullFC = array(null, null, null); //I need this method if there's ammo equipped.
+			$this->basicFC = $nullFC; 
+	
 		}					
 		//and immediately delete notes themselves, they're no longer needed (this will not touch the database, just memory!)
 //		$this->recalculateFireControl(); //necessary for the variable to affect actual firing		
@@ -2014,10 +2019,8 @@ class AmmoMissileRackF extends AmmoMissileRackS {
 		}			
 		$this->individualNotesTransfer = array(); //empty, just in case
 	}		
-	
-
 			
-		public function stripForJson(){
+	public function stripForJson(){
 			$strippedSystem = parent::stripForJson();
 			$strippedSystem->data = $this->data;
 			$strippedSystem->minDamage = $this->minDamage;

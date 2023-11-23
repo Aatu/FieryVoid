@@ -1,13 +1,12 @@
 <?php
-class Leklant extends BaseShip{
+class LeklantAM extends BaseShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 700;
-        $this->faction = "Custom Ships";
-	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
-        $this->phpclass = "Leklant";
+		$this->faction = "Kor-Lyan Kingdoms";
+        $this->phpclass = "LeklantAM";
         $this->imagePath = "img/ships/korlyan_leklant2.png";
         $this->shipClass = "Leklant Scout Cruiser";
         $this->shipSizeClass = 3;
@@ -31,12 +30,21 @@ class Leklant extends BaseShip{
         $this->iniativebonus = 0;
 
 	//ammo magazine itself (AND its missile options)
-	$ammoMagazine = new AmmoMagazine(120); //pass magazine capacity 
+	$ammoMagazine = new AmmoMagazine(160); //pass magazine capacity 
 	    $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
-	    $ammoMagazine->addAmmoEntry(new AmmoMissileI(), 120); //add full load of basic missiles  	      
+	    $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 40); //add full load of basic missiles  
+	    $ammoMagazine->addAmmoEntry(new AmmoMissileI(), 120); //add full load of intercept missiles  	      
 
 	    $this->enhancementOptionsEnabled[] = 'AMMO_A';//add enhancement options for other missiles - Class-A
 	    $this->enhancementOptionsEnabled[] = 'AMMO_C';//add enhancement options for other missiles - Class-C
+	    $this->enhancementOptionsEnabled[] = 'AMMO_F';//add enhancement options for other missiles - Class-F
+	    $this->enhancementOptionsEnabled[] = 'AMMO_H';//add enhancement options for other missiles - Class-H
+	    $this->enhancementOptionsEnabled[] = 'AMMO_K';//add enhancement options for other missiles - Class-K   
+	    $this->enhancementOptionsEnabled[] = 'AMMO_L';//add enhancement options for other missiles - Class-L
+	    $this->enhancementOptionsEnabled[] = 'AMMO_M';//add enhancement options for other missiles - Class-M	    
+		$this->enhancementOptionsEnabled[] = 'AMMO_P';//add enhancement options for other missiles - Class-P	    	    	    	    
+	    $this->enhancementOptionsEnabled[] = 'AMMO_S';//add enhancement options for other missiles - Class-S
+	    $this->enhancementOptionsEnabled[] = 'AMMO_X';//add enhancement options for other missiles - Class-X
 	    
         $this->addPrimarySystem(new Reactor(5, 21, 0, 0));
         $this->addPrimarySystem(new CnC(5, 16, 0, 0));
@@ -58,13 +66,13 @@ class Leklant extends BaseShip{
         $this->addAftSystem(new AmmoMissileRackD(3, 0, 0, 60, 240, $ammoMagazine, false));
 
         $this->addLeftSystem(new AmmoMissileRackD(2, 0, 0, 240, 60, $ammoMagazine, false));
-        $this->addLeftSystem(new FMissileRack(3, 6, 0, 180, 360, false)); 
+        $this->addLeftSystem(new AmmoMissileRackF(3, 0, 0, 180, 360, $ammoMagazine, false));
         $this->addLeftSystem(new StdParticleBeam(3, 4, 1, 180, 360));
         $this->addLeftSystem(new StdParticleBeam(3, 4, 1, 180, 360));
         $this->addLeftSystem(new Thruster(4, 15, 0, 5, 3));
 
         $this->addRightSystem(new AmmoMissileRackD(2, 0, 0, 300, 120, $ammoMagazine, false));
-        $this->addRightSystem(new FMissileRack(3, 6, 0, 0, 180, false)); 
+        $this->addRightSystem(new AmmoMissileRackF(3, 0, 0, 0, 180, $ammoMagazine, false)); 
         $this->addRightSystem(new StdParticleBeam(3, 4, 1, 0, 180));
         $this->addRightSystem(new StdParticleBeam(3, 4, 1, 0, 180));
         $this->addRightSystem(new Thruster(4, 15, 0, 5, 4));

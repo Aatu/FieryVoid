@@ -5,8 +5,8 @@ class Koskova extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 800;
-		$this->faction = "Kor-Lyan Kingdoms";
-//	$this->faction = "Custom Ships";
+        $this->faction = "Custom Ships";
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
         $this->phpclass = "Koskova";
         $this->imagePath = "img/ships/korlyan_koskova3.png";
         $this->shipClass = "Koskova Battlecruiser";
