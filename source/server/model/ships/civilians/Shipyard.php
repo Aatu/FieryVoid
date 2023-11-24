@@ -30,7 +30,7 @@ class Shipyard extends BaseShip{
          
         $this->addPrimarySystem(new Reactor(6, 50, 0, 0));
         $this->addPrimarySystem(new CnC(6, 8, 0, 0));
-        $this->addPrimarySystem(new Scanner(3, 6, 2, 2));
+        $this->addPrimarySystem(new Scanner(3, 6, 2, 1));
         $this->addPrimarySystem(new Hangar(3, 1, 1));
 		
 		//Structures are not displayed properly if there are no systems - using Vree Technical Structure system :)
