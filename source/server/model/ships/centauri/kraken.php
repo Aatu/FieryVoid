@@ -35,10 +35,6 @@ class Kraken extends StarBaseSixSections{
 			)
 		);
 
-		$this->addPrimarySystem(new Reactor(7, 35, 0, 0));
-		$this->addPrimarySystem(new Hangar(7, 14, 12));
-		$this->addPrimarySystem(new Hangar(7, 14, 12));
-		$this->addPrimarySystem(new Hangar(7, 14, 12));
 		
 		/* let's replace this with appropriate two C&Cs!
 		$this->addPrimarySystem(new ProtectedCnC(8, 60, 0, 0)); //originally 2 systems with sructure 30, armor 7 each
@@ -52,7 +48,10 @@ class Kraken extends StarBaseSixSections{
 		$cnc->endArc = 360;
         $this->addPrimarySystem($cnc);
 		
-		//$this->addPrimarySystem(new CnC(7, 30, 0, 0)); 
+		$this->addPrimarySystem(new Reactor(7, 35, 0, 0));
+		$this->addPrimarySystem(new Hangar(7, 14, 12));
+		$this->addPrimarySystem(new Hangar(7, 14, 12));
+		$this->addPrimarySystem(new Hangar(7, 14, 12));
 		$this->addPrimarySystem(new Scanner(7, 32, 5, 10));
 		$this->addPrimarySystem(new Scanner(7, 32, 5, 10));
 		$this->addPrimarySystem(new BattleLaser(7, 6, 6, 0, 360));

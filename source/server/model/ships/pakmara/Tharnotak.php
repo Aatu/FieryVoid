@@ -26,8 +26,19 @@ class Tharnotak extends BaseShip{
 		$this->iniativebonus = -1*5;
 		  				
 
-		$this->addPrimarySystem(new Reactor(5, 28, 0, 0));
+		/* let's replace this with appropriate two C&Cs!
 		$this->addPrimarySystem(new PakmaraCnC(6, 14, 0, 0));
+		*/
+		$cnc = new PakmaraCnC(5, 7, 0, 0);
+		$cnc->startArc = 0;
+		$cnc->endArc = 360;
+        $this->addPrimarySystem($cnc);
+		$cnc = new SecondaryCnC(5, 7, 0, 0);
+		$cnc->startArc = 0;
+		$cnc->endArc = 360;
+        $this->addPrimarySystem($cnc);
+		
+		$this->addPrimarySystem(new Reactor(5, 28, 0, 0));
 		$this->addPrimarySystem(new Scanner(5, 12, 6, 7));
 		$this->addPrimarySystem(new Engine(5, 18, 0, 10, 2));
 		$this->addPrimarySystem(new Hangar(3, 2));
@@ -72,7 +83,7 @@ class Tharnotak extends BaseShip{
                         15 => "Engine",
                         16 => "Hangar",
                         19 => "Reactor",
-                        20 => "C&C",
+                        20 => "TAG:C&C",
                 ),
                 1=> array(
                         4 => "Thruster",

@@ -34,7 +34,7 @@ class Orshilti extends FighterFlight{
 
         for ($i = 0; $i < $toAdd; $i++){            
             $armour = array(4, 4, 4, 4);
-            $fighter = new Fighter("Porfatis", $armour, 18, $this->id);
+            $fighter = new Fighter("Orshilti", $armour, 18, $this->id);
             $fighter->displayName = "Or'shil'ti";
             $fighter->imagePath = "img/ships/PakmaraOrshilti.png";
             $fighter->iconPath = "img/ships/PakmaraOrshilti_Large.png";

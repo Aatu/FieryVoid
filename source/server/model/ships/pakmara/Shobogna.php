@@ -23,9 +23,9 @@ class Shobogna extends MediumShip{
         $this->pivotcost = 1;
 		$this->iniativebonus = 11*5;
 		
+		$this->addPrimarySystem(new PakmaraCnC(3, 6, 0, 0));		
         $this->addPrimarySystem(new Reactor(3, 10, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 6, 4, 5));
-		$this->addPrimarySystem(new CnC(3, 6, 0, 0));
         $this->addPrimarySystem(new Engine(3, 9, 0, 9, 2));
         $this->addPrimarySystem(new Hangar(2, 2));
 		$this->addPrimarySystem(new Thruster(3, 10, 0, 4, 3));
@@ -36,8 +36,7 @@ class Shobogna extends MediumShip{
 		
         $this->addFrontSystem(new Thruster(3, 10, 0, 4, 1));
 		$this->addFrontSystem(new MediumPlasma(2, 5, 3, 240, 60));
-		$this->addFrontSystem(new MediumPlasma(2, 5, 3, 300, 120));		
-
+		$this->addFrontSystem(new MediumPlasma(2, 5, 3, 300, 120));
 		
         $this->addAftSystem(new Thruster(3, 5, 0, 3, 2));
         $this->addAftSystem(new Thruster(3, 5, 0, 3, 2));

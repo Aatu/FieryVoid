@@ -1261,7 +1261,9 @@ class ProtectedCnC extends CnC{
 		}else{
 			$this->data["Special"] .= '<br>';
 		}
-		$this->data["Special"] .= 'This unit should have two separate C&Cs. As this is not possible in FV, critical chart is changed instead.';
+		//actually now secondary C&C is present - Protected C&C-equipped units should be re-equipped with regular C&C + Secondary C&C instead!
+		//$this->data["Special"] .= 'This unit should have two separate C&Cs. As this is not possible in FV, critical chart is changed instead.';
+		$this->data["Special"] .= "C&C that's more resistnat to critical damage.";
 	}
 	
 	protected $possibleCriticals = array(
@@ -1306,9 +1308,11 @@ class PakmaraCnC extends CnC{
 			$this->data["Special"] .= '<br>';
 		}
 		$this->data["Special"] .= "Pak'ma'ra C&C: Initiative penalties for critical hits are doubled.";
-		$this->data["Special"] .= '<br>This unit should have two separate C&Cs. As this is not possible in FV, critical chart is changed instead.';
+		//below is no longer true - Secondary C&C kicks in!
+		//$this->data["Special"] .= '<br>This unit should have two separate C&Cs. As this is not possible in FV, critical chart is changed instead.';
 	}
 
+/*replaced by doubled Ini penalties, but no reduced crit chance
 			protected $possibleCriticals = array(
 				8=>array("CommunicationsDisrupted","CommunicationsDisrupted"), 
 				16=>"PenaltyToHit", 
@@ -1316,7 +1320,19 @@ class PakmaraCnC extends CnC{
 				24=>array("ReducedIniativeOneTurn","ReducedIniative","ReducedIniativeOneTurn","ReducedIniative"), 
 				32=>array("RestrictedEW","ReducedIniativeOneTurn","ReducedIniative","ReducedIniativeOneTurn","ReducedIniative"), 
 				40=>array("RestrictedEW","ReducedIniative","ReducedIniative","ShipDisabledOneTurn")
-		    );	
+		    );	*/
+			
+    protected $possibleCriticals = array(
+    	//1=>"SensorsDisrupted", //not implemented! so I take it out 
+		1=>array("CommunicationsDisrupted","CommunicationsDisrupted"),    //this instead of SensorsDisrupted
+		9=>array("CommunicationsDisrupted","CommunicationsDisrupted"), 
+		12=>"PenaltyToHit", 
+		15=>"RestrictedEW", 
+		18=>array("ReducedIniativeOneTurn","ReducedIniativeOneTurn","ReducedIniative","ReducedIniative"), 
+		21=>array("RestrictedEW","ReducedIniativeOneTurn","ReducedIniativeOneTurn","ReducedIniative","ReducedIniative"), 
+		24=>array("RestrictedEW","ReducedIniative","ReducedIniative","ShipDisabledOneTurn") 
+    );
+			
 }//endof class PakmaraCnC
 
 
@@ -1325,6 +1341,10 @@ class SecondaryCnC extends ShipSystem{
     public $displayName = "Secondary C&C";
     public $primary = true;
 	public $iconPath = "CnCSecondary.png";
+	
+	//make it all-around by default - potentially saves work, and the system is only usable with TAG anyway
+	public $startArc = 0;
+	public $endArc = 360;
 	
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);     
