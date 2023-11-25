@@ -537,7 +537,9 @@ class LimpetBoreTorpedo extends Torpedo{
 	    public $weaponClass = "Matter"; //should be Ballistic and Matter, but FV does not allow that. Instead decrease advanced armor encountered by 2 points (if any) (usually system does that, but it will account for Ballistic and not Matter)
 
 		public $overrideCallingRestrictions = true;
-		public $canTargetOtherSections = true;			 
+		public $canOnlyCalledShot = true;		
+//		public $canTargetOtherSections = true;
+			 
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
 		        //maxhealth and power reqirement are fixed; left option to override with hand-written values
@@ -548,9 +550,11 @@ class LimpetBoreTorpedo extends Torpedo{
 	    
         public function setSystemDataWindow($turn){
             parent::setSystemDataWindow($turn);
-            $this->data["Special"] = "Should ONLY be used for Called Shots on ship systems, will not cause any damage to ship structure.";
-            $this->data["Special"] .= "<br>No Called Shot penalty. Ignores Armor. No Overkill.";
-            $this->data["Special"] .= "<br>Will not damage ships with Advanced Armor.";            
+            $this->data["Special"] = "Ballistic weapon used ONLY for Called Shots on systems located on exterior sections (e.g. weapons/thrusters).";
+            $this->data["Special"] .= "<br>Once it hits a system, it has 25% chance to fail.";
+            $this->data["Special"] .= "<br>Has no effect on targets equipped with Advanced Armor.";
+            $this->data["Special"] .= "<br>No Called Shot penalty.";
+            $this->data["Special"] .= "<br>Ignores Armor. No Overkill.";                     
             $this->data["Ammunition"] = $this->ammunition;
         }
         
@@ -569,7 +573,7 @@ class LimpetBoreTorpedo extends Torpedo{
 		public function beforeDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
 			$dmgToReturn = $damage;
 			
-			if ($system instanceof Structure){//will not harm Structure!
+			if ($system instanceof Structure){//will not harm Structure!  Should never happen, but just in case.
 				$dmgToReturn = 0;
 				$fireOrder->pubnotes .= "<br> Limpet Bore impacted on ship structure and was ineffective .";
 			}	 
@@ -577,10 +581,10 @@ class LimpetBoreTorpedo extends Torpedo{
 				$dmgToReturn = 0; //will not harm ships with Advanced Armor				
 				$fireOrder->pubnotes .= "<br> Limpet Bore has no effect on advanced armor.";			
 			}
-			$roll = Dice::d(10);
-			if ($roll <= 3) { //30% chance of failure
+			$roll = Dice::d(100);
+			if ($roll <= 25) { //25% chance of failure
 				$dmgToReturn = 0;				
-				$fireOrder->pubnotes .= "<br> Limpet Bore was unable to attach to system, no damage caused. $roll / 10. ";				
+				$fireOrder->pubnotes .= "<br> Limpet Bore was unable to attach to system, no damage caused."; //$roll / 100.				
 			}
 			return $dmgToReturn;
 		}
@@ -610,7 +614,7 @@ class LimpetBoreTorpedoBase extends LimpetBoreTorpedo{
  
         public $range = 60;
         public $distanceRange = 60;
-        public $ammunition = 10; //limited number of shots
+        public $ammunition = 10; //limited number of shots.  Should be 15 with two reload phases every 5 shots, so we'll settle for just 10
         
         public $loadingtime = 1; 
 	    		

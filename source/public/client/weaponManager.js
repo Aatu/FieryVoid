@@ -1214,6 +1214,11 @@ window.weaponManager = {
                 debug && console.log("trying to call shot with ballistic");
                 continue;
             }
+            
+            if ((!system) && weapon.canOnlyCalledShot){
+                debug && console.log("trying to target ship with weapon that can only target systems");
+                continue;
+            }
 
             if (weaponManager.checkConflictingFireOrder(selectedShip, weapon, true)) {
                 debug && console.log("has conflicting fire orders");

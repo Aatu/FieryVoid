@@ -64,9 +64,9 @@ class KoskovaTestbed extends BaseShip{
 		$this->addFrontSystem(new LimpetBoreTorpedo(3, 0, 0, 300, 60));
 		$this->addFrontSystem(new LimpetBoreTorpedo(3, 0, 0, 300, 60));
 //        $this->addFrontSystem(new FMissileRack(3, 'F', 300, 120, false));
-		$this->addFrontSystem(new DirectLimpetBore(2, 5, 3, 270, 90));
-		$this->addFrontSystem(new DirectLimpetBore(2, 5, 3, 270, 90));
-		$this->addFrontSystem(new DirectLimpetBore(2, 5, 3, 270, 90));
+		$this->addFrontSystem(new LimpetBoreTorpedoBase(2, 5, 3, 270, 90));
+//		$this->addFrontSystem(new DirectLimpetBore(2, 5, 3, 270, 90));
+//		$this->addFrontSystem(new DirectLimpetBore(2, 5, 3, 270, 90));
 //        $this->addFrontSystem(new FMissileRack(3, 6, 0, 300, 120, false));
 
         $this->addAftSystem(new Thruster(4, 7, 0, 2, 2));
