@@ -1210,12 +1210,12 @@ window.weaponManager = {
                 continue;
             }
 
-            if (weapon.ballistic && system && (!weapon.overrideCallingRestrictions)) {
+            if (weapon.ballistic && system && (!weapon.overrideCallingRestrictions)) { //25.11.23 - Added last condition to allow Limpet Bore to make called shots as a ballsitic weapon.
                 debug && console.log("trying to call shot with ballistic");
                 continue;
             }
             
-            if ((!system) && weapon.canOnlyCalledShot){
+            if ((!system) && weapon.canOnlyCalledShot){ //25.11.23 - New statement to make sure Limpet Bore can ONLY make Called Shots.
                 debug && console.log("trying to target ship with weapon that can only target systems");
                 continue;
             }

@@ -113,7 +113,7 @@ window.InitialPhaseStrategy = function () {
         PhaseStrategy.prototype.onSystemDataChanged.call(this, {ship: ship});
     };
 
-    InitialPhaseStrategy.prototype.onSystemTargeted = function (payload) {
+    InitialPhaseStrategy.prototype.onSystemTargeted = function (payload) { //25.11.23 - Added onSystemTargeted here to allow Called Shots in Initial Orders phase e.g. Limpet Bore.
         var ship = payload.ship;
         var system = payload.system;
 
