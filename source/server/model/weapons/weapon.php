@@ -102,8 +102,9 @@ class Weapon extends ShipSystem
 	public $rakingArray = array();//size of rake (for multi-mode weapons with variable rake size)
 	public $noLockPenalty = true;
 
-	public $overrideCallingRestricions = false; //when set to true and checked for, can override a base setting (e.g., make a ballistic do a called shot)
-
+	public $overrideCallingRestrictions = false; //when set to true overrides default Called Shot setting (e.g., make a ballistic do a called shot)
+	public $canTargetOtherSections = false; //when set to true, weapon can called shot systems on external sections of target not facing firing ship.
+		
     public $shots = 1;
     public $shotsArray = array();
     public $defaultShots = 1;

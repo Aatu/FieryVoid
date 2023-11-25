@@ -7808,7 +7808,7 @@ class DirectLimpetBore extends Weapon{
         public $animationWidth = 4;
         public $trailLength = 100;    
 
-//		public $overrideCallingRestricions = true; //flag looked for in weaponManager.js to allow a ballistic called shot
+//		public $overrideCallingRestrictions = true; //flag looked for in weaponManager.js to allow a ballistic called shot
 
         public $useOEW = false; //missile
 //        public $ballistic = true; //missile
@@ -7847,11 +7847,34 @@ class DirectLimpetBore extends Weapon{
         
         public function setSystemDataWindow($turn){
             parent::setSystemDataWindow($turn);
-            $this->data["Special"] = "Ignores armor, no overkill (Ballistic+Matter weapon).";
+            $this->data["Special"] = "Should be used for Called Shots on ship systems, will not cause any damage to ship structure.";
+            $this->data["Special"] .= "<br>No called shot penalty, ignores armor, no overkill.";
+            $this->data["Special"] .= "<br>Will not damage ships with Advanced Armor.";            
             $this->data["Special"] .= "<br>NOTE: Fires in the normal weapons fire phase, not initial phase.";
             $this->data["Ammunition"] = $this->ammunition;
         }
-        
+
+		public function beforeDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
+			$dmgToReturn = $damage;
+			
+			if ($system instanceof Structure){//will not harm Structure!
+				$dmgToReturn = 0;
+				$fireOrder->pubnotes .= "<br> Limpet Bore impacted on ship structure and was ineffective .";
+			}	 
+			if ($system->advancedArmor) {
+				$dmgToReturn = 0; //will not harm ships with Advanced Armor				
+				$fireOrder->pubnotes .= "<br> Limpet Bore has no effect on advanced armor.";			
+			}
+			$roll = Dice::d(10);
+			if ($roll <= 3) { //30% chance of failure
+				$dmgToReturn = 0;				
+				$fireOrder->pubnotes .= "<br> Limpet Bore was unable to attach to system, no damage caused. $roll / 10. ";				
+			}
+			return $dmgToReturn;
+		}
+	        
+	        
+	        
         public function getDamage($fireOrder){
             return Dice::d(10, 2)+10;
        }
@@ -7884,7 +7907,7 @@ class DirectLimpetBoreBase extends DirectLimpetBore{
 
         public $range = 60;
 //        public $distanceRange = 60;
-        public $ammunition = 7; //limited number of shots
+        public $ammunition = 10; //limited number of shots
 		public $noInterceptDegradation = true; //if true, this weapon will be intercepted without degradation!
 		public $noPrimaryHits = true; //cannot hit PRIMARY from outer table
 
@@ -7892,13 +7915,13 @@ class DirectLimpetBoreBase extends DirectLimpetBore{
         
         public $rangePenalty = 0;
         public $fireControl = array(null, 2, 4); // fighters, <mediums, <capitals; INCLUDES BOTH LAUNCHER AND MISSILE DATA!
-	    		
+        public $loadingtime = 1; // 1/2 turns	    		
 }//endof LimpetBoreBase
 
 
 
 
-
+/*
 
 class LimpetBoreTorp extends Weapon{
         public $name = "LimpetBoreTorp";
@@ -7912,28 +7935,26 @@ class LimpetBoreTorp extends Weapon{
         public $animationWidth = 4;
         public $trailLength = 100;    
 
-		public $overrideCallingRestricions = true; //flag looked for in weaponManager.js to allow a ballistic called shot
-
-        public $useOEW = false; //missile
+        public $useOEW = true; //missile
         public $ballistic = true; //missile
         public $range = 30;
-        public $distanceRange = 60;
+        public $distanceRange = 30;
         public $ammunition = 5; //limited number of shots
-		public $noInterceptDegradation = true; //if true, this weapon will be intercepted without degradation!
+//		public $noInterceptDegradation = true; //if true, this weapon will be intercepted without degradation!
 		public $noPrimaryHits = true; //cannot hit PRIMARY from outer table
 
         public $calledShotMod = 0; //instead of usual -8
         
         public $loadingtime = 2; // 1/2 turns
         public $rangePenalty = 0;
-        public $fireControl = array(null, 2, 4); // fighters, <mediums, <capitals; INCLUDES BOTH LAUNCHER AND MISSILE DATA!
+        public $fireControl = array(null, 2, 4);
 	    
-	public $noOverkill = true; //Matter weapon
-	public $priority = 9; //Matter weapon
-	    
-//	public $firingMode = 'Called Shot'; //firing mode - just a name essentially
-	public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
-    	public $weaponClass = "Matter"; //should be Ballistic and Matter, but FV does not allow that. Instead decrease advanced armor encountered by 2 points (if any) (usually system does that, but it will account for Ballistic and not Matter)
+		public $noOverkill = true; //Matter weapon
+		public $priority = 9; //Matter weapon
+		    
+
+		public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+	    public $weaponClass = "Matter"; //should be Ballistic and Matter, but FV does not allow that. Instead decrease advanced armor encountered by 2 points (if any) (usually system does that, but it will account for Ballistic and not Matter)
 	 
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
@@ -7941,35 +7962,61 @@ class LimpetBoreTorp extends Weapon{
             if ( $maxhealth == 0 ) $maxhealth = 5;
             if ( $powerReq == 0 ) $powerReq = 3;
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-        }
-        
-        public function stripForJson() {
-            $strippedSystem = parent::stripForJson();    
-            $strippedSystem->ammunition = $this->ammunition;           
-            return $strippedSystem;
-        }
-        
+        }     
 	    
         public function setSystemDataWindow($turn){
             parent::setSystemDataWindow($turn);
-            $this->data["Special"] = "Ignores armor, no overkill (Ballistic+Matter weapon).";
+            $this->data["Special"] = "Should ONLY be used for Called Shots on ship systems, will not cause any damage to ship structure.";
+            $this->data["Special"] .= "<br>No Called Shot penalty. Ignores Armor. No Overkill.";
+            $this->data["Special"] .= "<br>Will not damage ships with Advanced Armor.";            
             $this->data["Ammunition"] = $this->ammunition;
         }
         
-        public function getDamage($fireOrder){
-            return Dice::d(10, 2)+10;
-       }
+
         public function setAmmo($firingMode, $amount){
             $this->ammunition = $amount;
         }
+        
+        
        public function fire($gamedata, $fireOrder){ //note ammo usage
             parent::fire($gamedata, $fireOrder);
             $this->ammunition--;
             Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);
         }
+
+		public function beforeDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
+			$dmgToReturn = $damage;
+			
+			if ($system instanceof Structure){//will not harm Structure!
+				$dmgToReturn = 0;
+				$fireOrder->pubnotes .= "<br> Limpet Bore impacted on ship structure and was ineffective .";
+			}	 
+			if ($system->advancedArmor) {
+				$dmgToReturn = 0; //will not harm ships with Advanced Armor				
+				$fireOrder->pubnotes .= "<br> Limpet Bore has no effect on advanced armor.";			
+			}
+			$roll = Dice::d(10);
+			if ($roll <= 3) { //30% chance of failure
+				$dmgToReturn = 0;				
+				$fireOrder->pubnotes .= "<br> Limpet Bore was unable to attach to system, no damage caused. $roll / 10. ";				
+			}
+			return $dmgToReturn;
+		}
+
+        public function getDamage($fireOrder){
+            return Dice::d(10, 2)+10;
+       }
+    
     
         public function setMinDamage(){     $this->minDamage = 12;      }
         public function setMaxDamage(){     $this->maxDamage = 30;      }
+
+        public function stripForJson() {
+            $strippedSystem = parent::stripForJson();    
+            $strippedSystem->ammunition = $this->ammunition;
+             $strippedSystem->overrideCallingRestrictions = $this->overrideCallingRestrictions;          
+            return $strippedSystem;
+        }
 		
 }//endof LimpetBoreTorp
 
@@ -8002,7 +8049,7 @@ class LimpetBoreBase extends LimpetBoreTorp{
 }//endof LimpetBoreBase
 
 
-
+*/
 
 
 class ProximityLaser extends Weapon{

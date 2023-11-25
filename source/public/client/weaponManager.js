@@ -426,7 +426,7 @@ window.weaponManager = {
 		//which can be used to specifically override the no ballistic called shots with the four lines below updated
 //		if (weapon.ballistic || weapon.hextarget) return false;
 		if (weapon.hextarget) return false;
-		if (weapon.overrideCallingRestricions) return true; //weapon feature specifically overriden to allow called shot
+		if (weapon.overrideCallingRestrictions) return true; //weapon feature specifically overriden to allow called shot
 		if (weapon.ballistic) return false; //ballistic weapons cannot do called shots
         if (weapon.damageType == 'Standard' || weapon.damageType == 'Pulse') return true;
         return false;
@@ -1210,7 +1210,7 @@ window.weaponManager = {
                 continue;
             }
 
-            if (weapon.ballistic && system) {
+            if (weapon.ballistic && system && (!weapon.overrideCallingRestrictions)) {
                 debug && console.log("trying to call shot with ballistic");
                 continue;
             }
