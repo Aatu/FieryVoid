@@ -538,7 +538,7 @@ class LimpetBoreTorpedo extends Torpedo{
 
 		public $overrideCallingRestrictions = true;
 		public $canOnlyCalledShot = true;		
-//		public $canTargetOtherSections = true;
+//		public $canTargetOtherSections = true; //NOT IMPLEMENTED. When set to true, weapon can called shot systems on external sections of target not facing firing ship.
 			 
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
