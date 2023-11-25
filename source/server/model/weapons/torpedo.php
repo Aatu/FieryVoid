@@ -600,7 +600,10 @@ class LimpetBoreTorpedo extends Torpedo{
         public function stripForJson() {
             $strippedSystem = parent::stripForJson();    
             $strippedSystem->ammunition = $this->ammunition;
-             $strippedSystem->overrideCallingRestrictions = $this->overrideCallingRestrictions;          
+            $strippedSystem->overrideCallingRestrictions = $this->overrideCallingRestrictions;
+            $strippedSystem->canOnlyCalledShot = $this->canOnlyCalledShot;   
+ //           $strippedSystem->canTargetOtherSections = $this->canTargetOtherSections;         
+                     
             return $strippedSystem;
         }
 		

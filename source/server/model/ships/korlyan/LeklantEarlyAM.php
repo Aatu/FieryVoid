@@ -60,7 +60,7 @@ class LeklantEarlyAM extends BaseShip{
         $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));
         $this->addFrontSystem(new AmmoMissileRackD(2, 0, 0, 240, 60, $ammoMagazine, false));
-        $this->addFrontSystem(new DirectLimpetBore(3, 5, 3, 300, 60));
+        $this->addFrontSystem(new LimpetBoreTorpedo(3, 0, 0, 300, 60));
         $this->addFrontSystem(new AmmoMissileRackD(2, 0, 0, 300, 120, $ammoMagazine, false));
 
         $this->addAftSystem(new Thruster(3, 7, 0, 2, 2));

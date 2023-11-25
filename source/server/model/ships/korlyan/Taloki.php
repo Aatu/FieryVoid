@@ -53,7 +53,7 @@ class Taloki extends StarBaseSixSections{
 		$this->addFrontSystem(new SubReactorUniversal(4, 20, 0, 0));
 		$this->addFrontSystem(new ParticleCannon(4, 8, 7, 270, 90));
 		$this->addFrontSystem(new ProximityLaser(4, 6, 6, 270, 90));
-		$this->addFrontSystem(new DirectLimpetBoreBase(4, 5, 3, 270, 90));
+		$this->addFrontSystem(new LimpetBoreTorpedoBase(4, 0, 0, 270, 90));
 		$this->addFrontSystem(new ProximityLaser(4, 6, 6, 270, 90));
 		$this->addFrontSystem(new ParticleCannon(4, 8, 7, 270, 90));
 		
@@ -61,7 +61,7 @@ class Taloki extends StarBaseSixSections{
 		$this->addAftSystem(new SubReactorUniversal(4, 20, 0, 0));
 		$this->addAftSystem(new ParticleCannon(4, 8, 7, 90, 270));
 		$this->addAftSystem(new ProximityLaser(4, 6, 6, 90, 270));
-		$this->addAftSystem(new DirectLimpetBoreBase(4, 5, 3, 90, 270));
+		$this->addAftSystem(new LimpetBoreTorpedoBase(4, 0, 0, 90, 270));
 		$this->addAftSystem(new ProximityLaser(4, 6, 6, 90, 270));
 		$this->addAftSystem(new ParticleCannon(4, 8, 7, 90, 270));
 		
@@ -134,7 +134,7 @@ class Taloki extends StarBaseSixSections{
                     20 => "C&C",
            		 ),
             1=> array(
-                    2 => "Base Limpet Bore Torpedo",
+                    2 => "Limpet Bore Torpedo",
 					4 => "Proximity Laser",
 					6 => "Particle Cannon",
 					7 => "Hangar",
@@ -143,7 +143,7 @@ class Taloki extends StarBaseSixSections{
                     20 => "Primary",
            		 ),
             2=> array(
-                    2 => "Base Limpet Bore Torpedo",
+                    2 => "Limpet Bore Torpedo",
 					4 => "Proximity Laser",
 					6 => "Particle Cannon",
 					7 => "Hangar",
