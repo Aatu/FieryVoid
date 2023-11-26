@@ -45,8 +45,8 @@ class Urshtalu extends StarBaseSixSections
 		$cnc->startArc = 0;
 		$cnc->endArc = 360;
         $this->addPrimarySystem($cnc);
-		$this->addPrimarySystem(new SecondaryCnC(6, 16, 0, 0));
-		$this->addPrimarySystem(new SecondaryCnC(6, 16, 0, 0));		
+		$this->addPrimarySystem(new SecondaryCnC(6, 16, 0, 0));//all-around by default
+		$this->addPrimarySystem(new SecondaryCnC(6, 16, 0, 0));//all-around by default	
         
 		$this->addPrimarySystem(new Reactor(6, 25, 0, 0));
 		$this->addPrimarySystem(new Hangar(6, 6));

@@ -36,9 +36,7 @@ class PrimusMaximus extends BaseShip{
 		$cnc->startArc = 0;
 		$cnc->endArc = 360;
         $this->addPrimarySystem($cnc);
-		$cnc = new SecondaryCnC(8, 8, 0, 0);
-		$cnc->startArc = 0;
-		$cnc->endArc = 360;
+		$cnc = new SecondaryCnC(8, 8, 0, 0); //all-around by default
         $this->addPrimarySystem($cnc);
 		
         $this->addPrimarySystem(new Reactor(8, 22, 0, 0));

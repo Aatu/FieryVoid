@@ -43,9 +43,7 @@ class Kraken extends StarBaseSixSections{
 		$cnc->startArc = 0;
 		$cnc->endArc = 360;
         $this->addPrimarySystem($cnc);
-		$cnc = new SecondaryCnC(7, 30, 0, 0);
-		$cnc->startArc = 0;
-		$cnc->endArc = 360;
+		$cnc = new SecondaryCnC(7, 30, 0, 0);//all-around by default
         $this->addPrimarySystem($cnc);
 		
 		$this->addPrimarySystem(new Reactor(7, 35, 0, 0));
@@ -70,10 +68,13 @@ class Kraken extends StarBaseSixSections{
 			$max = 120 + ($i*60);
 			
 /*some systems need pre-definition to have arcs set for TAGs!*/
+			/* replaced by shorter version...
 			$struct = new Structure(5, 115);
 			$struct->addTag("Outer Structure");
 			$struct->startArc = $min;
 			$struct->endArc = $max;
+			*/
+			$struct = Structure::createAsOuter(5, 115,$min,$max);
 			$cargoBay = new CargoBay(5, 30);
 			$cargoBay->startArc = $min;
 			$cargoBay->endArc = $max;

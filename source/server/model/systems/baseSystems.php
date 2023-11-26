@@ -1369,7 +1369,7 @@ class SecondaryCnC extends ShipSystem{
 		if($this->isDestroyed()) return;
 		
 		//find primary C&C
-		$primaryCnC = $ship->getSystemByName("C&C");
+		$primaryCnC = $ship->getSystemByName("CnC");
 		
 		if(!$primaryCnC->isDestroyed()) return; //primary C&C is not destroyed, no need to act
 		
@@ -1660,7 +1660,15 @@ class Structure extends ShipSystem{
 		$this->isIndestructible = $isIndestructible;
     }
 
-	
+	//creates pre-tagged Outer Structure, with appropriate arc
+	public static function createAsOuter($armour, $maxhealth, $startArc, $endArc, $isIndestructible = false){
+		$createdStruct = new Structure($armour, $maxhealth, $isIndestructible);
+		$createdStruct->startArc = $startArc;
+		$createdStruct->endArc = $endArc;
+		$createdStruct->addTag('Outer Structure');
+		return $createdStruct;
+	}
+		
 	//Vree need Structure that doesn't fall off even if it's destroyed - here it is!
 	//it will get destroyed all right (possibly multiple times in a batlle), but will still be there afterwards
 	//Will be destroyed if all such Structures are reduced to 0 (and then all of them will get destroyed !)

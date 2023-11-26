@@ -25,6 +25,14 @@ class marcanos extends SmallStarBaseFourSections{
 		$this->addLeftSystem(new Structure( 4, 90));
 		$this->addRightSystem(new Structure( 4, 90));
 		*/		
+		$this->addPrimarySystem(new Structure( 5, 100)); //needs to be called first for some reason - static call apparently fails fot the first time...
+		$this->addFrontSystem(Structure::createAsOuter(4, 90,270,90));
+		$this->addAftSystem(Structure::createAsOuter(4, 90, 90, 270));
+		$this->addLeftSystem(Structure::createAsOuter(4, 90, 180, 360));
+		$this->addRightSystem(Structure::createAsOuter(4, 90, 0, 180));
+		
+		
+		/*replaced by simpler version above
 		$structArmor = 4;
 		$structHP = 90;
 		
@@ -51,8 +59,8 @@ class marcanos extends SmallStarBaseFourSections{
 		$struct->startArc = 0;
 		$struct->endArc = 180;
         $this->addRightSystem($struct);
+		*/
 		
-		$this->addPrimarySystem(new Structure( 5, 100));
 		
 		
 		$this->hitChart = array(			
