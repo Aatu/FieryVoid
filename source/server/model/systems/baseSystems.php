@@ -1661,6 +1661,7 @@ class Structure extends ShipSystem{
     }
 
 	//creates pre-tagged Outer Structure, with appropriate arc
+	//warning: has trouble working if Structure isn't directly called earlier! so be sure to create PRIMARY Structure before trying to go for any Outer ones :)
 	public static function createAsOuter($armour, $maxhealth, $startArc, $endArc, $isIndestructible = false){
 		$createdStruct = new Structure($armour, $maxhealth, $isIndestructible);
 		$createdStruct->startArc = $startArc;
