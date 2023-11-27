@@ -926,7 +926,8 @@ class StunBeam extends Weapon{
 			$system->criticals[] =  $crit;
 			$fireOrder->pubnotes .= " DROPOUT! ";
 				}else{ //No other types of systems are effected.
-					return;	
+						$fireOrder->pubnotes .= "<br> Stun Beam has no effect.";				
+						return; 
 				}		
 	}//end of onDamagedSystem
 
