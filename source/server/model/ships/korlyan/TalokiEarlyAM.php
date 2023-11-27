@@ -24,7 +24,7 @@ class TalokiEarlyAM extends StarBaseSixSections{
 		$this->sideDefense = 24;
 
 		$this->imagePath = "img/ships/korlyan_taloki.png";
-		$this->canvasSize = 260; //Enormous Starbase
+		$this->canvasSize = 300; //Enormous Starbase
 
 	//ammo magazine itself (AND its missile options)
 	$ammoMagazine = new AmmoMagazine(400); //pass magazine capacity 

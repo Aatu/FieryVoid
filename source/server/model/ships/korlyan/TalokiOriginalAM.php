@@ -24,7 +24,7 @@ class TalokiOriginalAM extends StarBaseSixSections{
 		$this->sideDefense = 24;
 
 		$this->imagePath = "img/ships/korlyan_taloki2.png";
-		$this->canvasSize = 260; //Enormous Starbase
+		$this->canvasSize = 300; //Enormous Starbase
 
         //ammo magazine itself (AND its missile options)
         $ammoMagazine = new AmmoMagazine(400); //pass magazine capacity - 20 rounds per launcher, plus reload rack 80

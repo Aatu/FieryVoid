@@ -22,7 +22,7 @@ class TalokiAM extends StarBaseSixSections{
 		$this->sideDefense = 24;
 
 		$this->imagePath = "img/ships/korlyan_taloki2.png";
-		$this->canvasSize = 260; //Enormous Starbase
+		$this->canvasSize = 300; //Enormous Starbase
 
 		$this->locations = array(41, 42, 2, 32, 31, 1);
 
