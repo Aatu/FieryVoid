@@ -69,10 +69,7 @@ class Urshtalu extends StarBaseSixSections
 
 
 			/*some systems need pre-definition to have arcs set for TAGs!*/
-			$struct = new Structure(5, 100);
-			$struct->addTag("Outer Structure");
-			$struct->startArc = $min;
-			$struct->endArc = $max;
+			$struct = Structure::createAsOuter(5, 100,$min,$max);
 			$cargoBay = new CargoBay(5, 35);
 			$cargoBay->startArc = $min;
 			$cargoBay->endArc = $max;
