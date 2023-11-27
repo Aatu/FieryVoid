@@ -878,26 +878,58 @@ class StunBeam extends Weapon{
 		}
 		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
 	}
-       
+	
 	public function setSystemDataWindow($turn){
-		parent::setSystemDataWindow($turn);
-		$this->data["Special"] = 'Forces dropout on fighters (except superheavy), turns off powered systems. ';
-	}
+		parent::setSystemDataWindow($turn);  
+		$this->data["Special"] = "Doesn't deal damage. Effect depends on system hit:.";      
+		$this->data["Special"] .= "<br> - Weapon, Jammer or Jump Engine: System deactivated for one turn.";
+		$this->data["Special"] .= "<br> - Thruster: Thruster cannot be used for one turn."; 		 
+		$this->data["Special"] .= "<br> - C&C: -20 Initiative for one turn."; 
+		$this->data["Special"] .= "<br> - Scanner: Output halved for one turn."; 
+		$this->data["Special"] .= "<br> - Engine: Output halved for one turn.";
+		$this->data["Special"] .= "<br> - No effect on Structure or any other type of system.";		
+		$this->data["Special"] .= "<br>Forces dropout on fighters (except superheavy)."; 
+		$this->data["Special"] .= "<br>Does not affect ships with advanced armor.";  		    
+	}		
 		
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
-		$crit = null;
-		if (WeaponEM::isTargetEMResistant($ship,$system)) return;
-		if ($system instanceof Fighter && !($ship->superheavy)){
+		$crit = null;		
+		if ($system->isDestroyed()) return; //no point allocating
+		if ($ship->isDestroyed()) return; //no point allocating				
+		if ($system->advancedArmor) { //no effect on Advanced Armor but Ipsha etc still get affected.
+		$fireOrder->pubnotes .= "<br> Stun Beam has no effect on advanced armor.";				
+		return; 	
+		}
+		if($system instanceOf Structure){ //No effect on Structure.
+		$fireOrder->pubnotes .= "<br> Stun Beam impacted harmlessly on structure.";				
+		return; 
+		}else if ($system instanceOf Weapon || $system instanceOf JumpEngine || $system instanceOf Jammer){ //Deactivate for 1 turn.
+			if ($system->powerReq > 0 || $system->canOffLine ){
+			$system->addCritical($ship->id, "ForcedOfflineOneTurn", $gamedata);
+			}
+		}else if ($system instanceOf Thruster){ //Can't deactivate thurster, but can render it unusable for 1 turn using mulitple FirstThrustIgnored crits.
+			$thrusterOutput = $system->getOutput();	
+				for($i=1; $i<=$thrusterOutput;$i++){
+					$crit = new FirstThrustIgnoredOneTurn(-1, $ship->id, $system->id, 'FirstThrustIgnoredOneTurn', $gamedata->turn); 
+					$crit->updated = true;
+			        $system->criticals[] =  $crit;
+				}     			
+		}else if($system instanceOf CnC) { // -20 Initiative, so just ReducedIniativeOneTurn twice.
+			$system->addCritical($ship->id, "ReducedIniativeOneTurn", $gamedata);			
+			$system->addCritical($ship->id, "ReducedIniativeOneTurn", $gamedata);
+		}else if($system instanceOf Scanner || $system instanceOf Engine) { //Halve output for 1 turn.					
+			$system->addCritical($ship->id, "OutputHalvedOneTurn", $gamedata);								
+		}else if ($system instanceof Fighter && !($ship->superheavy)){ //Dropout unless super heavy fighter.
 			$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
 			$crit->updated = true;
-					$crit->inEffect = true;
+			$crit->inEffect = true;
 			$system->criticals[] =  $crit;
 			$fireOrder->pubnotes .= " DROPOUT! ";
-				}else if ($system->powerReq > 0 || $system->canOffLine ){
-			$system->addCritical($ship->id, "ForcedOfflineOneTurn", $gamedata);
-		}
-	}
-	
+				}else{ //No other types of systems are effected.
+					return;	
+				}		
+	}//end of onDamagedSystem
+
 	public function getDamage($fireOrder){        return 0;   }
 	public function setMinDamage(){     $this->minDamage = 0;      }
 	public function setMaxDamage(){     $this->maxDamage = 0;      }

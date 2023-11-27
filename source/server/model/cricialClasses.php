@@ -55,6 +55,15 @@ class OutputHalved extends Critical{
         parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend);
     }
 }
+
+class OutputHalvedOneTurn extends Critical{
+    public $description = "Output halved";
+    public $outputModPercentage = -50; //output modified by -50%
+    public $oneturn = true;    
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
+        parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend);
+    }
+}
 	
 class OutputReduced extends Critical{
     public $description = "Output reduced.";
@@ -171,6 +180,15 @@ class ForcedOfflineForTurns extends Critical{
 class FirstThrustIgnored extends Critical{
     public $description = "First point of channeled thrust is ignored.";
     public $outputMod = -1;
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
+            parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend);
+    }
+}
+
+class FirstThrustIgnoredOneTurn extends Critical{
+    public $description = "First point of channeled thrust is ignored.";
+    public $outputMod = -1;    
+    public $oneturn = true;
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
             parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend);
     }

@@ -332,6 +332,7 @@ spl_autoload_register(
                 'fireorder' => '/server/model/BaseClasses.php',
                 'firing' => '/server/handlers/firing.php',
                 'firstthrustignored' => '/server/model/cricialClasses.php',
+				'firstthrustignoredoneturn' => '/server/model/cricialClasses.php',                
                 'folshotb' => '/server/model/ships/brakiri/folshotB.php',
                 'forcedofflineforturns' => '/server/model/cricialClasses.php',
                 'forcedofflineoneturn' => '/server/model/cricialClasses.php',
@@ -2333,6 +2334,7 @@ spl_autoload_register(
 		    
 				//self-repair
 				'outputhalved' => '/server/model/cricialClasses.php',
+				'outputhalvedoneturn' => '/server/model/cricialClasses.php',	//For Markab Stun Beam			
 				'whitestarcmd' => '/server/model/ships/minbari/whitestarCmd.php',
 				
 				
