@@ -536,8 +536,8 @@ class LimpetBoreTorpedo extends Torpedo{
 		public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
 	    public $weaponClass = "Matter"; //should be Ballistic and Matter, but FV does not allow that. Instead decrease advanced armor encountered by 2 points (if any) (usually system does that, but it will account for Ballistic and not Matter)
 
-		public $overrideCallingRestrictions = true;
-		public $canOnlyCalledShot = true;		
+		protected $overrideCallingRestrictions = true;
+		protected $canOnlyCalledShot = true;		
 //		public $canTargetOtherSections = true; //NOT IMPLEMENTED. When set to true, weapon can called shot systems on external sections of target not facing firing ship.
 			 
 
@@ -551,7 +551,8 @@ class LimpetBoreTorpedo extends Torpedo{
         public function setSystemDataWindow($turn){
             parent::setSystemDataWindow($turn);
             $this->data["Special"] = "Ballistic weapon used ONLY for Called Shots on systems located on exterior sections (e.g. weapons/thrusters).";
-            $this->data["Special"] .= "<br>Once it hits a system, it has 25% chance to fail.";
+            $this->data["Special"] .= "<br>Once it hits a system, it will try to damage it by adding a critical effect.";
+            $this->data["Special"] .= "<br>This critical effect will remain until target system is destroyed, or after five failed attempts by the Limpet Bore.";            
             $this->data["Special"] .= "<br>Has no effect on targets equipped with Advanced Armor.";
             $this->data["Special"] .= "<br>No Called Shot penalty.";
             $this->data["Special"] .= "<br>Ignores Armor. No Overkill.";                     
@@ -569,13 +570,18 @@ class LimpetBoreTorpedo extends Torpedo{
             $this->ammunition--;
             Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);
         }
-
+/* //Old version of Limpet Bore, that didn't use a critical to score damage
 		public function beforeDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
 			$dmgToReturn = $damage;
 			
+			if ($system->id != $fireOrder->calledid){ //If multiple Limpet Bores target same system, avoid subsequent ones entering normal hitchart.
+				$dmgToReturn = 0;
+				$fireOrder->pubnotes .= "<br> Target system destroyed before Limpet Bore hit.";				
+			}
+			
 			if ($system instanceof Structure){//will not harm Structure!  Should never happen, but just in case.
 				$dmgToReturn = 0;
-				$fireOrder->pubnotes .= "<br> Limpet Bore impacted on ship structure and was ineffective .";
+				$fireOrder->pubnotes .= "<br> Limpet Bore impacted on ship structure and was ineffective.";
 			}	 
 			if ($system->advancedArmor) {
 				$dmgToReturn = 0; //will not harm ships with Advanced Armor				
@@ -584,17 +590,39 @@ class LimpetBoreTorpedo extends Torpedo{
 			$roll = Dice::d(100);
 			if ($roll <= 25) { //25% chance of failure
 				$dmgToReturn = 0;				
-				$fireOrder->pubnotes .= "<br> Limpet Bore was unable to attach to system, no damage caused."; //$roll / 100.				
+				$fireOrder->pubnotes .= "<br> Limpet Bore was unable to attach to system."; //$roll / 100.				
 			}
 			return $dmgToReturn;
 		}
+*/
+	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!
+		
+		if ($system->advancedArmor) {//no effect on Advanced Armor	
+		$fireOrder->pubnotes .= "<br> Limpet Bore has no effect on advanced armor.";				
+		return; 	
+		}
 
-        public function getDamage($fireOrder){
-            return Dice::d(10, 2)+10;
+		if ($system->id != $fireOrder->calledid) {//In case it ends up in general hit chart somehow.
+		$fireOrder->pubnotes .= "<br> Limpet Bore did not attach to target ship.";				
+		return; 	
+		}	
+				
+		if($system){
+			$fireOrder->pubnotes .= "<br> Limpet Bore attaches to target system.";				
+			$crit = new LimpetBore(-1, $ship->id, $system->id, 'LimpetBore', $gamedata->turn); 
+			$crit->updated = true;
+			$system->criticals[] =  $crit;
+			}
+		}	
+		
+		
+		
+        public function getDamage($fireOrder){ //Damage is handled in criticalPhaseEffects() once Limpet Bore attaches.
+            return 0;
        }
     
     
-        public function setMinDamage(){     $this->minDamage = 12;      }
+        public function setMinDamage(){     $this->minDamage = 12;      } //However, keep these values for intercept calculations.
         public function setMaxDamage(){     $this->maxDamage = 30;      }
 
         public function stripForJson() {

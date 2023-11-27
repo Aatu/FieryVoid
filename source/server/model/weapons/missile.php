@@ -519,6 +519,9 @@ class ReloadRack extends Weapon //ShipSystem
 	
 	
 	public function criticalPhaseEffects($ship, $gamedata){ //add testing for ammo explosion!
+	
+		parent::criticalPhaseEffects($ship, $gamedata);//Call parent to apply effects like Limpet Bore.
+	
 		if(!$this->isDamagedOnTurn($gamedata->turn)) return; //if there is no damage this turn, then no testing for explosion
         $explodes = false;
         $roll = Dice::d(20);
@@ -1293,6 +1296,9 @@ class AmmoMissileRackS extends Weapon{
 
 	
 	public function criticalPhaseEffects($ship, $gamedata){ //add testing for ammo explosion!
+	
+		parent::criticalPhaseEffects($ship, $gamedata);//Call parent to apply effects like Limpet Bore.		
+	
 		if(!$this->isDamagedOnTurn($gamedata->turn)) return; //if there is no damage this turn, then no testing for explosion
         $explodes = false;
         $roll = Dice::d(20);

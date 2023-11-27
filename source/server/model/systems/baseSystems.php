@@ -377,7 +377,10 @@ class Reactor extends ShipSystem implements SpecialAbility {
 		}
 	}	
 	
-	public function criticalPhaseEffects($ship, $gamedata) {		
+	public function criticalPhaseEffects($ship, $gamedata) {	
+	
+		parent::criticalPhaseEffects($ship, $gamedata);//Call parent to apply effects like Limpet Bore.		
+		
 		//as effects are getting complicate - call them separately
 		$this->executeContainmentBreach($ship, $gamedata);	
 		$this->executeReactorFlux($ship, $gamedata);	
@@ -664,6 +667,9 @@ class SubReactorUniversal extends ShipSystem{
 	//destroy section if destroyed
 	public function criticalPhaseEffects($ship, $gamedata)
     { 
+    
+		parent::criticalPhaseEffects($ship, $gamedata);//Call parent to apply effects like Limpet Bore.	    
+    
 		if (!$this->isDamagedOnTurn($gamedata->turn)) return; 
 		if (!$this->isDestroyed()) return;		
 	
@@ -765,6 +771,8 @@ class Engine extends ShipSystem implements SpecialAbility {
     }
 
 	public function criticalPhaseEffects($ship, $gamedata) {
+		
+		parent::criticalPhaseEffects($ship, $gamedata);//Call parent to apply effects like Limpet Bore.		
 		
 		$hasEngineFlux = $ship->hasSpecialAbility("EngineFlux");
 
@@ -966,7 +974,10 @@ class Scanner extends ShipSystem implements SpecialAbility{ //on its own Scanner
 		return $this->specialAbilityValue;
 	}
 
-	public function criticalPhaseEffects($ship, $gamedata) {		
+	public function criticalPhaseEffects($ship, $gamedata) {	
+	
+		parent::criticalPhaseEffects($ship, $gamedata);//Call parent to apply effects like Limpet Bore.		
+		
 		$hasSensorFlux = $ship->hasSpecialAbility("SensorFlux");
 		if ($hasSensorFlux) {
 			$roll = Dice::d(20) + 1 + $this->getTotalDamage();  //There is a +1 penalty in addition to any damage
@@ -1116,6 +1127,8 @@ class AntiquatedScanner extends Scanner {
 
 	public function criticalPhaseEffects($ship, $gamedata) {
 		
+		parent::criticalPhaseEffects($ship, $gamedata);//Call parent to apply effects like Limpet Bore.			
+		
 		$hasAntSensorFlux = $ship->hasSpecialAbility("AntiquatedSensorFlux");
 
 		if ($hasAntSensorFlux) {
@@ -1198,6 +1211,8 @@ class CnC extends ShipSystem implements SpecialAbility {
     }
 	
 	public function criticalPhaseEffects($ship, $gamedata) {
+			
+		parent::criticalPhaseEffects($ship, $gamedata);//Call parent to apply effects like Limpet Bore.			
 		
 		$hasCommsFlux = $ship->hasSpecialAbility("CommsFlux");
 
@@ -1591,11 +1606,14 @@ class Structure extends ShipSystem{
 
 	
 	//Vree need Structure that doesn't fall off even if it's destroyed - here it is!
-	//it will get destroyed all right (possibly multiple times in a batlle), but will still be there afterwards
+	//it will get destroyed all right (possibly multiple times in a battle), but will still be there afterwards
 	//Will be destroyed if all such Structures are reduced to 0 (and then all of them will get destroyed !)
 	//upon destruction - delete destruction marker
 	public function criticalPhaseEffects($ship, $gamedata)
     { 
+    
+		parent::criticalPhaseEffects($ship, $gamedata);//Call parent to apply effects like Limpet Bore.	    
+    
 		if($this->isIndestructible){
 			foreach ($this->damage as $damage ) if(($damage->turn == $gamedata->turn) && ($damage->destroyed)){ 
 				//check all others - if all of them are reduced to 0 - mark them destroyed as well; if not, delete destroyed marker!
@@ -2358,6 +2376,9 @@ by 4.
 	
 	//effects that happen in Critical phase (after criticals are rolled) - dissipation and actual loss of tendrils due to critical received
 	public function criticalPhaseEffects($ship, $gamedata){
+		
+		parent::criticalPhaseEffects($ship, $gamedata);//Call parent to apply effects like Limpet Bore.			
+		
 		if($this->isDestroyed()) return; //destroyed system does not work... but other critical phase effects may work even if destroyed!
 		
 		$ship = $this->getUnit();
@@ -2589,6 +2610,9 @@ class SelfRepair extends ShipSystem{
 	
 	public function criticalPhaseEffects($ship, $gamedata)
     { 
+    
+		parent::criticalPhaseEffects($ship, $gamedata);//Call parent to apply effects like Limpet Bore.	  
+    
 		if($this->isDestroyed()) return; //destroyed system does not work... but other critical phase effects may work even if destroyed!
 		
 		//how many points are available?
@@ -3009,6 +3033,9 @@ class ShadowPilot extends CnC{
 	
 	public function criticalPhaseEffects($ship, $gamedata)
     { 
+    
+    	parent::criticalPhaseEffects($ship, $gamedata);//Call parent to apply effects like Limpet Bore (altho this would never effect AA ships, but other effects added later might....
+    
 		if($this->isDestroyed()) return; //destroyed system does not work... but other critical phase effects may work even if destroyed!
 		
 		$damageSufferedThisTurn = 0;
@@ -3072,6 +3099,9 @@ class PhasingDrive extends JumpEngine{
 	//destroy ship if damaged while half-phaseing
 	public function criticalPhaseEffects($ship, $gamedata)
     { 
+    
+		parent::criticalPhaseEffects($ship, $gamedata);//Call parent to apply effects like Limpet Bore.	    
+    
 		if (!Movement::isHalfPhased($ship, $gamedata->turn)) return;
 		if (!$this->isDamagedOnTurn($gamedata->turn)) return; 
 		
@@ -3449,6 +3479,9 @@ capacitor is completely emptied.
 	// - add SelfRepair output reduction critical (so the damage isn't just repaired in a few turns ;) ).
 	public function criticalPhaseEffects($ship, $gamedata)
     { 
+    
+		parent::criticalPhaseEffects($ship, $gamedata);//Call parent to apply effects like Limpet Bore.	    
+    
 		if (!$this->isDamagedOnTurn($gamedata->turn)) return; 
 		if (!$this->isDestroyed()) return;		
 		

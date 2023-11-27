@@ -438,6 +438,12 @@ class SensorLoss extends Critical{
     }
 }
 
-
+class LimpetBore extends Critical{
+	//Used by the Limpet Bore Torpedo
+    public $description = "Limpet Bore attached to system.";
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
+            parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
+    }
+} 
 
 ?>

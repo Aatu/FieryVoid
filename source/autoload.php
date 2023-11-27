@@ -2847,6 +2847,7 @@ spl_autoload_register(
 
 //				'solyrn' => '/server/model/ships/korlyan/Solyrn.php',
                 'tmphitreduction' => '/server/model/cricialClasses.php',
+				'limpetbore' => '/server/model/cricialClasses.php',                
 
 //         		'chaffmissile' => '/server/model/weapons/customNexus.php', 
          		'proximitylaser' => '/server/model/weapons/customNexus.php', 
