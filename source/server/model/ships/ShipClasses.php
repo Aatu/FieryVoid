@@ -943,14 +943,15 @@ class BaseShip {
         /*'destroyed' means either destroyed as of PREVIOUS turn, OR reduced to health 0*/
 		$minUndestroyedPriority = 99; //lowest priority of undestroyed system found
 		$undestroyedExists = false; //does an undestroyed system actually exist?
-		$name = strtoupper($tag);
+		$searchName = strtoupper($tag);
 		
 		$returnTab = array();
 		
 		foreach ($this->systems as $currSystem){
+			$displayName = strtoupper( $currSystem->displayName );
 			if(
 				$currSystem->repairPriority <= $minUndestroyedPriority //priority fits
-				and ( ($currSystem->displayName == $tag) || $currSystem->checkTag($tag) ) //tag fits - either directly or to system name
+				and ( ($displayName == $searchName) || $currSystem->checkTag($searchName) ) //tag fits - either directly or to system name
 				and mathlib::isInArc($bearing, $currSystem->startArc, $currSystem->endArc) //arc fits
 			){
 				//tag fits and arc fits - is it destroyed?
