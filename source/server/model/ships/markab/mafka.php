@@ -17,7 +17,9 @@ class Mafka extends BaseShip{
         $this->accelcost = 4;
         $this->rollcost = 3;
         $this->pivotcost = 6;
-        $this->iniativebonus = -5;        
+        $this->iniativebonus = -5; 
+        
+		$this->enhancementOptionsEnabled[] = 'MARK_FERV'; //To activate Religious Fervor attributes.               
         
         $this->addPrimarySystem(new Reactor(4, 18, 0, 0));
         $this->addPrimarySystem(new CnC(4, 12, 0, 0));

@@ -1079,6 +1079,7 @@ class Weapon extends ShipSystem
         }
         $mod += $target->getHitChanceMod($shooter, $posmod, $gamedata->turn, $this);
         $mod += $this->getWeaponHitChanceMod($gamedata->turn);
+		$mod += $shooter->toHitBonus;//Some ships have bonuses to hit on all weapons e.g. Elite Crew and Markab Fervor 
 
         $ammo = $this->getAmmo($fireOrder);
         if ($ammo !== null) {
@@ -1222,6 +1223,7 @@ class Weapon extends ShipSystem
 			}
 		}
 		
+
 
         $hitPenalties = $dew + $bdew + $sdew + $rangePenalty + $jinkSelf + max($jammermod, $jinkTarget) + $noLockMod + $halfphasemod;
         $hitBonuses = $oew + $soew + $firecontrol + $mod;

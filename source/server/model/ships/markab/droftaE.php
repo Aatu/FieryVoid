@@ -8,7 +8,7 @@ class DroftaE extends FighterFlight{
         $this->pointCost = 40*6;
         $this->faction = "Markab";
         $this->phpclass = "DroftaE";
-        $this->shipClass = "Drofta Medium Fighters (early)";
+        $this->shipClass = "Drofta Medium Fighters (Early)";
 	    $this->variantOf = "Drofta Medium Fighters";
         $this->imagePath = "img/ships/MarkabDrofta.png";
 		$this->isd = 1925;
@@ -22,7 +22,11 @@ class DroftaE extends FighterFlight{
         
     	$this->iniativebonus = 18 *5;
         $this->populate();        
+
+		$this->enhancementOptionsEnabled[] = 'FTR_FERV'; //To activate Religious Fervor attributes.
     }
+
+
 
     public function populate(){
 

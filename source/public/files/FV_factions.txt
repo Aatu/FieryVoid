@@ -293,7 +293,9 @@ Missiles - The Llort have a couple of ships which use missiles, and are able to 
 
 
 MARKAB THEOCRACY
-Scattergun - see Gaim 
+Scattergun - see Gaim.
+Religious Fervor - In certain scenarios Markab can fight whilst under the Religious Fervor effect.  This is selected as an Enhancement option in fleet selection at no cost, and confers a +1 to hit with all weapons, +2 initiative and fighters gain a -3 bonus to dropout rolls.  However, this recklessness means their defence ratings are increased by 10 in all directions.  As a scenario specific option, you should check with your opponent before selecting this Enhancement, particularly as it signifies that the Markab should be permitted to ram.
+NOTE - You should not select the Religious Fervor enhancement for individual ships, you MUST either select it for all units in a fleet or none of them.
 
 
 MINBARI FEDERATION

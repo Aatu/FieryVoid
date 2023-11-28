@@ -794,6 +794,9 @@ window.weaponManager = {
 			    mod += weapon.calculateSpecialHitChanceMod(target);
 			}
 
+			if (shooter.toHitBonus != 0){ //Some enhancements give a bonus to hit chance on all weapons e.g. Elite Crew, Markab Fervor.
+			    mod += shooter.toHitBonus;
+			}
 
             if (!shooter.osat) {
                 mod -= shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(shooter, "cnC"), "PenaltyToHit");

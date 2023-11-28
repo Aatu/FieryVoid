@@ -21,7 +21,9 @@ class Shofab extends BaseShip{
         $this->variantOf = 'Shafab Heavy Cruiser';
         $this->occurence = "uncommon";
         $this->iniativebonus = 5;
-        
+
+		$this->enhancementOptionsEnabled[] = 'MARK_FERV'; //To activate Religious Fervor attributes.   
+
         $this->addPrimarySystem(new Reactor(5, 17, 0, 0));
         $this->addPrimarySystem(new CnC(5, 16, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 18, 8, 8));

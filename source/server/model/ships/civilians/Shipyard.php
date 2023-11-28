@@ -28,7 +28,7 @@ class Shipyard extends BaseShip{
         $this->pivotcost = 99;	
 	    
          
-        $this->addPrimarySystem(new Reactor(6, 50, 0, 0));
+        $this->addPrimarySystem(new Reactor(6, 25, 0, 0));
         $this->addPrimarySystem(new CnC(6, 8, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 6, 2, 1));
         $this->addPrimarySystem(new Hangar(3, 1, 1));
