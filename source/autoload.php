@@ -460,6 +460,7 @@ spl_autoload_register(
                 'jashakarn' => '/server/model/ships/dilgar/jashakarN.php',
                 'jashakarp' => '/server/model/ships/dilgar/jashakarP.php',
                 'jastat' => '/server/model/ships/narn/jastat.php',
+     		    'jadul' => '/server/model/ships/narn/JaDul.php',       
                 'jenas' => '/server/model/ships/centauri_old/jenas.php',
                 'jonkurfreighter' => '/server/model/ships/dilgar/jonkurFreighter.php',
                 'jonkurrefit' => '/server/model/ships/dilgar/jonkurRefit.php',
