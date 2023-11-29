@@ -27,12 +27,12 @@ class CorillaniThorkaOSAT extends OSAT
 		
 		$this->addPrimarySystem(new Reactor(5, 9, 0, 2));
 		$this->addPrimarySystem(new Scanner(4, 7, 2, 5));
-		$this->addPrimarySystem(new Thruster(4, 6, 0, 0, 2));
-		$this->addPrimarySystem(new RangedFuser(4, 12, 12, 300, 60));
-		$this->addPrimarySystem(new MediumPlasma(3, 5, 3, 270, 90));
-		$this->addPrimarySystem(new MediumPlasma(3, 5, 3, 270, 90));
-		$this->addPrimarySystem(new PakmaraPlasmaWeb(2, 4, 2, 0, 180));
-		$this->addPrimarySystem(new PakmaraPlasmaWeb(2, 4, 2, 180, 360));		
+		$this->addAftSystem(new Thruster(4, 6, 0, 0, 2));
+		$this->addFrontySystem(new RangedFuser(4, 12, 12, 300, 60));
+		$this->addFrontSystem(new MediumPlasma(3, 5, 3, 270, 90));
+		$this->addFrontySystem(new MediumPlasma(3, 5, 3, 270, 90));
+		$this->addAftSystem(new PakmaraPlasmaWeb(2, 4, 2, 0, 180));
+		$this->addAftSystem(new PakmaraPlasmaWeb(2, 4, 2, 180, 360));		
 
 
 		//0:primary, 1:front, 2:rear, 3:left, 4:right;
@@ -42,10 +42,10 @@ class CorillaniThorkaOSAT extends OSAT
 			$this->hitChart = array(
                 0=> array(
                         9 => "Structure",
-                        11 => "Thruster",
-						12 => "Ranged Fuser",
-						14 => "Medium Plasma Cannon",
-						16 => "Plasma Web",
+                        11 => "2:Thruster",
+						12 => "1:Ranged Fuser",
+						14 => "1:Medium Plasma Cannon",
+						16 => "2:Plasma Web",
 						18 => "Scanner",
                         20 => "Reactor",
                 ),
