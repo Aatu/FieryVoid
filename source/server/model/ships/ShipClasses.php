@@ -1690,8 +1690,9 @@ class BaseShip {
                 $rngCurr++;
                 if (isset($this->hitChart[$location][$roll])){
                     $name = $this->hitChart[$location][$roll];
-                    if($name != 'Primary'){ //no PRIMARY penetrating hits for Flash!
-                        $systemsArray = $this->getSystemsByNameLoc($name, $location, $bearing, false);//undestroyed ystems of this name
+			$name=strtoupper($name); //to ensure working no matter the spelling!
+                    if($name != 'PRIMARY'){ //no PRIMARY penetrating hits for Flash!
+                        $systemsArray = $this->getSystemsByNameLoc($name, $location, $bearing, false);//undestroyed sytems of this name
                         if(sizeof($systemsArray)>0){ //there actually are such systems!
                             $rngTotal+= $rngCurr;
                             $hitChart[$rngTotal] = $name;
@@ -1700,7 +1701,7 @@ class BaseShip {
                     $rngCurr = 0;
                 }
             }
-            if($rngTotal ==0) return $this->getStructureSystem(0);//there is nothing here! penetrate to PRIMARY...
+            if($rngTotal ==0) return $this->getStructureSystem(0);//there is nothing here! assign to Structure...
         }
         $noPrimaryHits = ($weapon->noPrimaryHits || ($weapon->damageType == 'Piercing'));
         if($noPrimaryHits){ //change hit chart! - no PRIMARY hits!
@@ -1712,7 +1713,8 @@ class BaseShip {
                 $rngCurr++;
                 if (isset($this->hitChart[$location][$roll])){
                     $name = $this->hitChart[$location][$roll];
-                    if($name != 'Primary'){ //no PRIMARY penetrating hits
+			$name=strtoupper($name); //to ensure working no matter the spelling!
+                    if($name != 'PRIMARY'){ //no PRIMARY penetrating hits
                         $systemsArray = $this->getSystemsByNameLoc($name, $location, $bearing, true);//accept destroyed systems too
                         if(sizeof($systemsArray)>0){ //there actually are such systems!
                             $rngTotal+= $rngCurr;
