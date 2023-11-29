@@ -659,9 +659,9 @@ class Enhancements{
 		  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 	  }
 
-	  //Markab specific - 'Religious Ferver' refit than provides some benefits long with some penalties.
+	  //Markab specific - 'Religious Ferver' refit than provides some benefits along with some penalties.
 	  $enhID = 'FTR_FERV';	  
-	  if(!in_array($enhID, $flight->enhancementOptionsEnabled)){ //option needs to be specifically enabled
+	  if(in_array($enhID, $flight->enhancementOptionsEnabled)){ //option needs to be specifically enabled
 		  $enhName = 'Religious Fervor';
 		  $enhLimit = 1;	
 		  $enhPrice = 0;	  
