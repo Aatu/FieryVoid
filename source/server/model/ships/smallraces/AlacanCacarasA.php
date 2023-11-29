@@ -23,11 +23,11 @@ class AlacanCacarasA extends OSAT{
         $this->pivotcost = 999;	*/
         $this->iniativebonus = 60;
 
-        $this->addPrimarySystem(new LightParticleBeamShip(1, 2, 1, 180, 360));
-        $this->addPrimarySystem(new CustomLightSoMissileRack(2, 6, 0, 270, 90));
-        $this->addPrimarySystem(new LightParticleBeamShip(1, 2, 1, 0, 360));
-        $this->addPrimarySystem(new CustomLightSoMissileRack(2, 6, 0, 270, 90));
-        $this->addPrimarySystem(new LightParticleBeamShip(1, 2, 1, 0, 180));
+        $this->addFrontSystem(new LightParticleBeamShip(1, 2, 1, 180, 360));
+        $this->addFrontSystem(new CustomLightSoMissileRack(2, 6, 0, 270, 90));
+        $this->addFrontSystem(new LightParticleBeamShip(1, 2, 1, 0, 360));
+        $this->addFrontSystem(new CustomLightSoMissileRack(2, 6, 0, 270, 90));
+        $this->addFrontSystem(new LightParticleBeamShip(1, 2, 1, 0, 180));
         $this->addPrimarySystem(new Reactor(3, 4, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 3, 2, 4));   
                 
@@ -37,8 +37,8 @@ class AlacanCacarasA extends OSAT{
 		$this->hitChart = array(
 			0=> array(
 				10 => "Structure",
-				13 => "Light SO-Missile Rack",
-				15 => "Light Particle Beam",
+				13 => "1:Light SO-Missile Rack",
+				15 => "1:Light Particle Beam",
 				17 => "Scanner",
 				20 => "Reactor",
 			),
