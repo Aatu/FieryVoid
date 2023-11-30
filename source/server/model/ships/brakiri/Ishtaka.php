@@ -35,14 +35,22 @@ class Ishtaka extends StarBaseSixSections
                     13 => "Scanner",
                     16 => "Hangar",
                     18 => "Reactor",
-                    20 => "C&C",
+                    20 => "TAG:C&C",
            		 ),
 		);
 
+		/* let's replace this with appropriate two C&Cs!
+		$this->addPrimarySystem(new ProtectedCnC(6, 36, 0, 0));
+		*/
+		$cnc = new CnC(5, 20, 0, 0);
+		$cnc->startArc = 0;
+		$cnc->endArc = 360;
+        $this->addPrimarySystem($cnc);
+		$cnc = new SecondaryCnC(5, 20, 0, 0);//all-around by default
+        $this->addPrimarySystem($cnc);
 		$this->addPrimarySystem(new Reactor(5, 25, 0, 12));
 		$this->addPrimarySystem(new Hangar(5, 15));
 		$this->addPrimarySystem(new Hangar(5, 15));		
-		$this->addPrimarySystem(new ProtectedCnC(6, 36, 0, 0));
 		$this->addPrimarySystem(new Scanner(5, 18, 6, 9));
 		$this->addPrimarySystem(new Scanner(5, 18, 6, 9));
 		$this->addPrimarySystem(new ShieldGenerator(5, 20, 6, 4));        					
@@ -54,6 +62,15 @@ class Ishtaka extends StarBaseSixSections
 			$min = 0 + ($i*60);
 			$max = 120 + ($i*60);
 
+/*some systems need pre-definition to have arcs set for TAGs!*/
+			$struct = Structure::createAsOuter(5, 120,$min,$max);
+			$cargoBay = new CargoBay(5, 25);
+			$cargoBay->startArc = $min;
+			$cargoBay->endArc = $max;
+			$subReactor = new SubReactorUniversal(5, 25, 0, 0);
+			$subReactor->startArc = $min;
+			$subReactor->endArc = $max;
+
 			$systems = array(
 				new GraviticLance(5, 12, 16, $min, $max),
 				new GravitonBeam(5, 8, 8, $min, $max),
@@ -61,22 +78,22 @@ class Ishtaka extends StarBaseSixSections
 				new GravitonPulsar(5, 5, 2, $min, $max),
 				new GraviticCannon(5, 6, 5, $min, $max),				
 				new GraviticShield(0, 6, 0, 4, $min, $max),	
-				new SubReactorUniversal(5, 25),
-				new CargoBay(5, 25),			
-				new Structure( 5, 120)
+				$subReactor, //new SubReactorUniversal(5, 25),
+				$cargoBay, //new CargoBay(5, 25),			
+				$struct //new Structure( 5, 120)
 			);
 
 			$loc = $this->locations[$i];
 
 			$this->hitChart[$loc] = array(
-                    1 => "Gravitic Shield",
-                    3 => "Gravitic Lance",                    
-                    5 => "Graviton Beam",
-                    7 => "Graviton Pulsar", 
-                    8 => "Gravitic Cannon",                                                              
-                    11 => "Cargo Bay",
-                    12 => "Sub Reactor",
-                    18 => "Structure",
+                    1 => "TAG:Gravitic Shield",
+                    3 => "TAG:Gravitic Lance",                    
+                    5 => "TAG:Graviton Beam",
+                    7 => "TAG:Graviton Pulsar", 
+                    8 => "TAG:Gravitic Cannon",                                                              
+                    11 => "TAG:Cargo Bay",
+                    12 => "TAG:Sub Reactor",
+                    18 => "TAG:Outer Structure",
                     20 => "Primary",
 			);
 

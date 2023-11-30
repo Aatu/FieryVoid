@@ -44,7 +44,7 @@ class GODAlphaAM extends OSAT{
         $this->addAftSystem(new LightPulse(2, 4, 2, 180, 360));
         $this->addAftSystem(new LightPulse(2, 4, 2, 180, 360));
         $this->addAftSystem(new LightPulse(2, 4, 2, 0, 180));
-        $this->addAftySystem(new LightPulse(2, 4, 2, 0, 180));
+        $this->addAftSystem(new LightPulse(2, 4, 2, 0, 180));
         $this->addAftSystem(new InterceptorMkII(2, 4, 2, 0, 360));
         $this->addAftSystem(new InterceptorMkII(2, 4, 2, 0, 360));
 

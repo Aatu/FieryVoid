@@ -23,7 +23,7 @@ class Ruqacc extends OSAT{
         $this->iniativebonus = 60;
 
         $this->addFrontSystem(new IonicLaser(2, 0, 0, 270, 90));
-        $this->addFrontySystem(new IonicLaser(2, 0, 0, 270, 90));
+        $this->addFrontSystem(new IonicLaser(2, 0, 0, 270, 90));
         $this->addFrontSystem(new IonTorpedo(2, 5, 4, 270, 90));
         $this->addFrontSystem(new IonTorpedo(2, 5, 4, 270, 90));
         $this->addFrontSystem(new DualIonBolter(1, 0, 0, 0, 360));

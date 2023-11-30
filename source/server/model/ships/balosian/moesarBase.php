@@ -57,11 +57,17 @@ class MoesarBase extends SmallStarBaseFourSections{
 		$this->addRightSystem(new StdParticleBeam(4, 4, 1, 30, 150));
 
 
+		/*replaced by TAGed versions!
 		$this->addFrontSystem(new Structure( 4, 60));
 		$this->addAftSystem(new Structure( 4, 60));
 		$this->addLeftSystem(new Structure( 4, 60));
 		$this->addRightSystem(new Structure( 4, 60));
+		*/
 		$this->addPrimarySystem(new Structure( 5, 60));
+		$this->addFrontSystem(Structure::createAsOuter(4, 60,270,90));
+		$this->addAftSystem(Structure::createAsOuter(4, 60, 90, 270));
+		$this->addLeftSystem(Structure::createAsOuter(4, 60, 180, 360));
+		$this->addRightSystem(Structure::createAsOuter(4, 60, 0, 180));
 		
 		$this->hitChart = array(			
 			0=> array(
@@ -73,27 +79,27 @@ class MoesarBase extends SmallStarBaseFourSections{
 				20 => "C&C",
 			),
 			1=> array(
-				6 => "Ion Cannon",
-				9 => "Standard Particle Beam",
-				18 => "Structure",
+				6 => "TAG:Ion Cannon",
+				9 => "TAG:Standard Particle Beam",
+				18 => "TAG:Outer Structure",
 				20 => "Primary",
 			),
 			2=> array(
-				6 => "Ion Cannon",
-				9 => "Standard Particle Beam",
-				18 => "Structure",
+				6 => "TAG:Ion Cannon",
+				9 => "TAG:Standard Particle Beam",
+				18 => "TAG:Outer Structure",
 				20 => "Primary",
 			),	
 			3=> array(
-				6 => "Ion Cannon",
-				9 => "Standard Particle Beam",
-				18 => "Structure",
+				6 => "TAG:Ion Cannon",
+				9 => "TAG:Standard Particle Beam",
+				18 => "TAG:Outer Structure",
 				20 => "Primary",
 			),
 			4=> array(
-				6 => "Ion Cannon",
-				9 => "Standard Particle Beam",
-				18 => "Structure",
+				6 => "TAG:Ion Cannon",
+				9 => "TAG:Standard Particle Beam",
+				18 => "TAG:Outer Structure",
 				20 => "Primary",
 			),
 		);

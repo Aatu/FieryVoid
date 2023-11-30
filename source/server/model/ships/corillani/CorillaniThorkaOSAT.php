@@ -28,9 +28,9 @@ class CorillaniThorkaOSAT extends OSAT
 		$this->addPrimarySystem(new Reactor(5, 9, 0, 2));
 		$this->addPrimarySystem(new Scanner(4, 7, 2, 5));
 		$this->addAftSystem(new Thruster(4, 6, 0, 0, 2));
-		$this->addFrontySystem(new RangedFuser(4, 12, 12, 300, 60));
+		$this->addFrontSystem(new RangedFuser(4, 12, 12, 300, 60));
 		$this->addFrontSystem(new MediumPlasma(3, 5, 3, 270, 90));
-		$this->addFrontySystem(new MediumPlasma(3, 5, 3, 270, 90));
+		$this->addFrontSystem(new MediumPlasma(3, 5, 3, 270, 90));
 		$this->addAftSystem(new PakmaraPlasmaWeb(2, 4, 2, 0, 180));
 		$this->addAftSystem(new PakmaraPlasmaWeb(2, 4, 2, 180, 360));		
 

@@ -31,6 +31,8 @@ class AlacanCacarasB extends OSAT{
 	    
         $this->addPrimarySystem(new Reactor(3, 4, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 3, 2, 4));   
+		
+		//lack of Thruster is deliberate - Alacan satellites are explicitly described as incapable of turning
                 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addPrimarySystem(new Structure(4, 20));

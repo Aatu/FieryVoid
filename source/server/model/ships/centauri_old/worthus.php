@@ -29,7 +29,7 @@ class Worthus extends SmallStarBaseFourSections{
 		$this->addRightSystem(new Structure( 5, 108));
 		*/
 		$this->addPrimarySystem(new Structure( 6, 140));//needs to be called first for some reason - static call apparently fails for the first time...
-		$this->addFrontSystem(Structure::createAsOuter(5, 108,270,90));
+		$this->addFrontSystem(Structure::createAsOuter(5, 108, 270,90));
 		$this->addAftSystem(Structure::createAsOuter(5, 108, 90, 270));
 		$this->addLeftSystem(Structure::createAsOuter(5, 108, 180, 360));
 		$this->addRightSystem(Structure::createAsOuter(5, 108, 0, 180));
