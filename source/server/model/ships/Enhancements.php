@@ -245,7 +245,7 @@ class Enhancements{
 		  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);//this is NOT an enhancement - rather an OPTION
 	  }  
 	  
-	  //Poor Crew (official but modified): -5 Initiative, -1 Engine, -1 Sensors, -1 Reactor power, +1 Profile, +2 to critical results
+	  //Poor Crew (official but modified): -5 Initiative, -1 Engine, -1 Sensors, -1 Reactor power, +1 Profile, +2 to critical results, -1 to hit all weapons
 	  //cost: -15% of ship cost (second time: -10%)
 	  $enhID = 'POOR_CREW';
 	  if(!in_array($enhID, $ship->enhancementOptionsDisabled)){ //option is not disabled
@@ -1145,12 +1145,13 @@ class Enhancements{
 						}  	
 						break;			
 						
-					case 'POOR_CREW': //Poor Crew: -1 Engine, -1 Sensors, -1 Reactor power, +1 Profile, +2 to critical results, -5 Initiative
+					case 'POOR_CREW': //Poor Crew: -1 Engine, -1 Sensors, -1 Reactor power, +1 Profile, +2 to critical results, -5 Initiative, -1 to hit all weapons
 						//fixed values
 						$ship->forwardDefense += $enhCount;
 						$ship->sideDefense += $enhCount;
 						$ship->iniativebonus -= $enhCount*5;
 						$ship->critRollMod += $enhCount*2;
+						$ship->toHitBonus -= $enhCount;								
 						
 						//system mods: Scanner						
 						$strongestSystem = null;
@@ -1418,6 +1419,7 @@ class Enhancements{
 							$strippedShip->forwardDefense = $ship->forwardDefense;
 							$strippedShip->sideDefense = $ship->sideDefense;
 							$strippedShip->iniativebonus = $ship->iniativebonus;
+							$strippedShip->toHitBonus = $ship->toHitBonus;	///Just in case needed on Front End.								
 							break;							
 						
 						case 'SLUGGISH': //Sluggish: Initiative  modified

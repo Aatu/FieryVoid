@@ -44,11 +44,11 @@ class Shipyard extends BaseShip{
         $this->addRightSystem(new StructureTechnical(0, 0, 0, 0));
 				
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
-        $this->addFrontSystem(new Structure(2, 150));
-        $this->addAftSystem(new Structure(2, 150));
-        $this->addLeftSystem(new Structure(2, 150));
-        $this->addRightSystem(new Structure(2, 150));
-        $this->addPrimarySystem(new Structure(3, 160));
+        $this->addFrontSystem(new Structure(1, 150));
+        $this->addAftSystem(new Structure(1, 150));
+        $this->addLeftSystem(new Structure(1, 150));
+        $this->addRightSystem(new Structure(1, 150));
+        $this->addPrimarySystem(new Structure(2, 100));
 
         $this->hitChart = array(
                 0=> array(
