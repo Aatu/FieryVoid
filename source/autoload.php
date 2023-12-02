@@ -3105,7 +3105,7 @@ spl_autoload_register(
 						//Gaim						
 						'gaimkastafighteram' => '/server/model/ships/gaim/gaimKastaFighterAM.php',
 						
-						//Extra Yolu
+						//Extra Ships for Existing Factions
 						'superheavymoleculardisruptor' => '/server/model/weapons/molecular.php',
 						'molecularpenetrator' => '/server/model/weapons/molecular.php',
 						'earlyfusionagitator' => '/server/model/weapons/molecular.php',
@@ -3125,7 +3125,9 @@ spl_autoload_register(
 					 	'lassankarefit' => '/server/model/ships/yolu/LassankaRefit.php', 	 						 	
 					 	'lacanna' => '/server/model/ships/yolu/Lacanna.php', 
 					 	'lacannarefit' => '/server/model/ships/yolu/LacannaRefit.php',
-					 	'falaren' => '/server/model/ships/yolu/Falaren.php',					 	 
+					 	'falaren' => '/server/model/ships/yolu/Falaren.php',
+					 	
+					 	'alanti' => '/server/model/ships/abbai/Alanti.php',					 	 
 					 							
 				//Thirdspace
 				'psychicfield' => '/server/model/weapons/specialWeapons.php',
