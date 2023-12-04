@@ -4535,7 +4535,7 @@ class AmmoMissileKK extends AmmoMissileTemplate{
 
 	public $specialRangeCalculation = true;
 	public $rangePenalty = 1;	//but only after 15 hexes
-	public $noLockPenalty = true;		
+	public $noLockPenalty = false;		
 	
     public function getDamage($fireOrder) //actual function to be called, as with weapon!
     {
