@@ -332,8 +332,7 @@ AmmoMissileRackF.prototype.doIndividualNotesTransfer = function () { //prepare i
 		var toReturn = false;
  		this.individualNotesTransfer = Array();	
   //Check for fire order and check Initial Orders  	
-    	if ((this.fireOrders.length > 0) && (gamedata.gamephase == 1)) {	
- //	if ((this.fireOrders.length > 0) && ((gamedata.gamephase == 1) || (gamedata.gamephase == 3))) {		
+    	if ((this.fireOrders.length > 0) && (gamedata.gamephase == 1)) {		
 	//Check for 1 turn loaded, as this will mean it has to be fired in Rapid Mode.	
 			if (this.turnsloaded == 1) {
 				this.individualNotesTransfer.push('R');
@@ -342,7 +341,7 @@ AmmoMissileRackF.prototype.doIndividualNotesTransfer = function () { //prepare i
 	
 	// Code below is for Long Ranged shot conditions, trying to get Rapid mode operating first.  		
 		if (this.turnsloaded == 2) {
-//		if (this.turnsloaded == 2 || this.turnsloaded == 0) {			
+			
 		    var aFireOrder = this.fireOrders[0]; 		    
 		    
 		    var firingShip = gamedata.getShip(aFireOrder.shooterid);
