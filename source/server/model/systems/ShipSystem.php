@@ -111,6 +111,8 @@ class ShipSystem {
 	    if ($this->isDestroyed()) return; // no point if the system is actually destroyed already
 	    			
 	    foreach ($this->criticals as $critical) {
+	    	
+	    	
 	    // Limpet Bore critical effects  	    	
 	    	if ($critical->phpclass == "LimpetBore") {
 	    			
