@@ -8,7 +8,7 @@ class KoshaEarlyAM extends BaseShip{
 		$this->faction = "Kor-Lyan Kingdoms";
         $this->phpclass = "KoshaEarlyAM";
         $this->imagePath = "img/ships/korlyan_koshaEarly.png";
-        $this->shipClass = "Kosha Light Cruiser (early)";
+        $this->shipClass = "Kosha Light Cruiser (Early)";
 			$this->occurence = "common";
 			$this->variantOf = 'Kosha Light Cruiser';
         $this->shipSizeClass = 3;

@@ -9,7 +9,7 @@ class LeklantEarlyAM extends BaseShip{
 //	$this->faction = "Custom Ships";
         $this->phpclass = "LeklantEarlyAM";
         $this->imagePath = "img/ships/korlyan_leklant.png";
-        $this->shipClass = "Leklant Scout Cruiser (early)";
+        $this->shipClass = "Leklant Scout Cruiser (Early)";
 			$this->occurence = "common";
 			$this->variantOf = 'Leklant Scout Cruiser';
         $this->shipSizeClass = 3;

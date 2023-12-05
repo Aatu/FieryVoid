@@ -464,13 +464,13 @@ var ProximityLaserLauncher = function ProximityLaserLauncher(json, ship) {
 ProximityLaserLauncher.prototype = Object.create(Weapon.prototype);
 ProximityLaserLauncher.prototype.constructor = ProximityLaserLauncher;
 
-var ProximityLaserTest = function ProximityLaserTest(json, ship) {
+var ProximityLaser = function ProximityLaser(json, ship) {
     Weapon.call(this, json, ship);
 };
-ProximityLaserTest.prototype = Object.create(Weapon.prototype);
-ProximityLaserTest.prototype.constructor = ProximityLaserTest;
+ProximityLaser.prototype = Object.create(Weapon.prototype);
+ProximityLaser.prototype.constructor = ProximityLaser;
 
-ProximityLaserTest.prototype.getFiringHex = function(shooter, weapon){ //Need to calculate hit chance from where Launcher targets.
+ProximityLaser.prototype.getFiringHex = function(shooter, weapon){ //Need to calculate hit chance from where Launcher targets.
 	var launcher = this.launcher; //Launcher data is held in Prox Laser weapon as a variable.
 	
 	var sPosLaunch; 

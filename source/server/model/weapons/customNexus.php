@@ -8051,7 +8051,7 @@ class LimpetBoreBase extends LimpetBoreTorp{
 
 */
 
-
+/*
 class ProximityLaser extends Weapon{
         public $name = "ProximityLaser";
         public $displayName = "Proximity Laser";
@@ -8135,7 +8135,7 @@ class ProximityLaser extends Weapon{
 		
 }//endof ProximityLaser
 
-
+*/
 
 
 // Safe working version - GTS - 12jan23

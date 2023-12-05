@@ -2853,7 +2853,8 @@ spl_autoload_register(
 				'limpetbore' => '/server/model/cricialClasses.php',                
 
 //         		'chaffmissile' => '/server/model/weapons/customNexus.php', 
-         		'proximitylaser' => '/server/model/weapons/customNexus.php', 
+         		'proximitylaser' => '/server/model/weapons/specialWeapons.php',
+         		'proximitylaserlauncher' => '/server/model/weapons/specialWeapons.php',         		 
          		'fmissilerack' => '/server/model/weapons/customNexus.php', 
          		'rangedfmissilerack' => '/server/model/weapons/customNexus.php', 
          		'limpetboretorp' => '/server/model/weapons/customNexus.php', 

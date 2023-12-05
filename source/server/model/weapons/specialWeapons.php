@@ -5268,8 +5268,8 @@ class ProximityLaserLauncher extends Weapon{
 }//endof class ProximityLaserLauncher
 
 
-   class ProximityLaserTest extends Weapon{        
-        public $name = "ProximityLaserTest";
+   class ProximityLaser extends Weapon{        
+        public $name = "ProximityLaser";
         public $displayName = "Proximity Laser";
 		public $iconPath = "ProximityLaser.png";        
         

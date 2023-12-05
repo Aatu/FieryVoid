@@ -57,12 +57,31 @@ class KoskovaTestbed extends BaseShip{
    
         $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));
+        
+		$Targeter1 = new ProximityLaser(4, 6, 6, 300, 60, 'A'); 
+		$Launcher1 = new ProximityLaserLauncher(0, 1, 0, 300, 60, 'A');
+		$Targeter1->addLauncher($Launcher1);
+		$this->addFrontSystem($Targeter1);
+		$this->addFrontSystem($Launcher1);        
+
+		$Targeter2 = new ProximityLaser(4, 6, 6, 300, 60, 'B'); 
+		$Launcher2 = new ProximityLaserLauncher(0, 1, 0, 300, 60, 'B');
+		$Targeter2->addLauncher($Launcher2);
+		$this->addFrontSystem($Targeter2);
+		$this->addFrontSystem($Launcher2);  
+		
+		$Targeter3 = new ProximityLaser(4, 6, 6, 300, 60, 'C'); 
+		$Launcher3 = new ProximityLaserLauncher(0, 1, 0, 300, 60, 'C');
+		$Targeter3->addLauncher($Launcher3);
+		$this->addFrontSystem($Targeter3);
+		$this->addFrontSystem($Launcher3);  		        
+        
 //        $this->addFrontSystem(new FMissileRack(3, 'F', 240, 60, false));
 //        $this->addFrontSystem(new FMissileRack(3, 6, 0, 240, 60, false));
-        $this->addFrontSystem(new AmmoMissileRackF(3, 0, 0, 300, 60, $ammoMagazine, false));
-        $this->addFrontSystem(new AmmoMissileRackF(3, 0, 0, 300, 60, $ammoMagazine, false));
-		$this->addFrontSystem(new LimpetBoreTorpedo(3, 0, 0, 300, 60));
-		$this->addFrontSystem(new LimpetBoreTorpedo(3, 0, 0, 300, 60));
+//$this->addFrontSystem(new AmmoMissileRackF(3, 0, 0, 300, 60, $ammoMagazine, false));
+//        $this->addFrontSystem(new AmmoMissileRackF(3, 0, 0, 300, 60, $ammoMagazine, false));
+//		$this->addFrontSystem(new LimpetBoreTorpedo(3, 0, 0, 300, 60));
+//		$this->addFrontSystem(new LimpetBoreTorpedo(3, 0, 0, 300, 60));
 //        $this->addFrontSystem(new FMissileRack(3, 'F', 300, 120, false));
 		$this->addFrontSystem(new LimpetBoreTorpedoBase(2, 5, 3, 270, 90));
 //		$this->addFrontSystem(new DirectLimpetBore(2, 5, 3, 270, 90));
@@ -76,12 +95,12 @@ class KoskovaTestbed extends BaseShip{
 //        $this->addAftSystem(new MultiDefenseLauncher(3, 'D', 60, 240, false));
 
 //        $this->addLeftSystem(new MultiDefenseLauncher(3, 'D', 240, 60, false));
-        $this->addLeftSystem(new ProximityLaser(4, 6, 1, 240, 60));
+//        $this->addLeftSystem(new ProximityLaser(4, 6, 1, 240, 60));
 //        $this->addLeftSystem(new FMissileRack(3, 6, 0, 180, 360, false));
         $this->addLeftSystem(new Thruster(4, 15, 0, 5, 3));
 
 //        $this->addRightSystem(new MultiDefenseLauncher(3, 'D', 300, 120, false));
-        $this->addRightSystem(new ProximityLaser(4, 6, 1, 300, 120));
+//        $this->addRightSystem(new ProximityLaser(4, 6, 1, 300, 120));
 //        $this->addRightSystem(new FMissileRack(3, 6, 0, 0, 180, false));
         $this->addRightSystem(new Thruster(4, 15, 0, 5, 4));
         

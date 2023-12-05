@@ -53,9 +53,24 @@ class Kolosk extends BaseShip{
         $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));
         $this->addFrontSystem(new FMissileRack(3, 6, 0, 240, 60, false));
-        $this->addFrontSystem(new ProximityLaser(3, 6, 6, 300, 60));
-        $this->addFrontSystem(new ProximityLaser(3, 6, 6, 300, 60));
-        $this->addFrontSystem(new ProximityLaser(3, 6, 6, 300, 60));
+//        $this->addFrontSystem(new ProximityLaser(3, 6, 6, 300, 60));
+		$TargeterA = new ProximityLaser(0, 1, 0, 300, 60, 'A');
+		$LauncherA = new ProximityLaserLauncher(3, 0, 0, 300, 60, 'A'); 
+		$TargeterA->addLauncher($LauncherA);
+		$this->addFrontSystem($TargeterA);
+		$this->addFrontSystem($LauncherA);
+//        $this->addFrontSystem(new ProximityLaser(3, 6, 6, 300, 60));
+		$TargeterB = new ProximityLaser(0, 1, 0, 300, 60, 'B');
+		$LauncherB = new ProximityLaserLauncher(3, 0, 0, 300, 60, 'B'); 
+		$TargeterB->addLauncher($LauncherB);
+		$this->addFrontSystem($TargeterB);
+		$this->addFrontSystem($LauncherB);
+//        $this->addFrontSystem(new ProximityLaser(3, 6, 6, 300, 60));
+		$TargeterC = new ProximityLaser(0, 1, 0, 300, 60, 'C');
+		$LauncherC = new ProximityLaserLauncher(3, 0, 0, 300, 60, 'C'); 
+		$TargeterC->addLauncher($LauncherC);
+		$this->addFrontSystem($TargeterC);
+		$this->addFrontSystem($LauncherC);
         $this->addFrontSystem(new FMissileRack(3, 6, 0, 300, 120, false));
 
         $this->addAftSystem(new Thruster(4, 7, 0, 2, 2));
@@ -65,12 +80,22 @@ class Kolosk extends BaseShip{
         $this->addAftSystem(new AmmoMissileRackD(2, 0, 0, 60, 240, $ammoMagazine, false));
 
         $this->addLeftSystem(new AmmoMissileRackD(4, 0, 0, 240, 60, $ammoMagazine, false));
-        $this->addLeftSystem(new ProximityLaser(4, 6, 6, 240, 60));
+//        $this->addLeftSystem(new ProximityLaser(4, 6, 6, 240, 60));
+		$TargeterD = new ProximityLaser(0, 1, 0, 240, 60, 'D');
+		$LauncherD = new ProximityLaserLauncher(4, 0, 0, 240, 60, 'D'); 
+		$TargeterD->addLauncher($LauncherD);
+		$this->addLeftSystem($TargeterD);
+		$this->addLeftSystem($LauncherD);  
         $this->addLeftSystem(new FMissileRack(3, 6, 0, 180, 360, false));
         $this->addLeftSystem(new Thruster(4, 15, 0, 5, 3));
 
         $this->addRightSystem(new AmmoMissileRackD(4, 0, 0, 300, 120, $ammoMagazine, false));
-        $this->addRightSystem(new ProximityLaser(4, 6, 6, 300, 120));
+//        $this->addRightSystem(new ProximityLaser(4, 6, 6, 300, 120));
+		$TargeterE = new ProximityLaser(0, 1, 0, 300, 120, 'E');
+		$LauncherE = new ProximityLaserLauncher(4, 0, 0, 300, 120, 'E'); 
+		$TargeterE->addLauncher($LauncherE);
+		$this->addRightSystem($TargeterE);
+		$this->addRightSystem($LauncherE);
         $this->addRightSystem(new FMissileRack(3, 6, 0, 0, 180, false));
         $this->addRightSystem(new Thruster(4, 15, 0, 5, 4));
         

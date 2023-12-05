@@ -9,7 +9,7 @@ class KoskovaEarlyAM extends BaseShip{
 //	$this->faction = "Custom Ships";
         $this->phpclass = "KoskovaEarlyAM";
         $this->imagePath = "img/ships/korlyan_koskova2.png";
-        $this->shipClass = "Koskova Battlecruiser (early)";
+        $this->shipClass = "Koskova Battlecruiser (Early)";
 			$this->occurence = "common";
 			$this->variantOf = 'Koskova Battlecruiser';
         $this->shipSizeClass = 3;
@@ -74,12 +74,22 @@ class KoskovaEarlyAM extends BaseShip{
         $this->addAftSystem(new AmmoMissileRackD(2, 0, 0, 60, 240, $ammoMagazine, false));
 
         $this->addLeftSystem(new AmmoMissileRackD(4, 0, 0, 240, 60, $ammoMagazine, false));
-        $this->addLeftSystem(new ProximityLaser(4, 6, 1, 240, 60));
+//        $this->addLeftSystem(new ProximityLaser(4, 6, 1, 240, 60));
+		$TargeterA = new ProximityLaser(0, 1, 0, 240, 60, 'A');
+		$LauncherA = new ProximityLaserLauncher(4, 0, 0, 240, 60, 'A'); 
+		$TargeterA->addLauncher($LauncherA);
+		$this->addLeftSystem($TargeterA);
+		$this->addLeftSystem($LauncherA);
         $this->addLeftSystem(new AmmoMissileRackL(3, 0, 0, 180, 360, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         $this->addLeftSystem(new Thruster(4, 15, 0, 5, 3));
 
-        $this->addRightSystem(new AmmoMissileRackD(4, 0, 0, 300, 10, $ammoMagazine, false));
-        $this->addRightSystem(new ProximityLaser(4, 6, 1, 300, 120));
+        $this->addRightSystem(new AmmoMissileRackD(4, 0, 0, 300, 120, $ammoMagazine, false));
+//        $this->addRightSystem(new ProximityLaser(4, 6, 1, 300, 120));
+		$TargeterB = new ProximityLaser(0, 1, 0, 300, 120, 'B');
+		$LauncherB = new ProximityLaserLauncher(4, 0, 0, 300, 120, 'B'); 
+		$TargeterB->addLauncher($LauncherB);
+		$this->addRightSystem($TargeterB);
+		$this->addRightSystem($LauncherB);
         $this->addRightSystem(new AmmoMissileRackL(3, 0, 0, 0, 180, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         $this->addRightSystem(new Thruster(4, 15, 0, 5, 4));
         
