@@ -99,16 +99,22 @@ Spark Curtain (completely unofficial, ALTERNATE TIMELINE):
 	Cost: 40 + 10/Spark Field
 	Limit: 1 
 
-Essan Barony refit (Barony-specific variant rather than enhancement)
+Essan Barony refit (Barony-specific variant rather than enhancement):
 	Effect: Engine +1 output and +2 structure boxes, Sensors -1 output and -2 structure boxes, Structure armor +1 on all sections (no higher than 5) 
 	Cost: 0
 	Limit: 1 
 
-Eethan Barony refit (Barony-specific variant rather than enhancement; this represents Power Pod upgrade, changed to be distributed ship upgrade rather than add-on system)
+Eethan Barony refit (Barony-specific variant rather than enhancement; this represents Power Pod upgrade, changed to be distributed ship upgrade rather than add-on system):
 	Effect: +2 free thrust, +25% available power, +0.1 turn delay, -5 Initiative, +4 critical roll modifier for Reactor and Engine
 	Cost: 10% of ship cost
 	Limit: 1
-	
+
+MARKAB:
+
+Religious Fervor:
+	Effect: +1 to hit on all weapons (or +5 OB for fighters), +10 initiative, Defense ratings increased by 10 (e.g. easier to be hit).  Fighters also gain -3 to Dropout.
+	Cost: 0
+	Limit: 1	
 	
 SHADOWS:
 
