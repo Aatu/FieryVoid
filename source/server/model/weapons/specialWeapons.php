@@ -5234,14 +5234,13 @@ class ProximityLaserLauncher extends Weapon{
 	}
 	
     public function fire($gamedata, $fireOrder) //Do i even need this
-    { //sadly here it really has to be completely redefined... or at least I see no option to avoid this
+    { 
         $this->changeFiringMode($fireOrder->firingMode);//changing firing mode may cause other changes, too!
         $shooter = $gamedata->getShipById($fireOrder->shooterid);        
         $rolled = Dice::d(100);
         $fireOrder->rolled = $rolled; 
-//		$fireOrder->pubnotes .= "Hit chance " . $fireOrder->needed . "%,"; //MIGHT NEED ADJUSTED.
+		$fireOrder->pubnotes .= "Automatically hits."; //MIGHT NEED ADJUSTED.
 		if($rolled <= $fireOrder->needed){//HIT!
-//			$fireOrder->pubnotes .= " HIT - target vortex is disrupted, ships entering it are destroyed! ";
 			$fireOrder->shotshit++;
             $this->ammunition--;
             Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);			
@@ -5291,7 +5290,11 @@ class ProximityLaserLauncher extends Weapon{
               
         
         public $weaponClass = "Laser"; 
-        public $damageType = "Raking";         
+        public $damageType = "Raking";
+        
+	public $firingModes = array(
+		1 => "Laser"
+	);                 
         
         public $rangePenalty = 0.5; //-1 per 2 hexes from Launcher's target hex.
         public $fireControl = array(null, 3, 3); //No fire control per se, but gets automatic +3 points.
