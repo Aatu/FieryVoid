@@ -106,6 +106,8 @@ class Weapon extends ShipSystem
 	protected $overrideCallingRestrictions = false; //when set to true overrides default Called Shot setting (e.g., make a ballistic do a called shot)
 	protected $canOnlyCalledShot = false;	
 //	public $canTargetOtherSections = false; //NOT IMPLEMENTED. When set to true, weapon can called shot systems on external sections of target not facing firing ship.
+	protected $hasSpecialLaunchHexCalculation = false; //Weapons like Proximty Laser use a separate launcher system to determine point of shot.
+
 		
     public $shots = 1;
     public $shotsArray = array();

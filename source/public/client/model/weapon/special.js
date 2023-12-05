@@ -457,3 +457,31 @@ PsychicField.prototype.getDefensiveHitChangeMod = function (target, shooter, wea
 	}
 	return out;
 }; 
+
+var ProximityLaserLauncher = function ProximityLaserLauncher(json, ship) {
+    Weapon.call(this, json, ship);
+};
+ProximityLaserLauncher.prototype = Object.create(Weapon.prototype);
+ProximityLaserLauncher.prototype.constructor = ProximityLaserLauncher;
+
+var ProximityLaserTest = function ProximityLaserTest(json, ship) {
+    Weapon.call(this, json, ship);
+};
+ProximityLaserTest.prototype = Object.create(Weapon.prototype);
+ProximityLaserTest.prototype.constructor = ProximityLaserTest;
+
+ProximityLaserTest.prototype.getFiringHex = function(shooter, weapon){ //Need to calculate hit chance from where Launcher targets.
+	var launcher = this.launcher; //Launcher data is held in Prox Laser weapon as a variable.
+	
+	var sPosLaunch; 
+
+	   	if (launcher.fireOrders.length > 0)	{	// check that launcher has firing orders.
+			var aFireOrder = launcher.fireOrders[0]; 		    
+
+			sPosLaunch = new hexagon.Offset(aFireOrder.x, aFireOrder.y); 
+		} else{
+		sPosLaunch = shipManager.movement.getPositionAtStartOfTurn(shooter, gamedata.turn); 	
+		}	
+	return sPosLaunch;
+	
+	};

@@ -5239,10 +5239,12 @@ class ProximityLaserLauncher extends Weapon{
         $shooter = $gamedata->getShipById($fireOrder->shooterid);        
         $rolled = Dice::d(100);
         $fireOrder->rolled = $rolled; 
-		$fireOrder->pubnotes .= " chance " . $fireOrder->needed . "%,"; //MIGHT NEED ADJUSTED.
+//		$fireOrder->pubnotes .= "Hit chance " . $fireOrder->needed . "%,"; //MIGHT NEED ADJUSTED.
 		if($rolled <= $fireOrder->needed){//HIT!
 //			$fireOrder->pubnotes .= " HIT - target vortex is disrupted, ships entering it are destroyed! ";
 			$fireOrder->shotshit++;
+            $this->ammunition--;
+            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);			
 		}else{ //MISS!  Should never happen.
 			$fireOrder->pubnotes .= " MISSED! ";
 		}
@@ -5296,7 +5298,7 @@ class ProximityLaserLauncher extends Weapon{
         
 		private $launcher = null;   //Variable where paired launcher be assigned.
 		private $pairing = null;	//Which launcher is it paired with?	    
-         
+		protected $hasSpecialLaunchHexCalculation = true; //Weapons like Proximty Laser use a separate launcher system to determine point of shot.         
     
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $pairing){
  			$this->pairing = $pairing;
@@ -5354,9 +5356,17 @@ class ProximityLaserLauncher extends Weapon{
             $this->ammunition = $amount;
         }
 
+       public function fire($gamedata, $fireOrder){ //note ammo usage
+            parent::fire($gamedata, $fireOrder);
+            $this->ammunition--;
+            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);
+        }
+
         public function stripForJson() {
             $strippedSystem = parent::stripForJson();    
-            $strippedSystem->ammunition = $this->ammunition;           
+            $strippedSystem->ammunition = $this->ammunition;
+            $strippedSystem->launcher = $this->launcher; 
+            $strippedSystem->hasSpecialLaunchHexCalculation = $this->hasSpecialLaunchHexCalculation;                              
             return $strippedSystem;
         }
         

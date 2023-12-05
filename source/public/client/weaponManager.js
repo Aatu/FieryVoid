@@ -694,6 +694,21 @@ window.weaponManager = {
     }, //endof calculateRamChance
 
 
+	getFiringHex: function getFiringHex(shooter, weapon){
+        var sPosLaunch = null;
+        
+ 				if (weapon.hasSpecialLaunchHexCalculation){ //Does weapon have a different method of determining point of shot e.g. Proximity Laser?
+					sPosLaunch = weapon.getFiringHex(shooter, weapon);
+				}else{
+					if (weapon.ballistic){	 //standard ballistic calculation						
+						sPosLaunch = shipManager.movement.getPositionAtStartOfTurn(shooter, gamedata.turn);	
+					} else { //Direct fire
+							var sPosLaunch= shipManager.getShipPosition(shooter);
+					}
+		}	      
+		return sPosLaunch;
+	},
+
     calculateHitChange: function calculateHitChange(shooter, target, weapon, calledid) {
 		if (weapon.isRammingAttack) {
 			return weaponManager.calculateRamChance(shooter, target, weapon, calledid);
@@ -701,7 +716,8 @@ window.weaponManager = {
 	    var defence = 0;
 	    var distance = 0;
 	    if (weapon.ballistic){		    
-		var sPosLaunch = shipManager.movement.getPositionAtStartOfTurn(shooter, gamedata.turn); 		    
+		var sPosLaunch = weaponManager.getFiringHex(shooter, weapon); 	
+//		var sPosLaunch = shipManager.movement.getPositionAtStartOfTurn(shooter, gamedata.turn); 		    
 		var sPosTarget = shipManager.getShipPosition(target);
 		defence = weaponManager.getShipDefenceValuePos(sPosLaunch, target);
 	        distance = sPosLaunch.distanceTo(sPosTarget).toFixed(2); 
