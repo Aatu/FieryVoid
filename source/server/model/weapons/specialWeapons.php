@@ -5220,7 +5220,7 @@ class ProximityLaserLauncher extends Weapon{
 	    		
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);        
-		$this->data["Special"] = "Launcher " . $this->pairing ."."; 
+		$this->data["Special"] = "Proximity Launcher " . $this->pairing ."."; 
 		$this->data["Special"] .= "<br>Use this Launcher to select the hex from where its paired Proximity Laser will fire."; 
 		$this->data["Special"] .= "<br>IMPORTANT - The Proximity Laser should be targeted at the same time as this launcher is fired.";
 		$this->data["Special"] .= "<br>DO NOT FIRE SEPARATELY."; 		 		
@@ -5313,7 +5313,7 @@ class ProximityLaserLauncher extends Weapon{
 
 		public function setSystemDataWindow($turn){
 			parent::setSystemDataWindow($turn);  
-			$this->data["Special"] = "Paired with Launcher ". $this->pairing ."."; 
+			$this->data["Special"] = "Paired with Proximity Launcher ". $this->pairing ."."; 
 			$this->data["Special"] .= "<br>Use the paired Proximity Launcher system to target a hex, this will be the location from where this weapon will fire at its target in Firing Phase.";
 			$this->data["Special"] .= "<br>Range Penalty will be calculated from the hex the Launcher hits, not from this ship.";
 			$this->data["Special"] .= "<br>IMPORTANT - The paired Proximity Launcher should be fired at the same time as this weapon is targeted.";

@@ -4,13 +4,13 @@ class Alanti extends OSAT{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 225; //-25 PV for having no Shield Projector
+	$this->pointCost = 250; //-25 PV for having no Shield Projector
 	$this->faction = "Abbai Matriarchate";
         $this->phpclass = "Alanti";
         $this->imagePath = "img/ships/AbbaiAlanti.png";
         $this->shipClass = 'Alanti Defense Satellite';
         $this->canvasSize = 100;
-	    $this->unofficial = 'S'; //Semi-official - added as reasonably close to official Ishtaka, while Grav Shifters are unavailable in FV        
+	    $this->unofficial = 'S'; //Semi-official - added as reasonably close to official.  Comms Disruptor has replaced Shield Projector.     
 
         $this->isd = 2230;
 
@@ -27,7 +27,8 @@ class Alanti extends OSAT{
         $this->addPrimarySystem(new Reactor(4, 7, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 9, 3, 7)); 
         $this->addPrimarySystem(new Thruster(3, 6, 0, 0, 2)); 
-        $this->addPrimarySystem(new CombatLaser(3, 0, 0, 270, 90)); 
+        $this->addPrimarySystem(new CombatLaser(3, 0, 0, 270, 90));
+        $this->addPrimarySystem(new CommDisruptor(3, 0, 0, 270, 90));         
         $this->addPrimarySystem(new QuadArray(3, 0, 0, 0, 360));
         $this->addPrimarySystem(new ShieldGenerator(3, 8, 2, 2));
         $this->addPrimarySystem(new GraviticShield(0, 6, 0, 2, 0, 360));
