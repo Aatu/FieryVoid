@@ -470,13 +470,11 @@ var ProximityLaser = function ProximityLaser(json, ship) {
 ProximityLaser.prototype = Object.create(Weapon.prototype);
 ProximityLaser.prototype.constructor = ProximityLaser;
 
-ProximityLaser.prototype.getFiringHex = function(shooter, weapon){ //Need to calculate hit chance from where Launcher targets.
-	var launcher = this.launcher; //Launcher data is held in Prox Laser weapon as a variable.
-	
+ProximityLaser.prototype.getFiringHex = function(shooter, weapon){ //Need to calculate hit chance from where Launcher targets.	
 	var sPosLaunch; 
 
 	   	if (this.launcher.fireOrders.length > 0)	{	// check that launcher has firing orders.
-			var aFireOrder = launcher.fireOrders[0]; 		    
+			var aFireOrder = this.launcher.fireOrders[0]; 		    
 
 			sPosLaunch = new hexagon.Offset(aFireOrder.x, aFireOrder.y); 
 		} else{
