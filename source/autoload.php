@@ -2920,6 +2920,8 @@ spl_autoload_register(
 				//TEMPORARY campaign-related designs - essentially upgrades of existing ships		    
 				'hyperionpulsearmored' => '/server/model/ships/customs/HyperionPulseArmored.php',
 				'gaimraxas' => '/server/model/ships/customs/gaimRaxas.php',
+				'gaimvraxas' => '/server/model/ships/customs/gaimVRaxas.php',
+				'heavyboltaccelerator' => '/server/model/weapons/particle.php',								
 				'apollowsf' => '/server/model/ships/customs/ApolloWSF.php',					
 				'prototype' => '/server/model/ships/customs/Prototype.php',
 				'explorerprototype' => '/server/model/ships/customs/ExplorerPrototype.php',
@@ -2944,7 +2946,9 @@ spl_autoload_register(
                 		'ammomissilek' => '/server/model/systems/baseSystems.php',
                 		'ammomissilem' => '/server/model/systems/baseSystems.php',
                 		'ammomissilekk' => '/server/model/systems/baseSystems.php',
-                		'ammomissilex' => '/server/model/systems/baseSystems.php',                		                 		                 		                		
+                		'ammomissilex' => '/server/model/systems/baseSystems.php',
+                		'ammomissileid' => '/server/model/systems/baseSystems.php',             
+                		                		                 		                 		                		
 						
                 		'ammomissilefb' => '/server/model/systems/baseSystems.php',
                 		'ammomissilefl' => '/server/model/systems/baseSystems.php',

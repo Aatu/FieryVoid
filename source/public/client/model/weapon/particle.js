@@ -337,3 +337,9 @@ var UnreliableTwinArray = function UnreliableTwinArray(json, ship) {
 };
 UnreliableTwinArray.prototype = Object.create(Particle.prototype);
 UnreliableTwinArray.prototype.constructor = UnreliableTwinArray;
+
+var HeavyBoltAccelerator = function HeavyBoltAccelerator(json, ship) {
+    Particle.call(this, json, ship);
+};
+HeavyBoltAccelerator.prototype = Object.create(Particle.prototype);
+HeavyBoltAccelerator.prototype.constructor = HeavyBoltAccelerator;
