@@ -39,7 +39,7 @@ class gaimVRaxas extends BaseShip{
 //		$this->addPrimarySystem(new Hangar(5, 14));
 		$this->addPrimarySystem(new MolecularPulsar(3, 8, 2, 0, 360));
 		$this->addPrimarySystem(new MolecularPulsar(3, 8, 2, 0, 360));
- 		$AAC = $this->createAdaptiveArmorController(3, 1, 0); //$AAtotal, $AApertype, $AApreallocated
+ 		$AAC = $this->createAdaptiveArmorController(3, 2, 0); //$AAtotal, $AApertype, $AApreallocated
 		$this->addPrimarySystem( $AAC );       		
 
 		$this->addFrontSystem(new Thruster(4, 20, 0, 5, 1));
