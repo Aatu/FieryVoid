@@ -1643,10 +1643,10 @@ class ParticleAccelerator extends Raking{
 	
 
 //Custome weapon for Abraxas Gaim Campaign
-class HeavyBoltAccelerator extends Raking{
-		public $name = "HeavyBoltAccelerator";
-        public $displayName = "Heavy Bolt Accelerator";
-        public $iconPath = "heavyBoltAccelerator.png";
+class BoltAccelerator extends Raking{
+		public $name = "BoltAccelerator";
+        public $displayName = "Bolt Accelerator";
+        public $iconPath = "BoltAccelerator.png";
 	
         public $animation = "bolt";
         public $animationColor = array(255, 163, 26);

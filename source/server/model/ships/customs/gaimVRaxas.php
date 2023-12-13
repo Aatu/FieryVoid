@@ -28,7 +28,7 @@ class gaimVRaxas extends BaseShip{
 
 		$this->iniativebonus = 0*5;
 
-		$this->advancedArmor = true;  			
+//		$this->advancedArmor = true;  			
 
 
 		$this->addPrimarySystem(new Reactor(5, 24, 0, 0));
@@ -45,14 +45,14 @@ class gaimVRaxas extends BaseShip{
 		$this->addFrontSystem(new Thruster(4, 20, 0, 5, 1));
 		$this->addFrontSystem(new ImprovedNeutronLaser(4, 11, 7, 300, 60));
 		$this->addFrontSystem(new ImprovedNeutronLaser(4, 11, 7, 300, 60));
-		$this->addFrontSystem(new HeavyBoltAccelerator(4, 9, 7, 240, 60));
-		$this->addFrontSystem(new HeavyBoltAccelerator(4, 9, 7, 300, 120));				
+		$this->addFrontSystem(new BoltAccelerator(4, 9, 7, 240, 60));
+		$this->addFrontSystem(new BoltAccelerator(4, 9, 7, 300, 120));				
 //		$this->addFrontSystem(new Bulkhead(0, 2));
 //		$this->addFrontSystem(new Bulkhead(0, 2));
 
 		$this->addAftSystem(new Thruster(4, 20, 0, 5, 2));
-		$this->addAftSystem(new HeavyBoltAccelerator(4, 9, 5, 120, 240));
-		$this->addAftSystem(new HeavyBoltAccelerator(4, 9, 5, 120, 240));
+		$this->addAftSystem(new BoltAccelerator(4, 9, 5, 120, 240));
+		$this->addAftSystem(new BoltAccelerator(4, 9, 5, 120, 240));
         $this->addAftSystem(new EMShield(4, 6, 0, 3, 120, 300));
         $this->addAftSystem(new EMShield(4, 6, 0, 3, 60, 240));		
 //		$this->addAftSystem(new Bulkhead(0, 2));
