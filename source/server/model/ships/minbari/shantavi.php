@@ -64,14 +64,14 @@ class Shantavi extends HeavyCombatVessel{
             ),
             1=> array(
                     4 => "Thruster",
-                    6 => "Neutron Laser",
+                    6 => "Improved Neutron Laser",
                     9 => "Molecular Pulsar",
                     18 => "Structure",
                     20 => "Primary",
             ),
             2=> array(
                     6 => "Thruster",
-                    9 => "Neutron Laser",
+                    9 => "Improved Neutron Laser",
 					12 => "Fusion Cannon",
                     18 => "Structure",
                     20 => "Primary",
