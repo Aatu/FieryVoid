@@ -256,6 +256,21 @@ AmmoMissileRackS.prototype.calculateSpecialHitChanceMod = function (target) {
 	return mod; 
 };
 
+//For Intercept Missile, to allow Missile Racks to select canSelfIntercept in Firing phase.
+AmmoMissileRackS.prototype.canWeaponInterceptAtAll = function (weapon) {
+  var canIntercept = false;
+
+  // Check if weapon intercept rating is greater than 0
+  if (this.intercept > 0) {
+    canIntercept = true;
+  }else {
+    // Check if any value in the interceptArray is greater than 0
+    var interceptArray = Object.values(this.interceptArray);
+    canIntercept = interceptArray.some(element => element > 0);
+  }
+  return canIntercept;
+};
+
 
 var AmmoMissileRackSO = function AmmoMissileRackSO(json, ship) {
     AmmoMissileRackS.call(this, json, ship);
@@ -288,9 +303,9 @@ AmmoMissileRackR.prototype = Object.create(AmmoMissileRackS.prototype);
 AmmoMissileRackR.prototype.constructor = AmmoMissileRackR;
 
 var AmmoMissileRackD = function AmmoMissileRackD(json, ship) {
-    Ballistic.call(this, json, ship);
+    AmmoMissileRackS.call(this, json, ship);
 };
-AmmoMissileRackD.prototype = Object.create(Ballistic.prototype);
+AmmoMissileRackD.prototype = Object.create(AmmoMissileRackS.prototype);
 AmmoMissileRackD.prototype.constructor = AmmoMissileRackD;
 
 var AmmoMissileRackB = function AmmoMissileRackB(json, ship) {
@@ -299,14 +314,20 @@ var AmmoMissileRackB = function AmmoMissileRackB(json, ship) {
 AmmoMissileRackB.prototype = Object.create(AmmoMissileRackS.prototype);
 AmmoMissileRackB.prototype.constructor = AmmoMissileRackB;
 
+var AmmoMissileRackA = function AmmoMissileRackA(json, ship) {
+    AmmoMissileRackS.call(this, json, ship);
+};
+AmmoMissileRackA.prototype = Object.create(AmmoMissileRackS.prototype);
+AmmoMissileRackA.prototype.constructor = AmmoMissileRackA;
+
 var AmmoBombRack = function AmmoBombRack(json, ship) {
-    Ballistic.call(this, json, ship);
+    Ballistic.call(this, json, ship);//I don't think Bomb Rack ever needs any AmmoMissileRackS function?
 };
 AmmoBombRack.prototype = Object.create(Ballistic.prototype);
 AmmoBombRack.prototype.constructor = AmmoBombRack;
 
 var AmmoFighterRack = function AmmoFighterRack(json, ship) {
-    Ballistic.call(this, json, ship);
+    Ballistic.call(this, json, ship);//I don't think AmmoFighterRack ever needs any AmmoMissileRackS function?
 };
 AmmoFighterRack.prototype = Object.create(Ballistic.prototype);
 AmmoFighterRack.prototype.constructor = AmmoFighterRack;

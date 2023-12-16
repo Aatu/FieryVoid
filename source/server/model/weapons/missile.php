@@ -1072,12 +1072,12 @@ class AmmoMissileRackS extends Weapon{
 	public $specialHitChanceCalculationArray = array();			
 	
 //Adding Intercept variables for Interceptor missiles
-	//public $intercept = 0;	//Adding Intercept variables for Interceptor missiles	
-	//public $ballisticIntercept = false;	
-	//public $interceptArray = array();     	
-	//public $ballisticInterceptArray = array();	
+	public $intercept = 0;	//Adding Intercept variables for Interceptor missiles	
+	public $interceptArray = array(); 
+	public $ballisticIntercept = false;	//Can only intercept other missiles.	    	
+	public $ballisticInterceptArray = array();	//Might not actually be needed currently.
     		
-	
+	public $canModesIntercept = true;	//Some missile launchers can have Interceptor missiles.
 	
 	
     /*ATYPICAL constructor: takes ammo magazine class and (optionally) information about being fitted to stable platform*/
@@ -1101,7 +1101,7 @@ class AmmoMissileRackS extends Weapon{
 			$this->ammoClassesArray[] =  new AmmoMissileM();
 			$this->ammoClassesArray[] =  new AmmoMissileKK();
 			$this->ammoClassesArray[] =  new AmmoMissileX();
-	//		$this->ammoClassesArray[] =  new AmmoMissileI(); //Only available to Class-D launchers on Kor-Lyan ships at this time, created in ship magazine.						
+			$this->ammoClassesArray[] =  new AmmoMissileI();						
 			$this->availableAmmoAlreadySet = true;
 		}
 	
@@ -1162,8 +1162,8 @@ class AmmoMissileRackS extends Weapon{
 		$this->rangePenaltyArray = array();
 		$this->noLockPenaltyArray = array();		 
 		$this->specialHitChanceCalculationArray = array();						
-//		$this->interceptArray = array();//Adding Intercept variables for Interceptor missiles	
-//		$this->ballisticInterceptArray = array();	    		
+		$this->interceptArray = array();//Adding Intercept variables for Interceptor missiles	
+		$this->ballisticInterceptArray = array();	    		
 							
 		
 		//add data for all modes to arrays
@@ -1215,8 +1215,8 @@ class AmmoMissileRackS extends Weapon{
 				$this->rangePenaltyArray[$currMode] = $currAmmo->rangePenalty;
 				$this->noLockPenaltyArray[$currMode] = $currAmmo->noLockPenalty;				
 				$this->specialHitChanceCalculationArray[$currMode] = $currAmmo->specialHitChanceCalculation;							    
-//				$this->interceptArray[$currMode] = $currAmmo->intercept;//Adding Intercept variables for Interceptor missiles	
-//				$this->ballisticInterceptArray[$currMode] = $currAmmo->ballisticIntercept;			    							
+				$this->interceptArray[$currMode] = $currAmmo->intercept;//Adding Intercept variables for Interceptor missiles	
+				$this->ballisticInterceptArray[$currMode] = $currAmmo->ballisticIntercept;			    							
 			}
 		}
 			
@@ -1255,11 +1255,11 @@ class AmmoMissileRackS extends Weapon{
 		$strippedSystem->fixedBonusPulsesArray = $this->fixedBonusPulsesArray;	
 		$strippedSystem->calledShotModArray = $this->calledShotModArray;	//Adding calledShotMod variable for Multiwarhead Missile.
 		$strippedSystem->specialRangeCalculationArray = $this->specialRangeCalculationArray; //Adding for KK Missile
-		$strippedSystem->rangePenaltyArray = $this->rangePenaltyArray;
+		$strippedSystem->rangePenaltyArray = $this->rangePenaltyArray; //Adding Range and No Lock variables for KK Missiles
 		$strippedSystem->noLockPenaltyArray = $this->noLockPenaltyArray;		
-		$strippedSystem->specialHitChanceCalculationArray = $this->specialHitChanceCalculationArray;		
-//		$strippedSystem->interceptArray = $this->interceptArray;//Adding Intercept variables for Interceptor missiles	
-//		$strippedSystem->ballisticInterceptArray = $this->ballisticInterceptArray;							
+		$strippedSystem->specialHitChanceCalculationArray = $this->specialHitChanceCalculationArray;//Adding marker for HARM missiles special hitchance calculation		
+		$strippedSystem->interceptArray = $this->interceptArray;//Adding Intercept nad ballisticIntercept variables for Interceptor missiles	
+		$strippedSystem->ballisticInterceptArray = $this->ballisticInterceptArray;							
 		return $strippedSystem;
 	} 
 	
@@ -1379,7 +1379,7 @@ class AmmoMissileRackS extends Weapon{
 	    
     public function beforeFiringOrderResolution($gamedata) //For Multiwarhead missile
     {
-    	$firingOrders = $this->getFireOrders($gamedata->turn);
+      $firingOrders = $this->getFireOrders($gamedata->turn);
     	
       $originalFireOrder = null;
               foreach ($firingOrders as $fireOrder) { 
@@ -1397,11 +1397,50 @@ class AmmoMissileRackS extends Weapon{
 			$currAmmo = $this->ammoClassesUsed[$originalFireOrder->firingMode];
 		}
 		if ($currAmmo) $currAmmo->beforeFiringOrderResolution($gamedata, $this, $originalFireOrder);
-		
+
         parent::beforeFiringOrderResolution($gamedata);
-        
+    
 	}	//endof function beforeFiringOrderResolution	
 
+	// Add function to check firing modes for an intercept rating, in case Interceptor Missiles are equipped.
+    public function switchModeForIntercept()
+    {
+		    $maxIntercept = 0; // Initialize as null.
+		    $bestFiringMode = 1; // Initialize with default mode
+
+		    foreach ($this->interceptArray as $firingMode => $interceptValue) { //Search through Firing Modes to see if any have Intercept Ratings.
+		        if ($interceptValue > $maxIntercept) { //If so, find highest intercept (to future proof) and pass Intercept Rating and Firing Mode it's associate with.	        
+		            $maxIntercept = $interceptValue;
+		            $bestFiringMode = $firingMode;
+		        }    
+		    $this->changeFiringMode($bestFiringMode); // Switch to the appropriate Firing Mode for best Intercept.
+		    $this->intercept = $maxIntercept;
+  		  }
+	}
+
+	//can intercept only if Magazine holds enough ammo of correct type...
+	public function canInterceptAtAll($gd, $fire, $shooter, $target, $interceptingShip, $firingweapon)
+	{
+		$ammoIsAvailable = false;
+    	$modeName = $this->firingModes[$this->firingMode];	
+		
+		$magazine = $this->unit->getSystemByName("AmmoMagazine");
+		if($magazine){ //else something is wrong - weapon is put on a ship without Ammo Magazine!
+			if($magazine->canDrawAmmo($modeName, 1)) $ammoIsAvailable = true;
+		}
+		return $ammoIsAvailable;
+	}
+
+	public function fireDefensively($gamedata, $interceptedWeapon)//Note that a missile has been used when launcher is fired defensively.
+	{
+		$magazine = $this->unit->getSystemByName("AmmoMagazine");
+    	$modeName = $this->firingModes[$this->firingMode];
+    			
+		if($magazine){ //else something is wrong - weapon is put on a ship without Ammo Magazine!
+			$magazine->doDrawAmmo($gamedata,$modeName);
+		}
+		parent::fireDefensively($gamedata, $interceptedWeapon);
+	}	
 
     public function getCalledShotMod()  	//For Multiwarhead missiles
         {
@@ -1433,23 +1472,23 @@ class AmmoMissileRackS extends Weapon{
 	}//endof function fire
 
 
-public function calculateRangePenalty($distance)
-{
-    $currAmmo = null;
-    
-    // find appropriate ammo
-    if (array_key_exists($this->firingMode, $this->ammoClassesUsed)) {
-        $currAmmo = $this->ammoClassesUsed[$this->firingMode];
-    }
-    
-    // Check if $currAmmo is not null before calling the method
-            if($currAmmo){
-                return $currAmmo->calculateRangePenalty($distance);
-            }else{
-                return 0;
-            }
-    parent::calculateRangePenalty($distance);        
-	}//endof function calculateRangePenalty
+	public function calculateRangePenalty($distance)
+	{
+	    $currAmmo = null;
+	    
+	    // find appropriate ammo
+	    if (array_key_exists($this->firingMode, $this->ammoClassesUsed)) {
+	        $currAmmo = $this->ammoClassesUsed[$this->firingMode];
+	    }
+	    
+	    // Check if $currAmmo is not null before calling the method
+	            if($currAmmo){
+	                return $currAmmo->calculateRangePenalty($distance);
+	            }else{
+	                return 0;
+	            }
+	    parent::calculateRangePenalty($distance);        
+		}//endof function calculateRangePenalty
 
 
     public function calculateHitBase($gamedata, $fireOrder)
@@ -1467,10 +1506,7 @@ public function calculateRangePenalty($distance)
         if ($currAmmo) {
             $currAmmo->calculateHitBase($gamedata, $fireOrder);
         }
-        
-
-	}//endof function calculateHitBase
-
+	}//endof function calculateHitBase	
 
 } //endof class AmmoMissileRackS
 
@@ -1665,7 +1701,7 @@ class AmmoMissileRackO extends AmmoMissileRackS{
 		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base); //Parent routines take care of the rest
 	}
 	
-} //endof class AmmoMissileRacSO
+} //endof class AmmoMissileRackO
 
 
 
@@ -1690,7 +1726,9 @@ class AmmoMissileRackA extends AmmoMissileRackS{
 	protected $basicDistanceRange = 60;
 
     protected $rackExplosionDamage = 56; //how much damage will this weapon do in case of catastrophic explosion
-    protected $rackExplosionThreshold = 19; //how high roll is needed for rack explosion            
+    protected $rackExplosionThreshold = 19; //how high roll is needed for rack explosion   
+    
+	public $canModesIntercept = false;	//A-Racks can't have Interceptor Missiles          
 	
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base=false)
 	{
@@ -1724,11 +1762,12 @@ class AmmoMissileRackD extends AmmoMissileRackS{
 	protected $basicRange=20;
 	protected $basicDistanceRange = 60;
 	
-	public $intercept = 6;	//Hardcoding intercept values to launcher until I-missile is ready	
+	public $intercept = 0;
 	public $ballisticIntercept = true;	
 
     protected $rackExplosionDamage = 15; //how much damage will this weapon do in case of catastrophic explosion
-    protected $rackExplosionThreshold = 20; //how high roll is needed for rack explosion           
+    protected $rackExplosionThreshold = 20; //how high roll is needed for rack explosion  
+                    
 	
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base=false)
 	{
@@ -1780,7 +1819,9 @@ class AmmoBombRack extends AmmoMissileRackS{
 	protected $basicDistanceRange = 60;
 
     protected $rackExplosionDamage = 30; //how much damage will this weapon do in case of catastrophic explosion
-    protected $rackExplosionThreshold = 20; //how high roll is needed for rack explosion           
+    protected $rackExplosionThreshold = 20; //how high roll is needed for rack explosion
+    
+ 	public $canModesIntercept = false;	//Bomb Racks should never be able to intercept.           
 	
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base=false)
 	{
@@ -1818,7 +1859,9 @@ class AmmoFighterRack extends AmmoMissileRackS{
 	protected $basicDistanceRange = 30;
 
     protected $rackExplosionDamage = 0; //how much damage will this weapon do in case of catastrophic explosion
-    protected $rackExplosionThreshold = 22; //how high roll is needed for rack explosion          
+    protected $rackExplosionThreshold = 22; //how high roll is needed for rack explosion 
+    
+	public $canModesIntercept = false;	//Fighter Racks can't have Interceptor Missiles             
 	
 	function __construct($startArc, $endArc, $magazine, $base=false) //fighter-sized OSATs might benefit from being stable!
 	{		

@@ -3717,6 +3717,8 @@ class AmmoMagazine extends ShipSystem {
 	public $ammoSizeArray = array();
 	public $ammoUseArray = array(); //to be used in front end to track actual ammo usage
 	public $output = 0;
+	
+	private $interceptorUsed = 0;//Communication variable.	
 		
     
     function __construct($capacity){ //magazine capacity
@@ -3808,7 +3810,31 @@ class AmmoMagazine extends ShipSystem {
 		}		
 		return $toReturn;
 	}
+
+	//Called when Interceptor missile is attempting to intercept, to check missiles are available.
+	public function canDrawAmmo($modeName){
+	    // Check if modeName exists in ammoCountArray and has a value of 1 or more
+	    	if(($this->ammoCountArray[$modeName] - $this->interceptorUsed) >= 1){
+	 		$this->interceptorUsed = 0; //Reset Interceptor count for that turn.	    	
+	        return true; // drawing ammo is possible
+	    } else {
+	        return false; // cannot draw ammo!
+	    }
+	}
 	
+	//Reduce number of Interceptor missile when one is ordered to intercept.
+	public function doDrawAmmo($gameData, $modeName){
+        $ship = $this->getUnit();		
+	 //PREPARE APPROPRIATE NOTES FOR AMMO USED TO INTERCEPT	
+            $notekey = 'AmmoUsed';
+            $noteHuman = 'Ammunition Magazine - a round is drawn';
+            $noteValue = $modeName;
+            $this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
+		if  ($noteValue == 'Interceptor'){//Same method might be used later for other direct fire weapons, so make this specific?          
+	 		$this->interceptorUsed += 1;//Interceptor just used!
+			}                    
+            $this->ammoAlreadyUsed = array(); 
+	}	
 		
  public function generateIndividualNotes($gameData, $dbManager){ //dbManager is necessary for Initial phase only
         $ship = $this->getUnit();
@@ -3894,7 +3920,7 @@ class AmmoMissileTemplate{
 	public $useOEW = false;
 	public $hidetarget = false;
 	public $intercept = 0;
-	public $ballisticIntercept = false;	
+	public $ballisticIntercept = false;
 
     //Adding Pulse variables for Starburst missiles	
 	public $maxpulses = 0;
@@ -4319,9 +4345,9 @@ class AmmoMissileI extends AmmoMissileTemplate{
 	public $priorityAF = 5;
 	public $noOverkill = false;
 	public $hidetarget = false;
-	public $intercept = 0;
-	public $ballisticIntercept = true;
-//    public $ballistic = false;		//Idea that making intercept missiles non-ballistic might help
+	public $intercept = 6;
+	public $ballisticIntercept = true; 
+
 		
     public function getDamage($fireOrder) //actual function to be called, as with weapon!
     {

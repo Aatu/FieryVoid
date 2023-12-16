@@ -170,7 +170,9 @@ Weapon.prototype.changeFiringMode = function () {
 	
 	
 	if (!mathlib.arrayIsEmpty(this.doNotInterceptArray)) this.doNotIntercept = this.doNotInterceptArray[this.firingMode];
-	if (!mathlib.arrayIsEmpty(this.uninterceptableArray)) this.uninterceptable = this.uninterceptableArray[this.firingMode];		
+	if (!mathlib.arrayIsEmpty(this.uninterceptableArray)) this.uninterceptable = this.uninterceptableArray[this.firingMode];
+	if (!mathlib.arrayIsEmpty(this.interceptArray)) this.intercept = this.interceptArray[this.firingMode];
+	if (!mathlib.arrayIsEmpty(this.ballisticInterceptArray)) this.ballisticIntercept = this.ballisticInterceptArray[this.firingMode];							
 
 	if (!mathlib.arrayIsEmpty(this.hextargetArray)) this.hextarget = this.hextargetArray[this.firingMode];
 	if (!mathlib.arrayIsEmpty(this.hidetargetArray)) this.hidetarget = this.hidetargetArray[this.firingMode];

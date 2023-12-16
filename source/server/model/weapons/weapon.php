@@ -107,7 +107,7 @@ class Weapon extends ShipSystem
 	protected $canOnlyCalledShot = false;	
 //	public $canTargetOtherSections = false; //NOT IMPLEMENTED. When set to true, weapon can called shot systems on external sections of target not facing firing ship.
 	protected $hasSpecialLaunchHexCalculation = false; //Weapons like Proximty Laser use a separate launcher system to determine point of shot.
-
+	public $canModesIntercept = false;	//Some missile launchers can have Interceptor missiles. variable for Front End so it knows to use weapon-specific function to search for intercept rating across firing modes e.g. Interceptor Missile on missile launcher.
 		
     public $shots = 1;
     public $shotsArray = array();
@@ -284,6 +284,7 @@ class Weapon extends ShipSystem
 			$strippedSystem->extraoverloadshots = $this->extraoverloadshots;
 			$strippedSystem->extraoverloadshotsArray = $this->extraoverloadshotsArray;
 			$strippedSystem->fireOrders = $this->fireOrders;
+			$strippedSystem->canModesIntercept = $this->canModesIntercept;//For weapons which intercept not using their default mode e.g. interceptor missiles - DK			
 			if(isset($this->ammunition)){
 				$strippedSystem->ammunition = $this->ammunition;
 				$strippedSystem->data = $this->data;
@@ -762,7 +763,7 @@ class Weapon extends ShipSystem
 
     private function calculateLoadingFromLastTurn($gamedata)
     {
-        if ($this->ballistic)
+        if ($this->ballistic && !(checkForSelfInterceptFire::checkFired($this->id, $gamedata->turn -1)))
             return null;
 
 
@@ -1901,9 +1902,17 @@ full Advanced Armor effects (by rules) for reference:
 		if (isset($this->calledShotModArray[$i])) $this->calledShotMod = $this->calledShotModArray[$i];  // DK		
 		if (isset($this->specialRangeCalculationArray[$i])) $this->specialRangeCalculation = $this->specialRangeCalculationArray[$i];  // DK
 		if (isset($this->specialHitChanceCalculationArray[$i])) $this->specialHitChanceCalculation = $this->specialHitChanceCalculationArray[$i];  // DK
-	
-													    
+			
+		if (isset($this->interceptArray[$i])) $this->intercept = $this->interceptArray[$i];  // DK		
+		if (isset($this->ballisticInterceptArray[$i])) $this->ballisticIntercept = $this->ballisticInterceptArray[$i];  // DK		
+											    
     }//endof function changeFiringMode
+
+
+	public function switchModeForIntercept()
+	{
+		return;
+	}
 
 
 } //end of class Weapon

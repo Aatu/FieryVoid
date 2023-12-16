@@ -1116,8 +1116,8 @@ window.weaponManager = {
 	if (gamedata.gamephase != 3 ) return false;//declaration in firing phase only
 	if (!weapon.weapon) return false;//only weapons can intercept ;)
 		var loadingTimeActual = Math.max(weapon.loadingtime,weapon.normalload);//Accelerator (or multi-mode) weapons may have loading time of 1, yet reach full potential only after longer charging
-	if ( (weapon.intercept < 1) || (loadingTimeActual <= 1) ) return false;//cannot intercept or quick to recharge anyway and will be auto-assigned
-	if (weapon.ballistic) return false;//no interception using ballistic weapons    
+	if ( (weapon.intercept < 1) && !(weaponManager.canWeaponInterceptAtAll(weapon)) || (loadingTimeActual <= 1) ) return false;//cannot intercept or quick to recharge anyway and will be auto-assigned
+	if (weapon.ballistic && !(weaponManager.canWeaponInterceptAtAll(weapon))) return false;//no interception using ballistic weapons    
 	if (weaponManager.hasFiringOrder(ship, weapon)) return false;//already declared
 	if (!weaponManager.isLoaded(weapon)) return false;//not ready to fire
 	return true;
@@ -1195,6 +1195,17 @@ window.weaponManager = {
             weaponManager.unSelectWeapon(ship, weapon);
         }
         //	gamedata.shipStatusChanged(ship);
+    },
+
+
+    canWeaponInterceptAtAll: function canWeaponInterceptAtAll(weapon){
+        var canIntercept = false;
+		var loadingTimeActual = Math.max(weapon.loadingtime,weapon.normalload);//Accelerator (or multi-mode) weapons may have loading time of 1, yet reach full potential only after longer charging        
+		if (weapon.canModesIntercept && (loadingTimeActual > 1)){ //Could weapon have alternative modes with Intercept Rating, and would need to use Self Intercept?
+			canIntercept = weapon.canWeaponInterceptAtAll(weapon);//Call to weapon function to check modes for intercept ratings.
+		}
+
+    	return canIntercept;    	
     },
 	
 	
