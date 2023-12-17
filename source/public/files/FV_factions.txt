@@ -44,13 +44,14 @@ SHIPBORNE MISSILES
  - class A - Antifighter Missile - -5 range and -15 distance range, as well as doing 15 points of damage. +3 Fire Control vs fighers. It's classified as light missile - which is meaningless for regular shipborne launchers, but means it's usable by light launchers (...which is the whole point).
  - class C - Chaff missile - On the turn that the chaff missile hits, any non-ballistic fire from that unit against the missile launching ship attracts a -15 intercept rating.
  - class D - Light Missile - 12 damage, -5 range/-15 distance range. Essentially used only by factions without access to Basic missile (Alacans, early Narn).
- - class F - Flash Missile - does damage in Flash mode.
- - class H - Heavy Missile - -10 range/distance range and -3 antifighter fire control, but damage 30. 
- - class L - Long Range Missile - +10 range/distance range, but damage 15.
+ - class F - Flash Missile - Does damage in Flash mode.
+ - class H - Heavy Missile - Has -10 range/distance range and -3 antifighter fire control, but damage 30.
+ - class I - Interceptor Missile - Can only be fired defensively for -30 intercept rating against other ballistic weapons.  Launchers with over 1 turn cooldowns will need to be set manually in Firing Phase. 
+ - class L - Long Range Missile - Has +10 range/distance range, but damage 15.
  - class K - Starburst Missile - Deals damage in pulse mode, with each missile generating D3+3 hits.
  - class KK - Kinetic Missile - Orieni only.  Deals 18 matter damage, and attracts a -5 per hex range penalty after 15 hexes up to it's maximum range.
  - class M - Multiwarhead Missile - Can only target fighter flights.  Splits into 6 submunitions which will each engage a separate fighter in flight.  Each submunition rolls to hit and scores damage separately, if there are fewer than 6 fighters on impact excess submunitions are lost) 
- - class P - Piercing Missile - damage 30, mode Piercing, cannot be fired at fighters.
+ - class P - Piercing Missile - Does 30 damage in Piercing mode, cannot be fired at fighters.
  - class S - Stealth Missile - Kor-Lyan only.  Target of this missile is not revealed to the enemy player.
  - class X - HARM Missile - Locks in on enemy EW and reduces scanner output by D6 points the FOLLOWING turn if it hits (a difference from tabletop).  The hit chance for this missile is increased by 5% per point of offensive EW the target ship is using (e.g. OEW and CCEW).
 
