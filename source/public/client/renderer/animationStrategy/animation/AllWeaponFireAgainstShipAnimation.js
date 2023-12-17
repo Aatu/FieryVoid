@@ -217,7 +217,7 @@ window.AllWeaponFireAgainstShipAnimation = function () {
 			
 		var weaponOrigin;			
 		if (weapon.hasSpecialLaunchHexCalculation && weapon.launcher.fireOrders && weapon.launcher.fireOrders.length > 0) {	//Weapons like proximity laser uses a paired launcher weapon to originate the shot from somewhere OTHER than shooter.	
-		    weaponOrigin = window.coordinateConverter.fromHexToGame(new hexagon.Offset(weapon.launcher.fireOrders[0].x, weapon.launcher.fireOrders[0].y));
+		    weaponOrigin = window.coordinateConverter.fromHexToGame(new hexagon.Offset(weapon.launcher.fireOrders[0].x, weapon.launcher.fireOrders[0].y));//Convert launcher target to weapon origin.
 		} else { //Everything else
 		    weaponOrigin = getShipPositionAtTime.call(this, this.shipIconContainer.getByShip(incomingFire.shooter), startLocationTime);
 		}
