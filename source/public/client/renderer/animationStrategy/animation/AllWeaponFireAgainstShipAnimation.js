@@ -210,19 +210,19 @@ window.AllWeaponFireAgainstShipAnimation = function () {
         var weapon = incomingFire.weapon;
         var animationType = weapon.animationArray[incomingFire.firingMode] || weapon.animation;
         var animationColor = weapon.animationColorArray[incomingFire.firingMode] || weapon.animationColor;
-        //for ballistic weapons - make start location different!
 		var startLocationTime = startTime;
-		var weaponOrigin
-				
-		if (weapon.hasSpecialLaunchHexCalculation && weapon.launcher.fireOrders && weapon.launcher.fireOrders.length > 0) {
-		    weaponOrigin = window.coordinateConverter.fromHexToGame(new hexagon.Offset(weapon.launcher.fireOrders[0].x, weapon.launcher.fireOrders[0].y));
-		} else {
-		    weaponOrigin = getShipPositionAtTime.call(this, this.shipIconContainer.getByShip(incomingFire.shooter), startLocationTime);
-		}
-				
 		if (weapon.ballistic) {
 			startLocationTime = 0;
 		}
+			
+		var weaponOrigin;			
+		if (weapon.hasSpecialLaunchHexCalculation && weapon.launcher.fireOrders && weapon.launcher.fireOrders.length > 0) {	//Weapons like proximity laser uses a paired launcher weapon to originate the shot from somewhere OTHER than shooter.	
+		    weaponOrigin = window.coordinateConverter.fromHexToGame(new hexagon.Offset(weapon.launcher.fireOrders[0].x, weapon.launcher.fireOrders[0].y));
+		} else { //Everything else
+		    weaponOrigin = getShipPositionAtTime.call(this, this.shipIconContainer.getByShip(incomingFire.shooter), startLocationTime);
+		}
+				
+
 
 	    
         switch (animationType) {
