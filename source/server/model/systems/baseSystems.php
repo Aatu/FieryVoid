@@ -3754,7 +3754,7 @@ class AmmoMagazine extends ShipSystem {
 		$strippedSystem->remainingAmmo = $this->remainingAmmo;
 		$strippedSystem->ammoCountArray = $this->ammoCountArray;
 		$strippedSystem->ammoSizeArray = $this->ammoSizeArray;
-		$strippedSystem->output = $this->output;
+		$strippedSystem->output = $this->output;	
 		return $strippedSystem;
 	} 
 	
@@ -3814,8 +3814,7 @@ class AmmoMagazine extends ShipSystem {
 	//Called when Interceptor missile is attempting to intercept, to check missiles are available.
 	public function canDrawAmmo($modeName){
 	    // Check if modeName exists in ammoCountArray and has a value of 1 or more
-	    	if(($this->ammoCountArray[$modeName] - $this->interceptorUsed) >= 1){
-	 		$this->interceptorUsed = 0; //Reset Interceptor count for that turn.	    	
+	    	if(($this->ammoCountArray[$modeName] - $this->interceptorUsed) >= 1){    	
 	        return true; // drawing ammo is possible
 	    } else {
 	        return false; // cannot draw ammo!
@@ -3830,7 +3829,7 @@ class AmmoMagazine extends ShipSystem {
             $noteHuman = 'Ammunition Magazine - a round is drawn';
             $noteValue = $modeName;
             $this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
-		if  ($noteValue == 'Interceptor'){//Same method might be used later for other direct fire weapons, so make this specific?          
+		if  ($noteValue == 'Interceptor'){//doDrawAmmo() method might be used later for other direct fire weapons, so make this specific?          
 	 		$this->interceptorUsed += 1;//Interceptor just used!
 			}                    
             $this->ammoAlreadyUsed = array(); 
@@ -3875,6 +3874,7 @@ public function onIndividualNotesLoaded($gamedata) {
                     $this->ammoCountArray[$currNote->notevalue] -= 1;
                     $this->ammoUsedTotal[$currNote->notevalue] += 1;
 
+
                 /*
                 $ammoSize = $this->ammoSizeArray[$currNote->notevalue];
                 $this->remainingAmmo -= $ammoSize;
@@ -3882,6 +3882,7 @@ public function onIndividualNotesLoaded($gamedata) {
                 break;
         }
     }
+	     
 } // End of function onIndividualNotesLoaded
 	
 	
