@@ -212,8 +212,12 @@ window.AllWeaponFireAgainstShipAnimation = function () {
         var animationColor = weapon.animationColorArray[incomingFire.firingMode] || weapon.animationColor;
         //for ballistic weapons - make start location different!
 		var startLocationTime = startTime;
-		var remoteWeaponOrigin = window.coordinateConverter.fromHexToGame(new hexagon.Offset(weapon.launcher.fireOrders[0].x, weapon.launcher.fireOrders[0].y)); //Proximity laseruses a paried launcher weapon to originate the shot from somewhere OTHER than shooter.  Used in "remoteWeapon" case.  
 		
+		if(weapon.hasSpecialLaunchHexCalculation){
+		var weaponOrigin = window.coordinateConverter.fromHexToGame(new hexagon.Offset(weapon.launcher.fireOrders[0].x, weapon.launcher.fireOrders[0].y)); //Proximity laseruses a paried launcher weapon to originate the shot from somewhere OTHER than shooter.  Used in "remoteWeapon" case.  
+		}else{
+		var weaponOrigin = getShipPositionAtTime.call(this, this.shipIconContainer.getByShip(incomingFire.shooter), startLocationTime)
+		}		
 	if (weapon.ballistic) {
 		startLocationTime = 0;
 	}
@@ -232,8 +236,8 @@ window.AllWeaponFireAgainstShipAnimation = function () {
                 });
             case "torpedo":
                 return new TorpedoEffect(this.particleEmitterContainer, {
-                    size: 200 * weapon.animationExplosionScale,
-                    origin: getShipPositionAtTime.call(this, this.shipIconContainer.getByShip(incomingFire.shooter), startLocationTime),
+                    size: 150 * weapon.animationExplosionScale,
+                    origin: weaponOrigin,
 		    target: getShotTargetVariance(getShipPositionAtTime.call(this, this.shipIcon, startTime), incomingFire, shotsFired),
                     color: new THREE.Color(animationColor[0] / 255, animationColor[1] / 255, animationColor[2] / 255),
                     hit: hit,
@@ -248,7 +252,7 @@ window.AllWeaponFireAgainstShipAnimation = function () {
             default:
                 return new BoltEffect(this.particleEmitterContainer, {
                     size: 300 * weapon.animationExplosionScale,
-                    origin: getShipPositionAtTime.call(this, this.shipIconContainer.getByShip(incomingFire.shooter), startLocationTime),
+                    origin: weaponOrigin,
                     target: getShotTargetVariance(getShipPositionAtTime.call(this, this.shipIcon, startTime), incomingFire, shotsFired),
                     color: new THREE.Color(animationColor[0] / 255, animationColor[1] / 255, animationColor[2] / 255),
                     hit: hit,
@@ -256,19 +260,7 @@ window.AllWeaponFireAgainstShipAnimation = function () {
                     time: startTime,
                     damagedNames: damagedNames,
                     systemDestroyedEffect: this.systemDestroyedEffect
-                });
-            case "remoteWeapon"://Originates somewhere other than Shooter.	            
-                return new BoltEffect(this.particleEmitterContainer, {
-                    size: 200 * weapon.animationExplosionScale,
-                    origin: remoteWeaponOrigin, //Shot does not come from shooter.
-				    target: getShotTargetVariance(getShipPositionAtTime.call(this, this.shipIcon, startTime), incomingFire, shotsFired),
-                    color: new THREE.Color(animationColor[0] / 255, animationColor[1] / 255, animationColor[2] / 255),
-                    hit: hit,
-                    damage: damage,
-                    time: startTime,
-                    damagedNames: damagedNames,
-                    systemDestroyedEffect: this.systemDestroyedEffect
-                });              
+                });         
         }
     }
 
