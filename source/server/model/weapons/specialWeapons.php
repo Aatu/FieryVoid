@@ -5272,7 +5272,7 @@ class ProximityLaserLauncher extends Weapon{
         public $displayName = "Proximity Laser";
 		public $iconPath = "ProximityLaser.png";        
         
-        public $animation = "bolt"; //Allows front-end animation to fire from hex targeted by paired launcher.
+        public $animation = "bolt";
 
         public $animationColor = array(179, 45, 0); //same as Heavy Laser
 
@@ -5286,7 +5286,7 @@ class ProximityLaserLauncher extends Weapon{
         
         public $loadingtime = 3;
         public $raking = 10; 
-	public $noLockPenalty = false;	        
+		public $noLockPenalty = false;	        
               
         
         public $weaponClass = "Laser"; 
