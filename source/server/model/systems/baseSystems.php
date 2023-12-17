@@ -4333,7 +4333,7 @@ class AmmoMissileI extends AmmoMissileTemplate{
 	public $modeName = 'Interceptor';
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'AMMO_I'; //enhancement name to be enabled
-	public $enhancementDescription = '(ammo) Interceptor Missile (2250)'; //enhancement description
+	public $enhancementDescription = '(ammo) Interceptor Missile (2250/2263)'; //enhancement description
 	public $enhancementPrice = 2; //PV per missile; originally it's 0 for Kor-Lyan and 2 for everyone else
 	
 	public $fireControlMod = array(null, null, null); //MODIFIER for weapon fire control!
