@@ -3813,7 +3813,7 @@ class AmmoMagazine extends ShipSystem {
 
 	//Called when Interceptor missile is attempting to intercept, to check missiles are available.
 	public function canDrawAmmo($modeName){
-	    // Check if modeName exists in ammoCountArray and has a value of 1 or more
+	    // Check if ammo count has a value of 1 or more after ammo used this turn deducted
 	    	if(($this->ammoCountArray[$modeName] - $this->interceptorUsed) >= 1){    	
 	        return true; // drawing ammo is possible
 	    } else {
@@ -3829,7 +3829,7 @@ class AmmoMagazine extends ShipSystem {
             $noteHuman = 'Ammunition Magazine - a round is drawn';
             $noteValue = $modeName;
             $this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
-		if  ($noteValue == 'Interceptor'){//doDrawAmmo() method might be used later for other direct fire weapons, so make this specific?          
+		if  ($noteValue == 'Interceptor'){//doDrawAmmo() maybe used for other direct fire weapons, make this specific?          
 	 		$this->interceptorUsed += 1;//Interceptor just used!
 			}                    
             $this->ammoAlreadyUsed = array(); 
