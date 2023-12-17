@@ -211,11 +211,13 @@ window.AllWeaponFireAgainstShipAnimation = function () {
         var animationType = weapon.animationArray[incomingFire.firingMode] || weapon.animation;
         var animationColor = weapon.animationColorArray[incomingFire.firingMode] || weapon.animationColor;
         //for ballistic weapons - make start location different!
-	var startLocationTime = startTime;
+		var startLocationTime = startTime;
+		var remoteWeaponOrigin = window.coordinateConverter.fromHexToGame(new hexagon.Offset(weapon.launcher.fireOrders[0].x, weapon.launcher.fireOrders[0].y)); //Proximity laseruses a paried launcher weapon to originate the shot from somewhere OTHER than shooter.  Used in "remoteWeapon" case.  
+		
 	if (weapon.ballistic) {
 		startLocationTime = 0;
 	}
-	    
+
 	    
         switch (animationType) {
             case "laser":
@@ -255,6 +257,18 @@ window.AllWeaponFireAgainstShipAnimation = function () {
                     damagedNames: damagedNames,
                     systemDestroyedEffect: this.systemDestroyedEffect
                 });
+            case "remoteWeapon"://Originates somewhere other than Shooter.	            
+                return new BoltEffect(this.particleEmitterContainer, {
+                    size: 200 * weapon.animationExplosionScale,
+                    origin: remoteWeaponOrigin, //Shot does not come from shooter.
+				    target: getShotTargetVariance(getShipPositionAtTime.call(this, this.shipIcon, startTime), incomingFire, shotsFired),
+                    color: new THREE.Color(animationColor[0] / 255, animationColor[1] / 255, animationColor[2] / 255),
+                    hit: hit,
+                    damage: damage,
+                    time: startTime,
+                    damagedNames: damagedNames,
+                    systemDestroyedEffect: this.systemDestroyedEffect
+                });              
         }
     }
 
