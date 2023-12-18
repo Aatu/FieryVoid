@@ -1641,7 +1641,130 @@ class ParticleAccelerator extends Raking{
 
 }//end of class Particle Accelerator
 	
+
+//Custome weapon for Abraxas Gaim Campaign
+class BoltAccelerator extends Raking{
+		public $name = "BoltAccelerator";
+        public $displayName = "Bolt Accelerator";
+        public $iconPath = "BoltAccelerator.png";
 	
+        public $animation = "bolt";
+        public $animationColor = array(255, 163, 26);
+	/*
+		public $animationExplosionScale = 0.25;
+		public $animationWidth = 4;
+		public $animationWidth2 = 0.3;
+        */
+        public $intercept = 3;
+		public $priority = 8; //light Raking		
+		
+        public $loadingtime = 1;
+		public $normalload = 3;
+		
+        public $rangePenalty = 0.33;
+        public $fireControl = array(1, 3, 5);
+
+        public $damageType = "Standard";
+		public $weaponClass = "Particle";
+		public $firingModes = array( 1 => "Standard");
+
+	 	public function getInterceptRating($turn){
+			if ($this->turnsloaded == 1)
+			{
+				return 3;
+			}
+			else if ($this->turnsloaded == 2)
+			{
+				return 2;
+			} 
+			else{
+				return 1;
+			}
+		}
+
+    public function calculateRangePenalty($distance)
+    {
+			if ($this->turnsloaded == 1)
+			{
+				return 1;
+			}
+			else if ($this->turnsloaded == 2)
+			{
+				return 0.5;
+			} 
+			else{
+				return 0.33;
+			}
+    }
+
+		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){ //maxhealth and power reqirement are fixed; left option to override with hand-written values
+			if ( $maxhealth == 0 ) $maxhealth = 9;
+			if ( $powerReq == 0 ) $powerReq = 7;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);   
+			$this->data["Special"] = "Can fire accelerated ROF for less damage:";  
+			$this->data["Special"] .= "<br> - 1 turn: 11 damage, intercept -5"; 
+			$this->data["Special"] .= "<br> - 2 turns: 17 damage, intercept -10";
+			$this->data["Special"] .= "<br> - 3 turns: 23 damage, intercept -15"; 			 
+		}
+	
+		public function getDamage($fireOrder){
+        	switch($this->turnsloaded){
+            	case 0:
+            	case 1:
+                	return 11;
+			    	break;
+            	case 2:
+                	return 17;
+			    	break;			    	
+            	default:
+                	return 23;
+			    	break;
+        	}
+		}
+
+ 		public function setMinDamage(){
+            switch($this->turnsloaded){
+                case 1:
+                    $this->minDamage = 11 ;
+                    break;
+                case 2:
+                    $this->minDamage = 17 ;
+                    break;                    
+                default:
+                    $this->minDamage = 24 ;  
+                    break;
+            }
+		}
+             
+        public function setMaxDamage(){
+            switch($this->turnsloaded){
+                case 1:
+                    $this->minDamage = 11 ;
+                    break;
+                case 2:
+                    $this->minDamage = 17 ;
+                    break;                    
+                default:
+                    $this->minDamage = 24 ;  
+                    break;
+            }
+		}
+
+		public function stripForJson(){
+			$strippedSystem = parent::stripForJson();
+			$strippedSystem->data = $this->data;
+			$strippedSystem->minDamage = $this->minDamage;
+			$strippedSystem->minDamageArray = $this->minDamageArray;
+			$strippedSystem->maxDamage = $this->maxDamage;
+			$strippedSystem->maxDamageArray = $this->maxDamageArray;				
+			return $strippedSystem;
+		}
+
+}//end of class Heavy Bolt Accelerator	
 	
 //Torata fighter weapon - with OPTIONAL ability of a powerful antiship shot if armed for two turns.	
 class LightParticleAccelerator extends LinkedWeapon{		

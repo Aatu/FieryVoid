@@ -23,6 +23,8 @@ class Maftora extends HeavyCombatVessel{
         $this->fighters = array("normal"=>6);
         $this->variantOf = 'Martoba Patrol Cutter';
         $this->occurence = "uncommon";
+        
+		$this->enhancementOptionsEnabled[] = 'MARK_FERV'; //To activate Religious Fervor attributes.           
 
 	$this->addPrimarySystem(new Reactor(4, 15, 0, 0));
 	$this->addPrimarySystem(new CnC(4, 8, 0, 0));

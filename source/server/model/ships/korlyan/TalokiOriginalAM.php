@@ -23,8 +23,8 @@ class TalokiOriginalAM extends StarBaseSixSections{
 		$this->forwardDefense = 21;
 		$this->sideDefense = 24;
 
-		$this->imagePath = "img/ships/korlyan_taloki2.png";
-		$this->canvasSize = 260; //Enormous Starbase
+		$this->imagePath = "img/ships/korlyan_taloki.png";
+		$this->canvasSize = 300; //Enormous Starbase
 
         //ammo magazine itself (AND its missile options)
         $ammoMagazine = new AmmoMagazine(400); //pass magazine capacity - 20 rounds per launcher, plus reload rack 80
@@ -35,11 +35,12 @@ class TalokiOriginalAM extends StarBaseSixSections{
 	    $this->enhancementOptionsEnabled[] = 'AMMO_C';//add enhancement options for other missiles - Class-C
 	    $this->enhancementOptionsEnabled[] = 'AMMO_F';//add enhancement options for other missiles - Class-F
 	    $this->enhancementOptionsEnabled[] = 'AMMO_H';//add enhancement options for other missiles - Class-H
+		$this->enhancementOptionsEnabled[] = 'AMMO_I';//add enhancement options for other missiles - Class-I	    
 	    $this->enhancementOptionsEnabled[] = 'AMMO_K';//add enhancement options for other missiles - Class-K   
 	    $this->enhancementOptionsEnabled[] = 'AMMO_L';//add enhancement options for other missiles - Class-L
 	    $this->enhancementOptionsEnabled[] = 'AMMO_M';//add enhancement options for other missiles - Class-M	    
 		$this->enhancementOptionsEnabled[] = 'AMMO_P';//add enhancement options for other missiles - Class-P
-	    $this->enhancementOptionsEnabled[] = 'AMMO_X';//add enhancement options for other missiles - Class-X			    	    	    	    
+		$this->enhancementOptionsEnabled[] = 'AMMO_X';//add enhancement options for other missiles - Class-X				    	    	    	    
 	    //$this->enhancementOptionsEnabled[] = 'AMMO_S';//add enhancement options for other missiles - Class-S
 		//Stealth missile removed from Early Kor-Lyan ships, as it's not availablee until 2252
 

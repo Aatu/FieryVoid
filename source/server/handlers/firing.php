@@ -32,6 +32,9 @@ class Firing
     /*gets all ready intercept-capable weapons that aren't otherwise assigned*/
     public static function getUnassignedInterceptors($gamedata, $ship)
     {
+    	
+
+    	
         $currTurn = $gamedata->turn;
         $toReturn = array();
         if ($ship instanceof FighterFlight) { //separate procedure for fighters
@@ -54,12 +57,15 @@ class Firing
             }
             if ($exclusiveWasFired) $toReturn = array(); //exclusive weapon was fired, nothing can intercept!
         } else { //proper ship
+           
             if (!(($ship->unavailable === true) || $ship->isDisabled())) { //ship itself can fight this turn
-                foreach ($ship->systems as $weapon) {
+                foreach ($ship->systems as $weapon) {               	
 //                    if ((!($weapon instanceof Weapon)) || ($weapon->ballistic)) continue; //not a weapon, or a ballistic weapon   NOTE: changed to allow ballistics to intercept GTS 07 Aug 2022
-                    if ((!($weapon instanceof Weapon))) continue; //not a weapon, or a ballistic weapon
+                    if ((!($weapon instanceof Weapon))) continue; //not a weapon, or a ballistic weapon         
+					if ($weapon->canModesIntercept && (!($weapon->firedOnTurn($currTurn)))) $weapon->switchModeForIntercept(); //To check for intercept values in non-default modes if weapon has appropriate marker and hasn't fired e.g. Intercept Missile etc  
+	                    	
                     if ((!$weapon->firedOnTurn($currTurn)) && ($weapon->intercept > 0)) {
-                        if (self::isValidInterceptor($gamedata, $weapon)) {//not fired this turn, intercept-capable, and valid interceptor
+                        if (self::isValidInterceptor($gamedata, $weapon)) {//not fired this turn, intercept-capable, and valid interceptor                 	
                             $toReturn[] = $weapon;
                         }
                     }
@@ -373,7 +379,7 @@ class Firing
             return false;
         }
 
-		//added for Vorlon weapons
+		//added for Vorlon weapons, also used for Interceptor missile.
 		if(!$weapon->canInterceptAtAll($gd, $fire, $shooter, $target, $interceptingShip, $firingweapon)) return false; //some weapons do have exotic rules whether they can intercept at all
 
         if ($interceptingShip->id == $target->id) { //ship intercepting fire directed at it - usual case
@@ -442,6 +448,8 @@ class Firing
             }
         }
 
+
+
         $ambiguousFireOrders  = array();
         foreach ($gamedata->ships as $ship){
             foreach($ship->getAllFireOrders($gamedata->turn) as $fire){
@@ -452,8 +460,9 @@ class Firing
                 if (!($weapon instanceof Weapon)){ //this isn't a weapon after all...
                     continue;
                 }		
-                
+               
 		$weapon->changeFiringMode($fire->firingMode); //For Chaff Missile
+		
 		    
                 $fire->priority = $weapon->priority;
 				//take different AF priority into account!
@@ -470,6 +479,8 @@ class Firing
                     $weapon->calculateHitBase($gamedata, $fire);
                 }
             }
+            
+//echo "Debug: Intercept at end:  $weapon->intercept\n";     // Add this line for debugging             
         }
 
         //calculate hit chances for ambiguous firing!

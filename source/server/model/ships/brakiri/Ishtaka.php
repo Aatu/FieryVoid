@@ -1,6 +1,6 @@
 <?php
 
-class Ishtaka extends StarBaseSixSections
+class Ishtakaton extends StarBaseSixSections
 {
 	function __construct($id, $userid, $name,  $slot){
 		parent::__construct($id, $userid, $name,  $slot);
@@ -8,14 +8,14 @@ class Ishtaka extends StarBaseSixSections
 		$this->pointCost = 4500;
 		$this->base = true;
 		$this->faction = "Brakiri Syndicracy";
-		$this->phpclass = "Ishtaka";
-		$this->shipClass = "Ishtaka Techbase";
+		$this->phpclass = "Ishtakaton";
+		$this->shipClass = "Ishtakaton Techbase";
 		$this->imagePath = "img/ships/BrakiriIshtaka.png";
 		$this->canvasSize = 310;
 		$this->fighters = array("normal" => 24);
 		$this->isd = 2256;
 		$this->notes = 'Im-Rehsa Technologies';//Corporation producing the design
-		$this->notes .= "<br>official Ishtaka Techbase with Grav Shifters replaced by Grav Cannons"; 		
+		$this->notes .= "<br>Official Ishtaka Techbase with Grav Shifters replaced by Grav Cannons"; 		
 	    $this->unofficial = 'S'; //Semi-official - added as reasonably close to official Ishtaka, while Grav Shifters are unavailable in FV
      
 		$this->shipSizeClass = 3;

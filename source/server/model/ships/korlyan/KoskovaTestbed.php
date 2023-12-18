@@ -29,21 +29,22 @@ class KoskovaTestbed extends BaseShip{
         $this->iniativebonus = 0;
 
 	//ammo magazine itself (AND its missile options)
-	$ammoMagazine = new AmmoMagazine(80); //pass magazine capacity 
+	$ammoMagazine = new AmmoMagazine(160); //pass magazine capacity 
 	    $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
-//	    $ammoMagazine->addAmmoEntry(new AmmoMissileI(), 80); //add full load of basic missiles 
+	    $ammoMagazine->addAmmoEntry(new AmmoMissileI(), 80); //add full load of Interceptor Missiles for D-Racks-only	    
 	    $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 80); //add full load of basic missiles 	     	      
 
 	    $this->enhancementOptionsEnabled[] = 'AMMO_A';//add enhancement options for other missiles - Class-A
 	    $this->enhancementOptionsEnabled[] = 'AMMO_C';//add enhancement options for other missiles - Class-C
 	    $this->enhancementOptionsEnabled[] = 'AMMO_F';//add enhancement options for other missiles - Class-F
 	    $this->enhancementOptionsEnabled[] = 'AMMO_H';//add enhancement options for other missiles - Class-H
-	    $this->enhancementOptionsEnabled[] = 'AMMO_I';//add enhancement options for other missiles - Class-I  	    
 	    $this->enhancementOptionsEnabled[] = 'AMMO_K';//add enhancement options for other missiles - Class-K   
 	    $this->enhancementOptionsEnabled[] = 'AMMO_L';//add enhancement options for other missiles - Class-L
 	    $this->enhancementOptionsEnabled[] = 'AMMO_M';//add enhancement options for other missiles - Class-M	    
 		$this->enhancementOptionsEnabled[] = 'AMMO_P';//add enhancement options for other missiles - Class-P	    	    	    	    
 	    $this->enhancementOptionsEnabled[] = 'AMMO_S';//add enhancement options for other missiles - Class-S
+	    $this->enhancementOptionsEnabled[] = 'AMMO_X';//add enhancement options for other missiles - Class-X	    
+	    $this->enhancementOptionsEnabled[] = 'AMMO_I';//add enhancement options for other missiles - Class-I (so can purchase for other launchers). 	    
 
         $this->addPrimarySystem(new Reactor(6, 25, 0, 1));
         $this->addPrimarySystem(new CnC(6, 16, 0, 0));
@@ -57,31 +58,48 @@ class KoskovaTestbed extends BaseShip{
    
         $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));
+        
+		$Targeter1 = new ProximityLaser(4, 6, 6, 300, 60, 'A'); 
+		$Launcher1 = new ProximityLaserLauncher(0, 1, 0, 300, 60, 'A');
+		$Targeter1->addLauncher($Launcher1);
+		$this->addFrontSystem($Targeter1);
+		$this->addFrontSystem($Launcher1);        
+
+		$Targeter2 = new ProximityLaser(4, 6, 6, 300, 60, 'B'); 
+		$Launcher2 = new ProximityLaserLauncher(0, 1, 0, 300, 60, 'B');
+		$Targeter2->addLauncher($Launcher2);
+		$this->addFrontSystem($Targeter2);
+		$this->addFrontSystem($Launcher2);  
+		
+		$Targeter3 = new ProximityLaser(4, 6, 6, 300, 60, 'C'); 
+		$Launcher3 = new ProximityLaserLauncher(0, 1, 0, 300, 60, 'C');
+		$Targeter3->addLauncher($Launcher3);
+		$this->addFrontSystem($Targeter3);
+		$this->addFrontSystem($Launcher3);  		        
+        
 //        $this->addFrontSystem(new FMissileRack(3, 'F', 240, 60, false));
 //        $this->addFrontSystem(new FMissileRack(3, 6, 0, 240, 60, false));
-        $this->addFrontSystem(new KKTest(3, 0, 0, 300, 60, $ammoMagazine, false));
-		$this->addFrontSystem(new KKTest(3, 6, 0, 0, 360, false));
-		$this->addFrontSystem(new ParticleCannon(3, 8, 7, 300, 60));
-		$this->addFrontSystem(new ParticleCannon(3, 8, 7, 300, 60));
+		$this->addFrontSystem(new AmmoMissileRackF(3, 0, 0, 300, 60, $ammoMagazine, false));
+        $this->addFrontSystem(new AmmoMissileRackF(3, 0, 0, 300, 60, $ammoMagazine, false));
+//		$this->addFrontSystem(new LimpetBoreTorpedo(3, 0, 0, 300, 60));
+//		$this->addFrontSystem(new LimpetBoreTorpedo(3, 0, 0, 300, 60));
 //        $this->addFrontSystem(new FMissileRack(3, 'F', 300, 120, false));
-		$this->addFrontSystem(new DirectLimpetBore(2, 5, 3, 270, 90));
-		$this->addFrontSystem(new DirectLimpetBore(2, 5, 3, 270, 90));
-		$this->addFrontSystem(new DirectLimpetBore(2, 5, 3, 270, 90));
+		$this->addFrontSystem(new LimpetBoreTorpedoBase(2, 5, 3, 270, 90));
+//		$this->addFrontSystem(new DirectLimpetBore(2, 5, 3, 270, 90));
+//		$this->addFrontSystem(new DirectLimpetBore(2, 5, 3, 270, 90));
 //        $this->addFrontSystem(new FMissileRack(3, 6, 0, 300, 120, false));
 
         $this->addAftSystem(new Thruster(4, 7, 0, 2, 2));
         $this->addAftSystem(new Thruster(4, 16, 0, 6, 2));
         $this->addAftSystem(new Thruster(4, 7, 0, 2, 2));
-//        $this->addAftSystem(new MultiDefenseLauncher(3, 'D', 120, 300, false));
-//        $this->addAftSystem(new MultiDefenseLauncher(3, 'D', 60, 240, false));
+        $this->addAftSystem(new AmmoMissileRackD(2, 0, 0, 120, 300, $ammoMagazine, false));
+        $this->addAftSystem(new AmmoMissileRackD(2, 0, 0, 60, 240, $ammoMagazine, false));
 
-//        $this->addLeftSystem(new MultiDefenseLauncher(3, 'D', 240, 60, false));
-        $this->addLeftSystem(new ProximityLaser(4, 6, 1, 240, 60));
+        $this->addLeftSystem(new AmmoMissileRackD(4, 0, 0, 240, 60, $ammoMagazine, false));
 //        $this->addLeftSystem(new FMissileRack(3, 6, 0, 180, 360, false));
         $this->addLeftSystem(new Thruster(4, 15, 0, 5, 3));
 
-//        $this->addRightSystem(new MultiDefenseLauncher(3, 'D', 300, 120, false));
-        $this->addRightSystem(new ProximityLaser(4, 6, 1, 300, 120));
+        $this->addRightSystem(new AmmoMissileRackD(4, 0, 0, 300, 120, $ammoMagazine, false));
 //        $this->addRightSystem(new FMissileRack(3, 6, 0, 0, 180, false));
         $this->addRightSystem(new Thruster(4, 15, 0, 5, 4));
         

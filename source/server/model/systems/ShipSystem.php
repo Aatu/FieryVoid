@@ -50,6 +50,7 @@ class ShipSystem {
 	
 	protected $tagList = array(); //tags for TAG hit chart entry; REMEMBER TAGS SHOULD BE MADE USING CAPITAL LETTERS!
 
+
     function __construct($armour, $maxhealth, $powerReq, $output){
         $this->armour = $armour;
         $this->maxhealth = (int)$maxhealth;
@@ -105,7 +106,82 @@ class ShipSystem {
         $this->destroyed = $this->isDestroyed();
     }
 	
-	public function criticalPhaseEffects($ship, $gamedata){} //hook for special effects that should happen in Critical phase/end of turn
+	public function criticalPhaseEffects($ship, $gamedata){
+	    	    
+	    if ($this->isDestroyed()) return; // no point if the system is actually destroyed already
+	    			
+	    foreach ($this->criticals as $critical) {
+	    	
+	    	
+	    // Limpet Bore critical effects  	    	
+	    	if ($critical->phpclass == "LimpetBore") {
+	    			
+			    $explodeRoll = Dice::d(10);
+				$turnsAttached = $gamedata->turn - $critical->turn;
+				$explodesOn = 7 - $turnsAttached;	//Initial success chance is 7 on a d10, improved by -1 for each turn Limpet is attached.				
+				$turnsAttachedForNotes = $turnsAttached+1; //First attempt not recorded in $turnsAttached, so add it manually.
+				$explodechance = (11 - $explodesOn) * 10;	//For fireorder to display correct % in combat log.			           
+
+			    $rammingSystem = $ship->getSystemByName("RammingAttack");
+			    $newFireOrder = null;
+
+				    if ($rammingSystem) { // actually exists! - it should on every ship!
+				        $shotsHit = 0;
+				        if ($explodeRoll >= $explodesOn) { // actual explosion
+				            $shotsHit = 1;
+
+				        }
+				        $newFireOrder = new FireOrder(
+				            -1, "normal", $ship->id, $ship->id,
+				            $rammingSystem->id, -1, $gamedata->turn, 1,
+				            $explodechance, $explodeRoll*10, 1, $shotsHit, 0,
+				            0, 0, 'LimpetBore', 10000
+				        );
+				        $newFireOrder->pubnotes = "Limpet Bore attempts to damage " . $this->displayName ."! $turnsAttachedForNotes attempt(s) made. Needed: $explodesOn, rolled: $explodeRoll.";
+				        $newFireOrder->addToDB = true;
+				        $rammingSystem->fireOrders[] = $newFireOrder;
+				    }
+
+				    if ($explodeRoll >= $explodesOn) { // actual explosion
+		      
+				        $maxDamage = $this->getRemainingHealth();
+				        $damageDealt = Dice::d(10, 2) + 10;
+						$damageCaused = min($damageDealt, $maxDamage); //Don't cause more damage than system's health remaining.
+				    
+				    if ($damageDealt >= $maxDamage){	//Deals enough to destroy system	        
+				        $damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $damageCaused, 0, 0, -1, true, false, "", "LimpetBore");
+				        $damageEntry->updated = true;
+				        $this->damage[] = $damageEntry;
+				    }else{ //Not enough to destroy, just damage system instead.
+				        $damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $damageCaused, 0, 0, -1, false, false, "", "LimpetBore");
+				        $damageEntry->updated = true;
+				        $this->damage[] = $damageEntry;
+				        
+				        $critical->turnend = $gamedata->turn;//End Limpet Bore crit this turn, it blew up!
+						$critical->forceModify = true; //actually save the change.
+						$critical->updated = true; //actually save the change cd!	        	      	
+				        }
+				        
+				    if ($rammingSystem) { // add extra data to damage entry - so the firing order can be identified!
+				        $damageEntry->shooterid = $ship->id; // additional field
+				        $damageEntry->weaponid = $rammingSystem->id; // additional field
+				        }
+				  }
+
+			    if ($explodeRoll < $explodesOn) {
+					if ($turnsAttachedForNotes >= 5){ //After 5 attempts Limpet Bore drops off / fails.
+						$critical->turnend = $gamedata->turn;//End Limpet Bore crit this turn
+						$critical->forceModify = true; //actually save the change.
+						$critical->updated = true; //actually save the change cd!
+					}
+
+				}
+			}
+		} //End of LimpetBore critical effects
+		
+		
+	} //Endof criticalPhaseEffects - A hook for special effects that should happen in Critical phase/end of turn
+
 	
 	/*saves individual notes (if any new ones exist) to database*/
 	public function saveIndividualNotes(DBManager $dbManager){ //loading exisiting notes is done in dbmanager->getSystemDataForShips()

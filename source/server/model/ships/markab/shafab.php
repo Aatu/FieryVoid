@@ -18,6 +18,8 @@ class Shafab extends BaseShip{
         $this->rollcost = 3;
         $this->pivotcost = 4;
         $this->fighters = array("normal"=>12);
+
+		$this->enhancementOptionsEnabled[] = 'MARK_FERV'; //To activate Religious Fervor attributes.
         
         $this->addPrimarySystem(new Reactor(4, 17, 0, 0));
         $this->addPrimarySystem(new CnC(4, 12, 0, 0));

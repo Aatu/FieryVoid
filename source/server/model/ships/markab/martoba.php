@@ -22,6 +22,8 @@ class Martoba extends HeavyCombatVessel{
         $this->isd = 2014;
         $this->fighters = array("normal"=>6);
 
+		$this->enhancementOptionsEnabled[] = 'MARK_FERV'; //To activate Religious Fervor attributes.   
+
 	$this->addPrimarySystem(new Reactor(4, 15, 0, 0));
 	$this->addPrimarySystem(new CnC(4, 8, 0, 0));
 	$this->addPrimarySystem(new Scanner(4, 16, 7, 7));
