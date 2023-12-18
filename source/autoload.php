@@ -2655,7 +2655,7 @@ spl_autoload_register(
 				'attackfrigate' => '/server/model/ships/brakiri_raiders/AttackFrigate.php',
 				'folshota' => '/server/model/ships/brakiri/folshotA.php',
 				'folshotaraider' => '/server/model/ships/brakiri_raiders/FolshotARaider.php',									
-				
+				'ishtakaton' => '/server/model/ships/brakiri/ishtakaton.php',		
 
 
 				//Star Trek conversions
