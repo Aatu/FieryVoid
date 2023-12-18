@@ -7,7 +7,7 @@ class skywatch1810 extends OSAT
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 540;
-		$this->faction = "Orieni";
+		$this->faction = "Orieni Imperium";
 		$this->phpclass = "skywatch1810";
 		$this->shipClass = "Skywatch Heavy Orbital Satellite (Early)";
 	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list

@@ -5,7 +5,7 @@ class Xixx extends VreeHCV{
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 650;
-		$this->faction = "Vree";
+		$this->faction = "Vree Conglomerate";
 		$this->phpclass = "Xixx";
 		$this->shipClass = "Xixx Torpedo Saucer";
 		$this->isd = 2251;

@@ -6,7 +6,7 @@ class DroftaE extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 40*6;
-        $this->faction = "Markab";
+        $this->faction = "Markab Theocracy";
         $this->phpclass = "DroftaE";
         $this->shipClass = "Drofta Medium Fighters (Early)";
 	    $this->variantOf = "Drofta Medium Fighters";

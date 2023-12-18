@@ -5,7 +5,7 @@ class ShoKar extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 575;
-		$this->faction = "Narn";
+		$this->faction = "Narn Regime";
         $this->phpclass = "ShoKar";
         $this->imagePath = "img/ships/shokar.png";
         $this->shipClass = "Sho'Kar Light Scout Cruiser";

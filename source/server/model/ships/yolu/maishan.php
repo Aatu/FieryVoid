@@ -5,7 +5,7 @@ class Maishan extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 710;
-		$this->faction = "Yolu";
+		$this->faction = "Yolu Confederation";
         $this->phpclass = "Maishan";
         $this->imagePath = "img/ships/maitau.png";
         $this->shipClass = "Maishan Strike Frigate";

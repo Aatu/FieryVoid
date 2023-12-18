@@ -5,7 +5,7 @@ class Xeecra extends VreeCapital{
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 475;
-		$this->faction = "Vree";
+		$this->faction = "Vree Conglomerate";
 		$this->phpclass = "Xeecra";
 		$this->shipClass = "Xeecra Trading Post";
 		$this->isd = 2262;

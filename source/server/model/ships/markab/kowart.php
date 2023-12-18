@@ -3,7 +3,7 @@ class Kowart extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         $this->pointCost = 300;
-        $this->faction = "Markab";
+        $this->faction = "Markab Theocracy";
         $this->phpclass = "Kowart";
         $this->isd = 2010;        
         $this->imagePath = "img/ships/MarkabAssaultShip.png"; //needs to be changed

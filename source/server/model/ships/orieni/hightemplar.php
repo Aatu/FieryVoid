@@ -6,7 +6,7 @@ class HighTemplar extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 40*6;
-        $this->faction = "Orieni";
+        $this->faction = "Orieni Imperium";
         $this->phpclass = "HighTemplar";
         $this->shipClass = "High Templar Interceptor flight";
         $this->imagePath = "img/ships/highTemplar.png";

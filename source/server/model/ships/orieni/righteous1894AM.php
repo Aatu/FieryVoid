@@ -5,7 +5,7 @@ class Righteous1894AM extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 725;
-		$this->faction = "Orieni";
+		$this->faction = "Orieni Imperium";
         $this->phpclass = "Righteous1894AM";
         $this->imagePath = "img/ships/righteous.png";
         $this->shipClass = "Righteous Missile Support Ship (early)";

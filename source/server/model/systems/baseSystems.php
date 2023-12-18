@@ -1276,7 +1276,9 @@ class ProtectedCnC extends CnC{
 		}else{
 			$this->data["Special"] .= '<br>';
 		}
-		$this->data["Special"] .= 'This unit should have two separate C&Cs. As this is not possible in FV, critical chart is changed instead.';
+		//actually now secondary C&C is present - Protected C&C-equipped units should be re-equipped with regular C&C + Secondary C&C instead!
+		//$this->data["Special"] .= 'This unit should have two separate C&Cs. As this is not possible in FV, critical chart is changed instead.';
+		$this->data["Special"] .= "C&C that's more resistnat to critical damage.";
 	}
 	
 	protected $possibleCriticals = array(
@@ -1312,8 +1314,7 @@ class ThirdspaceCnC extends CnC{
 	
 }//endof class ThirdspaceCnC
 	
-class PakmaraCnC extends CnC{
-	
+class PakmaraCnC extends CnC{	
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);     
 		if (!isset($this->data["Special"])) {
@@ -1322,9 +1323,11 @@ class PakmaraCnC extends CnC{
 			$this->data["Special"] .= '<br>';
 		}
 		$this->data["Special"] .= "Pak'ma'ra C&C: Initiative penalties for critical hits are doubled.";
-		$this->data["Special"] .= '<br>This unit should have two separate C&Cs. As this is not possible in FV, critical chart is changed instead.';
+		//below is no longer true - Secondary C&C kicks in!
+		//$this->data["Special"] .= '<br>This unit should have two separate C&Cs. As this is not possible in FV, critical chart is changed instead.';
 	}
 
+/*replaced by doubled Ini penalties, but no reduced crit chance
 			protected $possibleCriticals = array(
 				8=>array("CommunicationsDisrupted","CommunicationsDisrupted"), 
 				16=>"PenaltyToHit", 
@@ -1332,10 +1335,78 @@ class PakmaraCnC extends CnC{
 				24=>array("ReducedIniativeOneTurn","ReducedIniative","ReducedIniativeOneTurn","ReducedIniative"), 
 				32=>array("RestrictedEW","ReducedIniativeOneTurn","ReducedIniative","ReducedIniativeOneTurn","ReducedIniative"), 
 				40=>array("RestrictedEW","ReducedIniative","ReducedIniative","ShipDisabledOneTurn")
-		    );	
+		    );	*/
+			
+    protected $possibleCriticals = array(
+    	//1=>"SensorsDisrupted", //not implemented! so I take it out 
+		1=>array("CommunicationsDisrupted","CommunicationsDisrupted"),    //this instead of SensorsDisrupted
+		9=>array("CommunicationsDisrupted","CommunicationsDisrupted"), 
+		12=>"PenaltyToHit", 
+		15=>"RestrictedEW", 
+		18=>array("ReducedIniativeOneTurn","ReducedIniativeOneTurn","ReducedIniative","ReducedIniative"), 
+		21=>array("RestrictedEW","ReducedIniativeOneTurn","ReducedIniativeOneTurn","ReducedIniative","ReducedIniative"), 
+		24=>array("RestrictedEW","ReducedIniative","ReducedIniative","ShipDisabledOneTurn") 
+    );
+			
+}//endof class PakmaraCnC
 
 
-}
+class SecondaryCnC extends ShipSystem{	
+    public $name = "SecondaryCnC";
+    public $displayName = "Secondary C&C";
+    public $primary = true;
+	public $iconPath = "CnCSecondary.png";
+	
+	//make it all-around by default - potentially saves work, and the system is only usable with TAG anyway
+	public $startArc = 0;
+	public $endArc = 360;
+	
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);     
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}
+		$this->data["Special"] .= "Secondary C&C: May take damage on C&C hits (instead of actual C&C).";
+		$this->data["Special"] .= '<br>If primary C&C is destroyed while secondary C&C is still alive, primary C&C will be revived with as much health as secondary C&C had.';
+	}
+	
+	
+    function __construct($armour, $maxhealth, $powerReq, $output ){
+        parent::__construct($armour, $maxhealth, $powerReq, $output );
+		$this->addTag('C&C');
+    }
+	
+	//if primary C&C is destroyed while secondary is still alive - revive primary and destroy secondary!
+	public function criticalPhaseEffects($ship, $gamedata)
+    { 
+		if($this->isDestroyed()) return;
+		
+		//find primary C&C
+		$primaryCnC = $ship->getSystemByName("CnC");
+		
+		if(!$primaryCnC->isDestroyed()) return; //primary C&C is not destroyed, no need to act
+		
+		//revive primary C&C, kill Secondary
+		
+		//find the killing shot...
+		foreach ($primaryCnC->damage as $damage ) if(($damage->turn == $gamedata->turn) && ($damage->destroyed)){ 
+			$healthRemaining = $this->getRemainingHealth();
+			$damage->destroyed = false; //not a killing shot after all!
+			//add revival of HP - as separate entry so damage from shot is not changed!
+			$damageEntry = new DamageEntry(-1, $damage->shipid, -1, $damage->turn, $primaryCnC->id, -$healthRemaining, 0, 0, 0/*no fire order to tie this damage to actually*/, false, false, "Secondary C&C - reviving command", $damage->damageclass, 0/*no shooter*/, 0/*no firing weapon*/);
+			$damageEntry->updated = true;
+			$primaryCnC->damage[] = $damageEntry;
+			//add Secondary C&C destruction - without actual damage, just desstruction, so it can be tied to original weapon impact without affecting damage done numbers
+			$damageEntry = new DamageEntry(-1, $damage->shipid, -1, $damage->turn, $this->id, 0, 0, 0, $damage->fireorderid, true, false, "Secondary C&C - marking destroyed", $damage->damageclass, $damage->shooterid, $damage->weaponid);
+			$damageEntry->updated = true;
+			$struct->damage[] = $damageEntry;
+		}
+    } //endof function criticalPhaseEffects	
+	
+}//endof class SecondaryCnC
+
 
 class CargoBay extends ShipSystem{
     public $name = "cargoBay";
@@ -1411,7 +1482,7 @@ class Thruster extends ShipSystem{
 				break;
 		}
 		
-		$this->addTag('Thruster');
+		//$this->addTag('Thruster'); //no need, as now system name is considered a tag as well
     }
 } //endof Thruster
 
@@ -1604,7 +1675,16 @@ class Structure extends ShipSystem{
 		$this->isIndestructible = $isIndestructible;
     }
 
-	
+	//creates pre-tagged Outer Structure, with appropriate arc
+	//warning: has trouble working if Structure isn't directly called earlier! so be sure to create PRIMARY Structure before trying to go for any Outer ones :)
+	public static function createAsOuter($armour, $maxhealth, $startArc, $endArc, $isIndestructible = false){
+		$createdStruct = new Structure($armour, $maxhealth, $isIndestructible);
+		$createdStruct->startArc = $startArc;
+		$createdStruct->endArc = $endArc;
+		$createdStruct->addTag('Outer Structure');
+		return $createdStruct;
+	}
+		
 	//Vree need Structure that doesn't fall off even if it's destroyed - here it is!
 	//it will get destroyed all right (possibly multiple times in a battle), but will still be there afterwards
 	//Will be destroyed if all such Structures are reduced to 0 (and then all of them will get destroyed !)

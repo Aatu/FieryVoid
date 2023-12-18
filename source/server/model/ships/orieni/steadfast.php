@@ -5,7 +5,7 @@ class Steadfast extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 445;
-		$this->faction = "Orieni";
+		$this->faction = "Orieni Imperium";
         $this->phpclass = "Steadfast";
         $this->imagePath = "img/ships/steadfast.png";
         $this->shipClass = "Steadfast Escort Corvette";

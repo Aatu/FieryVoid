@@ -5,7 +5,7 @@ class Xorr extends VreeCapital{
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 550;
-		$this->faction = "Vree";
+		$this->faction = "Vree Conglomerate";
 		$this->phpclass = "Xorr";
 		$this->shipClass = "Xorr War Saucer";
 		$this->isd = 2210;

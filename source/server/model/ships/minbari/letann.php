@@ -5,7 +5,7 @@ class Letann extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
 
         $this->pointCost = 900;
-        $this->faction = "Minbari";
+        $this->faction = "Minbari Federation";
         $this->phpclass = "Letann";
         $this->imagePath = "img/ships/letann.png";
         $this->shipClass = "Letann Scout";

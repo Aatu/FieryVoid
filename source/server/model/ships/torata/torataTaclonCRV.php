@@ -7,7 +7,7 @@ class TorataTaclonCRV extends MediumShip
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 400;
-		$this->faction = "Torata";
+		$this->faction = "Torata Regency";
 		$this->phpclass = "TorataTaclonCRV";
 		$this->imagePath = "img/ships/TorataAtlac.png";
 		$this->canvasSize = 100;

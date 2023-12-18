@@ -5,7 +5,7 @@ class Enlightenment1712 extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 600;
-		$this->faction = "Orieni";
+		$this->faction = "Orieni Imperium";
         $this->phpclass = "Enlightenment1712";
         $this->imagePath = "img/ships/enlightenment.png";
         $this->shipClass = "Enlightenment Invader (early)";

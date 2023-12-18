@@ -5,7 +5,7 @@ class HeavyThentus extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 500;
-		$this->faction = "Narn";
+		$this->faction = "Narn Regime";
         $this->phpclass = "HeavyThentus";
         $this->imagePath = "img/ships/thentus.png";
         $this->shipClass = "Heavy Thentus Frigate";

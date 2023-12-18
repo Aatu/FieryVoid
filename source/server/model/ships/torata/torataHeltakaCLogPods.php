@@ -6,7 +6,7 @@ class TorataHeltakaCLogPods extends BaseShip{
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 600;
-		$this->faction = "Torata";
+		$this->faction = "Torata Regency";
 		$this->phpclass = "TorataHeltakaCLogPods";
 		$this->imagePath = "img/ships/TorataHeltaka.png";
 		$this->shipClass = "Heltaka Logistics Cruiser (w/Cargo Pods)";

@@ -5,7 +5,7 @@ class Xill extends VreeCapital{
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 700;
-		$this->faction = "Vree";
+		$this->faction = "Vree Conglomerate";
 		$this->phpclass = "Xill";
 		$this->shipClass = "Xill Battle Saucer";
 		$this->isd = 2258;

@@ -5,7 +5,7 @@ class wlcAshinar extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
 
         $this->pointCost = 725;
-        $this->faction = "Minbari";
+        $this->faction = "Minbari Federation";
         $this->phpclass = "wlcAshinar";
         $this->imagePath = "img/ships/tinashi.png";
         $this->shipClass = "Ashinar Close Escort";

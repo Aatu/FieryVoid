@@ -5,7 +5,7 @@ class Staroon extends LCV{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 200;
-        $this->faction = "Usuuth";
+        $this->faction = "Usuuth Coalition";
         $this->phpclass = "Staroon";
         $this->shipClass = "Staroon Strike Boat";
         $this->imagePath = "img/ships/UsuuthBaroon.png";

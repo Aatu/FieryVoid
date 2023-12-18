@@ -5,7 +5,7 @@ class Shargoti extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 2500;
-		$this->faction = "Minbari";
+		$this->faction = "Minbari Federation";
         $this->phpclass = "Shargoti";
         $this->imagePath = "img/ships/sharlin.png";
         $this->shipClass = "Shargoti Battlecruiser";

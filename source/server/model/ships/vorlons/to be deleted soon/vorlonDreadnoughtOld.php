@@ -5,7 +5,7 @@ class VorlonDreadnoughtOld extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 5000;
-		$this->faction = "Vorlons";
+		$this->faction = "Vorlon Empire";
         $this->phpclass = "VorlonDreadnoughtOld";
         $this->shipClass = "Dreadnought";
         $this->variantOf = "TO BE DELETED";		

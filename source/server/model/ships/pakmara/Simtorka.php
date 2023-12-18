@@ -5,7 +5,7 @@ class Simtorka extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 500;
-		$this->faction = "Pak'ma'ra";
+		$this->faction = "Pak'Ma'Ra Confederacy";
 		$this->phpclass = "Simtorka";
 		$this->imagePath = "img/ships/PakmaraSimsalle.png";
 		$this->shipClass = "Sim'tor'ka Survey Transport";
@@ -27,11 +27,23 @@ class Simtorka extends BaseShip{
 
 		$this->iniativebonus = -1*5;
 
-		$this->addPrimarySystem(new Reactor(4, 18, 0, 4));
-		$this->addPrimarySystem(new JumpEngine(4, 15, 4, 48));		
+
+		/* let's replace this with appropriate two C&Cs!
 		$this->addPrimarySystem(new PakmaraCnC(5, 12, 0, 0));
+		*/
+		$cnc = new PakmaraCnC(4, 6, 0, 0);
+		$cnc->startArc = 0;
+		$cnc->endArc = 360;
+        $this->addPrimarySystem($cnc);
+		$cnc = new SecondaryCnC(4, 6, 0, 0);
+		$cnc->startArc = 0;
+		$cnc->endArc = 360;
+        $this->addPrimarySystem($cnc);
+		
+		$this->addPrimarySystem(new Reactor(4, 18, 0, 4));	
 		$this->addPrimarySystem(new ElintScanner(4, 20, 6, 11));
 		$this->addPrimarySystem(new Engine(4, 14, 0, 10, 3));
+		$this->addPrimarySystem(new JumpEngine(4, 15, 4, 48));	
 		$this->addPrimarySystem(new Hangar(2, 8));
 		$this->addPrimarySystem(new CargoBay(3, 20));
 		$this->addPrimarySystem(new CargoBay(3, 20));				
@@ -78,7 +90,7 @@ class Simtorka extends BaseShip{
                         15 => "Engine",
                         16 => "Hangar",
                         19 => "Reactor",
-                        20 => "C&C",
+                        20 => "TAG:C&C",
                 ),
                 1=> array(
                         4 => "Thruster",

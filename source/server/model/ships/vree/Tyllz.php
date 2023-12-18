@@ -7,7 +7,7 @@ class Tyllz extends StarBaseSixSections
 
 		$this->pointCost = 3500;
 		$this->base = true;
-		$this->faction = "Vree";
+		$this->faction = "Vree Conglomerate";
 		$this->phpclass = "Tyllz";
 		$this->shipClass = "Tyllz Sector Trading Post";
 		$this->imagePath = "img/ships/VreeTyllz.png";

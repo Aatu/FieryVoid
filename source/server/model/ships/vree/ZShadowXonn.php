@@ -6,7 +6,7 @@ class ZShadowXonn extends VreeCapital{
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 2750;
-		$this->faction = "Vree";
+		$this->faction = "Vree Conglomerate";
 		$this->phpclass = "ZShadowXonn";
 		$this->shipClass = "Shadow Xonn Dreadnought";
 		$this->isd = 'not known';

@@ -5,7 +5,7 @@ class Gtal extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 900;
-	$this->faction = "Narn";
+	$this->faction = "Narn Regime";
         $this->phpclass = "Gtal";
         $this->imagePath = "img/ships/gquan.png";
         $this->shipClass = "G'Tal Command Cruiser";

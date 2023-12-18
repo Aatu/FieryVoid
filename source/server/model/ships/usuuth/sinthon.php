@@ -5,7 +5,7 @@ class Sinthon extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 350;
-        $this->faction = "Usuuth";
+        $this->faction = "Usuuth Coalition";
         $this->phpclass = "Sinthon";
         $this->imagePath = "img/ships/UsuuthSerron.png";
 		$this->canvasSize = 200;

@@ -26,11 +26,11 @@ class LessaOSAT extends OSAT
 		
 		$this->addPrimarySystem(new Reactor(4, 6, 0, 0));
 		$this->addPrimarySystem(new Scanner(4, 6, 3, 5));
-		$this->addPrimarySystem(new Thruster(4, 6, 0, 0, 2));
-		$this->addPrimarySystem(new IonCannon(4, 6, 4, 270, 90));
-		$this->addPrimarySystem(new IonCannon(4, 6, 4, 270, 90));
-		$this->addPrimarySystem(new StdParticleBeam(3, 4, 1, 240, 120));
-		$this->addPrimarySystem(new StdParticleBeam(3, 4, 1, 240, 120));
+		$this->addAftSystem(new Thruster(4, 6, 0, 0, 2));
+		$this->addFrontSystem(new IonCannon(4, 6, 4, 270, 90));
+		$this->addFrontSystem(new IonCannon(4, 6, 4, 270, 90));
+		$this->addFrontSystem(new StdParticleBeam(3, 4, 1, 240, 120));
+		$this->addFrontSystem(new StdParticleBeam(3, 4, 1, 240, 120));
 
 		$this->addPrimarySystem(new Structure(4, 36));
 		
@@ -39,9 +39,9 @@ class LessaOSAT extends OSAT
 		$this->hitChart = array(
 			0=> array(
 					9 => "Structure",
-					11 => "Thruster",
-					14 => "Ion Cannon",
-					16 => "Standard Particle Beam",
+					11 => "2:Thruster",
+					14 => "1:Ion Cannon",
+					16 => "1:Standard Particle Beam",
 					18 => "Scanner",
 					20 => "Reactor",
 			),

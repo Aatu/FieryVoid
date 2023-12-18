@@ -1035,6 +1035,7 @@ window.gamedata = {
         gamedata.gameid = serverdata.id;
         gamedata.slots = serverdata.slots;
         gamedata.rules = serverdata.rules;
+		gamedata.description = serverdata.description;
 
         if (!gamedata.replay) {
             gamedata.thisplayer = serverdata.forPlayer;

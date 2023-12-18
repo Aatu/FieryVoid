@@ -5,7 +5,7 @@ class Gsten extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 575;
-		$this->faction = "Narn";
+		$this->faction = "Narn Regime";
         $this->phpclass = "Gsten";
         $this->imagePath = "img/ships/gkarith.png";
         $this->shipClass = "G'Sten";

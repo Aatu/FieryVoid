@@ -5,7 +5,7 @@ class WhiteStar extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
 
         $this->pointCost = 750;
-        $this->faction = "Minbari";
+        $this->faction = "Minbari Federation";
         $this->phpclass = "WhiteStar";
         $this->imagePath = "img/ships/whitestar.png";
         $this->shipClass = "White Star";

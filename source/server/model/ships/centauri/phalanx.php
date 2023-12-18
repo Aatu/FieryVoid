@@ -25,12 +25,12 @@ class Phalanx extends OSAT{
 
         $this->addPrimarySystem(new Reactor(5, 7, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 7, 2, 8)); 
-        $this->addPrimarySystem(new Thruster(4, 6, 0, 0, 2)); 
+        $this->addAftSystem(new Thruster(4, 6, 0, 0, 2)); 
 
-        $this->addPrimarySystem(new BattleLaser(4, 6, 6, 270, 90)); 
-        $this->addPrimarySystem(new BattleLaser(4, 6, 6, 270, 90)); 
-        $this->addPrimarySystem(new TwinArray(3, 6, 2, 180, 360));
-        $this->addPrimarySystem(new TwinArray(3, 6, 2, 0, 180));  
+        $this->addFrontSystem(new BattleLaser(4, 6, 6, 270, 90)); 
+        $this->addFrontSystem(new BattleLaser(4, 6, 6, 270, 90)); 
+        $this->addFrontSystem(new TwinArray(3, 6, 2, 180, 360));
+        $this->addFrontSystem(new TwinArray(3, 6, 2, 0, 180));  
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         
@@ -41,12 +41,12 @@ class Phalanx extends OSAT{
 	//d20 hit chart
         $this->hitChart = array(
             0=> array( //PRIMARY
-                    9 => "Structure",
-                    11 => "Thruster",
-		    14 => "Battle Laser",
-		    16 => "Twin Array",
-                    18 => "Scanner",
-                    20 => "Reactor",
+				9 => "Structure",
+				11 => "2:Thruster",
+				14 => "1:Battle Laser",
+				16 => "1:Twin Array",
+				18 => "Scanner",
+				20 => "Reactor",
             )
         );
 	    

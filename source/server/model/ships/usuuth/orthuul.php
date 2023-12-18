@@ -5,7 +5,7 @@ class Orthuul  extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 600;
-        $this->faction = "Usuuth";
+        $this->faction = "Usuuth Coalition";
         $this->phpclass = "Orthuul";
         $this->imagePath = "img/ships/UsuuthOrthuus.png";
 		$this->canvasSize = 200;
