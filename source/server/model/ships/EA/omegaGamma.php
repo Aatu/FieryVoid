@@ -30,8 +30,18 @@ class OmegaGamma  extends BaseShip{
 	    
 	$this->iniativebonus = 1*5; 
          
-        $this->addPrimarySystem(new Reactor(6, 25, 0, 0));
+		 
+		/* let's replace this with appropriate two C&Cs!
         $this->addPrimarySystem(new ProtectedCnC(7, 20, 0, 0)); //One armor 6/str16 and a second one 4/4
+		*/
+		$cnc = new CnC(6, 16, 0, 0);
+		$cnc->startArc = 0;
+		$cnc->endArc = 360;
+        $this->addPrimarySystem($cnc);
+		$cnc = new SecondaryCnC(4, 4, 0, 0); //all-around by default
+        $this->addPrimarySystem($cnc);
+		
+        $this->addPrimarySystem(new Reactor(6, 25, 0, 0));
         $this->addPrimarySystem(new Scanner(6, 20, 4, 8));
         $this->addPrimarySystem(new Engine(6, 20, 0, 8, 3));
 	$this->addPrimarySystem(new Hangar(6, 26, 24));
