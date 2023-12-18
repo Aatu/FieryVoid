@@ -5,7 +5,7 @@ class upgTorotha extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 600;
-		$this->faction = "Minbari";
+		$this->faction = "Minbari Federation";
         $this->phpclass = "upgTorotha";
         $this->imagePath = "img/ships/torotha.png";
         $this->shipClass = "Torotha [Upgraded]";

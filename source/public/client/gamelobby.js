@@ -98,31 +98,31 @@ window.gamedata = {
 		  case 'Kor-Lyan Kingdoms':
 			powerRating = 'Tier 1';
 			break;
-		  case 'Llort':
+		  case 'Llort': //actually no full name in the sourcebook (RPP1), it's just Llort!
 			powerRating = 'Tier 1';
 			break;
-		  case 'Markab':
+		  case 'Markab Theocracy':
 			powerRating = 'Tier 2';
 			break;
-		  case 'Minbari':
+		  case 'Minbari Federation':
 			powerRating = 'Tier 1 (all-White Star: Superior)';
 			break;
 		  case 'Minbari Protectorate':
 			powerRating = 'Tier 1';
 			break;
-		  case 'Narn':
-			powerRating = 'Tier 1 (if >6 EMIne launchers: Superior)';
+		  case 'Narn Regime':
+			powerRating = 'Tier 1 (if >6 EMine launchers: Superior)';
 			break;
-		  case 'Orieni':
+		  case 'Orieni Imperium':
 			powerRating = 'Tier 1';
 			break;
-		  case "Pak'ma'ra":
+		  case "Pak'ma'ra Confederacy":
 			powerRating = 'Tier 2';
 			break;
 		  case 'Raiders':
 			powerRating = 'Tier 2 (directory contains distinct Raider factions in addition to generic Raiders!)';
 			break;
-		  case 'Shadows':
+		  case 'Shadow Association':
 			powerRating = 'Ancients';
 			break;
 		  case 'Small Races':
@@ -134,19 +134,19 @@ window.gamedata = {
 		  case 'Thirdspace':
 			powerRating = 'Ancients, custom faction';
 			break;
-		  case 'Torata':
+		  case 'Torata Regency':
 			powerRating = 'Tier 1';
 			break;
-		  case 'Usuuth':
+		  case 'Usuuth Coalition':
 			powerRating = 'Not balanced';
 			break;
-		  case 'Vorlons':
+		  case 'Vorlon Empire':
 			powerRating = 'Ancients';
 			break;
-		  case 'Vree':
+		  case 'Vree Conglomerate':
 			powerRating = 'Tier 1';
 			break;
-		  case 'Yolu':
+		  case 'Yolu Confederation':
 			powerRating = 'Superior';
 			break;
 		  case 'ZBSG Colonials':

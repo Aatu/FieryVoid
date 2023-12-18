@@ -6,7 +6,7 @@ class FlyerAssault extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
     	$this->pointCost = 40*6;
-    	$this->faction = "Minbari";
+    	$this->faction = "Minbari Federation";
         $this->phpclass = "FlyerAssault";
         $this->shipClass = "Assault Flyers";
     	$this->imagePath = "img/ships/MinbariFlyer.png"; //need Minbari Flyer image!

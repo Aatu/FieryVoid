@@ -7,7 +7,7 @@ class MinbariCivilianBase extends SmallStarBaseFourSections{
 		$this->pointCost = 500;
 		$this->base = true;
 		$this->smallBase = true;
-		$this->faction = "Minbari";
+		$this->faction = "Minbari Federation";
 		$this->phpclass = "minbaricivilianbase";
 		$this->shipClass = "Minbari Civilian Base";
 		$this->imagePath = "img/ships/MinbariCivBase.png";

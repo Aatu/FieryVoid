@@ -55,11 +55,17 @@ class Alykent extends SmallStarBaseFourSections{
 		$this->addRightSystem(new GraviticShield(0, 6, 0, 2, 30, 150));	
 
 
+		/*replaced by TAGed versions!
 		$this->addFrontSystem(new Structure( 5, 56));
 		$this->addAftSystem(new Structure( 5, 56));
 		$this->addLeftSystem(new Structure( 5, 56));
 		$this->addRightSystem(new Structure( 5, 56));
+		*/
 		$this->addPrimarySystem(new Structure( 5, 52));
+		$this->addFrontSystem(Structure::createAsOuter(5, 56, 270,90));
+		$this->addAftSystem(Structure::createAsOuter(5, 56, 90, 270));
+		$this->addLeftSystem(Structure::createAsOuter(5, 56, 180, 360));
+		$this->addRightSystem(Structure::createAsOuter(5, 56, 0, 180));
 		
 		$this->hitChart = array(			
 			0=> array(
@@ -71,31 +77,31 @@ class Alykent extends SmallStarBaseFourSections{
 				20 => "C&C",
 			),
 			1=> array(
-				4 => "Gravitic Cannon",
-				8 => "Gravitic Bolt",
-				10 => "Gravitic Shield",
-				18 => "Structure",
+				4 => "TAG:Gravitic Cannon",
+				8 => "TAG:Gravitic Bolt",
+				10 => "TAG:Gravitic Shield",
+				18 => "TAG:Outer Structure",
 				20 => "Primary",
 			),
 			2=> array(
-				4 => "Gravitic Cannon",
-				8 => "Gravitic Bolt",
-				10 => "Gravitic Shield",
-				18 => "Structure",
+				4 => "TAG:Gravitic Cannon",
+				8 => "TAG:Gravitic Bolt",
+				10 => "TAG:Gravitic Shield",
+				18 => "TAG:Outer Structure",
 				20 => "Primary",
 			),
 			3=> array(
-				4 => "Gravitic Cannon",
-				8 => "Gravitic Bolt",
-				10 => "Gravitic Shield",
-				18 => "Structure",
+				4 => "TAG:Gravitic Cannon",
+				8 => "TAG:Gravitic Bolt",
+				10 => "TAG:Gravitic Shield",
+				18 => "TAG:Outer Structure",
 				20 => "Primary",
 			),
 			4=> array(
-				4 => "Gravitic Cannon",
-				8 => "Gravitic Bolt",
-				10 => "Gravitic Shield",
-				18 => "Structure",
+				4 => "TAG:Gravitic Cannon",
+				8 => "TAG:Gravitic Bolt",
+				10 => "TAG:Gravitic Shield",
+				18 => "TAG:Outer Structure",
 				20 => "Primary",
 			),
 		);

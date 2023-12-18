@@ -5,7 +5,7 @@ class DtarnPlasma extends LCV{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 175;
-    $this->faction = "Narn";
+    $this->faction = "Narn Regime";
 	$this->phpclass = "DtarnPlasma";
 	$this->shipClass = "D'Tarn Light Gunboat (Plasma)";
 	$this->imagePath = "img/ships/trakk.png";

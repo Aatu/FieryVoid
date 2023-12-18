@@ -7,7 +7,7 @@ class Shadrak extends SmallStarBaseFourSections{
 		$this->pointCost = 600;
 		$this->base = true;
 		$this->smallBase = true;
-		$this->faction = "Markab";
+		$this->faction = "Markab Theocracy";
 		$this->phpclass = "Shadrak";
 		$this->shipClass = "Shadrak Shrine";
 		$this->imagePath = "img/ships/MarkabShadrakShrine.png";

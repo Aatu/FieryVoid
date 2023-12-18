@@ -5,7 +5,7 @@ class Tarza extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 270;
-	$this->faction = "Narn";
+	$this->faction = "Narn Regime";
         $this->phpclass = "Tarza";
         $this->shipClass = "Tarza Torpedo Fighters";
 	$this->imagePath = "img/ships/gorith.png";

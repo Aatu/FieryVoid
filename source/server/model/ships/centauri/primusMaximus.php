@@ -29,8 +29,17 @@ class PrimusMaximus extends BaseShip{
 		
 		$this->iniativebonus = 5;
          
-        $this->addPrimarySystem(new Reactor(8, 22, 0, 0));
+		/* let's replace this with appropriate two C&Cs!
         $this->addPrimarySystem(new ProtectedCnC(8, 28, 0, 0)); //nominally one 7/20 and one 8/8
+		*/
+		$cnc = new CnC(7, 20, 0, 0);
+		$cnc->startArc = 0;
+		$cnc->endArc = 360;
+        $this->addPrimarySystem($cnc);
+		$cnc = new SecondaryCnC(8, 8, 0, 0); //all-around by default
+        $this->addPrimarySystem($cnc);
+		
+        $this->addPrimarySystem(new Reactor(8, 22, 0, 0));
         $this->addPrimarySystem(new Scanner(7, 20, 5, 10));
         $this->addPrimarySystem(new Engine(7, 18, 0, 10, 2));
 		$this->addPrimarySystem(new Hangar(7, 14));
@@ -75,7 +84,7 @@ class PrimusMaximus extends BaseShip{
                     15 => "Engine",
                     17 => "Hangar",
                     19 => "Reactor",
-                    20 => "C&C",
+                    20 => "TAG:C&C",
             ),
             1=> array( //Forward
                     3 => "Thruster",

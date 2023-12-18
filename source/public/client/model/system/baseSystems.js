@@ -117,6 +117,12 @@ var PakmaraCnC = function PakmaraCnC(json, ship) {
 PakmaraCnC.prototype = Object.create(CnC.prototype);
 PakmaraCnC.prototype.constructor = PakmaraCnC;
 
+var SecondaryCnC = function SecondaryCnC(json, ship) {
+    ShipSystem.call(this, json, ship);
+};
+SecondaryCnC.prototype = Object.create(ShipSystem.prototype);
+SecondaryCnC.prototype.constructor = SecondaryCnC;
+
 var Thruster = function Thruster(json, ship) {
     ShipSystem.call(this, json, ship);
     this.channeled = 0;

@@ -6,7 +6,7 @@ class TorataToglatMonitor extends BaseShip{
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 800;
-		$this->faction = "Torata";
+		$this->faction = "Torata Regency";
 		$this->shipClass = "Toglat System Monitor";
 		$this->phpclass = "TorataToglatMonitor";
 		$this->imagePath = "img/ships/TorataToglat.png";

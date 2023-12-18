@@ -6,7 +6,7 @@ class zzunoffShoVor extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 365; //LOTS; as it's unofficial, I'm temted to reduce point cost - around 300, I'd say.
-		$this->faction = "Narn";
+		$this->faction = "Narn Regime";
         $this->phpclass = "zzunoffShoVor";
         $this->imagePath = "img/ships/shokos.png";
         $this->shipClass = "Sho'Vor Escort Cutter";

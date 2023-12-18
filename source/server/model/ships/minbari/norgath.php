@@ -5,7 +5,7 @@ class Norgath extends StarBaseSixSections{
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 9000;
-		$this->faction = 'Minbari';
+		$this->faction = "Minbari Federation";
 		$this->phpclass = "norgath";
 		$this->shipClass = "Norgath Starbase";
 		$this->fighters = array("heavy"=>36, "shuttles"=>6); 

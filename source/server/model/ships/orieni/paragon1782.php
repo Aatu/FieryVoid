@@ -5,7 +5,7 @@ class Paragon1782 extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 950;
-		$this->faction = "Orieni";
+		$this->faction = "Orieni Imperium";
         $this->phpclass = "Paragon1782";
         $this->imagePath = "img/ships/prophet.png";
         $this->canvasSize = 280;

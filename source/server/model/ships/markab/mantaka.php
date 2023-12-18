@@ -3,7 +3,7 @@ class Mantaka extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         $this->pointCost = 475;
-        $this->faction = "Markab";
+        $this->faction = "Markab Theocracy";
         $this->phpclass = "Mantaka";
         $this->isd = 2005;        
         $this->imagePath = "img/ships/MarkabAssaultShip.png"; //needs to be changed

@@ -5,12 +5,12 @@ class ZFtrZorth extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 35*6;
-		$this->faction = "Vree";
+		$this->faction = "Vree Conglomerate";
 		$this->phpclass = "ZFtrZorth";
         $this->shipClass = "Zorth Light Fighters";
         $this->imagePath = "img/ships/VreeZorth.png";
         
-        $this->faction = "Vree";
+        $this->faction = "Vree Conglomerate";
 	    $this->isd = 2162;
         $this->notes = 'Each hangar space on a ship can stack two Zorth fighters.';	    
 

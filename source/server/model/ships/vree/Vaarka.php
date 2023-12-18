@@ -5,7 +5,7 @@ class Vaarka extends VreeHCV{
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 675;
-		$this->faction = "Vree";
+		$this->faction = "Vree Conglomerate";
 		$this->phpclass = "Vaarka";
 		$this->shipClass = "Vaarka Escort Scout";
 		$this->isd = 2257;

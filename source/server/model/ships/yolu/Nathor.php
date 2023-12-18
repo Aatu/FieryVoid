@@ -5,7 +5,7 @@ class Nathor extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
 	        
 		$this->pointCost = 40*6;
-		$this->faction = "Yolu";
+		$this->faction = "Yolu Confederation";
 		$this->phpclass = "Nathor";
 		$this->shipClass = "Nathor Assault Shuttles";
 		$this->imagePath = "img/ships/Nathor.png";

@@ -5,7 +5,7 @@ class Varloth extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 520;
-        $this->faction = "Narn";
+        $this->faction = "Narn Regime";
         $this->phpclass = "Varloth";
         $this->imagePath = "img/ships/varnic.png";
         $this->shipClass = "Var'Loth Assault Destroyer";

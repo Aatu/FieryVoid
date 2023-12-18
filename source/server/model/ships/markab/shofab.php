@@ -3,7 +3,7 @@ class Shofab extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         $this->pointCost = 700;
-        $this->faction = "Markab";
+        $this->faction = "Markab Theocracy";
         $this->phpclass = "Shofab";
         $this->isd = 2231;        
         $this->imagePath = "img/ships/MarkabCruiser.png"; 

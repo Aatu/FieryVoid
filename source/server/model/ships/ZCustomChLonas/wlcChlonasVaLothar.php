@@ -52,6 +52,21 @@ class wlcChlonasVaLothar extends SmallStarBaseThreeSections{
 			$min = 270 + ($i*120);
 			$max = 90 + ($i*120);
 
+			/*some systems need pre-definition to have arcs set for TAGs!*/
+			$struct = Structure::createAsOuter(4, 154,$min,$max);
+			$cargoBay = new CargoBay(4, 24);
+			$cargoBay->startArc = $min;
+			$cargoBay->endArc = $max;
+			$cargoBay2 = new CargoBay(4, 24);
+			$cargoBay2->startArc = $min;
+			$cargoBay2->endArc = $max;
+			$subReactor = new SubReactorUniversal(4, 20, 0, 0);
+			$subReactor->startArc = $min;
+			$subReactor->endArc = $max;
+			$hangar = new Hangar(4, 14, 12, 0);
+			$hangar->startArc = $min;
+			$hangar->endArc = $max;
+			
 			$systems = array(
 				new CustomPulsarLaser(4, 0, 0, $min, $max),
 				new CustomPulsarLaser(4, 0, 0, $min, $max),
@@ -62,25 +77,25 @@ class wlcChlonasVaLothar extends SmallStarBaseThreeSections{
 				new LightParticleBeamShip(4, 2, 1, $min, $max),
 				new LightParticleBeamShip(4, 2, 1, $min, $max),
 				new LightParticleBeamShip(4, 2, 1, $min, $max),
-				new Hangar(4, 14),
-				new CargoBay(4, 24),
-				new CargoBay(4, 24),
-				new SubReactorUniversal(4, 20, 0, 0),
-				new Structure( 4, 154)
+				$hangar, //new Hangar(4, 14),
+				$cargoBay, //new CargoBay(4, 24),
+				$cargoBay2, //new CargoBay(4, 24),
+				$subReactor, //new SubReactorUniversal(4, 20, 0, 0),
+				$struct //new Structure( 4, 154)
 			);
 
 
 			$loc = $this->locations[$i];
 
 			$this->hitChart[$loc] = array(
-				3 => "Pulsar Laser",
-				5 => "Assault Laser",
-				7 => "Matter Cannon",
-				9 => "Light Particle Beam",
-				10 => "Hangar",
-				11 => "Cargo Bay",
-				12 => "Sub Reactor",
-				18 => "Structure",
+				3 => "TAG:Pulsar Laser",
+				5 => "TAG:Assault Laser",
+				7 => "TAG:Matter Cannon",
+				9 => "TAG:Light Particle Beam",
+				10 => "TAG:Hangar",
+				11 => "TAG:Cargo Bay",
+				12 => "TAG:Sub Reactor",
+				18 => "TAG:Outer Structure",
 				20 => "Primary",
 			);
 

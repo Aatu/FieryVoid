@@ -5,7 +5,7 @@ class JaDul extends SmallStarBaseThreeSections{
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 1500;
-		$this->faction = "Narn";
+		$this->faction = "Narn Regime";
 		$this->phpclass = "JaDul";
 		$this->shipClass = "Ja'Dul Civilian Starbase";
 		$this->fighters = array("medium"=>18); 

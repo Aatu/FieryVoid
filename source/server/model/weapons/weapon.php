@@ -1064,10 +1064,10 @@ class Weapon extends ShipSystem
             $soew = EW::getSupportedOEW($gamedata, $shooter, $target);
 			$dist = EW::getDistruptionEW($gamedata, $shooter);
             $oew -= $dist;
-            if ($oew <= 1) { //less than required for a lock-on
+            if ($oew < 1) { //less than required for a lock-on
 				$oew = max(0,$oew); //OEW cannot be negative
 				$soew = 0; //no lock-on negates SOEW, if any
-			}
+			}	
         } else {
             $soew = 0;
             $oew = 0;

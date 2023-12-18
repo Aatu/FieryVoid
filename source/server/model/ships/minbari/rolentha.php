@@ -5,7 +5,7 @@ class Rolentha extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
 
         $this->pointCost = 800;
-        $this->faction = "Minbari";
+        $this->faction = "Minbari Federation";
         $this->phpclass = "Rolentha";
         $this->imagePath = "img/ships/rogata.png";
         $this->shipClass = "Rolentha Combat Tug";

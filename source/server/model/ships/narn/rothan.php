@@ -4,7 +4,7 @@ class Rothan extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 460;
-        $this->faction = "Narn";
+        $this->faction = "Narn Regime";
         $this->phpclass = "Rothan";
         $this->imagePath = "img/ships/rongoth.png";
         $this->shipClass = "Rothan Plasma Destroyer";

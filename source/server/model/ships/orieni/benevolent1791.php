@@ -5,7 +5,7 @@ class Benevolent1791 extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 600;
-		$this->faction = "Orieni";
+		$this->faction = "Orieni Imperium";
         $this->phpclass = "Benevolent1791";
         $this->imagePath = "img/ships/benevolent.png";
         $this->shipClass = "Benevolent Heavy Scout (early)";

@@ -5,7 +5,7 @@ class Bintor extends BaseShip{
         parent::__construct($id, $userid, $name, $movement);
         
 		$this->pointCost = 1375;
-		$this->faction = "Narn";
+		$this->faction = "Narn Regime";
         $this->phpclass = "Bintor";
         $this->imagePath = "img/ships/bintak.png";
         $this->shipClass = "Bin'Tor Dreadnought";
