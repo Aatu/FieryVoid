@@ -99,7 +99,7 @@ class OmegaGamma  extends BaseShip{
                         15 => "Engine",
                         17 => "Hangar",
                         19 => "Reactor",
-                        20 => "C&C",
+                        20 => "TAG:C&C",
                 ),
                 1=> array(
                         3 => "Thruster",
