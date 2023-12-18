@@ -13,7 +13,8 @@ class JaStat extends StarBaseFiveSections{
 		$this->fighters = array("heavy"=>36); 
  		$this->unofficial = 'S'; //unavailable official Pulsar Mines replaced with Twin Arrays
 
-		$this->shipSizeClass = 3; //Enormous is not implemented
+		$this->shipSizeClass = 3;
+        $this->Enormous = true;		
 		$this->iniativebonus = -200; //no voluntary movement anyway
 		$this->turncost = 0;
 		$this->turndelaycost = 0;

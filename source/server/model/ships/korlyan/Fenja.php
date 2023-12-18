@@ -38,12 +38,12 @@ class Fenja extends MediumShip{
         $this->addFrontSystem(new Thruster(3, 10, 0, 4, 1));
         $this->addFrontSystem(new StdParticleBeam(1, 4, 1, 240, 60));
 		$this->addFrontSystem(new CustomIndustrialGrappler(3, 5, 0, 300, 60));
-		$this->addFrontSystem(new DirectLimpetBore(2, 5, 3, 270, 90));
+		$this->addFrontSystem(new LimpetBoreTorpedo(2, 0, 0, 270, 90));
 		$this->addFrontSystem(new CustomIndustrialGrappler(3, 5, 0, 300, 60));
         $this->addFrontSystem(new StdParticleBeam(1, 4, 1, 300, 120));
 		
         $this->addAftSystem(new Thruster(3, 6, 0, 2, 2));
-		$this->addAftSystem(new DirectLimpetBore(2, 5, 3, 90, 270));
+		$this->addAftSystem(new LimpetBoreTorpedo(2, 0, 0, 90, 270));
         $this->addAftSystem(new Thruster(3, 6, 0, 2, 2));
 	
         $this->addPrimarySystem(new Structure( 3, 64));

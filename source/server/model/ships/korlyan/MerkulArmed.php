@@ -5,11 +5,12 @@ class MerkulArmed extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 25*6;
-		$this->faction = "Kor-Lyan Kingdoms";
+        $this->faction = "Custom Ships";
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
         $this->phpclass = "MerkulArmed";
         $this->shipClass = "Merkul Armed Shuttles";
 			$this->occurence = "common";
-			$this->variantOf = 'Merkul Shuttles';
+//			$this->variantOf = 'Merkul Shuttles';
 		$this->imagePath = "img/ships/korlyanArmedMerkul2.png"; 
 
 		$this->canvasSize = 40;

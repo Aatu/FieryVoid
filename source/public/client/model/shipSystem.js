@@ -170,13 +170,18 @@ Weapon.prototype.changeFiringMode = function () {
 	
 	
 	if (!mathlib.arrayIsEmpty(this.doNotInterceptArray)) this.doNotIntercept = this.doNotInterceptArray[this.firingMode];
-	if (!mathlib.arrayIsEmpty(this.uninterceptableArray)) this.uninterceptable = this.uninterceptableArray[this.firingMode];		
+	if (!mathlib.arrayIsEmpty(this.uninterceptableArray)) this.uninterceptable = this.uninterceptableArray[this.firingMode];
+	if (!mathlib.arrayIsEmpty(this.interceptArray)) this.intercept = this.interceptArray[this.firingMode];
+	if (!mathlib.arrayIsEmpty(this.ballisticInterceptArray)) this.ballisticIntercept = this.ballisticInterceptArray[this.firingMode];							
 
 	if (!mathlib.arrayIsEmpty(this.hextargetArray)) this.hextarget = this.hextargetArray[this.firingMode];
 	if (!mathlib.arrayIsEmpty(this.hidetargetArray)) this.hidetarget = this.hidetargetArray[this.firingMode];
 		
-	if (!mathlib.arrayIsEmpty(this.specialRangeCalculationArray)) this.specialRangeCalculation = this.specialRangeCalculationArray[this.firingMode];
-	if (!mathlib.arrayIsEmpty(this.specialHitChanceCalculationArray)) this.specialHitChanceCalculation = this.specialHitChanceCalculationArray[this.firingMode];				
+	if (!mathlib.arrayIsEmpty(this.noLockPenaltyArray)) this.noLockPenalty = this.noLockPenaltyArray[this.firingMode]; //DK
+	if (!mathlib.arrayIsEmpty(this.calledShotModArray)) this.calledShotMod = this.calledShotModArray[this.firingMode];	//DK
+			
+	if (!mathlib.arrayIsEmpty(this.specialRangeCalculationArray)) this.specialRangeCalculation = this.specialRangeCalculationArray[this.firingMode];//DK
+	if (!mathlib.arrayIsEmpty(this.specialHitChanceCalculationArray)) this.specialHitChanceCalculation = this.specialHitChanceCalculationArray[this.firingMode];//DK				
 	
 		/*old animation-related variables - not used any more!
 	if (!mathlib.arrayIsEmpty(this.animationImgArray)) this.animationImg = this.animationImgArray[this.firingMode];

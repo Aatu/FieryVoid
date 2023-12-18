@@ -97,3 +97,16 @@ PsionicTorpedo.prototype.initBoostableInfo = function () {
     
     return this;
 };
+
+var LimpetBoreTorpedo = function  LimpetBoreTorpedo(json, ship) {
+    Torpedo.call(this, json, ship);
+};
+LimpetBoreTorpedo.prototype = Object.create(Torpedo.prototype);
+LimpetBoreTorpedo.prototype.constructor =  LimpetBoreTorpedo;
+
+var LimpetBoreTorpedoBase = function  LimpetBoreTorpedoBase(json, ship) {
+    Torpedo.call(this, json, ship);
+};
+LimpetBoreTorpedoBase.prototype = Object.create(Torpedo.prototype);
+LimpetBoreTorpedoBase.prototype.constructor =  LimpetBoreTorpedoBase;
+

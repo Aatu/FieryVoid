@@ -5,7 +5,8 @@ class Taloki extends StarBaseSixSections{
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 3500;
-		$this->faction = "Kor-Lyan Kingdoms";
+        $this->faction = "Custom Ships";
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
 		$this->phpclass = "Taloki";
 		$this->shipClass = "Taloki Starbase (2240)";
 		$this->fighters = array("assault shuttles"=>4, "normal"=>24);
@@ -51,17 +52,37 @@ class Taloki extends StarBaseSixSections{
 		$this->addFrontSystem(new Hangar(4, 14));
 		$this->addFrontSystem(new SubReactorUniversal(4, 20, 0, 0));
 		$this->addFrontSystem(new ParticleCannon(4, 8, 7, 270, 90));
-		$this->addFrontSystem(new ProximityLaser(4, 6, 6, 270, 90));
-		$this->addFrontSystem(new DirectLimpetBoreBase(4, 5, 3, 270, 90));
-		$this->addFrontSystem(new ProximityLaser(4, 6, 6, 270, 90));
+//		$this->addFrontSystem(new ProximityLaser(4, 6, 6, 270, 90));
+		$TargeterA = new ProximityLaser(0, 1, 0, 270, 90, 'A');
+		$LauncherA = new ProximityLaserLauncher(4, 0, 0, 270, 90, 'A'); 
+		$TargeterA->addLauncher($LauncherA);
+		$this->addFrontSystem($TargeterA);
+		$this->addFrontSystem($LauncherA);	
+		$this->addFrontSystem(new LimpetBoreTorpedoBase(4, 0, 0, 270, 90));
+//		$this->addFrontSystem(new ProximityLaser(4, 6, 6, 270, 90));
+		$TargeterB = new ProximityLaser(0, 1, 0, 270, 90, 'B');
+		$LauncherB = new ProximityLaserLauncher(4, 0, 0, 270, 90, 'B'); 
+		$TargeterB->addLauncher($LauncherB);
+		$this->addFrontSystem($TargeterB);
+		$this->addFrontSystem($LauncherB);
 		$this->addFrontSystem(new ParticleCannon(4, 8, 7, 270, 90));
 		
 		$this->addAftSystem(new Hangar(4, 14));
 		$this->addAftSystem(new SubReactorUniversal(4, 20, 0, 0));
 		$this->addAftSystem(new ParticleCannon(4, 8, 7, 90, 270));
-		$this->addAftSystem(new ProximityLaser(4, 6, 6, 90, 270));
-		$this->addAftSystem(new DirectLimpetBoreBase(4, 5, 3, 90, 270));
-		$this->addAftSystem(new ProximityLaser(4, 6, 6, 90, 270));
+//		$this->addAftSystem(new ProximityLaser(4, 6, 6, 90, 270));
+		$TargeterC = new ProximityLaser(0, 1, 0, 90, 270, 'C');
+		$LauncherC = new ProximityLaserLauncher(4, 0, 0, 90, 270, 'C'); 
+		$TargeterC->addLauncher($LauncherC);
+		$this->addAftSystem($TargeterC);
+		$this->addAftSystem($LauncherC);	
+		$this->addAftSystem(new LimpetBoreTorpedoBase(4, 0, 0, 90, 270));
+//		$this->addAftSystem(new ProximityLaser(4, 6, 6, 90, 270));
+		$TargeterD = new ProximityLaser(0, 1, 0, 90, 270, 'D');
+		$LauncherD = new ProximityLaserLauncher(4, 0, 0, 90, 270, 'D'); 
+		$TargeterD->addLauncher($LauncherD);
+		$this->addAftSystem($TargeterD);
+		$this->addAftSystem($LauncherD);	
 		$this->addAftSystem(new ParticleCannon(4, 8, 7, 90, 270));
 		
 		$this->addLeftFrontSystem(new SubReactorUniversal(4, 18, 0, 0));
@@ -133,7 +154,7 @@ class Taloki extends StarBaseSixSections{
                     20 => "C&C",
            		 ),
             1=> array(
-                    2 => "Base Limpet Bore Torpedo",
+                    2 => "Limpet Bore Torpedo",
 					4 => "Proximity Laser",
 					6 => "Particle Cannon",
 					7 => "Hangar",
@@ -142,7 +163,7 @@ class Taloki extends StarBaseSixSections{
                     20 => "Primary",
            		 ),
             2=> array(
-                    2 => "Base Limpet Bore Torpedo",
+                    2 => "Limpet Bore Torpedo",
 					4 => "Proximity Laser",
 					6 => "Particle Cannon",
 					7 => "Hangar",

@@ -20,8 +20,14 @@ class DroftaN extends FighterFlight{
         $this->turncost = 0.33;
         
     	$this->iniativebonus = 18 *5;
+  	
+    	
         $this->populate();        
+
+		$this->enhancementOptionsEnabled[] = 'FTR_FERV'; //To activate Religious Fervor attributes.  
     }
+
+
 
     public function populate(){
 

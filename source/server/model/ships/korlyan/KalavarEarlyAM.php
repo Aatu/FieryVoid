@@ -33,21 +33,32 @@ class KalavarEarlyAM extends OSAT{
 	    $this->enhancementOptionsEnabled[] = 'AMMO_A';//add enhancement options for other missiles - Class-A
 	    $this->enhancementOptionsEnabled[] = 'AMMO_C';//add enhancement options for other missiles - Class-C
 	    $this->enhancementOptionsEnabled[] = 'AMMO_F';//add enhancement options for other missiles - Class-F
-	    $this->enhancementOptionsEnabled[] = 'AMMO_H';//add enhancement options for other missiles - Class-H
+	    $this->enhancementOptionsEnabled[] = 'AMMO_H';//add enhancement options for other missiles - Class-H    
+	    $this->enhancementOptionsEnabled[] = 'AMMO_I';//add enhancement options for other missiles - Class-I 
 	    $this->enhancementOptionsEnabled[] = 'AMMO_K';//add enhancement options for other missiles - Class-K   
 	    $this->enhancementOptionsEnabled[] = 'AMMO_L';//add enhancement options for other missiles - Class-L
 	    $this->enhancementOptionsEnabled[] = 'AMMO_M';//add enhancement options for other missiles - Class-M	    
-		$this->enhancementOptionsEnabled[] = 'AMMO_P';//add enhancement options for other missiles - Class-P
-	    $this->enhancementOptionsEnabled[] = 'AMMO_X';//add enhancement options for other missiles - Class-X			    	    	    	    
+		$this->enhancementOptionsEnabled[] = 'AMMO_P';//add enhancement options for other missiles - Class-P    	    	    	    
+	    $this->enhancementOptionsEnabled[] = 'AMMO_X';//add enhancement options for other missiles - Class-X		    	    	    	    
 	    //$this->enhancementOptionsEnabled[] = 'AMMO_S';//add enhancement options for other missiles - Class-S
 		//Stealth missile removed from Early Kor-Lyan ships, as it's not availablee until 2252
 
         $this->addPrimarySystem(new Reactor(3, 5, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 5, 2, 4)); 
 
-        $this->addAftSystem(new ProximityLaser(3, 6, 6, 180, 360));
+//      $this->addAftSystem(new ProximityLaser(3, 6, 6, 180, 360));
+		$TargeterA = new ProximityLaser(0, 1, 0, 180, 360, 'A');
+		$LauncherA = new ProximityLaserLauncher(3, 0, 0, 180, 360, 'A'); 
+		$TargeterA->addLauncher($LauncherA);
+		$this->addAftSystem($TargeterA);
+		$this->addAftSystem($LauncherA);	
         $this->addAftSystem(new Thruster(4, 6, 0, 0, 2));
-        $this->addAftSystem(new ProximityLaser(3, 6, 6, 0, 180));
+//        $this->addAftSystem(new ProximityLaser(3, 6, 6, 0, 180));
+		$TargeterB = new ProximityLaser(0, 1, 0, 0, 180, 'B');
+		$LauncherB = new ProximityLaserLauncher(3, 0, 0, 0, 180, 'B'); 
+		$TargeterB->addLauncher($LauncherB);
+		$this->addAftSystem($TargeterB);
+		$this->addAftSystem($LauncherB);	
         
         $this->addFrontSystem(new AmmoMissileRackL(3, 0, 0, 270, 90, $ammoMagazine, true)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         $this->addFrontSystem(new AmmoMissileRackD(2, 0, 0, 0, 360, $ammoMagazine, false));

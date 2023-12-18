@@ -426,7 +426,7 @@ window.weaponManager = {
 		//which can be used to specifically override the no ballistic called shots with the four lines below updated
 //		if (weapon.ballistic || weapon.hextarget) return false;
 		if (weapon.hextarget) return false;
-		if (weapon.overrideCallingRestricions) return true; //weapon feature specifically overriden to allow called shot
+		if (weapon.overrideCallingRestrictions) return true; //weapon feature specifically overriden to allow called shot
 		if (weapon.ballistic) return false; //ballistic weapons cannot do called shots
         if (weapon.damageType == 'Standard' || weapon.damageType == 'Pulse') return true;
         return false;
@@ -694,6 +694,21 @@ window.weaponManager = {
     }, //endof calculateRamChance
 
 
+	getFiringHex: function getFiringHex(shooter, weapon){
+        var sPosLaunch = null;
+        
+ 				if (weapon.hasSpecialLaunchHexCalculation){ //Does weapon have a different method of determining point of shot e.g. Proximity Laser?
+					sPosLaunch = weapon.getFiringHex(shooter, weapon);
+				}else{
+					if (weapon.ballistic){	 //standard ballistic calculation						
+						sPosLaunch = shipManager.movement.getPositionAtStartOfTurn(shooter, gamedata.turn);	
+					} else { //Direct fire
+							var sPosLaunch= shipManager.getShipPosition(shooter);
+					}
+		}	      
+		return sPosLaunch;
+	},
+
     calculateHitChange: function calculateHitChange(shooter, target, weapon, calledid) {
 		if (weapon.isRammingAttack) {
 			return weaponManager.calculateRamChance(shooter, target, weapon, calledid);
@@ -701,7 +716,8 @@ window.weaponManager = {
 	    var defence = 0;
 	    var distance = 0;
 	    if (weapon.ballistic){		    
-		var sPosLaunch = shipManager.movement.getPositionAtStartOfTurn(shooter, gamedata.turn); 		    
+		var sPosLaunch = weaponManager.getFiringHex(shooter, weapon); 	
+//		var sPosLaunch = shipManager.movement.getPositionAtStartOfTurn(shooter, gamedata.turn); 		    
 		var sPosTarget = shipManager.getShipPosition(target);
 		defence = weaponManager.getShipDefenceValuePos(sPosLaunch, target);
 	        distance = sPosLaunch.distanceTo(sPosTarget).toFixed(2); 
@@ -794,6 +810,9 @@ window.weaponManager = {
 			    mod += weapon.calculateSpecialHitChanceMod(target);
 			}
 
+			if (shooter.toHitBonus != 0){ //Some ships have bonuses or minuses to hit on all weapons e.g. Elite Crew, Poor Crew and Markab Fervor 
+			    mod += shooter.toHitBonus;
+			}
 
             if (!shooter.osat) {
                 mod -= shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(shooter, "cnC"), "PenaltyToHit");
@@ -1097,8 +1116,8 @@ window.weaponManager = {
 	if (gamedata.gamephase != 3 ) return false;//declaration in firing phase only
 	if (!weapon.weapon) return false;//only weapons can intercept ;)
 		var loadingTimeActual = Math.max(weapon.loadingtime,weapon.normalload);//Accelerator (or multi-mode) weapons may have loading time of 1, yet reach full potential only after longer charging
-	if ( (weapon.intercept < 1) || (loadingTimeActual <= 1) ) return false;//cannot intercept or quick to recharge anyway and will be auto-assigned
-	if (weapon.ballistic) return false;//no interception using ballistic weapons    
+	if ( (weapon.intercept < 1) && !(weaponManager.canWeaponInterceptAtAll(weapon)) || (loadingTimeActual <= 1) ) return false;//cannot intercept or quick to recharge anyway and will be auto-assigned
+	if (weapon.ballistic && !(weaponManager.canWeaponInterceptAtAll(weapon))) return false;//no interception using ballistic weapons    
 	if (weaponManager.hasFiringOrder(ship, weapon)) return false;//already declared
 	if (!weaponManager.isLoaded(weapon)) return false;//not ready to fire
 	return true;
@@ -1177,6 +1196,17 @@ window.weaponManager = {
         }
         //	gamedata.shipStatusChanged(ship);
     },
+
+
+    canWeaponInterceptAtAll: function canWeaponInterceptAtAll(weapon){
+        var canIntercept = false;
+		var loadingTimeActual = Math.max(weapon.loadingtime,weapon.normalload);//Accelerator (or multi-mode) weapons may have loading time of 1, yet reach full potential only after longer charging        
+		if (weapon.canModesIntercept && (loadingTimeActual > 1)){ //Could weapon have alternative modes with Intercept Rating, and would need to use Self Intercept?
+			canIntercept = weapon.canWeaponInterceptAtAll(weapon);//Call to weapon function to check modes for intercept ratings.
+		}
+
+    	return canIntercept;    	
+    },
 	
 	
     //system is for called shot!
@@ -1210,8 +1240,13 @@ window.weaponManager = {
                 continue;
             }
 
-            if (weapon.ballistic && system) {
+            if (weapon.ballistic && system && (!weapon.overrideCallingRestrictions)) { //25.11.23 - Added last condition to allow Limpet Bore to make called shots as a ballsitic weapon.
                 debug && console.log("trying to call shot with ballistic");
+                continue;
+            }
+            
+            if ((!system) && weapon.canOnlyCalledShot){ //25.11.23 - New statement to make sure Limpet Bore can ONLY make Called Shots.
+                debug && console.log("trying to target ship with weapon that can only target systems");
                 continue;
             }
 
