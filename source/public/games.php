@@ -58,7 +58,7 @@ if (isset($_SESSION["user"])) {
 
 	    
         <h3> *** Merry Christmas and a Happy New Year! *** </h3>
-        <h4>may our games be fiery and our lives peaceful</h4>
+        <h4><i>may our games be fiery and our lives peaceful</i></h4>
         <br>
        
 		
