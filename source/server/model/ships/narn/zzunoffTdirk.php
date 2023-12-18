@@ -5,7 +5,7 @@ class zzunoffTdirk extends OSAT{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 175;
-		$this->faction = "Narn";
+		$this->faction = "Narn Regime";
         $this->phpclass = "zzunoffTdirk";
         $this->imagePath = "img/ships/tgan.png";
         $this->shipClass = "T'Dirk Early Satellite";

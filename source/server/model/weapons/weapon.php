@@ -101,9 +101,14 @@ class Weapon extends ShipSystem
 	public $raking = 10;//size of rake (for Raking weapons only)
 	public $rakingArray = array();//size of rake (for multi-mode weapons with variable rake size)
 	public $noLockPenalty = true;
+	public $noLockPenaltyArray = array();	
 
-	public $overrideCallingRestricions = false; //when set to true and checked for, can override a base setting (e.g., make a ballistic do a called shot)
-
+	protected $overrideCallingRestrictions = false; //when set to true overrides default Called Shot setting (e.g., make a ballistic do a called shot)
+	protected $canOnlyCalledShot = false;	
+//	public $canTargetOtherSections = false; //NOT IMPLEMENTED. When set to true, weapon can called shot systems on external sections of target not facing firing ship.
+	protected $hasSpecialLaunchHexCalculation = false; //Weapons like Proximty Laser use a separate launcher system to determine point of shot.
+	public $canModesIntercept = false;	//Some missile launchers can have Interceptor missiles. variable for Front End so it knows to use weapon-specific function to search for intercept rating across firing modes e.g. Interceptor Missile on missile launcher.
+		
     public $shots = 1;
     public $shotsArray = array();
     public $defaultShots = 1;
@@ -163,7 +168,6 @@ class Weapon extends ShipSystem
     protected $possibleCriticals = array(14 => "ReducedRange", 19 => "ReducedDamage", 25 => array("ReducedRange", "ReducedDamage"));
 
     protected $firedDefensivelyAlready = 0; //marker used for weapons capable of firing multiple defensive shots, but suffering backlash once
-
 
 
 	//Weapons are repaired before "average system", but after really important things! 
@@ -280,6 +284,7 @@ class Weapon extends ShipSystem
 			$strippedSystem->extraoverloadshots = $this->extraoverloadshots;
 			$strippedSystem->extraoverloadshotsArray = $this->extraoverloadshotsArray;
 			$strippedSystem->fireOrders = $this->fireOrders;
+			$strippedSystem->canModesIntercept = $this->canModesIntercept;//For weapons which intercept not using their default mode e.g. interceptor missiles - DK			
 			if(isset($this->ammunition)){
 				$strippedSystem->ammunition = $this->ammunition;
 				$strippedSystem->data = $this->data;
@@ -758,7 +763,7 @@ class Weapon extends ShipSystem
 
     private function calculateLoadingFromLastTurn($gamedata)
     {
-        if ($this->ballistic)
+        if ($this->ballistic && !(checkForSelfInterceptFire::checkFired($this->id, $gamedata->turn -1)))
             return null;
 
 
@@ -884,7 +889,19 @@ class Weapon extends ShipSystem
         return false;
     } //endof function isFtrFiringNonBallisticWeapons
 
-
+    public function getFiringHex($gamedata, $fireOrder){
+        $shooter = $gamedata->getShipById($fireOrder->shooterid);
+		$pos = $shooter->getHexPos();
+		$launchPos = null;		
+		
+        if ($this->ballistic) {
+            $movement = $shooter->getLastTurnMovement($fireOrder->turn);
+            $launchPos = $movement->position;
+        } else {
+            $launchPos = $pos;
+        }
+       return $launchPos; 
+	}//endof getFiringHex
 
     /*Marcin Sawicki: is there a chance that defender has choice of target section? */
     public function isTargetAmbiguous($gamedata, $fireOrder)
@@ -895,18 +912,21 @@ class Weapon extends ShipSystem
 
 
         if ($target == null) return true; //target is a hex rather than unit, probability of ambiguosness is relatively high
-        if ($target instanceof FighterFlight) return false; //shot at fighter may be ambiguous, but there's no point in poostponing the decision!
+        if ($target instanceof FighterFlight) return false; //shot at fighter may be ambiguous, but there's no point in postponing the decision!
 
         $pos = $shooter->getCoPos();
         $ambiguous = false;
 
+		$launchHex = $this->getFiringHex($gamedata, $fireOrder);	
+		$launchPos = mathlib::hexCoToPixel($launchHex);
+/*
 		if($this->ballistic){
 			$movement = $shooter->getLastTurnMovement($fireOrder->turn);
-			$launchPos = mathlib::hexCoToPixel($movement->position);		
+			$launchPos = mathlib::hexCoToPixel($movement->position);
 		}else{
 			$launchPos = $pos;
 		}
-		
+*/		
 		if($this->ballistic){
 			$ambiguous = $target->isHitSectionAmbiguousPos($launchPos, $fireOrder->turn);
 		}else{
@@ -996,14 +1016,16 @@ class Weapon extends ShipSystem
         $mod = 0;
         $oew = 0;
 		
-
+		$launchPos = $this->getFiringHex($gamedata, $fireOrder);
+/*			
         if ($this->ballistic) {
             $movement = $shooter->getLastTurnMovement($fireOrder->turn);
             $launchPos = $movement->position;
+
         } else {
             $launchPos = $pos;
         }
-
+*/
         if (!$this->isInDistanceRange($shooter, $target, $fireOrder)) {
             // Target is not in distance range. Auto-miss.
             $notes = ' Target moved out of range. ';
@@ -1042,10 +1064,10 @@ class Weapon extends ShipSystem
             $soew = EW::getSupportedOEW($gamedata, $shooter, $target);
 			$dist = EW::getDistruptionEW($gamedata, $shooter);
             $oew -= $dist;
-            if ($oew <= 1) { //less than required for a lock-on
+            if ($oew < 1) { //less than required for a lock-on
 				$oew = max(0,$oew); //OEW cannot be negative
 				$soew = 0; //no lock-on negates SOEW, if any
-			}
+			}	
         } else {
             $soew = 0;
             $oew = 0;
@@ -1078,6 +1100,7 @@ class Weapon extends ShipSystem
         }
         $mod += $target->getHitChanceMod($shooter, $posmod, $gamedata->turn, $this);
         $mod += $this->getWeaponHitChanceMod($gamedata->turn);
+		$mod += $shooter->toHitBonus;//Some ships have bonuses or minuses to hit on all weapons e.g. Elite Crew, Poor Crew and Markab Fervor 
 
         $ammo = $this->getAmmo($fireOrder);
         if ($ammo !== null) {
@@ -1167,7 +1190,7 @@ class Weapon extends ShipSystem
 		$distanceForPenalty = mathlib::getDistanceHex($launchPos, $targetPos);
 		$rangePenalty = $this->calculateRangePenalty($distanceForPenalty);
 		$noLockMod = 0;
-		$jammermod = 0; //no lock and jammer work on the same thing, but they still need to be separated (for jinking).
+		$jammermod = 0; //no lock and jammer work on tI havehe same thing, but they still need to be separated (for jinking).
 		
 		// if EW is ignored - make it so (and also Jammer and no lock modifier, which are derived from EW as well)
 		if($this->ignoreAllEW){
@@ -1221,6 +1244,7 @@ class Weapon extends ShipSystem
 			}
 		}
 		
+
 
         $hitPenalties = $dew + $bdew + $sdew + $rangePenalty + $jinkSelf + max($jammermod, $jinkTarget) + $noLockMod + $halfphasemod;
         $hitBonuses = $oew + $soew + $firecontrol + $mod;
@@ -1351,8 +1375,9 @@ class Weapon extends ShipSystem
         $pos = null; //functions will properly calculate from firing unit, which is important at range 0
         //$pos = $shooter->getCoPos();
         if ($this->ballistic) {
-            $movement = $shooter->getLastTurnMovement($fireOrder->turn);
-            $pos = $movement->position;
+//            $movement = $shooter->getLastTurnMovement($fireOrder->turn);
+//            $pos = $movement->position;
+            $pos = $this->getFiringHex($gamedata, $fireOrder);	
         }
 
         $shotsFired = $fireOrder->shots; //number of actual shots fired
@@ -1506,8 +1531,10 @@ class Weapon extends ShipSystem
 		$tmpLocation = $fireOrder->chosenLocation;
 		$launchPos = null;
 			if ($this->ballistic){
-			$movement = $shooter->getLastTurnMovement($fireOrder->turn);
-			$launchPos = mathlib::hexCoToPixel($movement->position);
+//			$movement = $shooter->getLastTurnMovement($fireOrder->turn);
+//			$launchPos = mathlib::hexCoToPixel($movement->position);			
+			$launchHex = $this->getFiringHex($gamedata, $fireOrder);	
+			$launchPos = mathlib::hexCoToPixel($launchHex);
 			if((!($tmpLocation > 0)) && (!$forcePrimary)){ //location not yet found or PRIMARY (reassignment causes no problem)
 				$tmpLocation = $target->getHitSectionPos($launchPos, $fireOrder->turn);
 			}
@@ -1615,8 +1642,10 @@ throw new Exception("getSystemArmourAdaptive! $ss");	*/
         $shooter = $gamedata->getShipById($fireOrder->shooterid);
         $armor = 0;
         if (($pos == null) && ($this->ballistic)) { //source of attack not explicitly defined, and weapon is ballistic
-            $movement = $shooter->getLastTurnMovement($fireOrder->turn);
-            $pos = mathlib::hexCoToPixel($movement->position);
+ //           $movement = $shooter->getLastTurnMovement($fireOrder->turn);
+ //           $pos = mathlib::hexCoToPixel($movement->position);
+				$launchHex = $this->getFiringHex($gamedata, $fireOrder);	
+				$pos = mathlib::hexCoToPixel($launchHex);
         }
         $armor = $system->getArmourBase($target, $shooter, $this->weaponClass, $pos);
 
@@ -1640,7 +1669,8 @@ throw new Exception("getSystemArmourAdaptive! $ss");	*/
             if ($pos != null) {
                 $sourcePos = $pos;
             } else {
-                $sourcePos = $shooter->getHexPos();
+//                $sourcePos = $shooter->getHexPos();
+					$sourcePos = $this->getFiringHex($gamedata, $fireOrder);                
             }
             $dis = mathlib::getDistanceHex($sourcePos, $target);
             $damage -= round($dis * $this->rangeDamagePenalty); //round to avoid damage loss at minimal ranges!
@@ -1867,9 +1897,22 @@ full Advanced Armor effects (by rules) for reference:
         if (isset($this->endArcArray[$i])) $this->endArc = $this->endArcArray[$i];
 		
 		if (isset($this->hidetargetArray[$i])) $this->hidetarget = $this->hidetargetArray[$i];  // GTS
-		
-	    
+		if (isset($this->noLockPenaltyArray[$i])) $this->noLockPenalty = $this->noLockPenaltyArray[$i];  // DK
+				
+		if (isset($this->calledShotModArray[$i])) $this->calledShotMod = $this->calledShotModArray[$i];  // DK		
+		if (isset($this->specialRangeCalculationArray[$i])) $this->specialRangeCalculation = $this->specialRangeCalculationArray[$i];  // DK
+		if (isset($this->specialHitChanceCalculationArray[$i])) $this->specialHitChanceCalculation = $this->specialHitChanceCalculationArray[$i];  // DK
+			
+		if (isset($this->interceptArray[$i])) $this->intercept = $this->interceptArray[$i];  // DK		
+		if (isset($this->ballisticInterceptArray[$i])) $this->ballisticIntercept = $this->ballisticInterceptArray[$i];  // DK		
+											    
     }//endof function changeFiringMode
+
+
+	public function switchModeForIntercept()
+	{
+		return;
+	}
 
 
 } //end of class Weapon

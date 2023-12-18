@@ -256,6 +256,21 @@ AmmoMissileRackS.prototype.calculateSpecialHitChanceMod = function (target) {
 	return mod; 
 };
 
+//For Intercept Missile, to allow Missile Racks to select canSelfIntercept in Firing phase.
+AmmoMissileRackS.prototype.canWeaponInterceptAtAll = function (weapon) {
+  var canIntercept = false;
+
+  // Check if weapon intercept rating is greater than 0
+  if (this.intercept > 0) {
+    canIntercept = true;
+  }else {
+    // Check if any value in the interceptArray is greater than 0
+    var interceptArray = Object.values(this.interceptArray);
+    canIntercept = interceptArray.some(element => element > 0);
+  }
+  return canIntercept;
+};
+
 
 var AmmoMissileRackSO = function AmmoMissileRackSO(json, ship) {
     AmmoMissileRackS.call(this, json, ship);
@@ -288,9 +303,9 @@ AmmoMissileRackR.prototype = Object.create(AmmoMissileRackS.prototype);
 AmmoMissileRackR.prototype.constructor = AmmoMissileRackR;
 
 var AmmoMissileRackD = function AmmoMissileRackD(json, ship) {
-    Ballistic.call(this, json, ship);
+    AmmoMissileRackS.call(this, json, ship);
 };
-AmmoMissileRackD.prototype = Object.create(Ballistic.prototype);
+AmmoMissileRackD.prototype = Object.create(AmmoMissileRackS.prototype);
 AmmoMissileRackD.prototype.constructor = AmmoMissileRackD;
 
 var AmmoMissileRackB = function AmmoMissileRackB(json, ship) {
@@ -299,14 +314,20 @@ var AmmoMissileRackB = function AmmoMissileRackB(json, ship) {
 AmmoMissileRackB.prototype = Object.create(AmmoMissileRackS.prototype);
 AmmoMissileRackB.prototype.constructor = AmmoMissileRackB;
 
+var AmmoMissileRackA = function AmmoMissileRackA(json, ship) {
+    AmmoMissileRackS.call(this, json, ship);
+};
+AmmoMissileRackA.prototype = Object.create(AmmoMissileRackS.prototype);
+AmmoMissileRackA.prototype.constructor = AmmoMissileRackA;
+
 var AmmoBombRack = function AmmoBombRack(json, ship) {
-    Ballistic.call(this, json, ship);
+    Ballistic.call(this, json, ship);//I don't think Bomb Rack ever needs any AmmoMissileRackS function?
 };
 AmmoBombRack.prototype = Object.create(Ballistic.prototype);
 AmmoBombRack.prototype.constructor = AmmoBombRack;
 
 var AmmoFighterRack = function AmmoFighterRack(json, ship) {
-    Ballistic.call(this, json, ship);
+    Ballistic.call(this, json, ship);//I don't think AmmoFighterRack ever needs any AmmoMissileRackS function?
 };
 AmmoFighterRack.prototype = Object.create(Ballistic.prototype);
 AmmoFighterRack.prototype.constructor = AmmoFighterRack;
@@ -319,49 +340,62 @@ MultiDefenseLauncher.prototype.constructor =  MultiDefenseLauncher;
 */
 
 
-var AmmoMissileRackF= function  AmmoMissileRackF(json, ship) {
+var AmmoMissileRackF = function  AmmoMissileRackF(json, ship) {
     AmmoMissileRackS.call(this, json, ship);
 };
 AmmoMissileRackF.prototype = Object.create(AmmoMissileRackS.prototype);
 AmmoMissileRackF.prototype.constructor =  AmmoMissileRackF;
 
 AmmoMissileRackF.prototype.doIndividualNotesTransfer = function () { //prepare individualNotesTransfer variable - if relevant for this particular system
-	//here: transfer information about firing in Rapid mode and Long Range modes
-	// (eg. weapon is being fired after 1 turn of arming)
-	var toReturn = false;
-
+    // prepare individualNotesTransfer variable - if relevant for this particular system
+    // here: transfer information about firing in Rapid mode
+    // (e.g., weapon is being fired after 1 turn of arming)
+		var toReturn = false;
+ 		this.individualNotesTransfer = Array();	
   //Check for fire order and check Initial Orders  	
-    	if ((this.fireOrders.length > 0) && (gamedata.gamephase == 1)) {	
-	
-	   		this.individualNotesTransfer = Array();	//Clear any current notes
-	   		
+    	if ((this.fireOrders.length > 0) && (gamedata.gamephase == 1)) {		
 	//Check for 1 turn loaded, as this will mean it has to be fired in Rapid Mode.	
 			if (this.turnsloaded == 1) {
 				this.individualNotesTransfer.push('R');
 				toReturn = true;
 			}
 	
-	// Code below is for Long Ranged shot conditions, trying to get Rapid mode operating first.
-		
-/*				   		
-			if (this.turnsloaded == 2) {
-	//Reduce range of weapon. Check range, then reset range (if false send 'L' note), reset to normal range.			
-			    var firingShip = gamedata.getShip(this.shipid);
-			    var aFireOrder = this.fireOrders[0]; 
-			    var targetShip = gamedata.getShip(aFireOrder.targetid); 
+	// Code below is for Long Ranged shot conditions, trying to get Rapid mode operating first.  		
+		if (this.turnsloaded == 2) {
+			
+		    var aFireOrder = this.fireOrders[0]; 		    
+		    
+		    var firingShip = gamedata.getShip(aFireOrder.shooterid);
 
-				this.weapon.range -= 15;
-				var longRanged = weaponManager.checkIsInRange(firingShip, targetShip, this);
-				this.range += 15;			
-						
-			if (longRanged == false ){
-					this.individualNotesTransfer.push('L');
-					toReturn = true;	
-				}else{
-					toReturn = false;	
-					}
-				}	*/	
+		    var targetShip = gamedata.getShip(aFireOrder.targetid); 
+
+		    this.range -= 15;
+		    var longRanged = weaponManager.checkIsInRange(firingShip, targetShip, this);
+		    this.range += 15;  // <-- Corrected line
+								
+		    if (!longRanged) {
+		        this.individualNotesTransfer.push('L');
+		        toReturn = true;	
+		    } else {
+		        toReturn = false;	
+		    }
 		}	
-	return toReturn;  
+	}	
+	
+    	if ((this.fireOrders.length > 0) && (gamedata.gamephase == 3)) {
+    		
+    		if (this.firedInRapidMode == true) {
+    			this.individualNotesTransfer.push('R');
+				toReturn = true;
+    		}
+    		if (this.firedInLongRangeMode == true) {
+    			this.individualNotesTransfer.push('L');
+				toReturn = true;
+    		} else {
+		        toReturn = false;	   			
+			}
+		}			
+	return toReturn;
+ 
 };
-
+	

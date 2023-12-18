@@ -5,7 +5,7 @@ class Xeel extends VreeCapital{
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 340;
-		$this->faction = "Vree";
+		$this->faction = "Vree Conglomerate";
 		$this->phpclass = "Xeel";
 		$this->shipClass = "Xeel War Carrier";
 		$this->isd = 2218;

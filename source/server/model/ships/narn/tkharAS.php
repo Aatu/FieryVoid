@@ -6,7 +6,7 @@ class tkharas extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
 		    $this->pointCost = 30*6;
-		    $this->faction = "Narn";
+		    $this->faction = "Narn Regime";
         $this->phpclass = "tkharas";
         $this->shipClass = "T'Khar Assault Shuttles";
 		    $this->imagePath = "img/ships/gorith.png";

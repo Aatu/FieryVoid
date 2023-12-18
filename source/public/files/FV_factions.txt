@@ -44,13 +44,14 @@ SHIPBORNE MISSILES
  - class A - Antifighter Missile - -5 range and -15 distance range, as well as doing 15 points of damage. +3 Fire Control vs fighers. It's classified as light missile - which is meaningless for regular shipborne launchers, but means it's usable by light launchers (...which is the whole point).
  - class C - Chaff missile - On the turn that the chaff missile hits, any non-ballistic fire from that unit against the missile launching ship attracts a -15 intercept rating.
  - class D - Light Missile - 12 damage, -5 range/-15 distance range. Essentially used only by factions without access to Basic missile (Alacans, early Narn).
- - class F - Flash Missile - does damage in Flash mode.
- - class H - Heavy Missile - -10 range/distance range and -3 antifighter fire control, but damage 30. 
- - class L - Long Range Missile - +10 range/distance range, but damage 15.
+ - class F - Flash Missile - Does damage in Flash mode.
+ - class H - Heavy Missile - Has -10 range/distance range and -3 antifighter fire control, but damage 30.
+ - class I - Interceptor Missile - Can only be fired defensively for -30 intercept rating against other ballistic weapons.  Launchers with over 1 turn cooldowns will need to be set manually in Firing Phase. 
+ - class L - Long Range Missile - Has +10 range/distance range, but damage 15.
  - class K - Starburst Missile - Deals damage in pulse mode, with each missile generating D3+3 hits.
  - class KK - Kinetic Missile - Orieni only.  Deals 18 matter damage, and attracts a -5 per hex range penalty after 15 hexes up to it's maximum range.
  - class M - Multiwarhead Missile - Can only target fighter flights.  Splits into 6 submunitions which will each engage a separate fighter in flight.  Each submunition rolls to hit and scores damage separately, if there are fewer than 6 fighters on impact excess submunitions are lost) 
- - class P - Piercing Missile - damage 30, mode Piercing, cannot be fired at fighters.
+ - class P - Piercing Missile - Does 30 damage in Piercing mode, cannot be fired at fighters.
  - class S - Stealth Missile - Kor-Lyan only.  Target of this missile is not revealed to the enemy player.
  - class X - HARM Missile - Locks in on enemy EW and reduces scanner output by D6 points the FOLLOWING turn if it hits (a difference from tabletop).  The hit chance for this missile is increased by 5% per point of offensive EW the target ship is using (e.g. OEW and CCEW).
 
@@ -129,7 +130,7 @@ Centauri fleet a few hundred years before the show era, representing Wars of the
 Sentinel Point Defense - Guardian Array precursor, with the same comments (except it doesn't have offensive mode available at all).
 
 
-CH'LONAS (unofficial faction)
+CH'LONAS COOPERATIVE (Unofficial faction)
 Based on design by Charles "Danesti" Haught, published in BabCom.
 No very specific technologies - although they do have quite a lot of fancy weapons, they don't have individually atypical properties. 
 
@@ -144,6 +145,7 @@ The Corillani are unusual in that they operate three independant navies, the Def
 The OSF use the unique Plasma Projector weapon which focuses plasma into tight beam, resulting in a longer range than most plasma weapons and with lower damage degradation.  It deals damage similar to a heavy plasma cannon, however this is applied in raking (8) mode rather than standard mode as with most other plasma weapons.
 Missiles - The Corillani are able to access all missile types except those restricted to specific factions e.g. Kor-Lyan and Orieni.
 
+
 CUSTOM SHIPS
 Units that, for some reason, were not fit for any faction. 
 Mostly a technical directory, not representing a playable faction.
@@ -157,6 +159,7 @@ DESCARI COMMITTEES
 The Descari possess unique Plasma Bolter weapons which combine features from both plasma and bolter weapon types.  These weapons do a set damage amount and do not suffer the damage reduction typical in plasma weapons up to a set range (which varies depending on the type of Plasma Bolter used).  
 Aside from this the Descari field a mixed of typical missile, laser, plasma and light particle weaponry.
 Missiles - The Descari are able to access all missile types except those restricted to specific factions e.g. Kor-Lyan and Orieni.
+
 
 DILGAR IMPERIUM
 Pentacan Formation (Inverted Wedge Formation in AoG Wars) - Dilgar ships can benefit from using Pentacan formation. In FV the rules for it have been altered (mostly simplified).
@@ -186,6 +189,7 @@ Hangar space - Drakh LCVs do require hangar space (like regular LCVs). They shar
 DRAZI FREEHOLD
 No very specific rules/technologies, although using alternate HCV layout is very notable and results in surprisingly resilient ships.
 Missiles - The Drazi use one missile-equipped ship, the Darkhawk, and have access all missile types except those restricted to specific factions e.g. Kor-Lyan and Orieni.
+
 
 DRAZI FREEHOLD (WotCR)
 Drazi fleet a few hundred years before the show era, representing Wars of the Centauri Republic period.
@@ -264,16 +268,15 @@ Jumpsphere - Ipsha have only one official jump-capable ship, Scout Wheel. This l
 KOR-LYAN KINGDOMS
 The Kor-Lyan specialize in ballistics, using them as their primary offensive and defensive weaponry. This specialization leads to the Kor-Lyan having several unique systems.
 Class-D Launcher - This is the main defensive system for the Kor-Lyan. It has three modes.
-     * Anti-missile missile: If the launcher remains unfired, it will provid a -30% intercept to any incoming ballistics.
-	 * Anti-fighter missile: This is the standard anti-fighter missile that provides a +45% to target fighters.
-	 * Chaff missile: This is fired at a target and if hit, the tartget receives a -15% to all weapons fire. Multiple chaff missiles are not cumulative.
-Class-F Launcher - F stands for flexible and can fire in three separate modes. NOTE: As of 13 February 2023, the F-Launcher can only fire basic missiles. This will be updated later.
-	 * Standard mode: This is equivalent to an S-Launcher and the default mode with a range of 20 hexes.
-	 * Long-range mode: When selected, the missile gains +15 hexes, but loses -10% fire control. 
-	 * Rapid-fire mode: The F-Launcher typically fires every other turn. However, it can fire every turn with a -5 hex and -10% penalty. It cannot fire in this mode the turn after firing in long-range mode.
-Proximity Laser - This deviates from the table top mode and will be upgraded at a future date. This is fired as a ballistic weapon, but hits as a laser during weapons fire originating from the launch hex.
-Limpet Bore Torpedo - This has been simplified from the table top version. Currently, this is fired during not-ballistic weapons fire, but is intercepted as a ballistic weapon. It can perform called shots 
-     without any penalties. Future updates will allow it to fire as a true ballistic weapon and perform called shots on non-facing systems.
+     - Anti-missile missile: If the launcher remains unfired, it will provid a -30% intercept to any incoming ballistics.
+     - Anti-fighter missile: This is the standard anti-fighter missile that provides a +45% to target fighters.
+     - Chaff missile: This is fired at a target and if hit, the tartget receives a -15% to all weapons fire. Multiple chaff missiles are not cumulative.
+Class-F Launcher - F stands for flexible and can fire in three separate modes.
+     - Normal mode: The launcher's normal range is 20 hexes, however it can fire up to an additional +15 hexes when it has been loaded for two turns. When this range extension is used the launcher suffers -2 fire control and cannot use Rapid Fire mode the following turn (see below). 
+     - Rapid-fire mode: The F-Launcher can choose to fire every turn with a -5 hex and -2 Fire Control penalty. As noted above, it cannot fire in this mode the turn after firing in long-range mode.
+Proximity Laser - This ballisitic weapon uses a separate launcher system to target where its laser attack will fire from.  Use the paired 'Proximity Launcher' system (each paired Laser/Launcher will have a unique letter assigned to the end of their name) to target the hex you wish to fire from.  The Launcher will automativally hit and then the laser attack will be made as normal as if it originate from that hex, and not the firing ship.
+NOTE - Currently the animations for this weapon in Replay are not working due to its unique nature.  However, the weapon does function correctly!
+Limpet Bore Torpedo - This is a ballistic weapon that can only fire as Called Shot.  If it hits a system, it will try to damage it by adding a critical effect. This critical effect will remain until target system is destroyed, or after five failed attempts by the Limpet Bore.  
 NOTE: Ballistic mines are currently not implemented.
 Semi-custom "early" units - A few key Kor-Lyan units are not available until the 2240s or 2250s. This can make fielding an accurate force difficult. The semi-custom versions are units that follow the example 
      of the Toloki Starbase and replace the F-Launchers with L-Launchers. These early versions, using L-Launchers provide players an option to take these units and purchase  special missiles, which is not 
@@ -292,7 +295,9 @@ Missiles - The Llort have a couple of ships which use missiles, and are able to 
 
 
 MARKAB THEOCRACY
-Scattergun - see Gaim 
+Scattergun - see Gaim.
+Religious Fervor - In certain scenarios Markab can fight whilst under the Religious Fervor effect.  This is selected as an Enhancement option in fleet selection at no cost, and confers a +1 to hit with all weapons, +2 initiative and fighters gain a -3 bonus to dropout rolls.  However, this recklessness means their defence ratings are increased by 10 in all directions.  As a scenario specific option, you should check with your opponent before selecting this Enhancement, particularly as it signifies that the Markab should be permitted to ram.
+NOTE - You should not select the Religious Fervor enhancement for individual ships, you MUST either select it for all units in a fleet or none of them.
 
 
 MINBARI FEDERATION

@@ -5,7 +5,7 @@ class zzunoffKaTor extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 550;
-        $this->faction = "Narn";
+        $this->faction = "Narn Regime";
         $this->phpclass = "zzunoffKaTor";
         $this->imagePath = "img/ships/katoc.png";
         $this->shipClass = "Ka'Tor Battle Destroyer";

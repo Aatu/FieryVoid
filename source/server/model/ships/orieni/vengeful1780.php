@@ -4,7 +4,7 @@ class Vengeful1780 extends MediumShip{
 	function __construct($id, $userid, $name,  $slot){
 		parent::__construct($id, $userid, $name,  $slot);
 		$this->pointCost = 365;
-		$this->faction = "Orieni";
+		$this->faction = "Orieni Imperium";
 		$this->phpclass = "Vengeful1780";
 		$this->imagePath = "img/ships/vengeful.png"; 
 		$this->shipClass = "Vengeful Laser Frigate (early)";

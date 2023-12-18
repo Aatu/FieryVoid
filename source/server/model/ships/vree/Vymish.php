@@ -5,7 +5,7 @@ class Vymish extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 300;
-		$this->faction = "Vree";
+		$this->faction = "Vree Conglomerate";
         $this->phpclass = "Vymish";
         $this->imagePath = "img/ships/VreeVymish.png";
         $this->shipClass = "Vymish Armed Trader";

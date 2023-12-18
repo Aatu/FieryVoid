@@ -6,7 +6,7 @@ class zzunoffShovok extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 345;
-		$this->faction = "Narn";
+		$this->faction = "Narn Regime";
         $this->phpclass = "zzunoffShovok";
         $this->imagePath = "img/ships/shokos.png";
         $this->shipClass = "Sho'Vok Attack Cutter";

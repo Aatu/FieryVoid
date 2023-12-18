@@ -5,7 +5,7 @@ class Commune extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 440;
-        $this->faction = "Orieni";
+        $this->faction = "Orieni Imperium";
         $this->phpclass = "Commune";
         $this->imagePath = "img/ships/commune.png";
         $this->shipClass = "Commune Battle Leader";

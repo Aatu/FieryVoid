@@ -5,7 +5,7 @@ class Seeker1793 extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
       	$this->pointCost = 385;
-	      $this->faction = "Orieni";
+	      $this->faction = "Orieni Imperium";
         $this->phpclass = "Seeker1793";
         $this->imagePath = "img/ships/seeker.png";
         $this->canvasSize = 100;   

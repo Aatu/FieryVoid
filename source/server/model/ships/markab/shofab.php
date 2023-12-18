@@ -3,7 +3,7 @@ class Shofab extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         $this->pointCost = 700;
-        $this->faction = "Markab";
+        $this->faction = "Markab Theocracy";
         $this->phpclass = "Shofab";
         $this->isd = 2231;        
         $this->imagePath = "img/ships/MarkabCruiser.png"; 
@@ -21,7 +21,9 @@ class Shofab extends BaseShip{
         $this->variantOf = 'Shafab Heavy Cruiser';
         $this->occurence = "uncommon";
         $this->iniativebonus = 5;
-        
+
+		$this->enhancementOptionsEnabled[] = 'MARK_FERV'; //To activate Religious Fervor attributes.   
+
         $this->addPrimarySystem(new Reactor(5, 17, 0, 0));
         $this->addPrimarySystem(new CnC(5, 16, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 18, 8, 8));

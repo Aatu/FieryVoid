@@ -3,7 +3,7 @@ class Talafat extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         $this->pointCost = 650;
-        $this->faction = "Markab";
+        $this->faction = "Markab Theocracy";
         $this->phpclass = "Talafat";
         $this->isd = 2015;        
         $this->imagePath = "img/ships/MarkabScout.png"; //needs to be changed
@@ -20,7 +20,7 @@ class Talafat extends BaseShip{
         $this->fighters = array("normal"=>6);
         $this->limited = 33;
 		
-		
+		$this->enhancementOptionsEnabled[] = 'MARK_FERV'; //To activate Religious Fervor attributes.   		
         
         $this->addPrimarySystem(new Reactor(4, 18, 0, 0));
         $this->addPrimarySystem(new CnC(4, 12, 0, 0));

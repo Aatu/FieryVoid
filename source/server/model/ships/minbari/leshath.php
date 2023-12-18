@@ -5,7 +5,7 @@ class Leshath extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
 
         $this->pointCost = 1500;
-        $this->faction = "Minbari";
+        $this->faction = "Minbari Federation";
         $this->phpclass = "Leshath";
         $this->imagePath = "img/ships/leshath.png";
         $this->shipClass = "Leshath Heavy Scout";

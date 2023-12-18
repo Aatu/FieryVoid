@@ -7,7 +7,7 @@ class Lamassa extends OSAT
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 260;
-        $this->faction = "Yolu";
+        $this->faction = "Yolu Confederation";
 //	      	$this->variantOf = "Lashanna Agitator OSAT";
 //	        $this->occurence = "uncommon";
 		$this->phpclass = "Lamassa";

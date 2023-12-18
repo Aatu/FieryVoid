@@ -5,7 +5,7 @@ class Rongoth extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 485;
-        $this->faction = "Narn";
+        $this->faction = "Narn Regime";
         $this->phpclass = "Rongoth";
         $this->imagePath = "img/ships/rongoth.png";
         $this->shipClass = "Rongoth Destroyer";

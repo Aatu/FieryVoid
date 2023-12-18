@@ -5,7 +5,7 @@ class Rolotha extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 180;
-		$this->faction = "Minbari";
+		$this->faction = "Minbari Federation";
         $this->phpclass = "Rolotha";
         $this->imagePath = "img/ships/rogata.png";
         $this->shipClass = "Rolotha Freighter";

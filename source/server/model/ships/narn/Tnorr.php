@@ -5,7 +5,7 @@ class Tnorr extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 425;
-		$this->faction = "Narn";
+		$this->faction = "Narn Regime";
         $this->phpclass = "Tnorr";
         $this->imagePath = "img/ships/trakk.png";
         $this->shipClass = "T'Norr Frigate";

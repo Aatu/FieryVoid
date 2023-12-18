@@ -26,12 +26,12 @@ class Hemsar extends OSAT
 		
 		$this->addPrimarySystem(new Reactor(4, 7, 0, 0));
 		$this->addPrimarySystem(new Scanner(4, 7, 2, 4));
-		$this->addPrimarySystem(new Thruster(3, 6, 0, 0, 2));
-		$this->addPrimarySystem(new DualPlasmaCannon(3, 0, 0, 270, 90));
-		$this->addPrimarySystem(new LightPlasma(3, 4, 2, 270, 90));
-		$this->addPrimarySystem(new LightPlasma(3, 4, 2, 270, 90));
-		$this->addPrimarySystem(new LightParticleBeamShip(2, 2, 1, 180, 360));
-		$this->addPrimarySystem(new LightParticleBeamShip(2, 2, 1, 0, 180));
+		$this->addAftSystem(new Thruster(3, 6, 0, 0, 2));
+		$this->addFrontSystem(new DualPlasmaCannon(3, 0, 0, 270, 90));
+		$this->addFrontSystem(new LightPlasma(3, 4, 2, 270, 90));
+		$this->addFrontSystem(new LightPlasma(3, 4, 2, 270, 90));
+		$this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 180, 360));
+		$this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 0, 180));
 
 		//0:primary, 1:front, 2:rear, 3:left, 4:right;
 
@@ -40,10 +40,10 @@ class Hemsar extends OSAT
 			$this->hitChart = array(
                 0=> array(
                         8 => "Structure",
-                        10 => "Thruster",
-						12 => "DualPlasmaCannon",
-						14 => "Light Plasma Cannon",
-						16 => "Light Particle Beam",
+                        10 => "2:Thruster",
+						12 => "1:DualPlasmaCannon",
+						14 => "1:Light Plasma Cannon",
+						16 => "1:Light Particle Beam",
 						18 => "Scanner",
                         20 => "Reactor",
                 ),

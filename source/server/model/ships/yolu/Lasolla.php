@@ -7,7 +7,7 @@ class Lasolla extends OSAT
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 200;
-        $this->faction = "Yolu";
+        $this->faction = "Yolu Confederation";
 	      	$this->variantOf = "Lashanna Agitator OSAT";
 	       	$this->occurence = "common";
 		$this->phpclass = "Lasolla";

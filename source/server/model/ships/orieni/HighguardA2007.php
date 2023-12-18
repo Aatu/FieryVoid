@@ -7,7 +7,7 @@ class HighguardA2007 extends OSAT
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 195;
-		$this->faction = "Orieni";
+		$this->faction = "Orieni Imperium";
 		$this->phpclass = "HighguardA2007";
 		$this->shipClass = "Highguard-A Orbital Satellite";
 		$this->imagePath = "img/ships/OrieniHighguardOSAT.png";

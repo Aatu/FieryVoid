@@ -377,7 +377,10 @@ class Reactor extends ShipSystem implements SpecialAbility {
 		}
 	}	
 	
-	public function criticalPhaseEffects($ship, $gamedata) {		
+	public function criticalPhaseEffects($ship, $gamedata) {	
+	
+		parent::criticalPhaseEffects($ship, $gamedata);//Call parent to apply effects like Limpet Bore.		
+		
 		//as effects are getting complicate - call them separately
 		$this->executeContainmentBreach($ship, $gamedata);	
 		$this->executeReactorFlux($ship, $gamedata);	
@@ -664,6 +667,9 @@ class SubReactorUniversal extends ShipSystem{
 	//destroy section if destroyed
 	public function criticalPhaseEffects($ship, $gamedata)
     { 
+    
+		parent::criticalPhaseEffects($ship, $gamedata);//Call parent to apply effects like Limpet Bore.	    
+    
 		if (!$this->isDamagedOnTurn($gamedata->turn)) return; 
 		if (!$this->isDestroyed()) return;		
 	
@@ -765,6 +771,8 @@ class Engine extends ShipSystem implements SpecialAbility {
     }
 
 	public function criticalPhaseEffects($ship, $gamedata) {
+		
+		parent::criticalPhaseEffects($ship, $gamedata);//Call parent to apply effects like Limpet Bore.		
 		
 		$hasEngineFlux = $ship->hasSpecialAbility("EngineFlux");
 
@@ -966,7 +974,10 @@ class Scanner extends ShipSystem implements SpecialAbility{ //on its own Scanner
 		return $this->specialAbilityValue;
 	}
 
-	public function criticalPhaseEffects($ship, $gamedata) {		
+	public function criticalPhaseEffects($ship, $gamedata) {	
+	
+		parent::criticalPhaseEffects($ship, $gamedata);//Call parent to apply effects like Limpet Bore.		
+		
 		$hasSensorFlux = $ship->hasSpecialAbility("SensorFlux");
 		if ($hasSensorFlux) {
 			$roll = Dice::d(20) + 1 + $this->getTotalDamage();  //There is a +1 penalty in addition to any damage
@@ -1116,6 +1127,8 @@ class AntiquatedScanner extends Scanner {
 
 	public function criticalPhaseEffects($ship, $gamedata) {
 		
+		parent::criticalPhaseEffects($ship, $gamedata);//Call parent to apply effects like Limpet Bore.			
+		
 		$hasAntSensorFlux = $ship->hasSpecialAbility("AntiquatedSensorFlux");
 
 		if ($hasAntSensorFlux) {
@@ -1198,6 +1211,8 @@ class CnC extends ShipSystem implements SpecialAbility {
     }
 	
 	public function criticalPhaseEffects($ship, $gamedata) {
+			
+		parent::criticalPhaseEffects($ship, $gamedata);//Call parent to apply effects like Limpet Bore.			
 		
 		$hasCommsFlux = $ship->hasSpecialAbility("CommsFlux");
 
@@ -1261,7 +1276,9 @@ class ProtectedCnC extends CnC{
 		}else{
 			$this->data["Special"] .= '<br>';
 		}
-		$this->data["Special"] .= 'This unit should have two separate C&Cs. As this is not possible in FV, critical chart is changed instead.';
+		//actually now secondary C&C is present - Protected C&C-equipped units should be re-equipped with regular C&C + Secondary C&C instead!
+		//$this->data["Special"] .= 'This unit should have two separate C&Cs. As this is not possible in FV, critical chart is changed instead.';
+		$this->data["Special"] .= "C&C that's more resistnat to critical damage.";
 	}
 	
 	protected $possibleCriticals = array(
@@ -1297,8 +1314,7 @@ class ThirdspaceCnC extends CnC{
 	
 }//endof class ThirdspaceCnC
 	
-class PakmaraCnC extends CnC{
-	
+class PakmaraCnC extends CnC{	
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);     
 		if (!isset($this->data["Special"])) {
@@ -1307,9 +1323,11 @@ class PakmaraCnC extends CnC{
 			$this->data["Special"] .= '<br>';
 		}
 		$this->data["Special"] .= "Pak'ma'ra C&C: Initiative penalties for critical hits are doubled.";
-		$this->data["Special"] .= '<br>This unit should have two separate C&Cs. As this is not possible in FV, critical chart is changed instead.';
+		//below is no longer true - Secondary C&C kicks in!
+		//$this->data["Special"] .= '<br>This unit should have two separate C&Cs. As this is not possible in FV, critical chart is changed instead.';
 	}
 
+/*replaced by doubled Ini penalties, but no reduced crit chance
 			protected $possibleCriticals = array(
 				8=>array("CommunicationsDisrupted","CommunicationsDisrupted"), 
 				16=>"PenaltyToHit", 
@@ -1317,10 +1335,78 @@ class PakmaraCnC extends CnC{
 				24=>array("ReducedIniativeOneTurn","ReducedIniative","ReducedIniativeOneTurn","ReducedIniative"), 
 				32=>array("RestrictedEW","ReducedIniativeOneTurn","ReducedIniative","ReducedIniativeOneTurn","ReducedIniative"), 
 				40=>array("RestrictedEW","ReducedIniative","ReducedIniative","ShipDisabledOneTurn")
-		    );	
+		    );	*/
+			
+    protected $possibleCriticals = array(
+    	//1=>"SensorsDisrupted", //not implemented! so I take it out 
+		1=>array("CommunicationsDisrupted","CommunicationsDisrupted"),    //this instead of SensorsDisrupted
+		9=>array("CommunicationsDisrupted","CommunicationsDisrupted"), 
+		12=>"PenaltyToHit", 
+		15=>"RestrictedEW", 
+		18=>array("ReducedIniativeOneTurn","ReducedIniativeOneTurn","ReducedIniative","ReducedIniative"), 
+		21=>array("RestrictedEW","ReducedIniativeOneTurn","ReducedIniativeOneTurn","ReducedIniative","ReducedIniative"), 
+		24=>array("RestrictedEW","ReducedIniative","ReducedIniative","ShipDisabledOneTurn") 
+    );
+			
+}//endof class PakmaraCnC
 
 
-}
+class SecondaryCnC extends ShipSystem{	
+    public $name = "SecondaryCnC";
+    public $displayName = "Secondary C&C";
+    public $primary = true;
+	public $iconPath = "CnCSecondary.png";
+	
+	//make it all-around by default - potentially saves work, and the system is only usable with TAG anyway
+	public $startArc = 0;
+	public $endArc = 360;
+	
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);     
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}
+		$this->data["Special"] .= "Secondary C&C: May take damage on C&C hits (instead of actual C&C).";
+		$this->data["Special"] .= '<br>If primary C&C is destroyed while secondary C&C is still alive, primary C&C will be revived with as much health as secondary C&C had.';
+	}
+	
+	
+    function __construct($armour, $maxhealth, $powerReq, $output ){
+        parent::__construct($armour, $maxhealth, $powerReq, $output );
+		$this->addTag('C&C');
+    }
+	
+	//if primary C&C is destroyed while secondary is still alive - revive primary and destroy secondary!
+	public function criticalPhaseEffects($ship, $gamedata)
+    { 
+		if($this->isDestroyed()) return;
+		
+		//find primary C&C
+		$primaryCnC = $ship->getSystemByName("CnC");
+		
+		if(!$primaryCnC->isDestroyed()) return; //primary C&C is not destroyed, no need to act
+		
+		//revive primary C&C, kill Secondary
+		
+		//find the killing shot...
+		foreach ($primaryCnC->damage as $damage ) if(($damage->turn == $gamedata->turn) && ($damage->destroyed)){ 
+			$healthRemaining = $this->getRemainingHealth();
+			$damage->destroyed = false; //not a killing shot after all!
+			//add revival of HP - as separate entry so damage from shot is not changed!
+			$damageEntry = new DamageEntry(-1, $damage->shipid, -1, $damage->turn, $primaryCnC->id, -$healthRemaining, 0, 0, 0/*no fire order to tie this damage to actually*/, false, false, "Secondary C&C - reviving command", $damage->damageclass, 0/*no shooter*/, 0/*no firing weapon*/);
+			$damageEntry->updated = true;
+			$primaryCnC->damage[] = $damageEntry;
+			//add Secondary C&C destruction - without actual damage, just desstruction, so it can be tied to original weapon impact without affecting damage done numbers
+			$damageEntry = new DamageEntry(-1, $damage->shipid, -1, $damage->turn, $this->id, 0, 0, 0, $damage->fireorderid, true, false, "Secondary C&C - marking destroyed", $damage->damageclass, $damage->shooterid, $damage->weaponid);
+			$damageEntry->updated = true;
+			$struct->damage[] = $damageEntry;
+		}
+    } //endof function criticalPhaseEffects	
+	
+}//endof class SecondaryCnC
+
 
 class CargoBay extends ShipSystem{
     public $name = "cargoBay";
@@ -1396,7 +1482,7 @@ class Thruster extends ShipSystem{
 				break;
 		}
 		
-		$this->addTag('Thruster');
+		//$this->addTag('Thruster'); //no need, as now system name is considered a tag as well
     }
 } //endof Thruster
 
@@ -1589,13 +1675,25 @@ class Structure extends ShipSystem{
 		$this->isIndestructible = $isIndestructible;
     }
 
-	
+	//creates pre-tagged Outer Structure, with appropriate arc
+	//warning: has trouble working if Structure isn't directly called earlier! so be sure to create PRIMARY Structure before trying to go for any Outer ones :)
+	public static function createAsOuter($armour, $maxhealth, $startArc, $endArc, $isIndestructible = false){
+		$createdStruct = new Structure($armour, $maxhealth, $isIndestructible);
+		$createdStruct->startArc = $startArc;
+		$createdStruct->endArc = $endArc;
+		$createdStruct->addTag('Outer Structure');
+		return $createdStruct;
+	}
+		
 	//Vree need Structure that doesn't fall off even if it's destroyed - here it is!
-	//it will get destroyed all right (possibly multiple times in a batlle), but will still be there afterwards
+	//it will get destroyed all right (possibly multiple times in a battle), but will still be there afterwards
 	//Will be destroyed if all such Structures are reduced to 0 (and then all of them will get destroyed !)
 	//upon destruction - delete destruction marker
 	public function criticalPhaseEffects($ship, $gamedata)
     { 
+    
+		parent::criticalPhaseEffects($ship, $gamedata);//Call parent to apply effects like Limpet Bore.	    
+    
 		if($this->isIndestructible){
 			foreach ($this->damage as $damage ) if(($damage->turn == $gamedata->turn) && ($damage->destroyed)){ 
 				//check all others - if all of them are reduced to 0 - mark them destroyed as well; if not, delete destroyed marker!
@@ -2358,6 +2456,9 @@ by 4.
 	
 	//effects that happen in Critical phase (after criticals are rolled) - dissipation and actual loss of tendrils due to critical received
 	public function criticalPhaseEffects($ship, $gamedata){
+		
+		parent::criticalPhaseEffects($ship, $gamedata);//Call parent to apply effects like Limpet Bore.			
+		
 		if($this->isDestroyed()) return; //destroyed system does not work... but other critical phase effects may work even if destroyed!
 		
 		$ship = $this->getUnit();
@@ -2589,6 +2690,9 @@ class SelfRepair extends ShipSystem{
 	
 	public function criticalPhaseEffects($ship, $gamedata)
     { 
+    
+		parent::criticalPhaseEffects($ship, $gamedata);//Call parent to apply effects like Limpet Bore.	  
+    
 		if($this->isDestroyed()) return; //destroyed system does not work... but other critical phase effects may work even if destroyed!
 		
 		//how many points are available?
@@ -3009,6 +3113,9 @@ class ShadowPilot extends CnC{
 	
 	public function criticalPhaseEffects($ship, $gamedata)
     { 
+    
+    	parent::criticalPhaseEffects($ship, $gamedata);//Call parent to apply effects like Limpet Bore (altho this would never effect AA ships, but other effects added later might....
+    
 		if($this->isDestroyed()) return; //destroyed system does not work... but other critical phase effects may work even if destroyed!
 		
 		$damageSufferedThisTurn = 0;
@@ -3072,6 +3179,9 @@ class PhasingDrive extends JumpEngine{
 	//destroy ship if damaged while half-phaseing
 	public function criticalPhaseEffects($ship, $gamedata)
     { 
+    
+		parent::criticalPhaseEffects($ship, $gamedata);//Call parent to apply effects like Limpet Bore.	    
+    
 		if (!Movement::isHalfPhased($ship, $gamedata->turn)) return;
 		if (!$this->isDamagedOnTurn($gamedata->turn)) return; 
 		
@@ -3449,6 +3559,9 @@ capacitor is completely emptied.
 	// - add SelfRepair output reduction critical (so the damage isn't just repaired in a few turns ;) ).
 	public function criticalPhaseEffects($ship, $gamedata)
     { 
+    
+		parent::criticalPhaseEffects($ship, $gamedata);//Call parent to apply effects like Limpet Bore.	    
+    
 		if (!$this->isDamagedOnTurn($gamedata->turn)) return; 
 		if (!$this->isDestroyed()) return;		
 		
@@ -3684,6 +3797,8 @@ class AmmoMagazine extends ShipSystem {
 	public $ammoSizeArray = array();
 	public $ammoUseArray = array(); //to be used in front end to track actual ammo usage
 	public $output = 0;
+	
+	private $interceptorUsed = 0;//Communication variable.	
 		
     
     function __construct($capacity){ //magazine capacity
@@ -3719,7 +3834,7 @@ class AmmoMagazine extends ShipSystem {
 		$strippedSystem->remainingAmmo = $this->remainingAmmo;
 		$strippedSystem->ammoCountArray = $this->ammoCountArray;
 		$strippedSystem->ammoSizeArray = $this->ammoSizeArray;
-		$strippedSystem->output = $this->output;
+		$strippedSystem->output = $this->output;	
 		return $strippedSystem;
 	} 
 	
@@ -3775,7 +3890,30 @@ class AmmoMagazine extends ShipSystem {
 		}		
 		return $toReturn;
 	}
+
+	//Called when Interceptor missile is attempting to intercept, to check missiles are available.
+	public function canDrawAmmo($modeName){
+	    // Check if ammo count has a value of 1 or more after ammo used this turn deducted
+	    	if(($this->ammoCountArray[$modeName] - $this->interceptorUsed) >= 1){    	
+	        return true; // drawing ammo is possible
+	    } else {
+	        return false; // cannot draw ammo!
+	    }
+	}
 	
+	//Reduce number of Interceptor missile when one is ordered to intercept.
+	public function doDrawAmmo($gameData, $modeName){
+        $ship = $this->getUnit();		
+	 //PREPARE APPROPRIATE NOTES FOR AMMO USED TO INTERCEPT	
+            $notekey = 'AmmoUsed';
+            $noteHuman = 'Ammunition Magazine - a round is drawn';
+            $noteValue = $modeName;
+            $this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
+		if  ($noteValue == 'Interceptor'){//doDrawAmmo() maybe used for other direct fire weapons, make this specific?          
+	 		$this->interceptorUsed += 1;//Interceptor just used!
+			}                    
+            $this->ammoAlreadyUsed = array(); 
+	}	
 		
  public function generateIndividualNotes($gameData, $dbManager){ //dbManager is necessary for Initial phase only
         $ship = $this->getUnit();
@@ -3816,6 +3954,7 @@ public function onIndividualNotesLoaded($gamedata) {
                     $this->ammoCountArray[$currNote->notevalue] -= 1;
                     $this->ammoUsedTotal[$currNote->notevalue] += 1;
 
+
                 /*
                 $ammoSize = $this->ammoSizeArray[$currNote->notevalue];
                 $this->remainingAmmo -= $ammoSize;
@@ -3823,6 +3962,7 @@ public function onIndividualNotesLoaded($gamedata) {
                 break;
         }
     }
+	     
 } // End of function onIndividualNotesLoaded
 	
 	
@@ -3861,7 +4001,7 @@ class AmmoMissileTemplate{
 	public $useOEW = false;
 	public $hidetarget = false;
 	public $intercept = 0;
-	public $ballisticIntercept = false;	
+	public $ballisticIntercept = false;
 
     //Adding Pulse variables for Starburst missiles	
 	public $maxpulses = 0;
@@ -4196,7 +4336,7 @@ class AmmoMissileC extends AmmoMissileTemplate{
 
 			$effectHit = 3; 
 			$effectHit5 = $effectHit * 5;
-			$fireOrder->pubnotes .= "<br> All non-ballistic weapon's fire by target reduced by $effectHit5 percent.";
+			$fireOrder->pubnotes .= "<br> All non-ballistic weapon fire by target reduced by $effectHit5 percent.";
 
 			$allFire = $ship->getAllFireOrders($gamedata->turn);
 			foreach($allFire as $fireOrder) {
@@ -4274,7 +4414,7 @@ class AmmoMissileI extends AmmoMissileTemplate{
 	public $modeName = 'Interceptor';
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'AMMO_I'; //enhancement name to be enabled
-	public $enhancementDescription = '(ammo) Interceptor Missile (2250)'; //enhancement description
+	public $enhancementDescription = '(ammo) Interceptor Missile (2250/2263)'; //enhancement description
 	public $enhancementPrice = 2; //PV per missile; originally it's 0 for Kor-Lyan and 2 for everyone else
 	
 	public $fireControlMod = array(null, null, null); //MODIFIER for weapon fire control!
@@ -4286,9 +4426,9 @@ class AmmoMissileI extends AmmoMissileTemplate{
 	public $priorityAF = 5;
 	public $noOverkill = false;
 	public $hidetarget = false;
-	public $intercept = 0;
-	public $ballisticIntercept = true;
-//    public $ballistic = false;		//Idea that making intercept missiles non-ballistic might help
+	public $intercept = 6;
+	public $ballisticIntercept = true; 
+
 		
     public function getDamage($fireOrder) //actual function to be called, as with weapon!
     {
@@ -4502,7 +4642,7 @@ class AmmoMissileKK extends AmmoMissileTemplate{
 
 	public $specialRangeCalculation = true;
 	public $rangePenalty = 1;	//but only after 15 hexes
-	public $noLockPenalty = true;		
+	public $noLockPenalty = false;		
 	
     public function getDamage($fireOrder) //actual function to be called, as with weapon!
     {

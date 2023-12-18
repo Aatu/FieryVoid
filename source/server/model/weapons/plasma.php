@@ -353,8 +353,7 @@ class PairedPlasmaBlaster extends LinkedWeapon{
 	function __construct($startArc, $endArc, $nrOfShots = 2){ 
 		$this->shots = $nrOfShots;
 		$this->defaultShots = $nrOfShots;
-		$this->intercept = $nrOfShots;            
-		
+		$this->intercept = $nrOfShots;
 		
 		if($nrOfShots === 1){
 			$this->iconPath = "pairedPlasmaBlaster1.png";
@@ -435,7 +434,7 @@ class RogolonLtPlasmaGun extends LinkedWeapon{
         public $animationExplosionScale = 0.25;
 */
 	
-        public $intercept = 0; //no interception for this weapon!
+        public $intercept = 2; //actually this weapon probably SHOULD have interception after all!
         public $loadingtime = 1;
         public $shots = 2;
         public $defaultShots = 2;
@@ -452,6 +451,7 @@ class RogolonLtPlasmaGun extends LinkedWeapon{
             $this->shots = $nrOfShots;
             $this->defaultShots = $nrOfShots;
 	    $this->damageBonus = $damageBonus;
+            $this->intercept = $nrOfShots;	
 	    
         if($nrOfShots === 1){
 			$this->iconPath = "lightPlasma.png";
@@ -834,7 +834,7 @@ class LightPlasmaBolterFighter extends LinkedWeapon{
     public $trailLength = 12;
     public $animationExplosionScale = 0.25;
 */	
-    public $intercept = 0; //no interception for this weapon!
+        public $intercept = 2; //actually this weapon probably SHOULD have interception after all!
 	public $loadingtime = 1;
 	public $shots = 2;
     public $defaultShots = 2;
@@ -852,6 +852,7 @@ class LightPlasmaBolterFighter extends LinkedWeapon{
 		function __construct($startArc, $endArc, $nrOfShots = 2){
 			$this->defaultShots = $nrOfShots;
 			$this->shots = $nrOfShots;
+            		$this->intercept = $nrOfShots;
 
 			parent::__construct(0, 1, 0, $startArc, $endArc);
 		}	
@@ -1305,8 +1306,8 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
         public $boostEfficiency = 1;
         public $maxBoostLevel = 1;     
 		
-		public $weaponClassArray = array(1=>'Standard', 2=>'Plasma');
-		public $damageTypeArray = array(1=>'Standard', 2=>'Plasma'); //indicates that this weapon does Plasma damage in Offensive mode    	
+		public $weaponClassArray = array(1=>'Plasma', 2=>'Plasma');
+		public $damageTypeArray = array(1=>'Plasma', 2=>'Plasma'); //indicates that this weapon does Plasma damage in Offensive mode    	
     	public $firingMode = "Defensive";
         public $firingModes = array(
             1 => "Defensive",

@@ -5,7 +5,7 @@ class Varnic extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
 
         $this->pointCost = 580;
-        $this->faction = "Narn";
+        $this->faction = "Narn Regime";
         $this->phpclass = "Varnic";
         $this->imagePath = "img/ships/varnic.png";
         $this->shipClass = "Var'Nic Long Range Destroyer";

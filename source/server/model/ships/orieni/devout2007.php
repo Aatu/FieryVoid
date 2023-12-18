@@ -5,7 +5,7 @@ class Devout2007 extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 310;
-        $this->faction = "Orieni";
+        $this->faction = "Orieni Imperium";
         $this->phpclass = "devout2007";
         $this->imagePath = "img/ships/obedient.png";
         $this->shipClass = "Devout Escort Frigate (2007)";

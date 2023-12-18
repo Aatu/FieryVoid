@@ -5,7 +5,7 @@ class Esharan extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
 
         $this->pointCost = 800;
-        $this->faction = "Minbari";
+        $this->faction = "Minbari Federation";
         $this->phpclass = "Esharan";
         $this->imagePath = "img/ships/tinashi.png";
         $this->shipClass = "Esharan Anti-Fighter Frigate";

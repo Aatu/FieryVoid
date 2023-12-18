@@ -18,8 +18,8 @@ class Selatra1989 extends StarBaseSixSections{
 		$this->sideDefense = 20;
 		$this->imagePath = "img/ships/AbbaiSelatra.png";
 		$this->canvasSize = 200; 
+		
 		$this->locations = array(41, 42, 2, 32, 31, 1);
-
 		$this->hitChart = array(			
 			0=> array(
 				9 => "Structure",
@@ -27,12 +27,22 @@ class Selatra1989 extends StarBaseSixSections{
 				15 => "Scanner",
 				16 => "Hangar",
 				18 => "Reactor",
-				20 => "C&C",
+				20 => "TAG:C&C",
 			),
 		);
 
-		$this->addPrimarySystem(new Reactor(5, 26, 0, 0));
+
+		/* replaced with proper two C&Cs!
 		$this->addPrimarySystem(new ProtectedCnC(6, 40, 0, 0)); //original: 2x20, armor 5
+		*/
+		$cnc = new CnC(5, 20, 0, 0);
+		$cnc->startArc = 0;
+		$cnc->endArc = 360;
+        $this->addPrimarySystem($cnc);
+		$cnc = new SecondaryCnC(5, 20, 0, 0);//all-around by default
+        $this->addPrimarySystem($cnc);
+		
+		$this->addPrimarySystem(new Reactor(5, 26, 0, 0));
 		$this->addPrimarySystem(new Scanner(5, 24, 5, 7));
 		$this->addPrimarySystem(new Scanner(5, 24, 5, 7));
 		$this->addPrimarySystem(new Hangar(5, 6));
@@ -44,6 +54,15 @@ class Selatra1989 extends StarBaseSixSections{
 			$min = 0 + ($i*60);
 			$max = 120 + ($i*60);
 
+/*some systems need pre-definition to have arcs set for TAGs!*/
+			$struct = Structure::createAsOuter(4, 80,$min,$max);
+			$cargoBay = new CargoBay(4, 25);
+			$cargoBay->startArc = $min;
+			$cargoBay->endArc = $max;
+			$subReactor = new SubReactorUniversal(4, 20, 0, 0);
+			$subReactor->startArc = $min;
+			$subReactor->endArc = $max;
+			
 			$systems = array(
 				new LightParticleBeamShip(4, 2, 1, $min, $max),
 				new LightParticleBeamShip(4, 2, 1, $min, $max),
@@ -52,13 +71,14 @@ class Selatra1989 extends StarBaseSixSections{
 				new MediumLaser(4, 6, 5, $min, $max),
 				new LaserCutter(4, 6, 4, $min, $max),
 				new GraviticShield(4, 6, 0, 2, $min, $max),
-				new CargoBay(4, 25),
-				new SubReactorUniversal(4, 20, 0, 0),
-				new Structure(4, 80)
+				$cargoBay, //new CargoBay(4, 25),
+				$subReactor, //new SubReactorUniversal(4, 20, 0, 0),
+				$struct //new Structure(4, 80)
 			);
 
 			$loc = $this->locations[$i];
 
+			/* replaced with TAG system!
 			$this->hitChart[$loc] = array(
 				1 => "Medium Laser",
 				2 => "Laser Cutter",
@@ -68,6 +88,18 @@ class Selatra1989 extends StarBaseSixSections{
 				8 => "Cargo Bay",
 				10 => "Sub Reactor",
 				18 => "Structure",
+				20 => "Primary",
+			);
+			*/
+			$this->hitChart[$loc] = array(
+				1 => "TAG:Medium Laser",
+				2 => "TAG:Laser Cutter",
+				4 => "TAG:Light Particle Beam",
+				5 => "TAG:Sensor Spear",
+				6 => "TAG:Gravitic Shield",	
+				8 => "TAG:Cargo Bay",
+				10 => "TAG:Sub Reactor",
+				18 => "TAG:Outer Structure",
 				20 => "Primary",
 			);
 
