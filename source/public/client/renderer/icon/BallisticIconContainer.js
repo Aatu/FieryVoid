@@ -107,7 +107,7 @@ window.BallisticIconContainer = function () {
         var launchPosition = this.coordinateConverter.fromHexToGame(shooterIcon.getFirstMovementOnTurn(turn).position);
 		if (ballistic.type == 'normal') { //it's direct fire after all!
 			launchPosition = this.coordinateConverter.fromHexToGame(shooterIcon.getLastMovement().position);
-			targetType = 'hexDirect';
+			targetType = 'hexDirectBlue';
 		}
         var targetPosition = null;
         var targetIcon = null;
