@@ -109,6 +109,10 @@ window.BallisticIconContainer = function () {
 			launchPosition = this.coordinateConverter.fromHexToGame(shooterIcon.getLastMovement().position);
 			targetType = 'hexDirectBlue';
 		}
+		if (ballistic.type == 'normal' && ballistic.damageclass == 'plasma') { //it's direct fire after all, and plasma so let's make it green!
+			launchPosition = this.coordinateConverter.fromHexToGame(shooterIcon.getLastMovement().position);
+			targetType = 'hexDirectGreen';
+		}		
         var targetPosition = null;
         var targetIcon = null;
 

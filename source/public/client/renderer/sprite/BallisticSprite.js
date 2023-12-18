@@ -7,6 +7,7 @@ window.BallisticSprite = function () {
     var TEXTURE_HEX = null;
     var TEXTURE_SHIP = null;
     var TEXTURE_HEX_DIRECT_BLUE = null;
+    var TEXTURE_HEX_DIRECT_GREEN = null;    
 
     function BallisticSprite(position, type) {
         HexagonSprite.call(this, -2);
@@ -29,7 +30,9 @@ window.BallisticSprite = function () {
             return TEXTURE_HEX;
         } else if (type == "hexDirectBlue") {
             return TEXTURE_HEX_DIRECT_BLUE;
-        } else {
+        } else if (type == "hexDirectGreen") {
+            return TEXTURE_HEX_DIRECT_GREEN;
+        }else {
             return TEXTURE_SHIP;
         }
     }
@@ -38,7 +41,8 @@ window.BallisticSprite = function () {
         TEXTURE_LAUNCH = createTexture('launch');
         TEXTURE_HEX = createTexture('hex');
         TEXTURE_SHIP = createTexture('ship');
-        TEXTURE_HEX_DIRECT_BLUE = createTexture('hexDirectBlue'); 
+        TEXTURE_HEX_DIRECT_BLUE = createTexture('hexDirectBlue');
+        TEXTURE_HEX_DIRECT_GREEN = createTexture('hexDirectGreen');         
     }
 
     function createTexture(type) {
@@ -58,7 +62,9 @@ window.BallisticSprite = function () {
             return "rgba(230,20,10,0.50)";
         } else if (type == "hexDirectBlue") {//direct fire target hex - light blue
             return "rgba(0,184,230,0.50)";
-        } else {//...something else...
+        } else if (type == "hexDirectGreen") {//direct fire target hex - light green
+            return "rgba(0, 204, 0,0.50)";
+        }else {//...something else...
             return "rgba(144,185,208,0.80)";
         }
     }
@@ -71,7 +77,9 @@ window.BallisticSprite = function () {
             return "rgba(230,20,10,0.15)";
         } else if (type == "hexDirectBlue") {//direct fire target hex - light blue
             return "rgba(0,184,230,0.15)";
-        } else {//...something else...
+        } else if (type == "hexDirectGreen") {//direct fire target hex - light green
+            return "rgba(0, 204, 0,0.15)";
+        }else {//...something else...
             return "rgba(144,185,208,0.30)";
         }
     }

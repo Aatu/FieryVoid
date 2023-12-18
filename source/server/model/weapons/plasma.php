@@ -1305,8 +1305,8 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
         public $boostEfficiency = 1;
         public $maxBoostLevel = 1;     
 		
-		public $weaponClassArray = array(1=>'Standard', 2=>'Plasma');
-		public $damageTypeArray = array(1=>'Standard', 2=>'Plasma'); //indicates that this weapon does Plasma damage in Offensive mode    	
+		public $weaponClassArray = array(1=>'Plasma', 2=>'Plasma');
+		public $damageTypeArray = array(1=>'Plasma', 2=>'Plasma'); //indicates that this weapon does Plasma damage in Offensive mode    	
     	public $firingMode = "Defensive";
         public $firingModes = array(
             1 => "Defensive",
