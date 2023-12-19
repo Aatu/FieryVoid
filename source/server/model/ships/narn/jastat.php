@@ -76,7 +76,7 @@ class JaStat extends StarBaseFiveSections{
 			$subReactor = new SubReactorUniversal(5, 35, 0, 0);
 			$subReactor->startArc = $min;
 			$subReactor->endArc = $max;
-			$hangar = new Hangar(5, 7, 6, 0);
+			$hangar = new Hangar(5, 7, 6);
 			$hangar->startArc = $min;
 			$hangar->endArc = $max;
 
