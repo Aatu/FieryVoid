@@ -3137,7 +3137,9 @@ spl_autoload_register(
 					 	'lacannarefit' => '/server/model/ships/yolu/LacannaRefit.php',
 					 	'falaren' => '/server/model/ships/yolu/Falaren.php',
 					 	
-					 	'alanti' => '/server/model/ships/abbai/Alanti.php',					 	 
+					 	'alanti' => '/server/model/ships/abbai/alanti.php',
+					 	'pirocia' => '/server/model/ships/abbai/pirocia.php',					 	
+					 						 	 
 					 							
 				//Thirdspace
 				'psychicfield' => '/server/model/weapons/specialWeapons.php',

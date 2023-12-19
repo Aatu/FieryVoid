@@ -1,12 +1,12 @@
 <?php
-class Alanti extends OSAT{
+class alanti extends OSAT{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 250; //-25 PV for having no Shield Projector
 	$this->faction = "Abbai Matriarchate";
-        $this->phpclass = "Alanti";
+        $this->phpclass = "alanti";
         $this->imagePath = "img/ships/AbbaiAlanti.png";
         $this->shipClass = 'Alanti Defense Satellite';
         $this->canvasSize = 100;
