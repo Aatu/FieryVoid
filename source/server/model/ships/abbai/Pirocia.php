@@ -54,7 +54,7 @@ class pirocia extends StarBaseSixSections
 		$this->addPrimarySystem(new Hangar(5, 14));				
 		$this->addPrimarySystem(new Scanner(5, 20, 8, 10));
 		$this->addPrimarySystem(new Scanner(5, 20, 8, 10));
-		$this->addPrimarySystem(new ShieldGenerator(5, 32, 10, 8));//Combine into single Shield Generator.
+		$this->addPrimarySystem(new ShieldGenerator(6, 32, 10, 8));//Combine into single Shield Generator (original: 2x armor 5, structure 16, rating 4)
 //		$this->addPrimarySystem(new ShieldGenerator(5, 16, 5, 4)); 		        					
         $this->addPrimarySystem(new Structure( 5, 125));
 
@@ -96,7 +96,7 @@ class pirocia extends StarBaseSixSections
                     8 => "TAG:Comm Disruptor",                                                              
                     11 => "TAG:Cargo Bay",
                     12 => "TAG:Sub Reactor",
-                    18 => "TAG:Structure",
+                    18 => "TAG:Outer Structure",
                     20 => "Primary",
 			);
 
