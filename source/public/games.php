@@ -55,21 +55,26 @@ if (isset($_SESSION["user"])) {
 <div class="panel news">
     <!-- <div id="newsHeader">Latest News - September 2020</div> -->
     <div id="newsEntry">
-        
-<!--	    
+
+	    
         <h3> *** Merry Christmas and a Happy New Year! *** </h3>
-        <h4>may our games be fiery and our lives peaceful</h4>
+        <h4><i>may our games be fiery and our lives peaceful</i></h4>
         <br>
--->
        
 		
 
-		---------- <b>LATEST NEWS - November 2023</b> ----------
-	    <br><b>Allocating damage by tag</b> - new option, revolutionizing Vree and Vorlon hit charts (and Starbases, in the future - not fitted yet)
-	    <br><b>Faction names</b> - about two thirds of official ones are expanded
-	    <br><b>Minor fixes</b> - as usual :)
-	    <br><b>A LOT of work</b> by Douglas and Geoffrey! New missiles, faction polishing, bugfixes, there's everything!
-	    
+		---------- <b>LATEST NEWS - December 2023</b> ----------
+<br><b>Faction names</b> - all official ones are expanded
+<br><b>Game description</b> - now actually available in-game, on Declarations pane
+<br><b>Secondary C&C</b> - now units with more than one C&C can reap (something like) appropriate benefits in game; Pak rejoice!
+<br><b>Kor-Lyan development</b> - A LOT of missile-related development: Interceptor missiles, Limpet-Bores, Proximity Lasers and more! courtesy of Douglas
+<br><b>Markab development</b> - Stun Beam enhanced, Religious Fervor added - courtesy of Douglas
+<br><b>Enhancement updates</b> - Elite/Poor Crew enhanced - again courtesy of Douglas
+<br><b>Bases reworked</b> - so far only partially (bases are major recipients of both twin C&C and TAG mechanics)
+<br><b>Bug fixes</b> - notably SOEW fix (token locks didn't count as locks for SOEW purposes)
+
+Sadly the amount of changes means that some games may break - particularly bases will be strongly affected. Sorry for that!
+
 <!--	        
 		 <br><br>---------- <b>update 20th of January</b> ---------- 
 	    <br><b><u><big>Thirdspace</big></u> arrived</b> - custom faction by Douglas
