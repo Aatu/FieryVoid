@@ -4437,7 +4437,8 @@ class AmmoMissileI extends AmmoMissileTemplate{
     
     function getPrice($unit) //some missiles might have different price depending on unit being fitted!
     {
-        if($unit->faction == 'Kor-Lyan') return 0;
+        //if($unit->faction == 'Kor-Lyan') return 0;		
+		if (stristr($unit->faction,'Kor-Lyan')) return 0;
         return $this->enhancementPrice;
     }	
 } //endof class AmmoMissileI
@@ -4493,7 +4494,8 @@ class AmmoMissileK extends AmmoMissileTemplate{
 
 	function getPrice($unit) //some missiles might have different price depending on unit being fitted!
 	{
-		if($unit->faction == 'Kor-Lyan') return 20;
+		//if($unit->faction == 'Kor-Lyan') return 20;
+		if (stristr($unit->faction,'Kor-Lyan')) return 20;
 		return $this->enhancementPrice;
 	}
 	
@@ -4781,7 +4783,8 @@ class AmmoMissileFL extends AmmoMissileTemplate{
 	
 	function getPrice($unit) //some missiles might have different price depending on unit being fitted!
 	{
-		if($unit->faction == 'Kor-Lyan') return 10;
+		//if($unit->faction == 'Kor-Lyan') return 10;
+		if (stristr($unit->faction,'Kor-Lyan')) return 10;
 		return $this->enhancementPrice;
 	}
 } //endof class AmmoMissileFL
@@ -4816,7 +4819,8 @@ class AmmoMissileFH extends AmmoMissileTemplate{
 	
 	function getPrice($unit) //some missiles might have different price depending on unit being fitted!
 	{
-		if($unit->faction == 'Kor-Lyan') return 10;
+		//if($unit->faction == 'Kor-Lyan') return 10;
+		if (stristr($unit->faction,'Kor-Lyan')) return 10;
 		return $this->enhancementPrice;
 	}
 } //endof class AmmoMissileFH
@@ -4876,7 +4880,8 @@ class AmmoMissileFD extends AmmoMissileTemplate{
 	
 	function getPrice($unit) //some missiles might have different price depending on unit being fitted!
 	{
-		if($unit->faction == 'Kor-Lyan') return 8;
+		//if($unit->faction == 'Kor-Lyan') return 8;
+		if (stristr($unit->faction,'Kor-Lyan')) return 8;
 		return $this->enhancementPrice;
 	}	
 	

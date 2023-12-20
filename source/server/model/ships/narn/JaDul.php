@@ -50,6 +50,19 @@ class JaDul extends SmallStarBaseThreeSections{
 			$min = 300 + ($i*120);
 			$max = 60 + ($i*120);
 
+
+			/*some systems need pre-definition to have arcs set for TAGs!*/
+			$struct = Structure::createAsOuter(3, 130,$min,$max);
+			$cargoBay = new CargoBay(3, 24);
+			$cargoBay->startArc = $min;
+			$cargoBay->endArc = $max;
+			$subReactor = new SubReactorUniversal(3, 20, 0, 0);
+			$subReactor->startArc = $min;
+			$subReactor->endArc = $max;
+			$hangar = new Hangar(3, 7, 6);
+			$hangar->startArc = $min;
+			$hangar->endArc = $max;
+
 			$systems = array(
 				new HeavyLaser(3, 8, 6, $min, $max),
 				new TwinArray(3, 6, 2, $min, $max),
@@ -57,23 +70,29 @@ class JaDul extends SmallStarBaseThreeSections{
 				new TwinArray(3, 6, 2, $min, $max),								
 				new LightPulse(3, 4, 2, $min, $max),
 				new LightPulse(3, 4, 2, $min, $max),
+				/* replaced with arced systems - for TAG
 				new SubReactorUniversal(3, 20),
 				new CargoBay(3, 24),				
 				new Hangar(3, 7),
 				new Structure( 3, 130)
+				*/
+				$subReactor,
+				$cargoBay,
+				$hangar,
+				$struct
 			);
 
 
 			$loc = $this->locations[$i];
 
 			$this->hitChart[$loc] = array(
-				3 => "Twin Array",
-				5 => "Light Pulse Cannon",
-				7 => "Heavy Laser",
-				9 => "Cargo Bay",				
-				10 => "Sub Reactor",				
-				11 => "Hangar",
-				18 => "Structure",
+				3 => "TAG:Twin Array",
+				5 => "TAG:Light Pulse Cannon",
+				7 => "TAG:Heavy Laser",
+				9 => "TAG:Cargo Bay",				
+				10 => "TAG:Sub Reactor",				
+				11 => "TAG:Hangar",
+				18 => "TAG:Outer Structure",
 				20 => "Primary",
 			);
 
