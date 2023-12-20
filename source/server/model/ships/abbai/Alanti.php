@@ -10,7 +10,7 @@ class alanti extends OSAT{
         $this->imagePath = "img/ships/AbbaiAlanti.png";
         $this->shipClass = 'Alanti Defense Satellite';
         $this->canvasSize = 100;
-	    $this->unofficial = 'S'; //Semi-official - added as reasonably close to official.  Comms Disruptor has replaced Shield Projector.     
+	    $this->unofficial = 'S'; //Semi-official - added as reasonably close to official.  Comm Disruptor has replaced Shield Projector.     
 
         $this->isd = 2230;
 
@@ -26,27 +26,31 @@ class alanti extends OSAT{
 
         $this->addPrimarySystem(new Reactor(4, 7, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 9, 3, 7)); 
-        $this->addAftSystem(new Thruster(3, 6, 0, 0, 2)); 
-        $this->addFrontSystem(new CombatLaser(3, 0, 0, 270, 90));
-        $this->addFrontSystem(new CommDisruptor(3, 0, 0, 270, 90));         
-        $this->addFrontSystem(new QuadArray(3, 0, 0, 0, 360));
         $this->addPrimarySystem(new ShieldGenerator(3, 8, 2, 2));
+		
+        $this->addFrontSystem(new CombatLaser(3, 0, 0, 270, 90));     
+        $this->addFrontSystem(new QuadArray(3, 0, 0, 0, 360));
+        $this->addFrontSystem(new CommDisruptor(3, 0, 0, 270, 90));    //replacing Shield Projector of the original 
+		
         $this->addAftSystem(new GraviticShield(0, 6, 0, 2, 0, 360));
+        $this->addAftSystem(new Particleimpeder(2, 0, 0, 0, 360));
+        $this->addAftSystem(new Thruster(3, 6, 0, 0, 2)); 
 
         
-        //0:primary, 1:front, 2:rear, 3:left, 4:right;
-        
+        //0:primary, 1:front, 2:rear, 3:left, 4:right;        
         $this->addPrimarySystem(new Structure(4, 30));
 
 
 		
 		$this->hitChart = array(
 			0=> array(
-					9 => "Structure",
-					10 => "2:Thruster",
-					12 => "1:Combat Laser",
-       				13 => "1:Light Particle Beam",
-					15 => "2:Gravitic Shield",
+					8 => "Structure",
+					9 => "2:Thruster",
+					11 => "1:Combat Laser",
+       				12 => "1:Quad Array",
+					13 => "1:Comm Disruptor",
+					14 => "2:Gravitic Shield",
+					15 => "2:Particle Impeder",
 					17 => "Scanner",
 					19 => "Reactor",
 					20 => "Shield Generator",
