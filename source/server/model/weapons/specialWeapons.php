@@ -5187,7 +5187,7 @@ class ProximityLaserLauncher extends Weapon{
 	public $noLockPenalty = false;	        
 	
 	public $range = 30;//no point firing at further target with base 24 to hit!
-	public $loadingtime = 3; //same as attached laser
+	public $loadingtime = 1; //same as attached laser
     public $ammunition = 10; //limited number of shots	
 	
 	public $animation = "ball";
@@ -5221,9 +5221,9 @@ class ProximityLaserLauncher extends Weapon{
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);        
 		$this->data["Special"] = "Proximity Launcher " . $this->pairing ."."; 
-		$this->data["Special"] .= "<br>Use this Launcher to select the hex from where its paired Proximity Laser will fire."; 
+		$this->data["Special"] .= "<br>Use this Launcher to select the hex from where its paired Proximity Laser will fire.";	 
 		$this->data["Special"] .= "<br>IMPORTANT - The Proximity Laser should be targeted at the same time as this launcher is fired.";
-		$this->data["Special"] .= "<br>DO NOT FIRE SEPARATELY."; 		 		
+		$this->data["Special"] .= "<br>HAS NO EFFECT UNLESS FIRED WITH PROXIMITY LASER" . $this->pairing ."."; 		 		
         $this->data["Ammunition"] = $this->ammunition;		
 	}	
 	
@@ -5316,8 +5316,9 @@ class ProximityLaserLauncher extends Weapon{
 			$this->data["Special"] = "Paired with Proximity Launcher ". $this->pairing ."."; 
 			$this->data["Special"] .= "<br>Use the paired Proximity Launcher system to target a hex, this will be the location from where this weapon will fire at its target in Firing Phase.";
 			$this->data["Special"] .= "<br>Range Penalty will be calculated from the hex the Launcher hits, not from this ship.";
+			$this->data["Special"] .= "<br>This weapon does not need an EW lock, and does not benefit from OEW.";				
 			$this->data["Special"] .= "<br>IMPORTANT - The paired Proximity Launcher should be fired at the same time as this weapon is targeted.";
-			$this->data["Special"] .= "<br>DO NOT FIRE SEPARATELY."; 					
+			$this->data["Special"] .= "<br>WILL FIRE FROM SHIP UNLESS FIRED TOGETHER WITH PROXIMITY LAUCNHER" . $this->pairing .".";					
 	        $this->data["Ammunition"] = $this->ammunition;		
 		}	
 
