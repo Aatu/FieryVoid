@@ -5223,7 +5223,7 @@ class ProximityLaserLauncher extends Weapon{
 		$this->data["Special"] = "Proximity Launcher " . $this->pairing ."."; 
 		$this->data["Special"] .= "<br>Use this Launcher to select the hex from where its paired Proximity Laser will fire.";	 
 		$this->data["Special"] .= "<br>IMPORTANT - The Proximity Laser should be targeted at the same time as this launcher is fired.";
-		$this->data["Special"] .= "<br>HAS NO EFFECT UNLESS FIRED WITH PROXIMITY LASER" . $this->pairing ."."; 		 		
+		$this->data["Special"] .= "<br>HAS NO EFFECT UNLESS FIRED WITH PROXIMITY LASER " . $this->pairing ."."; 		 		
         $this->data["Ammunition"] = $this->ammunition;		
 	}	
 	
@@ -5253,7 +5253,7 @@ class ProximityLaserLauncher extends Weapon{
     public function setAmmo($firingMode, $amount){
             $this->ammunition = $amount;
         }
-	
+ 	
     public function stripForJson() {
             $strippedSystem = parent::stripForJson();    
             $strippedSystem->ammunition = $this->ammunition;           
@@ -5373,6 +5373,9 @@ class ProximityLaserLauncher extends Weapon{
             $strippedSystem->hasSpecialLaunchHexCalculation = $this->hasSpecialLaunchHexCalculation;                              
             return $strippedSystem;
         }
+
+
+
         
         public function getDamage($fireOrder){        return Dice::d(10, 3)+8;   }
         public function setMinDamage(){     $this->minDamage = 11 ;      }
