@@ -137,7 +137,7 @@ class ShipSystem {
 				            $explodechance, $explodeRoll*10, 1, $shotsHit, 0,
 				            0, 0, 'LimpetBore', 10000
 				        );
-				        $newFireOrder->pubnotes = "Limpet Bore attempts to damage " . $this->displayName ."! $turnsAttachedForNotes attempt(s) made. Needed: $explodesOn, rolled: $explodeRoll.";
+				        $newFireOrder->pubnotes = "Limpet Bore attempts to damage " . $this->displayName ."! Needed: $explodesOn, rolled: $explodeRoll.";
 				        $newFireOrder->addToDB = true;
 				        $rammingSystem->fireOrders[] = $newFireOrder;
 				    }
