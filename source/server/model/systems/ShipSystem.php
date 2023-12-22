@@ -119,7 +119,6 @@ class ShipSystem {
 			    $explodeRoll = Dice::d(10);
 				$turnsAttached = $gamedata->turn - $critical->turn;
 				$explodesOn = 7 - $turnsAttached;	//Initial success chance is 7 on a d10, improved by -1 for each turn Limpet is attached.				
-				$turnsAttachedForNotes = $turnsAttached+1; //First attempt not recorded in $turnsAttached, so add it manually.
 				$explodechance = (11 - $explodesOn) * 10;	//For fireorder to display correct % in combat log.			           
 
 			    $rammingSystem = $ship->getSystemByName("RammingAttack");
@@ -169,7 +168,7 @@ class ShipSystem {
 				  }
 
 			    if ($explodeRoll < $explodesOn) {
-					if ($turnsAttachedForNotes >= 5){ //After 5 attempts Limpet Bore drops off / fails.
+					if ($turnsAttached >= 4){ //After initial +4 attempts Limpet Bore drops off / fails.
 						$critical->turnend = $gamedata->turn;//End Limpet Bore crit this turn
 						$critical->forceModify = true; //actually save the change.
 						$critical->updated = true; //actually save the change cd!
