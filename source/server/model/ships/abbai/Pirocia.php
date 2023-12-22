@@ -11,7 +11,7 @@ class pirocia extends StarBaseSixSections
 		$this->phpclass = "pirocia";
 		$this->shipClass = "Pirocia Starbase";
 		$this->imagePath = "img/ships/AbbaiPirocia.png";
-		$this->canvasSize = 300;
+		$this->canvasSize = 330;
 		$this->fighters = array("normal" => 36);
 		$this->isd = 2230;
 
