@@ -5233,7 +5233,7 @@ class ProximityLaserLauncher extends Weapon{
 			$fireOrder->updated = true;
 		}
 		
-	    public function fire($gamedata, $fireOrder) //Do i even need this
+	    public function fire($gamedata, $fireOrder)
 	    { 
 	        $this->changeFiringMode($fireOrder->firingMode);//changing firing mode may cause other changes, too!
 	        $shooter = $gamedata->getShipById($fireOrder->shooterid);        
@@ -5325,7 +5325,7 @@ class ProximityLaserLauncher extends Weapon{
 
 
 		public function getFiringHex($gamedata, $fireOrder) {
-			if($this->launcher){	
+			if($this->launcher){	//Check that Proximity Laser have a Launcher (it always should)
 
 		    $launchPos = null; // Initialize $launchPos outside the loop
 			$fireOrders = $this->launcher->getFireOrders($gamedata->turn);
