@@ -3138,7 +3138,8 @@ spl_autoload_register(
 					 	'falaren' => '/server/model/ships/yolu/Falaren.php',
 					 	
 					 	'alanti' => '/server/model/ships/abbai/alanti.php',
-					 	'pirocia' => '/server/model/ships/abbai/pirocia.php',					 	
+					 	'pirocia' => '/server/model/ships/abbai/pirocia.php',
+						'mayoverheat' => '/server/model/cricialClasses.php',	 						 	
 					 						 	 
 					 							
 				//Thirdspace

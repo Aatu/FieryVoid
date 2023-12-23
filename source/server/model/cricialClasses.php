@@ -29,8 +29,9 @@ class Critical{
     }
         
         
-    protected function setParam($param){
+    protected function setParam($param, $shots = null) {
         $this->param = $param;
+        $this->shots = $shots;
     }
 
     public function getDescription(){
@@ -464,5 +465,15 @@ class LimpetBore extends Critical{
             parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
     }
 } 
+
+class MayOverheat extends Critical {
+    public $description = "May overheat";
+
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0, $shots) {
+        if ($turnend == 0) $turnend = $turn + 1;
+        parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend, $shots);
+    }
+}
+
 
 ?>

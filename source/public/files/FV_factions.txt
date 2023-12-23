@@ -71,7 +71,7 @@ AVAILABLE FACTIONS
 ABBAI MATRIARCHATE
 Gravitic Shield - most Abbai units are equipped with Gravitic Shield. Active shield reduces both hit chance and damage of incoming fire. At range 0 fighters are assumed to be able to come close enough to ignore ship shields.
 	Gravitic Shields are powered by separate generator, that can power up a limited number of them (usually not allowing a ship all-around protection unless generator output is boosted).
-Quad Array - 4 separate weapons in a single housing that's prone to overheating. Using more than 2 shots can cause forced shutdown for a turn, to cool down. Number of shots is changed by using alternate firing modes. Defensive fire is always safe. (this is somewhat changed from tabletop arrangement, where a regular critical is rolled instead - with defensive fire too).
+Quad Array - 4 separate weapons in a single housing that's prone to overheating. Using more than 2 shots causes 'May Overheat' critical effect next turn. When this critical is in place, firing weapon again (offensively or defensively) will cause a critical roll at end of turn with the following modifiers; +2 modifier for evey shot fired in current turn, and -2 if only three shots were fired previous turn.
 Comm Disruptor - weapon reducing target's EW and Initiative for next turn. 
 Particle Impeder - purely defensive weapon, capable of intercepting weapons with "uninterceptable" trait (typically that means Lasers :) ).
 	In addition, it can be boosted by sarificing EW rather than usual Power. Such a boost, in addition to increasing intercept rating of the Impeder, counts as special kind of shielding, reducing hit chance of all incoming weapons (fighter fire included), that can't be flown under and is cumulative with regular shields.
