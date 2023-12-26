@@ -4331,19 +4331,18 @@ class AmmoMissileC extends AmmoMissileTemplate{
     }		
     
  	public function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ 
-
-	if (isset(AmmoMissileC::$alreadyEngaged[$ship->id])) return; //target already engaged by a previous Chaff Missile
+		if (isset(AmmoMissileC::$alreadyEngaged[$ship->id])) return; //target already engaged by a previous Chaff Missile
 
 			$effectHit = 3; 
 			$effectHit5 = $effectHit * 5;
 			$fireOrder->pubnotes .= "<br> All non-ballistic weapon fire by target reduced by $effectHit5 percent.";
 
 			$allFire = $ship->getAllFireOrders($gamedata->turn);
-			foreach($allFire as $fireOrder) {
-				if ($fireOrder->type == 'normal') {
-					if ($fireOrder->rolled > 0) {
+			foreach($allFire as $currFireOrder) {
+				if ($currFireOrder->type == 'normal') {
+					if ($currFireOrder->rolled > 0) {
 					}else{
-						$fireOrder->needed -= 3 *5; //$needed works on d100
+						$currFireOrder->needed -= 3 *5; //$needed works on d100
 	//					$fireOrder->pubnotes .= "; Chaff Missile impact, -15% to hit."; //note why hit chance does not match
 						AmmoMissileC::$alreadyEngaged[$ship->id] = true;
 					}
