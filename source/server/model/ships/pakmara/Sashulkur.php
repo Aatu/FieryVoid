@@ -5,7 +5,7 @@ class Sashulkur extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 600;
-		$this->faction = "Pak'Ma'Ra Confederacy";
+		$this->faction = "Pak'ma'ra Confederacy";
 		$this->phpclass = "Sashulkur";
 		$this->imagePath = "img/ships/PakmaraReshkasu.png";
 		$this->shipClass = "Sashul'kur Blockade Runner";
