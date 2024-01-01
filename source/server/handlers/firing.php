@@ -32,9 +32,6 @@ class Firing
     /*gets all ready intercept-capable weapons that aren't otherwise assigned*/
     public static function getUnassignedInterceptors($gamedata, $ship)
     {
-    	
-
-    	
         $currTurn = $gamedata->turn;
         $toReturn = array();
         if ($ship instanceof FighterFlight) { //separate procedure for fighters
@@ -115,7 +112,7 @@ class Firing
                 case 'Raking': //Raking damage gets reduced multiple times, account for that a bit! - another armour down!
                     if ($expectedDamage > 10) { ///simplified, assuming Raking will be in 10-strong rakes
                         $expectedDamage = $expectedDamage - $armour; //from second rake - let's simplify that two full weights of armor will be deduced from damage
-                        $expectedDamage = max(10, $expectedDamage);
+                        $expectedDamage = min(10, $expectedDamage);
                     }
                     break;
                 case 'Piercing': //Piercing does little damage to actual outer section... but it does PRIMARY damage! very dangerous!

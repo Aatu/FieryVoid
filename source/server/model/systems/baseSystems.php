@@ -4332,7 +4332,6 @@ class AmmoMissileC extends AmmoMissileTemplate{
     
  	public function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ 
 		if (isset(AmmoMissileC::$alreadyEngaged[$ship->id])) return; //target already engaged by a previous Chaff Missile
-
 			$effectHit = 3; 
 			$effectHit5 = $effectHit * 5;
 			$fireOrder->pubnotes .= "<br> All non-ballistic weapon fire by target reduced by $effectHit5 percent.";
@@ -4369,7 +4368,7 @@ class AmmoMissileC extends AmmoMissileTemplate{
 							$CnC->criticals[] =  $crit;
 					}
 				}
-			}
+		}
 	} //endof function onDamagedSystem
 	
 
