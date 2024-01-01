@@ -1669,8 +1669,8 @@ throw new Exception("getSystemArmourAdaptive! $ss");	*/
             if ($pos != null) {
                 $sourcePos = $pos;
             } else {
-//                $sourcePos = $shooter->getHexPos();
-					$sourcePos = $this->getFiringHex($gamedata, $fireOrder);                
+                $sourcePos = $shooter->getHexPos();
+				//	$sourcePos = $this->getFiringHex($gamedata, $fireOrder);     //this was for Proximity Launcher - but is incorrect here, returning line above            
             }
             $dis = mathlib::getDistanceHex($sourcePos, $target);
             $damage -= round($dis * $this->rangeDamagePenalty); //round to avoid damage loss at minimal ranges!

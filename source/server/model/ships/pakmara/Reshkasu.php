@@ -5,7 +5,7 @@ class Reshkasu extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 590;
-		$this->faction = "Pak'Ma'Ra Confederacy";
+		$this->faction = "Pak'ma'ra Confederacy";
 		$this->phpclass = "Reshkasu";
 		$this->imagePath = "img/ships/PakmaraReshkasu.png";
 		$this->shipClass = "Resh'kas'u Light Carrier";

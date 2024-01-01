@@ -5,7 +5,7 @@ class Padashar extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 350;
-		$this->faction = "Pak'Ma'Ra Confederacy";
+		$this->faction = "Pak'ma'ra Confederacy";
         $this->phpclass = "Padashar";
         $this->imagePath = "img/ships/PakmaraTrashuli.png";
         $this->shipClass = "Pa'da'shar Troop Liner";
