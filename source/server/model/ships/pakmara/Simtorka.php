@@ -5,7 +5,7 @@ class Simtorka extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 500;
-		$this->faction = "Pak'Ma'Ra Confederacy";
+		$this->faction = "Pak'ma'ra Confederacy";
 		$this->phpclass = "Simtorka";
 		$this->imagePath = "img/ships/PakmaraSimsalle.png";
 		$this->shipClass = "Sim'tor'ka Survey Transport";

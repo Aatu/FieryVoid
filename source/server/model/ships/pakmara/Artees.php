@@ -5,7 +5,7 @@ class Artees extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 400;
-		$this->faction = "Pak'Ma'Ra Confederacy";
+		$this->faction = "Pak'ma'ra Confederacy";
         $this->phpclass = "Artees";
         $this->imagePath = "img/ships/PakmaraTrashuli.png";
         $this->shipClass = "Ar'tees Battle Transport";
