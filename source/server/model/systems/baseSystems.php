@@ -3893,8 +3893,9 @@ class AmmoMagazine extends ShipSystem {
 
 	//Called when Interceptor missile is attempting to intercept, to check missiles are available.
 	public function canDrawAmmo($modeName){
+		
 	    // Check if ammo count has a value of 1 or more after ammo used this turn deducted
-	    	if(($this->ammoCountArray[$modeName] - $this->interceptorUsed) >= 1){    	
+	    	if(($this->remainingAmmo > 0) && (($this->ammoCountArray[$modeName] - $this->interceptorUsed) >= 1)){    	
 	        return true; // drawing ammo is possible
 	    } else {
 	        return false; // cannot draw ammo!

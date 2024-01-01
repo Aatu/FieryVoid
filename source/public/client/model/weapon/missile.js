@@ -346,6 +346,25 @@ var AmmoMissileRackF = function  AmmoMissileRackF(json, ship) {
 AmmoMissileRackF.prototype = Object.create(AmmoMissileRackS.prototype);
 AmmoMissileRackF.prototype.constructor =  AmmoMissileRackF;
 
+//For Intercept Missile, to allow Missile Racks to select canSelfIntercept in Firing phase.
+AmmoMissileRackF.prototype.canWeaponInterceptAtAll = function (weapon) {
+  var canIntercept = false;
+
+		if (weapon.fireControl[1] == null) { //To stop F-Racks being able to manually intercept after firing Long Range shot.
+		  return false;
+		}     
+  // Check if weapon intercept rating is greater than 0
+  if (this.intercept > 0) {
+    canIntercept = true;
+  }else {
+    // Check if any value in the interceptArray is greater than 0
+    var interceptArray = Object.values(this.interceptArray);
+    canIntercept = interceptArray.some(element => element > 0);
+  }
+  return canIntercept;
+};
+
+
 AmmoMissileRackF.prototype.doIndividualNotesTransfer = function () { //prepare individualNotesTransfer variable - if relevant for this particular system
     // prepare individualNotesTransfer variable - if relevant for this particular system
     // here: transfer information about firing in Rapid mode

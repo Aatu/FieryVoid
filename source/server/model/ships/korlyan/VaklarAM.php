@@ -65,8 +65,8 @@ class VaklarAM extends HeavyCombatVessel{
         $this->addFrontSystem(new AmmoMissileRackD(2, 0, 0, 240, 60, $ammoMagazine, false));
         $this->addFrontSystem(new StdParticleBeam(2, 4, 1, 240, 60));
 
-		$TargeterA = new ProximityLaser(0, 1, 0, 300, 60, 'A');
-		$LauncherA = new ProximityLaserLauncher(3, 0, 0, 300, 60, 'A'); 
+		$TargeterA = new ProximityLaser(3, 0, 0, 300, 60, 'A');
+		$LauncherA = new ProximityLaserLauncher(0, 1, 0, 300, 60, 'A'); 
 		$TargeterA->addLauncher($LauncherA);
 		$this->addFrontSystem($TargeterA);
 		$this->addFrontSystem($LauncherA);		 
