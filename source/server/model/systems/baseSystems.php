@@ -3893,8 +3893,9 @@ class AmmoMagazine extends ShipSystem {
 
 	//Called when Interceptor missile is attempting to intercept, to check missiles are available.
 	public function canDrawAmmo($modeName){
+		
 	    // Check if ammo count has a value of 1 or more after ammo used this turn deducted
-	    	if(($this->ammoCountArray[$modeName] - $this->interceptorUsed) >= 1){    	
+	    	if(($this->remainingAmmo > 0) && (($this->ammoCountArray[$modeName] - $this->interceptorUsed) >= 1)){    	
 	        return true; // drawing ammo is possible
 	    } else {
 	        return false; // cannot draw ammo!
@@ -4332,7 +4333,6 @@ class AmmoMissileC extends AmmoMissileTemplate{
     
  	public function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ 
 		if (isset(AmmoMissileC::$alreadyEngaged[$ship->id])) return; //target already engaged by a previous Chaff Missile
-
 			$effectHit = 3; 
 			$effectHit5 = $effectHit * 5;
 			$fireOrder->pubnotes .= "<br> All non-ballistic weapon fire by target reduced by $effectHit5 percent.";
@@ -4369,7 +4369,7 @@ class AmmoMissileC extends AmmoMissileTemplate{
 							$CnC->criticals[] =  $crit;
 					}
 				}
-			}
+		}
 	} //endof function onDamagedSystem
 	
 
