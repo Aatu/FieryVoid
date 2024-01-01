@@ -76,8 +76,8 @@ class KoskovaEarlyAM extends BaseShip{
 
         $this->addLeftSystem(new AmmoMissileRackD(4, 0, 0, 240, 60, $ammoMagazine, false));
 
-		$TargeterA = new ProximityLaser(0, 1, 0, 240, 60, 'A');
-		$LauncherA = new ProximityLaserLauncher(4, 0, 0, 240, 60, 'A'); 
+		$TargeterA = new ProximityLaser(3, 0, 0, 240, 60, 'A');
+		$LauncherA = new ProximityLaserLauncher(0, 1, 0, 240, 60, 'A'); 
 		$TargeterA->addLauncher($LauncherA);
 		$this->addLeftSystem($TargeterA);
 		$this->addLeftSystem($LauncherA);
@@ -86,8 +86,8 @@ class KoskovaEarlyAM extends BaseShip{
 
         $this->addRightSystem(new AmmoMissileRackD(4, 0, 0, 300, 120, $ammoMagazine, false));
 
-		$TargeterB = new ProximityLaser(0, 1, 0, 300, 120, 'B');
-		$LauncherB = new ProximityLaserLauncher(4, 0, 0, 300, 120, 'B'); 
+		$TargeterB = new ProximityLaser(3, 0, 0, 300, 120, 'B');
+		$LauncherB = new ProximityLaserLauncher(0, 1, 0, 300, 120, 'B'); 
 		$TargeterB->addLauncher($LauncherB);
 		$this->addRightSystem($TargeterB);
 		$this->addRightSystem($LauncherB);

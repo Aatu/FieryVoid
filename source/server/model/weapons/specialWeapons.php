@@ -5171,98 +5171,98 @@ class PsionicConcentrator extends Weapon{
 class ProximityLaserLauncher extends Weapon{
 	/*Kor-Lyan system, used to designate where attached Proximity Laser shots originates by targeting a hex and automatically hitting.
 	*/
-	public $name = "ProximityLaserLauncher";
-	public $displayName = "Proximity Launcher";
-	public $iconPath = "ProximityLaserLauncher.png";
-	
-	public $damageType = "Standard"; //irrelevant, really
-	public $weaponClass = "Ballistic";
-	public $hextarget = true;
-	public $hidetarget = true;
-	public $ballistic = true;
-	public $uninterceptable = true; 
-	public $doNotIntercept = true;
-	public $priority = 1;
-        public $useOEW = false;	
-	public $noLockPenalty = false;	        
-	
-	public $range = 30;//no point firing at further target with base 24 to hit!
-	public $loadingtime = 1; //same as attached laser
-    public $ammunition = 10; //limited number of shots	
-	
-	public $animation = "ball";
-	public $animationColor = array(245, 90, 90);
-	public $animationExplosionScale = 0.5; //single hex explosion
-	public $animationExplosionType = "AoE";
-	
-	//Should never be targeted or counted for CV.	
-	protected $doCountForCombatValue = false;
-	public $isPrimaryTargetable = false; //can this system be targeted by called shot if it's on PRIMARY?	
-	public $isTargetable = false; //cannot be targeted ever!	
+		public $name = "ProximityLaserLauncher";
+		public $displayName = "Proximity Launcher";
+		public $iconPath = "ProximityLaserLauncher.png";
+		
+		public $damageType = "Standard"; //irrelevant, really
+		public $weaponClass = "Ballistic";
+		public $hextarget = true;
+		public $hidetarget = true;
+		public $ballistic = true;
+		public $uninterceptable = true; 
+		public $doNotIntercept = true;
+		public $priority = 1;
+	        public $useOEW = false;	
+		public $noLockPenalty = false;	        
+		
+		public $range = 30;//no point firing at further target with base 24 to hit!
+		public $loadingtime = 1; //same as attached laser
+	    public $ammunition = 10; //limited number of shots	
+		
+		public $animation = "ball";
+		public $animationColor = array(245, 90, 90);
+		public $animationExplosionScale = 0.5; //single hex explosion
+		public $animationExplosionType = "AoE";
+		
+		//Should never be targeted or counted for CV.	
+		protected $doCountForCombatValue = false;
+		public $isPrimaryTargetable = false; //can this system be targeted by called shot if it's on PRIMARY?	
+		public $isTargetable = false; //cannot be targeted ever!	
 
-		private $pairing = null;	//Which targeter is it paired with?	
-		
-	public $firingModes = array(
-		1 => "Launcher"
-	);
-		
-	public $repairPriority = 5;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
- 
-	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $pairing)
-	{
-		$this->pairing = $pairing;
-		$this->displayName = 'Proximity Launcher ' . $pairing . ''; 				
-		//Nominal amount of health, should never be hit.
-		if ( $maxhealth == 0 ) $maxhealth = 1;
-		if ( $powerReq == 0 ) $powerReq = 0;
-		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-	}
-	    		
-	public function setSystemDataWindow($turn){
-		parent::setSystemDataWindow($turn);        
-		$this->data["Special"] = "Proximity Launcher " . $this->pairing ."."; 
-		$this->data["Special"] .= "<br>Use this Launcher to select the hex from where its paired Proximity Laser will fire.";	 
-		$this->data["Special"] .= "<br>IMPORTANT - The Proximity Laser should be targeted at the same time as this launcher is fired.";
-		$this->data["Special"] .= "<br>HAS NO EFFECT UNLESS FIRED WITH PROXIMITY LASER" . $this->pairing ."."; 		 		
-        $this->data["Ammunition"] = $this->ammunition;		
-	}	
-	
-	public function calculateHitBase($gamedata, $fireOrder)
-	{
-		$fireOrder->needed = 100; //always true
-		$fireOrder->updated = true;
-	}
-	
-    public function fire($gamedata, $fireOrder) //Do i even need this
-    { 
-        $this->changeFiringMode($fireOrder->firingMode);//changing firing mode may cause other changes, too!
-        $shooter = $gamedata->getShipById($fireOrder->shooterid);        
-        $rolled = Dice::d(100);
-        $fireOrder->rolled = $rolled; 
-		$fireOrder->pubnotes .= "Automatically hits."; //MIGHT NEED ADJUSTED.
-		if($rolled <= $fireOrder->needed){//HIT!
-			$fireOrder->shotshit++;
-            $this->ammunition--;
-            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);			
-		}else{ //MISS!  Should never happen.
-			$fireOrder->pubnotes .= " MISSED! ";
+			private $pairing = null;	//Which targeter is it paired with?	
+			
+		public $firingModes = array(
+			1 => "Launcher"
+		);
+			
+		public $repairPriority = 5;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
+	 
+		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $pairing)
+		{
+			$this->pairing = $pairing;
+			$this->displayName = 'Proximity Launcher ' . $pairing . ''; 				
+			//Nominal amount of health, should never be hit.
+			if ( $maxhealth == 0 ) $maxhealth = 1;
+			if ( $powerReq == 0 ) $powerReq = 0;
+			parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
 		}
-	} //endof function fire	
+		    		
+		public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);        
+			$this->data["Special"] = "Proximity Launcher " . $this->pairing ."."; 
+			$this->data["Special"] .= "<br>Use this Launcher to select the hex from where its paired Proximity Laser will fire.";	 
+			$this->data["Special"] .= "<br>IMPORTANT - The Proximity Laser should be targeted at the same time as this launcher is fired.";
+			$this->data["Special"] .= "<br>HAS NO EFFECT UNLESS FIRED WITH PROXIMITY LASER " . $this->pairing ."."; 		 		
+	        $this->data["Ammunition"] = $this->ammunition;		
+		}	
+		
+		public function calculateHitBase($gamedata, $fireOrder)
+		{
+			$fireOrder->needed = 100; //always true
+			$fireOrder->updated = true;
+		}
+		
+	    public function fire($gamedata, $fireOrder) //Do i even need this
+	    { 
+	        $this->changeFiringMode($fireOrder->firingMode);//changing firing mode may cause other changes, too!
+	        $shooter = $gamedata->getShipById($fireOrder->shooterid);        
+	        $rolled = Dice::d(100);
+	        $fireOrder->rolled = $rolled; 
+			$fireOrder->pubnotes .= "Automatically hits."; //MIGHT NEED ADJUSTED.
+			if($rolled <= $fireOrder->needed){//HIT!
+				$fireOrder->shotshit++;
+	            $this->ammunition--;
+	            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);			
+			}else{ //MISS!  Should never happen.
+				$fireOrder->pubnotes .= " MISSED! ";
+			}
+		} //endof function fire	
 
 
-    public function setAmmo($firingMode, $amount){
-            $this->ammunition = $amount;
-        }
-	
-    public function stripForJson() {
-            $strippedSystem = parent::stripForJson();    
-            $strippedSystem->ammunition = $this->ammunition;           
-            return $strippedSystem;
-        }
-        	
-	public function getDamage($fireOrder){       return 0; /*no actual damage*/  }
-	public function setMinDamage(){     $this->minDamage = 0 ;      }
-	public function setMaxDamage(){     $this->maxDamage = 0 ;      }
+	    public function setAmmo($firingMode, $amount){
+	            $this->ammunition = $amount;
+	        }
+	 	
+	    public function stripForJson() {
+	            $strippedSystem = parent::stripForJson();    
+	            $strippedSystem->ammunition = $this->ammunition;           
+	            return $strippedSystem;
+	        }
+	        	
+		public function getDamage($fireOrder){       return 0; /*no actual damage*/  }
+		public function setMinDamage(){     $this->minDamage = 0 ;      }
+		public function setMaxDamage(){     $this->maxDamage = 0 ;      }
 	
 }//endof class ProximityLaserLauncher
 
@@ -5318,7 +5318,7 @@ class ProximityLaserLauncher extends Weapon{
 			$this->data["Special"] .= "<br>Range Penalty will be calculated from the hex the Launcher hits, not from this ship.";
 			$this->data["Special"] .= "<br>This weapon does not need an EW lock, and does not benefit from OEW.";				
 			$this->data["Special"] .= "<br>IMPORTANT - The paired Proximity Launcher should be fired at the same time as this weapon is targeted.";
-			$this->data["Special"] .= "<br>WILL FIRE FROM SHIP UNLESS FIRED TOGETHER WITH PROXIMITY LAUCNHER" . $this->pairing .".";					
+			$this->data["Special"] .= "<br>WILL FIRE FROM SHIP UNLESS FIRED TOGETHER WITH PROXIMITY LAUNCHER " . $this->pairing .".";					
 	        $this->data["Ammunition"] = $this->ammunition;		
 		}	
 
@@ -5366,6 +5366,23 @@ class ProximityLaserLauncher extends Weapon{
             Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);
         }
 
+		//If Proximity Laser is destroyed, destroy this paired launcher as well.
+		public function criticalPhaseEffects($ship, $gamedata)
+	    { 
+		  	parent::criticalPhaseEffects($ship, $gamedata);//Some critical effects like Limpet Bore might destroy weapon in this phase!
+	  	 	    
+			if(!$this->isDestroyed()) return;//Laser is not destroyed, all is well.
+
+			if($this->isDestroyed()){ //Or if destroyed, find launcher and destroy it too.
+				$launcher = $this->launcher;
+				$launcherHealth = $launcher->getRemainingHealth();	//Just in case it's higher than 1 for some reason...						
+				$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $launcher->id, $launcherHealth, 0, 0, -1, true, false, "Proximity Laser Destroyed - Launcher removed");
+				$damageEntry->updated = true;
+				$this->damage[] = $damageEntry;								
+			}				
+	    } //endof function criticalPhaseEffects	
+	    
+	    
         public function stripForJson() {
             $strippedSystem = parent::stripForJson();    
             $strippedSystem->ammunition = $this->ammunition;
@@ -5373,6 +5390,7 @@ class ProximityLaserLauncher extends Weapon{
             $strippedSystem->hasSpecialLaunchHexCalculation = $this->hasSpecialLaunchHexCalculation;                              
             return $strippedSystem;
         }
+
         
         public function getDamage($fireOrder){        return Dice::d(10, 3)+8;   }
         public function setMinDamage(){     $this->minDamage = 11 ;      }

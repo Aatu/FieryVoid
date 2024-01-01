@@ -73,7 +73,7 @@ if (isset($_SESSION["user"])) {
 <br><b>Bases reworked</b> - so far only partially (bases are major recipients of both twin C&C and TAG mechanics)
 <br><b>Bug fixes</b> - notably SOEW fix (token locks didn't count as locks for SOEW purposes)
 
-Sadly the amount of changes means that some games may break - particularly bases will be strongly affected. Sorry for that!
+<br><br>Sadly the amount of changes means that some games may break - particularly bases and Pak'ma'ra will be strongly affected. Sorry for that!
 
 <!--	        
 		 <br><br>---------- <b>update 20th of January</b> ---------- 

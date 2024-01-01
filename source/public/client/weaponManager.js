@@ -1200,7 +1200,8 @@ window.weaponManager = {
 
     canWeaponInterceptAtAll: function canWeaponInterceptAtAll(weapon){
         var canIntercept = false;
-		var loadingTimeActual = Math.max(weapon.loadingtime,weapon.normalload);//Accelerator (or multi-mode) weapons may have loading time of 1, yet reach full potential only after longer charging        
+		var loadingTimeActual = Math.max(weapon.loadingtime,weapon.normalload);//Accelerator (or multi-mode) weapons may have loading time of 1, yet reach full potential only after longer charging
+   
 		if (weapon.canModesIntercept && (loadingTimeActual > 1)){ //Could weapon have alternative modes with Intercept Rating, and would need to use Self Intercept?
 			canIntercept = weapon.canWeaponInterceptAtAll(weapon);//Call to weapon function to check modes for intercept ratings.
 		}
