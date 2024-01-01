@@ -19,7 +19,7 @@ class JaDul extends SmallStarBaseThreeSections{
 		$this->forwardDefense = 20;
 		$this->sideDefense = 20;
 		$this->imagePath = "img/ships/JaDul.png";
-		$this->canvasSize = 200;
+		$this->canvasSize = 280;
 
 		$this->locations = array(1, 4, 3);
 		

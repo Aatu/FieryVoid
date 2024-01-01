@@ -570,51 +570,27 @@ class LimpetBoreTorpedo extends Torpedo{
             $this->ammunition--;
             Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);
         }
-/* //Old version of Limpet Bore, that didn't use a critical to score damage
-		public function beforeDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
-			$dmgToReturn = $damage;
-			
-			if ($system->id != $fireOrder->calledid){ //If multiple Limpet Bores target same system, avoid subsequent ones entering normal hitchart.
-				$dmgToReturn = 0;
-				$fireOrder->pubnotes .= "<br> Target system destroyed before Limpet Bore hit.";				
-			}
-			
-			if ($system instanceof Structure){//will not harm Structure!  Should never happen, but just in case.
-				$dmgToReturn = 0;
-				$fireOrder->pubnotes .= "<br> Limpet Bore impacted on ship structure and was ineffective.";
-			}	 
-			if ($system->advancedArmor) {
-				$dmgToReturn = 0; //will not harm ships with Advanced Armor				
-				$fireOrder->pubnotes .= "<br> Limpet Bore has no effect on advanced armor.";			
-			}
-			$roll = Dice::d(100);
-			if ($roll <= 25) { //25% chance of failure
-				$dmgToReturn = 0;				
-				$fireOrder->pubnotes .= "<br> Limpet Bore was unable to attach to system."; //$roll / 100.				
-			}
-			return $dmgToReturn;
-		}
-*/
+
+
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!
 		
 		if ($system->advancedArmor) {//no effect on Advanced Armor	
-		$fireOrder->pubnotes .= "<br> Limpet Bore has no effect on advanced armor.";				
+		$fireOrder->pubnotes .= "<br> Limpet Bore cannot attached to advanced armor.";				
 		return; 	
 		}
 
 		if ($system->id != $fireOrder->calledid) {//In case it ends up in general hit chart somehow.
-		$fireOrder->pubnotes .= "<br> Limpet Bore did not attach to target ship.";				
+		$fireOrder->pubnotes .= "<br> Limpet Bore was not targeted at a system.";				
 		return; 	
 		}	
 				
 		if($system){
-			$fireOrder->pubnotes .= "<br> Limpet Bore attaches to target system.";				
+			$fireOrder->pubnotes .= "<br> Limpet Bore attaches to system.";				
 			$crit = new LimpetBore(-1, $ship->id, $system->id, 'LimpetBore', $gamedata->turn); 
 			$crit->updated = true;
 			$system->criticals[] =  $crit;
 			}
 		}	
-		
 		
 		
         public function getDamage($fireOrder){ //Damage is handled in criticalPhaseEffects() once Limpet Bore attaches.
