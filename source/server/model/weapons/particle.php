@@ -1233,8 +1233,8 @@
         public $rangePenalty = 2;
         public $fireControl = array(6, 5, 4); // fighters, <mediums, <capitals
 
-        public $firingModes = array(1=>'4Quad', 2=>'3Triple', 3=>'2Dual', 4=>'1Single');
-        public $gunsArray = array(1=>4,2=>3,3=>2,4=>1);
+        public $firingModes = array(1=>'4Quad', 2=>'3Triple', 3=>'2Dual');
+        public $gunsArray = array(1=>4,2=>3,3=>2);
 	    
 	public $firedThisTurn = false; //to avoid re-rolling criticals!
 
@@ -1252,75 +1252,12 @@
         public function setSystemDataWindow($turn){
             parent::setSystemDataWindow($turn);
             //$this->output = $this->baseOutput + $this->getBoostLevel($turn); //handled in front end
-            $this->data["Special"] = 'After 3 or more shots are fired, weapon may overheat next turn';    
-            $this->data["Special"] .= "<br>When 'May Overheat' critical in place, firing weapon (offensively or defensively) will cause a critical roll at end of turn."; 
-            $this->data["Special"] .= "<br>This critical roll has +2 modifier for evey shot fired in current turn, and -2 if only three shots were fired previous turn.";  
-            $this->data["Special"] .= "<br>Critical roll can be avoided by manually deactivating weapon.";
-            $this->data["Special"] .= "<br>Dual or Single shots will not cause overheating.";                          
+            $this->data["Special"] = 'If fired offensively at full power, can overheat and shut down.<br>Can be fired at reduced power to avoid this:';    
+            $this->data["Special"] .= "<br>Quad shot: 50% chance to shut down for a turn"; 
+            $this->data["Special"] .= "<br>Triple shot: 25% chance to shut down for a turn";  
+            $this->data["Special"] .= "<br>Dual shot: always safe"; 
         }
 
-	    public function fire($gamedata, $fireOrder){
-            // If fires 3 or 4 shots, Quad Array might overheat next turn.  Make a crit roll taking into account number of shots fired this turn and last.
-            parent::fire($gamedata, $fireOrder);
-            
-		    if ($this->firedThisTurn) return; //crit already accounted for (if necessary)
-				$this->firedThisTurn = true; //to avoid rolling crit for every shot!
-			
-				//Weapon may overheat next turn if 3 or more shots are fired.
-	            if ($this->firingMode==1){//quad
-	                $crit = new MayOverheat(-1, $fireOrder->shooterid, $this->id, "MayOverheat", $gamedata->turn, 0, 4);
-	                $crit->updated = true;
-	                $this->criticals[] =  $crit;
-	            }else if ($this->firingMode==2){//triple
-	                $crit = new MayOverheat(-1, $fireOrder->shooterid, $this->id, "MayOverheat", $gamedata->turn, 0, 3);
-	                $crit->updated = true;
-	                $this->criticals[] =  $crit;
-	            }
-        }
-
-		public function criticalPhaseEffects($ship, $gamedata)
-	    { 
-		  	parent::criticalPhaseEffects($ship, $gamedata);//Some critical effects like Limpet Bore might destroy weapon in this phase!
-	  	 	    
-			if($this->isDestroyed()) return;//Quad Array is destroyed, no further action.
-
-			if ($this->firedDefensivelyAlready > 2){ //in case of multiple interceptions during one turn - create new crit if weapon fired 3 or more intercept shots			
-                $crit = new MayOverheat(-1, $ship->id, $this->id, "MayOverheat", $gamedata->turn, 0, $this->firedDefensivelyAlready);
-                $crit->updated = true;
-                $this->criticals[] =  $crit;	
-			}	
-
-		    foreach ($this->criticals as $critical) {
-			    // May Overheat critical effects  	    	
-			    if ($critical->phpclass == "MayOverheat") { //Does it have this critical.
-			    	
-					$OverheatTurn = $gamedata->turn - $critical->turn;		    
-					if($OverheatTurn == 1){ //Make sure it only applies on FOLLOWING turn.
-						
-					$shotsThisTurn = count($this->getFireOrders($gamedata->turn));	//How many shots were fired this turn?
-			        $shotsLastTurn = $critical->param; //Critical from last turn holds how many shots were fired in 'param' property.
-
-				        if ($shotsThisTurn >= 1) { //Did weapon fire this turn?			        	
-				        	
-			        		$this->critRollMod += $shotsThisTurn * 2; // +2 for every shot fired this turn			        		       
-				        	if ($shotsLastTurn == 3)  $this->critRollMod -= 2; // -2 to crit roll if 3 or fewer shots were fired last turn.
-											
-						    // Roll for possible crit.
-					        $crits = array();
-					        $crits = $this->testCritical($ship, $gamedata, $crits);
-						    		
-						}		 		
-					}
-				}			
-			}							
-		} //endof function criticalPhaseEffects	
-		
-        
-        public function getDamage($fireOrder){        return Dice::d(10)+4;   }
-        public function setMinDamage(){     $this->minDamage = 5 ;      }
-        public function setMaxDamage(){     $this->maxDamage = 14 ;      }
-
-/* OLD FIRE() FUNCTION - In case issue with new one ;)
         public function fire($gamedata, $fireOrder){
             // If fired, Quad Array might overheat and go in shutdown for 1 turn.
             // Make a crit roll taking into account used firing mode
@@ -1344,7 +1281,11 @@
             }
 		
         }
-*/
+        
+        public function getDamage($fireOrder){        return Dice::d(10)+4;   }
+        public function setMinDamage(){     $this->minDamage = 5 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 14 ;      }
+
     } //endof class QuadArray
 	
 
