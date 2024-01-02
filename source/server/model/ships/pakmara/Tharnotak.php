@@ -5,7 +5,7 @@ class Tharnotak extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 775;
-		$this->faction = "Pak'Ma'Ra Confederacy";
+		$this->faction = "Pak'ma'ra Confederacy";
 		$this->phpclass = "Tharnotak";
 		$this->imagePath = "img/ships/PakmaraTharnotak.png";
 		$this->shipClass = "Thar'not'ak Plasma Cruiser";

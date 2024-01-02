@@ -37,17 +37,17 @@ class LeonidasGammaAM extends OSAT{
         $this->enhancementOptionsEnabled[] = 'AMMO_L';//add enhancement options for other missiles - Class-L
 		//I assume "Old" EA is Dilgar War era, at the latest - so no Minbari War-designed Piercing Missile, Starburst or Multiwarhead.
 
-        $this->addPrimarySystem(new AmmoMissileRackSO(3, 0, 0, 270, 90, $ammoMagazine, true)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
-        $this->addPrimarySystem(new AmmoMissileRackSO(3, 0, 0, 270, 90, $ammoMagazine, true)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
-        $this->addPrimarySystem(new LightParticleBeamShip(2, 2, 1, 180, 360));
-        $this->addPrimarySystem(new LightParticleBeamShip(2, 2, 1, 0, 180));
-        $this->addPrimarySystem(new InterceptorPrototype(2, 4, 1, 0, 360));
+        $this->addFrontSystem(new AmmoMissileRackSO(3, 0, 0, 270, 90, $ammoMagazine, true)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+        $this->addFrontSystem(new AmmoMissileRackSO(3, 0, 0, 270, 90, $ammoMagazine, true)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+        $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 180, 360));
+        $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 0, 180));
+        $this->addAftSystem(new InterceptorPrototype(2, 4, 1, 0, 360));
         //$this->addPrimarySystem(new InterceptorMkI(2, 4, 1, 0, 360));
 
         $this->addPrimarySystem(new Reactor(4, 6, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 14, 2, 4));   
 
-        $this->addPrimarySystem(new Thruster(2, 6, 0, 0, 2));
+        $this->addAftSystem(new Thruster(2, 6, 0, 0, 2));
                 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addPrimarySystem(new Structure(3, 30));
@@ -55,30 +55,30 @@ class LeonidasGammaAM extends OSAT{
 		$this->hitChart = array(
 			0=> array(
 				9 => "Structure",
-				11 => "Thruster",
-				14 => "Class-SO Missile Rack",
-				16 => "Light Particle Beam",
+				11 => "2:Thruster",
+				14 => "1:Class-SO Missile Rack",
+				16 => "1:Light Particle Beam",
 				18 => "Scanner",
 				19 => "Reactor",
-				20 => "Interceptor Prototype",
+				20 => "2:Interceptor Prototype",
 			),
 			1=> array(
 				9 => "Structure",
-				11 => "0:Thruster",
-				14 => "0:Class-SO Missile Rack",
-				16 => "0:Light Particle Beam",
+				11 => "2:Thruster",
+				14 => "1:Class-SO Missile Rack",
+				16 => "1:Light Particle Beam",
 				18 => "0:Scanner",
 				19 => "0:Reactor",
-				20 => "0:Interceptor Prototype",
+				20 => "2:Interceptor Prototype",
 			),
 			2=> array(
 				9 => "Structure",
-				11 => "0:Thruster",
-				14 => "0:Class-SO Missile Rack",
-				16 => "0:Light Particle Beam",
+				11 => "2:Thruster",
+				14 => "1:Class-SO Missile Rack",
+				16 => "1:Light Particle Beam",
 				18 => "0:Scanner",
 				19 => "0:Reactor",
-				20 => "0:Interceptor Prototype",
+				20 => "2:Interceptor Prototype",
 			),
         );
     }
