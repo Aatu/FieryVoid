@@ -28,9 +28,9 @@ class KoskovaAM extends BaseShip{
         $this->iniativebonus = 0;
 
 	//ammo magazine itself (AND its missile options)
-	$ammoMagazine = new AmmoMagazine(160); //pass magazine capacity 
+	$ammoMagazine = new AmmoMagazine(120); //pass magazine capacity 
 	    $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
-	    $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 80); //add full load of basic missiles  
+	    $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 40); //add full load of basic missiles  
 	    $ammoMagazine->addAmmoEntry(new AmmoMissileI(), 80); //add full load of intercept missiles  	      
 
 	    $this->enhancementOptionsEnabled[] = 'AMMO_A';//add enhancement options for other missiles - Class-A
