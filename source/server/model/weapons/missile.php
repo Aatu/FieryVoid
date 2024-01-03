@@ -1938,10 +1938,10 @@ class AmmoMissileRackF extends AmmoMissileRackS {
 		}
 
         public function setSystemDataWindow($turn){	
-			$this->recalculateFireControl(); //necessary for correct  data outside of firing.
-			$this->data["Special"] = 'This weapon can fire either as regular missile launcher, or Long Range launcher. ';
-			$this->data["Special"] .= '<br>It can also fire in Rapid mode (with reduced Fire Control values, but after only 1 turn of charging) - though not right after using Long Range mode.';
-			parent::setSystemDataWindow($turn);	
+		$this->recalculateFireControl(); //necessary for correct  data outside of firing.	
+		parent::setSystemDataWindow($turn);	
+			$this->data["Special"] .= '<br>When fully loaded, can fire Normal mode (with 20 hex range before modifiers), or Long Range (with +15 hexes to normal range, but reduced Fire Control). ';
+			$this->data["Special"] .= '<br>After one turn loading, can fire in Rapid mode (with reduced range and Fire Control) - but NOT after using Long Range mode in previous turn.';
 		}
 
 /*		
