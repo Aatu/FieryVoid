@@ -1070,14 +1070,16 @@ class AmmoMissileRackS extends Weapon{
 //Extra variables for HARM Missile	
 	public $specialHitChanceCalculation = false;
 	public $specialHitChanceCalculationArray = array();			
-	
-//Adding Intercept variables for Interceptor missiles
+//Extra for Interceptor missiles
 	public $intercept = 0;	//Adding Intercept variables for Interceptor missiles	
 	public $interceptArray = array(); 
 	public $ballisticIntercept = false;	//Can only intercept other missiles.	    	
 	public $ballisticInterceptArray = array();	//Might not actually be needed currently.
-    		
-	public $canModesIntercept = true;	//Some missile launchers can have Interceptor missiles.
+    public $canModesIntercept = true;	//Some missile launchers can have Interceptor missiles.
+//Extra variables for Jammer missile	
+    public $hextarget = false;
+   	public $hextargetArray = array();
+    public $animationArray = array();  	
 	
 	
     /*ATYPICAL constructor: takes ammo magazine class and (optionally) information about being fitted to stable platform*/
@@ -1097,6 +1099,7 @@ class AmmoMissileRackS extends Weapon{
 			$this->ammoClassesArray[] =  new AmmoMissileD(); //...though only Alacans and Sorithians use those, as simple Basic missiles are far superior
 			$this->ammoClassesArray[] =  new AmmoMissileC();				
 			$this->ammoClassesArray[] =  new AmmoMissileS();
+			$this->ammoClassesArray[] =  new AmmoMissileJ();			
 			$this->ammoClassesArray[] =  new AmmoMissileK();
 			$this->ammoClassesArray[] =  new AmmoMissileM();
 			$this->ammoClassesArray[] =  new AmmoMissileKK();
@@ -1164,7 +1167,8 @@ class AmmoMissileRackS extends Weapon{
 		$this->specialHitChanceCalculationArray = array();						
 		$this->interceptArray = array();//Adding Intercept variables for Interceptor missiles	
 		$this->ballisticInterceptArray = array();	    		
-							
+		$this->hextargetArray = array();//For Jammer missile
+		$this->animationArray = array();											
 		
 		//add data for all modes to arrays
 		$currMode = 0;
@@ -1216,7 +1220,9 @@ class AmmoMissileRackS extends Weapon{
 				$this->noLockPenaltyArray[$currMode] = $currAmmo->noLockPenalty;				
 				$this->specialHitChanceCalculationArray[$currMode] = $currAmmo->specialHitChanceCalculation;							    
 				$this->interceptArray[$currMode] = $currAmmo->intercept;//Adding Intercept variables for Interceptor missiles	
-				$this->ballisticInterceptArray[$currMode] = $currAmmo->ballisticIntercept;			    							
+				$this->ballisticInterceptArray[$currMode] = $currAmmo->ballisticIntercept;
+				$this->hextargetArray[$currMode] = $currAmmo->hextarget;//For Jammer missile
+				$this->animationArray[$currMode] = $currAmmo->animation;												    							
 			}
 		}
 			
@@ -1259,7 +1265,9 @@ class AmmoMissileRackS extends Weapon{
 		$strippedSystem->noLockPenaltyArray = $this->noLockPenaltyArray;		
 		$strippedSystem->specialHitChanceCalculationArray = $this->specialHitChanceCalculationArray;//Adding marker for HARM missiles special hitchance calculation		
 		$strippedSystem->interceptArray = $this->interceptArray;//Adding Intercept nad ballisticIntercept variables for Interceptor missiles	
-		$strippedSystem->ballisticInterceptArray = $this->ballisticInterceptArray;							
+		$strippedSystem->ballisticInterceptArray = $this->ballisticInterceptArray;
+		$strippedSystem->hextargetArray = $this->hextargetArray;//For Jammer missile
+		$strippedSystem->animationArray = $this->animationArray;												
 		return $strippedSystem;
 	} 
 	
@@ -1383,11 +1391,12 @@ class AmmoMissileRackS extends Weapon{
     	
       $originalFireOrder = null;
               foreach ($firingOrders as $fireOrder) { 
-              	   if ($fireOrder->type == 'ballistic') { //this was just added after succesful test
+              	   if ($fireOrder->type == 'ballistic') { 
                     $originalFireOrder = $fireOrder;
                     break; //no need to search further
-                    }//this was just added after succesful test
-				}    
+                    }
+				}    			
+				
         if($originalFireOrder==null) return; //no appropriate fire order, end of work	
     	
     	
@@ -1424,7 +1433,7 @@ class AmmoMissileRackS extends Weapon{
 		$ammoIsAvailable = false;
     	$modeName = $this->firingModes[$this->firingMode];	
 		
-		$magazine = $this->unit->getSystemByName("AmmoMagazine");
+		$magazine = $this->getAmmoMagazine();
 		if($magazine){ //else something is wrong - weapon is put on a ship without Ammo Magazine!
 			if($magazine->canDrawAmmo($modeName, 1)) $ammoIsAvailable = true;
 		}
@@ -1433,7 +1442,7 @@ class AmmoMissileRackS extends Weapon{
 
 	public function fireDefensively($gamedata, $interceptedWeapon)//Note that a missile has been used when launcher is fired defensively.
 	{
-		$magazine = $this->unit->getSystemByName("AmmoMagazine");
+		$magazine =  $this->getAmmoMagazine();
     	$modeName = $this->firingModes[$this->firingMode];
     			
 		if($magazine){ //else something is wrong - weapon is put on a ship without Ammo Magazine!
@@ -1458,7 +1467,7 @@ class AmmoMissileRackS extends Weapon{
         }//endof function getCalledShotMod
 
 
-     public function fire($gamedata, $fireOrder)	//For Multiwarhead missiles
+     public function fire($gamedata, $fireOrder)	//For Multiwarhead & Jammer missiles
     {
 		$currAmmo = null;
         //find appropriate ammo
@@ -1466,11 +1475,26 @@ class AmmoMissileRackS extends Weapon{
 			$currAmmo = $this->ammoClassesUsed[$this->firingMode];
 		}
 		if ($currAmmo) $currAmmo->fire($gamedata, $fireOrder);
-		
+
+	        // Check if !$this->hextarget as these modes cannot use normal fire() function.
+        if (!$this->hextarget) {
+            // Call the parent method for weapon hit calculation if not hex targeted.		
         parent::fire($gamedata, $fireOrder);
+		}
+		
+	}//endof function fire	
 
-	}//endof function fire
 
+	public function AOEdamage($target, $shooter, $fireOrder, $sourceHex, $damage, $gamedata)
+	{
+		$currAmmo = null;
+        //find appropriate ammo
+		if (array_key_exists($this->firingMode,$this->ammoClassesUsed)){
+			$currAmmo = $this->ammoClassesUsed[$this->firingMode];
+		}
+		if ($currAmmo) $currAmmo->AOEdamage($target, $shooter, $fireOrder, $sourceHex, $damage, $gamedata);{
+	    }
+	}//endof function AOEdamage 
 
 	public function calculateRangePenalty($distance)
 	{
@@ -1493,9 +1517,12 @@ class AmmoMissileRackS extends Weapon{
 
     public function calculateHitBase($gamedata, $fireOrder)
     {
-    	// Call the parent method for weapon hit calculation
-        parent::calculateHitBase($gamedata, $fireOrder);
-    	
+         // Check if !$this->hextarget as these modes cannot use normal calculateHitBase() function.
+        if (!$this->hextarget) {
+            // Call the parent method for weapon hit calculation if not hex targeted.
+            parent::calculateHitBase($gamedata, $fireOrder);
+        }  
+           	
         $currAmmo = null;
         
         // Find appropriate ammo
@@ -1503,10 +1530,9 @@ class AmmoMissileRackS extends Weapon{
             $currAmmo = $this->ammoClassesUsed[$this->firingMode];
         }
         
-        if ($currAmmo) {
-            $currAmmo->calculateHitBase($gamedata, $fireOrder);
-        }
-	}//endof function calculateHitBase	
+        if ($currAmmo) $currAmmo->calculateHitBase($gamedata, $fireOrder);
+        
+	}//endof function calculateHitBase
 
 } //endof class AmmoMissileRackS
 

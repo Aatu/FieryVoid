@@ -389,7 +389,7 @@ AmmoMissileRackF.prototype.doIndividualNotesTransfer = function () { //prepare i
 		    var targetShip = gamedata.getShip(aFireOrder.targetid); 
 
 		    this.range -= 15;
-		    var longRanged = weaponManager.checkIsInRange(firingShip, targetShip, this);
+		    var longRanged = this.checkIsInRangeFRack(firingShip, targetShip, this);
 		    this.range += 15;  // <-- Corrected line
 								
 		    if (!longRanged) {
@@ -417,4 +417,46 @@ AmmoMissileRackF.prototype.doIndividualNotesTransfer = function () { //prepare i
 	return toReturn;
  
 };
-	
+
+AmmoMissileRackF.prototype.checkIsInRangeFRack = function (shooter, target, weapon) { 
+        var range = weapon.range;
+
+        if (weapon.hextarget){//For when this function called by FRack to check range of hex targeted missiles e.g. J-Missiles - DK
+	        var hexpos = {
+                            x: weapon.fireOrders[0].x,
+                            y: weapon.fireOrders[0].y,
+                        };        	
+			var targetPosition = new hexagon.Offset(hexpos.x, hexpos.y);
+			var distance = shipManager.getShipPosition(shooter).distanceTo(targetPosition);        
+		}else{
+			var distance = mathlib.getDistanceBetweenShipsInHex(shooter, target).toFixed(2);			
+		}
+		
+	   if (range === 0) return true;
+	   			
+       if(!weapon.hextarget){		
+	        var stealthSystem = shipManager.systems.getSystemByName(target, "stealth");
+
+	        if (stealthSystem && distance > 5 && weapon.ballistic) {
+	            return false;
+	        }
+
+	        var jammer = shipManager.systems.getSystemByName(target, "jammer");
+			if (jammer)
+			{
+				//check whether it was enabled last turn... if so, allow missile launch :)
+				if (!shipManager.power.isOfflineOnTurn(target, jammer, (gamedata.turn-1) )){
+					/*Improved/Advanced Sensors effect*/
+					var jammerValue = shipManager.systems.getOutput(target, jammer);
+					if (shipManager.hasSpecialAbility(shooter,"AdvancedSensors") || shipManager.systems.getSystemByName(shooter, "fighteradvsensors")) {
+						jammerValue = 0; //negated
+					} else if (shipManager.hasSpecialAbility(shooter,"ImprovedSensors") || shipManager.systems.getSystemByName(shooter, "fighterimprsensors")) {
+						jammerValue = jammerValue * 0.5; //halved
+					}
+					range = range / (1+jammerValue);
+					//range = range / (shipManager.systems.getOutput(target, jammer)+1);
+				}
+			}
+		}
+        return distance <= range;
+    };	

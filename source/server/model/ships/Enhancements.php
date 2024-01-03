@@ -567,13 +567,13 @@ class Enhancements{
 			  $enhPriceStep = 0; //flat rate
 			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
 		  }				  
-		  $enhID = 'AMMO_S'; //Stealth Missiles - Target is hidden
+		  $enhID = 'AMMO_J'; //Jammer Missiles - add BDEW
 		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
-				$ammoClass = new AmmoMissileS();
+				$ammoClass = new AmmoMissileJ();
 				$ammoSize = $ammoClass->size;
 				$actualCapacity = floor($magazineCapacity/$ammoSize);
 			  $enhName = $ammoClass->enhancementDescription;
-			  $enhLimit = $actualCapacity / 10;		//10% limit
+			  $enhLimit = $actualCapacity;
 			  $enhPrice = $ammoClass->getPrice($ship); 
 			  $enhPriceStep = 0; //flat rate
 			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
@@ -607,6 +607,17 @@ class Enhancements{
 				$actualCapacity = floor($magazineCapacity/$ammoSize);
 			  $enhName = $ammoClass->enhancementDescription;
 			  $enhLimit = $actualCapacity;		
+			  $enhPrice = $ammoClass->getPrice($ship); 
+			  $enhPriceStep = 0; //flat rate
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+		  }
+		  		  $enhID = 'AMMO_S'; //Stealth Missiles - Target is hidden
+		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
+				$ammoClass = new AmmoMissileS();
+				$ammoSize = $ammoClass->size;
+				$actualCapacity = floor($magazineCapacity/$ammoSize);
+			  $enhName = $ammoClass->enhancementDescription;
+			  $enhLimit = $actualCapacity / 10;		//10% limit
 			  $enhPrice = $ammoClass->getPrice($ship); 
 			  $enhPriceStep = 0; //flat rate
 			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
@@ -1285,8 +1296,8 @@ class Enhancements{
 					case 'AMMO_C': //Chaff Missile						
 						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoMissileC(), $enhCount, true); //do notify dependent weapons, too!
 						break;	
-					case 'AMMO_S': //Stealth Missile						
-						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoMissileS(), $enhCount, true); //do notify dependent weapons, too!
+					case 'AMMO_J': //Stealth Missile						
+						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoMissileJ(), $enhCount, true); //do notify dependent weapons, too!
 						break;
 					case 'AMMO_K': //Starburst Missile						
 						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoMissileK(), $enhCount, true); //do notify dependent weapons, too!
@@ -1297,6 +1308,9 @@ class Enhancements{
 					case 'AMMO_KK': //Kinetic Missile						
 						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoMissileKK(), $enhCount, true); //do notify dependent weapons, too!
 						break;
+					case 'AMMO_S': //Stealth Missile						
+						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoMissileS(), $enhCount, true); //do notify dependent weapons, too!
+						break;						
 					case 'AMMO_X': //HARM Missile						
 						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoMissileX(), $enhCount, true); //do notify dependent weapons, too!
 						break;															

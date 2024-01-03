@@ -4011,6 +4011,10 @@ class AmmoMissileTemplate{
 	public $fixedBonusPulses = 0;//for weapons doing dX+Y pulse	
 	
     public $calledShotMod = -8;    //Variable for Multiwarhead Missile.  Normal called shot modifier is -8.
+    
+    public $hextarget = false; //Variable for Jammer Missile.
+    public $animation = "trail";    
+	    
 
 //Extra variables for KK Missile
 	public $specialRangeCalculation = false;
@@ -4442,6 +4446,86 @@ class AmmoMissileI extends AmmoMissileTemplate{
     }	
 } //endof class AmmoMissileI
 
+//ammunition for AmmoMagazine - Class J Missile (for official Missile Racks)
+class AmmoMissileJ extends AmmoMissileTemplate{	
+	public $name = 'ammoMissileJ';
+	public $displayName = 'Jammer Missile';
+	public $modeName = 'Jammer';
+	public $size = 1; //how many store slots are required for a single round
+	public $enhancementName = 'AMMO_J'; //enhancement name to be enabled
+	public $enhancementDescription = '(ammo) Jammer Missile (2239)';
+	public $enhancementPrice = 8; //PV per missile;
+	
+	public $rangeMod = -5; //MODIFIER for launch range
+	public $distanceRangeMod = 0; //MODIFIER for distance range
+	public $fireControlMod = array(null, null, null); //MODIFIER for weapon fire control! Hex targetted!
+	public $minDamage = 0;
+	public $maxDamage = 0;	
+	public $damageType = 'Standard';//mode of dealing damage
+	public $weaponClass = 'Ballistic';//weapon class
+	public $priority = 1;
+	public $priorityAF = 1;
+	public $noOverkill = false;
+    public $useOEW = false;
+	public $hidetarget = false;
+    
+    public $hextarget = true;
+    public $animation = "ball";
+
+//		public $uninterceptable = true; 
+//		public $doNotIntercept = true;
+		public $noLockPenalty = false;	               	
+    
+	private static $alreadyJammed = array();     	
+
+    public function getDamage($fireOrder) //actual function to be called, as with weapon!
+    {
+        return 0;
+    }	
+
+		public function beforeFiringOrderResolution($gamedata, $weapon, $originalFireOrder)
+		{
+        			// Shouldn't happen with null FC, but just in case.
+						if ($originalFireOrder->targetid != -1) {// Sometimes player might target ship after all...
+	                        $targetship = $gamedata->getShipById($originalFireOrder->targetid);
+	                        $movement = $targetship->getLastTurnMovement($originalFireOrder->turn);
+	                        $originalFireOrder->x = $movement->position->q;
+	                        $originalFireOrder->y = $movement->position->r;
+	                        $originalFireOrder->targetid = -1; // Correct the error
+	                    }	
+
+	                $target = new OffsetCoordinate($originalFireOrder->x, $originalFireOrder->y);//Traget hex from Fire Order.
+					$affectedUnits = $gamedata->getShipsInDistance($target, 5);	//Find all ships within 5 hexes.
+				
+					foreach ($affectedUnits as $targetShip) { //Apply Jammer marker to those ships.
+						if (isset(AmmoMissileJ::$alreadyJammed[$targetShip->id])) return; //But not if jammed already.
+						$targetShip->jammerMissile = true;	//Give appropriate marker to ships in range.									                    		
+						AmmoMissileJ::$alreadyJammed[$targetShip->id] = true;//mark jammed already.
+					}
+	}//endof function beforeFiringOrderResolution 
+	
+	
+	public function calculateHitBase($gamedata, $fireOrder)
+		{
+			$fireOrder->needed = 100; //always true
+			$fireOrder->updated = true;			
+		}              
+
+    public function fire($gamedata, $fireOrder)
+    {
+		    $shooter = $gamedata->getShipById($fireOrder->shooterid);        
+	        $rolled = Dice::d(100);
+	        $fireOrder->rolled = $rolled; 
+			$fireOrder->pubnotes .= " All ships within 5 hexes receive two points of Blanket DEW.";	
+			if($rolled <= $fireOrder->needed){//HIT!
+				$fireOrder->shotshit++;		
+			}else{ //MISS!  Should never happen.
+				$fireOrder->pubnotes .= " MISSED! ";
+			}
+	}
+	
+} //endof class AmmoMissileJ
+
 
 //ammunition for AmmoMagazine - Class K Missile (for official Missile Racks)
 class AmmoMissileK extends AmmoMissileTemplate{	
@@ -4453,7 +4537,7 @@ class AmmoMissileK extends AmmoMissileTemplate{
 	public $enhancementDescription = '(ammo) Starburst Missile (2260/2264)'; //2260 for Kor-Lyan, 2264 for everyone else 
 	public $enhancementPrice = 30; //PV per missile; originally it's 20 for Kor-Lyan and 30 for everyone else
 	
-	public $rangeMod = 0; //MODIFIER for launch range
+	public $rangeMod = -5; //MODIFIER for launch range
 	public $distanceRangeMod = 0; //MODIFIER for distance range
 	public $fireControlMod = array(3, 3, 3); //MODIFIER for weapon fire control!
 	public $minDamage = 10;
@@ -4525,6 +4609,7 @@ class AmmoMissileM extends AmmoMissileTemplate{
     public $calledShotMod = 0;   	
 	
     public $ballistic = true;
+    public $hextarget = false;    
     
 	protected $engagedFighters = array();  //Required to avoid mulitple M-Missiles creating fire orders for destroyed fighters and therefore reverting to a normal shot. 	
 
@@ -4610,8 +4695,7 @@ class AmmoMissileM extends AmmoMissileTemplate{
 			$fireOrder->pubnotes .= '  No viable target - excess submunition lost';//inform player of situation
 		}else{ //valid target, will be engaged, note for further shots!
 				$this->engagedFighters[]= $fireOrder->calledid;
-			}
-		
+			}	
 	}//end of function fire
             
 	
@@ -4680,6 +4764,7 @@ class AmmoMissileX extends AmmoMissileTemplate{
 	public $noOverkill = false;
 	public $useOEW = false;
 	public $hidetarget = false;
+    public $hextarget = false;  	
 
 	public $specialHitChanceCalculation = true;
 	
@@ -4690,22 +4775,15 @@ class AmmoMissileX extends AmmoMissileTemplate{
 
 
 	public function calculateHitBase($gamedata, $fireOrder)
-	{
-        // Add a debug statement
- //       echo 'calculateHitBase in YourAmmoClass is being called!<br>';		
+	{	
 		
 		parent::calculateHitBase($gamedata, $fireOrder);
 		
 	    $target = $gamedata->getShipById($fireOrder->targetid); 
 	    $targetEW = $target->getAllOffensiveEW($gamedata->turn);
 	    $hitChanceBonus = $targetEW * 5;
-
-    // Print the values to the browser/console
- //   echo 'Target OEW: ' . $targetEW . '<br>';
 	    
-		$fireOrder->needed +=  $hitChanceBonus;
-		    
-		    
+		$fireOrder->needed +=  $hitChanceBonus;	    
 	}// end of function calculateHitBase  
 
 
