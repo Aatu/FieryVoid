@@ -50,6 +50,7 @@ SHIPBORNE MISSILES
  - class L - Long Range Missile - Has +10 range/distance range, but damage 15.
  - class K - Starburst Missile - Deals damage in pulse mode, with each missile generating D3+3 hits.
  - class KK - Kinetic Missile - Orieni only.  Deals 18 matter damage, and attracts a -5 per hex range penalty after 15 hexes up to it's maximum range.
+ - class J - Jammer Missile - Kor-Lyan only. Automatically hits target hex and emits a burst of sensor static.  All ships within 5 hexes (including enemies) receive two points of Blanket DEW.  Note - This cannot be combined with Blanket DEW protection from other sources, and only one jamming effect can apply to a unit per turn.
  - class M - Multiwarhead Missile - Can only target fighter flights.  Splits into 6 submunitions which will each engage a separate fighter in flight.  Each submunition rolls to hit and scores damage separately, if there are fewer than 6 fighters on impact excess submunitions are lost) 
  - class P - Piercing Missile - Does 30 damage in Piercing mode, cannot be fired at fighters.
  - class S - Stealth Missile - Kor-Lyan only.  Target of this missile is not revealed to the enemy player.
@@ -71,7 +72,7 @@ AVAILABLE FACTIONS
 ABBAI MATRIARCHATE
 Gravitic Shield - most Abbai units are equipped with Gravitic Shield. Active shield reduces both hit chance and damage of incoming fire. At range 0 fighters are assumed to be able to come close enough to ignore ship shields.
 	Gravitic Shields are powered by separate generator, that can power up a limited number of them (usually not allowing a ship all-around protection unless generator output is boosted).
-Quad Array - 4 separate weapons in a single housing that's prone to overheating. Using more than 2 shots can cause forced shutdown for a turn, to cool down. Number of shots is changed by using alternate firing modes. Defensive fire is always safe. (this is somewhat changed from tabletop arrangement, where a regular critical is rolled instead - with defensive fire too).
+Quad Array - Four separate weapons in a single housing that's prone to overheating. Using more than 2 shots offensively results in one or two 'May Overheat' critical effects the following turn (depending on whether 3 or 4 shots are fired). When this critical is in place, firing weapon again offensively will cause a critical roll at end of turn with the following modifiers; +2 modifier for every shot fired in current turn, and -2 if there is only one ‘May Overheat’ effect.
 Comm Disruptor - weapon reducing target's EW and Initiative for next turn. 
 Particle Impeder - purely defensive weapon, capable of intercepting weapons with "uninterceptable" trait (typically that means Lasers :) ).
 	In addition, it can be boosted by sarificing EW rather than usual Power. Such a boost, in addition to increasing intercept rating of the Impeder, counts as special kind of shielding, reducing hit chance of all incoming weapons (fighter fire included), that can't be flown under and is cumulative with regular shields.
