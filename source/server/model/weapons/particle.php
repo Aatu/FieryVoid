@@ -1269,19 +1269,16 @@
 
 
 			$shotsThisTurn = count($this->getFireOrders($gamedata->turn)); //How many shots were fired this turn?, if so roll critical as before:
-			$overheatLevel = $this->hasCritical("MayOverheat", $gamedata->turn);//Check for criticals from last turn firing. 
-
-				//echo "Value of \$overheatLevel: " . $overheatLevel;			
+			$overheatLevel = $this->hasCritical("MayOverheat", $gamedata->turn);//Check for criticals from last turn firing. 		
 			
 			if(($shotsThisTurn > 0) && ($overheatLevel > 0)){//Check that weapon fired (it should have) and there's at least one 'May Overheat' critical.
 			 $this->critRollMod += $shotsThisTurn * 2; // +2 for every shot fired this turn.
 			 if ($overheatLevel == 1) $this->critRollMod -= 2; // -2 to crit roll if 3 or fewer shots were fired last turn. 
 			 	
-				//echo "Value of \CritMod: " . $this->critRollMod;
 			 // Now roll for possible crits this turn. 
  		     $shooter = $gamedata->getShipById($fireOrder->shooterid);
 			 $crits = array(); 
-			 $crits = $this->testCritical($shooter, $gamedata, $crits);//Added $shooter instead of ship, Fire already defines this.
+			 $crits = $this->testCritical($shooter, $gamedata, $crits);//Added $shooter for ship variable.
 			}
 			
 			//Add any new crits for next turn. 
