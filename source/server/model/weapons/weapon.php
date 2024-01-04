@@ -492,7 +492,7 @@ class Weapon extends ShipSystem
 
         $interceptMod = $this->getInterceptRating($gamedata->turn);
 
-// Commenting out this fragmant as it's is duplicated below, and seemed to be causing intercept degradation to apply twice - DK - 4 Jan 23        
+// Commenting out this fragmant as it's is duplicated below, and seemed to be causing intercept degradation to apply twice - DK - 4 Jan 24        
  /*       if (!($interceptedWeapon->ballistic || $interceptedWeapon->noInterceptDegradation)) {//target is neither ballistic weapon nor has lifted degradation, so apply degradation!
             for ($i = 0; $i < $intercepted->numInterceptors; $i++) {
                 $interceptMod -= 1; //-1 for each already intercepting weapon
