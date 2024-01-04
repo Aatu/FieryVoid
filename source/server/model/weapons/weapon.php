@@ -491,11 +491,13 @@ class Weapon extends ShipSystem
         if ($this->ballisticIntercept && (!($interceptedWeapon->ballistic))) return 0;//can't intercept non-ballistic if weapon can intercept only ballistics!
 
         $interceptMod = $this->getInterceptRating($gamedata->turn);
-        if (!($interceptedWeapon->ballistic || $interceptedWeapon->noInterceptDegradation)) {//target is neither ballistic weapon nor has lifted degradation, so apply degradation!
+
+// Commenting out this fragmant as it's is duplicated below, and seemed to be causing intercept degradation to apply twice - DK - 4 Jan 23        
+ /*       if (!($interceptedWeapon->ballistic || $interceptedWeapon->noInterceptDegradation)) {//target is neither ballistic weapon nor has lifted degradation, so apply degradation!
             for ($i = 0; $i < $intercepted->numInterceptors; $i++) {
                 $interceptMod -= 1; //-1 for each already intercepting weapon
             }
-        }
+        }  */
 
 		if( ($interceptedWeapon->doInterceptDegradation) || (!($interceptedWeapon->ballistic || $interceptedWeapon->noInterceptDegradation)) ) {//target is neither ballistic weapon nor has lifted degradatoin, so apply degradation!
             for ($i = 0; $i < $intercepted->numInterceptors; $i++) {
