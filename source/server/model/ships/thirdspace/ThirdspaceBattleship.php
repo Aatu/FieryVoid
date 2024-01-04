@@ -13,7 +13,7 @@ class ThirdspaceBattleship extends BaseShip{
 	    $this->isd = 'Ancient';
 		$this->factionAge = 4;
 		$this->unofficial = true;
-		$this->canvasSize = 550;							    
+		$this->canvasSize = 650;							    
 	    
 		$this->fighters = array("LCVs" => 6);	
 		
