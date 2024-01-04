@@ -51,6 +51,14 @@ window.HexTargetedWeaponFireAnimation = function () {
         var startPosition = FireAnimationHelper.getShipPositionForFiring(this.shipIconContainer.getByShip(shooter), time, this.movementAnimations, weapon, this.turn);
         var endPosition = window.coordinateConverter.fromHexToGame(new hexagon.Offset(fire.fireOrder.x, fire.fireOrder.y));
 
+		var color;
+
+		if (weapon.noProjectile) { //Some weapon like Spark Field shouldn't have projectiles - DK - 4 Jan 24
+		    color = new THREE.Color((0 / 255, 0 / 255, 0 / 255));
+		} else {
+		    color = new THREE.Color(weapon.animationColor[0] / 255, weapon.animationColor[1] / 255, weapon.animationColor[2] / 255);
+		}
+		
         var hit = fire.fireOrder.shotshit !== 0;
 
         var shot = null;
@@ -65,7 +73,7 @@ window.HexTargetedWeaponFireAnimation = function () {
                     size: 20 * weapon.animationExplosionScale,
                     origin: startPosition,
                     target: endPosition,
-                    color: new THREE.Color(weapon.animationColor[0] / 255, weapon.animationColor[1] / 255, weapon.animationColor[2] / 255),
+                    color: color,
                     hit: hit,
                     damage: 0,
                     time: time
@@ -81,7 +89,7 @@ window.HexTargetedWeaponFireAnimation = function () {
                 size: 60 * weapon.animationExplosionScale,
                 position: endPosition,
                 type: "emp",
-                color: new THREE.Color(weapon.animationColor[0] / 255, weapon.animationColor[1] / 255, weapon.animationColor[2] / 255),
+                color: new THREE.Color(weapon.animationColor[0] / 255, weapon.animationColor[1] / 255, weapon.animationColor[2] / 255), //Always use weapon colour - DK - 4 Jan 24
                 time: time + shot.getDuration()
             });
             this.animations.push(explosion);

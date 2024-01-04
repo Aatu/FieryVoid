@@ -1274,12 +1274,18 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
         public $name = "PakmaraPlasmaWeb";
         public $displayName = "Plasma Web";
 		public $iconPath = "PlasmaWeb.png";
- 	    public $animation = "ball";
+//        public $trailColor = array(0, 0, 0);
+    	public $animation = "ball";
+        public $animationColor = array(75, 250, 90);    	
         public $animationExplosionScale = 0.5;
-        public $animationColor = array(0, 0, 0);   //Don't really want to see a projectile, so let's make it have no colour.
-        public $animationExplosionType = "AoE";        
-        public $explosionColor = array(75, 250, 90);   //Tried to make explosion green, but I don't think this variable actually works...                         
-		
+		private $noProjectile = true;        
+  /*      
+
+	public $animation = "ball";
+	public $animationColor = array(160, 0, 255);
+	public $animationExplosionScale = 2; //covers 2 hexes away from explosion center
+	public $animationExplosionType = "AoE";                             
+	*/	
         public $ballistic = false;
         public $hextarget = true;
         public $hidetarget = false;
@@ -1558,6 +1564,12 @@ public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon){
 								break;
 				}
 				$this->maxDamageArray[$this->firingMode] = $this->maxDamage;
+		}
+
+	public function stripForJson(){
+			$strippedSystem = parent::stripForJson();
+			$strippedSystem->noProjectile = $this->noProjectile;			
+			return $strippedSystem;
 		}
 
 	} //end of class PakmaraPlasmaWeb
