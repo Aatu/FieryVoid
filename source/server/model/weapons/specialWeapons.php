@@ -1440,11 +1440,12 @@ class SparkField extends Weapon implements DefensiveSystem{
 	public $iconPath = "SparkField.png";
 	
 	//let's make animation more or less invisible, and effect very large
-	public $trailColor = array(0, 0, 0);
+//	public $trailColor = array(0, 0, 0);
         public $animation = "ball";
-        public $animationColor = array(0, 0, 0);
+		public $animationColor = array(165, 165, 255);
         public $animationExplosionScale = 2;
-        public $animationExplosionType = "AoE";
+//        public $animationExplosionType = "AoE";
+		private $noProjectile = true;         
         //public $explosionColor = array(165, 165, 255);
         //public $projectilespeed = 20;
         //public $animationWidth = 1;
@@ -1654,6 +1655,13 @@ class SparkField extends Weapon implements DefensiveSystem{
         public function setMaxDamage(){   
 		$this->maxDamage = 7 ;	    
 	}
+	
+	public function stripForJson(){
+			$strippedSystem = parent::stripForJson();
+			$strippedSystem->noProjectile = $this->noProjectile;			
+			return $strippedSystem;
+		}	
+	
 } //endof class SparkField 
 
 
@@ -2801,16 +2809,18 @@ class IonFieldGenerator extends Weapon{
 	public $range = 35;
 	public $loadingtime = 2;
 	
-	public $trailColor = array(30, 170, 255);
+
 	public $animation = "ball";
-	public $animationColor = array(30, 170, 255);
+	public $animationColor = array(160, 0, 255);
 	public $animationExplosionScale = 2; //covers 2 hexes away from explosion center
-	public $animationExplosionType = "AoE";
+
 	/*useless
 	public $explosionColor = array(30, 170, 255);
+	public $animationExplosionType = "AoE";	
 	public $projectilespeed = 12;
 	public $animationWidth = 14;
 	public $trailLength = 10;
+	public $trailColor = array(160, 0, 255);	
 	    */
 	
 	public $firingModes = array(
@@ -4452,51 +4462,52 @@ class VorlonDischargeCannon extends Weapon{
 class PsychicField extends Weapon implements DefensiveSystem{ //Thirdspace weapons that operates similar to Spark Field, but debilitating enemies in range, not damaging them.
         public $name = "PsychicField";
         public $displayName = "Psychic Field";
-	public $iconPath = "PsychicField.png";
-	
+		public $iconPath = "PsychicField.png";
+
 	//let's make animation more or less invisible, and effect very large
-	public $trailColor = array(0, 0, 0); //hide projectile
+//	public $trailColor = array(0, 0, 0);
         public $animation = "ball";
-        public $animationColor = array(0, 0, 0); //hide projectile
+		public $animationColor = array(155, 0, 0);
         public $animationExplosionScale = 2;
-        public $animationExplosionType = "AoE";
+//        public $animationExplosionType = "AoE";
+		private $noProjectile = true;         
         //public $explosionColor = array(165, 165, 255);
         //public $projectilespeed = 20;
         //public $animationWidth = 1;
         //public $trailLength = 1;
 	
-	public $boostable = true;
+		public $boostable = true;
         public $boostEfficiency = 2;
         public $maxBoostLevel = 5;
 	
-	public $output = 0;
-	public $baseOutput = 2;//base output WITH Spark Curtain
-	public $defensiveType = "SparkCurtain"; //needs to be set to recognize as defensive system
+		public $output = 0;
+		public $baseOutput = 2;
+		public $defensiveType = "SparkCurtain"; //needs to be set to recognize as defensive system
       
         public $priority = 2; //should attack very early
 	
         public $loadingtime = 1;
-	public $autoFireOnly = true; //this weapon cannot be fired by player
-	public $doNotIntercept = true; //this weapon is a field, "attacks" are just for technical reason
+		public $autoFireOnly = true; //this weapon cannot be fired by player
+		public $doNotIntercept = true; //this weapon is a field, "attacks" are just for technical reason
         
         public $rangePenalty = 0; //no range penalty, but range itself is limited
         public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals ; not relevant really!
 	
-	public $boostlevel = 0;
+		public $boostlevel = 0;
 	
-	public $repairPriority = 3;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired	
+		public $repairPriority = 3;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired	
 		
-	public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
-	public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
-    	public $firingModes = array( 1 => "Field"); //just a convenient name for firing mode
-	public $hextarget = true;
-	
-	protected $targetList = array(); //weapon will hit units on this list rather than target from firing order; filled by PsychicField handler!
-	
-	
- 	protected $possibleCriticals = array( //no point in range reduced crit; but reduced damage is really nasty for this weapon!
-            16=>"ForcedOfflineOneTurn"
-			);
+		public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+		public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
+	    public $firingModes = array( 1 => "Field"); //just a convenient name for firing mode
+		public $hextarget = true;
+		
+		protected $targetList = array(); //weapon will hit units on this list rather than target from firing order; filled by PsychicField handler!
+		
+		
+	 	protected $possibleCriticals = array( //no point in range reduced crit; but reduced damage is really nasty for this weapon!
+	            16=>"ForcedOfflineOneTurn"
+				);
 	
 	
 	
@@ -4507,9 +4518,6 @@ class PsychicField extends Weapon implements DefensiveSystem{ //Thirdspace weapo
 	
 	    public function setSystemDataWindow($turn){
 		    $boostlevel = $this->getBoostLevel($turn);
-	//	    $this->minDamage = 2-$boostlevel;
-	//	    $this->maxDamage = 7-$boostlevel;
-	//	    $this->minDamage = max(0,$this->minDamage);
 		    $this->animationExplosionScale = $this->getAoE($turn);
 		    $this->range = $this->getAoE($turn);
 		      parent::setSystemDataWindow($turn);  
@@ -4657,6 +4665,12 @@ class PsychicField extends Weapon implements DefensiveSystem{ //Thirdspace weapo
 	public function getDamage($fireOrder){ return  0;   }
 	public function setMinDamage(){   $this->minDamage =  0 ;      }
 	public function setMaxDamage(){   $this->maxDamage =  0 ;      }
+
+	public function stripForJson(){
+			$strippedSystem = parent::stripForJson();
+			$strippedSystem->noProjectile = $this->noProjectile;			
+			return $strippedSystem;
+		}
 	
 } //endof class PsychicField 
 
