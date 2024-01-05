@@ -4000,27 +4000,29 @@ class AmmoMissileTemplate{
 	public $priorityAF = 1;
 	public $noOverkill = false;
 	public $useOEW = false;
+	//Variable for Stealth Missile		
 	public $hidetarget = false;
-	public $intercept = 0;
-	public $ballisticIntercept = false;
-
     //Adding Pulse variables for Starburst missiles	
 	public $maxpulses = 0;
 	public $rof = 0;
 	public $useDie = 0; //die used for base number of hits
 	public $fixedBonusPulses = 0;//for weapons doing dX+Y pulse	
-	
-    public $calledShotMod = -8;    //Variable for Multiwarhead Missile.  Normal called shot modifier is -8.
-    
-    public $hextarget = false; //Variable for Jammer Missile.
-    public $animation = "trail";    
-	    
-
-//Extra variables for KK Missile
+	//Variables for Multiwarhead Missile.  Normal called shot modifier is -8.	
+    public $calledShotMod = -8; 
+	//Variables for Interceptor Missile.
+	public $intercept = 0;
+	public $ballisticIntercept = false;       
+	//Variables for Jammer Missile.    
+    public $hextarget = false; 
+    public $animation = "trail";
+    public $animationExplosionScale = 0; //0 means it will be set automatically by standard constructor, based on average damage yield
+	public $uninterceptable = false; 
+	public $doNotIntercept = false;            
+	//Variables for KK Missile
 	public $specialRangeCalculation = false;
 	public $rangePenalty = 0;
 	public $noLockPenalty = false;		
-//Extra variable for HARM Missile	
+	//Variable for HARM Missile	
 	public $specialHitChanceCalculation = false;		
 	
     function __construct(){}
@@ -4471,9 +4473,10 @@ class AmmoMissileJ extends AmmoMissileTemplate{
     
     public $hextarget = true;
     public $animation = "ball";
+    public $animationExplosionScale = 2;   
 
-//		public $uninterceptable = true; 
-//		public $doNotIntercept = true;
+		public $uninterceptable = true; 
+		public $doNotIntercept = true;
 		public $noLockPenalty = false;	               	
     
 	private static $alreadyJammed = array();     	

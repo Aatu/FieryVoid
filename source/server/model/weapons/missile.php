@@ -1079,8 +1079,14 @@ class AmmoMissileRackS extends Weapon{
 //Extra variables for Jammer missile	
     public $hextarget = false;
    	public $hextargetArray = array();
-    public $animationArray = array();  	
-	
+    public $animationArray = array();
+    public $animationExplosionScale = 0; //0 means it will be set automatically by standard constructor, based on average damage yield
+    public $animationExplosionScaleArray = array();
+	public $uninterceptable = false;
+	public $uninterceptableArray = array();	 
+	public $doNotIntercept = false;
+	public $doNotInterceptArray = array();	             	
+//    public $animationColorArray = array();	
 	
     /*ATYPICAL constructor: takes ammo magazine class and (optionally) information about being fitted to stable platform*/
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base=false)
@@ -1169,7 +1175,9 @@ class AmmoMissileRackS extends Weapon{
 		$this->ballisticInterceptArray = array();	    		
 		$this->hextargetArray = array();//For Jammer missile
 		$this->animationArray = array();											
-		
+		$this->animationExplosionScaleArray = array();
+		$this->uninterceptableArray	= array();
+		$this->doNotInterceptArray	= array();						
 		//add data for all modes to arrays
 		$currMode = 0;
 		foreach ($this->ammoClassesArray as $currAmmo){
@@ -1222,7 +1230,9 @@ class AmmoMissileRackS extends Weapon{
 				$this->interceptArray[$currMode] = $currAmmo->intercept;//Adding Intercept variables for Interceptor missiles	
 				$this->ballisticInterceptArray[$currMode] = $currAmmo->ballisticIntercept;
 				$this->hextargetArray[$currMode] = $currAmmo->hextarget;//For Jammer missile
-				$this->animationArray[$currMode] = $currAmmo->animation;												    							
+				$this->animationArray[$currMode] = $currAmmo->animation;
+				$this->uninterceptableArray[$currMode] = $currAmmo->uninterceptable;				
+				$this->doNotInterceptArray[$currMode] = $currAmmo->doNotIntercept;											
 			}
 		}
 			
@@ -1267,7 +1277,10 @@ class AmmoMissileRackS extends Weapon{
 		$strippedSystem->interceptArray = $this->interceptArray;//Adding Intercept nad ballisticIntercept variables for Interceptor missiles	
 		$strippedSystem->ballisticInterceptArray = $this->ballisticInterceptArray;
 		$strippedSystem->hextargetArray = $this->hextargetArray;//For Jammer missile
-		$strippedSystem->animationArray = $this->animationArray;												
+		$strippedSystem->animationArray = $this->animationArray;
+		$strippedSystem->animationExplosionScaleArray = $this->animationExplosionScaleArray;
+		$strippedSystem->uninterceptableArray = $this->uninterceptableArray;		
+		$strippedSystem->doNotInterceptArray = $this->doNotInterceptArray;		
 		return $strippedSystem;
 	} 
 	
