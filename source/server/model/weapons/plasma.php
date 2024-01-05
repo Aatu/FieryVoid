@@ -1278,7 +1278,7 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
     	public $animation = "ball";
         public $animationColor = array(75, 250, 90);    	
         public $animationExplosionScale = 0.5;
-		private $noProjectile = true;        
+		public $noProjectile = true; //Marker for front end to make projectile invisible for weapons that shouldn't have one.  
   /*      
 
 	public $animation = "ball";
@@ -1566,11 +1566,6 @@ public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon){
 				$this->maxDamageArray[$this->firingMode] = $this->maxDamage;
 		}
 
-	public function stripForJson(){
-			$strippedSystem = parent::stripForJson();
-			$strippedSystem->noProjectile = $this->noProjectile;			
-			return $strippedSystem;
-		}
 
 	} //end of class PakmaraPlasmaWeb
 

@@ -1437,15 +1437,15 @@ class SparkField extends Weapon implements DefensiveSystem{
     */
         public $name = "SparkField";
         public $displayName = "Spark Field";
-	public $iconPath = "SparkField.png";
+		public $iconPath = "SparkField.png";
 	
 	//let's make animation more or less invisible, and effect very large
-//	public $trailColor = array(0, 0, 0);
+//		public $trailColor = array(0, 0, 0);
         public $animation = "ball";
 		public $animationColor = array(165, 165, 255);
         public $animationExplosionScale = 2;
-//        public $animationExplosionType = "AoE";
-		private $noProjectile = true;         
+//      public $animationExplosionType = "AoE";
+		public $noProjectile = true; //Marker for front end to make projectile invisible for weapons that shouldn't have one.          
         //public $explosionColor = array(165, 165, 255);
         //public $projectilespeed = 20;
         //public $animationWidth = 1;
@@ -1654,13 +1654,7 @@ class SparkField extends Weapon implements DefensiveSystem{
 	}
         public function setMaxDamage(){   
 		$this->maxDamage = 7 ;	    
-	}
-	
-	public function stripForJson(){
-			$strippedSystem = parent::stripForJson();
-			$strippedSystem->noProjectile = $this->noProjectile;			
-			return $strippedSystem;
-		}	
+	}	
 	
 } //endof class SparkField 
 
@@ -4468,9 +4462,9 @@ class PsychicField extends Weapon implements DefensiveSystem{ //Thirdspace weapo
 //	public $trailColor = array(0, 0, 0);
         public $animation = "ball";
 		public $animationColor = array(155, 0, 0);
-        public $animationExplosionScale = 2;
+        public $animationExplosionScale = 5;
 //        public $animationExplosionType = "AoE";
-		private $noProjectile = true;         
+		public $noProjectile = true; //Marker for front end to make projectile invisible for weapons that shouldn't have one.         
         //public $explosionColor = array(165, 165, 255);
         //public $projectilespeed = 20;
         //public $animationWidth = 1;
@@ -4665,12 +4659,6 @@ class PsychicField extends Weapon implements DefensiveSystem{ //Thirdspace weapo
 	public function getDamage($fireOrder){ return  0;   }
 	public function setMinDamage(){   $this->minDamage =  0 ;      }
 	public function setMaxDamage(){   $this->maxDamage =  0 ;      }
-
-	public function stripForJson(){
-			$strippedSystem = parent::stripForJson();
-			$strippedSystem->noProjectile = $this->noProjectile;			
-			return $strippedSystem;
-		}
 	
 } //endof class PsychicField 
 

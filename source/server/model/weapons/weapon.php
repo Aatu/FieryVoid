@@ -45,6 +45,7 @@ class Weapon extends ShipSystem
     public $animationColorArray = array();
     public $animationExplosionScale = 0; //0 means it will be set automatically by standard constructor, based on average damage yield
     public $animationExplosionScaleArray = array();
+	public $noProjectile = false; //Marker for front end to make projectile invisible for weapons that shouldn't have one.   
 
 	public $doubleRangeIfNoLock = false; //in case of no lock-on default procedure is to double range penalty; some weapons (notably most Antimatter ones) double range itself instead
     public $rangePenalty = 0;
@@ -284,7 +285,9 @@ class Weapon extends ShipSystem
 			$strippedSystem->extraoverloadshots = $this->extraoverloadshots;
 			$strippedSystem->extraoverloadshotsArray = $this->extraoverloadshotsArray;
 			$strippedSystem->fireOrders = $this->fireOrders;
-			$strippedSystem->canModesIntercept = $this->canModesIntercept;//For weapons which intercept not using their default mode e.g. interceptor missiles - DK			
+			$strippedSystem->canModesIntercept = $this->canModesIntercept;//For weapons which intercept not using their default mode e.g. interceptor missiles - DK
+			$strippedSystem->noProjectile = $this->noProjectile;
+			
 			if(isset($this->ammunition)){
 				$strippedSystem->ammunition = $this->ammunition;
 				$strippedSystem->data = $this->data;
