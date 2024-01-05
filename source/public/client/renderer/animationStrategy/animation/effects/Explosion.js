@@ -195,7 +195,7 @@ window.Explosion = function () {
         var activationTime = this.time;
         var fadeOutAt = activationTime;
 
-        particle.setSize(size * 0.9).setSizeChange(0.0039 * this.size).setOpacity(Math.random() * 0.2 + 0.6).setFadeIn(activationTime, 0.1).setFadeOut(fadeOutAt, (Math.random() * 200 + 800) / this.speed).setColor(getCoreColor()).setPosition({
+        particle.setSize(size * 0.9).setSizeChange(0.0039 * this.size).setOpacity(Math.random() * 0.1 + 0.3).setFadeIn(activationTime, 0.1).setFadeOut(fadeOutAt, (Math.random() * 200 + 800) / this.speed).setColor(getCoreColor()).setPosition({
             x: this.position.x, // + Math.floor(Math.random()*radius/10)-radius/5,
             y: this.position.y // + Math.floor(Math.random()*radius/10)-radius/5,
         }).setAngle(45).setTexture(texture).setVelocity(this.movement).setAngle(Math.floor(Math.random() * 360)).setAngleChange(5 * this.speed).setActivationTime(activationTime);
