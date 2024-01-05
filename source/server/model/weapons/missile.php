@@ -1231,6 +1231,7 @@ class AmmoMissileRackS extends Weapon{
 				$this->ballisticInterceptArray[$currMode] = $currAmmo->ballisticIntercept;
 				$this->hextargetArray[$currMode] = $currAmmo->hextarget;//For Jammer missile
 				$this->animationArray[$currMode] = $currAmmo->animation;
+				$this->animationExplosionScaleArray[$currMode] = $currAmmo->animationExplosionScale;				
 				$this->uninterceptableArray[$currMode] = $currAmmo->uninterceptable;				
 				$this->doNotInterceptArray[$currMode] = $currAmmo->doNotIntercept;											
 			}
