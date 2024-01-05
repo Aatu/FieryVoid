@@ -4475,9 +4475,9 @@ class AmmoMissileJ extends AmmoMissileTemplate{
     public $animation = "ball";
     public $animationExplosionScale = 2;   
 
-		public $uninterceptable = true; 
-		public $doNotIntercept = true;
-		public $noLockPenalty = false;	               	
+	public $uninterceptable = true; 
+	public $doNotIntercept = true;
+	public $noLockPenalty = false;	               	
     
 	private static $alreadyJammed = array();     	
 
