@@ -4452,56 +4452,54 @@ class VorlonDischargeCannon extends Weapon{
 
 }//endof class VorlonDischargeCannon
 
-
 class PsychicField extends Weapon implements DefensiveSystem{ //Thirdspace weapons that operates similar to Spark Field, but debilitating enemies in range, not damaging them.
         public $name = "PsychicField";
         public $displayName = "Psychic Field";
-		public $iconPath = "PsychicField.png";
-
+	public $iconPath = "PsychicField.png";
+	
 	//let's make animation more or less invisible, and effect very large
-//	public $trailColor = array(0, 0, 0);
+	public $trailColor = array(0, 0, 0); //hide projectile
         public $animation = "ball";
-		public $animationColor = array(155, 0, 0);
-        public $animationExplosionScale = 5;
-//        public $animationExplosionType = "AoE";
-		public $noProjectile = true; //Marker for front end to make projectile invisible for weapons that shouldn't have one.         
+        public $animationColor = array(0, 0, 0); //hide projectile
+        public $animationExplosionScale = 2;
+        public $animationExplosionType = "AoE";
         //public $explosionColor = array(165, 165, 255);
         //public $projectilespeed = 20;
         //public $animationWidth = 1;
         //public $trailLength = 1;
 	
-		public $boostable = true;
+	public $boostable = true;
         public $boostEfficiency = 2;
         public $maxBoostLevel = 5;
 	
-		public $output = 0;
-		public $baseOutput = 2;
-		public $defensiveType = "SparkCurtain"; //needs to be set to recognize as defensive system
+	public $output = 0;
+	public $baseOutput = 2;//base output WITH Spark Curtain
+	public $defensiveType = "SparkCurtain"; //needs to be set to recognize as defensive system
       
         public $priority = 2; //should attack very early
 	
         public $loadingtime = 1;
-		public $autoFireOnly = true; //this weapon cannot be fired by player
-		public $doNotIntercept = true; //this weapon is a field, "attacks" are just for technical reason
+	public $autoFireOnly = true; //this weapon cannot be fired by player
+	public $doNotIntercept = true; //this weapon is a field, "attacks" are just for technical reason
         
         public $rangePenalty = 0; //no range penalty, but range itself is limited
         public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals ; not relevant really!
 	
-		public $boostlevel = 0;
+	public $boostlevel = 0;
 	
-		public $repairPriority = 3;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired	
+	public $repairPriority = 3;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired	
 		
-		public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
-		public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
-	    public $firingModes = array( 1 => "Field"); //just a convenient name for firing mode
-		public $hextarget = true;
-		
-		protected $targetList = array(); //weapon will hit units on this list rather than target from firing order; filled by PsychicField handler!
-		
-		
-	 	protected $possibleCriticals = array( //no point in range reduced crit; but reduced damage is really nasty for this weapon!
-	            16=>"ForcedOfflineOneTurn"
-				);
+	public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+	public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
+    	public $firingModes = array( 1 => "Field"); //just a convenient name for firing mode
+	public $hextarget = true;
+	
+	protected $targetList = array(); //weapon will hit units on this list rather than target from firing order; filled by PsychicField handler!
+	
+	
+ 	protected $possibleCriticals = array( //no point in range reduced crit; but reduced damage is really nasty for this weapon!
+            16=>"ForcedOfflineOneTurn"
+			);
 	
 	
 	
@@ -4512,6 +4510,9 @@ class PsychicField extends Weapon implements DefensiveSystem{ //Thirdspace weapo
 	
 	    public function setSystemDataWindow($turn){
 		    $boostlevel = $this->getBoostLevel($turn);
+	//	    $this->minDamage = 2-$boostlevel;
+	//	    $this->maxDamage = 7-$boostlevel;
+	//	    $this->minDamage = max(0,$this->minDamage);
 		    $this->animationExplosionScale = $this->getAoE($turn);
 		    $this->range = $this->getAoE($turn);
 		      parent::setSystemDataWindow($turn);  
@@ -4663,8 +4664,6 @@ class PsychicField extends Weapon implements DefensiveSystem{ //Thirdspace weapo
 } //endof class PsychicField 
 
 
-
-
 /*handles creation of firing orders for Psychic Fields*/
 class PsychicFieldHandler{
 	public $name = "PsychicFieldHandler";
@@ -4744,7 +4743,7 @@ class PsychicFieldHandler{
 				$alreadyTargeted[] = $target->id; //add to list of already targeted units
 				$field->addTarget($target);
 			}
-		} //endof foreach sychicField
+		} //endof foreach PsychicField
 	}//endof function createFiringOrders
 	
 }//endof class PsychicFieldHandler
@@ -5023,45 +5022,38 @@ class PsionicLance extends Raking{
         }  
    }//end of Psionic Lance
 
+
 class PsionicConcentrator extends Weapon{
-    /*Psionic Concentrator - Thirdspace weapon*/
 	public $name = "PsionicConcentrator";
 	public $displayName = "Psionic Concentrator";
 	public $iconPath = "PsionicConcentrator.png";
 	
 	public $animation = "bolt";
-	    public $animationArray = array( 1=>"bolt", 2=>"bolt");
+//	public $animationArray = array( 1=>"bolt", 2=>"bolt", 3=>"bolt", 4=>"bolt");
     public $animationColor = array(128, 0, 0);
-	/*
-	public $trailColor = array(30, 170, 255);	
-	public $animationWidth = 4;
-	public $animationWidthArray = array(1=>4, 2=>5, 3=>6, 4=>7, 5=>8, 6=>10);
-	public $animationWidth2 = 0.3;
-        public $animationExplosionScale = 0.25;
-	public $animationExplosionScaleArray = array(1=>0.25, 2=>0.35, 3=>0.45, 4=>0.55, 5=>0.70, 6=>0.85);
-      */
-        public $loadingtime = 1;
+
+    public $loadingtime = 1;
 	public $intercept = 2; //intercept rating -1     
 	
 
-    public $priority = 6;
-    public $priorityArray = array(1=>5, 2=>6);
+    public $priority = 4;
+    public $priorityArray = array(1=>4, 2=>5, 3=>6, 4=>7);
 
 	public $firingMode = 1;	
             public $firingModes = array(
-                1 => "Single",
-                2 => "Double"
+                1 => "1Single",
+                2 => "2Double",
+                3 => "3Triple",
+                4 => "4Quad"                
             );
 
-    public $fireControl = array(6, 4, 2); // fighters, <mediums, <capitals 
-    public $fireControlArray = array( 1=>array(6, 4, 2), 2=>array(0, 4, 6));
+    public $fireControl = array(7, 3, 2); // fighters, <mediums, <capitals 
+    public $fireControlArray = array( 1=>array(6, 4, 3), 2=>array(2, 4, 4), 3=>array(0, 4, 4), 4=>array(null, 4, 5));
 
-        public $rangePenalty = 1;
-        public $rangePenaltyArray = array( 1=>1, 2=>0.66); //Standard and Raking modes
-
-              
-	public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
-  	public $damageTypeArray = array(1=>"Standard", 2=>"Standard");	    
+    public $rangePenalty = 1;
+    public $rangePenaltyArray = array( 1=>0.5, 2=>1, 3=>2, 4=>4);
+            
+	public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!   
 	public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!    
 	
 	public $isCombined = false; //is being combined with other weapon
@@ -5073,8 +5065,7 @@ class PsionicConcentrator extends Weapon{
 	
 	public function setSystemDataWindow($turn){
 		      parent::setSystemDataWindow($turn);  
-		      $this->data["Special"] = "Two Psionic Concentrators can be combined into a single standard shot in Double mode, with -3.33 per hex range penalty, 0/20/30 Fire Control and an additional 1d10+4 damage.";	      
-		      $this->data["Special"] .= "<br>If You allocate multiple Concentrators to the same Double mode of fire at the same target, they will be combined.";		       
+		      $this->data["Special"] = "Psionic Concentrators can be fired individually, or up to four concentrators can be combined for more powerful attacks with shorter range.";	      		      $this->data["Special"] .= "<br>If You allocate multiple Concentrators to the same mode of fire at the same target, they will be combined.";   		       
 		      $this->data["Special"] .= "<br>If not enough weapons are allocated to be combined, weapons will be fired in Single mode instead.";  		  
 		      $this->data["Special"] .= "<br>Has +1 modifier to critical hits, and +2 to fighter dropout rolls.";
 	    }	
@@ -5156,23 +5147,23 @@ class PsionicConcentrator extends Weapon{
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 	
-	
     public function getDamage($fireOrder){
-		return Dice::d(10, 1+$this->firingMode)+($this->firingMode*4); //2d10+4 +1d10+4 in Double mode.
+		return Dice::d(6, 1+$this->firingMode)+($this->firingMode*3)+3; 
 	}
 	public function setMinDamage(){    
-		$this->minDamage = 1*(1+$this->firingMode)+($this->firingMode*4); //6 and 11
+		$this->minDamage = 1*(1+$this->firingMode)+($this->firingMode*3)+3;
 		$this->minDamageArray[$this->firingMode] = $this->minDamage; 
 	}
 	public function setMaxDamage(){
-		$this->maxDamage = 10*(1+$this->firingMode)+($this->firingMode*4); //24 and 38
+		$this->maxDamage = 6*(1+$this->firingMode)+($this->firingMode*3)+3;
 		$this->maxDamageArray[$this->firingMode] = $this->maxDamage;  
 	}
 } //endof class PsionicConcentrator
 
+
+//Kor-Lyan system, used to designate where attached Proximity Laser shots originates by targeting a hex and automatically hitting.
 class ProximityLaserLauncher extends Weapon{
-	/*Kor-Lyan system, used to designate where attached Proximity Laser shots originates by targeting a hex and automatically hitting.
-	*/
+
 		public $name = "ProximityLaserLauncher";
 		public $displayName = "Proximity Launcher";
 		public $iconPath = "ProximityLaserLauncher.png";
