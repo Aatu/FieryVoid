@@ -562,6 +562,7 @@ class AdvancedSingularityDrive extends Reactor{
 	provides fixed power regardless of systems;
 	techical implementation: count as Power minus power required by all systems enabled
 */	
+    public $displayName = "Advanced Singularity Reactor";
     public $iconPath = "AdvancedSingularityDrive.png";
     
 	protected $possibleCriticals = array( //different set of criticals than standard Reactor
@@ -578,7 +579,8 @@ class AdvancedSingularityDrive extends Reactor{
 	public function setSystemDataWindow($turn){
 		$this->data["Output"] = $this->output;
 		parent::setSystemDataWindow($turn);     
-		$this->data["Special"] .= "<br>Advanced Mag-Gravitic Reactor: provides fixed total power, regardless of destroyed systems.";
+		$this->data["Special"] .= "<br>Advanced Singularity Reactor: provides fixed total power, regardless of destroyed systems.";
+		$this->data["Special"] .= "<br>The power of the void, harnessed to their will...";		
 	}	
 	
 }//endof AdvancedSingularityDrive		
@@ -888,11 +890,11 @@ class Scanner extends ShipSystem implements SpecialAbility{ //on its own Scanner
 		}else{
 			$this->data["Special"] .= '<br>';
 		}
-		$this->data["Special"] .= 'You can feel them, reaching from the Void...';
 		$this->data["Special"] .= '<br>Ignores enemy Jammers, BDEW, SDEW and DIST.';//not that of advanced races
 		$this->data["Special"] .= "<br>Also ignores any defensive systems lowering enemy profile (shields, EWeb...)."; //not that of advanced races
 		$this->data["Special"] .= "<br>All of the above work as usual if operated by Ancient races.";
-		$this->data["Special"] .= "<br>Can only be boosted twice.";	 
+		$this->data["Special"] .= "<br>Can only be boosted twice.";	
+		$this->data["Special"] .= 'You can feel them, reaching into your mind...';		 
 	}	
 		
 	/*note: StarWarsSensors mark in itself doesn't do anything beyond being recognizable for ship description function
@@ -2963,7 +2965,7 @@ class ThirdspaceSelfRepair extends SelfRepair{
 
     public $boostable = true;
     public $maxBoostLevel = 5;
-    public $boostEfficiency = 5; 
+    public $boostEfficiency = 4; 
 	
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);  

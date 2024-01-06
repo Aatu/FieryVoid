@@ -331,7 +331,7 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
                 $maxhealth = 9;
             }
             if ( $powerReq == 0 ){
-                $powerReq = 5;
+                $powerReq = 6;
             }
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }	
