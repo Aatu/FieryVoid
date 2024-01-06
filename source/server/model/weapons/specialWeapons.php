@@ -4584,7 +4584,7 @@ class PsychicField extends Weapon implements DefensiveSystem{ //Thirdspace weapo
 		$effectCrit = $effectIni +2;
 		$effectIni5 = $effectIni * 5;
 		$effecttohit5 = $effecttohit * 5;			
-		$fireOrder->pubnotes .= "<br> Initiative and Offensive Bonus reduced for fighters, and non-Thirdspace ships suffer potential disruption.";
+		$fireOrder->pubnotes .= "<br> Enemy ships have Initiative reduced, and suffer a to hit penalty next turn or a potential Critical.  Initiative and Offensive Bonus reduced for enemy fighters.";
 						
 		if ($system->advancedArmor){		
 			$effectIni = ceil($effectIni/2);  	//Other Ancients are somewhat resistant to pyschic attack from Thirdspace Aliens, 50% effect.	
