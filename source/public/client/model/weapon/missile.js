@@ -350,7 +350,7 @@ AmmoMissileRackF.prototype.constructor =  AmmoMissileRackF;
 AmmoMissileRackF.prototype.canWeaponInterceptAtAll = function (weapon) {
   var canIntercept = false;
 
-		if (weapon.fireControl[1] == null) { //To stop F-Racks being able to manually intercept after firing Long Range shot.
+		if (weapon.fireControl[1] == null) { //To stop F-Racks being able to manually intercept after firing Long Range shot.  Technically other modes coul have null FC1, but by the time you get to Firing Phase, F-Rack will default to Basic ammo (which should NOT have null FC unless fired LR last turn).
 		  return false;
 		}     
   // Check if weapon intercept rating is greater than 0
@@ -428,7 +428,7 @@ AmmoMissileRackF.prototype.checkIsInRangeFRack = function (shooter, target, weap
                         };        	
 			var targetPosition = new hexagon.Offset(hexpos.x, hexpos.y);
 			var distance = shipManager.getShipPosition(shooter).distanceTo(targetPosition);        
-		}else{
+		}else{//Normal method
 			var distance = mathlib.getDistanceBetweenShipsInHex(shooter, target).toFixed(2);			
 		}
 		
