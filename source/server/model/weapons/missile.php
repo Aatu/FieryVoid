@@ -1086,7 +1086,7 @@ class AmmoMissileRackS extends Weapon{
 	public $uninterceptableArray = array();	 
 	public $doNotIntercept = false;
 	public $doNotInterceptArray = array();	             	
-//    public $animationColorArray = array();	
+//    public $animationColorArray = array();//Not added yet.	
 	
     /*ATYPICAL constructor: takes ammo magazine class and (optionally) information about being fitted to stable platform*/
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base=false)
@@ -1954,7 +1954,8 @@ class AmmoMissileRackF extends AmmoMissileRackS {
         public function setSystemDataWindow($turn){	
 		$this->recalculateFireControl(); //necessary for correct  data outside of firing.	
 		parent::setSystemDataWindow($turn);	
-			$this->data["Special"] .= '<br>When fully loaded, can fire Normal mode (with 20 hex range before modifiers), or Long Range (with +15 hexes to normal range, but reduced Fire Control). ';
+			$this->data["Special"] .= '<br>When fully loaded, can fire Normal mode (with 20 hex range before modifiers), or Long Range (with +15 hexes to normal range, but reduced Fire Control).';
+			$this->data["Special"] .= '<br>NOTE - Weapon will select mode automatically based on the range of your selected target.';			
 			$this->data["Special"] .= '<br>After one turn loading, can fire in Rapid mode (with reduced range and Fire Control) - but NOT after using Long Range mode in previous turn.';
 		}
 
@@ -2089,7 +2090,7 @@ class AmmoMissileRackF extends AmmoMissileRackS {
 	
 			$nullFC = array(null, null, null); //I need this method if there's ammo equipped.
 			$this->basicFC = $nullFC; 
-	
+		
 		}					
 		//and immediately delete notes themselves, they're no longer needed (this will not touch the database, just memory!)
 //		$this->recalculateFireControl(); //necessary for the variable to affect actual firing		
