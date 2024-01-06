@@ -321,7 +321,7 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
         
         public $boostable = true;
         public $boostEfficiency = 2;
-        public $maxBoostLevel = 3;  
+        public $maxBoostLevel = 2;  
         
 		public $repairPriority = 5;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired                 
         

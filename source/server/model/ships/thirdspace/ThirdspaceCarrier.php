@@ -4,7 +4,7 @@ class ThirdspaceCarrier extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 5900;
+		$this->pointCost = 5500;
 		$this->faction = "Thirdspace";
         $this->phpclass = "ThirdspaceCarrier";
         $this->imagePath = "img/ships/ThirdspaceBattleship.png";
@@ -36,7 +36,7 @@ class ThirdspaceCarrier extends BaseShip{
 		/*Thirdspace use their own enhancement set */		
 		Enhancements::nonstandardEnhancementSet($this, 'ThirdspaceShip');			       
         
-        $this->addPrimarySystem(new AdvancedSingularityDrive(8, 50, 0, 152+10+4));
+        $this->addPrimarySystem(new AdvancedSingularityDrive(8, 50, 0, 124+10+4));
         $this->addPrimarySystem(new ThirdspaceCnC(8, 36, 0, 0));
         $scanner = new Scanner(7, 36, 10, 14);
 		$scanner->markThirdspace();
@@ -47,7 +47,7 @@ class ThirdspaceCarrier extends BaseShip{
 		$this->addPrimarySystem(new JumpEngine(6, 24, 4, 5));//Presumably have access to hyperspace, or possess some other form of FTL travel that this system represents.          		  		
       
 		$projection = new ThirdspaceShieldProjection(2, 120, 120, 330, 30, 'F');//: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R
-		$projector = new ThirdspaceShieldProjector(6, 24, 5, 3, 330, 30, 'F'); //: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R 
+		$projector = new ThirdspaceShieldProjector(6, 24, 4, 3, 330, 30, 'F'); //: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R 
 		$projection->addProjector($projector);
 		$this->addFrontSystem($projector);		
 		$this->addFrontSystem($projection);
@@ -66,7 +66,7 @@ class ThirdspaceCarrier extends BaseShip{
 			
 		
 		$projection = new ThirdspaceShieldProjection(2, 100, 100, 0, 360, 'C');//: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R
-		$projector = new ThirdspaceShieldProjector(6, 24, 5, 3, 0, 360, 'C'); //: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R 
+		$projector = new ThirdspaceShieldProjector(6, 24, 4, 3, 0, 360, 'C'); //: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R 
 		$projection->addProjector($projector);
 		$this->addAftSystem($projector);
 		$this->addAftSystem($projection);	
@@ -83,7 +83,7 @@ class ThirdspaceCarrier extends BaseShip{
        
        
         $projection = new ThirdspaceShieldProjection(2, 120, 120, 210, 330, 'L');//: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R
-		$projector = new ThirdspaceShieldProjector(6, 24, 5, 3, 210, 330, 'L'); //: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R 
+		$projector = new ThirdspaceShieldProjector(6, 24, 4, 3, 210, 330, 'L'); //: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R 
 		$projection->addProjector($projector);
 		$this->addLeftSystem($projector);		
 		$this->addLeftSystem($projection);
@@ -105,7 +105,7 @@ class ThirdspaceCarrier extends BaseShip{
             
             
         $projection = new ThirdspaceShieldProjection(2, 120, 120, 30, 150, 'R');//: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R
-		$projector = new ThirdspaceShieldProjector(6, 24, 5, 3, 30, 150, 'R'); //: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R 
+		$projector = new ThirdspaceShieldProjector(6, 24, 4, 3, 30, 150, 'R'); //: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R 
 		$projection->addProjector($projector);
 		$this->addRightSystem($projector);		
 		$this->addRightSystem($projection);
@@ -138,10 +138,10 @@ class ThirdspaceCarrier extends BaseShip{
 				9 => "Structure",
 				11 => "Psychic Field",
 				12 => "Self Repair",
-				14 => "Scanner",
+				14 => "Thirdspace Sensors",
 				16 => "Engine",
 				17 => "Jump Engine",
-				19 => "Reactor",
+				19 => "Advanced Singularity Reactor",
 				20 => "C&C",
 			),
 			1=> array( //Fwd

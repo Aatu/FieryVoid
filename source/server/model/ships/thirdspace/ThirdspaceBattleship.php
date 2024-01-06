@@ -13,7 +13,7 @@ class ThirdspaceBattleship extends BaseShip{
 	    $this->isd = 'Ancient';
 		$this->factionAge = 4;
 		$this->unofficial = true;
-		$this->canvasSize = 600;							    
+		$this->canvasSize = 650;							    
 	    
 		$this->fighters = array("LCVs" => 6);	
 		
@@ -34,9 +34,9 @@ class ThirdspaceBattleship extends BaseShip{
 		/*Thirdspace use their own enhancement set */		
 		Enhancements::nonstandardEnhancementSet($this, 'ThirdspaceShip');				     
         
-        $this->addPrimarySystem(new AdvancedSingularityDrive(8, 50, 0, 156+8+4));
+        $this->addPrimarySystem(new AdvancedSingularityDrive(8, 50, 0, 154+10+4));
         $this->addPrimarySystem(new ThirdspaceCnC(8, 36, 0, 0));
-        $scanner = new Scanner(7, 24, 8, 15);
+        $scanner = new Scanner(7, 24, 10, 15);
 		$scanner->markThirdspace();
 		$this->addPrimarySystem($scanner);	        
         $this->addPrimarySystem(new Engine(7, 36, 0, 22, 3));

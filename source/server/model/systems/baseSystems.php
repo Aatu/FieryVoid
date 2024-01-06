@@ -894,7 +894,7 @@ class Scanner extends ShipSystem implements SpecialAbility{ //on its own Scanner
 		$this->data["Special"] .= "<br>Also ignores any defensive systems lowering enemy profile (shields, EWeb...)."; //not that of advanced races
 		$this->data["Special"] .= "<br>All of the above work as usual if operated by Ancient races.";
 		$this->data["Special"] .= "<br>Can only be boosted twice.";	
-		$this->data["Special"] .= "'You can feel them, reaching into your mind...'";		 
+		$this->data["Special"] .= "<br>'You can feel them, reaching into your mind...'";		 
 	}	
 		
 	/*note: StarWarsSensors mark in itself doesn't do anything beyond being recognizable for ship description function
