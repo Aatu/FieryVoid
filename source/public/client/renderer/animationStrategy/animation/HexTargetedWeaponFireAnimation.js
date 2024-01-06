@@ -50,9 +50,15 @@ window.HexTargetedWeaponFireAnimation = function () {
         var shooter = fire.shooter;
         var startPosition = FireAnimationHelper.getShipPositionForFiring(this.shipIconContainer.getByShip(shooter), time, this.movementAnimations, weapon, this.turn);
         var endPosition = window.coordinateConverter.fromHexToGame(new hexagon.Offset(fire.fireOrder.x, fire.fireOrder.y));
-
-		var color;
-
+		
+        var modeIteration = fire.fireOrder.firingMode; //change weapons data to reflect mode actually used - DK - 6 Jan 24
+            if(modeIteration != weapon.firingMode){
+                while(modeIteration != weapon.firingMode){ //will loop until correct mode is found
+                weapon.changeFiringMode();
+                }
+            }
+            
+		var color;		
 		if (weapon.noProjectile) { //Some weapon like Spark Field shouldn't have projectiles - DK - 4 Jan 24
 		    color = new THREE.Color((0 / 255, 0 / 255, 0 / 255));
 		} else {
