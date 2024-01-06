@@ -4452,38 +4452,33 @@ class VorlonDischargeCannon extends Weapon{
 
 }//endof class VorlonDischargeCannon
 
-class PsychicField extends Weapon implements DefensiveSystem{ //Thirdspace weapons that operates similar to Spark Field, but debilitating enemies in range, not damaging them.
-        public $name = "PsychicField";
-        public $displayName = "Psychic Field";
+class PsychicField extends Weapon implements DefensiveSystem{ //Thirdspace weapons that operates similar to Spark Field.
+    public $name = "PsychicField";
+    public $displayName = "Psychic Field";
 	public $iconPath = "PsychicField.png";
 	
 	//let's make animation more or less invisible, and effect very large
-	public $trailColor = array(0, 0, 0); //hide projectile
-        public $animation = "ball";
-        public $animationColor = array(0, 0, 0); //hide projectile
-        public $animationExplosionScale = 2;
-        public $animationExplosionType = "AoE";
-        //public $explosionColor = array(165, 165, 255);
-        //public $projectilespeed = 20;
-        //public $animationWidth = 1;
-        //public $trailLength = 1;
+    public $animation = "ball";
+    public $animationColor = array(128, 0, 0);
+    public $animationExplosionScale = 5; //Default
+	public $noProjectile = true; //Marker for front end to make projectile invisible for weapons that shouldn't have one.      
 	
 	public $boostable = true;
-        public $boostEfficiency = 2;
-        public $maxBoostLevel = 5;
+    public $boostEfficiency = 4;
+    public $maxBoostLevel = 3;
 	
 	public $output = 0;
-	public $baseOutput = 2;//base output WITH Spark Curtain
-	public $defensiveType = "SparkCurtain"; //needs to be set to recognize as defensive system
+//	public $baseOutput = 2;//base output WITH Spark Curtain
+//	public $defensiveType = "SparkCurtain"; //needs to be set to recognize as defensive system
       
-        public $priority = 2; //should attack very early
+    public $priority = 2; //should attack very early
 	
-        public $loadingtime = 1;
+    public $loadingtime = 1;
 	public $autoFireOnly = true; //this weapon cannot be fired by player
 	public $doNotIntercept = true; //this weapon is a field, "attacks" are just for technical reason
         
-        public $rangePenalty = 0; //no range penalty, but range itself is limited
-        public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals ; not relevant really!
+    public $rangePenalty = 0; //no range penalty, but range itself is limited
+    public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals ; not relevant really!
 	
 	public $boostlevel = 0;
 	
@@ -4491,7 +4486,7 @@ class PsychicField extends Weapon implements DefensiveSystem{ //Thirdspace weapo
 		
 	public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
 	public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
-    	public $firingModes = array( 1 => "Field"); //just a convenient name for firing mode
+    public $firingModes = array( 1 => "Field"); //just a convenient name for firing mode
 	public $hextarget = true;
 	
 	protected $targetList = array(); //weapon will hit units on this list rather than target from firing order; filled by PsychicField handler!
@@ -4502,34 +4497,32 @@ class PsychicField extends Weapon implements DefensiveSystem{ //Thirdspace weapo
 			);
 	
 	
-	
 	public function addTarget($newTarget){
 		$this->targetList[] = $newTarget;
 	}
 
-	
 	    public function setSystemDataWindow($turn){
 		    $boostlevel = $this->getBoostLevel($turn);
-	//	    $this->minDamage = 2-$boostlevel;
-	//	    $this->maxDamage = 7-$boostlevel;
+		    $this->minDamage = 0+$boostlevel;
+		    $this->maxDamage = 0+$boostlevel;
 	//	    $this->minDamage = max(0,$this->minDamage);
 		    $this->animationExplosionScale = $this->getAoE($turn);
 		    $this->range = $this->getAoE($turn);
 		      parent::setSystemDataWindow($turn);  
-		      //$this->data["AoE"] = $this->getAoE($turn);
+//		      $this->data["AoE"] = $this->getAoE($turn);
 		      $this->data["Special"] = "This weapons automatically affects all units (friend or foe) in area of effect.  It should not be fired manually."; 
-		      $this->data["Special"] .= "<br>Affected Fighters have their initiative reduced by 5 to 20 points, and their hit chance reduced by 5 - 15% for 1 turn.";  
-		      $this->data["Special"] .= "<br>Affected Ships have their their hit chance reduced by 5 - 15% for 1 turn if hit on structure, and suffer a potential critical hit on non-Structure systems.";  		      
-		      $this->data["Special"] .= "<br>Can be boosted at a cost 2 Power, each boost gives +2 AoE range to maximum of 12 hexes."; 
-		      $this->data["Special"] .= "<br>Multiple overlapping Psychic Fields will only cause 1 (the strongest) attack on a particular target.";
-		      $this->data["Special"] .= "<br>Does not affect other Thirdspace units, and is only 50% effective against Advanced Armor.";  		       
+		      $this->data["Special"] .= "<br>Affected Fighters have their Initiative reduced by 5 to 15 points, and their Hit Chance reduced by 5 - 10% for 1 turn.";  
+		      $this->data["Special"] .= "<br>Affected Ships have their their Hit Chance reduced by 5 - 10% for 1 turn if hit on structure, and suffer a potential critical hit on non-Structure systems.";  		      
+		      $this->data["Special"] .= "<br>Can be boosted at a cost 4 Power, each boost gives +1 AoE range and +5 to Initiative and Hit Chance penalties."; 
+		      $this->data["Special"] .= "<br>Multiple overlapping Psychic Fields will only cause one (the strongest) attack on a particular target.";
+		      $this->data["Special"] .= "<br>Does not affect other friendly units, and is only 50% effective against Advanced Armor.";  		       
 	    }	//endof function setSystemDataWindow
 	
 	
 	
 	public function getAoE($turn){
 		$boostlevel = $this->getBoostLevel($turn);
-		$aoe = 2+(2*$boostlevel);
+		$aoe = 5+$boostlevel;
 		return $aoe;
 	}
 	
@@ -4580,18 +4573,23 @@ class PsychicField extends Weapon implements DefensiveSystem{ //Thirdspace weapo
 		PsychicFieldHandler::createFiringOrders($gamedata);		
 	}
 
-	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!		
-	if ($ship->faction == "Thirdspace") return; //No effect on other Thirdspace ships.
+	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!	
+//		if ($ship->faction == "Thirdspace") return; //No effect on other Thirdspace ships.
+		$shooter = $gamedata->getShipById($fireOrder->shooterid);
+		if ($ship->team == $shooter->team) return; //No effect on other Thirdspace ships.
 		
-		$effectIni = Dice::d(5,1);//strength of effect: 1d5
-		$effecttohit = Dice::d(3,1);//strength of effect: 1d3
+		$boostlevel = $this->getBoostLevel($gamedata->turn);
+		$effectIni = Dice::d(3,1)+$boostlevel;//strength of effect: -5 to -30 initiative.
+		$effecttohit = Dice::d(2,1)+$boostlevel;//strength of effect: -5 to -25 to hit chances.
+		$effectCrit = $effectIni +2;
 		$effectIni5 = $effectIni * 5;
-		$effecttohit5 = $effecttohit * 5;	
+		$effecttohit5 = $effecttohit * 5;			
 		$fireOrder->pubnotes .= "<br> Initiative and Offensive Bonus reduced for fighters, and non-Thirdspace ships suffer potential disruption.";
 						
 		if ($system->advancedArmor){		
 			$effectIni = ceil($effectIni/2);  	//Other Ancients are somewhat resistant to pyschic attack from Thirdspace Aliens, 50% effect.	
 			$effecttohit = ceil($effecttohit/2);
+			$effectCrit = ceil($effectCrit/2);		
 			}
 	
 		if ($ship instanceof FighterFlight){  //place effect on first fighter, even if it's already destroyed!			
@@ -4608,16 +4606,16 @@ class PsychicField extends Weapon implements DefensiveSystem{ //Thirdspace weapo
 			        	$firstFighter->criticals[] =  $crit;
 				}
 			}
-		}else if ($system instanceof Structure){
+		}else if ($system instanceof Structure){ //Give penalty to hit next turn if it hits structure.
 			$CnC = $ship->getSystemByName("CnC");
 				for($i=1; $i<=$effecttohit;$i++){
 					$crit = new PenaltyToHitOneTurn(-1, $ship->id, $CnC->id, 'PenaltyToHitOneTurn', $gamedata->turn); 
 					$crit->updated = true;
 			        $CnC->criticals[] =  $crit;
 				}
-			} else { //force critical roll at +4 even on other Ancients
+			} else { //Force critical roll if it hits something other than structure.
 				$system->forceCriticalRoll = true;
-				$system->critRollMod += 8;			
+				$system->critRollMod += $effectCrit;	//Add 3-8 modifier depending on $effectIni roll and boost (halved for Ancients). 		
 					}			
 	} //endof function onDamagedSystem	
 		
@@ -4628,7 +4626,7 @@ class PsychicField extends Weapon implements DefensiveSystem{ //Thirdspace weapo
 			$maxhealth = 20;
 		}
 		if ( $powerReq == 0 ){
-			$powerReq = 2;
+			$powerReq = 4;
 		}
 		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
 		PsychicFieldHandler::addPsychicField($this);//so all Psychic Fields are accessible together, and firing orders can be uniformly created
@@ -4637,8 +4635,8 @@ class PsychicField extends Weapon implements DefensiveSystem{ //Thirdspace weapo
 
 	public function onConstructed($ship, $turn, $phase){
 		parent::onConstructed($ship, $turn, $phase);
-		$this->tohitPenalty = $this->getOutput();
-		$this->damagePenalty = 0;
+//		$this->tohitPenalty = $this->getOutput();
+//		$this->damagePenalty = 0;
 	}
 		
 	public function getDefensiveType(){
@@ -4652,12 +4650,19 @@ class PsychicField extends Weapon implements DefensiveSystem{ //Thirdspace weapo
 	public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){
 		return 0;//does not reduce hit chance
 	}
-		
+/*		
 	public function getOutput(){
 		return 0;     
 	}    
+*/	
+	public function getDamage($fireOrder){        
+		$fieldDamage = 0;
+		$boostlevel = $this->getBoostLevel($fireOrder->turn);
+		$fieldDamage += $boostlevel; //-1 per level of boost
+//		$baseDamage = max(0,$baseDamage); //cannot do less than 0	
+		return $fieldDamage;   
+	}
 	
-	public function getDamage($fireOrder){ return  0;   }
 	public function setMinDamage(){   $this->minDamage =  0 ;      }
 	public function setMaxDamage(){   $this->maxDamage =  0 ;      }
 	
@@ -4755,13 +4760,7 @@ class PsychicFieldHandler{
         public $iconPath = "HeavyPsionicLance.png";        
         public $animation = "laser";
         public $animationColor = array(128, 0, 0);
-  //      public $animationExplosionScale = 0.35; //make it thin, despite high damage potential!
-	    /*
-        public $trailColor = array(30, 170, 255);
-        public $animationWidth = 2;
-        public $animationWidth2 = 0.3;
-        public $animationExplosionScale = 0.15;
-*/
+
         public $intercept = 0;
         public $loadingtime = 3;
         public $raking = 20;
@@ -4798,9 +4797,9 @@ class PsychicFieldHandler{
             } 
             //Raking(20) is already described in Raking class           
             $this->data["Special"] .= "<br>Uninterceptable.";  
-            $this->data["Special"] .= '<br>Can be boosted with EW for increased dmg output (+2d10 +8 per point of EW used, up to three times). This EW does not count towards your OEW lock on a target.';
-		    $this->data["Special"] .= "<br>Has +1 modifier to critical hits, and +2 to fighter dropout rolls.";
-//		    $this->data["Special"] .= "<br>Has a 3 turn recharge rate.";		                
+            $this->data["Special"] .= '<br>Can be boosted with EW for an extra +2d10 +8 damage per point of EW used, up to three times.';
+		    $this->data["Special"] .= "<br>This EW does not count towards your OEW lock on a target.";	            
+		    $this->data["Special"] .= "<br>Has +1 modifier to critical hits, and +2 to fighter dropout rolls.";                
             $this->data["Boostlevel"] = $boost;
         }
 
@@ -4894,13 +4893,7 @@ class PsionicLance extends Raking{
         public $iconPath = "PsionicLance.png";         
         public $animation = "laser";
         public $animationColor = array(128, 0, 0);
-  //      public $animationExplosionScale = 0.35; //make it thin, despite high damage potential!
-	    /*
-        public $trailColor = array(30, 170, 255);
-        public $animationWidth = 2;
-        public $animationWidth2 = 0.3;
-        public $animationExplosionScale = 0.15;
-*/
+
         public $intercept = 0;
         public $loadingtime = 2;
         public $raking = 15;
@@ -4936,9 +4929,9 @@ class PsionicLance extends Raking{
             } 
             //Raking(15) is already described in Raking class
             $this->data["Special"] .= "Uninterceptable.";              
-            $this->data["Special"] .= '<br>Can be boosted with EW for increased dmg output (+2d10 per point of EW used, up to twice). This EW does not count towards your OEW lock on a target.';
-		    $this->data["Special"] .= "<br>Has +1 modifier to critical hits, and +2 to fighter dropout rolls.";   
-		    $this->data["Special"] .= "<br>Can fire every turn.";  		                
+            $this->data["Special"] .= '<br>Can be boosted with EW for an extra +2d10 damage per point of EW used, up to twice.';
+		    $this->data["Special"] .= "<br>This EW does not count towards your OEW lock on a target.";		    
+		    $this->data["Special"] .= "<br>Has +1 modifier to critical hits, and +2 to fighter dropout rolls.";   	                
             $this->data["Boostlevel"] = $boost;
         }
 
@@ -5142,7 +5135,7 @@ class PsionicConcentrator extends Weapon{
                 $maxhealth = 7;
             }
             if ( $powerReq == 0 ){
-                $powerReq = 3;
+                $powerReq = 2;
             }
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
