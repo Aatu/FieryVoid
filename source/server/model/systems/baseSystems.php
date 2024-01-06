@@ -877,7 +877,8 @@ class Scanner extends ShipSystem implements SpecialAbility{ //on its own Scanner
 	}	
 	
 	public function markThirdspace(){	
-		$this->iconPath = "Thirdspacescanner.png";		
+		$this->iconPath = "Thirdspacescanner.png";	
+		$this->displayName = "Thirdspace Sensors";			
     	$this->specialAbilities[] = "AdvancedSensors";
 		$this->specialAbilityValue = true; //so it is actually recognized as special ability!
     	$this->boostEfficiency = 15; //Advanced Sensors are rarely lower than 13, so flat 14 boost cost is advantageous to output+1!
@@ -887,10 +888,10 @@ class Scanner extends ShipSystem implements SpecialAbility{ //on its own Scanner
 		}else{
 			$this->data["Special"] .= '<br>';
 		}
-		$this->data["Special"] .= 'Advanced Sensors - ignores Jammer.';//not that of advanced races
-		$this->data["Special"] .= "<br>Ignores enemy BDEW, SDEW and DIST."; //not that of advanced races
-		$this->data["Special"] .= "<br>Ignores any defensive systems lowering enemy profile (shields, EWeb...)."; //not that of advanced races
-		$this->data["Special"] .= "<br>All of the above work as usual if operated by advanced races.";
+		$this->data["Special"] .= 'You can feel them, reaching from the Void...';
+		$this->data["Special"] .= '<br>Ignores enemy Jammers, BDEW, SDEW and DIST.';//not that of advanced races
+		$this->data["Special"] .= "<br>Also ignores any defensive systems lowering enemy profile (shields, EWeb...)."; //not that of advanced races
+		$this->data["Special"] .= "<br>All of the above work as usual if operated by Ancient races.";
 		$this->data["Special"] .= "<br>Can only be boosted twice.";	 
 	}	
 		
