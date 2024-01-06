@@ -17,7 +17,7 @@ class ThirdspaceCarrier extends BaseShip{
 			$this->variantOf = "Eldritch Battleship";
 			$this->occurence = "uncommon";											    
 	    
-		$this->fighters = array("LCVs" => 20);	
+		$this->fighters = array("LCVs" => 12);	
 		
         $this->gravitic = true;
 		$this->advancedArmor = true; 		    
@@ -96,10 +96,10 @@ class ThirdspaceCarrier extends BaseShip{
         $this->addLeftSystem(new PsionicConcentrator(4, 0, 0, 240, 360)); 
         $this->addLeftSystem(new PsionicConcentrator(4, 0, 0, 240, 360));  
         $this->addLeftSystem(new GraviticThruster(6, 30, 0, 10, 3)); 
-        $LCVRail = new Catapult(3, 20, 3);
+        $LCVRail = new Catapult(3, 12, 3);
         $LCVRail->displayName = "LCV Rail";        
         $this->addLeftSystem($LCVRail); 
-        $LCVRail = new Catapult(3, 20, 3);
+        $LCVRail = new Catapult(3, 12, 3);
         $LCVRail->displayName = "LCV Rail";        
         $this->addLeftSystem($LCVRail);                              
             
@@ -118,10 +118,10 @@ class ThirdspaceCarrier extends BaseShip{
         $this->addRightSystem(new PsionicConcentrator(4, 0, 0, 0, 120));
         $this->addRightSystem(new PsionicConcentrator(4, 0, 0, 0, 120));                                      
         $this->addRightSystem(new GraviticThruster(6, 30, 0, 10, 4)); 
-        $LCVRail = new Catapult(3, 20, 3);		
+        $LCVRail = new Catapult(3, 12, 3);		
         $LCVRail->displayName = "LCV Rail";							  	
         $this->addRightSystem($LCVRail);
-        $LCVRail = new Catapult(3, 20, 3);		
+        $LCVRail = new Catapult(3, 12, 3);		
         $LCVRail->displayName = "LCV Rail";							  	
         $this->addRightSystem($LCVRail);          			                      
               			          
