@@ -67,6 +67,11 @@ if (isset($_SESSION["user"])) {
 <br><b>BUGFIX</b> - the bug a lot of people stumbled upon recently is (hopefully) fixed
 <br><b>Kor-Lyan polishing</b> - courtesy of Douglas
 
+		 <br><br>---------- <b>update 7th of January</b> ---------- 
+<br><b>Quad Array update</b> - now more in line with tabletop rules, courtesy of Douglas
+<br><b>Kor-Lyan polishing</b> - including Jammer Missile, courtesy of Douglas
+<br><b>Thirdspae polishing</b> - courtesy of Douglas
+<br><b>various bugfixes</b> - as usual
        
 
 <!--	        
