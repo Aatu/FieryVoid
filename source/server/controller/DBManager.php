@@ -152,7 +152,12 @@ class DBManager
 		if($ship->name == ''){
 				$ship->name = 'NAMELESS UNIT' ;
 		}
+		/*07.01.2024: merge options point cost into enhancements point cost! 
         $sql = "INSERT INTO `B5CGM`.`tac_ship` VALUES(null, $userid, $gameid, '" . $this->DBEscape($ship->name) . "', '" . $ship->phpclass . "', 0, 0, 0, 0, 0, $ship->slot, $ship->pointCostEnh)";
+		*/
+		$enhCostTotal = $ship->pointCostEnh + $ship->pointCostEnh2;
+        $sql = "INSERT INTO `B5CGM`.`tac_ship` VALUES(null, $userid, $gameid, '" . $this->DBEscape($ship->name) . "', '" . $ship->phpclass . "', 0, 0, 0, 0, 0, $ship->slot, $enhCostTotal)";
+		
         //   Debug::log($sql);
         $id = $this->insert($sql);
         return $id;
