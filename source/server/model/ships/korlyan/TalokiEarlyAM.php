@@ -27,9 +27,9 @@ class TalokiEarlyAM extends StarBaseSixSections{
 		$this->canvasSize = 300; //Enormous Starbase
 
 	//ammo magazine itself (AND its missile options)
-	$ammoMagazine = new AmmoMagazine(400); //pass magazine capacity 
+	$ammoMagazine = new AmmoMagazine(640); //pass magazine capacity - 20 rounds per launcher, plus reload rack 80
 	    $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
-	    $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 320); //add full load of basic missiles 
+	    $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 560); //add full load of basic missiles 
 	    $ammoMagazine->addAmmoEntry(new AmmoMissileI(), 80); //add full load of basic missiles  	      
 
 	    $this->enhancementOptionsEnabled[] = 'AMMO_A';//add enhancement options for other missiles - Class-A
