@@ -4513,7 +4513,7 @@ class PsychicField extends Weapon implements DefensiveSystem{ //Thirdspace weapo
 		      $this->data["Special"] = "This weapons automatically affects all units (friend or foe) in area of effect.  It should not be fired manually."; 
 		      $this->data["Special"] .= "<br>Affected Fighters have their Initiative reduced by 5 to 15 points, and their Hit Chance reduced by 5 - 10% for 1 turn.";  
 		      $this->data["Special"] .= "<br>Affected Ships have their their Hit Chance reduced by 5 - 10% for 1 turn if hit on structure, and suffer a potential critical hit on non-Structure systems.";  		      
-		      $this->data["Special"] .= "<br>Can be boosted at a cost 4 Power, each boost gives +1 AoE range and +5 to Initiative and Hit Chance penalties."; 
+		      $this->data["Special"] .= "<br>Can be boosted at a cost 4 Power, each boost gives +1 AoE range, +1 Damage and +5 to Initiative and Hit Chance penalties."; 
 		      $this->data["Special"] .= "<br>Multiple overlapping Psychic Fields will only cause one (the strongest) attack on a particular target.";
 		      $this->data["Special"] .= "<br>Does not affect other friendly units, and is only 50% effective against Advanced Armor.";  		       
 	    }	//endof function setSystemDataWindow
@@ -4550,6 +4550,31 @@ class PsychicField extends Weapon implements DefensiveSystem{ //Thirdspace weapo
 		TacGamedata::$lastFiringResolutionNo++;    //note for further shots
 		$fireOrder->resolutionOrder = TacGamedata::$lastFiringResolutionNo;//mark order in which firing was handled!
 	}
+
+	protected function beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata){
+		
+		if (!($target instanceof FighterFlight)){ //ship - as usual
+			$damage = $this->getFinalDamage($shooter, $target, $pos, $gamedata, $fireOrder);
+			if ($target->team == $shooter->team) $damage = 0; //No effect on other Thirdspace ships.			
+			$this->damage($target, $shooter, $fireOrder,  $gamedata, $damage);
+		}else{//fighter flight - separate hit on each fighter!
+			foreach ($target->systems as $fighter){
+				if ($fighter == null || $fighter->isDestroyed()){
+				    continue;
+				}
+				$damage = $this->getFinalDamage($shooter, $target, $pos, $gamedata, $fireOrder);
+				if ($target->team == $shooter->team) $damage = 0; //No effect on other Thirdspace ships.					
+				$this->doDamage($target, $shooter, $fighter, $damage, $fireOrder, null, $gamedata, false);
+                }
+		}
+	}	
+
+
+	public function beforeDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
+		$dmgToReturn = $damage;
+		if ($system instanceof Structure) $dmgToReturn = 0; //will not harm Structure!
+		return $dmgToReturn;
+	}
 	
 	public function calculateBoostLevel($turn){
 		$this->boostlevel = $this->getBoostLevel($turn);
@@ -4579,12 +4604,14 @@ class PsychicField extends Weapon implements DefensiveSystem{ //Thirdspace weapo
 		if ($ship->team == $shooter->team) return; //No effect on other Thirdspace ships.
 		
 		$boostlevel = $this->getBoostLevel($gamedata->turn);
+		
 		$effectIni = Dice::d(3,1)+$boostlevel;//strength of effect: -5 to -30 initiative.
 		$effecttohit = Dice::d(2,1)+$boostlevel;//strength of effect: -5 to -25 to hit chances.
 		$effectCrit = $effectIni +2;
+		
 		$effectIni5 = $effectIni * 5;
 		$effecttohit5 = $effecttohit * 5;			
-		$fireOrder->pubnotes .= "<br> Enemy ships have Initiative reduced, and suffer a to hit penalty next turn or a potential Critical.  Initiative and Offensive Bonus reduced for enemy fighters.";
+		$fireOrder->pubnotes .= "<br> Enemy ships have Initiative reduced, and suffer a penalty to hit next turn or a potential Critical.  Initiative and Offensive Bonus reduced for enemy fighters.";
 						
 		if ($system->advancedArmor){		
 			$effectIni = ceil($effectIni/2);  	//Other Ancients are somewhat resistant to pyschic attack from Thirdspace Aliens, 50% effect.	
@@ -4613,9 +4640,19 @@ class PsychicField extends Weapon implements DefensiveSystem{ //Thirdspace weapo
 					$crit->updated = true;
 			        $CnC->criticals[] =  $crit;
 				}
+				for($i=1; $i<=$effectIni;$i++){
+					$crit = new tmpinidown(-1, $ship->id, $CnC->id, 'tmpinidown', $gamedata->turn); 
+					$crit->updated = true;
+			        $CnC->criticals[] =  $crit;
+					}    
 			} else { //Force critical roll if it hits something other than structure.
-				$system->forceCriticalRoll = true;
-				$system->critRollMod += $effectCrit;	//Add 3-8 modifier depending on $effectIni roll and boost (halved for Ancients). 		
+				for($i=1; $i<=$effectIni;$i++){
+					$crit = new tmpinidown(-1, $ship->id, $CnC->id, 'tmpinidown', $gamedata->turn); 
+					$crit->updated = true;
+			        $CnC->criticals[] =  $crit;			
+					}
+					$system->forceCriticalRoll = true;
+					$system->critRollMod += $effectCrit;	//Add 3-8 modifier depending on $effectIni roll and boost (halved for Ancients). 		
 					}			
 	} //endof function onDamagedSystem	
 		
