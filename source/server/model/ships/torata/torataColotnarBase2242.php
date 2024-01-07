@@ -14,7 +14,7 @@ class TorataColotnarBase2242 extends SmallStarBaseFourSections
 		$this->shipClass = "Colotnar Defense Base (2242)";
 		$this->variantOf = "Colotnar Defense Base";
 		$this->imagePath = "img/ships/TorataColotnar.png";
-		$this->canvasSize = 200;
+		$this->canvasSize = 350;
 		$this->fighters = array("heavy"=>48);
 		$this->isd = 2242;
 

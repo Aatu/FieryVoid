@@ -416,12 +416,12 @@ PsychicField.prototype.initBoostableInfo = function(){
     // Needed because it can change during initial phase
     // because of adding extra power.
     if(window.weaponManager.isLoaded(this)){
-        this.range = 2 + 2*shipManager.power.getBoost(this);
+        this.range = 5 + 1*shipManager.power.getBoost(this);
         this.data["Range"] = this.range;
- //       this.minDamage = 2 - shipManager.power.getBoost(this);
- //       this.minDamage = Math.max(0,this.minDamage);
- //       this.maxDamage =  7 - shipManager.power.getBoost(this);
- //       this.data["Damage"] = "" + this.minDamage + "-" + this.maxDamage;
+        this.minDamage = 0 + shipManager.power.getBoost(this);//Psychic Field does flat damage, mainly to prioritise against other fields.
+//        this.minDamage = Math.max(0,this.minDamage);
+//        this.maxDamage =  0 + shipManager.power.getBoost(this);
+        this.data["Damage"] = "" + this.minDamage;
     }
     else{
         var count = shipManager.power.getBoost(this);

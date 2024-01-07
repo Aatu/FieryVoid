@@ -66,7 +66,7 @@
 				
 		}
         
-        public static function getBlanketDEW($gamedata, $target)
+    public static function getBlanketDEW($gamedata, $target)
         {
             $FDEW = 0;
             foreach ($gamedata->ships as $ship)
@@ -79,7 +79,10 @@
                     if ( $blanket > $FDEW ) $FDEW = $blanket;
                 }
             }
+
             $FDEW = $FDEW * 0.25;
+			if(($target->jammerMissile) && $FDEW < 2) $FDEW = 2; //Jammer Missiles provide 2 BDEW to all ships in range, but not in combination with normal BDEW!
+				            
             return $FDEW;
         }
         
