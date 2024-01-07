@@ -1427,7 +1427,17 @@ window.gamedata = {
 			if(noTaken > 0){ //enhancement picked - note!
 				ship.enhancementOptions[enhNo][2] = noTaken;
 				if(!ship.enhancementOptions[enhNo][6]){ //this is an actual enhancement (as opposed to option) - note value!
-					ship.pointCostEnh += target.data("enhCost");
+					if (ship.flight){
+						ship.pointCostEnh += target.data("enhCost") * flightSize;
+					} else {
+						ship.pointCostEnh += target.data("enhCost");
+					}
+				}else{ //this is an option - still note value, just separately!
+					if (ship.flight){
+						ship.pointCostEnh2 += target.data("enhCost") * flightSize;
+					} else {
+						ship.pointCostEnh2 += target.data("enhCost");
+					}
 				}
 			}
 			//go to next enhancement
