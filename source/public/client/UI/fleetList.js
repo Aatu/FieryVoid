@@ -93,7 +93,7 @@ window.fleetListManager = {
 			if (ship.flight === true) { //flight price is always set for 6 fighters, we need to derive actual for this flight!
 				baseValue = ship.pointCost * (ship.flightSize/6);
 			}
-			baseValue = Math.round(baseValue + ship.pointCostEnh); //enhancement price is total for unit
+			baseValue = Math.round(baseValue + ship.pointCostEnh + ship.pointCostEnh2); //enhancement price is total for unit
 			var currValue = Math.round(baseValue * ship.combatValue / 100);
 			totalBaseValue += baseValue;
 			totalCurrValue += currValue ;
