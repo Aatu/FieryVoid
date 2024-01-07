@@ -36,7 +36,7 @@ class gaimVRaxas extends BaseShip{
 		$this->addPrimarySystem(new Scanner(5, 16, 3, 6));
 		$this->addPrimarySystem(new Engine(5, 13, 0, 8, 4));
         $this->addPrimarySystem(new SelfRepair(6, 9, 3)); //armor, structure, output		
-//		$this->addPrimarySystem(new Hangar(5, 14));
+		$this->addPrimarySystem(new JumpEngine(4, 20, 5, 48));
 		$this->addPrimarySystem(new MolecularPulsar(3, 8, 2, 0, 360));
 		$this->addPrimarySystem(new MolecularPulsar(3, 8, 2, 0, 360));
  		$AAC = $this->createAdaptiveArmorController(3, 2, 0); //$AAtotal, $AApertype, $AApreallocated

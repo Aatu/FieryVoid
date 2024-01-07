@@ -321,7 +321,7 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
         
         public $boostable = true;
         public $boostEfficiency = 2;
-        public $maxBoostLevel = 3;  
+        public $maxBoostLevel = 2;  
         
 		public $repairPriority = 5;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired                 
         
@@ -331,7 +331,7 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
                 $maxhealth = 9;
             }
             if ( $powerReq == 0 ){
-                $powerReq = 5;
+                $powerReq = 6;
             }
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }	
@@ -448,9 +448,6 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
                     break;
                 case 2:
                     $add = 4;
-                    break;
-                case 3:
-                    $add = 6;
                     break;                    
                       
                 default:
@@ -475,7 +472,7 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
         
         public function getDamage($fireOrder){
             $add = $this->getExtraDamagebyBoostlevel($fireOrder->turn);
-            $dmg = Dice::d(6,1) + $add + 15;
+            $dmg = Dice::d(8,1) + $add + 11;
             return $dmg;
         }
 
@@ -492,13 +489,13 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
         public function setMinDamage(){
             $turn = TacGamedata::$currentTurn;
             $boost = $this->getBoostLevel($turn);
-            $this->minDamage = 16 + ($boost * 2);
+            $this->minDamage = 12 + ($boost * 2);
         }   
 
         public function setMaxDamage(){
             $turn = TacGamedata::$currentTurn;
             $boost = $this->getBoostLevel($turn);
-            $this->maxDamage = 21 + ($boost * 2); 
+            $this->maxDamage = 19 + ($boost * 2); 
 		}
 		    
     }//endof class PsionicTorpedo

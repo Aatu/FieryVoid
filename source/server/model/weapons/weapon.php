@@ -45,6 +45,7 @@ class Weapon extends ShipSystem
     public $animationColorArray = array();
     public $animationExplosionScale = 0; //0 means it will be set automatically by standard constructor, based on average damage yield
     public $animationExplosionScaleArray = array();
+	public $noProjectile = false; //Marker for front end to make projectile invisible for weapons that shouldn't have one.   
 
 	public $doubleRangeIfNoLock = false; //in case of no lock-on default procedure is to double range penalty; some weapons (notably most Antimatter ones) double range itself instead
     public $rangePenalty = 0;
@@ -284,7 +285,9 @@ class Weapon extends ShipSystem
 			$strippedSystem->extraoverloadshots = $this->extraoverloadshots;
 			$strippedSystem->extraoverloadshotsArray = $this->extraoverloadshotsArray;
 			$strippedSystem->fireOrders = $this->fireOrders;
-			$strippedSystem->canModesIntercept = $this->canModesIntercept;//For weapons which intercept not using their default mode e.g. interceptor missiles - DK			
+			$strippedSystem->canModesIntercept = $this->canModesIntercept;//For weapons which intercept not using their default mode e.g. interceptor missiles - DK
+			$strippedSystem->noProjectile = $this->noProjectile;
+			
 			if(isset($this->ammunition)){
 				$strippedSystem->ammunition = $this->ammunition;
 				$strippedSystem->data = $this->data;
@@ -491,11 +494,13 @@ class Weapon extends ShipSystem
         if ($this->ballisticIntercept && (!($interceptedWeapon->ballistic))) return 0;//can't intercept non-ballistic if weapon can intercept only ballistics!
 
         $interceptMod = $this->getInterceptRating($gamedata->turn);
-        if (!($interceptedWeapon->ballistic || $interceptedWeapon->noInterceptDegradation)) {//target is neither ballistic weapon nor has lifted degradation, so apply degradation!
+
+// Commenting out this fragmant as it's is duplicated below, and seemed to be causing intercept degradation to apply twice - DK - 4 Jan 24        
+ /*       if (!($interceptedWeapon->ballistic || $interceptedWeapon->noInterceptDegradation)) {//target is neither ballistic weapon nor has lifted degradation, so apply degradation!
             for ($i = 0; $i < $intercepted->numInterceptors; $i++) {
                 $interceptMod -= 1; //-1 for each already intercepting weapon
             }
-        }
+        }  */
 
 		if( ($interceptedWeapon->doInterceptDegradation) || (!($interceptedWeapon->ballistic || $interceptedWeapon->noInterceptDegradation)) ) {//target is neither ballistic weapon nor has lifted degradatoin, so apply degradation!
             for ($i = 0; $i < $intercepted->numInterceptors; $i++) {

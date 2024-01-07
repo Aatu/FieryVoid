@@ -27,22 +27,23 @@ class TalokiAM extends StarBaseSixSections{
 		$this->locations = array(41, 42, 2, 32, 31, 1);
 
 	//ammo magazine itself (AND its missile options)
-	$ammoMagazine = new AmmoMagazine(400); //pass magazine capacity 
+	$ammoMagazine = new AmmoMagazine(240); //pass magazine capacity 
 	    $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
-	    $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 320); //add full load of basic missiles 
+	    $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 160); //add full load of basic missiles 
 	    $ammoMagazine->addAmmoEntry(new AmmoMissileI(), 80); //add full load of intercept missiles  	      
 
 	    $this->enhancementOptionsEnabled[] = 'AMMO_A';//add enhancement options for other missiles - Class-A
 	    $this->enhancementOptionsEnabled[] = 'AMMO_C';//add enhancement options for other missiles - Class-C
 	    $this->enhancementOptionsEnabled[] = 'AMMO_F';//add enhancement options for other missiles - Class-F
 	    $this->enhancementOptionsEnabled[] = 'AMMO_H';//add enhancement options for other missiles - Class-H    
-	    $this->enhancementOptionsEnabled[] = 'AMMO_I';//add enhancement options for other missiles - Class-I 
+	    $this->enhancementOptionsEnabled[] = 'AMMO_I';//add enhancement options for other missiles - Class-I
+	    $this->enhancementOptionsEnabled[] = 'AMMO_J';//add enhancement options for other missiles - Class-J	     
 	    $this->enhancementOptionsEnabled[] = 'AMMO_K';//add enhancement options for other missiles - Class-K   
 	    $this->enhancementOptionsEnabled[] = 'AMMO_L';//add enhancement options for other missiles - Class-L
 	    $this->enhancementOptionsEnabled[] = 'AMMO_M';//add enhancement options for other missiles - Class-M	    
 		$this->enhancementOptionsEnabled[] = 'AMMO_P';//add enhancement options for other missiles - Class-P    	    	    	    
 	    $this->enhancementOptionsEnabled[] = 'AMMO_S';//add enhancement options for other missiles - Class-S
-	    $this->enhancementOptionsEnabled[] = 'AMMO_X';//add enhancement options for other missiles - Class-X		    
+	    $this->enhancementOptionsEnabled[] = 'AMMO_X';//add enhancement options for other missiles - Class-X	    
 	    
 		$this->addPrimarySystem(new Reactor(4, 25, 0, 0));
 		$this->addPrimarySystem(new CnC(4, 32, 0, 0)); 

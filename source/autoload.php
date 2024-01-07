@@ -2952,7 +2952,7 @@ spl_autoload_register(
                 		'ammomissilem' => '/server/model/systems/baseSystems.php',
                 		'ammomissilekk' => '/server/model/systems/baseSystems.php',
                 		'ammomissilex' => '/server/model/systems/baseSystems.php',
- //               		'ammomissileid' => '/server/model/systems/baseSystems.php',             
+                		'ammomissilej' => '/server/model/systems/baseSystems.php',             
                 		                		                 		                 		                		
 						
                 		'ammomissilefb' => '/server/model/systems/baseSystems.php',
@@ -3138,7 +3138,8 @@ spl_autoload_register(
 					 	'falaren' => '/server/model/ships/yolu/Falaren.php',
 					 	
 					 	'alanti' => '/server/model/ships/abbai/Alanti.php',
-					 	'pirocia' => '/server/model/ships/abbai/Pirocia.php',					 	
+					 	'pirocia' => '/server/model/ships/abbai/Pirocia.php',
+						'mayoverheat' => '/server/model/cricialClasses.php',					 						 	
 					 						 	 
 					 							
 				//Thirdspace
