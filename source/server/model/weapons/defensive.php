@@ -608,7 +608,7 @@ class ThirdspaceShieldProjector  extends Shield implements DefensiveSystem { //d
 		public $isPrimaryTargetable = false; //projector can be targeted even on PRIMARY, like a weapon!
 	    public $iconPath = "TrekShieldProjectorF.png"; //overridden anyway - to indicate proper direction
 	    public $boostable = true; //$this->boostEfficiency and $this->maxBoostLevel in __construct()  
-		public $boostEfficiency = 5;
+		public $boostEfficiency = 4;
 	    public $baseOutput = 0; //base output, before boost
 	    
 		
@@ -621,6 +621,9 @@ class ThirdspaceShieldProjector  extends Shield implements DefensiveSystem { //d
 	    
 	    function __construct($armor, $maxhealth, $power, $rating, $startArc, $endArc, $side = 'F'){ //parameters: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R/C suggests whether to use left or right graphics
 			$this->iconPath = 'TrekShieldProjector' . $side . '.png';
+            if ( $power == 0 ){
+                $power = 4;
+            }			
 			parent::__construct($armor, $maxhealth, $power, $rating, $startArc, $endArc);
 			$this->baseOutput = $rating;
 			$this->maxBoostLevel = $rating; //maximum double effect	

@@ -41,6 +41,7 @@ class BaseShip {
 	public $mine = false;
     public $SixSidedShip = false;
 	public $isCombatUnit = true; //is this a combat unit (as opposed to non-combat - transport, freighter, civilian, explorer, diplomatic ship, yacht...)
+
 	//non-combat ships cannot be taken in pickup battles by standard tourtnament rules
 	//rule of thumb is that if it has cargo bays, then it's not a combat ship - but it's far from proof
 	//eg. Pak'ma'ra and Orieni capital ships (combat ones) do have cargo bays, while eg. Emperor's transport or Grey Sharlin (non-combat ships) do not
@@ -54,7 +55,7 @@ class BaseShip {
     
 
     public $jinkinglimit = 0; //just in case there will be a ship actually able to jink; NOT SUPPORTED!
-
+	
     public $enabledSpecialAbilities = array();
 
     public $canvasSize = 200;
@@ -69,6 +70,7 @@ class BaseShip {
     public $rolled = false;
     public $rolling = false;
 	public $EMHardened = false; //EM Hardening (Ipsha have it) - some weapons would check for this value!
+	public $jammerMissile = false; //Marker for when ships are affected by Jammer Missile BDEW.		
 
     public $team;
     private $expectedDamage = array(); //loc=>dam; damage the unit is expected to take this turn (at outer locations), to decide where to take ambiguous shots

@@ -86,7 +86,7 @@ window.TorpedoEffect = function () {
         particle.setSize(size).setFadeIn(this.time, this.fadeInSpeed).setFadeOut(this.time + this.duration, this.fadeOutSpeed).setOpacity(0.5).setActivationTime(this.time).setVelocity(this.speedVector).setPosition(position).setTexture(BaseParticle.prototype.texture.glow).setColor(color);
 
         particle = this.emitterContainer.getParticle(this);
-        particle.setSize(size / 4).setFadeIn(this.time, this.fadeInSpeed).setFadeOut(this.time + this.duration, this.fadeOutSpeed).setOpacity(1.0).setActivationTime(this.time).setVelocity(this.speedVector).setPosition(position).setTexture(BaseParticle.prototype.texture.glow).setColor({ r: 1, g: 1, b: 1 });
+        particle.setSize(size / 4).setFadeIn(this.time, this.fadeInSpeed).setFadeOut(this.time + this.duration, this.fadeOutSpeed).setOpacity(1.0).setActivationTime(this.time).setVelocity(this.speedVector).setPosition(position).setTexture(BaseParticle.prototype.texture.glow).setColor(color);
     }
 
     return TorpedoEffect;
