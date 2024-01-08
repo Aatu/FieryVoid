@@ -562,7 +562,6 @@ class AdvancedSingularityDrive extends Reactor{
 	provides fixed power regardless of systems;
 	techical implementation: count as Power minus power required by all systems enabled
 */	
-    public $displayName = "Advanced Singularity Reactor";
     public $iconPath = "AdvancedSingularityDrive.png";
     
 	protected $possibleCriticals = array( //different set of criticals than standard Reactor
@@ -879,8 +878,7 @@ class Scanner extends ShipSystem implements SpecialAbility{ //on its own Scanner
 	}	
 	
 	public function markThirdspace(){	
-		$this->iconPath = "Thirdspacescanner.png";	
-		$this->displayName = "Thirdspace Sensors";			
+		$this->iconPath = "Thirdspacescanner.png";			
     	$this->specialAbilities[] = "AdvancedSensors";
 		$this->specialAbilityValue = true; //so it is actually recognized as special ability!
     	$this->boostEfficiency = 16; //Advanced Sensors are rarely lower than 13, so flat 14 boost cost is advantageous to output+1!

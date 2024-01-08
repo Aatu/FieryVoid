@@ -136,10 +136,10 @@ class ThirdspaceBattleship extends BaseShip{
 				9 => "Structure",
 				11 => "Psychic Field",
 				12 => "Self Repair",
-				14 => "Thirdspace Sensors",
+				14 => "Scanner",
 				16 => "Engine",
 				17 => "Jump Engine",
-				19 => "Advanced Singularity Reactor",
+				19 => "Reactor",
 				20 => "C&C",
 			),
 			1=> array( //Fwd
