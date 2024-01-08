@@ -4608,9 +4608,7 @@ class PsychicField extends Weapon implements DefensiveSystem{ //Thirdspace weapo
 		$effectIni = Dice::d(3,1)+$boostlevel;//strength of effect: -5 to -30 initiative.
 		$effecttohit = Dice::d(2,1)+$boostlevel;//strength of effect: -5 to -25 to hit chances.
 		$effectCrit = $effectIni +2;
-		
-		$effectIni5 = $effectIni * 5;
-		$effecttohit5 = $effecttohit * 5;			
+				
 		$fireOrder->pubnotes .= "<br> Enemy ships have Initiative reduced, and suffer a penalty to hit next turn or a potential Critical.  Initiative and Offensive Bonus reduced for enemy fighters.";
 						
 		if ($system->advancedArmor){		
@@ -4646,6 +4644,7 @@ class PsychicField extends Weapon implements DefensiveSystem{ //Thirdspace weapo
 			        $CnC->criticals[] =  $crit;
 					}    
 			} else { //Force critical roll if it hits something other than structure.
+			$CnC = $ship->getSystemByName("CnC");			
 				for($i=1; $i<=$effectIni;$i++){
 					$crit = new tmpinidown(-1, $ship->id, $CnC->id, 'tmpinidown', $gamedata->turn); 
 					$crit->updated = true;

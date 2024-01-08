@@ -41,7 +41,7 @@ class ThirdspaceCarrier extends BaseShip{
         $scanner = new Scanner(7, 36, 10, 14);
 		$scanner->markThirdspace();
 		$this->addPrimarySystem($scanner);	        
-        $this->addPrimarySystem(new Engine(7, 36, 0, 18, 3));
+        $this->addPrimarySystem(new Engine(7, 36, 0, 18, 4));
 		$this->addPrimarySystem(new PsychicField(6, 0, 0, 0, 360));		
         $this->addPrimarySystem(new ThirdspaceSelfRepair(7, 24, 10)); //armor, structure, output 
 		$this->addPrimarySystem(new JumpEngine(6, 24, 4, 5));//Presumably have access to hyperspace, or possess some other form of FTL travel that this system represents.          		  		
