@@ -346,7 +346,7 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
 		parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);			
 		//Weapon has hit, so apply+1 to crit roll, +2 to dropout roll to the damge elements
 		$mod = 1;
-		if ($ship instanceof FighterFlight) $mod+;
+		if ($ship instanceof FighterFlight) $mod++;
 		$system->critRollMod += $mod; 
 		
 		if (isset(PsionicTorpedo::$alreadyAffected[$ship->id])) return; //But not if affected already.											
@@ -409,7 +409,7 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
 			$this->data["Special"] .= "<br>Ballistic weapon that can use offensive EW.";
 			$this->data["Special"] .= "<br>Multiple Psionic Torpedoes do not stack effects (but do stack with Psychic Field).";			
 			$this->data["Special"] .= "<br>Can be boosted twice, for +2 damage per boost level.";			
-		    $this->data["Special"] .= "<br>Has +1 modifier to critical hits, and +1 to fighter dropout rolls.";			
+		    $this->data["Special"] .= "<br>Has +1 modifier to critical hits, and +2 to fighter dropout rolls.";			
 		}
 
         private function getExtraDamagebyBoostlevel($turn){
