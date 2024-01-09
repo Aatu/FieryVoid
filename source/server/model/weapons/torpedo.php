@@ -344,7 +344,7 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
 
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!
 		parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);			
-		//Weapon has hit, so apply+1 to crit roll, +2 to dropout roll to the damge elements
+		//Weapon has hit, so apply+1 to crit roll, +1 to dropout roll to the damge elements
 		$mod = 1;
 //		if ($ship instanceof FighterFlight) $mod++;
 		$system->critRollMod += $mod; 
