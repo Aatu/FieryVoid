@@ -307,7 +307,7 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
         
         public $weaponClass = "Electromagnetic"; //deals Plasma, not Ballistic, damage. Should be Ballistic(Plasma), but I had to choose ;)
         public $damageType = "Flash"; 
-//        private $alreadyFlayed = false; //to avoid doing this multiple times      
+//        private $alreadyFlayed = false; //to avoid doing this multiple times  //OLD CODE RELATING TO WHEN PSIONIC TORPEDO FLAYED ARMOUR FROM TARGET    
                 
         public $fireControl = array(null, 4, 5); // fighters, <mediums, <capitals 
         public $priority = 1; //Flash! should strike first 
