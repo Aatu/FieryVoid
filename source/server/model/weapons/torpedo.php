@@ -300,7 +300,7 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
         public $iconPath = "PsionicTorpedo.png";                
   	  	public $animation = "torpedo";
         public $animationColor = array(128, 0, 0);
-   		public $animationExplosionScale = 0.6;         
+//   		public $animationExplosionScale = 0.6;         
 
         public $range = 550;
         public $loadingtime = 2;
@@ -470,7 +470,7 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
             $this->maxDamage = 21 + ($boost * 2); 
 		}
 
-/*
+/* //OLD CODE RELATING TO WHEN PSIONIC TORPEDO FLAYED ARMOUR FROM TARGET
    protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location = null)
     {
     //$pos ONLY relevant for FIGHTER armor if damage source position is different than one from weapon itself
