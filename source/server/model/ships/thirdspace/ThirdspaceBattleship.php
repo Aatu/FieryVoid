@@ -34,7 +34,7 @@ class ThirdspaceBattleship extends BaseShip{
 		/*Thirdspace use their own enhancement set */		
 		Enhancements::nonstandardEnhancementSet($this, 'ThirdspaceShip');				     
         
-        $this->addPrimarySystem(new AdvancedSingularityDrive(8, 50, 0, 154+10+4));
+        $this->addPrimarySystem(new AdvancedSingularityDrive(8, 50, 0, 156+10+4));
         $this->addPrimarySystem(new ThirdspaceCnC(8, 36, 0, 0));
         $scanner = new Scanner(7, 24, 10, 15);
 		$scanner->markThirdspace();
