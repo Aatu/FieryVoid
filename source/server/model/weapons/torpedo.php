@@ -356,7 +356,7 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
 		$effectPower = Dice::d(4,1)+1;//strength of effect: -2 to -4 to power.
 //		$effectThrust = Dice::d(3,1); //Potentially could add additional crit effect.		
 			
-		$fireOrder->pubnotes .= "<br> Target has Initiative reduced, and suffers power and scanner fluctations.";				
+		$fireOrder->pubnotes .= "<br> Target has Initiative reduced, and suffers from power and scanner fluctations.";				
 			
 		if ($system->advancedArmor){		
 			$effectEW = ceil($effectEW/2);//Other Ancients are somewhat resistant to pyschic attack from Thirdspace Aliens, 50% effect.		
