@@ -354,6 +354,7 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
 		$effectEW = Dice::d(3,1);//strength of effect: -1 to -3 EW.				
 		$effectIni = Dice::d(3,1);//strength of effect: -5 to -15 initiative.		
 		$effectPower = Dice::d(4,1)+1;//strength of effect: -2 to -4 to power.
+//		$effectthrust = Dice::d(3,1); //Potentially could add additional crit effect.		
 			
 		$fireOrder->pubnotes .= "<br> Target has Initiative reduced, and suffers power and scanner fluctations.";				
 			
