@@ -1253,9 +1253,9 @@
             parent::setSystemDataWindow($turn);
             //$this->output = $this->baseOutput + $this->getBoostLevel($turn); //handled in front end
             $this->data["Special"] = 'If three or four shots are fired, this weapon may overheat next turn if fired again.';    
-            $this->data["Special"] .= "<br>When this weapon has 'May Overheat' critical(s), firing offensively will cause a critical roll at end of turn."; 
+            $this->data["Special"] .= "<br>When this weapon has 'May Overheat' critical(s), firing again will cause a critical roll at end of turn."; 
             $this->data["Special"] .= "<br>This critical roll has +2 modifier for evey shot fired in current turn, and -2 if there is only one 'May Overheat' critical effect.";  
-            $this->data["Special"] .= "<br>Dual or Single shots will not cause overheating the following turn.";                          
+            $this->data["Special"] .= "<br>Dual or Single shots will not cause overheating the following turn, nor will defensive fire.";                          
         }
 
 	//Fire function for Quad Array
