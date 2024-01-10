@@ -587,7 +587,7 @@ class LimpetBoreTorpedo extends Torpedo{
 	    
         public function setSystemDataWindow($turn){
             parent::setSystemDataWindow($turn);
-            $this->data["Special"] = "Ballistic weapon used ONLY for Called Shots on systems located on exterior sections (e.g. weapons/thrusters).";
+            $this->data["Special"] = "Ballistic weapon used ONLY for Called Shots (using normal rules).";
             $this->data["Special"] .= "<br>Once it hits a system, it will try to damage it by adding a critical effect.";
             $this->data["Special"] .= "<br>This critical effect will remain until target system is destroyed, or after five failed attempts by the Limpet Bore.";            
             $this->data["Special"] .= "<br>Has no effect on targets equipped with Advanced Armor.";
