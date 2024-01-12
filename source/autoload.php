@@ -2804,6 +2804,7 @@ spl_autoload_register(
 //				'hyachalichikav' => '/server/model/ships/hyach/HyachAlichiKav.php',
 //				'hyachdartha' => '/server/model/ships/hyach/HyachDartha.php',
 //				'hyachdoskva' => '/server/model/ships/hyach/HyachDoskva.php',
+//				'hyachcomputer' => '/server/model/systems/baseSystems.php',	
 //				'hyachirokaikam' => '/server/model/ships/hyach/HyachIrokaiKam.php',
 
 
@@ -3136,6 +3137,7 @@ spl_autoload_register(
 					 	'lacanna' => '/server/model/ships/yolu/Lacanna.php', 
 					 	'lacannarefit' => '/server/model/ships/yolu/LacannaRefit.php',
 					 	'falaren' => '/server/model/ships/yolu/Falaren.php',
+		                'balosiandeltav' => '/server/model/ships/balosian/balosianDeltaV.php',						 	
 					 	
 					 	'alanti' => '/server/model/ships/abbai/Alanti.php',
 					 	'pirocia' => '/server/model/ships/abbai/Pirocia.php',
