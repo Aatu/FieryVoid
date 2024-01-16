@@ -2804,8 +2804,8 @@ spl_autoload_register(
 //				'hyachalichikav' => '/server/model/ships/hyach/HyachAlichiKav.php',
 //				'hyachdartha' => '/server/model/ships/hyach/HyachDartha.php',
 //				'hyachdoskva' => '/server/model/ships/hyach/HyachDoskva.php',
-//				'hyachcomputer' => '/server/model/systems/baseSystems.php',	
-//				'hyachirokaikam' => '/server/model/ships/hyach/HyachIrokaiKam.php',
+				'hyachcomputer' => '/server/model/systems/baseSystems.php',	
+				'hyachirokaikam' => '/server/model/ships/hyach/HyachIrokaiKam.php',
 
 
 

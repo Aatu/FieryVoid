@@ -409,6 +409,26 @@ shipManager.systems = {
         return total;
     },
 
+	//Looks for ships with Hyach Computer and lists any where the balance of BFCP is negative for error message.
+	getNegativeBFCP: function getNegativeBFCP() {
+			var shipNames = new Array();
+			var counter = 0;
+			for (var i in gamedata.ships) {
+				var ship = gamedata.ships[i];
+				if (ship.unavailable) continue;
+				if (ship.flight) continue;
+				if (ship.userid != gamedata.thisplayer) continue;			
+				if (!(shipManager.systems.getSystemByName(ship, "hyachComputer"))) continue; //Does it have a computer?
+				if (shipManager.isDestroyed(ship)) continue;
+				var computer = (shipManager.systems.getSystemByName(ship, "hyachComputer"));						
+				if (computer.BFCPtotal_used > computer.output){ //Is the total BFCP used greater than output, usually due to damage to Computer.
+					shipNames[counter] = ship.name;
+					counter++;
+				}
+			}
+			return shipNames;
+		},	//endof getNegativeBFCP
+
     getRemainingHealth: function getRemainingHealth(system) {
         var damage = shipManager.systems.getTotalDamage(system);
         var max = system.maxhealth;

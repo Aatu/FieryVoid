@@ -407,8 +407,157 @@ AdaptiveArmorController.prototype.canIncreaseAnything = function () { //returns 
 		}
 	} while ( (toReturn!=true) && (lookingAt != startingFrom) );
 	return toReturn;
-};
+};//endof AA Controller
 
+
+
+var HyachComputer = function HyachComputer(json, ship) {
+    ShipSystem.call(this, json, ship);
+};
+HyachComputer.prototype = Object.create(ShipSystem.prototype);
+HyachComputer.prototype.constructor = HyachComputer;
+
+HyachComputer.prototype.getCurrClass = function () { //get current FC class for display; if none, find first!
+    if (this.currClass == ''){
+		var classes = Object.keys(this.allocatedBFCP); //Allocated is always the same for HC, so can serve same purpose as availableAA did.
+		if (classes.length>0){
+			this.currClass = classes[0];
+		}
+	}
+	return this.currClass;
+};
+HyachComputer.prototype.nextCurrClass = function () { //get next FC class for display
+	this.getCurrClass();
+    if (this.currClass == '') return ''; //this would mean there are no FC classes whatsover!  Should never happen.
+	var classes = Object.keys(this.allocatedBFCP);
+	var currId = -1;
+	for (var i = 0; i < classes.length; i++) {
+		if (this.currClass == classes[i]){
+			currId = i+1;
+			break; //loop
+		}
+	}
+	if (currId >= classes.length) currId = 0;
+	this.currClass = classes[currId];
+	return this.currClass;
+};
+HyachComputer.prototype.canIncrease = function () { //check if can increase rating for current class; can do if preallocated points are unused or allocated points are less than available 
+	//always needs to check that allocated are less than maximum and allocated total is less than total maximum
+	this.getCurrClass();
+    if (this.currClass == '') return false; //this would mean there are no FC classes whatsover! Should never happen.
+
+	if (this.BFCPtotal_used >= (this.output)) return false; //Is the number of BFCP points used more than possible by this HC?	
+		
+	//how many are allocated?
+	var allocated = this.allocatedBFCP[this.currClass];	
+	//how many are allowed?
+	var allowed = this.BFCPpertype;	
+	if (allocated >= allowed) return false; //full allowance for this FC type filled	
+	//availability for this FC type remaining.
+	var available = this.output - this.BFCPtotal_used;	
+	if (available <= 0 ){ //Could go under 0 after damage?
+		return false;
+	}
+	return true;
+};
+HyachComputer.prototype.canDecrease = function () { //can decrease if something was increased
+	this.getCurrClass();
+	if (this.currClass == '') return false; //this would mean there are no FC classes whatsover!  Should never happen.		
+
+	if (this.allocatedBFCP[this.currClass]>0) return true;
+	return false;
+};
+HyachComputer.prototype.doIncrease = function () { //increase BFCP usage
+	this.getCurrClass();
+	if (this.currClass == '') return false; //this would mean there are no FC classes whatsover! Should never happen.
+
+	if (this.allocatedBFCP[this.currClass] < this.BFCPpertype) { //else use regular pool 
+		this.allocatedBFCP[this.currClass]++;
+
+		this.BFCPtotal_used++;
+	}
+	this.refreshData();
+};
+HyachComputer.prototype.doDecrease = function () { //decrease BFCP usage
+	this.getCurrClass();
+	if (this.currClass == '') return false; //this would mean there are no FC classes whatsover!
+	//Decrease could be in current turn, or from previous turn allocation.
+	if (this.allocatedBFCP[this.currClass]>0){		
+
+			this.allocatedBFCP[this.currClass]--;
+			this.BFCPtotal_used--;
+	}
+	this.refreshData();
+};
+HyachComputer.prototype.refreshData = function () { //refresh description to show correct values
+	var classes = Object.keys(this.allocatedBFCP);
+	var entryName = '';
+	var currType = '';
+	for (var i = 0; i < classes.length; i++) {
+		currType = classes[i];
+		//entry should exist, just change it to show current values
+		entryName = ' - ' + currType;
+		this.data[entryName] = this.allocatedBFCP[currType] + '/' + this.BFCPpertype;
+	}
+
+	this.data["Bonus Fire Control Points (BFCP)"] =  this.BFCPtotal_used + '/' + this.output;
+	
+};
+HyachComputer.prototype.canPropagate = function () { //can propagate if set to >0
+	if (this.currClass == '') return false; //this would mean there are no FC classes whatsover!
+	if (this.allocatedBFCP[this.currClass]>0) return true;
+	return false;
+};
+HyachComputer.prototype.getCurrFCType = function () { //returns current FC type
+	return this.currClass;
+};
+HyachComputer.prototype.getCurrAllocated = function () { //returns setting for current FC type
+	if (this.currClass == '') return 0;
+	return this.allocatedBFCP[this.currClass];
+};
+HyachComputer.prototype.getFCAllocated = function (FCIndex) { //returns setting for current FC type
+
+	var bonusfirecontrol = 0; 		
+	var FCvalues = Object.values(this.allocatedBFCP);
+	bonusfirecontrol = FCvalues[FCIndex];	
+	return bonusfirecontrol;
+};
+HyachComputer.prototype.setCurrFCType= function (FCTypeToSet) { //sets indicated FC type as current (or sets empty as current)
+	this.currClass = ''; //will do if desired type does not exist here, which is rare but possible
+	var classes = Object.keys(this.allocatedBFCP);
+	var currType = '';
+	for (var i = 0; i < classes.length; i++) {
+		currType = classes[i];
+		if (currType == FCTypeToSet){ //exists!
+			this.currClass = currType;
+			return; //no need to loop further
+		}
+	}	
+};
+HyachComputer.prototype.doIndividualNotesTransfer = function () { //prepare individualNotesTransfer variable - if relevant for this particular system
+	this.individualNotesTransfer = Array();
+	//every point is denoted as single entry with damage class name
+	var FCCategories = Object.keys(this.allocatedBFCP);	
+	var currType = '';
+	for (var i = 0; i < FCCategories.length; i++) {
+		currType = FCCategories[i];
+		for (var j = 0; j< this.allocatedBFCP[currType];j++) this.individualNotesTransfer.push(currType); //Passes a equal number of currType notes as the value of each FC Type in allocatedBFCP
+	}
+	return true;
+};
+HyachComputer.prototype.canIncreaseAnything = function () { //returns true if any BFCP points can currently be allocated
+	var toReturn = false;
+	var startingFrom = this.getCurrClass(); //so we know where we should stop checking
+	var lookingAt = startingFrom;
+	do{
+		if (this.canIncrease()) {
+			toReturn = true;
+		}else{
+			lookingAt = this.nextCurrClass();
+		}
+	} while ( (toReturn!=true) && (lookingAt != startingFrom) );
+	return toReturn;
+};//Endof HyachComputer
 
 
 

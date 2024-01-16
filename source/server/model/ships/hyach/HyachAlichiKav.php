@@ -23,6 +23,8 @@ class HyachAlichiKav extends HeavyCombatVessel{
         $this->iniativebonus = 30;
 		
         $this->isd = 2210;
+        
+		$this->computerHyach = true;          
 
         $this->addPrimarySystem(new Reactor(6, 18, 0, 0));
         $this->addPrimarySystem(new CnC(6, 15, 0, 0));
@@ -31,6 +33,8 @@ class HyachAlichiKav extends HeavyCombatVessel{
 			$this->addPrimarySystem($sensors); 
         $this->addPrimarySystem(new Engine(6, 20, 0, 10, 2));
         $this->addPrimarySystem(new Hangar(3, 1));
+			$HyachComputer = $this->createHyachComputer(6, 10, 0, 2); //$armour, $maxhealth, $powerReq, $output
+			$this->addPrimarySystem( $HyachComputer );	        
 		$this->addPrimarySystem(new Stealth(1,1,0));
 		$this->addPrimarySystem(new Interdictor(2, 4, 1, 180, 360));
 		$this->addPrimarySystem(new MediumLaser(3, 6, 5, 240, 360));
@@ -53,10 +57,11 @@ class HyachAlichiKav extends HeavyCombatVessel{
 		
 		$this->hitChart = array(
             0=> array(
-                    9 => "Structure",
-                    11 => "Medium Laser",
-                    13 => "Interdictor",
-					14 => "Scanner",
+                    8 => "Structure",
+                    10 => "Medium Laser",
+                    12 => "Interdictor",
+					13 => "Scanner",
+					14 => "Computer",					
                     16 => "Engine",
                     17 => "Hangar",
                     19 => "Reactor",

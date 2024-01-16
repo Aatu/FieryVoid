@@ -1229,7 +1229,15 @@ class Weapon extends ShipSystem
             $mod -= ($CnC->hasCritical("ShadowPilotPain", $gamedata->turn));
         }
         $firecontrol = $this->fireControl[$target->getFireControlIndex()];
-		
+        
+		if ($shooter->computerHyach) { //Does ship have a Hyach Computer that might add bonus FC?
+			$bonusFireControl = 0; //initialise
+			$computer = $shooter->getSystemByName("HyachComputer"); //Find computer.
+			$FCIndex = $target->getFireControlIndex(); //Find out FC category of the target.
+			$bonusFireControl = $computer->getFCBonus($FCIndex);  //Use FCIndex to check if Computer has any BFCP allocated to that FC category.
+			$firecontrol += $bonusFireControl; //Add to $firecontrol.
+		}
+        		
 		//advanced sensors: negates BDEW and SDEW, unless target is unit of advanced race
 		if ( ($target->factionAge < 3) && ($shooter->hasSpecialAbility("AdvancedSensors")) ){
 			$bdew = 0;

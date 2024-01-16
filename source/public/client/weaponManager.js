@@ -907,6 +907,14 @@ window.weaponManager = {
         
 
         var firecontrol = weaponManager.getFireControl(target, weapon);
+        
+		if (shipManager.hasSpecialAbility(shooter,"HyachComputer")) { //To check for any bonuses from Hyach Coputer BFCP.
+			var bonusfirecontrol = 0;
+			var computer = shipManager.systems.getSystemByName(shooter, "hyachComputer");		
+			var	FCIndex = weaponManager.getFireControlIndex(target); //Find out FC category of the target (0, 1 or 2)
+			bonusfirecontrol = computer.getFCAllocated(FCIndex);  //Use FCIndex to check if Computer has any BFCP allocated to that FC category.
+			firecontrol += bonusfirecontrol; //Add to firecontrol.					
+			}       
 		
         var goal = baseDef - jammermod - noLockMod - rangePenalty + oew + soew + firecontrol + mod;
         var hitChance = Math.round(goal / 20 * 100);
@@ -928,6 +936,13 @@ window.weaponManager = {
         return weapon.fireControl[0];
     },
 
+    getFireControlIndex: function getFireControlIndex(target) {
+        if (target.shipSizeClass < 2) return 1;
+        if (target.shipSizeClass >= 2) return 2;        	
+        return 0;
+    },
+
+    
     // 'position' should be in HEX coordinate
     getShipDefenceValuePos: function getShipDefenceValuePos(position, target) {
         var targetFacing = shipManager.getShipHeadingAngle(target);

@@ -39942,7 +39942,7 @@ var SystemInfoButtons = function (_React$Component) {
 			webglScene.customEvent('CloseSystemInfo');
 		}
 
-		/*switch Adaptive Armor display to next damage class*/
+		/*switch Adaptive Armor or Hyach Computer display to next damage/FC class*/
 
 	}, {
 		key: "nextCurrClass",
@@ -40044,15 +40044,96 @@ var SystemInfoButtons = function (_React$Component) {
 			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 		}
 
+		/*Hyach Computer increase rating for current class*/
+
+	}, {
+		key: "BFCPincrease",
+		value: function BFCPincrease(e) {
+			e.stopPropagation();e.preventDefault();
+			var _props21 = this.props,
+			    ship = _props21.ship,
+			    system = _props21.system;
+
+			system.doIncrease();
+			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+		}
+		/*Hyach Computer decrease rating for current class*/
+
+	}, {
+		key: "BFCPdecrease",
+		value: function BFCPdecrease(e) {
+			e.stopPropagation();e.preventDefault();
+			var _props22 = this.props,
+			    ship = _props22.ship,
+			    system = _props22.system;
+
+			system.doDecrease();
+			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+		}
+		/*Hyach Computer propagate setting for current damage type*/
+
+	}, {
+		key: "BFCPpropagate",
+		value: function BFCPpropagate(e) {
+			e.stopPropagation();e.preventDefault();
+			var _props23 = this.props,
+			    ship = _props23.ship,
+			    system = _props23.system;
+
+			var FCType = system.getCurrFCType();
+			var allocated = system.getCurrAllocated();
+			//loop through all own units and increase setting for this dmg type until this level is achieved (or as high as possible otherwise)
+			var allOwnBFCP = [];
+			for (var i in gamedata.ships) {
+				var otherUnit = gamedata.ships[i];
+				if (otherUnit.userid != ship.userid) continue; //ignore other players' units
+				if (shipManager.isDestroyed(otherUnit)) continue; //ignore destroyed units
+				//now find Hyach Computers, if any...
+				if (otherUnit.flight) {
+					for (var iFtr = 0; iFtr < otherUnit.systems.length; iFtr++) {
+						var ftr = otherUnit.systems[iFtr];
+						if (ftr) for (var iSys = 0; iSys < ftr.systems.length; iSys++) {
+							var ctrl = ftr.systems[iSys];
+							if (ctrl) if (ctrl.displayName == "Computer") {
+								allOwnBFCP.push(ctrl);
+								break; //no point looking for SECOND Computer on a fighter, actually Hyach should never have any, so just future proofing.
+							}
+						}
+					}
+				} else {
+					for (var iSys = 0; iSys < otherUnit.systems.length; iSys++) {
+						var ctrl = otherUnit.systems[iSys];
+						if (ctrl.displayName == "Computer") {
+							allOwnBFCP.push(ctrl);
+							break; //no point looking for SECOND AA Controller on a ship
+						}
+					}
+				}
+			}
+
+			//for each Computer: set allocated level to desired if possible
+			for (var c = 0; c < allOwnBFCP.length; c++) {
+				var ctrl = allOwnBFCP[c];
+				ctrl.setCurrDmgType(dmgType); //set damage type to desired (or none)
+				while (ctrl.getCurrAllocated() < allocated // level lower than desired
+				&& ctrl.canIncrease() //level can be increased
+				) {
+					ctrl.doIncrease();
+				}
+			}
+
+			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+		}
+
 		/*Self Repair - display next system in need of repairs*/
 
 	}, {
 		key: "nextSRsystem",
 		value: function nextSRsystem(e) {
 			e.stopPropagation();e.preventDefault();
-			var _props21 = this.props,
-			    ship = _props21.ship,
-			    system = _props21.system;
+			var _props24 = this.props,
+			    ship = _props24.ship,
+			    system = _props24.system;
 
 			system.getNextSystem();
 			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
@@ -40063,9 +40144,9 @@ var SystemInfoButtons = function (_React$Component) {
 		key: "SRPriorityUp",
 		value: function SRPriorityUp(e) {
 			e.stopPropagation();e.preventDefault();
-			var _props22 = this.props,
-			    ship = _props22.ship,
-			    system = _props22.system;
+			var _props25 = this.props,
+			    ship = _props25.ship,
+			    system = _props25.system;
 
 			system.setRepairPriority(20);
 			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
@@ -40074,9 +40155,9 @@ var SystemInfoButtons = function (_React$Component) {
 		key: "SRPriorityDown",
 		value: function SRPriorityDown(e) {
 			e.stopPropagation();e.preventDefault();
-			var _props23 = this.props,
-			    ship = _props23.ship,
-			    system = _props23.system;
+			var _props26 = this.props,
+			    ship = _props26.ship,
+			    system = _props26.system;
 
 			system.setRepairPriority(0);
 			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
@@ -40085,9 +40166,9 @@ var SystemInfoButtons = function (_React$Component) {
 		key: "SRPriorityCancel",
 		value: function SRPriorityCancel(e) {
 			e.stopPropagation();e.preventDefault();
-			var _props24 = this.props,
-			    ship = _props24.ship,
-			    system = _props24.system;
+			var _props27 = this.props,
+			    ship = _props27.ship,
+			    system = _props27.system;
 
 			system.setRepairPriority(-1);
 			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
@@ -40095,10 +40176,10 @@ var SystemInfoButtons = function (_React$Component) {
 	}, {
 		key: "render",
 		value: function render() {
-			var _props25 = this.props,
-			    ship = _props25.ship,
-			    selectedShip = _props25.selectedShip,
-			    system = _props25.system;
+			var _props28 = this.props,
+			    ship = _props28.ship,
+			    selectedShip = _props28.selectedShip,
+			    system = _props28.system;
 
 
 			if (!canDoAnything) {
@@ -40125,6 +40206,11 @@ var SystemInfoButtons = function (_React$Component) {
 				canAAincrease(ship, system) && React.createElement(Button, { onClick: this.AAincrease.bind(this), img: "./img/systemicons/AAclasses/iconPlus.png" }),
 				canAAdecrease(ship, system) && React.createElement(Button, { onClick: this.AAdecrease.bind(this), img: "./img/systemicons/AAclasses/iconMinus.png" }),
 				canAApropagate(ship, system) && React.createElement(Button, { title: "propagate setting", onClick: this.AApropagate.bind(this), img: "./img/systemicons/AAclasses/iconPropagate.png" }),
+				canBFCPdisplayCurrClass(ship, system) && React.createElement(Button, { title: getBFCPcurrClassName(ship, system), img: getBFCPcurrClassImg(ship, system) }),
+				canBFCPdisplayCurrClass(ship, system) && React.createElement(Button, { title: "next", onClick: this.nextCurrClass.bind(this), img: "./img/systemicons/BFCPclasses/iconNext.png" }),
+				canBFCPincrease(ship, system) && React.createElement(Button, { onClick: this.BFCPincrease.bind(this), img: "./img/systemicons/BFCPclasses/iconPlus.png" }),
+				canBFCPdecrease(ship, system) && React.createElement(Button, { onClick: this.BFCPdecrease.bind(this), img: "./img/systemicons/BFCPclasses/iconMinus.png" }),
+				canBFCPpropagate(ship, system) && React.createElement(Button, { title: "propagate setting", onClick: this.BFCPpropagate.bind(this), img: "./img/systemicons/BFCPclasses/iconPropagate.png" }),
 				canSRdisplayCurrSystem(ship, system) && React.createElement(Button, { title: "next", onClick: this.nextSRsystem.bind(this), img: "./img/systemicons/AAclasses/iconNext.png" }),
 				canSRdisplayCurrSystem(ship, system) && React.createElement(Button, { title: getSRdescription(ship, system), img: getSRicon(ship, system) }),
 				canSRdisplayCurrSystem(ship, system) && React.createElement(Button, { title: "Highest priority", onClick: this.SRPriorityUp.bind(this), img: "./img/iconSRHigh.png" }),
@@ -40162,6 +40248,29 @@ var canAApropagate = function canAApropagate(ship, system) {
 	return canAA(ship, system) && system.canPropagate() != '';
 };
 
+//can do something with Hyach Computer
+var canBFCP = function canBFCP(ship, system) {
+	return gamedata.gamephase === 1 && system.name == 'hyachComputer';
+};
+var canBFCPdisplayCurrClass = function canBFCPdisplayCurrClass(ship, system) {
+	return canBFCP(ship, system) && system.getCurrClass() != '';
+};
+var getBFCPcurrClassImg = function getBFCPcurrClassImg(ship, system) {
+	return './img/systemicons/BFCPClasses/' + system.getCurrClass() + '.png';
+};
+var getBFCPcurrClassName = function getBFCPcurrClassName(ship, system) {
+	return system.getCurrClass();
+};
+var canBFCPincrease = function canBFCPincrease(ship, system) {
+	return canBFCP(ship, system) && system.canIncrease() != '';
+};
+var canBFCPdecrease = function canBFCPdecrease(ship, system) {
+	return canBFCP(ship, system) && system.canDecrease() != '';
+};
+var canBFCPpropagate = function canBFCPpropagate(ship, system) {
+	return canBFCP(ship, system) && system.canPropagate() != '';
+};
+
 //can do something with Self Repair...
 var canSRdisplayCurrSystem = function canSRdisplayCurrSystem(ship, system) {
 	return gamedata.gamephase === 1 && system.name == 'SelfRepair' && system.getCurrSystem() >= 0;
@@ -40174,7 +40283,7 @@ var getSRicon = function getSRicon(ship, system) {
 };
 
 var canDoAnything = exports.canDoAnything = function canDoAnything(ship, system) {
-	return canOffline(ship, system) || canOnline(ship, system) || canOverload(ship, system) || canStopOverload(ship, system) || canBoost(ship, system) || canDeBoost(ship, system) || canAddShots(ship, system) || canReduceShots(ship, system) || canRemoveFireOrder(ship, system) || canChangeFiringMode(ship, system) || canSelfIntercept(ship, system) || canAA(ship, system) || canSRdisplayCurrSystem(ship, system);
+	return canOffline(ship, system) || canOnline(ship, system) || canOverload(ship, system) || canStopOverload(ship, system) || canBoost(ship, system) || canDeBoost(ship, system) || canAddShots(ship, system) || canReduceShots(ship, system) || canRemoveFireOrder(ship, system) || canChangeFiringMode(ship, system) || canSelfIntercept(ship, system) || canAA(ship, system) || canBFCP(ship, system) || canSRdisplayCurrSystem(ship, system);
 };
 
 var canOffline = function canOffline(ship, system) {

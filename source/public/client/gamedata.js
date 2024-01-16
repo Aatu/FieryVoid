@@ -262,7 +262,8 @@ window.gamedata = {
             var hasNoEW = [];
             var selfDestructing = [];
 			var notLaunching = [];
-			var notSetAA = [];//available Adaptive Armor points remaining! 
+			var notSetAA = [];//available Adaptive Armor points remaining!
+			var notSetFC = [];//available BFCP points remaining for Hyach!
 		var powerSurplus = [];//power surplus
 
             for (var ship in myShips) {
@@ -279,6 +280,10 @@ window.gamedata = {
                         } else if (myShips[ship].systems[syst].name == "adaptiveArmorController") {
 							if (myShips[ship].systems[syst].canIncreaseAnything()) {
 								notSetAA.push(myShips[ship]);
+							}
+						}else if (myShips[ship].systems[syst].name == "hyachComputer") {
+							if (myShips[ship].systems[syst].canIncreaseAnything()) {
+								notSetFC.push(myShips[ship]);
 							}
 						}
                     }
@@ -334,7 +339,7 @@ window.gamedata = {
 					//check for ballistic launch
 					//and Adaptive Armor
 					var fired = 0;
-					var didNotSetAA = false;
+					var didNotSetAA = false;				
 					var hasReadyLaunchers = false;
 					for (var i = 0; i < myShips[ship].systems.length; i++) {
 						if (typeof myShips[ship].systems[i] != "undefined") {
@@ -359,7 +364,7 @@ window.gamedata = {
 										if (currWeapon.canIncreaseAnything()) {
 											didNotSetAA = true;
 										}
-									}
+									} 
 								}
 							}
 						}
@@ -369,7 +374,7 @@ window.gamedata = {
 					}
 					if (didNotSetAA){ //available Adaptive Armor has not been set
 						notSetAA.push(myShips[ship]);
-					}
+					}				
 				}
             }
 
@@ -424,6 +429,15 @@ window.gamedata = {
                 }
                 html += "<br>";
             }
+            if (notSetFC.length > 0) {
+                html += "You have not assigned available BFCP points for the following units: ";
+                html += "<br>";
+                for (var ship in notSetFC) {
+                    html += notSetFC[ship].name + " (" + notSetFC[ship].shipClass + ")";
+                    html += "<br>";
+                }
+                html += "<br>";
+            }            
             if (powerSurplus.length > 0) {
                 html += "Followed ships have unassigned Power reserves: ";
                 html += "<br>";
@@ -572,7 +586,20 @@ window.gamedata = {
                 window.confirm.error(tooManyShieldsError, function () {});
                 return false;
             }
-		
+
+            shipNames = shipManager.systems.getNegativeBFCP();
+
+            if (shipNames.length > 0) {
+                var tooManyBFCPError = "The following ships have too many Bonus Fire Control Points (BFCP) set:<br>";
+
+                for (var i in shipNames) {
+                    var shipName = shipNames[i];
+                    tooManyBFCPError += "- " + shipName + "<br>";
+                }
+                tooManyBFCPError += "You need to decrease the number of allocated BFCPs.";
+                window.confirm.error(tooManyBFCPError, function () {});
+                return false;
+            }		
 		
 		
             var myShips = [];

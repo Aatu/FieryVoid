@@ -1901,6 +1901,162 @@ class HkControlNode extends ShipSystem{
 } //endof class HkControlNode
 
 
+class HyachComputer extends ShipSystem{
+    public $name = "hyachComputer";
+    public $displayName = "Computer";
+    public $primary = true; //Check if inherited and remove?
+	public $isPrimaryTargetable = false; //Check if inherited and remove?
+	public $isTargetable = true; //Check if inherited and remove?
+    public $iconPath = "Computer.png";
+	protected $doCountForCombatValue = true; //Check if inherited and remove?
+		
+    public $specialAbilities = array("HyachComputer"); //Front end looks for this.	
+	public $specialAbilityValue = true; //so it is actually recognized as special ability!    		
+	
+	public $BFCPtotal_used = 0;
+	public $BFCPpertype = 2;//No category can be more than 2!
+	public $currClass = '';//for front end.
+	
+	public $allocatedBFCP = array('Fighter' => 0, 'MCV' => 0, 'Capital' => 0); //BFCP points allocated for given FC type
+    
+    protected $possibleCriticals = array(); //no available criticals - however damage to the computer will reduce BFCP available.
+    
+    function __construct($armour, $maxhealth, $powerReq, $output){ 
+        parent::__construct($armour, $maxhealth, $powerReq, $output ); //$armour, $maxhealth, $powerReq, $output    	
+    }  
+
+	/* this method generates additional non-standard information in the form of individual system notes
+	in this case: 
+	 - Initial phase: check setting changes made by user, convert to notes.
+	*/
+    public function generateIndividualNotes($gameData, $dbManager){ //dbManager is necessary for Initial phase only
+		$ship = $this->getUnit();
+		switch($gameData->phase){
+						
+				case 1: //Initial phase
+					//data returned as allocatedBFCP table, with one value passed per BFCP point in each FCType e.g. 'Fighter' mean +1 in allocatedBFCP['Fighter']
+					if($ship->userid == $gameData->forPlayer){ //only own ships, otherwise bad things may happen!
+						//load existing data first - at this point ship is rudimentary, without data from database!
+						$listNotes = $dbManager->getIndividualNotesForShip($gameData, $gameData->turn, $ship->id);	
+						foreach ($listNotes as $currNote){
+							if($currNote->systemid==$this->id){//note is intended for this system!
+								$this->addIndividualNote($currNote);	 								
+							}
+						}
+						$this->onIndividualNotesLoaded($gameData);		
+
+							
+						$keys = array_keys($this->allocatedBFCP); //Extract keys Fighter, MCV, Capital.
+						$values = array_values($this->allocatedBFCP);//Extract values for those keys.																	
+						foreach ($keys as $FCType) { //Will always be three keys.
+						    // Find the FC Type of the current key in $keys array
+						    $index = array_search($FCType, $keys);
+
+						    // Use the FC Type to access the corresponding value in $values array
+						    $ptsSet = $values[$index];	
+												
+							$notekey = $FCType;
+							$noteHuman = 'Bonus Fire Control Point set';
+							$notevalue = $ptsSet;
+							$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$notevalue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue         
+						}			
+		}								
+			break;				
+		}
+	} //endof function generateIndividualNotes
+	
+
+public function onIndividualNotesLoaded($gamedata)
+{
+	
+	switch($gamedata->phase){
+			//What were BFCP set as last turn, load them up at start of Initial Orders.			
+			case 1: //Initial phase		
+			    foreach ($this->individualNotes as $currNote) {
+			  		if($currNote->turn == $gamedata->turn-1) {  				    	
+			        $FCClass = $currNote->notevalue;
+
+			        // Check if the key exists in $this->allocatedBFCP
+			        if (array_key_exists($FCClass, $this->allocatedBFCP)) {
+			            // Increment the value associated with the appropirate key e.g. Fighter, MCV, Capital.
+			            $this->allocatedBFCP[$FCClass]++;
+			        		}
+						}
+					}				
+							
+			break;
+			//Otherwise, what were the points set this turn at end of Initial Orders.
+			default:					
+			    foreach ($this->individualNotes as $currNote) {
+			  		if($currNote->turn == $gamedata->turn) {  			    	
+			        $FCClass = $currNote->notevalue;
+
+			        // Check if the key exists in $this->allocatedBFCP
+			        if (array_key_exists($FCClass, $this->allocatedBFCP)) {
+			            // Increment the value associated with the appropirate key e.g. Fighter, MCV, Capital.
+			            $this->allocatedBFCP[$FCClass]++;
+			        		}
+						}
+					}
+			break;		
+			}		
+		
+        //and immediately delete notes themselves, they're no longer needed (this will not touch the database, just memory!)
+        $this->individualNotes = array();
+             
+        //calculate $this->BFCPtotal_used,
+        $this->BFCPtotal_used = 0;
+ 		$this->BFCPtotal_used = array_sum($this->allocatedBFCP);  
+ 		  
+ }//endof onIndividualNotesLoaded
+ 
+	
+    public function setSystemDataWindow($turn){
+        parent::setSystemDataWindow($turn);
+		$damageTaken = $this->maxhealth - ($this->getRemainingHealth()); //Check for damge taken.
+		$lostBFCP = floor($damageTaken/5);	//1 BFCP lost per 5 damage.        
+        $this->output = $this->output - $lostBFCP; //Adjust output based on damage taken, -1 point per 5 damage.
+         
+		$this->data["Bonus Fire Control Points (BFCP)"] = $this->BFCPtotal_used . '/' . $this->output;
+		$this->data[" - per Fire Control category"] =  $this->BFCPpertype;
+		foreach($this->allocatedBFCP as $FCType=>$BFCPallocated){
+			$this->data[' - '.$FCType] =  $BFCPallocated . '/' . $this->BFCPpertype;
+		}
+        $this->data["Special"] = "This system is responsible for Bonus Fire Control Points (BFCP) management.";	   
+        $this->data["Special"] .= "<br>Each turn you may assign available BFCP points in Initial phase to one of the three Fire Control categories.";
+        $this->data["Special"] .= "<br>Each category can be assigned up to two BFCP points.";
+        $this->data["Special"] .= "<br>The Computer will lose 1 BFCP per 5 points of damage taken, BFCP may then need to be reduced.";        
+    }
+	
+	//always redefine $this->data for Hyach Computer! A lot of variable information goes there...
+	public function stripForJson(){
+        $strippedSystem = parent::stripForJson();
+        $strippedSystem->data = $this->data;
+        $strippedSystem->allocatedBFCP = $this->allocatedBFCP;
+        $strippedSystem->BFCPtotal_used = $this->BFCPtotal_used;
+		
+        return $strippedSystem;
+    }
+	
+	public function doIndividualNotesTransfer(){
+		//data received in variable individualNotesTransfer, further functions will look for it in allocatedBFCP
+		if(is_array($this->individualNotesTransfer))	$this->allocatedBFCP = $this->individualNotesTransfer; //else there's nothing relevant there
+		$this->individualNotesTransfer = array(); //empty, just in case
+	}		
+	
+	//returns FC bonus for allocated for a given ship classes / FC index
+	public function getFCBonus($FCIndex){
+	    $FCvalue = 0;
+	    $FCvalueArray = array_values($this->allocatedBFCP);        
+	    if (isset($FCvalueArray[$FCIndex])) {
+	        $FCvalue = $FCvalueArray[$FCIndex]; 
+	    }
+	    return $FCvalue;
+	}
+
+							
+} //endof HyachComputer
+
 /* Connection Strut, as present on units too large for their designers tech level
 	in FV damage is reflected on Structure in Critical phase (not immediately), which means:
 	 - incoming fire will affect less damaged Structure (rather than potentially spill over to PRIMARY Structure)

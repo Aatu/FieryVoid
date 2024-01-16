@@ -5,7 +5,7 @@ class HyachIrokaiKam extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 1025;
-	$this->faction = "Hyach";
+        $this->faction = "Hyach";
         $this->phpclass = "HyachIrokaiKam";
         $this->imagePath = "img/ships/HyachIrokaiKam.png";
         $this->shipClass = "Irokai Kam Battlecruiser";
@@ -24,16 +24,18 @@ class HyachIrokaiKam extends BaseShip{
         $this->iniativebonus = 0;
         
         $this->gravitic = true;
+		$this->computerHyach = true;        
 
         $this->addPrimarySystem(new Reactor(5, 28, 0, 0));
         $this->addPrimarySystem(new CnC(5, 18, 0, 0));
 		$sensors = new Scanner(5, 28, 6, 11);
 			$sensors->markHyach();
 			$this->addPrimarySystem($sensors); 
- //       $this->addPrimarySystem(new Scanner(5, 28, 6, 11));
         $this->addPrimarySystem(new Engine(5, 26, 0, 12, 3));
 		$this->addPrimarySystem(new Hangar(4, 2));
 		$this->addPrimarySystem(new JumpEngine(5, 21, 4, 20));
+			$HyachComputer = $this->createHyachComputer(5, 15, 0, 3); //$armour, $maxhealth, $powerReq, $output
+			$this->addPrimarySystem( $HyachComputer );		
 
         $this->addFrontSystem(new GraviticThruster(4, 11, 0, 3, 1));
         $this->addFrontSystem(new GraviticThruster(4, 11, 0, 3, 1));
@@ -71,16 +73,17 @@ class HyachIrokaiKam extends BaseShip{
         $this->hitChart = array(
         		0=> array(
         				10 => "Structure",
-        				12 => "Jump Engine",
-        				14 => "Scanner",
+     	  				11 => "Jump Engine",
+        				13 => "Scanner",
+						14 => 'Computer',        				
         				16 => "Engine",
         				17 => "Hangar",
         				19 => "Reactor",
-        				20 => "C&C",
-        		),
+        				20 => "C&C",				
+        		), 
         		1=> array(
-        				5 => "Thruster",
-        				7 => "Spinal Laser",
+	       				5 => "Thruster",
+  	     				7 => "Spinal Laser",
         				9 => "Medium Laser",
 						11 => "Maser",
         				18 => "Structure",

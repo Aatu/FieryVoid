@@ -71,7 +71,8 @@ class BaseShip {
     public $rolled = false;
     public $rolling = false;
 	public $EMHardened = false; //EM Hardening (Ipsha have it) - some weapons would check for this value!
-	public $jammerMissile = false; //Marker for when ships are affected by Jammer Missile BDEW.		
+	public $jammerMissile = false; //Marker for when ships are affected by Jammer Missile BDEW.
+	public $computerHyach = false; //Marker for ships which have a Computer (e.g. Hyach).  calculateHitBase looks for this to modify FC values.			
 
     public $team;
     private $expectedDamage = array(); //loc=>dam; damage the unit is expected to take this turn (at outer locations), to decide where to take ambiguous shots
@@ -113,6 +114,15 @@ class BaseShip {
 		public function createAdaptiveArmorController($AAtotal, $AApertype, $AApreallocated){ //$AAtotal, $AApertype, $AApreallocated
 			$this->adaptiveArmorController = new AdaptiveArmorController($AAtotal, $AApertype, $AApreallocated); 
 			return $this->getAdaptiveArmorController();
+		}
+
+		public function getHyachComputer(){
+			return $this->HyachComputer;    
+		}
+
+		public function createHyachComputer($armour, $maxhealth, $powerReq, $output){ //$armour, $maxhealth, $powerReq, $output
+			$this->HyachComputer = new HyachComputer($armour, $maxhealth, $powerReq, $output); 
+			return $this->getHyachComputer();
 		}
         
         public function getCommonIniModifiers( $gamedata ){ //common Initiative modifiers: speed, criticals
