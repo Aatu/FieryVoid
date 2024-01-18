@@ -1,30 +1,29 @@
 <?php
-class HyachDoskva extends FighterFlight
+class HyachLaricha extends FighterFlight
 {
 
 	function __construct($id, $userid, $name,  $slot)
 	{
 		parent::__construct($id, $userid, $name,  $slot);
 
-		$this->pointCost = 75 *6;
+		$this->pointCost = 40 *6;
 		$this->faction = "Hyach Gerontocracy";
-		$this->phpclass = "HyachDoskva";
-		$this->shipClass = "Doskva Stealth Fighters";
-			$this->variantOf = "Dartha Medium Fighters";
-			$this->occurence = "rare";
+		$this->phpclass = "HyachLaricha";
+		$this->shipClass = "Laricha Assault Shuttles";
 		$this->imagePath = "img/ships/CorillaniTilliniCPN.png";
 				
-		$this->isd = 2254;
+		$this->isd = 2244;
 
-		$this->forwardDefense = 6;
-		$this->sideDefense = 6;
-		$this->freethrust = 9;
-		$this->offensivebonus = 6;
-		$this->jinkinglimit = 8;
+		$this->forwardDefense = 9;
+		$this->sideDefense = 7;
+		$this->freethrust = 8;
+		$this->offensivebonus = 4;
+		$this->jinkinglimit = 0;
+        $this->pivotcost = 2; //shuttles have pivot cost higher        
 		$this->turncost = 0.33;
         $this->gravitic = true;
 
-		$this->iniativebonus = 18 *5;
+		$this->iniativebonus = 9*5;
 		$this->populate();
 	}
 
@@ -36,16 +35,15 @@ class HyachDoskva extends FighterFlight
 
 		for ($i = 0; $i < $toAdd; $i++) {
 
-			$armour = array(2, 2, 1, 1);
-			$fighter = new Fighter("HyachDoskva", $armour, 10, $this->id);
-			$fighter->displayName = "Doskva";
+			$armour = array(2, 2, 2, 2);
+			$fighter = new Fighter("HyachLaricha", $armour, 10, $this->id);
+			$fighter->displayName = "Laricha";
 			$fighter->imagePath = "img/ships/CorillaniTilliniCPN.png";
 			$fighter->iconPath = "img/ships/CorillaniTilliniCPN_large.png";
 
-			$frontGun = new LtBlastLaser(330, 30);
-			$fighter->addFrontSystem($frontGun);
+            $frontGun = new LtBlastLaser(330, 30); //1 gun
+            $fighter->addFrontSystem($frontGun);
 			
-			$fighter->addAftSystem(new Stealth(1,1,0));
 			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
 			
 			$this->addSystem($fighter);

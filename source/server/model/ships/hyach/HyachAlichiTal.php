@@ -1,17 +1,21 @@
 <?php
-class HyachAlichiKav extends HeavyCombatVessel{
+class HyachAlichiTal extends HeavyCombatVessel{
 
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
 
-        $this->pointCost = 700;
+        $this->pointCost = 650;
         $this->faction = "Hyach Gerontocracy";
-        $this->phpclass = "HyachAlichiKav";
+        $this->phpclass = "HyachAlichiTal";
         $this->imagePath = "img/ships/HyachAlichiKavDemo.png";
-        $this->shipClass = "Alichi Kav Stealth Cruiser";
+        $this->shipClass = "Alichi Tal Infiltrator";
+			$this->variantOf = 'Alichi Kav Stealth Cruiser';
+			$this->occurence = "uncommon";
 		$this->canvasSize = 175; //img has 175px per side
         $this->gravitic = true;
         $this->limited = 33;
+		
+        $this->fighters = array("assault shuttles"=>12);
 		
         $this->forwardDefense = 10;
         $this->sideDefense = 12;
@@ -22,9 +26,9 @@ class HyachAlichiKav extends HeavyCombatVessel{
         $this->pivotcost = 3;
         $this->iniativebonus = 30;
 		
-        $this->isd = 2210;
+        $this->isd = 2244;
 
-        $this->addPrimarySystem(new Reactor(6, 18, 0, 0));
+        $this->addPrimarySystem(new Reactor(6, 15, 0, 0));
         $this->addPrimarySystem(new CnC(6, 15, 0, 0));
 		$sensors = new Scanner(6, 20, 5, 6);
 			$sensors->markHyach();
@@ -38,11 +42,11 @@ class HyachAlichiKav extends HeavyCombatVessel{
 		$this->addPrimarySystem(new Interdictor(2, 4, 1, 0, 180));
 //			$HyachComputer = $this->createHyachComputer(6, 10, 0, 2); //$armour, $maxhealth, $powerReq, $output
 //			$this->addPrimarySystem( $HyachComputer );
-			
+
         $this->addFrontSystem(new GraviticThruster(4, 15, 0, 5, 1));
-		$this->addFrontSystem(new SpinalLaser(5, 12, 12, 330, 30));
-		$this->addFrontSystem(new MediumLaser(3, 6, 5, 240, 360));
-		$this->addFrontSystem(new MediumLaser(3, 6, 5, 0, 120));
+        $this->addFrontSystem(new Hangar(4, 14));
+		$this->addFrontSystem(new Maser(3, 6, 3, 240, 360));
+		$this->addFrontSystem(new Maser(3, 6, 3, 0, 120));
 
         $this->addAftSystem(new GraviticThruster(4, 15, 0, 5, 3));
         $this->addAftSystem(new GraviticThruster(4, 15, 0, 5, 4));
@@ -67,8 +71,8 @@ class HyachAlichiKav extends HeavyCombatVessel{
             ),
             1=> array(
                     4 => "Thruster",
-					6 => "Spinal Laser",
-                    8 => "Medium Laser",
+					6 => "Hangar",
+                    8 => "Maser",
                     18 => "Structure",
                     20 => "Primary",
             ),

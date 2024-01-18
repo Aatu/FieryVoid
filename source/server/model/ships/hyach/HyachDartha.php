@@ -7,7 +7,7 @@ class HyachDartha extends FighterFlight
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 70 *6;
-		$this->faction = "Hyach";
+		$this->faction = "Hyach Gerontocracy";
 		$this->phpclass = "HyachDartha";
 		$this->shipClass = "Dartha Medium Fighters";
 		$this->imagePath = "img/ships/CorillaniTilliniCPN.png";
@@ -35,7 +35,7 @@ class HyachDartha extends FighterFlight
 		for ($i = 0; $i < $toAdd; $i++) {
 
 			$armour = array(2, 2, 1, 1);
-			$fighter = new Fighter("HyachDovoch", $armour, 10, $this->id);
+			$fighter = new Fighter("HyachDartha", $armour, 10, $this->id);
 			$fighter->displayName = "Dartha";
 			$fighter->imagePath = "img/ships/CorillaniTilliniCPN.png";
 			$fighter->iconPath = "img/ships/CorillaniTilliniCPN_large.png";

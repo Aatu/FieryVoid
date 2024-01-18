@@ -291,6 +291,9 @@ class BaseShip {
             if(($this->faction == "Pak'ma'ra") && (!($this instanceof FighterFlight))	){
                 return $this->doPakmaraInitiativeBonus($gamedata);
             }
+		   if($this->faction == "Hyach"){
+		                return $this->doHyachInitiativeBonus($gamedata);
+		        }            
 			if(($this->faction == "Gaim") && ($this instanceOf gaimMoas)){  //GTS
                 return $this->doGaimInitiativeBonus($gamedata);
             }
@@ -455,6 +458,19 @@ class BaseShip {
         return $this->iniativebonus - $mod*5;
     } //end of doPakmaraInitiativeBonus    
 
+
+         private function doHyachInitiativeBonus($gamedata){
+            foreach($gamedata->ships as $ship){
+                if(!$ship->isDestroyed()
+                        && ($ship->faction == "Hyach")
+                        && ($this->userid == $ship->userid)
+                        && ($ship instanceof HyachIrokaiKal)
+                        && ($this->id != $ship->id)){
+                    return ($this->iniativebonus+5);
+                }
+            }
+            return $this->iniativebonus;
+        }
 
 
 		//GTS
