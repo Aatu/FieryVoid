@@ -5,7 +5,7 @@ class HyachIrokaiKam extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 1025;
-        $this->faction = "Hyach";
+        $this->faction = "Hyach Gerontocracy";
         $this->phpclass = "HyachIrokaiKam";
         $this->imagePath = "img/ships/HyachIrokaiKam.png";
         $this->shipClass = "Irokai Kam Battlecruiser";

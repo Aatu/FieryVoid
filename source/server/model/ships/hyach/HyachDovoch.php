@@ -1,5 +1,5 @@
 <?php
-class HyachDartha extends FighterFlight
+class HyachDovoch extends FighterFlight
 {
 
 	function __construct($id, $userid, $name,  $slot)
@@ -8,8 +8,10 @@ class HyachDartha extends FighterFlight
 
 		$this->pointCost = 70 *6;
 		$this->faction = "Hyach Gerontocracy";
-		$this->phpclass = "HyachDartha";
-		$this->shipClass = "Dartha Medium Fighters";
+		$this->phpclass = "HyachDovoch";
+		$this->shipClass = "Dartha Medium Fighters (with Dovoch)";
+			$this->variantOf = "Dartha Medium Fighters";
+			$this->occurence = "common";		
 		$this->imagePath = "img/ships/CorillaniTilliniCPN.png";
 				
 		$this->isd = 2222;
@@ -21,6 +23,7 @@ class HyachDartha extends FighterFlight
 		$this->jinkinglimit = 8;
 		$this->turncost = 0.33;
         $this->gravitic = true;
+		$this->notes = 'Dartha flight with one Dovoch with Interdictor system';       
 
 		$this->iniativebonus = 18 *5;
 		$this->populate();
@@ -40,8 +43,13 @@ class HyachDartha extends FighterFlight
 			$fighter->imagePath = "img/ships/CorillaniTilliniCPN.png";
 			$fighter->iconPath = "img/ships/CorillaniTilliniCPN_large.png";
 
-			$frontGun = new LtBlastLaser(330, 30);
-			$fighter->addFrontSystem($frontGun);
+			if ($i == 1) {
+				$frontGun2 = new FtrInterdictor(330, 30);
+				$fighter->addFrontSystem($frontGun2);
+			} else {
+				$frontGun = new LtBlastLaser(330, 30);
+				$fighter->addFrontSystem($frontGun);
+			}
 			
 			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
 			

@@ -2796,22 +2796,21 @@ spl_autoload_register(
 				//Hyach
 				
 				//weapons
-//                'ftrinterdictor' => '/server/model/weapons/particle.php',
+                'ftrinterdictor' => '/server/model/weapons/particle.php',
                 'interdictor' => '/server/model/weapons/particle.php',
                 'ltblastlaser' => '/server/model/weapons/lasers.php',
-
-				//units
-//				'hyachalichikav' => '/server/model/ships/hyach/HyachAlichiKav.php',
-//				'hyachdartha' => '/server/model/ships/hyach/HyachDartha.php',
-//				'hyachdoskva' => '/server/model/ships/hyach/HyachDoskva.php',
 				'hyachcomputer' => '/server/model/systems/baseSystems.php',	
+				//units
 				'hyachirokaikam' => '/server/model/ships/hyach/HyachIrokaiKam.php',
+				'hyachdartha' => '/server/model/ships/hyach/HyachDartha.php',				
+				'hyachdoskva' => '/server/model/ships/hyach/HyachDoskva.php',
+				'hyachdovoch' => '/server/model/ships/hyach/HyachDovoch.php',									
 /*
 				'hyachalichikav' => '/server/model/ships/hyach/HyachAlichiKav.php',
 				'hyachalichital' => '/server/model/ships/hyach/HyachAlichiTal.php',
 				'hyachalichikav' => '/server/model/ships/hyach/HyachAlichiKav.php',
-				'hyachdartha' => '/server/model/ships/hyach/HyachDartha.php',
-				'hyachdoskva' => '/server/model/ships/hyach/HyachDoskva.php',
+	//			'hyachdartha' => '/server/model/ships/hyach/HyachDartha.php',
+	//			'hyachdoskva' => '/server/model/ships/hyach/HyachDoskva.php',
 				'hyachecamrontek' => '/server/model/ships/hyach/HyachEcamronTek.php',
 				'hyachevirolkon' => '/server/model/ships/hyach/HyachEvirolKon.php',
 				'hyacheviroltek' => '/server/model/ships/hyach/HyachEvirolTek.php',
