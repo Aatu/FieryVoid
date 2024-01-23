@@ -23,7 +23,7 @@ class HyachDovoch extends FighterFlight
 		$this->jinkinglimit = 8;
 		$this->turncost = 0.33;
         $this->gravitic = true;
-		$this->notes = 'Dartha flight with one Dovoch with Interdictor system';       
+		$this->notes = 'Contains a Dovoch fighter with Interdictor';       
 
 		$this->iniativebonus = 18 *5;
 		$this->populate();
