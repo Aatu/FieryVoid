@@ -472,7 +472,6 @@
 
 /*fighter-mounted variant*/
     class FtrInterdictor extends Interdictor{
-
         public $name = "FtrInterdictor";
         public $displayName = "Light Interdictor";
 		public $iconPath = "Interdictor.png";
@@ -493,7 +492,6 @@
         
         public $intercept = 3;
         
-//		private static $alreadyIntercepted = array(); //Only one Interdictor can intercept any shot, including ballistics.
 		private $flightIntercepted = array(); //To track when weapon intercept fighter direct fire and may be able to intercept more.
 
 		function __construct($startArc, $endArc, $nrOfShots = 1){
@@ -506,7 +504,7 @@
             parent::setSystemDataWindow($turn);
             $this->data["Special"] = "May intercept for friendly units. Must have friendly and enemy unit in arc and have friendly unit within 3 hexes.";
             $this->data["Special"] .= "<br>Only one interdictor can be applied to any incoming shot, including ballistics.";
-            $this->data["Special"] .= "<br>When intercepting fire from an enemy fighter flight, all enemy fighters have their chance to hit reduced by 15 for non-ballistics.";
+            $this->data["Special"] .= "<br>When intercepting non-ballistic fire from an enemy fighter flight, all enemy fighters have their chance to hit reduced by 15.";
             $this->data["Special"] .= "<br>Note - Automated intercept routines will often prioritise ship or missile fire, so aim Interdictor carefully to make full use of it against enemy fighter fire.";            
         }
 
@@ -531,7 +529,6 @@
 						
 			return true;
 		}
-
 
 	//return 0 if given fire order was already intercepted by this weapon - this should prevent such assignment
 	public function getInterceptionMod($gamedata, $intercepted)
