@@ -2671,7 +2671,7 @@ class RadCannon extends Weapon{
 		$this->data["Special"] .= "<br>Effect depends on system hit:";    
 		$this->data["Special"] .= "<br> - Structure: 10 boxes marked destroyed (regardless of armor)."; 
 		$this->data["Special"] .= "<br> - Shield: system destroyed."; 
-		$this->data["Special"] .= "<br>  -- Gravitic Shield reduces generator output by 1, too."; 
+		$this->data["Special"] .= "<br> - Gravitic Shield reduces generator output by 1, too."; 
 		$this->data["Special"] .= "<br> - Weapon, Thruster or Jump Engine: system destroyed."; 
 		$this->data["Special"] .= "<br> - C&C: critical roll forced (at +2)."; 
 		$this->data["Special"] .= "<br> - Scanner: output reduced by 1."; 
