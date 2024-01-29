@@ -2799,7 +2799,8 @@ spl_autoload_register(
                 'ftrinterdictor' => '/server/model/weapons/defensive.php',
                 'interdictor' => '/server/model/weapons/defensive.php',
                 'ltblastlaser' => '/server/model/weapons/lasers.php',
-				'hyachcomputer' => '/server/model/systems/baseSystems.php',	
+				'hyachcomputer' => '/server/model/systems/baseSystems.php',
+				'hyachspecialists' => '/server/model/systems/baseSystems.php',					
 				//units
 //				'hyachirokaikam' => '/server/model/ships/hyach/HyachIrokaiKam.php',
 								
@@ -2827,7 +2828,7 @@ spl_autoload_register(
 				'hyachtakaltikam' => '/server/model/ships/hyach/HyachTakaltiKam.php',
 				'hyachuruthakal' => '/server/model/ships/hyach/HyachUruthaKal.php',
 				'hyachutarator' => '/server/model/ships/hyach/HyachUtaraTor.php',
-/*
+*/
 
 				//Kor-Lyan
 				'axor' => '/server/model/ships/korlyan/Axor.php',
