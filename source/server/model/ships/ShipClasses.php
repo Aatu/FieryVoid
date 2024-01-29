@@ -115,15 +115,7 @@ class BaseShip {
 			$this->adaptiveArmorController = new AdaptiveArmorController($AAtotal, $AApertype, $AApreallocated); 
 			return $this->getAdaptiveArmorController();
 		}
-
-		public function getHyachComputer(){
-			return $this->HyachComputer;    
-		}
-
-		public function createHyachComputer($armour, $maxhealth, $powerReq, $output){ //$armour, $maxhealth, $powerReq, $output
-			$this->HyachComputer = new HyachComputer($armour, $maxhealth, $powerReq, $output); 
-			return $this->getHyachComputer();
-		}
+	
         
         public function getCommonIniModifiers( $gamedata ){ //common Initiative modifiers: speed, criticals
             $mod = 0;
@@ -267,34 +259,34 @@ class BaseShip {
     }
 	    
         public function getInitiativebonus($gamedata){
-            if($this->faction == "Abbai"){
+            if($this->faction == "Abbai Matriarchate"){
                 return $this->doAbbaiInitiativeBonus($gamedata);
             }
-            if($this->faction == "Centauri"){
+            if($this->faction == "Centauri Republic"){
                 return $this->doCentauriInitiativeBonus($gamedata);
             }
-            if($this->faction == "Dilgar"){
+            if($this->faction == "Dilgar Imperium"){
                 return $this->doDilgarInitiativeBonus($gamedata);
             }
-            if($this->faction == "Narn"){
+            if($this->faction == "Narn Regime"){
                 return $this->doNarnInitiativeBonus($gamedata);
             }
-            if($this->faction == "Yolu"){
+            if($this->faction == "Yolu Confederation"){
                 return $this->doYoluInitiativeBonus($gamedata);
 			}
-			if($this->faction == "EA"){
+			if($this->faction == "Earth Alliance"){
                 return $this->doEAInitiativeBonus($gamedata);
             }
 			if($this->faction == "Raiders"){
                 return $this->doRaidersInitiativeBonus($gamedata);
             }
-            if(($this->faction == "Pak'ma'ra") && (!($this instanceof FighterFlight))	){
+            if(($this->faction == "Pak'ma'ra Confederacy") && (!($this instanceof FighterFlight))	){
                 return $this->doPakmaraInitiativeBonus($gamedata);
             }
-		   if($this->faction == "Hyach"){
+		   if($this->faction == "Hyach Gerontocracy"){
 		                return $this->doHyachInitiativeBonus($gamedata);
 		        }            
-			if(($this->faction == "Gaim") && ($this instanceOf gaimMoas)){  //GTS
+			if(($this->faction == "Gaim Intelligence") && ($this instanceOf gaimMoas)){  //GTS
                 return $this->doGaimInitiativeBonus($gamedata);
             }
             return $this->iniativebonus;
@@ -304,7 +296,7 @@ class BaseShip {
         private function doAbbaiInitiativeBonus($gamedata){
             foreach($gamedata->ships as $ship){
                 if(!$ship->isDestroyed()
-                        && ($ship->faction == "Abbai")
+                        && ($ship->faction == "Abbai Matriarchate")
                         && ($this->userid == $ship->userid)
                         && ($ship instanceof Nakarsa)
                         && ($this->id != $ship->id)){
@@ -317,7 +309,7 @@ class BaseShip {
         private function doCentauriInitiativeBonus($gamedata){
             foreach($gamedata->ships as $ship){
                 if(!$ship->isDestroyed()
-                        && ($ship->faction == "Centauri")
+                        && ($ship->faction == "Centauri Republic")
                         && ($this->userid == $ship->userid)
                         && ($ship instanceof PrimusMaximus)
                         && ($this->id != $ship->id)){
@@ -331,7 +323,7 @@ class BaseShip {
         private function doNarnInitiativeBonus($gamedata){
             foreach($gamedata->ships as $ship){
                 if(!$ship->isDestroyed()
-                        && ($ship->faction == "Narn")
+                        && ($ship->faction == "Narn Regime")
                         && ($this->userid == $ship->userid)
                         && ($ship instanceof Gtal)
                         && ($this->id != $ship->id)){
@@ -345,7 +337,7 @@ class BaseShip {
          private function doEAInitiativeBonus($gamedata){
             foreach($gamedata->ships as $ship){
                 if(!$ship->isDestroyed()
-                        && ($ship->faction == "EA")
+                        && ($ship->faction == "Earth Alliance")
                         && ($this->userid == $ship->userid)
                         && ($ship instanceof Poseidon)
                         && ($this->id != $ship->id)){
@@ -420,7 +412,7 @@ class BaseShip {
 
             foreach($ships as $ship){
                 if( !$ship->isDestroyed()
-                    && ($ship->faction == "Dilgar")
+                    && ($ship->faction == "Dilgar Imperium")
                     && ($this->userid == $ship->userid)
                     && ($ship->shipSizeClass == 3)
                     && ($this->id != $ship->id)){
@@ -444,7 +436,7 @@ class BaseShip {
 			
 			foreach($gamedata->ships as $ship){
                 if(
-                     ($ship->faction == "Pak'ma'ra") //Correct faction
+                     ($ship->faction == "Pak'ma'ra Confederacy") //Correct faction
                     && ($this->userid == $ship->userid) //of same player
                     && (!($ship instanceOf FighterFlight)) //actually a ship
                     && (!$ship->isDestroyed()) //alive
@@ -462,7 +454,7 @@ class BaseShip {
          private function doHyachInitiativeBonus($gamedata){
             foreach($gamedata->ships as $ship){
                 if(!$ship->isDestroyed()
-                        && ($ship->faction == "Hyach")
+                        && ($ship->faction == "Hyach Gerontocracy")
                         && ($this->userid == $ship->userid)
                         && ($ship instanceof HyachIrokaiKal)
                         && ($this->id != $ship->id)){
@@ -484,7 +476,7 @@ class BaseShip {
 
             foreach($ships as $ship){
                 if( !$ship->isDestroyed()
-                    && ($ship->faction == "Gaim")
+                    && ($ship->faction == "Gaim Intelligence")
                     && ($this->userid == $ship->userid)
                     && ($ship instanceOf gaimMearc)
                     && ($this->id != $ship->id)){
@@ -526,7 +518,7 @@ class BaseShip {
     private function doYoluInitiativeBonus($gamedata){
         foreach($gamedata->ships as $ship){
             if(!$ship->isDestroyed()
-                && ($ship->faction == "Yolu")
+                && ($ship->faction == "Yolu Confederation")
                 && ($this->userid == $ship->userid)
                 && ($ship instanceof Udran)
                 && ($this->id != $ship->id)){
