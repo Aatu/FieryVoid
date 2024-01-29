@@ -16,8 +16,8 @@ class HyachEvirolTek extends BaseShip{
         $this->forwardDefense = 15;
         $this->sideDefense = 16;
         
-        $this->turncost = 1.0;
-        $this->turndelaycost = 1.0;
+        $this->turncost = 1;
+        $this->turndelaycost = 1;
         $this->accelcost = 4;
         $this->rollcost = 4;
         $this->pivotcost = 3;
@@ -30,7 +30,7 @@ class HyachEvirolTek extends BaseShip{
 		$sensors = new Scanner(4, 20, 6, 8);
 			$sensors->markHyach();
 			$this->addPrimarySystem($sensors); 
- //       $this->addPrimarySystem(new Scanner(5, 28, 6, 11));
+
         $this->addPrimarySystem(new Engine(5, 20, 0, 10, 4));
 		$this->addPrimarySystem(new Hangar(4, 4));
 		$this->addPrimarySystem(new CargoBay(4, 25));

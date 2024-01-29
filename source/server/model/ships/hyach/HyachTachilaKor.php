@@ -19,8 +19,8 @@ class HyachTachilaKor extends BaseShip{
         $this->forwardDefense = 15;
         $this->sideDefense = 15;
         
-        $this->turncost = 1.0;
-        $this->turndelaycost = 1.0;
+        $this->turncost = 1;
+        $this->turndelaycost = 1;
         $this->accelcost = 3;
         $this->rollcost = 3;
         $this->pivotcost = 2;
@@ -36,8 +36,8 @@ class HyachTachilaKor extends BaseShip{
  //       $this->addPrimarySystem(new Scanner(5, 28, 6, 11));
         $this->addPrimarySystem(new Engine(5, 22, 0, 9, 3));
 		$this->addPrimarySystem(new JumpEngine(5, 21, 4, 20));
-//			$HyachComputer = $this->createHyachComputer(5, 10, 0, 2); //$armour, $maxhealth, $powerReq, $output
-//			$this->addPrimarySystem( $HyachComputer );
+		$this->addPrimarySystem(new HyachComputer(5, 10, 0, 2));//$armour, $maxhealth, $powerReq, $output			
+
 
         $this->addFrontSystem(new GraviticThruster(4, 11, 0, 3, 1));
         $this->addFrontSystem(new GraviticThruster(4, 11, 0, 3, 1));

@@ -35,8 +35,8 @@ class HyachOkathKur extends MediumShip{
 		$this->addPrimarySystem(new Hangar(4, 1));
 		$this->addPrimarySystem(new GraviticThruster(4, 16, 0, 5, 3));
 		$this->addPrimarySystem(new GraviticThruster(4, 16, 0, 5, 4));
-//			$HyachComputer = $this->createHyachComputer(4, 8, 0, 2); //$armour, $maxhealth, $powerReq, $output
-//			$this->addPrimarySystem( $HyachComputer );
+		$this->addPrimarySystem(new HyachComputer(4, 8, 0, 2));//$armour, $maxhealth, $powerReq, $output		
+
 
 		$this->addFrontSystem(new GraviticThruster(4, 15, 0, 6, 1));
 		$this->addFrontSystem(new Interdictor(2, 6, 1, 180, 360));

@@ -5,7 +5,7 @@ class HyachEcamronTek extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 170;
-		$this->faction = "Hyach Gerontocracy";
+		$this->faction = "Civilians";
 		$this->phpclass = "HyachEcamronTek";
 		$this->imagePath = "img/ships/tethys.png";
 		$this->shipClass = "Ecamron Tek Freighter";

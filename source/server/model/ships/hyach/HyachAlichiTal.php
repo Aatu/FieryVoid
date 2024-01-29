@@ -20,7 +20,7 @@ class HyachAlichiTal extends HeavyCombatVessel{
         $this->forwardDefense = 10;
         $this->sideDefense = 12;
         $this->turncost = 0.66;
-        $this->turndelaycost = 1.0;
+        $this->turndelaycost = 1;
         $this->accelcost = 3;
         $this->rollcost = 2;
         $this->pivotcost = 3;
@@ -40,8 +40,8 @@ class HyachAlichiTal extends HeavyCombatVessel{
 		$this->addPrimarySystem(new MediumLaser(3, 6, 5, 240, 360));
 		$this->addPrimarySystem(new MediumLaser(3, 6, 5, 0, 120));
 		$this->addPrimarySystem(new Interdictor(2, 4, 1, 0, 180));
-//			$HyachComputer = $this->createHyachComputer(6, 10, 0, 2); //$armour, $maxhealth, $powerReq, $output
-//			$this->addPrimarySystem( $HyachComputer );
+		$this->addPrimarySystem(new HyachComputer(6, 10, 0, 2));//$armour, $maxhealth, $powerReq, $output			
+
 
         $this->addFrontSystem(new GraviticThruster(4, 15, 0, 5, 1));
         $this->addFrontSystem(new Hangar(4, 14));

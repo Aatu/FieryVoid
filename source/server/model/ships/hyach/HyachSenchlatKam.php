@@ -31,8 +31,8 @@ class HyachSenchlatKam extends HeavyCombatVessel{
         $this->addPrimarySystem(new Hangar(4, 2));
         $this->addPrimarySystem(new GraviticThruster(4, 18, 0, 5, 3));
         $this->addPrimarySystem(new GraviticThruster(4, 18, 0, 5, 4));
-//			$HyachComputer = $this->createHyachComputer(4, 15, 0, 3); //$armour, $maxhealth, $powerReq, $output
-//			$this->addPrimarySystem( $HyachComputer );
+		$this->addPrimarySystem(new HyachComputer(4, 15, 0, 3));//$armour, $maxhealth, $powerReq, $output        
+
 
         $this->addFrontSystem(new GraviticThruster(4, 9, 0, 3, 1));
         $this->addFrontSystem(new BlastLaser(3, 10, 5, 240, 60));

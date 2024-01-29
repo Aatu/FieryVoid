@@ -20,8 +20,8 @@ class HyachIrokaiKal extends BaseShip{
         $this->forwardDefense = 15;
         $this->sideDefense = 16;
         
-        $this->turncost = 1.0;
-        $this->turndelaycost = 1.0;
+        $this->turncost = 1;
+        $this->turndelaycost = 1;
         $this->accelcost = 4;
         $this->rollcost = 3;
         $this->pivotcost = 3;
@@ -34,12 +34,12 @@ class HyachIrokaiKal extends BaseShip{
 		$sensors = new Scanner(5, 30, 8, 12);
 			$sensors->markHyach();
 			$this->addPrimarySystem($sensors); 
- //       $this->addPrimarySystem(new Scanner(5, 28, 6, 11));
+
         $this->addPrimarySystem(new Engine(5, 26, 0, 12, 3));
 		$this->addPrimarySystem(new Hangar(4, 2));
 		$this->addPrimarySystem(new JumpEngine(5, 21, 4, 20));
-//			$HyachComputer = $this->createHyachComputer(5, 15, 0, 3); //$armour, $maxhealth, $powerReq, $output
-//			$this->addPrimarySystem( $HyachComputer );
+		$this->addPrimarySystem(new HyachComputer(5, 15, 0, 3));//$armour, $maxhealth, $powerReq, $output		
+
 
         $this->addFrontSystem(new GraviticThruster(4, 11, 0, 3, 1));
         $this->addFrontSystem(new GraviticThruster(4, 11, 0, 3, 1));

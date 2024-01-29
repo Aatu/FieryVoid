@@ -33,12 +33,11 @@ class HyachUruthaKal extends BaseShip{
 		$sensors = new Scanner(5, 30, 6, 12);
 			$sensors->markHyach();
 			$this->addPrimarySystem($sensors); 
- //       $this->addPrimarySystem(new Scanner(5, 28, 6, 11));
+
         $this->addPrimarySystem(new Engine(5, 28, 0, 13, 3));
 		$this->addPrimarySystem(new Hangar(4, 14));
 		$this->addPrimarySystem(new JumpEngine(5, 25, 4, 20));
-//			$HyachComputer = $this->createHyachComputer(5, 20, 0, 4); //$armour, $maxhealth, $powerReq, $output
-//			$this->addPrimarySystem( $HyachComputer );
+		$this->addPrimarySystem(new HyachComputer(5, 20, 0, 4));//$armour, $maxhealth, $powerReq, $output			
 
         $this->addFrontSystem(new GraviticThruster(5, 15, 0, 5, 1));
         $this->addFrontSystem(new GraviticThruster(5, 15, 0, 5, 1));

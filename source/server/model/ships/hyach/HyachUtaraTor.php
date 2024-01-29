@@ -37,23 +37,24 @@ class HyachUtaraTor extends StarBaseSixSections{
 		);
 
 		$this->addPrimarySystem(new Reactor(6, 45, 0, 0));
-        $this->addPrimarySystem(new CnC(6, 72, 0, 0));
-//			$cnc = new CnC(6, 36, 0, 0);
-//			$cnc->startArc = 0;
-//			$cnc->endArc = 360;
-//        $this->addPrimarySystem($cnc);
-//			$cnc = new SecondaryCnC(6, 36, 0, 0);//all-around by default
-//			$this->addPrimarySystem($cnc);		
+//        $this->addPrimarySystem(new CnC(6, 72, 0, 0));
+			$cnc = new CnC(6, 36, 0, 0);
+			$cnc->startArc = 0;
+			$cnc->endArc = 360;
+        $this->addPrimarySystem($cnc);
+			$cnc = new SecondaryCnC(6, 36, 0, 0);//all-around by default
+			$this->addPrimarySystem($cnc);		
+			
 		$sensors = new Scanner(6, 36, 6, 12);
 			$sensors->markHyach();
 			$this->addPrimarySystem($sensors); 
 		$sensors = new Scanner(6, 36, 6, 12);
 			$sensors->markHyach();
 			$this->addPrimarySystem($sensors); 
+			
 		$this->addPrimarySystem(new Interdictor(6, 4, 1, 0, 360));
 		$this->addPrimarySystem(new Interdictor(6, 4, 1, 0, 360));
-//			$HyachComputer = $this->createHyachComputer(6, 28, 0, 4); //$armour, $maxhealth, $powerReq, $output
-//			$this->addPrimarySystem( $HyachComputer );
+		$this->addPrimarySystem(new HyachComputer(6, 28, 0, 4));//$armour, $maxhealth, $powerReq, $output			
 
 		$this->addPrimarySystem(new Structure( 6, 186));
 
