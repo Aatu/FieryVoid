@@ -2802,9 +2802,9 @@ spl_autoload_register(
 				'hyachcomputer' => '/server/model/systems/baseSystems.php',
 				'hyachspecialists' => '/server/model/systems/baseSystems.php',					
 				//units
-//				'hyachirokaikam' => '/server/model/ships/hyach/HyachIrokaiKam.php',
+
 								
-/*
+
 				'hyachalichikav' => '/server/model/ships/hyach/HyachAlichiKav.php',
 				'hyachalichital' => '/server/model/ships/hyach/HyachAlichiTal.php',
 				'hyachalichikav' => '/server/model/ships/hyach/HyachAlichiKav.php',
@@ -2815,7 +2815,7 @@ spl_autoload_register(
 				'hyachevirolkon' => '/server/model/ships/hyach/HyachEvirolKon.php',
 				'hyacheviroltek' => '/server/model/ships/hyach/HyachEvirolTek.php',
 				'hyachirokaikal' => '/server/model/ships/hyach/HyachIrokaiKal.php',
-	//			'hyachirokaikam' => '/server/model/ships/hyach/HyachIrokaiKam.php',
+				'hyachirokaikam' => '/server/model/ships/hyach/HyachIrokaiKam.php',
 				'hyachirokaikar' => '/server/model/ships/hyach/HyachIrokaiKar.php',
 				'hyachlaricha' => '/server/model/ships/hyach/HyachLaricha.php',
 				'hyachokathkat' => '/server/model/ships/hyach/HyachOkathKat.php',
@@ -2828,7 +2828,7 @@ spl_autoload_register(
 				'hyachtakaltikam' => '/server/model/ships/hyach/HyachTakaltiKam.php',
 				'hyachuruthakal' => '/server/model/ships/hyach/HyachUruthaKal.php',
 				'hyachutarator' => '/server/model/ships/hyach/HyachUtaraTor.php',
-*/
+
 
 				//Kor-Lyan
 				'axor' => '/server/model/ships/korlyan/Axor.php',
