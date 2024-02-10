@@ -39,7 +39,9 @@ class HyachUruthaKal extends BaseShip{
         $this->addPrimarySystem(new Engine(5, 28, 0, 13, 3));
 		$this->addPrimarySystem(new Hangar(4, 14));
 		$this->addPrimarySystem(new JumpEngine(5, 25, 4, 20));
-		$this->addPrimarySystem(new HyachComputer(5, 20, 0, 4));//$armour, $maxhealth, $powerReq, $output			
+		$this->addPrimarySystem(new HyachComputer(5, 20, 0, 4));//$armour, $maxhealth, $powerReq, $output
+		$HyachSpecialists = $this->createHyachSpecialists(3); //$specTotal
+			$this->addPrimarySystem( $HyachSpecialists );						
 
         $this->addFrontSystem(new GraviticThruster(5, 15, 0, 5, 1));
         $this->addFrontSystem(new GraviticThruster(5, 15, 0, 5, 1));

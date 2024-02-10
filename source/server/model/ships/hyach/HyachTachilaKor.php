@@ -39,7 +39,8 @@ class HyachTachilaKor extends BaseShip{
         $this->addPrimarySystem(new Engine(5, 22, 0, 9, 3));
 		$this->addPrimarySystem(new JumpEngine(5, 21, 4, 20));
 		$this->addPrimarySystem(new HyachComputer(5, 10, 0, 2));//$armour, $maxhealth, $powerReq, $output			
-
+		$HyachSpecialists = $this->createHyachSpecialists(2); //$specTotal
+			$this->addPrimarySystem( $HyachSpecialists );	
 
         $this->addFrontSystem(new GraviticThruster(4, 11, 0, 3, 1));
         $this->addFrontSystem(new GraviticThruster(4, 11, 0, 3, 1));

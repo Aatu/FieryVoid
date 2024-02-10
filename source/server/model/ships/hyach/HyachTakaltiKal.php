@@ -43,7 +43,8 @@ class HyachTakaltiKal extends OSAT
 		$this->addPrimarySystem(new Maser(3, 6, 3, 0, 180));
 		$this->addPrimarySystem(new Interdictor(2, 4, 1, 0, 360));
 		$this->addPrimarySystem(new HyachComputer(4, 5, 0, 1));//$armour, $maxhealth, $powerReq, $output			
-
+		$HyachSpecialists = $this->createHyachSpecialists(1); //$specTotal
+			$this->addPrimarySystem( $HyachSpecialists );	
 
 		//0:primary, 1:front, 2:rear, 3:left, 4:right;
 

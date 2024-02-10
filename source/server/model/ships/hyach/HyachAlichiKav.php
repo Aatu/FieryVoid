@@ -39,7 +39,8 @@ class HyachAlichiKav extends HeavyCombatVessel{
 		$this->addPrimarySystem(new MediumLaser(3, 6, 5, 0, 120));
 		$this->addPrimarySystem(new Interdictor(2, 4, 1, 0, 180));
 		$this->addPrimarySystem(new HyachComputer(5, 10, 0, 2));//$armour, $maxhealth, $powerReq, $output			
-
+		$HyachSpecialists = $this->createHyachSpecialists(1); //$specTotal
+			$this->addPrimarySystem( $HyachSpecialists );	
 
         $this->addFrontSystem(new GraviticThruster(4, 15, 0, 5, 1));
 		$this->addFrontSystem(new SpinalLaser(5, 12, 12, 330, 30));
