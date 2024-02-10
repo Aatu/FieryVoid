@@ -881,7 +881,7 @@ class Scanner extends ShipSystem implements SpecialAbility{ //on its own Scanner
 		$this->iconPath = "Thirdspacescanner.png";			
     	$this->specialAbilities[] = "AdvancedSensors";
 		$this->specialAbilityValue = true; //so it is actually recognized as special ability!
-    	$this->boostEfficiency = 16; //Advanced Sensors are rarely lower than 13, so flat 14 boost cost is advantageous to output+1!
+    	$this->boostEfficiency = 14; //Advanced Sensors are rarely lower than 13, so flat 14 boost cost is advantageous to output+1!
     	$this->maxBoostLevel = 2; //Unlike Shadows/Vorlons Thirdspace ships have alot of spare power, so limit their max sensor boost for balance. 		
 		if (!isset($this->data["Special"])) {
 			$this->data["Special"] = '';
@@ -2056,6 +2056,232 @@ public function onIndividualNotesLoaded($gamedata)
 
 							
 } //endof HyachComputer
+
+
+//this system contains entirety of Specialists management
+class HyachSpecialists extends ShipSystem{
+    public $name = "hyachSpecialists";
+    public $displayName = "Specialists";
+    public $primary = true; 
+	public $isPrimaryTargetable = false;
+	public $isTargetable = false; //cannot be targeted ever!
+    public $iconPath = "Specialists.png";
+	protected $doCountForCombatValue = false; //don't count when estimating remaining combat value
+	
+	public $specTotal = 0; //How many Specialists does this ship have.
+	public $specTotalSelected = 0;	//How many Specialists have been selected.
+	public $specTotal_used = 0; //How many Specialists have been used.
+	public $specPertype = 1; //How may per type are allowed (should always be 1).
+	public $specCurrClass = '';//for front end, to display Specialist types in tooltips.
+	
+	public $allSpec = array('Defence' => 0, 'Engine' => 0, 'Targeting' => 0); //Lists all Specialists for selection on Turn 1.
+	public $availableSpec = array(); //Counts Specialists that have been selected by player from $allSpec on Turn 1.
+	public $selectedSpec = array(); //Used in front end so that it knows to transfer data on Specialists selected.
+//	public $specSelectedCount = array(); //Previous counter, swapped to just using availableSpec.
+
+	public $currchangedSpec = array(); //Specialists that have been used in front end this turn.	
+	public $allocatedSpec = array(); //Counts Specialists that have been used by player during game.
+	public $specAllocatedCount = array(); //Counter used for showing what Specialists were used in Current Turn (if any)		
+	public $currAllocatedSpec = array();//Used in front end so that it knows to transfer data on Specialists used.
+	
+	public $specDecreased = array(); //Front End counter for updating system tooltip on which Specialists were used this turn. 	
+	public $specIncreased = array(); //Front End counter for updating system tooltip on which Specialists were used this turn. 	 
+	
+    
+    protected $possibleCriticals = array(); //no available criticals - in fact, this system is a technicality and should never be hit
+    
+
+    function __construct( $specTotal  ){ //technical object, does not need typical system attributes (armor, structure...)
+        parent::__construct( 0, 1, 0, $specTotal ); //$armour, $maxhealth, $powerReq, $output
+		$this->specTotal = $specTotal;
+    }
+
+//	 this method generates additional non-standard informaction in the form of individual system notes in this case: 
+//	 - Initial phase: check setting changes made by user, convert to notes	
+    public function generateIndividualNotes($gameData, $dbManager){ //dbManager is necessary for Initial phase only
+		$ship = $this->getUnit();	
+		
+		switch($gameData->phase){
+								
+				case 1: //Initial phase
+
+					if($ship->userid == $gameData->forPlayer){ //only own ships, otherwise bad things may happen!
+						//load existing data first - at this point ship is rudimentary, without data from database!
+						$listNotes = $dbManager->getIndividualNotesForShip($gameData, $gameData->turn, $ship->id);	
+						foreach ($listNotes as $currNote){
+							if($currNote->systemid==$this->id){//note is intended for this system!
+								$this->addIndividualNote($currNote);
+							}
+						}
+						$this->onIndividualNotesLoaded($gameData);
+	
+
+					if ($gameData->turn==1){
+						
+						foreach ($this->selectedSpec as $specialistType) {//Take Front end data and modify availableSpec.
+						    $this->availableSpec[$specialistType] = 1;
+						}						
+										
+						foreach($this->availableSpec as $specialistType=>$specValue){//Now generate notes.
+							
+						$notekey = 'available;' . $specialistType; //Make those Specialist Types available for rest of game.
+						$noteHuman = 'Specialist available';
+						$noteValue = 1; //Max Specialists is always 1, value not actually used for this type of note.
+						$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
+						}
+					}	
+
+															
+						foreach($this->currchangedSpec as $specialistType){
+//							$this->allocatedSpec[$specialistType] = 1; //Take Front end data and modify allocatedSpec.
+//						}
+
+//						foreach($this->allocatedSpec as $specialistType=>$specValue){ //Now generate notes.
+//						    if ($specValue == 1){ //Only pass notes if Specialist was actually used this turn.
+
+							$notekey = 'allocated;' . $specialistType;
+							$noteHuman = 'Specialist Used';
+							$noteValue = $gameData->turn; //Mark Turn used so notes only actioned on that turn in onIndividualNotesLoaded()
+							$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
+						}
+					}
+					
+				break;
+				}
+			
+	} //endof function generateIndividualNotes
+	
+//	act on notes just loaded - to be redefined by systems as necessary - fill $allocation table
+	public function onIndividualNotesLoaded($gamedata){
+		foreach ($this->individualNotes as $currNote){ //assume ASCENDING sorting - so enact all changes as is
+			$explodedKey = explode ( ';' , $currNote->notekey ) ;//split into array: [area;value] where area denotes action, value - damage type (typically) 
+			
+			if ($explodedKey[0] == 'available'){//Mark when a Specialist has been selected for whole game.
+					$this->availableSpec[$explodedKey[1]] = 1;
+					$this->allocatedSpec[$explodedKey[1]] = 0;					
+			}
+					
+			if (($explodedKey[0] == 'allocated') && ($currNote->notevalue == $gamedata->turn)){ //Mark when a Specialist has been used on a given turn.
+				$ship = $this->getUnit();
+			
+				if ($explodedKey[1] == 'Defence'){ //Works, just doesn't display Front End.
+					$ship->forwardDefense -= 2;
+					$ship->sideDefense -= 2;
+					$this->specAllocatedCount[$explodedKey[1]] = 1; //To show it has been used this turn in system info tooltip.	
+					
+				}else if ($explodedKey[1] == 'Engine'){
+				 	$strongestSystem = null;
+					$strongestValue = -1;
+						foreach ($ship->systems as $system) {
+						    if ($system instanceof Engine) {
+						        if ($system->output > $strongestValue) {
+						            $strongestValue = $system->output;
+						            $strongestSystem = $system;
+
+						            if ($strongestValue > 0) { // Engine actually exists to be enhanced!
+						                $specialistBoost = floor($strongestSystem->output * 0.3);
+						                $strongestSystem->output += $specialistBoost;
+						            }	
+								} 		
+							}
+						}
+					$this->specAllocatedCount[$explodedKey[1]] = 1;//To show it has been used this turn in system info tooltip.
+						
+				}else if ($explodedKey[1] == 'Targeting'){ //+5% to hit on ALL weapons this turn
+					$ship->toHitBonus += 1;	
+					$this->specAllocatedCount[$explodedKey[1]] = 1;					
+				}else{}
+							
+
+			}
+			if ($explodedKey[0] == 'allocated'){ //Update variables to show Specialist used and not availale anymore.
+				 $this->allocatedSpec[$explodedKey[1]] = 1;			
+				 $this->availableSpec[$explodedKey[1]] = 0;
+			}	 	
+		}
+		//and immediately delete notes themselves, they're no longer needed (this will not touch the database, just memory!)
+		$this->individualNotes = array();
+		
+		//calculate $this->specTotal_used and specTotalSelected too!
+		$this->specTotalSelected = 0;		
+		$this->specTotal_used = 0;
+ 		$this->specTotalSelected = array_sum($this->availableSpec);	
+ 		$this->specTotal_used = array_sum($this->allocatedSpec);	  
+	} //endof function onIndividualNotesLoaded
+
+	
+    public function setSystemDataWindow($turn){
+        parent::setSystemDataWindow($turn);            
+		$this->data["Specialists"] =  $this->specTotalSelected . '/' . $this->specTotal; 
+		
+		foreach($this->availableSpec as $specialistType=>$specValue){
+			$specUsed = $this->allocatedSpec[$specialistType];
+			$this->data[' - '.$specialistType] =  $specValue;
+		}
+		
+		$this->data["Specialists used this turn"] = ''; // List which Specialists were actually used this turn.
+		foreach($this->specAllocatedCount as $specialistType => $specValue) {
+		    $this->data["Specialists used this turn"] .= $specialistType . ', ';
+		}
+        $this->data["Special"] = "This is a technical system used for Specialist management.";
+        $this->data["Special"] .= "<br>On Turn 1 Initial Orders, you must select which Specialists this ship will have available.";        	   
+        $this->data["Special"] .= "<br>You may then use Specialist(s) by clicking + button in any Initial Orders phase (including Turn 1)."; 
+        $this->data["Special"] .= "<br>Each Specialists can only be used once, with the following effects on turn they're used: ";
+		$this->data["Special"] .= "<br> - DEFENCE: Profiles lowered by 10."; 
+		$this->data["Special"] .= "<br> - ENGINE: +30% Thrust (rounded down)."; 
+		$this->data["Special"] .= "<br> - TARGETING: +5% to hit on all weapons."; 
+		$this->data["Special"] .= "<br> - XXXX: ."; 
+		$this->data["Special"] .= "<br> - XXXX: ."; 
+    }
+	
+	//always redefine $this->data for Specialists! Can trim down to essentials later.
+	public function stripForJson(){
+        $strippedSystem = parent::stripForJson();
+        $strippedSystem->data = $this->data;
+        $strippedSystem->allocatedSpec = $this->allocatedSpec;
+        $strippedSystem->availableSpec = $this->availableSpec;
+		$strippedSystem->selectedSpec = $this->selectedSpec;        
+        $strippedSystem->currchangedSpec = $this->currchangedSpec;
+        $strippedSystem->currAllocatedSpec = $this->currAllocatedSpec;        
+        $strippedSystem->specTotal_used = $this->specTotal_used;       
+        $strippedSystem->specAllocatedCount = $this->specAllocatedCount;
+//        $strippedSystem->allSpec = $this->allSpec;         
+//        $strippedSystem->specSelectedCount = $this->specSelectedCount;
+//        $strippedSystem->specDecreased = $this->specDecreased;
+//        $strippedSystem->specIncreased = $this->specIncreased;                             		
+        return $strippedSystem;
+    }
+
+	
+	public function doIndividualNotesTransfer(){   
+	    // Example array from Front End:
+	    // $this->individualNotesTransfer = array(
+	    //     "Defence" => array(1, 2),
+	    //     "Engine" => array(1, 0)  );
+	    
+	    // Data received in variable individualNotesTransfer, further functions will look for it in currchangedSpec
+	    if (is_array($this->individualNotesTransfer)) {
+	        foreach ($this->individualNotesTransfer as $specType => $specValues) {
+	            foreach ($specValues as $specAction) {
+	                if ($specAction === 1) { // Specialist has been selected.
+	                    // Add $specType key to $this->selectedSpec
+	                    $this->selectedSpec[] = $specType; // Append $specType to $this->selectedSpec array
+	                } elseif ($specAction === 2) { // Specialist has been used.
+	                    // Add $specType key to $this->currchangedSpec
+	                    $this->currchangedSpec[] = $specType; // Append $specType to $this->currchangedSpec array
+	                }
+	            }
+	        }
+	    }                       
+//	    var_dump($this->selectedSpec); 
+//	    var_dump($this->currchangedSpec);           
+	   
+	    $this->individualNotesTransfer = array(); // Empty, just in case
+	}	
+					
+							
+} //endof HyachSpecialists
+
 
 /* Connection Strut, as present on units too large for their designers tech level
 	in FV damage is reflected on Structure in Critical phase (not immediately), which means:

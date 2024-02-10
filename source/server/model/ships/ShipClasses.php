@@ -116,6 +116,14 @@ class BaseShip {
 			return $this->getAdaptiveArmorController();
 		}
 	
+		public function getHyachSpecialists(){
+			return $this->HyachSpecialists;    
+		}
+
+		public function createHyachSpecialists($specTotal){ //$specTotal
+			$this->HyachSpecialists = new HyachSpecialists($specTotal); 
+			return $this->getHyachSpecialists();
+		}		
         
         public function getCommonIniModifiers( $gamedata ){ //common Initiative modifiers: speed, criticals
             $mod = 0;
