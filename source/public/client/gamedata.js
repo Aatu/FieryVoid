@@ -600,7 +600,20 @@ window.gamedata = {
                 window.confirm.error(tooManyBFCPError, function () {});
                 return false;
             }		
-		
+
+            var shipNames = shipManager.systems.getUnusedSpecialists();        	
+
+            if (shipNames.length > 0) {
+                var specialistsError = "The following ships have not selected Specialists:<br>";
+                
+                for (var i in shipNames) {
+                    var shipName = shipNames[i];
+                    specialistsError += "- " + shipName + "<br>";
+                }
+                specialistsError += "You need to choose Specialists for these ships.";
+                window.confirm.error(specialistsError, function () {});
+                return false;                
+			}		
 		
             var myShips = [];
 

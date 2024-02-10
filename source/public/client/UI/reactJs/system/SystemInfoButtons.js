@@ -199,7 +199,7 @@ class SystemInfoButtons extends React.Component {
 	}	
 	
 	
-	/*switch Adaptive Armor or Hyach Computer display to next damage/FC class*/
+	/*switch Adaptive Armor, Hyach Computer or Specilaists display to next damage/FC class*/
 	nextCurrClass(e) {
         e.stopPropagation(); e.preventDefault();
 		const {ship, system} = this.props;
@@ -332,7 +332,7 @@ class SystemInfoButtons extends React.Component {
 		//for each Computer: set allocated level to desired if possible
 		for (var c = 0; c < allOwnBFCP.length; c++) {
 			var ctrl = allOwnBFCP[c];
-			ctrl.setCurrDmgType(dmgType); //set damage type to desired (or none)
+			ctrl.setCurrFCType(FCType); //set damage type to desired (or none)
 			while(
 				ctrl.getCurrAllocated() < allocated // level lower than desired
 				&& ctrl.canIncrease() //level can be increased
@@ -343,6 +343,35 @@ class SystemInfoButtons extends React.Component {
 		
 		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 	}
+
+	/*Hyach Specialists increase rating for current class*/
+	Specselect(e) {
+        e.stopPropagation(); e.preventDefault();
+		const {ship, system} = this.props;
+		system.doSelect();
+		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+	}	
+	Specunselect(e) {
+        e.stopPropagation(); e.preventDefault();
+		const {ship, system} = this.props;
+		system.doUnselect();
+		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+	}
+
+	Specincrease(e) {
+        e.stopPropagation(); e.preventDefault();
+		const {ship, system} = this.props;
+		system.doUse();
+		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+	}		
+	/*Hyach Specialists decrease rating for current class*/
+	Specdecrease(e) {
+        e.stopPropagation(); e.preventDefault();
+		const {ship, system} = this.props;
+		system.doDecrease();
+		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+	}
+	
 
 	/*Self Repair - display next system in need of repairs*/
 	nextSRsystem(e) {
@@ -404,7 +433,15 @@ class SystemInfoButtons extends React.Component {
 				{canBFCPdisplayCurrClass(ship, system) && <Button title="next" onClick={this.nextCurrClass.bind(this)} img="./img/systemicons/BFCPclasses/iconNext.png"></Button>}
 				{canBFCPincrease(ship, system) && <Button onClick={this.BFCPincrease.bind(this)} img="./img/systemicons/BFCPclasses/iconPlus.png"></Button>}
 				{canBFCPdecrease(ship, system) && <Button onClick={this.BFCPdecrease.bind(this)} img="./img/systemicons/BFCPclasses/iconMinus.png"></Button>}
-				{canBFCPpropagate(ship, system) && <Button title="propagate setting" onClick={this.BFCPpropagate.bind(this)} img="./img/systemicons/BFCPclasses/iconPropagate.png"></Button>}				
+				{canBFCPpropagate(ship, system) && <Button title="propagate setting" onClick={this.BFCPpropagate.bind(this)} img="./img/systemicons/BFCPclasses/iconPropagate.png"></Button>}
+			
+				{canSpecdisplayCurrClass(ship, system) && <Button title={getSpeccurrClassName(ship,system)} img={getSpeccurrClassImg(ship,system)}></Button>}
+				{canSpecdisplayCurrClass(ship, system) && <Button title="next" onClick={this.nextCurrClass.bind(this)} img="./img/systemicons/Specialistclasses/iconNext.png"></Button>}
+				{canSpecselect(ship, system) && <Button onClick={this.Specselect.bind(this)} img="./img/systemicons/Specialistclasses/select.png"></Button>}
+				{canSpecunselect(ship, system) && <Button onClick={this.Specunselect.bind(this)} img="./img/systemicons/Specialistclasses/unselect.png"></Button>}					
+				{canSpecincrease(ship, system) && <Button onClick={this.Specincrease.bind(this)} img="./img/systemicons/Specialistclasses/iconPlus.png"></Button>}
+				{canSpecdecrease(ship, system) && <Button onClick={this.Specdecrease.bind(this)} img="./img/systemicons/Specialistclasses/iconMinus.png"></Button>}
+								
 							 
 				{canSRdisplayCurrSystem(ship, system) && <Button title="next" onClick={this.nextSRsystem.bind(this)} img="./img/systemicons/AAclasses/iconNext.png"></Button>}
 				{canSRdisplayCurrSystem(ship, system) && <Button title={getSRdescription(ship,system)} img={getSRicon(ship,system)}></Button>}
@@ -435,6 +472,16 @@ const canBFCPincrease = (ship,system) => canBFCP(ship,system) && system.canIncre
 const canBFCPdecrease = (ship,system) => canBFCP(ship,system) && system.canDecrease()!='';
 const canBFCPpropagate = (ship,system) => canBFCP(ship,system) && system.canPropagate()!='';
 
+//can do something with Hyach Specialists
+const canSpec = (ship, system) => (gamedata.gamephase === 1) && system.name === 'hyachSpecialists';
+const canSpecdisplayCurrClass = (ship,system) => canSpec(ship,system) && system.getCurrClass()!='';
+const getSpeccurrClassImg = (ship,system) => './img/systemicons/Specialistclasses/'+system.getCurrClass()+'.png'; 
+const getSpeccurrClassName = (ship,system) => system.getCurrClass();
+const canSpecselect = (ship,system) => canSpec(ship,system) && system.canSelect()!='';
+const canSpecunselect = (ship,system) => canSpec(ship,system) && system.canUnselect()!=''; 
+const canSpecincrease = (ship,system) => canSpec(ship,system) && system.canUse()!='';
+const canSpecdecrease = (ship,system) => canSpec(ship,system) && system.canDecrease()!='';
+
 //can do something with Self Repair...
 const canSRdisplayCurrSystem = (ship,system) => (gamedata.gamephase === 1) && (system.name == 'SelfRepair') && (system.getCurrSystem()>=0); 
 const getSRdescription = (ship,system) => system.getCurrSystemDescription(); 
@@ -444,7 +491,7 @@ export const canDoAnything = (ship, system) => canOffline(ship, system) || canOn
 	|| canOverload(ship, system) || canStopOverload(ship, system) || canBoost(ship, system) 
 	|| canDeBoost(ship, system) || canAddShots(ship, system) || canReduceShots(ship, system)
 	|| canRemoveFireOrder(ship, system) || canChangeFiringMode(ship, system)
-	|| canSelfIntercept(ship, system) || canAA(ship,system) || canBFCP(ship, system) || canSRdisplayCurrSystem(ship,system);
+	|| canSelfIntercept(ship, system) || canAA(ship,system) || canBFCP(ship, system) || canSpec(ship,system) || canSRdisplayCurrSystem(ship,system);
 
 const canOffline = (ship, system) => gamedata.gamephase === 1 && (system.canOffLine || system.powerReq > 0) && !shipManager.power.isOffline(ship, system) && !shipManager.power.getBoost(system) && !weaponManager.hasFiringOrder(ship, system);
 

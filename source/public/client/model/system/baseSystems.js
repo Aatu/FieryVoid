@@ -522,13 +522,13 @@ HyachComputer.prototype.getFCAllocated = function (FCIndex) { //returns setting 
 	bonusfirecontrol = FCvalues[FCIndex];	
 	return bonusfirecontrol;
 };
-HyachComputer.prototype.setCurrFCType= function (FCTypeToSet) { //sets indicated FC type as current (or sets empty as current)
+HyachComputer.prototype.setCurrFCType= function (FCType) { //sets indicated FC type as current (or sets empty as current)
 	this.currClass = ''; //will do if desired type does not exist here, which is rare but possible
 	var classes = Object.keys(this.allocatedBFCP);
 	var currType = '';
 	for (var i = 0; i < classes.length; i++) {
 		currType = classes[i];
-		if (currType == FCTypeToSet){ //exists!
+		if (currType == FCType){ //exists!
 			this.currClass = currType;
 			return; //no need to loop further
 		}
@@ -560,6 +560,313 @@ HyachComputer.prototype.canIncreaseAnything = function () { //returns true if an
 };//Endof HyachComputer
 
 
+
+var HyachSpecialists = function HyachSpecialists(json, ship) {
+    ShipSystem.call(this, json, ship);
+};
+HyachSpecialists.prototype = Object.create(ShipSystem.prototype);
+HyachSpecialists.prototype.constructor = HyachSpecialists;
+
+HyachSpecialists.prototype.getCurrClass = function () {
+ if (gamedata.turn === 1 && this.specCurrClass == ''){
+		var classes = Object.keys(this.allSpec);
+		if (classes.length>0){
+			this.specCurrClass = classes[0];
+		}
+	} else if (this.specCurrClass == ''){
+		var classes = Object.keys(this.availableSpec);
+		if (classes.length>0){
+			this.specCurrClass = classes[0];
+		}
+	}
+	return this.specCurrClass;
+};
+HyachSpecialists.prototype.nextCurrClass = function () { //get next class for display
+	this.getCurrClass();
+    if (this.specCurrClass == '') return ''; //this would mean there are no classes whatsover!
+    	
+	if (gamedata.turn === 1){
+		var classes = Object.keys(this.allSpec);
+		var currId = -1;	
+		for (var i = 0; i < classes.length; i++) {
+			if (this.specCurrClass == classes[i]){
+				currId = i+1;
+				break; //loop
+			}
+		}	    
+	} else {
+		var classes = Object.keys(this.availableSpec);
+		var currId = -1;	
+		for (var i = 0; i < classes.length; i++) {
+			if (this.specCurrClass == classes[i]){
+				currId = i+1;
+				break; //loop
+			}
+		}
+	}	
+	if (currId >= classes.length) currId = 0;
+	this.specCurrClass = classes[currId];
+	
+	
+	return this.specCurrClass;
+};
+
+HyachSpecialists.prototype.canSelect = function () { //check if can increase rating for current class; can do if preallocated points are unused or allocated points are less than available 
+	//always needs to check that allocated are less than maximum and allocated total is less than total maximum
+	this.getCurrClass();
+    if (this.specCurrClass == '') return false; //this would mean there are no Specialist classes whatsover!
+
+	if (gamedata.turn != 1) return false;//Can only be selected on Turn 1.
+
+	var totalSpecSelected = Object.values(this.availableSpec).reduce((accumulator, currentValue) => accumulator + currentValue, 0); 
+	if (totalSpecSelected >= this.specTotal) return false;
+		
+		var selected = 	this.availableSpec[this.specCurrClass];//0 or 1			
+		//how many are allowed?
+		var allowed = this.specPertype;	//Always 1.		
+		if (selected >= allowed) return false; //full allowance for this damage type filled			
+	
+	return true;
+};
+
+HyachSpecialists.prototype.canUnselect = function () { //can unselect Specialists in Turn 1.
+	this.getCurrClass();
+	
+	if (gamedata.turn != 1) return false;	
+	if (this.specCurrClass == '') return false; //this would mean there are no Specialists whatsover!
+		
+	if (this.selectedSpec[this.specCurrClass]) return true;	//If it's filled, you can unselect.
+
+	return false;
+};
+
+HyachSpecialists.prototype.canUse = function () { //check if can increase rating for current class; can do if preallocated points are unused or allocated points are less than available 
+	//always needs to check that allocated are less than maximum and allocated total is less than total maximum
+	this.getCurrClass();
+    if (this.specCurrClass == '') return false; //this would mean there are no Specialist classes whatsover!
+
+		//total pool of Specialists used?
+//		if (this.specTotal_used >= this.specTotal) return false;
+		if (!this.availableSpec[this.specCurrClass]) return false; //Not selected, can't increase or decrease on Turn 1.
+		if (this.availableSpec[this.specCurrClass] < 1) return false; //Not selected, can't increase or decrease on Turn 1.
+		
+				
+		//Has it been allocated?
+		var allocatedThisTurn = this.specAllocatedCount[this.specCurrClass];//0 or 1
+		var allocatedPreviousTurns =  0;
+			if (this.allocatedSpec && this.allocatedSpec[this.specCurrClass] !== undefined && this.allocatedSpec[this.specCurrClass] !== null && this.allocatedSpec[this.specCurrClass] !== "") {
+			    // allocatedSpec is not null, we can use it here
+			    var allocatedPreviousTurns = this.allocatedSpec[this.specCurrClass];//0 or 1
+			}
+		var allocated = allocatedThisTurn + allocatedPreviousTurns;	//Should still only ever be 0 or 1!						
+		var allowed = this.specPertype;	//Always 1
+		if (allocated >= allowed) return false; //full allowance for this Specialist type filled
+			
+	return true;		
+};			
+	
+HyachSpecialists.prototype.canDecrease = function () { //can decrease if something was increased
+	this.getCurrClass();
+	if (this.specCurrClass == '') return false; //this would mean there are no Specialists whatsover!
+	if (!this.availableSpec[this.specCurrClass]) return false; //Not selected, can't increase or decrease on Turn 1.
+	if (this.availableSpec[this.specCurrClass] < 1) return false; //Not selected, can't increase or decrease on Turn 1.
+					
+	if (this.specAllocatedCount[this.specCurrClass] > 0) return true;	//If it's been increased, you can decrease.
+
+	return false;
+};
+
+
+HyachSpecialists.prototype.doSelect = function () { //increase AA usage
+	this.getCurrClass();
+	if (this.specCurrClass == '') return false; //this would mean there are no Specialist classes whatsover!
+
+	if (this.currchangedSpec[this.specCurrClass] == 0){ //Make sure currchangedSpec ends up being 1.
+			this.currchangedSpec[this.specCurrClass]++;
+		}else{
+			this.currchangedSpec[this.specCurrClass] = 1;			
+		}	
+
+	this.selectedSpec[this.specCurrClass] = 'selected';				
+	this.availableSpec[this.specCurrClass] = 1;	
+	this.specAllocatedCount[this.specCurrClass] = 0; //Set this variable for system data window.
+//currchangedSpec = 1, selectedSpec = 'selected', availableSpec = 1.
+	
+	this.refreshData();
+};
+
+HyachSpecialists.prototype.doUnselect = function () { //can unslect Specialists in Turn 1.
+	this.getCurrClass();
+	if (this.specCurrClass == '') return false; //this would mean there are no Specialist classes whatsover!
+
+	this.currchangedSpec[this.specCurrClass] = 0;	
+	this.selectedSpec[this.specCurrClass] = "";	//Empty array	
+	this.availableSpec[this.specCurrClass] = 0;	
+	
+	this.specAllocatedCount[this.specCurrClass] = 0; //Remove any allocations made after this Specialist was selected.
+	
+	if (this.currAllocatedSpec[this.specCurrClass]){//If player had allocated, then de-selected before removing allocation, make sure info window doesn't still say used.'
+		this.specDecreased[this.specCurrClass] = true;
+		this.specIncreased[this.specCurrClass] = false;
+		this.currAllocatedSpec[this.specCurrClass] = "";		
+	}		
+//currchangedSpec = 0, selectedSpec = '', availableSpec = 0.
+	
+	this.refreshData();
+};
+
+HyachSpecialists.prototype.doUse = function () { //Mark Specialist as used.
+	this.getCurrClass();
+	if (this.specCurrClass == '') return false; //this would mean there are no Specialist classes whatsover!
+		
+		if (this.currchangedSpec[this.specCurrClass] == 0){
+			this.currchangedSpec[this.specCurrClass]++;
+		}else{
+			this.currchangedSpec[this.specCurrClass] = 1;			
+		}
+
+		this.currAllocatedSpec[this.specCurrClass] = 'allocated';
+		this.specAllocatedCount[this.specCurrClass] = 1;	//Just for Status Window.
+		this.specTotal_used++;
+		this.specIncreased[this.specCurrClass] = true;
+		this.specDecreased[this.specCurrClass] = false;		
+//currchangedSpec = 1, currAllocatedSpec = 'allocated', availableSpec = 0, specTotal_used +1.
+	this.refreshData();
+	
+};
+
+HyachSpecialists.prototype.doDecrease = function () { //decrease Specialist allocation in current phase.
+	this.getCurrClass();
+	if (this.specCurrClass == '') return false; //this would mean there are no Specialist classes whatsover!
+
+		this.currchangedSpec[this.specCurrClass]= 0;
+		this.currAllocatedSpec[this.specCurrClass] = "";
+		this.specAllocatedCount[this.specCurrClass] = 0;//Just for Status Window.
+		this.specDecreased[this.specCurrClass] = true;
+		this.specIncreased[this.specCurrClass] = false;		
+					
+		this.specTotal_used--;	
+//currchangedSpec = 0, currAllocatedSpec = '', availableSpec = 1, specTotal_used -1.	
+	this.refreshData();
+};
+HyachSpecialists.prototype.refreshData = function () {
+    var classes = Object.keys(this.availableSpec);
+    var entryName = '';
+    var currType = '';
+    var usedSpecialists = '';
+
+    for (var i = 0; i < classes.length; i++) {
+        currType = classes[i];
+        entryName = ' - ' + currType;
+
+        if (!this.specAllocatedCount[currType]) this.specAllocatedCount[currType] = 0;
+        this.data[entryName] = this.availableSpec[currType] - this.specAllocatedCount[currType];
+
+        if (this.specIncreased[currType]) {
+            usedSpecialists += currType + (i < classes.length - 1 ? ', ' : ''); // Add comma and space.
+        }
+        if (this.specDecreased[currType]) {
+            var regex = new RegExp(currType + ', |, ' + currType);
+            usedSpecialists = usedSpecialists.replace(regex, '');
+        }
+    }
+
+    var totalSpecSelected = Object.values(this.availableSpec).reduce((accumulator, currentValue) => accumulator + currentValue, 0);
+    if (gamedata.turn == 1) {
+        this.data["Specialists"] = totalSpecSelected + '/' + this.specTotal;
+    } else {
+        this.data["Specialists"] = this.specTotal_used + '/' + this.specTotal;
+    }
+
+    // If usedSpecialists is empty, set it to 'NONE'
+    if (usedSpecialists === '') {
+        usedSpecialists = 'NONE';
+    }
+
+    // Update the line containing "Specialists to be used this turn:" if it exists
+    var specialIndex = -1;
+    this.data["Special"].split('<br>').forEach((line, index) => {
+        if (line.includes('Specialists to be used this turn:')) {
+            specialIndex = index;
+        }
+    });
+    
+    if (specialIndex !== -1) {
+        this.data["Special"] = this.data["Special"].split('<br>').slice(0, specialIndex).join('<br>') + '<br>Specialists to be used this turn: ' + usedSpecialists + '<br>';
+    } else {
+        this.data["Special"] += '<br>Specialists to be used this turn: ' + usedSpecialists + '<br>';
+    }
+};
+
+HyachSpecialists.prototype.doIndividualNotesTransfer = function () {
+    this.individualNotesTransfer = {}; // Change to object for better key-value pairing
+    var specClasses = Object.keys(this.currchangedSpec);
+    var specSelected = Object.values(this.selectedSpec);
+    var specUsed = Object.values(this.currAllocatedSpec);
+    var currType = '';
+
+    for (var i = 0; i < specClasses.length; i++) {
+        currType = specClasses[i];
+        if (this.currchangedSpec[specClasses[i]] == 1) {
+            this.individualNotesTransfer[currType] = [];
+            
+            if (specSelected[i] === 'selected') {
+                this.individualNotesTransfer[currType].push(1); // Push numeric value instead of string
+            } else {
+                this.individualNotesTransfer[currType].push(0); // Push 0 for debugging purposes
+            }
+            
+            if (specUsed[i] === 'allocated') {
+                this.individualNotesTransfer[currType].push(2); // Push numeric value instead of string
+            } else {
+                this.individualNotesTransfer[currType].push(0); // Push 0 for debugging purposes
+            }
+        }
+    }
+    return true;
+};
+
+
+
+HyachSpecialists.prototype.canSelectAnything = function () { //returns true if any AA points can currently be allocated
+	var toReturn = false;
+	var startingFrom = this.getCurrClass(); //so we know where we should stop checking
+	var lookingAt = startingFrom;
+	do{
+		if (this.canSelect()){
+			toReturn = true;
+		}else {lookingAt = this.nextCurrClass();
+		}
+	} while ( (toReturn!=true) && (lookingAt != startingFrom) );
+	return toReturn;
+};//endof HyachSpecialists
+
+/* //No need to Propogate Specialists I think, if it's helpful could add later...
+HyachSpecialists.prototype.canPropagate = function () { //can propagate if set to >0
+	if (this.specCurrClass == '') return false; //this would mean there are no damage classes whatsover!
+	if (this.allocatedSpec[this.specCurrClass]>0) return true;
+	return false;
+}; 
+HyachSpecialists.prototype.getCurrSpecType = function () { //returns current damage type
+	return this.specCurrClass;
+};
+HyachSpecialists.prototype.getCurrAllocated = function () { //returns setting for current damage type
+	if (this.specCurrClass == '') return 0;
+	return this.allocatedSpec[this.specCurrClass];
+}; 
+HyachSpecialists.prototype.setCurrSpecType= function (specTypeToSet) { //sets indicated damage type as current (or sets empty as current)
+	this.specCurrClass = ''; //will do if desired type does not exist here, which is rare but possible
+	var classes = Object.keys(this.availableSpec);
+	var currType = '';
+	for (var i = 0; i < classes.length; i++) {
+		currType = classes[i];
+		if (currType == specTypeToSet){ //exists!
+			this.specCurrClass = currType;
+			return; //no need to loop further
+		}
+	}	
+};//endof HyachSpecialists
+*/
 
 var DiffuserTendril = function DiffuserTendril(json, ship) {
     ShipSystem.call(this, json, ship);
