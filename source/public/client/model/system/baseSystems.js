@@ -762,17 +762,17 @@ HyachSpecialists.prototype.refreshData = function () {
         if (!this.specAllocatedCount[currType]) this.specAllocatedCount[currType] = 0;
         this.data[entryName] = this.availableSpec[currType] - this.specAllocatedCount[currType];
 
-        if (this.specIncreased[currType]) {
+        if (this.specIncreased[currType]) { //add entry showing which Specialists are being used this turn.
             usedSpecialists += currType + (i < classes.length - 1 ? ', ' : ''); // Add comma and space.
         }
-        if (this.specDecreased[currType]) {
+        if (this.specDecreased[currType]) {//add entry showing which Specialists are being used this turn.
             var regex = new RegExp(currType + ', |, ' + currType);
             usedSpecialists = usedSpecialists.replace(regex, '');
         }
     }
 
     var totalSpecSelected = Object.values(this.availableSpec).reduce((accumulator, currentValue) => accumulator + currentValue, 0);
-    if (gamedata.turn == 1) {
+    if (gamedata.turn == 1 && gamedata.phase == 1) { //Show Specialists selected in Turn 1 Initial Orders only, then change to showing Specilists used.
         this.data["Specialists"] = totalSpecSelected + '/' + this.specTotal;
     } else {
         this.data["Specialists"] = this.specTotal_used + '/' + this.specTotal;
