@@ -23,6 +23,8 @@ class HyachUtaraTor extends StarBaseSixSections{
 
 		$this->imagePath = "img/ships/orion.png";
 		$this->canvasSize = 280; //Enormous Starbase
+		
+		$this->computerHyach = true;		
 
 		$this->locations = array(41, 42, 2, 32, 31, 1);
 		$this->hitChart = array(			

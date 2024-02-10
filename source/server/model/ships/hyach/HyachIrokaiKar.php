@@ -26,6 +26,8 @@ class HyachIrokaiKar extends BaseShip{
         $this->pivotcost = 3;
         $this->iniativebonus = 0;
         
+		$this->computerHyach = true;        
+        
         $this->gravitic = true;
 
         $this->addPrimarySystem(new Reactor(5, 28, 0, 8));

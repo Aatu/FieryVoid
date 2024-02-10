@@ -21,6 +21,8 @@ class HyachAlichiKav extends HeavyCombatVessel{
         $this->rollcost = 2;
         $this->pivotcost = 3;
         $this->iniativebonus = 30;
+        
+		$this->computerHyach = true;        
 		
         $this->isd = 2210;
 

@@ -28,6 +28,8 @@ class HyachEvirolKon extends BaseShip{
         $this->pivotcost = 3;
         $this->iniativebonus = 0;
         
+		$this->computerHyach = true;        
+        
         $this->gravitic = true;
 
         $this->addPrimarySystem(new Reactor(4, 23, 0, 0));

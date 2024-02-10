@@ -27,6 +27,8 @@ class HyachTachilaKor extends BaseShip{
         $this->iniativebonus = 0;
         
         $this->gravitic = true;
+        
+		$this->computerHyach = true;        
 
         $this->addPrimarySystem(new Reactor(5, 25, 0, 0));
         $this->addPrimarySystem(new CnC(5, 19, 0, 0));
