@@ -826,8 +826,6 @@ HyachSpecialists.prototype.doIndividualNotesTransfer = function () {
     return true;
 };
 
-
-
 HyachSpecialists.prototype.canSelectAnything = function () { //returns true if any AA points can currently be allocated
 	var toReturn = false;
 	var startingFrom = this.getCurrClass(); //so we know where we should stop checking

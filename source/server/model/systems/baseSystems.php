@@ -2141,7 +2141,7 @@ class HyachSpecialists extends ShipSystem{
 
 							$notekey = 'allocated;' . $specialistType;
 							$noteHuman = 'Specialist Used';
-							$noteValue = $gameData->turn; //Mark Turn used so notes only actioned on that turn in onIndividualNotesLoaded()
+							$noteValue = 1; //Max Specialists is always 1, value not actually used for this type of note.
 							$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
 						}
 					}
@@ -2161,7 +2161,7 @@ class HyachSpecialists extends ShipSystem{
 					$this->allocatedSpec[$explodedKey[1]] = 0;					
 			}
 					
-			if (($explodedKey[0] == 'allocated') && ($currNote->notevalue == $gamedata->turn)){ //Mark when a Specialist has been used on a given turn.
+			if (($explodedKey[0] == 'allocated') && ($currNote->turn == $gamedata->turn)){ //Mark when a Specialist has been used on a given turn.
 				$ship = $this->getUnit();
 			
 				if ($explodedKey[1] == 'Defence'){ //Works, just doesn't display Front End.
@@ -2212,7 +2212,7 @@ class HyachSpecialists extends ShipSystem{
 	
     public function setSystemDataWindow($turn){
         parent::setSystemDataWindow($turn);            
-		$this->data["Specialists"] =  $this->specTotalSelected . '/' . $this->specTotal; 
+		$this->data["Specialists"] =  $this->specTotal_used . '/' . $this->specTotal; 
 		
 		foreach($this->availableSpec as $specialistType=>$specValue){
 			$specUsed = $this->allocatedSpec[$specialistType];
@@ -2240,9 +2240,9 @@ class HyachSpecialists extends ShipSystem{
         $strippedSystem->data = $this->data;
         $strippedSystem->allocatedSpec = $this->allocatedSpec;
         $strippedSystem->availableSpec = $this->availableSpec;
-		$strippedSystem->selectedSpec = $this->selectedSpec;        
-        $strippedSystem->currchangedSpec = $this->currchangedSpec;
-        $strippedSystem->currAllocatedSpec = $this->currAllocatedSpec;        
+//		$strippedSystem->selectedSpec = $this->selectedSpec;        
+//        $strippedSystem->currchangedSpec = $this->currchangedSpec;
+//        $strippedSystem->currAllocatedSpec = $this->currAllocatedSpec;        
         $strippedSystem->specTotal_used = $this->specTotal_used;       
         $strippedSystem->specAllocatedCount = $this->specAllocatedCount;
 //        $strippedSystem->allSpec = $this->allSpec;         
