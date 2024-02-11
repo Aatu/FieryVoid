@@ -2203,7 +2203,6 @@ class HyachSpecialists extends ShipSystem{
 	
     public function setSystemDataWindow($turn){
         parent::setSystemDataWindow($turn);            
-//		$this->data["Specialists"] =  $this->specTotal_used . '/' . $this->specTotal; 
 		$this->data["Specialists"] =  $this->specTotal - $this->specTotal_used; 		
 		foreach($this->availableSpec as $specialistType=>$specValue){
 			$specUsed = $this->allocatedSpec[$specialistType];
@@ -2219,11 +2218,10 @@ class HyachSpecialists extends ShipSystem{
         $this->data["Special"] .= "<br>On Turn 1 Initial Orders, you must select which Specialists this ship will have available.";        	   
         $this->data["Special"] .= "<br>You may then use Specialist(s) by clicking + button in any Initial Orders phase (including Turn 1)."; 
         $this->data["Special"] .= "<br>Each Specialists can only be used once, with the following effects on the turn they are used: ";
-		$this->data["Special"] .= "<br> - DEFENCE: Profiles lowered by 10%"; 
-		$this->data["Special"] .= "<br> - ENGINE: +30% Thrust (rounded down)."; 
-		$this->data["Special"] .= "<br> - TARGETING: +5% to hit on all weapons."; 
-		$this->data["Special"] .= "<br> - XXXX: ."; 
-		$this->data["Special"] .= "<br> - XXXX: ."; 
+		$this->data["Special"] .= "<br>  - Defence: Ship profiles lowered by 10%"; 
+		$this->data["Special"] .= "<br>  - Engine: +30% Thrust (rounded down)."; 
+//		$this->data["Special"] .= "<br>  - Maneuvering: Turn Cost and Delay reduced.";
+		$this->data["Special"] .= "<br>  - Targeting: +5% to hit on all weapons."; 		 
     }
 	
 	//always redefine $this->data for Specialists! Can trim down to essentials later.
@@ -2262,10 +2260,7 @@ class HyachSpecialists extends ShipSystem{
 	                }
 	            }
 	        }
-	    }                       
-//	    var_dump($this->currSelectedSpec); 
-//	    var_dump($this->currchangedSpec);           
-	   
+	    }                                	   
 	    $this->individualNotesTransfer = array(); // Empty, just in case
 	}	
 					
