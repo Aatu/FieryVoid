@@ -2076,8 +2076,8 @@ class HyachSpecialists extends ShipSystem{
 	
 	public $allSpec = array('Defence' => 0, 'Engine' => 0, 'Targeting' => 0); //Lists all Specialists for selection on Turn 1.
 	public $availableSpec = array(); //Counts Specialists that have been selected by player from $allSpec on Turn 1.
-	public $selectedSpec = array(); //Used in front end so that it knows to transfer data on Specialists selected.
-//	public $specSelectedCount = array(); //Previous counter, swapped to just using availableSpec.
+	public $currSelectedSpec = array(); //Used in front end so that it knows to transfer data on Specialists selected.
+
 
 	public $currchangedSpec = array(); //Specialists that have been used in front end this turn.	
 	public $allocatedSpec = array(); //Counts Specialists that have been used by player during game.
@@ -2118,12 +2118,8 @@ class HyachSpecialists extends ShipSystem{
 
 					if ($gameData->turn==1){
 						
-						foreach ($this->selectedSpec as $specialistType) {//Take Front end data and modify availableSpec.
-						    $this->availableSpec[$specialistType] = 1;
-						}						
-										
-						foreach($this->availableSpec as $specialistType=>$specValue){//Now generate notes.
-							
+						foreach ($this->currSelectedSpec as $specialistType) {//Take Front end data on Turn 1 and generate available Specs.
+
 						$notekey = 'available;' . $specialistType; //Make those Specialist Types available for rest of game.
 						$noteHuman = 'Specialist available';
 						$noteValue = 1; //Max Specialists is always 1, value not actually used for this type of note.
@@ -2132,12 +2128,7 @@ class HyachSpecialists extends ShipSystem{
 					}	
 
 															
-						foreach($this->currchangedSpec as $specialistType){
-//							$this->allocatedSpec[$specialistType] = 1; //Take Front end data and modify allocatedSpec.
-//						}
-
-//						foreach($this->allocatedSpec as $specialistType=>$specValue){ //Now generate notes.
-//						    if ($specValue == 1){ //Only pass notes if Specialist was actually used this turn.
+						foreach($this->currchangedSpec as $specialistType){//Take Front end data and generate used Specs.
 
 							$notekey = 'allocated;' . $specialistType;
 							$noteHuman = 'Specialist Used';
@@ -2212,22 +2203,23 @@ class HyachSpecialists extends ShipSystem{
 	
     public function setSystemDataWindow($turn){
         parent::setSystemDataWindow($turn);            
-		$this->data["Specialists"] =  $this->specTotal_used . '/' . $this->specTotal; 
-		
+//		$this->data["Specialists"] =  $this->specTotal_used . '/' . $this->specTotal; 
+		$this->data["Specialists"] =  $this->specTotal - $this->specTotal_used; 		
 		foreach($this->availableSpec as $specialistType=>$specValue){
 			$specUsed = $this->allocatedSpec[$specialistType];
 			$this->data[' - '.$specialistType] =  $specValue;
 		}
-		
-		$this->data["Specialists used this turn"] = ''; // List which Specialists were actually used this turn.
-		foreach($this->specAllocatedCount as $specialistType => $specValue) {
-		    $this->data["Specialists used this turn"] .= $specialistType . ', ';
+		if (TacGamedata::$currentPhase != 1  && ($this->specAllocatedCount)){ 		
+			$this->data["Specialists used this turn"] = ''; // List which Specialists were actually used this turn.
+			foreach($this->specAllocatedCount as $specialistType => $specValue) {
+			    $this->data["Specialists used this turn"] .= $specialistType . ', ';
+			}
 		}
         $this->data["Special"] = "This is a technical system used for Specialist management.";
         $this->data["Special"] .= "<br>On Turn 1 Initial Orders, you must select which Specialists this ship will have available.";        	   
         $this->data["Special"] .= "<br>You may then use Specialist(s) by clicking + button in any Initial Orders phase (including Turn 1)."; 
-        $this->data["Special"] .= "<br>Each Specialists can only be used once, with the following effects on turn they're used: ";
-		$this->data["Special"] .= "<br> - DEFENCE: Profiles lowered by 10."; 
+        $this->data["Special"] .= "<br>Each Specialists can only be used once, with the following effects on the turn they are used: ";
+		$this->data["Special"] .= "<br> - DEFENCE: Profiles lowered by 10%"; 
 		$this->data["Special"] .= "<br> - ENGINE: +30% Thrust (rounded down)."; 
 		$this->data["Special"] .= "<br> - TARGETING: +5% to hit on all weapons."; 
 		$this->data["Special"] .= "<br> - XXXX: ."; 
@@ -2239,23 +2231,21 @@ class HyachSpecialists extends ShipSystem{
         $strippedSystem = parent::stripForJson();
         $strippedSystem->data = $this->data;
         $strippedSystem->allocatedSpec = $this->allocatedSpec;
-        $strippedSystem->availableSpec = $this->availableSpec;
-//		$strippedSystem->selectedSpec = $this->selectedSpec;        
-//        $strippedSystem->currchangedSpec = $this->currchangedSpec;
-//        $strippedSystem->currAllocatedSpec = $this->currAllocatedSpec;        
+        $strippedSystem->availableSpec = $this->availableSpec;      
+      	$strippedSystem->currchangedSpec = $this->currchangedSpec;
+      	$strippedSystem->currSelectedSpec = $this->currSelectedSpec;		        
+      	$strippedSystem->currAllocatedSpec = $this->currAllocatedSpec;        
         $strippedSystem->specTotal_used = $this->specTotal_used;       
         $strippedSystem->specAllocatedCount = $this->specAllocatedCount;
 //        $strippedSystem->allSpec = $this->allSpec;         
-//        $strippedSystem->specSelectedCount = $this->specSelectedCount;
-//        $strippedSystem->specDecreased = $this->specDecreased;
-//        $strippedSystem->specIncreased = $this->specIncreased;                             		
+        $strippedSystem->specDecreased = $this->specDecreased;
+        $strippedSystem->specIncreased = $this->specIncreased;                             		
         return $strippedSystem;
     }
 
 	
 	public function doIndividualNotesTransfer(){   
 	    // Example array from Front End:
-	    // $this->individualNotesTransfer = array(
 	    //     "Defence" => array(1, 2),
 	    //     "Engine" => array(1, 0)  );
 	    
@@ -2264,8 +2254,8 @@ class HyachSpecialists extends ShipSystem{
 	        foreach ($this->individualNotesTransfer as $specType => $specValues) {
 	            foreach ($specValues as $specAction) {
 	                if ($specAction === 1) { // Specialist has been selected.
-	                    // Add $specType key to $this->selectedSpec
-	                    $this->selectedSpec[] = $specType; // Append $specType to $this->selectedSpec array
+	                    // Add $specType key to $this->currSelectedSpec
+	                    $this->currSelectedSpec[] = $specType; // Append $specType to $this->currSelectedSpec array
 	                } elseif ($specAction === 2) { // Specialist has been used.
 	                    // Add $specType key to $this->currchangedSpec
 	                    $this->currchangedSpec[] = $specType; // Append $specType to $this->currchangedSpec array
@@ -2273,7 +2263,7 @@ class HyachSpecialists extends ShipSystem{
 	            }
 	        }
 	    }                       
-//	    var_dump($this->selectedSpec); 
+//	    var_dump($this->currSelectedSpec); 
 //	    var_dump($this->currchangedSpec);           
 	   
 	    $this->individualNotesTransfer = array(); // Empty, just in case

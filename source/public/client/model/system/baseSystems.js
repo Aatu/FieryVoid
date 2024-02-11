@@ -635,7 +635,7 @@ HyachSpecialists.prototype.canUnselect = function () { //can unselect Specialist
 	if (gamedata.turn != 1) return false;	
 	if (this.specCurrClass == '') return false; //this would mean there are no Specialists whatsover!
 		
-	if (this.selectedSpec[this.specCurrClass]) return true;	//If it's filled, you can unselect.
+	if (this.currSelectedSpec[this.specCurrClass]) return true;	//If it's filled, you can unselect.
 
 	return false;
 };
@@ -687,10 +687,10 @@ HyachSpecialists.prototype.doSelect = function () { //increase AA usage
 			this.currchangedSpec[this.specCurrClass] = 1;			
 		}	
 
-	this.selectedSpec[this.specCurrClass] = 'selected';				
+	this.currSelectedSpec[this.specCurrClass] = 'selected';				
 	this.availableSpec[this.specCurrClass] = 1;	
 	this.specAllocatedCount[this.specCurrClass] = 0; //Set this variable for system data window.
-//currchangedSpec = 1, selectedSpec = 'selected', availableSpec = 1.
+//currchangedSpec = 1, currSelectedSpec = 'selected', availableSpec = 1.
 	
 	this.refreshData();
 };
@@ -700,7 +700,7 @@ HyachSpecialists.prototype.doUnselect = function () { //can unslect Specialists 
 	if (this.specCurrClass == '') return false; //this would mean there are no Specialist classes whatsover!
 
 	this.currchangedSpec[this.specCurrClass] = 0;	
-	this.selectedSpec[this.specCurrClass] = "";	//Empty array	
+	this.currSelectedSpec[this.specCurrClass] = "";	//Empty array	
 	this.availableSpec[this.specCurrClass] = 0;	
 	
 	this.specAllocatedCount[this.specCurrClass] = 0; //Remove any allocations made after this Specialist was selected.
@@ -710,7 +710,7 @@ HyachSpecialists.prototype.doUnselect = function () { //can unslect Specialists 
 		this.specIncreased[this.specCurrClass] = false;
 		this.currAllocatedSpec[this.specCurrClass] = "";		
 	}		
-//currchangedSpec = 0, selectedSpec = '', availableSpec = 0.
+//currchangedSpec = 0, currSelectedSpec = '', availableSpec = 0.
 	
 	this.refreshData();
 };
@@ -772,15 +772,15 @@ HyachSpecialists.prototype.refreshData = function () {
     }
 
     var totalSpecSelected = Object.values(this.availableSpec).reduce((accumulator, currentValue) => accumulator + currentValue, 0);
-    if (gamedata.turn == 1 && gamedata.phase == 1) { //Show Specialists selected in Turn 1 Initial Orders only, then change to showing Specilists used.
+    if (gamedata.turn == 1 && gamedata.gamephase == 1) { //Show Specialists selected in Turn 1 Initial Orders only, then change to showing Specilists used.
         this.data["Specialists"] = totalSpecSelected + '/' + this.specTotal;
     } else {
-        this.data["Specialists"] = this.specTotal_used + '/' + this.specTotal;
+        this.data["Specialists"] = this.specTotal - this.specTotal_used;
     }
 
     // If usedSpecialists is empty, set it to 'NONE'
     if (usedSpecialists === '') {
-        usedSpecialists = 'NONE';
+        usedSpecialists = 'None';
     }
 
     // Update the line containing "Specialists to be used this turn:" if it exists
@@ -801,7 +801,7 @@ HyachSpecialists.prototype.refreshData = function () {
 HyachSpecialists.prototype.doIndividualNotesTransfer = function () {
     this.individualNotesTransfer = {}; // Change to object for better key-value pairing
     var specClasses = Object.keys(this.currchangedSpec);
-    var specSelected = Object.values(this.selectedSpec);
+    var specSelected = Object.values(this.currSelectedSpec);
     var specUsed = Object.values(this.currAllocatedSpec);
     var currType = '';
 

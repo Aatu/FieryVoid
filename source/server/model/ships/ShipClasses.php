@@ -261,6 +261,21 @@ class BaseShip {
 			$strippedShip->enhancementTooltip = $this->enhancementTooltip; 
 			$strippedShip = Enhancements::addUnitEnhancementsForJSON($this, $strippedShip);//modifies $strippedShip  object
 		}
+
+		//Push Specialists updates to Ship variables when used
+		if ($this->getSystemByName("HyachSpecialists")){ //Does ship have Specialists system?
+			$specialists = $this->HyachSpecialists;
+			$specAllocatedArray = $specialists->specAllocatedCount;
+			foreach ($specAllocatedArray as $specsUsed=>$specValue){
+				if ($specsUsed == 'Defence'){
+					$strippedShip->forwardDefense = $this->forwardDefense; 
+        			$strippedShip->sideDefense = $this->sideDefense;					
+				}
+				if ($specsUsed == 'Targeting'){
+					$strippedShip->toHitBonus = $this->toHitBonus; 				
+				}				
+			}
+		}
 		
 		$strippedShip->enhancementOptions = array(); //no point in sending options information...
         return $strippedShip;
