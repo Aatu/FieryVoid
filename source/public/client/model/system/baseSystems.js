@@ -730,9 +730,9 @@ HyachSpecialists.prototype.doUse = function () { //Mark Specialist as used.
 		this.specTotal_used++;
 		this.specIncreased[this.specCurrClass] = true;
 		this.specDecreased[this.specCurrClass] = false;		
-//currchangedSpec = 1, currAllocatedSpec = 'allocated', availableSpec = 0, specTotal_used +1.
+
 	this.refreshData();
-	
+//currchangedSpec = 1, currAllocatedSpec = 'allocated', specAllocatedCount = 1, specTotal_used +1.	
 };
 
 HyachSpecialists.prototype.doDecrease = function () { //decrease Specialist allocation in current phase.
