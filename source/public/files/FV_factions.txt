@@ -242,6 +242,28 @@ Low-tech faction. No very specific rules/technologies.
 Missiles - The Hurr used purely basic missiles until 2232, when experiments with captured Dilgar tech provided the materials for anti-fighter, long-range, flash and heavy warheads. 
 
 
+HYACH GERONTOCRACY
+The Hyach are among the oldest of the League races, and have been in space longer than even the Abbai. Their ships are surprisingly advanced among League races, with formidable weapons and military training unequaled
+amongst the League. As the Hyach are very advanced in the area of computers, robotics, and communications, their ships tend to reflect these advantages, with better fire controls, enhanced sensors, and efficient construction.
+Hyach Computer - The weapons on Hyach ships are tied into an advanced central computer system that tracks enemy units faster than any mind can. This produces one or Bonus Fire Control Points (BFCP) every turn. The Hyach player is free to distribute these points as desired among the three fire control categories (capital ships/heavy combat vessels, medium ships, and fighters/shuttles) each turn, but cannot allocate more than two to any given category.
+Hyach Specialists - Some Hyach crewman receive special training as Specialists. In addition to their usual functions at their posts, they can provide their singular expertise at key moments in battle.
+	- Like TT, ships with Specialists slot(s) will be able to select these at the start of a game, however unlike TT each Specialist will only take one slot (and are balanced accordingly).
+	- In the Initial Orders phase of Turn 1 you have to use the 'Specialists' technical system to equip Specialists on each applicable ship, up to their maximum allowance. Only one of each Specialist type can be picked per ship.
+	- You can then use Specialist on any Initial Orders phase (including on Turn 1) by using +/- buttons.
+	- Specialists come in a range of differnt types, most of which are different from TT, and have been summarised below:
+		Defence: Ship profiles are lowered by 10% for this turn,
+		Engine: +30% thrust for this turn (rounded down),
+		Manoeuvring: Turn Cost and Turn Delay are reduced by a single step for this turn.
+		Targeting: All weapons have +5% to hit this turn.		
+Hyach Sensors - Hyach sensors are resistant to damage, and shrug off critical hits more easily. Instead of adding +1 to the critical sensor roll for every point of damage, they add +1 only for every two boxes of damage (drop fractions).
+Interdictors - The interdictor is an excellent defensive weapon, though it lacks any sort of offensive firepower. Interdictors can also defend nearby friendly ships, in much the same way as the guardian array
+		does, but with fewer restrictions. In order to block a shot aimed at a different unit, the following must be true:
+		(1) The enemy ship and the target ship must both be in the interdictor’s firing arc.
+		(2) The target ship must be no farther than 5 hexes away from the interdicting ship.
+		(3) No other interdictor may be used against that same incoming shot.
+Stealth Ships - The Hyach operate a few stealth designs that operate as the spacegoing equivalent of submarines.  In FV this is represented by giving them the same Stealth system as the Centauri Rutarian fighter.
+
+
 IPSHA BARONIES
 Baronies - there is no Ipsha "national fleet". Ipsha species is split into "Baronies" (separate feudal-like states), and fielded fleet belongs to one of them. Player may use only generic designs in use by all Baronies and designs specific to one chosen Barony (it's indicated in unit notes). Similarly, some enhancements are Barony-specific.
 	In-game fleet checker does not take this rule into account.
