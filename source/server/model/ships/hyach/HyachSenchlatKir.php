@@ -23,8 +23,7 @@ class HyachSenchlatKir extends HeavyCombatVessel{
         $this->iniativebonus = 30;
 		
         $this->isd = 2258;
-        
-		$this->computerHyach = true;        
+       
 
         $this->addPrimarySystem(new Reactor(4, 21, 0, 0));
         $this->addPrimarySystem(new CnC(4, 15, 0, 0));

@@ -25,8 +25,7 @@ class HyachIrokaiKar extends BaseShip{
         $this->rollcost = 3;
         $this->pivotcost = 3;
         $this->iniativebonus = 0;
-        
-		$this->computerHyach = true;        
+      
         
         $this->gravitic = true;
 

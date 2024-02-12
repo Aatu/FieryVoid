@@ -24,7 +24,6 @@ class HyachOkathKat extends MediumShip{
 		$this->pivotcost = 2;
 		$this->iniativebonus = 60;
 		
-		$this->computerHyach = true;		
 
 		$this->addPrimarySystem(new Reactor(4, 18, 0, 0));
 		$this->addPrimarySystem(new CnC(4, 11, 0, 0));

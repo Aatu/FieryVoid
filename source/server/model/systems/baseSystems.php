@@ -1901,7 +1901,7 @@ class HkControlNode extends ShipSystem{
 } //endof class HkControlNode
 
 
-class HyachComputer extends ShipSystem{
+class HyachComputer extends ShipSystem implements SpecialAbility{
     public $name = "hyachComputer";
     public $displayName = "Computer";
     public $primary = true; //Check if inherited and remove?
@@ -1925,6 +1925,10 @@ class HyachComputer extends ShipSystem{
         parent::__construct($armour, $maxhealth, $powerReq, $output ); //$armour, $maxhealth, $powerReq, $output    	
     }  
 
+	public function getSpecialAbilityValue($args)
+    {
+		return $this->specialAbilityValue;
+	}
 	/* this method generates additional non-standard information in the form of individual system notes
 	in this case: 
 	 - Initial phase: check setting changes made by user, convert to notes.

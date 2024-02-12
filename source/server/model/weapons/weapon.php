@@ -1230,7 +1230,8 @@ class Weapon extends ShipSystem
         }
         $firecontrol = $this->fireControl[$target->getFireControlIndex()];
         
-		if ($shooter->computerHyach) { //Does ship have a Hyach Computer that might add bonus FC?
+//		if ($shooter->computerHyach) { //Old method, discontinued to avoid adding variable.
+		if ($shooter->hasSpecialAbility("HyachComputer")) { //Does ship have a Hyach Computer that might add bonus FC?
 			$bonusFireControl = 0; //initialise
 			$computer = $shooter->getSystemByName("HyachComputer"); //Find computer.
 			$FCIndex = $target->getFireControlIndex(); //Find out FC category of the target.

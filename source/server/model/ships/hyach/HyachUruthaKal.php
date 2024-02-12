@@ -27,8 +27,7 @@ class HyachUruthaKal extends BaseShip{
         $this->iniativebonus = 0;
         
         $this->gravitic = true;
-        
-		$this->computerHyach = true;        
+             
 
         $this->addPrimarySystem(new Reactor(5, 30, 0, 0));
         $this->addPrimarySystem(new CnC(6, 25, 0, 0));

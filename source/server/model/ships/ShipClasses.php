@@ -72,7 +72,7 @@ class BaseShip {
     public $rolling = false;
 	public $EMHardened = false; //EM Hardening (Ipsha have it) - some weapons would check for this value!
 	public $jammerMissile = false; //Marker for when ships are affected by Jammer Missile BDEW.
-	public $computerHyach = false; //Marker for ships which have a Computer (e.g. Hyach).  calculateHitBase looks for this to modify FC values.			
+		
 
     public $team;
     private $expectedDamage = array(); //loc=>dam; damage the unit is expected to take this turn (at outer locations), to decide where to take ambiguous shots

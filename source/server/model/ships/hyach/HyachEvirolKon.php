@@ -27,8 +27,7 @@ class HyachEvirolKon extends BaseShip{
         $this->rollcost = 4;
         $this->pivotcost = 3;
         $this->iniativebonus = 0;
-        
-		$this->computerHyach = true;        
+               
         
         $this->gravitic = true;
 

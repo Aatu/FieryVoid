@@ -23,8 +23,7 @@ class HyachTakaltiKal extends OSAT
 		$this->rollcost = 0;
 		$this->pivotcost = 0;
 		$this->iniativebonus = 60;
-		
-		$this->computerHyach = true;		
+	
 		
 		$this->addPrimarySystem(new Reactor(4, 25, 0, 0));
 		$sensors = new Scanner(4, 20, 3, 8);
