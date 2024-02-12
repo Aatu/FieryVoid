@@ -273,7 +273,11 @@ class BaseShip {
 				}
 				if ($specsUsed == 'Targeting'){
 					$strippedShip->toHitBonus = $this->toHitBonus; 				
-				}				
+				}
+				if ($specsUsed == 'Maneuvering'){
+					$strippedShip->turncost = $this->turncost; 				
+					$strippedShip->turndelaycost = $this->turndelaycost; 				
+				}					
 			}
 		}
 		
