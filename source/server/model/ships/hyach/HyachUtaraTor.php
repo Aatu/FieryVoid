@@ -55,7 +55,7 @@ class HyachUtaraTor extends StarBaseSixSections{
 		$this->addPrimarySystem(new Interdictor(6, 4, 1, 0, 360));
 		$this->addPrimarySystem(new Interdictor(6, 4, 1, 0, 360));
 		$this->addPrimarySystem(new HyachComputer(6, 28, 0, 4));//$armour, $maxhealth, $powerReq, $output			
-		$HyachSpecialists = $this->createHyachSpecialists(4); //$specTotal Should be 6 for base, but just setting it to max available (even tho they can't all be used by a base, it means it can get past error message on Turn 1)
+		$HyachSpecialists = $this->createHyachSpecialists(6); //$specTotal Should be 6 for base, but just setting it to max available (even tho they can't all be used by a base, it means it can get past error message on Turn 1)
 			$this->addPrimarySystem( $HyachSpecialists );	
 
 
