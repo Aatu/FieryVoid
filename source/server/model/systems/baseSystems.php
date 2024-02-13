@@ -2174,7 +2174,7 @@ class HyachSpecialists extends ShipSystem{
 						            $strongestSystem = $system;
 
 						            if ($strongestValue > 0) { // Engine actually exists to be enhanced!
-						                $specialistBoost = floor($strongestSystem->output * 0.3);
+						                $specialistBoost = floor($strongestSystem->output * 0.33);
 						                $strongestSystem->output += $specialistBoost;
 						            }	
 								} 		
@@ -2198,9 +2198,9 @@ class HyachSpecialists extends ShipSystem{
 		            if ($ship->turndelaycost == 0.5) $ship->turndelaycost = 0.33;
 		            if ($ship->turndelaycost == 0.66) $ship->turndelaycost = 0.5;
 		            if ($ship->turndelaycost == 1) $ship->turndelaycost = 0.66;
-		 			if ($ship->turndelaycost == 1.5) $ship->turndelaycost = 1;
-		 				
-					$this->specAllocatedCount[$explodedKey[1]] = 1;									
+		 			if ($ship->turndelaycost == 1.5) $ship->turndelaycost = 1;				
+					$this->specAllocatedCount[$explodedKey[1]] = 1;	
+													
 				}else if ($explodedKey[1] == 'Thruster'){ //Remove limits on Thruster rating, improve Engine efficiency.
 				 	$strongestSystem = null;
 					$strongestValue = -1;
@@ -2256,15 +2256,28 @@ class HyachSpecialists extends ShipSystem{
 			    $this->data["Specialists used this turn"] .= $specialistType . ', ';
 			}
 		}
-        $this->data["Special"] = "This is a technical system used for Specialist management.";
-        $this->data["Special"] .= "<br>On Turn 1 Initial Orders, you must select which Specialists this ship will have available.";        	   
-        $this->data["Special"] .= "<br>You may then use Specialist(s) by clicking + button in any Initial Orders phase (including Turn 1)."; 
-        $this->data["Special"] .= "<br>Each Specialists can only be used once, with the following effects on the turn they are used: ";
-		$this->data["Special"] .= "<br>  - Defence: Ship profiles lowered by 10%"; 
-		$this->data["Special"] .= "<br>  - Engine: +30% Thrust (rounded down)."; 
-		$this->data["Special"] .= "<br>  - Maneuvering: Turn Cost and Delay reduced.";
-		$this->data["Special"] .= "<br>  - Targeting: +5% to hit on all weapons.";
-		$this->data["Special"] .= "<br>  - Thruster: Engine efficiency improved, no limits on thruster outputs.";					 
+	if 	(TacGamedata::$currentTurn == 1 && TacGamedata::$currentPhase = 1){	
+	        $this->data["Special"] = "This is a technical system used for Specialist management.";
+	        $this->data["Special"] .= "<br>On Turn 1 Initial Orders, you must select which Specialists this ship will have available.";        	   
+	        $this->data["Special"] .= "<br>You may then use Specialist(s) by clicking + button in any Initial Orders phase (including Turn 1)."; 
+	        $this->data["Special"] .= "<br>Each Specialists can only be used once, with the following effects on the turn they are used: ";
+			$this->data["Special"] .= "<br>  - Defence: Ship profiles lowered by 10%"; 
+			$this->data["Special"] .= "<br>  - Engine: +33% Thrust (rounded down)"; 
+			$this->data["Special"] .= "<br>  - Maneuvering: Turn Cost and Delay reduced.";
+			$this->data["Special"] .= "<br>  - Targeting: +5% to hit on all weapons.";
+			$this->data["Special"] .= "<br>  - Thruster: No limits on thruster outputs and engine efficiency improved.";					 
+	    }else{
+	        $this->data["Special"] = "This is a technical system used for Specialist management.";       	   
+	        $this->data["Special"] .= "<br>You use Specialist(s) by clicking + button in any Initial Orders phase (including Turn 1)."; 
+	        $this->data["Special"] .= "<br>Each Specialists can only be used once, with the following effects on the turn they are used: ";
+				foreach($this->allocatedSpec as $specialistType => $specValue) {
+					if ($specialistType == 'Defence') $this->data["Special"] .= '<br>  - '.$specialistType . ': Ship profiles lowered by 10%';
+					if ($specialistType == 'Engine') $this->data["Special"] .= '<br>  - '.$specialistType . ': +33% Thrust (rounded down)';
+					if ($specialistType == 'Maneuvering') $this->data["Special"] .= '<br>  - '.$specialistType . ': Turn Cost and Delay reduced.';										if ($specialistType == 'Targeting') $this->data["Special"] .= '<br>  - '.$specialistType . ': +5% to hit on all weapons.';
+					if ($specialistType == 'Thruster') $this->data["Special"] .= '<br>  - '.$specialistType . ': No limits on thruster outputs and engine efficiency improved.';											    
+				}        
+		}
+            	 	
     }
 	
 	//always redefine $this->data for Specialists! Can trim down to essentials later.
