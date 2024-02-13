@@ -2801,10 +2801,8 @@ spl_autoload_register(
                 'ltblastlaser' => '/server/model/weapons/lasers.php',
 				'hyachcomputer' => '/server/model/systems/baseSystems.php',
 				'hyachspecialists' => '/server/model/systems/baseSystems.php',					
-				//units
-
-								
-
+				//units						
+/*
 				'hyachalichikav' => '/server/model/ships/hyach/HyachAlichiKav.php',
 				'hyachalichital' => '/server/model/ships/hyach/HyachAlichiTal.php',
 				'hyachalichikav' => '/server/model/ships/hyach/HyachAlichiKav.php',
@@ -2828,7 +2826,7 @@ spl_autoload_register(
 				'hyachtakaltikam' => '/server/model/ships/hyach/HyachTakaltiKam.php',
 				'hyachuruthakal' => '/server/model/ships/hyach/HyachUruthaKal.php',
 				'hyachutarator' => '/server/model/ships/hyach/HyachUtaraTor.php',
-
+*/
 
 				//Kor-Lyan
 				'axor' => '/server/model/ships/korlyan/Axor.php',
