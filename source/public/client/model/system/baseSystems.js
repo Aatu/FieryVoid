@@ -709,6 +709,18 @@ HyachSpecialists.prototype.doUnselect = function () { //can unslect Specialists 
 		this.specDecreased[this.specCurrClass] = true;
 		this.specIncreased[this.specCurrClass] = false;
 		this.currAllocatedSpec[this.specCurrClass] = "";		
+	
+		if (this.specCurrClass == 'Thruster'){ //Make front-end changes to Engine efficiency in Initial Orders phase.
+			var ship = this.ship;
+
+			    for (var i in ship.systems) {
+			        var system = ship.systems[i];
+
+					if (system instanceof Engine) {
+					    system.boostEfficiency += 1;
+					}
+				}
+		}
 	}		
 //currchangedSpec = 0, currSelectedSpec = '', availableSpec = 0.
 	
@@ -730,9 +742,21 @@ HyachSpecialists.prototype.doUse = function () { //Mark Specialist as used.
 		this.specTotal_used++;
 		this.specIncreased[this.specCurrClass] = true;
 		this.specDecreased[this.specCurrClass] = false;		
-
-	this.refreshData();
 //currchangedSpec = 1, currAllocatedSpec = 'allocated', specAllocatedCount = 1, specTotal_used +1.	
+
+		if (this.specCurrClass == 'Thruster'){ //Make front-end changes to Engine efficiency in Initial Orders phase.
+		var ship = this.ship;
+
+		    for (var i in ship.systems) {
+		        var system = ship.systems[i];
+
+				if (system instanceof Engine) {
+				    system.boostEfficiency -= 1;
+				}
+			}
+		}
+	this.refreshData();
+
 };
 
 HyachSpecialists.prototype.doDecrease = function () { //decrease Specialist allocation in current phase.
@@ -746,7 +770,20 @@ HyachSpecialists.prototype.doDecrease = function () { //decrease Specialist allo
 		this.specIncreased[this.specCurrClass] = false;		
 					
 		this.specTotal_used--;	
-//currchangedSpec = 0, currAllocatedSpec = '', availableSpec = 1, specTotal_used -1.	
+//currchangedSpec = 0, currAllocatedSpec = '', availableSpec = 1, specTotal_used -1.
+
+		if (this.specCurrClass == 'Thruster'){//Make front-end changes to Engine efficiency in Initial Orders phase.
+		var ship = this.ship;
+
+		    for (var i in ship.systems) {
+		        var system = ship.systems[i];
+
+				if (system instanceof Engine) {
+				    system.boostEfficiency += 1;
+				}
+			}
+		}
+	
 	this.refreshData();
 };
 HyachSpecialists.prototype.refreshData = function () {

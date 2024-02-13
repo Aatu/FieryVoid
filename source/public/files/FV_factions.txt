@@ -24,7 +24,7 @@ GENERAL NOTES
 
 MISSILES
 --------
-For starters - general decription of missiles, as a complictaed system that is common for multiple factions.
+For starters - general description of missiles, as a complicated system that is common for multiple factions.
 
 General notes: ships usually come preloaded with missiles (usually Basic), and any missiles You buy is on top of that. Also, while amount of any given missile You can buy is limited by magazine size, total amount of missiles is not. 
 This means Your missile magazine may show more missiles available than it can actually hold. However, You cannot actually LAUNCH more missiles than magazine can hold - total number of launches is tracked. So extra missiles will provide You with extra variety (at a price ;) ), but not actual extra missiles.
@@ -254,7 +254,8 @@ Hyach Specialists - Some Hyach crewman receive special training as Specialists. 
 		Defence: Ship profiles are lowered by 10% for this turn,
 		Engine: +30% thrust for this turn (rounded down),
 		Manoeuvring: Turn Cost and Turn Delay are reduced by a single step for this turn.
-		Targeting: All weapons have +5% to hit this turn.		
+		Targeting: All weapons have +5% to hit this turn.
+		Thruster: Remove limits on Thruster ratings (set to 99) and improves Engine efficiency by 1 point. 		
 Hyach Sensors - Hyach sensors are resistant to damage, and shrug off critical hits more easily. Instead of adding +1 to the critical sensor roll for every point of damage, they add +1 only for every two boxes of damage (drop fractions).
 Interdictors - The interdictor is an excellent defensive weapon, though it lacks any sort of offensive firepower. Interdictors can also defend nearby friendly ships, in much the same way as the guardian array
 		does, but with fewer restrictions. In order to block a shot aimed at a different unit, the following must be true:

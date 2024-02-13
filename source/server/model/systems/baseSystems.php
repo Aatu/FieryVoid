@@ -2078,7 +2078,7 @@ class HyachSpecialists extends ShipSystem{
 	public $specPertype = 1; //How may per type are allowed (should always be 1).
 	public $specCurrClass = '';//for front end, to display Specialist types in tooltips.
 	
-	public $allSpec = array('Defence' => 0, 'Engine' => 0, 'Maneuvering' => 0,'Targeting' => 0); //Lists all Specialists for selection on Turn 1.
+	public $allSpec = array('Defence' => 0, 'Engine' => 0, 'Maneuvering' => 0,'Targeting' => 0, 'Thruster' => 0); //Lists all Specialists for selection on Turn 1.
 	public $availableSpec = array(); //Counts Specialists that have been selected by player from $allSpec on Turn 1.
 	public $currSelectedSpec = array(); //Used in front end so that it knows to transfer data on Specialists selected.
 
@@ -2184,7 +2184,8 @@ class HyachSpecialists extends ShipSystem{
 						
 				}else if ($explodedKey[1] == 'Targeting'){ //+5% to hit on ALL weapons this turn
 					$ship->toHitBonus += 1;	
-					$this->specAllocatedCount[$explodedKey[1]] = 1;					
+					$this->specAllocatedCount[$explodedKey[1]] = 1;
+										
 				}else if ($explodedKey[1] == 'Maneuvering'){ //Reduce Turn Cost and Turn Delay by one step.
 
 		            if ($ship->turncost == 0) $ship->turncost = 0;
@@ -2200,6 +2201,28 @@ class HyachSpecialists extends ShipSystem{
 		 			if ($ship->turndelaycost == 1.5) $ship->turndelaycost = 1;
 		 				
 					$this->specAllocatedCount[$explodedKey[1]] = 1;									
+				}else if ($explodedKey[1] == 'Thruster'){ //Remove limits on Thruster rating, improve Engine efficiency.
+				 	$strongestSystem = null;
+					$strongestValue = -1;
+						foreach ($ship->systems as $system) {
+						    if ($system instanceof Engine) {
+						        if ($system->output > $strongestValue) {
+						            $strongestValue = $system->output;
+						            $strongestSystem = $system;
+
+						            if ($strongestValue > 0) { // Engine actually exists to be enhanced!
+						                $strongestSystem->boostEfficiency -= 1;
+						            }	
+								} 		
+							}
+						}
+						foreach ($ship->systems as $system){
+							if ($system instanceof Thruster){
+								$system->output = 99;	
+							}
+						}		
+					$this->specAllocatedCount[$explodedKey[1]] = 1;//To show it has been used this turn.
+						
 				}else{}
 							
 
@@ -2240,7 +2263,8 @@ class HyachSpecialists extends ShipSystem{
 		$this->data["Special"] .= "<br>  - Defence: Ship profiles lowered by 10%"; 
 		$this->data["Special"] .= "<br>  - Engine: +30% Thrust (rounded down)."; 
 		$this->data["Special"] .= "<br>  - Maneuvering: Turn Cost and Delay reduced.";
-		$this->data["Special"] .= "<br>  - Targeting: +5% to hit on all weapons."; 		 
+		$this->data["Special"] .= "<br>  - Targeting: +5% to hit on all weapons.";
+		$this->data["Special"] .= "<br>  - Thruster: Engine efficiency improved, no limits on thruster outputs.";					 
     }
 	
 	//always redefine $this->data for Specialists! Can trim down to essentials later.
@@ -2253,8 +2277,7 @@ class HyachSpecialists extends ShipSystem{
       	$strippedSystem->currSelectedSpec = $this->currSelectedSpec;		        
       	$strippedSystem->currAllocatedSpec = $this->currAllocatedSpec;        
         $strippedSystem->specTotal_used = $this->specTotal_used;       
-        $strippedSystem->specAllocatedCount = $this->specAllocatedCount;
-//        $strippedSystem->allSpec = $this->allSpec;         
+        $strippedSystem->specAllocatedCount = $this->specAllocatedCount;      
         $strippedSystem->specDecreased = $this->specDecreased;
         $strippedSystem->specIncreased = $this->specIncreased;                             		
         return $strippedSystem;
