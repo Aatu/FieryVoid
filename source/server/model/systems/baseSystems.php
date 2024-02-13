@@ -2256,7 +2256,7 @@ class HyachSpecialists extends ShipSystem{
 			    $this->data["Specialists used this turn"] .= $specialistType . ', ';
 			}
 		}
-	if 	(TacGamedata::$currentTurn == 1 && TacGamedata::$currentPhase = 1){	
+	if 	(TacGamedata::$currentTurn == 1 && TacGamedata::$currentPhase == 1){	//Show all Specialist info on Turn 1 Initial Orders.
 	        $this->data["Special"] = "This is a technical system used for Specialist management.";
 	        $this->data["Special"] .= "<br>On Turn 1 Initial Orders, you must select which Specialists this ship will have available.";        	   
 	        $this->data["Special"] .= "<br>You may then use Specialist(s) by clicking + button in any Initial Orders phase (including Turn 1)."; 
@@ -2266,7 +2266,7 @@ class HyachSpecialists extends ShipSystem{
 			$this->data["Special"] .= "<br>  - Maneuvering: Turn Cost and Delay reduced.";
 			$this->data["Special"] .= "<br>  - Targeting: +5% to hit on all weapons.";
 			$this->data["Special"] .= "<br>  - Thruster: No limits on thruster outputs and engine efficiency improved.";					 
-	    }else{
+	    }else{ //After Initials Orders on Turn 1, reduce data so that it just shows relevant info on Specialists selected.
 	        $this->data["Special"] = "This is a technical system used for Specialist management.";       	   
 	        $this->data["Special"] .= "<br>You use Specialist(s) by clicking + button in any Initial Orders phase (including Turn 1)."; 
 	        $this->data["Special"] .= "<br>Each Specialists can only be used once, with the following effects on the turn they are used: ";
