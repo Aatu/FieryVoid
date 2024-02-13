@@ -706,6 +706,7 @@ HyachSpecialists.prototype.doUnselect = function () { //can unslect Specialists 
 	this.specAllocatedCount[this.specCurrClass] = 0; //Remove any allocations made after this Specialist was selected.
 	
 	if (this.currAllocatedSpec[this.specCurrClass]){//If player had allocated, then de-selected before removing allocation, make sure info window doesn't still say used.'
+		this.currchangedSpec[this.specCurrClass] = 1; //In this case it's been selected so keep it as 1.
 		this.specDecreased[this.specCurrClass] = true;
 		this.specIncreased[this.specCurrClass] = false;
 		this.currAllocatedSpec[this.specCurrClass] = "";		
@@ -763,7 +764,7 @@ HyachSpecialists.prototype.doDecrease = function () { //decrease Specialist allo
 	this.getCurrClass();
 	if (this.specCurrClass == '') return false; //this would mean there are no Specialist classes whatsover!
 
-		this.currchangedSpec[this.specCurrClass]= 0;
+		if (gamedata.turn != 1) this.currchangedSpec[this.specCurrClass]= 0;
 		this.currAllocatedSpec[this.specCurrClass] = "";
 		this.specAllocatedCount[this.specCurrClass] = 0;//Just for Status Window.
 		this.specDecreased[this.specCurrClass] = true;
@@ -837,27 +838,25 @@ HyachSpecialists.prototype.refreshData = function () {
 
 HyachSpecialists.prototype.doIndividualNotesTransfer = function () {
     this.individualNotesTransfer = {}; // Change to object for better key-value pairing
-    var specClasses = Object.keys(this.currchangedSpec);
-    var specSelected = Object.values(this.currSelectedSpec);
-    var specUsed = Object.values(this.currAllocatedSpec);
-    var currType = '';
+    var specClasses = Object.keys(this.allSpec);
 
     for (var i = 0; i < specClasses.length; i++) {
-        currType = specClasses[i];
-        if (this.currchangedSpec[specClasses[i]] == 1) {
-            this.individualNotesTransfer[currType] = [];
-            
-            if (specSelected[i] === 'selected') {
-                this.individualNotesTransfer[currType].push(1); // Push numeric value instead of string
-            } else {
-                this.individualNotesTransfer[currType].push(0); // Push 0 for debugging purposes
-            }
-            
-            if (specUsed[i] === 'allocated') {
-                this.individualNotesTransfer[currType].push(2); // Push numeric value instead of string
-            } else {
-                this.individualNotesTransfer[currType].push(0); // Push 0 for debugging purposes
-            }
+        var currType = specClasses[i];
+
+        // Initialize the array for the current spec
+        this.individualNotesTransfer[currType] = [];
+
+        // Check specSelected for 'selected' and specUsed for 'allocated'
+        if (this.currSelectedSpec[currType] === 'selected') {
+            this.individualNotesTransfer[currType].push(1); // Push 1 if 'selected'
+        } else {
+            this.individualNotesTransfer[currType].push(0); // Push 0 otherwise
+        }
+
+        if (this.currAllocatedSpec[currType] === 'allocated') {
+            this.individualNotesTransfer[currType].push(2); // Push 2 if 'allocated'
+        } else {
+            this.individualNotesTransfer[currType].push(0); // Push 0 otherwise
         }
     }
     return true;
