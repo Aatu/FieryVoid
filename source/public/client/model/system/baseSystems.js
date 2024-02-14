@@ -756,6 +756,18 @@ HyachSpecialists.prototype.doUse = function () { //Mark Specialist as used.
 				}
 			}
 		}
+		if (this.specCurrClass == 'Computer'){//Make front-end changes to Engine efficiency in Initial Orders phase.
+		var ship = this.ship;
+
+		    for (var i in ship.systems) {
+		        var system = ship.systems[i];
+
+				if (system instanceof HyachComputer) {
+				    system.output += 1;
+				}
+			}
+		}
+				
 	this.refreshData();
 
 };
@@ -784,7 +796,18 @@ HyachSpecialists.prototype.doDecrease = function () { //decrease Specialist allo
 				}
 			}
 		}
-	
+		if (this.specCurrClass == 'Computer'){//Make front-end changes to Engine efficiency in Initial Orders phase.
+		var ship = this.ship;
+
+		    for (var i in ship.systems) {
+		        var system = ship.systems[i];
+
+				if (system instanceof HyachComputer) {
+				    system.output -= 1;
+				}
+			}
+		}
+			
 	this.refreshData();
 };
 HyachSpecialists.prototype.refreshData = function () {

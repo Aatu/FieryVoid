@@ -2078,7 +2078,7 @@ class HyachSpecialists extends ShipSystem{
 	public $specPertype = 1; //How may per type are allowed (should always be 1).
 	public $specCurrClass = '';//for front end, to display Specialist types in tooltips.
 	
-	public $allSpec = array('Defence' => 0, 'Engine' => 0, 'Maneuvering' => 0,'Targeting' => 0, 'Thruster' => 0); //Lists all Specialists for selection on Turn 1.
+	public $allSpec = array('Computer' => 0, 'Defence' => 0, 'Engine' => 0, 'Maneuvering' => 0,'Targeting' => 0, 'Thruster' => 0); //Lists all Specialists for selection on Turn 1.
 	public $availableSpec = array(); //Counts Specialists that have been selected by player from $allSpec on Turn 1.  Numeric.
 	public $currSelectedSpec = array(); //Used in front end so that it knows to transfer data on Specialists selected. Value are empty or 'selected'.
 
@@ -2158,7 +2158,24 @@ class HyachSpecialists extends ShipSystem{
 			if (($explodedKey[0] == 'allocated') && ($currNote->turn == $gamedata->turn)){ //Mark when a Specialist has been used on a given turn.
 				$ship = $this->getUnit();
 			
-				if ($explodedKey[1] == 'Defence'){ //Works, just doesn't display Front End.
+				if ($explodedKey[1] == 'Computer'){
+				 	$strongestSystem = null;
+					$strongestValue = -1;
+						foreach ($ship->systems as $system) {
+						    if ($system instanceof HyachComputer) {
+						        if ($system->output > $strongestValue) {
+						            $strongestValue = $system->output;
+						            $strongestSystem = $system;
+
+						            if ($strongestValue > 0) { // Computer actually exists to be enhanced!
+						                $strongestSystem->output += 1;
+						            }	
+								} 		
+							}
+						}
+					$this->specAllocatedCount[$explodedKey[1]] = 1;//To show it has been used this turn in system info tooltip.
+						
+				}else if ($explodedKey[1] == 'Defence'){ //Works, just doesn't display Front End.
 					$ship->forwardDefense -= 2;
 					$ship->sideDefense -= 2;
 					$this->specAllocatedCount[$explodedKey[1]] = 1; //To show it has been used this turn in system info tooltip.	
@@ -2260,6 +2277,7 @@ class HyachSpecialists extends ShipSystem{
 	        $this->data["Special"] .= "<br>On Turn 1 Initial Orders, you must select which Specialists this ship will have available.";        	   
 	        $this->data["Special"] .= "<br>You may then use Specialist(s) by clicking + button in any Initial Orders phase (including Turn 1)."; 
 	        $this->data["Special"] .= "<br>Each Specialists can only be used once, with the following effects on the turn they are used: ";
+			$this->data["Special"] .= "<br>  - Computer: +1 Bonus Fire Control Point."; 
 			$this->data["Special"] .= "<br>  - Defence: Ship profiles lowered by 10%"; 
 			$this->data["Special"] .= "<br>  - Engine: +33% Thrust (rounded down)"; 
 			$this->data["Special"] .= "<br>  - Maneuvering: Turn Cost and Delay reduced.";
@@ -2270,14 +2288,14 @@ class HyachSpecialists extends ShipSystem{
 	        $this->data["Special"] .= "<br>You use Specialist(s) by clicking + button in any Initial Orders phase (including Turn 1)."; 
 	        $this->data["Special"] .= "<br>Each Specialists can only be used once, with the following effects on the turn they are used: ";
 				foreach($this->allocatedSpec as $specialistType => $specValue) {
+					if ($specialistType == 'Computer') $this->data["Special"] .= '<br>  - '.$specialistType . ': +1 Bonus Fire Control Point.';
 					if ($specialistType == 'Defence') $this->data["Special"] .= '<br>  - '.$specialistType . ': Ship profiles lowered by 10%';
 					if ($specialistType == 'Engine') $this->data["Special"] .= '<br>  - '.$specialistType . ': +33% Thrust (rounded down)';
 					if ($specialistType == 'Maneuvering') $this->data["Special"] .= '<br>  - '.$specialistType . ': Turn Cost and Delay reduced.';										
 					if ($specialistType == 'Targeting') $this->data["Special"] .= '<br>  - '.$specialistType . ': +3% to hit on all weapons.';
 					if ($specialistType == 'Thruster') $this->data["Special"] .= '<br>  - '.$specialistType . ': No limits on thruster outputs and engine efficiency improved.';											    
 				}        
-		}
-            	 	
+		}         	 	
     }
 	
 	//always redefine $this->data for Specialists! Can trim down to essentials later.

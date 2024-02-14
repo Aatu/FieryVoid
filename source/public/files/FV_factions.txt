@@ -251,8 +251,9 @@ Hyach Specialists - Some Hyach crewman receive special training as Specialists. 
 	- In the Initial Orders phase of Turn 1 you have to use the 'Specialists' technical system to equip Specialists on each applicable ship, up to their maximum allowance. Only one of each Specialist type can be picked per ship.
 	- You can then use Specialist on any Initial Orders phase (including on Turn 1) by using +/- buttons.
 	- Specialists come in a range of differnt types, most of which are different from TT, and have been summarised below:
-		Defence:  Ship profiles are lowered by 10% for this turn,
-		Engine:  +30% thrust for this turn (rounded down),
+		Computer: Computer generates an extra Bonus Fire Control Point this turn.
+		Defence:  Ship profiles are lowered by 10% for this turn.
+		Engine:  +30% thrust for this turn (rounded down).
 		Manoeuvring:  Turn Cost and Turn Delay are reduced by a single step for this turn.
 		Targeting:  All weapons have +3% to hit this turn.
 		Thruster:  Remove limits on Thruster ratings (set to 99) and improves Engine efficiency by 1 point. 		
