@@ -2272,7 +2272,8 @@ class HyachSpecialists extends ShipSystem{
 				foreach($this->allocatedSpec as $specialistType => $specValue) {
 					if ($specialistType == 'Defence') $this->data["Special"] .= '<br>  - '.$specialistType . ': Ship profiles lowered by 10%';
 					if ($specialistType == 'Engine') $this->data["Special"] .= '<br>  - '.$specialistType . ': +33% Thrust (rounded down)';
-					if ($specialistType == 'Maneuvering') $this->data["Special"] .= '<br>  - '.$specialistType . ': Turn Cost and Delay reduced.';										if ($specialistType == 'Targeting') $this->data["Special"] .= '<br>  - '.$specialistType . ': +3% to hit on all weapons.';
+					if ($specialistType == 'Maneuvering') $this->data["Special"] .= '<br>  - '.$specialistType . ': Turn Cost and Delay reduced.';										
+					if ($specialistType == 'Targeting') $this->data["Special"] .= '<br>  - '.$specialistType . ': +3% to hit on all weapons.';
 					if ($specialistType == 'Thruster') $this->data["Special"] .= '<br>  - '.$specialistType . ': No limits on thruster outputs and engine efficiency improved.';											    
 				}        
 		}
