@@ -681,11 +681,11 @@ HyachSpecialists.prototype.doSelect = function () { //increase AA usage
 	this.getCurrClass();
 	if (this.specCurrClass == '') return false; //this would mean there are no Specialist classes whatsover!
 
-	if (this.currchangedSpec[this.specCurrClass] == 0){ //Make sure currchangedSpec ends up being 1.
-			this.currchangedSpec[this.specCurrClass]++;
-		}else{
-			this.currchangedSpec[this.specCurrClass] = 1;			
-		}	
+//	if (this.currchangedSpec[this.specCurrClass] == 0){ //Make sure currchangedSpec ends up being 1.
+//			this.currchangedSpec[this.specCurrClass]++;
+//		}else{
+//			this.currchangedSpec[this.specCurrClass] = 1;			
+//		}	
 
 	this.currSelectedSpec[this.specCurrClass] = 'selected';				
 	this.availableSpec[this.specCurrClass] = 1;	
@@ -699,14 +699,14 @@ HyachSpecialists.prototype.doUnselect = function () { //can unslect Specialists 
 	this.getCurrClass();
 	if (this.specCurrClass == '') return false; //this would mean there are no Specialist classes whatsover!
 
-	this.currchangedSpec[this.specCurrClass] = 0;	
+//	this.currchangedSpec[this.specCurrClass] = 0;	
 	this.currSelectedSpec[this.specCurrClass] = "";	//Empty array	
 	this.availableSpec[this.specCurrClass] = 0;	
 	
 	this.specAllocatedCount[this.specCurrClass] = 0; //Remove any allocations made after this Specialist was selected.
 	
 	if (this.currAllocatedSpec[this.specCurrClass]){//If player had allocated, then de-selected before removing allocation, make sure info window doesn't still say used.'
-		this.currchangedSpec[this.specCurrClass] = 1; //In this case it's been selected so keep it as 1.
+//		this.currchangedSpec[this.specCurrClass] = 1; //In this case it's been selected so keep it as 1.
 		this.specDecreased[this.specCurrClass] = true;
 		this.specIncreased[this.specCurrClass] = false;
 		this.currAllocatedSpec[this.specCurrClass] = "";		
@@ -732,11 +732,11 @@ HyachSpecialists.prototype.doUse = function () { //Mark Specialist as used.
 	this.getCurrClass();
 	if (this.specCurrClass == '') return false; //this would mean there are no Specialist classes whatsover!
 		
-		if (this.currchangedSpec[this.specCurrClass] == 0){
-			this.currchangedSpec[this.specCurrClass]++;
-		}else{
-			this.currchangedSpec[this.specCurrClass] = 1;			
-		}
+//		if (this.currchangedSpec[this.specCurrClass] == 0){
+//			this.currchangedSpec[this.specCurrClass]++;
+//		}else{
+//			this.currchangedSpec[this.specCurrClass] = 1;			
+//		}
 
 		this.currAllocatedSpec[this.specCurrClass] = 'allocated';
 		this.specAllocatedCount[this.specCurrClass] = 1;	//Just for Status Window.
@@ -764,7 +764,7 @@ HyachSpecialists.prototype.doDecrease = function () { //decrease Specialist allo
 	this.getCurrClass();
 	if (this.specCurrClass == '') return false; //this would mean there are no Specialist classes whatsover!
 
-		if (gamedata.turn != 1) this.currchangedSpec[this.specCurrClass]= 0;
+//		if (gamedata.turn != 1) this.currchangedSpec[this.specCurrClass]= 0;
 		this.currAllocatedSpec[this.specCurrClass] = "";
 		this.specAllocatedCount[this.specCurrClass] = 0;//Just for Status Window.
 		this.specDecreased[this.specCurrClass] = true;

@@ -2079,14 +2079,13 @@ class HyachSpecialists extends ShipSystem{
 	public $specCurrClass = '';//for front end, to display Specialist types in tooltips.
 	
 	public $allSpec = array('Defence' => 0, 'Engine' => 0, 'Maneuvering' => 0,'Targeting' => 0, 'Thruster' => 0); //Lists all Specialists for selection on Turn 1.
-	public $availableSpec = array(); //Counts Specialists that have been selected by player from $allSpec on Turn 1.
-	public $currSelectedSpec = array(); //Used in front end so that it knows to transfer data on Specialists selected.
+	public $availableSpec = array(); //Counts Specialists that have been selected by player from $allSpec on Turn 1.  Numeric.
+	public $currSelectedSpec = array(); //Used in front end so that it knows to transfer data on Specialists selected. Value are empty or 'selected'.
 
-
-	public $currchangedSpec = array(); //Specialists that have been used in front end this turn.	
+	public $currchangedSpec = array(); //Creates backend notes on Specialists that have been used this turn.	
 	public $allocatedSpec = array(); //Counts Specialists that have been used by player during game.
-	public $specAllocatedCount = array(); //Counter used for showing what Specialists were used in Current Turn (if any)		
-	public $currAllocatedSpec = array();//Used in front end so that it knows to transfer data on Specialists used.
+	public $specAllocatedCount = array(); //Counter used for showing what Specialists were used in Current Turn (if any).		
+	public $currAllocatedSpec = array();//Used in front end so that it knows to transfer data on Specialists used. Value are empty or 'allocated'.
 	
 	public $specDecreased = array(); //Front End counter for updating system tooltip on which Specialists were used this turn. 	
 	public $specIncreased = array(); //Front End counter for updating system tooltip on which Specialists were used this turn. 	 
@@ -2286,7 +2285,7 @@ class HyachSpecialists extends ShipSystem{
         $strippedSystem->data = $this->data;
         $strippedSystem->allocatedSpec = $this->allocatedSpec;
         $strippedSystem->availableSpec = $this->availableSpec;      
-      	$strippedSystem->currchangedSpec = $this->currchangedSpec;
+//      	$strippedSystem->currchangedSpec = $this->currchangedSpec;
       	$strippedSystem->currSelectedSpec = $this->currSelectedSpec;		        
       	$strippedSystem->currAllocatedSpec = $this->currAllocatedSpec;        
         $strippedSystem->specTotal_used = $this->specTotal_used;       
