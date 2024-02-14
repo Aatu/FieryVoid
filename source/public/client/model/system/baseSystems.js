@@ -797,9 +797,13 @@ HyachSpecialists.prototype.refreshData = function () {
         currType = classes[i];
         entryName = ' - ' + currType;
 
-        if (!this.specAllocatedCount[currType]) this.specAllocatedCount[currType] = 0;
+        if (!this.specAllocatedCount[currType]) this.specAllocatedCount[currType] = 0; //Will show 1 if selected but not used, 0 if selected and used.
         this.data[entryName] = this.availableSpec[currType] - this.specAllocatedCount[currType];
 
+		if (this.availableSpec[currType] == 0 && gamedata.turn == 1 && gamedata.gamephase == 1) { //This way it's removed form list on Turn 1 whenever it's deselected.
+			delete this.data[entryName]; 
+			}       
+        
         if (this.specIncreased[currType]) { //add entry showing which Specialists are being used this turn.
             usedSpecialists += currType + (i < classes.length - 1 ? ', ' : ''); // Add comma and space.
         }
@@ -808,6 +812,8 @@ HyachSpecialists.prototype.refreshData = function () {
             usedSpecialists = usedSpecialists.replace(regex, '');
         }
     }
+
+
 
     var totalSpecSelected = Object.values(this.availableSpec).reduce((accumulator, currentValue) => accumulator + currentValue, 0);
     if (gamedata.turn == 1 && gamedata.gamephase == 1) { //Show Specialists selected in Turn 1 Initial Orders only, then change to showing Specilists used.
