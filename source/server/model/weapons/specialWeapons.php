@@ -5210,7 +5210,7 @@ class ProximityLaserLauncher extends Weapon{
 		
 		public $range = 30;//no point firing at further target with base 24 to hit!
 		public $loadingtime = 1; //same as attached laser
-	    public $ammunition = 10; //limited number of shots	
+	    public $ammunition = 99; //Just make unlimited, so account for accidental launches when Laser on recharge.	
 		
 		public $animation = "ball";
 		public $animationColor = array(245, 90, 90);
