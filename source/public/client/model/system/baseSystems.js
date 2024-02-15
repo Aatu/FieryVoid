@@ -709,18 +709,12 @@ HyachSpecialists.prototype.canDecrease = function () { //can decrease if somethi
 
 HyachSpecialists.prototype.doSelect = function () { //increase AA usage
 	this.getCurrClass();
-	if (this.specCurrClass == '') return false; //this would mean there are no Specialist classes whatsover!
-
-//	if (this.currchangedSpec[this.specCurrClass] == 0){ //Make sure currchangedSpec ends up being 1.
-//			this.currchangedSpec[this.specCurrClass]++;
-//		}else{
-//			this.currchangedSpec[this.specCurrClass] = 1;			
-//		}	
+	if (this.specCurrClass == '') return false; //this would mean there are no Specialist classes whatsover!	
 
 	this.currSelectedSpec[this.specCurrClass] = 'selected';				
 	this.availableSpec[this.specCurrClass] = 1;	
 	this.specAllocatedCount[this.specCurrClass] = 0; //Set this variable for system data window.
-//currchangedSpec = 1, currSelectedSpec = 'selected', availableSpec = 1.
+
 	
 	this.refreshData();
 };
@@ -729,7 +723,6 @@ HyachSpecialists.prototype.doUnselect = function () { //can unslect Specialists 
 	this.getCurrClass();
 	if (this.specCurrClass == '') return false; //this would mean there are no Specialist classes whatsover!
 
-//	this.currchangedSpec[this.specCurrClass] = 0;	
 	this.currSelectedSpec[this.specCurrClass] = "";	//Empty array	
 	this.availableSpec[this.specCurrClass] = 0;	
 	
@@ -753,7 +746,6 @@ HyachSpecialists.prototype.doUnselect = function () { //can unslect Specialists 
 				}
 		}
 	}		
-//currchangedSpec = 0, currSelectedSpec = '', availableSpec = 0.
 	
 	this.refreshData();
 };
@@ -761,19 +753,12 @@ HyachSpecialists.prototype.doUnselect = function () { //can unslect Specialists 
 HyachSpecialists.prototype.doUse = function () { //Mark Specialist as used.
 	this.getCurrClass();
 	if (this.specCurrClass == '') return false; //this would mean there are no Specialist classes whatsover!
-		
-//		if (this.currchangedSpec[this.specCurrClass] == 0){
-//			this.currchangedSpec[this.specCurrClass]++;
-//		}else{
-//			this.currchangedSpec[this.specCurrClass] = 1;			
-//		}
 
 		this.currAllocatedSpec[this.specCurrClass] = 'allocated';
 		this.specAllocatedCount[this.specCurrClass] = 1;	//Just for Status Window.
 		this.specTotal_used++;
 		this.specIncreased[this.specCurrClass] = true;
 		this.specDecreased[this.specCurrClass] = false;		
-//currchangedSpec = 1, currAllocatedSpec = 'allocated', specAllocatedCount = 1, specTotal_used +1.	
 
 
 		if (this.specCurrClass == 'Computer'){//Make front-end changes to Computer Output in Initial Orders phase.
@@ -787,7 +772,7 @@ HyachSpecialists.prototype.doUse = function () { //Mark Specialist as used.
 				}
 			}
 		}
-		if (this.specCurrClass == 'Power'){//Make front-end changes to Scanner output in Initial Orders phase.
+		if (this.specCurrClass == 'Power'){//Make front-end changes to Power output in Initial Orders phase.
 		var ship = this.ship;
 
 		    for (var i in ship.systems) {
@@ -833,14 +818,13 @@ HyachSpecialists.prototype.doDecrease = function () { //decrease Specialist allo
 	this.getCurrClass();
 	if (this.specCurrClass == '') return false; //this would mean there are no Specialist classes whatsover!
 
-//		if (gamedata.turn != 1) this.currchangedSpec[this.specCurrClass]= 0;
 		this.currAllocatedSpec[this.specCurrClass] = "";
 		this.specAllocatedCount[this.specCurrClass] = 0;//Just for Status Window.
 		this.specDecreased[this.specCurrClass] = true;
 		this.specIncreased[this.specCurrClass] = false;		
 					
 		this.specTotal_used--;	
-//currchangedSpec = 0, currAllocatedSpec = '', availableSpec = 1, specTotal_used -1.
+
 
 		if (this.specCurrClass == 'Thruster'){//Make front-end changes to Engine efficiency in Initial Orders phase.
 		var ship = this.ship;
@@ -864,7 +848,7 @@ HyachSpecialists.prototype.doDecrease = function () { //decrease Specialist allo
 				}
 			}
 		}
-		if (this.specCurrClass == 'Power'){//Make front-end changes to Scanner output in Initial Orders phase.
+		if (this.specCurrClass == 'Power'){//Make front-end changes to Power output in Initial Orders phase.
 		var ship = this.ship;
 
 		    for (var i in ship.systems) {

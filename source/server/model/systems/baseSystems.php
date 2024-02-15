@@ -2225,8 +2225,8 @@ class HyachSpecialists extends ShipSystem{
 						            if ($strongestValue > 0) { // Reactor actually exists to be enhanced!
 						            	$engine = (($ship->getSystemByName("Engine"))); //Find Engine
 						            	
-						            	if ($egine){
-						            	$powerBoost = $engine->boostEfficiency *4;//Boost by normal output +1.
+						            	if ($engine){
+						            	$powerBoost = $engine->boostEfficiency *4;//Boost by Efficiency * 4.
 						                $strongestSystem->output += $powerBoost;
 										}						            
 						            }	
