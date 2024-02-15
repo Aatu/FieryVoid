@@ -611,6 +611,36 @@ HyachSpecialists.prototype.nextCurrClass = function () { //get next class for di
 	return this.specCurrClass;
 };
 
+HyachSpecialists.prototype.prevCurrClass = function () { //get next class for display
+	this.getCurrClass();
+    if (this.specCurrClass == '') return ''; //this would mean there are no classes whatsover!
+    	
+	if (gamedata.turn === 1){
+		var classes = Object.keys(this.allSpec);
+		var currId = -1;	
+		for (var i = 0; i < classes.length; i++) {
+			if (this.specCurrClass == classes[i]){
+				currId = i-1;
+				break; //loop
+			}
+		}	    
+	} else {
+		var classes = Object.keys(this.availableSpec);
+		var currId = -1;	
+		for (var i = 0; i < classes.length; i++) {
+			if (this.specCurrClass == classes[i]){
+				currId = i-1;
+				break; //loop
+			}
+		}
+	}	
+	if (currId >= classes.length) currId = 0;
+	this.specCurrClass = classes[currId];
+	
+	
+	return this.specCurrClass;
+};
+
 HyachSpecialists.prototype.canSelect = function () { //check if can increase rating for current class; can do if preallocated points are unused or allocated points are less than available 
 	//always needs to check that allocated are less than maximum and allocated total is less than total maximum
 	this.getCurrClass();
@@ -745,6 +775,44 @@ HyachSpecialists.prototype.doUse = function () { //Mark Specialist as used.
 		this.specDecreased[this.specCurrClass] = false;		
 //currchangedSpec = 1, currAllocatedSpec = 'allocated', specAllocatedCount = 1, specTotal_used +1.	
 
+
+		if (this.specCurrClass == 'Computer'){//Make front-end changes to Computer Output in Initial Orders phase.
+		var ship = this.ship;
+
+		    for (var i in ship.systems) {
+		        var system = ship.systems[i];
+
+				if (system instanceof HyachComputer) {
+				    system.output += 1;
+				}
+			}
+		}
+		if (this.specCurrClass == 'Power'){//Make front-end changes to Scanner output in Initial Orders phase.
+		var ship = this.ship;
+
+		    for (var i in ship.systems) {
+		        var system = ship.systems[i];
+					if (system instanceof Reactor) {
+						var engine = ((shipManager.systems.getSystemByName(ship, "engine"))); //Find engine		
+							if (engine){ //engine exists.
+							var powerBoost = engine.boostEfficiency *4;//Boost by engine efficiency multiplied by 4.	
+						    system.output += powerBoost;
+//					    if (this.specAllocatedCount['Sensor'] = 1) system.output -= 1;
+						}	
+					}
+			}
+		}
+		if (this.specCurrClass == 'Sensor'){//Make front-end changes to Scanner output in Initial Orders phase.
+		var ship = this.ship;
+
+		    for (var i in ship.systems) {
+		        var system = ship.systems[i];
+
+				if (system instanceof Scanner) {
+				    system.output += 1;
+				}
+			}
+		}
 		if (this.specCurrClass == 'Thruster'){ //Make front-end changes to Engine efficiency in Initial Orders phase.
 		var ship = this.ship;
 
@@ -756,18 +824,7 @@ HyachSpecialists.prototype.doUse = function () { //Mark Specialist as used.
 				}
 			}
 		}
-		if (this.specCurrClass == 'Computer'){//Make front-end changes to Engine efficiency in Initial Orders phase.
-		var ship = this.ship;
-
-		    for (var i in ship.systems) {
-		        var system = ship.systems[i];
-
-				if (system instanceof HyachComputer) {
-				    system.output += 1;
-				}
-			}
-		}
-				
+						
 	this.refreshData();
 
 };
@@ -796,7 +853,7 @@ HyachSpecialists.prototype.doDecrease = function () { //decrease Specialist allo
 				}
 			}
 		}
-		if (this.specCurrClass == 'Computer'){//Make front-end changes to Engine efficiency in Initial Orders phase.
+		if (this.specCurrClass == 'Computer'){//Make front-end changes to Computer Output efficiency in Initial Orders phase.
 		var ship = this.ship;
 
 		    for (var i in ship.systems) {
@@ -807,7 +864,33 @@ HyachSpecialists.prototype.doDecrease = function () { //decrease Specialist allo
 				}
 			}
 		}
-			
+		if (this.specCurrClass == 'Power'){//Make front-end changes to Scanner output in Initial Orders phase.
+		var ship = this.ship;
+
+		    for (var i in ship.systems) {
+		        var system = ship.systems[i];
+					if (system instanceof Reactor) {
+						var engine = ((shipManager.systems.getSystemByName(ship, "engine"))); //Find engine		
+							if (engine){ //engine exists.
+							var powerBoost = engine.boostEfficiency *4;//Boost by engine efficiency multiplied by 4.	
+						    system.output -= powerBoost;
+//					    if (this.specAllocatedCount['Sensor'] = 1) system.output -= 1;
+						}	
+					}
+			}
+		}
+		if (this.specCurrClass == 'Sensor'){//Make front-end changes to Scanner output in Initial Orders phase.
+		var ship = this.ship;
+
+		    for (var i in ship.systems) {
+		        var system = ship.systems[i];
+
+				if (system instanceof Scanner) {
+				    system.output -= 1;
+				}
+			}
+		}
+					
 	this.refreshData();
 };
 HyachSpecialists.prototype.refreshData = function () {

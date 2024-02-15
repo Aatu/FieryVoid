@@ -2078,7 +2078,7 @@ class HyachSpecialists extends ShipSystem{
 	public $specPertype = 1; //How may per type are allowed (should always be 1).
 	public $specCurrClass = '';//for front end, to display Specialist types in tooltips.
 	
-	public $allSpec = array('Computer' => 0, 'Defence' => 0, 'Engine' => 0, 'Maneuvering' => 0,'Targeting' => 0, 'Thruster' => 0); //Lists all Specialists for selection on Turn 1.
+	public $allSpec = array('Computer' => 0, 'Defence' => 0, 'Engine' => 0, 'Maneuvering' => 0, 'Power'=>0, 'Sensor' => 0, 'Targeting' => 0, 'Thruster' => 0); //Lists all Specialists for selection on Turn 1.
 	public $availableSpec = array(); //Counts Specialists that have been selected by player from $allSpec on Turn 1.  Numeric.
 	public $currSelectedSpec = array(); //Used in front end so that it knows to transfer data on Specialists selected. Value are empty or 'selected'.
 
@@ -2198,10 +2198,6 @@ class HyachSpecialists extends ShipSystem{
 						}
 					$this->specAllocatedCount[$explodedKey[1]] = 1;//To show it has been used this turn in system info tooltip.
 						
-				}else if ($explodedKey[1] == 'Targeting'){ //+3% to hit on ALL weapons this turn
-					$ship->toHitBonus += 0.6;	
-					$this->specAllocatedCount[$explodedKey[1]] = 1;
-										
 				}else if ($explodedKey[1] == 'Maneuvering'){ //Reduce Turn Cost and Turn Delay by one step.
 
 		            if ($ship->turncost == 0) $ship->turncost = 0;
@@ -2217,6 +2213,49 @@ class HyachSpecialists extends ShipSystem{
 		 			if ($ship->turndelaycost == 1.5) $ship->turndelaycost = 1;				
 					$this->specAllocatedCount[$explodedKey[1]] = 1;	
 													
+				}else if ($explodedKey[1] == 'Power'){
+				 	$strongestSystem = null;
+					$strongestValue = -1;
+						foreach ($ship->systems as $system) {
+						    if ($system instanceof Reactor) {
+						        if ($system->output > $strongestValue) {
+						            $strongestValue = $system->output;
+						            $strongestSystem = $system;
+
+						            if ($strongestValue > 0) { // Reactor actually exists to be enhanced!
+						            	$engine = (($ship->getSystemByName("Engine"))); //Find Engine
+						            	
+						            	if ($egine){
+						            	$powerBoost = $engine->boostEfficiency *4;//Boost by normal output +1.
+						                $strongestSystem->output += $powerBoost;
+										}						            
+						            }	
+								} 		
+							}
+						}
+					$this->specAllocatedCount[$explodedKey[1]] = 1;//To show it has been used this turn in system info tooltip.
+						
+				}else if ($explodedKey[1] == 'Sensor'){
+				 	$strongestSystem = null;
+					$strongestValue = -1;
+						foreach ($ship->systems as $system) {
+						    if ($system instanceof Scanner) {
+						        if ($system->output > $strongestValue) {
+						            $strongestValue = $system->output;
+						            $strongestSystem = $system;
+
+						            if ($strongestValue > 0) { // Scanner actually exists to be enhanced!
+						                $strongestSystem->output += 1;
+						            }	
+								} 		
+							}
+						}
+					$this->specAllocatedCount[$explodedKey[1]] = 1;//To show it has been used this turn in system info tooltip.
+						
+				}else if ($explodedKey[1] == 'Targeting'){ //+3% to hit on ALL weapons this turn
+					$ship->toHitBonus += 0.6;	
+					$this->specAllocatedCount[$explodedKey[1]] = 1;
+										
 				}else if ($explodedKey[1] == 'Thruster'){ //Remove limits on Thruster rating, improve Engine efficiency.
 				 	$strongestSystem = null;
 					$strongestValue = -1;
@@ -2281,6 +2320,8 @@ class HyachSpecialists extends ShipSystem{
 			$this->data["Special"] .= "<br>  - Defence: Ship profiles lowered by 10%"; 
 			$this->data["Special"] .= "<br>  - Engine: +33% Thrust (rounded down)"; 
 			$this->data["Special"] .= "<br>  - Maneuvering: Turn Cost and Delay reduced.";
+			$this->data["Special"] .= "<br>  - Sensor: +1 EW this turn.";
+			$this->data["Special"] .= "<br>  - Power: Extra power this turn.";			 			
 			$this->data["Special"] .= "<br>  - Targeting: +3% to hit on all weapons.";
 			$this->data["Special"] .= "<br>  - Thruster: No limits on thruster outputs and engine efficiency improved.";					 
 	    }else{ //After Initials Orders on Turn 1, reduce data so that it just shows relevant info on Specialists selected.
@@ -2291,7 +2332,9 @@ class HyachSpecialists extends ShipSystem{
 					if ($specialistType == 'Computer') $this->data["Special"] .= '<br>  - '.$specialistType . ': +1 Bonus Fire Control Point.';
 					if ($specialistType == 'Defence') $this->data["Special"] .= '<br>  - '.$specialistType . ': Ship profiles lowered by 10%';
 					if ($specialistType == 'Engine') $this->data["Special"] .= '<br>  - '.$specialistType . ': +33% Thrust (rounded down)';
-					if ($specialistType == 'Maneuvering') $this->data["Special"] .= '<br>  - '.$specialistType . ': Turn Cost and Delay reduced.';										
+					if ($specialistType == 'Maneuvering') $this->data["Special"] .= '<br>  - '.$specialistType . ': Turn Cost and Delay reduced.';
+					if ($specialistType == 'Sensor') $this->data["Special"] .= '<br>  - '.$specialistType . ' :+1 EW this turn.';
+					if ($specialistType == 'Power') $this->data["Special"] .= '<br>  - '.$specialistType . ' :Extra power this turn.';
 					if ($specialistType == 'Targeting') $this->data["Special"] .= '<br>  - '.$specialistType . ': +3% to hit on all weapons.';
 					if ($specialistType == 'Thruster') $this->data["Special"] .= '<br>  - '.$specialistType . ': No limits on thruster outputs and engine efficiency improved.';											    
 				}        
