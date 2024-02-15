@@ -2158,7 +2158,7 @@ class HyachSpecialists extends ShipSystem{
 			if (($explodedKey[0] == 'allocated') && ($currNote->turn == $gamedata->turn)){ //Mark when a Specialist has been used on a given turn.
 				$ship = $this->getUnit();
 			
-				if ($explodedKey[1] == 'Computer'){
+				if ($explodedKey[1] == 'Computer'){ //Computer BFCP increased by 1.
 				 	$strongestSystem = null;
 					$strongestValue = -1;
 						foreach ($ship->systems as $system) {
@@ -2175,12 +2175,12 @@ class HyachSpecialists extends ShipSystem{
 						}
 					$this->specAllocatedCount[$explodedKey[1]] = 1;//To show it has been used this turn in system info tooltip.
 						
-				}else if ($explodedKey[1] == 'Defence'){ //Works, just doesn't display Front End.
+				}else if ($explodedKey[1] == 'Defence'){ //Ship profiles reduced by 2 / 10%
 					$ship->forwardDefense -= 2;
 					$ship->sideDefense -= 2;
 					$this->specAllocatedCount[$explodedKey[1]] = 1; //To show it has been used this turn in system info tooltip.	
 					
-				}else if ($explodedKey[1] == 'Engine'){
+				}else if ($explodedKey[1] == 'Engine'){ //+33% thrust
 				 	$strongestSystem = null;
 					$strongestValue = -1;
 						foreach ($ship->systems as $system) {
@@ -2213,7 +2213,7 @@ class HyachSpecialists extends ShipSystem{
 		 			if ($ship->turndelaycost == 1.5) $ship->turndelaycost = 1;				
 					$this->specAllocatedCount[$explodedKey[1]] = 1;	
 													
-				}else if ($explodedKey[1] == 'Power'){
+				}else if ($explodedKey[1] == 'Power'){ //Extra power in Initial Orders
 				 	$strongestSystem = null;
 					$strongestValue = -1;
 						foreach ($ship->systems as $system) {
@@ -2235,7 +2235,7 @@ class HyachSpecialists extends ShipSystem{
 						}
 					$this->specAllocatedCount[$explodedKey[1]] = 1;//To show it has been used this turn in system info tooltip.
 						
-				}else if ($explodedKey[1] == 'Sensor'){
+				}else if ($explodedKey[1] == 'Sensor'){ //+1 EW
 				 	$strongestSystem = null;
 					$strongestValue = -1;
 						foreach ($ship->systems as $system) {
@@ -2282,7 +2282,7 @@ class HyachSpecialists extends ShipSystem{
 							
 
 			}
-			if ($explodedKey[0] == 'allocated'){ //Update variables to show Specialist used and not availale anymore.
+			if ($explodedKey[0] == 'allocated'){ //Update variables to show Specialist used and not available anymore.
 				 $this->allocatedSpec[$explodedKey[1]] = 1;			
 				 $this->availableSpec[$explodedKey[1]] = 0;
 			}	 	
