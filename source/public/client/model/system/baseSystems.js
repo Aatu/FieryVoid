@@ -768,10 +768,23 @@ HyachSpecialists.prototype.doUse = function () { //Mark Specialist as used.
 		        var system = ship.systems[i];
 
 				if (system instanceof HyachComputer) {
-				    system.output += 1;
+				    system.output += 2;
 				}
 			}
 		}
+/*
+		if (this.specCurrClass == 'Engine'){//Make front-end changes to Computer Output efficiency in Initial Orders phase.
+		var ship = this.ship;
+
+		    for (var i in ship.systems) {
+		        var system = ship.systems[i];
+
+				if (system instanceof Engine) {
+					var specialistBoost = Math.floor(system.output * 0.25);					
+				    system.output += specialistBoost;
+				}
+			}
+		}	*/
 		if (this.specCurrClass == 'Power'){//Make front-end changes to Power output in Initial Orders phase.
 		var ship = this.ship;
 
@@ -782,7 +795,6 @@ HyachSpecialists.prototype.doUse = function () { //Mark Specialist as used.
 							if (engine){ //engine exists.
 							var powerBoost = engine.boostEfficiency *4;//Boost by engine efficiency multiplied by 4.	
 						    system.output += powerBoost;
-//					    if (this.specAllocatedCount['Sensor'] = 1) system.output -= 1;
 						}	
 					}
 			}
@@ -826,17 +838,6 @@ HyachSpecialists.prototype.doDecrease = function () { //decrease Specialist allo
 		this.specTotal_used--;	
 
 
-		if (this.specCurrClass == 'Thruster'){//Make front-end changes to Engine efficiency in Initial Orders phase.
-		var ship = this.ship;
-
-		    for (var i in ship.systems) {
-		        var system = ship.systems[i];
-
-				if (system instanceof Engine) {
-				    system.boostEfficiency += 1;
-				}
-			}
-		}
 		if (this.specCurrClass == 'Computer'){//Make front-end changes to Computer Output efficiency in Initial Orders phase.
 		var ship = this.ship;
 
@@ -844,10 +845,23 @@ HyachSpecialists.prototype.doDecrease = function () { //decrease Specialist allo
 		        var system = ship.systems[i];
 
 				if (system instanceof HyachComputer) {
-				    system.output -= 1;
+				    system.output -= 2;
 				}
 			}
 		}
+/*
+		if (this.specCurrClass == 'Engine'){//Make front-end changes to Computer Output efficiency in Initial Orders phase.
+		var ship = this.ship;
+
+		    for (var i in ship.systems) {
+		        var system = ship.systems[i];
+
+				if (system instanceof Engine) {
+					var specialistBoost = Math.floor(system.output * 0.25);					
+				    system.output -= specialistBoost;
+				}
+			}
+		} */		
 		if (this.specCurrClass == 'Power'){//Make front-end changes to Power output in Initial Orders phase.
 		var ship = this.ship;
 
@@ -874,7 +888,18 @@ HyachSpecialists.prototype.doDecrease = function () { //decrease Specialist allo
 				}
 			}
 		}
-					
+		if (this.specCurrClass == 'Thruster'){//Make front-end changes to Engine efficiency in Initial Orders phase.
+		var ship = this.ship;
+
+		    for (var i in ship.systems) {
+		        var system = ship.systems[i];
+
+				if (system instanceof Engine) {
+				    system.boostEfficiency += 1;
+				}
+			}
+		}	
+						
 	this.refreshData();
 };
 HyachSpecialists.prototype.refreshData = function () {

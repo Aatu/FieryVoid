@@ -2078,7 +2078,7 @@ class HyachSpecialists extends ShipSystem{
 	public $specPertype = 1; //How may per type are allowed (should always be 1).
 	public $specCurrClass = '';//for front end, to display Specialist types in tooltips.
 	
-	public $allSpec = array('Computer' => 0, 'Defence' => 0, 'Engine' => 0, 'Maneuvering' => 0, 'Power'=>0, 'Sensor' => 0, 'Targeting' => 0, 'Thruster' => 0); //Lists all Specialists for selection on Turn 1.
+	public $allSpec = array('Computer' => 0, 'Defence' => 0, 'Engine' => 0, 'Maneuvering' => 0, 'Power'=> 0, 'Repair' => 0, 'Sensor' => 0, 'Targeting' => 0, 'Thruster' => 0); //Lists all Specialists for selection on Turn 1.
 	public $availableSpec = array(); //Counts Specialists that have been selected by player from $allSpec on Turn 1.  Numeric.
 	public $currSelectedSpec = array(); //Used in front end so that it knows to transfer data on Specialists selected. Value are empty or 'selected'.
 
@@ -2098,6 +2098,15 @@ class HyachSpecialists extends ShipSystem{
         parent::__construct( 0, 1, 0, $specTotal ); //$armour, $maxhealth, $powerReq, $output
 		$this->specTotal = $specTotal;
     }
+
+    public static function sortCriticalsByRepairPriority($a, $b){ //For Repair Specialists
+		//priority, then cost, then ID!
+		if($a->repairPriority!==$b->repairPriority){ 
+            return $b->repairPriority - $a->repairPriority; //higher priority first!
+        }else if($a->repairCost!==$b->repairCost){ ///costlier first!
+            return $b->repairCost - $a->repairCost; //costlier first!
+        }else return $a->id - $b->id;
+    } //endof function sortSystemsByRepairPriority
 
 //	 this method generates additional non-standard informaction in the form of individual system notes in this case: 
 //	 - Initial phase: check setting changes made by user, convert to notes	
@@ -2158,65 +2167,94 @@ class HyachSpecialists extends ShipSystem{
 			if (($explodedKey[0] == 'allocated') && ($currNote->turn == $gamedata->turn)){ //Mark when a Specialist has been used on a given turn.
 				$ship = $this->getUnit();
 			
-				if ($explodedKey[1] == 'Computer'){ //Computer BFCP increased by 1.
+				if ($explodedKey[1] == 'Computer'){ //Computer BFCP increased by 2.
 				 	$strongestSystem = null;
 					$strongestValue = -1;
 						foreach ($ship->systems as $system) {
+							if ($system->isDestroyed($gamedata->turn)) continue;//don't need to do anything on destroyed systems.								
 						    if ($system instanceof HyachComputer) {
 						        if ($system->output > $strongestValue) {
 						            $strongestValue = $system->output;
 						            $strongestSystem = $system;
 
 						            if ($strongestValue > 0) { // Computer actually exists to be enhanced!
-						                $strongestSystem->output += 1;
+						                $strongestSystem->output += 2;
 						            }	
 								} 		
 							}
 						}
 					$this->specAllocatedCount[$explodedKey[1]] = 1;//To show it has been used this turn in system info tooltip.
 						
-				}else if ($explodedKey[1] == 'Defence'){ //Ship profiles reduced by 2 / 10%
+				}else if ($explodedKey[1] == 'Defence'){ //Ship profiles reduced by 2 / 10%,
 					$ship->forwardDefense -= 2;
 					$ship->sideDefense -= 2;
 					$this->specAllocatedCount[$explodedKey[1]] = 1; //To show it has been used this turn in system info tooltip.	
 					
-				}else if ($explodedKey[1] == 'Engine'){ //+33% thrust
+				}else if ($explodedKey[1] == 'Engine'){ //+25% thrust, remove an Engine crit.
 				 	$strongestSystem = null;
 					$strongestValue = -1;
 						foreach ($ship->systems as $system) {
+							if ($system->isDestroyed($gamedata->turn)) continue;//don't need to do anything on destroyed systems.								
 						    if ($system instanceof Engine) {
 						        if ($system->output > $strongestValue) {
 						            $strongestValue = $system->output;
 						            $strongestSystem = $system;
 
 						            if ($strongestValue > 0) { // Engine actually exists to be enhanced!
-						                $specialistBoost = floor($strongestSystem->output * 0.33);
+						                $specialistBoost = floor($strongestSystem->output * 0.25);
 						                $strongestSystem->output += $specialistBoost;
 						            }	
-								} 		
+								} 
+								
+								$critList = array();							
+								foreach($system->criticals as $critDmg) {
+											if($critDmg->repairPriority<1) continue;//if critical cannot be repaired
+											if($critDmg->turn >= $gamedata->turn) continue;//don't repair criticals caused in current (or future!) turn.  Shouldn't happen...
+	//										if ($critDmg->oneturn || ($critDmg->turnend > 0)) continue;//temporary criticals (or those already repaired) also cannot be repaired
+											$critList[] = $critDmg;				
+											}	
+								
+									$noOfCrits = count($critList);							
+									$critRepairs = 1;							
+									if($noOfCrits>0){
+										foreach ($critList as $critDmg){ //repairable criticals of current system
+											if ($critRepairs > 0){//Can still repair!
+												$critDmg->turnend = $gamedata->turn-1;//actual repair. Use previous turn so it disappears after Intitial Orders (but would effect then, time to repair etc.
+												$critDmg->forceModify = true; //actually save the repair...
+												$critDmg->updated = true; //actually save the repair cd!...
+												$critRepairs -= 1;
+												
+									        	if ($critRepairs <= 0) {
+									            break; // No need to continue looping if all repairs are done							
+												}
+											}
+										}
+									}																	
 							}
 						}
 					$this->specAllocatedCount[$explodedKey[1]] = 1;//To show it has been used this turn in system info tooltip.
 						
 				}else if ($explodedKey[1] == 'Maneuvering'){ //Reduce Turn Cost and Turn Delay by one step.
 
-		            if ($ship->turncost == 0) $ship->turncost = 0;
-		            if ($ship->turncost == 0.5) $ship->turncost = 0.33;
-		            if ($ship->turncost == 0.66) $ship->turncost = 0.5;
-		            if ($ship->turncost == 1) $ship->turncost = 0.66;
-		            if ($ship->turncost == 1.5) $ship->turncost = 1;
+			            if ($ship->turncost == 0) $ship->turncost = 0;
+			            if ($ship->turncost == 0.5) $ship->turncost = 0.33;
+			            if ($ship->turncost == 0.66) $ship->turncost = 0.5;
+			            if ($ship->turncost == 1) $ship->turncost = 0.66;
+			            if ($ship->turncost == 1.5) $ship->turncost = 1;
 
-		            if ($ship->turndelaycost == 0) $ship->turndelaycost = 0;        
-		            if ($ship->turndelaycost == 0.5) $ship->turndelaycost = 0.33;
-		            if ($ship->turndelaycost == 0.66) $ship->turndelaycost = 0.5;
-		            if ($ship->turndelaycost == 1) $ship->turndelaycost = 0.66;
-		 			if ($ship->turndelaycost == 1.5) $ship->turndelaycost = 1;				
+			            if ($ship->turndelaycost == 0) $ship->turndelaycost = 0;        
+			            if ($ship->turndelaycost == 0.5) $ship->turndelaycost = 0.33;
+			            if ($ship->turndelaycost == 0.66) $ship->turndelaycost = 0.5;
+			            if ($ship->turndelaycost == 1) $ship->turndelaycost = 0.66;
+			 			if ($ship->turndelaycost == 1.5) $ship->turndelaycost = 1;
+		 								
 					$this->specAllocatedCount[$explodedKey[1]] = 1;	
 													
-				}else if ($explodedKey[1] == 'Power'){ //Extra power in Initial Orders
+				}else if ($explodedKey[1] == 'Power'){ //Extra power in Initial Orders. remove a reactor crit.
 				 	$strongestSystem = null;
 					$strongestValue = -1;
 						foreach ($ship->systems as $system) {
+							if ($system->isDestroyed($gamedata->turn)) continue;//don't need to do anything on destroyed systems.								
 						    if ($system instanceof Reactor) {
 						        if ($system->output > $strongestValue) {
 						            $strongestValue = $system->output;
@@ -2230,36 +2268,129 @@ class HyachSpecialists extends ShipSystem{
 						                $strongestSystem->output += $powerBoost;
 										}						            
 						            }	
-								} 		
+								}
+								 
+								$critList = array();							
+								foreach($system->criticals as $critDmg) {
+											if($critDmg->repairPriority<1) continue;//if critical cannot be repaired
+											if($critDmg->turn >= $gamedata->turn) continue;//don't repair criticals caused in current (or future!) turn.  Shouldn't happen...
+											if ($critDmg->oneturn || ($critDmg->turnend > 0)) continue;//temporary criticals (or those already repaired) also cannot be repaired
+											$critList[] = $critDmg;				
+											}	
+								
+									$noOfCrits = count($critList);							
+									$critRepairs = 1;							
+									if($noOfCrits>0){
+										usort($critList, "self::sortCriticalsByRepairPriority");			
+										foreach ($critList as $critDmg){ //repairable criticals of current system
+											if ($critRepairs > 0){//Can still repair!
+//												if ($critDmg->phpclass == )
+												$critDmg->turnend = $gamedata->turn-1;//actual repair. Use previous turn so it disappears after Intitial Orders (but would effect then, time to repair etc.
+												$critDmg->forceModify = true; //actually save the repair...
+												$critDmg->updated = true; //actually save the repair cd!...
+												$critRepairs -= 1;
+												
+									        	if ($critRepairs <= 0) {
+									            break; // No need to continue looping if all repairs are done							
+												}
+											}
+										}
+									}														
 							}
 						}
 					$this->specAllocatedCount[$explodedKey[1]] = 1;//To show it has been used this turn in system info tooltip.
 						
-				}else if ($explodedKey[1] == 'Sensor'){ //+1 EW
+				}else if ($explodedKey[1] == 'Repair'){ //Repair two critical effects automatically.
+				
+					//repair criticals (on non-destroyed systems only; also, skip criticals generated this turn!)
+					$critList = array();
+					foreach ($ship->systems as $systemToRepair){//crit fixing may be necessary even on technically undamaged systems	
+						if ($systemToRepair->repairPriority<1) continue;//skip systems that cannot be repaired
+						if ($systemToRepair->isDestroyed($gamedata->turn)) continue;//don't repair criticals on destroyed system...
+
+						foreach($systemToRepair->criticals as $critDmg) {
+							if($critDmg->repairPriority<1) continue;//if critical cannot be repaired
+							if($critDmg->turn >= $gamedata->turn) continue;//don't repair criticals caused in current (or future!) turn.  Shouldn't happen...
+							if ($critDmg->oneturn || ($critDmg->turnend > 0)) continue;//temporary criticals (or those already repaired) also cannot be repaired
+							if($critDmg->repairPriority<10) $critDmg->repairPriority += $systemToRepair->repairPriority; //modify priority by priority of system critical is on! 
+							$critList[] = $critDmg;				
+						}		
+					}	
+					$noOfCrits = count($critList);
+					$critRepairs = 2;
+					if($noOfCrits>0){
+						usort($critList, "self::sortCriticalsByRepairPriority");
+		
+						foreach ($critList as $critDmg){ //repairable criticals of current system
+							if ($critRepairs > 0){//Can still repair!
+								$critDmg->turnend = $gamedata->turn-1;//actual repair. Use previous turn so it disappears after Intitial Orders (but would effect then, time to repair etc.
+								$critDmg->forceModify = true; //actually save the repair...
+								$critDmg->updated = true; //actually save the repair cd!...
+								$critRepairs -= 1;
+								
+					        	if ($critRepairs <= 0) {
+					            break; // No need to continue looping if all repairs are done							
+								}
+							}
+						}
+					}
+					$this->specAllocatedCount[$explodedKey[1]] = 1;//To show it has been used this turn in system info tooltip.
+						
+				}else if ($explodedKey[1] == 'Sensor'){ //+1 EW, repairs a Scanner crit.
 				 	$strongestSystem = null;
 					$strongestValue = -1;
 						foreach ($ship->systems as $system) {
-						    if ($system instanceof Scanner) {
-						        if ($system->output > $strongestValue) {
-						            $strongestValue = $system->output;
-						            $strongestSystem = $system;
+							if ($system->isDestroyed($gamedata->turn)) continue;//don't need to do anything on destroyed systems.								
+							    if ($system instanceof Scanner) {
+						    	
+							        if ($system->output > $strongestValue) {
+							            $strongestValue = $system->output;
+							            $strongestSystem = $system;
 
-						            if ($strongestValue > 0) { // Scanner actually exists to be enhanced!
-						                $strongestSystem->output += 1;
-						            }	
-								} 		
-							}
-						}
+							            if ($strongestValue > 0) { // Scanner actually exists to be enhanced!
+							                $strongestSystem->output += 1;
+							            }	
+									} 
+								
+								$critList = array();							
+								foreach($system->criticals as $critDmg) {
+											if($critDmg->repairPriority<1) continue;//if critical cannot be repaired
+											if($critDmg->turn >= $gamedata->turn) continue;//don't repair criticals caused in current (or future!) turn.  Shouldn't happen...
+											if ($critDmg->oneturn || ($critDmg->turnend > 0)) continue;//temporary criticals (or those already repaired) also cannot be repaired
+											$critList[] = $critDmg;				
+											}	
+								
+									$noOfCrits = count($critList);							
+									$critRepairs = 1;							
+									if($noOfCrits>0){
+										usort($critList, "self::sortCriticalsByRepairPriority");		
+										foreach ($critList as $critDmg){ //repairable criticals of current system
+											if ($critRepairs > 0){//Can still repair!
+												$critDmg->turnend = $gamedata->turn-1;//actual repair. Use previous turn so it disappears after Intitial Orders (but would effect then, time to repair etc.
+												$critDmg->forceModify = true; //actually save the repair...
+												$critDmg->updated = true; //actually save the repair cd!...
+												$critRepairs -= 1;
+												
+									        	if ($critRepairs <= 0) {
+									            break; // No need to continue looping if all repairs are done							
+												}
+											}
+										}
+									}
+								}
+						}			
+
 					$this->specAllocatedCount[$explodedKey[1]] = 1;//To show it has been used this turn in system info tooltip.
 						
 				}else if ($explodedKey[1] == 'Targeting'){ //+3% to hit on ALL weapons this turn
-					$ship->toHitBonus += 0.6;	
+					$ship->toHitBonus += 1;	
 					$this->specAllocatedCount[$explodedKey[1]] = 1;
 										
 				}else if ($explodedKey[1] == 'Thruster'){ //Remove limits on Thruster rating, improve Engine efficiency.
 				 	$strongestSystem = null;
 					$strongestValue = -1;
 						foreach ($ship->systems as $system) {
+							if ($system->isDestroyed($gamedata->turn)) continue;//don't need to do anything on destroyed systems.							
 						    if ($system instanceof Engine) {
 						        if ($system->output > $strongestValue) {
 						            $strongestValue = $system->output;
@@ -2316,27 +2447,29 @@ class HyachSpecialists extends ShipSystem{
 	        $this->data["Special"] .= "<br>On Turn 1 Initial Orders, you must select which Specialists this ship will have available.";        	   
 	        $this->data["Special"] .= "<br>You may then use Specialist(s) by clicking + button in any Initial Orders phase (including Turn 1)."; 
 	        $this->data["Special"] .= "<br>Each Specialists can only be used once, with the following effects on the turn they are used: ";
-			$this->data["Special"] .= "<br>  - Computer: +1 Bonus Fire Control Point."; 
+			$this->data["Special"] .= "<br>  - Computer: +2 Bonus Fire Control Point."; 
 			$this->data["Special"] .= "<br>  - Defence: Ship profiles lowered by 10%"; 
-			$this->data["Special"] .= "<br>  - Engine: +33% Thrust (rounded down)"; 
+			$this->data["Special"] .= "<br>  - Engine: +25% Thrust and remove a Engine critical."; 
 			$this->data["Special"] .= "<br>  - Maneuvering: Turn Cost and Delay reduced.";
-			$this->data["Special"] .= "<br>  - Sensor: +1 EW this turn.";
-			$this->data["Special"] .= "<br>  - Power: Extra power this turn.";			 			
-			$this->data["Special"] .= "<br>  - Targeting: +3% to hit on all weapons.";
+			$this->data["Special"] .= "<br>  - Sensor: +1 EW this turn and remove a Scanner critical.";
+			$this->data["Special"] .= "<br>  - Power: Extra power this turn and remove a Reactor critical.";
+			$this->data["Special"] .= "<br>  - Repair: Remove two critical effects.";						 			
+			$this->data["Special"] .= "<br>  - Targeting: +5% to hit on all weapons.";
 			$this->data["Special"] .= "<br>  - Thruster: No limits on thruster outputs and engine efficiency improved.";					 
 	    }else{ //After Initials Orders on Turn 1, reduce data so that it just shows relevant info on Specialists selected.
 	        $this->data["Special"] = "This is a technical system used for Specialist management.";       	   
 	        $this->data["Special"] .= "<br>You use Specialist(s) by clicking + button in any Initial Orders phase (including Turn 1)."; 
 	        $this->data["Special"] .= "<br>Each Specialists can only be used once, with the following effects on the turn they are used: ";
 				foreach($this->allocatedSpec as $specialistType => $specValue) {
-					if ($specialistType == 'Computer') $this->data["Special"] .= '<br>  - '.$specialistType . ': +1 Bonus Fire Control Point.';
+					if ($specialistType == 'Computer') $this->data["Special"] .= '<br>  - '.$specialistType . ': +2 Bonus Fire Control Point.';
 					if ($specialistType == 'Defence') $this->data["Special"] .= '<br>  - '.$specialistType . ': Ship profiles lowered by 10%';
-					if ($specialistType == 'Engine') $this->data["Special"] .= '<br>  - '.$specialistType . ': +33% Thrust (rounded down)';
+					if ($specialistType == 'Engine') $this->data["Special"] .= '<br>  - '.$specialistType . ': +25% Thrust and remove a Engine critical.';
 					if ($specialistType == 'Maneuvering') $this->data["Special"] .= '<br>  - '.$specialistType . ': Turn Cost and Delay reduced.';
-					if ($specialistType == 'Sensor') $this->data["Special"] .= '<br>  - '.$specialistType . ' :+1 EW this turn.';
-					if ($specialistType == 'Power') $this->data["Special"] .= '<br>  - '.$specialistType . ' :Extra power this turn.';
-					if ($specialistType == 'Targeting') $this->data["Special"] .= '<br>  - '.$specialistType . ': +3% to hit on all weapons.';
-					if ($specialistType == 'Thruster') $this->data["Special"] .= '<br>  - '.$specialistType . ': No limits on thruster outputs and engine efficiency improved.';											    
+					if ($specialistType == 'Repair') $this->data["Special"] .= '<br>  - '.$specialistType . ' :Remove two critical effects.';
+					if ($specialistType == 'Sensor') $this->data["Special"] .= '<br>  - '.$specialistType . ' :+1 EW this turn and remove a Scanner critical.';
+					if ($specialistType == 'Power') $this->data["Special"] .= '<br>  - '.$specialistType . ' :Extra power this turn and remove a Reactor critical.';
+					if ($specialistType == 'Targeting') $this->data["Special"] .= '<br>  - '.$specialistType . ': +5% to hit on all weapons.';
+					if ($specialistType == 'Thruster') $this->data["Special"] .= '<br>  - '.$specialistType . ': No limits on thruster outputs and engine efficiency improved.';
 				}        
 		}         	 	
     }
