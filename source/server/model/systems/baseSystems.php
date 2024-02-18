@@ -2458,7 +2458,7 @@ class HyachSpecialists extends ShipSystem{
 	        $this->data["Special"] .= "<br>You may then use Specialist(s) by clicking + button in any Initial Orders phase (including Turn 1)."; 
 	        $this->data["Special"] .= "<br>Each Specialists can only be used once, with the following effects on the turn they are used: ";
 			$this->data["Special"] .= "<br>  - Computer: +2 Bonus Fire Control Point."; 
-			$this->data["Special"] .= "<br>  - Defence: Ship profiles lowered by 5%, Interdictor's intercept rating increased."; 
+			$this->data["Special"] .= "<br>  - Defence: Ship profiles lowered by 5%, intercept ratings increased by 10."; 
 			$this->data["Special"] .= "<br>  - Engine: +25% Thrust and remove a Engine critical."; 
 			$this->data["Special"] .= "<br>  - Maneuvering: Turn Cost and Delay reduced.";
 			$this->data["Special"] .= "<br>  - Sensor: +1 EW this turn and remove a Scanner critical.";
@@ -2472,7 +2472,7 @@ class HyachSpecialists extends ShipSystem{
 	        $this->data["Special"] .= "<br>Each Specialists can only be used once, with the following effects on the turn they are used: ";
 				foreach($this->allocatedSpec as $specialistType => $specValue) {
 					if ($specialistType == 'Computer') $this->data["Special"] .= '<br>  - '.$specialistType . ': +2 Bonus Fire Control Point.';
-					if ($specialistType == 'Defence') $this->data["Special"] .= '<br>  - '.$specialistType . ': Ship profiles lowered by 5%, Interdictors intercept rating increased.';
+					if ($specialistType == 'Defence') $this->data["Special"] .= '<br>  - '.$specialistType . ': Ship profiles lowered by 5%, intercept ratings increased by 10.';
 					if ($specialistType == 'Engine') $this->data["Special"] .= '<br>  - '.$specialistType . ': +25% Thrust and remove a Engine critical.';
 					if ($specialistType == 'Maneuvering') $this->data["Special"] .= '<br>  - '.$specialistType . ': Turn Cost and Delay reduced.';
 					if ($specialistType == 'Repair') $this->data["Special"] .= '<br>  - '.$specialistType . ' :Remove two critical effects.';
