@@ -252,7 +252,7 @@ Hyach Specialists - Some Hyach crewman receive special training as Specialists. 
 	- You can then use Specialist on any Initial Orders phase (including on Turn 1) by using +/- buttons.
 	- Specialists come in a range of different types, most of which are different from TT, and have been summarised below:
 		Computer: Computer generates two extra Bonus Fire Control Points (BFCP) this turn.
-		Defence:  Ship profiles are lowered by 10% for this turn.
+		Defence:  Ship profiles lowered by 5%, Interdictor's intercept rating increased to -30 (Note - weapon tooltip does not udpate, but extra Intercept Rating will work).
 		Engine:  +25% thrust for this turn (rounded down).  Removes a Engine critical if there are any (including temporary ones), will take effect after Initial Orders phase.  
 		Manoeuvring:  Turn Cost and Turn Delay are reduced by a single step for this turn.
 		Power: Extra power this turn, equal to Engine efficiency multiplied by 4.  Does not carryover past Initial Orders, so reactor may show a negative value in later phases of that turn.  Also, removes a Reactor critical if there are any, will take effect after Initial Orders phase.
