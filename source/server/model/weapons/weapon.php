@@ -304,6 +304,18 @@ class Weapon extends ShipSystem
 				$strippedSystem->maxDamageArray = $this->maxDamageArray;
 				$strippedSystem->data = $this->data;    
 			}
+		//Hyach Specialists sometimes require additional info to be sent to front end.
+		$ship = $this->unit;
+		if ($ship->getSystemByName("HyachSpecialists")){ //Does ship have Specialists system?
+			$specialists = $ship->HyachSpecialists;
+			$specAllocatedArray = $specialists->specAllocatedCount;
+			foreach ($specAllocatedArray as $specsUsed=>$specValue){
+				if ($specsUsed == 'Defence'){ //Defence modifies intercept rating, show in system window.
+					$strippedSystem->data = $this->data; 				
+				}		
+			}
+		}				
+			
 		}
         return $strippedSystem;
     }
