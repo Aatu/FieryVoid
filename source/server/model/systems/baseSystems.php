@@ -2271,14 +2271,14 @@ class HyachSpecialists extends ShipSystem{
 						            $strongestSystem = $system;
 
 						            if ($strongestValue > 0) { // Reactor actually exists to be enhanced!
-						            	$engine = (($ship->getSystemByName("Engine"))); //Find Engine
-						            	
-						            	if ($engine){
-						            	$powerBoost = $engine->boostEfficiency *4;//Boost by Efficiency * 4.
+						            	if ($ship->shipSizeClass >= 3) $powerBoost = 12;
+						            	if ($ship->shipSizeClass == 2) $powerBoost = 10;						            		
+						            	if ($ship->shipSizeClass < 2) $powerBoost = 8;						            	
+
 						                $strongestSystem->output += $powerBoost;
 										}						            
 						            }	
-								}
+								
 								 
 								$critList = array();							
 								foreach($system->criticals as $critDmg) {
@@ -2420,15 +2420,22 @@ class HyachSpecialists extends ShipSystem{
 					$this->specAllocatedCount[$explodedKey[1]] = 1;//To show it has been used this turn.
 						
 				}else if ($explodedKey[1] == 'Weapon'){ //All weapon damage +3
-
+/*
 					foreach ($ship->systems as $system){
 						if ($system instanceof Weapon){
 							
-							$system->minDamage += 3;
-							$system->maxDamage += 3;							
+							if ($system->minDamage != $system->maxDamage){
+								$newMinDamage = $system->minDamage+3;
+								$newMaxDamage = $system->maxDamage+3;								
+								$system->data["Damage"] = $newMinDamage . "-" . $newMaxDamage;
+							}else{//shouldn't happen, but just in case / for future applications.
+								$newMaxDamage = $system->maxDamage+3;
+								$system->data["Damage"] = $newMaxDamage;	
+							}
+														
 						}
 					}
-					
+	*/				
 					$this->specAllocatedCount[$explodedKey[1]] = 1; //To show it has been used this turn in system info tooltip.	
 					
 				}else{}
