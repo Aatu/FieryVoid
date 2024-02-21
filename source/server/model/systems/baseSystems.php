@@ -2419,23 +2419,8 @@ class HyachSpecialists extends ShipSystem{
 						}		
 					$this->specAllocatedCount[$explodedKey[1]] = 1;//To show it has been used this turn.
 						
-				}else if ($explodedKey[1] == 'Weapon'){ //All weapon damage +3
-/*
-					foreach ($ship->systems as $system){
-						if ($system instanceof Weapon){
-							
-							if ($system->minDamage != $system->maxDamage){
-								$newMinDamage = $system->minDamage+3;
-								$newMaxDamage = $system->maxDamage+3;								
-								$system->data["Damage"] = $newMinDamage . "-" . $newMaxDamage;
-							}else{//shouldn't happen, but just in case / for future applications.
-								$newMaxDamage = $system->maxDamage+3;
-								$system->data["Damage"] = $newMaxDamage;	
-							}
-														
-						}
-					}
-	*/				
+				}else if ($explodedKey[1] == 'Weapon'){ //All weapon damage +3, actual damage increase done in weapon.php
+
 					$this->specAllocatedCount[$explodedKey[1]] = 1; //To show it has been used this turn in system info tooltip.	
 					
 				}else{}
@@ -2475,32 +2460,32 @@ class HyachSpecialists extends ShipSystem{
 	        $this->data["Special"] = "This is a technical system used for Specialist management.";
 	        $this->data["Special"] .= "<br>On Turn 1 Initial Orders, you must select which Specialists this ship will have available.";        	   
 	        $this->data["Special"] .= "<br>You may then use Specialist(s) by clicking + button in any Initial Orders phase (including Turn 1)."; 
-	        $this->data["Special"] .= "<br>Each Specialists can only be used once, with the following effects on the turn they are used: ";
+	        $this->data["Special"] .= "<br>Each Specialists can be used once, with these effects on the turn they are used:";
 			$this->data["Special"] .= "<br>  - Computer: +2 Bonus Fire Control Point."; 
 			$this->data["Special"] .= "<br>  - Defence: Profiles lowered by 5, intercept ratings +10."; 
-			$this->data["Special"] .= "<br>  - Engine: +25% Thrust and remove a Engine critical."; 
+			$this->data["Special"] .= "<br>  - Engine: +25% Thrust and remove an Engine critical."; 
 			$this->data["Special"] .= "<br>  - Maneuvering: Turn Cost and Delay reduced.";
-			$this->data["Special"] .= "<br>  - Sensor: +1 EW this turn and remove a Scanner critical.";
-			$this->data["Special"] .= "<br>  - Power: Extra power this turn and remove a Reactor critical.";
+			$this->data["Special"] .= "<br>  - Sensor: +1 EW and remove a Scanner critical.";
+			$this->data["Special"] .= "<br>  - Power: Extra power and remove a Reactor critical.";
 			$this->data["Special"] .= "<br>  - Repair: Remove two critical effects.";						 			
 			$this->data["Special"] .= "<br>  - Targeting: +5% to hit on all weapons.";
-			$this->data["Special"] .= "<br>  - Thruster: No limits on thruster outputs and engine efficiency improved.";
-			$this->data["Special"] .= "<br>  - Weapon: All weapons +3 damage.";								 
+			$this->data["Special"] .= "<br>  - Thruster: No thruster limits and engine efficiency improved.";
+			$this->data["Special"] .= "<br>  - Weapon: All weapons +3 damage this turn.";								 
 	    }else{ //After Initials Orders on Turn 1, reduce data so that it just shows relevant info on Specialists selected.
 	        $this->data["Special"] = "This is a technical system used for Specialist management.";       	   
 	        $this->data["Special"] .= "<br>You use Specialist(s) by clicking + button in any Initial Orders phase (including Turn 1)."; 
-	        $this->data["Special"] .= "<br>Each Specialists can only be used once, with the following effects on the turn they are used: ";
+	        $this->data["Special"] .= "<br>Each Specialists can be used once, with these effects on the turn they are used:";
 				foreach($this->allocatedSpec as $specialistType => $specValue) {
 					if ($specialistType == 'Computer') $this->data["Special"] .= '<br>  - '.$specialistType . ': +2 Bonus Fire Control Point.';
 					if ($specialistType == 'Defence') $this->data["Special"] .= '<br>  - '.$specialistType . ': Profiles lowered by 5, intercept ratings +10.';
-					if ($specialistType == 'Engine') $this->data["Special"] .= '<br>  - '.$specialistType . ': +25% Thrust and remove a Engine critical.';
+					if ($specialistType == 'Engine') $this->data["Special"] .= '<br>  - '.$specialistType . ': +25% Thrust and remove an Engine critical.';
 					if ($specialistType == 'Maneuvering') $this->data["Special"] .= '<br>  - '.$specialistType . ': Turn Cost and Delay reduced.';
 					if ($specialistType == 'Repair') $this->data["Special"] .= '<br>  - '.$specialistType . ' :Remove two critical effects.';
-					if ($specialistType == 'Sensor') $this->data["Special"] .= '<br>  - '.$specialistType . ' :+1 EW this turn and remove a Scanner critical.';
-					if ($specialistType == 'Power') $this->data["Special"] .= '<br>  - '.$specialistType . ' :Extra power this turn and remove a Reactor critical.';
+					if ($specialistType == 'Sensor') $this->data["Special"] .= '<br>  - '.$specialistType . ' :+1 EW and remove a Scanner critical.';
+					if ($specialistType == 'Power') $this->data["Special"] .= '<br>  - '.$specialistType . ' :Extra power and remove a Reactor critical.';
 					if ($specialistType == 'Targeting') $this->data["Special"] .= '<br>  - '.$specialistType . ': +5% to hit on all weapons.';
-					if ($specialistType == 'Thruster') $this->data["Special"] .= '<br>  - '.$specialistType . ': No limits on thruster outputs and engine efficiency improved.';
-					if ($specialistType == 'Weapon') $this->data["Special"] .= '<br>  - '.$specialistType . ': All weapons +3 damage.';						
+					if ($specialistType == 'Thruster') $this->data["Special"] .= '<br>  - '.$specialistType . ': No thruster limits and engine efficiency improved.';
+					if ($specialistType == 'Weapon') $this->data["Special"] .= '<br>  - '.$specialistType . ': All weapons +3 damage this turn.';						
 				}        
 		}         	 	
     }
