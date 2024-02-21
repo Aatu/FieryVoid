@@ -205,7 +205,14 @@ class SystemInfoButtons extends React.Component {
 		const {ship, system} = this.props;
 		system.nextCurrClass();
 		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
-	}	
+	}
+	
+	prevCurrClass(e) {
+        e.stopPropagation(); e.preventDefault();
+		const {ship, system} = this.props;
+		system.prevCurrClass();
+		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+	}		
 	
 	/*Adaptive Armor increase rating for current class*/
 	AAincrease(e) {
@@ -436,6 +443,7 @@ class SystemInfoButtons extends React.Component {
 				{canBFCPpropagate(ship, system) && <Button title="propagate setting" onClick={this.BFCPpropagate.bind(this)} img="./img/systemicons/BFCPclasses/iconPropagate.png"></Button>}
 			
 				{canSpecdisplayCurrClass(ship, system) && <Button title={getSpeccurrClassName(ship,system)} img={getSpeccurrClassImg(ship,system)}></Button>}
+				{canSpecdisplayCurrClass(ship, system) && <Button title="prev" onClick={this.prevCurrClass.bind(this)} img="./img/systemicons/Specialistclasses/iconPrev.png"></Button>}
 				{canSpecdisplayCurrClass(ship, system) && <Button title="next" onClick={this.nextCurrClass.bind(this)} img="./img/systemicons/Specialistclasses/iconNext.png"></Button>}
 				{canSpecselect(ship, system) && <Button onClick={this.Specselect.bind(this)} img="./img/systemicons/Specialistclasses/select.png"></Button>}
 				{canSpecunselect(ship, system) && <Button onClick={this.Specunselect.bind(this)} img="./img/systemicons/Specialistclasses/unselect.png"></Button>}					

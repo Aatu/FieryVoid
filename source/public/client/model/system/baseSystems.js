@@ -634,7 +634,7 @@ HyachSpecialists.prototype.prevCurrClass = function () { //get next class for di
 			}
 		}
 	}	
-	if (currId >= classes.length) currId = 0;
+	if (currId < 0) currId = classes.length-1;
 	this.specCurrClass = classes[currId];
 	
 	
@@ -773,7 +773,7 @@ HyachSpecialists.prototype.doUse = function () { //Mark Specialist as used.
 			}
 		}
 /*
-		if (this.specCurrClass == 'Engine'){//Make front-end changes to Computer Output efficiency in Initial Orders phase.
+		if (this.specCurrClass == 'Engine'){//Didn't work because wheny uo changed back % was different
 		var ship = this.ship;
 
 		    for (var i in ship.systems) {
@@ -787,18 +787,18 @@ HyachSpecialists.prototype.doUse = function () { //Mark Specialist as used.
 		}	*/
 		if (this.specCurrClass == 'Power'){//Make front-end changes to Power output in Initial Orders phase.
 		var ship = this.ship;
-
+		var powerBoost = 0;
 		    for (var i in ship.systems) {
 		        var system = ship.systems[i];
 					if (system instanceof Reactor) {
-						var engine = ((shipManager.systems.getSystemByName(ship, "engine"))); //Find engine		
-							if (engine){ //engine exists.
-							var powerBoost = engine.boostEfficiency *4;//Boost by engine efficiency multiplied by 4.	
-						    system.output += powerBoost;
+						if (ship.shipSizeClass >= 3) powerBoost = 12;//Capital or larger	
+						if (ship.shipSizeClass == 2) powerBoost = 10;//HCV						
+						if (ship.shipSizeClass <= 1) powerBoost = 8;//MCV or lower							
+						system.output += powerBoost;
 						}	
 					}
 			}
-		}
+		
 		if (this.specCurrClass == 'Sensor'){//Make front-end changes to Scanner output in Initial Orders phase.
 		var ship = this.ship;
 
