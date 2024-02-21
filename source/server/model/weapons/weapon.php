@@ -312,6 +312,13 @@ class Weapon extends ShipSystem
 			foreach ($specAllocatedArray as $specsUsed=>$specValue){
 				if ($specsUsed == 'Defence'){ //Defence modifies intercept rating, show in system window.
 					$strippedSystem->data = $this->data; 				
+				}
+				if ($specsUsed == 'Weapon'){ //Weapon modifies damage, show in system window.
+				$strippedSystem->minDamage = $this->minDamage;
+				$strippedSystem->maxDamage = $this->maxDamage;
+				$strippedSystem->minDamageArray = $this->minDamageArray;
+				$strippedSystem->maxDamageArray = $this->maxDamageArray;
+				$strippedSystem->data = $this->data; 				
 				}		
 			}
 		}				
@@ -866,6 +873,22 @@ class Weapon extends ShipSystem
     {
 
     }
+    
+     public function getBonusDamage(){
+		$bonusDamage = 0;	
+		//Hyach Specialists sometimes require additional info to be sent to front end.
+		$ship = $this->unit;			
+		if ($ship->getSystemByName("HyachSpecialists")){ //Does ship have Specialists system?
+			$specialists = $ship->HyachSpecialists;
+			$specAllocatedArray = $specialists->specAllocatedCount;
+			foreach ($specAllocatedArray as $specsUsed=>$specValue){
+				if ($specsUsed == 'Weapon'){ //Weapon Specialists add 3 damage.
+				$bonusDamage = 3;									
+				}		
+			}
+		}	
+		return $bonusDamage;
+    }   
 
 /*replacing this with function just accepting distance as parameter and returning penalty!
     public function calculateRangePenalty(OffsetCoordinate $pos, BaseShip $target)
@@ -1472,7 +1495,7 @@ class Weapon extends ShipSystem
 
     protected function beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata)
     {
-        $damage = $this->getFinalDamage($shooter, $target, $pos, $gamedata, $fireOrder);
+        $damage = $this->getFinalDamage($shooter, $target, $pos, $gamedata, $fireOrder);        
         $this->damage($target, $shooter, $fireOrder, $gamedata, $damage);
     }
 
@@ -1715,6 +1738,8 @@ throw new Exception("getSystemArmourAdaptive! $ss");	*/
 			}				
 		}
 
+		$damage += $this->getBonusDamage();//For bonus damage such as Weapon Specialists.   
+
         $damage = max(0, $damage); //at least 0	    
         $damage = floor($damage); //drop fractions, if any were generated
         return $damage;
@@ -1724,7 +1749,7 @@ throw new Exception("getSystemArmourAdaptive! $ss");	*/
     protected function getFinalDamage($shooter, $target, $pos, $gamedata, $fireOrder)
     {
         $damage = $this->getDamage($fireOrder);
-        $damage = $this->getDamageMod($damage, $shooter, $target, $pos, $gamedata);
+        $damage = $this->getDamageMod($damage, $shooter, $target, $pos, $gamedata);     
         $damage -= $target->getDamageMod($shooter, $pos, $gamedata->turn, $this);
 		
 		/* first attempt of StarTrek shield

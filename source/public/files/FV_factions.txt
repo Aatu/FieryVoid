@@ -252,14 +252,15 @@ Hyach Specialists - Some Hyach crewman receive special training as Specialists. 
 	- You can then use Specialist on any Initial Orders phase (including on Turn 1) by using +/- buttons.
 	- Specialists come in a range of different types, most of which are different from TT, and have been summarised below:
 		Computer: Computer generates two extra Bonus Fire Control Points (BFCP) this turn.
-		Defence:  Ship profiles lowered by 5%, intercept ratings increased by 10 (Note - weapon tooltip does not udpate, but extra Intercept Rating will work).
+		Defence:  Ship profiles lowered by 5%, intercept ratings increased by 10.
 		Engine:  +25% thrust for this turn (rounded down).  Removes a Engine critical if there are any (including temporary ones), will take effect after Initial Orders phase.  
 		Manoeuvring:  Turn Cost and Turn Delay are reduced by a single step for this turn.
 		Power: Extra power this turn, equal to Engine efficiency multiplied by 4.  Does not carryover past Initial Orders, so reactor may show a negative value in later phases of that turn.  Also, removes a Reactor critical if there are any, will take effect after Initial Orders phase.
 		Repair: Remove two criticals effects from ship, automatically prioritised by most important systems.  Ignores temporary criticals.
 		Sensor: +1 EW this turn.  Removes a Scanner critical if there are any, will take effect after Initial Orders phase.  	
 		Targeting:  All weapons have +5% to hit this turn.
-		Thruster:  Remove limits on Thruster ratings (set to 99) and improves Engine efficiency by 1 point. 		
+		Thruster:  Remove limits on Thruster ratings (set to 99) and improves Engine efficiency by 1 point.
+		Weapon: +3 damage to all weapons this turn.  (Note - Additional damage will not display in system tooltip, but will be applied)		
 Hyach Sensors - Hyach sensors are resistant to damage, and shrug off critical hits more easily. Instead of adding +1 to the critical sensor roll for every point of damage, they add +1 only for every two boxes of damage (rounded down).
 Interdictors - The Interdictor is an excellent defensive weapon, though it lacks any sort of offensive firepower. Interdictors can also defend nearby friendly ships, in much the same way as the guardian array
 		does, but with fewer restrictions. In order to block a shot aimed at a different unit, the following must be true:
