@@ -2220,7 +2220,7 @@ class HyachSpecialists extends ShipSystem{
 								foreach($system->criticals as $critDmg) {
 											if($critDmg->repairPriority<1) continue;//if critical cannot be repaired
 											if($critDmg->turn >= $gamedata->turn) continue;//don't repair criticals caused in current (or future!) turn.  Shouldn't happen...
-	//										if ($critDmg->oneturn || ($critDmg->turnend > 0)) continue;//temporary criticals (or those already repaired) also cannot be repaired
+											if ($critDmg->oneturn || ($critDmg->turnend > 0)) continue;//temporary criticals (or those already repaired) also cannot be repaired
 											$critList[] = $critDmg;				
 											}	
 								
