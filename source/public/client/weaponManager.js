@@ -940,7 +940,6 @@ window.weaponManager = {
         if (target.shipSizeClass >= 2) return 2;  
         if (target.shipSizeClass >= 0) return 1;
         if (target.shipSizeClass < 0) return 0;     	
-        return -1;
     },
 
     
