@@ -314,11 +314,11 @@ class Weapon extends ShipSystem
 					$strippedSystem->data = $this->data; 				
 				}
 				if ($specsUsed == 'Weapon'){ //Weapon modifies damage, show in system window.
-				$strippedSystem->minDamage = $this->minDamage;
-				$strippedSystem->maxDamage = $this->maxDamage;
-				$strippedSystem->minDamageArray = $this->minDamageArray;
-				$strippedSystem->maxDamageArray = $this->maxDamageArray;
-				$strippedSystem->data = $this->data; 				
+					$strippedSystem->minDamage = $this->minDamage;
+					$strippedSystem->maxDamage = $this->maxDamage;
+					$strippedSystem->minDamageArray = $this->minDamageArray;
+					$strippedSystem->maxDamageArray = $this->maxDamageArray;
+					$strippedSystem->data = $this->data; 				
 				}		
 			}
 		}				
