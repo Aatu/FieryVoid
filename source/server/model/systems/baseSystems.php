@@ -2260,7 +2260,7 @@ class HyachSpecialists extends ShipSystem{
 		 								
 					$this->specAllocatedCount[$explodedKey[1]] = 1;	
 													
-				}else if ($explodedKey[1] == 'Power'){ //Extra power in Initial Orders. remove a reactor crit.
+				}else if ($explodedKey[1] == 'Power'){ //Extra power in Initial Orders. Remove a reactor crit.
 				 	$strongestSystem = null;
 					$strongestValue = -1;
 						foreach ($ship->systems as $system) {
@@ -2461,7 +2461,7 @@ class HyachSpecialists extends ShipSystem{
 	        $this->data["Special"] .= "<br>On Turn 1 Initial Orders, you must select which Specialists this ship will have available.";        	   
 	        $this->data["Special"] .= "<br>You may then use Specialist(s) by clicking + button in any Initial Orders phase (including Turn 1)."; 
 	        $this->data["Special"] .= "<br>Each Specialists can be used once, with these effects on the turn they are used:";
-			$this->data["Special"] .= "<br>  - Computer: +2 Bonus Fire Control Point."; 
+			$this->data["Special"] .= "<br>  - Computer: +2 Bonus Fire Control Points."; 
 			$this->data["Special"] .= "<br>  - Defence: Profiles lowered by 5, intercept ratings +10."; 
 			$this->data["Special"] .= "<br>  - Engine: +25% Thrust and remove an Engine critical."; 
 			$this->data["Special"] .= "<br>  - Maneuvering: Turn Cost and Delay reduced.";
@@ -2476,7 +2476,7 @@ class HyachSpecialists extends ShipSystem{
 	        $this->data["Special"] .= "<br>You use Specialist(s) by clicking + button in any Initial Orders phase (including Turn 1)."; 
 	        $this->data["Special"] .= "<br>Each Specialists can be used once, with these effects on the turn they are used:";
 				foreach($this->allocatedSpec as $specialistType => $specValue) {
-					if ($specialistType == 'Computer') $this->data["Special"] .= '<br>  - '.$specialistType . ': +2 Bonus Fire Control Point.';
+					if ($specialistType == 'Computer') $this->data["Special"] .= '<br>  - '.$specialistType . ': +2 Bonus Fire Control Points.';
 					if ($specialistType == 'Defence') $this->data["Special"] .= '<br>  - '.$specialistType . ': Profiles lowered by 5, intercept ratings +10.';
 					if ($specialistType == 'Engine') $this->data["Special"] .= '<br>  - '.$specialistType . ': +25% Thrust and remove an Engine critical.';
 					if ($specialistType == 'Maneuvering') $this->data["Special"] .= '<br>  - '.$specialistType . ': Turn Cost and Delay reduced.';
@@ -2527,8 +2527,7 @@ class HyachSpecialists extends ShipSystem{
 	    }                                	   
 	    $this->individualNotesTransfer = array(); // Empty, just in case
 	}	
-					
-							
+									
 } //endof HyachSpecialists
 
 
