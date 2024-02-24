@@ -31,7 +31,7 @@ class Areko extends HeavyCombatVesselLeftRight{
 		$this->addPrimarySystem(new CargoBay(3, 10)); 
         $this->addPrimarySystem(new Hangar(5, 8));
         
-        $this->addFrontSystem(new StdParticleBeam(4, 4, 1, 90, 270));
+        $this->addAftSystem(new StdParticleBeam(4, 4, 1, 90, 270));
         $this->addAftSystem(new Thruster(5, 15, 0, 6, 1));        
         $this->addAftSystem(new Thruster(5, 18, 0, 10, 2));
 
