@@ -57,7 +57,7 @@ class Areko extends HeavyCombatVesselLeftRight{
 					7 => "Structure",
 					9 => "Cargo Bay",
 					11 => "2:Thruster",
-					12 => "1:Standard Particle Beam",
+					12 => "2:Standard Particle Beam",
 					15 => "Scanner",
 					17 => "Hangar",
 					19 => "Reactor",
