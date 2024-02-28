@@ -842,13 +842,10 @@ HyachSpecialists.prototype.doDecrease = function () { //decrease Specialist allo
 		    for (var i in ship.systems) {
 		        var system = ship.systems[i];
 					if (system instanceof Reactor) {
-						var engine = ((shipManager.systems.getSystemByName(ship, "engine"))); //Find engine		
-							if (engine){ //engine exists.
 								if (ship.shipSizeClass >= 3) powerBoost = 12;//Capital or larger	
 								if (ship.shipSizeClass == 2) powerBoost = 10;//HCV						
 								if (ship.shipSizeClass <= 1) powerBoost = 8;//MCV or lower	
 						    	system.output -= powerBoost;
-						}	
 					}
 			}
 		}
