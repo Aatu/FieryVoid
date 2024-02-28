@@ -611,7 +611,7 @@ HyachSpecialists.prototype.nextCurrClass = function () { //get next class for di
 	return this.specCurrClass;
 };
 
-HyachSpecialists.prototype.prevCurrClass = function () { //get next class for display
+HyachSpecialists.prototype.prevCurrClass = function () { //get previous class for display, useful when selecting from 10+ Specialists!
 	this.getCurrClass();
     if (this.specCurrClass == '') return ''; //this would mean there are no classes whatsover!
     	
@@ -676,7 +676,6 @@ HyachSpecialists.prototype.canUse = function () { //check if can increase rating
     if (this.specCurrClass == '') return false; //this would mean there are no Specialist classes whatsover!
 
 		//total pool of Specialists used?
-//		if (this.specTotal_used >= this.specTotal) return false;
 		if (!this.availableSpec[this.specCurrClass]) return false; //Not selected, can't increase or decrease on Turn 1.
 		if (this.availableSpec[this.specCurrClass] < 1) return false; //Not selected, can't increase or decrease on Turn 1.
 		
@@ -729,7 +728,7 @@ HyachSpecialists.prototype.doUnselect = function () { //can unslect Specialists 
 	this.specAllocatedCount[this.specCurrClass] = 0; //Remove any allocations made after this Specialist was selected.
 	
 	if (this.currAllocatedSpec[this.specCurrClass]){//If player had allocated, then de-selected before removing allocation, make sure info window doesn't still say used.'
-//		this.currchangedSpec[this.specCurrClass] = 1; //In this case it's been selected so keep it as 1.
+
 		this.specDecreased[this.specCurrClass] = true;
 		this.specIncreased[this.specCurrClass] = false;
 		this.currAllocatedSpec[this.specCurrClass] = "";		
@@ -760,7 +759,6 @@ HyachSpecialists.prototype.doUse = function () { //Mark Specialist as used.
 		this.specIncreased[this.specCurrClass] = true;
 		this.specDecreased[this.specCurrClass] = false;		
 
-
 		if (this.specCurrClass == 'Computer'){//Make front-end changes to Computer Output in Initial Orders phase.
 		var ship = this.ship;
 
@@ -772,19 +770,7 @@ HyachSpecialists.prototype.doUse = function () { //Mark Specialist as used.
 				}
 			}
 		}
-/*
-		if (this.specCurrClass == 'Engine'){//Didn't work because wheny uo changed back % was different
-		var ship = this.ship;
 
-		    for (var i in ship.systems) {
-		        var system = ship.systems[i];
-
-				if (system instanceof Engine) {
-					var specialistBoost = Math.floor(system.output * 0.25);					
-				    system.output += specialistBoost;
-				}
-			}
-		}	*/
 		if (this.specCurrClass == 'Power'){//Make front-end changes to Power output in Initial Orders phase.
 		var ship = this.ship;
 		var powerBoost = 0;
@@ -849,30 +835,19 @@ HyachSpecialists.prototype.doDecrease = function () { //decrease Specialist allo
 				}
 			}
 		}
-/*
-		if (this.specCurrClass == 'Engine'){//Make front-end changes to Computer Output efficiency in Initial Orders phase.
-		var ship = this.ship;
-
-		    for (var i in ship.systems) {
-		        var system = ship.systems[i];
-
-				if (system instanceof Engine) {
-					var specialistBoost = Math.floor(system.output * 0.25);					
-				    system.output -= specialistBoost;
-				}
-			}
-		} */		
+	
 		if (this.specCurrClass == 'Power'){//Make front-end changes to Power output in Initial Orders phase.
 		var ship = this.ship;
-
+		var powerBoost = 0;
 		    for (var i in ship.systems) {
 		        var system = ship.systems[i];
 					if (system instanceof Reactor) {
 						var engine = ((shipManager.systems.getSystemByName(ship, "engine"))); //Find engine		
 							if (engine){ //engine exists.
-							var powerBoost = engine.boostEfficiency *4;//Boost by engine efficiency multiplied by 4.	
-						    system.output -= powerBoost;
-//					    if (this.specAllocatedCount['Sensor'] = 1) system.output -= 1;
+								if (ship.shipSizeClass >= 3) powerBoost = 12;//Capital or larger	
+								if (ship.shipSizeClass == 2) powerBoost = 10;//HCV						
+								if (ship.shipSizeClass <= 1) powerBoost = 8;//MCV or lower	
+						    	system.output -= powerBoost;
 						}	
 					}
 			}
