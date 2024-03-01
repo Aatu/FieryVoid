@@ -34,7 +34,7 @@
 <!--        <div class="helphide" style="float:right"> <div id="helphideimg"></div>
         </div>-->
 		<div class="panel" style="width:400px;margin:auto;">
-			<a href="./reg.php"><b>Register new player account</b></a><br>
+			<a href="./reg.php"><b><u>Register new player account</u></b></a><br>
 			or log in below:
 			<form method="post">
 				<table>

@@ -66,7 +66,7 @@ include_once 'global.php';
 			<form method="post">
                 <div class="error"><span><?php print($error); ?></span></div>
 				<table>
-				<tr><td><label>Secret phrase <i>(if you don't know it, ask on <a href="https://discord.gg/Pmmdfz4NbC">Discord</a> or <a href="https://www.facebook.com/groups/fieryvoid">Facebook</a> group!)</i>:</label></td><td><input type="text" name="secret"></td></tr>
+				<tr><td><label>Secret phrase <i>(if you don't know it, click on these links to ask on our <a href="https://discord.gg/Pmmdfz4NbC">Discord</a> or <a href="https://www.facebook.com/groups/fieryvoid">Facebook</a>!)</i>:</label></td><td><input type="text" name="secret"></td></tr>
 				<tr><td><label>Username:</label></td><td><input type="text" name="user"></input></td></tr>
 				<tr><td><label>Password:</label></td><td><input type="password" name="pass"></input></td></tr>
                 <tr><td><label>Retype password:</label></td><td><input type="password" name="pass2"></input></td></tr>
