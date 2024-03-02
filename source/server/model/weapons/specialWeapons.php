@@ -5294,7 +5294,7 @@ class ProximityLaserLauncher extends Weapon{
         public $displayName = "Proximity Laser";
 		public $iconPath = "ProximityLaser.png";        
         
-        public $animation = "bolt";
+        public $animation = "laser";
 
         public $animationColor = array(179, 45, 0); //same as Heavy Laser
 
