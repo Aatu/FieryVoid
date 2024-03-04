@@ -5261,7 +5261,7 @@ class ProximityLaserLauncher extends Weapon{
 	        $shooter = $gamedata->getShipById($fireOrder->shooterid);        
 	        $rolled = Dice::d(100);
 	        $fireOrder->rolled = $rolled; 
-			$fireOrder->pubnotes .= "Automatically hits."; //MIGHT NEED ADJUSTED.
+			$fireOrder->pubnotes .= "Automatically hits."; 
 			if($rolled <= $fireOrder->needed){//HIT!
 				$fireOrder->shotshit++;
 	            $this->ammunition--;
@@ -5323,7 +5323,7 @@ class ProximityLaserLauncher extends Weapon{
         
 		private $launcher = null;   //Variable where paired launcher be assigned.
 		private $pairing = null;	//Which launcher is it paired with?	    
-		protected $hasSpecialLaunchHexCalculation = true; //Weapons like Proximty Laser use a separate launcher system to determine point of shot.         
+		protected $hasSpecialLaunchHexCalculation = true; //Weapons like Proximity Laser use a separate launcher system to determine point of shot.         
     
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $pairing){
  			$this->pairing = $pairing;
