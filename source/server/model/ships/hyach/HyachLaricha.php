@@ -10,7 +10,7 @@ class HyachLaricha extends FighterFlight
 		$this->faction = "Hyach Gerontocracy";
 		$this->phpclass = "HyachLaricha";
 		$this->shipClass = "Laricha Assault Shuttles";
-		$this->imagePath = "img/ships/HyachDartha.png";
+		$this->imagePath = "img/ships/HyachLaricha.png";
 				
 		$this->isd = 2244;
 
@@ -38,8 +38,8 @@ class HyachLaricha extends FighterFlight
 			$armour = array(2, 2, 2, 2);
 			$fighter = new Fighter("HyachLaricha", $armour, 10, $this->id);
 			$fighter->displayName = "Laricha";
-			$fighter->imagePath = "img/ships/HyachDartha.png";
-			$fighter->iconPath = "img/ships/HyachDartha_Large.png";
+			$fighter->imagePath = "img/ships/HyachLaricha.png";
+			$fighter->iconPath = "img/ships/HyachLaricha_Large.png";
 
             $frontGun = new LtBlastLaser(330, 30); //1 gun
             $fighter->addFrontSystem($frontGun);
