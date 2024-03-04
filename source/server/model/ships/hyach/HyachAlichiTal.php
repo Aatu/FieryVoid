@@ -7,11 +7,11 @@ class HyachAlichiTal extends HeavyCombatVessel{
         $this->pointCost = 650;
         $this->faction = "Hyach Gerontocracy";
         $this->phpclass = "HyachAlichiTal";
-        $this->imagePath = "img/ships/HyachAlichiKavDemo.png";
+        $this->imagePath = "img/ships/HyachAlichiKav.png";
         $this->shipClass = "Alichi Tal Infiltrator";
 			$this->variantOf = 'Alichi Kav Stealth Cruiser';
 			$this->occurence = "uncommon";
-		$this->canvasSize = 175; //img has 175px per side
+		$this->canvasSize = 100;
         $this->gravitic = true;
         $this->limited = 33;
 		

@@ -10,8 +10,8 @@ class HyachTakaltiKal extends OSAT
 		$this->faction = "Hyach Gerontocracy";
 		$this->phpclass = "HyachTakaltiKal";
 		$this->shipClass = "Takalti Kal Heavy OSAT";
-		$this->imagePath = "img/ships/OrieniSkywatchOSAT.png";
-		$this->canvasSize = 150;
+		$this->imagePath = "img/ships/HyachTakaltiKalOSAT.png";
+		$this->canvasSize = 100;
 		$this->isd = 2230;
 
 		$this->forwardDefense = 12;

@@ -7,7 +7,7 @@ class HyachOkathKur extends MediumShip{
 		$this->pointCost = 625;
 		$this->faction = "Hyach Gerontocracy";
 		$this->phpclass = "HyachOkathKur";
-		$this->imagePath = "img/ships/tethys.png";
+		$this->imagePath = "img/ships/HyachOkathKat.png";
 		$this->shipClass = "Okath Kur Escort Frigate";
 			$this->variantOf = 'Okath Kat Fast Frigate';
 			$this->occurence = "uncommon";

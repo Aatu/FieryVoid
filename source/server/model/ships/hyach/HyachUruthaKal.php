@@ -7,13 +7,13 @@ class HyachUruthaKal extends BaseShip{
 	$this->pointCost = 1300;
 	$this->faction = "Hyach Gerontocracy";
         $this->phpclass = "HyachUruthaKal";
-        $this->imagePath = "img/ships/HyachIrokaiKam.png";
+        $this->imagePath = "img/ships/HyachUruthaKal.png";
         $this->shipClass = "Urutha Kal Dreadnought";
         $this->shipSizeClass = 3;
         $this->limited = 33;
 
         $this->fighters = array("normal"=>12);
-
+		$this->canvasSize = 280;
         $this->isd = 2207;
         
         $this->forwardDefense = 17;

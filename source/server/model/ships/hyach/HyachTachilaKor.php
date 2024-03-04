@@ -7,7 +7,7 @@ class HyachTachilaKor extends BaseShip{
 	$this->pointCost = 1025;
 	$this->faction = "Hyach Gerontocracy";
         $this->phpclass = "HyachTachilaKor";
-        $this->imagePath = "img/ships/HyachIrokaiKam.png";
+        $this->imagePath = "img/ships/HyachTachilaKor.png";
         $this->shipClass = "Tachila Kor Scout Carrier";
         $this->shipSizeClass = 3;
         $this->limited = 33;

@@ -12,7 +12,7 @@ class HyachDoskva extends FighterFlight
 		$this->shipClass = "Doskva Stealth Fighters";
 			$this->variantOf = "Dartha Medium Fighters";
 			$this->occurence = "rare";
-		$this->imagePath = "img/ships/CorillaniTilliniCPN.png";
+		$this->imagePath = "img/ships/HyachDartha.png";
 				
 		$this->isd = 2254;
 
@@ -39,8 +39,8 @@ class HyachDoskva extends FighterFlight
 			$armour = array(2, 2, 1, 1);
 			$fighter = new Fighter("HyachDoskva", $armour, 10, $this->id);
 			$fighter->displayName = "Doskva";
-			$fighter->imagePath = "img/ships/CorillaniTilliniCPN.png";
-			$fighter->iconPath = "img/ships/CorillaniTilliniCPN_large.png";
+			$fighter->imagePath = "img/ships/HyachDartha.png";
+			$fighter->iconPath = "img/ships/HyachDartha_Large.png";
 
 			$frontGun = new LtBlastLaser(330, 30);
 			$fighter->addFrontSystem($frontGun);

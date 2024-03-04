@@ -12,7 +12,7 @@ class HyachDovoch extends FighterFlight
 		$this->shipClass = "Dartha Medium Fighters (with Dovoch)";
 			$this->variantOf = "Dartha Medium Fighters";
 			$this->occurence = "common";		
-		$this->imagePath = "img/ships/CorillaniTilliniCPN.png";
+		$this->imagePath = "img/ships/HyachDartha.png";
 				
 		$this->isd = 2222;
 
@@ -40,8 +40,8 @@ class HyachDovoch extends FighterFlight
 			$armour = array(2, 2, 1, 1);
 			$fighter = new Fighter("HyachDartha", $armour, 10, $this->id);
 			$fighter->displayName = "Dartha";
-			$fighter->imagePath = "img/ships/CorillaniTilliniCPN.png";
-			$fighter->iconPath = "img/ships/CorillaniTilliniCPN_large.png";
+			$fighter->imagePath = "img/ships/HyachDartha.png";
+			$fighter->iconPath = "img/ships/HyachDartha_Large.png";
 
 			if ($i == 1) {
 				$frontGun2 = new FtrInterdictor(330, 30);

@@ -7,7 +7,7 @@ class HyachEcamronTek extends MediumShip{
 		$this->pointCost = 170;
 		$this->faction = "Civilians";
 		$this->phpclass = "HyachEcamronTek";
-		$this->imagePath = "img/ships/tethys.png";
+		$this->imagePath = "img/ships/HyachEcamromTek.png";
 		$this->shipClass = "Ecamron Tek Freighter";
 		$this->canvasSize = 100;
         $this->gravitic = true;

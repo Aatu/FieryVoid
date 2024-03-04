@@ -21,8 +21,8 @@ class HyachUtaraTor extends StarBaseSixSections{
 		$this->forwardDefense = 22;
 		$this->sideDefense = 22;
 
-		$this->imagePath = "img/ships/orion.png";
-		$this->canvasSize = 280; //Enormous Starbase
+		$this->imagePath = "img/ships/HyachUtaraTor.png";
+		$this->canvasSize = 300; //Enormous Starbase
 
 		$this->locations = array(41, 42, 2, 32, 31, 1);
 		$this->hitChart = array(			

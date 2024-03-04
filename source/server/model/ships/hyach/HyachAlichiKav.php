@@ -7,9 +7,9 @@ class HyachAlichiKav extends HeavyCombatVessel{
         $this->pointCost = 700;
         $this->faction = "Hyach Gerontocracy";
         $this->phpclass = "HyachAlichiKav";
-        $this->imagePath = "img/ships/HyachAlichiKavDemo.png";
+        $this->imagePath = "img/ships/HyachAlichiKav.png";
         $this->shipClass = "Alichi Kav Stealth Cruiser";
-		$this->canvasSize = 175; //img has 175px per side
+		$this->canvasSize = 100;
         $this->gravitic = true;
         $this->limited = 33;
 		

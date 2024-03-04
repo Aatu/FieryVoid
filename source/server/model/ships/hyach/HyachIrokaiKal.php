@@ -8,6 +8,7 @@ class HyachIrokaiKal extends BaseShip{
 	$this->faction = "Hyach Gerontocracy";
         $this->phpclass = "HyachIrokaiKal";
         $this->imagePath = "img/ships/HyachIrokaiKam.png";
+		$this->canvasSize = 280;    
         $this->shipClass = "Irokai Kal Command Gunship";
 			$this->variantOf = 'Irokai Kam Battlecruiser';
 			$this->occurence = "rare";
