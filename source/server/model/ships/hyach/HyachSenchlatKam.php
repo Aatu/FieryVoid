@@ -8,6 +8,7 @@ class HyachSenchlatKam extends HeavyCombatVessel{
         $this->faction = "Hyach Gerontocracy";
         $this->phpclass = "HyachSenchlatKam";
         $this->imagePath = "img/ships/HyachSenchlatKam.png";
+		$this->canvasSize = 100;        
         $this->shipClass = "Senchlat Kam Light Cruiser";
         $this->gravitic = true;
 
