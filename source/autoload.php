@@ -2795,14 +2795,13 @@ spl_autoload_register(
 
 				//Hyach
 				
-				//weapons
+				//weapons & systems
                 'ftrinterdictor' => '/server/model/weapons/defensive.php',
                 'interdictor' => '/server/model/weapons/defensive.php',
                 'ltblastlaser' => '/server/model/weapons/lasers.php',
 				'hyachcomputer' => '/server/model/systems/baseSystems.php',
 				'hyachspecialists' => '/server/model/systems/baseSystems.php',					
 				//units						
-/*
 				'hyachalichikav' => '/server/model/ships/hyach/HyachAlichiKav.php',
 				'hyachalichital' => '/server/model/ships/hyach/HyachAlichiTal.php',
 				'hyachalichikav' => '/server/model/ships/hyach/HyachAlichiKav.php',
@@ -2826,7 +2825,7 @@ spl_autoload_register(
 				'hyachtakaltikam' => '/server/model/ships/hyach/HyachTakaltiKam.php',
 				'hyachuruthakal' => '/server/model/ships/hyach/HyachUruthaKal.php',
 				'hyachutarator' => '/server/model/ships/hyach/HyachUtaraTor.php',
-*/
+
 
 				//Kor-Lyan
 				'axor' => '/server/model/ships/korlyan/Axor.php',
@@ -2887,7 +2886,8 @@ spl_autoload_register(
          		'multidefenselauncher' => '/server/model/weapons/customNexus.php', //missile racks themselves
 				'koskovatestbed' => '/server/model/ships/korlyan/KoskovaTestbed.php',
          		'limpetboretorpedo' => '/server/model/weapons/torpedo.php', 				
-         		'limpetboretorpedobase' => '/server/model/weapons/torpedo.php', 
+         		'limpetboretorpedobase' => '/server/model/weapons/torpedo.php',
+  //       		'ballisticminelauncher' => '/server/model/weapons/missile.php', 	 
 
 
 				//Star Wars - Clone Wars testing
@@ -2972,7 +2972,7 @@ spl_autoload_register(
                 		'ammomissilekk' => '/server/model/systems/baseSystems.php',
                 		'ammomissilex' => '/server/model/systems/baseSystems.php',
                 		'ammomissilej' => '/server/model/systems/baseSystems.php',             
-                		                		                 		                 		                		
+    //            		'ammoblmineb' => '/server/model/systems/baseSystems.php',                  		                		                 		                 		                		
 						
                 		'ammomissilefb' => '/server/model/systems/baseSystems.php',
                 		'ammomissilefl' => '/server/model/systems/baseSystems.php',
