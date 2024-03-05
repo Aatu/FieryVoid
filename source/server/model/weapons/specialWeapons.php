@@ -2671,7 +2671,7 @@ class RadCannon extends Weapon{
 		$this->data["Special"] .= "<br>Effect depends on system hit:";    
 		$this->data["Special"] .= "<br> - Structure: 10 boxes marked destroyed (regardless of armor)."; 
 		$this->data["Special"] .= "<br> - Shield: system destroyed."; 
-		$this->data["Special"] .= "<br>  -- Gravitic Shield reduces generator output by 1, too."; 
+		$this->data["Special"] .= "<br> - Gravitic Shield reduces generator output by 1, too."; 
 		$this->data["Special"] .= "<br> - Weapon, Thruster or Jump Engine: system destroyed."; 
 		$this->data["Special"] .= "<br> - C&C: critical roll forced (at +2)."; 
 		$this->data["Special"] .= "<br> - Scanner: output reduced by 1."; 
@@ -4608,9 +4608,7 @@ class PsychicField extends Weapon implements DefensiveSystem{ //Thirdspace weapo
 		$effectIni = Dice::d(3,1)+$boostlevel;//strength of effect: -5 to -30 initiative.
 		$effecttohit = Dice::d(2,1)+$boostlevel;//strength of effect: -5 to -25 to hit chances.
 		$effectCrit = $effectIni +2;
-		
-		$effectIni5 = $effectIni * 5;
-		$effecttohit5 = $effecttohit * 5;			
+				
 		$fireOrder->pubnotes .= "<br> Enemy ships have Initiative reduced, and suffer a penalty to hit next turn or a potential Critical.  Initiative and Offensive Bonus reduced for enemy fighters.";
 						
 		if ($system->advancedArmor){		
@@ -4646,6 +4644,7 @@ class PsychicField extends Weapon implements DefensiveSystem{ //Thirdspace weapo
 			        $CnC->criticals[] =  $crit;
 					}    
 			} else { //Force critical roll if it hits something other than structure.
+			$CnC = $ship->getSystemByName("CnC");			
 				for($i=1; $i<=$effectIni;$i++){
 					$crit = new tmpinidown(-1, $ship->id, $CnC->id, 'tmpinidown', $gamedata->turn); 
 					$crit->updated = true;
@@ -5211,7 +5210,7 @@ class ProximityLaserLauncher extends Weapon{
 		
 		public $range = 30;//no point firing at further target with base 24 to hit!
 		public $loadingtime = 1; //same as attached laser
-	    public $ammunition = 10; //limited number of shots	
+	    public $ammunition = 99; //Just make unlimited, so account for accidental launches when Laser on recharge.	
 		
 		public $animation = "ball";
 		public $animationColor = array(245, 90, 90);
@@ -5262,7 +5261,7 @@ class ProximityLaserLauncher extends Weapon{
 	        $shooter = $gamedata->getShipById($fireOrder->shooterid);        
 	        $rolled = Dice::d(100);
 	        $fireOrder->rolled = $rolled; 
-			$fireOrder->pubnotes .= "Automatically hits."; //MIGHT NEED ADJUSTED.
+			$fireOrder->pubnotes .= "Automatically hits."; 
 			if($rolled <= $fireOrder->needed){//HIT!
 				$fireOrder->shotshit++;
 	            $this->ammunition--;
@@ -5295,7 +5294,7 @@ class ProximityLaserLauncher extends Weapon{
         public $displayName = "Proximity Laser";
 		public $iconPath = "ProximityLaser.png";        
         
-        public $animation = "bolt";
+        public $animation = "laser";
 
         public $animationColor = array(179, 45, 0); //same as Heavy Laser
 
@@ -5324,7 +5323,7 @@ class ProximityLaserLauncher extends Weapon{
         
 		private $launcher = null;   //Variable where paired launcher be assigned.
 		private $pairing = null;	//Which launcher is it paired with?	    
-		protected $hasSpecialLaunchHexCalculation = true; //Weapons like Proximty Laser use a separate launcher system to determine point of shot.         
+		protected $hasSpecialLaunchHexCalculation = true; //Weapons like Proximity Laser use a separate launcher system to determine point of shot.         
     
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $pairing){
  			$this->pairing = $pairing;

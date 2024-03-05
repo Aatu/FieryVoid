@@ -71,8 +71,8 @@ class ThirdspaceLanceAttackCraft extends LCV{ //Actually an LCV.
 						13 => "Self Repair",        				
         				14 => "Jump Engine",
         				16 => "Engine",
-        				18 => "Advanced Singularity Reactor",
-        				20 => "Thirdspace Sensors",
+        				18 => "Reactor",
+        				20 => "Scanner",
         		),
         		1=> array( //PRIMARY hit table, effectively
         				8 => "Structure",
@@ -81,8 +81,8 @@ class ThirdspaceLanceAttackCraft extends LCV{ //Actually an LCV.
 						13 => "0:Self Repair",        				
         				14 => "0:Jump Engine",
         				16 => "0:Engine",
-        				18 => "0:Advanced Singularity Reactor",
-        				20 => "0:Thirdspace Sensors",
+        				18 => "0:Reactor",
+        				20 => "0:Scanner",
         		),
         		2=> array( //PRIMARY hit table, effectively
         				8 => "Structure",
@@ -91,8 +91,8 @@ class ThirdspaceLanceAttackCraft extends LCV{ //Actually an LCV.
 						13 => "0:Self Repair",        				
         				14 => "0:Jump Engine",
         				16 => "0:Engine",
-        				18 => "0:Advanced Singularity Reactor",
-        				20 => "0:Thirdspace Sensors",
+        				18 => "0:Reactor",
+        				20 => "0:Scanner",
         		),
         		
         ); //end of hit chart

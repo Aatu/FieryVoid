@@ -458,7 +458,8 @@ class SensorLoss extends Critical{
 
 class LimpetBore extends Critical{
 	//Used by the Limpet Bore Torpedo
-    public $description = "Limpet Bore attached to system.";    
+    public $description = "Limpet Bore attached to system."; 
+	public $repairPriority = 0;//Can't repair.'       
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
 		if($turnend == 0) $turnend = $turn + 4;    	
             parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
@@ -468,7 +469,7 @@ class LimpetBore extends Critical{
 //For criticalClass.php		
 class MayOverheat extends Critical { //Critical to allow weapons to roll a critical at the end of following turn if they are at risk of overheating e.g. Quad Array.
     public $description = "May overheat";
-
+	public $repairPriority = 0;//Can't repair.'
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0) {
 //        if ($turnend == 0) $turnend = $turn + 1;
         parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );

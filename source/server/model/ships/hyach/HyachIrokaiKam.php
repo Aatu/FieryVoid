@@ -5,9 +5,10 @@ class HyachIrokaiKam extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 1025;
-	$this->faction = "Hyach";
+        $this->faction = "Hyach Gerontocracy";
         $this->phpclass = "HyachIrokaiKam";
         $this->imagePath = "img/ships/HyachIrokaiKam.png";
+		$this->canvasSize = 280;    
         $this->shipClass = "Irokai Kam Battlecruiser";
         $this->shipSizeClass = 3;
 
@@ -16,24 +17,28 @@ class HyachIrokaiKam extends BaseShip{
         $this->forwardDefense = 15;
         $this->sideDefense = 16;
         
-        $this->turncost = 1.0;
-        $this->turndelaycost = 1.0;
+        $this->turncost = 1;
+        $this->turndelaycost = 1;
         $this->accelcost = 4;
         $this->rollcost = 3;
         $this->pivotcost = 3;
         $this->iniativebonus = 0;
         
         $this->gravitic = true;
+      
 
         $this->addPrimarySystem(new Reactor(5, 28, 0, 0));
         $this->addPrimarySystem(new CnC(5, 18, 0, 0));
 		$sensors = new Scanner(5, 28, 6, 11);
 			$sensors->markHyach();
 			$this->addPrimarySystem($sensors); 
- //       $this->addPrimarySystem(new Scanner(5, 28, 6, 11));
         $this->addPrimarySystem(new Engine(5, 26, 0, 12, 3));
 		$this->addPrimarySystem(new Hangar(4, 2));
 		$this->addPrimarySystem(new JumpEngine(5, 21, 4, 20));
+		$this->addPrimarySystem(new HyachComputer(5, 15, 0, 3));//$armour, $maxhealth, $powerReq, $output		
+		
+		$HyachSpecialists = $this->createHyachSpecialists(2); //$specTotal
+			$this->addPrimarySystem( $HyachSpecialists );					
 
         $this->addFrontSystem(new GraviticThruster(4, 11, 0, 3, 1));
         $this->addFrontSystem(new GraviticThruster(4, 11, 0, 3, 1));
@@ -71,16 +76,17 @@ class HyachIrokaiKam extends BaseShip{
         $this->hitChart = array(
         		0=> array(
         				10 => "Structure",
-        				12 => "Jump Engine",
-        				14 => "Scanner",
+     	  				11 => "Jump Engine",
+        				13 => "Scanner",
+						14 => 'Computer',        				
         				16 => "Engine",
         				17 => "Hangar",
         				19 => "Reactor",
-        				20 => "C&C",
-        		),
+        				20 => "C&C",				
+        		), 
         		1=> array(
-        				5 => "Thruster",
-        				7 => "Spinal Laser",
+	       				5 => "Thruster",
+  	     				7 => "Spinal Laser",
         				9 => "Medium Laser",
 						11 => "Maser",
         				18 => "Structure",

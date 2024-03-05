@@ -40,7 +40,7 @@ class ThirdspaceAttackCraft extends LCV{ //Actually an LCV.
 	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 4)); //unhittable and with unlimited thrust allowance
 	$this->addPrimarySystem(new ThirdspaceCnC(99, 1, 0, 0)); //C&C should be unhittable anyway
 		    
-    $this->addPrimarySystem(new AdvancedSingularityDrive(6, 16, 0, 16+4+3));
+    $this->addPrimarySystem(new AdvancedSingularityDrive(6, 16, 0, 17+4+3));
 	$sensors = new Scanner(5, 12, 4, 9);
 		$sensors->markThirdspace();
 		$this->addPrimarySystem($sensors);
@@ -69,8 +69,8 @@ class ThirdspaceAttackCraft extends LCV{ //Actually an LCV.
 						13 => "Self Repair",        				
         				14 => "Jump Engine",
         				16 => "Engine",
-        				18 => "Advanced Singularity Reactor",
-        				20 => "Thirdspace Sensors",
+        				18 => "Reactor",
+        				20 => "Scanner",
         		),
         		1=> array( //PRIMARY hit table, effectively
         				8 => "Structure",
@@ -78,8 +78,8 @@ class ThirdspaceAttackCraft extends LCV{ //Actually an LCV.
 						13 => "0:Self Repair",        				
         				14 => "0:Jump Engine",
         				16 => "0:Engine",
-        				18 => "0:Advanced Singularity Reactor",
-        				20 => "0:Thirdspace Sensors",
+        				18 => "0:Reactor",
+        				20 => "0:Scanner",
         		),
         		2=> array( //PRIMARY hit table, effectively
         				8 => "Structure",
@@ -88,8 +88,8 @@ class ThirdspaceAttackCraft extends LCV{ //Actually an LCV.
 						13 => "0:Self Repair",        				
         				14 => "0:Jump Engine",
         				16 => "0:Engine",
-        				18 => "0:Advanced Singularity Reactor",
-        				20 => "0:Thirdspace Sensors",
+        				18 => "0:Reactor",
+        				20 => "0:Scanner",
         		),
         		
         ); //end of hit chart

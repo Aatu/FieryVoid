@@ -1,7 +1,7 @@
 "use strict";
 
 window.LaserEffect = function () {
-    function LaserEffect(shooter, target, scene, args) {
+    function LaserEffect(weapon, weaponOrigin, shooter, target, scene, args) {
         Animation.call(this);
 
         if (!args) {
@@ -19,6 +19,9 @@ window.LaserEffect = function () {
             y: Math.random() * 30 - 15
         };
 
+        this.weapon = weapon;
+        this.weaponOrigin = weaponOrigin;
+        
         this.damage = args.damage || 0;
         
         this.size = args.size || 10;
@@ -52,6 +55,7 @@ window.LaserEffect = function () {
         }, this);
 
         this.particleEmitter = new ParticleEmitterContainer(scene, 200);
+
 
         if (this.hit) {
             new Explosion(this.particleEmitter, {
@@ -149,9 +153,14 @@ window.LaserEffect = function () {
         }
 
         var endPosition = this.target instanceof ShipIcon ? this.target.getPosition() : this.target;
+        
+        if (this.weapon.hasSpecialLaunchHexCalculation){
+         var start = this.weaponOrigin;      	
+        }else{
         var start = this.shooter.getPosition();
         start.x += this.startOffset.x;
         start.y += this.startOffset.y;
+		}
         var end = { x: endPosition.x + offsetVelocity.x, y: endPosition.y + offsetVelocity.y };
         return { start: start, end: end };
     }

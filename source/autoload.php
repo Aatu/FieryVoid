@@ -2795,18 +2795,36 @@ spl_autoload_register(
 
 				//Hyach
 				
-				//weapons
-//                'ftrinterdictor' => '/server/model/weapons/particle.php',
-                'interdictor' => '/server/model/weapons/particle.php',
+				//weapons & systems
+                'ftrinterdictor' => '/server/model/weapons/defensive.php',
+                'interdictor' => '/server/model/weapons/defensive.php',
                 'ltblastlaser' => '/server/model/weapons/lasers.php',
-
-				//units
-//				'hyachalichikav' => '/server/model/ships/hyach/HyachAlichiKav.php',
-//				'hyachdartha' => '/server/model/ships/hyach/HyachDartha.php',
-//				'hyachdoskva' => '/server/model/ships/hyach/HyachDoskva.php',
-//				'hyachirokaikam' => '/server/model/ships/hyach/HyachIrokaiKam.php',
-
-
+				'hyachcomputer' => '/server/model/systems/baseSystems.php',
+				'hyachspecialists' => '/server/model/systems/baseSystems.php',					
+				//units						
+				'hyachalichikav' => '/server/model/ships/hyach/HyachAlichiKav.php',
+				'hyachalichital' => '/server/model/ships/hyach/HyachAlichiTal.php',
+				'hyachalichikav' => '/server/model/ships/hyach/HyachAlichiKav.php',
+				'hyachdartha' => '/server/model/ships/hyach/HyachDartha.php',
+				'hyachdovoch' => '/server/model/ships/hyach/HyachDovoch.php',				
+				'hyachdoskva' => '/server/model/ships/hyach/HyachDoskva.php',
+				'hyachecamrontek' => '/server/model/ships/hyach/HyachEcamronTek.php',
+				'hyachevirolkon' => '/server/model/ships/hyach/HyachEvirolKon.php',
+				'hyacheviroltek' => '/server/model/ships/hyach/HyachEvirolTek.php',
+				'hyachirokaikal' => '/server/model/ships/hyach/HyachIrokaiKal.php',
+				'hyachirokaikam' => '/server/model/ships/hyach/HyachIrokaiKam.php',
+				'hyachirokaikar' => '/server/model/ships/hyach/HyachIrokaiKar.php',
+				'hyachlaricha' => '/server/model/ships/hyach/HyachLaricha.php',
+				'hyachokathkat' => '/server/model/ships/hyach/HyachOkathKat.php',
+				'hyachokathkur' => '/server/model/ships/hyach/HyachOkathKur.php',
+				'hyachsenchlatkam' => '/server/model/ships/hyach/HyachSenchlatKam.php',
+				'hyachsenchlatkes' => '/server/model/ships/hyach/HyachSenchlatKes.php',
+				'hyachsenchlatkir' => '/server/model/ships/hyach/HyachSenchlatKir.php',
+				'hyachtachilakor' => '/server/model/ships/hyach/HyachTachilaKor.php',
+				'hyachtakaltikal' => '/server/model/ships/hyach/HyachTakaltiKal.php',
+				'hyachtakaltikam' => '/server/model/ships/hyach/HyachTakaltiKam.php',
+				'hyachuruthakal' => '/server/model/ships/hyach/HyachUruthaKal.php',
+				'hyachutarator' => '/server/model/ships/hyach/HyachUtaraTor.php',
 
 
 				//Kor-Lyan
@@ -2868,7 +2886,8 @@ spl_autoload_register(
          		'multidefenselauncher' => '/server/model/weapons/customNexus.php', //missile racks themselves
 				'koskovatestbed' => '/server/model/ships/korlyan/KoskovaTestbed.php',
          		'limpetboretorpedo' => '/server/model/weapons/torpedo.php', 				
-         		'limpetboretorpedobase' => '/server/model/weapons/torpedo.php', 
+         		'limpetboretorpedobase' => '/server/model/weapons/torpedo.php',
+  //       		'ballisticminelauncher' => '/server/model/weapons/missile.php', 	 
 
 
 				//Star Wars - Clone Wars testing
@@ -2953,7 +2972,7 @@ spl_autoload_register(
                 		'ammomissilekk' => '/server/model/systems/baseSystems.php',
                 		'ammomissilex' => '/server/model/systems/baseSystems.php',
                 		'ammomissilej' => '/server/model/systems/baseSystems.php',             
-                		                		                 		                 		                		
+    //            		'ammoblmineb' => '/server/model/systems/baseSystems.php',                  		                		                 		                 		                		
 						
                 		'ammomissilefb' => '/server/model/systems/baseSystems.php',
                 		'ammomissilefl' => '/server/model/systems/baseSystems.php',
@@ -3136,6 +3155,7 @@ spl_autoload_register(
 					 	'lacanna' => '/server/model/ships/yolu/Lacanna.php', 
 					 	'lacannarefit' => '/server/model/ships/yolu/LacannaRefit.php',
 					 	'falaren' => '/server/model/ships/yolu/Falaren.php',
+		                'balosiandeltav' => '/server/model/ships/balosian/balosianDeltaV.php',						 	
 					 	
 					 	'alanti' => '/server/model/ships/abbai/Alanti.php',
 					 	'pirocia' => '/server/model/ships/abbai/Pirocia.php',
