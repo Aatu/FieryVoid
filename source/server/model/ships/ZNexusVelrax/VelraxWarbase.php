@@ -13,7 +13,7 @@ class VelraxWarbase extends SmallStarBaseFourSections{
 			$this->variantOf = "Command Base";
 			$this->occurence = "common";
 		$this->imagePath = "img/ships/Nexus/VelraxBase.png";
-		$this->canvasSize = 175; 
+		$this->canvasSize = 200; 
 		$this->unofficial = true;
 		$this->isd = 2112;
 

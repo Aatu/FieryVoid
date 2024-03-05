@@ -1251,6 +1251,7 @@ spl_autoload_register(
 				'ewrocketlauncher' => '/server/model/weapons/customEscalation.php',
 				'ewdualrocketlauncher' => '/server/model/weapons/customEscalation.php',
 				'ewheavyrocketlauncher' => '/server/model/weapons/customEscalation.php',
+				'ewrangedheavyrocketlauncher' => '/server/model/weapons/customEscalation.php',
 				'ewomissilerack' => '/server/model/weapons/customEscalation.php',
 				'ewfightertorpedolauncher' => '/server/model/weapons/customEscalation.php',
 				'ewlightplasmamine' => '/server/model/weapons/customEscalation.php',
@@ -1564,6 +1565,8 @@ spl_autoload_register(
 				'nexusultralightrailgun' => '/server/model/weapons/customNexus.php',
 			//Nexus projectile weapons
 				'nexusdefensegun' => '/server/model/weapons/customNexus.php', 
+				'nexuslightdefensegun' => '/server/model/weapons/customNexus.php', 
+				'nexuswatercaster' => '/server/model/weapons/customNexus.php', 
 			//Nexus particle weapons
 				'gatlinggunftr' => '/server/model/weapons/customNexus.php', 
 				'lightparticlebeamftr' => '/server/model/weapons/customNexus.php', 
@@ -1617,6 +1620,7 @@ spl_autoload_register(
 				'nexuslightenhplasma' => '/server/model/weapons/customNexus.php',
 				'nexusltenhplasmaftr' => '/server/model/weapons/customNexus.php',
 				'nexusheavyplasmacharge' => '/server/model/weapons/customNexus.php',
+				'nexusplasmacharge' => '/server/model/weapons/customNexus.php',
 				'nexusfightertorpedolauncher' => '/server/model/weapons/customNexus.php',
 				'nexusltplasmatorpedo' => '/server/model/weapons/customNexus.php',
 //				'nexusheavychargedplasmagun' => '/server/model/weapons/customNexus.php',
@@ -1637,6 +1641,17 @@ spl_autoload_register(
 				'nexuslightionbolter' => '/server/model/weapons/customNexus.php',
 				'nexuslightiongun' => '/server/model/weapons/customNexus.php',
 				'nexustwiniongun' => '/server/model/weapons/customNexus.php',
+			//Nexus EM weapons
+				'nexuslightchargecannon' => '/server/model/weapons/customNexus.php',
+
+
+				'testgun1' => '/server/model/weapons/customNexus.php',
+				'testgun2a' => '/server/model/weapons/customNexus.php',
+				'testgun3' => '/server/model/weapons/customNexus.php',
+				'testgun4' => '/server/model/weapons/customNexus.php',
+				'testgun5' => '/server/model/weapons/customNexus.php',
+				'testgun6' => '/server/model/weapons/customNexus.php',
+				'testgun7' => '/server/model/weapons/customNexus.php',
 
 
 //                'pakmarasimsalle' => '/server/model/ships/pakmara/PakmaraSimSallE.php',					
@@ -1804,14 +1819,33 @@ spl_autoload_register(
                 'dalithorntransportrefit' => '/server/model/ships/ZNexusDalithorn/DalithornTransportRefit.php',					
                 'dalithornwarstation' => '/server/model/ships/ZNexusDalithorn/DalithornWarStation.php',					
 
-				//Nexus ships - Makar - Hitat
+				//Nexus ships - Makar
                 'makaramear' => '/server/model/ships/ZNexusMakar/MakarAmear.php',					
                 'makarbrassert' => '/server/model/ships/ZNexusMakar/MakarBrassert.php',					
+                'makarcorren' => '/server/model/ships/ZNexusMakar/MakarCorren.php',					
+//                'makarcorrenrefit' => '/server/model/ships/ZNexusMakar/MakarCorrenRefit.php',					
+//                'makarcorrenrefit2' => '/server/model/ships/ZNexusMakar/MakarCorrenRefit2.php',					
+                'makardreft' => '/server/model/ships/ZNexusMakar/MakarDreft.php',					
+                'makarhalicin' => '/server/model/ships/ZNexusMakar/MakarHalicin.php',					
+                'makarhanimat' => '/server/model/ships/ZNexusMakar/MakarHanimat.php',					
+                'makarkalmet' => '/server/model/ships/ZNexusMakar/MakarKalmet.php',					
+                'makarkrashnor' => '/server/model/ships/ZNexusMakar/MakarKrashnor.php',					
+                'makarmaleen' => '/server/model/ships/ZNexusMakar/MakarMaleen.php',					
+                'makarnarrit' => '/server/model/ships/ZNexusMakar/MakarNarrit.php',					
                 'makarporoke' => '/server/model/ships/ZNexusMakar/MakarPoroke.php',					
+                'makarracken' => '/server/model/ships/ZNexusMakar/MakarRacken.php',					
                 'makarratash' => '/server/model/ships/ZNexusMakar/MakarRatash.php',					
                 'makarratashen' => '/server/model/ships/ZNexusMakar/MakarRatashen.php',					
+                'makarskiff' => '/server/model/ships/ZNexusMakar/MakarSkiff.php',					
                 'makartorgeth' => '/server/model/ships/ZNexusMakar/MakarTorgeth.php',					
-                'makarvengeance' => '/server/model/ships/ZNexusMakar/MakarVengeance.php',					
+                'makarvalkar' => '/server/model/ships/ZNexusMakar/MakarValkar.php',					
+                'qomyominauxcarrier' => '/server/model/ships/ZNexusMakar/QomYominAuxCarrier.php',					
+                'qomyominauxdestroyer' => '/server/model/ships/ZNexusMakar/QomYominAuxDestroyer.php',					
+                'qomyominhauler' => '/server/model/ships/ZNexusMakar/QomYominHauler.php',					
+                'qomyominlightscout' => '/server/model/ships/ZNexusMakar/QomYominLightScout.php',					
+                'qomyominqolat' => '/server/model/ships/ZNexusMakar/QomYominQolAt.php',					
+                'qomyomintalrenhk' => '/server/model/ships/ZNexusMakar/QomYominTalRenHK.php',					
+                'qomyomintolmor' => '/server/model/ships/ZNexusMakar/QomYominTolMor.php',					
 
 
 				//Nexus ships - Sal-bez
@@ -2809,10 +2843,29 @@ spl_autoload_register(
                 'ltblastlaser' => '/server/model/weapons/lasers.php',
 
 				//units
-//				'hyachalichikav' => '/server/model/ships/hyach/HyachAlichiKav.php',
-//				'hyachdartha' => '/server/model/ships/hyach/HyachDartha.php',
-//				'hyachdoskva' => '/server/model/ships/hyach/HyachDoskva.php',
-//				'hyachirokaikam' => '/server/model/ships/hyach/HyachIrokaiKam.php',
+/*				'hyachalichikav' => '/server/model/ships/hyach/HyachAlichiKav.php',
+				'hyachalichital' => '/server/model/ships/hyach/HyachAlichiTal.php',
+				'hyachalichikav' => '/server/model/ships/hyach/HyachAlichiKav.php',
+				'hyachdartha' => '/server/model/ships/hyach/HyachDartha.php',
+				'hyachdoskva' => '/server/model/ships/hyach/HyachDoskva.php',
+				'hyachecamrontek' => '/server/model/ships/hyach/HyachEcamronTek.php',
+				'hyachevirolkon' => '/server/model/ships/hyach/HyachEvirolKon.php',
+				'hyacheviroltek' => '/server/model/ships/hyach/HyachEvirolTek.php',
+				'hyachirokaikal' => '/server/model/ships/hyach/HyachIrokaiKal.php',
+				'hyachirokaikam' => '/server/model/ships/hyach/HyachIrokaiKam.php',
+				'hyachirokaikar' => '/server/model/ships/hyach/HyachIrokaiKar.php',
+				'hyachlaricha' => '/server/model/ships/hyach/HyachLaricha.php',
+				'hyachokathkat' => '/server/model/ships/hyach/HyachOkathKat.php',
+				'hyachokathkur' => '/server/model/ships/hyach/HyachOkathKur.php',
+				'hyachsenchlatkam' => '/server/model/ships/hyach/HyachSenchlatKam.php',
+				'hyachsenchlatkes' => '/server/model/ships/hyach/HyachSenchlatKes.php',
+//				'hyachsenchlatkir' => '/server/model/ships/hyach/HyachSenchlatKir.php',
+				'hyachtachilakor' => '/server/model/ships/hyach/HyachTachilaKor.php',
+				'hyachtakaltikal' => '/server/model/ships/hyach/HyachTakaltiKal.php',
+				'hyachtakaltikam' => '/server/model/ships/hyach/HyachTakaltiKam.php',
+				'hyachuruthakal' => '/server/model/ships/hyach/HyachUruthaKal.php',
+				'hyachutarator' => '/server/model/ships/hyach/HyachUtaraTor.php',
+*/				
 
 
 

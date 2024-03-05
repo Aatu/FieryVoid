@@ -8,7 +8,7 @@ class CraytanForin extends HeavyCombatVesselLeftRight{
         $this->faction = "ZNexus Craytan Union";
         $this->phpclass = "CraytanForin";
         $this->imagePath = "img/ships/Nexus/CraytanDela.png";
-		$this->canvasSize = 125; //img has 200px per side
+		$this->canvasSize = 150; //img has 200px per side
         $this->shipClass = "Forin Auxiliary Carrier";
 			$this->variantOf = "Soren Auxiliary Cruiser";
 			$this->occurence = "uncommon";

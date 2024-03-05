@@ -12,7 +12,7 @@ class CraytanCrimur extends BaseShip{
 			$this->variantOf = "Dakran Heavy Cruiser";
 			$this->occurence = "common";
         $this->shipSizeClass = 3;
-		$this->canvasSize = 170; 
+		$this->canvasSize = 180; 
 		$this->unofficial = true;
         $this->limited = 10;
 

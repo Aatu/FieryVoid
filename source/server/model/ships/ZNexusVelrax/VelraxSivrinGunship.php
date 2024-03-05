@@ -10,7 +10,7 @@ class VelraxSivrinGunship extends HeavyCombatVesselLeftRight{
         $this->imagePath = "img/ships/Nexus/VelraxSivrin.png";
         $this->shipClass = "Sivrin Gunship";
 	    $this->isd = 2023;
-        $this->canvasSize = 95;
+        $this->canvasSize = 120;
 
 		$this->unofficial = true;
 

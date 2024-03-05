@@ -8,7 +8,7 @@ class BrixadiiPursuitFrigate2108 extends MediumShip{
         $this->faction = "ZNexus Brixadii Clans";
         $this->phpclass = "BrixadiiPursuitFrigate2108";
         $this->imagePath = "img/ships/Nexus/BrixadiiPursuitFrigate.png";
-			$this->canvasSize = 70; //img has 200px per side
+			$this->canvasSize = 85; //img has 200px per side
         $this->shipClass = "Pursuit Frigate (2108)";
 			$this->variantOf = "Pursuit Frigate";
 			$this->occurence = "common";

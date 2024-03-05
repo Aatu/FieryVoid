@@ -10,7 +10,7 @@ class VelraxThristenCorvette extends MediumShip{
         $this->imagePath = "img/ships/Nexus/VelraxThristen.png";
         $this->shipClass = "Thristen Corvette";
 		$this->unofficial = true;
-        $this->canvasSize = 75;
+        $this->canvasSize = 90;
 	    $this->isd = 2000;
 
 	    $this->notes = 'Atmospheric Capable.';

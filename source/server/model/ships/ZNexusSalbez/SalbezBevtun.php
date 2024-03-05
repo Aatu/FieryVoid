@@ -7,7 +7,7 @@ class SalbezBevtun extends BaseShip{
 		$this->pointCost = 575;
 		$this->faction = "ZNexus Sal-bez Coalition";
         $this->phpclass = "SalbezBevtun";
-        $this->imagePath = "img/ships/Nexus/salbez_bevtun.png";
+        $this->imagePath = "img/ships/Nexus/salbez_bevtun2.png";
         $this->shipClass = "Bev'tun Long-Range Miner (2029)";
 			$this->variantOf = "Av'rtz Explorer";
 			$this->occurence = "common";
