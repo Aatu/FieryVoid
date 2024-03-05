@@ -1562,6 +1562,8 @@ spl_autoload_register(
 				'nexusshattergun' => '/server/model/weapons/customNexus.php',
 				'nexusshattergunftr' => '/server/model/weapons/customNexus.php',
 				'nexusultralightrailgun' => '/server/model/weapons/customNexus.php',
+			//Nexus projectile weapons
+				'nexusdefensegun' => '/server/model/weapons/customNexus.php', 
 			//Nexus particle weapons
 				'gatlinggunftr' => '/server/model/weapons/customNexus.php', 
 				'lightparticlebeamftr' => '/server/model/weapons/customNexus.php', 
@@ -1627,6 +1629,8 @@ spl_autoload_register(
 				'nexuslaserspear' => '/server/model/weapons/customNexus.php',
 				'nexuslightindustriallaser' => '/server/model/weapons/customNexus.php',
 				'nexuslightlasercutter' => '/server/model/weapons/customNexus.php',
+				'nexuslightxraylaser' => '/server/model/weapons/customNexus.php',
+				'nexusxraylaser' => '/server/model/weapons/customNexus.php',
 			//Nexus ion weapons
 				'nexusionblaster' => '/server/model/weapons/customNexus.php',
 				'nexusiongun' => '/server/model/weapons/customNexus.php',
@@ -1799,6 +1803,15 @@ spl_autoload_register(
                 'dalithorntransport' => '/server/model/ships/ZNexusDalithorn/DalithornTransport.php',					
                 'dalithorntransportrefit' => '/server/model/ships/ZNexusDalithorn/DalithornTransportRefit.php',					
                 'dalithornwarstation' => '/server/model/ships/ZNexusDalithorn/DalithornWarStation.php',					
+
+				//Nexus ships - Makar - Hitat
+                'makaramear' => '/server/model/ships/ZNexusMakar/MakarAmear.php',					
+                'makarbrassert' => '/server/model/ships/ZNexusMakar/MakarBrassert.php',					
+                'makarporoke' => '/server/model/ships/ZNexusMakar/MakarPoroke.php',					
+                'makarratash' => '/server/model/ships/ZNexusMakar/MakarRatash.php',					
+                'makarratashen' => '/server/model/ships/ZNexusMakar/MakarRatashen.php',					
+                'makartorgeth' => '/server/model/ships/ZNexusMakar/MakarTorgeth.php',					
+                'makarvengeance' => '/server/model/ships/ZNexusMakar/MakarVengeance.php',					
 
 
 				//Nexus ships - Sal-bez
