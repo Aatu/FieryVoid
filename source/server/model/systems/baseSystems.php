@@ -4656,6 +4656,8 @@ class AmmoMissileTemplate{
 	public $noLockPenalty = false;		
 	//Variable for HARM Missile	
 	public $specialHitChanceCalculation = false;		
+	//Variable for Ballistic Mines
+	public $mineRange = 0;
 	
     function __construct(){}
 	
@@ -5101,7 +5103,7 @@ class AmmoMissileJ extends AmmoMissileTemplate{
 	public $priorityAF = 1;
 	public $noOverkill = false;
     public $useOEW = false;
-	public $hidetarget = false;
+	public $hidetarget = true;
     
     public $hextarget = true;
     public $animation = "ball";
@@ -5609,6 +5611,98 @@ class AmmoMissileFD extends AmmoMissileTemplate{
 		}
     }
 } //endof class AmmoMissileFD
+
+
+//ammunition for AmmoMagazine - Basic Mine for BallisticMineLauncher
+class AmmoBLMineB extends AmmoMissileTemplate{	
+	public $name = 'AmmoBLMineB';
+	public $displayName = 'Basic Mine';
+	public $modeName = 'Basic Mine';
+	public $size = 1; //how many store slots are required for a single round
+	public $enhancementName = 'MINE_BLB'; //enhancement name to be enabled
+	public $enhancementDescription = '(mine) Basic Mine'; //enhancement description
+	public $enhancementPrice = 6;
+	
+	public $rangeMod = 0; //MODIFIER for launch range
+	public $distanceRangeMod = 0; //MODIFIER for distance range
+	public $fireControlMod = array(8, 8, 8); //MODIFIER for weapon fire control!
+	public $minDamage = 17;
+	public $maxDamage = 26;	
+	public $damageType = 'Standard';//mode of dealing damage
+	public $weaponClass = 'Ballistic';//weapon class
+	public $priority = 6;
+	public $priorityAF = 5;
+
+	public $hidetarget = true;
+
+    public $hextarget = true; 
+	public $mineRange = 3;
+	
+
+    public function getDamage($fireOrder){        return Dice::d(10, 1)+16;   } 
+		
+} //endof class AmmoBLMineB
+
+
+//ammunition for AmmoMagazine - Basic Mine for BallisticMineLauncher
+class AmmoBLMineW extends AmmoMissileTemplate{	
+	public $name = 'AmmoBLMineW';
+	public $displayName = 'Wide-Range Mine';
+	public $modeName = 'Wide-Range Mine';
+	public $size = 1; //how many store slots are required for a single round
+	public $enhancementName = 'MINE_BLW'; //enhancement name to be enabled
+	public $enhancementDescription = '(mine) Wide-Range Mine'; //enhancement description
+	public $enhancementPrice = 6;
+	
+	public $rangeMod = 0; //MODIFIER for launch range
+	public $distanceRangeMod = 0; //MODIFIER for distance range
+	public $fireControlMod = array(6, 6, 6); //MODIFIER for weapon fire control!
+	public $minDamage = 13;
+	public $maxDamage = 22;	
+	public $damageType = 'Standard';//mode of dealing damage
+	public $weaponClass = 'Ballistic';//weapon class
+	public $priority = 6;
+	public $priorityAF = 5;
+	public $animationExplosionScale = 0.25;
+	
+	public $hidetarget = true;
+
+    public $hextarget = true; 
+	public $mineRange = 5;	
+
+    public function getDamage($fireOrder){        return Dice::d(10, 1)+12;   } 
+
+} //endof class AmmoBLMineW
+
+//ammunition for AmmoMagazine - Heavy Mine for BallisticMineLauncher
+class AmmoBLMineH extends AmmoMissileTemplate{	
+	public $name = 'AmmoBLMineH';
+	public $displayName = 'Heavy Mine';
+	public $modeName = 'Heavy Mine';
+	public $size = 1; //how many store slots are required for a single round
+	public $enhancementName = 'MINE_BLH'; //enhancement name to be enabled
+	public $enhancementDescription = '(mine) Heavy Mine'; //enhancement description
+	public $enhancementPrice = 6;
+	
+	public $rangeMod = 0; //MODIFIER for launch range
+	public $distanceRangeMod = 0; //MODIFIER for distance range
+	public $fireControlMod = array(5, 5, 5); //MODIFIER for weapon fire control!
+	public $minDamage = 25;
+	public $maxDamage = 34;	
+	public $damageType = 'Standard';//mode of dealing damage
+	public $weaponClass = 'Ballistic';//weapon class
+	public $priority = 6;
+	public $priorityAF = 5;
+	public $animationExplosionScale = 0.4;
+
+	public $hidetarget = true;
+
+    public $hextarget = true; 
+	public $mineRange = 2;
+
+    public function getDamage($fireOrder){        return Dice::d(10, 1)+24;   } 
+	
+} //endof class AmmoBLMineH
 
 
 ?>

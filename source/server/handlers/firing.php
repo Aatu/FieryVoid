@@ -220,7 +220,8 @@ class Firing
             if (($fireOrder->needed - $fireOrder->totalIntercept) <= 0) continue;//no chance of hitting
             if (($fireOrder->type == "selfIntercept") || ($fireOrder->type == "intercept")) continue; //interception shot
             $shooter = $gamedata->getShipById($fireOrder->shooterid);
-            $firingWeapon = $shooter->getSystemById($fireOrder->weaponid);
+            $firingWeapon = $shooter->getSystemById($fireOrder->weaponid);            
+            $firingWeapon->notActuallyHexTargeted($fireOrder);//Some weapons start hex targeted, but become normal e.g. BM Launcher - 4.3.24 DK
             if ($firingWeapon->hextarget) continue;//hex-targeted
             $shotsStillComing[] = $fireOrder;
         }
@@ -362,14 +363,19 @@ class Firing
             return false;
         }
 
+
+
         if ($firingweapon->ballistic) {
-            $movement = $shooter->getLastTurnMovement($fire->turn);
-            $pos = mathlib::hexCoToPixel($movement->position); //launch hex
+ //           $movement = $shooter->getLastTurnMovement($fire->turn); //Removed Mar '24 - To enable intercept for BallisticMineLauncher
+ //           $pos = mathlib::hexCoToPixel($movement->position); //Removed Mar '24 - To enable intercept for BallisticMineLauncher
+ 			$pos = $firingweapon->getFiringHex($gd, $fire); //Added Mar '24 - To enable intercept for BallisticMineLauncher
             $relativeBearing = $interceptingShip->getBearingOnPos($pos);
         } else {
             $pos = $shooter->getCoPos(); //current hex of firing unit
             $relativeBearing = $interceptingShip->getBearingOnUnit($shooter);
         }
+
+		
 
         if (!mathlib::isInArc($relativeBearing, $weapon->startArc, $weapon->endArc)) {
             //Debug::log("Fire is not on weapon arc\n");
