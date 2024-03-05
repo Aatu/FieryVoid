@@ -32,7 +32,7 @@ class SoskaAM extends BaseShip{
         $this->iniativebonus = 0;
 
 	//ammo magazine itself (AND its missile options)
-	$ammoMagazine = new AmmoMagazine(140); //pass magazine capacity 
+	$ammoMagazine = new AmmoMagazine(220); //pass magazine capacity 
 	    $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
 	    $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 80); //add full load of basic missiles 
 	    $ammoMagazine->addAmmoEntry(new AmmoMissileI(), 60); //add full load of basic missiles  	      

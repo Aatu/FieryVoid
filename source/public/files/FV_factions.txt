@@ -24,7 +24,7 @@ GENERAL NOTES
 
 MISSILES
 --------
-For starters - general decription of missiles, as a complictaed system that is common for multiple factions.
+For starters - general description of missiles, as a complicated system that is common for multiple factions.
 
 General notes: ships usually come preloaded with missiles (usually Basic), and any missiles You buy is on top of that. Also, while amount of any given missile You can buy is limited by magazine size, total amount of missiles is not. 
 This means Your missile magazine may show more missiles available than it can actually hold. However, You cannot actually LAUNCH more missiles than magazine can hold - total number of launches is tracked. So extra missiles will provide You with extra variety (at a price ;) ), but not actual extra missiles.
@@ -240,6 +240,34 @@ Notable technologies:
 HURR REPUBLIC
 Low-tech faction. No very specific rules/technologies.
 Missiles - The Hurr used purely basic missiles until 2232, when experiments with captured Dilgar tech provided the materials for anti-fighter, long-range, flash and heavy warheads. 
+
+
+HYACH GERONTOCRACY
+The Hyach are among the oldest of the League races, and have been in space longer than even the Abbai. Their ships are surprisingly advanced among League races, with formidable weapons and military training unequaled
+amongst the League. As the Hyach are very advanced in the area of computers, robotics, and communications, their ships tend to reflect these advantages, with better fire controls, enhanced sensors, and efficient construction.
+Hyach Computer - The weapons on Hyach ships are tied into an advanced central computer system that tracks enemy units faster than any mind can. This produces one or Bonus Fire Control Points (BFCP) every turn. The Hyach player is free to distribute these points as desired among the three fire control categories (capital ships/heavy combat vessels, medium ships, and fighters/shuttles) each turn, but cannot allocate more than two to any given category.
+Hyach Specialists - Some Hyach crewman receive special training as Specialists. In addition to their usual functions at their posts, they can provide their singular expertise at key moments in battle.
+	- Like TT, ships with Specialists slot(s) will be able to select these at the start of a game, however unlike TT each Specialist will only take one slot (and are balanced accordingly).
+	- In the Initial Orders phase of Turn 1 you have to use the 'Specialists' technical system to equip Specialists on each applicable ship, up to their maximum allowance. Only one of each Specialist type can be picked per ship.
+	- You can then use Specialist on any Initial Orders phase (including on Turn 1) by using +/- buttons.
+	- Specialists come in a range of different types, most of which are different from TT, and have been summarised below:
+		Computer: Computer generates two extra Bonus Fire Control Points (BFCP) this turn.
+		Defence:  Ship profiles lowered by 5%, intercept ratings increased by 10.
+		Engine:  +25% thrust for this turn (rounded down).  Removes an Engine critical if applicable. 
+		Manoeuvring:  Turn Cost and Turn Delay are reduced by a single step for this turn.
+		Power: Extra power this turn, depending on ship size (Capitals +12, HCV +10, MCVs +8).  Also removes a Reactor critical if applicable.
+		Repair: Remove two criticals effects from ship, automatically prioritised by most important systems.  Ignores temporary criticals.
+		Sensor: +1 EW this turn.  Removes a Scanner critical if applicable.	
+		Targeting:  All weapons have +5% to hit this turn.
+		Thruster:  Remove limits on Thruster ratings (i.e. set to 99) and improves Engine efficiency by 1 point.
+		Weapon: +3 damage to all weapons this turn.		
+Hyach Sensors - Hyach sensors are resistant to damage, and shrug off critical hits more easily. Instead of adding +1 to the critical sensor roll for every point of damage, they add +1 only for every two boxes of damage (rounded down).
+Interdictors - The Interdictor is an excellent defensive weapon, though it lacks any sort of offensive firepower. Interdictors can also defend nearby friendly ships, in much the same way as the guardian array
+		does, but with fewer restrictions. In order to block a shot aimed at a different unit, the following must be true:
+		(1) The enemy ship and the target ship must both be in the interdictor’s firing arc.
+		(2) The target ship must be no farther than 5 hexes away from the interdicting ship.
+		(3) No other interdictor may be used against that same incoming shot.
+Stealth Ships - The Hyach operate a few stealth designs that operate as the spacegoing equivalent of submarines.  In FV this is represented by giving them the same Stealth system as the Centauri Rutarian fighter.
 
 
 IPSHA BARONIES
@@ -477,10 +505,11 @@ THIRDSPACE (Unofficial Faction)
 The "Thirdspace aliens" are a mysterious and terrifying race of malevolent telepathic beings from an alternate dimension, in possession of technology considered more advanced than even the Shadows or Vorlons.  While not indestructible, their ships are protected by an powerful energy shield that can absorb a significant amount of weapons fire before opponenets can inflict damage on their ships themselves.
 In FV, they have been created as a Custom faction (with credit to Amras Arfeiniel for providing the original image for the Thirdspace Battleship) and some of their abilities have been described below:
  - Thirdspace shield absorb all incoming damage in the arc that they cover (note, the rear shield has a 360 degree arc so covers all directions nad effectively reinforces front and side shields).  Once these shields have been reduced to zero rating damage will start to be inflicted on their ships as usual.  At the end of the turn Shield Projectors will restore their respective shields by an amount based on their current rating.
- - Thirdspace have a number of Psionic weapons, which typically deal a large amount of electromgnetic damage and can fire frequently.  Many also have additional effects on Younger races such as an increased critical hit/fighter dropout chance or a reduction in ship armour.
- - Thirdspace capital ships produce a passive Psychic Field which affects all enemies within range (except other Thirdspace aliens), this attack debilitates opponenets by reducing fighter initiative and hit chances for the following turn and either decreasing the hit chances or causing possible system criticals on ships.  Ancients are not immune to this effect but are affected to a lesser degree than Younger/Middleborn races.
+ - Thirdspace capital ships produce a passive Psychic Field which affects all enemies within range, this attack debilitates opponents by applying debuffs on the following turn.  It reduces initiative for all units, and reduces fighters' offensive bonus for the following turn.  For enemy vessels,  it decreases hit chances for weapons if it hits structure or causes possible criticals on if it hits any other system.  Ancients are not immune to this effect but suffering only 50% of the effect compared to Younger races.
+ - Thirdspace have a number of other Psionic weapons, which typically deal a large amount of electromagnetic damage.  Many also have additional effects on Younger races such as an increased critical hit/fighter dropout chance or a reduction in ship armour.
  - Thirdspace heavy weapons, Psionic Lances, can be boosted with EW during Initial Orders phase to significantly increase their damage. 
- - The Thirdspace aliens also use the flexible Psionic Concentrator as their lighter weaponry. This is very effective against fighters as a single weapon or two Concentrators can be combined to deliver a powerful anti-ship shot each turn.
+ - Their Psionic Torpedo deals a significant amount of flash damage, making it dangerous for fighters to try and intercept.  In addition to damage, it also causes temporary penalties to initiative, power and sensors.
+ - The Thirdspace aliens also use the flexible Psionic Concentrator weapon.  This is very effective against fighters as a single weapon or up to four Concentrators can be combined to deliver a increasingly powerful, but shorter ranged, attack. 
  - Like the Ipsha, Thirdspace ships use a singularity reactor which produce a set amount of power, regardless of whether systems have been destroyed or not.  As Thirdspace ships utilise power management heavily, to boost shields, self-repair or EW for example, it means they can continue to fight effectively even when taking heavy damage.
 
 

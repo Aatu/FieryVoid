@@ -62,11 +62,11 @@ include_once 'global.php';
 	<body>
 <!--        <div class="helphide" style="float:right"> <div id="helphideimg"></div>
         </div>-->
-		<div class="panel" style="width:400px;margin:auto;">
+		<div class="panel" style="width:500px;margin:auto;">
 			<form method="post">
                 <div class="error"><span><?php print($error); ?></span></div>
 				<table>
-                <tr><td><label>Secret phrase <i>(ask on FieryVoid Discord or Facebook group!)</i>:</label></td><td><input type="text" name="secret"></input></td></tr>
+				<tr><td><label>Secret phrase:<br>(If you don't know it, click on these links to ask in our <b><a href="https://discord.gg/Pmmdfz4NbC"><u>Discord</u></a></b> or <b><a href="https://www.facebook.com/groups/fieryvoid"><u>Facebook</u></a></b> groups!)</label></td><td><input type="text" name="secret"></td></tr>
 				<tr><td><label>Username:</label></td><td><input type="text" name="user"></input></td></tr>
 				<tr><td><label>Password:</label></td><td><input type="password" name="pass"></input></td></tr>
                 <tr><td><label>Retype password:</label></td><td><input type="password" name="pass2"></input></td></tr>

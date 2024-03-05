@@ -28,9 +28,9 @@ class VaklarAM extends HeavyCombatVessel{
         
       
 	//ammo magazine itself (AND its missile options)
-	$ammoMagazine = new AmmoMagazine(80); //pass magazine capacity 
+	$ammoMagazine = new AmmoMagazine(240); //pass magazine capacity - 20 rounds per launcher, plus reload rack 80
 	    $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
-	    $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 40); //add full load of basic missiles 
+	    $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 200); //add full load of basic missiles 
 	    $ammoMagazine->addAmmoEntry(new AmmoMissileI(), 40); //add full load of basic missiles  	      
 
 	    $this->enhancementOptionsEnabled[] = 'AMMO_A';//add enhancement options for other missiles - Class-A

@@ -67,6 +67,12 @@ if (isset($_SESSION["user"])) {
 <br><b>BUGFIX</b> - the bug a lot of people stumbled upon recently is (hopefully) fixed
 <br><b>Kor-Lyan polishing</b> - courtesy of Douglas
 
+		 <br><br>---------- <b>update 7th of January</b> ---------- 
+<br><b>Quad Array update</b> - now more in line with tabletop rules, courtesy of Douglas
+<br><b>Kor-Lyan polishing</b> - including Jammer Missile, courtesy of Douglas
+<br><b>Thirdspace polishing</b> - courtesy of Douglas
+<br><b>Options counted for combat value</b> - not bad overall, essential for custom Cascor!
+<br><b>various bugfixes</b> - as usual
        
 
 <!--	        

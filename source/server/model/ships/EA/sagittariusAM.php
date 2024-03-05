@@ -12,6 +12,7 @@ class SagittariusAM extends BaseShip{
         $this->shipClass = "Sagittarius Missile Cruiser (Beta Model)";
         $this->shipSizeClass = 3;
         $this->limited = 33;
+  	    $this->isd = 2230;        
 
         $this->forwardDefense = 14;
         $this->sideDefense = 15;

@@ -92,6 +92,9 @@ window.gamedata = {
 		  case 'Hurr Republic':
 			powerRating = 'Not balanced';
 			break;
+		  case 'Hyach Gerontocracy':
+			powerRating = 'Tier 1';
+			break;
 		  case 'Ipsha Baronies':
 			powerRating = 'Tier 2 (distinct Baronies cannot be mixed)';
 			break;

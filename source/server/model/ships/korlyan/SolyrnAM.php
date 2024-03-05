@@ -30,9 +30,9 @@ class SolyrnAM extends HeavyCombatVessel{
         
       
 	//ammo magazine itself (AND its missile options)
-	$ammoMagazine = new AmmoMagazine(200); //pass magazine capacity 
+	$ammoMagazine = new AmmoMagazine(280); //pass magazine capacity 
 	    $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
-	    $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 120); //add full load of basic missiles 
+	    $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 200); //add full load of basic missiles 
 	    $ammoMagazine->addAmmoEntry(new AmmoMissileI(), 80); //add full load of Interceptor missiles  	      
 
 	    $this->enhancementOptionsEnabled[] = 'AMMO_A';//add enhancement options for other missiles - Class-A
