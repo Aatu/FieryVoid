@@ -33,7 +33,7 @@ Note that fighters usually start with empty magazine (although some missile entr
 Any missile available in magazine can be fired by any launcher (that is capable of firing it), missiles are not directly tied to particular mounts. This is different for weapons that do store ammo directly on mount - but such weapons usually can only hold one kind of ammo.
 Missiles (and Navigators, for fighters) are bought as enhancements despite being standard options (for technical reasons).
 
-Not all tabletop missiles made it to Fiery VOi - some proved just too difficult to implement!
+Not all tabletop missiles made it to Fiery Void - some proved just too difficult to implement!
 
 Shipborne missiles' built-in guidance package is often combined into weapons' Fire control, rather than being kept separate.
 
@@ -349,7 +349,7 @@ Missiles - All Orieni ships have access to Basic, Anti-Fighter, Heavy and Kineti
 	
 
 PAK'MA'RA
-Pak'ma' ra ships are quick, with excellent thrust and engine power, but are not maneouverable.  They depend on a heavy armament of plasma-based weapons with wide firing arcs to win battles.  Their unique plasma battery systems allow them to store power for opportune moments whilst their plasma webs provide both defensive cover and close-range anti-fighter protection.
+Pak'ma'ra ships are quick, with excellent thrust and engine power, but are not maneouverable.  They depend on a heavy armament of plasma-based weapons with wide firing arcs to win battles.  Their unique plasma battery systems allow them to store power for opportune moments whilst their plasma webs provide both defensive cover and close-range anti-fighter protection.
 
 Notes & Differences from B5W Tabletop:
 Plasma Webs
@@ -624,11 +624,11 @@ Electron Polarizer - A flash mode electromagnetic weapon, this can destroy or sh
 
 
 NEXUS SETTING
-The Nexus setting is designed by Jeremy and Geoffrey Stano. The current factions in Fiery Void (and described below) are the Brixadii Clans, Union of Craytan States, Dalithorn Commonwealth, Sal-bez Coalition, and the Velrax
-Republic. By design, Nexus is a lower tech setting. It is characterized by more basic weapons and lower sensor values. Over time the factions evolve better units and these are available to play as well. The 
-Nexus factions can be sub-divided into four "tech levels" or "tech eras", of which the first three are available in Fiery Void. These tech levels correspond to various conflicts each faction faced and were major drivers in
-the evolution of the Nexus fleets. In general, the earliest units are equivalent to "The Rest" or low "Tier 2" factions. The most advanced units are strong "Tier 2" designs. The individual factions descriptions
-below will provide more details. The Nexus factions also make extensive use of refits. Specialized weapons for each faction are shown.
+The Nexus setting is designed by Jeremy and Geoffrey Stano. The current factions in Fiery Void (and described below) are the Brixadii Clans, Union of Craytan States, Dalithorn Commonwealth, Federation of Makar, 
+Sal-bez Coalition, and the Velrax Republic. By design, Nexus is a lower tech setting. It is characterized by more basic weapons and lower sensor values. Over time the factions evolve better units and these are 
+available to play as well. The Nexus factions can be sub-divided into four "tech levels" or "tech eras", of which the first three are available in Fiery Void. These tech levels correspond to various conflicts 
+each faction faced and were major drivers in the evolution of the Nexus fleets. In general, the earliest units are equivalent to "The Rest" or low "Tier 2" factions. The most advanced units are strong "Tier 2" 
+designs. The individual factions descriptions below will provide more details. The Nexus factions also make extensive use of refits. Specialized weapons for each faction are shown.
 
 zNEXUS BRIXADII (custom, alternate universe faction)
 The Brixadii Clans are a spinward power within the Nexus sector, having fought with the Dalithorn Commonwealth early on and having hostile relations with the Velrax Republic. The Brixadii's 
@@ -676,8 +676,21 @@ field super-heavy fighters, but these are typically slow. However, their size an
 - Tech Level 3: War of Ascendancy through the First War of Control (2110s through th 2150s)
 
 
+zNEXUS MAKAR  (custom, alternate universe faction)
+The Makar Federation is made up of two species to arise from the homeworld of Makar; a blend of 'home' from both languages. The Federation consists of the land dwelling Hitat and the squid-like Qom Yomin.
+The Hitat make up the majority of the Federation's combat forces, but the Qom Yomin contribute a variety of support units. Additionally, being aquatic, Qom Yomin ships have larger ramming values if they 
+are rammed. The Makar have been shaped by the Reshmiyar Invasion and their subsequent rebellion that took place early in their space faring history.
+- Water Caster: Qom Yomin vessels have the ability to spray some of their onboard water to intercept incoming shots. This functions much like a plasma web, but with no offensive ability.
+- Plasma Charge: Another special Qom Yomin weapon. Qom Yomin ships have low thrust, but extra power. This can be used to charge this weapon or to increase thrust.
+- Drones: Except for a couple exceptions, the Makar use armed drones as fighters and hunter-killers. These are almost always on Qom Yomin vessels.
+- Nexus LCVs: Unlike the Babylon 5 powers, the Nexus powers focused more effort on their LCVs. As such, LCVs can be deployed independently.
+- Tech Level 1: Pre-contact through the Jump War (up through the 2050s)
+- Tech Level 2: Jump War era through the War of Ascendancy era (2050s through the 2110s)
+- Tech Level 3: War of Ascendancy through the First War of Control (2110s through th 2150s)
+
+
 zNEXUS SAL-BEZ  (custom, alternate universe faction)
-The Sal-bez Coalition is an insectoid race started as a typical queen / worker arrangement, but during the Enlightenment of Fire, the Sal-bez won their freedom. They are now a fiercly individualistic society. 
+The Sal-bez Coalition is an insectoid race that started as a typical queen / worker arrangement, but during the Enlightenment of Fire, the Sal-bez won their freedom. They are now a fiercly individualistic society. 
 The Coalition did not have a traditional military upon reaching for the stars and their early units are exclusively civilian designs using industrial systems as makeshift weapons. As the Sal-bez grew (and 
 discovered several technology caches from a previous power), they began to field purpose-built combat vessels that would ultimately lead to the Coalition becoming one of the most powerful of the Nexus factions.
 - Swarm Torpedo: One of the most iconic systems developed by the Sal-bez for their later generation of ships. It fires multiple, small ballistics at a target, which has led to its common name of swarm torpedo. 
@@ -689,7 +702,7 @@ discovered several technology caches from a previous power), they began to field
 
 
 zNEXUS VELRAX  (custom, alternate universe faction)
-The Velrax Republic is potentially the most aggressive faction within the Nexus setting. They have engaged both the Brixadii Clans, Dalithorn Commonwealth, and Makar Federation by the early 2100s. The Velrax are 
+The Velrax Republic is potentially the most aggressive faction within the Nexus setting. They have engaged the Brixadii Clans, Dalithorn Commonwealth, and Makar Federation by the early 2100s. The Velrax are 
 the most prolific users of fighters, which are supported with a rigid fleet structure. The Velrax field well armed "strike" carriers supported by anti-ship focused "gunships". Everything revolves around supporting 
 their fighter operations. The carriers utilize plasma waves to break up enemy forces at range, and gunships with plasma and lasers to single out anti-fighter units. Also, some Velrax carry plasma arcs used to strip 
 armor off their targets to make them more vulnerable to laser and fighter fire. Their heavy fighter mounts a potent anti-ship gun that was retrofitted to some of the interceptor fighters when they realized that

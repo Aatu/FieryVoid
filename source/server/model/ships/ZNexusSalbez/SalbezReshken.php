@@ -12,7 +12,7 @@ class SalbezReshken extends BaseShip{
 			$this->variantOf = "Jer't'kat Heavy Cruiser";
 			$this->occurence = "rare";
         $this->shipSizeClass = 3;
-		$this->canvasSize = 155; //img has 200px per side
+		$this->canvasSize = 185; //img has 200px per side
 		$this->unofficial = true;
         $this->limited = 33;
 

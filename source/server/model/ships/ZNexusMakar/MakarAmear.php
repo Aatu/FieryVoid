@@ -7,12 +7,12 @@ class MakarAmear extends MediumShip{
         $this->pointCost = 270;
         $this->faction = "ZNexus Makar Federation";
         $this->phpclass = "MakarAmear";
-        $this->imagePath = "img/ships/Nexus/makarRatash.png";
+        $this->imagePath = "img/ships/Nexus/makarRatash_v3.png";
         $this->shipClass = "Amear Heavy Frigate";
 			$this->variantOf = "Ratash Early Frigate";
 			$this->occurence = "rare";
 		$this->unofficial = true;
-        $this->canvasSize = 60;
+        $this->canvasSize = 80;
         $this->agile = true;
 	    $this->isd = 1928;
 
@@ -29,7 +29,7 @@ class MakarAmear extends MediumShip{
         $this->iniativebonus = 60;
          
         $this->addPrimarySystem(new Reactor(4, 14, 0, 0));
-        $this->addPrimarySystem(new CnC(4, 12, 0, 0));
+        $this->addPrimarySystem(new CnC(4, 16, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 16, 3, 5));
         $this->addPrimarySystem(new Engine(4, 16, 0, 6, 3));
         $this->addPrimarySystem(new Thruster(3, 13, 0, 4, 3));

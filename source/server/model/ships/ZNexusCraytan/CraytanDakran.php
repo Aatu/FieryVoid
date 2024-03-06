@@ -10,7 +10,7 @@ class CraytanDakran extends BaseShip{
         $this->imagePath = "img/ships/Nexus/CraytanDakran.png";
         $this->shipClass = "Dakran Heavy Cruiser";
         $this->shipSizeClass = 3;
-		$this->canvasSize = 170; 
+		$this->canvasSize = 180; 
 		$this->unofficial = true;
 
         $this->fighters = array("assault shuttles"=>6);

@@ -10,7 +10,7 @@ class SalbezDrevnan extends MediumShip{
         $this->imagePath = "img/ships/Nexus/salbez_drevnan.png";
         $this->shipClass = "Drev-nan Auxiliary Escort";
 		$this->unofficial = true;
-        $this->canvasSize = 65;
+        $this->canvasSize = 80;
 	    $this->isd = 2101;
         
         $this->forwardDefense = 11;

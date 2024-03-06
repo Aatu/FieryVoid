@@ -52,6 +52,12 @@ var EWHeavyRocketLauncher = function  EWHeavyRocketLauncher(json, ship) {
 EWHeavyRocketLauncher.prototype = Object.create(Weapon.prototype);
 EWHeavyRocketLauncher.prototype.constructor =  EWHeavyRocketLauncher;
 
+var EWRangedHeavyRocketLauncher = function  EWRangedHeavyRocketLauncher(json, ship) {
+    Weapon.call(this, json, ship);
+};
+EWRangedHeavyRocketLauncher.prototype = Object.create(Weapon.prototype);
+EWRangedHeavyRocketLauncher.prototype.constructor =  EWRangedHeavyRocketLauncher;
+
 var EWPointPlasmaGun = function  EWPointPlasmaGun(json, ship) {
     Weapon.call(this, json, ship);
 };

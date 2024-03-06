@@ -4,13 +4,13 @@ class MakarRatash extends MediumShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 270;
+        $this->pointCost = 240;
         $this->faction = "ZNexus Makar Federation";
         $this->phpclass = "MakarRatash";
-        $this->imagePath = "img/ships/Nexus/makarRatash.png";
+        $this->imagePath = "img/ships/Nexus/makarRatash_v3.png";
         $this->shipClass = "Ratash Early Frigate";
 		$this->unofficial = true;
-        $this->canvasSize = 60;
+        $this->canvasSize = 80;
         $this->agile = true;
 	    $this->isd = 1888;
 

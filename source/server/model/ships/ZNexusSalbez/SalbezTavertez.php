@@ -7,7 +7,7 @@ class SalbezTavertez extends BaseShipNoAft{
 		$this->pointCost = 400;
 		$this->faction = "ZNexus Sal-bez Coalition";
         $this->phpclass = "SalbezTavertez";
-        $this->imagePath = "img/ships/Nexus/salbez_felriz.png";
+        $this->imagePath = "img/ships/Nexus/salbez_tavertez.png";
 			$this->canvasSize = 135; //img has 200px per side
         $this->shipClass = "Ta'ver'tez Mining Cruiser";
 		$this->unofficial = true;

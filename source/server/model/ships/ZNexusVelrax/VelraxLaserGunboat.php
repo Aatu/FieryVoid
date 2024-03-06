@@ -8,7 +8,7 @@ class VelraxLaserGunboat extends LCV{
         $this->faction = "ZNexus Velrax Republic";
         $this->phpclass = "VelraxLaserGunboat";
         $this->imagePath = "img/ships/Nexus/VelraxGunboat.png";
-			$this->canvasSize = 55; //img has 200px per side
+			$this->canvasSize = 85; //img has 200px per side
         $this->shipClass = "Liviss Gunboat";
 			$this->variantOf = "Nashran Gunboat";
 			$this->occurence = "common";

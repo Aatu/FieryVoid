@@ -12,7 +12,7 @@ class SalbezResktan extends MediumShip{
 			$this->variantOf = "Shv'rak Mining Frigate";
 			$this->occurence = "common";
 		$this->unofficial = true;
-        $this->canvasSize = 65;
+        $this->canvasSize = 75;
 	    $this->isd = 2092;
         
         $this->forwardDefense = 11;

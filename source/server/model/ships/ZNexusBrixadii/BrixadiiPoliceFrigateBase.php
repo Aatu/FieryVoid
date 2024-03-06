@@ -7,8 +7,8 @@ class BrixadiiPoliceFrigateBase extends LCV{
         $this->pointCost = 100;
         $this->faction = "ZNexus Brixadii Clans";
         $this->phpclass = "BrixadiiPoliceFrigateBase";
-        $this->imagePath = "img/ships/Nexus/BrixadiiPoliceFrigateEarly.png";
-			$this->canvasSize = 60; //img has 200px per side
+        $this->imagePath = "img/ships/Nexus/BrixadiiPoliceFrigate.png";
+			$this->canvasSize = 70; //img has 200px per side
         $this->shipClass = "Police Frigate";
 		//$this->variantOf = "Police Frigate";
 		$this->unofficial = true;

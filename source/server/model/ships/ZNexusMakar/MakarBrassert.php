@@ -7,11 +7,11 @@ class MakarBrassert extends MediumShip{
         $this->pointCost = 350;
         $this->faction = "ZNexus Makar Federation";
         $this->phpclass = "MakarBrassert";
-        $this->imagePath = "img/ships/Nexus/makarBrassert.png";
+        $this->imagePath = "img/ships/Nexus/makarBrassert3.png";
         $this->shipClass = "Brassert Frigate";
 		$this->unofficial = true;
-        $this->canvasSize = 60;
-        $this->agile = true;
+        $this->canvasSize = 80;
+//        $this->agile = true;
 	    $this->isd = 2009;
 
 	    $this->notes = 'Atmospheric capable';
@@ -30,8 +30,8 @@ class MakarBrassert extends MediumShip{
         $this->addPrimarySystem(new CnC(4, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 16, 3, 6));
         $this->addPrimarySystem(new Engine(4, 16, 0, 8, 2));
-        $this->addPrimarySystem(new Thruster(4, 13, 0, 4, 3));
-        $this->addPrimarySystem(new Thruster(4, 13, 0, 4, 4));        
+        $this->addPrimarySystem(new Thruster(4, 13, 0, 5, 3));
+        $this->addPrimarySystem(new Thruster(4, 13, 0, 5, 4));        
         $this->addPrimarySystem(new Hangar(2, 1));
         
 		$this->addFrontSystem(new NexusLightXRayLaser(3, 3, 1, 270, 90));

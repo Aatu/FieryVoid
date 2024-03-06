@@ -8,7 +8,7 @@ class VelraxAxrinFighter extends FighterFlight{
         $this->faction = "ZNexus Velrax Republic";
         $this->phpclass = "VelraxAxrinFighter";
         $this->shipClass = "Axrin Strike flight";
-        $this->imagePath = "img/ships/Nexus/VelraxResterax_v2.png";
+        $this->imagePath = "img/ships/Nexus/VelraxResterax.png";
 		$this->unofficial = true;
 
         $this->isd = 2032;
@@ -36,7 +36,7 @@ class VelraxAxrinFighter extends FighterFlight{
             $armour = array(2, 1, 2, 2);
             $fighter = new Fighter("VelraxAxrinFighter", $armour, 10, $this->id);
             $fighter->displayName = "Axrin";
-            $fighter->imagePath = "img/ships/Nexus/VelraxResterax_v2.png";
+            $fighter->imagePath = "img/ships/Nexus/VelraxResterax.png";
             $fighter->iconPath = "img/ships/Nexus/VelraxResterax_Large.png";
 
 			$fighter->addFrontSystem(new IonBolt(330, 30));

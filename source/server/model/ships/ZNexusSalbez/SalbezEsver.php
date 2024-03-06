@@ -8,7 +8,7 @@ class SalbezEsver extends LCV{
         $this->faction = "ZNexus Sal-bez Coalition";
         $this->phpclass = "SalbezEsver";
         $this->imagePath = "img/ships/Nexus/salbez_evsk.png";
-			$this->canvasSize = 55; //img has 200px per side
+			$this->canvasSize = 80; //img has 200px per side
         $this->shipClass = "Es-ver Combat Cutter";
 			$this->variantOf = "Ev'sk Mining Cutter";
 			$this->occurence = "common";
