@@ -2321,12 +2321,13 @@ class BallisticMineLauncher extends AmmoMissileRackS{
 		$this->data["Range"] = $this->range; //Don't need to display distanceRange like Missile Racks do :)
 		$this->data["Special"] = 'Available firing modes depend on ammo bought as unit enhancements. Ammunition available is tracked by central Ammunition Magazine system.';
 		$this->data["Special"] = 'Hex-targeted weapon a 25% chance to scatter.';
-		$this->data["Special"] .= '<br>Will try to attack the closest ship from the hex where it detonates.';
-		$this->data["Special"] .= '<br>If several ships are equal distance, it will choose target randomly.';		
+		$this->data["Special"] .= '<br>Will try to attack the closest ship from the hex where it detonates, up to its maximum radius.';
+		$this->data["Special"] .= '<br>If several ships are of equal distance to the mines, it will choose a target randomly.';		
 		$this->data["Special"] .= '<br>Damage, Firecontrol and Range from target hex depends on ammo type:';	
-		$this->data["Special"] .= '<br> - Basic: 1d10 + 16 damage, +40 to hit and 3 hex attack range.';	
-		$this->data["Special"] .= '<br> - Wide-Range: 1d10 + 12 damage, +30 to hit and 5 hex attack range.';	
-		$this->data["Special"] .= '<br> - Heavy: 1d10 + 24 damage, +25 to hit and 2 hex attack range.';											
+		$this->data["Special"] .= '<br>  - Basic: 1d10 + 16 damage, +40 to hit and 3 hex radius.';	
+		$this->data["Special"] .= '<br>  - Wide-Range: 1d10 + 12 damage, +30 to hit and 5 hex radius.';	
+		$this->data["Special"] .= '<br>  - Heavy: 1d10 + 24 damage, +25 to hit and 2 hex radius.';
+		$this->data["Special"] .= '<br>If no targets are available the mine will deactivate.';														
 	}	
 
         public function stripForJson() {
