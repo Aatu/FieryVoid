@@ -1544,6 +1544,7 @@ spl_autoload_register(
 				
 				
 				
+				
 		//Nexus weapons
 			//Nexus matter weapons
 				'nexusacids' => '/server/model/weapons/customNexus.php',
@@ -1565,6 +1566,10 @@ spl_autoload_register(
 				'nexusshattergun' => '/server/model/weapons/customNexus.php',
 				'nexusshattergunftr' => '/server/model/weapons/customNexus.php',
 				'nexusultralightrailgun' => '/server/model/weapons/customNexus.php',
+			//Nexus projectile weapons
+				'nexusdefensegun' => '/server/model/weapons/customNexus.php', 
+				'nexuslightdefensegun' => '/server/model/weapons/customNexus.php', 
+				'nexuswatercaster' => '/server/model/weapons/customNexus.php', 
 			//Nexus particle weapons
 				'gatlinggunftr' => '/server/model/weapons/customNexus.php', 
 				'lightparticlebeamftr' => '/server/model/weapons/customNexus.php', 
@@ -1618,6 +1623,7 @@ spl_autoload_register(
 				'nexuslightenhplasma' => '/server/model/weapons/customNexus.php',
 				'nexusltenhplasmaftr' => '/server/model/weapons/customNexus.php',
 				'nexusheavyplasmacharge' => '/server/model/weapons/customNexus.php',
+				'nexusplasmacharge' => '/server/model/weapons/customNexus.php',
 				'nexusfightertorpedolauncher' => '/server/model/weapons/customNexus.php',
 				'nexusltplasmatorpedo' => '/server/model/weapons/customNexus.php',
 //				'nexusheavychargedplasmagun' => '/server/model/weapons/customNexus.php',
@@ -1630,12 +1636,25 @@ spl_autoload_register(
 				'nexuslaserspear' => '/server/model/weapons/customNexus.php',
 				'nexuslightindustriallaser' => '/server/model/weapons/customNexus.php',
 				'nexuslightlasercutter' => '/server/model/weapons/customNexus.php',
+				'nexuslightxraylaser' => '/server/model/weapons/customNexus.php',
+				'nexusxraylaser' => '/server/model/weapons/customNexus.php',
 			//Nexus ion weapons
 				'nexusionblaster' => '/server/model/weapons/customNexus.php',
 				'nexusiongun' => '/server/model/weapons/customNexus.php',
 				'nexuslightionbolter' => '/server/model/weapons/customNexus.php',
 				'nexuslightiongun' => '/server/model/weapons/customNexus.php',
 				'nexustwiniongun' => '/server/model/weapons/customNexus.php',
+			//Nexus EM weapons
+				'nexuslightchargecannon' => '/server/model/weapons/customNexus.php',
+
+
+				'testgun1' => '/server/model/weapons/customNexus.php',
+				'testgun2a' => '/server/model/weapons/customNexus.php',
+				'testgun3' => '/server/model/weapons/customNexus.php',
+				'testgun4' => '/server/model/weapons/customNexus.php',
+				'testgun5' => '/server/model/weapons/customNexus.php',
+				'testgun6' => '/server/model/weapons/customNexus.php',
+				'testgun7' => '/server/model/weapons/customNexus.php',
 
 
 //                'pakmarasimsalle' => '/server/model/ships/pakmara/PakmaraSimSallE.php',					
@@ -1646,6 +1665,7 @@ spl_autoload_register(
 				'testmissile2' => '/server/model/weapons/customNexus.php',
 //                'plasmabattery' => '/server/model/systems/baseSystems.php',
 //				'enveloper' => '/server/model/weapons/customNexus.php',
+
 
 
 
@@ -1803,6 +1823,34 @@ spl_autoload_register(
                 'dalithorntransportrefit' => '/server/model/ships/ZNexusDalithorn/DalithornTransportRefit.php',					
                 'dalithornwarstation' => '/server/model/ships/ZNexusDalithorn/DalithornWarStation.php',					
 
+				//Nexus ships - Makar
+                'makaramear' => '/server/model/ships/ZNexusMakar/MakarAmear.php',					
+                'makarbrassert' => '/server/model/ships/ZNexusMakar/MakarBrassert.php',					
+                'makarcorren' => '/server/model/ships/ZNexusMakar/MakarCorren.php',					
+//                'makarcorrenrefit' => '/server/model/ships/ZNexusMakar/MakarCorrenRefit.php',					
+//                'makarcorrenrefit2' => '/server/model/ships/ZNexusMakar/MakarCorrenRefit2.php',					
+                'makardreft' => '/server/model/ships/ZNexusMakar/MakarDreft.php',					
+                'makarhalicin' => '/server/model/ships/ZNexusMakar/MakarHalicin.php',					
+                'makarhanimat' => '/server/model/ships/ZNexusMakar/MakarHanimat.php',					
+                'makarkalmet' => '/server/model/ships/ZNexusMakar/MakarKalmet.php',					
+                'makarkrashnor' => '/server/model/ships/ZNexusMakar/MakarKrashnor.php',					
+                'makarmaleen' => '/server/model/ships/ZNexusMakar/MakarMaleen.php',					
+                'makarnarrit' => '/server/model/ships/ZNexusMakar/MakarNarrit.php',					
+                'makarporoke' => '/server/model/ships/ZNexusMakar/MakarPoroke.php',					
+                'makarracken' => '/server/model/ships/ZNexusMakar/MakarRacken.php',					
+                'makarratash' => '/server/model/ships/ZNexusMakar/MakarRatash.php',					
+                'makarratashen' => '/server/model/ships/ZNexusMakar/MakarRatashen.php',					
+                'makarskiff' => '/server/model/ships/ZNexusMakar/MakarSkiff.php',					
+                'makartorgeth' => '/server/model/ships/ZNexusMakar/MakarTorgeth.php',					
+                'makarvalkar' => '/server/model/ships/ZNexusMakar/MakarValkar.php',					
+                'qomyominauxcarrier' => '/server/model/ships/ZNexusMakar/QomYominAuxCarrier.php',					
+                'qomyominauxdestroyer' => '/server/model/ships/ZNexusMakar/QomYominAuxDestroyer.php',					
+                'qomyominhauler' => '/server/model/ships/ZNexusMakar/QomYominHauler.php',					
+                'qomyominlightscout' => '/server/model/ships/ZNexusMakar/QomYominLightScout.php',					
+                'qomyominqolat' => '/server/model/ships/ZNexusMakar/QomYominQolAt.php',					
+                'qomyomintalrenhk' => '/server/model/ships/ZNexusMakar/QomYominTalRenHK.php',					
+                'qomyomintolmor' => '/server/model/ships/ZNexusMakar/QomYominTolMor.php',					
+
 
 				//Nexus ships - Sal-bez
                 'salbezavrtz' => '/server/model/ships/ZNexusSalbez/SalbezAvrtz.php',					
@@ -1915,10 +1963,10 @@ spl_autoload_register(
 //                'velraxvasrevrefit2' => '/server/model/ships/ZNexusVelrax/VelraxVasrevRefit2.php',					
                 'velraxversissscout' => '/server/model/ships/ZNexusVelrax/VelraxVersissScout.php',					
                 'velraxversissrefit' => '/server/model/ships/ZNexusVelrax/VelraxVersissRefit.php',					
-                'velraxversytheexplorer' => '/server/model/ships/ZNexusVelrax/VelraxVersytheExplorer.php',					
-                'velraxversytherefit' => '/server/model/ships/ZNexusVelrax/VelraxVersytheRefit.php',					
-                'velraxversytherefit2' => '/server/model/ships/ZNexusVelrax/VelraxVersytheRefit2.php',					
-                'velraxwarbase' => '/server/model/ships/ZNexusVelrax/VelraxWarbase.php',					
+                'velraxversytheexplorer' => '/server/model/ships/ZNexusVelrax/VelraxVersytheExplorer.php',
+                'velraxversytherefit' => '/server/model/ships/ZNexusVelrax/VelraxVersytheRefit.php',
+                'velraxversytherefit2' => '/server/model/ships/ZNexusVelrax/VelraxVersytheRefit2.php',
+                'velraxwarbase' => '/server/model/ships/ZNexusVelrax/VelraxWarbase.php',	
 
 
                 //Grome Weapons and Systems
