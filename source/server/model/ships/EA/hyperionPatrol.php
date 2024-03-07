@@ -86,6 +86,7 @@ class HyperionPatrol extends BaseShip{
                 2=> array(
                         5 => "Thruster",
                         9 => "Jump Engine",
+                        11 => "Medium Pulse Cannon",
                         13 => "Interceptor I",
                         18 => "Structure",
                         20 => "Primary",

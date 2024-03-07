@@ -5,7 +5,7 @@ class Trakk extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 350;
-		$this->faction = "Narn";
+		$this->faction = "Narn Regime";
         $this->phpclass = "Trakk";
         $this->imagePath = "img/ships/trakk.png";
         $this->shipClass = "T'Rakk Frigate";

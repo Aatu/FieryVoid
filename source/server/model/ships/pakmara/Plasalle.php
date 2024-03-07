@@ -5,7 +5,7 @@ class Plasalle extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 550;
-		$this->faction = "Pak'ma'ra";
+		$this->faction = "Pak'ma'ra Confederacy";
 		$this->phpclass = "Plasalle";
 		$this->imagePath = "img/ships/PakmaraSimsalle.png";
 		$this->shipClass = "Pla'sall'e Wave Cruiser";
@@ -27,8 +27,19 @@ class Plasalle extends BaseShip{
 
 		$this->iniativebonus = -1*5;
 
-		$this->addPrimarySystem(new Reactor(4, 18, 0, 0));
+		/* let's replace this with appropriate two C&Cs!
 		$this->addPrimarySystem(new PakmaraCnC(5, 12, 0, 0));
+		*/
+		$cnc = new PakmaraCnC(4, 6, 0, 0);
+		$cnc->startArc = 0;
+		$cnc->endArc = 360;
+        $this->addPrimarySystem($cnc);
+		$cnc = new SecondaryCnC(4, 6, 0, 0);
+		$cnc->startArc = 0;
+		$cnc->endArc = 360;
+        $this->addPrimarySystem($cnc);
+		
+		$this->addPrimarySystem(new Reactor(4, 18, 0, 0));
 		$this->addPrimarySystem(new Scanner(4, 12, 6, 6));
 		$this->addPrimarySystem(new Engine(4, 14, 0, 10, 3));
 		$this->addPrimarySystem(new Hangar(2, 4));
@@ -78,7 +89,7 @@ class Plasalle extends BaseShip{
                         15 => "Engine",
                         16 => "Hangar",
                         19 => "Reactor",
-                        20 => "C&C",
+                        20 => "TAG:C&C",
                 ),
                 1=> array(
                         4 => "Thruster",

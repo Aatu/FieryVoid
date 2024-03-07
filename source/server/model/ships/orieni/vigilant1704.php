@@ -5,7 +5,7 @@ class Vigilant1704 extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 575;
-		$this->faction = "Orieni";
+		$this->faction = "Orieni Imperium";
         $this->phpclass = "Vigilant1704";
         $this->imagePath = "img/ships/vigilant.png";
         $this->shipClass = "Vigilant Combat Support Ship (early)";

@@ -5,8 +5,8 @@ class Koskova extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 800;
-		$this->faction = "Kor-Lyan Kingdoms";
-//	$this->faction = "Custom Ships";
+        $this->faction = "Custom Ships";
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
         $this->phpclass = "Koskova";
         $this->imagePath = "img/ships/korlyan_koskova3.png";
         $this->shipClass = "Koskova Battlecruiser";
@@ -62,12 +62,22 @@ class Koskova extends BaseShip{
         $this->addAftSystem(new AmmoMissileRackD(2, 0, 0, 60, 240, $ammoMagazine, false));
 
         $this->addLeftSystem(new AmmoMissileRackD(4, 0, 0, 240, 60, $ammoMagazine, false));
-        $this->addLeftSystem(new ProximityLaser(4, 6, 1, 240, 60));
+//        $this->addLeftSystem(new ProximityLaser(4, 6, 1, 240, 60));
+		$TargeterA = new ProximityLaser(0, 1, 0, 240, 60, 'A');
+		$LauncherA = new ProximityLaserLauncher(4, 0, 0, 240, 60, 'A'); 
+		$TargeterA->addLauncher($LauncherA);
+		$this->addLeftSystem($TargeterA);
+		$this->addLeftSystem($LauncherA);
         $this->addLeftSystem(new FMissileRack(3, 6, 0, 180, 360, false));
         $this->addLeftSystem(new Thruster(4, 15, 0, 5, 3));
 
         $this->addRightSystem(new AmmoMissileRackD(4, 0, 0, 300, 120, $ammoMagazine, false));
-        $this->addRightSystem(new ProximityLaser(4, 6, 1, 300, 120));
+//        $this->addRightSystem(new ProximityLaser(4, 6, 1, 300, 120));
+		$TargeterB = new ProximityLaser(0, 1, 0, 300, 120, 'B');
+		$LauncherB = new ProximityLaserLauncher(4, 0, 0, 300, 120, 'B'); 
+		$TargeterB->addLauncher($LauncherB);
+		$this->addRightSystem($TargeterB);
+		$this->addRightSystem($LauncherB);
         $this->addRightSystem(new FMissileRack(3, 6, 0, 0, 180, false));
         $this->addRightSystem(new Thruster(4, 15, 0, 5, 4));
         

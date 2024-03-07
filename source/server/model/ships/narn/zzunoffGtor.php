@@ -6,7 +6,7 @@ class zzunoffGTor extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
     	$this->pointCost = 650;
-    	$this->faction = "Narn";
+    	$this->faction = "Narn Regime";
         $this->phpclass = "zzunoffGTor";
         $this->imagePath = "img/ships/gquan.png";
         $this->shipClass = "G'Tor Bolt Cruiser";

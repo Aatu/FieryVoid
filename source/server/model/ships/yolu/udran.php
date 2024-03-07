@@ -5,7 +5,7 @@ class Udran extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
 
         $this->pointCost = 1375;
-        $this->faction = "Yolu";
+        $this->faction = "Yolu Confederation";
         $this->phpclass = "Udran";
         $this->imagePath = "img/ships/ulana.png";
         $this->shipClass = "Udran Command Cruiser";

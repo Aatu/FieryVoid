@@ -5,7 +5,7 @@ class wlcTishat1950 extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 390;
-		$this->faction = "Minbari";
+		$this->faction = "Minbari Federation";
 		$this->phpclass = "wlcTishat1950";
 		$this->shipClass = "Early Tishat flight";
 		$this->imagePath = "img/ships/tishat.png";

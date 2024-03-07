@@ -3,7 +3,7 @@ class Mafka extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         $this->pointCost = 475;
-        $this->faction = "Markab";
+        $this->faction = "Markab Theocracy";
         $this->phpclass = "Mafka";
         $this->isd = 2000;        
         $this->imagePath = "img/ships/MarkabAssaultShip.png"; 
@@ -17,7 +17,9 @@ class Mafka extends BaseShip{
         $this->accelcost = 4;
         $this->rollcost = 3;
         $this->pivotcost = 6;
-        $this->iniativebonus = -5;        
+        $this->iniativebonus = -5; 
+        
+		$this->enhancementOptionsEnabled[] = 'MARK_FERV'; //To activate Religious Fervor attributes.               
         
         $this->addPrimarySystem(new Reactor(4, 18, 0, 0));
         $this->addPrimarySystem(new CnC(4, 12, 0, 0));

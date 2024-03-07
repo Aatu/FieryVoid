@@ -27,13 +27,13 @@ class Kirva1980 extends OSAT{
 
         $this->addPrimarySystem(new Reactor(4, 6, 0, 0));
         $this->addPrimarySystem(new ELINTScanner(4, 6, 2, 4)); 
-        $this->addPrimarySystem(new Thruster(4, 5, 0, 0, 2)); 
-        $this->addPrimarySystem(new SensorSpear(3, 0, 0, 270, 90)); 
-        $this->addPrimarySystem(new LightParticleBeamShip(2, 2, 1, 0, 360));
-        $this->addPrimarySystem(new ImpCommJammer(3, 0, 0, 270, 90)); 
+        $this->addAftSystem(new Thruster(4, 5, 0, 0, 2)); 
+        $this->addFrontSystem(new SensorSpear(3, 0, 0, 270, 90)); 
+        $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 0, 360));
+        $this->addFrontSystem(new ImpCommJammer(3, 0, 0, 270, 90)); 
         $this->addPrimarySystem(new ShieldGenerator(3, 8, 4, 1));
-        $this->addPrimarySystem(new GraviticShield(0, 6, 0, 1, 180, 360));
-        $this->addPrimarySystem(new GraviticShield(0, 6, 0, 1, 0, 180, 0));
+        $this->addAftSystem(new GraviticShield(0, 6, 0, 1, 180, 360));
+        $this->addAftSystem(new GraviticShield(0, 6, 0, 1, 0, 180, 0));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         
@@ -44,11 +44,11 @@ class Kirva1980 extends OSAT{
 		$this->hitChart = array(
 			0=> array(
 					9 => "Structure",
-					10 => "Thruster",
-					11 => "Sensor Spear",
-					12 => "Improved Comm Jammer",
-       				13 => "Light Particle Beam",
-					15 => "Gravitic Shield",
+					10 => "2:Thruster",
+					11 => "1:Sensor Spear",
+					12 => "1:Improved Comm Jammer",
+       				13 => "1:Light Particle Beam",
+					15 => "2:Gravitic Shield",
 					17 => "Elint Scanner",
 					19 => "Reactor",
 					20 => "Shield Generator",

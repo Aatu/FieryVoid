@@ -5,7 +5,7 @@ class zzunoffTlorr extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 350;
-		$this->faction = "Narn";
+		$this->faction = "Narn Regime";
         $this->phpclass = "zzunoffTlorr";
         $this->imagePath = "img/ships/trakk.png";
         $this->shipClass = "T'Lorr Light Destroyer";

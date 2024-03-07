@@ -5,7 +5,7 @@ class StormFront1874 extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 360;
-		$this->faction = "Orieni";
+		$this->faction = "Orieni Imperium";
         $this->phpclass = "StormFront1874";
         $this->imagePath = "img/ships/stormFront.png";
         $this->shipClass = "Storm Front Missile Corvette (early)";

@@ -5,7 +5,7 @@ class EarthforceOne  extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 350;
-		$this->faction = "Earth Alliance";
+		$this->faction = "Earth Alliance (custom)";
         $this->phpclass = "EarthforceOne";
         $this->imagePath = "img/ships/earthforce_one.png";
         $this->shipClass = "EarthForce One (Delta)";

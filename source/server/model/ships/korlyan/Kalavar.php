@@ -5,7 +5,8 @@ class Kalavar extends OSAT{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 250;
-		$this->faction = "Kor-Lyan Kingdoms";
+        $this->faction = "Custom Ships";
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
         $this->phpclass = "Kalavar";
         $this->imagePath = "img/ships/korlyan_kalavar.png";
         $this->shipClass = "Kalavar Orbital Satellite (2240)";
@@ -32,9 +33,19 @@ class Kalavar extends OSAT{
         $this->addPrimarySystem(new Reactor(3, 5, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 5, 2, 4)); 
 
-        $this->addAftSystem(new ProximityLaser(3, 6, 6, 180, 360));
+//      $this->addAftSystem(new ProximityLaser(3, 6, 6, 180, 360));
+		$TargeterA = new ProximityLaser(0, 1, 0, 180, 360, 'A');
+		$LauncherA = new ProximityLaserLauncher(3, 0, 0, 180, 360, 'A'); 
+		$TargeterA->addLauncher($LauncherA);
+		$this->addAftSystem($TargeterA);
+		$this->addAftSystem($LauncherA);
         $this->addAftSystem(new Thruster(4, 6, 0, 0, 2));
-        $this->addAftSystem(new ProximityLaser(3, 6, 6, 0, 180));
+//        $this->addAftSystem(new ProximityLaser(3, 6, 6, 0, 180));
+		$TargeterB = new ProximityLaser(0, 1, 0, 0, 180, 'B');
+		$LauncherB = new ProximityLaserLauncher(3, 0, 0, 0, 180, 'B'); 
+		$TargeterB->addLauncher($LauncherB);
+		$this->addAftSystem($TargeterB);
+		$this->addAftSystem($LauncherB);	
         
         $this->addFrontSystem(new RangedFMissileRack(3, 6, 0, 270, 90, true)); 
         $this->addFrontSystem(new AmmoMissileRackD(2, 0, 0, 0, 360, $ammoMagazine, false));

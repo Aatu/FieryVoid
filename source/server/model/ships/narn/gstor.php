@@ -5,7 +5,7 @@ class Gstor extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 700;
-		$this->faction = "Narn";
+		$this->faction = "Narn Regime";
         $this->phpclass = "Gstor";
         $this->imagePath = "img/ships/gquan.png";
         $this->shipClass = "G'Stor Heavy Cruiser";

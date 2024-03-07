@@ -298,30 +298,25 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
         public $name = "PsionicTorpedo";
         public $displayName = "Psionic Torpedo";
         public $iconPath = "PsionicTorpedo.png";                
-        public $animation = "torpedo";
+  	  	public $animation = "torpedo";
         public $animationColor = array(128, 0, 0);
-           
-		/*
-        public $trailColor = array(141, 240, 255);
-        public $animationExplosionScale = 0.25;
-        public $projectilespeed = 12;
-        public $animationWidth = 10;
-        public $trailLength = 10;
-		*/
+//   		public $animationExplosionScale = 0.6;         
 
-        public $range = 40;
+        public $range = 550;
         public $loadingtime = 2;
         
         public $weaponClass = "Electromagnetic"; //deals Plasma, not Ballistic, damage. Should be Ballistic(Plasma), but I had to choose ;)
         public $damageType = "Flash"; 
-        private $alreadyFlayed = false; //to avoid doing this multiple times      
+//        private $alreadyFlayed = false; //to avoid doing this multiple times  //OLD CODE RELATING TO WHEN PSIONIC TORPEDO FLAYED ARMOUR FROM TARGET    
                 
-        public $fireControl = array(-4, 3, 5); // fighters, <mediums, <capitals 
+        public $fireControl = array(null, 4, 5); // fighters, <mediums, <capitals 
         public $priority = 1; //Flash! should strike first 
         
+		private static $alreadyAffected = array();         
+        
         public $boostable = true;
-        public $boostEfficiency = 2;
-        public $maxBoostLevel = 3;  
+        public $boostEfficiency = 1;
+        public $maxBoostLevel = 2;  
         
 		public $repairPriority = 5;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired                 
         
@@ -331,7 +326,7 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
                 $maxhealth = 9;
             }
             if ( $powerReq == 0 ){
-                $powerReq = 5;
+                $powerReq = 6;
             }
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }	
@@ -347,11 +342,141 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
         }
 	}    	
 
+	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!
+		parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);			
+		//Weapon has hit, so apply+1 to crit roll, +1 to dropout roll to the damge elements
+		$mod = 1;
+//		if ($ship instanceof FighterFlight) $mod++;
+		$system->critRollMod += $mod; 
+		
+		if (isset(PsionicTorpedo::$alreadyAffected[$ship->id])) return; //But not if affected already.											
+			
+		$effectEW = Dice::d(3,1);//strength of effect: -1 to -3 EW.				
+		$effectIni = Dice::d(3,1);//strength of effect: -5 to -15 initiative.		
+		$effectPower = Dice::d(4,1)+1;//strength of effect: -2 to -4 to power.
+//		$effectThrust = Dice::d(3,1); //Potentially could add additional crit effect.		
+			
+		$fireOrder->pubnotes .= "<br> Target has Initiative reduced, and suffers from power and scanner fluctations.";				
+			
+		if ($system->advancedArmor){		
+			$effectEW = ceil($effectEW/2);//Other Ancients are somewhat resistant to pyschic attack from Thirdspace Aliens, 50% effect.		
+			$effectIni = ceil($effectIni/2);  	
+			$effectPower = ceil($effectPower/2);			
+		}
+
+		if ($ship instanceof FighterFlight){  //No additional effect on fighters beyond flash damage.			
+			PsionicTorpedo::$alreadyAffected[$ship->id] = true;//mark affected already.	
+			return;
+		}else{				
+			$CnC = $ship->getSystemByName("CnC");
+			$reactor = $ship->getSystemByName("Reactor");
+			$scanner = $ship->getSystemByName("Scanner");			
+			PsionicTorpedo::$alreadyAffected[$ship->id] = true;//mark affected already.					
+			for($i=1; $i<=$effectIni;$i++){				
+				$crit = new tmpinidown(-1, $ship->id, $CnC->id, 'tmpinidown', $gamedata->turn); 
+				$crit->updated = true;
+		        $CnC->criticals[] =  $crit;
+			}							
+			for($i=1; $i<=$effectPower;$i++){
+				if ($reactor){//Some ships might not have a traditional reactor.						
+					$crit = new OutputReduced1(-1, $ship->id, $reactor->id, "OutputReduced1", $gamedata->turn, $gamedata->turn+1);
+					$crit->updated = true;
+					$reactor->criticals[] =  $crit;
+				}     
+			}
+			for($i=1; $i<=$effectEW;$i++){
+				if ($scanner){//Some ships might not have a traditional scanner.						
+					$crit = new OutputReduced1(-1, $ship->id, $scanner->id, "OutputReduced1", $gamedata->turn, $gamedata->turn+1);
+					$crit->updated = true;
+					$scanner->criticals[] =  $crit;
+				}     
+			}								
+		}
+			
+	} //endof function onDamagedSystem	
+    	
+		public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);
+			if (!isset($this->data["Special"])) {
+				$this->data["Special"] = '';
+			}else{
+				$this->data["Special"] .= '<br>';
+			}
+			$this->data["Special"] .= "<br>Deals Flash damage that ignores armor (Advanced Armor is treated as 2 points less).";	
+			$this->data["Special"] .= "<br>If this weapon hits, it uses psychic energy to disrupt its target next turn in the following ways:";
+			$this->data["Special"] .= "<br> - 1d3 penalty to EW,";
+			$this->data["Special"] .= "<br> - 1d3 penatly to Initiative,";
+			$this->data["Special"] .= "<br> - 1d4+1 penalty to available power.";													
+			$this->data["Special"] .= "<br>Ballistic weapon that can use offensive EW.";
+			$this->data["Special"] .= "<br>Multiple Psionic Torpedoes do not stack effects (but do stack with Psychic Field).";			
+			$this->data["Special"] .= "<br>Can be boosted twice, for +2 damage per boost level.";			
+		    $this->data["Special"] .= "<br>Has +1 modifier to critical hits, and +1 to fighter dropout rolls.";			
+		}
+
+        private function getExtraDamagebyBoostlevel($turn){
+            $add = 0;
+            switch($this->getBoostLevel($turn)){
+                case 1:
+                    $add = 2;
+                    break;
+                case 2:
+                    $add = 4;
+                    break;
+                                        
+                      
+                default:
+                    break;
+            }
+            return $add;
+        }
+
+         private function getBoostLevel($turn){
+            $boostLevel = 0;
+            foreach ($this->power as $i){
+                if ($i->turn != $turn){
+                   continue;
+                }
+                if ($i->type == 2){
+                    $boostLevel += $i->amount;
+                }
+            }
+            return $boostLevel;
+        }
+        
+        public function getDamage($fireOrder){
+            $add = $this->getExtraDamagebyBoostlevel($fireOrder->turn);
+            $dmg = Dice::d(8,1) + 13 + $add ;
+            return $dmg;
+        }
+
+        public function getAvgDamage(){
+            $this->setMinDamage();
+            $this->setMaxDamage();
+
+            $min = $this->minDamage;
+            $max = $this->maxDamage;
+            $avg = round(($min+$max)/2);
+            return $avg;
+        }
+
+        public function setMinDamage(){
+            $turn = TacGamedata::$currentTurn;
+            $boost = $this->getBoostLevel($turn);
+            $this->minDamage = 14 + ($boost * 2);
+        }   
+
+        public function setMaxDamage(){
+            $turn = TacGamedata::$currentTurn;
+            $boost = $this->getBoostLevel($turn);
+            $this->maxDamage = 21 + ($boost * 2); 
+		}
+
+/* //OLD CODE RELATING TO WHEN PSIONIC TORPEDO FLAYED ARMOUR FROM TARGET
    protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location = null)
     {
-        /*$pos ONLY relevant for FIGHTER armor if damage source position is different than one from weapon itself*/
-        /*otherwise best leave null BUT fill $location!*/
-        /*damageWasDealt indicates whether this hit already caused damage - important for overkill for some damage modes*/
+    //$pos ONLY relevant for FIGHTER armor if damage source position is different than one from weapon itself
+        //otherwise best leave null BUT fill $location!
+    //    damageWasDealt indicates whether this hit already caused damage - important for overkill for some damage modes
         //if (!$system->isDestroyed()) { //else system was already destroyed, proceed to overkill
 		if ($system->getRemainingHealth() > 0) { //Vree Structure systems are considered not there despite not being formally destroyed
             $damage = floor($damage);//make sure damage is a whole number, without fractions!
@@ -410,97 +535,134 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
 				}
 		     $fireOrder->pubnotes .= "<br> Armor reduced on entire ship section."; 				 
         } //endof function doDamage	 
-
-	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!
-		parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);		
-		if ($system->advancedArmor) return; //no effect on Advanced Armor		
-		//+1 to crit roll, +2 to dropout roll
-		$mod = 1;
-		if ($ship instanceof FighterFlight) $mod++;		
-		$system->critRollMod += $mod; 
-	} //endof function onDamagedSystem	
-    	
-		public function setSystemDataWindow($turn){
-			parent::setSystemDataWindow($turn);
-			if (!isset($this->data["Special"])) {
-				$this->data["Special"] = '';
-			}else{
-				$this->data["Special"] .= '<br>';
-			}
-			$this->data["Special"] .= "<br>Ignores armor when dealing damage (Advanced Armor is treated as 2 points less).";	
-			$this->data["Special"] .= "<br>Deals Flash damage and reduces armor of facing section of ships (e.g. structure and all systems) by 1-3 points. Advanced Armor is immune.";		
-			$this->data["Special"] .= "<br>Ballistic weapon that can use offensive EW.";
-			$this->data["Special"] .= "<br> Damage can be boosted up to " . $this->maxBoostLevel . " times at " . $this->boostEfficiency . " power per two extra points of damage.";			
-		    $this->data["Special"] .= "<br>Has +1 modifier to critical hits, and +2 to fighter dropout rolls.";			
-		}
-        
-        /*
-        public function getDamage($fireOrder){         return 18;   }
-        public function setMinDamage(){     $this->minDamage = 18;      }
-        public function setMaxDamage(){     $this->maxDamage = 18;      }
- */
-
-        private function getExtraDamagebyBoostlevel($turn){
-            $add = 0;
-            switch($this->getBoostLevel($turn)){
-                case 1:
-                    $add = 2;
-                    break;
-                case 2:
-                    $add = 4;
-                    break;
-                case 3:
-                    $add = 6;
-                    break;                    
-                      
-                default:
-                    break;
-            }
-            return $add;
-        }
-
-
-         private function getBoostLevel($turn){
-            $boostLevel = 0;
-            foreach ($this->power as $i){
-                if ($i->turn != $turn){
-                   continue;
-                }
-                if ($i->type == 2){
-                    $boostLevel += $i->amount;
-                }
-            }
-            return $boostLevel;
-        }
-        
-        public function getDamage($fireOrder){
-            $add = $this->getExtraDamagebyBoostlevel($fireOrder->turn);
-            $dmg = Dice::d(6,1) + $add + 15;
-            return $dmg;
-        }
-
-        public function getAvgDamage(){
-            $this->setMinDamage();
-            $this->setMaxDamage();
-
-            $min = $this->minDamage;
-            $max = $this->maxDamage;
-            $avg = round(($min+$max)/2);
-            return $avg;
-        }
-
-        public function setMinDamage(){
-            $turn = TacGamedata::$currentTurn;
-            $boost = $this->getBoostLevel($turn);
-            $this->minDamage = 16 + ($boost * 2);
-        }   
-
-        public function setMaxDamage(){
-            $turn = TacGamedata::$currentTurn;
-            $boost = $this->getBoostLevel($turn);
-            $this->maxDamage = 21 + ($boost * 2); 
-		}
+*/
 		    
     }//endof class PsionicTorpedo
+
+
+class LimpetBoreTorpedo extends Torpedo{
+        public $name = "LimpetBoreTorpedo";
+        public $displayName = "Limpet Bore Torpedo";
+		    public $iconPath = "LimpetBoreTorpedo.png";
+        public $animation = "trail";
+        public $trailColor = array(141, 240, 255);
+        public $animationColor = array(50, 50, 50);
+        public $animationExplosionScale = 0.2;
+        public $projectilespeed = 10;
+        public $animationWidth = 4;
+        public $trailLength = 100;    
+
+        public $useOEW = true; 
+        public $ballistic = true;
+        public $range = 30;
+        public $distanceRange = 30;
+        public $ammunition = 5; //limited number of shots
+
+		public $noPrimaryHits = true; //cannot hit PRIMARY from outer table
+
+        public $calledShotMod = 0; //instead of usual -8
+        
+        public $loadingtime = 2; // 1/2 turns
+        public $rangePenalty = 0;
+        public $fireControl = array(null, 2, 4);
+	    
+		public $noOverkill = true; //Matter weapon
+		public $priority = 9; //Matter weapon
+		    
+
+		public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+	    public $weaponClass = "Matter"; //should be Ballistic and Matter, but FV does not allow that. Instead decrease advanced armor encountered by 2 points (if any) (usually system does that, but it will account for Ballistic and not Matter)
+
+		protected $overrideCallingRestrictions = true;
+		protected $canOnlyCalledShot = true;		
+//		public $canTargetOtherSections = true; //NOT IMPLEMENTED. When set to true, weapon can called shot systems on external sections of target not facing firing ship.
+			 
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		        //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 5;
+            if ( $powerReq == 0 ) $powerReq = 3;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }     
+	    
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+            $this->data["Special"] = "Ballistic weapon used ONLY for Called Shots (using normal rules).";
+            $this->data["Special"] .= "<br>Once it hits a system, it will try to damage it by adding a critical effect.";
+            $this->data["Special"] .= "<br>This critical effect will remain until target system is destroyed, or after five failed attempts by the Limpet Bore.";            
+            $this->data["Special"] .= "<br>Has no effect on targets equipped with Advanced Armor.";
+            $this->data["Special"] .= "<br>No Called Shot penalty.";
+            $this->data["Special"] .= "<br>Ignores Armor. No Overkill.";                     
+            $this->data["Ammunition"] = $this->ammunition;
+        }
+        
+
+        public function setAmmo($firingMode, $amount){
+            $this->ammunition = $amount;
+        }
+        
+        
+       public function fire($gamedata, $fireOrder){ //note ammo usage
+            parent::fire($gamedata, $fireOrder);
+            $this->ammunition--;
+            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);
+        }
+
+
+	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!
+		
+		if ($system->advancedArmor) {//no effect on Advanced Armor	
+		$fireOrder->pubnotes .= "<br> Limpet Bore cannot attached to advanced armor.";				
+		return; 	
+		}
+
+		if ($system->id != $fireOrder->calledid) {//In case it ends up in general hit chart somehow.
+		$fireOrder->pubnotes .= "<br> Limpet Bore was not targeted at a system.";				
+		return; 	
+		}	
+				
+		if($system){
+			$fireOrder->pubnotes .= "<br> Limpet Bore attaches to system.";				
+			$crit = new LimpetBore(-1, $ship->id, $system->id, 'LimpetBore', $gamedata->turn); 
+			$crit->updated = true;
+			$system->criticals[] =  $crit;
+			}
+		}	
+		
+		
+        public function getDamage($fireOrder){ //Damage is handled in criticalPhaseEffects() once Limpet Bore attaches.
+            return 0;
+       }
+    
+    
+        public function setMinDamage(){     $this->minDamage = 12;      } //However, keep these values for intercept calculations.
+        public function setMaxDamage(){     $this->maxDamage = 30;      }
+
+        public function stripForJson() {
+            $strippedSystem = parent::stripForJson();    
+            $strippedSystem->ammunition = $this->ammunition;
+            $strippedSystem->overrideCallingRestrictions = $this->overrideCallingRestrictions;
+            $strippedSystem->canOnlyCalledShot = $this->canOnlyCalledShot;   
+ //           $strippedSystem->canTargetOtherSections = $this->canTargetOtherSections;         
+                     
+            return $strippedSystem;
+        }
+		
+}//endof LimpetBoreTorp
+
+
+
+class LimpetBoreTorpedoBase extends LimpetBoreTorpedo{
+        public $name = "LimpetBoreTorpedoBase";
+        public $displayName = "Limpet Bore Torpedo";
+ 
+        public $range = 60;
+        public $distanceRange = 60;
+        public $ammunition = 10; //limited number of shots.  Should be 15 with two reload phases every 5 shots, so we'll settle for just 10
+        
+        public $loadingtime = 1; 
+	    		
+}//endof LimpetBoreBase
+
     
 ?>

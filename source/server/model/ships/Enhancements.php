@@ -86,6 +86,7 @@ class Enhancements{
 		case 'ThirdspaceShip':
 			Enhancements::blockStandardEnhancements($unit);
 			$unit->enhancementOptionsEnabled[] = 'IMPR_SR';
+			$unit->enhancementOptionsEnabled[] = 'IMPR_ENG'; 					
 			break;		
 	}	  
   }//endof function nonstandardEnhancementSet
@@ -235,8 +236,17 @@ class Enhancements{
 		  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);//this is NOT an enhancement - rather an OPTION
 	  }  	
 
+	  //Markab-specific - Enables 'Religious Fervor' refit to selected vessel which comes with some bonus and some penalties.
+	  $enhID = 'MARK_FERV';	  
+	  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option needs to be specifically enabled
+		  $enhName = 'Religious Fervor';
+		  $enhLimit = 1;	
+		  $enhPrice = 0;
+		  $enhPriceStep = 0;
+		  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);//this is NOT an enhancement - rather an OPTION
+	  }  
 	  
-	  //Poor Crew (official but modified): -5 Initiative, -1 Engine, -1 Sensors, -1 Reactor power, +1 Profile, +2 to critical results
+	  //Poor Crew (official but modified): -5 Initiative, -1 Engine, -1 Sensors, -1 Reactor power, +1 Profile, +2 to critical results, -1 to hit all weapons
 	  //cost: -15% of ship cost (second time: -10%)
 	  $enhID = 'POOR_CREW';
 	  if(!in_array($enhID, $ship->enhancementOptionsDisabled)){ //option is not disabled
@@ -558,13 +568,13 @@ class Enhancements{
 			  $enhPriceStep = 0; //flat rate
 			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
 		  }				  
-		  $enhID = 'AMMO_S'; //Stealth Missiles - Target is hidden
+		  $enhID = 'AMMO_J'; //Jammer Missiles - add BDEW
 		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
-				$ammoClass = new AmmoMissileS();
+				$ammoClass = new AmmoMissileJ();
 				$ammoSize = $ammoClass->size;
 				$actualCapacity = floor($magazineCapacity/$ammoSize);
 			  $enhName = $ammoClass->enhancementDescription;
-			  $enhLimit = $actualCapacity / 10;		//10% limit
+			  $enhLimit = $actualCapacity;
 			  $enhPrice = $ammoClass->getPrice($ship); 
 			  $enhPriceStep = 0; //flat rate
 			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
@@ -602,6 +612,17 @@ class Enhancements{
 			  $enhPriceStep = 0; //flat rate
 			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
 		  }
+		  $enhID = 'AMMO_S'; //Stealth Missiles - Target is hidden
+		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
+				$ammoClass = new AmmoMissileS();
+				$ammoSize = $ammoClass->size;
+				$actualCapacity = floor($magazineCapacity/$ammoSize);
+			  $enhName = $ammoClass->enhancementDescription;
+			  $enhLimit = $actualCapacity / 10;		//10% limit
+			  $enhPrice = $ammoClass->getPrice($ship); 
+			  $enhPriceStep = 0; //flat rate
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+		  }
 		  $enhID = 'AMMO_X'; //HARM Missiles
 		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
 				$ammoClass = new AmmoMissileX();
@@ -612,7 +633,40 @@ class Enhancements{
 			  $enhPrice = $ammoClass->getPrice($ship); 
 			  $enhPriceStep = 0; //flat rate
 			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
-		  }						  	  
+		  }
+		  $enhID = 'MINE_BLB'; //Ballistic Launcher Basic Mine
+		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
+				$ammoClass = new AmmoBLMineB();
+				$ammoSize = $ammoClass->size;
+				$actualCapacity = floor($magazineCapacity/$ammoSize);
+			  $enhName = $ammoClass->enhancementDescription;
+			  $enhLimit = $actualCapacity;		
+			  $enhPrice = $ammoClass->getPrice($ship); 
+			  $enhPriceStep = 0; //flat rate
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+		  }	
+		  $enhID = 'MINE_BLW'; //Ballistic Launcher Basic Mine
+		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
+				$ammoClass = new AmmoBLMineW();
+				$ammoSize = $ammoClass->size;
+				$actualCapacity = floor($magazineCapacity/$ammoSize);
+			  $enhName = $ammoClass->enhancementDescription;
+			  $enhLimit = $actualCapacity;		
+			  $enhPrice = $ammoClass->getPrice($ship); 
+			  $enhPriceStep = 0; //flat rate
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+		  }		
+		  $enhID = 'MINE_BLH'; //Ballistic Launcher Basic Mine
+		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
+				$ammoClass = new AmmoBLMineH();
+				$ammoSize = $ammoClass->size;
+				$actualCapacity = floor($magazineCapacity/$ammoSize);
+			  $enhName = $ammoClass->enhancementDescription;
+			  $enhLimit = $actualCapacity;		
+			  $enhPrice = $ammoClass->getPrice($ship); 
+			  $enhPriceStep = 0; //flat rate
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+		  }				  		  		  						  	  
 	  } //end of magazine-requiring options
 	  
 	  
@@ -649,7 +703,17 @@ class Enhancements{
 		  $enhPriceStep = 0;
 		  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 	  }
-	  
+
+	  //Markab specific - 'Religious Ferver' refit than provides some benefits along with some penalties.
+	  $enhID = 'FTR_FERV';	  
+	  if(in_array($enhID, $flight->enhancementOptionsEnabled)){ //option needs to be specifically enabled
+		  $enhName = 'Religious Fervor';
+		  $enhLimit = 1;	
+		  $enhPrice = 0;	  
+		  $enhPriceStep = 0;
+		  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
+	  }
+
 	  //Improved Targeting Computer: +1 OB, cost: new rating *3, limit: 1
 	  $enhID = 'IMPR_OB';	  
 	  if(!in_array($enhID, $flight->enhancementOptionsDisabled)){ //option is not disabled
@@ -875,9 +939,16 @@ class Enhancements{
 						$flight->forwardDefense -= $enhCount;
 						$flight->sideDefense -= $enhCount;
 						break;
+					case 'FTR_FERV': //Markab Religious Fervor: +1 to hit for all weapons, +10 Initiative, +2 Defence Profiles, -3 dropout rolls
+						$flight->offensivebonus += $enhCount;
+						$flight->iniativebonus += $enhCount*10;
+						$flight->forwardDefense += $enhCount*2;
+						$flight->sideDefense += $enhCount*2;
+						$flight->critRollMod -= $enhCount*3;
+						break;	
 					case 'EXP_MOTIV': //Expert Motivator: -2 on dropout rolls
 						$flight->critRollMod -= $enhCount*2;
-						break;
+						break;					
 					case 'IMPR_OB': //Improved Targeting Computer: +1 OB
 						$flight->offensivebonus += $enhCount;
 						break;
@@ -960,12 +1031,13 @@ class Enhancements{
 				if ($enhCount>1) $ship->enhancementTooltip .= " (x$enhCount)";
 			        switch ($enhID) {
 						
-					case 'ELITE_CREW': //Elite Crew: +5 Initiative, +2 Engine, +1 Sensors, +2 Reactor power, -1 Profile, -2 to critical results
+					case 'ELITE_CREW': //Elite Crew: +5 Initiative, +2 Engine, +1 Sensors, +2 Reactor power, -1 Profile, -2 to critical results, +1 to hit all weapons
 						//fixed values
 						$ship->forwardDefense -= $enhCount;
 						$ship->sideDefense -= $enhCount;
 						$ship->iniativebonus += $enhCount*5;
 						$ship->critRollMod -= $enhCount*2;
+						$ship->toHitBonus += $enhCount;						
 						
 						//system mods: Scanner						
 						$strongestSystem = null;
@@ -1016,7 +1088,14 @@ class Enhancements{
 							}
 						} 						
 						break;						
-						
+
+					case 'MARK_FERV': //Markab Religious Fervor: +1 to hit all weapons, +10 Initiative, +2 Defence Profiles
+							$ship->toHitBonus += $enhCount;
+							$ship->iniativebonus += $enhCount*10;
+							$ship->forwardDefense += $enhCount*2;
+							$ship->sideDefense += $enhCount*2;
+							break;
+								
 					case 'IMPR_ENG': //Improved Engine: +1 Engine output (strongest Engine), may be taken multiple times
 						$strongestSystem = null;
 						$strongestValue = -1;	  
@@ -1111,12 +1190,13 @@ class Enhancements{
 						}  	
 						break;			
 						
-					case 'POOR_CREW': //Poor Crew: -1 Engine, -1 Sensors, -1 Reactor power, +1 Profile, +2 to critical results, -5 Initiative
+					case 'POOR_CREW': //Poor Crew: -1 Engine, -1 Sensors, -1 Reactor power, +1 Profile, +2 to critical results, -5 Initiative, -1 to hit all weapons
 						//fixed values
 						$ship->forwardDefense += $enhCount;
 						$ship->sideDefense += $enhCount;
 						$ship->iniativebonus -= $enhCount*5;
 						$ship->critRollMod += $enhCount*2;
+						$ship->toHitBonus -= $enhCount;								
 						
 						//system mods: Scanner						
 						$strongestSystem = null;
@@ -1250,8 +1330,8 @@ class Enhancements{
 					case 'AMMO_C': //Chaff Missile						
 						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoMissileC(), $enhCount, true); //do notify dependent weapons, too!
 						break;	
-					case 'AMMO_S': //Stealth Missile						
-						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoMissileS(), $enhCount, true); //do notify dependent weapons, too!
+					case 'AMMO_J': //Stealth Missile						
+						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoMissileJ(), $enhCount, true); //do notify dependent weapons, too!
 						break;
 					case 'AMMO_K': //Starburst Missile						
 						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoMissileK(), $enhCount, true); //do notify dependent weapons, too!
@@ -1262,9 +1342,21 @@ class Enhancements{
 					case 'AMMO_KK': //Kinetic Missile						
 						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoMissileKK(), $enhCount, true); //do notify dependent weapons, too!
 						break;
+					case 'AMMO_S': //Stealth Missile						
+						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoMissileS(), $enhCount, true); //do notify dependent weapons, too!
+						break;						
 					case 'AMMO_X': //HARM Missile						
 						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoMissileX(), $enhCount, true); //do notify dependent weapons, too!
-						break;															
+						break;	
+					case 'MINE_BLB': //Ballistic Launcher Basic Mine						
+						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoBLMineB(), $enhCount, true); //do notify dependent weapons, too!
+						break;
+					case 'MINE_BLW': //Ballistic Launcher Wide-Range Mine						
+						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoBLMineW(), $enhCount, true); //do notify dependent weapons, too!
+						break;	
+					case 'MINE_BLH': //Ballistic Launcher Heavy Mine						
+						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoBLMineH(), $enhCount, true); //do notify dependent weapons, too!
+						break;																																	
 				}
 			}
 			
@@ -1291,7 +1383,16 @@ class Enhancements{
 								$strippedShip->sideDefense = $ship->sideDefense;
 							}
 							break;
-							
+
+						case 'FTR_FERV': //Markab Religious Fervor: OB, Initiative and Profiles modified
+							if($ship instanceof FighterFlight){
+								$strippedShip->offensivebonus = $ship->offensivebonus;
+								$strippedShip->iniativebonus = $ship->iniativebonus;
+								$strippedShip->forwardDefense = $ship->forwardDefense;
+								$strippedShip->sideDefense = $ship->sideDefense;
+							}
+							break;
+														
 						case 'EXP_MOTIV': //Expert Motivator: modify dropout modifier
 							/* actually irrelevant for front end
 							if($ship instanceof FighterFlight){
@@ -1356,8 +1457,16 @@ class Enhancements{
 							$strippedShip->forwardDefense = $ship->forwardDefense;
 							$strippedShip->sideDefense = $ship->sideDefense;
 							$strippedShip->iniativebonus = $ship->iniativebonus;
+							$strippedShip->toHitBonus = $ship->toHitBonus;	///Just in case needed on Front End.							
 							break;
-							
+
+						case 'MARK_FERV': //Markab Religious Fervor: Initiative and Profiles modified
+							$strippedShip->forwardDefense = $ship->forwardDefense;
+							$strippedShip->sideDefense = $ship->sideDefense;
+							$strippedShip->iniativebonus = $ship->iniativebonus;
+							$strippedShip->toHitBonus = $ship->toHitBonus;	///Just in case needed on Front End.					
+							break;
+														
 						case 'IPSH_EETH': //Ipsha Eethan Barony refit: +2 free thrust, +25% available power (round up), +0.1 turn delay, -5 Initiative, +4 critical roll modifier for Reactor and Engine
 							$strippedShip->iniativebonus = $ship->iniativebonus;
 							$strippedShip->turndelaycost = $ship->turndelaycost;
@@ -1367,6 +1476,7 @@ class Enhancements{
 							$strippedShip->forwardDefense = $ship->forwardDefense;
 							$strippedShip->sideDefense = $ship->sideDefense;
 							$strippedShip->iniativebonus = $ship->iniativebonus;
+							$strippedShip->toHitBonus = $ship->toHitBonus;	///Just in case needed on Front End.								
 							break;							
 						
 						case 'SLUGGISH': //Sluggish: Initiative  modified

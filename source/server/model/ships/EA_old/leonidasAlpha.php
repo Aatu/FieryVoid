@@ -23,17 +23,17 @@ class LeonidasAlpha extends OSAT{
         $this->pivotcost = 0;	
         $this->iniativebonus = 60;
 
-        $this->addPrimarySystem(new EWOMissileRack(3, 6, 0, 270, 90, true));
-        $this->addPrimarySystem(new EWOMissileRack(3, 6, 0, 270, 90, true));
-        $this->addPrimarySystem(new LtBlastCannon(2, 4, 1, 180, 360));
-        $this->addPrimarySystem(new LtBlastCannon(2, 4, 1, 0, 360));
-        $this->addPrimarySystem(new LtBlastCannon(2, 4, 1, 0, 180));
+        $this->addFrontSystem(new EWOMissileRack(3, 6, 0, 270, 90, true));
+        $this->addFrontSystem(new EWOMissileRack(3, 6, 0, 270, 90, true));
+        $this->addFrontSystem(new LtBlastCannon(2, 4, 1, 180, 360));
+        $this->addFrontSystem(new LtBlastCannon(2, 4, 1, 0, 360));
+        $this->addFrontSystem(new LtBlastCannon(2, 4, 1, 0, 180));
         //$this->addPrimarySystem(new InterceptorMkI(2, 4, 1, 0, 360));
 
         $this->addPrimarySystem(new Reactor(4, 6, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 14, 2, 3));   
 
-        $this->addPrimarySystem(new Thruster(2, 6, 0, 0, 2));
+        $this->addAftSystem(new Thruster(2, 6, 0, 0, 2));
                 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addPrimarySystem(new Structure(3, 30));
@@ -41,9 +41,9 @@ class LeonidasAlpha extends OSAT{
 		$this->hitChart = array(
 			0=> array(
 				9 => "Structure",
-				11 => "Thruster",
-				14 => "Class-O Missile Rack",
-				17 => "Light Blast Cannon",
+				11 => "2:Thruster",
+				14 => "1:Class-O Missile Rack",
+				17 => "1:Light Blast Cannon",
 				19 => "Scanner",
 				20 => "Reactor",
 			),

@@ -5,7 +5,7 @@ class Sharaal extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 1600;
-		$this->faction = "Minbari";
+		$this->faction = "Minbari Federation";
         $this->phpclass = "Sharaal";
         $this->imagePath = "img/ships/sharlin.png";
         $this->shipClass = "Sharaal War Cruiser";

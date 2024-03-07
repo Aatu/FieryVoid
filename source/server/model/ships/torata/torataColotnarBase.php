@@ -9,7 +9,7 @@ class TorataColotnarBase extends SmallStarBaseFourSections
 		$this->pointCost = 2250;
 		$this->base = true;
 		$this->smallBase = true; //"small" as in 4 outer sections
-		$this->faction = "Torata";
+		$this->faction = "Torata Regency";
 		$this->phpclass = "TorataColotnarBase";
 		$this->shipClass = "Colotnar Defense Base";
 		$this->imagePath = "img/ships/TorataColotnar.png";

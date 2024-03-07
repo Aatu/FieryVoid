@@ -6,7 +6,9 @@ window.BallisticSprite = function () {
     var TEXTURE_LAUNCH = null;
     var TEXTURE_HEX = null;
     var TEXTURE_SHIP = null;
-    var TEXTURE_HEX_DIRECT = null;
+    var TEXTURE_HEX_DIRECT_BLUE = null;
+    var TEXTURE_HEX_DIRECT_GREEN = null;
+    var TEXTURE_HEX_DIRECT_YELLOW = null;         
 
     function BallisticSprite(position, type) {
         HexagonSprite.call(this, -2);
@@ -27,9 +29,13 @@ window.BallisticSprite = function () {
             return TEXTURE_LAUNCH;
         } else if (type == "hex") {
             return TEXTURE_HEX;
-        } else if (type == "hexDirect") {
-            return TEXTURE_HEX_DIRECT;
-        } else {
+        } else if (type == "hexDirectBlue") {
+            return TEXTURE_HEX_DIRECT_BLUE;
+        } else if (type == "hexDirectGreen") {
+            return TEXTURE_HEX_DIRECT_GREEN;
+        }else if (type == "hexDirectYellow") {
+            return TEXTURE_HEX_DIRECT_YELLOW;
+        }else {
             return TEXTURE_SHIP;
         }
     }
@@ -38,7 +44,9 @@ window.BallisticSprite = function () {
         TEXTURE_LAUNCH = createTexture('launch');
         TEXTURE_HEX = createTexture('hex');
         TEXTURE_SHIP = createTexture('ship');
-        TEXTURE_HEX_DIRECT = createTexture('hexDirect'); 
+        TEXTURE_HEX_DIRECT_BLUE = createTexture('hexDirectBlue');
+        TEXTURE_HEX_DIRECT_GREEN = createTexture('hexDirectGreen');
+        TEXTURE_HEX_DIRECT_YELLOW = createTexture('hexDirectYellow');                  
     }
 
     function createTexture(type) {
@@ -56,9 +64,13 @@ window.BallisticSprite = function () {
             return "rgba(250,110,5,0.50)"; 
         } else if (type == "hex") {//ballistic target hex - red
             return "rgba(230,20,10,0.50)";
-        } else if (type == "hexDirect") {//direct fire target hex - light blue
+        } else if (type == "hexDirectBlue") {//direct fire target hex - light blue
             return "rgba(0,184,230,0.50)";
-        } else {//...something else...
+        } else if (type == "hexDirectGreen") {//direct fire target hex - light green
+            return "rgba(0, 204, 0,0.50)";
+        }else if (type == "hexDirectYellow") {//direct fire target hex - light yellow
+            return "rgba(255, 255, 0,0.50)";
+        }else {//...something else...
             return "rgba(144,185,208,0.80)";
         }
     }
@@ -69,9 +81,13 @@ window.BallisticSprite = function () {
             return "rgba(250,110,5,0.15)";//launch hex - orange
         } else if (type == "hex") {//ballistic target hex - red
             return "rgba(230,20,10,0.15)";
-        } else if (type == "hexDirect") {//direct fire target hex - light blue
-            return "rgba(0,184,230,0.50)";
-        } else {//...something else...
+        } else if (type == "hexDirectBlue") {//direct fire target hex - light blue
+            return "rgba(0,184,230,0.15)";
+        } else if (type == "hexDirectGreen") {//direct fire target hex - light green
+            return "rgba(0, 204, 0,0.15)";
+        }else if (type == "hexDirectYellow") {//direct fire target hex - light yellow
+            return "rgba(255, 255, 0,0.15)";
+        }else {//...something else...
             return "rgba(144,185,208,0.30)";
         }
     }

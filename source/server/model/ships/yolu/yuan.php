@@ -5,7 +5,7 @@ class Yuan extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
 
         $this->pointCost = 2100;
-        $this->faction = "Yolu";
+        $this->faction = "Yolu Confederation";
         $this->phpclass = "Yuan";
         $this->imagePath = "img/ships/yuan.png";
         $this->shipClass = "Yuan Dreadnought";

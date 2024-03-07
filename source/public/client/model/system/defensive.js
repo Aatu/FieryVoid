@@ -219,6 +219,18 @@ var HeavyInterceptorBattery = function HeavyInterceptorBattery(json, ship) {
 HeavyInterceptorBattery.prototype = Object.create(InterceptorMkI.prototype);
 HeavyInterceptorBattery.prototype.constructor = HeavyInterceptorBattery;
 
+var Interdictor = function Interdictor(json, ship) {
+    Weapon.call(this, json, ship);
+};
+Interdictor.prototype = Object.create(Weapon.prototype);
+Interdictor.prototype.constructor = Interdictor;
+
+var FtrInterdictor = function FtrInterdictor(json, ship) {
+    Weapon.call(this, json, ship);
+};
+FtrInterdictor.prototype = Object.create(Weapon.prototype);
+FtrInterdictor.prototype.constructor = FtrInterdictor;
+
 var ThirdspaceShieldProjection = function ThirdspaceShieldProjection(json, ship) {
     ShipSystem.call(this, json, ship);
     this.defensiveType = "none";

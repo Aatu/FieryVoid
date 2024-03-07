@@ -5,7 +5,7 @@ class Torotha extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 550;
-		$this->faction = "Minbari";
+		$this->faction = "Minbari Federation";
         $this->phpclass = "Torotha";
         $this->imagePath = "img/ships/torotha.png";
         $this->shipClass = "Torotha Assault Frigate";

@@ -5,7 +5,7 @@ class VorlonAssaultFighterFlight extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 295*6;
-		$this->faction = "Vorlons";
+		$this->faction = "Vorlon Empire";
 		$this->phpclass = "VorlonAssaultFighterFlight";
 		$this->shipClass = "Assault Fighters";
 		$this->imagePath = "img/ships/VorlonAssaultFighter.png";

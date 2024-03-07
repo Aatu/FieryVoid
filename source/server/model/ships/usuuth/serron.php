@@ -5,7 +5,7 @@ class Serron extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 375;
-        $this->faction = "Usuuth";
+        $this->faction = "Usuuth Coalition";
         $this->phpclass = "Serron";
         $this->imagePath = "img/ships/UsuuthSerron.png";
 		$this->canvasSize = 200;

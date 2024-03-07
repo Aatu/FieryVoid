@@ -5,8 +5,8 @@ class Leklant extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 700;
-		$this->faction = "Kor-Lyan Kingdoms";
-//	$this->faction = "Custom Ships";
+        $this->faction = "Custom Ships";
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
         $this->phpclass = "Leklant";
         $this->imagePath = "img/ships/korlyan_leklant2.png";
         $this->shipClass = "Leklant Scout Cruiser";
@@ -48,7 +48,7 @@ class Leklant extends BaseShip{
         $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));
         $this->addFrontSystem(new AmmoMissileRackD(2, 0, 0, 300, 60, $ammoMagazine, false));
-        $this->addFrontSystem(new DirectLimpetBore(3, 5, 3, 300, 60));
+        $this->addFrontSystem(new LimpetBoreTorpedo(3, 0, 0, 300, 60));
         $this->addFrontSystem(new AmmoMissileRackD(2, 0, 0, 300, 60, $ammoMagazine, false));
 
         $this->addAftSystem(new Thruster(3, 7, 0, 2, 2));

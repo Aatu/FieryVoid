@@ -5,7 +5,7 @@ class Obedient extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 310;
-        $this->faction = "Orieni";
+        $this->faction = "Orieni Imperium";
         $this->phpclass = "Obedient";
         $this->imagePath = "img/ships/obedient.png";
         $this->shipClass = "Obedient Patrol Frigate (2007)";

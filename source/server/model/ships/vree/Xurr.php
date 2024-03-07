@@ -5,7 +5,7 @@ class Xurr extends VreeCapital{
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 600;
-		$this->faction = "Vree";
+		$this->faction = "Vree Conglomerate";
 		$this->phpclass = "Xurr";
 		$this->shipClass = "Xurr Conversion Saucer";
 		$this->isd = 2210;

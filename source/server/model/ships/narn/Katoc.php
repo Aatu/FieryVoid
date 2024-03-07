@@ -5,7 +5,7 @@ class Katoc extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 575;
-        $this->faction = "Narn";
+        $this->faction = "Narn Regime";
         $this->phpclass = "Katoc";
         $this->imagePath = "img/ships/katoc.png";
         $this->shipClass = "Ka'Toc Battle Destroyer";

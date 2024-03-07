@@ -149,7 +149,7 @@ window.confirm = {
         var enhNo = 0;
         var target = $(".selectAmount.shpenh" + enhNo);
         while(typeof target.data("enhPrice") != 'undefined'){ //as long as there are enhancements defined...
-            enhCost += target.data("enhCost");		
+            enhCost += target.data("enhCost");
             //go to next enhancement
             enhNo++;
             target = $(".selectAmount.shpenh" + enhNo);

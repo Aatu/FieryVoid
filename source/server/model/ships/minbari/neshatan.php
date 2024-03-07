@@ -4,8 +4,8 @@ class Neshatan extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
 
-	$this->pointCost = 2300;
-	$this->faction = "Minbari";
+		$this->pointCost = 2300;
+		$this->faction = "Minbari Federation";
         $this->phpclass = "Neshatan";
         $this->imagePath = "img/ships/neshatan.png";
         $this->shipClass = "Neshatan Gunship";

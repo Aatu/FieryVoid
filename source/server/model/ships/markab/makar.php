@@ -5,7 +5,7 @@ class Makar extends OSAT{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 225;
-		$this->faction = "Markab";
+		$this->faction = "Markab Theocracy";
         $this->phpclass = "Makar";
         $this->imagePath = "img/ships/MarkabOSAT.png";
         $this->shipClass = "Makar Defense Satellite";
@@ -21,6 +21,8 @@ class Makar extends OSAT{
         $this->pivotcost = 0;	
         $this->iniativebonus = 60;
         $this->isd = 2201;
+
+		$this->enhancementOptionsEnabled[] = 'MARK_FERV'; //To activate Religious Fervor attributes.   
 
         $this->addPrimarySystem(new Reactor(5, 9, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 9, 3, 6));   

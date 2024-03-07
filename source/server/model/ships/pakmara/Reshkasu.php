@@ -5,7 +5,7 @@ class Reshkasu extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 590;
-		$this->faction = "Pak'ma'ra";
+		$this->faction = "Pak'ma'ra Confederacy";
 		$this->phpclass = "Reshkasu";
 		$this->imagePath = "img/ships/PakmaraReshkasu.png";
 		$this->shipClass = "Resh'kas'u Light Carrier";
@@ -28,11 +28,22 @@ class Reshkasu extends BaseShip{
 		
   				
 
-		$this->addPrimarySystem(new Reactor(5, 23, 0, 0));
-		$this->addPrimarySystem(new JumpEngine(4, 15, 4, 48));
+		/* let's replace this with appropriate two C&Cs!
 		$this->addPrimarySystem(new PakmaraCnC(6, 12, 0, 0));
+		*/
+		$cnc = new PakmaraCnC(5, 6, 0, 0);
+		$cnc->startArc = 0;
+		$cnc->endArc = 360;
+        $this->addPrimarySystem($cnc);
+		$cnc = new SecondaryCnC(5, 6, 0, 0);
+		$cnc->startArc = 0;
+		$cnc->endArc = 360;
+        $this->addPrimarySystem($cnc);
+		
+		$this->addPrimarySystem(new Reactor(5, 23, 0, 0));
 		$this->addPrimarySystem(new Scanner(4, 12, 6, 7));
 		$this->addPrimarySystem(new Engine(5, 18, 0, 12, 3));
+		$this->addPrimarySystem(new JumpEngine(4, 15, 4, 48));
 		$this->addPrimarySystem(new Hangar(3, 15));
 
 		$this->addFrontSystem(new Thruster(4, 13, 0, 4, 1));
@@ -78,7 +89,7 @@ class Reshkasu extends BaseShip{
                         14 => "Engine",
                         16 => "Hangar",
                         19 => "Reactor",
-                        20 => "C&C",
+                        20 => "TAG:C&C",
                 ),
                 1=> array(
                         3 => "Thruster",

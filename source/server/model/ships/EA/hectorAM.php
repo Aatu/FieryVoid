@@ -30,23 +30,24 @@ class HectorAM extends OSAT{
 	    $this->enhancementOptionsEnabled[] = 'AMMO_C';//add enhancement options for other missiles - Class-C
 	    $this->enhancementOptionsEnabled[] = 'AMMO_F';//add enhancement options for other missiles - Class-F
 	    $this->enhancementOptionsEnabled[] = 'AMMO_H';//add enhancement options for other missiles - Class-H
+		$this->enhancementOptionsEnabled[] = 'AMMO_I';//add enhancement options for other missiles - Class-I	    
 	    $this->enhancementOptionsEnabled[] = 'AMMO_K';//add enhancement options for other missiles - Class-K   
 	    $this->enhancementOptionsEnabled[] = 'AMMO_L';//add enhancement options for other missiles - Class-L
 	    $this->enhancementOptionsEnabled[] = 'AMMO_M';//add enhancement options for other missiles - Class-M	    
 		$this->enhancementOptionsEnabled[] = 'AMMO_P';//add enhancement options for other missiles - Class-P
 		$this->enhancementOptionsEnabled[] = 'AMMO_X';//add enhancement options for other missiles - Class-X			
 		
-        $this->addPrimarySystem(new AmmoMissileRackB(3, 0, 0, 270, 90, $ammoMagazine, true)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
-        $this->addPrimarySystem(new AmmoMissileRackB(3, 0, 0, 270, 90, $ammoMagazine, true)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
-        $this->addPrimarySystem(new LightPulse(2, 4, 2, 180, 360));
-        $this->addPrimarySystem(new LightPulse(2, 4, 2, 0, 180));
-        $this->addPrimarySystem(new InterceptorMkI(2, 4, 1, 0, 360));
-        //$this->addPrimarySystem(new InterceptorMkI(2, 4, 1, 0, 360));
+        $this->addFrontSystem(new AmmoMissileRackB(3, 0, 0, 270, 90, $ammoMagazine, true)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+        $this->addFrontSystem(new AmmoMissileRackB(3, 0, 0, 270, 90, $ammoMagazine, true)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+        $this->addAftSystem(new LightPulse(2, 4, 2, 180, 360)); //fitting LPCs to the Aft as defensive/antivighter weapons - not much difference here, but will be handy for GODSat line!
+        $this->addAftSystem(new LightPulse(2, 4, 2, 0, 180));
+        $this->addAftSystem(new InterceptorMkI(2, 4, 1, 0, 360));
+        //$this->addAftSystem(new InterceptorMkI(2, 4, 1, 0, 360));
 
         $this->addPrimarySystem(new Reactor(4, 7, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 16, 2, 4));   
 
-        $this->addPrimarySystem(new Thruster(3, 6, 0, 0, 2));
+        $this->addAftSystem(new Thruster(3, 6, 0, 0, 2));
                 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addPrimarySystem(new Structure(4, 30));
@@ -55,30 +56,18 @@ class HectorAM extends OSAT{
 		$this->hitChart = array(
 			0=> array(
 				9 => "Structure",
-				11 => "Thruster",
-				14 => "Class-B Missile Rack",
-				16 => "Light Pulse Cannon",
+				11 => "2:Thruster",
+				14 => "1:Class-B Missile Rack",
+				16 => "2:Light Pulse Cannon",
 				18 => "Scanner",
 				19 => "Reactor",
-				20 => "Interceptor I",
+				20 => "2:Interceptor I",
 			),
 			1=> array(
-				9 => "Structure",
-				11 => "0:Thruster",
-				14 => "0:Class-B Missile Rack",
-				16 => "0:Light Pulse Cannon",
-				18 => "0:Scanner",
-				19 => "0:Reactor",
-				20 => "0:Interceptor I",
+				20 => "PRIMARY",
 			),
 			2=> array(
-				9 => "Structure",
-				11 => "0:Thruster",
-				14 => "0:Class-B Missile Rack",
-				16 => "0:Light Pulse Cannon",
-				18 => "0:Scanner",
-				19 => "0:Reactor",
-				20 => "0:Interceptor I",
+				20 => "PRIMARY",
 			),
         );
     }

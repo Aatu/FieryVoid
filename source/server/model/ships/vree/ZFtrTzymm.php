@@ -5,12 +5,12 @@ class ZFtrTzymm extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 85*6;
-		$this->faction = "Vree";
+		$this->faction = "Vree Conglomerate";
 		$this->phpclass = "ZFtrTzymm";
         $this->shipClass = "Tzymm Heavy Fighters";
         $this->imagePath = "img/ships/VreeTzymm.png";
         
-        $this->faction = "Vree";
+        $this->faction = "Vree Conglomerate";
 	    $this->isd = 2210;
 
         $this->forwardDefense = 9;

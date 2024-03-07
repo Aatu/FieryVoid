@@ -5,7 +5,7 @@ class Explorer extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 1000;
-		$this->faction = "Earth Alliance";
+		$this->faction = "Earth Alliance (custom)";
         $this->phpclass = "Explorer";
         $this->imagePath = "img/ships/explorer.png";
 			$this->canvasSize = 300; //img has 300px per side

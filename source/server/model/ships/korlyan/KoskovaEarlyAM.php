@@ -9,7 +9,7 @@ class KoskovaEarlyAM extends BaseShip{
 //	$this->faction = "Custom Ships";
         $this->phpclass = "KoskovaEarlyAM";
         $this->imagePath = "img/ships/korlyan_koskova2.png";
-        $this->shipClass = "Koskova Battlecruiser (early)";
+        $this->shipClass = "Koskova Battlecruiser (Early)";
 			$this->occurence = "common";
 			$this->variantOf = 'Koskova Battlecruiser';
         $this->shipSizeClass = 3;
@@ -32,19 +32,21 @@ class KoskovaEarlyAM extends BaseShip{
         $this->iniativebonus = 0;
 
 	//ammo magazine itself (AND its missile options)
-	$ammoMagazine = new AmmoMagazine(160); //pass magazine capacity 
+	$ammoMagazine = new AmmoMagazine(240); //pass magazine capacity - 20 rounds per launcher, plus reload rack 80
 	    $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
-	    $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 80); //add full load of basic missiles 
+	    $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 160); //add full load of basic missiles 
 	    $ammoMagazine->addAmmoEntry(new AmmoMissileI(), 80); //add full load of basic missiles  	      
 
 	    $this->enhancementOptionsEnabled[] = 'AMMO_A';//add enhancement options for other missiles - Class-A
 	    $this->enhancementOptionsEnabled[] = 'AMMO_C';//add enhancement options for other missiles - Class-C
 	    $this->enhancementOptionsEnabled[] = 'AMMO_F';//add enhancement options for other missiles - Class-F
-	    $this->enhancementOptionsEnabled[] = 'AMMO_H';//add enhancement options for other missiles - Class-H
+	    $this->enhancementOptionsEnabled[] = 'AMMO_H';//add enhancement options for other missiles - Class-H    
+	    $this->enhancementOptionsEnabled[] = 'AMMO_I';//add enhancement options for other missiles - Class-I
+	    $this->enhancementOptionsEnabled[] = 'AMMO_J';//add enhancement options for other missiles - Class-J	     
 	    $this->enhancementOptionsEnabled[] = 'AMMO_K';//add enhancement options for other missiles - Class-K   
 	    $this->enhancementOptionsEnabled[] = 'AMMO_L';//add enhancement options for other missiles - Class-L
 	    $this->enhancementOptionsEnabled[] = 'AMMO_M';//add enhancement options for other missiles - Class-M	    
-		$this->enhancementOptionsEnabled[] = 'AMMO_P';//add enhancement options for other missiles - Class-P	    	    	    	    
+		$this->enhancementOptionsEnabled[] = 'AMMO_P';//add enhancement options for other missiles - Class-P    	    	    	    
 	    $this->enhancementOptionsEnabled[] = 'AMMO_S';//add enhancement options for other missiles - Class-S
 	    $this->enhancementOptionsEnabled[] = 'AMMO_X';//add enhancement options for other missiles - Class-X	    
 		//Early cruiser, but modern Koskova doesn't appear until 2255 so this Early version could potentially have Stealth missiles from 2252.		 	    
@@ -74,12 +76,22 @@ class KoskovaEarlyAM extends BaseShip{
         $this->addAftSystem(new AmmoMissileRackD(2, 0, 0, 60, 240, $ammoMagazine, false));
 
         $this->addLeftSystem(new AmmoMissileRackD(4, 0, 0, 240, 60, $ammoMagazine, false));
-        $this->addLeftSystem(new ProximityLaser(4, 6, 1, 240, 60));
+
+		$TargeterA = new ProximityLaser(3, 0, 0, 240, 60, 'A');
+		$LauncherA = new ProximityLaserLauncher(0, 1, 0, 240, 60, 'A'); 
+		$TargeterA->addLauncher($LauncherA);
+		$this->addLeftSystem($TargeterA);
+		$this->addLeftSystem($LauncherA);
         $this->addLeftSystem(new AmmoMissileRackL(3, 0, 0, 180, 360, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         $this->addLeftSystem(new Thruster(4, 15, 0, 5, 3));
 
-        $this->addRightSystem(new AmmoMissileRackD(4, 0, 0, 300, 10, $ammoMagazine, false));
-        $this->addRightSystem(new ProximityLaser(4, 6, 1, 300, 120));
+        $this->addRightSystem(new AmmoMissileRackD(4, 0, 0, 300, 120, $ammoMagazine, false));
+
+		$TargeterB = new ProximityLaser(3, 0, 0, 300, 120, 'B');
+		$LauncherB = new ProximityLaserLauncher(0, 1, 0, 300, 120, 'B'); 
+		$TargeterB->addLauncher($LauncherB);
+		$this->addRightSystem($TargeterB);
+		$this->addRightSystem($LauncherB);
         $this->addRightSystem(new AmmoMissileRackL(3, 0, 0, 0, 180, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         $this->addRightSystem(new Thruster(4, 15, 0, 5, 4));
         
@@ -118,7 +130,7 @@ class KoskovaEarlyAM extends BaseShip{
 			3=> array(
 					5 => "Thruster",
 					7 => "Class-L Missile Rack",
-					9 => "Proximity Laser",
+					9 => "Proximity Laser A",
 					11 => "Class-D Missile Rack",
 					18 => "Structure",
 					20 => "Primary",
@@ -126,7 +138,7 @@ class KoskovaEarlyAM extends BaseShip{
 			4=> array(
 					5 => "Thruster",
 					7 => "Class-L Missile Rack",
-					9 => "Proximity Laser",
+					9 => "Proximity Laser B",
 					11 => "Class-D Missile Rack",
 					18 => "Structure",
 					20 => "Primary",

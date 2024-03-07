@@ -40,11 +40,11 @@ class ThirdspaceAttackCraft extends LCV{ //Actually an LCV.
 	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 4)); //unhittable and with unlimited thrust allowance
 	$this->addPrimarySystem(new ThirdspaceCnC(99, 1, 0, 0)); //C&C should be unhittable anyway
 		    
-    $this->addPrimarySystem(new AdvancedSingularityDrive(6, 16, 0, 21+4+3));
+    $this->addPrimarySystem(new AdvancedSingularityDrive(6, 16, 0, 17+4+3));
 	$sensors = new Scanner(5, 12, 4, 9);
 		$sensors->markThirdspace();
 		$this->addPrimarySystem($sensors);
-	$this->addPrimarySystem(new JumpEngine(5, 8, 3, 8));//Added a small jump drive, how they travel is unknown but if White Star can house a jump drive it's not unfeasible Thirdspace aliens would have a FTL drive on their smaller craft.
+	$this->addPrimarySystem(new JumpEngine(5, 8, 4, 8));//Added a small jump drive, how they travel is unknown but if White Star can house a jump drive it's not unfeasible Thirdspace aliens would have a FTL drive on their smaller craft.
 	$this->addPrimarySystem(new Engine(5, 12, 0, 10, 2));
     $this->addPrimarySystem(new ThirdspaceSelfRepair(5, 8, 4)); //armor, structure, output 	
 

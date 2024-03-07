@@ -5,7 +5,7 @@ class ShaveenPoliceLeader extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 600;
-		$this->faction = "Minbari";
+		$this->faction = "Minbari Federation";
         $this->phpclass = "ShaveenPoliceLeader";
         $this->imagePath = "img/ships/shaveen.png";
         $this->shipClass = "Shaveen Police Leader";

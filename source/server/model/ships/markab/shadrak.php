@@ -7,7 +7,7 @@ class Shadrak extends SmallStarBaseFourSections{
 		$this->pointCost = 600;
 		$this->base = true;
 		$this->smallBase = true;
-		$this->faction = "Markab";
+		$this->faction = "Markab Theocracy";
 		$this->phpclass = "Shadrak";
 		$this->shipClass = "Shadrak Shrine";
 		$this->imagePath = "img/ships/MarkabShadrakShrine.png";
@@ -22,6 +22,7 @@ class Shadrak extends SmallStarBaseFourSections{
 		$this->forwardDefense = 16;
 		$this->sideDefense = 16;
 
+		$this->enhancementOptionsEnabled[] = 'MARK_FERV'; //To activate Religious Fervor attributes.   
 
 		$this->addFrontSystem(new Structure( 4, 60));
 		$this->addAftSystem(new Structure( 4, 60));

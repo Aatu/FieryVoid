@@ -7,7 +7,7 @@ class MinbariOrbitalHanger extends SmallStarBaseFourSections{
 		$this->pointCost = 600;
 		$this->base = true;
 		$this->smallBase = true;
-		$this->faction = "Minbari";
+		$this->faction = "Minbari Federation";
 		$this->phpclass = "minbariorbitalhanger";
 		$this->shipClass = "Minbari Orbital Hangar";
 		$this->variantOf = "Minbari Civilian Base";

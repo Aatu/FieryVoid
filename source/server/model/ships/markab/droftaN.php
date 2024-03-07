@@ -6,7 +6,7 @@ class DroftaN extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 46*6;
-        $this->faction = "Markab";
+        $this->faction = "Markab Theocracy";
         $this->phpclass = "DroftaN";
         $this->shipClass = "Drofta Medium Fighters";
         $this->imagePath = "img/ships/MarkabDrofta.png";
@@ -20,8 +20,14 @@ class DroftaN extends FighterFlight{
         $this->turncost = 0.33;
         
     	$this->iniativebonus = 18 *5;
+  	
+    	
         $this->populate();        
+
+		$this->enhancementOptionsEnabled[] = 'FTR_FERV'; //To activate Religious Fervor attributes.  
     }
+
+
 
     public function populate(){
 

@@ -604,7 +604,7 @@ class Manager{
             
             /** @var BaseShip $ship */
             $ship = new $value["phpclass"]($value["id"], $value["userid"], $value['name'], $value["slot"]);       
-			$ship->pointCostEnh = $value["pointCostEnh"];			
+			$ship->pointCostEnh = $value["pointCostEnh"]+$value["pointCostEnh2"]; //merge enhancements and options into one value! - Options not saved separately
             $ship->setMovements($movements);    
             $ship->EW = $EW;
 

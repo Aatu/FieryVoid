@@ -5,7 +5,7 @@ class Shokov extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 400;
-		$this->faction = "Narn";
+		$this->faction = "Narn Regime";
         $this->phpclass = "Shokov";
         $this->imagePath = "img/ships/shokos.png";
         $this->shipClass = "Sho'Kov Torpedo Cutter";

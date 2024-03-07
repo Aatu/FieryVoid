@@ -5,7 +5,7 @@ class Tradana extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 575;
-		$this->faction = "Minbari";
+		$this->faction = "Minbari Federation";
         $this->phpclass = "Tradana";
         $this->imagePath = "img/ships/tradana.png";
         $this->shipClass = "Tradana Combat Frigate";

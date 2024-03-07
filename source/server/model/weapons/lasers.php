@@ -848,6 +848,7 @@ class LaserAccelerator extends Laser{
 
         public $raking = 10;
         public $priority = 9;
+		public $repairPriority = 6;//Make slightly higher than normal weapons :)        
         
         public $rangePenalty = 0.2;
         public $fireControl = array(null, 2, 4); // fighters, <mediums, <capitals 
