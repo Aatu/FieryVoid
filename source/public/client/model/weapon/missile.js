@@ -460,3 +460,9 @@ AmmoMissileRackF.prototype.checkIsInRangeFRack = function (shooter, target, weap
 		}
         return distance <= range;
     };	
+    
+var BallisticMineLauncher = function BallisticMineLauncher(json, ship) {
+    Weapon.call(this, json, ship);
+};
+BallisticMineLauncher.prototype = Object.create(Weapon.prototype);
+BallisticMineLauncher.prototype.constructor = BallisticMineLauncher;    

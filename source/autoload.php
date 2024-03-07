@@ -2862,7 +2862,9 @@ spl_autoload_register(
 				'talokiam' => '/server/model/ships/korlyan/TalokiAM.php',				
 				'talokiearlyam' => '/server/model/ships/korlyan/TalokiEarlyAM.php',
 				'talokioriginalam' => '/server/model/ships/korlyan/TalokiOriginalAM.php',
-				'vaklaram' => '/server/model/ships/korlyan/VaklarAM.php',
+				'vaklaram' => '/server/model/ships/korlyan/VaklarAM.php',			
+				'trylkanam' => '/server/model/ships/korlyan/TrylkanAM.php',
+				'verlokaam' => '/server/model/ships/korlyan/VerlokaAM.php',								
 
 /*         		'multidefenselauncher' => '/server/model/weapons/customNexus.php', //missile racks themselves
          		'limpetboretorp' => '/server/model/weapons/customNexus.php', 
@@ -2887,7 +2889,7 @@ spl_autoload_register(
 				'koskovatestbed' => '/server/model/ships/korlyan/KoskovaTestbed.php',
          		'limpetboretorpedo' => '/server/model/weapons/torpedo.php', 				
          		'limpetboretorpedobase' => '/server/model/weapons/torpedo.php',
-  //       		'ballisticminelauncher' => '/server/model/weapons/missile.php', 	 
+         		'ballisticminelauncher' => '/server/model/weapons/missile.php', 	 
 
 
 				//Star Wars - Clone Wars testing
@@ -2971,8 +2973,10 @@ spl_autoload_register(
                 		'ammomissilem' => '/server/model/systems/baseSystems.php',
                 		'ammomissilekk' => '/server/model/systems/baseSystems.php',
                 		'ammomissilex' => '/server/model/systems/baseSystems.php',
-                		'ammomissilej' => '/server/model/systems/baseSystems.php',             
-    //            		'ammoblmineb' => '/server/model/systems/baseSystems.php',                  		                		                 		                 		                		
+                		'ammomissilej' => '/server/model/systems/baseSystems.php',
+                		 //Ballistic Mines            
+                		'ammoblmineb' => '/server/model/systems/baseSystems.php',                  		                		                                 			'ammoblminew' => '/server/model/systems/baseSystems.php',
+             			'ammoblmineh' => '/server/model/systems/baseSystems.php',                				                 		                		
 						
                 		'ammomissilefb' => '/server/model/systems/baseSystems.php',
                 		'ammomissilefl' => '/server/model/systems/baseSystems.php',
