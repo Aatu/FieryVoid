@@ -5,7 +5,7 @@ class VorlonDreadnought extends VorlonCapitalShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 5000;
-		$this->faction = "Vorlons";
+		$this->faction = "Vorlon Empire";
         $this->phpclass = "VorlonDreadnought";
         $this->shipClass = "Dreadnought";
         //$this->variantOf = "Battle Destroyer";		

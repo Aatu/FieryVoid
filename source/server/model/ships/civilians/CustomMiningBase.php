@@ -23,11 +23,18 @@ class CustomMiningBase extends SmallStarBaseFourSections{
 		$this->unofficial = true;
 		$this->isd = 2000;
 		
+		
+		/*replaced by TAGed versions!
 		$this->addFrontSystem(new Structure( 2, 58));
 		$this->addAftSystem(new Structure( 2, 58));
 		$this->addLeftSystem(new Structure( 2, 58));
 		$this->addRightSystem(new Structure( 2, 58));
+		*/
 		$this->addPrimarySystem(new Structure( 4, 44));
+		$this->addFrontSystem(Structure::createAsOuter(2, 58, 270,90));
+		$this->addAftSystem(Structure::createAsOuter(2, 58, 90, 270));
+		$this->addLeftSystem(Structure::createAsOuter(2, 58, 180, 360));
+		$this->addRightSystem(Structure::createAsOuter(2, 58, 0, 180));
 		
 		$this->addPrimarySystem(new Reactor(4, 16, 0, 0));
 		$this->addPrimarySystem(new CnC(4, 15, 0, 0)); 
@@ -40,34 +47,74 @@ class CustomMiningBase extends SmallStarBaseFourSections{
 		$this->addFrontSystem(new CustomIndustrialGrappler(2, 0, 0, 270, 90));
 		$this->addFrontSystem(new CustomIndustrialGrappler(2, 0, 0, 270, 90));
 		$this->addFrontSystem(new CustomIndustrialGrappler(2, 0, 0, 270, 90));
+		/*
 		$this->addFrontSystem(new Hangar(2, 6));
 		$this->addFrontSystem(new CargoBay(2, 18));
+		*/
+			$hangar = new Hangar(2, 6);
+			$hangar->startArc = 270;
+			$hangar->endArc = 90;
+			$this->addFrontSystem($hangar);
+			$cargoBay = new CargoBay(2, 25);
+			$cargoBay->startArc = 270;
+			$cargoBay->endArc = 90;
+			$this->addFrontSystem($cargoBay);
+		
+		
 		
 		$this->addAftSystem(new CustomMiningCutter(2, 0, 0, 90,270));
 		$this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 90,270));
 		$this->addAftSystem(new CustomIndustrialGrappler(2, 0, 0, 90,270));
 		$this->addAftSystem(new CustomIndustrialGrappler(2, 0, 0, 90,270));
 		$this->addAftSystem(new CustomIndustrialGrappler(2, 0, 0, 90,270));
+		/*
 		$this->addAftSystem(new Hangar(2, 6));
 		$this->addAftSystem(new CargoBay(2, 18));		
+		*/
+			$hangar = new Hangar(2, 6);
+			$hangar->startArc = 90;
+			$hangar->endArc = 270;
+			$this->addAftSystem($hangar);
+			$cargoBay = new CargoBay(2, 25);
+			$cargoBay->startArc = 90;
+			$cargoBay->endArc = 270;
+			$this->addAftSystem($cargoBay);
 		
 		$this->addRightSystem(new CustomMiningCutter(2, 0, 0, 0, 180));
 		$this->addRightSystem(new LightParticleBeamShip(2, 2, 1, 0, 180));
 		$this->addRightSystem(new CustomIndustrialGrappler(2, 0, 0, 0, 180));
 		$this->addRightSystem(new CustomIndustrialGrappler(2, 0, 0, 0, 180));
 		$this->addRightSystem(new CustomIndustrialGrappler(2, 0, 0, 0, 180));
+		/*
 		$this->addRightSystem(new Hangar(2, 6));
 		$this->addRightSystem(new CargoBay(2, 18));
-		
+		*/
+			$hangar = new Hangar(2, 6);
+			$hangar->startArc = 0;
+			$hangar->endArc = 180;
+			$this->addRightSystem($hangar);
+			$cargoBay = new CargoBay(2, 25);
+			$cargoBay->startArc = 0;
+			$cargoBay->endArc = 180;
+			$this->addRightSystem($cargoBay);
 
 		$this->addLeftSystem(new CustomMiningCutter(2, 0, 0, 180, 0));
 		$this->addLeftSystem(new LightParticleBeamShip(2, 2, 1, 180, 0));
 		$this->addLeftSystem(new CustomIndustrialGrappler(2, 0, 0, 180, 0));
 		$this->addLeftSystem(new CustomIndustrialGrappler(2, 0, 0, 180, 0));
 		$this->addLeftSystem(new CustomIndustrialGrappler(2, 0, 0, 180, 0));
+		/*
 		$this->addLeftSystem(new Hangar(2, 6));
 		$this->addLeftSystem(new CargoBay(2, 18));
-		
+		*/
+			$hangar = new Hangar(2, 6);
+			$hangar->startArc = 180;
+			$hangar->endArc = 0;
+			$this->addLeftSystem($hangar);
+			$cargoBay = new CargoBay(2, 25);
+			$cargoBay->startArc = 180;
+			$cargoBay->endArc = 0;
+			$this->addLeftSystem($cargoBay);
 				
 		
 		$this->hitChart = array(			
@@ -80,39 +127,39 @@ class CustomMiningBase extends SmallStarBaseFourSections{
 				20 => "C&C",
 			),
 			1=> array(
-				1 => "Light Particle Beam",
-				3 => "Mining Cutter",
-				6 => "Industrial Grappler",
-				8 => "Cargo Bay",
-				10 => "Hangar",
-				18 => "Structure",
+				1 => "TAG:Light Particle Beam",
+				3 => "TAG:Mining Cutter",
+				6 => "TAG:Industrial Grappler",
+				8 => "TAG:Cargo Bay",
+				10 => "TAG:Hangar",
+				18 => "TAG:Outer Structure",
 				20 => "Primary",
 			),
 			2=> array(
-				1 => "Light Particle Beam",
-				3 => "Mining Cutter",
-				6 => "Industrial Grappler",
-				8 => "Cargo Bay",
-				10 => "Hangar",
-				18 => "Structure",
+				1 => "TAG:Light Particle Beam",
+				3 => "TAG:Mining Cutter",
+				6 => "TAG:Industrial Grappler",
+				8 => "TAG:Cargo Bay",
+				10 => "TAG:Hangar",
+				18 => "TAG:Outer Structure",
 				20 => "Primary",
 			),	
 			3=> array(
-				1 => "Light Particle Beam",
-				3 => "Mining Cutter",
-				6 => "Industrial Grappler",
-				8 => "Cargo Bay",
-				10 => "Hangar",
-				18 => "Structure",
+				1 => "TAG:Light Particle Beam",
+				3 => "TAG:Mining Cutter",
+				6 => "TAG:Industrial Grappler",
+				8 => "TAG:Cargo Bay",
+				10 => "TAG:Hangar",
+				18 => "TAG:Outer Structure",
 				20 => "Primary",
 			),
 			4=> array(
-				1 => "Light Particle Beam",
-				3 => "Mining Cutter",
-				6 => "Industrial Grappler",
-				8 => "Cargo Bay",
-				10 => "Hangar",
-				18 => "Structure",
+				1 => "TAG:Light Particle Beam",
+				3 => "TAG:Mining Cutter",
+				6 => "TAG:Industrial Grappler",
+				8 => "TAG:Cargo Bay",
+				10 => "TAG:Hangar",
+				18 => "TAG:Outer Structure",
 				20 => "Primary",
 			),
 		);

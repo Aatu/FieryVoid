@@ -5,7 +5,7 @@ class Ulana extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
 
         $this->pointCost = 1200;
-        $this->faction = "Yolu";
+        $this->faction = "Yolu Confederation";
         $this->phpclass = "Ulana";
         $this->imagePath = "img/ships/ulana.png";
         $this->shipClass = "Ulana Patrol Cruiser";

@@ -5,7 +5,7 @@ class Ashinta extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
 
         $this->pointCost = 850;
-        $this->faction = "Minbari";
+        $this->faction = "Minbari Federation";
         $this->phpclass = "Ashinta";
         $this->imagePath = "img/ships/tinashi.png";
         $this->shipClass = "Ashinta Close Escort";

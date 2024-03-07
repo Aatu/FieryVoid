@@ -878,26 +878,59 @@ class StunBeam extends Weapon{
 		}
 		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
 	}
-       
+	
 	public function setSystemDataWindow($turn){
-		parent::setSystemDataWindow($turn);
-		$this->data["Special"] = 'Forces dropout on fighters (except superheavy), turns off powered systems. ';
-	}
+		parent::setSystemDataWindow($turn);  
+		$this->data["Special"] = "Doesn't deal damage. Effect depends on system hit:.";      
+		$this->data["Special"] .= "<br> - Weapon, Jammer or Jump Engine: System deactivated for one turn.";
+		$this->data["Special"] .= "<br> - Thruster: Thruster cannot be used for one turn."; 		 
+		$this->data["Special"] .= "<br> - C&C: -20 Initiative for one turn."; 
+		$this->data["Special"] .= "<br> - Scanner: Output halved for one turn."; 
+		$this->data["Special"] .= "<br> - Engine: Output halved for one turn.";
+		$this->data["Special"] .= "<br> - No effect on Structure or any other type of system.";		
+		$this->data["Special"] .= "<br>Forces dropout on fighters (except superheavy)."; 
+		$this->data["Special"] .= "<br>Does not affect ships with advanced armor.";  		    
+	}		
 		
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
-		$crit = null;
-		if (WeaponEM::isTargetEMResistant($ship,$system)) return;
-		if ($system instanceof Fighter && !($ship->superheavy)){
+		$crit = null;		
+		if ($system->isDestroyed()) return; //no point allocating
+		if ($ship->isDestroyed()) return; //no point allocating				
+		if ($system->advancedArmor) { //no effect on Advanced Armor but Ipsha etc still get affected.
+		$fireOrder->pubnotes .= "<br> Stun Beam has no effect on advanced armor.";				
+		return; 	
+		}
+		if($system instanceOf Structure){ //No effect on Structure.
+		$fireOrder->pubnotes .= "<br> Stun Beam impacted harmlessly on structure.";				
+		return; 
+		}else if ($system instanceOf Weapon || $system instanceOf JumpEngine || $system instanceOf Jammer){ //Deactivate for 1 turn.
+			if ($system->powerReq > 0 || $system->canOffLine ){
+			$system->addCritical($ship->id, "ForcedOfflineOneTurn", $gamedata);
+			}
+		}else if ($system instanceOf Thruster){ //Can't deactivate thurster, but can render it unusable for 1 turn using mulitple FirstThrustIgnored crits.
+			$thrusterOutput = $system->getOutput();	
+				for($i=1; $i<=$thrusterOutput;$i++){
+					$crit = new FirstThrustIgnoredOneTurn(-1, $ship->id, $system->id, 'FirstThrustIgnoredOneTurn', $gamedata->turn); 
+					$crit->updated = true;
+			        $system->criticals[] =  $crit;
+				}     			
+		}else if($system instanceOf CnC) { // -20 Initiative, so just ReducedIniativeOneTurn twice.
+			$system->addCritical($ship->id, "ReducedIniativeOneTurn", $gamedata);			
+			$system->addCritical($ship->id, "ReducedIniativeOneTurn", $gamedata);
+		}else if($system instanceOf Scanner || $system instanceOf Engine) { //Halve output for 1 turn.					
+			$system->addCritical($ship->id, "OutputHalvedOneTurn", $gamedata);								
+		}else if ($system instanceof Fighter && !($ship->superheavy)){ //Dropout unless super heavy fighter.
 			$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
 			$crit->updated = true;
-					$crit->inEffect = true;
+			$crit->inEffect = true;
 			$system->criticals[] =  $crit;
 			$fireOrder->pubnotes .= " DROPOUT! ";
-				}else if ($system->powerReq > 0 || $system->canOffLine ){
-			$system->addCritical($ship->id, "ForcedOfflineOneTurn", $gamedata);
-		}
-	}
-	
+				}else{ //No other types of systems are effected.
+						$fireOrder->pubnotes .= "<br> Stun Beam has no effect.";				
+						return; 
+				}		
+	}//end of onDamagedSystem
+
 	public function getDamage($fireOrder){        return 0;   }
 	public function setMinDamage(){     $this->minDamage = 0;      }
 	public function setMaxDamage(){     $this->maxDamage = 0;      }
@@ -1404,14 +1437,15 @@ class SparkField extends Weapon implements DefensiveSystem{
     */
         public $name = "SparkField";
         public $displayName = "Spark Field";
-	public $iconPath = "SparkField.png";
+		public $iconPath = "SparkField.png";
 	
 	//let's make animation more or less invisible, and effect very large
-	public $trailColor = array(0, 0, 0);
+//		public $trailColor = array(0, 0, 0);
         public $animation = "ball";
-        public $animationColor = array(0, 0, 0);
+		public $animationColor = array(165, 165, 255);
         public $animationExplosionScale = 2;
-        public $animationExplosionType = "AoE";
+//      public $animationExplosionType = "AoE";
+		public $noProjectile = true; //Marker for front end to make projectile invisible for weapons that shouldn't have one.          
         //public $explosionColor = array(165, 165, 255);
         //public $projectilespeed = 20;
         //public $animationWidth = 1;
@@ -1620,7 +1654,8 @@ class SparkField extends Weapon implements DefensiveSystem{
 	}
         public function setMaxDamage(){   
 		$this->maxDamage = 7 ;	    
-	}
+	}	
+	
 } //endof class SparkField 
 
 
@@ -2636,7 +2671,7 @@ class RadCannon extends Weapon{
 		$this->data["Special"] .= "<br>Effect depends on system hit:";    
 		$this->data["Special"] .= "<br> - Structure: 10 boxes marked destroyed (regardless of armor)."; 
 		$this->data["Special"] .= "<br> - Shield: system destroyed."; 
-		$this->data["Special"] .= "<br>  -- Gravitic Shield reduces generator output by 1, too."; 
+		$this->data["Special"] .= "<br> - Gravitic Shield reduces generator output by 1, too."; 
 		$this->data["Special"] .= "<br> - Weapon, Thruster or Jump Engine: system destroyed."; 
 		$this->data["Special"] .= "<br> - C&C: critical roll forced (at +2)."; 
 		$this->data["Special"] .= "<br> - Scanner: output reduced by 1."; 
@@ -2768,16 +2803,18 @@ class IonFieldGenerator extends Weapon{
 	public $range = 35;
 	public $loadingtime = 2;
 	
-	public $trailColor = array(30, 170, 255);
+
 	public $animation = "ball";
-	public $animationColor = array(30, 170, 255);
+	public $animationColor = array(160, 0, 255);
 	public $animationExplosionScale = 2; //covers 2 hexes away from explosion center
-	public $animationExplosionType = "AoE";
+
 	/*useless
 	public $explosionColor = array(30, 170, 255);
+	public $animationExplosionType = "AoE";	
 	public $projectilespeed = 12;
 	public $animationWidth = 14;
 	public $trailLength = 10;
+	public $trailColor = array(160, 0, 255);	
 	    */
 	
 	public $firingModes = array(
@@ -4415,39 +4452,33 @@ class VorlonDischargeCannon extends Weapon{
 
 }//endof class VorlonDischargeCannon
 
-
-class PsychicField extends Weapon implements DefensiveSystem{ //Thirdspace weapons that operates similar to Spark Field, but debilitating enemies in range, not damaging them.
-        public $name = "PsychicField";
-        public $displayName = "Psychic Field";
+class PsychicField extends Weapon implements DefensiveSystem{ //Thirdspace weapons that operates similar to Spark Field.
+    public $name = "PsychicField";
+    public $displayName = "Psychic Field";
 	public $iconPath = "PsychicField.png";
 	
 	//let's make animation more or less invisible, and effect very large
-	public $trailColor = array(0, 0, 0); //hide projectile
-        public $animation = "ball";
-        public $animationColor = array(0, 0, 0); //hide projectile
-        public $animationExplosionScale = 2;
-        public $animationExplosionType = "AoE";
-        //public $explosionColor = array(165, 165, 255);
-        //public $projectilespeed = 20;
-        //public $animationWidth = 1;
-        //public $trailLength = 1;
+    public $animation = "ball";
+    public $animationColor = array(128, 0, 0);
+    public $animationExplosionScale = 5; //Default
+	public $noProjectile = true; //Marker for front end to make projectile invisible for weapons that shouldn't have one.      
 	
 	public $boostable = true;
-        public $boostEfficiency = 2;
-        public $maxBoostLevel = 5;
+    public $boostEfficiency = 4;
+    public $maxBoostLevel = 3;
 	
 	public $output = 0;
-	public $baseOutput = 2;//base output WITH Spark Curtain
-	public $defensiveType = "SparkCurtain"; //needs to be set to recognize as defensive system
+//	public $baseOutput = 2;//base output WITH Spark Curtain
+//	public $defensiveType = "SparkCurtain"; //needs to be set to recognize as defensive system
       
-        public $priority = 2; //should attack very early
+    public $priority = 2; //should attack very early
 	
-        public $loadingtime = 1;
+    public $loadingtime = 1;
 	public $autoFireOnly = true; //this weapon cannot be fired by player
 	public $doNotIntercept = true; //this weapon is a field, "attacks" are just for technical reason
         
-        public $rangePenalty = 0; //no range penalty, but range itself is limited
-        public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals ; not relevant really!
+    public $rangePenalty = 0; //no range penalty, but range itself is limited
+    public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals ; not relevant really!
 	
 	public $boostlevel = 0;
 	
@@ -4455,7 +4486,7 @@ class PsychicField extends Weapon implements DefensiveSystem{ //Thirdspace weapo
 		
 	public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
 	public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
-    	public $firingModes = array( 1 => "Field"); //just a convenient name for firing mode
+    public $firingModes = array( 1 => "Field"); //just a convenient name for firing mode
 	public $hextarget = true;
 	
 	protected $targetList = array(); //weapon will hit units on this list rather than target from firing order; filled by PsychicField handler!
@@ -4466,34 +4497,32 @@ class PsychicField extends Weapon implements DefensiveSystem{ //Thirdspace weapo
 			);
 	
 	
-	
 	public function addTarget($newTarget){
 		$this->targetList[] = $newTarget;
 	}
 
-	
 	    public function setSystemDataWindow($turn){
 		    $boostlevel = $this->getBoostLevel($turn);
-	//	    $this->minDamage = 2-$boostlevel;
-	//	    $this->maxDamage = 7-$boostlevel;
+		    $this->minDamage = 0+$boostlevel;
+		    $this->maxDamage = 0+$boostlevel;
 	//	    $this->minDamage = max(0,$this->minDamage);
 		    $this->animationExplosionScale = $this->getAoE($turn);
 		    $this->range = $this->getAoE($turn);
 		      parent::setSystemDataWindow($turn);  
-		      //$this->data["AoE"] = $this->getAoE($turn);
+//		      $this->data["AoE"] = $this->getAoE($turn);
 		      $this->data["Special"] = "This weapons automatically affects all units (friend or foe) in area of effect.  It should not be fired manually."; 
-		      $this->data["Special"] .= "<br>Affected Fighters have their initiative reduced by 5 to 20 points, and their hit chance reduced by 5 - 15% for 1 turn.";  
-		      $this->data["Special"] .= "<br>Affected Ships have their their hit chance reduced by 5 - 15% for 1 turn if hit on structure, and suffer a potential critical hit on non-Structure systems.";  		      
-		      $this->data["Special"] .= "<br>Can be boosted at a cost 2 Power, each boost gives +2 AoE range to maximum of 12 hexes."; 
-		      $this->data["Special"] .= "<br>Multiple overlapping Psychic Fields will only cause 1 (the strongest) attack on a particular target.";
-		      $this->data["Special"] .= "<br>Does not affect other Thirdspace units, and is only 50% effective against Advanced Armor.";  		       
+		      $this->data["Special"] .= "<br>Affected Fighters have their Initiative reduced by 5 to 15 points, and their Hit Chance reduced by 5 - 10% for 1 turn.";  
+		      $this->data["Special"] .= "<br>Affected Ships have their their Hit Chance reduced by 5 - 10% for 1 turn if hit on structure, and suffer a potential critical hit on non-Structure systems.";  		      
+		      $this->data["Special"] .= "<br>Can be boosted at a cost 4 Power, each boost gives +1 AoE range, +1 Damage and +5 to Initiative and Hit Chance penalties."; 
+		      $this->data["Special"] .= "<br>Multiple overlapping Psychic Fields will only cause one (the strongest) attack on a particular target.";
+		      $this->data["Special"] .= "<br>Does not affect other friendly units, and is only 50% effective against Advanced Armor.";  		       
 	    }	//endof function setSystemDataWindow
 	
 	
 	
 	public function getAoE($turn){
 		$boostlevel = $this->getBoostLevel($turn);
-		$aoe = 2+(2*$boostlevel);
+		$aoe = 5+$boostlevel;
 		return $aoe;
 	}
 	
@@ -4521,6 +4550,31 @@ class PsychicField extends Weapon implements DefensiveSystem{ //Thirdspace weapo
 		TacGamedata::$lastFiringResolutionNo++;    //note for further shots
 		$fireOrder->resolutionOrder = TacGamedata::$lastFiringResolutionNo;//mark order in which firing was handled!
 	}
+
+	protected function beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata){
+		
+		if (!($target instanceof FighterFlight)){ //ship - as usual
+			$damage = $this->getFinalDamage($shooter, $target, $pos, $gamedata, $fireOrder);
+			if ($target->team == $shooter->team) $damage = 0; //No effect on other Thirdspace ships.			
+			$this->damage($target, $shooter, $fireOrder,  $gamedata, $damage);
+		}else{//fighter flight - separate hit on each fighter!
+			foreach ($target->systems as $fighter){
+				if ($fighter == null || $fighter->isDestroyed()){
+				    continue;
+				}
+				$damage = $this->getFinalDamage($shooter, $target, $pos, $gamedata, $fireOrder);
+				if ($target->team == $shooter->team) $damage = 0; //No effect on other Thirdspace ships.					
+				$this->doDamage($target, $shooter, $fighter, $damage, $fireOrder, null, $gamedata, false);
+                }
+		}
+	}	
+
+
+	public function beforeDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
+		$dmgToReturn = $damage;
+		if ($system instanceof Structure) $dmgToReturn = 0; //will not harm Structure!
+		return $dmgToReturn;
+	}
 	
 	public function calculateBoostLevel($turn){
 		$this->boostlevel = $this->getBoostLevel($turn);
@@ -4544,18 +4598,23 @@ class PsychicField extends Weapon implements DefensiveSystem{ //Thirdspace weapo
 		PsychicFieldHandler::createFiringOrders($gamedata);		
 	}
 
-	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!		
-	if ($ship->faction == "Thirdspace") return; //No effect on other Thirdspace ships.
+	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!	
+//		if ($ship->faction == "Thirdspace") return; //No effect on other Thirdspace ships.
+		$shooter = $gamedata->getShipById($fireOrder->shooterid);
+		if ($ship->team == $shooter->team) return; //No effect on other Thirdspace ships.
 		
-		$effectIni = Dice::d(5,1);//strength of effect: 1d5
-		$effecttohit = Dice::d(3,1);//strength of effect: 1d3
-		$effectIni5 = $effectIni * 5;
-		$effecttohit5 = $effecttohit * 5;	
-		$fireOrder->pubnotes .= "<br> Initiative and Offensive Bonus reduced for fighters, and non-Thirdspace ships suffer potential disruption.";
+		$boostlevel = $this->getBoostLevel($gamedata->turn);
+		
+		$effectIni = Dice::d(3,1)+$boostlevel;//strength of effect: -5 to -30 initiative.
+		$effecttohit = Dice::d(2,1)+$boostlevel;//strength of effect: -5 to -25 to hit chances.
+		$effectCrit = $effectIni +2;
+				
+		$fireOrder->pubnotes .= "<br> Enemy ships have Initiative reduced, and suffer a penalty to hit next turn or a potential Critical.  Initiative and Offensive Bonus reduced for enemy fighters.";
 						
 		if ($system->advancedArmor){		
 			$effectIni = ceil($effectIni/2);  	//Other Ancients are somewhat resistant to pyschic attack from Thirdspace Aliens, 50% effect.	
 			$effecttohit = ceil($effecttohit/2);
+			$effectCrit = ceil($effectCrit/2);		
 			}
 	
 		if ($ship instanceof FighterFlight){  //place effect on first fighter, even if it's already destroyed!			
@@ -4572,16 +4631,27 @@ class PsychicField extends Weapon implements DefensiveSystem{ //Thirdspace weapo
 			        	$firstFighter->criticals[] =  $crit;
 				}
 			}
-		}else if ($system instanceof Structure){
+		}else if ($system instanceof Structure){ //Give penalty to hit next turn if it hits structure.
 			$CnC = $ship->getSystemByName("CnC");
 				for($i=1; $i<=$effecttohit;$i++){
 					$crit = new PenaltyToHitOneTurn(-1, $ship->id, $CnC->id, 'PenaltyToHitOneTurn', $gamedata->turn); 
 					$crit->updated = true;
 			        $CnC->criticals[] =  $crit;
 				}
-			} else { //force critical roll at +4 even on other Ancients
-				$system->forceCriticalRoll = true;
-				$system->critRollMod += 8;			
+				for($i=1; $i<=$effectIni;$i++){
+					$crit = new tmpinidown(-1, $ship->id, $CnC->id, 'tmpinidown', $gamedata->turn); 
+					$crit->updated = true;
+			        $CnC->criticals[] =  $crit;
+					}    
+			} else { //Force critical roll if it hits something other than structure.
+			$CnC = $ship->getSystemByName("CnC");			
+				for($i=1; $i<=$effectIni;$i++){
+					$crit = new tmpinidown(-1, $ship->id, $CnC->id, 'tmpinidown', $gamedata->turn); 
+					$crit->updated = true;
+			        $CnC->criticals[] =  $crit;			
+					}
+					$system->forceCriticalRoll = true;
+					$system->critRollMod += $effectCrit;	//Add 3-8 modifier depending on $effectIni roll and boost (halved for Ancients). 		
 					}			
 	} //endof function onDamagedSystem	
 		
@@ -4592,7 +4662,7 @@ class PsychicField extends Weapon implements DefensiveSystem{ //Thirdspace weapo
 			$maxhealth = 20;
 		}
 		if ( $powerReq == 0 ){
-			$powerReq = 2;
+			$powerReq = 4;
 		}
 		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
 		PsychicFieldHandler::addPsychicField($this);//so all Psychic Fields are accessible together, and firing orders can be uniformly created
@@ -4601,8 +4671,8 @@ class PsychicField extends Weapon implements DefensiveSystem{ //Thirdspace weapo
 
 	public function onConstructed($ship, $turn, $phase){
 		parent::onConstructed($ship, $turn, $phase);
-		$this->tohitPenalty = $this->getOutput();
-		$this->damagePenalty = 0;
+//		$this->tohitPenalty = $this->getOutput();
+//		$this->damagePenalty = 0;
 	}
 		
 	public function getDefensiveType(){
@@ -4616,18 +4686,23 @@ class PsychicField extends Weapon implements DefensiveSystem{ //Thirdspace weapo
 	public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){
 		return 0;//does not reduce hit chance
 	}
-		
+/*		
 	public function getOutput(){
 		return 0;     
 	}    
+*/	
+	public function getDamage($fireOrder){        
+		$fieldDamage = 0;
+		$boostlevel = $this->getBoostLevel($fireOrder->turn);
+		$fieldDamage += $boostlevel; //-1 per level of boost
+//		$baseDamage = max(0,$baseDamage); //cannot do less than 0	
+		return $fieldDamage;   
+	}
 	
-	public function getDamage($fireOrder){ return  0;   }
 	public function setMinDamage(){   $this->minDamage =  0 ;      }
 	public function setMaxDamage(){   $this->maxDamage =  0 ;      }
 	
 } //endof class PsychicField 
-
-
 
 
 /*handles creation of firing orders for Psychic Fields*/
@@ -4709,7 +4784,7 @@ class PsychicFieldHandler{
 				$alreadyTargeted[] = $target->id; //add to list of already targeted units
 				$field->addTarget($target);
 			}
-		} //endof foreach sychicField
+		} //endof foreach PsychicField
 	}//endof function createFiringOrders
 	
 }//endof class PsychicFieldHandler
@@ -4721,13 +4796,7 @@ class PsychicFieldHandler{
         public $iconPath = "HeavyPsionicLance.png";        
         public $animation = "laser";
         public $animationColor = array(128, 0, 0);
-  //      public $animationExplosionScale = 0.35; //make it thin, despite high damage potential!
-	    /*
-        public $trailColor = array(30, 170, 255);
-        public $animationWidth = 2;
-        public $animationWidth2 = 0.3;
-        public $animationExplosionScale = 0.15;
-*/
+
         public $intercept = 0;
         public $loadingtime = 3;
         public $raking = 20;
@@ -4764,9 +4833,9 @@ class PsychicFieldHandler{
             } 
             //Raking(20) is already described in Raking class           
             $this->data["Special"] .= "<br>Uninterceptable.";  
-            $this->data["Special"] .= '<br>Can be boosted with EW for increased dmg output (+2d10 +8 per point of EW used, up to three times). This EW does not count towards your OEW lock on a target.';
-		    $this->data["Special"] .= "<br>Has +1 modifier to critical hits, and +2 to fighter dropout rolls.";
-//		    $this->data["Special"] .= "<br>Has a 3 turn recharge rate.";		                
+            $this->data["Special"] .= '<br>Can be boosted with EW for an extra +2d10 +8 damage per point of EW used, up to three times.';
+		    $this->data["Special"] .= "<br>This EW does not count towards your OEW lock on a target.";	            
+		    $this->data["Special"] .= "<br>Has +1 modifier to critical hits, and +2 to fighter dropout rolls.";                
             $this->data["Boostlevel"] = $boost;
         }
 
@@ -4860,13 +4929,7 @@ class PsionicLance extends Raking{
         public $iconPath = "PsionicLance.png";         
         public $animation = "laser";
         public $animationColor = array(128, 0, 0);
-  //      public $animationExplosionScale = 0.35; //make it thin, despite high damage potential!
-	    /*
-        public $trailColor = array(30, 170, 255);
-        public $animationWidth = 2;
-        public $animationWidth2 = 0.3;
-        public $animationExplosionScale = 0.15;
-*/
+
         public $intercept = 0;
         public $loadingtime = 2;
         public $raking = 15;
@@ -4902,9 +4965,9 @@ class PsionicLance extends Raking{
             } 
             //Raking(15) is already described in Raking class
             $this->data["Special"] .= "Uninterceptable.";              
-            $this->data["Special"] .= '<br>Can be boosted with EW for increased dmg output (+2d10 per point of EW used, up to twice). This EW does not count towards your OEW lock on a target.';
-		    $this->data["Special"] .= "<br>Has +1 modifier to critical hits, and +2 to fighter dropout rolls.";   
-		    $this->data["Special"] .= "<br>Can fire every turn.";  		                
+            $this->data["Special"] .= '<br>Can be boosted with EW for an extra +2d10 damage per point of EW used, up to twice.';
+		    $this->data["Special"] .= "<br>This EW does not count towards your OEW lock on a target.";		    
+		    $this->data["Special"] .= "<br>Has +1 modifier to critical hits, and +2 to fighter dropout rolls.";   	                
             $this->data["Boostlevel"] = $boost;
         }
 
@@ -4988,45 +5051,38 @@ class PsionicLance extends Raking{
         }  
    }//end of Psionic Lance
 
+
 class PsionicConcentrator extends Weapon{
-    /*Psionic Concentrator - Thirdspace weapon*/
 	public $name = "PsionicConcentrator";
 	public $displayName = "Psionic Concentrator";
 	public $iconPath = "PsionicConcentrator.png";
 	
 	public $animation = "bolt";
-	    public $animationArray = array( 1=>"bolt", 2=>"bolt");
+//	public $animationArray = array( 1=>"bolt", 2=>"bolt", 3=>"bolt", 4=>"bolt");
     public $animationColor = array(128, 0, 0);
-	/*
-	public $trailColor = array(30, 170, 255);	
-	public $animationWidth = 4;
-	public $animationWidthArray = array(1=>4, 2=>5, 3=>6, 4=>7, 5=>8, 6=>10);
-	public $animationWidth2 = 0.3;
-        public $animationExplosionScale = 0.25;
-	public $animationExplosionScaleArray = array(1=>0.25, 2=>0.35, 3=>0.45, 4=>0.55, 5=>0.70, 6=>0.85);
-      */
-        public $loadingtime = 1;
+
+    public $loadingtime = 1;
 	public $intercept = 2; //intercept rating -1     
 	
 
-    public $priority = 6;
-    public $priorityArray = array(1=>5, 2=>6);
+    public $priority = 4;
+    public $priorityArray = array(1=>4, 2=>5, 3=>6, 4=>7);
 
 	public $firingMode = 1;	
             public $firingModes = array(
-                1 => "Single",
-                2 => "Double"
+                1 => "1Single",
+                2 => "2Double",
+                3 => "3Triple",
+                4 => "4Quad"                
             );
 
-    public $fireControl = array(6, 4, 2); // fighters, <mediums, <capitals 
-    public $fireControlArray = array( 1=>array(6, 4, 2), 2=>array(0, 4, 6));
+    public $fireControl = array(7, 3, 2); // fighters, <mediums, <capitals 
+    public $fireControlArray = array( 1=>array(6, 4, 3), 2=>array(2, 4, 4), 3=>array(0, 4, 4), 4=>array(null, 4, 5));
 
-        public $rangePenalty = 1;
-        public $rangePenaltyArray = array( 1=>1, 2=>0.66); //Standard and Raking modes
-
-              
-	public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
-  	public $damageTypeArray = array(1=>"Standard", 2=>"Standard");	    
+    public $rangePenalty = 1;
+    public $rangePenaltyArray = array( 1=>0.5, 2=>1, 3=>2, 4=>4);
+            
+	public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!   
 	public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!    
 	
 	public $isCombined = false; //is being combined with other weapon
@@ -5038,8 +5094,7 @@ class PsionicConcentrator extends Weapon{
 	
 	public function setSystemDataWindow($turn){
 		      parent::setSystemDataWindow($turn);  
-		      $this->data["Special"] = "Two Psionic Concentrators can be combined into a single standard shot in Double mode, with -3.33 per hex range penalty, 0/20/30 Fire Control and an additional 1d10+4 damage.";	      
-		      $this->data["Special"] .= "<br>If You allocate multiple Concentrators to the same Double mode of fire at the same target, they will be combined.";		       
+		      $this->data["Special"] = "Psionic Concentrators can be fired individually, or up to four concentrators can be combined for more powerful attacks with shorter range.";	      		      $this->data["Special"] .= "<br>If You allocate multiple Concentrators to the same mode of fire at the same target, they will be combined.";   		       
 		      $this->data["Special"] .= "<br>If not enough weapons are allocated to be combined, weapons will be fired in Single mode instead.";  		  
 		      $this->data["Special"] .= "<br>Has +1 modifier to critical hits, and +2 to fighter dropout rolls.";
 	    }	
@@ -5116,23 +5171,252 @@ class PsionicConcentrator extends Weapon{
                 $maxhealth = 7;
             }
             if ( $powerReq == 0 ){
-                $powerReq = 3;
+                $powerReq = 2;
             }
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 	
-	
     public function getDamage($fireOrder){
-		return Dice::d(10, 1+$this->firingMode)+($this->firingMode*4); //2d10+4 +1d10+4 in Double mode.
+		return Dice::d(6, 1+$this->firingMode)+($this->firingMode*3)+3; 
 	}
 	public function setMinDamage(){    
-		$this->minDamage = 1*(1+$this->firingMode)+($this->firingMode*4); //6 and 11
+		$this->minDamage = 1*(1+$this->firingMode)+($this->firingMode*3)+3;
 		$this->minDamageArray[$this->firingMode] = $this->minDamage; 
 	}
 	public function setMaxDamage(){
-		$this->maxDamage = 10*(1+$this->firingMode)+($this->firingMode*4); //24 and 38
+		$this->maxDamage = 6*(1+$this->firingMode)+($this->firingMode*3)+3;
 		$this->maxDamageArray[$this->firingMode] = $this->maxDamage;  
 	}
 } //endof class PsionicConcentrator
+
+
+//Kor-Lyan system, used to designate where attached Proximity Laser shots originates by targeting a hex and automatically hitting.
+class ProximityLaserLauncher extends Weapon{
+
+		public $name = "ProximityLaserLauncher";
+		public $displayName = "Proximity Launcher";
+		public $iconPath = "ProximityLaserLauncher.png";
+		
+		public $damageType = "Standard"; //irrelevant, really
+		public $weaponClass = "Ballistic";
+		public $hextarget = true;
+		public $hidetarget = true;
+		public $ballistic = true;
+		public $uninterceptable = true; 
+		public $doNotIntercept = true;
+		public $priority = 1;
+	        public $useOEW = false;	
+		public $noLockPenalty = false;	        
+		
+		public $range = 30;//no point firing at further target with base 24 to hit!
+		public $loadingtime = 1; //same as attached laser
+	    public $ammunition = 99; //Just make unlimited, so account for accidental launches when Laser on recharge.	
+		
+		public $animation = "ball";
+		public $animationColor = array(245, 90, 90);
+		public $animationExplosionScale = 0.5; //single hex explosion
+		public $animationExplosionType = "AoE";
+		
+		//Should never be targeted or counted for CV.	
+		protected $doCountForCombatValue = false;
+		public $isPrimaryTargetable = false; //can this system be targeted by called shot if it's on PRIMARY?	
+		public $isTargetable = false; //cannot be targeted ever!	
+
+			private $pairing = null;	//Which targeter is it paired with?	
+			
+		public $firingModes = array(
+			1 => "Launcher"
+		);
+			
+		public $repairPriority = 5;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
+	 
+		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $pairing)
+		{
+			$this->pairing = $pairing;
+			$this->displayName = 'Proximity Launcher ' . $pairing . ''; 				
+			//Nominal amount of health, should never be hit.
+			if ( $maxhealth == 0 ) $maxhealth = 1;
+			if ( $powerReq == 0 ) $powerReq = 0;
+			parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+		}
+		    		
+		public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);        
+			$this->data["Special"] = "Proximity Launcher " . $this->pairing ."."; 
+			$this->data["Special"] .= "<br>Use this Launcher to select the hex from where its paired Proximity Laser will fire.";	 
+			$this->data["Special"] .= "<br>IMPORTANT - The Proximity Laser should be targeted at the same time as this launcher is fired.";
+			$this->data["Special"] .= "<br>HAS NO EFFECT UNLESS FIRED WITH PROXIMITY LASER " . $this->pairing ."."; 		 		
+	        $this->data["Ammunition"] = $this->ammunition;		
+		}	
+		
+		public function calculateHitBase($gamedata, $fireOrder)
+		{
+			$fireOrder->needed = 100; //always true
+			$fireOrder->updated = true;
+		}
+		
+	    public function fire($gamedata, $fireOrder)
+	    { 
+	        $this->changeFiringMode($fireOrder->firingMode);//changing firing mode may cause other changes, too!
+	        $shooter = $gamedata->getShipById($fireOrder->shooterid);        
+	        $rolled = Dice::d(100);
+	        $fireOrder->rolled = $rolled; 
+			$fireOrder->pubnotes .= "Automatically hits."; 
+			if($rolled <= $fireOrder->needed){//HIT!
+				$fireOrder->shotshit++;
+	            $this->ammunition--;
+	            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);			
+			}else{ //MISS!  Should never happen.
+				$fireOrder->pubnotes .= " MISSED! ";
+			}
+		} //endof function fire	
+
+
+	    public function setAmmo($firingMode, $amount){
+	            $this->ammunition = $amount;
+	        }
+	 	
+	    public function stripForJson() {
+	            $strippedSystem = parent::stripForJson();    
+	            $strippedSystem->ammunition = $this->ammunition;           
+	            return $strippedSystem;
+	        }
+	        	
+		public function getDamage($fireOrder){       return 0; /*no actual damage*/  }
+		public function setMinDamage(){     $this->minDamage = 0 ;      }
+		public function setMaxDamage(){     $this->maxDamage = 0 ;      }
+	
+}//endof class ProximityLaserLauncher
+
+
+   class ProximityLaser extends Weapon{        
+        public $name = "ProximityLaser";
+        public $displayName = "Proximity Laser";
+		public $iconPath = "ProximityLaser.png";        
+        
+        public $animation = "laser";
+
+        public $animationColor = array(179, 45, 0); //same as Heavy Laser
+
+        public $priority = 8;
+
+        public $useOEW = false;
+		public $hidetarget = true;
+		public $ballistic = true;
+        public $ammunition = 10; //limited number of shots	
+        public $uninterceptable = true;        	
+        
+        public $loadingtime = 3;
+        public $raking = 10; 
+		public $noLockPenalty = false;	        
+              
+        
+        public $weaponClass = "Laser"; 
+        public $damageType = "Raking";
+        
+	public $firingModes = array(
+		1 => "Laser"
+	);                 
+        
+        public $rangePenalty = 0.5; //-1 per 2 hexes from Launcher's target hex.
+        public $fireControl = array(null, 3, 3); //No fire control per se, but gets automatic +3 points.
+        
+		private $launcher = null;   //Variable where paired launcher be assigned.
+		private $pairing = null;	//Which launcher is it paired with?	    
+		protected $hasSpecialLaunchHexCalculation = true; //Weapons like Proximity Laser use a separate launcher system to determine point of shot.         
+    
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $pairing){
+ 			$this->pairing = $pairing;
+			$this->displayName = 'Proximity Laser ' . $pairing . ''; 			
+			if ( $maxhealth == 0 ) $maxhealth = 6;
+			if ( $powerReq == 0 ) $powerReq = 6;        	       	
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+		public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);  
+			$this->data["Special"] = "Paired with Proximity Launcher ". $this->pairing ."."; 
+			$this->data["Special"] .= "<br>Use the paired Proximity Launcher system to target a hex, this will be the location from where this weapon will fire at its target in Firing Phase.";
+			$this->data["Special"] .= "<br>Range Penalty will be calculated from the hex the Launcher hits, not from this ship.";
+			$this->data["Special"] .= "<br>This weapon does not need an EW lock, and does not benefit from OEW.";				
+			$this->data["Special"] .= "<br>IMPORTANT - The paired Proximity Launcher should be fired at the same time as this weapon is targeted.";
+			$this->data["Special"] .= "<br>WILL FIRE FROM SHIP UNLESS FIRED TOGETHER WITH PROXIMITY LAUNCHER " . $this->pairing .".";					
+	        $this->data["Ammunition"] = $this->ammunition;		
+		}	
+
+
+
+		public function getFiringHex($gamedata, $fireOrder) {
+			if($this->launcher){	//Check that Proximity Laser have a Launcher (it always should)
+
+		    $launchPos = null; // Initialize $launchPos outside the loop
+			$fireOrders = $this->launcher->getFireOrders($gamedata->turn);
+		    
+            foreach($fireOrders as $fireOrder){	       	
+			            // Sometimes player might target ship after all...
+						if ($fireOrder->targetid != -1) {
+	                        $targetship = $gamedata->getShipById($fireOrder->targetid);
+	                        $movement = $targetship->getLastTurnMovement($fireOrder->turn);
+	                        $fireOrder->x = $movement->position->q;
+	                        $fireOrder->y = $movement->position->r;
+	                        $fireOrder->targetid = -1; // Correct the error
+	                    }
+	                    $target = new OffsetCoordinate($fireOrder->x, $fireOrder->y);
+	                    $launchPos = $target; 	            
+			        break;				       
+			        }
+			}
+			if($launchPos == null) $launchPos = parent::getFiringHex($gamedata, $fireOrder); //Go back to normal function if returning null for some reason.
+				
+		    return $launchPos;
+		} //endof getFiringHex
+		
+
+
+       function addLauncher($launcher){ //Function used to assign launcher on ship php file.
+             $this->launcher = $launcher;
+        }
+
+
+        public function setAmmo($firingMode, $amount){
+            $this->ammunition = $amount;
+        }
+
+       public function fire($gamedata, $fireOrder){ //note ammo usage
+            parent::fire($gamedata, $fireOrder);
+            $this->ammunition--;
+            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);
+        }
+
+		//If Proximity Laser is destroyed, destroy this paired launcher as well.
+		public function criticalPhaseEffects($ship, $gamedata)
+	    { 
+		  	parent::criticalPhaseEffects($ship, $gamedata);//Some critical effects like Limpet Bore might destroy weapon in this phase!
+	  	 	    
+			if(!$this->isDestroyed()) return;//Laser is not destroyed, all is well.
+
+			if($this->isDestroyed()){ //Or if destroyed, find launcher and destroy it too.
+				$launcher = $this->launcher;
+				$launcherHealth = $launcher->getRemainingHealth();	//Just in case it's higher than 1 for some reason...						
+				$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $launcher->id, $launcherHealth, 0, 0, -1, true, false, "Proximity Laser Destroyed - Launcher removed");
+				$damageEntry->updated = true;
+				$this->damage[] = $damageEntry;								
+			}				
+	    } //endof function criticalPhaseEffects	
+	    
+	    
+        public function stripForJson() {
+            $strippedSystem = parent::stripForJson();    
+            $strippedSystem->ammunition = $this->ammunition;
+            $strippedSystem->launcher = $this->launcher; 
+            $strippedSystem->hasSpecialLaunchHexCalculation = $this->hasSpecialLaunchHexCalculation;                              
+            return $strippedSystem;
+        }
+
+        
+        public function getDamage($fireOrder){        return Dice::d(10, 3)+8;   }
+        public function setMinDamage(){     $this->minDamage = 11 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 38 ;      }    
+    }
 
 ?>

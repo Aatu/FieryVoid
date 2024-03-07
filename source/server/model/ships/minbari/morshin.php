@@ -5,7 +5,7 @@ class Morshin extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
 
         $this->pointCost = 650;
-        $this->faction = "Minbari";
+        $this->faction = "Minbari Federation";
         $this->phpclass = "Morshin";
         $this->imagePath = "img/ships/morshin.png";
         $this->shipClass = "Morshin Carrier";

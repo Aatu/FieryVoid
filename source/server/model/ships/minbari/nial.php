@@ -5,7 +5,7 @@ class Nial extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 636;
-		$this->faction = "Minbari";
+		$this->faction = "Minbari Federation";
 		$this->phpclass = "Nial";
 		$this->shipClass = "Nial heavy flight";
 		$this->imagePath = "img/ships/nial.png";

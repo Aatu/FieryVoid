@@ -5,7 +5,7 @@ class Martoba extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 480;
-        $this->faction = "Markab";
+        $this->faction = "Markab Theocracy";
         $this->phpclass = "Martoba";
         $this->imagePath = "img/ships/MarkabPatrolShip.png"; //change
         $this->shipClass = "Martoba Patrol Cutter";
@@ -21,6 +21,8 @@ class Martoba extends HeavyCombatVessel{
         $this->iniativebonus = 30;
         $this->isd = 2014;
         $this->fighters = array("normal"=>6);
+
+		$this->enhancementOptionsEnabled[] = 'MARK_FERV'; //To activate Religious Fervor attributes.   
 
 	$this->addPrimarySystem(new Reactor(4, 15, 0, 0));
 	$this->addPrimarySystem(new CnC(4, 8, 0, 0));

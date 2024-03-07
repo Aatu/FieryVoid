@@ -5,7 +5,7 @@ class Shanteen extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
 
         $this->pointCost = 900;
-        $this->faction = "Minbari";
+        $this->faction = "Minbari Federation";
         $this->phpclass = "Shanteen";
         $this->imagePath = "img/ships/tinashi.png";
         $this->shipClass = "Shanteen Patrol Frigate";

@@ -5,7 +5,7 @@ class Sethrus extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 400;
-        $this->faction = "Usuuth";
+        $this->faction = "Usuuth Coalition";
         $this->phpclass = "Sethrus";
         $this->imagePath = "img/ships/UsuuthSerron.png";
 		$this->canvasSize = 200;

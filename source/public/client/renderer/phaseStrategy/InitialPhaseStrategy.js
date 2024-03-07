@@ -113,5 +113,16 @@ window.InitialPhaseStrategy = function () {
         PhaseStrategy.prototype.onSystemDataChanged.call(this, {ship: ship});
     };
 
+    InitialPhaseStrategy.prototype.onSystemTargeted = function (payload) { //25.11.23 - Added onSystemTargeted here to allow Called Shots in Initial Orders phase e.g. Limpet Bore.
+        var ship = payload.ship;
+        var system = payload.system;
+
+        if (gamedata.isEnemy(ship, this.selectedShip) && gamedata.selectedSystems.length > 0 && weaponManager.canCalledshot(ship, system, this.selectedShip)) {
+            weaponManager.targetShip(this.selectedShip, ship, system);
+        }
+
+        PhaseStrategy.prototype.onSystemDataChanged.call(this, {ship: ship});
+    };
+    
     return InitialPhaseStrategy;
 }();

@@ -5,7 +5,7 @@ class ShadowDreadnoughtPrimordial extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 4250*1.2+15*25;//Primordial: +20%; Additional Tendril: Tendril capacity * Diffuser output
-		$this->faction = "Shadows";
+		$this->faction = "Shadow Association";
         $this->phpclass = "ShadowDreadnoughtPrimordial";
         $this->imagePath = "img/ships/ShadowDreadnought.png";
         $this->shipClass = "Dreadnought (Primordial)";

@@ -7,7 +7,7 @@ class Nergell extends SmallStarBaseFourSections{
 		$this->pointCost = 1900;
 		$this->base = true;
 		$this->smallBase = true;
-		$this->faction = "Minbari";
+		$this->faction = "Minbari Federation";
 		$this->phpclass = "nergell";
 		$this->shipClass = "Nergell Military Guardpost";
 		$this->imagePath = "img/ships/MinbariGuardpost.png";

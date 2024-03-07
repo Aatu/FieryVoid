@@ -74,26 +74,35 @@ PsionicTorpedo.prototype.initBoostableInfo = function () {
     	
     switch (shipManager.power.getBoost(this)) {
         case 0:
-            this.data["Damage"] = '10 - 19';
+            this.data["Damage"] = '14 - 21';
             this.data["Boostlevel"] = '0';
             break;
         case 1:
-            this.data["Damage"] = '12 - 21';
+            this.data["Damage"] = '16 - 23';
             this.data["Boostlevel"] = '1';
             break;
         case 2:
-            this.data["Damage"] = '14 - 23';
+            this.data["Damage"] = '18 - 25';
             this.data["Boostlevel"] = '2';
-            break;
-        case 3:
-            this.data["Damage"] = '16 - 25';
-            this.data["Boostlevel"] = '3';
-            break;             
+            break;          
         default:
-            this.data["Damage"] = '10 - 19';
+            this.data["Damage"] = '14 - 21';
             this.data["Boostlevel"] = '0';
             break;
     }
     
     return this;
 };
+
+var LimpetBoreTorpedo = function  LimpetBoreTorpedo(json, ship) {
+    Torpedo.call(this, json, ship);
+};
+LimpetBoreTorpedo.prototype = Object.create(Torpedo.prototype);
+LimpetBoreTorpedo.prototype.constructor =  LimpetBoreTorpedo;
+
+var LimpetBoreTorpedoBase = function  LimpetBoreTorpedoBase(json, ship) {
+    Torpedo.call(this, json, ship);
+};
+LimpetBoreTorpedoBase.prototype = Object.create(Torpedo.prototype);
+LimpetBoreTorpedoBase.prototype.constructor =  LimpetBoreTorpedoBase;
+

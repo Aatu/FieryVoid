@@ -5,7 +5,7 @@ class Artees extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 400;
-		$this->faction = "Pak'ma'ra";
+		$this->faction = "Pak'ma'ra Confederacy";
         $this->phpclass = "Artees";
         $this->imagePath = "img/ships/PakmaraTrashuli.png";
         $this->shipClass = "Ar'tees Battle Transport";
@@ -27,9 +27,20 @@ class Artees extends MediumShip{
         $this->pivotcost = 2;
 		$this->iniativebonus = 11*5;
 		
+		/* let's replace this with appropriate two C&Cs!
+		$this->addPrimarySystem(new PakmaraCnC(4, 8, 0, 0));
+		*/		
+		$cnc = new PakmaraCnC(3, 4, 0, 0);
+		$cnc->startArc = 0;
+		$cnc->endArc = 360;
+        $this->addPrimarySystem($cnc);
+		$cnc = new SecondaryCnC(3, 4, 0, 0);
+		$cnc->startArc = 0;
+		$cnc->endArc = 360;
+        $this->addPrimarySystem($cnc);
+		
         $this->addPrimarySystem(new Reactor(3, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 6, 4, 5));
-		$this->addPrimarySystem(new PakmaraCnC(4, 8, 0, 0));
         $this->addPrimarySystem(new Engine(3, 11, 0, 10, 2));
         $this->addPrimarySystem(new Hangar(2, 7));
 		$this->addPrimarySystem(new Thruster(4, 10, 0, 4, 3));
@@ -58,7 +69,7 @@ class Artees extends MediumShip{
 						16 => "Engine",
         				17 => "Hangar",
 						19 => "Reactor",
-        				20 => "C&C",
+        				20 => "TAG:C&C",
         		),
         		1=> array(
         				5 => "Thruster",

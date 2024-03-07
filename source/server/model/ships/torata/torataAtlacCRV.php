@@ -7,7 +7,7 @@ class TorataAtlacCRV extends MediumShip
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 400;
-		$this->faction = "Torata";
+		$this->faction = "Torata Regency";
 		$this->phpclass = "TorataAtlacCRV";
 		$this->imagePath = "img/ships/TorataAtlac.png";
 		$this->shipClass = "Atlac Corvette";

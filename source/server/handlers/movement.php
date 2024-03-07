@@ -432,6 +432,9 @@
 			
 			if ($system->hasCritical("FirstThrustIgnored", $turn))
 				$used--;
+			
+			if ($system->hasCritical("FirstThrustIgnoredOneTurn", $turn))
+				$used--;			
 				
 			$crits = $system->hasCritical("HalfEfficiency", $turn);
 			$used = round($used/($crits+1));

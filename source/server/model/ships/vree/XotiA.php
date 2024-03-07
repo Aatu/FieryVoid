@@ -7,7 +7,7 @@ class XotiA extends OSAT
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 225;
-		$this->faction = "Vree";
+		$this->faction = "Vree Conglomerate";
 		$this->phpclass = "XotiA";
 		$this->shipClass = "Xoti Orbital Satellite A";
 		$this->imagePath = "img/ships/VreeXoti.png";

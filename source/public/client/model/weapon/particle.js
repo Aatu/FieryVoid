@@ -320,20 +320,15 @@ var LightParticleBolt = function LightParticleBolt(json, ship) {
 LightParticleBolt.prototype = Object.create(Weapon.prototype);
 LightParticleBolt.prototype.constructor = LightParticleBolt;
 
-var Interdictor = function Interdictor(json, ship) {
-    Weapon.call(this, json, ship);
-};
-Interdictor.prototype = Object.create(Weapon.prototype);
-Interdictor.prototype.constructor = Interdictor;
-
-var FtrInterdictor = function FtrInterdictor(json, ship) {
-    Weapon.call(this, json, ship);
-};
-FtrInterdictor.prototype = Object.create(Weapon.prototype);
-FtrInterdictor.prototype.constructor = FtrInterdictor;
 
 var UnreliableTwinArray = function UnreliableTwinArray(json, ship) {
     Particle.call(this, json, ship);
 };
 UnreliableTwinArray.prototype = Object.create(Particle.prototype);
 UnreliableTwinArray.prototype.constructor = UnreliableTwinArray;
+
+var BoltAccelerator = function BoltAccelerator(json, ship) {
+    Particle.call(this, json, ship);
+};
+BoltAccelerator.prototype = Object.create(Particle.prototype);
+BoltAccelerator.prototype.constructor = BoltAccelerator;

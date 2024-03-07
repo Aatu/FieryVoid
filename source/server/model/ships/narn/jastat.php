@@ -7,13 +7,14 @@ class JaStat extends StarBaseFiveSections{
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 5000;
-		$this->faction = "Narn";
+		$this->faction = "Narn Regime";
 		$this->phpclass = "JaStat";
 		$this->shipClass = "Ja'Stat Warbase";
 		$this->fighters = array("heavy"=>36); 
  		$this->unofficial = 'S'; //unavailable official Pulsar Mines replaced with Twin Arrays
 
-		$this->shipSizeClass = 3; //Enormous is not implemented
+		$this->shipSizeClass = 3;
+        $this->Enormous = true;		
 		$this->iniativebonus = -200; //no voluntary movement anyway
 		$this->turncost = 0;
 		$this->turndelaycost = 0;
@@ -32,12 +33,22 @@ class JaStat extends StarBaseFiveSections{
 				14 => "Energy Mine",
 				16 => "Scanner",
 				18 => "Reactor",
-				20 => "C&C",
+				20 => "TAG:C&C",
 			)
 		);
 
+		
+		/* replaced with proper two C&Cs!
 		//$this->addPrimarySystem(new CnC(6, 25, 0, 0)); 
 		$this->addPrimarySystem(new ProtectedCnC(7, 50, 0, 0)); //instead of two 6x25 C&C, make it 1 7x50
+		*/
+		$cnc = new CnC(6, 25, 0, 0);
+		$cnc->startArc = 0;
+		$cnc->endArc = 360;
+        $this->addPrimarySystem($cnc);
+		$cnc = new SecondaryCnC(6, 25, 0, 0);//all-around by default
+        $this->addPrimarySystem($cnc);
+		
 		$this->addPrimarySystem(new Scanner(6, 28, 4, 8));
 		$this->addPrimarySystem(new Scanner(6, 28, 4, 8));
 		$this->addPrimarySystem(new Reactor(6, 25, 0, 0));
@@ -56,6 +67,18 @@ class JaStat extends StarBaseFiveSections{
 
 			$min = 270 + ($i*72);
 			$max = 90 + ($i*72);
+			
+			/*some systems need pre-definition to have arcs set for TAGs!*/
+			$struct = Structure::createAsOuter(5, 90,$min,$max);
+			$cargoBay = new CargoBay(5, 36);
+			$cargoBay->startArc = $min;
+			$cargoBay->endArc = $max;
+			$subReactor = new SubReactorUniversal(5, 35, 0, 0);
+			$subReactor->startArc = $min;
+			$subReactor->endArc = $max;
+			$hangar = new Hangar(5, 7, 6);
+			$hangar->startArc = $min;
+			$hangar->endArc = $max;
 
 			$systems = array(
 				new MagGun(5, 9, 8, $min, $max),
@@ -66,25 +89,31 @@ class JaStat extends StarBaseFiveSections{
 				new TwinArray(5, 6, 2, $min, $max),
 				new LightPulse(5, 4, 2, $min, $max),
 				new LightPulse(5, 4, 2, $min, $max),
+				/* replaced with arced systems - for TAG
 				new CargoBay(5, 36),
 				new SubReactorUniversal(5, 35, 0, 0),
 				new Hangar(5, 7, 6),
 				new Structure(5, 90)
+				*/
+				$cargoBay,
+				$subReactor,
+				$hangar,
+				$struct
 			);
 			
 			$loc = $this->locations[$i];
 
 			$this->hitChart[$loc] = array(
-				1 => "Mag Gun",
-				2 => "Heavy Pulse Cannon",
-				3 => "Heavy Laser",
-				4 => "Ion Torpedo",
-				5 => "Twin Array",
-				6 => "Light Pulse Cannon",
-				8 => "Cargo Bay",
-				9 => "Sub Reactor",
-				10 => "Hangar",
-				18 => "Structure",
+				1 => "TAG:Mag Gun",
+				2 => "TAG:Heavy Pulse Cannon",
+				3 => "TAG:Heavy Laser",
+				4 => "TAG:Ion Torpedo",
+				5 => "TAG:Twin Array",
+				6 => "TAG:Light Pulse Cannon",
+				8 => "TAG:Cargo Bay",
+				9 => "TAG:Sub Reactor",
+				10 => "TAG:Hangar",
+				18 => "TAG:Outer Structure",
 				20 => "Primary",
 			);
 

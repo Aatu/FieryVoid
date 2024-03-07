@@ -5,7 +5,7 @@ class Glan extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 820;
-		$this->faction = "Narn";
+		$this->faction = "Narn Regime";
         $this->phpclass = "Glan";
         $this->imagePath = "img/ships/gquan.png";
         $this->shipClass = "G'Lan Mag Cruiser";

@@ -28,6 +28,7 @@ class BaseShip {
     public $destroyed = false;
     public $pointCost = 0;
     public $pointCostEnh = 0; //points spent on enhanements (in addition to crafts' own price), DOES NOT include cost of items being only technically enhancements (special missiles, Navigators...)
+	public $pointCostEnh2 = 0; //points spent on non-enhancements - separation actuallly exists only at fleet selection, afterwards it will be always 0 with points added to $pointCostEnh
 	public $combatValue = 100; //current combat value, as percentage of original
     public $faction = null;
 	public $factionAge = 1; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial 
@@ -41,13 +42,13 @@ class BaseShip {
 	public $mine = false;
     public $SixSidedShip = false;
 	public $isCombatUnit = true; //is this a combat unit (as opposed to non-combat - transport, freighter, civilian, explorer, diplomatic ship, yacht...)
+
 	//non-combat ships cannot be taken in pickup battles by standard tourtnament rules
 	//rule of thumb is that if it has cargo bays, then it's not a combat ship - but it's far from proof
-	//eg. Pak'ma'ra and Orini capital ships (combat ones) do have cargo bays, while eg. EMperor's transport or Grey Sharlin (non-combat ships) do not
+	//eg. Pak'ma'ra and Orieni capital ships (combat ones) do have cargo bays, while eg. Emperor's transport or Grey Sharlin (non-combat ships) do not
 	//by core definition, combat ship is one that is intended to be present in fleet sent into combat zone.
-	
 
-	
+	public $toHitBonus = 0; //Used to increase hit chance of all weapons fired by a ship e.g. Elite Crew / Markab enhancements.		
     public $critRollMod = 0; //penalty tu critical damage roll: positive means crit is more likely, negative less likely (for all systems)
 
 	
@@ -55,7 +56,7 @@ class BaseShip {
     
 
     public $jinkinglimit = 0; //just in case there will be a ship actually able to jink; NOT SUPPORTED!
-
+	
     public $enabledSpecialAbilities = array();
 
     public $canvasSize = 200;
@@ -70,6 +71,8 @@ class BaseShip {
     public $rolled = false;
     public $rolling = false;
 	public $EMHardened = false; //EM Hardening (Ipsha have it) - some weapons would check for this value!
+	public $jammerMissile = false; //Marker for when ships are affected by Jammer Missile BDEW.
+		
 
     public $team;
     private $expectedDamage = array(); //loc=>dam; damage the unit is expected to take this turn (at outer locations), to decide where to take ambiguous shots
@@ -112,6 +115,15 @@ class BaseShip {
 			$this->adaptiveArmorController = new AdaptiveArmorController($AAtotal, $AApertype, $AApreallocated); 
 			return $this->getAdaptiveArmorController();
 		}
+	
+		public function getHyachSpecialists(){
+			return $this->HyachSpecialists;    
+		}
+
+		public function createHyachSpecialists($specTotal){ //$specTotal
+			$this->HyachSpecialists = new HyachSpecialists($specTotal); 
+			return $this->getHyachSpecialists();
+		}		
         
         public function getCommonIniModifiers( $gamedata ){ //common Initiative modifiers: speed, criticals
             $mod = 0;
@@ -249,37 +261,59 @@ class BaseShip {
 			$strippedShip->enhancementTooltip = $this->enhancementTooltip; 
 			$strippedShip = Enhancements::addUnitEnhancementsForJSON($this, $strippedShip);//modifies $strippedShip  object
 		}
+
+		//Push Specialists updates to Ship variables when used
+		if ($this->getSystemByName("HyachSpecialists")){ //Does ship have Specialists system?
+			$specialists = $this->HyachSpecialists;
+			$specAllocatedArray = $specialists->specAllocatedCount;
+			foreach ($specAllocatedArray as $specsUsed=>$specValue){
+				if ($specsUsed == 'Defence'){
+					$strippedShip->forwardDefense = $this->forwardDefense; 
+        			$strippedShip->sideDefense = $this->sideDefense;					
+				}
+				if ($specsUsed == 'Targeting'){
+					$strippedShip->toHitBonus = $this->toHitBonus; 				
+				}
+				if ($specsUsed == 'Maneuvering'){
+					$strippedShip->turncost = $this->turncost; 				
+					$strippedShip->turndelaycost = $this->turndelaycost; 				
+				}					
+			}
+		}
 		
 		$strippedShip->enhancementOptions = array(); //no point in sending options information...
         return $strippedShip;
     }
 	    
         public function getInitiativebonus($gamedata){
-            if($this->faction == "Abbai"){
+            if($this->faction == "Abbai Matriarchate"){
                 return $this->doAbbaiInitiativeBonus($gamedata);
             }
-            if($this->faction == "Centauri"){
+            if($this->faction == "Centauri Republic"){
                 return $this->doCentauriInitiativeBonus($gamedata);
             }
-            if($this->faction == "Dilgar"){
+            if($this->faction == "Dilgar Imperium"){
                 return $this->doDilgarInitiativeBonus($gamedata);
             }
-            if($this->faction == "Narn"){
+            if($this->faction == "Narn Regime"){
                 return $this->doNarnInitiativeBonus($gamedata);
             }
-            if($this->faction == "Yolu"){
+            if($this->faction == "Yolu Confederation"){
                 return $this->doYoluInitiativeBonus($gamedata);
 			}
-			if($this->faction == "EA"){
+			if($this->faction == "Earth Alliance"){
                 return $this->doEAInitiativeBonus($gamedata);
             }
 			if($this->faction == "Raiders"){
                 return $this->doRaidersInitiativeBonus($gamedata);
             }
-            if(($this->faction == "Pak'ma'ra") && (!($this instanceof FighterFlight))	){
+            if(($this->faction == "Pak'ma'ra Confederacy") && (!($this instanceof FighterFlight))	){
                 return $this->doPakmaraInitiativeBonus($gamedata);
             }
-			if(($this->faction == "Gaim") && ($this instanceOf gaimMoas)){  //GTS
+		   if($this->faction == "Hyach Gerontocracy"){
+		                return $this->doHyachInitiativeBonus($gamedata);
+		        }            
+			if(($this->faction == "Gaim Intelligence") && ($this instanceOf gaimMoas)){  //GTS
                 return $this->doGaimInitiativeBonus($gamedata);
             }
             return $this->iniativebonus;
@@ -289,7 +323,7 @@ class BaseShip {
         private function doAbbaiInitiativeBonus($gamedata){
             foreach($gamedata->ships as $ship){
                 if(!$ship->isDestroyed()
-                        && ($ship->faction == "Abbai")
+                        && ($ship->faction == "Abbai Matriarchate")
                         && ($this->userid == $ship->userid)
                         && ($ship instanceof Nakarsa)
                         && ($this->id != $ship->id)){
@@ -302,7 +336,7 @@ class BaseShip {
         private function doCentauriInitiativeBonus($gamedata){
             foreach($gamedata->ships as $ship){
                 if(!$ship->isDestroyed()
-                        && ($ship->faction == "Centauri")
+                        && ($ship->faction == "Centauri Republic")
                         && ($this->userid == $ship->userid)
                         && ($ship instanceof PrimusMaximus)
                         && ($this->id != $ship->id)){
@@ -316,7 +350,7 @@ class BaseShip {
         private function doNarnInitiativeBonus($gamedata){
             foreach($gamedata->ships as $ship){
                 if(!$ship->isDestroyed()
-                        && ($ship->faction == "Narn")
+                        && ($ship->faction == "Narn Regime")
                         && ($this->userid == $ship->userid)
                         && ($ship instanceof Gtal)
                         && ($this->id != $ship->id)){
@@ -330,7 +364,7 @@ class BaseShip {
          private function doEAInitiativeBonus($gamedata){
             foreach($gamedata->ships as $ship){
                 if(!$ship->isDestroyed()
-                        && ($ship->faction == "EA")
+                        && ($ship->faction == "Earth Alliance")
                         && ($this->userid == $ship->userid)
                         && ($ship instanceof Poseidon)
                         && ($this->id != $ship->id)){
@@ -405,7 +439,7 @@ class BaseShip {
 
             foreach($ships as $ship){
                 if( !$ship->isDestroyed()
-                    && ($ship->faction == "Dilgar")
+                    && ($ship->faction == "Dilgar Imperium")
                     && ($this->userid == $ship->userid)
                     && ($ship->shipSizeClass == 3)
                     && ($this->id != $ship->id)){
@@ -429,7 +463,7 @@ class BaseShip {
 			
 			foreach($gamedata->ships as $ship){
                 if(
-                     ($ship->faction == "Pak'ma'ra") //Correct faction
+                     ($ship->faction == "Pak'ma'ra Confederacy") //Correct faction
                     && ($this->userid == $ship->userid) //of same player
                     && (!($ship instanceOf FighterFlight)) //actually a ship
                     && (!$ship->isDestroyed()) //alive
@@ -444,6 +478,19 @@ class BaseShip {
     } //end of doPakmaraInitiativeBonus    
 
 
+         private function doHyachInitiativeBonus($gamedata){
+            foreach($gamedata->ships as $ship){
+                if(!$ship->isDestroyed()
+                        && ($ship->faction == "Hyach Gerontocracy")
+                        && ($this->userid == $ship->userid)
+                        && ($ship instanceof HyachIrokaiKal)
+                        && ($this->id != $ship->id)){
+                    return ($this->iniativebonus+5);
+                }
+            }
+            return $this->iniativebonus;
+        }
+
 
 		//GTS
 	private function doGaimInitiativeBonus($gamedata){
@@ -456,7 +503,7 @@ class BaseShip {
 
             foreach($ships as $ship){
                 if( !$ship->isDestroyed()
-                    && ($ship->faction == "Gaim")
+                    && ($ship->faction == "Gaim Intelligence")
                     && ($this->userid == $ship->userid)
                     && ($ship instanceOf gaimMearc)
                     && ($this->id != $ship->id)){
@@ -498,7 +545,7 @@ class BaseShip {
     private function doYoluInitiativeBonus($gamedata){
         foreach($gamedata->ships as $ship){
             if(!$ship->isDestroyed()
-                && ($ship->faction == "Yolu")
+                && ($ship->faction == "Yolu Confederation")
                 && ($this->userid == $ship->userid)
                 && ($ship instanceof Udran)
                 && ($this->id != $ship->id)){
@@ -943,14 +990,15 @@ class BaseShip {
         /*'destroyed' means either destroyed as of PREVIOUS turn, OR reduced to health 0*/
 		$minUndestroyedPriority = 99; //lowest priority of undestroyed system found
 		$undestroyedExists = false; //does an undestroyed system actually exist?
-		$name = strtoupper($tag);
+		$searchName = strtoupper($tag);
 		
 		$returnTab = array();
 		
 		foreach ($this->systems as $currSystem){
+			$displayName = strtoupper( $currSystem->displayName );
 			if(
 				$currSystem->repairPriority <= $minUndestroyedPriority //priority fits
-				and $currSystem->checkTag($tag) //tag fits
+				and ( ($displayName == $searchName) || $currSystem->checkTag($searchName) ) //tag fits - either directly or to system name
 				and mathlib::isInArc($bearing, $currSystem->startArc, $currSystem->endArc) //arc fits
 			){
 				//tag fits and arc fits - is it destroyed?
@@ -1689,8 +1737,9 @@ class BaseShip {
                 $rngCurr++;
                 if (isset($this->hitChart[$location][$roll])){
                     $name = $this->hitChart[$location][$roll];
-                    if($name != 'Primary'){ //no PRIMARY penetrating hits for Flash!
-                        $systemsArray = $this->getSystemsByNameLoc($name, $location, $bearing, false);//undestroyed ystems of this name
+			$name=strtoupper($name); //to ensure working no matter the spelling!
+                    if($name != 'PRIMARY'){ //no PRIMARY penetrating hits for Flash!
+                        $systemsArray = $this->getSystemsByNameLoc($name, $location, $bearing, false);//undestroyed sytems of this name
                         if(sizeof($systemsArray)>0){ //there actually are such systems!
                             $rngTotal+= $rngCurr;
                             $hitChart[$rngTotal] = $name;
@@ -1699,7 +1748,7 @@ class BaseShip {
                     $rngCurr = 0;
                 }
             }
-            if($rngTotal ==0) return $this->getStructureSystem(0);//there is nothing here! penetrate to PRIMARY...
+            if($rngTotal ==0) return $this->getStructureSystem(0);//there is nothing here! assign to Structure...
         }
         $noPrimaryHits = ($weapon->noPrimaryHits || ($weapon->damageType == 'Piercing'));
         if($noPrimaryHits){ //change hit chart! - no PRIMARY hits!
@@ -1711,7 +1760,8 @@ class BaseShip {
                 $rngCurr++;
                 if (isset($this->hitChart[$location][$roll])){
                     $name = $this->hitChart[$location][$roll];
-                    if($name != 'Primary'){ //no PRIMARY penetrating hits
+			$name=strtoupper($name); //to ensure working no matter the spelling!
+                    if($name != 'PRIMARY'){ //no PRIMARY penetrating hits
                         $systemsArray = $this->getSystemsByNameLoc($name, $location, $bearing, true);//accept destroyed systems too
                         if(sizeof($systemsArray)>0){ //there actually are such systems!
                             $rngTotal+= $rngCurr;

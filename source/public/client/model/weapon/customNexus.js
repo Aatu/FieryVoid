@@ -1098,7 +1098,7 @@ var DirectLimpetBoreBase = function  DirectLimpetBoreBase(json, ship) {
 };
 DirectLimpetBoreBase.prototype = Object.create(Weapon.prototype);
 DirectLimpetBoreBase.prototype.constructor =  DirectLimpetBoreBase;
-
+/*
 var ProximityLaser = function ProximityLaser(json, ship) {
     Torpedo.call(this, json, ship);
 };
@@ -1109,7 +1109,7 @@ ProximityLaser.prototype.calculateSpecialRangePenalty = function (distance) {
     var rangePenalty = this.rangePenalty * distancePenalized;
     return rangePenalty;
 };
-
+*/
 var FMissileRack = function  FMissileRack(json, ship) {
     Weapon.call(this, json, ship);
 };
@@ -1178,12 +1178,6 @@ var MultiDefenseLauncher = function  MultiDefenseLauncher(json, ship) {
 };
 MultiDefenseLauncher.prototype = Object.create(Weapon.prototype);
 MultiDefenseLauncher.prototype.constructor =  MultiDefenseLauncher;
-
-var AmmoMissileRackF = function AmmoMissileRackF(json, ship) {
-    Ballistic.call(this, json, ship);
-};
-AmmoMissileRackF.prototype = Object.create(Ballistic.prototype);
-AmmoMissileRackF.prototype.constructor = AmmoMissileRackF;
 
 var AmmoMissileRackD = function AmmoMissileRackD(json, ship) {
     Ballistic.call(this, json, ship);

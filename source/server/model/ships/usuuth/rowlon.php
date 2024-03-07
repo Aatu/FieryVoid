@@ -5,7 +5,7 @@ class Rowlon extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 30 *6;
-        $this->faction = "Usuuth";
+        $this->faction = "Usuuth Coalition";
         $this->phpclass = "Rowlon";
         $this->shipClass = "Rowlon Armored Fighter";
         $this->imagePath = "img/ships/UsuuthRowlon.png";

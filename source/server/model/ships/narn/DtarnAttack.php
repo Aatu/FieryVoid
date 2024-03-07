@@ -5,7 +5,7 @@ class DtarnAttack extends LCV{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 225;
-    $this->faction = "Narn";
+    $this->faction = "Narn Regime";
 	$this->phpclass = "DtarnAttack";
 	$this->shipClass = "D'Tarn Light Gunboat (Attack)";
 			$this->occurence = "rare";

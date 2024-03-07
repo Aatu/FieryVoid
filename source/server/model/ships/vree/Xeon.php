@@ -5,7 +5,7 @@ class Xeon extends VreeCapital{
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 340;
-		$this->faction = "Vree";
+		$this->faction = "Vree Conglomerate";
 		$this->phpclass = "Xeon";
 		$this->shipClass = "Xeon Assault Saucer";
 		$this->isd = 2225;

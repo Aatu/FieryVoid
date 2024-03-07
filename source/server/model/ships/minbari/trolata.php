@@ -5,7 +5,7 @@ class Trolata extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
 
         $this->pointCost = 1100;
-        $this->faction = "Minbari";
+        $this->faction = "Minbari Federation";
         $this->phpclass = "Trolata";
         $this->imagePath = "img/ships/troligan.png";
         $this->shipClass = "Trolata Armored Cruiser";

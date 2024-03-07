@@ -5,7 +5,7 @@ class resoluteHK extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 175;
-		$this->faction = "Orieni";
+		$this->faction = "Orieni Imperium";
         $this->phpclass = "ResoluteHK";
         $this->imagePath = "img/ships/resolute.png";
         $this->shipClass = "Resolute Hunter-Killer Conveyor";

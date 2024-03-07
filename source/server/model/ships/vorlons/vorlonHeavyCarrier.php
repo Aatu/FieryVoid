@@ -5,7 +5,7 @@ class VorlonHeavyCarrier extends VorlonCapitalShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 3300;
-		$this->faction = "Vorlons";
+		$this->faction = "Vorlon Empire";
         $this->phpclass = "VorlonHeavyCarrier";
         $this->shipClass = "Heavy Carrier";
         //$this->variantOf = "Heavy Cruiser"; //officially this is NOT a variant, presumably to stack Limited restriction on it	

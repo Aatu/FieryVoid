@@ -5,7 +5,7 @@ class Gorith extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 240;
-		$this->faction = "Narn";
+		$this->faction = "Narn Regime";
         $this->phpclass = "Gorith";
         $this->shipClass = "Gorith Medium Fighters";
 		$this->imagePath = "img/ships/gorith.png";

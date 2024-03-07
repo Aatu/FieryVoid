@@ -23,13 +23,14 @@ class Tokrana extends OSAT{
 
         $this->addPrimarySystem(new Reactor(4, 7, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 7, 3, 6)); 
-        $this->addPrimarySystem(new GraviticShield(0, 6, 0, 2, 0, 360));
-        $this->addPrimarySystem(new Thruster(4, 6, 0, 0, 2)); 
+		
+        $this->addAftSystem(new GraviticShield(0, 6, 0, 2, 0, 360));
+        $this->addAftSystem(new Thruster(4, 6, 0, 0, 2)); 
 
-        $this->addPrimarySystem(new GraviticCannon(4, 6, 5, 270, 90)); 
-        $this->addPrimarySystem(new GraviticCannon(4, 6, 5, 270, 90)); 
-        $this->addPrimarySystem(new GraviticBolt(3, 5, 2, 180, 360));  
-        $this->addPrimarySystem(new GraviticBolt(3, 5, 2, 0, 180));  
+        $this->addFrontSystem(new GraviticCannon(4, 6, 5, 270, 90)); 
+        $this->addFrontSystem(new GraviticCannon(4, 6, 5, 270, 90)); 
+        $this->addFrontSystem(new GraviticBolt(3, 5, 2, 180, 360));  
+        $this->addFrontSystem(new GraviticBolt(3, 5, 2, 0, 180));  
 
         $this->addPrimarySystem(new ShieldGenerator(4, 8, 2, 1));
         
@@ -41,10 +42,10 @@ class Tokrana extends OSAT{
 		$this->hitChart = array(
 			0=> array(
 					9 => "Structure",
-					11 => "Thruster",
-					13 => "Gravitic Cannon",
-					14 => "Gravitic Bolt",
-					15 => "Gravitic Shield",
+					11 => "2:Thruster",
+					13 => "1:Gravitic Cannon",
+					14 => "1:Gravitic Bolt",
+					15 => "2:Gravitic Shield",
 					17 => "Scanner",
 					19 => "Reactor",
 					20 => "Shield Generator",

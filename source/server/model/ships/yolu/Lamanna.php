@@ -7,7 +7,7 @@ class Lamanna extends OSAT
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 250;
-        $this->faction = "Yolu";
+        $this->faction = "Yolu Confederation";
 		$this->phpclass = "Lamanna";
 		$this->shipClass = "Lamanna Flayer OSAT";
 		$this->imagePath = "img/ships/YoluLamanna.png";

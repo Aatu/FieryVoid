@@ -427,6 +427,23 @@ window.declarations = {
   callTarget: function callTarget() {
     declarations.GlobalDisplay = 'Target';
     declarations.fillDeclarationsActual();
-  }    
+  },    
+  
+  //let's place game description here as well!
+  callGameDescriptionActual: function callGameDescriptionActual() {
+	//prepare text
+    var newText = '';
+    //start with header
+    newText = '<br><big><b><u>';
+    newText += 'GAME DESCRIPTION';
+    newText += '</b></u></big><br><br>';
+    //actual data
+    newText += gamedata.description;
+    
+    //display text
+    var targetDiv = document.getElementById("declarationsActual"); 
+    targetDiv.style.display = "block";
+    targetDiv.innerHTML = newText;
+  }
   
 }

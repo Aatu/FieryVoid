@@ -5,7 +5,7 @@ class Xvell extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 350;
-		$this->faction = "Vree";
+		$this->faction = "Vree Conglomerate";
         $this->phpclass = "Xvell";
         $this->imagePath = "img/ships/VreeXvell.png";
         $this->shipClass = "Xvell Escort Saucer";

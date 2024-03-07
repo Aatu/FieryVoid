@@ -5,7 +5,7 @@ class ShadowCruiserPrimordial extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = round(2750*1.2+10*15);//Primordial: +20%; Additional Tendril: Tendril capacity * Diffuser output
-		$this->faction = "Shadows";
+		$this->faction = "Shadow Association";
         $this->phpclass = "ShadowCruiserPrimordial";
         $this->imagePath = "img/ships/ShadowCruiser.png";
         $this->shipClass = "Cruiser (Primordial)";

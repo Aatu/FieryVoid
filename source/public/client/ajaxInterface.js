@@ -69,7 +69,8 @@ window.ajaxInterface = {
                 'slot': ship.slot,
                 'id': ship.id,
                 'name': ship.name,
-				'pointCostEnh': ship.pointCostEnh
+				'pointCostEnh': ship.pointCostEnh,
+				'pointCostEnh2': ship.pointCostEnh2
             };
             newShip.movement = Array();
             newShip.EW = Array();

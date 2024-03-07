@@ -5,7 +5,7 @@ class Romak extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 400;
-		$this->faction = "Markab";
+		$this->faction = "Markab Theocracy";
         $this->phpclass = "Romak";
         $this->imagePath = "img/ships/MarkabPoliceShip.png"; //change
         $this->shipClass = "Romak Escort Frigate";
@@ -22,6 +22,8 @@ class Romak extends MediumShip{
         $this->rollcost = 2;
         $this->pivotcost = 1;
 		$this->iniativebonus = 60;
+
+		$this->enhancementOptionsEnabled[] = 'MARK_FERV'; //To activate Religious Fervor attributes.   
          
         $this->addPrimarySystem(new Reactor(3, 13, 0, 0));
         $this->addPrimarySystem(new CnC(4, 6, 0, 0));

@@ -77,6 +77,9 @@ window.gamedata = {
 		  case 'Earth Alliance':
 			powerRating = 'Tier 1 (except Warlock, which is Superior)';
 			break;
+		  case 'Earth Alliance (custom)':
+			powerRating = 'custom and non-combatant designs for EA faction';
+			break;
 		  case 'Earth Alliance (defenses)':
 			powerRating = 'fixed tefenses for EA faction';
 			break;
@@ -92,37 +95,43 @@ window.gamedata = {
 		  case 'Hurr Republic':
 			powerRating = 'Not balanced';
 			break;
+		  case 'Hyach Gerontocracy':
+			powerRating = 'Tier 1';
+			break;
 		  case 'Ipsha Baronies':
 			powerRating = 'Tier 2 (distinct Baronies cannot be mixed)';
 			break;
 		  case 'Kor-Lyan Kingdoms':
 			powerRating = 'Tier 1';
 			break;
-		  case 'Llort':
+		  case 'Llort': //actually no full name in the sourcebook (RPP1), it's just Llort!
 			powerRating = 'Tier 1';
 			break;
-		  case 'Markab':
+		  case 'Markab Theocracy':
 			powerRating = 'Tier 2';
 			break;
-		  case 'Minbari':
+		  case 'Minbari Federation':
 			powerRating = 'Tier 1 (all-White Star: Superior)';
 			break;
 		  case 'Minbari Protectorate':
 			powerRating = 'Tier 1';
 			break;
-		  case 'Narn':
-			powerRating = 'Tier 1 (if >6 EMIne launchers: Superior)';
+		  case 'Narn Regime':
+			powerRating = 'Tier 1 (if >6 EMine launchers: Superior)';
 			break;
-		  case 'Orieni':
+		  case 'Orieni Imperium':
 			powerRating = 'Tier 1';
 			break;
-		  case "Pak'ma'ra":
+		  case 'Orieni Imperium (defenses)':
+			powerRating = 'fixed tefenses for Orieni faction';
+			break;
+		  case "Pak'ma'ra Confederacy":
 			powerRating = 'Tier 2';
 			break;
 		  case 'Raiders':
 			powerRating = 'Tier 2 (directory contains distinct Raider factions in addition to generic Raiders!)';
 			break;
-		  case 'Shadows':
+		  case 'Shadow Association':
 			powerRating = 'Ancients';
 			break;
 		  case 'Small Races':
@@ -134,19 +143,19 @@ window.gamedata = {
 		  case 'Thirdspace':
 			powerRating = 'Ancients, custom faction';
 			break;
-		  case 'Torata':
+		  case 'Torata Regency':
 			powerRating = 'Tier 1';
 			break;
-		  case 'Usuuth':
+		  case 'Usuuth Coalition':
 			powerRating = 'Not balanced';
 			break;
-		  case 'Vorlons':
+		  case 'Vorlon Empire':
 			powerRating = 'Ancients';
 			break;
-		  case 'Vree':
+		  case 'Vree Conglomerate':
 			powerRating = 'Tier 1';
 			break;
-		  case 'Yolu':
+		  case 'Yolu Confederation':
 			powerRating = 'Superior';
 			break;
 		  case 'ZBSG Colonials':
@@ -1430,7 +1439,17 @@ window.gamedata = {
 			if(noTaken > 0){ //enhancement picked - note!
 				ship.enhancementOptions[enhNo][2] = noTaken;
 				if(!ship.enhancementOptions[enhNo][6]){ //this is an actual enhancement (as opposed to option) - note value!
-					ship.pointCostEnh += target.data("enhCost");
+					if (ship.flight){
+						ship.pointCostEnh += target.data("enhCost") * flightSize;
+					} else {
+						ship.pointCostEnh += target.data("enhCost");
+					}
+				}else{ //this is an option - still note value, just separately!
+					if (ship.flight){
+						ship.pointCostEnh2 += target.data("enhCost") * flightSize;
+					} else {
+						ship.pointCostEnh2 += target.data("enhCost");
+					}
 				}
 			}
 			//go to next enhancement

@@ -5,7 +5,7 @@ class Virtue1783 extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
       	$this->pointCost = 395;
-      	$this->faction = "Orieni";
+      	$this->faction = "Orieni Imperium";
         $this->phpclass = "Virtue1783";
         $this->imagePath = "img/ships/steadfast.png";
         $this->shipClass = "Virtue Strike Force Corvette (early)";  

@@ -6,7 +6,7 @@ class Critical{
     public $outputMod = 0;
     public $outputModPercentage = 0; //if output is percentage-based rather than absolute
     public $description = "";
-    public $oneturn = false; //technically superseded by $turnend, but there are many exiting references to $oneturn - I'm leaving it fully functional rather than overhaul
+    public $oneturn = false; //technically superseded by $turnend, but there are many exiting references to $oneturn - I'm leaving it fully functional rather than overhaul   
     public $inEffect = true;
     public $newCrit = false; //true forces database insert even out of current turn! (obsolete ATM, code checks presence of ID instead!
 	//criticals remake
@@ -25,7 +25,7 @@ class Critical{
         $this->turn = (int)$turn;
         $this->turnend = (int)$turnend;
         $this->setParam($param);
-		if($this->oneturn) $this->turnend = $this->turn + 1; //set appropriate ending for "one turn" criticals, even if not called to explicitly
+		if($this->oneturn) $this->turnend = $this->turn + 1; //set appropriate ending for "one turn" criticals, even if not called to explicitly		
     }
         
         
@@ -51,6 +51,15 @@ class DisengagedFighter extends Critical{
 class OutputHalved extends Critical{
     public $description = "Output halved.";
     public $outputModPercentage = -50; //output modified by -50%
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
+        parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend);
+    }
+}
+
+class OutputHalvedOneTurn extends Critical{
+    public $description = "Output halved";
+    public $outputModPercentage = -50; //output modified by -50%
+    public $oneturn = true;    
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
         parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend);
     }
@@ -171,6 +180,15 @@ class ForcedOfflineForTurns extends Critical{
 class FirstThrustIgnored extends Critical{
     public $description = "First point of channeled thrust is ignored.";
     public $outputMod = -1;
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
+            parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend);
+    }
+}
+
+class FirstThrustIgnoredOneTurn extends Critical{
+    public $description = "First point of channeled thrust is ignored.";
+    public $outputMod = -1;    
+    public $oneturn = true;
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
             parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend);
     }
@@ -438,6 +456,24 @@ class SensorLoss extends Critical{
     }
 }
 
+class LimpetBore extends Critical{
+	//Used by the Limpet Bore Torpedo
+    public $description = "Limpet Bore attached to system."; 
+	public $repairPriority = 0;//Can't repair.'       
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
+		if($turnend == 0) $turnend = $turn + 4;    	
+            parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
+    }
+} 
 
+//For criticalClass.php		
+class MayOverheat extends Critical { //Critical to allow weapons to roll a critical at the end of following turn if they are at risk of overheating e.g. Quad Array.
+    public $description = "May overheat";
+	public $repairPriority = 0;//Can't repair.'
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0) {
+//        if ($turnend == 0) $turnend = $turn + 1;
+        parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
+    }
+}
 
 ?>

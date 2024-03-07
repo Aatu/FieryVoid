@@ -5,7 +5,7 @@ class Tigara extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
 
         $this->pointCost = 1100;
-        $this->faction = "Minbari";
+        $this->faction = "Minbari Federation";
         $this->phpclass = "Tigara";
         $this->imagePath = "img/ships/tigara.png";
         $this->shipClass = "Tigara Attack Cruiser";

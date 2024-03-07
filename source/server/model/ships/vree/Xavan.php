@@ -5,7 +5,7 @@ class Xavan extends VreeCapital{
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 500;
-		$this->faction = "Vree";
+		$this->faction = "Vree Conglomerate";
 		$this->phpclass = "Xavan";
 		$this->shipClass = "Xavan Gun Saucer";
 		$this->isd = 2213;

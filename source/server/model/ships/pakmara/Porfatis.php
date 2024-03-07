@@ -5,7 +5,7 @@ class Porfatis extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 50*6;
-        $this->faction = "Pak'ma'ra";
+        $this->faction = "Pak'ma'ra Confederacy";
         $this->phpclass = "Porfatis"; 
         $this->shipClass = "Por'fa'tis Medium flight";
         $this->imagePath = "img/ships/PakmaraPorfatis.png";

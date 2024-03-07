@@ -8501,7 +8501,7 @@ class LimpetBoreBase extends LimpetBoreTorp{
 
 
 
-
+/* COMMENT OUT, weapon moved elsewhere
 class ProximityLaser extends Weapon{
         public $name = "ProximityLaser";
         public $displayName = "Proximity Laser";
@@ -8584,7 +8584,7 @@ class ProximityLaser extends Weapon{
         public function setMaxDamage(){     $this->maxDamage = 38;      }
 		
 }//endof ProximityLaser
-
+*/
 
 
 

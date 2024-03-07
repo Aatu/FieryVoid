@@ -5,7 +5,7 @@ class wlcTinshara extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
 
         $this->pointCost = 725;
-        $this->faction = "Minbari";
+        $this->faction = "Minbari Federation";
         $this->phpclass = "wlcTinshara";
         $this->imagePath = "img/ships/tinashi.png";
         $this->shipClass = "Tinshara War Frigate";

@@ -66,7 +66,7 @@
 				
 		}
         
-        public static function getBlanketDEW($gamedata, $target)
+    public static function getBlanketDEW($gamedata, $target)
         {
             $FDEW = 0;
             foreach ($gamedata->ships as $ship)
@@ -79,7 +79,10 @@
                     if ( $blanket > $FDEW ) $FDEW = $blanket;
                 }
             }
+
             $FDEW = $FDEW * 0.25;
+			if(($target->jammerMissile) && $FDEW < 2) $FDEW = 2; //Jammer Missiles provide 2 BDEW to all ships in range, but not in combination with normal BDEW!
+				            
             return $FDEW;
         }
         
@@ -97,29 +100,30 @@
 				}
 			}
 			*/
-                        
+			
             $amount = 0;
             foreach ($gamedata->ships as $elint)
             {
-                if ($elint->id === $ship->id)
+                if ($elint->id === $ship->id) 
                     continue;
                 
                 if (!$elint->isElint())
                     continue;
                 
-                if (Mathlib::getDistanceHex( $target, $elint ) > 30)
+                if (Mathlib::getDistanceHex( $target, $elint ) > 30) 
                     continue;
                 
-                if (Mathlib::getDistanceHex( $ship, $elint ) > 30)
+                if (Mathlib::getDistanceHex( $ship, $elint ) > 30) 
                     continue;
 
-                if (!$elint->getEWbyType("SOEW", $gamedata->turn, $ship))
+                if (!$elint->getEWbyType("SOEW", $gamedata->turn, $ship)) 
                     continue;
 
 				$jammerValue = $target->getSpecialAbilityValue("Jammer", array("shooter" => $elint, "target" => $target));
 				if ($jammerValue>0) {
+					return 40;
 					continue; //no lock-on negates SOEW, if any
-				}		
+				}
 
                 $foew = $elint->getEWByType("OEW", $gamedata->turn, $target) * 0.5;
 								

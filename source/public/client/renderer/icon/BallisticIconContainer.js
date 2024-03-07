@@ -105,10 +105,22 @@ window.BallisticIconContainer = function () {
         var shooterIcon = iconContainer.getById(ballistic.shooterid);	
 		var targetType = 'hex';
         var launchPosition = this.coordinateConverter.fromHexToGame(shooterIcon.getFirstMovementOnTurn(turn).position);
+
 		if (ballistic.type == 'normal') { //it's direct fire after all!
-			launchPosition = this.coordinateConverter.fromHexToGame(shooterIcon.getLastMovement().position);
-			targetType = 'hexDirect';
-		}
+		            launchPosition = this.coordinateConverter.fromHexToGame(shooterIcon.getLastMovement().position);
+			switch (ballistic.damageclass) {
+			case 'antimatter':
+			            targetType = 'hexDirectBlue';
+			break;
+			case 'plasma':
+			            targetType = 'hexDirectGreen';
+			break;
+			default:
+			            targetType = 'hexDirectYellow';
+			break;
+
+	        }
+		}    		
         var targetPosition = null;
         var targetIcon = null;
 

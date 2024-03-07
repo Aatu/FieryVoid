@@ -6,7 +6,7 @@ class KatanPulseDestroyer extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 600;
-        $this->faction = "Narn";
+        $this->faction = "Narn Regime";
         $this->phpclass = "KatanPulseDestroyer";
         $this->imagePath = "img/ships/katoc.png";
         $this->shipClass = "Ka'Tan Pulse Destroyer";

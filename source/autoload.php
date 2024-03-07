@@ -2528,22 +2528,22 @@ spl_autoload_register(
 		    	'hurrmissileosat2240' => '/server/model/ships/hurr/HurrmissileOSAT2240.php',
 		    	'roskorbase2215' => '/server/model/ships/hurr/Roskorbase2215.php',
 		    	'roskorbase2240' => '/server/model/ships/hurr/Roskorbase2240.php',
-		    	'highguarda' => '/server/model/ships/orieni/HighguardA.php',
+		    	//'highguarda' => '/server/model/ships/orieni/HighguardA.php',
 		    	//'highguarda2003' => '/server/model/ships/orieni/HighguardA2003.php',
 		    	'highguarda2007' => '/server/model/ships/orieni/HighguardA2007.php',
 		    	'highguardb' => '/server/model/ships/orieni/HighguardB.php',
 		    	'highguardb2003' => '/server/model/ships/orieni/HighguardB2003.php',
 		    	'highguardb2007' => '/server/model/ships/orieni/HighguardB2007.php',
-                'penitent' => '/server/model/ships/orieni/penitent.php',
+                //'penitent' => '/server/model/ships/orieni/penitent.php',
                 //'penitent1782' => '/server/model/ships/orieni/penitent1782.php',
-                'penitent2003' => '/server/model/ships/orieni/penitent2003.php',
+                //'penitent2003' => '/server/model/ships/orieni/penitent2003.php',
 		    	'resolute' => '/server/model/ships/orieni/resolute.php',
 		    	'resolutehk' => '/server/model/ships/orieni/resoluteHK.php',
 		    	'resolute2007' => '/server/model/ships/orieni/resolute2007.php',
 		    	'resolutehk2007' => '/server/model/ships/orieni/resoluteHK2007.php',
-		    	'skywatch' => '/server/model/ships/orieni/skywatch.php',
+		    	//'skywatch' => '/server/model/ships/orieni/skywatch.php',
 		    	//'skywatch1810' => '/server/model/ships/orieni/skywatch1810.php',
-		    	'skywatch2003' => '/server/model/ships/orieni/skywatch2003.php',
+		    	//'skywatch2003' => '/server/model/ships/orieni/skywatch2003.php',
 		    	'kaedashkada' => '/server/model/ships/llort/Kaedashkada.php',
 		    	'brostilli' => '/server/model/ships/drazi/Brostilli.php',
 		    	'deathfalcon' => '/server/model/ships/drazi/Deathfalcon.php',
@@ -2802,7 +2802,7 @@ spl_autoload_register(
 				//TNG (Next Generation, Deep Space Nine, Voyager)
 				
 				
-				//other factions
+				//other factions / playtest
 				'trekmazeriteship' => '/server/model/ships/ZTrekOther/TrekMazeriteShip.php',
 				'trekmazeriteshuttles' => '/server/model/ships/ZTrekOther/TrekMazeriteShuttles.php',
 				'treknausicaanglidersshf' => '/server/model/ships/ZTrekOther/TrekNausicaanGlidersSHF.php',
@@ -2812,6 +2812,15 @@ spl_autoload_register(
 				'treknausicaanguramba' => '/server/model/ships/ZTrekOther/TrekNausicaanGuramba.php',				
 				'treknausicaanshefafighter' => '/server/model/ships/ZTrekOther/TrekNausicaanShefaFighter.php',
 				'treknausicaanshefalitayalfighter' => '/server/model/ships/ZTrekOther/TrekNausicaanShefalitayalFighter.php',
+				
+				'treksulibancellshiplarge' => '/server/model/ships/ZTrekOther/TrekSulibanCellshipLarge.php',
+				'treksulibancellshipmed' => '/server/model/ships/ZTrekOther/TrekSulibanCellshipMed.php',
+				'treksulibancellshipsmall' => '/server/model/ships/ZTrekOther/TrekSulibanCellshipSmall.php',
+				'treksulibancarrier' => '/server/model/ships/ZTrekOther/TrekSulibanCarrier.php',
+				'treksulibancruiser' => '/server/model/ships/ZTrekOther/TrekSulibanCruiser.php',
+				'treksulibanhelix' => '/server/model/ships/ZTrekOther/TrekSulibanHelix.php',
+				
+				
 				
 				//Pak'ma'ra
 				'plasmabattery' => '/server/model/systems/baseSystems.php',

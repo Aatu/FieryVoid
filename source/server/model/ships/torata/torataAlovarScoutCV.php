@@ -6,7 +6,7 @@ class TorataAlovarScoutCV extends BaseShip{
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 675;
-		$this->faction = "Torata";
+		$this->faction = "Torata Regency";
 		$this->phpclass = "TorataAlovarScoutCV";
 		$this->imagePath = "img/ships/TorataClovant.png";
 		$this->shipClass = "Alovar Scout Carrier";

@@ -7,7 +7,7 @@ class Lashanna extends OSAT
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 220;
-        $this->faction = "Yolu";
+        $this->faction = "Yolu Confederation";
 //	      $this->variantOf = "";
 //        $this->occurence = "";
 		$this->phpclass = "Lashanna";

@@ -5,7 +5,7 @@ class VorlonStrikeCruiser extends VorlonCapitalShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 2950;
-		$this->faction = "Vorlons";
+		$this->faction = "Vorlon Empire";
         $this->phpclass = "VorlonStrikeCruiser";
         $this->shipClass = "Strike Cruiser";
 				$this->variantOf = "UNDER CONSTRUCTION";

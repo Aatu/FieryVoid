@@ -5,7 +5,7 @@ class Faithful extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 630;
-		$this->faction = "Orieni";
+		$this->faction = "Orieni Imperium";
         $this->phpclass = "Faithful";
         $this->imagePath = "img/ships/faithful.png";
         $this->canvasSize = 200;

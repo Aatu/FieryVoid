@@ -5,7 +5,7 @@ class Sheganna extends OSAT{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 300;
-		$this->faction = "Minbari";
+		$this->faction = "Minbari Federation";
         $this->phpclass = "Sheganna";
         $this->imagePath = "img/ships/sheganna.png";
         $this->shipClass = 'Sheganna OSAT';        

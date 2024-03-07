@@ -5,7 +5,7 @@ class Malau extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
 
         $this->pointCost = 625;
-        $this->faction = "Yolu";
+        $this->faction = "Yolu Confederation";
         $this->phpclass = "Malau";
         $this->imagePath = "img/ships/maitau.png";
         $this->shipClass = "Malau Attack Frigate";

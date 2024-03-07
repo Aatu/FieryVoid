@@ -5,7 +5,7 @@ class Gquan extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 625;
-		$this->faction = "Narn";
+		$this->faction = "Narn Regime";
         $this->phpclass = "Gquan";
         $this->imagePath = "img/ships/gquan.png";
         $this->shipClass = "G'Quan Heavy Cruiser";

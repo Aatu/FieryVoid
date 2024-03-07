@@ -55,21 +55,25 @@ if (isset($_SESSION["user"])) {
 <div class="panel news">
     <!-- <div id="newsHeader">Latest News - September 2020</div> -->
     <div id="newsEntry">
-        
-<!--	    
+
+	    <!--
         <h3> *** Merry Christmas and a Happy New Year! *** </h3>
-        <h4>may our games be fiery and our lives peaceful</h4>
+        <h4><i>may our games be fiery and our lives peaceful</i></h4>
         <br>
--->
-       
+       -->
 		
 
-		---------- <b>LATEST NEWS - November 2023</b> ----------
-	    <br><b>Allocating damage by tag</b> - new option, revolutionizing Vree and Vorlon hit charts (and Starbases, in the future - not fitted yet)
-	    <br><b>Faction names</b> - about two thirds of official ones are expanded
-	    <br><b>Minor fixes</b> - as usual :)
-	    <br><b>A LOT of work</b> by Douglas and Geoffrey! New missiles, faction polishing, bugfixes, there's everything!
-	    
+		---------- <b>LATEST NEWS - March 2024</b> ----------
+<br><u><b>HYAAAAAACH!</b></u> - by Douglas
+<br><b>Balosian Delta-V</b> for all the Underdweller fans ;)
+<br><b>bugfixes and laubout changes</b> - by Douglas
+<br><b>Thirdspace updates</b> - by Douglas
+<br><b>Hyperlinks added to Register Account window</b> - by Douglas
+<br><b>Nexus updates, including new Makar Federation</b> - by Geoffrey
+<br><b>EA and Orieni split</b> - big factions should be playable again!
+
+       
+
 <!--	        
 		 <br><br>---------- <b>update 20th of January</b> ---------- 
 	    <br><b><u><big>Thirdspace</big></u> arrived</b> - custom faction by Douglas

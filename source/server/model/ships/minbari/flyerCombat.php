@@ -6,7 +6,7 @@ class FlyerCombat extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
     	$this->pointCost = 70*6;
-    	$this->faction = "Minbari";
+    	$this->faction = "Minbari Federation";
         $this->phpclass = "FlyerCombat";
         $this->shipClass = "Combat Flyers";
         $this->variantOf = "Assault Flyers";

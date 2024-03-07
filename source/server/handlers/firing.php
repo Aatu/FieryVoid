@@ -54,12 +54,15 @@ class Firing
             }
             if ($exclusiveWasFired) $toReturn = array(); //exclusive weapon was fired, nothing can intercept!
         } else { //proper ship
+           
             if (!(($ship->unavailable === true) || $ship->isDisabled())) { //ship itself can fight this turn
-                foreach ($ship->systems as $weapon) {
+                foreach ($ship->systems as $weapon) {               	
 //                    if ((!($weapon instanceof Weapon)) || ($weapon->ballistic)) continue; //not a weapon, or a ballistic weapon   NOTE: changed to allow ballistics to intercept GTS 07 Aug 2022
-                    if ((!($weapon instanceof Weapon))) continue; //not a weapon, or a ballistic weapon
+                    if ((!($weapon instanceof Weapon))) continue; //not a weapon, or a ballistic weapon         
+					if ($weapon->canModesIntercept && (!($weapon->firedOnTurn($currTurn)))) $weapon->switchModeForIntercept(); //To check for intercept values in non-default modes if weapon has appropriate marker and hasn't fired e.g. Intercept Missile etc  
+	                    	
                     if ((!$weapon->firedOnTurn($currTurn)) && ($weapon->intercept > 0)) {
-                        if (self::isValidInterceptor($gamedata, $weapon)) {//not fired this turn, intercept-capable, and valid interceptor
+                        if (self::isValidInterceptor($gamedata, $weapon)) {//not fired this turn, intercept-capable, and valid interceptor                 	
                             $toReturn[] = $weapon;
                         }
                     }
@@ -109,7 +112,7 @@ class Firing
                 case 'Raking': //Raking damage gets reduced multiple times, account for that a bit! - another armour down!
                     if ($expectedDamage > 10) { ///simplified, assuming Raking will be in 10-strong rakes
                         $expectedDamage = $expectedDamage - $armour; //from second rake - let's simplify that two full weights of armor will be deduced from damage
-                        $expectedDamage = max(10, $expectedDamage);
+                        $expectedDamage = min(10, $expectedDamage);
                     }
                     break;
                 case 'Piercing': //Piercing does little damage to actual outer section... but it does PRIMARY damage! very dangerous!
@@ -217,7 +220,8 @@ class Firing
             if (($fireOrder->needed - $fireOrder->totalIntercept) <= 0) continue;//no chance of hitting
             if (($fireOrder->type == "selfIntercept") || ($fireOrder->type == "intercept")) continue; //interception shot
             $shooter = $gamedata->getShipById($fireOrder->shooterid);
-            $firingWeapon = $shooter->getSystemById($fireOrder->weaponid);
+            $firingWeapon = $shooter->getSystemById($fireOrder->weaponid);            
+            $firingWeapon->notActuallyHexTargeted($fireOrder);//Some weapons start hex targeted, but become normal e.g. BM Launcher - 4.3.24 DK
             if ($firingWeapon->hextarget) continue;//hex-targeted
             $shotsStillComing[] = $fireOrder;
         }
@@ -359,21 +363,26 @@ class Firing
             return false;
         }
 
+
+
         if ($firingweapon->ballistic) {
-            $movement = $shooter->getLastTurnMovement($fire->turn);
-            $pos = mathlib::hexCoToPixel($movement->position); //launch hex
+ //           $movement = $shooter->getLastTurnMovement($fire->turn); //Removed Mar '24 - To enable intercept for BallisticMineLauncher
+ //           $pos = mathlib::hexCoToPixel($movement->position); //Removed Mar '24 - To enable intercept for BallisticMineLauncher
+ 			$pos = $firingweapon->getFiringHex($gd, $fire); //Added Mar '24 - To enable intercept for BallisticMineLauncher
             $relativeBearing = $interceptingShip->getBearingOnPos($pos);
         } else {
             $pos = $shooter->getCoPos(); //current hex of firing unit
             $relativeBearing = $interceptingShip->getBearingOnUnit($shooter);
         }
 
+		
+
         if (!mathlib::isInArc($relativeBearing, $weapon->startArc, $weapon->endArc)) {
             //Debug::log("Fire is not on weapon arc\n");
             return false;
         }
 
-		//added for Vorlon weapons
+		//added for Vorlon weapons, also used for Interceptor missile.
 		if(!$weapon->canInterceptAtAll($gd, $fire, $shooter, $target, $interceptingShip, $firingweapon)) return false; //some weapons do have exotic rules whether they can intercept at all
 
         if ($interceptingShip->id == $target->id) { //ship intercepting fire directed at it - usual case
@@ -381,6 +390,11 @@ class Firing
         } else { //fire directed at third party - only particular weapons are able to do so
             //Debug::log("Target is this another ship\n");
             if ($interceptingShip instanceof FighterFlight) { //can intercept ballistics IF together with target ship form start of turn
+            	
+				if($weapon->freeinterceptspecial){ //weapon has own routine that handles whether it's capable of intercepting the shot
+					return $weapon->canFreeInterceptShot($gd, $fire, $shooter, $target, $interceptingShip, $firingweapon);					
+				}            	
+            	
                 if ($firingweapon->ballistic) { //only ballistic weapons can be intercepted this way
                     if ($target instanceof FighterFlight) {
                         return false; //cannot intercept fire at other fighters
@@ -442,6 +456,8 @@ class Firing
             }
         }
 
+
+
         $ambiguousFireOrders  = array();
         foreach ($gamedata->ships as $ship){
             foreach($ship->getAllFireOrders($gamedata->turn) as $fire){
@@ -452,8 +468,9 @@ class Firing
                 if (!($weapon instanceof Weapon)){ //this isn't a weapon after all...
                     continue;
                 }		
-                
+               
 		$weapon->changeFiringMode($fire->firingMode); //For Chaff Missile
+		
 		    
                 $fire->priority = $weapon->priority;
 				//take different AF priority into account!
@@ -470,6 +487,8 @@ class Firing
                     $weapon->calculateHitBase($gamedata, $fire);
                 }
             }
+            
+//echo "Debug: Intercept at end:  $weapon->intercept\n";     // Add this line for debugging             
         }
 
         //calculate hit chances for ambiguous firing!

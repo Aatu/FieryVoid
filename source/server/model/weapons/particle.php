@@ -1233,8 +1233,8 @@
         public $rangePenalty = 2;
         public $fireControl = array(6, 5, 4); // fighters, <mediums, <capitals
 
-        public $firingModes = array(1=>'4Quad', 2=>'3Triple', 3=>'2Dual');
-        public $gunsArray = array(1=>4,2=>3,3=>2);
+        public $firingModes = array(1=>'4Quad', 2=>'3Triple', 3=>'2Dual', 4=>'1Single');
+        public $gunsArray = array(1=>4,2=>3,3=>2,4=>1);
 	    
 	public $firedThisTurn = false; //to avoid re-rolling criticals!
 
@@ -1252,12 +1252,54 @@
         public function setSystemDataWindow($turn){
             parent::setSystemDataWindow($turn);
             //$this->output = $this->baseOutput + $this->getBoostLevel($turn); //handled in front end
-            $this->data["Special"] = 'If fired offensively at full power, can overheat and shut down.<br>Can be fired at reduced power to avoid this:';    
-            $this->data["Special"] .= "<br>Quad shot: 50% chance to shut down for a turn"; 
-            $this->data["Special"] .= "<br>Triple shot: 25% chance to shut down for a turn";  
-            $this->data["Special"] .= "<br>Dual shot: always safe"; 
+            $this->data["Special"] = 'If three or four shots are fired, this weapon may overheat next turn if fired again.';    
+            $this->data["Special"] .= "<br>When this weapon has 'May Overheat' critical(s), firing again will cause a critical roll at end of turn."; 
+            $this->data["Special"] .= "<br>This critical roll has +2 modifier for evey shot fired in current turn, and -2 if there is only one 'May Overheat' critical effect.";  
+            $this->data["Special"] .= "<br>Dual or Single shots will not cause overheating the following turn, nor will defensive fire.";                          
         }
 
+	//Fire function for Quad Array
+	public function fire($gamedata, $fireOrder){ 
+	// If fires 3 or 4 shots, Quad Array might overheat next turn. Make a crit roll taking into account number of shots fired this turn and last.
+	 
+		parent::fire($gamedata, $fireOrder);
+
+		 	if ($this->firedThisTurn) return; //Crits already accounted for (if necessary)
+			$this->firedThisTurn = true; //To avoid rolling and adding crits for every shot fired, just once.
+
+
+			$shotsThisTurn = count($this->getFireOrders($gamedata->turn)); //How many shots were fired this turn?, if so roll critical as before:
+			$overheatLevel = $this->hasCritical("MayOverheat", $gamedata->turn);//Check for criticals from last turn firing. 		
+			
+			if(($shotsThisTurn > 0) && ($overheatLevel > 0)){//Check that weapon fired (it should have) and there's at least one 'May Overheat' critical.
+			 $this->critRollMod += $shotsThisTurn * 2; // +2 for every shot fired this turn.
+			 if ($overheatLevel == 1) $this->critRollMod -= 2; // -2 to crit roll if 3 or fewer shots were fired last turn. 
+			 	
+			 // Now roll for possible crits this turn. 
+ 		     $shooter = $gamedata->getShipById($fireOrder->shooterid);
+			 $crits = array(); 
+			 $crits = $this->testCritical($shooter, $gamedata, $crits);//Added $shooter for ship variable.
+			}
+			
+			//Add any new crits for next turn. 
+			if($this->firingMode==1){//Quad 
+						$crit1 = new MayOverheat(-1, $fireOrder->shooterid, $this->id, "MayOverheat", $gamedata->turn, $gamedata->turn+1);
+				        $crit1->updated = true;
+						$crit1->newCrit = true; //force save even if crit is not for current turn
+				        $this->criticals[] =  $crit1;
+				        //Add second critical when 4 shots are fired.
+				        $crit2 = clone $crit1;
+				        $this->criticals[] =  $crit2;
+			}else if ($this->firingMode==2){//Triple 
+				$crit = new MayOverheat(-1, $fireOrder->shooterid, $this->id, "MayOverheat", $gamedata->turn, $gamedata->turn+1);
+				        $crit->updated = true;
+						$crit->newCrit = true; //force save even if crit is not for current turn
+				        $this->criticals[] =  $crit;
+			} 
+		 
+		}//end of function Fire
+
+/* //Previous version of Quad Array Fire function, just in case.
         public function fire($gamedata, $fireOrder){
             // If fired, Quad Array might overheat and go in shutdown for 1 turn.
             // Make a crit roll taking into account used firing mode
@@ -1281,7 +1323,7 @@
             }
 		
         }
-        
+  */      
         public function getDamage($fireOrder){        return Dice::d(10)+4;   }
         public function setMinDamage(){     $this->minDamage = 5 ;      }
         public function setMaxDamage(){     $this->maxDamage = 14 ;      }
@@ -1641,7 +1683,130 @@ class ParticleAccelerator extends Raking{
 
 }//end of class Particle Accelerator
 	
+
+//Custome weapon for Abraxas Gaim Campaign
+class BoltAccelerator extends Raking{
+		public $name = "BoltAccelerator";
+        public $displayName = "Bolt Accelerator";
+        public $iconPath = "BoltAccelerator.png";
 	
+        public $animation = "bolt";
+        public $animationColor = array(255, 163, 26);
+	/*
+		public $animationExplosionScale = 0.25;
+		public $animationWidth = 4;
+		public $animationWidth2 = 0.3;
+        */
+        public $intercept = 3;
+		public $priority = 8; //light Raking		
+		
+        public $loadingtime = 1;
+		public $normalload = 3;
+		
+        public $rangePenalty = 0.33;
+        public $fireControl = array(1, 3, 5);
+
+        public $damageType = "Standard";
+		public $weaponClass = "Particle";
+		public $firingModes = array( 1 => "Standard");
+
+	 	public function getInterceptRating($turn){
+			if ($this->turnsloaded == 1)
+			{
+				return 3;
+			}
+			else if ($this->turnsloaded == 2)
+			{
+				return 2;
+			} 
+			else{
+				return 1;
+			}
+		}
+
+    public function calculateRangePenalty($distance)
+    {
+			if ($this->turnsloaded == 1)
+			{
+				return 1;
+			}
+			else if ($this->turnsloaded == 2)
+			{
+				return 0.5;
+			} 
+			else{
+				return 0.33;
+			}
+    }
+
+		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){ //maxhealth and power reqirement are fixed; left option to override with hand-written values
+			if ( $maxhealth == 0 ) $maxhealth = 9;
+			if ( $powerReq == 0 ) $powerReq = 7;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);   
+			$this->data["Special"] = "Can fire accelerated ROF for less damage:";  
+			$this->data["Special"] .= "<br> - 1 turn: 11 damage, intercept -5"; 
+			$this->data["Special"] .= "<br> - 2 turns: 17 damage, intercept -10";
+			$this->data["Special"] .= "<br> - 3 turns: 23 damage, intercept -15"; 			 
+		}
+	
+		public function getDamage($fireOrder){
+        	switch($this->turnsloaded){
+            	case 0:
+            	case 1:
+                	return 11;
+			    	break;
+            	case 2:
+                	return 17;
+			    	break;			    	
+            	default:
+                	return 23;
+			    	break;
+        	}
+		}
+
+ 		public function setMinDamage(){
+            switch($this->turnsloaded){
+                case 1:
+                    $this->minDamage = 11 ;
+                    break;
+                case 2:
+                    $this->minDamage = 17 ;
+                    break;                    
+                default:
+                    $this->minDamage = 24 ;  
+                    break;
+            }
+		}
+             
+        public function setMaxDamage(){
+            switch($this->turnsloaded){
+                case 1:
+                    $this->minDamage = 11 ;
+                    break;
+                case 2:
+                    $this->minDamage = 17 ;
+                    break;                    
+                default:
+                    $this->minDamage = 24 ;  
+                    break;
+            }
+		}
+
+		public function stripForJson(){
+			$strippedSystem = parent::stripForJson();
+			$strippedSystem->data = $this->data;
+			$strippedSystem->minDamage = $this->minDamage;
+			$strippedSystem->minDamageArray = $this->minDamageArray;
+			$strippedSystem->maxDamage = $this->maxDamage;
+			$strippedSystem->maxDamageArray = $this->maxDamageArray;				
+			return $strippedSystem;
+		}
+
+}//end of class Heavy Bolt Accelerator	
 	
 //Torata fighter weapon - with OPTIONAL ability of a powerful antiship shot if armed for two turns.	
 class LightParticleAccelerator extends LinkedWeapon{		
@@ -1770,212 +1935,6 @@ class LightParticleAccelerator extends LinkedWeapon{
         public function setMaxDamage(){     $this->maxDamage = 12 ;      }
     }	
 	
-
-
-    class Interdictor extends Weapon{
-        public $name = "Interdictor";
-        public $displayName = "Interdictor";
-		public $iconPath = "Interdictor.png";
-
-        public $freeintercept = true; //can intercept fire directed at different unit
-        public $freeinterceptspecial = true; //has own custom routine for deciding whether third party interception is legal
-
-        public $loadingtime = 1;
-        public $priority = 1; //will never fire anyway except defensively, purely a defensive system
-		public $autoFireOnly = true; //this weapon cannot be fired by player
-
-        public $rangePenalty = 2; //irrelevant
-        public $fireControl = array(null, null, null); // fighters, <mediums, <capitals
-
-		public $firingMode = 'Intercept'; //firing mode - just a name essentially
-		public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
-    	public $weaponClass = "Particle"; //not important really
-        
-        public $intercept = 4;
-		private static $alreadyIntercepted = array(); //Only one Interdictor can intercept any shot, including ballistics.
-
-     	protected $possibleCriticals = array( //different than usual B5Wars weapon
-            16=>"ForcedOfflineOneTurn"
-		);
-
-		public function setSystemDataWindow($turn){
-            parent::setSystemDataWindow($turn);
-            $this->data["Special"] = "May intercept for friendly units. Must have friendly and enemy unit in arc and have friendly unit within 5 hexes.";
-            $this->data["Special"] .= "<br>Only one interdictor can be applied to any incoming shot, including ballistics.";
-        }
-                
-        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
-		        //maxhealth and power reqirement are fixed; left option to override with hand-written values
-            if ( $maxhealth == 0 ) $maxhealth = 4;
-            if ( $powerReq == 0 ) $powerReq = 1;
-            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-//			InterdictorHandler::addInterdictor($this);//so all Interdictors are accessible together, and firing orders can be uniformly created
-        }
-
-		public function canFreeInterceptShot($gamedata, $fireOrder, $shooter, $target, $interceptingShip, $firingWeapon){
-			//target must be within 5 hexes
-			$distance = mathlib::getDistanceHex($interceptingShip, $target);
-			if ($distance > 5) return false;
-			
-			//both source and target of fire must be in arc
-			//first check target
-			$targetBearing = $interceptingShip->getBearingOnUnit($target);
-			if (!mathlib::isInArc($targetBearing, $this->startArc, $this->endArc)) return false;
-			//check on source - launch hex for ballistics, current position for direct fire
-			if ($firingWeapon->ballistic){
-				$movement = $shooter->getLastTurnMovement($fireOrder->turn);
-				$pos = mathlib::hexCoToPixel($movement->position); //launch hex
-				$sourceBearing = $interceptingShip->getBearingOnPos($pos);				
-			}else{ //direct fire
-				$sourceBearing = $interceptingShip->getBearingOnUnit($shooter);
-			}
-			if (!mathlib::isInArc($sourceBearing, $this->startArc, $this->endArc)) return false;
-						
-			return true;
-		}
-
-	    /*return 0 if given fire order was already intercepted by this weapon - this should prevent such assignment*/
-	public function getInterceptionMod($gamedata, $intercepted)
-	{
-		$wasIntercepted = false;
-		$interceptMod = 0;
-		foreach(Interdictor::$alreadyIntercepted as $alreadyAssignedAgainst){
-			if ($alreadyAssignedAgainst->id == $intercepted->id){ //this fire order was already intercepted by this weapon, this Scattergun cannot do so again
-				$wasIntercepted = true;
-				break;//foreach
-			}
-		}
-		if(!$wasIntercepted) $interceptMod = parent::getInterceptionMod($gamedata, $intercepted);
-		return $interceptMod;
-	}//endof  getInterceptionMod
-        
-	//on weapon being ordered to intercept - note which shot (fireorder, actually) was intercepted!
-	public function fireDefensively($gamedata, $interceptedWeapon)
-	{
-		parent::fireDefensively($gamedata, $interceptedWeapon);
-		Interdictor::$alreadyIntercepted[] = $interceptedWeapon;
-	}	    
-		
-        public function getDamage($fireOrder){        return 0;   }
-        public function setMinDamage(){     $this->minDamage = 0 ;      }
-        public function setMaxDamage(){     $this->maxDamage = 0 ;      }
-
-    }  // end of class Interdictor
-	
-
-
-
-/*fighter-mounted variant*/
-    class FtrInterdictor extends Weapon{
-//        public $trailColor = array(30, 170, 255);
-
-        public $name = "FtrInterdictor";
-        public $displayName = "Light Interdictor";
-		public $iconPath = "Interdictor.png";
-
-		public $animation = "ball";
-		public $trailColor = array(255, 250, 230);
-        public $animationColor = array(255, 250, 230);
-        public $animationExplosionScale = 0.3;
-        public $animationExplosionType = "AoE";
-        public $explosionColor = array(255,250,230);
-        public $projectilespeed = 12;
-        public $animationWidth = 10;
-        public $trailLength = 10;
-
-		public $uninterceptable = true;
-		public $doNotIntercept = true;
-	    
-        public $freeintercept = true; //can intercept fire directed at different unit
-        public $freeinterceptspecial = true; //has own custom routine for deciding whether third party interception is legal
-
-		public $range = 10; //
-
-		private static $alreadyIntercepted = array(); //Only one Interdictor can intercept any shot, including ballistics.
-
-		public $firingMode = 'Intercept';
-		public $damageType = 'Standard'; //indicates that this weapon does damage in Pulse mode
-    	public $weaponClass = 'Particle'; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!	
-
-        public $intercept = 3;
-        public $loadingtime = 1;
-        public $priority = 1;
-
-        public $rangePenalty = 0;
-        public $fireControl = array(50, null, null); // fighters, <mediums, <capitals 
-
-		function __construct($startArc, $endArc, $nrOfShots = 1){
-            $this->defaultShots = $nrOfShots;
-            $this->shots = $nrOfShots;
-            parent::__construct(0, 1, 0, $startArc, $endArc);
-        }
-
-		public function setSystemDataWindow($turn){
-            parent::setSystemDataWindow($turn);
-            $this->data["Special"] = "May intercept for friendly units. Must have friendly and enemy unit in arc and have friendly unit within 3 hexes.";
-            $this->data["Special"] .= "<br>Only one interdictor can be applied to any incoming shot, including ballistics.";
-            $this->data["Special"] .= "<br>Alternate anti-fighter intercept mode: If used on an enemy fighter flight, all fighters have their chance to hit reduced by 15 for non-ballistics.";
-        }
-
-		public function canFreeInterceptShot($gamedata, $fireOrder, $shooter, $target, $interceptingShip, $firingWeapon){
-			//target must be within 3 hexes
-			$distance = mathlib::getDistanceHex($interceptingShip, $target);
-			if ($distance > 3) return false;
-			
-			//both source and target of fire must be in arc
-			//first check target
-			$targetBearing = $interceptingShip->getBearingOnUnit($target);
-			if (!mathlib::isInArc($targetBearing, $this->startArc, $this->endArc)) return false;
-			//check on source - launch hex for ballistics, current position for direct fire
-			if ($firingWeapon->ballistic){
-				$movement = $shooter->getLastTurnMovement($fireOrder->turn);
-				$pos = mathlib::hexCoToPixel($movement->position); //launch hex
-				$sourceBearing = $interceptingShip->getBearingOnPos($pos);				
-			}else{ //direct fire
-				$sourceBearing = $interceptingShip->getBearingOnUnit($shooter);
-			}
-			if (!mathlib::isInArc($sourceBearing, $this->startArc, $this->endArc)) return false;
-						
-			return true;
-		}
-
-
-
-
-
-
-
-
-
-
-	    /*return 0 if given fire order was already intercepted by this weapon - this should prevent such assignment*/
-	public function getInterceptionMod($gamedata, $intercepted)
-	{
-		$wasIntercepted = false;
-		$interceptMod = 0;
-		foreach(FtrInterdictor::$alreadyIntercepted as $alreadyAssignedAgainst){
-			if ($alreadyAssignedAgainst->id == $intercepted->id){ //this fire order was already intercepted by this weapon, this Scattergun cannot do so again
-				$wasIntercepted = true;
-				break;//foreach
-			}
-		}
-		if(!$wasIntercepted) $interceptMod = parent::getInterceptionMod($gamedata, $intercepted);
-		return $interceptMod;
-	}//endof  getInterceptionMod
-        
-	//on weapon being ordered to intercept - note which shot (fireorder, actually) was intercepted!
-	public function fireDefensively($gamedata, $interceptedWeapon)
-	{
-		parent::fireDefensively($gamedata, $interceptedWeapon);
-		FtrInterdictor::$alreadyIntercepted[] = $interceptedWeapon;
-	}	    
-
-        public function getDamage($fireOrder){        return 0;   }
-        public function setMinDamage(){     $this->minDamage = 0 ;      }
-        public function setMaxDamage(){     $this->maxDamage = 0 ;      }
-
-	}// endof FtrInterdictor
-
 
 class UnreliableTwinArray extends TwinArray{
 
