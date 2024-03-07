@@ -409,6 +409,50 @@ shipManager.systems = {
         return total;
     },
 
+	//Looks for ships with Hyach Computer and lists any where the balance of BFCP is negative for error message.
+	getNegativeBFCP: function getNegativeBFCP() {
+			var shipNames = new Array();
+			var counter = 0;
+			for (var i in gamedata.ships) {
+				var ship = gamedata.ships[i];
+				if (ship.unavailable) continue;
+				if (ship.flight) continue;
+				if (ship.userid != gamedata.thisplayer) continue;			
+				if (!(shipManager.systems.getSystemByName(ship, "hyachComputer"))) continue; //Does it have a computer?
+				if (shipManager.isDestroyed(ship)) continue;
+				var computer = (shipManager.systems.getSystemByName(ship, "hyachComputer"));						
+				if (computer.BFCPtotal_used > computer.output){ //Is the total BFCP used greater than output, usually due to damage to Computer.
+					shipNames[counter] = ship.name;
+					counter++;
+				}
+			}
+			return shipNames;
+		},	//endof getNegativeBFCP
+
+	//Looks for ships with Hyach Specialists and lists any where these have not been selected in Deployment Phase.
+	getUnusedSpecialists: function getUnusedSpecialists() {
+			var shipNames = new Array();
+			var counter = 0;
+				if (gamedata.turn == 1)	{
+					for (var i in gamedata.ships) {
+					var ship = gamedata.ships[i];
+				
+					if (ship.unavailable) continue;
+					if (ship.flight) continue;
+					if (ship.userid != gamedata.thisplayer) continue;			
+					if (!(shipManager.systems.getSystemByName(ship, "hyachSpecialists"))) continue; //Does it Specialists?
+					if (shipManager.isDestroyed(ship)) continue;
+					var specialists = (shipManager.systems.getSystemByName(ship, "hyachSpecialists"));						
+						if (specialists.canSelectAnything()){ //Can anymore Specialists be selected?
+							shipNames[counter] = ship.name;
+							counter++;
+						}
+					}
+				}	
+			return shipNames;
+		},	//endof getUnusedSpecialists
+
+
     getRemainingHealth: function getRemainingHealth(system) {
         var damage = shipManager.systems.getTotalDamage(system);
         var max = system.maxhealth;

@@ -27,9 +27,9 @@ class TalokiAM extends StarBaseSixSections{
 		$this->locations = array(41, 42, 2, 32, 31, 1);
 
 	//ammo magazine itself (AND its missile options)
-	$ammoMagazine = new AmmoMagazine(240); //pass magazine capacity 
+	$ammoMagazine = new AmmoMagazine(480); //pass magazine capacity - 10-20 rounds per launcher, plus reload rack 80
 	    $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
-	    $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 160); //add full load of basic missiles 
+	    $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 400); //add full load of basic missiles 
 	    $ammoMagazine->addAmmoEntry(new AmmoMissileI(), 80); //add full load of intercept missiles  	      
 
 	    $this->enhancementOptionsEnabled[] = 'AMMO_A';//add enhancement options for other missiles - Class-A

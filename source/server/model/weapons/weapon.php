@@ -304,6 +304,32 @@ class Weapon extends ShipSystem
 				$strippedSystem->maxDamageArray = $this->maxDamageArray;
 				$strippedSystem->data = $this->data;    
 			}
+		//Hyach Specialists sometimes require additional info to be sent to front end.
+		$ship = $this->unit;
+		if ($ship->getSystemByName("HyachSpecialists")){ //Does ship have Specialists system?
+			$specialists = $ship->HyachSpecialists;
+			$specAllocatedArray = $specialists->specAllocatedCount;
+			foreach ($specAllocatedArray as $specsUsed=>$specValue){
+				if ($specsUsed == 'Defence'){ //Defence modifies intercept rating, show in system window.
+					$strippedSystem->data = $this->data; 				
+				}
+				if ($specsUsed == 'Weapon'){ //Weapon modifies damage, show in system window.
+					if ($this->maxDamage > 0){
+												
+						$newMinDamage = $this->minDamage+3;
+						$newMaxDamage = $this->maxDamage+3;	
+       				if ($this->minDamage != $this->maxDamage){									
+						$this->data["Damage"] = $newMinDamage . "-" . $newMaxDamage;
+					}else{
+						$this->data["Damage"] = $newMaxDamage;						
+					}					
+						$strippedSystem->data = $this->data; 
+						$strippedSystem->data["Damage"] = $this->data["Damage"]; 				
+					}
+				}		
+			}
+		}				
+			
 		}
         return $strippedSystem;
     }
@@ -854,6 +880,22 @@ class Weapon extends ShipSystem
     {
 
     }
+    
+     public function getBonusDamage(){
+		$bonusDamage = 0;	
+		//Hyach Specialists sometimes require additional info to be sent to front end.
+		$ship = $this->unit;			
+		if ($ship->getSystemByName("HyachSpecialists")){ //Does ship have Specialists system?
+			$specialists = $ship->HyachSpecialists;
+			$specAllocatedArray = $specialists->specAllocatedCount;
+			foreach ($specAllocatedArray as $specsUsed=>$specValue){
+				if ($specsUsed == 'Weapon'){ //Weapon Specialists add 3 damage.
+				$bonusDamage = 3;									
+				}		
+			}
+		}	
+		return $bonusDamage;
+    }   
 
 /*replacing this with function just accepting distance as parameter and returning penalty!
     public function calculateRangePenalty(OffsetCoordinate $pos, BaseShip $target)
@@ -1229,7 +1271,16 @@ class Weapon extends ShipSystem
             $mod -= ($CnC->hasCritical("ShadowPilotPain", $gamedata->turn));
         }
         $firecontrol = $this->fireControl[$target->getFireControlIndex()];
-		
+        
+//		if ($shooter->computerHyach) { //Old method, discontinued to avoid adding variable.
+		if ($shooter->hasSpecialAbility("HyachComputer")) { //Does ship have a Hyach Computer that might add bonus FC?
+			$bonusFireControl = 0; //initialise
+			$computer = $shooter->getSystemByName("HyachComputer"); //Find computer.
+			$FCIndex = $target->getFireControlIndex(); //Find out FC category of the target.
+			$bonusFireControl = $computer->getFCBonus($FCIndex);  //Use FCIndex to check if Computer has any BFCP allocated to that FC category.
+			$firecontrol += $bonusFireControl; //Add to $firecontrol.
+		}
+        		
 		//advanced sensors: negates BDEW and SDEW, unless target is unit of advanced race
 		if ( ($target->factionAge < 3) && ($shooter->hasSpecialAbility("AdvancedSensors")) ){
 			$bdew = 0;
@@ -1451,7 +1502,7 @@ class Weapon extends ShipSystem
 
     protected function beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata)
     {
-        $damage = $this->getFinalDamage($shooter, $target, $pos, $gamedata, $fireOrder);
+        $damage = $this->getFinalDamage($shooter, $target, $pos, $gamedata, $fireOrder);        
         $this->damage($target, $shooter, $fireOrder, $gamedata, $damage);
     }
 
@@ -1694,6 +1745,8 @@ throw new Exception("getSystemArmourAdaptive! $ss");	*/
 			}				
 		}
 
+		$damage += $this->getBonusDamage();//For bonus damage such as Weapon Specialists.   
+
         $damage = max(0, $damage); //at least 0	    
         $damage = floor($damage); //drop fractions, if any were generated
         return $damage;
@@ -1703,7 +1756,7 @@ throw new Exception("getSystemArmourAdaptive! $ss");	*/
     protected function getFinalDamage($shooter, $target, $pos, $gamedata, $fireOrder)
     {
         $damage = $this->getDamage($fireOrder);
-        $damage = $this->getDamageMod($damage, $shooter, $target, $pos, $gamedata);
+        $damage = $this->getDamageMod($damage, $shooter, $target, $pos, $gamedata);     
         $damage -= $target->getDamageMod($shooter, $pos, $gamedata->turn, $this);
 		
 		/* first attempt of StarTrek shield
@@ -1919,8 +1972,14 @@ full Advanced Armor effects (by rules) for reference:
 		return;
 	}
 
+	public function notActuallyHexTargeted($fireOrder)
+	{
+		return;
+	}
 
 } //end of class Weapon
+
+
 
 
 class checkForSelfInterceptFire

@@ -218,7 +218,9 @@ window.AllWeaponFireAgainstShipAnimation = function () {
 		var weaponOrigin;			
 		if (weapon.hasSpecialLaunchHexCalculation && weapon.launcher.fireOrders && weapon.launcher.fireOrders.length > 0) {	//Weapons like proximity laser use a paired launcher weapon to originate the shot from somewhere OTHER than shooter.	
 		    weaponOrigin = window.coordinateConverter.fromHexToGame(new hexagon.Offset(weapon.launcher.fireOrders[0].x, weapon.launcher.fireOrders[0].y));//Convert launcher target to weapon origin.
-		} else { //Everything else
+		}else if (weapon.specialPosNoLauncher && weapon.fireOrders.targetid != -1){ //BL Launcher - So that Mine comes from hex it lands in.
+			weaponOrigin = window.coordinateConverter.fromHexToGame(new hexagon.Offset(weapon.fireOrders[0].x, weapon.fireOrders[0].y));		
+		}else { //Everything else
 		    weaponOrigin = getShipPositionAtTime.call(this, this.shipIconContainer.getByShip(incomingFire.shooter), startLocationTime);
 		}
 				
@@ -227,7 +229,7 @@ window.AllWeaponFireAgainstShipAnimation = function () {
 	    
         switch (animationType) {
             case "laser":
-                return new LaserEffect(this.shipIconContainer.getByShip(incomingFire.shooter), getShipPositionAtTime.call(this, this.shipIcon, startLocationTime), this.scene, {
+                return new LaserEffect(weapon, weaponOrigin, this.shipIconContainer.getByShip(incomingFire.shooter), getShipPositionAtTime.call(this, this.shipIcon, startLocationTime), this.scene, {
                     size: 100 * weapon.animationExplosionScale,		
                     color: new THREE.Color(animationColor[0] / 255, animationColor[1] / 255, animationColor[2] / 255),
                     hit: hit,

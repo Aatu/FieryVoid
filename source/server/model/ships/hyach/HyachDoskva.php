@@ -7,14 +7,14 @@ class HyachDoskva extends FighterFlight
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 75 *6;
-		$this->faction = "Hyach";
+		$this->faction = "Hyach Gerontocracy";
 		$this->phpclass = "HyachDoskva";
 		$this->shipClass = "Doskva Stealth Fighters";
 			$this->variantOf = "Dartha Medium Fighters";
 			$this->occurence = "rare";
-		$this->imagePath = "img/ships/CorillaniTilliniCPN.png";
+		$this->imagePath = "img/ships/HyachDartha.png";
 				
-		$this->isd = 2222;
+		$this->isd = 2254;
 
 		$this->forwardDefense = 6;
 		$this->sideDefense = 6;
@@ -37,10 +37,10 @@ class HyachDoskva extends FighterFlight
 		for ($i = 0; $i < $toAdd; $i++) {
 
 			$armour = array(2, 2, 1, 1);
-			$fighter = new Fighter("HyachDovoch", $armour, 10, $this->id);
+			$fighter = new Fighter("HyachDoskva", $armour, 10, $this->id);
 			$fighter->displayName = "Doskva";
-			$fighter->imagePath = "img/ships/CorillaniTilliniCPN.png";
-			$fighter->iconPath = "img/ships/CorillaniTilliniCPN_large.png";
+			$fighter->imagePath = "img/ships/HyachDartha.png";
+			$fighter->iconPath = "img/ships/HyachDartha_Large.png";
 
 			$frontGun = new LtBlastLaser(330, 30);
 			$fighter->addFrontSystem($frontGun);

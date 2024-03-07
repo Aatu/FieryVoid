@@ -8,7 +8,7 @@ class CraytanUlten extends HeavyCombatVessel{
         $this->faction = "ZNexus Craytan Union";
         $this->phpclass = "CraytanUlten";
         $this->imagePath = "img/ships/Nexus/CraytanTopren.png";
-		$this->canvasSize = 120; //img has 200px per side
+		$this->canvasSize = 150; //img has 200px per side
         $this->shipClass = "Ulten Scout Carrier";
 			$this->variantOf = "Topren Patrol Destroyer";
 			$this->occurence = "rare";

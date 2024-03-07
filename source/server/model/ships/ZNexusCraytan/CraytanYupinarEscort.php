@@ -8,7 +8,7 @@ class CraytanYupinarEscort extends HeavyCombatVessel{
         $this->faction = "ZNexus Craytan Union";
         $this->phpclass = "CraytanYupinarEscort";
         $this->imagePath = "img/ships/Nexus/CraytanTopren.png";
-		$this->canvasSize = 120; //img has 200px per side
+		$this->canvasSize = 150; //img has 200px per side
         $this->shipClass = "Yupinar Heavy Escort";
 			$this->variantOf = "Topren Patrol Destroyer";
 			$this->occurence = "common";

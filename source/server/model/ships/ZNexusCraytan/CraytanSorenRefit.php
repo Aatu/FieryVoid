@@ -8,7 +8,7 @@ class CraytanSorenRefit extends HeavyCombatVesselLeftRight{
         $this->faction = "ZNexus Craytan Union";
         $this->phpclass = "CraytanSorenRefit";
         $this->imagePath = "img/ships/Nexus/CraytanDela.png";
-		$this->canvasSize = 125; //img has 200px per side
+		$this->canvasSize = 150; //img has 200px per side
         $this->shipClass = "Soren Auxiliary Cruiser  (2113 refit)";
 			$this->variantOf = "Soren Auxiliary Cruiser";
 			$this->occurence = "rare";

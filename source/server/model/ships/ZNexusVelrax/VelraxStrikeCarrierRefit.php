@@ -12,7 +12,7 @@ class VelraxStrikeCarrierRefit extends BaseShip{
 			$this->variantOf = "Resskar Strike Carrier";
 			$this->occurence = "common";
         $this->shipSizeClass = 3;
-		$this->canvasSize = 150; //img has 200px per side
+		$this->canvasSize = 170; //img has 200px per side
 		$this->unofficial = true;
 
         $this->fighters = array("light"=>18, "heavy"=>6);

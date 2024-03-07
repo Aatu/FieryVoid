@@ -65,8 +65,12 @@ window.HexTargetedWeaponFireAnimation = function () {
 		    color = new THREE.Color(weapon.animationColor[0] / 255, weapon.animationColor[1] / 255, weapon.animationColor[2] / 255);
 		}
 		
+        if (weapon.specialPosNoLauncher){
+		var hit = true;       	
+        }else{
         var hit = fire.fireOrder.shotshit !== 0;
-
+		}
+		
         var shot = null;
 
         var cameraAnimation = new CameraPositionAnimation(endPosition, time);

@@ -20,6 +20,7 @@ This is default power level of show era major factions ('Big 4') - what I consid
  - Drazi
  - EA (barring Warlock)
  - Gaim
+ - Hyach	
  - Kor-Lyan (very heavy use of ballistics)
  - Llort
  - Minbari (warning: Jammer is very daunting, expecially to new players - it's easy to feel overwhelmed; at the same time flying Minbari is not easy either. Not recommended (on either side of the table) until You feel You have solid command of the game!)
@@ -54,6 +55,7 @@ Factions that point for point will have uphill battle against First Tier, yet ot
  - Nexus Brixadii (custom faction - Nexus universe)
  - Nexus Craytan Union (custom faction - Nexus universe)
  - Nexus Dalithorn (custom faction - Nexus universe)
+ - Nexus Makar (custom faction - Nexus universe)
  - Nexus Sal-bez (custom faction - Nexus universe)
  - Nexus Velrax (custom faction - Nexus universe)
  - Pak'ma'ra

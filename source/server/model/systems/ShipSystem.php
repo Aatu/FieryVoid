@@ -70,11 +70,23 @@ class ShipSystem {
         $strippedSystem->output = $this->output;
         $strippedSystem->outputMod = $this->outputMod;
         $strippedSystem->destroyed = $this->destroyed;
-		$strippedSystem->individualNotesTransfer = $this->individualNotesTransfer; //necessary 
+		$strippedSystem->individualNotesTransfer = $this->individualNotesTransfer; //necessary		 
 
 		//ship enhancements - check if this system is affected...
 		$strippedSystem = Enhancements::addSystemEnhancementsForJSON($this->unit, $this, $strippedSystem);//modifies $strippedSystem object
-
+		
+		//Hyach Specialists sometimes require additional info to be sent to front end.
+		$ship = $this->unit;
+		if ($ship->getSystemByName("HyachSpecialists")){ //Does ship have Specialists system?
+			$specialists = $ship->HyachSpecialists;
+			$specAllocatedArray = $specialists->specAllocatedCount;
+			foreach ($specAllocatedArray as $specsUsed=>$specValue){
+				if ($specsUsed == 'Thruster'){
+					$strippedSystem->boostEfficiency = $this->boostEfficiency; 				
+				}		
+			}
+		}	
+		
         return $strippedSystem;
     }
 	

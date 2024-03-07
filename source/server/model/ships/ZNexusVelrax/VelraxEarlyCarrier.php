@@ -10,7 +10,7 @@ class VelraxEarlyCarrier extends BaseShip{
         $this->imagePath = "img/ships/Nexus/VelraxDraskar.png";
         $this->shipClass = "Draskar Early Carrier";
         $this->shipSizeClass = 3;
-		$this->canvasSize = 150; //img has 200px per side
+		$this->canvasSize = 170; //img has 200px per side
 //		$this->limited = 33;
 		$this->unofficial = true;
 

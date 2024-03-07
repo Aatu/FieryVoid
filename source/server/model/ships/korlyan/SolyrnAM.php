@@ -1,6 +1,5 @@
 <?php
 class SolyrnAM extends HeavyCombatVessel{
-  //Olympus equipped with actual working Ammunition Magazine
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
@@ -18,8 +17,8 @@ class SolyrnAM extends HeavyCombatVessel{
 	    $this->notes = 'Atmospheric Capable.';
         $this->fighters = array("assault shuttles"=>2);
         
-        $this->forwardDefense = 15;
-        $this->sideDefense = 15;
+        $this->forwardDefense = 13;
+        $this->sideDefense = 14;
         
         $this->turncost = 0.75;
         $this->turndelaycost = 0.75;
@@ -30,9 +29,9 @@ class SolyrnAM extends HeavyCombatVessel{
         
       
 	//ammo magazine itself (AND its missile options)
-	$ammoMagazine = new AmmoMagazine(200); //pass magazine capacity 
+	$ammoMagazine = new AmmoMagazine(280); //pass magazine capacity 
 	    $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
-	    $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 120); //add full load of basic missiles 
+	    $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 200); //add full load of basic missiles 
 	    $ammoMagazine->addAmmoEntry(new AmmoMissileI(), 80); //add full load of Interceptor missiles  	      
 
 	    $this->enhancementOptionsEnabled[] = 'AMMO_A';//add enhancement options for other missiles - Class-A

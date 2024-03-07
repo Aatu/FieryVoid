@@ -11,7 +11,7 @@ class VaklarAM extends HeavyCombatVessel{
         $this->shipClass = "Vaklar Logistics Frigate";
 	    $this->isd = 2208;
 		$this->canvasSize = 130;
- 		$this->unofficial = 'S'; //design released after AoG demise
+// 		$this->unofficial = 'S'; //design released after AoG demise
 
 	    $this->notes = 'Atmospheric Capable.';
 		$this->notes .= "<br>Official Vaklar Logistics Frigate with Ballistic Mine replaced by Proximity Laser"; 
@@ -28,10 +28,13 @@ class VaklarAM extends HeavyCombatVessel{
         
       
 	//ammo magazine itself (AND its missile options)
-	$ammoMagazine = new AmmoMagazine(80); //pass magazine capacity 
+	$ammoMagazine = new AmmoMagazine(250); //pass magazine capacity - 20 rounds per launcher, plus reload rack 80. 160+40 Basic, 40 Intercept and 10 Mines
 	    $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
-	    $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 40); //add full load of basic missiles 
-	    $ammoMagazine->addAmmoEntry(new AmmoMissileI(), 40); //add full load of basic missiles  	      
+	    $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 200); //add full load of basic missiles 
+	    $ammoMagazine->addAmmoEntry(new AmmoMissileI(), 40); //add full load of basic missiles
+	    $ammoMagazine->addAmmoEntry(new AmmoBLMineB(), 0); //add full load of basic missiles
+	    $ammoMagazine->addAmmoEntry(new AmmoBLMineW(), 0); //add full load of basic missiles 
+	    $ammoMagazine->addAmmoEntry(new AmmoBLMineH(), 0); //add full load of basic missiles 	    	     	      	      
 
 	    $this->enhancementOptionsEnabled[] = 'AMMO_A';//add enhancement options for other missiles - Class-A
 	    $this->enhancementOptionsEnabled[] = 'AMMO_C';//add enhancement options for other missiles - Class-C
@@ -43,7 +46,10 @@ class VaklarAM extends HeavyCombatVessel{
 	    $this->enhancementOptionsEnabled[] = 'AMMO_L';//add enhancement options for other missiles - Class-L
 	    $this->enhancementOptionsEnabled[] = 'AMMO_M';//add enhancement options for other missiles - Class-M	    
 		$this->enhancementOptionsEnabled[] = 'AMMO_P';//add enhancement options for other missiles - Class-P
-		$this->enhancementOptionsEnabled[] = 'AMMO_X';//add enhancement options for other missiles - Class-X			    	    	    	    
+		$this->enhancementOptionsEnabled[] = 'AMMO_X';//add enhancement options for other missiles - Class-X
+		$this->enhancementOptionsEnabled[] = 'MINE_BLB';//add enhancement options for mines - Basic Mines
+		$this->enhancementOptionsEnabled[] = 'MINE_BLW';//add enhancement options for mines - Wide-Range Mines
+		$this->enhancementOptionsEnabled[] = 'MINE_BLH';//add enhancement options for mines - Wide-Range Mines 		 		  	    	    	    
 	    //$this->enhancementOptionsEnabled[] = 'AMMO_S';//add enhancement options for other missiles - Class-S
 		//Stealth missile removed from Early Kor-Lyan ships, as it's not available until 2252
 
@@ -63,14 +69,14 @@ class VaklarAM extends HeavyCombatVessel{
         
         $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));
+        $this->addFrontSystem(new BallisticMineLauncher(3, 0, 0, 300, 60, $ammoMagazine, false));        
         $this->addFrontSystem(new AmmoMissileRackD(2, 0, 0, 240, 60, $ammoMagazine, false));
         $this->addFrontSystem(new StdParticleBeam(2, 4, 1, 240, 60));
-
-		$TargeterA = new ProximityLaser(3, 0, 0, 300, 60, 'A');
-		$LauncherA = new ProximityLaserLauncher(0, 1, 0, 300, 60, 'A'); 
-		$TargeterA->addLauncher($LauncherA);
-		$this->addFrontSystem($TargeterA);
-		$this->addFrontSystem($LauncherA);		 
+//		$TargeterA = new ProximityLaser(3, 0, 0, 300, 60, 'A');
+//		$LauncherA = new ProximityLaserLauncher(0, 1, 0, 300, 60, 'A'); 
+//		$TargeterA->addLauncher($LauncherA);
+//		$this->addFrontSystem($TargeterA);
+//		$this->addFrontSystem($LauncherA);		 
         $this->addFrontSystem(new StdParticleBeam(2, 4, 1, 300, 120));
         $this->addFrontSystem(new AmmoMissileRackD(2, 0, 0, 300, 120, $ammoMagazine, false));
 		
@@ -103,7 +109,7 @@ class VaklarAM extends HeavyCombatVessel{
                         5 => "Thruster",
 						7 => "Standard Particle Beam",
                         9 => "Class-D Missile Rack",
-						10 => "Proxmity Laser A",
+						10 => "Ballistic Mine Launcher",
                         18 => "Structure",
                         20 => "Primary",
                 ),

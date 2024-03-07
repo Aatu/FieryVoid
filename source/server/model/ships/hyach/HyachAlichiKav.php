@@ -5,22 +5,23 @@ class HyachAlichiKav extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
 
         $this->pointCost = 700;
-        $this->faction = "Hyach";
+        $this->faction = "Hyach Gerontocracy";
         $this->phpclass = "HyachAlichiKav";
-        $this->imagePath = "img/ships/HyachAlichiKavDemo.png";
+        $this->imagePath = "img/ships/HyachAlichiKav.png";
         $this->shipClass = "Alichi Kav Stealth Cruiser";
-		$this->canvasSize = 175; //img has 175px per side
+		$this->canvasSize = 100;
         $this->gravitic = true;
         $this->limited = 33;
 		
         $this->forwardDefense = 10;
         $this->sideDefense = 12;
         $this->turncost = 0.66;
-        $this->turndelaycost = 1.0;
+        $this->turndelaycost = 1;
         $this->accelcost = 3;
         $this->rollcost = 2;
         $this->pivotcost = 3;
         $this->iniativebonus = 30;
+      
 		
         $this->isd = 2210;
 
@@ -36,6 +37,9 @@ class HyachAlichiKav extends HeavyCombatVessel{
 		$this->addPrimarySystem(new MediumLaser(3, 6, 5, 240, 360));
 		$this->addPrimarySystem(new MediumLaser(3, 6, 5, 0, 120));
 		$this->addPrimarySystem(new Interdictor(2, 4, 1, 0, 180));
+		$this->addPrimarySystem(new HyachComputer(5, 10, 0, 2));//$armour, $maxhealth, $powerReq, $output			
+		$HyachSpecialists = $this->createHyachSpecialists(1); //$specTotal
+			$this->addPrimarySystem( $HyachSpecialists );	
 
         $this->addFrontSystem(new GraviticThruster(4, 15, 0, 5, 1));
 		$this->addFrontSystem(new SpinalLaser(5, 12, 12, 330, 30));
@@ -53,10 +57,11 @@ class HyachAlichiKav extends HeavyCombatVessel{
 		
 		$this->hitChart = array(
             0=> array(
-                    9 => "Structure",
-                    11 => "Medium Laser",
-                    13 => "Interdictor",
-					14 => "Scanner",
+                    8 => "Structure",
+                    10 => "Medium Laser",
+                    12 => "Interdictor",
+					13 => "Scanner",
+					14 => "Computer",
                     16 => "Engine",
                     17 => "Hangar",
                     19 => "Reactor",

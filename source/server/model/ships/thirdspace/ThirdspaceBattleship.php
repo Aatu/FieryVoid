@@ -34,12 +34,12 @@ class ThirdspaceBattleship extends BaseShip{
 		/*Thirdspace use their own enhancement set */		
 		Enhancements::nonstandardEnhancementSet($this, 'ThirdspaceShip');				     
         
-        $this->addPrimarySystem(new AdvancedSingularityDrive(8, 50, 0, 154+10+4));
+        $this->addPrimarySystem(new AdvancedSingularityDrive(8, 50, 0, 156+10+4));
         $this->addPrimarySystem(new ThirdspaceCnC(8, 36, 0, 0));
         $scanner = new Scanner(7, 24, 10, 15);
 		$scanner->markThirdspace();
 		$this->addPrimarySystem($scanner);	        
-        $this->addPrimarySystem(new Engine(7, 36, 0, 22, 3));
+        $this->addPrimarySystem(new Engine(7, 36, 0, 20, 4));
 		$this->addPrimarySystem(new PsychicField(6, 0, 0, 0, 360));		
         $this->addPrimarySystem(new ThirdspaceSelfRepair(7, 24, 10)); //armor, structure, output 
 		$this->addPrimarySystem(new JumpEngine(6, 24, 4, 5));//Presumably have access to hyperspace, or possess some other form of FTL travel that this system represents.          		  		
@@ -136,10 +136,10 @@ class ThirdspaceBattleship extends BaseShip{
 				9 => "Structure",
 				11 => "Psychic Field",
 				12 => "Self Repair",
-				14 => "Thirdspace Sensors",
+				14 => "Scanner",
 				16 => "Engine",
 				17 => "Jump Engine",
-				19 => "Advanced Singularity Reactor",
+				19 => "Reactor",
 				20 => "C&C",
 			),
 			1=> array( //Fwd

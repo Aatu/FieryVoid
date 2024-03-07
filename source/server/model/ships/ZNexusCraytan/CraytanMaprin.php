@@ -10,7 +10,7 @@ class CraytanMaprin extends MediumShip{
         $this->imagePath = "img/ships/Nexus/CraytanCorvette.png";
         $this->shipClass = "Maprin Corvette";
 		$this->unofficial = true;
-        $this->canvasSize = 60;
+        $this->canvasSize = 75;
         $this->agile = true;
 	    $this->isd = 2048;
 

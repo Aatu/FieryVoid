@@ -373,6 +373,226 @@
     } //endof class EMWaveDisruptor
 
 
+    class Interdictor extends Weapon{
+        public $name = "Interdictor";
+        public $displayName = "Interdictor";
+		public $iconPath = "Interdictor.png";
+
+        public $freeintercept = true; //can intercept fire directed at different unit
+        public $freeinterceptspecial = true; //has own custom routine for deciding whether third party interception is legal
+
+        public $loadingtime = 1;
+        public $priority = 1; //will never fire anyway except defensively, purely a defensive system
+		public $autoFireOnly = true; //this weapon cannot be fired by player
+
+        public $rangePenalty = 2; //irrelevant
+        public $fireControl = array(null, null, null); // fighters, <mediums, <capitals
+
+		public $firingMode = 'Intercept'; //firing mode - just a name essentially
+		public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+    	public $weaponClass = "Particle"; //not important really
+        
+        public $intercept = 4;
+		protected static $alreadyIntercepted = array(); //Only one Interdictor can intercept any shot, including ballistics.
+
+     	protected $possibleCriticals = array( //different than usual B5Wars weapon
+            16=>"ForcedOfflineOneTurn"
+		);
+
+		public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+            $this->data["Special"] = "May intercept for friendly units. Must have friendly and enemy unit in arc and have friendly unit within 5 hexes.";
+            $this->data["Special"] .= "<br>Only one interdictor can be applied to any incoming shot, including ballistics.";
+        }
+                
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		        //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 4;
+            if ( $powerReq == 0 ) $powerReq = 1;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+//			InterdictorHandler::addInterdictor($this);//so all Interdictors are accessible together, and firing orders can be uniformly created
+        }
+
+		public function canFreeInterceptShot($gamedata, $fireOrder, $shooter, $target, $interceptingShip, $firingWeapon){
+			//target must be within 5 hexes
+			$distance = mathlib::getDistanceHex($interceptingShip, $target);
+			if ($distance > 5) return false;
+			
+			//both source and target of fire must be in arc
+			//first check target
+			$targetBearing = $interceptingShip->getBearingOnUnit($target);
+			if (!mathlib::isInArc($targetBearing, $this->startArc, $this->endArc)) return false;
+			//check on source - launch hex for ballistics, current position for direct fire
+			if ($firingWeapon->ballistic){
+				$movement = $shooter->getLastTurnMovement($fireOrder->turn);
+				$pos = mathlib::hexCoToPixel($movement->position); //launch hex
+				$sourceBearing = $interceptingShip->getBearingOnPos($pos);				
+			}else{ //direct fire
+				$sourceBearing = $interceptingShip->getBearingOnUnit($shooter);
+			}
+			if (!mathlib::isInArc($sourceBearing, $this->startArc, $this->endArc)) return false;
+						
+			return true;
+		}
+
+	    /*return 0 if given fire order was already intercepted by this weapon - this should prevent such assignment*/
+
+	public function getInterceptionMod($gamedata, $intercepted)
+	{
+		$wasIntercepted = false;
+		$interceptMod = 0;
+		
+		foreach(Interdictor::$alreadyIntercepted as $alreadyAssignedAgainst){
+			if ($alreadyAssignedAgainst->id == $intercepted->id){ //this fire order was already intercepted by this weapon, this Scattergun cannot do so again
+				$wasIntercepted = true;
+				break;//foreach
+			}
+		}
+		if(!$wasIntercepted) $interceptMod = parent::getInterceptionMod($gamedata, $intercepted);
+		return $interceptMod;
+	}//endof  getInterceptionMod
+
+
+        
+	//on weapon being ordered to intercept - note which shot (fireorder, actually) was intercepted!
+	public function fireDefensively($gamedata, $interceptedWeapon)
+	{
+		parent::fireDefensively($gamedata, $interceptedWeapon);
+		Interdictor::$alreadyIntercepted[] = $interceptedWeapon;
+	}	    
+		
+        public function getDamage($fireOrder){        return 0;   }
+        public function setMinDamage(){     $this->minDamage = 0 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 0 ;      }
+
+    }  // end of class Interdictor
+	
+
+
+
+/*fighter-mounted variant*/
+    class FtrInterdictor extends Interdictor{
+        public $name = "FtrInterdictor";
+        public $displayName = "Light Interdictor";
+		public $iconPath = "Interdictor.png";
+
+        public $freeintercept = true; //can intercept fire directed at different unit
+        public $freeinterceptspecial = true; //has own custom routine for deciding whether third party interception is legal
+
+        public $loadingtime = 1;
+        public $priority = 1; //will never fire anyway except defensively, purely a defensive system
+		public $autoFireOnly = true; //this weapon cannot be fired by player
+
+        public $rangePenalty = 2; //irrelevant
+        public $fireControl = array(null, null, null); // fighters, <mediums, <capitals
+
+		public $firingMode = 'Intercept'; //firing mode - just a name essentially
+		public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+    	public $weaponClass = "Particle"; //not important really
+        
+        public $intercept = 3;
+        
+		private $flightIntercepted = array(); //To track when weapon intercept fighter direct fire and may be able to intercept more.
+
+		function __construct($startArc, $endArc, $nrOfShots = 1){
+            $this->defaultShots = $nrOfShots;
+            $this->shots = $nrOfShots;
+            parent::__construct(0, 1, 0, $startArc, $endArc);
+        }
+
+		public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+            $this->data["Special"] = "May intercept for friendly units. Must have friendly and enemy unit in arc and have friendly unit within 3 hexes.";
+            $this->data["Special"] .= "<br>Only one interdictor can be applied to any incoming shot, including ballistics.";
+            $this->data["Special"] .= "<br>When intercepting non-ballistic fire from an enemy fighter flight, all enemy fighters have their chance to hit reduced by 15.";
+            $this->data["Special"] .= "<br>Note - Automated intercept routines will often prioritise ship or missile fire, so aim Interdictor carefully to make full use of it against enemy fighter fire.";            
+        }
+
+		public function canFreeInterceptShot($gamedata, $fireOrder, $shooter, $target, $interceptingShip, $firingWeapon){
+			//target must be within 3 hexes
+			$distance = mathlib::getDistanceHex($interceptingShip, $target);
+			if ($distance > 3) return false;
+			
+			//both source and target of fire must be in arc
+			//first check target
+			$targetBearing = $interceptingShip->getBearingOnUnit($target);
+			if (!mathlib::isInArc($targetBearing, $this->startArc, $this->endArc)) return false;
+			//check on source - launch hex for ballistics, current position for direct fire
+			if ($firingWeapon->ballistic){
+				$movement = $shooter->getLastTurnMovement($fireOrder->turn);
+				$pos = mathlib::hexCoToPixel($movement->position); //launch hex
+				$sourceBearing = $interceptingShip->getBearingOnPos($pos);				
+			}else{ //direct fire
+				$sourceBearing = $interceptingShip->getBearingOnUnit($shooter);
+			}
+			if (!mathlib::isInArc($sourceBearing, $this->startArc, $this->endArc)) return false;
+						
+			return true;
+		}
+
+	//return 0 if given fire order was already intercepted by this weapon - this should prevent such assignment
+	public function getInterceptionMod($gamedata, $intercepted)
+	{
+		$wasIntercepted = false;	
+		$interceptMod = 0;
+		
+		foreach(FtrInterdictor::$alreadyIntercepted as $alreadyAssignedAgainst){
+			if ($alreadyAssignedAgainst->id == $intercepted->id){ //this fire order was already intercepted by this weapon, cannot do so again
+				$wasIntercepted = true;
+				break;//foreach
+			}
+		}
+ 
+		$sameFlight = false;
+		         		
+		if (!empty($this->flightIntercepted)){ //Is the array populated i.e. at least the 2nd intercepting shot?  Will skip this part if not populated i.e. 1 intercepting shot.     		
+			if (isset($this->flightIntercepted[$intercepted->shooterid])){  //Is it the same fighter flight?  		
+			$sameFlight = true;	//Mark true if above conditions are met.		
+			}				
+		}
+
+//If shot hasn't been intercepted by an Interdictor and it's the same flight as this weapon has intercepted (or the first shot it's intercepting from flight), go to usual routine.		
+		if($sameFlight){
+	        $interceptMod = parent::getInterceptionMod($gamedata, $intercepted);
+	        return $interceptMod;
+	    }else if(!$wasIntercepted){	    	
+	        $interceptMod = parent::getInterceptionMod($gamedata, $intercepted);
+	        return $interceptMod;	    	
+	    }		
+		//Otherwise, return the intialised value of 0 as Intercept value.		
+		return $interceptMod;
+	}//endof  getInterceptionMod
+
+        
+	//on weapon being ordered to intercept - note which shot (fireorder, actually) was intercepted!
+	public function fireDefensively($gamedata, $intercepted) //Gamedata and a fireOrder passed.
+	{
+		parent::fireDefensively($gamedata, $intercepted);
+		FtrInterdictor::$alreadyIntercepted[] = $intercepted;
+		
+        $shooter = $gamedata->getShipById($intercepted->shooterid);
+		$target =  $gamedata->getShipById($intercepted->targetid);       					
+		if ($shooter instanceof FighterFlight){ //We're only interested in fighters.
+				if (empty($this->flightIntercepted) && $intercepted->type != 'ballistic'){ //Is the array empty?  If so let's fill it with the Fighter Flight fire order that was intercepted, but not if ballistic shot was intercepted.			. 		
+					$this->flightIntercepted[] = $intercepted;//Note the specific flight that can be intercepted further.
+			        $this->guns += 1; //Add an extra shot for anymore direct fire from this flight, 
+				}else{
+					foreach($this->flightIntercepted as $interceptedFlight){					
+						if ($interceptedFlight->shooterid == $intercepted->shooterid){ //this fire order was already intercepted by this weapon, cannot do so again
+				        	$this->guns += 1; //Add an extra shot for anymore direct fire from this flight.
+							break;//foreach
+						}	
+					}	
+				}
+		}
+	}	    
+
+        public function getDamage($fireOrder){        return 0;   }
+        public function setMinDamage(){     $this->minDamage = 0 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 0 ;      }
+
+		
+	}// endof FtrInterdictor
 
 
 /*
