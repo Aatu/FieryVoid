@@ -77,6 +77,9 @@ window.gamedata = {
 		  case 'Earth Alliance':
 			powerRating = 'Tier 1 (except Warlock, which is Superior)';
 			break;
+		  case 'Earth Alliance (custom)':
+			powerRating = 'custom and non-combatant designs for EA faction';
+			break;
 		  case 'Earth Alliance (defenses)':
 			powerRating = 'fixed tefenses for EA faction';
 			break;
@@ -118,6 +121,9 @@ window.gamedata = {
 			break;
 		  case 'Orieni Imperium':
 			powerRating = 'Tier 1';
+			break;
+		  case 'Orieni Imperium (defenses)':
+			powerRating = 'fixed tefenses for Orieni faction';
 			break;
 		  case "Pak'ma'ra Confederacy":
 			powerRating = 'Tier 2';
