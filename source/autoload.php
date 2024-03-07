@@ -35,7 +35,7 @@ spl_autoload_register(
                 'anroethas' => '/server/model/ships/hurr/anroethAS.php',
                 'antimatterconverter' => '/server/model/weapons/antimatter.php',
                 'alykent' => '/server/model/ships/brakiri/Alykent.php',
-                'ishtaka' => '/server/model/ships/brakiri/Ishtaka.php',
+                'ishtakaton' => '/server/model/ships/brakiri/ishtakaton.php',
                 'antoph' => '/server/model/ships/brakiri/antoph.php',
                 'antophearly' => '/server/model/ships/brakiri/antophEarly.php',
                 'antophupgrade' => '/server/model/ships/brakiri/antophUpgrade.php',
@@ -167,6 +167,7 @@ spl_autoload_register(
                 'civilianfreighter' => '/server/model/ships/civilians/civilianFreighter.php',
                 'civiliantanker' => '/server/model/ships/civilians/civilianTanker.php',
                 'cnc' => '/server/model/systems/baseSystems.php',
+				'secondarycnc' => '/server/model/systems/baseSystems.php',
                 'protectedcnc' => '/server/model/systems/baseSystems.php',
                 'cobra' => '/server/model/ships/raiders/cobra.php',
                 'adjudicator' => '/server/model/ships/streib/adjudicator.php',
@@ -332,6 +333,7 @@ spl_autoload_register(
                 'fireorder' => '/server/model/BaseClasses.php',
                 'firing' => '/server/handlers/firing.php',
                 'firstthrustignored' => '/server/model/cricialClasses.php',
+				'firstthrustignoredoneturn' => '/server/model/cricialClasses.php',                
                 'folshotb' => '/server/model/ships/brakiri/folshotB.php',
                 'forcedofflineforturns' => '/server/model/cricialClasses.php',
                 'forcedofflineoneturn' => '/server/model/cricialClasses.php',
@@ -459,6 +461,7 @@ spl_autoload_register(
                 'jashakarn' => '/server/model/ships/dilgar/jashakarN.php',
                 'jashakarp' => '/server/model/ships/dilgar/jashakarP.php',
                 'jastat' => '/server/model/ships/narn/jastat.php',
+     		    'jadul' => '/server/model/ships/narn/JaDul.php',       
                 'jenas' => '/server/model/ships/centauri_old/jenas.php',
                 'jonkurfreighter' => '/server/model/ships/dilgar/jonkurFreighter.php',
                 'jonkurrefit' => '/server/model/ships/dilgar/jonkurRefit.php',
@@ -1251,7 +1254,6 @@ spl_autoload_register(
 				'ewrocketlauncher' => '/server/model/weapons/customEscalation.php',
 				'ewdualrocketlauncher' => '/server/model/weapons/customEscalation.php',
 				'ewheavyrocketlauncher' => '/server/model/weapons/customEscalation.php',
-				'ewrangedheavyrocketlauncher' => '/server/model/weapons/customEscalation.php',
 				'ewomissilerack' => '/server/model/weapons/customEscalation.php',
 				'ewfightertorpedolauncher' => '/server/model/weapons/customEscalation.php',
 				'ewlightplasmamine' => '/server/model/weapons/customEscalation.php',
@@ -1542,6 +1544,7 @@ spl_autoload_register(
 				
 				
 				
+				
 		//Nexus weapons
 			//Nexus matter weapons
 				'nexusacids' => '/server/model/weapons/customNexus.php',
@@ -1662,6 +1665,7 @@ spl_autoload_register(
 				'testmissile2' => '/server/model/weapons/customNexus.php',
 //                'plasmabattery' => '/server/model/systems/baseSystems.php',
 //				'enveloper' => '/server/model/weapons/customNexus.php',
+
 
 
 
@@ -1959,10 +1963,10 @@ spl_autoload_register(
 //                'velraxvasrevrefit2' => '/server/model/ships/ZNexusVelrax/VelraxVasrevRefit2.php',					
                 'velraxversissscout' => '/server/model/ships/ZNexusVelrax/VelraxVersissScout.php',					
                 'velraxversissrefit' => '/server/model/ships/ZNexusVelrax/VelraxVersissRefit.php',					
-                'velraxversytheexplorer' => '/server/model/ships/ZNexusVelrax/VelraxVersytheExplorer.php',					
-                'velraxversytherefit' => '/server/model/ships/ZNexusVelrax/VelraxVersytheRefit.php',					
-                'velraxversytherefit2' => '/server/model/ships/ZNexusVelrax/VelraxVersytheRefit2.php',					
-                'velraxwarbase' => '/server/model/ships/ZNexusVelrax/VelraxWarbase.php',					
+                'velraxversytheexplorer' => '/server/model/ships/ZNexusVelrax/VelraxVersytheExplorer.php',
+                'velraxversytherefit' => '/server/model/ships/ZNexusVelrax/VelraxVersytheRefit.php',
+                'velraxversytherefit2' => '/server/model/ships/ZNexusVelrax/VelraxVersytheRefit2.php',
+                'velraxwarbase' => '/server/model/ships/ZNexusVelrax/VelraxWarbase.php',	
 
 
                 //Grome Weapons and Systems
@@ -2380,6 +2384,7 @@ spl_autoload_register(
 		    
 				//self-repair
 				'outputhalved' => '/server/model/cricialClasses.php',
+				'outputhalvedoneturn' => '/server/model/cricialClasses.php',	//For Markab Stun Beam			
 				'whitestarcmd' => '/server/model/ships/minbari/whitestarCmd.php',
 				
 				
@@ -2697,8 +2702,7 @@ spl_autoload_register(
 				'rava' => '/server/model/ships/brakiri_raiders/Rava.php',
 				'attackfrigate' => '/server/model/ships/brakiri_raiders/AttackFrigate.php',
 				'folshota' => '/server/model/ships/brakiri/folshotA.php',
-				'folshotaraider' => '/server/model/ships/brakiri_raiders/FolshotARaider.php',									
-				
+				'folshotaraider' => '/server/model/ships/brakiri_raiders/FolshotARaider.php',	
 
 
 				//Star Trek conversions
@@ -2805,7 +2809,9 @@ spl_autoload_register(
 				'treknausicaanheavyglider' => '/server/model/ships/ZTrekOther/TrekNausicaanHeavyGlider.php',
 				'treknausicaanvandal' => '/server/model/ships/ZTrekOther/TrekNausicaanVandal.php',
 				'treknausicaanscourge' => '/server/model/ships/ZTrekOther/TrekNausicaanScourge.php',
-				'treknausicaanguramba' => '/server/model/ships/ZTrekOther/TrekNausicaanGuramba.php',
+				'treknausicaanguramba' => '/server/model/ships/ZTrekOther/TrekNausicaanGuramba.php',				
+				'treknausicaanshefafighter' => '/server/model/ships/ZTrekOther/TrekNausicaanShefaFighter.php',
+				'treknausicaanshefalitayalfighter' => '/server/model/ships/ZTrekOther/TrekNausicaanShefalitayalFighter.php',
 				
 				//Pak'ma'ra
 				'plasmabattery' => '/server/model/systems/baseSystems.php',
@@ -2837,16 +2843,18 @@ spl_autoload_register(
 
 				//Hyach
 				
-				//weapons
-//                'ftrinterdictor' => '/server/model/weapons/particle.php',
-                'interdictor' => '/server/model/weapons/particle.php',
+				//weapons & systems
+                'ftrinterdictor' => '/server/model/weapons/defensive.php',
+                'interdictor' => '/server/model/weapons/defensive.php',
                 'ltblastlaser' => '/server/model/weapons/lasers.php',
-
-				//units
-/*				'hyachalichikav' => '/server/model/ships/hyach/HyachAlichiKav.php',
+				'hyachcomputer' => '/server/model/systems/baseSystems.php',
+				'hyachspecialists' => '/server/model/systems/baseSystems.php',					
+				//units						
+				'hyachalichikav' => '/server/model/ships/hyach/HyachAlichiKav.php',
 				'hyachalichital' => '/server/model/ships/hyach/HyachAlichiTal.php',
 				'hyachalichikav' => '/server/model/ships/hyach/HyachAlichiKav.php',
 				'hyachdartha' => '/server/model/ships/hyach/HyachDartha.php',
+				'hyachdovoch' => '/server/model/ships/hyach/HyachDovoch.php',				
 				'hyachdoskva' => '/server/model/ships/hyach/HyachDoskva.php',
 				'hyachecamrontek' => '/server/model/ships/hyach/HyachEcamronTek.php',
 				'hyachevirolkon' => '/server/model/ships/hyach/HyachEvirolKon.php',
@@ -2859,15 +2867,12 @@ spl_autoload_register(
 				'hyachokathkur' => '/server/model/ships/hyach/HyachOkathKur.php',
 				'hyachsenchlatkam' => '/server/model/ships/hyach/HyachSenchlatKam.php',
 				'hyachsenchlatkes' => '/server/model/ships/hyach/HyachSenchlatKes.php',
-//				'hyachsenchlatkir' => '/server/model/ships/hyach/HyachSenchlatKir.php',
+				'hyachsenchlatkir' => '/server/model/ships/hyach/HyachSenchlatKir.php',
 				'hyachtachilakor' => '/server/model/ships/hyach/HyachTachilaKor.php',
 				'hyachtakaltikal' => '/server/model/ships/hyach/HyachTakaltiKal.php',
 				'hyachtakaltikam' => '/server/model/ships/hyach/HyachTakaltiKam.php',
 				'hyachuruthakal' => '/server/model/ships/hyach/HyachUruthaKal.php',
 				'hyachutarator' => '/server/model/ships/hyach/HyachUtaraTor.php',
-*/				
-
-
 
 
 				//Kor-Lyan
@@ -2875,29 +2880,39 @@ spl_autoload_register(
 				'cokra' => '/server/model/ships/korlyan/Cokra.php',
 				'fenja' => '/server/model/ships/korlyan/Fenja.php',
 				'kalavar' => '/server/model/ships/korlyan/Kalavar.php',
+				'kalavaram' => '/server/model/ships/korlyan/KalavarAM.php',
 				'kalavarearlyam' => '/server/model/ships/korlyan/KalavarEarlyAM.php',
 				'kalavaroriginalam' => '/server/model/ships/korlyan/KalavarOriginalAM.php',
 				'kaltiam' => '/server/model/ships/korlyan/KaltiAM.php',
 				'kolosk' => '/server/model/ships/korlyan/Kolosk.php',
+				'koloskam' => '/server/model/ships/korlyan/KoloskAM.php',
 				'koloskearlyam' => '/server/model/ships/korlyan/KoloskEarlyAM.php',
 				'koloskovaam' => '/server/model/ships/korlyan/KoloskovaAM.php',
 				'koshaam' => '/server/model/ships/korlyan/KoshaAM.php',
 				'koshaearlyam' => '/server/model/ships/korlyan/KoshaEarlyAM.php',
 				'koskova' => '/server/model/ships/korlyan/Koskova.php',
+				'koskovaam' => '/server/model/ships/korlyan/KoskovaAM.php',
 				'koskovaearlyam' => '/server/model/ships/korlyan/KoskovaEarlyAM.php',
 				'leklant' => '/server/model/ships/korlyan/Leklant.php',
+				'leklantam' => '/server/model/ships/korlyan/LeklantAM.php',
 				'leklantearlyam' => '/server/model/ships/korlyan/LeklantEarlyAM.php',
 				'lekra' => '/server/model/ships/korlyan/Lekra.php',
 				'merkul' => '/server/model/ships/korlyan/Merkul.php',
 				'merkularmed' => '/server/model/ships/korlyan/MerkulArmed.php',
 				'merkulmissile' => '/server/model/ships/korlyan/MerkulMissile.php',
+				'merkulam' => '/server/model/ships/korlyan/MerkulAM.php',
+				'merkularmedam' => '/server/model/ships/korlyan/MerkulArmedAM.php',
+				'merkulmissileam' => '/server/model/ships/korlyan/MerkulMissileAM.php',				
 				'raklaviam' => '/server/model/ships/korlyan/RaklaviAM.php',
 				'solyrnam' => '/server/model/ships/korlyan/SolyrnAM.php',
 				'soskaam' => '/server/model/ships/korlyan/SoskaAM.php',
 				'taloki' => '/server/model/ships/korlyan/Taloki.php',
+				'talokiam' => '/server/model/ships/korlyan/TalokiAM.php',				
 				'talokiearlyam' => '/server/model/ships/korlyan/TalokiEarlyAM.php',
 				'talokioriginalam' => '/server/model/ships/korlyan/TalokiOriginalAM.php',
-				'vaklaram' => '/server/model/ships/korlyan/VaklarAM.php',
+				'vaklaram' => '/server/model/ships/korlyan/VaklarAM.php',			
+				'trylkanam' => '/server/model/ships/korlyan/TrylkanAM.php',
+				'verlokaam' => '/server/model/ships/korlyan/VerlokaAM.php',								
 
 /*         		'multidefenselauncher' => '/server/model/weapons/customNexus.php', //missile racks themselves
          		'limpetboretorp' => '/server/model/weapons/customNexus.php', 
@@ -2908,9 +2923,11 @@ spl_autoload_register(
 
 //				'solyrn' => '/server/model/ships/korlyan/Solyrn.php',
                 'tmphitreduction' => '/server/model/cricialClasses.php',
+				'limpetbore' => '/server/model/cricialClasses.php',                
 
 //         		'chaffmissile' => '/server/model/weapons/customNexus.php', 
-         		'proximitylaser' => '/server/model/weapons/customNexus.php', 
+         		'proximitylaser' => '/server/model/weapons/specialWeapons.php',
+         		'proximitylaserlauncher' => '/server/model/weapons/specialWeapons.php',         		 
          		'fmissilerack' => '/server/model/weapons/customNexus.php', 
          		'rangedfmissilerack' => '/server/model/weapons/customNexus.php', 
          		'limpetboretorp' => '/server/model/weapons/customNexus.php', 
@@ -2918,7 +2935,9 @@ spl_autoload_register(
          		'directlimpetborebase' => '/server/model/weapons/customNexus.php', 
          		'multidefenselauncher' => '/server/model/weapons/customNexus.php', //missile racks themselves
 				'koskovatestbed' => '/server/model/ships/korlyan/KoskovaTestbed.php',
-
+         		'limpetboretorpedo' => '/server/model/weapons/torpedo.php', 				
+         		'limpetboretorpedobase' => '/server/model/weapons/torpedo.php',
+         		'ballisticminelauncher' => '/server/model/weapons/missile.php', 	 
 
 
 				//Star Wars - Clone Wars testing
@@ -2975,6 +2994,8 @@ spl_autoload_register(
 				//TEMPORARY campaign-related designs - essentially upgrades of existing ships		    
 				'hyperionpulsearmored' => '/server/model/ships/customs/HyperionPulseArmored.php',
 				'gaimraxas' => '/server/model/ships/customs/gaimRaxas.php',
+				'gaimvraxas' => '/server/model/ships/customs/gaimVRaxas.php',
+				'boltaccelerator' => '/server/model/weapons/particle.php',								
 				'apollowsf' => '/server/model/ships/customs/ApolloWSF.php',					
 				'prototype' => '/server/model/ships/customs/Prototype.php',
 				'explorerprototype' => '/server/model/ships/customs/ExplorerPrototype.php',
@@ -2999,7 +3020,11 @@ spl_autoload_register(
                 		'ammomissilek' => '/server/model/systems/baseSystems.php',
                 		'ammomissilem' => '/server/model/systems/baseSystems.php',
                 		'ammomissilekk' => '/server/model/systems/baseSystems.php',
-                		'ammomissilex' => '/server/model/systems/baseSystems.php',                		                 		                 		                		
+                		'ammomissilex' => '/server/model/systems/baseSystems.php',
+                		'ammomissilej' => '/server/model/systems/baseSystems.php',
+                		 //Ballistic Mines            
+                		'ammoblmineb' => '/server/model/systems/baseSystems.php',                  		                		                                 			'ammoblminew' => '/server/model/systems/baseSystems.php',
+             			'ammoblmineh' => '/server/model/systems/baseSystems.php',                				                 		                		
 						
                 		'ammomissilefb' => '/server/model/systems/baseSystems.php',
                 		'ammomissilefl' => '/server/model/systems/baseSystems.php',
@@ -3161,7 +3186,7 @@ spl_autoload_register(
 						//Gaim						
 						'gaimkastafighteram' => '/server/model/ships/gaim/gaimKastaFighterAM.php',
 						
-						//Extra Yolu
+						//Extra Ships for Existing Factions
 						'superheavymoleculardisruptor' => '/server/model/weapons/molecular.php',
 						'molecularpenetrator' => '/server/model/weapons/molecular.php',
 						'earlyfusionagitator' => '/server/model/weapons/molecular.php',
@@ -3181,7 +3206,13 @@ spl_autoload_register(
 					 	'lassankarefit' => '/server/model/ships/yolu/LassankaRefit.php', 	 						 	
 					 	'lacanna' => '/server/model/ships/yolu/Lacanna.php', 
 					 	'lacannarefit' => '/server/model/ships/yolu/LacannaRefit.php',
-					 	'falaren' => '/server/model/ships/yolu/Falaren.php',					 	 
+					 	'falaren' => '/server/model/ships/yolu/Falaren.php',
+		                'balosiandeltav' => '/server/model/ships/balosian/balosianDeltaV.php',						 	
+					 	
+					 	'alanti' => '/server/model/ships/abbai/Alanti.php',
+					 	'pirocia' => '/server/model/ships/abbai/Pirocia.php',
+						'mayoverheat' => '/server/model/cricialClasses.php',					 						 	
+					 						 	 
 					 							
 				//Thirdspace
 				'psychicfield' => '/server/model/weapons/specialWeapons.php',
@@ -3224,7 +3255,6 @@ spl_autoload_register(
 						'gquan_wi' => '/server/model/ships/whatif/gquan_WI.php',	
 						'vorchan_wi' => '/server/model/ships/whatif/vorchan_WI.php',
 						
-						'kktest' => '/server/model/weapons/customs.php',	
 						
 	
 				//let's end this with unit enhancement class...		    
