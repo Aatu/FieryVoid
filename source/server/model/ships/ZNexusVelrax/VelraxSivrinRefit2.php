@@ -12,7 +12,7 @@ class VelraxSivrinRefit2 extends HeavyCombatVesselLeftRight{
 			$this->variantOf = "Sivrin Gunship";
 			$this->occurence = "common";
 		$this->isd = 2106;
-        $this->canvasSize = 95;
+        $this->canvasSize = 120;
 
 		$this->unofficial = true;
 

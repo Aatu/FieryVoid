@@ -12,7 +12,7 @@ class VelraxHisshrimRefit2 extends HeavyCombatVesselLeftRight{
 			$this->variantOf = "Hisshrim Patrol Carrier";
 			$this->occurence = "common";
 	    $this->isd = 2105;
-        $this->canvasSize = 95;
+        $this->canvasSize = 130;
 		$this->unofficial = true;
 
         $this->fighters = array("light"=>6, "heavy"=>6);

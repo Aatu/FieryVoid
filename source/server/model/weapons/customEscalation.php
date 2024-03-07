@@ -1452,6 +1452,17 @@ class EWHeavyRocketLauncher extends Torpedo{
 
 
 
+class EWRangedHeavyRocketLauncher extends EWHeavyRocketLauncher {
+        public $name = "EWRangedHeavyRocketLauncher";
+        public $displayName = "Ranged Heavy Rocket Launcher";
+	    public $iconPath = "EWHeavyRocketLauncher.png";
+
+        public $range = 50;
+		
+}//endof EWRangedHeavyRocketLauncher
+
+
+
 class EWRangedDualHeavyRocketLauncher extends Torpedo{
         public $name = "EWRangedDualHeavyRocketLauncher";
         public $displayName = "Ranged Dual Heavy Rocket Launcher";

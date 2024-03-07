@@ -8,7 +8,7 @@ class DalithornTransportRefit extends HeavyCombatVessel{
         $this->faction = "ZNexus Dalithorn Commonwealth";
         $this->phpclass = "DalithornTransportRefit";
         $this->imagePath = "img/ships/Nexus/DalithornTransportRefit.png";
-		$this->canvasSize = 115; //img has 200px per side
+		$this->canvasSize = 125; //img has 200px per side
         $this->shipClass = "Military Transport (2048 refit)";
 			$this->variantOf = "Flag Cruiser";
 			$this->occurence = "common";

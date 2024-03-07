@@ -8,7 +8,7 @@ class SalbezVaschk extends HeavyCombatVessel{
         $this->faction = "ZNexus Sal-bez Coalition";
         $this->phpclass = "SalbezVaschk";
         $this->imagePath = "img/ships/Nexus/salbez_vaschk.png";
-			$this->canvasSize = 115; //img has 200px per side
+			$this->canvasSize = 125; //img has 200px per side
         $this->shipClass = "Vas-chk Support Destroyer";
 			$this->variantOf = "Vas-ren Destroyer";
 			$this->occurence = "uncommon";

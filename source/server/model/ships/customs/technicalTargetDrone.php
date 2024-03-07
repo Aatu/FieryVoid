@@ -8,7 +8,7 @@ class technicalTargetDrone extends BaseShip{
 		$this->faction = "Custom Ships";
 		$this->phpclass = "technicalTargetDrone";
 //		$this->imagePath = "img/ships/BASurveyShip.png";
-		$this->imagePath = "img/ships/Nexus/CraytanDakran.png";
+		$this->imagePath = "img/ships/hyach_tachilakor.png";
 		$this->shipClass = "Target Drone - DO NOT USE";
 		$this->shipSizeClass = 3;
 //		$this->canvasSize = 75; //img has 125px per side
@@ -28,14 +28,14 @@ class technicalTargetDrone extends BaseShip{
 
 
 	//ammo magazine itself (AND its missile options)
-	$ammoMagazine = new AmmoMagazine(120); //pass magazine capacity 
-	    $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
-	    $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 120); //add full load of basic missiles
-	    $this->enhancementOptionsEnabled[] = 'AMMO_L';//add enhancement options for other missiles - Class-L
-	    $this->enhancementOptionsEnabled[] = 'AMMO_H';//add enhancement options for other missiles - Class-L
-	    $this->enhancementOptionsEnabled[] = 'AMMO_F';//add enhancement options for other missiles - Class-L
-	    $this->enhancementOptionsEnabled[] = 'AMMO_A';//add enhancement options for other missiles - Class-L
-	    $this->enhancementOptionsEnabled[] = 'AMMO_P';//add enhancement options for other missiles - Class-P
+//	$ammoMagazine = new AmmoMagazine(120); //pass magazine capacity 
+//	    $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
+//	    $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 120); //add full load of basic missiles
+//	    $this->enhancementOptionsEnabled[] = 'AMMO_L';//add enhancement options for other missiles - Class-L
+//	    $this->enhancementOptionsEnabled[] = 'AMMO_H';//add enhancement options for other missiles - Class-L
+//	    $this->enhancementOptionsEnabled[] = 'AMMO_F';//add enhancement options for other missiles - Class-L
+//	    $this->enhancementOptionsEnabled[] = 'AMMO_A';//add enhancement options for other missiles - Class-L
+//	    $this->enhancementOptionsEnabled[] = 'AMMO_P';//add enhancement options for other missiles - Class-P
 
 
 		
@@ -66,12 +66,13 @@ class technicalTargetDrone extends BaseShip{
 		$this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));
 //		$this->addFrontSystem(new BSGHybrid(0, 20, 0, 0));
 		//$this->addFrontSystem(new Hangar(4, 6));
-		$this->addFrontSystem(new NexusHeavyEnhPlasma(4, 9, 5, 270, 90));
-		$this->addFrontSystem(new NexusHeavyEnhPlasma(4, 9, 5, 270, 90));
-		$this->addFrontSystem(new NexusHeavyEnhPlasma(4, 9, 5, 270, 90));
-		$this->addFrontSystem(new NexusMedEnhPlasma(4, 9, 5, 270, 90));
-		$this->addFrontSystem(new NexusMedEnhPlasma(4, 9, 5, 270, 90));
-		$this->addFrontSystem(new NexusLightEnhPlasma(4, 9, 5, 270, 90));
+//		$this->addFrontSystem(new TestGun1(4, 3, 1, 0, 360));
+//		$this->addFrontSystem(new TestGun2a(4, 3, 1, 0, 360));
+//		$this->addFrontSystem(new TestGun3(4, 3, 1, 0, 360));
+//		$this->addFrontSystem(new TestGun4(4, 3, 1, 0, 360));
+//		$this->addFrontSystem(new TestGun5(4, 3, 1, 0, 360));
+//		$this->addFrontSystem(new TestGun6(4, 3, 1, 0, 360));
+//		$this->addFrontSystem(new TestGun7(4, 3, 1, 0, 360));
 
 
 		
@@ -89,17 +90,22 @@ class technicalTargetDrone extends BaseShip{
 
 
 		$this->addPrimarySystem(new SpinalLaser(5, 12, 12, 330, 30));
+		$this->addPrimarySystem(new Interdictor(2, 4, 1, 0, 360));
+		$this->addPrimarySystem(new Interdictor(2, 4, 1, 0, 360));
+		$this->addPrimarySystem(new Interdictor(2, 4, 1, 0, 360));
+		$this->addPrimarySystem(new Interdictor(2, 4, 1, 0, 360));
+
 //		$this->addPrimarySystem(new Stealth(1,1,0));
 		
 		
 
-        $this->addFrontSystem(new Jammer(4, 180, 7));
-		$this->addFrontSystem(new TestGun(2, 4, 1, 0, 360));
-		$this->addFrontSystem(new TestGun2(2, 4, 1, 0, 360));
-		$this->addFrontSystem(new EWHETLaser(2, 10, 5, 270, 90));
+//        $this->addFrontSystem(new Jammer(4, 180, 7));
+//		$this->addFrontSystem(new TestGun(2, 4, 1, 0, 360));
+//		$this->addFrontSystem(new TestGun2(2, 4, 1, 0, 360));
+//		$this->addFrontSystem(new EWHETLaser(2, 10, 5, 270, 90));
 		
-        $this->addFrontSystem(new AmmoMissileRackF(3, 0, 0, 240, 120, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
-        $this->addFrontSystem(new AmmoMissileRackF(3, 0, 0, 240, 120, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+//        $this->addFrontSystem(new AmmoMissileRackF(3, 0, 0, 240, 120, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+//        $this->addFrontSystem(new AmmoMissileRackF(3, 0, 0, 240, 120, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
 //		$this->addFrontSystem(new Enveloper(3, 8, 6, 300, 60));
 
 		$this->addAftSystem(new Thruster(4, 10, 0, 3, 2));

@@ -13,7 +13,7 @@ class VelraxVersytheRefit2 extends HeavyCombatVesselLeftRight{
 			$this->occurence = "common";
         $this->limited = 10;
 	    $this->isd = 2108;
-        $this->canvasSize = 105;
+        $this->canvasSize = 130;
 		$this->unofficial = true;
 
         $this->fighters = array("normal"=>6);

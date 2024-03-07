@@ -6,7 +6,7 @@ class penitentAM extends SmallStarBaseFourSections{
 		$this->pointCost = 2270;
 		$this->base = true;
 		$this->smallBase = true;
-		$this->faction = "Orieni Imperium";
+		$this->faction = "Orieni Imperium (defenses)";
 		$this->phpclass = "penitentAM";
 		$this->shipClass = "Penitent Station";
 		$this->imagePath = "img/ships/penitent.png";

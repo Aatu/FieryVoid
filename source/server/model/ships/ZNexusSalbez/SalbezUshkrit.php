@@ -8,7 +8,7 @@ class SalbezUshkrit extends BaseShipNoAft{
 		$this->faction = "ZNexus Sal-bez Coalition";
         $this->phpclass = "SalbezUshkrit";
         $this->imagePath = "img/ships/Nexus/salbez_ushkrit.png";
-			$this->canvasSize = 155; //img has 200px per side
+			$this->canvasSize = 175; //img has 200px per side
         $this->shipClass = "Ush-k'rit Command Cruiser";
 			$this->variantOf = "Fel-riz Patrol Cruiser";
 			$this->occurence = "rare";

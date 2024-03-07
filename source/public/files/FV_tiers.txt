@@ -55,6 +55,7 @@ Factions that point for point will have uphill battle against First Tier, yet ot
  - Nexus Brixadii (custom faction - Nexus universe)
  - Nexus Craytan Union (custom faction - Nexus universe)
  - Nexus Dalithorn (custom faction - Nexus universe)
+ - Nexus Makar (custom faction - Nexus universe)
  - Nexus Sal-bez (custom faction - Nexus universe)
  - Nexus Velrax (custom faction - Nexus universe)
  - Pak'ma'ra
