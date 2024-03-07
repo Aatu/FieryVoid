@@ -11,7 +11,7 @@ class VelraxVersytheExplorer extends HeavyCombatVesselLeftRight{
         $this->shipClass = "Versythe Explorer";
 	    $this->isd = 2031;
         $this->limited = 10;
-        $this->canvasSize = 105;
+        $this->canvasSize = 130;
 		$this->unofficial = true;
 
         $this->fighters = array("normal"=>6);

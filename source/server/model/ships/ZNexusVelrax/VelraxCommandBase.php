@@ -11,7 +11,7 @@ class VelraxCommandBase extends SmallStarBaseFourSections{
 		$this->phpclass = "VelraxCommandBase";
 		$this->shipClass = "Command Base";
 		$this->imagePath = "img/ships/Nexus/VelraxBase.png";
-		$this->canvasSize = 175; 
+		$this->canvasSize = 200; 
 		$this->unofficial = true;
 		$this->isd = 2061;
 

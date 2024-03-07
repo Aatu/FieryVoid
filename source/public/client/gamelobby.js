@@ -185,6 +185,9 @@ window.gamedata = {
 		  case 'ZNexus Dalithorn Commonwealth':
 			powerRating = 'Tier 2, custom faction';
 			break;
+		  case 'ZNexus Makar Federation':
+			powerRating = 'Tier 2, custom faction, playtest';
+			break;
 		  case 'ZNexus Sal-bez Coalition':
 			powerRating = 'Tier 2, custom faction';
 			break;

@@ -10,7 +10,7 @@ class VelraxHisshrimCarrier extends HeavyCombatVesselLeftRight{
         $this->imagePath = "img/ships/Nexus/VelraxHisshrim.png";
         $this->shipClass = "Hisshrim Patrol Carrier";
 	    $this->isd = 2023;
-        $this->canvasSize = 95;
+        $this->canvasSize = 130;
 		$this->unofficial = true;
 
         $this->fighters = array("light"=>6, "heavy"=>6);
