@@ -1972,8 +1972,14 @@ full Advanced Armor effects (by rules) for reference:
 		return;
 	}
 
+	public function notActuallyHexTargeted($fireOrder)
+	{
+		return;
+	}
 
 } //end of class Weapon
+
+
 
 
 class checkForSelfInterceptFire
