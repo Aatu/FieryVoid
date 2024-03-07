@@ -388,11 +388,11 @@ AmmoMissileRackF.prototype.doIndividualNotesTransfer = function () { //prepare i
 
 		    var targetShip = gamedata.getShip(aFireOrder.targetid); 
 
-		    this.range -= 15;
-		    var longRanged = this.checkIsInRangeFRack(firingShip, targetShip, this);
-		    this.range += 15;  // <-- Corrected line
+		    this.range -= 15; //Reduce range to normal range, check if shot is still in range.
+		    var normalRange = this.checkIsInRangeFRack(firingShip, targetShip, this);
+		    this.range += 15;  // Reset range to full.
 								
-		    if (!longRanged) {
+		    if (!normalRange) { //Is a long range shot.
 		        this.individualNotesTransfer.push('L');
 		        toReturn = true;	
 		    } else {

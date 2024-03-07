@@ -8,7 +8,7 @@ class TrylkanAM extends HeavyCombatVessel{
 		$this->faction = "Kor-Lyan Kingdoms";
         $this->phpclass = "TrylkanAM";
         $this->imagePath = "img/ships/korlyan_solyrn2.png";
-        $this->shipClass = "Trylkan Ballistic Destryor";
+        $this->shipClass = "Trylkan Ballistic Destroyer";
 			$this->occurence = "uncommon";
 			$this->variantOf = 'Solyrn Missile Destroyer';			
         $this->limited = 10;
