@@ -8,7 +8,7 @@ class CraytanCalen extends LCV{
         $this->faction = "ZNexus Craytan Union";
         $this->phpclass = "CraytanCalen";
         $this->imagePath = "img/ships/Nexus/CraytanCalen.png";
-			$this->canvasSize = 55; //img has 200px per side
+			$this->canvasSize = 65; //img has 200px per side
         $this->shipClass = "Calen Gunboat";
 		$this->unofficial = true;
 		$this->isd = 2038;

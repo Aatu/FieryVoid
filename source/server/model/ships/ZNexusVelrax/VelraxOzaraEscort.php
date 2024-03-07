@@ -12,7 +12,7 @@ class VelraxOzaraEscort extends MediumShip{
 			$this->variantOf = "Thristen Corvette";
 			$this->occurence = "uncommon";
 		$this->unofficial = true;
-        $this->canvasSize = 75;
+        $this->canvasSize = 90;
 	    $this->isd = 2058;
 
 	    $this->notes = 'Atmospheric Capable.';

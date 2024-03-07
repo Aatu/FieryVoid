@@ -12,7 +12,7 @@ class CraytanEskavin extends BaseShip{
 			$this->variantOf = "Dakran Heavy Cruiser";
 			$this->occurence = "uncommon";
         $this->shipSizeClass = 3;
-		$this->canvasSize = 170; 
+		$this->canvasSize = 180; 
 		$this->unofficial = true;
 
         $this->fighters = array("assault shuttles"=>6);

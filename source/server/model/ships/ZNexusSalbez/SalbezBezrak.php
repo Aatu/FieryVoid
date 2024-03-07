@@ -10,7 +10,7 @@ class SalbezBezrak extends SmallStarBaseFourSections{
 		$this->faction = "ZNexus Sal-bez Coalition";
 		$this->phpclass = "SalbezBezrak";
 		$this->shipClass = "Bez'rak Armed Station";
-		$this->imagePath = "img/ships/Nexus/salbez_combatBase.png";
+		$this->imagePath = "img/ships/Nexus/salbez_combatBase2.png";
 		$this->canvasSize = 175; 
 		$this->unofficial = true;
 		$this->isd = 2081;

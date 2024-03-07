@@ -8,7 +8,7 @@ class SalbezFelriz extends BaseShipNoAft{
 		$this->faction = "ZNexus Sal-bez Coalition";
         $this->phpclass = "SalbezFelriz";
         $this->imagePath = "img/ships/Nexus/salbez_felriz.png";
-			$this->canvasSize = 135; //img has 200px per side
+			$this->canvasSize = 165; //img has 200px per side
         $this->shipClass = "Fel-riz Patrol Cruiser";
 		$this->unofficial = true;
 		$this->isd = 2063;

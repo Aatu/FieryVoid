@@ -13,7 +13,7 @@ class VelraxVasrevRefit2 extends MediumShip{
 			$this->occurence = "common";
 		$this->unofficial = true;
         $this->agile = true;
-        $this->canvasSize = 60;
+        $this->canvasSize = 85;
 	    $this->isd = 2152;
 
 	    $this->notes = 'Atmospheric Capable.';

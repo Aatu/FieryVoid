@@ -13,7 +13,7 @@ class VelraxVersissRefit extends HeavyCombatVesselLeftRight{
 			$this->occurence = "rare";
 	    $this->isd = 2108;
         $this->limited = 10;
-        $this->canvasSize = 105;
+        $this->canvasSize = 130;
 		$this->unofficial = true;
 
         $this->forwardDefense = 15;

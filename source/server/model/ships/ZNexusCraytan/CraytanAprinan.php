@@ -10,7 +10,7 @@ class CraytanAprinan extends MediumShip{
         $this->imagePath = "img/ships/Nexus/CraytanAprinan.png";
         $this->shipClass = "Aprinan Patroller";
 		$this->unofficial = true;
-        $this->canvasSize = 60;
+        $this->canvasSize = 75;
 	    $this->isd = 1906;
 
 	    $this->notes = 'Atmospheric capable';

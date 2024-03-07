@@ -8,7 +8,7 @@ class DalithornGunboat extends LCV{
         $this->faction = "ZNexus Dalithorn Commonwealth";
         $this->phpclass = "DalithornGunboat";
         $this->imagePath = "img/ships/Nexus/DalithornGunboat.png";
-			$this->canvasSize = 55; //img has 200px per side
+			$this->canvasSize = 70; //img has 200px per side
         $this->shipClass = "Gunboat";
 		$this->unofficial = true;
 			$this->isd = 2112;

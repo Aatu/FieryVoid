@@ -12,7 +12,7 @@ class VelraxRastenCorvetteRefit extends MediumShip{
 			$this->variantOf = "Thristen Corvette";
 			$this->occurence = "uncommon";
 		$this->unofficial = true;
-        $this->canvasSize = 75;
+        $this->canvasSize = 90;
 	    $this->isd = 2059;
 
 	    $this->notes = 'Atmospheric Capable.';

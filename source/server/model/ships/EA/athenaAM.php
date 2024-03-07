@@ -3,12 +3,12 @@ class AthenaAM extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
 		$this->pointCost = 1900;
-        $this->faction = "Earth Alliance"; 
+        $this->faction = "Earth Alliance (custom)"; 
 		$this->phpclass = "AthenaAM";
 		$this->imagePath = "img/ships/warlock.png";
 		$this->shipClass = "Athena Battleship";
 	    	$this->unofficial = true;
-		$this->variantOf = "Warlock Advanced Destroyer";
+		//$this->variantOf = "Warlock Advanced Destroyer"; //marked as base hull when moved to Customs directory
 
 		$this->shipSizeClass = 3;
 		$this->canvasSize= 400;

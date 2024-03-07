@@ -63,16 +63,15 @@ if (isset($_SESSION["user"])) {
        -->
 		
 
-		---------- <b>LATEST NEWS - January 2024</b> ----------
-<br><b>BUGFIX</b> - the bug a lot of people stumbled upon recently is (hopefully) fixed
-<br><b>Kor-Lyan polishing</b> - courtesy of Douglas
+		---------- <b>LATEST NEWS - March 2024</b> ----------
+<br><u><b>HYAAAAAACH!</b></u> - by Douglas
+<br><b>Balosian Delta-V</b> for all the Underdweller fans ;)
+<br><b>bugfixes and laubout changes</b> - by Douglas
+<br><b>Thirdspace updates</b> - by Douglas
+<br><b>Hyperlinks added to Register Account window</b> - by Douglas
+<br><b>Nexus updates, including new Makar Federation</b> - by Geoffrey
+<br><b>EA and Orieni split</b> - big factions should be playable again!
 
-		 <br><br>---------- <b>update 7th of January</b> ---------- 
-<br><b>Quad Array update</b> - now more in line with tabletop rules, courtesy of Douglas
-<br><b>Kor-Lyan polishing</b> - including Jammer Missile, courtesy of Douglas
-<br><b>Thirdspace polishing</b> - courtesy of Douglas
-<br><b>Options counted for combat value</b> - not bad overall, essential for custom Cascor!
-<br><b>various bugfixes</b> - as usual
        
 
 <!--	        

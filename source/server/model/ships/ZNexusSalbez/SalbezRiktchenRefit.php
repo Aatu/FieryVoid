@@ -12,7 +12,7 @@ class SalbezRiktchenRefit extends BaseShip{
 			$this->variantOf = "Jer't'kat Heavy Cruiser";
 			$this->occurence = "uncommon";
         $this->shipSizeClass = 3;
-		$this->canvasSize = 135; //img has 200px per side
+		$this->canvasSize = 125; //img has 200px per side
 		$this->unofficial = true;
 
         $this->fighters = array("heavy"=>12);

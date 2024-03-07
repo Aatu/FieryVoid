@@ -14,7 +14,7 @@ class OmegaEpsilonDrakh  extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 1500;
-        $this->faction = "Earth Alliance";
+        $this->faction = "Earth Alliance (custom)";
         $this->phpclass = "OmegaEpsilonDrakh";
         $this->imagePath = "img/ships/omegaShadow.png";
         $this->shipClass = "Shadow Omega Destroyer (Epsilon)";
@@ -28,7 +28,7 @@ class OmegaEpsilonDrakh  extends BaseShip{
 	    
 	    
 	$this->isd = 2261;
-	$this->variantOf = 'Omega Destroyer (Alpha)';
+	//$this->variantOf = 'Omega Destroyer (Alpha)'; //marked as base hull when moving to Customs directory
 	$this->occurence = 'uncommon';
 	    
 	$this->unofficial = true; 
