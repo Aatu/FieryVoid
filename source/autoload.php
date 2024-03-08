@@ -2923,13 +2923,6 @@ spl_autoload_register(
 				'trylkanam' => '/server/model/ships/korlyan/TrylkanAM.php',
 				'verlokaam' => '/server/model/ships/korlyan/VerlokaAM.php',								
 
-/*         		'multidefenselauncher' => '/server/model/weapons/customNexus.php', //missile racks themselves
-         		'limpetboretorp' => '/server/model/weapons/customNexus.php', 
-         		'proximitylaser' => '/server/model/weapons/customNexus.php', 
-         		'fmissilerack' => '/server/model/weapons/customNexus.php', 
-         		'dmissilerack' => '/server/model/weapons/customNexus.php', 
-*/
-
 //				'solyrn' => '/server/model/ships/korlyan/Solyrn.php',
                 'tmphitreduction' => '/server/model/cricialClasses.php',
 				'limpetbore' => '/server/model/cricialClasses.php',                
@@ -2937,11 +2930,11 @@ spl_autoload_register(
 //         		'chaffmissile' => '/server/model/weapons/customNexus.php', 
          		'proximitylaser' => '/server/model/weapons/specialWeapons.php',
          		'proximitylaserlauncher' => '/server/model/weapons/specialWeapons.php',         		 
-         		'fmissilerack' => '/server/model/weapons/customNexus.php', 
-         		'rangedfmissilerack' => '/server/model/weapons/customNexus.php', 
-         		'limpetboretorp' => '/server/model/weapons/customNexus.php', 
-         		'directlimpetbore' => '/server/model/weapons/customNexus.php', 
-         		'directlimpetborebase' => '/server/model/weapons/customNexus.php', 
+//         		'fmissilerack' => '/server/model/weapons/customNexus.php', 
+ //        		'rangedfmissilerack' => '/server/model/weapons/customNexus.php', 
+  //       		'limpetboretorp' => '/server/model/weapons/customNexus.php', 
+ //        		'directlimpetbore' => '/server/model/weapons/customNexus.php', 
+//         		'directlimpetborebase' => '/server/model/weapons/customNexus.php', 
          		'multidefenselauncher' => '/server/model/weapons/customNexus.php', //missile racks themselves
 				'koskovatestbed' => '/server/model/ships/korlyan/KoskovaTestbed.php',
          		'limpetboretorpedo' => '/server/model/weapons/torpedo.php', 				

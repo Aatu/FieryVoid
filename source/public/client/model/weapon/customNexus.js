@@ -1071,79 +1071,6 @@ NexusPlasmaCharge.prototype.initBoostableInfo = function () {
 
 
 
-
-//Kor-Lyan testing systems
-
-/*
-var LimpetBoreTorp = function  LimpetBoreTorp(json, ship) {
-    Ballistic.call(this, json, ship);
-};
-LimpetBoreTorp.prototype = Object.create(Ballistic.prototype);
-LimpetBoreTorp.prototype.constructor =  LimpetBoreTorp;
-*/
-var DirectLimpetBore = function  DirectLimpetBore(json, ship) {
-    Weapon.call(this, json, ship);
-};
-DirectLimpetBore.prototype = Object.create(Weapon.prototype);
-DirectLimpetBore.prototype.constructor =  DirectLimpetBore;
-/*
-var LimpetBoreBase = function  LimpetBoreBase(json, ship) {
-    Weapon.call(this, json, ship);
-};
-LimpetBoreBase.prototype = Object.create(Weapon.prototype);
-LimpetBoreBase.prototype.constructor =  LimpetBoreBase;
-*/
-var DirectLimpetBoreBase = function  DirectLimpetBoreBase(json, ship) {
-    Weapon.call(this, json, ship);
-};
-DirectLimpetBoreBase.prototype = Object.create(Weapon.prototype);
-DirectLimpetBoreBase.prototype.constructor =  DirectLimpetBoreBase;
-/*
-var ProximityLaser = function ProximityLaser(json, ship) {
-    Torpedo.call(this, json, ship);
-};
-ProximityLaser.prototype = Object.create(Torpedo.prototype);
-ProximityLaser.prototype.constructor = ProximityLaser;
-ProximityLaser.prototype.calculateSpecialRangePenalty = function (distance) {
-    var distancePenalized = Math.max(0,distance - 30); //ignore first 30 hexes
-    var rangePenalty = this.rangePenalty * distancePenalized;
-    return rangePenalty;
-};
-*/
-var FMissileRack = function  FMissileRack(json, ship) {
-    Weapon.call(this, json, ship);
-};
-FMissileRack.prototype = Object.create(Weapon.prototype);
-FMissileRack.prototype.constructor =  FMissileRack;
-FMissileRack.prototype.doIndividualNotesTransfer = function () { //prepare individualNotesTransfer variable - if relevant for this particular system
-	//here: transfer information about firing in Rapid mode
-	// (eg. weapon is being fired after 1 turn of arming)
-	var toReturn = false;
-    this.individualNotesTransfer = Array();	
-	if ((this.turnsloaded == 1) && (this.fireOrders.length > 0)) {
-		this.individualNotesTransfer.push('X');
-		toReturn = true;
-	}
-    return toReturn;
-};
-
-var RangedFMissileRack = function  RangedFMissileRack(json, ship) {
-    Weapon.call(this, json, ship);
-};
-RangedFMissileRack.prototype = Object.create(Weapon.prototype);
-RangedFMissileRack.prototype.constructor =  RangedFMissileRack;
-RangedFMissileRack.prototype.doIndividualNotesTransfer = function () { //prepare individualNotesTransfer variable - if relevant for this particular system
-	//here: transfer information about firing in Rapid mode
-	// (eg. weapon is being fired after 1 turn of arming)
-	var toReturn = false;
-    this.individualNotesTransfer = Array();	
-	if ((this.turnsloaded == 1) && (this.fireOrders.length > 0)) {
-		this.individualNotesTransfer.push('X');
-		toReturn = true;
-	}
-    return toReturn;
-};
-
 /*
 var MultiDefenseLauncher = function  MultiDefenseLauncher(json, ship) {
     Weapon.call(this, json, ship);
@@ -1178,13 +1105,13 @@ var MultiDefenseLauncher = function  MultiDefenseLauncher(json, ship) {
 };
 MultiDefenseLauncher.prototype = Object.create(Weapon.prototype);
 MultiDefenseLauncher.prototype.constructor =  MultiDefenseLauncher;
-
+/*
 var AmmoMissileRackD = function AmmoMissileRackD(json, ship) {
     Ballistic.call(this, json, ship);
 };
 AmmoMissileRackD.prototype = Object.create(Ballistic.prototype);
 AmmoMissileRackD.prototype.constructor = AmmoMissileRackD;
-
+*/
 var LaserArray = function  LaserArray(json, ship) {
     Weapon.call(this, json, ship);
 };
