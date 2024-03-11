@@ -40323,7 +40323,7 @@ var canBFCPdisplayCurrClass = function canBFCPdisplayCurrClass(ship, system) {
 	return canBFCP(ship, system) && system.getCurrClass() != '';
 };
 var getBFCPcurrClassImg = function getBFCPcurrClassImg(ship, system) {
-	return './img/systemicons/BFCPClasses/' + system.getCurrClass() + '.png';
+	return './img/systemicons/BFCPclasses/' + system.getCurrClass() + '.png';
 };
 var getBFCPcurrClassName = function getBFCPcurrClassName(ship, system) {
 	return system.getCurrClass();

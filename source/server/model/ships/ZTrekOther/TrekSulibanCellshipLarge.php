@@ -4,7 +4,7 @@ class TrekSulibanCellshipLarge extends FighterFlight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 120 *3; //for 3; a bit add-on for not requiring carrier
+        $this->pointCost = 120 *6; //a bit add-on for not requiring carrier
         $this->faction = "ZTrek Playtest Other Factions";
         $this->phpclass = "TrekSulibanCellshipLarge";
         $this->shipClass = "Suliban Large Cellships";
@@ -41,8 +41,8 @@ class TrekSulibanCellshipLarge extends FighterFlight{
             $fighter->imagePath = "img/ships/StarTrek/SulibanCellshipLarge.png";
             $fighter->iconPath = "img/ships/StarTrek/SulibanCellshipLarge_Large.png";
 
-			$frontGun1 = new TrekFtrPhaser(300, 60, 2, 2, "Phase Cannons");
-            $fighter->addFrontSystem($frontGun1);
+            $heavyGun = new TrekFtrPhaseCannon(300, 60, 4, 2, 8, "Phaser"); //arc from/to, damage bonus, number of shots, rake size, base weapon name
+            $fighter->addFrontSystem($heavyGun);
 			
 			$frontGun = new TrekFtrPhaser(270, 90, 2, 2, "Phase Cannons");
             $fighter->addFrontSystem($frontGun);

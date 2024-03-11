@@ -211,7 +211,7 @@ window.AllWeaponFireAgainstShipAnimation = function () {
         var animationType = weapon.animationArray[incomingFire.firingMode] || weapon.animation;
         var animationColor = weapon.animationColorArray[incomingFire.firingMode] || weapon.animationColor;
 		var startLocationTime = startTime;
-		if (weapon.ballistic) {
+		if (weapon.ballistic && (!weapon.hasSpecialLaunchHexCalculation)) {
 			startLocationTime = 0;
 		}
 			

@@ -1964,15 +1964,18 @@ class AmmoMissileRackF extends AmmoMissileRackS {
 			$this->data["Special"] .= '<br>After one turn loading, can fire in Rapid mode (with reduced range and Fire Control) - but NOT after using Long Range mode in previous turn.';
 		}
 
-/*		
-	private function nullFireControl(&$subArray) {//Extra function needed to null Fire Control values across ALL ammo types in recalculateFireControl.
-  		 	 foreach ($subArray as $key => &$value) {
-    		    if (is_numeric($value)) {
-            $subArray[$key] = null;
-      				  }
-    			}
+		
+	private function nullFireControl() {//Extra function needed to null Fire Control values across ALL ammo types in recalculateFireControl.
+			$this->fireControl = array(null,null,null);//I need this method if launched has NO ammo modes.
+			$this->fireControlArray = array();
+			
+//			$this->hextarget = null;
+//			$this->hextargetArray = array();	
+	
+			$nullFC = array(null, null, null); //I need this method if there's ammo equipped.
+			$this->basicFC = $nullFC; 
 		}		
-*/
+
 	private function modifyFireControl(&$subArray) {//Extra function needed to modify Fire Control values across ALL ammo types in recalculateFireControl.
   		 	 foreach ($subArray as $key => &$value) {
     		    if (is_numeric($value)) {
@@ -1996,7 +1999,14 @@ class AmmoMissileRackF extends AmmoMissileRackS {
       				  }
     			}
 		}	
+/*
+	private function modifyHexTarget(&$hextargetArray) {
 
+	    foreach ($hextargetArray as $key => $value) {
+	        $hextargetArray[$key] = false; // Set each element to false
+	    }	
+	}	
+	*/
     public function beforeFiringOrderResolution($gamedata) //Necessary for recalculateFireControl to apply to actual firing results.
 	    {		
 	        parent::beforeFiringOrderResolution($gamedata);
@@ -2090,13 +2100,11 @@ class AmmoMissileRackF extends AmmoMissileRackS {
 		foreach ($this->individualNotes as $currNote) //To null firecontrol if fired long range PREVIOUS turn, Rapid not available.
 			if($currNote->turn == $gamedata->turn-1) if ($currNote->notevalue == 'L'){ //only current round matters!
 				
-			$this->fireControl = array(null,null,null);//I need this method if launched has NO ammo modes.
-			$this->fireControlArray = array();
-	
-			$nullFC = array(null, null, null); //I need this method if there's ammo equipped.
-			$this->basicFC = $nullFC; 
-		
-		}					
+			$this->nullFireControl();//Null fire control for weapon, to prevent firing after Long Range shot.
+			
+//			$this->modifyHexTarget($this->hextargetArray);//Make hexTarget variable false across all modes, to prevetn Jammer missile firing after Long Range shot.
+
+		}		
 		//and immediately delete notes themselves, they're no longer needed (this will not touch the database, just memory!)
 //		$this->recalculateFireControl(); //necessary for the variable to affect actual firing		
 		$this->individualNotes = array();
@@ -2127,7 +2135,7 @@ class AmmoMissileRackF extends AmmoMissileRackS {
 			$strippedSystem->range = $this->range;
 			$strippedSystem->rangeArray = $this->rangeArray;
 			$strippedSystem->firedInRapidMode = $this->firedInRapidMode;			
-			$strippedSystem->firedInLongRangeMode = $this->firedInLongRangeMode;			
+			$strippedSystem->firedInLongRangeMode = $this->firedInLongRangeMode;							
 			return $strippedSystem;
 		}
 
@@ -2261,7 +2269,7 @@ class BallisticMineLauncher extends AmmoMissileRackS{
     public function calculateHitBase($gamedata, $fireOrder)
     {
 		if ($fireOrder->type == 'ballistic') {				
-					$fireOrder->needed = 100;	//just so no one tries to intercept it, and it auto-misses anyone.				
+					$fireOrder->needed = 100;				
 					$fireOrder->updated = true;
 				} else{
 
@@ -2320,14 +2328,15 @@ class BallisticMineLauncher extends AmmoMissileRackS{
 		parent::setSystemDataWindow($turn);
 		$this->data["Range"] = $this->range; //Don't need to display distanceRange like Missile Racks do :)
 		$this->data["Special"] = 'Available firing modes depend on ammo bought as unit enhancements. Ammunition available is tracked by central Ammunition Magazine system.';
-		$this->data["Special"] = 'Hex-targeted weapon a 25% chance to scatter.';
+		$this->data["Special"] = 'Hex-targeted weapon with a 25% chance to scatter.';
 		$this->data["Special"] .= '<br>Will try to attack the closest ship from the hex where it detonates, up to its maximum radius.';
 		$this->data["Special"] .= '<br>If several ships are of equal distance to the mines, it will choose a target randomly.';		
 		$this->data["Special"] .= '<br>Damage, Firecontrol and Range from target hex depends on ammo type:';	
 		$this->data["Special"] .= '<br>  - Basic: 1d10 + 16 damage, +40 to hit and 3 hex radius.';	
 		$this->data["Special"] .= '<br>  - Wide-Range: 1d10 + 12 damage, +30 to hit and 5 hex radius.';	
 		$this->data["Special"] .= '<br>  - Heavy: 1d10 + 24 damage, +25 to hit and 2 hex radius.';
-		$this->data["Special"] .= '<br>If no targets are available the mine will deactivate.';														
+		$this->data["Special"] .= '<br>If no targets are available the mine will deactivate.';
+		$this->data["Special"] .= '<br>The mine attack can be intercepted under normal ballistic rules.';																
 	}	
 
         public function stripForJson() {
