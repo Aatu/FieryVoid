@@ -41,8 +41,8 @@ class TrekSulibanCellshipLarge extends FighterFlight{
             $fighter->imagePath = "img/ships/StarTrek/SulibanCellshipLarge.png";
             $fighter->iconPath = "img/ships/StarTrek/SulibanCellshipLarge_Large.png";
 
-			$frontGun1 = new TrekFtrPhaser(300, 60, 2, 2, "Phase Cannons");
-            $fighter->addFrontSystem($frontGun1);
+            $heavyGun = new TrekFtrPhaseCannon(300, 60, 4, 2, 8, "Phaser"); //arc from/to, damage bonus, number of shots, rake size, base weapon name
+            $fighter->addFrontSystem($heavyGun);
 			
 			$frontGun = new TrekFtrPhaser(270, 90, 2, 2, "Phase Cannons");
             $fighter->addFrontSystem($frontGun);
