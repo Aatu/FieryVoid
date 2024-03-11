@@ -35,8 +35,7 @@ class TrekSulibanCellshipMed extends FighterFlight{
             $fighter->imagePath = "img/ships/StarTrek/SulibanCellshipMed.png";
             $fighter->iconPath = "img/ships/StarTrek/SulibanCellship_Large.png";
 			
-            $frontGun = new LightParticleBeam(0, 360, 2, 2);
-            $frontGun->displayName = "Ultralight Dual Phase Cannon";
+			$frontGun = new TrekFtrPhaser(0, 360, 2, 2, "Phase Cannons");
             $fighter->addFrontSystem($frontGun);
 
 
