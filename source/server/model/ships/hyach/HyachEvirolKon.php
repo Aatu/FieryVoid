@@ -7,7 +7,7 @@ class HyachEvirolKon extends BaseShip{
 	$this->pointCost = 500;
 	$this->faction = "Hyach Gerontocracy";
         $this->phpclass = "HyachEvirolKon";
-        $this->imagePath = "img/ships/HyachIrokaiKam.png";
+        $this->imagePath = "img/ships/HyachEvirolTek.png";
         $this->shipClass = "Evirol Kon Auxiliary Carrier";
 			$this->variantOf = 'Evirol Tek Logistics Cruiser';
 			$this->occurence = "common";
