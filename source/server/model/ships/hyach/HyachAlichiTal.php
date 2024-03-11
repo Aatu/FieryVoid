@@ -51,8 +51,9 @@ class HyachAlichiTal extends HeavyCombatVessel{
 		$this->addFrontSystem(new Maser(3, 6, 3, 0, 120));
 
         $this->addAftSystem(new GraviticThruster(4, 15, 0, 5, 3));
+        $this->addAftSystem(new GraviticThruster(4, 28, 0, 10, 2));        
         $this->addAftSystem(new GraviticThruster(4, 15, 0, 5, 4));
-        $this->addAftSystem(new GraviticThruster(4, 28, 0, 10, 2));
+
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 5, 48));
