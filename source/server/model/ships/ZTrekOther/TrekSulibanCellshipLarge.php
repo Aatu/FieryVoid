@@ -4,7 +4,7 @@ class TrekSulibanCellshipLarge extends FighterFlight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 120 *3; //for 3; a bit add-on for not requiring carrier
+        $this->pointCost = 120 *6; //a bit add-on for not requiring carrier
         $this->faction = "ZTrek Playtest Other Factions";
         $this->phpclass = "TrekSulibanCellshipLarge";
         $this->shipClass = "Suliban Large Cellships";
