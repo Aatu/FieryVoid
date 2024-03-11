@@ -4,7 +4,7 @@ class TrekSulibanHelix extends VreeCapital{
 	function __construct($id, $userid, $name,  $slot){
 		parent::__construct($id, $userid, $name,  $slot);
 
-        $this->pointCost = 2000;
+        $this->pointCost = 1300;
         $this->faction = "ZTrek Playtest Other Factions";
         $this->phpclass = "TrekSulibanHelix";
         $this->imagePath = "img/ships/StarTrek/SulibanHelix.png";
@@ -27,15 +27,18 @@ class TrekSulibanHelix extends VreeCapital{
 		$this->forwardDefense = 19;
 		$this->sideDefense = 19;
 
+//--section--
 		$this->addPrimarySystem(new Reactor(4, 40, 0, 0));
 		$this->addPrimarySystem(new CnC(5, 16, 0, 0));
 		$this->addPrimarySystem(new Scanner(5, 12, 6, 6));
 		$impulseDrive = new TrekImpulseDrive(4,30,0,1,8); //Impulse Drive is an engine in its own right, in addition to serving as hub for Nacelle output: $armour, $maxhealth, $powerReq, $output, $boostEfficiency
 		$this->addPrimarySystem(new CargoBay(2, 40));
 
-
-		$this->addFrontSystem(new GraviticThruster(4, 14, 0, 6, 1));   
-		$this->addFrontSystem(new CargoBay(3, 15));
+//--section--
+		$cargoBay = new CargoBay(3, 15);
+			$cargoBay->startArc = 300;
+			$cargoBay->endArc = 60;
+			$this->addFrontSystem($cargoBay);
 		$this->addFrontSystem(new AntimatterTorpedo(2, 0, 0, 300, 60));		
 		$cutter = new ParticleCutter(4, 8, 3, 300, 60);
 		$cutter->addTag("Weapon");
@@ -48,17 +51,23 @@ class TrekSulibanHelix extends VreeCapital{
 	$lightgun->addTag("Weapon");
 	$lightgun->displayName = "Defense Guns";
 	$this->addFrontSystem($lightgun);
-		$projection = new TrekShieldProjection(0, 20, 6, 270, 90, 'F');//parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
-			$projector = new TrekShieldProjector(1, 8, 2, 4, 270, 90, 'F'); //parameters: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
+	
+		$projection = new TrekShieldProjection(0, 15, 6, 300, 60, 'F');//parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
+			$projector = new TrekShieldProjector(1, 8, 2, 3, 300, 60, 'F'); //parameters: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
 			$projection->addProjector($projector);
 			$this->addFrontSystem($projector);
-			$projector = new TrekShieldProjector(1, 8, 2, 4, 270, 90, 'F'); //parameters: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
+			$projector = new TrekShieldProjector(1, 8, 2, 3, 300, 60, 'F'); //parameters: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
 			$projection->addProjector($projector);
 			$this->addFrontSystem($projector);
 		$this->addFrontSystem($projection);
 
-		$this->addAftSystem(new GraviticThruster(4, 14, 0, 6, 2)); 
-		$this->addAftSystem(new CargoBay(3, 15));
+
+
+//--section--
+		$cargoBay = new CargoBay(3, 15);
+			$cargoBay->startArc = 120;
+			$cargoBay->endArc = 240;
+			$this->addAftSystem($cargoBay);
         $this->addAftSystem(new AntimatterTorpedo(2, 0, 0, 120, 240));
 		$cutter = new ParticleCutter(4, 8, 3, 120, 240);
 		$cutter->addTag("Weapon");
@@ -71,17 +80,22 @@ class TrekSulibanHelix extends VreeCapital{
 	$lightgun->addTag("Weapon");
 	$lightgun->displayName = "Defense Guns";
 	$this->addAftSystem($lightgun);  
-		$projection = new TrekShieldProjection(0, 18, 6, 90, 270, 'A');//parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
-			$projector = new TrekShieldProjector(1, 8, 2, 4, 90, 270, 'A'); //parameters: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
+	
+		$projection = new TrekShieldProjection(0, 15, 6, 120, 240, 'A');//parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
+			$projector = new TrekShieldProjector(1, 8, 2, 3, 120, 240, 'A'); //parameters: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
 			$projection->addProjector($projector);
 			$this->addAftSystem($projector);
-			$projector = new TrekShieldProjector(1, 8, 2, 4, 90, 270, 'A'); //parameters: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
+			$projector = new TrekShieldProjector(1, 8, 2, 3, 120, 240, 'A'); //parameters: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
 			$projection->addProjector($projector);
 			$this->addAftSystem($projector);
 		$this->addAftSystem($projection);      
      
 
-		$this->addLeftFrontSystem(new CargoBay(3, 15));
+//--section--
+		$cargoBay = new CargoBay(3, 15);
+			$cargoBay->startArc = 240;
+			$cargoBay->endArc = 360;
+			$this->addLeftFrontSystem($cargoBay);
         $this->addLeftFrontSystem(new AntimatterTorpedo(2, 0, 0, 240, 360));
 		$cutter = new ParticleCutter(4, 8, 3, 240, 360);
 		$cutter->addTag("Weapon");
@@ -94,17 +108,22 @@ class TrekSulibanHelix extends VreeCapital{
 	$lightgun->addTag("Weapon");
 	$lightgun->displayName = "Defense Guns";
 	$this->addLeftFrontSystem($lightgun);
-		$projection = new TrekShieldProjection(0, 20, 6, 270, 90, 'L');//parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
-			$projector = new TrekShieldProjector(1, 8, 2, 4, 270, 90, 'L'); //parameters: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
+	
+		$projection = new TrekShieldProjection(0, 15, 6, 240, 360, 'L');//parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
+			$projector = new TrekShieldProjector(1, 8, 2, 3, 240, 360, 'L'); //parameters: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
 			$projection->addProjector($projector);
 			$this->addLeftFrontSystem($projector);
-			$projector = new TrekShieldProjector(1, 8, 2, 4, 270, 90, 'L'); //parameters: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
+			$projector = new TrekShieldProjector(1, 8, 2, 3, 240, 360, 'L'); //parameters: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
 			$projection->addProjector($projector);
 			$this->addLeftFrontSystem($projector);
 		$this->addLeftFrontSystem($projection);		
 				
-		$this->addLeftAftSystem(new GraviticThruster(4, 14, 0, 6, 3));
-		$this->addLeftAftSystem(new CargoBay(3, 15));	
+				
+//--section--
+		$cargoBay = new CargoBay(3, 15);
+			$cargoBay->startArc = 180;
+			$cargoBay->endArc = 300;
+			$this->addLeftAftSystem($cargoBay);
         $this->addLeftAftSystem(new AntimatterTorpedo(2, 0, 0, 180, 300));
 		$cutter = new ParticleCutter(4, 8, 3, 180, 300);
 		$cutter->addTag("Weapon");
@@ -116,12 +135,29 @@ class TrekSulibanHelix extends VreeCapital{
 	$lightgun = new SWMediumLaser(2, 150, 330, 4);
 	$lightgun->addTag("Weapon");
 	$lightgun->displayName = "Defense Guns";
-	$this->addLeftAftSystem($lightgun);
+	$this->addLeftAftSystem($lightgun);	
+	
+		$projection = new TrekShieldProjection(0, 15, 6, 180, 300, 'L');//parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
+			$projector = new TrekShieldProjector(1, 8, 2, 3, 180, 300, 'L'); //parameters: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
+			$projection->addProjector($projector);
+			$this->addLeftAftSystem($projector);
+			$projector = new TrekShieldProjector(1, 8, 2, 3, 180, 300, 'L'); //parameters: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
+			$projection->addProjector($projector);
+			$this->addLeftAftSystem($projector);
+		$this->addLeftAftSystem($projection);		
+	
 		$warpNacelle = new TrekWarpDrive(3, 24, 0, 3); //armor, structure, power usage, impulse output
+			$warpNacelle->startArc = 120;
+			$warpNacelle->endArc = 360;
 		$impulseDrive->addThruster($warpNacelle);
 		$this->addLeftAftSystem($warpNacelle);	
 		
-		$this->addRightFrontSystem(new CargoBay(3, 15));
+		
+//--section--
+		$cargoBay = new CargoBay(3, 15);
+			$cargoBay->startArc = 0;
+			$cargoBay->endArc = 120;
+			$this->addRightFrontSystem($cargoBay);
         $this->addRightFrontSystem(new AntimatterTorpedo(2, 0, 0, 0, 120));
 		$cutter = new ParticleCutter(4, 8, 3, 0, 120);
 		$cutter->addTag("Weapon");
@@ -134,17 +170,21 @@ class TrekSulibanHelix extends VreeCapital{
 	$lightgun->addTag("Weapon");
 	$lightgun->displayName = "Defense Guns";
 	$this->addRightFrontSystem($lightgun);
-		$projection = new TrekShieldProjection(0, 20, 6, 270, 90, 'R');//parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
-			$projector = new TrekShieldProjector(1, 8, 2, 4, 270, 90, 'R'); //parameters: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
+	
+		$projection = new TrekShieldProjection(0, 15, 6, 0, 120, 'R');//parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
+			$projector = new TrekShieldProjector(1, 8, 2, 3, 0, 120, 'R'); //parameters: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
 			$projection->addProjector($projector);
 			$this->addRightFrontSystem($projector);
-			$projector = new TrekShieldProjector(1, 8, 2, 4, 270, 90, 'R'); //parameters: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
+			$projector = new TrekShieldProjector(1, 8, 2, 3, 0, 120, 'R'); //parameters: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
 			$projection->addProjector($projector);
 			$this->addRightFrontSystem($projector);
 		$this->addRightFrontSystem($projection);					
 	
-		$this->addRightAftSystem(new GraviticThruster(4, 14, 0, 6, 4));	
-		$this->addRightAftSystem(new CargoBay(3, 15));
+//--section--
+		$cargoBay = new CargoBay(3, 15);
+			$cargoBay->startArc = 60;
+			$cargoBay->endArc = 180;
+			$this->addRightAftSystem($cargoBay);
         $this->addRightAftSystem(new AntimatterTorpedo(2, 0, 0, 60, 180));
 		$cutter = new ParticleCutter(4, 8, 3, 60, 180);
 		$cutter->addTag("Weapon");
@@ -156,11 +196,32 @@ class TrekSulibanHelix extends VreeCapital{
 	$lightgun = new SWMediumLaser(2, 30, 210, 4);
 	$lightgun->addTag("Weapon");
 	$lightgun->displayName = "Defense Guns";
-	$this->addRightAftSystem($lightgun);
+	$this->addRightAftSystem($lightgun);	
+	
+		$projection = new TrekShieldProjection(0, 15, 6, 60, 180, 'R');//parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
+			$projector = new TrekShieldProjector(1, 8, 2, 3, 60, 180, 'R'); //parameters: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
+			$projection->addProjector($projector);
+			$this->addRightAftSystem($projector);
+			$projector = new TrekShieldProjector(1, 8, 2, 3, 60, 180, 'R'); //parameters: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
+			$projection->addProjector($projector);
+			$this->addRightAftSystem($projector);
+		$this->addRightAftSystem($projection);			
+	
 		$warpNacelle = new TrekWarpDrive(3, 24, 0, 3); //armor, structure, power usage, impulse output
+			$warpNacelle->startArc = 0;
+			$warpNacelle->endArc = 240;
 		$impulseDrive->addThruster($warpNacelle);
-		$this->addLeftAftSystem($warpNacelle);
+		$this->addRightAftSystem($warpNacelle);
        
+	   
+	   
+	//technical thrusters - unlimited, like for LCVs		
+	$this->addPrimarySystem(new InvulnerableThruster(1, 1, 0, 99, 3)); //unhitable and with unlimited thrust allowance
+	$this->addPrimarySystem(new InvulnerableThruster(1, 1, 0, 99, 1)); //unhitable and with unlimited thrust allowance
+	$this->addPrimarySystem(new InvulnerableThruster(1, 1, 0, 99, 2)); //unhitable and with unlimited thrust allowance
+	$this->addPrimarySystem(new InvulnerableThruster(1, 1, 0, 99, 4)); //unhitable and with unlimited thrust allowance  
+	
+	   
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
 		$structArmor = 4;
 		$structHP = 45;
@@ -214,54 +275,49 @@ class TrekSulibanHelix extends VreeCapital{
                     20 => "C&C",
            		 ),
             1=> array(
-                    4 => "TAG:Thruster",
-                    6 => "Cargo Bay",
-				8 => "Shield Projector",
-                    12 => "TAG:Weapon",                    
+                    4 => "TAG:Cargo Bay",
+					6 => "TAG:Shield Projector",
+                    10 => "TAG:Weapon",                    
                     17 => "TAG:Outer Structure",
                     20 => "Primary",
            		 ),
             2=> array(
-                    4 => "TAG:Thruster",
-                    6 => "Cargo Bay",
-					8 => "Shield Projector",
-                    12 => "TAG:Weapon",                      
+                    4 => "TAG:Cargo Bay",
+					6 => "TAG:Shield Projector",
+                    9 => "TAG:Weapon",            
+                    11 => "TAG:Nacelle",                     
                     17 => "TAG:Outer Structure",
                     20 => "Primary",
            		 ),
             31=> array(
-                    4 => "TAG:Thruster",
-                    6 => "Cargo Bay",
-					8 => "Shield Projector",
-                    12 => "TAG:Weapon",
-					13 => "32:Nacelle",                      
+                    4 => "TAG:Cargo Bay",
+					6 => "TAG:Shield Projector",
+                    9 => "TAG:Weapon",            
+                    11 => "TAG:Nacelle",                     
                     17 => "TAG:Outer Structure",
                     20 => "Primary",
            		 ),
             32=> array(
-                    4 => "TAG:Thruster",
-                    6 => "Cargo Bay",
-					9 => "Nacelle",
-                    12 => "TAG:Weapon",
-					13 => "31:Shield Projector",                        
+                    4 => "TAG:Cargo Bay",
+					6 => "TAG:Shield Projector",
+                    9 => "TAG:Weapon",            
+                    11 => "TAG:Nacelle",                     
                     17 => "TAG:Outer Structure",
                     20 => "Primary",
            		 ),
             41=> array(
-                    4 => "TAG:Thruster",
-                    6 => "Cargo Bay",
-					8 => "Shield Projector",
-                    12 => "TAG:Weapon",
-					13 => "42:Nacelle",                      
+                    4 => "TAG:Cargo Bay",
+					6 => "TAG:Shield Projector",
+                    9 => "TAG:Weapon",            
+                    11 => "TAG:Nacelle",                     
                     17 => "TAG:Outer Structure",
                     20 => "Primary",
            		 ),
        		42=> array(
-                    4 => "TAG:Thruster",
-                    6 => "Cargo Bay",
-					9 => "Nacelle",
-                    12 => "TAG:Weapon",
-					13 => "41:Shield Projector",                      
+                    4 => "TAG:Cargo Bay",
+					6 => "TAG:Shield Projector",
+                    9 => "TAG:Weapon",            
+                    11 => "TAG:Nacelle",                     
                     17 => "TAG:Outer Structure",
                     20 => "Primary",
            		 ),
