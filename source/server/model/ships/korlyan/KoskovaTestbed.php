@@ -78,17 +78,11 @@ class KoskovaTestbed extends BaseShip{
 		$this->addFrontSystem($Targeter3);
 		$this->addFrontSystem($Launcher3);  		        
         
-//        $this->addFrontSystem(new FMissileRack(3, 'F', 240, 60, false));
-//        $this->addFrontSystem(new FMissileRack(3, 6, 0, 240, 60, false));
 		$this->addFrontSystem(new AmmoMissileRackF(3, 0, 0, 300, 60, $ammoMagazine, false));
         $this->addFrontSystem(new AmmoMissileRackF(3, 0, 0, 300, 60, $ammoMagazine, false));
-//		$this->addFrontSystem(new LimpetBoreTorpedo(3, 0, 0, 300, 60));
-//		$this->addFrontSystem(new LimpetBoreTorpedo(3, 0, 0, 300, 60));
-//        $this->addFrontSystem(new FMissileRack(3, 'F', 300, 120, false));
+
 		$this->addFrontSystem(new LimpetBoreTorpedoBase(2, 5, 3, 270, 90));
-//		$this->addFrontSystem(new DirectLimpetBore(2, 5, 3, 270, 90));
-//		$this->addFrontSystem(new DirectLimpetBore(2, 5, 3, 270, 90));
-//        $this->addFrontSystem(new FMissileRack(3, 6, 0, 300, 120, false));
+
 
         $this->addAftSystem(new Thruster(4, 7, 0, 2, 2));
         $this->addAftSystem(new Thruster(4, 16, 0, 6, 2));
@@ -97,11 +91,9 @@ class KoskovaTestbed extends BaseShip{
         $this->addAftSystem(new AmmoMissileRackD(2, 0, 0, 60, 240, $ammoMagazine, false));
 
         $this->addLeftSystem(new AmmoMissileRackD(4, 0, 0, 240, 60, $ammoMagazine, false));
-//        $this->addLeftSystem(new FMissileRack(3, 6, 0, 180, 360, false));
         $this->addLeftSystem(new Thruster(4, 15, 0, 5, 3));
 
         $this->addRightSystem(new AmmoMissileRackD(4, 0, 0, 300, 120, $ammoMagazine, false));
-//        $this->addRightSystem(new FMissileRack(3, 6, 0, 0, 180, false));
         $this->addRightSystem(new Thruster(4, 15, 0, 5, 4));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;

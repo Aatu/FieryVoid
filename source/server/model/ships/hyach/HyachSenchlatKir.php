@@ -7,8 +7,7 @@ class HyachSenchlatKir extends HeavyCombatVessel{
         $this->pointCost = 800;
         $this->faction = "Hyach Gerontocracy";
         $this->phpclass = "HyachSenchlatKir";
-        $this->imagePath = "img/ships/HyachSenchlatKam.png";
-		$this->canvasSize = 100;            
+        $this->imagePath = "img/ships/HyachSenchlatKam.png";           
         $this->shipClass = "Senchlat Kir Ballistic Cruiser";
 			$this->variantOf = 'Senchlat Kam Light Cruiser';
 			$this->occurence = "rare";

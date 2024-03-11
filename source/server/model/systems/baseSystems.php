@@ -5093,7 +5093,7 @@ class AmmoMissileJ extends AmmoMissileTemplate{
 	public $enhancementPrice = 8; //PV per missile;
 	
 	public $rangeMod = -5; //MODIFIER for launch range
-	public $distanceRangeMod = 0; //MODIFIER for distance range
+	public $distanceRangeMod = -5; //MODIFIER for distance range
 	public $fireControlMod = array(null, null, null); //MODIFIER for weapon fire control! Hex targetted!
 	public $minDamage = 0;
 	public $maxDamage = 0;	
