@@ -8,7 +8,7 @@ class TrylkanAM extends HeavyCombatVessel{
 		$this->faction = "Kor-Lyan Kingdoms";
         $this->phpclass = "TrylkanAM";
         $this->imagePath = "img/ships/korlyan_solyrn2.png";
-        $this->shipClass = "Trylkan Ballistic Destryor";
+        $this->shipClass = "Trylkan Ballistic Destroyer";
 			$this->occurence = "uncommon";
 			$this->variantOf = 'Solyrn Missile Destroyer';			
         $this->limited = 10;
@@ -39,6 +39,8 @@ class TrylkanAM extends HeavyCombatVessel{
 	    $ammoMagazine->addAmmoEntry(new AmmoBLMineW(), 0); //add full load of basic missiles 
 	    $ammoMagazine->addAmmoEntry(new AmmoBLMineH(), 0); //add full load of basic missiles 
 
+	    $this->enhancementOptionsEnabled[] = 'AMMO_A';//add enhancement options for other missiles - Class-A
+	    $this->enhancementOptionsEnabled[] = 'AMMO_C';//add enhancement options for other missiles - Class-C
 		$this->enhancementOptionsEnabled[] = 'MINE_BLB';//add enhancement options for mines - Basic Mines
 		$this->enhancementOptionsEnabled[] = 'MINE_BLW';//add enhancement options for mines - Wide-Range Mines
 		$this->enhancementOptionsEnabled[] = 'MINE_BLH';//add enhancement options for mines - Wide-Range Mines 	  

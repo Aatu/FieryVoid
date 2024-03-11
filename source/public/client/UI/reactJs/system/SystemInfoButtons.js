@@ -474,7 +474,7 @@ const canAApropagate = (ship,system) => canAA(ship,system) && system.canPropagat
 //can do something with Hyach Computer
 const canBFCP = (ship,system) => (gamedata.gamephase === 1) && (system.name == 'hyachComputer'); 
 const canBFCPdisplayCurrClass = (ship,system) => canBFCP(ship,system) && system.getCurrClass()!='';
-const getBFCPcurrClassImg = (ship,system) => './img/systemicons/BFCPClasses/'+system.getCurrClass()+'.png'; 
+const getBFCPcurrClassImg = (ship,system) => './img/systemicons/BFCPclasses/'+system.getCurrClass()+'.png'; 
 const getBFCPcurrClassName = (ship,system) => system.getCurrClass(); 
 const canBFCPincrease = (ship,system) => canBFCP(ship,system) && system.canIncrease()!='';
 const canBFCPdecrease = (ship,system) => canBFCP(ship,system) && system.canDecrease()!='';
