@@ -33,8 +33,8 @@ class Seta1926 extends HeavyCombatVessel{
         $this->addPrimarySystem(new Thruster(3, 10, 0, 4, 4));
    
         $this->addFrontSystem(new Thruster(3, 10, 0, 5, 1));
-        $this->addFrontSystem(new GraviticShield(0, 6, 0, 1, 0, 90));
         $this->addFrontSystem(new GraviticShield(0, 6, 0, 1, 270, 0));
+        $this->addFrontSystem(new GraviticShield(0, 6, 0, 1, 0, 90));
         $this->addFrontSystem(new SensorSpear(2, 0, 0, 240, 60));
         $this->addFrontSystem(new CommJammer(3, 0, 0, 300, 60));
         $this->addFrontSystem(new SensorSpear(2, 0, 0, 300, 120));
