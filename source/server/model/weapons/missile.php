@@ -1970,9 +1970,7 @@ class AmmoMissileRackF extends AmmoMissileRackS {
 			$this->fireControl = array(null,null,null);//I need this method if launched has NO ammo modes.
 			$this->fireControlArray = array();
 			
-		$this->noHexTargeting = true;			
-//			$this->hextarget = null;
-//			$this->hextargetArray = array();	
+			$this->noHexTargeting = true;				
 	
 			$nullFC = array(null, null, null); //I need this method if there's ammo equipped.
 			$this->basicFC = $nullFC; 
@@ -2001,14 +1999,7 @@ class AmmoMissileRackF extends AmmoMissileRackS {
       				  }
     			}
 		}	
-/*
-	private function modifyHexTarget(&$hextargetArray) {
 
-	    foreach ($hextargetArray as $key => $value) {
-	        $hextargetArray[$key] = false; // Set each element to false
-	    }	
-	}	
-	*/
     public function beforeFiringOrderResolution($gamedata) //Necessary for recalculateFireControl to apply to actual firing results.
 	    {		
 	        parent::beforeFiringOrderResolution($gamedata);
@@ -2103,8 +2094,6 @@ class AmmoMissileRackF extends AmmoMissileRackS {
 			if($currNote->turn == $gamedata->turn-1) if ($currNote->notevalue == 'L'){ //only current round matters!
 				
 			$this->nullFireControl();//Null fire control for weapon, to prevent firing after Long Range shot.
-			
-//			$this->modifyHexTarget($this->hextargetArray);//Make hexTarget variable false across all modes, to prevetn Jammer missile firing after Long Range shot.
 
 		}		
 		//and immediately delete notes themselves, they're no longer needed (this will not touch the database, just memory!)
