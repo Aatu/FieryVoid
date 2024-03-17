@@ -1948,6 +1948,7 @@ class AmmoMissileRackF extends AmmoMissileRackS {
 
 		private $firedInRapidMode = false; //was this weapon fired in rapid mode (this turn)?
 		private $firedInLongRangeMode = false;//was this weapon fired in Long Range mode this turn?
+		private $noHexTargeting = false;		
 
 		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base=false)
 		{
@@ -1969,6 +1970,7 @@ class AmmoMissileRackF extends AmmoMissileRackS {
 			$this->fireControl = array(null,null,null);//I need this method if launched has NO ammo modes.
 			$this->fireControlArray = array();
 			
+		$this->noHexTargeting = true;			
 //			$this->hextarget = null;
 //			$this->hextargetArray = array();	
 	
@@ -2135,7 +2137,8 @@ class AmmoMissileRackF extends AmmoMissileRackS {
 			$strippedSystem->range = $this->range;
 			$strippedSystem->rangeArray = $this->rangeArray;
 			$strippedSystem->firedInRapidMode = $this->firedInRapidMode;			
-			$strippedSystem->firedInLongRangeMode = $this->firedInLongRangeMode;							
+			$strippedSystem->firedInLongRangeMode = $this->firedInLongRangeMode;
+			$strippedSystem->noHexTargeting = $this->noHexTargeting;													
 			return $strippedSystem;
 		}
 

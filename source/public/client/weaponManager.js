@@ -1409,6 +1409,10 @@ window.weaponManager = {
             if (!weapon.hextarget) {
                 continue;
             }
+            
+            if (weapon.noHexTargeting) { //Prevent weapons like F-Rack targeting hexes when they shouldn’t be able to! DK 17.3.24
+                continue;
+            }
 
             if (weapon.ballistic && gamedata.gamephase != 1) {
                 continue;
