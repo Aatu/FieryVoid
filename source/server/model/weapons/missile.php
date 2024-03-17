@@ -2158,8 +2158,8 @@ class BallisticMineLauncher extends AmmoMissileRackS{
 		public $animationExplosionScale = 0.25; //single hex explosion
 		public $animationExplosionType = "AoE";
 		
-	private $ammoMagazine; //reference to ammo magazine
-	private $ammoClassesUsed = array();
+//	private $ammoMagazine; //reference to ammo magazine
+//	private $ammoClassesUsed = array();
 				
 
     protected $rackExplosionDamage = 0; //how much damage will this weapon do in case of catastrophic explosion
@@ -2174,8 +2174,8 @@ class BallisticMineLauncher extends AmmoMissileRackS{
 		if(!$this->availableAmmoAlreadySet){
 			$this->ammoClassesArray = array();
 			$this->ammoClassesArray[] =  new AmmoBLMineB();
-			$this->ammoClassesArray[] =  new AmmoBLMineW();
-			$this->ammoClassesArray[] =  new AmmoBLMineH();						
+			$this->ammoClassesArray[] =  new AmmoBLMineH();				
+			$this->ammoClassesArray[] =  new AmmoBLMineW();					
 			$this->availableAmmoAlreadySet = true;
 		}	            		
             						
