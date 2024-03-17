@@ -81,12 +81,12 @@ class VerlokaAM extends BaseShip{
 
         $this->addLeftSystem(new AmmoMissileRackD(4, 0, 0, 240, 60, $ammoMagazine, false));
         $this->addLeftSystem(new AmmoMissileRackF(3, 0, 0, 180, 360, $ammoMagazine, false));
-		$this->addLeftSystem(new BallisticMineLauncher(4, 0, 0, 300, 120, $ammoMagazine, false));        
+		$this->addLeftSystem(new BallisticMineLauncher(4, 0, 0, 240, 60, $ammoMagazine, false));        
         $this->addLeftSystem(new Thruster(4, 15, 0, 5, 3));
 
         $this->addRightSystem(new AmmoMissileRackD(4, 0, 0, 300, 120, $ammoMagazine, false));
         $this->addRightSystem(new AmmoMissileRackF(3, 0, 0, 0, 180, $ammoMagazine, false));
-		$this->addRightSystem(new BallisticMineLauncher(4, 0, 0, 240, 60, $ammoMagazine, false));        
+		$this->addRightSystem(new BallisticMineLauncher(4, 0, 0, 300, 120, $ammoMagazine, false));        
         $this->addRightSystem(new Thruster(4, 15, 0, 5, 4));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
