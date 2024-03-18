@@ -80,17 +80,30 @@ class Stealth extends ShipSystem implements SpecialAbility{
         if (! ($shooter instanceof BaseShip) || ! ($target instanceof BaseShip))
             throw new InvalidArgumentException("Wrong argument type for Stealth getSpecialAbilityValue");
 		
-        $jammerValue = 0; 
-        if (mathlib::getDistanceHex($shooter, $target) > 5) //kicks in!
-        {
-			$jammerValue = 1; 
-			//Advanced Sensors negate Jammer, Improved Sensors halve Jammer
-			if ($shooter->hasSpecialAbility("AdvancedSensors")) {
-				$jammerValue = 0; //negated
-			} else if ($shooter->hasSpecialAbility("ImprovedSensors")) {
-				$jammerValue = $jammerValue * 0.5; //halved
-			}
-        }
+               $jammerValue = 0; 
+		if ($target instanceof FighterFlight){
+			    if (mathlib::getDistanceHex($shooter, $target) > 5) //kicks in for fighters over 5 hexes!
+			        {
+					$jammerValue = 1; 
+						//Advanced Sensors negate Jammer, Improved Sensors halve Jammer
+						if ($shooter->hasSpecialAbility("AdvancedSensors")) {
+							$jammerValue = 0; //negated
+						} else if ($shooter->hasSpecialAbility("ImprovedSensors")) {
+							$jammerValue = $jammerValue * 0.5; //halved
+						}
+			        }
+		}else{ //Ships
+			    if (mathlib::getDistanceHex($shooter, $target) > 10) //kicks in for ships over 10 hexes!
+ 					{						
+			    	$jammerValue = 1; 
+						//Advanced Sensors negate Jammer, Improved Sensors halve Jammer
+						if ($shooter->hasSpecialAbility("AdvancedSensors")) {
+							$jammerValue = 0; //negated
+						} else if ($shooter->hasSpecialAbility("ImprovedSensors")) {
+							$jammerValue = $jammerValue * 0.5; //halved
+						}
+			    }
+			}	
         return $jammerValue;        
     }
 } //endof Stealth

@@ -491,10 +491,15 @@ window.ew = {
 			}
 		}
 		var stealthSystem = shipManager.systems.getSystemByName(target, "stealth");
-		var stealthValue = 0;		
-		if( (stealthSystem != null) && (mathlib.getDistanceBetweenShipsInHex(shooter, target) > 5) ) { //stealth-protected target at range >5 hexes gains STealth properties
+		var stealthValue = 0;
+		//Amended this section to accommodate Hyach Stealth ships - DK 18.3.24				
+		if( (stealthSystem != null) && (mathlib.getDistanceBetweenShipsInHex(shooter, target) > 5) && target.flight) { //stealth-protected fighter at range >5 hexes may gain Stealth properties
 			stealthValue = shipManager.systems.getOutput(target, stealthSystem);
 		}
+		if( (stealthSystem != null) && (mathlib.getDistanceBetweenShipsInHex(shooter, target) > 10) && target.shipSizeClass >= 0) { //stealth-protected ship at range >10 hexes may gain Stealth properties
+			stealthValue = shipManager.systems.getOutput(target, stealthSystem);
+		}		
+		
 		if(stealthValue > jammerValue) jammerValue = stealthValue;//larger value is used
 		
 		if (jammerValue > 0){ //else no point
