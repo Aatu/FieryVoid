@@ -1365,7 +1365,7 @@ window.weaponManager = {
 
         var stealthSystem = shipManager.systems.getSystemByName(target, "stealth");
 
-        if (stealthSystem && distance > 5 && weapon.ballistic) {
+        if (stealthSystem && distance > 5 && weapon.ballistic && target.flight) {
             return false;
         }
 
