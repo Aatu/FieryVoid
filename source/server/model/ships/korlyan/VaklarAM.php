@@ -26,6 +26,7 @@ class VaklarAM extends HeavyCombatVessel{
         $this->pivotcost = 3;
         $this->iniativebonus = 20;
         
+		$this->IFFSystem = false; 
       
 	//ammo magazine itself (AND its missile options)
 	$ammoMagazine = new AmmoMagazine(250); //pass magazine capacity - 20 rounds per launcher, plus reload rack 80. 160+40 Basic, 40 Intercept and 10 Mines
@@ -49,7 +50,8 @@ class VaklarAM extends HeavyCombatVessel{
 		$this->enhancementOptionsEnabled[] = 'AMMO_X';//add enhancement options for other missiles - Class-X
 		$this->enhancementOptionsEnabled[] = 'MINE_BLB';//add enhancement options for mines - Basic Mines
 		$this->enhancementOptionsEnabled[] = 'MINE_BLW';//add enhancement options for mines - Wide-Range Mines
-		$this->enhancementOptionsEnabled[] = 'MINE_BLH';//add enhancement options for mines - Wide-Range Mines 		 		  	    	    	    
+		$this->enhancementOptionsEnabled[] = 'MINE_BLH';//add enhancement options for mines - Wide-Range Mines
+		$this->enhancementOptionsEnabled[] = 'IFF_SYS'; //Abilty to choose IFF enhancement.		 		 		  	    	    	    
 	    //$this->enhancementOptionsEnabled[] = 'AMMO_S';//add enhancement options for other missiles - Class-S
 		//Stealth missile removed from Early Kor-Lyan ships, as it's not available until 2252
 

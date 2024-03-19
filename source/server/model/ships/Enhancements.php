@@ -108,8 +108,23 @@ class Enhancements{
 		  $enhPriceStep = ceil($ship->pointCost*0.2); //+20% of base, for total price of 60% for second level
 		  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 		  //technical ID, human readable name, number taken, maximum number to take, price for one, price increase for each further, is an option (rather than enhancement)
-	  }	  
-	  
+	  }	 
+	   
+	  $enhID = 'IFF_SYS';
+	  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option needs to be specifically enabled
+		  $enhName = 'Identify Friend or Foe (IFF) System';
+		  $enhLimit = 1; //Only ever need 1
+		  $enhPrice = 0; //fixed.		  
+		  foreach ($ship->systems as $system){
+			if ($system instanceof BallisticMineLauncher){
+		  	$enhPrice += 4;
+		    }
+		  }  
+		  $enhPriceStep = 0; //flat rate
+		  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
+		  }
+		
+		    
 	  //Improved Engine: +1 Thrust, cost: 12+4/turn cost, round up, limit: up to +50%
 	  $enhID = 'IMPR_ENG';
 	  if(!in_array($enhID, $ship->enhancementOptionsDisabled)){ //option is not disabled
@@ -1029,8 +1044,8 @@ class Enhancements{
 				if($ship->enhancementTooltip != "") $ship->enhancementTooltip .= "<br>";
 				$ship->enhancementTooltip .= "$enhDescription";
 				if ($enhCount>1) $ship->enhancementTooltip .= " (x$enhCount)";
-			        switch ($enhID) {
-						
+			        switch ($enhID) {	
+							
 					case 'ELITE_CREW': //Elite Crew: +5 Initiative, +2 Engine, +1 Sensors, +2 Reactor power, -1 Profile, -2 to critical results, +1 to hit all weapons
 						//fixed values
 						$ship->forwardDefense -= $enhCount;
@@ -1089,12 +1104,10 @@ class Enhancements{
 						} 						
 						break;						
 
-					case 'MARK_FERV': //Markab Religious Fervor: +1 to hit all weapons, +10 Initiative, +2 Defence Profiles
-							$ship->toHitBonus += $enhCount;
-							$ship->iniativebonus += $enhCount*10;
-							$ship->forwardDefense += $enhCount*2;
-							$ship->sideDefense += $enhCount*2;
-							break;
+					case 'IFF_SYS': //Add IFF system for Mine Launcher ships.
+						//Mark true
+						$ship->IFFSystem = true;
+						break;
 								
 					case 'IMPR_ENG': //Improved Engine: +1 Engine output (strongest Engine), may be taken multiple times
 						$strongestSystem = null;
@@ -1189,7 +1202,14 @@ class Enhancements{
 							}
 						}  	
 						break;			
-						
+
+					case 'MARK_FERV': //Markab Religious Fervor: +1 to hit all weapons, +10 Initiative, +2 Defence Profiles
+							$ship->toHitBonus += $enhCount;
+							$ship->iniativebonus += $enhCount*10;
+							$ship->forwardDefense += $enhCount*2;
+							$ship->sideDefense += $enhCount*2;
+							break;
+													
 					case 'POOR_CREW': //Poor Crew: -1 Engine, -1 Sensors, -1 Reactor power, +1 Profile, +2 to critical results, -5 Initiative, -1 to hit all weapons
 						//fixed values
 						$ship->forwardDefense += $enhCount;

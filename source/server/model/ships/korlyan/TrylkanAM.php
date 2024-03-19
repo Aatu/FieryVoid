@@ -29,6 +29,7 @@ class TrylkanAM extends HeavyCombatVessel{
         $this->pivotcost = 3;
         $this->iniativebonus = 30;
         
+		$this->IFFSystem = false; 
       
 	//ammo magazine itself (AND its missile options)
 	$ammoMagazine = new AmmoMagazine(80); //pass magazine capacity. 40 Intercept and 40 Mines 
@@ -43,7 +44,8 @@ class TrylkanAM extends HeavyCombatVessel{
 	    $this->enhancementOptionsEnabled[] = 'AMMO_C';//add enhancement options for other missiles - Class-C
 		$this->enhancementOptionsEnabled[] = 'MINE_BLB';//add enhancement options for mines - Basic Mines
 		$this->enhancementOptionsEnabled[] = 'MINE_BLW';//add enhancement options for mines - Wide-Range Mines
-		$this->enhancementOptionsEnabled[] = 'MINE_BLH';//add enhancement options for mines - Wide-Range Mines 	  
+		$this->enhancementOptionsEnabled[] = 'MINE_BLH';//add enhancement options for mines - Wide-Range Mines
+		$this->enhancementOptionsEnabled[] = 'IFF_SYS'; //Abilty to choose IFF enhancement.		 	  
          
         $this->addPrimarySystem(new Reactor(4, 11, 0, 0));
         $this->addPrimarySystem(new CnC(4, 12, 0, 0));

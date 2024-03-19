@@ -94,7 +94,7 @@ class BaseShip {
 	public $unitSize = 1; //typically ships are berthed in dedicated space, 1 per slot - but other arrangements are certainly possible.
 	
 	protected $adaptiveArmorController = null; //Adaptive Armor Controller object (if present)
-	    
+	public $IFFSystem = false;	    
 	    
         function __construct($id, $userid, $name, $slot){
             $this->id = (int)$id;

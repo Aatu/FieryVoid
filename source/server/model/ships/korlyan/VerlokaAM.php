@@ -28,6 +28,8 @@ class VerlokaAM extends BaseShip{
         $this->rollcost = 1;
         $this->pivotcost = 3;
         $this->iniativebonus = 0;
+        
+		$this->IFFSystem = false;        
 
 	//ammo magazine itself (AND its missile options)
 	$ammoMagazine = new AmmoMagazine(230); //80+20 Basic, 80 Intercept and 50 Mines
@@ -51,7 +53,8 @@ class VerlokaAM extends BaseShip{
 	    $this->enhancementOptionsEnabled[] = 'AMMO_X';//add enhancement options for other missiles - Class-X
 		$this->enhancementOptionsEnabled[] = 'MINE_BLB';//add enhancement options for mines - Basic Mines
 		$this->enhancementOptionsEnabled[] = 'MINE_BLW';//add enhancement options for mines - Wide-Range Mines
-		$this->enhancementOptionsEnabled[] = 'MINE_BLH';//add enhancement options for mines - Wide-Range Mines 		 		  	    	    	    
+		$this->enhancementOptionsEnabled[] = 'MINE_BLH';//add enhancement options for mines - Wide-Range Mines
+		$this->enhancementOptionsEnabled[] = 'IFF_SYS'; //Abilty to choose IFF enhancement.		 		 		  	    	    	    
 	    //$this->enhancementOptionsEnabled[] = 'AMMO_S';//add enhancement options for other missiles - Class-S
 		//Stealth missile removed from Early Kor-Lyan ships, as it's not availablee until 2252	  
         
