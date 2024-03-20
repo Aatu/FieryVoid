@@ -29,7 +29,7 @@ class VaklarAM extends HeavyCombatVessel{
 		$this->IFFSystem = false; 
       
 	//ammo magazine itself (AND its missile options)
-	$ammoMagazine = new AmmoMagazine(250); //pass magazine capacity - 20 rounds per launcher, plus reload rack 80. 160+40 Basic, 40 Intercept and 10 Mines
+	$ammoMagazine = new AmmoMagazine(280); //pass magazine capacity - 20 rounds per launcher, plus reload rack 80. 160+40 Basic, 40 Intercept and 40 Mines
 	    $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
 	    $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 200); //add full load of basic missiles 
 	    $ammoMagazine->addAmmoEntry(new AmmoMissileI(), 40); //add full load of basic missiles
@@ -73,12 +73,7 @@ class VaklarAM extends HeavyCombatVessel{
         $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));
         $this->addFrontSystem(new BallisticMineLauncher(3, 0, 0, 300, 60, $ammoMagazine, false));        
         $this->addFrontSystem(new AmmoMissileRackD(2, 0, 0, 240, 60, $ammoMagazine, false));
-        $this->addFrontSystem(new StdParticleBeam(2, 4, 1, 240, 60));
-//		$TargeterA = new ProximityLaser(3, 0, 0, 300, 60, 'A');
-//		$LauncherA = new ProximityLaserLauncher(0, 1, 0, 300, 60, 'A'); 
-//		$TargeterA->addLauncher($LauncherA);
-//		$this->addFrontSystem($TargeterA);
-//		$this->addFrontSystem($LauncherA);		 
+        $this->addFrontSystem(new StdParticleBeam(2, 4, 1, 240, 60));	 
         $this->addFrontSystem(new StdParticleBeam(2, 4, 1, 300, 120));
         $this->addFrontSystem(new AmmoMissileRackD(2, 0, 0, 300, 120, $ammoMagazine, false));
 		
