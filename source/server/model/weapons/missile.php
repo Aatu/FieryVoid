@@ -2351,30 +2351,12 @@ class AbbaiMineLauncher extends BallisticMineLauncher{
     public $iconPath = "AbbaiMineLauncher.png";    
 	
     public $range = 20;
-    public $distanceRange = 40;
-//    public $firingMode = 1;
-//    public $priority = 6;
-//    public $loadingtime = 2;
-//	public $hextarget = true;
-//	public $hidetarget = true;	     
-//	private $specialPosNoLauncher = true; //Allows mine explosion to animate AND for Mine to originated from there.	     
+    public $distanceRange = 40;   
     
 	//basic launcher data, before being modified by actual missiles
 	protected $basicFC=array(0,0,0);
 	protected $basicRange = 20;
 	protected $basicDistanceRange = 40; //Just so scattering past 30 hexes doesn't cause an issue.
-	
-//		public $animation = "bolt";
-//		public $animationColor = array(245, 90, 90);
-//		public $animationExplosionScale = 0.25; //single hex explosion
-//		public $animationExplosionType = "AoE";
-		
-//	private $ammoMagazine; //reference to ammo magazine
-//	private $ammoClassesUsed = array();
-				
-
-//    protected $rackExplosionDamage = 0; //how much damage will this weapon do in case of catastrophic explosion
-//    protected $rackExplosionThreshold = 21; //Not sure these can explode in same way as Missile Racks.  Set above threshold for now.  
 	
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base=false)
 	{
