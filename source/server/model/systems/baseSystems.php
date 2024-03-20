@@ -5706,7 +5706,6 @@ class AmmoBLMineW extends AmmoMissileTemplate{
 	public $weaponClass = 'Ballistic';//weapon class
 	public $priority = 6;
 	public $priorityAF = 5;
-	public $animationExplosionScale = 0.25;
 	
 	public $hidetarget = true;
 
@@ -5716,5 +5715,65 @@ class AmmoBLMineW extends AmmoMissileTemplate{
     public function getDamage($fireOrder){        return Dice::d(10, 1)+12;   } 
 
 } //endof class AmmoBLMineW
+
+//ammunition for AmmoMagazine - Basic Mine for AbbaiMineLauncher
+class AmmoBistifA extends AmmoMissileTemplate{	
+	public $name = 'AmmoBistifA';
+	public $displayName = 'Basic Mine';
+	public $modeName = 'Basic Mine';
+	public $size = 1; //how many store slots are required for a single round
+	public $enhancementName = 'MINE_MLB'; //enhancement name to be enabled
+	public $enhancementDescription = '(mine) Basic Mine'; //enhancement description
+	public $enhancementPrice = 8;
+	
+	public $rangeMod = 0; //MODIFIER for launch range
+	public $distanceRangeMod = 0; //MODIFIER for distance range
+	public $fireControlMod = array(2, 2, 2); //MODIFIER for weapon fire control!
+	public $minDamage = 12;
+	public $maxDamage = 12;	
+	public $damageType = 'Standard';//mode of dealing damage
+	public $weaponClass = 'Ballistic';//weapon class
+	public $priority = 6;
+	public $priorityAF = 5;
+	
+	public $hidetarget = true;
+
+    public $hextarget = true; 
+	public $mineRange = 4;	
+
+    public function getDamage($fireOrder){        return 12;   } 
+
+} //endof class AmmoBistifA
+
+//ammunition for AmmoMagazine - Wide-Ranged Mine for AbbaiMineLauncher
+class AmmoBistifB extends AmmoMissileTemplate{	
+	public $name = 'AmmoBistifB';
+	public $displayName = 'Wide-Ranged Mine';
+	public $modeName = 'Wide-Ranged Mine';
+	public $size = 1; //how many store slots are required for a single round
+	public $enhancementName = 'MINE_MLW'; //enhancement name to be enabled
+	public $enhancementDescription = '(mine) Wide-Range Mine'; //enhancement description
+	public $enhancementPrice = 12;
+	
+	public $rangeMod = 0; //MODIFIER for launch range
+	public $distanceRangeMod = 0; //MODIFIER for distance range
+	public $fireControlMod = array(2, 2, 2); //MODIFIER for weapon fire control!
+	public $minDamage = 12;
+	public $maxDamage = 12;	
+	public $damageType = 'Standard';//mode of dealing damage
+	public $weaponClass = 'Ballistic';//weapon class
+	public $priority = 6;
+	public $priorityAF = 5;
+	public $animationExplosionScale = 0.25;
+	
+	public $hidetarget = true;
+
+    public $hextarget = true; 
+	public $mineRange = 7;	
+
+    public function getDamage($fireOrder){        return 12;   } 
+
+} //endof class AmmoBistifB
+
 
 ?>

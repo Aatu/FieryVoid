@@ -116,7 +116,7 @@ class Enhancements{
 		  $enhLimit = 1; //Only ever need 1
 		  $enhPrice = 0; //fixed.		  
 		  foreach ($ship->systems as $system){
-			if ($system instanceof BallisticMineLauncher){
+			if ($system instanceof BallisticMineLauncher || $system instanceof AbbaiMineLauncher){
 		  	$enhPrice += 4;
 		    }
 		  }  
@@ -659,19 +659,8 @@ class Enhancements{
 			  $enhPrice = $ammoClass->getPrice($ship); 
 			  $enhPriceStep = 0; //flat rate
 			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
-		  }	
-		  $enhID = 'MINE_BLW'; //Ballistic Launcher Basic Mine
-		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
-				$ammoClass = new AmmoBLMineW();
-				$ammoSize = $ammoClass->size;
-				$actualCapacity = floor($magazineCapacity/$ammoSize);
-			  $enhName = $ammoClass->enhancementDescription;
-			  $enhLimit = $actualCapacity;		
-			  $enhPrice = $ammoClass->getPrice($ship); 
-			  $enhPriceStep = 0; //flat rate
-			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
 		  }		
-		  $enhID = 'MINE_BLH'; //Ballistic Launcher Basic Mine
+		  $enhID = 'MINE_BLH'; //Ballistic Launcher Heavy Mine
 		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
 				$ammoClass = new AmmoBLMineH();
 				$ammoSize = $ammoClass->size;
@@ -681,7 +670,40 @@ class Enhancements{
 			  $enhPrice = $ammoClass->getPrice($ship); 
 			  $enhPriceStep = 0; //flat rate
 			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
-		  }				  		  		  						  	  
+		  }
+		  $enhID = 'MINE_BLW'; //Ballistic Launcher Wide-Ranged Mine
+		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
+				$ammoClass = new AmmoBLMineW();
+				$ammoSize = $ammoClass->size;
+				$actualCapacity = floor($magazineCapacity/$ammoSize);
+			  $enhName = $ammoClass->enhancementDescription;
+			  $enhLimit = $actualCapacity;		
+			  $enhPrice = $ammoClass->getPrice($ship); 
+			  $enhPriceStep = 0; //flat rate
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+		  }			  	
+		  $enhID = 'MINE_MLB'; //Abbai Mine Launcher Basic Mine
+		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
+				$ammoClass = new AmmoBistifA();
+				$ammoSize = $ammoClass->size;
+				$actualCapacity = floor($magazineCapacity/$ammoSize);
+			  $enhName = $ammoClass->enhancementDescription;
+			  $enhLimit = $actualCapacity;		
+			  $enhPrice = $ammoClass->getPrice($ship); 
+			  $enhPriceStep = 0; //flat rate
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+		  }		
+		  $enhID = 'MINE_MLW'; //Abbai Mine Launcher Wide-Ranged Mine
+		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
+				$ammoClass = new AmmoBistifB();
+				$ammoSize = $ammoClass->size;
+				$actualCapacity = floor($magazineCapacity/$ammoSize);
+			  $enhName = $ammoClass->enhancementDescription;
+			  $enhLimit = $actualCapacity;		
+			  $enhPrice = $ammoClass->getPrice($ship); 
+			  $enhPriceStep = 0; //flat rate
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+		  }			  			  		  		  						  	  
 	  } //end of magazine-requiring options
 	  
 	  
@@ -1371,12 +1393,18 @@ class Enhancements{
 					case 'MINE_BLB': //Ballistic Launcher Basic Mine						
 						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoBLMineB(), $enhCount, true); //do notify dependent weapons, too!
 						break;
-					case 'MINE_BLW': //Ballistic Launcher Wide-Range Mine						
-						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoBLMineW(), $enhCount, true); //do notify dependent weapons, too!
-						break;	
 					case 'MINE_BLH': //Ballistic Launcher Heavy Mine						
 						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoBLMineH(), $enhCount, true); //do notify dependent weapons, too!
-						break;																																	
+						break;
+					case 'MINE_BLW': //Ballistic Launcher Wide-Range Mine						
+						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoBLMineW(), $enhCount, true); //do notify dependent weapons, too!
+						break;
+					case 'MINE_MLB': //Abbai Mine Launcher Wide-Ranged Mine													
+						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoBistifA(), $enhCount, true); //do notify dependent weapons, too!
+						break;	
+					case 'MINE_MLW': //Abbai Mine Launcher Wide-Ranged Mine						
+						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoBistifB(), $enhCount, true); //do notify dependent weapons, too!
+						break;												
 				}
 			}
 			

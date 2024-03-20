@@ -2345,5 +2345,69 @@ class BallisticMineLauncher extends AmmoMissileRackS{
 } //endof class BallisticMineLauncher
 
 
+class AbbaiMineLauncher extends BallisticMineLauncher{
+	public $name = "AbbaiMineLauncher";
+    public $displayName = "Mine Launcher";
+    public $iconPath = "AbbaiMineLauncher.png";    
+	
+    public $range = 20;
+    public $distanceRange = 40;
+//    public $firingMode = 1;
+//    public $priority = 6;
+//    public $loadingtime = 2;
+//	public $hextarget = true;
+//	public $hidetarget = true;	     
+//	private $specialPosNoLauncher = true; //Allows mine explosion to animate AND for Mine to originated from there.	     
+    
+	//basic launcher data, before being modified by actual missiles
+	protected $basicFC=array(0,0,0);
+	protected $basicRange = 20;
+	protected $basicDistanceRange = 40; //Just so scattering past 30 hexes doesn't cause an issue.
+	
+//		public $animation = "bolt";
+//		public $animationColor = array(245, 90, 90);
+//		public $animationExplosionScale = 0.25; //single hex explosion
+//		public $animationExplosionType = "AoE";
+		
+//	private $ammoMagazine; //reference to ammo magazine
+//	private $ammoClassesUsed = array();
+				
+
+//    protected $rackExplosionDamage = 0; //how much damage will this weapon do in case of catastrophic explosion
+//    protected $rackExplosionThreshold = 21; //Not sure these can explode in same way as Missile Racks.  Set above threshold for now.  
+	
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base=false)
+	{
+		if ( $maxhealth == 0 ) $maxhealth = 6;
+            	if ( $powerReq == 0 ) $powerReq = 3;
+
+			//Set mine availability! (Cannot fire missiles like S-Rack)
+		if(!$this->availableAmmoAlreadySet){
+			$this->ammoClassesArray = array();
+			$this->ammoClassesArray[] =  new AmmoBistifA();			
+			$this->ammoClassesArray[] =  new AmmoBistifB();					
+			$this->availableAmmoAlreadySet = true;
+		}	            		
+            						
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base); //Parent routines take care of the rest
+	}   
+
+	
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+		$this->data["Range"] = $this->range; //Don't need to display distanceRange like Missile Racks do :)
+		$this->data["Special"] = 'Available firing modes depend on ammo bought as unit enhancements. Ammunition available is tracked by central Ammunition Magazine system.';
+		$this->data["Special"] = 'Hex-targeted weapon with a 25% chance to scatter.';
+		$this->data["Special"] .= '<br>Will try to attack the closest ship from the hex where it detonates, up to its maximum radius.';
+		$this->data["Special"] .= '<br>If several ships are of equal distance to the mines, it will choose a target randomly.';		
+		$this->data["Special"] .= '<br>Damage, Firecontrol and Range from target hex depends on ammo type:';	
+		$this->data["Special"] .= '<br>  - Basic: 12 damage, +10 to hit and 4 hex radius.';	
+		$this->data["Special"] .= '<br>  - Wide-Range: 12 damage, +10 to hit and 7 hex radius.';	
+		$this->data["Special"] .= '<br>If no targets are available the mine will deactivate.';
+		$this->data["Special"] .= '<br>The mine attack can be intercepted under normal ballistic rules.';																
+	}	
+	
+} //endof class AbbaiMineLauncher
+
 ?>
 

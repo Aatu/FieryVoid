@@ -470,4 +470,10 @@ var BallisticMineLauncher = function BallisticMineLauncher(json, ship) {
     Weapon.call(this, json, ship);
 };
 BallisticMineLauncher.prototype = Object.create(Weapon.prototype);
-BallisticMineLauncher.prototype.constructor = BallisticMineLauncher;    
+BallisticMineLauncher.prototype.constructor = BallisticMineLauncher;
+
+var AbbaiMineLauncher = function AbbaiMineLauncher(json, ship) {
+    Weapon.call(this, json, ship);
+};
+AbbaiMineLauncher.prototype = Object.create(Weapon.prototype);
+AbbaiMineLauncher.prototype.constructor = AbbaiMineLauncher;     

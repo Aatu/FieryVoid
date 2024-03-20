@@ -634,6 +634,9 @@ spl_autoload_register(
                 'motenai' => '/server/model/ships/abbai_old/motenai.php',
                 'motenai1935' => '/server/model/ships/abbai_old/motenai1935.php',
                 'motenai1980' => '/server/model/ships/abbai_old/motenai1980.php',
+                'motenaiam' => '/server/model/ships/abbai_old/motenaiam.php',
+                'motenai1935am' => '/server/model/ships/abbai_old/motenai1935am.php',
+                'motenai1980am' => '/server/model/ships/abbai_old/motenai1980am.php',                
                 'movement' => '/server/handlers/movement.php',
                 'movementgamephase' => '/server/Phase/MovementGamePhase.php',
                 'movementorder' => '/server/model/BaseClasses.php',
@@ -2939,7 +2942,8 @@ spl_autoload_register(
 				'koskovatestbed' => '/server/model/ships/korlyan/KoskovaTestbed.php',
          		'limpetboretorpedo' => '/server/model/weapons/torpedo.php', 				
          		'limpetboretorpedobase' => '/server/model/weapons/torpedo.php',
-         		'ballisticminelauncher' => '/server/model/weapons/missile.php', 	 
+         		'ballisticminelauncher' => '/server/model/weapons/missile.php',
+         		'abbaiminelauncher' => '/server/model/weapons/missile.php', 	 
 
 
 				//Star Wars - Clone Wars testing
