@@ -23,11 +23,11 @@ class penitent2003AM extends SmallStarBaseFourSections{
 		$this->sideDefense = 22;
 		$this->isd = 2003;
 		
+		$this->addPrimarySystem(new Structure(5, 150)); //needs to be called first for some reason - static call apparently fails for the first time...
 		$this->addFrontSystem(new Structure(5, 132));
 		$this->addAftSystem(new Structure(5, 132));
 		$this->addLeftSystem(new Structure(5, 132));
 		$this->addRightSystem(new Structure(5, 132));
-		$this->addPrimarySystem(new Structure(5, 150));
 		
 		
         //ammo magazine itself (AND its missile options)
@@ -41,10 +41,17 @@ class penitent2003AM extends SmallStarBaseFourSections{
         $this->enhancementOptionsEnabled[] = 'AMMO_L';//add enhancement options for other missiles - Class-L
 		//By the Book Orieni should have access to missie types: KK, B, A, H, L, C
 		
+		/* replaced with proper two C&Cs!
+        $this->addPrimarySystem(new ProtectedCnC(6, 42, 0, 0));
+		*/
+		$cnc = new CnC(5, 21, 0, 0);
+		$cnc->startArc = 0;
+		$cnc->endArc = 360;
+        $this->addPrimarySystem($cnc);
+		$cnc = new SecondaryCnC(5, 21, 0, 0);//all-around by default
+        $this->addPrimarySystem($cnc);
 		
 		$this->addPrimarySystem(new Reactor(5, 44, 0, 0));
-        $this->addPrimarySystem(new ProtectedCnC(6, 42, 0, 0));
-        //$this->addPrimarySystem(new CnC(5, 21, 0, 0)); //2 C&Cs do not work in FV - merging into one larger and better protected system!
 		$this->addPrimarySystem(new Scanner(5, 28, 4, 7));
 		$this->addPrimarySystem(new Scanner(5, 28, 4, 7));
 		$this->addPrimarySystem(new Hangar(5, 14));

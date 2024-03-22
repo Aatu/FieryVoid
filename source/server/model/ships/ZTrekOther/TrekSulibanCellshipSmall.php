@@ -36,7 +36,7 @@ class TrekSulibanCellshipSmall extends FighterFlight{
             $fighter->iconPath = "img/ships/StarTrek/SulibanCellship_Large.png";
 			
 
-			$frontGun = new TrekFtrPhaser(0, 360, 2, 1, "Phase Cannons");
+			$frontGun = new TrekFtrPhaser(0, 360, 2, 1, "Phase Cannon");
             $fighter->addFrontSystem($frontGun);
 
 

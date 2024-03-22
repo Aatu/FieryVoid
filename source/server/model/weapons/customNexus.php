@@ -7085,7 +7085,7 @@ class NexusLightBurstBeam extends Weapon{
         public $loadingtime = 1;
         public $priority = 3;
 
-        public $rangePenalty = 2;
+        public $rangePenalty = 1;
         public $fireControl = array(3, 2, 2); // fighters, <mediums, <capitals
 
         public $damageType = "Standard"; 
