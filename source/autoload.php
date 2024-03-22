@@ -745,6 +745,7 @@ spl_autoload_register(
                 'phasemanager' => '/server/controller/PhaseManager.php',
                 'pikitos' => '/server/model/ships/brakiri/pikitos.php',
                 'pillager' => '/server/model/ships/raiders/pillager.php',
+                'pillum' => '/server/model/ships/centauri_raiders/pillum.php',
                 'pinnace' => '/server/model/ships/raiders/pinnace.php',
                 'piratehunter' => '/server/model/ships/civilians/pirateHunter.php',
                 'plasma' => '/server/model/weapons/plasma.php',
