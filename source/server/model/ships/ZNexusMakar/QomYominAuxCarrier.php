@@ -11,7 +11,7 @@ class QomYominAuxCarrier extends HeavyCombatVesselLeftRight{
 		$this->canvasSize = 105; //img has 200px per side
         $this->shipClass = "Roquola Auxiliary Carrier";
 			$this->variantOf = "Srea Tormal Auxiliary Destroyer";
-			$this->occurence = "uncommon";
+			$this->occurence = "common";
 		$this->unofficial = true;
         $this->isd = 1931;
 
