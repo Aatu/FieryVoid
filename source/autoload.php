@@ -3162,8 +3162,16 @@ spl_autoload_register(
 						'govallearlyam' => '/server/model/ships/llort/govallEarlyAM.php',
 
 						//Grome
+						'gromemahkgaram' => '/server/model/ships/grome/GromeMahkgarAM.php',						
+						'gromegormokosatam' => '/server/model/ships/grome/GromeGormokOSATAM.php',						
+						'gromegrotham' => '/server/model/ships/grome/GromeGrothAM.php',						
+						'gromegralacam' => '/server/model/ships/grome/GromeGralacAM.php',						
 						'grometrokanam' => '/server/model/ships/grome/GromeTrokanAM.php',						
-				
+						'grometrokanmargusam' => '/server/model/ships/grome/GromeTrokanMargusAM.php',
+						'gromemogortaam' => '/server/model/ships/grome/GromeMogortaAM.php',						
+						'gromemorgatam' => '/server/model/ships/grome/GromeMorgatAM.php',							
+						'gromemelagaram' => '/server/model/ships/grome/GromeMelagarAM.php',						
+						'grometelgaram' => '/server/model/ships/grome/GromeTelgarAM.php',										
 				
 						//Hurr
 						'roskorbase2215am' => '/server/model/ships/hurr/Roskorbase2215AM.php',
