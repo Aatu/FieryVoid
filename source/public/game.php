@@ -212,6 +212,7 @@
     <script src="client/model/system/baseSystems.js"></script>
     <script src="client/model/system/defensive.js"></script>
     <script src="client/model/weapon/ammo.js"></script>
+    <script src="client/model/weapon/ammoWeapons.js"></script>    
     <script src="client/model/weapon/laser.js"></script>
     <script src="client/model/weapon/particle.js"></script>
     <script src="client/model/weapon/matter.js"></script>

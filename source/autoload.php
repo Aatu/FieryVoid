@@ -3051,12 +3051,35 @@ spl_autoload_register(
                 		'ammobombrack' => '/server/model/weapons/missile.php',
                 		'ammofighterrack' => '/server/model/weapons/missile.php',
 						
-                		
+ 				//Direct Fire Weapons that use Ammo Magazine
+						'ammodirectweapon' => '/server/model/weapons/ammoWeapons.php',							
+					               		
+						'ammoheavyrailgun' => '/server/model/weapons/ammoWeapons.php',
+						'ammomediumrailgun' => '/server/model/weapons/ammoWeapons.php',
+						'ammolightrailgun' => '/server/model/weapons/ammoWeapons.php',						
+
+
+				//Ammo for Direct Fire Weapons
+						'ammotemplatedirectweapons' => '/server/model/weapons/ammoWeapons.php',	
+						'ammohshellbasic' => '/server/model/weapons/ammoWeapons.php',				
+						'ammomshellbasic' => '/server/model/weapons/ammoWeapons.php',						
+						'ammolshellbasic' => '/server/model/weapons/ammoWeapons.php',						
+						'ammohshellflash' => '/server/model/weapons/ammoWeapons.php',				
+						'ammomshellflash' => '/server/model/weapons/ammoWeapons.php',						
+						'ammolshellflash' => '/server/model/weapons/ammoWeapons.php',						
+						'ammohshellscatter' => '/server/model/weapons/ammoWeapons.php',				
+						'ammomshellscatter' => '/server/model/weapons/ammoWeapons.php',						
+						'ammolshellscatter' => '/server/model/weapons/ammoWeapons.php',
+						'ammohshellheavy' => '/server/model/weapons/ammoWeapons.php',				
+						'ammomshellheavy' => '/server/model/weapons/ammoWeapons.php',						
+						'ammolshellheavy' => '/server/model/weapons/ammoWeapons.php',						
+						'ammohshelllrange' => '/server/model/weapons/ammoWeapons.php',				
+						'ammomshelllrange' => '/server/model/weapons/ammoWeapons.php',						
+						'ammohshellulrange' => '/server/model/weapons/ammoWeapons.php',
 						
-						
+																								
 						//ships using new style launchers (and magazine of course) - by faction
-						
-	  
+							  
 						//EA
                 		'sagittariusam' => '/server/model/ships/EA/sagittariusAM.php', 
                 		'sagittariusalphaam' => '/server/model/ships/EA/sagittariusAlphaAM.php',
@@ -3137,6 +3160,10 @@ spl_autoload_register(
 						'fwellgonam' => '/server/model/ships/llort/fwellgonAM.php',
 						'govallam' => '/server/model/ships/llort/govallAM.php',
 						'govallearlyam' => '/server/model/ships/llort/govallEarlyAM.php',
+
+						//Grome
+						'grometrokanam' => '/server/model/ships/grome/GromeTrokanAM.php',						
+				
 				
 						//Hurr
 						'roskorbase2215am' => '/server/model/ships/hurr/Roskorbase2215AM.php',
