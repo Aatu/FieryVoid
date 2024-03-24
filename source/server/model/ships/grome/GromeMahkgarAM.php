@@ -38,7 +38,7 @@ class GromeMahkgarAM extends StarBaseSixSections{
 		);
 
  	//ammo magazine itself (AND its missile options)
-	$ammoMagazine = new AmmoMagazine(1300); //pass magazine capacity 
+	$ammoMagazine = new AmmoMagazine(1500); //pass magazine capacity 
 	    $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
 	    $ammoMagazine->addAmmoEntry(new AmmoHShellBasic(), 300); //add full load of basic shells  
 	    $ammoMagazine->addAmmoEntry(new AmmoMShellBasic(), 600); //add full load of basic shells  
