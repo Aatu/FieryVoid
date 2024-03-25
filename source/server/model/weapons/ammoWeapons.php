@@ -301,6 +301,17 @@ class AmmoHeavyRailGun extends AmmoDirectWeapon{
 		}            						
 		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine); //Parent routines take care of the rest
 	}
+	
+        public function setSystemDataWindow($turn){		
+		parent::setSystemDataWindow($turn);	
+			$this->data["Special"] .= '<br>Can fire different shells, effects are outlined below:';
+			$this->data["Special"] .= "<br>  - Flash: Deals Plasma damage in Flash mode."; 
+			$this->data["Special"] .= "<br>  - Scatter: Pulse mode with 25% grouping "; 
+			$this->data["Special"] .= "<br>  - Heavy: Deals +15 damage"; 
+			$this->data["Special"] .= "<br>  - Long Range: Range penalty -5 per 4 hex, damage 3d10+3.";
+			$this->data["Special"] .= "<br>  - Ultra Long Range: Range penalty -5 per 4 hex, damage 1d10+5.";
+		}	
+	
 } //endof class AmmoHeavyRailGun
 
 class AmmoMediumRailGun extends AmmoDirectWeapon{
@@ -332,6 +343,17 @@ class AmmoMediumRailGun extends AmmoDirectWeapon{
 		}              						
 		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine); //Parent routines take care of the rest
 	}
+	
+        public function setSystemDataWindow($turn){		
+		parent::setSystemDataWindow($turn);	
+			$this->data["Special"] .= '<br>Can fire different shells, effects are outlined below:';
+			$this->data["Special"] .= "<br>  - Flash: Deals Plasma damage in Flash mode."; 
+			$this->data["Special"] .= "<br>  - Scatter: Pulse mode with 25% grouping "; 
+			$this->data["Special"] .= "<br>  - Heavy: Deals +10 damage"; 
+			$this->data["Special"] .= "<br>  - Long Range: Range penalty -5 per 3 hex, damage 3d10+3.";
+		}		
+	
+	
 } //endof class AmmoMediumRailGun
 
 class AmmoLightRailGun extends AmmoDirectWeapon{
@@ -363,6 +385,15 @@ class AmmoLightRailGun extends AmmoDirectWeapon{
 		}                						
 		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine); //Parent routines take care of the rest
 	}
+	
+        public function setSystemDataWindow($turn){		
+		parent::setSystemDataWindow($turn);	
+			$this->data["Special"] .= '<br>Can fire different shells, effects are outlined below:';
+			$this->data["Special"] .= "<br>  - Flash: Deals Plasma damage in Flash mode."; 
+			$this->data["Special"] .= "<br>  - Scatter: Pulse mode with 25% grouping "; 
+			$this->data["Special"] .= "<br>  - Heavy: Deals +5 damage"; 
+		}		
+	
 } //endof class AmmoLightRailGun
 
 
