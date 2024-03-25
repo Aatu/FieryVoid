@@ -199,7 +199,7 @@ window.ShipIcon = function () {
 	    this.mesh.position.set(500, 0, 0);
 	    this.mesh.renderDepth = 10;
 
-	    // Define maximum width and height, some new ships like Thirdspace are MUCH larger and benefit from this.
+	    // Defined a maximum width and height, some new ships like Thirdspace are MUCH larger and benefit from this - DK 25.3.24
 	    var maxWidth = 300;
 	    var maxHeight = 300;
 
