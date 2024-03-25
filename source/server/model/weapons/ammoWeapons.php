@@ -308,8 +308,8 @@ class AmmoHeavyRailGun extends AmmoDirectWeapon{
 			$this->data["Special"] .= "<br>  - Flash: Deals Plasma damage in Flash mode."; 
 			$this->data["Special"] .= "<br>  - Scatter: Pulse mode with 25% grouping "; 
 			$this->data["Special"] .= "<br>  - Heavy: Deals +15 damage"; 
-			$this->data["Special"] .= "<br>  - Long Range: Range penalty -5 per 4 hex, damage 3d10+3.";
-			$this->data["Special"] .= "<br>  - Ultra Long Range: Range penalty -5 per 4 hex, damage 1d10+5.";
+			$this->data["Special"] .= "<br>  - Long Range: Range penalty -5% per 4 hex, damage 3d10+3.";
+			$this->data["Special"] .= "<br>  - Ultra Long Range: Range penalty -5% per 5 hex, damage 1d10+5.";
 		}	
 	
 } //endof class AmmoHeavyRailGun
