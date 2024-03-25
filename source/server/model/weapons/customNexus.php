@@ -1171,7 +1171,7 @@ class NexusPlasmaCharge extends Weapon {
 //        public $animationColor = array(99, 255, 00);
 
         public $boostable = true;
-        public $boostEfficiency = 4;
+        public $boostEfficiency = 0;//Weapon is boosted by Thrust, not power.  Handled in Front-End in getRemainingEngineThrust
         public $maxBoostLevel = 2;
         public $loadingtime = 1;
 //        public $curDamage = 9;
@@ -1183,7 +1183,9 @@ class NexusPlasmaCharge extends Weapon {
 //        public $intercept = 1;
         
 		public $damageType = 'Flash'; 
-    	public $weaponClass = "Plasma"; 
+    	public $weaponClass = "Plasma";
+    	
+    	protected $thrustBoosted = true; 
 	    
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
         {
@@ -1207,7 +1209,7 @@ class NexusPlasmaCharge extends Weapon {
                 $this->data["Special"] .= '<br>';
             } 
 		$this->data["Special"] .= "<br>-1 damage per 3 hexes.";
-            $this->data["Special"] .= '<br>Can be boosted for increased dmg output (+2d10 per 4 power added, up to 2 times).';
+            $this->data["Special"] .= '<br>Can be boosted with Engine thrust for increased dmg output (+2d10 per point of thrust added, up to 2 times).';
             $this->data["Boostlevel"] = $boost;
         }
 
@@ -1383,6 +1385,12 @@ class NexusPlasmaCharge extends Weapon {
             $this->maxDamage = 10 + ($add * 10) + 10;
         }  
 
+
+	public function stripForJson(){
+			$strippedSystem = parent::stripForJson();
+			$strippedSystem->thrustBoosted = $this->thrustBoosted;													
+			return $strippedSystem;
+		}
 		
     } //endof NexusPlasmaCharge
 
