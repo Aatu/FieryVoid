@@ -575,7 +575,7 @@ class LimpetBoreTorpedo extends Torpedo{
 
 		protected $overrideCallingRestrictions = true;
 		protected $canOnlyCalledShot = true;		
-//		public $canTargetOtherSections = true; //NOT IMPLEMENTED. When set to true, weapon can called shot systems on external sections of target not facing firing ship.
+//		protected $canTargetOtherSections = true; //NOT IMPLEMENTED. When set to true, weapon can called shot systems on external sections of target not facing firing ship.
 			 
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
@@ -620,8 +620,9 @@ class LimpetBoreTorpedo extends Torpedo{
 		$fireOrder->pubnotes .= "<br> Limpet Bore was not targeted at a system.";				
 		return; 	
 		}	
-				
+			
 		if($system){
+	//Add check here so if system is not in arc crit start turn is $gamedats->turn+1?			
 			$fireOrder->pubnotes .= "<br> Limpet Bore attaches to system.";				
 			$crit = new LimpetBore(-1, $ship->id, $system->id, 'LimpetBore', $gamedata->turn); 
 			$crit->updated = true;
