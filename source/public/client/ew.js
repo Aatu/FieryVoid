@@ -238,8 +238,8 @@ window.ew = {
 				usedEW += entry.amount;
 			}
         }
-		
-/*22.10.2022: count Particle Impeder boost as used EW!*/
+/*		
+//22.10.2022: count Particle Impeder boost as used EW!
 		var impederList = shipManager.systems.getSystemListByName(ship, "Particleimpeder");
 		for (var i in impederList) {
 			var currImpeder = impederList[i];
@@ -250,16 +250,17 @@ window.ew = {
 			var currBoost = shipManager.power.getBoost(currImpeder);
 			if (currBoost > 0) usedEW += currBoost;
 		}
-/*end of Impeder impact*/	
-
-		var ewBoostedWeaponList = shipManager.systems.getSystemListEWBoosted(ship);
-		for (var i in ewBoostedWeaponList) {
-			var currWeapon = ewBoostedWeaponList[i];
+//end of Impeder impact	
+*/
+		//Consolidated entries for EW boosted systems e.g. Particle Impeders and Psionic Lances.
+		var ewBoostedSystemList = shipManager.systems.getSystemListEWBoosted(ship);
+		for (var i in ewBoostedSystemList) {
+			var currSystem = ewBoostedSystemList[i];
 			//is it alive and powered up?
-			if (shipManager.systems.isDestroyed(ship, currWeapon)) continue;
-			if (shipManager.power.isOffline(ship, currWeapon)) continue;			
+			if (shipManager.systems.isDestroyed(ship, currSystem)) continue;
+			if (shipManager.power.isOffline(ship, currSystem)) continue;			
 			//current boost
-			var currBoost = shipManager.power.getBoost(currWeapon);
+			var currBoost = shipManager.power.getBoost(currSystem);
 			if (currBoost > 0) usedEW += currBoost;
 		}
 

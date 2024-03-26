@@ -68,7 +68,7 @@
         
         public function getDamage($fireOrder){        return Dice::d(10)+5;   }
         public function setMinDamage(){     $this->minDamage = 6 ;      }
-        public function setMaxDamage(){     $this->maxDamage = 15 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 15 ;      }               
     } //endof class Interceptor MkI
     
 
@@ -216,6 +216,9 @@
         public $damagePenalty = 0;
         public $damageType = "Standard"; 
         public $weaponClass = "Particle";
+        
+    	protected $ewBoosted = true;          
+        
      	protected $possibleCriticals = array( //different than usual B5Wars weapon - simplification
             16=>"ForcedOfflineOneTurn"
 	);
@@ -294,6 +297,13 @@
         public function getDamage($fireOrder){        return 0;   }
         public function setMinDamage(){     $this->minDamage = 0 ;      }
         public function setMaxDamage(){     $this->maxDamage = 0 ;      }
+        
+		public function stripForJson(){
+			$strippedSystem = parent::stripForJson();
+			$strippedSystem->ewBoosted = $this->ewBoosted;													
+			return $strippedSystem;
+		}           
+        
     }//endof class ParticleImpeder
 
 
