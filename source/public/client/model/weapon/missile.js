@@ -437,27 +437,32 @@ AmmoMissileRackF.prototype.checkIsInRangeFRack = function (shooter, target, weap
        if(!weapon.hextarget){		
 	        var stealthSystem = shipManager.systems.getSystemByName(target, "stealth");
 
-	        if (stealthSystem && distance > 5 && weapon.ballistic) {
-	            return false;
-	        }
+        if (stealthSystem && distance > 5 && weapon.ballistic && target.flight) { //Shouldn't happen, as fighters with stealth can't be targeted over 5 hexes.
+            return false;
+        }
 
-	        var jammer = shipManager.systems.getSystemByName(target, "jammer");
-			if (jammer)
+       var jammer = shipManager.systems.getSystemByName(target, "jammer");
+			if (jammer || stealthSystem)
 			{
-				//check whether it was enabled last turn... if so, allow missile launch :)
-				if (!shipManager.power.isOfflineOnTurn(target, jammer, (gamedata.turn-1) )){
-					/*Improved/Advanced Sensors effect*/
-					var jammerValue = shipManager.systems.getOutput(target, jammer);
-					if (shipManager.hasSpecialAbility(shooter,"AdvancedSensors") || shipManager.systems.getSystemByName(shooter, "fighteradvsensors")) {
-						jammerValue = 0; //negated
-					} else if (shipManager.hasSpecialAbility(shooter,"ImprovedSensors") || shipManager.systems.getSystemByName(shooter, "fighterimprsensors")) {
-						jammerValue = jammerValue * 0.5; //halved
+			var jammerValue = 0;
+					if (jammer && (!shipManager.power.isOfflineOnTurn(target, jammer, (gamedata.turn-1) ))) {//Jammer exists and was enabled last turn.
+						jammerValue = shipManager.systems.getOutput(target, jammer);
 					}
-					range = range / (1+jammerValue);
-					//range = range / (shipManager.systems.getOutput(target, jammer)+1);
+				var stealthValue = 0;	
+					if (stealthSystem && (mathlib.getDistanceBetweenShipsInHex(shooter, target) > 10 && target.shipSizeClass >= 0)){
+					 stealthValue = shipManager.systems.getOutput(target, stealthSystem);
+					} 
+					
+				if(stealthValue > jammerValue) jammerValue = stealthValue;//larger value is used
+				
+				if (shipManager.hasSpecialAbility(shooter,"AdvancedSensors") || shipManager.systems.getSystemByName(shooter, "fighteradvsensors")) {
+					jammerValue = 0; //negated
+				} else if (shipManager.hasSpecialAbility(shooter,"ImprovedSensors") || shipManager.systems.getSystemByName(shooter, "fighterimprsensors")) {
+					jammerValue = jammerValue * 0.5; //halved
 				}
+				range = range / (1+jammerValue);
 			}
-		}
+		}	
         return distance <= range;
     };	
     
@@ -465,4 +470,10 @@ var BallisticMineLauncher = function BallisticMineLauncher(json, ship) {
     Weapon.call(this, json, ship);
 };
 BallisticMineLauncher.prototype = Object.create(Weapon.prototype);
-BallisticMineLauncher.prototype.constructor = BallisticMineLauncher;    
+BallisticMineLauncher.prototype.constructor = BallisticMineLauncher;
+
+var AbbaiMineLauncher = function AbbaiMineLauncher(json, ship) {
+    Weapon.call(this, json, ship);
+};
+AbbaiMineLauncher.prototype = Object.create(Weapon.prototype);
+AbbaiMineLauncher.prototype.constructor = AbbaiMineLauncher;     

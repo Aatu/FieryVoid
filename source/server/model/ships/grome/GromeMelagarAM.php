@@ -1,29 +1,18 @@
 <?php
-class GromeMelagarFull extends MediumShip{
-/*Melagar with fully decked out railguns with special shells!*/
+class GromeMelagarAM extends MediumShip{
+
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
- /*To account for the increased flexibility a points increase is needed as we cannont, yet,
-purchase individual shells individually. To do this, I am assuming that each railgun is
-equipped with 2 of the most expensive shells (heavies). Most shells are cheaper, but using
-heavies ensures a realatively fair cost as a player is unlikely to use a standard shell 
-on one of these "full" units. The final point total will be adjusted to be divisible by 5.
-The costs before rounding the final value are: 
-			Heavy railgun ~36 points
-			Railgun ~24 points
-			Light railgun ~12 points
-		Estimated cost is 500 (5x24) = 620*/       
-        $this->pointCost = 620;
-        $this->faction = "Custom Ships";
-	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
-        $this->phpclass = "GromeMelagarFull";
+        
+        $this->pointCost = 500;
+        $this->faction = "Grome Autocracy";
+        $this->phpclass = "GromeMelagarAM";
         $this->imagePath = "img/ships/GromeMorgat.png";
-        $this->shipClass = "Melagar Frigate Leader (full)";
+        $this->shipClass = "Melagar Frigate Leader";
 			$this->variantOf = "Morgat Heavy Frigate";
 			$this->occurence = "uncommon";		
         $this->canvasSize = 75;
 	    $this->isd = 2221;
-	    $this->unofficial = true;
 
 	    $this->notes = 'Antiquated Sensors (cannot be boosted).';
 	    $this->notes .= '<br>Targeting Array treated as a 1 point sensor.';
@@ -37,7 +26,18 @@ The costs before rounding the final value are:
         $this->rollcost = 3;
         $this->pivotcost = 2;
         $this->iniativebonus = 65;
-         
+        
+ 	//ammo magazine itself (AND its missile options)
+	$ammoMagazine = new AmmoMagazine(250); //pass magazine capacity 
+	    $this->addPrimarySystem($ammoMagazine); //fit to ship immediately 
+	    $ammoMagazine->addAmmoEntry(new AmmoMShellBasic(), 250); //add full load of basic shells   
+	    	    
+	    $this->enhancementOptionsEnabled[] = 'SHELL_MFLH';//add enhancement options for ammo - Medium Flash Shell    
+	    $this->enhancementOptionsEnabled[] = 'SHELL_MSCT';//add enhancement options for ammo - Medium Scatter Shell		    
+	    $this->enhancementOptionsEnabled[] = 'SHELL_MHVY';//add enhancement options for ammo - Medium Heavy Shell		    
+	    $this->enhancementOptionsEnabled[] = 'SHELL_MLR';//add enhancement options for ammo - Medium Long Range Shell		
+
+       
         $this->addPrimarySystem(new Reactor(3, 18, 0, 0));
         $this->addPrimarySystem(new CnC(3, 16, 0, 0));
         $this->addPrimarySystem(new AntiquatedScanner(3, 12, 4, 5));
@@ -52,16 +52,16 @@ The costs before rounding the final value are:
         $this->addPrimarySystem(new ConnectionStrut(3));
         
 		$this->addFrontSystem(new FlakCannon(2, 4, 2, 180, 60));
-		$this->addFrontSystem(new GromeMedRailgun(2, 9, 6, 300, 60));
-		$this->addFrontSystem(new GromeMedRailgun(2, 9, 6, 300, 60));
-		$this->addFrontSystem(new GromeMedRailgun(2, 9, 6, 300, 60));
+		$this->addFrontSystem(new AmmoMediumRailGun(2, 9, 6, 300, 60, $ammoMagazine));
+		$this->addFrontSystem(new AmmoMediumRailGun(2, 9, 6, 300, 60, $ammoMagazine));
+		$this->addFrontSystem(new AmmoMediumRailGun(2, 9, 6, 300, 60, $ammoMagazine));
 		$this->addFrontSystem(new FlakCannon(2, 4, 2, 300, 180));
         $this->addFrontSystem(new Thruster(2, 10, 0, 3, 1));
 	    
         $this->addAftSystem(new Thruster(2, 8, 0, 3, 2));    
         $this->addAftSystem(new Thruster(2, 8, 0, 3, 2));    
-		$this->addAftSystem(new GromeMedRailgun(2, 9, 6, 120, 240));
-		$this->addAftSystem(new GromeMedRailgun(2, 9, 6, 120, 240));
+		$this->addAftSystem(new AmmoMediumRailGun(2, 9, 6, 120, 240, $ammoMagazine));
+		$this->addAftSystem(new AmmoMediumRailGun(2, 9, 6, 120, 240, $ammoMagazine));
        
         $this->addPrimarySystem(new Structure(3, 85));
 
@@ -81,7 +81,7 @@ The costs before rounding the final value are:
 
 		1=> array(
 			4 => "Thruster",
-			7 => "Railgun",
+			7 => "Medium Railgun",
 			9 => "Flak Cannon",
 			17 => "Structure",
 			20 => "Primary",
@@ -89,7 +89,7 @@ The costs before rounding the final value are:
 
 		2=> array(
 			6 => "Thruster",
-			9 => "Railgun",
+			9 => "Medium Railgun",
 			17 => "Structure",
 			20 => "Primary",
 		),

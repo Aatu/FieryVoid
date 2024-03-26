@@ -1,13 +1,12 @@
 <?php
-class GromeMorgat extends MediumShip{
+class GromeMorgatAM extends MediumShip{
 
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
 
         $this->pointCost = 450;
-        $this->faction = "Custom Ships";
-	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
-        $this->phpclass = "GromeMorgat";
+        $this->faction = "Grome Autocracy";
+        $this->phpclass = "GromeMorgatAM";
         $this->imagePath = "img/ships/GromeMorgat.png";
         $this->shipClass = "Morgat Heavy Frigate";
         $this->canvasSize = 75;
@@ -26,6 +25,19 @@ class GromeMorgat extends MediumShip{
         $this->pivotcost = 2;
         $this->iniativebonus = 60;
         
+ 	//ammo magazine itself (AND its missile options)
+	$ammoMagazine = new AmmoMagazine(350); //pass magazine capacity 
+	    $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
+	    $ammoMagazine->addAmmoEntry(new AmmoMShellBasic(), 50); //add full load of basic shells  
+	    $ammoMagazine->addAmmoEntry(new AmmoLShellBasic(), 300); //add full load of basic shells  
+	    	    
+	    $this->enhancementOptionsEnabled[] = 'SHELL_MFLH';//add enhancement options for ammo - Medium Flash Shell
+	    $this->enhancementOptionsEnabled[] = 'SHELL_LFLH';//add enhancement options for ammo - Light Flash Shell  
+	    $this->enhancementOptionsEnabled[] = 'SHELL_MSCT';//add enhancement options for ammo - Medium Scatter Shell	
+	    $this->enhancementOptionsEnabled[] = 'SHELL_LSCT';//add enhancement options for ammo - Light Scatter Shell   
+	    $this->enhancementOptionsEnabled[] = 'SHELL_MHVY';//add enhancement options for ammo - Medium Heavy Shell	
+	    $this->enhancementOptionsEnabled[] = 'SHELL_LHVY';//add enhancement options for ammo - Light Heavy Shell	    
+	    $this->enhancementOptionsEnabled[] = 'SHELL_MLR';//add enhancement options for ammo - Medium Long Range Shell	
          
         $this->addPrimarySystem(new Reactor(3, 18, 0, 0));
         $this->addPrimarySystem(new CnC(3, 12, 0, 0));
@@ -41,11 +53,11 @@ class GromeMorgat extends MediumShip{
         $this->addPrimarySystem(new Thruster(2, 13, 0, 3, 4));     
         $this->addPrimarySystem(new ConnectionStrut(3));
         
-		$this->addFrontSystem(new LightRailGun(2, 6, 3, 300, 60));
-		$this->addFrontSystem(new LightRailGun(2, 6, 3, 300, 60));
-		$this->addFrontSystem(new LightRailGun(2, 6, 3, 300, 60));
-		$this->addFrontSystem(new LightRailGun(2, 6, 3, 300, 60));
-		$this->addFrontSystem(new Railgun(2, 9, 6, 300, 60));
+		$this->addFrontSystem(new AmmoLightRailGun(2, 6, 3, 300, 60, $ammoMagazine));
+		$this->addFrontSystem(new AmmoLightRailGun(2, 6, 3, 300, 60, $ammoMagazine));
+		$this->addFrontSystem(new AmmoLightRailGun(2, 6, 3, 300, 60, $ammoMagazine));
+		$this->addFrontSystem(new AmmoLightRailGun(2, 6, 3, 300, 60, $ammoMagazine));
+		$this->addFrontSystem(new AmmoMediumRailGun(2, 9, 6, 300, 60, $ammoMagazine));
         $this->addFrontSystem(new Thruster(2, 10, 0, 3, 1));
 	    
         $this->addAftSystem(new Thruster(2, 8, 0, 3, 2));    
@@ -72,7 +84,7 @@ class GromeMorgat extends MediumShip{
 
 		1=> array(
 			4 => "Thruster",
-			5 => "Railgun",
+			5 => "Medium Railgun",
 			9 => "Light Railgun",
 			17 => "Structure",
 			20 => "Primary",

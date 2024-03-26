@@ -634,6 +634,9 @@ spl_autoload_register(
                 'motenai' => '/server/model/ships/abbai_old/motenai.php',
                 'motenai1935' => '/server/model/ships/abbai_old/motenai1935.php',
                 'motenai1980' => '/server/model/ships/abbai_old/motenai1980.php',
+                'motenaiam' => '/server/model/ships/abbai_old/motenaiam.php',
+                'motenai1935am' => '/server/model/ships/abbai_old/motenai1935am.php',
+                'motenai1980am' => '/server/model/ships/abbai_old/motenai1980am.php',                
                 'movement' => '/server/handlers/movement.php',
                 'movementgamephase' => '/server/Phase/MovementGamePhase.php',
                 'movementorder' => '/server/model/BaseClasses.php',
@@ -2939,7 +2942,8 @@ spl_autoload_register(
 				'koskovatestbed' => '/server/model/ships/korlyan/KoskovaTestbed.php',
          		'limpetboretorpedo' => '/server/model/weapons/torpedo.php', 				
          		'limpetboretorpedobase' => '/server/model/weapons/torpedo.php',
-         		'ballisticminelauncher' => '/server/model/weapons/missile.php', 	 
+         		'ballisticminelauncher' => '/server/model/weapons/missile.php',
+         		'abbaiminelauncher' => '/server/model/weapons/missile.php', 	 
 
 
 				//Star Wars - Clone Wars testing
@@ -3047,12 +3051,35 @@ spl_autoload_register(
                 		'ammobombrack' => '/server/model/weapons/missile.php',
                 		'ammofighterrack' => '/server/model/weapons/missile.php',
 						
-                		
+ 				//Direct Fire Weapons that use Ammo Magazine
+						'ammodirectweapon' => '/server/model/weapons/ammoWeapons.php',							
+					               		
+						'ammoheavyrailgun' => '/server/model/weapons/ammoWeapons.php',
+						'ammomediumrailgun' => '/server/model/weapons/ammoWeapons.php',
+						'ammolightrailgun' => '/server/model/weapons/ammoWeapons.php',						
+
+
+				//Ammo for Direct Fire Weapons
+						'ammotemplatedirectweapons' => '/server/model/weapons/ammoWeapons.php',	
+						'ammohshellbasic' => '/server/model/weapons/ammoWeapons.php',				
+						'ammomshellbasic' => '/server/model/weapons/ammoWeapons.php',						
+						'ammolshellbasic' => '/server/model/weapons/ammoWeapons.php',						
+						'ammohshellflash' => '/server/model/weapons/ammoWeapons.php',				
+						'ammomshellflash' => '/server/model/weapons/ammoWeapons.php',						
+						'ammolshellflash' => '/server/model/weapons/ammoWeapons.php',						
+						'ammohshellscatter' => '/server/model/weapons/ammoWeapons.php',				
+						'ammomshellscatter' => '/server/model/weapons/ammoWeapons.php',						
+						'ammolshellscatter' => '/server/model/weapons/ammoWeapons.php',
+						'ammohshellheavy' => '/server/model/weapons/ammoWeapons.php',				
+						'ammomshellheavy' => '/server/model/weapons/ammoWeapons.php',						
+						'ammolshellheavy' => '/server/model/weapons/ammoWeapons.php',						
+						'ammohshelllrange' => '/server/model/weapons/ammoWeapons.php',				
+						'ammomshelllrange' => '/server/model/weapons/ammoWeapons.php',						
+						'ammohshellulrange' => '/server/model/weapons/ammoWeapons.php',
 						
-						
+																								
 						//ships using new style launchers (and magazine of course) - by faction
-						
-	  
+							  
 						//EA
                 		'sagittariusam' => '/server/model/ships/EA/sagittariusAM.php', 
                 		'sagittariusalphaam' => '/server/model/ships/EA/sagittariusAlphaAM.php',
@@ -3133,6 +3160,18 @@ spl_autoload_register(
 						'fwellgonam' => '/server/model/ships/llort/fwellgonAM.php',
 						'govallam' => '/server/model/ships/llort/govallAM.php',
 						'govallearlyam' => '/server/model/ships/llort/govallEarlyAM.php',
+
+						//Grome
+						'gromemahkgaram' => '/server/model/ships/grome/GromeMahkgarAM.php',						
+						'gromegormokosatam' => '/server/model/ships/grome/GromeGormokOSATAM.php',						
+						'gromegrotham' => '/server/model/ships/grome/GromeGrothAM.php',						
+						'gromegralacam' => '/server/model/ships/grome/GromeGralacAM.php',						
+						'grometrokanam' => '/server/model/ships/grome/GromeTrokanAM.php',						
+						'grometrokanmargusam' => '/server/model/ships/grome/GromeTrokanMargusAM.php',
+						'gromemogortaam' => '/server/model/ships/grome/GromeMogortaAM.php',						
+						'gromemorgatam' => '/server/model/ships/grome/GromeMorgatAM.php',							
+						'gromemelagaram' => '/server/model/ships/grome/GromeMelagarAM.php',						
+						'grometelgaram' => '/server/model/ships/grome/GromeTelgarAM.php',										
 				
 						//Hurr
 						'roskorbase2215am' => '/server/model/ships/hurr/Roskorbase2215AM.php',

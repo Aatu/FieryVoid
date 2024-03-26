@@ -1,30 +1,19 @@
 <?php
-class GromeTrokanMargusFull extends BaseShip{
-/*Trokan Margus with fully decked out railguns with special shells!*/    
+class GromeTrokanMargusAM extends BaseShip{
+    
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
-/*To account for the increased flexibility a points increase is needed as we cannont, yet,
-purchase individual shells individually. To do this, I am assuming that each railgun is
-equipped with 2 of the most expensive shells (heavies). Most shells are cheaper, but using
-heavies ensures a realatively fair cost as a player is unlikely to use a standard shell 
-on one of these "full" units. The final point total will be adjusted to be divisible by 5.
-The costs before rounding the final value are: 
-			Heavy railgun ~36 points
-			Railgun ~24 points
-			Light railgun ~12 points
-		Estimated cost is 1200 + (5x36) + (4x24) = 1476 -> rounded to 1475*/        
-	$this->pointCost = 1475; 
-        $this->faction = "Custom Ships";
-	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
-        $this->phpclass = "GromeTrokanMargusFull";
+        
+	$this->pointCost = 1200; 
+	$this->faction = "Grome Autocracy";
+        $this->phpclass = "GromeTrokanMargusAM";
         $this->imagePath = "img/ships/GromeTrokan.png";
-        $this->shipClass = "Trokan Margus Command Flagship (full)";
+        $this->shipClass = "Trokan Margus Command Flagship";
 			$this->variantOf = 'Trokan Flagship';
 			$this->occurence = "unique";
 		$this->limited = 10;
         $this->shipSizeClass = 3;
 		$this->canvasSize = 180; //img has 200px per side
-	    $this->unofficial = true;
 
 	    $this->notes = 'Antiquated Sensors (cannot be boosted).';
 	    $this->notes .= '<br>Targeting Arrays treated as a 1 point sensors.';
@@ -36,11 +25,23 @@ The costs before rounding the final value are:
 		$this->enhancementOptionsDisabled[] = 'IMPR_REA';
 		$this->enhancementOptionsDisabled[] = 'IMPR_ENG';
 		$this->enhancementOptionsDisabled[] = 'IMPR_SENS';
-		
-//		$this->notes = "Engine fluctuations. Rolls for engine critical every turn with +5% penalty. Effect lasts one turn.";
-//		$this->notes .= "<br>Power fluctuations. Rolls for reactor critical every turn with +5% penalty. Effect lasts one turn.";
-//		$this->notes .= "<br>Sensor fluctuations. Rolls for sensor critical every turn with +5% penalty. Effect lasts one turn.";
-//		$this->notes .= "<br>Communications problems. Rolls for C&C critical every turn with +5% penalty. Effect lasts one turn.";
+
+ 	//ammo magazine itself (AND its missile options)
+	$ammoMagazine = new AmmoMagazine(450); //pass magazine capacity 
+	    $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
+	    $ammoMagazine->addAmmoEntry(new AmmoHShellBasic(), 250); //add full load of basic shells  
+	    $ammoMagazine->addAmmoEntry(new AmmoMShellBasic(), 200); //add full load of basic shells  
+	    	    
+		$this->enhancementOptionsEnabled[] = 'SHELL_HFLH';//add enhancement options for ammo - Heavy Flash Shell
+	    $this->enhancementOptionsEnabled[] = 'SHELL_MFLH';//add enhancement options for ammo - Medium Flash Shell
+	    $this->enhancementOptionsEnabled[] = 'SHELL_HSCT';//add enhancement options for ammo - Heavy Scatter Shell	    
+	    $this->enhancementOptionsEnabled[] = 'SHELL_MSCT';//add enhancement options for ammo - Medium Scatter Shell	
+	    $this->enhancementOptionsEnabled[] = 'SHELL_HHVY';//add enhancement options for ammo - Heavy Heavy Shell	    
+	    $this->enhancementOptionsEnabled[] = 'SHELL_MHVY';//add enhancement options for ammo - Medium Heavy Shell			    	    
+	    $this->enhancementOptionsEnabled[] = 'SHELL_HLR';//add enhancement options for ammo - Heavy Long Range Shell	    
+	    $this->enhancementOptionsEnabled[] = 'SHELL_MLR';//add enhancement options for ammo - Medium Long Range Shell	
+	    $this->enhancementOptionsEnabled[] = 'SHELL_HULR';//add enhancement options for ammo - Heavy Ultra Long Range Shell	
+
         
         $this->forwardDefense = 18;
         $this->sideDefense = 19;
@@ -50,21 +51,18 @@ The costs before rounding the final value are:
         $this->accelcost = 4;
         $this->rollcost = 99; //cannot roll
         $this->pivotcost = 4;
-        $this->iniativebonus = -15; //
-        
+        $this->iniativebonus = -15; 
+
+
 		$reactor = new Reactor(5, 33, 0, 0);
 			$reactor->markPowerFlux();
 			$this->addPrimarySystem($reactor);
-//        $this->addPrimarySystem(new Reactor(5, 33, 0, 0));  
 		$cnc = new CnC(4, 42, 0, 0);
 			$cnc->markCommsFlux();
 			$this->addPrimarySystem($cnc);
-//        $this->addPrimarySystem(new CnC(4, 30, 0, 0));
-//        $this->addPrimarySystem(new CnC(5, 12, 0, 0));
 		$sensor = new AntiquatedScanner(4, 24, 6, 7);
 			$sensor->markAntSensorFlux();
 			$this->addPrimarySystem($sensor);
-//        $this->addPrimarySystem(new AntiquatedScanner(4, 24, 6, 6)); //kept at 6 for sensor fluctuations
 		$targetingArray = new AntiquatedScanner(2, 6, 2, 1);
 			$targetingArray->displayName = 'Targeting Array';
 			$targetingArray->iconPath = "TargetingArray.png";
@@ -76,13 +74,12 @@ The costs before rounding the final value are:
 		$engine = new Engine(4, 36, 0, 12, 4);
 			$engine->markEngineFlux();
 			$this->addPrimarySystem($engine);
-//        $this->addPrimarySystem(new Engine(4, 36, 0, 10, 4)); 
 		$this->addPrimarySystem(new Hangar(3, 14));
 		$this->addPrimarySystem(new JumpEngine(5, 20, 4, 36));
 		
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
-		$this->addFrontSystem(new GromeHvyRailgun(4, 12, 9, 330, 30));
+		$this->addFrontSystem(new AmmoHeavyRailGun(4, 12, 9, 330, 30, $ammoMagazine));
 		$this->addFrontSystem(new FlakCannon(2, 4, 2, 240, 60));
 		$this->addFrontSystem(new FlakCannon(2, 4, 2, 240, 60));
 		$this->addFrontSystem(new FlakCannon(2, 4, 2, 300, 120));
@@ -102,10 +99,10 @@ The costs before rounding the final value are:
         $this->addLeftSystem(new FlakCannon(2, 4, 2, 180, 360));
         $this->addLeftSystem(new FlakCannon(2, 4, 2, 180, 360));
         $this->addLeftSystem(new FlakCannon(2, 4, 2, 180, 360));
-		$this->addLeftSystem(new GromeHvyRailgun(3, 12, 9, 300, 360));
-		$this->addLeftSystem(new GromeMedRailgun(3, 9, 6, 300, 360));
-		$this->addLeftSystem(new GromeHvyRailgun(3, 12, 9, 180, 240));
-		$this->addLeftSystem(new GromeMedRailgun(3, 9, 6, 180, 240));
+		$this->addLeftSystem(new AmmoHeavyRailGun(3, 12, 9, 300, 360, $ammoMagazine));
+		$this->addLeftSystem(new AmmoMediumRailGun(3, 9, 6, 300, 360, $ammoMagazine));
+		$this->addLeftSystem(new AmmoHeavyRailGun(3, 12, 9, 180, 240, $ammoMagazine));
+		$this->addLeftSystem(new AmmoMediumRailGun(3, 9, 6, 180, 240, $ammoMagazine));
         $this->addLeftSystem(new Thruster(3, 10, 0, 3, 3));
         $this->addLeftSystem(new Thruster(3, 10, 0, 3, 3));
         $this->addLeftSystem(new ConnectionStrut(4));
@@ -114,10 +111,10 @@ The costs before rounding the final value are:
         $this->addRightSystem(new FlakCannon(2, 4, 2, 0, 180));
         $this->addRightSystem(new FlakCannon(2, 4, 2, 0, 180));
         $this->addRightSystem(new FlakCannon(2, 4, 2, 0, 180));
-		$this->addRightSystem(new GromeHvyRailgun(3, 12, 9, 0, 60));
-		$this->addRightSystem(new GromeMedRailgun(3, 9, 6, 0, 60));
-		$this->addRightSystem(new GromeHvyRailgun(3, 12, 9, 120, 180));
-		$this->addRightSystem(new GromeMedRailgun(3, 9, 6, 120, 180));
+		$this->addRightSystem(new AmmoHeavyRailGun(3, 12, 9, 0, 60, $ammoMagazine));
+		$this->addRightSystem(new AmmoMediumRailGun(3, 0, 0, 0, 60, $ammoMagazine));
+		$this->addRightSystem(new AmmoHeavyRailGun(3, 12, 9, 120, 180, $ammoMagazine));
+		$this->addRightSystem(new AmmoMediumRailGun(3, 9, 6, 120, 180, $ammoMagazine));
         $this->addRightSystem(new Thruster(3, 10, 0, 3, 4));
         $this->addRightSystem(new Thruster(3, 10, 0, 3, 4));
         $this->addRightSystem(new ConnectionStrut(4));
@@ -157,7 +154,7 @@ The costs before rounding the final value are:
 			),
 			3=> array(
 					7 => "Thruster",
-					8 => "Railgun",
+					8 => "Medium Railgun",
 					10 => "Heavy Railgun",
 					12 => "Flak Cannon",
 					15 => "Structure",
@@ -166,7 +163,7 @@ The costs before rounding the final value are:
 			),
 			4=> array(
 					7 => "Thruster",
-					8 => "Railgun",
+					8 => "Medium Railgun",
 					10 => "Heavy Railgun",
 					12 => "Flak Cannon",
 					15 => "Structure",

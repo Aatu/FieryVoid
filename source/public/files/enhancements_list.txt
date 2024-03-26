@@ -109,6 +109,14 @@ Eethan Barony refit (Barony-specific variant rather than enhancement; this repre
 	Cost: 10% of ship cost
 	Limit: 1
 
+KOR-LYAN (and Abbai Motenai)
+
+Identify Friend or Foe (IFF) System:
+	Effect: Prevent ballistic mines from attacking friendly units.
+	Cost: 4 pts per Ballistic Mine Launcher
+	Limit: 1 (Ballistic Mine Launcher Ships only)
+
+
 MARKAB:
 
 Religious Fervor:

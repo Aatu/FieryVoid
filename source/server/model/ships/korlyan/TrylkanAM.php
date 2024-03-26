@@ -29,11 +29,11 @@ class TrylkanAM extends HeavyCombatVessel{
         $this->pivotcost = 3;
         $this->iniativebonus = 30;
         
+		$this->IFFSystem = false; 
       
 	//ammo magazine itself (AND its missile options)
-	$ammoMagazine = new AmmoMagazine(80); //pass magazine capacity. 40 Intercept and 40 Mines 
+	$ammoMagazine = new AmmoMagazine(144); //pass magazine capacity. 80 Intercept and 64 Mines 
 	    $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
-//	    $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 200); //add full load of basic missiles 
 	    $ammoMagazine->addAmmoEntry(new AmmoMissileI(), 80); //add full load of Interceptor missiles  	      
 	    $ammoMagazine->addAmmoEntry(new AmmoBLMineB(), 0); //add full load of basic missiles
 	    $ammoMagazine->addAmmoEntry(new AmmoBLMineW(), 0); //add full load of basic missiles 
@@ -43,7 +43,8 @@ class TrylkanAM extends HeavyCombatVessel{
 	    $this->enhancementOptionsEnabled[] = 'AMMO_C';//add enhancement options for other missiles - Class-C
 		$this->enhancementOptionsEnabled[] = 'MINE_BLB';//add enhancement options for mines - Basic Mines
 		$this->enhancementOptionsEnabled[] = 'MINE_BLW';//add enhancement options for mines - Wide-Range Mines
-		$this->enhancementOptionsEnabled[] = 'MINE_BLH';//add enhancement options for mines - Wide-Range Mines 	  
+		$this->enhancementOptionsEnabled[] = 'MINE_BLH';//add enhancement options for mines - Wide-Range Mines
+		$this->enhancementOptionsEnabled[] = 'IFF_SYS'; //Abilty to choose IFF enhancement.		 	  
          
         $this->addPrimarySystem(new Reactor(4, 11, 0, 0));
         $this->addPrimarySystem(new CnC(4, 12, 0, 0));
@@ -75,6 +76,7 @@ class TrylkanAM extends HeavyCombatVessel{
 		$TargeterB->addTag("Front Proximity Laser");
 		
         $this->addFrontSystem(new AmmoMissileRackD(2, 0, 0, 300, 120, $ammoMagazine, false));//$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+
 		
         $this->addAftSystem(new AmmoMissileRackD(2, 0, 0, 120, 300, $ammoMagazine, false));//$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
 		$this->addAftSystem(new BallisticMineLauncher(3, 0, 0, 120, 300, $ammoMagazine, false));

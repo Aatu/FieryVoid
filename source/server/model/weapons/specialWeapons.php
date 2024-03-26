@@ -4818,7 +4818,9 @@ class PsychicFieldHandler{
         public $damageType = "Raking"; 
         public $weaponClass = "Electromagnetic"; 
         
-        public $uninterceptable = true;    
+        public $uninterceptable = true;
+        
+    	protected $ewBoosted = true;             
         
 		public $repairPriority = 5;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired            
 
@@ -4920,6 +4922,13 @@ class PsychicFieldHandler{
             $boost = $this->getBoostLevel($turn);
             $this->maxDamage = 120 + ($boost * 28);
         }  
+        
+	public function stripForJson(){
+			$strippedSystem = parent::stripForJson();
+			$strippedSystem->ewBoosted = $this->ewBoosted;													
+			return $strippedSystem;
+		}     
+        
    } //end of class HeavyPsionicLance
    
 
@@ -4950,9 +4959,11 @@ class PsionicLance extends Raking{
         public $damageType = "Raking"; 
         public $weaponClass = "Electromagnetic";
         
-        public $uninterceptable = true; 
+        public $uninterceptable = true;
+        
+    	protected $ewBoosted = true;          
        
-	public $repairPriority = 5;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired                
+		public $repairPriority = 5;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired                
 
 
         public function setSystemDataWindow($turn){
@@ -5048,7 +5059,15 @@ class PsionicLance extends Raking{
             $turn = TacGamedata::$currentTurn;
             $boost = $this->getBoostLevel($turn);
             $this->maxDamage = 65 + ($boost * 20);
-        }  
+        } 
+        
+		public function stripForJson(){
+			$strippedSystem = parent::stripForJson();
+			$strippedSystem->ewBoosted = $this->ewBoosted;													
+			return $strippedSystem;
+		}            
+        
+         
    }//end of Psionic Lance
 
 

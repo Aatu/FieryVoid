@@ -15,8 +15,8 @@ window.LaserEffect = function () {
         this.color = args.color || new THREE.Color(0, 0, 0);
         this.shooter = shooter;
         this.startOffset = {
-            x: Math.random() * 30 - 15,
-            y: Math.random() * 30 - 15
+            x: Math.random() * 30 - 10,
+            y: Math.random() * 30 - 10
         };
 
         this.weapon = weapon;
@@ -29,7 +29,7 @@ window.LaserEffect = function () {
         this.target = target;
         if (!this.hit) {
             var targetPosition = this.target instanceof ShipIcon ? this.target.getPosition() : this.target;
-            this.target = mathlib.getPointBetween(this.shooter.getPosition(), targetPosition, Math.random() * 0.1 + 1.1);
+            this.target = mathlib.getPointBetween(this.shooter.getPosition(), targetPosition, Math.random() * 0.1 + 1.5);
         }
 
         this.scene = scene;
@@ -37,7 +37,7 @@ window.LaserEffect = function () {
         this.fadeInSpeed = Math.random() * 250;
         this.fadeOutSpeed = Math.random() * 500 + 500;
         this.pulsatingFactor = Math.random() * 100 + 100;
-        var offsetVelocityFactor = this.hit ? 1 : 10;
+        var offsetVelocityFactor = this.hit ? 1 : 3;
         this.offsetVelocity = {
             x: Math.random() * 0.01 * offsetVelocityFactor - 0.005 * offsetVelocityFactor,
             y: Math.random() * 0.01 * offsetVelocityFactor - 0.005 * offsetVelocityFactor
@@ -46,7 +46,7 @@ window.LaserEffect = function () {
         //adding width depending on animation size:
         //this.lasers = [createLaser.call(this, this.color, 0.5, 10), createLaser.call(this, new THREE.Color(1, 1, 1), 0.6, 3)];
         var beamWidth = Math.ceil(this.size*0.2);
-        var haloWidth = Math.ceil(this.size*0.8);
+        var haloWidth = Math.ceil(this.size*0.5);
         this.lasers = [createLaser.call(this, this.color, 0.5, haloWidth), createLaser.call(this, new THREE.Color(1, 1, 1), 0.6, beamWidth)];
         
         this.lasers.forEach(function (laser) {

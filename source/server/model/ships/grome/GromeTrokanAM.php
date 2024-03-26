@@ -1,13 +1,12 @@
 <?php
-class GromeTrokan extends BaseShip{
+class GromeTrokanAM extends BaseShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 900;
-        $this->faction = "Custom Ships";
-	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
-        $this->phpclass = "GromeTrokan";
+	$this->faction = "Grome Autocracy";
+        $this->phpclass = "GromeTrokanAM";
         $this->imagePath = "img/ships/GromeTrokan.png";
         $this->shipClass = "Trokan Flagship";
 			$this->limited = 10;
@@ -30,7 +29,24 @@ class GromeTrokan extends BaseShip{
         $this->rollcost = 99; //cannot roll
         $this->pivotcost = 4;
         $this->iniativebonus = 0;
-        
+ 
+ 	//ammo magazine itself (AND its missile options)
+	$ammoMagazine = new AmmoMagazine(450); //pass magazine capacity 
+	    $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
+	    $ammoMagazine->addAmmoEntry(new AmmoHShellBasic(), 50); //add full load of basic shells  
+	    $ammoMagazine->addAmmoEntry(new AmmoMShellBasic(), 400); //add full load of basic shells   
+	    	    
+		$this->enhancementOptionsEnabled[] = 'SHELL_HFLH';//add enhancement options for ammo - Heavy Flash Shell
+	    $this->enhancementOptionsEnabled[] = 'SHELL_MFLH';//add enhancement options for ammo - Medium Flash Shell
+	    $this->enhancementOptionsEnabled[] = 'SHELL_HSCT';//add enhancement options for ammo - Heavy Scatter Shell	    
+	    $this->enhancementOptionsEnabled[] = 'SHELL_MSCT';//add enhancement options for ammo - Medium Scatter Shell	
+	    $this->enhancementOptionsEnabled[] = 'SHELL_HHVY';//add enhancement options for ammo - Heavy Heavy Shell	    
+	    $this->enhancementOptionsEnabled[] = 'SHELL_MHVY';//add enhancement options for ammo - Medium Heavy Shell	
+	    $this->enhancementOptionsEnabled[] = 'SHELL_HLR';//add enhancement options for ammo - Heavy Long Range Shell	    
+	    $this->enhancementOptionsEnabled[] = 'SHELL_MLR';//add enhancement options for ammo - Medium Long Range Shell	
+	    $this->enhancementOptionsEnabled[] = 'SHELL_HULR';//add enhancement options for ammo - Heavy Ultra Long Range Shell		    
+
+	            
         $this->addPrimarySystem(new Reactor(4, 25, 0, 0));
         $this->addPrimarySystem(new CnC(4, 30, 0, 0));
         $this->addPrimarySystem(new AntiquatedScanner(4, 20, 6, 6));
@@ -48,7 +64,7 @@ class GromeTrokan extends BaseShip{
 		
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
-		$this->addFrontSystem(new HeavyRailGun(4, 12, 9, 330, 30));
+		$this->addFrontSystem(new AmmoHeavyRailGun(4, 0, 0, 330, 30, $ammoMagazine));	
 		$this->addFrontSystem(new FlakCannon(2, 4, 2, 240, 60));
 		$this->addFrontSystem(new FlakCannon(2, 4, 2, 300, 120));
         $this->addFrontSystem(new ConnectionStrut(4));
@@ -63,10 +79,10 @@ class GromeTrokan extends BaseShip{
         $this->addLeftSystem(new FlakCannon(2, 4, 2, 180, 360));
         $this->addLeftSystem(new FlakCannon(2, 4, 2, 180, 360));
         $this->addLeftSystem(new FlakCannon(2, 4, 2, 180, 360));
-		$this->addLeftSystem(new Railgun(3, 9, 6, 300, 360));
-		$this->addLeftSystem(new Railgun(3, 9, 6, 300, 360));
-		$this->addLeftSystem(new Railgun(3, 9, 6, 180, 240));
-		$this->addLeftSystem(new Railgun(3, 9, 6, 180, 240));
+		$this->addLeftSystem(new AmmoMediumRailGun(3, 0, 0, 300, 360, $ammoMagazine));
+		$this->addLeftSystem(new AmmoMediumRailGun(3, 0, 0, 300, 360, $ammoMagazine));
+		$this->addLeftSystem(new AmmoMediumRailGun(3, 0, 0, 180, 240, $ammoMagazine));
+		$this->addLeftSystem(new AmmoMediumRailGun(3, 0, 0, 180, 240, $ammoMagazine));
         $this->addLeftSystem(new Thruster(3, 10, 0, 3, 3));
         $this->addLeftSystem(new Thruster(3, 10, 0, 3, 3));
         $this->addLeftSystem(new ConnectionStrut(4));
@@ -74,10 +90,10 @@ class GromeTrokan extends BaseShip{
         $this->addRightSystem(new FlakCannon(2, 4, 2, 0, 180));
         $this->addRightSystem(new FlakCannon(2, 4, 2, 0, 180));
         $this->addRightSystem(new FlakCannon(2, 4, 2, 0, 180));
-		$this->addRightSystem(new Railgun(3, 9, 6, 0, 60));
-		$this->addRightSystem(new Railgun(3, 9, 6, 0, 60));
-		$this->addRightSystem(new Railgun(3, 9, 6, 120, 180));
-		$this->addRightSystem(new Railgun(3, 9, 6, 120, 180));
+		$this->addRightSystem(new AmmoMediumRailGun(3, 0, 0, 0, 60, $ammoMagazine));
+		$this->addRightSystem(new AmmoMediumRailGun(3, 0, 0, 0, 60, $ammoMagazine));
+		$this->addRightSystem(new AmmoMediumRailGun(3, 0, 0, 120, 180, $ammoMagazine));
+		$this->addRightSystem(new AmmoMediumRailGun(3, 0, 0, 120, 180, $ammoMagazine));
         $this->addRightSystem(new Thruster(3, 10, 0, 3, 4));
         $this->addRightSystem(new Thruster(3, 10, 0, 3, 4));
         $this->addRightSystem(new ConnectionStrut(4));
@@ -117,7 +133,7 @@ class GromeTrokan extends BaseShip{
 			),
 			3=> array(
 					6 => "Thruster",
-					9 => "Railgun",
+					9 => "Medium Railgun",
 					12 => "Flak Cannon",
 					15 => "Structure",
 					18 => "Connection Strut",
@@ -125,7 +141,7 @@ class GromeTrokan extends BaseShip{
 			),
 			4=> array(
 					6 => "Thruster",
-					9 => "Railgun",
+					9 => "Medium Railgun",
 					12 => "Flak Cannon",
 					15 => "Structure",
 					18 => "Connection Strut",

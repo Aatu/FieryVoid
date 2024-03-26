@@ -5,7 +5,8 @@ class GromeTelgar extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 400;
-        $this->faction = "Grome Autocracy";
+        $this->faction = "Custom Ships";
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
         $this->phpclass = "GromeTelgar";
         $this->imagePath = "img/ships/GromeTelgar.png";
         $this->shipClass = "Telgar Defense Frigate";

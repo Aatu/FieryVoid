@@ -5,7 +5,8 @@ class GromeGroth extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 1000;
-		$this->faction = "Grome Autocracy";
+        $this->faction = "Custom Ships";
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
         $this->phpclass = "GromeGroth";
         $this->imagePath = "img/ships/GromeGroth.png";
         $this->shipClass = "Groth Gunship";

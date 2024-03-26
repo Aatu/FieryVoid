@@ -1365,19 +1365,29 @@ window.weaponManager = {
 
         var stealthSystem = shipManager.systems.getSystemByName(target, "stealth");
 
-        if (stealthSystem && distance > 5 && weapon.ballistic) {
+        if (stealthSystem && distance > 5 && weapon.ballistic && target.flight) {
             return false;
         }
 
         if (range === 0) return true;
 
         var jammer = shipManager.systems.getSystemByName(target, "jammer");
-		if (jammer)
+		if (jammer || stealthSystem)
 		{
-			//check whether it was enabled last turn... if so, allow missile launch :)
-			if (!shipManager.power.isOfflineOnTurn(target, jammer, (gamedata.turn-1) )){
+
+//			if (!shipManager.power.isOfflineOnTurn(target, jammer, (gamedata.turn-1) )){ //Amended this section to accommodate Hyach Stealth ships - DK 18.3.24
 				/*Improved/Advanced Sensors effect*/
-				var jammerValue = shipManager.systems.getOutput(target, jammer);
+				var jammerValue = 0;
+					if (jammer && (!shipManager.power.isOfflineOnTurn(target, jammer, (gamedata.turn-1) ))) {//Jammer exists and was enabled last turn.
+						jammerValue = shipManager.systems.getOutput(target, jammer);
+					}
+				var stealthValue = 0;	
+					if (stealthSystem && (mathlib.getDistanceBetweenShipsInHex(shooter, target) > 10 && target.shipSizeClass >= 0)){
+					 stealthValue = shipManager.systems.getOutput(target, stealthSystem);
+					} 
+					
+				if(stealthValue > jammerValue) jammerValue = stealthValue;//larger value is used
+				
 				if (shipManager.hasSpecialAbility(shooter,"AdvancedSensors") || shipManager.systems.getSystemByName(shooter, "fighteradvsensors")) {
 					jammerValue = 0; //negated
 				} else if (shipManager.hasSpecialAbility(shooter,"ImprovedSensors") || shipManager.systems.getSystemByName(shooter, "fighterimprsensors")) {
@@ -1385,7 +1395,7 @@ window.weaponManager = {
 				}
 				range = range / (1+jammerValue);
 				//range = range / (shipManager.systems.getOutput(target, jammer)+1);
-			}
+	//		}
 		}
 
         return distance <= range;
@@ -1407,6 +1417,10 @@ window.weaponManager = {
             }
 
             if (!weapon.hextarget) {
+                continue;
+            }
+            
+            if (weapon.noHexTargeting) { //Prevent weapons like F-Rack targeting hexes when they shouldn’t be able to! DK 17.3.24
                 continue;
             }
 

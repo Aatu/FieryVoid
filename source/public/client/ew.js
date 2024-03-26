@@ -252,31 +252,17 @@ window.ew = {
 		}
 /*end of Impeder impact*/	
 
-/*Count Psionic Lance boost as used EW!*/
-		var psilanceList = shipManager.systems.getSystemListByName(ship, "PsionicLance");
-		for (var i in psilanceList) {
-			var currPsilance = psilanceList[i];
+		var ewBoostedWeaponList = shipManager.systems.getSystemListEWBoosted(ship);
+		for (var i in ewBoostedWeaponList) {
+			var currWeapon = ewBoostedWeaponList[i];
 			//is it alive and powered up?
-			if (shipManager.systems.isDestroyed(ship, currPsilance)) continue;
-			if (shipManager.power.isOffline(ship, currPsilance)) continue;			
+			if (shipManager.systems.isDestroyed(ship, currWeapon)) continue;
+			if (shipManager.power.isOffline(ship, currWeapon)) continue;			
 			//current boost
-			var currBoost = shipManager.power.getBoost(currPsilance);
+			var currBoost = shipManager.power.getBoost(currWeapon);
 			if (currBoost > 0) usedEW += currBoost;
 		}
-/*end of Psionic Lance impact*/	
 
-/*Count Heavy Psionic Lance boost as used EW!*/
-		var heavypsilanceList = shipManager.systems.getSystemListByName(ship, "HeavyPsionicLance");
-		for (var i in heavypsilanceList) {
-			var currHeavypsilance = heavypsilanceList[i];
-			//is it alive and powered up?
-			if (shipManager.systems.isDestroyed(ship, currHeavypsilance)) continue;
-			if (shipManager.power.isOffline(ship, currHeavypsilance)) continue;			
-			//current boost
-			var currBoost = shipManager.power.getBoost(currHeavypsilance);
-			if (currBoost > 0) usedEW += currBoost;
-		}
-/*end of Heavy Psionic Lance impact*/		
 		
 		var totalAvailable = ew.getScannerOutput(ship);
 		var leftEW = totalAvailable-usedEW;
@@ -491,10 +477,15 @@ window.ew = {
 			}
 		}
 		var stealthSystem = shipManager.systems.getSystemByName(target, "stealth");
-		var stealthValue = 0;		
-		if( (stealthSystem != null) && (mathlib.getDistanceBetweenShipsInHex(shooter, target) > 5) ) { //stealth-protected target at range >5 hexes gains STealth properties
+		var stealthValue = 0;
+		//Amended this section to accommodate Hyach Stealth ships - DK 18.3.24				
+		if( (stealthSystem != null) && (mathlib.getDistanceBetweenShipsInHex(shooter, target) > 5) && target.flight) { //stealth-protected fighter at range >5 hexes may gain Stealth properties
 			stealthValue = shipManager.systems.getOutput(target, stealthSystem);
 		}
+		if( (stealthSystem != null) && (mathlib.getDistanceBetweenShipsInHex(shooter, target) > 10) && target.shipSizeClass >= 0) { //stealth-protected ship at range >10 hexes may gain Stealth properties
+			stealthValue = shipManager.systems.getOutput(target, stealthSystem);
+		}		
+		
 		if(stealthValue > jammerValue) jammerValue = stealthValue;//larger value is used
 		
 		if (jammerValue > 0){ //else no point

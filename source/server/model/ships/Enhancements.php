@@ -108,8 +108,23 @@ class Enhancements{
 		  $enhPriceStep = ceil($ship->pointCost*0.2); //+20% of base, for total price of 60% for second level
 		  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 		  //technical ID, human readable name, number taken, maximum number to take, price for one, price increase for each further, is an option (rather than enhancement)
-	  }	  
-	  
+	  }	 
+	   
+	  $enhID = 'IFF_SYS';
+	  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option needs to be specifically enabled
+		  $enhName = 'Identify Friend or Foe (IFF) System';
+		  $enhLimit = 1; //Only ever need 1
+		  $enhPrice = 0; //fixed.		  
+		  foreach ($ship->systems as $system){
+			if ($system instanceof BallisticMineLauncher || $system instanceof AbbaiMineLauncher){
+		  	$enhPrice += 4;
+		    }
+		  }  
+		  $enhPriceStep = 0; //flat rate
+		  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
+		  }
+		
+		    
 	  //Improved Engine: +1 Thrust, cost: 12+4/turn cost, round up, limit: up to +50%
 	  $enhID = 'IMPR_ENG';
 	  if(!in_array($enhID, $ship->enhancementOptionsDisabled)){ //option is not disabled
@@ -644,19 +659,8 @@ class Enhancements{
 			  $enhPrice = $ammoClass->getPrice($ship); 
 			  $enhPriceStep = 0; //flat rate
 			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
-		  }	
-		  $enhID = 'MINE_BLW'; //Ballistic Launcher Basic Mine
-		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
-				$ammoClass = new AmmoBLMineW();
-				$ammoSize = $ammoClass->size;
-				$actualCapacity = floor($magazineCapacity/$ammoSize);
-			  $enhName = $ammoClass->enhancementDescription;
-			  $enhLimit = $actualCapacity;		
-			  $enhPrice = $ammoClass->getPrice($ship); 
-			  $enhPriceStep = 0; //flat rate
-			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
 		  }		
-		  $enhID = 'MINE_BLH'; //Ballistic Launcher Basic Mine
+		  $enhID = 'MINE_BLH'; //Ballistic Launcher Heavy Mine
 		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
 				$ammoClass = new AmmoBLMineH();
 				$ammoSize = $ammoClass->size;
@@ -666,7 +670,255 @@ class Enhancements{
 			  $enhPrice = $ammoClass->getPrice($ship); 
 			  $enhPriceStep = 0; //flat rate
 			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
-		  }				  		  		  						  	  
+		  }
+		  $enhID = 'MINE_BLW'; //Ballistic Launcher Wide-Ranged Mine
+		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
+				$ammoClass = new AmmoBLMineW();
+				$ammoSize = $ammoClass->size;
+				$actualCapacity = floor($magazineCapacity/$ammoSize);
+			  $enhName = $ammoClass->enhancementDescription;
+			  $enhLimit = $actualCapacity;		
+			  $enhPrice = $ammoClass->getPrice($ship); 
+			  $enhPriceStep = 0; //flat rate
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+		  }			  	
+		  $enhID = 'MINE_MLB'; //Abbai Mine Launcher Basic Mine
+		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
+				$ammoClass = new AmmoBistifA();
+				$ammoSize = $ammoClass->size;
+				$actualCapacity = floor($magazineCapacity/$ammoSize);
+			  $enhName = $ammoClass->enhancementDescription;
+			  $enhLimit = $actualCapacity;		
+			  $enhPrice = $ammoClass->getPrice($ship); 
+			  $enhPriceStep = 0; //flat rate
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+		  }		
+		  $enhID = 'MINE_MLW'; //Abbai Mine Launcher Wide-Ranged Mine
+		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
+				$ammoClass = new AmmoBistifB();
+				$ammoSize = $ammoClass->size;
+				$actualCapacity = floor($magazineCapacity/$ammoSize);
+			  $enhName = $ammoClass->enhancementDescription;
+			  $enhLimit = $actualCapacity;		
+			  $enhPrice = $ammoClass->getPrice($ship); 
+			  $enhPriceStep = 0; //flat rate
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+		  }	
+
+	//Ammo for Direct Fire Weapons	
+		  $enhID = 'SHELL_HBSC'; //Standard Ammo for Heavy Railgun
+		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
+				$ammoClass = new AmmoHShellBasic();
+				$ammoSize = $ammoClass->size;
+				$actualCapacity = floor($magazineCapacity/$ammoSize);
+			  $enhName = $ammoClass->enhancementDescription;
+			  $enhLimit = $actualCapacity;		
+			  $enhPrice = $ammoClass->getPrice($ship); 
+			  $enhPriceStep = 0; //flat rate
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+		  }			  
+		  $enhID = 'SHELL_MBSC'; //Standard Ammo for Heavy Railgun
+		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
+				$ammoClass = new AmmoMShellBasic();
+				$ammoSize = $ammoClass->size;
+				$actualCapacity = floor($magazineCapacity/$ammoSize);
+			  $enhName = $ammoClass->enhancementDescription;
+			  $enhLimit = $actualCapacity;		
+			  $enhPrice = $ammoClass->getPrice($ship); 
+			  $enhPriceStep = 0; //flat rate
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+		  }				  
+		  $enhID = 'SHELL_LBSC'; //Standard Ammo for Heavy Railgun
+		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
+				$ammoClass = new AmmoLShellBasic();
+				$ammoSize = $ammoClass->size;
+				$actualCapacity = floor($magazineCapacity/$ammoSize);
+			  $enhName = $ammoClass->enhancementDescription;
+			  $enhLimit = $actualCapacity;		
+			  $enhPrice = $ammoClass->getPrice($ship); 
+			  $enhPriceStep = 0; //flat rate
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+		  }			  
+		  $enhID = 'SHELL_HFLH'; //Flash Ammo for Heavy Railgun
+		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
+				$ammoClass = new AmmoHShellFlash();
+				$ammoSize = $ammoClass->size;
+			  $enhName = $ammoClass->enhancementDescription;
+			  $enhLimit = 0;
+			  foreach ($ship->systems as $system){
+					if ($system instanceof AmmoHeavyRailGun){
+				  	$enhLimit += 3;
+				  }
+			  }  			  	  		
+			  $enhPrice = $ammoClass->getPrice($ship); 
+			  $enhPriceStep = 0; //flat rate
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+		  }			  
+		  $enhID = 'SHELL_MFLH'; //Flash Ammo for Medium Railgun
+		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
+				$ammoClass = new AmmoMShellFlash();
+				$ammoSize = $ammoClass->size;
+			  $enhName = $ammoClass->enhancementDescription;
+			  $enhLimit = 0;
+			  foreach ($ship->systems as $system){
+					if ($system instanceof AmmoMediumRailGun){
+				  	$enhLimit += 3;
+				  }
+			  }  		
+			  $enhPrice = $ammoClass->getPrice($ship); 
+			  $enhPriceStep = 0; //flat rate
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+		  }	
+		  $enhID = 'SHELL_LFLH'; //Flash Ammo for Heavy Railgun
+		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
+				$ammoClass = new AmmoLShellFlash();
+				$ammoSize = $ammoClass->size;
+			  $enhName = $ammoClass->enhancementDescription;
+			  $enhLimit = 0;
+			  foreach ($ship->systems as $system){
+					if ($system instanceof AmmoLightRailGun){
+				  	$enhLimit += 3;
+				  }
+			  }  		
+			  $enhPrice = $ammoClass->getPrice($ship); 
+			  $enhPriceStep = 0; //flat rate
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+		  }	
+		  $enhID = 'SHELL_HSCT'; //Scatter Ammo for Heavy Railgun
+		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
+				$ammoClass = new AmmoHShellScatter();
+				$ammoSize = $ammoClass->size;
+			  $enhName = $ammoClass->enhancementDescription;
+			  $enhLimit = 0;
+			  foreach ($ship->systems as $system){
+					if ($system instanceof AmmoHeavyRailGun){
+				  	$enhLimit += 3;
+				  }
+			  }  			  	  		
+			  $enhPrice = $ammoClass->getPrice($ship); 
+			  $enhPriceStep = 0; //flat rate
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+		  }				    
+		  $enhID = 'SHELL_MSCT'; //Scatter Ammo for Medium Railgun
+		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
+				$ammoClass = new AmmoMShellScatter();
+				$ammoSize = $ammoClass->size;
+			  $enhName = $ammoClass->enhancementDescription;
+			  $enhLimit = 0;
+			  foreach ($ship->systems as $system){
+					if ($system instanceof AmmoMediumRailGun){
+				  	$enhLimit += 3;
+				  }
+			  }  			  	  		
+			  $enhPrice = $ammoClass->getPrice($ship); 
+			  $enhPriceStep = 0; //flat rate
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+		  }	
+		  $enhID = 'SHELL_LSCT'; //Scatter Ammo for Light Railgun
+		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
+				$ammoClass = new AmmoLShellScatter();
+				$ammoSize = $ammoClass->size;
+			  $enhName = $ammoClass->enhancementDescription;
+			  $enhLimit = 0;
+			  foreach ($ship->systems as $system){
+					if ($system instanceof AmmoLightRailGun){
+				  	$enhLimit += 3;
+				  }
+			  }  			  	  		
+			  $enhPrice = $ammoClass->getPrice($ship); 
+			  $enhPriceStep = 0; //flat rate
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+		  }
+		  $enhID = 'SHELL_HHVY'; //Heavy Ammo for Heavy Railgun
+		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
+				$ammoClass = new AmmoHShellHeavy();
+				$ammoSize = $ammoClass->size;
+			  $enhName = $ammoClass->enhancementDescription;
+			  $enhLimit = 0;
+			  foreach ($ship->systems as $system){
+					if ($system instanceof AmmoHeavyRailGun){
+				  	$enhLimit += 1;
+				  }
+			  }  			  	  		
+			  $enhPrice = $ammoClass->getPrice($ship); 
+			  $enhPriceStep = 0; //flat rate
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+		  }				    
+		  $enhID = 'SHELL_MHVY'; //Heavy Ammo for Medium Railgun
+		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
+				$ammoClass = new AmmoMShellHeavy();
+				$ammoSize = $ammoClass->size;
+			  $enhName = $ammoClass->enhancementDescription;
+			  $enhLimit = 0;
+			  foreach ($ship->systems as $system){
+					if ($system instanceof AmmoMediumRailGun){
+				  	$enhLimit += 1;
+				  }
+			  }  			  	  		
+			  $enhPrice = $ammoClass->getPrice($ship); 
+			  $enhPriceStep = 0; //flat rate
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+		  }	
+		  $enhID = 'SHELL_LHVY'; //Heavy Ammo for Light Railgun
+		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
+				$ammoClass = new AmmoLShellHeavy();
+				$ammoSize = $ammoClass->size;
+			  $enhName = $ammoClass->enhancementDescription;
+			  $enhLimit = 0;
+			  foreach ($ship->systems as $system){
+					if ($system instanceof AmmoLightRailGun){
+				  	$enhLimit += 1;
+				  }
+			  }  			  	  		
+			  $enhPrice = $ammoClass->getPrice($ship); 
+			  $enhPriceStep = 0; //flat rate
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+		  }
+		  $enhID = 'SHELL_HLR'; //Long Range Ammo for Heavy Railgun
+		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
+				$ammoClass = new AmmoHShellLRange();
+				$ammoSize = $ammoClass->size;
+			  $enhName = $ammoClass->enhancementDescription;
+			  $enhLimit = 0;
+			  foreach ($ship->systems as $system){
+					if ($system instanceof AmmoHeavyRailGun){
+				  	$enhLimit += 3;
+				  }
+			  }  			  	  		
+			  $enhPrice = $ammoClass->getPrice($ship); 
+			  $enhPriceStep = 0; //flat rate
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+		  }				    
+		  $enhID = 'SHELL_MLR'; //Long Range Ammo for Medium Railgun
+		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
+				$ammoClass = new AmmoMShellLRange();
+				$ammoSize = $ammoClass->size;
+			  $enhName = $ammoClass->enhancementDescription;
+			  $enhLimit = 0;
+			  foreach ($ship->systems as $system){
+					if ($system instanceof AmmoMediumRailGun){
+				  	$enhLimit += 3;
+				  }
+			  }  			  	  		
+			  $enhPrice = $ammoClass->getPrice($ship); 
+			  $enhPriceStep = 0; //flat rate
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+		  }			  
+		  $enhID = 'SHELL_HULR'; //Ultra Long Range Ammo for Heavy Railgun
+		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
+				$ammoClass = new AmmoHShellULRange();
+				$ammoSize = $ammoClass->size;
+			  $enhName = $ammoClass->enhancementDescription;
+			  $enhLimit = 0;
+			  foreach ($ship->systems as $system){
+					if ($system instanceof AmmoHeavyRailGun){
+				  	$enhLimit += 3;
+				  }
+			  }  			  	  		
+			  $enhPrice = $ammoClass->getPrice($ship); 
+			  $enhPriceStep = 0; //flat rate
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+		  }			    				  			  		  		  			  		  		  						  	  
 	  } //end of magazine-requiring options
 	  
 	  
@@ -1029,8 +1281,8 @@ class Enhancements{
 				if($ship->enhancementTooltip != "") $ship->enhancementTooltip .= "<br>";
 				$ship->enhancementTooltip .= "$enhDescription";
 				if ($enhCount>1) $ship->enhancementTooltip .= " (x$enhCount)";
-			        switch ($enhID) {
-						
+			        switch ($enhID) {	
+							
 					case 'ELITE_CREW': //Elite Crew: +5 Initiative, +2 Engine, +1 Sensors, +2 Reactor power, -1 Profile, -2 to critical results, +1 to hit all weapons
 						//fixed values
 						$ship->forwardDefense -= $enhCount;
@@ -1089,12 +1341,10 @@ class Enhancements{
 						} 						
 						break;						
 
-					case 'MARK_FERV': //Markab Religious Fervor: +1 to hit all weapons, +10 Initiative, +2 Defence Profiles
-							$ship->toHitBonus += $enhCount;
-							$ship->iniativebonus += $enhCount*10;
-							$ship->forwardDefense += $enhCount*2;
-							$ship->sideDefense += $enhCount*2;
-							break;
+					case 'IFF_SYS': //Add IFF system for Mine Launcher ships.
+						//Mark true
+						$ship->IFFSystem = true;
+						break;
 								
 					case 'IMPR_ENG': //Improved Engine: +1 Engine output (strongest Engine), may be taken multiple times
 						$strongestSystem = null;
@@ -1189,7 +1439,14 @@ class Enhancements{
 							}
 						}  	
 						break;			
-						
+
+					case 'MARK_FERV': //Markab Religious Fervor: +1 to hit all weapons, +10 Initiative, +2 Defence Profiles
+							$ship->toHitBonus += $enhCount;
+							$ship->iniativebonus += $enhCount*10;
+							$ship->forwardDefense += $enhCount*2;
+							$ship->sideDefense += $enhCount*2;
+							break;
+													
 					case 'POOR_CREW': //Poor Crew: -1 Engine, -1 Sensors, -1 Reactor power, +1 Profile, +2 to critical results, -5 Initiative, -1 to hit all weapons
 						//fixed values
 						$ship->forwardDefense += $enhCount;
@@ -1351,12 +1608,63 @@ class Enhancements{
 					case 'MINE_BLB': //Ballistic Launcher Basic Mine						
 						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoBLMineB(), $enhCount, true); //do notify dependent weapons, too!
 						break;
-					case 'MINE_BLW': //Ballistic Launcher Wide-Range Mine						
-						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoBLMineW(), $enhCount, true); //do notify dependent weapons, too!
-						break;	
 					case 'MINE_BLH': //Ballistic Launcher Heavy Mine						
 						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoBLMineH(), $enhCount, true); //do notify dependent weapons, too!
-						break;																																	
+						break;
+					case 'MINE_BLW': //Ballistic Launcher Wide-Range Mine						
+						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoBLMineW(), $enhCount, true); //do notify dependent weapons, too!
+						break;
+					case 'MINE_MLB': //Abbai Mine Launcher Basic Mine													
+						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoBistifA(), $enhCount, true); //do notify dependent weapons, too!
+						break;	
+					case 'MINE_MLW': //Abbai Mine Launcher Wide-Ranged Mine						
+						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoBistifB(), $enhCount, true); //do notify dependent weapons, too!
+						break;
+						
+		//AMMO TYPES FOR DIRECT FIRE WEAPONS					
+					case 'SHELL_HBSC': //Standard Ammo for Heavy Railgun						
+						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoHShellBasic(), $enhCount, true); //do notify dependent weapons, too!
+						break;							
+					case 'SHELL_MBSC': //Standard Ammo for Medium Railgun						
+						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoMShellBasic(), $enhCount, true); //do notify dependent weapons, too!
+						break;								
+					case 'SHELL_LBSC': //Standard Ammo for Light Railgun						
+						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoLShellBasic(), $enhCount, true); //do notify dependent weapons, too!
+						break;								
+					case 'SHELL_HFLH': //Flash Ammo for Heavy Railgun						
+						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoHShellFlash(), $enhCount, true); //do notify dependent weapons, too!
+						break;							
+					case 'SHELL_MFLH': //Flash Ammo for Medium Railgun						
+						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoMShellFlash(), $enhCount, true); //do notify dependent weapons, too!
+						break;								
+					case 'SHELL_LFLH': //Flash Ammo for Light Railgun						
+						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoLShellFlash(), $enhCount, true); //do notify dependent weapons, too!
+						break;							
+					case 'SHELL_HSCT': //Scatter Ammo for Heavy Railgun						
+						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoHShellScatter(), $enhCount, true); //do notify dependent weapons, too!
+						break;	
+					case 'SHELL_MSCT': //Scatter Ammo for Medium Railgun						
+						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoMShellScatter(), $enhCount, true); //do notify dependent weapons, too!
+						break;																												case 'SHELL_LSCT': //Scatter Ammo for Light Railgun						
+						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoLShellScatter(), $enhCount, true); //do notify dependent weapons, too!
+						break;	
+					case 'SHELL_HHVY': //Heavy Ammo for Heavy Railgun						
+						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoHShellHeavy(), $enhCount, true); //do notify dependent weapons, too!
+						break;	
+					case 'SHELL_MHVY': //Heavy Ammo for Medium Railgun						
+						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoMShellHeavy(), $enhCount, true); //do notify dependent weapons, too!
+						break;	
+					case 'SHELL_LHVY': //Heavy Ammo for Light Railgun						
+						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoLShellHeavy(), $enhCount, true); //do notify dependent weapons, too!
+						break;																												case 'SHELL_HLR': //Long Range Ammo for Heavy Railgun						
+						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoHShellLRange(), $enhCount, true); //do notify dependent weapons, too!
+						break;	
+					case 'SHELL_MLR': //Long Range Ammo for Medium Railgun						
+						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoMShellLRange(), $enhCount, true); //do notify dependent weapons, too!
+						break;
+					case 'SHELL_HULR': //Long Range Ammo for Heavy Railgun						
+						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoHShellULRange(), $enhCount, true); //do notify dependent weapons, too!
+						break;							
 				}
 			}
 			

@@ -1,27 +1,15 @@
 <?php
-class GromeMahkgarFull extends StarBaseSixSections{
-/*Mahkgar with fully decked out railguns with special shells!*/
+class GromeMahkgarAM extends StarBaseSixSections{
+
 	function __construct($id, $userid, $name,  $slot){
 		parent::__construct($id, $userid, $name,  $slot);
-/*To account for the increased flexibility a points increase is needed as we cannont, yet,
-purchase individual shells individually. To do this, I am assuming that each railgun is
-equipped with 2 of the most expensive shells (heavies). Most shells are cheaper, but using
-heavies ensures a realatively fair cost as a player is unlikely to use a standard shell 
-on one of these "full" units. The final point total will be adjusted to be divisible by 5.
-The costs before rounding the final value are: 
-			Heavy railgun ~36 points
-			Railgun ~24 points
-			Light railgun ~12 points
-		Estimated cost is 2500 + (6x36) + (12x24) + (12x12) = 3148 -> rounded to 3150*/
-		$this->pointCost = 3150;
-        $this->faction = "Custom Ships";
-	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
-		$this->phpclass = "GromeMahkgarFull";
-		$this->variantOf = "Mahkgar Starbase";
-		$this->shipClass = "Mahkgar Starbase (full)";
+
+		$this->pointCost = 2500;
+		$this->faction = "Grome Autocracy";
+		$this->phpclass = "GromeMahkgarAM";
+		$this->shipClass = "Mahkgar Starbase";
 		$this->fighters = array("normal"=>36); 
         $this->isd = 2235;
-	    $this->unofficial = true;
 
 	    $this->notes = 'Antiquated Sensors (cannot be boosted).';
 	    $this->notes .= '<br>Targeting Arrays treated as a 1 point sensors.';
@@ -49,6 +37,25 @@ The costs before rounding the final value are:
 			),
 		);
 
+ 	//ammo magazine itself (AND its missile options)
+	$ammoMagazine = new AmmoMagazine(1500); //pass magazine capacity 
+	    $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
+	    $ammoMagazine->addAmmoEntry(new AmmoHShellBasic(), 300); //add full load of basic shells  
+	    $ammoMagazine->addAmmoEntry(new AmmoMShellBasic(), 600); //add full load of basic shells  
+	    $ammoMagazine->addAmmoEntry(new AmmoLShellBasic(), 600); //add full load of basic shells  
+	    	    
+		$this->enhancementOptionsEnabled[] = 'SHELL_HFLH';//add enhancement options for ammo - Heavy Flash Shell
+	    $this->enhancementOptionsEnabled[] = 'SHELL_MFLH';//add enhancement options for ammo - Medium Flash Shell
+	    $this->enhancementOptionsEnabled[] = 'SHELL_LFLH';//add enhancement options for ammo - Light Flash Shell
+	    $this->enhancementOptionsEnabled[] = 'SHELL_HSCT';//add enhancement options for ammo - Heavy Scatter Shell	    
+	    $this->enhancementOptionsEnabled[] = 'SHELL_MSCT';//add enhancement options for ammo - Medium Scatter Shell	
+	    $this->enhancementOptionsEnabled[] = 'SHELL_LSCT';//add enhancement options for ammo - Light Scatter Shell
+	    $this->enhancementOptionsEnabled[] = 'SHELL_HHVY';//add enhancement options for ammo - Heavy Heavy Shell	    
+	    $this->enhancementOptionsEnabled[] = 'SHELL_MHVY';//add enhancement options for ammo - Medium Heavy Shell	
+	    $this->enhancementOptionsEnabled[] = 'SHELL_LHVY';//add enhancement options for ammo - Light Heavy Shell		    	    
+	    $this->enhancementOptionsEnabled[] = 'SHELL_HLR';//add enhancement options for ammo - Heavy Long Range Shell	    
+	    $this->enhancementOptionsEnabled[] = 'SHELL_MLR';//add enhancement options for ammo - Medium Long Range Shell	
+	    $this->enhancementOptionsEnabled[] = 'SHELL_HULR';//add enhancement options for ammo - Heavy Ultra Long Range Shell	
 
 		$this->addPrimarySystem(new Reactor(4, 26, 0, 0));
 		$this->addPrimarySystem(new CnC(4, 25, 0, 0)); 
@@ -76,11 +83,11 @@ The costs before rounding the final value are:
 			$max = 120 + ($i*60);
 
 			$systems = array(
-				new GromeHvyRailgun(4, 12, 9, $min, $max),
-				new GromeMedRailgun(4, 9, 6, $min, $max),
-				new GromeMedRailgun(4, 9, 6, $min, $max),
-				new GromeLgtRailgun(4, 6, 3, $min, $max),
-				new GromeLgtRailgun(4, 6, 3, $min, $max),
+				new AmmoHeavyRailGun(4, 12, 9, $min, $max, $ammoMagazine),
+				new AmmoMediumRailGun(4, 9, 6, $min, $max, $ammoMagazine),
+				new AmmoMediumRailGun(4, 9, 6, $min, $max, $ammoMagazine),
+				new AmmoLightRailGun(4, 6, 3, $min, $max, $ammoMagazine),
+				new AmmoLightRailGun(4, 6, 3, $min, $max, $ammoMagazine),
 				new FlakCannon(4, 4, 2, $min, $max),
 				new FlakCannon(4, 4, 2, $min, $max),
 				new Hangar(4, 7, 6),
@@ -95,7 +102,7 @@ The costs before rounding the final value are:
 			$this->hitChart[$loc] = array(
 				2 => "Flak Cannon",
 				4 => "Light Railgun",
-				6 => "Railgun",
+				6 => "Medium Railgun",
 				7 => "Heavy Railgun",
 				9 => "Cargo Bay",
 				10 => "Hangar",
