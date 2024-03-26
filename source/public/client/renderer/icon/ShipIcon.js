@@ -200,11 +200,11 @@ window.ShipIcon = function () {
 	    this.mesh.renderDepth = 10;
 
 	    // Defined a maximum width and height, some new ships like Thirdspace are MUCH larger and benefit from this - DK 25.3.24
-	    var maxWidth = 300;
-	    var maxHeight = 300;
+	    var maxWidth = 250;
+	    var maxHeight = 250;
 
-	    var spriteWidthDirection = Math.min(this.size / 1.5, maxWidth);
-	    var spriteHeightDirection = Math.min(this.size / 1.5, maxHeight);
+	    var spriteWidthDirection = Math.min(this.size / 1.5, maxWidth-25);
+	    var spriteHeightDirection = Math.min(this.size / 1.5, maxHeight-25);
 
 	    this.shipDirectionOfProwSprite = new window.webglSprite('./img/directionOfProw.png', { width: spriteWidthDirection, height: spriteHeightDirection }, -2);
 	    this.mesh.add(this.shipDirectionOfProwSprite.mesh);
