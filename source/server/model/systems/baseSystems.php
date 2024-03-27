@@ -2172,10 +2172,11 @@ class HyachSpecialists extends ShipSystem{
 		foreach ($this->individualNotes as $currNote){ //assume ASCENDING sorting - so enact all changes as is
 			$explodedKey = explode ( ';' , $currNote->notekey ) ;//split into array: [area;value] where area denotes action, value - damage type (typically) 
 			
-			if ($explodedKey[0] == 'available'){//Mark when a Specialist has been selected for whole game.
-					$this->availableSpec[$explodedKey[1]] = 1;
-					$this->allocatedSpec[$explodedKey[1]] = 0;					
-			}
+
+            if ( !array_key_exists($explodedKey[1], $this->availableSpec) ){ //if this specialist is not yet set - do set it
+                    $this->availableSpec[$explodedKey[1]] = 1;
+                    $this->allocatedSpec[$explodedKey[1]] = 0;
+            }
 					
 			if (($explodedKey[0] == 'allocated') && ($currNote->turn == $gamedata->turn)){ //Mark when a Specialist has been used on a given turn.
 				$ship = $this->getUnit();
