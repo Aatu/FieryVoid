@@ -1184,8 +1184,6 @@ class NexusPlasmaCharge extends Weapon {
         
 		public $damageType = 'Flash'; 
     	public $weaponClass = "Plasma";
-    	
-//    	protected $thrustBoosted = true; 
 	    
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
         {
@@ -1385,12 +1383,6 @@ class NexusPlasmaCharge extends Weapon {
             $this->maxDamage = 10 + ($add * 10) + 10;
         }  
 
-
-//	public function stripForJson(){
-//			$strippedSystem = parent::stripForJson();
-//			$strippedSystem->thrustBoosted = $this->thrustBoosted;													
-//			return $strippedSystem;
-//		}
 		
     } //endof NexusPlasmaCharge
 
@@ -1420,7 +1412,7 @@ class NexusPlasmaChargeThrust extends Weapon {
 		public $damageType = 'Flash'; 
     	public $weaponClass = "Plasma";
     	
-    	protected $thrustBoosted = true; 
+    	protected $thrustBoosted = true;//Variable FRont End looks for to use thrust as boost. 
 	    
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
         {
