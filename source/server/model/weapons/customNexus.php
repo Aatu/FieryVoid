@@ -1171,11 +1171,11 @@ class NexusPlasmaCharge extends Weapon {
 //        public $animationColor = array(99, 255, 00);
 
         public $boostable = true;
-        public $boostEfficiency = 0;//Weapon is boosted by Thrust, not power.  Handled in Front-End in getRemainingEngineThrust
+        public $boostEfficiency = 4;
         public $maxBoostLevel = 2;
         public $loadingtime = 1;
 //        public $curDamage = 9;
-        public $priority = 1;
+        public $priority = 2;
 		
         public $rangePenalty = 0.33;
         public $fireControl = array(null, 3, 4); // fighters, <mediums, <capitals 
@@ -1185,7 +1185,7 @@ class NexusPlasmaCharge extends Weapon {
 		public $damageType = 'Flash'; 
     	public $weaponClass = "Plasma";
     	
-    	protected $thrustBoosted = true; 
+//    	protected $thrustBoosted = true; 
 	    
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
         {
@@ -1209,7 +1209,7 @@ class NexusPlasmaCharge extends Weapon {
                 $this->data["Special"] .= '<br>';
             } 
 		$this->data["Special"] .= "<br>-1 damage per 3 hexes.";
-            $this->data["Special"] .= '<br>Can be boosted with Engine thrust for increased dmg output (+2d10 per point of thrust added, up to 2 times).';
+            $this->data["Special"] .= '<br>Can be boosted for increased dmg output (+2d10 per 4 power added, up to 2 times).';
             $this->data["Boostlevel"] = $boost;
         }
 
@@ -1386,15 +1386,177 @@ class NexusPlasmaCharge extends Weapon {
         }  
 
 
+//	public function stripForJson(){
+//			$strippedSystem = parent::stripForJson();
+//			$strippedSystem->thrustBoosted = $this->thrustBoosted;													
+//			return $strippedSystem;
+//		}
+		
+    } //endof NexusPlasmaCharge
+
+
+class NexusPlasmaChargeThrust extends Weapon {
+        public $name = "NexusPlasmaChargeThrust";
+        public $displayName = "Plasma Charge";
+        public $iconPath = "NexusPlasmaCharge.png";         
+
+        public $animation = "torpedo";
+        public $animationColor = array(49, 55, 253);
+//        public $animation = "bolt";
+//        public $animationColor = array(99, 255, 00);
+
+        public $boostable = true;
+        public $boostEfficiency = 0;//Weapon is boosted by Thrust, not power.  Handled in Front-End in getRemainingEngineThrust
+        public $maxBoostLevel = 2;
+        public $loadingtime = 1;
+//        public $curDamage = 9;
+        public $priority = 2;
+		
+        public $rangePenalty = 0.33;
+        public $fireControl = array(null, 3, 4); // fighters, <mediums, <capitals 
+    	public $rangeDamagePenalty = 0.33;
+//        public $intercept = 1;
+        
+		public $damageType = 'Flash'; 
+    	public $weaponClass = "Plasma";
+    	
+    	protected $thrustBoosted = true; 
+	    
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+        {
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 7;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 4;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+
+        public function setSystemDataWindow($turn){
+            $boost = $this->getExtraDicebyBoostlevel($turn);            
+            parent::setSystemDataWindow($turn);
+            if (!isset($this->data["Special"])) {
+                $this->data["Special"] = '';
+            }else{
+                $this->data["Special"] .= '<br>';
+            } 
+		$this->data["Special"] .= "<br>-1 damage per 3 hexes.";
+            $this->data["Special"] .= '<br>Can be boosted with Engine thrust for increased dmg output (+2d10 per point of thrust added, up to 2 times).';
+            $this->data["Boostlevel"] = $boost;
+        }
+
+
+        private function getExtraDicebyBoostlevel($turn){
+            $add = 0;
+            switch($this->getBoostLevel($turn)){
+                case 1:
+                    $add = 2;
+                    break;
+                case 2:
+                    $add = 4;
+                    break;
+                default:
+                    break;
+            }
+            return $add;
+        }
+
+
+         private function getBoostLevel($turn){
+            $boostLevel = 0;
+            foreach ($this->power as $i){
+                if ($i->turn != $turn){
+                   continue;
+                }
+                if ($i->type == 2){
+                    $boostLevel += $i->amount;
+                }
+            }
+            return $boostLevel;
+        }
+        
+        public function getNormalLoad(){
+            return $this->loadingtime + $this->maxBoostLevel;
+        }
+        
+        public function getLoadingTime(){
+			return $this->loadingtime;
+        }
+
+        public function getTurnsloaded(){
+			return $this->turnsloaded;
+        }        
+
+	protected function applyCooldown($gamedata){
+		$currBoostlevel = $this->getBoostLevel($gamedata->turn);
+		
+		if($currBoostlevel > 0){
+			$cooldownLength = $currBoostlevel ;
+			$finalTurn = $gamedata->turn + $cooldownLength;
+			$crit = new ForcedOfflineForTurns(-1, $this->unit->id, $this->id, "ForcedOfflineForTurns", $gamedata->turn, $finalTurn);
+			$crit->updated = true;
+			$this->criticals[] =  $crit;
+		}
+	}	
+	    
+        public function fire($gamedata, $fireOrder){
+		$currBoostlevel = $this->getBoostLevel($gamedata->turn);
+            $this->setTimes();
+                        
+            parent::fire($gamedata, $fireOrder);
+		
+		
+		$this->applyCooldown($gamedata);
+        }
+
+
+        public function setTimes(){		
+                $this->loadingtime = 1;
+                $this->turnsloaded = 1;
+                $this->normalload = 1;
+        }
+
+        public function getDamage($fireOrder){
+            $add = $this->getExtraDicebyBoostlevel($fireOrder->turn);
+            $dmg = Dice::d(10, (1 + $add)) + 10;
+            return $dmg;
+        }
+
+        public function getAvgDamage(){
+            $this->setMinDamage();
+            $this->setMaxDamage();
+
+            $min = $this->minDamage;
+            $max = $this->maxDamage;
+            $avg = round(($min+$max)/2);
+            return $avg;
+        }
+
+        public function setMinDamage(){
+            $turn = TacGamedata::$currentTurn;
+            $boost = $this->getBoostLevel($turn);
+			$add = $this->getExtraDicebyBoostlevel($turn);
+            $this->minDamage = 1 + ($add * 1) + 10;
+        }   
+
+        public function setMaxDamage(){
+            $turn = TacGamedata::$currentTurn;
+            $boost = $this->getBoostLevel($turn);
+			$add = $this->getExtraDicebyBoostlevel($turn);
+            $this->maxDamage = 10 + ($add * 10) + 10;
+        }  
+
+
 	public function stripForJson(){
 			$strippedSystem = parent::stripForJson();
 			$strippedSystem->thrustBoosted = $this->thrustBoosted;													
 			return $strippedSystem;
 		}
 		
-    } //endof NexusPlasmaCharge
-
-
+    } //endof NexusPlasmaChargeThrust
 
 
 
