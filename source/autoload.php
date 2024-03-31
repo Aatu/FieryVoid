@@ -285,6 +285,7 @@ spl_autoload_register(
                 'empulsar' => '/server/model/weapons/specialWeapons.php',
                 'emshield' => '/server/model/systems/baseSystems.php',
                 'emwavedisruptor' => '/server/model/weapons/defensive.php',
+                'enbrak' => '/server/model/ships/brakiri/enbrak.php',
                 'energymine' => '/server/model/weapons/AoE.php',
                 'energypulsar' => '/server/model/weapons/pulse.php',
                 'engine' => '/server/model/systems/baseSystems.php',
