@@ -25,6 +25,7 @@ class TrekSulibanCellshipLarge extends FighterFlight{
 	//$this->unitSize = 3; //number of craft in squadron
     	$this->superheavy = true;
         $this->maxFlightSize = 3;//this is a superheavy fighter originally intended as single unit, limit flight size to 3
+        $this->hangarRequired = ''; //Star Trek unit independence is much larger than B5, this SHF-sized unit has great endurance and can be deployed independently
 
 
         $this->populate();
