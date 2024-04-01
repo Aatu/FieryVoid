@@ -47,7 +47,7 @@ class TrekSulibanCellshipLarge extends FighterFlight{
 			$frontGun = new TrekFtrPhaser(270, 90, 2, 2, "Phase Cannons");
             $fighter->addFrontSystem($frontGun);
 			
-			$fighter->addAftSystem(new TrekShieldFtr(0, 10, 8, 4) ); //armor, health, rating, recharge
+			$fighter->addAftSystem(new TrekShieldFtr(0, 10, 5, 3) ); //armor, health, rating, recharge
 			
 			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
 		
