@@ -1272,13 +1272,16 @@ class Weapon extends ShipSystem
         }
         $firecontrol = $this->fireControl[$target->getFireControlIndex()];
         
-//		if ($shooter->computerHyach) { //Old method, discontinued to avoid adding variable.
 		if ($shooter->hasSpecialAbility("HyachComputer")) { //Does ship have a Hyach Computer that might add bonus FC?
 			$bonusFireControl = 0; //initialise
 			$computer = $shooter->getSystemByName("HyachComputer"); //Find computer.
 			$FCIndex = $target->getFireControlIndex(); //Find out FC category of the target.
 			$bonusFireControl = $computer->getFCBonus($FCIndex);  //Use FCIndex to check if Computer has any BFCP allocated to that FC category.
 			$firecontrol += $bonusFireControl; //Add to $firecontrol.
+		}
+
+		if ($shooter->hasSpecialAbility("TargetingArray")){		
+			$mod += TargetingArrayHandler::getHitBonus($gamedata, $fireOrder, $target);
 		}
         		
 		//advanced sensors: negates BDEW and SDEW, unless target is unit of advanced race

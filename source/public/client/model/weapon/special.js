@@ -483,3 +483,11 @@ ProximityLaser.prototype.getFiringHex = function(shooter, weapon){ //Need to cal
 	return sPosLaunch;
 	
 	};
+		
+var GromeTargetingArray = function GromeTargetingArray(json, ship) {
+    Weapon.call(this, json, ship);
+};
+GromeTargetingArray.prototype = Object.create(Weapon.prototype);
+GromeTargetingArray.prototype.constructor = GromeTargetingArray;
+
+

@@ -231,8 +231,7 @@ Notable technologies:
 		all fire from a single unit at -3 and suffers degredation like normal interception. Therefore three Flak Cannons can generate a -6 to hit from all fire from a single unit. In addition, the Flak Cannon can intercept for friendly units. As long as the friendly unit is 
 		within 5 hexes and both the friendly and firing unit are in arc, it is able to engage. Lastly, the Flak Cannon can also intercept uninterceptable weapons like lasers. This is a little more effective in Fiery Void than on the table top.
 	Light and Heavy Railguns - These are smaller and larger versions, respectively, of the standard railgun.
-	Targeting Array - Currently, this system is being developed for Fiery Void. However, with are available and all other systems ready, the Grome are deploying with a modified version in Fiery Void. The Targeting Arrays are treated as 1 point Antiquated Sensors. This does 
-		enable the Grome to improve their defensive abilities, but the overall trade-off enables the Grome to become a playable faction.
+	Targeting Array - This weapon automatically hits, but scores no damage.  Instead it adds a bonus to the hit chances for all other weapons against the selected target, by 5% for each point of rating on the Targeting Array e.g. A rating of 2 would equal +10% to hit chance.  Multiple Targeting Arrays can be combined against the same target, but the effect will degrade by 5% for each subsequent array e.g. two Targeting Arrays with a rating of 2 would only increase overall hit chances by 15%, not 20%.
 	Special Shells - The Grome Rail guns each have access to a number of different shells, whose effects are outlined below:
 		Flash - Deals Plasma damage in Flash mode.
 		Scatter - Shell fragments and acts as a pulse weapon with 1 shot by default, but a grouping bonus of 25 i.e. when firing, for each 25% rolled under the % needed to hit an extra shot will hit target.

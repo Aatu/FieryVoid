@@ -1975,8 +1975,8 @@ spl_autoload_register(
 
                 //Grome Weapons and Systems
                 'antiquatedscanner' => '/server/model/systems/baseSystems.php',
- //               'grometargetingarray' => '/server/model/weapons/specialWeapons.php',
- //               'targetingarrayhandler' => '/server/model/weapons/specialWeapons.php',                
+                'grometargetingarray' => '/server/model/weapons/specialWeapons.php',             
+                'targetingarrayhandler' => '/server/model/weapons/specialWeapons.php',                
                 'flakcannon' => '/server/model/weapons/matter.php',
 				'slugcannon' => '/server/model/weapons/matter.php',
 				'singleslugcannon' => '/server/model/weapons/matter.php',
@@ -1984,7 +1984,7 @@ spl_autoload_register(
 				'gromemedrailgun' => '/server/model/weapons/customs.php',
 				'gromehvyrailgun' => '/server/model/weapons/customs.php',
                 
-                //Grome Ships
+                //Grome Ships - To be discontinued
                 'gromegormokosat' => '/server/model/ships/grome/GromeGormokOSAT.php',
                 'gromegralac' => '/server/model/ships/grome/GromeGralac.php',
                 'gromegroth' => '/server/model/ships/grome/GromeGroth.php',
@@ -1997,7 +1997,7 @@ spl_autoload_register(
                 'grometrokan' => '/server/model/ships/grome/GromeTrokan.php',
                 'grometrokanmargus' => '/server/model/ships/grome/GromeTrokanMargus.php',
 
-					//Grome Ships Using grome(lgt/med/hvy)railgun with special shells similar to full missile ships
+					//Grome Ships Using grome(lgt/med/hvy)railgun with special shells similar to full missile ships -  To be discontinued
 					'gromegormokfull' => '/server/model/ships/grome/GromeGormokFull.php',
 					'gromegralacfull' => '/server/model/ships/grome/GromeGralacFull.php',
 					'gromegrothfull' => '/server/model/ships/grome/GromeGrothFull.php',
@@ -3171,8 +3171,10 @@ spl_autoload_register(
 						'gromegralacam' => '/server/model/ships/grome/GromeGralacAM.php',						
 						'grometrokanam' => '/server/model/ships/grome/GromeTrokanAM.php',						
 						'grometrokanmargusam' => '/server/model/ships/grome/GromeTrokanMargusAM.php',
-						'gromemogortaam' => '/server/model/ships/grome/GromeMogortaAM.php',						
-						'gromemorgatam' => '/server/model/ships/grome/GromeMorgatAM.php',							
+						'gromemogortaam' => '/server/model/ships/grome/GromeMogortaAM.php',
+						'gromeadrinaam' => '/server/model/ships/grome/GromeAdrinaAM.php',												
+						'gromemorgatam' => '/server/model/ships/grome/GromeMorgatAM.php',
+						'gromemorstagam' => '/server/model/ships/grome/GromeMorstagAM.php',													
 						'gromemelagaram' => '/server/model/ships/grome/GromeMelagarAM.php',						
 						'grometelgaram' => '/server/model/ships/grome/GromeTelgarAM.php',										
 				

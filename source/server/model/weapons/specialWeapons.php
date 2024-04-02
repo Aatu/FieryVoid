@@ -5227,7 +5227,7 @@ class ProximityLaserLauncher extends Weapon{
 	        public $useOEW = false;	
 		public $noLockPenalty = false;	        
 		
-		public $range = 30;//no point firing at further target with base 24 to hit!
+		public $range = 30;
 		public $loadingtime = 1; //same as attached laser
 	    public $ammunition = 99; //Just make unlimited, so account for accidental launches when Laser on recharge.	
 		
@@ -5286,7 +5286,7 @@ class ProximityLaserLauncher extends Weapon{
 	            $this->ammunition--;
 	            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);			
 			}else{ //MISS!  Should never happen.
-				$fireOrder->pubnotes .= " MISSED! ";
+				$fireOrder->pubnotes .= "DEBUG - MISSED! ";
 			}
 		} //endof function fire	
 
@@ -5437,5 +5437,199 @@ class ProximityLaserLauncher extends Weapon{
         public function setMinDamage(){     $this->minDamage = 11 ;      }
         public function setMaxDamage(){     $this->maxDamage = 38 ;      }    
     }
+
+
+class GromeTargetingArray extends Weapon implements SpecialAbility {
+
+		public $name = "GromeTargetingArray";
+		public $displayName = "Targeting Array";
+		public $iconPath = "TargetingArray.png";
+
+    	public $specialAbilities = array("TargetingArray"); //Front end looks for this.	
+		public $specialAbilityValue = true; //so it is actually recognized as special ability!
+		
+		public $damageType = "Standard"; //irrelevant, really
+		public $weaponClass = "Particle";
+
+		public $uninterceptable = true; 
+		public $doNotIntercept = true;
+		public $priority = 1;
+	    public $useOEW = false;	
+		public $noLockPenalty = false;	        
+		
+		public $range = 15;
+		public $loadingtime = 1;	
+		
+		public $animation = "bolt";
+		public $animationColor = array(250, 250, 250);
+		
+		public $output = 0;
+		public $outputDisplay = ''; //if not empty - overrides default on-icon display text
+		public $escortArray = false;		
+		public $animationExplosionScale = 0.5; //single hex explosion
+			
+		public $firingModes = array(
+			1 => "Targeting Array"
+		);
+			
+		public $repairPriority = 5;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
+	 
+		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $output, $escort, $base)
+		{				
+			//Nominal amount of health, should never be hit.
+			if ( $maxhealth == 0 ) $maxhealth = 6;
+			if ( $powerReq == 0 ) $powerReq = 2;	
+			parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $output);
+			$this->output = $output;
+			$this->outputDisplay = $this->output;
+			if($escort){
+				$this->escortArray = true;
+			}
+			if($base){
+				$this->range += 30;
+			}										
+			TargetingArrayHandler::addTargetingArray($this);//so all Targeting Array are accessible together.			
+		}
+
+	    protected $possibleCriticals = array(
+			1=>array("OutputReduced1"), 
+	    );
+
+		public function getSpecialAbilityValue($args)
+	    {
+			return $this->specialAbilityValue;
+		}
+
+		public function getOutput()
+		{
+			return $this->output;			
+		}
+		    		
+		public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);      
+			$this->data["Special"] = "Automatically hits, but scores no damage."; 
+			$this->data["Special"] .= "<br>Adds a bonus to hit for all other weapons against selected target based on rating of Targeting Array e.g. A rating of 2 would equal +10% to hit chance.";
+			$this->data["Special"] .= "<br>Multiple Targeting Arrays can combine, but the effect will degrade by 5% per subsequent array.";
+		}	
+		
+		public function calculateHitBase($gamedata, $fireOrder)
+		{
+			$fireOrder->needed = 100; //always true
+			$fireOrder->updated = true;
+			$fireOrder->pubnotes .= " Increases hit chance of other weapons."; 			
+		}
+			
+	        	
+		public function getDamage($fireOrder){       return 0; /*no actual damage*/  }
+		public function setMinDamage(){     $this->minDamage = 0 ;      }
+		public function setMaxDamage(){     $this->maxDamage = 0 ;      }
+			
+        public function stripForJson() {
+            $strippedSystem = parent::stripForJson();    
+            $strippedSystem->escortArray = $this->escortArray;                            
+            return $strippedSystem;
+        }
+
+	
+}//endof class GromeTargetingArray
+
+
+class TargetingArrayHandler{
+	public $name = "TargetingArrayHandler";
+	private static $targetingArrays = array();
+	
+	
+	//should be called by every Targeting Array on creation!
+	public static function addTargetingArray($weapon){
+		TargetingArrayHandler::$targetingArrays[] = $weapon;		
+	}
+
+	//compares Output of applicable Targeting Arrays, sorts them, then deducts -1 from output for each subsequent T. Array.
+	public static function sortByOutput($arraysOnTarget){
+	    // Initialize the adjustedBonus array
+	    $adjustedBonus = array();
+	    // Initialize the rank counter
+	    $rank = 1;
+
+	    // Sort the array based on the 'output' value
+	    usort($arraysOnTarget, function($a, $b) {
+	        return $b['output'] <=> $a['output'];
+	    });
+
+	    // Iterate over each item in the sorted array
+	    foreach ($arraysOnTarget as $item) {
+	        // Get the output value from the current item
+	        $output = $item['output'];
+	        // Adjust the value based on the rank
+	        $adjustedOutput = max(0, $output - ($rank - 1));
+	        // Store the adjusted value using the original key
+	        $adjustedBonus[] = $adjustedOutput;
+	        // Increment the rank counter
+	        $rank++;
+	    }
+
+	    // Calculate the total sum of adjusted outputs
+	    $totalSum = array_sum($adjustedBonus);
+
+	    return $totalSum;
+	}
+	
+	//Called during calculateHitBase whenever a weapon is fired at a target and shooter has Targeting Arrays.	
+	public static function getHitBonus($gamedata, $fireOrder, $target){ 
+	
+		//apparently ships may be loaded multiple times... make sure Targeting Arrays in $targetingArrays belong to current gamedata!
+		$tmpArrays = array();
+		foreach(TargetingArrayHandler::$targetingArrays as $targetArray){
+			$arrayShooter = $targetArray->getUnit();
+			if($targetArray->isDestroyed($gamedata->turn)) continue; //actually at this stage - CURRENT turn should be indicated!
+			//is this unit defined in current gamedata? (particular instance!)
+			$belongs = $gamedata->shipBelongs($arrayShooter);
+			if ($belongs){
+				$tmpArrays[] = $targetArray;
+			}			
+		}
+		TargetingArrayHandler::$targetingArrays = $tmpArrays;
+		
+		$hitMod = 0; //Initialise
+		$arraysOnTarget = array();	//Initialise	
+		
+		foreach(TargetingArrayHandler::$targetingArrays as $tArray){ //Check each Targeting Array in game.
+			if ($tArray->isDestroyed($gamedata->turn-1)) continue; //destroyed Targeting Array does not matter.
+			if ($tArray->isOfflineOnTurn($gamedata->turn)) continue; //disabled Targeting Array does not matter.			
+
+			$arrayUnit = $tArray->getUnit(); //Unit with Targeting Array.
+			if($arrayUnit->id != $fireOrder->shooterid) continue; //Only interested in Targeting Arrays that belong to shooter.
+										
+		    $arrayFiringOrders = $tArray->getFireOrders($gamedata->turn); //Get fireorders for current Targeting Array.
+		    	
+		    $arrayOrder = null;
+		        foreach ($arrayFiringOrders as $order) { //Find appropriate order.
+		              if ($order->type == 'normal') { 
+		                $arrayOrder = $order;
+		                break; //no need to search further
+		              }
+				}    						
+        	if($arrayOrder==null) continue; //no fire order, end of work	
+
+	        if ($arrayOrder->targetid == $fireOrder->targetid) { //Is the current shot against same ship hit by Targeting Array?
+	          		$output = $tArray->getOutput(); //Get Targeting Array Output.
+    				$arraysOnTarget[] = array( //Add both Array and Output to variable for sorting.
+	       				 'tArray' => $tArray,
+	        			 'output' => $output
+    				);         
+	        }
+	        
+		}		
+		
+		$hitMod += TargetingArrayHandler::sortByOutput($arraysOnTarget); //Use sort function to find total hit bonus.
+		$arraysOnTarget = array();	//clear, just in case.		
+			
+		return $hitMod;		
+	
+	}//endof function getHitBonus  	
+
+}//endof class TargetingArrayHandler
+
+
 
 ?>
