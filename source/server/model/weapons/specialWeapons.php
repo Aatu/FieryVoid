@@ -5439,14 +5439,14 @@ class ProximityLaserLauncher extends Weapon{
     }
 
 
-class GromeTargetingArray extends Weapon implements SpecialAbility {
-
+//class GromeTargetingArray extends Weapon implements SpecialAbility {
+class GromeTargetingArray extends Weapon{
 		public $name = "GromeTargetingArray";
 		public $displayName = "Targeting Array";
 		public $iconPath = "TargetingArray.png";
 
-    	public $specialAbilities = array("TargetingArray"); //Front end looks for this.	
-		public $specialAbilityValue = true; //so it is actually recognized as special ability!
+//    	public $specialAbilities = array("TargetingArray"); //Front end looks for this.	
+//		public $specialAbilityValue = true; //so it is actually recognized as special ability!
 		
 		public $damageType = "Standard"; //irrelevant, really
 		public $weaponClass = "Particle";
@@ -5466,7 +5466,7 @@ class GromeTargetingArray extends Weapon implements SpecialAbility {
 		public $output = 0;
 		public $outputDisplay = ''; //if not empty - overrides default on-icon display text
 		public $escortArray = false;		
-		public $animationExplosionScale = 0.5; //single hex explosion
+		public $animationExplosionScale = 0.4; //single hex explosion
 			
 		public $firingModes = array(
 			1 => "Targeting Array"
@@ -5494,12 +5494,12 @@ class GromeTargetingArray extends Weapon implements SpecialAbility {
 	    protected $possibleCriticals = array(
 			1=>array("OutputReduced1"), 
 	    );
-
+/*
 		public function getSpecialAbilityValue($args)
 	    {
 			return $this->specialAbilityValue;
 		}
-
+*/
 		public function getOutput()
 		{
 			return $this->output;			
@@ -5510,6 +5510,9 @@ class GromeTargetingArray extends Weapon implements SpecialAbility {
 			$this->data["Special"] = "Automatically hits, but scores no damage."; 
 			$this->data["Special"] .= "<br>Adds a bonus to hit for all other weapons against selected target based on rating of Targeting Array e.g. A rating of 2 would equal +10% to hit chance.";
 			$this->data["Special"] .= "<br>Multiple Targeting Arrays can combine, but the effect will degrade by 5% per subsequent array.";
+			if ($this->escortArray){
+				$this->data["Special"] .= "<br>Escort Array - Also provides targeting assistance to friendly ships within 5 hexes.";			
+			}	
 		}	
 		
 		public function calculateHitBase($gamedata, $fireOrder)
@@ -5544,6 +5547,16 @@ class TargetingArrayHandler{
 		TargetingArrayHandler::$targetingArrays[] = $weapon;		
 	}
 
+
+	//Checks if current Array is potentially valid to support nearby friendly ships.
+	public static function targetingArraysExist(){
+		
+		if(isset(TargetingArrayHandler::$targetingArrays)) return true;
+
+	    return false;
+	}//endof function targetingArraysExist 
+	
+	
 	//compares Output of applicable Targeting Arrays, sorts them, then deducts -1 from output for each subsequent T. Array.
 	public static function sortByOutput($arraysOnTarget){
 	    // Initialize the adjustedBonus array
@@ -5572,10 +5585,19 @@ class TargetingArrayHandler{
 	    $totalSum = array_sum($adjustedBonus);
 
 	    return $totalSum;
-	}
+	}//endof function sortByOutput 
+	
+	
+	//Checks if current Array is potentially valid to support nearby friendly ships.
+	public static function isValidEscort($tArray, $arrayUnit, $shooter){
+		$distance =	mathlib::getDistanceHex($arrayUnit, $shooter);
+		if ($distance <= 5 && $arrayUnit->team == $shooter->team && $tArray->escortArray) return true;//Within 5 hexes, same team and has Escort Array marker.
+	    return false;
+	}//endof function isValidEscort 
+
 	
 	//Called during calculateHitBase whenever a weapon is fired at a target and shooter has Targeting Arrays.	
-	public static function getHitBonus($gamedata, $fireOrder, $target){ 
+	public static function getHitBonus($gamedata, $fireOrder, $shooter, $target){ 
 	
 		//apparently ships may be loaded multiple times... make sure Targeting Arrays in $targetingArrays belong to current gamedata!
 		$tmpArrays = array();
@@ -5598,20 +5620,23 @@ class TargetingArrayHandler{
 			if ($tArray->isOfflineOnTurn($gamedata->turn)) continue; //disabled Targeting Array does not matter.			
 
 			$arrayUnit = $tArray->getUnit(); //Unit with Targeting Array.
-			if($arrayUnit->id != $fireOrder->shooterid) continue; //Only interested in Targeting Arrays that belong to shooter.
-										
-		    $arrayFiringOrders = $tArray->getFireOrders($gamedata->turn); //Get fireorders for current Targeting Array.
-		    	
+			$validEscort = TargetingArrayHandler::isValidEscort($tArray, $arrayUnit, $shooter);
+		
+			if($arrayUnit->id != $fireOrder->shooterid && (!$validEscort)) continue; //Only interested in Targeting Arrays that belong to shooter, or valid Escort Array.			
+		    $arrayFiringOrders = $tArray->getFireOrders($gamedata->turn); //Get fireorders for current Targeting Array.		    	
 		    $arrayOrder = null;
+		    
 		        foreach ($arrayFiringOrders as $order) { //Find appropriate order.
 		              if ($order->type == 'normal') { 
 		                $arrayOrder = $order;
 		                break; //no need to search further
 		              }
-				}    						
+				}   
+				 						
         	if($arrayOrder==null) continue; //no fire order, end of work	
 
 	        if ($arrayOrder->targetid == $fireOrder->targetid) { //Is the current shot against same ship hit by Targeting Array?
+			//The Targeting Array is now either on the Shooter vessel, or an friendly Escort within 5 hexes, and has fired at Target	        	
 	          		$output = $tArray->getOutput(); //Get Targeting Array Output.
     				$arraysOnTarget[] = array( //Add both Array and Output to variable for sorting.
 	       				 'tArray' => $tArray,
