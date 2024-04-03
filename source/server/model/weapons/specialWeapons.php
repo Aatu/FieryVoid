@@ -5467,7 +5467,9 @@ class GromeTargetingArray extends Weapon{
 		public $outputDisplay = ''; //if not empty - overrides default on-icon display text
 		public $escortArray = false;		
 		public $animationExplosionScale = 0.4; //single hex explosion
-			
+		
+		public $haphazardTargeting = false;
+		private $malfunction = false;			
 		public $firingModes = array(
 			1 => "Targeting Array"
 		);
@@ -5492,7 +5494,7 @@ class GromeTargetingArray extends Weapon{
 		}
 
 	    protected $possibleCriticals = array(
-			1=>array("OutputReduced1"), 
+//			1=>array("OutputReduced1"), 
 	    );
 /*
 		public function getSpecialAbilityValue($args)
@@ -5504,6 +5506,11 @@ class GromeTargetingArray extends Weapon{
 		{
 			return $this->output;			
 		}
+
+		public function markHaphazard()
+		{
+			$this->haphazardTargeting = true;			
+		}
 		    		
 		public function setSystemDataWindow($turn){
 			parent::setSystemDataWindow($turn);      
@@ -5514,25 +5521,68 @@ class GromeTargetingArray extends Weapon{
 				$this->data["Special"] .= "<br>Escort Array - Also provides targeting assistance to friendly ships within 5 hexes.";			
 			}	
 		}	
+
+
+    public function beforeFiringOrderResolution($gamedata)
+    {
+		if($this->haphazardTargeting){//Firing with Haphazard Targeting Systems.
+        		
+			$ship = $this->getUnit();
+			$arraysDeactivated = 0;//Initialise counter.
+					//Less chance of a malfunction if 1 or more Targeting Arrays are unavailable. 
+			        foreach ($ship->systems as $system) {
+			            if ($system instanceof GromeTargetingArray) {
+			                if ($system->isDestroyed($gamedata->turn) || $system->isOfflineOnTurn($gamedata->turn)) {
+			                    $arraysDeactivated++;
+			                }
+			            }
+			        }
+		        				
+					if($arraysDeactivated == 0){//No Targeting Array deactivated, 16.66% chance of malfunction.				
+							$roll6 = Dice::d(6);
+//	echo "Value of rolled: " . $roll6. "\n";								
+								if($roll6 < 2){ 								
+									$this->output = 0;
+									$this->malfunction = true;														
+								}
+					}else if($arraysDeactivated == 1){//One Targeting Array deactivated, 12.5% chance of malfunction.			
+							$roll10 = Dice::d(8);
+								if($roll10 < 2){ 				
+									$this->output = 0;
+									$this->malfunction = true;													
+								}
+					}else{} //2 or more deactivated/destroyed = no effect.
+			}
+		}//endof beforeFiringOrderResolution 
+
 		
 		public function calculateHitBase($gamedata, $fireOrder)
 		{
+			if($this->malfunction){
+					$fireOrder->needed = 0;
+					$fireOrder->updated = true;																	
+					$fireOrder->pubnotes .= " A Targeting Array malfunctions.";							
+			}else{
+			//Normal firing without Haphazard Targeting Systems, or with 2 or more destroyed/deactivated.
 			$fireOrder->needed = 100; //always true
 			$fireOrder->updated = true;
-			$fireOrder->pubnotes .= " Increases hit chance of other weapons."; 			
-		}
+//			$fireOrder->pubnotes .= " Hits."; 			
+			}					
+		}//endof calculateHitBase
 			
 	        	
-		public function getDamage($fireOrder){       return 0; /*no actual damage*/  }
+		public function getDamage($fireOrder){       return 0;   } //no actual damage
 		public function setMinDamage(){     $this->minDamage = 0 ;      }
 		public function setMaxDamage(){     $this->maxDamage = 0 ;      }
-			
+
+/*			
         public function stripForJson() {
             $strippedSystem = parent::stripForJson();    
-            $strippedSystem->escortArray = $this->escortArray;                            
+            $strippedSystem->escortArray = $this->escortArray;
+            $strippedSystem->haphazardTargeting = $this->haphazardTargeting;                                          
             return $strippedSystem;
         }
-
+*/
 	
 }//endof class GromeTargetingArray
 
@@ -5616,7 +5666,7 @@ class TargetingArrayHandler{
 		$arraysOnTarget = array();	//Initialise	
 		
 		foreach(TargetingArrayHandler::$targetingArrays as $tArray){ //Check each Targeting Array in game.
-			if ($tArray->isDestroyed($gamedata->turn-1)) continue; //destroyed Targeting Array does not matter.
+			if ($tArray->isDestroyed($gamedata->turn)) continue; //destroyed Targeting Array does not matter.
 			if ($tArray->isOfflineOnTurn($gamedata->turn)) continue; //disabled Targeting Array does not matter.			
 
 			$arrayUnit = $tArray->getUnit(); //Unit with Targeting Array.
@@ -5638,6 +5688,7 @@ class TargetingArrayHandler{
 	        if ($arrayOrder->targetid == $fireOrder->targetid) { //Is the current shot against same ship hit by Targeting Array?
 			//The Targeting Array is now either on the Shooter vessel, or an friendly Escort within 5 hexes, and has fired at Target	        	
 	          		$output = $tArray->getOutput(); //Get Targeting Array Output.
+///	echo "Value of output: " . $output. "\n";		          			          			          			          		
     				$arraysOnTarget[] = array( //Add both Array and Output to variable for sorting.
 	       				 'tArray' => $tArray,
 	        			 'output' => $output
@@ -5647,8 +5698,8 @@ class TargetingArrayHandler{
 		}		
 		
 		$hitMod += TargetingArrayHandler::sortByOutput($arraysOnTarget); //Use sort function to find total hit bonus.
-		$arraysOnTarget = array();	//clear, just in case.		
-			
+		$arraysOnTarget = array();	//clear, just in case.
+//	echo "Value of hitMod: " . $hitMod. "\n";							
 		return $hitMod;		
 	
 	}//endof function getHitBonus  	
