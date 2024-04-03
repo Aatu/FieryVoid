@@ -12,8 +12,7 @@ class GromeTelgarAM extends MediumShip{
         $this->canvasSize = 75;
 	    $this->isd = 2218;
 
-	    $this->notes = 'Antiquated Sensors (cannot be boosted).';
-	    $this->notes .= '<br>Targeting Array treated as a 1 point sensor.';
+	    $this->notes = 'Antiquated Sensors (cannot be boosted)';
         
         $this->forwardDefense = 13;
         $this->sideDefense = 14;
@@ -38,10 +37,7 @@ class GromeTelgarAM extends MediumShip{
         $this->addPrimarySystem(new Reactor(3, 15, 0, 0));
         $this->addPrimarySystem(new CnC(3, 12, 0, 0));
         $this->addPrimarySystem(new AntiquatedScanner(3, 12, 4, 4));
-		$targetingArray = new AntiquatedScanner(2, 6, 2, 1);
-			$targetingArray->displayName = 'Targeting Array';
-			$targetingArray->iconPath = "TargetingArray.png";
-			$this->addPrimarySystem($targetingArray);
+        $this->addPrimarySystem(new GromeTargetingArray(2, 0, 0, 0, 360, 2, false, false)); //Armor, health, power, startarc, endarc, output, escort, base
         $this->addPrimarySystem(new Engine(3, 16, 0, 6, 3));
         $this->addPrimarySystem(new Hangar(1, 1));
         $this->addPrimarySystem(new Thruster(2, 13, 0, 3, 3));

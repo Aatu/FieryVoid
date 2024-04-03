@@ -13,8 +13,7 @@ class GromeGrothAM extends BaseShip{
         $this->shipSizeClass = 3;
 		$this->canvasSize = 175; //img has 200px per side
 
-	    $this->notes = 'Antiquated Sensors (cannot be boosted).';
-	    $this->notes .= '<br>Targeting Arrays treated as a 1 point sensors.';
+	    $this->notes = 'Antiquated Sensors (cannot be boosted)';
 
         $this->fighters = array("normal"=>6);
 
@@ -49,14 +48,8 @@ class GromeGrothAM extends BaseShip{
         $this->addPrimarySystem(new Reactor(4, 23, 0, 0));
         $this->addPrimarySystem(new CnC(4, 20, 0, 0));
         $this->addPrimarySystem(new AntiquatedScanner(3, 20, 6, 6));
-		$targetingArray = new AntiquatedScanner(2, 6, 2, 1);
-			$targetingArray->displayName = 'Targeting Array';
-			$targetingArray->iconPath = "TargetingArray.png";
-			$this->addPrimarySystem($targetingArray);
-		$targetingArray = new AntiquatedScanner(2, 6, 2, 1);
-			$targetingArray->displayName = 'Targeting Array';
-			$targetingArray->iconPath = "TargetingArray.png";
-			$this->addPrimarySystem($targetingArray);
+        $this->addPrimarySystem(new GromeTargetingArray(2, 0, 0, 0, 360, 2, false, false)); //Armor, health, power, startarc, endarc, output, escort, base	
+        $this->addPrimarySystem(new GromeTargetingArray(2, 0, 0, 0, 360, 2, false, false)); //Armor, health, power, startarc, endarc, output, escort, base	
         $this->addPrimarySystem(new Engine(4, 28, 0, 8, 4));
 		$this->addPrimarySystem(new Hangar(2, 8));
 		$this->addPrimarySystem(new JumpEngine(4, 20, 4, 36));
@@ -99,7 +92,7 @@ class GromeGrothAM extends BaseShip{
 		$this->hitChart = array(
 			0=> array(
 					6 => "Structure",
-					8 => "Targeting Array",
+					20 => "Targeting Array",
 					10 => "Jump Engine",
 					13 => "Engine",
 					16 => "Scanner",

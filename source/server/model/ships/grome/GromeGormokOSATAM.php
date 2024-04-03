@@ -11,8 +11,7 @@ class GromeGormokOSATAM extends OSAT{
         $this->canvasSize = 60;
         $this->shipClass = 'Gormok Orbital Satellite';
 		
-	    $this->notes = 'Antiquated Sensors (cannot be boosted).';
-	    $this->notes .= '<br>Targeting Array treated as a 1 point sensor.';
+	    $this->notes = 'Antiquated Sensors (cannot be boosted)';
         
         $this->isd = 2240;
         
@@ -44,10 +43,7 @@ class GromeGormokOSATAM extends OSAT{
 		
         $this->addPrimarySystem(new Reactor(3, 8, 0, 0));
         $this->addPrimarySystem(new AntiquatedScanner(3, 4, 2, 3)); 
-		$targetingArray = new AntiquatedScanner(3, 6, 2, 1);
-			$targetingArray->displayName = 'Targeting Array';
-			$targetingArray->iconPath = "TargetingArray.png";
-			$this->addPrimarySystem($targetingArray);
+        $this->addPrimarySystem(new GromeTargetingArray(3, 0, 0, 0, 360, 2, false, true)); //Armor, health, power, startarc, endarc, output, escort, base
         $this->addPrimarySystem(new Thruster(4, 6, 0, 0, 2)); 
         $this->addPrimarySystem(new FlakCannon(2, 4, 2, 0, 360)); 
         $this->addPrimarySystem(new AmmoHeavyRailGun(3, 12, 9, 300, 60, $ammoMagazine));

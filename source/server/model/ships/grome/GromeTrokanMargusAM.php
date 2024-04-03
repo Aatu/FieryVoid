@@ -15,8 +15,7 @@ class GromeTrokanMargusAM extends BaseShip{
         $this->shipSizeClass = 3;
 		$this->canvasSize = 180; //img has 200px per side
 
-	    $this->notes = 'Antiquated Sensors (cannot be boosted).';
-	    $this->notes .= '<br>Targeting Arrays treated as a 1 point sensors.';
+	    $this->notes = 'Antiquated Sensors (cannot be boosted)';
 
         $this->fighters = array("normal"=>12);
 
@@ -63,14 +62,9 @@ class GromeTrokanMargusAM extends BaseShip{
 		$sensor = new AntiquatedScanner(4, 24, 6, 7);
 			$sensor->markAntSensorFlux();
 			$this->addPrimarySystem($sensor);
-		$targetingArray = new AntiquatedScanner(2, 6, 2, 1);
-			$targetingArray->displayName = 'Targeting Array';
-			$targetingArray->iconPath = "TargetingArray.png";
-			$this->addPrimarySystem($targetingArray);
-		$targetingArray = new AntiquatedScanner(2, 6, 2, 1);
-			$targetingArray->displayName = 'Targeting Array';
-			$targetingArray->iconPath = "TargetingArray.png";
-			$this->addPrimarySystem($targetingArray);
+        $this->addPrimarySystem(new GromeTargetingArray(2, 0, 0, 0, 360, 3, false, false)); //Armor, health, power, startarc, endarc, output, escort, base	
+        $this->addPrimarySystem(new GromeTargetingArray(2, 0, 0, 0, 360, 2, false, false)); //Armor, health, power, startarc, endarc, output, escort, base
+        $this->addPrimarySystem(new GromeTargetingArray(2, 0, 0, 0, 360, 2, false, false)); //Armor, health, power, startarc, endarc, output, escort, base
 		$engine = new Engine(4, 36, 0, 12, 4);
 			$engine->markEngineFlux();
 			$this->addPrimarySystem($engine);
