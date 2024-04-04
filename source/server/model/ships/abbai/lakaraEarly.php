@@ -13,7 +13,7 @@ class LakaraEarly extends BaseShip{
 			$this->variantOf = 'Lakara Cruiser';
         $this->shipSizeClass = 3;
 
-		$this->isd = 2180;
+		$this->isd = 2220;
         
         $this->forwardDefense = 18;
         $this->sideDefense = 16;
