@@ -490,4 +490,9 @@ var GromeTargetingArray = function GromeTargetingArray(json, ship) {
 GromeTargetingArray.prototype = Object.create(Weapon.prototype);
 GromeTargetingArray.prototype.constructor = GromeTargetingArray;
 
+GromeTargetingArray.prototype.initializationUpdate = function() {
+var ship = this.ship;	
+this.outputDisplay = shipManager.systems.getOutput(ship, this);
+return this;
+};
 

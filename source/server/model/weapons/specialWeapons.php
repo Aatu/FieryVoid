@@ -5458,6 +5458,7 @@ class GromeTargetingArray extends Weapon{
 		
 		public $range = 15;
 		public $loadingtime = 1;	
+        public $fireControl = array(null, 0, 0); //No fire control per se, but gets automatic +3 points.		
 		
 		public $animation = "bolt";
 		public $animationColor = array(250, 250, 250);
@@ -5470,7 +5471,7 @@ class GromeTargetingArray extends Weapon{
 		public $haphazardTargeting = false;
 		private $malfunction = false;			
 		public $firingModes = array(
-			1 => "Targeting Array"
+			1 => "Targeting"
 		);
 			
 		public $repairPriority = 5;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
@@ -5482,7 +5483,7 @@ class GromeTargetingArray extends Weapon{
 			if ( $powerReq == 0 ) $powerReq = 2;	
 			parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $output);
 			$this->output = $output;
-			$this->outputDisplay = $this->output;
+//			$this->outputDisplay = $this->output;
 			if($escort){
 				$this->escortArray = true;
 			}
@@ -5493,7 +5494,7 @@ class GromeTargetingArray extends Weapon{
 		}
 
 	    protected $possibleCriticals = array(
-//			1=>array("OutputReduced1"), 
+			1=>array("OutputReduced1"), 
 	    );
 /*
 		public function getSpecialAbilityValue($args)
@@ -5516,6 +5517,7 @@ class GromeTargetingArray extends Weapon{
 			$this->data["Special"] = "Automatically hits, but scores no damage."; 
 			$this->data["Special"] .= "<br>Adds a bonus to hit for all other weapons against selected target based on rating of Targeting Array e.g. A rating of 2 would equal +10% to hit chance.";
 			$this->data["Special"] .= "<br>Multiple Targeting Arrays can combine, but the effect will degrade by 5% per subsequent array.";
+			$this->data["Special"] .= "<br>Cannot target fighters.";			
 			if ($this->escortArray){
 				$this->data["Special"] .= "<br>Escort Array - Also provides targeting assistance to friendly ships within 5 hexes.";			
 			}	
@@ -5595,7 +5597,7 @@ class TargetingArrayHandler{
 	}//endof function targetingArraysExist 
 	
 	
-	//compares Output of applicable Targeting Arrays, sorts them, then deducts -1 from output for each subsequent T. Array.
+	//compares Output of applicable Targeting Arrays, sorts them, then deducts -1 from output for each subsequent Targeting Array.
 	public static function sortByOutput($arraysOnTarget){
 	    // Initialize the adjustedBonus array
 	    $adjustedBonus = array();
