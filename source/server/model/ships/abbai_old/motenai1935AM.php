@@ -34,7 +34,7 @@ class motenai1935AM extends BaseShip{
 	    $ammoMagazine->addAmmoEntry(new AmmoBistifA(), 0); //add full load of basic missiles
 	    $ammoMagazine->addAmmoEntry(new AmmoBistifB(), 0); //add full load of basic missiles 
 
-		$this->enhancementOptionsEnabled[] = 'MINE_MLB';//add enhancement options for mines - Wide-Range Mines
+		$this->enhancementOptionsEnabled[] = 'MINE_MLB';//add enhancement options for mines - Basic Mines
 		$this->enhancementOptionsEnabled[] = 'MINE_MLW';//add enhancement options for mines - Wide-Range Mines
 		$this->enhancementOptionsEnabled[] = 'IFF_SYS'; //Abilty to choose IFF enhancement.
 			            
