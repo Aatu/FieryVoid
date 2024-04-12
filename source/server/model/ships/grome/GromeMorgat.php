@@ -36,7 +36,7 @@ class GromeMorgat extends MediumShip{
 		$this->addPrimarySystem($targetingArray);
         $this->addPrimarySystem(new Engine(3, 16, 0, 6, 3));
         $this->addPrimarySystem(new Hangar(2, 1));
-		$this->addPrimarySystem(new FlakCannon(2, 4, 2, 0, 360));
+		$this->addPrimarySystem(new GromeFlakCannon(2, 4, 2, 0, 360));
         $this->addPrimarySystem(new Thruster(2, 13, 0, 3, 3));
         $this->addPrimarySystem(new Thruster(2, 13, 0, 3, 4));     
         $this->addPrimarySystem(new ConnectionStrut(3));

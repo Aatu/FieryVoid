@@ -58,8 +58,8 @@ class GromeGrothAM extends BaseShip{
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
 		$this->addFrontSystem(new AmmoMediumRailGun(3, 9, 6, 300, 360, $ammoMagazine));
 		$this->addFrontSystem(new AmmoMediumRailGun(3, 9, 6, 0, 60, $ammoMagazine));
-		$this->addFrontSystem(new FlakCannon(5, 4, 2, 240, 60));
-		$this->addFrontSystem(new FlakCannon(5, 4, 2, 300, 120));
+		$this->addFrontSystem(new GromeFlakCannon(5, 4, 2, 240, 60));
+		$this->addFrontSystem(new GromeFlakCannon(5, 4, 2, 300, 120));
         $this->addFrontSystem(new ConnectionStrut(4));
 
         $this->addAftSystem(new Thruster(3, 16, 0, 4, 2));
@@ -68,14 +68,14 @@ class GromeGrothAM extends BaseShip{
 		$this->addAftSystem(new AmmoMediumRailGun(3, 9, 6, 120, 180, $ammoMagazine));
         $this->addAftSystem(new ConnectionStrut(4));
 
-        $this->addLeftSystem(new FlakCannon(2, 4, 2, 180, 360));
+        $this->addLeftSystem(new GromeFlakCannon(2, 4, 2, 180, 360));
 		$this->addLeftSystem(new AmmoMediumRailGun(3, 9, 6, 210, 330, $ammoMagazine));
 		$this->addLeftSystem(new AmmoHeavyRailGun(3, 12, 9, 300, 360, $ammoMagazine));
 		$this->addLeftSystem(new AmmoHeavyRailGun(3, 12, 9, 180, 240, $ammoMagazine));
         $this->addLeftSystem(new Thruster(3, 15, 0, 4, 3));
         $this->addLeftSystem(new ConnectionStrut(4));
 
-        $this->addRightSystem(new FlakCannon(2, 4, 2, 0, 180));
+        $this->addRightSystem(new GromeFlakCannon(2, 4, 2, 0, 180));
 		$this->addRightSystem(new AmmoMediumRailGun(3, 9, 6, 30, 150, $ammoMagazine));
 		$this->addRightSystem(new AmmoHeavyRailGun(3, 12, 9, 0, 60, $ammoMagazine));
 		$this->addRightSystem(new AmmoHeavyRailGun(3, 12, 9, 120, 180, $ammoMagazine));

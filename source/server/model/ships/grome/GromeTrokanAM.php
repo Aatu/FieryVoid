@@ -58,20 +58,20 @@ class GromeTrokanAM extends BaseShip{
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
 		$this->addFrontSystem(new AmmoHeavyRailGun(4, 0, 0, 330, 30, $ammoMagazine));	
-		$this->addFrontSystem(new FlakCannon(2, 4, 2, 240, 60));
-		$this->addFrontSystem(new FlakCannon(2, 4, 2, 300, 120));
+		$this->addFrontSystem(new GromeFlakCannon(2, 4, 2, 240, 60));
+		$this->addFrontSystem(new GromeFlakCannon(2, 4, 2, 300, 120));
         $this->addFrontSystem(new ConnectionStrut(4));
 
         $this->addAftSystem(new Thruster(3, 12, 0, 3, 2));
         $this->addAftSystem(new Thruster(3, 12, 0, 3, 2));
         $this->addAftSystem(new Thruster(3, 16, 0, 4, 2));
-		$this->addAftSystem(new FlakCannon(2, 4, 2, 120, 300));
-		$this->addAftSystem(new FlakCannon(2, 4, 2, 60, 240));
+		$this->addAftSystem(new GromeFlakCannon(2, 4, 2, 120, 300));
+		$this->addAftSystem(new GromeFlakCannon(2, 4, 2, 60, 240));
         $this->addAftSystem(new ConnectionStrut(4));
 
-        $this->addLeftSystem(new FlakCannon(2, 4, 2, 180, 360));
-        $this->addLeftSystem(new FlakCannon(2, 4, 2, 180, 360));
-        $this->addLeftSystem(new FlakCannon(2, 4, 2, 180, 360));
+        $this->addLeftSystem(new GromeFlakCannon(2, 4, 2, 180, 360));
+        $this->addLeftSystem(new GromeFlakCannon(2, 4, 2, 180, 360));
+        $this->addLeftSystem(new GromeFlakCannon(2, 4, 2, 180, 360));
 		$this->addLeftSystem(new AmmoMediumRailGun(3, 0, 0, 300, 360, $ammoMagazine));
 		$this->addLeftSystem(new AmmoMediumRailGun(3, 0, 0, 300, 360, $ammoMagazine));
 		$this->addLeftSystem(new AmmoMediumRailGun(3, 0, 0, 180, 240, $ammoMagazine));
@@ -80,9 +80,9 @@ class GromeTrokanAM extends BaseShip{
         $this->addLeftSystem(new Thruster(3, 10, 0, 3, 3));
         $this->addLeftSystem(new ConnectionStrut(4));
 
-        $this->addRightSystem(new FlakCannon(2, 4, 2, 0, 180));
-        $this->addRightSystem(new FlakCannon(2, 4, 2, 0, 180));
-        $this->addRightSystem(new FlakCannon(2, 4, 2, 0, 180));
+        $this->addRightSystem(new GromeFlakCannon(2, 4, 2, 0, 180));
+        $this->addRightSystem(new GromeFlakCannon(2, 4, 2, 0, 180));
+        $this->addRightSystem(new GromeFlakCannon(2, 4, 2, 0, 180));
 		$this->addRightSystem(new AmmoMediumRailGun(3, 0, 0, 0, 60, $ammoMagazine));
 		$this->addRightSystem(new AmmoMediumRailGun(3, 0, 0, 0, 60, $ammoMagazine));
 		$this->addRightSystem(new AmmoMediumRailGun(3, 0, 0, 120, 180, $ammoMagazine));

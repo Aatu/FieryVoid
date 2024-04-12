@@ -48,8 +48,8 @@ class GromeMorstagAM extends MediumShip{
         
 		$this->addFrontSystem(new AmmoLightRailGun(2, 6, 3, 300, 60, $ammoMagazine));
 		$this->addFrontSystem(new AmmoLightRailGun(2, 6, 3, 300, 60, $ammoMagazine));
-		$this->addFrontSystem(new FlakCannon(2, 4, 2, 180, 60));
-		$this->addFrontSystem(new FlakCannon(2, 4, 2, 300, 180));
+		$this->addFrontSystem(new GromeFlakCannon(2, 4, 2, 180, 60));
+		$this->addFrontSystem(new GromeFlakCannon(2, 4, 2, 300, 180));
         $this->addFrontSystem(new GromeTargetingArray(2, 0, 0, 240, 120, 3, true, false)); //Armor, health, power, startarc, endarc, output, escort, base	  		
         $this->addFrontSystem(new Thruster(2, 10, 0, 3, 1));
 	    

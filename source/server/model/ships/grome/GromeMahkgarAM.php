@@ -61,12 +61,12 @@ class GromeMahkgarAM extends StarBaseSixSections{
 		$this->addPrimarySystem(new CnC(4, 25, 0, 0)); 
 		$this->addPrimarySystem(new AntiquatedScanner(4, 24, 6, 6));
 		$this->addPrimarySystem(new AntiquatedScanner(4, 24, 6, 6));
-        $this->addPrimarySystem(new GromeTargetingArray(2, 0, 0, 0, 360, 3, false, true)); //Armor, health, power, startarc, endarc, output, escort, base		
         $this->addPrimarySystem(new GromeTargetingArray(2, 0, 0, 0, 360, 3, false, true)); //Armor, health, power, startarc, endarc, output, escort, base	
-        $this->addPrimarySystem(new GromeTargetingArray(2, 0, 0, 0, 360, 3, false, true)); //Armor, health, power, startarc, endarc, output, escort, base	     	
-        $this->addPrimarySystem(new GromeTargetingArray(2, 0, 0, 0, 360, 3, false, true)); //Armor, health, power, startarc, endarc, output, escort, base	
-        $this->addPrimarySystem(new GromeTargetingArray(2, 0, 0, 0, 360, 3, false, true)); //Armor, health, power, startarc, endarc, output, escort, base	
-        $this->addPrimarySystem(new GromeTargetingArray(2, 0, 0, 0, 360, 3, false, true)); //Armor, health, power, startarc, endarc, output, escort, base	
+        $this->addPrimarySystem(new GromeTargetingArray(2, 0, 0, 0, 360, 3, false, true)); //Armor, health, power, startarc, endarc, output, escort, base
+        $this->addPrimarySystem(new GromeTargetingArray(2, 0, 0, 0, 360, 3, false, true)); //Armor, health, power, startarc, endarc, output, escort, base     	
+        $this->addPrimarySystem(new GromeTargetingArray(2, 0, 0, 0, 360, 3, false, true)); //Armor, health, power, startarc, endarc, output, escort, base
+        $this->addPrimarySystem(new GromeTargetingArray(2, 0, 0, 0, 360, 3, false, true)); //Armor, health, power, startarc, endarc, output, escort, base
+        $this->addPrimarySystem(new GromeTargetingArray(2, 0, 0, 0, 360, 3, false, true)); //Armor, health, power, startarc, endarc, output, escort, base
 		$this->addPrimarySystem(new Structure( 4, 240));
 
 		for ($i = 0; $i < sizeof($this->locations); $i++){
@@ -80,8 +80,8 @@ class GromeMahkgarAM extends StarBaseSixSections{
 				new AmmoMediumRailGun(4, 9, 6, $min, $max, $ammoMagazine),
 				new AmmoLightRailGun(4, 6, 3, $min, $max, $ammoMagazine),
 				new AmmoLightRailGun(4, 6, 3, $min, $max, $ammoMagazine),
-				new FlakCannon(4, 4, 2, $min, $max),
-				new FlakCannon(4, 4, 2, $min, $max),
+				new GromeFlakCannon(4, 4, 2, $min, $max),
+				new GromeFlakCannon(4, 4, 2, $min, $max),
 				new Hangar(4, 7, 6),
 				new CargoBay(4, 30),
 				new SubReactorUniversal(4, 30, 0, 0),

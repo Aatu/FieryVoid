@@ -47,11 +47,11 @@ class GromeMelagarAM extends MediumShip{
         $this->addPrimarySystem(new Thruster(2, 13, 0, 3, 4));     
         $this->addPrimarySystem(new ConnectionStrut(3));
         
-		$this->addFrontSystem(new FlakCannon(2, 4, 2, 180, 60));
+		$this->addFrontSystem(new GromeFlakCannon(2, 4, 2, 180, 60));
 		$this->addFrontSystem(new AmmoMediumRailGun(2, 9, 6, 300, 60, $ammoMagazine));
 		$this->addFrontSystem(new AmmoMediumRailGun(2, 9, 6, 300, 60, $ammoMagazine));
 		$this->addFrontSystem(new AmmoMediumRailGun(2, 9, 6, 300, 60, $ammoMagazine));
-		$this->addFrontSystem(new FlakCannon(2, 4, 2, 300, 180));
+		$this->addFrontSystem(new GromeFlakCannon(2, 4, 2, 300, 180));
         $this->addFrontSystem(new Thruster(2, 10, 0, 3, 1));
 	    
         $this->addAftSystem(new Thruster(2, 8, 0, 3, 2));    

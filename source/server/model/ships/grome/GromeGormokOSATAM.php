@@ -45,7 +45,7 @@ class GromeGormokOSATAM extends OSAT{
         $this->addPrimarySystem(new AntiquatedScanner(3, 4, 2, 3)); 
         $this->addPrimarySystem(new GromeTargetingArray(3, 0, 0, 0, 360, 2, false, true)); //Armor, health, power, startarc, endarc, output, escort, base
         $this->addPrimarySystem(new Thruster(4, 6, 0, 0, 2)); 
-        $this->addPrimarySystem(new FlakCannon(2, 4, 2, 0, 360)); 
+        $this->addPrimarySystem(new GromeFlakCannon(2, 4, 2, 0, 360)); 
         $this->addPrimarySystem(new AmmoHeavyRailGun(3, 12, 9, 300, 60, $ammoMagazine));
         $this->addPrimarySystem(new AmmoLightRailGun(3, 6, 3, 180, 360, $ammoMagazine));
         $this->addPrimarySystem(new AmmoLightRailGun(3, 6, 3, 0, 180, $ammoMagazine));

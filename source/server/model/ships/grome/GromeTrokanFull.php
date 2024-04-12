@@ -60,20 +60,20 @@ The costs before rounding the final value are:
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
 		$this->addFrontSystem(new GromeHvyRailgun(4, 12, 9, 330, 30));
-		$this->addFrontSystem(new FlakCannon(2, 4, 2, 240, 60));
-		$this->addFrontSystem(new FlakCannon(2, 4, 2, 300, 120));
+		$this->addFrontSystem(new GromeFlakCannon(2, 4, 2, 240, 60));
+		$this->addFrontSystem(new GromeFlakCannon(2, 4, 2, 300, 120));
         $this->addFrontSystem(new ConnectionStrut(4));
 
         $this->addAftSystem(new Thruster(3, 12, 0, 3, 2));
         $this->addAftSystem(new Thruster(3, 12, 0, 3, 2));
         $this->addAftSystem(new Thruster(3, 16, 0, 4, 2));
-		$this->addAftSystem(new FlakCannon(2, 4, 2, 120, 300));
-		$this->addAftSystem(new FlakCannon(2, 4, 2, 60, 240));
+		$this->addAftSystem(new GromeFlakCannon(2, 4, 2, 120, 300));
+		$this->addAftSystem(new GromeFlakCannon(2, 4, 2, 60, 240));
         $this->addAftSystem(new ConnectionStrut(4));
 
-        $this->addLeftSystem(new FlakCannon(2, 4, 2, 180, 360));
-        $this->addLeftSystem(new FlakCannon(2, 4, 2, 180, 360));
-        $this->addLeftSystem(new FlakCannon(2, 4, 2, 180, 360));
+        $this->addLeftSystem(new GromeFlakCannon(2, 4, 2, 180, 360));
+        $this->addLeftSystem(new GromeFlakCannon(2, 4, 2, 180, 360));
+        $this->addLeftSystem(new GromeFlakCannon(2, 4, 2, 180, 360));
 		$this->addLeftSystem(new GromeMedRailgun(3, 9, 6, 300, 360));
 		$this->addLeftSystem(new GromeMedRailgun(3, 9, 6, 300, 360));
 		$this->addLeftSystem(new GromeMedRailgun(3, 9, 6, 180, 240));
@@ -82,9 +82,9 @@ The costs before rounding the final value are:
         $this->addLeftSystem(new Thruster(3, 10, 0, 3, 3));
         $this->addLeftSystem(new ConnectionStrut(4));
 
-        $this->addRightSystem(new FlakCannon(2, 4, 2, 0, 180));
-        $this->addRightSystem(new FlakCannon(2, 4, 2, 0, 180));
-        $this->addRightSystem(new FlakCannon(2, 4, 2, 0, 180));
+        $this->addRightSystem(new GromeFlakCannon(2, 4, 2, 0, 180));
+        $this->addRightSystem(new GromeFlakCannon(2, 4, 2, 0, 180));
+        $this->addRightSystem(new GromeFlakCannon(2, 4, 2, 0, 180));
 		$this->addRightSystem(new GromeMedRailgun(3, 9, 6, 0, 60));
 		$this->addRightSystem(new GromeMedRailgun(3, 9, 6, 0, 60));
 		$this->addRightSystem(new GromeMedRailgun(3, 9, 6, 120, 180));

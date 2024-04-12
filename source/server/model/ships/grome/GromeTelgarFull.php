@@ -52,18 +52,18 @@ The costs before rounding the final value are:
         
 		$this->addFrontSystem(new GromeLgtRailgun(2, 6, 3, 300, 60));
 		$this->addFrontSystem(new GromeLgtRailgun(2, 6, 3, 300, 60));
-		$this->addFrontSystem(new FlakCannon(2, 4, 2, 180, 360));
-		$this->addFrontSystem(new FlakCannon(2, 4, 2, 180, 360));
-		$this->addFrontSystem(new FlakCannon(2, 4, 2, 0, 180));
-		$this->addFrontSystem(new FlakCannon(2, 4, 2, 0, 180));
+		$this->addFrontSystem(new GromeFlakCannon(2, 4, 2, 180, 360));
+		$this->addFrontSystem(new GromeFlakCannon(2, 4, 2, 180, 360));
+		$this->addFrontSystem(new GromeFlakCannon(2, 4, 2, 0, 180));
+		$this->addFrontSystem(new GromeFlakCannon(2, 4, 2, 0, 180));
         $this->addFrontSystem(new Thruster(2, 10, 0, 3, 1));
 	    
         $this->addAftSystem(new Thruster(2, 8, 0, 3, 2));    
         $this->addAftSystem(new Thruster(2, 8, 0, 3, 2));    
-		$this->addAftSystem(new FlakCannon(2, 4, 2, 180, 360));
-		$this->addAftSystem(new FlakCannon(2, 4, 2, 180, 360));
-		$this->addAftSystem(new FlakCannon(2, 4, 2, 0, 180));
-		$this->addAftSystem(new FlakCannon(2, 4, 2, 0, 180));
+		$this->addAftSystem(new GromeFlakCannon(2, 4, 2, 180, 360));
+		$this->addAftSystem(new GromeFlakCannon(2, 4, 2, 180, 360));
+		$this->addAftSystem(new GromeFlakCannon(2, 4, 2, 0, 180));
+		$this->addAftSystem(new GromeFlakCannon(2, 4, 2, 0, 180));
        
         $this->addPrimarySystem(new Structure(3, 80));
 
