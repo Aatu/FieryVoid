@@ -1271,117 +1271,102 @@ class RangedFuser extends Plasma{
 
 
 class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{        
-        public $name = "PakmaraPlasmaWeb";
-        public $displayName = "Plasma Web";
-		public $iconPath = "PlasmaWeb.png";
-//        public $trailColor = array(0, 0, 0);
-    	public $animation = "ball";
-        public $animationColor = array(75, 250, 90);    	
-        public $animationExplosionScale = 0.5;
-		public $noProjectile = true; //Marker for front end to make projectile invisible for weapons that shouldn't have one.  
-  /*      
+    public $name = "PakmaraPlasmaWeb";
+    public $displayName = "Plasma Web";
+	public $iconPath = "PlasmaWeb.png";
 
-	public $animation = "ball";
-	public $animationColor = array(160, 0, 255);
-	public $animationExplosionScale = 2; //covers 2 hexes away from explosion center
-	public $animationExplosionType = "AoE";                             
-	*/	
-        public $ballistic = false;
-        public $hextarget = true;
-        public $hidetarget = false;
-        public $priority = 1; //to show effect quickly
- 	   	public $priorityArray = array(1=>1, 2=>2);        
+    public $animation = "ball";
+    public $animationColor = array(75, 250, 90);    	
+    public $animationExplosionScale = 0.5;
+	public $noProjectile = true; //Marker for front end to make projectile invisible for weapons that shouldn't have one.  
+
+    public $ballistic = false;
+    public $hextarget = true;
+    public $hidetarget = false;
+    public $priority = 1; //to show effect quickly
+ 	public $priorityArray = array(1=>1, 2=>2);        
                 
-        public $uninterceptable = true; //just so nothing tries to actually intercept this weapon
-        public $doNotIntercept = true; //do not intercept this weapon, period
-		public $canInterceptUninterceptable = true; //able to intercept shots that are normally uninterceptable, eg. Lasers
-        public $useOEW = false; //not important, really
+    public $uninterceptable = true; //just so nothing tries to actually intercept this weapon
+    public $doNotIntercept = true; //do not intercept this weapon, period
+	public $canInterceptUninterceptable = true; //able to intercept shots that are normally uninterceptable, eg. Lasers
+    public $useOEW = false; //not important, really
         		
-        public $loadingtime = 1;
-        public $intercept = 0; 
+    public $loadingtime = 1;
+    public $intercept = 0; 
 
-	    public $tohitPenalty = 0;
-	    public $damagePenalty = 0;        
+	public $tohitPenalty = 0;
+	public $damagePenalty = 0;        
          		
-		public $range = 100;
-        public $rangeArray = array(1=>100, 2=>3); //range is essentially unlimited for Defensive, but limited for Offensive.
-		public $rangePenalty= 0;
-		public $rangePenaltyArray = array(1=>0, 2=>0); //no range penalty in either mode                  
+	public $range = 100;
+    public $rangeArray = array(1=>100, 2=>3); //range is essentially unlimited for Defensive, but limited for Offensive.
+	public $rangePenalty= 0;
+	public $rangePenaltyArray = array(1=>0, 2=>0); //no range penalty in either mode                  
         
-        public $boostable = true;
-        public $boostEfficiency = 1;
-        public $maxBoostLevel = 1;     
+    public $boostable = true;
+    public $boostEfficiency = 1;
+    public $maxBoostLevel = 1;     
 		
-		public $weaponClassArray = array(1=>'Plasma', 2=>'Plasma');
-		public $damageTypeArray = array(1=>'Plasma', 2=>'Plasma'); //indicates that this weapon does Plasma damage in Offensive mode    	
-    	public $firingMode = "Defensive";
-        public $firingModes = array(
+	public $weaponClassArray = array(1=>'Plasma', 2=>'Plasma');
+	public $damageTypeArray = array(1=>'Plasma', 2=>'Plasma'); //indicates that this weapon does Plasma damage in Offensive mode    	
+    public $firingMode = "Defensive";
+        
+    public $firingModes = array(
             1 => "Defensive",
 			2 => "Offensive",			
-        );
+    );
     
-        public $fireControlArray = array( 1=>array(50,50,50), 2=>array(50, null, null)); // fighters, <mediums, <capitals 
+    public $fireControlArray = array( 1=>array(0,0,0), 2=>array(0, null, null)); // fighters, <mediums, <capitals 
 		
-		private static $alreadyEngaged = array(); //units that were already engaged by a Plasma Web this turn (multiple Webs do not stack).
+	private static $alreadyEngaged = array(); //units that were already engaged by a Plasma Web this turn (multiple Webs do not stack).
+	protected $autoHit = true;//To show 100% hit chance in front end.		
 
     protected $possibleCriticals = array(
             17=>array("OutputReduced1", "ReducedDamage"));  //Provding Outputreduced1 works then replace reduced range from TT with reduced damage for Offensive mode
 
-        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
-			if ( $maxhealth == 0 ) $maxhealth = 4;
-            if ( $powerReq == 0 ) $powerReq = 2;            
-            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-        }
+    function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		if ( $maxhealth == 0 ) $maxhealth = 4;
+        if ( $powerReq == 0 ) $powerReq = 2;            
+        parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+    }
 
-//Defensive system functions
+	//Defensive system functions
 
-public function getDefensiveType()
+	public function getDefensiveType()
     {
         return "Shield";
     }
     
-public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){
-
-//variable initialization    	
+	public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){
+	//variable initialization    	
           $output = 0;
           $targetpos = null;
 		                		
-//checking whether the weapon is actually ordered to intercept
+	//checking whether the weapon is actually ordered to intercept
         foreach ($this->fireOrders as $fire) 
             if ($fire->firingMode == "1" && $fire->turn == $turn) {
                 $targetpos = new OffsetCoordinate($fire->x, $fire->y);
                 $output = 2;
               } 
-//No point doing location checks if output already 0                 	 		          
+	//No point doing location checks if output already 0                 	 		          
      if ($output == 0) return 0;  
 	
-//Determining position the shot is coming from
+	//Determining position the shot is coming from
   	if(!$weapon->ballistic){ //direct fire
 		$pos = $shooter->getHexPos();
 		} else { //ballistic
 		   	$movement = $shooter->getLastTurnMovement($fire->turn); 
 		    $pos = $movement->position;
 				}
-				
-  /* Old method of trying to convert $pos into same format of coordinates as $targetpos, saved in case useful at a later point.
-    		 if($pos === null){
-                $pos = $shooter->getHexPos();
-                	}
-                else{ //change format
-                $pos = Mathlib::pixelCoToHex($pos["x"], $pos["y"]);
-                $pos = new OffsetCoordinate($pos["x"], $pos["y"]); 
-                	}  */
  
-//if Web is ordered to intercept somewhere else - cannot intercept this shot
+	//if Web is ordered to intercept somewhere else - cannot intercept this shot
     if ($pos != $targetpos) $output = 0;			
  			
-//return actual value
+	//return actual value
     return $output;
-            } //end of getDefensiveHitChangeMod
+    } //end of getDefensiveHitChangeMod
 
 
-
-public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon){
+	public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon){
 
 		//variable initialization
           $output = 0;
@@ -1413,13 +1398,13 @@ public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon){
 					
 		//return actual value
 		return $output;					
-				} //End of getDefensiveDamageMod
+	} //End of getDefensiveDamageMod
 			
-//end Defensive system functions
 
 
-		public function calculateHitBase($gamedata, $fireOrder)
-		{
+
+	public function calculateHitBase($gamedata, $fireOrder)
+	{
 			$this->changeFiringMode($fireOrder->firingMode);
 			//	if ($fireOrder->targetid == -1) {				
 					$fireOrder->needed = 100;	//just so no one tries to intercept it				
@@ -1436,7 +1421,7 @@ public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon){
 						$fireOrder->targetid = -1; //correct the error
 						$fireOrder->calledid = -1; //just in case
 					} 		
-		}		
+	}		
 		
 		
 	public function fire($gamedata, $fireOrder){
@@ -1478,7 +1463,6 @@ public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon){
 		TacGamedata::$lastFiringResolutionNo++;    //note for further shots
 		$fireOrder->resolutionOrder = TacGamedata::$lastFiringResolutionNo;//mark order in which firing was handled!		
 		$fireOrder->rolled = max(1, $fireOrder->rolled);//Marks that fire order has been handled, just in case it wasn't marked yet!
-			
 						
 	} //endof function fire		
 
@@ -1494,7 +1478,6 @@ public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon){
 		return $boostLevel;
 	}
 	
-
 //and now actual damage dealing for Offensive Mode - and we already know fighter is hit (fire()) doesn't pass anything else)
 //source hex will be taken from firing unit, damage will be individually rolled for each fighter hit
 	public function AOEdamage($target, $shooter, $fireOrder, $gamedata)    {
@@ -1567,7 +1550,13 @@ public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon){
 		}
 
 
-	} //end of class PakmaraPlasmaWeb
+    public function stripForJson() {
+            $strippedSystem = parent::stripForJson();    
+            $strippedSystem->autoHit = $this->autoHit;                                      
+            return $strippedSystem;
+	}
+
+} //end of class PakmaraPlasmaWeb
 
 	
 ?>
