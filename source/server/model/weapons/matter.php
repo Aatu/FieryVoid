@@ -655,7 +655,7 @@ class GromeFlakCannon extends Weapon{
     public $weaponClassArray = array(1=>'Matter', 2=>'Matter'); //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!	
     
 	protected $autoHit = false;//To show 100% hit chance in front end.    
-	protected $autoHitArray = array(1=>false, 2=>true);//To show 100% hit chance in front end.   
+	protected $autoHitArray = array(1=>false, 2=>true); //To show 100% hit chance in front end.   
 	
     function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
 			if ( $maxhealth == 0 ) $maxhealth = 4;
@@ -665,7 +665,7 @@ class GromeFlakCannon extends Weapon{
 
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);
-			$this->data["Special"] .= "Can intercept uninterceptable weapons at 50% effectiveness.";
+			$this->data["Special"] = "Can intercept uninterceptable weapons at 50% effectiveness.";
 			$this->data["Special"] .= "<br>May also intercept for friendly units (except uninterceptable weapons). Must have friendly and enemy unit in arc and have friendly unit within 5 hexes.";
 			$this->data["Special"] .= "<br>Can also be manually targeted to intercept specific units in Defensive firing mode";
 			$this->data["Special"] .= "<br>In this mode it will automatically hit and intercept all fire from targeted ship at the Flak Cannon-firing ship (except ballistics).";
