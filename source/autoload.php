@@ -1976,8 +1976,9 @@ spl_autoload_register(
                 //Grome Weapons and Systems
                 'antiquatedscanner' => '/server/model/systems/baseSystems.php',
                 'grometargetingarray' => '/server/model/weapons/specialWeapons.php',             
-                'targetingarrayhandler' => '/server/model/weapons/specialWeapons.php',                
-                'flakcannon' => '/server/model/weapons/matter.php',
+                'targetingarrayhandler' => '/server/model/weapons/specialWeapons.php',
+                'gromeflakcannon' => '/server/model/weapons/matter.php',//NEW VERSION                                
+//                'flakcannon' => '/server/model/weapons/matter.php',//OLD VERSION OF FLAK CANNON - DK
 				'slugcannon' => '/server/model/weapons/matter.php',
 				'singleslugcannon' => '/server/model/weapons/matter.php',
 				'gromelgtrailgun' => '/server/model/weapons/customs.php',
