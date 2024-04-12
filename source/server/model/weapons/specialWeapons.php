@@ -5473,6 +5473,7 @@ class GromeTargetingArray extends Weapon{
 		public $firingModes = array(
 			1 => "Targeting"
 		);
+		protected $autoHit = true;//To show 100% hit chance in front end.
 			
 		public $repairPriority = 5;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
 	 
@@ -5573,7 +5574,13 @@ class GromeTargetingArray extends Weapon{
 		public function getDamage($fireOrder){       return 0;   } //no actual damage
 		public function setMinDamage(){     $this->minDamage = 0 ;      }
 		public function setMaxDamage(){     $this->maxDamage = 0 ;      }
-	
+
+        public function stripForJson() {
+            $strippedSystem = parent::stripForJson();    
+            $strippedSystem->autoHit = $this->autoHit;                         
+            return $strippedSystem;
+		}
+		
 }//endof class GromeTargetingArray
 
 

@@ -181,7 +181,8 @@ Weapon.prototype.changeFiringMode = function () {
 	if (!mathlib.arrayIsEmpty(this.calledShotModArray)) this.calledShotMod = this.calledShotModArray[this.firingMode];	//DK
 			
 	if (!mathlib.arrayIsEmpty(this.specialRangeCalculationArray)) this.specialRangeCalculation = this.specialRangeCalculationArray[this.firingMode];//DK
-	if (!mathlib.arrayIsEmpty(this.specialHitChanceCalculationArray)) this.specialHitChanceCalculation = this.specialHitChanceCalculationArray[this.firingMode];//DK				
+	if (!mathlib.arrayIsEmpty(this.specialHitChanceCalculationArray)) this.specialHitChanceCalculation = this.specialHitChanceCalculationArray[this.firingMode];//DK	
+	if (!mathlib.arrayIsEmpty(this.autoHitArray)) this.autoHit = this.autoHitArray[this.firingMode];//DK				
 	
 		/*old animation-related variables - not used any more!
 	if (!mathlib.arrayIsEmpty(this.animationImgArray)) this.animationImg = this.animationImgArray[this.firingMode];

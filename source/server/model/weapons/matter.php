@@ -653,6 +653,9 @@ class GromeFlakCannon extends Weapon{
 	public $firingModes = array(1=>'Offensive', 2=>'Defensive');
 	public $damageTypeArray = array(1=>'Flash', 2=>'Standard'); //indicates that this weapon does damage in Pulse mode
     public $weaponClassArray = array(1=>'Matter', 2=>'Matter'); //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!	
+    
+	protected $autoHit = false;//To show 100% hit chance in front end.    
+	protected $autoHitArray = array(1=>false, 2=>true);  
 	
     function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
 			if ( $maxhealth == 0 ) $maxhealth = 4;
@@ -826,6 +829,13 @@ class GromeFlakCannon extends Weapon{
 		}
 		$this->maxDamageArray[$this->firingMode] = $this->maxDamage;
 	}
+
+        public function stripForJson() {
+            $strippedSystem = parent::stripForJson();    
+            $strippedSystem->autoHit = $this->autoHit;
+            $strippedSystem->autoHitArray = $this->autoHitArray;                                       
+            return $strippedSystem;
+		}
 
 }	//endof class GromeFlakCannon
 

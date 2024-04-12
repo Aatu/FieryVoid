@@ -713,6 +713,9 @@ window.weaponManager = {
 		if (weapon.isRammingAttack) {
 			return weaponManager.calculateRamChance(shooter, target, weapon, calledid);
 		}
+		
+		if(weapon.autoHit) return 100; //Some weapons always hit, let's just show 100% chance to prevent confusion at firing. DK - 12 Apr 2024
+			
 	    var defence = 0;
 	    var distance = 0;
 	    if (weapon.ballistic){		    
