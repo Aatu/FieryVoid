@@ -1312,7 +1312,7 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
         
     public $firingModes = array(
             1 => "Defensive",
-			2 => "Offensive",			
+			2 => "Anti-Fighter",			
     );
     
     public $fireControlArray = array( 1=>array(0,0,0), 2=>array(0, null, null)); // fighters, <mediums, <capitals 
