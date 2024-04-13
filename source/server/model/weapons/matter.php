@@ -650,7 +650,7 @@ class GromeFlakCannon extends Weapon{
     public $rangePenaltyArray = array(1=>2, 2=>0);
     public $fireControlArray = array( 1=>array(4, null, null), 2=>array(0, 0, 0)); // fighters, <mediums, <capitals 
 	
-	public $firingModes = array(1=>'Offensive', 2=>'Defensive');
+	public $firingModes = array(1=>'Anti-Fighter', 2=>'Defensive');
 	public $damageTypeArray = array(1=>'Flash', 2=>'Standard'); //indicates that this weapon does damage in Pulse mode
     public $weaponClassArray = array(1=>'Matter', 2=>'Matter'); //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!	
     
