@@ -32,7 +32,7 @@ class VerlokaAM extends BaseShip{
 		$this->IFFSystem = false;        
 
 	//ammo magazine itself (AND its missile options)
-	$ammoMagazine = new AmmoMagazine(220); //80+20 Basic, 80 Intercept and 40 Mines
+	$ammoMagazine = new AmmoMagazine(220); //80+20 Basic, 80 Intercept and up to 40 Mines
 	    $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
 	    $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 100); //add full load of basic missiles 
 	    $ammoMagazine->addAmmoEntry(new AmmoMissileI(), 80); //add full load of missiles

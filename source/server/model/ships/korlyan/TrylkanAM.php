@@ -32,7 +32,7 @@ class TrylkanAM extends HeavyCombatVessel{
 		$this->IFFSystem = false; 
       
 	//ammo magazine itself (AND its missile options)
-	$ammoMagazine = new AmmoMagazine(144); //pass magazine capacity. 80 Intercept and 64 Mines 
+	$ammoMagazine = new AmmoMagazine(144); //pass magazine capacity. 80 Intercept and up to 64 Mines 
 	    $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
 	    $ammoMagazine->addAmmoEntry(new AmmoMissileI(), 80); //add full load of Interceptor missiles  	      
 	    $ammoMagazine->addAmmoEntry(new AmmoBLMineB(), 0); //add full load of basic missiles

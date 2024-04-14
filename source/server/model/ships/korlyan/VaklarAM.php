@@ -29,7 +29,7 @@ class VaklarAM extends HeavyCombatVessel{
 		$this->IFFSystem = false; 
       
 	//ammo magazine itself (AND its missile options)
-	$ammoMagazine = new AmmoMagazine(280); //pass magazine capacity - 20 rounds per launcher, plus reload rack 80. 160+40 Basic, 40 Intercept and 40 Mines
+	$ammoMagazine = new AmmoMagazine(280); //pass magazine capacity - 20 rounds per launcher, plus reload racks 80 each. 160+40 Basic, 40 Intercept and up to 40 Mines
 	    $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
 	    $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 200); //add full load of basic missiles 
 	    $ammoMagazine->addAmmoEntry(new AmmoMissileI(), 40); //add full load of basic missiles
