@@ -1,22 +1,16 @@
 <?php
-class Gsten extends BaseShip{
+class Gkarith extends BaseShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 575;
+		$this->pointCost = 500;
 		$this->faction = "Narn Regime";
-        $this->phpclass = "Gsten";
+        $this->phpclass = "Gkarith";
         $this->imagePath = "img/ships/gkarith.png";
-        $this->shipClass = "G'Sten War Cruiser";
-			$this->variantOf = "G'Karith Patrol Cruiser";
-			$this->occurence = "rare";	        
+        $this->shipClass = "G'Karith Patrol Cruiser";        
         $this->shipSizeClass = 3;
-        //$this->occurence = "special";
         $this->fighters = array("normal"=>6);
-// 		$this->unofficial = 'S'; //reclassified as Common due to lack of G'Karith, otherwise an official ship
-	    
-//	    $this->notes = "Nominally Rare variant of G'Karith cruiser (not present in FV)";
 	    
 		
         $this->forwardDefense = 15;
@@ -39,14 +33,14 @@ class Gsten extends BaseShip{
 		$this->addPrimarySystem(new Hangar(5, 8));
 		
 		
-        $this->addFrontSystem(new HeavyPulse(5, 6, 4, 300, 60));        
+        $this->addFrontSystem(new PulsarMine(5, 0, 0, 240, 120));        
         $this->addFrontSystem(new LightPulse(2, 4, 2, 270, 90));
         $this->addFrontSystem(new LightPulse(2, 4, 2, 270, 90));
         $this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));
         $this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));
         
         $this->addAftSystem(new LightPulse(2, 4, 2, 90, 270));
-        $this->addAftSystem(new LightPulse(2, 4, 2, 90, 270));
+        $this->addAftSystem(new PulsarMine(2, 4, 2, 60, 300));
 		$this->addAftSystem(new LightPulse(2, 4, 2, 90, 270));
         $this->addAftSystem(new Thruster(4, 8, 0, 3, 2));
         $this->addAftSystem(new Thruster(4, 16, 0, 6, 2));
@@ -80,13 +74,14 @@ class Gsten extends BaseShip{
 			),
 			1=> array(
 				6 => "Thruster",
-				8 => "Heavy Pulse Cannon",
+				8 => "Pulsar Mine",
 				10 => "Light Pulse Cannon",
 				18 => "Structure",
 				20 => "Primary",
 			),
 			2=> array(
 				7 => "Thruster",
+				8 => "Pulsar Mine",			
 				10 => "Light Pulse Cannon",
 				18 => "Structure",
 				20 => "Primary",
