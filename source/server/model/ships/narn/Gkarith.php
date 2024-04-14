@@ -25,7 +25,7 @@ class Gkarith extends BaseShip{
         $this->iniativebonus = 1*5;
 
         
-        $this->addPrimarySystem(new Reactor(6, 18, 0, 2));
+        $this->addPrimarySystem(new Reactor(6, 18, 0, 0));
         $this->addPrimarySystem(new CnC(6, 16, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 18, 4, 8));
         $this->addPrimarySystem(new Engine(5, 18, 0, 12, 3));
