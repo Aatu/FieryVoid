@@ -2325,7 +2325,7 @@ class BallisticMineLauncher extends AmmoMissileRackS{
 		parent::setSystemDataWindow($turn);
 		$this->data["Range"] = $this->range; //Don't need to display distanceRange like Missile Racks do :)
 		$this->data["Special"] = 'Available firing modes depend on ammo bought as unit enhancements. Ammunition available is tracked by central Ammunition Magazine system.';
-		$this->data["Special"] = 'Hex-targeted weapon with a 25% chance to scatter.';
+		$this->data["Special"] .= 'Hex-targeted weapon with a 25% chance to scatter.';
 		$this->data["Special"] .= '<br>Will try to attack the closest ship from the hex where it detonates, up to its maximum radius.';
 		$this->data["Special"] .= '<br>If several ships are of equal distance to the mines, it will choose a target randomly.';		
 		$this->data["Special"] .= '<br>Damage, Firecontrol and Range from target hex depends on ammo type:';	
