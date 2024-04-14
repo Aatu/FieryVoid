@@ -5719,11 +5719,9 @@ class PulsarMine extends Weapon{
     public $rangePenalty = 0; 
     public $fireControl = array(4, null, null); // fighters, <mediums, <capitals 
 
-	
 	public $animation = "bolt";
 	public $animationColor = array(245, 90, 90);
 	public $animationExplosionScale = 0.15; //single hex explosion
-//	public $animationExplosionType = "AoE";
 
 	private $alreadyEngaged = array(); //units that were already engaged by this Pulsar Mine this turn 
 	
@@ -5776,7 +5774,7 @@ class PulsarMine extends Weapon{
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);
 		$this->data["Special"] = 'Automatically attacks up to 18 enemy fighters who end their movement within 2 hexes (and are in weapons arc)';
-		$this->data["Special"] .= 'Cannot be manually targeted.';													
+		$this->data["Special"] .= '<br>Cannot be manually targeted.';													
 	}	
 
         public function stripForJson() {
