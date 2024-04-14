@@ -5701,6 +5701,94 @@ class TargetingArrayHandler{
 
 }//endof class TargetingArrayHandler
 
+class PulsarMine extends Weapon{
+	public $name = "PulsarMine";
+    public $displayName = "Pulsar Mine";
+    public $iconPath = "PulsarMine.png";    
+	
+    public $range = 2;
+    public $firingMode = 1;
+    public $priorityAF = 1;
+    public $loadingtime = 1;
+	public $hextarget = true;
+	private $noHexTargeting = true;//Never actually fires.
+    public $useOEW = false;
+	public $noLockPenalty = false;
+    public $calledShotMod = 0; 		    		          
+    
+    public $rangePenalty = 0; 
+    public $fireControl = array(4, null, null); // fighters, <mediums, <capitals 
 
+	
+	public $animation = "bolt";
+	public $animationColor = array(245, 90, 90);
+	public $animationExplosionScale = 0.15; //single hex explosion
+//	public $animationExplosionType = "AoE";
+
+	private $alreadyEngaged = array(); //units that were already engaged by this Pulsar Mine this turn 
+	
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		if ( $maxhealth == 0 ) $maxhealth = 6;
+		if ( $powerReq == 0 ) $powerReq = 4;
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+	} 
+
+
+    public function beforeFiringOrderResolution($gamedata)
+    {
+    	$ship = $this->getUnit();  
+    	$nearbyShips = $gamedata->getShipsInDistance($ship, 2);
+
+    	// To create up to 18 attacks.
+		$attacksTotal = 18;
+		$currentShotNumber = 0;
+    	
+    	foreach ($nearbyShips as $targetShip){
+			if (!($targetShip instanceof FighterFlight)) continue;//Ignore anything that's not a fighter flight. 
+			if ($targetShip->team == $ship->team) continue; //Ignore flights that are friendly.
+			$targetBearing = $ship->getBearingOnUnit($targetShip);				    		
+    		if (!mathlib::isInArc($targetBearing, $this->startArc, $this->endArc)) continue;//Ignore flights that are not in arc.   			
+			if (isset($this->alreadyEngaged[$targetShip->id])) continue; //Ignore flights that have already been engaged. 
+
+		        foreach ($targetShip->systems as $fighter) { // Now make an attack against every fighter in fighter flight.
+						if ($fighter == null || $fighter->isDestroyed()) {
+							continue;
+						}
+						$newFireOrder = new FireOrder(
+							-1, "normal", $ship->id, $targetShip->id,
+							$this->id, $fighter->id, $gamedata->turn, 1, 
+							0, 0, 1, 0, 0, //needed, rolled, shots, shotshit, intercepted
+							0,0,$this->weaponClass,-1 //X, Y, damageclass, resolutionorder
+						);		
+						$newFireOrder->addToDB = true;
+						$this->fireOrders[] = $newFireOrder;
+						$currentShotNumber++;					
+						if($currentShotNumber >= $attacksTotal) break; //will get out of foreach loop once we're out of mines, even if there are still fighters unassigned
+				}	
+					
+				$this->alreadyEngaged[$targetShip->id] = true;//mark engaged
+				if($currentShotNumber >= $attacksTotal) break; //No sense looking at further Target units if mines all used up.
+			}
+   		
+	} //endof beforeFiringOrderResolution
+	
+	
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+		$this->data["Special"] = 'Automatically attacks up to 18 enemy fighters who end their movement within 2 hexes (and are in weapons arc)';
+		$this->data["Special"] .= 'Cannot be manually targeted.';													
+	}	
+
+        public function stripForJson() {
+            $strippedSystem = parent::stripForJson();    
+            $strippedSystem->noHexTargeting = $this->noHexTargeting;                              
+            return $strippedSystem;
+        }
+
+        public function getDamage($fireOrder){        return 8;   }
+        public function setMinDamage(){     $this->minDamage = 8 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 8 ;      }
+	
+} //endof class PulsarMine
 
 ?>

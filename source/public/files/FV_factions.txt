@@ -365,8 +365,7 @@ Energy Mine - hex-targeted weapon, causing heavy damage to everything on hex hit
 	Opponent does not see EMine target hexes (just the fact that they've been launched).
 	Not 100% accurate - a launched mine may scatter or fizzle.
 	Extremely disruptive to enemy fighters.
-Pulsar Mine - higly automated short-range weapon that fires at passing fighters in Movement phase.
-	In Fiery Void it is not implemented. Ships using it are also not present, bases have it replaced by other weapons.
+Pulsar Mine - Highly automated short-range weapon that fires at passing fighters.  Unlike Tabletop, it attacks at beginning of Firing Phase as it is not possible to attack during Movement phase in FV.
 
 	
 ORIENI IMPERIUM

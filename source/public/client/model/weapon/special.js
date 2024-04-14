@@ -496,3 +496,10 @@ this.outputDisplay = shipManager.systems.getOutput(ship, this);
 return this;
 };
 
+var PulsarMine = function PulsarMine(json, ship) {
+    Weapon.call(this, json, ship);
+};
+PulsarMine.prototype = Object.create(Weapon.prototype);
+PulsarMine.prototype.constructor = PulsarMine;
+
+

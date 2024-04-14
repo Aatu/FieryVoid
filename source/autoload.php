@@ -3233,7 +3233,7 @@ spl_autoload_register(
 						//Gaim						
 						'gaimkastafighteram' => '/server/model/ships/gaim/gaimKastaFighterAM.php',
 						
-						//Extra Ships for Existing Factions
+						//Extra Ships/Systems for Existing Factions
 						'superheavymoleculardisruptor' => '/server/model/weapons/molecular.php',
 						'molecularpenetrator' => '/server/model/weapons/molecular.php',
 						'earlyfusionagitator' => '/server/model/weapons/molecular.php',
@@ -3258,7 +3258,9 @@ spl_autoload_register(
 					 	
 					 	'alanti' => '/server/model/ships/abbai/Alanti.php',
 					 	'pirocia' => '/server/model/ships/abbai/Pirocia.php',
-						'mayoverheat' => '/server/model/cricialClasses.php',					 						 	
+						'mayoverheat' => '/server/model/cricialClasses.php',
+						'pulsarmine' => '/server/model/weapons/specialWeapons.php', 					 						 	
+					 	'gkarith' => '/server/model/ships/narn/Gkarith.php',
 					 						 	 
 					 							
 				//Thirdspace
