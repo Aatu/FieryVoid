@@ -5710,8 +5710,7 @@ class PulsarMine extends Weapon{
     public $firingMode = 1;
     public $priorityAF = 1;
     public $loadingtime = 1;
-	public $hextarget = true;
-	private $noHexTargeting = true;//Never actually fires.
+	public $autoFireOnly = true; //this weapon cannot be fired by player
     public $useOEW = false;
 	public $noLockPenalty = false;
     public $calledShotMod = 0; 		    		          
