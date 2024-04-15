@@ -5776,13 +5776,13 @@ class PulsarMine extends Weapon{
 		$this->data["Special"] = 'Automatically attacks up to 18 enemy fighters who end their movement within 2 hexes (and are in weapons arc)';
 		$this->data["Special"] .= '<br>Cannot be manually targeted.';													
 	}	
-
+/*
         public function stripForJson() {
             $strippedSystem = parent::stripForJson();    
             $strippedSystem->noHexTargeting = $this->noHexTargeting;                              
             return $strippedSystem;
         }
-
+*/
         public function getDamage($fireOrder){        return 8;   }
         public function setMinDamage(){     $this->minDamage = 8 ;      }
         public function setMaxDamage(){     $this->maxDamage = 8 ;      }
