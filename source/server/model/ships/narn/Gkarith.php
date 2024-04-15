@@ -39,12 +39,14 @@ class Gkarith extends BaseShip{
         $this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));
         $this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));
         
-        $this->addAftSystem(new PulsarMine(5, 0, 0, 60, 300));
-        $this->addAftSystem(new LightPulse(2, 4, 2, 90, 270));
-		$this->addAftSystem(new LightPulse(2, 4, 2, 90, 270));
+
+		
         $this->addAftSystem(new Thruster(4, 8, 0, 3, 2));
         $this->addAftSystem(new Thruster(4, 16, 0, 6, 2));
-        $this->addAftSystem(new Thruster(4, 8, 0, 3, 2));		
+        $this->addAftSystem(new Thruster(4, 8, 0, 3, 2));
+        $this->addAftSystem(new LightPulse(2, 4, 2, 90, 270));
+		$this->addAftSystem(new LightPulse(2, 4, 2, 90, 270));
+        $this->addAftSystem(new PulsarMine(5, 0, 0, 60, 300));        		
 		
 		$this->addLeftSystem(new mediumPulse(3, 6, 3, 240, 0));
         $this->addLeftSystem(new mediumPulse(3, 6, 3, 240, 0));
