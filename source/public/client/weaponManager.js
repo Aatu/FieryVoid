@@ -404,11 +404,14 @@ window.weaponManager = {
                 if (weaponManager.checkIsInRange(selectedShip, ship, weapon)) {
                     var value = weapon.firingMode;
                     value = weapon.firingModes[value];
+					var keys = Object.keys(weapon.firingModes);                    
                     if (calledid != null && !weaponManager.canWeaponCall(weapon)) {
                         //called shot, weapon not eligible!
                         $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="hitchange"> CANNOT CALL SHOT</span></div>').appendTo(f);
-                    } else {
-                        $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="hitchange"> - Approx: ' + weaponManager.calculateHitChange(selectedShip, ship, weapon, calledid) + '%</span></div>').appendTo(f);
+                    } else if (keys.length > 1){//DK - Added to better display Firing Mode info on targeting enemy ship.
+                        $('<div><span class="weapon">' + weapon.displayName + '<span class="firingMode"> (' + value + ')</span><span class="hitchange"> - Approx: ' + weaponManager.calculateHitChange(selectedShip, ship, weapon, calledid) + '%</span></div>').appendTo(f);                      
+					} else {
+                        $('<div><span class="weapon">' + weapon.displayName + '</span><span class="hitchange"> - Approx: ' + weaponManager.calculateHitChange(selectedShip, ship, weapon, calledid) + '%</span></div>').appendTo(f);
                     }
                 } else {
                     $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="hitchange"> NOT IN RANGE</span></div>').appendTo(f);
