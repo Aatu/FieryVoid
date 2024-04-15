@@ -5701,6 +5701,7 @@ class TargetingArrayHandler{
 
 }//endof class TargetingArrayHandler
 
+
 class PulsarMine extends Weapon{
 	public $name = "PulsarMine";
     public $displayName = "Pulsar Mine";
