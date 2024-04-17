@@ -575,7 +575,7 @@ class LimpetBoreTorpedo extends Torpedo{
 
 		protected $overrideCallingRestrictions = true;//Front End: To allow this as a ballistic weapon to make called shots.
 		protected $canTargetAllExtSections = true; //Front End: Allow this weapon to target any system on external sections of target ship.  Keep separate from above in case useful at a later point.
-		protected $canOnlyCalledShot = true;		
+		protected $canOnlyCalledShot = true;//Front End: To block it from targeting ships, only systems.		
 
 			 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
@@ -589,8 +589,8 @@ class LimpetBoreTorpedo extends Torpedo{
             parent::setSystemDataWindow($turn);
             $this->data["Special"] = "Ballistic weapon used ONLY for Called Shots.";
             $this->data["Special"] .= "<br>Can target any system on target, even those not facing the firing vessel.";            
-            $this->data["Special"] .= "<br>Once it hits a ship, it will attach to target system  and try to damage it the following turn by adding a critical effect.";
-            $this->data["Special"] .= "<br>If the target system is not on the section that the torpedo hits, it will take an additional turn(s) before it attaches.";            
+            $this->data["Special"] .= "<br>Once it hits a ship, it will attach to target system and try to damage it the following turn by adding a critical effect.";
+            $this->data["Special"] .= "<br>If the target system is not on the section that the torpedo hits, it will take an additional turn(s) to travel to it.";            
             $this->data["Special"] .= "<br>Once attached, this critical effect will remain until target system is destroyed, or after five failed attempts.";            
             $this->data["Special"] .= "<br>Has no effect on OSATs or targets equipped with Advanced Armor.";
             $this->data["Special"] .= "<br>No Called Shot penalty.";
@@ -614,7 +614,7 @@ class LimpetBoreTorpedo extends Torpedo{
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!
 		
 		if ($system->advancedArmor) {//no effect on Advanced Armor	
-			$fireOrder->pubnotes .= "<br> Limpet Bore cannot attached to advanced armor.";				
+			$fireOrder->pubnotes .= "<br> Limpet Bore cannot attach to advanced armor.";				
 			return; 	
 		}
 
