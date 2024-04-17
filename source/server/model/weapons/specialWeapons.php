@@ -5229,7 +5229,7 @@ class ProximityLaserLauncher extends Weapon{
 		
 		public $range = 30;
 		public $loadingtime = 1; //same as attached laser
-	    public $ammunition = 99; //Just make unlimited, so account for accidental launches when Laser on recharge.	
+//	    public $ammunition = 99; //Just make unlimited, so account for accidental launches when Laser on recharge.	
 		
 		public $animation = "ball";
 		public $animationColor = array(245, 90, 90);
@@ -5265,7 +5265,7 @@ class ProximityLaserLauncher extends Weapon{
 			$this->data["Special"] .= "<br>Use this Launcher to select the hex from where its paired Proximity Laser will fire.";	 
 			$this->data["Special"] .= "<br>IMPORTANT - The Proximity Laser should be targeted at the same time as this launcher is fired.";
 			$this->data["Special"] .= "<br>HAS NO EFFECT UNLESS FIRED WITH PROXIMITY LASER " . $this->pairing ."."; 		 		
-	        $this->data["Ammunition"] = $this->ammunition;		
+//	        $this->data["Ammunition"] = $this->ammunition;		
 		}	
 		
 		public function calculateHitBase($gamedata, $fireOrder)
@@ -5283,24 +5283,25 @@ class ProximityLaserLauncher extends Weapon{
 			$fireOrder->pubnotes .= "Automatically hits."; 
 			if($rolled <= $fireOrder->needed){//HIT!
 				$fireOrder->shotshit++;
-	            $this->ammunition--;
-	            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);			
+//	            $this->ammunition--;
+//	            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);			
 			}else{ //MISS!  Should never happen.
 				$fireOrder->pubnotes .= "DEBUG - MISSED! ";
 			}
 		} //endof function fire	
 
-
+/*
 	    public function setAmmo($firingMode, $amount){
 	            $this->ammunition = $amount;
 	        }
 	 	
+	 
 	    public function stripForJson() {
 	            $strippedSystem = parent::stripForJson();    
 	            $strippedSystem->ammunition = $this->ammunition;           
 	            return $strippedSystem;
 	        }
-	        	
+	  */      	
 		public function getDamage($fireOrder){       return 0; /*no actual damage*/  }
 		public function setMinDamage(){     $this->minDamage = 0 ;      }
 		public function setMaxDamage(){     $this->maxDamage = 0 ;      }
@@ -5348,7 +5349,7 @@ class ProximityLaserLauncher extends Weapon{
  			$this->pairing = $pairing;
 			$this->displayName = 'Proximity Laser ' . $pairing . ''; 			
 			if ( $maxhealth == 0 ) $maxhealth = 6;
-			if ( $powerReq == 0 ) $powerReq = 6;        	       	
+			if ( $powerReq == 0 ) $powerReq = 6;				        	       	
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
@@ -5359,7 +5360,8 @@ class ProximityLaserLauncher extends Weapon{
 			$this->data["Special"] .= "<br>Range Penalty will be calculated from the hex the Launcher hits, not from this ship.";
 			$this->data["Special"] .= "<br>This weapon does not need an EW lock, and does not benefit from OEW.";				
 			$this->data["Special"] .= "<br>IMPORTANT - The paired Proximity Launcher should be fired at the same time as this weapon is targeted.";
-			$this->data["Special"] .= "<br>WILL FIRE FROM SHIP UNLESS FIRED TOGETHER WITH PROXIMITY LAUNCHER " . $this->pairing .".";					
+//			$this->data["Special"] .= "<br>WILL FIRE FROM SHIP UNLESS FIRED TOGETHER WITH PROXIMITY LAUNCHER " . $this->pairing .".";
+$this->data["Special"] .= "<br>WILL AUTOMATICALLY MISS UNLESS FIRED TOGETHER WITH PROXIMITY LAUNCHER " . $this->pairing .".";						
 	        $this->data["Ammunition"] = $this->ammunition;		
 		}	
 
@@ -5369,9 +5371,9 @@ class ProximityLaserLauncher extends Weapon{
 			if($this->launcher){	//Check that Proximity Laser have a Launcher (it always should)
 
 		    $launchPos = null; // Initialize $launchPos outside the loop
-			$fireOrders = $this->launcher->getFireOrders($gamedata->turn);
+			$launcherFireOrders = $this->launcher->getFireOrders($gamedata->turn);
 		    
-            foreach($fireOrders as $fireOrder){	       	
+            foreach($launcherFireOrders as $fireOrder){	       	
 			            // Sometimes player might target ship after all...
 						if ($fireOrder->targetid != -1) {
 	                        $targetship = $gamedata->getShipById($fireOrder->targetid);
@@ -5401,6 +5403,20 @@ class ProximityLaserLauncher extends Weapon{
             $this->ammunition = $amount;
         }
 
+		public function calculateHitBase($gamedata, $fireOrder)
+		{
+			parent::calculateHitBase($gamedata, $fireOrder);
+
+			$launcherFireOrder = $this->launcher->getFireOrders($gamedata->turn);
+						
+			if(empty($launcherFireOrder)){//Launcher hasn't fired, laser automatically misses.	
+				$fireOrder->needed = 0; //auto-miss.
+				$fireOrder->updated = true;
+				$fireOrder->pubnotes .= "<br>A Proximity Launcher was not fired, it's laser shot automatically missed.";				
+			}	
+		}//endof calculateHitBase()
+
+		
        public function fire($gamedata, $fireOrder){ //note ammo usage
             parent::fire($gamedata, $fireOrder);
             $this->ammunition--;
