@@ -123,10 +123,9 @@ class ShipSystem {
 	    if ($this->isDestroyed()) return; // no point if the system is actually destroyed already
 	    			
 	    foreach ($this->criticals as $critical) {
-	    	
-	    	
+	    	  	
 	    // Limpet Bore critical effects  	    	
-	    	if ($critical->phpclass == "LimpetBore") {
+	    	if ($critical->phpclass == "LimpetBore" && $critical->turn <= $gamedata->turn) {//Has Limpet Bore crit AND has had time to activate.
 	    			
 			    $explodeRoll = Dice::d(10);
 				$turnsAttached = $gamedata->turn - $critical->turn;
@@ -138,10 +137,10 @@ class ShipSystem {
 
 				    if ($rammingSystem) { // actually exists! - it should on every ship!
 				        $shotsHit = 0;
-				        if ($explodeRoll >= $explodesOn) { // actual explosion
-				            $shotsHit = 1;
-
-				        }
+					        if ($explodeRoll >= $explodesOn) { // actual explosion
+					            $shotsHit = 1;
+					    	}
+				    	
 				        $newFireOrder = new FireOrder(
 				            -1, "normal", $ship->id, $ship->id,
 				            $rammingSystem->id, -1, $gamedata->turn, 1,
@@ -153,31 +152,30 @@ class ShipSystem {
 				        $rammingSystem->fireOrders[] = $newFireOrder;
 				    }
 
-				    if ($explodeRoll >= $explodesOn) { // actual explosion
-		      
+				    if ($explodeRoll >= $explodesOn) { // actual explosion	      
 				        $maxDamage = $this->getRemainingHealth();
 				        $damageDealt = Dice::d(10, 2) + 10;
 						$damageCaused = min($damageDealt, $maxDamage); //Don't cause more damage than system's health remaining.
 				    
-				    if ($damageDealt >= $maxDamage){	//Deals enough to destroy system	        
-				        $damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $damageCaused, 0, 0, -1, true, false, "", "LimpetBore");
-				        $damageEntry->updated = true;
-				        $this->damage[] = $damageEntry;
-				    }else{ //Not enough to destroy, just damage system instead.
-				        $damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $damageCaused, 0, 0, -1, false, false, "", "LimpetBore");
-				        $damageEntry->updated = true;
-				        $this->damage[] = $damageEntry;
-				        
-				        $critical->turnend = $gamedata->turn;//End Limpet Bore crit this turn, it blew up!
-						$critical->forceModify = true; //actually save the change.
-						$critical->updated = true; //actually save the change cd!	        	      	
-				        }
-				        
-				    if ($rammingSystem) { // add extra data to damage entry - so the firing order can be identified!
-				        $damageEntry->shooterid = $ship->id; // additional field
-				        $damageEntry->weaponid = $rammingSystem->id; // additional field
-				        }
-				  }
+					    if ($damageDealt >= $maxDamage){	//Deals enough to destroy system	        
+					        $damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $damageCaused, 0, 0, -1, true, false, "", "LimpetBore");
+					        $damageEntry->updated = true;
+					        $this->damage[] = $damageEntry;
+					    }else{ //Not enough to destroy, just damage system instead.
+					        $damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $damageCaused, 0, 0, -1, false, false, "", "LimpetBore");
+					        $damageEntry->updated = true;
+					        $this->damage[] = $damageEntry;
+					        
+					        $critical->turnend = $gamedata->turn;//End Limpet Bore crit this turn, it blew up!
+							$critical->forceModify = true; //actually save the change.
+							$critical->updated = true; //actually save the change cd!	        	      	
+					    }
+					        
+					    if ($rammingSystem) { // add extra data to damage entry - so the firing order can be identified!
+					        $damageEntry->shooterid = $ship->id; // additional field
+					        $damageEntry->weaponid = $rammingSystem->id; // additional field
+					    }
+				 	 }
 
 			    if ($explodeRoll < $explodesOn) {
 					if ($turnsAttached >= 4){ //After initial +4 attempts Limpet Bore drops off / fails.
@@ -188,6 +186,7 @@ class ShipSystem {
 
 				}
 			}
+			
 		} //End of LimpetBore critical effects
 		
 		

@@ -442,6 +442,12 @@ window.weaponManager = {
 		if (system.isTargetable != true) return false; //cannot be targeted by called shots under any conditions
 
         if (target.flight) return true; //allow called shots at fighters (in effect it will affect particular fighter, not fighter system)
+      
+		//Added fragment below to allow Limpet Bore Torpedo to target any exterior system, no other weapon should meet criteria at this time - DK - 16 Apr 2024
+  		for (var i in gamedata.selectedSystems) {
+           var shooterSystem = gamedata.selectedSystems[i];
+           if (shooterSystem.weapon && shooterSystem.canTargetAllExtSections && (system.location != 0 || system.location == 0 && system.isPrimaryTargetable)) return true;            
+		}                  	
 
         var shooterCompassHeading = mathlib.getCompassHeadingOfShip(target, shooter);
         var targetFacing = shipManager.getShipHeadingAngle(target);
