@@ -43,29 +43,29 @@ class HyperionAegis extends BaseShip{
 		
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
-		$this->addFrontSystem(new StdParticleBeam(3, 5, 3, 270, 90));
-		$this->addFrontSystem(new StdParticleBeam(3, 5, 3, 270, 90));
-        $this->addFrontSystem(new InterceptorMkII(2, 4, 1, 240, 60));
-        $this->addFrontSystem(new InterceptorMkII(2, 4, 1, 300, 120));
+		$this->addFrontSystem(new StdParticleBeam(2, 4, 1, 270, 90));
+		$this->addFrontSystem(new StdParticleBeam(2, 4, 1, 270, 90));
+        $this->addFrontSystem(new InterceptorMkII(2, 4, 2, 240, 60));
+        $this->addFrontSystem(new InterceptorMkII(2, 4, 2, 300, 120));
 
         $this->addAftSystem(new Thruster(4, 9, 0, 2, 2));
 		$this->addAftSystem(new Thruster(4, 12, 0, 3, 2));
         $this->addAftSystem(new Thruster(4, 9, 0, 2, 2));
         $this->addAftSystem(new JumpEngine(4, 16, 3, 24));
-		$this->addAftSystem(new InterceptorMkII(2, 4, 1, 120, 300));
-        $this->addAftSystem(new InterceptorMkII(2, 4, 1, 60, 240));
+		$this->addAftSystem(new InterceptorMkII(2, 4, 2, 120, 300));
+        $this->addAftSystem(new InterceptorMkII(2, 4, 2, 60, 240));
         
 		$this->addLeftSystem(new Thruster(3, 13, 0, 5, 3));
 		$this->addLeftSystem(new AegisSensorPod(0, 0, 0, 0, 360, 3));
 		$this->addLeftSystem(new AmmoMissileRackA(4, 6, 0, 180, 0, $ammoMagazine, false));
-		$this->addLeftSystem(new StdParticleBeam(4, 8, 6, 180, 0));
-		$this->addLeftSystem(new StdParticleBeam(3, 6, 3, 180, 0));
+		$this->addLeftSystem(new StdParticleBeam(2, 4, 1, 180, 0));
+		$this->addLeftSystem(new StdParticleBeam(2, 4, 1, 180, 0));
 		
 		$this->addRightSystem(new Thruster(3, 13, 0, 5, 4));
 		$this->addRightSystem(new AegisSensorPod(0, 0, 0, 0, 360, 3));
 		$this->addRightSystem(new AmmoMissileRackA(4, 6, 0, 0, 180, $ammoMagazine, false));
-		$this->addRightSystem(new StdParticleBeam(4, 8, 6, 0, 180));
-		$this->addRightSystem(new StdParticleBeam(3, 6, 3, 0, 180));
+		$this->addRightSystem(new StdParticleBeam(2, 4, 1, 0, 180));
+		$this->addRightSystem(new StdParticleBeam(2, 4, 1, 0, 180));
         
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
