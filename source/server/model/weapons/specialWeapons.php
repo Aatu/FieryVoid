@@ -5481,11 +5481,11 @@ class GromeTargetingArray extends Weapon{
 		
 		public $output = 0;
 		public $outputDisplay = ''; //if not empty - overrides default on-icon display text
-		public $escortArray = false;		
+		public $escortArray = false;//Can be marked during firing if Array can support nearby vessels.		
 		public $animationExplosionScale = 0.4; //single hex explosion
 		
-		public $haphazardTargeting = false;
-		private $malfunction = false;			
+		public $haphazardTargeting = false;//To mark if ship has Haphazard Targeting Systems
+		private $malfunction = false;//To mark when an array malfunctions.			
 		public $firingModes = array(
 			1 => "Targeting"
 		);
@@ -5598,6 +5598,7 @@ class GromeTargetingArray extends Weapon{
 		}
 		
 }//endof class GromeTargetingArray
+
 
 
 class TargetingArrayHandler{
