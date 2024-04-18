@@ -5463,7 +5463,8 @@ class GromeTargetingArray extends Weapon{
 //    	public $specialAbilities = array("TargetingArray"); //Front end looks for this.	
 //		public $specialAbilityValue = true; //so it is actually recognized as special ability!
 		
-		public $damageType = "Raking"; //irrelevant, really
+
+		public $damageType = "Raking"; //To prevent called shots"
 		public $weaponClass = "Particle";
 
 		public $uninterceptable = true; 
@@ -5599,6 +5600,98 @@ class GromeTargetingArray extends Weapon{
 		
 }//endof class GromeTargetingArray
 
+
+
+class AegisSensorPod extends Weapon implements SpecialAbility{
+		public $name = "AegisSensorPod";
+		public $displayName = "Aegis Sensor Pod";
+		public $iconPath = "AegisSensorPod.png";
+		
+		public $damageType = "Raking"; //irrelevant, really
+		public $weaponClass = "Particle";
+
+    	public $specialAbilities = array("BonusOEW"); //Front end looks for this.	
+		public $specialAbilityValue = true; //so it is actually recognized as special ability!
+
+		public $uninterceptable = true; 
+		public $doNotIntercept = true;
+		public $priority = 1;
+	    public $useOEW = false;	
+		public $noLockPenalty = false;
+		public $range = 10;		        
+		
+		public $loadingtime = 1;	
+        public $fireControl = array(0, null, null); //No fire control per se, but gets automatic +3 points.		
+		
+		public $animation = "bolt";
+		public $animationColor = array(250, 250, 250);
+		
+		public $output = 0;
+		public $outputDisplay = ''; //if not empty - overrides default on-icon display text
+		
+		public $animationExplosionScale = 0.4; //single hex explosion
+		
+		protected $calledShotBonus = 2;//Some systems, like Aegis Sensor Pod are easier to hit with called shots.		
+					
+		public $firingModes = array(
+			1 => "Targeting"
+		);
+		protected $autoHit = true;//To show 100% hit chance in front end.
+			
+		public $repairPriority = 5;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
+	 
+		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $output)
+		{				
+			//Nominal amount of health, should never be hit.
+			if ( $maxhealth == 0 ) $maxhealth = 5;
+			if ( $powerReq == 0 ) $powerReq = 2;	
+			parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $output);
+			$this->output = $output;											
+		}
+
+	    protected $possibleCriticals = array(
+			1=>array("OutputReduced3"), //System only exists on Aegis Cruiser and always has Output of 3.  So this works to make it cease to function.
+	    );
+
+		public function getSpecialAbilityValue($args)
+	    {
+			return $this->specialAbilityValue;
+		}
+		    		
+		public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);      
+			$this->data["Special"] = "<br>Can only target fighters.";
+			$this->data["Special"] .= "Automatically hits, but scores no damage."; 
+			$this->data["Special"] .= "<br>Provides 3 CCEW against target fighter unit.";
+			$this->data["Special"] .= "<br>This CCEW cannot be combined with any other EW produced by the aegis ship, including OEW, CCEW, or another Aegis pods.";
+			$this->data["Special"] .= "<br>Called shots have +10% chance to hit this system (i.e. -30%, not -40%).";
+			
+		}	
+
+		public function checkforCalledShotBonus(){
+			return $this->calledShotBonus;
+		}
+		
+		public function calculateHitBase($gamedata, $fireOrder)
+		{
+			$fireOrder->needed = 100; //always true
+			$fireOrder->updated = true;			
+								
+		}//endof calculateHitBase
+			
+	        	
+		public function getDamage($fireOrder){       return 0;   } //no actual damage
+		public function setMinDamage(){     $this->minDamage = 0 ;      }
+		public function setMaxDamage(){     $this->maxDamage = 0 ;      }
+
+        public function stripForJson() {
+            $strippedSystem = parent::stripForJson();    
+            $strippedSystem->autoHit = $this->autoHit;
+            $strippedSystem->calledShotBonus = $this->calledShotBonus;                         
+            return $strippedSystem;
+		}
+		
+}//endof class AegisSensorPod
 
 
 class TargetingArrayHandler{

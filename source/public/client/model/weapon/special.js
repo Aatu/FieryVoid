@@ -502,4 +502,15 @@ var PulsarMine = function PulsarMine(json, ship) {
 PulsarMine.prototype = Object.create(Weapon.prototype);
 PulsarMine.prototype.constructor = PulsarMine;
 
+var AegisSensorPod = function AegisSensorPod(json, ship) {
+    Weapon.call(this, json, ship);
+};
+AegisSensorPod.prototype = Object.create(Weapon.prototype);
+AegisSensorPod.prototype.constructor = AegisSensorPod;
+
+AegisSensorPod.prototype.initializationUpdate = function() {
+var ship = this.ship;	
+this.outputDisplay = shipManager.systems.getOutput(ship, this);
+return this;
+};
 

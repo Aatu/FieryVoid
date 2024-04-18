@@ -1133,6 +1133,9 @@ class Weapon extends ShipSystem
         if ($fireOrder->calledid != -1) {
             $mod += $this->getCalledShotMod();
             if ($target->base) $mod += $this->getCalledShotMod();//called shots vs bases suffer double penalty!
+			//Add bonus to hit on Called Shots for certain systems, like Aegis Sensor Pod
+            $calledSystem = $target->getSystemById($fireOrder->calledid);
+            $mod += $calledSystem->checkforCalledShotBonus();             	
         }
 
         if ($shooter instanceof OSAT && Movement::hasTurned($shooter, $gamedata->turn)) { //leaving instanceof OSAT here - assuming MicroSATs will not suffer this penalty (Dovarum seems to be able to turn/pivot like a superheavy fighter it's based on)
@@ -1275,7 +1278,7 @@ class Weapon extends ShipSystem
 			$bonusFireControl = 0; //initialise
 			$computer = $shooter->getSystemByName("HyachComputer"); //Find computer.
 			$FCIndex = $target->getFireControlIndex(); //Find out FC category of the target.
-			$bonusFireControl = $computer->getFCBonus($FCIndex);  //Use FCIndex to check if Computer has any BFCP allocated to that FC category.
+			$bonusFireControl = $computer->getFCBonus($FCIndex, $gamedata->turn);  //Use FCIndex to check if Computer has any BFCP allocated to that FC category.
 			$firecontrol += $bonusFireControl; //Add to $firecontrol.
 		}
 

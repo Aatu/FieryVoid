@@ -49,6 +49,8 @@ class ShipSystem {
 	protected $doCountForCombatValue = true; //false means this system is skipped when evaluating ships' combat value!
 	
 	protected $tagList = array(); //tags for TAG hit chart entry; REMEMBER TAGS SHOULD BE MADE USING CAPITAL LETTERS!
+	
+	protected $calledShotBonus = 0;//Some systems, like Aegis Sensor Pod are easier to hit with called shots.		
 
 
     function __construct($armour, $maxhealth, $powerReq, $output){
@@ -104,6 +106,10 @@ class ShipSystem {
 		$tag = strtoupper($tag);
 		if(in_array($tag,$this->tagList)) $toReturn = true;		
 		return $toReturn;
+	}
+
+	public function checkforCalledShotBonus(){
+		return 0;
 	}
 	
 	public function doIndividualNotesTransfer(){//optionally to be redefined if system can receive any private data from front endthat need immediate attention		

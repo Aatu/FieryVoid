@@ -1301,6 +1301,40 @@ class BaseShip {
                     //return $EW->amount;
 					$totalAmount += $EW->amount;
             }
+			//Added ability for Systems like Aegis Pod to give Bonus OEW - 18 Apr 2024 - DK
+			if ($this->hasSpecialAbility("BonusOEW")) {//'$this' is shooter in this function.
+			    // Initialize podEW to store maximum output
+			    $podEW = 0;         	
+			    foreach ($this->systems as $system) {
+			        if ($system->isDestroyed($turn) || $system->isOfflineOnTurn($turn)) continue; // Do nothing if destroyed or deactivated
+			        if ($system instanceof AegisSensorPod) {
+			            // Initialize $podFireOrder to null
+			            $podFireOrder = null;
+			            // Get Aegis Pod fireOrders, if any
+			            $podFireOrders = $system->getFireOrders($turn);
+			            // Iterate through fire orders
+				            foreach ($podFireOrders as $fireOrder) { 
+				                if ($fireOrder->type == 'normal') { 
+				                    $podFireOrder = $fireOrder;
+				                    // Break the loop after finding the first 'normal' fire order
+				                    break;
+				                }
+				            }
+			            // If there is no fire order, continue to search for other Aegis Pods
+			            if ($podFireOrder === null) continue;
+			            // Check if $podFireOrder is not null and the target id matches				            
+			            if ($podFireOrder->targetid == $target->id) {
+			                // Update podEW if system output is greater
+			                if ($system->output > $podEW) {
+			                    $podEW = $system->output;
+			                }
+			            }
+			        }
+			    }
+				    // Return podEW if it's greater than the total amount				    
+				    if ($podEW > $totalAmount) return $podEW;	    
+			}		    
+			    
         //}
         return $totalAmount;
     }

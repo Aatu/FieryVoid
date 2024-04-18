@@ -3262,7 +3262,8 @@ spl_autoload_register(
 						'mayoverheat' => '/server/model/cricialClasses.php',
 						'pulsarmine' => '/server/model/weapons/specialWeapons.php', 					 						 	
 					 	'gkarith' => '/server/model/ships/narn/Gkarith.php',
-					 						 	 
+					 	'aegissensorpod' => '/server/model/weapons/specialWeapons.php', 
+						'hyperionaegis' => '/server/model/ships/EA/HyperionAegis.php',					 						 	 
 					 							
 				//Thirdspace
 				'psychicfield' => '/server/model/weapons/specialWeapons.php',

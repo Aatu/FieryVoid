@@ -835,6 +835,9 @@ window.weaponManager = {
         if (calledid > 0) {
             mod += weapon.calledShotMod;
             if (target.base) mod += weapon.calledShotMod; //double penalty vs bases!
+			//Add bonus to hit Aegis SensorPod?
+            var calledSystem = shipManager.systems.getSystem(target, calledid);
+            if(calledSystem.calledShotBonus != null) mod += calledSystem.calledShotBonus;               	
         }
 
         var ammo = weapon.getAmmo(null);
