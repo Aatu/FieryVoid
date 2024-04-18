@@ -5463,7 +5463,7 @@ class GromeTargetingArray extends Weapon{
 //    	public $specialAbilities = array("TargetingArray"); //Front end looks for this.	
 //		public $specialAbilityValue = true; //so it is actually recognized as special ability!
 		
-		public $damageType = "Standard"; //irrelevant, really
+		public $damageType = "Raking"; //irrelevant, really
 		public $weaponClass = "Particle";
 
 		public $uninterceptable = true; 
