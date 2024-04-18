@@ -2062,8 +2062,9 @@ public function onIndividualNotesLoaded($gamedata)
 	}		
 	
 	//returns FC bonus for allocated for a given ship classes / FC index
-	public function getFCBonus($FCIndex){
-	    $FCvalue = 0;
+	public function getFCBonus($FCIndex, $turn){
+	    if($this->isDestroyed($turn)) return 0;
+	    $FCvalue = 0;	    	
 	    $FCvalueArray = array_values($this->allocatedBFCP);        
 	    if (isset($FCvalueArray[$FCIndex])) {
 	        $FCvalue = $FCvalueArray[$FCIndex]; 

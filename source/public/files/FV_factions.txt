@@ -198,6 +198,7 @@ No very specific rules/technologies.
 EARTH ALLIANCE
 Interceptor - dedicated defensive weapon. In tabletop, it needs to be shut down for a turn before switching between offensive (anti-fighter) and defensive (interception) modes. There is no such requirement in Fiery Void, weapon can intercept or fire offensively at will.
 Energy Web - defensive system integrated with Interceptor. Active Interceptor provides (in its arc) shield-like effect of reducing hit chance of all incoming fire by its Intercept Rating. EWeb cannot be flown under by fighters, and does NOT provide damage reduction.
+Aegis Sensor Pod - A specialised system, found only on the Hyperion Aegis Cruiser.  The system targets a fighter flight and automatically hits giving the firing ship 3 CCEW against that unit.  This bonus EW cannot be combined with any other OEW, CCEW or EW from another Aegis Pod.  The Pod are relatively prominent on the ships hull, and Called Shots have a +10% bonus against them (so -30% instead of the usual -40%).
 Shadow Omega - official Shadow Omega conversion by AoG is marked as unofficial because that's what official deployment restrictions sum up to (not tournament legal, opponent permission required). Actual fan-made conversions are present as well!
 NOTE: defensive structures were moved out to separate directory due to presence of A LOT of designs in EA directory, which caused technical problems.
 Missiles - The Earth Alliance are able to access all missile types except those restricted to specific factions e.g. Kor-Lyan nad Orieni.
