@@ -5675,7 +5675,8 @@ class AegisSensorPod extends Weapon implements SpecialAbility{
 		public function calculateHitBase($gamedata, $fireOrder)
 		{
 			$fireOrder->needed = 100; //always true
-			$fireOrder->updated = true;			
+			$fireOrder->updated = true;
+			$fireOrder->pubnotes .= "<br>Aegis Pod provides at least 3 CCEW against this target."; 						
 								
 		}//endof calculateHitBase
 			
