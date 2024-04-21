@@ -168,6 +168,8 @@ class Weapon extends ShipSystem
     protected $possibleCriticals = array(14 => "ReducedRange", 19 => "ReducedDamage", 25 => array("ReducedRange", "ReducedDamage"));
 
     protected $firedDefensivelyAlready = 0; //marker used for weapons capable of firing multiple defensive shots, but suffering backlash once
+	protected $autoHit = false;//To show 100% hit chance in front end.   			        
+   	protected $autoHitArray = array();    
 
 
 	//Weapons are repaired before "average system", but after really important things! 

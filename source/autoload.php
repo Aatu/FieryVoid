@@ -2709,8 +2709,10 @@ spl_autoload_register(
 				'rava' => '/server/model/ships/brakiri_raiders/Rava.php',
 				'attackfrigate' => '/server/model/ships/brakiri_raiders/AttackFrigate.php',
 				'folshota' => '/server/model/ships/brakiri/folshotA.php',
-				'folshotaraider' => '/server/model/ships/brakiri_raiders/FolshotARaider.php',	
-
+				'folshotaraider' => '/server/model/ships/brakiri_raiders/FolshotARaider.php',
+				'gaimphotonbomb' => '/server/model/weapons/customs.php',
+				'gaimtixtyk' => '/server/model/ships/customs/gaimTixTyk.php',				
+				'gaimtixtykupgrade' => '/server/model/ships/customs/gaimTixTykUpgrade.php',	
 
 				//Star Trek conversions
 				//weapons
