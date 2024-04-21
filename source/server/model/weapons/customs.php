@@ -2398,7 +2398,7 @@ class GromeHvyRailgun extends Weapon{
         public function setSystemDataWindow($turn){			
             parent::setSystemDataWindow($turn);        
             $this->data["Special"] = "Can fire in two modes:";
-            $this->data["Special"] .= "<br>  Razzle - Deals 12 damage in Flash mode to target.";
+            $this->data["Special"] .= "<br>  Razzle - Deals 12 damage in Flash mode to target, +1 to fighter dropout rolls.";
             $this->data["Special"] .= "<br>  Dazzle - Hex targeted, enemy fighters suffer 50% reduction to Offensive Bonus, and enemy ships have -1 EW next turn.";            
             $this->data["Special"] .= "<br>Only one 'Dazzle' effect can apply to an enemy unit each turn.";
             $this->data["Special"] .= "<br>Intercept rating is doubled against ballistics.";            
@@ -2507,11 +2507,11 @@ class GromeHvyRailgun extends Weapon{
 			case 1:	
 				parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);		
 				if ($system->advancedArmor) return; //no additional effect on Advanced Armor		
-				//+2 to dropout roll (in case we want to add later)
-//				if ($ship instanceof FighterFlight)	{
-//					$mod = 2;		
-//					$system->critRollMod += $mod;
-//				} 
+				//+1 to dropout roll (in case we want to add later)
+				if ($ship instanceof FighterFlight)	{
+					$mod = 1;		
+					$system->critRollMod += $mod;
+				} 
 				break;	
 						
 			case 2:	
