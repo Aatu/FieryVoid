@@ -2522,7 +2522,7 @@ class GromeHvyRailgun extends Weapon{
 				if ($ship instanceof FighterFlight){
 					$effectHit = round($ship->offensivebonus)/2;//Reduce Offensive Bonus by half.
 					$allFire = $ship->getAllFireOrders($gamedata->turn);
-					$fireOrder->pubnotes .= " All non-ballistic weapon fire by fighter flight reduced by $effectHit5 percent.";					
+					$fireOrder->pubnotes .= " All non-ballistic weapon fire by fighter flight reduced by $effectHit5 percent (does not stack).";					
 					foreach($allFire as $currFireOrder) {
 						if ($currFireOrder->type == 'normal') {
 							if ($currFireOrder->rolled > 0) {
@@ -2542,11 +2542,12 @@ class GromeHvyRailgun extends Weapon{
 							}
 						}
 					}else{ //ship - place effect on Scanner next turn!
-						$scanner = $ship->getSystemByName("Scanner");//EW always reduced by 1 for ships.						    
+						$scanner = $ship->getSystemByName("Scanner");//EW always reduced by 1 for ships.	    
 						if($scanner){
 								$crit = new OutputReduced1(-1, $ship->id, $scanner->id, 'OutputReduced1', $gamedata->turn+1, $gamedata->turn+1); 
 								$crit->updated = true;
 								$scanner->criticals[] =  $crit;
+								$fireOrder->pubnotes .= " Affect ships have their EW reduced by 1 point next turn (does not stack).";										
 						}
 					}					
 				break;				
