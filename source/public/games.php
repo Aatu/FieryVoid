@@ -63,17 +63,23 @@ if (isset($_SESSION["user"])) {
        -->
 		
 
-		---------- <b>LATEST NEWS - March 2024</b> ----------
-<br><u><b>HYAAAAAACH!</b></u> - by Douglas
-<br><b>Balosian Delta-V</b> for all the Underdweller fans ;)
-<br><b>bugfixes and laubout changes</b> - by Douglas
-<br><b>Thirdspace updates</b> - by Douglas
-<br><b>Hyperlinks added to Register Account window</b> - by Douglas
-<br><b>Nexus updates, including new Makar Federation</b> - by Geoffrey
-<br><b>EA and Orieni split</b> - big factions should be playable again!
+		---------- <b>LATEST NEWS - May 2024</b> ----------
+<br><u><b>A LOT of new content by Douglas!</b></u>
+<br>Grome Refit: Railgun Shells, TT-accurate Targeting/Escort Arrays and Flak Cannons.
+<br>Narn Pulsar Mine & GKarith,
+<br>Aegis Sensor Pod and Hyperion Aegis Cruiser,
+<br>Limpet Bore Torpedo - Rework,
+<br>Prox Laser - Change arcs and add auto-miss if Launcher not fired,
+<br>Hyach and KL Polishing,
+<br>Hyach Stealth Ship fixes,
+<br>Thrust Boosted Weapons & Nexus Protoype
+<br>IFF System for Mine Launcher equipped ships,
+<br>Abbai Mine Launcher and remade Motenai Mine Launcher ship,
+<br>Custom Ship & Weapon: Gaim Tiktyx + Photon Bomb,
+<br>Targeting Tooltip updated for weapon with multiple Firing Modes, and for weapons that always hit.
+<br>Set max size for Ship Icons graphics, adjusted ewSprite sizes,
+<br>Update Laser Effects.
 
-		 <br><br>---------- <b>update 11th of March</b> ---------- 
-	    <br><b>fixes</b> - polishing of all above
        
 
 <!--	        
