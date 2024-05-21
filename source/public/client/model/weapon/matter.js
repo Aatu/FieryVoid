@@ -66,11 +66,20 @@ var MatterGun = function MatterGun(json, ship) {
 MatterGun.prototype = Object.create(Matter.prototype);
 MatterGun.prototype.constructor = MatterGun;
 
+//OLD VERSION OF FLAK CANNON - STILL USED ON SOME BSG SHIPS SO I HAVEN'T REMOVED - DK
+/*
 var FlakCannon = function FlakCannon(json, ship) {
     Matter.call(this, json, ship);
 };
 FlakCannon.prototype = Object.create(Matter.prototype);
 FlakCannon.prototype.constructor = FlakCannon;
+*/
+//NEW VERSION
+var GromeFlakCannon = function GromeFlakCannon(json, ship) {
+    Matter.call(this, json, ship);
+};
+GromeFlakCannon.prototype = Object.create(Matter.prototype);
+GromeFlakCannon.prototype.constructor = GromeFlakCannon;
 
 var SlugCannon = function SlugCannon(json, ship) {
     Matter.call(this, json, ship);

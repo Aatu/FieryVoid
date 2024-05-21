@@ -104,9 +104,8 @@ class Weapon extends ShipSystem
 	public $noLockPenalty = true;
 	public $noLockPenaltyArray = array();	
 
-	protected $overrideCallingRestrictions = false; //when set to true overrides default Called Shot setting (e.g., make a ballistic do a called shot)
-	protected $canOnlyCalledShot = false;	
-//	public $canTargetOtherSections = false; //NOT IMPLEMENTED. When set to true, weapon can called shot systems on external sections of target not facing firing ship.
+//	protected $overrideCallingRestrictions = false; //when set to true overrides default Called Shot setting (e.g., make a ballistic do a called shot)
+//	protected $canOnlyCalledShot = false;	
 	protected $hasSpecialLaunchHexCalculation = false; //Weapons like Proximty Laser use a separate launcher system to determine point of shot.
 	public $canModesIntercept = false;	//Some missile launchers can have Interceptor missiles. variable for Front End so it knows to use weapon-specific function to search for intercept rating across firing modes e.g. Interceptor Missile on missile launcher.
 		
@@ -169,6 +168,8 @@ class Weapon extends ShipSystem
     protected $possibleCriticals = array(14 => "ReducedRange", 19 => "ReducedDamage", 25 => array("ReducedRange", "ReducedDamage"));
 
     protected $firedDefensivelyAlready = 0; //marker used for weapons capable of firing multiple defensive shots, but suffering backlash once
+//	protected $autoHit = false;//To show 100% hit chance in front end - DK 			        
+//   	protected $autoHitArray = array();    
 
 
 	//Weapons are repaired before "average system", but after really important things! 
@@ -1134,6 +1135,9 @@ class Weapon extends ShipSystem
         if ($fireOrder->calledid != -1) {
             $mod += $this->getCalledShotMod();
             if ($target->base) $mod += $this->getCalledShotMod();//called shots vs bases suffer double penalty!
+			//Add bonus to hit on Called Shots for certain systems, like Aegis Sensor Pod
+            $calledSystem = $target->getSystemById($fireOrder->calledid);
+            $mod += $calledSystem->checkforCalledShotBonus();             	
         }
 
         if ($shooter instanceof OSAT && Movement::hasTurned($shooter, $gamedata->turn)) { //leaving instanceof OSAT here - assuming MicroSATs will not suffer this penalty (Dovarum seems to be able to turn/pivot like a superheavy fighter it's based on)
@@ -1272,13 +1276,17 @@ class Weapon extends ShipSystem
         }
         $firecontrol = $this->fireControl[$target->getFireControlIndex()];
         
-//		if ($shooter->computerHyach) { //Old method, discontinued to avoid adding variable.
 		if ($shooter->hasSpecialAbility("HyachComputer")) { //Does ship have a Hyach Computer that might add bonus FC?
 			$bonusFireControl = 0; //initialise
 			$computer = $shooter->getSystemByName("HyachComputer"); //Find computer.
 			$FCIndex = $target->getFireControlIndex(); //Find out FC category of the target.
-			$bonusFireControl = $computer->getFCBonus($FCIndex);  //Use FCIndex to check if Computer has any BFCP allocated to that FC category.
+			$bonusFireControl = $computer->getFCBonus($FCIndex, $gamedata->turn);  //Use FCIndex to check if Computer has any BFCP allocated to that FC category.
 			$firecontrol += $bonusFireControl; //Add to $firecontrol.
+		}
+
+//		if ($shooter->hasSpecialAbility("TargetingArray") || TargetingArrayHandler::targetingArraysExist()){ //Does shooter have Targeting Array, or could Escort Arrays exist in game?	
+		if (TargetingArrayHandler::targetingArraysExist()){ //Do Targeting Array exist in game?		
+			$mod += TargetingArrayHandler::getHitBonus($gamedata, $fireOrder, $shooter, $target);
 		}
         		
 		//advanced sensors: negates BDEW and SDEW, unless target is unit of advanced race

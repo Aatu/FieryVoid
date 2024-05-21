@@ -43,8 +43,8 @@ class KobolValkyrie extends BaseShip{
 		$this->addFrontSystem(new MedBlastCannon(4, 5, 2, 240, 120));
         $this->addFrontSystem(new LightRailGun(4, 6, 3, 300, 60));        
         $this->addFrontSystem(new LightRailGun(4, 6, 3, 300, 60));     
-		$this->addFrontSystem(new FlakCannon(4, 4, 2, 210, 30));
-		$this->addFrontSystem(new FlakCannon(4, 4, 2, 330, 150));
+		$this->addFrontSystem(new GromeFlakCannon(4, 4, 2, 210, 30));
+		$this->addFrontSystem(new GromeFlakCannon(4, 4, 2, 330, 150));
 		$this->addFrontSystem(new Bulkhead(0, 4));
         $this->addFrontSystem(new Bulkhead(0, 4));
         $this->addFrontSystem(new Thruster(4, 9, 0, 3, 1));
@@ -58,12 +58,12 @@ class KobolValkyrie extends BaseShip{
 		$this->addAftSystem(new Bulkhead(0, 4));
 		$this->addAftSystem(new MedBlastCannon(4, 5, 2, 180, 330));
 		$this->addAftSystem(new MedBlastCannon(4, 5, 2, 30, 180));
-		$this->addAftSystem(new FlakCannon(4, 4, 2, 60, 300));
+		$this->addAftSystem(new GromeFlakCannon(4, 4, 2, 60, 300));
 
 		$this->addLeftSystem(new MedBlastCannon(4, 5, 2, 210, 360));
 		$this->addLeftSystem(new MedBlastCannon(4, 5, 2, 210, 360));
-		$this->addLeftSystem(new FlakCannon(4, 4, 2, 210, 330));
-		$this->addLeftSystem(new FlakCannon(4, 4, 2, 210, 330));
+		$this->addLeftSystem(new GromeFlakCannon(4, 4, 2, 210, 330));
+		$this->addLeftSystem(new GromeFlakCannon(4, 4, 2, 210, 330));
 		$this->addLeftSystem(new Bulkhead(0, 4));
         $this->addLeftSystem(new Bulkhead(0, 4));
         $this->addLeftSystem(new Thruster(4, 9, 0, 3, 3));
@@ -71,8 +71,8 @@ class KobolValkyrie extends BaseShip{
 
 		$this->addRightSystem(new MedBlastCannon(4, 5, 2, 0, 150));
 		$this->addRightSystem(new MedBlastCannon(4, 5, 2, 0, 150));
-		$this->addRightSystem(new FlakCannon(4, 4, 2, 30, 150));
-		$this->addRightSystem(new FlakCannon(4, 4, 2, 30, 150));
+		$this->addRightSystem(new GromeFlakCannon(4, 4, 2, 30, 150));
+		$this->addRightSystem(new GromeFlakCannon(4, 4, 2, 30, 150));
 		$this->addRightSystem(new Bulkhead(0, 4));
         $this->addRightSystem(new Bulkhead(0, 4));
         $this->addRightSystem(new Thruster(4, 9, 0, 3, 4));

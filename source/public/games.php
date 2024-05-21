@@ -72,6 +72,8 @@ if (isset($_SESSION["user"])) {
 <br><b>Nexus updates, including new Makar Federation</b> - by Geoffrey
 <br><b>EA and Orieni split</b> - big factions should be playable again!
 
+		 <br><br>---------- <b>update 11th of March</b> ---------- 
+	    <br><b>fixes</b> - polishing of all above
        
 
 <!--	        

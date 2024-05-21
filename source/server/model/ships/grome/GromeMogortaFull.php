@@ -14,7 +14,8 @@ The costs before rounding the final value are:
 			Light railgun ~12 points
 		Estimated cost is 650 + (6x24) = 794 -> rounded to 800*/	
 	$this->pointCost = 800;
-	$this->faction = "Grome Autocracy";
+        $this->faction = "Custom Ships";
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
         $this->phpclass = "GromeMogortaFull";
 		$this->variantOf = "Mogorta Warship";
         $this->imagePath = "img/ships/GromeMogorta.png";
@@ -69,15 +70,15 @@ The costs before rounding the final value are:
 		$this->addAftSystem(new GromeMedRailgun(3, 9, 6, 120, 180));
         $this->addAftSystem(new ConnectionStrut(3));
 
-        $this->addLeftSystem(new FlakCannon(2, 4, 2, 180, 360));
-        $this->addLeftSystem(new FlakCannon(2, 4, 2, 180, 360));
-        $this->addLeftSystem(new FlakCannon(2, 4, 2, 180, 360));
+        $this->addLeftSystem(new GromeFlakCannon(2, 4, 2, 180, 360));
+        $this->addLeftSystem(new GromeFlakCannon(2, 4, 2, 180, 360));
+        $this->addLeftSystem(new GromeFlakCannon(2, 4, 2, 180, 360));
         $this->addLeftSystem(new Thruster(3, 15, 0, 3, 3));
         $this->addLeftSystem(new ConnectionStrut(3));
 
-        $this->addRightSystem(new FlakCannon(2, 4, 2, 0, 180));
-        $this->addRightSystem(new FlakCannon(2, 4, 2, 0, 180));
-        $this->addRightSystem(new FlakCannon(2, 4, 2, 0, 180));
+        $this->addRightSystem(new GromeFlakCannon(2, 4, 2, 0, 180));
+        $this->addRightSystem(new GromeFlakCannon(2, 4, 2, 0, 180));
+        $this->addRightSystem(new GromeFlakCannon(2, 4, 2, 0, 180));
         $this->addRightSystem(new Thruster(3, 15, 0, 3, 4));
         $this->addRightSystem(new ConnectionStrut(3));
 

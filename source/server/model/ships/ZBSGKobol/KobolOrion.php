@@ -43,15 +43,15 @@ class KobolOrion extends MediumShip{
 
 		$this->addFrontSystem(new Hangar(3, 9));
         $this->addFrontSystem(new Thruster(2, 9, 0, 4, 1));
-		$this->addFrontSystem(new FlakCannon(2, 4, 2, 240, 120));
-		$this->addFrontSystem(new FlakCannon(2, 4, 2, 240, 120));
+		$this->addFrontSystem(new GromeFlakCannon(2, 4, 2, 240, 120));
+		$this->addFrontSystem(new GromeFlakCannon(2, 4, 2, 240, 120));
 		$this->addFrontSystem(new LtBlastCannon(3, 4, 1, 180, 30));
 		$this->addFrontSystem(new LtBlastCannon(3, 4, 1, 330, 180));
 
 		$this->addAftSystem(new LtBlastCannon(3, 4, 1, 150, 360));
 		$this->addAftSystem(new LtBlastCannon(3, 4, 1, 0, 210));
-		$this->addAftSystem(new FlakCannon(2, 4, 2, 60, 300));
-		$this->addAftSystem(new FlakCannon(2, 4, 2, 60, 300));
+		$this->addAftSystem(new GromeFlakCannon(2, 4, 2, 60, 300));
+		$this->addAftSystem(new GromeFlakCannon(2, 4, 2, 60, 300));
         $this->addAftSystem(new ElintScanner(3, 15, 4, 3));
         $this->addAftSystem(new Thruster(2, 12, 0, 4, 2));    
         $this->addAftSystem(new Thruster(2, 12, 0, 4, 2));    
