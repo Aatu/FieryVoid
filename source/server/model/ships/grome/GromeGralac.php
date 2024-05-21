@@ -5,7 +5,8 @@ class GromeGralac extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 900;
-	$this->faction = "Grome Autocracy";
+        $this->faction = "Custom Ships";
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
         $this->phpclass = "GromeGralac";
         $this->imagePath = "img/ships/GromeGroth.png";
         $this->shipClass = "Gralac Heavy Carrier";
@@ -51,8 +52,8 @@ class GromeGralac extends BaseShip{
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
 		$this->addFrontSystem(new Railgun(3, 9, 6, 300, 360));
 		$this->addFrontSystem(new Railgun(3, 9, 6, 0, 60));
-        $this->addFrontSystem(new FlakCannon(5, 4, 2, 240, 60));
-        $this->addFrontSystem(new FlakCannon(5, 4, 2, 300, 120));
+        $this->addFrontSystem(new GromeFlakCannon(5, 4, 2, 240, 60));
+        $this->addFrontSystem(new GromeFlakCannon(5, 4, 2, 300, 120));
         $this->addFrontSystem(new ConnectionStrut(4));
 
         $this->addAftSystem(new Thruster(3, 16, 0, 4, 2));
@@ -61,19 +62,19 @@ class GromeGralac extends BaseShip{
 		$this->addAftSystem(new Railgun(3, 9, 6, 120, 180));
         $this->addAftSystem(new ConnectionStrut(4));
 
-        $this->addLeftSystem(new FlakCannon(2, 4, 2, 180, 360));
-        $this->addLeftSystem(new FlakCannon(2, 4, 2, 180, 360));
-        $this->addLeftSystem(new FlakCannon(2, 4, 2, 180, 360));
-        $this->addLeftSystem(new FlakCannon(2, 4, 2, 180, 360));
+        $this->addLeftSystem(new GromeFlakCannon(2, 4, 2, 180, 360));
+        $this->addLeftSystem(new GromeFlakCannon(2, 4, 2, 180, 360));
+        $this->addLeftSystem(new GromeFlakCannon(2, 4, 2, 180, 360));
+        $this->addLeftSystem(new GromeFlakCannon(2, 4, 2, 180, 360));
         $this->addLeftSystem(new Thruster(3, 15, 0, 4, 3));
 		$this->addLeftSystem(new Hangar(3, 12));
 		$this->addLeftSystem(new Hangar(3, 12));
         $this->addLeftSystem(new ConnectionStrut(4));
 
-        $this->addRightSystem(new FlakCannon(2, 4, 2, 0, 180));
-        $this->addRightSystem(new FlakCannon(2, 4, 2, 0, 180));
-        $this->addRightSystem(new FlakCannon(2, 4, 2, 0, 180));
-        $this->addRightSystem(new FlakCannon(2, 4, 2, 0, 180));
+        $this->addRightSystem(new GromeFlakCannon(2, 4, 2, 0, 180));
+        $this->addRightSystem(new GromeFlakCannon(2, 4, 2, 0, 180));
+        $this->addRightSystem(new GromeFlakCannon(2, 4, 2, 0, 180));
+        $this->addRightSystem(new GromeFlakCannon(2, 4, 2, 0, 180));
         $this->addRightSystem(new Thruster(3, 15, 0, 4, 4));
 		$this->addRightSystem(new Hangar(3, 12));
 		$this->addRightSystem(new Hangar(3, 12));

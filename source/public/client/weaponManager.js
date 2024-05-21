@@ -404,11 +404,14 @@ window.weaponManager = {
                 if (weaponManager.checkIsInRange(selectedShip, ship, weapon)) {
                     var value = weapon.firingMode;
                     value = weapon.firingModes[value];
+					var keys = Object.keys(weapon.firingModes);                    
                     if (calledid != null && !weaponManager.canWeaponCall(weapon)) {
                         //called shot, weapon not eligible!
                         $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="hitchange"> CANNOT CALL SHOT</span></div>').appendTo(f);
-                    } else {
-                        $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="hitchange"> - Approx: ' + weaponManager.calculateHitChange(selectedShip, ship, weapon, calledid) + '%</span></div>').appendTo(f);
+                    } else if (keys.length > 1){//DK - Added to better display Firing Mode info on targeting enemy ship.
+                        $('<div><span class="weapon">' + weapon.displayName + '<span class="firingMode"> (' + value + ')</span><span class="hitchange"> - Approx: ' + weaponManager.calculateHitChange(selectedShip, ship, weapon, calledid) + '%</span></div>').appendTo(f);                      
+					} else {
+                        $('<div><span class="weapon">' + weapon.displayName + '</span><span class="hitchange"> - Approx: ' + weaponManager.calculateHitChange(selectedShip, ship, weapon, calledid) + '%</span></div>').appendTo(f);
                     }
                 } else {
                     $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="hitchange"> NOT IN RANGE</span></div>').appendTo(f);
@@ -439,6 +442,12 @@ window.weaponManager = {
 		if (system.isTargetable != true) return false; //cannot be targeted by called shots under any conditions
 
         if (target.flight) return true; //allow called shots at fighters (in effect it will affect particular fighter, not fighter system)
+      
+		//Added fragment below to allow Limpet Bore Torpedo to target any exterior system, no other weapon should meet criteria at this time - DK - 16 Apr 2024
+  		for (var i in gamedata.selectedSystems) {
+           var shooterSystem = gamedata.selectedSystems[i];
+           if (shooterSystem.weapon && shooterSystem.canTargetAllExtSections && (system.location != 0 || system.location == 0 && system.isPrimaryTargetable)) return true;            
+		}                  	
 
         var shooterCompassHeading = mathlib.getCompassHeadingOfShip(target, shooter);
         var targetFacing = shipManager.getShipHeadingAngle(target);
@@ -713,6 +722,9 @@ window.weaponManager = {
 		if (weapon.isRammingAttack) {
 			return weaponManager.calculateRamChance(shooter, target, weapon, calledid);
 		}
+		
+		if(weapon.autoHit) return 100; //Some weapons always hit, let's just show 100% chance to prevent confusion at firing. DK - 12 Apr 2024
+			
 	    var defence = 0;
 	    var distance = 0;
 	    if (weapon.ballistic){		    
@@ -823,6 +835,9 @@ window.weaponManager = {
         if (calledid > 0) {
             mod += weapon.calledShotMod;
             if (target.base) mod += weapon.calledShotMod; //double penalty vs bases!
+			//Add bonus to hit Aegis SensorPod?
+            var calledSystem = shipManager.systems.getSystem(target, calledid);
+            if(calledSystem.calledShotBonus != null) mod += calledSystem.calledShotBonus;               	
         }
 
         var ammo = weapon.getAmmo(null);
@@ -1365,19 +1380,29 @@ window.weaponManager = {
 
         var stealthSystem = shipManager.systems.getSystemByName(target, "stealth");
 
-        if (stealthSystem && distance > 5 && weapon.ballistic) {
+        if (stealthSystem && distance > 5 && weapon.ballistic && target.flight) {
             return false;
         }
 
         if (range === 0) return true;
 
         var jammer = shipManager.systems.getSystemByName(target, "jammer");
-		if (jammer)
+		if (jammer || stealthSystem)
 		{
-			//check whether it was enabled last turn... if so, allow missile launch :)
-			if (!shipManager.power.isOfflineOnTurn(target, jammer, (gamedata.turn-1) )){
+
+//			if (!shipManager.power.isOfflineOnTurn(target, jammer, (gamedata.turn-1) )){ //Amended this section to accommodate Hyach Stealth ships - DK 18.3.24
 				/*Improved/Advanced Sensors effect*/
-				var jammerValue = shipManager.systems.getOutput(target, jammer);
+				var jammerValue = 0;
+					if (jammer && (!shipManager.power.isOfflineOnTurn(target, jammer, (gamedata.turn-1) ))) {//Jammer exists and was enabled last turn.
+						jammerValue = shipManager.systems.getOutput(target, jammer);
+					}
+				var stealthValue = 0;	
+					if (stealthSystem && (mathlib.getDistanceBetweenShipsInHex(shooter, target) > 10 && target.shipSizeClass >= 0)){
+					 stealthValue = shipManager.systems.getOutput(target, stealthSystem);
+					} 
+					
+				if(stealthValue > jammerValue) jammerValue = stealthValue;//larger value is used
+				
 				if (shipManager.hasSpecialAbility(shooter,"AdvancedSensors") || shipManager.systems.getSystemByName(shooter, "fighteradvsensors")) {
 					jammerValue = 0; //negated
 				} else if (shipManager.hasSpecialAbility(shooter,"ImprovedSensors") || shipManager.systems.getSystemByName(shooter, "fighterimprsensors")) {
@@ -1385,7 +1410,7 @@ window.weaponManager = {
 				}
 				range = range / (1+jammerValue);
 				//range = range / (shipManager.systems.getOutput(target, jammer)+1);
-			}
+	//		}
 		}
 
         return distance <= range;
@@ -1407,6 +1432,10 @@ window.weaponManager = {
             }
 
             if (!weapon.hextarget) {
+                continue;
+            }
+            
+            if (weapon.noHexTargeting) { //Prevent weapons like F-Rack targeting hexes when they shouldn’t be able to! DK 17.3.24
                 continue;
             }
 
