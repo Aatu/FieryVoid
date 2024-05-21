@@ -1841,7 +1841,7 @@ class CustomLightOMissileRack extends CustomLightSMissileRack{
 //Grome special shell railguns
 //Listed in Customs as these are official options for the Grome.
 //However, I did not want these in Matter as they do not adhear the to proper shell limits.
-
+//OLD VERSION OF FULL GROME RAILGUN - REPLACED WITH SHELL AMMO FROM APR 2024 - TO BE DELETED with 'FULL' Variants files
 class GromeLgtRailgun extends Weapon{ 
 /*Multi-mode weapon based off the EA Laser-Pulse Array code. This fires as:
 	Standard light railgun (S): Matter, 1d10+5, -1/hex, +0/+2/+3, 1/2 turns
@@ -1971,6 +1971,7 @@ class GromeLgtRailgun extends Weapon{
 } //endof class GromeLgtRailgun
 
 
+//OLD VERSION OF FULL GROME RAILGUN - REPLACED WITH SHELL AMMO FROM APR 2024 - TO BE DELETED with 'FULL' Variants files
 class GromeMedRailgun extends Weapon{ 
 /*Multi-mode weapon based off the EA Laser-Pulse Array code. This fires as:
 	Standard light railgun (S): Matter, 3d10+3, -1/2 hexes, +2/+2/-3, 1/3 turns
@@ -2112,6 +2113,7 @@ class GromeMedRailgun extends Weapon{
 } //endof class GromeMedRailgun
 
 
+//OLD VERSION OF FULL GROME RAILGUN - REPLACED WITH SHELL AMMO FROM APR 2024 - TO BE DELETED with 'FULL' Variants files
 class GromeHvyRailgun extends Weapon{ 
 /*Multi-mode weapon based off the EA Laser-Pulse Array code. This fires as:
 	Standard light railgun (S): Matter, 5d10+7, -1/3 hexes, +2/+2/-3, 1/4 turns
@@ -2345,6 +2347,258 @@ class GromeHvyRailgun extends Weapon{
     } //endof class CustomEarlyLtParticleCutter
 
 
+//Custom weapon requested by Abraxas for his Campaign - Apr 24 - DK
+  class GaimPhotonBomb extends Weapon{
+        public $name = "GaimPhotonBomb";
+        public $displayName = "Photon Bomb";
+	    public $iconPath = "GaimPhotonBomb.png";
+		public $animation = "laser";
+        public $animationArray = array(1=>"laser", 2=>"bolt");		
+        public $animationColor = array(255, 153, 102);
+		public $animationExplosionScale = 0.5; //single hex explosion
+			    
+        public $firingModes = array( 1 =>"Razzle", 2 =>"Dazzle");
+        
+        public $damageType = "Flash";
+        public $damageTypeArray = array(1=> 'Flash', 2=>'Standard');
+                 
+        public $weaponClass = "Particle";
+        
+        public $loadingtime = 1;
+        public $priority = 4;
+
+        public $rangePenalty = 1;
+        public $fireControl = array(4, 0, 0); // fighters, <mediums, <capitals
+
+    	public $range = 0;
+    	public $rangeArray = array(1=>0, 2=>10);
+    
+    	public $intercept = 2;        
+   	 	public $hextarget = false; //this weapon is targeted on hex, not unit
+   		public $hextargetArray = array(1=>false, 2=>true);
+   		
+		protected $autoHit = false;//To show 100% hit chance in front end.   			        
+   		protected $autoHitArray = array(1=>false, 2=>true);
+   		
+   		
+		private static $alreadyDazzled = array();	
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+        {
+			//maxhealth and power reqirement are fixed; left option to override with hand-written values
+			if ( $maxhealth == 0 ){
+				$maxhealth = 9;
+			}
+			if ( $powerReq == 0 ){
+				$powerReq = 3;
+			}
+			parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function setSystemDataWindow($turn){			
+            parent::setSystemDataWindow($turn);        
+            $this->data["Special"] = "Can fire in two modes:";
+            $this->data["Special"] .= "<br>  Razzle - Deals 12 damage in Flash mode to target, +1 to fighter dropout rolls.";
+            $this->data["Special"] .= "<br>  Dazzle - Hex targeted, enemy fighters suffer 50% reduction to Offensive Bonus, and enemy ships have -1 EW next turn.";            
+            $this->data["Special"] .= "<br>Only one 'Dazzle' effect can apply to an enemy unit each turn.";
+            $this->data["Special"] .= "<br>Intercept rating is doubled against ballistics.";            
+		}
+
+	public function getInterceptionMod($gamedata, $fireOrder){
+						
+		$interceptMod = parent::getInterceptionMod($gamedata, $fireOrder);		
+	    $shooter = $gamedata->getShipById($fireOrder->shooterid);
+	    $firingweapon = $shooter->getSystemById($fireOrder->weaponid);		
+
+		if($firingweapon->ballistic) $interceptMod = $interceptMod *2;//Doubly effective against ballistics.		
+
+		return $interceptMod;
+	}
+
+
+	public function calculateHitBase($gamedata, $fireOrder)
+	{
+		switch($this->firingMode){
+			
+			case 1:
+				parent::calculateHitBase($gamedata, $fireOrder);
+				break;
+			
+			case 2:				
+				$fireOrder->needed = 100; //always true
+				$fireOrder->updated = true;
+				break;
+		}
+	}
+
+
+    public function fire($gamedata, $fireOrder)
+    { 
+    
+    	switch($this->firingMode){
+			
+			case 1:	
+				
+				parent::fire($gamedata, $fireOrder);
+				break;
+						
+			case 2://redefined for hex-targeting
+				
+		        $this->changeFiringMode($fireOrder->firingMode);//changing firing mode may cause other changes, too!
+		        $shooter = $gamedata->getShipById($fireOrder->shooterid);
+
+		        $movement = $shooter->getLastTurnMovement($fireOrder->turn);
+		        $posLaunch = $movement->position;//at moment of launch!!!
+		        //sometimes player does manage to target ship after all..
+		        if ($fireOrder->targetid != -1) {
+		            $targetship = $gamedata->getShipById($fireOrder->targetid);
+		            //insert correct target coordinates: last turns' target position
+		            $movement = $targetship->getLastTurnMovement($fireOrder->turn);
+		            $fireOrder->x = $movement->position->q;
+		            $fireOrder->y = $movement->position->r;
+		            $fireOrder->targetid = -1; //correct the error
+		        }
+		        $target = new OffsetCoordinate($fireOrder->x, $fireOrder->y);
+		        $rolled = Dice::d(100);
+		        $fireOrder->rolled = $rolled; //...and hit, regardless of value rolled
+
+				$fireOrder->shotshit++;            
+				//Affect ships in range
+				$affectedUnits = $gamedata->getShipsInDistance($target);
+							
+				foreach ($affectedUnits as $targetShip) {	
+					if (!$targetShip->isDestroyed()) { //no point allocating to destroyed ship		
+					//check for overlap - return if this unit was already affected
+						foreach (GaimPhotonBomb::$alreadyDazzled as $affectedID){
+							if ($affectedID == $targetShip->id) return;	
+						}
+				
+					GaimPhotonBomb::$alreadyDazzled[] = $targetShip->id;//add new ID to affected list
+										
+						if (isset($affectedUnits[$targetShip->id])) { //units on target hex! direction damage is coming from: launch hex
+							$sourceHex = $posLaunch;
+						} else { //other units in range! direction damage is coming from: impact hex
+							$sourceHex = $target;
+						}
+						$this->AOEdamage($targetShip, $shooter, $fireOrder, $sourceHex, 0, $gamedata);										}
+				}
+		        $fireOrder->rolled = max(1, $fireOrder->rolled);//Marks that fire order has been handled, just in case.
+	        
+	        break;
+		} 
+    } //endof function fire	
+	
+
+	public function AOEdamage($target, $shooter, $fireOrder, $sourceHex, $damage, $gamedata)
+	{						
+		if ($target instanceOf FighterFlight) {
+			$firstFighter = $target->getSampleFighter(); //place effect on the first fighter, even if it's already destroyed - entire flight will be affected!
+			$this->onDamagedSystem($target, $firstFighter, 0, 0, $gamedata, $fireOrder);//no actual damage, proceed to apply effects
+		}else{//Ships!
+			$scanner = $target->getSystemByName("Scanner");//EW always reduced by 1 for ships.			
+			$this->onDamagedSystem($target, $scanner, 0, 0, $gamedata, $fireOrder);					
+		}	
+	}		
+
+	public function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ 
+
+		switch($this->firingMode){
+				
+			case 1:	
+				parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);		
+				if ($system->advancedArmor) return; //no additional effect on Advanced Armor		
+				//+1 to dropout roll (in case we want to add later)
+				if ($ship instanceof FighterFlight)	{
+					$mod = 1;		
+					$system->critRollMod += $mod;
+				} 
+				break;	
+						
+			case 2:	
+					$effectHit = 0; //Initialise.
+					$effectHit5 = $effectHit * 5;//For notes only.
+
+					
+				if ($ship instanceof FighterFlight){
+					$effectHit = round($ship->offensivebonus)/2;//Reduce Offensive Bonus by half.
+					$allFire = $ship->getAllFireOrders($gamedata->turn);
+					$fireOrder->pubnotes .= " All non-ballistic weapon fire by fighter flight reduced by $effectHit5 percent (does not stack).";					
+					foreach($allFire as $currFireOrder) {
+						if ($currFireOrder->type == 'normal') {
+							if ($currFireOrder->rolled > 0) {
+							}else{
+								$currFireOrder->needed -= $effectHit *5; //$needed works on d100
+							}
+						}
+					}
+
+  					//place effect on first fighter, even if it's already destroyed!
+					$firstFighter = $ship->getSampleFighter();     
+						if($firstFighter){
+							for($i=1; $i<=$effectHit;$i++){
+								$crit = new tmphitreduction(-1, $ship->id, $firstFighter->id, 'tmphitreduction', $gamedata->turn, $gamedata->turn); 
+								$crit->updated = true;
+								$firstFighter->criticals[] =  $crit;
+							}
+						}
+					}else{ //ship - place effect on Scanner next turn!
+						$scanner = $ship->getSystemByName("Scanner");//EW always reduced by 1 for ships.	    
+						if($scanner){
+								$crit = new OutputReduced1(-1, $ship->id, $scanner->id, 'OutputReduced1', $gamedata->turn+1, $gamedata->turn+1); 
+								$crit->updated = true;
+								$scanner->criticals[] =  $crit;
+								$fireOrder->pubnotes .= " Affect ships have their EW reduced by 1 point next turn (does not stack).";										
+						}
+					}					
+				break;				
+			}
+			
+	} //endof function onDamagedSystem
+
+        
+        public function getDamage($fireOrder){ 
+			switch($this->firingMode){
+				case 1:
+					return 12;
+					break;
+				case 2:
+					return 0;
+					break;	
+			}
+		}
+        public function setMinDamage(){ 
+			switch($this->firingMode){
+				case 1:
+					$this->minDamage = 12;
+					break;
+				case 2:
+					$this->minDamage = 0;
+					break;	
+			}
+			$this->minDamageArray[$this->firingMode] = $this->minDamage;
+	}
+	
+        public function setMaxDamage(){
+			switch($this->firingMode){
+				case 1:
+					$this->maxDamage = 12;
+					break;
+				case 2:
+					$this->maxDamage = 0;
+					break;	
+			}
+			$this->maxDamageArray[$this->firingMode] = $this->maxDamage;
+		}
+
+        public function stripForJson() {
+            $strippedSystem = parent::stripForJson();    
+            $strippedSystem->autoHit = $this->autoHit;
+            $strippedSystem->autoHitArray = $this->autoHitArray;                          
+            return $strippedSystem;
+		}
+
+
+} //endof class GaimPhotonBomb
 
 
 

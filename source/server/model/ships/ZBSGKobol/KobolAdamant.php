@@ -45,8 +45,8 @@ class KobolAdamant extends HeavyCombatVessel{
 		$this->addFrontSystem(new LightRailGun(3, 6, 3, 210, 360)); 
         $this->addFrontSystem(new LightRailGun(3, 6, 3, 0, 150)); 
 		$this->addFrontSystem(new LightRailGun(3, 6, 3, 0, 150)); 
-		$this->addFrontSystem(new FlakCannon(3, 4, 2, 270, 30));
-		$this->addFrontSystem(new FlakCannon(3, 4, 2, 330, 90));
+		$this->addFrontSystem(new GromeFlakCannon(3, 4, 2, 270, 30));
+		$this->addFrontSystem(new GromeFlakCannon(3, 4, 2, 330, 90));
 		$this->addFrontSystem(new Bulkhead(0, 4));
 		$this->addFrontSystem(new Bulkhead(0, 4));
 
@@ -60,8 +60,8 @@ class KobolAdamant extends HeavyCombatVessel{
 		$this->addAftSystem(new LightRailGun(3, 6, 3, 180, 330)); 
 		$this->addAftSystem(new LightRailGun(3, 6, 3, 30, 180)); 
 		$this->addAftSystem(new LightRailGun(3, 6, 3, 30, 180)); 
-		$this->addAftSystem(new FlakCannon(3, 4, 2, 150, 270)); 
-		$this->addAftSystem(new FlakCannon(3, 4, 2, 90, 210)); 
+		$this->addAftSystem(new GromeFlakCannon(3, 4, 2, 150, 270)); 
+		$this->addAftSystem(new GromeFlakCannon(3, 4, 2, 90, 210)); 
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 4, 40));

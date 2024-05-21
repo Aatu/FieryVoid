@@ -2147,12 +2147,12 @@ class DBManager
             WHERE
                 DATE_ADD(p.lastactivity, INTERVAL 2 MONTH) < NOW()
             OR
-                (DATE_ADD(p.lastactivity, INTERVAL 3 DAY) < NOW() 
+                (DATE_ADD(p.lastactivity, INTERVAL 5 DAY) < NOW() 
                 AND
                 g.status = 'LOBBY')
 
         ");
-
+		//28.03.2024: increased delete time for inactive games to 5 days: useful for test games, as well as allows games to be picked up after weekend!
         if ($stmt) {
             $stmt->bind_result($id);
             $stmt->execute();

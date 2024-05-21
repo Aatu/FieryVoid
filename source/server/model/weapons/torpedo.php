@@ -573,11 +573,11 @@ class LimpetBoreTorpedo extends Torpedo{
 		public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
 	    public $weaponClass = "Matter"; //should be Ballistic and Matter, but FV does not allow that. Instead decrease advanced armor encountered by 2 points (if any) (usually system does that, but it will account for Ballistic and not Matter)
 
-		protected $overrideCallingRestrictions = true;
-		protected $canOnlyCalledShot = true;		
-//		public $canTargetOtherSections = true; //NOT IMPLEMENTED. When set to true, weapon can called shot systems on external sections of target not facing firing ship.
-			 
+		protected $overrideCallingRestrictions = true;//Front End: To allow this as a ballistic weapon to make called shots.
+		protected $canTargetAllExtSections = true; //Front End: Allow this weapon to target any system on external sections of target ship.  Keep separate from above in case useful at a later point.
+		protected $canOnlyCalledShot = true;//Front End: To block it from targeting ships, only systems.		
 
+			 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
 		        //maxhealth and power reqirement are fixed; left option to override with hand-written values
             if ( $maxhealth == 0 ) $maxhealth = 5;
@@ -587,10 +587,12 @@ class LimpetBoreTorpedo extends Torpedo{
 	    
         public function setSystemDataWindow($turn){
             parent::setSystemDataWindow($turn);
-            $this->data["Special"] = "Ballistic weapon used ONLY for Called Shots (using normal rules).";
-            $this->data["Special"] .= "<br>Once it hits a system, it will try to damage it by adding a critical effect.";
-            $this->data["Special"] .= "<br>This critical effect will remain until target system is destroyed, or after five failed attempts by the Limpet Bore.";            
-            $this->data["Special"] .= "<br>Has no effect on targets equipped with Advanced Armor.";
+            $this->data["Special"] = "Ballistic weapon used ONLY for Called Shots.";
+            $this->data["Special"] .= "<br>Can target any system on target, even those not facing the firing vessel.";            
+            $this->data["Special"] .= "<br>Once it hits a ship, it will attach to target system and try to damage it the following turn by adding a critical effect.";
+            $this->data["Special"] .= "<br>If the target system is not on the section that the torpedo hits, it will take an additional turn(s) to travel to it.";            
+            $this->data["Special"] .= "<br>Once attached, this critical effect will remain until target system is destroyed, or after five failed attempts.";            
+            $this->data["Special"] .= "<br>Has no effect on OSATs or targets equipped with Advanced Armor.";
             $this->data["Special"] .= "<br>No Called Shot penalty.";
             $this->data["Special"] .= "<br>Ignores Armor. No Overkill.";                     
             $this->data["Ammunition"] = $this->ammunition;
@@ -612,41 +614,124 @@ class LimpetBoreTorpedo extends Torpedo{
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!
 		
 		if ($system->advancedArmor) {//no effect on Advanced Armor	
-		$fireOrder->pubnotes .= "<br> Limpet Bore cannot attached to advanced armor.";				
-		return; 	
+			$fireOrder->pubnotes .= "<br> Limpet Bore cannot attach to advanced armor.";				
+			return; 	
 		}
 
 		if ($system->id != $fireOrder->calledid) {//In case it ends up in general hit chart somehow.
-		$fireOrder->pubnotes .= "<br> Limpet Bore was not targeted at a system.";				
-		return; 	
-		}	
-				
+			$fireOrder->pubnotes .= "<br> Limpet Bore was not targeted at a system.";				
+			return; 	
+		}
+		
+		if ($ship instanceof OSAT) {//In case it ends up in general hit chart somehow.
+			$fireOrder->pubnotes .= "<br> Limpet Bore cannot attach to OSAT units.";				
+			return; 	
+		}			
+			
 		if($system){
-			$fireOrder->pubnotes .= "<br> Limpet Bore attaches to system.";				
-			$crit = new LimpetBore(-1, $ship->id, $system->id, 'LimpetBore', $gamedata->turn); 
-			$crit->updated = true;
-			$system->criticals[] =  $crit;
-			}
-		}	
 		
-		
-        public function getDamage($fireOrder){ //Damage is handled in criticalPhaseEffects() once Limpet Bore attaches.
-            return 0;
-       }
-    
-    
-        public function setMinDamage(){     $this->minDamage = 12;      } //However, keep these values for intercept calculations.
-        public function setMaxDamage(){     $this->maxDamage = 30;      }
+			$locationPairsTwoTurn = [//Create list of non-adjacent sections, that Limpet Bore will take TWO turns to reach.
+			    [1, 2],
+			    [2, 1],
+			    [3, 4],
+			    [4, 3],
+			    [1, 42],
+			    [42, 1],
+			    [1, 32],
+			    [32, 1],			    
+			    [2, 31],
+			    [31, 2],
+			    [2, 41],
+			    [41, 2]				    			    			    			    
+			];						
+			$locationPairsThreeTurn = [//Create list of OPPOSITE sections in six sided units, that Limpet Bore will take THREE turns to reach.
+			    [32, 41],
+			    [41, 32],
+			    [31, 42],
+			    [42, 31]			    			    			    			    
+			];		
 
-        public function stripForJson() {
+			$turnActivates = $gamedata->turn+1;//Usually Limpet will attack the turn AFTER it hits.
+						    			
+				if($system->location == $fireOrder->chosenLocation || $ship instanceof LCV){//Hits same side as target system or an LCV.  Attaches (current turn +1)
+					
+					$fireOrder->pubnotes .= "<br> Limpet Bore attaches to ship, it will attack target system next turn.";				
+					$crit = new LimpetBore(-1, $ship->id, $system->id, 'LimpetBore', $gamedata->turn+1); //The crit takes effect the FOLLOWING turn.
+					$crit->updated = true;
+					$system->criticals[] =  $crit;
+								
+				}elseif(in_array([$system->location, $fireOrder->chosenLocation], $locationPairsTwoTurn)){//Non-Adjacent locations, takes longer to travel there.
+					$turnActivates += 2;//Add two turn of travel time before attaching (current turn +3).
+					
+					if($ship instanceof MediumShip) $turnActivates = $gamedata->turn+2;//MCVs and HCVs can only have a maximum of 1 turn travel time.
+					if($ship instanceof VreeCapital) $turnActivates -= 1; //Easier to traverse Vree ships due to wider structure arcs.						
+					if((($system->location == 1 && $fireOrder->chosenLocation == 2) || ($system->location == 2 && $fireOrder->chosenLocation == 1)) && $ship instanceof StarBaseSixSections) $turnActivates += 1; //Starbases 1 and 2 locs are actually OPPOSITE!
+	
+																					
+						//Add crit to show Limpet Bore is on its way.
+						$fireOrder->pubnotes .= "<br>Limpet Bore attaches to ship and will traverse the hull to attack target system.";				
+						$crit = new LimpetBoreTravelling(-1, $ship->id, $system->id, 'LimpetBoreTravelling', $gamedata->turn+1, $turnActivates-1); //The crit takes effect the turn after next.
+						$crit->updated = true;
+						$system->criticals[] =  $crit;
+					
+						//Now add crit to actually show Limpet attached and will attack.			
+						$crit2 = new LimpetBore(-1, $ship->id, $system->id, 'LimpetBore', $turnActivates); //The crit takes effect the FOLLOWING turn.
+						$crit2->updated = true;
+						$system->criticals[] =  $crit2;	
+																	
+				}elseif(in_array([$system->location, $fireOrder->chosenLocation], $locationPairsThreeTurn)){//Opposite locations, takes longer to travel there.
+					$turnActivates += 3;//Add three turns of travel time before attaching (current turn +4).
+					
+					if($ship instanceof MediumShip) $turnActivates = $gamedata->turn+2;//MCVs can only have a maximum of 1 turn travel time.
+					if($ship instanceof VreeCapital) $turnActivates -= 1; //Easier to traverse Vree ships due to wider structure arcs.
+																	
+						//Add crit to show Limpet Bore is on its way.
+						$fireOrder->pubnotes .= "<br>Limpet Bore attaches to ship and will traverse the hull to attack target system.";				
+						$crit = new LimpetBoreTravelling(-1, $ship->id, $system->id, 'LimpetBoreTravelling', $gamedata->turn+1, $turnActivates-1); //The crit takes effect the turn after next.
+						$crit->updated = true;
+						$system->criticals[] =  $crit;
+						
+						//Now add crit to actually show Limpet attached and will attack.			
+						$crit2 = new LimpetBore(-1, $ship->id, $system->id, 'LimpetBore', $turnActivates); //The crit takes effect the FOLLOWING turn.
+						$crit2->updated = true;
+						$system->criticals[] =  $crit2;	
+																	
+				}else{//Adjacent sections, Primary sections or anything else.
+					$turnActivates += 1;//Add extra turn of travel time, attaches current turn +2.
+					
+						//Add crit to show Limpet Bore is on its way.
+						$fireOrder->pubnotes .= "<br>Limpet Bore attaches to ship and will traverse the hull to attack target system.";					
+						$crit = new LimpetBoreTravelling(-1, $ship->id, $system->id, 'LimpetBoreTravelling', $gamedata->turn+1, $gamedata->turn+1); //The crit takes effect the turn after next.
+						$crit->updated = true;
+						$system->criticals[] =  $crit;
+						
+						//Now add crit to actually show Limpet attached and will attack.			
+						$crit2 = new LimpetBore(-1, $ship->id, $system->id, 'LimpetBore', $turnActivates); //The crit takes effect the FOLLOWING turn.
+						$crit2->updated = true;
+						$system->criticals[] =  $crit2;										
+				}		
+				
+			}
+			
+	}//endof onDamagedSystem() 	
+		
+		
+    public function getDamage($fireOrder){ //Damage is handled in criticalPhaseEffects() once Limpet Bore attaches.
+            return 0;
+    }
+    
+    
+    public function setMinDamage(){     $this->minDamage = 12;      } //However, keep these values for intercept calculations.
+    public function setMaxDamage(){     $this->maxDamage = 30;      }
+
+    public function stripForJson() {
             $strippedSystem = parent::stripForJson();    
             $strippedSystem->ammunition = $this->ammunition;
             $strippedSystem->overrideCallingRestrictions = $this->overrideCallingRestrictions;
             $strippedSystem->canOnlyCalledShot = $this->canOnlyCalledShot;   
- //           $strippedSystem->canTargetOtherSections = $this->canTargetOtherSections;         
-                     
+            $strippedSystem->canTargetAllExtSections = $this->canTargetAllExtSections;                            
             return $strippedSystem;
-        }
+    }
 		
 }//endof LimpetBoreTorp
 

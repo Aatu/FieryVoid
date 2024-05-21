@@ -42,8 +42,8 @@ class KobolAtlas extends BaseShip{
 		$this->addFrontSystem(new Bulkhead(0, 4));
 		$this->addFrontSystem(new Railgun(4, 9, 6, 270, 30));
 		$this->addFrontSystem(new Railgun(4, 9, 6, 330, 90));
-		$this->addFrontSystem(new FlakCannon(3, 4, 2, 240, 120));
-		$this->addFrontSystem(new FlakCannon(3, 4, 2, 240, 120));
+		$this->addFrontSystem(new GromeFlakCannon(3, 4, 2, 240, 120));
+		$this->addFrontSystem(new GromeFlakCannon(3, 4, 2, 240, 120));
 
         $this->addAftSystem(new Thruster(3, 9, 0, 2, 2));
         $this->addAftSystem(new Thruster(3, 9, 0, 2, 2));
@@ -57,15 +57,15 @@ class KobolAtlas extends BaseShip{
 		$this->addLeftSystem(new Bulkhead(0, 4));
 		$this->addLeftSystem(new MedBlastCannon(4, 5, 2, 180, 360));
 		$this->addLeftSystem(new MedBlastCannon(4, 5, 2, 180, 360));
-		$this->addLeftSystem(new FlakCannon(3, 4, 2, 150, 360));
-		$this->addLeftSystem(new FlakCannon(3, 4, 2, 150, 360));
+		$this->addLeftSystem(new GromeFlakCannon(3, 4, 2, 150, 360));
+		$this->addLeftSystem(new GromeFlakCannon(3, 4, 2, 150, 360));
 
         $this->addRightSystem(new Thruster(4, 9, 0, 3, 4));
 		$this->addRightSystem(new Bulkhead(0, 4));
 		$this->addRightSystem(new MedBlastCannon(4, 5, 2, 0, 180));
 		$this->addRightSystem(new MedBlastCannon(4, 5, 2, 0, 180));
-		$this->addRightSystem(new FlakCannon(3, 4, 2, 0, 210));
-		$this->addRightSystem(new FlakCannon(3, 4, 2, 0, 210));
+		$this->addRightSystem(new GromeFlakCannon(3, 4, 2, 0, 210));
+		$this->addRightSystem(new GromeFlakCannon(3, 4, 2, 0, 210));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure(5, 45));

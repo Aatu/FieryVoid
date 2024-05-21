@@ -80,7 +80,7 @@ Particle Impeder - purely defensive weapon, capable of intercepting weapons with
 ABBAI MATRIARCHATE (WotCR)
 Abbai fleet a few hundred years before the show era, representing Wars of the Centauri Republic period.
 They have Gravitic Shielding much like modern Abbai (although much weaker), and weapons being precursors to modern Comm Disruptor (Comm Jammer and Sensor Spike).
-Mine Launcher - Weapon that can deploy mines during combat. Not implemented in FV, unit that has it (Motenai Mine Layer) is present in game but equipped with missile launchers instead.
+Mine Launcher - Launches a mine at a target hex, with a 25% chance to scatter.  Once it lands on a hex it will look for ships up to its maximum radius then attack the closest, including friendly ships (if multiple ships are equally distant it will select one at random).  The launcher does not come with any ammunition and you must purchase this at Fleet Selection from the available choices: Basic (4 hex range, +10 to hit 12 Damage), Wide-Ranged (7 hex range, +10 to hit 12 Damage).  Unlike the Tabletop rules, unexploded mines do not remain in play the following turn.
 
 
 BALOSIAN UNDERDWELLERS
@@ -198,6 +198,7 @@ No very specific rules/technologies.
 EARTH ALLIANCE
 Interceptor - dedicated defensive weapon. In tabletop, it needs to be shut down for a turn before switching between offensive (anti-fighter) and defensive (interception) modes. There is no such requirement in Fiery Void, weapon can intercept or fire offensively at will.
 Energy Web - defensive system integrated with Interceptor. Active Interceptor provides (in its arc) shield-like effect of reducing hit chance of all incoming fire by its Intercept Rating. EWeb cannot be flown under by fighters, and does NOT provide damage reduction.
+Aegis Sensor Pod - A specialised system, found only on the Hyperion Aegis Cruiser.  The system targets a fighter flight and automatically hits giving the firing ship 3 CCEW against that unit.  This bonus EW cannot be combined with any other OEW, CCEW or EW from another Aegis Pod.  The Pod are relatively prominent on the ships hull, and Called Shots have a +10% bonus against them (so -30% instead of the usual -40%).
 Shadow Omega - official Shadow Omega conversion by AoG is marked as unofficial because that's what official deployment restrictions sum up to (not tournament legal, opponent permission required). Actual fan-made conversions are present as well!
 NOTE: defensive structures were moved out to separate directory due to presence of A LOT of designs in EA directory, which caused technical problems.
 Missiles - The Earth Alliance are able to access all missile types except those restricted to specific factions e.g. Kor-Lyan nad Orieni.
@@ -213,13 +214,13 @@ Missiles - Early Earth Alliance ships are able to access basic, antifighter, cha
 GAIM INTELLIGENCE
 Gaim are minor League race, but their ships are very good and their diversity is excellent - making them (in game, tactically ) in all respects equal to Big4 factions.
 Notable technologies:
-	Bulkheads - defensive system that can take damage first (after armor) when system is hit, which greatly increases resilience of Gaim systems. Bulkhead can protect systems on the same section, and structure it's mounted to (even if it's technically on different section, like on MCV). Note that PRIMARY systems are not protected by bulkheads. In FV decision whether to use bulkhead will be made automatically - Bulkheads will be used if they can prevent system destruction, when structure would be destroyed by the hit or when integrity of relevant Structure block remaining boxes fall too low. 
+	Bulkheads - Defensive system that can take damage first (after armor) when system is hit, which greatly increases resilience of Gaim systems. Bulkhead can protect systems on the same section, and structure it's mounted to (even if it's technically on different section, like on MCV). Note that PRIMARY systems are not protected by bulkheads. In FV decision whether to use bulkhead will be made automatically - Bulkheads will be used if they can prevent system destruction, when structure would be destroyed by the hit or when integrity of relevant Structure block remaining boxes fall too low. 
 	Particle Concentrator - multiple Concentrators firing from the same hex may combine into one more powerful (and more accurate!) shot, a bit similar to what Ipsha Surge Cannons do. Its hit chance is average of all weapons concentrating (as they may be fitted on different ships, with different EW, their chances may differ).
 		In tabletop it's more or less the same, except weapons within 1 hex can still participate and lock-on is denied if any participating weapon lacks lock-on.
 		Kind of "known bug" - on MCVs/LCVs all Bulkheads can protect Structure against any shot, even coming from different direction (so eg. Aft bulkhead may kick in if a ship is attacked from front - though it will protect only Structure in this case)
-	Packet Torpedo - ballistic weapon that has (besides range) a range penalty, just like direct fire weapons - with a twist that it kicks in only after first 10 hexes of travel.
+	Packet Torpedo - Ballistic weapon that has (besides range) a range penalty, just like direct fire weapons - with a twist that it kicks in only after first 10 hexes of travel.
 		In tabletop target of this weapon is not known to opponent until impact (not implemented in FV).
-	Scattergun - light weapon that fires random number of shots. When firing defensively (also random number of shots) those shots must be directed at separate threats.
+	Scattergun - Light weapon that fires random number of shots. When firing defensively (also random number of shots) those shots must be directed at separate threats.
 
 
 GROME AUTOCRACY
@@ -227,15 +228,18 @@ The Grome a low-tech faction that prides itself in only using what they can buil
 Notable technologies:
 	Antiquated Sensors - These sensors cannot be boosted beyond their base state.
 	Connection Struts - While Grome vessels have huge structure blocks, they are very fragile. If a connection strut is hit, the damage to the structure is doubled.
-	Flak Cannons - This is key defensive weapon available to the Grome. It can only engage fighters, but scores damage in flash mode and the splash damage can damage anything. While effective in this role, the main ability is its defensive fire. It is capable of intercepting
-		all fire from a single unit at -3 and suffers degredation like normal interception. Therefore three Flak Cannons can generate a -6 to hit from all fire from a single unit. In addition, the Flak Cannon can intercept for friendly units. As long as the friendly unit is 
-		within 5 hexes and both the friendly and firing unit are in arc, it is able to engage. Lastly, the Flak Cannon can also intercept uninterceptable weapons like lasers. This is a little more effective in Fiery Void than on the table top.
+	Flak Cannons - This is key defensive weapon available to the Grome. Offensively, it can only engage fighters, but scores matter damage in flash mode. While effective in this role, the main ability is its defensive fire. It is capable of intercepting ALL fire from a single unit using the normal interception rules. Therefore three Flak Cannons cann generate a -6 to hit from all fire from a single unit. Unlike most weapons, the Flak Cannon intercept fire can also be target manually using it's alternative Firing Mode in the Firing phase, and will apply it's intercept to all non-Ballistic fire from target enemy ship.  This ability can be useful if the player is expecting large amounts of low damage fire from an unit (e.g. fighters), which automatic intercept algorithms may not prioritise.
+		In addition, the Flak Cannon can intercept for friendly units as long as the friendly unit is within 5 hexes and both the friendly and firing unit are in arc, it is able to engage. Lastly, the Flak Cannon can also intercept uninterceptable weapons like lasers when fired at the Flak Cannon-equipped ship e.g. it cannot intercept this type of weapon at all for friendly units.
 	Light and Heavy Railguns - These are smaller and larger versions, respectively, of the standard railgun.
-	Targeting Array - Currently, this system is being developed for Fiery Void. However, with are available and all other systems ready, the Grome are deploying with a modified version in Fiery Void. The Targeting Arrays are treated as 1 point Antiquated Sensors. This does 
-		enable the Grome to improve their defensive abilities, but the overall trade-off enables the Grome to become a playable faction.
-	Special Shells - Like missile armed vessels, the table top Grome had the ability to purchase special shells for their railguns. Currently, individual shells are not available. Therefore, the Grome have custom "full" variants of each of their units. These "full" variants
-	    have an increased points cost, but enable you to fire any shell type that is legal for the size railgun being fired.
-
+	Targeting Array - This weapon automatically hits, but scores no damage.  Instead it adds a bonus to the hit chances for all other weapons against the selected target, by 5% for each point of rating on the Targeting Array e.g. A rating of 2 would equal +10% to hit chance.  Multiple Targeting Arrays can be combined against the same target, but the effect will degrade by 5% for each subsequent array e.g. two Targeting Arrays with a rating of 2 would only increase overall hit chances by 15%, not 20%.
+	Escort Arrays - These operate in exactly the same way as Targeting Arrays above, however they also provide the hit chance increases to friendly ships within 5 hexes.
+	Haphazard Targeting Systems - Ships with this in their notes have many Targeting Arrays and this risks having them interfere with one other. After they have been ordered to fire, they have a chance to malfunction, with this chance being reduced or removed if one or two Targeting Arrays are destroyed of deactivated.  With no Arrays disabled, there's is 1 in 6 chance of malfunction, with one Array disabled this drops to a 1 in 8 chance.  With two or more arrays disabled none of the other arrays will malfunction.
+	Special Shells - The Grome Rail guns each have access to a number of different shells, whose effects are outlined below:
+		Flash - Deals Plasma damage in Flash mode.
+		Scatter - Shell fragments and acts as a pulse weapon with 1 shot by default, but a grouping bonus of 25 i.e. when firing, for each 25% rolled under the % needed to hit an extra shot will hit target.
+		Heavy - Deals extra damage.
+		Long Range - Medium and Heavy Railguns only.  Improve range penalty, but lower damage.
+		Ultra Long Range - Heavy Railguns only.  Further increase range but with even lower damage.
 
 HURR REPUBLIC
 Low-tech faction. No very specific rules/technologies.
@@ -301,10 +305,10 @@ Class-D Launcher - This is the main defensive system for the Kor-Lyan. It has th
 Class-F Launcher - F stands for flexible and can fire in three separate modes.
      - Normal mode: The launcher's normal range is 20 hexes, however it can fire up to an additional +15 hexes when it has been loaded for two turns. When this range extension is used the launcher suffers -2 fire control and cannot use Rapid Fire mode the following turn (see below). 
      - Rapid-fire mode: The F-Launcher can choose to fire every turn with a -5 hex and -2 Fire Control penalty. As noted above, it cannot fire in this mode the turn after firing in long-range mode.
-Proximity Laser - This ballisitic weapon uses a separate launcher system to target where its laser attack will fire from.  Use the paired 'Proximity Launcher' system (each paired Laser/Launcher will have a unique letter assigned to the end of their name) to target the hex you wish to fire from.  The Launcher will automativally hit and then the laser attack will be made as normal as if it originate from that hex, and not the firing ship.
+Proximity Laser - This ballisitic weapon uses a separate launcher system to target where its laser attack will fire from.  Use the paired 'Proximity Launcher' system (each paired Laser/Launcher will have a unique letter assigned to the end of their name) to target the hex you wish to fire from.  The Launcher will automativally hit and then the laser attack will be made as normal as if it originate from that hex, and not the firing ship.  IF you do not fire the Launcher at the same time as the Laser, the shot will automatically miss.
 NOTE - Currently the animations for this weapon in Replay are not working due to its unique nature.  However, the weapon does function correctly!
-Limpet Bore Torpedo - This is a ballistic weapon that can only fire as Called Shot.  If it hits a system, it will try to damage it by adding a critical effect. This critical effect will remain until target system is destroyed, or after five failed attempts by the Limpet Bore.  
-Ballistic Mines Launcher - Launches a mine at a target hex, with a 25% chance to scatter.  Once it lands on a hex it will look for ships up to its maximum radius then attack the closest, including friendly ships (if multiple ships are equally distant it will select one at random).  The launcher does not come with any ammunition and you must purchase this at Fleet Selection from the available choices: Basic (3 hex range, +40 to hit 16-24 Damage), Wide-Ranged (3 hex range, +40 to hit 13-22 Damage) and Heavy (2 hex range, +25 to hit 25-34 Damage).  Unlike the Tabletop rules, unexploded mines do not remain in play the following turn.
+Limpet Bore Torpedo - This is a ballistic weapon that can only fire as Called Shot, however one that can target ANY system on an enemy ship (including those that are not on facing sections).  If it hits, it will attach to the target system and try to damage it by adding a critical effect. If the system targeted is not on a facing section at the moment of impact, it will take an additional turn(s) to attach.  This critical effect will remain until target system is destroyed, or after five failed attempts by the Limpet Bore. It has no effect on OSATs or units equipped with Advanced Armor. 
+Ballistic Mine Launcher - Launches a mine at a target hex, with a 25% chance to scatter.  Once it lands on a hex it will look for ships up to its maximum radius then attack the closest, including friendly ships (if multiple ships are equally distant it will select one at random).  The launcher does not come with any ammunition and you must purchase this at Fleet Selection from the available choices: Basic (3 hex range, +40 to hit 16-24 Damage), Wide-Ranged (3 hex range, +40 to hit 13-22 Damage) and Heavy (2 hex range, +25 to hit 25-34 Damage).  Unlike the Tabletop rules, unexploded mines do not remain in play the following turn.
 Shuttles - Like all Babylon 5 ships, Kor-Lyan ships receive a number of shuttles for no additional points. However, the Kor-Lyan have  the option to take these shuttles and arm them with two basic fighter 
      missiles. The only cost is the missiles. Additionally, the Kor-Lyan can replace their standard shuttles with armed shuttles. The most common one has a single fighter gun and two missile hard points. An 
 	 uncommon variant removes the gun, but allows the armed shuttle to hold up to six basic fighter missiles. The Kor-Lyan player is under no obligation to take any of these in a match, unlike fighters with 
@@ -362,8 +366,7 @@ Energy Mine - hex-targeted weapon, causing heavy damage to everything on hex hit
 	Opponent does not see EMine target hexes (just the fact that they've been launched).
 	Not 100% accurate - a launched mine may scatter or fizzle.
 	Extremely disruptive to enemy fighters.
-Pulsar Mine - higly automated short-range weapon that fires at passing fighters in Movement phase.
-	In Fiery Void it is not implemented. Ships using it are also not present, bases have it replaced by other weapons.
+Pulsar Mine - Highly automated short-range weapon that fires at passing fighters.  Unlike Tabletop, it attacks at beginning of Firing Phase as it is not possible to attack during Movement phase in FV.
 
 	
 ORIENI IMPERIUM

@@ -25,6 +25,7 @@ class TrekSulibanCellshipLarge extends FighterFlight{
 	//$this->unitSize = 3; //number of craft in squadron
     	$this->superheavy = true;
         $this->maxFlightSize = 3;//this is a superheavy fighter originally intended as single unit, limit flight size to 3
+        $this->hangarRequired = ''; //Star Trek unit independence is much larger than B5, this SHF-sized unit has great endurance and can be deployed independently
 
 
         $this->populate();
@@ -47,7 +48,7 @@ class TrekSulibanCellshipLarge extends FighterFlight{
 			$frontGun = new TrekFtrPhaser(270, 90, 2, 2, "Phase Cannons");
             $fighter->addFrontSystem($frontGun);
 			
-			$fighter->addAftSystem(new TrekShieldFtr(0, 10, 8, 4) ); //armor, health, rating, recharge
+			$fighter->addAftSystem(new TrekShieldFtr(0, 10, 5, 3) ); //armor, health, rating, recharge
 			
 			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
 		

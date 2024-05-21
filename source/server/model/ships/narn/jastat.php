@@ -11,7 +11,7 @@ class JaStat extends StarBaseFiveSections{
 		$this->phpclass = "JaStat";
 		$this->shipClass = "Ja'Stat Warbase";
 		$this->fighters = array("heavy"=>36); 
- 		$this->unofficial = 'S'; //unavailable official Pulsar Mines replaced with Twin Arrays
+// 		$this->unofficial = 'S'; //unavailable official Pulsar Mines replaced with Twin Arrays
 
 		$this->shipSizeClass = 3;
         $this->Enormous = true;		
@@ -28,9 +28,9 @@ class JaStat extends StarBaseFiveSections{
 		$this->locations = array(1, 41, 42, 32, 31);
 		$this->hitChart = array(			
 			0=> array(
-				10 => "Structure",
-				12 => "Twin Array",
-				14 => "Energy Mine",
+				11 => "Structure",
+				12 => "Pulsar Mine",
+				13 => "Energy Mine",
 				16 => "Scanner",
 				18 => "Reactor",
 				20 => "TAG:C&C",
@@ -52,8 +52,8 @@ class JaStat extends StarBaseFiveSections{
 		$this->addPrimarySystem(new Scanner(6, 28, 4, 8));
 		$this->addPrimarySystem(new Scanner(6, 28, 4, 8));
 		$this->addPrimarySystem(new Reactor(6, 25, 0, 0));
-		$this->addPrimarySystem(new TwinArray(6, 6, 2, 0, 360));
-		$this->addPrimarySystem(new TwinArray(6, 6, 2, 0, 360));
+		$this->addPrimarySystem(new PulsarMine(6, 0, 0, 0, 360));
+		$this->addPrimarySystem(new PulsarMine(6, 0, 0, 0, 360));
 		$this->addPrimarySystem(new EnergyMine(6, 5, 4, 0, 360));
 		$this->addPrimarySystem(new EnergyMine(6, 5, 4, 0, 360));
 		$this->addPrimarySystem(new EnergyMine(6, 5, 4, 0, 360));

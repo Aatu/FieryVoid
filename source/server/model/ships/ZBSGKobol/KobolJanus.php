@@ -43,8 +43,8 @@ class KobolJanus extends HeavyCombatVessel{
 		$this->addFrontSystem(new HvyBlastCannon(4, 6, 4, 270, 60)); 
         $this->addFrontSystem(new HeavyRailGun(4, 12, 9, 300, 60)); 
 		$this->addFrontSystem(new HvyBlastCannon(4, 6, 4, 300, 90)); 
-		$this->addFrontSystem(new FlakCannon(3, 4, 2, 180, 30));
-		$this->addFrontSystem(new FlakCannon(3, 4, 2, 330, 180));
+		$this->addFrontSystem(new GromeFlakCannon(3, 4, 2, 180, 30));
+		$this->addFrontSystem(new GromeFlakCannon(3, 4, 2, 330, 180));
 		$this->addFrontSystem(new Bulkhead(0, 4));
 		$this->addFrontSystem(new Bulkhead(0, 4));
 
@@ -56,8 +56,8 @@ class KobolJanus extends HeavyCombatVessel{
         $this->addAftSystem(new Bulkhead(0, 4));
 		$this->addAftSystem(new MedBlastCannon(4, 5, 2, 180, 360)); 
 		$this->addAftSystem(new MedBlastCannon(4, 5, 2, 0, 180)); 
-		$this->addAftSystem(new FlakCannon(3, 4, 2, 120, 240)); 
-		$this->addAftSystem(new FlakCannon(3, 4, 2, 120, 240)); 
+		$this->addAftSystem(new GromeFlakCannon(3, 4, 2, 120, 240)); 
+		$this->addAftSystem(new GromeFlakCannon(3, 4, 2, 120, 240)); 
         $hyperdrive = new JumpEngine(4, 12, 6, 20);
 			$hyperdrive->displayName = 'FTL Drive';
 			$this->addAftSystem($hyperdrive);

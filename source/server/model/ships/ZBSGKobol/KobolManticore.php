@@ -42,8 +42,8 @@ class KobolManticore extends MediumShip{
         $this->addFrontSystem(new Thruster(4, 9, 0, 4, 1));
 		$this->addFrontSystem(new Bulkhead(0, 4));
 
-		$this->addAftSystem(new FlakCannon(4, 4, 2, 180, 360));
-		$this->addAftSystem(new FlakCannon(4, 4, 2, 0, 180));
+		$this->addAftSystem(new GromeFlakCannon(4, 4, 2, 180, 360));
+		$this->addAftSystem(new GromeFlakCannon(4, 4, 2, 0, 180));
         $this->addAftSystem(new Thruster(3, 9, 0, 4, 2));    
         $this->addAftSystem(new Thruster(3, 9, 0, 4, 2));    
 		$this->addAftSystem(new Bulkhead(0, 4));

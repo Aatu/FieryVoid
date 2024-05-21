@@ -4818,7 +4818,9 @@ class PsychicFieldHandler{
         public $damageType = "Raking"; 
         public $weaponClass = "Electromagnetic"; 
         
-        public $uninterceptable = true;    
+        public $uninterceptable = true;
+        
+    	protected $ewBoosted = true;             
         
 		public $repairPriority = 5;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired            
 
@@ -4920,6 +4922,13 @@ class PsychicFieldHandler{
             $boost = $this->getBoostLevel($turn);
             $this->maxDamage = 120 + ($boost * 28);
         }  
+        
+	public function stripForJson(){
+			$strippedSystem = parent::stripForJson();
+			$strippedSystem->ewBoosted = $this->ewBoosted;													
+			return $strippedSystem;
+		}     
+        
    } //end of class HeavyPsionicLance
    
 
@@ -4950,9 +4959,11 @@ class PsionicLance extends Raking{
         public $damageType = "Raking"; 
         public $weaponClass = "Electromagnetic";
         
-        public $uninterceptable = true; 
+        public $uninterceptable = true;
+        
+    	protected $ewBoosted = true;          
        
-	public $repairPriority = 5;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired                
+		public $repairPriority = 5;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired                
 
 
         public function setSystemDataWindow($turn){
@@ -5048,7 +5059,15 @@ class PsionicLance extends Raking{
             $turn = TacGamedata::$currentTurn;
             $boost = $this->getBoostLevel($turn);
             $this->maxDamage = 65 + ($boost * 20);
-        }  
+        } 
+        
+		public function stripForJson(){
+			$strippedSystem = parent::stripForJson();
+			$strippedSystem->ewBoosted = $this->ewBoosted;													
+			return $strippedSystem;
+		}            
+        
+         
    }//end of Psionic Lance
 
 
@@ -5208,9 +5227,9 @@ class ProximityLaserLauncher extends Weapon{
 	        public $useOEW = false;	
 		public $noLockPenalty = false;	        
 		
-		public $range = 30;//no point firing at further target with base 24 to hit!
+		public $range = 30;
 		public $loadingtime = 1; //same as attached laser
-	    public $ammunition = 99; //Just make unlimited, so account for accidental launches when Laser on recharge.	
+//	    public $ammunition = 99; //Just make unlimited, so account for accidental launches when Laser on recharge.	
 		
 		public $animation = "ball";
 		public $animationColor = array(245, 90, 90);
@@ -5246,7 +5265,7 @@ class ProximityLaserLauncher extends Weapon{
 			$this->data["Special"] .= "<br>Use this Launcher to select the hex from where its paired Proximity Laser will fire.";	 
 			$this->data["Special"] .= "<br>IMPORTANT - The Proximity Laser should be targeted at the same time as this launcher is fired.";
 			$this->data["Special"] .= "<br>HAS NO EFFECT UNLESS FIRED WITH PROXIMITY LASER " . $this->pairing ."."; 		 		
-	        $this->data["Ammunition"] = $this->ammunition;		
+//	        $this->data["Ammunition"] = $this->ammunition;		
 		}	
 		
 		public function calculateHitBase($gamedata, $fireOrder)
@@ -5264,24 +5283,25 @@ class ProximityLaserLauncher extends Weapon{
 			$fireOrder->pubnotes .= "Automatically hits."; 
 			if($rolled <= $fireOrder->needed){//HIT!
 				$fireOrder->shotshit++;
-	            $this->ammunition--;
-	            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);			
+//	            $this->ammunition--;
+//	            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);			
 			}else{ //MISS!  Should never happen.
-				$fireOrder->pubnotes .= " MISSED! ";
+				$fireOrder->pubnotes .= "DEBUG - MISSED! ";
 			}
 		} //endof function fire	
 
-
+/*
 	    public function setAmmo($firingMode, $amount){
 	            $this->ammunition = $amount;
 	        }
 	 	
+	 
 	    public function stripForJson() {
 	            $strippedSystem = parent::stripForJson();    
 	            $strippedSystem->ammunition = $this->ammunition;           
 	            return $strippedSystem;
 	        }
-	        	
+	  */      	
 		public function getDamage($fireOrder){       return 0; /*no actual damage*/  }
 		public function setMinDamage(){     $this->minDamage = 0 ;      }
 		public function setMaxDamage(){     $this->maxDamage = 0 ;      }
@@ -5329,7 +5349,7 @@ class ProximityLaserLauncher extends Weapon{
  			$this->pairing = $pairing;
 			$this->displayName = 'Proximity Laser ' . $pairing . ''; 			
 			if ( $maxhealth == 0 ) $maxhealth = 6;
-			if ( $powerReq == 0 ) $powerReq = 6;        	       	
+			if ( $powerReq == 0 ) $powerReq = 6;				        	       	
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
@@ -5340,7 +5360,8 @@ class ProximityLaserLauncher extends Weapon{
 			$this->data["Special"] .= "<br>Range Penalty will be calculated from the hex the Launcher hits, not from this ship.";
 			$this->data["Special"] .= "<br>This weapon does not need an EW lock, and does not benefit from OEW.";				
 			$this->data["Special"] .= "<br>IMPORTANT - The paired Proximity Launcher should be fired at the same time as this weapon is targeted.";
-			$this->data["Special"] .= "<br>WILL FIRE FROM SHIP UNLESS FIRED TOGETHER WITH PROXIMITY LAUNCHER " . $this->pairing .".";					
+//			$this->data["Special"] .= "<br>WILL FIRE FROM SHIP UNLESS FIRED TOGETHER WITH PROXIMITY LAUNCHER " . $this->pairing .".";
+$this->data["Special"] .= "<br>WILL AUTOMATICALLY MISS UNLESS FIRED TOGETHER WITH PROXIMITY LAUNCHER " . $this->pairing .".";						
 	        $this->data["Ammunition"] = $this->ammunition;		
 		}	
 
@@ -5350,9 +5371,9 @@ class ProximityLaserLauncher extends Weapon{
 			if($this->launcher){	//Check that Proximity Laser have a Launcher (it always should)
 
 		    $launchPos = null; // Initialize $launchPos outside the loop
-			$fireOrders = $this->launcher->getFireOrders($gamedata->turn);
+			$launcherFireOrders = $this->launcher->getFireOrders($gamedata->turn);
 		    
-            foreach($fireOrders as $fireOrder){	       	
+            foreach($launcherFireOrders as $fireOrder){	       	
 			            // Sometimes player might target ship after all...
 						if ($fireOrder->targetid != -1) {
 	                        $targetship = $gamedata->getShipById($fireOrder->targetid);
@@ -5382,6 +5403,20 @@ class ProximityLaserLauncher extends Weapon{
             $this->ammunition = $amount;
         }
 
+		public function calculateHitBase($gamedata, $fireOrder)
+		{
+			parent::calculateHitBase($gamedata, $fireOrder);
+
+			$launcherFireOrder = $this->launcher->getFireOrders($gamedata->turn);
+						
+			if(empty($launcherFireOrder)){//Launcher hasn't fired, laser automatically misses.	
+				$fireOrder->needed = 0; //auto-miss.
+				$fireOrder->updated = true;
+				$fireOrder->pubnotes .= "<br>A Proximity Launcher was not fired, it's laser shot automatically missed.";				
+			}	
+		}//endof calculateHitBase()
+
+		
        public function fire($gamedata, $fireOrder){ //note ammo usage
             parent::fire($gamedata, $fireOrder);
             $this->ammunition--;
@@ -5418,5 +5453,451 @@ class ProximityLaserLauncher extends Weapon{
         public function setMinDamage(){     $this->minDamage = 11 ;      }
         public function setMaxDamage(){     $this->maxDamage = 38 ;      }    
     }
+
+
+class GromeTargetingArray extends Weapon{
+		public $name = "GromeTargetingArray";
+		public $displayName = "Targeting Array";
+		public $iconPath = "TargetingArray.png";
+
+//    	public $specialAbilities = array("TargetingArray"); //Front end looks for this.	
+//		public $specialAbilityValue = true; //so it is actually recognized as special ability!
+		
+
+		public $damageType = "Raking"; //To prevent called shots"
+		public $weaponClass = "Particle";
+
+		public $uninterceptable = true; 
+		public $doNotIntercept = true;
+		public $priority = 1;
+	    public $useOEW = false;	
+		public $noLockPenalty = false;	        
+		
+		public $range = 15;
+		public $loadingtime = 1;	
+        public $fireControl = array(null, 0, 0); //No fire control per se, but gets automatic +3 points.		
+		
+		public $animation = "bolt";
+		public $animationColor = array(250, 250, 250);
+		
+		public $output = 0;
+		public $outputDisplay = ''; //if not empty - overrides default on-icon display text
+		public $escortArray = false;//Can be marked during firing if Array can support nearby vessels.		
+		public $animationExplosionScale = 0.4; //single hex explosion
+		
+		public $haphazardTargeting = false;//To mark if ship has Haphazard Targeting Systems
+		private $malfunction = false;//To mark when an array malfunctions.			
+		public $firingModes = array(
+			1 => "Targeting"
+		);
+		protected $autoHit = true;//To show 100% hit chance in front end.
+			
+		public $repairPriority = 5;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
+	 
+		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $output, $escort, $base)
+		{				
+			//Nominal amount of health, should never be hit.
+			if ( $maxhealth == 0 ) $maxhealth = 6;
+			if ( $powerReq == 0 ) $powerReq = 2;	
+			parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $output);
+			$this->output = $output;
+//			$this->outputDisplay = $this->output;
+			if($escort){
+				$this->escortArray = true;
+			}
+			if($base){
+				$this->range += 30;
+			}										
+			TargetingArrayHandler::addTargetingArray($this);//so all Targeting Array are accessible together.			
+		}
+
+	    protected $possibleCriticals = array(
+			1=>array("OutputReduced1"), 
+	    );
+/*
+		public function getSpecialAbilityValue($args)
+	    {
+			return $this->specialAbilityValue;
+		}
+*/
+		public function getOutput()
+		{
+			return $this->output;			
+		}
+
+		public function markHaphazard()
+		{
+			$this->haphazardTargeting = true;			
+		}
+		    		
+		public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);      
+			$this->data["Special"] = "Automatically hits, but scores no damage."; 
+			$this->data["Special"] .= "<br>Adds a bonus to hit for all other weapons against selected target based on rating of Targeting Array e.g. A rating of 2 would equal +10% to hit chance.";
+			$this->data["Special"] .= "<br>Multiple Targeting Arrays can combine, but the effect will degrade by 5% per subsequent array.";
+			$this->data["Special"] .= "<br>Cannot target fighters.";			
+			if ($this->escortArray){
+				$this->data["Special"] .= "<br>Escort Array - Also provides targeting assistance to friendly ships within 5 hexes.";			
+			}	
+		}	
+
+
+    public function beforeFiringOrderResolution($gamedata)
+    {
+		if($this->haphazardTargeting){//Firing with Haphazard Targeting Systems.
+        		
+			$ship = $this->getUnit();
+			$arraysDeactivated = 0;//Initialise counter.
+					//Less chance of a malfunction if 1 or more Targeting Arrays are unavailable. 
+			        foreach ($ship->systems as $system) {
+			            if ($system instanceof GromeTargetingArray) {
+			                if ($system->isDestroyed($gamedata->turn) || $system->isOfflineOnTurn($gamedata->turn)) {
+			                    $arraysDeactivated++;
+			                }
+			            }
+			        }
+		        				
+					if($arraysDeactivated == 0){//No Targeting Array deactivated, 16.66% chance of malfunction.				
+							$roll6 = Dice::d(6);								
+								if($roll6 < 2){ 								
+									$this->output = 0;
+									$this->malfunction = true;														
+								}
+					}else if($arraysDeactivated == 1){//One Targeting Array deactivated, 12.5% chance of malfunction.			
+							$roll8 = Dice::d(8);
+								if($roll8 < 2){ 				
+									$this->output = 0;
+									$this->malfunction = true;													
+								}
+					}else{} //2 or more deactivated/destroyed = no effect.
+			}
+		}//endof beforeFiringOrderResolution 
+
+		
+		public function calculateHitBase($gamedata, $fireOrder)
+		{
+			if($this->malfunction){//If Haphazard and a malfunction has been rolled.
+					$fireOrder->needed = 0;
+					$fireOrder->updated = true;																	
+					$fireOrder->pubnotes .= " A Targeting Array malfunctions.";							
+			}else{
+			//Normal firing
+			$fireOrder->needed = 100; //always true
+			$fireOrder->updated = true;			
+			}					
+		}//endof calculateHitBase
+			
+	        	
+		public function getDamage($fireOrder){       return 0;   } //no actual damage
+		public function setMinDamage(){     $this->minDamage = 0 ;      }
+		public function setMaxDamage(){     $this->maxDamage = 0 ;      }
+
+        public function stripForJson() {
+            $strippedSystem = parent::stripForJson();    
+            $strippedSystem->autoHit = $this->autoHit;                         
+            return $strippedSystem;
+		}
+		
+}//endof class GromeTargetingArray
+
+
+
+class AegisSensorPod extends Weapon implements SpecialAbility{
+		public $name = "AegisSensorPod";
+		public $displayName = "Aegis Sensor Pod";
+		public $iconPath = "AegisSensorPod.png";
+		
+		public $damageType = "Raking"; //irrelevant, really
+		public $weaponClass = "Particle";
+
+    	public $specialAbilities = array("BonusOEW"); //Front end looks for this.	
+		public $specialAbilityValue = true; //so it is actually recognized as special ability!
+
+		public $uninterceptable = true; 
+		public $doNotIntercept = true;
+		public $priority = 1;
+	    public $useOEW = false;	
+		public $noLockPenalty = false;
+		public $range = 10;		        
+		
+		public $loadingtime = 1;	
+        public $fireControl = array(0, null, null); //No fire control per se, but gets automatic +3 points.		
+		
+		public $animation = "bolt";
+		public $animationColor = array(250, 250, 250);
+		
+		public $output = 0;
+		public $outputDisplay = ''; //if not empty - overrides default on-icon display text
+		
+		public $animationExplosionScale = 0.4; //single hex explosion
+		
+		protected $calledShotBonus = 2;//Some systems, like Aegis Sensor Pod are easier to hit with called shots.		
+					
+		public $firingModes = array(
+			1 => "Targeting"
+		);
+		protected $autoHit = true;//To show 100% hit chance in front end.
+			
+		public $repairPriority = 5;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
+	 
+		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $output)
+		{				
+			//Nominal amount of health, should never be hit.
+			if ( $maxhealth == 0 ) $maxhealth = 5;
+			if ( $powerReq == 0 ) $powerReq = 2;	
+			parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $output);
+			$this->output = $output;											
+		}
+
+	    protected $possibleCriticals = array(
+			1=>array("OutputReduced3"), //System only exists on Aegis Cruiser and always has Output of 3.  So this works to make it cease to function.
+	    );
+
+		public function getSpecialAbilityValue($args)
+	    {
+			return $this->specialAbilityValue;
+		}
+		    		
+		public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);      
+			$this->data["Special"] = "<br>Can only target fighters.";
+			$this->data["Special"] .= "Automatically hits, but scores no damage."; 
+			$this->data["Special"] .= "<br>Provides 3 CCEW against target fighter unit.";
+			$this->data["Special"] .= "<br>This CCEW cannot be combined with any other EW produced by the aegis ship, including OEW, CCEW, or another Aegis pods.";
+			$this->data["Special"] .= "<br>Called shots have +10% chance to hit this system (i.e. -30%, not -40%).";
+			
+		}	
+
+		public function checkforCalledShotBonus(){
+			return $this->calledShotBonus;
+		}
+		
+		public function calculateHitBase($gamedata, $fireOrder)
+		{
+			$fireOrder->needed = 100; //always true
+			$fireOrder->updated = true;
+			$fireOrder->pubnotes .= "<br>Aegis Pod provides at least 3 CCEW against this target."; 						
+								
+		}//endof calculateHitBase
+			
+	        	
+		public function getDamage($fireOrder){       return 0;   } //no actual damage
+		public function setMinDamage(){     $this->minDamage = 0 ;      }
+		public function setMaxDamage(){     $this->maxDamage = 0 ;      }
+
+        public function stripForJson() {
+            $strippedSystem = parent::stripForJson();    
+            $strippedSystem->autoHit = $this->autoHit;
+            $strippedSystem->calledShotBonus = $this->calledShotBonus;                         
+            return $strippedSystem;
+		}
+		
+}//endof class AegisSensorPod
+
+
+class TargetingArrayHandler{
+	public $name = "TargetingArrayHandler";
+	private static $targetingArrays = array();
+	
+	
+	//should be called by every Targeting Array on creation!
+	public static function addTargetingArray($weapon){
+		TargetingArrayHandler::$targetingArrays[] = $weapon;		
+	}
+
+
+	//Checks if current Array is potentially valid to support nearby friendly ships.
+	public static function targetingArraysExist(){
+		
+		if(isset(TargetingArrayHandler::$targetingArrays)) return true;
+
+	    return false;
+	}//endof function targetingArraysExist 
+	
+	
+	//compares Output of applicable Targeting Arrays, sorts them, then deducts -1 from output for each subsequent Targeting Array.
+	public static function sortByOutput($arraysOnTarget){
+	    // Initialize the adjustedBonus array
+	    $adjustedBonus = array();
+	    // Initialize the rank counter
+	    $rank = 1;
+
+	    // Sort the array based on the 'output' value
+	    usort($arraysOnTarget, function($a, $b) {
+	        return $b['output'] <=> $a['output'];
+	    });
+
+	    // Iterate over each item in the sorted array
+	    foreach ($arraysOnTarget as $item) {
+	        // Get the output value from the current item
+	        $output = $item['output'];
+	        // Adjust the value based on the rank
+	        $adjustedOutput = max(0, $output - ($rank - 1));
+	        // Store the adjusted value using the original key
+	        $adjustedBonus[] = $adjustedOutput;
+	        // Increment the rank counter
+	        $rank++;
+	    }
+
+	    // Calculate the total sum of adjusted outputs
+	    $totalSum = array_sum($adjustedBonus);
+
+	    return $totalSum;
+	}//endof function sortByOutput 
+	
+	
+	//Checks if current Array is potentially valid to support nearby friendly ships.
+	public static function isValidEscort($tArray, $arrayUnit, $shooter){
+		$distance =	mathlib::getDistanceHex($arrayUnit, $shooter);
+		if ($distance <= 5 && $arrayUnit->team == $shooter->team && $tArray->escortArray) return true;//Within 5 hexes, same team and has Escort Array marker.
+	    return false;
+	}//endof function isValidEscort 
+
+	
+	//Called during calculateHitBase whenever a weapon is fired at a target and shooter has Targeting Arrays.	
+	public static function getHitBonus($gamedata, $fireOrder, $shooter, $target){ 
+	
+		//apparently ships may be loaded multiple times... make sure Targeting Arrays in $targetingArrays belong to current gamedata!
+		$tmpArrays = array();
+		foreach(TargetingArrayHandler::$targetingArrays as $targetArray){
+			$arrayShooter = $targetArray->getUnit();
+			if($targetArray->isDestroyed($gamedata->turn)) continue; //actually at this stage - CURRENT turn should be indicated!
+			//is this unit defined in current gamedata? (particular instance!)
+			$belongs = $gamedata->shipBelongs($arrayShooter);
+			if ($belongs){
+				$tmpArrays[] = $targetArray;
+			}			
+		}
+		TargetingArrayHandler::$targetingArrays = $tmpArrays;
+		
+		$hitMod = 0; //Initialise
+		$arraysOnTarget = array();	//Initialise	
+		
+		foreach(TargetingArrayHandler::$targetingArrays as $tArray){ //Check each Targeting Array in game.
+			if ($tArray->isDestroyed($gamedata->turn)) continue; //destroyed Targeting Array does not matter.
+			if ($tArray->isOfflineOnTurn($gamedata->turn)) continue; //disabled Targeting Array does not matter.			
+
+			$arrayUnit = $tArray->getUnit(); //Unit with Targeting Array.
+			$validEscort = TargetingArrayHandler::isValidEscort($tArray, $arrayUnit, $shooter);
+		
+			if($arrayUnit->id != $fireOrder->shooterid && (!$validEscort)) continue; //Only interested in Targeting Arrays that belong to shooter, or valid Escort Array.			
+		    $arrayFiringOrders = $tArray->getFireOrders($gamedata->turn); //Get fireorders for current Targeting Array.		    	
+		    $arrayOrder = null;
+		    
+		        foreach ($arrayFiringOrders as $order) { //Find appropriate order.
+		              if ($order->type == 'normal') { 
+		                $arrayOrder = $order;
+		                break; //no need to search further
+		              }
+				}   
+				 						
+        	if($arrayOrder==null) continue; //no fire order, end of work	
+
+	        if ($arrayOrder->targetid == $fireOrder->targetid) { //Is the current shot against same ship hit by Targeting Array?
+			//The Targeting Array is now either on the Shooter vessel, or an friendly Escort within 5 hexes, and has fired at Target	        	
+	          		$output = $tArray->getOutput(); //Get Targeting Array Output.		          			          			          			          		
+    				$arraysOnTarget[] = array( //Add both Array and Output to variable for sorting.
+	       				 'tArray' => $tArray,
+	        			 'output' => $output
+    				);         
+	        }
+	        
+		}		
+		
+		$hitMod += TargetingArrayHandler::sortByOutput($arraysOnTarget); //Use sort function to find total hit bonus.
+		$arraysOnTarget = array();	//clear, just in case.						
+		return $hitMod;		
+	
+	}//endof function getHitBonus  	
+
+}//endof class TargetingArrayHandler
+
+
+class PulsarMine extends Weapon{
+	public $name = "PulsarMine";
+    public $displayName = "Pulsar Mine";
+    public $iconPath = "PulsarMine.png";    
+	
+    public $range = 2;
+    public $firingMode = 1;
+    public $priorityAF = 1;
+    public $loadingtime = 1;
+	public $autoFireOnly = true; //this weapon cannot be fired by player
+    public $useOEW = false;
+	public $noLockPenalty = false;
+    public $calledShotMod = 0; 		    		          
+    
+    public $rangePenalty = 0; 
+    public $fireControl = array(4, null, null); // fighters, <mediums, <capitals 
+
+	public $animation = "bolt";
+	public $animationColor = array(245, 90, 90);
+	public $animationExplosionScale = 0.15; //single hex explosion
+
+	private $alreadyEngaged = array(); //units that were already engaged by this Pulsar Mine this turn 
+	
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		if ( $maxhealth == 0 ) $maxhealth = 6;
+		if ( $powerReq == 0 ) $powerReq = 4;
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+	} 
+
+
+    public function beforeFiringOrderResolution($gamedata)
+    {
+    	$ship = $this->getUnit();  
+    	$nearbyShips = $gamedata->getShipsInDistance($ship, 2);
+
+    	// To create up to 18 attacks.
+		$attacksTotal = 18;
+		$currentShotNumber = 0;
+    	
+    	foreach ($nearbyShips as $targetShip){
+			if (!($targetShip instanceof FighterFlight)) continue;//Ignore anything that's not a fighter flight. 
+			if ($targetShip->team == $ship->team) continue; //Ignore flights that are friendly.
+			$targetBearing = $ship->getBearingOnUnit($targetShip);				    		
+    		if (!mathlib::isInArc($targetBearing, $this->startArc, $this->endArc)) continue;//Ignore flights that are not in arc.   			
+			if (isset($this->alreadyEngaged[$targetShip->id])) continue; //Ignore flights that have already been engaged. 
+
+		        foreach ($targetShip->systems as $fighter) { // Now make an attack against every fighter in fighter flight.
+						if ($fighter == null || $fighter->isDestroyed()) {
+							continue;
+						}
+						$newFireOrder = new FireOrder(
+							-1, "normal", $ship->id, $targetShip->id,
+							$this->id, $fighter->id, $gamedata->turn, 1, 
+							0, 0, 1, 0, 0, //needed, rolled, shots, shotshit, intercepted
+							0,0,$this->weaponClass,-1 //X, Y, damageclass, resolutionorder
+						);		
+						$newFireOrder->addToDB = true;
+						$this->fireOrders[] = $newFireOrder;
+						$currentShotNumber++;					
+						if($currentShotNumber >= $attacksTotal) break; //will get out of foreach loop once we're out of mines, even if there are still fighters unassigned
+				}	
+					
+				$this->alreadyEngaged[$targetShip->id] = true;//mark engaged
+				if($currentShotNumber >= $attacksTotal) break; //No sense looking at further Target units if mines all used up.
+			}
+   		
+	} //endof beforeFiringOrderResolution
+	
+	
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+		$this->data["Special"] = 'Automatically attacks up to 18 enemy fighters who end their movement within 2 hexes (and are in weapons arc)';
+		$this->data["Special"] .= '<br>Cannot be manually targeted.';													
+	}	
+/*
+        public function stripForJson() {
+            $strippedSystem = parent::stripForJson();    
+            $strippedSystem->noHexTargeting = $this->noHexTargeting;                              
+            return $strippedSystem;
+        }
+*/
+        public function getDamage($fireOrder){        return 8;   }
+        public function setMinDamage(){     $this->minDamage = 8 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 8 ;      }
+	
+} //endof class PulsarMine
 
 ?>

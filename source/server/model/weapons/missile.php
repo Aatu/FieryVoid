@@ -1948,6 +1948,7 @@ class AmmoMissileRackF extends AmmoMissileRackS {
 
 		private $firedInRapidMode = false; //was this weapon fired in rapid mode (this turn)?
 		private $firedInLongRangeMode = false;//was this weapon fired in Long Range mode this turn?
+		private $noHexTargeting = false;		
 
 		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base=false)
 		{
@@ -1969,8 +1970,7 @@ class AmmoMissileRackF extends AmmoMissileRackS {
 			$this->fireControl = array(null,null,null);//I need this method if launched has NO ammo modes.
 			$this->fireControlArray = array();
 			
-//			$this->hextarget = null;
-//			$this->hextargetArray = array();	
+			$this->noHexTargeting = true;				
 	
 			$nullFC = array(null, null, null); //I need this method if there's ammo equipped.
 			$this->basicFC = $nullFC; 
@@ -1999,14 +1999,7 @@ class AmmoMissileRackF extends AmmoMissileRackS {
       				  }
     			}
 		}	
-/*
-	private function modifyHexTarget(&$hextargetArray) {
 
-	    foreach ($hextargetArray as $key => $value) {
-	        $hextargetArray[$key] = false; // Set each element to false
-	    }	
-	}	
-	*/
     public function beforeFiringOrderResolution($gamedata) //Necessary for recalculateFireControl to apply to actual firing results.
 	    {		
 	        parent::beforeFiringOrderResolution($gamedata);
@@ -2101,8 +2094,6 @@ class AmmoMissileRackF extends AmmoMissileRackS {
 			if($currNote->turn == $gamedata->turn-1) if ($currNote->notevalue == 'L'){ //only current round matters!
 				
 			$this->nullFireControl();//Null fire control for weapon, to prevent firing after Long Range shot.
-			
-//			$this->modifyHexTarget($this->hextargetArray);//Make hexTarget variable false across all modes, to prevetn Jammer missile firing after Long Range shot.
 
 		}		
 		//and immediately delete notes themselves, they're no longer needed (this will not touch the database, just memory!)
@@ -2135,7 +2126,8 @@ class AmmoMissileRackF extends AmmoMissileRackS {
 			$strippedSystem->range = $this->range;
 			$strippedSystem->rangeArray = $this->rangeArray;
 			$strippedSystem->firedInRapidMode = $this->firedInRapidMode;			
-			$strippedSystem->firedInLongRangeMode = $this->firedInLongRangeMode;							
+			$strippedSystem->firedInLongRangeMode = $this->firedInLongRangeMode;
+			$strippedSystem->noHexTargeting = $this->noHexTargeting;													
 			return $strippedSystem;
 		}
 
@@ -2166,8 +2158,8 @@ class BallisticMineLauncher extends AmmoMissileRackS{
 		public $animationExplosionScale = 0.25; //single hex explosion
 		public $animationExplosionType = "AoE";
 		
-	private $ammoMagazine; //reference to ammo magazine
-	private $ammoClassesUsed = array();
+//	private $ammoMagazine; //reference to ammo magazine
+//	private $ammoClassesUsed = array();
 				
 
     protected $rackExplosionDamage = 0; //how much damage will this weapon do in case of catastrophic explosion
@@ -2182,8 +2174,8 @@ class BallisticMineLauncher extends AmmoMissileRackS{
 		if(!$this->availableAmmoAlreadySet){
 			$this->ammoClassesArray = array();
 			$this->ammoClassesArray[] =  new AmmoBLMineB();
-			$this->ammoClassesArray[] =  new AmmoBLMineW();
-			$this->ammoClassesArray[] =  new AmmoBLMineH();						
+			$this->ammoClassesArray[] =  new AmmoBLMineH();				
+			$this->ammoClassesArray[] =  new AmmoBLMineW();					
 			$this->availableAmmoAlreadySet = true;
 		}	            		
             						
@@ -2246,8 +2238,13 @@ class BallisticMineLauncher extends AmmoMissileRackS{
 			    
 		//Now used updated x and y coordinates after scatter to find ships in range.		    
 	    $finalHexTarget = new OffsetCoordinate($updatedFireOrder->x, $updatedFireOrder->y);
-        $mineRange = $this->mineRangeArray[$originalFireOrder->firingMode];	         
-	    $mineTarget = $gamedata->getClosestShip($finalHexTarget, $mineRange); //Find the closest ship, then attack it.
+        $mineRange = $this->mineRangeArray[$originalFireOrder->firingMode];
+        
+		if ($shooter->IFFSystem){ ////Returns true if ship has the Identify Friend or Foe Enhancment.
+		    $mineTarget = $gamedata->getClosestEnemyShip($shooter, $finalHexTarget, $mineRange); //Find the closest enemy ship only, then attack it.
+		}else{	
+		    $mineTarget = $gamedata->getClosestShip($finalHexTarget, $mineRange); //Just find the closest ship, then attack it.			
+		}        
     
 		    if ($mineTarget instanceof BaseShip || $mineTarget instanceof FighterFlight) { // Check if $mineTarget is a valid ship/fighter flight
 						$newFireOrder = new FireOrder(
@@ -2328,7 +2325,7 @@ class BallisticMineLauncher extends AmmoMissileRackS{
 		parent::setSystemDataWindow($turn);
 		$this->data["Range"] = $this->range; //Don't need to display distanceRange like Missile Racks do :)
 		$this->data["Special"] = 'Available firing modes depend on ammo bought as unit enhancements. Ammunition available is tracked by central Ammunition Magazine system.';
-		$this->data["Special"] = 'Hex-targeted weapon with a 25% chance to scatter.';
+		$this->data["Special"] .= '<br>Hex-targeted weapon with a 25% chance to scatter.';
 		$this->data["Special"] .= '<br>Will try to attack the closest ship from the hex where it detonates, up to its maximum radius.';
 		$this->data["Special"] .= '<br>If several ships are of equal distance to the mines, it will choose a target randomly.';		
 		$this->data["Special"] .= '<br>Damage, Firecontrol and Range from target hex depends on ammo type:';	
@@ -2347,6 +2344,52 @@ class BallisticMineLauncher extends AmmoMissileRackS{
 	
 } //endof class BallisticMineLauncher
 
+
+class AbbaiMineLauncher extends BallisticMineLauncher{
+	public $name = "AbbaiMineLauncher";
+    public $displayName = "Mine Launcher";
+    public $iconPath = "AbbaiMineLauncher.png";    
+	
+    public $range = 20;
+    public $distanceRange = 40;   
+    
+	//basic launcher data, before being modified by actual missiles
+	protected $basicFC=array(0,0,0);
+	protected $basicRange = 20;
+	protected $basicDistanceRange = 40; //Just so scattering past 30 hexes doesn't cause an issue.
+	
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base=false)
+	{
+		if ( $maxhealth == 0 ) $maxhealth = 6;
+            	if ( $powerReq == 0 ) $powerReq = 3;
+
+			//Set mine availability! (Cannot fire missiles like S-Rack)
+		if(!$this->availableAmmoAlreadySet){
+			$this->ammoClassesArray = array();
+			$this->ammoClassesArray[] =  new AmmoBistifA();			
+			$this->ammoClassesArray[] =  new AmmoBistifB();					
+			$this->availableAmmoAlreadySet = true;
+		}	            		
+            						
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base); //Parent routines take care of the rest
+	}   
+
+	
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+		$this->data["Range"] = $this->range; //Don't need to display distanceRange like Missile Racks do :)
+		$this->data["Special"] = 'Available firing modes depend on ammo bought as unit enhancements. Ammunition available is tracked by central Ammunition Magazine system.';
+		$this->data["Special"] = 'Hex-targeted weapon with a 25% chance to scatter.';
+		$this->data["Special"] .= '<br>Will try to attack the closest ship from the hex where it detonates, up to its maximum radius.';
+		$this->data["Special"] .= '<br>If several ships are of equal distance to the mines, it will choose a target randomly.';		
+		$this->data["Special"] .= '<br>Damage, Firecontrol and Range from target hex depends on ammo type:';	
+		$this->data["Special"] .= '<br>  - Basic: 12 damage, +10 to hit and 4 hex radius.';	
+		$this->data["Special"] .= '<br>  - Wide-Range: 12 damage, +10 to hit and 7 hex radius.';	
+		$this->data["Special"] .= '<br>If no targets are available the mine will deactivate.';
+		$this->data["Special"] .= '<br>The mine attack can be intercepted under normal ballistic rules.';																
+	}	
+	
+} //endof class AbbaiMineLauncher
 
 ?>
 

@@ -453,6 +453,33 @@ shipManager.systems = {
 		},	//endof getUnusedSpecialists
 
 
+    getSystemListThrustBoosted: function getSystemListThrustBoosted(ship) { //For Nexus PLasma Charge, but coulod be used for other Thrust-boosted system - DK 25.3.24
+		var toReturn = Array();
+        for (var i in ship.systems) {
+            var system = ship.systems[i];
+
+            if (system.thrustBoosted) {
+                toReturn.push(system);
+            }
+        }
+
+        return toReturn;
+    },
+
+
+    getSystemListEWBoosted: function getSystemListEWBoosted(ship) { //Instead of listing weapons like Psionic Lances separately, call one function - DK 25.3.24
+		var toReturn = Array();
+        for (var i in ship.systems) {
+            var system = ship.systems[i];
+
+            if (system.ewBoosted) {
+                toReturn.push(system);
+            }
+        }
+
+        return toReturn;
+    },    
+    
     getRemainingHealth: function getRemainingHealth(system) {
         var damage = shipManager.systems.getTotalDamage(system);
         var max = system.maxhealth;

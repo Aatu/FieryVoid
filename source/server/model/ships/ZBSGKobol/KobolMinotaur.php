@@ -40,8 +40,8 @@ class KobolMinotaur extends BaseShip{
 		$this->addFrontSystem(new HeavyRailGun(5, 12, 9, 330, 30));
 		$this->addFrontSystem(new HvyBlastCannon(5, 6, 4, 270, 30));
 		$this->addFrontSystem(new HvyBlastCannon(5, 6, 4, 330, 90));
-		$this->addFrontSystem(new FlakCannon(3, 4, 2, 210, 360));
-		$this->addFrontSystem(new FlakCannon(3, 4, 2, 0, 150));
+		$this->addFrontSystem(new GromeFlakCannon(3, 4, 2, 210, 360));
+		$this->addFrontSystem(new GromeFlakCannon(3, 4, 2, 0, 150));
 
         $this->addAftSystem(new Thruster(5, 10, 0, 2, 2));
         $this->addAftSystem(new Thruster(5, 10, 0, 2, 2));
@@ -49,8 +49,8 @@ class KobolMinotaur extends BaseShip{
         $this->addAftSystem(new Thruster(5, 10, 0, 2, 2));
 		$this->addAftSystem(new Bulkhead(0, 4));
 		$this->addAftSystem(new Bulkhead(0, 4));
-		$this->addAftSystem(new FlakCannon(3, 4, 2, 180, 330));
-		$this->addAftSystem(new FlakCannon(3, 4, 2, 30, 180));
+		$this->addAftSystem(new GromeFlakCannon(3, 4, 2, 180, 330));
+		$this->addAftSystem(new GromeFlakCannon(3, 4, 2, 30, 180));
 		$hyperdrive = new JumpEngine(5, 32, 6, 20);
 			$hyperdrive->displayName = 'FTL Drive';
 			$this->addAftSystem($hyperdrive);
@@ -58,8 +58,8 @@ class KobolMinotaur extends BaseShip{
         $this->addLeftSystem(new Thruster(6, 9, 0, 3, 3));
 		$this->addLeftSystem(new Bulkhead(0, 4));
 		$this->addLeftSystem(new Bulkhead(0, 4));
-		$this->addLeftSystem(new FlakCannon(3, 4, 2, 210, 330));
-		$this->addLeftSystem(new FlakCannon(3, 4, 2, 210, 330));
+		$this->addLeftSystem(new GromeFlakCannon(3, 4, 2, 210, 330));
+		$this->addLeftSystem(new GromeFlakCannon(3, 4, 2, 210, 330));
 		$this->addLeftSystem(new MedBlastCannon(4, 5, 2, 210, 330));
 		$this->addLeftSystem(new MedBlastCannon(4, 5, 2, 210, 330));
 		$this->addLeftSystem(new MedBlastCannon(4, 5, 2, 210, 330));
@@ -73,8 +73,8 @@ class KobolMinotaur extends BaseShip{
         $this->addRightSystem(new Thruster(6, 9, 0, 3, 4));
 		$this->addRightSystem(new Bulkhead(0, 4));
 		$this->addRightSystem(new Bulkhead(0, 4));
-		$this->addRightSystem(new FlakCannon(3, 4, 2, 30, 150));
-		$this->addRightSystem(new FlakCannon(3, 4, 2, 30, 150));
+		$this->addRightSystem(new GromeFlakCannon(3, 4, 2, 30, 150));
+		$this->addRightSystem(new GromeFlakCannon(3, 4, 2, 30, 150));
 		$this->addRightSystem(new MedBlastCannon(4, 5, 2, 30, 150));
 		$this->addRightSystem(new MedBlastCannon(4, 5, 2, 30, 150));
 		$this->addRightSystem(new MedBlastCannon(4, 5, 2, 30, 150));

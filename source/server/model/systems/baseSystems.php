@@ -80,17 +80,30 @@ class Stealth extends ShipSystem implements SpecialAbility{
         if (! ($shooter instanceof BaseShip) || ! ($target instanceof BaseShip))
             throw new InvalidArgumentException("Wrong argument type for Stealth getSpecialAbilityValue");
 		
-        $jammerValue = 0; 
-        if (mathlib::getDistanceHex($shooter, $target) > 5) //kicks in!
-        {
-			$jammerValue = 1; 
-			//Advanced Sensors negate Jammer, Improved Sensors halve Jammer
-			if ($shooter->hasSpecialAbility("AdvancedSensors")) {
-				$jammerValue = 0; //negated
-			} else if ($shooter->hasSpecialAbility("ImprovedSensors")) {
-				$jammerValue = $jammerValue * 0.5; //halved
-			}
-        }
+               $jammerValue = 0; 
+		if ($target instanceof FighterFlight){
+			    if (mathlib::getDistanceHex($shooter, $target) > 5) //kicks in for fighters over 5 hexes!
+			        {
+					$jammerValue = 1; 
+						//Advanced Sensors negate Jammer, Improved Sensors halve Jammer
+						if ($shooter->hasSpecialAbility("AdvancedSensors")) {
+							$jammerValue = 0; //negated
+						} else if ($shooter->hasSpecialAbility("ImprovedSensors")) {
+							$jammerValue = $jammerValue * 0.5; //halved
+						}
+			        }
+		}else{ //Ships
+			    if (mathlib::getDistanceHex($shooter, $target) > 10) //kicks in for ships over 10 hexes!
+ 					{						
+			    	$jammerValue = 1; 
+						//Advanced Sensors negate Jammer, Improved Sensors halve Jammer
+						if ($shooter->hasSpecialAbility("AdvancedSensors")) {
+							$jammerValue = 0; //negated
+						} else if ($shooter->hasSpecialAbility("ImprovedSensors")) {
+							$jammerValue = $jammerValue * 0.5; //halved
+						}
+			    }
+			}	
         return $jammerValue;        
     }
 } //endof Stealth
@@ -2049,8 +2062,9 @@ public function onIndividualNotesLoaded($gamedata)
 	}		
 	
 	//returns FC bonus for allocated for a given ship classes / FC index
-	public function getFCBonus($FCIndex){
-	    $FCvalue = 0;
+	public function getFCBonus($FCIndex, $turn){
+	    if($this->isDestroyed($turn)) return 0;
+	    $FCvalue = 0;	    	
 	    $FCvalueArray = array_values($this->allocatedBFCP);        
 	    if (isset($FCvalueArray[$FCIndex])) {
 	        $FCvalue = $FCvalueArray[$FCIndex]; 
@@ -2159,10 +2173,11 @@ class HyachSpecialists extends ShipSystem{
 		foreach ($this->individualNotes as $currNote){ //assume ASCENDING sorting - so enact all changes as is
 			$explodedKey = explode ( ';' , $currNote->notekey ) ;//split into array: [area;value] where area denotes action, value - damage type (typically) 
 			
-			if ($explodedKey[0] == 'available'){//Mark when a Specialist has been selected for whole game.
-					$this->availableSpec[$explodedKey[1]] = 1;
-					$this->allocatedSpec[$explodedKey[1]] = 0;					
-			}
+
+            if ( !array_key_exists($explodedKey[1], $this->availableSpec) ){ //if this specialist is not yet set - do set it
+                    $this->availableSpec[$explodedKey[1]] = 1;
+                    $this->allocatedSpec[$explodedKey[1]] = 0;
+            }
 					
 			if (($explodedKey[0] == 'allocated') && ($currNote->turn == $gamedata->turn)){ //Mark when a Specialist has been used on a given turn.
 				$ship = $this->getUnit();
@@ -5644,36 +5659,6 @@ class AmmoBLMineB extends AmmoMissileTemplate{
 } //endof class AmmoBLMineB
 
 
-//ammunition for AmmoMagazine - Basic Mine for BallisticMineLauncher
-class AmmoBLMineW extends AmmoMissileTemplate{	
-	public $name = 'AmmoBLMineW';
-	public $displayName = 'Wide-Range Mine';
-	public $modeName = 'Wide-Range Mine';
-	public $size = 1; //how many store slots are required for a single round
-	public $enhancementName = 'MINE_BLW'; //enhancement name to be enabled
-	public $enhancementDescription = '(mine) Wide-Range Mine'; //enhancement description
-	public $enhancementPrice = 6;
-	
-	public $rangeMod = 0; //MODIFIER for launch range
-	public $distanceRangeMod = 0; //MODIFIER for distance range
-	public $fireControlMod = array(6, 6, 6); //MODIFIER for weapon fire control!
-	public $minDamage = 13;
-	public $maxDamage = 22;	
-	public $damageType = 'Standard';//mode of dealing damage
-	public $weaponClass = 'Ballistic';//weapon class
-	public $priority = 6;
-	public $priorityAF = 5;
-	public $animationExplosionScale = 0.25;
-	
-	public $hidetarget = true;
-
-    public $hextarget = true; 
-	public $mineRange = 5;	
-
-    public function getDamage($fireOrder){        return Dice::d(10, 1)+12;   } 
-
-} //endof class AmmoBLMineW
-
 //ammunition for AmmoMagazine - Heavy Mine for BallisticMineLauncher
 class AmmoBLMineH extends AmmoMissileTemplate{	
 	public $name = 'AmmoBLMineH';
@@ -5703,6 +5688,94 @@ class AmmoBLMineH extends AmmoMissileTemplate{
     public function getDamage($fireOrder){        return Dice::d(10, 1)+24;   } 
 	
 } //endof class AmmoBLMineH
+
+//ammunition for AmmoMagazine - Basic Mine for BallisticMineLauncher
+class AmmoBLMineW extends AmmoMissileTemplate{	
+	public $name = 'AmmoBLMineW';
+	public $displayName = 'Wide-Range Mine';
+	public $modeName = 'Wide-Range Mine';
+	public $size = 1; //how many store slots are required for a single round
+	public $enhancementName = 'MINE_BLW'; //enhancement name to be enabled
+	public $enhancementDescription = '(mine) Wide-Range Mine'; //enhancement description
+	public $enhancementPrice = 6;
+	
+	public $rangeMod = 0; //MODIFIER for launch range
+	public $distanceRangeMod = 0; //MODIFIER for distance range
+	public $fireControlMod = array(6, 6, 6); //MODIFIER for weapon fire control!
+	public $minDamage = 13;
+	public $maxDamage = 22;	
+	public $damageType = 'Standard';//mode of dealing damage
+	public $weaponClass = 'Ballistic';//weapon class
+	public $priority = 6;
+	public $priorityAF = 5;
+	
+	public $hidetarget = true;
+
+    public $hextarget = true; 
+	public $mineRange = 5;	
+
+    public function getDamage($fireOrder){        return Dice::d(10, 1)+12;   } 
+
+} //endof class AmmoBLMineW
+
+//ammunition for AmmoMagazine - Basic Mine for AbbaiMineLauncher
+class AmmoBistifA extends AmmoMissileTemplate{	
+	public $name = 'AmmoBistifA';
+	public $displayName = 'Basic Mine';
+	public $modeName = 'Basic Mine';
+	public $size = 1; //how many store slots are required for a single round
+	public $enhancementName = 'MINE_MLB'; //enhancement name to be enabled
+	public $enhancementDescription = '(mine) Basic Mine'; //enhancement description
+	public $enhancementPrice = 8;
+	
+	public $rangeMod = 0; //MODIFIER for launch range
+	public $distanceRangeMod = 0; //MODIFIER for distance range
+	public $fireControlMod = array(2, 2, 2); //MODIFIER for weapon fire control!
+	public $minDamage = 12;
+	public $maxDamage = 12;	
+	public $damageType = 'Standard';//mode of dealing damage
+	public $weaponClass = 'Ballistic';//weapon class
+	public $priority = 6;
+	public $priorityAF = 5;
+	
+	public $hidetarget = true;
+
+    public $hextarget = true; 
+	public $mineRange = 4;	
+
+    public function getDamage($fireOrder){        return 12;   } 
+
+} //endof class AmmoBistifA
+
+//ammunition for AmmoMagazine - Wide-Ranged Mine for AbbaiMineLauncher
+class AmmoBistifB extends AmmoMissileTemplate{	
+	public $name = 'AmmoBistifB';
+	public $displayName = 'Wide-Ranged Mine';
+	public $modeName = 'Wide-Ranged Mine';
+	public $size = 1; //how many store slots are required for a single round
+	public $enhancementName = 'MINE_MLW'; //enhancement name to be enabled
+	public $enhancementDescription = '(mine) Wide-Range Mine'; //enhancement description
+	public $enhancementPrice = 12;
+	
+	public $rangeMod = 0; //MODIFIER for launch range
+	public $distanceRangeMod = 0; //MODIFIER for distance range
+	public $fireControlMod = array(2, 2, 2); //MODIFIER for weapon fire control!
+	public $minDamage = 12;
+	public $maxDamage = 12;	
+	public $damageType = 'Standard';//mode of dealing damage
+	public $weaponClass = 'Ballistic';//weapon class
+	public $priority = 6;
+	public $priorityAF = 5;
+	public $animationExplosionScale = 0.25;
+	
+	public $hidetarget = true;
+
+    public $hextarget = true; 
+	public $mineRange = 7;	
+
+    public function getDamage($fireOrder){        return 12;   } 
+
+} //endof class AmmoBistifB
 
 
 ?>
