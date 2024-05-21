@@ -14,7 +14,8 @@ The costs before rounding the final value are:
 			Light railgun ~12 points
 		Estimated cost is 2500 + (6x36) + (12x24) + (12x12) = 3148 -> rounded to 3150*/
 		$this->pointCost = 3150;
-		$this->faction = "Grome Autocracy";
+        $this->faction = "Custom Ships";
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
 		$this->phpclass = "GromeMahkgarFull";
 		$this->variantOf = "Mahkgar Starbase";
 		$this->shipClass = "Mahkgar Starbase (full)";
@@ -80,8 +81,8 @@ The costs before rounding the final value are:
 				new GromeMedRailgun(4, 9, 6, $min, $max),
 				new GromeLgtRailgun(4, 6, 3, $min, $max),
 				new GromeLgtRailgun(4, 6, 3, $min, $max),
-				new FlakCannon(4, 4, 2, $min, $max),
-				new FlakCannon(4, 4, 2, $min, $max),
+				new GromeFlakCannon(4, 4, 2, $min, $max),
+				new GromeFlakCannon(4, 4, 2, $min, $max),
 				new Hangar(4, 7, 6),
 				new CargoBay(4, 30),
 				new SubReactorUniversal(4, 30, 0, 0),

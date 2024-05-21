@@ -483,3 +483,34 @@ ProximityLaser.prototype.getFiringHex = function(shooter, weapon){ //Need to cal
 	return sPosLaunch;
 	
 	};
+		
+var GromeTargetingArray = function GromeTargetingArray(json, ship) {
+    Weapon.call(this, json, ship);
+};
+GromeTargetingArray.prototype = Object.create(Weapon.prototype);
+GromeTargetingArray.prototype.constructor = GromeTargetingArray;
+
+GromeTargetingArray.prototype.initializationUpdate = function() {
+var ship = this.ship;	
+this.outputDisplay = shipManager.systems.getOutput(ship, this);
+return this;
+};
+
+var PulsarMine = function PulsarMine(json, ship) {
+    Weapon.call(this, json, ship);
+};
+PulsarMine.prototype = Object.create(Weapon.prototype);
+PulsarMine.prototype.constructor = PulsarMine;
+
+var AegisSensorPod = function AegisSensorPod(json, ship) {
+    Weapon.call(this, json, ship);
+};
+AegisSensorPod.prototype = Object.create(Weapon.prototype);
+AegisSensorPod.prototype.constructor = AegisSensorPod;
+
+AegisSensorPod.prototype.initializationUpdate = function() {
+var ship = this.ship;	
+this.outputDisplay = shipManager.systems.getOutput(ship, this);
+return this;
+};
+

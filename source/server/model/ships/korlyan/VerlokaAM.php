@@ -28,9 +28,11 @@ class VerlokaAM extends BaseShip{
         $this->rollcost = 1;
         $this->pivotcost = 3;
         $this->iniativebonus = 0;
+        
+		$this->IFFSystem = false;        
 
 	//ammo magazine itself (AND its missile options)
-	$ammoMagazine = new AmmoMagazine(230); //80+20 Basic, 80 Intercept and 50 Mines
+	$ammoMagazine = new AmmoMagazine(220); //80+20 Basic, 80 Intercept and up to 40 Mines
 	    $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
 	    $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 100); //add full load of basic missiles 
 	    $ammoMagazine->addAmmoEntry(new AmmoMissileI(), 80); //add full load of missiles
@@ -51,7 +53,8 @@ class VerlokaAM extends BaseShip{
 	    $this->enhancementOptionsEnabled[] = 'AMMO_X';//add enhancement options for other missiles - Class-X
 		$this->enhancementOptionsEnabled[] = 'MINE_BLB';//add enhancement options for mines - Basic Mines
 		$this->enhancementOptionsEnabled[] = 'MINE_BLW';//add enhancement options for mines - Wide-Range Mines
-		$this->enhancementOptionsEnabled[] = 'MINE_BLH';//add enhancement options for mines - Wide-Range Mines 		 		  	    	    	    
+		$this->enhancementOptionsEnabled[] = 'MINE_BLH';//add enhancement options for mines - Wide-Range Mines
+		$this->enhancementOptionsEnabled[] = 'IFF_SYS'; //Abilty to choose IFF enhancement.		 		 		  	    	    	    
 	    //$this->enhancementOptionsEnabled[] = 'AMMO_S';//add enhancement options for other missiles - Class-S
 		//Stealth missile removed from Early Kor-Lyan ships, as it's not availablee until 2252	  
         
@@ -81,12 +84,12 @@ class VerlokaAM extends BaseShip{
 
         $this->addLeftSystem(new AmmoMissileRackD(4, 0, 0, 240, 60, $ammoMagazine, false));
         $this->addLeftSystem(new AmmoMissileRackF(3, 0, 0, 180, 360, $ammoMagazine, false));
-		$this->addLeftSystem(new BallisticMineLauncher(4, 0, 0, 300, 120, $ammoMagazine, false));        
+		$this->addLeftSystem(new BallisticMineLauncher(4, 0, 0, 240, 60, $ammoMagazine, false));        
         $this->addLeftSystem(new Thruster(4, 15, 0, 5, 3));
 
         $this->addRightSystem(new AmmoMissileRackD(4, 0, 0, 300, 120, $ammoMagazine, false));
         $this->addRightSystem(new AmmoMissileRackF(3, 0, 0, 0, 180, $ammoMagazine, false));
-		$this->addRightSystem(new BallisticMineLauncher(4, 0, 0, 240, 60, $ammoMagazine, false));        
+		$this->addRightSystem(new BallisticMineLauncher(4, 0, 0, 300, 120, $ammoMagazine, false));        
         $this->addRightSystem(new Thruster(4, 15, 0, 5, 4));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;

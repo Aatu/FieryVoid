@@ -5,7 +5,8 @@ class GromeGroth extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 1000;
-		$this->faction = "Grome Autocracy";
+        $this->faction = "Custom Ships";
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
         $this->phpclass = "GromeGroth";
         $this->imagePath = "img/ships/GromeGroth.png";
         $this->shipClass = "Groth Gunship";
@@ -49,8 +50,8 @@ class GromeGroth extends BaseShip{
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
 		$this->addFrontSystem(new Railgun(3, 9, 6, 300, 360));
 		$this->addFrontSystem(new Railgun(3, 9, 6, 0, 60));
-		$this->addFrontSystem(new FlakCannon(5, 4, 2, 240, 60));
-		$this->addFrontSystem(new FlakCannon(5, 4, 2, 300, 120));
+		$this->addFrontSystem(new GromeFlakCannon(5, 4, 2, 240, 60));
+		$this->addFrontSystem(new GromeFlakCannon(5, 4, 2, 300, 120));
         $this->addFrontSystem(new ConnectionStrut(4));
 
         $this->addAftSystem(new Thruster(3, 16, 0, 4, 2));
@@ -59,14 +60,14 @@ class GromeGroth extends BaseShip{
 		$this->addAftSystem(new Railgun(3, 9, 6, 120, 180));
         $this->addAftSystem(new ConnectionStrut(4));
 
-        $this->addLeftSystem(new FlakCannon(2, 4, 2, 180, 360));
+        $this->addLeftSystem(new GromeFlakCannon(2, 4, 2, 180, 360));
 		$this->addLeftSystem(new Railgun(3, 9, 6, 210, 330));
 		$this->addLeftSystem(new HeavyRailGun(3, 12, 9, 300, 360));
 		$this->addLeftSystem(new HeavyRailGun(3, 12, 9, 180, 240));
         $this->addLeftSystem(new Thruster(3, 15, 0, 4, 3));
         $this->addLeftSystem(new ConnectionStrut(4));
 
-        $this->addRightSystem(new FlakCannon(2, 4, 2, 0, 180));
+        $this->addRightSystem(new GromeFlakCannon(2, 4, 2, 0, 180));
 		$this->addRightSystem(new Railgun(3, 9, 6, 30, 150));
 		$this->addRightSystem(new HeavyRailGun(3, 12, 9, 0, 60));
 		$this->addRightSystem(new HeavyRailGun(3, 12, 9, 120, 180));

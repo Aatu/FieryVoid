@@ -223,3 +223,9 @@ var CustomEarlyLtParticleCutter = function CustomEarlyLtParticleCutter(json, shi
 CustomEarlyLtParticleCutter.prototype = Object.create(Weapon.prototype);
 CustomEarlyLtParticleCutter.prototype.constructor = CustomEarlyLtParticleCutter;
 
+var GaimPhotonBomb = function GaimPhotonBomb(json, ship) {
+    Weapon.call(this, json, ship);
+};
+GaimPhotonBomb.prototype = Object.create(Weapon.prototype);
+GaimPhotonBomb.prototype.constructor = GaimPhotonBomb;
+

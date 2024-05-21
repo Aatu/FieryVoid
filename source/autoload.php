@@ -634,6 +634,9 @@ spl_autoload_register(
                 'motenai' => '/server/model/ships/abbai_old/motenai.php',
                 'motenai1935' => '/server/model/ships/abbai_old/motenai1935.php',
                 'motenai1980' => '/server/model/ships/abbai_old/motenai1980.php',
+                'motenaiam' => '/server/model/ships/abbai_old/motenaiam.php',
+                'motenai1935am' => '/server/model/ships/abbai_old/motenai1935am.php',
+                'motenai1980am' => '/server/model/ships/abbai_old/motenai1980am.php',                
                 'movement' => '/server/handlers/movement.php',
                 'movementgamephase' => '/server/Phase/MovementGamePhase.php',
                 'movementorder' => '/server/model/BaseClasses.php',
@@ -1624,6 +1627,7 @@ spl_autoload_register(
 				'nexusltenhplasmaftr' => '/server/model/weapons/customNexus.php',
 				'nexusheavyplasmacharge' => '/server/model/weapons/customNexus.php',
 				'nexusplasmacharge' => '/server/model/weapons/customNexus.php',
+				'nexusplasmachargethrust' => '/server/model/weapons/customNexus.php',				
 				'nexusfightertorpedolauncher' => '/server/model/weapons/customNexus.php',
 				'nexusltplasmatorpedo' => '/server/model/weapons/customNexus.php',
 //				'nexusheavychargedplasmagun' => '/server/model/weapons/customNexus.php',
@@ -1971,14 +1975,17 @@ spl_autoload_register(
 
                 //Grome Weapons and Systems
                 'antiquatedscanner' => '/server/model/systems/baseSystems.php',
-                'flakcannon' => '/server/model/weapons/matter.php',
+                'grometargetingarray' => '/server/model/weapons/specialWeapons.php',             
+                'targetingarrayhandler' => '/server/model/weapons/specialWeapons.php',
+                'gromeflakcannon' => '/server/model/weapons/matter.php',//NEW VERSION                                
+//                'flakcannon' => '/server/model/weapons/matter.php',//OLD VERSION OF FLAK CANNON - DK
 				'slugcannon' => '/server/model/weapons/matter.php',
 				'singleslugcannon' => '/server/model/weapons/matter.php',
 				'gromelgtrailgun' => '/server/model/weapons/customs.php',
 				'gromemedrailgun' => '/server/model/weapons/customs.php',
 				'gromehvyrailgun' => '/server/model/weapons/customs.php',
                 
-                //Grome Ships
+                //Grome Ships - To be discontinued
                 'gromegormokosat' => '/server/model/ships/grome/GromeGormokOSAT.php',
                 'gromegralac' => '/server/model/ships/grome/GromeGralac.php',
                 'gromegroth' => '/server/model/ships/grome/GromeGroth.php',
@@ -1991,7 +1998,7 @@ spl_autoload_register(
                 'grometrokan' => '/server/model/ships/grome/GromeTrokan.php',
                 'grometrokanmargus' => '/server/model/ships/grome/GromeTrokanMargus.php',
 
-					//Grome Ships Using grome(lgt/med/hvy)railgun with special shells similar to full missile ships
+					//Grome Ships Using grome(lgt/med/hvy)railgun with special shells similar to full missile ships -  To be discontinued
 					'gromegormokfull' => '/server/model/ships/grome/GromeGormokFull.php',
 					'gromegralacfull' => '/server/model/ships/grome/GromeGralacFull.php',
 					'gromegrothfull' => '/server/model/ships/grome/GromeGrothFull.php',
@@ -2702,8 +2709,10 @@ spl_autoload_register(
 				'rava' => '/server/model/ships/brakiri_raiders/Rava.php',
 				'attackfrigate' => '/server/model/ships/brakiri_raiders/AttackFrigate.php',
 				'folshota' => '/server/model/ships/brakiri/folshotA.php',
-				'folshotaraider' => '/server/model/ships/brakiri_raiders/FolshotARaider.php',	
-
+				'folshotaraider' => '/server/model/ships/brakiri_raiders/FolshotARaider.php',
+				'gaimphotonbomb' => '/server/model/weapons/customs.php',
+				'gaimtixtyk' => '/server/model/ships/customs/gaimTixTyk.php',				
+				'gaimtixtykupgrade' => '/server/model/ships/customs/gaimTixTykUpgrade.php',	
 
 				//Star Trek conversions
 				//weapons
@@ -2926,7 +2935,8 @@ spl_autoload_register(
 //				'solyrn' => '/server/model/ships/korlyan/Solyrn.php',
                 'tmphitreduction' => '/server/model/cricialClasses.php',
 				'limpetbore' => '/server/model/cricialClasses.php',                
-
+				'limpetboretravelling' => '/server/model/cricialClasses.php', 
+				
 //         		'chaffmissile' => '/server/model/weapons/customNexus.php', 
          		'proximitylaser' => '/server/model/weapons/specialWeapons.php',
          		'proximitylaserlauncher' => '/server/model/weapons/specialWeapons.php',         		 
@@ -2939,7 +2949,8 @@ spl_autoload_register(
 				'koskovatestbed' => '/server/model/ships/korlyan/KoskovaTestbed.php',
          		'limpetboretorpedo' => '/server/model/weapons/torpedo.php', 				
          		'limpetboretorpedobase' => '/server/model/weapons/torpedo.php',
-         		'ballisticminelauncher' => '/server/model/weapons/missile.php', 	 
+         		'ballisticminelauncher' => '/server/model/weapons/missile.php',
+         		'abbaiminelauncher' => '/server/model/weapons/missile.php', 	 
 
 
 				//Star Wars - Clone Wars testing
@@ -3047,12 +3058,35 @@ spl_autoload_register(
                 		'ammobombrack' => '/server/model/weapons/missile.php',
                 		'ammofighterrack' => '/server/model/weapons/missile.php',
 						
-                		
+ 				//Direct Fire Weapons that use Ammo Magazine
+						'ammodirectweapon' => '/server/model/weapons/ammoWeapons.php',							
+					               		
+						'ammoheavyrailgun' => '/server/model/weapons/ammoWeapons.php',
+						'ammomediumrailgun' => '/server/model/weapons/ammoWeapons.php',
+						'ammolightrailgun' => '/server/model/weapons/ammoWeapons.php',						
+
+
+				//Ammo for Direct Fire Weapons
+						'ammotemplatedirectweapons' => '/server/model/weapons/ammoWeapons.php',	
+						'ammohshellbasic' => '/server/model/weapons/ammoWeapons.php',				
+						'ammomshellbasic' => '/server/model/weapons/ammoWeapons.php',						
+						'ammolshellbasic' => '/server/model/weapons/ammoWeapons.php',						
+						'ammohshellflash' => '/server/model/weapons/ammoWeapons.php',				
+						'ammomshellflash' => '/server/model/weapons/ammoWeapons.php',						
+						'ammolshellflash' => '/server/model/weapons/ammoWeapons.php',						
+						'ammohshellscatter' => '/server/model/weapons/ammoWeapons.php',				
+						'ammomshellscatter' => '/server/model/weapons/ammoWeapons.php',						
+						'ammolshellscatter' => '/server/model/weapons/ammoWeapons.php',
+						'ammohshellheavy' => '/server/model/weapons/ammoWeapons.php',				
+						'ammomshellheavy' => '/server/model/weapons/ammoWeapons.php',						
+						'ammolshellheavy' => '/server/model/weapons/ammoWeapons.php',						
+						'ammohshelllrange' => '/server/model/weapons/ammoWeapons.php',				
+						'ammomshelllrange' => '/server/model/weapons/ammoWeapons.php',						
+						'ammohshellulrange' => '/server/model/weapons/ammoWeapons.php',
 						
-						
+																								
 						//ships using new style launchers (and magazine of course) - by faction
-						
-	  
+							  
 						//EA
                 		'sagittariusam' => '/server/model/ships/EA/sagittariusAM.php', 
                 		'sagittariusalphaam' => '/server/model/ships/EA/sagittariusAlphaAM.php',
@@ -3133,6 +3167,20 @@ spl_autoload_register(
 						'fwellgonam' => '/server/model/ships/llort/fwellgonAM.php',
 						'govallam' => '/server/model/ships/llort/govallAM.php',
 						'govallearlyam' => '/server/model/ships/llort/govallEarlyAM.php',
+
+						//Grome
+						'gromemahkgaram' => '/server/model/ships/grome/GromeMahkgarAM.php',						
+						'gromegormokosatam' => '/server/model/ships/grome/GromeGormokOSATAM.php',						
+						'gromegrotham' => '/server/model/ships/grome/GromeGrothAM.php',						
+						'gromegralacam' => '/server/model/ships/grome/GromeGralacAM.php',						
+						'grometrokanam' => '/server/model/ships/grome/GromeTrokanAM.php',						
+						'grometrokanmargusam' => '/server/model/ships/grome/GromeTrokanMargusAM.php',
+						'gromemogortaam' => '/server/model/ships/grome/GromeMogortaAM.php',
+						'gromeadrinaam' => '/server/model/ships/grome/GromeAdrinaAM.php',												
+						'gromemorgatam' => '/server/model/ships/grome/GromeMorgatAM.php',
+						'gromemorstagam' => '/server/model/ships/grome/GromeMorstagAM.php',													
+						'gromemelagaram' => '/server/model/ships/grome/GromeMelagarAM.php',						
+						'grometelgaram' => '/server/model/ships/grome/GromeTelgarAM.php',										
 				
 						//Hurr
 						'roskorbase2215am' => '/server/model/ships/hurr/Roskorbase2215AM.php',
@@ -3188,7 +3236,7 @@ spl_autoload_register(
 						//Gaim						
 						'gaimkastafighteram' => '/server/model/ships/gaim/gaimKastaFighterAM.php',
 						
-						//Extra Ships for Existing Factions
+						//Extra Ships/Systems for Existing Factions
 						'superheavymoleculardisruptor' => '/server/model/weapons/molecular.php',
 						'molecularpenetrator' => '/server/model/weapons/molecular.php',
 						'earlyfusionagitator' => '/server/model/weapons/molecular.php',
@@ -3213,8 +3261,11 @@ spl_autoload_register(
 					 	
 					 	'alanti' => '/server/model/ships/abbai/Alanti.php',
 					 	'pirocia' => '/server/model/ships/abbai/Pirocia.php',
-						'mayoverheat' => '/server/model/cricialClasses.php',					 						 	
-					 						 	 
+						'mayoverheat' => '/server/model/cricialClasses.php',
+						'pulsarmine' => '/server/model/weapons/specialWeapons.php', 					 						 	
+					 	'gkarith' => '/server/model/ships/narn/Gkarith.php',
+					 	'aegissensorpod' => '/server/model/weapons/specialWeapons.php', 
+						'hyperionaegis' => '/server/model/ships/EA/HyperionAegis.php',					 						 	 
 					 							
 				//Thirdspace
 				'psychicfield' => '/server/model/weapons/specialWeapons.php',

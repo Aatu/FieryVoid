@@ -66,7 +66,8 @@ class TalokiEarlyAM extends StarBaseSixSections{
 		$this->addFrontSystem(new SubReactorUniversal(4, 20, 0, 0));
 		$this->addFrontSystem(new ParticleCannon(4, 8, 7, 270, 90));
 
-		$TargeterA = new ProximityLaser(0, 1, 0, 270, 90, 'A');
+//		$TargeterA = new ProximityLaser(0, 1, 0, 270, 90, 'A');
+		$TargeterA = new ProximityLaser(0, 1, 0, 0, 360, 'A');		
 		$LauncherA = new ProximityLaserLauncher(4, 0, 0, 270, 90, 'A'); 
 		$TargeterA->addLauncher($LauncherA);
 		$this->addFrontSystem($TargeterA);
@@ -74,7 +75,8 @@ class TalokiEarlyAM extends StarBaseSixSections{
 		$TargeterA->addTag("Front Proximity Laser");				
 		$this->addFrontSystem(new LimpetBoreTorpedoBase(4, 0, 0, 270, 90));
 
-		$TargeterB = new ProximityLaser(0, 1, 0, 270, 90, 'B');
+//		$TargeterB = new ProximityLaser(0, 1, 0, 270, 90, 'B');
+		$TargeterB = new ProximityLaser(0, 1, 0, 0, 360, 'B');		
 		$LauncherB = new ProximityLaserLauncher(4, 0, 0, 270, 90, 'B'); 
 		$TargeterB->addLauncher($LauncherB);
 		$this->addFrontSystem($TargeterB);
@@ -86,7 +88,8 @@ class TalokiEarlyAM extends StarBaseSixSections{
 		$this->addAftSystem(new SubReactorUniversal(4, 20, 0, 0));
 		$this->addAftSystem(new ParticleCannon(4, 8, 7, 90, 270));
 
-		$TargeterC = new ProximityLaser(0, 1, 0, 90, 270, 'C');
+//		$TargeterC = new ProximityLaser(0, 1, 0, 90, 270, 'C');
+		$TargeterC = new ProximityLaser(0, 1, 0, 0, 360, 'C');		
 		$LauncherC = new ProximityLaserLauncher(4, 0, 0, 90, 270, 'C'); 
 		$TargeterC->addLauncher($LauncherC);
 		$this->addAftSystem($TargeterC);
@@ -94,7 +97,8 @@ class TalokiEarlyAM extends StarBaseSixSections{
 		$TargeterC->addTag("Aft Proximity Laser");			
 		$this->addAftSystem(new LimpetBoreTorpedoBase(4, 0, 0, 90, 270));
 
-		$TargeterD = new ProximityLaser(0, 1, 0, 90, 270, 'D');
+//		$TargeterD = new ProximityLaser(0, 1, 0, 90, 270, 'D');
+		$TargeterD = new ProximityLaser(0, 1, 0, 0, 360, 'D');		
 		$LauncherD = new ProximityLaserLauncher(4, 0, 0, 90, 270, 'D'); 
 		$TargeterD->addLauncher($LauncherD);
 		$this->addAftSystem($TargeterD);

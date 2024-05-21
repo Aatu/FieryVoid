@@ -14,7 +14,8 @@ The costs before rounding the final value are:
 			Light railgun ~12 points
 		Estimated cost is 400 + (2x12) = 424 -> rounded to 425*/        
         $this->pointCost = 425;
-        $this->faction = "Grome Autocracy";
+        $this->faction = "Custom Ships";
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
         $this->phpclass = "GromeTelgarFull";
 		$this->variantOf = "Telgar Defense Frigate";
         $this->imagePath = "img/ships/GromeTelgar.png";
@@ -51,18 +52,18 @@ The costs before rounding the final value are:
         
 		$this->addFrontSystem(new GromeLgtRailgun(2, 6, 3, 300, 60));
 		$this->addFrontSystem(new GromeLgtRailgun(2, 6, 3, 300, 60));
-		$this->addFrontSystem(new FlakCannon(2, 4, 2, 180, 360));
-		$this->addFrontSystem(new FlakCannon(2, 4, 2, 180, 360));
-		$this->addFrontSystem(new FlakCannon(2, 4, 2, 0, 180));
-		$this->addFrontSystem(new FlakCannon(2, 4, 2, 0, 180));
+		$this->addFrontSystem(new GromeFlakCannon(2, 4, 2, 180, 360));
+		$this->addFrontSystem(new GromeFlakCannon(2, 4, 2, 180, 360));
+		$this->addFrontSystem(new GromeFlakCannon(2, 4, 2, 0, 180));
+		$this->addFrontSystem(new GromeFlakCannon(2, 4, 2, 0, 180));
         $this->addFrontSystem(new Thruster(2, 10, 0, 3, 1));
 	    
         $this->addAftSystem(new Thruster(2, 8, 0, 3, 2));    
         $this->addAftSystem(new Thruster(2, 8, 0, 3, 2));    
-		$this->addAftSystem(new FlakCannon(2, 4, 2, 180, 360));
-		$this->addAftSystem(new FlakCannon(2, 4, 2, 180, 360));
-		$this->addAftSystem(new FlakCannon(2, 4, 2, 0, 180));
-		$this->addAftSystem(new FlakCannon(2, 4, 2, 0, 180));
+		$this->addAftSystem(new GromeFlakCannon(2, 4, 2, 180, 360));
+		$this->addAftSystem(new GromeFlakCannon(2, 4, 2, 180, 360));
+		$this->addAftSystem(new GromeFlakCannon(2, 4, 2, 0, 180));
+		$this->addAftSystem(new GromeFlakCannon(2, 4, 2, 0, 180));
        
         $this->addPrimarySystem(new Structure(3, 80));
 
