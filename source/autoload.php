@@ -634,7 +634,7 @@ spl_autoload_register(
                 'motenai' => '/server/model/ships/abbai_old/motenai.php',
                 'motenai1935' => '/server/model/ships/abbai_old/motenai1935.php',
                 'motenai1980' => '/server/model/ships/abbai_old/motenai1980.php',
-                'motenaiam' => '/server/model/ships/abbai_old/motenaiam.php',
+                'motenaiam' => '/server/model/ships/abbai_old/motenaiAM.php',
                 'motenai1935am' => '/server/model/ships/abbai_old/motenai1935AM.php',
                 'motenai1980am' => '/server/model/ships/abbai_old/motenai1980AM.php',                
                 'movement' => '/server/handlers/movement.php',
