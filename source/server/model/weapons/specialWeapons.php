@@ -5579,7 +5579,7 @@ class GromeTargetingArray extends Weapon{
 			if($this->malfunction){//If Haphazard and a malfunction has been rolled.
 					$fireOrder->needed = 0;
 					$fireOrder->updated = true;																	
-					$fireOrder->pubnotes .= " A Targeting Array malfunctions.";							
+					$fireOrder->pubnotes .= " <br>A Targeting Array malfunctions!";							
 			}else{
 			//Normal firing
 			$fireOrder->needed = 100; //always true
