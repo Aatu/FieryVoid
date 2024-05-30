@@ -3293,6 +3293,9 @@ spl_autoload_register(
 						'impheavylaser' => '/server/model/weapons/customDevelopment.php',
 						'directemine' => '/server/model/weapons/customDevelopment.php',
 
+				//Marine Boarding Actions
+				'sabotage' => '/server/model/cricialClasses.php',
+				'sabotageelite' => '/server/model/cricialClasses.php',
 
 						//Satyra (Wolfgang campaign)
 						'satyrashield' => '/server/model/weapons/customDevelopment.php',

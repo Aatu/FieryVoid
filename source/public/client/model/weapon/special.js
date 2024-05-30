@@ -514,3 +514,8 @@ this.outputDisplay = shipManager.systems.getOutput(ship, this);
 return this;
 };
 
+var Marines = function Marines(json, ship) {
+    Weapon.call(this, json, ship);
+};
+Marines.prototype = Object.create(Weapon.prototype);
+Marines.prototype.constructor = Marines;

@@ -5115,6 +5115,7 @@ class PsionicConcentrator extends Weapon{
 		      parent::setSystemDataWindow($turn);  
 		      $this->data["Special"] = "Psionic Concentrators can be fired individually, or up to four concentrators can be combined for more powerful attacks with shorter range.";	      		      $this->data["Special"] .= "<br>If You allocate multiple Concentrators to the same mode of fire at the same target, they will be combined.";   		       
 		      $this->data["Special"] .= "<br>If not enough weapons are allocated to be combined, weapons will be fired in Single mode instead.";  		  
+		      $this->data["Special"] .= "<br>Causes -1 Power on ships with reactors the following turn.";
 		      $this->data["Special"] .= "<br>Has +1 modifier to critical hits, and +2 to fighter dropout rolls.";
 	    }	
 	
@@ -5176,10 +5177,24 @@ class PsionicConcentrator extends Weapon{
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!
 		parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);		
 		if ($system->advancedArmor) return; //no effect on Advanced Armor		
-		//+1 to crit roll, +2 to dropout roll
+		//+1 to crit roll, +2 to dropout roll, -1 power to ships.
 		$mod = 1;
-		if ($ship instanceof FighterFlight) $mod++;		
-		$system->critRollMod += $mod; 
+
+		if ($ship instanceof FighterFlight) {
+            $mod += 1;    		
+            $system->critRollMod += $mod; 
+        }else{
+			$reactor = $ship->getSystemByName("Reactor");
+			if($reactor){
+				for($i=1; $i<=$mod;$i++){
+					$crit = new OutputReduced1(-1, $ship->id, $reactor->id, 'OutputReduced1', $gamedata->turn, $gamedata->turn+1); 
+					$crit->updated = true;
+			        $reactor->criticals[] =  $crit;
+				}    		
+            }
+        $system->critRollMod += $mod;     
+        }    
+
 	} //endof function onDamagedSystem	
 
 	
