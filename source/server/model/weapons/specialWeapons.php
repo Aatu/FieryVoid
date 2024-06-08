@@ -5174,27 +5174,34 @@ class PsionicConcentrator extends Weapon{
 	}//endof function calculateHitBase
 
 
-	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!
-		parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);		
-		if ($system->advancedArmor) return; //no effect on Advanced Armor		
-		//+1 to crit roll, +2 to dropout roll, -1 power to ships.
-		$mod = 1;
-
-		if ($ship instanceof FighterFlight) {
-            $mod += 1;    		
-            $system->critRollMod += $mod; 
-        }else{
-			$reactor = $ship->getSystemByName("Reactor");
+    protected function beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata)
+    {
+		parent::beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata);
+ 		//-1 power to ships for one turn.  
+		if ($target->advancedArmor) return; //no effect on Advanced Armor
+			 		     
+		$reactor = $target->getSystemByName("Reactor");
+		$mod = 1;//Easier to change later.
 			if($reactor){
 				for($i=1; $i<=$mod;$i++){
-					$crit = new OutputReduced1(-1, $ship->id, $reactor->id, 'OutputReduced1', $gamedata->turn, $gamedata->turn+1); 
+					$crit = new OutputReduced1(-1, $target->id, $reactor->id, 'OutputReduced1', $gamedata->turn, $gamedata->turn+1); 
 					$crit->updated = true;
 			        $reactor->criticals[] =  $crit;
 				}    		
-            }
-        $system->critRollMod += $mod;     
-        }    
+            }          
+    }
 
+	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!
+		parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);		
+		if ($system->advancedArmor) return; //no effect on Advanced Armor		
+		//+1 to crit roll, +2 to dropout roll, 
+		$mod = 1;
+
+		if ($ship instanceof FighterFlight) {
+            $mod += 1;    		 
+        }
+        
+        $system->critRollMod += $mod; 
 	} //endof function onDamagedSystem	
 
 	
@@ -5243,8 +5250,7 @@ class ProximityLaserLauncher extends Weapon{
 		public $noLockPenalty = false;	        
 		
 		public $range = 30;
-		public $loadingtime = 1; //same as attached laser
-//	    public $ammunition = 99; //Just make unlimited, so account for accidental launches when Laser on recharge.	
+		public $loadingtime = 1; //same as attached laser	
 		
 		public $animation = "ball";
 		public $animationColor = array(245, 90, 90);
@@ -5278,9 +5284,8 @@ class ProximityLaserLauncher extends Weapon{
 			parent::setSystemDataWindow($turn);        
 			$this->data["Special"] = "Proximity Launcher " . $this->pairing ."."; 
 			$this->data["Special"] .= "<br>Use this Launcher to select the hex from where its paired Proximity Laser will fire.";	 
-			$this->data["Special"] .= "<br>IMPORTANT - The Proximity Laser should be targeted at the same time as this launcher is fired.";
-			$this->data["Special"] .= "<br>HAS NO EFFECT UNLESS FIRED WITH PROXIMITY LASER " . $this->pairing ."."; 		 		
-//	        $this->data["Ammunition"] = $this->ammunition;		
+			$this->data["Special"] .= "<br>IMPORTANT - The paired Proximity Laser should be targeted at the same time as this launcher is fired.";
+			$this->data["Special"] .= "<br>HAS NO EFFECT UNLESS FIRED WITH PROXIMITY LASER " . $this->pairing ."."; 		 			
 		}	
 		
 		public function calculateHitBase($gamedata, $fireOrder)
@@ -5297,26 +5302,13 @@ class ProximityLaserLauncher extends Weapon{
 	        $fireOrder->rolled = $rolled; 
 			$fireOrder->pubnotes .= "Automatically hits."; 
 			if($rolled <= $fireOrder->needed){//HIT!
-				$fireOrder->shotshit++;
-//	            $this->ammunition--;
-//	            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);			
+				$fireOrder->shotshit++;			
 			}else{ //MISS!  Should never happen.
 				$fireOrder->pubnotes .= "DEBUG - MISSED! ";
 			}
 		} //endof function fire	
 
-/*
-	    public function setAmmo($firingMode, $amount){
-	            $this->ammunition = $amount;
-	        }
-	 	
-	 
-	    public function stripForJson() {
-	            $strippedSystem = parent::stripForJson();    
-	            $strippedSystem->ammunition = $this->ammunition;           
-	            return $strippedSystem;
-	        }
-	  */      	
+     	
 		public function getDamage($fireOrder){       return 0; /*no actual damage*/  }
 		public function setMinDamage(){     $this->minDamage = 0 ;      }
 		public function setMaxDamage(){     $this->maxDamage = 0 ;      }
@@ -5914,5 +5906,267 @@ class PulsarMine extends Weapon{
         public function setMaxDamage(){     $this->maxDamage = 8 ;      }
 	
 } //endof class PulsarMine
+
+
+/*
+class Marines extends Weapon{
+	public $name = "Marines";
+	public $displayName = "Marines";
+	public $iconPath = "Marines.png";
+	public $animation = "trail";
+	public $animationColor = array(50, 50, 50);
+	public $animationWidth = 0.2;
+  
+	public $useOEW = false; 
+	public $range = 0.1;
+	public $ammunition = 2; //limited number of Marine contingents.
+
+	public $noPrimaryHits = true; //cannot hit PRIMARY from outer table, should never happen.
+
+	public $calledShotMod = 0; //instead of usual -8
+	
+	public $loadingtime = 1;
+	public $rangePenalty = 0;
+	public $fireControl = array(null, 0, 0);
+	
+	public $noOverkill = true;
+	public $priority = 9;
+		
+
+	public $damageType = "Standard";
+	public $weaponClass = "Matter";
+	public $firingModes = array(
+		1 => "Sabotage",
+		2 => "Capture Ship",
+		3 => "Rescue Mission"
+	);		
+
+	public $specialHitChanceCalculation = true;//For Front End hit chance calculation.
+	private $eliteMarines = false;	
+			
+		 
+	function __construct($startArc, $endArc, $damagebonus, $elite){
+		parent::__construct(0, 1, 0, $startArc, $endArc);
+		$this->eliteMarines = $elite;
+	}    
+	
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+		$this->data["Special"] = "Can ONLY be used for Called Shots.";         
+		$this->data["Special"] .= "<br>If on same hex as enemy ship can attempt to board an enemy vessel.";	 
+		$this->data["Special"] .= "<br>If successful, Marines will attempt to damage target system on the following turn, and roll a d10 to see the result:";
+		$this->data["Special"] .= "<br> - On a roll of 1 or less, deals 3D6 + 2 damage to sysem.";            
+		$this->data["Special"] .= "<br> - On a roll of 2-5, deals 1D6 + 2 damage to sysem.";
+		$this->data["Special"] .= "<br> - On a roll of 6-8, does no damage, but Marines can try again next turn.";
+		$this->data["Special"] .= "<br> - On a roll of 9 or more, attack fails and Marines are killed.";  		  		  
+		$this->data["Special"] .= "<br>No Called Shot penalty.";
+		$this->data["Special"] .= "<br>Ignores Armor. No Overkill.  No effect on Advanced Armor.";
+		$this->data["Special"] .= "<br>Custom Firing Mdoe has no effect, it is intended for use in Scenario missions.";  		                     
+		$this->data["Ammunition"] = $this->ammunition;
+	}
+	
+
+	public function setAmmo($firingMode, $amount){
+		$this->ammunition = $amount;
+	}
+
+	public function calculateHitBase($gamedata, $fireOrder)
+	{
+		//Needs it's own custom routine for hit chance.
+		$shooter = $gamedata->getShipById($fireOrder->shooterid);	
+		$target = $gamedata->getShipById($fireOrder->targetid);	
+
+		if($target->factionAge > 2) {//Cannot attach to Ancients.  Might be impossible if Front End chance is also made 0%
+			$fireOrder->pubnotes .= "<br> Breaching pods cannot attach to Ancient ships.";
+			$fireOrder->needed = 0;
+			$fireOrder->updated = true;						
+			return; 
+		}
+
+		$noOfMarines = 0;	
+
+		foreach($target->system as $system){ //Need to check all systems for sabotage missions.
+			if($system->hasCritical("Sabotage", $gamedata->turn) > 0)  $noOfMarines += $system->hasCritical("Sabotage", $gamedata->turn); //returns a number I think.
+			if($system->hasCritical("SabotageElite", $gamedata->turn) > 0) $noOfMarines += $system->hasCritical("SabotageElite", $gamedata->turn); //returns a number I think.	
+		}
+
+		$cnc = $target->getSystemByName("CnC"); //For other marine missions, only need to check CnC on target.
+			if($cnc->hasCritical("CaptureShip", $gamedata->turn) > 0) 	$noOfMarines += $cnc->hasCritical("CaptureShip", $gamedata->turn); 
+			if($cnc->hasCritical("CaptureShipElite", $gamedata->turn) > 0) $noOfMarines += $cnc->hasCritical("CaptureShipElite", $gamedata->turn); 
+			if($cnc->hasCritical("RescueMission", $gamedata->turn) > 0) $noOfMarines += $cnc->hasCritical("RescueMission", $gamedata->turn); 
+			if($cnc->hasCritical("RescueMissionElite", $gamedata->turn) > 0) $noOfMarines += $cnc->hasCritical("RescueMissionElite", $gamedata->turn); 
+		     		
+				
+		//Different amount of marine missions possible depending on size of ships.
+		if(($target->shipSizeClass >= 3 && $noOfMarines >= 8) ||
+		   ($target->shipSizeClass == 2 && $noOfMarines >= 4) || 
+		   ($target->shipSizeClass == 1 && $noOfMarines >= 2) ||
+		   ($target->shipSizeClass >= 0 && $noOfMarines > 1)) {
+		 	
+			$fireOrder->pubnotes .= "<br> Too many current Marine missions on target, boarding attempt cancelled.";
+			$fireOrder->needed = 0;
+			$fireOrder->updated = true;						
+			return; 
+		}
+		
+		//Now roll to see if the Breaching Pod attaches on this turn.
+		$shooterMove = $shooter->getLastMovement();
+		$shooterSpeed = $shooterMove->speed;
+		$targetMove = $target->getLastMovement();
+		$targetSpeed = $targetMove->speed;
+		$speedDifference = abs($targetSpeed - $shooterSpeed);//Calculate absolute difference in speed.
+		
+		if($speedDifference > $shooter->freethrust){//Pod cannot compensate enough for speed difference with available thrust.
+			$fireOrder->needed = 0;
+			$fireOrder->updated = true;		
+			return; 
+		}
+		
+		if($targetSpeed > $shooterSpeed){//Target is moving faster, roll to attach.
+			$attachRoll = Dice::d(10);
+			if($attachRoll >= $speedDifference){//Successful attaches if dice roll is equal or greater.
+				$fireOrder->needed = 100;
+				$fireOrder->updated = true;			
+				return;
+			}else{
+				$fireOrder->needed = 0;
+				$fireOrder->updated = true;			
+				return;
+			}	
+		}
+	}//endof calculateHitBase
+	
+   public function fire($gamedata, $fireOrder){ //note ammo usage
+		parent::fire($gamedata, $fireOrder);
+
+		if($fireOrder->rolled <= $fireOrdeer->needed){//Only reduce ammo if Marines successfully boarded enemy ship.
+		$this->ammunition--;
+		Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);
+		}	
+	}
+
+
+	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!
+			
+		if ($system->advancedArmor) {//no effect on Advanced Armor for Younger Races equipped with this e.g. Shadow Omega.	
+			$fireOrder->pubnotes .= "<br> Marines cannot attack systems with advanced armor.";				
+			return; 	
+		}
+
+		$shooter = $fireOrder->getShipById($fireOrder->shooterid);
+		$target = $fireOrder->getShipById($fireOrder->targetid);
+		
+		//Roll to deliver the Marines
+		$rollMod = 0;
+		if($this->eliteMarines) $rollMod -= 1; //Elite Marines board more easily. 
+
+		$deliveryRoll = min(0, Dice::d(10) + $rollMod);
+		
+		if($deliveryRoll <= 5){ //successful delivery, continue with applying critical effects.						
+				
+			switch($this->firingMode){
+
+				case 1:
+
+					if($fireOrder->calledid != -1){//Is a called shot, place crit on system.
+							$fireOrder->pubnotes .= "<br>Marines will attempt to sabotage target system next turn.";
+						if($this->eliteMarines){//Are Marines Elite?
+							$crit = new SabotageElite(-1, $ship->id, $system->id, 'SabotageElite', $gamedata->turn+1); //Takes effect next turn.
+							$crit->updated = true;
+							$system->criticals[] =  $crit;					
+						}else{//Not Elite Marines			
+							$crit = new Sabotage(-1, $ship->id, $system->id, 'Sabotage', $gamedata->turn+1); //Takes effect next turn.
+							$crit->updated = true;
+							$system->criticals[] =  $crit;
+						}	
+					}else{ //Has targeted ship generally, not a specific system.  Apply crit to CnC.
+						$cnc = $ship->getSystemByName("CnC");
+						$fireOrder->pubnotes .= "<br>Marines will attempt sabotage operations on enemy ship next turn.";								
+							if($cnc){
+									if($this->eliteMarines){//Are Marines Elite?
+										$crit = new SabotageElite(-1, $ship->id, $cnc->id, 'SabotageElite', $gamedata->turn+1); //Takes effect next turn.
+										$crit->updated = true;
+										$cnc->criticals[] =  $crit;					
+									}else{//Not Elite Marines					
+										$crit = new Sabotage(-1, $ship->id, $cnc->id, 'Sabotage', $gamedata->turn+1);  //Takes effect next turn.
+										$crit->updated = true;
+										$cnc->criticals[] =  $crit;
+									}							    		
+				            }				
+					}	
+					
+					break;
+				
+				
+				case 2:
+
+					$fireOrder->pubnotes .= "<br>Marines will attempt to capture enemy ship next turn.";
+					$cnc = $ship->getSystemByName("CnC");				
+						if($cnc){
+								if($this->eliteMarines){//Are Marines Elite?
+									$crit = new CaptureShipElite(-1, $ship->id, $cnc->id, 'CaptureShipElite', $gamedata->turn+1); //Takes effect next turn.
+									$crit->updated = true;
+									$cnc->criticals[] =  $crit;					
+								}else{//Not Elite Marines					
+									$crit = new CaptureShip(-1, $ship->id, $cnc->id, 'CaptureShip', $gamedata->turn+1);  //Takes effect next turn.
+									$crit->updated = true;
+									$cnc->criticals[] =  $crit;
+								}							    		
+			            }				
+				
+					break;
+				
+				
+				case 3:
+
+					$fireOrder->pubnotes .= "<br>Marines will attempt their rescue mission next turn.";
+					$cnc = $ship->getSystemByName("CnC");				
+						if($cnc){
+								if($this->eliteMarines){//Are Marines Elite?
+									$crit = new RescueMissionElite(-1, $ship->id, $cnc->id, 'RescueMissionElite', $gamedata->turn+1); //Takes effect next turn.
+									$crit->updated = true;
+									$cnc->criticals[] =  $crit;					
+								}else{//Not Elite Marines					
+									$crit = new RescueMission(-1, $ship->id, $cnc->id, 'RescueMission', $gamedata->turn+1);  //Takes effect next turn.
+									$crit->updated = true;
+									$cnc->criticals[] =  $crit;
+								}							    		
+			            }	
+				
+					break;			
+				
+			}
+		}elseif($deliveryRoll >= 6 && $deliveryRoll <=8){
+			$this->ammunition++;//Marines weren't killed, they just didn't deliver.  Give ammunition back to weapon.
+			Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);						
+			$fireOrder->pubnotes .= "<br>Marines were beaten back by defenders but managed to return safely to their pod.";				
+			return;	
+		}else{
+			$fireOrder->pubnotes .= "<br>Marines were beaten back by defenders and killed.";			
+			return;
+		}			
+	}//endof onDamagedSystem() 	
+	
+	
+	public function getDamage($fireOrder){ //Damage is handled in criticalPhaseEffects() once Limpet Bore attaches.
+		return 0;
+	}
+
+
+	public function setMinDamage(){     $this->minDamage = 0;      } //However, keep these values for intercept calculations.
+	public function setMaxDamage(){     $this->maxDamage = 0;      }
+
+	public function stripForJson() {
+			$strippedSystem = parent::stripForJson();    
+			$strippedSystem->ammunition = $this->ammunition;
+			$strippedSystem->eliteMarines = $this->eliteMarines;				
+			$strippedSystem->specialHitChanceCalculation = $this->specialHitChanceCalculation;                            
+			return $strippedSystem;
+	}
+	
+}//endof Marines
+*/
+
+
 
 ?>
