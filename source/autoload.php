@@ -3294,7 +3294,7 @@ spl_autoload_register(
 						'directemine' => '/server/model/weapons/customDevelopment.php',
 
 				//Marine Boarding Actions
-				'marines' => '/server/model/weapons/specialWeapons.php',
+	/*			'marines' => '/server/model/weapons/specialWeapons.php',
 				'sabotage' => '/server/model/cricialClasses.php',
 				'sabotageelite' => '/server/model/cricialClasses.php',
 				'profileincreased' => '/server/model/cricialClasses.php',				
@@ -3304,7 +3304,7 @@ spl_autoload_register(
 				'captureshipelite' => '/server/model/cricialClasses.php',					
 				'shipdisabled' => '/server/model/cricialClasses.php',
 				'defenderlost' => '/server/model/cricialClasses.php',
-				
+	*/			
 				
 				
 				//New Breaching pods units		
