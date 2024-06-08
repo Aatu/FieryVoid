@@ -53,19 +53,19 @@ class HyachOkathKat extends MediumShip{
 		
 				$this->hitChart = array(
                 0=> array(
-                        8 => "Thruster",
-                        11 => "Scanner",
-						12 => "Hangar",
-						14 => "Computer",
-                        17 => "Engine",
-                        19 => "Reactor",
-                        20 => "C&C",
+   //                     8 => "Thruster",
+   //                     11 => "Scanner",
+	///					12 => "Hangar",
+						20 => "Computer",
+   //                     17 => "Engine",
+   //                     19 => "Reactor",
+   //                     20 => "C&C",
                 ),
                 1=> array(
-                        5 => "Thruster",
-                        8 => "Medium Laser",
-                        10 => "Interdictor",
-                        17 => "Structure",
+  //                      5 => "Thruster",
+  //                      8 => "Medium Laser",
+  //                      10 => "Interdictor",
+  //                      17 => "Structure",
                         20 => "Primary",
                 ),
                 2=> array(
