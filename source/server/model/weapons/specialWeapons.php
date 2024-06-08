@@ -5184,7 +5184,7 @@ class PsionicConcentrator extends Weapon{
 		$mod = 1;//Easier to change later.
 			if($reactor){
 				for($i=1; $i<=$mod;$i++){
-					$crit = new OutputReduced1(-1, $target->id, $reactor->id, 'OutputReduced1', $gamedata->turn, $gamedata->turn+1); 
+					$crit = new OutputReduced1(-1, $target->id, $reactor->id, 'OutputReduced1', $gamedata->turn+1, $gamedata->turn+1); 
 					$crit->updated = true;
 			        $reactor->criticals[] =  $crit;
 				}    		
