@@ -1993,7 +1993,6 @@ spl_autoload_register(
                 'gromemelagar' => '/server/model/ships/grome/GromeMelagar.php',
                 'gromemogorta' => '/server/model/ships/grome/GromeMogorta.php',
                 'gromemorgat' => '/server/model/ships/grome/GromeMorgat.php',
-                'gromeregla' => '/server/model/ships/grome/GromeRegla.php',
                 'grometelgar' => '/server/model/ships/grome/GromeTelgar.php',
                 'grometrokan' => '/server/model/ships/grome/GromeTrokan.php',
                 'grometrokanmargus' => '/server/model/ships/grome/GromeTrokanMargus.php',
@@ -3180,7 +3179,8 @@ spl_autoload_register(
 						'gromemorgatam' => '/server/model/ships/grome/GromeMorgatAM.php',
 						'gromemorstagam' => '/server/model/ships/grome/GromeMorstagAM.php',													
 						'gromemelagaram' => '/server/model/ships/grome/GromeMelagarAM.php',						
-						'grometelgaram' => '/server/model/ships/grome/GromeTelgarAM.php',										
+						'grometelgaram' => '/server/model/ships/grome/GromeTelgarAM.php',
+                		'gromeregla' => '/server/model/ships/grome/GromeRegla.php',																
 				
 						//Hurr
 						'roskorbase2215am' => '/server/model/ships/hurr/Roskorbase2215AM.php',
@@ -3303,7 +3303,8 @@ spl_autoload_register(
 				'captureship' => '/server/model/cricialClasses.php',	
 				'captureshipelite' => '/server/model/cricialClasses.php',					
 				'shipdisabled' => '/server/model/cricialClasses.php',
-				'defenderlost' => '/server/model/cricialClasses.php',			
+				'defenderlost' => '/server/model/cricialClasses.php',
+							
 				
 				//New Breaching pods units		
 				'breachingpodea' => '/server/model/ships/EA/breachingPodEA.php',				
