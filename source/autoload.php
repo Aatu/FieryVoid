@@ -1986,7 +1986,7 @@ spl_autoload_register(
 				'gromehvyrailgun' => '/server/model/weapons/customs.php',
                 
                 //Grome Ships - To be discontinued
-                'gromegormokosat' => '/server/model/ships/grome/GromeGormokOSAT.php',
+ /*               'gromegormokosat' => '/server/model/ships/grome/GromeGormokOSAT.php',
                 'gromegralac' => '/server/model/ships/grome/GromeGralac.php',
                 'gromegroth' => '/server/model/ships/grome/GromeGroth.php',
                 'gromemahkgar' => '/server/model/ships/grome/GromeMahkgar.php',
@@ -2009,7 +2009,7 @@ spl_autoload_register(
 					'grometelgarfull' => '/server/model/ships/grome/GromeTelgarFull.php',
 					'grometrokanfull' => '/server/model/ships/grome/GromeTrokanFull.php',
 					'grometrokanmargusfull' => '/server/model/ships/grome/GromeTrokanMargusFull.php',
-
+*/
 
                 //Semi-Custom Minbari
                 'shargoti' => '/server/model/ships/minbari/shargoti.php',
@@ -3292,9 +3292,9 @@ spl_autoload_register(
 						'plasmasiegecannon' => '/server/model/weapons/customDevelopment.php',
 						'impheavylaser' => '/server/model/weapons/customDevelopment.php',
 						'directemine' => '/server/model/weapons/customDevelopment.php',
-
+/*
 				//Marine Boarding Actions
-	/*			'marines' => '/server/model/weapons/specialWeapons.php',
+				'marines' => '/server/model/weapons/specialWeapons.php',
 				'sabotage' => '/server/model/cricialClasses.php',
 				'sabotageelite' => '/server/model/cricialClasses.php',
 				'profileincreased' => '/server/model/cricialClasses.php',				
@@ -3303,13 +3303,11 @@ spl_autoload_register(
 				'captureship' => '/server/model/cricialClasses.php',	
 				'captureshipelite' => '/server/model/cricialClasses.php',					
 				'shipdisabled' => '/server/model/cricialClasses.php',
-				'defenderlost' => '/server/model/cricialClasses.php',
-	*/			
-				
+				'defenderlost' => '/server/model/cricialClasses.php',			
 				
 				//New Breaching pods units		
 				'breachingpodea' => '/server/model/ships/EA/breachingPodEA.php',				
-
+*/
 						//Satyra (Wolfgang campaign)
 						'satyrashield' => '/server/model/weapons/customDevelopment.php',
 						'laserarray' => '/server/model/weapons/customDevelopment.php',
