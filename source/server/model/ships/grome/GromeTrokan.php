@@ -5,7 +5,8 @@ class GromeTrokan extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 900;
-	$this->faction = "Grome Autocracy";
+        $this->faction = "Custom Ships";
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
         $this->phpclass = "GromeTrokan";
         $this->imagePath = "img/ships/GromeTrokan.png";
         $this->shipClass = "Trokan Flagship";
@@ -48,20 +49,20 @@ class GromeTrokan extends BaseShip{
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
 		$this->addFrontSystem(new HeavyRailGun(4, 12, 9, 330, 30));
-		$this->addFrontSystem(new FlakCannon(2, 4, 2, 240, 60));
-		$this->addFrontSystem(new FlakCannon(2, 4, 2, 300, 120));
+		$this->addFrontSystem(new GromeFlakCannon(2, 4, 2, 240, 60));
+		$this->addFrontSystem(new GromeFlakCannon(2, 4, 2, 300, 120));
         $this->addFrontSystem(new ConnectionStrut(4));
 
         $this->addAftSystem(new Thruster(3, 12, 0, 3, 2));
         $this->addAftSystem(new Thruster(3, 12, 0, 3, 2));
         $this->addAftSystem(new Thruster(3, 16, 0, 4, 2));
-		$this->addAftSystem(new FlakCannon(2, 4, 2, 120, 300));
-		$this->addAftSystem(new FlakCannon(2, 4, 2, 60, 240));
+		$this->addAftSystem(new GromeFlakCannon(2, 4, 2, 120, 300));
+		$this->addAftSystem(new GromeFlakCannon(2, 4, 2, 60, 240));
         $this->addAftSystem(new ConnectionStrut(4));
 
-        $this->addLeftSystem(new FlakCannon(2, 4, 2, 180, 360));
-        $this->addLeftSystem(new FlakCannon(2, 4, 2, 180, 360));
-        $this->addLeftSystem(new FlakCannon(2, 4, 2, 180, 360));
+        $this->addLeftSystem(new GromeFlakCannon(2, 4, 2, 180, 360));
+        $this->addLeftSystem(new GromeFlakCannon(2, 4, 2, 180, 360));
+        $this->addLeftSystem(new GromeFlakCannon(2, 4, 2, 180, 360));
 		$this->addLeftSystem(new Railgun(3, 9, 6, 300, 360));
 		$this->addLeftSystem(new Railgun(3, 9, 6, 300, 360));
 		$this->addLeftSystem(new Railgun(3, 9, 6, 180, 240));
@@ -70,9 +71,9 @@ class GromeTrokan extends BaseShip{
         $this->addLeftSystem(new Thruster(3, 10, 0, 3, 3));
         $this->addLeftSystem(new ConnectionStrut(4));
 
-        $this->addRightSystem(new FlakCannon(2, 4, 2, 0, 180));
-        $this->addRightSystem(new FlakCannon(2, 4, 2, 0, 180));
-        $this->addRightSystem(new FlakCannon(2, 4, 2, 0, 180));
+        $this->addRightSystem(new GromeFlakCannon(2, 4, 2, 0, 180));
+        $this->addRightSystem(new GromeFlakCannon(2, 4, 2, 0, 180));
+        $this->addRightSystem(new GromeFlakCannon(2, 4, 2, 0, 180));
 		$this->addRightSystem(new Railgun(3, 9, 6, 0, 60));
 		$this->addRightSystem(new Railgun(3, 9, 6, 0, 60));
 		$this->addRightSystem(new Railgun(3, 9, 6, 120, 180));

@@ -5,7 +5,8 @@ class GromeMahkgar extends StarBaseSixSections{
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 2500;
-		$this->faction = "Grome Autocracy";
+        $this->faction = "Custom Ships";
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
 		$this->phpclass = "GromeMahkgar";
 		$this->shipClass = "Mahkgar Starbase";
 		$this->fighters = array("normal"=>36); 
@@ -69,8 +70,8 @@ class GromeMahkgar extends StarBaseSixSections{
 				new Railgun(4, 9, 6, $min, $max),
 				new LightRailGun(4, 6, 3, $min, $max),
 				new LightRailGun(4, 6, 3, $min, $max),
-				new FlakCannon(4, 4, 2, $min, $max),
-				new FlakCannon(4, 4, 2, $min, $max),
+				new GromeFlakCannon(4, 4, 2, $min, $max),
+				new GromeFlakCannon(4, 4, 2, $min, $max),
 				new Hangar(4, 7, 6),
 				new CargoBay(4, 30),
 				new SubReactorUniversal(4, 30, 0, 0),

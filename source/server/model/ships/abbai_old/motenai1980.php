@@ -5,7 +5,8 @@ class Motenai1980 extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 615;
-		$this->faction = "Abbai Matriarchate (WotCR)";
+        $this->faction = "Custom Ships";
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
         $this->phpclass = "Motenai1980";
         $this->imagePath = "img/ships/AbbaiMotenai.png";
         $this->shipClass = "Motenai Missile Cruiser (1980)";

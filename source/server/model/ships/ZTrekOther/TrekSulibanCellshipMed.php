@@ -4,7 +4,7 @@ class TrekSulibanCellshipMed extends FighterFlight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 33 *6; //for 6; a bit add-on for not requiring carrier
+        $this->pointCost = 37 *6; //for 6; a bit add-on for not requiring carrier
         $this->faction = "ZTrek Playtest Other Factions";
         $this->phpclass = "TrekSulibanCellshipMed";
         $this->shipClass = "Suliban Medium Cellships";
@@ -17,7 +17,7 @@ class TrekSulibanCellshipMed extends FighterFlight{
         $this->sideDefense = 7;
         $this->freethrust = 7;
         $this->offensivebonus = 4;
-        $this->jinkinglimit = 6;
+        $this->jinkinglimit = 6;//deliberate!
         $this->turncost = 0.33;
        	$this->iniativebonus = 15 *5; 
 

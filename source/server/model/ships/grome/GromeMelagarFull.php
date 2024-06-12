@@ -14,7 +14,8 @@ The costs before rounding the final value are:
 			Light railgun ~12 points
 		Estimated cost is 500 (5x24) = 620*/       
         $this->pointCost = 620;
-        $this->faction = "Grome Autocracy";
+        $this->faction = "Custom Ships";
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
         $this->phpclass = "GromeMelagarFull";
         $this->imagePath = "img/ships/GromeMorgat.png";
         $this->shipClass = "Melagar Frigate Leader (full)";
@@ -50,11 +51,11 @@ The costs before rounding the final value are:
         $this->addPrimarySystem(new Thruster(2, 13, 0, 3, 4));     
         $this->addPrimarySystem(new ConnectionStrut(3));
         
-		$this->addFrontSystem(new FlakCannon(2, 4, 2, 180, 60));
+		$this->addFrontSystem(new GromeFlakCannon(2, 4, 2, 180, 60));
 		$this->addFrontSystem(new GromeMedRailgun(2, 9, 6, 300, 60));
 		$this->addFrontSystem(new GromeMedRailgun(2, 9, 6, 300, 60));
 		$this->addFrontSystem(new GromeMedRailgun(2, 9, 6, 300, 60));
-		$this->addFrontSystem(new FlakCannon(2, 4, 2, 300, 180));
+		$this->addFrontSystem(new GromeFlakCannon(2, 4, 2, 300, 180));
         $this->addFrontSystem(new Thruster(2, 10, 0, 3, 1));
 	    
         $this->addAftSystem(new Thruster(2, 8, 0, 3, 2));    

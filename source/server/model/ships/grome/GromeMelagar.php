@@ -5,7 +5,8 @@ class GromeMelagar extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 500;
-        $this->faction = "Grome Autocracy";
+        $this->faction = "Custom Ships";
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
         $this->phpclass = "GromeMelagar";
         $this->imagePath = "img/ships/GromeMorgat.png";
         $this->shipClass = "Melagar Frigate Leader";
@@ -41,11 +42,11 @@ class GromeMelagar extends MediumShip{
         $this->addPrimarySystem(new Thruster(2, 13, 0, 3, 4));     
         $this->addPrimarySystem(new ConnectionStrut(3));
         
-		$this->addFrontSystem(new FlakCannon(2, 4, 2, 180, 60));
+		$this->addFrontSystem(new GromeFlakCannon(2, 4, 2, 180, 60));
 		$this->addFrontSystem(new Railgun(2, 9, 6, 300, 60));
 		$this->addFrontSystem(new Railgun(2, 9, 6, 300, 60));
 		$this->addFrontSystem(new Railgun(2, 9, 6, 300, 60));
-		$this->addFrontSystem(new FlakCannon(2, 4, 2, 300, 180));
+		$this->addFrontSystem(new GromeFlakCannon(2, 4, 2, 300, 180));
         $this->addFrontSystem(new Thruster(2, 10, 0, 3, 1));
 	    
         $this->addAftSystem(new Thruster(2, 8, 0, 3, 2));    

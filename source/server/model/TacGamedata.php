@@ -477,6 +477,50 @@ class TacGamedata {
 	    }
 	}
 
+	
+	public function getClosestEnemyShip($shooter, $pos, $maxRange = 0){
+
+	    if ($pos instanceof BaseShip) {
+	        $pos = $pos->getHexPos();
+	    }
+
+	    if (!($pos instanceof OffsetCoordinate)) {
+	        throw new Exception("only OffsetCoordinate supported");
+	    }
+
+	    $closestShips = array(); // Array to store equally closest ships
+	    $closestDistance = 100; // Initialize with a large value
+
+	    foreach ($this->ships as $ship){
+	        if ($ship->unavailable)
+	            continue;
+
+			if ($ship->team == $shooter->team)	        
+				continue;
+		        
+	        $distance = Mathlib::getDistanceHex($ship->getHexPos(), $pos);
+
+	        if ($distance <= $maxRange && $distance < $closestDistance){
+	            // New closest distance found, clear the array and add this ship
+	            $closestShips = array($ship);
+	            $closestDistance = $distance;
+	        } elseif ($distance == $closestDistance) {
+	            // Add ship to equally close ships
+	            $closestShips[] = $ship;
+	        }
+	    }
+
+	    // Randomly select among equally close ships
+	    if (!empty($closestShips)) {
+	        $randomIndex = array_rand($closestShips);
+	        return $closestShips[$randomIndex];
+	    } else {
+	        return null; // No ships found within range
+	    }
+	}
+
+
+
     public function prepareForPlayer($all = false){
         $this->setWaiting();
         $this->calculateTurndelays();

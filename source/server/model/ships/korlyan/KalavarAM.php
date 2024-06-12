@@ -43,15 +43,17 @@ class KalavarAM extends OSAT{
         $this->addPrimarySystem(new Reactor(3, 5, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 5, 2, 4)); 
 
-//      $this->addAftSystem(new ProximityLaser(3, 6, 6, 180, 360));
-		$TargeterA = new ProximityLaser(0, 1, 0, 180, 360, 'A');
+
+//		$TargeterA = new ProximityLaser(0, 1, 0, 180, 360, 'A');
+		$TargeterA = new ProximityLaser(0, 1, 0, 0, 360, 'A');		
 		$LauncherA = new ProximityLaserLauncher(3, 0, 0, 180, 360, 'A'); 
 		$TargeterA->addLauncher($LauncherA);
 		$this->addAftSystem($TargeterA);
 		$this->addAftSystem($LauncherA);
         $this->addAftSystem(new Thruster(4, 6, 0, 0, 2));
-//        $this->addAftSystem(new ProximityLaser(3, 6, 6, 0, 180));
-		$TargeterB = new ProximityLaser(0, 1, 0, 0, 180, 'B');
+
+//		$TargeterB = new ProximityLaser(0, 1, 0, 0, 180, 'B');
+		$TargeterB = new ProximityLaser(0, 1, 0, 0, 360, 'B');		
 		$LauncherB = new ProximityLaserLauncher(3, 0, 0, 0, 180, 'B'); 
 		$TargeterB->addLauncher($LauncherB);
 		$this->addAftSystem($TargeterB);

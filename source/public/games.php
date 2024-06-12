@@ -63,17 +63,10 @@ if (isset($_SESSION["user"])) {
        -->
 		
 
-		---------- <b>LATEST NEWS - March 2024</b> ----------
-<br><u><b>HYAAAAAACH!</b></u> - by Douglas
-<br><b>Balosian Delta-V</b> for all the Underdweller fans ;)
-<br><b>bugfixes and laubout changes</b> - by Douglas
-<br><b>Thirdspace updates</b> - by Douglas
-<br><b>Hyperlinks added to Register Account window</b> - by Douglas
-<br><b>Nexus updates, including new Makar Federation</b> - by Geoffrey
-<br><b>EA and Orieni split</b> - big factions should be playable again!
+		---------- <b>LATEST NEWS - June 2024</b> ----------
+<br><b>Updates and Nexus balancing</b> - by Geoffrey
+<br><b>bugfixes</b> - by Douglas
 
-		 <br><br>---------- <b>update 11th of March</b> ---------- 
-	    <br><b>fixes</b> - polishing of all above
        
 
 <!--	        
