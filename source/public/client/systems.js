@@ -420,8 +420,9 @@ shipManager.systems = {
 				if (ship.userid != gamedata.thisplayer) continue;			
 				if (!(shipManager.systems.getSystemByName(ship, "hyachComputer"))) continue; //Does it have a computer?
 				if (shipManager.isDestroyed(ship)) continue;
-				var computer = (shipManager.systems.getSystemByName(ship, "hyachComputer"));						
-				if (computer.BFCPtotal_used > computer.output){ //Is the total BFCP used greater than output, usually due to damage to Computer.
+				var computer = (shipManager.systems.getSystemByName(ship, "hyachComputer"));
+				if(shipManager.systems.isDestroyed(ship, computer)) continue; 										
+				if (computer.BFCPtotal_used > computer.output){ //Is the total BFCP used greater than output and Computer NOT destroyed, usually due to damage to Computer.
 					shipNames[counter] = ship.name;
 					counter++;
 				}

@@ -2547,7 +2547,7 @@ class GromeHvyRailgun extends Weapon{
 								$crit = new OutputReduced1(-1, $ship->id, $scanner->id, 'OutputReduced1', $gamedata->turn+1, $gamedata->turn+1); 
 								$crit->updated = true;
 								$scanner->criticals[] =  $crit;
-								$fireOrder->pubnotes .= " Affect ships have their EW reduced by 1 point next turn (does not stack).";										
+								$fireOrder->pubnotes .= " Affected ships have their EW reduced by 1 point next turn (does not stack).";										
 						}
 					}					
 				break;				

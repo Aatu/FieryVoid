@@ -42,15 +42,15 @@ class GromeAdrinaAM extends BaseShip{
         $this->addPrimarySystem(new Reactor(4, 20, 0, 0));
         $this->addPrimarySystem(new CnC(4, 16, 0, 0));
         $this->addPrimarySystem(new AntiquatedScanner(3, 16, 5, 6));
-        $targetingArray = new GromeTargetingArray(2, 0, 0, 0, 360, 3, true, false); //Armor, health, power, startarc, endarc, output, escort, base	
-			$targetingArray->markHaphazard();
-			$this->addPrimarySystem($targetingArray);
-        $targetingArray = new GromeTargetingArray(2, 0, 0, 0, 360, 2, true, false); //Armor, health, power, startarc, endarc, output, escort, base	
-			$targetingArray->markHaphazard();
-			$this->addPrimarySystem($targetingArray);
-        $targetingArray = new GromeTargetingArray(2, 0, 0, 0, 360, 2, true, false); //Armor, health, power, startarc, endarc, output, escort, base	
-			$targetingArray->markHaphazard();
-			$this->addPrimarySystem($targetingArray);							 
+        $targetingArray1 = new GromeTargetingArray(2, 0, 0, 0, 360, 2, true, false); //Armor, health, power, startarc, endarc, output, escort, base	
+			$targetingArray1->markHaphazard();
+			$this->addPrimarySystem($targetingArray1);
+        $targetingArray2 = new GromeTargetingArray(2, 0, 0, 0, 360, 3, true, false); //Armor, health, power, startarc, endarc, output, escort, base	
+			$targetingArray2->markHaphazard();
+			$this->addPrimarySystem($targetingArray2);
+        $targetingArray3 = new GromeTargetingArray(2, 0, 0, 0, 360, 2, true, false); //Armor, health, power, startarc, endarc, output, escort, base	
+			$targetingArray3->markHaphazard();
+			$this->addPrimarySystem($targetingArray3);							 
         $this->addPrimarySystem(new Engine(4, 24, 0, 6, 4));
 		$this->addPrimarySystem(new Hangar(2, 2));
 		$this->addPrimarySystem(new JumpEngine(4, 20, 4, 36));
@@ -59,22 +59,22 @@ class GromeAdrinaAM extends BaseShip{
         $this->addFrontSystem(new Thruster(3, 8, 0, 2, 1));
 		$this->addFrontSystem(new AmmoMediumRailGun(3, 9, 6, 300, 360, $ammoMagazine));
 		$this->addFrontSystem(new AmmoMediumRailGun(3, 9, 6, 0, 60, $ammoMagazine));
-		$targetingArray = new GromeTargetingArray(2, 0, 0, 240, 60, 3, true, false); //Armor, health, power, startarc, endarc, output, escort, base	
-			$targetingArray->markHaphazard();
-			$this->addFrontSystem($targetingArray);
-		$targetingArray = new GromeTargetingArray(2, 0, 0, 300, 120, 3, true, false); //Armor, health, power, startarc, endarc, output, escort, base	
-			$targetingArray->markHaphazard();
-			$this->addFrontSystem($targetingArray);					
+		$targetingArray4 = new GromeTargetingArray(2, 0, 0, 240, 60, 3, true, false); //Armor, health, power, startarc, endarc, output, escort, base	
+			$targetingArray4->markHaphazard();
+			$this->addFrontSystem($targetingArray4);
+		$targetingArray5 = new GromeTargetingArray(2, 0, 0, 300, 120, 3, true, false); //Armor, health, power, startarc, endarc, output, escort, base	
+			$targetingArray5->markHaphazard();
+			$this->addFrontSystem($targetingArray5);					
         $this->addFrontSystem(new ConnectionStrut(4));
 
         $this->addAftSystem(new Thruster(3, 16, 0, 3, 2));
         $this->addAftSystem(new Thruster(3, 16, 0, 3, 2));
-		$targetingArray = new GromeTargetingArray(2, 0, 0, 120, 300, 3, true, false); //Armor, health, power, startarc, endarc, output, escort, base	
-			$targetingArray->markHaphazard();
-			$this->addAftSystem($targetingArray);
-		$targetingArray = new GromeTargetingArray(2, 0, 0, 60, 240, 3, true, false); //Armor, health, power, startarc, endarc, output, escort, base	
-			$targetingArray->markHaphazard();
-			$this->addAftSystem($targetingArray);  			        		
+		$targetingArray6 = new GromeTargetingArray(2, 0, 0, 120, 300, 3, true, false); //Armor, health, power, startarc, endarc, output, escort, base	
+			$targetingArray6->markHaphazard();
+			$this->addAftSystem($targetingArray6);
+		$targetingArray7 = new GromeTargetingArray(2, 0, 0, 60, 240, 3, true, false); //Armor, health, power, startarc, endarc, output, escort, base	
+			$targetingArray7->markHaphazard();
+			$this->addAftSystem($targetingArray7);  			        		
         $this->addAftSystem(new ConnectionStrut(3));
 
         $this->addLeftSystem(new GromeFlakCannon(2, 4, 2, 180, 360));

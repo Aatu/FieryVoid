@@ -55,8 +55,8 @@ class GromeMorstagAM extends MediumShip{
 	    
         $this->addAftSystem(new Thruster(2, 8, 0, 3, 2));    
         $this->addAftSystem(new Thruster(2, 8, 0, 3, 2));    
-		$this->addAftSystem(new LightRailGun(2, 6, 3, 120, 240));
-		$this->addAftSystem(new LightRailGun(2, 6, 3, 120, 240));
+		$this->addAftSystem(new AmmoLightRailGun(2, 6, 3, 120, 240, $ammoMagazine));
+		$this->addAftSystem(new AmmoLightRailGun(2, 6, 3, 120, 240, $ammoMagazine));
        
         $this->addPrimarySystem(new Structure(3, 85));
 
