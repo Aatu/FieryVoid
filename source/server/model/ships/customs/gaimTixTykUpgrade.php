@@ -39,14 +39,14 @@ class gaimTixTykUpgrade extends HeavyCombatVesselLeftRight{
         $this->addAftSystem(new Thruster(4, 12, 0, 5, 2));        
 
         $this->addLeftSystem(new ParticleConcentrator(4, 9, 7, 300, 60));
-        $this->addLeftSystem(new TwinArray(3, 6, 2, 300, 120));
-        $this->addLeftSystem(new BattleLaser(4, 6, 6, 0, 120));
+        $this->addLeftSystem(new TwinArray(3, 6, 2, 240, 60));
+        $this->addLeftSystem(new BattleLaser(4, 6, 6, 240, 360));
         $this->addLeftSystem(new Thruster(4, 15, 0, 4, 3));
 		$this->addLeftSystem(new Bulkhead(0, 4));
 
         $this->addRightSystem(new ParticleConcentrator(4, 9, 7, 300, 60));
-        $this->addRightSystem(new TwinArray(3, 6, 2, 240, 60));
-        $this->addRightSystem(new BattleLaser(4, 6, 6, 240, 360));
+        $this->addRightSystem(new TwinArray(3, 6, 2, 300, 120));
+        $this->addRightSystem(new BattleLaser(4, 6, 6, 0, 120));
         $this->addRightSystem(new Thruster(4, 15, 0, 4, 4));
 		$this->addRightSystem(new Bulkhead(0, 4));
 
