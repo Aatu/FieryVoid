@@ -3292,7 +3292,7 @@ spl_autoload_register(
 						'plasmasiegecannon' => '/server/model/weapons/customDevelopment.php',
 						'impheavylaser' => '/server/model/weapons/customDevelopment.php',
 						'directemine' => '/server/model/weapons/customDevelopment.php',
-/*
+
 				//Marine Boarding Actions
 				'marines' => '/server/model/weapons/specialWeapons.php',
 				'sabotage' => '/server/model/cricialClasses.php',
@@ -3308,7 +3308,7 @@ spl_autoload_register(
 				
 				//New Breaching pods units		
 				'breachingpodea' => '/server/model/ships/EA/breachingPodEA.php',				
-*/
+
 						//Satyra (Wolfgang campaign)
 						'satyrashield' => '/server/model/weapons/customDevelopment.php',
 						'laserarray' => '/server/model/weapons/customDevelopment.php',
