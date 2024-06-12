@@ -7,13 +7,13 @@ class LakaraEarly extends BaseShip{
 	$this->pointCost = 600;
 	$this->faction = "Abbai Matriarchate";
         $this->phpclass = "LakaraEarly";
-        $this->imagePath = "img/ships/AbbaiLakara.png";   //How do I add pictures?
+        $this->imagePath = "img/ships/AbbaiNakarsa.png";   //How do I add pictures?
         $this->shipClass = "Lakara Cruiser (early)";
 			$this->occurence = "common";
 			$this->variantOf = 'Lakara Cruiser';
         $this->shipSizeClass = 3;
 
-		$this->isd = 2180;
+		$this->isd = 2220;
         
         $this->forwardDefense = 18;
         $this->sideDefense = 16;
