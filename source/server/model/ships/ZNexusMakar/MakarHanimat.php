@@ -29,8 +29,8 @@ class MakarHanimat extends BaseShip{
         $this->forwardDefense = 17;
         $this->sideDefense = 17;
         
-        $this->turncost = 1.33;
-        $this->turndelaycost = 1.33;
+        $this->turncost = 1;
+        $this->turndelaycost = 1;
         $this->accelcost = 4;
         $this->rollcost = 4;
         $this->pivotcost = 4;

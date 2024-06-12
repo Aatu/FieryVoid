@@ -220,43 +220,44 @@ class TrekSulibanHelix extends VreeCapital{
 	$this->addPrimarySystem(new InvulnerableThruster(1, 1, 0, 99, 1)); //unhitable and with unlimited thrust allowance
 	$this->addPrimarySystem(new InvulnerableThruster(1, 1, 0, 99, 2)); //unhitable and with unlimited thrust allowance
 	$this->addPrimarySystem(new InvulnerableThruster(1, 1, 0, 99, 4)); //unhitable and with unlimited thrust allowance  
+        $this->addPrimarySystem($impulseDrive);
 	
 	   
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
 		$structArmor = 4;
 		$structHP = 45;
 		
-		$struct = new Structure( $structArmor, $structHP, true);
+		$struct = new Structure( $structArmor, $structHP);
 		$struct->addTag("Outer Structure");
 		$struct->startArc = 300;
 		$struct->endArc = 60;
         $this->addFrontSystem($struct);
 		
-		$struct = new Structure( $structArmor, $structHP, true);
+		$struct = new Structure( $structArmor, $structHP);
 		$struct->addTag("Outer Structure");
 		$struct->startArc = 120;
 		$struct->endArc = 240;
         $this->addAftSystem($struct);
 		
-		$struct = new Structure( $structArmor, $structHP, true);
+		$struct = new Structure( $structArmor, $structHP);
 		$struct->addTag("Outer Structure");
 		$struct->startArc = 240;
 		$struct->endArc = 0;
         $this->addLeftFrontSystem($struct);
 		
-		$struct = new Structure( $structArmor, $structHP, true);
+		$struct = new Structure( $structArmor, $structHP);
 		$struct->addTag("Outer Structure");
 		$struct->startArc = 180;
 		$struct->endArc = 300;
         $this->addLeftAftSystem($struct);
 		
-		$struct = new Structure( $structArmor, $structHP, true);
+		$struct = new Structure( $structArmor, $structHP);
 		$struct->addTag("Outer Structure");
 		$struct->startArc = 0;
 		$struct->endArc = 120;
         $this->addRightFrontSystem($struct);
 		
-		$struct = new Structure( $structArmor, $structHP, true);
+		$struct = new Structure( $structArmor, $structHP);
 		$struct->addTag("Outer Structure");
 		$struct->startArc = 60;
 		$struct->endArc = 180;
