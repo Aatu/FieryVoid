@@ -63,22 +63,9 @@ if (isset($_SESSION["user"])) {
        -->
 		
 
-		---------- <b>LATEST NEWS - May 2024</b> ----------
-<br><u><b>A LOT of new content by Douglas!</b></u>
-<br>Grome Refit: Railgun Shells, TT-accurate Targeting/Escort Arrays and Flak Cannons.
-<br>Narn Pulsar Mine & GKarith,
-<br>Aegis Sensor Pod and Hyperion Aegis Cruiser,
-<br>Limpet Bore Torpedo - Rework,
-<br>Prox Laser - Change arcs and add auto-miss if Launcher not fired,
-<br>Hyach and KL Polishing,
-<br>Hyach Stealth Ship fixes,
-<br>Thrust Boosted Weapons & Nexus Protoype
-<br>IFF System for Mine Launcher equipped ships,
-<br>Abbai Mine Launcher and remade Motenai Mine Launcher ship,
-<br>Custom Ship & Weapon: Gaim Tiktyx + Photon Bomb,
-<br>Targeting Tooltip updated for weapon with multiple Firing Modes, and for weapons that always hit.
-<br>Set max size for Ship Icons graphics, adjusted ewSprite sizes,
-<br>Update Laser Effects.
+		---------- <b>LATEST NEWS - June 2024</b> ----------
+<br><b>Updates and Nexus balancing</b> - by Geoffrey
+<br><b>bugfixes</b> - by Douglas
 
        
 
