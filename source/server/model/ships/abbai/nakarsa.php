@@ -7,7 +7,7 @@ class Nakarsa extends BaseShip{
 	$this->pointCost = 750;
 	$this->faction = "Abbai Matriarchate";
         $this->phpclass = "Nakarsa";
-        $this->imagePath = "img/ships/AbbaiLakara.png";
+        $this->imagePath = "img/ships/AbbaiNakarsa.png";
         $this->shipClass = "Nakarsa Command Cruiser";
         $this->shipSizeClass = 3;
         $this->fighters = array("normal"=>6);
