@@ -40,7 +40,7 @@ class GromeGormokOSATAM extends OSAT{
 	    $this->enhancementOptionsEnabled[] = 'SHELL_HLR';//add enhancement options for ammo - Heavy Long Range Shell	    	
 	    $this->enhancementOptionsEnabled[] = 'SHELL_HULR';//add enhancement options for ammo - Heavy Ultra Long Range Shell	
 
-		
+        $this->addPrimarySystem(new OSATCnC(0, 1, 0, 0));		
         $this->addPrimarySystem(new Reactor(3, 8, 0, 0));
         $this->addPrimarySystem(new AntiquatedScanner(3, 4, 2, 3)); 
         $this->addPrimarySystem(new GromeTargetingArray(3, 0, 0, 0, 360, 2, false, true)); //Armor, health, power, startarc, endarc, output, escort, base
