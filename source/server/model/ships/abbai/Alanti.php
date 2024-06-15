@@ -24,6 +24,7 @@ class alanti extends OSAT{
         $this->pivotcost = 0;	
         $this->iniativebonus = 60;
 
+        $this->addPrimarySystem(new OSATCnC(0, 1, 0, 0));
         $this->addPrimarySystem(new Reactor(4, 7, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 9, 3, 7)); 
         $this->addPrimarySystem(new ShieldGenerator(3, 8, 2, 2));

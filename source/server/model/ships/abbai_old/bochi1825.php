@@ -25,6 +25,7 @@ class Bochi1825 extends OSAT{
         $this->pivotcost = 0;	
         $this->iniativebonus = 60;
 
+        $this->addPrimarySystem(new OSATCnC(0, 1, 0, 0));
         $this->addPrimarySystem(new Reactor(4, 6, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 6, 2, 4)); 
         $this->addAftSystem(new Thruster(4, 5, 0, 0, 2)); 
