@@ -30,6 +30,7 @@ class LeonidasAlpha extends OSAT{
         $this->addFrontSystem(new LtBlastCannon(2, 4, 1, 0, 180));
         //$this->addPrimarySystem(new InterceptorMkI(2, 4, 1, 0, 360));
 
+        $this->addPrimarySystem(new OSATCnC(0, 1, 0, 0));
         $this->addPrimarySystem(new Reactor(4, 6, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 14, 2, 3));   
 
