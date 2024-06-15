@@ -24,6 +24,7 @@ class Makar extends OSAT{
 
 		$this->enhancementOptionsEnabled[] = 'MARK_FERV'; //To activate Religious Fervor attributes.   
 
+        $this->addPrimarySystem(new OSATCnC(0, 1, 0, 0));
         $this->addPrimarySystem(new Reactor(5, 9, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 9, 3, 6));   
         $this->addPrimarySystem(new Thruster(4, 6, 0, 0, 2));
