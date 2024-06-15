@@ -36,7 +36,7 @@ class HighguardA2003AM extends OSAT
         $this->enhancementOptionsEnabled[] = 'AMMO_L';//add enhancement options for other missiles - Class-L
 		//By the Book Orieni should have access to missie types: KK, B, A, H, L, C
 		
-		
+        $this->addPrimarySystem(new OSATCnC(0, 1, 0, 0));		
 		$this->addPrimarySystem(new Reactor(4, 6, 0, 0));
 		$this->addPrimarySystem(new Scanner(4, 4, 2, 4));
 		$this->addPrimarySystem(new Thruster(4, 4, 0, 0, 2));
