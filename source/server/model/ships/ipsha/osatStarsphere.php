@@ -36,7 +36,7 @@ class OsatStarsphere extends OSAT{
         $this->iniativebonus = 60;
       
         
-    
+    $this->addPrimarySystem(new OSATCnC(0, 1, 0, 0));    
 	$this->addPrimarySystem(new MagGravReactor(4, 12, 0, 14+2));
 	$this->addPrimarySystem(new Scanner(4, 7, 2, 5));
 	$this->addPrimarySystem(new MagGraviticThruster(3, 6, 0, 99, 2));    
