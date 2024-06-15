@@ -1308,6 +1308,11 @@ class OSATCnC extends CnC{	//Special technical OSAT CnC system, so criticals eff
 
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);     
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}
 		$this->data["Special"] .= "Technical system only, cannot be damaged in any way.";
 	}
 		
