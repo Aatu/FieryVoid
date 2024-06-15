@@ -19,6 +19,7 @@ class ProtectorateSheganna extends OSAT{
         $this->iniativebonus = 65; 
         $this->isd = 2070;
 
+        $this->addPrimarySystem(new OSATCnC(0, 1, 0, 0));
         $this->addPrimarySystem(new Reactor(4, 9, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 7, 2, 8)); 
         $this->addPrimarySystem(new Thruster(4, 7, 0, 0, 2));
