@@ -6082,9 +6082,11 @@ class Marines extends Weapon{
 		if($target->faction == "Narn Regime" || $target->faction == "Gaim Intelligence" )	$rollMod += 1; //Certain factions defend harder! 
 				
 		$location = $fireOrder->chosenLocation ;
-		if($location == 0) $rollMod -= 1; //Easier to deliver marines to destroyed sections i.e direct to Primary section.	       	
+		if($location == 0 && (!$target instanceof OSAT)) $rollMod -= 1; //Easier to deliver marines to destroyed sections i.e direct to Primary section.	       
+echo "Value of location: " . $location. "\n";
+echo "Value of location: " . $rollMod. "\n";
 
-		foreach ($target->enhancementOptions as $enhancement) {//ID,readableName,numberTaken,limit,price,priceStep
+		foreach ($target->enhancementOptions as $enhancement) {//Defender quality can influence roll too.
 		    $enhID = $enhancement[0];
 			$enhCount = $enhancement[2];		        
 			if($enhCount > 0) {		            

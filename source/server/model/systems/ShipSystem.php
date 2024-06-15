@@ -315,8 +315,7 @@ class ShipSystem {
 
 		$rollMod = $this->getMarineRollMod($critical, $ship, $gamedata);					    			
 		$wreakHavocRoll = max(0, Dice::d(10) + $rollMod); //Main roll for effect of Marines sabotage.
-//$wreakHavocRoll = 5;		
-//echo "Value of wreakHavocRoll: " . $wreakHavocRoll. "\n";
+//$wreakHavocRoll = 4;		
 
 			//Now apply effect based on the rolled dice!
 		if ($wreakHavocRoll <= 1) { 		    //Damage to a random primary system.
@@ -381,9 +380,12 @@ class ShipSystem {
 
 			if ($wreakHavocRoll == 4) { //reduce thrust next turn
 				$engine = $ship->getSystemByName("Engine");
+				$effectEngine = Dice::d(3,1);//strength of effect: 1d3				
+				$newFireOrder->pubnotes = "<br>Rolled: $wreakHavocRoll - A marine unit has sabotaged engine conduits, thrust reduced by $effectEngine next turn unless ship is gravitic or an OSAT.";					
 				if($ship->gravitic) return; //No effect on Gravitic engines.
-				$effectEngine = Dice::d(3,1);//strength of effect: 1d3
-				$newFireOrder->pubnotes = "<br>Rolled: $wreakHavocRoll - A marine unit has sabotaged engine conduits, thrust reduced by $effectEngine next turn unless gravitic.";															
+				if($ship instanceof OSAT) return; //OSATs have no engines.					
+
+														
 				if($engine){
 					for($i=1; $i<=$effectEngine;$i++){
 						$crit = new OutputReduced1(-1, $ship->id, $engine->id, 'OutputReduced1', $gamedata->turn+1, $gamedata->turn+1); 
@@ -715,9 +717,9 @@ class ShipSystem {
 		$defendersLost = 0;//Initialise
 		$defendersLost = $startingMarines - $currentMarines; //If 0 currentMarines, bascially that means all are gone.
 		
-echo "Value of startingMarines: " . $startingMarines. "\n";
-echo "Value of currentMarines: " . $currentMarines. "\n";
-echo "Value of defendersLost: " . $defendersLost. "\n";
+//echo "Value of startingMarines: " . $startingMarines. "\n";
+//echo "Value of currentMarines: " . $currentMarines. "\n";
+//echo "Value of defendersLost: " . $defendersLost. "\n";
 		
 		$attackersOnboard = 0;//Initialise
 //echo "Value of marineDefendersafter: " . $marineDefenders. "\n";										
@@ -727,7 +729,7 @@ echo "Value of defendersLost: " . $defendersLost. "\n";
 		}
 
 //echo "Value of marineDefendersbefore: " . $marineDefenders. "\n";
-echo "Value of attackersOnboard: " . $attackersOnboard. "\n";
+//echo "Value of attackersOnboard: " . $attackersOnboard. "\n";
 			
 		//Check if Marine Defenders eliminated AND if attackers still onboard e.g. defenders weren't lost to structure damage being boarded in a previous turn.				
 		if(($defendersLost >= $startingMarines) && ($attackersOnboard > 0)){ //Ship's defenders have been eliminated and attackers onboard.  Ship is disabled.
