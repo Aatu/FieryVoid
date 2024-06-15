@@ -25,6 +25,7 @@ class DalithornOSATEarly extends OSAT{
         $this->pivotcost = 0;	
         $this->iniativebonus = 60;
 
+        $this->addPrimarySystem(new OSATCnC(0, 1, 0, 0));
         $this->addPrimarySystem(new NexusCoilgun(2, 10, 4, 300, 60));
         $this->addPrimarySystem(new NexusLightGasGun(2, 5, 1, 180, 60));
         $this->addPrimarySystem(new NexusShatterGun(1, 2, 1, 0, 360));
