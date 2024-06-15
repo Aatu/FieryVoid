@@ -37,7 +37,8 @@ class HurrmissileOSAT2220AM extends OSAT
         //$this->enhancementOptionsEnabled[] = 'AMMO_P';//add enhancement options for other missiles - Class-P
 		//Hurr developed their missiles from Dilgar tech - they have L,H,F and A missiles (even if only after Dilgar War)
 		//they developed P missiles as well (just before Show era), but they remain very rare (tabletop limit of 1 per ship (2 per dedicated missile ship)). I opted to skip these missiles instead. 
-		
+
+        $this->addPrimarySystem(new OSATCnC(0, 1, 0, 0));		
 		$this->addPrimarySystem(new Reactor(3, 5, 0, 0));
 		$this->addPrimarySystem(new Scanner(3, 5, 2, 4));
 		$this->addPrimarySystem(new Thruster(3, 4, 0, 0, 2));
