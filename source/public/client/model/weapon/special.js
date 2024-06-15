@@ -513,17 +513,12 @@ var ship = this.ship;
 this.outputDisplay = shipManager.systems.getOutput(ship, this);
 return this;
 };
-/*
+
 var Marines = function Marines(json, ship) {
     Weapon.call(this, json, ship);
 };
 Marines.prototype = Object.create(Weapon.prototype);
 Marines.prototype.constructor = Marines;
 
-Marines.prototype.calculateSpecialHitChanceMod = function (target) {
-	var mod = 0;
-	var ship = this.ship;
-		
-	return mod; 
-};
-*/
+
+

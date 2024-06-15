@@ -1189,6 +1189,7 @@ class CnC extends ShipSystem implements SpecialAbility {
     public $name = "cnC";
     public $displayName = "C&C";
     public $primary = true;
+    private $marines = 0;//Front end varibale to dispaly current marine count on ship.
 	
 	//C&C  is VERY important, although not as much as the reactor!
 	public $repairPriority = 9;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
@@ -1275,10 +1276,42 @@ class CnC extends ShipSystem implements SpecialAbility {
 			
 		}
 		
-	}	
+	}
+	
+	
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+		$ship = $this->getUnit();
+		$marineDefenders = $ship->howManyMarines();
+		if($ship->factionAge > 2){//Ancients can't be boarded and who knows what their defenders look like!
+			$this->data["Marine Units"] = 'n/a';//Or change to 'N/A'
+		}else{
+			$this->data["Marine Units"] = $marineDefenders;
+			$this->marines = $marineDefenders;
+		}
+	}
+
+        public function stripForJson() {//Need to send Marines to front-end so it updates count.
+            $strippedSystem = parent::stripForJson();    
+            $strippedSystem->marines = $this->marines;                             
+            return $strippedSystem;
+        }
 			
 } //endof class CnC
 
+
+class OSATCnC extends CnC{	//Special technical OSAT CnC system, so criticals effects can be applied to these units etc
+    public $iconPath = "cnCtechnical.png";
+    public $isPrimaryTargetable = false;
+	public $isTargetable = false;   
+	public $doCountForCombatValue = false;   
+
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);     
+		$this->data["Special"] .= "Technical system only, cannot be damaged in any way.";
+	}
+		
+}//endof OSATCnC
 
 /*Protected CnC - as compensation for ships lacking two C&Cs, these systems get different (lighter) critical table 
 */
@@ -1293,7 +1326,7 @@ class ProtectedCnC extends CnC{
 		}
 		//actually now secondary C&C is present - Protected C&C-equipped units should be re-equipped with regular C&C + Secondary C&C instead!
 		//$this->data["Special"] .= 'This unit should have two separate C&Cs. As this is not possible in FV, critical chart is changed instead.';
-		$this->data["Special"] .= "C&C that's more resistnat to critical damage.";
+		$this->data["Special"] .= "C&C that's more resistant to critical damage.";
 	}
 	
 	protected $possibleCriticals = array(
@@ -1328,6 +1361,7 @@ class ThirdspaceCnC extends CnC{
     );
 	
 }//endof class ThirdspaceCnC
+
 	
 class PakmaraCnC extends CnC{	
 	public function setSystemDataWindow($turn){

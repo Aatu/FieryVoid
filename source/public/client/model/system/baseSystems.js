@@ -105,6 +105,17 @@ var CnC = function CnC(json, ship) {
 CnC.prototype = Object.create(ShipSystem.prototype);
 CnC.prototype.constructor = CnC;
 
+CnC.prototype.initializationUpdate = function() {
+var ship = this.ship;
+	if(ship.factionAge > 2){
+		this.data["Marine Units"] = 'n/a';	
+	}else{	
+		this.data["Marine Units"] = this.marines;
+	}
+return this;
+};
+
+
 var ProtectedCnC = function ProtectedCnC(json, ship) {
     CnC.call(this, json, ship);
 };
@@ -122,6 +133,12 @@ var SecondaryCnC = function SecondaryCnC(json, ship) {
 };
 SecondaryCnC.prototype = Object.create(ShipSystem.prototype);
 SecondaryCnC.prototype.constructor = SecondaryCnC;
+
+var OSATCnC = function OSATCnC(json, ship) {
+    ShipSystem.call(this, json, ship);
+};
+OSATCnC.prototype = Object.create(ShipSystem.prototype);
+OSATCnC.prototype.constructor = OSATCnC;
 
 var Thruster = function Thruster(json, ship) {
     ShipSystem.call(this, json, ship);

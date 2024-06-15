@@ -169,6 +169,7 @@ spl_autoload_register(
                 'cnc' => '/server/model/systems/baseSystems.php',
 				'secondarycnc' => '/server/model/systems/baseSystems.php',
                 'protectedcnc' => '/server/model/systems/baseSystems.php',
+         		'osatcnc' => '/server/model/systems/baseSystems.php',       
                 'cobra' => '/server/model/ships/raiders/cobra.php',
                 'adjudicator' => '/server/model/ships/streib/adjudicator.php',
                 'collector' => '/server/model/ships/streib/collector.php',
@@ -3292,7 +3293,7 @@ spl_autoload_register(
 						'plasmasiegecannon' => '/server/model/weapons/customDevelopment.php',
 						'impheavylaser' => '/server/model/weapons/customDevelopment.php',
 						'directemine' => '/server/model/weapons/customDevelopment.php',
-/*
+
 				//Marine Boarding Actions
 				'marines' => '/server/model/weapons/specialWeapons.php',
 				'sabotage' => '/server/model/cricialClasses.php',
@@ -3304,11 +3305,11 @@ spl_autoload_register(
 				'captureshipelite' => '/server/model/cricialClasses.php',					
 				'shipdisabled' => '/server/model/cricialClasses.php',
 				'defenderlost' => '/server/model/cricialClasses.php',
-							
+											
 				
 				//New Breaching pods units		
 				'breachingpodea' => '/server/model/ships/EA/breachingPodEA.php',				
-*/
+
 						//Satyra (Wolfgang campaign)
 						'satyrashield' => '/server/model/weapons/customDevelopment.php',
 						'laserarray' => '/server/model/weapons/customDevelopment.php',

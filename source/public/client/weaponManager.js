@@ -703,6 +703,40 @@ window.weaponManager = {
     }, //endof calculateRamChance
 
 
+    //calculate hit chance for Boarding Action - different procedure
+    calculateBoardingAction: function calculateBoardingAction(shooter, target, weapon){
+ //       if (calledid > 0) return 0;//can called Boarding Actions!
+        if (target.flight) return 0;//Cannot board fighters, null FC stops this but showing 0% is more informative for players!
+        	
+        var hitChance = 20; //base: 100%
+
+        //‐1 for every level of jinking the ramming or target unit is using.  Should be 0 for both, but just in case for future.
+        hitChance -= shipManager.movement.getJinking(shooter);
+        hitChance -= shipManager.movement.getJinking(target);
+        
+        //fire control: should be 0, but units specifically designed for boarding may have some bonus!
+        hitChance += weaponManager.getFireControl(target, weapon);        
+
+        var targetSpeed = Math.abs(shipManager.movement.getSpeed(target)); //I think speed cannot be negative, but just in case ;)
+		var ownSpeed = Math.abs(shipManager.movement.getSpeed(shooter)); 
+		var speedDifference = Math.abs(targetSpeed - ownSpeed); //keep it a positive number. 		
+		var freeThrust = shooter.freethrust;
+		
+		if(speedDifference > freeThrust) return 0;//Not enough thrust to compensate for speed difference, automatic miss.		
+          		
+		if(targetSpeed > ownSpeed){//Target is moving faster, what are chances to attach?
+			var speedChance = speedDifference*2;//Each point of speed differnece equates to 10% chance to miss.
+			var newHitchance = hitChance - speedChance;//Take current hitChance, and remove speed differenc penalty.
+        	hitChance = Math.round(newHitchance * 5);//Convert to % value			
+			return hitChance;			
+		}else{
+        	hitChance = Math.round(hitChance * 5);	//Convert to % value				
+			return hitChance;
+		}			
+
+    }, //endof calculateBoardingAction
+
+
 	getFiringHex: function getFiringHex(shooter, weapon){
         var sPosLaunch = null;
         
@@ -722,6 +756,10 @@ window.weaponManager = {
 		if (weapon.isRammingAttack) {
 			return weaponManager.calculateRamChance(shooter, target, weapon, calledid);
 		}
+		if(weapon.isBoardingAction){
+			return weaponManager.calculateBoardingAction(shooter, target, weapon);			
+		}
+
 		
 		if(weapon.autoHit) return 100; //Some weapons always hit, let's just show 100% chance to prevent confusion at firing. DK - 12 Apr 2024
 			
@@ -748,7 +786,9 @@ window.weaponManager = {
 		}
 
         var baseDef = weaponManager.calculateBaseHitChange(target, defence, shooter, weapon);
-		
+        
+        //This part added to count new critical that raises Defence profiles on ships and adds to hit chance - June 2024 DK
+		if(!target.flight) baseDef += shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(target, "cnC"), "ProfileIncreased");		
 
         var soew = 0;
         var dist = 0;
