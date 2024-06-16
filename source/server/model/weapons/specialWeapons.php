@@ -5992,14 +5992,18 @@ class Marines extends Weapon{
 		
 		//Now roll to see if the Breaching Pod attaches on this turn.
 		$shooterMove = $shooter->getLastMovement();
-		$shooterSpeed = $shooterMove->speed;
+		$shooterSpeed = $shooterMove->speed;		
+		
 		$targetMove = $target->getLastMovement();
 		$targetSpeed = $targetMove->speed;
 		$speedDifference = abs($targetSpeed - $shooterSpeed);//Calculate absolute difference in speed.
-
+		if($shooter->faction == "Llort") $speedDifference -= 1;
+			
+		$finalSpeedDifference = max(0, $speedDifference);//Llort bonus could make it -1...
+		
 //echo "Value of speedDifference: " . $speedDifference. "\n";
 		
-		if($speedDifference > $shooter->freethrust){//Pod cannot compensate enough for speed difference with available thrust.
+		if($finalSpeedDifference > $shooter->freethrust){//Pod cannot compensate enough for speed difference with available thrust.
 			$fireOrder->needed = 0;
 			$fireOrder->updated = true;
 			$fireOrder->pubnotes .= "<br> The speed difference to target is too great and pod is unable to attach.";					
@@ -6008,7 +6012,7 @@ class Marines extends Weapon{
 		
 		if($targetSpeed > $shooterSpeed){//Target is moving faster, roll to attach.
 			$baseHitChance = 100;//Start with automatic hit.
-			$speedChance = 	$speedDifference *10;//Each point of speed difference is 10% chance to miss.
+			$speedChance = 	$finalSpeedDifference *10;//Each point of speed difference is 10% chance to miss.
 			$finalHitChance = $baseHitChance - $speedChance;//Adjust hitchance.
 			$fireOrder->needed = $finalHitChance;//Update fireOrder.		
 			$fireOrder->updated = true;	
@@ -6075,12 +6079,14 @@ class Marines extends Weapon{
 		
 	}//endof checkMissionAmount()
 
-	private function getDeliveryRollMod($target, $gamedata, $fireOrder){
+	private function getDeliveryRollMod($shooter, $target, $gamedata, $fireOrder){
 		$rollMod = 0;
 		if($this->eliteMarines) $rollMod -= 1; //Elite Marines board more easily.
 
 		if($target->faction == "Narn Regime" || $target->faction == "Gaim Intelligence" )	$rollMod += 1; //Certain factions defend harder! 
-				
+
+		if($shooter->faction == "Llort")  $rollMod -= 1; //Llort should get bonus to Rescue and Capture, but making them elite feels incorrect.  Have instead made it easier for their marines to board. 	
+					
 		$location = $fireOrder->chosenLocation ;
 		if($location == 0 && (!$target instanceof OSAT)) $rollMod -= 1; //Easier to deliver marines to destroyed sections i.e direct to Primary section.	       
 echo "Value of location: " . $location. "\n";
@@ -6119,7 +6125,7 @@ echo "Value of location: " . $rollMod. "\n";
 		}	
 		
 		//Can proceed with boarding actions, roll to see if Marines are delivered.		
-		$rollMod = $this->getDeliveryRollMod($target, $gamedata, $fireOrder);		
+		$rollMod = $this->getDeliveryRollMod($shooter, $target, $gamedata, $fireOrder);		
 		$deliveryRoll = max(0, Dice::d(10) + $rollMod);
 //		$deliveryRoll = 1;			
 		

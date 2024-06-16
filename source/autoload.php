@@ -3318,12 +3318,14 @@ spl_autoload_register(
 				'breachingpodbrakiri' => '/server/model/ships/brakiri/breachingpodbrakiri.php',				
 				'breachingpoddrazi' => '/server/model/ships/drazi/breachingpoddrazi.php',					
 				'breachingpodpakmara' => '/server/model/ships/pakmara/breachingpodpakmara.php',				
-				'breachingpodvree' => '/server/model/ships/vree/breachingpodvree.php',		
+				'breachingpodvree' => '/server/model/ships/vree/breachingpodvree.php',
+				'breachingpodgaim' => '/server/model/ships/gaim/breachingpodgaim.php',						
 				'breachingpodraiders' => '/server/model/ships/raiders/breachingpodraiders.php',	
+				'breachingpodllort' => '/server/model/ships/llort/breachingpodllort.php',				
 				
 				
 				
-				'breachingpodgaim' => '/server/model/ships/gaim/breachingpodgaim.php',	
+	
 										
 
 						//Satyra (Wolfgang campaign)
