@@ -13,7 +13,7 @@ class breachingpodcentwotcr extends FighterFlight{
         
         $this->forwardDefense = 9;
         $this->sideDefense = 9;
-        $this->freethrust = 6;
+        $this->freethrust = 5;
         $this->offensivebonus = 1;
         $this->jinkinglimit = 0;
         $this->pivotcost = 2; //shuttles have pivot cost higher
@@ -33,7 +33,7 @@ class breachingpodcentwotcr extends FighterFlight{
         for ($i = 0; $i < $toAdd; $i++){
 			
 			$armour = array(2, 2, 2, 2);
-			$fighter = new Fighter("Sciona", $armour, 8, $this->id);
+			$fighter = new Fighter("breachingpodcentwotcr", $armour, 8, $this->id);
 			$fighter->displayName = "Sciona";
 			$fighter->imagePath = "img/ships/phalan.png";
 			$fighter->iconPath = "img/ships/phalan_large.png";

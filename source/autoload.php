@@ -3314,7 +3314,7 @@ spl_autoload_register(
 				'breachingpodminprot' => '/server/model/ships/minbari_protectorate/breachingPodMinProt.php',
 				'lakritas' => '/server/model/ships/centauri_old/lakritAS.php',					
 				'breachingpodcentwotcr' => '/server/model/ships/centauri_old/breachingpodcentwotcr.php',
-								
+				'breachingpodgaim' => '/server/model/ships/gaim/breachingpodgaim.php',							
 
 						//Satyra (Wolfgang campaign)
 						'satyrashield' => '/server/model/weapons/customDevelopment.php',

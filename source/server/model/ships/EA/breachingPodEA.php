@@ -38,7 +38,7 @@ class breachingPodEA extends FighterFlight{
 
         for ($i = 0; $i < $toAdd; $i++){
             $armour = array(3, 3, 3, 3);
-            $fighter = new Fighter("Lamprey", $armour, 18, $this->id);
+            $fighter = new Fighter("breachingPodEA", $armour, 18, $this->id);
             $fighter->displayName = "Lamprey";
             $fighter->imagePath = "img/ships/Hades.png";
             $fighter->iconPath = "img/ships/Hades_Large.png";

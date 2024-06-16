@@ -35,7 +35,7 @@ class breachingPodMinbari  extends FighterFlight{
         $toAdd = $new - $current;
         for ($i = 0; $i < $toAdd; $i++){
             $armour = array(4, 4, 4, 4);
-            $fighter = new Fighter("Ronati", $armour, 21, $this->id);
+            $fighter = new Fighter("breachingPodMinbari", $armour, 21, $this->id);
             $fighter->displayName = "Ronati";
             $fighter->imagePath = "img/ships/MinbariFlyer.png";
             $fighter->iconPath = "img/ships/MinbariFlyer_Large.png";

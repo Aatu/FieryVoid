@@ -35,7 +35,7 @@ class scionbp extends FighterFlight{
 
         for ($i = 0; $i < $toAdd; $i++){
 	        $armour = array(2, 2, 2, 2);
-	        $fighter = new Fighter("Scion", $armour, 16, $this->id);
+	        $fighter = new Fighter("scionbp", $armour, 16, $this->id);
 	        $fighter->displayName = "Scion";
 			$fighter->imagePath = "img/ships/phalan.png";
 			$fighter->iconPath = "img/ships/phalan_large.png";
