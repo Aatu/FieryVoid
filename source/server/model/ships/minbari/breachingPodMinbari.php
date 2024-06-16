@@ -1,5 +1,5 @@
 <?php
-class breachingPodMinabri  extends FighterFlight{
+class breachingPodMinbari  extends FighterFlight{
 	/*Minbari Assault Flyers*/
     
     function __construct($id, $userid, $name,  $slot){
@@ -7,7 +7,7 @@ class breachingPodMinabri  extends FighterFlight{
         
     	$this->pointCost = 60*6;
     	$this->faction = "Minbari Federation";
-        $this->phpclass = "breachingPodMinabri";
+        $this->phpclass = "breachingPodMinbari";
         $this->shipClass = "Ronati Breaching Pod";
     	$this->imagePath = "img/ships/MinbariFlyer.png"; //need Minbari Flyer image!
         
@@ -35,7 +35,7 @@ class breachingPodMinabri  extends FighterFlight{
         $toAdd = $new - $current;
         for ($i = 0; $i < $toAdd; $i++){
             $armour = array(4, 4, 4, 4);
-            $fighter = new Fighter("Ronati", $armour, 16, $this->id);
+            $fighter = new Fighter("Ronati", $armour, 21, $this->id);
             $fighter->displayName = "Ronati";
             $fighter->imagePath = "img/ships/MinbariFlyer.png";
             $fighter->iconPath = "img/ships/MinbariFlyer_Large.png";
