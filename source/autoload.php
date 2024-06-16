@@ -3325,7 +3325,9 @@ spl_autoload_register(
 				'breachingpoddilgar' => '/server/model/ships/dilgar/breachingpoddilgar.php',					
 				'breachingpodyolu' => '/server/model/ships/yolu/breachingpodyolu.php',				
 				'breachingpodbalosian' => '/server/model/ships/yolu/breachingpodbalosian.php',				
-	
+				'zftrnoscho' => '/server/model/ships/descari/ZFtrNoscho.php',
+				'breachingpoddescari' => '/server/model/ships/descari/breachingpoddescari.php',				
+						
 										
 
 						//Satyra (Wolfgang campaign)
