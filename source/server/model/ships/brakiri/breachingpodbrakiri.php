@@ -7,7 +7,7 @@ class breachingpodbrakiri extends FighterFlight{
     	$this->pointCost = 42*6;
     	$this->faction = "Brakiri Syndicracy";
         $this->phpclass = "breachingpodbrakiri";
-        $this->shipClass = "Pri-Thentat Breaching Pod";
+        $this->shipClass = "Pri-Thentat Breaching Pods";
     	$this->imagePath = "img/ships/falkosi.png";
         
 		$this->notes = 'Pri-Wakat Concepts & Solutions';//Corporation producing the design

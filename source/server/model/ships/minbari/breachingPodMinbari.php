@@ -8,7 +8,7 @@ class breachingPodMinbari  extends FighterFlight{
     	$this->pointCost = 60*6;
     	$this->faction = "Minbari Federation";
         $this->phpclass = "breachingPodMinbari";
-        $this->shipClass = "Ronati Breaching Pod";
+        $this->shipClass = "Ronati Breaching Pods";
     	$this->imagePath = "img/ships/MinbariFlyer.png"; //need Minbari Flyer image!
         
 		

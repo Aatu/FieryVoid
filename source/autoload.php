@@ -3314,10 +3314,10 @@ spl_autoload_register(
 				'breachingpodminprot' => '/server/model/ships/minbari_protectorate/breachingPodMinProt.php',
 				'lakritas' => '/server/model/ships/centauri_old/lakritAS.php',					
 	//			'breachingpodcentwotcr' => '/server/model/ships/centauri_old/breachingpodcentwotcr.php',
-				'breachingpodabbai' => '/server/model/ships/abbai/breachingpodabbai.php',					
+				'breachingpodabbai' => '/server/model/ships/abbai/breachingpodabbai.php',		//pluralised from here :/			
 				'breachingpodbrakiri' => '/server/model/ships/brakiri/breachingpodbrakiri.php',				
 				'breachingpoddrazi' => '/server/model/ships/drazi/breachingpoddrazi.php',					
-				'breachingpodpakmara' => '/server/model/ships/pakmara/breachingpodpakmara.php',				
+				'breachingpodpakmara' => '/server/model/ships/pakmara/breachingpodpakmara.php', 				
 				'breachingpodvree' => '/server/model/ships/vree/breachingpodvree.php',
 				'breachingpodgaim' => '/server/model/ships/gaim/breachingpodgaim.php',						
 				'breachingpodraiders' => '/server/model/ships/raiders/breachingpodraiders.php',	
@@ -3326,9 +3326,11 @@ spl_autoload_register(
 				'breachingpodyolu' => '/server/model/ships/yolu/breachingpodyolu.php',				
 				'breachingpodbalosian' => '/server/model/ships/balosian/breachingpodbalosian.php',				
 				'zftrnoscho' => '/server/model/ships/descari/ZFtrNoscho.php',
-				'breachingpoddescari' => '/server/model/ships/descari/breachingpoddescari.php',	//pluralised from here :/			
+				'breachingpoddescari' => '/server/model/ships/descari/breachingpoddescari.php',				
 				'breachingpodhyach' => '/server/model/ships/hyach/breachingpodhyach.php',	
-						
+				'trofaas' => '/server/model/ships/markab/trofaAS.php',
+				'breachingpodmarkab' => '/server/model/ships/markab/breachingpodmarkab.php',					
+				'breachingpodcorillani' => '/server/model/ships/corillani/breachingpodcorillani.php',													'breachingpodkorlyan' => '/server/model/ships/korlyan/breachingpodkorlyan.php',		
 										
 
 						//Satyra (Wolfgang campaign)

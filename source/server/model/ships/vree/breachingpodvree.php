@@ -7,7 +7,7 @@ class breachingpodvree extends FighterFlight{
         $this->pointCost = 40*6;
 		$this->faction = "Vree Conglomerate";
 		$this->phpclass = "breachingpodvree";
-        $this->shipClass = "Zyleen Breaching Pod";
+        $this->shipClass = "Zyleen Breaching Pods";
 		$this->imagePath = "img/ships/VreeZeoth.png";
         
         $this->forwardDefense = 9;

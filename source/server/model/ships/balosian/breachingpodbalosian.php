@@ -7,7 +7,7 @@ class breachingpodbalosian extends FighterFlight{
         $this->pointCost = 75*6;
         $this->faction = "Balosian Underdwellers";
         $this->phpclass = "breachingpodbalosian";
-        $this->shipClass = "Shappa Breaching Pod";
+        $this->shipClass = "Shappa Breaching Pods";
         $this->imagePath = "img/ships/Tortra.png";
 		
         $this->isd = 2223;
