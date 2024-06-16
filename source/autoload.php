@@ -3313,7 +3313,7 @@ spl_autoload_register(
 				'breachingpodminbari' => '/server/model/ships/minbari/breachingPodMinbari.php',
 				'breachingpodminprot' => '/server/model/ships/minbari_protectorate/breachingPodMinProt.php',
 				'lakritas' => '/server/model/ships/centauri_old/lakritAS.php',					
-				'breachingpodcentwotcr' => '/server/model/ships/centauri_old/breachingpodcentwotcr.php',
+	//			'breachingpodcentwotcr' => '/server/model/ships/centauri_old/breachingpodcentwotcr.php',
 				'breachingpodabbai' => '/server/model/ships/abbai/breachingpodabbai.php',					
 				'breachingpodbrakiri' => '/server/model/ships/brakiri/breachingpodbrakiri.php',				
 				'breachingpoddrazi' => '/server/model/ships/drazi/breachingpoddrazi.php',					
