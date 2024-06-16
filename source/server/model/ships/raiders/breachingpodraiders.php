@@ -23,6 +23,8 @@ class breachingpodraiders extends FighterFlight{
 		$this->unitSize = 1; 
 
 		$this->iniativebonus = 9*10;
+		$this->notes = "Cannot attach to enemy ships while jinking.";		
+		
         $this->populate();
     }
 
