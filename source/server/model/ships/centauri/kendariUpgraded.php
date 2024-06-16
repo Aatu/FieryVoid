@@ -28,8 +28,8 @@ class kendariUpgraded extends BaseShip{
 		$this->enhancementOptionsDisabled[] = 'SLUGGISH';
 		$this->enhancementOptionsDisabled[] = 'VULN_CRIT';
 
-	    $this->notes .= '<br>Ablated armor.';
-	    $this->notes .= '<br>Sluggish.';
+	    $this->notes .= 'Ablated armor';
+	    $this->notes .= '<br>Sluggish';
          
         $this->addPrimarySystem(new Reactor(6, 14, 0, 0));
         $this->addPrimarySystem(new CnC(5, 16, 0, 0));

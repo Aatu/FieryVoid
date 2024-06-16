@@ -48,8 +48,8 @@ class KobolArtemis extends BaseShip{
 		$this->addFrontSystem(new MedBlastCannon(4, 5, 2, 240, 120));
 		$this->addFrontSystem(new MedBlastCannon(4, 5, 2, 240, 120));
 		$this->addFrontSystem(new MedBlastCannon(4, 5, 2, 240, 120));
-		$this->addFrontSystem(new FlakCannon(3, 4, 2, 270, 30));
-		$this->addFrontSystem(new FlakCannon(3, 4, 2, 330, 90));
+		$this->addFrontSystem(new GromeFlakCannon(3, 4, 2, 270, 30));
+		$this->addFrontSystem(new GromeFlakCannon(3, 4, 2, 330, 90));
 
         $this->addAftSystem(new Thruster(4, 12, 0, 3, 2));
         $this->addAftSystem(new Thruster(4, 12, 0, 3, 2));
@@ -59,25 +59,25 @@ class KobolArtemis extends BaseShip{
 		$this->addAftSystem(new MedBlastCannon(4, 5, 2, 60, 300));
 		$this->addAftSystem(new MedBlastCannon(4, 5, 2, 60, 300));
 		$this->addAftSystem(new MedBlastCannon(4, 5, 2, 60, 300));
-		$this->addAftSystem(new FlakCannon(3, 4, 2, 150, 270));
-		$this->addAftSystem(new FlakCannon(3, 4, 2, 90, 210));
+		$this->addAftSystem(new GromeFlakCannon(3, 4, 2, 150, 270));
+		$this->addAftSystem(new GromeFlakCannon(3, 4, 2, 90, 210));
 
         $this->addLeftSystem(new Thruster(5, 9, 0, 4, 3));
 		$this->addLeftSystem(new Bulkhead(0, 4));
 		$this->addLeftSystem(new Bulkhead(0, 4));
-        $this->addLeftSystem(new FlakCannon(5, 4, 2, 210, 330));
-        $this->addLeftSystem(new FlakCannon(5, 4, 2, 210, 330));
-        $this->addLeftSystem(new FlakCannon(5, 4, 2, 210, 330));
-        $this->addLeftSystem(new FlakCannon(5, 4, 2, 210, 330));
+        $this->addLeftSystem(new GromeFlakCannon(5, 4, 2, 210, 330));
+        $this->addLeftSystem(new GromeFlakCannon(5, 4, 2, 210, 330));
+        $this->addLeftSystem(new GromeFlakCannon(5, 4, 2, 210, 330));
+        $this->addLeftSystem(new GromeFlakCannon(5, 4, 2, 210, 330));
 		$this->addLeftSystem(new Hangar(6, 14));
 
         $this->addRightSystem(new Thruster(5, 9, 0, 4, 4));
 		$this->addRightSystem(new Bulkhead(0, 4));
 		$this->addRightSystem(new Bulkhead(0, 4));
-        $this->addRightSystem(new FlakCannon(5, 4, 2, 30, 150));
-        $this->addRightSystem(new FlakCannon(5, 4, 2, 30, 150));
-        $this->addRightSystem(new FlakCannon(5, 4, 2, 30, 150));
-        $this->addRightSystem(new FlakCannon(5, 4, 2, 30, 150));
+        $this->addRightSystem(new GromeFlakCannon(5, 4, 2, 30, 150));
+        $this->addRightSystem(new GromeFlakCannon(5, 4, 2, 30, 150));
+        $this->addRightSystem(new GromeFlakCannon(5, 4, 2, 30, 150));
+        $this->addRightSystem(new GromeFlakCannon(5, 4, 2, 30, 150));
 		$this->addRightSystem(new Hangar(6, 14));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;

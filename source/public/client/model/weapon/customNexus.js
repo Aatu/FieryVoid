@@ -1070,6 +1070,68 @@ NexusPlasmaCharge.prototype.initBoostableInfo = function () {
 };
 
 
+var NexusPlasmaChargeThrust = function NexusPlasmaChargeThrust(json, ship) {
+    Weapon.call(this, json, ship);
+};
+NexusPlasmaChargeThrust.prototype = Object.create(Weapon.prototype);
+NexusPlasmaChargeThrust.prototype.constructor = NexusPlasmaChargeThrust;
+
+NexusPlasmaChargeThrust.prototype.initBoostableInfo = function () {
+    // Needed because it can change during initial phase
+    // because of adding extra power.
+
+    if (window.weaponManager.isLoaded(this)) {
+        /*no longer needed!        */
+    } else {
+        var count = shipManager.power.getBoost(this);
+
+        for (var i = 0; i < count; i++) {
+            shipManager.power.unsetBoost(null, this);
+        }
+    }
+    return this;
+};
+
+NexusPlasmaChargeThrust.prototype.clearBoost = function () {
+    for (var i in system.power) {
+        var power = system.power[i];
+        if (power.turn != gamedata.turn) continue;
+        if (power.type == 2) {
+            system.power.splice(i, 1);
+            return;
+        }
+    }
+};
+
+NexusPlasmaChargeThrust.prototype.hasMaxBoost = function () {
+    return true;
+};
+
+NexusPlasmaChargeThrust.prototype.getMaxBoost = function () {
+    return this.maxBoostLevel;
+};
+
+NexusPlasmaChargeThrust.prototype.initBoostableInfo = function () {
+    switch (shipManager.power.getBoost(this)) {
+        case 0:
+            this.data["Damage"] = '11 - 20';
+            this.data["Boostlevel"] = '0';
+            break;
+        case 1:
+            this.data["Damage"] = '13 - 40';
+            this.data["Boostlevel"] = '1';
+            break;
+        case 2:
+            this.data["Damage"] = '15 - 60';
+            this.data["Boostlevel"] = '2';
+            break;
+        default:
+            this.data["Damage"] = '11 - 20';
+            this.data["Boostlevel"] = '0';
+            break;
+    }
+    return this;
+};
 
 /*
 var MultiDefenseLauncher = function  MultiDefenseLauncher(json, ship) {

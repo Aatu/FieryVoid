@@ -46,8 +46,8 @@ class KobolRanger extends HeavyCombatVessel{
         $this->addFrontSystem(new Railgun(4, 9, 6, 300, 60)); 
 		$this->addFrontSystem(new LMissileRack(4, 6, 0, 240, 60)); 
 		$this->addFrontSystem(new LMissileRack(4, 6, 0, 300, 120)); 
-		$this->addFrontSystem(new FlakCannon(3, 4, 2, 210, 330));
-		$this->addFrontSystem(new FlakCannon(3, 4, 2, 30, 150));
+		$this->addFrontSystem(new GromeFlakCannon(3, 4, 2, 210, 330));
+		$this->addFrontSystem(new GromeFlakCannon(3, 4, 2, 30, 150));
 		$this->addFrontSystem(new LtBlastCannon(3, 4, 1, 210, 330));
 		$this->addFrontSystem(new LtBlastCannon(3, 4, 1, 30, 150));
 		$this->addFrontSystem(new Bulkhead(0, 4));
@@ -58,8 +58,8 @@ class KobolRanger extends HeavyCombatVessel{
         $this->addAftSystem(new Bulkhead(0, 4));
 		$this->addAftSystem(new LtBlastCannon(3, 4, 1, 210, 330)); 
 		$this->addAftSystem(new LtBlastCannon(3, 4, 1, 30, 150)); 
-		$this->addAftSystem(new FlakCannon(3, 4, 2, 210, 330)); 
-		$this->addAftSystem(new FlakCannon(3, 4, 2, 30, 150)); 
+		$this->addAftSystem(new GromeFlakCannon(3, 4, 2, 210, 330)); 
+		$this->addAftSystem(new GromeFlakCannon(3, 4, 2, 30, 150)); 
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 4, 45));

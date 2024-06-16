@@ -8,13 +8,15 @@ class Gsten extends BaseShip{
 		$this->faction = "Narn Regime";
         $this->phpclass = "Gsten";
         $this->imagePath = "img/ships/gkarith.png";
-        $this->shipClass = "G'Sten";
+        $this->shipClass = "G'Sten War Cruiser";
+			$this->variantOf = "G'Karith Patrol Cruiser";
+			$this->occurence = "rare";	        
         $this->shipSizeClass = 3;
         //$this->occurence = "special";
-        $this->fighters = array("medium"=>6);
- 		$this->unofficial = 'S'; //reclassified as Common due to lack of G'Karith, otherwise an official ship
+        $this->fighters = array("normal"=>6);
+// 		$this->unofficial = 'S'; //reclassified as Common due to lack of G'Karith, otherwise an official ship
 	    
-	    $this->notes = "Nominally Rare variant of G'Karith cruiser (not present in FV)";
+//	    $this->notes = "Nominally Rare variant of G'Karith cruiser (not present in FV)";
 	    
 		
         $this->forwardDefense = 15;
@@ -26,7 +28,7 @@ class Gsten extends BaseShip{
         $this->rollcost = 2;
         $this->pivotcost = 3;
         
-        $this->iniativebonus = 5;
+        $this->iniativebonus = 1*5;
 
         
         $this->addPrimarySystem(new Reactor(6, 18, 0, 2));

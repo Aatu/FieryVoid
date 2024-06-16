@@ -54,8 +54,8 @@ spl_autoload_register(
                 'aspar' => '/server/model/ships/raiders/aspar.php',
                 'assaultlaser' => '/server/model/weapons/lasers.php',
                 'athasa' => '/server/model/ships/balosian/athasa.php',
-                'athraskala' => '/server/model/ships/dilgar/athraskala.php',
-                'athraskalac' => '/server/model/ships/dilgar/athraskalaC.php',
+                //OBSOLETE 'athraskala' => '/server/model/ships/dilgar/athraskala.php',
+                //OBSOLETE 'athraskalac' => '/server/model/ships/dilgar/athraskalaC.php',
                 'auk' => '/server/model/ships/drazi_old/auk.php',
                 'auk1935' => '/server/model/ships/drazi_old/auk1935.php',
                 'aurorastarfury' => '/server/model/ships/EA/auroraStarfury.php',
@@ -109,8 +109,8 @@ spl_autoload_register(
                 'battlelaserftr' => '/server/model/weapons/customNexus.php',
                 'unreliablebattlelaser' => '/server/model/weapons/lasers.php',
                 'battlewagon' => '/server/model/ships/raiders/battlewagon.php',
-                'benevolent' => '/server/model/ships/orieni/benevolent.php',
-                'benevolent1791' => '/server/model/ships/orieni/benevolent1791.php',
+                //OBSOLETE 'benevolent' => '/server/model/ships/orieni/benevolent.php',
+                //OBSOLETE 'benevolent1791' => '/server/model/ships/orieni/benevolent1791.php',
                 'benota' => '/server/model/ships/abbai_old/benota.php',
                 'benota1920' => '/server/model/ships/abbai_old/benota1920.php',
                 'benota2017' => '/server/model/ships/abbai_old/benota2017.php',
@@ -193,8 +193,8 @@ spl_autoload_register(
                 'critical' => '/server/model/cricialClasses.php',
                 'criticals' => '/server/handlers/criticals.php',
                 'cronos' => '/server/model/ships/EA/cronos.php',
-                'crusader' => '/server/model/ships/orieni/crusader.php',
-                'crusader2003' => '/server/model/ships/orieni/crusader2003.php',
+                //OBSOLETE 'crusader' => '/server/model/ships/orieni/crusader.php',
+                //OBSOLETE 'crusader2003' => '/server/model/ships/orieni/crusader2003.php',
                 'cubecoordinate' => '/server/model/CubeCoordinate.php',
                 'customerlightpbeam' => '/server/model/weapons/customs.php',
                 'customheavymattercannon' => '/server/model/weapons/customs.php',
@@ -299,7 +299,7 @@ spl_autoload_register(
                 'erlorrapods' => '/server/model/ships/llort/erlorraPods.php',
                 'error' => '/server/lib/random_compat-2.0.2/lib/error_polyfill.php',
                 'esharan' => '/server/model/ships/minbari/esharan.php',
-                'eskravat' => '/server/model/ships/dilgar/eskravat.php',
+                //OBSOLETE 'eskravat' => '/server/model/ships/dilgar/eskravat.php',
                 'essusu' => '/server/model/ships/balosian/essusu.php',
                 'esthasa' => '/server/model/ships/balosian/esthasa.php',
                 'estnassa' => '/server/model/ships/balosian/estnassa.php',
@@ -495,7 +495,7 @@ spl_autoload_register(
                 'kirva1980' => '/server/model/ships/abbai_old/kirva1980.php',
                 'koeth' => '/server/model/ships/hurr/koeth.php',
                 'koethy' => '/server/model/ships/hurr/koethY.php',
-                'koratyl' => '/server/model/ships/dilgar/koratyl.php',
+                //OBSOLETE 'koratyl' => '/server/model/ships/dilgar/koratyl.php',
                 'kostina' => '/server/model/ships/abbai_old/kostina.php',
                 'kostina2009' => '/server/model/ships/abbai_old/kostina2009.php',
                 'kostina2018' => '/server/model/ships/abbai_old/kostina2018.php',
@@ -613,9 +613,9 @@ spl_autoload_register(
                 'milianiearly' => '/server/model/ships/abbai/milianiEarly.php',
                 'minbaricivilianbase' => '/server/model/ships/minbari/minbariCivilianBase.php',
                 'minbariorbitalhanger' => '/server/model/ships/minbari/minbariOrbitalHanger.php',
-                'mishakur' => '/server/model/ships/dilgar/mishakur.php',
+                //OBSOLETE 'mishakur' => '/server/model/ships/dilgar/mishakur.php',
                 'mishakurb' => '/server/model/ships/dilgar/mishakurB.php',
-                'mishakurd' => '/server/model/ships/dilgar/mishakurD.php',
+                //OBSOLETE 'mishakurd' => '/server/model/ships/dilgar/mishakurD.php',
                 'missileb' => '/server/model/weapons/ammo.php',
                 'missilebarge' => '/server/model/ships/civilians/missileBarge.php',
                 'missilefb' => '/server/model/weapons/ammo.php',
@@ -635,6 +635,9 @@ spl_autoload_register(
                 'motenai' => '/server/model/ships/abbai_old/motenai.php',
                 'motenai1935' => '/server/model/ships/abbai_old/motenai1935.php',
                 'motenai1980' => '/server/model/ships/abbai_old/motenai1980.php',
+                'motenaiam' => '/server/model/ships/abbai_old/motenaiAM.php',
+                'motenai1935am' => '/server/model/ships/abbai_old/motenai1935AM.php',
+                'motenai1980am' => '/server/model/ships/abbai_old/motenai1980AM.php',                
                 'movement' => '/server/handlers/movement.php',
                 'movementgamephase' => '/server/Phase/MovementGamePhase.php',
                 'movementorder' => '/server/model/BaseClasses.php',
@@ -665,11 +668,11 @@ spl_autoload_register(
                 'obedient' => '/server/model/ships/orieni/obedient.php',
                 'obedient1780' => '/server/model/ships/orieni/obedient1780.php',
                 'obedient2003' => '/server/model/ships/orieni/obedient2003.php',
-                'ochlavita' => '/server/model/ships/dilgar/ochlavita.php',
+                //OBSOLETE 'ochlavita' => '/server/model/ships/dilgar/ochlavita.php',
                 'ochlavitab' => '/server/model/ships/dilgar/ochlavitaB.php',
                 'ochlavitad' => '/server/model/ships/dilgar/ochlavitaD.php',
                 'ochlavitae' => '/server/model/ships/dilgar/ochlavitaE.php',
-                'ochlavitam' => '/server/model/ships/dilgar/ochlavitaM.php',
+                //OBSOLETE 'ochlavitam' => '/server/model/ships/dilgar/ochlavitaM.php',
                 'octurion' => '/server/model/ships/centauri/octurion.php',
                 'offsetcoordinate' => '/server/model/OffsetCoordinate.php',
                 'olgata' => '/server/model/ships/dilgar/olgata.php',
@@ -714,10 +717,10 @@ spl_autoload_register(
                 'pairedlightboltcannon' => '/server/model/weapons/pulse.php',
                 'pairedparticlegun' => '/server/model/weapons/particle.php',
                 'pairedplasmablaster' => '/server/model/weapons/plasma.php',
-                'paragon' => '/server/model/ships/orieni/paragon.php',
-                'paragon1782' => '/server/model/ships/orieni/paragon1782.php',
-                'paragon2003' => '/server/model/ships/orieni/paragon2003.php',
-                'pariah' => '/server/model/ships/orieni/pariah.php',
+                //OBSOLETE 'paragon' => '/server/model/ships/orieni/paragon.php',
+                //OBSOLETE 'paragon1782' => '/server/model/ships/orieni/paragon1782.php',
+                //OBSOLETE 'paragon2003' => '/server/model/ships/orieni/paragon2003.php',
+                //OBSOLETE 'pariah' => '/server/model/ships/orieni/pariah.php',
                 'partialburnout' => '/server/model/cricialClasses.php',
                 'particle' => '/server/model/weapons/particle.php',
                 'particleblaster' => '/server/model/weapons/particle.php',
@@ -1033,7 +1036,7 @@ spl_autoload_register(
                 'hades' => '/server/model/ships/EA/Hades.php',                
                 'taras' => '/server/model/ships/centauri_old/taras.php',
                 'targath' => '/server/model/ships/dilgar/targath.php',
-                'targathc' => '/server/model/ships/dilgar/targathC.php',
+                //OBSOLETE 'targathc' => '/server/model/ships/dilgar/targathC.php',
                 'tarza' => '/server/model/ships/narn/tarza.php',
                 'tarzanav' => '/server/model/ships/narn/tarzanav.php',
                 'tatros' => '/server/model/ships/centauri_old/tatros.php',
@@ -1202,10 +1205,10 @@ spl_autoload_register(
                 'zzunofftvoth' => '/server/model/ships/narn/zzunoffTvoth.php',
 		    
 		 
-                'ochlavitafull' => '/server/model/ships/dilgar/ochlavitaFull.php',   
-                'ochlavitamfull' => '/server/model/ships/dilgar/ochlavitaMFull.php',   
-                'athraskalafull' => '/server/model/ships/dilgar/athraskalaFull.php',   
-                'athraskalacfull' => '/server/model/ships/dilgar/athraskalaCFull.php',  
+                //OBSOLETE 'ochlavitafull' => '/server/model/ships/dilgar/ochlavitaFull.php',   
+                //OBSOLETE 'ochlavitamfull' => '/server/model/ships/dilgar/ochlavitaMFull.php',   
+                //OBSOLETE 'athraskalafull' => '/server/model/ships/dilgar/athraskalaFull.php',   
+                //OBSOLETE 'athraskalacfull' => '/server/model/ships/dilgar/athraskalaCFull.php',  
 		    
 				//Alacan units
                 'alacanatrimis' => '/server/model/ships/smallraces/AlacanAtrimis.php',  
@@ -1626,6 +1629,7 @@ spl_autoload_register(
 				'nexusltenhplasmaftr' => '/server/model/weapons/customNexus.php',
 				'nexusheavyplasmacharge' => '/server/model/weapons/customNexus.php',
 				'nexusplasmacharge' => '/server/model/weapons/customNexus.php',
+				'nexusplasmachargethrust' => '/server/model/weapons/customNexus.php',				
 				'nexusfightertorpedolauncher' => '/server/model/weapons/customNexus.php',
 				'nexusltplasmatorpedo' => '/server/model/weapons/customNexus.php',
 //				'nexusheavychargedplasmagun' => '/server/model/weapons/customNexus.php',
@@ -1973,14 +1977,17 @@ spl_autoload_register(
 
                 //Grome Weapons and Systems
                 'antiquatedscanner' => '/server/model/systems/baseSystems.php',
-                'flakcannon' => '/server/model/weapons/matter.php',
+                'grometargetingarray' => '/server/model/weapons/specialWeapons.php',             
+                'targetingarrayhandler' => '/server/model/weapons/specialWeapons.php',
+                'gromeflakcannon' => '/server/model/weapons/matter.php',//NEW VERSION                                
+//                'flakcannon' => '/server/model/weapons/matter.php',//OLD VERSION OF FLAK CANNON - DK
 				'slugcannon' => '/server/model/weapons/matter.php',
 				'singleslugcannon' => '/server/model/weapons/matter.php',
 				'gromelgtrailgun' => '/server/model/weapons/customs.php',
 				'gromemedrailgun' => '/server/model/weapons/customs.php',
 				'gromehvyrailgun' => '/server/model/weapons/customs.php',
                 
-                //Grome Ships
+                //Grome Ships - To be discontinued
                 'gromegormokosat' => '/server/model/ships/grome/GromeGormokOSAT.php',
                 'gromegralac' => '/server/model/ships/grome/GromeGralac.php',
                 'gromegroth' => '/server/model/ships/grome/GromeGroth.php',
@@ -1993,7 +2000,7 @@ spl_autoload_register(
                 'grometrokan' => '/server/model/ships/grome/GromeTrokan.php',
                 'grometrokanmargus' => '/server/model/ships/grome/GromeTrokanMargus.php',
 
-					//Grome Ships Using grome(lgt/med/hvy)railgun with special shells similar to full missile ships
+					//Grome Ships Using grome(lgt/med/hvy)railgun with special shells similar to full missile ships -  To be discontinued
 					'gromegormokfull' => '/server/model/ships/grome/GromeGormokFull.php',
 					'gromegralacfull' => '/server/model/ships/grome/GromeGralacFull.php',
 					'gromegrothfull' => '/server/model/ships/grome/GromeGrothFull.php',
@@ -2532,7 +2539,7 @@ spl_autoload_register(
 		    	'roskorbase2240' => '/server/model/ships/hurr/Roskorbase2240.php',
 		    	//'highguarda' => '/server/model/ships/orieni/HighguardA.php',
 		    	//'highguarda2003' => '/server/model/ships/orieni/HighguardA2003.php',
-		    	'highguarda2007' => '/server/model/ships/orieni/HighguardA2007.php',
+		    	//OBSOLETE 'highguarda2007' => '/server/model/ships/orieni/HighguardA2007.php',
 		    	'highguardb' => '/server/model/ships/orieni/HighguardB.php',
 		    	'highguardb2003' => '/server/model/ships/orieni/HighguardB2003.php',
 		    	'highguardb2007' => '/server/model/ships/orieni/HighguardB2007.php',
@@ -2628,14 +2635,14 @@ spl_autoload_register(
 				//Corillani
 				'plasmaprojector' => '/server/model/weapons/plasma.php',
 				'conosti' => '/server/model/ships/corillani/Conosti.php',
-				'garunda' => '/server/model/ships/corillani/Garunda.php',
-				'llartol' => '/server/model/ships/corillani/Llartol.php',
-				'mollanta' => '/server/model/ships/corillani/Mollanta.php',
+				//OBSOLETE 'garunda' => '/server/model/ships/corillani/Garunda.php',
+				//OBSOLETE 'llartol' => '/server/model/ships/corillani/Llartol.php',
+				//OBSOLETE 'mollanta' => '/server/model/ships/corillani/Mollanta.php',
 				'zftrtillinicpn' => '/server/model/ships/corillani/ZFtrTilliniCPN.php',
 				'zftrtillinidoc' => '/server/model/ships/corillani/ZFtrTilliniDoC.php',
 				'zftrtilliniosf' => '/server/model/ships/corillani/ZFtrTilliniOSF.php',
 				'botral' => '/server/model/ships/corillani/Botral.php',
-				'intona' => '/server/model/ships/corillani/Intona.php',
+				//OBSOLETE 'intona' => '/server/model/ships/corillani/Intona.php',
 				'ortana' => '/server/model/ships/corillani/Ortana.php',
 				'nollita' => '/server/model/ships/corillani/Nollita.php',
 				'dovota' => '/server/model/ships/corillani/Dovota.php',
@@ -2704,8 +2711,10 @@ spl_autoload_register(
 				'rava' => '/server/model/ships/brakiri_raiders/Rava.php',
 				'attackfrigate' => '/server/model/ships/brakiri_raiders/AttackFrigate.php',
 				'folshota' => '/server/model/ships/brakiri/folshotA.php',
-				'folshotaraider' => '/server/model/ships/brakiri_raiders/FolshotARaider.php',	
-
+				'folshotaraider' => '/server/model/ships/brakiri_raiders/FolshotARaider.php',
+				'gaimphotonbomb' => '/server/model/weapons/customs.php',
+				'gaimtixtyk' => '/server/model/ships/customs/gaimTixTyk.php',				
+				'gaimtixtykupgrade' => '/server/model/ships/customs/gaimTixTykUpgrade.php',	
 
 				//Star Trek conversions
 				//weapons
@@ -2890,34 +2899,34 @@ spl_autoload_register(
 				'axor' => '/server/model/ships/korlyan/Axor.php',
 				'cokra' => '/server/model/ships/korlyan/Cokra.php',
 				'fenja' => '/server/model/ships/korlyan/Fenja.php',
-				'kalavar' => '/server/model/ships/korlyan/Kalavar.php',
+//				'kalavar' => '/server/model/ships/korlyan/Kalavar.php',
 				'kalavaram' => '/server/model/ships/korlyan/KalavarAM.php',
 				'kalavarearlyam' => '/server/model/ships/korlyan/KalavarEarlyAM.php',
 				'kalavaroriginalam' => '/server/model/ships/korlyan/KalavarOriginalAM.php',
 				'kaltiam' => '/server/model/ships/korlyan/KaltiAM.php',
-				'kolosk' => '/server/model/ships/korlyan/Kolosk.php',
+//				'kolosk' => '/server/model/ships/korlyan/Kolosk.php',
 				'koloskam' => '/server/model/ships/korlyan/KoloskAM.php',
 				'koloskearlyam' => '/server/model/ships/korlyan/KoloskEarlyAM.php',
 				'koloskovaam' => '/server/model/ships/korlyan/KoloskovaAM.php',
 				'koshaam' => '/server/model/ships/korlyan/KoshaAM.php',
 				'koshaearlyam' => '/server/model/ships/korlyan/KoshaEarlyAM.php',
-				'koskova' => '/server/model/ships/korlyan/Koskova.php',
+//				'koskova' => '/server/model/ships/korlyan/Koskova.php',
 				'koskovaam' => '/server/model/ships/korlyan/KoskovaAM.php',
 				'koskovaearlyam' => '/server/model/ships/korlyan/KoskovaEarlyAM.php',
-				'leklant' => '/server/model/ships/korlyan/Leklant.php',
+//				'leklant' => '/server/model/ships/korlyan/Leklant.php',
 				'leklantam' => '/server/model/ships/korlyan/LeklantAM.php',
 				'leklantearlyam' => '/server/model/ships/korlyan/LeklantEarlyAM.php',
 				'lekra' => '/server/model/ships/korlyan/Lekra.php',
-				'merkul' => '/server/model/ships/korlyan/Merkul.php',
-				'merkularmed' => '/server/model/ships/korlyan/MerkulArmed.php',
-				'merkulmissile' => '/server/model/ships/korlyan/MerkulMissile.php',
+//				'merkul' => '/server/model/ships/korlyan/Merkul.php',
+//				'merkularmed' => '/server/model/ships/korlyan/MerkulArmed.php',
+//				'merkulmissile' => '/server/model/ships/korlyan/MerkulMissile.php',
 				'merkulam' => '/server/model/ships/korlyan/MerkulAM.php',
 				'merkularmedam' => '/server/model/ships/korlyan/MerkulArmedAM.php',
 				'merkulmissileam' => '/server/model/ships/korlyan/MerkulMissileAM.php',				
 				'raklaviam' => '/server/model/ships/korlyan/RaklaviAM.php',
 				'solyrnam' => '/server/model/ships/korlyan/SolyrnAM.php',
 				'soskaam' => '/server/model/ships/korlyan/SoskaAM.php',
-				'taloki' => '/server/model/ships/korlyan/Taloki.php',
+//				'taloki' => '/server/model/ships/korlyan/Taloki.php',
 				'talokiam' => '/server/model/ships/korlyan/TalokiAM.php',				
 				'talokiearlyam' => '/server/model/ships/korlyan/TalokiEarlyAM.php',
 				'talokioriginalam' => '/server/model/ships/korlyan/TalokiOriginalAM.php',
@@ -2928,7 +2937,8 @@ spl_autoload_register(
 //				'solyrn' => '/server/model/ships/korlyan/Solyrn.php',
                 'tmphitreduction' => '/server/model/cricialClasses.php',
 				'limpetbore' => '/server/model/cricialClasses.php',                
-
+				'limpetboretravelling' => '/server/model/cricialClasses.php', 
+				
 //         		'chaffmissile' => '/server/model/weapons/customNexus.php', 
          		'proximitylaser' => '/server/model/weapons/specialWeapons.php',
          		'proximitylaserlauncher' => '/server/model/weapons/specialWeapons.php',         		 
@@ -2938,10 +2948,11 @@ spl_autoload_register(
  //        		'directlimpetbore' => '/server/model/weapons/customNexus.php', 
 //         		'directlimpetborebase' => '/server/model/weapons/customNexus.php', 
          		'multidefenselauncher' => '/server/model/weapons/customNexus.php', //missile racks themselves
-				'koskovatestbed' => '/server/model/ships/korlyan/KoskovaTestbed.php',
+//				'koskovatestbed' => '/server/model/ships/korlyan/KoskovaTestbed.php',
          		'limpetboretorpedo' => '/server/model/weapons/torpedo.php', 				
          		'limpetboretorpedobase' => '/server/model/weapons/torpedo.php',
-         		'ballisticminelauncher' => '/server/model/weapons/missile.php', 	 
+         		'ballisticminelauncher' => '/server/model/weapons/missile.php',
+         		'abbaiminelauncher' => '/server/model/weapons/missile.php', 	 
 
 
 				//Star Wars - Clone Wars testing
@@ -3049,12 +3060,35 @@ spl_autoload_register(
                 		'ammobombrack' => '/server/model/weapons/missile.php',
                 		'ammofighterrack' => '/server/model/weapons/missile.php',
 						
-                		
+ 				//Direct Fire Weapons that use Ammo Magazine
+						'ammodirectweapon' => '/server/model/weapons/ammoWeapons.php',							
+					               		
+						'ammoheavyrailgun' => '/server/model/weapons/ammoWeapons.php',
+						'ammomediumrailgun' => '/server/model/weapons/ammoWeapons.php',
+						'ammolightrailgun' => '/server/model/weapons/ammoWeapons.php',						
+
+
+				//Ammo for Direct Fire Weapons
+						'ammotemplatedirectweapons' => '/server/model/weapons/ammoWeapons.php',	
+						'ammohshellbasic' => '/server/model/weapons/ammoWeapons.php',				
+						'ammomshellbasic' => '/server/model/weapons/ammoWeapons.php',						
+						'ammolshellbasic' => '/server/model/weapons/ammoWeapons.php',						
+						'ammohshellflash' => '/server/model/weapons/ammoWeapons.php',				
+						'ammomshellflash' => '/server/model/weapons/ammoWeapons.php',						
+						'ammolshellflash' => '/server/model/weapons/ammoWeapons.php',						
+						'ammohshellscatter' => '/server/model/weapons/ammoWeapons.php',				
+						'ammomshellscatter' => '/server/model/weapons/ammoWeapons.php',						
+						'ammolshellscatter' => '/server/model/weapons/ammoWeapons.php',
+						'ammohshellheavy' => '/server/model/weapons/ammoWeapons.php',				
+						'ammomshellheavy' => '/server/model/weapons/ammoWeapons.php',						
+						'ammolshellheavy' => '/server/model/weapons/ammoWeapons.php',						
+						'ammohshelllrange' => '/server/model/weapons/ammoWeapons.php',				
+						'ammomshelllrange' => '/server/model/weapons/ammoWeapons.php',						
+						'ammohshellulrange' => '/server/model/weapons/ammoWeapons.php',
 						
-						
+																								
 						//ships using new style launchers (and magazine of course) - by faction
-						
-	  
+							  
 						//EA
                 		'sagittariusam' => '/server/model/ships/EA/sagittariusAM.php', 
                 		'sagittariusalphaam' => '/server/model/ships/EA/sagittariusAlphaAM.php',
@@ -3135,6 +3169,20 @@ spl_autoload_register(
 						'fwellgonam' => '/server/model/ships/llort/fwellgonAM.php',
 						'govallam' => '/server/model/ships/llort/govallAM.php',
 						'govallearlyam' => '/server/model/ships/llort/govallEarlyAM.php',
+
+						//Grome
+						'gromemahkgaram' => '/server/model/ships/grome/GromeMahkgarAM.php',						
+						'gromegormokosatam' => '/server/model/ships/grome/GromeGormokOSATAM.php',						
+						'gromegrotham' => '/server/model/ships/grome/GromeGrothAM.php',						
+						'gromegralacam' => '/server/model/ships/grome/GromeGralacAM.php',						
+						'grometrokanam' => '/server/model/ships/grome/GromeTrokanAM.php',						
+						'grometrokanmargusam' => '/server/model/ships/grome/GromeTrokanMargusAM.php',
+						'gromemogortaam' => '/server/model/ships/grome/GromeMogortaAM.php',
+						'gromeadrinaam' => '/server/model/ships/grome/GromeAdrinaAM.php',												
+						'gromemorgatam' => '/server/model/ships/grome/GromeMorgatAM.php',
+						'gromemorstagam' => '/server/model/ships/grome/GromeMorstagAM.php',													
+						'gromemelagaram' => '/server/model/ships/grome/GromeMelagarAM.php',						
+						'grometelgaram' => '/server/model/ships/grome/GromeTelgarAM.php',										
 				
 						//Hurr
 						'roskorbase2215am' => '/server/model/ships/hurr/Roskorbase2215AM.php',
@@ -3190,7 +3238,7 @@ spl_autoload_register(
 						//Gaim						
 						'gaimkastafighteram' => '/server/model/ships/gaim/gaimKastaFighterAM.php',
 						
-						//Extra Ships for Existing Factions
+						//Extra Ships/Systems for Existing Factions
 						'superheavymoleculardisruptor' => '/server/model/weapons/molecular.php',
 						'molecularpenetrator' => '/server/model/weapons/molecular.php',
 						'earlyfusionagitator' => '/server/model/weapons/molecular.php',
@@ -3215,8 +3263,11 @@ spl_autoload_register(
 					 	
 					 	'alanti' => '/server/model/ships/abbai/Alanti.php',
 					 	'pirocia' => '/server/model/ships/abbai/Pirocia.php',
-						'mayoverheat' => '/server/model/cricialClasses.php',					 						 	
-					 						 	 
+						'mayoverheat' => '/server/model/cricialClasses.php',
+						'pulsarmine' => '/server/model/weapons/specialWeapons.php', 					 						 	
+					 	'gkarith' => '/server/model/ships/narn/Gkarith.php',
+					 	'aegissensorpod' => '/server/model/weapons/specialWeapons.php', 
+						'hyperionaegis' => '/server/model/ships/EA/HyperionAegis.php',					 						 	 
 					 							
 				//Thirdspace
 				'psychicfield' => '/server/model/weapons/specialWeapons.php',
@@ -3244,6 +3295,22 @@ spl_autoload_register(
 						'impheavylaser' => '/server/model/weapons/customDevelopment.php',
 						'directemine' => '/server/model/weapons/customDevelopment.php',
 
+				//Marine Boarding Actions
+	/*			'marines' => '/server/model/weapons/specialWeapons.php',
+				'sabotage' => '/server/model/cricialClasses.php',
+				'sabotageelite' => '/server/model/cricialClasses.php',
+				'profileincreased' => '/server/model/cricialClasses.php',				
+				'rescuemission' => '/server/model/cricialClasses.php',	
+				'rescuemissionelite' => '/server/model/cricialClasses.php',	
+				'captureship' => '/server/model/cricialClasses.php',	
+				'captureshipelite' => '/server/model/cricialClasses.php',					
+				'shipdisabled' => '/server/model/cricialClasses.php',
+				'defenderlost' => '/server/model/cricialClasses.php',
+	*/			
+				
+				
+				//New Breaching pods units		
+				'breachingpodea' => '/server/model/ships/EA/breachingPodEA.php',				
 
 						//Satyra (Wolfgang campaign)
 						'satyrashield' => '/server/model/weapons/customDevelopment.php',

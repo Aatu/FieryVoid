@@ -4,7 +4,7 @@ class TrekSulibanCruiser extends MediumShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 350;
+        $this->pointCost = 425;
         $this->faction = "ZTrek Playtest Other Factions";
         $this->phpclass = "TrekSulibanCruiser";
         $this->imagePath = "img/ships/StarTrek/SulibanCruiser.png";

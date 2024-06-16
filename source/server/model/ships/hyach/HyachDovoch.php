@@ -46,6 +46,7 @@ class HyachDovoch extends FighterFlight
 			if ($i == 1) {
 				$frontGun2 = new FtrInterdictor(330, 30);
 				$fighter->addFrontSystem($frontGun2);
+//			$fighter->displayName = "Dovoch";	//FV appears to take one sample fighter name and apply to all, so this didn't work unfortunately.			
 			} else {
 				$frontGun = new LtBlastLaser(330, 30);
 				$fighter->addFrontSystem($frontGun);

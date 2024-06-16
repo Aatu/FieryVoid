@@ -4,7 +4,7 @@ class TrekSulibanHelix extends VreeCapital{
 	function __construct($id, $userid, $name,  $slot){
 		parent::__construct($id, $userid, $name,  $slot);
 
-        $this->pointCost = 1300;
+        $this->pointCost = 1100;
         $this->faction = "ZTrek Playtest Other Factions";
         $this->phpclass = "TrekSulibanHelix";
         $this->imagePath = "img/ships/StarTrek/SulibanHelix.png";
@@ -32,15 +32,19 @@ class TrekSulibanHelix extends VreeCapital{
 		$this->addPrimarySystem(new CnC(5, 16, 0, 0));
 		$this->addPrimarySystem(new Scanner(5, 12, 6, 6));
 		$impulseDrive = new TrekImpulseDrive(4,30,0,1,8); //Impulse Drive is an engine in its own right, in addition to serving as hub for Nacelle output: $armour, $maxhealth, $powerReq, $output, $boostEfficiency
-		$this->addPrimarySystem(new CargoBay(2, 40));
+		$primaryCargo = new CargoBay(3, 40);
+			$primaryCargo->startArc = 0;
+			$primaryCargo->endArc = 360;
+			$primaryCargo->repairPriority = 3; //higher repair priority = lower hit priority compared to outer cargo
+		$this->addPrimarySystem($primaryCargo);
 
 //--section--
-		$cargoBay = new CargoBay(3, 15);
+		$cargoBay = new CargoBay(2, 15);
 			$cargoBay->startArc = 300;
 			$cargoBay->endArc = 60;
 			$this->addFrontSystem($cargoBay);
 		$this->addFrontSystem(new AntimatterTorpedo(2, 0, 0, 300, 60));		
-		$cutter = new ParticleCutter(4, 8, 3, 300, 60);
+		$cutter = new ParticleCutter(3, 8, 3, 300, 60);
 		$cutter->addTag("Weapon");
         $this->addFrontSystem($cutter);		
 	$lightgun = new SWMediumLaser(2, 270, 90, 4);
@@ -64,12 +68,12 @@ class TrekSulibanHelix extends VreeCapital{
 
 
 //--section--
-		$cargoBay = new CargoBay(3, 15);
+		$cargoBay = new CargoBay(2, 15);
 			$cargoBay->startArc = 120;
 			$cargoBay->endArc = 240;
 			$this->addAftSystem($cargoBay);
         $this->addAftSystem(new AntimatterTorpedo(2, 0, 0, 120, 240));
-		$cutter = new ParticleCutter(4, 8, 3, 120, 240);
+		$cutter = new ParticleCutter(3, 8, 3, 120, 240);
 		$cutter->addTag("Weapon");
         $this->addAftSystem($cutter);
 	$lightgun = new SWMediumLaser(2, 90, 270, 4);
@@ -92,12 +96,12 @@ class TrekSulibanHelix extends VreeCapital{
      
 
 //--section--
-		$cargoBay = new CargoBay(3, 15);
+		$cargoBay = new CargoBay(2, 15);
 			$cargoBay->startArc = 240;
 			$cargoBay->endArc = 360;
 			$this->addLeftFrontSystem($cargoBay);
         $this->addLeftFrontSystem(new AntimatterTorpedo(2, 0, 0, 240, 360));
-		$cutter = new ParticleCutter(4, 8, 3, 240, 360);
+		$cutter = new ParticleCutter(3, 8, 3, 240, 360);
 		$cutter->addTag("Weapon");
         $this->addLeftFrontSystem($cutter);
 	$lightgun = new SWMediumLaser(2, 210, 30, 4);
@@ -120,12 +124,12 @@ class TrekSulibanHelix extends VreeCapital{
 				
 				
 //--section--
-		$cargoBay = new CargoBay(3, 15);
+		$cargoBay = new CargoBay(2, 15);
 			$cargoBay->startArc = 180;
 			$cargoBay->endArc = 300;
 			$this->addLeftAftSystem($cargoBay);
         $this->addLeftAftSystem(new AntimatterTorpedo(2, 0, 0, 180, 300));
-		$cutter = new ParticleCutter(4, 8, 3, 180, 300);
+		$cutter = new ParticleCutter(3, 8, 3, 180, 300);
 		$cutter->addTag("Weapon");
         $this->addLeftAftSystem($cutter);
 	$lightgun = new SWMediumLaser(2, 150, 330, 4);
@@ -154,12 +158,12 @@ class TrekSulibanHelix extends VreeCapital{
 		
 		
 //--section--
-		$cargoBay = new CargoBay(3, 15);
+		$cargoBay = new CargoBay(2, 15);
 			$cargoBay->startArc = 0;
 			$cargoBay->endArc = 120;
 			$this->addRightFrontSystem($cargoBay);
         $this->addRightFrontSystem(new AntimatterTorpedo(2, 0, 0, 0, 120));
-		$cutter = new ParticleCutter(4, 8, 3, 0, 120);
+		$cutter = new ParticleCutter(3, 8, 3, 0, 120);
 		$cutter->addTag("Weapon");
         $this->addRightFrontSystem($cutter);
 	$lightgun = new SWMediumLaser(2, 330, 150, 4);
@@ -181,12 +185,12 @@ class TrekSulibanHelix extends VreeCapital{
 		$this->addRightFrontSystem($projection);					
 	
 //--section--
-		$cargoBay = new CargoBay(3, 15);
+		$cargoBay = new CargoBay(2, 15);
 			$cargoBay->startArc = 60;
 			$cargoBay->endArc = 180;
 			$this->addRightAftSystem($cargoBay);
         $this->addRightAftSystem(new AntimatterTorpedo(2, 0, 0, 60, 180));
-		$cutter = new ParticleCutter(4, 8, 3, 60, 180);
+		$cutter = new ParticleCutter(3, 8, 3, 60, 180);
 		$cutter->addTag("Weapon");
         $this->addRightAftSystem($cutter);
 	$lightgun = new SWMediumLaser(2, 30, 210, 4);

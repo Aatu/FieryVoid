@@ -14,7 +14,8 @@ The costs before rounding the final value are:
 			Light railgun ~12 points
 		Estimated cost is 1000 + (4x36) + (6x24) = 1288 -> rounded to 1250*/
 		$this->pointCost = 1250;
-		$this->faction = "Grome Autocracy";
+        $this->faction = "Custom Ships";
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
         $this->phpclass = "GromeGrothFull";
 		$this->variantOf = "Groth Gunship";
         $this->imagePath = "img/ships/GromeGroth.png";
@@ -60,8 +61,8 @@ The costs before rounding the final value are:
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
 		$this->addFrontSystem(new GromeMedRailgun(3, 9, 6, 300, 360));
 		$this->addFrontSystem(new GromeMedRailgun(3, 9, 6, 0, 60));
-		$this->addFrontSystem(new FlakCannon(5, 4, 2, 240, 60));
-		$this->addFrontSystem(new FlakCannon(5, 4, 2, 300, 120));
+		$this->addFrontSystem(new GromeFlakCannon(5, 4, 2, 240, 60));
+		$this->addFrontSystem(new GromeFlakCannon(5, 4, 2, 300, 120));
         $this->addFrontSystem(new ConnectionStrut(4));
 
         $this->addAftSystem(new Thruster(3, 16, 0, 4, 2));
@@ -70,14 +71,14 @@ The costs before rounding the final value are:
 		$this->addAftSystem(new GromeMedRailgun(3, 9, 6, 120, 180));
         $this->addAftSystem(new ConnectionStrut(4));
 
-        $this->addLeftSystem(new FlakCannon(2, 4, 2, 180, 360));
+        $this->addLeftSystem(new GromeFlakCannon(2, 4, 2, 180, 360));
 		$this->addLeftSystem(new GromeMedRailgun(3, 9, 6, 210, 330));
 		$this->addLeftSystem(new GromeHvyRailGun(3, 12, 9, 300, 360));
 		$this->addLeftSystem(new GromeHvyRailGun(3, 12, 9, 180, 240));
         $this->addLeftSystem(new Thruster(3, 15, 0, 4, 3));
         $this->addLeftSystem(new ConnectionStrut(4));
 
-        $this->addRightSystem(new FlakCannon(2, 4, 2, 0, 180));
+        $this->addRightSystem(new GromeFlakCannon(2, 4, 2, 0, 180));
 		$this->addRightSystem(new GromeMedRailgun(3, 9, 6, 30, 150));
 		$this->addRightSystem(new GromeHvyRailGun(3, 12, 9, 0, 60));
 		$this->addRightSystem(new GromeHvyRailGun(3, 12, 9, 120, 180));
