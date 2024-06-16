@@ -9,7 +9,7 @@ class breachingpoddescari extends FighterFlight
 		$this->pointCost = 38 *6;
 		$this->faction = "Descari Committees";
 		$this->phpclass = "breachingpoddescari";
-		$this->shipClass = "Noscun Assault Shuttles";
+		$this->shipClass = "Noscun Breaching Pods";
 		$this->imagePath = "img/ships/DescariNoscho.png";
 		
 		$this->isd = 2218;
