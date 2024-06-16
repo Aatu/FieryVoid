@@ -3317,6 +3317,8 @@ spl_autoload_register(
 				'breachingpodabbai' => '/server/model/ships/abbai/breachingpodabbai.php',					
 				'breachingpodbrakiri' => '/server/model/ships/brakiri/breachingpodbrakiri.php',				
 				'breachingpoddrazi' => '/server/model/ships/drazi/breachingpoddrazi.php',					
+				'breachingpodpakmara' => '/server/model/ships/pakmara/breachingpodpakmara.php',				
+		
 				
 				
 				'breachingpodgaim' => '/server/model/ships/gaim/breachingpodgaim.php',	
