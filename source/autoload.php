@@ -3324,9 +3324,10 @@ spl_autoload_register(
 				'breachingpodllort' => '/server/model/ships/llort/breachingpodllort.php',				
 				'breachingpoddilgar' => '/server/model/ships/dilgar/breachingpoddilgar.php',					
 				'breachingpodyolu' => '/server/model/ships/yolu/breachingpodyolu.php',				
-				'breachingpodbalosian' => '/server/model/ships/yolu/breachingpodbalosian.php',				
+				'breachingpodbalosian' => '/server/model/ships/balosian/breachingpodbalosian.php',				
 				'zftrnoscho' => '/server/model/ships/descari/ZFtrNoscho.php',
-				'breachingpoddescari' => '/server/model/ships/descari/breachingpoddescari.php',				
+				'breachingpoddescari' => '/server/model/ships/descari/breachingpoddescari.php',	//pluralised from here :/			
+				'breachingpodhyach' => '/server/model/ships/hyach/breachingpodhyach.php',	
 						
 										
 
