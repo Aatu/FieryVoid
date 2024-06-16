@@ -3315,6 +3315,7 @@ spl_autoload_register(
 				'lakritas' => '/server/model/ships/centauri_old/lakritAS.php',					
 				'breachingpodcentwotcr' => '/server/model/ships/centauri_old/breachingpodcentwotcr.php',
 				'breachingpodabbai' => '/server/model/ships/abbai/breachingpodabbai.php',					
+				'breachingpodbrakiri' => '/server/model/ships/brakiri/breachingpodbrakiri.php',				
 				
 				
 				'breachingpodgaim' => '/server/model/ships/gaim/breachingpodgaim.php',	
