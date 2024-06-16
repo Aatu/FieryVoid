@@ -3323,7 +3323,7 @@ spl_autoload_register(
 				'breachingpodraiders' => '/server/model/ships/raiders/breachingpodraiders.php',	
 				'breachingpodllort' => '/server/model/ships/llort/breachingpodllort.php',				
 				'breachingpoddilgar' => '/server/model/ships/dilgar/breachingpoddilgar.php',					
-				
+				'breachingpodyolu' => '/server/model/ships/yolu/breachingpodyolu.php',				
 				
 	
 										
