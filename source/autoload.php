@@ -3308,7 +3308,13 @@ spl_autoload_register(
 											
 				
 				//New Breaching pods units		
-				'breachingpodea' => '/server/model/ships/EA/breachingPodEA.php',				
+				'breachingpodea' => '/server/model/ships/EA/breachingPodEA.php',
+				'trakhbp' => '/server/model/ships/narn/trakhbp.php',				
+				'breachingpodminbari' => '/server/model/ships/minbari/breachingPodMinbari.php',
+				'breachingpodminprot' => '/server/model/ships/minbari_protectorate/breachingPodMinProt.php',
+				'lakritas' => '/server/model/ships/centauri_old/lakritAS.php',					
+				'breachingpodcentwotcr' => '/server/model/ships/centauri_old/breachingpodcentwotcr.php',
+								
 
 						//Satyra (Wolfgang campaign)
 						'satyrashield' => '/server/model/weapons/customDevelopment.php',
