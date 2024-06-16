@@ -1,22 +1,22 @@
 <?php
-class FlyerAssault extends FighterFlight{
+class breachingPodMinProt  extends FighterFlight{
 	/*Minbari Assault Flyers*/
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-    	$this->pointCost = 40*6;
-    	$this->faction = "Minbari Federation";
-        $this->phpclass = "FlyerAssault";
-        $this->shipClass = "Assault Flyers";
+    	$this->pointCost = 55*6;
+    	$this->faction = "Minbari Protectorate";
+        $this->phpclass = "breachingPodMinProt";
+        $this->shipClass = "Ronati Breaching Pod";
     	$this->imagePath = "img/ships/MinbariFlyer.png"; //need Minbari Flyer image!
         
 		
 		
-        $this->forwardDefense = 9;
-        $this->sideDefense = 7;
+        $this->forwardDefense = 8;
+        $this->sideDefense = 8;
         $this->freethrust = 8;
-        $this->offensivebonus = 3;
+        $this->offensivebonus = 0;
         $this->jinkinglimit = 0;
 		$this->pivotcost = 2; //shuttles have pivot cost higher
         $this->turncost = 0.33;
@@ -34,14 +34,14 @@ class FlyerAssault extends FighterFlight{
         $new = $this->flightSize;
         $toAdd = $new - $current;
         for ($i = 0; $i < $toAdd; $i++){
-            $armour = array(1, 1, 1, 1);
-            $fighter = new Fighter("FlyerAssault", $armour, 16, $this->id);
-            $fighter->displayName = "Assault Flyer";
+            $armour = array(4, 4, 4, 4);
+            $fighter = new Fighter("Ronati", $armour, 16, $this->id);
+            $fighter->displayName = "Ronati";
             $fighter->imagePath = "img/ships/MinbariFlyer.png";
             $fighter->iconPath = "img/ships/MinbariFlyer_Large.png";
 			
-            $fighter->addFrontSystem(new LightFusionCannon(330, 30, 4, 1));
-            $fighter->addAftSystem(new Jammer(0, 1, 0));	
+			$fighter->addFrontSystem(new Marines(330, 30, 0, false)); //startarc, endarc, damagebonus, elite.
+	
 			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
 			
             $this->addSystem($fighter);
