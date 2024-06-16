@@ -44,7 +44,7 @@ class trakhabp extends FighterFlight{
 			$fighter->imagePath = "img/ships/NarnTRakh.png";
 			$fighter->iconPath = "img/ships/NarnTRakh_Large.png";
 			
-			$fighter->addFrontSystem(new Marines(330, 30, 0, false)); //startarc, endarc, damagebonus, elite.
+			$fighter->addFrontSystem(new Marines(330, 30, 0, true)); //startarc, endarc, damagebonus, elite.
 			$fighter->addFrontSystem(new PairedParticleGun(330, 30, 5)); //2 guns d6+5
 			
 			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
