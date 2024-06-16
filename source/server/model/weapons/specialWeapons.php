@@ -5997,7 +5997,7 @@ class Marines extends Weapon{
 		$targetMove = $target->getLastMovement();
 		$targetSpeed = $targetMove->speed;
 		$speedDifference = abs($targetSpeed - $shooterSpeed);//Calculate absolute difference in speed.
-		if($shooter->faction == "Llort") $speedDifference -= 1;
+		if($shooter->faction == "Llort") $speedDifference -= 1;//Llort reduce speed difference by 1.
 			
 		$finalSpeedDifference = max(0, $speedDifference);//Llort bonus could make it -1...
 		
@@ -6089,8 +6089,6 @@ class Marines extends Weapon{
 					
 		$location = $fireOrder->chosenLocation ;
 		if($location == 0 && (!$target instanceof OSAT)) $rollMod -= 1; //Easier to deliver marines to destroyed sections i.e direct to Primary section.	       
-echo "Value of location: " . $location. "\n";
-echo "Value of location: " . $rollMod. "\n";
 
 		foreach ($target->enhancementOptions as $enhancement) {//Defender quality can influence roll too.
 		    $enhID = $enhancement[0];

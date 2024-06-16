@@ -9,7 +9,7 @@ class breachingpodllort extends FighterFlight{
 		$this->faction = "Llort";
         $this->phpclass = "breachingpodllort";
         $this->shipClass = "Skulattra Breaching Pods";
-		$this->imagePath = "img/ships/LlortLeteerum.png";
+		$this->imagePath = "img/ships/LlortSkulattra.png";
         
         $this->forwardDefense = 8;
         $this->sideDefense = 8;
@@ -24,6 +24,8 @@ class breachingpodllort extends FighterFlight{
 		$this->unitSize = 1; 
 		
 		$this->iniativebonus = 9*5;
+		$this->notes = "Bonuses to attaching to enemy ships and delivering marines.";	
+
       
         $this->populate();
     }
@@ -38,8 +40,8 @@ class breachingpodllort extends FighterFlight{
 			$armour = array(2, 2, 2, 2);
 			$fighter = new Fighter("breachingpodllort", $armour, 18, $this->id);
 			$fighter->displayName = "Skulattra";
-			$fighter->imagePath = "img/ships/LlortLeteerum.png";
-			$fighter->iconPath = "img/ships/LlortLeteerum_Large.png";
+			$fighter->imagePath = "img/ships/LlortSkulattra.png";
+			$fighter->iconPath = "img/ships/LlortSkulattra_Large.png";
 			
 			
 			$fighter->addFrontSystem(new Marines(330, 30, 0, false)); //startarc, endarc, damagebonus, elite.
