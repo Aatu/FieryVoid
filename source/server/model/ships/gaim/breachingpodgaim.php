@@ -13,9 +13,9 @@ class breachingpodgaim extends FighterFlight{
         $this->isd = 2251;
         
         $this->forwardDefense = 8;
-        $this->sideDefense = 7;
+        $this->sideDefense = 8;
         $this->freethrust = 9;
-        $this->offensivebonus = 2;
+        $this->offensivebonus = 0;
         $this->jinkinglimit = 0;
         $this->turncost = 0.33;
 		$this->turndelay = 0;
@@ -36,7 +36,7 @@ class breachingpodgaim extends FighterFlight{
 
         for ($i = 0; $i < $toAdd; $i++){            
             $armour = array(2, 2, 2, 2);
-            $fighter = new Fighter("Ech'Akki", $armour, 12, $this->id);
+            $fighter = new Fighter("breachingpodgaim", $armour, 15, $this->id);
             $fighter->displayName = "Ech'Akki";
             $fighter->imagePath = "img/ships/GaimIttaka.png";
             $fighter->iconPath = "img/ships/GaimIttaka_large.png";
