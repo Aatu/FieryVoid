@@ -45,6 +45,8 @@ class StreibArmedBreachingPod extends FighterFlight{
             $frontGun = new LtSurgeBlaster(330, 30, 1); //1 gun - dmg bonus not selectable
             $fighter->addFrontSystem($frontGun);			
 			$fighter->addFrontSystem(new LtEMWaveDisruptor(240, 120, 1));
+			
+			$fighter->addFrontSystem(new Marines(330, 30, 0, false)); //startarc, endarc, damagebonus, elite.			
 
 			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
 			
