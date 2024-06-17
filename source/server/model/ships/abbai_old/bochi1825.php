@@ -11,7 +11,7 @@ class Bochi1825 extends OSAT{
         $this->shipClass = 'Bochi Defense Satellite (1825)';
 			$this->occurence = 'common'; 
 			$this->variantOf = "Bochi Defense Satellite";
-        $this->canvasSize = 100;
+        $this->canvasSize = 200;
 
         $this->isd = 1825;
 
