@@ -279,6 +279,7 @@ class ShipSystem {
 				if($enhCount > 0) {		            
 					if ($enhID == 'ELITE_CREW') $rollMod += $enhCount;	//Elite Crews are better at defending.
 					if ($enhID == 'POOR_CREW') $rollMod -= $enhCount; //Poor Crews are worse.
+		        	if ($enhID == 'MARK_FERV') $rollMod += $enhCount; //Markab Fervor causes defenders to fight harder.
 				}
 		}
 		
