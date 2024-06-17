@@ -8,7 +8,7 @@ class breachingpodbrakiri extends FighterFlight{
     	$this->faction = "Brakiri Syndicracy";
         $this->phpclass = "breachingpodbrakiri";
         $this->shipClass = "Pri-Thentat Breaching Pods";
-    	$this->imagePath = "img/ships/falkosi.png";
+    	$this->imagePath = "img/ships/takala.png";
         
 		$this->notes = 'Pri-Wakat Concepts & Solutions';//Corporation producing the design
 		$this->isd = 2198;
@@ -40,8 +40,8 @@ class breachingpodbrakiri extends FighterFlight{
             $armour = array(2, 2, 2, 2);
             $fighter = new Fighter("breachingpodbrakiri", $armour, 18, $this->id);
             $fighter->displayName = "Pri-Thentat";
-            $fighter->imagePath = "img/ships/falkosi.png";
-            $fighter->iconPath = "img/ships/falkosi_large.png";
+            $fighter->imagePath = "img/ships/takala.png";
+            $fighter->iconPath = "img/ships/takala_large.png";
             
 			$fighter->addFrontSystem(new Marines(330, 30, 0, false)); //startarc, endarc, damagebonus, elite.
             
