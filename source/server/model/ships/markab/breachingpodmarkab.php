@@ -9,7 +9,7 @@ class breachingpodmarkab extends FighterFlight{
         $this->faction = "Markab Theocracy";
         $this->phpclass = "breachingpodmarkab";
         $this->shipClass = "Dojafa Breaching Pods";
-        $this->imagePath = "img/ships/MarkabDrofta.png";
+        $this->imagePath = "img/ships/MarkabDojafa.png";
 		$this->isd = 2005;
         
         $this->forwardDefense = 7;
@@ -42,8 +42,8 @@ class breachingpodmarkab extends FighterFlight{
             $armour = array(3, 3, 3, 3);
             $fighter = new Fighter("breachingpodmarkab", $armour, 18, $this->id);
             $fighter->displayName = "Dojafa";
-            $fighter->imagePath = "img/ships/MarkabDrofta.png";
-            $fighter->iconPath = "img/ships/MarkabDroftaLARGE.png";
+            $fighter->imagePath = "img/ships/MarkabDojafa.png";
+            $fighter->iconPath = "img/ships/MarkabDojafa_large.png";
 
 			$fighter->addFrontSystem(new Marines(330, 30, 0, false)); //startarc, endarc, damagebonus, elite.
 		
