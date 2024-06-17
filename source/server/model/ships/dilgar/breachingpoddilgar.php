@@ -8,7 +8,7 @@ class breachingpoddilgar extends FighterFlight{
 	    $this->faction = "Dilgar Imperium";
         $this->phpclass = "breachingpoddilgar";
         $this->shipClass = "Jortavo Breaching Pods";
-	    $this->imagePath = "img/ships/Torushka.png";
+	    $this->imagePath = "img/ships/Jortavo.png";
         
         $this->forwardDefense = 9;
         $this->sideDefense = 10;
@@ -37,8 +37,8 @@ class breachingpoddilgar extends FighterFlight{
 			$armour = array(3, 3, 3, 3);
 			$fighter = new Fighter("breachingpoddilgar", $armour, 18, $this->id);
 			$fighter->displayName = "Jortavo";
-			$fighter->imagePath = "img/ships/Torushka.png";
-			$fighter->iconPath = "img/ships/Torushka_large.png";
+			$fighter->imagePath = "img/ships/Jortavo.png";
+			$fighter->iconPath = "img/ships/Jortavo_large.png";
 			
 			$fighter->addFrontSystem(new Marines(330, 30, 0, false)); //startarc, endarc, damagebonus, elite.
 			
