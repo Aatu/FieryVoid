@@ -3329,7 +3329,7 @@ spl_autoload_register(
 				'breachingpodhyach' => '/server/model/ships/hyach/breachingpodhyach.php',	
 				'trofaas' => '/server/model/ships/markab/trofaAS.php',
 				'breachingpodmarkab' => '/server/model/ships/markab/breachingpodmarkab.php',					
-				'breachingpodcorillani' => '/server/model/ships/corillani/breachingpodcorillani.php',													'breachingpodkorlyan' => '/server/model/ships/korlyan/breachingpodkorlyan.php',		
+				'breachingpodcorillani' => '/server/model/ships/corillani/breachingpodcorillani.php',										'breachingpodkorlyan' => '/server/model/ships/korlyan/breachingpodkorlyan.php',		
 										
 
 						//Satyra (Wolfgang campaign)

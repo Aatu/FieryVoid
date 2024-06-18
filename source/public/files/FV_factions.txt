@@ -21,10 +21,10 @@ GENERAL NOTES
 	Fleet checker - tool that performs automatic check of fleet composition. Game does not enforce its use, but these restrictions are aimed at creation of balanced and interesting fleets so it's encouraged :) . It's SUBJECTIVELY extrapolated from official tournament rules.
 
 
+For starters - general description of missiles and boarding actions, as complicated systems that are common for multiple factions:
 
 MISSILES
 --------
-For starters - general description of missiles, as a complicated system that is common for multiple factions.
 
 General notes: ships usually come preloaded with missiles (usually Basic), and any missiles You buy is on top of that. Also, while amount of any given missile You can buy is limited by magazine size, total amount of missiles is not. 
 This means Your missile magazine may show more missiles available than it can actually hold. However, You cannot actually LAUNCH more missiles than magazine can hold - total number of launches is tracked. So extra missiles will provide You with extra variety (at a price ;) ), but not actual extra missiles.
@@ -62,6 +62,31 @@ FIGHTERBORNE MISSILES
  - class FH - Heavy Fighter Missile - (Range 5 - Damage 15 - Offensive Bonus: +1/+3/+3) - Limited to 1 per fighter (2 per SHF).
  - class FL - Long Range Fighter Missile - (Range 15 - Damage 8 - Offensive Bonus: +3/+3/+3)
  - class FY - Dogfight Missile - (Range 8 - Damage 6 - Offensive Bonus: +3/+3/+3) - In tabletop it can be snap fired in direct fire phase, but this ability is not present in FV.
+
+
+BOARDING ACTIONS WITH MARINES
+--------
+
+Many factions have access to boarding actions through the use of Breaching Pods, which come equipped with a 'Marines' weapon system and two contingents of Marines aboard as standard.  During the Firing Phase, Pods can attempt to attach to enemy ships in the same hex (and in arc) and deliver Marines to undertake a selection of missions (Sabotage, Capture Ship and Rescue).
+
+ATTACHING A POD:
+In all cases the first step will be the same, attempt to attach a Breaching Pod to the target ship.  Pods automatically attach to enemy ships they are moving faster than, providing the speed difference is not higher that their thrust rating.  Where the enemy ship is moving faster than the Pod they will need to roll for success, with a base chance of 100% and -10% per point of speed difference.  The LLort treat speed difference as one point lower for attaching a pod.
+
+DELIVERING THE MARINES:
+Once attached, the Pod will attempt to deliver the Marines, again this part is the same regardless of which mission has been selected.  The Marines have a base chance of 50% of successfully baording the vessel 5 or under on a d10), if they roll over there is a chance that the marines may be lost.  Otherwise they will return to the Pod and can attempt to Board again in future turns.  A number of modifiers are sometimes applied to this roll as well depending on circumstances, and these have been summarised below:
+ 	+20% success - Yolu-specific bonus
+	+10% success - Elite marines (e.g. Gaim or Narn) / Llort Breaching Pod / Target vessel has Poor Crew / Attempting to board a Primary section after an external section has been destroyed
+	-10% success - Narn or Gaim Defenders / Target vessel has Elite Crew or Markab Fervor
+
+MARINE MISSIONS:
+Marines that successfully board a vessel will then attempt to carry out their intended missions, which are detailed below.  Like the Delivery Roll, these can attract several modifiers depedning on circumstances:
+	+10% success - Elite Marines (e.g. Gaim or Narn) / Target vessel has Poor Crew  
+	-10% success - Narn or Gaim Defenders / Target vessel has Elite Crew or Markab Fervor
+In addition, for Sabotage and Rescue missions there is an additional -10% added to the roll for every two turns that the Marines are active aboard the enemy vessel.
+	- Sabotage: Marines can either attempt to damage a specific system on an enemy ships (by making a called shot against it using the usual rules) or disrupt the ship more generally (e.g. minor damage to a Primary system, EW/Initiative/Thrust/Defence Profile penalties) by targeting it in the normal fashion.  In both cases, Marines that are successfully delivered will roll on a d10 the following turn to see how successful their mission has been.  Note - Marines which target a specific system and are successful in destroying it will then continue to Sabotage the ship generally providing they have not been eliminated.
+	- Capture Ship: Marines will fight the defending marine contingents directly (the number of current Marines on a ship can be seen in its CnC tooltip!).  From the end of each Firing phase a marine unit has boarded they will roll separately to see if they a) eliminate a defender (50% base chance) and b) if they themselves are eliminiated (25% base chance).  If the attacking marines manage to defeat all defenders during a scenario, the enemy ship will immediately be disabled for the remainder of the battle so long as there are still at least one attacking marine unit on board.
+	- Rescue Mission: For scenarios only, Marines will attach their pod and attempt to board as normal.  Then, from the following turn, the Combat Log will provide players with updates on the progress of their Rescue mission.
+
 
 
 AVAILABLE FACTIONS
