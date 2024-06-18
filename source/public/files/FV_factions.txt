@@ -76,17 +76,17 @@ DELIVERING THE MARINES:
 Once attached, the Pod will attempt to deliver the Marines, again this part is the same regardless of which mission has been selected.  The Marines have a base chance of 50% of successfully baording the vessel 5 or under on a d10), if they roll over there is a chance that the marines may be lost.  Otherwise they will return to the Pod and can attempt to Board again in future turns.  A number of modifiers are sometimes applied to this roll as well depending on circumstances, and these have been summarised below:
  	+20% success - Yolu-specific bonus
 	+10% success - Elite marines (e.g. Gaim or Narn) / Llort Breaching Pod / Target vessel has Poor Crew / Attempting to board a Primary section after an external section has been destroyed
-	-10% success - Narn or Gaim Defenders / Target vessel has Elite Crew or Markab Fervor
+	-10% success - Narn or Gaim Defenders / Target vessel has Elite Crew or under the effects of Markab's Religious Fervor
+Note - The Combat Log will display the value of any modifiers along with the number rolled, negative modifiers denote increased success rate, positive indicate decreased success rate for Marine missions.
 
 MARINE MISSIONS:
 Marines that successfully board a vessel will then attempt to carry out their intended missions, which are detailed below.  Like the Delivery Roll, these can attract several modifiers depedning on circumstances:
 	+10% success - Elite Marines (e.g. Gaim or Narn) / Target vessel has Poor Crew  
-	-10% success - Narn or Gaim Defenders / Target vessel has Elite Crew or Markab Fervor
+	-10% success - Narn or Gaim Defenders / Target vessel has Elite Crew or under the effects of Markab's Religious Fervor
 In addition, for Sabotage and Rescue missions there is an additional -10% added to the roll for every two turns that the Marines are active aboard the enemy vessel.
 	- Sabotage: Marines can either attempt to damage a specific system on an enemy ships (by making a called shot against it using the usual rules) or disrupt the ship more generally (e.g. minor damage to a Primary system, EW/Initiative/Thrust/Defence Profile penalties) by targeting it in the normal fashion.  In both cases, Marines that are successfully delivered will roll on a d10 the following turn to see how successful their mission has been.  Note - Marines which target a specific system and are successful in destroying it will then continue to Sabotage the ship generally providing they have not been eliminated.
 	- Capture Ship: Marines will fight the defending marine contingents directly (the number of current Marines on a ship can be seen in its CnC tooltip!).  From the end of each Firing phase a marine unit has boarded they will roll separately to see if they a) eliminate a defender (50% base chance) and b) if they themselves are eliminiated (25% base chance).  If the attacking marines manage to defeat all defenders during a scenario, the enemy ship will immediately be disabled for the remainder of the battle so long as there are still at least one attacking marine unit on board.
 	- Rescue Mission: For scenarios only, Marines will attach their pod and attempt to board as normal.  Then, from the following turn, the Combat Log will provide players with updates on the progress of their Rescue mission.
-
 
 
 AVAILABLE FACTIONS
