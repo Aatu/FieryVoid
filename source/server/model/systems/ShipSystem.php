@@ -690,8 +690,7 @@ class ShipSystem {
 		$defendersLost = $startingMarines - $currentMarines; //If 0 currentMarines, bascially that means all are gone.
 		
 		$attackersOnboard = 0;//Initialise								
-		foreach($cnc->criticals as $critical){
-//			if($critical->phpclass == "DefenderLost")	$defendersLost += 1;	 										
+		foreach($cnc->criticals as $critical){ 										
 			if($critical->phpclass == "CaptureShip" || $critical->phpclass == "CaptureShipElite")	$attackersOnboard += 1;		
 		}
 			
