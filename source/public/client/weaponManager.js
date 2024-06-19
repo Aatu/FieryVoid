@@ -705,7 +705,6 @@ window.weaponManager = {
 
     //calculate hit chance for Boarding Action - different procedure
     calculateBoardingAction: function calculateBoardingAction(shooter, target, weapon){
- //       if (calledid > 0) return 0;//can called Boarding Actions!
         if (target.flight) return 0;//Cannot board fighters, null FC stops this but showing 0% is more informative for players!
 		var jinking = shipManager.movement.getJinking(shooter); //Raider pods can jink, but can't attach at same time.
  		if(jinking > 0) return 0;		
