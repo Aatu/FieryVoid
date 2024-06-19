@@ -41,7 +41,7 @@ class HurrmissileOSAT2220AM extends OSAT
         $this->addPrimarySystem(new OSATCnC(0, 1, 0, 0));		
 		$this->addPrimarySystem(new Reactor(3, 5, 0, 0));
 		$this->addPrimarySystem(new Scanner(3, 5, 2, 4));
-		$this->addPrimarySystem(new Thruster(3, 4, 0, 0, 2));
+		$this->addAftSystem(new Thruster(3, 4, 0, 0, 2));
 		$this->addFrontSystem(new AmmoMissileRackSO(3, 0, 0, 270, 90, $ammoMagazine, true)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
 		$this->addFrontSystem(new AmmoMissileRackSO(3, 0, 0, 270, 90, $ammoMagazine, true)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
 		$this->addFrontSystem(new AmmoMissileRackSO(3, 0, 0, 270, 90, $ammoMagazine, true)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
@@ -55,7 +55,7 @@ class HurrmissileOSAT2220AM extends OSAT
 			$this->hitChart = array(
                 0=> array(
                         9 => "Structure",
-                        11 => "Thruster",
+                        11 => "2:Thruster",
 						15 => "Class-SO Missile Rack",
 						17 => "Scanner",
                         19 => "Reactor",

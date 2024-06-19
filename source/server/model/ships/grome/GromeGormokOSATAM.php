@@ -44,11 +44,11 @@ class GromeGormokOSATAM extends OSAT{
         $this->addPrimarySystem(new Reactor(3, 8, 0, 0));
         $this->addPrimarySystem(new AntiquatedScanner(3, 4, 2, 3)); 
         $this->addPrimarySystem(new GromeTargetingArray(3, 0, 0, 0, 360, 2, false, true)); //Armor, health, power, startarc, endarc, output, escort, base
-        $this->addPrimarySystem(new Thruster(4, 6, 0, 0, 2)); 
-        $this->addPrimarySystem(new GromeFlakCannon(2, 4, 2, 0, 360)); 
-        $this->addPrimarySystem(new AmmoHeavyRailGun(3, 12, 9, 300, 60, $ammoMagazine));
-        $this->addPrimarySystem(new AmmoLightRailGun(3, 6, 3, 180, 360, $ammoMagazine));
-        $this->addPrimarySystem(new AmmoLightRailGun(3, 6, 3, 0, 180, $ammoMagazine));
+        $this->addAftSystem(new Thruster(4, 6, 0, 0, 2)); 
+        $this->addAftSystem(new GromeFlakCannon(2, 4, 2, 0, 360)); 
+        $this->addFrontSystem(new AmmoHeavyRailGun(3, 12, 9, 300, 60, $ammoMagazine));
+        $this->addFrontSystem(new AmmoLightRailGun(3, 6, 3, 180, 360, $ammoMagazine));
+        $this->addFrontSystem(new AmmoLightRailGun(3, 6, 3, 0, 180, $ammoMagazine));
 		
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         
@@ -58,13 +58,13 @@ class GromeGormokOSATAM extends OSAT{
 		$this->hitChart = array(
 			0=> array(
 					8 => "Structure",
-					10 => "Thruster",
+					10 => "2:Thruster",
 					11 => "Targeting Array",
-					13 => "Heavy Railgun",
-					15 => "Light Railgun",
+					13 => "1:Heavy Railgun",
+					15 => "1:Light Railgun",
 					17 => "Scanner",
 					19 => "Reactor",
-					20 => "Flak Cannon",
+					20 => "2:Flak Cannon",
 			)
 		);
     

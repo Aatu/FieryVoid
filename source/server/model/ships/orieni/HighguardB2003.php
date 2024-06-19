@@ -28,7 +28,7 @@ class HighguardB2003 extends OSAT
         $this->addPrimarySystem(new OSATCnC(0, 1, 0, 0));		
 		$this->addPrimarySystem(new Reactor(4, 6, 0, 0));
 		$this->addPrimarySystem(new Scanner(4, 4, 2, 4));
-		$this->addPrimarySystem(new Thruster(4, 4, 0, 0, 2));
+		$this->addAftSystem(new Thruster(4, 4, 0, 0, 2));
 		$this->addFrontSystem(new HeavyLaserLance(4, 6, 0, 270, 90));
 		$this->addFrontSystem(new HeavyLaserLance(4, 6, 0, 270, 90));
 		$this->addFrontSystem(new OrieniGatlingRG(1, 4, 1, 180, 360));
@@ -41,7 +41,7 @@ class HighguardB2003 extends OSAT
 			$this->hitChart = array(
                 0=> array(
                         9 => "Structure",
-                        11 => "Thruster",
+                        11 => "2:Thruster",
 						14 => "1:Heavy Laser Lance",
 						16 => "1:Gatling Railgun",
 						18 => "Scanner",

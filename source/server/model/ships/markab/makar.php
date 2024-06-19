@@ -27,13 +27,13 @@ class Makar extends OSAT{
         $this->addPrimarySystem(new OSATCnC(0, 1, 0, 0));
         $this->addPrimarySystem(new Reactor(5, 9, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 9, 3, 6));   
-        $this->addPrimarySystem(new Thruster(4, 6, 0, 0, 2));
+        $this->addAftSystem(new Thruster(4, 6, 0, 0, 2));
         
-        $this->addPrimarySystem(new PlasmaWaveTorpedo(3, 0, 0, 270, 90));
-        $this->addPrimarySystem(new PlasmaWaveTorpedo(3, 0, 0, 270, 90));
-        $this->addPrimarySystem(new HeavyPlasma(4, 8, 5, 300, 60));
-        $this->addPrimarySystem(new ScatterGun(3, 0, 0, 180, 360));
-        $this->addPrimarySystem(new ScatterGun(3, 0, 0, 0, 180));      
+        $this->addFrontSystem(new PlasmaWaveTorpedo(3, 0, 0, 270, 90));
+        $this->addFrontSystem(new PlasmaWaveTorpedo(3, 0, 0, 270, 90));
+        $this->addFrontSystem(new HeavyPlasma(4, 8, 5, 300, 60));
+        $this->addAftSystem(new ScatterGun(3, 0, 0, 180, 360));
+        $this->addAftSystem(new ScatterGun(3, 0, 0, 0, 180));      
                 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addPrimarySystem(new Structure(5, 30));
@@ -41,18 +41,12 @@ class Makar extends OSAT{
 		$this->hitChart = array(
                 0=> array(
                         9 => "Structure",
-                       	11 => "Thruster",
-                        12 => "Heavy Plasma Cannon",
-                        14 => "Plasma Wave",
-                        16 => "Scattergun",
+                       	11 => "2:Thruster",
+                        12 => "1:Heavy Plasma Cannon",
+                        14 => "1:Plasma Wave",
+                        16 => "2:Scattergun",
                         18 => "Scanner",
                         20 => "Reactor",
-                ),
-                1=> array(
-                        20 => "Primary",
-                ),
-                2=> array(
-                        20 => "Primary",
                 ),
         );
     }

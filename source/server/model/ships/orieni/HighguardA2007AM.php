@@ -39,7 +39,7 @@ class HighguardA2007AM extends OSAT
         $this->addPrimarySystem(new OSATCnC(0, 1, 0, 0));		
 		$this->addPrimarySystem(new Reactor(4, 6, 0, 0));
 		$this->addPrimarySystem(new Scanner(4, 4, 2, 5));
-		$this->addPrimarySystem(new Thruster(4, 4, 0, 0, 2));
+		$this->addAftSystem(new Thruster(4, 4, 0, 0, 2));
 		$this->addFrontSystem(new AmmoMissileRackS(3, 0, 0, 270, 90, $ammoMagazine, true)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
 		$this->addFrontSystem(new AmmoMissileRackS(3, 0, 0, 270, 90, $ammoMagazine, true)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
 		$this->addFrontSystem(new RapidGatling(2, 4, 1, 180, 360));
@@ -52,7 +52,7 @@ class HighguardA2007AM extends OSAT
 			$this->hitChart = array(
                 0=> array(
                         9 => "Structure",
-                        11 => "Thruster",
+                        11 => "2:Thruster",
 						14 => "1:Class-S Missile Rack",
 						16 => "1:Rapid Gatling Railgun",
 						18 => "Scanner",
