@@ -26,6 +26,10 @@ class breachingpoddilgar extends FighterFlight{
 		$this->notes = "Takes up two hanger slots.";
       
         $this->populate();
+    
+    	$this->enhancementOptionsEnabled[] = 'ELT_MAR'; //To enable Elite Marines enhancement
+		$this->enhancementOptionsEnabled[] = 'EXT_MAR'; //To enable extra Marines enhancement
+		
     }
     
     public function populate(){

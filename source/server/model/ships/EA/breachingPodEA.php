@@ -28,6 +28,10 @@ class breachingPodEA extends FighterFlight{
 		
     	$this->iniativebonus = 9 * 5;
         $this->populate();
+    
+    	$this->enhancementOptionsEnabled[] = 'ELT_MAR'; //To enable Elite Marines enhancement
+		$this->enhancementOptionsEnabled[] = 'EXT_MAR'; //To enable extra Marines enhancement
+		
     }
 
     public function populate(){

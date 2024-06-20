@@ -27,9 +27,13 @@ class breachingpodyolu extends FighterFlight{
 		$this->notes = "Bonus to delivery roll for marines.";
 		
 		$this->gravitic = true; //not 100% clear from SCS if these ships are gravitic, but every other Yolu ship is so seems safe to assume.
-//		$this->dropOutBonus = -2; //Less easier to argue they should get the same bonus ro dropout rolls that the Utan gets
+//		$this->dropOutBonus = -2; //Less easier to argue they should get the same bonus to dropout rolls that the Utan gets
 		 
         $this->populate();
+    
+    	$this->enhancementOptionsEnabled[] = 'ELT_MAR'; //To enable Elite Marines enhancement
+		$this->enhancementOptionsEnabled[] = 'EXT_MAR'; //To enable extra Marines enhancement
+		
     }
 
     public function populate(){

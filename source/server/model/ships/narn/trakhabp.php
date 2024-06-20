@@ -27,8 +27,11 @@ class trakhabp extends FighterFlight{
 		$this->variantOf = "T'Rakh Breaching Pods";		
 		
 		$this->iniativebonus = 8*5;
-      
+    
         $this->populate();
+        
+		$this->enhancementOptionsEnabled[] = 'EXT_MAR'; //To enable extra Marines enhancement        
+        
     }
     
     

@@ -24,8 +24,15 @@ class StreibArmedBreachingPod extends FighterFlight{
         
 		$this->hangarRequired = 'shuttles'; //for fleet check
 		$this->iniativebonus = 8*5;
+
+        $this->occurence = 'common';
+		$this->variantOf = "Breaching Pods";	
       
         $this->populate();
+    
+    	$this->enhancementOptionsEnabled[] = 'ELT_MAR'; //To enable Elite Marines enhancement
+		$this->enhancementOptionsEnabled[] = 'EXT_MAR'; //To enable extra Marines enhancement
+		
     }
     
     

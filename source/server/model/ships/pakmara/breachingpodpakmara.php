@@ -27,6 +27,9 @@ class breachingpodpakmara extends FighterFlight{
         $this->iniativebonus = 6*5;
         $this->populate();       
 
+    	$this->enhancementOptionsEnabled[] = 'ELT_MAR'; //To enable Elite Marines enhancement
+		$this->enhancementOptionsEnabled[] = 'EXT_MAR'; //To enable extra Marines enhancement
+		
     }
 
     public function populate(){

@@ -25,6 +25,9 @@ class trakhbp extends FighterFlight{
 		$this->iniativebonus = 8*5;
       
         $this->populate();
+        
+		$this->enhancementOptionsEnabled[] = 'EXT_MAR'; //To enable extra Marines enhancement        
+        
     }
     
     
