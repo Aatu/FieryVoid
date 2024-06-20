@@ -26,6 +26,10 @@ class breachingpodraiders extends FighterFlight{
 		$this->notes = "Cannot attach to enemy ships while jinking.";		
 		
         $this->populate();
+    
+    	$this->enhancementOptionsEnabled[] = 'ELT_MAR'; //To enable Elite Marines enhancement
+		$this->enhancementOptionsEnabled[] = 'EXT_MAR'; //To enable extra Marines enhancement
+		
     }
 
     public function populate(){
