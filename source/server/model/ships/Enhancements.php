@@ -965,6 +965,17 @@ class Enhancements{
 		  $enhPriceStep = 0;
 		  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 	  }
+	  
+	  //Extra Ammo for Fighters with a limited supply, cost: 3 per extra shot, limit: 5	  	
+	  $enhID = 'EXT_AMMO';	  
+	  if(in_array($enhID, $flight->enhancementOptionsEnabled)){ //option needs to be specifically enabled
+		  $enhName = 'Additional Ammo for Gun';
+		  $enhLimit = 4;	
+		  $enhPrice = 3; //price per craft, while flight price is per 6-craft flight	  
+		  $enhPriceStep = 0;
+		  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+	  } 
+	  	  
 	  //Extra Marines for Breaching Pods, cost: 15 per pod, limit: 1	  	
 	  $enhID = 'EXT_MAR';	  
 	  if(in_array($enhID, $flight->enhancementOptionsEnabled)){ //option needs to be specifically enabled
@@ -1217,6 +1228,16 @@ class Enhancements{
 					case 'EXP_MOTIV': //Expert Motivator: -2 on dropout rolls
 						$flight->critRollMod -= $enhCount*2;
 						break;
+					case 'EXT_AMMO'://Extra ammo, for fighter with a limited supply.  Max 5 extra shots.
+						foreach($flight->systems as $ftr) foreach($ftr->systems as $sys)
+							//Find relevant weapons 
+							if(	$sys instanceOf PairedGatlingGun || 
+								$sys instanceOf MatterGun || 
+								$sys instanceOf SlugCannon || 
+								$sys instanceOf GatlingGunFtr){
+							$sys->ammunition += $enhCount;//Increase ammo for these weapons by $enhCount
+							}
+						break;							
 					case 'EXT_MAR'://Extra marines, increase contingent per pod by 1.
 						foreach($flight->systems as $ftr) foreach($ftr->systems as $sys) if($sys instanceOf Marines){
 						$sys->ammunition += $enhCount;
