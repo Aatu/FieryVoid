@@ -31,8 +31,8 @@ class ThirdspaceAttackCraft extends LCV{ //Actually an LCV.
 		
 	$this->hangarRequired = "LCVs";
 	
-		/*Thirdspace use their own enhancement set */		
-		Enhancements::nonstandardEnhancementSet($this, 'ThirdspaceShip');		
+	/*Thirdspace use their own enhancement set */		
+	Enhancements::nonstandardEnhancementSet($this, 'ThirdspaceShip');		
 	    
 	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 1)); //unhittable and with unlimited thrust allowance   
 	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 3)); //unhittable and with unlimited thrust allowance
@@ -48,10 +48,10 @@ class ThirdspaceAttackCraft extends LCV{ //Actually an LCV.
 	$this->addPrimarySystem(new Engine(5, 12, 0, 10, 2));
     $this->addPrimarySystem(new ThirdspaceSelfRepair(5, 8, 4)); //armor, structure, output 	
 
-	$this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 210, 60));
-	$this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 210, 60));
-	$this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 300, 150));
-	$this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 300, 150));
+	$this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 210, 30));
+	$this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 210, 30));
+	$this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 330, 150));
+	$this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 330, 150));
 			
 	$projection = new ThirdspaceShieldProjection(2, 60, 55, 0, 360, 'C');//: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R
 	$projector = new ThirdspaceShieldProjector(6, 12, 4, 3, 0, 360, 'C'); //: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R
