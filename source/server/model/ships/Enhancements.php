@@ -85,8 +85,11 @@ class Enhancements{
 			
 		case 'ThirdspaceShip':
 			Enhancements::blockStandardEnhancements($unit);
-			$unit->enhancementOptionsEnabled[] = 'IMPR_SR';
-			$unit->enhancementOptionsEnabled[] = 'IMPR_ENG'; 					
+			$unit->enhancementOptionsEnabled[] = 'IMPR_SR';			
+			foreach ( $unit->enhancementOptionsDisabled as $key=>$value){ 
+				if($value=='IMPR_ENG'){ unset($unit->enhancementOptionsDisabled[$key]); }
+				if($value=='IMPR_SENS'){ unset($unit->enhancementOptionsDisabled[$key]); }									
+			}					
 			break;		
 	}	  
   }//endof function nonstandardEnhancementSet
