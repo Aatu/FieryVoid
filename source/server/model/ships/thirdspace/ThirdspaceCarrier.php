@@ -4,7 +4,7 @@ class ThirdspaceCarrier extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 5500;
+		$this->pointCost = 4000;
 		$this->faction = "Thirdspace";
         $this->phpclass = "ThirdspaceCarrier";
         $this->imagePath = "img/ships/ThirdspaceBattleship.png";
@@ -36,7 +36,7 @@ class ThirdspaceCarrier extends BaseShip{
 		/*Thirdspace use their own enhancement set */		
 		Enhancements::nonstandardEnhancementSet($this, 'ThirdspaceShip');			       
         
-        $this->addPrimarySystem(new AdvancedSingularityDrive(8, 50, 0, 124+10+4));
+        $this->addPrimarySystem(new AdvancedSingularityDrive(8, 50, 0, 104+10+4));
         $this->addPrimarySystem(new ThirdspaceCnC(8, 36, 0, 0));
         $scanner = new Scanner(7, 36, 10, 14);
 		$scanner->markThirdspace();
@@ -51,15 +51,11 @@ class ThirdspaceCarrier extends BaseShip{
 		$projection->addProjector($projector);
 		$this->addFrontSystem($projector);		
 		$this->addFrontSystem($projection);
-        $this->addFrontSystem(new PsionicLance(5, 0, 0, 300, 60));
-        $this->addFrontSystem(new PsionicLance(5, 0, 0, 300, 60));
         $this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 240, 60));
         $this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 240, 60));
         $this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 300, 120));
-        $this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 300, 120));        
-        $this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 240, 60)); 
-        $this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 240, 60)); 
-        $this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 300, 120));        
+        $this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 240, 60));        
+        $this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 300, 120)); 
         $this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 300, 120));                         	          	
         $this->addFrontSystem(new GraviticThruster(6, 20, 0, 8, 1));
         $this->addFrontSystem(new GraviticThruster(6, 20, 0, 8, 1));           
@@ -74,7 +70,7 @@ class ThirdspaceCarrier extends BaseShip{
         $this->addAftSystem(new PsionicConcentrator(4, 0, 0, 120, 300));
         $this->addAftSystem(new PsionicConcentrator(4, 0, 0, 60, 240));         
         $this->addAftSystem(new PsionicConcentrator(4, 0, 0, 120, 300)); 
-        $this->addAftSystem(new PsionicConcentrator(4, 0, 0, 60, 240));         
+        $this->addAftSystem(new PsionicConcentrator(4, 0, 0, 60, 240));        
         $this->addAftSystem(new PsionicConcentrator(4, 0, 0, 60, 240));                         
         $this->addAftSystem(new GraviticThruster(5, 24, 0, 8, 2));
         $this->addAftSystem(new GraviticThruster(5, 24, 0, 8, 2));
@@ -87,8 +83,8 @@ class ThirdspaceCarrier extends BaseShip{
 		$projection->addProjector($projector);
 		$this->addLeftSystem($projector);		
 		$this->addLeftSystem($projection);
-		$this->addLeftSystem(new PsionicTorpedo(5, 0, 0, 240, 360));
-		$this->addLeftSystem(new PsionicTorpedo(5, 0, 0, 240, 360));   		                  
+		$this->addLeftSystem(new PsionicLance(5, 0, 0, 240, 360));
+		$this->addLeftSystem(new PsionicLance(5, 0, 0, 180, 300));   		                  
         $this->addLeftSystem(new PsionicConcentrator(4, 0, 0, 180, 300));
         $this->addLeftSystem(new PsionicConcentrator(4, 0, 0, 180, 300));
         $this->addLeftSystem(new PsionicConcentrator(4, 0, 0, 180, 300));          
@@ -109,8 +105,8 @@ class ThirdspaceCarrier extends BaseShip{
 		$projection->addProjector($projector);
 		$this->addRightSystem($projector);		
 		$this->addRightSystem($projection);
- 		$this->addRightSystem(new PsionicTorpedo(5, 0, 0, 0, 120));
- 		$this->addRightSystem(new PsionicTorpedo(5, 0, 0, 0, 120)); 		
+ 		$this->addRightSystem(new PsionicLance(5, 0, 0, 0, 120));
+ 		$this->addRightSystem(new PsionicLance(5, 0, 0, 60, 180)); 		
         $this->addRightSystem(new PsionicConcentrator(4, 0, 0, 60, 180));                  
         $this->addRightSystem(new PsionicConcentrator(4, 0, 0, 60, 180)); 
         $this->addRightSystem(new PsionicConcentrator(4, 0, 0, 60, 180));          
