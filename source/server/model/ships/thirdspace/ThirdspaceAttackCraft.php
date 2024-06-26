@@ -54,7 +54,7 @@ class ThirdspaceAttackCraft extends LCV{ //Actually an LCV.
 	$this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 330, 150));
 			
 	$projection = new ThirdspaceShieldProjection(2, 60, 55, 0, 360, 'C');//: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R
-	$projector = new ThirdspaceShieldProjector(6, 12, 4, 3, 0, 360, 'C'); //: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R
+	$projector = new ThirdspaceShieldProjector(6, 12, 4, 3, 0, 360, 'A'); //: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R
 	$projection->addProjector($projector);
 	$this->addAftSystem($projector);
 	$this->addAftSystem($projection);

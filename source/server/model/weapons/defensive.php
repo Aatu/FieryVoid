@@ -717,15 +717,15 @@ class ThirdspaceShieldProjection extends Shield implements DefensiveSystem { //d
 
 		public function setSystemDataWindow($turn){
 			parent::setSystemDataWindow($turn);  
-//			$absorb = $this->output - $this->armour;
 			$this->data["Special"] = "Defensive system which absorbs damage from incoming shots within its arc.";
 			$this->data["Special"] .= "<br>Can absorb up to its maximum capacity before allowing damage to ship.";		
 			$this->data["Special"] .= "<br>Shield system's structure represents damage capacity, if it is reduced to zero system will cease to function.";
 			$this->data["Special"] .= "<br>Can't be destroyed unless associated structure block is also destroyed.";
 			$this->data["Special"] .= "<br>Cannot be flown under, and does not reduce the damage dealt or hit chance of enemy weapons.";
 			$this->data["Special"] .= "<br>Has an Armor value of "  . $this->armour . ".";				
-			
+			$this->data["Max Strength"] = $this->output;			
 			$this->outputDisplay = $this->getRemainingCapacity();//override on-icon display default
+//			$this->outputDisplay = $this->getRemainingCapacity() . '/' . $this->output;//override on-icon display default			
 		}	
 		
 		public function getRemainingCapacity(){
