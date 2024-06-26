@@ -685,7 +685,7 @@ class ThirdspaceShieldProjection extends Shield implements DefensiveSystem { //d
 	    public $primary = true;
 		public $isPrimaryTargetable = false; //shouldn't be targetable at all, in fact!
 		public $isTargetable = false; //cannot be targeted ever!
-	    public $iconPath = "TrekShieldProjection.png"; //overridden anyway - to indicate proper direction
+	    public $iconPath = "ThirdspaceShieldF.png"; //overridden anyway - to indicate proper direction
 	    
 		protected $possibleCriticals = array(); //no criticals possible
 		
@@ -698,7 +698,7 @@ class ThirdspaceShieldProjection extends Shield implements DefensiveSystem { //d
 		
 	    
 	    function __construct($armor, $maxhealth, $rating, $startArc, $endArc, $side = 'F'){ //parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
-			$this->iconPath = 'TrekShieldProjection' . $side . '.png';
+			$this->iconPath = 'ThirdspaceShield' . $side . '.png';
 			parent::__construct($armor, $maxhealth, 0, $rating, $startArc, $endArc);
 			$this->output=$rating;//output is displayed anyway, make it show something useful... in this case - number of points absorbed per hit
 				}
@@ -836,7 +836,7 @@ class ThirdspaceShieldProjector  extends Shield implements DefensiveSystem { //d
 	    public $name = "ThirdspaceShieldProjector";
 	    public $displayName = "Shield Projector";
 		public $isPrimaryTargetable = false; //projector can be targeted even on PRIMARY, like a weapon!
-	    public $iconPath = "TrekShieldProjectorF.png"; //overridden anyway - to indicate proper direction
+	    public $iconPath = "ThirdspaceProjectorF.png"; //overridden anyway - to indicate proper direction
 	    public $boostable = true; //$this->boostEfficiency and $this->maxBoostLevel in __construct()  
 		public $boostEfficiency = 4;
 	    public $baseOutput = 0; //base output, before boost
@@ -850,7 +850,7 @@ class ThirdspaceShieldProjector  extends Shield implements DefensiveSystem { //d
 
 	    
 	    function __construct($armor, $maxhealth, $power, $rating, $startArc, $endArc, $side = 'F'){ //parameters: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R/C suggests whether to use left or right graphics
-			$this->iconPath = 'TrekShieldProjector' . $side . '.png';
+			$this->iconPath = 'ThirdspaceProjector' . $side . '.png';
             if ( $power == 0 ){
                 $power = 4;
             }			
