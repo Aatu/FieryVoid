@@ -65,7 +65,7 @@ class ThirdspaceBattleScout extends BaseShip{
         $this->addFrontSystem(new GraviticThruster(6, 20, 0, 8, 1));             
 			
 		
-		$projection = new ThirdspaceShield(3, 110, 110, 0, 360, 'A');//: $armor, $startHealth, $maxRating, $arc from/to - F/A/L/R
+		$projection = new ThirdspaceShield(3, 110, 110, 0, 360, 'C');//: $armor, $startHealth, $maxRating, $arc from/to - F/A/L/R
 		$projector = new ThirdspaceShieldProjector(6, 24, 4, 3, 0, 360, 'A'); //: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R 
 		$projection->addProjector($projector);
 		$this->addAftSystem($projector);
