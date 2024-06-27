@@ -679,8 +679,8 @@ class HeavyInterceptorBattery extends InterceptorMkI{
 }  //end of class HeavyInterceptorBattery
 
 //Adding Thirdspace as unique systems to use different icon and allow modifictions from the Trek systems
-class ThirdspaceShieldProjection extends Shield implements DefensiveSystem { //defensive values of zero, but still formally there to display arcs!
-	    public $name = "ThirdspaceShieldProjection";
+class ThirdspaceShield extends Shield implements DefensiveSystem { //defensive values of zero, but still formally there to display arcs!
+	    public $name = "ThirdspaceShield";
 	    public $displayName = "Shield Projection";
 	    public $primary = true;
 		public $isPrimaryTargetable = false; //shouldn't be targetable at all, in fact!
@@ -697,10 +697,10 @@ class ThirdspaceShieldProjection extends Shield implements DefensiveSystem { //d
 		protected $doCountForCombatValue = false;		//To ignore projection for combat value calculations
 		
 	    
-	    function __construct($armor, $maxhealth, $rating, $startArc, $endArc, $side = 'F'){ //parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
+	    function __construct($armor, $startHealth, $maxRating, $startArc, $endArc, $side = 'F'){ //parameters: $armor, $startHealth, $maxRating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
 			$this->iconPath = 'ThirdspaceShield' . $side . '.png';
-			parent::__construct($armor, $maxhealth, 0, $rating, $startArc, $endArc);
-			$this->output=$rating;//output is displayed anyway, make it show something useful... in this case - number of points absorbed per hit
+			parent::__construct($armor, $startHealth, 0, $maxRating, $startArc, $endArc);
+			$this->output=$maxRating;//output is displayed anyway, make it show something useful... in this case - number of points absorbed per hit
 				}
 		
 		
@@ -723,7 +723,7 @@ class ThirdspaceShieldProjection extends Shield implements DefensiveSystem { //d
 			$this->data["Special"] .= "<br>Can't be destroyed unless associated structure block is also destroyed.";
 			$this->data["Special"] .= "<br>Cannot be flown under, and does not reduce the damage dealt or hit chance of enemy weapons.";
 			$this->data["Special"] .= "<br>Has an Armor value of "  . $this->armour . ".";				
-			$this->data["Max Strength"] = $this->output;			
+			$this->data["Max Strength"] = $this->output;//Output is basically the mac strength of shield			
 			$this->outputDisplay = $this->getRemainingCapacity();//override on-icon display default
 //			$this->outputDisplay = $this->getRemainingCapacity() . '/' . $this->output;//override on-icon display default			
 		}	
@@ -737,7 +737,7 @@ class ThirdspaceShieldProjection extends Shield implements DefensiveSystem { //d
 		}
 		
 		public function absorbDamage($ship,$gamedata,$value){ //or dissipate, with negative value
-			$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $value, 0, 0, -1, false, false, "Absorb/Regenerate!", "ThirdspaceShieldProjection");
+			$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $value, 0, 0, -1, false, false, "Absorb/Regenerate!", "ThirdspaceShield");
 			$damageEntry->updated = true;
 			$this->damage[] = $damageEntry;
 		}
@@ -770,7 +770,7 @@ class ThirdspaceShieldProjection extends Shield implements DefensiveSystem { //d
 				$absorbedFreely = 0;
 				//first, armor takes part
 				$absorbedFreely = min($this->armour, $damageToAbsorb);
-	//			$damageToAbsorb += -$absorbedFreely;
+				$damageToAbsorb += -$absorbedFreely;//Re-added 26.6.24
 				//next, actual absorbtion
 				$absorbedDamage = min($this->output - $this->armour , $remainingCapacity, $damageToAbsorb ); //no more than output (modified by already accounted for armor); no more than remaining capacity; no more than damage incoming
 				$damageToAbsorb += -$absorbedDamage;

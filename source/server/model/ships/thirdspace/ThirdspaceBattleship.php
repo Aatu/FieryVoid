@@ -44,7 +44,7 @@ class ThirdspaceBattleship extends BaseShip{
         $this->addPrimarySystem(new ThirdspaceSelfRepair(7, 24, 10)); //armor, structure, output 
 		$this->addPrimarySystem(new JumpEngine(6, 24, 4, 5));//Presumably have access to hyperspace, or possess some other form of FTL travel that this system represents.          		  		
       
-		$projection = new ThirdspaceShieldProjection(4, 150, 150, 330, 30, 'F');//: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R
+		$projection = new ThirdspaceShield(4, 150, 150, 330, 30, 'F');//: $armor, $startHealth, $maxRating, $arc from/to - F/A/L/R
 		$projector = new ThirdspaceShieldProjector(6, 24, 0, 4, 330, 30, 'F'); //: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R 
 		$projection->addProjector($projector);
 		$this->addFrontSystem($projector);		
@@ -62,7 +62,7 @@ class ThirdspaceBattleship extends BaseShip{
         $this->addFrontSystem(new GraviticThruster(6, 20, 0, 8, 1));           
 			
 		
-		$projection = new ThirdspaceShieldProjection(4, 120, 120, 0, 360, 'A');//: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R
+		$projection = new ThirdspaceShield(4, 120, 120, 0, 360, 'A');//: $armor, $startHealth, $maxRating, $arc from/to - F/A/L/R
 		$projector = new ThirdspaceShieldProjector(6, 24, 0, 4, 0, 360, 'A'); //: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R 
 		$projection->addProjector($projector);
 		$this->addAftSystem($projector);
@@ -79,7 +79,7 @@ class ThirdspaceBattleship extends BaseShip{
         $this->addAftSystem(new GraviticThruster(5, 24, 0, 8, 2));       
        
        
-        $projection = new ThirdspaceShieldProjection(4, 150, 150, 210, 330, 'L');//: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R
+        $projection = new ThirdspaceShield(4, 150, 150, 210, 330, 'L');//: $armor, $startHealth, $maxRating, $arc from/to - F/A/L/R
 		$projector = new ThirdspaceShieldProjector(6, 24, 0, 4, 210, 330, 'L'); //: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R 
 		$projection->addProjector($projector);
 		$this->addLeftSystem($projector);		
@@ -100,7 +100,7 @@ class ThirdspaceBattleship extends BaseShip{
         $this->addLeftSystem($LCVRail);                      
             
             
-        $projection = new ThirdspaceShieldProjection(4, 150, 150, 30, 150, 'R');//: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R
+        $projection = new ThirdspaceShield(4, 150, 150, 30, 150, 'R');//: $armor, $startHealth, $maxRating, $arc from/to - F/A/L/R
 		$projector = new ThirdspaceShieldProjector(6, 24, 0, 4, 30, 150, 'R'); //: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R 
 		$projection->addProjector($projector);
 		$this->addRightSystem($projector);		

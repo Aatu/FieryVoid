@@ -231,13 +231,13 @@ var FtrInterdictor = function FtrInterdictor(json, ship) {
 FtrInterdictor.prototype = Object.create(Weapon.prototype);
 FtrInterdictor.prototype.constructor = FtrInterdictor;
 
-var ThirdspaceShieldProjection = function ThirdspaceShieldProjection(json, ship) {
+var ThirdspaceShield = function ThirdspaceShield(json, ship) {
     ShipSystem.call(this, json, ship);
     this.defensiveType = "none";
 };
-ThirdspaceShieldProjection.prototype = Object.create(ShipSystem.prototype);
-ThirdspaceShieldProjection.prototype.constructor = ThirdspaceShieldProjection;
-ThirdspaceShieldProjection.prototype.getDefensiveHitChangeMod = function (target, shooter, weapon) {
+ThirdspaceShield.prototype = Object.create(ShipSystem.prototype);
+ThirdspaceShield.prototype.constructor = ThirdspaceShield;
+ThirdspaceShield.prototype.getDefensiveHitChangeMod = function (target, shooter, weapon) {
     //this is made to be a shield just to display arc visually, no actual protection
     return 0;
 };
@@ -246,6 +246,9 @@ var ThirdspaceShieldProjector = function ThirdspaceShieldProjector(json, ship) {
     ShipSystem.call(this, json, ship);
     this.defensiveType = "none";
 };
+
+
+
 ThirdspaceShieldProjector.prototype = Object.create(ShipSystem.prototype);
 ThirdspaceShieldProjector.prototype.constructor = ThirdspaceShieldProjector;
 ThirdspaceShieldProjector.prototype.hasMaxBoost = function () {

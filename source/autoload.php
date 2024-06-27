@@ -3271,7 +3271,7 @@ spl_autoload_register(
 				//Thirdspace
 				'psychicfield' => '/server/model/weapons/specialWeapons.php',
 				'psychicfieldhandler' => '/server/model/weapons/specialWeapons.php',
-				'thirdspaceshieldprojection' =>	'/server/model/weapons/defensive.php',
+				'thirdspaceshield' =>	'/server/model/weapons/defensive.php',
 				'thirdspaceshieldprojector' =>	'/server/model/weapons/defensive.php',
 				'advancedsingularitydrive' => '/server/model/systems/baseSystems.php',
 				'psionicconcentrator' => '/server/model/weapons/specialWeapons.php',
