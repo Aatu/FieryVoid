@@ -1851,6 +1851,7 @@ spl_autoload_register(
                 'makarvalkar' => '/server/model/ships/ZNexusMakar/MakarValkar.php',					
                 'qomyominauxcarrier' => '/server/model/ships/ZNexusMakar/QomYominAuxCarrier.php',					
                 'qomyominauxdestroyer' => '/server/model/ships/ZNexusMakar/QomYominAuxDestroyer.php',					
+                'qomyominauxdestroyeralt' => '/server/model/ships/ZNexusMakar/QomYominAuxDestroyerAlt.php',					
                 'qomyominhauler' => '/server/model/ships/ZNexusMakar/QomYominHauler.php',					
                 'qomyominlightscout' => '/server/model/ships/ZNexusMakar/QomYominLightScout.php',					
                 'qomyominqolat' => '/server/model/ships/ZNexusMakar/QomYominQolAt.php',					
