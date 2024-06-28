@@ -1284,7 +1284,7 @@ class Weapon extends ShipSystem
 			$firecontrol += $bonusFireControl; //Add to $firecontrol.
 		}
 
-//		if ($shooter->hasSpecialAbility("TargetingArray") || TargetingArrayHandler::targetingArraysExist()){ //Does shooter have Targeting Array, or could Escort Arrays exist in game?	
+
 		if (TargetingArrayHandler::targetingArraysExist()){ //Do Targeting Array exist in game?		
 			$mod += TargetingArrayHandler::getHitBonus($gamedata, $fireOrder, $shooter, $target);
 		}

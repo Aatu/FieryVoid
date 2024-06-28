@@ -5763,7 +5763,9 @@ class TargetingArrayHandler{
 	
 	//Called during calculateHitBase whenever a weapon is fired at a target and shooter has Targeting Arrays.	
 	public static function getHitBonus($gamedata, $fireOrder, $shooter, $target){ 
-	
+
+		if($shooter instanceof FighterFlight) return 0; //Fighters can't benefit from Targeting Arrays!
+				
 		//apparently ships may be loaded multiple times... make sure Targeting Arrays in $targetingArrays belong to current gamedata!
 		$tmpArrays = array();
 		foreach(TargetingArrayHandler::$targetingArrays as $targetArray){
