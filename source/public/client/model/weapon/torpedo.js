@@ -78,11 +78,11 @@ PsionicTorpedo.prototype.initBoostableInfo = function () {
             this.data["Boostlevel"] = '0';
             break;
         case 1:
-            this.data["Damage"] = '16 - 23';
+            this.data["Damage"] = '17 - 24';
             this.data["Boostlevel"] = '1';
             break;
         case 2:
-            this.data["Damage"] = '18 - 25';
+            this.data["Damage"] = '20 - 27';
             this.data["Boostlevel"] = '2';
             break;          
         default:
