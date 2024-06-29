@@ -39942,7 +39942,7 @@ var SystemInfoButtons = function (_React$Component) {
 			webglScene.customEvent('CloseSystemInfo');
 		}
 
-		/*switch Adaptive Armor, Hyach Computer or Specilaists display to next damage/FC class*/
+		/*switch Adaptive Armor, Hyach Computer or Specialists display to next damage/FC class*/
 
 	}, {
 		key: "nextCurrClass",
@@ -40185,15 +40185,77 @@ var SystemInfoButtons = function (_React$Component) {
 			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 		}
 
+		/*Thirdspace Shield increase health*/
+
+	}, {
+		key: "TSShieldIncrease10",
+		value: function TSShieldIncrease10(e) {
+			e.stopPropagation();e.preventDefault();
+			var _props29 = this.props,
+			    ship = _props29.ship,
+			    system = _props29.system;
+
+			system.doIncrease10();
+			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+		}
+	}, {
+		key: "TSShieldIncrease",
+		value: function TSShieldIncrease(e) {
+			e.stopPropagation();e.preventDefault();
+			var _props30 = this.props,
+			    ship = _props30.ship,
+			    system = _props30.system;
+
+			system.doIncrease();
+			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+		}
+		/*Thirdspace Shield decrease health*/
+
+	}, {
+		key: "TSShieldDecrease",
+		value: function TSShieldDecrease(e) {
+			e.stopPropagation();e.preventDefault();
+			var _props31 = this.props,
+			    ship = _props31.ship,
+			    system = _props31.system;
+
+			system.doDecrease();
+			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+		}
+	}, {
+		key: "TSShieldDecrease10",
+		value: function TSShieldDecrease10(e) {
+			e.stopPropagation();e.preventDefault();
+			var _props32 = this.props,
+			    ship = _props32.ship,
+			    system = _props32.system;
+
+			system.doDecrease10();
+			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+		}
+		/*Thirdspace Shield Generator Presets*/
+
+	}, {
+		key: "TSShieldGenSelect",
+		value: function TSShieldGenSelect(e) {
+			e.stopPropagation();e.preventDefault();
+			var _props33 = this.props,
+			    ship = _props33.ship,
+			    system = _props33.system;
+
+			system.doSelect();
+			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+		}
+
 		/*Self Repair - display next system in need of repairs*/
 
 	}, {
 		key: "nextSRsystem",
 		value: function nextSRsystem(e) {
 			e.stopPropagation();e.preventDefault();
-			var _props29 = this.props,
-			    ship = _props29.ship,
-			    system = _props29.system;
+			var _props34 = this.props,
+			    ship = _props34.ship,
+			    system = _props34.system;
 
 			system.getNextSystem();
 			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
@@ -40204,9 +40266,9 @@ var SystemInfoButtons = function (_React$Component) {
 		key: "SRPriorityUp",
 		value: function SRPriorityUp(e) {
 			e.stopPropagation();e.preventDefault();
-			var _props30 = this.props,
-			    ship = _props30.ship,
-			    system = _props30.system;
+			var _props35 = this.props,
+			    ship = _props35.ship,
+			    system = _props35.system;
 
 			system.setRepairPriority(20);
 			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
@@ -40215,9 +40277,9 @@ var SystemInfoButtons = function (_React$Component) {
 		key: "SRPriorityDown",
 		value: function SRPriorityDown(e) {
 			e.stopPropagation();e.preventDefault();
-			var _props31 = this.props,
-			    ship = _props31.ship,
-			    system = _props31.system;
+			var _props36 = this.props,
+			    ship = _props36.ship,
+			    system = _props36.system;
 
 			system.setRepairPriority(0);
 			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
@@ -40226,9 +40288,9 @@ var SystemInfoButtons = function (_React$Component) {
 		key: "SRPriorityCancel",
 		value: function SRPriorityCancel(e) {
 			e.stopPropagation();e.preventDefault();
-			var _props32 = this.props,
-			    ship = _props32.ship,
-			    system = _props32.system;
+			var _props37 = this.props,
+			    ship = _props37.ship,
+			    system = _props37.system;
 
 			system.setRepairPriority(-1);
 			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
@@ -40236,10 +40298,10 @@ var SystemInfoButtons = function (_React$Component) {
 	}, {
 		key: "render",
 		value: function render() {
-			var _props33 = this.props,
-			    ship = _props33.ship,
-			    selectedShip = _props33.selectedShip,
-			    system = _props33.system;
+			var _props38 = this.props,
+			    ship = _props38.ship,
+			    selectedShip = _props38.selectedShip,
+			    system = _props38.system;
 
 
 			if (!canDoAnything) {
@@ -40278,6 +40340,15 @@ var SystemInfoButtons = function (_React$Component) {
 				canSpecunselect(ship, system) && React.createElement(Button, { onClick: this.Specunselect.bind(this), img: "./img/systemicons/Specialistclasses/unselect.png" }),
 				canSpecincrease(ship, system) && React.createElement(Button, { onClick: this.Specincrease.bind(this), img: "./img/systemicons/Specialistclasses/iconPlus.png" }),
 				canSpecdecrease(ship, system) && React.createElement(Button, { onClick: this.Specdecrease.bind(this), img: "./img/systemicons/Specialistclasses/iconMinus.png" }),
+				canTSShieldIncrease(ship, system) && React.createElement(Button, { onClick: this.TSShieldIncrease10.bind(this), img: "./img/systemicons/ShieldGenclasses/iconPlus10.png" }),
+				canTSShieldIncrease(ship, system) && React.createElement(Button, { onClick: this.TSShieldIncrease.bind(this), img: "./img/systemicons/BFCPclasses/iconPlus.png" }),
+				canTSShieldDecrease(ship, system) && React.createElement(Button, { onClick: this.TSShieldDecrease.bind(this), img: "./img/systemicons/BFCPclasses/iconMinus.png" }),
+				canTSShieldDecrease(ship, system) && React.createElement(Button, { onClick: this.TSShieldDecrease10.bind(this), img: "./img/systemicons/ShieldGenclasses/iconMinus10.png" }),
+				canTSShieldGendisplayCurrClass(ship, system) && React.createElement(Button, { title: getTSShieldGencurrClassName(ship, system), img: getTSShieldGencurrClassImg(ship, system) }),
+				canTSShieldGendisplayCurrClass(ship, system) && React.createElement(Button, { title: "prev", onClick: this.prevCurrClass.bind(this), img: "./img/systemicons/Specialistclasses/iconPrev.png" }),
+				canTSShieldGendisplayCurrClass(ship, system) && React.createElement(Button, { title: "next", onClick: this.nextCurrClass.bind(this), img: "./img/systemicons/Specialistclasses/iconNext.png" }),
+				"     ",
+				canTSShieldGenSelect(ship, system) && React.createElement(Button, { onClick: this.TSShieldGenSelect.bind(this), img: "./img/systemicons/Specialistclasses/select.png" }),
 				canSRdisplayCurrSystem(ship, system) && React.createElement(Button, { title: "next", onClick: this.nextSRsystem.bind(this), img: "./img/systemicons/AAclasses/iconNext.png" }),
 				canSRdisplayCurrSystem(ship, system) && React.createElement(Button, { title: getSRdescription(ship, system), img: getSRicon(ship, system) }),
 				canSRdisplayCurrSystem(ship, system) && React.createElement(Button, { title: "Highest priority", onClick: this.SRPriorityUp.bind(this), img: "./img/iconSRHigh.png" }),
@@ -40364,6 +40435,33 @@ var canSpecdecrease = function canSpecdecrease(ship, system) {
 	return canSpec(ship, system) && system.canDecrease() != '';
 };
 
+//can do something with Thirdspace Shields
+var canChangeShield = function canChangeShield(ship, system) {
+	return gamedata.gamephase === 1 && system.name === 'ThirdspaceShield';
+};
+var canTSShieldIncrease = function canTSShieldIncrease(ship, system) {
+	return canChangeShield(ship, system) && system.canIncrease() != '';
+};
+var canTSShieldDecrease = function canTSShieldDecrease(ship, system) {
+	return canChangeShield(ship, system) && system.canDecrease() != '';
+};
+//can do something with Thirdspace Shield Generator
+var canShieldGen = function canShieldGen(ship, system) {
+	return gamedata.gamephase === 1 && system.name === 'ThirdspaceShieldGenerator';
+};
+var canTSShieldGendisplayCurrClass = function canTSShieldGendisplayCurrClass(ship, system) {
+	return canShieldGen(ship, system) && system.getCurrClass() != '';
+};
+var getTSShieldGencurrClassImg = function getTSShieldGencurrClassImg(ship, system) {
+	return './img/systemicons/ShieldGenclasses/' + system.getCurrClass() + '.png';
+};
+var getTSShieldGencurrClassName = function getTSShieldGencurrClassName(ship, system) {
+	return system.getCurrClass();
+};
+var canTSShieldGenSelect = function canTSShieldGenSelect(ship, system) {
+	return canShieldGen(ship, system) && system.canSelect() != '';
+};
+
 //can do something with Self Repair...
 var canSRdisplayCurrSystem = function canSRdisplayCurrSystem(ship, system) {
 	return gamedata.gamephase === 1 && system.name == 'SelfRepair' && system.getCurrSystem() >= 0;
@@ -40376,7 +40474,7 @@ var getSRicon = function getSRicon(ship, system) {
 };
 
 var canDoAnything = exports.canDoAnything = function canDoAnything(ship, system) {
-	return canOffline(ship, system) || canOnline(ship, system) || canOverload(ship, system) || canStopOverload(ship, system) || canBoost(ship, system) || canDeBoost(ship, system) || canAddShots(ship, system) || canReduceShots(ship, system) || canRemoveFireOrder(ship, system) || canChangeFiringMode(ship, system) || canSelfIntercept(ship, system) || canAA(ship, system) || canBFCP(ship, system) || canSpec(ship, system) || canSRdisplayCurrSystem(ship, system);
+	return canOffline(ship, system) || canOnline(ship, system) || canOverload(ship, system) || canStopOverload(ship, system) || canBoost(ship, system) || canDeBoost(ship, system) || canAddShots(ship, system) || canReduceShots(ship, system) || canRemoveFireOrder(ship, system) || canChangeFiringMode(ship, system) || canSelfIntercept(ship, system) || canAA(ship, system) || canBFCP(ship, system) || canSpec(ship, system) || canChangeShield(ship, system) || canShieldGen(ship, system) || canSRdisplayCurrSystem(ship, system);
 };
 
 var canOffline = function canOffline(ship, system) {
