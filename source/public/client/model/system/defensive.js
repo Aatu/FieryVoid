@@ -231,6 +231,7 @@ var FtrInterdictor = function FtrInterdictor(json, ship) {
 FtrInterdictor.prototype = Object.create(Weapon.prototype);
 FtrInterdictor.prototype.constructor = FtrInterdictor;
 
+
 var ThirdspaceShield = function ThirdspaceShield(json, ship) {
     ShipSystem.call(this, json, ship);
     this.defensiveType = "none";
@@ -242,12 +243,165 @@ ThirdspaceShield.prototype.getDefensiveHitChangeMod = function (target, shooter,
     return 0;
 };
 
+ThirdspaceShield.prototype.initializationUpdate = function() {
+	var ship = this.ship;	
+	this.outputDisplay = this.currentHealth;
+	return this;
+};
+
+ThirdspaceShield.prototype.canIncrease = function () { //Can increase if not at max / destroyed.
+ //Check if it is at maxHealth / not destroyed etc / Is there spare capacity in Generator?	
+ 
+ 	var ship = this.ship;
+ 	if (shipManager.systems.isDestroyed(ship, this)) return false; //Shield section has been destroyed and so has shield.
+	if(this.currentHealth >= this.maxStrength) return false; //Shield is at maximum output.
+		
+ 	var ship = this.ship;	
+	for (var i in ship.systems) {
+		var system = ship.systems[i];
+
+		if (system instanceof ThirdspaceShieldGenerator) {
+			var generator = system; //Find generator
+		}
+	}	
+
+	if(!generator) return false; //This Thirdspace ship has no generator, can't move shields around!
+		
+	return true;		
+};			
+	
+ThirdspaceShield.prototype.canDecrease = function () { //can decrease if not at zero / destroyed.
+ //Check if it is at 0 health / not destroyed etc
+ 	var ship = this.ship;
+ 	if (shipManager.systems.isDestroyed(ship, this)) return false; //Section has been destroyed and so has shield.
+	if(this.currentHealth <= 1) return false; //Shield cannot be reduced more.
+
+	var ship = this.ship;	
+	for (var i in ship.systems) {
+		var system = ship.systems[i];
+
+		if (system instanceof ThirdspaceShieldGenerator) {
+			var generator = system; //Find generator
+		}
+	}	
+
+	if(!generator) return false; //This Thirdspace ship has no generator, can't move shields around!	
+	
+	return true;
+};
+
+
+ThirdspaceShield.prototype.doIncrease = function () { //	
+//Increase this.maxhealth by 5 (or lower if less available) + decrease Shield Generator by same amount.
+	
+ 	var ship = this.ship;	
+	for (var i in ship.systems) {
+		var system = ship.systems[i];
+
+		if (system instanceof ThirdspaceShieldGenerator) {
+			var generator = system; //Find generator
+		}
+	}	
+
+	var shieldHealth = this.currentHealth; //
+	var shieldHeadroom = this.maxStrength - shieldHealth;//How much room for increase does shield have?
+		
+	if(shieldHeadroom >= 1){		
+		this.currentHealth += 1;
+		generator.storedCapacity -= 1;
+	}
+
+};
+
+ThirdspaceShield.prototype.doIncrease10 = function () { //	
+//Increase this.maxhealth by 5 (or lower if less available) + decrease Shield Generator by same amount.
+	
+ 	var ship = this.ship;	
+	for (var i in ship.systems) {
+		var system = ship.systems[i];
+
+		if (system instanceof ThirdspaceShieldGenerator) {
+			var generator = system; //Find generator
+		}
+	}	
+
+	var shieldHealth = this.currentHealth; 
+	var shieldHeadroom = this.maxStrength - shieldHealth;//How much room for increase does shield have?
+		
+	if(shieldHeadroom >= 10){		
+		this.currentHealth += 10;
+		generator.storedCapacity -= 10;
+	}else{ //Just increase by how much you can!
+		this.currentHealth += shieldHeadroom;
+		generator.storedCapacity -= shieldHeadroom;		
+	}	
+
+};
+
+
+ThirdspaceShield.prototype.doDecrease = function () { 
+//Reduce this.maxhealth by 5 (or lower if less available) + increase Shield Generator by same amount.
+	
+ 	var ship = this.ship;	
+	for (var i in ship.systems) {
+		var system = ship.systems[i];
+
+		if (system instanceof ThirdspaceShieldGenerator) {
+			var generator = system; //Find generator
+		}
+	}
+
+	var shieldHealth = this.currentHealth;
+	if(shieldHealth > 1){		
+		this.currentHealth -= 1;
+		generator.storedCapacity += 1;
+	}
+
+};
+
+ThirdspaceShield.prototype.doDecrease10 = function () { 
+//Reduce this.maxhealth by 5 (or lower if less available) + increase Shield Generator by same amount.
+	
+ 	var ship = this.ship;	
+	for (var i in ship.systems) {
+		var system = ship.systems[i];
+
+		if (system instanceof ThirdspaceShieldGenerator) {
+			var generator = system; //Find generator
+		}
+	}
+
+	var shieldHealth = this.currentHealth;
+	if(shieldHealth > 10){		
+		this.currentHealth -= 10;
+		generator.storedCapacity += 10;
+	}else{
+		var shieldIncrement = Math.max(0, shieldHealth-1); //Value is 10 or under, remove 1 point to prevent shield going to 0, then decrease.
+		this.currentHealth -= shieldIncrement;
+		generator.storedCapacity += shieldIncrement;		
+	}	
+};
+
+
+ThirdspaceShield.prototype.doIndividualNotesTransfer = function () { //prepare individualNotesTransfer variable - if relevant for this particular system
+	this.individualNotesTransfer = Array();
+	//Now pass a note to create a damage entry that will either increase or decrease shields strength.
+	var startHealth = shipManager.systems.getRemainingHealth(this); //What was the health at start of Initial Orders?
+	var endHealth = this.currentHealth; //currentHealth is effectively the counter for where shield strength ends up.
+	var shieldChange = startHealth - endHealth;//What is the change that should go into Damage Entry. Positive if decreased, negative if increased.
+	
+	if(gamedata.gamephase == 1 && (shieldChange != 0)){
+		this.individualNotesTransfer.push(shieldChange); //Push change in shield strength to back end for Damage Entry creation if required e.g. over or under 0.
+	}
+	
+	return true;
+};
+
+
 var ThirdspaceShieldProjector = function ThirdspaceShieldProjector(json, ship) {
     ShipSystem.call(this, json, ship);
     this.defensiveType = "none";
 };
-
-
 
 ThirdspaceShieldProjector.prototype = Object.create(ShipSystem.prototype);
 ThirdspaceShieldProjector.prototype.constructor = ThirdspaceShieldProjector;

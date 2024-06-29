@@ -264,7 +264,8 @@ window.gamedata = {
 			var notLaunching = [];
 			var notSetAA = [];//available Adaptive Armor points remaining!
 			var notSetFC = [];//available BFCP points remaining for Hyach!
-		var powerSurplus = [];//power surplus
+//			var excessShield =[];//available shield power in Generator for Thirdspace!
+			var powerSurplus = [];//power surplus
 
             for (var ship in myShips) {
                 if (!myShips[ship].flight) {
@@ -286,6 +287,11 @@ window.gamedata = {
 								notSetFC.push(myShips[ship]);
 							}
 						}
+						/*else if (myShips[ship].systems[syst].name == "ThirdspaceShieldGenerator") {
+							if (myShips[ship].systems[syst].hasExcessCapacity()) {
+								excessShield.push(myShips[ship]);
+							}
+						}*/
                     }
 
                     if (shipManager.isDisabled(myShips[ship])) {
@@ -437,7 +443,16 @@ window.gamedata = {
                     html += "<br>";
                 }
                 html += "<br>";
-            }            
+            }
+   /*         if (excessShield.length > 0) {
+                html += "You have excess capacity remaining in your shield generator for the following units: ";
+                html += "<br>";
+                for (var ship in excessShield) {
+                    html += excessShield[ship].name + " (" + excessShield[ship].shipClass + ")";
+                    html += "<br>";
+                }
+                html += "<br>";
+            } */                           
             if (powerSurplus.length > 0) {
                 html += "Followed ships have unassigned Power reserves: ";
                 html += "<br>";
@@ -601,7 +616,7 @@ window.gamedata = {
                 return false;
             }		
 
-            var shipNames = shipManager.systems.getUnusedSpecialists();        	
+            shipNames = shipManager.systems.getUnusedSpecialists();        	
 
             if (shipNames.length > 0) {
                 var specialistsError = "The following ships have not selected Specialists:<br>";
@@ -614,7 +629,21 @@ window.gamedata = {
                 window.confirm.error(specialistsError, function () {});
                 return false;                
 			}		
-		
+
+            shipNames = shipManager.systems.checkShieldGenValue();
+
+            if (shipNames.length > 0) {
+                var shieldCapacityError = "The following ships have directed too much or too little power to their shields:<br>";
+
+                for (var i in shipNames) {
+                    var shipName = shipNames[i];
+                    shieldCapacityError += "- " + shipName + "<br>";
+                }
+                shieldCapacityError += "You need to change their allocation of shield power.";
+                window.confirm.error(shieldCapacityError, function () {});
+                return false;
+            }	
+            		
             var myShips = [];
 
             for (var ship in gamedata.ships) {

@@ -1304,3 +1304,204 @@ PlasmaBattery.prototype.doIndividualNotesTransfer = function () { //prepare indi
     this.individualNotesTransfer.push(this.powerStoredFront);
     return true;
 };
+
+
+var ThirdspaceShieldGenerator = function ThirdspaceShieldGenerator(json, ship) {
+    ShipSystem.call(this, json, ship);
+};
+ThirdspaceShieldGenerator.prototype = Object.create(ShipSystem.prototype);
+ThirdspaceShieldGenerator.prototype.constructor = ThirdspaceShieldGenerator;
+/*
+ThirdspaceShieldGenerator.prototype.hasExcessCapacity = function () { //Check if there is extra power still in Generator.
+	if(this.storedCapacity > 0) return true;
+		
+	return false;
+};
+*/
+ThirdspaceShieldGenerator.prototype.initializationUpdate = function() {
+	var ship = this.ship;	
+	this.outputDisplay = this.storedCapacity;
+	return this;
+};
+
+ThirdspaceShieldGenerator.prototype.getCurrClass = function () { //get current FC class for display; if none, find first!
+    if (this.presetCurrClass == ''){
+		var classes = this.shieldPresets; //
+		if (classes.length>0){
+			this.presetCurrClass = classes[0];
+		}
+	}
+	return this.presetCurrClass;
+};
+ThirdspaceShieldGenerator.prototype.nextCurrClass = function () { //get next FC class for display
+	this.getCurrClass();
+    if (this.presetCurrClass == '') return ''; //this would mean there are no FC classes whatsover!  Should never happen.
+	var classes = this.shieldPresets;
+	var currId = -1;
+	for (var i = 0; i < classes.length; i++) {
+		if (this.presetCurrClass == classes[i]){
+			currId = i+1;
+			break; //loop
+		}
+	}
+	if (currId >= classes.length) currId = 0;
+	this.presetCurrClass = classes[currId];
+	return this.presetCurrClass;
+};
+
+ThirdspaceShieldGenerator.prototype.prevCurrClass = function () { //get previous class for display, useful when selecting from 10+ Specialists!
+	this.getCurrClass();
+    if (this.presetCurrClass == '') return ''; //this would mean there are no classes whatsover!
+    	
+	var classes = this.shieldPresets;
+	var currId = -1;	
+	for (var i = 0; i < classes.length; i++) {
+		if (this.presetCurrClass == classes[i]){
+			currId = i-1;
+			break; //loop
+		}
+	}
+		
+	if (currId < 0) currId = classes.length-1;
+	this.presetCurrClass = classes[currId];
+	
+	
+	return this.presetCurrClass;
+};
+
+ThirdspaceShieldGenerator.prototype.canSelect = function () { //check if can increase rating for current class; can do if preallocated points are unused or allocated points are less than available 
+	//always needs to check that allocated are less than maximum and allocated total is less than total maximum
+	this.getCurrClass();
+    if (this.presetCurrClass == '') return false; //this would mean there are no Specialist classes whatsover!
+
+	return true;
+};
+
+ThirdspaceShieldGenerator.prototype.doSelect = function () { //check if can increase rating for current class; can do if preallocated points are unused or allocated points are less than available 
+	this.getCurrClass();
+    if (this.presetCurrClass == 'Equalise'){
+		this.doEqualise();
+	}else{
+		this.doPreset(this.presetCurrClass); 
+	}
+		
+	return;
+};
+/*
+ThirdspaceShieldGenerator.prototype.doIndividualNotesTransfer = function () { //prepare individualNotesTransfer variable - if relevant for this particular system	
+	this.individualNotesTransfer = Array();
+	//Now pass a note to create a damage entry that will either increase or decrease shields strength.
+	if(gamedata.gamephase == 1 && this.storedCapacity > 0){
+		var spareCapacity = this.storedCapacity;
+		this.individualNotesTransfer.push(spareCapacity); //Push change in shield strength to back end for Damage Entry creation if required e.g. over or under 0.
+	}
+	return true;
+};	
+*/
+ThirdspaceShieldGenerator.prototype.doEqualise = function () { //Check if there is extra power still in Generator.
+
+	var totalShieldPool = 0;
+	var shieldsAvailable = [];
+	
+	var ship = this.ship;	 	
+	for (var i = 0; i < ship.systems.length; i++) {
+		var system = ship.systems[i];
+
+	//Find total pool of shield energy
+	if (system instanceof ThirdspaceShield) {
+			if (shipManager.systems.isDestroyed(ship, system)) continue; //Shield is destroyed.			
+			totalShieldPool += system.currentHealth; //Add each shield's current health to the overall pool of shield energy.
+			system.currentHealth = 0;			
+			shieldsAvailable.push(system);
+		}
+	}
+	
+	//Now distribute accordingly!
+	if (totalShieldPool > 0 && shieldsAvailable.length > 1) { //There is energy to distribute, and shields to distribute to!
+		var noOfShields = shieldsAvailable.length;
+		var amountEachShield = Math.round(totalShieldPool / noOfShields);
+		
+		for (var j = 0; j < shieldsAvailable.length; j++) {
+			var shield = shieldsAvailable[j];			
+			var shieldHeadRoom = shield.maxStrength - shield.currentHealth;
+			shield.currentHealth += Math.min(amountEachShield, shieldHeadRoom);//Do not reinforce with more than it's able to hold!		
+		}
+	} 
+};
+
+ThirdspaceShieldGenerator.prototype.doPreset = function (presetCurrClass) { // Check if there is extra power still in Generator.
+	var totalShieldPool = 0;
+	var shieldsAvailable = [];
+	var priorityShield = null; // Single priority shield
+	var reinforceLocation = -1;
+
+	//Note which shield we are reinforcing.	
+	if(presetCurrClass == 'Forward') reinforceLocation = 1;
+	if(presetCurrClass == 'Starboard') reinforceLocation = 4;
+	if(presetCurrClass == 'Aft') reinforceLocation = 2;
+	if(presetCurrClass == 'Port') reinforceLocation = 3;						
+	
+	var ship = this.ship;
+	// Find total pool of shield energy		 	
+	for (var i = 0; i < ship.systems.length; i++) {
+		var system = ship.systems[i];
+		if (system instanceof ThirdspaceShield) {
+			if (system.location == 1 && shipManager.systems.isDestroyed(ship, system)) return; // Front Shield is destroyed, cannot reinforce!				
+			if (shipManager.systems.isDestroyed(ship, system)) continue; // Shield is destroyed.			
+			totalShieldPool += system.currentHealth; // Add each shield's current health to the overall pool of shield energy.
+			system.currentHealth = 0;
+			shieldsAvailable.push(system);
+		}
+	}
+	
+	// Now distribute accordingly!
+	if (totalShieldPool > 0 && shieldsAvailable.length > 1) { // There is energy to distribute and more than one shield!
+		var noOfShields = shieldsAvailable.length;
+		var remainingShields = noOfShields - 1;
+		var totalUnits = remainingShields + 2; // 1 unit for each remaining shield + 2 units for the double shield
+		var amountEachShield = Math.floor(totalShieldPool / totalUnits);
+		var prioritisedAmount = amountEachShield * 2;
+
+		for (var j = 0; j < shieldsAvailable.length; j++) {
+			var shield = shieldsAvailable[j];
+			
+			if (shield.location == reinforceLocation) { //This is the shield to reinforce!				
+				var shieldHeadRoom = shield.maxStrength - shield.currentHealth;
+				var amountToAdd = Math.min(prioritisedAmount, shieldHeadRoom);
+				shield.currentHealth += amountToAdd; // Do not reinforce with more than it's able to hold!
+				
+				var excessShield = prioritisedAmount - amountToAdd; // Find 'wasted' amount.
+				if (excessShield > 0) totalShieldPool += excessShield; // And subtract from total if any wasted.
+				priorityShield = shield; // Mark which shield is a priority.					
+			} else {
+				shield.currentHealth = amountEachShield;
+			}
+		}
+
+		// Handle any leftover energy that wasn't distributed due to rounding
+		var leftoverEnergy = totalShieldPool - (amountEachShield * remainingShields + prioritisedAmount);
+		if (leftoverEnergy > 0 && priorityShield) { // Distribute to Priority shield first, if we can.
+			var priorityHeadRoom = priorityShield.maxStrength - priorityShield.currentHealth;
+			var amountToAdd = Math.min(leftoverEnergy, priorityHeadRoom);
+			priorityShield.currentHealth += amountToAdd; // Do not reinforce with more than it's able to hold!				
+			leftoverEnergy -= amountToAdd; // Remove any spent from leftover energy.
+		}
+		
+		var leftoverSplit = Math.round(leftoverEnergy/remainingShields); //Divide remainder energy by number of remaining shields.			
+		if (leftoverEnergy > 0){//There is still some left, but Priority shield is maxxed out.
+			for (var k = 0; k < shieldsAvailable.length; k++) {
+				var shield = shieldsAvailable[k];		
+				var shieldHeadRoom = shield.maxStrength - shield.currentHealth;//Still need to check there's space altho there should be...
+				shield.currentHealth += Math.min(leftoverSplit, shieldHeadRoom);//Do not reinforce with more than it's able to hold!				
+				leftoverEnergy -= Math.min(leftoverSplit, shieldHeadRoom);//Reduce leftover
+				
+				if(leftoverEnergy <= 0) return;	//Nothing left to allocate, return.	
+			
+			}
+		}
+	}
+};
+
+
+
+
