@@ -3273,6 +3273,7 @@ spl_autoload_register(
 				'psychicfieldhandler' => '/server/model/weapons/specialWeapons.php',
 				'thirdspaceshield' =>	'/server/model/weapons/defensive.php',
 				'thirdspaceshieldprojector' =>	'/server/model/weapons/defensive.php',
+				'thirdspaceshieldgenerator' => '/server/model/systems/baseSystems.php',				
 				'advancedsingularitydrive' => '/server/model/systems/baseSystems.php',
 				'psionicconcentrator' => '/server/model/weapons/specialWeapons.php',
 				'heavypsioniclance' => 	'/server/model/weapons/specialWeapons.php',

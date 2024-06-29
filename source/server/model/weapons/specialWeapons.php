@@ -4510,12 +4510,12 @@ class PsychicField extends Weapon implements DefensiveSystem{ //Thirdspace weapo
 		    $this->range = $this->getAoE($turn);
 		      parent::setSystemDataWindow($turn);  
 //		      $this->data["AoE"] = $this->getAoE($turn);
-		      $this->data["Special"] = "This weapons automatically affects all units (friend or foe) in area of effect.  It should not be fired manually."; 
-		      $this->data["Special"] .= "<br>Affected Fighters have their Initiative reduced by 5 to 15 points, and their Hit Chance reduced by 5 - 10% for 1 turn.";  
-		      $this->data["Special"] .= "<br>Affected Ships have their their Hit Chance reduced by 5 - 10% for 1 turn if hit on structure, and suffer a potential critical hit on non-Structure systems.";  		      
-		      $this->data["Special"] .= "<br>Can be boosted at a cost 4 Power, each boost gives +1 AoE range, +1 Damage and +5 to Initiative and Hit Chance penalties."; 
+		      $this->data["Special"] = "Automatically affects all enemy units in range.  Cannot be fired manually."; 
+		      $this->data["Special"] .= "<br>Fighters have Initiative reduced by 5 - 15 points, and Hit Chances reduced by 5 - 10% next turn.";  
+		      $this->data["Special"] .= "<br>Ships have Hit Chances reduced by 5 - 10% next turn if hit on Structure, or suffer a potential critical on non-Structure systems.";  		      
+		      $this->data["Special"] .= "<br>Can be boosted twice which each boost adding +1 AoE range, +1 Damage and +5 to Initiative / Hit Chance penalties."; 
 		      $this->data["Special"] .= "<br>Multiple overlapping Psychic Fields will only cause one (the strongest) attack on a particular target.";
-		      $this->data["Special"] .= "<br>Does not affect other friendly units, and is only 50% effective against Advanced Armor.";  		       
+		      $this->data["Special"] .= "<br>Does not affect friendly units, and is only 50% effective against Advanced Armor.";  		       
 	    }	//endof function setSystemDataWindow
 	
 	
@@ -5115,7 +5115,7 @@ class PsionicConcentrator extends Weapon{
 		      parent::setSystemDataWindow($turn);  
 		      $this->data["Special"] = "Psionic Concentrators can be fired individually, or up to four concentrators can be combined for more powerful attacks with shorter range.";	      		      $this->data["Special"] .= "<br>If You allocate multiple Concentrators to the same mode of fire at the same target, they will be combined.";   		       
 		      $this->data["Special"] .= "<br>If not enough weapons are allocated to be combined, weapons will be fired in Single mode instead.";  		  
-		      $this->data["Special"] .= "<br>Causes -1 Power on ships with reactors the following turn.";
+		      $this->data["Special"] .= "<br>Each hit causes -1 Power on ships with reactors for one turn.";
 		      $this->data["Special"] .= "<br>Has +1 modifier to critical hits, and +2 to fighter dropout rolls.";
 	    }	
 	
