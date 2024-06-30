@@ -5467,10 +5467,6 @@ class GromeTargetingArray extends Weapon{
 		public $displayName = "Targeting Array";
 		public $iconPath = "TargetingArray.png";
 
-//    	public $specialAbilities = array("TargetingArray"); //Front end looks for this.	
-//		public $specialAbilityValue = true; //so it is actually recognized as special ability!
-		
-
 		public $damageType = "Raking"; //To prevent called shots"
 		public $weaponClass = "Particle";
 
@@ -5521,12 +5517,7 @@ class GromeTargetingArray extends Weapon{
 	    protected $possibleCriticals = array(
 			1=>array("OutputReduced1"), 
 	    );
-/*
-		public function getSpecialAbilityValue($args)
-	    {
-			return $this->specialAbilityValue;
-		}
-*/
+
 		public function getOutput()
 		{
 			return $this->output;			
@@ -5649,7 +5640,6 @@ class AegisSensorPod extends Weapon implements SpecialAbility{
 	 
 		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $output)
 		{				
-			//Nominal amount of health, should never be hit.
 			if ( $maxhealth == 0 ) $maxhealth = 5;
 			if ( $powerReq == 0 ) $powerReq = 2;	
 			parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $output);
