@@ -1503,18 +1503,7 @@ class AmmoMissileRackS extends Weapon{
 		
 	}//endof function fire	
 
-/*
-	public function AOEdamage($target, $shooter, $fireOrder, $sourceHex, $damage, $gamedata)
-	{
-		$currAmmo = null;
-        //find appropriate ammo
-		if (array_key_exists($this->firingMode,$this->ammoClassesUsed)){
-			$currAmmo = $this->ammoClassesUsed[$this->firingMode];
-		}
-		if ($currAmmo) $currAmmo->AOEdamage($target, $shooter, $fireOrder, $sourceHex, $damage, $gamedata);{
-	    }
-	}//endof function AOEdamage 
-*/
+
 	public function calculateRangePenalty($distance)
 	{
 	    $currAmmo = null;
