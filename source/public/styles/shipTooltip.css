@@ -95,6 +95,10 @@
 
 }
 
+.targetSuppWeapons {
+    background-image: url("../img/targetSupport.png");
+}
+
 .openSCS {
     background-image: url("../img/openShipDetails.png");
 }
