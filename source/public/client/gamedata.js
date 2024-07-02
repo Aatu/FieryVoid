@@ -201,6 +201,12 @@ window.gamedata = {
         }
     },
 
+    canTargetAlly: function canTargetAlly(ship) {//30 June 2024 - DK - Added for Ally targeting.
+        for (var i in gamedata.selectedSystems) {        	
+            if(gamedata.selectedSystems[i].canTargetAllies) return true;
+        }
+    },
+
     isPlayerInGame: function isPlayerInGame() {
         if (gamedata.thisplayer === null || gamedata.thisplayer === -1) {
             return false;
@@ -264,7 +270,6 @@ window.gamedata = {
 			var notLaunching = [];
 			var notSetAA = [];//available Adaptive Armor points remaining!
 			var notSetFC = [];//available BFCP points remaining for Hyach!
-//			var excessShield =[];//available shield power in Generator for Thirdspace!
 			var powerSurplus = [];//power surplus
 
             for (var ship in myShips) {
@@ -287,11 +292,6 @@ window.gamedata = {
 								notSetFC.push(myShips[ship]);
 							}
 						}
-						/*else if (myShips[ship].systems[syst].name == "ThirdspaceShieldGenerator") {
-							if (myShips[ship].systems[syst].hasExcessCapacity()) {
-								excessShield.push(myShips[ship]);
-							}
-						}*/
                     }
 
                     if (shipManager.isDisabled(myShips[ship])) {
@@ -443,16 +443,7 @@ window.gamedata = {
                     html += "<br>";
                 }
                 html += "<br>";
-            }
-   /*         if (excessShield.length > 0) {
-                html += "You have excess capacity remaining in your shield generator for the following units: ";
-                html += "<br>";
-                for (var ship in excessShield) {
-                    html += excessShield[ship].name + " (" + excessShield[ship].shipClass + ")";
-                    html += "<br>";
-                }
-                html += "<br>";
-            } */                           
+            }                         
             if (powerSurplus.length > 0) {
                 html += "Followed ships have unassigned Power reserves: ";
                 html += "<br>";

@@ -1318,6 +1318,11 @@ window.weaponManager = {
                 continue;
             }
 
+            if (!gamedata.isMyOrTeamOneShip(ship) && weapon.weaponClass == 'Support'){ //30.06.24 - New statement to stop players supporting enemies!
+                debug && console.log("trying to target enemy ship with a support weapon");
+                continue;
+            }
+
             if (weaponManager.checkConflictingFireOrder(selectedShip, weapon, true)) {
                 debug && console.log("has conflicting fire orders");
                 for (var j = gamedata.selectedSystems.length - 1; j >= 0; j--) {
