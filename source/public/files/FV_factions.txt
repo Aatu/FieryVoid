@@ -100,6 +100,7 @@ Comm Disruptor - weapon reducing target's EW and Initiative for next turn.
 Particle Impeder - purely defensive weapon, capable of intercepting weapons with "uninterceptable" trait (typically that means Lasers :) ).
 	In addition, it can be boosted by sarificing EW rather than usual Power. Such a boost, in addition to increasing intercept rating of the Impeder, counts as special kind of shielding, reducing hit chance of all incoming weapons (fighter fire included), that can't be flown under and is cumulative with regular shields.
 	It is (by background as well as effect) DEW channeled to a specific arc, that has the added advantage of affecting fighters.
+Shield Projector - System only seen on Abbai base and OSATs, can target allies within 15 hexes and boost their Gravitic Shield on that turn.  Fires as a ballistic weapon effectively, with affect being applied during Firing Phase.  Note - Allied unit being boosted MUST be within 5 hexes of the Shield Projector unit by the start of Firing Phase to receive the benefit e.g. must move there during Movement phase if necessary.
 	
 
 ABBAI MATRIARCHATE (WotCR)
