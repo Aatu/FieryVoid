@@ -3266,7 +3266,8 @@ spl_autoload_register(
 						'pulsarmine' => '/server/model/weapons/specialWeapons.php', 					 						 	
 					 	'gkarith' => '/server/model/ships/narn/Gkarith.php',
 					 	'aegissensorpod' => '/server/model/weapons/specialWeapons.php', 
-						'hyperionaegis' => '/server/model/ships/EA/HyperionAegis.php',					 						 	 
+						'hyperionaegis' => '/server/model/ships/EA/HyperionAegis.php',	
+						'abbaishieldprojector' => '/server/model/weapons/supportWeapons.php',				 						 	 
 					 							
 				//Thirdspace
 				'psychicfield' => '/server/model/weapons/specialWeapons.php',
