@@ -21,6 +21,8 @@ class ShodromaOSAT extends OSAT{
         $this->rollcost = 0;
         $this->pivotcost = 0;	
         $this->iniativebonus = 65;
+        
+        $this->addPrimarySystem(new OSATCnC(0, 1, 0, 0));        
         $this->addPrimarySystem(new Reactor(4, 9, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 7, 3, 6)); 
         $this->addAftSystem(new Thruster(3, 4, 0, 0, 2)); 

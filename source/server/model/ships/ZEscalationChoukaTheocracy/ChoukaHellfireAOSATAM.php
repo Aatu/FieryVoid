@@ -29,7 +29,8 @@ class ChoukaHellfireAOSATAM extends OSAT{
         $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
         $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 12); //add full load of basic missiles
         $this->enhancementOptionsEnabled[] = 'AMMO_H';//add enhancement options for other missiles - Class-L
-		
+
+        $this->addPrimarySystem(new OSATCnC(0, 1, 0, 0));		
         $this->addPrimarySystem(new Reactor(3, 6, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 6, 4, 4)); 
         $this->addPrimarySystem(new Thruster(2, 6, 0, 0, 2)); 

@@ -22,7 +22,7 @@ class DudromaB_early extends OSAT{
         $this->pivotcost = 0;	
         $this->iniativebonus = 60;
 
-
+        $this->addPrimarySystem(new OSATCnC(0, 1, 0, 0));
         $this->addPrimarySystem(new Reactor(4, 6, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 6, 3, 5)); 
         $this->addAftSystem(new Thruster(3, 4, 0, 0, 2)); 

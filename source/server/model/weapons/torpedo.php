@@ -306,7 +306,7 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
         public $loadingtime = 2;
         
         public $weaponClass = "Electromagnetic"; //deals Plasma, not Ballistic, damage. Should be Ballistic(Plasma), but I had to choose ;)
-        public $damageType = "Flash"; 
+        public $damageType = "Standard"; 
 //        private $alreadyFlayed = false; //to avoid doing this multiple times  //OLD CODE RELATING TO WHEN PSIONIC TORPEDO FLAYED ARMOUR FROM TARGET    
                 
         public $fireControl = array(null, 4, 5); // fighters, <mediums, <capitals 
@@ -315,7 +315,7 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
 		private static $alreadyAffected = array();         
         
         public $boostable = true;
-        public $boostEfficiency = 1;
+        public $boostEfficiency = 2;
         public $maxBoostLevel = 2;  
         
 		public $repairPriority = 5;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired                 
@@ -345,7 +345,7 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!
 		parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);			
 		//Weapon has hit, so apply+1 to crit roll, +1 to dropout roll to the damge elements
-		$mod = 1;
+		$mod = 2;
 //		if ($ship instanceof FighterFlight) $mod++;
 		$system->critRollMod += $mod; 
 		
@@ -402,25 +402,25 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
 			}else{
 				$this->data["Special"] .= '<br>';
 			}
-			$this->data["Special"] .= "<br>Deals Flash damage that ignores armor (Advanced Armor is treated as 2 points less).";	
-			$this->data["Special"] .= "<br>If this weapon hits, it uses psychic energy to disrupt its target next turn in the following ways:";
+			$this->data["Special"] .= "<br>Ignores armor (Advanced Armor is treated as 2 points less).";	
+			$this->data["Special"] .= "<br>Uses psychic energy to disrupt target next turn in the following ways:";
 			$this->data["Special"] .= "<br> - 1d3 penalty to EW,";
 			$this->data["Special"] .= "<br> - 1d3 penatly to Initiative,";
 			$this->data["Special"] .= "<br> - 1d4+1 penalty to available power.";													
 			$this->data["Special"] .= "<br>Ballistic weapon that can use offensive EW.";
 			$this->data["Special"] .= "<br>Multiple Psionic Torpedoes do not stack effects (but do stack with Psychic Field).";			
-			$this->data["Special"] .= "<br>Can be boosted twice, for +2 damage per boost level.";			
-		    $this->data["Special"] .= "<br>Has +1 modifier to critical hits, and +1 to fighter dropout rolls.";			
+			$this->data["Special"] .= "<br>Can be boosted twice, for +3 damage per boost.";			
+		    $this->data["Special"] .= "<br>Has +2 modifier to critical hits.";			
 		}
 
         private function getExtraDamagebyBoostlevel($turn){
             $add = 0;
             switch($this->getBoostLevel($turn)){
                 case 1:
-                    $add = 2;
+                    $add = 3;
                     break;
                 case 2:
-                    $add = 4;
+                    $add = 6;
                     break;
                                         
                       
@@ -462,13 +462,13 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
         public function setMinDamage(){
             $turn = TacGamedata::$currentTurn;
             $boost = $this->getBoostLevel($turn);
-            $this->minDamage = 14 + ($boost * 2);
+            $this->minDamage = 14 + ($boost * 3);
         }   
 
         public function setMaxDamage(){
             $turn = TacGamedata::$currentTurn;
             $boost = $this->getBoostLevel($turn);
-            $this->maxDamage = 21 + ($boost * 2); 
+            $this->maxDamage = 21 + ($boost * 3); 
 		}
 
 /* //OLD CODE RELATING TO WHEN PSIONIC TORPEDO FLAYED ARMOUR FROM TARGET

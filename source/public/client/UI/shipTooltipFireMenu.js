@@ -11,8 +11,9 @@ window.ShipTooltipFireMenu = function () {
     ShipTooltipFireMenu.prototype = Object.create(ShipTooltipMenu.prototype);
 
     ShipTooltipFireMenu.buttons = [
-		{ className: "targetWeapons", condition: [isEnemy, hasWeaponsSelected], action: targetWeapons, info: "Target selected weapons" },
-        { className: "targetWeaponsHex", condition: [hasHexWeaponsSelected], action: targetHexagon, info: "Target selected weapons on hexagon" }
+		{ className: "targetWeapons", condition: [isEnemy, hasWeaponsSelected], action: targetWeapons, info: "Target selected weapons" },	
+        { className: "targetWeaponsHex", condition: [hasHexWeaponsSelected], action: targetHexagon, info: "Target selected weapons on hexagon" },
+        { className: "targetSuppWeapons", condition: [isFriendly, hasWeaponsSelected, hasSupportWeaponSelected, notSelf], action: targetWeapons, info: "Target support weapons" }//30 June 2024 - DK - Added for Ally targeting.	
 	];
 
     ShipTooltipFireMenu.prototype.getAllButtons = function () {
@@ -33,6 +34,14 @@ window.ShipTooltipFireMenu = function () {
 		return this.selectedShip && !gamedata.isMyOrTeamOneShip(this.targetedShip);
     }
 
+    function isFriendly() {//30 June 2024 - DK - Added for Ally targeting.
+        return gamedata.isMyShip(this.targetedShip);
+    }
+
+    function notSelf() {//30 June 2024 - DK - Added for Ally targeting.
+        return this.selectedShip !== this.targetedShip;
+    }
+
     function hasWeaponsSelected() {
         return gamedata.selectedSystems.length > 0;
     }
@@ -43,6 +52,12 @@ window.ShipTooltipFireMenu = function () {
             return system instanceof Weapon && system.hextarget === true;
         });
     }
+
+	function hasSupportWeaponSelected() {//30 June 2024 - DK - Added for Ally targeting.
+	    return gamedata.selectedSystems.some((system) => {
+	        return system.canTargetAllies === true;
+	    });
+	}
 
     return ShipTooltipFireMenu;
 }();

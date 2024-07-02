@@ -165,6 +165,9 @@ Ship.prototype = {
             if (system.name == "graviticShield" && !(system.destroyed || shipManager.power.isOffline(this, system))) {
                 activeShields = activeShields + 1;
             }
+            if (system.name == "abbaiShieldProjector" && !(system.destroyed || shipManager.power.isOffline(this, system))) {
+                activeShields = activeShields + 1;
+            }            
         }
 
         return shieldCapacity >= activeShields;

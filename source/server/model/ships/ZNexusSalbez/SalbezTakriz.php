@@ -25,6 +25,7 @@ class SalbezTakriz extends OSAT{
         $this->pivotcost = 0;	
         $this->iniativebonus = 60;
 
+        $this->addPrimarySystem(new OSATCnC(0, 1, 0, 0));
         $this->addPrimarySystem(new NexusIndustrialLaser(2, 6, 3, 270, 90));
         $this->addPrimarySystem(new NexusRangedBoltTorpedo(2, 5, 2, 270, 90));
         $this->addPrimarySystem(new NexusParticleGrid(1, 3, 1, 180, 360));

@@ -10,6 +10,7 @@ class Axor extends MediumShip{
         $this->imagePath = "img/ships/korlyan_axor2.png";
         $this->shipClass = "Axor Assault Frigate";
         $this->canvasSize = 70;
+		$this->fighters = array("assault shuttles"=>4);
 	    
 	    $this->isd = 2223;
 

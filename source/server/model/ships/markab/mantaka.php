@@ -19,6 +19,8 @@ class Mantaka extends BaseShip{
         $this->pivotcost = 6;
         $this->variantOf = 'Mafka Transport Cruiser';
         $this->occurence = "common";
+        $this->fighters = array("assault shuttles"=>9);
+
 
 		$this->enhancementOptionsEnabled[] = 'MARK_FERV'; //To activate Religious Fervor attributes.   
         

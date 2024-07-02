@@ -250,6 +250,9 @@ window.ShipTooltip = function () {
         if (this.selectedShip && gamedata.isEnemy(ship, this.selectedShip) && this.showTargeting) {
             weaponManager.targetingShipTooltip(this.selectedShip, ship, this.element, null);
             $(".fire", this.element).show();
+        } else if (this.selectedShip && gamedata.canTargetAlly(ship) && this.showTargeting) {//30 June 2024 - DK - Added for Ally targeting.
+            weaponManager.targetingShipTooltip(this.selectedShip, ship, this.element, null);
+            $(".fire", this.element).show();     	
         } else {
             $(".fire", this.element).hide();
         }

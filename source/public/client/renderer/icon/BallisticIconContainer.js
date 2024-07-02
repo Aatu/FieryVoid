@@ -107,7 +107,7 @@ window.BallisticIconContainer = function () {
         var launchPosition = this.coordinateConverter.fromHexToGame(shooterIcon.getFirstMovementOnTurn(turn).position);
 
 		if (ballistic.type == 'normal') { //it's direct fire after all!
-		            launchPosition = this.coordinateConverter.fromHexToGame(shooterIcon.getLastMovement().position);
+		    launchPosition = this.coordinateConverter.fromHexToGame(shooterIcon.getLastMovement().position);
 			switch (ballistic.damageclass) {
 			case 'antimatter':
 			            targetType = 'hexDirectBlue';
@@ -120,7 +120,13 @@ window.BallisticIconContainer = function () {
 			break;
 
 	        }
-		}    		
+		}  
+		
+		if (ballistic.damageclass == 'support') { //30 June 2024 - DK - Added for Ally targeting.
+			targetType = 'hexDirectGreen';
+
+		} 		
+		  		
         var targetPosition = null;
         var targetIcon = null;
 

@@ -24,10 +24,11 @@ class XotiB extends OSAT
 		$this->rollcost = 0;
 		$this->pivotcost = 0;
 		$this->iniativebonus = 12 *5;
-		
+
+        $this->addPrimarySystem(new OSATCnC(0, 1, 0, 0));		
 		$this->addPrimarySystem(new Reactor(4, 9, 0, 0));
 		$this->addPrimarySystem(new Scanner(4, 7, 2, 7));
-		$this->addPrimarySystem(new Thruster(4, 6, 0, 0, 2));
+		$this->addAftSystem(new Thruster(4, 6, 0, 0, 2));
 		$this->addFrontSystem(new AntimatterShredder(4, 10, 8, 270, 90));
 		$this->addFrontSystem(new AntiprotonDefender(2, 4, 3, 180, 360));
 		$this->addFrontSystem(new AntiprotonDefender(2, 4, 3, 0, 180));
@@ -42,7 +43,7 @@ class XotiB extends OSAT
 			$this->hitChart = array(//Vree OSATs actually do NOT use "Weapon" tag on hit chart!
                 0=> array(
                         9 => "Structure",
-                        11 => "Thruster",
+                        11 => "2:Thruster",
 						12 => "1:Antimatter Shredder",
 						14 => "1:Antiproton Gun",
 						16 => "1:Antiproton Defender",

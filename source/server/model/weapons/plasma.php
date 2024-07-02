@@ -335,7 +335,7 @@ class PairedPlasmaBlaster extends LinkedWeapon{
 	public $trailLength = 10;
 	public $animationExplosionScale = 0.1;
 */
-	public $intercept = 2;
+	public $intercept = 0;//Changed June 2024 nothing in TT rules to say this can intercept. DK
 	public $priority = 4; //eqivalent of d6+3, on account of armor piercing properties of Plasma
 
 	public $loadingtime = 1;
@@ -353,7 +353,7 @@ class PairedPlasmaBlaster extends LinkedWeapon{
 	function __construct($startArc, $endArc, $nrOfShots = 2){ 
 		$this->shots = $nrOfShots;
 		$this->defaultShots = $nrOfShots;
-		$this->intercept = $nrOfShots;
+//		$this->intercept = $nrOfShots; //Changed June 2024 nothing in TT rules to say this can intercept. DK
 		
 		if($nrOfShots === 1){
 			$this->iconPath = "pairedPlasmaBlaster1.png";

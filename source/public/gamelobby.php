@@ -84,6 +84,7 @@
         <script src="client/model/weapon/matter.js"></script>
         <script src="client/model/weapon/plasma.js"></script>
         <script src="client/model/weapon/special.js"></script>
+        <script src="client/model/weapon/supportWeapons.js"></script>        
         <script src="client/model/weapon/torpedo.js"></script>
         <script src="client/model/weapon/pulse.js"></script>
         <script src="client/model/weapon/electromagnetic.js"></script>

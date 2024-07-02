@@ -23,7 +23,8 @@ class TorataTumalOSAT extends OSAT
 		$this->rollcost = 0;
 		$this->pivotcost = 0;
 		$this->iniativebonus = 12 *5;
-		
+
+        $this->addPrimarySystem(new OSATCnC(0, 1, 0, 0));		
 		$this->addPrimarySystem(new Reactor(4, 8, 0, 0));
 		$this->addPrimarySystem(new Scanner(4, 7, 2, 5));
 		$this->addAftSystem(new Thruster(4, 6, 0, 0, 2));

@@ -501,13 +501,13 @@ window.shipManager = {
         if (ship.base) {
             var primary = shipManager.getPrimaryCnC(ship);
 
-            if (!shipManager.criticals.hasCriticalOnTurn(primary, "ShipDisabledOneTurn", gamedata.turn - 1)) {
+            if (!shipManager.criticals.hasCriticalOnTurn(primary, "ShipDisabledOneTurn", gamedata.turn - 1) || !shipManager.criticals.hasCriticalOnTurn(primary, "ShipDisabled", gamedata.turn - 1)) {
                 return false;
             }
         } else {
             for (var i = 0; i < ship.systems.length; i++) {
                 if (ship.systems[i].displayName == "C&C") {
-                    if (shipManager.criticals.hasCriticalOnTurn(ship.systems[i], "ShipDisabledOneTurn", gamedata.turn - 1)) {
+                    if (shipManager.criticals.hasCriticalOnTurn(ship.systems[i], "ShipDisabledOneTurn", gamedata.turn - 1) || shipManager.criticals.hasCriticalOnTurn(ship.systems[i], "ShipDisabled", gamedata.turn - 1)) {
                         return true;
                     }
                 }
@@ -612,7 +612,7 @@ window.shipManager = {
     isAdrift: function isAdrift(ship) {
         if (ship.flight || ship.osat || ship.base) return false;
 
-        if (shipManager.criticals.hasCriticalInAnySystem(ship, "ShipDisabledOneTurn")) return true;
+        if (shipManager.criticals.hasCriticalInAnySystem(ship, "ShipDisabledOneTurn") || shipManager.criticals.hasCriticalInAnySystem(ship, "ShipDisabled")) return true;
 
         if (shipManager.systems.isDestroyed(ship, shipManager.systems.getSystemByName(ship, "cnC"))) {
             return true;

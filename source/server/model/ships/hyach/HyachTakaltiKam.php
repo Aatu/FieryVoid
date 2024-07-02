@@ -23,17 +23,18 @@ class HyachTakaltiKam extends OSAT
 		$this->rollcost = 0;
 		$this->pivotcost = 0;
 		$this->iniativebonus = 60;
-		
+
+        $this->addPrimarySystem(new OSATCnC(0, 1, 0, 0));		
 		$this->addPrimarySystem(new Reactor(4, 9, 0, 0));
 		$sensors = new Scanner(4, 9, 2, 7);
 			$sensors->markHyach();
 			$this->addPrimarySystem($sensors); 
-		$this->addPrimarySystem(new Thruster(4, 6, 0, 0, 2));
-		$this->addPrimarySystem(new Maser(3, 6, 3, 180, 360));
-		$this->addPrimarySystem(new BlastLaser(4, 10, 5, 270, 90));
-		$this->addPrimarySystem(new Interdictor(2, 4, 1, 0, 360));
-		$this->addPrimarySystem(new BlastLaser(4, 10, 5, 270, 90));
-		$this->addPrimarySystem(new Maser(3, 6, 3, 0, 180));
+		$this->addAftSystem(new Thruster(4, 6, 0, 0, 2));
+		$this->addAftSystem(new Maser(3, 6, 3, 180, 360));
+		$this->addFrontSystem(new BlastLaser(4, 10, 5, 270, 90));
+		$this->addFrontSystem(new Interdictor(2, 4, 1, 0, 360));
+		$this->addFrontSystem(new BlastLaser(4, 10, 5, 270, 90));
+		$this->addAftSystem(new Maser(3, 6, 3, 0, 180));
 
 		//0:primary, 1:front, 2:rear, 3:left, 4:right;
 
@@ -42,20 +43,14 @@ class HyachTakaltiKam extends OSAT
 			$this->hitChart = array(
                 0=> array(
 					9 => "Structure",
-                    11 => "Thruster",
-					13 => "Blast Laser",
-					15 => "Maser",
+                    11 => "2:Thruster",
+					13 => "1:Blast Laser",
+					15 => "2:Maser",
 					17 => "Scanner",
                     19 => "Reactor",
-					20 => "Interdictor",
-                ),
-				1=> array(
-					20 => "Primary",
-				),
-				2=> array(
-					20 => "Primary",
-				),								
-        );
+					20 => "1:Interdictor",
+                ),						
+       		);
 
 	}
 

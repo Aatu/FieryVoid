@@ -22,7 +22,7 @@ class upgTorotha extends MediumShip{
 		$this->isd = 2261;
 		$this->unofficial = true;
 		$this->variantOf = "Torotha Assault Frigate";
-        $this->fighters = array("assault shuttles"=>2);
+        $this->fighters = array("shuttles"=>2);
 
         $this->addPrimarySystem(new Reactor(5, 15, 0, 0));
         $this->addPrimarySystem(new CnC(6, 16, 0, 0));

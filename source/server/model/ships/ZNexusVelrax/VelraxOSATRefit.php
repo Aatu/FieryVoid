@@ -25,6 +25,7 @@ class VelraxOSATRefit extends OSAT{
         $this->pivotcost = 0;	
         $this->iniativebonus = 60;
 
+        $this->addPrimarySystem(new OSATCnC(0, 1, 0, 0));
         $this->addPrimarySystem(new NexusRangedPlasmaWave(3, 7, 4, 270, 90));
         $this->addPrimarySystem(new DualIonBolter(2, 4, 4, 180, 360));
         $this->addPrimarySystem(new LaserLance(3, 6, 4, 300, 60));

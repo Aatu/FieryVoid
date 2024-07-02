@@ -77,7 +77,7 @@ class pirocia extends StarBaseSixSections
 				new CombatLaser(4, 0, 0, $min, $max),
 				new QuadArray(4, 0, 0, $min, $max),
 				new QuadArray(4, 0, 0, $min, $max),
-				new CommDisruptor(4, 0, 0, $min, $max),				
+				new AbbaiShieldProjector(4, 0, 0, $min, $max, 3),					
 				new Particleimpeder(4, 0, 0, $min, $max),
 				new Particleimpeder(4, 0, 0, $min, $max),								
 				new GraviticShield(0, 6, 0, 4, $min, $max),

@@ -20,7 +20,11 @@ class BAStarfoxFtr extends FighterFlight{
         
     	$this->iniativebonus = 90;
         $this->populate();        
+    
+        $this->enhancementOptionsEnabled[] = 'EXT_AMMO'; //To enable extra Ammo for main gun.
+        	
     }
+    
     public function populate(){
         $current = count($this->systems);
         $new = $this->flightSize;
