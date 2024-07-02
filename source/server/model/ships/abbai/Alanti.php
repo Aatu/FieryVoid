@@ -31,8 +31,8 @@ class alanti extends OSAT{
 		
         $this->addFrontSystem(new CombatLaser(3, 0, 0, 270, 90));     
         $this->addFrontSystem(new QuadArray(3, 0, 0, 0, 360));
-        $this->addFrontSystem(new CommDisruptor(3, 0, 0, 270, 90));    //replacing Shield Projector of the original 
-		
+        
+        $this->addAftSystem(new AbbaiShieldProjector(2, 0, 0, 0, 360, 2));		
         $this->addAftSystem(new GraviticShield(0, 6, 0, 2, 0, 360));
         $this->addAftSystem(new Particleimpeder(2, 0, 0, 0, 360));
         $this->addAftSystem(new Thruster(3, 6, 0, 0, 2)); 
