@@ -5428,8 +5428,7 @@ class AmmoMissileM extends AmmoMissileTemplate{
     }	
 
 
-		public function beforeFiringOrderResolution($gamedata, $weapon, $originalFireOrder)
-		{
+	public function beforeFiringOrderResolution($gamedata, $weapon, $originalFireOrder){
 		    // To create 6 missiles instead of just one.
 		    $missilesTotal = 6;
 		    $currentShotNumber = 1;
@@ -5460,13 +5459,13 @@ class AmmoMissileM extends AmmoMissileTemplate{
                             $newFireOrder->addToDB = true;
                             $weapon->fireOrders[] = $newFireOrder;
                          
-							}
+					}
 						
-						$currentShotNumber++;
-						if($currentShotNumber > $missilesTotal) break; //will get out of foreach loop once we're out of submissiles, even if there are still fighters unassigned	
+					$currentShotNumber++;
+					if($currentShotNumber > $missilesTotal) break; //will get out of foreach loop once we're out of submissiles, even if there are still fighters unassigned	
 					
 				}
-		}
+			}
 	}//endof function beforeFiringOrderResolution   
 
      public function fire($gamedata, $fireOrder) 	//For Multiwarhead missiles
@@ -5481,30 +5480,31 @@ class AmmoMissileM extends AmmoMissileTemplate{
 		
 	if (!$validTarget) {//target is not valid, find another one
 		 $targetFighter = null;
-		                foreach ($target->systems as $fighter) { // Can only target fighters.
-		                    if ($fighter->isDestroyed()) { // Ignore destroyed fighters.
-		                        continue;
-		                    }
+		foreach ($target->systems as $fighter) { // Can only target fighters.
+		
+		     if ($fighter->isDestroyed()) { // Ignore destroyed fighters.
+		         continue;
+		     }
 		                    	                    
 			if(in_array($fighter->id,  $this->engagedFighters)) continue; //ignore already engaged fighters
 			 	
 			$targetFighter = $fighter; //found appropriate target! 
 			
 	//		break; //Removed so that retargetted munitions strike last fighter in flight.
-			                }                
+		}                
 			                
-				if($targetFighter!=null){
+			if($targetFighter!=null){
 				$fireOrder->calledid = $targetFighter->id; //this redirection will be correctly handled by standard routines
 				$validTarget = true;
-				}
-			}	
+			}
+	}	
 
-		 if (!$validTarget) { //target not valid and no replacement found - make the shot miss!
+		if (!$validTarget) { //target not valid and no replacement found - make the shot miss!
 			$fireOrder->needed = 0; //set hit chance as 0
 			$fireOrder->pubnotes .= '  No viable target - excess submunition lost';//inform player of situation
 		}else{ //valid target, will be engaged, note for further shots!
 				$this->engagedFighters[]= $fireOrder->calledid;
-			}	
+		}	
 	}//end of function fire
             
 	

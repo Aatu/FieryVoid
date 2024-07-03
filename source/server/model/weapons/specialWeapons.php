@@ -5876,7 +5876,7 @@ class PulsarMine extends Weapon{
 					
 				$this->alreadyEngaged[$targetShip->id] = true;//mark engaged
 				if($currentShotNumber >= $attacksTotal) break; //No sense looking at further Target units if mines all used up.
-			}
+		}
    		
 	} //endof beforeFiringOrderResolution
 	
