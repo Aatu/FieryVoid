@@ -5824,8 +5824,12 @@ class PulsarMine extends Weapon{
 	public $autoFireOnly = true; //this weapon cannot be fired by player
     public $useOEW = false;
 	public $noLockPenalty = false;
-    public $calledShotMod = 0; 		    		          
+    public $calledShotMod = 0;
     
+    public $doNotIntercept = true; 		    		          
+    public $uninterceptable = true;
+   	public $ignoreJinking = true;//weapon ignores jinking completely.
+        
     public $rangePenalty = 0; 
     public $fireControl = array(4, null, null); // fighters, <mediums, <capitals 
 
@@ -5833,7 +5837,8 @@ class PulsarMine extends Weapon{
 	public $animationColor = array(245, 90, 90);
 	public $animationExplosionScale = 0.15; //single hex explosion
 
-	private $alreadyEngaged = array(); //units that were already engaged by this Pulsar Mine this turn 
+	private $alreadyEngaged = array(); //units that were already engaged by this Pulsar Mine this turn	 
+
 	
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
 		if ( $maxhealth == 0 ) $maxhealth = 6;
@@ -5842,60 +5847,189 @@ class PulsarMine extends Weapon{
 	} 
 
 
-    public function beforeFiringOrderResolution($gamedata)
-    {
-    	$ship = $this->getUnit();  
-    	$nearbyShips = $gamedata->getShipsInDistance($ship, 2);
+    public function beforeFiringOrderResolution($gamedata){
+    	
+    	$thisShip = $this->getUnit();  
+    	$allShips = $gamedata->ships;
+    	$relevantShips = array();
 
-    	// To create up to 18 attacks.
+		//Make a list of relelvant ships e.g. this ship and enemy fighters in the game.
+		foreach($allShips as $ship){
+			if($ship->isDestroyed()) continue;
+			if (!$ship instanceof FighterFlight && ($ship->id != $thisShip->id)) continue; //Ignore ships EXCEPT this one!			
+			if ($ship instanceof FighterFlight && $ship->team == $thisShip->team) continue;	//Ignore flights that are friendly.	
+			$relevantShips[] = $ship;			
+		}
+	
+		//Now check if any enemy fighters got in arc and range during their movement.
+		$targetFighters = $this->checkForValidTargets($relevantShips, $thisShip, $gamedata);
+
+    	//Now create up to 18 attacks using $targetFighters array.
+    	$this->createFireOrders($targetFighters, $thisShip, $gamedata);		
+
+    	
+	} //endof beforeFiringOrderResolution
+
+
+	private function getTempBearing($shipPosition, $targetPostion, $currFacing){
+		$relativeBearing = null;
+		
+		$oPos = mathlib::hexCoToPixel($shipPosition);//Convert to pixel format		
+		$tPos = mathlib::hexCoToPixel($targetPostion); //Convert to pixel format
+		
+		$compassHeading = mathlib::getCompassHeadingOfPoint($oPos, $tPos);//Get heading using pixel formats.
+        $relativeBearing =  Mathlib::addToDirection($compassHeading, -$currFacing);//relative bearing, compass - current facing.
+       
+        $ship = $this->getUnit();
+        if( Movement::isRolled($ship) ){ //if ship is rolled, mirror relative bearing.  No really needed, since arcs don't actually change.  
+            if( $relativeBearing <> 0 ) { //mirror of 0 is 0
+                $relativeBearing = 360-$relativeBearing;
+            }
+        }        
+        							
+		return round($relativeBearing);//Round and return!
+	}
+	
+
+	private function checkTargetConditions($previousBearing, $shipPosition, $targetPostion, $shipfacing){
+		$canTarget = false;
+		
+		$distance =	mathlib::getDistanceHex($shipPosition, $targetPostion);//Compare starting positions.						
+		$targetBearing = 0;
+		
+		if($distance == 0){//Ship and target are on same hex.
+			if($previousBearing != null) $targetBearing = $previousBearing;//Same hex returns wrong bearing, so use previous if there is one. If null will return 0.
+		}else{//Distance not 0, get bearing normally.
+			$targetBearing = $this->getTempBearing($shipPosition, $targetPostion, $shipfacing);					
+		} 
+		
+	    if ($distance <= 2 && mathlib::isInArc($targetBearing, $this->startArc, $this->endArc)) $canTarget = true;//Not in arc at turn start.
+
+		return $canTarget;
+	}	
+
+
+	private function checkForValidTargets($relevantShips, $thisShip, $gamedata){
+    	$targetFighters = array();//Initialise array for fighters to be fired at.		
+
+		$shipStartLoc = $thisShip->getLastTurnMovement($gamedata->turn);
+		$shipPosition = $shipStartLoc->position;
+		$shipfacing = $shipStartLoc->getFacingAngle();
+
+		foreach($relevantShips as $unit){//Now look through relevant ships and take appropriate action.				
+				
+			if($unit->id == $thisShip->id){//We've found Pulsar Mine equipped ship in array, check and update position and facing.
+							
+				foreach($unit->movement as $shipMove){ //Update position and facing. Assume handled in order.			
+					if($shipMove->turn == $gamedata->turn){//This turn.
+						if($shipMove->type == "start") continue; //not a move
+						if($shipMove->type == "speedchange") continue; //not a move							
+					
+						$newPosition = $shipMove->position;//Update position for distance check.
+						$shipPosition = $newPosition;
+						$newfacing = $shipMove->getFacingAngle();//Update facing for arc check.
+						$shipfacing = $newfacing;
+					}
+				}
+							
+			}else{//Look through enemy fighter positions to see if they were ever in arc/range.  Only during in Fighter's' movement, not $thisShip!	
+
+				//Check starting position first.
+				$fighterStartLoc = $unit->getLastTurnMovement($gamedata->turn);
+				$previousBearing = null;
+								
+			    //Check if Fighter can be attacked in its starting position	
+				if($this->checkTargetConditions($previousBearing, $shipPosition, $fighterStartLoc->position, $shipfacing)){
+					$targetFighters[] = $unit;//Add to array.
+					continue;//Fire Orders will be created for this unit, move to next.
+				}		
+						    
+			    //Now check other movements in turn.	
+				foreach($unit->movement as $fighterMove){//When we find Pulsar Mine equipped ship, update it's position as it moves. Assume will be handle in order.
+					if($fighterMove->turn == $gamedata->turn){
+						if($fighterMove->type == "start" ||
+						 $fighterMove->type == "speedchange" ||
+						 $fighterMove->type == "turnleft" || 
+						 $fighterMove->type == "turnright") continue; //Not interested in start during Deployment, speed changes or turns.
+
+			    		if(!$this->checkTargetConditions($previousBearing, $shipPosition, $fighterMove->position, $shipfacing)) {
+				    		$distance =	mathlib::getDistanceHex($shipPosition, $fighterMove->position);	//Compare positions at point of movement.	
+					    	$targetBearing = $this->getTempBearing($shipPosition, $fighterMove->position, $shipfacing);//Get bearing at this point in movement.
+							if($distance != 0) $previousBearing = $targetBearing;//Update previous bearing with latest unless distance still 0.			    			
+			    			continue;//Doesn't meet targeting criteria.
+						}
+			    			
+				    	$targetFighters[] = $unit; //Add to array to be targeted.
+				    	break; //Fire Orders will be created, no sense in checking further $fighterMove(s).   		 		
+					}
+				}					
+			}			
+		}		
+
+	return $targetFighters; 		
+		
+	}//end of checkForValidTargets
+
+
+	private function createFireOrders($targetFighters, $thisShip, $gamedata){
 		$attacksTotal = 18;
 		$currentShotNumber = 0;
-    	
-    	foreach ($nearbyShips as $targetShip){
-			if (!($targetShip instanceof FighterFlight)) continue;//Ignore anything that's not a fighter flight. 
-			if ($targetShip->team == $ship->team) continue; //Ignore flights that are friendly.
-			$targetBearing = $ship->getBearingOnUnit($targetShip);				    		
-    		if (!mathlib::isInArc($targetBearing, $this->startArc, $this->endArc)) continue;//Ignore flights that are not in arc.   			
-			if (isset($this->alreadyEngaged[$targetShip->id])) continue; //Ignore flights that have already been engaged. 
 
-		        foreach ($targetShip->systems as $fighter) { // Now make an attack against every fighter in fighter flight.
-						if ($fighter == null || $fighter->isDestroyed()) {
-							continue;
-						}
-						$newFireOrder = new FireOrder(
-							-1, "normal", $ship->id, $targetShip->id,
-							$this->id, $fighter->id, $gamedata->turn, 1, 
-							0, 0, 1, 0, 0, //needed, rolled, shots, shotshit, intercepted
-							0,0,$this->weaponClass,-1 //X, Y, damageclass, resolutionorder
-						);		
-						$newFireOrder->addToDB = true;
-						$this->fireOrders[] = $newFireOrder;
-						$currentShotNumber++;					
-						if($currentShotNumber >= $attacksTotal) break; //will get out of foreach loop once we're out of mines, even if there are still fighters unassigned
-				}	
-					
-				$this->alreadyEngaged[$targetShip->id] = true;//mark engaged
-				if($currentShotNumber >= $attacksTotal) break; //No sense looking at further Target units if mines all used up.
+		foreach ($targetFighters as $target) {
+		    if (isset($this->alreadyEngaged[$target->id])) continue; // Ignore flights that have already been engaged. Shouldn't happen.
+		    $fighters = $target->systems;
+		    
+		    // Create an array of valid indices
+		    $validIndices = [];
+		    foreach ($fighters as $index => $fighter) {
+		        if ($fighter !== null) {
+		            $validIndices[] = $index;
+		        }
+		    }
+		    
+		    // Sort the valid indices in descending order
+		    rsort($validIndices);
+
+		    // Iterate over the valid indices backwards
+		    foreach ($validIndices as $i) {
+		        $fighter = $fighters[$i];
+		        
+		        // Check if the fighter is null or destroyed
+		        if ($fighter == null || $fighter->isDestroyed()) {
+		            continue;
+		        }
+
+		        // Create a new FireOrder
+		        $newFireOrder = new FireOrder(
+		            -1, "normal", $thisShip->id, $target->id,
+		            $this->id, $fighter->id, $gamedata->turn, 1, 
+		            0, 0, 1, 0, 0, // needed, rolled, shots, shotshit, intercepted
+		            0, 0, $this->weaponClass, -1 // X, Y, damageclass, resolutionorder
+		        );        
+
+		        $newFireOrder->addToDB = true;
+		        $this->fireOrders[] = $newFireOrder;
+		        $currentShotNumber++;
+		                                                        
+		        if ($currentShotNumber >= $attacksTotal) break; // Break out of the loop if the required number of attacks is reached
+		    }
+
+		    $this->alreadyEngaged[$target->id] = true; // Mark engaged
+		    if ($currentShotNumber >= $attacksTotal) break; // No sense looking at further target units if mines all used up.
 		}
-   		
-	} //endof beforeFiringOrderResolution
-	
+	}//End of createFireOrders()	
+
 	
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);
-		$this->data["Special"] = 'Automatically attacks up to 18 enemy fighters who end their movement within 2 hexes (and are in weapons arc)';
+		$this->data["Special"] = 'Automatically attacks up to 18 enemy fighters who were within 2 hexes of this ship during their Movement Phase (and were in arc)';
+		$this->data["Special"] .= '<br>Attacks are generated during the Firing Phase as normal.';	
 		$this->data["Special"] .= '<br>Cannot be manually targeted.';													
 	}	
-/*
-        public function stripForJson() {
-            $strippedSystem = parent::stripForJson();    
-            $strippedSystem->noHexTargeting = $this->noHexTargeting;                              
-            return $strippedSystem;
-        }
-*/
-        public function getDamage($fireOrder){        return 8;   }
-        public function setMinDamage(){     $this->minDamage = 8 ;      }
-        public function setMaxDamage(){     $this->maxDamage = 8 ;      }
+
+    public function getDamage($fireOrder){        return 8;   }
+    public function setMinDamage(){     $this->minDamage = 8 ;      }
+    public function setMaxDamage(){     $this->maxDamage = 8 ;      }
 	
 } //endof class PulsarMine
 
