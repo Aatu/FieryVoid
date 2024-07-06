@@ -36,7 +36,7 @@ class AbbaiShieldProjector extends Weapon implements DefensiveSystem{
     public $tohitPenalty = 0;
     public $damagePenalty = 0;
     public $rangePenalty = 0;
-    public $range = 15;
+    public $range = 10; //Let it target double it's effective range.
     public $canOffLine = true;    
 	
 	public $isPrimaryTargetable = true; //can this system be targeted by called shot if it's on PRIMARY?
