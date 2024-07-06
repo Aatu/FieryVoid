@@ -121,9 +121,9 @@ class AbbaiShieldProjector extends Weapon implements DefensiveSystem{
 		$damageReduction = $this->output;
 		$profileReduction = $this->output *5;
 		$this->data["Special"] = "Can be fired at allied units in range to boost their Gravitic Shields by $damageReduction."; 
-		$this->data["Special"] .= "<br>Target unit MUST be within 5 hexes by Firing Phase, and still in arc, for Shield Projector to assist it.";
+		$this->data["Special"] .= "<br>Allied unit MUST be within 5 hexes by Firing Phase, for Shield Projector to assist it.";
 		$this->data["Special"] .= "<br>When not fired, acts as Gravitic Shield, reducing damage by $damageReduction and hit chance by $profileReduction.";
-		$this->data["Special"] .= "<br>When acting as Gravtiic Shield, is ignored by fighter direct fire at range 0 (fighters flying under shields)."; 
+		$this->data["Special"] .= "<br>When acting as Gravitic Shield, is ignored by fighter direct fire at range 0 (fighters flying under shields)."; 
 	}	
 
 
