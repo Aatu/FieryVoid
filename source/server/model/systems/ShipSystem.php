@@ -678,8 +678,8 @@ class ShipSystem {
 	public function checkShipCaptured($critical, $ship, $gamedata){
 		$cnc = $ship->getSystemByName("CnC");//$this should be CnC, but just in case.
 		if($cnc){
-			foreach($cnc->criticals as $critical){
-				if($critical->phpclass == "ShipDisabled"  && $critical->turn <= $gamedata->turn) return;//Already captured, no more work!					
+			foreach($cnc->criticals as $critDisabled){
+				if($critDisabled->phpclass == "ShipDisabled"  && $critDisabled->turn <= $gamedata->turn) return;//Already captured, no more work!					
 			}
 		}		
 		
@@ -690,8 +690,8 @@ class ShipSystem {
 		$defendersLost = $startingMarines - $currentMarines; //If 0 currentMarines, bascially that means all are gone.
 		
 		$attackersOnboard = 0;//Initialise								
-		foreach($cnc->criticals as $critical){ 										
-			if($critical->phpclass == "CaptureShip" || $critical->phpclass == "CaptureShipElite")	$attackersOnboard += 1;		
+		foreach($cnc->criticals as $critCapture){ 										
+			if($critCapture->phpclass == "CaptureShip" || $critCapture->phpclass == "CaptureShipElite")	$attackersOnboard += 1;		
 		}
 			
 		//Check if Marine Defenders eliminated AND if attackers still onboard e.g. defenders weren't lost to structure damage being boarded in a previous turn.		
