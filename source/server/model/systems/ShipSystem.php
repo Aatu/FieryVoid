@@ -641,6 +641,7 @@ class ShipSystem {
 
 
 	public function doRescueMission($critical, $ship, $gamedata){ 
+
 		//Create fireOrder to show the attempted marine action.
 		$rammingSystem = $ship->getSystemByName("RammingAttack");
 		$newFireOrder = null;
@@ -655,6 +656,16 @@ class ShipSystem {
 							
 			$newFireOrder->addToDB = true;
 			$rammingSystem->fireOrders[] = $newFireOrder;
+		}
+
+		$cnc = $ship->getSystemByName("CnC");//$this should be CnC, but just in case.
+		if($cnc){
+			foreach($cnc->criticals as $critDisabled){
+				if($critDisabled->phpclass == "ShipDisabled"  && $critDisabled->turn <= $gamedata->turn){
+				$newFireOrder->pubnotes = "<br>Enemy ship has been captured, a marine unit automatically completes their rescue mission!";					
+					return;//Already captured, no more sabotage!					
+				}
+			}
 		}
 
 		$rollMod = $this->getMarineRollMod($critical, $ship, $gamedata);										    			
