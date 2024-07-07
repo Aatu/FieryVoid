@@ -284,6 +284,13 @@ class ShipSystem {
 	}//endof getMarineRollMod	
 
 	public function doWreakHavocMission($critical, $ship, $gamedata){
+		$cnc = $ship->getSystemByName("CnC");//$this should be CnC, but just in case.
+		if($cnc){
+			foreach($cnc->criticals as $critDisabled){
+				if($critDisabled->phpclass == "ShipDisabled"  && $critDisabled->turn <= $gamedata->turn) return;//Already captured, no more havoc!					
+			}
+		}
+
 		//Create fireOrder to show the attempted marine action.		          
 		$rammingSystem = $ship->getSystemByName("RammingAttack");
 		$newFireOrder = null;
@@ -410,6 +417,13 @@ class ShipSystem {
 
 
 	public function doSabotageMission($critical, $ship, $gamedata){ //loading exisiting notes is done in dbmanager->getSystemDataForShips()	
+		$cnc = $ship->getSystemByName("CnC");//$this should be CnC, but just in case.
+		if($cnc){
+			foreach($cnc->criticals as $critDisabled){
+				if($critDisabled->phpclass == "ShipDisabled"  && $critDisabled->turn <= $gamedata->turn) return;//Already captured, no more sabotage!					
+			}
+		}
+
 		//Create fireOrder to show the attempted marine action.		          
 		$rammingSystem = $ship->getSystemByName("RammingAttack");
 		$newFireOrder = null;
