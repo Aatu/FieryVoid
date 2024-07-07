@@ -327,7 +327,7 @@ class ShipSystem {
 					$damageEntry->updated = true;
 					$this->damage[] = $damageEntry;
 					$crits = array(); 
-					$crits = $this->testCritical($ship, $gamedata, $crits);//Damage caused, need to force critical test outside normal routine
+					$crits = $attackedSystem->testCritical($ship, $gamedata, $crits);//Damage caused, need to force critical test outside normal routine
 				}
 
 				if ($rammingSystem) { // add extra data to damage entry - so the firing order can be identified!
@@ -341,7 +341,7 @@ class ShipSystem {
 				$cnc = $ship->getSystemByName("CnC");
 				$effectInitiative = Dice::d(6,1);//strength of effect: 1d6
 				$effectInitiative5 = $effectInitiative * 5;
-				$newFireOrder->pubnotes = "<br>Roll(Mod): $wreakHavocRoll($rollMod) - A marine unit has disrupted internal operations, initiative by $effectInitiative5 next turn.";						
+				$newFireOrder->pubnotes = "<br>Roll(Mod): $wreakHavocRoll($rollMod) - A marine unit has disrupted internal operations, initiative reduced by $effectInitiative5 next turn.";						
 										
 				if($cnc){
 					for($i=1; $i<=$effectInitiative;$i++){
