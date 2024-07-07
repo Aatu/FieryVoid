@@ -567,8 +567,8 @@ class ShipSystem {
 	public function doCaptureMission($critical, $ship, $gamedata){ 
 
 		$cnc = $ship->getSystemByName("CnC");	
-			foreach ($cnc->criticals as $critical){
-				if($critical->phpclass == "ShipDisabled" && $critical->turn <= $gamedata->turn) return;//Ship already captured, no more work here.	
+			foreach ($cnc->criticals as $cncCrit){
+				if($cncCrit->phpclass == "ShipDisabled" && $cncCrit->turn <= $gamedata->turn) return;//Ship already captured, no more work here.	
 			}		
 
 		//Create fireOrder to show the attempted marine action.
@@ -596,9 +596,9 @@ class ShipSystem {
 			//Now resolve the attackers roll							
 			if ($attackerRoll <= 50) { // Marines kill a defender.
 				if($cnc){
-						$crit = new DefenderLost(-1, $ship->id, $cnc->id, 'DefenderLost', $gamedata->turn); 
-						$crit->updated = true;
-				        $cnc->criticals[] =  $crit;				
+						$newCrit = new DefenderLost(-1, $ship->id, $cnc->id, 'DefenderLost', $gamedata->turn); 
+						$newCrit->updated = true;
+				        $cnc->criticals[] =  $newCrit;				
 				}						
 					$newFireOrder->pubnotes = "<br>Roll(Mod): $attackerRoll($attackerRollMod10) - Attacking marine unit eliminates a defender.";    	      	
 			}
