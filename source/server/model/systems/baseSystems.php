@@ -4498,7 +4498,7 @@ class ThirdspaceShieldGenerator extends ShipSystem{
         $this->data["Special"] .= "<br>During Initial Orders this system can be used to transfer shield power from one shield system to another e.g. front to aft etc.";	   
         $this->data["Special"] .= "<br>You cannot commit your Intial Orders if there is an excess or deficit of shield energy in this system.";
  		$this->outputDisplay = $this->storedCapacity;
- 		$this->data["Output"] = $this->getOutputOnTurn($turn);               
+ 		$this->data["Output"] = $this->getOutput();               
     }
 	
 	//always redefine $this->data, variable information goes there...
