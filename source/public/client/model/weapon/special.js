@@ -394,14 +394,7 @@ PsionicLance.prototype.initBoostableInfo = function () {
             this.data["Boostlevel"] = '0';
             break;
     }
-/*
-	if (this.data.Boostlevel > 0) {
-		this.outputDisplay = this.data.Boostlevel;
-	} else {
-		this.outputDisplay = '-'; //'0' is not shown!
-	}    
-    
-*/
+
     return this;
 };
 
@@ -416,11 +409,11 @@ PsychicField.prototype.initBoostableInfo = function(){
     // Needed because it can change during initial phase
     // because of adding extra power.
     if(window.weaponManager.isLoaded(this)){
-        this.range = 5 + 1*shipManager.power.getBoost(this);
+        this.range = 4 + 1*shipManager.power.getBoost(this);
         this.data["Range"] = this.range;
-        this.minDamage = 0 + shipManager.power.getBoost(this);//Psychic Field does flat damage, mainly to prioritise against other fields.
-//        this.minDamage = Math.max(0,this.minDamage);
-//        this.maxDamage =  0 + shipManager.power.getBoost(this);
+        this.minDamage = 1 + shipManager.power.getBoost(this);//Psychic Field does flat damage, mainly to prioritise against other fields.
+        this.minDamage = Math.max(1,this.minDamage);
+        this.maxDamage =  1 + shipManager.power.getBoost(this);
         this.data["Damage"] = "" + this.minDamage;
     }
     else{
@@ -447,7 +440,7 @@ PsychicField.prototype.hasMaxBoost = function(){
 PsychicField.prototype.getMaxBoost = function(){
     return this.maxBoostLevel;
 }
-
+/*
 //needed for Spark Curtain upgrade
 PsychicField.prototype.getDefensiveHitChangeMod = function (target, shooter, weapon) {
     if (!weapon.ballistic) return 0;//only ballistic weapons are affected
@@ -457,7 +450,7 @@ PsychicField.prototype.getDefensiveHitChangeMod = function (target, shooter, wea
 	}
 	return out;
 }; 
-
+*/
 var ProximityLaserLauncher = function ProximityLaserLauncher(json, ship) {
     Weapon.call(this, json, ship);
 };
