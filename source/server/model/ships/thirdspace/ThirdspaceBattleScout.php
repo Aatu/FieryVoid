@@ -47,10 +47,7 @@ class ThirdspaceBattleScout extends BaseShip{
         $this->addPrimarySystem(new ThirdspaceSelfRepair(7, 20, 10)); //armor, structure, output 
 		$this->addPrimarySystem(new JumpEngine(6, 24, 4, 5));//Presumably have access to hyperspace, or possess some other form of FTL travel that this system represents.          		  		
       
-//		$projection = new ThirdspaceShield(3, 80, 80, 330, 30, 'F');//: $armor, $startHealth, $maxRating, $arc from/to - F/A/L/R
-//		$projector = new ThirdspaceShieldProjector(6, 24, 4, 3, 330, 30, 'F'); //: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R 
-//		$projection->addProjector($projector);
-//		$this->addFrontSystem($projector);		
+	
 		$this->addFrontSystem(new ThirdspaceShield(3, 80, 80, 330, 30, 'F'));
         $this->addFrontSystem(new PsionicTorpedo(5, 0, 0, 240, 0));
         $this->addFrontSystem(new PsionicTorpedo(5, 0, 0, 240, 0));        
@@ -66,10 +63,6 @@ class ThirdspaceBattleScout extends BaseShip{
         $this->addFrontSystem(new GraviticThruster(6, 20, 0, 8, 1));             
 			
 		
-//		$projection = new ThirdspaceShield(3, 80, 80, 0, 360, 'C');//: $armor, $startHealth, $maxRating, $arc from/to - F/A/L/R
-//		$projector = new ThirdspaceShieldProjector(6, 24, 4, 3, 0, 360, 'A'); //: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R 
-//		$projection->addProjector($projector);
-//		$this->addAftSystem($projector);
 		$this->addAftSystem(new ThirdspaceShield(3, 80, 80, 0, 360, 'A'));
         $this->addAftSystem(new PsionicTorpedo(5, 0, 0, 180, 300));
         $this->addAftSystem(new PsionicTorpedo(5, 0, 0, 60, 180));			
@@ -87,11 +80,7 @@ class ThirdspaceBattleScout extends BaseShip{
         $LCVRail1->displayName = "LCV Rail";        
         $this->addAftSystem($LCVRail1);                
        
-       
-//        $projection = new ThirdspaceShield(3, 160, 160, 210, 330, 'L');//: $armor, $startHealth, $maxRating, $arc from/to - F/A/L/R
-//		$projector = new ThirdspaceShieldProjector(6, 24, 4, 3, 210, 330, 'L'); //: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R 
-//		$projection->addProjector($projector);
-//		$this->addLeftSystem($projector);		
+       		
 		$this->addLeftSystem(new ThirdspaceShield(3, 160, 160, 210, 330, 'L'));
 		$this->addLeftSystem(new PsionicLance(5, 0, 0, 240, 360));
 		$this->addLeftSystem(new PsionicLance(5, 0, 0, 180, 300));   		                  
@@ -106,11 +95,7 @@ class ThirdspaceBattleScout extends BaseShip{
         $LCVRail2->displayName = "LCV Rail";        
         $this->addLeftSystem($LCVRail2);                      
             
-            
-//        $projection = new ThirdspaceShield(3, 160, 160, 30, 150, 'R');//: $armor, $startHealth, $maxRating, $arc from/to - F/A/L/R
-//		$projector = new ThirdspaceShieldProjector(6, 24, 4, 3, 30, 150, 'R'); //: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R 
-//		$projection->addProjector($projector);
-//		$this->addRightSystem($projector);		
+            	
 		$this->addRightSystem(new ThirdspaceShield(3, 160, 160, 30, 150, 'R'));
  		$this->addRightSystem(new PsionicLance(5, 0, 0, 0, 120));
  		$this->addRightSystem(new PsionicLance(5, 0, 0, 60, 180)); 		
@@ -147,7 +132,6 @@ class ThirdspaceBattleScout extends BaseShip{
 			),
 			1=> array( //Fwd
 				6 => "Thruster",
-//				7 => "Shield Projector",
 				9 => "Psionic Torpedo",
 				11 => "Psionic Concentrator",
 				18 => "Structure",
@@ -156,7 +140,6 @@ class ThirdspaceBattleScout extends BaseShip{
 			2=> array( //Aft
 				7 => "Thruster",
 				9 => "Psionic Torpedo",				
-//				9 => "Shield Projector",
 				12 => "Psionic Concentrator",
 				18 => "Structure",
 				20 => "Primary",
@@ -165,7 +148,6 @@ class ThirdspaceBattleScout extends BaseShip{
 				4 => "Thruster",
 				6 => "Psionic Lance",
 				9 => "Psionic Concentrator",
-//				11 => "Shield Projector",
 				11 => "LCV Rail",
 				18 => "Structure",
 				20 => "Primary",
@@ -174,7 +156,6 @@ class ThirdspaceBattleScout extends BaseShip{
 				4 => "Thruster",
 				6 => "Psionic Lance",
 				9 => "Psionic Concentrator",
-//				11 => "Shield Projector",
 				11 => "LCV Rail",
 				18 => "Structure",
 				20 => "Primary",
