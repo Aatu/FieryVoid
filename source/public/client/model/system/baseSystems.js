@@ -1311,16 +1311,21 @@ var ThirdspaceShieldGenerator = function ThirdspaceShieldGenerator(json, ship) {
 };
 ThirdspaceShieldGenerator.prototype = Object.create(ShipSystem.prototype);
 ThirdspaceShieldGenerator.prototype.constructor = ThirdspaceShieldGenerator;
-/*
-ThirdspaceShieldGenerator.prototype.hasExcessCapacity = function () { //Check if there is extra power still in Generator.
-	if(this.storedCapacity > 0) return true;
-		
-	return false;
-};
-*/
+
 ThirdspaceShieldGenerator.prototype.initializationUpdate = function() {
-	var ship = this.ship;	
-	this.outputDisplay = this.storedCapacity;
+	var ship = this.ship;
+	
+	if(gamedata.gamephase == 1){		
+		this.outputDisplay = this.storedCapacity;
+		
+		if (this.storedCapacity == 0) {
+			this.outputDisplay = '-'; //'0' is not shown!
+		}		
+		
+	}else{
+		this.outputDisplay = this.output;			
+	}
+	
 	return this;
 };
 
@@ -1387,17 +1392,7 @@ ThirdspaceShieldGenerator.prototype.doSelect = function () { //check if can incr
 		
 	return;
 };
-/*
-ThirdspaceShieldGenerator.prototype.doIndividualNotesTransfer = function () { //prepare individualNotesTransfer variable - if relevant for this particular system	
-	this.individualNotesTransfer = Array();
-	//Now pass a note to create a damage entry that will either increase or decrease shields strength.
-	if(gamedata.gamephase == 1 && this.storedCapacity > 0){
-		var spareCapacity = this.storedCapacity;
-		this.individualNotesTransfer.push(spareCapacity); //Push change in shield strength to back end for Damage Entry creation if required e.g. over or under 0.
-	}
-	return true;
-};	
-*/
+
 ThirdspaceShieldGenerator.prototype.doEqualise = function () { //Check if there is extra power still in Generator.
 
 	var totalShieldPool = 0;
