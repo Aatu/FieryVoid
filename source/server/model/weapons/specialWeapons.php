@@ -4452,7 +4452,7 @@ class VorlonDischargeCannon extends Weapon{
 
 }//endof class VorlonDischargeCannon
 
-class PsychicField extends Weapon implements DefensiveSystem{ //Thirdspace weapons that operates similar to Spark Field.
+class PsychicField extends Weapon{ //Thirdspace weapons that operates similar to Spark Field.
     public $name = "PsychicField";
     public $displayName = "Psychic Field";
 	public $iconPath = "PsychicField.png";
@@ -4464,12 +4464,10 @@ class PsychicField extends Weapon implements DefensiveSystem{ //Thirdspace weapo
 	public $noProjectile = true; //Marker for front end to make projectile invisible for weapons that shouldn't have one.      
 	
 	public $boostable = true;
-    public $boostEfficiency = 4;
+    public $boostEfficiency = 0;
     public $maxBoostLevel = 3;
 	
 	public $output = 0;
-//	public $baseOutput = 2;//base output WITH Spark Curtain
-//	public $defensiveType = "SparkCurtain"; //needs to be set to recognize as defensive system
       
     public $priority = 2; //should attack very early
 	
@@ -4489,6 +4487,8 @@ class PsychicField extends Weapon implements DefensiveSystem{ //Thirdspace weapo
     public $firingModes = array( 1 => "Field"); //just a convenient name for firing mode
 	public $hextarget = true;
 	
+    protected $ewBoosted = true;	
+	
 	protected $targetList = array(); //weapon will hit units on this list rather than target from firing order; filled by PsychicField handler!
 	
 	
@@ -4503,26 +4503,27 @@ class PsychicField extends Weapon implements DefensiveSystem{ //Thirdspace weapo
 
 	    public function setSystemDataWindow($turn){
 		    $boostlevel = $this->getBoostLevel($turn);
-		    $this->minDamage = 0+$boostlevel;
-		    $this->maxDamage = 0+$boostlevel;
-	//	    $this->minDamage = max(0,$this->minDamage);
+		    $this->minDamage = 1+$boostlevel;
+		    $this->maxDamage = 1+$boostlevel;
+		    $this->minDamage = max(1,$this->minDamage);
 		    $this->animationExplosionScale = $this->getAoE($turn);
 		    $this->range = $this->getAoE($turn);
 		      parent::setSystemDataWindow($turn);  
 //		      $this->data["AoE"] = $this->getAoE($turn);
-		      $this->data["Special"] = "Automatically affects all enemy units in range.  Cannot be fired manually."; 
-		      $this->data["Special"] .= "<br>Fighters have Initiative reduced by 5 - 15 points, and Hit Chances reduced by 5 - 10% next turn.";  
-		      $this->data["Special"] .= "<br>Ships have Hit Chances reduced by 5 - 10% next turn if hit on Structure, or suffer a potential critical on non-Structure systems.";  		      
-		      $this->data["Special"] .= "<br>Can be boosted twice which each boost adding +1 AoE range, +1 Damage and +5 to Initiative / Hit Chance penalties."; 
+		      $this->data["Special"] = "Automatically affects all enemy units in Range.  Cannot be fired manually."; 
+		      $this->data["Special"] .= "<br>Reduces Fighters' Initiative (5-15 pts), and Hit Chances (5-10%) next turn.";  
+		      $this->data["Special"] .= "<br>Reduces Ships' Hit Chances (5-10%) next turn if hits Structure, or causes potential critical on other systems.";  		      
+		      $this->data["Special"] .= "<br>Can be boosted three times using EW, with each boost adding +1 Range, +1 Damage and +5 to Initiative / Hit Chance penalties."; 
 		      $this->data["Special"] .= "<br>Multiple overlapping Psychic Fields will only cause one (the strongest) attack on a particular target.";
-		      $this->data["Special"] .= "<br>Does not affect friendly units, and is only 50% effective against Advanced Armor.";  		       
+		      $this->data["Special"] .= "<br>Does not affect friendly units. Only 50% effective against Advanced Armor.";
+		      $this->data["Special"] .= "<br>Only 50% effective against Advanced Armor."; 		        		       
 	    }	//endof function setSystemDataWindow
 	
 	
 	
 	public function getAoE($turn){
 		$boostlevel = $this->getBoostLevel($turn);
-		$aoe = 5+$boostlevel;
+		$aoe = 4+$boostlevel;
 		return $aoe;
 	}
 	
@@ -4599,7 +4600,6 @@ class PsychicField extends Weapon implements DefensiveSystem{ //Thirdspace weapo
 	}
 
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!	
-//		if ($ship->faction == "Thirdspace") return; //No effect on other Thirdspace ships.
 		$shooter = $gamedata->getShipById($fireOrder->shooterid);
 		if ($ship->team == $shooter->team) return; //No effect on other Thirdspace ships.
 		
@@ -4662,7 +4662,7 @@ class PsychicField extends Weapon implements DefensiveSystem{ //Thirdspace weapo
 			$maxhealth = 20;
 		}
 		if ( $powerReq == 0 ){
-			$powerReq = 4;
+			$powerReq = 0;
 		}
 		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
 		PsychicFieldHandler::addPsychicField($this);//so all Psychic Fields are accessible together, and firing orders can be uniformly created
@@ -4671,10 +4671,8 @@ class PsychicField extends Weapon implements DefensiveSystem{ //Thirdspace weapo
 
 	public function onConstructed($ship, $turn, $phase){
 		parent::onConstructed($ship, $turn, $phase);
-//		$this->tohitPenalty = $this->getOutput();
-//		$this->damagePenalty = 0;
 	}
-		
+/*		
 	public function getDefensiveType(){
 		return "SparkCurtain";
 	}    
@@ -4686,13 +4684,13 @@ class PsychicField extends Weapon implements DefensiveSystem{ //Thirdspace weapo
 	public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){
 		return 0;//does not reduce hit chance
 	}
-/*		
+		
 	public function getOutput(){
 		return 0;     
 	}    
 */	
 	public function getDamage($fireOrder){        
-		$fieldDamage = 0;
+		$fieldDamage = 1;
 		$boostlevel = $this->getBoostLevel($fireOrder->turn);
 		$fieldDamage += $boostlevel; //-1 per level of boost
 //		$baseDamage = max(0,$baseDamage); //cannot do less than 0	
@@ -4701,6 +4699,13 @@ class PsychicField extends Weapon implements DefensiveSystem{ //Thirdspace weapo
 	
 	public function setMinDamage(){   $this->minDamage =  0 ;      }
 	public function setMaxDamage(){   $this->maxDamage =  0 ;      }
+
+	public function stripForJson(){
+		$strippedSystem = parent::stripForJson();
+		$strippedSystem->ewBoosted = $this->ewBoosted;													
+		return $strippedSystem;
+	} 
+
 	
 } //endof class PsychicField 
 
@@ -4848,7 +4853,7 @@ class PsychicFieldHandler{
                 $maxhealth = 16;
             }
             if ( $powerReq == 0 ){
-                $powerReq = 12;
+                $powerReq = 10;
             }
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
@@ -4989,7 +4994,7 @@ class PsionicLance extends Raking{
                 $maxhealth = 12;
             }
             if ( $powerReq == 0 ){
-                $powerReq = 6;
+                $powerReq = 4;
             }
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
@@ -5109,7 +5114,18 @@ class PsionicConcentrator extends Weapon{
 	public $testRun = false;//testRun = true means hit chance is calculated nominal skipping concentration issues - for subordinate weapon to calculate average hit chance
 	
 	public $repairPriority = 4;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
-	
+
+    function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+        {
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 7;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 1;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }	
 	
 	public function setSystemDataWindow($turn){
 		      parent::setSystemDataWindow($turn);  
@@ -5204,18 +5220,6 @@ class PsionicConcentrator extends Weapon{
         $system->critRollMod += $mod; 
 	} //endof function onDamagedSystem	
 
-	
-    function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
-        {
-            //maxhealth and power reqirement are fixed; left option to override with hand-written values
-            if ( $maxhealth == 0 ){
-                $maxhealth = 7;
-            }
-            if ( $powerReq == 0 ){
-                $powerReq = 2;
-            }
-            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-        }
 	
     public function getDamage($fireOrder){
 		return Dice::d(6, 1+$this->firingMode)+($this->firingMode*3)+3; 
