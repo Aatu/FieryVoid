@@ -74,19 +74,19 @@ PsionicTorpedo.prototype.initBoostableInfo = function () {
     	
     switch (shipManager.power.getBoost(this)) {
         case 0:
-            this.data["Damage"] = '14 - 21';
+            this.data["Damage"] = '13 - 22';
             this.data["Boostlevel"] = '0';
             break;
         case 1:
-            this.data["Damage"] = '17 - 24';
+            this.data["Damage"] = '17 - 26';
             this.data["Boostlevel"] = '1';
             break;
         case 2:
-            this.data["Damage"] = '20 - 27';
+            this.data["Damage"] = '21 - 30';
             this.data["Boostlevel"] = '2';
             break;          
         default:
-            this.data["Damage"] = '14 - 21';
+            this.data["Damage"] = '13 - 22';
             this.data["Boostlevel"] = '0';
             break;
     }
