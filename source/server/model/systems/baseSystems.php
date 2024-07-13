@@ -4488,8 +4488,9 @@ class ThirdspaceShieldGenerator extends ShipSystem{
     }  	    
 		
 	protected $possibleCriticals = array(
-	            19=>"OutputReduced2",
-	            28=>"OutputReduced4" );
+	            18=>"OutputReduced1",
+	            20=>"OutputReduced2",
+	            26=>"OutputReduced4" );
 
 		
     public function setSystemDataWindow($turn){
