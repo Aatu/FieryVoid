@@ -728,8 +728,7 @@ class ThirdspaceShield extends Shield implements DefensiveSystem { //defensive v
 			$this->data["Special"] .= "<br>Has an Armor value of "  . $this->armour . ".";				
 			$this->data["Max Strength"] = $this->maxStrength;			
 			$this->currentHealth = $this->getRemainingCapacity();//override on-icon display default
-			$this->outputDisplay = $this->currentHealth;//override on-icon display default			
-//			$this->outputDisplay = $this->getRemainingCapacity() . '/' . $this->output;//override on-icon display default			
+			$this->outputDisplay = $this->currentHealth;//override on-icon display default					
 		}	
 		
 		public function getRemainingCapacity(){
@@ -792,7 +791,7 @@ class ThirdspaceShield extends Shield implements DefensiveSystem { //defensive v
 		function addProjector($projector){
 			if($projector) $this->projectorList[] = $projector;
 		}
-		
+/*		
 		//effects that happen in Critical phase (after criticals are rolled) - replenishment from active projectors 
 		public function criticalPhaseEffects($ship, $gamedata){
 			
@@ -811,10 +810,7 @@ class ThirdspaceShield extends Shield implements DefensiveSystem { //defensive v
 				$activeProjectors++;
 				$projectorOutput += $projector->getOutputOnTurn($gamedata->turn);
 			}
-			/*after all - shield will NOT fall!
-			if($activeProjectors <= 0){ //no active projectors - shield is falling!
-				$toReplenish = -$this->getRemainingCapacity();	
-				*/
+
 			if($activeProjectors > 0){ //active projectors present - reinforce shield!
 				$toReplenish = min($projectorOutput,$this->getUsedCapacity());		
 			}
@@ -823,18 +819,38 @@ class ThirdspaceShield extends Shield implements DefensiveSystem { //defensive v
 				$this->absorbDamage($ship,$gamedata,-$toReplenish);
 			}
 		} //endof function criticalPhaseEffects
-		
+*/		
+
+		//effects that happen in Critical phase (after criticals are rolled) - replenishment from active Generator 
+		public function criticalPhaseEffects($ship, $gamedata){
+			
+			parent::criticalPhaseEffects($ship, $gamedata);//Call parent to apply effects like Limpet Bore.
+			
+			if($this->isDestroyed()) return; //destroyed shield does not work... but other critical phase effects may work even if destroyed!
+
+			$generator = $ship->getSystemByName("ThirdspaceShieldGenerator");	
+			$generatorOutput = 0;
+
+			if($generator){//Generator exists and is not destroyed!
+				if($generator->isDestroyed()) return; //Generator is destroyed, cannot replenish shields.
+
+				$generatorOutput = $generator->getOutput(); 				
+				$toReplenish = min($generatorOutput,$this->getUsedCapacity());		
+											
+				if($toReplenish != 0){ //something changes!
+					$this->absorbDamage($ship,$gamedata,-$toReplenish);
+				}				
+			}
+
+		} //endof function criticalPhaseEffects
 
 	// this method generates additional non-standard information in the form of individual system notes, in this case: - Initial phase: check setting changes made by user, convert to notes.	
 	public function doIndividualNotesTransfer(){
 	//data received in variable individualNotesTransfer, positive if Shield decreased, negative if Shield increased.
-//var_dump($this->individualNotesTransfer);
-	// Data received in variable individualNotesTransfer, further functions will look for it in currchangedSpec
 	    if (is_array($this->individualNotesTransfer) && isset($this->individualNotesTransfer[0])) { // Check if it's an array and the key exists
 	        $shieldChange = $this->individualNotesTransfer[0];
 	        $this->changeThisTurn = $shieldChange;
-	    }
-//	echo "Value of $changeThisTurn: " . $this->changeThisTurn. "\n";	    
+	    }	    
 	    // Clear the individualNotesTransfer array
 	    $this->individualNotesTransfer = array();
 	}
