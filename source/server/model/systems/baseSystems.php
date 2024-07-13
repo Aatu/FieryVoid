@@ -4486,11 +4486,11 @@ class ThirdspaceShieldGenerator extends ShipSystem{
     function __construct($armour, $maxhealth, $powerReq, $output){ 
         parent::__construct($armour, $maxhealth, $powerReq, $output ); //$armour, $maxhealth, $powerReq, $output    		    
     }  	    
-/*		
+		
 	protected $possibleCriticals = array(
 	            19=>"OutputReduced2",
 	            28=>"OutputReduced4" );
-*/
+
 		
     public function setSystemDataWindow($turn){
         parent::setSystemDataWindow($turn);
