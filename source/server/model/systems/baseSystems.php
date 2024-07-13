@@ -3646,14 +3646,23 @@ class SelfRepair extends ShipSystem{
 class ThirdspaceSelfRepair extends SelfRepair{
 
     public $boostable = true;
-    public $maxBoostLevel = 5;
-    public $boostEfficiency = 4; 
+    public $maxBoostLevel = 3;
+    public $boostEfficiency = 0;
+    
+    protected $ewBoosted = true;   
 	
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);  
-		$this->data["Special"] .= "<br> Output can be boosted up to " . $this->maxBoostLevel . " times at " . $this->boostEfficiency . " power per extra point of self repair.";	
+		$this->data["Special"] .= "<br> Output can be boosted up to " . $this->maxBoostLevel . " times at 1 EW per extra point of self repair.";	
 		}	
-	}	
+
+	public function stripForJson(){
+		$strippedSystem = parent::stripForJson();
+		$strippedSystem->ewBoosted = $this->ewBoosted;													
+		return $strippedSystem;
+	} 
+
+}	
 
 //BioThruster - it's NOT seen as thruster by game; used to calculate output of BioDrive engine 
 class BioThruster extends ShipSystem{
@@ -4466,103 +4475,33 @@ class ThirdspaceShieldGenerator extends ShipSystem{
     public $iconPath = "ThirdspaceShieldGen.png";
 	protected $doCountForCombatValue = false; //Check if inherited and remove?
 	
-	
 	public $storedCapacity = 0;
 	public $excessCapacity = 0;	//Variable to store front end values, when player commits Initial Orders with excess energy in Generator. 
 	public $shieldPresets = array('Equalise', 'Forward', 'Starboard', 'Aft', 'Port');	
 	public $presetCurrClass = '';//for front end, to display Preset types in tooltips.
+
+	public $repairPriority = 9;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
     
-    protected $possibleCriticals = array(); //no available criticals
     
     function __construct($armour, $maxhealth, $powerReq, $output){ 
-        parent::__construct($armour, $maxhealth, $powerReq, $output ); //$armour, $maxhealth, $powerReq, $output    	
-    }  
-
-/*
-	// this method generates additional non-standard information in the form of individual system notes, in this case: - Initial phase: check setting changes made by user, convert to notes.	
-	public function doIndividualNotesTransfer(){
-	//data received in variable individualNotesTransfer, positive if Shield decreased, negative if Shield increased.
-	// Data received in variable individualNotesTransfer, further functions will look for it in currchangedSpec
-	    if (is_array($this->individualNotesTransfer) && isset($this->individualNotesTransfer[0])) { // Check if it's an array and the key exists
-	        $excessCapacity = $this->individualNotesTransfer[0];
-	        $this->excessCapacity = $excessCapacity;
-	    }	    
-	    // Clear the individualNotesTransfer array
-	    $this->individualNotesTransfer = array();
-	}
-	
+        parent::__construct($armour, $maxhealth, $powerReq, $output ); //$armour, $maxhealth, $powerReq, $output    		    
+    }  	    
+/*		
+	protected $possibleCriticals = array(
+	            19=>"OutputReduced2",
+	            28=>"OutputReduced4" );
+*/
 		
-    public function generateIndividualNotes($gameData, $dbManager){ //dbManager is necessary for Initial phase only
-		$ship = $this->getUnit();
-		switch($gameData->phase){
-					
-				case 1: //Initial phase
-					//data returned as a number to create a new damage entry.
-					if($ship->userid == $gameData->forPlayer){ //only own ships, otherwise bad things may happen!
-						//load existing data first - at this point ship is rudimentary, without data from database!
-						$listNotes = $dbManager->getIndividualNotesForShip($gameData, $gameData->turn, $ship->id);	
-						foreach ($listNotes as $currNote){
-							if($currNote->systemid==$this->id){//note is intended for this system!
-								$this->addIndividualNote($currNote);	 								
-							}
-						}
-						$this->onIndividualNotesLoaded($gameData);		
-
-						$excessCapacity = $this->excessCapacity;//Extract change value for shield this turn.																
-												
-						$notekey = 'Excess';
-						$noteHuman = 'Generator had spare capacity';
-						$notevalue = $excessCapacity;
-						$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$notevalue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue         
-					}			
-										
-			break;				
-		}
-	} //endof function generateIndividualNotes
-	
-
-	public function onIndividualNotesLoaded($gamedata)
-	{
-		$ship = $this->getUnit();
-		$damageValue = 0;
-
-		switch($gamedata->phase){			
-		
-			case 1: //Initial phase		
-			    foreach ($this->individualNotes as $currNote) {
-			  		if($currNote->turn == $gamedata->turn-1) {  				    	
-				        $excessCapacity = $currNote->notevalue;
-				        $this->storedCapacity = $excessCapacity;
-			        }
-				}				
-							
-			break;
-			
-			//Otherwise, what were the points set this turn at end of Initial Orders.
-			default:					
-			    foreach ($this->individualNotes as $currNote) {
-			  		if($currNote->turn == $gamedata->turn) {  			    	
-				        $excessCapacity = $currNote->notevalue;
-				        $this->storedCapacity = $excessCapacity;
-			        }
-				}   
-				 
-			break;		
-		}		
-			
-        //and immediately delete notes themselves, they're no longer needed (this will not touch the database, just memory!)
-        $this->individualNotes = array();
-	 		  
-	}//endof onIndividualNotesLoaded
-*/	
     public function setSystemDataWindow($turn){
         parent::setSystemDataWindow($turn);
-        $this->data["Special"] = "Technical system used to transfer shield power from one shield system to another e.g. front to aft etc.";	   
+		$this->data["Special"] = "Regenerates 1 health per point of output for each Shield at the end of each turn.";
+        $this->data["Special"] .= "<br>During Initial Orders this system can be used to transfer shield power from one shield system to another e.g. front to aft etc.";	   
         $this->data["Special"] .= "<br>You cannot commit your Intial Orders if there is an excess or deficit of shield energy in this system.";
- 		$this->outputDisplay = $this->storedCapacity;               
+ 		$this->outputDisplay = $this->storedCapacity;
+ 		$this->data["Output"] = $this->getOutputOnTurn($turn);               
     }
 	
-	//always redefine $this->data for Hyach Computer! A lot of variable information goes there...
+	//always redefine $this->data, variable information goes there...
 	public function stripForJson(){
         $strippedSystem = parent::stripForJson();
         $strippedSystem->data = $this->data;
