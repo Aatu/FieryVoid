@@ -919,9 +919,7 @@ class ThirdspaceShield extends Shield implements DefensiveSystem { //defensive v
 }//endof class ThirdspaceShield
 
 
-/* ThirdspaceShieldProjector: reinforces shield projection (and prevents it from falling)
- actual reinforcing (and falling) is done from Projection's own end, Projector just is (needs to be plugged into appropriate projection at design stage
-*/
+/*
 class ThirdspaceShieldProjector  extends Shield implements DefensiveSystem { //defensive values of zero, but still formally there to display arcs!
 	    public $name = "ThirdspaceShieldProjector";
 	    public $displayName = "Shield Projector";
@@ -984,6 +982,6 @@ class ThirdspaceShieldProjector  extends Shield implements DefensiveSystem { //d
 		}
 		
 } //endof class ThirdspaceShieldProjector
-
+*/
 
 ?>

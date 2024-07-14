@@ -397,7 +397,7 @@ ThirdspaceShield.prototype.doIndividualNotesTransfer = function () { //prepare i
 	return true;
 };
 
-
+/*
 var ThirdspaceShieldProjector = function ThirdspaceShieldProjector(json, ship) {
     ShipSystem.call(this, json, ship);
     this.defensiveType = "none";
@@ -415,3 +415,4 @@ ThirdspaceShieldProjector.prototype.getDefensiveHitChangeMod = function (target,
     //this is made to be a shield just to display arc visually, no actual protection
     return 0;
 };
+*/
