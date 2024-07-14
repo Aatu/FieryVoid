@@ -63,7 +63,7 @@ class ThirdspaceBattleScout extends BaseShip{
         $this->addFrontSystem(new GraviticThruster(6, 20, 0, 8, 1));             
 			
 		
-		$this->addAftSystem(new ThirdspaceShield(3, 80, 80, 0, 360, 'A'));
+		$this->addAftSystem(new ThirdspaceShield(3, 80, 80, 150, 210, 'A'));
         $this->addAftSystem(new PsionicTorpedo(5, 0, 0, 180, 300));
         $this->addAftSystem(new PsionicTorpedo(5, 0, 0, 60, 180));			
         $this->addAftSystem(new PsionicConcentrator(4, 0, 0, 120, 300)); 

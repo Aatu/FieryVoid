@@ -59,7 +59,7 @@ class ThirdspaceCarrier extends BaseShip{
         $this->addFrontSystem(new GraviticThruster(6, 20, 0, 8, 1));           
 			
 		
-		$this->addAftSystem(new ThirdspaceShield(2, 70, 70, 0, 360, 'A'));	
+		$this->addAftSystem(new ThirdspaceShield(2, 70, 70, 150, 210, 'A'));	
         $this->addAftSystem(new PsionicConcentrator(4, 0, 0, 120, 300)); 
         $this->addAftSystem(new PsionicConcentrator(4, 0, 0, 120, 300));
         $this->addAftSystem(new PsionicConcentrator(4, 0, 0, 60, 240));         
