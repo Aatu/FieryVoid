@@ -692,7 +692,7 @@ class ThirdspaceShield extends Shield implements DefensiveSystem { //defensive v
 		//Shield Projections cannot be repaired at all!
 		public $repairPriority = 0;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
 
-		private $projectorList = array();
+//		private $projectorList = array();
 		
 		protected $doCountForCombatValue = false;		//To ignore projection for combat value calculations
 		public $changeThisTurn = 0;		
@@ -702,8 +702,9 @@ class ThirdspaceShield extends Shield implements DefensiveSystem { //defensive v
 	    function __construct($armor, $startHealth, $rating, $startArc, $endArc, $side = 'F'){ //parameters: $armor, $startHealth, $Rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
 			$this->iconPath = 'ThirdspaceShield' . $side . '.png';
 			parent::__construct($armor, $startHealth, 0, $rating, $startArc, $endArc);
-			$this->maxStrength = $rating*2;
-				}
+			$this->maxStrength = $startHealth*2;
+			//rating not currently used.			
+		}
 		
 		
 		
@@ -787,52 +788,25 @@ class ThirdspaceShield extends Shield implements DefensiveSystem { //defensive v
 			
 			return $returnValues;
 		} //endof function doProtect
-		    
+/*		    
 		function addProjector($projector){
 			if($projector) $this->projectorList[] = $projector;
 		}
-/*		
-		//effects that happen in Critical phase (after criticals are rolled) - replenishment from active projectors 
-		public function criticalPhaseEffects($ship, $gamedata){
-			
-			parent::criticalPhaseEffects($ship, $gamedata);//Call parent to apply effects like Limpet Bore.
-			
-			if($this->isDestroyed()) return; //destroyed system does not work... but other critical phase effects may work even if destroyed!
-			
-			$activeProjectors = 0;
-			$projectorOutput = 0;
-			$toReplenish = 0;
-			
-			foreach($this->projectorList as $projector){
-				if ( ($projector->isDestroyed($gamedata->turn))
-				     || ($projector->isOfflineOnTurn($gamedata->turn))
-				) continue;
-				$activeProjectors++;
-				$projectorOutput += $projector->getOutputOnTurn($gamedata->turn);
-			}
-
-			if($activeProjectors > 0){ //active projectors present - reinforce shield!
-				$toReplenish = min($projectorOutput,$this->getUsedCapacity());		
-			}
-			
-			if($toReplenish != 0){ //something changes!
-				$this->absorbDamage($ship,$gamedata,-$toReplenish);
-			}
-		} //endof function criticalPhaseEffects
-*/		
+*/
 
 		//effects that happen in Critical phase (after criticals are rolled) - replenishment from active Generator 
 		public function criticalPhaseEffects($ship, $gamedata){
 			
 			parent::criticalPhaseEffects($ship, $gamedata);//Call parent to apply effects like Limpet Bore.
 			
-			if($this->isDestroyed()) return; //destroyed shield does not work... but other critical phase effects may work even if destroyed!
+			if($this->isDestroyed()) return; //destroyed shield does not work...
+			//Shields should not be destroyed, check damage this turn for anything that destroyed it and undestroy.
 
 			$generator = $ship->getSystemByName("ThirdspaceShieldGenerator");	
 			$generatorOutput = 0;
 
 			if($generator){//Generator exists and is not destroyed!
-				if($generator->isDestroyed()) return; //Generator is destroyed, cannot replenish shields.
+				if($generator->isDestroyed()) return; //Double-check. Just in case.
 
 				$generatorOutput = $generator->getOutput(); 				
 				$toReplenish = min($generatorOutput,$this->getUsedCapacity());		
@@ -907,14 +881,14 @@ class ThirdspaceShield extends Shield implements DefensiveSystem { //defensive v
 	}//endof onIndividualNotesLoaded
 
 		
-		public function stripForJson() {
-	        $strippedSystem = parent::stripForJson();
-			$strippedSystem->currentHealth = $this->currentHealth;
-			$strippedSystem->outputDisplay = $this->outputDisplay;
-			$strippedSystem->maxStrength = $this->maxStrength;
+	public function stripForJson() {
+	    $strippedSystem = parent::stripForJson();
+		$strippedSystem->currentHealth = $this->currentHealth;
+		$strippedSystem->outputDisplay = $this->outputDisplay;
+		$strippedSystem->maxStrength = $this->maxStrength;
 					
-	        return $strippedSystem;
-		} 
+	    return $strippedSystem;
+	} 
 	
 }//endof class ThirdspaceShield
 
