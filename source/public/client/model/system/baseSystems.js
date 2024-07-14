@@ -1485,47 +1485,57 @@ ThirdspaceShieldGenerator.prototype.doPreset = function (presetCurrClass) { // C
 	
 	// Now distribute accordingly!
 	if (totalShieldPool > 0 && shieldsAvailable.length > 1) { // There is energy to distribute and more than one shield!
-		var noOfShields = shieldsAvailable.length;
-		var remainingShields = noOfShields - 1;
-		var totalUnits = remainingShields + 2; // 1 unit for each remaining shield + 2 units for the double shield
-		var amountEachShield = Math.floor(totalShieldPool / totalUnits);
-		var prioritisedAmount = amountEachShield * 2;
+		var shieldsToCharge = shieldsAvailable.slice(); // Create a copy of the shieldsAvailable array
+		var priorityShieldFound = false;
 
-		for (var j = 0; j < shieldsAvailable.length; j++) {
-			var shield = shieldsAvailable[j];
-			
-			if (shield.location == reinforceLocation) { //This is the shield to reinforce!				
-				var shieldHeadRoom = shield.maxStrength - shield.currentHealth;
-				var amountToAdd = Math.min(prioritisedAmount, shieldHeadRoom);
-				shield.currentHealth += amountToAdd; // Do not reinforce with more than it's able to hold!
-				
-				var excessShield = prioritisedAmount - amountToAdd; // Find 'wasted' amount.
-				if (excessShield > 0) totalShieldPool += excessShield; // And subtract from total if any wasted.
-				priorityShield = shield; // Mark which shield is a priority.					
-			} else {
-				shield.currentHealth = amountEachShield;
+		while (totalShieldPool > 0 && shieldsToCharge.length > 0) {
+			var noOfShieldsToCharge = shieldsToCharge.length;
+			var totalUnits = (priorityShieldFound ? noOfShieldsToCharge : noOfShieldsToCharge + 1);
+			var amountEachShield = Math.floor(totalShieldPool / totalUnits);
+			var prioritisedAmount = amountEachShield * 2;
+			var remainingShieldPool = 0;
+
+			if (amountEachShield < 1 && totalShieldPool < noOfShieldsToCharge) {
+				// If the remaining energy is too small to be meaningfully distributed, break the loop
+				break;
 			}
+
+			for (var j = 0; j < shieldsToCharge.length; j++) {
+				var shield = shieldsToCharge[j];
+				var amountToAdd = amountEachShield;
+
+				if (shield.location == reinforceLocation && !priorityShieldFound) { // This is the shield to reinforce!
+					amountToAdd = prioritisedAmount;
+					priorityShield = shield; // Mark which shield is a priority.
+					priorityShieldFound = true;
+				}
+
+				var shieldHeadRoom = shield.maxStrength - shield.currentHealth;
+				amountToAdd = Math.min(amountToAdd, shieldHeadRoom);
+
+				shield.currentHealth += amountToAdd;
+				totalShieldPool -= amountToAdd;
+
+				if (amountToAdd < amountEachShield) {
+					remainingShieldPool += amountEachShield - amountToAdd;
+				}
+			}
+
+			// Remove fully charged shields from the shieldsToCharge array
+			shieldsToCharge = shieldsToCharge.filter(shield => shield.maxStrength > shield.currentHealth);
+
+			// Add any remaining energy back to the total pool to redistribute
+//			totalShieldPool += remainingShieldPool;
 		}
 
-		// Handle any leftover energy that wasn't distributed due to rounding
-		var leftoverEnergy = totalShieldPool - (amountEachShield * remainingShields + prioritisedAmount);
-		if (leftoverEnergy > 0 && priorityShield) { // Distribute to Priority shield first, if we can.
-			var priorityHeadRoom = priorityShield.maxStrength - priorityShield.currentHealth;
-			var amountToAdd = Math.min(leftoverEnergy, priorityHeadRoom);
-			priorityShield.currentHealth += amountToAdd; // Do not reinforce with more than it's able to hold!				
-			leftoverEnergy -= amountToAdd; // Remove any spent from leftover energy.
-		}
-		
-		var leftoverSplit = Math.round(leftoverEnergy/remainingShields); //Divide remainder energy by number of remaining shields.			
-		if (leftoverEnergy > 0){//There is still some left, but Priority shield is maxxed out.
-			for (var k = 0; k < shieldsAvailable.length; k++) {
-				var shield = shieldsAvailable[k];		
-				var shieldHeadRoom = shield.maxStrength - shield.currentHealth;//Still need to check there's space altho there should be...
-				shield.currentHealth += Math.min(leftoverSplit, shieldHeadRoom);//Do not reinforce with more than it's able to hold!				
-				leftoverEnergy -= Math.min(leftoverSplit, shieldHeadRoom);//Reduce leftover
-				
-				if(leftoverEnergy <= 0) return;	//Nothing left to allocate, return.	
-			
+		// Distribute any remaining energy (if totalShieldPool is less than the number of shields)
+		if (totalShieldPool > 0) {
+			for (var j = 0; j < shieldsToCharge.length; j++) {
+				var shield = shieldsToCharge[j];
+				var amountToAdd = Math.min(1, totalShieldPool); // Distribute 1 unit at a time
+				shield.currentHealth += amountToAdd;
+				totalShieldPool -= amountToAdd;
+				if (totalShieldPool <= 0) break;
 			}
 		}
 	}
