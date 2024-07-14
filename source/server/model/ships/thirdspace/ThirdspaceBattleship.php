@@ -36,7 +36,7 @@ class ThirdspaceBattleship extends BaseShip{
         
         $this->addPrimarySystem(new AdvancedSingularityDrive(8, 50, 0, 70+10+4));
         $this->addPrimarySystem(new ThirdspaceCnC(8, 36, 0, 0));
-        $scanner = new Scanner(7, 24, 10, 16);
+        $scanner = new Scanner(7, 24, 10, 15);
 		$scanner->markThirdspace();
 		$this->addPrimarySystem($scanner);	        
         $this->addPrimarySystem(new Engine(7, 36, 0, 20, 4));
