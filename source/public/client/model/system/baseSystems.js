@@ -1429,7 +1429,7 @@ ThirdspaceShieldGenerator.prototype.doPreset = function (presetCurrClass) { // C
 	var shieldsAvailable = [];
 	var priorityShield = null; // Single priority shield
 	var reinforceLocation = -1;
-
+	
 	//Note which shield we are reinforcing.	
 	if(presetCurrClass == 'Forward') reinforceLocation = 1;
 	if(presetCurrClass == 'Starboard') reinforceLocation = 4;
@@ -1441,8 +1441,8 @@ ThirdspaceShieldGenerator.prototype.doPreset = function (presetCurrClass) { // C
 	for (var i = 0; i < ship.systems.length; i++) {
 		var system = ship.systems[i];
 		if (system instanceof ThirdspaceShield) {
-			if (system.location == 1 && shipManager.systems.isDestroyed(ship, system)) return; // Front Shield is destroyed, cannot reinforce!				
-			if (shipManager.systems.isDestroyed(ship, system)) continue; // Shield is destroyed.			
+			if (system.location == reinforceLocation && shipManager.systems.isDestroyed(ship, system)) return; // Priority Shield is destroyed, cannot reinforce!				
+			if (shipManager.systems.isDestroyed(ship, system)) continue; //Non-priority Shield is destroyed.			
 			totalShieldPool += system.currentHealth; // Add each shield's current health to the overall pool of shield energy.
 			system.currentHealth = 0;
 			shieldsAvailable.push(system);
