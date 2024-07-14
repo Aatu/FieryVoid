@@ -788,11 +788,41 @@ class ThirdspaceShield extends Shield implements DefensiveSystem { //defensive v
 			
 			return $returnValues;
 		} //endof function doProtect
+
 /*		    
 		function addProjector($projector){
 			if($projector) $this->projectorList[] = $projector;
 		}
 */
+/*		
+		//effects that happen in Critical phase (after criticals are rolled) - replenishment from active projectors 
+		public function criticalPhaseEffects($ship, $gamedata){
+			
+			parent::criticalPhaseEffects($ship, $gamedata);//Call parent to apply effects like Limpet Bore.
+			
+			if($this->isDestroyed()) return; //destroyed system does not work... but other critical phase effects may work even if destroyed!
+			
+			$activeProjectors = 0;
+			$projectorOutput = 0;
+			$toReplenish = 0;
+			
+			foreach($this->projectorList as $projector){
+				if ( ($projector->isDestroyed($gamedata->turn))
+				     || ($projector->isOfflineOnTurn($gamedata->turn))
+				) continue;
+				$activeProjectors++;
+				$projectorOutput += $projector->getOutputOnTurn($gamedata->turn);
+			}
+
+			if($activeProjectors > 0){ //active projectors present - reinforce shield!
+				$toReplenish = min($projectorOutput,$this->getUsedCapacity());		
+			}
+			
+			if($toReplenish != 0){ //something changes!
+				$this->absorbDamage($ship,$gamedata,-$toReplenish);
+			}
+		} //endof function criticalPhaseEffects
+*/	
 
 		//effects that happen in Critical phase (after criticals are rolled) - replenishment from active Generator 
 		public function criticalPhaseEffects($ship, $gamedata){
