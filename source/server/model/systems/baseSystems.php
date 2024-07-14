@@ -4501,6 +4501,26 @@ class ThirdspaceShieldGenerator extends ShipSystem{
  		$this->outputDisplay = $this->storedCapacity;
  		$this->data["Output"] = $this->getOutput();               
     }
+
+		//effects that happen in Critical phase (after criticals are rolled) - replenishment from active Generator 
+		public function criticalPhaseEffects($ship, $gamedata){
+			
+			parent::criticalPhaseEffects($ship, $gamedata);//Call parent to apply effects like Limpet Bore.
+/*
+			//Thought about adding something to reduce all shields to 0 when generator destryoed.  But I think them not regenerating is enough.			
+			if($this->isDestroyed()){
+				$shields = $ship->getSystemsByName('ThirdspaceShield', true);
+				
+				foreach($shields as $shield){
+					$currHealth = $shield->getRemainingHealth();
+					$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $currHealth, 0, 0, -1, false, false, "DepleteToZero!", "ThirdspaceShield");
+					$damageEntry->updated = true;
+					$this->damage[] = $damageEntry;							
+				}
+			}
+*/
+		} //endof function criticalPhaseEffects
+
 	
 	//always redefine $this->data, variable information goes there...
 	public function stripForJson(){
