@@ -1402,24 +1402,58 @@ ThirdspaceShieldGenerator.prototype.doEqualise = function () { //Check if there 
 	for (var i = 0; i < ship.systems.length; i++) {
 		var system = ship.systems[i];
 
-	//Find total pool of shield energy
-	if (system instanceof ThirdspaceShield) {
-			if (shipManager.systems.isDestroyed(ship, system)) continue; //Shield is destroyed.			
-			totalShieldPool += system.currentHealth; //Add each shield's current health to the overall pool of shield energy.
+		// Find total pool of shield energy
+		if (system instanceof ThirdspaceShield) {
+			if (shipManager.systems.isDestroyed(ship, system)) continue; // Shield is destroyed.			
+			totalShieldPool += system.currentHealth; // Add each shield's current health to the overall pool of shield energy.
 			system.currentHealth = 0;			
 			shieldsAvailable.push(system);
 		}
 	}
 	
-	//Now distribute accordingly!
-	if (totalShieldPool > 0 && shieldsAvailable.length > 1) { //There is energy to distribute, and shields to distribute to!
-		var noOfShields = shieldsAvailable.length;
-		var amountEachShield = Math.round(totalShieldPool / noOfShields);
+	// Now distribute accordingly!
+	if (totalShieldPool > 0 && shieldsAvailable.length > 1) { // There is energy to distribute, and shields to distribute to!
+		var shieldsToCharge = shieldsAvailable.slice(); // Create a copy of the shieldsAvailable array
 		
-		for (var j = 0; j < shieldsAvailable.length; j++) {
-			var shield = shieldsAvailable[j];			
-			var shieldHeadRoom = shield.maxStrength - shield.currentHealth;
-			shield.currentHealth += Math.min(amountEachShield, shieldHeadRoom);//Do not reinforce with more than it's able to hold!		
+		while (totalShieldPool > 0 && shieldsToCharge.length > 0) {
+			var noOfShields = shieldsToCharge.length;
+			var amountEachShield = Math.floor(totalShieldPool / noOfShields);
+
+			// Break the loop if the remaining energy is too small to be meaningfully distributed
+			if (amountEachShield < 1) {
+				break;
+			}
+
+			var remainingShieldPool = 0;
+			
+			for (var j = 0; j < shieldsToCharge.length; j++) {
+				var shield = shieldsToCharge[j];
+				var shieldHeadRoom = shield.maxStrength - shield.currentHealth;
+				var amountToAdd = Math.min(amountEachShield, shieldHeadRoom);
+				
+				shield.currentHealth += amountToAdd;
+				totalShieldPool -= amountToAdd;
+				
+				if (amountToAdd < amountEachShield) {
+					remainingShieldPool += amountEachShield - amountToAdd;
+				}
+			}
+			
+			// Remove fully charged shields from the shieldsToCharge array
+			shieldsToCharge = shieldsToCharge.filter(shield => shield.maxStrength > shield.currentHealth);
+			
+
+		}
+
+		// Distribute any remaining energy (if totalShieldPool is less than the number of shields)
+		if (totalShieldPool > 0) {
+			for (var j = 0; j < shieldsToCharge.length; j++) {
+				var shield = shieldsToCharge[j];
+				var amountToAdd = Math.min(1, totalShieldPool); // Distribute 1 unit at a time
+				shield.currentHealth += amountToAdd;
+				totalShieldPool -= amountToAdd;
+				if (totalShieldPool <= 0) break;
+			}
 		}
 	} 
 };
