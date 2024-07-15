@@ -65,12 +65,12 @@ class SystemInfo extends React.Component {
 
         return (
             <SystemInfoTooltip position={getPosition(boundingBox)}>
-                <InfoHeader>{system.displayName}</InfoHeader>
-   {!ship.flight && (
-        system.maxStrength
-            ? getEntry('Structure', system.maxhealth - damageManager.getDamage(ship, system) + '/' + system.maxStrength)
-            : getEntry('Structure', system.maxhealth - damageManager.getDamage(ship, system) + '/' + system.maxhealth)
-    )}
+                <InfoHeader>{system.displayName}</InfoHeader>		  
+			   {!ship.flight && (
+			        system.maxStrength
+			            ? getEntry('Structure', system.maxhealth - damageManager.getDamage(ship, system) + '/' + system.maxStrength)
+			            : getEntry('Structure', system.maxhealth - damageManager.getDamage(ship, system) + '/' + system.maxhealth)
+			    )}
                 {!ship.flight && getEntry('Armor', shipManager.systems.getArmour(ship, system))}
                 {ship.flight && getEntry('Offensive bonus', ship.offensivebonus * 5)}
                 
