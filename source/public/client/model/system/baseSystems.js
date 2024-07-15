@@ -1465,17 +1465,17 @@ ThirdspaceShieldGenerator.prototype.doPreset = function (presetCurrClass) { // C
 	var reinforceLocation = -1;
 	
 	//Note which shield we are reinforcing.	
-	if(presetCurrClass == 'Forward') reinforceLocation = 1;
-	if(presetCurrClass == 'Starboard') reinforceLocation = 4;
-	if(presetCurrClass == 'Aft') reinforceLocation = 2;
-	if(presetCurrClass == 'Port') reinforceLocation = 3;						
+	if(presetCurrClass == 'Forward') reinforceLocation = 'F';
+	if(presetCurrClass == 'Starboard') reinforceLocation = 'R';
+	if(presetCurrClass == 'Aft') reinforceLocation = 'A';
+	if(presetCurrClass == 'Port') reinforceLocation = 'L';						
 	
 	var ship = this.ship;
 	// Find total pool of shield energy		 	
 	for (var i = 0; i < ship.systems.length; i++) {
 		var system = ship.systems[i];
 		if (system instanceof ThirdspaceShield) {
-			if (system.location == reinforceLocation && shipManager.systems.isDestroyed(ship, system)) return; // Priority Shield is destroyed, cannot reinforce!				
+			if (system.side == reinforceLocation && shipManager.systems.isDestroyed(ship, system)) return; // Priority Shield is destroyed, cannot reinforce!				
 			if (shipManager.systems.isDestroyed(ship, system)) continue; //Non-priority Shield is destroyed.			
 			totalShieldPool += system.currentHealth; // Add each shield's current health to the overall pool of shield energy.
 			system.currentHealth = 0;
@@ -1504,7 +1504,7 @@ ThirdspaceShieldGenerator.prototype.doPreset = function (presetCurrClass) { // C
 				var shield = shieldsToCharge[j];
 				var amountToAdd = amountEachShield;
 
-				if (shield.location == reinforceLocation && !priorityShieldFound) { // This is the shield to reinforce!
+				if (shield.side == reinforceLocation && !priorityShieldFound) { // This is the shield to reinforce!
 					amountToAdd = prioritisedAmount;
 					priorityShield = shield; // Mark which shield is a priority.
 					priorityShieldFound = true;
@@ -1524,8 +1524,6 @@ ThirdspaceShieldGenerator.prototype.doPreset = function (presetCurrClass) { // C
 			// Remove fully charged shields from the shieldsToCharge array
 			shieldsToCharge = shieldsToCharge.filter(shield => shield.maxhealth > shield.currentHealth);
 
-			// Add any remaining energy back to the total pool to redistribute
-//			totalShieldPool += remainingShieldPool;
 		}
 
 		// Distribute any remaining energy (if totalShieldPool is less than the number of shields)

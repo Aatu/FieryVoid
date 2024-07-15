@@ -691,21 +691,19 @@ class ThirdspaceShield extends Shield implements DefensiveSystem { //defensive v
 		
 		//Shield Projections cannot be repaired at all!
 		public $repairPriority = 0;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
-
-//		private $projectorList = array();
 		
-		protected $doCountForCombatValue = false;		//To ignore projection for combat value calculations
-		public $changeThisTurn = 0;		
+		protected $doCountForCombatValue = false;//To ignore projection for combat value calculations
+		
+		public $changeThisTurn = 0;	//When shields moved around, change it tracked here to be made into Damage Entry.	
 		public $currentHealth = 0; //Value for front-end when moving shield power around.
-//		public $maxStrength = 0;//Maximum capacity of shield even after boosting with others.
+		public $side = '';//Required for prioritising a shield using Generator Presets.		
 	    
 	    function __construct($armor, $startHealth, $rating, $startArc, $endArc, $side = 'F'){ //parameters: $armor, $startHealth, $Rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
 			$this->iconPath = 'ThirdspaceShield' . $side . '.png';
 			parent::__construct($armor, $startHealth, 0, $rating, $startArc, $endArc);
-//			$this->maxStrength = $startHealth;
-			//rating not currently used.			
+			//rating not currently used.
+			$this->side = $side;						
 		}
-		
 		
 		
 	    public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){ //no defensive hit chance change
@@ -726,8 +724,7 @@ class ThirdspaceShield extends Shield implements DefensiveSystem { //defensive v
 			$this->data["Special"] .= "<br>Shield system's structure represents damage capacity, if it is reduced to zero system will cease to function.";
 			$this->data["Special"] .= "<br>Can't be destroyed unless associated structure block is also destroyed.";
 			$this->data["Special"] .= "<br>Cannot be flown under, and does not reduce the damage dealt or hit chance of enemy weapons.";
-			$this->data["Special"] .= "<br>Has an Armor value of "  . $this->armour . ".";				
-//			$this->data["Max Strength"] = $this->maxStrength;			
+			$this->data["Special"] .= "<br>Has an Armor value of "  . $this->armour . ".";							
 			$this->currentHealth = $this->getRemainingCapacity();//override on-icon display default
 			$this->outputDisplay = $this->currentHealth;//override on-icon display default					
 		}	
@@ -747,8 +744,6 @@ class ThirdspaceShield extends Shield implements DefensiveSystem { //defensive v
 		}
 		
 		public function getUsedCapacity(){
-//			$shieldHeadroom = $this->maxStrength - $this->getRemainingHealth();
-//			return $shieldHeadroom;
 			return $this->getTotalDamage();
 		}
 
@@ -805,41 +800,6 @@ class ThirdspaceShield extends Shield implements DefensiveSystem { //defensive v
 			
 			return $returnValues;
 		} //endof function doProtect
-
-/*		    
-		function addProjector($projector){
-			if($projector) $this->projectorList[] = $projector;
-		}
-*/
-/*		
-		//effects that happen in Critical phase (after criticals are rolled) - replenishment from active projectors 
-		public function criticalPhaseEffects($ship, $gamedata){
-			
-			parent::criticalPhaseEffects($ship, $gamedata);//Call parent to apply effects like Limpet Bore.
-			
-			if($this->isDestroyed()) return; //destroyed system does not work... but other critical phase effects may work even if destroyed!
-			
-			$activeProjectors = 0;
-			$projectorOutput = 0;
-			$toReplenish = 0;
-			
-			foreach($this->projectorList as $projector){
-				if ( ($projector->isDestroyed($gamedata->turn))
-				     || ($projector->isOfflineOnTurn($gamedata->turn))
-				) continue;
-				$activeProjectors++;
-				$projectorOutput += $projector->getOutputOnTurn($gamedata->turn);
-			}
-
-			if($activeProjectors > 0){ //active projectors present - reinforce shield!
-				$toReplenish = min($projectorOutput,$this->getUsedCapacity());		
-			}
-			
-			if($toReplenish != 0){ //something changes!
-				$this->absorbDamage($ship,$gamedata,-$toReplenish);
-			}
-		} //endof function criticalPhaseEffects
-*/	
 
 		//effects that happen in Critical phase (after criticals are rolled) - replenishment from active Generator 
 		public function criticalPhaseEffects($ship, $gamedata){
@@ -932,7 +892,7 @@ class ThirdspaceShield extends Shield implements DefensiveSystem { //defensive v
 	    $strippedSystem = parent::stripForJson();
 		$strippedSystem->currentHealth = $this->currentHealth;
 		$strippedSystem->outputDisplay = $this->outputDisplay;
-//		$strippedSystem->maxStrength = $this->maxStrength;
+		$strippedSystem->side = $this->side;
 					
 	    return $strippedSystem;
 	} 
