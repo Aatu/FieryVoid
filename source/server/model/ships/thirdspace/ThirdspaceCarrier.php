@@ -48,7 +48,7 @@ class ThirdspaceCarrier extends BaseShip{
 		$this->addPrimarySystem(new JumpEngine(6, 24, 4, 5));//Presumably have access to hyperspace, or possess some other form of FTL travel that this system represents.          		  		
       
 		
-		$this->addFrontSystem(new ThirdspaceShield(2, 70, 70, 330, 30, 'F'));
+		$this->addFrontSystem(new ThirdspaceShield(2, 140, 140, 330, 30, 'F'));
         $this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 240, 60));
         $this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 240, 60));
         $this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 300, 120));
@@ -59,7 +59,7 @@ class ThirdspaceCarrier extends BaseShip{
         $this->addFrontSystem(new GraviticThruster(6, 20, 0, 8, 1));           
 			
 		
-		$this->addAftSystem(new ThirdspaceShield(2, 70, 70, 150, 210, 'A'));	
+		$this->addAftSystem(new ThirdspaceShield(2, 140, 140, 150, 210, 'A'));	
         $this->addAftSystem(new PsionicConcentrator(4, 0, 0, 120, 300)); 
         $this->addAftSystem(new PsionicConcentrator(4, 0, 0, 120, 300));
         $this->addAftSystem(new PsionicConcentrator(4, 0, 0, 60, 240));         
@@ -72,7 +72,7 @@ class ThirdspaceCarrier extends BaseShip{
         $this->addAftSystem(new GraviticThruster(5, 24, 0, 8, 2));       
        
        	
-		$this->addLeftSystem(new ThirdspaceShield(2, 140, 140, 210, 330, 'L'));
+		$this->addLeftSystem(new ThirdspaceShield(2, 280, 280, 210, 330, 'L'));
 		$this->addLeftSystem(new PsionicLance(5, 0, 0, 240, 360));
 		$this->addLeftSystem(new PsionicLance(5, 0, 0, 180, 300));   		                  
         $this->addLeftSystem(new PsionicConcentrator(4, 0, 0, 180, 300));
@@ -90,7 +90,7 @@ class ThirdspaceCarrier extends BaseShip{
         $this->addLeftSystem($LCVRail);                              
             
             	
-		$this->addRightSystem(new ThirdspaceShield(2, 140, 140, 30, 150, 'R'));
+		$this->addRightSystem(new ThirdspaceShield(2, 280, 280, 30, 150, 'R'));
  		$this->addRightSystem(new PsionicLance(5, 0, 0, 0, 120));
  		$this->addRightSystem(new PsionicLance(5, 0, 0, 60, 180)); 		
         $this->addRightSystem(new PsionicConcentrator(4, 0, 0, 60, 180));                  
