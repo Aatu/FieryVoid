@@ -697,12 +697,12 @@ class ThirdspaceShield extends Shield implements DefensiveSystem { //defensive v
 		protected $doCountForCombatValue = false;		//To ignore projection for combat value calculations
 		public $changeThisTurn = 0;		
 		public $currentHealth = 0; //Value for front-end when moving shield power around.
-		public $maxStrength = 0;//Maximum capacity of shield even after boosting with others.
+//		public $maxStrength = 0;//Maximum capacity of shield even after boosting with others.
 	    
 	    function __construct($armor, $startHealth, $rating, $startArc, $endArc, $side = 'F'){ //parameters: $armor, $startHealth, $Rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
 			$this->iconPath = 'ThirdspaceShield' . $side . '.png';
 			parent::__construct($armor, $startHealth, 0, $rating, $startArc, $endArc);
-			$this->maxStrength = $startHealth*2;
+//			$this->maxStrength = $startHealth;
 			//rating not currently used.			
 		}
 		
@@ -731,14 +731,31 @@ class ThirdspaceShield extends Shield implements DefensiveSystem { //defensive v
 			$this->currentHealth = $this->getRemainingCapacity();//override on-icon display default
 			$this->outputDisplay = $this->currentHealth;//override on-icon display default					
 		}	
+
+    	public function onConstructed($ship, $turn, $phase){
+	    	parent::onConstructed($ship, $turn, $phase);	    	
+			
+			if($turn == 1){//Shields will spawn at max capacity, reduce this by half to give starting amount.
+		    	$halveShield = $this->maxhealth/2;
+		    	$this->setShields($ship, $turn, $halveShield);
+			}  		
+		
+		}	
 		
 		public function getRemainingCapacity(){
 			return $this->getRemainingHealth();
 		}
 		
 		public function getUsedCapacity(){
-			$shieldHeadroom = $this->maxStrength - $this->getRemainingHealth();
-			return $shieldHeadroom;
+//			$shieldHeadroom = $this->maxStrength - $this->getRemainingHealth();
+//			return $shieldHeadroom;
+			return $this->getTotalDamage();
+		}
+
+		public function setShields($ship,$turn,$value){
+			$damageEntry = new DamageEntry(-1, $ship->id, -1, $turn, $this->id, $value, 0, 0, -1, false, false, "SetShield!", "ThirdspaceShield");
+			$damageEntry->updated = true;
+			$this->damage[] = $damageEntry;
 		}
 		
 		public function absorbDamage($ship,$gamedata,$value){ //or dissipate, with negative value
@@ -915,7 +932,7 @@ class ThirdspaceShield extends Shield implements DefensiveSystem { //defensive v
 	    $strippedSystem = parent::stripForJson();
 		$strippedSystem->currentHealth = $this->currentHealth;
 		$strippedSystem->outputDisplay = $this->outputDisplay;
-		$strippedSystem->maxStrength = $this->maxStrength;
+//		$strippedSystem->maxStrength = $this->maxStrength;
 					
 	    return $strippedSystem;
 	} 

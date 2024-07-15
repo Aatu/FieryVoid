@@ -254,7 +254,7 @@ ThirdspaceShield.prototype.canIncrease = function () { //Can increase if not at 
  
  	var ship = this.ship;
  	if (shipManager.systems.isDestroyed(ship, this)) return false; //Shield section has been destroyed and so has shield.
-	if(this.currentHealth >= this.maxStrength) return false; //Shield is at maximum output.
+	if(this.currentHealth >= this.maxhealth) return false; //Shield is at maximum output.
 		
  	var ship = this.ship;	
 	for (var i in ship.systems) {
@@ -304,7 +304,7 @@ ThirdspaceShield.prototype.doIncrease = function () { //
 	}	
 
 	var shieldHealth = this.currentHealth; //
-	var shieldHeadroom = this.maxStrength - shieldHealth;//How much room for increase does shield have?
+	var shieldHeadroom = this.maxhealth - shieldHealth;//How much room for increase does shield have?
 		
 	if(shieldHeadroom >= 1){		
 		this.currentHealth += 1;
@@ -326,7 +326,7 @@ ThirdspaceShield.prototype.doIncrease10 = function () { //
 	}	
 
 	var shieldHealth = this.currentHealth; 
-	var shieldHeadroom = this.maxStrength - shieldHealth;//How much room for increase does shield have?
+	var shieldHeadroom = this.maxhealth - shieldHealth;//How much room for increase does shield have?
 		
 	if(shieldHeadroom >= 10){		
 		this.currentHealth += 10;

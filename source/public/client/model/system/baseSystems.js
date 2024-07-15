@@ -1428,7 +1428,7 @@ ThirdspaceShieldGenerator.prototype.doEqualise = function () { //Check if there 
 			
 			for (var j = 0; j < shieldsToCharge.length; j++) {
 				var shield = shieldsToCharge[j];
-				var shieldHeadRoom = shield.maxStrength - shield.currentHealth;
+				var shieldHeadRoom = shield.maxhealth - shield.currentHealth;
 				var amountToAdd = Math.min(amountEachShield, shieldHeadRoom);
 				
 				shield.currentHealth += amountToAdd;
@@ -1440,7 +1440,7 @@ ThirdspaceShieldGenerator.prototype.doEqualise = function () { //Check if there 
 			}
 			
 			// Remove fully charged shields from the shieldsToCharge array
-			shieldsToCharge = shieldsToCharge.filter(shield => shield.maxStrength > shield.currentHealth);
+			shieldsToCharge = shieldsToCharge.filter(shield => shield.maxhealth > shield.currentHealth);
 			
 
 		}
@@ -1510,7 +1510,7 @@ ThirdspaceShieldGenerator.prototype.doPreset = function (presetCurrClass) { // C
 					priorityShieldFound = true;
 				}
 
-				var shieldHeadRoom = shield.maxStrength - shield.currentHealth;
+				var shieldHeadRoom = shield.maxhealth - shield.currentHealth;
 				amountToAdd = Math.min(amountToAdd, shieldHeadRoom);
 
 				shield.currentHealth += amountToAdd;
@@ -1522,7 +1522,7 @@ ThirdspaceShieldGenerator.prototype.doPreset = function (presetCurrClass) { // C
 			}
 
 			// Remove fully charged shields from the shieldsToCharge array
-			shieldsToCharge = shieldsToCharge.filter(shield => shield.maxStrength > shield.currentHealth);
+			shieldsToCharge = shieldsToCharge.filter(shield => shield.maxhealth > shield.currentHealth);
 
 			// Add any remaining energy back to the total pool to redistribute
 //			totalShieldPool += remainingShieldPool;
