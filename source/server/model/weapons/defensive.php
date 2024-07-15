@@ -727,7 +727,7 @@ class ThirdspaceShield extends Shield implements DefensiveSystem { //defensive v
 			$this->data["Special"] .= "<br>Can't be destroyed unless associated structure block is also destroyed.";
 			$this->data["Special"] .= "<br>Cannot be flown under, and does not reduce the damage dealt or hit chance of enemy weapons.";
 			$this->data["Special"] .= "<br>Has an Armor value of "  . $this->armour . ".";				
-			$this->data["Max Strength"] = $this->maxStrength;			
+//			$this->data["Max Strength"] = $this->maxStrength;			
 			$this->currentHealth = $this->getRemainingCapacity();//override on-icon display default
 			$this->outputDisplay = $this->currentHealth;//override on-icon display default					
 		}	
