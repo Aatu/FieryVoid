@@ -43,7 +43,7 @@ class ThirdspaceBattleship extends BaseShip{
 		$this->addPrimarySystem(new PsychicField(6, 0, 0, 0, 360));
 		$this->addPrimarySystem(new ThirdspaceShieldGenerator(7, 24, 0, 15)); //$armor, $maxhealth, $power used, output				
         $this->addPrimarySystem(new ThirdspaceSelfRepair(7, 24, 12)); //armor, structure, output 
-		$this->addPrimarySystem(new JumpEngine(6, 24, 4, 5));//Presumably have access to hyperspace, or possess some other form of FTL travel that this system represents.          		  		
+		$this->addPrimarySystem(new JumpEngine(6, 24, 4, 7));//Presumably have access to hyperspace, or possess some other form of FTL travel that this system represents.          		  		
       
 	
 		$this->addPrimarySystem(new ThirdspaceShield(3, 180, 180, 330, 30, 'F'));
@@ -110,7 +110,7 @@ class ThirdspaceBattleship extends BaseShip{
         $this->addRightSystem($LCVRail); 			                      
               			          
 		//structures
-        $this->addFrontSystem(new Structure(7, 102));
+        $this->addFrontSystem(new Structure(6, 102));
         $this->addAftSystem(new Structure(6, 108));
         $this->addLeftSystem(new Structure(6, 120));
         $this->addRightSystem(new Structure(6, 120));
