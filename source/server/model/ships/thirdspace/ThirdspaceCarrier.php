@@ -47,8 +47,8 @@ class ThirdspaceCarrier extends BaseShip{
         $this->addPrimarySystem(new ThirdspaceSelfRepair(7, 16, 8)); //armor, structure, output 
 		$this->addPrimarySystem(new JumpEngine(6, 24, 4, 7));//Presumably have access to hyperspace, or possess some other form of FTL travel that this system represents.          		  		
       
-		
-		$this->addPrimarySystem(new ThirdspaceShield(2, 140, 140, 330, 30, 'F'));
+		$this->addPrimarySystem(new ThirdspaceShield(2, 280, 280, 210, 330, 'L'));		
+
         $this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 240, 60));
         $this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 240, 60));
         $this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 300, 120));
@@ -58,8 +58,8 @@ class ThirdspaceCarrier extends BaseShip{
         $this->addFrontSystem(new GraviticThruster(6, 20, 0, 8, 1));
         $this->addFrontSystem(new GraviticThruster(6, 20, 0, 8, 1));           
 			
-		
-		$this->addPrimarySystem(new ThirdspaceShield(2, 140, 140, 150, 210, 'A'));	
+		$this->addPrimarySystem(new ThirdspaceShield(2, 140, 140, 330, 30, 'F'));		
+	
         $this->addAftSystem(new PsionicConcentrator(4, 0, 0, 120, 300)); 
         $this->addAftSystem(new PsionicConcentrator(4, 0, 0, 120, 300));
         $this->addAftSystem(new PsionicConcentrator(4, 0, 0, 60, 240));         
@@ -72,7 +72,7 @@ class ThirdspaceCarrier extends BaseShip{
         $this->addAftSystem(new GraviticThruster(5, 24, 0, 8, 2));       
        
        	
-		$this->addPrimarySystem(new ThirdspaceShield(2, 280, 280, 210, 330, 'L'));
+		$this->addPrimarySystem(new ThirdspaceShield(2, 140, 140, 150, 210, 'A'));
 		$this->addLeftSystem(new PsionicLance(5, 0, 0, 240, 360));
 		$this->addLeftSystem(new PsionicLance(5, 0, 0, 180, 300));   		                  
         $this->addLeftSystem(new PsionicConcentrator(4, 0, 0, 180, 300));
