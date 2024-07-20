@@ -313,8 +313,33 @@ ThirdspaceShield.prototype.doIncrease = function () { //
 
 };
 
-ThirdspaceShield.prototype.doIncrease10 = function () { //	
+ThirdspaceShield.prototype.doIncrease5 = function () { //	
 //Increase this.maxhealth by 5 (or lower if less available) + decrease Shield Generator by same amount.
+	
+ 	var ship = this.ship;	
+	for (var i in ship.systems) {
+		var system = ship.systems[i];
+
+		if (system instanceof ThirdspaceShieldGenerator) {
+			var generator = system; //Find generator
+		}
+	}	
+
+	var shieldHealth = this.currentHealth; 
+	var shieldHeadroom = this.maxhealth - shieldHealth;//How much room for increase does shield have?
+		
+	if(shieldHeadroom >= 5){		
+		this.currentHealth += 5;
+		generator.storedCapacity -= 5;
+	}else{ //Just increase by how much you can!
+		this.currentHealth += shieldHeadroom;
+		generator.storedCapacity -= shieldHeadroom;		
+	}	
+
+};
+
+ThirdspaceShield.prototype.doIncrease10 = function () { //	
+//Increase this.maxhealth by 10 (or lower if less available) + decrease Shield Generator by same amount.
 	
  	var ship = this.ship;	
 	for (var i in ship.systems) {
@@ -359,8 +384,31 @@ ThirdspaceShield.prototype.doDecrease = function () {
 
 };
 
-ThirdspaceShield.prototype.doDecrease10 = function () { 
+ThirdspaceShield.prototype.doDecrease5 = function () { 
 //Reduce this.maxhealth by 5 (or lower if less available) + increase Shield Generator by same amount.
+	
+ 	var ship = this.ship;	
+	for (var i in ship.systems) {
+		var system = ship.systems[i];
+
+		if (system instanceof ThirdspaceShieldGenerator) {
+			var generator = system; //Find generator
+		}
+	}
+
+	var shieldHealth = this.currentHealth;
+	if(shieldHealth > 5){		
+		this.currentHealth -= 5;
+		generator.storedCapacity += 5;
+	}else{
+		var shieldIncrement = Math.max(0, shieldHealth-1); //Value is 5 or under, remove 1 point to prevent shield going to 0, then decrease.
+		this.currentHealth -= shieldIncrement;
+		generator.storedCapacity += shieldIncrement;		
+	}	
+};
+
+ThirdspaceShield.prototype.doDecrease10 = function () { 
+//Reduce this.maxhealth by 10 (or lower if less available) + increase Shield Generator by same amount.
 	
  	var ship = this.ship;	
 	for (var i in ship.systems) {
@@ -398,6 +446,15 @@ ThirdspaceShield.prototype.doIndividualNotesTransfer = function () { //prepare i
 };
 
 /*
+var ThoughtShield = function ThoughtShield(json, ship) {
+    ThirdspaceShield.call(this, json, ship);
+    this.defensiveType = "none";//Migh need to amend to     this.defensiveType = "Shield";
+};
+
+ThoughtShield.prototype = Object.create(ThirdspaceShield.prototype);
+ThoughtShield.prototype.constructor = ThoughtShield;
+
+
 var ThirdspaceShieldProjector = function ThirdspaceShieldProjector(json, ship) {
     ShipSystem.call(this, json, ship);
     this.defensiveType = "none";
