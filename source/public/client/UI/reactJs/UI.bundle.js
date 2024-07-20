@@ -38264,7 +38264,9 @@ var getAmount = function getAmount(ewEntry, ship) {
     switch (ewEntry.type) {
         case 'SDEW':
             if (shipManager.hasSpecialAbility(ship, "ConstrainedEW")) {
-                return ewEntry.amount * 0.33;
+                var result = ewEntry.amount * 0.333;
+                result = Math.round(result * 3) / 3;
+                return result.toFixed(2);
             } else {
                 return ewEntry.amount * 0.5;
             }
