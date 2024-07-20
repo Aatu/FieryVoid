@@ -38221,7 +38221,6 @@ var getEW = function getEW(ship) {
 
     if (shipManager.hasSpecialAbility(ship, "ConstrainedEW")) bdew = ew.getBDEW(ship) * 0.2;
 
-    // Conditionally adding BDEW entry
     if (bdew) {
         list.push(React.createElement(
             Entry,

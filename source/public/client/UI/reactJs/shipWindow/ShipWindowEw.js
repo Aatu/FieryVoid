@@ -72,7 +72,6 @@ const getEW = ship => {
 
 	if(shipManager.hasSpecialAbility(ship, "ConstrainedEW")) bdew = ew.getBDEW(ship) * 0.2;
 	    
-    // Conditionally adding BDEW entry
     if (bdew) {
         list.push(<Entry key={`bdew-scs-${ship.id}`}><EntryHeader>BDEW:</EntryHeader>{bdew.toFixed(2)}</Entry>);
     }
