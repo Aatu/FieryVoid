@@ -445,7 +445,7 @@ ThirdspaceShield.prototype.doIndividualNotesTransfer = function () { //prepare i
 	return true;
 };
 
-
+/*
 var ThoughtShield = function ThoughtShield(json, ship) {
     ThirdspaceShield.call(this, json, ship);
     this.defensiveType = "none";//Migh need to amend to     this.defensiveType = "Shield";
@@ -454,7 +454,7 @@ var ThoughtShield = function ThoughtShield(json, ship) {
 ThoughtShield.prototype = Object.create(ThirdspaceShield.prototype);
 ThoughtShield.prototype.constructor = ThoughtShield;
 
-/*
+
 var ThirdspaceShieldProjector = function ThirdspaceShieldProjector(json, ship) {
     ShipSystem.call(this, json, ship);
     this.defensiveType = "none";
