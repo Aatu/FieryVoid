@@ -1410,6 +1410,9 @@ ThirdspaceShieldGenerator.prototype.doEqualise = function () { //Check if there 
 			shieldsAvailable.push(system);
 		}
 	}
+
+	totalShieldPool += this.storedCapacity;//Add anything currently in Generator.
+	this.storedCapacity = 0;
 	
 	// Now distribute accordingly!
 	if (totalShieldPool > 0 && shieldsAvailable.length > 1) { // There is energy to distribute, and shields to distribute to!
@@ -1482,6 +1485,9 @@ ThirdspaceShieldGenerator.prototype.doPreset = function (presetCurrClass) { // C
 			shieldsAvailable.push(system);
 		}
 	}
+
+	totalShieldPool += this.storedCapacity;//Add anything currently in Generator.
+	this.storedCapacity = 0;
 	
 	// Now distribute accordingly!
 	if (totalShieldPool > 0 && shieldsAvailable.length > 1) { // There is energy to distribute and more than one shield!
@@ -1538,7 +1544,12 @@ ThirdspaceShieldGenerator.prototype.doPreset = function (presetCurrClass) { // C
 		}
 	}
 };
-
-
+/*
+var ThoughtShieldGenerator = function ThoughtShieldGenerator(json, ship) {
+    ThirdspaceShieldGenerator.call(this, json, ship);
+};
+ThoughtShieldGenerator.prototype = Object.create(ThirdspaceShieldGenerator.prototype);
+ThoughtShieldGenerator.prototype.constructor = ThoughtShieldGenerator;
+*/
 
 
