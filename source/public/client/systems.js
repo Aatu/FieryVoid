@@ -453,26 +453,31 @@ shipManager.systems = {
 			return shipNames;
 		},	//endof getUnusedSpecialists
 
-	//Looks for ships with Thirdspace Shield Generators and compiles list of any with negative capacity.
-	checkShieldGenValue: function checkShieldGenValue() {
-			var shipNames = new Array();
+		// Looks for ships with Thirdspace Shield Generators or ThoughtShieldGenerators and compiles a list of any with negative capacity.
+		checkShieldGenValue: function checkShieldGenValue() {
+			var shipNames = [];
 			var counter = 0;
 			for (var i in gamedata.ships) {
 				var ship = gamedata.ships[i];
 				if (ship.unavailable) continue;
 				if (ship.flight) continue;
-				if (ship.userid != gamedata.thisplayer) continue;			
-				if (!(shipManager.systems.getSystemByName(ship, "ThirdspaceShieldGenerator"))) continue; //Does it have a Generator?
+				if (ship.userid != gamedata.thisplayer) continue;
+				
+				// Check for either ThirdspaceShieldGenerator or ThoughtShieldGenerator
+				var generator = shipManager.systems.getSystemByName(ship, "ThirdspaceShieldGenerator") || 
+								shipManager.systems.getSystemByName(ship, "ThoughtShieldGenerator");
+				if (!generator) continue; // No generator found
+				
 				if (shipManager.isDestroyed(ship)) continue;
-				var generator = (shipManager.systems.getSystemByName(ship, "ThirdspaceShieldGenerator"));
-				if(shipManager.systems.isDestroyed(ship, generator)) continue; 	//Shouldn't happen, but just in case.									
-				if (generator.storedCapacity != 0){ //Generator is not zero, either too much or too little shield allocation.
+				if (shipManager.systems.isDestroyed(ship, generator)) continue;
+				
+				if (generator.storedCapacity != 0) { // Generator is not zero, either too much or too little shield allocation.
 					shipNames[counter] = ship.name;
 					counter++;
 				}
 			}
 			return shipNames;
-		},	//endof getShieldGenValue
+		}, // end of checkShieldGenValue
 
     getSystemListThrustBoosted: function getSystemListThrustBoosted(ship) { //For Nexus PLasma Charge, but coulod be used for other Thrust-boosted system - DK 25.3.24
 		var toReturn = Array();
