@@ -68,11 +68,13 @@ const getEW = ship => {
     var CCEWamount = Math.max(0,ew.getCCEW(ship) - ew.getDistruptionEW(ship));
     list.push(<Entry key={`ccew-scs-${ship.id}`}><EntryHeader>CCEW:</EntryHeader>{CCEWamount}</Entry>);
 
+   	let bdew = ew.getBDEW(ship) * 0.25;
 
-    const bdew = ew.getBDEW(ship) * 0.25;
-    
+	if(shipManager.hasSpecialAbility(ship, "ConstrainedEW")) bdew = ew.getBDEW(ship) * 0.2;
+	    
+    // Conditionally adding BDEW entry
     if (bdew) {
-        list.push(<Entry key={`bdew-scs-${ship.id}`}><EntryHeader>BDEW:</EntryHeader>{bdew}</Entry>);
+        list.push(<Entry key={`bdew-scs-${ship.id}`}><EntryHeader>BDEW:</EntryHeader>{bdew.toFixed(2)}</Entry>);
     }
 
     list = list.concat(ship.EW
@@ -87,9 +89,17 @@ const getEW = ship => {
 const getAmount = (ewEntry, ship) => {
     switch (ewEntry.type) {
         case 'SDEW':
-            return ewEntry.amount * 0.5; 
+			if(shipManager.hasSpecialAbility(ship, "ConstrainedEW")){
+            	return ewEntry.amount * 0.33;			
+			}else{        
+            	return ewEntry.amount * 0.5;
+			} 
         case 'DIST':
-            return ewEntry.amount / 3;
+			if(shipManager.hasSpecialAbility(ship, "ConstrainedEW")){
+            	return ewEntry.amount / 4;				
+			}else{        
+            	return ewEntry.amount / 3;
+			}
         case 'OEW':
             return Math.max(0,ewEntry.amount - ew.getDistruptionEW(ship));
         default:

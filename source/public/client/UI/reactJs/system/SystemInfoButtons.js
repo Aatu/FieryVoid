@@ -386,6 +386,12 @@ class SystemInfoButtons extends React.Component {
 		system.doIncrease10();
 		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 	}
+	TSShieldIncrease5(e) {
+        e.stopPropagation(); e.preventDefault();
+		const {ship, system} = this.props;
+		system.doIncrease5();
+		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+	}	
 	TSShieldIncrease(e) {
         e.stopPropagation(); e.preventDefault();
 		const {ship, system} = this.props;
@@ -399,6 +405,12 @@ class SystemInfoButtons extends React.Component {
 		system.doDecrease();
 		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 	}
+	TSShieldDecrease5(e) {
+        e.stopPropagation(); e.preventDefault();
+		const {ship, system} = this.props;
+		system.doDecrease5();
+		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+	}	
 	TSShieldDecrease10(e) {
         e.stopPropagation(); e.preventDefault();
 		const {ship, system} = this.props;
@@ -413,6 +425,52 @@ class SystemInfoButtons extends React.Component {
 		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 	}
 
+
+	/*Thought Shield increase health*/
+	ThoughtShieldIncrease10(e) {
+        e.stopPropagation(); e.preventDefault();
+		const {ship, system} = this.props;
+		system.doIncrease10();
+		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+	}
+	ThoughtShieldIncrease5(e) {
+        e.stopPropagation(); e.preventDefault();
+		const {ship, system} = this.props;
+		system.doIncrease5();
+		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+	}	
+	ThoughtShieldIncrease(e) {
+        e.stopPropagation(); e.preventDefault();
+		const {ship, system} = this.props;
+		system.doIncrease();
+		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+	}	
+	/*Thought Shield decrease health*/
+	ThoughtShieldDecrease(e) {
+        e.stopPropagation(); e.preventDefault();
+		const {ship, system} = this.props;
+		system.doDecrease();
+		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+	}
+	ThoughtShieldDecrease5(e) {
+        e.stopPropagation(); e.preventDefault();
+		const {ship, system} = this.props;
+		system.doDecrease5();
+		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+	}	
+	ThoughtShieldDecrease10(e) {
+        e.stopPropagation(); e.preventDefault();
+		const {ship, system} = this.props;
+		system.doDecrease10();
+		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+	}
+	/*Thought Shield Generator Presets*/
+	ThoughtShieldGenSelect(e) {
+        e.stopPropagation(); e.preventDefault();
+		const {ship, system} = this.props;
+		system.doSelect();
+		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+	}
 					
 	/*Self Repair - display next system in need of repairs*/
 	nextSRsystem(e) {
@@ -485,13 +543,26 @@ class SystemInfoButtons extends React.Component {
 				{canSpecdecrease(ship, system) && <Button onClick={this.Specdecrease.bind(this)} img="./img/systemicons/Specialistclasses/iconMinus.png"></Button>}
 
 				{canTSShieldIncrease(ship, system) && <Button onClick={this.TSShieldIncrease10.bind(this)} img="./img/systemicons/ShieldGenclasses/iconPlus10.png"></Button>}
+				{canTSShieldIncrease(ship, system) && <Button onClick={this.TSShieldIncrease5.bind(this)} img="./img/systemicons/ShieldGenclasses/iconPlus5.png"></Button>}	
 				{canTSShieldIncrease(ship, system) && <Button onClick={this.TSShieldIncrease.bind(this)} img="./img/systemicons/BFCPclasses/iconPlus.png"></Button>}				
 				{canTSShieldDecrease(ship, system) && <Button onClick={this.TSShieldDecrease.bind(this)} img="./img/systemicons/BFCPclasses/iconMinus.png"></Button>}				
+				{canTSShieldDecrease(ship, system) && <Button onClick={this.TSShieldDecrease5.bind(this)} img="./img/systemicons/ShieldGenclasses/iconMinus5.png"></Button>}
 				{canTSShieldDecrease(ship, system) && <Button onClick={this.TSShieldDecrease10.bind(this)} img="./img/systemicons/ShieldGenclasses/iconMinus10.png"></Button>}
-				
 				{canTSShieldGendisplayCurrClass(ship, system) && <Button title={getTSShieldGencurrClassName(ship,system)} img={getTSShieldGencurrClassImg(ship,system)}></Button>}
 				{canTSShieldGendisplayCurrClass(ship, system) && <Button title="prev" onClick={this.prevCurrClass.bind(this)} img="./img/systemicons/Specialistclasses/iconPrev.png"></Button>}
 				{canTSShieldGendisplayCurrClass(ship, system) && <Button title="next" onClick={this.nextCurrClass.bind(this)} img="./img/systemicons/Specialistclasses/iconNext.png"></Button>}					{canTSShieldGenSelect(ship, system) && <Button onClick={this.TSShieldGenSelect.bind(this)} img="./img/systemicons/Specialistclasses/select.png"></Button>}		
+
+				{canThoughtShieldIncrease(ship, system) && <Button onClick={this.ThoughtShieldIncrease10.bind(this)} img="./img/systemicons/ShieldGenclasses/iconPlus10.png"></Button>}
+				{canThoughtShieldIncrease(ship, system) && <Button onClick={this.ThoughtShieldIncrease5.bind(this)} img="./img/systemicons/ShieldGenclasses/iconPlus5.png"></Button>}	
+				{canThoughtShieldIncrease(ship, system) && <Button onClick={this.ThoughtShieldIncrease.bind(this)} img="./img/systemicons/BFCPclasses/iconPlus.png"></Button>}				
+				{canThoughtShieldDecrease(ship, system) && <Button onClick={this.ThoughtShieldDecrease.bind(this)} img="./img/systemicons/BFCPclasses/iconMinus.png"></Button>}				
+				{canThoughtShieldDecrease(ship, system) && <Button onClick={this.ThoughtShieldDecrease5.bind(this)} img="./img/systemicons/ShieldGenclasses/iconMinus5.png"></Button>}
+				{canThoughtShieldDecrease(ship, system) && <Button onClick={this.ThoughtShieldDecrease10.bind(this)} img="./img/systemicons/ShieldGenclasses/iconMinus10.png"></Button>}
+				{canThoughtShieldGendisplayCurrClass(ship, system) && <Button title={getTSShieldGencurrClassName(ship,system)} img={getTSShieldGencurrClassImg(ship,system)}></Button>}
+				{canThoughtShieldGendisplayCurrClass(ship, system) && <Button title="prev" onClick={this.prevCurrClass.bind(this)} img="./img/systemicons/Specialistclasses/iconPrev.png"></Button>}
+				{canThoughtShieldGendisplayCurrClass(ship, system) && <Button title="next" onClick={this.nextCurrClass.bind(this)} img="./img/systemicons/Specialistclasses/iconNext.png"></Button>}					
+				{canThoughtShieldGenSelect(ship, system) && <Button onClick={this.TSShieldGenSelect.bind(this)} img="./img/systemicons/Specialistclasses/select.png"></Button>}
+
 											 
 				{canSRdisplayCurrSystem(ship, system) && <Button title="next" onClick={this.nextSRsystem.bind(this)} img="./img/systemicons/AAclasses/iconNext.png"></Button>}
 				{canSRdisplayCurrSystem(ship, system) && <Button title={getSRdescription(ship,system)} img={getSRicon(ship,system)}></Button>}
@@ -533,15 +604,26 @@ const canSpecincrease = (ship,system) => canSpec(ship,system) && system.canUse()
 const canSpecdecrease = (ship,system) => canSpec(ship,system) && system.canDecrease()!='';
 
 //can do something with Thirdspace Shields
-const canChangeShield = (ship, system) => (gamedata.gamephase === 1) && system.name === 'ThirdspaceShield';
-const canTSShieldIncrease= (ship,system) => canChangeShield (ship,system) && system.canIncrease()!='';
-const canTSShieldDecrease= (ship,system) => canChangeShield (ship,system) && system.canDecrease()!='';
+const canTSShield = (ship, system) => (gamedata.gamephase === 1) && system.name === 'ThirdspaceShield';
+const canTSShieldIncrease= (ship,system) => canTSShield (ship,system) && system.canIncrease()!='';
+const canTSShieldDecrease= (ship,system) => canTSShield (ship,system) && system.canDecrease()!='';
 //can do something with Thirdspace Shield Generator
-const canShieldGen = (ship, system) => (gamedata.gamephase === 1) && system.name === 'ThirdspaceShieldGenerator';
-const canTSShieldGendisplayCurrClass = (ship,system) => canShieldGen(ship,system) && system.getCurrClass()!='';
+const canTSShieldGen = (ship, system) => (gamedata.gamephase === 1) && system.name === 'ThirdspaceShieldGenerator';
+const canTSShieldGendisplayCurrClass = (ship,system) => canTSShieldGen(ship,system) && system.getCurrClass()!='';
 const getTSShieldGencurrClassImg = (ship,system) => './img/systemicons/ShieldGenclasses/'+system.getCurrClass()+'.png'; 
 const getTSShieldGencurrClassName = (ship,system) => system.getCurrClass();
-const canTSShieldGenSelect= (ship,system) => canShieldGen (ship,system) && system.canSelect()!='';
+const canTSShieldGenSelect = (ship,system) => canTSShieldGen (ship,system) && system.canSelect()!='';
+
+//can do something with Thought Shields
+const canThoughtShield = (ship, system) => (gamedata.gamephase === 1) && system.name === 'ThoughtShield';
+const canThoughtShieldIncrease = (ship,system) => canThoughtShield (ship,system) && system.canIncrease()!='';
+const canThoughtShieldDecrease= (ship,system) => canThoughtShield (ship,system) && system.canDecrease()!='';
+//can do something with Thirdspace Shield Generator
+const canThoughtShieldGen = (ship, system) => (gamedata.gamephase === 1) && system.name === 'ThoughtShieldGenerator';
+const canThoughtShieldGendisplayCurrClass = (ship,system) => canThoughtShieldGen(ship,system) && system.getCurrClass()!='';
+const getThoughtShieldGencurrClassImg = (ship,system) => './img/systemicons/ShieldGenclasses/'+system.getCurrClass()+'.png'; 
+const getThoughtShieldGencurrClassName = (ship,system) => system.getCurrClass();
+const canThoughtShieldGenSelect= (ship,system) => canThoughtShieldGen (ship,system) && system.canSelect()!='';
 
 //can do something with Self Repair...
 const canSRdisplayCurrSystem = (ship,system) => (gamedata.gamephase === 1) && (system.name == 'SelfRepair') && (system.getCurrSystem()>=0); 
@@ -552,7 +634,7 @@ export const canDoAnything = (ship, system) => canOffline(ship, system) || canOn
 	|| canOverload(ship, system) || canStopOverload(ship, system) || canBoost(ship, system) 
 	|| canDeBoost(ship, system) || canAddShots(ship, system) || canReduceShots(ship, system)
 	|| canRemoveFireOrder(ship, system) || canChangeFiringMode(ship, system)
-	|| canSelfIntercept(ship, system) || canAA(ship,system) || canBFCP(ship, system) || canSpec(ship,system) || canChangeShield(ship,system) || canShieldGen(ship,system) 
+	|| canSelfIntercept(ship, system) || canAA(ship,system) || canBFCP(ship, system) || canSpec(ship,system) || canTSShield(ship,system) || canThoughtShield(ship,system) || canTSShieldGen(ship,system) || canThoughtShieldGen(ship,system) 
 	|| canSRdisplayCurrSystem(ship,system);
 
 const canOffline = (ship, system) => gamedata.gamephase === 1 && (system.canOffLine || system.powerReq > 0) && !shipManager.power.isOffline(ship, system) && !shipManager.power.getBoost(system) && !weaponManager.hasFiringOrder(ship, system);
