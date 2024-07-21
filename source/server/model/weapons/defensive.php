@@ -758,8 +758,10 @@ class ThirdspaceShield extends Shield implements DefensiveSystem { //defensive v
 
 			foreach($this->damage as $damage){
 				if($damage->turn != $gamedata->turn) continue;//Only interested in this turn.
-				if($damage->fireorderid == $fireOrder->id) $deductArmour = false;	//Previous damage this turn has been found from this raking weapon.
-				break;//no need to search further	
+				if($damage->fireorderid == $fireOrder->id) {
+					$deductArmour = false;	//Previous damage this turn has been found from this raking weapon.
+					break;//No need to search futher.
+				}		
 			}					
 			return 	$deductArmour;		
 		}//endof checkArmourDeduction
