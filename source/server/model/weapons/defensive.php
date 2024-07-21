@@ -753,7 +753,7 @@ class ThirdspaceShield extends Shield implements DefensiveSystem { //defensive v
 			$this->damage[] = $damageEntry;
 		}
 
-		public function checkArmourDeduction($gamedata, $fireOrder){
+		private function checkArmourDeduction($gamedata, $fireOrder){
 			$deductArmour = true;
 
 			foreach($this->damage as $damage){
@@ -795,6 +795,7 @@ class ThirdspaceShield extends Shield implements DefensiveSystem { //defensive v
 			
 			if($remainingCapacity>0) { //else projection does not protect
 				$absorbedForFree = 0;
+				
 				//first, armor takes part
 				$armour = $this->armour;				
 				$deductArmour = true;//Do we want to deduct armour?
@@ -1003,7 +1004,7 @@ class ThoughtShield extends Shield implements DefensiveSystem {
 			return $this->getTotalDamage();
 		}
 
-		public function setShields($ship,$turn,$value){
+		public function setShields($ship,$turn,$value){//On Turn 1, reduce shields to their correct starting amount.
 			$damageEntry = new DamageEntry(-1, $ship->id, -1, $turn, $this->id, $value, 0, 0, -1, false, false, "SetShield!", "ThoughtShield");
 			$damageEntry->updated = true;
 			$this->damage[] = $damageEntry;
@@ -1016,13 +1017,16 @@ class ThoughtShield extends Shield implements DefensiveSystem {
 		}
 		
 
-		public function checkShieldDeduction($gamedata, $fireOrder, $shooter, $weapon){
+		private function checkShieldDeduction($gamedata, $fireOrder){
 			$deductShieldRating = true;
 			//how to check it's this turn?  Check damage entries for this turn instead, with Shooter and Weapon ids?
 
 			foreach($this->damage as $damage){
 				if($damage->turn != $gamedata->turn) continue;//Only interested in this turn.
-				if($damage->fireorderid == $fireOrder->id) $deductShieldRating = false;	//Previous damage this turn has been found from this raking weapon.
+				if($damage->fireorderid == $fireOrder->id) {
+					$deductShieldRating = false;	//Previous damage this turn has been found from this raking weapon.
+					break;
+				}
 			}
 					
 			return 	$deductShieldRating;		
@@ -1052,17 +1056,17 @@ class ThoughtShield extends Shield implements DefensiveSystem {
 			$absorbedDamage = 0;
 			
 			if($remainingCapacity>0) { //else projection does not protect
-//				$absorbedForFree = 0;
 
-				//first, armor takes part
-//				$absorbedForFree = min($this->armour, $damageToAbsorb);//So either armour value, or if damage remaining is less than armour then it's that.
-//				$damageToAbsorb += -$absorbedForFree;//Armour is alawys 0 here.				
+				$armour = $this->armour;				
+				$AddShieldRating = true;//Do we want to deduct armour?
+				if($weapon instanceof Raking) $AddShieldRating = $this->checkShieldDeduction($gamedata, $fireOrder);//Check armour assumption on Raking weapons.
+				if($AddShieldRating) $damageToAbsorb += $this->defenceMod; //Usually 0, but if not (due to reinforcement) add Shield Rating to damage in 1st rake.
 
 				//next, actual absorbtion				
 				$absorbedDamage = min($remainingCapacity, $damageToAbsorb ); //no more than remaining capacity; no more than damage incoming
-				$damageToAbsorb += -$absorbedDamage;
+				$damageToAbsorb += -$absorbedDamage;//Reduce amount to absorb by Armour or reduce to 0 if less than Armour.
 					
-				if($absorbedDamage>0){ //mark!
+				if($absorbedDamage>0){ //Damage was absorbed, update Shield!
 					$this->absorbDamage($target,$gamedata,$absorbedDamage, $fireOrder->id);
 				}
 				$returnValues['dmg'] = $damageToAbsorb;
@@ -1173,7 +1177,7 @@ class ThoughtShield extends Shield implements DefensiveSystem {
 		$strippedSystem->currentHealth = $this->currentHealth;
 		$strippedSystem->outputDisplay = $this->outputDisplay;
 		$strippedSystem->side = $this->side;
-					
+		$strippedSystem->defenceMod = $this->defenceMod;					
 	    return $strippedSystem;
 	} 
 
