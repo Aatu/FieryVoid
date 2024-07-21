@@ -752,19 +752,27 @@ class ThirdspaceShield extends Shield implements DefensiveSystem { //defensive v
 			$damageEntry->updated = true;
 			$this->damage[] = $damageEntry;
 		}
+
+		public function checkArmourDeduction($gamedata, $fireOrder){
+			$deductArmour = true;
+
+			foreach($this->damage as $damage){
+				if($damage->turn != $gamedata->turn) continue;//Only interested in this turn.
+				if($damage->fireorderid == $fireOrder->id) $deductArmour = false;	//Previous damage this turn has been found from this raking weapon.
+				break;//no need to search further	
+			}					
+			return 	$deductArmour;		
+		}//endof checkArmourDeduction
 		
-		public function absorbDamage($ship,$gamedata,$value){ //or dissipate, with negative value
-			$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $value, 0, 0, -1, false, false, "Absorb/Regenerate!", "ThirdspaceShield");
+		public function absorbDamage($ship,$gamedata,$value, $fireOrderid = -1){ //or dissipate, with negative value
+			$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $value, 0, 0, $fireOrderid, false, false, "Absorb/Regenerate!", "ThirdspaceShield");
 			$damageEntry->updated = true;
 			$this->damage[] = $damageEntry;
 		}
-		
-		
+			
 		
 		//decision whether this system can protect from damage - value used only for choosing strongest shield to balance load.
-		public function doesProtectFromDamage($expectedDmg, $systemProtected = null, $damageWasDealt = false) {
-	//		if($damageWasDealt) return 0; //Thirdspace shields do protect from overkill
-			
+		public function doesProtectFromDamage($expectedDmg, $systemProtected = null, $damageWasDealt = false) {		
 			$remainingCapacity = $this->getRemainingCapacity();
 			$protectionValue = 0;
 			if($remainingCapacity>0){
@@ -784,15 +792,23 @@ class ThirdspaceShield extends Shield implements DefensiveSystem { //defensive v
 			$absorbedDamage = 0;
 			
 			if($remainingCapacity>0) { //else projection does not protect
-				$absorbedFreely = 0;
+				$absorbedForFree = 0;
 				//first, armor takes part
-				$absorbedFreely = min($this->armour, $damageToAbsorb);//So either armour value, or if damage remaining is less than armour then it's that.
-				$damageToAbsorb += -$absorbedFreely;//Re-added 26.6.24 - But applies to every rake, which I might not want actually.
+				$armour = $this->armour;				
+				$deductArmour = true;//Do we want to deduct armour?
+				if($weapon instanceof Raking) $deductArmour = $this->checkArmourDeduction($gamedata, $fireOrder);//Check armour assumption on Raking weapons.
+				if(!$deductArmour) $armour = 0; //If returns false, Armour already taken into account for raking weapon.
+	
+				//Then check that damage is actually greater than Armour.		
+				$absorbedForFree = min($armour, $damageToAbsorb);//So either armour value, or if damage remaining is less than armour then it's that.
+				$damageToAbsorb += -$absorbedForFree;//Reduce amount to absorb by Armour or reduce to 0 if less than Armour.
+				
 				//next, actual absorbtion
 				$absorbedDamage = min($remainingCapacity, $damageToAbsorb ); //no more than remaining capacity; no more than damage incoming
-				$damageToAbsorb += -$absorbedDamage;
-				if($absorbedDamage>0){ //mark!
-					$this->absorbDamage($target,$gamedata,$absorbedDamage);
+				$damageToAbsorb += -$absorbedDamage;//Deduct the amount of shield absorption from initial damage.
+				
+				if($absorbedDamage>0){ //Damage was absorbed, update Shield!
+					$this->absorbDamage($target,$gamedata,$absorbedDamage, $fireOrder->id);
 				}
 				$returnValues['dmg'] = $damageToAbsorb;
 				$returnValues['armor'] = min($damageToAbsorb, $returnValues['armor']);
@@ -951,8 +967,7 @@ class ThoughtShield extends Shield implements DefensiveSystem {
 		        }
 		        return false;
 		}
-	   
-		
+	   		
 
 		public function setSystemDataWindow($turn){
 			parent::setSystemDataWindow($turn);  
@@ -992,17 +1007,27 @@ class ThoughtShield extends Shield implements DefensiveSystem {
 			$this->damage[] = $damageEntry;
 		}
 		
-		public function absorbDamage($ship,$gamedata,$value){ //or dissipate, with negative value
-			$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $value, 0, 0, -1, false, false, "Absorb/Regenerate!", "ThoughtShield");
+		public function absorbDamage($ship,$gamedata,$value, $fireOrderid = -1){ //or dissipate, with negative value
+			$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $value, 0, 0, $fireOrderid, false, false, "Absorb/Regenerate!", "ThoughtShield");
 			$damageEntry->updated = true;
 			$this->damage[] = $damageEntry;
 		}
 		
-		
+
+		public function checkShieldDeduction($gamedata, $fireOrder, $shooter, $weapon){
+			$deductShieldRating = true;
+			//how to check it's this turn?  Check damage entries for this turn instead, with Shooter and Weapon ids?
+
+			foreach($this->damage as $damage){
+				if($damage->turn != $gamedata->turn) continue;//Only interested in this turn.
+				if($damage->fireorderid == $fireOrder->id) $deductShieldRating = false;	//Previous damage this turn has been found from this raking weapon.
+			}
+					
+			return 	$deductShieldRating;		
+		}//endof checkShieldDeduction		
 		
 		//decision whether this system can protect from damage - value used only for choosing strongest shield to balance load.
 		public function doesProtectFromDamage($expectedDmg, $systemProtected = null, $damageWasDealt = false) {
-	//		if($damageWasDealt) return 0; //Thirdspace shields do protect from overkill
 			
 			$remainingCapacity = $this->getRemainingCapacity();
 			$protectionValue = 0;
@@ -1025,15 +1050,18 @@ class ThoughtShield extends Shield implements DefensiveSystem {
 			$absorbedDamage = 0;
 			
 			if($remainingCapacity>0) { //else projection does not protect
-				$absorbedFreely = 0;
+//				$absorbedForFree = 0;
+
 				//first, armor takes part
-				$absorbedFreely = min($this->armour, $damageToAbsorb);//So either armour value, or if damage remaining is less than armour then it's that.
-				$damageToAbsorb += -$absorbedFreely;//Re-added 26.6.24 - But applies to every rake, which I might not want actually.
-				//next, actual absorbtion
+//				$absorbedForFree = min($this->armour, $damageToAbsorb);//So either armour value, or if damage remaining is less than armour then it's that.
+//				$damageToAbsorb += -$absorbedForFree;//Armour is alawys 0 here.				
+
+				//next, actual absorbtion				
 				$absorbedDamage = min($remainingCapacity, $damageToAbsorb ); //no more than remaining capacity; no more than damage incoming
 				$damageToAbsorb += -$absorbedDamage;
+					
 				if($absorbedDamage>0){ //mark!
-					$this->absorbDamage($target,$gamedata,$absorbedDamage);
+					$this->absorbDamage($target,$gamedata,$absorbedDamage, $fireOrder->id);
 				}
 				$returnValues['dmg'] = $damageToAbsorb;
 				$returnValues['armor'] = min($damageToAbsorb, $returnValues['armor']);
@@ -1041,6 +1069,7 @@ class ThoughtShield extends Shield implements DefensiveSystem {
 			
 			return $returnValues;
 		} //endof function doProtect
+
 
 		//effects that happen in Critical phase (after criticals are rolled) - replenishment from active Generator 
 		public function criticalPhaseEffects($ship, $gamedata){
@@ -1063,11 +1092,10 @@ class ThoughtShield extends Shield implements DefensiveSystem {
 				if($cnc->isDestroyed()) $baseRegen = 0;		
 
 		    	$currentRating = $this->getRemainingHealth();
+		    	
 		    	$toReplenish = 0;
-//echo "Value of currentRating: " . $currentRating. "\n";
-//echo "Value of baseRegen: " . $baseRegen. "\n";
 				$toReplenish = $currentRating - $baseRegen; //Create a plus or minus figure to restore shield to start strength.
-//echo "Value of toReplenish: " . $toReplenish. "\n";																									
+																								
 				if($toReplenish != 0){ //something changes!
 					$this->absorbDamage($ship,$gamedata,$toReplenish);
 				}				
@@ -1150,8 +1178,8 @@ class ThoughtShield extends Shield implements DefensiveSystem {
 	
 }//endof class ThoughtShield
 
-
 */
+
 
 
 /*
