@@ -331,7 +331,7 @@ class NexusLaserMissile extends Laser{
             $this->data["Special"] = "Bomb-pumped laser. Ballistic weapon that scores raking (8) damage.";
             $this->data["Special"] .= "<br>Long-range: 20 hex launch and 30 hex max range, 2d10+2 damage.";
             $this->data["Special"] .= "<br>Short-range: 10 hex launch and 15 hex max range, 3d10+4 damage.";
-            $this->data["Special"] .= "<br>Due to how this works, intercepted as a normal weapon and not a ballistic weapon.";
+            $this->data["Special"] .= "<br>Due to standoff nature, intercepted as a normal weapon and not a ballistic weapon.";
             $this->data["Ammunition"] = $this->ammunition;
         }
         
@@ -434,7 +434,7 @@ class NexusHeavyLaserMissile extends Laser{
             $this->data["Special"] = "Bomb-pumped laser. Ballistic weapon that scores raking (8) damage.";
             $this->data["Special"] .= "<br>Long-range: 50 hex launch and 60 hex max range, 2d10+2 damage.";
             $this->data["Special"] .= "<br>Short-range: 20 hex launch and 30 hex max range, 3d10+4 damage.";
-            $this->data["Special"] .= "<br>Due to how this works, intercepted as a normal weapon and not a ballistic weapon.";
+            $this->data["Special"] .= "<br>Due to standoff nature, intercepted as a normal weapon and not a ballistic weapon.";
             $this->data["Ammunition"] = $this->ammunition;
         }
         
@@ -4087,7 +4087,7 @@ class NexusHeavyCoilgun extends Matter{
         public $priority = 9;
 
         public $rangePenalty = 0.25; //-1/4 hexes
-        public $fireControl = array(null, 3, 3); // fighters, <mediums, <capitals
+        public $fireControl = array(-4, 3, 3); // fighters, <mediums, <capitals
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
 		//maxhealth and power reqirement are fixed; left option to override with hand-written values
@@ -5607,6 +5607,64 @@ class NexusHeavyAssaultCannonBattery extends Weapon{
         public function setMaxDamage(){ $this->maxDamage = 34 ; }
 
     } // endof NexusMediumChemicalLaser
+
+
+//fighter mounted variant//
+	class NexusMedChemicalLaserFtr extends Laser{
+        public $name = "NexusMedChemicalLaserFtr";
+        public $displayName = "Medium Chemical Laser";
+        public $iconPath = "NexusMediumChemicalLaser.png"; 		
+        public $animation = "laser";
+        public $animationColor = array(220, 60, 120);
+//        public $animationWidth = 5;
+//        public $animationWidth2 = 0.5;
+        public $ammunition = 6;
+        public $priority = 8;
+
+        public $loadingtime = 3;
+
+        public $raking = 8;
+
+        public $rangePenalty = 0.66;
+        public $fireControl = array(-4, 0, 0); // fighters, <mediums, <capitals
+
+		function __construct($startArc, $endArc, $nrOfShots = 1){
+            $this->defaultShots = $nrOfShots;
+            $this->shots = $nrOfShots;
+            parent::__construct(0, 1, 0, $startArc, $endArc);
+        }
+
+		public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);
+			$this->data["Special"] = "Scores damage in raking (8).";
+            $this->data["Ammunition"] = $this->ammunition;
+		}
+
+        public function setAmmo($firingMode, $amount){
+            $this->ammunition = $amount;
+        }
+
+       public function fire($gamedata, $fireOrder){ //note ammo usage
+        	//debug::log("fire function");
+            parent::fire($gamedata, $fireOrder);
+            $this->ammunition--;
+            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);
+        }
+		
+        public function getDamage($fireOrder){ return Dice::d(10, 3)+4; }
+        public function setMinDamage(){ $this->minDamage = 7 ; }
+        public function setMaxDamage(){ $this->maxDamage = 34 ; }
+
+		public function stripForJson(){
+			$strippedSystem = parent::stripForJson();
+			$strippedSystem->data = $this->data;
+            $strippedSystem->ammunition = $this->ammunition;
+
+			return $strippedSystem;
+		}
+
+    } // endof NexusMedChemicalLaserFtr
+
 
 
     class NexusHeavyChemicalLaser extends Laser{
@@ -8290,6 +8348,92 @@ class BattleLaserFtr extends BattleLaser {
         public function setMaxDamage(){     $this->maxDamage = 6+$this->damagebonus ;      }
     } //endof GatlingGunFtr
 
+
+
+
+
+
+
+
+class AmmoMag extends Weapon {
+
+    public $name = "AmmoMag";
+    public $displayName = "Ammo Magazine";
+    public $iconPath = "AmmoMagazine.png";
+
+    public $fireControl = array(null, null, null); // this is a weapon in name only, it cannot actually fire!
+    
+    //public $isPrimaryTargetable = false; //can this system be targeted by called shot if it's on PRIMARY?	
+    //public $isTargetable = false; //false means it cannot be targeted at all by called shots! - good for technical systems :)
+   
+    //it can explode, too...
+    //public $weapon = false; //well, it can't be actually fired BUT if marked, explosions will not be shown in log!
+    public $damageType = 'Flash'; //needed to simulate that it's a weapon
+    public $weaponClass = 'Ballistic';
+    private $rackExplosionDamage = 40; //how much damage will this weapon do in case of catastrophic explosion (80 missiles... that's devastating)
+    private $rackExplosionThreshold = 20; //how high roll is needed for rack explosion    
+	
+	protected $possibleCriticals = array(); //Reload Rack does not suffer any criticals (barring catastrophic explosion)
+	
+    function __construct($armour, $maxhealth){
+        //parent::__construct($armour, $maxhealth, 0, 0); //that's for extending ShipSystem
+        parent::__construct($armour, $maxhealth, 0, 0, 0);//that's for extending Weapon
+		
+		$this->data["Special"] = 'Magazine for ammunition-based weapons. No actual effect in FV.';
+		
+		if ($this->rackExplosionThreshold < 21) { //can explode - inform player!
+			$chance = (21 - $this->rackExplosionThreshold) * 5; //percentage chance of explosion
+			$this->data["Special"] .= '<br>Can explode if damaged or destroyed, dealing ' . $this->rackExplosionDamage . ' damage in Flash mode (' . $chance . '% chance).';
+		}
+    }
+
+	public function getDamage($fireOrder){ return 0; }
+	public function setMinDamage(){ 
+		$this->minDamage = 0; 
+	}
+	public function setMaxDamage(){
+		$this->maxDamage = 0; 
+	}	
+	
+	public function criticalPhaseEffects($ship, $gamedata){ //add testing for ammo explosion!
+	
+		parent::criticalPhaseEffects($ship, $gamedata);//Call parent to apply effects like Limpet Bore.
+	
+		if(!$this->isDamagedOnTurn($gamedata->turn)) return; //if there is no damage this turn, then no testing for explosion
+        $explodes = false;
+        $roll = Dice::d(20)+20;
+        if ($roll >= $this->rackExplosionThreshold) $explodes = true;
+        		
+        if($explodes){
+            $this->ammoExplosion($ship, $gamedata, $this->rackExplosionDamage, $roll);  
+        }
+    } //endof function testCritical
+    public function ammoExplosion($ship, $gamedata, $damage, $roll){
+        //first, destroy self if not yet done...
+        if (!$this->isDestroyed()){
+            $this->noOverkill = true;
+            $fireOrder =  new FireOrder(-1, "normal", $ship->id,  $ship->id, $this->id, -1, 
+                    $gamedata->turn, 1, 100, 1, 1, 1, 0, null, null, 'ballistic');//needed, rolled, shots, shotshit, intercepted
+			$fireOrder->addToDB = true;
+			$fireOrder->pubnotes = "Ammunition magazine explosion (roll $roll)!";
+			$this->fireOrders[] = $fireOrder;							
+            $dmgToSelf = 1000; //rely on $noOverkill instead of counting exact amount left - 1000 should be more than enough...
+            $this->doDamage($ship, $ship, $this, $dmgToSelf, $fireOrder, null, $gamedata, true, $this->location);
+        }        
+        //then apply damage potential as a hit... should be Raking by the rules, let's do it as Flash instead (not quite the same, but easier to do)
+        if($damage>0){
+            $this->noOverkill = false;
+            $this->damageType = 'Flash'; //should be Raking by the rules, but Flash is much easier to do - and very fitting for explosion!
+            $fireOrder =  new FireOrder(-1, "normal", $ship->id,  $ship->id, $this->id, -1, 
+                    $gamedata->turn, 1, 100, 1, 1, 1, 0, null, null, 'ballistic');
+			$fireOrder->addToDB = true;
+			$fireOrder->pubnotes = "Ammunition magazine explosion (roll $roll)!";
+			$this->fireOrders[] = $fireOrder;					
+            $this->doDamage($ship, $ship, $this, $damage, $fireOrder, null, $gamedata, false, $this->location); //show $this as target system - this will ensure its destruction, and Flash mode will take care of the rest
+        }
+    }
+
+}
 
 
 

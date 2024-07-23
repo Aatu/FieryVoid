@@ -4,7 +4,7 @@ class DalithornPrototypeJumpcruiser extends HeavyCombatVessel{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 400;
+        $this->pointCost = 350;
         $this->faction = "ZNexus Dalithorn Commonwealth";
         $this->phpclass = "DalithornPrototypeJumpcruiser";
         $this->imagePath = "img/ships/Nexus/DalithornPrototypeJumpship.png";
@@ -19,8 +19,8 @@ class DalithornPrototypeJumpcruiser extends HeavyCombatVessel{
         $this->forwardDefense = 15;
         $this->sideDefense = 15;
         
-        $this->turncost = 1;
-        $this->turndelaycost = 1;
+        $this->turncost = 0.75;
+        $this->turndelaycost = 0.75;
         $this->accelcost = 3;
         $this->rollcost = 2;
         $this->pivotcost = 2;
@@ -59,13 +59,13 @@ class DalithornPrototypeJumpcruiser extends HeavyCombatVessel{
 		
         $this->hitChart = array(
             0=> array(
-                    8 => "Structure",
-					9 => "Catapult",
-					11 => "Magazine",
-                    13 => "Thruster",
-                    15 => "Scanner",
-                    17 => "Engine",
-                    18 => "Hangar",
+                    6 => "Structure",
+					7 => "Catapult",
+					8 => "Magazine",
+                    12 => "Thruster",
+                    14 => "Scanner",
+                    16 => "Engine",
+                    17 => "Hangar",
                     19 => "Reactor",
                     20 => "C&C",
             ),

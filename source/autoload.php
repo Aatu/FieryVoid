@@ -1652,6 +1652,9 @@ spl_autoload_register(
 				'nexustwiniongun' => '/server/model/weapons/customNexus.php',
 			//Nexus EM weapons
 				'nexuslightchargecannon' => '/server/model/weapons/customNexus.php',
+			//Nexus other weapons
+				'ammomag' => '/server/model/weapons/customNexus.php',
+			
 
 
 				'testgun1' => '/server/model/weapons/customNexus.php',

@@ -4,7 +4,7 @@ class DalithornCommandFrigate extends MediumShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 245;
+        $this->pointCost = 235;
         $this->faction = "ZNexus Dalithorn Commonwealth";
         $this->phpclass = "DalithornCommandFrigate";
         $this->imagePath = "img/ships/Nexus/DalithornCommandFrigate.png";
@@ -27,20 +27,21 @@ class DalithornCommandFrigate extends MediumShip{
          
         $this->addPrimarySystem(new Reactor(3, 9, 0, 0));
         $this->addPrimarySystem(new CnC(3, 14, 0, 0));
-        $this->addPrimarySystem(new Scanner(3, 10, 3, 5));
-        $this->addPrimarySystem(new Engine(3, 12, 0, 6, 3));
+        $this->addPrimarySystem(new Scanner(3, 10, 3, 4));
+        $this->addPrimarySystem(new Engine(3, 12, 0, 7, 3));
         $this->addPrimarySystem(new Hangar(1, 1));
 		$this->addPrimarySystem(new Magazine(3, 10));
-        $this->addPrimarySystem(new Thruster(2, 10, 0, 3, 3));
-        $this->addPrimarySystem(new Thruster(2, 10, 0, 3, 4));        
+        $this->addPrimarySystem(new Thruster(2, 11, 0, 4, 3));
+        $this->addPrimarySystem(new Thruster(2, 11, 0, 4, 4));        
         
 		$this->addFrontSystem(new NexusLightCoilgun(3, 7, 3, 330, 30));
 		$this->addFrontSystem(new NexusLightGasGun(2, 5, 1, 240, 360));
 		$this->addFrontSystem(new NexusLightGasGun(2, 5, 1, 0, 120));
-        $this->addFrontSystem(new Thruster(2, 8, 0, 4, 1));
+        $this->addPrimarySystem(new Thruster(2, 11, 0, 3, 3));
+        $this->addPrimarySystem(new Thruster(2, 11, 0, 3, 4));        
 	    
         $this->addAftSystem(new Thruster(1, 4, 0, 1, 2));    
-        $this->addAftSystem(new Thruster(2, 8, 0, 4, 2));    
+        $this->addAftSystem(new Thruster(2, 8, 0, 5, 2));    
         $this->addAftSystem(new Thruster(1, 4, 0, 1, 2));    
 		$this->addAftSystem(new NexusLightGasGun(2, 5, 1, 240, 60));
 		$this->addAftSystem(new NexusLightGasGun(2, 5, 1, 300, 120));
@@ -57,7 +58,7 @@ class DalithornCommandFrigate extends MediumShip{
 			8 => "Thruster",
 			10 => "Magazine",
 			12 => "Scanner",
-			16 => "Engine",
+			15 => "Engine",
 			17 => "Hangar",
 			19 => "Reactor",
 			20 => "C&C",
