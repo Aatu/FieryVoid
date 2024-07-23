@@ -3512,7 +3512,7 @@ class NexusMinigun extends Weapon{
 		public function setSystemDataWindow($turn){
 			parent::setSystemDataWindow($turn);
 			$this->data["Special"] = "Ignores armor, does not overkill.";
-			$this->data["Special"] .= "<br>Burst mode: 1d4 +1/25% pulses (max 6) of 3 damage.";
+			$this->data["Special"] .= "<br>Burst mode: 1d4 +1/25% pulses (max 6) of 4 damage.";
 			$this->data["Special"] .= "<br>Concentrated mode:  1d3*4 damage but -10 fire control.";
 			$this->data["Special"] .= "<br>Can intercept ballistic weapons only.";
 		}
