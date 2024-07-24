@@ -284,7 +284,7 @@ class NexusAntifighterLauncher extends Weapon{
 class NexusLaserMissile extends Laser{
         public $name = "NexusLaserMissile";
         public $displayName = "Laser Missile";
-		    public $iconPath = "NexusLaserMissile.png";
+		    public $iconPath = "NexusLaserMissile2.png";
         public $animationArray = array(1=>'laser', 2=>'laser');
         public $trailColor = array(141, 240, 255);
         public $animationColorArray = array(1=>array(220, 60, 120), array(220, 60, 120));
@@ -387,7 +387,7 @@ class NexusLaserMissile extends Laser{
 class NexusHeavyLaserMissile extends Laser{
         public $name = "NexusHeavyLaserMissile";
         public $displayName = "Heavy Laser Missile";
-		    public $iconPath = "NexusHeavyLaserMissile.png";
+		    public $iconPath = "NexusHeavyLaserMissile2.png";
         public $animationArray = array(1=>'laser', 2=>'laser');
         public $trailColor = array(141, 240, 255);
         public $animationColorArray = array(1=>array(220, 60, 120), array(220, 60, 120));
