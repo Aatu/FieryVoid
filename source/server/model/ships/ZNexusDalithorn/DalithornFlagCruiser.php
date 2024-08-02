@@ -56,13 +56,13 @@ class DalithornFlagCruiser extends HeavyCombatVessel{
 		
         $this->hitChart = array(
             0=> array(
-                    8 => "Structure",
-					9 => "Catapult",
-					11 => "Magazine",
-                    13 => "Thruster",
-                    15 => "Scanner",
-                    17 => "Engine",
-                    18 => "Hangar",
+                    6 => "Structure",
+					7 => "Catapult",
+					8 => "Magazine",
+                    12 => "Thruster",
+                    14 => "Scanner",
+                    16 => "Engine",
+                    17 => "Hangar",
                     19 => "Reactor",
                     20 => "C&C",
             ),
@@ -76,7 +76,7 @@ class DalithornFlagCruiser extends HeavyCombatVessel{
             ),
             2=> array(
                     6 => "Thruster",
-                    8 => "Gas Gun",
+                    9 => "Gas Gun",
                     18 => "Structure",
                     20 => "Primary",
             ),
