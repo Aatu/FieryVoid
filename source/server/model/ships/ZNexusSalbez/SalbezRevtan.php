@@ -25,6 +25,7 @@ class SalbezRevTan extends OSAT{
         $this->pivotcost = 0;	
         $this->iniativebonus = 60;
 
+        $this->addPrimarySystem(new OSATCnC(0, 1, 0, 0));
         $this->addPrimarySystem(new MediumLaser(3, 6, 5, 300, 60));
         $this->addPrimarySystem(new NexusRangedSwarmTorpedo(3, 5, 2, 270, 90));
         $this->addPrimarySystem(new LightParticleBeamShip(2, 2, 1, 0, 360));

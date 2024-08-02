@@ -1189,6 +1189,7 @@ class CnC extends ShipSystem implements SpecialAbility {
     public $name = "cnC";
     public $displayName = "C&C";
     public $primary = true;
+    private $marines = 0;//Front end varibale to dispaly current marine count on ship.
 	
 	//C&C  is VERY important, although not as much as the reactor!
 	public $repairPriority = 9;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
@@ -1275,10 +1276,47 @@ class CnC extends ShipSystem implements SpecialAbility {
 			
 		}
 		
-	}	
+	}
+	
+	
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+		$ship = $this->getUnit();
+		$marineDefenders = $ship->howManyMarines();
+		if($ship->factionAge > 2){//Ancients can't be boarded and who knows what their defenders look like!
+			$this->data["Marine Units"] = 'n/a';//Or change to 'N/A'
+		}else{
+			$this->data["Marine Units"] = $marineDefenders;
+			$this->marines = $marineDefenders;
+		}
+	}
+
+        public function stripForJson() {//Need to send Marines to front-end so it updates count.
+            $strippedSystem = parent::stripForJson();    
+            $strippedSystem->marines = $this->marines;                             
+            return $strippedSystem;
+        }
 			
 } //endof class CnC
 
+
+class OSATCnC extends CnC{	//Special technical OSAT CnC system, so criticals effects can be applied to these units etc
+    public $iconPath = "cnCtechnical.png";
+    public $isPrimaryTargetable = false;
+	public $isTargetable = false;   
+	public $doCountForCombatValue = false;   
+
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);     
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}
+		$this->data["Special"] .= "Technical system only, cannot be damaged in any way.";
+	}
+		
+}//endof OSATCnC
 
 /*Protected CnC - as compensation for ships lacking two C&Cs, these systems get different (lighter) critical table 
 */
@@ -1293,7 +1331,7 @@ class ProtectedCnC extends CnC{
 		}
 		//actually now secondary C&C is present - Protected C&C-equipped units should be re-equipped with regular C&C + Secondary C&C instead!
 		//$this->data["Special"] .= 'This unit should have two separate C&Cs. As this is not possible in FV, critical chart is changed instead.';
-		$this->data["Special"] .= "C&C that's more resistnat to critical damage.";
+		$this->data["Special"] .= "C&C that's more resistant to critical damage.";
 	}
 	
 	protected $possibleCriticals = array(
@@ -1328,6 +1366,7 @@ class ThirdspaceCnC extends CnC{
     );
 	
 }//endof class ThirdspaceCnC
+
 	
 class PakmaraCnC extends CnC{	
 	public function setSystemDataWindow($turn){
@@ -3607,14 +3646,23 @@ class SelfRepair extends ShipSystem{
 class ThirdspaceSelfRepair extends SelfRepair{
 
     public $boostable = true;
-    public $maxBoostLevel = 5;
-    public $boostEfficiency = 4; 
+    public $maxBoostLevel = 3;
+    public $boostEfficiency = 0;
+    
+    protected $ewBoosted = true;   
 	
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);  
-		$this->data["Special"] .= "<br> Output can be boosted up to " . $this->maxBoostLevel . " times at " . $this->boostEfficiency . " power per extra point of self repair.";	
+		$this->data["Special"] .= "<br> Output can be boosted up to " . $this->maxBoostLevel . " times at 1 EW per extra point of self repair.";	
 		}	
-	}	
+
+	public function stripForJson(){
+		$strippedSystem = parent::stripForJson();
+		$strippedSystem->ewBoosted = $this->ewBoosted;													
+		return $strippedSystem;
+	} 
+
+}	
 
 //BioThruster - it's NOT seen as thruster by game; used to calculate output of BioDrive engine 
 class BioThruster extends ShipSystem{
@@ -4417,6 +4465,75 @@ class PlasmaBattery extends ShipSystem{
 							
 } //endof PlasmaBattery.php
 
+
+class ThirdspaceShieldGenerator extends ShipSystem{
+    public $name = "ThirdspaceShieldGenerator";
+    public $displayName = "Shield Generator";
+    public $primary = true; //Check if inherited and remove?
+	public $isPrimaryTargetable = false; //Check if inherited and remove?
+	public $isTargetable = false; //Check if inherited and remove?
+    public $iconPath = "ThirdspaceShieldGen.png";
+	protected $doCountForCombatValue = false; //Check if inherited and remove?
+	
+	public $storedCapacity = 0;
+	public $excessCapacity = 0;	//Variable to store front end values, when player commits Initial Orders with excess energy in Generator. 
+	public $shieldPresets = array('Equalise', 'Forward', 'Starboard', 'Aft', 'Port');	
+	public $presetCurrClass = '';//for front end, to display Preset types in tooltips.
+
+	public $repairPriority = 9;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
+    
+    
+    function __construct($armour, $maxhealth, $powerReq, $output){ 
+        parent::__construct($armour, $maxhealth, $powerReq, $output ); //$armour, $maxhealth, $powerReq, $output    		    
+    }  	    
+		
+	protected $possibleCriticals = array(
+	            18=>"OutputReduced1",
+	            20=>"OutputReduced2",
+	            26=>"OutputReduced4" );
+
+		
+    public function setSystemDataWindow($turn){
+        parent::setSystemDataWindow($turn);
+		$this->data["Special"] = "Regenerates 1 health per point of output for each Shield at the end of each turn.";
+        $this->data["Special"] .= "<br>During Initial Orders this system can be used to transfer shield power from one shield system to another e.g. front to aft etc.";	   
+        $this->data["Special"] .= "<br>You cannot commit your Intial Orders if there is an excess or deficit of shield energy in this system.";
+ 		$this->outputDisplay = $this->storedCapacity;
+ 		$this->data["Output"] = $this->getOutput();               
+    }
+
+		//effects that happen in Critical phase (after criticals are rolled) - replenishment from active Generator 
+		public function criticalPhaseEffects($ship, $gamedata){
+			
+			parent::criticalPhaseEffects($ship, $gamedata);//Call parent to apply effects like Limpet Bore.
+/*
+			//Thought about adding something to reduce all shields to 0 when generator destryoed.  But I think them not regenerating is enough.			
+			if($this->isDestroyed()){
+				$shields = $ship->getSystemsByName('ThirdspaceShield', true);
+				
+				foreach($shields as $shield){
+					$currHealth = $shield->getRemainingHealth();
+					$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $currHealth, 0, 0, -1, false, false, "DepleteToZero!", "ThirdspaceShield");
+					$damageEntry->updated = true;
+					$this->damage[] = $damageEntry;							
+				}
+			}
+*/
+		} //endof function criticalPhaseEffects
+
+	
+	//always redefine $this->data, variable information goes there...
+	public function stripForJson(){
+        $strippedSystem = parent::stripForJson();
+        $strippedSystem->data = $this->data;
+        $strippedSystem->shieldPresets = $this->shieldPresets;
+        $strippedSystem->storedCapacity = $this->storedCapacity;       
+        $strippedSystem->presetCurrClass = $this->presetCurrClass;  
+		
+        return $strippedSystem;
+    }
+							
+} //endof ThirdspaceShieldGenerator
 
 
 /*UNDER CONSTRUCTION*/
@@ -5271,8 +5388,7 @@ class AmmoMissileM extends AmmoMissileTemplate{
     }	
 
 
-		public function beforeFiringOrderResolution($gamedata, $weapon, $originalFireOrder)
-		{
+	public function beforeFiringOrderResolution($gamedata, $weapon, $originalFireOrder){
 		    // To create 6 missiles instead of just one.
 		    $missilesTotal = 6;
 		    $currentShotNumber = 1;
@@ -5303,13 +5419,13 @@ class AmmoMissileM extends AmmoMissileTemplate{
                             $newFireOrder->addToDB = true;
                             $weapon->fireOrders[] = $newFireOrder;
                          
-							}
+					}
 						
-						$currentShotNumber++;
-						if($currentShotNumber > $missilesTotal) break; //will get out of foreach loop once we're out of submissiles, even if there are still fighters unassigned	
+					$currentShotNumber++;
+					if($currentShotNumber > $missilesTotal) break; //will get out of foreach loop once we're out of submissiles, even if there are still fighters unassigned	
 					
 				}
-		}
+			}
 	}//endof function beforeFiringOrderResolution   
 
      public function fire($gamedata, $fireOrder) 	//For Multiwarhead missiles
@@ -5324,30 +5440,31 @@ class AmmoMissileM extends AmmoMissileTemplate{
 		
 	if (!$validTarget) {//target is not valid, find another one
 		 $targetFighter = null;
-		                foreach ($target->systems as $fighter) { // Can only target fighters.
-		                    if ($fighter->isDestroyed()) { // Ignore destroyed fighters.
-		                        continue;
-		                    }
+		foreach ($target->systems as $fighter) { // Can only target fighters.
+		
+		     if ($fighter->isDestroyed()) { // Ignore destroyed fighters.
+		         continue;
+		     }
 		                    	                    
 			if(in_array($fighter->id,  $this->engagedFighters)) continue; //ignore already engaged fighters
 			 	
 			$targetFighter = $fighter; //found appropriate target! 
 			
 	//		break; //Removed so that retargetted munitions strike last fighter in flight.
-			                }                
+		}                
 			                
-				if($targetFighter!=null){
+			if($targetFighter!=null){
 				$fireOrder->calledid = $targetFighter->id; //this redirection will be correctly handled by standard routines
 				$validTarget = true;
-				}
-			}	
+			}
+	}	
 
-		 if (!$validTarget) { //target not valid and no replacement found - make the shot miss!
+		if (!$validTarget) { //target not valid and no replacement found - make the shot miss!
 			$fireOrder->needed = 0; //set hit chance as 0
 			$fireOrder->pubnotes .= '  No viable target - excess submunition lost';//inform player of situation
 		}else{ //valid target, will be engaged, note for further shots!
 				$this->engagedFighters[]= $fireOrder->calledid;
-			}	
+		}	
 	}//end of function fire
             
 	

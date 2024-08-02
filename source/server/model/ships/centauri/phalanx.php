@@ -22,7 +22,7 @@ class Phalanx extends OSAT{
         $this->pivotcost = 0;	
         $this->iniativebonus = 60;
 	
-
+        $this->addPrimarySystem(new OSATCnC(0, 1, 0, 0));
         $this->addPrimarySystem(new Reactor(5, 7, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 7, 2, 8)); 
         $this->addAftSystem(new Thruster(4, 6, 0, 0, 2)); 

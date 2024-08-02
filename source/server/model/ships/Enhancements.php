@@ -85,8 +85,11 @@ class Enhancements{
 			
 		case 'ThirdspaceShip':
 			Enhancements::blockStandardEnhancements($unit);
-			$unit->enhancementOptionsEnabled[] = 'IMPR_SR';
-			$unit->enhancementOptionsEnabled[] = 'IMPR_ENG'; 					
+			$unit->enhancementOptionsEnabled[] = 'IMPR_SR';			
+			foreach ( $unit->enhancementOptionsDisabled as $key=>$value){ 
+				if($value=='IMPR_ENG'){ unset($unit->enhancementOptionsDisabled[$key]); }
+				if($value=='IMPR_SENS'){ unset($unit->enhancementOptionsDisabled[$key]); }									
+			}					
 			break;		
 	}	  
   }//endof function nonstandardEnhancementSet
@@ -928,6 +931,16 @@ class Enhancements{
 	/* all fighter enhancement options - availability and cost calculation
 	*/
   public static function setEnhancementOptionsFighter($flight){
+	  //Elite Marines for Breaching Pods, cost: 40% craft price (round up), limit: 1	  	
+	  $enhID = 'ELT_MAR';	  
+	  if(in_array($enhID, $flight->enhancementOptionsEnabled)){ //option needs to be specifically enabled
+		  $enhName = 'Elite Marines';
+		  $enhLimit = 1;	
+		  $enhPrice = ceil($flight->pointCost/15); //price per craft, while flight price is per 6-craft flight	  
+		  $enhPriceStep = 0;
+		  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
+	  }  
+
 	  //Elite Pilot: StarWars only, sets pivot cost to 1, Initiative +1(5),  OB +1, profile -1, cost: 40% craft price (round up), limit: 1
 	  $enhID = 'ELITE_SW';	  
 	  if(in_array($enhID, $flight->enhancementOptionsEnabled)){ //option needs to be specifically enabled
@@ -955,7 +968,26 @@ class Enhancements{
 		  $enhPriceStep = 0;
 		  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 	  }
-
+	  
+	  //Extra Ammo for Fighters with a limited supply, cost: 3 per extra shot, limit: 5	  	
+	  $enhID = 'EXT_AMMO';	  
+	  if(in_array($enhID, $flight->enhancementOptionsEnabled)){ //option needs to be specifically enabled
+		  $enhName = 'Additional Ammo for Gun';
+		  $enhLimit = 4;	
+		  $enhPrice = 3; //price per craft, while flight price is per 6-craft flight	  
+		  $enhPriceStep = 0;
+		  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+	  } 
+	  	  
+	  //Extra Marines for Breaching Pods, cost: 15 per pod, limit: 1	  	
+	  $enhID = 'EXT_MAR';	  
+	  if(in_array($enhID, $flight->enhancementOptionsEnabled)){ //option needs to be specifically enabled
+		  $enhName = 'Additional Marine Unit';
+		  $enhLimit = 1;	
+		  $enhPrice = 12; //price per craft, while flight price is per 6-craft flight	  
+		  $enhPriceStep = 0;
+		  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+	  }  
 	  //Markab specific - 'Religious Ferver' refit than provides some benefits along with some penalties.
 	  $enhID = 'FTR_FERV';	  
 	  if(in_array($enhID, $flight->enhancementOptionsEnabled)){ //option needs to be specifically enabled
@@ -1184,6 +1216,11 @@ class Enhancements{
 				$flight->enhancementTooltip .= "$enhDescription";
 				if ($enhCount>1) $flight->enhancementTooltip .= " (x$enhCount)";
 				switch ($enhID) { 
+					case 'ELT_MAR'://Elite marines, mark every Marines system as Elite.
+						foreach($flight->systems as $ftr) foreach($ftr->systems as $sys) if($sys instanceOf Marines){
+						$sys->eliteMarines = true;
+						}
+						break;						
 					case 'ELITE_SW': //Elite Pilot (SW): pivot cost 1, Ini +1, OB +1, Profiles -1
 						$flight->pivotcost = 1;
 						$flight->offensivebonus += $enhCount;
@@ -1191,16 +1228,31 @@ class Enhancements{
 						$flight->forwardDefense -= $enhCount;
 						$flight->sideDefense -= $enhCount;
 						break;
+					case 'EXP_MOTIV': //Expert Motivator: -2 on dropout rolls
+						$flight->critRollMod -= $enhCount*2;
+						break;
+					case 'EXT_AMMO'://Extra ammo, for fighter with a limited supply.  Max 5 extra shots.
+						foreach($flight->systems as $ftr) foreach($ftr->systems as $sys)
+							//Find relevant weapons 
+							if(	$sys instanceOf PairedGatlingGun || 
+								$sys instanceOf MatterGun || 
+								$sys instanceOf SlugCannon || 
+								$sys instanceOf GatlingGunFtr){
+							$sys->ammunition += $enhCount;//Increase ammo for these weapons by $enhCount
+							}
+						break;							
+					case 'EXT_MAR'://Extra marines, increase contingent per pod by 1.
+						foreach($flight->systems as $ftr) foreach($ftr->systems as $sys) if($sys instanceOf Marines){
+						$sys->ammunition += $enhCount;
+						}
+						break;							
 					case 'FTR_FERV': //Markab Religious Fervor: +1 to hit for all weapons, +10 Initiative, +2 Defence Profiles, -3 dropout rolls
 						$flight->offensivebonus += $enhCount;
 						$flight->iniativebonus += $enhCount*10;
 						$flight->forwardDefense += $enhCount*2;
 						$flight->sideDefense += $enhCount*2;
 						$flight->critRollMod -= $enhCount*3;
-						break;	
-					case 'EXP_MOTIV': //Expert Motivator: -2 on dropout rolls
-						$flight->critRollMod -= $enhCount*2;
-						break;					
+						break;												
 					case 'IMPR_OB': //Improved Targeting Computer: +1 OB
 						$flight->offensivebonus += $enhCount;
 						break;

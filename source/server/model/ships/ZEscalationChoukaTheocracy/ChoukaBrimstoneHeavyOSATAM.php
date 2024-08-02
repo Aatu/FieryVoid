@@ -30,7 +30,8 @@ class ChoukaBrimstoneHeavyOSATAM extends OSAT
         $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
         $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 80); //add full load of basic missiles
         $this->enhancementOptionsEnabled[] = 'AMMO_H';//add enhancement options for other missiles - Class-L
-		
+
+        $this->addPrimarySystem(new OSATCnC(0, 1, 0, 0));		
 		$this->addPrimarySystem(new Reactor(4, 16, 0, 0));
 		$this->addPrimarySystem(new Scanner(4, 12, 5, 5));
 		$this->addPrimarySystem(new Thruster(2, 10, 0, 0, 2));

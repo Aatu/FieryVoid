@@ -24,8 +24,15 @@ class StreibArmedBreachingPod extends FighterFlight{
         
 		$this->hangarRequired = 'shuttles'; //for fleet check
 		$this->iniativebonus = 8*5;
+
+        $this->occurence = 'common';
+		$this->variantOf = "Breaching Pods";	
       
         $this->populate();
+    
+    	$this->enhancementOptionsEnabled[] = 'ELT_MAR'; //To enable Elite Marines enhancement
+		$this->enhancementOptionsEnabled[] = 'EXT_MAR'; //To enable extra Marines enhancement
+		
     }
     
     
@@ -45,6 +52,8 @@ class StreibArmedBreachingPod extends FighterFlight{
             $frontGun = new LtSurgeBlaster(330, 30, 1); //1 gun - dmg bonus not selectable
             $fighter->addFrontSystem($frontGun);			
 			$fighter->addFrontSystem(new LtEMWaveDisruptor(240, 120, 1));
+			
+			$fighter->addFrontSystem(new Marines(330, 30, 0, false)); //startarc, endarc, damagebonus, elite.			
 
 			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
 			

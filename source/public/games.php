@@ -63,9 +63,15 @@ if (isset($_SESSION["user"])) {
        -->
 		
 
-		---------- <b>LATEST NEWS - June 2024</b> ----------
-<br><b>Updates and Nexus balancing</b> - by Geoffrey
-<br><b>bugfixes</b> - by Douglas
+		---------- <b>LATEST NEWS - August 2024</b> ----------
+	    <br><b>Deleting inactive games</b>: delay increased to 5 days (test games are useful, and picking up games after weekend is a thing!)
+		<br><b>Nexus Dalithorn rebalance</b> - by Geoffrey
+	    <br><b><u><big>Douglas' updates - big ones!:</big></u></b>
+	    <br><b>Boarding Actions</b> - Added Breaching Pods with Marines to relevant factions.
+	    <br><b>Pulsar Mine Rework</b> - Now targets enemy fighters at ANY point in their movement, not just the end.
+	    <br><b>Extra Ammo Enhancement</b> - For Fighters with limited ammunition.
+	    <br><b>Thirdspace Shield Rework</b> - Can now transfer shields between arcs!
+	    <br><b>Abbai Shield Generator</b> - First ally-targeting weapon :)
 
        
 

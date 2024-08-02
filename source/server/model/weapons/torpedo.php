@@ -302,12 +302,11 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
         public $animationColor = array(128, 0, 0);
 //   		public $animationExplosionScale = 0.6;         
 
-        public $range = 550;
+        public $range = 50;
         public $loadingtime = 2;
         
         public $weaponClass = "Electromagnetic"; //deals Plasma, not Ballistic, damage. Should be Ballistic(Plasma), but I had to choose ;)
-        public $damageType = "Flash"; 
-//        private $alreadyFlayed = false; //to avoid doing this multiple times  //OLD CODE RELATING TO WHEN PSIONIC TORPEDO FLAYED ARMOUR FROM TARGET    
+        public $damageType = "Standard";     
                 
         public $fireControl = array(null, 4, 5); // fighters, <mediums, <capitals 
         public $priority = 1; //Flash! should strike first 
@@ -315,8 +314,10 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
 		private static $alreadyAffected = array();         
         
         public $boostable = true;
-        public $boostEfficiency = 1;
-        public $maxBoostLevel = 2;  
+        public $boostEfficiency = 0;
+        public $maxBoostLevel = 2; 
+        
+    protected $ewBoosted = true;         
         
 		public $repairPriority = 5;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired                 
         
@@ -326,7 +327,7 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
                 $maxhealth = 9;
             }
             if ( $powerReq == 0 ){
-                $powerReq = 6;
+                $powerReq = 3;
             }
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }	
@@ -345,15 +346,15 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!
 		parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);			
 		//Weapon has hit, so apply+1 to crit roll, +1 to dropout roll to the damge elements
-		$mod = 1;
+		$mod = 2;
 //		if ($ship instanceof FighterFlight) $mod++;
 		$system->critRollMod += $mod; 
 		
 		if (isset(PsionicTorpedo::$alreadyAffected[$ship->id])) return; //But not if affected already.											
 			
-		$effectEW = Dice::d(3,1);//strength of effect: -1 to -3 EW.				
-		$effectIni = Dice::d(3,1);//strength of effect: -5 to -15 initiative.		
-		$effectPower = Dice::d(4,1)+1;//strength of effect: -2 to -4 to power.
+		$effectEW = Dice::d(2,1)+$boostlevel;//strength of effect: -1 to -4 EW.				
+		$effectIni = Dice::d(3,1)+$boostlevel;//strength of effect: -5 to -25 initiative.		
+		$effectPower = Dice::d(4,1)+$boostlevel;//strength of effect: -1 to -6 to power.
 //		$effectThrust = Dice::d(3,1); //Potentially could add additional crit effect.		
 			
 		$fireOrder->pubnotes .= "<br> Target has Initiative reduced, and suffers from power and scanner fluctations.";				
@@ -402,25 +403,25 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
 			}else{
 				$this->data["Special"] .= '<br>';
 			}
-			$this->data["Special"] .= "<br>Deals Flash damage that ignores armor (Advanced Armor is treated as 2 points less).";	
-			$this->data["Special"] .= "<br>If this weapon hits, it uses psychic energy to disrupt its target next turn in the following ways:";
-			$this->data["Special"] .= "<br> - 1d3 penalty to EW,";
+			$this->data["Special"] .= "<br>Ignores armor (Advanced Armor is treated as 2 points less).";	
+			$this->data["Special"] .= "<br>Uses psychic energy to disrupt target next turn in the following ways:";
+			$this->data["Special"] .= "<br> - 1d2 penalty to EW,";
 			$this->data["Special"] .= "<br> - 1d3 penatly to Initiative,";
-			$this->data["Special"] .= "<br> - 1d4+1 penalty to available power.";													
+			$this->data["Special"] .= "<br> - 1d4 penalty to available power.";													
 			$this->data["Special"] .= "<br>Ballistic weapon that can use offensive EW.";
 			$this->data["Special"] .= "<br>Multiple Psionic Torpedoes do not stack effects (but do stack with Psychic Field).";			
-			$this->data["Special"] .= "<br>Can be boosted twice, for +2 damage per boost level.";			
-		    $this->data["Special"] .= "<br>Has +1 modifier to critical hits, and +1 to fighter dropout rolls.";			
+			$this->data["Special"] .= "<br>Can be boosted twice using EW, for +4 damage per boost, and +1 to each disruptive effect above.";			
+		    $this->data["Special"] .= "<br>Has +2 modifier to critical hits.";			
 		}
 
         private function getExtraDamagebyBoostlevel($turn){
             $add = 0;
             switch($this->getBoostLevel($turn)){
                 case 1:
-                    $add = 2;
+                    $add = 4;
                     break;
                 case 2:
-                    $add = 4;
+                    $add = 8;
                     break;
                                         
                       
@@ -445,7 +446,7 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
         
         public function getDamage($fireOrder){
             $add = $this->getExtraDamagebyBoostlevel($fireOrder->turn);
-            $dmg = Dice::d(8,1) + 13 + $add ;
+            $dmg = Dice::d(10,1) + 12 + $add ;
             return $dmg;
         }
 
@@ -462,80 +463,20 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
         public function setMinDamage(){
             $turn = TacGamedata::$currentTurn;
             $boost = $this->getBoostLevel($turn);
-            $this->minDamage = 14 + ($boost * 2);
+            $this->minDamage = 13 + ($boost * 4);
         }   
 
         public function setMaxDamage(){
             $turn = TacGamedata::$currentTurn;
             $boost = $this->getBoostLevel($turn);
-            $this->maxDamage = 21 + ($boost * 2); 
+            $this->maxDamage = 22 + ($boost * 4); 
 		}
 
-/* //OLD CODE RELATING TO WHEN PSIONIC TORPEDO FLAYED ARMOUR FROM TARGET
-   protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location = null)
-    {
-    //$pos ONLY relevant for FIGHTER armor if damage source position is different than one from weapon itself
-        //otherwise best leave null BUT fill $location!
-    //    damageWasDealt indicates whether this hit already caused damage - important for overkill for some damage modes
-        //if (!$system->isDestroyed()) { //else system was already destroyed, proceed to overkill
-		if ($system->getRemainingHealth() > 0) { //Vree Structure systems are considered not there despite not being formally destroyed
-            $damage = floor($damage);//make sure damage is a whole number, without fractions!
-            $armour = $this->getSystemArmourComplete($target, $system, $gamedata, $fireOrder, $pos); //handles standard and Adaptive armor, as well as Advanced armor and weapon class modifiers
-			// ...if armor-related modifications are needed, they should extend appropriate method (Complete or Base, as Adaptive should not be affected)
-			// ...and doDamage should always call Complete
-
-
-            //armor may be ignored for some reason... usually because of Raking mode :)
-            $armourIgnored = 0;
-            if (isset($fireOrder->armorIgnored[$system->id])) {
-                $armourIgnored = $fireOrder->armorIgnored[$system->id];
-                $armour = $armour - $armourIgnored;
-            } 
-            $armour = max($armour, 0); 
-
-			//returned array: dmgDealt, dmgRemaining, armorPierced	
-			$damage = $this->beforeDamagedSystem($target, $system, $damage, $armour, $gamedata, $fireOrder);
-			$effects = $system->assignDamageReturnOverkill($target, $shooter, $this, $gamedata, $fireOrder, $damage, $armour, $pos, $damageWasDealt);
-			$this->onDamagedSystem($target, $system, $effects["dmgDealt"], $effects["armorPierced"], $gamedata, $fireOrder);//weapons that do effects on hitting something
-			$damage = $effects["dmgRemaining"];
-			if ($this->damageType == 'Raking'){ //note armor already pierced so further rakes have it easier
-				$armourIgnored = $armourIgnored + $effects["armorPierced"];
-				$fireOrder->armorIgnored[$system->id] = $armourIgnored;
-			}			
-			
-            $damageWasDealt = true; //actual damage was done! might be relevant for overkill allocation
-        }
-
-        if (($damage > 0) || (!$damageWasDealt)) {//overkilling!
-            $overkillSystem = $this->getOverkillSystem($target, $shooter, $system, $fireOrder, $gamedata, $damageWasDealt, $location);
-            if ($overkillSystem != null)
-                $this->doDamage($target, $shooter, $overkillSystem, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location);
-        }     
-             
-			if (isset($this->alreadyFlayed[$target->id])) return;         	
-			$this->alreadyFlayed[$target->id] = true;//mark engaged 
-			
- 			if ($target instanceof FighterFlight) return;	//Fighrers armour isn't flayed'			
-			
-            if ($system->advancedArmor) return; //Neither is Advanced Armour
-      
-                  	 			        	                         
-	        $effectArmor = Dice::d(3,1);//strength of effect: 1d3
-	
-            foreach ($target->systems as $system){
-  //              if ($system->advancedArmor) return;              					
-                if ($target->shipSizeClass<=1 || $system->location === $location){ //MCVs and smaller ships are one huge section technically
-	             	for($i=1; $i<=$effectArmor;$i++){
-	                    $crit = new ArmorReduced(-1, $target->id, $system->id, "ArmorReduced", $gamedata->turn);
-	                    $crit->updated = true;
-	                    $crit->inEffect = false;
-	                    $system->criticals[] = $crit;                 
-		                }     
-		            }	            
-				}
-		     $fireOrder->pubnotes .= "<br> Armor reduced on entire ship section."; 				 
-        } //endof function doDamage	 
-*/
+	public function stripForJson(){
+		$strippedSystem = parent::stripForJson();
+		$strippedSystem->ewBoosted = $this->ewBoosted;													
+		return $strippedSystem;
+	} 
 		    
     }//endof class PsionicTorpedo
 

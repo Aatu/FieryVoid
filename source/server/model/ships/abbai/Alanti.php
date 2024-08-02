@@ -24,14 +24,15 @@ class alanti extends OSAT{
         $this->pivotcost = 0;	
         $this->iniativebonus = 60;
 
+        $this->addPrimarySystem(new OSATCnC(0, 1, 0, 0));
         $this->addPrimarySystem(new Reactor(4, 7, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 9, 3, 7)); 
         $this->addPrimarySystem(new ShieldGenerator(3, 8, 2, 2));
 		
         $this->addFrontSystem(new CombatLaser(3, 0, 0, 270, 90));     
         $this->addFrontSystem(new QuadArray(3, 0, 0, 0, 360));
-        $this->addFrontSystem(new CommDisruptor(3, 0, 0, 270, 90));    //replacing Shield Projector of the original 
-		
+        
+        $this->addAftSystem(new AbbaiShieldProjector(2, 0, 0, 0, 360, 2));		
         $this->addAftSystem(new GraviticShield(0, 6, 0, 2, 0, 360));
         $this->addAftSystem(new Particleimpeder(2, 0, 0, 0, 360));
         $this->addAftSystem(new Thruster(3, 6, 0, 0, 2)); 

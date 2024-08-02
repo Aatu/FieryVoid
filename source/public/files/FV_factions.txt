@@ -21,10 +21,10 @@ GENERAL NOTES
 	Fleet checker - tool that performs automatic check of fleet composition. Game does not enforce its use, but these restrictions are aimed at creation of balanced and interesting fleets so it's encouraged :) . It's SUBJECTIVELY extrapolated from official tournament rules.
 
 
+For starters - general description of missiles and boarding actions, as complicated systems that are common for multiple factions:
 
 MISSILES
 --------
-For starters - general description of missiles, as a complicated system that is common for multiple factions.
 
 General notes: ships usually come preloaded with missiles (usually Basic), and any missiles You buy is on top of that. Also, while amount of any given missile You can buy is limited by magazine size, total amount of missiles is not. 
 This means Your missile magazine may show more missiles available than it can actually hold. However, You cannot actually LAUNCH more missiles than magazine can hold - total number of launches is tracked. So extra missiles will provide You with extra variety (at a price ;) ), but not actual extra missiles.
@@ -64,6 +64,31 @@ FIGHTERBORNE MISSILES
  - class FY - Dogfight Missile - (Range 8 - Damage 6 - Offensive Bonus: +3/+3/+3) - In tabletop it can be snap fired in direct fire phase, but this ability is not present in FV.
 
 
+BOARDING ACTIONS WITH MARINES
+--------
+
+Many factions have access to boarding actions through the use of Breaching Pods, which come equipped with a 'Marines' weapon system and two contingents of Marines aboard as standard.  During the Firing Phase, Pods can attempt to attach to enemy ships in the same hex (and in arc) and deliver Marines to undertake a selection of missions (Sabotage, Capture Ship and Rescue).
+
+ATTACHING A POD:
+In all cases the first step will be the same, attempt to attach a Breaching Pod to the target ship.  Pods automatically attach to enemy ships they are moving faster than, providing the speed difference is not higher that their thrust rating.  Where the enemy ship is moving faster than the Pod they will need to roll for success, with a base chance of 100% and -10% per point of speed difference.  The LLort treat speed difference as one point lower for attaching a pod.
+
+DELIVERING THE MARINES:
+Once attached, the Pod will attempt to deliver the Marines, again this part is the same regardless of which mission has been selected.  The Marines have a base chance of 50% of successfully boording the vessel 5 or under on a d10), if they roll over there is a chance that the marines may be lost.  Otherwise they will return to the Pod and can attempt to Board again in future turns.  A number of modifiers are sometimes applied to this roll as well depending on circumstances, and these have been summarised below:
+ 	+20% success - Yolu-specific bonus
+	+10% success - Elite marines (e.g. Gaim or Narn) / Llort Breaching Pod / Target vessel has Poor Crew / Attempting to board a Primary section after an external section has been destroyed
+	-10% success - Narn or Gaim Defenders / Target vessel has Elite Crew or under the effects of Markab's Religious Fervor
+Note - The Combat Log will display the value of any modifiers along with the number rolled, negative modifiers denote increased success rate, positive indicate decreased success rate for Marine missions.
+
+MARINE MISSIONS:
+Marines that successfully board a vessel will then attempt to carry out their intended missions, which are detailed below.  Like the Delivery Roll, these can attract several modifiers depending on circumstances:
+	+10% success - Elite Marines (e.g. Gaim or Narn) / Target vessel has Poor Crew  
+	-10% success - Narn or Gaim Defenders / Target vessel has Elite Crew or under the effects of Markab's Religious Fervor
+In addition, for Sabotage and Rescue missions there is an additional -10% added to the roll for every two turns that the Marines are active aboard the enemy vessel.
+	- Sabotage: Marines can either attempt to damage a specific system on an enemy ships (by making a called shot against it using the usual rules) or disrupt the ship more generally (e.g. minor damage to a Primary system, EW/Initiative/Thrust/Defence Profile penalties) by targeting it in the normal fashion.  In both cases, Marines that are successfully delivered will roll on a d10 the following turn to see how successful their mission has been.  Note - Marines which target a specific system and are successful in destroying it will then continue to Sabotage the ship generally providing they have not been eliminated.
+	- Capture Ship: Marines will fight the defending marine contingents directly (the number of current Marines on a ship can be seen in its CnC tooltip!).  From the end of each Firing phase a marine unit has boarded they will roll separately to see if they a) eliminate a defender (50% base chance) and b) if they themselves are eliminated (25% base chance).  If the attacking marines manage to defeat all defenders during a scenario, the enemy ship will immediately be disabled for the remainder of the battle so long as there are still at least one attacking marine unit on board.
+	- Rescue Mission: For scenarios only, Marines will attach their pod and attempt to board as normal.  Then, from the following turn, the Combat Log will provide players with updates on the progress of their Rescue mission.
+
+
 AVAILABLE FACTIONS
 ------------------
 
@@ -75,6 +100,7 @@ Comm Disruptor - weapon reducing target's EW and Initiative for next turn.
 Particle Impeder - purely defensive weapon, capable of intercepting weapons with "uninterceptable" trait (typically that means Lasers :) ).
 	In addition, it can be boosted by sarificing EW rather than usual Power. Such a boost, in addition to increasing intercept rating of the Impeder, counts as special kind of shielding, reducing hit chance of all incoming weapons (fighter fire included), that can't be flown under and is cumulative with regular shields.
 	It is (by background as well as effect) DEW channeled to a specific arc, that has the added advantage of affecting fighters.
+Shield Projector - System only seen on Abbai base and OSATs, can target allies within 10 hexes and boost their Gravitic Shield on that turn.  Fires as a ballistic weapon effectively, with affect being applied during Firing Phase.  Note - Allied unit being boosted MUST be within 5 hexes of the Shield Projector unit by the start of Firing Phase to receive the benefit.
 	
 
 ABBAI MATRIARCHATE (WotCR)
@@ -218,8 +244,8 @@ Notable technologies:
 	Particle Concentrator - multiple Concentrators firing from the same hex may combine into one more powerful (and more accurate!) shot, a bit similar to what Ipsha Surge Cannons do. Its hit chance is average of all weapons concentrating (as they may be fitted on different ships, with different EW, their chances may differ).
 		In tabletop it's more or less the same, except weapons within 1 hex can still participate and lock-on is denied if any participating weapon lacks lock-on.
 		Kind of "known bug" - on MCVs/LCVs all Bulkheads can protect Structure against any shot, even coming from different direction (so eg. Aft bulkhead may kick in if a ship is attacked from front - though it will protect only Structure in this case)
-	Packet Torpedo - Ballistic weapon that has (besides range) a range penalty, just like direct fire weapons - with a twist that it kicks in only after first 10 hexes of travel.
-		In tabletop target of this weapon is not known to opponent until impact (not implemented in FV).
+	Packet Torpedo - Ballistic weapon that has a range penalty, just like direct fire weapons - although it only kicks in after first 10 hexes of travel.
+		In addition, the target of this weapon is not known to opponent until impact.
 	Scattergun - Light weapon that fires random number of shots. When firing defensively (also random number of shots) those shots must be directed at separate threats.
 
 
@@ -366,7 +392,7 @@ Energy Mine - hex-targeted weapon, causing heavy damage to everything on hex hit
 	Opponent does not see EMine target hexes (just the fact that they've been launched).
 	Not 100% accurate - a launched mine may scatter or fizzle.
 	Extremely disruptive to enemy fighters.
-Pulsar Mine - Highly automated short-range weapon that fires at passing fighters.  Unlike Tabletop, it attacks at beginning of Firing Phase as it is not possible to attack during Movement phase in FV.
+Pulsar Mine - Highly automated short-range weapon that fires at passing fighters.  The weapon will automcatically track enemy fighters during the Movement Phase, and attack any that came within arc and range during their movement in the Firing Phase.
 
 	
 ORIENI IMPERIUM
@@ -504,15 +530,15 @@ Their design makes them a bit Ancient-like when it comes to balancing - they are
 
 
 THIRDSPACE (Unofficial Faction)
-The "Thirdspace aliens" are a mysterious and terrifying race of malevolent telepathic beings from an alternate dimension, in possession of technology considered more advanced than even the Shadows or Vorlons.  While not indestructible, their ships are protected by an powerful energy shield that can absorb a significant amount of weapons fire before opponenets can inflict damage on their ships themselves.
-In FV, they have been created as a Custom faction (with credit to Amras Arfeiniel for providing the original image for the Thirdspace Battleship) and some of their abilities have been described below:
- - Thirdspace shield absorb all incoming damage in the arc that they cover (note, the rear shield has a 360 degree arc so covers all directions nad effectively reinforces front and side shields).  Once these shields have been reduced to zero rating damage will start to be inflicted on their ships as usual.  At the end of the turn Shield Projectors will restore their respective shields by an amount based on their current rating.
- - Thirdspace capital ships produce a passive Psychic Field which affects all enemies within range, this attack debilitates opponents by applying debuffs on the following turn.  It reduces initiative for all units, and reduces fighters' offensive bonus for the following turn.  For enemy vessels,  it decreases hit chances for weapons if it hits structure or causes possible criticals on if it hits any other system.  Ancients are not immune to this effect but suffering only 50% of the effect compared to Younger races.
+The "Thirdspace aliens" are a mysterious and terrifying race of malevolent telepaths from an alternate dimension, in possession of technology considered more advanced than even the Shadows or Vorlons.  While not indestructible, their ships are protected by an powerful energy shield that can absorb a significant amount of weapons fire before opponenets can inflict damage on their ships themselves.
+In FV, they have been created as a Custom faction (with credit to Amras Arfeiniel for providing the original image for the Thirdspace Battleship) and their key features have been described below:
+ - Thirdspace shields absorb all incoming damage in the arc that they cover.  Once these shields have been reduced to zero rating damage will start to be inflicted on their ships as normal.  During Intial Orders phase players can free move shield power around via the Shield Generator (note, this system must be at 0 in order to commit your orders e.g. you can't 'save' shield energy in the generator for future turns).  The Shield Generator also comes with a number of preset options you can click on to assist in moving shield energy around.  At the end of the turn, Shield Projectors will restore their respective shields by an amount based on their current rating.
+ - Thirdspace capital ships produce a passive Psychic Field which affects all enemies within range, this attack debilitates opponents in range by applying debuffs on the following turn.  It reduces initiative for all units, and reduces fighters' offensive bonus for the following turn.  For enemy vessels,  it either decreases hit chances if it hits structure, or causes a possible critical when if it hits any other system.  Ancients are not immune to this effect but suffering only 50% of the effect compared to Younger races.
  - Thirdspace have a number of other Psionic weapons, which typically deal a large amount of electromagnetic damage.  Many also have additional effects on Younger races such as an increased critical hit/fighter dropout chance or a reduction in ship armour.
- - Thirdspace heavy weapons, Psionic Lances, can be boosted with EW during Initial Orders phase to significantly increase their damage. 
- - Their Psionic Torpedo deals a significant amount of flash damage, making it dangerous for fighters to try and intercept.  In addition to damage, it also causes temporary penalties to initiative, power and sensors.
- - The Thirdspace aliens also use the flexible Psionic Concentrator weapon.  This is very effective against fighters as a single weapon or up to four Concentrators can be combined to deliver a increasingly powerful, but shorter ranged, attack. 
- - Like the Ipsha, Thirdspace ships use a singularity reactor which produce a set amount of power, regardless of whether systems have been destroyed or not.  As Thirdspace ships utilise power management heavily, to boost shields, self-repair or EW for example, it means they can continue to fight effectively even when taking heavy damage.
+ - Thirdspace heavy weapons, Psionic Lances, can be boosted with EW during Initial Orders phase to increase their damage. 
+ - Their Psionic Torpedo deals a reasonable amount of damage, and in addition also causes temporary penalties to initiative, power and sensors (which are cumulative with the Psychic Field, not not other Psionic Torpedoes).
+ - Thirdspace aliens make significant use of the flexible Psionic Concentrator weapon.  This is very effective against fighters as a single weapon or, when up to four Concentrators can be combined, can deliver increasingly powerful, but shorter ranged, attacks. 
+ - Like the Ipsha, Thirdspace ships use a singularity reactor which produce a set amount of power, regardless of whether systems have been destroyed or not.  As Thirdspace ships utilise power management heavily, to boost shields, self-repair or EW for example, it means they can continue to fight effectively even when taking damage.
 
 
 TORATA REGENCY

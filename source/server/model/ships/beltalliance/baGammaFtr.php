@@ -4,11 +4,11 @@ class baGammaFtr extends FighterFlight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 60;
-	$this->faction = "Belt Alliance";
+		$this->pointCost = 60;
+		$this->faction = "Belt Alliance";
         $this->phpclass = "baGammaFtr";
         $this->shipClass = "BA Gamma Light Fighters";
-	$this->imagePath = "img/ships/BAGamma.png";
+		$this->imagePath = "img/ships/BAGamma.png";
 	    $this->isd = 2135;
  		$this->unofficial = true;
         
@@ -19,8 +19,11 @@ class baGammaFtr extends FighterFlight{
         $this->jinkinglimit = 10;
         $this->turncost = 0.33;
         
-	$this->iniativebonus = 90;
+		$this->iniativebonus = 90;
         $this->populate();
+    
+        $this->enhancementOptionsEnabled[] = 'EXT_AMMO'; //To enable extra Ammo for main gun.
+           
     }
 
     public function populate(){
