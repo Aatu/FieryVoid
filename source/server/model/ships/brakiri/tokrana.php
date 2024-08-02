@@ -20,7 +20,7 @@ class Tokrana extends OSAT{
         $this->pivotcost = 0;	
         $this->iniativebonus = 60;
 
-
+        $this->addPrimarySystem(new OSATCnC(0, 1, 0, 0));
         $this->addPrimarySystem(new Reactor(4, 7, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 7, 3, 6)); 
 		

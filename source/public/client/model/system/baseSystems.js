@@ -105,6 +105,17 @@ var CnC = function CnC(json, ship) {
 CnC.prototype = Object.create(ShipSystem.prototype);
 CnC.prototype.constructor = CnC;
 
+CnC.prototype.initializationUpdate = function() {
+var ship = this.ship;
+	if(ship.factionAge > 2){
+		this.data["Marine Units"] = 'n/a';	
+	}else{	
+		this.data["Marine Units"] = this.marines;
+	}
+return this;
+};
+
+
 var ProtectedCnC = function ProtectedCnC(json, ship) {
     CnC.call(this, json, ship);
 };
@@ -122,6 +133,12 @@ var SecondaryCnC = function SecondaryCnC(json, ship) {
 };
 SecondaryCnC.prototype = Object.create(ShipSystem.prototype);
 SecondaryCnC.prototype.constructor = SecondaryCnC;
+
+var OSATCnC = function OSATCnC(json, ship) {
+    ShipSystem.call(this, json, ship);
+};
+OSATCnC.prototype = Object.create(ShipSystem.prototype);
+OSATCnC.prototype.constructor = OSATCnC;
 
 var Thruster = function Thruster(json, ship) {
     ShipSystem.call(this, json, ship);
@@ -1287,3 +1304,252 @@ PlasmaBattery.prototype.doIndividualNotesTransfer = function () { //prepare indi
     this.individualNotesTransfer.push(this.powerStoredFront);
     return true;
 };
+
+
+var ThirdspaceShieldGenerator = function ThirdspaceShieldGenerator(json, ship) {
+    ShipSystem.call(this, json, ship);
+};
+ThirdspaceShieldGenerator.prototype = Object.create(ShipSystem.prototype);
+ThirdspaceShieldGenerator.prototype.constructor = ThirdspaceShieldGenerator;
+
+ThirdspaceShieldGenerator.prototype.initializationUpdate = function() {
+	var ship = this.ship;
+	
+	if(gamedata.gamephase == 1){		
+		this.outputDisplay = this.storedCapacity;
+		
+		if (this.storedCapacity == 0) {
+			this.outputDisplay = '-'; //'0' is not shown!
+		}		
+		
+	}else{
+		this.outputDisplay = this.output;			
+	}
+	
+	return this;
+};
+
+ThirdspaceShieldGenerator.prototype.getCurrClass = function () { //get current FC class for display; if none, find first!
+    if (this.presetCurrClass == ''){
+		var classes = this.shieldPresets; //
+		if (classes.length>0){
+			this.presetCurrClass = classes[0];
+		}
+	}
+	return this.presetCurrClass;
+};
+ThirdspaceShieldGenerator.prototype.nextCurrClass = function () { //get next FC class for display
+	this.getCurrClass();
+    if (this.presetCurrClass == '') return ''; //this would mean there are no FC classes whatsover!  Should never happen.
+	var classes = this.shieldPresets;
+	var currId = -1;
+	for (var i = 0; i < classes.length; i++) {
+		if (this.presetCurrClass == classes[i]){
+			currId = i+1;
+			break; //loop
+		}
+	}
+	if (currId >= classes.length) currId = 0;
+	this.presetCurrClass = classes[currId];
+	return this.presetCurrClass;
+};
+
+ThirdspaceShieldGenerator.prototype.prevCurrClass = function () { //get previous class for display, useful when selecting from 10+ Specialists!
+	this.getCurrClass();
+    if (this.presetCurrClass == '') return ''; //this would mean there are no classes whatsover!
+    	
+	var classes = this.shieldPresets;
+	var currId = -1;	
+	for (var i = 0; i < classes.length; i++) {
+		if (this.presetCurrClass == classes[i]){
+			currId = i-1;
+			break; //loop
+		}
+	}
+		
+	if (currId < 0) currId = classes.length-1;
+	this.presetCurrClass = classes[currId];
+	
+	
+	return this.presetCurrClass;
+};
+
+ThirdspaceShieldGenerator.prototype.canSelect = function () { //check if can increase rating for current class; can do if preallocated points are unused or allocated points are less than available 
+	//always needs to check that allocated are less than maximum and allocated total is less than total maximum
+	this.getCurrClass();
+    if (this.presetCurrClass == '') return false; //this would mean there are no Specialist classes whatsover!
+
+	return true;
+};
+
+ThirdspaceShieldGenerator.prototype.doSelect = function () { //check if can increase rating for current class; can do if preallocated points are unused or allocated points are less than available 
+	this.getCurrClass();
+    if (this.presetCurrClass == 'Equalise'){
+		this.doEqualise();
+	}else{
+		this.doPreset(this.presetCurrClass); 
+	}
+		
+	return;
+};
+
+ThirdspaceShieldGenerator.prototype.doEqualise = function () { //Check if there is extra power still in Generator.
+
+	var totalShieldPool = 0;
+	var shieldsAvailable = [];
+	
+	var ship = this.ship;	 	
+	for (var i = 0; i < ship.systems.length; i++) {
+		var system = ship.systems[i];
+
+		// Find total pool of shield energy
+		if (system instanceof ThirdspaceShield) {
+			if (shipManager.systems.isDestroyed(ship, system)) continue; // Shield is destroyed.			
+			totalShieldPool += system.currentHealth; // Add each shield's current health to the overall pool of shield energy.
+			system.currentHealth = 0;			
+			shieldsAvailable.push(system);
+		}
+	}
+
+	totalShieldPool += this.storedCapacity;//Add anything currently in Generator.
+	this.storedCapacity = 0;
+	
+	// Now distribute accordingly!
+	if (totalShieldPool > 0 && shieldsAvailable.length > 1) { // There is energy to distribute, and shields to distribute to!
+		var shieldsToCharge = shieldsAvailable.slice(); // Create a copy of the shieldsAvailable array
+		
+		while (totalShieldPool > 0 && shieldsToCharge.length > 0) {
+			var noOfShields = shieldsToCharge.length;
+			var amountEachShield = Math.floor(totalShieldPool / noOfShields);
+
+			// Break the loop if the remaining energy is too small to be meaningfully distributed
+			if (amountEachShield < 1) {
+				break;
+			}
+
+			var remainingShieldPool = 0;
+			
+			for (var j = 0; j < shieldsToCharge.length; j++) {
+				var shield = shieldsToCharge[j];
+				var shieldHeadRoom = shield.maxhealth - shield.currentHealth;
+				var amountToAdd = Math.min(amountEachShield, shieldHeadRoom);
+				
+				shield.currentHealth += amountToAdd;
+				totalShieldPool -= amountToAdd;
+				
+				if (amountToAdd < amountEachShield) {
+					remainingShieldPool += amountEachShield - amountToAdd;
+				}
+			}
+			
+			// Remove fully charged shields from the shieldsToCharge array
+			shieldsToCharge = shieldsToCharge.filter(shield => shield.maxhealth > shield.currentHealth);
+			
+
+		}
+
+		// Distribute any remaining energy (if totalShieldPool is less than the number of shields)
+		if (totalShieldPool > 0) {
+			for (var j = 0; j < shieldsToCharge.length; j++) {
+				var shield = shieldsToCharge[j];
+				var amountToAdd = Math.min(1, totalShieldPool); // Distribute 1 unit at a time
+				shield.currentHealth += amountToAdd;
+				totalShieldPool -= amountToAdd;
+				if (totalShieldPool <= 0) break;
+			}
+		}
+	} 
+};
+
+ThirdspaceShieldGenerator.prototype.doPreset = function (presetCurrClass) { // Check if there is extra power still in Generator.
+	var totalShieldPool = 0;
+	var shieldsAvailable = [];
+	var priorityShield = null; // Single priority shield
+	var reinforceLocation = -1;
+	
+	//Note which shield we are reinforcing.	
+	if(presetCurrClass == 'Forward') reinforceLocation = 'F';
+	if(presetCurrClass == 'Starboard') reinforceLocation = 'R';
+	if(presetCurrClass == 'Aft') reinforceLocation = 'A';
+	if(presetCurrClass == 'Port') reinforceLocation = 'L';						
+	
+	var ship = this.ship;
+	// Find total pool of shield energy		 	
+	for (var i = 0; i < ship.systems.length; i++) {
+		var system = ship.systems[i];
+		if (system instanceof ThirdspaceShield) {
+			if (system.side == reinforceLocation && shipManager.systems.isDestroyed(ship, system)) return; // Priority Shield is destroyed, cannot reinforce!				
+			if (shipManager.systems.isDestroyed(ship, system)) continue; //Non-priority Shield is destroyed.			
+			totalShieldPool += system.currentHealth; // Add each shield's current health to the overall pool of shield energy.
+			system.currentHealth = 0;
+			shieldsAvailable.push(system);
+		}
+	}
+
+	totalShieldPool += this.storedCapacity;//Add anything currently in Generator.
+	this.storedCapacity = 0;
+	
+	// Now distribute accordingly!
+	if (totalShieldPool > 0 && shieldsAvailable.length > 1) { // There is energy to distribute and more than one shield!
+		var shieldsToCharge = shieldsAvailable.slice(); // Create a copy of the shieldsAvailable array
+		var priorityShieldFound = false;
+
+		while (totalShieldPool > 0 && shieldsToCharge.length > 0) {
+			var noOfShieldsToCharge = shieldsToCharge.length;
+			var totalUnits = (priorityShieldFound ? noOfShieldsToCharge : noOfShieldsToCharge + 1);
+			var amountEachShield = Math.floor(totalShieldPool / totalUnits);
+			var prioritisedAmount = amountEachShield * 2;
+			var remainingShieldPool = 0;
+
+			if (amountEachShield < 1 && totalShieldPool < noOfShieldsToCharge) {
+				// If the remaining energy is too small to be meaningfully distributed, break the loop
+				break;
+			}
+
+			for (var j = 0; j < shieldsToCharge.length; j++) {
+				var shield = shieldsToCharge[j];
+				var amountToAdd = amountEachShield;
+
+				if (shield.side == reinforceLocation && !priorityShieldFound) { // This is the shield to reinforce!
+					amountToAdd = prioritisedAmount;
+					priorityShield = shield; // Mark which shield is a priority.
+					priorityShieldFound = true;
+				}
+
+				var shieldHeadRoom = shield.maxhealth - shield.currentHealth;
+				amountToAdd = Math.min(amountToAdd, shieldHeadRoom);
+
+				shield.currentHealth += amountToAdd;
+				totalShieldPool -= amountToAdd;
+
+				if (amountToAdd < amountEachShield) {
+					remainingShieldPool += amountEachShield - amountToAdd;
+				}
+			}
+
+			// Remove fully charged shields from the shieldsToCharge array
+			shieldsToCharge = shieldsToCharge.filter(shield => shield.maxhealth > shield.currentHealth);
+
+		}
+
+		// Distribute any remaining energy (if totalShieldPool is less than the number of shields)
+		if (totalShieldPool > 0) {
+			for (var j = 0; j < shieldsToCharge.length; j++) {
+				var shield = shieldsToCharge[j];
+				var amountToAdd = Math.min(1, totalShieldPool); // Distribute 1 unit at a time
+				shield.currentHealth += amountToAdd;
+				totalShieldPool -= amountToAdd;
+				if (totalShieldPool <= 0) break;
+			}
+		}
+	}
+};
+/*
+var ThoughtShieldGenerator = function ThoughtShieldGenerator(json, ship) {
+    ThirdspaceShieldGenerator.call(this, json, ship);
+};
+ThoughtShieldGenerator.prototype = Object.create(ThirdspaceShieldGenerator.prototype);
+ThoughtShieldGenerator.prototype.constructor = ThoughtShieldGenerator;
+*/
+
+

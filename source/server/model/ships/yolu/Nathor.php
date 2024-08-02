@@ -35,7 +35,7 @@ class Nathor extends FighterFlight{
         for ($i = 0; $i < $toAdd; $i++){
             $armour = array(5, 5, 5, 5);
             $fighter = new Fighter("Nathor", $armour, 21, $this->id);
-            $fighter->displayName = "Nathor Assault Shuttle";
+            $fighter->displayName = "Nathor";
             $fighter->imagePath = "img/ships/Nathor.png";
             $fighter->iconPath = "img/ships/Nathor_large.png";
 
