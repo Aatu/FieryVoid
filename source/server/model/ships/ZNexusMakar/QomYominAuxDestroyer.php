@@ -16,6 +16,7 @@ class QomYominAuxDestroyer extends HeavyCombatVesselLeftRight{
 	    $this->notes = '<br>Unreliable Ship:';
  	    $this->notes .= '<br> - Sluggish';
 		$this->notes .= '<br>Ramming damage is +33% greater due to large quantities of on board water.';
+		$this->notes .= '<br>Design using the original plasma charge.';
 		$this->enhancementOptionsDisabled[] = 'SLUGGISH';
 
         $this->forwardDefense = 15;

@@ -4,7 +4,7 @@ class DalithornHeavySupportFrigate extends MediumShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 285;
+        $this->pointCost = 260;
         $this->faction = "ZNexus Dalithorn Commonwealth";
         $this->phpclass = "DalithornHeavySupportFrigate";
         $this->imagePath = "img/ships/Nexus/DalithornSupportFrigate.png";
@@ -33,13 +33,14 @@ class DalithornHeavySupportFrigate extends MediumShip{
         $this->addPrimarySystem(new Engine(4, 12, 0, 8, 2));
         $this->addPrimarySystem(new Hangar(1, 1));
 		$this->addPrimarySystem(new Magazine(3, 10));
-        $this->addPrimarySystem(new Thruster(2, 14, 0, 5, 3));
-        $this->addPrimarySystem(new Thruster(2, 14, 0, 5, 4));        
+        $this->addPrimarySystem(new Thruster(2, 14, 0, 4, 3));
+        $this->addPrimarySystem(new Thruster(2, 14, 0, 4, 4));        
         
 		$this->addFrontSystem(new Catapult(1, 6));
 		$this->addFrontSystem(new NexusMinigun(2, 4, 1, 240, 60));
 		$this->addFrontSystem(new NexusMinigun(2, 4, 1, 300, 120));
-        $this->addFrontSystem(new Thruster(3, 12, 0, 4, 1));
+        $this->addFrontSystem(new Thruster(3, 8, 0, 2, 1));
+        $this->addFrontSystem(new Thruster(3, 8, 0, 2, 1));
 	    
         $this->addAftSystem(new Thruster(1, 5, 0, 2, 2));    
         $this->addAftSystem(new Thruster(2, 12, 0, 4, 2));    
@@ -59,7 +60,7 @@ class DalithornHeavySupportFrigate extends MediumShip{
 			8 => "Thruster",
 			10 => "Magazine",
 			12 => "Scanner",
-			16 => "Engine",
+			15 => "Engine",
 			17 => "Hangar",
 			19 => "Reactor",
 			20 => "C&C",
