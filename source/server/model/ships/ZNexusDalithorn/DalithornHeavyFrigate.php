@@ -30,13 +30,14 @@ class DalithornHeavyFrigate extends MediumShip{
         $this->addPrimarySystem(new Engine(4, 12, 0, 8, 2));
         $this->addPrimarySystem(new Hangar(1, 1));
 		$this->addPrimarySystem(new Magazine(3, 10));
-        $this->addPrimarySystem(new Thruster(2, 14, 0, 5, 3));
-        $this->addPrimarySystem(new Thruster(2, 14, 0, 5, 4));        
+        $this->addPrimarySystem(new Thruster(2, 14, 0, 4, 3));
+        $this->addPrimarySystem(new Thruster(2, 14, 0, 4, 4));        
         
 		$this->addFrontSystem(new NexusGasGun(3, 7, 2, 300, 60));
 		$this->addFrontSystem(new NexusMinigun(2, 4, 1, 240, 60));
 		$this->addFrontSystem(new NexusMinigun(2, 4, 1, 300, 120));
-        $this->addFrontSystem(new Thruster(3, 12, 0, 4, 1));
+        $this->addFrontSystem(new Thruster(3, 8, 0, 2, 1));
+        $this->addFrontSystem(new Thruster(3, 8, 0, 2, 1));
 	    
         $this->addAftSystem(new Thruster(1, 5, 0, 2, 2));    
         $this->addAftSystem(new Thruster(2, 12, 0, 4, 2));    
@@ -56,7 +57,7 @@ class DalithornHeavyFrigate extends MediumShip{
 			8 => "Thruster",
 			10 => "Magazine",
 			12 => "Scanner",
-			16 => "Engine",
+			15 => "Engine",
 			17 => "Hangar",
 			19 => "Reactor",
 			20 => "C&C",

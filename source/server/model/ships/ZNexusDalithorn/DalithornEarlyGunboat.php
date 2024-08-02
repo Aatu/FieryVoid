@@ -4,7 +4,7 @@ class DalithornEarlyGunboat extends LCV{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 150;
+        $this->pointCost = 140;
         $this->faction = "ZNexus Dalithorn Commonwealth";
         $this->phpclass = "DalithornEarlyGunboat";
         $this->imagePath = "img/ships/Nexus/DalithornEarlyGunboat.png";
@@ -50,7 +50,7 @@ class DalithornEarlyGunboat extends LCV{
         		0=> array( 
         				11 => "Structure",
         				13 => "1:Shatter Gun",
-        				16 => "1:Gas Gun",
+        				15 => "1:Gas Gun",
 						18 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",
@@ -58,7 +58,7 @@ class DalithornEarlyGunboat extends LCV{
         		1=> array( //redirect to PRIMARY
         				11 => "Structure",
         				13 => "1:Shatter Gun",
-        				16 => "1:Gas Gun",
+        				15 => "1:Gas Gun",
 						18 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",
@@ -66,7 +66,7 @@ class DalithornEarlyGunboat extends LCV{
         		2=> array( //redirect to PRIMARY
         				11 => "Structure",
         				13 => "1:Shatter Gun",
-        				16 => "1:Gas Gun",
+        				15 => "1:Gas Gun",
 						18 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",

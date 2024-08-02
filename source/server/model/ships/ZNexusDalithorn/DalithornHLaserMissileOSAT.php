@@ -25,15 +25,15 @@ class DalithornHLaserMissileOSAT extends OSAT{
         $this->pivotcost = 0;	
         $this->iniativebonus = 60;
 
-        $this->addPrimarySystem(new NexusHeavyLaserMissile(2, 6, 3, 300, 60));
-        $this->addPrimarySystem(new NexusAutocannon(2, 4, 1, 180, 60));
-        $this->addPrimarySystem(new NexusMinigun(2, 4, 1, 0, 360));
-        $this->addPrimarySystem(new NexusAutocannon(2, 4, 1, 300, 180));
-        $this->addPrimarySystem(new NexusHeavyLaserMissile(2, 6, 3, 300, 60));
+        $this->addFrontSystem(new NexusHeavyLaserMissile(2, 6, 3, 300, 60));
+        $this->addFrontSystem(new NexusAutocannon(2, 4, 1, 180, 60));
+        $this->addFrontSystem(new NexusProtector(2, 4, 1, 0, 360));
+        $this->addFrontSystem(new NexusAutocannon(2, 4, 1, 300, 180));
+        $this->addFrontSystem(new NexusHeavyLaserMissile(2, 6, 3, 300, 60));
         $this->addPrimarySystem(new Reactor(4, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 10, 3, 5));
 		$this->addPrimarySystem(new Magazine(4, 12));
-        $this->addPrimarySystem(new Thruster(3, 8, 0, 0, 2));
+        $this->addAftSystem(new Thruster(3, 8, 0, 0, 2));
                 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addPrimarySystem(new Structure(4, 30));
@@ -41,19 +41,33 @@ class DalithornHLaserMissileOSAT extends OSAT{
 		$this->hitChart = array(
 			0=> array(
 				7 => "Structure",
-				8 => "Magazine",
-				10 => "Thruster",
-				12 => "Heavy Laser Missile",
-				14 => "Minigun",
-				16 => "Autocannon",
-				18 => "Scanner",
-				20 => "Reactor",
+				8 => "0:Magazine",
+				10 => "2:Thruster",
+				12 => "1:Heavy Laser Missile",
+				14 => "1:Protector",
+				16 => "1:Autocannon",
+				18 => "0:Scanner",
+				20 => "0:Reactor",
 			),
 			1=> array(
-				20 => "Primary",
+				7 => "Structure",
+				8 => "0:Magazine",
+				10 => "2:Thruster",
+				12 => "1:Heavy Laser Missile",
+				14 => "1:Protector",
+				16 => "1:Autocannon",
+				18 => "0:Scanner",
+				20 => "0:Reactor",
 			),
 			2=> array(
-				20 => "Primary",
+				7 => "Structure",
+				8 => "0:Magazine",
+				10 => "2:Thruster",
+				12 => "1:Heavy Laser Missile",
+				14 => "1:Protector",
+				16 => "1:Autocannon",
+				18 => "0:Scanner",
+				20 => "0:Reactor",
 			),
         );
     }

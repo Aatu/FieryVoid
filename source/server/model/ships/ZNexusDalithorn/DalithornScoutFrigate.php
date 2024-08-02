@@ -4,7 +4,7 @@ class DalithornScoutFrigate extends MediumShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 325;
+        $this->pointCost = 335;
         $this->faction = "ZNexus Dalithorn Commonwealth";
         $this->phpclass = "DalithornScoutFrigate";
         $this->imagePath = "img/ships/Nexus/DalithornSmallScout.png";
@@ -26,7 +26,6 @@ class DalithornScoutFrigate extends MediumShip{
         $this->rollcost = 1;
         $this->pivotcost = 1;
         $this->iniativebonus = 60;
-        
          
         $this->addPrimarySystem(new Reactor(4, 12, 0, 0));
         $this->addPrimarySystem(new CnC(4, 8, 0, 0));
@@ -34,13 +33,14 @@ class DalithornScoutFrigate extends MediumShip{
         $this->addPrimarySystem(new Engine(4, 12, 0, 8, 2));
         $this->addPrimarySystem(new Hangar(1, 1));
 		$this->addPrimarySystem(new Magazine(3, 10));
-        $this->addPrimarySystem(new Thruster(2, 14, 0, 5, 3));
-        $this->addPrimarySystem(new Thruster(2, 14, 0, 5, 4));        
+        $this->addPrimarySystem(new Thruster(2, 11, 0, 4, 3));
+        $this->addPrimarySystem(new Thruster(2, 11, 0, 4, 4));        
         
-        $this->addFrontSystem(new ELINTScanner(3, 10, 4, 3));
+        $this->addFrontSystem(new ELINTScanner(3, 10, 4, 2));
 		$this->addFrontSystem(new NexusMinigun(2, 4, 1, 240, 60));
 		$this->addFrontSystem(new NexusMinigun(2, 4, 1, 300, 120));
-        $this->addFrontSystem(new Thruster(3, 12, 0, 4, 1));
+        $this->addFrontSystem(new Thruster(3, 8, 0, 2, 1));
+        $this->addFrontSystem(new Thruster(3, 8, 0, 2, 1));
 	    
         $this->addAftSystem(new Thruster(1, 5, 0, 2, 2));    
         $this->addAftSystem(new Thruster(2, 12, 0, 4, 2));    
@@ -59,7 +59,7 @@ class DalithornScoutFrigate extends MediumShip{
 			8 => "Thruster",
 			10 => "Magazine",
 			12 => "ELINT Scanner",
-			16 => "Engine",
+			15 => "Engine",
 			17 => "Hangar",
 			19 => "Reactor",
 			20 => "C&C",

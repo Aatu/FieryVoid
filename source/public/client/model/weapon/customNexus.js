@@ -341,6 +341,12 @@ var NexusMediumChemicalLaser = function NexusMediumChemicalLaser(json, ship) {
 NexusMediumChemicalLaser.prototype = Object.create(Weapon.prototype);
 NexusMediumChemicalLaser.prototype.constructor = NexusMediumChemicalLaser;
 
+var NexusMedChemicalLaserFtr = function NexusMedChemicalLaserFtr(json, ship) {
+	Weapon.call(this, json, ship);
+};
+NexusMedChemicalLaserFtr.prototype = Object.create(Weapon.prototype);
+NexusMedChemicalLaserFtr.prototype.constructor = NexusMedChemicalLaserFtr;
+
 var NexusMediumPlasmaGun = function NexusMediumPlasmaGun(json, ship) {
 	Weapon.call(this, json, ship);
 };
@@ -580,6 +586,11 @@ var NexusMauler = function  NexusMauler(json, ship) {
 NexusMauler.prototype = Object.create(Weapon.prototype);
 NexusMauler.prototype.constructor =  NexusMauler;
 
+var AmmoMag = function AmmoMag(json, ship) {
+    ShipSystem.call(this, json, ship);
+};
+AmmoMag.prototype = Object.create(ShipSystem.prototype);
+AmmoMag.prototype.constructor = AmmoMag;
 
 
 

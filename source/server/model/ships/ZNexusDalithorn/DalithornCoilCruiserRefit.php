@@ -4,12 +4,12 @@ class DalithornCoilCruiserRefit extends HeavyCombatVessel{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 450;
+        $this->pointCost = 380;
         $this->faction = "ZNexus Dalithorn Commonwealth";
         $this->phpclass = "DalithornCoilCruiserRefit";
         $this->imagePath = "img/ships/Nexus/DalithornCoilCruiser.png";
 		$this->canvasSize = 125; //img has 200px per side
-        $this->shipClass = "Coil Cruiser (2048 refit)";
+        $this->shipClass = "Coil Cruiser (2048)";
 			$this->variantOf = "Flag Cruiser";
 			$this->occurence = "uncommon";
 		$this->unofficial = true;
@@ -59,13 +59,13 @@ class DalithornCoilCruiserRefit extends HeavyCombatVessel{
 		
         $this->hitChart = array(
             0=> array(
-                    8 => "Structure",
-					9 => "Catapult",
-					11 => "Magazine",
-                    13 => "Thruster",
-                    15 => "Scanner",
-                    17 => "Engine",
-                    18 => "Hangar",
+                    6 => "Structure",
+					7 => "Catapult",
+					8 => "Magazine",
+                    12 => "Thruster",
+                    14 => "Scanner",
+                    16 => "Engine",
+                    17 => "Hangar",
                     19 => "Reactor",
                     20 => "C&C",
             ),
