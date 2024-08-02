@@ -41,7 +41,7 @@ class DalithornGunboat extends LCV{
 		$this->addPrimarySystem(new Engine(4, 13, 0, 6, 2));
 
 		$this->addFrontSystem(new NexusMinigun(2, 4, 1, 180, 60));
-		$this->addFrontSystem(new NexusGasGun(4, 7, 2, 300, 60));
+		$this->addFrontSystem(new NexusGasGun(2, 7, 2, 300, 60));
 		$this->addFrontSystem(new NexusMinigun(2, 4, 1, 300, 180));
 	    
         $this->addPrimarySystem(new Structure(4, 32));
@@ -50,7 +50,7 @@ class DalithornGunboat extends LCV{
         		0=> array( 
         				11 => "Structure",
         				13 => "1:Minigun",
-        				16 => "1:Gas Gun",
+        				15 => "1:Gas Gun",
 						18 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",
@@ -58,7 +58,7 @@ class DalithornGunboat extends LCV{
         		1=> array( //redirect to PRIMARY
         				11 => "Structure",
         				13 => "1:Minigun",
-        				16 => "1:Gas Gun",
+        				15 => "1:Gas Gun",
 						18 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",
@@ -66,7 +66,7 @@ class DalithornGunboat extends LCV{
         		2=> array( //redirect to PRIMARY
         				11 => "Structure",
         				13 => "1:Minigun",
-        				16 => "1:Gas Gun",
+        				15 => "1:Gas Gun",
 						18 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",

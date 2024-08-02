@@ -44,7 +44,7 @@ class DalithornMicrosat extends MicroSAT{
 		            
 			$leftgun = new NexusShatterGunFtr(180, 360, 1);
 			$fighter->addFrontSystem($leftgun);
-			$hvyGun = new NexusMediumChemicalLaser(0, 1, 0, 330, 30); 
+			$hvyGun = new NexusMedChemicalLaserFtr(330, 30, 1); 
 			$hvyGun->fireControl = array(-4, 0, 0); // fighters, <mediums, <capitals	
 			$fighter->addFrontSystem($hvyGun);
 			$rightgun = new NexusShatterGunFtr(0, 180, 1);

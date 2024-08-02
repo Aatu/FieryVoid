@@ -1,22 +1,22 @@
 <?php
-class QomYominAuxDestroyer extends HeavyCombatVesselLeftRight{
+class QomYominAuxDestroyerAlt extends HeavyCombatVesselLeftRight{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 400;
         $this->faction = "ZNexus Makar Federation";
-        $this->phpclass = "QomYominAuxDestroyer";
+        $this->phpclass = "QomYominAuxDestroyerAlt";
         $this->imagePath = "img/ships/Nexus/makarSreaTormal.png";
 		$this->canvasSize = 105; //img has 200px per side
-        $this->shipClass = "Srea Tormal Auxiliary Destroyer";
+        $this->shipClass = "Srea Tormal Auxiliary Destroyer (Alternate)";
 		$this->unofficial = true;
         $this->isd = 1928;
 
 	    $this->notes = '<br>Unreliable Ship:';
  	    $this->notes .= '<br> - Sluggish';
 		$this->notes .= '<br>Ramming damage is +33% greater due to large quantities of on board water.';
-		$this->notes .= '<br>Design using the original plasma charge.';
+		$this->notes .= '<br>Alternate design using the thrust-based plasma charge.';
 		$this->enhancementOptionsDisabled[] = 'SLUGGISH';
 
         $this->forwardDefense = 15;
@@ -35,11 +35,11 @@ class QomYominAuxDestroyer extends HeavyCombatVesselLeftRight{
 	    $rammingAttack = new RammingAttack(0, 0, 360, 130, $hitBonus, true, 0); //actual damage - NOT calculated, but designed (130)
 		$this->addPrimarySystem($rammingAttack);
          
-        $this->addPrimarySystem(new Reactor(2, 18, 0, 6));
+        $this->addPrimarySystem(new Reactor(2, 18, 0, 0));
         $this->addPrimarySystem(new CnC(2, 9, 0, 0));
         $this->addPrimarySystem(new Scanner(2, 10, 3, 5));
-		$this->addFrontSystem(new NexusPlasmaCharge(2, 7, 4, 300, 60));
-        $this->addPrimarySystem(new Engine(2, 13, 0, 4, 4));
+		$this->addFrontSystem(new NexusPlasmaChargeThrust(2, 7, 4, 300, 60));
+        $this->addPrimarySystem(new Engine(2, 13, 0, 7, 4));
         $this->addFrontSystem(new Thruster(1, 13, 0, 4, 1));
         $this->addAftSystem(new Thruster(2, 15, 0, 8, 2));
       

@@ -1652,6 +1652,9 @@ spl_autoload_register(
 				'nexustwiniongun' => '/server/model/weapons/customNexus.php',
 			//Nexus EM weapons
 				'nexuslightchargecannon' => '/server/model/weapons/customNexus.php',
+			//Nexus other weapons
+				'ammomag' => '/server/model/weapons/customNexus.php',
+			
 
 
 				'testgun1' => '/server/model/weapons/customNexus.php',
@@ -1851,6 +1854,7 @@ spl_autoload_register(
                 'makarvalkar' => '/server/model/ships/ZNexusMakar/MakarValkar.php',					
                 'qomyominauxcarrier' => '/server/model/ships/ZNexusMakar/QomYominAuxCarrier.php',					
                 'qomyominauxdestroyer' => '/server/model/ships/ZNexusMakar/QomYominAuxDestroyer.php',					
+                'qomyominauxdestroyeralt' => '/server/model/ships/ZNexusMakar/QomYominAuxDestroyerAlt.php',					
                 'qomyominhauler' => '/server/model/ships/ZNexusMakar/QomYominHauler.php',					
                 'qomyominlightscout' => '/server/model/ships/ZNexusMakar/QomYominLightScout.php',					
                 'qomyominqolat' => '/server/model/ships/ZNexusMakar/QomYominQolAt.php',					

@@ -4,7 +4,7 @@ class DalithornHeavyCommandFrigate extends MediumShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 295;
+        $this->pointCost = 285;
         $this->faction = "ZNexus Dalithorn Commonwealth";
         $this->phpclass = "DalithornHeavyCommandFrigate";
         $this->imagePath = "img/ships/Nexus/DalithornCommandFrigate.png";
@@ -29,7 +29,7 @@ class DalithornHeavyCommandFrigate extends MediumShip{
         $this->addPrimarySystem(new Reactor(4, 12, 0, 0));
         $this->addPrimarySystem(new CnC(4, 14, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 10, 3, 5));
-        $this->addPrimarySystem(new Engine(4, 12, 0, 8, 2));
+        $this->addPrimarySystem(new Engine(4, 12, 0, 9, 2));
         $this->addPrimarySystem(new Hangar(1, 1));
 		$this->addPrimarySystem(new Magazine(3, 10));
         $this->addPrimarySystem(new Thruster(2, 14, 0, 5, 3));
@@ -38,10 +38,11 @@ class DalithornHeavyCommandFrigate extends MediumShip{
 		$this->addFrontSystem(new NexusLightCoilgun(3, 7, 3, 300, 60));
 		$this->addFrontSystem(new NexusMinigun(2, 4, 1, 240, 60));
 		$this->addFrontSystem(new NexusMinigun(2, 4, 1, 300, 120));
-        $this->addFrontSystem(new Thruster(3, 12, 0, 4, 1));
+        $this->addFrontSystem(new Thruster(3, 8, 0, 2, 1));
+        $this->addFrontSystem(new Thruster(3, 8, 0, 2, 1));
 	    
         $this->addAftSystem(new Thruster(1, 5, 0, 2, 2));    
-        $this->addAftSystem(new Thruster(2, 12, 0, 4, 2));    
+        $this->addAftSystem(new Thruster(2, 12, 0, 5, 2));    
         $this->addAftSystem(new Thruster(1, 5, 0, 2, 2));    
 		$this->addAftSystem(new NexusProtector(1, 4, 1, 180, 60));
 		$this->addAftSystem(new NexusProtector(1, 4, 1, 300, 180));
@@ -58,7 +59,7 @@ class DalithornHeavyCommandFrigate extends MediumShip{
 			8 => "Thruster",
 			10 => "Magazine",
 			12 => "Scanner",
-			16 => "Engine",
+			15 => "Engine",
 			17 => "Hangar",
 			19 => "Reactor",
 			20 => "C&C",

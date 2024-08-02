@@ -4,12 +4,12 @@ class DalithornEarlyScoutRefit extends HeavyCombatVessel{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 375;
+        $this->pointCost = 390;
         $this->faction = "ZNexus Dalithorn Commonwealth";
         $this->phpclass = "DalithornEarlyScoutRefit";
         $this->imagePath = "img/ships/Nexus/DalithornScout.png";
 		$this->canvasSize = 125; //img has 200px per side
-        $this->shipClass = "Early Scout (2048 Refit)";
+        $this->shipClass = "Early Scout (2048)";
 			$this->variantOf = "Early Scout";
 			$this->occurence = "common";
 		$this->unofficial = true;
@@ -61,13 +61,13 @@ class DalithornEarlyScoutRefit extends HeavyCombatVessel{
 		
         $this->hitChart = array(
             0=> array(
-                    8 => "Structure",
-					9 => "Catapult",
-					11 => "Magazine",
-                    13 => "Thruster",
-                    15 => "ELINT Scanner",
-                    17 => "Engine",
-                    18 => "Hangar",
+                    6 => "Structure",
+					7 => "Catapult",
+					8 => "Magazine",
+                    12 => "Thruster",
+                    14 => "ELINT Scanner",
+                    16 => "Engine",
+                    17 => "Hangar",
                     19 => "Reactor",
                     20 => "C&C",
             ),
