@@ -4,7 +4,7 @@ class DalithornSmallScout extends MediumShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 250;
+        $this->pointCost = 230;
         $this->faction = "ZNexus Dalithorn Commonwealth";
         $this->phpclass = "DalithornSmallScout";
         $this->imagePath = "img/ships/Nexus/DalithornSmallScout.png";
@@ -33,13 +33,14 @@ class DalithornSmallScout extends MediumShip{
         $this->addPrimarySystem(new Engine(3, 12, 0, 6, 3));
         $this->addPrimarySystem(new Hangar(1, 1));
 		$this->addPrimarySystem(new Magazine(3, 10));
-        $this->addPrimarySystem(new Thruster(2, 10, 0, 3, 3));
-        $this->addPrimarySystem(new Thruster(2, 10, 0, 3, 4));        
+        $this->addPrimarySystem(new Thruster(2, 11, 0, 3, 3));
+        $this->addPrimarySystem(new Thruster(2, 11, 0, 3, 4));        
         
-        $this->addFrontSystem(new ELINTScanner(3, 10, 4, 2));
+        $this->addFrontSystem(new ELINTScanner(3, 10, 4, 1));
 		$this->addFrontSystem(new NexusLightGasGun(2, 5, 1, 240, 360));
 		$this->addFrontSystem(new NexusLightGasGun(2, 5, 1, 0, 120));
-        $this->addFrontSystem(new Thruster(2, 8, 0, 4, 1));
+        $this->addFrontSystem(new Thruster(3, 8, 0, 2, 1));
+        $this->addFrontSystem(new Thruster(3, 8, 0, 2, 1));
 	    
         $this->addAftSystem(new Thruster(1, 4, 0, 1, 2));    
         $this->addAftSystem(new Thruster(2, 8, 0, 4, 2));    
@@ -59,7 +60,7 @@ class DalithornSmallScout extends MediumShip{
 			8 => "Thruster",
 			10 => "Magazine",
 			12 => "ELINT Scanner",
-			16 => "Engine",
+			15 => "Engine",
 			17 => "Hangar",
 			19 => "Reactor",
 			20 => "C&C",

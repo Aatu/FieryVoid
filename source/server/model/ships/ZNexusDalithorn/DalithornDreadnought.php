@@ -39,16 +39,18 @@ class DalithornDreadnought extends BaseShip{
         $this->addFrontSystem(new Thruster(2, 10, 0, 3, 1));
 		$this->addFrontSystem(new NexusShatterGun(1, 2, 1, 270, 90));
 		$this->addFrontSystem(new NexusShatterGun(1, 2, 1, 270, 90));
-		$this->addFrontSystem(new NexusLightGasGun(2, 5, 1, 240, 360));
-		$this->addFrontSystem(new NexusLightGasGun(2, 5, 1, 0, 120));
+		$this->addFrontSystem(new NexusLightGasGun(2, 5, 1, 240, 60));
+		$this->addFrontSystem(new NexusLightGasGun(2, 5, 1, 300, 120));
 		$this->addFrontSystem(new NexusCoilgun(2, 10, 4, 330, 30));
 		$this->addFrontSystem(new NexusCoilgun(2, 10, 4, 330, 30));
 
         $this->addAftSystem(new Thruster(2, 10, 0, 1, 2));
         $this->addAftSystem(new Thruster(3, 14, 0, 4, 2));
         $this->addAftSystem(new Thruster(2, 10, 0, 1, 2));
-		$this->addAftSystem(new NexusLightGasGun(2, 5, 1, 180, 300));
-		$this->addAftSystem(new NexusLightGasGun(2, 5, 1, 60, 180));
+		$this->addAftSystem(new NexusLightGasGun(2, 5, 1, 120, 300));
+		$this->addAftSystem(new NexusLightGasGun(2, 5, 1, 60, 240));
+		$this->addAftSystem(new NexusShatterGun(1, 2, 1, 120, 300));
+		$this->addAftSystem(new NexusShatterGun(1, 2, 1, 60, 240));
         $this->addAftSystem(new Catapult(1, 6));
         $this->addAftSystem(new Catapult(1, 6));
 
@@ -82,8 +84,8 @@ class DalithornDreadnought extends BaseShip{
 			1=> array(
 					5 => "Thruster",
 					7 => "Light Gas Gun",
-					11 => "Coilgun",
-					13 => "Shatter Gun",
+					9 => "Coilgun",
+					11 => "Shatter Gun",
 					18 => "Structure",
 					20 => "Primary",
 			),
@@ -91,11 +93,12 @@ class DalithornDreadnought extends BaseShip{
 					6 => "Thruster",
 					8 => "Catapult",
 					10 => "Light Gas Gun",
+					12 => "Shatter Gun",
 					18 => "Structure",
 					20 => "Primary",
 			),
 			3=> array(
-					4 => "Thruster",
+					5 => "Thruster",
 					6 => "Medium Chemical Laser",
 					8 => "Gas Gun",
 					10 => "Shatter Gun",
@@ -103,7 +106,7 @@ class DalithornDreadnought extends BaseShip{
 					20 => "Primary",
 			),
 			4=> array(
-					4 => "Thruster",
+					5 => "Thruster",
 					6 => "Medium Chemical Laser",
 					8 => "Gas Gun",
 					10 => "Shatter Gun",

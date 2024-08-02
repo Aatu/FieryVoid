@@ -4,7 +4,7 @@ class DalithornScoutCruiser extends HeavyCombatVessel{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 520;
+        $this->pointCost = 490;
         $this->faction = "ZNexus Dalithorn Commonwealth";
         $this->phpclass = "DalithornScoutCruiser";
         $this->imagePath = "img/ships/Nexus/DalithornScout.png";
@@ -30,7 +30,7 @@ class DalithornScoutCruiser extends HeavyCombatVessel{
         
         $this->addPrimarySystem(new Reactor(4, 16, 0, 0));
         $this->addPrimarySystem(new CnC(4, 14, 0, 0));
-        $this->addPrimarySystem(new ELINTScanner(4, 14, 5, 5));
+        $this->addPrimarySystem(new ELINTScanner(4, 14, 5, 6));
         $this->addPrimarySystem(new Engine(4, 16, 0, 8, 3));
         $this->addPrimarySystem(new Hangar(1, 2));
 		$this->addPrimarySystem(new Magazine(3, 12));
@@ -40,7 +40,7 @@ class DalithornScoutCruiser extends HeavyCombatVessel{
       
         $this->addFrontSystem(new Thruster(3, 10, 0, 2, 1));
         $this->addFrontSystem(new Thruster(3, 10, 0, 2, 1));
-        $this->addFrontSystem(new ELINTScanner(3, 10, 5, 5));
+        $this->addFrontSystem(new ELINTScanner(3, 10, 5, 4));
         $this->addFrontSystem(new NexusAutocannon(2, 4, 1, 240, 360));
         $this->addFrontSystem(new NexusAutocannon(2, 4, 1, 0, 120));
         $this->addFrontSystem(new NexusProtector(2, 4, 1, 180, 60));
@@ -61,13 +61,13 @@ class DalithornScoutCruiser extends HeavyCombatVessel{
 		
         $this->hitChart = array(
             0=> array(
-                    8 => "Structure",
-					9 => "Catapult",
-					11 => "Magazine",
-                    13 => "Thruster",
-                    15 => "ELINT Scanner",
-                    17 => "Engine",
-                    18 => "Hangar",
+                    6 => "Structure",
+					7 => "Catapult",
+					8 => "Magazine",
+                    12 => "Thruster",
+                    14 => "ELINT Scanner",
+                    16 => "Engine",
+                    17 => "Hangar",
                     19 => "Reactor",
                     20 => "C&C",
             ),

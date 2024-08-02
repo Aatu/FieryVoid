@@ -4,12 +4,12 @@ class DalithornEarlyGunboatRefit extends LCV{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 165;
+        $this->pointCost = 155;
         $this->faction = "ZNexus Dalithorn Commonwealth";
         $this->phpclass = "DalithornEarlyGunboatRefit";
         $this->imagePath = "img/ships/Nexus/DalithornEarlyGunboat.png";
 		$this->canvasSize = 70; //img has 200px per side
-        $this->shipClass = "Early Gunboat (2038 Refit)";
+        $this->shipClass = "Early Gunboat (2038)";
 			$this->variantOf = "Early Gunboat";
 			$this->occurence = "common";
 		$this->unofficial = true;
@@ -46,13 +46,13 @@ class DalithornEarlyGunboatRefit extends LCV{
 		$this->addFrontSystem(new NexusGasGun(1, 7, 2, 300, 60));
 		$this->addFrontSystem(new NexusShatterGun(1, 2, 1, 0, 180));
 	    
-        $this->addPrimarySystem(new Structure(4, 30));
+        $this->addPrimarySystem(new Structure(3, 30));
 	    
         $this->hitChart = array(
         		0=> array( 
         				11 => "Structure",
         				13 => "1:Shatter Gun",
-        				16 => "1:Gas Gun",
+        				15 => "1:Gas Gun",
 						18 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",
@@ -60,7 +60,7 @@ class DalithornEarlyGunboatRefit extends LCV{
         		1=> array( //redirect to PRIMARY
         				11 => "Structure",
         				13 => "1:Shatter Gun",
-        				16 => "1:Gas Gun",
+        				15 => "1:Gas Gun",
 						18 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",
@@ -68,7 +68,7 @@ class DalithornEarlyGunboatRefit extends LCV{
         		2=> array( //redirect to PRIMARY
         				11 => "Structure",
         				13 => "1:Shatter Gun",
-        				16 => "1:Gas Gun",
+        				15 => "1:Gas Gun",
 						18 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",
