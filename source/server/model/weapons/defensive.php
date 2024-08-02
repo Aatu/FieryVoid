@@ -679,29 +679,31 @@ class HeavyInterceptorBattery extends InterceptorMkI{
 }  //end of class HeavyInterceptorBattery
 
 //Adding Thirdspace as unique systems to use different icon and allow modifictions from the Trek systems
-class ThirdspaceShieldProjection extends Shield implements DefensiveSystem { //defensive values of zero, but still formally there to display arcs!
-	    public $name = "ThirdspaceShieldProjection";
+class ThirdspaceShield extends Shield implements DefensiveSystem { //defensive values of zero, but still formally there to display arcs!
+	    public $name = "ThirdspaceShield";
 	    public $displayName = "Shield Projection";
 	    public $primary = true;
 		public $isPrimaryTargetable = false; //shouldn't be targetable at all, in fact!
 		public $isTargetable = false; //cannot be targeted ever!
-	    public $iconPath = "TrekShieldProjection.png"; //overridden anyway - to indicate proper direction
+	    public $iconPath = "ThirdspaceShieldF.png"; //overridden anyway - to indicate proper direction
 	    
 		protected $possibleCriticals = array(); //no criticals possible
 		
 		//Shield Projections cannot be repaired at all!
 		public $repairPriority = 0;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
-
-		private $projectorList = array();
 		
-		protected $doCountForCombatValue = false;		//To ignore projection for combat value calculations
+		protected $doCountForCombatValue = false;//To ignore projection for combat value calculations
 		
+		public $changeThisTurn = 0;	//When shields moved around, change it tracked here to be made into Damage Entry.	
+		public $currentHealth = 0; //Value for front-end when moving shield power around.
+		public $side = '';//Required for prioritising a shield using Generator Presets.		
 	    
-	    function __construct($armor, $maxhealth, $rating, $startArc, $endArc, $side = 'F'){ //parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
-			$this->iconPath = 'TrekShieldProjection' . $side . '.png';
-			parent::__construct($armor, $maxhealth, 0, $rating, $startArc, $endArc);
-			$this->output=$rating;//output is displayed anyway, make it show something useful... in this case - number of points absorbed per hit
-				}
+	    function __construct($armor, $startHealth, $rating, $startArc, $endArc, $side = 'F'){ //parameters: $armor, $startHealth, $Rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
+			$this->iconPath = 'ThirdspaceShield' . $side . '.png';
+			parent::__construct($armor, $startHealth, 0, $rating, $startArc, $endArc);
+			//rating not currently used.
+			$this->side = $side;						
+		}
 		
 		
 	    public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){ //no defensive hit chance change
@@ -717,15 +719,24 @@ class ThirdspaceShieldProjection extends Shield implements DefensiveSystem { //d
 
 		public function setSystemDataWindow($turn){
 			parent::setSystemDataWindow($turn);  
-//			$absorb = $this->output - $this->armour;
 			$this->data["Special"] = "Defensive system which absorbs damage from incoming shots within its arc.";
 			$this->data["Special"] .= "<br>Can absorb up to its maximum capacity before allowing damage to ship.";		
 			$this->data["Special"] .= "<br>Shield system's structure represents damage capacity, if it is reduced to zero system will cease to function.";
 			$this->data["Special"] .= "<br>Can't be destroyed unless associated structure block is also destroyed.";
 			$this->data["Special"] .= "<br>Cannot be flown under, and does not reduce the damage dealt or hit chance of enemy weapons.";
-			$this->data["Special"] .= "<br>Has an Armor value of "  . $this->armour . ".";				
+			$this->data["Special"] .= "<br>Has an Armor value of "  . $this->armour . ".";							
+			$this->currentHealth = $this->getRemainingCapacity();//override on-icon display default
+			$this->outputDisplay = $this->currentHealth;//override on-icon display default					
+		}	
+
+    	public function onConstructed($ship, $turn, $phase){
+	    	parent::onConstructed($ship, $turn, $phase);	    	
 			
-			$this->outputDisplay = $this->getRemainingCapacity();//override on-icon display default
+			if($turn == 1){//Shields will spawn at max capacity, reduce this by half to give starting amount.
+		    	$halveShield = $this->maxhealth/2;
+		    	$this->setShields($ship, $turn, $halveShield);
+			}  		
+		
 		}	
 		
 		public function getRemainingCapacity(){
@@ -735,19 +746,35 @@ class ThirdspaceShieldProjection extends Shield implements DefensiveSystem { //d
 		public function getUsedCapacity(){
 			return $this->getTotalDamage();
 		}
-		
-		public function absorbDamage($ship,$gamedata,$value){ //or dissipate, with negative value
-			$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $value, 0, 0, -1, false, false, "Absorb/Regenerate!", "ThirdspaceShieldProjection");
+
+		public function setShields($ship,$turn,$value){
+			$damageEntry = new DamageEntry(-1, $ship->id, -1, $turn, $this->id, $value, 0, 0, -1, false, false, "SetShield!", "ThirdspaceShield");
 			$damageEntry->updated = true;
 			$this->damage[] = $damageEntry;
 		}
+
+		private function checkArmourDeduction($gamedata, $fireOrder){
+			$deductArmour = true;
+
+			foreach($this->damage as $damage){
+				if($damage->turn != $gamedata->turn) continue;//Only interested in this turn.
+				if($damage->fireorderid == $fireOrder->id) {
+					$deductArmour = false;	//Previous damage this turn has been found from this raking weapon.
+					break;//No need to search futher.
+				}		
+			}					
+			return 	$deductArmour;		
+		}//endof checkArmourDeduction
 		
-		
+		public function absorbDamage($ship,$gamedata,$value, $fireOrderid = -1){ //or dissipate, with negative value
+			$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $value, 0, 0, $fireOrderid, false, false, "Absorb/Regenerate!", "ThirdspaceShield");
+			$damageEntry->updated = true;
+			$this->damage[] = $damageEntry;
+		}
+			
 		
 		//decision whether this system can protect from damage - value used only for choosing strongest shield to balance load.
-		public function doesProtectFromDamage($expectedDmg, $systemProtected = null, $damageWasDealt = false) {
-	//		if($damageWasDealt) return 0; //Thirdspace shields do protect from overkill
-			
+		public function doesProtectFromDamage($expectedDmg, $systemProtected = null, $damageWasDealt = false) {		
 			$remainingCapacity = $this->getRemainingCapacity();
 			$protectionValue = 0;
 			if($remainingCapacity>0){
@@ -767,15 +794,24 @@ class ThirdspaceShieldProjection extends Shield implements DefensiveSystem { //d
 			$absorbedDamage = 0;
 			
 			if($remainingCapacity>0) { //else projection does not protect
-				$absorbedFreely = 0;
+				$absorbedForFree = 0;
+				
 				//first, armor takes part
-				$absorbedFreely = min($this->armour, $damageToAbsorb);
-	//			$damageToAbsorb += -$absorbedFreely;
+				$armour = $this->armour;				
+				$deductArmour = true;//Do we want to deduct armour?
+				if($weapon instanceof Raking) $deductArmour = $this->checkArmourDeduction($gamedata, $fireOrder);//Check armour assumption on Raking weapons.
+				if(!$deductArmour) $armour = 0; //If returns false, Armour already taken into account for raking weapon.
+	
+				//Then check that damage is actually greater than Armour.		
+				$absorbedForFree = min($armour, $damageToAbsorb);//So either armour value, or if damage remaining is less than armour then it's that.
+				$damageToAbsorb += -$absorbedForFree;//Reduce amount to absorb by Armour or reduce to 0 if less than Armour.
+				
 				//next, actual absorbtion
-				$absorbedDamage = min($this->output - $this->armour , $remainingCapacity, $damageToAbsorb ); //no more than output (modified by already accounted for armor); no more than remaining capacity; no more than damage incoming
-				$damageToAbsorb += -$absorbedDamage;
-				if($absorbedDamage>0){ //mark!
-					$this->absorbDamage($target,$gamedata,$absorbedDamage);
+				$absorbedDamage = min($remainingCapacity, $damageToAbsorb ); //no more than remaining capacity; no more than damage incoming
+				$damageToAbsorb += -$absorbedDamage;//Deduct the amount of shield absorption from initial damage.
+				
+				if($absorbedDamage>0){ //Damage was absorbed, update Shield!
+					$this->absorbDamage($target,$gamedata,$absorbedDamage, $fireOrder->id);
 				}
 				$returnValues['dmg'] = $damageToAbsorb;
 				$returnValues['armor'] = min($damageToAbsorb, $returnValues['armor']);
@@ -783,60 +819,381 @@ class ThirdspaceShieldProjection extends Shield implements DefensiveSystem { //d
 			
 			return $returnValues;
 		} //endof function doProtect
-		    
-		function addProjector($projector){
-			if($projector) $this->projectorList[] = $projector;
-		}
-		
-		//effects that happen in Critical phase (after criticals are rolled) - replenishment from active projectors 
+
+		//effects that happen in Critical phase (after criticals are rolled) - replenishment from active Generator 
 		public function criticalPhaseEffects($ship, $gamedata){
 			
 			parent::criticalPhaseEffects($ship, $gamedata);//Call parent to apply effects like Limpet Bore.
 			
-			if($this->isDestroyed()) return; //destroyed system does not work... but other critical phase effects may work even if destroyed!
-			
-			$activeProjectors = 0;
-			$projectorOutput = 0;
-			$toReplenish = 0;
-			
-			foreach($this->projectorList as $projector){
-				if ( ($projector->isDestroyed($gamedata->turn))
-				     || ($projector->isOfflineOnTurn($gamedata->turn))
-				) continue;
-				$activeProjectors++;
-				$projectorOutput += $projector->getOutputOnTurn($gamedata->turn);
+			if($this->isDestroyed()) return; //destroyed shield does not work...
+			//Shields should not be destroyed, check damage this turn for anything that destroyed it and undestroy.
+
+			$generator = $ship->getSystemByName("ThirdspaceShieldGenerator");	
+			$generatorOutput = 0;
+
+			if($generator){//Generator exists and is not destroyed!
+				if($generator->isDestroyed()) return; //Double-check. Just in case.
+
+				$generatorOutput = $generator->getOutput(); 				
+				$toReplenish = min($generatorOutput,$this->getUsedCapacity());		
+											
+				if($toReplenish != 0){ //something changes!
+					$this->absorbDamage($ship,$gamedata,-$toReplenish);
+				}				
 			}
-			/*after all - shield will NOT fall!
-			if($activeProjectors <= 0){ //no active projectors - shield is falling!
-				$toReplenish = -$this->getRemainingCapacity();	
-				*/
-			if($activeProjectors > 0){ //active projectors present - reinforce shield!
-				$toReplenish = min($projectorOutput,$this->getUsedCapacity());		
-			}
-			
-			if($toReplenish != 0){ //something changes!
-				$this->absorbDamage($ship,$gamedata,-$toReplenish);
-			}
+
 		} //endof function criticalPhaseEffects
+
+	// this method generates additional non-standard information in the form of individual system notes, in this case: - Initial phase: check setting changes made by user, convert to notes.	
+	public function doIndividualNotesTransfer(){
+	//data received in variable individualNotesTransfer, positive if Shield decreased, negative if Shield increased.
+	    if (is_array($this->individualNotesTransfer) && isset($this->individualNotesTransfer[0])) { // Check if it's an array and the key exists
+	        $shieldChange = $this->individualNotesTransfer[0];
+	        $this->changeThisTurn = $shieldChange;
+	    }	    
+	    // Clear the individualNotesTransfer array
+	    $this->individualNotesTransfer = array();
+	}
+	
 		
-		public function stripForJson() {
-	        $strippedSystem = parent::stripForJson();
+    public function generateIndividualNotes($gameData, $dbManager){ //dbManager is necessary for Initial phase only
+		$ship = $this->getUnit();
+		switch($gameData->phase){
+					
+				case 1: //Initial phase
+					//data returned as a number to create a new damage entry.
+					if($ship->userid == $gameData->forPlayer){ //only own ships, otherwise bad things may happen!
+						//load existing data first - at this point ship is rudimentary, without data from database!
+						$listNotes = $dbManager->getIndividualNotesForShip($gameData, $gameData->turn, $ship->id);	
+						foreach ($listNotes as $currNote){
+							if($currNote->systemid==$this->id){//note is intended for this system!
+								$this->addIndividualNote($currNote);	 								
+							}
+						}
+						$this->onIndividualNotesLoaded($gameData);		
 
-			$strippedSystem->outputDisplay = $this->outputDisplay;
-			
-	        return $strippedSystem;
+						$changeValue = $this->changeThisTurn;//Extract change value for shield this turn.																
+												
+						$notekey = 'change';
+						$noteHuman = 'Shield value has been changed';
+						$notevalue = $changeValue;
+						$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$notevalue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue         
+					}			
+										
+			break;				
 		}
-}//endof class ThirdspaceProjection
+	} //endof function generateIndividualNotes
+	
+
+	public function onIndividualNotesLoaded($gamedata)
+	{
+		$ship = $this->getUnit();
+		$damageValue = 0;
+							
+	    foreach ($this->individualNotes as $currNote) {
+	  		if($currNote->turn == $gamedata->turn) {  				    	
+	        $damageValue = $currNote->notevalue; //Positive if decreased, negative if increased.
+			}
+		}				
+		//actual change(damage) entry
+		if($damageValue != 0){
+		$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $damageValue, 0, 0, -1, false, false, 'shieldChange', 'shieldChange');
+		$damageEntry->updated = true;
+		$this->damage[] = $damageEntry;	
+		}	
+        //and immediately delete notes themselves, they're no longer needed (this will not touch the database, just memory!)
+        $this->individualNotes = array();
+	 		  
+	}//endof onIndividualNotesLoaded
+
+		
+	public function stripForJson() {
+	    $strippedSystem = parent::stripForJson();
+		$strippedSystem->currentHealth = $this->currentHealth;
+		$strippedSystem->outputDisplay = $this->outputDisplay;
+		$strippedSystem->side = $this->side;
+					
+	    return $strippedSystem;
+	} 
+	
+}//endof class ThirdspaceShield
+
+/*
+class ThoughtShield extends Shield implements DefensiveSystem {
+	    public $name = "ThoughtShield";
+	    public $displayName = "Shield Projection";
+	    public $primary = true;
+		public $isPrimaryTargetable = false; //shouldn't be targetable at all, in fact!
+		public $isTargetable = false; //cannot be targeted ever!
+	    public $iconPath = "ThirdspaceShieldF.png"; //overridden anyway - to indicate proper direction
+	    
+		protected $possibleCriticals = array(); //no criticals possible
+		
+		//Shield Projections cannot be repaired at all!
+		public $repairPriority = 0;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
+		
+		protected $doCountForCombatValue = false;//To ignore projection for combat value calculations
+		
+		public $changeThisTurn = 0;	//When shields moved around, change it tracked here to be made into Damage Entry.	
+		public $currentHealth = 0; //Value for front-end when moving shield power around.
+		public $side = '';//Required for prioritising a shield using Generator Presets.
+		public $baseRating = 0; //Will be set when contructed.
+		public $defenceMod = 0;	//To allow shield to be reinfored and act as an EM shield as well.	
+	    
+	    function __construct($armor, $startHealth, $rating, $startArc, $endArc, $side = 'F'){ //parameters: $armor, $startHealth, $Rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
+			$this->iconPath = 'ThirdspaceShield' . $side . '.png';
+			parent::__construct($armor, $startHealth, 0, $rating, $startArc, $endArc);
+			//rating not currently used.
+			$this->side = $side;
+			$this->baseRating = $rating;						
+		}
+		
+		//ThoughtShield CAN be reinforced to act as a EM Shield as well, so we need to add some checks and not just return 0.		
+	    public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){ //no defensive hit chance change
+	        if ($this->checkIsFighterUnderShield($target, $shooter, $weapon))
+	            return 0;
+
+	        return $this->defenceMod;
+	    }
+		public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon){ //no shield-like damage reduction
+	        if ($this->checkIsFighterUnderShield($target, $shooter, $weapon))
+	            return 0;
+        
+	        return $this->defenceMod;
+		}
+	    private function checkIsFighterUnderShield($target, $shooter, $weapon){ //no flying under shield
+			if(!($shooter instanceof FighterFlight)) return false; //only fighters may fly under shield!
+			if($weapon && $weapon->ballistic) return false; //fighter missiles may NOT fly under shield
+		        $dis = mathlib::getDistanceOfShipInHex($target, $shooter);
+		        if ( $dis == 0 ){ //If shooter are fighers and range is 0, they are under the shield
+		            return true;
+		        }
+		        return false;
+		}
+	   		
+
+		public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);  
+			$this->data["Special"] = "Defensive system which absorbs damage from incoming shots within its arc.";
+			$this->data["Special"] .= "<br>Can absorb up to its maximum capacity before allowing damage to ship.";		
+			$this->data["Special"] .= "<br>Shield system's structure represents damage capacity, if it is reduced to zero system will cease to function.";
+			$this->data["Special"] .= "<br>Can't be destroyed unless associated structure block is also destroyed.";
+			$this->data["Special"] .= "<br>Cannot be flown under, and does not reduce the damage dealt or hit chance of enemy weapons.";
+			$this->currentHealth = $this->getRemainingCapacity();//override on-icon display default
+			$this->outputDisplay = $this->currentHealth;//override on-icon display default					
+		}	
+
+    	public function onConstructed($ship, $turn, $phase){
+	    	parent::onConstructed($ship, $turn, $phase);	    	
+			
+			if($turn == 1){//Shields will spawn at max possible capacity, reduce this to give starting amount.
+		    	$startRating = $this->baseRating;
+		    	$currentRating = $this->getRemainingHealth();
+		    	$adjustment = $currentRating - $startRating;
+		    	
+		    	$this->setShields($ship, $turn, $adjustment);
+			}  		
+		
+		}	
+		
+		public function getRemainingCapacity(){
+			return $this->getRemainingHealth();
+		}
+		
+		public function getUsedCapacity(){
+			return $this->getTotalDamage();
+		}
+
+		public function setShields($ship,$turn,$value){//On Turn 1, reduce shields to their correct starting amount.
+			$damageEntry = new DamageEntry(-1, $ship->id, -1, $turn, $this->id, $value, 0, 0, -1, false, false, "SetShield!", "ThoughtShield");
+			$damageEntry->updated = true;
+			$this->damage[] = $damageEntry;
+		}
+		
+		public function absorbDamage($ship,$gamedata,$value, $fireOrderid = -1){ //or dissipate, with negative value
+			$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $value, 0, 0, $fireOrderid, false, false, "Absorb/Regenerate!", "ThoughtShield");
+			$damageEntry->updated = true;
+			$this->damage[] = $damageEntry;
+		}
+		
+
+		private function checkShieldDeduction($gamedata, $fireOrder){
+			$deductShieldRating = true;
+			//how to check it's this turn?  Check damage entries for this turn instead, with Shooter and Weapon ids?
+
+			foreach($this->damage as $damage){
+				if($damage->turn != $gamedata->turn) continue;//Only interested in this turn.
+				if($damage->fireorderid == $fireOrder->id) {
+					$deductShieldRating = false;	//Previous damage this turn has been found from this raking weapon.
+					break;
+				}
+			}
+					
+			return 	$deductShieldRating;		
+		}//endof checkShieldDeduction		
+		
+		//decision whether this system can protect from damage - value used only for choosing strongest shield to balance load.
+		public function doesProtectFromDamage($expectedDmg, $systemProtected = null, $damageWasDealt = false) {
+			
+			$remainingCapacity = $this->getRemainingCapacity();
+			$protectionValue = 0;
+			if($remainingCapacity>0){
+				$protectionValue = $remainingCapacity+$this->armour; //this is actually more than this system can protect from - but allows to balance load between systems in arc
+			}
+			return $protectionValue;
+		}
 
 
-/* ThirdspaceShieldProjector: reinforces shield projection (and prevents it from falling)
- actual reinforcing (and falling) is done from Projection's own end, Projector just is (needs to be plugged into appropriate projection at design stage
+		//actual protection
+		public function doProtect($gamedata, $fireOrder, $target, $shooter, $weapon, $systemProtected, $effectiveDamage,$effectiveArmor){ //hook for actual effect of protection - return modified values of damage and armor that should be used in further calculations
+			$returnValues=array('dmg'=>$effectiveDamage, 'armor'=>$effectiveArmor);
+			$damageToAbsorb=$effectiveDamage; //shield works BEFORE armor
+			$damageAbsorbed=0;
+			
+			if($damageToAbsorb<=0) return $returnValues; //nothing to absorb
+			
+			$remainingCapacity = $this->getRemainingCapacity();
+			$absorbedDamage = 0;
+			
+			if($remainingCapacity>0) { //else projection does not protect
+
+				$armour = $this->armour;				
+				$AddShieldRating = true;//Do we want to deduct armour?
+				if($weapon instanceof Raking) $AddShieldRating = $this->checkShieldDeduction($gamedata, $fireOrder);//Check armour assumption on Raking weapons.
+				if($AddShieldRating) $damageToAbsorb += $this->defenceMod; //Usually 0, but if not (due to reinforcement) add Shield Rating to damage in 1st rake.
+
+				//next, actual absorbtion				
+				$absorbedDamage = min($remainingCapacity, $damageToAbsorb ); //no more than remaining capacity; no more than damage incoming
+				$damageToAbsorb += -$absorbedDamage;//Reduce amount to absorb by Armour or reduce to 0 if less than Armour.
+					
+				if($absorbedDamage>0){ //Damage was absorbed, update Shield!
+					$this->absorbDamage($target,$gamedata,$absorbedDamage, $fireOrder->id);
+				}
+				$returnValues['dmg'] = $damageToAbsorb;
+				$returnValues['armor'] = min($damageToAbsorb, $returnValues['armor']);
+			}
+			
+			return $returnValues;
+		} //endof function doProtect
+
+
+		//effects that happen in Critical phase (after criticals are rolled) - replenishment from active Generator 
+		public function criticalPhaseEffects($ship, $gamedata){
+			
+			parent::criticalPhaseEffects($ship, $gamedata);//Call parent to apply effects like Limpet Bore.
+			
+			if($this->isDestroyed()) return; //destroyed shield does not work...
+			//Shields should not be destroyed, check damage this turn for anything that destroyed it and undestroy.
+
+			$generator = $ship->getSystemByName("ThoughtShieldGenerator");	
+			$cnc = $ship->getSystemByName("CnC");
+			$secondaryCnC = $ship->getSystemByName("SecondaryCnC");
+			$generatorOutput = 0;
+
+			if($generator){//Generator exists and is not destroyed!
+
+				$baseRegen = $this->baseRating;
+
+				if($secondaryCnC->isDestroyed()) $baseRegen = round($baseRegen/2);
+				if($cnc->isDestroyed()) $baseRegen = 0;		
+
+		    	$currentRating = $this->getRemainingHealth();
+		    	
+		    	$toReplenish = 0;
+				$toReplenish = $currentRating - $baseRegen; //Create a plus or minus figure to restore shield to start strength.
+																								
+				if($toReplenish != 0){ //something changes!
+					$this->absorbDamage($ship,$gamedata,$toReplenish);
+				}				
+			}
+
+		} //endof function criticalPhaseEffects
+
+	// this method generates additional non-standard information in the form of individual system notes, in this case: - Initial phase: check setting changes made by user, convert to notes.	
+	public function doIndividualNotesTransfer(){
+	//data received in variable individualNotesTransfer, positive if Shield decreased, negative if Shield increased.
+	    if (is_array($this->individualNotesTransfer) && isset($this->individualNotesTransfer[0])) { // Check if it's an array and the key exists
+	        $shieldChange = $this->individualNotesTransfer[0];
+	        $this->changeThisTurn = $shieldChange;
+	    }	    
+	    // Clear the individualNotesTransfer array
+	    $this->individualNotesTransfer = array();
+	}
+	
+		
+    public function generateIndividualNotes($gameData, $dbManager){ //dbManager is necessary for Initial phase only
+		$ship = $this->getUnit();
+		switch($gameData->phase){
+					
+				case 1: //Initial phase
+					//data returned as a number to create a new damage entry.
+					if($ship->userid == $gameData->forPlayer){ //only own ships, otherwise bad things may happen!
+						//load existing data first - at this point ship is rudimentary, without data from database!
+						$listNotes = $dbManager->getIndividualNotesForShip($gameData, $gameData->turn, $ship->id);	
+						foreach ($listNotes as $currNote){
+							if($currNote->systemid==$this->id){//note is intended for this system!
+								$this->addIndividualNote($currNote);	 								
+							}
+						}
+						$this->onIndividualNotesLoaded($gameData);		
+
+						$changeValue = $this->changeThisTurn;//Extract change value for shield this turn.																
+												
+						$notekey = 'change';
+						$noteHuman = 'Shield value has been changed';
+						$notevalue = $changeValue;
+						$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$notevalue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue         
+					}			
+										
+			break;				
+		}
+	} //endof function generateIndividualNotes
+	
+
+	public function onIndividualNotesLoaded($gamedata)
+	{
+		$ship = $this->getUnit();
+		$damageValue = 0;
+							
+	    foreach ($this->individualNotes as $currNote) {
+	  		if($currNote->turn == $gamedata->turn) {  				    	
+	        $damageValue = $currNote->notevalue; //Positive if decreased, negative if increased.
+			}
+		}				
+		//actual change(damage) entry
+		if($damageValue != 0){
+		$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $damageValue, 0, 0, -1, false, false, 'shieldChange', 'shieldChange');
+		$damageEntry->updated = true;
+		$this->damage[] = $damageEntry;	
+		}	
+        //and immediately delete notes themselves, they're no longer needed (this will not touch the database, just memory!)
+        $this->individualNotes = array();
+	 		  
+	}//endof onIndividualNotesLoaded
+
+		
+	public function stripForJson() {
+	    $strippedSystem = parent::stripForJson();
+		$strippedSystem->currentHealth = $this->currentHealth;
+		$strippedSystem->outputDisplay = $this->outputDisplay;
+		$strippedSystem->side = $this->side;
+		$strippedSystem->defenceMod = $this->defenceMod;					
+	    return $strippedSystem;
+	} 
+
+	
+}//endof class ThoughtShield
+
 */
+
+
+
+/*
 class ThirdspaceShieldProjector  extends Shield implements DefensiveSystem { //defensive values of zero, but still formally there to display arcs!
 	    public $name = "ThirdspaceShieldProjector";
 	    public $displayName = "Shield Projector";
 		public $isPrimaryTargetable = false; //projector can be targeted even on PRIMARY, like a weapon!
-	    public $iconPath = "TrekShieldProjectorF.png"; //overridden anyway - to indicate proper direction
+	    public $iconPath = "ThirdspaceProjectorF.png"; //overridden anyway - to indicate proper direction
 	    public $boostable = true; //$this->boostEfficiency and $this->maxBoostLevel in __construct()  
 		public $boostEfficiency = 4;
 	    public $baseOutput = 0; //base output, before boost
@@ -850,13 +1207,13 @@ class ThirdspaceShieldProjector  extends Shield implements DefensiveSystem { //d
 
 	    
 	    function __construct($armor, $maxhealth, $power, $rating, $startArc, $endArc, $side = 'F'){ //parameters: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R/C suggests whether to use left or right graphics
-			$this->iconPath = 'TrekShieldProjector' . $side . '.png';
+			$this->iconPath = 'ThirdspaceProjector' . $side . '.png';
             if ( $power == 0 ){
                 $power = 4;
             }			
 			parent::__construct($armor, $maxhealth, $power, $rating, $startArc, $endArc);
 			$this->baseOutput = $rating;
-			$this->maxBoostLevel = $rating; //maximum double effect	
+			$this->maxBoostLevel = floor($rating/2); //maximum double effect -1	
 		}
 		
 		
@@ -872,12 +1229,12 @@ class ThirdspaceShieldProjector  extends Shield implements DefensiveSystem { //d
 
 		public function setSystemDataWindow($turn){
 			parent::setSystemDataWindow($turn); 
-			$this->data["Special"] = "Regenerates 5 health for the associated Shield per point of Projector rating at the end of each turn .";
-		$this->data["Special"] .= "<br> Output can be boosted up to " . $this->maxBoostLevel . " times at " . $this->boostEfficiency . " power per extra point of rating.";
+			$this->data["Special"] = "Regenerates 4 health for the associated Shield per point of Projector output at the end of each turn .";
+		$this->data["Special"] .= "<br> Output can be boosted " . $this->maxBoostLevel . " time(s) for " . $this->boostEfficiency . " power.";
 		}	
 		
 	    public function getOutputOnTurn($turn){
-	        $output = ($this->getOutput() + $this->getBoostLevel($turn))*5;
+	        $output = ($this->getOutput() + $this->getBoostLevel($turn))*4;
 	        return $output;
 	    }
 		
@@ -894,6 +1251,6 @@ class ThirdspaceShieldProjector  extends Shield implements DefensiveSystem { //d
 		}
 		
 } //endof class ThirdspaceShieldProjector
-
+*/
 
 ?>

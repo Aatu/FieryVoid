@@ -49,6 +49,7 @@ class GODAlphaAM extends OSAT{
         $this->addAftSystem(new InterceptorMkII(2, 4, 2, 0, 360));
         $this->addAftSystem(new InterceptorMkII(2, 4, 2, 0, 360));
 
+        $this->addPrimarySystem(new OSATCnC(0, 1, 0, 0));
         $this->addPrimarySystem(new Reactor(4, 24, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 16, 3, 6));   
         $this->addAftSystem(new Thruster(4, 20, 0, 0, 2));

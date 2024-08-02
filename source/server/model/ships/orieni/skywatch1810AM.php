@@ -40,10 +40,10 @@ class skywatch1810AM extends OSAT
   //      $this->enhancementOptionsEnabled[] = 'AMMO_L';//add enhancement options for other missiles - Class-L
 		//By the Book Orieni should have access to missie types: KK, B, A, H, L, C, but L and C not available until 2005 so disabled on these older ships.
 		
-		
+        $this->addPrimarySystem(new OSATCnC(0, 1, 0, 0));		
 		$this->addPrimarySystem(new Reactor(4, 16, 0, 0));
 		$this->addPrimarySystem(new Scanner(4, 12, 3, 5));
-		$this->addPrimarySystem(new Thruster(4, 14, 0, 0, 2));
+		$this->addAftSystem(new Thruster(4, 14, 0, 0, 2));
         $this->addPrimarySystem(new HKControlNode(4, 12, 1, 1));
 		
 		$this->addFrontSystem(new AmmoMissileRackSO(5, 0, 0, 270, 90, $ammoMagazine, true)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
@@ -66,7 +66,7 @@ class skywatch1810AM extends OSAT
 			$this->hitChart = array(
                 0=> array(
 					8 => "Structure",
-                    10 => "Thruster",
+                    10 => "2:Thruster",
 					13 => "1:Class-SO Missile Rack",
 					15 => "1:Laser Lance",
 					17 => "1:Gatling Railgun",

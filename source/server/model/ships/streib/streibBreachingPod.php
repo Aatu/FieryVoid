@@ -4,11 +4,11 @@ class StreibBreachingPod extends FighterFlight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 50*6;
-	$this->faction = "Streib";
+		$this->pointCost = 50*6;
+		$this->faction = "Streib";
         $this->phpclass = "StreibBreachingPod";
         $this->shipClass = "Breaching Pods";
-	 $this->imagePath = "img/ships/streibbreachingpod.png";
+	 	$this->imagePath = "img/ships/streibbreachingpod.png";
         
         $this->forwardDefense = 8;
         $this->sideDefense = 8;
@@ -24,6 +24,10 @@ class StreibBreachingPod extends FighterFlight{
 		$this->iniativebonus = 8*5;
       
         $this->populate();
+    
+    	$this->enhancementOptionsEnabled[] = 'ELT_MAR'; //To enable Elite Marines enhancement
+		$this->enhancementOptionsEnabled[] = 'EXT_MAR'; //To enable extra Marines enhancement
+		
     }
     
     
@@ -41,6 +45,7 @@ class StreibBreachingPod extends FighterFlight{
 			
 				
 			$fighter->addFrontSystem(new LtEMWaveDisruptor(240, 120, 1));
+			$fighter->addFrontSystem(new Marines(330, 30, 0, false)); //startarc, endarc, damagebonus, elite.			
 
 			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
 			

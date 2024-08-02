@@ -36,15 +36,15 @@ class OsatStarsphere extends OSAT{
         $this->iniativebonus = 60;
       
         
-    
+    $this->addPrimarySystem(new OSATCnC(0, 1, 0, 0));    
 	$this->addPrimarySystem(new MagGravReactor(4, 12, 0, 14+2));
 	$this->addPrimarySystem(new Scanner(4, 7, 2, 5));
-	$this->addPrimarySystem(new MagGraviticThruster(3, 6, 0, 99, 2));    
+	$this->addAftSystem(new MagGraviticThruster(3, 6, 0, 99, 2));    
 	$this->addPrimarySystem(new SparkField(2, 0, 0, 0, 360));   
-	$this->addPrimarySystem(new SurgeCannon(3, 0, 0, 300, 60)); 
-	$this->addPrimarySystem(new SurgeCannon(3, 0, 0, 300, 60)); 
-	$this->addPrimarySystem(new SurgeCannon(3, 0, 0, 300, 60)); 
-	$this->addPrimarySystem(new SurgeCannon(3, 0, 0, 300, 60)); 
+	$this->addFrontSystem(new SurgeCannon(3, 0, 0, 300, 60)); 
+	$this->addFrontSystem(new SurgeCannon(3, 0, 0, 300, 60)); 
+	$this->addFrontSystem(new SurgeCannon(3, 0, 0, 300, 60)); 
+	$this->addFrontSystem(new SurgeCannon(3, 0, 0, 300, 60)); 
 	    
       
       
@@ -58,8 +58,8 @@ class OsatStarsphere extends OSAT{
         $this->hitChart = array(
           0=> array(
             9 => "Structure",
-            11 => "Thruster",
-            15 => "Surge Cannon",
+            11 => "2:Thruster",
+            15 => "1:Surge Cannon",
             17 => "Scanner",
             19 => "Reactor",
             20 => "Spark Field",
