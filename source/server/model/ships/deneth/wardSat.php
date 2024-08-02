@@ -25,14 +25,16 @@ class wardsat extends OSAT{
         $this->rollcost = 0;
         $this->pivotcost = 0;	
         $this->iniativebonus = 60;
+        
+        $this->addPrimarySystem(new OSATCnC(0, 1, 0, 0));        
         $this->addPrimarySystem(new Reactor(5, 7, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 6, 3, 6)); 
-        $this->addPrimarySystem(new Thruster(4, 6, 0, 0, 2)); 
-        $this->addPrimarySystem(new AssaultLaser(4, 6, 4, 270, 90)); 
-        $this->addPrimarySystem(new AssaultLaser(4, 6, 4, 270, 90)); 
-        $this->addPrimarySystem(new TwinArray(3, 6, 2, 180, 360));
-	$this->addPrimarySystem(new TwinArray(3, 6, 2, 0, 360));        
-	$this->addPrimarySystem(new TwinArray(3, 6, 2, 0, 180));  
+        $this->addAftSystem(new Thruster(4, 6, 0, 0, 2)); 
+        $this->addFrontSystem(new AssaultLaser(4, 6, 4, 270, 90)); 
+        $this->addFrontSystem(new AssaultLaser(4, 6, 4, 270, 90)); 
+        $this->addFrontSystem(new TwinArray(3, 6, 2, 180, 360));
+		$this->addFrontSystem(new TwinArray(3, 6, 2, 0, 360));        
+		$this->addFrontSystem(new TwinArray(3, 6, 2, 0, 180));  
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         
@@ -42,9 +44,9 @@ class wardsat extends OSAT{
 		$this->hitChart = array(
 			0=> array(
 					9 => "Structure",
-					11 => "Thruster",
-					14 => "Assault Laser",
-          				16 => "Twin Array",
+					11 => "2:Thruster",
+					14 => "1:Assault Laser",
+          			16 => "1:Twin Array",
 					18 => "Scanner",
 					20 => "Reactor",
 			)

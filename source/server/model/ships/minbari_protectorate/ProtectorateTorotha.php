@@ -20,7 +20,7 @@ class ProtectorateTorotha extends MediumShip{
         $this->pivotcost = 2;
 		$this->iniativebonus = 65;
 		$this->isd = 2006;
-        $this->fighters = array("assault shuttles"=>2);
+        $this->fighters = array("shuttles"=>2);
 
         $this->addPrimarySystem(new Reactor(5, 15, 0, 0));
         $this->addPrimarySystem(new CnC(6, 16, 0, 0));

@@ -287,6 +287,13 @@ class ShipDisabledOneTurn extends Critical{
     }
 }
 
+class ShipDisabled extends Critical{
+    public $description = "Ship disabled.";
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
+    parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
+    }
+}
+
 class ReducedRange extends Critical{
     public $description = "Range penalty increased.";
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
@@ -483,5 +490,76 @@ class MayOverheat extends Critical { //Critical to allow weapons to roll a criti
         parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
     }
 }
+
+class Sabotage extends Critical{
+	//Used by Breaching Pods to mark when Marines are trying to sabotage a system / wreck havoc.
+    public $description = "Enemy marine unit is undertaking sabotage operations."; 
+	public $repairPriority = 0;//Can't repair.'       
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){  	
+    parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
+    }
+} 
+
+class SabotageElite extends Critical{
+	//Used by Breaching Pods to mark when Marines are trying to sabotage a system / wreck havoc.
+    public $description = "Elite enemy marine unit is undertaking sabotage operations."; 
+	public $repairPriority = 0;//Can't repair.'       
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){  	
+    parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
+    }
+} 
+
+class ProfileIncreased extends Critical{
+	//Used to increase ship profiles during firing, and make them easier to hit.
+    public $description = "Ship defence profile increased.";      
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){  	
+    parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
+    }
+}
+
+class CaptureShip extends Critical{
+	//Used by Breaching Pods to mark when Marines are conducting a Rescue mission for scenarios etc
+    public $description = "Enemy marines are attempting to capture this ship."; 
+	public $repairPriority = 0;//Can't repair.'       
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){  	
+    parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
+    }
+} 
+
+class CaptureShipElite extends Critical{
+	//Used by Breaching Pods to mark when Marines are conducting a Rescue mission for scenarios etc
+    public $description = "Elite enemy marines are attempting to capture this ship."; 
+	public $repairPriority = 0;//Can't repair.'       
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){  	
+    parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
+    }
+} 
+
+class RescueMission extends Critical{
+	//Used by Breaching Pods to mark when Marines are conducting a Rescue mission for scenarios etc
+    public $description = "An enemy Marine unit is conducting a rescue mission."; 
+	public $repairPriority = 0;//Can't repair.'       
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){  	
+    parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
+    }
+} 
+
+class RescueMissionElite extends Critical{
+	//Used by Breaching Pods to mark when Marines are conducting a Rescue mission for scenarios etc
+    public $description = "An elite enemy Marine unit is conducting a rescue mission."; 
+	public $repairPriority = 0;//Can't repair.'       
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){  	
+    parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
+    }
+} 
+
+class DefenderLost extends Critical{
+	//To record when defending marines are killed.
+    public $description = "Defender lost."; 
+	public $repairPriority = 0;//Can't repair.'       
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){  	
+    parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
+    }
+} 
 
 ?>

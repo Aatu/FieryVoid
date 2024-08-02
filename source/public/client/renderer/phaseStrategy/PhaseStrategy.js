@@ -210,8 +210,8 @@ window.PhaseStrategy = function () {
         this.shipWindowManager.open(ship);
     };
 
-    PhaseStrategy.prototype.onShipClicked = function (ship, payload) {
-        if (this.gamedata.isMyShip(ship)) {
+    PhaseStrategy.prototype.onShipClicked = function (ship, payload) {//30 June 2024 - DK - Added for Ally targeting.
+		if(this.gamedata.isMyShip(ship) && (!this.gamedata.canTargetAlly(ship))) {
             this.selectShip(ship, payload);
         } else {
             this.targetShip(ship, payload);

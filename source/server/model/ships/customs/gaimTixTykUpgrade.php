@@ -30,8 +30,8 @@ class gaimTixTykUpgrade extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new Scanner(5, 16, 5, 7));
         $this->addPrimarySystem(new Engine(5, 15, 0, 10, 3));
         $this->addPrimarySystem(new Hangar(5, 8));
-        $this->addPrimarySystem(new GaimPhotonBomb(4, 0, 0, 0, 360));
-        $this->addPrimarySystem(new GaimPhotonBomb(4, 0, 0, 0, 360)); 
+        $this->addPrimarySystem(new GaimPhotonBomb(4, 0, 0, 180, 360));
+        $this->addPrimarySystem(new GaimPhotonBomb(4, 0, 0, 0, 180)); 
                
         $this->addFrontSystem(new Thruster(4, 9, 0, 3, 1));
         $this->addFrontSystem(new Thruster(4, 9, 0, 3, 1));               

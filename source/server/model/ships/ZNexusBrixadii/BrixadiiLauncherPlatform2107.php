@@ -25,6 +25,7 @@ class BrixadiiLauncherPlatform2107 extends OSAT{
         $this->pivotcost = 0;	
         $this->iniativebonus = 60;
 
+        $this->addPrimarySystem(new OSATCnC(0, 1, 0, 0));
         $this->addPrimarySystem(new NexusRangedKineticBoxLauncher(3, 10, 0, 270, 90));
         $this->addPrimarySystem(new NexusRangedKineticBoxLauncher(3, 10, 0, 270, 90));
         $this->addPrimarySystem(new NexusChaffLauncher(1, 2, 1, 0, 360));

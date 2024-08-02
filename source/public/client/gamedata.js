@@ -201,6 +201,12 @@ window.gamedata = {
         }
     },
 
+    canTargetAlly: function canTargetAlly(ship) {//30 June 2024 - DK - Added for Ally targeting.
+        for (var i in gamedata.selectedSystems) {        	
+            if(gamedata.selectedSystems[i].canTargetAllies) return true;
+        }
+    },
+
     isPlayerInGame: function isPlayerInGame() {
         if (gamedata.thisplayer === null || gamedata.thisplayer === -1) {
             return false;
@@ -264,7 +270,7 @@ window.gamedata = {
 			var notLaunching = [];
 			var notSetAA = [];//available Adaptive Armor points remaining!
 			var notSetFC = [];//available BFCP points remaining for Hyach!
-		var powerSurplus = [];//power surplus
+			var powerSurplus = [];//power surplus
 
             for (var ship in myShips) {
                 if (!myShips[ship].flight) {
@@ -437,7 +443,7 @@ window.gamedata = {
                     html += "<br>";
                 }
                 html += "<br>";
-            }            
+            }                         
             if (powerSurplus.length > 0) {
                 html += "Followed ships have unassigned Power reserves: ";
                 html += "<br>";
@@ -601,7 +607,7 @@ window.gamedata = {
                 return false;
             }		
 
-            var shipNames = shipManager.systems.getUnusedSpecialists();        	
+            shipNames = shipManager.systems.getUnusedSpecialists();        	
 
             if (shipNames.length > 0) {
                 var specialistsError = "The following ships have not selected Specialists:<br>";
@@ -614,7 +620,21 @@ window.gamedata = {
                 window.confirm.error(specialistsError, function () {});
                 return false;                
 			}		
-		
+
+            shipNames = shipManager.systems.checkShieldGenValue();
+
+            if (shipNames.length > 0) {
+                var shieldCapacityError = "The following ships have directed too much or too little power to their shields:<br>";
+
+                for (var i in shipNames) {
+                    var shipName = shipNames[i];
+                    shieldCapacityError += "- " + shipName + "<br>";
+                }
+                shieldCapacityError += "You need to change their allocation of shield power.";
+                window.confirm.error(shieldCapacityError, function () {});
+                return false;
+            }	
+            		
             var myShips = [];
 
             for (var ship in gamedata.ships) {
