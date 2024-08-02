@@ -23,6 +23,7 @@ class DalithornLaserMissileOSAT extends OSAT{
         $this->pivotcost = 0;	
         $this->iniativebonus = 60;
 
+        $this->addPrimarySystem(new OSATCnC(0, 1, 0, 0));
         $this->addFrontSystem(new NexusLaserMissile(2, 6, 1, 300, 60));
         $this->addFrontSystem(new NexusLightGasGun(2, 5, 1, 180, 60));
         $this->addFrontSystem(new NexusShatterGun(1, 2, 1, 0, 360));
