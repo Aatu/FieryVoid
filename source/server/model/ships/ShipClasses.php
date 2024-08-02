@@ -229,6 +229,24 @@ class BaseShip {
 		
 		return $effectiveValue;
 	} //endOf function calculateCombatValue
+
+
+	public function howManyMarines(){
+		$marines = 0;
+		$rammingFactor = $this->getRammingFactor();
+		$marines = floor($rammingFactor/20);//TT rules suggest using Ramming factor and divding by 20.	
+				
+		$cnc = $this->getSystemByName("CnC");//$this should be CnC, but just in case.
+		if($cnc){
+			foreach($cnc->criticals as $critical){
+				if($critical->phpclass == "DefenderLost")	$marines -= 1;	 												
+			}
+		}		
+		
+		$totalMarines = max(0, $marines);
+		
+		return $totalMarines;
+	}
 	
 	
     public function stripForJson() {
@@ -1425,7 +1443,7 @@ class BaseShip {
             return true;
 
         $CnC = $this->getSystemByName("CnC");
-        if (!$CnC || $CnC->destroyed || $CnC->hasCritical("ShipDisabledOneTurn", TacGamedata::$currentTurn))
+        if (!$CnC || $CnC->destroyed || $CnC->hasCritical("ShipDisabledOneTurn", TacGamedata::$currentTurn ) || $CnC->hasCritical("ShipDisabled", TacGamedata::$currentTurn ))
             return true;
 
         return false;
@@ -2333,7 +2351,7 @@ class StarBase extends BaseShip{
             $CnC = $cncs[0];
         }
 
-        if ($CnC->hasCritical("ShipDisabledOneTurn", TacGamedata::$currentTurn)){
+        if ($CnC->hasCritical("ShipDisabledOneTurn", TacGamedata::$currentTurn) || $CnC->hasCritical("ShipDisabled", TacGamedata::$currentTurn)){
             debug::log("is effeictlvy PHP Disabled due to ".$CnC->id);
             return true;
         }

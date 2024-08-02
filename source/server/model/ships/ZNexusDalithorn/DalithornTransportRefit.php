@@ -4,12 +4,12 @@ class DalithornTransportRefit extends HeavyCombatVessel{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 180;
+        $this->pointCost = 265;
         $this->faction = "ZNexus Dalithorn Commonwealth";
         $this->phpclass = "DalithornTransportRefit";
         $this->imagePath = "img/ships/Nexus/DalithornTransportRefit.png";
 		$this->canvasSize = 125; //img has 200px per side
-        $this->shipClass = "Military Transport (2048 refit)";
+        $this->shipClass = "Military Transport (2048)";
 			$this->variantOf = "Flag Cruiser";
 			$this->occurence = "common";
 		$this->unofficial = true;
@@ -20,19 +20,19 @@ class DalithornTransportRefit extends HeavyCombatVessel{
         $this->forwardDefense = 14;
         $this->sideDefense = 15;
         
-        $this->turncost = 0.66;
-        $this->turndelaycost = 0.66;
-        $this->accelcost = 2;
+        $this->turncost = 0.75;
+        $this->turndelaycost = 0.75;
+        $this->accelcost = 3;
         $this->rollcost = 2;
         $this->pivotcost = 2;
-        $this->iniativebonus = 6*5;
+        $this->iniativebonus = 3*5;
         
         $this->addPrimarySystem(new Reactor(3, 10, 0, 0));
         $this->addPrimarySystem(new CnC(3, 10, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 14, 3, 4));
         $this->addPrimarySystem(new Engine(3, 16, 0, 8, 3));
         $this->addPrimarySystem(new Hangar(1, 2));
-		$this->addPrimarySystem(new CargoBay(2, 12));
+		$this->addPrimarySystem(new Magazine(2, 6));
 		$this->addPrimarySystem(new Catapult(1, 6));
         $this->addPrimarySystem(new Thruster(2, 10, 0, 4, 3));
         $this->addPrimarySystem(new Thruster(2, 10, 0, 4, 4));
@@ -60,13 +60,13 @@ class DalithornTransportRefit extends HeavyCombatVessel{
 		
         $this->hitChart = array(
             0=> array(
-                    8 => "Structure",
-					9 => "Catapult",
-					11 => "Cargo Bay",
-                    13 => "Thruster",
-                    15 => "Scanner",
-                    17 => "Engine",
-                    18 => "Hangar",
+                    6 => "Structure",
+					7 => "Catapult",
+					8 => "Magazine",
+                    12 => "Thruster",
+                    14 => "Scanner",
+                    16 => "Engine",
+                    17 => "Hangar",
                     19 => "Reactor",
                     20 => "C&C",
             ),

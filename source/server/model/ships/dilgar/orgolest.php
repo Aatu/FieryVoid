@@ -21,6 +21,7 @@ class Orgolest extends OSAT{
         $this->pivotcost = 0;	
         $this->iniativebonus = 60; 
 
+        $this->addPrimarySystem(new OSATCnC(0, 1, 0, 0));
         $this->addPrimarySystem(new Reactor(3, 6, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 4, 2, 4)); 
         $this->addAftSystem(new Thruster(2, 4, 0, 0, 2));

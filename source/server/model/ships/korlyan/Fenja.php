@@ -12,6 +12,7 @@ class Fenja extends MediumShip{
 			$this->occurence = "uncommon";
 			$this->variantOf = 'Axor Assault Frigate';
         $this->canvasSize = 70;
+		$this->fighters = array("assault shuttles"=>4);
 	    
 	    $this->isd = 2243;
 

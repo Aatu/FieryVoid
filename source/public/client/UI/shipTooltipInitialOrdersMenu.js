@@ -24,7 +24,8 @@ window.ShipTooltipInitialOrdersMenu = function () {
         { className: "removeBDEW", condition: [isSelf, isElint, notFlight, doesNotHaveOtherElintEWThanBDEW], action: removeBDEW, info: "remove BDEW" }, 
         { className: "removeAllEW", condition: [isSelf, notFlight], action: removeAllEW, info: "Remove All EW" }, 
         { className: "targetWeapons", condition: [isEnemy, hasShipWeaponsSelected], action: targetWeapons, info: "Target selected weapons on ship" }, 
-        { className: "targetWeaponsHex", condition: [hasHexWeaponsSelected], action: targetHexagon, info: "Target selected weapons on hexagon" }
+        { className: "targetWeaponsHex", condition: [hasHexWeaponsSelected], action: targetHexagon, info: "Target selected weapons on hexagon" },
+		{ className: "targetSuppWeapons", condition: [isFriendly, hasShipWeaponsSelected, hasSupportWeaponSelected, notSelf], action: targetWeapons, info: "Target support weapons" }//30 June 2024 - DK - Added for Ally targeting.		        
     ];
     
 
@@ -53,6 +54,12 @@ window.ShipTooltipInitialOrdersMenu = function () {
     function targetHexagon() {
         weaponManager.targetHex(this.selectedShip, this.hexagon);
     }
+
+	function hasSupportWeaponSelected() {//30 June 2024 - DK - Added for Ally targeting.	
+	    return gamedata.selectedSystems.some((system) => {
+	        return system.canTargetAllies === true;
+	    });
+	}
 
     function addCCEW() {
         var entry = ew.getEntryByTargetAndType(this.selectedShip, null, "CCEW", this.turn);

@@ -23,6 +23,7 @@ class MakarCorren extends OSAT{
         $this->rollcost = 0;
         $this->pivotcost = 0;	
         $this->iniativebonus = 60;
+        $this->addPrimarySystem(new OSATCnC(0, 1, 0, 0));        
         $this->addPrimarySystem(new Reactor(3, 7, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 7, 2, 4)); 
         $this->addPrimarySystem(new Thruster(3, 8, 0, 0, 2)); 

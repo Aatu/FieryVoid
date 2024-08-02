@@ -26,7 +26,7 @@ class BrixadiiWeaponsPlatform2107 extends OSAT{
         $this->pivotcost = 0;	
         $this->iniativebonus = 60;
 
-
+        $this->addPrimarySystem(new OSATCnC(0, 1, 0, 0));
         $this->addPrimarySystem(new ParticleHammer(1, 12, 6, 300, 60));
         $this->addPrimarySystem(new NexusChaffLauncher(1, 2, 1, 0, 360));
         $this->addPrimarySystem(new ScatterPulsar(2, 4, 2, 0, 360));

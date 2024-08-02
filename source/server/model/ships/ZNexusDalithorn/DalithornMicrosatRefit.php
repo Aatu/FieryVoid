@@ -3,10 +3,10 @@ class DalithornMicrosatRefit extends MicroSAT{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 125*6;
+        $this->pointCost = 110*6;
         $this->faction = "ZNexus Dalithorn Commonwealth";
         $this->phpclass = "DalithornMicrosatRefit";
-        $this->shipClass = "Laser MicroSAT Cluster (2132 refit)";
+        $this->shipClass = "Laser MicroSAT Cluster (2132)";
 			$this->variantOf = "Laser MicroSAT Cluster";
 			$this->occurence = "common";
         $this->imagePath = "img/ships/Nexus/DalithornMicrosat.png";
@@ -46,7 +46,7 @@ class DalithornMicrosatRefit extends MicroSAT{
 		            
 			$leftgun = new NexusMinigunFtr(180, 360, 1);
 			$fighter->addFrontSystem($leftgun);
-			$hvyGun = new NexusMediumChemicalLaser(0, 1, 0, 330, 30); 
+			$hvyGun = new NexusMedChemicalLaserFtr(330, 30, 1); 
 			$hvyGun->fireControl = array(-4, 0, 0); // fighters, <mediums, <capitals	
 			$fighter->addFrontSystem($hvyGun);
 			$rightgun = new NexusMinigunFtr(0, 180, 1);

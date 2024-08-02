@@ -23,7 +23,7 @@ class BrixadiiSentinelPlatformBase extends OSAT{
         $this->pivotcost = 0;	
         $this->iniativebonus = 60;
 
-
+        $this->addPrimarySystem(new OSATCnC(0, 1, 0, 0));
         $this->addPrimarySystem(new HvyParticleProjector(3, 8, 4, 300, 60));
         $this->addPrimarySystem(new HvyParticleProjector(3, 8, 4, 300, 60));
         $this->addPrimarySystem(new NexusChaffLauncher(1, 2, 1, 0, 360));
