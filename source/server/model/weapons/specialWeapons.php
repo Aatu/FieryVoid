@@ -4483,7 +4483,7 @@ class PsychicField extends Weapon{ //Thirdspace weapons that operates similar to
 	public $repairPriority = 3;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired	
 		
 	public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
-	public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
+	public $weaponClass = "Psychic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
     public $firingModes = array( 1 => "Field"); //just a convenient name for firing mode
 	public $hextarget = true;
 	
@@ -4509,7 +4509,6 @@ class PsychicField extends Weapon{ //Thirdspace weapons that operates similar to
 		    $this->animationExplosionScale = $this->getAoE($turn);
 		    $this->range = $this->getAoE($turn);
 		      parent::setSystemDataWindow($turn);  
-//		      $this->data["AoE"] = $this->getAoE($turn);
 		      $this->data["Special"] = "Automatically affects all enemy units in Range.  Cannot be fired manually."; 
 		      $this->data["Special"] .= "<br>Reduces Fighters' Initiative (5-15 pts), and Hit Chances (5-10%) next turn.";  
 		      $this->data["Special"] .= "<br>Reduces Ships' Hit Chances (5-10%) next turn if hits Structure, or causes potential critical on other systems.";  		      
@@ -4529,14 +4528,12 @@ class PsychicField extends Weapon{ //Thirdspace weapons that operates similar to
 	
 	
 	public function calculateHitBase($gamedata, $fireOrder){
-		//parent::calculateHitBase($gamedata, $fireOrder);
-	        $fireOrder->updated = true;
+	    $fireOrder->updated = true;
 		$fireOrder->chosenLocation = 0;//so it's recalculated later every time! - as location chosen here is completely incorrect for target 
 		$fireOrder->needed = 100; //hit is automatic
 	}
 	
 	public function fire($gamedata, $fireOrder){
-		//parent::fire($gamedata, $fireOrder);
 		//actually fire at units from target list - and fill fire order data appropriately
 		$shooter = $gamedata->getShipById($fireOrder->shooterid);
 		$fireOrder->rolled = 1; //just to mark that there was a roll!
@@ -4672,28 +4669,11 @@ class PsychicField extends Weapon{ //Thirdspace weapons that operates similar to
 	public function onConstructed($ship, $turn, $phase){
 		parent::onConstructed($ship, $turn, $phase);
 	}
-/*		
-	public function getDefensiveType(){
-		return "SparkCurtain";
-	}    
-	
-	public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon){
-		return 0; //does not reduce damage
-	}
-	
-	public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){
-		return 0;//does not reduce hit chance
-	}
-		
-	public function getOutput(){
-		return 0;     
-	}    
-*/	
+
 	public function getDamage($fireOrder){        
 		$fieldDamage = 1;
 		$boostlevel = $this->getBoostLevel($fireOrder->turn);
-		$fieldDamage += $boostlevel; //-1 per level of boost
-//		$baseDamage = max(0,$baseDamage); //cannot do less than 0	
+		$fieldDamage += $boostlevel; //-1 per level of boost	
 		return $fieldDamage;   
 	}
 	
@@ -4821,7 +4801,7 @@ class PsychicFieldHandler{
         //private $damagebonus = 10;
 
         public $damageType = "Raking"; 
-        public $weaponClass = "Electromagnetic"; 
+        public $weaponClass = "Psychic"; 
         
         public $uninterceptable = true;
         
@@ -4962,7 +4942,7 @@ class PsionicLance extends Raking{
         public $fireControl = array(-4, 4, 5); // fighters, <mediums, <capitals
 
         public $damageType = "Raking"; 
-        public $weaponClass = "Electromagnetic";
+        public $weaponClass = "Psychic";
         
         public $uninterceptable = true;
         
@@ -5107,7 +5087,7 @@ class PsionicConcentrator extends Weapon{
     public $rangePenaltyArray = array( 1=>0.5, 2=>1, 3=>2, 4=>4);
             
 	public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!   
-	public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!    
+	public $weaponClass = "Psychic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!    
 	
 	public $isCombined = false; //is being combined with other weapon
 	public $alreadyConsidered = false; //already considered - either being fired or combined
@@ -5853,7 +5833,10 @@ class PulsarMine extends Weapon{
 
     public function beforeFiringOrderResolution($gamedata){
     	
-    	$thisShip = $this->getUnit();  
+    	$thisShip = $this->getUnit();
+    	
+    	if($this->isDestroyed($gamedata->turn)) return;//Pulsar Mine is destroyed
+    	  
     	$allShips = $gamedata->ships;
     	$relevantShips = array();
 
@@ -6363,7 +6346,140 @@ class Marines extends Weapon{
 	
 }//endof Marines
 
+/*
+
+class SecondSight extends Weapon{
+	public $name = "SecondSight";
+    public $displayName = "Second Sight";
+    public $iconPath = "SecondSight.png";    
+	
+    public $range = 100;
+    public $firingMode = 1;
+    public $priorityAF = 1;
+    public $loadingtime = 2;
+	public $hextarget = true; //this weapon cannot be fired by player
+    public $useOEW = false;
+	public $noLockPenalty = false;
+    
+    public $doNotIntercept = true; 		    		          
+    public $uninterceptable = true;
+   	public $ignoreJinking = true;//weapon ignores jinking completely.
+        
+    public $rangePenalty = 0; 
+    public $fireControl = array(null, null, null); // fighters, <mediums, <capitals 
+
+	public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!   
+	public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set! 
+
+    public $animation = "ball";
+    public $animationExplosionScale = 10;   
+	public $animationColor = array(204, 153, 255);
+
+	protected $autoHit = true;//To show 100% hit chance in front end.
+	
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		if ( $maxhealth == 0 ) $maxhealth = 16;
+		if ( $powerReq == 0 ) $powerReq = 8;
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+	} 
 
 
+    public function beforeFiringOrderResolution($gamedata){
+
+      $firingOrders = $this->getFireOrders($gamedata->turn);
+    	
+      $hasFireOrder = null;
+              foreach ($firingOrders as $fireOrder) { 
+              	   if ($fireOrder->type == 'normal') { 
+                    $hasFireOrder = $fireOrder;
+                    break; //no need to search further
+                    }
+				}    			
+				
+        if($hasFireOrder==null) return; //no appropriate fire order, end of work
+
+    	
+    	$thisShip = $this->getUnit();  
+    	$allShips = $gamedata->ships;
+    	$relevantShips = array();
+
+		//Make a list of relelvant ships e.g. this ship and enemy fighters in the game.
+		foreach($allShips as $ship){
+			if($ship->isDestroyed()) continue;		
+			if ($ship->team == $thisShip->team) continue;	//Ignore friendlies.	
+			$relevantShips[] = $ship;			
+		}
+	
+		foreach($relevantShips as $target){
+			
+			$effectIni = Dice::d(6, 1)+2;
+			if ($target->advancedArmor) $effectIni = 2;
+			
+			if ($target instanceof FighterFlight){  //place effect on first fighter, even if it's already destroyed!
+				$firstFighter = $target->getSampleFighter();
+				if($firstFighter){
+					for($i=1; $i<=$effectIni;$i++){
+						$crit = new tmpinidown(-1, $target->id, $firstFighter->id, 'tmpinidown', $gamedata->turn); 
+						$crit->updated = true;
+				        $firstFighter->criticals[] =  $crit;
+					}
+				}
+			}else{ //ship - place effcet on C&C!
+				$CnC = $target->getSystemByName("CnC");
+				if($CnC){
+					for($i=1; $i<=$effectIni;$i++){
+						$crit = new tmpinidown(-1, $target->id, $CnC->id, 'tmpinidown', $gamedata->turn); 
+						$crit->updated = true;
+				        $CnC->criticals[] =  $crit;
+					}
+				}
+			}			
+
+		}
+    	
+	} //endof beforeFiringOrderResolution
+
+	public function calculateHitBase($gamedata, $fireOrder)
+		{
+			$fireOrder->needed = 100; //always true
+			$fireOrder->updated = true;			
+		}              
+
+    public function fire($gamedata, $fireOrder)
+    {
+		    $shooter = $gamedata->getShipById($fireOrder->shooterid);        
+	        $rolled = Dice::d(100);
+	        $fireOrder->rolled = $rolled; 
+			$fireOrder->pubnotes .= "<br> Reduces Initiative of all enemy ships.";
+			if($rolled <= $fireOrder->needed){//HIT!
+				$fireOrder->shotshit++;		
+			}else{ //MISS!  Should never happen.
+				$fireOrder->pubnotes .= " MISSED! ";
+			}
+	}
+	
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+		$this->data["Special"] = '<br>Reduces Initiative of all enemy units next turn.';
+		$this->data["Special"] .= '<br>Fire this weapon by targeting any hex during the Firing Phase.';
+		$this->data["Special"] .= '<br>Enemy ships suffer a D6+2 (e.g. -15 to -40) Initiative penalty next turn.';	
+		$this->data["Special"] .= '<br>Ships equipped with Advanced Armor will only suffer -10 Initiatve penalty.';
+		$this->data["Special"] .= '<br>Initiative penalties ARE cumulative with other Second Sight weapons.';	
+	}	
+
+    public function getDamage($fireOrder){        return 0;   }
+    public function setMinDamage(){     $this->minDamage = 0 ;      }
+    public function setMaxDamage(){     $this->maxDamage = 0 ;      }
+    
+
+    public function stripForJson() {
+        $strippedSystem = parent::stripForJson();    
+        $strippedSystem->autoHit = $this->autoHit;                         
+        return $strippedSystem;
+	}    
+    
+	
+} //endof class SecondSight
+*/
 
 ?>
