@@ -6347,7 +6347,7 @@ class Marines extends Weapon{
 }//endof Marines
 
 
-
+/*
 class SecondSight extends Weapon{
 	public $name = "SecondSight";
     public $displayName = "Second Sight";
@@ -6480,7 +6480,7 @@ class SecondSight extends Weapon{
     
 	
 } //endof class SecondSight 
-
+*/
 
 
 
