@@ -351,7 +351,7 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
 		$system->critRollMod += $mod; 
 		
 		if (isset(PsionicTorpedo::$alreadyAffected[$ship->id])) return; //But not if affected already.											
-			
+		$boostlevel = $this->getBoostLevel($fireOrder->turn);			
 		$effectEW = Dice::d(2,1)+$boostlevel;//strength of effect: -1 to -4 EW.				
 		$effectIni = Dice::d(3,1)+$boostlevel;//strength of effect: -5 to -25 initiative.		
 		$effectPower = Dice::d(4,1)+$boostlevel;//strength of effect: -1 to -6 to power.
