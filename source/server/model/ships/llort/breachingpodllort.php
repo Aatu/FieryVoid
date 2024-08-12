@@ -19,7 +19,7 @@ class breachingpodllort extends FighterFlight{
         $this->pivotcost = 2; //shuttles have pivot cost higher
         $this->turncost = 0.33;
         
-        $this->maxFlightSize = 6;//this is an unusual type of 'fighter', limit flight size.      
+        $this->maxFlightSize = 3;//this is an unusual type of 'fighter', limit flight size.      
 		$this->hangarRequired = 'assault shuttles'; //for fleet check
 		$this->unitSize = 1; 
 		
