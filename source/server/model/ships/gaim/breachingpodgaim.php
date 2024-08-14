@@ -44,7 +44,7 @@ class breachingpodgaim extends FighterFlight{
             $fighter->imagePath = "img/ships/GaimIttaka.png";
             $fighter->iconPath = "img/ships/GaimIttaka_large.png";
 
-			$fighter->addFrontSystem(new Marines(330, 30, 0, true)); //startarc, endarc, damagebonus, elite.
+			$fighter->addFrontSystem(new Marines(0, 360, 0, true)); //startarc, endarc, damagebonus, elite.
 			
 			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack			
             

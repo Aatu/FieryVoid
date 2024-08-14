@@ -45,7 +45,7 @@ class breachingPodMinbari  extends FighterFlight{
             $fighter->imagePath = "img/ships/MinbariFlyer.png";
             $fighter->iconPath = "img/ships/MinbariFlyer_Large.png";
 			
-			$fighter->addFrontSystem(new Marines(330, 30, 0, false)); //startarc, endarc, damagebonus, elite.
+			$fighter->addFrontSystem(new Marines(0, 360, 0, false)); //startarc, endarc, damagebonus, elite.
             $fighter->addAftSystem(new Jammer(0, 1, 0));	
 			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
 			

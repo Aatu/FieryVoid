@@ -47,7 +47,7 @@ class breachingpodbalosian extends FighterFlight{
 			$gun->displayName = "Light Particle Gun";
 			$fighter->addFrontSystem($gun);
 						
-			$fighter->addFrontSystem(new Marines(330, 30, 0, false)); //startarc, endarc, damagebonus, elite.
+			$fighter->addFrontSystem(new Marines(0, 360, 0, false)); //startarc, endarc, damagebonus, elite.
 			
 			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack			
             

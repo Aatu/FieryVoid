@@ -19,7 +19,7 @@ class breachingpodabbai extends FighterFlight{
         $this->jinkinglimit = 0;
         $this->turncost = 0.33;
 
-        $this->maxFlightSize = 6;//this is an unusual type of 'fighter', limit flight size.      
+        $this->maxFlightSize = 3;//this is an unusual type of 'fighter', limit flight size.      
 		$this->hangarRequired = 'assault shuttles'; //for fleet check
 		$this->unitSize = 1;        
         
@@ -42,7 +42,7 @@ class breachingpodabbai extends FighterFlight{
             $fighter->imagePath = "img/ships/abbaibreachingpod.png";
             $fighter->iconPath = "img/ships/abbaibreachingpod_Large.png";
             
-			$fighter->addFrontSystem(new Marines(330, 30, 0, false)); //startarc, endarc, damagebonus, elite.
+			$fighter->addFrontSystem(new Marines(0, 360, 0, false)); //startarc, endarc, damagebonus, elite.
 
        	    //Grav Shield Level 1
             $fighter->addAftSystem(new FtrShield(1, 0, 360));

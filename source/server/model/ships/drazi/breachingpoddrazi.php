@@ -45,7 +45,7 @@ class breachingpoddrazi extends FighterFlight{
 			$fighter->iconPath = "img/ships/drazi/DraziTroshanthi_large.png";
 
 			$fighter->addFrontSystem(new PairedParticleGun(330, 30, 2, 2)); //2 gun d6+2			
-			$fighter->addFrontSystem(new Marines(330, 30, 0, false)); //startarc, endarc, damagebonus, elite.
+			$fighter->addFrontSystem(new Marines(0, 360, 0, false)); //startarc, endarc, damagebonus, elite.
 			
 			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
 			
