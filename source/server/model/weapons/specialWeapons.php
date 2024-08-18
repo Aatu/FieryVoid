@@ -4490,6 +4490,7 @@ class PsychicField extends Weapon{ //Thirdspace weapons that operates similar to
     protected $ewBoosted = true;	
 	
 	protected $targetList = array(); //weapon will hit units on this list rather than target from firing order; filled by PsychicField handler!
+	private $alreadyEngaged = array();
 	
 	
  	protected $possibleCriticals = array( //no point in range reduced crit; but reduced damage is really nasty for this weapon!
@@ -4599,11 +4600,12 @@ class PsychicField extends Weapon{ //Thirdspace weapons that operates similar to
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!	
 		$shooter = $gamedata->getShipById($fireOrder->shooterid);
 		if ($ship->team == $shooter->team) return; //No effect on other Thirdspace ships.
-		
+		if (isset($this->alreadyEngaged[$ship->id])) return; // Ignore flights that have already been had crits applied.
+			
 		$boostlevel = $this->getBoostLevel($gamedata->turn);
 		
-		$effectIni = Dice::d(3,1)+$boostlevel;//strength of effect: -5 to -30 initiative.
-		$effecttohit = Dice::d(2,1)+$boostlevel;//strength of effect: -5 to -25 to hit chances.
+		$effectIni = Dice::d(3,1)+$boostlevel;//strength of effect: -5 to -15 base, up to -30 with boost. initiative.
+		$effecttohit = Dice::d(2,1)+$boostlevel;//strength of effect: -5 to -10 base, up to -25 with boost.
 		$effectCrit = $effectIni +2;
 				
 		$fireOrder->pubnotes .= "<br> Enemy ships have Initiative reduced, and suffer a penalty to hit next turn or a potential Critical.  Initiative and Offensive Bonus reduced for enemy fighters.";
@@ -4627,6 +4629,7 @@ class PsychicField extends Weapon{ //Thirdspace weapons that operates similar to
 					$crit->updated = true;
 			        	$firstFighter->criticals[] =  $crit;
 				}
+		    $this->alreadyEngaged[$ship->id] = true; // Mark engaged				
 			}
 		}else if ($system instanceof Structure){ //Give penalty to hit next turn if it hits structure.
 			$CnC = $ship->getSystemByName("CnC");
@@ -4640,16 +4643,16 @@ class PsychicField extends Weapon{ //Thirdspace weapons that operates similar to
 					$crit->updated = true;
 			        $CnC->criticals[] =  $crit;
 					}    
-			} else { //Force critical roll if it hits something other than structure.
-			$CnC = $ship->getSystemByName("CnC");			
-				for($i=1; $i<=$effectIni;$i++){
-					$crit = new tmpinidown(-1, $ship->id, $CnC->id, 'tmpinidown', $gamedata->turn); 
-					$crit->updated = true;
-			        $CnC->criticals[] =  $crit;			
+				}else { //Force critical roll if it hits something other than structure.
+					$CnC = $ship->getSystemByName("CnC");			
+					for($i=1; $i<=$effectIni;$i++){
+						$crit = new tmpinidown(-1, $ship->id, $CnC->id, 'tmpinidown', $gamedata->turn); 
+						$crit->updated = true;
+				        $CnC->criticals[] =  $crit;			
 					}
 					$system->forceCriticalRoll = true;
 					$system->critRollMod += $effectCrit;	//Add 3-8 modifier depending on $effectIni roll and boost (halved for Ancients). 		
-					}			
+				}			
 	} //endof function onDamagedSystem	
 		
 		
@@ -6274,7 +6277,6 @@ class Marines extends Weapon{
 							Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note pod attached this turn.	
 						}	
 					}else{ //Has targeted ship generally, not a specific system.  Apply crit to CnC.
-//						$cnc = $target->getSystemByName("CnC");
 						$fireOrder->pubnotes .= "<br>Roll(Mod): $deliveryRoll($rollMod) - A marine unit will attempt sabotage operations on enemy ship next turn.";								
 							if($cnc){
 									if($this->eliteMarines){//Are Marines Elite?
@@ -6295,8 +6297,7 @@ class Marines extends Weapon{
 								
 				case 2://Capture
 
-					$fireOrder->pubnotes .= "<br>Roll(Mod): $deliveryRoll($rollMod) - A marine unit will attempt to capture enemy ship next turn.";
-//					$cnc = $ship->getSystemByName("CnC");				
+					$fireOrder->pubnotes .= "<br>Roll(Mod): $deliveryRoll($rollMod) - A marine unit will attempt to capture enemy ship next turn.";			
 						if($cnc){
 								if($this->eliteMarines){//Are Marines Elite?
 									$crit = new CaptureShipElite(-1, $ship->id, $cnc->id, 'CaptureShipElite', $gamedata->turn+1); //Takes effect next turn.
@@ -6316,8 +6317,7 @@ class Marines extends Weapon{
 				
 				case 3://Rescue
 
-					$fireOrder->pubnotes .= "<br>Roll(Mod): $deliveryRoll($rollMod) - A marine unit will attempt their rescue mission next turn.";
-//					$cnc = $ship->getSystemByName("CnC");				
+					$fireOrder->pubnotes .= "<br>Roll(Mod): $deliveryRoll($rollMod) - A marine unit will attempt their rescue mission next turn.";			
 						if($cnc){
 								if($this->eliteMarines){//Are Marines Elite?
 									$crit = new RescueMissionElite(-1, $ship->id, $cnc->id, 'RescueMissionElite', $gamedata->turn+1); //Takes effect next turn.
