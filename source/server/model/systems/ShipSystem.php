@@ -314,25 +314,26 @@ class ShipSystem {
 
 			//Now apply effect based on the rolled dice!
 		if ($wreakHavocRoll <= 1) { 		    //Damage to a random primary system.
-				$maxDamage = $this->getRemainingHealth();
-				$damageDealt = Dice::d(6, 1);
-				$damageCaused = min($damageDealt, $maxDamage); //Don't cause more damage than system's health remaining.			
-							
+
 				$attackedSystem = null;  // Initialize $attackedSystem to null
 				do {
 				    $attackedSystem = $ship->getHitSystem($ship, $newFireOrder, $rammingSystem, $gamedata, 0);
 				} while ($attackedSystem instanceof Structure);// Re-roll $attackedSystem until it is not an instance of Structure.
+	
+				$maxDamage = $attackedSystem->getRemainingHealth();
+				$damageDealt = Dice::d(6, 1);
+				$damageCaused = min($damageDealt, $maxDamage); //Don't cause more damage than system's health remaining.					
 
 				$newFireOrder->pubnotes = "<br>Roll(Mod): $wreakHavocRoll($rollMod) - A marine unit deals $damageDealt damage to the " . $attackedSystem->displayName .".";
 						
 				if ($damageDealt >= $maxDamage){	//Deals enough to destroy system	        
 					$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $attackedSystem->id, $damageCaused, 0, 0, -1, true, false, "", "Wreak Havoc");
 					$damageEntry->updated = true;
-					$this->damage[] = $damageEntry;			
+					$attackedSystem->damage[] = $damageEntry;			
 				}else{ //Not enough to destroy, just damage system instead.
 					$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $attackedSystem->id, $damageCaused, 0, 0, -1, false, false, "", "Wreak Havoc");
 					$damageEntry->updated = true;
-					$this->damage[] = $damageEntry;
+					$attackedSystem->damage[] = $damageEntry;
 					$crits = array(); 
 					$crits = $attackedSystem->testCritical($ship, $gamedata, $crits);//Damage caused, need to force critical test outside normal routine
 				}
