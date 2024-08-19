@@ -37758,8 +37758,7 @@ var findFriendForTwo = function findFriendForTwo(two, systems) {
        if (onePick.picked.length === 1) {
            return {three: [two[0], onePick.picked[0], two[1]], remainingSystems: onePick.remaining}
        }
-    
-       if (systems.length > 0) {
+        if (systems.length > 0) {
            return {three: [two[0], systems.pop(), two[1]], remainingSystems: systems}
        }
     */
