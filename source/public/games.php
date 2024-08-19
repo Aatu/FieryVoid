@@ -62,8 +62,9 @@ if (isset($_SESSION["user"])) {
         <br>
        -->
 		
+		<big><b>Welcome to Fiery Void, an adaption of the 'Babylon 5 Wars' tabletop game, by Agents of Gaming!</b></big>
 
-		---------- <b>LATEST NEWS - August 2024</b> ----------
+		<br><br>---------- <b>LATEST NEWS - August 2024</b> ----------
 	    <br><b>Deleting inactive games</b>: delay increased to 5 days (test games are useful, and picking up games after weekend is a thing!)
 		<br><b>Nexus Dalithorn rebalance</b> - by Geoffrey
 	    <br><b>Boarding Actions</b> - Added Breaching Pods with Marines to relevant factions - by Dougie.
@@ -82,8 +83,6 @@ if (isset($_SESSION["user"])) {
 -->	    
 		
 	    
-        <br><br>
-        Enjoy and report BUGS on Discord or Facebook. Also force reload <big><font color="red">(<b><u>ctrl+F5</u></b>)</big> <b>whenever something weird happens</b></font>.
 
         <br><br>---------- <b>HOW TO GET STARTED</b> ----------
 		<br><a href="files/Fiery_Void_-_How_to_Play.docx">How to Play Fiery Void</a> - Text tutorial (friendlier than full blown game manual - to help you get started quickly!)
@@ -96,6 +95,8 @@ if (isset($_SESSION["user"])) {
 	    <br><a href="files/FV_FAQ.txt">Fiery Void FAQ</a> - Differences from B5 Wars, known bugs... look here if something works contrary to how you expect it to!
 		<br><a href="files/enhancements_list.txt">Common Systems & Enhancement List</a> - Details of enhancements and other common systems e.g. Boarding / Missiles	    
 		<br><a href="http://b5warsvault.wikidot.com/" target="_blank">B5Wars Vault</a> - Full B5Wars <a href="http://www.tesarta.com/b5wars/aogwarskitchensink.pdf" target="_blank">rules</a> and LOTS of other related B5W stuff
+        
+        <br><br>Enjoy and report BUGS on Discord or Facebook. Also force reload <big><font color="red">(<b><u>ctrl+F5</u></b>)</big> <b>whenever something weird happens</b></font>.		
 				
 		<br><br>---------- <b>ACCOUNT MANAGEMENT</b> ----------
         <br><a href="chpass.php">Change password</a> of your account
