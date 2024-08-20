@@ -1,7 +1,7 @@
-FROM php:7.2-fpm-alpine
+FROM php:8.2-fpm
 
-RUN apk update && apk add coreutils findutils sed bash rsync inotify-tools \
-    && docker-php-ext-install -j$(nproc) mysqli pdo_mysql
+RUN apt update && apt install -y coreutils findutils sed bash rsync inotify-tools
+RUN docker-php-ext-install mysqli && docker-php-ext-enable mysqli
 
 WORKDIR /usr/src/fieryvoid
 
