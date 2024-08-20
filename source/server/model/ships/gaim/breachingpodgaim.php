@@ -19,7 +19,8 @@ class breachingpodgaim extends FighterFlight{
         $this->jinkinglimit = 0;
         $this->turncost = 0.33;
 		$this->turndelay = 0;
-        
+
+        $this->maxFlightSize = 3;//this is an unusual type of 'fighter', limit flight size.         
         $this->pivotcost = 2; //shuttles have pivot cost higher
 		$this->hangarRequired = 'assault shuttles'; //for fleet check
 		
@@ -43,7 +44,7 @@ class breachingpodgaim extends FighterFlight{
             $fighter->imagePath = "img/ships/GaimIttaka.png";
             $fighter->iconPath = "img/ships/GaimIttaka_large.png";
 
-			$fighter->addFrontSystem(new Marines(330, 30, 0, true)); //startarc, endarc, damagebonus, elite.
+			$fighter->addFrontSystem(new Marines(0, 360, 0, true)); //startarc, endarc, damagebonus, elite.
 			
 			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack			
             

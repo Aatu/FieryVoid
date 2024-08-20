@@ -19,7 +19,7 @@ class breachingpodmarkab extends FighterFlight{
         $this->jinkinglimit = 0;
         $this->turncost = 0.33;
 
-        $this->maxFlightSize = 6;//this is an unusual type of 'fighter', limit flight size.      
+        $this->maxFlightSize = 3;//this is an unusual type of 'fighter', limit flight size.      
 		$this->hangarRequired = 'assault shuttles'; //for fleet check
 		$this->unitSize = 1; 
         
@@ -48,7 +48,7 @@ class breachingpodmarkab extends FighterFlight{
             $fighter->imagePath = "img/ships/MarkabDojafa.png";
             $fighter->iconPath = "img/ships/MarkabDojafa_large.png";
 
-			$fighter->addFrontSystem(new Marines(330, 30, 0, false)); //startarc, endarc, damagebonus, elite.
+			$fighter->addFrontSystem(new Marines(0, 360, 0, false)); //startarc, endarc, damagebonus, elite.
 		
 			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
 			
