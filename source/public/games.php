@@ -73,6 +73,8 @@ if (isset($_SESSION["user"])) {
 	    <br><b>Thirdspace Shield Rework</b> - Can now transfer shields between arcs!
 	    <br><b>Abbai Shield Generator</b> - First ally-targeting weapon :)
 
+		 <br><br>---------- <b>update 20th of August</b> ---------- 
+	    <br><b>bugfixes</b> - general boarding actions polishing - remember to ctrl+F5!
        
 
 <!--	        
