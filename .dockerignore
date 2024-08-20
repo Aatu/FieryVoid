@@ -17,3 +17,5 @@ composer.phar
 
 source/server/varconfig.php
 .env
+
+node_modules
