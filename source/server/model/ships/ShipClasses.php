@@ -72,6 +72,8 @@ class BaseShip {
     public $rolling = false;
 	public $EMHardened = false; //EM Hardening (Ipsha have it) - some weapons would check for this value!
 	public $jammerMissile = false; //Marker for when ships are affected by Jammer Missile BDEW.
+	
+	public $ignoreManoeuvreMods = false;	
 		
 
     public $team;
@@ -179,6 +181,13 @@ class BaseShip {
 		
 		//destroyed ship gets no value
 		if($this->isDestroyed()) $effectiveValue = 0;
+			
+		$cnc = $this->getSystemByName("CnC");
+		if($cnc){
+			foreach($cnc->criticals as $critDisabled){
+				if($critDisabled->phpclass == "ShipDisabled") $effectiveValue = 0;//Captured, no value!					
+			}
+		}		
 		
 		if($effectiveValue>0){ //check for critical systems: Sensors, Engine, C&C - if none are active, reduce combat value appropriately
 			$cncPresent = false;
@@ -1737,13 +1746,13 @@ class BaseShip {
 
 
     public function getHitSystem($shooter, $fireOrder, $weapon, $gamedata, $location = null){
-        /*if something has to choose system by firing position, use getHitSystemPos instead*/
+        /*if something has to choose system by firing position, use getHitSystemPos instead*/           
         if (isset($this->hitChart[0])){
-            $system = $this->getHitSystemByTable($shooter, $fireOrder, $weapon, $location);
+            $system = $this->getHitSystemByTable($shooter, $fireOrder, $weapon, $location);             
         }
-        else {
-            $system = $this->getHitSystemByDice($shooter, $fireOrder, $weapon, $location);
-        }
+        else {        	
+            $system = $this->getHitSystemByDice($shooter, $fireOrder, $weapon, $location);            
+        }          
         return $system;
     }
 
@@ -1756,17 +1765,15 @@ class BaseShip {
         //$location_different = false; //target system may be on different location?
         //$location_different_array = array(); //array(location,system) if so indicated
         $systems = array();
-
+ 
         if ($fire->calledid != -1){
             $system = $this->getSystemById($fire->calledid);
         }
 
         if ($system != null && !$system->isDestroyed()) return $system; //if destroted, allocate s if it wasn't called
-
         if ($location === null) {
             $location = $this->getHitSectionChoice($shooter, $fire, $weapon);
-        }
-		
+        }	
 		//15.09.2023 - moved bearing calculation here, as it will be needed earlier than previously
 		$bearing = 0;
 		//this will ignore non-standard direction of impact - like with Flash collateral damage. This information is simply not available here, and IMO not important enough to rewrite entire chain if calls to pass
@@ -1777,8 +1784,7 @@ class BaseShip {
 		}else{
 			$bearing = $this->getBearingOnUnit($shooter);	
 		}		
-
-        $hitChart = $this->hitChart[$location];
+        $hitChart = $this->hitChart[$location];             
         $rngTotal = 20; //standard hit chart has 20 possible locations
         if($weapon->damageType == 'Flash'){ //Flash - change hit chart! - only undestroyed systems
             $hitChart = array();
@@ -1802,7 +1808,7 @@ class BaseShip {
             }
             if($rngTotal ==0) return $this->getStructureSystem(0);//there is nothing here! assign to Structure...
         }
-        $noPrimaryHits = ($weapon->noPrimaryHits || ($weapon->damageType == 'Piercing'));
+        $noPrimaryHits = ($weapon->noPrimaryHits || ($weapon->damageType == 'Piercing'));       
         if($noPrimaryHits){ //change hit chart! - no PRIMARY hits!
             $hitChart = array();
             //use only non-destroyed systems on section hit
@@ -1826,7 +1832,6 @@ class BaseShip {
             if($rngTotal ==0) return $this->getStructureSystem($location);//there is nothing here! return facing Structure anyway, overkill methods will handle it
         }
 
-
         //now choose system from chart...
         $roll = Dice::d($rngTotal);
         $name = '';
@@ -1849,7 +1854,7 @@ class BaseShip {
                 }
             }
         }
-
+ 
         if($name == 'Primary'){ //redirect to PRIMARY!
             return $this->getHitSystemByTable($shooter, $fire, $weapon, 0);
         }
@@ -1858,7 +1863,7 @@ class BaseShip {
             $struct = $this->getStructureSystem($location);
             return $struct;
         }
-		
+ 		
 		//prioritize in-arc systems - 13.09.2021
 		$systemsInArc = array();
 		
@@ -1873,6 +1878,7 @@ class BaseShip {
 			$bearing = $this->getBearingOnUnit($shooter);	
 		}		
 		*/
+		
 		foreach($systems as $systemInArc){
 			if(mathlib::isInArc($bearing, $systemInArc->startArc, $systemInArc->endArc)){ //actually this system is in relevant arc!
 				$systemsInArc[] = $systemInArc;
@@ -1883,6 +1889,7 @@ class BaseShip {
         //now choose one of equal eligible systems (they're already known to be undestroyed... well, they may be destroyed, but then they're to be returned anyway)
         $roll = Dice::d(sizeof($systems));
         $system = $systems[$roll-1];
+	        
         return $system;
 
     } //end of function getHitSystemByTable
@@ -2683,7 +2690,16 @@ class SixSidedShip extends BaseShip{
         $locs[] = array("loc" => 31, "min" => 270, "max" => 330, "profile" => $this->sideDefense);
 
         return $locs;
-    }		
+    }
+    
+	//always redefine $this->data, variable information goes there...
+	public function stripForJson(){
+        $strippedSystem = parent::stripForJson();
+        $strippedSystem->ignoreManoeuvreMods = $this->ignoreManoeuvreMods; 
+		
+        return $strippedSystem;
+    }    
+    		
 } //end of SixSidedShip
 
 //Vorlon Capital Ships are made using 6-sided layout - with side-aft being actual sides, and side-front a pseudo-section to fit Lightning Cannons that do not fall off
@@ -2739,5 +2755,84 @@ class VreeHCV extends HeavyCombatVessel{
         
 } //end of VreeHCV
 
+/*
+class MindriderCapital extends BaseShip{
+	
+	public $ignoreManoeuvreMods = true;
+
+    public function getLocations(){
+        $locs = array();
+        $locs[] = array("loc" => 1, "min" => 270, "max" => 360, "profile" => $this->forwardDefense);
+        $locs[] = array("loc" => 4, "min" => 0, "max" => 90, "profile" => $this->sideDefense);
+        $locs[] = array("loc" => 2, "min" => 90, "max" => 180, "profile" => $this->forwardDefense);
+        $locs[] = array("loc" => 3, "min" => 180, "max" => 270, "profile" => $this->sideDefense);
+        return $locs;
+    }
+
+	//always redefine $this->data, variable information goes there...
+	public function stripForJson(){
+        $strippedSystem = parent::stripForJson();
+        $strippedSystem->ignoreManoeuvreMods = $this->ignoreManoeuvreMods; 
+		
+        return $strippedSystem;
+    }
+
+
+}
+
+class MindriderHCV extends SixSidedShip{
+
+	public $shipSizeClass = 2;	
+	public $ignoreManoeuvreMods = true;
+	
+
+    function __construct($id, $userid, $name, $slot){
+        parent::__construct($id, $userid, $name,$slot);
+    }
+
+    protected function addLeftSystem($system){//Left = Left Aft
+        $this->addLeftAftSystem($system);
+    }
+    protected function addRightSystem($system){//Right = Right Aft
+        $this->addRightAftSystem($system);
+    }
+
+    public function getLocations(){
+        //debug::log("getLocations");         
+        $locs = array();
+
+		//locations 41 and 31 CANNOT be targeted, because it would be picked if PRIMARY Structure was more healthy than side
+        $locs[] = array("loc" => 2, "min" => 120, "max" => 240, "profile" => $this->forwardDefense);
+        $locs[] = array("loc" => 32, "min" => 240, "max" => 330, "profile" => $this->sideDefense);
+        $locs[] = array("loc" => 42, "min" => 30, "max" => 120, "profile" => $this->sideDefense);
+        $locs[] = array("loc" => 32, "min" => 330, "max" => 0, "profile" => $this->sideDefense);
+        $locs[] = array("loc" => 42, "min" => 0, "max" => 30, "profile" => $this->sideDefense);        
+
+        return $locs;
+    }
+
+}//endof MindriderHCV
+
+
+class MindriderMCV extends MediumShip{
+	
+	public $ignoreManoeuvreMods = true;
+	private $mustPivot = true;	
+
+    function __construct($id, $userid, $name, $slot){
+        parent::__construct($id, $userid, $name,$slot);
+    }
+
+	//always redefine $this->data, variable information goes there...
+	public function stripForJson(){
+        $strippedSystem = parent::stripForJson();
+        $strippedSystem->ignoreManoeuvreMods = $this->ignoreManoeuvreMods; 
+        $strippedSystem->mustPivot = $this->mustPivot;		
+        return $strippedSystem;
+    }
+
+
+}//endof MindriderMCV
+*/
     
 ?>

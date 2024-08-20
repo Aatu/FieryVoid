@@ -5,6 +5,73 @@ Their main intent is to be scenario option, or a campaign tool where they can re
 
 NOTE: some FV enhancements represent regular unit options rather than proper enhancements. Fighter Navigator is good example, as well as variable missile loads.
 
+For starters - general description of missiles and boarding actions, as complicated systems that are common for multiple factions:
+
+MISSILES
+--------
+
+General notes: ships usually come preloaded with missiles (usually Basic), and any missiles You buy is on top of that. Also, while amount of any given missile You can buy is limited by magazine size, total amount of missiles is not. 
+This means Your missile magazine may show more missiles available than it can actually hold. However, You cannot actually LAUNCH more missiles than magazine can hold - total number of launches is tracked. So extra missiles will provide You with extra variety (at a price ;) ), but not actual extra missiles.
+This is particularly important for fighters (as ships' cavernous magazines are unlikely to run out during a battle). You are encouraged to observetotal amount of missiles a fighter can have, but if You do not (hether by omission or intentionally) - You will get extra missile variety, but no extra missiles.
+Note that fighters usually start with empty magazine (although some missile entry is present, for technical reasons).
+Any missile available in magazine can be fired by any launcher (that is capable of firing it), missiles are not directly tied to particular mounts. This is different for weapons that do store ammo directly on mount - but such weapons usually can only hold one kind of ammo.
+Missiles (and Navigators, for fighters) are bought as enhancements despite being standard options (for technical reasons).
+
+Not all tabletop missiles made it to Fiery Void - some proved just too difficult to implement!
+
+Shipborne missiles' built-in guidance package is often combined into weapons' Fire control, rather than being kept separate.
+
+Enhancement names for ammo usually contain year available (for primary and other races, if this differs - with primary usually bein Kor-Lyan ;) ). Game does not enforce anything in regard to this information it's up to player to refrain from using anachronic weapons (or not).
+
+SHIPBORNE MISSILES (with normal Range, Damage and Fire Control displayed)
+ - class B - Basic Missile - (Range 20 - Damage 20 - Fire Control: +3/+3/+3) --- The name says it all, default loadout present on most ships. All other shipborne missiles have the same data except attributes specifically indicated. Missiles do NOT use firing ships' OEW.
+ - class A - Antifighter Missile - (Range 15 - Damage 15 - Fire Control: +6/+3/+3) --- It's classified as light missile - which is meaningless for regular shipborne launchers, but means it's usable by light launchers (...which is the whole point).
+ - class C - Chaff missile - (Range 20 - Damage 0 - Fire Control: +3/+3/+3) --- When a chaff missile hits, any non-ballistic fire from that unit against the missile launching ship on current turn attracts a -15 intercept rating.
+ - class D - Light Missile - (Range 15 - Damage 12 - Fire Control: +3/+3/+3) --- Sub-standard missile, essentially used only by factions without access to Basic missile (e.g. Alacans, early Narn).
+ - class F - Flash Missile - (Range 20 - Damage 20 - Fire Control: +3/+3/+3) --- Deals damage in FLASH mode.
+ - class H - Heavy Missile - (Range 0 - Damage 0 - Fire Control: +0/+3/+3) --- Heavier, but shorter-ranged version of Basic missile.
+ - class I - Interceptor Missile - (Range 10 - Damage 30 - Fire Control: -/-/-) --- Can only fire defensively for -30 intercept rating against other ballistic weapons.  Launchers with over 1 turn cooldowns need to be set to intercept manually in Firing Phase to use I-missile. 
+ - class L - Long Range Missile - (Range 30 - Damage 15 - Fire Control: +3/+3/+3) --- Longer-ranged version of Basic missile, but deals less damage.
+ - class K - Starburst Missile - (Range 15 - Damage 10*[D3+3] - Fire Control: +3/+3/+3) --- Deals damage in PULSE mode, with each missile that hits generating D3+3 hits.
+ - class KK - Kinetic Missile - (Range 60 [but penalty after 15 hexes] - Damage 18 - Fire Control: +3/+3/+3) --- Orieni only.  Deals 18 MATTER damage, and attracts a -5 per hex range penalty AFTER 15 hexes up to it's maximum range.
+ - class J - Jammer Missile - (Range 15 - Damage 0 - Fire Control: -/-/-) --- Kor-Lyan only. Automatically hits target hex and emits a burst of sensor static.  All ships within 5 hexes (including enemies) receive two points of Blanket DEW.  Note - This cannot be combined with Blanket DEW protection from other sources, and only one jamming effect can apply to a unit per turn.
+ - class M - Multiwarhead Missile - (Range 20 - Damage 10*6 - Fire Control: +3/-/-) --- Can only target fighters.  Splits into 6 submunitions which will each engage a separate fighter in flight.  Each submunition rolls to hit and scores damage separately, if there are fewer than 6 fighters on impact excess submunitions are lost) 
+ - class P - Piercing Missile - (Range 20 - Damage 30 - Fire Control: -/+3/+3) --- Does damage in PIERCING mode, cannot be fired at fighters.
+ - class S - Stealth Missile - (Range 20 - Damage 20- Fire Control: +3/+3/+3) --- Kor-Lyan only.  Target of this missile is not revealed to the enemy player.
+ - class X - HARM Missile - (Range 20 - Damage 0 - Fire Control: -/+3/+3) ---  Hit chance is increased by 5% per point of offensive EW the target ship is using (e.g. OEW and CCEW). If it hits, reduces scanner output by D6 points the FOLLOWING turn (a difference from tabletop).  
+
+FIGHTERBORNE MISSILES
+ - class FB - Basic Fighter Missile (Range 10 - Damage 10- Offensive Bonus: +3/+3/+3)
+ - class FD - Dropout Missile - (Range 10 - Damage 6 - Offensive Bonus: +3/+1/+1) - Adds cumulative dropout penalty of -6 on target hit (-3 on superheavy fighters). Does not force a roll, just increases chance of dropout under regular rules.
+ - class FH - Heavy Fighter Missile - (Range 5 - Damage 15 - Offensive Bonus: +1/+3/+3) - Limited to 1 per fighter (2 per SHF).
+ - class FL - Long Range Fighter Missile - (Range 15 - Damage 8 - Offensive Bonus: +3/+3/+3)
+ - class FY - Dogfight Missile - (Range 8 - Damage 6 - Offensive Bonus: +3/+3/+3) - In tabletop it can be snap fired in direct fire phase, but this ability is not present in FV.
+
+
+BOARDING ACTIONS WITH MARINES
+--------
+
+Many factions have access to boarding actions through the use of Breaching Pods, which come equipped with a 'Marines' weapon system and two contingents of Marines aboard as standard.  During the Firing Phase, Pods can attempt to attach to enemy ships in the same hex (and in arc) and deliver Marines to undertake a selection of missions (Sabotage, Capture Ship and Rescue).
+
+ATTACHING A POD:
+In all cases the first step will be the same, attempt to attach a Breaching Pod to the target ship.  Pods automatically attach to enemy ships they are moving faster than, providing the speed difference is not higher that their thrust rating.  Where the enemy ship is moving faster than the Pod they will need to roll for success, with a base chance of 100% and -10% per point of speed difference.  The LLort treat speed difference as one point lower for attaching a pod.
+
+DELIVERING THE MARINES:
+Once attached, the Pod will attempt to deliver the Marines, again this part is the same regardless of which mission has been selected.  The Marines have a base chance of 50% of successfully boording the vessel 5 or under on a d10), if they roll over there is a chance that the marines may be lost.  Otherwise they will return to the Pod and can attempt to Board again in future turns.  A number of modifiers are sometimes applied to this roll as well depending on circumstances, and these have been summarised below:
+ 	+20% success - Yolu-specific bonus
+	+10% success - Elite marines (e.g. Gaim or Narn) / Llort Breaching Pod / Target vessel has Poor Crew / Attempting to board a Primary section after an external section has been destroyed
+	-10% success - Narn or Gaim Defenders / Target vessel has Elite Crew or under the effects of Markab's Religious Fervor
+Note - The Combat Log will display the value of any modifiers along with the number rolled, negative modifiers denote increased success rate, positive indicate decreased success rate for Marine missions.
+
+MARINE MISSIONS:
+Marines that successfully board a vessel will then attempt to carry out their intended missions, which are detailed below.  Like the Delivery Roll, these can attract several modifiers depending on circumstances:
+	+10% success - Elite Marines (e.g. Gaim or Narn) / Target vessel has Poor Crew  
+	-10% success - Narn or Gaim Defenders / Target vessel has Elite Crew or under the effects of Markab's Religious Fervor
+In addition, for Sabotage and Rescue missions there is an additional -10% added to the roll for every two turns that the Marines are active aboard the enemy vessel.
+	- Sabotage: Marines can either attempt to damage a specific system on an enemy ships (by making a called shot against it using the usual rules) or disrupt the ship more generally (e.g. minor damage to a Primary system, EW/Initiative/Thrust/Defence Profile penalties) by targeting it in the normal fashion.  In both cases, Marines that are successfully delivered will roll on a d10 the following turn to see how successful their mission has been.  Note - Marines which target a specific system and are successful in destroying it will then continue to Sabotage the ship generally providing they have not been eliminated.
+	- Capture Ship: Marines will fight the defending marine contingents directly (the number of current Marines on a ship can be seen in its CnC tooltip!).  From the end of each Firing phase a marine unit has boarded they will roll separately to see if they a) eliminate a defender (50% base chance) and b) if they themselves are eliminated (25% base chance).  If the attacking marines manage to defeat all defenders during a scenario, the enemy ship will immediately be disabled for the remainder of the battle so long as there are still at least one attacking marine unit on board.
+	- Rescue Mission: For scenarios only, Marines will attach their pod and attempt to board as normal.  Then, from the following turn, the Combat Log will provide players with updates on the progress of their Rescue mission.
+
 
 SHIP ENHANCEMENTS:
 
