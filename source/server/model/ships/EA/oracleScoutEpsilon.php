@@ -11,6 +11,7 @@ class OracleScoutEpsilon extends BaseShip{
         $this->shipClass = "Oracle Scout Cruiser (Epsilon)";
 			$this->unofficial = true;
         $this->shipSizeClass = 3;
+        $this->limited = 33;        
 //		$this->occurence = "rare";
 //	        $this->variantOf = "Oracle Scout Cruiser (Gamma)";
 	    
