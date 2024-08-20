@@ -19,7 +19,8 @@ class StreibBreachingPod extends FighterFlight{
 	    $this->gravitic = true;
         $this->turncost = 0.33;
         $this->turndelaycost = 0.33;
-        
+
+        $this->maxFlightSize = 3;//this is an unusual type of 'fighter', limit flight size.          
 		$this->hangarRequired = 'shuttles'; //for fleet check
 		$this->iniativebonus = 8*5;
       
@@ -45,7 +46,7 @@ class StreibBreachingPod extends FighterFlight{
 			
 				
 			$fighter->addFrontSystem(new LtEMWaveDisruptor(240, 120, 1));
-			$fighter->addFrontSystem(new Marines(330, 30, 0, false)); //startarc, endarc, damagebonus, elite.			
+			$fighter->addFrontSystem(new Marines(0, 360, 0, false)); //startarc, endarc, damagebonus, elite.			
 
 			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
 			

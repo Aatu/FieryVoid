@@ -26,7 +26,7 @@ class ThirdspaceCarrier extends BaseShip{
         $this->sideDefense = 20;
         
         $this->turncost = 1.5;
-        $this->turndelaycost = 1.5;
+        $this->turndelaycost = 1;
         $this->accelcost = 6;
         $this->rollcost = 6;
         $this->pivotcost = 4;
@@ -47,7 +47,7 @@ class ThirdspaceCarrier extends BaseShip{
         $this->addPrimarySystem(new ThirdspaceSelfRepair(7, 16, 8)); //armor, structure, output 
 		$this->addPrimarySystem(new JumpEngine(6, 24, 4, 7));//Presumably have access to hyperspace, or possess some other form of FTL travel that this system represents.          		  		
       
-		$this->addPrimarySystem(new ThirdspaceShield(2, 280, 280, 210, 330, 'L'));		
+		$this->addPrimarySystem(new ThirdspaceShield(2, 280, 140, 210, 330, 'L'));		
 
         $this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 240, 60));
         $this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 240, 60));
@@ -58,7 +58,7 @@ class ThirdspaceCarrier extends BaseShip{
         $this->addFrontSystem(new GraviticThruster(6, 20, 0, 8, 1));
         $this->addFrontSystem(new GraviticThruster(6, 20, 0, 8, 1));           
 			
-		$this->addPrimarySystem(new ThirdspaceShield(2, 140, 140, 330, 30, 'F'));		
+		$this->addPrimarySystem(new ThirdspaceShield(2, 140, 70, 330, 30, 'F'));		
 	
         $this->addAftSystem(new PsionicConcentrator(4, 0, 0, 120, 300)); 
         $this->addAftSystem(new PsionicConcentrator(4, 0, 0, 120, 300));
@@ -72,7 +72,7 @@ class ThirdspaceCarrier extends BaseShip{
         $this->addAftSystem(new GraviticThruster(5, 24, 0, 8, 2));       
        
        	
-		$this->addPrimarySystem(new ThirdspaceShield(2, 140, 140, 150, 210, 'A'));
+		$this->addPrimarySystem(new ThirdspaceShield(2, 140, 70, 150, 210, 'A'));
 		$this->addLeftSystem(new PsionicLance(5, 0, 0, 240, 360));
 		$this->addLeftSystem(new PsionicLance(5, 0, 0, 180, 300));   		                  
         $this->addLeftSystem(new PsionicConcentrator(4, 0, 0, 180, 300));
@@ -90,7 +90,7 @@ class ThirdspaceCarrier extends BaseShip{
         $this->addLeftSystem($LCVRail);                              
             
             	
-		$this->addPrimarySystem(new ThirdspaceShield(2, 280, 280, 30, 150, 'R'));
+		$this->addPrimarySystem(new ThirdspaceShield(2, 280, 140, 30, 150, 'R'));
  		$this->addRightSystem(new PsionicLance(5, 0, 0, 0, 120));
  		$this->addRightSystem(new PsionicLance(5, 0, 0, 60, 180)); 		
         $this->addRightSystem(new PsionicConcentrator(4, 0, 0, 60, 180));                  

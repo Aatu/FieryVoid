@@ -1507,11 +1507,13 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 			}else{
 				$this->data["Special"] .= '<br>';
 			}
-			$this->data["Special"] .= 'Defensive mode automatically hits target hex and applies -10 intercept rating against all incoming enemy fire, and 2 damage reduction against Antimatter, Laser and Particle weapons attacks from that hex.';
+			$this->data["Special"] .= 'When firing in Defensive mode, target a hex with enemy ships whose fire you wish to affect during the Firing Phase.';
+			$this->data["Special"] .= '<br>The Plasma Web will automatically hit, then apply -10 intercept rating against all incoming enemy fire from that hex, plus 2 damage reduction against Antimatter, Laser and Particle weapons attacks.';
 			$this->data["Special"] .= '<br>To reduce the hit chance of ballistic weapons with Defensive Mode, target the hex from where the shot was launched.';			
 			$this->data["Special"] .= '<br>Offensive Mode targets a hex within 3 hexes of firing unit and deals D6+2 plasma damage to all fighters in that hex.';
-			$this->data["Special"] .= '<br>Offensive Mode requires 1 additional power either from boosting in Initial Orders phase or from power currently stored in plasma batteries during Firing Phase.';
-			$this->data["Special"] .= '<br>Plasma Webs are not cumulative. If several are targeted at the same hex in the same mode, only one will apply its effects'; 
+			$this->data["Special"] .= '<br>Offensive Mode requires 1 additional power either from boosting in Initial Orders or from power currently stored in Plasma Batteries during Firing Phase.';
+			$this->data["Special"] .= '<br>Plasma Webs are not cumulative. If several are targeted at the same hex in the same mode, only one will apply its effects';
+			$this->data["Special"] .= '<br>Plasma Webs will not persist to the following turn when fired in Offensive mode.'; 			 
 	 }
                
 		public function getDamage($fireOrder){
