@@ -636,8 +636,7 @@
 		
         <div id="halfphase">
             <canvas id="halfphasecanvas" width="50" height="50"></canvas>
-        </div>
-		
+        </div>		
         
         <div id="jink">
 			<div class="centercontainer">
@@ -645,7 +644,21 @@
             </div>
             <canvas id="jinkcanvas" width="40" height="40"></canvas>
         </div>
+
+        <div id="contraction">
+			<div class="centercontainer">
+                <span class="contractionvalue value centercontent">0</span>
+            </div>
+            <canvas id="contractioncanvas" width="40" height="40"></canvas>
+        </div>        
+
+        <div id="morecontraction">
+            <canvas id="morecontractioncanvas" width="16" height="16"></canvas>
+        </div>
         
+        <div id="lesscontraction">
+            <canvas id="lesscontractioncanvas" width="16" height="16"></canvas>
+        </div>
         
         <div id="cancel">
             <canvas id="cancelcanvas" width="30" height="30"></canvas>

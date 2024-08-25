@@ -112,6 +112,7 @@ shipManager.movement = {
             ship.currentturndelay = shipManager.movement.calculateCurrentTurndelay(ship);
             var shipwindow = $(".shipwindow_" + ship.id);
             //shipWindowManager.cancelAssignThrust(ship);
+            if(movement.type == "contract") shipManager.movement.amendContractValue(ship, -movement.value);//For Contraction, need to amend level.
         }
     },
 
@@ -794,7 +795,162 @@ shipManager.movement = {
             shipWindowManager.assignThrust(ship);
         }
     },
+
+
+
+    canContract: function canContract(ship, value) {
+        if (gamedata.gamephase != 2) return false;
+		var canContract = false;
+        var contraction = 0;
+		for (var i in ship.systems) {
+			var system = ship.systems[i];
+			if (system.hasOwnProperty('contraction')) {
+			    canContract = true;
+			    contraction = system.contraction;
+			    break;
+			}					
+		}		
+	    
+	    if (canContract == false) return false;
+        	
+		var remThrust = shipManager.movement.getRemainingEngineThrust(ship);
+		var speed = shipManager.movement.getSpeed(ship);	
+		var contractCostBase = Math.round(speed * ship.turncost); //turn cost should be 1.33
+		var contractCost = Math.max(2, contractCostBase); //Minimum of 2 thrust
 	
+		if(value == 1 && contractCost > remThrust) return false;//Not enough thrust to contract. 
+		if(value == -1 && contraction == 0) return false;	       
+        
+        return true;
+    },
+
+    getContraction: function getContraction(ship) {
+		var contraction = 0;
+
+	    for (var i in ship.movement) {
+	        var move = ship.movement[i];
+	        
+	        if (move.turn != gamedata.turn) continue;
+
+	        if (move.type == "contract") {
+				contraction += move.value;//Will +1 depending on Contraction.
+	        }
+	    }
+/*		
+		for (var i in ship.systems) {
+			var system = ship.systems[i];
+			if (system.hasOwnProperty('contraction')) {
+			    contraction = system.contraction;
+			    break;
+			}					
+		}	
+ */      	
+       	return contraction;
+    },
+
+    doContraction: function doContraction(ship, value) {
+        if (!shipManager.movement.canContract(ship, value)) return;
+
+		var remThrust = shipManager.movement.getRemainingEngineThrust(ship);
+		var speed = shipManager.movement.getSpeed(ship);	
+		var contractCostBase = Math.round(speed * ship.turncost); //turn cost should be 1.33
+		var contractCost = Math.max(2, contractCostBase);	//Minimum of 2 thrust        	
+
+        var lastMovement = ship.movement[ship.movement.length - 1];
+
+        var commit = false;
+        var assignedThrust = Array();
+        var requiredThrust = Array(contractCost, 0, 0, 0, 0);
+        
+        var lm = shipManager.movement.getLastCommitedMove(ship);
+
+        if (value < 0) {//Check if the decrease cancels an increase this turn, in which case just refund.
+            for (var i in ship.movement) {
+                var move = ship.movement[i];
+                if (move.turn != gamedata.turn) continue;
+
+                if (move.type == "contract") {
+                    ship.movement.splice(i, 1);
+                    shipManager.movement.amendContractValue(ship, value);
+                    break;
+                }
+            }
+		}else{                                
+     
+		    ship.movement[ship.movement.length] = {
+		        id: -1,
+		        type: "contract",
+		        position: lm.position,
+		        xOffset: lm.xOffset,
+		        yOffset: lm.yOffset,
+		        facing: lm.facing,
+		        heading: lm.heading,
+		        speed: lm.speed,
+		        animating: false,
+		        animated: true,
+		        animationtics: 0,
+		        requiredThrust: requiredThrust,
+		        assignedThrust: assignedThrust,
+		        commit: commit,
+		        preturn: false,
+		        at_initiative: shipManager.getIniativeOrder(ship),
+		        turn: gamedata.turn,
+		        forced: false,
+		        value: value
+		    };
+						
+
+		    shipWindowManager.assignThrust(ship);
+//            shipManager.movement.amendContractValue(ship, value);			    	        
+		}
+	
+    },
+
+
+	amendContractValue: function amendContractValue(ship, value){
+
+			for (var i in ship.systems) {
+				var system = ship.systems[i];
+				if (system.hasOwnProperty('contraction')) {
+				    system.contraction += value;
+				    if(system.contraction <= 0) system.contraction = 0;
+				    break;
+				}					
+			}	
+
+/*
+		var contractOnTurn = 0;
+		if(value == 1){		
+		    for (var i in ship.movement) {
+		        var move = ship.movement[i];
+		        
+		        if (move.turn != gamedata.turn) continue;
+
+		        if (move.type == "contract") {
+					contractOnTurn += move.value;
+		        }
+		    }
+
+				for (var i in ship.systems) {
+					var system = ship.systems[i];
+					if (system.hasOwnProperty('contraction')) {
+					    system.contraction = contractOnTurn;
+					    if(system.contraction <= 0) system.contraction = 0;
+					    break;
+					}					
+				}	
+		}else{ //When a move is deleted basically.
+			for (var i in ship.systems) {
+				var system = ship.systems[i];
+				if (system.hasOwnProperty('contraction')) {
+					system.contraction += value;
+					if(system.contraction <= 0) system.contraction = 0;
+					break;
+				}					
+			}				
+		}
+*/
+	},
 	
     canTurnIntoPivot: function canTurnIntoPivot(ship, right) {
         if (gamedata.gamephase != 2) return false;
@@ -826,8 +982,12 @@ shipManager.movement = {
     
     
     doIntoPivotTurn: function doIntoPivotTurn(ship, right) {
+    	if(ship.hasOwnProperty('mindrider')) ship.mindrider = false;//Aug 2024 - Mindrider thurster rules don't apply to turnintopivots
+    	
         var requiredThrust = shipManager.movement.calculateRequiredThrust(ship, right);
         var lastMovement = ship.movement[ship.movement.length - 1];
+    	
+    	if(ship.hasOwnProperty('mindrider')) ship.mindrider = true;
 
         var name;
         var step = 1;
@@ -1329,6 +1489,7 @@ shipManager.movement = {
 
         shipWindowManager.setDataForSystem(ship, system);
         shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "engine"));
+     
         return true;
     },
 
@@ -1639,10 +1800,16 @@ shipManager.movement = {
             return Array(1, 0, 0, 0, 0);
         }
 
-        side = Math.floor(turncost / 2);
-        rear = Math.floor(turncost / 2);
-        any = turncost % 2;
-
+		if(ship.mindrider){//Aug 2024 - Mindrider's have special thurster allocation rules
+	        side = turncost;
+	        rear = 0;
+	        any = 0;						
+		}else{
+	        side = Math.floor(turncost / 2);
+	        rear = Math.floor(turncost / 2);
+	        any = turncost % 2;
+		}
+		
         requiredThrust[0] = any;
 
         var reqThrusterName = "main";

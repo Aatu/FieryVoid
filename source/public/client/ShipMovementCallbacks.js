@@ -33,6 +33,18 @@ window.ShipMovementCallbacks = function () {
         shipManager.movement.doHalfPhase(this.ship);
         this.updateCallback({ ship: this.ship });
     };
+
+    ShipMovementCallbacks.prototype.morecontractionCallback = function (e) {
+        e.stopPropagation();
+        shipManager.movement.doContraction(this.ship, 1);
+        this.updateCallback({ ship: this.ship });
+    };
+
+    ShipMovementCallbacks.prototype.lesscontractionCallback = function (e) {
+        e.stopPropagation();
+        shipManager.movement.doContraction(this.ship, -1);
+        this.updateCallback({ ship: this.ship });
+    };
 	
     ShipMovementCallbacks.prototype.accelCallback = function (e) {
         e.stopPropagation();

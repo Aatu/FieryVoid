@@ -16,6 +16,11 @@ window.UI = {
         currentHeading: null,
 		
 		halfphaseElement: null,
+		contractionElement: null,
+		morecontractionElement: null,
+		lesscontractionElement: null,				
+
+
 
         initMoveUI: function initMoveUI() {
             if (UI.shipMovement.iniated == true) return;
@@ -54,6 +59,11 @@ window.UI = {
 			
 			UI.shipMovement.halfphaseElement = $("#halfphase", ui);
 
+			UI.shipMovement.contractionElement = $("#contraction", ui);			
+            UI.shipMovement.morecontractionElement = $("#morecontraction", ui);
+            UI.shipMovement.lesscontractionElement = $("#lesscontraction", ui);
+            UI.shipMovement.contractionvalueElement = UI.shipMovement.contractionElement.find(".contractionvalue");            			
+
             UI.shipMovement.cancelElement.on("click touchstart contextmenu", UI.shipMovement.cancelCallback);
             UI.shipMovement.moveElement.on("click touchstart contextmenu", UI.shipMovement.moveCallback);
 
@@ -77,6 +87,9 @@ window.UI = {
             UI.shipMovement.lessjinkElement.on("click touchstart", UI.shipMovement.lessjinkCallback);
 			
             UI.shipMovement.halfphaseElement.on("click touchstart", UI.shipMovement.halfphaseCallback);
+
+            UI.shipMovement.morecontractionElement.on("click touchstart", UI.shipMovement.morecontractionCallback);
+            UI.shipMovement.lesscontractionElement.on("click touchstart", UI.shipMovement.lesscontractionCallback);
 
             UI.shipMovement.turnIntoPivotLeftElement.on("click touchstart", UI.shipMovement.turnIntoPivotLeftCallback);
             UI.shipMovement.turnIntoPivotRightElement.on("click touchstart", UI.shipMovement.turnIntoPivotRightCallback);
@@ -124,6 +137,14 @@ window.UI = {
 
         halfphaseCallback: function halfphaseCallback(e) {
             UI.shipMovement.callbackHandler.halfphaseCallback(e);
+        },
+
+        morecontractionCallback: function morecontractionCallback(e) {
+            UI.shipMovement.callbackHandler.morecontractionCallback(e);
+        },
+
+        lesscontractionCallback: function lesscontractionCallback(e) {
+            UI.shipMovement.callbackHandler.lesscontractionCallback(e);
         },
 
         accelCallback: function accelCallback(e) {
@@ -397,13 +418,37 @@ window.UI = {
                 halfphase.hide();
             }
 
-
             var cancel = UI.shipMovement.cancelElement;
             if (shipManager.movement.hasDeletableMovements(ship) && weaponManager.canCombatTurn(ship)) {
                 dis += 26;
                 UI.shipMovement.drawUIElement(cancel, pos.x, pos.y, 30, dis * 1.4, angle, "img/cancel.png", "cancelcanvas", 0);
             } else {
                 cancel.hide();
+            }
+ 
+            var contraction = UI.shipMovement.contractionElement;
+            if (shipManager.movement.canContract(ship, 0)) {
+                var icon = "img/contraction.png";
+                UI.shipMovement.contractionvalueElement.html(shipManager.movement.getContraction(ship));
+                UI.shipMovement.drawUIElement(contraction, pos.x, pos.y, 40, 30 * 1.4, angle, icon, "contractioncanvas", shipHeading);
+            } else {
+                contraction.hide();
+            }
+            
+            angle = mathlib.addToDirection(shipHeading, 218);                       
+            var morecontraction = UI.shipMovement.morecontractionElement;
+            if (shipManager.movement.canContract(ship, 1)) {
+                UI.shipMovement.drawUIElement(morecontraction, pos.x, pos.y, 16, 38 * 1.4, angle, "img/plus.png", "morecontractioncanvas", 0);
+            } else {
+                morecontraction.hide();
+            }
+
+            angle = mathlib.addToDirection(shipHeading, 142);             
+            var lesscontraction = UI.shipMovement.lesscontractionElement;
+            if (shipManager.movement.canContract(ship, -1)) {
+                UI.shipMovement.drawUIElement(lesscontraction, pos.x, pos.y, 16, 38 * 1.4, angle, "img/minus.png", "lesscontractioncanvas", 0);
+            } else {
+                lesscontraction.hide();
             }
 
             ui.show();
@@ -423,6 +468,9 @@ window.UI = {
 
 			//align jinking value with player:
 			jQuery(".jinkvalue.value").css("transform", "rotate(" + -heading + "deg)").css("display", "block");
+
+			//align contraction value with player:
+			jQuery(".contractionvalue.value").css("transform", "rotate(" + -heading + "deg)").css("display", "block");
 
             UI.shipMovement.currentPosition = position;
             UI.shipMovement.currentHeading = heading;
