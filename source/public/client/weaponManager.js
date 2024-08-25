@@ -831,23 +831,23 @@ window.weaponManager = {
 				mod -= shipManager.movement.getJinking(shooter);
 			}
 
-            if (shipManager.movement.hasCombatPivoted(shooter)) mod--;
+            if (shipManager.movement.hasCombatPivoted(shooter) && (!shooter.ignoreManoeuvreMods)) mod--;
         } else {
 			if (shooter.agile === true){
 				if (shipManager.movement.hasRolled(shooter)) {
 					//		console.log("is rolling -3");
-					mod -= 3;
+					if(!shooter.ignoreManoeuvreMods) mod -= 3;
 				}
 			} else {
 				if (shipManager.movement.isRolling(shooter)) {
 					//		console.log("is rolling -3");
-					mod -= 3;
+					if(!shooter.ignoreManoeuvreMods) mod -= 3;
 				}
 			}
 
             if (shipManager.movement.hasPivotedForShooting(shooter)) {
                 //		console.log("pivoting");
-                mod -= 3;
+                if(!shooter.ignoreManoeuvreMods) mod -= 3;
             }
 
             if (shooter.osat && shipManager.movement.hasTurned(shooter)) {
@@ -1351,6 +1351,13 @@ window.weaponManager = {
             var type = 'normal';
             if (weapon.ballistic) {
                 type = 'ballistic';
+            }
+
+            if (weapon.reinforceAmount > 0){ //22.07.24 - New statement to add check and change reinforce amount for Mindrider Shield Reinforcement!
+				if(!weapon.confirmReinforcement(selectedShip, ship)){
+				    confirm.error("You do not have enough capacity to reinforce allied unit's shields by that amount.");
+      				return;	
+				}	
             }
 
             if (weaponManager.isOnWeaponArc(selectedShip, ship, weapon)) {
