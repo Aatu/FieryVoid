@@ -1554,7 +1554,8 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 
     public function stripForJson() {
             $strippedSystem = parent::stripForJson();    
-            $strippedSystem->autoHit = $this->autoHit;                                      
+            $strippedSystem->autoHit = $this->autoHit;
+			$strippedSystem->noProjectile = $this->noProjectile;                                                  
             return $strippedSystem;
 	}
 
