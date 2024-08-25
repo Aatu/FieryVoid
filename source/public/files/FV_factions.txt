@@ -2,8 +2,6 @@ FACTIONS available in Fiery Void
 notable technologies, special rules, differences from official version (if applicable)
 
 
-
-
 GENERAL NOTES
 -------------
 	Custom designs - some units are marked as "custom". This means they're not official designs released by AoG. This means they may not be evaluated as well as official ones, as well as they may not fit into the faction as originally designed.
@@ -317,6 +315,29 @@ are rather limited based on the number of hulls and lacking ways to bring fighte
 the Imperial Star Legion raider group.
 NOTE: No other Minbari units, other than those listed in the fleet selection screen, may be used by the Protectorate. Other Minbari units can only be included 
 if part of a joint force with the Minbari Federation.
+
+
+MINDRIDERS
+Ancient race of energy-based telepaths.  By definition complicated, very specific and not really on par with younger ones - tech difference is too high for proper balance. Ancient factions were officially not tournament legal.
+But with these caveats - have fun! Ancients should be balanced against each other, and if Your opponent knows what to expect, or you're playing a scenario, go ahead with other pairings as well. Note that sky-high individual cost of Ancient units makes standard requirements based on total fleet value completely inadequate - so they have been modified for fleet checker.
+Below list of systems Mindriders use, with a short description of their effects and any differences from B5W tabletop game.
+Special Hull Arrangements - Mindrider ships do not follow the usual layout, as a rule you can see what arcs their structure has by looking at the arcs of the Thought Shield (see below).  Mindrider vessels benefit from this arrangement by being allowed to pivot for free, and do not suffer the usual hit chance penalties for pivoting/rolling.  Note - The Wheel of Thought ship is unusual in that it MUST pivot every turn.
+Constrained EW - All Mindrider ships are able to use ELINT abilities, however these are on a 'constrained' basis, and therefore each ability costs 1 extra EW compared to normal ELINT vessels.
+Self-Repair - Automated, but players can modify the default priority of repairs. Damage and criticals suffered in the current turn cannot be repaired. Cost of critical repair has been changed in places (in particular C&C criticals aren't that costly to fix), and there's no partial repair of crits. 
+	If Self-Repair is destroyed or damaged, unused repair points are NOT lost.
+Though Shields - Mindrider ships and fighters are protected by Thought Shields.  Each shield has a specific arc it covers, and will absorb enemy fire up to it's maximum hit points on that arc.  Thoughts Shields will automatically regenerate to their full capacity at the start of each turn, and hit points can be transferred between arcs during Initial Orders phase to reinforce particular arcs.
+Contraction - The Mind's Eye vessel can choose to Contract itself during the Movement Phase, gaining +1 bonus to it's Thought Shields and -5 bonus to its Defence Profiles for every level of Contraction.  In addition, for every 3 levels of Contraction ALL systems on the Mind's Eye gain +1 Armour.  To use Contraction ability simply click on the + and - buttons by it's special icon, and then apply thurst as usual.  Contraction lasts until the end of the turn and then resets to 0.
+Shield Reinforcement - Mindrider ships equipped with this system can use it's output to reinforce their own shields and the shields of ally ships with EM Shield properties (e.g. reduced hit chance and damage reduction as well as usual Thought Shield damage absorbance).  To do so, boost the Shield Reinforcement system to the level of reinforcement you'd like and then target ally ships in the Initial Orders phase.  All shields on a ship must be reinforced equally, at a cost of 1 output per level of reinforcement per shield (e.g. reinforcing a Thoughtforce vessel with 4 shields by 3 levels would cost 12 output, 3 * 4).  Any unspent output will instead be used to reinforce the vessel equipped with the Shield Reinforcement system.
+Second Sight - This weapon reduces the Initiative of ALL enemy ships on the following turn.  To fire the weapon simply target ANY hex during Firing phase.
+Thought Wave - Ballistic weapon that, when fired in Initial Orders turn, will attempt to strike all non-Mindrider ships in the game.  Calculates its Hit Chance and Damage using special formualas:
+	- Hit Chances is (15 + OEW + d20 roll - Range Penalty - DEW - Target's Initiative).
+	- Damage is (3d6/3) * (Target Defence Profile/5).  Note - For ships with Advanced Armour, the first half of this calcuation is (3d6/5), reducing the damage potential of the Thought Wave.
+	Only successful attacks will be shown in the Combat Log.
+Ultra Pulse Cannon - The ultimate in pulse technology.  Can fire in three modes, Heavy (24 damage, D3 pulses), Medium (16 damage, D5 pulses), Light (12 damage, D6 pulses).
+Telekinetic Cutter - Fires two shots per turn, with high damage range.
+Trioptic Pulsar - Fires three shots, the main light weapon on Mindrider ships.
+Thought Projections - Mindirder use energy to create 'fighter' units called Though Projections.  These Projections MUST have a Mindrider ship with appropriate hangar capacity present in the game, or they will destabilise and drop out at the end of the turn where this is no longer the case.  E.g. the two Thoughtforce vessels can sustain 24 Projections, if during a battle one of the Thoughtforce ships is destroyed then the number of Thought Projections that can be sustained would drop to 12, and any Projection over 12 will drop out.
+Minor Thought Pulsar - Fighter weapon for Mindriders, will be automatically boosted with unused Thrust when fired in Firing phase (one boost for every 3 unused Thrust), instead of this being done manually as in Tabletop.  The type of boost will be decided by the Firing Mode selected and includes bonuses to Rate of Fire, Damage, Hit Chance, or a combination of these three benefits.
 
 
 NARN REGIME
