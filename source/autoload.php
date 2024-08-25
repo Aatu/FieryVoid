@@ -3294,25 +3294,28 @@ spl_autoload_register(
 				'thirdspaceselfrepair' => '/server/model/systems/baseSystems.php',	
 
 				//Mindriders 
-/*				'thoughtshield' => '/server/model/weapons/defensive.php',				
+				'thoughtshield' => '/server/model/weapons/defensive.php',				
 				'thoughtshieldgenerator' => '/server/model/systems/baseSystems.php',
 				'ultrapulsecannon' => '/server/model/weapons/pulse.php',
 				'telekineticcutter' => '/server/model/weapons/particle.php',								
 				'triopticpulsar' =>	'/server/model/weapons/pulse.php',
 				'minorthoughtpulsar' => '/server/model/weapons/particle.php',				
-				'secondsight' => '/server/model/weapons/specialWeapons.php',											
+				'secondsight' => '/server/model/weapons/specialWeapons.php',
+				'thoughtwave' => '/server/model/weapons/specialWeapons.php',
 				'shieldreinforcement' => '/server/model/weapons/supportWeapons.php',
 				'mindriderthruster' => '/server/model/systems/baseSystems.php',
-				'mindriderHangar' => '/server/model/systems/baseSystems.php', 
+				'mindriderhangar' => '/server/model/systems/baseSystems.php',
+				'mindriderengine' => '/server/model/systems/baseSystems.php',				 
 				
 				'mindridercapital' => '/server/model/ships/ShipClasses.php',
 				'mindriderhcv' => '/server/model/ships/ShipClasses.php',
 				'mindridermcv' => '/server/model/ships/ShipClasses.php',								
+				'mindseye' => '/server/model/ships/mindriders/MindsEye.php',
 				'thoughtforce' => '/server/model/ships/mindriders/Thoughtforce.php',
 				'consortium' => '/server/model/ships/mindriders/Consortium.php',
-				'wheelofthought' => '/server/model/ships/mindriders/WheelofThought.php',														
+				'wheelofthought' => '/server/model/ships/mindriders/WheelofThought.php',
 				'thoughtprojections' => '/server/model/ships/mindriders/ThoughtProjections.php',						
-*/				
+				
 						
 						//Development systems
 						'testgun' => '/server/model/weapons/customDevelopment.php',
