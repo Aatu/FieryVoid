@@ -11,7 +11,7 @@ class Consortium extends MindriderHCV{
         $this->shipClass = "Consortium";
         $this->shipSizeClass = 2;
 	    $this->isd = 'Ancient';
-		$this->factionAge = 4;
+		$this->factionAge = 3;
 		$this->canvasSize = 200;							    
 
 		$this->notes = 'Special Hull Arrangement';

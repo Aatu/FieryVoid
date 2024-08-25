@@ -11,7 +11,7 @@ class Thoughtforce extends MindriderCapital{
         $this->shipClass = "Thoughtforce";
         $this->shipSizeClass = 3;
 	    $this->isd = 'Ancient';
-		$this->factionAge = 4;
+		$this->factionAge = 3;
 		$this->canvasSize = 250;							    
 
 		$this->notes = 'Special Hull Arrangement';

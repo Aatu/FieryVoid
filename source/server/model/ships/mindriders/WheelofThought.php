@@ -11,7 +11,7 @@ class WheelofThought extends MindriderMCV{
         $this->shipClass = "Wheel of Thought";
         $this->shipSizeClass = 1;
 	    $this->isd = 'Ancient';
-		$this->factionAge = 4;
+		$this->factionAge = 3;
 		$this->canvasSize = 100;							    
 
 		$this->notes = 'Special Hull Arrangement';
