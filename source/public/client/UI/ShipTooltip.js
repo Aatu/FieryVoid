@@ -232,10 +232,16 @@ window.ShipTooltip = function () {
 				}
             }
         }
-
+			
+/* 		
         if (ew.getSupportedDEW(ship)) {
             this.addEntryElement('Support DEW: ' + ew.getSupportedDEW(ship), ship.flight !== true);
         }
+*/
+		if (ew.getSupportedDEW(ship)) {//Amended because Mindrider Constrained EW can create over 2 decimal places in Ship Tooltip! DK - 20.7.24	
+		    var dewValue = ew.getSupportedDEW(ship).toFixed(2);
+		    this.addEntryElement('Support DEW: ' + dewValue, ship.flight !== true);
+		}
 
         if (shipManager.isElint(ship)){
             this.addEntryElement('Blanket DEW: ' + ew.getEWByType('BDEW', ship), ship.flight !== true);
