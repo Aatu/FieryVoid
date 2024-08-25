@@ -116,6 +116,9 @@ window.gamedata = {
 		  case 'Minbari Protectorate':
 			powerRating = 'Tier 1';
 			break;
+		  case 'Mindriders':
+			powerRating = 'Ancients';
+			break;			
 		  case 'Narn Regime':
 			powerRating = 'Tier 1 (if >6 EMine launchers: Superior)';
 			break;
