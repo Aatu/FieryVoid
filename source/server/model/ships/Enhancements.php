@@ -59,6 +59,17 @@ class Enhancements{
   */
   public static function nonstandardEnhancementSet($unit, $setName){
 	switch($setName) {
+
+		case 'MindriderFighter':
+			Enhancements::blockStandardEnhancements($unit);
+			break;	
+	
+		case 'MindriderShip':
+			Enhancements::blockStandardEnhancements($unit);
+			$unit->enhancementOptionsEnabled[] = 'IMPR_SR';
+			$unit->enhancementOptionsEnabled[] = 'IMPR_TS';			
+			break;
+	
 		case 'ShadowShip':
 			Enhancements::blockStandardEnhancements($unit);
 			$unit->enhancementOptionsEnabled[] = 'IMPR_SR';
@@ -69,6 +80,15 @@ class Enhancements{
 			Enhancements::blockStandardEnhancements($unit);
 			$unit->enhancementOptionsEnabled[] = 'SHAD_CTRL';
 			break;	  
+
+		case 'ThirdspaceShip':
+			Enhancements::blockStandardEnhancements($unit);
+			$unit->enhancementOptionsEnabled[] = 'IMPR_SR';			
+			foreach ( $unit->enhancementOptionsDisabled as $key=>$value){ 
+				if($value=='IMPR_ENG'){ unset($unit->enhancementOptionsDisabled[$key]); }
+				if($value=='IMPR_SENS'){ unset($unit->enhancementOptionsDisabled[$key]); }									
+			}					
+			break;	
 			
 		case 'VorlonShip':
 			Enhancements::blockStandardEnhancements($unit);
@@ -82,15 +102,7 @@ class Enhancements{
 			Enhancements::blockStandardEnhancements($unit);
 			$unit->enhancementOptionsEnabled[] = 'VOR_AZURF';
 			break;	  
-			
-		case 'ThirdspaceShip':
-			Enhancements::blockStandardEnhancements($unit);
-			$unit->enhancementOptionsEnabled[] = 'IMPR_SR';			
-			foreach ( $unit->enhancementOptionsDisabled as $key=>$value){ 
-				if($value=='IMPR_ENG'){ unset($unit->enhancementOptionsDisabled[$key]); }
-				if($value=='IMPR_SENS'){ unset($unit->enhancementOptionsDisabled[$key]); }									
-			}					
-			break;		
+
 	}	  
   }//endof function nonstandardEnhancementSet
 	
@@ -232,8 +244,25 @@ class Enhancements{
 			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 		  }
 	  }  	
-	    
-	  
+
+	  //Improved Thought Shield for Mindriders		    
+	  $enhID = 'IMPR_TS';
+	  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option needs to be specifically enabled
+		  $enhName = 'Improved Thought Shield';
+		  $enhLimit = 5; //Maximum 5 upgrades.
+		  $shields = 0;
+		  $rating = 0;		  
+		  foreach ($ship->systems as $system){
+			if ($system instanceof ThoughtShield){
+		  	$shields++;
+		  	$rating = $system->baseRating;
+		    }
+		  } 
+		  $enhPrice = (($rating+1) * $shields) * $shields;//New rating multiplied by number of shields, for EACH shield 
+		  $enhPriceStep = $shields * $shields;
+		  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
+		  }
+		  	  
 	  //Ipsha-specific - Eethan Barony refit (available for generic Ipsha designs only, Eethan-specific may have it already incorporated in some form)
 	  $enhID = 'IPSH_EETH';	  
 	  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option needs to be specifically enabled
@@ -1457,6 +1486,17 @@ class Enhancements{
 							if ($system instanceof SelfRepair){
 								$system->output += $enhCount;
 							}
+						}  
+						break;	
+
+					case 'IMPR_TS': //Improved Thought Shield: +1 rating for each Thought Shield
+						foreach ($ship->systems as $system){
+							if ($system instanceof ThoughtShield){
+								$system->baseRating += $enhCount;
+							}
+							if ($system instanceof ThoughtShieldGenerator){
+								$system->output += $enhCount;
+							}							
 						}  
 						break;	
 						
