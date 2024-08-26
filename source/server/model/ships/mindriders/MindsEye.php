@@ -40,8 +40,17 @@ class MindsEye extends SixSidedShip{
 		Enhancements::nonstandardEnhancementSet($this, 'MindriderShip');				     
         
         $this->addPrimarySystem(new Reactor(7, 50, 0, -24));
-        $this->addPrimarySystem(new CnC(8, 24, 0, 0));
-        $this->addPrimarySystem(new SecondaryCnC(8, 24, 0, 0));        
+		$cnc = new CnC(8, 24, 0, 0);
+		$cnc->startArc = 0;
+		$cnc->endArc = 360;
+        $this->addPrimarySystem($cnc);
+		$cnc = new SecondaryCnC(8, 24, 0, 0);
+		$cnc->startArc = 0;
+		$cnc->endArc = 360;
+        $this->addPrimarySystem($cnc);        
+        
+//        $this->addPrimarySystem(new CnC(8, 24, 0, 0));
+//        $this->addPrimarySystem(new SecondaryCnC(8, 24, 0, 0));        
 		$scanner = new ElintScanner(7, 24, 0, 14);//Ancient Scanners do not need power - base systems are included in zero hull running costs
 		$scanner->markAdvanced();
 		$this->addPrimarySystem($scanner);	        
@@ -141,7 +150,7 @@ class MindsEye extends SixSidedShip{
 				16 => "Engine",
 				17 => "Jump Engine",
 				19 => "Reactor",
-				20 => "C&C",
+				20 => "TAG:C&C",
 			),
 			1=> array( //Fwd
 				4 => "TAG:Thruster",

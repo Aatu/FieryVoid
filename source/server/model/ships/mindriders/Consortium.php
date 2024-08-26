@@ -37,8 +37,17 @@ class Consortium extends MindriderHCV{
 
 		      
         $this->addPrimarySystem(new Reactor(6, 20, 0, 0));
-        $this->addPrimarySystem(new CnC(7, 16, 0, 0));
-        $this->addPrimarySystem(new SecondaryCnC(7, 16, 0, 0));        
+		$cnc = new CnC(7, 16, 0, 0);
+		$cnc->startArc = 0;
+		$cnc->endArc = 360;
+        $this->addPrimarySystem($cnc);
+		$cnc = new SecondaryCnC(7, 16, 0, 0);
+		$cnc->startArc = 0;
+		$cnc->endArc = 360;
+        $this->addPrimarySystem($cnc); 
+
+//        $this->addPrimarySystem(new CnC(7, 16, 0, 0));
+//        $this->addPrimarySystem(new SecondaryCnC(7, 16, 0, 0));        
         $scanner = new ElintScanner(6, 24, 0, 10);
 		$scanner->markMindrider();
 		$this->addPrimarySystem($scanner);	        
@@ -104,7 +113,7 @@ class Consortium extends MindriderHCV{
 				16 => "Engine",
 				17 => "Jump Engine",
 				19 => "Reactor",
-				20 => "C&C",
+				20 => "TAG:C&C",
 			),
 			2=> array( //Aft
 				6 => "TAG:Thruster",

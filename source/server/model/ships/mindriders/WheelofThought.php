@@ -38,8 +38,17 @@ class WheelofThought extends MindriderMCV{
 
 		      
         $this->addPrimarySystem(new Reactor(7, 20, 0, 12));
-        $this->addPrimarySystem(new CnC(8, 12, 0, 0));
-        $this->addPrimarySystem(new SecondaryCnC(8, 12, 0, 0));        
+		$cnc = new CnC(8, 12, 0, 0);
+		$cnc->startArc = 0;
+		$cnc->endArc = 360;
+        $this->addPrimarySystem($cnc);
+		$cnc = new SecondaryCnC(8, 12, 0, 0);
+		$cnc->startArc = 0;
+		$cnc->endArc = 360;
+        $this->addPrimarySystem($cnc); 
+
+//        $this->addPrimarySystem(new CnC(8, 12, 0, 0));
+//        $this->addPrimarySystem(new SecondaryCnC(8, 12, 0, 0));        
         $scanner = new ElintScanner(7, 12, 0, 10);
 		$scanner->markMindrider();
 		$this->addPrimarySystem($scanner);	        
@@ -77,7 +86,7 @@ class WheelofThought extends MindriderMCV{
 				16 => "Engine",
 				17 => "Jump Engine",
 				19 => "Reactor",
-				20 => "C&C",
+				20 => "TAG:C&C",
 			),
 			1=> array(
 				4 => "Thruster",

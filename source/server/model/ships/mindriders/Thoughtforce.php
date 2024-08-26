@@ -38,8 +38,17 @@ class Thoughtforce extends MindriderCapital{
 		Enhancements::nonstandardEnhancementSet($this, 'MindriderShip');				     
         
         $this->addPrimarySystem(new Reactor(7, 35, 0, 0));
-        $this->addPrimarySystem(new CnC(8, 16, 0, 0));
-        $this->addPrimarySystem(new SecondaryCnC(8, 16, 0, 0));        
+		$cnc = new CnC(8, 16, 0, 0);
+		$cnc->startArc = 0;
+		$cnc->endArc = 360;
+        $this->addPrimarySystem($cnc);
+		$cnc = new SecondaryCnC(8, 16, 0, 0);
+		$cnc->startArc = 0;
+		$cnc->endArc = 360;
+        $this->addPrimarySystem($cnc);     
+
+//        $this->addPrimarySystem(new CnC(8, 16, 0, 0));
+//        $this->addPrimarySystem(new SecondaryCnC(8, 16, 0, 0));        
         $scanner = new ElintScanner(7, 22, 0, 12);
 		$scanner->markMindrider();
 		$this->addPrimarySystem($scanner);	        
@@ -100,7 +109,7 @@ class Thoughtforce extends MindriderCapital{
 				16 => "Engine",
 				17 => "Jump Engine",
 				19 => "Reactor",
-				20 => "C&C",
+				20 => "TAG:C&C",
 			),
 			1=> array( //Fwd
 				4 => "TAG:Thruster",

@@ -693,7 +693,7 @@ class ThirdspaceShield extends Shield implements DefensiveSystem { //defensive v
 		public $repairPriority = 0;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
 		
 		protected $doCountForCombatValue = false;//To ignore projection for combat value calculations
-		
+		public $baseRating = 0; //Will be set when contructed.		
 		public $changeThisTurn = 0;	//When shields moved around, change it tracked here to be made into Damage Entry.	
 		public $currentHealth = 0; //Value for front-end when moving shield power around.
 		public $side = '';//Required for prioritising a shield using Generator Presets.		
@@ -701,7 +701,7 @@ class ThirdspaceShield extends Shield implements DefensiveSystem { //defensive v
 	    function __construct($armor, $startHealth, $rating, $startArc, $endArc, $side = 'F'){ //parameters: $armor, $startHealth, $Rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
 			$this->iconPath = 'ThirdspaceShield' . $side . '.png';
 			parent::__construct($armor, $startHealth, 0, $rating, $startArc, $endArc);
-			//rating not currently used.
+			$this->baseRating = $rating;			
 			$this->side = $side;						
 		}
 		
@@ -733,8 +733,12 @@ class ThirdspaceShield extends Shield implements DefensiveSystem { //defensive v
 	    	parent::onConstructed($ship, $turn, $phase);	    	
 			
 			if($turn == 1){//Shields will spawn at max capacity, reduce this by half to give starting amount.
-		    	$halveShield = $this->maxhealth/2;
-		    	$this->setShields($ship, $turn, $halveShield);
+//		    	$halveShield = $this->maxhealth/2;
+		    	$startRating = $this->baseRating;
+		    	$currentRating = $this->getRemainingHealth();
+		    	$adjustment = $currentRating - $startRating;
+		    	
+		    	$this->setShields($ship, $turn, $adjustment);
 			}  		
 		
 		}	
@@ -918,7 +922,7 @@ class ThirdspaceShield extends Shield implements DefensiveSystem { //defensive v
 	
 }//endof class ThirdspaceShield
 
-/*
+
 class ThoughtShield extends Shield implements DefensiveSystem {
 	    public $name = "ThoughtShield";
 	    public $displayName = "Shield Projection";
@@ -950,15 +954,13 @@ class ThoughtShield extends Shield implements DefensiveSystem {
 		
 		//ThoughtShield CAN be reinforced to act as a EM Shield as well, so we need to add some checks and not just return 0.		
 	    public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){ //no defensive hit chance change
-	        if ($this->checkIsFighterUnderShield($target, $shooter, $weapon))
-	            return 0;
-
+	        if ($this->checkIsFighterUnderShield($target, $shooter, $weapon)) return 0;
+ 
 	        return $this->defenceMod;
 	    }
 		public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon){ //no shield-like damage reduction
-	        if ($this->checkIsFighterUnderShield($target, $shooter, $weapon))
-	            return 0;
-        
+	        if ($this->checkIsFighterUnderShield($target, $shooter, $weapon)) return 0;
+       
 	        return $this->defenceMod;
 		}
 	    private function checkIsFighterUnderShield($target, $shooter, $weapon){ //no flying under shield
@@ -987,13 +989,20 @@ class ThoughtShield extends Shield implements DefensiveSystem {
 	    	parent::onConstructed($ship, $turn, $phase);	    	
 			
 			if($turn == 1){//Shields will spawn at max possible capacity, reduce this to give starting amount.
-		    	$startRating = $this->baseRating;
-		    	$currentRating = $this->getRemainingHealth();
-		    	$adjustment = $currentRating - $startRating;
-		    	
-		    	$this->setShields($ship, $turn, $adjustment);
+
+			    $startRating = $this->baseRating;
+			    $currentRating = $this->getRemainingHealth();
+			    $adjustment = $currentRating - $startRating;
+
+				if(!$ship instanceof FighterFlight){//Fighters don't have Generators, and can't offline anyway!	
+					$generator = $ship->getSystemByName("ThoughtShieldGenerator");				
+		            if($generator->isOfflineOnTurn($turn)) {
+		            	$adjustment = $currentRating;//In the bizarre situation where player deactivates Generator on Turn 1...	
+					}			
+				}		    	
+			    $this->setShields($ship, $turn, $adjustment);
 			}  		
-		
+					
 		}	
 		
 		public function getRemainingCapacity(){
@@ -1005,6 +1014,8 @@ class ThoughtShield extends Shield implements DefensiveSystem {
 		}
 
 		public function setShields($ship,$turn,$value){//On Turn 1, reduce shields to their correct starting amount.
+
+		
 			$damageEntry = new DamageEntry(-1, $ship->id, -1, $turn, $this->id, $value, 0, 0, -1, false, false, "SetShield!", "ThoughtShield");
 			$damageEntry->updated = true;
 			$this->damage[] = $damageEntry;
@@ -1081,31 +1092,35 @@ class ThoughtShield extends Shield implements DefensiveSystem {
 		public function criticalPhaseEffects($ship, $gamedata){
 			
 			parent::criticalPhaseEffects($ship, $gamedata);//Call parent to apply effects like Limpet Bore.
-			
-			if($this->isDestroyed()) return; //destroyed shield does not work...
-			//Shields should not be destroyed, check damage this turn for anything that destroyed it and undestroy.
-
-			$generator = $ship->getSystemByName("ThoughtShieldGenerator");	
-			$cnc = $ship->getSystemByName("CnC");
-			$secondaryCnC = $ship->getSystemByName("SecondaryCnC");
-			$generatorOutput = 0;
-
-			if($generator){//Generator exists and is not destroyed!
+	
+			if($this->isDestroyed()) return; //destroyed shield does not work...shouldn't happen.
 
 				$baseRegen = $this->baseRating;
-
-				if($secondaryCnC->isDestroyed()) $baseRegen = round($baseRegen/2);
-				if($cnc->isDestroyed()) $baseRegen = 0;		
-
+				$generator = $ship->getSystemByName("ThoughtShieldGenerator");
+				if($generator){//Fighters don't have Generators, and can't offline anyway!	
+          	 		if($generator->isOfflineOnTurn($gamedata->turn)) return; //Generator is offline, can't restore shields.
+          	 	}
+					
+				if(!$ship instanceof FighterFlight){//Fighters don't have CnC!	
+					$cnc = $ship->getSystemByName("CnC");
+					$secondaryCnC = $ship->getSystemByName("SecondaryCnC");					
+					if($secondaryCnC->isDestroyed()) $baseRegen = round($baseRegen/2);
+					if($cnc->isDestroyed()) $baseRegen = 0;				
+				}
+					
 		    	$currentRating = $this->getRemainingHealth();
 		    	
 		    	$toReplenish = 0;
 				$toReplenish = $currentRating - $baseRegen; //Create a plus or minus figure to restore shield to start strength.
-																								
+				
+				if($generator){//Fighters don't have Generators!
+					if($generator->isDestroyed()) $toReplenish = $currentRating; //Generator was destroyed, reduce shields to zero.
+				}
+																									
 				if($toReplenish != 0){ //something changes!
 					$this->absorbDamage($ship,$gamedata,$toReplenish);
 				}				
-			}
+
 
 		} //endof function criticalPhaseEffects
 
@@ -1177,14 +1192,15 @@ class ThoughtShield extends Shield implements DefensiveSystem {
 		$strippedSystem->currentHealth = $this->currentHealth;
 		$strippedSystem->outputDisplay = $this->outputDisplay;
 		$strippedSystem->side = $this->side;
-		$strippedSystem->defenceMod = $this->defenceMod;					
+		$strippedSystem->defenceMod = $this->defenceMod;
+		$strippedSystem->baseRating = $this->baseRating;							
 	    return $strippedSystem;
 	} 
 
 	
 }//endof class ThoughtShield
 
-*/
+
 
 
 

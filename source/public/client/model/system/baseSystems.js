@@ -1591,18 +1591,24 @@ ThoughtShieldGenerator.prototype.onTurnOff = function (ship) {
     for (var i in ship.systems) {
         var system = ship.systems[i];
         if (system.name == 'ThoughtShield') {
-            // Shut it down.
-			system.currentHealth = 0;
+			system.currentHealth = 0;  // Shut it down.
         }
     }
 };
 
 ThoughtShieldGenerator.prototype.onTurnOn = function (ship) {
+    var CnCvalue = 1;
+	var CnC = shipManager.systems.getSystemByName(ship, "cnC");
+	var CnC2 = shipManager.systems.getSystemByName(ship, "SecondaryCnC");
+
+ 	if(shipManager.systems.isDestroyed(ship, CnC2)) CnCvalue = 0.5;        
+    if(shipManager.systems.isDestroyed(ship, CnC)) CnCvalue = 0;
+
     for (var i in ship.systems) {
         var system = ship.systems[i];
+        
         if (system.name == 'ThoughtShield') {
-            // Shut it down.
-			system.currentHealth = system.baseRating;
+			system.currentHealth = Math.round(system.baseRating * CnCvalue); //Power back up
         }
     }
 };
