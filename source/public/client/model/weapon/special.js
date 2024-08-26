@@ -512,10 +512,16 @@ var Marines = function Marines(json, ship) {
 };
 Marines.prototype = Object.create(Weapon.prototype);
 Marines.prototype.constructor = Marines;
-/*
+
 var SecondSight = function SecondSight(json, ship) {
     Weapon.call(this, json, ship);
 };
 SecondSight.prototype = Object.create(Weapon.prototype);
 SecondSight.prototype.constructor = SecondSight;
-*/
+
+var ThoughtWave = function ThoughtWave(json, ship) {
+    Weapon.call(this, json, ship);
+};
+ThoughtWave.prototype = Object.create(Weapon.prototype);
+ThoughtWave.prototype.constructor = ThoughtWave;
+

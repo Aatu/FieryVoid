@@ -1655,6 +1655,12 @@ class SparkField extends Weapon implements DefensiveSystem{
         public function setMaxDamage(){   
 		$this->maxDamage = 7 ;	    
 	}	
+
+	public function stripForJson(){
+		$strippedSystem = parent::stripForJson();
+		$strippedSystem->noProjectile = $this->noProjectile;															
+		return $strippedSystem;
+	} 
 	
 } //endof class SparkField 
 
@@ -4685,7 +4691,8 @@ class PsychicField extends Weapon{ //Thirdspace weapons that operates similar to
 
 	public function stripForJson(){
 		$strippedSystem = parent::stripForJson();
-		$strippedSystem->ewBoosted = $this->ewBoosted;													
+		$strippedSystem->ewBoosted = $this->ewBoosted;
+		$strippedSystem->noProjectile = $this->noProjectile;															
 		return $strippedSystem;
 	} 
 
@@ -6367,7 +6374,7 @@ class Marines extends Weapon{
 }//endof Marines
 
 
-/*
+
 class SecondSight extends Weapon{
 	public $name = "SecondSight";
     public $displayName = "Second Sight";
@@ -6393,7 +6400,8 @@ class SecondSight extends Weapon{
 
     public $animation = "ball";
     public $animationExplosionScale = 15;   
-	public $animationColor = array(204, 153, 255);
+	public $animationColor = array(204, 102, 0);
+	public $noProjectile = true; //Marker for front end to make projectile invisible for weapons that shouldn't have one.  		
 
 	protected $autoHit = true;//To show 100% hit chance in front end.
 	
@@ -6477,11 +6485,25 @@ class SecondSight extends Weapon{
 				$fireOrder->pubnotes .= " MISSED! ";
 			}
 	}
+
+    public function getFiringHex($gamedata, $fireOrder){
+        $shooter = $gamedata->getShipById($fireOrder->shooterid);
+		$pos = $shooter->getHexPos();
+		$launchPos = null;		
+		
+        if ($this->ballistic) {
+            $movement = $shooter->getLastTurnMovement($fireOrder->turn);
+            $launchPos = $movement->position;
+        } else {
+            $launchPos = $pos;
+        }
+       return $launchPos; 
+	}//endof getFiringHex
 	
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);
-		$this->data["Special"] = 'Reduces Initiative of all enemy units next turn.';
-		$this->data["Special"] .= '<br>Fire this weapon by targeting any hex during the Firing Phase.';
+		$this->data["Special"] = 'Fire this weapon by targeting ANY adjacent hex during the Firing Phase.';
+		$this->data["Special"] .= '<br>Automatically reduces Initiative of ALL enemy units next turn.';		
 		$this->data["Special"] .= '<br>Enemy ships suffer a D6+2 (e.g. -15 to -40) Initiative penalty next turn.';	
 		$this->data["Special"] .= '<br>Ships equipped with Advanced Armor will only suffer -10 Initiatve penalty.';
 		$this->data["Special"] .= '<br>Initiative penalties ARE cumulative with other Second Sight weapons.';	
@@ -6494,25 +6516,27 @@ class SecondSight extends Weapon{
 
     public function stripForJson() {
         $strippedSystem = parent::stripForJson();    
-        $strippedSystem->autoHit = $this->autoHit;                         
+        $strippedSystem->autoHit = $this->autoHit;
+		$strippedSystem->noProjectile = $this->noProjectile;                                 
         return $strippedSystem;
 	}    
-    
+ 
 	
 } //endof class SecondSight 
 
 
-class ThoughtWave extends Weapon{
+class ThoughtWave extends Plasma{
 	public $name = "ThoughtWave";
     public $displayName = "Thought Wave";
     public $iconPath = "ThoughtWave.png";    
 
 	public $ballistic = true;	
-    public $range = 0.1;
+    public $range = 100;
     public $firingMode = 1;
     public $priorityAF = 1;
-    public $loadingtime = 3;
+    public $loadingtime = 1;//CHANGE BACK!
 	public $hextarget = true;
+	public $hidetarget  = true;	
     public $useOEW = false;
 	public $noLockPenalty = false;
     
@@ -6525,11 +6549,12 @@ class ThoughtWave extends Weapon{
 
 	public $damageType = "Flash"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!   
 	public $weaponClass = "Plasma"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set! 
-	public $rangeDamagePenalty = 1;	
+	public $rangeDamagePenalty = 2;	
 
     public $animation = "ball";
-    public $animationExplosionScale = 10;   
-	public $animationColor = array(204, 102, 0);
+    public $animationExplosionScale = 1;   
+	public $animationColor = array(0, 0, 0);
+	public $noProjectile = true; //Marker for front end to make projectile invisible for weapons that shouldn't have one.  	
 
 	public $output = 15;//Is actually used as the base hit chance, but can be modified by critical hits.	
 	private $diceRollonTurn = null;	
@@ -6538,10 +6563,11 @@ class ThoughtWave extends Weapon{
 	    21=>array("OutputReduced1", "OutputReduced1", "OutputReduced1", "OutputReduced1", "OutputReduced1")
     );
 	
-	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $output){
 		if ( $maxhealth == 0 ) $maxhealth = 9;
 		if ( $powerReq == 0 ) $powerReq = 8;
-		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $output);
+		$this->output = $output;
 	}    
 		
 
@@ -6552,11 +6578,11 @@ class ThoughtWave extends Weapon{
       $originalFireOrder = null;
               foreach ($firingOrders as $fireOrder) { 
               	   if ($fireOrder->type == 'ballistic') { 
-                    $hasFireOrder = $fireOrder;
+                    $originalFireOrder = $fireOrder;
                     break; //no need to search further
                     }
 				}    			
-				
+			
         if($originalFireOrder==null) return; //no appropriate fire order, end of work
 
 		if ($originalFireOrder->targetid != -1) {
@@ -6577,7 +6603,7 @@ class ThoughtWave extends Weapon{
 		//Make a list of relelvant ships e.g. all enemy ships.
 		foreach($allShips as $ship){
 			if($ship->isDestroyed()) continue;		
-			if ($ship->team == $thisShip->team) continue;	//Ignore friendlies.	
+			if ($ship->faction == "Mindriders") continue;//Mindriders not affected.	
 			$relevantShips[] = $ship;			
 		}
 	
@@ -6590,30 +6616,14 @@ class ThoughtWave extends Weapon{
 
 	private function prepareFiringOrder($shooter, $target, $gamedata){
 
-				if($target instanceOf FighterFlight){ //one attack against every fighter!
-					foreach ($target->systems as $fighter) {
-						if ($fighter == null || $fighter->isDestroyed()) {
-							continue;
-						}
-						$newFireOrder = new FireOrder(
-							-1, "normal", $shooter->id, $target->id,
-							$this->id, $fighter->id, $gamedata->turn, 1, 
-							0, 0, 1, 0, 0, //needed, rolled, shots, shotshit, intercepted
-							0,0,$this->weaponClass,-1 //X, Y, damageclass, resolutionorder
-						);		
-						$newFireOrder->addToDB = true;
-						$this->fireOrders[] = $newFireOrder;
-					}
-				}else{
-					$newFireOrder = new FireOrder(
-						-1, "normal", $shooter->id, $target->id,
-						$this->id, -1, $gamedata->turn, 1, 
-						0, 0, 1, 0, 0, //needed, rolled, shots, shotshit, intercepted
-						0,0,$this->weaponClass,-1 //X, Y, damageclass, resolutionorder
-					);		
-					$newFireOrder->addToDB = true;
-					$this->fireOrders[] = $newFireOrder;
-				}
+		$newFireOrder = new FireOrder(
+			-1, "normal", $shooter->id, $target->id,
+			$this->id, -1, $gamedata->turn, 1, 
+			0, 0, 1, 0, 0, //needed, rolled, shots, shotshit, intercepted
+			0,0,$this->weaponClass,-1 //X, Y, damageclass, resolutionorder
+		);		
+		$newFireOrder->addToDB = true;
+		$this->fireOrders[] = $newFireOrder;
 			
 	}//endof function prepareFiringOrders		          
 
@@ -6627,7 +6637,6 @@ class ThoughtWave extends Weapon{
 		}
 
 		//Direct shot - Thought Wave specific routine!
-//		parent::calculateHitBase($gamedata, $fireOrder);
         $shooter = $gamedata->getShipById($fireOrder->shooterid);
         $target = $gamedata->getShipById($fireOrder->targetid);
 		$launchPos = $this->getFiringHex($gamedata, $fireOrder);
@@ -6638,80 +6647,102 @@ class ThoughtWave extends Weapon{
 		$dew = 0;
 		$distanceForPenalty = mathlib::getDistanceHex($launchPos, $targetPos);
 
-		$rangePenalty = $this->calculateRangePenalty($distanceForPenalty);		
+		$rangePenalty = $this->calculateRangePenalty($distanceForPenalty);//Straight rp, no need to consider Jammers (unless Torvalus added!)		
 		$oew = $shooter->getOEW($target, $gamedata->turn);
         $dew = $target->getDEW($gamedata->turn);
-echo "Value of rangePenalty: " . $rangePenalty. "\n";
-echo "Value of oew: " . $oew. "\n";
-echo "Value of dew: " . $dew. "\n";
+
 		if($this->diceRollonTurn == null){//Roll once for entire turn.
-			$this->diceRollonTurn = Dice::d(20);						
+			$rollD20 = Dice::d(20);
+			$this->diceRollonTurn = $rollD20;						
 		}
 		
-		$diceRoll = $this->diceRollTurn * 5;//Take d20 roll and convert to %
-		$initiative = ($target->iniative / 5); //Target initiative convert FROM a %
-echo "Value of diceRoll: " . $diceRoll. "\n";
-echo "Value of initiative: " . $initiative. "\n";
+		$diceRoll = $this->diceRollonTurn;//Take d20 roll
+		$initiativeBase = max(0, $target->iniative / 5); //Target initiative convert FROM a %.  Don't go into negative.
+		$initiative = round($initiativeBase);		
 
         $hitLoc = null;
         $hitLoc = $target->getHitSectionPos(mathlib::hexCoToPixel($launchPos), $fireOrder->turn);
-echo "Value of hitLoc: " . $hitLoc. "\n";
+
         $fireOrder->chosenLocation = $hitLoc;
-        $fireOrder->needed = round($this->output - $rangePenalty + $oew - $dew - $initiative + $diceRoll); //chance of not hitting target hex: 25%; chance of dissipating: 40$ of that
+        
+        $result = round($this->output - $rangePenalty + $oew - $dew - $initiative + $diceRoll);//basehit - rp + OEW - DEW - target ini + d20
+        
+		if($result > 0){ //Automatically hits if calculation result is above 0.
+        	$fireOrder->needed = 100;
+		}else{
+			$fireOrder->needed = 0;			
+		}
 		$fireOrder->notes .= 'Thought Wave direct shot.';        
         $fireOrder->updated = true;		
-echo "Value of fireOrder->needed: " . $fireOrder->needed. "\n";						
+					
 	}  //end of calculateHitBase() 
 
 
     public function fire($gamedata, $fireOrder){
-			if($fireOrder->targetid == -1) { //initial "targeting location" Thought Wave shot should not actually be resolved
-				return;
-			}else if($fireOrder->calledid >= 0){ //in case of direct Thought Wave attack - skip it if target fighter is already destroyed!
-			$target = $gamedata->getShipById($fireOrder->targetid);
-				if($target instanceOf FighterFlight) { //it should be so, check is just in case
-					$craft = $target->getFighterBySystem($fireOrder->calledid);
-					if($craft && $craft->isDestroyed()) return;//the shot is dedicated to this one fighter, cannot be retargeted on another - skip resolution
-				}
+		if($fireOrder->targetid == -1) { //initial "targeting location" Thought Wave shot should not actually be resolved
+			return;
+		}else if($fireOrder->calledid >= 0){ //in case of direct Thought Wave attack - skip it if target fighter is already destroyed!
+		$target = $gamedata->getShipById($fireOrder->targetid);
+			if($target instanceOf FighterFlight) { //it should be so, check is just in case
+				$craft = $target->getFighterBySystem($fireOrder->calledid);
+				if($craft && $craft->isDestroyed()) return;//shot is dedicated to this one fighter, cannot be retargeted on another - skip resolution
 			}
-			//Direct Thoughtwave Attack - default routine will do!
-			if($fireOrder->needed <= 0){ //Don't resolve shots which simply cannot hit.
-				return;				
-			}
-			parent::fire($gamedata, $fireOrder);
 		}
+		//Direct Thoughtwave Attack - default routine will do!
+		if($fireOrder->needed <= 0){ //Don't resolve shots which don't hit.
+			return;				
+		}
+		//Standard routines for everything else!
+		parent::fire($gamedata, $fireOrder);
+	}
 
 
     protected function getFinalDamage($shooter, $target, $pos, $gamedata, $fireOrder)
     {
-		$damage = 0;//Does zero damage for hex target shot.
+		$damage = 0;//Intialise.
 		
-		if($fireOrder->targetid != -1){
+		if($fireOrder->targetid != -1){//Direct fire shot.
 			$diceRoll = Dice::d(6, 3);
-            $defence = $target->getHitSectionProfilePos(mathlib::hexCoToPixel($pos));									
-			$damage = floor(($diceRoll/3) * ($defence/5)); //3d6 divide by 3, multiplie by TT defence profile (e.g. divided by 5).
-echo "Value of damageBefore: " . $damage. "\n";		
+            $defence = $target->getHitSectionProfilePos(mathlib::hexCoToPixel($pos));//Base profile.
+        	$mod = $target->getHitChanceMod($shooter, $pos, $gamedata->turn, $this); //Shields/E-web etc affect profile!
+        	           
+            if($target->advancedArmor){//Divide by 5 for AA
+				$damage = floor(($diceRoll/5) * ($defence + $mod)); //3d6 divide by 5, multiplied by defence profile.            	
+            }else{//Divide by 3 for everything else							
+				$damage = floor(($diceRoll/3) * ($defence + $mod)); //3d6 divide by 3, multiplied by defence profile.
+			}				
 		}
 
         $damage = $this->getDamageMod($damage, $shooter, $target, $pos, $gamedata);     
         $damage -= $target->getDamageMod($shooter, $pos, $gamedata->turn, $this);
-echo "Value of damageAfter: " . $damage. "\n";		
+		
         return $damage;
     }
 	
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);
-		$this->data["Special"] = '.';
-		$this->data["Special"] .= '<br>.';
-	
+		$this->data["Damage"] = 'Special';	
+		$this->data["Special"] = 'To fire this weapon, target ANY hex during Initial Orders Phase.';
+		$this->data["Special"] .= '<br><br>The Thought Wave will always originate from the starting location of the firing ship (as per usual with ballistic weapons).';
+		$this->data["Special"] .= '<br>The Thought Wave will attempt to hit ALL enemy ships in the game in Firing Phase, using the following formula:';
+		$this->data["Special"] .= '<br> - (15 + OEW + d20) - (Range Penalty + DEW - Target Initiative/5)';
+		$this->data["Special"] .= '<br>If this formula returns a result above 0, the Thought Wave automatically hits, and deals (3D6/3) * (Profile/5) flash damage.';
+		$this->data["Special"] .= '<br>Advanced armor changes this formula to (3d6/5) * (Profile/5), and Shields etc affect profile as normal for this calculation.';			
+		$this->data["Special"] .= '<br>Will only strike 1 fighter in a flight, but Flash damage may still affect other fighters.';
+		$this->data["Special"] .= '<br>Note - Only successful attacks will appear in the Combat Log.';								
 	}	
 
     public function getDamage($fireOrder){ return 0;   }//Initial shot doesn't actually do any damage.
     public function setMinDamage(){     $this->minDamage = 0 ;      }
     public function setMaxDamage(){     $this->maxDamage = 0 ;      }
-      
+
+ 	public function stripForJson(){
+		$strippedSystem = parent::stripForJson();
+		$strippedSystem->noProjectile = $this->noProjectile;															
+		return $strippedSystem;
+	}         
 	
 } //endof class ThoughtWave
-*/
+
 
 ?>
