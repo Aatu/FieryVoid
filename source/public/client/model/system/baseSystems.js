@@ -1365,7 +1365,7 @@ ThirdspaceShieldGenerator.prototype.initializationUpdate = function() {
 	return this;
 };
 
-ThirdspaceShieldGenerator.prototype.getCurrClass = function () { //get current FC class for display; if none, find first!
+ThirdspaceShieldGenerator.prototype.getCurrClass = function () { //get current preset for display; if none, find first!
     if (this.presetCurrClass == ''){
 		var classes = this.shieldPresets; //
 		if (classes.length>0){
@@ -1374,9 +1374,9 @@ ThirdspaceShieldGenerator.prototype.getCurrClass = function () { //get current F
 	}
 	return this.presetCurrClass;
 };
-ThirdspaceShieldGenerator.prototype.nextCurrClass = function () { //get next FC class for display
+ThirdspaceShieldGenerator.prototype.nextCurrClass = function () { //get next preset for display
 	this.getCurrClass();
-    if (this.presetCurrClass == '') return ''; //this would mean there are no FC classes whatsover!  Should never happen.
+    if (this.presetCurrClass == '') return ''; //this would mean there are no presets whatsover!  Should never happen.
 	var classes = this.shieldPresets;
 	var currId = -1;
 	for (var i = 0; i < classes.length; i++) {
@@ -1390,9 +1390,9 @@ ThirdspaceShieldGenerator.prototype.nextCurrClass = function () { //get next FC 
 	return this.presetCurrClass;
 };
 
-ThirdspaceShieldGenerator.prototype.prevCurrClass = function () { //get previous class for display, useful when selecting from 10+ Specialists!
+ThirdspaceShieldGenerator.prototype.prevCurrClass = function () { //get previous class for display.
 	this.getCurrClass();
-    if (this.presetCurrClass == '') return ''; //this would mean there are no classes whatsover!
+    if (this.presetCurrClass == '') return ''; //this would mean there are no presets whatsover!  Should never happen.
     	
 	var classes = this.shieldPresets;
 	var currId = -1;	
@@ -1410,10 +1410,10 @@ ThirdspaceShieldGenerator.prototype.prevCurrClass = function () { //get previous
 	return this.presetCurrClass;
 };
 
-ThirdspaceShieldGenerator.prototype.canSelect = function () { //check if can increase rating for current class; can do if preallocated points are unused or allocated points are less than available 
-	//always needs to check that allocated are less than maximum and allocated total is less than total maximum
+ThirdspaceShieldGenerator.prototype.canSelect = function () { 
+
 	this.getCurrClass();
-    if (this.presetCurrClass == '') return false; //this would mean there are no Specialist classes whatsover!
+    if (this.presetCurrClass == '') return false;
 
 	return true;
 };
@@ -1601,8 +1601,8 @@ ThoughtShieldGenerator.prototype.onTurnOn = function (ship) {
 	var CnC = shipManager.systems.getSystemByName(ship, "cnC");
 	var CnC2 = shipManager.systems.getSystemByName(ship, "SecondaryCnC");
 
- 	if(shipManager.systems.isDestroyed(ship, CnC2)) CnCvalue = 0.5;        
-    if(shipManager.systems.isDestroyed(ship, CnC)) CnCvalue = 0;
+ 	if(shipManager.systems.isDestroyed(ship, CnC2)) CnCvalue = 0.5;//50% if Secondary CnC is destroyed.        
+    if(shipManager.systems.isDestroyed(ship, CnC)) CnCvalue = 0;//0% if CnC is destroyed.
 
     for (var i in ship.systems) {
         var system = ship.systems[i];
