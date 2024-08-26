@@ -660,6 +660,7 @@ var batteryPowerRequired = 0;
 				return;
 			}
 		}
+				
 	},
 
 	setBoost: function setBoost(ship, system) {
@@ -742,8 +743,9 @@ var batteryPowerRequired = 0;
 				return;
 			}
 		}
-
+				
 		shipManager.power.setBoost(ship, system);
+		system.onBoostIncrease();		
 		shipWindowManager.setDataForSystem(ship, system);
 		shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
         webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
@@ -761,8 +763,8 @@ var batteryPowerRequired = 0;
 			return;
 		}
 		*/
-
 		shipManager.power.unsetBoost(ship, system);
+		system.onBoostDecrease();		
 		shipWindowManager.setDataForSystem(ship, system);
 		shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
         webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
@@ -833,7 +835,7 @@ var batteryPowerRequired = 0;
 			return;
 		}*/
 
-		if (system.name == "shieldGenerator") {
+		if (system.name == "shieldGenerator" || system instanceof ThirdspaceShieldGenerator) {
 			system.onTurnOff(ship);
 		}
 
@@ -895,7 +897,7 @@ var batteryPowerRequired = 0;
 		shipManager.power.setOnline(ship, system);
 		shipWindowManager.setDataForSystem(ship, system);
 
-		if (system.name == "shieldGenerator") {
+		if (system.name == "shieldGenerator" || system instanceof ThirdspaceShieldGenerator) {
 			system.onTurnOn(ship);
 		}
 
