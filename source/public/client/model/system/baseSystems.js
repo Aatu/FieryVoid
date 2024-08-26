@@ -95,8 +95,32 @@ Engine.prototype.addInfo = function () {
     this.data["Efficiency"] = this.boostEfficiency;
 };
 
-//  this.data["Weapon type"] ="Gravitic";
-//  this.data["Damage type"] ="Standard";
+Engine.prototype.doIndividualNotesTransfer = function () { //prepare individualNotesTransfer variable - if relevant for this particular system
+
+	if(!this.hasOwnProperty('contraction')) return;
+
+    this.individualNotesTransfer = Array();
+	var contractOnTurn = 0;
+	var ship = this.ship;	
+	
+	if(gamedata.gamephase == 2){		
+	    for (var i in ship.movement) {
+	        var move = ship.movement[i];
+	        
+	        if (move.turn != gamedata.turn) continue;
+
+	        if (move.type == "contract") {
+				contractOnTurn += move.value;//Will +1 depending on Contraction.
+	        }
+	    }
+	}	
+	//Now pass a note to amend Contraction level in backend and make stat changes.
+	if(contractOnTurn != 0){
+		this.individualNotesTransfer.push(contractOnTurn); //Push change in shield strength to back end for Damage Entry creation if required e.g. over or under 0.
+	}
+	
+	return true;
+};
 
 
 var CnC = function CnC(json, ship) {
@@ -153,6 +177,12 @@ var GraviticThruster = function GraviticThruster(json, ship) {
 GraviticThruster.prototype = Object.create(Thruster.prototype);
 GraviticThruster.prototype.constructor = GraviticThruster;
 
+var MindriderThruster = function MindriderThruster(json, ship) {
+    Thruster.call(this, json, ship);
+};
+MindriderThruster.prototype = Object.create(Thruster.prototype);
+MindriderThruster.prototype.constructor = MindriderThruster;
+
 var MagGraviticThruster = function(json, ship)
 {
     Thruster.call( this, json, ship);
@@ -166,6 +196,12 @@ var Hangar = function(json, ship)
 }
 Hangar.prototype = Object.create( ShipSystem.prototype );
 Hangar.prototype.constructor = Hangar;
+
+var MindriderHangar = function MindriderHangar(json, ship) {
+    ShipSystem.call(this, json, ship);
+};
+MindriderHangar.prototype = Object.create(ShipSystem.prototype);
+MindriderHangar.prototype.constructor = MindriderHangar;
 
 var Catapult = function Catapult(json, ship) {
     ShipSystem.call(this, json, ship);
@@ -1544,12 +1580,29 @@ ThirdspaceShieldGenerator.prototype.doPreset = function (presetCurrClass) { // C
 		}
 	}
 };
-/*
+
 var ThoughtShieldGenerator = function ThoughtShieldGenerator(json, ship) {
     ThirdspaceShieldGenerator.call(this, json, ship);
 };
 ThoughtShieldGenerator.prototype = Object.create(ThirdspaceShieldGenerator.prototype);
 ThoughtShieldGenerator.prototype.constructor = ThoughtShieldGenerator;
-*/
 
+ThoughtShieldGenerator.prototype.onTurnOff = function (ship) {
+    for (var i in ship.systems) {
+        var system = ship.systems[i];
+        if (system.name == 'ThoughtShield') {
+            // Shut it down.
+			system.currentHealth = 0;
+        }
+    }
+};
 
+ThoughtShieldGenerator.prototype.onTurnOn = function (ship) {
+    for (var i in ship.systems) {
+        var system = ship.systems[i];
+        if (system.name == 'ThoughtShield') {
+            // Shut it down.
+			system.currentHealth = system.baseRating;
+        }
+    }
+};
