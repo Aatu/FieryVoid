@@ -832,7 +832,7 @@ class Engine extends ShipSystem implements SpecialAbility {
 class MindriderEngine extends Engine{
     public $name = "engine";
 
-	public $contraction = 0;
+	private $contraction = 0;
 	private $changeThisTurn = 0;
     public $thrustused;
     public $primary = true;
