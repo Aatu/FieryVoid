@@ -2780,6 +2780,8 @@ class ConnectionStrut extends ShipSystem{
     public $displayName = "Connection Strut";
     public $iconPath = "connectionStrut.png";
     
+	protected $doCountForCombatValue = false; //false means this system is skipped when evaluating ships' combat value!    
+    
 	//Connection Strut cannot be repaired!
 	public $repairPriority = 0;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
     
@@ -4724,6 +4726,23 @@ class ThoughtShieldGenerator extends ShipSystem{
         parent::__construct($armour, $maxhealth, $powerReq, $output ); //$armour, $maxhealth, $powerReq, $output    		    
     }  	    
 
+    public function onConstructed($ship, $turn, $phase){
+        parent::onConstructed($ship, $turn, $phase);
+        
+		$this->shieldPresets = array();	//Empty, in case.	
+		$this->shieldPresets[] = 'Equalise';//Always start with default equalise setting.	
+		
+		foreach($ship->systems as $system){
+			if($system instanceof ThoughtShield){
+				if($system->side == 'F' ) 	$this->shieldPresets[] = 'Forward';
+				if($system->side == 'A' ) 	$this->shieldPresets[] = 'Aft'; 
+				if($system->side == 'FP' ) 	$this->shieldPresets[] = 'ForwardPort'; 
+				if($system->side == 'FS' ) 	$this->shieldPresets[] = 'ForwardStarboard'; 
+				if($system->side == 'AP' ) 	$this->shieldPresets[] = 'AftPort'; 
+				if($system->side == 'AS' ) 	$this->shieldPresets[] = 'AftStarboard'; 
+			}			
+		}
+    }
 		
     public function setSystemDataWindow($turn){
         parent::setSystemDataWindow($turn);

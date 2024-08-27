@@ -1507,7 +1507,11 @@ ThirdspaceShieldGenerator.prototype.doPreset = function (presetCurrClass) { // C
 	if(presetCurrClass == 'Forward') reinforceLocation = 'F';
 	if(presetCurrClass == 'Starboard') reinforceLocation = 'R';
 	if(presetCurrClass == 'Aft') reinforceLocation = 'A';
-	if(presetCurrClass == 'Port') reinforceLocation = 'L';						
+	if(presetCurrClass == 'Port') reinforceLocation = 'L';
+	if(presetCurrClass == 'ForwardPort') reinforceLocation = 'FP';
+	if(presetCurrClass == 'ForwardStarboard') reinforceLocation = 'FS';
+	if(presetCurrClass == 'AftPort') reinforceLocation = 'AP';
+	if(presetCurrClass == 'AftStarboard') reinforceLocation = 'AS';								
 	
 	var ship = this.ship;
 	// Find total pool of shield energy		 	
