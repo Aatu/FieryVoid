@@ -994,6 +994,11 @@ class ThoughtShield extends Shield implements DefensiveSystem {
 			    $currentRating = $this->getRemainingHealth();
 			    $adjustment = $currentRating - $startRating;
 
+				//For Mind's Eye, need to adjust on Turn 1 if Contraction is used to change shields.
+				$mindriderEngine = $ship->getSystemByName("MindriderEngine");			    
+			    if($mindriderEngine) $adjustment -= $mindriderEngine->contraction;
+
+
 				if(!$ship instanceof FighterFlight){//Fighters don't have Generators, and can't offline anyway!	
 					$generator = $ship->getSystemByName("ThoughtShieldGenerator");				
 		            if($generator->isOfflineOnTurn($turn)) {
