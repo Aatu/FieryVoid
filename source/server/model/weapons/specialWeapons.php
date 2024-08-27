@@ -6534,7 +6534,7 @@ class ThoughtWave extends Plasma{
     public $range = 100;
     public $firingMode = 1;
     public $priorityAF = 1;
-    public $loadingtime = 1;//CHANGE BACK!
+    public $loadingtime = 3;
 	public $hextarget = true;
 	public $hidetarget  = true;	
     public $useOEW = false;
@@ -6584,19 +6584,22 @@ class ThoughtWave extends Plasma{
 				}    			
 			
         if($originalFireOrder==null) return; //no appropriate fire order, end of work
-
+	
+    	$thisShip = $this->getUnit();  	
+    				
+		//Have Thought Wave originate from usual ballistic location.	
+		$shipStartLoc = $thisShip->getLastTurnMovement($gamedata->turn);
+		$startPosition = $shipStartLoc->position;
+		$originalFireOrder->x = $startPosition->q;
+		$originalFireOrder->y = $startPosition->r;
+		
+		//Correct any errors.
 		if ($originalFireOrder->targetid != -1) {
-			$targetship = $gamedata->getShipById($fireOrder->targetid);
-			//insert correct target coordinates: last turns' target position
-			$targetPos = $targetship->getHexPos();
-			$originalFireOrder->x = $targetPos->q;
-			$originalFireOrder->y = $targetPos->r;
 			$originalFireOrder->targetid = -1; //correct the error
 			$originalFireOrder->calledid = -1; //just in case
 		}
-		
+	
 		//find all units in target area, to declare firing orders vs them...    	
-    	$thisShip = $this->getUnit();  
     	$allShips = $gamedata->ships;
     	$relevantShips = array();
 
