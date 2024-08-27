@@ -2780,7 +2780,7 @@ class ConnectionStrut extends ShipSystem{
     public $displayName = "Connection Strut";
     public $iconPath = "connectionStrut.png";
     
-	protected $doCountForCombatValue = false; //false means this system is skipped when evaluating ships' combat value!    
+	protected $doCountForCombatValue = false; //false means this system is skipped when evaluating ships' combat value!
     
 	//Connection Strut cannot be repaired!
 	public $repairPriority = 0;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
