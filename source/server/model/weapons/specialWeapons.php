@@ -6533,7 +6533,7 @@ class ThoughtWave extends Plasma{
 	public $ballistic = true;	
     public $range = 100;
     public $firingMode = 1;
-    public $priorityAF = 1;
+    public $priority = 7;
     public $loadingtime = 3;
 	public $hextarget = true;
 	public $hidetarget  = true;	
