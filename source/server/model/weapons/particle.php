@@ -2022,7 +2022,7 @@ class MinorThoughtPulsar extends LinkedWeapon{
 
     public $rangePenalty = 2; //-2/hex
     public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
-    public $priority = 5; //2d6+2 qualifies as "large" fighter weapon, I think! 
+    public $priority = 5; 
 
 	public $firingMode = 1;	
     public $firingModes = array( 1 => "RoF", 2 => "Damage", 3 => "Hitchance", 4 => "1Combo1",  5 => "2Combo2");
