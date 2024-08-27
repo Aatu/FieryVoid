@@ -937,7 +937,7 @@ class PulseAccelerator extends Pulse{
         public $loadingtime = 1;
         public $normalload = 1;
 	    
-        public $priority = 6;
+        public $priority = 4;
         
         public $calledShotMod = -4; //instead of usual -8
 	    
@@ -989,8 +989,8 @@ class UltraPulseCannon extends Pulse{
     public $maxpulsesArray = array(1=>6, 2=>9, 3=>12);	    
     public $rof = 4;
 	public $rofArray = array(1=>4, 2=>5, 3=>6);      
-    public $priority = 4;
-    public $priorityArray = array(1=>4, 2=>6, 3=>7);    
+    public $priority = 7;
+    public $priorityArray = array(1=>7, 2=>6, 3=>4);    
 	public $damageType = 'Pulse'; //indicates that this weapon does damage in Pulse mode
     public $weaponClass = "Particle"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
 	public $intercept = 6; //intercept rating -1
