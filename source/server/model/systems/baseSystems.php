@@ -4748,7 +4748,8 @@ class ThoughtShieldGenerator extends ShipSystem{
         parent::setSystemDataWindow($turn);
 		$this->data["Special"] = "Resets all Thoughtshields to " .$this->getOutput(). " at the beginning of each turn.";
         $this->data["Special"] .= "<br>If one CnC on ship is destroyed only regenerates shields by 50%, if both are destroyed no shields are regenerated.";	  		
-        $this->data["Special"] .= "<br>During Initial Orders this system can be used to transfer shield power from one shield system to another e.g. front to aft etc.";	   
+        $this->data["Special"] .= "<br>During Initial Orders this system can be used to transfer shield power from one shield system to another e.g. front to aft etc.";
+        $this->data["Special"] .= "<br>By selecting Shield Presets you will triple the power of any given shield by drawing energy from others, or Equalise all shields.";	        	   
         $this->data["Special"] .= "<br>You cannot commit your Intial Orders if there is an excess or deficit of shield energy in this system.";
  		$this->outputDisplay = $this->storedCapacity;
  		$this->data["Output"] = $this->getOutput();               

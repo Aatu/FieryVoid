@@ -1536,9 +1536,9 @@ ThirdspaceShieldGenerator.prototype.doPreset = function (presetCurrClass) { // C
 
 		while (totalShieldPool > 0 && shieldsToCharge.length > 0) {
 			var noOfShieldsToCharge = shieldsToCharge.length;
-			var totalUnits = (priorityShieldFound ? noOfShieldsToCharge : noOfShieldsToCharge + 1);
+			var totalUnits = (priorityShieldFound ? noOfShieldsToCharge : noOfShieldsToCharge + 2);
 			var amountEachShield = Math.floor(totalShieldPool / totalUnits);
-			var prioritisedAmount = amountEachShield * 2;
+			var prioritisedAmount = amountEachShield * 3;
 			var remainingShieldPool = 0;
 
 			if (amountEachShield < 1 && totalShieldPool < noOfShieldsToCharge) {
