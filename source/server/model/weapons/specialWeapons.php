@@ -6534,7 +6534,7 @@ class ThoughtWave extends Plasma{
     public $range = 100;
     public $firingMode = 1;
     public $priority = 7;
-    public $loadingtime = 3;
+    public $loadingtime = 1;
 	public $hextarget = true;
 	public $hidetarget  = true;	
     public $useOEW = false;
@@ -6553,8 +6553,10 @@ class ThoughtWave extends Plasma{
 
     public $animation = "ball";
     public $animationExplosionScale = 1;   
-	public $animationColor = array(0, 0, 0);
-	public $noProjectile = true; //Marker for front end to make projectile invisible for weapons that shouldn't have one.  	
+	public $animationColor = array(204, 102, 0);
+	public $noProjectile = true; //Marker for front end to make projectile invisible for weapons that shouldn't have one.
+	
+	public $firingModes = array(1=> "ThoughtWave"); 	
 
 	public $output = 15;//Is actually used as the base hit chance, but can be modified by critical hits.	
 	private $diceRollonTurn = null;	
@@ -6675,24 +6677,27 @@ class ThoughtWave extends Plasma{
 		}else{
 			$fireOrder->needed = 0;			
 		}
-		$fireOrder->notes .= 'Thought Wave direct shot.';        
+		$fireOrder->notes .= 'Thought Wave direct shot.';
+		$fireOrder->pubnotes .= ' Hit Roll: ' . $result . '.';		        
         $fireOrder->updated = true;		
 					
 	}  //end of calculateHitBase() 
 
 
     public function fire($gamedata, $fireOrder){
-		if($fireOrder->targetid == -1) { //initial "targeting location" Thought Wave shot should not actually be resolved
+/*		if($fireOrder->targetid == -1) { //initial "targeting location" Thought Wave shot should not actually be resolved
 			return;
-		}else if($fireOrder->calledid >= 0){ //in case of direct Thought Wave attack - skip it if target fighter is already destroyed!
+		}else 
+		if($fireOrder->calledid >= 0){ //in case of direct Thought Wave attack - skip it if target fighter is already destroyed!
 		$target = $gamedata->getShipById($fireOrder->targetid);
 			if($target instanceOf FighterFlight) { //it should be so, check is just in case
 				$craft = $target->getFighterBySystem($fireOrder->calledid);
 				if($craft && $craft->isDestroyed()) return;//shot is dedicated to this one fighter, cannot be retargeted on another - skip resolution
 			}
 		}
+*/		
 		//Direct Thoughtwave Attack - default routine will do!
-		if($fireOrder->needed <= 0){ //Don't resolve shots which don't hit.
+		if($fireOrder->needed <= 0 && $fireOrder->targetid != -1){ //Don't resolve direct shots which don't hit.
 			return;				
 		}
 		//Standard routines for everything else!
