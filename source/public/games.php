@@ -62,7 +62,7 @@ if (isset($_SESSION["user"])) {
         <br>
        -->
 		
-		<big><b>Welcome to Fiery Void, an adaption of the 'Babylon 5 Wars' tabletop game, by Agents of Gaming!</b></big>
+		<big><b>Welcome to Fiery Void, an adaptation of the 'Babylon 5 Wars' tabletop game, by Agents of Gaming!</b></big>
 
 		<br><br>---------- <b>LATEST NEWS - August 2024</b> ----------
 	    <br><b>Deleting inactive games</b>: delay increased to 5 days (test games are useful, and picking up games after weekend is a thing!)
