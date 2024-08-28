@@ -6611,19 +6611,19 @@ class ThoughtWave extends Plasma{
 		}
 	
 		foreach($relevantShips as $target){
-			$this->prepareFiringOrder($thisShip, $target, $gamedata);							
+			$this->prepareFiringOrder($thisShip, $target, $gamedata, $originalFireOrder);							
 		}
 				 	
 	} //endof beforeFiringOrderResolution
 
 
-	private function prepareFiringOrder($shooter, $target, $gamedata){
+	private function prepareFiringOrder($shooter, $target, $gamedata, $originalFireOrder){
 
 		$newFireOrder = new FireOrder(
 			-1, "normal", $shooter->id, $target->id,
 			$this->id, -1, $gamedata->turn, 1, 
 			0, 0, 1, 0, 0, //needed, rolled, shots, shotshit, intercepted
-			0,0,$this->weaponClass,-1 //X, Y, damageclass, resolutionorder
+			$originalFireOrder->x,$originalFireOrder->y,$this->weaponClass,-1 //X, Y, damageclass, resolutionorder
 		);		
 		$newFireOrder->addToDB = true;
 		$this->fireOrders[] = $newFireOrder;
