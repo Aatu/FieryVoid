@@ -6552,7 +6552,7 @@ class ThoughtWave extends Plasma{
 	public $rangeDamagePenalty = 2;	
 
     public $animation = "ball";
-    public $animationExplosionScale = 1;   
+    public $animationExplosionScale = 2;   
 	public $animationColor = array(204, 102, 0);
 	public $noProjectile = true; //Marker for front end to make projectile invisible for weapons that shouldn't have one.
 	
@@ -6685,22 +6685,11 @@ class ThoughtWave extends Plasma{
 
 
     public function fire($gamedata, $fireOrder){
-/*		if($fireOrder->targetid == -1) { //initial "targeting location" Thought Wave shot should not actually be resolved
-			return;
-		}else 
-		if($fireOrder->calledid >= 0){ //in case of direct Thought Wave attack - skip it if target fighter is already destroyed!
-		$target = $gamedata->getShipById($fireOrder->targetid);
-			if($target instanceOf FighterFlight) { //it should be so, check is just in case
-				$craft = $target->getFighterBySystem($fireOrder->calledid);
-				if($craft && $craft->isDestroyed()) return;//shot is dedicated to this one fighter, cannot be retargeted on another - skip resolution
-			}
-		}
-*/		
-		//Direct Thoughtwave Attack - default routine will do!
+
 		if($fireOrder->needed <= 0 && $fireOrder->targetid != -1){ //Don't resolve direct shots which don't hit.
 			return;				
 		}
-		//Standard routines for everything else!
+		//Standard routines for everything!
 		parent::fire($gamedata, $fireOrder);
 	}
 
