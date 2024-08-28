@@ -287,7 +287,7 @@ class Weapon extends ShipSystem
 			$strippedSystem->extraoverloadshotsArray = $this->extraoverloadshotsArray;
 			$strippedSystem->fireOrders = $this->fireOrders;
 			$strippedSystem->canModesIntercept = $this->canModesIntercept;//For weapons which intercept not using their default mode e.g. interceptor missiles - DK
-			
+			  
 			if(isset($this->ammunition)){
 				$strippedSystem->ammunition = $this->ammunition;
 				$strippedSystem->data = $this->data;
