@@ -3360,8 +3360,12 @@ spl_autoload_register(
 				'trofaas' => '/server/model/ships/markab/trofaAS.php',
 				'breachingpodmarkab' => '/server/model/ships/markab/breachingpodmarkab.php',					
 				'breachingpodcorillani' => '/server/model/ships/corillani/breachingpodcorillani.php',										
-				'breachingpodkorlyan' => '/server/model/ships/korlyan/breachingpodkorlyan.php',		
-										
+				'breachingpodkorlyan' => '/server/model/ships/korlyan/breachingpodkorlyan.php',	
+				
+				//Grappling Claw & Grapple ships
+				'grapplingclaw' => '/server/model/weapons/specialWeapons.php',					
+				'claweagle' => '/server/model/ships/drazi/claweagle.php',										
+				'assaultsloop' => '/server/model/ships/raiders/assaultsloop.php',
 
 						//Satyra (Wolfgang campaign)
 						'satyrashield' => '/server/model/weapons/customDevelopment.php',

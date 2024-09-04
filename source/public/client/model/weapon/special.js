@@ -525,3 +525,9 @@ var ThoughtWave = function ThoughtWave(json, ship) {
 ThoughtWave.prototype = Object.create(Weapon.prototype);
 ThoughtWave.prototype.constructor = ThoughtWave;
 
+var GrapplingClaw = function GrapplingClaw(json, ship) {
+    Weapon.call(this, json, ship);
+};
+GrapplingClaw.prototype = Object.create(Weapon.prototype);
+GrapplingClaw.prototype.constructor = GrapplingClaw;
+

@@ -719,17 +719,31 @@ window.weaponManager = {
 		var speedDifference = Math.abs(targetSpeed - ownSpeed); //keep it a positive number. 		
 		var freeThrust = shooter.freethrust;
 		
-		if(speedDifference > freeThrust) return 0;//Not enough thrust to compensate for speed difference, automatic miss.		
-          		
-		if(targetSpeed > ownSpeed){//Target is moving faster, what are chances to attach?
-			var speedChance = speedDifference*2;//Each point of speed differnece equates to 10% chance to miss.
-			var newHitchance = hitChance - speedChance;//Take current hitChance, and remove speed differenc penalty.
-        	hitChance = Math.round(newHitchance * 5);//Convert to % value			
-			return hitChance;			
-		}else{
-        	hitChance = Math.round(hitChance * 5);	//Convert to % value				
-			return hitChance;
-		}			
+		if(shooter.flight){	//Breaching Pods.	
+			if(speedDifference > freeThrust) return 0;//Not enough thrust to compensate for speed difference, automatic miss.		
+	          		
+			if(targetSpeed > ownSpeed){//Target is moving faster, what are chances to attach?
+				var speedChance = speedDifference*2;//Each point of speed differnece equates to 10% chance to miss.
+				var newHitchance = hitChance - speedChance;//Take current hitChance, and remove speed difference penalty.
+	        	hitChance = Math.round(newHitchance * 5);//Convert to % value			
+				return hitChance;			
+			}else{
+	        	hitChance = Math.round(hitChance * 5);	//Convert to % value				
+				return hitChance;
+			}			
+		}else{ //Grapple Ships
+        	if (target.iniative > shooter.iniative) return 0;//Cannot grapple ships which rolled equal or higher initiative than you.		
+			if(speedDifference > 0){//Check Speed difference
+				var speedChance = speedDifference;//Each point of speed difference equates to 5% chance to miss.
+				var newHitchance = hitChance - speedChance;//Take current hitChance, and remove speed difference penalty.
+				if(target.Enormous) $newHitchance += 2;//You can't attach to Enormous Units without auto-ramming, but at least you get a bonus :)
+	        	hitChance = Math.round(newHitchance * 5);//Convert to % value			
+				return hitChance;			
+			}else{
+	        	hitChance = Math.round(hitChance * 5);	//Convert to % value				
+				return hitChance;
+			}			
+		}
 
     }, //endof calculateBoardingAction
 

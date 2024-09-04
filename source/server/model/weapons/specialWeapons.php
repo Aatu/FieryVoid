@@ -6059,19 +6059,18 @@ class Marines extends Weapon{
 	public $doNotIntercept = true;	
 		
 
-	public $damageType = "Standard";
+	public $damageType = "Special";
 	public $weaponClass = "Matter";
 	public $firingModes = array(
-		1 => "Sabotage",
-		2 => "Capture Ship",
+		1 => "Capture Ship",
+		2 => "Sabotage",
 		3 => "Rescue"
 	);		
 
-	public $specialHitChanceCalculation = true;//For Front End hit chance calculation.
 	public $eliteMarines = false;
 	public $isBoardingAction = true;//For front end to recalculate hit chance.	
 
-	private static $boardedThisTurn = array();//Static variable to keep track of Marine actions on current turn (to prevent too many on a ship).			
+	public static $boardedThisTurn = array();//Static variable to keep track of Marine actions on current turn (to prevent too many on a ship).			
 		 
 	function __construct($startArc, $endArc, $damagebonus, $elite){
 		parent::__construct(0, 1, 0, $startArc, $endArc);
@@ -6080,12 +6079,12 @@ class Marines extends Weapon{
 	
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);      
-		$this->data["Special"] = "<br>If on same hex as enemy ship can attempt to board an enemy vessel.";	
-		$this->data["Special"] .= "<br>Marines may attempt three 'Missions' using Firing Modes.";  		
-		$this->data["Special"] .= "<br> - Sabotage: Can be directed at a specific system (i.e. called shot) or for general sabotage operations on enemy ship."; 
+		$this->data["Special"] = "<br>If on same hex as an enemy ship, can attempt to board that vessel.";	
+		$this->data["Special"] .= "<br>Marines may attempt three 'Missions' by selecting the appropriate Firing Mode.";  		 		
 		$this->data["Special"] .= "<br> - Capture Ship: Marines can attempt to overcome defenders on enemy ship and disable it."; 
+		$this->data["Special"] .= "<br> - Sabotage: Can be directed at a specific system (i.e. called shot) or for general sabotage operations on enemy ship.";
 		$this->data["Special"] .= "<br> - Rescue: Scenarios only, Marines will board enemy ship and attempt to rescue target."; 						 
-		$this->data["Special"] .= "<br>See 'Faction Notes' file for full information on Boarding Actions.";  		                     
+		$this->data["Special"] .= "<br>See 'Common Systems & Enhancements' file for full information on Boarding Actions.";  		                     
 		if($this->eliteMarines){
 			$this->data["Elite"] = "Yes";
 		}else{
@@ -6159,37 +6158,27 @@ class Marines extends Weapon{
 
 			//Need to remove Enhancement bonuses from saved ammo count, as these will be re-added in onConstructed()
 			$ship = $gamedata->getShipById($fireOrder->shooterid);
-//echo "Value of ammoAmountBEFORE: " . $this->ammunition. "\n";		
+	
 			foreach ($ship->enhancementOptions as $enhancement) {
 			    $enhID = $enhancement[0];
 				$enhCount = $enhancement[2];		        
 				if($enhCount > 0) {		            
 			        if ($enhID == 'EXT_MAR') $this->ammunition -= $enhCount;       	
 				}
-			}
-//echo "Value of ammoAmountAFTER: " . $this->ammunition. "\n";		
+			}	
 			Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);
-		}			
+		}
+					
 	}
 
-	private static function recordBoarding($targetId) {
+	public static function recordBoarding($targetId) {
 	    Marines::$boardedThisTurn[] = $targetId;
 	}	
 	
 	private function checkMissionAmount($target, $gamedata, $fireOrder){	
 		$tooMany = false;//Initialise
 		$noOfPods = 0;//Initialise	
-		
-/* //Remove check for Marines already on board.
-		foreach($target->systems as $system){ //Need to check all systems for marine missions from PREVIOUS turns and increment counter.
-			if($system->hasCritical("Sabotage", $gamedata->turn) > 0)  $noOfMarines += $system->hasCritical("Sabotage", $gamedata->turn); //returns a number I think.
-			if($system->hasCritical("SabotageElite", $gamedata->turn) > 0) $noOfMarines += $system->hasCritical("SabotageElite", $gamedata->turn);
-			if($system->hasCritical("CaptureShip", $gamedata->turn) > 0) 	$noOfMarines += $system->hasCritical("CaptureShip", $gamedata->turn); 
-			if($system->hasCritical("CaptureShipElite", $gamedata->turn) > 0) $noOfMarines += $system->hasCritical("CaptureShipElite", $gamedata->turn); 
-			if($system->hasCritical("RescueMission", $gamedata->turn) > 0) $noOfMarines += $system->hasCritical("RescueMission", $gamedata->turn); 
-			if($system->hasCritical("RescueMissionElite", $gamedata->turn) > 0) $noOfMarines += $system->hasCritical("RescueMissionElite", $gamedata->turn); 
-		}
-*/
+
 	    foreach (Marines::$boardedThisTurn as $boardedId) {//Check static variable for how many marines missions have boarded THIS turn.
 	        if ($boardedId == $target->id) {
 	            $noOfPods++;
@@ -6251,7 +6240,7 @@ class Marines extends Weapon{
 		if($this->checkMissionAmount($target, $gamedata, $fireOrder)){//If it returns true, there are too many attaching pods.							
 			$this->ammunition++;//Marines weren't eliminated.  Give ammunition back to weapon.
 			Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);	
-			$fireOrder->pubnotes .= "<br>Too many Breaching Pods attached on target, boarding attempt cancelled.";		
+			$fireOrder->pubnotes .= "<br>Too many Breaching Pods/Grappling Claws attached on target, boarding attempt cancelled.";		
 			return;
 		}	
 			
@@ -6267,8 +6256,27 @@ class Marines extends Weapon{
 		if($deliveryRoll <= 5){ //successful delivery, continue with applying critical effects.						
 				
 			switch($this->firingMode){
+								
+				case 1://Capture
 
-				case 1://Sabotage
+					$fireOrder->pubnotes .= "<br>Roll(Mod): $deliveryRoll($rollMod) - A marine unit will attempt to capture enemy ship next turn.";			
+						if($cnc){
+								if($this->eliteMarines){//Are Marines Elite?
+									$crit = new CaptureShipElite(-1, $ship->id, $cnc->id, 'CaptureShipElite', $gamedata->turn+1); //Takes effect next turn.
+									$crit->updated = true;
+									$cnc->criticals[] =  $crit;
+									Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note pod attached this turn.	
+								}else{//Not Elite Marines					
+									$crit = new CaptureShip(-1, $ship->id, $cnc->id, 'CaptureShip', $gamedata->turn+1);  //Takes effect next turn.
+									$crit->updated = true;
+									$cnc->criticals[] =  $crit;
+									Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note pod attached this turn.	
+								}							    		
+			            }				
+				
+					break;
+
+				case 2://Sabotage
 
 					if($fireOrder->calledid != -1){//Is a called shot, place crit on system.
 							$fireOrder->pubnotes .= "<br>Roll(Mod): $deliveryRoll($rollMod) - A marine unit will attempt to sabotage " . $system->displayName ." system next turn.";
@@ -6300,27 +6308,7 @@ class Marines extends Weapon{
 				            }				
 					}	
 					
-					break;
-								
-				case 2://Capture
-
-					$fireOrder->pubnotes .= "<br>Roll(Mod): $deliveryRoll($rollMod) - A marine unit will attempt to capture enemy ship next turn.";			
-						if($cnc){
-								if($this->eliteMarines){//Are Marines Elite?
-									$crit = new CaptureShipElite(-1, $ship->id, $cnc->id, 'CaptureShipElite', $gamedata->turn+1); //Takes effect next turn.
-									$crit->updated = true;
-									$cnc->criticals[] =  $crit;
-									Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note pod attached this turn.	
-								}else{//Not Elite Marines					
-									$crit = new CaptureShip(-1, $ship->id, $cnc->id, 'CaptureShip', $gamedata->turn+1);  //Takes effect next turn.
-									$crit->updated = true;
-									$cnc->criticals[] =  $crit;
-									Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note pod attached this turn.	
-								}							    		
-			            }				
-				
-					break;
-				
+					break;				
 				
 				case 3://Rescue
 
@@ -6372,6 +6360,340 @@ class Marines extends Weapon{
 	}
 	
 }//endof Marines
+
+
+
+class GrapplingClaw extends Weapon{
+	public $name = "GrapplingClaw";
+	public $displayName = "Grappling Claw";
+	public $iconPath = "grapplingClaw.png";
+	public $animation = "trail";
+	public $animationColor = array(50, 50, 50);
+	public $animationWidth = 0.2;
+  
+	public $useOEW = false; 
+	public $range = 0.1;
+
+	public $noPrimaryHits = true; //cannot hit PRIMARY from outer table, should never happen.
+
+	public $calledShotMod = 0; //instead of usual -8
+	
+	public $loadingtime = 1;
+	public $rangePenalty = 0;
+	
+	public $noOverkill = true;
+	public $priority = 9;
+	
+	public $uninterceptable = true; 
+	public $doNotIntercept = true;			
+
+	public $damageType = "Special";
+	public $weaponClass = "Matter";
+	public $firingModes = array(
+		1 => "Capture Ship",
+		2 => "Sabotage",
+		3 => "Rescue"
+	);		
+
+	public $eliteMarines = false;
+	public $isBoardingAction = true;//For front end to recalculate hit chance.	
+		
+	public $ammunition = 0; //limited number of Marine contingents.
+	
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $ammunition, $elite)
+	{
+		if ( $maxhealth == 0 ) $maxhealth = 5;
+        if ( $powerReq == 0 ) $powerReq = 0;      						
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $ammunition, $elite); //Parent routines take care of the rest
+		$this->ammunition = $ammunition;			
+		$this->eliteMarines = $elite;	       
+	}
+
+	
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);      
+		$this->data["Special"] = "<br>If on same hex as an enemy ship, and in arc, this weapon attempt to deliver Marines to that vessel.";	
+		$this->data["Special"] .= "<br>Marines may attempt three 'Missions' by selecting the appropriate Firing Mode.";  		
+		$this->data["Special"] .= "<br> - Capture Ship: Marines can attempt to overcome defenders on enemy ship and disable it."; 
+		$this->data["Special"] .= "<br> - Sabotage: Can be directed at a specific system (i.e. called shot) or for general sabotage operations on enemy ship."; 
+		$this->data["Special"] .= "<br> - Rescue: Scenarios only, Marines will board enemy ship and attempt to rescue target."; 
+		$this->data["Special"] .= "<br>NOTE - You cannot Grapple ships which rolled higher initiative than you this turn, even if you are in the same Initiative bracket using Simultaneous Movement rules."; 
+		$this->data["Special"] .= "<br>See 'Common Systems & Enhancements' file for full information on Boarding Actions.";  		                     
+		if($this->eliteMarines){
+			$this->data["Elite"] = "Yes";
+		}else{
+			$this->data["Elite"] = "No";			
+		}
+	    $this->data["Ammunition"] = $this->ammunition;					
+	}
+
+
+	public function calculateHitBase($gamedata, $fireOrder)
+	{
+		//Needs it's own custom routine for hit chance.
+		$shooter = $gamedata->getShipById($fireOrder->shooterid);	
+		$target = $gamedata->getShipById($fireOrder->targetid);			
+
+		if($target->factionAge > 2) {//Cannot attach to Ancients.  Might be impossible if Front End chance is also made 0%
+			$fireOrder->pubnotes .= "<br> Grappling Claws cannot attach to Ancient ships.";
+			$fireOrder->needed = 0;
+			$fireOrder->updated = true;
+			$this->dontDeductAmmmo = true;//Marines weren't eliminated, they just weren't delivered.  Don't take ammo from Magazine.	
+			return; 
+		}
+		
+        if($target->iniative > $shooter->iniative){//Should not happen, Front End will prevent.  But just in case.
+			$fireOrder->pubnotes .= "<br> Grappling Claws cannot attach when you have lower Initiative than target.";
+			$fireOrder->needed = 0;
+			$fireOrder->updated = true;
+			$this->dontDeductAmmmo = true;//Marines weren't eliminated, they just weren't delivered.  Don't take ammo from Magazine.	
+			return; 
+		}  		
+		
+		//Now roll to see if the Grappling Claw attaches on this turn.
+		$shooterMove = $shooter->getLastMovement();
+		$shooterSpeed = $shooterMove->speed;		
+		
+		$targetMove = $target->getLastMovement();
+		$targetSpeed = $targetMove->speed;
+		$speedDifference = abs($targetSpeed - $shooterSpeed);//Calculate absolute difference in speed.
+			
+		$finalSpeedDifference = max(0, $speedDifference);
+
+        $hitLoc = null;
+        $hitLoc = $target->getHitSection($shooter, $fireOrder->turn);
+        
+        $attachRoll = Dice::d(20);      	
+        	
+		
+		if($finalSpeedDifference > 0){//D20 roll needs to be over speed difference.
+			$baseHitChance = 100;//Start with automatic hit.
+			$speedChance = 	$finalSpeedDifference *5;//Each point of speed difference is 5% chance to miss.
+			$finalHitChance = $baseHitChance - $speedChance;//Adjust hitchance.
+			if($target->Enormous) $finalHitChance += 10; //You can't attach to Enormous Units without auto-ramming, but at least you get a bonus :)
+			$fireOrder->needed = $finalHitChance;//Update fireOrder.		
+			$fireOrder->updated = true;	
+			$fireOrder->chosenLocation = $hitLoc;//Need to mark this for successful shots to check if hitting Primary.									
+			return;
+		}else{
+			$fireOrder->needed = 100;
+			$fireOrder->updated = true;
+			$fireOrder->chosenLocation = $hitLoc;		
+			$this->dontDeductAmmmo = true;//Marines weren't eliminated, they just weren't delivered.  Don't take ammo from Magazine						
+			return;
+		}	
+		
+	}//endof calculateHitBase
+
+   public function fire($gamedata, $fireOrder){ //note ammo usage
+		parent::fire($gamedata, $fireOrder);
+
+		if($fireOrder->rolled <= $fireOrder->needed){//Only reduce ammo if Marines successfully boarded enemy ship.
+
+			$this->ammunition--;//Deduct Marine unit just used.			
+
+			//Need to remove Enhancement bonuses from saved ammo count, as these will be re-added in onConstructed()
+			$ship = $gamedata->getShipById($fireOrder->shooterid);
+	
+			foreach ($ship->enhancementOptions as $enhancement) {
+			    $enhID = $enhancement[0];
+				$enhCount = $enhancement[2];		        
+				if($enhCount > 0) {		            
+			        if ($enhID == 'EXT_MRN') $this->ammunition -= $enhCount;       	
+				}
+			}	
+			Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);
+		}
+			
+	}
+
+/*
+	private static function recordBoarding($targetId) {
+	    Marines::$boardedThisTurn[] = $targetId;
+	}	
+*/	
+
+
+	private function checkMissionAmount($target, $gamedata, $fireOrder){	
+		$tooMany = false;//Initialise
+		$noOfPods = 0;//Initialise	
+
+	    foreach (Marines::$boardedThisTurn as $boardedId) {//Check static variable for how many marines missions have boarded THIS turn.
+	        if ($boardedId == $target->id) {
+	            $noOfPods++;
+	        }
+	    }	
+		
+		//Different amount of marine missions possible depending on size of ships.
+		if(	($target->shipSizeClass > 3 && $noOfPods >= 12) ||
+			($target->shipSizeClass == 3 && $noOfPods >= 8) ||
+		   	($target->shipSizeClass == 2 && $noOfPods >= 4) || 
+		   	($target->shipSizeClass == 1 && $noOfPods >= 2) ||
+		   	($target->shipSizeClass < 1 && $noOfPods > 1)) {
+		 									
+			$tooMany = true; //There are too many, change to false.
+		}	
+
+		return $tooMany;	
+		
+	}//endof checkMissionAmount()
+
+
+
+	private function getDeliveryRollMod($shooter, $target, $gamedata, $fireOrder){
+		$rollMod = 0;
+		if($this->eliteMarines) $rollMod -= 1; //Elite Marines board more easily.
+						
+		$location = $fireOrder->chosenLocation ;
+		if($location == 0 && (!$target instanceof OSAT)) $rollMod -= 1; //Easier to deliver marines to destroyed sections i.e direct to Primary section.	       
+
+		foreach ($target->enhancementOptions as $enhancement) {//Defender quality can influence roll too.
+		    $enhID = $enhancement[0];
+			$enhCount = $enhancement[2];		        
+			if($enhCount > 0) {		            
+		        if ($enhID == 'ELITE_CREW') $rollMod += $enhCount;	//Elite Crews are better at defending.
+		        if ($enhID == 'POOR_CREW') $rollMod -= $enhCount; //Poor Crews are worse.
+		        if ($enhID == 'MARK_FERV') $rollMod += $enhCount; //Markab Fervor causes defenders to fight harder.		        	
+			}
+		}
+
+        return $rollMod;
+        		
+	}//endof getDeliveryRollMod	
+	
+	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!
+
+		$shooter = $gamedata->getShipById($fireOrder->shooterid);
+		$target = $gamedata->getShipById($fireOrder->targetid);
+			
+		if ($system->advancedArmor) {//no effect on Advanced Armor for Younger Races equipped with this e.g. Shadow Omega.	
+			$fireOrder->pubnotes .= "<br> Marines cannot attack systems with advanced armor.";				
+			return; 	
+		}
+		
+		//check if there are too many marines already on target ship.
+		if($this->checkMissionAmount($target, $gamedata, $fireOrder)){//If it returns true, there are too many attaching pods.							
+			$this->ammunition++;//Marines weren't eliminated.  Give ammunition back to weapon.
+			Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);	
+			$fireOrder->pubnotes .= "<br>Too many Breaching Pods/Grappling Claws attached on target, boarding attempt cancelled.";		
+			return;
+		}	
+			
+		//Can proceed with boarding actions, roll to see if Marines are delivered.		
+		$rollMod = $this->getDeliveryRollMod($shooter, $target, $gamedata, $fireOrder);		
+		$deliveryRoll = max(0, Dice::d(10) + $rollMod);		
+
+		$cnc = $ship->getSystemByName("CnC");//$this should be CnC, but just in case.		
+		foreach($cnc->criticals as $critDisabled){
+			if($critDisabled->phpclass == "ShipDisabled"  && $critDisabled->turn <= $gamedata->turn) $deliveryRoll = 1;//Ship captured, auto success.		
+		}		
+		
+		if($deliveryRoll <= 5){ //successful delivery, continue with applying critical effects.						
+				
+			switch($this->firingMode){
+								
+				case 1://Capture
+
+					$fireOrder->pubnotes .= "<br>Roll(Mod): $deliveryRoll($rollMod) - A marine unit will attempt to capture enemy ship next turn.";			
+						if($cnc){
+								if($this->eliteMarines){//Are Marines Elite?
+									$crit = new CaptureShipElite(-1, $ship->id, $cnc->id, 'CaptureShipElite', $gamedata->turn+1); //Takes effect next turn.
+									$crit->updated = true;
+									$cnc->criticals[] =  $crit;
+									Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note pod attached this turn.	
+								}else{//Not Elite Marines					
+									$crit = new CaptureShip(-1, $ship->id, $cnc->id, 'CaptureShip', $gamedata->turn+1);  //Takes effect next turn.
+									$crit->updated = true;
+									$cnc->criticals[] =  $crit;
+									Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note pod attached this turn.	
+								}							    		
+			            }				
+				
+					break;
+
+				case 2://Sabotage
+
+					if($fireOrder->calledid != -1){//Is a called shot, place crit on system.
+							$fireOrder->pubnotes .= "<br>Roll(Mod): $deliveryRoll($rollMod) - A marine unit will attempt to sabotage " . $system->displayName ." system next turn.";
+						if($this->eliteMarines){//Are Marines Elite?
+							$crit = new SabotageElite(-1, $ship->id, $system->id, 'SabotageElite', $gamedata->turn+1); //Takes effect next turn.
+							$crit->updated = true;
+							$system->criticals[] =  $crit;
+							Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note pod attached this turn.	
+						}else{//Not Elite Marines			
+							$crit = new Sabotage(-1, $ship->id, $system->id, 'Sabotage', $gamedata->turn+1); //Takes effect next turn.
+							$crit->updated = true;
+							$system->criticals[] =  $crit;
+							Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note pod attached this turn.	
+						}	
+					}else{ //Has targeted ship generally, not a specific system.  Apply crit to CnC.
+						$fireOrder->pubnotes .= "<br>Roll(Mod): $deliveryRoll($rollMod) - A marine unit will attempt sabotage operations on enemy ship next turn.";								
+							if($cnc){
+									if($this->eliteMarines){//Are Marines Elite?
+										$crit = new SabotageElite(-1, $ship->id, $cnc->id, 'SabotageElite', $gamedata->turn+1); //Takes effect next turn.
+										$crit->updated = true;
+										$cnc->criticals[] =  $crit;
+										Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note pod attached this turn.							
+									}else{//Not Elite Marines					
+										$crit = new Sabotage(-1, $ship->id, $cnc->id, 'Sabotage', $gamedata->turn+1);  //Takes effect next turn.
+										$crit->updated = true;
+										$cnc->criticals[] =  $crit;
+										Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note pod attached this turn.	
+									}							    		
+				            }				
+					}	
+					
+					break;				
+				
+				case 3://Rescue
+
+					$fireOrder->pubnotes .= "<br>Roll(Mod): $deliveryRoll($rollMod) - A marine unit will attempt their rescue mission next turn.";			
+						if($cnc){
+								if($this->eliteMarines){//Are Marines Elite?
+									$crit = new RescueMissionElite(-1, $ship->id, $cnc->id, 'RescueMissionElite', $gamedata->turn+1); //Takes effect next turn.
+									$crit->updated = true;
+									$cnc->criticals[] =  $crit;
+									Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note marines have boarded this turn
+								}else{//Not Elite Marines					
+									$crit = new RescueMission(-1, $ship->id, $cnc->id, 'RescueMission', $gamedata->turn+1);  //Takes effect next turn.
+									$crit->updated = true;
+									$cnc->criticals[] =  $crit;
+									Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note pod attached this turn.	
+								}							    		
+			            }	
+				
+					break;			
+				
+			}
+		}elseif($deliveryRoll >= 6 && $deliveryRoll <=8){//Unsuccessful delivery
+			$this->ammunition++;//Marines weren't eliminated, they just weren't delivered.  Give ammunition back to weapon.
+			Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);
+			$fireOrder->pubnotes .= "<br>Roll(Mod): $deliveryRoll($rollMod) - A marine unit was beaten back by defenders but managed to return safely to their pod.";
+			Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note pod attached this turn.							
+			return;	
+		}else{//Roll result is 9 or over
+			$fireOrder->pubnotes .= "<br>Roll(Mod): $deliveryRoll($rollMod) - A marine unit was eliminated by defenders whilst trying to board the enemy ship.";
+			Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note pod attached this turn.								
+			return;
+		}			
+	}//endof onDamagedSystem() 		
+	
+	
+	public function getDamage($fireOrder){ //Damage is handled in criticalPhaseEffects()
+		return 0;
+	}
+
+	public function setMinDamage(){     $this->minDamage = 0;      }
+	public function setMaxDamage(){     $this->maxDamage = 0;      }
+
+	public function stripForJson() {
+			$strippedSystem = parent::stripForJson();    
+			$strippedSystem->ammunition = $this->ammunition;			
+			$strippedSystem->isBoardingAction = $this->isBoardingAction;                          
+			return $strippedSystem;
+	}	
+	
+} //endof class GrapplingClaw
 
 
 
