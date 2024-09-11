@@ -41,11 +41,11 @@ class ThirdspaceBattleship extends BaseShip{
 		$this->addPrimarySystem($scanner);	        
         $this->addPrimarySystem(new Engine(7, 36, 0, 20, 4));
 		$this->addPrimarySystem(new PsychicField(6, 0, 0, 0, 360));
-		$this->addPrimarySystem(new ThirdspaceShieldGenerator(7, 24, 0, 15)); //$armor, $maxhealth, $power used, output				
+		$this->addPrimarySystem(new ThirdspaceShieldGenerator(7, 24, 0, 60)); //$armor, $maxhealth, $power used, output				
         $this->addPrimarySystem(new ThirdspaceSelfRepair(7, 24, 12)); //armor, structure, output 
 		$this->addPrimarySystem(new JumpEngine(6, 24, 4, 7));//Presumably have access to hyperspace, or possess some other form of FTL travel that this system represents.          		  		
       
-		$this->addPrimarySystem(new ThirdspaceShield(3, 360, 180, 210, 330, 'L'));		
+		$this->addPrimarySystem(new ThirdspaceShield(3, 400, 200, 210, 330, 'L'));		
 
         $this->addFrontSystem(new HeavyPsionicLance(6, 0, 0, 330, 30));
         $this->addFrontSystem(new PsionicLance(5, 0, 0, 300, 60));
@@ -59,7 +59,7 @@ class ThirdspaceBattleship extends BaseShip{
         $this->addFrontSystem(new GraviticThruster(6, 20, 0, 8, 1));
         $this->addFrontSystem(new GraviticThruster(6, 20, 0, 8, 1));           
 			
-		$this->addPrimarySystem(new ThirdspaceShield(3, 180, 90, 330, 30, 'F'));		
+		$this->addPrimarySystem(new ThirdspaceShield(3, 200, 100, 330, 30, 'F'));		
 
         $this->addAftSystem(new PsionicConcentrator(4, 0, 0, 120, 300)); 
         $this->addAftSystem(new PsionicConcentrator(4, 0, 0, 120, 300));
@@ -74,7 +74,7 @@ class ThirdspaceBattleship extends BaseShip{
        
        
        	
-		$this->addPrimarySystem(new ThirdspaceShield(3, 180, 90, 150, 210, 'A'));	              
+		$this->addPrimarySystem(new ThirdspaceShield(3, 200, 100, 150, 210, 'A'));	              
         $this->addLeftSystem(new PsionicConcentrator(4, 0, 0, 180, 300));
         $this->addLeftSystem(new PsionicConcentrator(4, 0, 0, 180, 300));
         $this->addLeftSystem(new PsionicConcentrator(4, 0, 0, 180, 300));          
@@ -92,7 +92,7 @@ class ThirdspaceBattleship extends BaseShip{
         $this->addLeftSystem($LCVRail);                      
             
             	
-		$this->addPrimarySystem(new ThirdspaceShield(3, 360, 180, 30, 150, 'R'));
+		$this->addPrimarySystem(new ThirdspaceShield(3, 400, 200, 30, 150, 'R'));
         $this->addRightSystem(new PsionicConcentrator(4, 0, 0, 60, 180));                  
         $this->addRightSystem(new PsionicConcentrator(4, 0, 0, 60, 180)); 
         $this->addRightSystem(new PsionicConcentrator(4, 0, 0, 60, 180));          

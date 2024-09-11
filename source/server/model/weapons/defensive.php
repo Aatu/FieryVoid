@@ -724,7 +724,8 @@ class ThirdspaceShield extends Shield implements DefensiveSystem { //defensive v
 			$this->data["Special"] .= "<br>Shield system's structure represents damage capacity, if it is reduced to zero system will cease to function.";
 			$this->data["Special"] .= "<br>Can't be destroyed unless associated structure block is also destroyed.";
 			$this->data["Special"] .= "<br>Cannot be flown under, and does not reduce the damage dealt or hit chance of enemy weapons.";
-			$this->data["Special"] .= "<br>Has an Armor value of "  . $this->armour . ".";							
+			$this->data["Special"] .= "<br>Has an Armor value of "  . $this->armour . ".";	
+ 			$this->data["Normal Strength"] = $this->baseRating; 									
 			$this->currentHealth = $this->getRemainingCapacity();//override on-icon display default
 			$this->outputDisplay = $this->currentHealth;//override on-icon display default					
 		}	
@@ -733,7 +734,6 @@ class ThirdspaceShield extends Shield implements DefensiveSystem { //defensive v
 	    	parent::onConstructed($ship, $turn, $phase);	    	
 			
 			if($turn == 1){//Shields will spawn at max capacity, reduce this by half to give starting amount.
-//		    	$halveShield = $this->maxhealth/2;
 		    	$startRating = $this->baseRating;
 		    	$currentRating = $this->getRemainingHealth();
 		    	$adjustment = $currentRating - $startRating;
@@ -824,29 +824,31 @@ class ThirdspaceShield extends Shield implements DefensiveSystem { //defensive v
 			return $returnValues;
 		} //endof function doProtect
 
-		//effects that happen in Critical phase (after criticals are rolled) - replenishment from active Generator 
-		public function criticalPhaseEffects($ship, $gamedata){
-			
-			parent::criticalPhaseEffects($ship, $gamedata);//Call parent to apply effects like Limpet Bore.
-			
-			if($this->isDestroyed()) return; //destroyed shield does not work...
-			//Shields should not be destroyed, check damage this turn for anything that destroyed it and undestroy.
+/* //OLD METHOD FOR RESTORING SHIELDS, NOW HANDLED BY THIRDSPACE SHIELD GENERATOR
+		// Effects that happen in the Critical phase (after criticals are rolled) - replenishment from active Generator
+		public function criticalPhaseEffects($ship, $gamedata) {
+		    
+		    parent::criticalPhaseEffects($ship, $gamedata); // Call parent to apply effects like Limpet Bore.
 
-			$generator = $ship->getSystemByName("ThirdspaceShieldGenerator");	
-			$generatorOutput = 0;
+		    // If the shield is destroyed, it does not work
+		    if ($this->isDestroyed()) return; 
 
-			if($generator){//Generator exists and is not destroyed!
-				if($generator->isDestroyed()) return; //Double-check. Just in case.
+		    // Find the shield generator system
+		    $generator = $ship->getSystemByName("ThirdspaceShieldGenerator");	
+		    if (!$generator || $generator->isDestroyed()) return; // Exit if generator does not exist or is destroyed
 
-				$generatorOutput = $generator->getOutput(); 				
-				$toReplenish = min($generatorOutput,$this->getUsedCapacity());		
-											
-				if($toReplenish != 0){ //something changes!
-					$this->absorbDamage($ship,$gamedata,-$toReplenish);
-				}				
-			}
+		    $generatorOutput = $generator->getOutput(); // Generator output, e.g., 15
+		    $maxRegen = $this->baseRating - $this->getRemainingCapacity(); // Calculate how much capacity can be replenished
 
-		} //endof function criticalPhaseEffects
+		    // Calculate the amount to replenish (limited by generator output or max regen possible), Generator will catch any spare output and reallocate.
+		    $toReplenish = min($generatorOutput, $maxRegen);
+
+		    // Only attempt to replenish if there is a positive amount to replenish
+		    if ($toReplenish > 0) {
+		        $this->absorbDamage($ship, $gamedata, -$toReplenish); // Apply regeneration (negative value to heal)
+		    }
+		} // end of function criticalPhaseEffects
+*/
 
 	// this method generates additional non-standard information in the form of individual system notes, in this case: - Initial phase: check setting changes made by user, convert to notes.	
 	public function doIndividualNotesTransfer(){
