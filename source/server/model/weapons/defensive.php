@@ -903,9 +903,9 @@ class ThirdspaceShield extends Shield implements DefensiveSystem { //defensive v
 		}				
 		//actual change(damage) entry
 		if($damageValue != 0){
-		$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $damageValue, 0, 0, -1, false, false, 'shieldChange', 'shieldChange');
-		$damageEntry->updated = true;
-		$this->damage[] = $damageEntry;	
+			$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $damageValue, 0, 0, -1, false, false, 'shieldChange', 'shieldChange');
+			$damageEntry->updated = true;
+			$this->damage[] = $damageEntry;	
 		}	
         //and immediately delete notes themselves, they're no longer needed (this will not touch the database, just memory!)
         $this->individualNotes = array();
