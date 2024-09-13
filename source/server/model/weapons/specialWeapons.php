@@ -5878,7 +5878,7 @@ class PulsarMine extends Weapon{
         $relativeBearing =  Mathlib::addToDirection($compassHeading, -$currFacing);//relative bearing, compass - current facing.
        
         $ship = $this->getUnit();
-        if( Movement::isRolled($ship) ){ //if ship is rolled, mirror relative bearing.  No really needed, since arcs don't actually change.  
+        if( Movement::isRolled($ship) ){ //if ship is rolled, mirror relative bearing.  Not really needed, since arcs don't actually change.  
             if( $relativeBearing <> 0 ) { //mirror of 0 is 0
                 $relativeBearing = 360-$relativeBearing;
             }
