@@ -90,7 +90,7 @@ window.BallisticIconContainer = function () {
 
     function createOrUpdateBallistic(ballistic, iconContainer, turn) {
         var icon = getBallisticIcon.call(this, ballistic.id);
-        if (icon) {
+        if (icon && ballistic.notes != 'Persistent Effect') {//We want Persistent Effects to show up in initial Orders! - DK 09.24
             updateBallisticIcon.call(this, icon, ballistic, iconContainer, turn);
         } else {
             createBallisticIcon.call(this, ballistic, iconContainer, turn, this.scene);
@@ -103,29 +103,53 @@ window.BallisticIconContainer = function () {
 
     function createBallisticIcon(ballistic, iconContainer, turn, scene) {
         var shooterIcon = iconContainer.getById(ballistic.shooterid);	
-		var targetType = 'hex';
+		var targetType = 'hexRed';
         var launchPosition = this.coordinateConverter.fromHexToGame(shooterIcon.getFirstMovementOnTurn(turn).position);
 
 		if (ballistic.type == 'normal') { //it's direct fire after all!
 		    launchPosition = this.coordinateConverter.fromHexToGame(shooterIcon.getLastMovement().position);
 			switch (ballistic.damageclass) {
 			case 'antimatter':
-			            targetType = 'hexDirectBlue';
+			            targetType = 'hexBlue';
 			break;
 			case 'plasma':
-			            targetType = 'hexDirectGreen';
+			            targetType = 'hexGreen';
 			break;
 			default:
-			            targetType = 'hexDirectYellow';
+			            targetType = 'hexYellow';
 			break;
 
 	        }
+		}else{ //Maybe its nice to have other colours for certain types of weapon?
+			switch (ballistic.damageclass) {
+			case 'ion':
+			            targetType = 'hexPurple';
+			break;
+			default:
+			            targetType = 'hexRed';
+			break;
+
+	        }			
+			
+			
 		}  
 		
 		if (ballistic.damageclass == 'support') { //30 June 2024 - DK - Added for Ally targeting.
-			targetType = 'hexDirectGreen';
+			targetType = 'hexGreen';
 
 		} 		
+		//We want Persistent Effects to have a separate colour from normal ballistics! DK 09.24
+		if (ballistic.notes == 'Persistent Effect') { //30 June 2024 - DK - Added for Persistent Effects e.g. Plasma Web.
+			switch (ballistic.damageclass) {
+			case 'Plasma':
+			            targetType = 'hexGreenExclamation';
+			break;
+			default:
+			            targetType = 'hexYellow';
+			break;
+
+	        }
+		} 	
 		  		
         var targetPosition = null;
         var targetIcon = null;
@@ -137,10 +161,11 @@ window.BallisticIconContainer = function () {
             targetPosition = { x: 0, y: 0 };
         }
 
+		//Create orange launch icon on firing ship.
         var launchSprite = null;
 
-        if (!getByLaunchPosition(launchPosition, this.ballisticIcons)) {
-            launchSprite = new BallisticSprite(launchPosition, 'launch');
+        if ((!getByLaunchPosition(launchPosition, this.ballisticIcons)) && ballistic.notes != 'Persistent Effect') {
+            launchSprite = new BallisticSprite(launchPosition, 'hexOrange');
             scene.add(launchSprite.mesh);
         }
 
