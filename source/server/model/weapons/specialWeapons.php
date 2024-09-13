@@ -6824,7 +6824,7 @@ class SecondSight extends Weapon{
 	
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);
-		$this->data["Special"] = 'Fire this weapon by targeting ANY adjacent hex during the Firing Phase.';
+		$this->data["Special"] = 'Fire this weapon by targeting ANY hex during the Firing Phase.';
 		$this->data["Special"] .= '<br>Automatically reduces Initiative of ALL enemy units next turn.';		
 		$this->data["Special"] .= '<br>Enemy ships suffer a D6+2 (e.g. -15 to -40) Initiative penalty next turn.';	
 		$this->data["Special"] .= '<br>Ships equipped with Advanced Armor will only suffer -10 Initiatve penalty.';
