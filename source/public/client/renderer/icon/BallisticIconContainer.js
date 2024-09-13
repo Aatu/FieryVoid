@@ -129,9 +129,7 @@ window.BallisticIconContainer = function () {
 				        targetType = 'hexRed';
 				break;
 
-	        }			
-			
-			
+	        }				
 		}  
 		
 		if (ballistic.damageclass == 'support') { //30 June 2024 - DK - Added for Ally targeting.
