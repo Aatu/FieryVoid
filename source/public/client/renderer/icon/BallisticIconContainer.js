@@ -109,25 +109,25 @@ window.BallisticIconContainer = function () {
 		if (ballistic.type == 'normal') { //it's direct fire after all!
 		    launchPosition = this.coordinateConverter.fromHexToGame(shooterIcon.getLastMovement().position);
 			switch (ballistic.damageclass) {
-			case 'antimatter':
-			            targetType = 'hexBlue';
-			break;
-			case 'plasma':
-			            targetType = 'hexGreen';
-			break;
-			default:
-			            targetType = 'hexYellow';
-			break;
+				case 'antimatter':
+				        targetType = 'hexBlue';
+				break;
+				case 'plasma':
+				        targetType = 'hexGreen';
+				break;
+				default:
+				        targetType = 'hexYellow';
+				break;
 
 	        }
-		}else{ //Maybe its nice to have other colours for certain types of weapon?
+		}else if (ballistic.targetid == -1){ //Maybe its nice to have other colours for certain types of hex targetted weapons?
 			switch (ballistic.damageclass) {
-			case 'ion':
-			            targetType = 'hexPurple';
-			break;
-			default:
-			            targetType = 'hexRed';
-			break;
+				case 'ion': //Cascor Ion Field
+				        targetType = 'hexPurple';
+				break;
+				default:
+				        targetType = 'hexRed';
+				break;
 
 	        }			
 			
