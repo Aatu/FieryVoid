@@ -7041,7 +7041,7 @@ class ThoughtWave extends Plasma{
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);
 		$this->data["Damage"] = 'Special';	
-		$this->data["Special"] = 'To fire this weapon, target ANY hex during Initial Orders Phase.';
+		$this->data["Special"] = 'To fire this weapon, target ANY hex during the Initial Orders Phase.';
 		$this->data["Special"] .= '<br><br>The Thought Wave will always originate from the starting location of the firing ship (as per usual with ballistic weapons).';
 		$this->data["Special"] .= '<br>The Thought Wave will attempt to hit ALL enemy ships in the game in Firing Phase, using the following formula:';
 		$this->data["Special"] .= '<br> - (15 + OEW + d20) - (Range Penalty + DEW - Target Initiative/5)';
