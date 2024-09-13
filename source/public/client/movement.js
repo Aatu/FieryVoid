@@ -819,7 +819,7 @@ shipManager.movement = {
 		var contractCost = Math.max(2, contractCostBase); //Minimum of 2 thrust
 	
 		if(value == 1 && contractCost > remThrust) return false;//Not enough thrust to contract. 
-		if(value == -1 && contraction == 0) return false;	       
+		if(value == -1 && this.getContraction(ship) == 0) return false;	       
         
         return true;
     },
