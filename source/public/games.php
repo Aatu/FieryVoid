@@ -88,7 +88,7 @@ if (isset($_SESSION["user"])) {
 
         <br><br>---------- <b>HOW TO GET STARTED</b> ----------
 		<br><a href="files/Fiery_Void_-_How_to_Play.docx">How to Play Fiery Void</a> - Text tutorial (friendlier than full blown game manual - to help you get started quickly!)
-		<br><a href="https://www.youtube.com/channel/UCpzERJTeVoFVon_QqWQxesw/featured" target=\"_blank\">Video tutorials</a> - Video tutorials are also available on YouTube!
+		<br><a href="https://www.youtube.com/watch?v=pOLp4RF9cjY&list=PLTGKagm5KkMxB8oKBiIUeoBQTRYz2z0-3" target=\"_blank\">Video tutorials</a> - Video tutorials are also available on YouTube!
 	    <br><a href="https://discord.gg/kjZAjr3" target=\"_blank\">Discord</a> - Join our community to help find games and discuss all things B5 / Fiery Void!
         <br><a href="https://www.facebook.com/groups/218482691602941/" target=\"_blank\">Facebook group</a> - We're also on Facebook!
         	
