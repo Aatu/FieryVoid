@@ -1056,7 +1056,7 @@ class ThoughtShield extends Shield implements DefensiveSystem {
 			$remainingCapacity = $this->getRemainingCapacity();
 			$protectionValue = 0;
 			if($remainingCapacity>0){
-				$protectionValue = $remainingCapacity+$this->armour; //this is actually more than this system can protect from - but allows to balance load between systems in arc
+				$protectionValue = $remainingCapacity;
 			}
 			return $protectionValue;
 		}
