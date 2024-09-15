@@ -6053,7 +6053,8 @@ class AmmoMissileX extends AmmoMissileTemplate{
 
 
  	public function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //Reduces Sensors by 1D6 next turn.
-
+			if ($system->advancedArmor) return; //no effect on Advanced Armor
+				
 			$effectSensors = Dice::d(6,1);//Strength of effect: 1d6
 			$fireOrder->pubnotes .= "<br> Sensors reduced by $effectSensors next turn.";
 
