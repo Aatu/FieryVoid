@@ -93,7 +93,7 @@ if (isset($_SESSION["user"])) {
         <br><a href="https://www.facebook.com/groups/218482691602941/" target=\"_blank\">Facebook group</a> - We're also on Facebook!
         	
         <br><br>---------- <b>FURTHER INFO</b> ----------        			
-		<br><a href="files/FV_factions.txt">Fiery Void Factions and Tier List</a> - Overview of rules and systems of the fleets available in Fiery Void
+		<br><a href="files/FV_factions.txt">Fiery Void Factions & Tier List</a> - Overview of rules and systems of the fleets available in Fiery Void
 	    <br><a href="files/FV_FAQ.txt">Fiery Void FAQ</a> - Differences from B5 Wars, known bugs... look here if something works contrary to how you expect it to!
 		<br><a href="files/enhancements_list.txt">Common Systems & Enhancement List</a> - Details of enhancements and other common systems e.g. Boarding / Missiles	    
 		<br><a href="http://b5warsvault.wikidot.com/" target="_blank">B5Wars Vault</a> - Full B5Wars <a href="http://www.tesarta.com/b5wars/aogwarskitchensink.pdf" target="_blank">rules</a> and LOTS of other related B5W stuff
