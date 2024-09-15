@@ -364,13 +364,8 @@ Missiles - All Orieni ships have access to Basic, Anti-Fighter, Heavy and Kineti
 PAK'MA'RA
 Pak'ma'ra ships are quick, with excellent thrust and engine power, but are not maneouverable.  They depend on a heavy armament of plasma-based weapons with wide firing arcs to win battles.  Their unique plasma battery systems allow them to store power for opportune moments whilst their plasma webs provide both defensive cover and close-range anti-fighter protection.
 
-Notes & Differences from B5W Tabletop:
-Plasma Webs
-	- Plasma Webs fired in Offensive modes do not persist in the targeted hex for the following turn, meaning they will not damage any fighter units that move through them on the subsequent turn.
-	- Plasma Webs fired in Offensive mode must use hex targeting icon to lock onto a hex.
-CnC Systems and Initiative
-	- As it is not possible to implement two CnC systems on ships in FV Pakmara ships, these are instead combined into a single CnC sytem with the combined health of both TT CnCs and improved armour / critical hit chart.  Note, Pakmara ships still suffer double the intiative penalty on CnC as they do in Tabletop.
-	- Pak'ma'ra fighters have inherent turn delay - but FV does not provide turn shortening for fighters, which further limits their maneuvrability. They're still Agile though :) . 
+Differences from B5W Tabletop:
+- Pak'ma'ra fighters have an inherent turn delay - but FV does not provide turn shortening for fighters, which limits their maneuvrability a bit more that Tabletop. 
 
 
 
