@@ -434,19 +434,28 @@ window.UI = {
             } else {
                 contraction.hide();
             }
-            
-            angle = mathlib.addToDirection(shipHeading, 218);                       
+ 
+			var moreContractionAngle = mathlib.addToDirection(shipHeading, 218);
+			var lessContractionAngle = mathlib.addToDirection(shipHeading, 142);
+
+			// Check if the ship is facing left (adjust condition as needed)
+			var checkHeading = shipManager.getShipDoMAngle(ship);
+			if (checkHeading >= 90 && checkHeading <= 270) {	
+			    // Swap angles for the morecontraction and lesscontraction buttons
+			    moreContractionAngle = mathlib.addToDirection(shipHeading, 142);
+			    lessContractionAngle = mathlib.addToDirection(shipHeading, 218);
+			} 
+			                    
             var morecontraction = UI.shipMovement.morecontractionElement;
             if (shipManager.movement.canContract(ship, 1)) {
-                UI.shipMovement.drawUIElement(morecontraction, pos.x, pos.y, 16, 38 * 1.4, angle, "img/plus.png", "morecontractioncanvas", 0);
+                UI.shipMovement.drawUIElement(morecontraction, pos.x, pos.y, 16, 38 * 1.4, moreContractionAngle, "img/plus.png", "morecontractioncanvas", 0);
             } else {
                 morecontraction.hide();
             }
-
-            angle = mathlib.addToDirection(shipHeading, 142);             
+          
             var lesscontraction = UI.shipMovement.lesscontractionElement;
             if (shipManager.movement.canContract(ship, -1)) {
-                UI.shipMovement.drawUIElement(lesscontraction, pos.x, pos.y, 16, 38 * 1.4, angle, "img/minus.png", "lesscontractioncanvas", 0);
+                UI.shipMovement.drawUIElement(lesscontraction, pos.x, pos.y, 16, 38 * 1.4, lessContractionAngle, "img/minus.png", "lesscontractioncanvas", 0);
             } else {
                 lesscontraction.hide();
             }
