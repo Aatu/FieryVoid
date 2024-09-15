@@ -5599,7 +5599,8 @@ class AmmoMissileC extends AmmoMissileTemplate{
         return 0;
     }		
     
- 	public function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ 
+ 	public function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
+//		if($ship->hasSpecialAbility("AdvancedSensors")) return;		 
 		if (isset(AmmoMissileC::$alreadyEngaged[$ship->id])) return; //target already engaged by a previous Chaff Missile
 			$effectHit = 3; 
 			$effectHit5 = $effectHit * 5;
@@ -5611,7 +5612,6 @@ class AmmoMissileC extends AmmoMissileTemplate{
 					if ($currFireOrder->rolled > 0) {
 					}else{
 						$currFireOrder->needed -= 3 *5; //$needed works on d100
-	//					$fireOrder->pubnotes .= "; Chaff Missile impact, -15% to hit."; //note why hit chance does not match
 						AmmoMissileC::$alreadyEngaged[$ship->id] = true;
 					}
 				}
@@ -6053,7 +6053,10 @@ class AmmoMissileX extends AmmoMissileTemplate{
 
 
  	public function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //Reduces Sensors by 1D6 next turn.
-			if ($system->advancedArmor) return; //no effect on Advanced Armor
+			if ($system->advancedArmor){
+				$fireOrder->pubnotes .= "<br> No effect on ships with Advanced Armor.";				
+				return; //no effect on Advanced Armor
+			}
 				
 			$effectSensors = Dice::d(6,1);//Strength of effect: 1d6
 			$fireOrder->pubnotes .= "<br> Sensors reduced by $effectSensors next turn.";
