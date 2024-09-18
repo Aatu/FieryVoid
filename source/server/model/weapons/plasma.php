@@ -1409,7 +1409,7 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
     	
 		//Start by checking for Ballistic fireOrder, if there isn't one there's no need to do anything!
 		$firingOrders = $this->getFireOrders($gamedata->turn);
-/*						    	
+/* //Alternative method of finding if we need to check if we create additional firing orders						    	
 		$ballisticFireOrder = null;
 			foreach ($firingOrders as $fireOrder) { 
 				if ($fireOrder->type == "ballistic") { 
@@ -1425,8 +1425,7 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 			if (($ballisticFireOrder->type == "ballistic") &&  ($ballisticFireOrder->damageclass == 'Persistent Effect Plasma')) { 		
 
 				//fireOrder found, proceed to check whether any fighters passed through it.   	
-		    	$thisShip = $this->getUnit();
-		    	  
+		    	$thisShip = $this->getUnit();		    	  
 		    	$allShips = $gamedata->ships;
 		    	$relevantShips = array();
 
@@ -1461,7 +1460,7 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 	        // Now check other movements in the turn.
 	        foreach ($flight->movement as $fighterMove) {
 	            if ($fighterMove->turn == $gamedata->turn) {
-	                // Skip irrelevant movement types
+	                // Alternative method of skipping irrelevant movement types
 	                /*
 	                if ($fighterMove->type == "start" ||
 	                    $fighterMove->type == "speedchange" ||
@@ -1514,9 +1513,39 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 				$newFireOrder->x = $targetPositionArray[0];
 				$newFireOrder->y = $targetPositionArray[1];	
 				
-		        $newFireOrder->addToDB = true;
+		        $newFireOrder->addToDB = false;//Will be manually entered immediately below!
 		        $this->fireOrders[] = $newFireOrder;
+		        
+		    	//Save the fire order to database
+                Manager::insertSingleFiringOrder($gamedata, $newFireOrder);
+                // Retrieve and handle fire orders from the DB
+				$dbFireOrders = Manager::retrieveFiringOrdersForWeapon($gamedata, $thisShip->id, $this->id);
+			
+				//Orders should arrive in descending order, meaning the first one will be the newFireOrder.  Find and use to change is.
+				if($dbFireOrders != null){
+					foreach($dbFireOrders as $dbFire){
+						$newFireOrder->id = $dbFire->id;//Change id of newFireOrder to id assigned by database.
+						break; //Don't check the others, first one is the one we want!
+					}
+				}	
+/* //Alternative method of sorting through fireOrders!
+                $existingFiringOrders = $this->getFireOrders($gamedata->turn);
 
+                $existingOrderIds = array_map(function($order) {
+                    return $order->id;
+                }, $existingFiringOrders);
+
+                $unmatchedFireOrders = array_filter($dbFireOrders, function($dbOrder) use ($existingOrderIds) {
+                    return !in_array($dbOrder->id, $existingOrderIds);
+                });
+
+                foreach ($unmatchedFireOrders as $unmatchedOrder) {
+                    $newFireOrder->id = $unmatchedOrder->id;
+                    break;
+                }
+ 
+        }
+*/		
 		}
 
 	}//End of createFireOrders()	
@@ -1600,12 +1629,13 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 //and now actual damage dealing for Offensive Mode - and we already know fighter is hit (fire()) doesn't pass anything else)
 //source hex will be taken from firing unit, damage will be individually rolled for each fighter hit
 	public function AOEdamage($target, $shooter, $fireOrder, $gamedata)    {
-        if ($target->isDestroyed()) return; //no point allocating
         	
         if (isset(PakmaraPlasmaWeb::$alreadyEngaged[$target->id])){
         	$fireOrder->pubnotes .= " No effect on fighters already damaged by Plasma Webs this turn." ; //just information for player.
-        	return; //hex already engaged by a previous Plasma Web
+        	return; //unit already engaged by a previous Plasma Web
 		}
+
+        if ($target->isDestroyed()) return; //no point allocating
 			
         foreach ($target->systems as $fighter) {
             if ($fighter == null || $fighter->isDestroyed()) {
@@ -1637,7 +1667,7 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 			$this->data["Special"] .= '<br>ANTI-FIGHTER - Creates a damaging cloud of plasma within 3 hexes, which deals D6+2 plasma damage to all fighters in hex when created.';
 			$this->data["Special"] .= '<br>This cloud remains during the Movement Phase of next, and damage any fighters that move through it then.';			
 			$this->data["Special"] .= '<br>Anti-Fighter mode requires 1 additional power at moment of firing, either from boosting in Initial Orders or from power stored in Plasma Batteries.';
-			$this->data["Special"] .= '<br>NOTE - Plasma Webs are not cumulative. If several effect the same target in the same mode, its effects are only apply once.';		 
+			$this->data["Special"] .= '<br>NOTE - Plasma Webs are not cumulative. If several effect the same target in the same mode in a turn, its effects are only apply once.';		 
 	 }
 
 
