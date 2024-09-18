@@ -1608,18 +1608,17 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 					$fireOrder->resolutionOrder = TacGamedata::$lastFiringResolutionNo;//mark order in which firing was handled!						
 
 				}
-			
-				break;
 
-		}	
-
-		//deal damage!
-		$target = new OffsetCoordinate($fireOrder->x, $fireOrder->y);
-		$ships1 = $gamedata->getShipsInDistance($target); //all ships on target hex
+				//deal damage!
+				$target = new OffsetCoordinate($fireOrder->x, $fireOrder->y);
+				$ships1 = $gamedata->getShipsInDistance($target); //all ships on target hex
+							
+				foreach ($ships1 as $targetShip) if ($targetShip instanceOf FighterFlight) {
+					$this->AOEdamage($targetShip, $shooter, $fireOrder, $gamedata);
+				}	
 					
-		foreach ($ships1 as $targetShip) if ($targetShip instanceOf FighterFlight) {
-			$this->AOEdamage($targetShip, $shooter, $fireOrder, $gamedata);
-		}				
+				break;
+		}		
 	
 		$fireOrder->rolled = max(1, $fireOrder->rolled);//Marks that fire order has been handled, just in case it wasn't marked yet!
 						
