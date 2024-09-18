@@ -1409,7 +1409,7 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
     	
 		//Start by checking for Ballistic fireOrder, if there isn't one there's no need to do anything!
 		$firingOrders = $this->getFireOrders($gamedata->turn);
-/* //Alternative method of finding if we need to check if we create additional firing orders						    	
+ //Alternative method of finding if we need to check if we create additional firing orders						    	
 		$ballisticFireOrder = null;
 			foreach ($firingOrders as $fireOrder) { 
 				if ($fireOrder->type == "ballistic") { 
@@ -1419,7 +1419,7 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 			}    			
 								
 		if($ballisticFireOrder==null) return; //no appropriate fire order, end of work.  
-*/
+
 		//Check through fireOrders, only interested in Persistent Effect orders created in Initial Orders Phase
 		foreach ($firingOrders as $ballisticFireOrder) { 		
 			if (($ballisticFireOrder->type == "ballistic") &&  ($ballisticFireOrder->damageclass == 'Persistent Effect Plasma')) { 		
@@ -1515,12 +1515,15 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 				
 		        $newFireOrder->addToDB = false;//Will be manually entered immediately below!
 		        $this->fireOrders[] = $newFireOrder;
-		        
+	
+echo "Value of newfireOrderid1: " . $newFireOrder->id. "\n";		        
 		    	//Save the fire order to database
                 Manager::insertSingleFiringOrder($gamedata, $newFireOrder);
                 // Retrieve and handle fire orders from the DB
 				$dbFireOrders = Manager::retrieveFiringOrdersForWeapon($gamedata, $thisShip->id, $this->id);
-			
+
+
+/*			
 				//Orders should arrive in descending order, meaning the first one will be the newFireOrder.  Find and use to change is.
 				if($dbFireOrders != null){
 					foreach($dbFireOrders as $dbFire){
@@ -1528,7 +1531,9 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 						break; //Don't check the others, first one is the one we want!
 					}
 				}	
-/* //Alternative method of sorting through fireOrders!
+*/
+
+ 				//Alternative method of sorting through fireOrders!
                 $existingFiringOrders = $this->getFireOrders($gamedata->turn);
 
                 $existingOrderIds = array_map(function($order) {
@@ -1543,10 +1548,10 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
                     $newFireOrder->id = $unmatchedOrder->id;
                     break;
                 }
- 
+ echo "Value of newfireOrderid1: " . $newFireOrder->id. "\n";
         }
-*/		
-		}
+		
+		
 
 	}//End of createFireOrders()	
 
@@ -1586,7 +1591,7 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 				$fireOrder->rolled = $rolled; ///and auto-hit
 				$fireOrder->shotshit++;
 											
-				$fireOrder->pubnotes .= "Damage and Hit Chance reduction effects applied to weapons fired from target hex. "; //just information for player				
+				$fireOrder->pubnotes .= "Damage and Hit Chance reduction effects applied to weapons fired from target hex (" . $fireOrder->id . "), (" . $fireOrder->x . "/" . $fireOrder->y . ")."; //just information for player				
 						break;
 									
 			case 2:		
@@ -1597,17 +1602,18 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 				$fireOrder->shotshit++;
 				
 				if($fireOrder->type == "ballistic"){ //Plasma cloud attack, shouldn't draw power.
-					$fireOrder->pubnotes .= "<br>Plasma cloud damages fighters that moved through it." ; //just information for player.				
+					$fireOrder->pubnotes .= "<br>Plasma cloud damages fighters that moved through it (" . $fireOrder->id . "), (" . $fireOrder->x . "/" . $fireOrder->y . ").";//just information for player.				
 				}else{//Anti-Fighter mode FIRED this turn, draw power if not boosted.
 					if ($this->getBoostLevel(TacGamedata::$currentTurn) <=0 ) { //not boosted...
 						PlasmaBattery::shipDrawPower($this->unit);
 					}
 									
-					$fireOrder->pubnotes .= "Plasma cloud created on target hex, will remain in place until next Firing Phase!" ; //just information for player.
-					TacGamedata::$lastFiringResolutionNo++;    //note for further shots
-					$fireOrder->resolutionOrder = TacGamedata::$lastFiringResolutionNo;//mark order in which firing was handled!						
+					$fireOrder->pubnotes .= "Plasma cloud created on target hex, will remain in place until next Firing Phase! (" . $fireOrder->id . "), (" . $fireOrder->x . "/" . $fireOrder->y . ")."; //just information for player.						
 
 				}
+
+				TacGamedata::$lastFiringResolutionNo++;    //note for further shots
+				$fireOrder->resolutionOrder = TacGamedata::$lastFiringResolutionNo;//mark order in which firing was handled!
 
 				//deal damage!
 				$target = new OffsetCoordinate($fireOrder->x, $fireOrder->y);
@@ -1615,12 +1621,15 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 							
 				foreach ($ships1 as $targetShip) if ($targetShip instanceOf FighterFlight) {
 					$this->AOEdamage($targetShip, $shooter, $fireOrder, $gamedata);
-				}	
-					
+				}
+			
 				break;
-		}		
+
+		}	
+
+				
 	
-		$fireOrder->rolled = max(1, $fireOrder->rolled);//Marks that fire order has been handled, just in case it wasn't marked yet!
+//		$fireOrder->rolled = max(1, $fireOrder->rolled);//Marks that fire order has been handled, just in case it wasn't marked yet!
 						
 	} //endof function fire		
 	
