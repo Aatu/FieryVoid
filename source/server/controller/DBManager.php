@@ -1818,7 +1818,7 @@ class DBManager
         }
     }
 
-    public function submitSingleFireorder($gameid, $fireOrder, $turn, $phase)
+    public function submitSingleFireorder($gameid, $fireOrder)
     {
             $sql = "INSERT INTO `B5CGM`.`tac_fireorder` VALUES (null, '" . $fireOrder->type . "', " . $fireOrder->shooterid . ", " . $fireOrder->targetid . ", " . $fireOrder->weaponid . ", " . $fireOrder->calledid . ", " . $fireOrder->turn . ", "
                 . $fireOrder->firingMode . ", " . $fireOrder->needed . ", " . $fireOrder->rolled . ", $gameid, '" . $fireOrder->notes . "', " . $fireOrder->shotshit . ", " . $fireOrder->shots . ", '" . $fireOrder->pubnotes . "', 0, '" . $fireOrder->x . "', '" . $fireOrder->y . "', '" . $fireOrder->damageclass . "', '" . $fireOrder->resolutionOrder . "')";
@@ -1828,7 +1828,7 @@ class DBManager
     }
 
 
-	public function getFireOrdersForWeapon($gamedata, $shooterid, $weaponid, $fetchTurn)
+	public function getFireOrdersForWeapon($gameid, $shooterid, $weaponid, $fetchTurn)
 	{
 	    $fireOrders = []; // Initialize an array to store the results
 
@@ -1846,7 +1846,7 @@ class DBManager
 	    );
 
 	    if ($stmt) {
-	        $stmt->bind_param('iiii', $gamedata->id, $shooterid, $weaponid, $fetchTurn);
+	        $stmt->bind_param('iiii', $gameid, $shooterid, $weaponid, $fetchTurn);
 	        $stmt->execute();
 
 	        $stmt->store_result(); // Store the result set to access the number of rows

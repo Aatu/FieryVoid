@@ -365,7 +365,6 @@ PAK'MA'RA
 Pak'ma'ra ships are quick, with excellent thrust and engine power, but are not maneouverable.  They depend on a heavy armament of plasma-based weapons with wide firing arcs to win battles.  Their unique plasma battery systems allow them to store power for opportune moments whilst their plasma webs provide both defensive cover and close-range anti-fighter protection.
 
 Differences from B5W Tabletop:
-- NOTE Plasma Web's which damage fighters during the Movement Phase will sometimes display the damage against the wrong Fire Order in the Replay. This is a known issue with the Comabt Log, and Plasma Web should be operating as intended!
 - Pak'ma'ra fighters have an inherent turn delay - but FV does not provide turn shortening for fighters, which limits their maneuvrability a bit more that Tabletop. 
 
 

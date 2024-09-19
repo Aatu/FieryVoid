@@ -1317,7 +1317,8 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
     
     public $fireControlArray = array( 1=>array(0,0,0), 2=>array(0, null, null)); // fighters, <mediums, <capitals 
 		
-	private static $alreadyEngaged = array(); //units that were already engaged by a Plasma Web this turn (multiple Webs do not stack).
+	private static $alreadyEngagedDirect = array(); //units that were already engaged by a Plasma Web this turn (multiple Webs do not stack).
+	private static $alreadyEngagedClouded = array();
 	protected $autoHit = true;//To show 100% hit chance in front end.				
 
     protected $possibleCriticals = array(
@@ -1409,20 +1410,20 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
     	
 		//Start by checking for Ballistic fireOrder, if there isn't one there's no need to do anything!
 		$firingOrders = $this->getFireOrders($gamedata->turn);
- //Alternative method of finding if we need to check if we create additional firing orders						    	
-		$ballisticFireOrder = null;
+						    	
+		$cloudFireOrder = null;
 			foreach ($firingOrders as $fireOrder) { 
 				if ($fireOrder->type == "ballistic") { 
-					$ballisticFireOrder = $fireOrder;
+					$cloudFireOrder = $fireOrder;
 					break; //no need to search further
 				}
 			}    			
 								
-		if($ballisticFireOrder==null) return; //no appropriate fire order, end of work.  
+		if($cloudFireOrder==null) return; //no appropriate fire order, end of work.  
 
 		//Check through fireOrders, only interested in Persistent Effect orders created in Initial Orders Phase
-		foreach ($firingOrders as $ballisticFireOrder) { 		
-			if (($ballisticFireOrder->type == "ballistic") &&  ($ballisticFireOrder->damageclass == 'Persistent Effect Plasma')) { 		
+		foreach ($firingOrders as $cloudFireOrder) { 		
+			if (($cloudFireOrder->type == "ballistic") &&  ($cloudFireOrder->damageclass == 'Persistent Effect Plasma')) { 	//Double-check.	
 
 				//fireOrder found, proceed to check whether any fighters passed through it.   	
 		    	$thisShip = $this->getUnit();		    	  
@@ -1437,22 +1438,24 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 				}
 
 				//Now check if any enemy fighters got in arc and range during their movement.
-				$targetFighters = $this->checkForValidTargets($relevantShips, $ballisticFireOrder, $gamedata);	
-
-		    	$this->createFireOrders($targetFighters, $thisShip, $gamedata, $ballisticFireOrder);
+				$targetFighters = $this->checkForValidTargets($relevantShips, $cloudFireOrder, $gamedata);	
+				
+				if(!empty($targetFighters))	$this->createFireOrders($targetFighters, $thisShip, $gamedata, $cloudFireOrder);
 			}
 		}
 
     	
 	}//endof beforeFiringOrderResolution
 
+
 	private function convertOffsetCoordinateToArray($offsetCoordinate) {
 	    return array((string)$offsetCoordinate->q, (string)$offsetCoordinate->r);
 	}
 
-	private function checkForValidTargets($relevantShips, $ballisticFireOrder, $gamedata) {
+
+	private function checkForValidTargets($relevantShips, $cloudFireOrder, $gamedata) {
 	    $targetFighters = array(); // Initialize array for fighters to be fired at.		
-	    $plasmaPosition = array((string)$ballisticFireOrder->x, (string)$ballisticFireOrder->y); // Convert plasma cloud position to a string array.
+	    $plasmaPosition = array((string)$cloudFireOrder->x, (string)$cloudFireOrder->y); // Convert plasma cloud position to a string array.
 	
 	    foreach ($relevantShips as $flight) { // Look through relevant ships and take appropriate action.					
 	        // Check starting position first.
@@ -1480,7 +1483,6 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 	                    // Check if the position matches the plasma cloud
 	                    if ($fighterPositionArray === $plasmaPosition) {
 	                        $targetFighters[] = $flight; // Add to array to be targeted.
-	                        break; // Flight will be attacked; no sense in checking further movements.
 	                    }
 	                }
 	            }
@@ -1491,49 +1493,63 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 	} // end of checkForValidTargets
 
 
-	private function createFireOrders($targetFighters, $thisShip, $gamedata, $fireOrder){
+	private function createFireOrders($targetFighters, $thisShip, $gamedata, $cloudFireOrder){
 
 		foreach ($targetFighters as $target) {
 
-		        // Create a new FireOrder
-		        $newFireOrder = new FireOrder(
-		            -1, "ballistic", $thisShip->id, -1,
-		            $this->id, -1, $gamedata->turn, 2, 
-		            100, 0, 1, 0, 0, // needed, rolled, shots, shotshit, intercepted
-		            0, 0, $this->weaponClass, 1000 // X, Y, damageclass, resolutionorder
-		        );        
-
-				$movement = null;
-		        foreach ($target->movement as $move){
-		            $movement = $move;
-		        }
-
-	            $targetPositionArray = $this->convertOffsetCoordinateToArray($movement->position);
-
-				$newFireOrder->x = $targetPositionArray[0];
-				$newFireOrder->y = $targetPositionArray[1];	
-				
-		        $newFireOrder->addToDB = false;//Will be manually entered immediately below!
-		        $this->fireOrders[] = $newFireOrder;
+		    // Create a key from the coordinates of the fire order
+		    $coordinatesKey = $cloudFireOrder->x . ',' . $cloudFireOrder->y; // This will be the key for the array
+		 
+			// Check if the target has been engaged by a Plasma Cloud at these coordinates
+			if (isset(PakmaraPlasmaWeb::$alreadyEngagedClouded[$target->id][$coordinatesKey])) {
+				if (PakmaraPlasmaWeb::$alreadyEngagedClouded[$target->id][$coordinatesKey]['engaged'] === true) {
+				    // Target was already engaged at these coordinates
+				    return; // unit already engaged by a Plasma Web at these coordinates, don't create new fireOrder
+				}
+			}
 	
-echo "Value of newfireOrderid1: " . $newFireOrder->id. "\n";		        
-		    	//Save the fire order to database
-                Manager::insertSingleFiringOrder($gamedata, $newFireOrder);
-                // Retrieve and handle fire orders from the DB
-				$dbFireOrders = Manager::retrieveFiringOrdersForWeapon($gamedata, $thisShip->id, $this->id);
+		    // Create a new FireOrder
+		    $newDamageFireOrder = new FireOrder(
+		        -1, "ballistic", $thisShip->id, $target->id,
+		        $this->id, -1, $gamedata->turn, 2, 
+		        100, 0, 1, 0, 0, // needed, rolled, shots, shotshit, intercepted
+		        $cloudFireOrder->x, $cloudFireOrder->y, $this->weaponClass, -1 // X, Y, damageclass, resolutionorder
+		    );
+
+	        // Store the engagement with coordinates as the key
+	        PakmaraPlasmaWeb::$alreadyEngagedClouded[$target->id][$coordinatesKey] = [
+	            'engaged' => true, // marking engagement
+	            'coordinates' => ['x' => $newDamageFireOrder->x, 'y' => $newDamageFireOrder->y] // store the x and y coordinates while they are still the cloud coordinate.
+	        ];		 	                
+
+			//Then change coordinates so AoE Damage and Replay are function correctly
+			$movement = null;
+		    foreach ($target->movement as $move){
+		        $movement = $move;
+		    }
+
+	        $targetPositionArray = $this->convertOffsetCoordinateToArray($movement->position);
+
+			$newDamageFireOrder->x = $targetPositionArray[0];
+			$newDamageFireOrder->y = $targetPositionArray[1];	
+				
+		    $newDamageFireOrder->addToDB = false;//Will be manually entered immediately below!
+		    $this->fireOrders[] = $newDamageFireOrder;
+		        
+		    //Save the fire order to database
+            Manager::insertSingleFiringOrder($gamedata, $newDamageFireOrder);
+            // Retrieve and handle fire orders from the DB
+			$dbFireOrders = Manager::retrieveFiringOrdersForWeapon($gamedata, $thisShip->id, $this->id);
 
 
-/*			
-				//Orders should arrive in descending order, meaning the first one will be the newFireOrder.  Find and use to change is.
 				if($dbFireOrders != null){
 					foreach($dbFireOrders as $dbFire){
-						$newFireOrder->id = $dbFire->id;//Change id of newFireOrder to id assigned by database.
-						break; //Don't check the others, first one is the one we want!
+						$newDamageFireOrder->id = $dbFire->id;//Change id of newFireOrder to id assigned by database.
+						break; //Don't check the others, retrieved in Descending order so first one is the one we want!
 					}
-				}	
-*/
-
- 				//Alternative method of sorting through fireOrders!
+				}
+/*
+ 				//ALTERNATIVE METHOD - Sort through fireOrders and find the one that doesn't match, assign it to this fireOrder!
                 $existingFiringOrders = $this->getFireOrders($gamedata->turn);
 
                 $existingOrderIds = array_map(function($order) {
@@ -1545,13 +1561,11 @@ echo "Value of newfireOrderid1: " . $newFireOrder->id. "\n";
                 });
 
                 foreach ($unmatchedFireOrders as $unmatchedOrder) {
-                    $newFireOrder->id = $unmatchedOrder->id;
+                    $newDamageFireOrder->id = $unmatchedOrder->id;
                     break;
                 }
- echo "Value of newfireOrderid1: " . $newFireOrder->id. "\n";
+*/
         }
-		
-		
 
 	}//End of createFireOrders()	
 
@@ -1560,95 +1574,113 @@ echo "Value of newfireOrderid1: " . $newFireOrder->id. "\n";
 	{
 		if($fireOrder->type == "ballistic" && $fireOrder->damageclass == 'Persistent Effect Plasma') return; //Don't resolve ballistic 'cloud' fireOrders.
 			
-			$this->changeFiringMode($fireOrder->firingMode);
+		$this->changeFiringMode($fireOrder->firingMode);
 			
-			$fireOrder->needed = 100;				
-			$fireOrder->updated = true;
-			$fireOrder->shots = 1;					
-			$fireOrder->notes .= 'Plasma Web aiming shot, not resolved.';
+		$fireOrder->needed = 100;				
+		$fireOrder->updated = true;
+		$fireOrder->shots = 1;					
+		$fireOrder->notes .= 'Plasma Web direct shot.';
 
-			if($fireOrder->type == "ballistic" && $fireOrder->damageclass != 'Persistent Effect Plasma') $fireOrder->notes = 'Attack on fighters passing through';
+		if($fireOrder->type == "ballistic" && $fireOrder->damageclass != 'Persistent Effect Plasma') $fireOrder->notes = 'Attack on fighters passing through';
 				
-			if ($fireOrder->targetid != -1) {
-				$targetship = $gamedata->getShipById($fireOrder->targetid);
-				//insert correct target coordinates: last turns' target position
- 				$targetpos = $targetShip->getHexPos();
-				$fireOrder->x = $targetPos->q;
-				$fireOrder->y = $targetPos->r;
-				$fireOrder->targetid = -1; //correct the error
-				$fireOrder->calledid = -1; //just in case
-			} 		
+		if ($fireOrder->targetid != -1 && $fireOrder->type == "normal") {//Correct any direct fireOrders that targeted a ship.
+			$targetship = $gamedata->getShipById($fireOrder->targetid);
+			//insert correct target coordinates: last turns' target position
+ 			$targetpos = $targetShip->getHexPos();
+			$fireOrder->x = $targetPos->q;
+			$fireOrder->y = $targetPos->r;
+			$fireOrder->targetid = -1; //correct the error
+			$fireOrder->calledid = -1; //just in case
+		} 		
 	}		
 		
 		
 	public function fire($gamedata, $fireOrder){
 
 		if($fireOrder->type == "ballistic" && $fireOrder->damageclass == 'Persistent Effect Plasma') return; //Don't resolve ballistic 'cloud' fireOrders.		
-							
+		$shooter = $gamedata->getShipById($fireOrder->shooterid);
+
+		$this->changeFiringMode($fireOrder->firingMode);		
+										
 		switch($this->firingMode){
 			case 1:	
 				$rolled = Dice::d(100);
 				$fireOrder->rolled = $rolled; ///and auto-hit
 				$fireOrder->shotshit++;
 											
-				$fireOrder->pubnotes .= "Damage and Hit Chance reduction effects applied to weapons fired from target hex (" . $fireOrder->id . "), (" . $fireOrder->x . "/" . $fireOrder->y . ")."; //just information for player				
-						break;
+				$fireOrder->pubnotes .= "Damage and Hit Chance reduction effects applied to weapons fired from target hex."; //just information for player				
+								
+				break;
 									
 			case 2:		
-				$shooter = $gamedata->getShipById($fireOrder->shooterid);			
-					
+								
 				$rolled = Dice::d(100);
 				$fireOrder->rolled = $rolled; ///and auto-hit ;)
 				$fireOrder->shotshit++;
 				
 				if($fireOrder->type == "ballistic"){ //Plasma cloud attack, shouldn't draw power.
-					$fireOrder->pubnotes .= "<br>Plasma cloud damages fighters that moved through it (" . $fireOrder->id . "), (" . $fireOrder->x . "/" . $fireOrder->y . ").";//just information for player.				
+					$fireOrder->pubnotes .= "<br>Plasma cloud(s) damages fighters that pass through.";//just information for player.				
+				
+					//deal damage!  Will be to a particular flight, not genuinely AoE!
+					$targetFlight = $gamedata->getShipById($fireOrder->targetid);						
+					$this->AOEdamage($targetFlight, $shooter, $fireOrder, $gamedata);	
+					
+					$fireOrder->targetid = -1; //Do not need targetid anymore, change to -1			
+				
 				}else{//Anti-Fighter mode FIRED this turn, draw power if not boosted.
 					if ($this->getBoostLevel(TacGamedata::$currentTurn) <=0 ) { //not boosted...
 						PlasmaBattery::shipDrawPower($this->unit);
 					}
 									
-					$fireOrder->pubnotes .= "Plasma cloud created on target hex, will remain in place until next Firing Phase! (" . $fireOrder->id . "), (" . $fireOrder->x . "/" . $fireOrder->y . ")."; //just information for player.						
+					$fireOrder->pubnotes .= "Plasma cloud created on hex, remains in place until next Firing Phase!"; //just information for player.
+					
+					//deal damage!
+					$target = new OffsetCoordinate($fireOrder->x, $fireOrder->y);
+					$ships1 = $gamedata->getShipsInDistance($target); //all ships on target hex
+								
+					foreach ($ships1 as $targetShip) if ($targetShip instanceOf FighterFlight) {
+						$this->AOEdamage($targetShip, $shooter, $fireOrder, $gamedata);
+					}											
 
-				}
-
-				TacGamedata::$lastFiringResolutionNo++;    //note for further shots
-				$fireOrder->resolutionOrder = TacGamedata::$lastFiringResolutionNo;//mark order in which firing was handled!
-
-				//deal damage!
-				$target = new OffsetCoordinate($fireOrder->x, $fireOrder->y);
-				$ships1 = $gamedata->getShipsInDistance($target); //all ships on target hex
-							
-				foreach ($ships1 as $targetShip) if ($targetShip instanceOf FighterFlight) {
-					$this->AOEdamage($targetShip, $shooter, $fireOrder, $gamedata);
 				}
 			
 				break;
 
 		}	
 
-				
-	
-//		$fireOrder->rolled = max(1, $fireOrder->rolled);//Marks that fire order has been handled, just in case it wasn't marked yet!
+		TacGamedata::$lastFiringResolutionNo++;    //note for further shots
+		$fireOrder->resolutionOrder = TacGamedata::$lastFiringResolutionNo;//mark order in which firing was handled!			
+		$fireOrder->rolled = max(1, $fireOrder->rolled);//Marks that fire order has been handled, just in case it wasn't marked yet!
 						
 	} //endof function fire		
 	
 	
-//and now actual damage dealing for Offensive Mode - and we already know fighter is hit (fire()) doesn't pass anything else)
-//source hex will be taken from firing unit, damage will be individually rolled for each fighter hit
-	public function AOEdamage($target, $shooter, $fireOrder, $gamedata)    {
-        	
-        if (isset(PakmaraPlasmaWeb::$alreadyEngaged[$target->id])){
-        	$fireOrder->pubnotes .= " No effect on fighters already damaged by Plasma Webs this turn." ; //just information for player.
-        	return; //unit already engaged by a previous Plasma Web
-		}
+	//and now actual damage dealing for Offensive Mode - and we already know fighter is hit (fire()) doesn't pass anything else)
+	//source hex will be taken from firing unit, damage will be individually rolled for each fighter hit
+	public function AOEdamage($target, $shooter, $fireOrder, $gamedata){
+
+		$coordinatesKey = $fireOrder->x . ',' . $fireOrder->y; // This will be the key for the array
+	
+		if($fireOrder->type == "normal"){
+	        if (isset(PakmaraPlasmaWeb::$alreadyEngagedDirect[$target->id])){
+	        	$fireOrder->pubnotes .= "<br> No effect on fighters already damaged by a Plasma Web on this hex." ; //just information for player.
+	        	return; //unit already engaged by a previous direct Plasma Web at this hex.
+			}	
+			if (isset(PakmaraPlasmaWeb::$alreadyEngagedClouded[$target->id][$coordinatesKey])) {
+				if (PakmaraPlasmaWeb::$alreadyEngagedClouded[$target->id][$coordinatesKey]['engaged'] === true) {
+				    // Target was already engaged at these coordinates
+	        		$fireOrder->pubnotes .= "<br> No effect on fighters already damaged by a Plasma Web on this hex." ; //just information for player.				    
+				    return; // unit already engaged by a Plasma Web cloud at these coordinates, don't cause further damage.
+				}
+			}					
+		}	
 
         if ($target->isDestroyed()) return; //no point allocating
 			
         foreach ($target->systems as $fighter) {
             if ($fighter == null || $fighter->isDestroyed()) {
                     continue;
-            }
+        	}
                 
 		    //roll (and modify as appropriate) damage for this particular fighter:
 		    $damage = $this->getDamage($fireOrder);
@@ -1656,9 +1688,12 @@ echo "Value of newfireOrderid1: " . $newFireOrder->id. "\n";
 		    $damage -= $target->getDamageMod($shooter, null, $gamedata->turn, $this);
 
 		    $this->doDamage($target, $shooter, $fighter, $damage, $fireOrder, null, $gamedata, false);
-		                
-		    PakmaraPlasmaWeb::$alreadyEngaged[$target->id] = true;//mark engaged        
-		}
+		}			                
+
+		if($fireOrder->type == "normal"){		    		    
+			PakmaraPlasmaWeb::$alreadyEngagedDirect[$target->id] = true;//mark engaged
+		}	
+	
 	}//endof AOEdamage()
 	
 		
@@ -1669,13 +1704,13 @@ echo "Value of newfireOrderid1: " . $newFireOrder->id. "\n";
 			}else{
 				$this->data["Special"] .= '<br>';
 			}
-			$this->data["Special"] .= 'DEFENSIVE - Target a hex with enemy ships whose fire you wish to affect during the Firing Phase.';
-			$this->data["Special"] .= '<br>The Web automatically hits, applying -10 intercept rating against enemy fire from that hex, plus 2 damage reduction against Antimatter, Laser and Particle weapons attacks.';
-			$this->data["Special"] .= '<br>To reduce hit chance of ballistic weapons, target the hex from where the shot was launched.';			
-			$this->data["Special"] .= '<br>ANTI-FIGHTER - Creates a damaging cloud of plasma within 3 hexes, which deals D6+2 plasma damage to all fighters in hex when created.';
-			$this->data["Special"] .= '<br>This cloud remains during the Movement Phase of next, and damage any fighters that move through it then.';			
+			$this->data["Special"] .= 'DEFENSIVE MODE - Target a hex with enemy ships whose fire you wish to affect during the Firing Phase.';
+			$this->data["Special"] .= '<br>The Web automatically hits, applying -10 Intercept against enemy fire from hex, plus 2 Damage Reduction against Antimatter, Laser and Particle attacks.';
+			$this->data["Special"] .= '<br>To reduce Hit Chance of Ballistic weapons, target the hex from where the shot was launched.';			
+			$this->data["Special"] .= '<br>ANTI-FIGHTER MODE - Creates a damaging cloud within 3 hexes of ship, which deals D6+2 Plasma damage to all fighters in hex when created.';
+			$this->data["Special"] .= '<br>This cloud remains during the next Movement Phase and will damage any fighters that move through it.';			
 			$this->data["Special"] .= '<br>Anti-Fighter mode requires 1 additional power at moment of firing, either from boosting in Initial Orders or from power stored in Plasma Batteries.';
-			$this->data["Special"] .= '<br>NOTE - Plasma Webs are not cumulative. If several effect the same target in the same mode in a turn, its effects are only apply once.';		 
+			$this->data["Special"] .= '<br>NOTE - Plasma Webs used in the same mode in the same hex are not cumulative, effects are only apply once.';		 
 	 }
 
 
@@ -1702,12 +1737,12 @@ echo "Value of newfireOrderid1: " . $newFireOrder->id. "\n";
 			    	
 				      $originalFireOrder = null;
 					      
-				              	foreach ($firingOrders as $fireOrder) { 				              		
-				              	   if ($fireOrder->type == "normal" && $fireOrder->firingMode == 2) { //Not the ballistic cloud effect, and not generated fireOrders passing through cloud.
-				                    $originalFireOrder = $fireOrder;
-				                    break; //no need to search further
-				                    }
-								}    			
+				        foreach ($firingOrders as $fireOrder) { 				              		
+				            if ($fireOrder->type == "normal" && $fireOrder->firingMode == 2) { //Not the ballistic cloud effect, and not generated fireOrders passing through cloud.
+				                $originalFireOrder = $fireOrder;
+				                break; //no need to search further
+				                }
+							}    			
 						
 				    	if($originalFireOrder==null) return; //no appropriate fire order, end of work						
 							

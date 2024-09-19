@@ -701,14 +701,14 @@ class Manager{
 
     public static function insertSingleFiringOrder($gamedata, $fireOrder)
     {          
-		self::$dbManager->submitSingleFireorder($gamedata->id, $fireOrder, $gamedata->turn, $gamedata->phase);
+		self::$dbManager->submitSingleFireorder($gamedata->id, $fireOrder);
 		
     }
     
     
     public static function retrieveFiringOrdersForWeapon($gamedata, $shooterid, $weaponid)
     {	
-		$fireOrders = self::$dbManager->getFireOrdersForWeapon($gamedata, $shooterid, $weaponid, $gamedata->turn);	
+		$fireOrders = self::$dbManager->getFireOrdersForWeapon($gamedata->id, $shooterid, $weaponid, $gamedata->turn);	
 		return $fireOrders;
     }    
 
