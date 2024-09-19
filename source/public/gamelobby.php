@@ -238,7 +238,13 @@ if ($simMv==true){//simultaneous movement
 <br>
 <a href="files/enhancements_list.txt" target="_blank">Common Systems & Enhancement List</a> 
 - Details of enhancements and other common systems e.g. Boarding / Missiles
+<br>
+<strong style="color: #f8f8f8;">Random Fleet Selection</strong> - 
+<a href="https://old.wheelofnames.com/8fz-ny7" target="_blank" style="color: #00e300;"><strong>Tier 1</strong> </a> <strong> ||</strong> 
+<a href="https://old.wheelofnames.com/8fz-ny7" target="_blank" style="color: #00e300;"><strong>Tier 2</strong></a> 
 <br><br>
+
+
 	    
 			<div><span>TEAM 1</span></div>
 			<div id="team1" class="subpanel slotcontainer">
