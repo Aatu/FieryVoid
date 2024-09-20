@@ -1022,10 +1022,15 @@ window.gamedata = {
             points += gamedata.ships[i].pointCost;
         }
 
+	    var maxPoints = selectedSlot.points;
+	    var remainingPoints = maxPoints - points;
+
         $('.max').html(selectedSlot.points);
         $('.current').html(points);
+        $('.remaining').html(remainingPoints);        
         return points;
     },
+
 
     isMyShip: function isMyShip(ship) {
         return ship.userid == gamedata.thisplayer;

@@ -73,6 +73,11 @@ a.link:hover
 	color:#496791;
 }
 
+.smallcolored {
+    font-size: 1.0em; /* Reduces the font size to 80% of the original */
+    color: #00d6d6;   /* Example color (orange), choose your desired color */
+}
+
 a{
 	color:white;
 	text-decoration:none;

@@ -233,15 +233,17 @@ if ($simMv==true){//simultaneous movement
 			<div><span> <b>Options:</b> <?php print($optionsUsed); ?> </span></div>
 
 <br>
-<a href="files/FV_factions.txt" target="_blank">Fiery Void Factions & Tier List</a> 
+<a href="files/FV_factions.txt" target="_blank" style="text-decoration: underline;">Fiery Void Factions & Tier List</a> 
 - Overview of rules and systems of the fleets available in Fiery Void
 <br>
-<a href="files/enhancements_list.txt" target="_blank">Common Systems & Enhancement List</a> 
+<a href="files/enhancements_list.txt" target="_blank" style="text-decoration: underline;">Common Systems & Enhancement List</a> 
 - Details of enhancements and other common systems e.g. Boarding / Missiles
 <br>
-<strong style="color: #f8f8f8;">Random Fleet Selection</strong> - 
-<a href="https://old.wheelofnames.com/8fz-ny7" target="_blank" style="color: #00e300;"><strong>Tier 1</strong> </a> <strong> ||</strong> 
-<a href="https://old.wheelofnames.com/8fz-ny7" target="_blank" style="color: #00e300;"><strong>Tier 2</strong></a> 
+<span style="color: #f8f8f8;">Random Fleet Selection</span> 
+<span style="margin-right: 3px;">-</span> 
+<a href="https://old.wheelofnames.com/8fz-ny7" target="_blank" style="color: #ff9500; text-decoration: underline;"><strong>Tier 1</strong></a> 
+<strong style="margin: 0 2.5px;">|</strong> 
+<a href="https://old.wheelofnames.com/3ek-kyf" target="_blank" style="color: #ff9500; text-decoration: underline;"><strong>Tier 2</strong></a>
 <br><br>
 
 
@@ -266,6 +268,10 @@ if ($simMv==true){//simultaneous movement
 				<span class="panelsubheader">/</span>
 				<span class="panelsubheader max">0</span>
 				<span class="panelsubheader">points</span>
+				<span class="smallcolored">(</span>				
+				<span class="smallcolored remaining">0</span>
+				<span class="smallcolored">points remaining</span>								
+				<span class="smallcolored">)</span>					
 				</div>
 			<table class="store" style="width:100%;">
 				<tr><td style="width:40%;vertical-align:top;">
