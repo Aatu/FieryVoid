@@ -268,10 +268,10 @@ if ($simMv==true){//simultaneous movement
 				<span class="panelsubheader">/</span>
 				<span class="panelsubheader max">0</span>
 				<span class="panelsubheader">points</span>
-				<span class="smallcolored">(</span>				
-				<span class="smallcolored remaining">0</span>
-				<span class="smallcolored">points remaining</span>								
-				<span class="smallcolored">)</span>					
+				<span class="panelsmallcyan">(</span>				
+				<span class="panelsmallcyan remaining">0</span>
+				<span class="panelsmallcyan">points remaining</span>								
+				<span class="panelsmallcyan">)</span>					
 				</div>
 			<table class="store" style="width:100%;">
 				<tr><td style="width:40%;vertical-align:top;">
