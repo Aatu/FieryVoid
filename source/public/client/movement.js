@@ -523,7 +523,7 @@ shipManager.movement = {
         var hasPivoted = shipManager.movement.hasPivoted(ship);
         var hasTurnedIntoPivot = shipManager.movement.hasTurnedIntoPivot(ship);//New check to see if ship has ended a pivot this turn by turning into it DK 09.24
         var isPivoting = shipManager.movement.isPivoting(ship);
-        if(hasTurnedIntoPivot) return false;//New check to see if ship has ended a pivot this turn by turning into it DK 09.24
+        if(hasTurnedIntoPivot && !ship.agile) return false;//New check to see if ship has ended a pivot this turn by turning into it DK 09.24
         if (hasPivoted.right && isPivoting != "right" && right && !ship.agile) return false;
         if (hasPivoted.left && isPivoting != "left" && !right && !ship.agile) return false;
         if (right && isPivoting == "left" || !right && isPivoting == "right" && !ship.agile) {
