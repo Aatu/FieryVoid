@@ -74,7 +74,7 @@ a.link:hover
 }
 
 .panelsmallcyan {
-    font-size:12px; /* Reduces the font size to 80% of the original */
+    font-size:14px; /* Reduces the font size to 80% of the original */
     color: #00caca;   /* Example color (orange), choose your desired color */
 }
 
@@ -92,4 +92,21 @@ a:hover{
 	top:10px;
 	right:10px;
 	width:50px;
+}
+
+.flex-container {
+    display: flex;
+    align-items: flex-start; /* Vertically aligns elements */
+}
+
+.depheightheader, .depheight {
+    margin: 0; /* Reset margins */
+    margin-right: 10px; 
+}
+
+span.clickable.close {
+    margin-left: auto; /* Pushes the REMOVE SLOT to the far right */
+    cursor: pointer;
+    margin-top: -15px; /* Adjust this value to raise it */    
+    color: #ffffff; /* Optional to make it stand out */
 }
