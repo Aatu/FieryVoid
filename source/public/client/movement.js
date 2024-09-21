@@ -932,6 +932,41 @@ shipManager.movement = {
 				}					
 			}	
 	},
+
+
+	cancelPivotAfterTurn: function cancelPivotAfterTurn(ship){
+        var name;
+		var isPivoting = shipManager.movement.isPivoting(ship);
+		//Create a pivot order that is the reverse of current pivot to cancel it.
+		if (isPivoting == 'left'){
+			name = "pivotright";
+		}else if (isPivoting == 'right'){
+			name = "pivotleft";
+		} 
+		//Add movement order!		
+		ship.movement[ship.movement.length] = {
+		    id: -1,
+		    type: name,
+		    position: movement.position,
+		    xOffset: movement.xOffset,
+		    yOffset: movement.yOffset,
+		    facing: movement.facing,
+		    heading: movement.heading,
+		    speed: movement.speed,
+		    animating: false,
+		    animated: false,
+		    animationtics: 0,
+		    requiredThrust: Array(0, 0, 0, 0, 0),
+		    assignedThrust: Array(),
+		    commit: true,
+		    preturn: false,
+		    at_initiative: shipManager.getIniativeOrder(ship),
+		    turn: gamedata.turn,
+		    forced: false,
+		    value: 0
+		};
+	},
+
 	
     canTurnIntoPivot: function canTurnIntoPivot(ship, right) {
         if (gamedata.gamephase != 2) return false;
