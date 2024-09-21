@@ -1473,7 +1473,42 @@ window.shipWindowManager = {
 			webglScene.customEvent("ShipMovementChanged", { ship: ship });
 			window.webglScene.customEvent("AssignThrust", false)
 		}
-        if(movement.type == "contract") shipManager.movement.amendContractValue(ship, movement.value);//For Contraction, need to amend level.		
+        if(movement.type == "contract") shipManager.movement.amendContractValue(ship, movement.value);//For Contraction, need to amend level for first order.
+
+		//To recognise when player is turning into a pivot and cancel that pivot when thrust is assigned DK 09.24	  
+	    if(movement.value === 'turnIntoPivot'){ //Is a turnintopivot, as normal turns have .value of 0.            	
+				var isPivoting = shipManager.movement.isPivoting(ship) ;
+				//Create a pivot order that is the reverse of current pivot to cancel it.
+				if (isPivoting == 'left'){
+					var name = "pivotright";
+				}else if (isPivoting == 'right'){
+					var name = "pivotleft";
+				} 
+				//Add movement order!		
+				ship.movement[ship.movement.length] = {
+		            id: -1,
+		            type: name,
+		            position: movement.position,
+		            xOffset: movement.xOffset,
+		            yOffset: movement.yOffset,
+		            facing: movement.facing,
+		            heading: movement.heading,
+		            speed: movement.speed,
+		            animating: false,
+		            animated: false,
+		            animationtics: 0,
+		            requiredThrust: Array(0, 0, 0, 0, 0),
+		            assignedThrust: Array(),
+		            commit: true,
+		            preturn: false,
+		            at_initiative: shipManager.getIniativeOrder(ship),
+		            turn: gamedata.turn,
+		            forced: false,
+		            value: 0
+		        };
+			
+			}	       	
+			
 	},
 
 	cancelAssignThrustEvent: function cancelAssignThrustEvent(ship) {

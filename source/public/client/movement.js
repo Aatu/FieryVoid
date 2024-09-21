@@ -521,7 +521,9 @@ shipManager.movement = {
         var othername = right ? "pivotleft" : "pivotright";
         if (shipManager.movement.isRolling(ship) && !ship.gravitic) return false;
         var hasPivoted = shipManager.movement.hasPivoted(ship);
+        var hasTurnedIntoPivot = shipManager.movement.hasTurnedIntoPivot(ship);//New check to see if ship has ended a pivot this turn by turning into it DK 09.24
         var isPivoting = shipManager.movement.isPivoting(ship);
+        if(hasTurnedIntoPivot) return false;//New check to see if ship has ended a pivot this turn by turning into it DK 09.24
         if (hasPivoted.right && isPivoting != "right" && right && !ship.agile) return false;
         if (hasPivoted.left && isPivoting != "left" && !right && !ship.agile) return false;
         if (right && isPivoting == "left" || !right && isPivoting == "right" && !ship.agile) {
@@ -548,6 +550,20 @@ shipManager.movement = {
 		//ship is pivoting, last maneuver was a turn and it brought ship in alignment - call it turn into pivot!
 		return true;
 	},
+
+	//New function to check if ship turned into apivot at any point in turn DK 09.24
+    hasTurnedIntoPivot: function hasTurnedIntoPivot(ship) {
+        for (var i in ship.movement) {
+            var movement = ship.movement[i];
+            if (movement.turn != gamedata.turn) continue;
+
+            if (movement.value === 'turnIntoPivot') {
+				return true;
+        	}
+		}	
+        return false;
+    },
+
     
     countCombatPivot: function countCombatPivot(ship) {
         var c = 0;
@@ -695,11 +711,10 @@ shipManager.movement = {
             if (movement.type == "pivotleft" && pivoting == "right" && movement.preturn == false) {
                 pivoting = "no";
             }
-			/* this fragment seems to be unsuccessful attempt at recognizing turning into pivot; it DOES so (for not-gravitic ship at least), but doesn't stop pivoting itself...
-            if (!ship.gravitic && shipManager.movement.isTurn(movement) && pivoting != "no") {
-                pivoting = "no";
-            }
-			*/
+
+			//New check to see if ship turned into a pivot this turn, and therefore is not pivoting anymore! DK 09.24
+            if (movement.value === 'turnIntoPivot') pivoting = "no";
+			
         }
         return pivoting;
     },
@@ -900,8 +915,7 @@ shipManager.movement = {
 		    };
 						
 
-		    shipWindowManager.assignThrust(ship);
-//            shipManager.movement.amendContractValue(ship, value);			    	        
+		    shipWindowManager.assignThrust(ship);		    	        
 		}
 	
     },
@@ -917,39 +931,6 @@ shipManager.movement = {
 				    break;
 				}					
 			}	
-
-/*
-		var contractOnTurn = 0;
-		if(value == 1){		
-		    for (var i in ship.movement) {
-		        var move = ship.movement[i];
-		        
-		        if (move.turn != gamedata.turn) continue;
-
-		        if (move.type == "contract") {
-					contractOnTurn += move.value;
-		        }
-		    }
-
-				for (var i in ship.systems) {
-					var system = ship.systems[i];
-					if (system.hasOwnProperty('contraction')) {
-					    system.contraction = contractOnTurn;
-					    if(system.contraction <= 0) system.contraction = 0;
-					    break;
-					}					
-				}	
-		}else{ //When a move is deleted basically.
-			for (var i in ship.systems) {
-				var system = ship.systems[i];
-				if (system.hasOwnProperty('contraction')) {
-					system.contraction += value;
-					if(system.contraction <= 0) system.contraction = 0;
-					break;
-				}					
-			}				
-		}
-*/
 	},
 	
     canTurnIntoPivot: function canTurnIntoPivot(ship, right) {
@@ -982,12 +963,12 @@ shipManager.movement = {
     
     
     doIntoPivotTurn: function doIntoPivotTurn(ship, right) {
-    	if(ship.hasOwnProperty('mindrider')) ship.mindrider = false;//Aug 2024 - Mindrider thurster rules don't apply to turnintopivots
+    	if(ship.hasOwnProperty('mindrider')) ship.mindrider = false;//Aug 2024 - Mindrider thurster rules don't apply to turnintopivots, remove marking
     	
         var requiredThrust = shipManager.movement.calculateRequiredThrust(ship, right);
         var lastMovement = ship.movement[ship.movement.length - 1];
     	
-    	if(ship.hasOwnProperty('mindrider')) ship.mindrider = true;
+    	if(ship.hasOwnProperty('mindrider')) ship.mindrider = true; //And reapply after calculateRequiredThrust()
 
         var name;
         var step = 1;
@@ -1033,14 +1014,15 @@ shipManager.movement = {
             at_initiative: shipManager.getIniativeOrder(ship),
             turn: gamedata.turn,
             forced: false,
-            value: 0
+            value: 'turnIntoPivot'
         };        
 
         if (!ship.flight) {
             shipWindowManager.assignThrust(ship);
         }
 		
-		/*does not work correctly, because thrust is yest to be actually assigned!!!
+		/*does not work correctly, because thrust is yet to be actually assigned!!!
+		//New method added to doneAssignThrust shipWindow.js in UI folder, where thrust HAS been confirmed DK 09.24
 		//cancel pivoting itself, too
 		//it will be cancelled separately - but if done so, it will return to current state of turning into pivot without cancelling pivoting
 		var isPivoting = shipManager.movement.isPivoting(ship) ;
