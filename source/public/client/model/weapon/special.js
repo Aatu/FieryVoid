@@ -502,9 +502,9 @@ AegisSensorPod.prototype = Object.create(Weapon.prototype);
 AegisSensorPod.prototype.constructor = AegisSensorPod;
 
 AegisSensorPod.prototype.initializationUpdate = function() {
-var ship = this.ship;	
-this.outputDisplay = shipManager.systems.getOutput(ship, this);
-return this;
+	var ship = this.ship;	
+	this.outputDisplay = shipManager.systems.getOutput(ship, this);
+	return this;
 };
 
 var Marines = function Marines(json, ship) {
@@ -524,6 +524,35 @@ var ThoughtWave = function ThoughtWave(json, ship) {
 };
 ThoughtWave.prototype = Object.create(Weapon.prototype);
 ThoughtWave.prototype.constructor = ThoughtWave;
+
+ThoughtWave.prototype.initializationUpdate = function() {
+	var ship = this.ship;	
+    if (this.fireOrders.length > 0) {					
+		var aFireOrder = this.fireOrders[0]; 
+		if(aFireOrder)	aFireOrder.damageclass = 'Thoughtwave';
+	}			        
+	return this;
+};
+
+/*
+ThoughtWave.prototype.doIndividualNotesTransfer = function () { //prepare individualNotesTransfer variable - if relevant for this particular system
+    // prepare individualNotesTransfer variable - if relevant for this particular system
+    // here: transfer information about firing in Rapid mode
+    // (e.g., weapon is being fired after 1 turn of arming)
+		var toReturn = false;
+ 		this.individualNotesTransfer = Array();	
+  //Check for fire order and check Initial Orders  	
+    	if ((this.fireOrders.length > 0) && (gamedata.gamephase == 1)) {					
+		    var aFireOrder = this.fireOrders[0]; 		        
+		    var firingShip = gamedata.getShip(aFireOrder.shooterid);
+		    var targetShip = gamedata.getShip(aFireOrder.targetid); 			
+		    this.individualNotesTransfer.push('Y');		
+		}	
+		
+	return;
+ 
+};
+*/
 
 var GrapplingClaw = function GrapplingClaw(json, ship) {
     Weapon.call(this, json, ship);

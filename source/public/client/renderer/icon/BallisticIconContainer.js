@@ -105,6 +105,7 @@ window.BallisticIconContainer = function () {
         var shooterIcon = iconContainer.getById(ballistic.shooterid);	
 		var targetType = 'hexRed';
         var launchPosition = this.coordinateConverter.fromHexToGame(shooterIcon.getFirstMovementOnTurn(turn).position);
+        var text = '';
 
 		if (ballistic.type == 'normal') { //it's direct fire after all!
 		    launchPosition = this.coordinateConverter.fromHexToGame(shooterIcon.getLastMovement().position);
@@ -114,6 +115,7 @@ window.BallisticIconContainer = function () {
 				break;
 				case 'plasma':
 				        targetType = 'hexGreen';
+				        if(ballistic.firingMode == 2) targetType = 'hexGreenExclamation';
 				break;
 				default:
 				        targetType = 'hexYellow';
@@ -124,6 +126,7 @@ window.BallisticIconContainer = function () {
 			switch (ballistic.damageclass) {
 				case 'ion': //Cascor Ion Field
 				        targetType = 'hexPurple';
+				        text = "Ion Field"
 				break;
 				default:
 				        targetType = 'hexRed';
@@ -139,12 +142,12 @@ window.BallisticIconContainer = function () {
 		//We want Persistent Effects to have a separate colour from normal ballistics! DK 09.24
 		if (ballistic.notes == 'Persistent Effect') { //30 June 2024 - DK - Added for Persistent Effects e.g. Plasma Web.
 			switch (ballistic.damageclass) {
-			case 'Persistent Effect Plasma':
-			            targetType = 'hexGreenExclamation';
-				break;
-			default:
-			            targetType = 'hexYellow';
-				break;
+				case 'Persistent Effect Plasma':
+				            targetType = 'hexGreenExclamation';		            
+					break;
+				default:
+				            targetType = 'hexYellow';
+					break;
 
 	        }
 		} 	
@@ -162,14 +165,23 @@ window.BallisticIconContainer = function () {
 		//Create orange launch icon on firing ship.
         var launchSprite = null;
 
-        if ((!getByLaunchPosition(launchPosition, this.ballisticIcons)) && ballistic.notes != 'Persistent Effect') {
-            launchSprite = new BallisticSprite(launchPosition, 'hexOrange');
+        if ((!getByLaunchPosition(launchPosition, this.ballisticIcons)) && ballistic.notes != 'Persistent Effect') { //Don't create launch sprite for persistant effects!
+			switch (ballistic.damageclass) {
+			case 'Thoughtwave':
+			            launchSprite = new BallisticSprite(launchPosition, 'hexPurple', "Thoughtwave");
+				break;
+			default:
+			            launchSprite = new BallisticSprite(launchPosition, 'hexOrange', text);
+				break;
+
+	        }            
             scene.add(launchSprite.mesh);
         }
 
         var targetSprite = null;
 
         if (!getByTargetIdOrTargetPosition(targetPosition, ballistic.targetId, this.ballisticIcons)) {
+            if(ballistic.damageclass == 'Thoughtwave') return;//Don't create target hex for Thougtwave
             if (targetIcon && targetPosition) {
                 targetSprite =  new BallisticSprite(targetPosition, targetType);//'hex');
                 targetIcon.mesh.add(targetSprite.mesh);
