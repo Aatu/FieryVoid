@@ -11,22 +11,47 @@ window.BallisticSprite = function () {
     var TEXTURE_HEX_PURPLE = null;         
     var TEXTURE_HEX_GREEN_EXCLAMATION = null; // New texture
 
-function BallisticSprite(position, type, text = "", textColour = "#aaaa00") {
-    HexagonSprite.call(this, -2);
+	function BallisticSprite(position, type, text = "", textColour = "#ffffff") {
+	    HexagonSprite.call(this, -2);
 
-    // If there is custom text (like Thoughtwave, Ion Field, etc.), create a custom texture
-    if (text) {
-        // Ensure textColour defaults to "#aaaa00" if not provided
-        this.uniforms.texture.value = createTextureWithText(type, text, textColour || "#aaaa00");
-    } else {
-        if (!TEXTURE_HEX_ORANGE) {
-            createTextures(); // Initialize all textures once
+	    // If there is custom text (like Thoughtwave, Ion Field, Plasma Web etc.), create a custom texture
+	    if (text) {
+	        // Ensure textColour defaults to "#aaaa00" if not provided
+	        this.uniforms.texture.value = createTextureWithText(type, text, textColour || "#ffffff");
+	    } else {
+	        if (!TEXTURE_HEX_ORANGE) {
+	            createTextures(); // Initialize all textures once
+	        }
+	        this.uniforms.texture.value = chooseTexture(type);
+	    }
+
+	    this.setPosition(position);
+	}
+	
+/* //Alterantive method if we want to add images to the hex icons in future. DK.
+    function BallisticSprite(position, type, text = "", textColour = "#aaaa00", imageSrc = null) {
+        HexagonSprite.call(this, -2);
+
+        // If there is custom text, create a custom texture
+        if (text) {
+            this.uniforms.texture.value = createTextureWithText(type, text, textColour || "#aaaa00");
+        } else {
+            if (!TEXTURE_HEX_ORANGE) {
+                createTextures(); // Initialize all textures once
+            }
+            this.uniforms.texture.value = chooseTexture(type);
         }
-        this.uniforms.texture.value = chooseTexture(type);
-    }
 
-    this.setPosition(position);
-}
+        // If an image source is provided, load and set the image texture
+        if (imageSrc) {
+            const imgTexture = new THREE.TextureLoader().load(imageSrc, (texture) => {
+                this.uniforms.texture.value = texture; // Update texture to the loaded image
+            });
+        }
+
+        this.setPosition(position);
+    }
+*/
 
     BallisticSprite.prototype = Object.create(HexagonSprite.prototype);
 

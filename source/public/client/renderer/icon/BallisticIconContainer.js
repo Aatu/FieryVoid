@@ -107,6 +107,7 @@ window.BallisticIconContainer = function () {
         var launchPosition = this.coordinateConverter.fromHexToGame(shooterIcon.getFirstMovementOnTurn(turn).position);
         var text = "";
         var textColour = "";
+//		var iconImage = null; //Additional variable that could be added in future by passing to new BallisticSprite()!        
 
 		if (ballistic.type == 'normal') { //it's direct fire after all!
 		    launchPosition = this.coordinateConverter.fromHexToGame(shooterIcon.getLastMovement().position);
@@ -117,11 +118,11 @@ window.BallisticIconContainer = function () {
 				case 'plasma':
 				        targetType = 'hexGreen';
 				        if(ballistic.firingMode == 2) text = '!';
+				        textColour = "#aaaa00";				        	
 				break;
 				case 'SecondSight':
 				        targetType = 'hexPurple';
 				        text = "Second Sight";
-				        textColour = "#ffffff";
 				break;				        
 				default:
 				        targetType = 'hexYellow';
@@ -136,8 +137,7 @@ window.BallisticIconContainer = function () {
 				break;
 				case 'Thoughtwave': //Cascor Ion Field
 				        targetType = 'hexPurple';
-				        text = "Thoughtwave";
-				        textColour = "#ffffff";				        
+				        text = "Thoughtwave";			        
 				break;				
 				default:
 				        targetType = 'hexRed';
@@ -154,11 +154,12 @@ window.BallisticIconContainer = function () {
 		if (ballistic.notes == 'Persistent Effect') { //30 June 2024 - DK - Added for Persistent Effects e.g. Plasma Web.
 			switch (ballistic.damageclass) {
 				case 'Persistent Effect Plasma':
-				            targetType = 'hexGreen';
-				            text = "!";		            
+				        targetType = 'hexGreen';
+				        text = "!";
+				        textColour = "#aaaa00";				            		            
 					break;
 				default:
-				            targetType = 'hexYellow';
+				        targetType = 'hexYellow';
 					break;
 
 	        }
