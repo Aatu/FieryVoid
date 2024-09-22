@@ -119,7 +119,7 @@ window.BallisticIconContainer = function () {
 				        if(ballistic.firingMode == 2) text = '!';
 				break;
 				case 'SecondSight':
-				        targetType = 'hexYellow';
+				        targetType = 'hexPurple';
 				        text = "Second Sight";
 				        textColour = "#ffffff";
 				break;				        
@@ -136,7 +136,8 @@ window.BallisticIconContainer = function () {
 				break;
 				case 'Thoughtwave': //Cascor Ion Field
 				        targetType = 'hexPurple';
-				        text = "Thoughtwave"
+				        text = "Thoughtwave";
+				        textColour = "#ffffff";				        
 				break;				
 				default:
 				        targetType = 'hexRed';
