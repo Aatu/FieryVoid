@@ -11,17 +11,22 @@ window.BallisticSprite = function () {
     var TEXTURE_HEX_PURPLE = null;         
     var TEXTURE_HEX_GREEN_EXCLAMATION = null; // New texture
 
-    function BallisticSprite(position, type, text = "") {
-        HexagonSprite.call(this, -2);
+function BallisticSprite(position, type, text = "", textColour = "#aaaa00") {
+    HexagonSprite.call(this, -2);
 
+    // If there is custom text (like Thoughtwave, Ion Field, etc.), create a custom texture
+    if (text) {
+        // Ensure textColour defaults to "#aaaa00" if not provided
+        this.uniforms.texture.value = createTextureWithText(type, text, textColour || "#aaaa00");
+    } else {
         if (!TEXTURE_HEX_ORANGE) {
-            createTextures(text);
+            createTextures(); // Initialize all textures once
         }
-
         this.uniforms.texture.value = chooseTexture(type);
-
-        this.setPosition(position);
     }
+
+    this.setPosition(position);
+}
 
     BallisticSprite.prototype = Object.create(HexagonSprite.prototype);
 
@@ -50,9 +55,9 @@ window.BallisticSprite = function () {
         TEXTURE_HEX_RED = createTexture('hexRed');
         TEXTURE_SHIP = createTexture('ship');
         TEXTURE_HEX_BLUE = createTexture('hexBlue');
-        TEXTURE_HEX_GREEN = createTextureWithText('hexGreen', text, "#aaaa00");
+        TEXTURE_HEX_GREEN = createTexture('hexGreen');
         TEXTURE_HEX_YELLOW = createTexture('hexYellow');
-        TEXTURE_HEX_PURPLE = createTextureWithText('hexPurple', text, "#aaaa00");           
+        TEXTURE_HEX_PURPLE = createTexture('hexPurple');           
         TEXTURE_HEX_GREEN_EXCLAMATION = createTextureWithText('hexGreen', "!", "#aaaa00");
     }
 
@@ -77,7 +82,7 @@ window.BallisticSprite = function () {
 	    ctx.textBaseline = "middle";
 
 	    // Measure the text width and reduce the font size until it fits
-	    var maxWidth = TEXTURE_SIZE * 0.5; // Adjust max width based on hexagon size (80% of the hexagon width)
+	    var maxWidth = TEXTURE_SIZE * 0.4; // Adjust max width based on hexagon size (80% of the hexagon width)
 	    var textWidth = ctx.measureText(text).width;
 
 	    while (textWidth > maxWidth && fontSize > 10) { // Stop reducing at a minimum font size of 10
