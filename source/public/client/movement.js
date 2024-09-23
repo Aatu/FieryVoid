@@ -229,7 +229,7 @@ shipManager.movement = {
         return true;
     },
 
-
+/*
     canEmergencyRoll: function canEmergencyRoll(ship) {
         if (gamedata.gamephase != 2) return false;
         if (ship.flight || ship.osat) return false;
@@ -248,14 +248,14 @@ shipManager.movement = {
         }
         return true;
     },
-
+*/
 
     doRoll: function doRoll(ship) {
         if (!shipManager.movement.canRoll(ship)) return false;        
         var lm = ship.movement[ship.movement.length - 1];
         var requiredThrust = Array(ship.rollcost, 0, 0, 0, 0);
-        var value = 0;
-       if (shipManager.movement.isPivoting(ship) != "no" && (!ship.gravitic)) value = 'emergencyRoll';//Mark when an emergency roll has been made.
+ //       var value = 0;
+//       if (shipManager.movement.isPivoting(ship) != "no" && (!ship.gravitic)) value = 'emergencyRoll';//Mark when an emergency roll has been made.
         
         ship.movement[ship.movement.length] = {
             id: -1,
