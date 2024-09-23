@@ -1475,8 +1475,6 @@ window.shipWindowManager = {
 		}
         //For Contraction, need to amend level for first order.
         if(movement.type == "contract") shipManager.movement.amendContractValue(ship, movement.value);
-		//To recognise when player is turning into a pivot and cancel that pivot at moment when thrust is assigned DK 09.24	  
-	    if(movement.value === 'turnIntoPivot') shipManager.movement.cancelPivotAfterTurn(ship, movement.value);
 
 	},
 

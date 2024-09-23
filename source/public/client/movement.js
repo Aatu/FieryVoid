@@ -98,6 +98,7 @@ shipManager.movement = {
         return false;
     },
 
+
     deleteMove: function deleteMove(ship) {
         var movement = ship.movement[ship.movement.length - 1];
         if (!movement.preturn && !movement.forced && movement.turn == gamedata.turn) {
@@ -115,6 +116,7 @@ shipManager.movement = {
             if(movement.type == "contract") shipManager.movement.amendContractValue(ship, -movement.value);//For Contraction, need to amend level.
         }
     },
+
 
     deleteSpeedChange: function deleteSpeedChange(ship, accel) {
         var curheading = shipManager.movement.getLastCommitedMove(ship).heading;
@@ -227,8 +229,62 @@ shipManager.movement = {
         return true;
     },
 
+/*
+    canEmergencyRoll: function canEmergencyRoll(ship) {
+        if (gamedata.gamephase != 2) return false;
+        if (ship.flight || ship.osat) return false;
+        if (shipManager.isDestroyed(ship) || shipManager.isAdrift(ship)) return false;
+        if (shipManager.systems.isEngineDestroyed(ship)) return false;
+        if (shipManager.movement.isRolling(ship)) return true; //rolling ship should be always able to stop...
+        if ((!ship.agile) && shipManager.movement.hasRolled(ship) ) {
+            return false;
+        }
+        //For emergency rolls ships should be pivoting, and not gravitic!
+        if (shipManager.movement.isPivoting(ship) == "no") return false;
+        if(ship.gravitic) return false;
+             
+        if (ship.rollcost > shipManager.movement.getRemainingEngineThrust(ship)) {
+            return false;
+        }
+        return true;
+    },
+*/
+
     doRoll: function doRoll(ship) {
         if (!shipManager.movement.canRoll(ship)) return false;        
+        var lm = ship.movement[ship.movement.length - 1];
+        var requiredThrust = Array(ship.rollcost, 0, 0, 0, 0);
+//        var value = 0;
+//       if (shipManager.movement.isPivoting(ship) != "no" && (!ship.gravitic)) value = 'emergencyRoll';//Mark when an emergency roll has been made.
+        
+        ship.movement[ship.movement.length] = {
+            id: -1,
+            type: "roll",
+            position: lm.position,
+            xOffset: lm.xOffset,
+            yOffset: lm.xOffset,
+            facing: lm.facing,
+            heading: lm.heading,
+            speed: lm.speed,
+            animating: false,
+            animated: true,
+            animationtics: 0,
+            requiredThrust: requiredThrust,
+            assignedThrust: Array(),
+            commit: false,
+            preturn: false,
+            at_initiative: shipManager.getIniativeOrder(ship),
+            turn: gamedata.turn,
+            forced: false,
+            value: value
+        };
+        shipWindowManager.assignThrust(ship);
+        ship.rolling = true;
+    },
+
+/*
+    doEmergencyRoll: function doEmergencyRoll(ship) {
+        if (!shipManager.movement.canEmergencyRoll(ship)) return false;        
         var lm = ship.movement[ship.movement.length - 1];
         var requiredThrust = Array(ship.rollcost, 0, 0, 0, 0);
         ship.movement[ship.movement.length] = {
@@ -250,11 +306,12 @@ shipManager.movement = {
             at_initiative: shipManager.getIniativeOrder(ship),
             turn: gamedata.turn,
             forced: false,
-            value: 0
+            value: 'emergencyRoll'
         };
         shipWindowManager.assignThrust(ship);
         ship.rolling = true;
     },
+*/    
 
     isRolling: function isRolling(ship) {
         var rolling = false;
@@ -529,9 +586,9 @@ shipManager.movement = {
         if (right && isPivoting == "left" || !right && isPivoting == "right" && !ship.agile) {
             return false;
         }
-		if (!shipManager.movement.hasJustTurnedIntoPivot(ship)){ //don't look at thrust available for pivot cancelling IF previous maneuver is turn into pivot
-			if (ship.pivotcost > shipManager.movement.getRemainingEngineThrust(ship)) return false;
-		}
+//		if (!shipManager.movement.hasJustTurnedIntoPivot(ship)){ //don't look at thrust available for pivot cancelling IF previous maneuver is turn into pivot. No longer needed.
+		if (ship.pivotcost > shipManager.movement.getRemainingEngineThrust(ship)) return false;
+//		}
         if (ship.flight && gamedata.gamephase == 3) {
             if (!weaponManager.canCombatTurn(ship)) return false;
             if (Math.ceil(ship.pivotcost * 1.5) > shipManager.movement.getRemainingEngineThrust(ship)) return false;
@@ -585,9 +642,9 @@ shipManager.movement = {
         var pivotcost = ship.pivotcost;
 		
 		
-		if (shipManager.movement.hasJustTurnedIntoPivot(ship)){ //just after turning into pivot - cancelling pivot is free!
-			pivotcost = 0;
-		}
+//		if (shipManager.movement.hasJustTurnedIntoPivot(ship)){ //just after turning into pivot - cancelling pivot is free! No longer needed.
+//			pivotcost = 0;
+//		}
 		
         var value = 0;
         if (gamedata.gamephase == 3) {
@@ -933,9 +990,10 @@ shipManager.movement = {
 			}	
 	},
 
-
+/*//No longer needed
 	cancelPivotAfterTurn: function cancelPivotAfterTurn(ship){
         var name;
+        var movement = ship.movement[ship.movement.length - 1];        
 		var isPivoting = shipManager.movement.isPivoting(ship);
 		//Create a pivot order that is the reverse of current pivot to cancel it.
 		if (isPivoting == 'left'){
@@ -947,7 +1005,7 @@ shipManager.movement = {
 		ship.movement[ship.movement.length] = {
 		    id: -1,
 		    type: name,
-		    position: movement.position,
+		    position: movement.position, 
 		    xOffset: movement.xOffset,
 		    yOffset: movement.yOffset,
 		    facing: movement.facing,
@@ -963,10 +1021,10 @@ shipManager.movement = {
 		    at_initiative: shipManager.getIniativeOrder(ship),
 		    turn: gamedata.turn,
 		    forced: false,
-		    value: 0
+		    value: "freecancelpivot"
 		};
 	},
-
+*/
 	
     canTurnIntoPivot: function canTurnIntoPivot(ship, right) {
         if (gamedata.gamephase != 2) return false;
@@ -1055,18 +1113,7 @@ shipManager.movement = {
         if (!ship.flight) {
             shipWindowManager.assignThrust(ship);
         }
-		
-		/*does not work correctly, because thrust is yet to be actually assigned!!!
-		//New method added to doneAssignThrust shipWindow.js in UI folder, where thrust HAS been confirmed DK 09.24
-		//cancel pivoting itself, too
-		//it will be cancelled separately - but if done so, it will return to current state of turning into pivot without cancelling pivoting
-		var isPivoting = shipManager.movement.isPivoting(ship) ;
-		if (isPivoting == 'left'){
-			shipManager.movement.doPivot(ship,false,true); //to stop pivot, counter-pivot order is given; parameters: ship, right, free)
-		}else if (isPivoting == 'right'){
-			shipManager.movement.doPivot(ship,true,true); //to stop pivot, counter-pivot order is given; parameters: ship, right, free)
-		}
-		*/
+
     },
 
     hasPivoted: function hasPivoted(ship) {
