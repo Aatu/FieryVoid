@@ -10,7 +10,8 @@ window.BallisticSprite = function () {
     var TEXTURE_HEX_YELLOW = null;
     var TEXTURE_HEX_PURPLE = null;         
     var TEXTURE_HEX_GREEN_EXCLAMATION = null; // New texture
-
+    
+/* //Old method that just accommodates text inside hex icons
 	function BallisticSprite(position, type, text = "", textColour = "#ffffff") {
 	    HexagonSprite.call(this, -2);
 
@@ -27,14 +28,17 @@ window.BallisticSprite = function () {
 
 	    this.setPosition(position);
 	}
-	
-/* //Alterantive method if we want to add images to the hex icons in future. DK.
-    function BallisticSprite(position, type, text = "", textColour = "#aaaa00", imageSrc = null) {
+*/	
+ 	//Alternative method if we want to add images to the hex icons in future. DK.
+    function BallisticSprite(position, type, text = "", textColour = "#ffffff", imageSrc = null) {
         HexagonSprite.call(this, -2);
 
-        // If there is custom text, create a custom texture
-        if (text) {
-            this.uniforms.texture.value = createTextureWithText(type, text, textColour || "#aaaa00");
+        // If an image source is provided, create a texture with the image
+        if (imageSrc) {
+            this.uniforms.texture.value = createTextureWithImage(type, text, textColour, imageSrc);
+        } else if (text) {
+            // If there is custom text (like Thoughtwave, Ion Field, etc.), create a custom texture
+            this.uniforms.texture.value = createTextureWithText(type, text, textColour || "#ffffff");
         } else {
             if (!TEXTURE_HEX_ORANGE) {
                 createTextures(); // Initialize all textures once
@@ -42,16 +46,9 @@ window.BallisticSprite = function () {
             this.uniforms.texture.value = chooseTexture(type);
         }
 
-        // If an image source is provided, load and set the image texture
-        if (imageSrc) {
-            const imgTexture = new THREE.TextureLoader().load(imageSrc, (texture) => {
-                this.uniforms.texture.value = texture; // Update texture to the loaded image
-            });
-        }
-
         this.setPosition(position);
     }
-*/
+
 
     BallisticSprite.prototype = Object.create(HexagonSprite.prototype);
 
@@ -94,6 +91,50 @@ window.BallisticSprite = function () {
         return tex;
     }
 
+function createTextureWithImage(type, text, textColour, imageSrc) {
+    // Create the initial hex grid texture with the colored background
+    var canvas = HexagonTexture.renderHexGrid(TEXTURE_SIZE, getStrokeColorByType(type), getFillColorByType(type), 10);
+    var ctx = canvas.getContext('2d');
+
+    // Create a temporary texture to return immediately
+    var tex = new THREE.Texture(canvas);
+    tex.needsUpdate = true;
+
+    // Load the image asynchronously
+    var image = new Image();
+    image.src = imageSrc;
+
+    image.onload = function () {
+        // Redraw the hex grid background (without clearing the canvas)
+        HexagonTexture.renderHexGrid(TEXTURE_SIZE, getStrokeColorByType(type), getFillColorByType(type), 10, ctx);
+
+        // Scale and position the image in the center of the hex
+        var imageSize = TEXTURE_SIZE * 0.28; // Scale image to 50% of the hex size
+        var xPos = (TEXTURE_SIZE - imageSize) / 2;
+        var yPos = (TEXTURE_SIZE - imageSize) / 2 + 20;
+
+        ctx.drawImage(image, xPos, yPos, imageSize, imageSize);
+
+        // Optionally draw text after the image
+        if (text) {
+            var fontSize = 25;
+			var initTextColour = textColour;
+			var lightenedColour = lightenColor(initTextColour, 40); // Lighten by 40%            
+            ctx.font = `bold ${fontSize}px Arial`;
+            ctx.fillStyle = lightenedColour || "#ffffff";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(text, TEXTURE_SIZE / 2, TEXTURE_SIZE / 1.55);
+        }
+
+        // Update the texture with the new canvas content
+        tex.needsUpdate = true;
+    };
+
+    // Return the placeholder texture, which will update once the image is loaded
+    return tex;
+}
+
     //New function to create the texture with text inside - DK 09.24
     function createTextureWithText(type, text, textColour) {
         var canvas = HexagonTexture.renderHexGrid(TEXTURE_SIZE, getStrokeColorByType(type), getFillColorByType(type), 10);
@@ -101,8 +142,11 @@ window.BallisticSprite = function () {
         
 	    // Set initial font size to the maximum you expect
 	    var fontSize = 130;
+		var initTextColour = textColour;
+		var lightenedColour = lightenColor(initTextColour, 35); // Lighten by 40%
+	    
 	    ctx.font = `bold ${fontSize}px Arial`;
-	    ctx.fillStyle = textColour;
+	    ctx.fillStyle = lightenedColour;
 	    ctx.textAlign = "center";
 	    ctx.textBaseline = "middle";
 
@@ -122,6 +166,23 @@ window.BallisticSprite = function () {
         tex.needsUpdate = true;
         return tex;
     }
+
+	function lightenColor(hex, percent) { //Need to lighten text so it stands out from hex clouring a little!
+	    // Convert hex to RGB
+	    var num = parseInt(hex.slice(1), 16),
+	        r = (num >> 16) + Math.round(255 * percent / 100),
+	        g = ((num >> 8) & 0x00FF) + Math.round(255 * percent / 100),
+	        b = (num & 0x0000FF) + Math.round(255 * percent / 100);
+	    
+	    // Ensure values stay within bounds
+	    r = r > 255 ? 255 : r;
+	    g = g > 255 ? 255 : g;
+	    b = b > 255 ? 255 : b;
+
+	    // Convert back to hex
+	    return `#${(r << 16 | g << 8 | b).toString(16).padStart(6, 0)}`;
+	}
+
 
     function getStrokeColorByType(type) {
         if (type == "hexOrange") {

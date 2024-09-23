@@ -107,7 +107,7 @@ window.BallisticIconContainer = function () {
         var launchPosition = this.coordinateConverter.fromHexToGame(shooterIcon.getFirstMovementOnTurn(turn).position);
         var text = "";
         var textColour = "";
-//		var iconImage = null; //Additional variable that could be added in future by passing to new BallisticSprite()!        
+		var iconImage = null; //Additional variable that can pass images to new BallisticSprite()!        
 
 		if (ballistic.type == 'normal') { //it's direct fire after all!
 		    launchPosition = this.coordinateConverter.fromHexToGame(shooterIcon.getLastMovement().position);
@@ -117,12 +117,14 @@ window.BallisticIconContainer = function () {
 				break;
 				case 'plasma':
 				        targetType = 'hexGreen';
-				        if(ballistic.firingMode == 2) text = '!';
-				        textColour = "#aaaa00";				        	
+				        if(ballistic.firingMode == 2) text = '!';//For plasma webs, if this is being used for other weapons will need refined.
+				        textColour = "#787800";				        	
 				break;
 				case 'SecondSight':
 				        targetType = 'hexPurple';
 				        text = "Second Sight";
+				        textColour = "#7f00ff";
+//				        iconImage = "./img/systemicons/SecondSightICON.png"; //Example image to pass
 				break;				        
 				default:
 				        targetType = 'hexYellow';
@@ -134,10 +136,13 @@ window.BallisticIconContainer = function () {
 				case 'ion': //Cascor Ion Field
 				        targetType = 'hexPurple';
 				        text = "Ion Field";
+				        textColour = "#bc3782";				        
 				break;
 				case 'Thoughtwave': //Cascor Ion Field
 				        targetType = 'hexPurple';
-				        text = "Thoughtwave";			        
+				        text = "Thoughtwave";
+				        textColour = "#bc3782";
+//				        iconImage = "./img/systemicons/ThoughtWaveICON.png";			        
 				break;				
 				default:
 				        targetType = 'hexRed';
@@ -156,7 +161,7 @@ window.BallisticIconContainer = function () {
 				case 'Persistent Effect Plasma':
 				        targetType = 'hexGreen';
 				        text = "!";
-				        textColour = "#aaaa00";				            		            
+				        textColour = "#787800";				            		            
 					break;
 				default:
 				        targetType = 'hexYellow';
@@ -188,10 +193,10 @@ window.BallisticIconContainer = function () {
         if (!getByTargetIdOrTargetPosition(targetPosition, ballistic.targetId, this.ballisticIcons)) {
             if(ballistic.damageclass == 'Thoughtwave') targetPosition = launchPosition;//Don't create target hex for Thougtwave
             if (targetIcon && targetPosition) {
-                targetSprite =  new BallisticSprite(targetPosition, targetType, text, textColour);//'hex');
+                targetSprite =  new BallisticSprite(targetPosition, targetType, text, textColour, iconImage);//'hex');
                 targetIcon.mesh.add(targetSprite.mesh);
             } else if (targetPosition) {
-                targetSprite =  new BallisticSprite(targetPosition, targetType, text, textColour);//'hex');
+                targetSprite =  new BallisticSprite(targetPosition, targetType, text, textColour, iconImage);//'hex');
                 scene.add(targetSprite.mesh);
             }
         }
