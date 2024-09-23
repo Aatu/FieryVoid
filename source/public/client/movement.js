@@ -229,7 +229,7 @@ shipManager.movement = {
         return true;
     },
 
-/*
+
     canEmergencyRoll: function canEmergencyRoll(ship) {
         if (gamedata.gamephase != 2) return false;
         if (ship.flight || ship.osat) return false;
@@ -248,14 +248,14 @@ shipManager.movement = {
         }
         return true;
     },
-*/
+
 
     doRoll: function doRoll(ship) {
         if (!shipManager.movement.canRoll(ship)) return false;        
         var lm = ship.movement[ship.movement.length - 1];
         var requiredThrust = Array(ship.rollcost, 0, 0, 0, 0);
-//        var value = 0;
-//       if (shipManager.movement.isPivoting(ship) != "no" && (!ship.gravitic)) value = 'emergencyRoll';//Mark when an emergency roll has been made.
+        var value = 0;
+       if (shipManager.movement.isPivoting(ship) != "no" && (!ship.gravitic)) value = 'emergencyRoll';//Mark when an emergency roll has been made.
         
         ship.movement[ship.movement.length] = {
             id: -1,
@@ -596,7 +596,7 @@ shipManager.movement = {
 
         return true;
     },
-
+/* //No longer needed
 	hasJustTurnedIntoPivot: function hasJustTurnedIntoPivot(ship){
 		if(shipManager.movement.isOutOfAlignment(ship)) return false; //if ship is out of alignment, then it hasn't just turned into pivot
 		if (shipManager.movement.isPivoting(ship) == "no" ) return false; //if it's not pivoting, then theres noting to talk about
@@ -607,7 +607,7 @@ shipManager.movement = {
 		//ship is pivoting, last maneuver was a turn and it brought ship in alignment - call it turn into pivot!
 		return true;
 	},
-
+*/
 	//New function to check if ship turned into apivot at any point in turn DK 09.24
     hasTurnedIntoPivot: function hasTurnedIntoPivot(ship) {
         for (var i in ship.movement) {
