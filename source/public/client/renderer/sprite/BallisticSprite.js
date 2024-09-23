@@ -11,7 +11,22 @@ window.BallisticSprite = function () {
     var TEXTURE_HEX_PURPLE = null;         
     var TEXTURE_HEX_GREEN_EXCLAMATION = null; // New texture
     
-/* //Old method that just accommodates text inside hex icons
+/* //Older methods that don't accommodate text/image or just accommodate text inside hex icons
+
+	function BallisticSprite(position, type, text = "", textColour = "#aaaa00") {
+	    HexagonSprite.call(this, -2);
+
+	    if (!TEXTURE_HEX_ORANGE) {
+	        createTextures(); // Initialize all textures once
+	    }
+	    
+	    this.uniforms.texture.value = chooseTexture(type);
+	    
+
+	    this.setPosition(position);
+	}
+
+
 	function BallisticSprite(position, type, text = "", textColour = "#ffffff") {
 	    HexagonSprite.call(this, -2);
 
@@ -91,49 +106,49 @@ window.BallisticSprite = function () {
         return tex;
     }
 
-function createTextureWithImage(type, text, textColour, imageSrc) {
-    // Create the initial hex grid texture with the colored background
-    var canvas = HexagonTexture.renderHexGrid(TEXTURE_SIZE, getStrokeColorByType(type), getFillColorByType(type), 10);
-    var ctx = canvas.getContext('2d');
+	function createTextureWithImage(type, text, textColour, imageSrc) {
+	    // Create the initial hex grid texture with the colored background
+	    var canvas = HexagonTexture.renderHexGrid(TEXTURE_SIZE, getStrokeColorByType(type), getFillColorByType(type), 10);
+	    var ctx = canvas.getContext('2d');
 
-    // Create a temporary texture to return immediately
-    var tex = new THREE.Texture(canvas);
-    tex.needsUpdate = true;
+	    // Create a temporary texture to return immediately
+	    var tex = new THREE.Texture(canvas);
+	    tex.needsUpdate = true;
 
-    // Load the image asynchronously
-    var image = new Image();
-    image.src = imageSrc;
+	    // Load the image asynchronously
+	    var image = new Image();
+	    image.src = imageSrc;
 
-    image.onload = function () {
-        // Redraw the hex grid background (without clearing the canvas)
-        HexagonTexture.renderHexGrid(TEXTURE_SIZE, getStrokeColorByType(type), getFillColorByType(type), 10, ctx);
+	    image.onload = function () {
+	        // Redraw the hex grid background (without clearing the canvas)
+	        HexagonTexture.renderHexGrid(TEXTURE_SIZE, getStrokeColorByType(type), getFillColorByType(type), 10, ctx);
 
-        // Scale and position the image in the center of the hex
-        var imageSize = TEXTURE_SIZE * 0.28; // Scale image to 50% of the hex size
-        var xPos = (TEXTURE_SIZE - imageSize) / 2;
-        var yPos = (TEXTURE_SIZE - imageSize) / 2 + 20;
+	        // Scale and position the image in the center of the hex
+	        var imageSize = TEXTURE_SIZE * 0.28; // Scale image to 50% of the hex size
+	        var xPos = (TEXTURE_SIZE - imageSize) / 2;
+	        var yPos = (TEXTURE_SIZE - imageSize) / 2 + 20;
 
-        ctx.drawImage(image, xPos, yPos, imageSize, imageSize);
+	        ctx.drawImage(image, xPos, yPos, imageSize, imageSize);
 
-        // Optionally draw text after the image
-        if (text) {
-            var fontSize = 25;
-			var initTextColour = textColour;
-			var lightenedColour = lightenColor(initTextColour, 40); // Lighten by 40%            
-            ctx.font = `bold ${fontSize}px Arial`;
-            ctx.fillStyle = lightenedColour || "#ffffff";
-            ctx.textAlign = "center";
-            ctx.textBaseline = "middle";
-            ctx.fillText(text, TEXTURE_SIZE / 2, TEXTURE_SIZE / 1.55);
-        }
+	        // Optionally draw text after the image
+	        if (text) {
+	            var fontSize = 25;
+				var initTextColour = textColour;
+				var lightenedColour = lightenColor(initTextColour, 40); // Lighten by 40%            
+	            ctx.font = `bold ${fontSize}px Arial`;
+	            ctx.fillStyle = lightenedColour || "#ffffff";
+	            ctx.textAlign = "center";
+	            ctx.textBaseline = "middle";
+	            ctx.fillText(text, TEXTURE_SIZE / 2, TEXTURE_SIZE / 1.55);
+	        }
 
-        // Update the texture with the new canvas content
-        tex.needsUpdate = true;
-    };
+	        // Update the texture with the new canvas content
+	        tex.needsUpdate = true;
+	    };
 
-    // Return the placeholder texture, which will update once the image is loaded
-    return tex;
-}
+	    // Return the placeholder texture, which will update once the image is loaded
+	    return tex;
+	}
 
     //New function to create the texture with text inside - DK 09.24
     function createTextureWithText(type, text, textColour) {
