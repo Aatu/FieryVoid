@@ -171,6 +171,15 @@ var IonFieldGenerator = function(json, ship)
 IonFieldGenerator.prototype = Object.create( Weapon.prototype );
 IonFieldGenerator.prototype.constructor = IonFieldGenerator;
 
+IonFieldGenerator.prototype.initializationUpdate = function() {
+	var ship = this.ship;	
+    if (this.fireOrders.length > 0) {					
+		var aFireOrder = this.fireOrders[0]; 
+		if(aFireOrder)	aFireOrder.damageclass = 'IonField';
+	}			        
+	return this;
+};
+
 
 var ParticleConcentrator = function(json, ship)
 {

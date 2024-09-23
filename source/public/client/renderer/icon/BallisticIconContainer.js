@@ -120,7 +120,7 @@ window.BallisticIconContainer = function () {
 				        if(ballistic.firingMode == 2) text = '!';//For plasma webs, if this is being used for other weapons will need refined.
 				        textColour = "#787800";				        	
 				break;
-				case 'SecondSight':
+				case 'SecondSight': //Mindrider Second Sight
 				        targetType = 'hexPurple';
 				        text = "Second Sight";
 				        textColour = "#7f00ff";
@@ -133,12 +133,12 @@ window.BallisticIconContainer = function () {
 	        }
 		}else if (ballistic.targetid == -1){ //Maybe its nice to have other colours for certain types of hex targetted weapons?
 			switch (ballistic.damageclass) {
-				case 'ion': //Cascor Ion Field
+				case 'IonField': //Cascor Ion Field
 				        targetType = 'hexPurple';
 				        text = "Ion Field";
 				        textColour = "#bc3782";				        
 				break;
-				case 'Thoughtwave': //Cascor Ion Field
+				case 'Thoughtwave': //Mindrider Thoughwave
 				        targetType = 'hexPurple';
 				        text = "Thoughtwave";
 				        textColour = "#bc3782";
