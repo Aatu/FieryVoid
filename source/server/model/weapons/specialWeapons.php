@@ -6824,7 +6824,7 @@ class SecondSight extends Weapon{
 	
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);
-		$this->data["Special"] = 'Fire this weapon by targeting ANY hex during the Firing Phase.';
+		$this->data["Special"] = 'Fire this weapon by targeting ANY hex during the Firing phase.';
 		$this->data["Special"] .= '<br>Automatically reduces Initiative of ALL enemy units next turn.';		
 		$this->data["Special"] .= '<br>Enemy ships suffer a D6+2 (e.g. -15 to -40) Initiative penalty next turn.';	
 		$this->data["Special"] .= '<br>Ships equipped with Advanced Armor will only suffer -10 Initiatve penalty.';
@@ -7041,11 +7041,11 @@ class ThoughtWave extends Plasma{
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);
 		$this->data["Damage"] = 'Special';	
-		$this->data["Special"] = 'To fire this weapon, target ANY hex during the Initial Orders Phase.';
+		$this->data["Special"] = 'To fire this weapon, target ANY hex during the Initial Orders phase.';
 		$this->data["Special"] .= '<br><br>The Thought Wave will always originate from the starting location of the firing ship (as per usual with ballistic weapons).';
 		$this->data["Special"] .= '<br>The Thought Wave will attempt to hit ALL enemy ships in the game in Firing Phase, using the following formula:';
 		$this->data["Special"] .= '<br> - (15 + OEW + d20) - (Range Penalty + DEW - Target Initiative/5)';
-		$this->data["Special"] .= '<br>If this formula returns a result above 0, the Thought Wave automatically hits, and deals (3D6/3) * (Profile/5) flash damage.';
+		$this->data["Special"] .= '<br>If this formula returns a result above 0, the Thought Wave automatically hits, and deals (3D6/3) * (Profile/5) Flash damage.';
 		$this->data["Special"] .= '<br>Advanced armor changes this formula to (3d6/5) * (Profile/5), and Shields etc affect profile as normal for this calculation.';			
 		$this->data["Special"] .= '<br>Will only strike 1 fighter in a flight, but Flash damage may still affect other fighters.';
 		$this->data["Special"] .= '<br>Note - Only successful attacks will appear in the Combat Log.';								
