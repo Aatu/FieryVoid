@@ -1704,13 +1704,13 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 			}else{
 				$this->data["Special"] .= '<br>';
 			}
-			$this->data["Special"] .= 'DEFENSIVE MODE - Target a hex with enemy ships whose fire you wish to affect during the Firing Phase.';
-			$this->data["Special"] .= '<br>The Web automatically hits, applying -10 Intercept against enemy fire from hex, plus 2 Damage Reduction against Antimatter, Laser and Particle attacks.';
-			$this->data["Special"] .= '<br>To reduce Hit Chance of Ballistic weapons, target the hex from where the shot was launched.';			
-			$this->data["Special"] .= '<br>ANTI-FIGHTER MODE - Creates a damaging cloud within 3 hexes of ship, which deals D6+2 Plasma damage to all fighters in hex when created.';
-			$this->data["Special"] .= '<br>This cloud remains during the next Movement Phase and will damage any fighters that move through it.';			
-			$this->data["Special"] .= '<br>Anti-Fighter mode requires 1 additional power at moment of firing, either from boosting in Initial Orders or from power stored in Plasma Batteries.';
-			$this->data["Special"] .= '<br>NOTE - Plasma Webs used in the same mode in the same hex are not cumulative, effects are only apply once.';		 
+			$this->data["Special"] .= 'DEFENSIVE MODE - Target a hex with enemy ships during the Firing Phase.';
+			$this->data["Special"] .= '<br>Automatically hits, applying -10 Intercept against enemy fire from hex, plus -2 damage against Antimatter, Laser and Particle attacks.';
+			$this->data["Special"] .= '<br>To affect Ballistic weapons, target hex from where the shot was launched.';			
+			$this->data["Special"] .= '<br>ANTI-FIGHTER MODE - Creates damaging cloud, which deals D6+2 Plasma damage to all fighters in hex when created.';
+			$this->data["Special"] .= '<br>Cloud remains in hex until end of next Movement Phase, damaging any fighters that move through it.';			
+			$this->data["Special"] .= '<br>Anti-Fighter mode requires 1 extra power when fired, either from boosting in Initial Orders or from Plasma Batteries.';
+			$this->data["Special"] .= '<br>NOTE - Plasma Webs used in same mode in the same hex are not cumulative, effects are only apply once.';		 
 	 }
 
 
