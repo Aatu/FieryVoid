@@ -130,15 +130,14 @@ CnC.prototype = Object.create(ShipSystem.prototype);
 CnC.prototype.constructor = CnC;
 
 CnC.prototype.initializationUpdate = function() {
-var ship = this.ship;
-	if(ship.factionAge > 2){
-		this.data["Marine Units"] = 'n/a';	
-	}else{	
-		this.data["Marine Units"] = this.marines;
-	}
-return this;
+    var ship = this.ship;
+    if(ship.factionAge > 2){
+        this.data["Marine Units"] = 'n/a';	
+    } else {	
+        this.data["Marine Units"] = this.marines || 0; // Ensure marines is defined
+    }
+    return this;
 };
-
 
 var ProtectedCnC = function ProtectedCnC(json, ship) {
     CnC.call(this, json, ship);
