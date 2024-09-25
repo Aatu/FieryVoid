@@ -19,7 +19,7 @@ window.UI = {
 		contractionElement: null,
 		morecontractionElement: null,
 		lesscontractionElement: null,				
-
+		emergencyrollElement: null,
 
 
         initMoveUI: function initMoveUI() {
@@ -47,6 +47,8 @@ window.UI = {
             UI.shipMovement.rotaterightElement = $("#rotateright", ui);
 
             UI.shipMovement.rollElement = $("#roll", ui);
+            UI.shipMovement.emergencyrollElement = $("#emergencyroll", ui);            
+            
             UI.shipMovement.jinkElement = $("#jink", ui);
             UI.shipMovement.jinkvalueElement = UI.shipMovement.jinkElement.find(".jinkvalue");
 			
@@ -79,7 +81,8 @@ window.UI = {
             UI.shipMovement.rotaterightElement.on("click touchstart", UI.shipMovement.rotaterightCallback);
 
             UI.shipMovement.rollElement.on("click touchstart", UI.shipMovement.rollCallback);
-
+            UI.shipMovement.emergencyrollElement.on("click touchstart", UI.shipMovement.emergencyrollCallback);
+            
             UI.shipMovement.accElement.on("click touchstart", UI.shipMovement.accelCallback);
             UI.shipMovement.deaccElement.on("click touchstart", UI.shipMovement.deaccCallback);
 
@@ -157,6 +160,10 @@ window.UI = {
 
         rollCallback: function rollCallback(e) {
             UI.shipMovement.callbackHandler.rollCallback(e);
+        },
+
+        emergencyrollCallback: function emergencyrollCallback(e) {
+            UI.shipMovement.callbackHandler.emergencyrollCallback(e);
         },
 
         pivotrightCallback: function pivotrightCallback(e) {
@@ -372,15 +379,31 @@ window.UI = {
 
             dis = 30;
             angle = mathlib.addToDirection(shipHeading, 180);
+			var checkHeading = shipManager.getShipDoMAngle(ship);
+			            
             var roll = UI.shipMovement.rollElement;
+            var emergencyroll = UI.shipMovement.emergencyrollElement;            
             if (shipManager.movement.canRoll(ship)) {
                 var icon = "img/rotate.png";
                 if (shipManager.movement.isRolling(ship)) icon = "img/rotate_active.png";
 
                 dis += 30;
                 UI.shipMovement.drawUIElement(roll, pos.x, pos.y, s, dis * 1.4, angle, icon, "rollcanvas", shipHeading);
-            } else {
+                emergencyroll.hide()
+            } else if (shipManager.movement.canEmergencyRoll(ship)){
+                var icon = "img/emergencyRoll.png";
+				// Check if the ship is facing left (adjust condition as needed)
+				var rollIconAngle = mathlib.addToDirection(shipHeading, 180);;
+				if (checkHeading >= 90 && checkHeading <= 270) {	
+				    // Swap angles for the morecontraction and lesscontraction buttons
+				    icon = "img/emergencyRollFlipped.png";
+				} 
+                dis += 30;
+                UI.shipMovement.drawUIElement(emergencyroll, pos.x, pos.y, s, dis * 1.4, angle, icon, "emergencyrollcanvas", shipHeading);
+                roll.hide();                            
+			}else {
                 roll.hide();
+                emergencyroll.hide()                
             }
 
             var morejink = UI.shipMovement.morejinkElement;
@@ -439,7 +462,6 @@ window.UI = {
 			var lessContractionAngle = mathlib.addToDirection(shipHeading, 142);
 
 			// Check if the ship is facing left (adjust condition as needed)
-			var checkHeading = shipManager.getShipDoMAngle(ship);
 			if (checkHeading >= 90 && checkHeading <= 270) {	
 			    // Swap angles for the morecontraction and lesscontraction buttons
 			    moreContractionAngle = mathlib.addToDirection(shipHeading, 142);

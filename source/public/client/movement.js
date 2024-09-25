@@ -229,7 +229,7 @@ shipManager.movement = {
         return true;
     },
 
-/*
+
     canEmergencyRoll: function canEmergencyRoll(ship) {
         if (gamedata.gamephase != 2) return false;
         if (ship.flight || ship.osat) return false;
@@ -248,14 +248,12 @@ shipManager.movement = {
         }
         return true;
     },
-*/
+
 
     doRoll: function doRoll(ship) {
         if (!shipManager.movement.canRoll(ship)) return false;        
         var lm = ship.movement[ship.movement.length - 1];
         var requiredThrust = Array(ship.rollcost, 0, 0, 0, 0);
- //       var value = 0;
-//       if (shipManager.movement.isPivoting(ship) != "no" && (!ship.gravitic)) value = 'emergencyRoll';//Mark when an emergency roll has been made.
         
         ship.movement[ship.movement.length] = {
             id: -1,
@@ -276,13 +274,13 @@ shipManager.movement = {
             at_initiative: shipManager.getIniativeOrder(ship),
             turn: gamedata.turn,
             forced: false,
-            value: value
+            value: 0
         };
         shipWindowManager.assignThrust(ship);
         ship.rolling = true;
     },
 
-/*
+
     doEmergencyRoll: function doEmergencyRoll(ship) {
         if (!shipManager.movement.canEmergencyRoll(ship)) return false;        
         var lm = ship.movement[ship.movement.length - 1];
@@ -311,7 +309,7 @@ shipManager.movement = {
         shipWindowManager.assignThrust(ship);
         ship.rolling = true;
     },
-*/    
+   
 
     isRolling: function isRolling(ship) {
         var rolling = false;
@@ -908,15 +906,7 @@ shipManager.movement = {
 				contraction += move.value;//Will +1 depending on Contraction.
 	        }
 	    }
-/*		
-		for (var i in ship.systems) {
-			var system = ship.systems[i];
-			if (system.hasOwnProperty('contraction')) {
-			    contraction = system.contraction;
-			    break;
-			}					
-		}	
- */      	
+	    
        	return contraction;
     },
 
@@ -971,7 +961,6 @@ shipManager.movement = {
 		        value: value
 		    };
 						
-
 		    shipWindowManager.assignThrust(ship);		    	        
 		}
 	
@@ -990,41 +979,6 @@ shipManager.movement = {
 			}	
 	},
 
-/*//No longer needed
-	cancelPivotAfterTurn: function cancelPivotAfterTurn(ship){
-        var name;
-        var movement = ship.movement[ship.movement.length - 1];        
-		var isPivoting = shipManager.movement.isPivoting(ship);
-		//Create a pivot order that is the reverse of current pivot to cancel it.
-		if (isPivoting == 'left'){
-			name = "pivotright";
-		}else if (isPivoting == 'right'){
-			name = "pivotleft";
-		} 
-		//Add movement order!		
-		ship.movement[ship.movement.length] = {
-		    id: -1,
-		    type: name,
-		    position: movement.position, 
-		    xOffset: movement.xOffset,
-		    yOffset: movement.yOffset,
-		    facing: movement.facing,
-		    heading: movement.heading,
-		    speed: movement.speed,
-		    animating: false,
-		    animated: false,
-		    animationtics: 0,
-		    requiredThrust: Array(0, 0, 0, 0, 0),
-		    assignedThrust: Array(),
-		    commit: true,
-		    preturn: false,
-		    at_initiative: shipManager.getIniativeOrder(ship),
-		    turn: gamedata.turn,
-		    forced: false,
-		    value: "freecancelpivot"
-		};
-	},
-*/
 	
     canTurnIntoPivot: function canTurnIntoPivot(ship, right) {
         if (gamedata.gamephase != 2) return false;
@@ -1032,7 +986,8 @@ shipManager.movement = {
 
         /*cannot turn into pivot if unit is aligned...*/
         if(!shipManager.movement.isOutOfAlignment(ship)) return false;
-        
+        if (shipManager.movement.isRolling(ship) && !ship.gravitic) return false; //Cannot turn at all if rolling, unless gravitic
+	        
 		var turndelay = shipManager.movement.calculateCurrentTurndelay(ship);
         if (turndelay > 0) return false; //cannot turn into pivot if turn delay is not satisfied!
 		

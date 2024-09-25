@@ -632,7 +632,10 @@
         <div id="roll">
             <canvas id="rollcanvas" width="40" height="40"></canvas>
         </div>
-		
+
+        <div id="emergencyroll">
+            <canvas id="emergencyrollcanvas" width="40" height="40"></canvas>
+        </div>		
 		
         <div id="halfphase">
             <canvas id="halfphasecanvas" width="50" height="50"></canvas>

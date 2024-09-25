@@ -65,6 +65,13 @@ window.ShipMovementCallbacks = function () {
         this.updateCallback({ ship: this.ship });
     };
 
+    ShipMovementCallbacks.prototype.emergencyrollCallback = function (e) {
+        e.stopPropagation();
+
+        shipManager.movement.doEmergencyRoll(this.ship);
+        this.updateCallback({ ship: this.ship });
+    };
+    
     ShipMovementCallbacks.prototype.pivotrightCallback = function (e) {
         e.stopPropagation();
         this.pivotCallback(e, true);

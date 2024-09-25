@@ -871,7 +871,7 @@ class MindriderEngine extends Engine{
 						$this->onIndividualNotesLoaded($gameData);		
 
 						$changeValue = $this->changeThisTurn;//Extract change value for shield this turn.													
-//echo "Value of changeValueAFTER: " . $changeValue. "\n";				
+				
 						if($changeValue != 0){												
 							$notekey = 'contract';
 							$noteHuman = 'Contraction value has been changed';
@@ -1342,7 +1342,7 @@ class CnC extends ShipSystem implements SpecialAbility {
 	
 	//C&C  is VERY important, although not as much as the reactor!
 	public $repairPriority = 9;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
-    
+
     
     protected $possibleCriticals = array(
     	//1=>"SensorsDisrupted", //not implemented! so I take it out 
@@ -1378,6 +1378,26 @@ class CnC extends ShipSystem implements SpecialAbility {
 	public function criticalPhaseEffects($ship, $gamedata) {
 			
 		parent::criticalPhaseEffects($ship, $gamedata);//Call parent to apply effects like Limpet Bore.			
+
+		foreach($ship->movement as $shipMove){ //Look through Movement Orders to see if an Emergency Roll occurred this turn.			
+			if($shipMove->turn == $gamedata->turn){	//This turn.					
+				if($shipMove->value == "emergencyRoll"){ //Has Emergency rolled!								
+							$testCrit = array(); 
+							$testCrit = $this->testCritical($ship, $gamedata, $testCrit);//Damage caused, need to force critical test outside normal routine
+						$effectIni = 6;
+						if(!$this->isDestroyed()){//Check if destroyed, but really shouldn't be rolling if it is!										
+							for($i=1; $i<=$effectIni;$i++){
+								$crit = new tmpinidown(-1, $ship->id, $this->id, 'tmpinidown', $gamedata->turn); 
+								$crit->updated = true;
+								$this->criticals[] =  $crit;
+							}		        		
+						} 
+				break; //No need to look further!						   
+				}									
+
+			}
+		}
+				
 		
 		$hasCommsFlux = $ship->hasSpecialAbility("CommsFlux");
 
