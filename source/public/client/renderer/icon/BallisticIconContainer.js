@@ -153,8 +153,9 @@ window.BallisticIconContainer = function () {
 		
 		if (ballistic.damageclass == 'support') { //30 June 2024 - DK - Added for Ally targeting.
 			targetType = 'hexGreen';
-
-		} 		
+			iconImage = "./img/allySupport.png";				
+		} 
+				
 		//We want Persistent Effects to have a separate colour from normal ballistics! DK 09.24
 		if (ballistic.notes == 'Persistent Effect') { //30 June 2024 - DK - Added for Persistent Effects e.g. Plasma Web.
 			switch (ballistic.damageclass) {
