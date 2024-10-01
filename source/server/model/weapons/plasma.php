@@ -434,7 +434,7 @@ class RogolonLtPlasmaGun extends LinkedWeapon{
         public $animationExplosionScale = 0.25;
 */
 	
-        public $intercept = 2; //actually this weapon probably SHOULD have interception after all!
+//        public $intercept = 2; //actually this weapon probably SHOULD have interception after all! Disagree! :) DK
         public $loadingtime = 1;
         public $shots = 2;
         public $defaultShots = 2;
