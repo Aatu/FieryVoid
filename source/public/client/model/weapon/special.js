@@ -449,22 +449,21 @@ PsychicField.prototype.hasMaxBoost = function(){
 PsychicField.prototype.getMaxBoost = function(){
     return this.maxBoostLevel;
 }
-/*
-//needed for Spark Curtain upgrade
-PsychicField.prototype.getDefensiveHitChangeMod = function (target, shooter, weapon) {
-    if (!weapon.ballistic) return 0;//only ballistic weapons are affected
-	var out = shipManager.systems.getOutput(target, this);
-	if (shipManager.power.getBoost(this) >= out){ //if boost is equal to output - this means base output is 0 = no Spark Curtain mod!
-		out = 0;
-	}
-	return out;
-}; 
-*/
+
 var ProximityLaserLauncher = function ProximityLaserLauncher(json, ship) {
     Weapon.call(this, json, ship);
 };
 ProximityLaserLauncher.prototype = Object.create(Weapon.prototype);
 ProximityLaserLauncher.prototype.constructor = ProximityLaserLauncher;
+
+ProximityLaserLauncher.prototype.initializationUpdate = function() {
+	var ship = this.ship;	
+    if (this.fireOrders.length > 0) {					
+		var aFireOrder = this.fireOrders[0]; 
+		if(aFireOrder)	aFireOrder.damageclass = 'ProximityLaser';
+	}			        
+	return this;
+};
 
 var ProximityLaser = function ProximityLaser(json, ship) {
     Weapon.call(this, json, ship);

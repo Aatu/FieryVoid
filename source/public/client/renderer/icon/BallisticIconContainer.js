@@ -133,11 +133,21 @@ window.BallisticIconContainer = function () {
 	        }
 		}else if (ballistic.targetid == -1){ //Maybe its nice to have other colours for certain types of hex targetted weapons?
 			switch (ballistic.damageclass) {
+				case 'BallisticMine': //KL Proximity Laser
+				        targetType = 'hexYellow';
+				        text = "Ballistic Mine";
+				        textColour = "#ffff00";		        
+				break;	
 				case 'IonField': //Cascor Ion Field
 				        targetType = 'hexPurple';
 				        text = "Ion Field";
 				        textColour = "#bc3782";				        
 				break;
+				case 'ProximityLaser': //KL Proximity Laser
+				        targetType = 'hexRed';
+				        text = "Proximity Laser";
+				        textColour = "#e6140a";		        
+				break;	
 				case 'Thoughtwave': //Mindrider Thoughwave
 				        targetType = 'hexPurple';
 				        text = "Thoughtwave";
