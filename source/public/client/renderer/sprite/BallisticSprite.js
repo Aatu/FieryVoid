@@ -126,7 +126,7 @@ window.BallisticSprite = function () {
 	        // Scale and position the image in the center of the hex
 	        var imageSize = TEXTURE_SIZE * 0.28; // Scale image to 50% of the hex size
 	        var xPos = (TEXTURE_SIZE - imageSize) / 2;
-	        var yPos = (TEXTURE_SIZE - imageSize) / 2 + 20;
+	        var yPos = (TEXTURE_SIZE - imageSize) / 2;
 
 	        ctx.drawImage(image, xPos, yPos, imageSize, imageSize);
 
