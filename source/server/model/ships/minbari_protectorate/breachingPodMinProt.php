@@ -20,7 +20,8 @@ class breachingPodMinProt  extends FighterFlight{
         $this->jinkinglimit = 0;
 		$this->pivotcost = 2; //shuttles have pivot cost higher
         $this->turncost = 0.33;
-		
+
+        $this->maxFlightSize = 3;//this is an unusual type of 'fighter', limit flight size. 		
 		$this->hangarRequired = 'shuttles'; //for fleet check
         $this->iniativebonus = 10*5;
         
@@ -44,7 +45,7 @@ class breachingPodMinProt  extends FighterFlight{
             $fighter->imagePath = "img/ships/MinbariFlyer.png";
             $fighter->iconPath = "img/ships/MinbariFlyer_Large.png";
 			
-			$fighter->addFrontSystem(new Marines(330, 30, 0, false)); //startarc, endarc, damagebonus, elite.
+			$fighter->addFrontSystem(new Marines(0, 360, 0, false)); //startarc, endarc, damagebonus, elite.
 	
 			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
 			

@@ -8339,8 +8339,18 @@ class BattleLaserFtr extends BattleLaser {
        public function fire($gamedata, $fireOrder){ //note ammo usage
         	//debug::log("fire function");
             parent::fire($gamedata, $fireOrder);
-            $this->ammunition--;
-            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);
+
+			$ship = $gamedata->getShipById($fireOrder->shooterid);
+            $this->ammunition--;//Deduct round just fired!			
+			//Now need to remove Enhancement bonuses from saved ammo count, as these will be re-added in onConstructed()			
+			foreach ($ship->enhancementOptions as $enhancement) {
+			    $enhID = $enhancement[0];
+				$enhCount = $enhancement[2];		        
+				if($enhCount > 0) {		            
+			        if ($enhID == 'EXT_AMMO') $this->ammunition -= $enhCount;     	
+				}
+			}		
+			Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);
         }
 		
         public function getDamage($fireOrder){        return Dice::d(6)+$this->damagebonus;   }
