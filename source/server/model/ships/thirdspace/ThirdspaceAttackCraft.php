@@ -40,21 +40,21 @@ class ThirdspaceAttackCraft extends LCV{ //Actually an LCV.
 	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 4)); //unhittable and with unlimited thrust allowance
 
 	$this->addPrimarySystem(new ThirdspaceCnC(99, 1, 0, 0)); //C&C should be unhittable anyway	    
-    $this->addPrimarySystem(new AdvancedSingularityDrive(6, 16, 0, 8+4+4));
+    $this->addPrimarySystem(new AdvancedSingularityDrive(6, 16, 0, 4+4+4));
 	$sensors = new Scanner(5, 12, 4, 9);
 		$sensors->markThirdspace();
 		$this->addPrimarySystem($sensors);
 	$this->addPrimarySystem(new JumpEngine(5, 8, 4, 8));//Added a small jump drive, how they travel is unknown but if White Star can house a jump drive it's not unfeasible Thirdspace aliens would have a FTL drive on their smaller craft.
-	$this->addPrimarySystem(new Engine(5, 12, 0, 10, 2));
+	$this->addPrimarySystem(new Engine(5, 12, 0, 12, 2));
 	$this->addPrimarySystem(new ThirdspaceShieldGenerator(5, 8, 0, 10)); //$armor, $maxhealth, $power used, output	
     $this->addPrimarySystem(new ThirdspaceSelfRepair(5, 8, 4)); //armor, structure, output 	
 
-	$this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 210, 30));
-	$this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 210, 30));
-	$this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 330, 150));
-	$this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 330, 150));
+	$this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 210, 60));
+	$this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 210, 60));
+	$this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 300, 150));
+	$this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 300, 150));
 			
-	$this->addPrimarySystem(new ThirdspaceShield(2, 120, 120, 0, 360, 'C'));
+	$this->addPrimarySystem(new ThirdspaceShield(2, 60, 60, 0, 360, 'C'));
 				
 	$this->addPrimarySystem(new Structure( 5, 36));
 	    

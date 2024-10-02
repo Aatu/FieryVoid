@@ -18,7 +18,7 @@ class breachingpoddilgar extends FighterFlight{
         $this->pivotcost = 2; //shuttles have pivot cost higher
         $this->turncost = 0.33;
         
-        $this->maxFlightSize = 6;//this is an unusual type of 'fighter', limit flight size.      
+        $this->maxFlightSize = 3;//this is an unusual type of 'fighter', limit flight size.      
 		$this->hangarRequired = 'assault shuttles'; //for fleet check
 		$this->unitSize = 0.5; //Dilgar get half the number of breaching pods as others.
 		
@@ -44,7 +44,7 @@ class breachingpoddilgar extends FighterFlight{
 			$fighter->imagePath = "img/ships/Jortavo.png";
 			$fighter->iconPath = "img/ships/Jortavo_large.png";
 			
-			$fighter->addFrontSystem(new Marines(330, 30, 0, false)); //startarc, endarc, damagebonus, elite.
+			$fighter->addFrontSystem(new Marines(0, 360, 0, false)); //startarc, endarc, damagebonus, elite.
 			
 			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
 			

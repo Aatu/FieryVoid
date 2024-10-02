@@ -1,4 +1,4 @@
-version: '2'
+version: "2"
 services:
   mariadb:
     build:
@@ -17,6 +17,13 @@ services:
       - composercache:/root/.composer
     networks:
       - default
+    develop:
+      watch:
+        - action: sync
+          path: ./source
+          target: /usr/src/fieryvoid/source
+          ignore:
+            - node_modules/
 
   nginx:
     build:
@@ -36,4 +43,3 @@ volumes:
     external: false
   composercache:
     external: false
-

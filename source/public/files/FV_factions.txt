@@ -10,83 +10,15 @@ GENERAL NOTES
 	Before using custom units it's good practice to make sure that Your opponent allows that (and if You create a game with such units allowed - say so explicitly in game description!)
 	
 	Semi-custom designs - some units are marked as "semi-custom". This means they're not official designs released by AoG, but for some reason are not considered custom units and can be used in "official only" matches. Common reasons for such units' classification include:
- - official units that could not be faithfully ported into FV for technical reasons, but were nonetheless considered important and are present with some changes (eg. Brakiri Tashkat and Shakara)
- - units that notably expand fleet build options of faction while keeping close to official designs (eg. Ipsha Jumpsphere allowing tournament-legal fleets not centered on an ElInt, and a few Belt Alliance designs allowing to bring LCVs to the table while conforming to these rules)
- - units that were released by AoG in expansion released after the company ceased to produce B5Wars related materials, but developed earlier (eg. sourcebook Variants-6)
+ 	- official units that could not be faithfully ported into FV for technical reasons, but were nonetheless considered important and are present with some changes (eg. Brakiri Tashkat and Shakara)
+ 	- units that notably expand fleet build options of faction while keeping close to official designs (eg. Ipsha Jumpsphere allowing tournament-legal fleets not centered on an ElInt, and a few Belt Alliance designs allowing to bring LCVs to the table while conforming to these rules)
+ 	- units that were released by AoG in expansion released after the company ceased to produce B5Wars related materials, but developed earlier (eg. sourcebook Variants-6)
 	
 	Unit enhancements - Fiery Void allows players to add enhancements to their ships (full list is available in separate file). Keep in mind that unit enhancements are originally optional rule, and enhancements may not be evaluated as well as base hulls (although they're generally pricy compared to their effect!). 
 	Before using enhancements for more than rounding out remaining points it's good practice to make sure that Your opponent agrees with that (and if You create a game with enhancements allowed - say so explicitly in game description!).
 	Note that some options listed as "Enhancements" are such only technically, as they're regularly available unit options (eg. variable missile loadouts or Navigators). This is noted in enhancements list as well.
 	
 	Fleet checker - tool that performs automatic check of fleet composition. Game does not enforce its use, but these restrictions are aimed at creation of balanced and interesting fleets so it's encouraged :) . It's SUBJECTIVELY extrapolated from official tournament rules.
-
-
-For starters - general description of missiles and boarding actions, as complicated systems that are common for multiple factions:
-
-MISSILES
---------
-
-General notes: ships usually come preloaded with missiles (usually Basic), and any missiles You buy is on top of that. Also, while amount of any given missile You can buy is limited by magazine size, total amount of missiles is not. 
-This means Your missile magazine may show more missiles available than it can actually hold. However, You cannot actually LAUNCH more missiles than magazine can hold - total number of launches is tracked. So extra missiles will provide You with extra variety (at a price ;) ), but not actual extra missiles.
-This is particularly important for fighters (as ships' cavernous magazines are unlikely to run out during a battle). You are encouraged to observetotal amount of missiles a fighter can have, but if You do not (hether by omission or intentionally) - You will get extra missile variety, but no extra missiles.
-Note that fighters usually start with empty magazine (although some missile entry is present, for technical reasons).
-Any missile available in magazine can be fired by any launcher (that is capable of firing it), missiles are not directly tied to particular mounts. This is different for weapons that do store ammo directly on mount - but such weapons usually can only hold one kind of ammo.
-Missiles (and Navigators, for fighters) are bought as enhancements despite being standard options (for technical reasons).
-
-Not all tabletop missiles made it to Fiery Void - some proved just too difficult to implement!
-
-Shipborne missiles' built-in guidance package is often combined into weapons' Fire control, rather than being kept separate.
-
-Enhancement names for ammo usually contain year available (for primary and other races, if this differs - with primary usually bein Kor-Lyan ;) ). Game does not enforce anything in regard to this information it's up to player to refrain from using anachronic weapons (or not).
-
-SHIPBORNE MISSILES (with normal Range, Damage and Fire Control displayed)
- - class B - Basic Missile - (Range 20 - Damage 20 - Fire Control: +3/+3/+3) --- The name says it all, default loadout present on most ships. All other shipborne missiles have the same data except attributes specifically indicated. Missiles do NOT use firing ships' OEW.
- - class A - Antifighter Missile - (Range 15 - Damage 15 - Fire Control: +6/+3/+3) --- It's classified as light missile - which is meaningless for regular shipborne launchers, but means it's usable by light launchers (...which is the whole point).
- - class C - Chaff missile - (Range 20 - Damage 0 - Fire Control: +3/+3/+3) --- When a chaff missile hits, any non-ballistic fire from that unit against the missile launching ship on current turn attracts a -15 intercept rating.
- - class D - Light Missile - (Range 15 - Damage 12 - Fire Control: +3/+3/+3) --- Sub-standard missile, essentially used only by factions without access to Basic missile (e.g. Alacans, early Narn).
- - class F - Flash Missile - (Range 20 - Damage 20 - Fire Control: +3/+3/+3) --- Deals damage in FLASH mode.
- - class H - Heavy Missile - (Range 0 - Damage 0 - Fire Control: +0/+3/+3) --- Heavier, but shorter-ranged version of Basic missile.
- - class I - Interceptor Missile - (Range 10 - Damage 30 - Fire Control: -/-/-) --- Can only fire defensively for -30 intercept rating against other ballistic weapons.  Launchers with over 1 turn cooldowns need to be set to intercept manually in Firing Phase to use I-missile. 
- - class L - Long Range Missile - (Range 30 - Damage 15 - Fire Control: +3/+3/+3) --- Longer-ranged version of Basic missile, but deals less damage.
- - class K - Starburst Missile - (Range 15 - Damage 10*[D3+3] - Fire Control: +3/+3/+3) --- Deals damage in PULSE mode, with each missile that hits generating D3+3 hits.
- - class KK - Kinetic Missile - (Range 60 [but penalty after 15 hexes] - Damage 18 - Fire Control: +3/+3/+3) --- Orieni only.  Deals 18 MATTER damage, and attracts a -5 per hex range penalty AFTER 15 hexes up to it's maximum range.
- - class J - Jammer Missile - (Range 15 - Damage 0 - Fire Control: -/-/-) --- Kor-Lyan only. Automatically hits target hex and emits a burst of sensor static.  All ships within 5 hexes (including enemies) receive two points of Blanket DEW.  Note - This cannot be combined with Blanket DEW protection from other sources, and only one jamming effect can apply to a unit per turn.
- - class M - Multiwarhead Missile - (Range 20 - Damage 10*6 - Fire Control: +3/-/-) --- Can only target fighters.  Splits into 6 submunitions which will each engage a separate fighter in flight.  Each submunition rolls to hit and scores damage separately, if there are fewer than 6 fighters on impact excess submunitions are lost) 
- - class P - Piercing Missile - (Range 20 - Damage 30 - Fire Control: -/+3/+3) --- Does damage in PIERCING mode, cannot be fired at fighters.
- - class S - Stealth Missile - (Range 20 - Damage 20- Fire Control: +3/+3/+3) --- Kor-Lyan only.  Target of this missile is not revealed to the enemy player.
- - class X - HARM Missile - (Range 20 - Damage 0 - Fire Control: -/+3/+3) ---  Hit chance is increased by 5% per point of offensive EW the target ship is using (e.g. OEW and CCEW). If it hits, reduces scanner output by D6 points the FOLLOWING turn (a difference from tabletop).  
-
-FIGHTERBORNE MISSILES
- - class FB - Basic Fighter Missile (Range 10 - Damage 10- Offensive Bonus: +3/+3/+3)
- - class FD - Dropout Missile - (Range 10 - Damage 6 - Offensive Bonus: +3/+1/+1) - Adds cumulative dropout penalty of -6 on target hit (-3 on superheavy fighters). Does not force a roll, just increases chance of dropout under regular rules.
- - class FH - Heavy Fighter Missile - (Range 5 - Damage 15 - Offensive Bonus: +1/+3/+3) - Limited to 1 per fighter (2 per SHF).
- - class FL - Long Range Fighter Missile - (Range 15 - Damage 8 - Offensive Bonus: +3/+3/+3)
- - class FY - Dogfight Missile - (Range 8 - Damage 6 - Offensive Bonus: +3/+3/+3) - In tabletop it can be snap fired in direct fire phase, but this ability is not present in FV.
-
-
-BOARDING ACTIONS WITH MARINES
---------
-
-Many factions have access to boarding actions through the use of Breaching Pods, which come equipped with a 'Marines' weapon system and two contingents of Marines aboard as standard.  During the Firing Phase, Pods can attempt to attach to enemy ships in the same hex (and in arc) and deliver Marines to undertake a selection of missions (Sabotage, Capture Ship and Rescue).
-
-ATTACHING A POD:
-In all cases the first step will be the same, attempt to attach a Breaching Pod to the target ship.  Pods automatically attach to enemy ships they are moving faster than, providing the speed difference is not higher that their thrust rating.  Where the enemy ship is moving faster than the Pod they will need to roll for success, with a base chance of 100% and -10% per point of speed difference.  The LLort treat speed difference as one point lower for attaching a pod.
-
-DELIVERING THE MARINES:
-Once attached, the Pod will attempt to deliver the Marines, again this part is the same regardless of which mission has been selected.  The Marines have a base chance of 50% of successfully boording the vessel 5 or under on a d10), if they roll over there is a chance that the marines may be lost.  Otherwise they will return to the Pod and can attempt to Board again in future turns.  A number of modifiers are sometimes applied to this roll as well depending on circumstances, and these have been summarised below:
- 	+20% success - Yolu-specific bonus
-	+10% success - Elite marines (e.g. Gaim or Narn) / Llort Breaching Pod / Target vessel has Poor Crew / Attempting to board a Primary section after an external section has been destroyed
-	-10% success - Narn or Gaim Defenders / Target vessel has Elite Crew or under the effects of Markab's Religious Fervor
-Note - The Combat Log will display the value of any modifiers along with the number rolled, negative modifiers denote increased success rate, positive indicate decreased success rate for Marine missions.
-
-MARINE MISSIONS:
-Marines that successfully board a vessel will then attempt to carry out their intended missions, which are detailed below.  Like the Delivery Roll, these can attract several modifiers depending on circumstances:
-	+10% success - Elite Marines (e.g. Gaim or Narn) / Target vessel has Poor Crew  
-	-10% success - Narn or Gaim Defenders / Target vessel has Elite Crew or under the effects of Markab's Religious Fervor
-In addition, for Sabotage and Rescue missions there is an additional -10% added to the roll for every two turns that the Marines are active aboard the enemy vessel.
-	- Sabotage: Marines can either attempt to damage a specific system on an enemy ships (by making a called shot against it using the usual rules) or disrupt the ship more generally (e.g. minor damage to a Primary system, EW/Initiative/Thrust/Defence Profile penalties) by targeting it in the normal fashion.  In both cases, Marines that are successfully delivered will roll on a d10 the following turn to see how successful their mission has been.  Note - Marines which target a specific system and are successful in destroying it will then continue to Sabotage the ship generally providing they have not been eliminated.
-	- Capture Ship: Marines will fight the defending marine contingents directly (the number of current Marines on a ship can be seen in its CnC tooltip!).  From the end of each Firing phase a marine unit has boarded they will roll separately to see if they a) eliminate a defender (50% base chance) and b) if they themselves are eliminated (25% base chance).  If the attacking marines manage to defeat all defenders during a scenario, the enemy ship will immediately be disabled for the remainder of the battle so long as there are still at least one attacking marine unit on board.
-	- Rescue Mission: For scenarios only, Marines will attach their pod and attempt to board as normal.  Then, from the following turn, the Combat Log will provide players with updates on the progress of their Rescue mission.
 
 
 AVAILABLE FACTIONS
@@ -392,7 +324,7 @@ Energy Mine - hex-targeted weapon, causing heavy damage to everything on hex hit
 	Opponent does not see EMine target hexes (just the fact that they've been launched).
 	Not 100% accurate - a launched mine may scatter or fizzle.
 	Extremely disruptive to enemy fighters.
-Pulsar Mine - Highly automated short-range weapon that fires at passing fighters.  The weapon will automcatically track enemy fighters during the Movement Phase, and attack any that came within arc and range during their movement in the Firing Phase.
+Pulsar Mine - Automated short-range weapon that fires at passing fighters.  The weapon will automcatically track enemy fighters during the Movement Phase, and attack any that came within arc and range during their movement in the Firing Phase.
 
 	
 ORIENI IMPERIUM
@@ -480,7 +412,7 @@ Ancient race, by definition complicated, very specific and not really on par wit
 But with these caveats - have fun! Ancients should be balanced against each other, and if Your opponent knows what to expect/You're playing a scenario, go ahead with other pairings as well. Note that sky-high individual cost of Ancient units makes standard requirements based on total fleet value completely inadequate - so they have been modified for fleet checker.
 Below list of systems Shadows use, with short description of effect and design differences from original tabletop.
 Called shots - systems on Shadow ships cannot be targeted by called shots.
-Enhancements - Shadow ships use no crew, so cannot use rew-related enhancements. They can use enhancements relating to special officers (that would be ship pilot's skill in such case). They have their own faction-specific enhancements as well.
+Enhancements - Shadow ships use no crew, so cannot use crew-related enhancements. They can use enhancements relating to special officers (that would be ship pilot's skill in such case). They have their own faction-specific enhancements as well.
 Self-Repair - automated, but player can modify default priority of repairs. Damage and criticals suffered in current turn cannot be repaired. Cost of critical repair has been changed in places (in particular C&C criticals aren't that costly to fix), and there's no partial repair of crits. 
 	If Self-Repair is destroyed or damaged, unused repair points are NOT lost.
 Energy Diffuser - absorbs damage as it's being dealt (and diffuses it over time). In FV Diffuser always kicks in if possible, there's no option to withhold its use eg. waiting for more threatening damage and conserving resources. Diffuser can dissipate damage just absorbed. For visual reasons tendrils are shown as separate (untargetable) systems. Damage absorbed by ship tendrils is not shown in log.
@@ -624,6 +556,117 @@ Light Molecular Disruptor - armor-stripping heavy fighter weapon.
 Fusion Agitator - Raking weapon that does damage in inefficient Raking(6) mode. However, it ignores a point of armor (which helps), its raw damage output is decent, and if extra power is thrown in to boost it - damage output can rise to extremely high. Make no mistake: this is a very dangerous weapon! 
 	Many Yolu weapons have special features, usually relating to target armor - see descriptions.
 	
+
+FACTIONS TIERS 
+The factions available in Fiery Void are split into more or less cohesive groups ("Tiers"), to help players pick fleets which are fairly well-matched for a competitive pickup play (which doesn't mean perfect! - also, see Tier descriptions above).
+This list is completely UNOFFICIAL and SUBJECTIVE and  in a few cases a particular build for Faction is listed a separate 'tier', too.
+This evaluation (just like point values) assumes standard conditions (default-sized fixed map, basically) - in different conditions (say, open map) different factors become important and balance changes.
+
+
+EASY AND FORGIVING
+Factions that are particularly easy to fly, recommended for new players. Use these factions for Your first set of battles - You will fight interface and opponent, let your ships make that a bit easier for you!
+ 
+ - Drazi (their jack-of-all-trades ships are very flexible and can unleash full power against any oponent, while their layout makes them retain combat value even after sustaining heavy damage)
+ - Narn (very tough and with powerful weapons - they may not be fancy, but they get the job done and refuse to die even if put in unfavorable position; average in most other aspects, which gives good feeling of what you want from your units and allows informed choices for expanding Your picks)
+ - EA (extremely tough, with awesome defenses and good firepower - balanced by difficulties with firepower concentration and low maneuvrability. Their resilience makes them very forgiving to any mistakes a beginner may make)
+  
+
+FIRST TIER
+This is default power level of show era major factions ('Big 4') - what I consider to be the 'baseline' of competitive play. Smaller factions may fit here due to their raw power, but usually won't allow flexibility of fleet design offered by major factions.
+
+ - Brakiri
+ - Centauri
+ - Dilgar
+ - Drakh (custom faction; being Middleborn rather than Young race, they exhibit some traits similar to Ancients - not enough to kick them to Ancients grouping though)
+ - Drazi
+ - EA (barring Warlock)
+ - Gaim
+ - Hyach	
+ - Kor-Lyan (very heavy use of ballistics)
+ - Llort
+ - Minbari (warning: Jammer is very daunting, expecially to new players - it's easy to feel overwhelmed; at the same time flying Minbari is not easy either. Not recommended (on either side of the table) until You feel You have solid command of the game!)
+ - Minbari Protectorate (while lacking Jammers, they still field quite capable units, but their fleet selection is limited)
+ - Narn (barring massed EMines; opinions about what 'massed' means vary, but let's call 6 launchers as upper limit acceptable for Tier 1 - just to have an explicit borderline)
+ - Orieni (very tricky - may feel superior due to raw damage output of Hunter-Killers and massed RGRs, while remaining vulnerable against sharp handling by expert oponent)
+ - Torata 
+ - Vree (warning: their high resilence coupled with all-around, accurate firepower is very daunting! Not recommended to face them until You feel You have solid command of the game)
+
+
+SECOND TIER
+Factions that point for point will have uphill battle against First Tier, yet otherwise are balanced and competitive. Many of them have weaknesses more pronounced than acceptable for Tier 1, too. Should be interesting to play against each other, and if given some extra PV allowance - possibly against First Tier as well (at least factions without too glaring weaknesses). Most of these factions do not offer fleet build flexibility of major ones, but may offer very distinct playstyle instead.
+
+ - Abbai
+ - Balosian
+ - Battlestar Galactica Colonials (Custom)
+ - Belt Alliance
+ - Cascor (official)
+ - Cascor (Custom - basically official Cascor with enhancement that modifies their point value, making them more competitive)
+ - Centauri (WotCR)
+ - Ch'Lonas (custom faction)
+ - Corillani
+ - Deneth
+ - Descari
+ - Drazi (WotCR)
+ - Escalation Blood Sword Raiders (custom faction - Escalation Wars universe - small unit selection)
+ - Escalation Chouka (custom faction - Escalation Wars universe)
+ - Escalation Circasian (custom faction - Escalation Wars universe)
+ - Escalation Sshel'ath (custom faction - Escalation Wars universe)
+ - Escalation Kastan (custom faction - Escalation Wars universe)
+ - Ipsha  
+ - Markab
+ - Nexus Brixadii (custom faction - Nexus universe)
+ - Nexus Craytan Union (custom faction - Nexus universe)
+ - Nexus Dalithorn (custom faction - Nexus universe)
+ - Nexus Makar (custom faction - Nexus universe)
+ - Nexus Sal-bez (custom faction - Nexus universe)
+ - Nexus Velrax (custom faction - Nexus universe)
+ - Pak'ma'ra
+ - Raiders (note plethora of background-driven options - Raiders often use a hodgepodge of units and formal FV fleet selection rules don't always do them justice!)
+ - Star Trek Federation (early) (custom faction - Star Trek universe)
+ - Star Trek Federation (TOS) (custom faction - Star Trek universe)
+ - Star Wars (custom faction (or rather factions), Star Wars universe - with VERY different playstyle, consider them difficult to fly!)
+
+
+SUPERIOR
+Factions that, point for point, usually beat First Tier. That may be due to overall superior value or some special side effect of their rules, so simply allowing opponent extra PV might not be enough to balance things.
+This group is inherently unbalanced, even against each other!
+
+ - EA using Warlock
+ - ISA (eg. all-White Star fleet - note that it's difficult to fly, too!)
+ - Narn (when using 6 or more Energy Mines) 
+ - Yolu
+
+
+ANCIENTS
+Ancient factions that can't really be balanced vs Young Races. Overall high power and durability and selective ignoring enemy systems (especially defensive ones - which hurts some opponents while leaving others untouched) coupled with small numer of shots and relative vulnerability to swarms are impossible to properly balance for pickup battle, being vulnerable to some fleet builds and devastating vs others. For these reasons Ancients got their own category. Be warned that these fleets generally are difficult to fly and have LOTS of special rules.
+They should be balanced against each other though! Playing against Young fleet that is deliberately built to face particular Ancient may be interesting as well.
+
+ - Shadows
+ - Thirdspace (Custom faction)
+ - Vorlons
+
+
+THE REST
+Factions that don't fit in any of the brackets above. Most of them cannot seriously compete, showing some deficiencies that cannot be fixed by simply increasing their PV allowance (like combination of poor maneuvrability/poor Sensors/short range weapons on low-tech ships or some glaring weakness in overall fleet layout). 
+This group is inherently unbalanced, even against each other!
+
+ - Abbai (WotCR)
+ - Alacan (Small Races)
+ - EA (early)
+ - Escalation Chouka Raiders (custom faction - Escalation Wars universe)
+ - Grome
+ - Hurr
+ - Mitoc (Small Races - only one MCV-class vessel)
+ - Rogolon (Small Races)
+ - Sorithian (Small Races)
+ - Star Wars: Clone Wars (Playtest. A different look at the setting, but using the Clone Wars era to avoid confusion with the existing Star Wars work)
+ - Streib (custom faction; their ship design and technology is peculiar enough for them to feel surprisingly Ancient-like when it comes to balancing. Streib are definitely NOT up to fighting actual Ancients though! - hence "the Rest")
+ - Usuuth
+
+
+
+CUSTOM FACTIONS
+These factions have been created by the community using the FV system.  They should be considered balanced against each other (e.g. Nexus units will be fairly balanced against other Nexus units), but not against Official faction above.
 
 zBSG COLONIALS (custom, Battlestar Galactica setting)
 The Battlestar Galactica Colonials represent the Twelve Colonies of Man. The faction is characterized by good armor and bulkheads, providing significant durability. Weaponry is a mix of missiles and matter weapons. The primary heavy weapons are nearly identical to the Belt Alliance's blast cannons. 
