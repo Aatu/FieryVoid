@@ -171,7 +171,7 @@
     <script src="client/UI/shipTooltipInitialOrdersMenu.js"></script>
     <script src="client/UI/shipTooltipFireMenu.js"></script>
     <script src="client/UI/ShipTooltipBallisticsMenu.js"></script>
-
+	<script src="client/UI/moveTooltip.js"></script>
 
 
     <script src="client/ShipMovementCallbacks.js"></script>
@@ -561,109 +561,106 @@
     
     
     <div id="shipMovementUI">
-        <div id="move">
+        <div id="move" class="movement-icon" data-movement-type="Move">
             <div class="centercontainer">
                 <span class="speedvalue value centercontent">00</span>
             </div>
             <canvas id="movecanvas" width="50" height="50"></canvas>
         </div>
         
-        <div id="turnright">
+        <div id="turnright" class="movement-icon" data-movement-type="Turn Right">
             <canvas id="turnrightcanvas" width="40" height="40"></canvas>
         </div>
         
-        <div id="turnleft">
+        <div id="turnleft" class="movement-icon" data-movement-type="Turn Left">
             <canvas id="turnleftcanvas" width="40" height="40"></canvas>
         </div>
         
-        <div id="turnIntoPivotLeft">
+        <div id="turnIntoPivotLeft" class="movement-icon" data-movement-type="Turn Into Pivot">
             <canvas id="turnIntoPivotLeftCanvas" width="40" height="40"></canvas>
         </div>
         
-        <div id="turnIntoPivotRight">
+        <div id="turnIntoPivotRight" class="movement-icon" data-movement-type="Turn Into Pivot">
             <canvas id="turnIntoPivotRightCanvas" width="40" height="40"></canvas>
         </div>
 
-        <div id="slipright">
+        <div id="slipright" class="movement-icon" data-movement-type="Slip Right">
             <canvas id="sliprightcanvas" width="30" height="30"></canvas>
         </div>
         
-        <div id="slipleft">
+        <div id="slipleft" class="movement-icon" data-movement-type="Slip Left">
             <canvas id="slipleftcanvas" width="30" height="30"></canvas>
         </div>
         
-        <div id="pivotright">
+        <div id="pivotright" class="movement-icon" data-movement-type="Pivot Right">
             <canvas id="pivotrightcanvas" width="40" height="40"></canvas>
         </div>
         
-        <div id="pivotleft">
+        <div id="pivotleft" class="movement-icon" data-movement-type="Pivot Left">
             <canvas id="pivotleftcanvas" width="40" height="40"></canvas>
         </div>
 
 
-
-        <div id="rotateleft">
+        <div id="rotateleft" class="movement-icon" data-movement-type="Port Rotation">
             <canvas id="rotateleftcanvas" width="40" height="40"></canvas>
         </div>
 
-        <div id="rotateright">
+        <div id="rotateright" class="movement-icon" data-movement-type="Starboard Rotation">
             <canvas id="rotaterightcanvas" width="40" height="40"></canvas>
         </div>
         
-
-
         
-        <div id="accelerate">
+        <div id="accelerate" class="movement-icon" data-movement-type="Accelerate">
             <canvas id="acceleratecanvas" width="16" height="16"></canvas>
         </div>
         
-        <div id="deaccelerate">
+        <div id="deaccelerate" class="movement-icon" data-movement-type="Deaccelerate">
             <canvas id="deacceleratecanvas" width="16" height="16"></canvas>
         </div>
         
-        <div id="morejink">
+        <div id="morejink" class="movement-icon" data-movement-type="Increase Jinking">
             <canvas id="morejinkcanvas" width="16" height="16"></canvas>
         </div>
         
-        <div id="lessjink">
+        <div id="lessjink" class="movement-icon" data-movement-type="Decrease Jinking">
             <canvas id="lessjinkcanvas" width="16" height="16"></canvas>
         </div>
         
-        <div id="roll">
+		<div id="roll" class="movement-icon" data-movement-type="Roll">
             <canvas id="rollcanvas" width="40" height="40"></canvas>
         </div>
 
-        <div id="emergencyroll">
-            <canvas id="emergencyrollcanvas" width="40" height="40"></canvas>
-        </div>		
+		<div id="emergencyroll" class="movement-icon" data-movement-type="Emergency Roll">
+		    <canvas id="emergencyrollcanvas" width="40" height="40"></canvas>
+		</div>        	
 		
-        <div id="halfphase">
+        <div id="halfphase" class="movement-icon" data-movement-type="Half-Phase">
             <canvas id="halfphasecanvas" width="50" height="50"></canvas>
         </div>		
         
-        <div id="jink">
+        <div id="jink" class="movement-icon" data-movement-type="Jinking">
 			<div class="centercontainer">
                 <span class="jinkvalue value centercontent">0</span>
             </div>
             <canvas id="jinkcanvas" width="40" height="40"></canvas>
         </div>
 
-        <div id="contraction">
+        <div id="contraction" class="movement-icon" data-movement-type="Contraction">
 			<div class="centercontainer">
                 <span class="contractionvalue value centercontent">0</span>
             </div>
             <canvas id="contractioncanvas" width="40" height="40"></canvas>
         </div>        
 
-        <div id="morecontraction">
+        <div id="morecontraction" class="movement-icon" data-movement-type="Increase Contraction">
             <canvas id="morecontractioncanvas" width="16" height="16"></canvas>
         </div>
         
-        <div id="lesscontraction">
+        <div id="lesscontraction" class="movement-icon" data-movement-type="Decrease Contraction">
             <canvas id="lesscontractioncanvas" width="16" height="16"></canvas>
         </div>
         
-        <div id="cancel">
+        <div id="cancel" class="movement-icon" data-movement-type="Cancel Last Move">
             <canvas id="cancelcanvas" width="30" height="30"></canvas>
         </div>
         
