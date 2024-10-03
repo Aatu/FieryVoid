@@ -54,9 +54,7 @@ ShieldReinforcement.prototype.onBoostIncrease = function () {
 		shipManager.power.unsetBoost(null, this);		
       	return;	
 	}
-//		this.reinforceAmount += 1;    	
-//		this.reinforceAmount = Math.min(20, this.reinforceAmount) //Shouldn't happen, as will be caught earlier.  But just in case.
-//		this.outputDisplay = this.reinforceAmount;	
+
 	return;	 		
 }    
 
@@ -69,10 +67,7 @@ ShieldReinforcement.prototype.onBoostDecrease = function () {
 		shipManager.power.setBoost(null, this);		
       	return;	
 	}
-	
-//		this.reinforceAmount -= 1; 
-//		this.reinforceAmount = Math.max(0, this.reinforceAmount)//Don't let it go below 0.
-//		this.outputDisplay = this.reinforceAmount;			
+			
 	return;	   	
 }    
 
