@@ -223,7 +223,7 @@ shipManager.power = {
 	//like getShipsNegativePower BUT only looks for PowerCapacitor-equipped ships
 	getCapacitorShipsNegativePower: function getCapacitorShipsNegativePower() {
 			var shipNames = new Array();
-		//	var counter = 0;
+			var counter = 0;
 			for (var i in gamedata.ships) {
 				var ship = gamedata.ships[i];
 				if (ship.unavailable) continue;
