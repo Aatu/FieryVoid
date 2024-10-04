@@ -5119,9 +5119,10 @@ class PsionicConcentrator extends Weapon{
 	
 	public function setSystemDataWindow($turn){
 		      parent::setSystemDataWindow($turn);  
-		      $this->data["Special"] = "Psionic Concentrators can be fired individually, or up to four concentrators can be combined for more powerful attacks with shorter range.";	      		      $this->data["Special"] .= "<br>If You allocate multiple Concentrators to the same mode of fire at the same target, they will be combined.";   		       
-		      $this->data["Special"] .= "<br>If not enough weapons are allocated to be combined, weapons will be fired in Single mode instead.";  		  
-		      $this->data["Special"] .= "<br>Each hit causes -1 Power on ships with reactors for one turn.";
+		      $this->data["Special"] = "Can be fired individually, or up to four Concentrators can be combined for more powerful attacks with shorter range.";
+		      $this->data["Special"] .= "<br>If You allocate multiple Concentrators in the same Firing Mode at the same target, they will be combined."; 
+		      $this->data["Special"] .= "<br>If not enough Concentrators are allocated to be combined, shots will be fired in Single mode instead.";  		  
+		      $this->data["Special"] .= "<br>Each hit causes -1 Power on non-Ancient ships with Reactors for one turn.";
 		      $this->data["Special"] .= "<br>Has +1 modifier to critical hits, and +2 to fighter dropout rolls.";
 	    }	
 	
