@@ -585,7 +585,7 @@ shipManager.movement = {
             return false;
         }
 //		if (!shipManager.movement.hasJustTurnedIntoPivot(ship)){ //don't look at thrust available for pivot cancelling IF previous maneuver is turn into pivot. No longer needed.
-		if (ship.pivotcost > shipManager.movement.getRemainingEngineThrust(ship)) return false;
+		if (ship.pivotcost > shipManager.movement.getRemainingEngineThrust(ship) && gamedata.gamephase != 3) return false;
 //		}
         if (ship.flight && gamedata.gamephase == 3) {
             if (!weaponManager.canCombatTurn(ship)) return false;
@@ -622,10 +622,12 @@ shipManager.movement = {
     
     countCombatPivot: function countCombatPivot(ship) {
         var c = 0;
-        for (var i in ship.movement) {
-            var move = ship.movement[i];
-            if (move.value == "combatpivot") c++;
-        }
+        if(ship.flight){
+	        for (var i in ship.movement) {
+	            var move = ship.movement[i];
+	            if (move.value == "combatpivot") c++;
+	        }
+		}    
         return c;
     },
 

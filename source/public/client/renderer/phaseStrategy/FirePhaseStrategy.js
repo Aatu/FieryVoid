@@ -79,7 +79,7 @@ window.FirePhaseStrategy = function () {
     FirePhaseStrategy.prototype.setSelectedShip = function (ship) {
         PhaseStrategy.prototype.setSelectedShip.call(this, ship);
 
-        if (shipManager.movement.canPivot(ship)) {
+        if (shipManager.movement.canPivot(ship) || (shipManager.movement.countCombatPivot(ship) > 0)) {
             this.drawMovementUI(this.selectedShip);
         }
     };
