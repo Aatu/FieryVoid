@@ -812,6 +812,11 @@ class BaseShip {
 					break; //checking one Engine is enough
 				}
 				foreach($this->systems as $sensor) if ($sensor instanceof Scanner){
+					
+					if ($sensor instanceof ElintScanner) {
+						$this->notes .= '<br>ELINT Sensors';
+					}				
+					
 					foreach($sensor->specialAbilities as $ability){
 						if ($ability=='AdvancedSensors'){
 							$this->notes .= '<br>Advanced Sensors';
@@ -823,9 +828,8 @@ class BaseShip {
 							$this->notes .= '<br>LCV Sensors';
 						}else if ($ability=='SensorFlux'){ 
 							$this->notes .= '<br>Sensor Fluctuations';
-						}
-						if ($sensor instanceof ElintScanner) {
-							$this->notes .= '<br>ElInt Sensors';
+						}else if ($ability=='ConstrainedEW'){ 
+							$this->notes .= '<br>Constrained ELINT';
 						}
 					}
 					break; //checking one Scanner is enough
