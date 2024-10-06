@@ -2172,21 +2172,21 @@ spl_autoload_register(
 
 
 				//Specific Raider Groups
-				//Imperial Star Legion
-                'imlarmedtransport' => '/server/model/ships/raiders/IMLArmedTransport.php',
+				//IML		
+//                'imlarmedtransport' => '/server/model/ships/raiders/IMLArmedTransport.php',
                 'imlarmedtransportam' => '/server/model/ships/raiders/IMLArmedTransportAM.php',                
                 'imlarmedtransporttorpedo' => '/server/model/ships/raiders/IMLArmedTransportTorpedo.php',
                 'imlattackcruiser' => '/server/model/ships/raiders/IMLAttackCruiser.php',
                 'imlattackcruiserlaser' => '/server/model/ships/raiders/IMLAttackCruiserLaser.php',
-                'imlmissilefrigate' => '/server/model/ships/raiders/IMLMissileFrigate.php',
-                'imlmissilefrigatebeam' => '/server/model/ships/raiders/IMLMissileFrigateBeam.php',
-                'imlmissilefrigaterapid' => '/server/model/ships/raiders/IMLMissileFrigateRapid.php',
-                'imlmissilefrigaterapidbeam' => '/server/model/ships/raiders/IMLMissileFrigateRapidBeam.php',
+//                'imlmissilefrigate' => '/server/model/ships/raiders/IMLMissileFrigate.php',
+//                'imlmissilefrigatebeam' => '/server/model/ships/raiders/IMLMissileFrigateBeam.php',
+//                'imlmissilefrigaterapid' => '/server/model/ships/raiders/IMLMissileFrigateRapid.php',
+//                'imlmissilefrigaterapidbeam' => '/server/model/ships/raiders/IMLMissileFrigateRapidBeam.php',
                 'imlmissilefrigateam' => '/server/model/ships/raiders/IMLMissileFrigateAM.php',
                 'imlmissilefrigatebeamam' => '/server/model/ships/raiders/IMLMissileFrigateBeamAM.php',
                 'imlmissilefrigaterapidam' => '/server/model/ships/raiders/IMLMissileFrigateRapidAM.php',
                 'imlmissilefrigaterapidbeamam' => '/server/model/ships/raiders/IMLMissileFrigateRapidBeamAM.php',                
-
+				//Junkyard Dogs
                 'jydkutai' => '/server/model/ships/raiders/JYDKutai.php',
                 'jydlias' => '/server/model/ships/raiders/JYDLias.php',
                 'jydmograth' => '/server/model/ships/raiders/JYDMograth.php',
@@ -2194,16 +2194,16 @@ spl_autoload_register(
                 'jydtethysomega' => '/server/model/ships/raiders/JYDTethysOmega.php',
                 'jydthentus' => '/server/model/ships/raiders/JYDThentus.php',
                 'jydvorchan' => '/server/model/ships/raiders/JYDVorchan.php',
-
+				//Imperial Star Legion
                 'legionaugustus' => '/server/model/ships/raiders/LegionAugustus.php',
                 'legiongladius' => '/server/model/ships/raiders/LegionGladius.php',
                 'legionstarjammer' => '/server/model/ships/raiders/LegionStarjammer.php',
                 'legiontroligan' => '/server/model/ships/raiders/LegionTroligan.php',
-
+				//TFS
                 'tfsblockaderunner' => '/server/model/ships/raiders/tfsblockaderunner.php',
                 'tfsfreedombase' => '/server/model/ships/raiders/tfsfreedombase.php',
                 'tfsmonitor' => '/server/model/ships/raiders/tfsmonitor.php',
-
+				//Narn Raiders
                 'lkarus' => '/server/model/ships/narn_raiders/lkarus.php',
                 'lkarusrefit' => '/server/model/ships/narn_raiders/lkarusRefit.php',
                 'lshon' => '/server/model/ships/narn_raiders/lshon.php',
