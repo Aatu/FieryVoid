@@ -297,7 +297,7 @@ class ShieldReinforcement extends Weapon{
         parent::setSystemDataWindow($turn);
 		$damageReduction = $this->output;
 		$profileReduction = $this->output *5;
-		$this->data["Special"] = "Can be fired at allied units during Intial Orders to reinforce their Thought Shields by adding EM Shield properties (e.g. hit chance and damage reductions)."; 
+		$this->data["Special"] = "Can be fired at allied units during Initial Orders to reinforce their Thought Shields by adding EM Shield properties (e.g. hit chance and damage reductions)."; 
 		$this->data["Special"] .= "<br>Select the amount you wish to reinforce an ally's shields by boosting this system, then target ally ship.";
 		$this->data["Special"] .= "<br>Allied ship must remain within 20 hexes by end of Movement Phase to receive reinforcement.";		
 		$this->data["Special"] .= "<br>Each level of shield reinforcement costs 1 point of this system's capacity per shield. All shields must be boosted equally on a ship.";
