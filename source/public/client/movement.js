@@ -622,9 +622,10 @@ shipManager.movement = {
     
     countCombatPivot: function countCombatPivot(ship) {
         var c = 0;
-        if(ship.flight){
-	        for (var i in ship.movement) {
+        if(ship.flight){ //Just check flights, is now called in FirePhaseStrategy.js - DK 10.24
+	        for (var i in ship.movement) {	        	
 	            var move = ship.movement[i];
+            	if (move.turn != gamedata.turn) continue;	            
 	            if (move.value == "combatpivot") c++;
 	        }
 		}    
