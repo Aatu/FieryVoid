@@ -54,7 +54,7 @@ class gaimDraskar extends HeavyCombatVesselLeftRight{
 			0=> array(
 					9 => "Structure",
 					11 => "2:Thruster",
-					12 => "1:Twin Array",
+					12 => "2:Twin Array",
 					14 => "Scanner",
 					16 => "Engine",
 					17 => "Hangar",
