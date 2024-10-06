@@ -15,7 +15,7 @@ class Consortium extends MindriderHCV{
 		$this->canvasSize = 200;							    
 
 		$this->notes = 'Special Hull Arrangement';
-		$this->notes .= '<br>Ignores manoeuvre hit modifiers';		
+		$this->notes .= '<br>Ignores Manoeuvre Hit Modifiers';		
 		
         $this->gravitic = true;
 		$this->advancedArmor = true; 		    

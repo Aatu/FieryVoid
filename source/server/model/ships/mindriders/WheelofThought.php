@@ -15,7 +15,8 @@ class WheelofThought extends MindriderMCV{
 		$this->canvasSize = 100;							    
 
 		$this->notes = 'Special Hull Arrangement';
-		$this->notes .= '<br>Ignores manoeuvre hit modifiers';		
+		$this->notes .= '<br>Ignores Manoeuvre Hit Modifiers';	
+		$this->notes .= '<br>Must Pivot Every Turn';				
 
         $this->agile = true;		
         $this->gravitic = true;

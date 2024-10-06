@@ -15,7 +15,7 @@ class Thoughtforce extends MindriderCapital{
 		$this->canvasSize = 250;							    
 
 		$this->notes = 'Special Hull Arrangement';
-		$this->notes .= '<br>Ignores manoeuvre hit modifiers';		
+		$this->notes .= '<br>Ignores Manoeuvre Hit Modifiers';			
 	    
 		$this->fighters = array("normal" => 12);	
 		

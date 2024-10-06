@@ -16,7 +16,7 @@ class ThoughtProjections extends FighterFlight{
 		Enhancements::nonstandardEnhancementSet($this, 'MindriderFighter');
 		
 		$this->notes = "Automatically drop out unless hangar-equipped Mindrider ship available!";
-		$this->notes .= '<br>Ignores manoeuvre hit modifiers';		
+		$this->notes .= '<br>Ignores Manoeuvre Hit Modifiers';		
 		
 		$this->forwardDefense = 4;
 		$this->sideDefense = 4;

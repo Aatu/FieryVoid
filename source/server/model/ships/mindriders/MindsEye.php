@@ -17,7 +17,7 @@ class MindsEye extends SixSidedShip{
 		$this->mindrider = true;							    
 
 		$this->notes = 'Special Hull Arrangement';
-		$this->notes .= '<br>Ignores manoeuvre hit modifiers';
+		$this->notes .= '<br>Ignores Manoeuvre Hit Modifiers';	
 	    
 		$this->fighters = array("normal" => 24);	
 		
