@@ -31,7 +31,7 @@ class gaimDraskar extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new Hangar(6, 8));
         $this->addAftSystem(new Thruster(6, 15, 0, 6, 1));
         $this->addAftSystem(new Thruster(6, 18, 0, 10, 2));
-        $this->addFrontSystem(new TwinArray(4, 6, 2, 90, 270));
+        $this->addAftSystem(new TwinArray(4, 6, 2, 90, 270));
 
         $this->addLeftSystem(new PacketTorpedo(5, 6, 5, 240, 360));
         $this->addLeftSystem(new TwinArray(4, 6, 2, 240, 60));
