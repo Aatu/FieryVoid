@@ -220,7 +220,7 @@ window.BallisticIconContainer = function () {
 				case 'ThoughtWave': //Mindrider Thoughwave
 				        targetType = 'hexPurple';
 				        text = "Thought Wave";
-				        textColour = "#bc3782";
+				        textColour = "#bc3782"; //Actually a pink-purple, as it blends with luanch hex Orange!
 //				        iconImage = "./img/systemicons/ThoughtWaveICON.png";  //Example image to pass	 		        
 				break;													        
 				}				
