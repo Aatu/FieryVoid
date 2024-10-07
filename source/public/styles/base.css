@@ -70,13 +70,14 @@ a.link:hover
 
 .panelsubheader{
 	font-size:20px;
-/*	color:#496791; */
-	color:#618ac2;
+/*	color:#496791; Seemed a bit too dark to read well - DK */
+	color:#6896d2;
 }
 
-.panelsmallcyan {
+.panelsmall {
     font-size:14px; /* Reduces the font size to 80% of the original */
-    color: #00caca;   /* Example color (orange), choose your desired color */
+/*    color: #00caca;    Example color (cyan), choose your desired color */
+	color: #DEEBFF;
 }
 
 a{
