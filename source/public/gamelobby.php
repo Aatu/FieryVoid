@@ -276,17 +276,16 @@ if ($simMv == true) { // simultaneous movement
 			
 		</div>
 		<div class="panel large buy" style="display:none;">
-		<div>
-		    <span class="panelheader" style="padding-right:20px;">PURCHASE YOUR FLEET</span>
-		    <span class="panelsubheader current">0</span>
-		    <span class="panelsubheader">/</span>
-		    <span class="panelsubheader max">0</span>
-		    <span class="panelsubheader">points</span>
-		    <span class="panelsmall" style="margin-left: 5px;">(</span> <!-- Added margin-left -->
-		    <span class="panelsmall remaining">0</span>
-		    <span class="panelsmall">points remaining</span>
-		    <span class="panelsmall">)</span>
-		</div>
+			<div><span class="panelheader" style="padding-right:20px;">PURCHASE YOUR FLEET</span>
+				<span class="panelsubheader current">0</span>
+				<span class="panelsubheader">/</span>
+				<span class="panelsubheader max">0</span>
+				<span class="panelsubheader">points</span>
+				<span class="panelsmallcyan">(</span>				
+				<span class="panelsmallcyan remaining">0</span>
+				<span class="panelsmallcyan">points remaining</span>								
+				<span class="panelsmallcyan">)</span>					
+				</div>
 			<table class="store" style="width:100%;">
 				<tr><td style="width:40%;vertical-align:top;">
 					<div id="fleet" class="subpanel">
