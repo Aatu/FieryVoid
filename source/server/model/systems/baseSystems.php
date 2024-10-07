@@ -6330,7 +6330,7 @@ class AmmoBLMineH extends AmmoMissileTemplate{
 class AmmoBLMineW extends AmmoMissileTemplate{	
 	public $name = 'AmmoBLMineW';
 	public $displayName = 'Wide-Range Mine';
-	public $modeName = 'Wide-Range Mine';
+	public $modeName = 'Wide Mine';
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'MINE_BLW'; //enhancement name to be enabled
 	public $enhancementDescription = '(mine) Wide-Range Mine'; //enhancement description
@@ -6388,7 +6388,7 @@ class AmmoBistifA extends AmmoMissileTemplate{
 class AmmoBistifB extends AmmoMissileTemplate{	
 	public $name = 'AmmoBistifB';
 	public $displayName = 'Wide-Ranged Mine';
-	public $modeName = 'Wide-Ranged Mine';
+	public $modeName = 'Wide Mine';
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'MINE_MLW'; //enhancement name to be enabled
 	public $enhancementDescription = '(mine) Wide-Range Mine'; //enhancement description

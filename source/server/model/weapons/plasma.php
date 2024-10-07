@@ -1311,8 +1311,8 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
     public $firingMode = "Defensive";
         
     public $firingModes = array(
-            1 => "Defensive",
-			2 => "Anti-Fighter",			
+            1 => "Defensive Plasma Web",
+			2 => "Anti-Fighter Plasma Web",			
     );
     
     public $fireControlArray = array( 1=>array(0,0,0), 2=>array(0, null, null)); // fighters, <mediums, <capitals 
@@ -1791,7 +1791,7 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 		                    // Create a new FireOrder
 		                    $newFireOrder = new FireOrder(
 		                        -1, "ballistic", $ship->id, -1,
-		                        $this->id, -1, $gamedata->turn, -1, 
+		                        $this->id, -1, $gamedata->turn, 2, 
 		                        1, 0, 1, 0, 0, // needed, rolled, shots, shotshit, intercepted
 		                        $xCoordinate, $yCoordinate, 'Persistent Effect Plasma', -1 // X, Y, damageclass, resolutionorder
 		                    ); 
@@ -1807,6 +1807,7 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 		        }
 		    }
 		}
+		
 	    // Clear individual notes, they're no longer needed
 	    $this->individualNotes = array();	
 

@@ -124,7 +124,7 @@ window.BallisticSprite = function () {
 	        HexagonTexture.renderHexGrid(TEXTURE_SIZE, getStrokeColorByType(type), getFillColorByType(type), 10, ctx);
 
 	        // Scale and position the image in the center of the hex
-	        var imageSize = TEXTURE_SIZE * 0.28; // Scale image to 50% of the hex size
+	        var imageSize = TEXTURE_SIZE * 0.28; // Scale image to 28% of the hex size
 	        var xPos = (TEXTURE_SIZE - imageSize) / 2;
 	        var yPos = (TEXTURE_SIZE - imageSize) / 2;
 
@@ -158,7 +158,7 @@ window.BallisticSprite = function () {
 	    // Set initial font size to the maximum you expect
 	    var fontSize = 130;
 		var initTextColour = textColour;
-		var lightenedColour = lightenColor(initTextColour, 35); // Lighten by 40%
+		var lightenedColour = lightenColor(initTextColour, 35); // Lighten by 35%
 	    
 	    ctx.font = `bold ${fontSize}px Arial`;
 	    ctx.fillStyle = lightenedColour;

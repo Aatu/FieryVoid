@@ -171,15 +171,6 @@ var IonFieldGenerator = function(json, ship)
 IonFieldGenerator.prototype = Object.create( Weapon.prototype );
 IonFieldGenerator.prototype.constructor = IonFieldGenerator;
 
-IonFieldGenerator.prototype.initializationUpdate = function() {
-	var ship = this.ship;	
-    if (this.fireOrders.length > 0) {					
-		var aFireOrder = this.fireOrders[0]; 
-		if(aFireOrder)	aFireOrder.damageclass = 'IonField';
-	}			        
-	return this;
-};
-
 
 var ParticleConcentrator = function(json, ship)
 {
@@ -456,15 +447,6 @@ var ProximityLaserLauncher = function ProximityLaserLauncher(json, ship) {
 ProximityLaserLauncher.prototype = Object.create(Weapon.prototype);
 ProximityLaserLauncher.prototype.constructor = ProximityLaserLauncher;
 
-ProximityLaserLauncher.prototype.initializationUpdate = function() {
-	var ship = this.ship;	
-    if (this.fireOrders.length > 0) {					
-		var aFireOrder = this.fireOrders[0]; 
-		if(aFireOrder)	aFireOrder.damageclass = 'ProximityLaser';
-	}			        
-	return this;
-};
-
 var ProximityLaser = function ProximityLaser(json, ship) {
     Weapon.call(this, json, ship);
 };
@@ -527,29 +509,11 @@ var SecondSight = function SecondSight(json, ship) {
 SecondSight.prototype = Object.create(Weapon.prototype);
 SecondSight.prototype.constructor = SecondSight;
 
-SecondSight.prototype.initializationUpdate = function() {
-	var ship = this.ship;	
-    if (this.fireOrders.length > 0) {					
-		var aFireOrder = this.fireOrders[0]; 
-		if(aFireOrder)	aFireOrder.damageclass = 'SecondSight';
-	}			        
-	return this;
-};
-
 var ThoughtWave = function ThoughtWave(json, ship) {
     Weapon.call(this, json, ship);
 };
 ThoughtWave.prototype = Object.create(Weapon.prototype);
 ThoughtWave.prototype.constructor = ThoughtWave;
-
-ThoughtWave.prototype.initializationUpdate = function() {
-	var ship = this.ship;	
-    if (this.fireOrders.length > 0) {					
-		var aFireOrder = this.fireOrders[0]; 
-		if(aFireOrder)	aFireOrder.damageclass = 'Thoughtwave';
-	}			        
-	return this;
-};
 
 var GrapplingClaw = function GrapplingClaw(json, ship) {
     Weapon.call(this, json, ship);
