@@ -1434,6 +1434,12 @@ window.weaponManager = {
         }
 
         webglScene.customEvent('ShipTargeted', {shooter: selectedShip, target: ship, weapons: toUnselect})
+        
+        //Reset Movement UI after moment of targeting, to prevent cancel of last Combat Pivot AFTER locking target! - DK 10.24
+        if(gamedata.gamephase == 3 && selectedShip.flight){
+            UI.shipMovement.drawShipMovementUI(selectedShip);        	 	
+        }
+        
     },
 
 	    
