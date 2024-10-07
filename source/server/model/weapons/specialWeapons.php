@@ -5260,7 +5260,7 @@ class ProximityLaserLauncher extends Weapon{
 			private $pairing = null;	//Which targeter is it paired with?	
 			
 		public $firingModes = array(
-			1 => "Launcher"
+			1 => "Proximity Laser Launcher"
 		);
 			
 		public $repairPriority = 5;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
@@ -6720,6 +6720,7 @@ class SecondSight extends Weapon{
 
 	public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!   
 	public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set! 
+	public $firingModes = array(1=> "SecondSight"); 
 
     public $animation = "ball";
     public $animationExplosionScale = 15;   
@@ -6876,7 +6877,7 @@ class ThoughtWave extends Plasma{
 
     public $animation = "ball";
     public $animationExplosionScale = 2;   
-	public $animationColor = array(204, 102, 0);
+	public $animationColor = array(188, 55, 130);
 	public $noProjectile = true; //Marker for front end to make projectile invisible for weapons that shouldn't have one.
 	
 	public $firingModes = array(1=> "ThoughtWave"); 	
@@ -7025,7 +7026,8 @@ class ThoughtWave extends Plasma{
 			$diceRoll = Dice::d(6, 3);
             $defence = $target->getHitSectionProfilePos(mathlib::hexCoToPixel($pos));//Base profile.
         	$mod = $target->getHitChanceMod($shooter, $pos, $gamedata->turn, $this); //Shields/E-web etc affect profile!
-        	           
+			$fireOrder->pubnotes .= ' Damage Roll: ' . $diceRoll . '.';	
+		        	           
             if($target->advancedArmor){//Divide by 5 for AA
 				$damage = floor(($diceRoll/5) * ($defence + $mod)); //3d6 divide by 5, multiplied by defence profile.            	
             }else{//Divide by 3 for everything else							
@@ -7035,7 +7037,7 @@ class ThoughtWave extends Plasma{
 
         $damage = $this->getDamageMod($damage, $shooter, $target, $pos, $gamedata);     
         $damage -= $target->getDamageMod($shooter, $pos, $gamedata->turn, $this);
-		
+			$fireOrder->pubnotes .= ' Damage: ' . $damage . '.';			
         return $damage;
     }
 	
@@ -7044,7 +7046,7 @@ class ThoughtWave extends Plasma{
 		$this->data["Damage"] = 'Special';	
 		$this->data["Special"] = 'To fire this weapon, target ANY hex during the Initial Orders phase.';
 		$this->data["Special"] .= '<br><br>The Thought Wave will always originate from the starting location of the firing ship (as per usual with ballistic weapons).';
-		$this->data["Special"] .= '<br>The Thought Wave will attempt to hit ALL enemy ships in the game in Firing Phase, using the following formula:';
+		$this->data["Special"] .= '<br>The Thought Wave will attempt to hit ALL non-Mindrider ships in the game in Firing Phase (even friendlies), using the following formula:';
 		$this->data["Special"] .= '<br> - (15 + OEW + d20) - (Range Penalty + DEW - Target Initiative/5)';
 		$this->data["Special"] .= '<br>If this formula returns a result above 0, the Thought Wave automatically hits, and deals (3D6/3) * (Profile/5) Flash damage.';
 		$this->data["Special"] .= '<br>Advanced armor changes this formula to (3d6/5) * (Profile/5), and Shields etc affect profile as normal for this calculation.';			
