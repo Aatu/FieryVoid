@@ -15,6 +15,7 @@ jQuery(function ($) {
     $("#movementcheck").on("click", createGame.doMovementCheck);
     
     $(".setsizeknifefight").on("click", createGame.doSwitchSizeKnifeFight);
+    $(".setswitchsizebaseassault").on("click", createGame.doSwitchSizeBaseAssault);    
     $(".setsizestandard").on("click", createGame.doSwitchSizeStandard);
 
     createGame.createSlotsFromArray();
@@ -102,7 +103,7 @@ window.createGame = {
             createGame.variableFlights = 1;
         } else createGame.variableFlights = 0;
     },
-
+/*
     doMovementCheck: function doMovementCheck(data) {
         var checkval = $("#movementcheck:checked").val();
 
@@ -112,6 +113,30 @@ window.createGame = {
             delete createGame.rules.initiativeCategories;
         }
     },
+*/
+
+doMovementCheck: function doMovementCheck(data) {
+    var checkval = $("#movementcheck:checked").val();
+
+    if (checkval == "on") {
+        // Show the dropdown for selecting initiative categories
+        $("#movementDropdown").show();
+        // Set the selected value as initiativeCategories when checkbox is checked
+        var selectedValue = $("#initiativeSelect").val();
+        createGame.rules.initiativeCategories = parseInt(selectedValue, 10);
+        
+        // Add an event listener to update the value if the user changes the dropdown
+        $("#initiativeSelect").on('change', function() {
+            createGame.rules.initiativeCategories = parseInt($(this).val(), 10);
+        });
+    } else {
+        // Hide the dropdown when the checkbox is unchecked
+        $("#movementDropdown").hide();
+        // Remove initiativeCategories rule
+        delete createGame.rules.initiativeCategories;
+    }
+},
+
 
     doGameSpaceCheck: function doGameSpaceCheck(data) {
         var checkval = $("#gamespacecheck:checked").val();
@@ -218,6 +243,42 @@ window.createGame = {
         createGame.slots[0].depavailable = 0;
         createGame.slots[1].depavailable = 0;
 		*/
+    },
+
+
+    doSwitchSizeBaseAssault: function doSwitchSizeBaseAssault(data) {
+		createGame.gamespace_data.width = 60;
+		createGame.gamespace_data.height = 40;		
+        $(".spacex").val(60);
+        $(".spacey").val(40);
+        $(".deptype").val("box");
+        $("#team1 .depx").val(-28);
+        $("#team2 .depx").val(27);
+        $("#team1 .depy").val(0);
+        $("#team2 .depy").val(0);
+        $("#team1 .depwidth").val(5);
+        $("#team2 .depwidth").val(5);
+        $("#team1 .depheight").val(40);
+        $("#team2 .depheight").val(40);
+		//modify ALL SLOTS, rather than flat slots 0 and 1!
+		for (var slotID in createGame.slots) {
+			var slotData = createGame.slots[slotID];
+			if (slotData.team == 1){ //data for team 1
+				slotData.depx = $("#team1 .depx").val();
+				slotData.depy = $("#team1 .depy").val();
+				slotData.depwidth = $("#team1 .depwidth").val();
+				slotData.depheight = $("#team1 .depheight").val();
+				slotData.deptype = $(".deptype").val();
+				slotData.depavailable = 0;
+			} else { //data for team 2
+				slotData.depx = $("#team2 .depx").val();
+				slotData.depy = $("#team2 .depy").val();
+				slotData.depwidth = $("#team2 .depwidth").val();
+				slotData.depheight = $("#team2 .depheight").val();
+				slotData.deptype = $(".deptype").val();
+				slotData.depavailable = 0;
+			}
+        }
     },
 	
 	

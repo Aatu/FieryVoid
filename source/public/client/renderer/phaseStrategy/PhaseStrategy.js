@@ -137,6 +137,10 @@ window.PhaseStrategy = function () {
             this.deselectShip(this.selectedShip);
         }
 
+        if (this.selectFromShips){ //To clear selectFromShips correctly if player clicks Commit before clicking anywhere else - DK 10/24
+			this.hideSelectFromShips(this.selectFromShips); 
+		}
+		
         this.currentlyMouseOveredIds = null;
 
         this.uiManager.hideWeaponList();

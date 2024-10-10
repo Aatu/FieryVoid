@@ -750,7 +750,34 @@ window.gamedata = {
 
             ajaxInterface.submitGamedata();
         } else if (gamedata.gamephase == 2) {
-            ajaxInterface.submitGamedata();
+        	
+			var pivotShips = shipManager.checkConstantPivot();        	
+
+			if (pivotShips.length > 0) {
+				
+			    // Get the active ships array
+			    var active = gamedata.getActiveShips();            	
+			    var mustPivotError = "The following ships must pivot during their movement<br>";
+
+			    // Check if any of the ship ids exist in the active array
+			    var foundActiveShip = false;
+			    for (var i in pivotShips) {
+			        var ship = pivotShips[i];
+			        
+			        if (active.some(activeShip => activeShip.id == ship.id)) {
+			            foundActiveShip = true;
+			            mustPivotError += "- " + ship.name + "<br>";
+			        }
+			    }
+
+			    if (foundActiveShip) {
+			        mustPivotError += "You need to order them to pivot.";
+			        window.confirm.error(mustPivotError, function () {});
+			        return false;
+			    }
+			}	        	        	
+			        	
+			ajaxInterface.submitGamedata();
         } else if (gamedata.gamephase == 3) { //firing phase
 		
 			//prevent Vorlons from borrowing future power for firing 

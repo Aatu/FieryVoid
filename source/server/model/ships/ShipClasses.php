@@ -49,7 +49,7 @@ class BaseShip {
 	//by core definition, combat ship is one that is intended to be present in fleet sent into combat zone.
 
 	public $toHitBonus = 0; //Used to increase hit chance of all weapons fired by a ship e.g. Elite Crew / Markab enhancements.		
-    public $critRollMod = 0; //penalty tu critical damage roll: positive means crit is more likely, negative less likely (for all systems)
+    public $critRollMod = 0; //penalty to critical damage roll: positive means crit is more likely, negative less likely (for all systems)
 
 	
 	public $halfPhaseThrust = 0; //needed for half phasing; equal to thrust from two BioThrusters on a given ship; 0 for ships that cannot half phase, eg. vast majority
@@ -73,7 +73,7 @@ class BaseShip {
 	public $EMHardened = false; //EM Hardening (Ipsha have it) - some weapons would check for this value!
 	public $jammerMissile = false; //Marker for when ships are affected by Jammer Missile BDEW.
 	
-	public $ignoreManoeuvreMods = false;	
+	public $ignoreManoeuvreMods = false;//New marker for factions like Mindriders that don't take penalties for pivoting etc	
 		
 
     public $team;
@@ -307,6 +307,15 @@ class BaseShip {
 				}					
 			}
 		}
+		
+		if($this->getSystemByName("MindriderEngine")){//Mind's Eye Contraction needs a few more values to got to Front End.
+			$strippedShip->forwardDefense = $this->forwardDefense; 
+        	$strippedShip->sideDefense = $this->sideDefense;
+		    $strippedShip->Enormous = $this->Enormous; 
+			$strippedShip->iconPath = $this->iconPath;
+			$strippedShip->canvasSize = $this->canvasSize;			 		           	
+		}				
+	
 		
 		$strippedShip->enhancementOptions = array(); //no point in sending options information...
         return $strippedShip;
@@ -803,6 +812,11 @@ class BaseShip {
 					break; //checking one Engine is enough
 				}
 				foreach($this->systems as $sensor) if ($sensor instanceof Scanner){
+					
+					if ($sensor instanceof ElintScanner) {
+						$this->notes .= '<br>ELINT Sensors';
+					}				
+					
 					foreach($sensor->specialAbilities as $ability){
 						if ($ability=='AdvancedSensors'){
 							$this->notes .= '<br>Advanced Sensors';
@@ -814,9 +828,8 @@ class BaseShip {
 							$this->notes .= '<br>LCV Sensors';
 						}else if ($ability=='SensorFlux'){ 
 							$this->notes .= '<br>Sensor Fluctuations';
-						}
-						if ($sensor instanceof ElintScanner) {
-							$this->notes .= '<br>ElInt Sensors';
+						}else if ($ability=='ConstrainedEW'){ 
+							$this->notes .= '<br>Constrained ELINT';
 						}
 					}
 					break; //checking one Scanner is enough
@@ -2659,7 +2672,7 @@ class UnevenBaseFourSections extends BaseShip{ //4-sided base which has differen
 
 class SixSidedShip extends BaseShip{
     public $SixSidedShip = true;
- 
+//	public $mindrider = false; 
      
     function __construct($id, $userid, $name, $slot){
         parent::__construct($id, $userid, $name,$slot);
@@ -2690,15 +2703,7 @@ class SixSidedShip extends BaseShip{
         $locs[] = array("loc" => 31, "min" => 270, "max" => 330, "profile" => $this->sideDefense);
 
         return $locs;
-    }
-    
-	//always redefine $this->data, variable information goes there...
-	public function stripForJson(){
-        $strippedSystem = parent::stripForJson();
-        $strippedSystem->ignoreManoeuvreMods = $this->ignoreManoeuvreMods; 
-		
-        return $strippedSystem;
-    }    
+    } 
     		
 } //end of SixSidedShip
 
@@ -2755,10 +2760,11 @@ class VreeHCV extends HeavyCombatVessel{
         
 } //end of VreeHCV
 
-/*
+
 class MindriderCapital extends BaseShip{
 	
 	public $ignoreManoeuvreMods = true;
+	public $mindrider = true;
 
     public function getLocations(){
         $locs = array();
@@ -2769,21 +2775,13 @@ class MindriderCapital extends BaseShip{
         return $locs;
     }
 
-	//always redefine $this->data, variable information goes there...
-	public function stripForJson(){
-        $strippedSystem = parent::stripForJson();
-        $strippedSystem->ignoreManoeuvreMods = $this->ignoreManoeuvreMods; 
-		
-        return $strippedSystem;
-    }
-
-
 }
 
 class MindriderHCV extends SixSidedShip{
 
 	public $shipSizeClass = 2;	
 	public $ignoreManoeuvreMods = true;
+	public $mindrider = true;	
 	
 
     function __construct($id, $userid, $name, $slot){
@@ -2817,22 +2815,14 @@ class MindriderHCV extends SixSidedShip{
 class MindriderMCV extends MediumShip{
 	
 	public $ignoreManoeuvreMods = true;
-	private $mustPivot = true;	
+	public $mustPivot = true;
+	public $mindrider = true;		
 
     function __construct($id, $userid, $name, $slot){
         parent::__construct($id, $userid, $name,$slot);
     }
 
-	//always redefine $this->data, variable information goes there...
-	public function stripForJson(){
-        $strippedSystem = parent::stripForJson();
-        $strippedSystem->ignoreManoeuvreMods = $this->ignoreManoeuvreMods; 
-        $strippedSystem->mustPivot = $this->mustPivot;		
-        return $strippedSystem;
-    }
-
-
 }//endof MindriderMCV
-*/
+
     
 ?>

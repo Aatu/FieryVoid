@@ -116,5 +116,15 @@ var PhasingPulseCannonH = function PhasingPulseCannonH(json, ship) {
 PhasingPulseCannonH.prototype = Object.create(PhasingPulseCannon.prototype);
 PhasingPulseCannonH.prototype.constructor = PhasingPulseCannonH;
 
+var UltraPulseCannon = function UltraPulseCannon(json, ship) {
+    Pulse.call(this, json, ship);
+};
+UltraPulseCannon.prototype = Object.create(Pulse.prototype);
+UltraPulseCannon.prototype.constructor = UltraPulseCannon;
 
+var TriopticPulsar = function TriopticPulsar(json, ship) {
+    Pulse.call(this, json, ship);
+};
+TriopticPulsar.prototype = Object.create(Pulse.prototype);
+TriopticPulsar.prototype.constructor = TriopticPulsar;
 

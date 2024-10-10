@@ -222,16 +222,45 @@ if ($gamelobbydata->gamespace == '-1x-1'){ //open map
 }
 
 $simMv = false;
-if ($gamelobbydata->rules) if ($gamelobbydata->rules->hasRuleName('initiativeCategories')) $simMv = true;
-if ($simMv==true){//simultaneous movement
-	$optionsUsed  .= ', Simultaneous Movement';
-}else{//standard movement
-	$optionsUsed  .= ', Standard Movement';
+$initiativeCategories = null;
+
+if ($gamelobbydata->rules) {
+    if ($gamelobbydata->rules->hasRuleName('initiativeCategories')) {
+        $simMv = true;
+        if ($gamelobbydata->rules->hasRule('jsonSerialize')) {
+            $initiativeCategories = $gamelobbydata->rules->callRule('jsonSerialize', []);
+        }
+    }
 }
 
-?>		
-			<div><span> <b>Options:</b> <?php print($optionsUsed); ?> </span></div>
-			
+if ($simMv == true) { // simultaneous movement
+    $optionsUsed .= ', Simultaneous Movement';
+    if ($initiativeCategories !== null) {
+        $optionsUsed .= ' (Initiative Categories: ' . $initiativeCategories . ')';
+    }
+} else { // standard movement
+    $optionsUsed .= ', Standard Movement';
+}
+
+?>
+<div><span><b>Options:</b> <?php print($optionsUsed); ?> </span></div>
+
+<br>
+<a href="files/FV_factions.txt" target="_blank" style="text-decoration: underline;">Fiery Void Factions & Tier List</a> 
+- Overview of rules and systems of the fleets available in Fiery Void
+<br>
+<a href="files/enhancements_list.txt" target="_blank" style="text-decoration: underline;">Common Systems & Enhancement List</a> 
+- Details of enhancements and other common systems e.g. Boarding / Missiles
+<br>
+<span style="color: #f8f8f8;">Random Fleet Selection</span> 
+<span style="margin-right: 3px;">-</span> 
+<a href="https://old.wheelofnames.com/8fz-ny7" target="_blank" style="color: #ff9500; text-decoration: underline;"><strong>Tier 1</strong></a> 
+<strong style="margin: 0 2.5px;">|</strong> 
+<a href="https://old.wheelofnames.com/3ek-kyf" target="_blank" style="color: #ff9500; text-decoration: underline;"><strong>Tier 2</strong></a>
+<br><br>
+
+
+	    
 			<div><span>TEAM 1</span></div>
 			<div id="team1" class="subpanel slotcontainer">
 			</div>
@@ -247,12 +276,17 @@ if ($simMv==true){//simultaneous movement
 			
 		</div>
 		<div class="panel large buy" style="display:none;">
-			<div><span class="panelheader" style="padding-right:20px;">PURCHASE YOUR FLEET</span>
-				<span class="panelsubheader current">0</span>
-				<span class="panelsubheader">/</span>
-				<span class="panelsubheader max">0</span>
-				<span class="panelsubheader">points</span>
-				</div>
+		<div>
+		    <span class="panelheader" style="padding-right:20px;">PURCHASE YOUR FLEET</span>
+		    <span class="panelsubheader current">0</span>
+		    <span class="panelsubheader">/</span>
+		    <span class="panelsubheader max">0</span>
+		    <span class="panelsubheader">points</span>
+		    <span class="panelsmall" style="margin-left: 5px;">(</span> <!-- Added margin-left -->
+		    <span class="panelsmall remaining">0</span>
+		    <span class="panelsmall">points remaining</span>
+		    <span class="panelsmall">)</span>
+		</div>
 			<table class="store" style="width:100%;">
 				<tr><td style="width:40%;vertical-align:top;">
 					<div id="fleet" class="subpanel">

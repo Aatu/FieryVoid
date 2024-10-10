@@ -16,6 +16,11 @@ window.UI = {
         currentHeading: null,
 		
 		halfphaseElement: null,
+		contractionElement: null,
+		morecontractionElement: null,
+		lesscontractionElement: null,				
+		emergencyrollElement: null,
+
 
         initMoveUI: function initMoveUI() {
             if (UI.shipMovement.iniated == true) return;
@@ -42,6 +47,8 @@ window.UI = {
             UI.shipMovement.rotaterightElement = $("#rotateright", ui);
 
             UI.shipMovement.rollElement = $("#roll", ui);
+            UI.shipMovement.emergencyrollElement = $("#emergencyroll", ui);            
+            
             UI.shipMovement.jinkElement = $("#jink", ui);
             UI.shipMovement.jinkvalueElement = UI.shipMovement.jinkElement.find(".jinkvalue");
 			
@@ -53,6 +60,11 @@ window.UI = {
             UI.shipMovement.cancelElement = $("#cancel", ui);
 			
 			UI.shipMovement.halfphaseElement = $("#halfphase", ui);
+
+			UI.shipMovement.contractionElement = $("#contraction", ui);			
+            UI.shipMovement.morecontractionElement = $("#morecontraction", ui);
+            UI.shipMovement.lesscontractionElement = $("#lesscontraction", ui);
+            UI.shipMovement.contractionvalueElement = UI.shipMovement.contractionElement.find(".contractionvalue");            			
 
             UI.shipMovement.cancelElement.on("click touchstart contextmenu", UI.shipMovement.cancelCallback);
             UI.shipMovement.moveElement.on("click touchstart contextmenu", UI.shipMovement.moveCallback);
@@ -69,7 +81,8 @@ window.UI = {
             UI.shipMovement.rotaterightElement.on("click touchstart", UI.shipMovement.rotaterightCallback);
 
             UI.shipMovement.rollElement.on("click touchstart", UI.shipMovement.rollCallback);
-
+            UI.shipMovement.emergencyrollElement.on("click touchstart", UI.shipMovement.emergencyrollCallback);
+            
             UI.shipMovement.accElement.on("click touchstart", UI.shipMovement.accelCallback);
             UI.shipMovement.deaccElement.on("click touchstart", UI.shipMovement.deaccCallback);
 
@@ -77,6 +90,9 @@ window.UI = {
             UI.shipMovement.lessjinkElement.on("click touchstart", UI.shipMovement.lessjinkCallback);
 			
             UI.shipMovement.halfphaseElement.on("click touchstart", UI.shipMovement.halfphaseCallback);
+
+            UI.shipMovement.morecontractionElement.on("click touchstart", UI.shipMovement.morecontractionCallback);
+            UI.shipMovement.lesscontractionElement.on("click touchstart", UI.shipMovement.lesscontractionCallback);
 
             UI.shipMovement.turnIntoPivotLeftElement.on("click touchstart", UI.shipMovement.turnIntoPivotLeftCallback);
             UI.shipMovement.turnIntoPivotRightElement.on("click touchstart", UI.shipMovement.turnIntoPivotRightCallback);
@@ -126,6 +142,14 @@ window.UI = {
             UI.shipMovement.callbackHandler.halfphaseCallback(e);
         },
 
+        morecontractionCallback: function morecontractionCallback(e) {
+            UI.shipMovement.callbackHandler.morecontractionCallback(e);
+        },
+
+        lesscontractionCallback: function lesscontractionCallback(e) {
+            UI.shipMovement.callbackHandler.lesscontractionCallback(e);
+        },
+
         accelCallback: function accelCallback(e) {
             UI.shipMovement.callbackHandler.accelCallback(e);
         },
@@ -136,6 +160,10 @@ window.UI = {
 
         rollCallback: function rollCallback(e) {
             UI.shipMovement.callbackHandler.rollCallback(e);
+        },
+
+        emergencyrollCallback: function emergencyrollCallback(e) {
+            UI.shipMovement.callbackHandler.emergencyrollCallback(e);
         },
 
         pivotrightCallback: function pivotrightCallback(e) {
@@ -351,15 +379,31 @@ window.UI = {
 
             dis = 30;
             angle = mathlib.addToDirection(shipHeading, 180);
+			var checkHeading = shipManager.getShipDoMAngle(ship);
+			            
             var roll = UI.shipMovement.rollElement;
+            var emergencyroll = UI.shipMovement.emergencyrollElement;            
             if (shipManager.movement.canRoll(ship)) {
                 var icon = "img/rotate.png";
                 if (shipManager.movement.isRolling(ship)) icon = "img/rotate_active.png";
 
                 dis += 30;
                 UI.shipMovement.drawUIElement(roll, pos.x, pos.y, s, dis * 1.4, angle, icon, "rollcanvas", shipHeading);
-            } else {
+                emergencyroll.hide()
+            } else if (shipManager.movement.canEmergencyRoll(ship)){
+                var icon = "img/emergencyRoll.png";
+				// Check if the ship is facing left (adjust condition as needed)
+				var rollIconAngle = mathlib.addToDirection(shipHeading, 180);;
+				if (checkHeading >= 90 && checkHeading <= 270) {	
+				    // Swap angles for the morecontraction and lesscontraction buttons
+				    icon = "img/emergencyRollFlipped.png";
+				} 
+                dis += 30;
+                UI.shipMovement.drawUIElement(emergencyroll, pos.x, pos.y, s, dis * 1.4, angle, icon, "emergencyrollcanvas", shipHeading);
+                roll.hide();                            
+			}else {
                 roll.hide();
+                emergencyroll.hide()                
             }
 
             var morejink = UI.shipMovement.morejinkElement;
@@ -397,13 +441,45 @@ window.UI = {
                 halfphase.hide();
             }
 
-
             var cancel = UI.shipMovement.cancelElement;
             if (shipManager.movement.hasDeletableMovements(ship) && weaponManager.canCombatTurn(ship)) {
                 dis += 26;
                 UI.shipMovement.drawUIElement(cancel, pos.x, pos.y, 30, dis * 1.4, angle, "img/cancel.png", "cancelcanvas", 0);
             } else {
                 cancel.hide();
+            }
+ 
+            var contraction = UI.shipMovement.contractionElement;
+            if (shipManager.movement.canContract(ship, 0)) {
+                var icon = "img/contraction.png";
+                UI.shipMovement.contractionvalueElement.html(shipManager.movement.getContraction(ship));
+                UI.shipMovement.drawUIElement(contraction, pos.x, pos.y, 40, 30 * 1.4, angle, icon, "contractioncanvas", shipHeading);
+            } else {
+                contraction.hide();
+            }
+ 
+			var moreContractionAngle = mathlib.addToDirection(shipHeading, 218);
+			var lessContractionAngle = mathlib.addToDirection(shipHeading, 142);
+
+			// Check if the ship is facing left (adjust condition as needed)
+			if (checkHeading >= 90 && checkHeading <= 270) {	
+			    // Swap angles for the morecontraction and lesscontraction buttons
+			    moreContractionAngle = mathlib.addToDirection(shipHeading, 142);
+			    lessContractionAngle = mathlib.addToDirection(shipHeading, 218);
+			} 
+			                    
+            var morecontraction = UI.shipMovement.morecontractionElement;
+            if (shipManager.movement.canContract(ship, 1)) {
+                UI.shipMovement.drawUIElement(morecontraction, pos.x, pos.y, 16, 38 * 1.4, moreContractionAngle, "img/plus.png", "morecontractioncanvas", 0);
+            } else {
+                morecontraction.hide();
+            }
+          
+            var lesscontraction = UI.shipMovement.lesscontractionElement;
+            if (shipManager.movement.canContract(ship, -1)) {
+                UI.shipMovement.drawUIElement(lesscontraction, pos.x, pos.y, 16, 38 * 1.4, lessContractionAngle, "img/minus.png", "lesscontractioncanvas", 0);
+            } else {
+                lesscontraction.hide();
             }
 
             ui.show();
@@ -423,6 +499,9 @@ window.UI = {
 
 			//align jinking value with player:
 			jQuery(".jinkvalue.value").css("transform", "rotate(" + -heading + "deg)").css("display", "block");
+
+			//align contraction value with player:
+			jQuery(".contractionvalue.value").css("transform", "rotate(" + -heading + "deg)").css("display", "block");
 
             UI.shipMovement.currentPosition = position;
             UI.shipMovement.currentHeading = heading;
