@@ -2372,7 +2372,7 @@ class RammingAttack extends Weapon{
 	public $weaponClass = "Ramming"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
 
 	public $isRammingAttack = true;	
-	private $designedToRam = false;
+	public $designedToRam = false;
 	private $selfDestroy = 0; //will successful attack destroy the ramming ship? Additional damage modifier
 	private $designDamage = 0;
 	private $damageModRolled = 0;
@@ -2579,7 +2579,7 @@ class RammingAttack extends Weapon{
 	}
         public function setMaxDamage(){     
 		$this->maxDamage = $this->getRammingFactor();				      
-	}
+	}	
 } //endof class RammingAttack
 
 
