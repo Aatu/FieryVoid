@@ -1439,7 +1439,15 @@ window.weaponManager = {
         if(gamedata.gamephase == 3 && selectedShip.flight){
             UI.shipMovement.drawShipMovementUI(selectedShip);        	 	
         }
-        
+		
+		//Add new warning for when people ignore tooltip and try to ram when they possibly shouldn't - DK 10/24
+		if (weapon.isRammingAttack && (!weapon.designedToRam)) { //No warning for ships designed to ram!	
+	            var html = '';		
+		        html += "WARNING - Ramming Attacks should only be used in scenarios where they are specifically permitted.";
+		        html += "<br>";
+				confirm.warning(html);			
+		}
+		
     },
 
 	    
