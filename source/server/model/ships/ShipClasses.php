@@ -2672,7 +2672,7 @@ class UnevenBaseFourSections extends BaseShip{ //4-sided base which has differen
 
 class SixSidedShip extends BaseShip{
     public $SixSidedShip = true;
-	public $mindrider = false; 
+//	public $mindrider = false; 
      
     function __construct($id, $userid, $name, $slot){
         parent::__construct($id, $userid, $name,$slot);
@@ -2782,7 +2782,7 @@ class MindriderCapital extends BaseShip{
         $locs[] = array("loc" => 3, "min" => 180, "max" => 270, "profile" => $this->sideDefense);
         return $locs;
     }
-
+/*
 	//always redefine $this->data, variable information goes there...
 	public function stripForJson(){
         $strippedSystem = parent::stripForJson();
@@ -2790,7 +2790,7 @@ class MindriderCapital extends BaseShip{
         $strippedSystem->mindrider = $this->mindrider;			
         return $strippedSystem;
     }
-
+*/
 
 }
 
@@ -2825,7 +2825,7 @@ class MindriderHCV extends SixSidedShip{
 
         return $locs;
     }
-
+/*
 	//always redefine $this->data, variable information goes there...
 	public function stripForJson(){
         $strippedSystem = parent::stripForJson();
@@ -2833,20 +2833,20 @@ class MindriderHCV extends SixSidedShip{
         $strippedSystem->mindrider = $this->mindrider;			
         return $strippedSystem;
     }
-
+*/
 }//endof MindriderHCV
 
 
 class MindriderMCV extends MediumShip{
 	
 	public $ignoreManoeuvreMods = true;
-	private $mustPivot = true;
+	public $mustPivot = true;
 	public $mindrider = true;		
 
     function __construct($id, $userid, $name, $slot){
         parent::__construct($id, $userid, $name,$slot);
     }
-
+/*
 	//always redefine $this->data, variable information goes there...
 	public function stripForJson(){
         $strippedSystem = parent::stripForJson();
@@ -2855,7 +2855,7 @@ class MindriderMCV extends MediumShip{
         $strippedSystem->mindrider = $this->mindrider;        		
         return $strippedSystem;
     }
-
+*/
 
 }//endof MindriderMCV
 
