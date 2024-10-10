@@ -253,7 +253,7 @@ shipManager.power = {
 	            if (shipManager.isDestroyed(ship)) continue;
 
 var batteryPowerAvailable = 0;
-//alculate battery power available (find all batteries that are not destroyed, sum up their contents)
+//Calculate battery power available (find all batteries that are not destroyed, sum up their contents)
 
                    for (var i = 0; i < ship.systems.length; i++) {
                         var currBattery = ship.systems[i];
@@ -663,6 +663,36 @@ var batteryPowerRequired = 0;
 				
 	},
 
+
+	checkBoostValid: function checkBoostValid(ship, system) {
+
+		var validBoost = true;
+		
+		if (ship.faction == "Pak'ma'ra Confederacy" && system instanceof Scanner) {
+			
+			var batteryPowerAvailable = 0;
+			var scannerStrength = shipManager.systems.getOutput(ship, system);
+			var reactorSurplus = shipManager.power.getReactorPower(ship, system);
+			
+			//Calculate battery power available (find all batteries that are not destroyed, sum up their contents)
+            for (var i = 0; i < ship.systems.length; i++) {
+                var currBattery = ship.systems[i];
+              	if (currBattery.name == "PlasmaBattery" && !(shipManager.systems.isDestroyed(ship, currBattery))){
+				batteryPowerAvailable += shipManager.systems.getOutput(ship, currBattery);                                                              
+				}
+			}
+			
+			//Check if reactor surplus, minus battery power is enough to boost Scanner.  If not, throw error.	
+			if ((reactorSurplus - batteryPowerAvailable) < (scannerStrength+1)) {
+				confirm.error("Power from Plasma Batteries cannot be used to boost sensors.");
+				validBoost = false;
+			}
+		}
+		
+		return validBoost;
+	},
+	
+
 	setBoost: function setBoost(ship, system) {
 		if (!shipManager.power.canBoost(ship, system)) {
 			window.confirm.error("You do not have sufficient energy to boost this system.", function () {});
@@ -743,9 +773,12 @@ var batteryPowerRequired = 0;
 				return;
 			}
 		}
+
+		//New function to check for things like Pak'ma'ra power boosting exceptions - DK 10/24
+		if(!shipManager.power.checkBoostValid(ship, system)) return;	
 				
 		shipManager.power.setBoost(ship, system);
-		system.onBoostIncrease();		
+		system.onBoostIncrease(); //To apply conditions/effects when a system is actually boosted.		
 		shipWindowManager.setDataForSystem(ship, system);
 		shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
         webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
@@ -845,6 +878,18 @@ var batteryPowerRequired = 0;
 
 		if (system.weapon) {
 			weaponManager.unSelectWeapon(ship, system);
+		}
+
+		//Add new warning for when people ignore tooltip and try to deactivate Jump Drive before they should - DK 10/24
+        if (system instanceof JumpEngine) {
+			var healthThreshold = system.maxhealth / 2;
+			var currHealth = shipManager.systems.getRemainingHealth(system);
+            var html = '';		
+			if(currHealth > healthThreshold){
+	                html += "WARNING - Jump Drive should only be deactivated after it’s taken 50% damage or more.";
+	                html += "<br>";
+					confirm.warning(html);
+	         }         
 		}
 
         webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
