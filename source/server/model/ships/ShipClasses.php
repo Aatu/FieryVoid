@@ -2703,15 +2703,7 @@ class SixSidedShip extends BaseShip{
         $locs[] = array("loc" => 31, "min" => 270, "max" => 330, "profile" => $this->sideDefense);
 
         return $locs;
-    }
-    
-	//always redefine $this->data, variable information goes there...
-	public function stripForJson(){
-        $strippedSystem = parent::stripForJson();
-        $strippedSystem->ignoreManoeuvreMods = $this->ignoreManoeuvreMods; 
-        $strippedSystem->mindrider = $this->mindrider;		
-        return $strippedSystem;
-    }    
+    } 
     		
 } //end of SixSidedShip
 
@@ -2782,15 +2774,6 @@ class MindriderCapital extends BaseShip{
         $locs[] = array("loc" => 3, "min" => 180, "max" => 270, "profile" => $this->sideDefense);
         return $locs;
     }
-/*
-	//always redefine $this->data, variable information goes there...
-	public function stripForJson(){
-        $strippedSystem = parent::stripForJson();
-        $strippedSystem->ignoreManoeuvreMods = $this->ignoreManoeuvreMods; 
-        $strippedSystem->mindrider = $this->mindrider;			
-        return $strippedSystem;
-    }
-*/
 
 }
 
@@ -2825,15 +2808,7 @@ class MindriderHCV extends SixSidedShip{
 
         return $locs;
     }
-/*
-	//always redefine $this->data, variable information goes there...
-	public function stripForJson(){
-        $strippedSystem = parent::stripForJson();
-        $strippedSystem->ignoreManoeuvreMods = $this->ignoreManoeuvreMods; 
-        $strippedSystem->mindrider = $this->mindrider;			
-        return $strippedSystem;
-    }
-*/
+
 }//endof MindriderHCV
 
 
@@ -2846,16 +2821,6 @@ class MindriderMCV extends MediumShip{
     function __construct($id, $userid, $name, $slot){
         parent::__construct($id, $userid, $name,$slot);
     }
-/*
-	//always redefine $this->data, variable information goes there...
-	public function stripForJson(){
-        $strippedSystem = parent::stripForJson();
-        $strippedSystem->ignoreManoeuvreMods = $this->ignoreManoeuvreMods; 
-        $strippedSystem->mustPivot = $this->mustPivot;
-        $strippedSystem->mindrider = $this->mindrider;        		
-        return $strippedSystem;
-    }
-*/
 
 }//endof MindriderMCV
 
