@@ -757,7 +757,7 @@ window.gamedata = {
 				
 			    // Get the active ships array
 			    var active = gamedata.getActiveShips();            	
-			    var mustPivotError = "The following ships must be pivoting at the end of their movement<br>";
+			    var mustPivotError = "The following ships must pivot during their movement<br>";
 
 			    // Check if any of the ship ids exist in the active array
 			    var foundActiveShip = false;
