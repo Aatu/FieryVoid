@@ -13,7 +13,7 @@ class HyachUruthaKal extends BaseShip{
         $this->limited = 33;
 
         $this->fighters = array("normal"=>12);
-		$this->canvasSize = 256;
+		$this->canvasSize = 280;
         $this->isd = 2207;
         
         $this->forwardDefense = 17;
