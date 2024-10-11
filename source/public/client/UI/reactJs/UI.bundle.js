@@ -40660,7 +40660,7 @@ var canDeBoost = function canDeBoost(ship, system) {
 };
 
 var canAddShots = function canAddShots(ship, system) {
-	return system.weapon && system.canChangeShots && weaponManager.hasFiringOrder(ship, system) && weaponManager.getFiringOrder(ship, system).shots < system.shots;
+	return system.weapon && system.canChangeShots && weaponManager.hasFiringOrder(ship, system) && weaponManager.getFiringOrder(ship, system).shots < system.turnsloaded;
 };
 
 var canReduceShots = function canReduceShots(ship, system) {
