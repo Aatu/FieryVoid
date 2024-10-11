@@ -505,7 +505,7 @@ class QuadPulsar extends Pulse{
         public $animationColor =  array(175, 225, 175);
         public $trailColor = array(110, 225, 110);
 	*/
-	public $guns = 1; //multiplied to d6 at firing
+		public $guns = 1; //multiplied to d6 at firing
 	     
         public $loadingtime = 1;
         public $normalload = 1;	    
@@ -513,7 +513,7 @@ class QuadPulsar extends Pulse{
         	    
         public $intercept = 2; //as it should be, but here they CAN combine vs same shot!
 	    
-	public $rangePenalty = 2;
+		public $rangePenalty = 2;
         public $fireControl = array(5, 2, 0); // fighters, <mediums, <capitals
 	    
 	    public $damageType = "Standard"; 
@@ -599,8 +599,70 @@ class QuadPulsar extends Pulse{
         {
             $this->maxDamage = 13 ;
         }
-    }
+    }//endof Scattergun
 
+
+//Markab fighter weapon - d3 shots (here treated as a single Pulse shot, no grouping bonus)
+class LightScattergun extends ScatterGun{
+	public $name = "LightScattergun";
+	public $displayName = "Light Scattergun";
+	public  $iconPath = "scatterGun.png";
+   
+	public $animation = "bolt";
+	public $animationColor = array(190, 75, 20);
+	
+	public $intercept = 2;	
+	public $rangePenalty = 2; //-2/hex	
+	public $priority = 4;
+
+	//temporary private variables
+	private $multiplied = false;
+	private $alreadyIntercepted = array();
+	
+	function __construct($startArc, $endArc){//more than a single emplacement not supported!
+		$this->defaultShots = 1;
+        $this->shots = 1;							
+		parent::__construct(0, 1, 0, $startArc, $endArc);
+	}    
+		
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+			$this->data["Special"] = "Fires d3 separate shots (actual number rolled at firing resolution).";
+			$this->data["Special"] .= "<br>When fired defensively, a single Scattergun cannot engage the same incoming shot twice (even ballistic one).";
+	}
+    
+	//if fired offensively - make d3 attacks (copies of 1 existing); 
+	//if defensively - make weapon have d3 GUNS (would be temporary, but enough to assign multiple shots for interception)
+	public function beforeFiringOrderResolution($gamedata){
+		if($this->multiplied==true) return;//shots of this weapon are already multiplied
+		$this->multiplied = true;//shots WILL be multiplied in a moment, mark this
+		//is offensive fire declared?...
+		$offensiveShot = null;
+		$noOfShots = Dice::d(3,1); //actual number of shots for this turn
+
+		foreach($this->fireOrders as $fire){
+			if(($fire->type =='normal') && ($fire->turn == $gamedata->turn)) $offensiveShot = $fire;
+		}
+		if($offensiveShot!==null){ //offensive fire declared, multiply!
+			while($noOfShots > 1){ //first shot is already declared!
+				$multipliedFireOrder = new FireOrder( -1, $offensiveShot->type, $offensiveShot->shooterid, $offensiveShot->targetid,
+					$offensiveShot->weaponid, $offensiveShot->calledid, $offensiveShot->turn, $offensiveShot->firingMode,
+					0, 0, 1, 0, 0, null, null
+				);
+				$multipliedFireOrder->addToDB = true;
+				$this->fireOrders[] = $multipliedFireOrder;
+				$noOfShots--;	      
+			}
+		}else{//offensive fire NOT declared, multiply guns for interception!
+			$this->guns = $noOfShots; //d6 intercept shots
+		}
+	} //endof function beforeFiringOrderResolution
+	
+	public function getDamage($fireOrder){        return Dice::d(6,2);   }
+	public function setMinDamage(){     $this->minDamage = 2 ;      }
+	public function setMaxDamage(){     $this->maxDamage = 12 ;      }
+	
+} //end of class LightScattergun
 
 
     class BlastCannonFamily extends Pulse{

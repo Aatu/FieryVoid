@@ -547,7 +547,8 @@ spl_autoload_register(
                 'lightplasma' => '/server/model/weapons/plasma.php',
                 'lightpulse' => '/server/model/weapons/pulse.php',
                 'lightrailgun' => '/server/model/weapons/matter.php',
-                'lightscattergun' => '/server/model/weapons/customs.php',
+//                'lightscattergun' => '/server/model/weapons/customs.php',
+				'lightscattergun' => '/server/model/weapons/pulse.php', //Moved from customs - DK 10/24
                 'lightship' => '/server/model/ships/ShipClasses.php',
                 'liner' => '/server/model/ships/civilians/liner.php',
                 'linkedweapon' => '/server/model/weapons/linkedWeapon.php',
