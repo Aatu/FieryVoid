@@ -770,8 +770,14 @@ window.weaponManager = {
 		if(weapon.isBoardingAction){
 			return weaponManager.calculateBoardingAction(shooter, target, weapon);			
 		}
-
 		
+		//Weapons like Mass Drivers have special criteria for targets and shooter speed etc.
+		if(weapon.targetsImmobile){ //Target must be en
+			var ownSpeed = shipManager.movement.getSpeed(shooter);
+			var targetSpeed = shipManager.movement.getSpeed(target);
+			if(!target.Enormous || ownSpeed > 0 || targetSpeed > 0)	return 0;	
+		}
+			
 		if(weapon.autoHit) return 100; //Some weapons always hit, let's just show 100% chance to prevent confusion at firing. DK - 12 Apr 2024
 			
 	    var defence = 0;
