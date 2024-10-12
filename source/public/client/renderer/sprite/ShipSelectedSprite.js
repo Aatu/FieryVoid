@@ -40,8 +40,8 @@ window.ShipSelectedSprite = function () {
         TEXTURE_ALLY = createTexture('ally', false);
         TEXTURE_ALLY_SELECTED = createTexture('ally', true);
         TEXTURE_ENEMY = createTexture('enemy', false);
-        TEXTURE_ENEMY_SELECTED = createTexture('enemy', true);
-        TEXTURE_NEUTRAL = createTexture('neutral', false);
+        TEXTURE_ENEMY_SELECTED = createTexture('enemy', true); //Actually use this somehow for enemies moving this turn.
+        TEXTURE_NEUTRAL = createTexture('neutral', true);
     }
 
     function createTexture(type, selected) {
@@ -49,9 +49,13 @@ window.ShipSelectedSprite = function () {
         var context = canvas.getContext("2d");
         getColorByType(context, type, selected);
 
-        if (selected) {
-            window.graphics.drawDottedCircle(context, TEXTURE_SIZE / 2, TEXTURE_SIZE / 2, TEXTURE_SIZE * 0.25, TEXTURE_SIZE * 0.30, 16, 0.3);
-        } else {
+        if (selected && type == 'ally') {
+            window.graphics.drawDottedCircle(context, TEXTURE_SIZE / 2, TEXTURE_SIZE / 2, TEXTURE_SIZE * 0.23, TEXTURE_SIZE * 0.30, 16, 0.3);
+        } else if (selected && type == 'enemy') {
+            window.graphics.drawDottedCircle(context, TEXTURE_SIZE / 2, TEXTURE_SIZE / 2, TEXTURE_SIZE * 0.23, TEXTURE_SIZE * 0.30, 10, 0.20);      
+		} else if (selected && type == 'neutral') {
+            window.graphics.drawDottedCircle(context, TEXTURE_SIZE / 2, TEXTURE_SIZE / 2, TEXTURE_SIZE * 0.22, TEXTURE_SIZE * 0.26, 4, 0.15);      
+		} else {
             window.graphics.drawCircleAndFill(context, TEXTURE_SIZE / 2, TEXTURE_SIZE / 2, TEXTURE_SIZE * 0.30, 4);
         }
 
@@ -65,15 +69,21 @@ window.ShipSelectedSprite = function () {
 
         var a = -0.1;
 
-        if (type == "ally") {
+        if (type == "ally" && selected) {
+            context.strokeStyle = "rgba(78,220,25," + (0.60 + a) + ")";
+            context.fillStyle = "rgba(78,220,25," + (0.40 + a) + ")";
+        } else if (type == "ally") {
             context.strokeStyle = "rgba(78,220,25," + (0.50 + a) + ")";
             context.fillStyle = "rgba(78,220,25," + (0.30 + a) + ")";
+        } else if (type == "enemy" && selected) {
+            context.strokeStyle = "rgba(229,87,38," + (0.80 + a) + ")";
+            context.fillStyle = "rgba(229,87,38," + (0.50 + a) + ")";
         } else if (type == "enemy") {
             context.strokeStyle = "rgba(229,87,38," + (0.70 + a) + ")";
-            context.fillStyle = "rgba(229,87,38," + (0.60 + a) + ")";
+            context.fillStyle = "rgba(229,87,38," + (0.30 + a) + ")";
         } else {
-            context.strokeStyle = "rgba(144,185,208,0.90)";
-            context.fillStyle = "rgba(255,255,255,0.30)";
+            context.strokeStyle = "rgba(255,194,102,0.45)";
+            context.fillStyle = "rgba(255,194,102,0.25)";
         }
     }
 
