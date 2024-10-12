@@ -49,6 +49,7 @@ window.ShipSelectedSprite = function () {
         var context = canvas.getContext("2d");
         getColorByType(context, type, selected);
 
+		//Separate these so we can give different type of dotted circles different number of segments - DK 10/24
         if (selected && type == 'ally') {
             window.graphics.drawDottedCircle(context, TEXTURE_SIZE / 2, TEXTURE_SIZE / 2, TEXTURE_SIZE * 0.23, TEXTURE_SIZE * 0.30, 16, 0.3);
         } else if (selected && type == 'enemy') {
