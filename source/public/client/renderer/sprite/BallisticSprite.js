@@ -12,7 +12,6 @@ window.BallisticSprite = function () {
     var TEXTURE_HEX_GREEN_EXCLAMATION = null; // New texture
     
 /* //Older methods that don't accommodate text/image or just accommodate text inside hex icons
-
 	function BallisticSprite(position, type, text = "", textColour = "#aaaa00") {
 	    HexagonSprite.call(this, -2);
 
@@ -44,9 +43,9 @@ window.BallisticSprite = function () {
 	    this.setPosition(position);
 	}
 */	
- 	//Alternative method if we want to add images to the hex icons in future. DK.
+
     function BallisticSprite(position, type, text = "", textColour = "#ffffff", imageSrc = null) {
-        HexagonSprite.call(this, -2);
+        HexagonSprite.call(this, -3);
 
         // If an image source is provided, create a texture with the image
         if (imageSrc) {
