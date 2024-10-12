@@ -281,6 +281,19 @@ window.gamedata = {
 	
 	/*checks fleet composition and displays alert with result*/
     checkChoices: function(){
+
+		//block if player already has confirmed fleet (in any slot)
+		for (var i in gamedata.slots)  { //check all slots
+			var checkSlot = gamedata.slots[i];
+			if (checkSlot.lastphase == "-2") { //this slot has ready fleet
+				var player = playerManager.getPlayerInSlot(checkSlot);
+				if (player.id == gamedata.thisplayer){
+					window.confirm.error("You have already confirmed Your fleet for this game!", function () {});
+					return;
+				}
+			}
+		}
+
 		var warningText = ""
 	    var checkResult = "";
 	    var problemFound = false;
@@ -1561,18 +1574,30 @@ window.gamedata = {
         return null;
     },
 
-onReadyClicked: function onReadyClicked() {
-    var points = gamedata.calculateFleet();
+	onReadyClicked: function onReadyClicked() {
+	    var points = gamedata.calculateFleet();
 
-    if (points == 0) {
-        window.confirm.error("You have to buy at least one ship!", function () {});
-        return;
-    }
-    // Pass the submission function as a callback, not invoke it immediately
-    confirm.confirm("Are you sure you wish to ready your fleet?", function () {
-        ajaxInterface.submitGamedata();
-    });
-},
+		//block if player already has confirmed fleet (in any slot)
+		for (var i in gamedata.slots)  { //check all slots
+			var checkSlot = gamedata.slots[i];
+			if (checkSlot.lastphase == "-2") { //this slot has ready fleet
+				var player = playerManager.getPlayerInSlot(checkSlot);
+				if (player.id == gamedata.thisplayer){
+					window.confirm.error("You have already confirmed Your fleet for this game!", function () {});
+					return;
+				}
+			}
+		}
+
+	    if (points == 0) {
+	        window.confirm.error("You have to buy at least one ship!", function () {});
+	        return;
+	    }
+	    // Pass the submission function as a callback, not invoke it immediately
+	    confirm.confirm("Are you sure you wish to ready your fleet?", function () {
+	        ajaxInterface.submitGamedata();
+	    });
+	},
 
     onLeaveClicked: function onLeaveClicked() {
         window.location = "gamelobby.php?gameid=" + gamedata.gameid + "&leave=true";
