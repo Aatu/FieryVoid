@@ -1561,16 +1561,18 @@ window.gamedata = {
         return null;
     },
 
-    onReadyClicked: function onReadyClicked() {
-        var points = gamedata.calculateFleet();
+onReadyClicked: function onReadyClicked() {
+    var points = gamedata.calculateFleet();
 
-        if (points == 0) {
-            window.confirm.error("You have to buy at least one ship!", function () {});
-            return;
-        }
-
+    if (points == 0) {
+        window.confirm.error("You have to buy at least one ship!", function () {});
+        return;
+    }
+    // Pass the submission function as a callback, not invoke it immediately
+    confirm.confirm("Are you sure you wish to ready your fleet?", function () {
         ajaxInterface.submitGamedata();
-    },
+    });
+},
 
     onLeaveClicked: function onLeaveClicked() {
         window.location = "gamelobby.php?gameid=" + gamedata.gameid + "&leave=true";
