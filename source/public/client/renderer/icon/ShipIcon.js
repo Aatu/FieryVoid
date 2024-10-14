@@ -379,26 +379,97 @@ window.ShipIcon = function () {
         return null;
     };
 
-    ShipIcon.prototype.showWeaponArc = function (ship, weapon) {
+	ShipIcon.prototype.showWeaponArc = function (ship, weapon) {
+	    var hexDistance = window.coordinateConverter.getHexDistance();
 
-        var hexDistance = window.coordinateConverter.getHexDistance();
-        var dis = weapon.rangePenalty === 0 ? hexDistance * weapon.range : 50 / weapon.rangePenalty * hexDistance;
-        var arcs = shipManager.systems.getArcs(ship, weapon);
+	    if (weapon instanceof Thruster) { //When 'weapon' system is a Thruster, displays small thruster icon on approriate location in relation to ship  - DK 10/24
+	        var graphicSize = 40; // Adjust the size of your graphic as needed
+	        var textureLoader = new THREE.TextureLoader();
 
-        var arcLenght = arcs.start === arcs.end ? 360 : mathlib.getArcLength(arcs.start, arcs.end);
-        var arcStart = mathlib.addToDirection(0, arcLenght * -0.5);
-        var arcFacing = mathlib.addToDirection(arcs.end, arcLenght * -0.5);
+	        textureLoader.load("./img/systemicons/thrusterICON.png", (graphicTexture) => {
+	            // Create a PlaneGeometry for the graphic
+	            var geometry = new THREE.PlaneGeometry(graphicSize, graphicSize);
+	            var material = new THREE.MeshBasicMaterial({
+	                map: graphicTexture,
+	                transparent: true,
+	                opacity: 0.75 // Set the desired opacity
+	            });
 
-        var geometry = new THREE.CircleGeometry(dis, 32, mathlib.degreeToRadian(arcStart), mathlib.degreeToRadian(arcLenght));
-        var material = new THREE.MeshBasicMaterial({ color: new THREE.Color("rgb(20,80,128)"), opacity: 0.5, transparent: true });
-        var circle = new THREE.Mesh(geometry, material);
-        circle.rotation.z = mathlib.degreeToRadian(-mathlib.addToDirection(arcFacing, -this.getFacing()));
-        circle.position.z = -1;
-        this.mesh.add(circle);
-        this.weaponArcs.push(circle);
+	            // Create a Mesh with the geometry and material
+	            var meshGraphic = new THREE.Mesh(geometry, material);
 
-        return null;
-    };
+	            // Get the ship's current facing angle
+	            var shipFacing = this.getFacing(); // Get facing in degrees
+
+	            // Determine the offset based on weapon.direction
+	            var offsetDistance = 80; // Adjust this value as needed for positioning
+	            var offsetX = 0;
+	            var offsetY = 0;
+				var rolled = shipManager.movement.isRolled(ship);
+				var rollAdd = 0;
+				if(rolled) rollAdd = 180;			
+				
+	            switch (weapon.direction) {
+	                case 1:
+	                    offsetX = Math.cos(mathlib.degreeToRadian(shipFacing)) * offsetDistance;
+	                    offsetY = Math.sin(mathlib.degreeToRadian(shipFacing)) * offsetDistance;
+	                    break;
+	                case 2:
+	                    offsetX = Math.cos(mathlib.degreeToRadian(shipFacing + 180)) * offsetDistance; // Back
+	                    offsetY = Math.sin(mathlib.degreeToRadian(shipFacing + 180)) * offsetDistance;
+	                    break;
+	                case 3:
+	                    offsetX = Math.cos(mathlib.degreeToRadian(shipFacing + 90 + rollAdd)) * offsetDistance; 
+	                    offsetY = Math.sin(mathlib.degreeToRadian(shipFacing + 90 + rollAdd)) * offsetDistance;
+	                    break;
+	                case 4:
+	                    offsetX = Math.cos(mathlib.degreeToRadian(shipFacing + 270 + rollAdd)) * offsetDistance; 
+	                    offsetY = Math.sin(mathlib.degreeToRadian(shipFacing + 270 + rollAdd)) * offsetDistance;
+	                    break;
+	                default:
+	                    offsetX = 0; 
+	                    offsetY = 0;
+	                    break;
+	            }
+
+	            // Calculate the final position
+	            meshGraphic.position.set(offsetX, offsetY, 1); 
+
+	            // Set rotation for the graphic to match the ship's facing
+	            var arcs = shipManager.systems.getArcs(ship, weapon);
+	            var arcLength = arcs.start === arcs.end ? 360 : mathlib.getArcLength(arcs.start, arcs.end);
+	            var arcFacing = mathlib.addToDirection(arcs.end, arcLength * -0.5);
+
+	            // Calculate the rotation
+				meshGraphic.rotation.z = mathlib.degreeToRadian(-mathlib.addToDirection(arcFacing, -this.getFacing()));            	
+
+	            // Add the mesh graphic to the parent mesh
+	            this.mesh.add(meshGraphic);
+
+	            // Optional: If you need to track it for later removal
+	            this.weaponArcs.push(meshGraphic);
+	        }, undefined, (error) => {
+	            console.error("Error loading texture:", error);
+	        });
+	    } else { //Normal code to show weapon arc.
+	        var dis = weapon.rangePenalty === 0 ? hexDistance * weapon.range : 50 / weapon.rangePenalty * hexDistance;
+	        var arcs = shipManager.systems.getArcs(ship, weapon);
+	        var arcLength = arcs.start === arcs.end ? 360 : mathlib.getArcLength(arcs.start, arcs.end);
+	        
+	        var arcStart = mathlib.addToDirection(0, arcLength * -0.5);
+	        var arcFacing = mathlib.addToDirection(arcs.end, arcLength * -0.5);
+
+	        var geometry = new THREE.CircleGeometry(dis, 32, mathlib.degreeToRadian(arcStart), mathlib.degreeToRadian(arcLength));
+	        var material = new THREE.MeshBasicMaterial({ color: new THREE.Color("rgb(20,80,128)"), opacity: 0.5, transparent: true });
+	        var circle = new THREE.Mesh(geometry, material);
+	        circle.rotation.z = mathlib.degreeToRadian(-mathlib.addToDirection(arcFacing, -this.getFacing()));
+	        circle.position.z = -1;
+	        this.mesh.add(circle);
+	        this.weaponArcs.push(circle);
+	    }
+
+	    return null;
+	};
 
     ShipIcon.prototype.hideWeaponArcs = function () {
         this.weaponArcs.forEach(function (arc) {

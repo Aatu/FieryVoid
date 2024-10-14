@@ -299,13 +299,12 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
         public $displayName = "Psionic Torpedo";
         public $iconPath = "PsionicTorpedo.png";                
   	  	public $animation = "torpedo";
-        public $animationColor = array(128, 0, 0);
-//   		public $animationExplosionScale = 0.6;         
+        public $animationColor = array(128, 0, 0);        
 
         public $range = 50;
         public $loadingtime = 2;
         
-        public $weaponClass = "Electromagnetic"; //deals Plasma, not Ballistic, damage. Should be Ballistic(Plasma), but I had to choose ;)
+        public $weaponClass = "Psychic";
         public $damageType = "Standard";     
                 
         public $fireControl = array(null, 4, 5); // fighters, <mediums, <capitals 
@@ -362,7 +361,7 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
 		if ($system->advancedArmor){		
 			$effectEW = ceil($effectEW/2);//Other Ancients are somewhat resistant to pyschic attack from Thirdspace Aliens, 50% effect.		
 			$effectIni = ceil($effectIni/2);  	
-			$effectPower = ceil($effectPower/2);			
+			$effectPower = 0; //Reducing power in Vorlons can make it impossible for them to commit Initial Orders.		
 		}
 
 		if ($ship instanceof FighterFlight){  //No additional effect on fighters beyond flash damage.			

@@ -149,12 +149,12 @@ window.ShipTooltip = function () {
 	if (ship.agile && (!ship.flight)){
 		if (shipManager.movement.hasRolled(ship)){
 			toDisplay += 'Has rolled; ';
-			rollPivotModifier -= 15;
+			if(!ship.ignoreManoeuvreMods) rollPivotModifier -= 15;
 		}
-	}else if (!ship.flight){
+	}else if ((!ship.flight)){
 		if (shipManager.movement.isRolling(ship)){
 			toDisplay += 'Rolling; ';
-			rollPivotModifier -= 15;
+			if(!ship.ignoreManoeuvreMods) rollPivotModifier -= 15;
 		}
 	}
 	if ((!ship.flight) && shipManager.movement.isRolled(ship)) toDisplay += 'Rolled; '; //fighters don't roll, no point looking for it
@@ -163,11 +163,11 @@ window.ShipTooltip = function () {
 		rollPivotModifier -= 50;
 	}
 	if (ship.flight === true){		
-		if (shipManager.movement.hasCombatPivoted(ship)) rollPivotModifier -= 5;
+		if (shipManager.movement.hasCombatPivoted(ship) && (!ship.ignoreManoeuvreMods)) rollPivotModifier -= 5;
 	}else if (ship.osat){
 		if (shipManager.movement.hasTurned(ship)) rollPivotModifier -= 5;
 	}else{
-		if (shipManager.movement.hasPivotedForShooting(ship)) rollPivotModifier -= 15;
+		if (shipManager.movement.hasPivotedForShooting(ship) && (!ship.ignoreManoeuvreMods)) rollPivotModifier -= 15;
 	}
 	if (rollPivotModifier!=0) toDisplay += 'Firing modifier: ' + rollPivotModifier; //display firing modifier from roll/pivot/combat pivot
 	
@@ -225,21 +225,38 @@ window.ShipTooltip = function () {
             }
 
             if (shipManager.isElint(this.selectedShip)){
-                this.addEntryElement('DIST: ' + ew.getOffensiveEW(this.selectedShip, ship, "DIST") / 3, this.selectedShip !== ship && ship.flight !== true);
+				if(shipManager.hasSpecialAbility(this.selectedShip, "ConstrainedEW")){//Mindrider ships have less efficient ELINT abilities - DK 19.07.24.            	
+					this.addEntryElement('DIST: ' + ew.getOffensiveEW(this.selectedShip, ship, "DIST") / 4, this.selectedShip !== ship && ship.flight !== true);
+				}else{
+					this.addEntryElement('DIST: ' + ew.getOffensiveEW(this.selectedShip, ship, "DIST") / 3, this.selectedShip !== ship && ship.flight !== true);
+				}
             }
         }
-
+			
+/* 		
         if (ew.getSupportedDEW(ship)) {
             this.addEntryElement('Support DEW: ' + ew.getSupportedDEW(ship), ship.flight !== true);
         }
+*/
+		if (ew.getSupportedDEW(ship)) {//Amended because Mindrider Constrained EW can create over 2 decimal places in Ship Tooltip! DK - 20.7.24	
+		    var dewValue = ew.getSupportedDEW(ship).toFixed(2);
+		    this.addEntryElement('Support DEW: ' + dewValue, ship.flight !== true);
+		}
 
         if (shipManager.isElint(ship)){
             this.addEntryElement('Blanket DEW: ' + ew.getEWByType('BDEW', ship), ship.flight !== true);
         }
 
         this.addEntryElement('DEW: ' + ew.getDefensiveEW(ship) + ' CCEW: ' + ew.getCCEW(ship), ship.flight !== true);
-        var fDef = weaponManager.calculateBaseHitChange(ship, ship.forwardDefense) * 5;
-        var sDef = weaponManager.calculateBaseHitChange(ship, ship.sideDefense) * 5;
+//      var fDef = weaponManager.calculateBaseHitChange(ship, ship.forwardDefense) * 5;
+//      var sDef = weaponManager.calculateBaseHitChange(ship, ship.sideDefense) * 5;
+
+		//Amended because Mindrider Constrained EW can create over 2 decimal places in Ship Tooltip! DK - 20.7.24
+		var fDef = weaponManager.calculateBaseHitChange(ship, ship.forwardDefense) * 5;
+		fDef = parseFloat(fDef.toFixed(2));
+		var sDef = weaponManager.calculateBaseHitChange(ship, ship.sideDefense) * 5;
+		sDef = parseFloat(sDef.toFixed(2)); 
+		
         this.addEntryElement("Defence (F/S): " + fDef + "(" + ship.forwardDefense * 5 + ") / " + sDef + "(" + ship.sideDefense * 5 + ")%");
 
         if (this.selectedShip && this.selectedShip !== ship) {

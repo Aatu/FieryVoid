@@ -719,17 +719,31 @@ window.weaponManager = {
 		var speedDifference = Math.abs(targetSpeed - ownSpeed); //keep it a positive number. 		
 		var freeThrust = shooter.freethrust;
 		
-		if(speedDifference > freeThrust) return 0;//Not enough thrust to compensate for speed difference, automatic miss.		
-          		
-		if(targetSpeed > ownSpeed){//Target is moving faster, what are chances to attach?
-			var speedChance = speedDifference*2;//Each point of speed differnece equates to 10% chance to miss.
-			var newHitchance = hitChance - speedChance;//Take current hitChance, and remove speed differenc penalty.
-        	hitChance = Math.round(newHitchance * 5);//Convert to % value			
-			return hitChance;			
-		}else{
-        	hitChance = Math.round(hitChance * 5);	//Convert to % value				
-			return hitChance;
-		}			
+		if(shooter.flight){	//Breaching Pods.	
+			if(speedDifference > freeThrust) return 0;//Not enough thrust to compensate for speed difference, automatic miss.		
+	          		
+			if(targetSpeed > ownSpeed){//Target is moving faster, what are chances to attach?
+				var speedChance = speedDifference*2;//Each point of speed differnece equates to 10% chance to miss.
+				var newHitchance = hitChance - speedChance;//Take current hitChance, and remove speed difference penalty.
+	        	hitChance = Math.round(newHitchance * 5);//Convert to % value			
+				return hitChance;			
+			}else{
+	        	hitChance = Math.round(hitChance * 5);	//Convert to % value				
+				return hitChance;
+			}			
+		}else{ //Grapple Ships
+        	if (target.iniative > shooter.iniative) return 0;//Cannot grapple ships which rolled equal or higher initiative than you.		
+			if(speedDifference > 0){//Check Speed difference
+				var speedChance = speedDifference;//Each point of speed difference equates to 5% chance to miss.
+				var newHitchance = hitChance - speedChance;//Take current hitChance, and remove speed difference penalty.
+				if(target.Enormous) $newHitchance += 2;//You can't attach to Enormous Units without auto-ramming, but at least you get a bonus :)
+	        	hitChance = Math.round(newHitchance * 5);//Convert to % value			
+				return hitChance;			
+			}else{
+	        	hitChance = Math.round(hitChance * 5);	//Convert to % value				
+				return hitChance;
+			}			
+		}
 
     }, //endof calculateBoardingAction
 
@@ -756,8 +770,14 @@ window.weaponManager = {
 		if(weapon.isBoardingAction){
 			return weaponManager.calculateBoardingAction(shooter, target, weapon);			
 		}
-
 		
+		//Weapons like Mass Drivers have special criteria for targets and shooter speed etc.
+		if(weapon.targetsImmobile){ //Target must be en
+			var ownSpeed = shipManager.movement.getSpeed(shooter);
+			var targetSpeed = shipManager.movement.getSpeed(target);
+			if(!target.Enormous || ownSpeed > 0 || targetSpeed > 0)	return 0;	
+		}
+			
 		if(weapon.autoHit) return 100; //Some weapons always hit, let's just show 100% chance to prevent confusion at firing. DK - 12 Apr 2024
 			
 	    var defence = 0;
@@ -831,23 +851,23 @@ window.weaponManager = {
 				mod -= shipManager.movement.getJinking(shooter);
 			}
 
-            if (shipManager.movement.hasCombatPivoted(shooter)) mod--;
+            if (shipManager.movement.hasCombatPivoted(shooter) && (!shooter.ignoreManoeuvreMods)) mod--;
         } else {
 			if (shooter.agile === true){
 				if (shipManager.movement.hasRolled(shooter)) {
 					//		console.log("is rolling -3");
-					mod -= 3;
+					if(!shooter.ignoreManoeuvreMods) mod -= 3;
 				}
 			} else {
 				if (shipManager.movement.isRolling(shooter)) {
 					//		console.log("is rolling -3");
-					mod -= 3;
+					if(!shooter.ignoreManoeuvreMods) mod -= 3;
 				}
 			}
 
             if (shipManager.movement.hasPivotedForShooting(shooter)) {
                 //		console.log("pivoting");
-                mod -= 3;
+                if(!shooter.ignoreManoeuvreMods) mod -= 3;
             }
 
             if (shooter.osat && shipManager.movement.hasTurned(shooter)) {
@@ -1353,6 +1373,13 @@ window.weaponManager = {
                 type = 'ballistic';
             }
 
+            if (weapon.reinforceAmount > 0){ //22.07.24 - New statement to add check and change reinforce amount for Mindrider Shield Reinforcement!
+				if(!weapon.confirmReinforcement(selectedShip, ship)){
+				    confirm.error("You do not have enough capacity to reinforce allied unit's shields by that amount.");
+      				return;	
+				}	
+            }
+
             if (weaponManager.isOnWeaponArc(selectedShip, ship, weapon)) {
                 debug && console.log("is on arc");
                 if (weaponManager.checkIsInRange(selectedShip, ship, weapon)) {
@@ -1413,6 +1440,20 @@ window.weaponManager = {
         }
 
         webglScene.customEvent('ShipTargeted', {shooter: selectedShip, target: ship, weapons: toUnselect})
+        
+        //Reset Movement UI after moment of targeting, to prevent cancel of last Combat Pivot AFTER locking target! - DK 10.24
+        if(gamedata.gamephase == 3 && selectedShip.flight){
+            UI.shipMovement.drawShipMovementUI(selectedShip);        	 	
+        }
+		
+		//Add new warning for when people ignore tooltip and try to ram when they possibly shouldn't - DK 10/24
+		if (weapon.isRammingAttack && (!weapon.designedToRam)) { //No warning for ships designed to ram!	
+	            var html = '';		
+		        html += "WARNING - Ramming Attacks should only be used in scenarios where they are specifically permitted.";
+		        html += "<br>";
+				confirm.warning(html);			
+		}
+		
     },
 
 	    
@@ -1620,7 +1661,8 @@ window.weaponManager = {
         for (var i in fires) {
             var fire = fires[i];
             var weapon = shipManager.systems.getSystem(ship, fire.weaponid);
-            if (fire.turn == gamedata.turn && !fire.rolled && !weapon.ballistic) {
+			//Added Persistent effect check below, as was preventing cancel moves when non-ballistic Plasma Web generated a plasma cloud in Intial Orders - DK 09.24 
+            if (fire.turn == gamedata.turn && !fire.rolled && !weapon.ballistic && fire.notes != 'Persistent Effect') { 
                 return false;
             }
         }

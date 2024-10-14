@@ -23,6 +23,15 @@ ShipSystem.prototype.initializationUpdate = function () { //for all systems, not
 ShipSystem.prototype.hasMaxBoost = function () {
 				return false;
 };
+
+ShipSystem.prototype.onBoostIncrease = function () {
+				return;
+};
+
+ShipSystem.prototype.onBoostDecrease = function () {
+				return;
+};    
+
 ShipSystem.prototype.isScanner = function () {
 				return false;
 };

@@ -161,7 +161,7 @@
         public $animationExplosionScale = 0.90;
 	*/
 		public $noInterceptDegradation = true;
-        //public $targetImmobile = true;
+        public $targetsImmobile = true;
         
         public $loadingtime = 4;
 		
@@ -175,10 +175,10 @@
 		}else{
 			$this->data["Special"] .= '<br>';
 		}
-		$this->data["Special"] .= "Weapon misses automatically except vs speed 0 Enormous units. "     
-			."<br>Weapon misses automatically if launching unit speed is > 0. "  
-			."<br>Weapon always hits Structure. "
-			."<br>Weapon can be intercepted without degradation (like ballistics). "; 
+		$this->data["Special"] .= "Weapon misses automatically except vs Speed 0 Enormous units. "     
+			."<br>Weapon also misses automatically if launching unit speed is > 0. "  
+			."<br>Weapon always hits Structure."
+			."<br>Weapon can be intercepted without degradation (like ballistics)."; 
 	}	    
 
 	    

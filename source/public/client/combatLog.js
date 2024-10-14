@@ -90,15 +90,29 @@ window.combatLog = {
 
         var intertext = "";
         //if (shotsintercepted > 0) intertext = ", " + shotsintercepted + " intercepted";
-		if (shotsintercepted > 0) intertext = ", " + ordersCintercepted + '(' + shotsintercepted + ") intercepted";
-
+		//if (shotsintercepted > 0) intertext = ", " + ordersCintercepted + '(' + shotsintercepted + ") intercepted";
+		if (shotsintercepted > 0){
+			if(ordersC != shots){
+			 	intertext = ", " + ordersCintercepted + '(' + shotsintercepted + ") intercepted";
+			}else{
+				if (shotsintercepted > 0) intertext = ", " + shotsintercepted + " intercepted";				
+			}	
+		}
+		
         var targettext = "";
         if (target) targettext = '<span> at </span><span class="shiplink target" data-id="' + target.id + '" >' + target.name + '</span>';
 
         var shottext = "";
         //if (target) shottext = ', ' + shotshit + '/' + shots + ' shots hit' + intertext + '.';
-		if (target) shottext = ', ' + ordersChit + '(' +shotshit + ')/' + ordersC + '(' +shots + ') shots hit' + intertext + '.';
-
+		//if (target) shottext = ', ' + ordersChit + '(' +shotshit + ')/' + ordersC + '(' +shots + ') shots hit' + intertext + '.';
+		if (target){
+			if(ordersC != shots){
+			 shottext = ', ' + ordersChit + '(' +shotshit + ')/' + ordersC + '(' +shots + ') shots hit' + intertext + '.';
+			}else{
+			shottext = ', ' + shotshit + '/' + shots + ' shots hit' + intertext + '.';				
+			}	
+		}
+		
         var notestext = "";
         if (notes) notestext = '<span class="pubotes">' + notes + '</span>';
 

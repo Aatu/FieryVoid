@@ -853,6 +853,8 @@ window.shipWindowManager = {
 		var bdew = ew.getBDEW(ship) * 0.25;
 		var elint = shipManager.isElint(ship);
 
+		if(shipManager.hasSpecialAbility(ship, "ConstrainedEW")) bdew = ew.getBDEW(ship) * 0.2;//Mindrider ships have less efficient ELINT abilities - DK 19.07.24.
+		
 		if (!shipwindow) {
 			shipwindow = ship.shipStatusWindow;
 		}
@@ -899,11 +901,15 @@ window.shipWindowManager = {
 			if (entry.type == "SOEW") {
 				element.find(".button2").remove();
 				element.find(".value").html(entry.amount);
+			} else if((entry.type == "SDEW") && (shipManager.hasSpecialAbility(ship, "ConstrainedEW")))	{ 
+				element.find(".value").html(entry.amount * 0.33);		
 			} else if (entry.type == "SDEW") {
 				element.find(".value").html(entry.amount * 0.5);
+			} else if((entry.type == "DIST") && (shipManager.hasSpecialAbility(ship, "ConstrainedEW")))	{ 
+				element.find(".value").html(entry.amount / 4);			
 			} else if (entry.type == "DIST") {
 				element.find(".value").html(entry.amount / 3);
-			} else if (entry.type == "OEW") {
+			}else if (entry.type == "OEW") {
 				element.find(".value").html(entry.amount - ew.getDistruptionEW(ship));
 			} else {
 				element.find(".value").html(entry.amount);
@@ -1467,6 +1473,9 @@ window.shipWindowManager = {
 			webglScene.customEvent("ShipMovementChanged", { ship: ship });
 			window.webglScene.customEvent("AssignThrust", false)
 		}
+        //For Contraction, need to amend level for first order.
+        if(movement.type == "contract") shipManager.movement.amendContractValue(ship, movement.value);
+
 	},
 
 	cancelAssignThrustEvent: function cancelAssignThrustEvent(ship) {

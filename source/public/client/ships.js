@@ -828,6 +828,28 @@ window.shipManager = {
         return false;
     },
 
+    checkConstantPivot: function checkConstantPivot() {
+		var pivotShips = [];
+		var counter = 0;
+		for (var i in gamedata.ships) {
+			var ship = gamedata.ships[i];
+			if (!ship.mustPivot) continue;//Ignore everything but ships that HAVE to pivot.
+			if (ship.unavailable) continue;
+			if (ship.flight) continue;
+			if (ship.userid != gamedata.thisplayer) continue;					
+			if (shipManager.isDestroyed(ship)) continue;
+
+	    var hasPivoted = shipManager.movement.hasPivoted(ship);
+			if (hasPivoted.right) continue;
+			if (hasPivoted.left) continue;	
+				
+			pivotShips[counter] = ship;
+			counter++;							
+		}
+			return pivotShips;
+    },
+
+
     isEscorting: function isEscorting(ship, target) {
         if (!ship.flight) return false;
         //var ships = shipManager.getShipsInSameHex(ship);

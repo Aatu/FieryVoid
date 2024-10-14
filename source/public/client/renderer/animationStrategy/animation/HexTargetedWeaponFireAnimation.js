@@ -94,7 +94,7 @@ window.HexTargetedWeaponFireAnimation = function () {
         var duration = shot.getDuration();
 
         this.animations.push(shot);
-        if (hit) {
+        if (hit || weapon instanceof ThoughtWave) {
             var explosion = new Explosion(this.particleEmitterContainer, {
                 size: 60 * weapon.animationExplosionScale,
                 position: endPosition,

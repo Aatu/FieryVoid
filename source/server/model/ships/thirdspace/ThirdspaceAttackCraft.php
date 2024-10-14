@@ -24,7 +24,7 @@ class ThirdspaceAttackCraft extends LCV{ //Actually an LCV.
 	    
 	$this->turncost = 0.25;
 	$this->turndelaycost = 0.25;
-	$this->accelcost = 2;
+	$this->accelcost = 1;
 	$this->rollcost = 1;
 	$this->pivotcost = 1;
 	$this->iniativebonus = 15 *5;
@@ -45,7 +45,7 @@ class ThirdspaceAttackCraft extends LCV{ //Actually an LCV.
 		$sensors->markThirdspace();
 		$this->addPrimarySystem($sensors);
 	$this->addPrimarySystem(new JumpEngine(5, 8, 4, 8));//Added a small jump drive, how they travel is unknown but if White Star can house a jump drive it's not unfeasible Thirdspace aliens would have a FTL drive on their smaller craft.
-	$this->addPrimarySystem(new Engine(5, 12, 0, 12, 2));
+	$this->addPrimarySystem(new Engine(5, 12, 0, 10, 1));
 	$this->addPrimarySystem(new ThirdspaceShieldGenerator(5, 8, 0, 10)); //$armor, $maxhealth, $power used, output	
     $this->addPrimarySystem(new ThirdspaceSelfRepair(5, 8, 4)); //armor, structure, output 	
 

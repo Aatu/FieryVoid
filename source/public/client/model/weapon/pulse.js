@@ -72,6 +72,12 @@ var ScatterGun = function ScatterGun(json, ship) {
 ScatterGun.prototype = Object.create(Weapon.prototype);
 ScatterGun.prototype.constructor = ScatterGun;
 
+var LightScattergun = function LightScattergun(json, ship) {
+    Weapon.call(this, json, ship);
+};
+LightScattergun.prototype = Object.create(Weapon.prototype);
+LightScattergun.prototype.constructor = LightScattergun;
+
 var LtBlastCannon = function LtBlastCannon(json, ship) {
     Pulse.call(this, json, ship);
 };
@@ -116,5 +122,15 @@ var PhasingPulseCannonH = function PhasingPulseCannonH(json, ship) {
 PhasingPulseCannonH.prototype = Object.create(PhasingPulseCannon.prototype);
 PhasingPulseCannonH.prototype.constructor = PhasingPulseCannonH;
 
+var UltraPulseCannon = function UltraPulseCannon(json, ship) {
+    Pulse.call(this, json, ship);
+};
+UltraPulseCannon.prototype = Object.create(Pulse.prototype);
+UltraPulseCannon.prototype.constructor = UltraPulseCannon;
 
+var TriopticPulsar = function TriopticPulsar(json, ship) {
+    Pulse.call(this, json, ship);
+};
+TriopticPulsar.prototype = Object.create(Pulse.prototype);
+TriopticPulsar.prototype.constructor = TriopticPulsar;
 

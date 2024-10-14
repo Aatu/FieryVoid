@@ -14,7 +14,6 @@ class VaklarAM extends HeavyCombatVessel{
 // 		$this->unofficial = 'S'; //design released after AoG demise
 
 	    $this->notes = 'Atmospheric Capable.';
-		$this->notes .= "<br>Official Vaklar Logistics Frigate with Ballistic Mine replaced by Proximity Laser"; 
         
         $this->forwardDefense = 12;
         $this->sideDefense = 12;

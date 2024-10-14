@@ -97,6 +97,8 @@ VICTORY CONDITIONS: Last unit on map / Last ship on map / More forces remaining 
                                 <input class ="spacey tinySize" data-validation="^-{0,1}[0-9]+$" data-default ="0" type="text" name="spacey" value="0">   
 				    &nbsp;&nbsp;
 				    <span class="clickable setsizeknifefight">Resize: Knife Fight</span> <!-- button switching map dimensions -->
+				    &nbsp;&nbsp;
+				    <span class="clickable setswitchsizebaseassault">Resize: Base Assault</span> <!-- button switching map dimensions -->				    
 				    &nbsp;&nbsp;<span class="clickable setsizestandard">Resize: Standard</span> <!-- button switching map dimensions -->
                             </span>
                         </div>
@@ -104,7 +106,7 @@ VICTORY CONDITIONS: Last unit on map / Last ship on map / More forces remaining 
                   -->
                     </div>
                 </div>
-
+<!---
                 <div style="margin-top:20px;"><h3>SIMULTANEOUS MOVEMENT</h3></div>
                 <div id="simultaenousMovement" class="subpanel movementspacecontainer">
                     <div class="slot" >
@@ -113,6 +115,35 @@ VICTORY CONDITIONS: Last unit on map / Last ship on map / More forces remaining 
                         </div>
                     </div>
                 </div>
+-->
+<div style="margin-top:20px;">
+    <h3>SIMULTANEOUS MOVEMENT</h3>
+</div>
+<div id="simultaenousMovement" class="subpanel movementspacecontainer">
+    <div class="slot">
+        <div>
+            <input id="movementcheck" type="checkbox" name="movementcheck">USE SIMULTANEOUS MOVEMENT
+        </div>
+    </div>
+    <div class="slot" id="movementDropdown" style="display:none;">
+        <label for="initiativeSelect">NUMBER OF INITIATIVE GROUPS:</label>
+        <select id="initiativeSelect" name="initiativeCategories">
+            <!-- Dropdown options from 1 to 12 -->
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6" selected>6</option> <!-- Default selection -->
+            <option value="7">7</option>
+            <option value="8">8</option>
+            <option value="9">9</option>
+            <option value="10">10</option>
+            <option value="11">11</option>
+            <option value="12">12</option>
+        </select>
+    </div>
+</div>
                 
                 <div style="margin-top:20px;"><h3>TEAM 1</h3></div>
                 <div id="team1" class="subpanel slotcontainer">
@@ -193,10 +224,15 @@ VICTORY CONDITIONS: Last unit on map / Last ship on map / More forces remaining 
                     </select>
                     <span class="depwidthheader">Width:</span>
                     <input class ="depwidth tinySize" type="text" name="depwidth" value="0">
-                    <span class="depheightheader">Height:</span>
-                    <input class ="depheight tinySize" type="text" name="depheight" value="0">
+                	<span class="depheightheader">Height:</span>
+                	<input class="depheight tinySize" type="text" name="depheight" value="0">                    
+            		<!-- Add a Flexbox container here to align REMOVE SLOT to the right-->
+            		<div class="flex-container">
+                	<span class="clickable close">REMOVE SLOT</span>            
+                    
+                    <!-- options to deploy later do not work correctly, I'm disabling them
                     <span>Turn available:</span>
-                    <input class ="depavailable tinySize" type="text" name="depavailable" value="0">
+                    <input class ="depavailable tinySize" type="text" name="depavailable" value="0">-->
                 </div>
             </div>
         </div>
