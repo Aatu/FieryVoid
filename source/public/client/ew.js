@@ -539,8 +539,9 @@ window.ew = {
             var elint = gamedata.ships[i];
             if (elint == ship || !shipManager.isElint(elint)) continue;
 
-            if (!ew.checkInELINTDistance(target, elint, 30)) continue;
-
+            if (!ew.checkInELINTDistance(target, elint, 30)) continue; //Check distance between target ship and ELINT
+            if (!ew.checkInELINTDistance(ship, elint, 30)) continue; //Check distance between firing ship and ELINT
+            	
             if (!ew.getEWByType("SOEW", elint, ship)) continue;
 
 			jammerValue = ew.getJammerValueFromTo(elint,target);
