@@ -1341,9 +1341,9 @@ class customMphasedBeamAcc extends Weapon{
 
 
 
-
+/*//Moved to Pulse
 class LightScattergun extends Pulse{
-    /*Markab fighter weapon - d3 shots (here treated as a single Pulse shot, no grouping bonus)*/
+    //Markab fighter weapon - d3 shots (here treated as a single Pulse shot, no grouping bonus)
        public $shots = 2; //overridden by Pulse, but still used for estimation of threat for interception
 	public  $iconPath = "scatterGun.png";
 	
@@ -1388,7 +1388,7 @@ class LightScattergun extends Pulse{
 	public function setMinDamage(){     $this->minDamage = 2 ;      }
 	public function setMaxDamage(){     $this->maxDamage = 12 ;      }
 } //end of class LightScattergun
-
+*/
 
 class CustomBPALight extends Weapon{ 
 /*Light Bolt-Pulse Array - custom weapon, combining Light Bolter and Pulse Cannon*/	

@@ -9,6 +9,7 @@ window.ReplayPhaseStrategy = function () {
         this.currentPhase = null;
         this.replayTurn = null;
         this.replayPhase = null;
+		this.hexBallistics = null; //New variable added so that ballisticIcons can be rendered during Replay - DK 10/24        
 
         this.loading = false;
     }
@@ -34,7 +35,7 @@ window.ReplayPhaseStrategy = function () {
         this.shipWindowManager = shipWindowManager;
 
         this.createReplayUI();
-
+        
         startReplayOrRequestGamedata.call(this);
 
         activatePause.call(this);
@@ -213,12 +214,16 @@ window.ReplayPhaseStrategy = function () {
                 time: new Date().getTime()
             },
             success: function (data) {
-                gamedata.parseServerData(data);
+                gamedata.parseServerData(data); 
+                //New section called at this point so that ballisticIcons can be rendered during Replay - DK 10/24  
+				this.hexBallistics = weaponManager.getAllHexTargetedBallistics()				               
+        		this.ballisticIconContainer.consumeGamedata(this.gamedata, this.shipIconContainer, this.hexBallistics);                       
                 stopLoading.call(this);
             }.bind(this),
             error: ajaxInterface.errorAjax
         });
-    }
+    }            
+
 
     function requestPlayableGamedata() {
         startLoading.call(this);

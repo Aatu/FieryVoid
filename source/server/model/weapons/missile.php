@@ -2144,7 +2144,8 @@ class BallisticMineLauncher extends AmmoMissileRackS{
 	
 		public $animation = "bolt";
 		public $animationColor = array(245, 90, 90);
-		public $animationExplosionScale = 0.25; //single hex explosion
+    public $animationExplosionScale = 0; //0 means it will be set automatically by standard constructor, based on average damage yield
+    public $animationExplosionScaleArray = array();
 		public $animationExplosionType = "AoE";
 		
 //	private $ammoMagazine; //reference to ammo magazine

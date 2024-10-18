@@ -162,7 +162,7 @@ public function calculateHit($gamedata, $fireOrder){
         public $trailLength = 10;
 	    */
 	public $firingModes = array(
-		1 => "AoE"
+		1 => "Energy Mine"
 	);
 
         	    

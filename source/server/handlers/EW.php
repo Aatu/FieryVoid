@@ -7,21 +7,22 @@
 		    $EW = $ship->EW;
 			$turn = $gamedata->turn;
 			$used = 0;
-			
+      /* //Removed to allow Contrained ELINT vessels to work e.g. Mindriders - DK - 20.7.24  			
 			foreach ($EW as $entry){
 			
 				if ($turn != $entry->turn)
 					continue;
 
 				$used += $entry->amount;
-                
+				
+        
                 if ($entry->type === "DIST")
                 {
-                    if ($entry->amount % 3 !== 0)
-                        throw new Exception("Validation of EW failed: DIST ew not divisable by 3");
+                   if ($entry->amount % 3 !== 0)
+                       throw new Exception("Validation of EW failed: DIST ew not divisable by 3");
                 }
 			}
-			
+	*/		
 			/* Marcin Sawicki, 27.09.2019: apparently at this point ship enhancements are NOT taken into account (and scanner output can be affected by them)
 			hence I disable this check! judging it not to be necessary.
 			*/
@@ -80,7 +81,11 @@
                 }
             }
 
+		if($target->hasSpecialAbility("ConstrainedEW")){//Mindrider ships have less efficient ELINT abilities - DK 19.07.24.
+            $FDEW = $FDEW * 0.2;			
+		}else{
             $FDEW = $FDEW * 0.25;
+		}    
 			if(($target->jammerMissile) && $FDEW < 2) $FDEW = 2; //Jammer Missiles provide 2 BDEW to all ships in range, but not in combination with normal BDEW!
 				            
             return $FDEW;
@@ -125,7 +130,12 @@
 					continue; //no lock-on negates SOEW, if any
 				}
 
-                $foew = $elint->getEWByType("OEW", $gamedata->turn, $target) * 0.5;
+				if($elint->hasSpecialAbility("ConstrainedEW")){//Mindrider ships have less efficient ELINT abilities - DK 19.07.24.
+				    $foew = $elint->getEWByType("OEW", $gamedata->turn, $target) * 0.33;
+				    $foew = round($foew * 3) / 3;		
+				}else{
+          	      $foew = $elint->getEWByType("OEW", $gamedata->turn, $target) * 0.5;
+				}
 								
 				$dist = EW::getDistruptionEW($gamedata, $elint); //account for ElInt being disrupted
 				$foew = $foew-$dist;		
@@ -161,7 +171,12 @@
                 if (Mathlib::getDistanceHex( $ship, $elint ) > 50)
                     continue;
 
-                $fdew = $elint->getEWByType("SDEW", $gamedata->turn, $ship)*0.5;
+                if($elint->hasSpecialAbility("ConstrainedEW")){//Mindrider ships have less efficient ELINT abilities - DK 19.07.24.
+               		$fdew = $elint->getEWByType("SDEW", $gamedata->turn, $ship)*0.33;
+				    $fdew = round($fdew * 3) / 3;	               				
+				}else{
+              	  $fdew = $elint->getEWByType("SDEW", $gamedata->turn, $ship)*0.5;
+				}
 
                 if ($fdew > $amount)
                 $amount = $fdew;
@@ -184,12 +199,18 @@
                 
                 if (Mathlib::getDistanceHex( $ship, $elint ) > 30) continue;
 
-                $fdew = $elint->getEWByType("DIST", $gamedata->turn, $ship) / 3 ;//NOT *0.25;
+                if($elint->hasSpecialAbility("ConstrainedEW")){//Mindrider ships have less efficient ELINT abilities - DK 19.07.24.
+        	        $fdew = $elint->getEWByType("DIST", $gamedata->turn, $ship) / 4 ;	
+				}else{	
+        	        $fdew = $elint->getEWByType("DIST", $gamedata->turn, $ship) / 3 ;//NOT *0.25;
 
                 //if (fdew > amount)
                 $amount += $fdew;
             }
             if ($num > 0) return $amount/$num;
             return 0; //NOT $amount;
-        }
-	}
+    		 }
+		}
+	}	
+	
+		
