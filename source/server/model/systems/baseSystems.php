@@ -6289,7 +6289,7 @@ class AmmoBLMineB extends AmmoMissileTemplate{
 
     public $hextarget = true; 
 	public $mineRange = 3;
-	
+		public $animationExplosionScale = 0.25; //single hex explosion	
 
     public function getDamage($fireOrder){        return Dice::d(10, 1)+16;   } 
 		
@@ -6350,6 +6350,7 @@ class AmmoBLMineW extends AmmoMissileTemplate{
 
     public $hextarget = true; 
 	public $mineRange = 5;	
+		public $animationExplosionScale = 0.25; //single hex explosion
 
     public function getDamage($fireOrder){        return Dice::d(10, 1)+12;   } 
 

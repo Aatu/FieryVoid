@@ -9,17 +9,23 @@ window.BallisticIconContainer = function () {
         this.zoomScale = 1;
     }
 
-    BallisticIconContainer.prototype.consumeGamedata = function (gamedata, iconContainer) {
+    BallisticIconContainer.prototype.consumeGamedata = function (gamedata, iconContainer, replayData = null) {
         this.ballisticIcons.forEach(function (ballisticIcon) {
             ballisticIcon.used = false;
         });
 
-        var allBallistics = weaponManager.getAllFireOrdersForAllShipsForTurn(gamedata.turn, 'ballistic');
-
-        allBallistics.forEach(function (ballistic) {
-            createOrUpdateBallistic.call(this, ballistic, iconContainer, gamedata.turn);
-        }, this);
-
+		if(replayData){ //Pass true marker for Replay
+			var allBallistics = replayData;				
+	        allBallistics.forEach(function (ballistic) {
+	            createOrUpdateBallistic.call(this, ballistic, iconContainer, gamedata.turn, true);
+	        }, this);					
+		} else {
+        	var allBallistics = weaponManager.getAllFireOrdersForAllShipsForTurn(gamedata.turn, 'ballistic');			
+	        allBallistics.forEach(function (ballistic) {
+	            createOrUpdateBallistic.call(this, ballistic, iconContainer, gamedata.turn);
+	        }, this);
+		}
+		
         this.ballisticIcons = this.ballisticIcons.filter(function (icon) {
             if (!icon.used) {
                 
@@ -88,21 +94,26 @@ window.BallisticIconContainer = function () {
         */
     };
 
-    function createOrUpdateBallistic(ballistic, iconContainer, turn) {
+    function createOrUpdateBallistic(ballistic, iconContainer, turn, replay = false) {
         var icon = getBallisticIcon.call(this, ballistic.id);
-        if (icon && ballistic.notes != 'Persistent Effect') {//We want Persistent Effects to show up in initial Orders! - DK 09.24
-            updateBallisticIcon.call(this, icon, ballistic, iconContainer, turn);
-        } else {
-            createBallisticIcon.call(this, ballistic, iconContainer, turn, this.scene);
-        }
-    }
+
+	    if (icon && ballistic.notes != 'Persistent Effect') {//We want Persistent Effects to show up in initial Orders! - DK 09.24
+	        updateBallisticIcon.call(this, icon, ballistic, iconContainer, turn);
+	    } else {   	
+	        createBallisticIcon.call(this, ballistic, iconContainer, turn, this.scene, replay);
+	    }
+    	
+	}	
 
     function updateBallisticIcon(icon, ballistic, iconContainer, turn) {
         icon.used = true;
     }
 
-    function createBallisticIcon(ballistic, iconContainer, turn, scene) {
+    function createBallisticIcon(ballistic, iconContainer, turn, scene, replay = false) {
+		if(replay) ballistic = ballistic.fireOrder; //Replay passes slightly different type of data, so adjust ballistic variable here.
+			
         var shooterIcon = iconContainer.getById(ballistic.shooterid);	
+        if(!shooterIcon) shooterIcon = iconContainer.getById(ballistic.shooter.id);
 		var targetType = 'hexRed'; //Default red hex if none of the later conditions are true.
         var launchPosition = this.coordinateConverter.fromHexToGame(shooterIcon.getFirstMovementOnTurn(turn).position);
         var text = ""; //Additional variable that can pass text to new BallisticSprite()
@@ -111,9 +122,9 @@ window.BallisticIconContainer = function () {
 		
 		//New variables found to enhance Ballistic Icons further! - DK 10.24
 		var shooter = shooterIcon.ship; //Get shooter info.
-		var weapon = shooter.systems[ballistic.weaponid]; //Find weapon
-		var modeName = weapon.firingModes[ballistic.firingMode]; //Get actual Firing Mode name, so we can be more specific below!		        
-
+		var weapon = shooter.systems[ballistic.weaponid]; //Find weapon			
+		var modeName = weapon.firingModes[ballistic.firingMode]; //Get actual Firing Mode name, so we can be more specific below!
+		
 		if (ballistic.type == 'normal') { //it's direct fire after all!
 		    launchPosition = this.coordinateConverter.fromHexToGame(shooterIcon.getLastMovement().position);
 			if(modeName){
