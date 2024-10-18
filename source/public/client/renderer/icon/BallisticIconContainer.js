@@ -131,7 +131,7 @@ window.BallisticIconContainer = function () {
 				switch (modeName) {			
 				case 'Shredder': //Vree Anti-Matter Shredder
 				        targetType = 'hexBlue';
-				        text = "Antimatter Shredder";
+				        text = "Shredder";
 				        textColour = "#00b8e6";				        
 				break;
 				case 'Defensive Plasma Web': //Pak'ma'ra Plasma Web Defensive
