@@ -220,7 +220,7 @@ window.BallisticIconContainer = function () {
 					break;					
 				case 'Anti-Fighter Plasma Web': //Pak'ma'ra Plasma Web Persistent Effect
 				        targetType = 'hexGreen';
-				        text = '!';
+				        text = 'Plasma';
 				        textColour = "#787800";				        	
 				break;
 				case 'Proximity Laser Launcher': //KL Proximity Laser
