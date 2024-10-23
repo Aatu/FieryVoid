@@ -5,7 +5,8 @@ class Erlorhark extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 650;
-        $this->faction = "Llort";
+       // $this->faction = "Llort";
+        $this->faction = 'Custom Ships';
         $this->phpclass = "erlorhark";
         $this->imagePath = "img/ships/LlortErlorhark.png";
         $this->shipClass = "Erlorhark Battle Cruiser";
