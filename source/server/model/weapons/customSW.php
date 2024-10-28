@@ -359,6 +359,7 @@ class SWBallisticWeapon extends Torpedo{
 	    $this->data["Special"] = 'Spread mode: 0..1 +1/'. $this->grouping."%, max. ".$this->maxpulses." missiles";
 		$this->data["Special"] .= '<br>Minimum of 1 missile.';
 		$this->data["Special"] .= '<br>Cannot penetrate to PRIMARY when hitting outer section.';
+		$this->data["Special"] .= '<br>Benefits from offensive EW.';
             parent::setSystemDataWindow($turn);
         }
 	
