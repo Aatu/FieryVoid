@@ -1053,7 +1053,7 @@ class Scanner extends ShipSystem implements SpecialAbility{ //on its own Scanner
 		$this->data["Special"] .= '<br>Ignores enemy Jammers, BDEW, SDEW and DIST.';//not that of advanced races
 		$this->data["Special"] .= "<br>Also ignores any defensive systems lowering enemy profile (shields, EWeb...)."; //not that of advanced races
 		$this->data["Special"] .= "<br>All of the above work as usual if operated by Ancient races.";
-		$this->data["Special"] .= "<br>Can only be boosted twice, for 16 power each boost.";	
+		$this->data["Special"] .= "<br>Can only be boosted twice, for " . $this->boostEfficiency . " power each boost.";	
 		$this->data["Special"] .= "<br>'You can feel them, reaching into your mind...'";		 
 	}	
 		
