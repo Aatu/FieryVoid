@@ -1372,12 +1372,13 @@ ThirdspaceShieldGenerator.prototype.initializationUpdate = function() {
 		if (this.storedCapacity == 0) {
 			this.outputDisplay = '-'; //'0' is not shown!
 		}		
-		this.data["Output"] = totalOutput;	//Update this to help show player how much they've boosted, since outputDisplay used for transferring.
-		this.data["Current Shield Power"] = currentShieldHealth;	
+		this.data["Current Output "] = totalOutput;	//Update this to help show player how much they've boosted, since outputDisplay used for transferring.
+		this.data["Current Shield Power "] = currentShieldHealth;
+		this.data["Boosted by "] = boostCount;			
 	}else{
 		this.outputDisplay = totalOutput;
-		this.data["Output"] = totalOutput;
-		this.data["Current Shield Power"] = currentShieldHealth;							
+		this.data["Current Output"] = totalOutput;
+		this.data["Current Shield Power "] = currentShieldHealth;							
 	}
 	
 	return this;
