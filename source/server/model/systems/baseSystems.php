@@ -4685,6 +4685,8 @@ class ThirdspaceShieldGenerator extends ShipSystem{
 	public $storedCapacity = 0;
 	public $shieldPresets = array('Equalise', 'Forward', 'Starboard', 'Aft', 'Port');	
 	public $presetCurrClass = '';//for front end, to display Preset types in tooltips.
+	
+	private $shieldCount = 0;
 
 	public $repairPriority = 9;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
     
@@ -4698,10 +4700,12 @@ class ThirdspaceShieldGenerator extends ShipSystem{
     public function onConstructed($ship, $turn, $phase){
         parent::onConstructed($ship, $turn, $phase);	
 		
-		$totalShieldsRating = 0;				
+		$totalShieldsRating = 0;
+						
 		foreach($ship->systems as $system){
 			if($system instanceof ThirdspaceShield){
-				$totalShieldsRating += $system->baseRating;	
+				$totalShieldsRating += $system->baseRating;
+				$this->shieldCount++;	
 			}			
 		}
 		$this->totalBaseRating = $totalShieldsRating;
@@ -4712,18 +4716,26 @@ class ThirdspaceShieldGenerator extends ShipSystem{
 	            20=>"OutputReduced2",
 	            26=>"OutputReduced4" );
 
+	private function getRegenforNotes($turn){
+		$regen = 0;
+		$regen = $this->getOutput() + ($this->getBoostLevel($turn) * $this->shieldCount);
+		return $regen; 
+	}
+
 		
     public function setSystemDataWindow($turn){
         parent::setSystemDataWindow($turn);
-		$this->data["Special"] = "Regenerates " . $this->getOutput() . " health split eqaully amongst all Thirdspace Shields at the end of each turn.";
-		$this->data["Special"] .= "<br>Shields will not regenerate above their Base Rating, instead any excess will be allocate to another shield where possible..";       
-        $this->data["Special"] .= "<br>Regeneration can be boosted " . $this->maxBoostLevel  . " times at " . $this->boostEfficiency ." power per boost.";  
+		$this->data["Special"] = "Regenerates " . $this->getRegenforNotes($turn) . " health split eqaully amongst all Thirdspace Shields at the end of each turn.";
+		$this->data["Special"] .= "<br>Shields will not regenerate above their Base Rating, instead any excess will be allocate to another shield where possible.";
+		$this->data["Special"] .= "<br>Current Shield Power CANNOT be regenerated above Maximum Shield Power.";		       
+        $this->data["Special"] .= "<br>Regeneration can be boosted " . $this->maxBoostLevel  . " times at " . $this->boostEfficiency ." power for " . $this->boostEfficiency ." extra output.";  
         $this->data["Special"] .= "<br>During Initial Orders this system can also be used to transfer shield power from one shield arc to another e.g. front to aft etc.";	   
         $this->data["Special"] .= "<br>You cannot commit your Intial Orders if there is an excess or deficit of shield energy in this system.";       
  		$this->outputDisplay = $this->storedCapacity;
- 		$this->data["Output"] = $this->getOutput();
- 		$this->data["Max Shield Power"] = $this->totalBaseRating;
- 		$this->data["Current Shield Power"] = $this->totalBaseRating; //Will be updated in Front End anyway. 		  		               
+ 		$this->data["Current Output "] = $this->getOutput();
+ 		$this->data["Boosted by "] = $this->getBoostLevel($turn) * $this->shieldCount; 		
+ 		$this->data["Maximum Shield Power "] = $this->totalBaseRating;
+ 		$this->data["Current Shield Power "] = $this->totalBaseRating; //Will be updated in Front End anyway. 		  		               
     }
 
 	private function getBoostLevel($turn){
