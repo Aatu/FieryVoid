@@ -614,7 +614,7 @@
             <canvas id="acceleratecanvas" width="16" height="16"></canvas>
         </div>
         
-        <div id="deaccelerate" class="movement-icon" data-movement-type="Deaccelerate">
+        <div id="deaccelerate" class="movement-icon" data-movement-type="Decelerate">
             <canvas id="deacceleratecanvas" width="16" height="16"></canvas>
         </div>
         
