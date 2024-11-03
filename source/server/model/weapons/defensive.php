@@ -724,8 +724,9 @@ class ThirdspaceShield extends Shield implements DefensiveSystem { //defensive v
 			$this->data["Special"] .= "<br>Shield system's structure represents damage capacity, if it is reduced to zero system will cease to function.";
 			$this->data["Special"] .= "<br>Can't be destroyed unless associated structure block is also destroyed.";
 			$this->data["Special"] .= "<br>Cannot be flown under, and does not reduce the damage dealt or hit chance of enemy weapons.";
+	        $this->data["Special"] .= "<br>The Shield's Generator will regenerate Shields up to their Base Rating at the end of each turn, any excess will be allocate to another shield where possible.";			
 			$this->data["Special"] .= "<br>Has an Armor value of "  . $this->armour . ".";	
- 			$this->data["Normal Strength"] = $this->baseRating; 									
+ 			$this->data["Base Rating"] = $this->baseRating; 									
 			$this->currentHealth = $this->getRemainingCapacity();//override on-icon display default
 			$this->outputDisplay = $this->currentHealth;//override on-icon display default					
 		}	

@@ -1349,19 +1349,47 @@ ThirdspaceShieldGenerator.prototype.constructor = ThirdspaceShieldGenerator;
 
 ThirdspaceShieldGenerator.prototype.initializationUpdate = function() {
 	var ship = this.ship;
-	
+	var shieldCount = 0;
+	var currentShieldHealth = 0; 
+		
+	for (var i = 0; i < ship.systems.length; i++) {
+		var system = ship.systems[i];
+
+		// Find total pool of shield energy
+		if (system instanceof ThirdspaceShield) {
+			shieldCount++;
+			currentShieldHealth += system.currentHealth;
+		}
+	}
+
+	var boostCount = shipManager.power.getBoost(this); //Find any boost.
+	if(shieldCount > 0) boostCount = boostCount * shieldCount; //Multiply boost count by number of shields.
+	var totalOutput = this.output + boostCount; // Get total output. 		
+			
 	if(gamedata.gamephase == 1){		
 		this.outputDisplay = this.storedCapacity;
 		
 		if (this.storedCapacity == 0) {
 			this.outputDisplay = '-'; //'0' is not shown!
 		}		
-		
+		this.data["Output"] = totalOutput;	//Update this to help show player how much they've boosted, since outputDisplay used for transferring.
+		this.data["Current Shield Power"] = currentShieldHealth;	
 	}else{
-		this.outputDisplay = this.output;			
+		this.outputDisplay = totalOutput;
+		this.data["Output"] = totalOutput;
+		this.data["Current Shield Power"] = currentShieldHealth;							
 	}
 	
 	return this;
+};
+
+
+ThirdspaceShieldGenerator.prototype.hasMaxBoost = function () {
+	if (this.maxBoostLevel > 0){ 
+		return true;
+		}else{
+		return false;
+		}	
 };
 
 ThirdspaceShieldGenerator.prototype.getCurrClass = function () { //get current preset for display; if none, find first!

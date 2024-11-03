@@ -4677,6 +4677,11 @@ class ThirdspaceShieldGenerator extends ShipSystem{
     public $iconPath = "ThirdspaceShieldGen.png";
 	protected $doCountForCombatValue = false; //Check if inherited and remove?
 	
+    public $boostable = true;	
+    public $boostEfficiency = 0; //Advanced Sensors are rarely lower than 13, so flat 14 boost cost is advantageous to output+1!
+    public $maxBoostLevel = 0; //Unlike Shadows/Vorlons Thirdspace ships have alot of spare power, so limit their max sensor boost for balance. 	
+
+	public $totalBaseRating = 0;// Maximum shield amount for ALL shields.	
 	public $storedCapacity = 0;
 	public $shieldPresets = array('Equalise', 'Forward', 'Starboard', 'Aft', 'Port');	
 	public $presetCurrClass = '';//for front end, to display Preset types in tooltips.
@@ -4684,9 +4689,23 @@ class ThirdspaceShieldGenerator extends ShipSystem{
 	public $repairPriority = 9;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
     
     
-    function __construct($armour, $maxhealth, $powerReq, $output){ 
+    function __construct($armour, $maxhealth, $powerReq, $output, $maxBoost = 0, $boostEfficiency = 0){ 
+    	$this->maxBoostLevel = $maxBoost;
+    	$this->boostEfficiency = $boostEfficiency;    	
         parent::__construct($armour, $maxhealth, $powerReq, $output ); //$armour, $maxhealth, $powerReq, $output    		    
     }  	    
+
+    public function onConstructed($ship, $turn, $phase){
+        parent::onConstructed($ship, $turn, $phase);	
+		
+		$totalShieldsRating = 0;				
+		foreach($ship->systems as $system){
+			if($system instanceof ThirdspaceShield){
+				$totalShieldsRating += $system->baseRating;	
+			}			
+		}
+		$this->totalBaseRating = $totalShieldsRating;
+    }
 		
 	protected $possibleCriticals = array(
 	            18=>"OutputReduced1",
@@ -4696,13 +4715,28 @@ class ThirdspaceShieldGenerator extends ShipSystem{
 		
     public function setSystemDataWindow($turn){
         parent::setSystemDataWindow($turn);
-		$this->data["Special"] = "Regenerates " . $this->getOutput() . " total health for Thirdspace Shields at the end of each turn.";
-        $this->data["Special"] .= "<br>Shield's cannot regenerate when at or above their Normal Strength, instead the Generator will try and allocate their excess energy to another shield.";
-        $this->data["Special"] .= "<br>During Initial Orders this system can be used to transfer shield power from one shield arc to another e.g. front to aft etc.";	   
-        $this->data["Special"] .= "<br>You cannot commit your Intial Orders if there is an excess or deficit of shield energy in this system.";
+		$this->data["Special"] = "Regenerates " . $this->getOutput() . " health split eqaully amongst all Thirdspace Shields at the end of each turn.";
+		$this->data["Special"] .= "<br>Shields will not regenerate above their Base Rating, instead any excess will be allocate to another shield where possible..";       
+        $this->data["Special"] .= "<br>Regeneration can be boosted " . $this->maxBoostLevel  . " times at " . $this->boostEfficiency ." power per boost.";  
+        $this->data["Special"] .= "<br>During Initial Orders this system can also be used to transfer shield power from one shield arc to another e.g. front to aft etc.";	   
+        $this->data["Special"] .= "<br>You cannot commit your Intial Orders if there is an excess or deficit of shield energy in this system.";       
  		$this->outputDisplay = $this->storedCapacity;
- 		$this->data["Output"] = $this->getOutput();               
+ 		$this->data["Output"] = $this->getOutput();
+ 		$this->data["Max Shield Power"] = $this->totalBaseRating;
+ 		$this->data["Current Shield Power"] = $this->totalBaseRating; //Will be updated in Front End anyway. 		  		               
     }
+
+	private function getBoostLevel($turn){
+            $boostLevel = 0;
+            foreach ($this->power as $i){
+                    if ($i->turn != $turn)
+                            continue;
+                    if ($i->type == 2){
+                            $boostLevel += $i->amount;
+                    }
+            }
+            return $boostLevel;
+        }
 
 	//effects that happen in Critical phase (after criticals are rolled) - replenishment from active Generator 
 	public function criticalPhaseEffects($ship, $gamedata){
@@ -4726,8 +4760,9 @@ class ThirdspaceShieldGenerator extends ShipSystem{
 		if($currentShieldHealth >= $totalShieldRating) return; //If for some reason total shield health is equal/greater than baseRatings combined, don't regen at all!
 
 		$noOfShields = count($allShields);
-		$generatorOutput = $this->getOutput(); //  60				
-		$amountPerShield = $generatorOutput / $noOfShields; //15
+		$generatorOutput = $this->getOutput(); // e.g  60
+		$boostLevel = $this->getBoostLevel($gamedata->turn); // e.g. 2				
+		$amountPerShield = ($generatorOutput / $noOfShields) + $boostLevel; //e.g 15 + boost
 
 		$canRechargeTotal = $totalShieldRating - $currentShieldHealth;
 		$spareEnergy = 0; //Counter for shield energy not used in next part.	
@@ -4738,7 +4773,7 @@ class ThirdspaceShieldGenerator extends ShipSystem{
 			
 			if($maxRegenThisTurn >= $canRechargeTotal) $maxRegenThisTurn = $canRechargeTotal;//Final loop might need adjusted to no overcharge!
 
- 			//Check if Generator can fully charge shields and shield is below baseRating, if not add excess to $spareEnergy ounter.
+ 			//Check if Generator can fully charge shields and shield is below baseRating, if not add excess to $spareEnergy csounter.
 			if($maxRegenThisTurn >= $amountPerShield){ //Can be regenerated by full Generator amount
 				$shield->absorbDamage($ship, $gamedata, -$amountPerShield); // Apply full regeneration.
 				$canRechargeTotal -= $amountPerShield;						
