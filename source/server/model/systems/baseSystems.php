@@ -3852,6 +3852,17 @@ class ThirdspaceSelfRepair extends SelfRepair{
     public $boostEfficiency = 0;
     
     protected $ewBoosted = true;   
+
+	function __construct($armour, $maxhealth, $output, $maxBoost = 0)
+	{
+		//power requirement is 0, health is always defined by constructor, as is output - but they cannot be <1!
+		if ( $maxhealth <1 ) $maxhealth = 1;
+		if ( $output <1 ) $output = 1; //base output cannot be <1
+		parent::__construct($armour, $maxhealth, 0, 0, 0);
+		$this->output = $output; //after parent - weapon has no output and passes 0 to system creation
+		$this->maxRepairPoints = $maxhealth*10;
+		$this->maxBoostLevel = $maxBoost;		
+	}
 	
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);  
