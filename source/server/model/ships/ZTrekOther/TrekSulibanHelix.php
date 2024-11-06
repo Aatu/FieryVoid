@@ -31,7 +31,7 @@ class TrekSulibanHelix extends VreeCapital{
 		$this->addPrimarySystem(new Reactor(4, 40, 0, 0));
 		$this->addPrimarySystem(new CnC(5, 16, 0, 0));
 		$this->addPrimarySystem(new Scanner(5, 12, 6, 6));
-		$impulseDrive = new TrekImpulseDrive(4,30,0,2,8); //Impulse Drive is an engine in its own right, in addition to serving as hub for Nacelle output: $armour, $maxhealth, $powerReq, $output, $boostEfficiency
+		$impulseDrive = new TrekImpulseDrive(4,30,0,2,7); //Impulse Drive is an engine in its own right, in addition to serving as hub for Nacelle output: $armour, $maxhealth, $powerReq, $output, $boostEfficiency
 		$primaryCargo = new CargoBay(3, 40);
 			$primaryCargo->startArc = 0;
 			$primaryCargo->endArc = 360;
