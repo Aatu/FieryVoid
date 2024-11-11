@@ -7,12 +7,12 @@ class DalithornSmallScout extends MediumShip{
         $this->pointCost = 230;
         $this->faction = "ZNexus Dalithorn Commonwealth";
         $this->phpclass = "DalithornSmallScout";
-        $this->imagePath = "img/ships/Nexus/DalithornSmallScout.png";
+        $this->imagePath = "img/ships/Nexus/Dalithorn_SmallScout2.png";
         $this->shipClass = "Small Scout";
 //			$this->variantOf = "Frigate";
 //			$this->occurence = "common";
 		$this->unofficial = true;
-        $this->canvasSize = 80;
+        $this->canvasSize = 100;
         $this->limited = 33;
 
 	    $this->isd = 1999;

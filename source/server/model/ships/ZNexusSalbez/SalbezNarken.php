@@ -7,8 +7,8 @@ class SalbezNarken extends HeavyCombatVessel{
         $this->pointCost = 375;
         $this->faction = "ZNexus Sal-bez Coalition";
         $this->phpclass = "SalbezNarken";
-        $this->imagePath = "img/ships/Nexus/salbez_zefjem2.png";
-			$this->canvasSize = 95; //img has 200px per side
+        $this->imagePath = "img/ships/Nexus/salbez_zefjem3.png";
+			$this->canvasSize = 115; //img has 200px per side
         $this->shipClass = "Nar-ken Early Scout";
 			$this->variantOf = "Nav-ren Prospector";
 			$this->occurence = "uncommon";

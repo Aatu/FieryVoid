@@ -7,7 +7,7 @@ class SalbezCrenskRefit extends LCV{
         $this->pointCost = 215;
         $this->faction = "ZNexus Sal-bez Coalition";
         $this->phpclass = "SalbezCrenskRefit";
-        $this->imagePath = "img/ships/Nexus/salbez_crensk.png";
+        $this->imagePath = "img/ships/Nexus/salbez_crensk3.png";
 			$this->canvasSize = 70; //img has 200px per side
         $this->shipClass = "Cre-nsk Combat Cutter (2143 refit)";
 			$this->variantOf = "Cre-nsk Combat Cutter";

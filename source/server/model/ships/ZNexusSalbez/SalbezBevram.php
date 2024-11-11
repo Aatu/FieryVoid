@@ -10,8 +10,8 @@ class SalbezBevram extends SmallStarBaseFourSections{
 		$this->faction = "ZNexus Sal-bez Coalition";
 		$this->phpclass = "SalbezBevram";
 		$this->shipClass = "Bev'ram Mining Center";
-		$this->imagePath = "img/ships/Nexus/salbez_civilianBase.png";
-		$this->canvasSize = 175; 
+		$this->imagePath = "img/ships/Nexus/salbez_civilianBase3.png";
+		$this->canvasSize = 140; 
 		$this->unofficial = true;
 		$this->isd = 2021;
 

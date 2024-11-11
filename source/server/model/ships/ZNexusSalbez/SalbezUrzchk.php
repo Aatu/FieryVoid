@@ -8,7 +8,7 @@ class SalbezUrzchk extends FighterFlight{
         $this->faction = "ZNexus Sal-bez Coalition";
         $this->phpclass = "SalbezUrzchk";
         $this->shipClass = "Urz'chk Heavy Flight";
-        $this->imagePath = "img/ships/Nexus/salbez_urzchk.png";
+        $this->imagePath = "img/ships/Nexus/salbez_urzchk3.png";
 		$this->unofficial = true;
 
         $this->isd = 2063;
@@ -36,8 +36,8 @@ class SalbezUrzchk extends FighterFlight{
             $armour = array(2, 2, 2, 2);
             $fighter = new Fighter("SalbezUrzchk", $armour, 11, $this->id);
             $fighter->displayName = "Urz'chk";
-            $fighter->imagePath = "img/ships/Nexus/salbez_urzchk.png";
-            $fighter->iconPath = "img/ships/Nexus/salbez_urzchk_large.png";
+            $fighter->imagePath = "img/ships/Nexus/salbez_urzchk3.png";
+            $fighter->iconPath = "img/ships/Nexus/salbez_urzchk_large3.png";
 
 	        $light = new HvyParticleGunFtr(300, 60, 1); //$startArc, $endArc, $nrOfShots
 	        $fighter->addFrontSystem($light);

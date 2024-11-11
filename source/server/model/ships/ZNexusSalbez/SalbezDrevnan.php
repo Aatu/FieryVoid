@@ -7,10 +7,10 @@ class SalbezDrevnan extends MediumShip{
         $this->pointCost = 230;
         $this->faction = "ZNexus Sal-bez Coalition";
         $this->phpclass = "SalbezDrevnan";
-        $this->imagePath = "img/ships/Nexus/salbez_drevnan.png";
+        $this->imagePath = "img/ships/Nexus/salbez_drevnan3.png";
         $this->shipClass = "Drev-nan Auxiliary Escort";
 		$this->unofficial = true;
-        $this->canvasSize = 80;
+        $this->canvasSize = 90;
 	    $this->isd = 2101;
         
         $this->forwardDefense = 11;

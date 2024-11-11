@@ -79,7 +79,10 @@ class TrekImpulseDrive extends Engine{
 	
     public function getOutput(){ 
 		$this->output = $this->baseOutput;//reset base value!
+	    	/*11.11.2024 - Marcin Sawicki - use basic output only, as front end accounts for criticals again!
 		$output = max(0,parent::getOutput());//criticals cannot bring base output below 0
+  		*/
+	    	$output = $this->output; //corrected version 11.11.2024
 		//count thrust from Warp Drives
 		foreach($this->warpDrives as $thruster){
 			$output += max(0,$thruster->getOutput());//cannot provide negative output!

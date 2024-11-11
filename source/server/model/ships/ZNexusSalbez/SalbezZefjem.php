@@ -7,8 +7,8 @@ class SalbezZefjem extends HeavyCombatVessel{
         $this->pointCost = 360;
         $this->faction = "ZNexus Sal-bez Coalition";
         $this->phpclass = "SalbezZefjem";
-        $this->imagePath = "img/ships/Nexus/salbez_zefjem2.png";
-			$this->canvasSize = 95; //img has 200px per side
+        $this->imagePath = "img/ships/Nexus/salbez_zefjem3.png";
+			$this->canvasSize = 115; //img has 200px per side
         $this->shipClass = "Zef'jem Heavy Frigate";
 			$this->unofficial = true;
         $this->isd = 2090;

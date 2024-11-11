@@ -7,7 +7,7 @@ class DalithornNewCarrier extends HeavyCombatVessel{
         $this->pointCost = 400;
         $this->faction = "ZNexus Dalithorn Commonwealth";
         $this->phpclass = "DalithornNewCarrier";
-        $this->imagePath = "img/ships/Nexus/DalithornCarrier.png";
+        $this->imagePath = "img/ships/Nexus/Dalithorn_Carrier2.png";
 		$this->canvasSize = 125; //img has 200px per side
         $this->shipClass = "New Carrier";
 			$this->variantOf = "Light Cruiser";

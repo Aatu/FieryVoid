@@ -64,18 +64,20 @@ if (isset($_SESSION["user"])) {
 		
 		<big><b>Welcome to Fiery Void, an adaptation of the 'Babylon 5 Wars' tabletop game, by Agents of Gaming!</b></big>
 
-		<br><br>---------- <b>LATEST NEWS - August 2024</b> ----------
-	    <br><b>Deleting inactive games</b>: delay increased to 5 days (test games are useful, and picking up games after weekend is a thing!)
-		<br><b>Nexus Dalithorn rebalance</b> - by Geoffrey
-	    <br><b>Boarding Actions</b> - Added Breaching Pods with Marines to relevant factions - by Dougie.
-	    <br><b>Pulsar Mine Rework</b> - Now targets enemy fighters at ANY point in their movement, not just the end.
-	    <br><b>Extra Ammo Enhancement</b> - For Fighters with limited ammunition.
-	    <br><b>Thirdspace Shield Rework</b> - Can now transfer shields between arcs!
-	    <br><b>Abbai Shield Generator</b> - First ally-targeting weapon :)
-
-		 <br><br>---------- <b>update 20th of August</b> ---------- 
-	    <br><b>bugfixes</b> - general boarding actions polishing - remember to ctrl+F5!
-       
+		<br><br>---------- <b>LATEST NEWS - November 2024</b> ----------
+		<br>---------- <b>Major deployment of Douglas' and Geoffrey's work!</b> ----------
+	    <br>
+	    <br><b><u>Mindriders</u> have arrived!</b> - a new Ancient faction!
+		<br><b>Plasma Webs enhanced</b> - they do stay!
+	    <br><b>Hex highlight enhanced</b> - try some ballistics and see the effect Yourself!
+	    <br><b>Rule Warnings</b> - most commonly missed rules (Jump Drive disable, Ramming declarations) got extra warnings
+	    <br><b>Turn Into Pivots / Emergency Roll</b> - enhanced and added, respectively
+	    <br><b>Movement icons enhanced</b> - shape improved, tooltips added
+	    <br><b>Improved game creation</b> - SumMovement got options, useful links were added, and more!
+	    
+	    <br><b>Nexus updatesr</b> - quie a lot of post-tournament observations applied
+	    <br><b>bugfixes</b> - as always, there's quite a few of them
+       <br><br>
 
 <!--	        
 		 <br><br>---------- <b>update 20th of January</b> ---------- 
