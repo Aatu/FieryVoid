@@ -122,8 +122,12 @@ window.BallisticIconContainer = function () {
 		
 		//New variables found to enhance Ballistic Icons further! - DK 10.24
 		var shooter = shooterIcon.ship; //Get shooter info.
-		var weapon = shooter.systems[ballistic.weaponid]; //Find weapon			
-		var modeName = weapon.firingModes[ballistic.firingMode]; //Get actual Firing Mode name, so we can be more specific below!
+		var modeName = null;
+		
+		if(!shooter.flight){ //Fighters don't currently have hex target weapons (plus, would need to find weaponid differently)
+			var weapon = shooter.systems[ballistic.weaponid]; //Find weapon			
+			var modeName = weapon.firingModes[ballistic.firingMode]; //Get actual Firing Mode name, so we can be more specific below!
+		}
 		
 		if (ballistic.type == 'normal') { //it's direct fire after all!
 		    launchPosition = this.coordinateConverter.fromHexToGame(shooterIcon.getLastMovement().position);
