@@ -67,7 +67,7 @@ if (isset($_SESSION["user"])) {
 		<br><br>---------- <b>LATEST NEWS - November 2024</b> ----------
 		<br>---------- <b>Major deployment of Douglas' and Geoffrey's work!</b> ----------
 	    
-	    <br><b><u></u>Mindriders</b>u> have arrived!</b> - a new Ancient faction!
+	    <br><b><u>Mindriders</u> have arrived!</b> - a new Ancient faction!
 		<br><b>Plasma Webs enhanced</b> - they do stay!
 	    <br><b>Hex highlight enhanced</b> - try some ballistics and see the effect Yourself!
 	    <br><b>Rule Warnings</b> - most commonly missed rules (Jump Drive disable, Ramming declarations) got extra warnings
