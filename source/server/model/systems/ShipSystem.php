@@ -88,7 +88,11 @@ class ShipSystem {
 				}		
 			}
 		}	
-		
+
+		if($ship->getSystemByName("MindriderEngine")){ //Mind's Eye COntraction CAN increase armour!
+			$strippedSystem->armour = $this->armour;
+		}			
+							
         return $strippedSystem;
     }
 	
@@ -631,9 +635,9 @@ class ShipSystem {
 				$critical->turnend = $gamedata->turn;//End Capture crit this turn
 				$critical->forceModify = true; //actually save the change.
 				$critical->updated = true; //actually save the change cd!
-				$newFireOrder->pubnotes .= " The defending crew eliminates an attacking marine unit. Roll(Mod): $defenderRoll($defRollMod10).";	
+				$newFireOrder->pubnotes .= " The defending crew eliminate an attacking marine unit. Roll(Mod): $defenderRoll($defRollMod10).";	
 			}else{
-				$newFireOrder->pubnotes .= " The defending crew does not eliminate the attacking marines. Roll(Mod): $defenderRoll($defRollMod10).";					
+				$newFireOrder->pubnotes .= " The defending crew do not eliminate the attacking marines. Roll(Mod): $defenderRoll($defRollMod10).";					
 			}
 			
 		$this->checkShipCaptured($critical, $ship, $gamedata);	//Check if last defender eliminated and ship still under attack.

@@ -50,8 +50,8 @@ class Simtorka extends BaseShip{
 
 		$this->addFrontSystem(new Thruster(3, 10, 0, 4, 1));
 		$this->addFrontSystem(new Thruster(3, 10, 0, 4, 1));
-		$this->addFrontSystem(new PakmaraPlasmaWeb(2, 4, 2, 270, 90));	
 		$this->addFrontSystem(new PakmaraPlasmaWeb(2, 4, 2, 180, 360));
+		$this->addFrontSystem(new PakmaraPlasmaWeb(2, 4, 2, 270, 90));	
 		$this->addFrontSystem(new PakmaraPlasmaWeb(2, 4, 2, 0, 180));	
 		$this->addFrontSystem(new PlasmaBattery(2, 2, 0, 2)); 
 		$this->addFrontSystem(new PlasmaBattery(2, 2, 0, 2));	

@@ -15,7 +15,7 @@ class zzunoffShakaraton extends BaseShip{
 	
 	
 		$this->notes = 'Im-Rehsa Technologies';//Corporation producing the design
-		$this->notes .= "<br>official Shakara Scout Cruiser with Grav Shifters replaced by Grav Cannons"; 
+		$this->notes .= "<br>Official Shakara Scout Cruiser with Grav Shifters replaced by Grav Cannons"; 
 		$this->isd = 2251;
 	    $this->unofficial = 'S'; //Semi-official - added as reasonably close to official Shakara, while Grav Shifters are unavailable in FV
         

@@ -1818,6 +1818,71 @@ class DBManager
         }
     }
 
+    public function submitSingleFireorder($gameid, $fireOrder)
+    {
+            $sql = "INSERT INTO `B5CGM`.`tac_fireorder` VALUES (null, '" . $fireOrder->type . "', " . $fireOrder->shooterid . ", " . $fireOrder->targetid . ", " . $fireOrder->weaponid . ", " . $fireOrder->calledid . ", " . $fireOrder->turn . ", "
+                . $fireOrder->firingMode . ", " . $fireOrder->needed . ", " . $fireOrder->rolled . ", $gameid, '" . $fireOrder->notes . "', " . $fireOrder->shotshit . ", " . $fireOrder->shots . ", '" . $fireOrder->pubnotes . "', 0, '" . $fireOrder->x . "', '" . $fireOrder->y . "', '" . $fireOrder->damageclass . "', '" . $fireOrder->resolutionOrder . "')";
+
+            $this->update($sql);
+
+    }
+
+
+	public function getFireOrdersForWeapon($gameid, $shooterid, $weaponid, $fetchTurn)
+	{
+	    $fireOrders = []; // Initialize an array to store the results
+
+	    $stmt = $this->connection->prepare(
+	        "SELECT 
+	            id, type, shooterid, targetid, weaponid, calledid, turn,
+	            firingmode, needed, rolled, gameid, notes, shotshit,
+	            shots, pubnotes, intercepted, x, y, damageclass, resolutionorder
+	        FROM 
+	            tac_fireorder
+	        WHERE 
+	            gameid = ? AND shooterid = ? AND weaponid = ? AND turn = ?
+	        ORDER BY 
+	            gameid DESC"
+	    );
+
+	    if ($stmt) {
+	        $stmt->bind_param('iiii', $gameid, $shooterid, $weaponid, $fetchTurn);
+	        $stmt->execute();
+
+	        $stmt->store_result(); // Store the result set to access the number of rows
+	        if ($stmt->num_rows == 0) {
+	            echo "No matching rows found for the query.";
+	        }
+
+	        $stmt->bind_result(
+	            $id, $type, $shooterid, $targetid, $weaponid, $calledid,
+	            $turn, $firingMode, $needed, $rolled, $gameid, $notes,
+	            $shotshit, $shots, $pubnotes, $intercepted, $x, $y,
+	            $damageclass, $resolutionOrder
+	        );
+
+	        while ($stmt->fetch()) {
+	            $entry = new FireOrder(
+	                $id, $type, $shooterid, $targetid,
+	                $weaponid, $calledid, $turn, $firingMode, $needed,
+	                $rolled, $shots, $shotshit, $intercepted, $x, $y, $damageclass, $resolutionOrder
+	            );
+
+	            $entry->notes = $notes;
+	            $entry->pubnotes = $pubnotes;
+	            
+	            // Add the entry to the array
+	            $fireOrders[] = $entry;
+	        }
+	        $stmt->close();
+	    } else {
+	        echo "Failed to prepare statement.\n";
+	    }
+
+	    return $fireOrders; // Return the array of FireOrder objects
+	}
+
+
     public function isNewGamedata($gameid, $turn, $phase, $activeship)
     {
         try {

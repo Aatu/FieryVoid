@@ -77,7 +77,10 @@
                         $pivoting = 1;
                     }
                 }
-                
+
+                if ($move->value == "turnIntoPivot" && !$move->preturn){
+  				   $pivoting = 0;
+				}                 
             }
             
             return $pivoting;

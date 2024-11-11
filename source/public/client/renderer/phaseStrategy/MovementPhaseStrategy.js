@@ -211,7 +211,8 @@ window.MovementPhaseStrategy = function () {
             })
             .forEach(function (ship) {
                 var icon = this.shipIconContainer.getByShip(ship);
-                icon.showSideSprite(true);
+//                icon.showSideSprite(true); //Shows circle, not dotted circle.
+                icon.setSelected(true); //This actually sets icon for enemy ships that move during same sim phase - DK 10/24
             }, this);            
     }
 

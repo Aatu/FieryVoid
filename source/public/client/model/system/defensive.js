@@ -246,6 +246,11 @@ ThirdspaceShield.prototype.getDefensiveHitChangeMod = function (target, shooter,
 ThirdspaceShield.prototype.initializationUpdate = function() {
 	var ship = this.ship;	
 	this.outputDisplay = this.currentHealth;
+	
+	if (this.currentHealth == 0) {
+		this.outputDisplay = '-'; //'0' is not shown!							
+	}		
+	
 	return this;
 };
 
@@ -253,10 +258,10 @@ ThirdspaceShield.prototype.canIncrease = function () { //Can increase if not at 
  //Check if it is at maxHealth / not destroyed etc / Is there spare capacity in Generator?	
  
  	var ship = this.ship;
- 	if (shipManager.systems.isDestroyed(ship, this)) return false; //Shield section has been destroyed and so has shield.
+
+	if(ship.flight) return false;//Fighters can't increase or decrease shields
 	if(this.currentHealth >= this.maxhealth) return false; //Shield is at maximum output.
-		
- 	var ship = this.ship;	
+			
 	for (var i in ship.systems) {
 		var system = ship.systems[i];
 
@@ -273,10 +278,10 @@ ThirdspaceShield.prototype.canIncrease = function () { //Can increase if not at 
 ThirdspaceShield.prototype.canDecrease = function () { //can decrease if not at zero / destroyed.
  //Check if it is at 0 health / not destroyed etc
  	var ship = this.ship;
- 	if (shipManager.systems.isDestroyed(ship, this)) return false; //Section has been destroyed and so has shield.
-	if(this.currentHealth <= 1) return false; //Shield cannot be reduced more.
 
-	var ship = this.ship;	
+	if(ship.flight) return false;//Fighters can't increase or decrease shields
+	if(this.currentHealth <= 0) return false; //Shield cannot be reduced more.
+
 	for (var i in ship.systems) {
 		var system = ship.systems[i];
 
@@ -377,9 +382,13 @@ ThirdspaceShield.prototype.doDecrease = function () {
 	}
 
 	var shieldHealth = this.currentHealth;
-	if(shieldHealth > 1){		
+	if(shieldHealth >= 1){		
 		this.currentHealth -= 1;
 		generator.storedCapacity += 1;
+	}
+
+	if (this.shieldHealth == 0) {
+		this.outputDisplay = '-'; //'0' is not shown!							
 	}
 
 };
@@ -397,14 +406,19 @@ ThirdspaceShield.prototype.doDecrease5 = function () {
 	}
 
 	var shieldHealth = this.currentHealth;
-	if(shieldHealth > 5){		
+	if(shieldHealth >= 5){		
 		this.currentHealth -= 5;
 		generator.storedCapacity += 5;
 	}else{
-		var shieldIncrement = Math.max(0, shieldHealth-1); //Value is 5 or under, remove 1 point to prevent shield going to 0, then decrease.
+		var shieldIncrement = Math.max(0, shieldHealth);
 		this.currentHealth -= shieldIncrement;
 		generator.storedCapacity += shieldIncrement;		
+	}
+	
+	if (this.shieldHealth == 0) {
+		this.outputDisplay = '-'; //'0' is not shown!							
 	}	
+		
 };
 
 ThirdspaceShield.prototype.doDecrease10 = function () { 
@@ -420,14 +434,19 @@ ThirdspaceShield.prototype.doDecrease10 = function () {
 	}
 
 	var shieldHealth = this.currentHealth;
-	if(shieldHealth > 10){		
+	if(shieldHealth >= 10){		
 		this.currentHealth -= 10;
 		generator.storedCapacity += 10;
 	}else{
-		var shieldIncrement = Math.max(0, shieldHealth-1); //Value is 10 or under, remove 1 point to prevent shield going to 0, then decrease.
+		var shieldIncrement = Math.max(0, shieldHealth);
 		this.currentHealth -= shieldIncrement;
 		generator.storedCapacity += shieldIncrement;		
 	}	
+	
+	if (this.shieldHealth == 0) {
+		this.outputDisplay = '-'; //'0' is not shown!							
+	}	
+	
 };
 
 
@@ -445,7 +464,7 @@ ThirdspaceShield.prototype.doIndividualNotesTransfer = function () { //prepare i
 	return true;
 };
 
-/*
+
 var ThoughtShield = function ThoughtShield(json, ship) {
     ThirdspaceShield.call(this, json, ship);
     this.defensiveType = "none";//Migh need to amend to     this.defensiveType = "Shield";
@@ -453,37 +472,8 @@ var ThoughtShield = function ThoughtShield(json, ship) {
 
 ThoughtShield.prototype = Object.create(ThirdspaceShield.prototype);
 ThoughtShield.prototype.constructor = ThoughtShield;
-
-
-var ThirdspaceShieldProjector = function ThirdspaceShieldProjector(json, ship) {
-    ShipSystem.call(this, json, ship);
-    this.defensiveType = "none";
-};
-
-ThirdspaceShieldProjector.prototype = Object.create(ShipSystem.prototype);
-ThirdspaceShieldProjector.prototype.constructor = ThirdspaceShieldProjector;
-ThirdspaceShieldProjector.prototype.hasMaxBoost = function () {
-    return true;
-};
-ThirdspaceShieldProjector.prototype.getMaxBoost = function () {
-    return this.maxBoostLevel;
-};
-ThirdspaceShieldProjector.prototype.getDefensiveHitChangeMod = function (target, shooter, weapon) {
+ThoughtShield.prototype.getDefensiveHitChangeMod = function (target, shooter, weapon) {
     //this is made to be a shield just to display arc visually, no actual protection
-    return 0;
-};
-*/
-
-
-InterceptorMkI.prototype.getDefensiveHitChangeMod = function (target, shooter, weapon) {
-    return shipManager.systems.getOutput(target, this);
+    return this.defenceMod; //Usually 0, unless reinforced.
 };
 
-
-
-var EMShield = function EMShield(json, ship) {
-    Shield.call(this, json, ship);
-    this.defensiveType = "Shield";
-};
-EMShield.prototype = Object.create(Shield.prototype);
-EMShield.prototype.constructor = EMShield;

@@ -17,7 +17,7 @@ class TrekSulibanCellshipLarge extends FighterFlight{
         $this->sideDefense = 11;
         $this->freethrust = 8;
         $this->offensivebonus = 5;
-        $this->jinkinglimit = 2;
+        $this->jinkinglimit = 3;
         $this->turncost = 0.33;
        	$this->iniativebonus = 14 *5; 
         $this->pivotcost = 2;
@@ -26,6 +26,8 @@ class TrekSulibanCellshipLarge extends FighterFlight{
     	$this->superheavy = true;
         $this->maxFlightSize = 3;//this is a superheavy fighter originally intended as single unit, limit flight size to 3
         $this->hangarRequired = ''; //Star Trek unit independence is much larger than B5, this SHF-sized unit has great endurance and can be deployed independently
+		$this->notes = "Warp Engine";
+		$this->notes .= "<br>No hangar required";
 
 
         $this->populate();

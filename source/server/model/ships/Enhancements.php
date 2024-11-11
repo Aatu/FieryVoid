@@ -59,6 +59,17 @@ class Enhancements{
   */
   public static function nonstandardEnhancementSet($unit, $setName){
 	switch($setName) {
+
+		case 'MindriderFighter':
+			Enhancements::blockStandardEnhancements($unit);
+			break;	
+	
+		case 'MindriderShip':
+			Enhancements::blockStandardEnhancements($unit);
+			$unit->enhancementOptionsEnabled[] = 'IMPR_SR';
+			$unit->enhancementOptionsEnabled[] = 'IMPR_TS';			
+			break;
+	
 		case 'ShadowShip':
 			Enhancements::blockStandardEnhancements($unit);
 			$unit->enhancementOptionsEnabled[] = 'IMPR_SR';
@@ -69,6 +80,15 @@ class Enhancements{
 			Enhancements::blockStandardEnhancements($unit);
 			$unit->enhancementOptionsEnabled[] = 'SHAD_CTRL';
 			break;	  
+
+		case 'ThirdspaceShip':
+			Enhancements::blockStandardEnhancements($unit);
+			$unit->enhancementOptionsEnabled[] = 'IMPR_SR';			
+			foreach ( $unit->enhancementOptionsDisabled as $key=>$value){ 
+				if($value=='IMPR_ENG'){ unset($unit->enhancementOptionsDisabled[$key]); }
+				if($value=='IMPR_SENS'){ unset($unit->enhancementOptionsDisabled[$key]); }									
+			}					
+			break;	
 			
 		case 'VorlonShip':
 			Enhancements::blockStandardEnhancements($unit);
@@ -82,15 +102,7 @@ class Enhancements{
 			Enhancements::blockStandardEnhancements($unit);
 			$unit->enhancementOptionsEnabled[] = 'VOR_AZURF';
 			break;	  
-			
-		case 'ThirdspaceShip':
-			Enhancements::blockStandardEnhancements($unit);
-			$unit->enhancementOptionsEnabled[] = 'IMPR_SR';			
-			foreach ( $unit->enhancementOptionsDisabled as $key=>$value){ 
-				if($value=='IMPR_ENG'){ unset($unit->enhancementOptionsDisabled[$key]); }
-				if($value=='IMPR_SENS'){ unset($unit->enhancementOptionsDisabled[$key]); }									
-			}					
-			break;		
+
 	}	  
   }//endof function nonstandardEnhancementSet
 	
@@ -98,6 +110,7 @@ class Enhancements{
 	/* all ship enhancement options - availability and cost calculation
 	*/
   public static function setEnhancementOptionsShip($ship){
+
 	  //Elite Crew: +5 Initiative, +2 Engine, +1 Sensors, +2 Reactor power, -1 Profile, -2 to critical results
 	  //cost: +40% of ship cost (second time: +60%)
 	  //all Hangar-related advantages of original Elite Crew are skipped, and so is turn shortening
@@ -112,7 +125,32 @@ class Enhancements{
 		  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 		  //technical ID, human readable name, number taken, maximum number to take, price for one, price increase for each further, is an option (rather than enhancement)
 	  }	 
-	   
+
+	  //Elite Marines for Grappling Claws, cost: 40% craft price (round up), limit: 1	  	
+	  $enhID = 'ELT_MRN';	  
+	  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option needs to be specifically enabled
+		  $enhName = 'Elite Marines';
+		  $enhLimit = 1;	
+		  $enhPrice = ceil($ship->pointCost * 0.4); //40% ship cost  
+		  $enhPriceStep = 0;
+		  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
+	  }  
+	  
+	  //Extra Marines for Grappling Claws, cost: 10 per unit, limit: 3	  	
+	  $enhID = 'EXT_MRN';	  
+	  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option needs to be specifically enabled
+		  $enhName = 'Extra Marine Units';
+		  $enhLimit = 3;	
+		  $enhPrice = 0; //fixed.		  
+		  foreach ($ship->systems as $system){
+			if ($system instanceof GrapplingClaw){
+		  	$enhPrice += 10;
+		    }
+		  } 	  
+		  $enhPriceStep = 0;
+		  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+	  } 
+	  	   
 	  $enhID = 'IFF_SYS';
 	  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option needs to be specifically enabled
 		  $enhName = 'Identify Friend or Foe (IFF) System';
@@ -232,8 +270,25 @@ class Enhancements{
 			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 		  }
 	  }  	
-	    
-	  
+
+	  //Improved Thought Shield for Mindriders		    
+	  $enhID = 'IMPR_TS';
+	  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option needs to be specifically enabled
+		  $enhName = 'Improved Thought Shield';
+		  $enhLimit = 5; //Maximum 5 upgrades.
+		  $shields = 0;
+		  $rating = 0;		  
+		  foreach ($ship->systems as $system){
+			if ($system instanceof ThoughtShield){
+		  	$shields++;
+		  	$rating = $system->baseRating;
+		    }
+		  } 
+		  $enhPrice = (($rating+1) * $shields) * $shields;//New rating multiplied by number of shields, for EACH shield 
+		  $enhPriceStep = $shields * $shields;
+		  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
+		  }
+		  	  
 	  //Ipsha-specific - Eethan Barony refit (available for generic Ipsha designs only, Eethan-specific may have it already incorporated in some form)
 	  $enhID = 'IPSH_EETH';	  
 	  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option needs to be specifically enabled
@@ -979,12 +1034,12 @@ class Enhancements{
 		  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
 	  } 
 	  	  
-	  //Extra Marines for Breaching Pods, cost: 15 per pod, limit: 1	  	
+	  //Extra Marines for Breaching Pods, cost: 10 per pod, limit: 2	  	
 	  $enhID = 'EXT_MAR';	  
 	  if(in_array($enhID, $flight->enhancementOptionsEnabled)){ //option needs to be specifically enabled
-		  $enhName = 'Additional Marine Unit';
-		  $enhLimit = 1;	
-		  $enhPrice = 12; //price per craft, while flight price is per 6-craft flight	  
+		  $enhName = 'Extra Marine Units';
+		  $enhLimit = 2;	
+		  $enhPrice = 10; //price per craft, while flight price is per 6-craft flight	  
 		  $enhPriceStep = 0;
 		  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
 	  }  
@@ -1393,6 +1448,22 @@ class Enhancements{
 						} 						
 						break;						
 
+					case 'ELT_MRN'://Elite marines, mark every Marines system as Elite.
+						foreach ($ship->systems as $system){
+							if ($system instanceof GrapplingClaw){							
+								$system->eliteMarines = true;
+							}
+						}	
+						break;	
+
+					case 'EXT_MRN'://Extra marines, increase contingent per Claw by 1.
+						foreach ($ship->systems as $system){
+							if ($system instanceof GrapplingClaw){							
+								$system->ammunition += $enhCount;
+							}
+						}
+						break;	
+												
 					case 'IFF_SYS': //Add IFF system for Mine Launcher ships.
 						//Mark true
 						$ship->IFFSystem = true;
@@ -1457,6 +1528,17 @@ class Enhancements{
 							if ($system instanceof SelfRepair){
 								$system->output += $enhCount;
 							}
+						}  
+						break;	
+
+					case 'IMPR_TS': //Improved Thought Shield: +1 rating for each Thought Shield
+						foreach ($ship->systems as $system){
+							if ($system instanceof ThoughtShield){
+								$system->baseRating += $enhCount;
+							}
+							if ($system instanceof ThoughtShieldGenerator){
+								$system->output += $enhCount;
+							}							
 						}  
 						break;	
 						

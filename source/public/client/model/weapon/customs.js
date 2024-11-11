@@ -125,13 +125,13 @@ var CustomPhaseSweeper = function CustomLtPhaseDisruptor(json, ship) {
 };
 CustomPhaseSweeper.prototype = Object.create(Weapon.prototype);
 CustomPhaseSweeper.prototype.constructor = CustomPhaseSweeper;
-
+/*//Moved to Pulse
 var LightScattergun = function LightScattergun(json, ship) {
     Weapon.call(this, json, ship);
 };
 LightScattergun.prototype = Object.create(Weapon.prototype);
 LightScattergun.prototype.constructor = LightScattergun;
-
+*/
 
 var CustomERLightPBeam = function CustomERLightPBeam(json, ship) {
     Weapon.call(this, json, ship);

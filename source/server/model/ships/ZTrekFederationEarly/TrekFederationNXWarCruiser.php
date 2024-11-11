@@ -121,7 +121,7 @@ class TrekFederationNXWarCruiser extends MediumShip{
 		2=> array(
 		    7 => "Nacelle",
 			9 => "Phase Cannon",
-			11 => "Spatial Torpedo",
+			11 => "Photonic Torpedo",
 			17 => "Structure",
 			20 => "Primary",
 		),
