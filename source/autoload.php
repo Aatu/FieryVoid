@@ -547,7 +547,8 @@ spl_autoload_register(
                 'lightplasma' => '/server/model/weapons/plasma.php',
                 'lightpulse' => '/server/model/weapons/pulse.php',
                 'lightrailgun' => '/server/model/weapons/matter.php',
-                'lightscattergun' => '/server/model/weapons/customs.php',
+//                'lightscattergun' => '/server/model/weapons/customs.php',
+				'lightscattergun' => '/server/model/weapons/pulse.php', //Moved from customs - DK 10/24
                 'lightship' => '/server/model/ships/ShipClasses.php',
                 'liner' => '/server/model/ships/civilians/liner.php',
                 'linkedweapon' => '/server/model/weapons/linkedWeapon.php',
@@ -2172,21 +2173,21 @@ spl_autoload_register(
 
 
 				//Specific Raider Groups
-				//Imperial Star Legion
-                'imlarmedtransport' => '/server/model/ships/raiders/IMLArmedTransport.php',
+				//IML		
+//                'imlarmedtransport' => '/server/model/ships/raiders/IMLArmedTransport.php',
                 'imlarmedtransportam' => '/server/model/ships/raiders/IMLArmedTransportAM.php',                
                 'imlarmedtransporttorpedo' => '/server/model/ships/raiders/IMLArmedTransportTorpedo.php',
                 'imlattackcruiser' => '/server/model/ships/raiders/IMLAttackCruiser.php',
                 'imlattackcruiserlaser' => '/server/model/ships/raiders/IMLAttackCruiserLaser.php',
-                'imlmissilefrigate' => '/server/model/ships/raiders/IMLMissileFrigate.php',
-                'imlmissilefrigatebeam' => '/server/model/ships/raiders/IMLMissileFrigateBeam.php',
-                'imlmissilefrigaterapid' => '/server/model/ships/raiders/IMLMissileFrigateRapid.php',
-                'imlmissilefrigaterapidbeam' => '/server/model/ships/raiders/IMLMissileFrigateRapidBeam.php',
+//                'imlmissilefrigate' => '/server/model/ships/raiders/IMLMissileFrigate.php',
+//                'imlmissilefrigatebeam' => '/server/model/ships/raiders/IMLMissileFrigateBeam.php',
+//                'imlmissilefrigaterapid' => '/server/model/ships/raiders/IMLMissileFrigateRapid.php',
+//                'imlmissilefrigaterapidbeam' => '/server/model/ships/raiders/IMLMissileFrigateRapidBeam.php',
                 'imlmissilefrigateam' => '/server/model/ships/raiders/IMLMissileFrigateAM.php',
                 'imlmissilefrigatebeamam' => '/server/model/ships/raiders/IMLMissileFrigateBeamAM.php',
                 'imlmissilefrigaterapidam' => '/server/model/ships/raiders/IMLMissileFrigateRapidAM.php',
                 'imlmissilefrigaterapidbeamam' => '/server/model/ships/raiders/IMLMissileFrigateRapidBeamAM.php',                
-
+				//Junkyard Dogs
                 'jydkutai' => '/server/model/ships/raiders/JYDKutai.php',
                 'jydlias' => '/server/model/ships/raiders/JYDLias.php',
                 'jydmograth' => '/server/model/ships/raiders/JYDMograth.php',
@@ -2194,16 +2195,16 @@ spl_autoload_register(
                 'jydtethysomega' => '/server/model/ships/raiders/JYDTethysOmega.php',
                 'jydthentus' => '/server/model/ships/raiders/JYDThentus.php',
                 'jydvorchan' => '/server/model/ships/raiders/JYDVorchan.php',
-
+				//Imperial Star Legion
                 'legionaugustus' => '/server/model/ships/raiders/LegionAugustus.php',
                 'legiongladius' => '/server/model/ships/raiders/LegionGladius.php',
                 'legionstarjammer' => '/server/model/ships/raiders/LegionStarjammer.php',
                 'legiontroligan' => '/server/model/ships/raiders/LegionTroligan.php',
-
+				//TFS
                 'tfsblockaderunner' => '/server/model/ships/raiders/tfsblockaderunner.php',
                 'tfsfreedombase' => '/server/model/ships/raiders/tfsfreedombase.php',
                 'tfsmonitor' => '/server/model/ships/raiders/tfsmonitor.php',
-
+				//Narn Raiders
                 'lkarus' => '/server/model/ships/narn_raiders/lkarus.php',
                 'lkarusrefit' => '/server/model/ships/narn_raiders/lkarusRefit.php',
                 'lshon' => '/server/model/ships/narn_raiders/lshon.php',
@@ -3294,25 +3295,28 @@ spl_autoload_register(
 				'thirdspaceselfrepair' => '/server/model/systems/baseSystems.php',	
 
 				//Mindriders 
-/*				'thoughtshield' => '/server/model/weapons/defensive.php',				
+				'thoughtshield' => '/server/model/weapons/defensive.php',				
 				'thoughtshieldgenerator' => '/server/model/systems/baseSystems.php',
 				'ultrapulsecannon' => '/server/model/weapons/pulse.php',
 				'telekineticcutter' => '/server/model/weapons/particle.php',								
 				'triopticpulsar' =>	'/server/model/weapons/pulse.php',
 				'minorthoughtpulsar' => '/server/model/weapons/particle.php',				
-				'secondsight' => '/server/model/weapons/specialWeapons.php',											
+				'secondsight' => '/server/model/weapons/specialWeapons.php',
+				'thoughtwave' => '/server/model/weapons/specialWeapons.php',
 				'shieldreinforcement' => '/server/model/weapons/supportWeapons.php',
 				'mindriderthruster' => '/server/model/systems/baseSystems.php',
-				'mindriderHangar' => '/server/model/systems/baseSystems.php', 
+				'mindriderhangar' => '/server/model/systems/baseSystems.php',
+				'mindriderengine' => '/server/model/systems/baseSystems.php',				 
 				
 				'mindridercapital' => '/server/model/ships/ShipClasses.php',
 				'mindriderhcv' => '/server/model/ships/ShipClasses.php',
 				'mindridermcv' => '/server/model/ships/ShipClasses.php',								
+				'mindseye' => '/server/model/ships/mindriders/MindsEye.php',
 				'thoughtforce' => '/server/model/ships/mindriders/Thoughtforce.php',
 				'consortium' => '/server/model/ships/mindriders/Consortium.php',
-				'wheelofthought' => '/server/model/ships/mindriders/WheelofThought.php',														
+				'wheelofthought' => '/server/model/ships/mindriders/WheelofThought.php',
 				'thoughtprojections' => '/server/model/ships/mindriders/ThoughtProjections.php',						
-*/				
+				
 						
 						//Development systems
 						'testgun' => '/server/model/weapons/customDevelopment.php',
@@ -3357,8 +3361,12 @@ spl_autoload_register(
 				'trofaas' => '/server/model/ships/markab/trofaAS.php',
 				'breachingpodmarkab' => '/server/model/ships/markab/breachingpodmarkab.php',					
 				'breachingpodcorillani' => '/server/model/ships/corillani/breachingpodcorillani.php',										
-				'breachingpodkorlyan' => '/server/model/ships/korlyan/breachingpodkorlyan.php',		
-										
+				'breachingpodkorlyan' => '/server/model/ships/korlyan/breachingpodkorlyan.php',	
+				
+				//Grappling Claw & Grapple ships
+				'grapplingclaw' => '/server/model/weapons/specialWeapons.php',					
+				'claweagle' => '/server/model/ships/drazi/claweagle.php',										
+				'assaultsloop' => '/server/model/ships/raiders/assaultsloop.php',
 
 						//Satyra (Wolfgang campaign)
 						'satyrashield' => '/server/model/weapons/customDevelopment.php',

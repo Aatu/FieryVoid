@@ -1964,7 +1964,296 @@ class UnreliableTwinArray extends TwinArray{
 	
 } //endof class UnreliableTwinArray
 	
+
+class TelekineticCutter extends Raking{
+    public $name = "TelekineticCutter";
+    public $displayName = "Telekinetic Cutter";
+    public $iconPath = "TelekineticCutter.png";
+        	    
+	public $animation = "laser";
+    public $animationColor = array(204, 102, 0);
+
+    public $intercept = 4;
+    public $loadingtime = 1;
+    public $priority = 6;
+    public $guns = 2;
+    
+    public $rangePenalty = 0.33;
+    public $fireControl = array(4, 4, 4); // fighters, <mediums, <capitals
+
+    public $damageType = "Raking"; 
+    public $weaponClass = "Particle";
+    public $firingModes = array( 1 => "Raking");
+        
+        
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		if ( $maxhealth == 0 ) $maxhealth = 12;
+		if ( $powerReq == 0 ) $powerReq = 4;
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+	}
+
+    public function setSystemDataWindow($turn){
+        parent::setSystemDataWindow($turn);
+    }
+
+    public function getDamage($fireOrder){ return Dice::d(10, 4);   }
+    public function setMinDamage(){     $this->minDamage = 4 ;      }
+    public function setMaxDamage(){     $this->maxDamage = 40 ;      }
+
+}//endof TelekineticCutter	
+
+
+class MinorThoughtPulsar extends LinkedWeapon{
+    public $name = "MinorThoughtPulsar";
+    public $displayName = "Minor Thought Pulsar";
+    public $iconPath = "MinorThoughtPulsar.png";
+
+    public $damageType = "Standard"; 
+    public $weaponClass = "Particle"; 
+	    
+    public $animation = "bolt";
+    public $animationColor = array(204, 102, 0);
+        
+	public $factionAge = 3;//Ancient weapon, which sometimes has consequences!
+
+    public $intercept = 1; //weapon can (..probably...) intercept at default rules... probably intended as a single shot of -2/-3 - but in FV these shots are separate, so that's a lot of separate -1s
+    public $loadingtime = 1;
+	public $guns = 2;
+
+    public $rangePenalty = 2; //-2/hex
+    public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
+    public $priority = 5; 
+
+	public $firingMode = 1;	
+    public $firingModes = array( 1 => "RoF", 2 => "Damage", 3 => "Hitchance", 4 => "1Combo1",  5 => "2Combo2");
+
+	public $bonusDamageShots = 0;//Effectively a counter for shots.
+
+    function __construct($startArc, $endArc, $shots=1){
+        $this->shots = $shots;
+        $this->defaultShots = $shots;
+        parent::__construct(0, 1, 0, $startArc, $endArc);
+    }
+
+	private function getSpareThrust($ship, $gamedata){
+		$thrustUsed = 0;
+		
+		foreach($ship->movement as $shipMove){ //Update position and facing. Assume handled in order.			
+			if($shipMove->turn != $gamedata->turn) continue; //Only interested in this turn.
+
+            foreach ($shipMove->assignedThrust as $i=>$value){
+				if (empty($value))
+					continue;
+					
+				if ($ship instanceof FighterFlight){ //Check if fighter, just in case weapon ends up on a ship.
+					$thrustUsed += $value;
+				}					
+			}
+		}
+			
+		return $thrustUsed;
+	}//endof getSpareThrust
+
+
+    public function beforeFiringOrderResolution($gamedata){
+
+      $firingOrders = $this->getFireOrders($gamedata->turn);
+    	
+      $originalFireOrder = null;
+              foreach ($firingOrders as $fireOrder) { 
+              	   if ($fireOrder->type == 'normal') { 
+                    $originalFireOrder = $fireOrder;
+                    break; //no need to search further
+                    }
+				}    			
+				
+        if($originalFireOrder==null) return; //no appropriate fire order, end of work
 	
+		$ship = $this->getUnit();
+		$target = $gamedata->getShipById($originalFireOrder->targetid);
+		
+		$freeThrust = $ship->freethrust; //Should be 16.	
+		$thrustUsed = $this->getSpareThrust($ship, $gamedata);	//16 - used	
+		$thrustForBoost = $freeThrust - $thrustUsed;	
+		if($thrustForBoost < 3) return; //Not enough spare thrust to do anything, no boosts.		
+		$noOfBoosts = floor($thrustForBoost/3);	//Divide remaining thurst by 3, rounded down.
+	
+		$this->changeFiringMode($originalFireOrder->firingMode);//Change Firing Mode, just in case.
+			
+			switch($this->firingMode){
+				
+				case 1: //Prioritise RoF then hitchance
+				
+					if($noOfBoosts < 3){
+						$newShots = $noOfBoosts;
+						for($i = 0; $i < $newShots; $i++){
+							$this->createNewFireOrder($ship, $target, $gamedata, $originalFireOrder);
+						}																	
+					}else{	
+						$newShots = 2;//Create extra two shots to max 4.
+						for($i = 0; $i < $newShots; $i++){
+							$this->createNewFireOrder($ship, $target, $gamedata, $originalFireOrder);
+						}								
+													
+						$OBBoost = max(0, $noOfBoosts-$newShots) * 2;//Dump any remaining into hitchance, ensure not a minus.					
+						$this->fireControl[0] += $OBBoost;
+						$this->fireControl[1] += $OBBoost;
+						$this->fireControl[2] += $OBBoost;	
+					}
+					break;
+						
+						
+				case 2: //Priortise Damage then hitchance
+				
+					if($noOfBoosts < 3){
+						$this->bonusDamageShots += $noOfBoosts; //First two boosts go into Damage.						
+					}else{
+						$this->bonusDamageShots += 2; //First two boosts go into Damage.							
+						$OBBoost = max(0, $noOfBoosts-2) * 2;//Dump any remaining into hitchance, ensure not a minus.
+							
+						$this->fireControl[0] += $OBBoost;
+						$this->fireControl[1] += $OBBoost;
+						$this->fireControl[2] += $OBBoost;	
+					}
+					break;
+				
+				
+				case 3: //Prioritise only Hitchance
+				
+					$OBBoost = $noOfBoosts * 2;//Dump all into hitchance.
+						
+						$this->fireControl[0] += $OBBoost;
+						$this->fireControl[1] += $OBBoost;
+						$this->fireControl[2] += $OBBoost;	
+						
+					break;
+
+
+				case 4://Prioritise Damage, Shots then Hitchance
+
+					if($noOfBoosts <= 1){//1 boost
+						$this->bonusDamageShots += 1; //Boost damage of first shot.						
+					}else if($noOfBoosts == 2){//2 boosts
+						$this->bonusDamageShots += 1; //Split first two boosts go into damage and an extra shot.							
+						$this->createNewFireOrder($ship, $target, $gamedata, $originalFireOrder);//Then add extra shot
+					}else if($noOfBoosts == 3){//3 boosts
+						$this->bonusDamageShots += 2; //First two boosts go into damage.							
+						$this->createNewFireOrder($ship, $target, $gamedata, $originalFireOrder);//Then add extra shot(3)
+					}else if($noOfBoosts == 4){//4 boosts
+						$this->createNewFireOrder($ship, $target, $gamedata, $originalFireOrder);//Add extra shot(3)
+						$this->bonusDamageShots += 3; //Then three boosts into damage.							
+					}else{//5 of more Boosts
+						$this->createNewFireOrder($ship, $target, $gamedata, $originalFireOrder);//Add extra shot
+						$this->bonusDamageShots += 3; //Then three boosts into damage.
+						$OBBoost = 1*2;//Dump remaining into hitchance, ensure not a minus.						
+								
+						$this->fireControl[0] += $OBBoost;
+						$this->fireControl[1] += $OBBoost;
+						$this->fireControl[2] += $OBBoost;	
+					}
+					break;
+					
+					
+				case 5://Prioritise Shots, and Damage equally.
+				
+					if($noOfBoosts <= 1){//1 boost - extra shot(3)
+						$this->createNewFireOrder($ship, $target, $gamedata, $originalFireOrder);			
+					}else if($noOfBoosts == 2){//2 boosts
+						$this->bonusDamageShots += 1; //Split first two boosts into damage and an extra shot.							
+						$this->createNewFireOrder($ship, $target, $gamedata, $originalFireOrder);
+					}else if($noOfBoosts == 3){//3 boosts
+						$this->bonusDamageShots += 1; //First boosts goes into damage.							
+						$newShots = 2; //Then create two extra shots
+						for($i = 0; $i < $newShots; $i++){
+							$this->createNewFireOrder($ship, $target, $gamedata, $originalFireOrder);
+						}
+					}else if($noOfBoosts == 4){//4 boosts
+						$this->bonusDamageShots += 2; //Two boosts go into damage.							
+						$newShots = 2;//Then create two extra shots
+						for($i = 0; $i < $newShots; $i++){
+							$this->createNewFireOrder($ship, $target, $gamedata, $originalFireOrder);
+						}						
+					}else{//5 of more Boosts
+						$this->bonusDamageShots += 3; //Three boosts go into damage.							
+						$newShots = 2;//Then create two extra shots
+						for($i = 0; $i < $newShots; $i++){
+							$this->createNewFireOrder($ship, $target, $gamedata, $originalFireOrder);
+						}	
+					}
+					break;
+
+				
+				default://Same as Case 1.
+					if($noOfBoosts < 3){
+						// Create a new FireOrders
+						$newShots = $noOfBoosts;
+						for($i = 0; $i < $newShots; $i++){
+							$this->createNewFireOrder($ship, $target, $gamedata, $originalFireOrder);
+						}																	
+					}else{	
+						$newShots = 2;
+						for($i = 0; $i < $newShots; $i++){
+							$this->createNewFireOrder($ship, $target, $gamedata, $originalFireOrder);
+						}								
+													
+						$OBBoost = max(0, $noOfBoosts-$newShots) * 2;//Dump any remaining into hitchance, ensure not a minus.					
+						$this->fireControl[0] += $OBBoost;
+						$this->fireControl[1] += $OBBoost;
+						$this->fireControl[2] += $OBBoost;	
+					}
+					break;
+													
+			}    	
+	
+	}//endof beforeFiringOrderResolution	
+
+	public function createNewFireOrder($ship, $target, $gamedata, $originalFireOrder){
+		
+		$newFireOrder = new FireOrder(
+		    -1, "normal", $ship->id, $target->id,
+		    $this->id, -1, $gamedata->turn, $originalFireOrder->firingMode, 
+		    0, 0, 1, 0, 0, // needed, rolled, shots, shotshit, intercepted
+		    0, 0, $this->weaponClass, -1 // X, Y, damageclass, resolutionorder
+		);        
+
+		$newFireOrder->addToDB = true;
+		$this->fireOrders[] = $newFireOrder;			
+	}
+
+        
+    public function setSystemDataWindow($turn){          
+            parent::setSystemDataWindow($turn);
+			$this->data["Special"] = "Can be improved for each 3 points of remaining Thrust after Movement.";  
+			$this->data["Special"] .= "<br>Select type of bonus using Firing Modes as follow:";
+			$this->data["Special"] .= "<br> - Rate of Fire - Prioritises extra shots this turn (+1 per 3 Thrust).";
+			$this->data["Special"] .= "<br> - Damage - Prioritises extra Damage this turn (+5 per shot per 3 Thrust).";
+			$this->data["Special"] .= "<br> - Hit Chance - Uses all thrust to improve hit chance (+10% per 3 Thrust).";				
+			$this->data["Special"] .= "<br> - Combo 1 - Prioritises Shots then Damage, then Hitchance.";	
+			$this->data["Special"] .= "<br> - Combo 2 - Prioritises Damage then shots.";				
+    }
+
+    public function getDamage($fireOrder){         
+		$damage = Dice::d(6,1)+ 5;
+		  	    
+	    if($this->bonusDamageShots > 0){    	
+	    	$damage +=5;
+	    	$this->bonusDamageShots -= 1;	
+	    }   
+	    
+	    return $damage;    
+    }
+    
+    public function setMinDamage(){     $this->minDamage = 6 ;      }
+    public function setMaxDamage(){     $this->maxDamage = 11 ;      }
+
+	public function stripForJson(){
+		$strippedSystem = parent::stripForJson();
+		$strippedSystem->data = $this->data;		
+		$strippedSystem->guns = $this->guns;		
+		return $strippedSystem;
+	}
+
+}//endof MinorThoughtPulsar	
 	
 	
 ?>

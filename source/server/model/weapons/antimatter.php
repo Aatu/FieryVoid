@@ -492,6 +492,7 @@ class AntiprotonGun extends AntimatterWeapon{
 			}else{
 				$this->data["Special"] .= '<br>';
 			}
+			$this->data["Range brackets"] = 'For Antimatter Cannon modes: No penalty up to ' . $this->rngNoPenaltyArray[2] . ' / Normal penalty up to ' . $this->rngNormalPenaltyArray[2] . ' / Double therafter ' ;	
 			$this->data["Special"] .= 'Shredder mode is aimed at hex, and affects all units within 1 hex of target point (not beyond 10 hexes though, and will never hit firing unit itself).';
 			$this->data["Special"] .= '<br>Shredder will roll to hit separately for each attack. Attack will suffer no range penalty of any kind, will ignore any EW and jinking.';
 			$this->data["Special"] .= '<br>Each fighter will suffer 1 attack, LCVs/MCVs/HCVs d3 attacks, Capital ships d6 and Enormous units d6+3.';

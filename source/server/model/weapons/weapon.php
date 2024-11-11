@@ -141,7 +141,7 @@ class Weapon extends ShipSystem
     public $ballistic = false; //this is a ballistic weapon, not direct fire
     public $ballisticIntercept = false; //can intercept, but only ballistics
     public $hextarget = false; //this weapon is targeted on hex, not unit
-   		public $hextargetArray = array(); //For AntimatterShredder		
+   	public $hextargetArray = array(); //For AntimatterShredder		
 		
     public $noPrimaryHits = false; //PRIMARY removed from outer charts if true
 	
@@ -287,7 +287,6 @@ class Weapon extends ShipSystem
 			$strippedSystem->extraoverloadshotsArray = $this->extraoverloadshotsArray;
 			$strippedSystem->fireOrders = $this->fireOrders;
 			$strippedSystem->canModesIntercept = $this->canModesIntercept;//For weapons which intercept not using their default mode e.g. interceptor missiles - DK
-			$strippedSystem->noProjectile = $this->noProjectile;
 			
 			if(isset($this->ammunition)){
 				$strippedSystem->ammunition = $this->ammunition;
@@ -1121,7 +1120,7 @@ class Weapon extends ShipSystem
             $oew = 0;
         }
 
-        if (!($shooter instanceof FighterFlight)) {			
+		if (!($shooter instanceof FighterFlight) && !$shooter->ignoreManoeuvreMods) {//Mindriders ignore pivot and roll penalties - DK 17.7.24
             if ((!$shooter->agile) && Movement::isRolling($shooter, $gamedata->turn)) { //non-agile ships suffer as long as they're ROLLING
                 $mod -= 3;
             } else if ($shooter->agile && Movement::hasRolled($shooter, $gamedata->turn)) { //Agile ships suffer on the turn they actually rolled!
@@ -1162,7 +1161,7 @@ class Weapon extends ShipSystem
         //and use OB instead of OEW
         if ($shooter instanceof FighterFlight) {
             if (Movement::getCombatPivots($shooter, $gamedata->turn) > 0) {
-                $mod -= 1;
+            	 if(!$shooter->ignoreManoeuvreMods) $mod -= 1;
             }
 
             $effectiveOB = $shooter->offensivebonus;
@@ -1743,7 +1742,6 @@ throw new Exception("getSystemArmourAdaptive! $ss");	*/
                 $sourcePos = $pos;
             } else {
                 $sourcePos = $shooter->getHexPos();
-				//	$sourcePos = $this->getFiringHex($gamedata, $fireOrder);     //this was for Proximity Launcher - but is incorrect here, returning line above            
             }
             $dis = mathlib::getDistanceHex($sourcePos, $target);
             $damage -= round($dis * $this->rangeDamagePenalty); //round to avoid damage loss at minimal ranges!

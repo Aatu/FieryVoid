@@ -829,12 +829,145 @@ class Engine extends ShipSystem implements SpecialAbility {
 }
 
 
+class MindriderEngine extends Engine{
+    public $name = "engine";
+
+	public $contraction = 0;
+	private $changeThisTurn = 0;
+    public $thrustused;
+    public $primary = true;
+    public $boostable = true;
+    public $outputType = "thrust";	
+	
+	// this method generates additional non-standard information in the form of individual system notes, in this case: - Initial phase: check setting changes made by user, convert to notes.	
+	public function doIndividualNotesTransfer(){
+
+		$contractionOnTurn = 0;	
+	    if (is_array($this->individualNotesTransfer) && isset($this->individualNotesTransfer[0])) { // Check if it's an array and the key exists
+	
+		    $contractionOnTurn = $this->individualNotesTransfer[0];
+	        $this->changeThisTurn = $contractionOnTurn;
+	    }
+	    	    
+	    // Clear the individualNotesTransfer array
+	    $this->individualNotesTransfer = array();
+	}
+	
+		
+    public function generateIndividualNotes($gameData, $dbManager){ //dbManager is necessary for Initial phase only
+		$ship = $this->getUnit();
+		switch($gameData->phase){
+					
+				case 2: //Movement phase
+					//data returned as a number to update level of contraction.
+					if($ship->userid == $gameData->forPlayer){ //only own ships, otherwise bad things may happen!
+						//load existing data first - at this point ship is rudimentary, without data from database!
+						$listNotes = $dbManager->getIndividualNotesForShip($gameData, $gameData->turn, $ship->id);	
+						foreach ($listNotes as $currNote){
+							if($currNote->systemid==$this->id){//note is intended for this system!
+								$this->addIndividualNote($currNote);	 								
+							}
+						}
+						$this->onIndividualNotesLoaded($gameData);		
+
+						$changeValue = $this->changeThisTurn;//Extract change value for shield this turn.													
+				
+						if($changeValue != 0){												
+							$notekey = 'contract';
+							$noteHuman = 'Contraction value has been changed';
+							$notevalue = $changeValue;
+							$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$notevalue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue         
+						}					
+					}			
+										
+			break;				
+		}
+	} //endof function generateIndividualNotes
+	
+
+	public function onIndividualNotesLoaded($gamedata)
+	{
+
+		$ship = $this->getUnit();
+		$contractValue = 0;//Initialise.
+						
+		foreach ($this->individualNotes as $currNote) {
+			if($currNote->turn == $gamedata->turn){				    	
+		        $contractValue += $currNote->notevalue;//Get value of Contraction this turn
+			}    
+		}
+
+			$this->contraction = $contractValue;	
+
+			//Reduce image size if needed! :)
+			$level = floor($this->contraction/3);			
+			$ship->iconPath = "img/ships/MindriderMindsEye' . $level . '.png";
+			$ship->canvasSize = 280-($level *50);
+
+		if($contractValue == 0) return; //No effects this turn, just return.
+
+			$ship->forwardDefense -= $this->contraction;
+			$ship->sideDefense -= $this->contraction;
+					
+			//Now set current contraction
+			foreach ($ship->systems as $system){//Increase Thought Shield amount by contraction level, and decrease profiles by same.
+				
+				if ($system instanceof ThoughtShield){
+					
+					//Need to temporarily lower/raise shield on turn Contraction happens.  Will reset at end of turn based on Generator value.
+					foreach ($this->individualNotes as $currNote) {
+						if($currNote->turn == $gamedata->turn){
+							$system->setShields($ship, $gamedata->turn, -$currNote->notevalue);					
+						}
+					}
+				}
+
+			}
+		
+			if($this->contraction >= 3){ //Additional effects after 3 levels of contraction.
+				$ship->Enormous = false;
+				
+				$armourBoost = floor($this->contraction/3);
+				
+				foreach ($ship->systems as $system){
+					$system->armour	+= $armourBoost;		
+				}											
+			}		
+
+	        //and immediately delete notes themselves, they're no longer needed (this will not touch the database, just memory!)
+	        $this->individualNotes = array();
+			  
+	}//endof onIndividualNotesLoaded
+
+
+    public function setSystemDataWindow($turn){
+	parent::setSystemDataWindow($turn);
+		$this->data["Contraction Level"] = $this->contraction;		       	     
+		$this->data["Special"] = "Allow Mind's Eye to contract, improving it's Thought Shields and Defence Profile by 1pt for each level of Contraction.";
+		$this->data["Special"] .= "In addtion, all Mind's Eye systems gain +1 armour for every 3pts of Contraction.";		
+		$this->data["Special"] .= "Note - After 3 levels of Contraction the Mind's Eye is no longer considered Enormous.";		
+    }
+
+
+	//always redefine $this->data, variable information goes there...
+	public function stripForJson(){
+        $strippedSystem = parent::stripForJson();
+        $strippedSystem->data = $this->data;	        
+        $strippedSystem->contraction = $this->contraction;
+        $strippedSystem->changeThisTurn = $this->changeThisTurn;        	
+        return $strippedSystem;
+    }
+	
+}//endof MindriderEngine
+
+
 class Scanner extends ShipSystem implements SpecialAbility{ //on its own Scanner does not implement anything in particular, but classes ovverriding it do!
     public $name = "scanner";
     public $displayName = "Scanner";
     public $primary = true;
     public $boostable = true;
     public $outputType = "EW";
+  
 	//Scanner  is fairly important, being a core system!
 	public $repairPriority = 7;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
     public $specialAbilityValue = false; //changed by modifications marking Improved/Advanced Sensors!
@@ -888,7 +1021,23 @@ class Scanner extends ShipSystem implements SpecialAbility{ //on its own Scanner
 		$this->data["Special"] .= "<br>Ignores enemy BDEW, SDEW and DIST."; //not that of advanced races
 		$this->data["Special"] .= "<br>Ignores any defensive systems lowering enemy profile (shields, EWeb...)."; //not that of advanced races
 		$this->data["Special"] .= "<br>All of the above work as usual if operated by advanced races."; 
-	}	
+	}		
+
+	public function markMindrider(){		
+    	$this->specialAbilities[] = "AdvancedSensors";
+    	$this->specialAbilities[] = "ConstrainedEW";    	
+		$this->specialAbilityValue = true; //so it is actually recognized as special ability!
+		$this->boostEfficiency = 14; //Advanced Sensors are rarely lower than 13, so flat 14 boost cost is advantageous to output+1!
+		
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}
+		$this->data["Special"] .= '<br>Advanced Sensors - ignores Jammer, flat 14 boost cost.';//not that of advanced races
+		$this->data["Special"] .= "<br>Ignores enemy BDEW, SDEW and DIST and other defensive systems unless operated by Ancient races."; //not that of advanced races
+		$this->data["Special"] .= '<br>CONSTRAINED - All ELINT effects below each cost 1 extra EW.';//not that of advanced races		
+	}
 	
 	public function markThirdspace(){	
 		$this->iconPath = "Thirdspacescanner.png";			
@@ -904,7 +1053,7 @@ class Scanner extends ShipSystem implements SpecialAbility{ //on its own Scanner
 		$this->data["Special"] .= '<br>Ignores enemy Jammers, BDEW, SDEW and DIST.';//not that of advanced races
 		$this->data["Special"] .= "<br>Also ignores any defensive systems lowering enemy profile (shields, EWeb...)."; //not that of advanced races
 		$this->data["Special"] .= "<br>All of the above work as usual if operated by Ancient races.";
-		$this->data["Special"] .= "<br>Can only be boosted twice, for 16 power each boost.";	
+		$this->data["Special"] .= "<br>Can only be boosted twice, for " . $this->boostEfficiency . " power each boost.";	
 		$this->data["Special"] .= "<br>'You can feel them, reaching into your mind...'";		 
 	}	
 		
@@ -1032,7 +1181,7 @@ class ElintScanner extends Scanner implements SpecialAbility{
     public $name = "elintScanner";
     public $displayName = "ELINT Scanner";
     public $specialAbilities = array("ELINT");
-    public $iconPath = "elintArray.png";
+    public $iconPath = "elintArray.png";   
 
     function __construct($armour, $maxhealth, $powerReq, $output ){
         parent::__construct($armour, $maxhealth, $powerReq, $output );
@@ -1193,7 +1342,7 @@ class CnC extends ShipSystem implements SpecialAbility {
 	
 	//C&C  is VERY important, although not as much as the reactor!
 	public $repairPriority = 9;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
-    
+
     
     protected $possibleCriticals = array(
     	//1=>"SensorsDisrupted", //not implemented! so I take it out 
@@ -1229,6 +1378,26 @@ class CnC extends ShipSystem implements SpecialAbility {
 	public function criticalPhaseEffects($ship, $gamedata) {
 			
 		parent::criticalPhaseEffects($ship, $gamedata);//Call parent to apply effects like Limpet Bore.			
+
+		foreach($ship->movement as $shipMove){ //Look through Movement Orders to see if an Emergency Roll occurred this turn.			
+			if($shipMove->turn == $gamedata->turn){	//This turn.					
+				if($shipMove->value == "emergencyRoll"){ //Has Emergency rolled!								
+							$testCrit = array(); 
+							$testCrit = $this->testCritical($ship, $gamedata, $testCrit);//Damage caused, need to force critical test outside normal routine
+						$effectIni = 6;
+						if(!$this->isDestroyed()){//Check if destroyed, but really shouldn't be rolling if it is!										
+							for($i=1; $i<=$effectIni;$i++){
+								$crit = new tmpinidown(-1, $ship->id, $this->id, 'tmpinidown', $gamedata->turn); 
+								$crit->updated = true;
+								$this->criticals[] =  $crit;
+							}		        		
+						} 
+				break; //No need to look further!						   
+				}									
+
+			}
+		}
+				
 		
 		$hasCommsFlux = $ship->hasSpecialAbility("CommsFlux");
 
@@ -1626,6 +1795,37 @@ class GraviticThruster extends Thruster{
         return $crit;
     }
 }
+
+class MindriderThruster extends GraviticThruster{ 
+
+    function __construct($armour, $maxhealth, $powerReq, $output, $direction, $thrustused = 0 ){
+        parent::__construct($armour, $maxhealth, $powerReq, $output, $direction, $thrustused);
+         
+        $this->thrustused = (int)$thrustused;
+        $this->direction = (int)$direction;
+        //arc depends on direction!
+		switch($this->direction){
+			case 1: //retro
+				$this->startArc = 315;
+				$this->endArc = 45;
+				break;
+			case 2: //main
+				$this->startArc = 135;
+				$this->endArc = 225;
+				break;	
+			case 3://port
+				$this->startArc = 225;
+				$this->endArc = 315;
+				break;
+			case 4://Stbd
+				$this->startArc = 45;
+				$this->endArc = 135;
+				break;
+		}
+
+	}
+	
+}//endof MindriderThruster 
 
 
 class MagGraviticThruster extends Thruster{ 
@@ -2599,6 +2799,8 @@ class ConnectionStrut extends ShipSystem{
     public $name = "connectionStrut";
     public $displayName = "Connection Strut";
     public $iconPath = "connectionStrut.png";
+    
+	protected $doCountForCombatValue = false; //false means this system is skipped when evaluating ships' combat value!
     
 	//Connection Strut cannot be repaired!
 	public $repairPriority = 0;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
@@ -3650,6 +3852,17 @@ class ThirdspaceSelfRepair extends SelfRepair{
     public $boostEfficiency = 0;
     
     protected $ewBoosted = true;   
+
+	function __construct($armour, $maxhealth, $output, $maxBoost = 0)
+	{
+		//power requirement is 0, health is always defined by constructor, as is output - but they cannot be <1!
+		if ( $maxhealth <1 ) $maxhealth = 1;
+		if ( $output <1 ) $output = 1; //base output cannot be <1
+		parent::__construct($armour, $maxhealth, 0, 0, 0);
+		$this->output = $output; //after parent - weapon has no output and passes 0 to system creation
+		$this->maxRepairPoints = $maxhealth*10;
+		$this->maxBoostLevel = $maxBoost;		
+	}
 	
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);  
@@ -4475,51 +4688,152 @@ class ThirdspaceShieldGenerator extends ShipSystem{
     public $iconPath = "ThirdspaceShieldGen.png";
 	protected $doCountForCombatValue = false; //Check if inherited and remove?
 	
+    public $boostable = true;	
+    public $boostEfficiency = 0; //Advanced Sensors are rarely lower than 13, so flat 14 boost cost is advantageous to output+1!
+    public $maxBoostLevel = 0; //Unlike Shadows/Vorlons Thirdspace ships have alot of spare power, so limit their max sensor boost for balance. 	
+
+	public $totalBaseRating = 0;// Maximum shield amount for ALL shields.	
 	public $storedCapacity = 0;
-	public $excessCapacity = 0;	//Variable to store front end values, when player commits Initial Orders with excess energy in Generator. 
 	public $shieldPresets = array('Equalise', 'Forward', 'Starboard', 'Aft', 'Port');	
 	public $presetCurrClass = '';//for front end, to display Preset types in tooltips.
+	
+	private $shieldCount = 0;
 
 	public $repairPriority = 9;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
     
     
-    function __construct($armour, $maxhealth, $powerReq, $output){ 
+    function __construct($armour, $maxhealth, $powerReq, $output, $maxBoost = 0, $boostEfficiency = 0){ 
+    	$this->maxBoostLevel = $maxBoost;
+    	$this->boostEfficiency = $boostEfficiency;    	
         parent::__construct($armour, $maxhealth, $powerReq, $output ); //$armour, $maxhealth, $powerReq, $output    		    
     }  	    
+
+    public function onConstructed($ship, $turn, $phase){
+        parent::onConstructed($ship, $turn, $phase);	
+		
+		$totalShieldsRating = 0;
+						
+		foreach($ship->systems as $system){
+			if($system instanceof ThirdspaceShield){
+				$totalShieldsRating += $system->baseRating;
+				$this->shieldCount++;	
+			}			
+		}
+		$this->totalBaseRating = $totalShieldsRating;
+    }
 		
 	protected $possibleCriticals = array(
 	            18=>"OutputReduced1",
 	            20=>"OutputReduced2",
 	            26=>"OutputReduced4" );
 
+	private function getRegenforNotes($turn){
+		$regen = 0;
+		$regen = $this->getOutput() + ($this->getBoostLevel($turn) * $this->shieldCount);
+		return $regen; 
+	}
+
 		
     public function setSystemDataWindow($turn){
         parent::setSystemDataWindow($turn);
-		$this->data["Special"] = "Regenerates 1 health per point of output for each Shield at the end of each turn.";
-        $this->data["Special"] .= "<br>During Initial Orders this system can be used to transfer shield power from one shield system to another e.g. front to aft etc.";	   
-        $this->data["Special"] .= "<br>You cannot commit your Intial Orders if there is an excess or deficit of shield energy in this system.";
+		$this->data["Special"] = "Regenerates " . $this->getRegenforNotes($turn) . " health split eqaully amongst all Thirdspace Shields at the end of each turn.";
+		$this->data["Special"] .= "<br>Shields will not regenerate above their Base Rating, instead any excess will be allocate to another shield where possible.";
+		$this->data["Special"] .= "<br>Current Shield Power CANNOT be regenerated above Maximum Shield Power.";		       
+        $this->data["Special"] .= "<br>Regeneration can be boosted " . $this->maxBoostLevel  . " times at " . $this->boostEfficiency ." power for " . $this->boostEfficiency ." extra output.";  
+        $this->data["Special"] .= "<br>During Initial Orders this system can also be used to transfer shield power from one shield arc to another e.g. front to aft etc.";	   
+        $this->data["Special"] .= "<br>You cannot commit your Intial Orders if there is an excess or deficit of shield energy in this system.";       
  		$this->outputDisplay = $this->storedCapacity;
- 		$this->data["Output"] = $this->getOutput();               
+ 		$this->data["Current Output "] = $this->getOutput();
+ 		$this->data["Boosted by "] = $this->getBoostLevel($turn) * $this->shieldCount; 		
+ 		$this->data["Maximum Shield Power "] = $this->totalBaseRating;
+ 		$this->data["Current Shield Power "] = $this->totalBaseRating; //Will be updated in Front End anyway. 		  		               
     }
 
-		//effects that happen in Critical phase (after criticals are rolled) - replenishment from active Generator 
-		public function criticalPhaseEffects($ship, $gamedata){
+	private function getBoostLevel($turn){
+            $boostLevel = 0;
+            foreach ($this->power as $i){
+                    if ($i->turn != $turn)
+                            continue;
+                    if ($i->type == 2){
+                            $boostLevel += $i->amount;
+                    }
+            }
+            return $boostLevel;
+        }
+
+	//effects that happen in Critical phase (after criticals are rolled) - replenishment from active Generator 
+	public function criticalPhaseEffects($ship, $gamedata){
 			
-			parent::criticalPhaseEffects($ship, $gamedata);//Call parent to apply effects like Limpet Bore.
-/*
-			//Thought about adding something to reduce all shields to 0 when generator destryoed.  But I think them not regenerating is enough.			
-			if($this->isDestroyed()){
-				$shields = $ship->getSystemsByName('ThirdspaceShield', true);
+		parent::criticalPhaseEffects($ship, $gamedata);//Call parent to apply effects like Limpet Bore.
 				
-				foreach($shields as $shield){
-					$currHealth = $shield->getRemainingHealth();
-					$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $currHealth, 0, 0, -1, false, false, "DepleteToZero!", "ThirdspaceShield");
-					$damageEntry->updated = true;
-					$this->damage[] = $damageEntry;							
-				}
+		if ($this->isDestroyed()) return; // Exit if generator is destroyed						
+				
+		$allShields = array(); //Create array of all shields on ship.
+		$totalShieldRating = 0;//initialise
+		$currentShieldHealth = 0;//initialise	
+					
+		foreach($ship->systems as $system){//Loop through systems to find Shields
+			if($system instanceof ThirdspaceShield){
+				$allShields[] = $system; //Add to list of shields.
+				$totalShieldRating += $system->baseRating;
+				$currentShieldHealth += $system->getRemainingCapacity();				
+			}				
+		}	
+
+		if($currentShieldHealth >= $totalShieldRating) return; //If for some reason total shield health is equal/greater than baseRatings combined, don't regen at all!
+
+		$noOfShields = count($allShields);
+		$generatorOutput = $this->getOutput(); // e.g  60
+		$boostLevel = $this->getBoostLevel($gamedata->turn); // e.g. 2				
+		$amountPerShield = ($generatorOutput / $noOfShields) + $boostLevel; //e.g 15 + boost
+
+		$canRechargeTotal = $totalShieldRating - $currentShieldHealth;
+		$spareEnergy = 0; //Counter for shield energy not used in next part.	
+					
+		foreach ($allShields as $shield) {							
+			$maxRegenThisTurn = $shield->baseRating - $shield->getRemainingCapacity(); //Amount between health and baseRating.
+			$maxRegenThisTurn = max(0, $maxRegenThisTurn);
+			
+			if($maxRegenThisTurn >= $canRechargeTotal) $maxRegenThisTurn = $canRechargeTotal;//Final loop might need adjusted to no overcharge!
+
+ 			//Check if Generator can fully charge shields and shield is below baseRating, if not add excess to $spareEnergy csounter.
+			if($maxRegenThisTurn >= $amountPerShield){ //Can be regenerated by full Generator amount
+				$shield->absorbDamage($ship, $gamedata, -$amountPerShield); // Apply full regeneration.
+				$canRechargeTotal -= $amountPerShield;						
+			}else{ //Can only be regenerated by partial Generator amount, or not at all e.g. equal and greater than baseRating.
+				$regenAmount = min($amountPerShield, $maxRegenThisTurn);								
+				$shield->absorbDamage($ship, $gamedata, -$regenAmount); // Apply regeneration (negative to heal).										
+				$canRechargeTotal -= $regenAmount;	//Deduct what we did regen from total possible to regen.
+				$spareEnergy += $amountPerShield - $regenAmount;	//Add any unused energy to pool.				
+			}																
+		}						
+					
+		// When there is spare energy, loop through shields, checking if it can be allocated to any other shields.
+		while ($spareEnergy > 0 && $canRechargeTotal > 0) { //
+			$energyAllocated = false; // Track if any energy is allocated in this pass.
+					
+			foreach ($allShields as $shield) {
+			    $remainingCapacity = $shield->baseRating - $shield->getRemainingCapacity(); // Calculate remaining capacity.				
+
+				if($spareEnergy >= $canRechargeTotal) $spareEnergy = $canRechargeTotal;//Final loop might need adjusted to no overcharge!
+
+			    if ($remainingCapacity > 0) { // Check if there is space for regeneration.
+			        $regenAmount = min($remainingCapacity, $spareEnergy); // Determine the amount of energy to regenerate.
+			            
+			        $shield->absorbDamage($ship, $gamedata, -$regenAmount); // Apply regeneration (negative to heal).
+					$canRechargeTotal -= $regenAmount;	//Deduct what we did regen from total possible to regen.			        
+			        $spareEnergy -= $regenAmount; // Deduct used energy.
+			            
+			        $energyAllocated = true; // Energy was allocated in this iteration.
+			    }			    			    
 			}
-*/
-		} //endof function criticalPhaseEffects
+
+			// Break loop if no energy was allocated to avoid an infinite loop.
+			if (!$energyAllocated) {
+			    break;
+			}
+		}							
+	} //endof function criticalPhaseEffects
 
 	
 	//always redefine $this->data, variable information goes there...
@@ -4534,6 +4848,266 @@ class ThirdspaceShieldGenerator extends ShipSystem{
     }
 							
 } //endof ThirdspaceShieldGenerator
+
+
+class ThoughtShieldGenerator extends ShipSystem{
+    public $name = "ThoughtShieldGenerator";
+    public $displayName = "Thought Shield";
+    public $primary = true; //Check if inherited and remove?
+	public $isPrimaryTargetable = false; //Check if inherited and remove?
+	public $isTargetable = false; //Check if inherited and remove?
+    public $iconPath = "ThirdspaceShieldGen.png";
+	protected $doCountForCombatValue = false; //Check if inherited and remove?
+
+    public $canOffLine = true;	
+	public $storedCapacity = 0; 
+	public $shieldPresets = array('Equalise');	
+	public $presetCurrClass = '';//for front end, to display Preset types in tooltips.
+
+	public $repairPriority = 4;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
+    
+    
+    function __construct($armour, $maxhealth, $powerReq, $output){ 
+        parent::__construct($armour, $maxhealth, $powerReq, $output ); //$armour, $maxhealth, $powerReq, $output    		    
+    }  	    
+
+    public function onConstructed($ship, $turn, $phase){
+        parent::onConstructed($ship, $turn, $phase);
+        
+		$this->shieldPresets = array();	//Empty, in case.	
+		$this->shieldPresets[] = 'Equalise';//Always start with default equalise setting.	
+		
+		foreach($ship->systems as $system){
+			if($system instanceof ThoughtShield){
+				if($system->side == 'F' ) 	$this->shieldPresets[] = 'Forward';
+				if($system->side == 'A' ) 	$this->shieldPresets[] = 'Aft'; 
+				if($system->side == 'FP' ) 	$this->shieldPresets[] = 'ForwardPort'; 
+				if($system->side == 'FS' ) 	$this->shieldPresets[] = 'ForwardStarboard'; 
+				if($system->side == 'AP' ) 	$this->shieldPresets[] = 'AftPort'; 
+				if($system->side == 'AS' ) 	$this->shieldPresets[] = 'AftStarboard'; 
+			}			
+		}
+    }
+		
+    public function setSystemDataWindow($turn){
+        parent::setSystemDataWindow($turn);
+		$this->data["Special"] = "Resets all Thoughtshields to " .$this->getOutput(). " at the beginning of each turn.";
+        $this->data["Special"] .= "<br>If one CnC on ship is destroyed only regenerates shields by 50%, if both are destroyed no shields are regenerated.";	  		
+        $this->data["Special"] .= "<br>During Initial Orders this system can be used to transfer shield power from one shield system to another e.g. front to aft etc.";
+        $this->data["Special"] .= "<br>By selecting Shield Presets you will triple the power of any given shield by drawing energy from others, or Equalise all shields.";	        	   
+        $this->data["Special"] .= "<br>You cannot commit your Intial Orders if there is an excess or deficit of shield energy in this system.";
+ 		$this->outputDisplay = $this->storedCapacity;
+ 		$this->data["Output"] = $this->getOutput();               
+    }
+
+	
+	//always redefine $this->data, variable information goes there...
+	public function stripForJson(){
+        $strippedSystem = parent::stripForJson();
+        $strippedSystem->data = $this->data;
+        $strippedSystem->shieldPresets = $this->shieldPresets;
+        $strippedSystem->storedCapacity = $this->storedCapacity;       
+        $strippedSystem->presetCurrClass = $this->presetCurrClass;  
+		
+        return $strippedSystem;
+    }
+							
+} //endof ThoughtShieldGenerator
+
+//Mindrider Hangar operates as way to keep track of how many Thought Projections Mindriders can have in play.
+class MindriderHangar extends ShipSystem{
+    public $name = "MindriderHangar";
+    public $displayName = "Hangar";
+    public $primary = true;
+    public $iconPath = "hangar.png";
+    
+	public $isPrimaryTargetable = true; //shouldn't be targetable at all, in fact!
+	public $isTargetable = true; //cannot be targeted ever!
+	protected $doCountForCombatValue = true; //don't count when estimating remaining combat value    
+	
+    public static $alreadyCleared = false;	
+	public static $hangarList = array(); //array of Mindrider Hangars in game
+	public static $projectionList = array(); // array of Thought Projection flights in game
+	public $output = 0;
+    
+    protected $possibleCriticals = array(
+    );	
+
+    function __construct($armour, $maxhealth, $powerReq, $output){
+        parent::__construct($armour, $maxhealth, $powerReq, $output ); 
+	    MindriderHangar::$hangarList[] = $this;
+	    $this->output = $output;
+	    
+	    if($output == 0){
+			$this->iconPath = "hangarTechnical.png";	    	
+			$this->isPrimaryTargetable = false; //shouldn't be targetable at all, in fact!
+			$this->isTargetable = false; //cannot be targeted ever!
+			$this->doCountForCombatValue = false; //don't count when estimating remaining combat value 	    	
+	    }	    
+    }
+	
+	
+	//to be called by every Thought Projection flight after creation
+    public static function addProjections($projectionflight){
+	    MindriderHangar::$projectionList[] = $projectionflight;
+    }
+	
+	//inactive entries (from other gamedata) might have slipped by... clear them out!
+	public static function clearLists($gamedata){
+	    // Mark $alreadyCleared so it only happens once per turn.
+		MindriderHangar::$alreadyCleared = true;
+		$tmpArray = array();
+		foreach(MindriderHangar::$hangarList as $curr){
+			$ship = $curr->getUnit();
+			//is this unit defined in current gamedata? (particular instance!)
+			$belongs = $gamedata->shipBelongs($ship);
+			if ($belongs){
+				$tmpArray[] = $curr;
+			}			
+		}
+		MindriderHangar::$hangarList = $tmpArray;
+		$tmpArray = array();
+		foreach(MindriderHangar::$projectionList as $curr){
+			//is this unit defined in current gamedata? (particular instance!)
+			$belongs = $gamedata->shipBelongs($curr);
+			if ($belongs){
+				$tmpArray[] = $curr;
+			}			
+		}
+		MindriderHangar::$projectionList = $tmpArray;
+	}//endof function clearLists
+
+	//effects that happen in Critical phase (after criticals are rolled) - replenishment from active Generator 
+	public function criticalPhaseEffects($ship, $gamedata) {
+
+	    if (MindriderHangar::$alreadyCleared) return; // Already checked, no further action neeed for other Hangars.
+
+		$this->clearLists($gamedata);
+	
+	    $hangarCapacity = 0;
+	    $thisShip = $this->getUnit();
+
+
+	    foreach (MindriderHangar::$hangarList as $hangar) {
+	        $hangarShip = $hangar->getUnit();
+	        if ($hangarShip->team != $thisShip->team) continue; // Not interested in non-friendly ships.
+	        if ($hangarShip->isDestroyed()) continue; // Ignore destroyed ships - destroyed Hangars are actually fine.
+
+	        $hangarCapacity += $hangar->output; // Add output of Hangar (e.g. how many Thought Projections ship can sustain).
+	    }
+
+	    $activeThoughts = 0;
+
+	    foreach (MindriderHangar::$projectionList as $projection) {
+	        if ($projection->team != $thisShip->team) continue; // Not interested in non-friendly ships.
+	        if ($projection->isDestroyed()) continue; // Ignore destroyed flights.
+
+	        foreach ($projection->systems as $ftr) {
+	            if ($ftr->isDestroyed()) continue; // Do not count destroyed/disengaged fighters.
+	            $activeThoughts += 1;
+	        }
+	    }
+
+	    while ($activeThoughts > $hangarCapacity) {//Too many Projection active!
+	    	
+	    	$noToDisengage = $activeThoughts - $hangarCapacity;
+	        $disengaged = $this->dropoutFighters($thisShip, $gamedata, $noToDisengage);
+	        $activeThoughts -= $disengaged;
+	    }
+	    
+	    parent::criticalPhaseEffects($ship, $gamedata); // Call parent to apply effects like Limpet Bore.	    
+	} // end of function criticalPhaseEffects
+
+
+
+	public function dropoutFighters($thisShip, $gamedata, $noToDisengage = 0) {
+	    $fighterCount = 0;
+	    $toDisengage = $noToDisengage;
+
+		if($toDisengage > 0){
+
+		    if (empty(MindriderHangar::$projectionList)) {
+		        return $fighterCount;
+		    }
+
+		    $randomPick = array_rand(MindriderHangar::$projectionList);
+		    $projectionFlight = MindriderHangar::$projectionList[$randomPick];
+
+		    if ($projectionFlight->team != $thisShip->team || $projectionFlight->isDestroyed()) {
+		        return $fighterCount; // Return if invalid flight
+		    }
+
+		    $fighters = $projectionFlight->systems;
+
+		    // Create an array of valid indices
+		    $validIndices = [];
+		    foreach ($fighters as $index => $fighter) {
+		        if ($fighter !== null && !$fighter->isDestroyed()) {
+		            $validIndices[] = $index;
+		        }
+		    }
+
+		    if (empty($validIndices)) {
+		        return $fighterCount; // No valid fighters in this flight
+		    }
+
+		    // Sort the valid indices in descending order
+		    rsort($validIndices);
+
+		    $rammingSystem = $thisShip->getSystemByName("RammingAttack");
+		    $newFireOrder = null;
+
+		    if ($rammingSystem) { // Actually exists! - it should on every ship!
+		        $shotsHit = 1;
+
+		        $newFireOrder = new FireOrder(
+		            -1, "normal", $thisShip->id, $thisShip->id,
+		            $rammingSystem->id, -1, $gamedata->turn, 1,
+		            100, 100, 1, $shotsHit, 0,
+		            0, 0, 'Sabotage', 10000
+		        );
+
+		        $newFireOrder->addToDB = true;
+		        $rammingSystem->fireOrders[] = $newFireOrder;
+		    }
+
+		    // Iterate over the valid indices
+		    foreach ($validIndices as $i) {
+		        $fighter = $fighters[$i];
+
+		        // Check if the fighter is null or destroyed
+		        if ($fighter == null || $fighter->isDestroyed()) {
+		            continue;
+		        }
+
+		        // Create Dropout crit
+		        $crit = new DisengagedFighter(-1, $projectionFlight->id, $fighter->id, "DisengagedFighter", $gamedata->turn);
+		        $crit->updated = true;
+		        $crit->inEffect = true;
+		        $fighter->criticals[] = $crit;
+		        if ($newFireOrder) {
+		            $newFireOrder->pubnotes .= "<br>The Mindriders have lost control of a Thought Projections! ";
+		        }
+		        $fighterCount += 1;
+		        $toDisengage -= 1;
+		        if($toDisengage < 1) break;
+		    }
+		}
+	    return $fighterCount;
+	    
+	} // end of dropoutFighters
+
+		
+    public function setSystemDataWindow($turn){
+	parent::setSystemDataWindow($turn);
+		if($this->output == 0){	     
+			$this->data["Special"] = "Technical system only.";
+		}else{		       	     
+			$this->data["Special"] = "Hangar capacity equals number of Thought Projections this ship can control.";
+		}    
+    }	    	
+
+}//endof MindriderHangar
 
 
 /*UNDER CONSTRUCTION*/
@@ -5103,7 +5677,8 @@ class AmmoMissileC extends AmmoMissileTemplate{
         return 0;
     }		
     
- 	public function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ 
+ 	public function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
+//		if($ship->hasSpecialAbility("AdvancedSensors")) return;		 
 		if (isset(AmmoMissileC::$alreadyEngaged[$ship->id])) return; //target already engaged by a previous Chaff Missile
 			$effectHit = 3; 
 			$effectHit5 = $effectHit * 5;
@@ -5115,7 +5690,6 @@ class AmmoMissileC extends AmmoMissileTemplate{
 					if ($currFireOrder->rolled > 0) {
 					}else{
 						$currFireOrder->needed -= 3 *5; //$needed works on d100
-	//					$fireOrder->pubnotes .= "; Chaff Missile impact, -15% to hit."; //note why hit chance does not match
 						AmmoMissileC::$alreadyEngaged[$ship->id] = true;
 					}
 				}
@@ -5557,7 +6131,11 @@ class AmmoMissileX extends AmmoMissileTemplate{
 
 
  	public function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //Reduces Sensors by 1D6 next turn.
-
+			if ($system->advancedArmor){
+				$fireOrder->pubnotes .= "<br> No effect on ships with Advanced Armor.";				
+				return; //no effect on Advanced Armor
+			}
+				
 			$effectSensors = Dice::d(6,1);//Strength of effect: 1d6
 			$fireOrder->pubnotes .= "<br> Sensors reduced by $effectSensors next turn.";
 
@@ -5769,7 +6347,7 @@ class AmmoBLMineB extends AmmoMissileTemplate{
 
     public $hextarget = true; 
 	public $mineRange = 3;
-	
+		public $animationExplosionScale = 0.25; //single hex explosion	
 
     public function getDamage($fireOrder){        return Dice::d(10, 1)+16;   } 
 		
@@ -5810,7 +6388,7 @@ class AmmoBLMineH extends AmmoMissileTemplate{
 class AmmoBLMineW extends AmmoMissileTemplate{	
 	public $name = 'AmmoBLMineW';
 	public $displayName = 'Wide-Range Mine';
-	public $modeName = 'Wide-Range Mine';
+	public $modeName = 'Wide Mine';
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'MINE_BLW'; //enhancement name to be enabled
 	public $enhancementDescription = '(mine) Wide-Range Mine'; //enhancement description
@@ -5830,6 +6408,7 @@ class AmmoBLMineW extends AmmoMissileTemplate{
 
     public $hextarget = true; 
 	public $mineRange = 5;	
+		public $animationExplosionScale = 0.25; //single hex explosion
 
     public function getDamage($fireOrder){        return Dice::d(10, 1)+12;   } 
 
@@ -5868,7 +6447,7 @@ class AmmoBistifA extends AmmoMissileTemplate{
 class AmmoBistifB extends AmmoMissileTemplate{	
 	public $name = 'AmmoBistifB';
 	public $displayName = 'Wide-Ranged Mine';
-	public $modeName = 'Wide-Ranged Mine';
+	public $modeName = 'Wide Mine';
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'MINE_MLW'; //enhancement name to be enabled
 	public $enhancementDescription = '(mine) Wide-Range Mine'; //enhancement description

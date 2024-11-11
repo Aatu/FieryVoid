@@ -440,17 +440,7 @@ PsychicField.prototype.hasMaxBoost = function(){
 PsychicField.prototype.getMaxBoost = function(){
     return this.maxBoostLevel;
 }
-/*
-//needed for Spark Curtain upgrade
-PsychicField.prototype.getDefensiveHitChangeMod = function (target, shooter, weapon) {
-    if (!weapon.ballistic) return 0;//only ballistic weapons are affected
-	var out = shipManager.systems.getOutput(target, this);
-	if (shipManager.power.getBoost(this) >= out){ //if boost is equal to output - this means base output is 0 = no Spark Curtain mod!
-		out = 0;
-	}
-	return out;
-}; 
-*/
+
 var ProximityLaserLauncher = function ProximityLaserLauncher(json, ship) {
     Weapon.call(this, json, ship);
 };
@@ -502,9 +492,9 @@ AegisSensorPod.prototype = Object.create(Weapon.prototype);
 AegisSensorPod.prototype.constructor = AegisSensorPod;
 
 AegisSensorPod.prototype.initializationUpdate = function() {
-var ship = this.ship;	
-this.outputDisplay = shipManager.systems.getOutput(ship, this);
-return this;
+	var ship = this.ship;	
+	this.outputDisplay = shipManager.systems.getOutput(ship, this);
+	return this;
 };
 
 var Marines = function Marines(json, ship) {
@@ -512,10 +502,22 @@ var Marines = function Marines(json, ship) {
 };
 Marines.prototype = Object.create(Weapon.prototype);
 Marines.prototype.constructor = Marines;
-/*
+
 var SecondSight = function SecondSight(json, ship) {
     Weapon.call(this, json, ship);
 };
 SecondSight.prototype = Object.create(Weapon.prototype);
 SecondSight.prototype.constructor = SecondSight;
-*/
+
+var ThoughtWave = function ThoughtWave(json, ship) {
+    Weapon.call(this, json, ship);
+};
+ThoughtWave.prototype = Object.create(Weapon.prototype);
+ThoughtWave.prototype.constructor = ThoughtWave;
+
+var GrapplingClaw = function GrapplingClaw(json, ship) {
+    Weapon.call(this, json, ship);
+};
+GrapplingClaw.prototype = Object.create(Weapon.prototype);
+GrapplingClaw.prototype.constructor = GrapplingClaw;
+

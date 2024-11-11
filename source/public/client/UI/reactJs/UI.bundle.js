@@ -37758,7 +37758,8 @@ var findFriendForTwo = function findFriendForTwo(two, systems) {
        if (onePick.picked.length === 1) {
            return {three: [two[0], onePick.picked[0], two[1]], remainingSystems: onePick.remaining}
        }
-        if (systems.length > 0) {
+    
+       if (systems.length > 0) {
            return {three: [two[0], systems.pop(), two[1]], remainingSystems: systems}
        }
     */
@@ -39358,7 +39359,7 @@ var SystemInfoTooltip = _common.Tooltip.extend(_templateObject2, function (props
         return style + "\n" + key + ':' + props.position[key] + 'px;';
     }, '');
 }, function (props) {
-    return props.ship ? '300px' : '200px';
+    return props.ship ? '320px' : '220px';
 });
 
 var Entry = exports.Entry = _common.TooltipEntry.extend(_templateObject3);
@@ -40659,7 +40660,7 @@ var canDeBoost = function canDeBoost(ship, system) {
 };
 
 var canAddShots = function canAddShots(ship, system) {
-	return system.weapon && system.canChangeShots && weaponManager.hasFiringOrder(ship, system) && weaponManager.getFiringOrder(ship, system).shots < system.shots;
+	return system.weapon && system.canChangeShots && weaponManager.hasFiringOrder(ship, system) && weaponManager.getFiringOrder(ship, system).shots < system.turnsloaded;
 };
 
 var canReduceShots = function canReduceShots(ship, system) {

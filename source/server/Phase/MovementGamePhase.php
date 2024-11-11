@@ -67,6 +67,13 @@ class MovementGamePhase implements Phase
 				}
 			}
 		}
+		//Added August 2024 for Mindriders.       
+		foreach ($ships as $ship){ //generate system-specific information if necessary
+			$ship->generateIndividualNotes($gameData, $dbManager);
+		}		
+		foreach ($ships as $ship){ //save system-specific information if necessary (separate loop - generate for all, THEN save for all!
+			$ship->saveIndividualNotes($dbManager);
+		} 
 		
         if ($gameData->rules->hasRule("processMovement")) {
             return $gameData->rules->callRule("processMovement", [$gameData, $dbManager, $ships]);

@@ -70,7 +70,14 @@ a.link:hover
 
 .panelsubheader{
 	font-size:20px;
-	color:#496791;
+/*	color:#496791; Seemed a bit too dark to read well - DK */
+	color:#6896d2;
+}
+
+.panelsmall {
+    font-size:14px; /* Reduces the font size to 80% of the original */
+/*    color: #00caca;    Example color (cyan), choose your desired color */
+	color: #DEEBFF;
 }
 
 a{
@@ -87,4 +94,21 @@ a:hover{
 	top:10px;
 	right:10px;
 	width:50px;
+}
+
+.flex-container {
+    display: flex;
+    align-items: flex-start; /* Vertically aligns elements */
+}
+
+.depheightheader, .depheight {
+    margin: 0; /* Reset margins */
+    margin-right: 10px; 
+}
+
+span.clickable.close {
+    margin-left: auto; /* Pushes the REMOVE SLOT to the far right */
+    cursor: pointer;
+    margin-top: -15px; /* Adjust this value to raise it */    
+    color: #ffffff; /* Optional to make it stand out */
 }
