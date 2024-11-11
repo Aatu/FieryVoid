@@ -11,7 +11,7 @@ class DalithornPinnace extends FighterFlight{
         $this->imagePath = "img/ships/Nexus/Dalithorn_Pinnace2.png";
 		$this->unofficial = true;
 	    $this->isd = 2113;
-        $this->canvasSize = 150;
+//        $this->canvasSize = 150;
 
         $this->forwardDefense = 8;
         $this->sideDefense = 10;

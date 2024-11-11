@@ -35,7 +35,7 @@ class IMLArmedTransportTorpedo extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new Hangar(6, 6));
         $this->addAftSystem(new GraviticThruster(5, 15, 0, 6, 1));
         $this->addAftSystem(new GraviticThruster(5, 18, 0, 10, 2));
-        $this->addFrontSystem(new GraviticCannon(4, 6, 5, 90, 270));
+        $this->addAftSystem(new GraviticCannon(4, 6, 5, 90, 270));
 
         $this->addLeftSystem(new GraviticCannon(5, 6, 5, 240, 0));
         $this->addLeftSystem(new IonTorpedo(4, 5, 4, 180, 360));
@@ -56,7 +56,7 @@ class IMLArmedTransportTorpedo extends HeavyCombatVesselLeftRight{
 			0=> array(
 					8 => "Structure",
 					11 => "2:Thruster",
-					12 => "1:Gravitic Cannon",
+					12 => "2:Gravitic Cannon",
 					14 => "Scanner",
 					16 => "Engine",
 					17 => "Hangar",

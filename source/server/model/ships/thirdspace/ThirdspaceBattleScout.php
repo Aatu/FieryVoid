@@ -43,8 +43,8 @@ class ThirdspaceBattleScout extends BaseShip{
 		$this->addPrimarySystem($scanner);	        
         $this->addPrimarySystem(new Engine(7, 36, 0, 18, 4));
 		$this->addPrimarySystem(new PsychicField(6, 0, 0, 0, 360));		
-		$this->addPrimarySystem(new ThirdspaceShieldGenerator(7, 24, 0, 12)); //$armor, $maxhealth, $power used, output			
-        $this->addPrimarySystem(new ThirdspaceSelfRepair(7, 20, 10)); //armor, structure, output 
+		$this->addPrimarySystem(new ThirdspaceShieldGenerator(7, 24, 0, 48, 4, 4)); //$armor, $maxhealth, $power used, output, maxBoost, boostEfficiency
+		$this->addPrimarySystem(new ThirdspaceSelfRepair(7, 20, 10, 4)); //armor, structure, output, maxBoost  
 		$this->addPrimarySystem(new JumpEngine(6, 24, 4, 7));//Presumably have access to hyperspace, or possess some other form of FTL travel that this system represents.          		  		
       
 		$this->addPrimarySystem(new ThirdspaceShield(3, 320, 160, 210, 330, 'L'));	

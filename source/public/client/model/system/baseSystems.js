@@ -95,8 +95,32 @@ Engine.prototype.addInfo = function () {
     this.data["Efficiency"] = this.boostEfficiency;
 };
 
-//  this.data["Weapon type"] ="Gravitic";
-//  this.data["Damage type"] ="Standard";
+Engine.prototype.doIndividualNotesTransfer = function () { //prepare individualNotesTransfer variable - if relevant for this particular system
+
+	if(!this.hasOwnProperty('contraction')) return;
+
+    this.individualNotesTransfer = Array();
+	var contractOnTurn = 0;
+	var ship = this.ship;	
+	
+	if(gamedata.gamephase == 2){		
+	    for (var i in ship.movement) {
+	        var move = ship.movement[i];
+	        
+	        if (move.turn != gamedata.turn) continue;
+
+	        if (move.type == "contract") {
+				contractOnTurn += move.value;//Will +1 depending on Contraction.
+	        }
+	    }
+	}	
+	//Now pass a note to amend Contraction level in backend and make stat changes.
+	if(contractOnTurn != 0){
+		this.individualNotesTransfer.push(contractOnTurn); //Push change in shield strength to back end for Damage Entry creation if required e.g. over or under 0.
+	}
+	
+	return true;
+};
 
 
 var CnC = function CnC(json, ship) {
@@ -106,15 +130,14 @@ CnC.prototype = Object.create(ShipSystem.prototype);
 CnC.prototype.constructor = CnC;
 
 CnC.prototype.initializationUpdate = function() {
-var ship = this.ship;
-	if(ship.factionAge > 2){
-		this.data["Marine Units"] = 'n/a';	
-	}else{	
-		this.data["Marine Units"] = this.marines;
-	}
-return this;
+    var ship = this.ship;
+    if(ship.factionAge > 2){
+        this.data["Marine Units"] = 'n/a';	
+    } else {	
+        this.data["Marine Units"] = this.marines || 0; // Ensure marines is defined
+    }
+    return this;
 };
-
 
 var ProtectedCnC = function ProtectedCnC(json, ship) {
     CnC.call(this, json, ship);
@@ -153,6 +176,12 @@ var GraviticThruster = function GraviticThruster(json, ship) {
 GraviticThruster.prototype = Object.create(Thruster.prototype);
 GraviticThruster.prototype.constructor = GraviticThruster;
 
+var MindriderThruster = function MindriderThruster(json, ship) {
+    Thruster.call(this, json, ship);
+};
+MindriderThruster.prototype = Object.create(Thruster.prototype);
+MindriderThruster.prototype.constructor = MindriderThruster;
+
 var MagGraviticThruster = function(json, ship)
 {
     Thruster.call( this, json, ship);
@@ -166,6 +195,12 @@ var Hangar = function(json, ship)
 }
 Hangar.prototype = Object.create( ShipSystem.prototype );
 Hangar.prototype.constructor = Hangar;
+
+var MindriderHangar = function MindriderHangar(json, ship) {
+    ShipSystem.call(this, json, ship);
+};
+MindriderHangar.prototype = Object.create(ShipSystem.prototype);
+MindriderHangar.prototype.constructor = MindriderHangar;
 
 var Catapult = function Catapult(json, ship) {
     ShipSystem.call(this, json, ship);
@@ -1314,22 +1349,51 @@ ThirdspaceShieldGenerator.prototype.constructor = ThirdspaceShieldGenerator;
 
 ThirdspaceShieldGenerator.prototype.initializationUpdate = function() {
 	var ship = this.ship;
-	
+	var shieldCount = 0;
+	var currentShieldHealth = 0; 
+		
+	for (var i = 0; i < ship.systems.length; i++) {
+		var system = ship.systems[i];
+
+		// Find total pool of shield energy
+		if (system instanceof ThirdspaceShield) {
+			shieldCount++;
+			currentShieldHealth += system.currentHealth;
+		}
+	}
+
+	var boostCount = shipManager.power.getBoost(this); //Find any boost.
+	if(shieldCount > 0) boostCount = boostCount * shieldCount; //Multiply boost count by number of shields.
+	var totalOutput = this.output + boostCount; // Get total output. 		
+			
 	if(gamedata.gamephase == 1){		
 		this.outputDisplay = this.storedCapacity;
 		
 		if (this.storedCapacity == 0) {
 			this.outputDisplay = '-'; //'0' is not shown!
 		}		
-		
+		this.data["Current Output "] = totalOutput;	//Update this to help show player how much they've boosted, since outputDisplay used for transferring.
+		this.data["Current Shield Power "] = currentShieldHealth;
+		this.data["Boosted by "] = boostCount;			
 	}else{
-		this.outputDisplay = this.output;			
+		this.outputDisplay = totalOutput;
+		this.data["Current Output"] = totalOutput;
+		this.data["Current Shield Power "] = currentShieldHealth;							
 	}
 	
 	return this;
 };
 
-ThirdspaceShieldGenerator.prototype.getCurrClass = function () { //get current FC class for display; if none, find first!
+
+ThirdspaceShieldGenerator.prototype.hasMaxBoost = function () {
+	if (this.maxBoostLevel > 0){ 
+		return true;
+		}else{
+		return false;
+		}	
+};
+
+ThirdspaceShieldGenerator.prototype.getCurrClass = function () { //get current preset for display; if none, find first!
     if (this.presetCurrClass == ''){
 		var classes = this.shieldPresets; //
 		if (classes.length>0){
@@ -1338,9 +1402,9 @@ ThirdspaceShieldGenerator.prototype.getCurrClass = function () { //get current F
 	}
 	return this.presetCurrClass;
 };
-ThirdspaceShieldGenerator.prototype.nextCurrClass = function () { //get next FC class for display
+ThirdspaceShieldGenerator.prototype.nextCurrClass = function () { //get next preset for display
 	this.getCurrClass();
-    if (this.presetCurrClass == '') return ''; //this would mean there are no FC classes whatsover!  Should never happen.
+    if (this.presetCurrClass == '') return ''; //this would mean there are no presets whatsover!  Should never happen.
 	var classes = this.shieldPresets;
 	var currId = -1;
 	for (var i = 0; i < classes.length; i++) {
@@ -1354,9 +1418,9 @@ ThirdspaceShieldGenerator.prototype.nextCurrClass = function () { //get next FC 
 	return this.presetCurrClass;
 };
 
-ThirdspaceShieldGenerator.prototype.prevCurrClass = function () { //get previous class for display, useful when selecting from 10+ Specialists!
+ThirdspaceShieldGenerator.prototype.prevCurrClass = function () { //get previous class for display.
 	this.getCurrClass();
-    if (this.presetCurrClass == '') return ''; //this would mean there are no classes whatsover!
+    if (this.presetCurrClass == '') return ''; //this would mean there are no presets whatsover!  Should never happen.
     	
 	var classes = this.shieldPresets;
 	var currId = -1;	
@@ -1374,10 +1438,10 @@ ThirdspaceShieldGenerator.prototype.prevCurrClass = function () { //get previous
 	return this.presetCurrClass;
 };
 
-ThirdspaceShieldGenerator.prototype.canSelect = function () { //check if can increase rating for current class; can do if preallocated points are unused or allocated points are less than available 
-	//always needs to check that allocated are less than maximum and allocated total is less than total maximum
+ThirdspaceShieldGenerator.prototype.canSelect = function () { 
+
 	this.getCurrClass();
-    if (this.presetCurrClass == '') return false; //this would mean there are no Specialist classes whatsover!
+    if (this.presetCurrClass == '') return false;
 
 	return true;
 };
@@ -1471,7 +1535,11 @@ ThirdspaceShieldGenerator.prototype.doPreset = function (presetCurrClass) { // C
 	if(presetCurrClass == 'Forward') reinforceLocation = 'F';
 	if(presetCurrClass == 'Starboard') reinforceLocation = 'R';
 	if(presetCurrClass == 'Aft') reinforceLocation = 'A';
-	if(presetCurrClass == 'Port') reinforceLocation = 'L';						
+	if(presetCurrClass == 'Port') reinforceLocation = 'L';
+	if(presetCurrClass == 'ForwardPort') reinforceLocation = 'FP';
+	if(presetCurrClass == 'ForwardStarboard') reinforceLocation = 'FS';
+	if(presetCurrClass == 'AftPort') reinforceLocation = 'AP';
+	if(presetCurrClass == 'AftStarboard') reinforceLocation = 'AS';								
 	
 	var ship = this.ship;
 	// Find total pool of shield energy		 	
@@ -1496,9 +1564,9 @@ ThirdspaceShieldGenerator.prototype.doPreset = function (presetCurrClass) { // C
 
 		while (totalShieldPool > 0 && shieldsToCharge.length > 0) {
 			var noOfShieldsToCharge = shieldsToCharge.length;
-			var totalUnits = (priorityShieldFound ? noOfShieldsToCharge : noOfShieldsToCharge + 1);
+			var totalUnits = (priorityShieldFound ? noOfShieldsToCharge : noOfShieldsToCharge + 2);
 			var amountEachShield = Math.floor(totalShieldPool / totalUnits);
-			var prioritisedAmount = amountEachShield * 2;
+			var prioritisedAmount = amountEachShield * 3;
 			var remainingShieldPool = 0;
 
 			if (amountEachShield < 1 && totalShieldPool < noOfShieldsToCharge) {
@@ -1544,12 +1612,35 @@ ThirdspaceShieldGenerator.prototype.doPreset = function (presetCurrClass) { // C
 		}
 	}
 };
-/*
+
 var ThoughtShieldGenerator = function ThoughtShieldGenerator(json, ship) {
     ThirdspaceShieldGenerator.call(this, json, ship);
 };
 ThoughtShieldGenerator.prototype = Object.create(ThirdspaceShieldGenerator.prototype);
 ThoughtShieldGenerator.prototype.constructor = ThoughtShieldGenerator;
-*/
 
+ThoughtShieldGenerator.prototype.onTurnOff = function (ship) {
+    for (var i in ship.systems) {
+        var system = ship.systems[i];
+        if (system.name == 'ThoughtShield') {
+			system.currentHealth = 0;  // Shut it down.
+        }
+    }
+};
 
+ThoughtShieldGenerator.prototype.onTurnOn = function (ship) {
+    var CnCvalue = 1;
+	var CnC = shipManager.systems.getSystemByName(ship, "cnC");
+	var CnC2 = shipManager.systems.getSystemByName(ship, "SecondaryCnC");
+
+ 	if(shipManager.systems.isDestroyed(ship, CnC2)) CnCvalue = 0.5;//50% if Secondary CnC is destroyed.        
+    if(shipManager.systems.isDestroyed(ship, CnC)) CnCvalue = 0;//0% if CnC is destroyed.
+
+    for (var i in ship.systems) {
+        var system = ship.systems[i];
+        
+        if (system.name == 'ThoughtShield') {
+			system.currentHealth = Math.round(system.baseRating * CnCvalue); //Power back up
+        }
+    }
+};

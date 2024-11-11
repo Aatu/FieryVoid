@@ -27,6 +27,9 @@ class Fenja extends MediumShip{
         $this->rollcost = 1;
         $this->pivotcost = 1;
 		$this->iniativebonus = 65;
+ 
+   		$this->enhancementOptionsEnabled[] = 'ELT_MRN'; //To enable Elite Marines enhancement
+		$this->enhancementOptionsEnabled[] = 'EXT_MRN'; //To enable extra Marines enhancement
          
         $this->addPrimarySystem(new Reactor(3, 10, 0, 0));
         $this->addPrimarySystem(new CnC(3, 9, 0, 0));
@@ -38,9 +41,9 @@ class Fenja extends MediumShip{
 		
         $this->addFrontSystem(new Thruster(3, 10, 0, 4, 1));
         $this->addFrontSystem(new StdParticleBeam(1, 4, 1, 240, 60));
-		$this->addFrontSystem(new CustomIndustrialGrappler(3, 5, 0, 300, 60));
+		$this->addFrontSystem(new GrapplingClaw(3, 0, 0, 300, 60, 6, false));
 		$this->addFrontSystem(new LimpetBoreTorpedo(2, 0, 0, 270, 90));
-		$this->addFrontSystem(new CustomIndustrialGrappler(3, 5, 0, 300, 60));
+		$this->addFrontSystem(new GrapplingClaw(3, 0, 0, 300, 60, 6, false));
         $this->addFrontSystem(new StdParticleBeam(1, 4, 1, 300, 120));
 		
         $this->addAftSystem(new Thruster(3, 6, 0, 2, 2));
@@ -62,7 +65,7 @@ class Fenja extends MediumShip{
                         5 => "Thruster",
 						7 => "Standard Particle Beam",
                         9 => "Limpet Bore Torpedo",
-						11 => "Industrial Grappler",
+						11 => "Grappling Claw",
                         17 => "Structure",
                         20 => "Primary",
                 ),

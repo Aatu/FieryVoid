@@ -332,3 +332,15 @@ var BoltAccelerator = function BoltAccelerator(json, ship) {
 };
 BoltAccelerator.prototype = Object.create(Particle.prototype);
 BoltAccelerator.prototype.constructor = BoltAccelerator;
+
+var TelekineticCutter = function TelekineticCutter(json, ship) {
+    Particle.call(this, json, ship);
+};
+TelekineticCutter.prototype = Object.create(Particle.prototype);
+TelekineticCutter.prototype.constructor = TelekineticCutter;
+
+var MinorThoughtPulsar = function MinorThoughtPulsar(json, ship) {
+    Particle.call(this, json, ship);
+};
+MinorThoughtPulsar.prototype = Object.create(Particle.prototype);
+MinorThoughtPulsar.prototype.constructor = MinorThoughtPulsar;
