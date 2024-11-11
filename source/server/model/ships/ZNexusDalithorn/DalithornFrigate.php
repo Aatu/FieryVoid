@@ -7,10 +7,10 @@ class DalithornFrigate extends MediumShip{
         $this->pointCost = 225;
         $this->faction = "ZNexus Dalithorn Commonwealth";
         $this->phpclass = "DalithornFrigate";
-        $this->imagePath = "img/ships/Nexus/DalithornFrigate.png";
+        $this->imagePath = "img/ships/Nexus/Dalithorn_Frigate2.png";
         $this->shipClass = "Frigate";
 		$this->unofficial = true;
-        $this->canvasSize = 80;
+        $this->canvasSize = 100;
 	    $this->isd = 1908;
         
         $this->forwardDefense = 10;

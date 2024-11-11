@@ -7,8 +7,8 @@ class SalbezRevTan extends OSAT{
 		$this->pointCost = 200;
 		$this->faction = 'ZNexus Sal-bez Coalition';
         $this->phpclass = "SalbezRevTan";
-        $this->imagePath = "img/ships/Nexus/salbez_revtan_v2.png";
-			$this->canvasSize = 80; //img has 100px per side
+        $this->imagePath = "img/ships/Nexus/salbez_revtan3.png";
+			$this->canvasSize = 65; //img has 100px per side
         $this->shipClass = "Rev'tan OSAT";
 //			$this->variantOf = "Rev'tan OSAT";
 //			$this->occurence = "common";

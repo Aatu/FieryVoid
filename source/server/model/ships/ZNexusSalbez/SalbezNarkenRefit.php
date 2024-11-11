@@ -7,8 +7,8 @@ class SalbezNarkenRefit extends HeavyCombatVessel{
         $this->pointCost = 450;
         $this->faction = "ZNexus Sal-bez Coalition";
         $this->phpclass = "SalbezNarkenRefit";
-        $this->imagePath = "img/ships/Nexus/salbez_zefjem2.png";
-			$this->canvasSize = 95; //img has 200px per side
+        $this->imagePath = "img/ships/Nexus/salbez_zefjem3.png";
+			$this->canvasSize = 115; //img has 200px per side
         $this->shipClass = "Nar-ken Scout (2090 refit)";
 			$this->variantOf = "Zef'jem Heavy Frigate";
 			$this->occurence = "uncommon";

@@ -10,8 +10,8 @@ class OracleScoutAM extends BaseShip{
         $this->imagePath = "img/ships/oracle.png";
         $this->shipClass = "Oracle Scout Cruiser (Gamma)";
         $this->shipSizeClass = 3;
-	    
-	$this->isd = 2216;
+        $this->limited = 33;	    
+		$this->isd = 2216;
         
         $this->forwardDefense = 13;
         $this->sideDefense = 16;
@@ -25,7 +25,7 @@ class OracleScoutAM extends BaseShip{
 		
 		
         //ammo magazine itself (AND its missile options)
-        $ammoMagazine = new AmmoMagazine(240); //pass magazine capacity - 20 rounds per launcher, plus reload rack 80
+        $ammoMagazine = new AmmoMagazine(20); //pass magazine capacity - 20 rounds per launcher, plus reload rack 80
         $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
         $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 240); //add full load of basic missiles
 	    $this->enhancementOptionsEnabled[] = 'AMMO_A';//add enhancement options for other missiles - Class-A

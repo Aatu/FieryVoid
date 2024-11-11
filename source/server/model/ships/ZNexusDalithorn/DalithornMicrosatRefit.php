@@ -9,7 +9,7 @@ class DalithornMicrosatRefit extends MicroSAT{
         $this->shipClass = "Laser MicroSAT Cluster (2132)";
 			$this->variantOf = "Laser MicroSAT Cluster";
 			$this->occurence = "common";
-        $this->imagePath = "img/ships/Nexus/DalithornMicrosat.png";
+        $this->imagePath = "img/ships/Nexus/Dalithorn_Microsat2.png";
 		$this->unofficial = true;
         
 		$this->isd = 2132;
@@ -41,8 +41,8 @@ class DalithornMicrosatRefit extends MicroSAT{
             $armour = array(3, 3, 3, 3);
             $fighter = new Fighter("Microsat", $armour, 26, $this->id);
             $fighter->displayName = "Microsat";
-            $fighter->imagePath = "img/ships/Nexus/DalithornMicrosat.png";
-            $fighter->iconPath = "img/ships/Nexus/DalithornMicrosat_large.png"; 
+            $fighter->imagePath = "img/ships/Nexus/Dalithorn_Microsat2.png";
+            $fighter->iconPath = "img/ships/Nexus/Dalithorn_Microsat_Large2.png"; 
 		            
 			$leftgun = new NexusMinigunFtr(180, 360, 1);
 			$fighter->addFrontSystem($leftgun);

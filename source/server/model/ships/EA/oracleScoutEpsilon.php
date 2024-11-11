@@ -5,14 +5,15 @@ class OracleScoutEpsilon extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 625;
-	$this->faction = "Earth Alliance";
+        $this->faction = "Earth Alliance (custom)";
         $this->phpclass = "OracleScoutEpsilon";
         $this->imagePath = "img/ships/oracle.png";
         $this->shipClass = "Oracle Scout Cruiser (Epsilon)";
 			$this->unofficial = true;
         $this->shipSizeClass = 3;
-		$this->occurence = "rare";
-	        $this->variantOf = "Oracle Scout Cruiser (Gamma)";
+        $this->limited = 33;        
+//		$this->occurence = "rare";
+//	        $this->variantOf = "Oracle Scout Cruiser (Gamma)";
 	    
 		$this->isd = 2255;
         
@@ -69,7 +70,7 @@ class OracleScoutEpsilon extends BaseShip{
                 0=> array(
                         10 => "Structure",
                         11 => "Jump Engine",
-                        12 => "Class-L Missile Rack",
+                        12 => "Standard Particle Beam",
                         14 => "ELINT Scanner",
                         16 => "Engine",
                         17 => "Hangar",

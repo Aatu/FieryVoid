@@ -409,8 +409,19 @@
        public function fire($gamedata, $fireOrder){ //note ammo usage
         	//debug::log("fire function");
             parent::fire($gamedata, $fireOrder);
-            $this->ammunition--;
-            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);			
+
+			$ship = $gamedata->getShipById($fireOrder->shooterid);
+            $this->ammunition--;//Deduct round just fired!			
+			//Now need to remove Enhancement bonuses from saved ammo count, as these will be re-added in onConstructed()			
+			foreach ($ship->enhancementOptions as $enhancement) {
+			    $enhID = $enhancement[0];
+				$enhCount = $enhancement[2];		        
+				if($enhCount > 0) {		            
+			        if ($enhID == 'EXT_AMMO') $this->ammunition -= $enhCount;     	
+				}
+			}		
+			Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);			
+			
         }
     
         public function getDamage($fireOrder){
@@ -440,190 +451,6 @@
         public function setMaxDamage(){     $this->maxDamage = 5;      }
     }
 
-
-//OLD VERSION OF FLAK CANNON - TO BE REMOVED - DK
-/*
-   class FlakCannon extends Weapon{ 
-
-        public $name = "FlakCannon";
-        public $displayName = "Flak Cannon";
-	    public  $iconPath = "FlakCannon.png";
-
-	 public $animation = "bolt";
-        public $animationColor = array(255, 250, 230);
-
-	//actual weapons data
-        public $priorityArray = array(1=>1, 2=>1);
-		public $uninterceptableArray = array(1=>true, 2=>false);
-		public $doNotInterceptArray = array(1=>true, 2=>false);
-
-        public $intercept = 3;
-        public $freeintercept = true; //can intercept fire directed at different unit
-        public $freeinterceptspecial = true; //has own custom routine for deciding whether third party interception is legal
-        public $loadingtime = 1;
-
-//        public $output = 3;
-		public $canInterceptUninterceptable = true;
-
-		public $range = 100; //let's put maximum range here, but generous one
-	
-        public $loadingtimeArray = array(1=>1, 2=>1); //mode 1 should be the one with longest loading time
-        public $rangePenaltyArray = array(1=>0, 2=>2);
-        public $fireControlArray = array( 1=>array(50, 50, 50), 2=>array(4, null, null) ); // fighters, <mediums, <capitals 
-	
-		public $firingModes = array(1=>'Intercept', 2=>'Anti-fighter');
-		public $damageTypeArray = array(1=>'Standard', 2=>'Flash'); //indicates that this weapon does damage in Pulse mode
-    	public $weaponClassArray = array(1=>'Matter', 2=>'Matter'); //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!	
-	
-        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
-			if ( $maxhealth == 0 ) $maxhealth = 4;
-            if ( $powerReq == 0 ) $powerReq = 2;            
-            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-        }
-
-		public function setSystemDataWindow($turn){
-			parent::setSystemDataWindow($turn);
-			$this->data["Special"] = "Can intercept lasers.";
-			$this->data["Special"] .= "<br>May intercept for friendly units. Must have friendly and enemy unit in arc and have friendly unit within 5 hexes. Friendly intercept only engages individual shots.";
-			$this->data["Special"] .= "<br>If manually targeted in Intercept (I) mode, will intercept all fire from targeted ship (except ballistics), with usual intercept degredation, at the Flak Cannon-firing ship.";
-			$this->data["Special"] .= "<br>Offensive, Anti-fighter mode (A) targets fighters only, but as Matter weapon doing damage in flash mode.";
-			$this->data["Special"] .= "<br>Offensive mode fire control is +20/--/--. Damage is 1d10+2 as Matter (Flash).";
-		}
-
-		//hit chance always 100 - so it always hits and is correctly animated
-		public function calculateHitBase($gamedata, $fireOrder){
-
-			$this->changeFiringMode($fireOrder->firingMode);  //needs to be outside the switch routine
-
-			switch($this->firingMode){
-				case 1:
-
-				$fireOrder->needed = 100; //auto hit!
-				$fireOrder->updated = true;
-		
-		
-				//while we're at it - we may add appropriate interception orders!	
-				if ($fireOrder->targetid >= 0) {//actual target is chosen...				
-				$targetShip = $gamedata->getShipById($fireOrder->targetid);
-				
-//				$shipsInRange = $gamedata->getShipsInDistance($targetShip); //all units on target hex
-//				foreach ($shipsInRange as $affectedShip) {
-					$allOrders = $targetShip->getAllFireOrders($gamedata->turn);
-//					$allOrders = $affectedShip->getAllFireOrders($gamedata->turn);
-					foreach($allOrders as $subOrder) {
-						if (($subOrder->type == 'normal') && ($subOrder->targetid == $fireOrder->shooterid) ){ //something is firing at protected unit - and is affected!
-							//uninterceptable are affected all right, just those that outright cannot be intercepted - like ramming or mass driver - will not be affected
-							$subWeapon = $targetShip->getSystemById($subOrder->weaponid);
-//							$subWeapon = $affectedShip->getSystemById($subOrder->weaponid);
-							if( $subWeapon->doNotIntercept != true ){
-								//apply interception! Note that this weapon is technically not marked as firing defensively - it is marked as firing offensively though! (already)
-								//like firing.php addToInterceptionTotal
-								$subOrder->totalIntercept += $this->getInterceptionMod($gamedata, $subOrder);
-								$subOrder->numInterceptors++;
-							}
-						}
-					}	
-//				}
-		
-				}
-				break;
-		
-			case 2:
-		
-				parent::calculateHitBase($gamedata, $fireOrder);
-				break;
-			}
-
-		}//endof function calculateHitBase
-
-	   
-		public function fire($gamedata, $fireOrder) { 
-
-			switch($this->firingMode){
-				case 1:
-
-//					$this->changeFiringMode($fireOrder->firingMode);//changing firing mode may cause other changes, too!
-					$shooter = $gamedata->getShipById($fireOrder->shooterid);
-
-					$movement = $shooter->getLastTurnMovement($fireOrder->turn);
-					$posLaunch = $movement->position;//at moment of launch!!!		
-					//$this->calculateHit($gamedata, $fireOrder); //already calculated!
-					$rolled = Dice::d(100);
-					$fireOrder->rolled = $rolled; ///and auto-hit ;)
-					$fireOrder->shotshit++;
-					$fireOrder->pubnotes .= "Interception applied to all weapons on target unit that are firing at Flak Cannon-firing ship. "; //just information for player, actual applying was done in calculateHitBase method
-
-					$fireOrder->rolled = max(1, $fireOrder->rolled);//Marks that fire order has been handled, just in case it wasn't marked yet!
-					TacGamedata::$lastFiringResolutionNo++;    //note for further shots
-					$fireOrder->resolutionOrder = TacGamedata::$lastFiringResolutionNo;//mark order in which firing was handled!
-
-					break;
-				
-				case 2:
-				
-					parent::fire($gamedata, $fireOrder);
-					break;
-			}
-
-		} //endof function fire
-			
-		public function canFreeInterceptShot($gamedata, $fireOrder, $shooter, $target, $interceptingShip, $firingWeapon){
-			//target must be within 5 hexes
-			$distance = mathlib::getDistanceHex($interceptingShip, $target);
-			if ($distance > 5) return false;
-			
-			//both source and target of fire must be in arc
-			//first check target
-			$targetBearing = $interceptingShip->getBearingOnUnit($target);
-			if (!mathlib::isInArc($targetBearing, $this->startArc, $this->endArc)) return false;
-			//check on source - launch hex for ballistics, current position for direct fire
-			if ($firingWeapon->ballistic){
-				$movement = $shooter->getLastTurnMovement($fireOrder->turn);
-				$pos = mathlib::hexCoToPixel($movement->position); //launch hex
-				$sourceBearing = $interceptingShip->getBearingOnPos($pos);				
-			}else{ //direct fire
-				$sourceBearing = $interceptingShip->getBearingOnUnit($shooter);
-			}
-			if (!mathlib::isInArc($sourceBearing, $this->startArc, $this->endArc)) return false;
-						
-			return true;
-		}
-
-        public function getDamage($fireOrder){ 
-		switch($this->firingMode){
-			case 1:
-				return 0; //Manual intercept
-				break;
-			case 2:
-				return Dice::d(10, 1)+2; //Anti-fighter shot
-				break;	
-		}
-	}
-        public function setMinDamage(){ 
-		switch($this->firingMode){
-			case 1:
-				$this->minDamage = 0; //Manual intercept
-				break;
-			case 2:
-				$this->minDamage = 3; //Anti-fighter shot
-				break;	
-		}
-		$this->minDamageArray[$this->firingMode] = $this->minDamage;
-	}
-        public function setMaxDamage(){
-		switch($this->firingMode){
-			case 1:
-				$this->maxDamage = 0; //Manual intercept
-				break;
-			case 2:
-				$this->maxDamage = 12; //Anti-fighter shot
-				break;	
-		}
-		$this->maxDamageArray[$this->firingMode] = $this->maxDamage;
-	}
-
-    }	//endof class FlakCannon
-*/
 
 //New Version of Grome Flak Cannon which is more Tabletop Accurate - DK - April 2024
 class GromeFlakCannon extends Weapon{ 
@@ -904,8 +731,19 @@ class SlugCannon extends LinkedWeapon{
        public function fire($gamedata, $fireOrder){ //note ammo usage
         	//debug::log("fire function");
             parent::fire($gamedata, $fireOrder);
-            $this->ammunition--;
-            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);
+
+			$ship = $gamedata->getShipById($fireOrder->shooterid);
+			$ammo = $this->ammunition;
+            $ammo--;//Deduct round just fired!			
+			//Now need to remove Enhancement bonuses from saved ammo count, as these will be re-added in onConstructed()			
+			foreach ($ship->enhancementOptions as $enhancement) {
+			    $enhID = $enhancement[0];
+				$enhCount = $enhancement[2];		        
+				if($enhCount > 0) {		            
+			        if ($enhID == 'EXT_AMMO') $ammo -= $enhCount;     	
+				}
+			}		
+			Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $ammo, $gamedata->turn);
         }
     
         public function getDamage($fireOrder){        return 3;   }

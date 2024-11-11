@@ -473,3 +473,17 @@ ThirdspaceShieldProjector.prototype.getDefensiveHitChangeMod = function (target,
     return 0;
 };
 */
+
+
+InterceptorMkI.prototype.getDefensiveHitChangeMod = function (target, shooter, weapon) {
+    return shipManager.systems.getOutput(target, this);
+};
+
+
+
+var EMShield = function EMShield(json, ship) {
+    Shield.call(this, json, ship);
+    this.defensiveType = "Shield";
+};
+EMShield.prototype = Object.create(Shield.prototype);
+EMShield.prototype.constructor = EMShield;

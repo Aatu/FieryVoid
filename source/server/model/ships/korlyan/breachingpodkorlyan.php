@@ -19,7 +19,8 @@ class breachingpodkorlyan extends FighterFlight{
         $this->jinkinglimit = 0;
         $this->pivotcost = 2; //shuttles have pivot cost higher
         $this->turncost = 0.33;
-        
+
+        $this->maxFlightSize = 3;//this is an unusual type of 'fighter', limit flight size.         
 		$this->hangarRequired = 'assault shuttles'; //for fleet check
 		$this->iniativebonus = 9*5;
       
@@ -43,7 +44,7 @@ class breachingpodkorlyan extends FighterFlight{
 			$fighter->imagePath = "img/ships/korlyanMerkul2.png";
 			$fighter->iconPath = "img/ships/korlyanMerkul_large2.png";
 						
-			$fighter->addFrontSystem(new Marines(330, 30, 0, false)); //startarc, endarc, damagebonus, elite.
+			$fighter->addFrontSystem(new Marines(0, 360, 0, false)); //startarc, endarc, damagebonus, elite.
 
 			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
 			
