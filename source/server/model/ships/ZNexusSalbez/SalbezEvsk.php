@@ -7,8 +7,8 @@ class SalbezEvsk extends LCV{
         $this->pointCost = 150;
         $this->faction = "ZNexus Sal-bez Coalition";
         $this->phpclass = "SalbezEvsk";
-        $this->imagePath = "img/ships/Nexus/salbez_evsk.png";
-			$this->canvasSize = 80; //img has 200px per side
+        $this->imagePath = "img/ships/Nexus/salbez_evsk3.png";
+			$this->canvasSize = 70; //img has 200px per side
         $this->shipClass = "Ev'sk Mining Cutter";
 		$this->unofficial = true;
 			$this->isd = 2003;

@@ -7,12 +7,12 @@ class SalbezResktan extends MediumShip{
         $this->pointCost = 280;
         $this->faction = "ZNexus Sal-bez Coalition";
         $this->phpclass = "SalbezResktan";
-        $this->imagePath = "img/ships/Nexus/salbez_mining_frigate.png";
+        $this->imagePath = "img/ships/Nexus/salbez_mining_frigate3.png";
         $this->shipClass = "Resk'tan Frigate";
 			$this->variantOf = "Shv'rak Mining Frigate";
 			$this->occurence = "common";
 		$this->unofficial = true;
-        $this->canvasSize = 75;
+        $this->canvasSize = 80;
 	    $this->isd = 2092;
         
         $this->forwardDefense = 11;

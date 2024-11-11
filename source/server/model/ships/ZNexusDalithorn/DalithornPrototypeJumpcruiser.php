@@ -7,7 +7,7 @@ class DalithornPrototypeJumpcruiser extends HeavyCombatVessel{
         $this->pointCost = 350;
         $this->faction = "ZNexus Dalithorn Commonwealth";
         $this->phpclass = "DalithornPrototypeJumpcruiser";
-        $this->imagePath = "img/ships/Nexus/DalithornPrototypeJumpship.png";
+        $this->imagePath = "img/ships/Nexus/Dalithorn_PrototypeJumpship2.png";
 			$this->canvasSize = 135; //img has 200px per side
         $this->shipClass = "Prototype Jumpship";
         $this->limited = 10;

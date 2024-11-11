@@ -48,6 +48,7 @@ class EnlightenmentAM extends BaseShip{
         $this->addFrontSystem(new LaserLance(2, 6, 4, 300, 120));
         $this->addFrontSystem(new RapidGatling(2, 4, 1, 240, 120));
         $this->addFrontSystem(new RapidGatling(2, 4, 1, 240, 120));
+        $this->addFrontSystem(new RapidGatling(2, 4, 1, 240, 120));
         $this->addFrontSystem(new Thruster(2, 15, 0, 2, 1));
         $this->addFrontSystem(new Thruster(2, 15, 0, 2, 1));
         $this->addFrontSystem(new Thruster(2, 15, 0, 2, 1));  
@@ -65,7 +66,7 @@ class EnlightenmentAM extends BaseShip{
         $this->addLeftSystem(new RapidGatling(2, 4, 1, 180, 360));
         $this->addLeftSystem(new RapidGatling(2, 4, 1, 180, 360));
         $this->addLeftSystem(new Hangar(3, 14));        
-        $this->addLeftSystem(new CargoBay(2, 30));    
+        $this->addLeftSystem(new CargoBay(2, 25));    
         $this->addLeftSystem(new Thruster(4, 20, 0, 6, 3));
 
 		$this->addRightSystem(new AmmoMissileRackS(3, 0, 0, 0, 120, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
@@ -73,7 +74,7 @@ class EnlightenmentAM extends BaseShip{
         $this->addRightSystem(new RapidGatling(2, 4, 1, 0, 180));
         $this->addRightSystem(new RapidGatling(2, 4, 1, 0, 180));
         $this->addRightSystem(new Hangar(3, 14));        
-        $this->addRightSystem(new CargoBay(2, 30));    
+        $this->addRightSystem(new CargoBay(2, 25));    
         $this->addRightSystem(new Thruster(4, 20, 0, 6, 4));
 	    
 

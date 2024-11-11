@@ -8,7 +8,7 @@ class DalithornPinnace extends FighterFlight{
         $this->faction = "ZNexus Dalithorn Commonwealth";
         $this->phpclass = "DalithornPinnace";
         $this->shipClass = "Pinnace";
-        $this->imagePath = "img/ships/Nexus/DalithornPinnace.png";
+        $this->imagePath = "img/ships/Nexus/Dalithorn_Pinnace2.png";
 		$this->unofficial = true;
 	    $this->isd = 2113;
         $this->canvasSize = 150;
@@ -40,8 +40,8 @@ class DalithornPinnace extends FighterFlight{
 			$armour = array(4, 3, 3, 3);
 			$fighter = new Fighter("DalithornPinnace", $armour, 30, $this->id);
 			$fighter->displayName = "Pinnace";
-			$fighter->imagePath = "img/ships/Nexus/DalithornPinnace.png";
-			$fighter->iconPath = "img/ships/Nexus/DalithornPinnace_Large.png";
+			$fighter->imagePath = "img/ships/Nexus/Dalithorn_Pinnace2.png";
+			$fighter->iconPath = "img/ships/Nexus/Dalithorn_Pinnace_Large2.png";
 
 			$light1 = new NexusMinigunFtr(180, 360, 1);
 			$fighter->addFrontSystem($light1);

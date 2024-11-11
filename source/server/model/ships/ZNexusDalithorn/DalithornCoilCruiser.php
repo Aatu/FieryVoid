@@ -7,7 +7,7 @@ class DalithornCoilCruiser extends HeavyCombatVessel{
         $this->pointCost = 370;
         $this->faction = "ZNexus Dalithorn Commonwealth";
         $this->phpclass = "DalithornCoilCruiser";
-        $this->imagePath = "img/ships/Nexus/DalithornCoilCruiserEarly.png";
+        $this->imagePath = "img/ships/Nexus/Dalithorn_CoilCruiser2.png";
 		$this->canvasSize = 125; //img has 200px per side
         $this->shipClass = "Coil Cruiser";
 			$this->variantOf = "Flag Cruiser";
