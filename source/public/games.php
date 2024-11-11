@@ -76,7 +76,7 @@ if (isset($_SESSION["user"])) {
 	    <br><b>Improved Game Creation</b> - SimMovement got options, useful links were added, and more!
 	    
 	    <br><b>Nexus Updates</b> - Quite a lot of post-tournament observations applied
-	    <br><b>bugfixes</b> - As always, there's quite a few of them
+	    <br><b>Bugfixes</b> - As always, there's quite a few of them
        <br><br>
 
 <!--	        
