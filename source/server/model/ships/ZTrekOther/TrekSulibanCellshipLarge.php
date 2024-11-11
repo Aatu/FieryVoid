@@ -17,7 +17,7 @@ class TrekSulibanCellshipLarge extends FighterFlight{
         $this->sideDefense = 11;
         $this->freethrust = 8;
         $this->offensivebonus = 5;
-        $this->jinkinglimit = 2;
+        $this->jinkinglimit = 3;
         $this->turncost = 0.33;
        	$this->iniativebonus = 14 *5; 
         $this->pivotcost = 2;
