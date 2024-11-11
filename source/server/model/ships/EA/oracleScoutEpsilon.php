@@ -70,7 +70,7 @@ class OracleScoutEpsilon extends BaseShip{
                 0=> array(
                         10 => "Structure",
                         11 => "Jump Engine",
-                        12 => "Class-L Missile Rack",
+                        12 => "Standard Particle Beam",
                         14 => "ELINT Scanner",
                         16 => "Engine",
                         17 => "Hangar",

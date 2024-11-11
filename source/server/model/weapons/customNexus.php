@@ -1752,8 +1752,8 @@ class NexusRangedBoltTorpedo extends Weapon{
 			return 10;   
 		}
 
-        public function setMinDamage(){     $this->minDamage = 10;      }
-        public function setMaxDamage(){     $this->maxDamage = 10;      }
+        public function setMinDamage(){     $this->minDamage = 12;      }
+        public function setMaxDamage(){     $this->maxDamage = 12;      }
 		
 }//endof NexusRangedBoltTorpedo
 
@@ -7488,7 +7488,7 @@ class NexusSwarmTorpedo extends Pulse{
         }
 
 	
-        public function getDamage($fireOrder){        return 8;   }
+        public function getDamage($fireOrder){        return 10;   }
     }  // endof NexusSwarmTorpedo
 
 
@@ -7542,7 +7542,7 @@ class NexusRangedSwarmTorpedo extends Pulse{
 			$this->data["Special"] .= '<br>Benefits from offensive EW.';			
         }
 	
-        public function getDamage($fireOrder){        return 8;   }
+        public function getDamage($fireOrder){        return 12;   }
     }  
 
 // endof NexusRangedSwarmTorpedo
@@ -7597,7 +7597,7 @@ class NexusHeavySwarmTorpedo extends Pulse{
         }
 
 	
-        public function getDamage($fireOrder){        return 10;   }
+        public function getDamage($fireOrder){        return 12;   }
     }  // endof NexusHeavySwarmTorpedo
 
 

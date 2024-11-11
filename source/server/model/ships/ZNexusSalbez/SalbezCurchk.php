@@ -7,7 +7,7 @@ class SalbezCurchk extends HeavyCombatVessel{
         $this->pointCost = 375;
         $this->faction = "ZNexus Sal-bez Coalition";
         $this->phpclass = "SalbezCurchk";
-        $this->imagePath = "img/ships/Nexus/salbez_curchk.png";
+        $this->imagePath = "img/ships/Nexus/salbez_curchk3.png";
 			$this->canvasSize = 115; //img has 200px per side
         $this->shipClass = "Cur-chk Support Frigate";
 			$this->variantOf = "Zef'jem Heavy Frigate";
