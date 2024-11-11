@@ -12,7 +12,7 @@ class DalithornCommandFrigateRefit extends MediumShip{
 			$this->variantOf = "Frigate";
 			$this->occurence = "rare";
 		$this->unofficial = true;
-        $this->canvasSize = 80;
+        $this->canvasSize = 100;
 	    $this->isd = 2044;
         
         $this->forwardDefense = 10;

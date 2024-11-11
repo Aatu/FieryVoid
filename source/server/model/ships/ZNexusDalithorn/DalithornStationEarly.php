@@ -13,7 +13,7 @@ class DalithornStationEarly extends SmallStarBaseFourSections{
 			$this->variantOf = "Station";
 			$this->occurence = "common";
 		$this->imagePath = "img/ships/Nexus/Dalithorn_Station2.png";
-		$this->canvasSize = 175; 
+		$this->canvasSize = 140; 
 		$this->unofficial = true;
 		$this->isd = 1945;
 

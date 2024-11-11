@@ -12,7 +12,7 @@ class DalithornSmallScout extends MediumShip{
 //			$this->variantOf = "Frigate";
 //			$this->occurence = "common";
 		$this->unofficial = true;
-        $this->canvasSize = 80;
+        $this->canvasSize = 100;
         $this->limited = 33;
 
 	    $this->isd = 1999;

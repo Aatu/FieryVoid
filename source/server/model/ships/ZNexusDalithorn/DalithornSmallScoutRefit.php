@@ -12,7 +12,7 @@ class DalithornSmallScoutRefit extends MediumShip{
 			$this->variantOf = "Small Scout";
 			$this->occurence = "common";
 		$this->unofficial = true;
-        $this->canvasSize = 80;
+        $this->canvasSize = 100;
         $this->limited = 33;
 
 	    $this->isd = 2048;

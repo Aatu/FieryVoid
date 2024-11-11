@@ -10,7 +10,7 @@ class DalithornFrigate extends MediumShip{
         $this->imagePath = "img/ships/Nexus/Dalithorn_Frigate2.png";
         $this->shipClass = "Frigate";
 		$this->unofficial = true;
-        $this->canvasSize = 80;
+        $this->canvasSize = 100;
 	    $this->isd = 1908;
         
         $this->forwardDefense = 10;

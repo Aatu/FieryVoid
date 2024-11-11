@@ -12,7 +12,7 @@ class DalithornHeavyCommandFrigate extends MediumShip{
 			$this->variantOf = "Heavy Frigate";
 			$this->occurence = "rare";
 		$this->unofficial = true;
-        $this->canvasSize = 80;
+        $this->canvasSize = 100;
 	    $this->isd = 2109;
         
         $this->forwardDefense = 10;

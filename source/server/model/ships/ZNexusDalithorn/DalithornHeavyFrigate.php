@@ -10,7 +10,7 @@ class DalithornHeavyFrigate extends MediumShip{
         $this->imagePath = "img/ships/Nexus/Dalithorn_Frigate2.png";
         $this->shipClass = "Heavy Frigate";
 		$this->unofficial = true;
-        $this->canvasSize = 80;
+        $this->canvasSize = 100;
 	    $this->isd = 2108;
         
         $this->forwardDefense = 10;

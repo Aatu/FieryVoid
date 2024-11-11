@@ -13,7 +13,7 @@ class DalithornCutterRefit extends FighterFlight{
         $this->imagePath = "img/ships/Nexus/Dalithorn_Cutter2.png";
 		$this->unofficial = true;
 	    $this->isd = 2041;
-        $this->canvasSize = 100;
+        $this->canvasSize = 120;
 
         $this->forwardDefense = 8;
         $this->sideDefense = 10;
