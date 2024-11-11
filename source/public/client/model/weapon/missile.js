@@ -472,8 +472,28 @@ var BallisticMineLauncher = function BallisticMineLauncher(json, ship) {
 BallisticMineLauncher.prototype = Object.create(Weapon.prototype);
 BallisticMineLauncher.prototype.constructor = BallisticMineLauncher;
 
+//Needed for Ballistic Icon to display properly
+BallisticMineLauncher.prototype.initializationUpdate = function() {
+	var ship = this.ship;	
+    if (this.fireOrders.length > 0) {					
+		var aFireOrder = this.fireOrders[0]; 
+		if(aFireOrder)	aFireOrder.damageclass = 'MultiModeHex';
+	}			        
+	return this;
+};
+
 var AbbaiMineLauncher = function AbbaiMineLauncher(json, ship) {
     Weapon.call(this, json, ship);
 };
 AbbaiMineLauncher.prototype = Object.create(Weapon.prototype);
-AbbaiMineLauncher.prototype.constructor = AbbaiMineLauncher;     
+AbbaiMineLauncher.prototype.constructor = AbbaiMineLauncher; 
+
+AbbaiMineLauncher.prototype.initializationUpdate = function() {
+	var ship = this.ship;	
+    if (this.fireOrders.length > 0) {					
+		var aFireOrder = this.fireOrders[0]; 
+		if(aFireOrder)	aFireOrder.damageclass = 'MultiModeHex';
+	}			        
+	return this;
+};
+    

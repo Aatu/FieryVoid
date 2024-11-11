@@ -345,7 +345,10 @@ window.ew = {
 		//var left = ew.getDefensiveEW(selected);
 		var left = ew.getEWLeft(selected);
 
-        if (left < 1 || type === "DIST" && left < 3) {
+		var mod = 0;
+		if(shipManager.hasSpecialAbility(selected, "ConstrainedEW")) mod += 1;//Mindrider ships have less efficient ELINT abilities - DK 19.07.24.
+
+        if (left < 1 || type === "DIST" && left < (3 + mod)) {
             return;
         }
 
@@ -371,7 +374,7 @@ window.ew = {
         }
 
         var amount = 1;
-        if (type == "DIST") amount = 3;
+        if (type == "DIST") amount = (3 + mod);
 
         selected.EW.push({ shipid: selected.id, type: type, amount: amount, targetid: ship.id, turn: gamedata.turn });
         webglScene.customEvent("ShipEwChanged", { ship: selected });
@@ -387,6 +390,8 @@ window.ew = {
     assignEW: function assignEW(ship, entry) {
         //var left = ew.getDefensiveEW(ship);		
 		var left = ew.getEWLeft(ship);
+
+		
         if (left < 1) return;
 
         if (!ship.osat) {
@@ -398,6 +403,9 @@ window.ew = {
             }
         }
 
+		var mod = 0;
+		if(shipManager.hasSpecialAbility(ship, "ConstrainedEW")) mod += 1;//Mindrider ships have less efficient ELINT abilities - DK 19.07.24.
+
         if (entry == "CCEW") {
             ship.EW.push({ shipid: ship.id, type: "CCEW", amount: 1, targetid: -1, turn: gamedata.turn });
         } else if (entry == "BDEW") {
@@ -408,8 +416,8 @@ window.ew = {
                 ship.EW.push({ shipid: ship.id, type: "BDEW", amount: 1, targetid: -1, turn: gamedata.turn });
             }
         } else if (entry.type == "DIST") {
-            if (left < 3) return;
-            entry.amount += 3;
+            if (left < (3 + mod)) return;
+            entry.amount += (3 + mod);
         } else if (entry.type == "SOEW") {
             return;
         } else {
@@ -430,8 +438,11 @@ window.ew = {
             return;
         }
 
+		var mod = 0;
+		if(shipManager.hasSpecialAbility(ship, "ConstrainedEW")) mod += 1;//Mindrider ships have less efficient ELINT abilities - DK 19.07.24.
+
         var amount = 1;
-        if (entry.type == "DIST") amount = 3;
+        if (entry.type == "DIST") amount = 3 + mod;
 
         entry.amount -= amount;
         if (entry.amount < 1) {
@@ -444,7 +455,10 @@ window.ew = {
 
     deassignEW: function deassignEW(ship, entry) {
         var amount = 1;
-        if (entry.type === "DIST") amount = 3;
+		var mod = 0;
+		if(shipManager.hasSpecialAbility(ship, "ConstrainedEW")) mod += 1;//Mindrider ships have less efficient ELINT abilities - DK 19.07.24.     
+        
+        if (entry.type === "DIST") amount = 3 + mod;
 
         entry.amount -= amount;
 
@@ -525,15 +539,21 @@ window.ew = {
             var elint = gamedata.ships[i];
             if (elint == ship || !shipManager.isElint(elint)) continue;
 
-            if (!ew.checkInELINTDistance(target, elint, 30)) continue;
-
+            if (!ew.checkInELINTDistance(target, elint, 30)) continue; //Check distance between target ship and ELINT
+            if (!ew.checkInELINTDistance(ship, elint, 30)) continue; //Check distance between firing ship and ELINT
+            	
             if (!ew.getEWByType("SOEW", elint, ship)) continue;
 
 			jammerValue = ew.getJammerValueFromTo(elint,target);
 			if (jammerValue>0) continue; //no lock-on negates SOEW, if any
-			
-            var foew = ew.getEWByType("OEW", elint, target) * 0.5;
 
+			if(shipManager.hasSpecialAbility(ship, "ConstrainedEW")){//Mindrider ships have less efficient ELINT abilities - DK 19.07.24.
+ 	           	var foew = ew.getEWByType("OEW", elint, target) * 0.33;
+			    foew = Math.round(foew * 3) / 3; 	           					
+			}else{	
+ 	           	var foew = ew.getEWByType("OEW", elint, target) * 0.5;
+			}
+			
 			var dist = ew.getDistruptionEW(elint); //account for ElInt being disrupted
 			foew = foew-dist;
 				
@@ -555,8 +575,13 @@ window.ew = {
             var elint = elints[i];
             if (elint.id === ship.id) continue;
 
-            var fdew = ew.getEWByType("SDEW", elint, ship) * 0.5;
-
+			if(shipManager.hasSpecialAbility(ship, "ConstrainedEW")){//Mindrider ships have less efficient ELINT abilities - DK 19.07.24.
+            	var fdew = ew.getEWByType("SDEW", elint, ship) * 0.33;
+			    fdew = Math.round(fdew * 3) / 3;             					
+			}else{	
+            	var fdew = ew.getEWByType("SDEW", elint, ship) * 0.5;
+			}
+			
             if (fdew > amount) amount = fdew;
         }
 
@@ -574,8 +599,12 @@ window.ew = {
 
             if (!ew.checkInELINTDistance(ship, elint, 20)) continue;
 
-            var fdew = ew.getEWByType("BDEW", elint) * 0.25;
-
+			if(shipManager.hasSpecialAbility(ship, "ConstrainedEW")){//Mindrider ships have less efficient ELINT abilities - DK 19.07.24.
+            	var fdew = ew.getEWByType("BDEW", elint) * 0.2;			
+			}else{	
+            	var fdew = ew.getEWByType("BDEW", elint) * 0.25;
+			}
+			
             if (fdew > amount) amount = fdew;
         }
 
@@ -589,8 +618,12 @@ window.ew = {
             var elint = gamedata.ships[i];
             if (elint == ship || !shipManager.isElint(elint)) continue;
 
-            var fdew = ew.getEWByType("DIST", elint, ship) / 3;
-
+			if(shipManager.hasSpecialAbility(elint, "ConstrainedEW")){//Mindrider ships have less efficient ELINT abilities - DK 19.07.24.
+            	var fdew = ew.getEWByType("DIST", elint, ship) / 4;	
+			}else{
+            	var fdew = ew.getEWByType("DIST", elint, ship) / 3;
+			}
+			
             //if (fdew > amount)
             amount += fdew;
         }

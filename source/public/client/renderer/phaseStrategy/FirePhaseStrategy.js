@@ -78,8 +78,8 @@ window.FirePhaseStrategy = function () {
 
     FirePhaseStrategy.prototype.setSelectedShip = function (ship) {
         PhaseStrategy.prototype.setSelectedShip.call(this, ship);
-
-        if (shipManager.movement.canPivot(ship)) {
+		//added extra check for combat pivots to allow cancelling these when flight has 0 thrust - DK 10.24
+        if (shipManager.movement.canPivot(ship) || (shipManager.movement.countCombatPivot(ship) > 0)) { 
             this.drawMovementUI(this.selectedShip);
         }
     };

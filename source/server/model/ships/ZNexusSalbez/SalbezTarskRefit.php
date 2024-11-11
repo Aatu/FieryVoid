@@ -7,7 +7,7 @@ class SalbezTarskRefit extends HeavyCombatVessel{
         $this->pointCost = 410;
         $this->faction = "ZNexus Sal-bez Coalition";
         $this->phpclass = "SalbezTarskRefit";
-        $this->imagePath = "img/ships/Nexus/salbez_tarsk.png";
+        $this->imagePath = "img/ships/Nexus/salbez_tarsk3.png";
 			$this->canvasSize = 115; //img has 200px per side
         $this->shipClass = "Ta'rsk Light Carrier (2145 refit)";
 			$this->variantOf = "Vas-ren Destroyer";

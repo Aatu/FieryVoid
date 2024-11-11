@@ -8,10 +8,10 @@ class DalithornCutter extends FighterFlight{
         $this->faction = "ZNexus Dalithorn Commonwealth";
         $this->phpclass = "DalithornCutter";
         $this->shipClass = "Cutter";
-        $this->imagePath = "img/ships/Nexus/DalithornCutterv2.png";
+        $this->imagePath = "img/ships/Nexus/Dalithorn_Cutter2.png";
 		$this->unofficial = true;
 	    $this->isd = 1879;
-        $this->canvasSize = 100;
+        $this->canvasSize = 120;
 
         $this->forwardDefense = 8;
         $this->sideDefense = 10;
@@ -40,8 +40,8 @@ class DalithornCutter extends FighterFlight{
 			$armour = array(2, 1, 2, 2);
 			$fighter = new Fighter("DalithornCutter", $armour, 24, $this->id);
 			$fighter->displayName = "Cutter";
-			$fighter->imagePath = "img/ships/Nexus/DalithornCutter2.png.png";
-			$fighter->iconPath = "img/ships/Nexus/DalithornCutter_Large.png";
+			$fighter->imagePath = "img/ships/Nexus/Dalithorn_Cutter2.png.png";
+			$fighter->iconPath = "img/ships/Nexus/Dalithorn_Cutter_Large2.png";
 
 	        $lightGasGun = new NexusLightGasGunFtr(300, 60, 1); //$startArc, $endArc, $nrOfShots
 	        $fighter->addFrontSystem($lightGasGun);

@@ -5,7 +5,8 @@ class Erlorhark extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 650;
-        $this->faction = "Llort";
+       // $this->faction = "Llort";
+        $this->faction = "Custom Ships";
         $this->phpclass = "erlorhark";
         $this->imagePath = "img/ships/LlortErlorhark.png";
         $this->shipClass = "Erlorhark Battle Cruiser";
@@ -13,8 +14,8 @@ class Erlorhark extends BaseShip{
         $this->fighters = array("normal"=>12);
 
 		$this->unofficial = true;     
-        $this->occurence = "uncommon";
-        $this->variantOf = 'Erlorra Raiding Cruiser';
+//        $this->occurence = "uncommon";
+//        $this->variantOf = 'Erlorra Raiding Cruiser';
         $this->isd = 2245;
    
         $this->forwardDefense = 17;

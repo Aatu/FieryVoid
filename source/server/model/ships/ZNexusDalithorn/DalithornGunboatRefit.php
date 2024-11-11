@@ -7,7 +7,7 @@ class DalithornGunboatRefit extends LCV{
         $this->pointCost = 195;
         $this->faction = "ZNexus Dalithorn Commonwealth";
         $this->phpclass = "DalithornGunboatRefit";
-        $this->imagePath = "img/ships/Nexus/DalithornGunboat.png";
+        $this->imagePath = "img/ships/Nexus/Dalithorn_Gunboat2.png";
 		$this->canvasSize = 70; //img has 200px per side
         $this->shipClass = "Gunboat (2150)";
 			$this->variantOf = "Gunboat";
