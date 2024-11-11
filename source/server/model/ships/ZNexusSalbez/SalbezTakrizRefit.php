@@ -7,8 +7,8 @@ class SalbezTakrizRefit extends OSAT{
 		$this->pointCost = 100;
 		$this->faction = 'ZNexus Sal-bez Coalition';
         $this->phpclass = "SalbezTakrizRefit";
-        $this->imagePath = "img/ships/Nexus/salbez_takriz_v2.png";
-			$this->canvasSize = 80; //img has 100px per side
+        $this->imagePath = "img/ships/Nexus/salbez_takriz3.png";
+			$this->canvasSize = 65; //img has 100px per side
         $this->shipClass = "Tak'riz OSAT (2085 refit)";
 			$this->variantOf = "Tak'riz Early OSAT";
 			$this->occurence = "common";

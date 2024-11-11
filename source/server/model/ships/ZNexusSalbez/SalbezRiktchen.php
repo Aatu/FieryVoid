@@ -7,12 +7,12 @@ class SalbezRiktchen extends BaseShip{
 	$this->pointCost = 530;
 	$this->faction = "ZNexus Sal-bez Coalition";
         $this->phpclass = "SalbezRiktchen";
-        $this->imagePath = "img/ships/Nexus/salbez_riktchen.png";
+        $this->imagePath = "img/ships/Nexus/salbez_riktchen3.png";
         $this->shipClass = "Rik't'chen Carrier";
 			$this->variantOf = "Jer't'kat Heavy Cruiser";
 			$this->occurence = "uncommon";
         $this->shipSizeClass = 3;
-		$this->canvasSize = 125; //img has 200px per side
+		$this->canvasSize = 140; //img has 200px per side
 		$this->unofficial = true;
 
         $this->fighters = array("heavy"=>12);

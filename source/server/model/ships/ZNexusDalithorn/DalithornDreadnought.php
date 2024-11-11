@@ -7,7 +7,7 @@ class DalithornDreadnought extends BaseShip{
 	$this->pointCost = 450;
 	$this->faction = "ZNexus Dalithorn Commonwealth";
         $this->phpclass = "DalithornDreadnought";
-        $this->imagePath = "img/ships/Nexus/DalithornDreadnought.png";
+        $this->imagePath = "img/ships/Nexus/Dalithorn_Dreadnought2.png";
         $this->shipClass = "Dreadnought";
         $this->shipSizeClass = 3;
 		$this->canvasSize = 175; //img has 200px per side

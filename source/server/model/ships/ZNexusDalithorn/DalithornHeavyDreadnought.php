@@ -7,7 +7,7 @@ class DalithornHeavyDreadnought extends BaseShip{
 	$this->pointCost = 480;
 	$this->faction = "ZNexus Dalithorn Commonwealth";
         $this->phpclass = "DalithornHeavyDreadnought";
-        $this->imagePath = "img/ships/Nexus/DalithornDreadnought.png";
+        $this->imagePath = "img/ships/Nexus/Dalithorn_Dreadnought2.png";
         $this->shipClass = "Heavy Dreadnought";
 // NOTE: As an updated version of the Dreadnought, the Dalithorn have
 // perfected their construction techniques. As such, the hull no longer has

@@ -7,10 +7,10 @@ class SalbezJertkat extends BaseShip{
 	$this->pointCost = 550;
 	$this->faction = "ZNexus Sal-bez Coalition";
         $this->phpclass = "SalbezJertkat";
-        $this->imagePath = "img/ships/Nexus/salbez_jertkat.png";
+        $this->imagePath = "img/ships/Nexus/salbez_jertkat3.png";
         $this->shipClass = "Jer't'kat Heavy Cruiser";
         $this->shipSizeClass = 3;
-		$this->canvasSize = 145; //img has 200px per side
+		$this->canvasSize = 150; //img has 200px per side
 		$this->unofficial = true;
 //        $this->limited = 33;
 

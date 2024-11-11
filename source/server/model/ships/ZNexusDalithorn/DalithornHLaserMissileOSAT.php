@@ -7,8 +7,8 @@ class DalithornHLaserMissileOSAT extends OSAT{
 		$this->pointCost = 200;
 		$this->faction = 'ZNexus Dalithorn Commonwealth';
         $this->phpclass = "DalithornHLaserMissileOSAT";
-        $this->imagePath = "img/ships/Nexus/DalithornLaserMissileOSAT.png";
-			$this->canvasSize = 100; //img has 100px per side
+        $this->imagePath = "img/ships/Nexus/Dalithorn_LaserMissileOSAT2.png";
+			$this->canvasSize = 90; //img has 100px per side
         $this->shipClass = "Heavy Laser Missile OSAT";
 			$this->variantOf = "Laser Missile OSAT";
 			$this->occurence = "common";

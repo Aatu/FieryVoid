@@ -1108,7 +1108,7 @@ class EWPlasmaMine extends Plasma{
 
 
 
-class EWPlasmaArc extends Raking{
+class EWPlasmaArcOld extends Raking{
 	public $name = "EWPlasmaArc";
 	public $displayName = "Plasma Arc";
     public $iconPath = "EWPlasmaArc.png";
@@ -1175,6 +1175,30 @@ class EWPlasmaArc extends Raking{
         public function setMaxDamage(){     $this->maxDamage = 24;      }
 		
 }//endof class EWPlasmaArc
+
+
+
+class EWPlasmaArc extends PlasmaStream {
+
+	public $name = "EWPlasmaArc";
+	public $displayName = "Plasma Arc";
+    public $iconPath = "EWPlasmaArc.png";
+	
+	public $animation = "laser";
+	public $priority = 1; //early, due to armor reduction effect
+		        
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		if ( $maxhealth == 0 ) $maxhealth = 5;
+		if ( $powerReq == 0 ) $powerReq = 4;
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+	}
+        
+	public function getDamage($fireOrder){        return Dice::d(10,2)+4;   }
+	public function setMinDamage(){     $this->minDamage = 6 ;      }
+	public function setMaxDamage(){     $this->maxDamage = 24 ;      }
+	
+}
+
 
 
 

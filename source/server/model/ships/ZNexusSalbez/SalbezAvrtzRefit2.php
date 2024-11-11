@@ -7,12 +7,12 @@ class SalbezAvrtzRefit2 extends BaseShip{
 		$this->pointCost = 825;
 		$this->faction = "ZNexus Sal-bez Coalition";
         $this->phpclass = "SalbezAvrtzRefit2";
-        $this->imagePath = "img/ships/Nexus/salbez_bevtun2.png";
+        $this->imagePath = "img/ships/Nexus/salbez_bevtun3.png";
         $this->shipClass = "Av'rtz Explorer (2153 Refit)";
 			$this->variantOf = "Av'rtz Explorer";
 			$this->occurence = "common";
 //        $this->shipSizeClass = 3;
-		$this->canvasSize = 190; //img has 200px per side
+		$this->canvasSize = 200; //img has 200px per side
 		$this->unofficial = true;
         $this->limited = 10;
 

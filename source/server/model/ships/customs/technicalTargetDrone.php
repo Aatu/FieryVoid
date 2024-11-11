@@ -7,7 +7,8 @@ class technicalTargetDrone extends BaseShip{
 		$this->pointCost = 10;
 		$this->faction = "Custom Ships";
 		$this->phpclass = "technicalTargetDrone";
-		$this->imagePath = "img/ships/BASurveyShip.png";
+		$this->imagePath = "img/ships/Nexus/salbez_cruiser_ai2.png";
+		$this->canvasSize = 145; //img has 200px per side
 //		$this->imagePath = "img/ships/hyach_tachilakor.png";
 		$this->shipClass = "Target Drone - DO NOT USE";
 		$this->shipSizeClass = 3;
@@ -59,6 +60,8 @@ class technicalTargetDrone extends BaseShip{
 		$this->addPrimarySystem(new IonFieldGenerator(2, 0, 0, 0, 360));
 		$this->addPrimarySystem(new IonFieldGenerator(2, 0, 0, 0, 360));
 		$this->addPrimarySystem(new NexusAntifighterLauncher(2, 5, 0, 0, 360));
+
+//        $this->addPrimarySystem(new EMShield(3, 6, 0, 2, 180, 360));
 		
 //        $this->addFrontSystem(new AntiquatedScanner(3, 20, 6, 6));
 		$this->addFrontSystem(new CnC(6, 40, 0, 0));

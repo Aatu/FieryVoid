@@ -19,9 +19,9 @@ class CrusaderAM extends MediumShip{
         $this->forwardDefense = 14;
         $this->sideDefense = 14;
         
-        $this->turncost = 0.5;
+        $this->turncost = 0.66;
         $this->turndelaycost = 0.5;
-        $this->accelcost = 2;
+        $this->accelcost = 3;
         $this->rollcost = 1;
         $this->pivotcost = 2;
         $this->iniativebonus = 65;
@@ -41,14 +41,13 @@ class CrusaderAM extends MediumShip{
         $this->enhancementOptionsEnabled[] = 'AMMO_L';//add enhancement options for other missiles - Class-L
 		//By the Book Orieni should have access to missie types: KK, B, A, H, L, C
 		
-		
         $this->addPrimarySystem(new Reactor(5, 18, 0, 0));
-        $this->addPrimarySystem(new CnC(5, 15, 0, 0));
+        $this->addPrimarySystem(new CnC(5, 18, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 12, 3, 6));
-        $this->addPrimarySystem(new Engine(4, 15, 0, 12, 3));
-        $this->addPrimarySystem(new Hangar(1, 1));
-        $this->addPrimarySystem(new Thruster(2, 10, 0, 5, 3));
-        $this->addPrimarySystem(new Thruster(2, 10, 0, 5, 4));        
+        $this->addPrimarySystem(new Engine(4, 18, 0, 12, 3));
+        $this->addPrimarySystem(new Hangar(4, 2));
+        $this->addPrimarySystem(new Thruster(3, 10, 0, 5, 3));
+        $this->addPrimarySystem(new Thruster(3, 10, 0, 5, 4));        
         
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
@@ -56,7 +55,7 @@ class CrusaderAM extends MediumShip{
         $this->addFrontSystem(new HeavyGaussCannon(3, 10, 4, 300, 120));
         $this->addFrontSystem(new RapidGatling(2, 4, 1, 240, 120));
         $this->addFrontSystem(new RapidGatling(2, 4, 1, 240, 120));
-		$this->addFrontSystem(new AmmoMissileRackS(5, 0, 0, 270, 90, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+		$this->addFrontSystem(new AmmoMissileRackS(3, 0, 0, 270, 90, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
 
         $this->addAftSystem(new RapidGatling(2, 4, 1, 120, 360)); 
         $this->addAftSystem(new RapidGatling(2, 4, 1, 0, 240)); 

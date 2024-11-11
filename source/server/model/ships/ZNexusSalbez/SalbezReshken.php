@@ -7,12 +7,12 @@ class SalbezReshken extends BaseShip{
 	$this->pointCost = 570;
 	$this->faction = "ZNexus Sal-bez Coalition";
         $this->phpclass = "SalbezReshken";
-        $this->imagePath = "img/ships/Nexus/salbez_reshken.png";
+        $this->imagePath = "img/ships/Nexus/salbez_reshken3.png";
         $this->shipClass = "Resh-ken Command Cruiser";
 			$this->variantOf = "Jer't'kat Heavy Cruiser";
 			$this->occurence = "rare";
         $this->shipSizeClass = 3;
-		$this->canvasSize = 185; //img has 200px per side
+		$this->canvasSize = 165; //img has 200px per side
 		$this->unofficial = true;
         $this->limited = 33;
 

@@ -7,8 +7,8 @@ class SalbezKretck extends BaseShipNoAft{
 		$this->pointCost = 450;
 		$this->faction = "ZNexus Sal-bez Coalition";
         $this->phpclass = "SalbezKretck";
-        $this->imagePath = "img/ships/Nexus/salbez_kretck.png";
-			$this->canvasSize = 155; //img has 200px per side
+        $this->imagePath = "img/ships/Nexus/salbez_kretck3.png";
+			$this->canvasSize = 120; //img has 200px per side
         $this->shipClass = "Kre'tck Carrier";
 			$this->variantOf = "Fel-riz Patrol Cruiser";
 			$this->occurence = "uncommon";

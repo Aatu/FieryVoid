@@ -20,8 +20,8 @@ class Benevolent1791AM extends BaseShip{
         
         $this->turncost = 1;
         $this->turndelaycost = 1;
-        $this->accelcost = 4;
-        $this->rollcost = 3;
+        $this->accelcost = 3;
+        $this->rollcost = 2;
         $this->pivotcost = 3;
         $this->limited = 33;
 	    
@@ -43,7 +43,7 @@ class Benevolent1791AM extends BaseShip{
         $this->addPrimarySystem(new CnC(6, 25, 0, 0));
         $this->addPrimarySystem(new ElintScanner(5, 25, 8, 8));
         $this->addPrimarySystem(new Engine(5, 25, 0, 9, 4));
-        $this->addPrimarySystem(new Hangar(4, 14, 12));
+        $this->addPrimarySystem(new Hangar(4, 15, 12));
         $this->addPrimarySystem(new JumpEngine(5, 30, 6, 25));
 		$this->addPrimarySystem(new AmmoMissileRackSO(5, 0, 0, 0, 360, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         

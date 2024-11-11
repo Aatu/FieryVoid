@@ -28,15 +28,15 @@ class CraytanDeprinRefit extends OSAT{
         $this->addPrimarySystem(new Reactor(4, 24, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 16, 3, 6));   
 		$this->addPrimarySystem(new Magazine(4, 18));
-		$this->addPrimarySystem(new NexusACIDS(2, 6, 2, 180, 360));
-		$this->addPrimarySystem(new NexusACIDS(2, 6, 2, 180, 360));
-		$this->addPrimarySystem(new NexusMedEnhPlasma(3, 6, 4, 300, 60));
-		$this->addPrimarySystem(new NexusAssaultCannonBattery(4, 16, 10, 0, 360));
-		$this->addPrimarySystem(new NexusAssaultCannonBattery(4, 16, 10, 0, 360));
-		$this->addPrimarySystem(new NexusMedEnhPlasma(3, 6, 4, 300, 60));
-		$this->addPrimarySystem(new NexusACIDS(2, 6, 2, 0, 180));
-		$this->addPrimarySystem(new NexusACIDS(2, 6, 2, 0, 180));
-        $this->addPrimarySystem(new Thruster(4, 20, 0, 0, 2));
+		$this->addAftSystem(new NexusACIDS(2, 6, 2, 180, 360));
+		$this->addAftSystem(new NexusACIDS(2, 6, 2, 180, 360));
+		$this->addFrontSystem(new NexusMedEnhPlasma(3, 6, 4, 300, 60));
+		$this->addFrontSystem(new NexusAssaultCannonBattery(4, 16, 10, 0, 360));
+		$this->addFrontSystem(new NexusAssaultCannonBattery(4, 16, 10, 0, 360));
+		$this->addFrontSystem(new NexusMedEnhPlasma(3, 6, 4, 300, 60));
+		$this->addAftSystem(new NexusACIDS(2, 6, 2, 0, 180));
+		$this->addAftSystem(new NexusACIDS(2, 6, 2, 0, 180));
+        $this->addAftSystem(new Thruster(4, 20, 0, 0, 2));
                 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addPrimarySystem(new Structure(4, 80));
@@ -44,19 +44,33 @@ class CraytanDeprinRefit extends OSAT{
 		$this->hitChart = array(
 			0=> array(
 				6 => "Structure",
-				8 => "Thruster",
-				10 => "Medium Enhanced Plasma",
-				13 => "Assault Cannon Battery",
-				15 => "Advanced Close-In Defense System",
-				17 => "Scanner",
-				19 => "Reactor",
-				20 => "Magazine",
+				8 => "2:Thruster",
+				10 => "1:Medium Enhanced Plasma",
+				13 => "1:Assault Cannon Battery",
+				15 => "2:Advanced Close-In Defense System",
+				17 => "0:Scanner",
+				19 => "0:Reactor",
+				20 => "0:Magazine",
 			),
 			1=> array(
-				20 => "Primary",
+				6 => "Structure",
+				8 => "2:Thruster",
+				10 => "1:Medium Enhanced Plasma",
+				13 => "1:Assault Cannon Battery",
+				15 => "2:Advanced Close-In Defense System",
+				17 => "0:Scanner",
+				19 => "0:Reactor",
+				20 => "0:Magazine",
 			),
 			2=> array(
-				20 => "Primary",
+				6 => "Structure",
+				8 => "2:Thruster",
+				10 => "1:Medium Enhanced Plasma",
+				13 => "1:Assault Cannon Battery",
+				15 => "2:Advanced Close-In Defense System",
+				17 => "0:Scanner",
+				19 => "0:Reactor",
+				20 => "0:Magazine",
 			),
         );
     }

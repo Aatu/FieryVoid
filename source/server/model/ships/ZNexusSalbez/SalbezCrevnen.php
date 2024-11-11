@@ -8,7 +8,7 @@ class SalbezCrevnen extends FighterFlight{
         $this->faction = "ZNexus Sal-bez Coalition";
         $this->phpclass = "SalbezCrevnen";
         $this->shipClass = "Crev-nen Attack Shuttle";
-        $this->imagePath = "img/ships/Nexus/salbez_crevnen.png";
+        $this->imagePath = "img/ships/Nexus/salbez_crevnen3.png";
 		$this->unofficial = true;
 
         $this->isd = 1999;
@@ -36,8 +36,8 @@ class SalbezCrevnen extends FighterFlight{
             $armour = array(1, 0, 1, 1);
             $fighter = new Fighter("SalbezCrevnen", $armour, 12, $this->id);
             $fighter->displayName = "Crev-nen";
-            $fighter->imagePath = "img/ships/Nexus/salbez_crevnen.png";
-            $fighter->iconPath = "img/ships/Nexus/salbez_crevnen_large.png";
+            $fighter->imagePath = "img/ships/Nexus/salbez_crevnen3.png";
+            $fighter->iconPath = "img/ships/Nexus/salbez_crevnen_large3.png";
 
 	        $light = new NexusParticleGridFtr(270, 90, 1); //$startArc, $endArc, $nrOfShots
 	        $fighter->addFrontSystem($light);

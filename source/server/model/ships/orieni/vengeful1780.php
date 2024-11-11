@@ -39,7 +39,7 @@ class Vengeful1780 extends MediumShip{
 		$this->addFrontSystem(new LightLaser(0, 4, 3, 0, 120));
 
 		$this->addAftSystem(new Thruster(1, 6, 0, 3, 2));
-		$this->addAftSystem(new Thruster(1, 6, 0, 4, 2));
+		$this->addAftSystem(new Thruster(1, 8, 0, 4, 2));
 		$this->addAftSystem(new Thruster(1, 6, 0, 3, 2));
 		$this->addAftSystem(new OrieniGatlingRG(1, 4, 1, 120, 360));
 		$this->addAftSystem(new OrieniGatlingRG(1, 4, 1, 0, 240));

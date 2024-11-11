@@ -7,10 +7,10 @@ class SalbezShvrak extends MediumShip{
         $this->pointCost = 250;
         $this->faction = "ZNexus Sal-bez Coalition";
         $this->phpclass = "SalbezShvrak";
-        $this->imagePath = "img/ships/Nexus/salbez_mining_frigate.png";
+        $this->imagePath = "img/ships/Nexus/salbez_mining_frigate3.png";
         $this->shipClass = "Shv'rak Mining Frigate";
 		$this->unofficial = true;
-        $this->canvasSize = 75;
+        $this->canvasSize = 80;
 	    $this->isd = 2019;
         
         $this->forwardDefense = 11;
