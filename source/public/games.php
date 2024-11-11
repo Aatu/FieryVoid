@@ -66,7 +66,7 @@ if (isset($_SESSION["user"])) {
 
 		<br><br>---------- <b>LATEST NEWS - November 2024</b> ----------
 		<br>---------- <b>Major deployment of Douglas' and Geoffrey's work!</b> ----------
-	    
+	    <br>
 	    <br><b><u>Mindriders</u> have arrived!</b> - a new Ancient faction!
 		<br><b>Plasma Webs enhanced</b> - they do stay!
 	    <br><b>Hex highlight enhanced</b> - try some ballistics and see the effect Yourself!
@@ -77,7 +77,7 @@ if (isset($_SESSION["user"])) {
 	    
 	    <br><b>Nexus updatesr</b> - quie a lot of post-tournament observations applied
 	    <br><b>bugfixes</b> - as always, there's quite a few of them
-       
+       <br><br>
 
 <!--	        
 		 <br><br>---------- <b>update 20th of January</b> ---------- 
