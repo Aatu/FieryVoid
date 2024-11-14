@@ -731,19 +731,7 @@ class ThirdspaceShield extends Shield implements DefensiveSystem { //defensive v
 			$this->outputDisplay = $this->currentHealth;//override on-icon display default					
 		}	
 
-    	public function onConstructed($ship, $turn, $phase){
-	    	parent::onConstructed($ship, $turn, $phase);	    	
-			
-			if($turn == 1){//Shields will spawn at max capacity, reduce this by half to give starting amount.
-		    	$startRating = $this->baseRating;
-		    	$currentRating = $this->getRemainingHealth();
-		    	$adjustment = $currentRating - $startRating;
-		    	
-		    	$this->setShields($ship, $turn, $adjustment);
-			}  		
-		
-		}	
-		
+
 		public function getRemainingCapacity(){
 			return $this->getRemainingHealth();
 		}
@@ -896,7 +884,17 @@ class ThirdspaceShield extends Shield implements DefensiveSystem { //defensive v
 	{
 		$ship = $this->getUnit();
 		$damageValue = 0;
-							
+
+		if($gamedata->turn == 1){//Shields will spawn at max possible capacity, reduce this to give starting amount on Turn 1.
+
+			$startRating = $this->baseRating;
+			$currentRating = $this->getRemainingHealth();
+			$adjustment = $currentRating - $startRating;
+					    	
+			$this->setShields($ship, $gamedata->turn, $adjustment);
+		}
+		
+		//Now make any changes as a result of rearrangements by player.					
 	    foreach ($this->individualNotes as $currNote) {
 	  		if($currNote->turn == $gamedata->turn) {  				    	
 	        $damageValue = $currNote->notevalue; //Positive if decreased, negative if increased.
@@ -988,31 +986,7 @@ class ThoughtShield extends Shield implements DefensiveSystem {
 			$this->outputDisplay = $this->currentHealth;//override on-icon display default					
 		}	
 
-    	public function onConstructed($ship, $turn, $phase){
-	    	parent::onConstructed($ship, $turn, $phase);	    	
-			
-			if($turn == 1){//Shields will spawn at max possible capacity, reduce this to give starting amount.
 
-			    $startRating = $this->baseRating;
-			    $currentRating = $this->getRemainingHealth();
-			    $adjustment = $currentRating - $startRating;
-
-				//For Mind's Eye, need to adjust on Turn 1 if Contraction is used to change shields.
-				$mindriderEngine = $ship->getSystemByName("MindriderEngine");			    
-			    if($mindriderEngine) $adjustment -= $mindriderEngine->contraction;
-
-
-				if(!$ship instanceof FighterFlight){//Fighters don't have Generators, and can't offline anyway!	
-					$generator = $ship->getSystemByName("ThoughtShieldGenerator");				
-		            if($generator->isOfflineOnTurn($turn)) {
-		            	$adjustment = $currentRating;//In the bizarre situation where player deactivates Generator on Turn 1...	
-					}			
-				}		    	
-			    $this->setShields($ship, $turn, $adjustment);
-			}  		
-					
-		}	
-		
 		public function getRemainingCapacity(){
 			return $this->getRemainingHealth();
 		}
@@ -1021,10 +995,12 @@ class ThoughtShield extends Shield implements DefensiveSystem {
 			return $this->getTotalDamage();
 		}
 
-		public function setShields($ship,$turn,$value){//On Turn 1, reduce shields to their correct starting amount.
+		public function setShields($ship,$turn,$adjustment){//On Turn 1, reduce shields to their correct starting amount.
+			//For Mind's Eye, need to adjust on Turn 1 if Contraction is used to change shields.
+			$mindriderEngine = $ship->getSystemByName("MindriderEngine");			    
+			if($mindriderEngine) $adjustment -= $mindriderEngine->contraction;
 
-		
-			$damageEntry = new DamageEntry(-1, $ship->id, -1, $turn, $this->id, $value, 0, 0, -1, false, false, "SetShield!", "ThoughtShield");
+			$damageEntry = new DamageEntry(-1, $ship->id, -1, $turn, $this->id, $adjustment, 0, 0, -1, false, false, "SetShield!", "ThoughtShield");
 			$damageEntry->updated = true;
 			$this->damage[] = $damageEntry;
 		}
@@ -1177,7 +1153,24 @@ class ThoughtShield extends Shield implements DefensiveSystem {
 	{
 		$ship = $this->getUnit();
 		$damageValue = 0;
-							
+
+		if($gamedata->turn == 1){//Shields will spawn at max possible capacity, reduce this to give starting amount on Turn 1.
+
+			$startRating = $this->baseRating;
+			$currentRating = $this->getRemainingHealth();
+			$adjustment = $currentRating - $startRating;
+
+			if(!$ship instanceof FighterFlight){//Fighters don't have Generators, and can't offline anyway!	
+				$generator = $ship->getSystemByName("ThoughtShieldGenerator");				
+		        if($generator->isOfflineOnTurn($gamedata->turn)) {
+		            $adjustment = $currentRating;//In the bizarre situation where player deactivates Generator on Turn 1...	
+				}			
+			}
+					    	
+			$this->setShields($ship, $gamedata->turn, $adjustment);
+		}
+		
+		//Now make any readjustments the player has made to sheild strengths					
 	    foreach ($this->individualNotes as $currNote) {
 	  		if($currNote->turn == $gamedata->turn) {  				    	
 	        $damageValue = $currNote->notevalue; //Positive if decreased, negative if increased.
@@ -1208,73 +1201,5 @@ class ThoughtShield extends Shield implements DefensiveSystem {
 	
 }//endof class ThoughtShield
 
-
-
-
-
-/*
-class ThirdspaceShieldProjector  extends Shield implements DefensiveSystem { //defensive values of zero, but still formally there to display arcs!
-	    public $name = "ThirdspaceShieldProjector";
-	    public $displayName = "Shield Projector";
-		public $isPrimaryTargetable = false; //projector can be targeted even on PRIMARY, like a weapon!
-	    public $iconPath = "ThirdspaceProjectorF.png"; //overridden anyway - to indicate proper direction
-	    public $boostable = true; //$this->boostEfficiency and $this->maxBoostLevel in __construct()  
-		public $boostEfficiency = 4;
-	    public $baseOutput = 0; //base output, before boost
-	    
-		
-	    protected $possibleCriticals = array(
-	            19=>"OutputReduced1",
-	            28=>"OutputReduced2" );
-		
-		public $repairPriority = 9;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
-
-	    
-	    function __construct($armor, $maxhealth, $power, $rating, $startArc, $endArc, $side = 'F'){ //parameters: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R/C suggests whether to use left or right graphics
-			$this->iconPath = 'ThirdspaceProjector' . $side . '.png';
-            if ( $power == 0 ){
-                $power = 4;
-            }			
-			parent::__construct($armor, $maxhealth, $power, $rating, $startArc, $endArc);
-			$this->baseOutput = $rating;
-			$this->maxBoostLevel = floor($rating/2); //maximum double effect -1	
-		}
-		
-		
-	    public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){ //no defensive hit chance change
-	            return 0;
-	    }
-		public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon){ //no shield-like damage reduction
-			return 0;
-		}
-	    private function checkIsFighterUnderShield($target, $shooter){ //no flying under shield
-	        return false;
-	    }
-
-		public function setSystemDataWindow($turn){
-			parent::setSystemDataWindow($turn); 
-			$this->data["Special"] = "Regenerates 4 health for the associated Shield per point of Projector output at the end of each turn .";
-		$this->data["Special"] .= "<br> Output can be boosted " . $this->maxBoostLevel . " time(s) for " . $this->boostEfficiency . " power.";
-		}	
-		
-	    public function getOutputOnTurn($turn){
-	        $output = ($this->getOutput() + $this->getBoostLevel($turn))*4;
-	        return $output;
-	    }
-		
-		
-		private function getBoostLevel($turn){
-			$boostLevel = 0;
-			foreach ($this->power as $i){
-					if ($i->turn != $turn) continue;
-					if ($i->type == 2){
-							$boostLevel += $i->amount;
-					}
-			}
-			return $boostLevel;
-		}
-		
-} //endof class ThirdspaceShieldProjector
-*/
 
 ?>
