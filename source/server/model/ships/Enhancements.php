@@ -1532,14 +1532,21 @@ class Enhancements{
 						break;	
 
 					case 'IMPR_TS': //Improved Thought Shield: +1 rating for each Thought Shield
+						$thoughtShields = array();
+						$shieldCount = 0;
 						foreach ($ship->systems as $system){
 							if ($system instanceof ThoughtShield){
-								$system->baseRating += $enhCount;
+								$thoughtShields[] = $system;
+								$shieldCount++;								
 							}
 							if ($system instanceof ThoughtShieldGenerator){
 								$system->output += $enhCount;
 							}							
-						}  
+						}	
+						foreach ($thoughtShields as $shield){
+								$shield->baseRating += $enhCount;
+    							$shield->maxhealth += ($enhCount * $shieldCount);
+						}																 
 						break;	
 						
 					case 'IPSH_EETH': //Ipsha Eethan Barony refit: +2 free thrust, +25% available power (round arithmetically), +0.1 turn delay, -5 Initiative, +4 critical roll modifier for Reactor and Engine
@@ -1965,7 +1972,12 @@ class Enhancements{
 								$strippedSystem->critRollMod = $system->critRollMod ;
 							}
 							break;		
-
+						case 'IMPR_TS': //improved Thought Shield
+							if ($system instanceof ThoughtShield){
+								$strippedSystem->maxhealth = $system->maxhealth ;
+							}													
+							break;	
+							
 						case 'IPSH_EETH': //modifies output and crit mod of Engine and Reactor
 							if ($system instanceof MagGravReactor){ //Reactor
 								$strippedSystem->output = $system->output ;
