@@ -465,15 +465,56 @@ ThirdspaceShield.prototype.doIndividualNotesTransfer = function () { //prepare i
 };
 
 
+//MINDRIDER THOUGHT SHIELDS
 var ThoughtShield = function ThoughtShield(json, ship) {
     ThirdspaceShield.call(this, json, ship);
-    this.defensiveType = "none";//Migh need to amend to     this.defensiveType = "Shield";
+    this.defensiveType = "none";
 };
-
 ThoughtShield.prototype = Object.create(ThirdspaceShield.prototype);
 ThoughtShield.prototype.constructor = ThoughtShield;
+
 ThoughtShield.prototype.getDefensiveHitChangeMod = function (target, shooter, weapon) {
     //this is made to be a shield just to display arc visually, no actual protection
     return this.defenceMod; //Usually 0, unless reinforced.
 };
 
+ThoughtShield.prototype.canIncrease = function () { //Can increase if not at max / destroyed.
+ //Check if it is at maxHealth / not destroyed etc / Is there spare capacity in Generator?	
+ 
+ 	var ship = this.ship;
+
+	if(ship.flight) return false;//Fighters can't increase or decrease shields
+	if(this.currentHealth >= this.maxhealth) return false; //Shield is at maximum output.
+			
+	for (var i in ship.systems) {
+		var system = ship.systems[i];
+
+		if (system instanceof ThoughtShieldGenerator) {
+			var generator = system; //Find generator
+		}
+	}	
+
+	if(!generator) return false; //This Thirdspace ship has no generator, can't move shields around!
+		
+	return true;		
+};			
+	
+ThoughtShield.prototype.canDecrease = function () { //can decrease if not at zero / destroyed.
+ //Check if it is at 0 health / not destroyed etc
+ 	var ship = this.ship;
+
+	if(ship.flight) return false;//Fighters can't increase or decrease shields
+	if(this.currentHealth <= 0) return false; //Shield cannot be reduced more.
+
+	for (var i in ship.systems) {
+		var system = ship.systems[i];
+
+		if (system instanceof ThoughtShieldGenerator) {
+			var generator = system; //Find generator
+		}
+	}	
+
+	if(!generator) return false; //This Thirdspace ship has no generator, can't move shields around!	
+	
+	return true;
+};
