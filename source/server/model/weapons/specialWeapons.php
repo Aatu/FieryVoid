@@ -4490,7 +4490,7 @@ class PsychicField extends Weapon{ //Thirdspace weapons that operates similar to
 		
 	public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
 	public $weaponClass = "Psychic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
-    public $firingModes = array( 1 => "Field"); //just a convenient name for firing mode
+    public $firingModes = array( 1 => "Psychic Field"); //just a convenient name for firing mode
 	public $hextarget = true;
 	
     protected $ewBoosted = true;	
