@@ -45,9 +45,7 @@ class Consortium extends MindriderHCV{
 		$cnc->startArc = 0;
 		$cnc->endArc = 360;
         $this->addPrimarySystem($cnc); 
-
-//        $this->addPrimarySystem(new CnC(7, 16, 0, 0));
-//        $this->addPrimarySystem(new SecondaryCnC(7, 16, 0, 0));        
+        
         $scanner = new ElintScanner(6, 24, 0, 10);
 		$scanner->markMindrider();
 		$this->addPrimarySystem($scanner);	        

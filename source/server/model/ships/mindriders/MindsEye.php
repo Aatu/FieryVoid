@@ -48,9 +48,7 @@ class MindsEye extends SixSidedShip{
 		$cnc->startArc = 0;
 		$cnc->endArc = 360;
         $this->addPrimarySystem($cnc);        
-        
-//        $this->addPrimarySystem(new CnC(8, 24, 0, 0));
-//        $this->addPrimarySystem(new SecondaryCnC(8, 24, 0, 0));        
+               
 		$scanner = new ElintScanner(7, 24, 0, 14);//Ancient Scanners do not need power - base systems are included in zero hull running costs
 		$scanner->markAdvanced();
 		$this->addPrimarySystem($scanner);	        
