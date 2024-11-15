@@ -7026,7 +7026,7 @@ class ThoughtWave extends Plasma{
 			$diceRoll = Dice::d(6, 3);
             $defence = $target->getHitSectionProfilePos(mathlib::hexCoToPixel($pos));//Base profile.
         	$mod = $target->getHitChanceMod($shooter, $pos, $gamedata->turn, $this); //Shields/E-web etc affect profile!
-			$fireOrder->pubnotes .= ' Damage Roll: ' . $diceRoll . '.';	
+			$fireOrder->pubnotes .= ' Damage Roll: ' . $diceRoll . '/18.';	
 		        	           
             if($target->advancedArmor){//Divide by 5 for AA
 				$damage = floor(($diceRoll/5) * ($defence + $mod)); //3d6 divide by 5, multiplied by defence profile.            	
@@ -7037,7 +7037,10 @@ class ThoughtWave extends Plasma{
 
         $damage = $this->getDamageMod($damage, $shooter, $target, $pos, $gamedata);     
         $damage -= $target->getDamageMod($shooter, $pos, $gamedata->turn, $this);
-			$fireOrder->pubnotes .= ' Damage: ' . $damage . '.';			
+
+		$damageForLog = max(0,$damage);			
+		$fireOrder->pubnotes .= ' Final Damage: ' . $damageForLog . '.';
+					
         return $damage;
     }
 	
@@ -7049,7 +7052,7 @@ class ThoughtWave extends Plasma{
 		$this->data["Special"] .= '<br>The Thought Wave will attempt to hit ALL non-Mindrider ships in the game in Firing Phase (even friendlies), using the following formula:';
 		$this->data["Special"] .= '<br> - (15 + OEW + d20) - (Range Penalty + DEW - Target Initiative/5)';
 		$this->data["Special"] .= '<br>If this formula returns a result above 0, the Thought Wave automatically hits, and deals (3D6/3) * (Profile/5) Flash damage (-' . $this->rangeDamagePenalty . ' per hex as per usual Plasma rules).';
-		$this->data["Special"] .= '<br>Advanced armor changes this formula to (3d6/5) * (Profile/5), and Shields etc affect profile as normal for this calculation.';			
+		$this->data["Special"] .= '<br>Advanced Armor changes this formula to (3d6/5) * (Profile/5), and Shields etc affect profile as normal for this calculation.';			
 		$this->data["Special"] .= '<br>Will only strike 1 fighter in a flight, but Flash damage may still affect other fighters.';
 		$this->data["Special"] .= '<br>Note - Only successful attacks will appear in the Combat Log.';								
 	}	
