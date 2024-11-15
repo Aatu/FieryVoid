@@ -1090,9 +1090,9 @@ class UltraPulseCannon extends Pulse{
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);
 		$this->data["Special"] = 'Pulse characterstics vary depending on Firing Mode:';
-		$this->data["Special"] .= '<br> - Heavy: 24 Damage, D3 Pulses, 20% grouping';
-		$this->data["Special"] .= '<br> - Medium: 16 Damage, D5 Pulses, 15% grouping';	
-		$this->data["Special"] .= '<br> - Light: 12 Damage, D6 Pulses, 10% grouping';			
+		$this->data["Special"] .= '<br> - HEAVY: 24 Damage, D3 Pulses, 20% grouping, Max. Pulses: 6';
+		$this->data["Special"] .= '<br> - MEDIUM: 16 Damage, D5 Pulses, 15% grouping, Max. Pulses: 9';	
+		$this->data["Special"] .= '<br> - LIGHT: 12 Damage, D6 Pulses, 10% grouping, Max. Pulses: 12';			
 	}
         
     protected function getPulses($turn){
