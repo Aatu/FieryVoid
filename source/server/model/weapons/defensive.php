@@ -760,7 +760,7 @@ class ThirdspaceShield extends Shield implements DefensiveSystem { //defensive v
 		}//endof checkArmourDeduction
 		
 		public function absorbDamage($ship,$gamedata,$value, $fireOrderid = -1){ //or dissipate, with negative value
-			$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $value, 0, 0, $fireOrderid, false, false, "Absorb/Regenerate!", "ThirdspaceShield");
+			$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $value, 0, 0, -1, false, false, "Absorb/Regenerate!", "ThirdspaceShield");
 			$damageEntry->updated = true;
 			$this->damage[] = $damageEntry;
 		}
@@ -1006,7 +1006,7 @@ class ThoughtShield extends Shield implements DefensiveSystem {
 		}
 		
 		public function absorbDamage($ship,$gamedata,$value, $fireOrderid = -1){ //or dissipate, with negative value
-			$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $value, 0, 0, $fireOrderid, false, false, "Absorb/Regenerate!", "ThoughtShield");
+			$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $value, 0, 0, -1, false, false, "Absorb/Regenerate!", "ThoughtShield");
 			$damageEntry->updated = true;
 			$this->damage[] = $damageEntry;
 		}
