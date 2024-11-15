@@ -6873,7 +6873,7 @@ class ThoughtWave extends Plasma{
 
 	public $damageType = "Flash"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!   
 	public $weaponClass = "Plasma"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set! 
-	public $rangeDamagePenalty = 2;	
+	public $rangeDamagePenalty = 1;	
 
     public $animation = "ball";
     public $animationExplosionScale = 2;   
@@ -7048,7 +7048,7 @@ class ThoughtWave extends Plasma{
 		$this->data["Special"] .= '<br><br>The Thought Wave will always originate from the starting location of the firing ship (as per usual with ballistic weapons).';
 		$this->data["Special"] .= '<br>The Thought Wave will attempt to hit ALL non-Mindrider ships in the game in Firing Phase (even friendlies), using the following formula:';
 		$this->data["Special"] .= '<br> - (15 + OEW + d20) - (Range Penalty + DEW - Target Initiative/5)';
-		$this->data["Special"] .= '<br>If this formula returns a result above 0, the Thought Wave automatically hits, and deals (3D6/3) * (Profile/5) Flash damage.';
+		$this->data["Special"] .= '<br>If this formula returns a result above 0, the Thought Wave automatically hits, and deals (3D6/3) * (Profile/5) Flash damage (-' . $this->rangeDamagePenalty . ' per hex as per usual Plasma rules).';
 		$this->data["Special"] .= '<br>Advanced armor changes this formula to (3d6/5) * (Profile/5), and Shields etc affect profile as normal for this calculation.';			
 		$this->data["Special"] .= '<br>Will only strike 1 fighter in a flight, but Flash damage may still affect other fighters.';
 		$this->data["Special"] .= '<br>Note - Only successful attacks will appear in the Combat Log.';								
