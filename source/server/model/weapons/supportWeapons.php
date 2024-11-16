@@ -357,23 +357,24 @@ class ShieldReinforcement extends Weapon{
 			        }
 			    }
 			//Then see what what is left over and reinforce this ship's shields.
-			$this->reinforceOwnShields($ship, $usedOutput);
+			$this->reinforceOwnShields($gamedata, $ship, $usedOutput);
 
 			// Mark the target as engaged in Staic variable
 			ShieldReinforcement::$shieldReinforced[$target->id] = $this->output;
 			
 		}else{//No fireOrder, just improve own shields.
-			$this->reinforceOwnShields($ship, 0);						
+			$this->reinforceOwnShields($gamedata, $ship, 0);						
 		} 
 		   
 	} // end of beforeFiringOrderResolution 
 
 
-	private function reinforceOwnShields($ship, $usedOutput){
+	private function reinforceOwnShields($gamedata, $ship, $usedOutput){
 		//Then see what what is left over and reinforce this ship's shields.				
 		$remainingOutput = $this->getCapacity() - $usedOutput;//Deduct amount used on allies from total capacity (e.g. system health).  Front end checks shoudl stop this from being under 0.
 		$remainingOutput = max(0, $remainingOutput);
 		$ownShields = array();
+		$reinforcePerShield = 0;
 
 		if($remainingOutput > 0){//No point if remaining output is 0!		
 				foreach ($ship->systems as $system) {
@@ -382,16 +383,28 @@ class ShieldReinforcement extends Weapon{
 				    }
 				}			
 
-		    $noOfOwnShields = count($ownShields); // 3 for Consortium, 6 for Mind's Eye, etc.
-		         
-		    if ($noOfOwnShields > 0) { // Ensure we don't divide by zero
-		        $reinforcePerShield = floor($remainingOutput / $noOfOwnShields); // Divide capacity by number of own shields, rounding down.
+			$noOfOwnShields = count($ownShields); // 3 for Consortium, 6 for Mind's Eye, etc.
+			         
+			if ($noOfOwnShields > 0) { // Ensure we don't divide by zero
+			    $reinforcePerShield = floor($remainingOutput / $noOfOwnShields); // Divide capacity by number of own shields, rounding down.
 
-		        foreach ($ownShields as $shield) {
-		            $shield->defenceMod = $reinforcePerShield;
-		        }        
-		    }
-		}		
+			    foreach ($ownShields as $shield) {
+			        $shield->defenceMod = $reinforcePerShield;
+			    }        
+			}
+		}
+		
+		//Now create fireOrder to show in Combat Log
+		$newFireOrder = new FireOrder(
+		    -1, "normal", $ship->id, $ship->id,
+		    $this->id, -1, $gamedata->turn, 1, 
+		    100, 100, 1, 1, 0, // needed, rolled, shots, shotshit, intercepted
+		    0, 0, $this->weaponClass, -1 // X, Y, damageclass, resolutionorder
+		);        
+
+		$newFireOrder->addToDB = true;
+		$newFireOrder->pubnotes .= " <br>Ship enhances its own Thought Shields with EM Shield properties (" . $reinforcePerShield . ")."; 
+		$this->fireOrders[] = $newFireOrder;				
 
 	}//endof reinforceOwnShields()
 		
@@ -402,10 +415,13 @@ class ShieldReinforcement extends Weapon{
 			$fireOrder->needed = 0; //always misses
 			$fireOrder->updated = true;		
 			$fireOrder->pubnotes .= " <br>Target was out of range when Shield Reinforcement was attempted!";
+		}else if($fireOrder->type == "normal"){
+			$fireOrder->needed = 100; //always true
+			$fireOrder->updated = true;				
 		}else{//Normal firing always hits.		
 			$fireOrder->needed = 100; //always true
 			$fireOrder->updated = true;			
-			$fireOrder->pubnotes .= " <br>Shield Reinforcement enhances Thought Shields with EM Shield properties (" . $this->reinforceAmount . ")!";
+			$fireOrder->pubnotes .= " <br>Shield Reinforcement enhances Thought Shields with EM Shield properties (" . $this->reinforceAmount . ").";
 		}								
 	}//endof calculateHitBase
 			
