@@ -930,7 +930,8 @@ class MindriderEngine extends Engine{
 				$armourBoost = floor($this->contraction/3);
 				
 				foreach ($ship->systems as $system){
-					$system->armour	+= $armourBoost;		
+					//Boost all Armour values except for Thought Shields		
+					if (!$system instanceof ThoughtShield) $system->armour += $armourBoost;		
 				}											
 			}		
 
@@ -943,7 +944,7 @@ class MindriderEngine extends Engine{
     public function setSystemDataWindow($turn){
 	parent::setSystemDataWindow($turn);
 		$this->data["Contraction Level"] = $this->contraction;		       	     
-		$this->data["Special"] = "Allows Mind's Eye to Contract, improving its Thought Shields and Defence Profile by 1 point per level of Contraction.";
+		$this->data["Special"] = "Allows Mind's Eye to Contract, improving its Thought Shields by 1 point and Defence Profiles by 5 points per level of Contraction.";
 		$this->data["Special"] .= "<br>In addition, all Mind's Eye systems gain +1 armour for every 3 points of Contraction.";		
 		$this->data["Special"] .= "<br>After the first three levels of Contraction applied, the Mind's Eye is no longer considered an Enormous unit.";		
     }
