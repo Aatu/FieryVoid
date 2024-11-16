@@ -307,6 +307,9 @@ class ShieldReinforcement extends Weapon{
 
 	public function beforeFiringOrderResolution($gamedata)
 	{
+		if($this->isDestroyed($gamedata->turn)) return;
+		if($this->isOfflineOnTurn($gamedata->turn)) return;			
+		
 	    // Get all firing orders for the current turn
 		$ship = $this->getUnit();
 		$weaponFiringOrders = $this->getFireOrders($gamedata->turn);
