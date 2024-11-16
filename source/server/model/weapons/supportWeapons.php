@@ -402,7 +402,7 @@ class ShieldReinforcement extends Weapon{
 		}else{//Normal firing always hits.		
 			$fireOrder->needed = 100; //always true
 			$fireOrder->updated = true;			
-			$fireOrder->pubnotes .= " <br>Shield Reinforcement enhances Thought Shields with EM Shield properties!";
+			$fireOrder->pubnotes .= " <br>Shield Reinforcement enhances Thought Shields with EM Shield properties (" . $this->reinforceAmount . ")!";
 		}								
 	}//endof calculateHitBase
 			
