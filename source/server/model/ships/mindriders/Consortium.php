@@ -61,8 +61,8 @@ class Consortium extends MindriderHCV{
         
         $this->addFrontSystem(new MindriderThruster(6, 30, 0, 10, 1));       
         
-		$this->addLeftFrontSystem(new ThoughtShield(0, 45, 15, 240, 360, 'FP'));	
-		$this->addRightFrontSystem(new ThoughtShield(0, 45, 15, 0, 120, 'FS')); 
+		$this->addFrontSystem(new ThoughtShield(0, 45, 15, 240, 360, 'FP'));	
+		$this->addFrontSystem(new ThoughtShield(0, 45, 15, 0, 120, 'FS')); 
 							
 		$this->addLeftSystem(new SelfRepair(6, 6, 3)); //armor, structure, output 
 		$tPulsar = new TriopticPulsar(6, 0, 0, 240, 60);
@@ -123,32 +123,17 @@ class Consortium extends MindriderHCV{
 			31=> array(
 				4 => "TAG:Thruster",
 				6 => "TAG:Trioptic Pulsar", 
-				8 => "32:Self Repair",
-				17 => "32:Structure",
-				20 => "Primary",
-			),			
-			32=> array(
-				4 => "TAG:Thruster",
-				6 => "TAG:Trioptic Pulsar", 
 				8 => "Self Repair",
 				17 => "Structure",
 				20 => "Primary",
-			),
+			),		
 			41=> array(
 				4 => "TAG:Thruster",
 				6 => "TAG:Trioptic Pulsar", 
-				8 => "42:Self Repair",
-				17 => "42:Structure",
-				20 => "Primary",
-			),			
-			42=> array(
-				4 => "TAG:Thruster",
-				6 => "TAG:Trioptic Pulsar", 
 				8 => "Self Repair",
 				17 => "Structure",
 				20 => "Primary",
-			),
-
+			),		
 		);
 		
     }

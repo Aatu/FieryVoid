@@ -2788,23 +2788,23 @@ class MindriderHCV extends SixSidedShip{
         parent::__construct($id, $userid, $name,$slot);
     }
 
-    protected function addLeftSystem($system){//Left = Left Aft
-        $this->addLeftAftSystem($system);
+    protected function addLeftSystem($system){//Left = Left Front
+        $this->addLeftFrontSystem($system);
     }
-    protected function addRightSystem($system){//Right = Right Aft
-        $this->addRightAftSystem($system);
+    protected function addRightSystem($system){//Right = Right Front
+        $this->addRightFrontSystem($system);
     }
 
     public function getLocations(){
         //debug::log("getLocations");         
         $locs = array();
 
-		//locations 41 and 31 CANNOT be targeted, because it would be picked if PRIMARY Structure was more healthy than side
+		//locations 42 and 32 CANNOT be targeted, because it would be picked if PRIMARY Structure was more healthy than side
         $locs[] = array("loc" => 2, "min" => 120, "max" => 240, "profile" => $this->forwardDefense);
-        $locs[] = array("loc" => 32, "min" => 240, "max" => 330, "profile" => $this->sideDefense);
-        $locs[] = array("loc" => 42, "min" => 30, "max" => 120, "profile" => $this->sideDefense);
-        $locs[] = array("loc" => 32, "min" => 330, "max" => 0, "profile" => $this->sideDefense);
-        $locs[] = array("loc" => 42, "min" => 0, "max" => 30, "profile" => $this->sideDefense);        
+        $locs[] = array("loc" => 31, "min" => 240, "max" => 330, "profile" => $this->sideDefense);
+        $locs[] = array("loc" => 41, "min" => 30, "max" => 120, "profile" => $this->sideDefense);
+        $locs[] = array("loc" => 31, "min" => 330, "max" => 0, "profile" => $this->sideDefense);
+        $locs[] = array("loc" => 41, "min" => 0, "max" => 30, "profile" => $this->sideDefense);        
 
         return $locs;
     }
