@@ -943,9 +943,9 @@ class MindriderEngine extends Engine{
     public function setSystemDataWindow($turn){
 	parent::setSystemDataWindow($turn);
 		$this->data["Contraction Level"] = $this->contraction;		       	     
-		$this->data["Special"] = "Allow Mind's Eye to contract, improving it's Thought Shields and Defence Profile by 1pt for each level of Contraction.";
-		$this->data["Special"] .= "In addtion, all Mind's Eye systems gain +1 armour for every 3pts of Contraction.";		
-		$this->data["Special"] .= "Note - After 3 levels of Contraction the Mind's Eye is no longer considered Enormous.";		
+		$this->data["Special"] = "Allows Mind's Eye to Contract, improving its Thought Shields and Defence Profile by 1 point per level of Contraction.";
+		$this->data["Special"] .= "<br>In addition, all Mind's Eye systems gain +1 armour for every 3 points of Contraction.";		
+		$this->data["Special"] .= "<br>After the first three levels of Contraction applied, the Mind's Eye is no longer considered an Enormous unit.";		
     }
 
 
@@ -4925,7 +4925,7 @@ class MindriderHangar extends ShipSystem{
 	public $isTargetable = true; //cannot be targeted ever!
 	protected $doCountForCombatValue = true; //don't count when estimating remaining combat value    
 	
-    public static $alreadyCleared = false;	
+	public static $alreadyCleared = array();    	
 	public static $hangarList = array(); //array of Mindrider Hangars in game
 	public static $projectionList = array(); // array of Thought Projection flights in game
 	public $output = 0;
@@ -4953,9 +4953,10 @@ class MindriderHangar extends ShipSystem{
     }
 	
 	//inactive entries (from other gamedata) might have slipped by... clear them out!
-	public static function clearLists($gamedata){
+	public static function clearLists($gamedata, $ship){
 	    // Mark $alreadyCleared so it only happens once per turn.
-		MindriderHangar::$alreadyCleared = true;
+	    
+		MindriderHangar::$alreadyCleared[] = $ship->team;
 		$tmpArray = array();
 		foreach(MindriderHangar::$hangarList as $curr){
 			$ship = $curr->getUnit();
@@ -4979,14 +4980,14 @@ class MindriderHangar extends ShipSystem{
 
 	//effects that happen in Critical phase (after criticals are rolled) - replenishment from active Generator 
 	public function criticalPhaseEffects($ship, $gamedata) {
-
-	    if (MindriderHangar::$alreadyCleared) return; // Already checked, no further action neeed for other Hangars.
-
-		$this->clearLists($gamedata);
-	
-	    $hangarCapacity = 0;
 	    $thisShip = $this->getUnit();
-
+	    
+	    foreach(MindriderHangar::$alreadyCleared as $team){
+	    	if($team == $thisShip->team)	return; // Already checked for this team, no further action neeed for other Hangars.
+		}
+		
+		$this->clearLists($gamedata, $thisShip);	
+	    $hangarCapacity = 0;
 
 	    foreach (MindriderHangar::$hangarList as $hangar) {
 	        $hangarShip = $hangar->getUnit();
@@ -5064,7 +5065,7 @@ class MindriderHangar extends ShipSystem{
 		            -1, "normal", $thisShip->id, $thisShip->id,
 		            $rammingSystem->id, -1, $gamedata->turn, 1,
 		            100, 100, 1, $shotsHit, 0,
-		            0, 0, 'Sabotage', 10000
+		            0, 0, 'NoHangar', 10000
 		        );
 
 		        $newFireOrder->addToDB = true;
@@ -5086,11 +5087,14 @@ class MindriderHangar extends ShipSystem{
 		        $crit->inEffect = true;
 		        $fighter->criticals[] = $crit;
 		        if ($newFireOrder) {
-		            $newFireOrder->pubnotes .= "<br>The Mindriders have lost control of a Thought Projections! ";
+		            $newFireOrder->pubnotes .= "<br>The Mindriders have lost control of a Thought Projection! ";
 		        }
 		        $fighterCount += 1;
 		        $toDisengage -= 1;
 		        if($toDisengage < 1) break;
+		        
+		        //At least make the FireOrder target Projections.		        
+		        $newFireOrder->targetid = $projectionFlight->id;        		        
 		    }
 		}
 	    return $fighterCount;
@@ -5110,7 +5114,7 @@ class MindriderHangar extends ShipSystem{
 }//endof MindriderHangar
 
 
-/*UNDER CONSTRUCTION*/
+
 /* Ammunition magazine
 technical system, storing information about available (and used) consumable weapons (primarily ballistic ones)
 */
