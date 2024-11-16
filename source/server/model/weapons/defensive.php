@@ -998,7 +998,7 @@ class ThoughtShield extends Shield implements DefensiveSystem {
 		public function setShields($ship,$turn,$adjustment){//On Turn 1, reduce shields to their correct starting amount.
 			//For Mind's Eye, need to adjust on Turn 1 if Contraction is used to change shields.
 			$mindriderEngine = $ship->getSystemByName("MindriderEngine");			    
-			if($mindriderEngine) $adjustment -= $mindriderEngine->contraction;
+			if($mindriderEngine) $adjustment -= $mindriderEngine->contraction;		
 
 			$damageEntry = new DamageEntry(-1, $ship->id, -1, $turn, $this->id, $adjustment, 0, 0, -1, false, false, "SetShield!", "ThoughtShield");
 			$damageEntry->updated = true;
@@ -1158,6 +1158,25 @@ class ThoughtShield extends Shield implements DefensiveSystem {
 
 			$startRating = $this->baseRating;
 			$currentRating = $this->getRemainingHealth();
+
+			$shieldCount = 0;
+			foreach ($ship->systems as $system){
+				if ($system instanceof ThoughtShield){
+					$thoughtShields[] = $system;
+					$shieldCount++;								
+				}	
+			}		
+			foreach ($ship->enhancementOptions as $enhancement) {
+			    $enhID = $enhancement[0];
+				$enhCount = $enhancement[2];		        
+				if($enhCount > 0) {		            
+			        if ($enhID == 'IMPR_TS'){
+			        	$startRating += $enhCount;						        	
+			        	$currentRating += $shieldCount * $enhCount;			        	     	
+					}
+				}	
+			}
+			
 			$adjustment = $currentRating - $startRating;
 
 			if(!$ship instanceof FighterFlight){//Fighters don't have Generators, and can't offline anyway!	
@@ -1175,7 +1194,10 @@ class ThoughtShield extends Shield implements DefensiveSystem {
 	  		if($currNote->turn == $gamedata->turn) {  				    	
 	        $damageValue = $currNote->notevalue; //Positive if decreased, negative if increased.
 			}
-		}				
+		}	
+		
+//echo "Value of damageValue: " . $damageValue. "\n";	
+				
 		//actual change(damage) entry
 		if($damageValue != 0){
 		$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $damageValue, 0, 0, -1, false, false, 'shieldChange', 'shieldChange');
