@@ -1159,24 +1159,19 @@ class ThoughtShield extends Shield implements DefensiveSystem {
 			$startRating = $this->baseRating;
 			$currentRating = $this->getRemainingHealth();
 
-			$shieldCount = 0;
-			foreach ($ship->systems as $system){
-				if ($system instanceof ThoughtShield){
-					$thoughtShields[] = $system;
-					$shieldCount++;								
-				}	
-			}		
+			//Find and account for any Enhancements
 			foreach ($ship->enhancementOptions as $enhancement) {
 			    $enhID = $enhancement[0];
 				$enhCount = $enhancement[2];		        
 				if($enhCount > 0) {		            
 			        if ($enhID == 'IMPR_TS'){
 			        	$startRating += $enhCount;						        	
-			        	$currentRating += $shieldCount * $enhCount;			        	     	
+			        	$currentRating += $enhCount * 2;			        	     	
 					}
 				}	
 			}
 			
+			//Adjust the adjustment
 			$adjustment = $currentRating - $startRating;
 
 			if(!$ship instanceof FighterFlight){//Fighters don't have Generators, and can't offline anyway!	
@@ -1185,18 +1180,16 @@ class ThoughtShield extends Shield implements DefensiveSystem {
 		            $adjustment = $currentRating;//In the bizarre situation where player deactivates Generator on Turn 1...	
 				}			
 			}
-					    	
+			//Actually adjust shields		    	
 			$this->setShields($ship, $gamedata->turn, $adjustment);
 		}
 		
-		//Now make any readjustments the player has made to sheild strengths					
+		//Now make any manual readjustments the player has made to shield strengths					
 	    foreach ($this->individualNotes as $currNote) {
 	  		if($currNote->turn == $gamedata->turn) {  				    	
 	        $damageValue = $currNote->notevalue; //Positive if decreased, negative if increased.
 			}
 		}	
-		
-//echo "Value of damageValue: " . $damageValue. "\n";	
 				
 		//actual change(damage) entry
 		if($damageValue != 0){
