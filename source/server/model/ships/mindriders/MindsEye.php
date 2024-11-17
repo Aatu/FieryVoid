@@ -61,12 +61,12 @@ class MindsEye extends SixSidedShip{
 		$this->addPrimarySystem(new ThoughtWave(7, 0, 0, 0, 360, 15));     
 		$this->addPrimarySystem(new JumpEngine(7, 25, 8, 8));   		  		
       
-		$this->addPrimarySystem(new ThoughtShield(0, 150, 25, 210, 270, 'AP'));
-		$this->addPrimarySystem(new ThoughtShield(0, 150, 25, 330, 30, 'F'));			
-		$this->addPrimarySystem(new ThoughtShield(0, 150, 25, 30, 90, 'FS'));
-		$this->addPrimarySystem(new ThoughtShield(0, 150, 25, 270, 330, 'FP'));
-		$this->addPrimarySystem(new ThoughtShield(0, 150, 25, 150, 210, 'A'));	
-		$this->addPrimarySystem(new ThoughtShield(0, 150, 25, 90, 150, 'AS'));
+		$this->addPrimarySystem(new ThoughtShield(0, 50, 25, 210, 270, 'AP'));
+		$this->addPrimarySystem(new ThoughtShield(0, 50, 25, 330, 30, 'F'));			
+		$this->addPrimarySystem(new ThoughtShield(0, 50, 25, 30, 90, 'FS'));
+		$this->addPrimarySystem(new ThoughtShield(0, 50, 25, 270, 330, 'FP'));
+		$this->addPrimarySystem(new ThoughtShield(0, 50, 25, 150, 210, 'A'));	
+		$this->addPrimarySystem(new ThoughtShield(0, 50, 25, 90, 150, 'AS'));
 		
 				
 		$this->addFrontSystem(new SelfRepair(6, 6, 3)); //armor, structure, output 

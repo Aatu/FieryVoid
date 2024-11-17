@@ -58,7 +58,7 @@ class Thoughtforce extends MindriderCapital{
 		$this->addPrimarySystem(new JumpEngine(7, 25, 8, 8));   		  		
       
 	
-		$this->addPrimarySystem(new ThoughtShield(0, 100, 25, 270, 360, 'FP'));
+		$this->addPrimarySystem(new ThoughtShield(0, 50, 25, 270, 360, 'FP'));
 		$this->addLeftFrontSystem(new SelfRepair(6, 6, 3)); //armor, structure, output 
 		$tPulsar = new TriopticPulsar(6, 0, 0, 270, 90);
 		$tPulsar->addTag("Trioptic Pulsar");
@@ -66,7 +66,7 @@ class Thoughtforce extends MindriderCapital{
         $this->addFrontSystem(new MindriderThruster(6, 35, 0, 12, 1));           
 			
 	
-		$this->addPrimarySystem(new ThoughtShield(0, 100, 25, 180, 270, 'AP')); 	
+		$this->addPrimarySystem(new ThoughtShield(0, 50, 25, 180, 270, 'AP')); 	
 		$this->addRightFrontSystem(new SelfRepair(6, 6, 3)); //armor, structure, output 
 		$tPulsar = new TriopticPulsar(6, 0, 0, 90, 270);
 		$tPulsar->addTag("Trioptic Pulsar");
@@ -74,14 +74,14 @@ class Thoughtforce extends MindriderCapital{
         $this->addAftSystem(new MindriderThruster(6, 35, 0, 12, 2));        
        
         	
-		$this->addPrimarySystem(new ThoughtShield(0, 100, 25, 90, 180, 'AS'));	              
+		$this->addPrimarySystem(new ThoughtShield(0, 50, 25, 90, 180, 'AS'));	              
 		$this->addLeftAftSystem(new SelfRepair(6, 6, 3)); //armor, structure, output 
 		$tPulsar = new TriopticPulsar(6, 0, 0, 180, 360);
 		$tPulsar->addTag("Trioptic Pulsar");
 		$this->addLeftFrontSystem($tPulsar);
         $this->addLeftAftSystem(new MindriderThruster(6, 35, 0, 12, 3));                                                               
                  	
-		$this->addPrimarySystem(new ThoughtShield(0, 100, 25, 0, 90, 'FS'));	
+		$this->addPrimarySystem(new ThoughtShield(0, 50, 25, 0, 90, 'FS'));	
 		$this->addRightAftSystem(new SelfRepair(6, 6, 3)); //armor, structure, output 
 		$tPulsar = new TriopticPulsar(6, 0, 0, 0, 180);
 		$tPulsar->addTag("Trioptic Pulsar");
