@@ -704,7 +704,10 @@ class ThirdspaceShield extends Shield implements DefensiveSystem { //defensive v
 			$this->baseRating = $rating;			
 			$this->side = $side;						
 		}
-		
+
+
+	    public function setCritical($critical, $turn = 0){ //do nothing, shield projection should not receive any criticals
+	    }		
 		
 	    public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){ //no defensive hit chance change
 	            return 0;
@@ -952,6 +955,9 @@ class ThoughtShield extends Shield implements DefensiveSystem {
 			$this->side = $side;
 			$this->baseRating = $rating;						
 		}
+
+	    public function setCritical($critical, $turn = 0){ //do nothing, shield projection should not receive any criticals
+	    }	
 		
 		//ThoughtShield CAN be reinforced to act as a EM Shield as well, so we need to add some checks and not just return 0.		
 	    public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){ //no defensive hit chance change
