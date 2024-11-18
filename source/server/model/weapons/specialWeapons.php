@@ -7023,23 +7023,25 @@ class ThoughtWave extends Plasma{
 		$damage = 0;//Intialise.
 		
 		if($fireOrder->targetid != -1){//Direct fire shot.
-			$diceRoll = Dice::d(6, 3);
+			$diceRoll = Dice::d(6, 3); // 13
             $defence = $target->getHitSectionProfilePos(mathlib::hexCoToPixel($pos));//Base profile.
         	$mod = $target->getHitChanceMod($shooter, $pos, $gamedata->turn, $this); //Shields/E-web etc affect profile!
 			$fireOrder->pubnotes .= ' Damage Roll: ' . $diceRoll . '/18.';	
-		        	           
+			$fireOrder->pubnotes .= ' Profile/Mod: ' . $defence . '/' . $mod . '. ';					
+					        	           
             if($target->advancedArmor){//Divide by 5 for AA
-				$damage = floor(($diceRoll/5) * ($defence + $mod)); //3d6 divide by 5, multiplied by defence profile.            	
+				$damage = floor(floor($diceRoll/5) * ($defence + $mod)); //3d6 divide by 5, multiplied by defence profile.            	
             }else{//Divide by 3 for everything else							
-				$damage = floor(($diceRoll/3) * ($defence + $mod)); //3d6 divide by 3, multiplied by defence profile.
+				$damage = floor(floor($diceRoll/3) * ($defence + $mod)); //3d6 divide by 3, multiplied by defence profile.
 			}				
 		}
-
-        $damage = $this->getDamageMod($damage, $shooter, $target, $pos, $gamedata);     
-        $damage -= $target->getDamageMod($shooter, $pos, $gamedata->turn, $this);
+		$fireOrder->pubnotes .= ' Damage before Mods: ' . $damage . '. ';
+		
+        $damage = $this->getDamageMod($damage, $shooter, $target, $pos, $gamedata); // -5           
+        $damage -= $target->getDamageMod($shooter, $pos, $gamedata->turn, $this);// -4
 
 		$damageForLog = max(0,$damage);			
-		$fireOrder->pubnotes .= ' Final Damage: ' . $damageForLog . '.';
+		$fireOrder->pubnotes .= '  Final Damage: ' . $damageForLog . '.';
 					
         return $damage;
     }
