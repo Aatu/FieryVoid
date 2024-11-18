@@ -104,7 +104,7 @@ class TrekFederationNXWarCruiserUpg extends MediumShip{
 		    	2 => "Shield Projector",
 			8 => "Nacelle",
 			10 => "Phase Cannon",
-			12 => "Spatial Torpedo",
+			12 => "Photonic Torpedo",
 			17 => "Structure",
 			20 => "Primary",
 		),

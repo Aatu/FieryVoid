@@ -505,7 +505,7 @@ class QuadPulsar extends Pulse{
         public $animationColor =  array(175, 225, 175);
         public $trailColor = array(110, 225, 110);
 	*/
-	public $guns = 1; //multiplied to d6 at firing
+		public $guns = 1; //multiplied to d6 at firing
 	     
         public $loadingtime = 1;
         public $normalload = 1;	    
@@ -513,7 +513,7 @@ class QuadPulsar extends Pulse{
         	    
         public $intercept = 2; //as it should be, but here they CAN combine vs same shot!
 	    
-	public $rangePenalty = 2;
+		public $rangePenalty = 2;
         public $fireControl = array(5, 2, 0); // fighters, <mediums, <capitals
 	    
 	    public $damageType = "Standard"; 
@@ -599,8 +599,70 @@ class QuadPulsar extends Pulse{
         {
             $this->maxDamage = 13 ;
         }
-    }
+    }//endof Scattergun
 
+
+//Markab fighter weapon - d3 shots (here treated as a single Pulse shot, no grouping bonus)
+class LightScattergun extends ScatterGun{
+	public $name = "LightScattergun";
+	public $displayName = "Light Scattergun";
+	public  $iconPath = "scatterGun.png";
+   
+	public $animation = "bolt";
+	public $animationColor = array(190, 75, 20);
+	
+	public $intercept = 2;	
+	public $rangePenalty = 2; //-2/hex	
+	public $priority = 4;
+
+	//temporary private variables
+	private $multiplied = false;
+	private $alreadyIntercepted = array();
+	
+	function __construct($startArc, $endArc){//more than a single emplacement not supported!
+		$this->defaultShots = 1;
+        $this->shots = 1;							
+		parent::__construct(0, 1, 0, $startArc, $endArc);
+	}    
+		
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+			$this->data["Special"] = "Fires d3 separate shots (actual number rolled at firing resolution).";
+			$this->data["Special"] .= "<br>When fired defensively, a single Scattergun cannot engage the same incoming shot twice (even ballistic one).";
+	}
+    
+	//if fired offensively - make d3 attacks (copies of 1 existing); 
+	//if defensively - make weapon have d3 GUNS (would be temporary, but enough to assign multiple shots for interception)
+	public function beforeFiringOrderResolution($gamedata){
+		if($this->multiplied==true) return;//shots of this weapon are already multiplied
+		$this->multiplied = true;//shots WILL be multiplied in a moment, mark this
+		//is offensive fire declared?...
+		$offensiveShot = null;
+		$noOfShots = Dice::d(3,1); //actual number of shots for this turn
+
+		foreach($this->fireOrders as $fire){
+			if(($fire->type =='normal') && ($fire->turn == $gamedata->turn)) $offensiveShot = $fire;
+		}
+		if($offensiveShot!==null){ //offensive fire declared, multiply!
+			while($noOfShots > 1){ //first shot is already declared!
+				$multipliedFireOrder = new FireOrder( -1, $offensiveShot->type, $offensiveShot->shooterid, $offensiveShot->targetid,
+					$offensiveShot->weaponid, $offensiveShot->calledid, $offensiveShot->turn, $offensiveShot->firingMode,
+					0, 0, 1, 0, 0, null, null
+				);
+				$multipliedFireOrder->addToDB = true;
+				$this->fireOrders[] = $multipliedFireOrder;
+				$noOfShots--;	      
+			}
+		}else{//offensive fire NOT declared, multiply guns for interception!
+			$this->guns = $noOfShots; //d6 intercept shots
+		}
+	} //endof function beforeFiringOrderResolution
+	
+	public function getDamage($fireOrder){        return Dice::d(6,2);   }
+	public function setMinDamage(){     $this->minDamage = 2 ;      }
+	public function setMaxDamage(){     $this->maxDamage = 12 ;      }
+	
+} //end of class LightScattergun
 
 
     class BlastCannonFamily extends Pulse{
@@ -921,6 +983,181 @@ class PulseAccelerator extends Pulse{
 		
     }//endof class PhasingPulseCannonH
 
+
+    class TriopticPulsar extends PointPulsar //this is NOT a Pulse weapon, disregard Pulse-specific settings...
+    {
+        public $name = "TriopticPulsar";
+        public $displayName = "Trioptic Pulsar";
+        public $iconPath = "TriopticPulsar.png";
+	    
+        public $animation = "bolt";	    
+ 	   public $animationColor = array(204, 102, 0);
+
+        public $guns = 3; //always 3, completely separate (not Pulse!) shots
+        public $maxpulses = 3;
+        public $grouping = 0;
+        public $loadingtime = 1;
+        public $normalload = 1;
+	    
+        public $priority = 4;
+        
+        public $calledShotMod = -4; //instead of usual -8
+	    
+        public $intercept = 2; //should be 3, but then intercept should be like a Pulse weapon - just once... call this a compromise!
+	    
+        public $rangePenalty = 0.5;
+        public $fireControl = array(-4, 3, 5); // fighters, <mediums, <capitals
+	    
+	    public $damageType = "Standard"; 
+	    public $weaponClass = "Particle"; 
+	    
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		if ( $maxhealth == 0 ) $maxhealth = 6;
+		if ( $powerReq == 0 ) $powerReq = 3;
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+	}
+        
+	    
+        public function setSystemDataWindow($turn){            
+            parent::setSystemDataWindow($turn);		
+		$this->data["Special"] = "Always fires three shots.";
+        }
+        
+        public function getDamage($fireOrder){
+            return Dice::d(10,2); 
+        }
+ 
+        public function setMinDamage()
+        {
+            $this->minDamage = 2;
+        }
+        public function setMaxDamage()
+        {
+            $this->maxDamage = 20;
+        }
+    }//endof class TriopticPulsar
+
+
+class UltraPulseCannon extends Pulse{        
+    public $name = "UltraPulseCannon";
+    public $displayName = "Ultra Pulse Cannon";
+    public $iconPath = "UltraPulseCannon.png";
+    public $animation = "bolt";
+    public $animationColor = array(204, 102, 0);
+    
+    public $grouping = 20;
+    public $groupingArray = array(1=>20, 2=>15, 3=>10);    
+    public $maxpulses = 6;
+    public $maxpulsesArray = array(1=>6, 2=>9, 3=>12);	    
+    public $rof = 4;
+	public $rofArray = array(1=>4, 2=>5, 3=>6);      
+    public $priority = 7;
+    public $priorityArray = array(1=>7, 2=>6, 3=>4);    
+	public $damageType = 'Pulse'; //indicates that this weapon does damage in Pulse mode
+    public $weaponClass = "Particle"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
+	public $intercept = 6; //intercept rating -1
+    public $loadingtime = 1;
+    public $normalload = 1;
+    public $rangePenalty = 0.25;    
+    public $rangePenaltyArray = array(1=>0.25, 2=>0.33, 3=>0.5);   	      
+    	
+	protected $useDie = 3; //die used for base number of hits
+	protected $useDieArray = array(1=>3, 2=>5, 3=>6);  	
+	protected $fixedBonusPulses=0;//for weapons doing dX+Y pulse
+	
+    public $firingModes = array( 1 => "Heavy",
+    							 2 => "Medium",
+    							 3 => "Light"	
+    							); //just a convenient name for firing mode
+		
+
+    public $fireControl = array(4, 6, 8); // fighters, <mediums, <capitals 
+    public $fireControlArray = array( 1=>array(4, 6, 8), 2=>array(6, 6, 6), 3=>array(8, 6, 4));    
+	
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		if ( $maxhealth == 0 ) $maxhealth = 28;
+		if ( $powerReq == 0 ) $powerReq = 12;
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+	}
+
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+		$this->data["Special"] = 'Pulse characterstics vary depending on Firing Mode:';
+		$this->data["Special"] .= '<br> - Heavy: 24 Damage, D3 Pulses, 20% grouping';
+		$this->data["Special"] .= '<br> - Medium: 16 Damage, D5 Pulses, 15% grouping';	
+		$this->data["Special"] .= '<br> - Light: 12 Damage, D6 Pulses, 10% grouping';			
+	}
+        
+    protected function getPulses($turn){
+    	return Dice::d($this->useDie) + $this->fixedBonusPulses;
+    }
+	
+    protected function getExtraPulses($needed, $rolled)
+    {
+         return floor(($needed - $rolled) / ($this->grouping));
+    }
+	
+	public function rollPulses($turn, $needed, $rolled){
+		$pulses = $this->getPulses($turn);
+		$pulses+= $this->getExtraPulses($needed, $rolled);
+		$pulses=min($pulses,$this->maxpulses);
+		return $pulses;
+	}
+	
+        public function getDamage($fireOrder){ 
+		switch($this->firingMode){
+			case 1:
+				return 24; //Heavy Pulse
+				break;	
+			case 2:
+				return 16; //Medium Pulse
+				break;
+			case 3:
+				return 12; //Light Pulse
+				break;
+			default:
+				return 24;
+				break;							
+		}
+	}
+        public function setMinDamage(){ 
+			switch($this->firingMode){
+				case 1:
+					$this->minDamage = 24; //Heavy Pulse
+					break;
+				case 2:
+					$this->minDamage = 16; //Medium Pulse
+					break;
+				case 3:
+					$this->minDamage = 12; //Light Pulse
+					break;
+				default:
+					$this->maxDamage = 24; //Hvy Pulse
+					break;													
+			}
+			$this->minDamageArray[$this->firingMode] = $this->minDamage;
+		}
+	    
+	    public function setMaxDamage(){
+			switch($this->firingMode){
+				case 1:
+					$this->maxDamage = 24; //Hvy Pulse
+					break;
+				case 2:
+					$this->maxDamage = 16; //Medium Pulse
+					break;
+				case 3:
+					$this->maxDamage = 12; //Light Pulse
+					break;
+				default:
+					$this->maxDamage = 24; //Hvy Pulse
+					break;																		
+			}
+			$this->maxDamageArray[$this->firingMode] = $this->maxDamage;
+		}  
+               
+	
+} //endof class UltraPulseCannon
 
 
 ?>

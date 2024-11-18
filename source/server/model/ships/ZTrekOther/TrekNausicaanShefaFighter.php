@@ -43,7 +43,7 @@ class TrekNausicaanShefaFighter extends FighterFlight{
             		//$largeGun->exclusive = true; 
             		//$fighter->addFrontSystem($largeGun);
 
-            $Disabler = new SWFighterIon(0, 360, 3, 1); //Ion Cannon borrowed from Star Wars
+            $Disabler = new SWFighterIon(330, 30, 3, 1); //Ion Cannon borrowed from Star Wars
             $Disabler->exclusive = true; //either this or other weapons!
             $fighter->addFrontSystem($Disabler);
 

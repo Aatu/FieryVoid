@@ -15,6 +15,7 @@ class TrekFederationConstitutionCL extends HeavyCombatVessel{
 
 
 	$this->fighters = array("Shuttlecraft"=>6);
+		$this->customFighter = array("Human small craft"=>6); //can deploy small craft with Human crew
         
         $this->forwardDefense = 13;
         $this->sideDefense = 15;

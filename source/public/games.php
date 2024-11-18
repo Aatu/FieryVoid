@@ -62,20 +62,22 @@ if (isset($_SESSION["user"])) {
         <br>
        -->
 		
-		<big><b>Welcome to Fiery Void, an adaption of the 'Babylon 5 Wars' tabletop game, by Agents of Gaming!</b></big>
+		<big><b>Welcome to Fiery Void, an adaptation of the 'Babylon 5 Wars' tabletop game, by Agents of Gaming!</b></big>
 
-		<br><br>---------- <b>LATEST NEWS - August 2024</b> ----------
-	    <br><b>Deleting inactive games</b>: delay increased to 5 days (test games are useful, and picking up games after weekend is a thing!)
-		<br><b>Nexus Dalithorn rebalance</b> - by Geoffrey
-	    <br><b>Boarding Actions</b> - Added Breaching Pods with Marines to relevant factions - by Dougie.
-	    <br><b>Pulsar Mine Rework</b> - Now targets enemy fighters at ANY point in their movement, not just the end.
-	    <br><b>Extra Ammo Enhancement</b> - For Fighters with limited ammunition.
-	    <br><b>Thirdspace Shield Rework</b> - Can now transfer shields between arcs!
-	    <br><b>Abbai Shield Generator</b> - First ally-targeting weapon :)
-
-		 <br><br>---------- <b>update 20th of August</b> ---------- 
-	    <br><b>bugfixes</b> - general boarding actions polishing - remember to ctrl+F5!
-       
+		<br><br>---------- <b>LATEST NEWS - November 2024</b> ----------
+		<br>---------- <b>Major deployment of Douglas' and Geoffrey's work!</b> ----------
+	    <br>
+	    <br><b><u>Mindriders</u> have arrived!</b> - a new Ancient faction!
+		<br><b>Plasma Webs Enhanced</b> - they stay until next turn!
+	    <br><b>Hex Highlights Enhanced</b> - try some ballistics and see the effect yourself!
+	    <br><b>Rule Warnings</b> - Most commonly missed rules (Jump Drive disable, Ramming declarations) got extra warnings
+	    <br><b>Turn Into Pivots / Emergency Roll</b> - enhanced and added, respectively
+	    <br><b>Movement icons Enhanced</b> - Shape improved, tooltips added
+	    <br><b>Improved Game Creation</b> - SimMovement got options, useful links were added, and more!
+	    
+	    <br><b>Nexus Updates</b> - Quite a lot of post-tournament observations applied
+	    <br><b>Bugfixes</b> - As always, there's quite a few of them
+       <br><br>
 
 <!--	        
 		 <br><br>---------- <b>update 20th of January</b> ---------- 
@@ -88,12 +90,12 @@ if (isset($_SESSION["user"])) {
 
         <br><br>---------- <b>HOW TO GET STARTED</b> ----------
 		<br><a href="files/Fiery_Void_-_How_to_Play.docx">How to Play Fiery Void</a> - Text tutorial (friendlier than full blown game manual - to help you get started quickly!)
-		<br><a href="https://www.youtube.com/channel/UCpzERJTeVoFVon_QqWQxesw/featured" target=\"_blank\">Video tutorials</a> - Video tutorials are also available on YouTube!
+		<br><a href="https://www.youtube.com/watch?v=pOLp4RF9cjY&list=PLTGKagm5KkMxB8oKBiIUeoBQTRYz2z0-3" target=\"_blank\">Video tutorials</a> - Video tutorials are also available on YouTube!
 	    <br><a href="https://discord.gg/kjZAjr3" target=\"_blank\">Discord</a> - Join our community to help find games and discuss all things B5 / Fiery Void!
         <br><a href="https://www.facebook.com/groups/218482691602941/" target=\"_blank\">Facebook group</a> - We're also on Facebook!
         	
         <br><br>---------- <b>FURTHER INFO</b> ----------        			
-		<br><a href="files/FV_factions.txt">Fiery Void Factions and Tier List</a> - Overview of rules and systems of the fleets available in Fiery Void
+		<br><a href="files/FV_factions.txt">Fiery Void Factions & Tier List</a> - Overview of rules and systems of the fleets available in Fiery Void
 	    <br><a href="files/FV_FAQ.txt">Fiery Void FAQ</a> - Differences from B5 Wars, known bugs... look here if something works contrary to how you expect it to!
 		<br><a href="files/enhancements_list.txt">Common Systems & Enhancement List</a> - Details of enhancements and other common systems e.g. Boarding / Missiles	    
 		<br><a href="http://b5warsvault.wikidot.com/" target="_blank">B5Wars Vault</a> - Full B5Wars <a href="http://www.tesarta.com/b5wars/aogwarskitchensink.pdf" target="_blank">rules</a> and LOTS of other related B5W stuff

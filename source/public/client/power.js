@@ -223,7 +223,7 @@ shipManager.power = {
 	//like getShipsNegativePower BUT only looks for PowerCapacitor-equipped ships
 	getCapacitorShipsNegativePower: function getCapacitorShipsNegativePower() {
 			var shipNames = new Array();
-		//	var counter = 0;
+			var counter = 0;
 			for (var i in gamedata.ships) {
 				var ship = gamedata.ships[i];
 				if (ship.unavailable) continue;
@@ -253,7 +253,7 @@ shipManager.power = {
 	            if (shipManager.isDestroyed(ship)) continue;
 
 var batteryPowerAvailable = 0;
-//alculate battery power available (find all batteries that are not destroyed, sum up their contents)
+//Calculate battery power available (find all batteries that are not destroyed, sum up their contents)
 
                    for (var i = 0; i < ship.systems.length; i++) {
                         var currBattery = ship.systems[i];
@@ -660,7 +660,38 @@ var batteryPowerRequired = 0;
 				return;
 			}
 		}
+				
 	},
+
+
+	checkBoostValid: function checkBoostValid(ship, system) {
+
+		var validBoost = true;
+		
+		if (ship.faction == "Pak'ma'ra Confederacy" && system instanceof Scanner) {
+			
+			var batteryPowerAvailable = 0;
+			var scannerStrength = shipManager.systems.getOutput(ship, system);
+			var reactorSurplus = shipManager.power.getReactorPower(ship, system);
+			
+			//Calculate battery power available (find all batteries that are not destroyed, sum up their contents)
+            for (var i = 0; i < ship.systems.length; i++) {
+                var currBattery = ship.systems[i];
+              	if (currBattery.name == "PlasmaBattery" && !(shipManager.systems.isDestroyed(ship, currBattery))){
+				batteryPowerAvailable += shipManager.systems.getOutput(ship, currBattery);                                                              
+				}
+			}
+			
+			//Check if reactor surplus, minus battery power is enough to boost Scanner.  If not, throw error.	
+			if ((reactorSurplus - batteryPowerAvailable) < (scannerStrength+1)) {
+				confirm.error("Power from Plasma Batteries cannot be used to boost sensors.");
+				validBoost = false;
+			}
+		}
+		
+		return validBoost;
+	},
+	
 
 	setBoost: function setBoost(ship, system) {
 		if (!shipManager.power.canBoost(ship, system)) {
@@ -743,7 +774,11 @@ var batteryPowerRequired = 0;
 			}
 		}
 
+		//New function to check for things like Pak'ma'ra power boosting exceptions - DK 10/24
+		if(!shipManager.power.checkBoostValid(ship, system)) return;	
+				
 		shipManager.power.setBoost(ship, system);
+		system.onBoostIncrease(); //To apply conditions/effects when a system is actually boosted.		
 		shipWindowManager.setDataForSystem(ship, system);
 		shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
         webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
@@ -761,8 +796,8 @@ var batteryPowerRequired = 0;
 			return;
 		}
 		*/
-
 		shipManager.power.unsetBoost(ship, system);
+		system.onBoostDecrease();		
 		shipWindowManager.setDataForSystem(ship, system);
 		shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
         webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
@@ -833,7 +868,7 @@ var batteryPowerRequired = 0;
 			return;
 		}*/
 
-		if (system.name == "shieldGenerator") {
+		if (system.name == "shieldGenerator" || system instanceof ThirdspaceShieldGenerator) {
 			system.onTurnOff(ship);
 		}
 
@@ -843,6 +878,18 @@ var batteryPowerRequired = 0;
 
 		if (system.weapon) {
 			weaponManager.unSelectWeapon(ship, system);
+		}
+
+		//Add new warning for when people ignore tooltip and try to deactivate Jump Drive before they should - DK 10/24
+        if (system instanceof JumpEngine) {
+			var healthThreshold = system.maxhealth / 2;
+			var currHealth = shipManager.systems.getRemainingHealth(system);
+            var html = '';		
+			if(currHealth > healthThreshold){
+	                html += "WARNING - Jump Drive should only be deactivated after it’s taken 50% damage or more.";
+	                html += "<br>";
+					confirm.warning(html);
+	         }         
 		}
 
         webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
@@ -895,7 +942,7 @@ var batteryPowerRequired = 0;
 		shipManager.power.setOnline(ship, system);
 		shipWindowManager.setDataForSystem(ship, system);
 
-		if (system.name == "shieldGenerator") {
+		if (system.name == "shieldGenerator" || system instanceof ThirdspaceShieldGenerator) {
 			system.onTurnOn(ship);
 		}
 
