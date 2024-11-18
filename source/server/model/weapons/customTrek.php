@@ -1022,7 +1022,6 @@ class TrekShieldProjection extends Shield implements DefensiveSystem { //defensi
 			}
 	
     public function setCritical($critical, $turn = 0){ //do nothing, shield projection should not receive any criticals
-            $this->criticals[] = $critical; 
     }
 	
     public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){ //no defensive hit chance change
