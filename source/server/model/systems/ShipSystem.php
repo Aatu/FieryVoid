@@ -862,7 +862,7 @@ class ShipSystem {
         $this->id = $id;
     }
     
-    public function setCritical($critical, $turn){
+    public function setCritical($critical, $turn = 0){ //turn no longer relevant
 		/* obsolete now that Criticals are considered with turn restriction
         if ($critical->param){            
             $currentTurn = TacGamedata::$currentTurn;
@@ -875,7 +875,7 @@ class ShipSystem {
             $this->criticals[] = $critical; 
     }
     
-    public function setCriticals($criticals, $turn){
+    public function setCriticals($criticals, $turn = 0){ 
         foreach( $criticals as $crit){
             $this->setCritical($crit, $turn);
         }

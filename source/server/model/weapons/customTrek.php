@@ -1021,6 +1021,8 @@ class TrekShieldProjection extends Shield implements DefensiveSystem { //defensi
 		$this->output=$rating;//output is displayed anyway, make it show something useful... in this case - number of points absorbed per hit
 			}
 	
+    public function setCritical($critical, $turn = 0){ //do nothing, shield projection should not receive any criticals
+    }
 	
     public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){ //no defensive hit chance change
             return 0;

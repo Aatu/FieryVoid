@@ -77,6 +77,11 @@ if (isset($_SESSION["user"])) {
 	    
 	    <br><b>Nexus Updates</b> - Quite a lot of post-tournament observations applied
 	    <br><b>Bugfixes</b> - As always, there's quite a few of them
+	    
+		 <br><br>---------- <b>update 19th of November</b> ---------- 
+	    <br><b>Point value calculations</b> - remaining point value updated as per online discussion
+	    <br><b>Thirdspace, Mindriders, Nexus</b> - fixes, fixes, polishing!
+	    
        <br><br>
 
 <!--	        
