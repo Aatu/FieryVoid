@@ -7,7 +7,7 @@ class CraytanAvitun extends BaseShip{
 	$this->pointCost = 570;
 	$this->faction = "ZNexus Craytan Union";
         $this->phpclass = "CraytanAvitun";
-        $this->imagePath = "img/ships/Nexus/CraytanEpiron.png";
+        $this->imagePath = "img/ships/Nexus/craytan_epiron.png";
         $this->shipClass = "Avitun Gun Cruiser";
 			$this->variantOf = "Epiron Cruiser";
 			$this->occurence = "uncommon";

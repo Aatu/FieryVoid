@@ -7,10 +7,11 @@ class CraytanDeprinRefit extends OSAT{
 		$this->pointCost = 700;
 		$this->faction = "ZNexus Craytan Union";
         $this->phpclass = "CraytanDeprinRefit";
-        $this->imagePath = "img/ships/Nexus/CraytanDeprin.png";
+        $this->imagePath = "img/ships/Nexus/craytan_deprin.png";
         $this->shipClass = "Deprin (2132 refit)";
 			$this->variantOf = "Deprin Orbital Defenses";
 			$this->occurence = "common";
+		$this->canvasSize = 160; 
 		$this->unofficial = true;
         $this->isd = 2132;
         

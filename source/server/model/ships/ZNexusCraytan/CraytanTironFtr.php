@@ -8,7 +8,7 @@ class CraytanTironFtr extends FighterFlight{
         $this->faction = "ZNexus Craytan Union";
         $this->phpclass = "CraytanTironFtr";
         $this->shipClass = "Tiron Medium Fighters";
-        $this->imagePath = "img/ships/Nexus/CraytanTiron.png";
+        $this->imagePath = "img/ships/Nexus/craytan_tiron.png";
         
         $this->isd = 2114;
         
@@ -33,8 +33,8 @@ class CraytanTironFtr extends FighterFlight{
             $armour = array(2, 2, 1, 1);
             $fighter = new Fighter("RogolonChelekFtr", $armour, 10, $this->id);
             $fighter->displayName = "Tiron";
-            $fighter->imagePath = "img/ships/Nexus/CraytanTiron.png";
-            $fighter->iconPath = "img/ships/Nexus/CraytanTiron_large.png"; 
+            $fighter->imagePath = "img/ships/Nexus/craytan_tiron.png";
+            $fighter->iconPath = "img/ships/Nexus/craytan_tiron_large.png"; 
 
             $fighter->addFrontSystem(new RogolonLtPlasmaGun(330, 30, 5, 2));
 			
