@@ -147,12 +147,17 @@ window.BallisticIconContainer = function () {
 				        text = '!';
 				        textColour = "#787800";				        	
 				break;
-				case 'SecondSight': //Mindrider Second Sight
+				case 'Psychic Field': //Mindrider Second Sight
+				        targetType = 'hexRed';
+				        text = "Psychic";
+				        textColour = "#e6140a";
+//				        iconImage = "./img/systemicons/SecondSightICON.png"; //Example image to pass			        
+				break;	
+				case 'SecondSight': //Thirdspace Psychic Field
 				        targetType = 'hexPurple';
 				        text = "Second Sight";
-				        textColour = "#7f00ff";
-//				        iconImage = "./img/systemicons/SecondSightICON.png"; //Example image to pass			        
-				break;
+				        textColour = "#7f00ff";			        
+				break;			
 				default:
 				        targetType = 'hexYellow';
 				break;													        

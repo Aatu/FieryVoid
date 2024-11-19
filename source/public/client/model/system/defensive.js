@@ -465,15 +465,164 @@ ThirdspaceShield.prototype.doIndividualNotesTransfer = function () { //prepare i
 };
 
 
+//MINDRIDER THOUGHT SHIELDS
 var ThoughtShield = function ThoughtShield(json, ship) {
     ThirdspaceShield.call(this, json, ship);
-    this.defensiveType = "none";//Migh need to amend to     this.defensiveType = "Shield";
+    this.defensiveType = "none";
 };
-
 ThoughtShield.prototype = Object.create(ThirdspaceShield.prototype);
 ThoughtShield.prototype.constructor = ThoughtShield;
+
 ThoughtShield.prototype.getDefensiveHitChangeMod = function (target, shooter, weapon) {
-    //this is made to be a shield just to display arc visually, no actual protection
-    return this.defenceMod; //Usually 0, unless reinforced.
+    var thisShip = this.ship;
+    var defenceMod = 0; // Default value
+
+    // Iterate through all ships
+    gamedata.ships.forEach(ship => {
+        if (ship.phpclass !== 'Consortium') return; // Only Consortium ships
+        if (ship.team !== target.team) return; // Same team as the target
+        if (shipManager.isDestroyed(ship)) return; // Skip destroyed ships
+
+        // Process each system in the current ship
+        ship.systems.forEach(system => {
+            if (!(system instanceof ShieldReinforcement)) return; // Only Shield Reinforcement systems
+            
+            // Calculate baseOutput once
+            const baseOutput = shipManager.systems.getRemainingHealth(system);
+            let noOfShieldsBoosted = 0;
+
+            // Process all fire orders for the system
+            system.fireOrders.forEach(fireOrder => {
+                if (fireOrder.targetid === thisShip.id) {
+                    defenceMod = system.reinforceAmount; // Set defenceMod for this ship
+                }
+
+                // Check the target ship's systems for Thought Shields
+                const reinforceTarget = gamedata.getShip(fireOrder.targetid);
+                noOfShieldsBoosted += reinforceTarget.systems.filter(s => s instanceof ThoughtShield).length;
+            });
+
+            // Handle the case where the Consortium is the target ship
+            if (ship.id === thisShip.id) {
+                const usedOutput = noOfShieldsBoosted * system.reinforceAmount;
+                const remainingOutput = baseOutput - usedOutput;
+
+                // Count Thought Shields on this ship
+                const ownShields = thisShip.systems.filter(s => s instanceof ThoughtShield).length;
+
+                if (ownShields > 0) {
+                    defenceMod = Math.round(remainingOutput / ownShields);
+                }
+            }
+        });
+    });
+
+    return defenceMod; // Return the calculated defenceMod
 };
 
+
+/* //OLD VERSION BEFORE OPTIMISATION - LEAVE HERE FOR NOW
+ThoughtShield.prototype.getDefensiveHitChangeMod = function (target, shooter, weapon) {
+
+ 	var thisShip = this.ship;
+
+    for (var i in gamedata.ships) {
+        var ship = gamedata.ships[i];
+        
+        if(!ship.phpclass == 'Consortium') continue;  //Only one type of ship can Reinforce Thought Shield 
+    	if(!ship.team == target.team) continue; //And in this ship's team.
+    	if(shipManager.isDestroyed(ship)) continue;	//Not dead!
+
+		//Search Consortium's systems for Shield Reinforcement    		
+		for (var j in ship.systems) {
+			var system = ship.systems[j];
+
+			//Only interested in Shield Reinforcement systems
+			if (system instanceof ShieldReinforcement) {
+					var baseOutput = shipManager.systems.getRemainingHealth(system);
+					var noOfShieldsBoosted = 0;//Initialise	
+					var usedOutput = 0;					
+					
+					//Now check it's fireOrders
+					if(system.fireOrders.length > 0){
+						for(var k in system.fireOrders){
+							var fireOrder = system.fireOrders[k];
+							//Looking for a fireOrder boosting shields and amend defenceMod
+							if(fireOrder.targetid == thisShip.id) this.defenceMod = system.reinforceAmount;	
+								
+							//Also record how much shield power was used so we know how much is left to boost Consortium below
+							var reinforceTarget = gamedata.getShip(fireOrder.targetid);
+							for (var l in reinforceTarget.systems) {//Check all systems for Thought Shield
+								var targetSystem = reinforceTarget.systems[l];
+								
+								if (targetSystem instanceof ThoughtShield) {
+									noOfShieldsBoosted += 1;//Shield found, add it to tally.
+								}
+							}						
+						}
+					}
+				
+					if(ship.id == thisShip.id){ //The Consortium IS the targeted ship!
+						usedOutput = noOfShieldsBoosted * system.reinforceAmount;
+						var remainingOutput = baseOutput - usedOutput;
+						var ownShields = 0;
+						
+						for (var m in thisShip.systems) {//Check all systems for Thought Shield
+							var ownSystem = thisShip.systems[m];
+									
+								if (ownSystem instanceof ThoughtShield) {
+									ownShields += 1;//Shield found, add it to tally.
+								}
+						}
+						
+						this.defenceMod = Math.round(remainingOutput / ownShields);								
+					}	
+			}
+		}    	
+        
+	}
+    
+    return this.defenceMod; //Usually 0, unless reinforced.
+};
+*/
+
+ThoughtShield.prototype.canIncrease = function () { //Can increase if not at max / destroyed.
+ //Check if it is at maxHealth / not destroyed etc / Is there spare capacity in Generator?	
+ 
+ 	var ship = this.ship;
+
+	if(ship.flight) return false;//Fighters can't increase or decrease shields
+	if(this.currentHealth >= this.maxhealth) return false; //Shield is at maximum output.
+			
+	for (var i in ship.systems) {
+		var system = ship.systems[i];
+
+		if (system instanceof ThoughtShieldGenerator) {
+			var generator = system; //Find generator
+		}
+	}	
+
+	if(!generator) return false; //This Thirdspace ship has no generator, can't move shields around!
+		
+	return true;		
+};			
+	
+ThoughtShield.prototype.canDecrease = function () { //can decrease if not at zero / destroyed.
+ //Check if it is at 0 health / not destroyed etc
+ 	var ship = this.ship;
+
+	if(ship.flight) return false;//Fighters can't increase or decrease shields
+	if(this.currentHealth <= 0) return false; //Shield cannot be reduced more.
+
+	for (var i in ship.systems) {
+		var system = ship.systems[i];
+
+		if (system instanceof ThoughtShieldGenerator) {
+			var generator = system; //Find generator
+		}
+	}	
+
+	if(!generator) return false; //This Thirdspace ship has no generator, can't move shields around!	
+	
+	return true;
+};

@@ -45,9 +45,7 @@ class Consortium extends MindriderHCV{
 		$cnc->startArc = 0;
 		$cnc->endArc = 360;
         $this->addPrimarySystem($cnc); 
-
-//        $this->addPrimarySystem(new CnC(7, 16, 0, 0));
-//        $this->addPrimarySystem(new SecondaryCnC(7, 16, 0, 0));        
+        
         $scanner = new ElintScanner(6, 24, 0, 10);
 		$scanner->markMindrider();
 		$this->addPrimarySystem($scanner);	        
@@ -55,7 +53,7 @@ class Consortium extends MindriderHCV{
 		$this->addPrimarySystem(new JumpEngine(7, 25, 8, 8)); 
         $this->addPrimarySystem(new MindriderHangar(0, 1, 0, 0)); 	//technical system only		                	
 		$this->addPrimarySystem(new ThoughtShieldGenerator(6, 15, 6, 15)); //$armor, $maxhealth, $power used, output
- 		$this->addPrimarySystem(new ThoughtShield(0, 60, 15, 120, 240, 'A'));            
+ 		$this->addPrimarySystem(new ThoughtShield(0, 30, 15, 120, 240, 'A'));            
         $this->addPrimarySystem(new TelekineticCutter(6, 0, 0, 0, 360));	   	       
         $this->addPrimarySystem(new TelekineticCutter(6, 0, 0, 0, 360));         
         $this->addPrimarySystem(new TelekineticCutter(6, 0, 0, 0, 360)); 
@@ -63,8 +61,8 @@ class Consortium extends MindriderHCV{
         
         $this->addFrontSystem(new MindriderThruster(6, 30, 0, 10, 1));       
         
-		$this->addLeftFrontSystem(new ThoughtShield(0, 60, 15, 240, 360, 'FP'));	
-		$this->addRightFrontSystem(new ThoughtShield(0, 60, 15, 0, 120, 'FS')); 
+		$this->addFrontSystem(new ThoughtShield(0, 30, 15, 240, 360, 'FP'));	
+		$this->addFrontSystem(new ThoughtShield(0, 30, 15, 0, 120, 'FS')); 
 							
 		$this->addLeftSystem(new SelfRepair(6, 6, 3)); //armor, structure, output 
 		$tPulsar = new TriopticPulsar(6, 0, 0, 240, 60);
@@ -125,32 +123,17 @@ class Consortium extends MindriderHCV{
 			31=> array(
 				4 => "TAG:Thruster",
 				6 => "TAG:Trioptic Pulsar", 
-				8 => "32:Self Repair",
-				17 => "32:Structure",
-				20 => "Primary",
-			),			
-			32=> array(
-				4 => "TAG:Thruster",
-				6 => "TAG:Trioptic Pulsar", 
 				8 => "Self Repair",
 				17 => "Structure",
 				20 => "Primary",
-			),
+			),		
 			41=> array(
 				4 => "TAG:Thruster",
 				6 => "TAG:Trioptic Pulsar", 
-				8 => "42:Self Repair",
-				17 => "42:Structure",
-				20 => "Primary",
-			),			
-			42=> array(
-				4 => "TAG:Thruster",
-				6 => "TAG:Trioptic Pulsar", 
 				8 => "Self Repair",
 				17 => "Structure",
 				20 => "Primary",
-			),
-
+			),		
 		);
 		
     }
