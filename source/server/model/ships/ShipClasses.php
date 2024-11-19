@@ -205,11 +205,10 @@ class BaseShip {
 		$otherCurr = 0;
 		$otherMax = 0;
 		$otherMultiplier = 1;
-					
+
 		$cncPresent = false;
 		$enginePresent = false;
 		$scannerPresent = false;
-		
 		
 		//destroyed ship gets no value
 		if($this->isDestroyed()) $effectiveValue = 0;
@@ -285,14 +284,13 @@ class BaseShip {
 				if ($system instanceOf Structure) { //Structure block
 					$structCurr += $systemCurr;
 					$structMax += $systemMax;
-				}
-				else if (($system instanceOf Weapon) || ($system instanceOf ElintScanner)) { //weapon! (count ElInt Scanner as a weapn here)
+				} else if (($system instanceOf Weapon) || ($system instanceOf ElintScanner)) { //weapon! (count ElInt Scanner as a weapn here)
 					$weaponCurr += $systemCurr;
 					$weaponMax += $systemMax;
 				} else if ($system instanceOf Thruster) { //Thruster
 					$thrusterCurr += $systemCurr;
 					$thrusterMax += $systemMax;
-				} else if (!$system->isTargetable) { //core system
+				} else if (!$system->isPrimaryTargetable) { //core system
 					$coreCurr += $systemCurr;
 					$coreMax += $systemMax;
 			   	} else { //other systems - not listed in relevant categories, but not core either
@@ -333,7 +331,7 @@ class BaseShip {
 				$structureCombatEffectiveness = $currentStructure / $totalStructure;
 				$structureCombatEffectiveness = max(0.1,$structureCombatEffectiveness); //let's say structural damage cannot reduce effectiveness below 20%!
 				if($structureCombatEffectiveness >= 0.95) $structureCombatEffectiveness = 1; //let's first few damage points be free - at less than 5% damage ship retains full effectiveness!
-				$effectiveValue = $effectiveValue*$structureCombatEffectiveness;
+				$effectiveValue = $effectiveValue * $structureCombatEffectiveness;
 			}				
 		}
 
