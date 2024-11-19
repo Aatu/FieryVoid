@@ -7,10 +7,10 @@ class CraytanPoltenRefit extends FighterFlight{
 	    $this->pointCost = 18*6;
 	    $this->faction = "ZNexus Craytan Union";
         $this->phpclass = "CraytanPoltenRefit";
-        $this->shipClass = "Polten Assault Shuttles (2090 refit)";
+        $this->shipClass = "Polten Assault Shuttles (2090)";
 			$this->variantOf = "Polten Assault Shuttles";
 			$this->occurence = "common";
-	    $this->imagePath = "img/ships/Nexus/CraytanPolten.png";
+	    $this->imagePath = "img/ships/Nexus/craytan_polten.png";
 
 	    $this->isd = 2090;
 		$this->unofficial = true;
@@ -38,8 +38,8 @@ class CraytanPoltenRefit extends FighterFlight{
 			$armour = array(2, 2, 2, 2);
 			$fighter = new Fighter("Polten", $armour, 12, $this->id);
 			$fighter->displayName = "Polten";
-			$fighter->imagePath = "img/ships/Nexus/CraytanPolten.png";
-			$fighter->iconPath = "img/ships/Nexus/CraytanPolten_large.png";
+			$fighter->imagePath = "img/ships/Nexus/craytan_polten.png";
+			$fighter->iconPath = "img/ships/Nexus/craytan_polten_large.png";
 			
 	        $autogun = new NexusAutogun(300, 60, 1); //$startArc, $endArc, $nrOfShots
 	        $fighter->addFrontSystem($autogun);

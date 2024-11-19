@@ -7,7 +7,7 @@ class CraytanGramitha extends MediumShip{
         $this->pointCost = 330;
         $this->faction = "ZNexus Craytan Union";
         $this->phpclass = "CraytanGramitha";
-        $this->imagePath = "img/ships/Nexus/CraytanCorvette.png";
+        $this->imagePath = "img/ships/Nexus/craytan_corvette.png";
         $this->shipClass = "Gramitha Escort Frigate";
 			$this->variantOf = "Sahvor Frigate";
 			$this->occurence = "uncommon";

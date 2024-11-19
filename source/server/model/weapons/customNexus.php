@@ -1749,7 +1749,7 @@ class NexusRangedBoltTorpedo extends Weapon{
         }
 
         public function getDamage($fireOrder){ 
-			return 10;   
+			return 12;   
 		}
 
         public function setMinDamage(){     $this->minDamage = 12;      }
