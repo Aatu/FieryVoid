@@ -7,8 +7,8 @@ class CraytanTopren extends HeavyCombatVessel{
         $this->pointCost = 450;
         $this->faction = "ZNexus Craytan Union";
         $this->phpclass = "CraytanTopren";
-        $this->imagePath = "img/ships/Nexus/CraytanTopren.png";
-		$this->canvasSize = 150; //img has 200px per side
+        $this->imagePath = "img/ships/Nexus/craytan_topren.png";
+		$this->canvasSize = 125; //img has 200px per side
         $this->shipClass = "Topren Patrol Destroyer";
 		$this->unofficial = true;
         $this->isd = 2118;

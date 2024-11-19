@@ -9,11 +9,11 @@ class CraytanOlipanRefit extends SmallStarBaseFourSections{
 		$this->smallBase = true;
 		$this->faction = "ZNexus Craytan Union";
 		$this->phpclass = "CraytanOlipanRefit";
-		$this->shipClass = "Olipan Supply Post (2097 refit)";
+		$this->shipClass = "Olipan Supply Post (2097)";
 			$this->variantOf = "Olipan Supply Post";
 			$this->occurence = "common";
-		$this->imagePath = "img/ships/Nexus/CraytanOlipan.png";
-		$this->canvasSize = 175; 
+		$this->imagePath = "img/ships/Nexus/craytan_olipan.png";
+		$this->canvasSize = 140; 
 		$this->unofficial = true;
 		$this->isd = 2097;
 

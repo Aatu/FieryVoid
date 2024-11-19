@@ -10,7 +10,7 @@ class CraytanTironRefit extends FighterFlight{
         $this->shipClass = "Tiron Medium Fighter Refit";
  			$this->variantOf = "Tiron Medium Fighters";
 			$this->occurence = "common";
-       $this->imagePath = "img/ships/Nexus/CraytanTiron.png";
+       $this->imagePath = "img/ships/Nexus/craytan_tiron.png";
         
         $this->isd = 2133;
         
@@ -34,8 +34,8 @@ class CraytanTironRefit extends FighterFlight{
             $armour = array(2, 2, 1, 1);
             $fighter = new Fighter("RogolonChelekFtr", $armour, 10, $this->id);
             $fighter->displayName = "Tiron";
-            $fighter->imagePath = "img/ships/Nexus/CraytanTiron.png";
-            $fighter->iconPath = "img/ships/Nexus/CraytanTiron_large.png"; 
+            $fighter->imagePath = "img/ships/Nexus/craytan_tiron.png";
+            $fighter->iconPath = "img/ships/Nexus/craytan_tiron_large.png"; 
 
             $fighter->addFrontSystem(new NexusLtEnhPlasmaFtr(330, 30));
 			
