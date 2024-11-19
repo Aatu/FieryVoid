@@ -547,7 +547,7 @@ window.ew = {
 			jammerValue = ew.getJammerValueFromTo(elint,target);
 			if (jammerValue>0) continue; //no lock-on negates SOEW, if any
 
-			if(shipManager.hasSpecialAbility(ship, "ConstrainedEW")){//Mindrider ships have less efficient ELINT abilities - DK 19.07.24.
+			if(shipManager.hasSpecialAbility(elint, "ConstrainedEW")){//Mindrider ships have less efficient ELINT abilities - DK 19.07.24.
  	           	var foew = ew.getEWByType("OEW", elint, target) * 0.33;
 			    foew = Math.round(foew * 3) / 3; 	           					
 			}else{	
@@ -575,7 +575,7 @@ window.ew = {
             var elint = elints[i];
             if (elint.id === ship.id) continue;
 
-			if(shipManager.hasSpecialAbility(ship, "ConstrainedEW")){//Mindrider ships have less efficient ELINT abilities - DK 19.07.24.
+			if(shipManager.hasSpecialAbility(elint, "ConstrainedEW")){//Mindrider ships have less efficient ELINT abilities - DK 19.07.24.
             	var fdew = ew.getEWByType("SDEW", elint, ship) * 0.33;
 			    fdew = Math.round(fdew * 3) / 3;             					
 			}else{	
@@ -599,7 +599,7 @@ window.ew = {
 
             if (!ew.checkInELINTDistance(ship, elint, 20)) continue;
 
-			if(shipManager.hasSpecialAbility(ship, "ConstrainedEW")){//Mindrider ships have less efficient ELINT abilities - DK 19.07.24.
+			if(shipManager.hasSpecialAbility(elint, "ConstrainedEW")){//Mindrider ships have less efficient ELINT abilities - DK 19.07.24.
             	var fdew = ew.getEWByType("BDEW", elint) * 0.2;			
 			}else{	
             	var fdew = ew.getEWByType("BDEW", elint) * 0.25;

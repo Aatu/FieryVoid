@@ -47,9 +47,7 @@ class WheelofThought extends MindriderMCV{
 		$cnc->startArc = 0;
 		$cnc->endArc = 360;
         $this->addPrimarySystem($cnc); 
-
-//        $this->addPrimarySystem(new CnC(8, 12, 0, 0));
-//        $this->addPrimarySystem(new SecondaryCnC(8, 12, 0, 0));        
+       
         $scanner = new ElintScanner(7, 12, 0, 10);
 		$scanner->markMindrider();
 		$this->addPrimarySystem($scanner);	        
@@ -62,13 +60,13 @@ class WheelofThought extends MindriderMCV{
         $this->addPrimarySystem(new GraviticThruster(6, 15, 0, 8, 4));         	   	       
         
                    
-		$this->addFrontSystem(new ThoughtShield(0, 60, 15, 270, 90, 'F'));	
+		$this->addFrontSystem(new ThoughtShield(0, 30, 15, 270, 90, 'F'));	
 		$this->addFrontSystem(new TriopticPulsar(6, 0, 0, 270, 90));		
 		$this->addFrontSystem(new SelfRepair(6, 6, 3)); //armor, structure, output 
         $this->addFrontSystem(new GraviticThruster(6, 15, 0, 8, 1)); 		 
 		
 		
-		$this->addAftSystem(new ThoughtShield(0, 60, 15, 90, 270, 'A')); 
+		$this->addAftSystem(new ThoughtShield(0, 30, 15, 90, 270, 'A')); 
 		$this->addAftSystem(new TriopticPulsar(6, 0, 0, 90, 270));		
 		$this->addAftSystem(new SelfRepair(6, 6, 3)); //armor, structure, output     
 		$this->addAftSystem(new GraviticThruster(6, 15, 0, 8, 2)); 		  			                  		                    

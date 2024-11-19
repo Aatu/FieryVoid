@@ -48,9 +48,7 @@ class MindsEye extends SixSidedShip{
 		$cnc->startArc = 0;
 		$cnc->endArc = 360;
         $this->addPrimarySystem($cnc);        
-        
-//        $this->addPrimarySystem(new CnC(8, 24, 0, 0));
-//        $this->addPrimarySystem(new SecondaryCnC(8, 24, 0, 0));        
+               
 		$scanner = new ElintScanner(7, 24, 0, 14);//Ancient Scanners do not need power - base systems are included in zero hull running costs
 		$scanner->markAdvanced();
 		$this->addPrimarySystem($scanner);	        
@@ -63,12 +61,12 @@ class MindsEye extends SixSidedShip{
 		$this->addPrimarySystem(new ThoughtWave(7, 0, 0, 0, 360, 15));     
 		$this->addPrimarySystem(new JumpEngine(7, 25, 8, 8));   		  		
       
-		$this->addPrimarySystem(new ThoughtShield(0, 100, 25, 210, 270, 'AP'));
-		$this->addPrimarySystem(new ThoughtShield(0, 100, 25, 330, 30, 'F'));			
-		$this->addPrimarySystem(new ThoughtShield(0, 100, 25, 30, 90, 'FS'));
-		$this->addPrimarySystem(new ThoughtShield(0, 100, 25, 270, 330, 'FP'));
-		$this->addPrimarySystem(new ThoughtShield(0, 100, 25, 150, 210, 'A'));	
-		$this->addPrimarySystem(new ThoughtShield(0, 100, 25, 90, 150, 'AS'));
+		$this->addPrimarySystem(new ThoughtShield(0, 50, 25, 210, 270, 'AP'));
+		$this->addPrimarySystem(new ThoughtShield(0, 50, 25, 330, 30, 'F'));			
+		$this->addPrimarySystem(new ThoughtShield(0, 50, 25, 30, 90, 'FS'));
+		$this->addPrimarySystem(new ThoughtShield(0, 50, 25, 270, 330, 'FP'));
+		$this->addPrimarySystem(new ThoughtShield(0, 50, 25, 150, 210, 'A'));	
+		$this->addPrimarySystem(new ThoughtShield(0, 50, 25, 90, 150, 'AS'));
 		
 				
 		$this->addFrontSystem(new SelfRepair(6, 6, 3)); //armor, structure, output 
