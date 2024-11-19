@@ -299,35 +299,35 @@ class BaseShip {
 					$otherCurr += $systemCurr;
 					$otherMax += $systemMax;
 				}
-
-				//add all boxes counted - with appropriate multipliers!	
-
-				//weapons
-				$multiplier = $weaponMultiplier;
-				if ($weaponCurr == 0) $multiplier = $weaponMultiplierMax; //if there are no weapons left, ship is defanged - count weapons higher to push total value lower despite other systems being intact!
-				$currentStructure += $multiplier * $weaponCurr;
-				$totalStructure +=  $multiplier * $weaponMax;
-
-				//structural integrity
-				$multiplier = $structMultiplier;
-				$currentStructure += $multiplier * $structCurr;
-				$totalStructure +=  $multiplier * $structMax;
-
-				//core systems
-				$multiplier = $coreMultiplier;
-				$currentStructure += $multiplier * $coreCurr;
-				$totalStructure +=  $multiplier * $coreMax;
-						
-				//thrusters
-				$multiplier = $thrusterMultiplier;
-				$currentStructure += $multiplier * $thrusterCurr;
-				$totalStructure +=  $multiplier * $thrusterMax;
-		
-				//everything else
-				$multiplier = $otherMultiplier;
-				$currentStructure += $multiplier * $otherCurr;
-				$totalStructure +=  $multiplier * $otherMax;												   
 			}
+
+			//add all boxes counted - with appropriate multipliers!	
+
+			//weapons
+			$multiplier = $weaponMultiplier;
+			if ($weaponCurr == 0) $multiplier = $weaponMultiplierMax; //if there are no weapons left, ship is defanged - count weapons higher to push total value lower despite other systems being intact!
+			$currentStructure += $multiplier * $weaponCurr;
+			$totalStructure +=  $multiplier * $weaponMax;
+
+			//structural integrity
+			$multiplier = $structMultiplier;
+			$currentStructure += $multiplier * $structCurr;
+			$totalStructure +=  $multiplier * $structMax;
+
+			//core systems
+			$multiplier = $coreMultiplier;
+			$currentStructure += $multiplier * $coreCurr;
+			$totalStructure +=  $multiplier * $coreMax;
+					
+			//thrusters
+			$multiplier = $thrusterMultiplier;
+			$currentStructure += $multiplier * $thrusterCurr;
+			$totalStructure +=  $multiplier * $thrusterMax;
+	
+			//everything else
+			$multiplier = $otherMultiplier;
+			$currentStructure += $multiplier * $otherCurr;
+			$totalStructure +=  $multiplier * $otherMax;
 				      
 			if($totalStructure>0){
 				$structureCombatEffectiveness = $currentStructure / $totalStructure;
