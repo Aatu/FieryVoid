@@ -7,10 +7,10 @@ class CraytanDakran extends BaseShip{
 	$this->pointCost = 625;
 	$this->faction = "ZNexus Craytan Union";
         $this->phpclass = "CraytanDakran";
-        $this->imagePath = "img/ships/Nexus/CraytanDakran.png";
+        $this->imagePath = "img/ships/Nexus/craytan_dakran.png";
         $this->shipClass = "Dakran Heavy Cruiser";
         $this->shipSizeClass = 3;
-		$this->canvasSize = 180; 
+		$this->canvasSize = 160; 
 		$this->unofficial = true;
 
         $this->fighters = array("assault shuttles"=>6);

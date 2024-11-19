@@ -7,9 +7,9 @@ class CraytanHelisRefit extends LCV{
         $this->pointCost = 165;
         $this->faction = "ZNexus Craytan Union";
         $this->phpclass = "CraytanHelisRefit";
-        $this->imagePath = "img/ships/Nexus/CraytanHelis.png";
+        $this->imagePath = "img/ships/Nexus/craytan_helis.png";
 			$this->canvasSize = 65; //img has 200px per side
-        $this->shipClass = "Helis Interdictor (2097 refit)";
+        $this->shipClass = "Helis Interdictor (2097)";
 			$this->variantOf = "Helis Interdictor";
 			$this->occurence = "common";
 		$this->unofficial = true;

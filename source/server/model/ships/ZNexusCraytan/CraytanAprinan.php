@@ -7,10 +7,10 @@ class CraytanAprinan extends MediumShip{
         $this->pointCost = 230;
         $this->faction = "ZNexus Craytan Union";
         $this->phpclass = "CraytanAprinan";
-        $this->imagePath = "img/ships/Nexus/CraytanAprinan.png";
+        $this->imagePath = "img/ships/Nexus/craytan_aprinan.png";
         $this->shipClass = "Aprinan Patroller";
 		$this->unofficial = true;
-        $this->canvasSize = 75;
+        $this->canvasSize = 90;
 	    $this->isd = 1906;
 
 	    $this->notes = 'Atmospheric capable';
