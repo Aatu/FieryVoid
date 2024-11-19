@@ -271,8 +271,8 @@ class BaseShip {
 		
 		
 		if($effectiveValue>0){ //check for state of structures and systems; calculate total boxes and total remaining boxes 
-		     	$totalStructure = 0;
-		      	$totalStructure = 0;
+			$currentStructure = 0;
+			$totalStructure = 0;
 				      
 			foreach ($this->systems as $system) if($system->getCountForCombatValue()) { //skip technical systems
 				$systemCurr = 0;
@@ -289,7 +289,7 @@ class BaseShip {
 				else if (($system instanceOf Weapon) || ($system instanceOf ElintScanner)) { //weapon! (count ElInt Scanner as a weapn here)
 					$weaponCurr += $systemCurr;
 					$weaponMax += $systemMax;
-				} else if ($system instance of Thruster) { //Thruster
+				} else if ($system instanceOf Thruster) { //Thruster
 					$thrusterCurr += $systemCurr;
 					$thrusterMax += $systemMax;
 				} else if (!$system->isTargetable) { //core system
@@ -298,7 +298,7 @@ class BaseShip {
 			   	} else { //other systems - not listed in relevant categories, but not core either
 					$otherCurr += $systemCurr;
 					$otherMax += $systemMax;
-			       	}
+				}
 
 				//add all boxes counted - with appropriate multipliers!	
 
