@@ -422,7 +422,7 @@ class SuperHeavyMolecularDisruptor extends Raking
                     $crit = new ArmorReduced(-1, $target->id, $system->id, "ArmorReduced", $gamedata->turn);
                     $crit->updated = true;
                     $crit->inEffect = false;
-                    $system->criticals[] = $crit;
+                    $system->setCritical($crit); //$system->criticals[] = $crit;
                 }
             }
         } //endof function doDamage
