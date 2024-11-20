@@ -160,6 +160,187 @@ class BaseShip {
 	    return $mod;
     }
     
+
+	
+	/*calculates current combat value of the ship, as a perentage of original value - algorithm modified by public discussion
+	algorithm:
+		- sum all current boxes, weighted by system class
+  		- sum all max boxes, weighterd by system class
+    		- current/mas is base percentage (<10% is 10%, >=95% is 100%)
+      		- further modified by core system destruction
+		- core systems affecting value:
+  			- C&C - 0%
+			- Sensors - 50%
+     			- Engine - 50%
+			- Thrusters - 5/20/40/50% for 1/2/3/4 sets missing (but counted only if engine is present)
+   		- weight modifiers:
+     			- core systems - 0 (simply do not count them. their destruction will be counted separately)
+			- Thrusters - 0 (simply do not count them, their detruction will be counted separately)
+			- Structure - 2
+   			- Weapons - 3, unless no weapons are left then 5 (note: count ElInt Sensors as a weapon)
+      			- everything else - 1
+	 		- this basically means that point value is primarily derived from structure and weapons, with other systems being counted a little or not at all - but completely disabling relevant abilities will be counted extra)
+	*/
+	public function calculateCombatValue() {
+		$effectiveValue = 100;
+		$overallModifier = 1;
+
+		$weaponCurr = 0;
+		$weaponMax = 0;
+		$weaponMultiplier = 3;
+		$weaponMultiplierMax = 5; //to be used if no weapons are left
+
+		$structCurr = 0;
+		$structMax = 0;
+		$structMultiplier = 2;
+		
+		$coreCurr = 0;
+		$coreMax = 0;
+		$coreMultiplier = 0;
+		
+		$thrusterCurr = 0;
+		$thrusterMax = 0;
+		$thrusterMultiplier = 0;
+		
+		$otherCurr = 0;
+		$otherMax = 0;
+		$otherMultiplier = 1;
+					
+		$cncPresent = false;
+		$enginePresent = false;
+		$scannerPresent = false;
+		
+		
+		//destroyed ship gets no value
+		if($this->isDestroyed()) $effectiveValue = 0;
+
+		/*moved
+		$cnc = $this->getSystemByName("CnC");
+		if($cnc){
+			foreach($cnc->criticals as $critDisabled){
+				if($critDisabled->phpclass == "ShipDisabled") $effectiveValue = 0;//Captured, no value!					
+			}
+		}
+  		*/		
+		
+		if($effectiveValue>0){ //check for critical systems: Sensors, Engine, C&C - if none are active, reduce combat value appropriately
+			$cncPresent = false;
+			$enginePresent = false;
+			$scannerPresent = false;
+			foreach ($this->systems as $system) {
+				if (!$system->isDestroyed()) {
+					if ($system instanceOf Scanner) $scannerPresent = true;
+					if ($system instanceOf Engine) $enginePresent = true;
+					if ($system instanceOf CnC) {
+						$cncPresent = true;
+						foreach($system->criticals as $critDisabled){ //look for disabled ship! - 
+							if($critDisabled->phpclass == "ShipDisabled") $effectiveValue = 0;//Captured, no value!					
+						}
+					}
+				}
+			}
+			if ( (!$this->osat) && (!$cncPresent) ) $effectiveValue = 0; //ship disabled - no value - except OSATs which simpy don't have C&C!
+			if (!$scannerPresent) $overallModifier = $overallModifier/2; //no Sensors: cut value in half
+			if ( (!$this->base) && (!$this->osat) && (!$enginePresent)) $overallModifier = $overallModifier/2; //no Engine: cut value in half - except starbases which don't have any engine, and OSATs for which it's secondary anyway
+		}	
+
+		if(($effectiveValue>0) && ($enginePresent)){ //if engine is present - check for thruster sets (no engine present already skips check for bases and OSATs
+			$set1 = false;
+			$set2 = false;
+			$set3 = false;
+			$set4 = false;
+			$thrusterList = $this->getSystemsByName('Thruster', false); //list of active thrusters on the ship						    
+			foreach ($thrusterList as $thruster) {
+				if ($thruster->direction == 1) $set1 = true;
+				if ($thruster->direction == 2) $set2 = true;
+				if ($thruster->direction == 3) $set3 = true;
+				if ($thruster->direction == 4) $set4 = true;
+			}
+			$totalSets = 0;
+			if ($set1) $totalSets += 1;
+			if ($set2) $totalSets += 1;
+			if ($set3) $totalSets += 1;
+			if ($set4) $totalSets += 1;
+			$setModifier = 1; //all 4 sets
+			if ($totalSets == 3) $setModifier = 0.95; //one set missing, -5%
+			else if ($totalSets == 2) $setModifier = 0.8; //two sets missing, -20%
+			else if ($totalSets == 1) $setModifier = 0.6; //three set missing, -40%
+			else if ($totalSets < 1) $setModifier = 0.5; //no thrusters left, -50%
+			$overallModifier *= $setModifier;
+	   	}
+		
+		
+		if($effectiveValue>0){ //check for state of structures and systems; calculate total boxes and total remaining boxes 
+			$currentStructure = 0;
+			$totalStructure = 0;
+				      
+			foreach ($this->systems as $system) if($system->getCountForCombatValue()) { //skip technical systems
+				$systemCurr = 0;
+				$systemMax =  $system->maxhealth;				
+				if (!$system->isDestroyed()) {				
+					$systemCurr = $system->getRemainingHealth();
+				}
+
+				//classify system appropriately
+				if ($system instanceOf Structure) { //Structure block
+					$structCurr += $systemCurr;
+					$structMax += $systemMax;
+				}
+				else if (($system instanceOf Weapon) || ($system instanceOf ElintScanner)) { //weapon! (count ElInt Scanner as a weapn here)
+					$weaponCurr += $systemCurr;
+					$weaponMax += $systemMax;
+				} else if ($system instanceOf Thruster) { //Thruster
+					$thrusterCurr += $systemCurr;
+					$thrusterMax += $systemMax;
+				} else if (!$system->isTargetable) { //core system
+					$coreCurr += $systemCurr;
+					$coreMax += $systemMax;
+			   	} else { //other systems - not listed in relevant categories, but not core either
+					$otherCurr += $systemCurr;
+					$otherMax += $systemMax;
+				}
+
+				//add all boxes counted - with appropriate multipliers!	
+
+				//weapons
+				$multiplier = $weaponMultiplier;
+				if ($weaponCurr == 0) $multiplier = $weaponMultiplierMax; //if there are no weapons left, ship is defanged - count weapons higher to push total value lower despite other systems being intact!
+				$currentStructure += $multiplier * $weaponCurr;
+				$totalStructure +=  $multiplier * $weaponMax;
+
+				//structural integrity
+				$multiplier = $structMultiplier;
+				$currentStructure += $multiplier * $structCurr;
+				$totalStructure +=  $multiplier * $structMax;
+
+				//core systems
+				$multiplier = $coreMultiplier;
+				$currentStructure += $multiplier * $coreCurr;
+				$totalStructure +=  $multiplier * $coreMax;
+						
+				//thrusters
+				$multiplier = $thrusterMultiplier;
+				$currentStructure += $multiplier * $thrusterCurr;
+				$totalStructure +=  $multiplier * $thrusterMax;
+		
+				//everything else
+				$multiplier = $otherMultiplier;
+				$currentStructure += $multiplier * $otherCurr;
+				$totalStructure +=  $multiplier * $otherMax;												   
+			}
+				      
+			if($totalStructure>0){
+				$structureCombatEffectiveness = $currentStructure / $totalStructure;
+				$structureCombatEffectiveness = max(0.1,$structureCombatEffectiveness); //let's say structural damage cannot reduce effectiveness below 20%!
+				if($structureCombatEffectiveness >= 0.95) $structureCombatEffectiveness = 1; //let's first few damage points be free - at less than 5% damage ship retains full effectiveness!
+				$effectiveValue = $effectiveValue*$structureCombatEffectiveness;
+			}				
+		}
+
+		$effectiveValue = $effectiveValue * $overallModifier; //this may get total value below structural minimum all right	
+		return $effectiveValue;
+	} //endOf function calculateCombatValue
+
 	
 	/*calculates current combat value of the ship, as a perentage of original value
 	current algorithm:
@@ -176,8 +357,8 @@ class BaseShip {
 	  -- no Sensors: cut value in half (this means offensive fire is mostly ineffective (except point blank and ballistics), and ship is very easy target)
 	  -- no C&C: reduce value to 0 (cannot contribute to current game at all)
 	*/
-	public function calculateCombatValue() {
-		$effectiveValue = 100;
+	public function calculateCombatValueOld() {
+				$effectiveValue = 100;
 		
 		//destroyed ship gets no value
 		if($this->isDestroyed()) $effectiveValue = 0;
@@ -237,7 +418,7 @@ class BaseShip {
 		}
 		
 		return $effectiveValue;
-	} //endOf function calculateCombatValue
+	} //endOf function calculateCombatValueOld
 
 
 	public function howManyMarines(){

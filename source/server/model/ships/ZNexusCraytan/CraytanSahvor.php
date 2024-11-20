@@ -7,7 +7,7 @@ class CraytanSahvor extends MediumShip{
         $this->pointCost = 330;
         $this->faction = "ZNexus Craytan Union";
         $this->phpclass = "CraytanSahvor";
-        $this->imagePath = "img/ships/Nexus/CraytanCorvette.png";
+        $this->imagePath = "img/ships/Nexus/craytan_corvette.png";
         $this->shipClass = "Sahvor Frigate";
 		$this->unofficial = true;
         $this->canvasSize = 75;

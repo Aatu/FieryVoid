@@ -7,8 +7,8 @@ class CraytanKilten extends LCV{
         $this->pointCost = 165;
         $this->faction = "ZNexus Craytan Union";
         $this->phpclass = "CraytanKilten";
-        $this->imagePath = "img/ships/Nexus/CraytanHelis.png";
-			$this->canvasSize = 65; //img has 200px per side
+        $this->imagePath = "img/ships/Nexus/craytan_helis.png";
+			$this->canvasSize = 70; //img has 200px per side
         $this->shipClass = "Kilten Escort";
 			$this->variantOf = "Helis Interdictor";
 			$this->occurence = "common";

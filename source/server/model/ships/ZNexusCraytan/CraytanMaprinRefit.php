@@ -7,8 +7,8 @@ class CraytanMaprinRefit extends MediumShip{
         $this->pointCost = 310;
         $this->faction = "ZNexus Craytan Union";
         $this->phpclass = "CraytanMaprinRefit";
-        $this->imagePath = "img/ships/Nexus/CraytanCorvette.png";
-        $this->shipClass = "Maprin Corvette (2087 refit)";
+        $this->imagePath = "img/ships/Nexus/craytan_corvette.png";
+        $this->shipClass = "Maprin Corvette (2087)";
 			$this->variantOf = "Maprin Corvette";
 			$this->occurence = "common";
 		$this->unofficial = true;
