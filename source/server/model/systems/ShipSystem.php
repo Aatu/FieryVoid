@@ -28,6 +28,7 @@ class ShipSystem {
     
     protected $possibleCriticals = array();
 	
+    public $primary = false; //is this a core system?
     public $isPrimaryTargetable = false; //can this system be targeted by called shot if it's on PRIMARY?	
     public $isTargetable = true; //false means it cannot be targeted at all by called shots! - good for technical systems :)
     
