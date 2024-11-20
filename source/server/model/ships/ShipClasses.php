@@ -290,7 +290,8 @@ class BaseShip {
 				} else if ($system instanceOf Thruster) { //Thruster
 					$thrusterCurr += $systemCurr;
 					$thrusterMax += $systemMax;
-				} else if (!$system->isPrimaryTargetable) { //core system
+				//} else if (!$system->isPrimaryTargetable) { //core system} 
+				else if ($system->primary) { //core system - change the way of assessing this
 					$coreCurr += $systemCurr;
 					$coreMax += $systemMax;
 			   	} else { //other systems - not listed in relevant categories, but not core either
