@@ -4922,9 +4922,9 @@ class MindriderHangar extends ShipSystem{
     public $primary = true;
     public $iconPath = "hangar.png";
     
-	public $isPrimaryTargetable = true; //shouldn't be targetable at all, in fact!
-	public $isTargetable = true; //cannot be targeted ever!
-	protected $doCountForCombatValue = true; //don't count when estimating remaining combat value    
+	public $isPrimaryTargetable = true; //true if hangar has capacity
+	public $isTargetable = true; //true if hangar has capacity
+	protected $doCountForCombatValue = true; //true if hangar has capacity  
 	
 	public static $alreadyCleared = array();    	
 	public static $hangarList = array(); //array of Mindrider Hangars in game
@@ -4941,9 +4941,9 @@ class MindriderHangar extends ShipSystem{
 	    
 	    if($output == 0){
 			$this->iconPath = "hangarTechnical.png";	    	
-			$this->isPrimaryTargetable = false; //shouldn't be targetable at all, in fact!
-			$this->isTargetable = false; //cannot be targeted ever!
-			$this->doCountForCombatValue = false; //don't count when estimating remaining combat value 	    	
+			$this->isPrimaryTargetable = false; //change to false if if hangar has no capacity
+			$this->isTargetable = false; //change to false if if hangar has no capacity
+			$this->doCountForCombatValue = false; //change to false if if hangar has no capacity	    	
 	    }	    
     }
 	
