@@ -7,10 +7,10 @@ class CraytanCorvette extends MediumShip{
         $this->pointCost = 300;
         $this->faction = "ZNexus Craytan Union";
         $this->phpclass = "CraytanCorvette";
-        $this->imagePath = "img/ships/Nexus/CraytanCorvette.png";
+        $this->imagePath = "img/ships/Nexus/craytan_corvette.png";
         $this->shipClass = "Corvette";
 		$this->unofficial = true;
-        $this->canvasSize = 60;
+        $this->canvasSize = 100;
         $this->agile = true;
 	    $this->isd = 2048;
         

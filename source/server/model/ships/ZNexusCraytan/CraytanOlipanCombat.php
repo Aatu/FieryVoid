@@ -10,8 +10,8 @@ class CraytanOlipanCombat extends SmallStarBaseFourSections{
 		$this->faction = "ZNexus Craytan Union";
 		$this->phpclass = "CraytanOlipanCombat";
 		$this->shipClass = "Olipan Combat Base";
-		$this->imagePath = "img/ships/Nexus/CraytanOlipanRefit.png";
-		$this->canvasSize = 175; 
+		$this->imagePath = "img/ships/Nexus/craytan_olipanRefit.png";
+		$this->canvasSize = 140; 
 		$this->unofficial = true;
 		$this->isd = 2130;
 

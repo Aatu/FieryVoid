@@ -7,7 +7,7 @@ class CraytanLopin extends BaseShip{
 	$this->pointCost = 490;
 	$this->faction = "ZNexus Craytan Union";
         $this->phpclass = "CraytanLopin";
-        $this->imagePath = "img/ships/Nexus/CraytanEpiron.png";
+        $this->imagePath = "img/ships/Nexus/craytan_epiron.png";
         $this->shipClass = "Lopin Explorer";
         $this->shipSizeClass = 3;
 		$this->canvasSize = 160; 

@@ -8,7 +8,7 @@ class CraytanPolten extends FighterFlight{
 	    $this->faction = "ZNexus Craytan Union";
         $this->phpclass = "CraytanPolten";
         $this->shipClass = "Polten Assault Shuttles";
-	    $this->imagePath = "img/ships/Nexus/CraytanPolten.png";
+	    $this->imagePath = "img/ships/Nexus/craytan_polten.png";
 
 	    $this->isd = 1902;
 		$this->unofficial = true;
@@ -37,8 +37,8 @@ class CraytanPolten extends FighterFlight{
 			$armour = array(2, 2, 2, 2);
 			$fighter = new Fighter("Polten", $armour, 12, $this->id);
 			$fighter->displayName = "Polten";
-			$fighter->imagePath = "img/ships/Nexus/CraytanPolten.png";
-			$fighter->iconPath = "img/ships/Nexus/CraytanPolten_large.png";
+			$fighter->imagePath = "img/ships/Nexus/craytan_polten.png";
+			$fighter->iconPath = "img/ships/Nexus/craytan_polten_large.png";
 			
 	        $autogun = new NexusAutogun(300, 60, 1); //$startArc, $endArc, $nrOfShots
 	        $fighter->addFrontSystem($autogun);
