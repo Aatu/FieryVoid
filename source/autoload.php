@@ -2742,6 +2742,9 @@ spl_autoload_register(
 				'trekftrphotontorpedo' => '/server/model/weapons/customTrek.php',
 				'trekftrphotontorpedoammo' => '/server/model/weapons/customTrek.php',
 				
+				'trekphasedpulsecannon' => '/server/model/weapons/customTrek.php',
+				'trekphasedpulseaccelerator' => '/server/model/weapons/customTrek.php',
+				
 				//systems
                 'trekwarpdrive' => '/server/model/weapons/customTrek.php', //nacelle
                 'trekimpulsedrive' => '/server/model/weapons/customTrek.php',
@@ -2811,6 +2814,8 @@ spl_autoload_register(
 				'trekfederationillustrious' => '/server/model/ships/ZTrekFederationTOS/TrekFederationIllustrious.php',
 								
 				'trekvulcandkyrtos' => '/server/model/ships/ZTrekFederationTOS/TrekVulcanDKyrTOS.php',
+				
+				'trekfederationkelvin' => '/server/model/ships/ZTrekFederationTOS/TrekFederationKelvin.php',
 				
 				
 				//TNG (Next Generation, Deep Space Nine, Voyager)

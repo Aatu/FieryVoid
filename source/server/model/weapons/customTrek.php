@@ -328,6 +328,95 @@ class TrekHvyPhaseCannon extends TrekPhaserBase{
 }//end of class Trek Heavy Phase Cannon
 
 
+//Pulse weapon based on Light Phase Cannon
+class TrekPhasedPulseCannon extends Pulse{ //NOT TrekPhaserBase!
+		public $name = "TrekPhasedPulseCannon";
+        public $displayName = "Phased Pulse Cannon";
+        public $iconPath = "TrekPulsePhaseCannon.png";
+        //public $animationExplosionScale = 0.2;		
+        public $animationColor = array(225, 0, 0);	
+        
+        public $intercept = 2;
+		public $priority = 3; //very light Standard
+		
+        public $loadingtime = 1;
+		
+        public $rangePenalty = 1.5; //-3/2 hexes
+        public $fireControl = array(3, 2, 2);
+
+        public $damageType = "Pulse";
+		public $weaponClass = "Particle";
+		public $firingModes = array( 1 => "Pulse");
+
+		//Pulse data:		
+        public $grouping = 20; //+1 hit per 4 below target number
+        public $maxpulses = 6;
+		protected $useDie = 5; //die used for base number of hits
+		
+
+		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){ //maxhealth and power reqirement are fixed; left option to override with hand-written values
+			if ( $maxhealth == 0 ) $maxhealth = 5;
+			if ( $powerReq == 0 ) $powerReq = 2;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+			
+        public function getDamage($fireOrder){        return 7;   }
+}//end of class TrekPhasedPulseCannon
+
+//Pulse weapon based on Light Phase Cannon
+class TrekPhasedPulseAccelerator extends Pulse{ //NOT TrekPhaserBase!
+		public $name = "TrekPhasedPulseAccelerator";
+        public $displayName = "Phased Pulse Accelerator";
+        public $iconPath = "TrekPulsePhaseAccel.png";
+        //public $animationExplosionScale = 0.2;		
+        public $animationColor = array(225, 0, 0);	
+        
+        public $intercept = 2;
+		public $priority = 4; //light Standard
+		public $priorityArray = array(1=>4,2=>3); //light to very light Standard
+		
+        public $loadingtime = 2;
+        public $loadingtimeArray = array(1=>2,2=>1);
+		
+        public $rangePenalty = 0.66; //-2/3 hexes
+        public $rangePenaltyArray = array(1=>2,2=>1.5);
+        public $fireControl = array(2, 3, 3);
+
+        public $damageType = "Pulse";
+		public $weaponClass = "Particle";
+		public $firingModes = array( 1 => "Full", 2 => "Light");
+
+		//Pulse data:		
+        public $grouping = 20; //+1 hit per 4 below target number
+        public $maxpulses = 6;
+		protected $useDie = 5; //die used for base number of hits
+		
+
+		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){ //maxhealth and power reqirement are fixed; left option to override with hand-written values
+			if ( $maxhealth == 0 ) $maxhealth = 5;
+			if ( $powerReq == 0 ) $powerReq = 2;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+			
+		
+		public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);
+				$this->data["Special"] .= "Can fire as lighter weapon after 1 turn of charging.";
+		}
+	
+	
+        public function getDamage($fireOrder){
+			switch($this->firingMode){
+				case 1:
+					return 9; //full
+					break;
+				case 2:
+					return 7; //light
+					break;	
+			}
+		}
+}//end of class TrekPhasedPulseAccelerator
+
 
 
 class TrekPhaser extends TrekPhaserBase{

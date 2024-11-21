@@ -28,6 +28,20 @@ var TrekHvyPhaseCannon = function TrekHvyPhaseCannon(json, ship) {
 TrekHvyPhaseCannon.prototype = Object.create(Weapon.prototype);
 TrekHvyPhaseCannon.prototype.constructor = TrekHvyPhaseCannon;
 
+
+var TrekPhasedPulseAccelerator = function TrekPhasedPulseAccelerator(json, ship) {
+    Weapon.call(this, json, ship);
+};
+TrekPhasedPulseAccelerator.prototype = Object.create(Weapon.prototype);
+TrekPhasedPulseAccelerator.prototype.constructor = TrekPhasedPulseAccelerator;
+
+var TrekPhasedPulseCannon = function TrekPhasedPulseCannon(json, ship) {
+    Weapon.call(this, json, ship);
+};
+TrekPhasedPulseCannon.prototype = Object.create(Weapon.prototype);
+TrekPhasedPulseCannon.prototype.constructor = TrekPhasedPulseCannon;
+
+
 var TrekPhotonicTorp = function TrekPhotonicTorp(json, ship) {
     Weapon.call(this, json, ship);
 };

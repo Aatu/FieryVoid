@@ -1865,7 +1865,7 @@ class Hangar extends ShipSystem{
     public $name = "hangar";
     public $displayName = "Hangar";
     public $squadrons = Array();
-    public $primary = true;
+    public $primary = false; //changed from true on 21.11 - let's not consider it a core system after all!
     
 	//Hangar is not important at all!
 	public $repairPriority = 1;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
@@ -1883,7 +1883,7 @@ class Catapult extends ShipSystem{
     public $name = "catapult";
     public $displayName = "Catapult";
     public $squadrons = Array();
-    public $primary = true;
+    public $primary = false; //changed from true on 21.11 - let's not consider it a core system after all!
     
 	//Catapult is not impotant at all!
 	public $repairPriority = 1;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
@@ -1984,6 +1984,7 @@ class DrakhRaiderController extends ShipSystem {
     public $iconPath = "hkControlNode.png";
     public $boostable = true;
     public $maxBoostLevel = 2;
+	public $primary = true;
 	
     public static function addController($controller){
 	    DrakhRaiderController::$controllerList[] = $controller; //add controller to list
@@ -2157,7 +2158,7 @@ class HkControlNode extends ShipSystem{
 class HyachComputer extends ShipSystem implements SpecialAbility{
     public $name = "hyachComputer";
     public $displayName = "Computer";
-    public $primary = true; //Check if inherited and remove?
+    public $primary = true; 
 	public $isPrimaryTargetable = false; //Check if inherited and remove?
 	public $isTargetable = true; //Check if inherited and remove?
     public $iconPath = "Computer.png";
@@ -2225,7 +2226,6 @@ class HyachComputer extends ShipSystem implements SpecialAbility{
 
 public function onIndividualNotesLoaded($gamedata)
 {
-	
 	switch($gamedata->phase){
 			//What were BFCP set as last turn, load them up at start of Initial Orders.			
 			case 1: //Initial phase		

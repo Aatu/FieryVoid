@@ -298,7 +298,7 @@ class BaseShip {
 					$thrusterCurr += $systemCurr + ($systemDmg * $thrusterDmgMultiplier);
 					$thrusterMax += $systemMax;
 				//} else if (!$system->isPrimaryTargetable) { //core system} 
-				else if ($system->primary) { //core system - change the way of assessing this
+				} else if ($system->primary) { //core system - change the way of assessing this
 					$coreCurr += $systemCurr + ($systemDmg * $coreDmgMultiplier);
 					$coreMax += $systemMax;
 			   	} else { //other systems - not listed in relevant categories, but not core either
