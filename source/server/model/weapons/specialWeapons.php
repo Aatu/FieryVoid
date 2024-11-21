@@ -6729,6 +6729,8 @@ class SecondSight extends Weapon{
 
 	protected $autoHit = true;//To show 100% hit chance in front end.
 	
+    protected $possibleCriticals = array();	
+	
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
 		if ( $maxhealth == 0 ) $maxhealth = 16;
 		if ( $powerReq == 0 ) $powerReq = 8;
