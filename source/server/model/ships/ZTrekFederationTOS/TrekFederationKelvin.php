@@ -4,7 +4,7 @@ class TrekFederationKelvin extends MediumShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 475;
+        $this->pointCost = 425;
         $this->faction = "ZStarTrek Federation (TOS)";
         $this->phpclass = "TrekFederationKelvin";
         $this->imagePath = "img/ships/StarTrek/FederationKelvin.png";
@@ -83,8 +83,8 @@ class TrekFederationKelvin extends MediumShip{
 		
 		0=> array(
 			4 => "2:Nacelle",
-			7 => "Scanner",
-			12 => "Hangar",
+			9 => "Hangar",
+			12 => "Scanner",
 			15 => "Engine",
 			18 => "Reactor",
 			20 => "C&C",
@@ -100,12 +100,12 @@ class TrekFederationKelvin extends MediumShip{
 		),
 
 		2=> array(
-		    5 => "Nacelle",
-			7 => "Shield Projector",
-		    9 => "Light Phaser Lance",
-			10 => "Phased Pulse Cannon",
-			16 => "Structure",
-			18 => "0:Hangar",			
+		    4 => "Nacelle",
+			6 => "0:Hangar",	
+			8 => "Shield Projector",
+		    10 => "Light Phaser Lance",
+			12 => "Phased Pulse Cannon",
+			18 => "Structure",		
 			20 => "Primary",
 		),
 
