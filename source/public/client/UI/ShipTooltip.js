@@ -209,7 +209,9 @@ window.ShipTooltip = function () {
 	if (ship.agile) toDisplay = ', Agile';
         this.addEntryElement('Turn Cost: ' + turncost + ' ('+ship.turncost+'); Turn Delay: ' + turnDelayCost + ' ('+ship.turndelaycost+')' + toDisplay);
 
-	toDisplay = 'Thrust: ' + shipManager.movement.getRemainingEngineThrust(ship) + '/' + shipManager.movement.getFullEngineThrust(ship);//thrust: remaining/full
+	var thrustRemaining = Math.max(shipManager.movement.getRemainingEngineThrust(ship), 0);//EngineShorted can make this go negative.
+	
+	toDisplay = 'Thrust: ' + thrustRemaining + '/' + shipManager.movement.getFullEngineThrust(ship);//thrust: remaining/full
 	this.addEntryElement(toDisplay, toDisplay!='');
         //this.addEntryElement('Unused thrust: ' + shipManager.movement.getRemainingEngineThrust(ship), ship.flight || gamedata.gamephase === 2);
 	    
