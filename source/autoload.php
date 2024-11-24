@@ -2791,6 +2791,8 @@ spl_autoload_register(
 								
 				'trekfederationdaedalusff' => '/server/model/ships/ZTrekFederationEarly/TrekFederationDaedalusFF.php',
 				'trekfederationfreedomff' => '/server/model/ships/ZTrekFederationEarly/TrekFederationFreedomFF.php',
+				'trekfederationfreedomupgrff' => '/server/model/ships/ZTrekFederationEarly/TrekFederationFreedomUpgrFF.php',
+				'trekfederationintrepidupgr' => '/server/model/ships/ZTrekFederationEarly/TrekFederationIntrepidUpgr.php',
 								
 								
 								
