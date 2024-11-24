@@ -63,7 +63,7 @@ class PlasmaStream extends Plasma{
 			$crit = new ArmorReduced(-1, $ship->id, $system->id, "ArmorReduced", $gamedata->turn);
 			$crit->updated = true;
 			$crit->inEffect = true; //in effect immediately, affecting further damage in the same turn!
-			$system->criticals[] =  $crit;			
+			$system->setCritical($crit); //$system->criticals[] =  $crit;			
 			//and previous turn crit - to be NOT saved, but so crit is recognized as
 		}
 	}
@@ -283,25 +283,25 @@ class ShockCannon extends Weapon{
 					while($outputMod<=-4){
 						$crit = new OutputReduced4(-1, $ship->id, $reactor->id, "OutputReduced4", $gamedata->turn);
 						$crit->updated = true;
-						$reactor->criticals[] =  $crit;
+						$reactor->setCritical($crit); //$reactor->criticals[] =  $crit;
 						$outputMod += 4;
 					}
 					while($outputMod<=-3){
 						$crit = new OutputReduced3(-1, $ship->id, $reactor->id, "OutputReduced3", $gamedata->turn);
 						$crit->updated = true;
-						$reactor->criticals[] =  $crit;
+						$reactor->setCritical($crit); //$reactor->criticals[] =  $crit;
 						$outputMod += 3;
 					}
 					while($outputMod<=-2){
 						$crit = new OutputReduced2(-1, $ship->id, $reactor->id, "OutputReduced2", $gamedata->turn);
 						$crit->updated = true;
-						$reactor->criticals[] =  $crit;
+						$reactor->setCritical($crit); //$reactor->criticals[] =  $crit;
 						$outputMod += 2;
 					}
 					while($outputMod<=-1){
 						$crit = new OutputReduced1(-1, $ship->id, $reactor->id, "OutputReduced1", $gamedata->turn);
 						$crit->updated = true;
-						$reactor->criticals[] =  $crit;
+						$reactor->setCritical($crit); //$reactor->criticals[] =  $crit;
 						$outputMod += 1;
 					}					
 					/* original version
@@ -324,7 +324,7 @@ class ShockCannon extends Weapon{
 					$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
 					$crit->updated = true;
 					$crit->inEffect = true;
-					$system->criticals[] =  $crit;
+					$system->setCritical($crit); //$system->criticals[] =  $crit;
 					$fireOrder->pubnotes .= " DROPOUT! ";
 				}
 			}
@@ -435,13 +435,13 @@ class BurstBeam extends Weapon{
 				$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
 				$crit->updated = true;
 				$crit->inEffect = true;
-				$system->criticals[] =  $crit;
+				$system->setCritical($crit); //$system->criticals[] =  $crit;
 				$fireOrder->pubnotes .= " DROPOUT! ";
 			}else if ($system instanceof Structure){
 				$reactor = $ship->getSystemByName("Reactor");
 				$crit = new OutputReduced1(-1, $ship->id, $reactor->id, "OutputReduced1", $gamedata->turn);
 				$crit->updated = true;
-				$reactor->criticals[] =  $crit;
+				$reactor->setCritical($crit); //$reactor->criticals[] =  $crit;
 			}else if ($system->powerReq > 0 || $system->canOffLine ){
 				$system->addCritical($ship->id, "ForcedOfflineOneTurn", $gamedata);
 			} else { //force critical roll at +4
@@ -551,13 +551,13 @@ class BurstPulseCannon extends Pulse {
 				$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
 				$crit->updated = true;
 				$crit->inEffect = true;
-				$system->criticals[] =  $crit;
+				$system->setCritical($crit); //$system->criticals[] =  $crit;
 				$fireOrder->pubnotes .= " DROPOUT! ";
 			}else if ($system instanceof Structure){
 				$reactor = $ship->getSystemByName("Reactor");
 				$crit = new OutputReduced1(-1, $ship->id, $reactor->id, "OutputReduced1", $gamedata->turn);
 				$crit->updated = true;
-				$reactor->criticals[] =  $crit;
+				$reactor->setCritical($crit); //$reactor->criticals[] =  $crit;
 			}else if ($system->powerReq > 0 || $system->canOffLine ){
 				$system->addCritical($ship->id, "ForcedOfflineOneTurn", $gamedata);
 			} else { //force critical roll at +4
@@ -641,7 +641,7 @@ class MediumBurstBeam extends BurstBeam{
 				$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
 				$crit->updated = true;
 				$crit->inEffect = true;
-				$system->criticals[] =  $crit;
+				$system->setCritical($crit); //$system->criticals[] =  $crit;
 				$fireOrder->pubnotes .= " DROPOUT! ";
 			}
 		}
@@ -649,12 +649,12 @@ class MediumBurstBeam extends BurstBeam{
 			$reactor = $ship->getSystemByName("Reactor");
 			$crit = new OutputReduced1(-1, $ship->id, $reactor->id, "OutputReduced2", $gamedata->turn);
 			$crit->updated = true;
-			$reactor->criticals[] =  $crit;
+			$reactor->setCritical($crit); //$reactor->criticals[] =  $crit;
 		}
 		else if ($system->powerReq > 0 || $system->canOffLine ){
 			$crit = new ForcedOfflineForTurns (-1, $ship->id, $system->id, "ForcedOfflineForTurns", $gamedata->turn, $gamedata->turn+2);
 			$crit->updated = true;
-			$system->criticals[] = $crit;
+			$system->setCritical($crit); //$system->criticals[] = $crit;
 		}
 		else {//force critical roll at +6
 			$system->forceCriticalRoll = true;
@@ -724,7 +724,7 @@ class HeavyBurstBeam extends BurstBeam{
 				$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
 				$crit->updated = true;
 				$crit->inEffect = true;
-				$system->criticals[] =  $crit;
+				$system->setCritical($crit); //$system->criticals[] =  $crit;
 				$fireOrder->pubnotes .= " DROPOUT! ";
 			}
 		}
@@ -732,12 +732,12 @@ class HeavyBurstBeam extends BurstBeam{
 			$reactor = $ship->getSystemByName("Reactor");
 			$crit = new OutputReduced1(-1, $ship->id, $reactor->id, "OutputReduced4", $gamedata->turn);
 			$crit->updated = true;
-			$reactor->criticals[] =  $crit;
+			$reactor->setCritical($crit); //$reactor->criticals[] =  $crit;
 		}
 		else if ($system->powerReq > 0 || $system->canOffLine ){
 			$crit = new ForcedOfflineForTurns (-1, $ship->id, $system->id, "ForcedOfflineForTurns", $gamedata->turn, $gamedata->turn+3);
 			$crit->updated = true;
-			$system->criticals[] = $crit;
+			$system->setCritical($crit); //$system->criticals[] = $crit;
 		}
 		else {//force critical roll at +8
 			$system->forceCriticalRoll = true;
@@ -826,7 +826,7 @@ class ElectroPulseGun extends Weapon{
 			$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
 			$crit->updated = true;
 			$crit->inEffect = true;
-			$system->criticals[] =  $crit;
+			$system->setCritical($crit); //$system->criticals[] =  $crit;
 			$fireOrder->pubnotes .= " DROPOUT! ";
 			}
 		}
@@ -923,7 +923,7 @@ class StunBeam extends Weapon{
 			$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
 			$crit->updated = true;
 			$crit->inEffect = true;
-			$system->criticals[] =  $crit;
+			$system->setCritical($crit); //$system->criticals[] =  $crit;
 			$fireOrder->pubnotes .= " DROPOUT! ";
 				}else{ //No other types of systems are effected.
 						$fireOrder->pubnotes .= "<br> Stun Beam has no effect.";				
@@ -1107,7 +1107,7 @@ class CommJammer extends Weapon{
 				for($i=1; $i<=$effectIni;$i++){
 					$crit = new tmpinidown(-1, $ship->id, $CnC->id, 'tmpinidown', $gamedata->turn); 
 					$crit->updated = true;
-			        	$CnC->criticals[] =  $crit;
+			        	$CnC->setCritical($crit); //$CnC->criticals[] =  $crit;
 				}
 			}
 		}
@@ -1200,7 +1200,7 @@ class SensorSpear extends Weapon{
 				for($i=1; $i<=$effectSensors;$i++){
 					$crit = new tmpsensordown(-1, $ship->id, $CnC->id, 'tmpsensordown', $gamedata->turn); 
 					$crit->updated = true;
-			        	$CnC->criticals[] =  $crit;
+			        	$CnC->setCritical($crit); //$CnC->criticals[] =  $crit;
 				}
 			}
 		}
@@ -1250,7 +1250,7 @@ class SensorSpike extends SensorSpear{
 				for($i=1; $i<=$effectSensors;$i++){
 					$crit = new tmpsensordown(-1, $ship->id, $CnC->id, 'tmpsensordown', $gamedata->turn); 
 					$crit->updated = true;
-			        	$CnC->criticals[] =  $crit;
+			        	$CnC->setCritical($crit); //$CnC->criticals[] =  $crit;
 				}
 			}
 		}
@@ -2773,12 +2773,12 @@ class RadCannon extends Weapon{
 			$crit = new OutputReduced1(-1, $ship->id, $system->id, "OutputReduced1", $gamedata->turn);
 			$crit->updated = true;
 			$crit->inEffect = false;
-			$system->criticals[] =  $crit;
+			$system->setCritical($crit); //$system->criticals[] =  $crit;
 		} else if($system instanceOf Engine) { //Engine: output reduced by 2.
 			$crit = new OutputReduced2(-1, $ship->id, $system->id, "OutputReduced2", $gamedata->turn);
 			$crit->updated = true;
 			$crit->inEffect = false;
-			$system->criticals[] =  $crit;
+			$system->setCritical($crit); //$system->criticals[] =  $crit;
 		} //other systems: no effect!			 
 	}//endof function onDamagedSystem
 			
@@ -2926,16 +2926,16 @@ class IonFieldGenerator extends Weapon{
 			$crit = new ForcedOfflineOneTurn(-1, $ship->id, $system->id, "ForcedOfflineOneTurn", $gamedata->turn);
 			$crit->updated = true;
 			$crit->newCrit = true; //force save even if crit is not for current turn
-			$system->criticals[] =  $crit;
+			$system->setCritical($crit); //$system->criticals[] =  $crit;
 		}
 		if($ship instanceOf FighterFlight){ //effects on fighters - applying to first fighter (already found), will affect entire flight
 			$crit = new tmpsensordown(-1, $ship->id, $system->id, 'tmpsensordown', $gamedata->turn);  //-1 OB
 			$crit->updated = true;
-			$system->criticals[] =  $crit;
+			$system->setCritical($crit); //$system->criticals[] =  $crit;
 			for($i=1; $i<=3;$i++){ //-3 Initiative
 				$crit = new tmpinidown(-1, $ship->id, $system->id, 'tmpinidown', $gamedata->turn);  
 				$crit->updated = true;
-				$system->criticals[] =  $crit;
+				$system->setCritical($crit); //$system->criticals[] =  $crit;
 			}
 		}else{ //effects on ships
 			$CnC = $ship->getSystemByName("CnC"); //temporary effects are applied to C&C 
@@ -2943,18 +2943,18 @@ class IonFieldGenerator extends Weapon{
 				for($i=1; $i<=2;$i++){ //-2 Sensor rating
 					$crit = new tmpsensordown(-1, $ship->id, $CnC->id, 'tmpsensordown', $gamedata->turn); 
 					$crit->updated = true;
-			        	$CnC->criticals[] =  $crit;
+			        	$CnC->setCritical($crit); //$CnC->criticals[] =  $crit;
 				}
 				for($i=1; $i<=3;$i++){ //-3 Initiative
 					$crit = new tmpinidown(-1, $ship->id, $CnC->id, 'tmpinidown', $gamedata->turn); 
 					$crit->updated = true;
-			        	$CnC->criticals[] =  $crit;
+			        	$CnC->setCritical($crit); //$CnC->criticals[] =  $crit;
 				}
 				$powerLoss = min(2,$ship->shipSizeClass); //1 for LCVs and smaller, 2 for larger ships
 				for($i=1; $i<=$powerLoss;$i++){ //-3 Initiative
 					$crit = new tmppowerdown(-1, $ship->id, $CnC->id, 'tmppowerdown', $gamedata->turn); 
 					$crit->updated = true;
-			        	$CnC->criticals[] =  $crit;
+			        	$CnC->setCritical($crit); //$CnC->criticals[] =  $crit;
 				}
 			}
 		}			 
@@ -4490,7 +4490,7 @@ class PsychicField extends Weapon{ //Thirdspace weapons that operates similar to
 		
 	public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
 	public $weaponClass = "Psychic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
-    public $firingModes = array( 1 => "Field"); //just a convenient name for firing mode
+    public $firingModes = array( 1 => "Psychic Field"); //just a convenient name for firing mode
 	public $hextarget = true;
 	
     protected $ewBoosted = true;	
@@ -6873,7 +6873,7 @@ class ThoughtWave extends Plasma{
 
 	public $damageType = "Flash"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!   
 	public $weaponClass = "Plasma"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set! 
-	public $rangeDamagePenalty = 2;	
+	public $rangeDamagePenalty = 1;	
 
     public $animation = "ball";
     public $animationExplosionScale = 2;   
@@ -7023,21 +7023,26 @@ class ThoughtWave extends Plasma{
 		$damage = 0;//Intialise.
 		
 		if($fireOrder->targetid != -1){//Direct fire shot.
-			$diceRoll = Dice::d(6, 3);
+			$diceRoll = Dice::d(6, 3); // 13
             $defence = $target->getHitSectionProfilePos(mathlib::hexCoToPixel($pos));//Base profile.
         	$mod = $target->getHitChanceMod($shooter, $pos, $gamedata->turn, $this); //Shields/E-web etc affect profile!
-			$fireOrder->pubnotes .= ' Damage Roll: ' . $diceRoll . '.';	
-		        	           
+			$fireOrder->pubnotes .= ' Damage Roll: ' . $diceRoll . '/18.';	
+			$fireOrder->pubnotes .= ' Profile/Mod: ' . $defence . '/' . $mod . '. ';					
+					        	           
             if($target->advancedArmor){//Divide by 5 for AA
-				$damage = floor(($diceRoll/5) * ($defence + $mod)); //3d6 divide by 5, multiplied by defence profile.            	
+				$damage = floor(floor($diceRoll/5) * ($defence + $mod)); //3d6 divide by 5, multiplied by defence profile.            	
             }else{//Divide by 3 for everything else							
-				$damage = floor(($diceRoll/3) * ($defence + $mod)); //3d6 divide by 3, multiplied by defence profile.
+				$damage = floor(floor($diceRoll/3) * ($defence + $mod)); //3d6 divide by 3, multiplied by defence profile.
 			}				
 		}
+		$fireOrder->pubnotes .= ' Damage before Mods: ' . $damage . '. ';
+		
+        $damage = $this->getDamageMod($damage, $shooter, $target, $pos, $gamedata); // -5           
+        $damage -= $target->getDamageMod($shooter, $pos, $gamedata->turn, $this);// -4
 
-        $damage = $this->getDamageMod($damage, $shooter, $target, $pos, $gamedata);     
-        $damage -= $target->getDamageMod($shooter, $pos, $gamedata->turn, $this);
-			$fireOrder->pubnotes .= ' Damage: ' . $damage . '.';			
+		$damageForLog = max(0,$damage);			
+		$fireOrder->pubnotes .= '  Final Damage: ' . $damageForLog . '.';
+					
         return $damage;
     }
 	
@@ -7048,8 +7053,8 @@ class ThoughtWave extends Plasma{
 		$this->data["Special"] .= '<br><br>The Thought Wave will always originate from the starting location of the firing ship (as per usual with ballistic weapons).';
 		$this->data["Special"] .= '<br>The Thought Wave will attempt to hit ALL non-Mindrider ships in the game in Firing Phase (even friendlies), using the following formula:';
 		$this->data["Special"] .= '<br> - (15 + OEW + d20) - (Range Penalty + DEW - Target Initiative/5)';
-		$this->data["Special"] .= '<br>If this formula returns a result above 0, the Thought Wave automatically hits, and deals (3D6/3) * (Profile/5) Flash damage.';
-		$this->data["Special"] .= '<br>Advanced armor changes this formula to (3d6/5) * (Profile/5), and Shields etc affect profile as normal for this calculation.';			
+		$this->data["Special"] .= '<br>If this formula returns a result above 0, the Thought Wave automatically hits, and deals (3D6/3) * (Profile/5) Flash damage (-' . $this->rangeDamagePenalty . ' per hex as per usual Plasma rules).';
+		$this->data["Special"] .= '<br>Advanced Armor changes this formula to (3d6/5) * (Profile/5), and Shields etc affect profile as normal for this calculation.';			
 		$this->data["Special"] .= '<br>Will only strike 1 fighter in a flight, but Flash damage may still affect other fighters.';
 		$this->data["Special"] .= '<br>Note - Only successful attacks will appear in the Combat Log.';								
 	}	

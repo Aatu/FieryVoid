@@ -835,18 +835,29 @@ window.shipManager = {
 			var ship = gamedata.ships[i];
 			if (!ship.mustPivot) continue;//Ignore everything but ships that HAVE to pivot.
 			if (ship.unavailable) continue;
-			if (ship.flight) continue;
 			if (ship.userid != gamedata.thisplayer) continue;					
 			if (shipManager.isDestroyed(ship)) continue;
 
-	    var hasPivoted = shipManager.movement.hasPivoted(ship);
-			if (hasPivoted.right) continue;
-			if (hasPivoted.left) continue;	
-				
-			pivotShips[counter] = ship;
-			counter++;							
+			var left = 0;
+			var right = 0;				
+	
+	        const currentTurnMovements = ship.movement.filter(movement => movement.turn == gamedata.turn);
+	        currentTurnMovements.forEach(movement => {
+	            if (movement.type == "pivotleft" && !movement.preturn) {
+	                left++;
+	            }
+	            if (movement.type == "pivotright" && !movement.preturn) {
+	                right++;
+	            }
+	        });
+
+			if(left == right){				
+				pivotShips[counter] = ship;
+				counter++;		
+			}					
 		}
-			return pivotShips;
+		
+		return pivotShips;
     },
 
 

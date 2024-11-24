@@ -984,44 +984,51 @@ class PulseAccelerator extends Pulse{
     }//endof class PhasingPulseCannonH
 
 
-    class TriopticPulsar extends PointPulsar //this is NOT a Pulse weapon, disregard Pulse-specific settings...
+    class TriopticPulsar extends Pulse //this is NOT a Pulse weapon, disregard Pulse-specific settings...
     {
         public $name = "TriopticPulsar";
         public $displayName = "Trioptic Pulsar";
         public $iconPath = "TriopticPulsar.png";
 	    
         public $animation = "bolt";	    
- 	   public $animationColor = array(204, 102, 0);
+	 	public $animationColor = array(204, 102, 0);
 
-        public $guns = 3; //always 3, completely separate (not Pulse!) shots
         public $maxpulses = 3;
         public $grouping = 0;
         public $loadingtime = 1;
         public $normalload = 1;
 	    
-        public $priority = 4;
-        
-        public $calledShotMod = -4; //instead of usual -8
-	    
+        public $priority = 4;    
         public $intercept = 2; //should be 3, but then intercept should be like a Pulse weapon - just once... call this a compromise!
 	    
         public $rangePenalty = 0.5;
-        public $fireControl = array(-4, 3, 5); // fighters, <mediums, <capitals
+        public $fireControl = array(4, 3, 2); // fighters, <mediums, <capitals
 	    
-	    public $damageType = "Standard"; 
+	    public $damageType = "Pulse"; 
 	    public $weaponClass = "Particle"; 
 	    
-	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
-		if ( $maxhealth == 0 ) $maxhealth = 6;
-		if ( $powerReq == 0 ) $powerReq = 3;
-		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-	}
+		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+			if ( $maxhealth == 0 ) $maxhealth = 6;
+			if ( $powerReq == 0 ) $powerReq = 3;
+			parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+		}
         
 	    
         public function setSystemDataWindow($turn){            
             parent::setSystemDataWindow($turn);		
-		$this->data["Special"] = "Always fires three shots.";
+		$this->data["Special"] = "Always fires three pulses.";
         }
+
+        protected function getPulses($turn)
+        {
+            return 3;
+        }
+	
+        protected function getExtraPulses($needed, $rolled)
+        {
+            return 0;
+        }
+
         
         public function getDamage($fireOrder){
             return Dice::d(10,2); 
@@ -1083,9 +1090,9 @@ class UltraPulseCannon extends Pulse{
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);
 		$this->data["Special"] = 'Pulse characterstics vary depending on Firing Mode:';
-		$this->data["Special"] .= '<br> - Heavy: 24 Damage, D3 Pulses, 20% grouping';
-		$this->data["Special"] .= '<br> - Medium: 16 Damage, D5 Pulses, 15% grouping';	
-		$this->data["Special"] .= '<br> - Light: 12 Damage, D6 Pulses, 10% grouping';			
+		$this->data["Special"] .= '<br> - HEAVY: 24 Damage, D3 Pulses, 20% grouping, Max. Pulses: 6';
+		$this->data["Special"] .= '<br> - MEDIUM: 16 Damage, D5 Pulses, 15% grouping, Max. Pulses: 9';	
+		$this->data["Special"] .= '<br> - LIGHT: 12 Damage, D6 Pulses, 10% grouping, Max. Pulses: 12';			
 	}
         
     protected function getPulses($turn){

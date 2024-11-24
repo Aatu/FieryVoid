@@ -383,10 +383,10 @@ window.ShipIcon = function () {
 	    var hexDistance = window.coordinateConverter.getHexDistance();
 
 	    if (weapon instanceof Thruster) { //When 'weapon' system is a Thruster, displays small thruster icon on approriate location in relation to ship  - DK 10/24
-	        var graphicSize = 40; // Adjust the size of your graphic as needed
+	        var graphicSize = 32; // Adjust the size of your graphic as needed
 	        var textureLoader = new THREE.TextureLoader();
 
-	        textureLoader.load("./img/systemicons/thrusterICON.png", (graphicTexture) => {
+	        textureLoader.load("./img/systemicons/thrusterICON1.png", (graphicTexture) => {
 	            // Create a PlaneGeometry for the graphic
 	            var geometry = new THREE.PlaneGeometry(graphicSize, graphicSize);
 	            var material = new THREE.MeshBasicMaterial({

@@ -83,7 +83,7 @@ ShieldReinforcement.prototype.confirmReinforcement = function (shooter, target) 
 				    noOfshields += 1;//Shield found, add it to tally.
 		}
 	}
-//	var reinforceAmount = shipManager.power.getBoost(this);
+
 	var output = shipManager.systems.getRemainingHealth(this);
 	var totalCost = noOfshields * this.reinforceAmount;
 	

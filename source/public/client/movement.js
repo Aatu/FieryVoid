@@ -972,14 +972,43 @@ shipManager.movement = {
 
 	amendContractValue: function amendContractValue(ship, value){
 
-			for (var i in ship.systems) {
-				var system = ship.systems[i];
-				if (system.hasOwnProperty('contraction')) {
-				    system.contraction += value;
-				    if(system.contraction <= 0) system.contraction = 0;
-				    break;
-				}					
-			}	
+		var mindriderEngine = null;
+
+		for (var i in ship.systems) {
+			var engineSystem = ship.systems[i];
+			if (engineSystem.hasOwnProperty('contraction')) {
+				engineSystem.contraction += value;
+				if(engineSystem.contraction <= 0) engineSystem.contraction = 0;
+				//Now update ship stats/Engine tooltip	
+				ship.forwardDefense -= value;					    	
+				ship.sideDefense -= value;
+				engineSystem.data['Contraction Level'] = engineSystem.contraction;
+				//And store Engine system for next part.				    
+				mindriderEngine = engineSystem;	
+				break;
+			}					
+		}
+
+	    if (mindriderEngine) {
+	        // Calculate the new armour boost based on multiples of 3
+	        var newArmourBoost = Math.floor(mindriderEngine.contraction / 3);
+
+	        for (var j in ship.systems) {
+	            var system = ship.systems[j];
+
+	            if (system instanceof ThoughtShield) {
+	                // Adjust ThoughtShield health
+	                system.currentHealth += value;
+	            } else {
+	                // Adjust armour based on the change in contraction
+	                if (system.armour === undefined) continue; // Skip systems without armour property
+	                var currentBoost = system._armourBoost || 0; // Track previous boost
+	                system.armour -= currentBoost; // Remove previous boost
+	                system.armour += newArmourBoost; // Apply new boost
+	                system._armourBoost = newArmourBoost; // Store the current boost for future adjustments
+	            }
+	        }
+	    }
 	},
 
 	

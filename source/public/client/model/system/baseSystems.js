@@ -97,23 +97,28 @@ Engine.prototype.addInfo = function () {
 
 Engine.prototype.doIndividualNotesTransfer = function () { //prepare individualNotesTransfer variable - if relevant for this particular system
 
-	if(!this.hasOwnProperty('contraction')) return;
+	if(!this.hasOwnProperty('contraction')) return;//Method below only relates to ships which can Contract.
+		
+	var ship = this.ship;
+	var activeShips = gamedata.activeship;
+	var contractOnTurn = 0;	
+		
+	if(gamedata.gamephase == 2){
+		if (Array.isArray(activeShips) ? activeShips.includes(ship.id) : activeShips === ship.id) {
+			this.individualNotesTransfer = Array();					
+			    
+			for (var i in ship.movement) {
+			    var move = ship.movement[i];
+			        
+			    if (move.turn != gamedata.turn) continue;
 
-    this.individualNotesTransfer = Array();
-	var contractOnTurn = 0;
-	var ship = this.ship;	
-	
-	if(gamedata.gamephase == 2){		
-	    for (var i in ship.movement) {
-	        var move = ship.movement[i];
-	        
-	        if (move.turn != gamedata.turn) continue;
-
-	        if (move.type == "contract") {
-				contractOnTurn += move.value;//Will +1 depending on Contraction.
-	        }
-	    }
+			    if (move.type == "contract") {
+						contractOnTurn += move.value;//Will +1 depending on Contraction.
+			    }
+			}
+		}	
 	}	
+
 	//Now pass a note to amend Contraction level in backend and make stat changes.
 	if(contractOnTurn != 0){
 		this.individualNotesTransfer.push(contractOnTurn); //Push change in shield strength to back end for Damage Entry creation if required e.g. over or under 0.
