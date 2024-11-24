@@ -1,17 +1,21 @@
 <?php
-class QomYominLightScout extends MediumShip{
+class QomYominEloquay extends MediumShip{
 
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 330;
+        $this->pointCost = 300;
         $this->faction = "ZNexus Makar Federation";
-        $this->phpclass = "QomYominLightScout";
-        $this->imagePath = "img/ships/Nexus/makar_sorolma.png";
-        $this->shipClass = "Sorol Ma Light Scout";
+        $this->phpclass = "QomYominEloquay";
+        $this->imagePath = "img/ships/Nexus/makar_eloquay2.png";
+        $this->shipClass = "Eloquay Drone Frigate";
+			$this->variantOf = "Sorol Ma Light Scout";
+			$this->occurence = "common";
 		$this->unofficial = true;
         $this->canvasSize = 80;
-	    $this->isd = 1879;
+	    $this->isd = 1920;
+
+        $this->fighters = array("normal"=>6);
 
 	    $this->notes = '<br>Unreliable Ship:';
  	    $this->notes .= '<br> - Sluggish';
@@ -28,7 +32,7 @@ class QomYominLightScout extends MediumShip{
         $this->pivotcost = 2;
         $this->iniativebonus = 53;
          
-        $this->addPrimarySystem(new Reactor(3, 13, 0, 4));
+        $this->addPrimarySystem(new Reactor(3, 13, 0, 6));
         $this->addPrimarySystem(new CnC(4, 9, 0, 0));
         $this->addPrimarySystem(new ELINTScanner(3, 12, 5, 5));
         $this->addPrimarySystem(new Engine(3, 11, 0, 5, 3));
@@ -43,7 +47,7 @@ class QomYominLightScout extends MediumShip{
 		$this->addPrimarySystem($rammingAttack);
         
 		$this->addFrontSystem(new SensorSpear(3, 6, 3, 180, 60));
-		$this->addFrontSystem(new NexusPlasmaCharge(3, 7, 4, 300, 60));
+		$this->addFrontSystem(new HKControlNode(3, 10, 2, 1));
 		$this->addFrontSystem(new SensorSpear(3, 6, 3, 300, 180));
         $this->addFrontSystem(new Thruster(3, 7, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 7, 0, 3, 1));
@@ -71,7 +75,7 @@ class QomYominLightScout extends MediumShip{
 
 		1=> array(
 			6 => "Thruster",
-			8 => "Plasma Charge",
+			8 => "HK Control Node",
 			10 => "Sensor Spear",
 			17 => "Structure",
 			20 => "Primary",

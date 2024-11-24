@@ -7,7 +7,7 @@ class MakarCorrenRefit2 extends OSAT{
 	$this->pointCost = 150;
 	$this->faction = "ZNexus Makar Federation";
         $this->phpclass = "MakarCorrenRefit2";
-        $this->imagePath = "img/ships/Nexus/makarCorren.png";
+        $this->imagePath = "img/ships/Nexus/makar_corren3.png";
         $this->canvasSize = 60;
         $this->shipClass = 'Corren OSAT (2109 refit)';
 			$this->variantOf = "Corren OSAT";

@@ -1,17 +1,19 @@
 <?php
-class QomYominLightScout extends MediumShip{
+class QomYominCeedrae extends MediumShip{
 
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 330;
+        $this->pointCost = 310;
         $this->faction = "ZNexus Makar Federation";
-        $this->phpclass = "QomYominLightScout";
-        $this->imagePath = "img/ships/Nexus/makar_sorolma.png";
-        $this->shipClass = "Sorol Ma Light Scout";
+        $this->phpclass = "QomYominCeedrae";
+        $this->imagePath = "img/ships/Nexus/makar_ceedrae2.png";
+        $this->shipClass = "Ceedrae Escort Frigate";
+			$this->variantOf = "Sorol Ma Light Scout";
+			$this->occurence = "common";
 		$this->unofficial = true;
         $this->canvasSize = 80;
-	    $this->isd = 1879;
+	    $this->isd = 2107;
 
 	    $this->notes = '<br>Unreliable Ship:';
  	    $this->notes .= '<br> - Sluggish';
@@ -28,9 +30,9 @@ class QomYominLightScout extends MediumShip{
         $this->pivotcost = 2;
         $this->iniativebonus = 53;
          
-        $this->addPrimarySystem(new Reactor(3, 13, 0, 4));
+        $this->addPrimarySystem(new Reactor(3, 13, 0, 6));
         $this->addPrimarySystem(new CnC(4, 9, 0, 0));
-        $this->addPrimarySystem(new ELINTScanner(3, 12, 5, 5));
+        $this->addPrimarySystem(new ELINTScanner(3, 12, 5, 6));
         $this->addPrimarySystem(new Engine(3, 11, 0, 5, 3));
 		$this->addPrimarySystem(new NexusWaterCaster(3, 4, 1, 0, 360));
         $this->addPrimarySystem(new Thruster(3, 13, 0, 5, 3));
@@ -42,9 +44,9 @@ class QomYominLightScout extends MediumShip{
 	    $rammingAttack = new RammingAttack(0, 0, 360, 60, $hitBonus, true, 0); //actual damage - NOT calculated, but designed (60)
 		$this->addPrimarySystem($rammingAttack);
         
-		$this->addFrontSystem(new SensorSpear(3, 6, 3, 180, 60));
-		$this->addFrontSystem(new NexusPlasmaCharge(3, 7, 4, 300, 60));
-		$this->addFrontSystem(new SensorSpear(3, 6, 3, 300, 180));
+		$this->addFrontSystem(new NexusLightBurstBeam(3, 6, 3, 180, 60));
+		$this->addFrontSystem(new EWDualRocketLauncher(3, 6, 2, 270, 90));
+		$this->addFrontSystem(new NexusLightBurstBeam(3, 6, 3, 300, 180));
         $this->addFrontSystem(new Thruster(3, 7, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 7, 0, 3, 1));
 	    
@@ -71,8 +73,8 @@ class QomYominLightScout extends MediumShip{
 
 		1=> array(
 			6 => "Thruster",
-			8 => "Plasma Charge",
-			10 => "Sensor Spear",
+			8 => "Dual Rocket Launcher",
+			10 => "Light Burst Beam",
 			17 => "Structure",
 			20 => "Primary",
 		),

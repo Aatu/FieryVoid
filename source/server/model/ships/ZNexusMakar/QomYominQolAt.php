@@ -7,7 +7,7 @@ class QomYominQolAt extends OSAT{
 	$this->pointCost = 120;
 	$this->faction = "ZNexus Makar Federation";
         $this->phpclass = "QomYominQolAt";
-        $this->imagePath = "img/ships/Nexus/makarQolat.png";
+        $this->imagePath = "img/ships/Nexus/makar_qolat2.png";
         $this->canvasSize = 80;
         $this->shipClass = 'Qol At Support OSAT';
         

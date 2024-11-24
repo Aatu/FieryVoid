@@ -8,7 +8,7 @@ class QomYominTolMor extends FighterFlight{
         $this->faction = "ZNexus Makar Federation";
         $this->phpclass = "QomYominTolMor";
         $this->shipClass = "Tol Mor Armed Drone";
-        $this->imagePath = "img/ships/Nexus/makar_tolmor.png";
+        $this->imagePath = "img/ships/Nexus/makar_tolmor2.png";
 		$this->unofficial = true;
 
         $this->isd = 1925;
@@ -38,8 +38,8 @@ class QomYominTolMor extends FighterFlight{
             $armour = array(1, 1, 0, 0);
             $fighter = new Fighter("QomYominTolMor", $armour, 5, $this->id);
             $fighter->displayName = "Tol Mor";
-            $fighter->imagePath = "img/ships/Nexus/makar_tolmor.png";
-            $fighter->iconPath = "img/ships/Nexus/makar_tolmor_large.png";
+            $fighter->imagePath = "img/ships/Nexus/makar_tolmor2.png";
+            $fighter->iconPath = "img/ships/Nexus/makar_tolmor_large2.png";
 
 	        $light = new NexusLightDefenseGun(300, 60, 1); //$startArc, $endArc, $nrOfShots
 	        $fighter->addFrontSystem($light);

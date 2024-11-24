@@ -1263,6 +1263,7 @@ spl_autoload_register(
 				'ewfightertorpedolauncher' => '/server/model/weapons/customEscalation.php',
 				'ewlightplasmamine' => '/server/model/weapons/customEscalation.php',
 				'ewrangedrocketlauncher' => '/server/model/weapons/customEscalation.php',
+				'ewrangedheavyrocketlauncher' => '/server/model/weapons/customEscalation.php',
 				'ewrangeddualrocketlauncher' => '/server/model/weapons/customEscalation.php',
 				'ewrangeddualheavyrocketlauncher' => '/server/model/weapons/customEscalation.php',
 				'ewplasmamine' => '/server/model/weapons/customEscalation.php',
@@ -1652,6 +1653,7 @@ spl_autoload_register(
 				'nexustwiniongun' => '/server/model/weapons/customNexus.php',
 			//Nexus EM weapons
 				'nexuslightchargecannon' => '/server/model/weapons/customNexus.php',
+				'nexuslightburstbeam' => '/server/model/weapons/customNexus.php',
 			//Nexus other weapons
 				'ammomag' => '/server/model/weapons/customNexus.php',
 			
@@ -1855,6 +1857,8 @@ spl_autoload_register(
                 'qomyominauxcarrier' => '/server/model/ships/ZNexusMakar/QomYominAuxCarrier.php',					
                 'qomyominauxdestroyer' => '/server/model/ships/ZNexusMakar/QomYominAuxDestroyer.php',					
                 'qomyominauxdestroyeralt' => '/server/model/ships/ZNexusMakar/QomYominAuxDestroyerAlt.php',					
+                'qomyominceedrae' => '/server/model/ships/ZNexusMakar/QomYominCeedrae.php',					
+                'qomyomineloquay' => '/server/model/ships/ZNexusMakar/QomYominEloquay.php',					
                 'qomyominhauler' => '/server/model/ships/ZNexusMakar/QomYominHauler.php',					
                 'qomyominlightscout' => '/server/model/ships/ZNexusMakar/QomYominLightScout.php',					
                 'qomyominqolat' => '/server/model/ships/ZNexusMakar/QomYominQolAt.php',					

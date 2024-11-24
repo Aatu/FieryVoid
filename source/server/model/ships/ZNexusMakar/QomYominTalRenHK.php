@@ -11,7 +11,7 @@ class QomYominTalRenHK extends FighterFlight{
         $this->shipClass = "Tal Ren Hunter-Killer flight";
 			$this->variantOf = "Tol Mor Armed Drone";
 			$this->occurence = "rare";
-        $this->imagePath = "img/ships/Nexus/makar_talren.png";
+        $this->imagePath = "img/ships/Nexus/makar_tolmor2.png";
         
         $this->isd = 1930;
         $this->forwardDefense = 7;
@@ -35,8 +35,8 @@ class QomYominTalRenHK extends FighterFlight{
             $armour = array(1, 1, 0, 0);
             $fighter = new Fighter("QomYominTalRenHK", $armour, 6, $this->id);
             $fighter->displayName = "Tal Ren";
-            $fighter->imagePath = "img/ships/Nexus/makar_talren.png";
-            $fighter->iconPath = "img/ships/Nexus/makar_talren_large.png";
+            $fighter->imagePath = "img/ships/Nexus/makar_tolmor2.png";
+            $fighter->iconPath = "img/ships/Nexus/makar_tolmor_large2.png";
             
             //$armour, $startArc, $endArc, $designDamage = 0, $fcbonus = 0, $designedToRam = false, $selfDestruct = 0
             //Shining Light should by rules get a penalty of -1 per 2 speed at the moment of ram, and flat +1 bonus

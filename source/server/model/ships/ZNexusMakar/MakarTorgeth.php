@@ -7,12 +7,12 @@ class MakarTorgeth extends MediumShip{
         $this->pointCost = 220;
         $this->faction = "ZNexus Makar Federation";
         $this->phpclass = "MakarTorgeth";
-        $this->imagePath = "img/ships/Nexus/makarRatash_v3.png";
+        $this->imagePath = "img/ships/Nexus/makar_ratash2.png";
         $this->shipClass = "Torgeth Troop Transport";
 			$this->variantOf = "Ratash Early Frigate";
 			$this->occurence = "uncommon";
 		$this->unofficial = true;
-        $this->canvasSize = 80;
+        $this->canvasSize = 90;
         $this->agile = true;
 	    $this->isd = 1912;
 

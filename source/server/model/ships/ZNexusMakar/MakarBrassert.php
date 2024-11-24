@@ -7,7 +7,7 @@ class MakarBrassert extends MediumShip{
         $this->pointCost = 350;
         $this->faction = "ZNexus Makar Federation";
         $this->phpclass = "MakarBrassert";
-        $this->imagePath = "img/ships/Nexus/makarBrassert3.png";
+        $this->imagePath = "img/ships/Nexus/makar_brassert2.png";
         $this->shipClass = "Brassert Frigate";
 		$this->unofficial = true;
         $this->canvasSize = 80;
