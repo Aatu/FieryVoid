@@ -1473,9 +1473,12 @@ window.shipWindowManager = {
 			webglScene.customEvent("ShipMovementChanged", { ship: ship });
 			window.webglScene.customEvent("AssignThrust", false)
 		}
+        
         //For Contraction, need to amend level for first order.
-        if(movement.type == "contract") shipManager.movement.amendContractValue(ship, movement.value);
-
+		if(done){
+			if(movement.type == "contract") shipManager.movement.amendContractValue(ship, movement.value);
+		}
+			
 	},
 
 	cancelAssignThrustEvent: function cancelAssignThrustEvent(ship) {

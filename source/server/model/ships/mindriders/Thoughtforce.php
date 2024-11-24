@@ -46,9 +46,7 @@ class Thoughtforce extends MindriderCapital{
 		$cnc->startArc = 0;
 		$cnc->endArc = 360;
         $this->addPrimarySystem($cnc);     
-
-//        $this->addPrimarySystem(new CnC(8, 16, 0, 0));
-//        $this->addPrimarySystem(new SecondaryCnC(8, 16, 0, 0));        
+      
         $scanner = new ElintScanner(7, 22, 0, 12);
 		$scanner->markMindrider();
 		$this->addPrimarySystem($scanner);	        
@@ -60,41 +58,41 @@ class Thoughtforce extends MindriderCapital{
 		$this->addPrimarySystem(new JumpEngine(7, 25, 8, 8));   		  		
       
 	
-		$this->addPrimarySystem(new ThoughtShield(0, 100, 25, 270, 360, 'FP'));
-		$this->addFrontSystem(new SelfRepair(6, 6, 3)); //armor, structure, output 
+		$this->addPrimarySystem(new ThoughtShield(0, 50, 25, 270, 360, 'FP'));
+		$this->addLeftFrontSystem(new SelfRepair(6, 6, 3)); //armor, structure, output 
 		$tPulsar = new TriopticPulsar(6, 0, 0, 270, 90);
 		$tPulsar->addTag("Trioptic Pulsar");
 		$this->addFrontSystem($tPulsar);           
         $this->addFrontSystem(new MindriderThruster(6, 35, 0, 12, 1));           
 			
 	
-		$this->addPrimarySystem(new ThoughtShield(0, 100, 25, 180, 270, 'AP')); 	
-		$this->addAftSystem(new SelfRepair(6, 6, 3)); //armor, structure, output 
+		$this->addPrimarySystem(new ThoughtShield(0, 50, 25, 180, 270, 'AP')); 	
+		$this->addRightFrontSystem(new SelfRepair(6, 6, 3)); //armor, structure, output 
 		$tPulsar = new TriopticPulsar(6, 0, 0, 90, 270);
 		$tPulsar->addTag("Trioptic Pulsar");
 		$this->addAftSystem($tPulsar);         
         $this->addAftSystem(new MindriderThruster(6, 35, 0, 12, 2));        
        
         	
-		$this->addPrimarySystem(new ThoughtShield(0, 100, 25, 90, 180, 'AS'));	              
-		$this->addLeftSystem(new SelfRepair(6, 6, 3)); //armor, structure, output 
+		$this->addPrimarySystem(new ThoughtShield(0, 50, 25, 90, 180, 'AS'));	              
+		$this->addLeftAftSystem(new SelfRepair(6, 6, 3)); //armor, structure, output 
 		$tPulsar = new TriopticPulsar(6, 0, 0, 180, 360);
 		$tPulsar->addTag("Trioptic Pulsar");
-		$this->addLeftSystem($tPulsar);
-        $this->addLeftSystem(new MindriderThruster(6, 35, 0, 12, 3));                                                               
+		$this->addLeftFrontSystem($tPulsar);
+        $this->addLeftAftSystem(new MindriderThruster(6, 35, 0, 12, 3));                                                               
                  	
-		$this->addPrimarySystem(new ThoughtShield(0, 100, 25, 0, 90, 'FS'));	
-		$this->addRightSystem(new SelfRepair(6, 6, 3)); //armor, structure, output 
+		$this->addPrimarySystem(new ThoughtShield(0, 50, 25, 0, 90, 'FS'));	
+		$this->addRightAftSystem(new SelfRepair(6, 6, 3)); //armor, structure, output 
 		$tPulsar = new TriopticPulsar(6, 0, 0, 0, 180);
 		$tPulsar->addTag("Trioptic Pulsar");
-		$this->addRightSystem($tPulsar);	         
-        $this->addRightSystem(new MindriderThruster(6, 35, 0, 12, 4));    			                  		                      
+		$this->addRightFrontSystem($tPulsar);	         
+        $this->addRightAftSystem(new MindriderThruster(6, 35, 0, 12, 4));    			                  		                      
               			          
 		//structures
-        $this->addFrontSystem(new Structure(7, 88));
-        $this->addAftSystem(new Structure(7, 88));
-        $this->addLeftSystem(new Structure(7, 88));
-        $this->addRightSystem(new Structure(7, 88));
+        $this->addLeftFrontSystem(new Structure(7, 88));
+        $this->addRightAftSystem(new Structure(7, 88));
+        $this->addLeftAftSystem(new Structure(7, 88));
+        $this->addRightFrontSystem(new Structure(7, 88));
         $this->addPrimarySystem(new Structure(8, 90));
 		
 		
@@ -111,28 +109,28 @@ class Thoughtforce extends MindriderCapital{
 				19 => "Reactor",
 				20 => "TAG:C&C",
 			),
-			1=> array( //Fwd
+			31=> array( //Fwd
 				4 => "TAG:Thruster",
 				6 => "TAG:Trioptic Pulsar", 
 				8 => "Self Repair",
 				16 => "Structure",
 				20 => "Primary",
 			),
-			2=> array( //Aft
+			32=> array( //Aft
 				4 => "TAG:Thruster",
 				6 => "TAG:Trioptic Pulsar", 
 				8 => "Self Repair",
 				16 => "Structure",
 				20 => "Primary",
 			),
-			3=> array(
+			41=> array(
 				4 => "TAG:Thruster",
 				6 => "TAG:Trioptic Pulsar", 
 				8 => "Self Repair",
 				16 => "Structure",
 				20 => "Primary",
 			),
-			4=> array(
+			42=> array(
 				4 => "TAG:Thruster",
 				6 => "TAG:Trioptic Pulsar", 
 				8 => "Self Repair",
