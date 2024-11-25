@@ -562,4 +562,23 @@ class DefenderLost extends Critical{
     }
 } 
 
+class EngineShorted extends Critical{
+	//Serious engine critical to roll for whether to offline or force full acceleration.
+    public $description = "Engine Shorted";
+    public $oneturn = true;     
+	public $repairPriority = 0;//Can't repair.'       
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){  	
+    parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
+    }
+} 
+
+class ControlsStuck extends Critical{
+	//Serious engine critical to roll for whether to offline or force full acceleration.
+    public $description = "Involuntary Acceleration";  
+	public $repairPriority = 0;//Can't repair.'       
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){  	
+    parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
+    }
+} 
+
 ?>

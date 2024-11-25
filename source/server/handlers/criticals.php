@@ -59,6 +59,19 @@ class Criticals{
 				
 				$system->criticalPhaseEffects($ship, $gamedata); //hook for Critical phase effects
 				
+					//Now check for any EngineShorted Crits added by testCritical or criticalPhaseEffects()
+					if ($system instanceof Engine) {
+					    foreach ($system->criticals as $critical) {
+					        if ($critical->phpclass === "EngineShorted" && $critical->inEffect) {
+					            // Check if it matches the current turn
+					            if ($critical->turn == $gamedata->turn) {		                
+					                // Found a matching "Engine Shorted" critical for this turn
+					                $system->doEngineShorted($ship, $gamedata);
+					                break;
+					            }
+					        }
+					    }
+					}
             }
         }
         

@@ -3272,7 +3272,10 @@ spl_autoload_register(
 					 	'gkarith' => '/server/model/ships/narn/Gkarith.php',
 					 	'aegissensorpod' => '/server/model/weapons/specialWeapons.php', 
 						'hyperionaegis' => '/server/model/ships/EA/HyperionAegis.php',	
-						'abbaishieldprojector' => '/server/model/weapons/supportWeapons.php',				 						 	 
+						'abbaishieldprojector' => '/server/model/weapons/supportWeapons.php',
+						'engineshorted' => '/server/model/cricialClasses.php',				 						 	 
+						'controlsstuck' => '/server/model/cricialClasses.php',	
+
 					 							
 				//Thirdspace
 				'psychicfield' => '/server/model/weapons/specialWeapons.php',
