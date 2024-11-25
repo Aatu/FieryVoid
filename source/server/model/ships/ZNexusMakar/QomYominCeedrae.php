@@ -32,7 +32,7 @@ class QomYominCeedrae extends MediumShip{
          
         $this->addPrimarySystem(new Reactor(3, 13, 0, 6));
         $this->addPrimarySystem(new CnC(4, 9, 0, 0));
-        $this->addPrimarySystem(new ELINTScanner(3, 12, 5, 6));
+        $this->addPrimarySystem(new Scanner(3, 12, 5, 6));
         $this->addPrimarySystem(new Engine(3, 11, 0, 5, 3));
 		$this->addPrimarySystem(new NexusWaterCaster(3, 4, 1, 0, 360));
         $this->addPrimarySystem(new Thruster(3, 13, 0, 5, 3));
@@ -65,7 +65,7 @@ class QomYominCeedrae extends MediumShip{
 		0=> array(
 			8 => "Thruster",
 			10 => "Water Caster",
-			14 => "ELINT Scanner",
+			14 => "Scanner",
 			17 => "Engine",
 			19 => "Reactor",
 			20 => "C&C",
