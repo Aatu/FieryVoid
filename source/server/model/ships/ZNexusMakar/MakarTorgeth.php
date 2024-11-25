@@ -27,6 +27,9 @@ class MakarTorgeth extends MediumShip{
         $this->rollcost = 1;
         $this->pivotcost = 1;
         $this->iniativebonus = 60;
+
+   		$this->enhancementOptionsEnabled[] = 'ELT_MRN'; //To enable Elite Marines enhancement
+		$this->enhancementOptionsEnabled[] = 'EXT_MRN'; //To enable extra Marines enhancement
          
         $this->addPrimarySystem(new Reactor(4, 14, 0, 0));
         $this->addPrimarySystem(new CnC(4, 12, 0, 0));
@@ -37,6 +40,7 @@ class MakarTorgeth extends MediumShip{
         
 		$this->addFrontSystem(new EWRocketLauncher(3, 4, 1, 240, 60));
 		$this->addFrontSystem(new Quarters(3, 9));
+		$this->addFrontSystem(new GrapplingClaw(5, 0, 0, 300, 60, 8, false));
 		$this->addFrontSystem(new EWRocketLauncher(3, 4, 1, 300, 120));
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
@@ -61,7 +65,8 @@ class MakarTorgeth extends MediumShip{
 		1=> array(
 			5 => "Thruster",
 			7 => "Quarters",
-			9 => "Rocket Launcher",
+			8 => "Grappling Claw",
+			10 => "Rocket Launcher",
 			17 => "Structure",
 			20 => "Primary",
 		),
