@@ -5,12 +5,12 @@ class QomYominTalRenHK extends FighterFlight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 35*6;
+        $this->pointCost = 32*6;
         $this->faction = "ZNexus Makar Federation";
         $this->phpclass = "QomYominTalRenHK";
         $this->shipClass = "Tal Ren Hunter-Killer flight";
 			$this->variantOf = "Tol Mor Armed Drone";
-			$this->occurence = "rare";
+			$this->occurence = "uncommon";
         $this->imagePath = "img/ships/Nexus/makar_tolmor2.png";
         
         $this->isd = 1930;
@@ -42,7 +42,7 @@ class QomYominTalRenHK extends FighterFlight{
             //Shining Light should by rules get a penalty of -1 per 2 speed at the moment of ram, and flat +1 bonus
 	    //...and I do it so
 	    $hitPenalty = 2; //a bonus, actually!
-	    $ram = new RammingAttack(0, 0, 360, 30, $hitPenalty, true, 0);
+	    $ram = new RammingAttack(0, 0, 360, 36, $hitPenalty, true, 0);
 	    $ram->rangePenalty = 0.5; //-1/2 hexes
             $fighter->addFrontSystem($ram);
             
