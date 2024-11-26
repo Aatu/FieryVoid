@@ -505,6 +505,19 @@ shipManager.systems = {
 
         return toReturn;
     },    
+
+    hasBorderHighlight: function hasBorderHighlight(system) { 
+		var highlight = null;
+
+		var mayOverheat = shipManager.criticals.countCriticalOnTurn(system, "MayOverheat", gamedata.turn);
+		if(mayOverheat){ 
+			if(mayOverheat > 0) highlight = 'Yellow';
+			if(mayOverheat > 1) highlight = 'Red';			
+		}
+		
+
+        return highlight;
+    }, 
     
     getRemainingHealth: function getRemainingHealth(system) {
         var damage = shipManager.systems.getTotalDamage(system);
