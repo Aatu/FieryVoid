@@ -45,9 +45,9 @@ const System = styled.div`
 		if (props.firing) {
             return '1px solid #eb5c15';
         }else if (props.highlight === 'Yellow') {
-            return '2px solid #ffff00'; // Some systems get a different border
+            return '1px solid #ffff00'; // Some systems get a different border
         }else if (props.highlight === 'Red') {
-            return '2px solid #ff0000'; // Some systems get a different border            
+            return '1px solid #ff0000'; // Some systems get a different border            
         }else {
             return '1px solid #496791';
         }
@@ -201,7 +201,7 @@ class SystemIcon extends React.Component{
         return (
             <System 
                 scs={scs}
-    			highlight={hasBorderHighlight(system)} // Pass criticals here to System                
+    			highlight={hasBorderHighlight(ship, system)} // Pass criticals here to System                
                 onClick={this.clickSystem.bind(this)}
                 onMouseOver={this.onSystemMouseOver.bind(this)}
                 onMouseOut={this.onSystemMouseOut.bind(this)}
@@ -247,7 +247,7 @@ const getBackgroundImage = (system) => {
 
 const hasCriticals = (system) => shipManager.criticals.hasCriticals(system)
 
-const hasBorderHighlight = (system) => shipManager.systems.hasBorderHighlight(system);
+const hasBorderHighlight = (ship, system) => shipManager.systems.hasBorderHighlight(ship, system);
 
 const isSelected = (system) => weaponManager.isSelectedWeapon(system)
 

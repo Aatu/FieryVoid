@@ -38805,9 +38805,9 @@ var System = _styledComponents2.default.div.withConfig({
     if (props.firing) {
         return '1px solid #eb5c15';
     } else if (props.highlight === 'Yellow') {
-        return '2px solid #ffff00'; // Some systems get a different border
+        return '1px solid #ffff00'; // Some systems get a different border
     } else if (props.highlight === 'Red') {
-        return '2px solid #ff0000'; // Some systems get a different border            
+        return '1px solid #ff0000'; // Some systems get a different border            
     } else {
         return '1px solid #496791';
     }
@@ -38970,7 +38970,7 @@ var SystemIcon = function (_React$Component) {
                 System,
                 {
                     scs: scs,
-                    highlight: hasBorderHighlight(system) // Pass criticals here to System                
+                    highlight: hasBorderHighlight(ship, system) // Pass criticals here to System                
                     , onClick: this.clickSystem.bind(this),
                     onMouseOver: this.onSystemMouseOver.bind(this),
                     onMouseOut: this.onSystemMouseOut.bind(this),
@@ -39039,8 +39039,8 @@ var hasCriticals = function hasCriticals(system) {
     return shipManager.criticals.hasCriticals(system);
 };
 
-var hasBorderHighlight = function hasBorderHighlight(system) {
-    return shipManager.systems.hasBorderHighlight(system);
+var hasBorderHighlight = function hasBorderHighlight(ship, system) {
+    return shipManager.systems.hasBorderHighlight(ship, system);
 };
 
 var isSelected = function isSelected(system) {
