@@ -265,7 +265,7 @@
 			$this->data["Special"] .= '<br>';
 		}
 		$this->data["Special"] .= "This weapon suffers range penalty (like direct fire weapons do), but only after first 10 hexes of distance.";
-		$this->data["Special"] .= "<br>Also, targeting information is hidden for opponent - weapon will be marged as fired, but target will not be highlighted, and weapon will not be shown as incoming.";
+		$this->data["Special"] .= "<br>Also, targeting information is hidden for opponent - weapon will be marked as fired, but target will not be highlighted, and weapon will not be shown as incoming.";
 	}
         
 	    //override standard to skip first 10 hexes when calculating range penalty
@@ -689,5 +689,131 @@ class LimpetBoreTorpedoBase extends LimpetBoreTorpedo{
 	    		
 }//endof LimpetBoreBase
 
+
+	//Custom Updagrade Version of Packet Torpedo for Abraxas' campaign.
+   	class FlexPacketTorpedo extends Torpedo{
+        public $name = "FlexPacketTorpedo";
+        public $displayName = "Flexible Packet Torpedo";
+        public $iconPath = "flexPacketTorpedo.png";
+        public $range = 50;  
+		public $specialRangeCalculation = true; //to inform front end that it should use weapon-specific range penalty calculation
+        
+        public $weaponClass = "Ballistic"; 
+        public $damageType = "Standard"; 
+
+		public $loadingtime = 1;
+		public $normalload = 2;        
+		public $hidetarget = true;
+		
+		public $firingMode = 1;	
+		public $firingModes = array(
+			1 => "Torpedo"
+		);		
+        
+        public $fireControl = array(-6, 3, 3); // fighters, <mediums, <capitals 
+		public $rangePenalty = 0.5; //-1/2 hexes - BUT ONLY AFTER 10 HEXES
+        
+        public $animation = "torpedo";
+        public $animationColor = array(130, 170, 255);
+
+		private $firedInRapidMode = false; //was this weapon fired in rapid mode (this turn)?
+        public $priority = 6; //heavy Standard
+        
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 9;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 9;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+            	
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}
+		$this->data["Special"] .= "Weapon suffers range penalty (like direct fire weapons do), but only after first 20 hexes of distance.";		
+		$this->data["Special"] .= "<br>Can fire after only recharging for one turn, but range penalty is applied after first 5 hexes of distance.";					
+		$this->data["Special"] .= "<br>Targeting information is hidden for opponent - weapon will be marked as fired, but target will not be highlighted, and weapon will not be shown as incoming.";
+	}
+        
+		
+	private function nullFireControl() {//Extra function needed to null Fire Control values across ALL ammo types in recalculateFireControl.
+			$this->fireControl = array(null,null,null);//I need this method if launched has NO ammo modes.
+			$this->fireControlArray = array();		
+	}		
+
+	
+	// This method generates additional non-standard information in the form of individual system notes
+	 public function generateIndividualNotes($gameData, $dbManager){ //dbManager is necessary for Initial phase only
+			$ship = $this->getUnit();
+			switch($gameData->phase){								
+				case 1: //Initial phase 
+					//if weapon is marked as firing in Rapid mode, make a note of it!
+					if($ship->userid == $gameData->forPlayer){ //only own ships, otherwise bad things may happen!
+						if($this->firedInRapidMode){
+							$notekey = 'RapidFire';
+							$noteHuman = 'fired in Rapid mode';
+							$noteValue = 'R';
+							$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
+						}		
+					}							
+                break;
+			}					
+
+	} //endof function generateIndividualNotes
+	
+	//act on notes just loaded - to be redefined by systems as necessary
+	public function onIndividualNotesLoaded($gamedata){
+		foreach ($this->individualNotes as $currNote) 
+			if($currNote->turn == $gamedata->turn) if ($currNote->notevalue == 'R'){ //only current round matters!
+			$this->firedInRapidMode = true;			
+		}	
+		//and immediately delete notes themselves, they're no longer needed (this will not touch the database, just memory!)		
+		$this->individualNotes = array();
+	} //endof function onIndividualNotesLoaded
+	
+	
+	public function doIndividualNotesTransfer(){
+		//data received in variable individualNotesTransfer, further functions will look for variable firedInRapidMode
+		if(is_array($this->individualNotesTransfer)) foreach($this->individualNotesTransfer as $entry) {
+			if ($entry == 'R') $this->firedInRapidMode = true;
+			if ($entry == 'L') $this->firedInLongRangeMode = true;				
+		}
+		
+		$this->individualNotesTransfer = array(); //empty, just in case
+	}			
+		
+		public function calculateRangePenalty($distance){
+
+			if($this->firedInRapidMode){
+				$rangePenalty = 0;//base penalty
+				$rangePenalty += $this->rangePenalty * max(0,$distance - 5); //Normal range penalty in rapid mode
+				return $rangePenalty;				
+			}else{
+				$rangePenalty = 0;//base penalty
+				$rangePenalty += $this->rangePenalty * max(0,$distance-20); //everything above 10 hexes receives range penalty
+				return $rangePenalty;
+			}
+		}
+			
+	public function stripForJson(){
+		$strippedSystem = parent::stripForJson();	
+		$strippedSystem->firedInRapidMode = $this->firedInRapidMode;			
+		return $strippedSystem;
+	}
+        
+        public function getDamage($fireOrder){        return Dice::d(10, 2)+10;    }
+        public function setMinDamage(){     $this->minDamage = 12;      }
+        public function setMaxDamage(){     $this->maxDamage = 30;      }
+    
+    }//endof class FlexPacketTorpedo
+    
+    
     
 ?>

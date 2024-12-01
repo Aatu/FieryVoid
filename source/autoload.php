@@ -2590,6 +2590,7 @@ spl_autoload_register(
                 'bulkhead' => '/server/model/systems/baseSystems.php',
                 'packettorpedo' => '/server/model/weapons/torpedo.php',
                 'particleconcentrator' => '/server/model/weapons/specialWeapons.php',
+                'flexpackettorpedo' => '/server/model/weapons/torpedo.php', //Custom Packet Torp variant
 
 				//Gaim ships				
 				'gaimbassari' => '/server/model/ships/gaim/gaimBassari.php',
@@ -2717,7 +2718,6 @@ spl_autoload_register(
 				'folshotaraider' => '/server/model/ships/brakiri_raiders/FolshotARaider.php',
 				'gaimphotonbomb' => '/server/model/weapons/customs.php',
 				'gaimtixtyk' => '/server/model/ships/customs/gaimTixTyk.php',				
-				'gaimtixtykupgrade' => '/server/model/ships/customs/gaimTixTykUpgrade.php',	
 
 				//Star Trek conversions
 				//weapons
