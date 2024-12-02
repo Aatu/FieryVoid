@@ -131,7 +131,9 @@ shipManager.power = {
 		if (system.boostable && !boost) {
 			//if(system.name == "scanner" || system.name == "elintScanner"){
 			if (system.isScanner()) {
-				if (system.id == shipManager.power.getHighestSensorsId(ship)) {
+				if ( ($ship.base) //02.12.2024, Marcin Sawicki - bases can boost any sonsors, not just strongest
+				     || (system.id == shipManager.power.getHighestSensorsId(ship))  
+				   ){
 					// You can only boost the highest sensor rating
 					// if multiple sensors are present on one ship
 					systemwindow.addClass("canboost");
