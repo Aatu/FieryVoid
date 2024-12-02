@@ -24,6 +24,12 @@ class zzunoffDagkur extends MediumShip{
         $this->pivotcost = 2;
         
         $this->iniativebonus = 60;
+
+        //ammo magazine itself (AND its missile options)
+        $ammoMagazine = new AmmoMagazine(64); //pass magazine capacity - 12 rounds per class-SO rack, 20 most other shipborne racks, 60 class-B rack and 80 Reload Rack
+        $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
+        $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 64); //add full load of basic missiles
+        $this->enhancementOptionsEnabled[] = 'AMMO_F';//add enhancement options for other missiles - Class-F 
         
         $this->addPrimarySystem(new Reactor(4, 8, 0, 0));
         $this->addPrimarySystem(new CnC(5, 12, 0, 0));
@@ -37,14 +43,14 @@ class zzunoffDagkur extends MediumShip{
         //front
         $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
         $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
-        $this->addFrontSystem(new BombRack(4, 6, 0, 300, 60));
-        $this->addFrontSystem(new BombRack(4, 6, 0, 300, 60));
-        $this->addFrontSystem(new BombRack(4, 6, 0, 300, 60));
-        $this->addFrontSystem(new BombRack(4, 6, 0, 300, 60));
-        $this->addFrontSystem(new BombRack(4, 6, 0, 300, 60));
-        $this->addFrontSystem(new BombRack(4, 6, 0, 300, 60));
-        $this->addFrontSystem(new BombRack(4, 6, 0, 300, 60));
-        $this->addFrontSystem(new BombRack(4, 6, 0, 300, 60));
+        $this->addFrontSystem(new AmmoBombRack(4, 6, 0, 300, 60, $ammoMagazine, false));
+        $this->addFrontSystem(new AmmoBombRack(4, 6, 0, 300, 60, $ammoMagazine, false));
+        $this->addFrontSystem(new AmmoBombRack(4, 6, 0, 300, 60, $ammoMagazine, false));
+        $this->addFrontSystem(new AmmoBombRack(4, 6, 0, 300, 60, $ammoMagazine, false));
+        $this->addFrontSystem(new AmmoBombRack(4, 6, 0, 300, 60, $ammoMagazine, false));
+        $this->addFrontSystem(new AmmoBombRack(4, 6, 0, 300, 60, $ammoMagazine, false));
+        $this->addFrontSystem(new AmmoBombRack(4, 6, 0, 300, 60, $ammoMagazine, false));
+        $this->addFrontSystem(new AmmoBombRack(4, 6, 0, 300, 60, $ammoMagazine, false));
         
         //aft
         $this->addAftSystem(new Thruster(4, 10, 0, 5, 2));
