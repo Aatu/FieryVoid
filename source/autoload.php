@@ -2793,6 +2793,7 @@ spl_autoload_register(
 				'trekfederationfreedomff' => '/server/model/ships/ZTrekFederationEarly/TrekFederationFreedomFF.php',
 				'trekfederationfreedomupgrff' => '/server/model/ships/ZTrekFederationEarly/TrekFederationFreedomUpgrFF.php',
 				'trekfederationintrepidupgr' => '/server/model/ships/ZTrekFederationEarly/TrekFederationIntrepidUpgr.php',
+				'trekfederationdaedalusupgrff' => '/server/model/ships/ZTrekFederationEarly/TrekFederationDaedalusUpgrFF.php',
 								
 								
 								
@@ -2818,7 +2819,7 @@ spl_autoload_register(
 				'trekvulcandkyrtos' => '/server/model/ships/ZTrekFederationTOS/TrekVulcanDKyrTOS.php',
 				
 				'trekfederationkelvin' => '/server/model/ships/ZTrekFederationTOS/TrekFederationKelvin.php',
-				
+				'trekfederationconstitutionaltcl' => '/server/model/ships/ZTrekFederationTOS/TrekFederationConstitutionAltCL.php',
 				
 				//TNG (Next Generation, Deep Space Nine, Voyager)
 				

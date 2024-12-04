@@ -378,8 +378,8 @@ class TrekPhasedPulseAccelerator extends Pulse{ //NOT TrekPhaserBase!
         public $loadingtime = 2;
         public $loadingtimeArray = array(1=>2,2=>1);
 		
-        public $rangePenalty = 0.66; //-2/3 hexes
-        public $rangePenaltyArray = array(1=>2,2=>1.5);
+        public $rangePenalty = 0.66; //-2/3 hexes at full power, -3/2 hexes accelerated
+        public $rangePenaltyArray = array(1=>0.66,2=>1.5);
         public $fireControl = array(2, 3, 3);
 
         public $damageType = "Pulse";
@@ -393,8 +393,8 @@ class TrekPhasedPulseAccelerator extends Pulse{ //NOT TrekPhaserBase!
 		
 
 		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){ //maxhealth and power reqirement are fixed; left option to override with hand-written values
-			if ( $maxhealth == 0 ) $maxhealth = 5;
-			if ( $powerReq == 0 ) $powerReq = 2;
+			if ( $maxhealth == 0 ) $maxhealth = 7;
+			if ( $powerReq == 0 ) $powerReq = 4;
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 			
