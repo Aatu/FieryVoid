@@ -400,7 +400,7 @@ class PlasmaGun extends Plasma{
         public $exlusive = true;
 	public $priority = 5;
             
-        public $rangePenalty = 0.66;
+        public $rangePenalty = 1.5; //-3/2 hexes
         public $fireControl = array(-6, 4, 4); // fighters, <=mediums, <=capitals 
 
 

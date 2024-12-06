@@ -1,19 +1,19 @@
 <?php
-class TrekFederationDeltaFFBeta extends LCV{
+class TrekFederationDeltaFFGamma extends LCV{
 
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 170;
+        $this->pointCost = 220;
         $this->faction = "ZStarTrek Federation (early)";
-        $this->phpclass = "TrekFederationDeltaFFBeta";
+        $this->phpclass = "TrekFederationDeltaFFGamma";
         $this->imagePath = "img/ships/StarTrek/DeltaClass.png";
-        $this->shipClass = "Delta Frigate Beta";
+        $this->shipClass = "Delta Frigate Gamma";
 	$this->variantOf = "Delta Frigate Alpha";
 
 	$this->unofficial = true;
         $this->canvasSize = 100;
-	$this->isd = 2150;
+	$this->isd = 2170;
         
         $this->forwardDefense = 11;
         $this->sideDefense = 11;
@@ -34,21 +34,23 @@ class TrekFederationDeltaFFBeta extends LCV{
 	$this->addPrimarySystem(new Reactor(3, 10, 0, 0));
 	$this->addPrimarySystem(new CnC(99, 1, 0, 0)); //C&C should be unhittable anyway
 	    	$sensors = new Scanner(3, 12, 4, 3);
-		//$sensors->markLCV();//let's give Beta regular Sensors...
+		//$sensors->markLCV();//regular Sensors
 		$this->addPrimarySystem($sensors);
-	$impulseDrive = new TrekImpulseDrive(3,10,0,0,2);
+	$impulseDrive = new TrekImpulseDrive(3,11,0,1,2);
 
-/*
-		$polarizedhullplating = new AbsorbtionShield(2,4,2,1,0,360);  //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
-		$polarizedhullplating->displayName = "Polarized Hull Plating";
-		$this->addPrimarySystem($polarizedhullplating);
-	*/		
-		$projection = new TrekShieldProjection(1, 6, 3, 0, 360, 'F');//parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
-			$projection->displayName = "Polarized Hull Plating";
-		$this->addPrimarySystem($projection);
+
+	$projection = new TrekShieldProjection(1, 8, 3, 0, 360, 'F');//parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
+		$projector = new TrekShieldProjector(2, 6, 2, 2, 0, 360, 'F'); //parameters: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
+		$projection->addProjector($projector);
+		$this->addPrimarySystem($projector);
+	$this->addPrimarySystem($projection);
 		
-		$this->addFrontSystem(new TrekPhaseCannon(3, 6, 4, 180, 30));
-		$this->addFrontSystem(new TrekPhaseCannon(3, 6, 4, 330, 180));
+		$this->addFrontSystem(new TrekPhaseCannon(3, 0, 0, 240, 30));
+		$this->addFrontSystem(new TrekPhaseCannon(3, 0, 0, 330, 120));
+
+		$this->addAftSystem(new TrekLtPhaseCannon(2, 0, 0, 120, 360));
+		$this->addAftSystem(new TrekLtPhaseCannon(2, 0, 0, 0, 240));
+
 
 		$warpNacelle = new TrekWarpDrive(2, 10, 0, 3); //armor, structure, power usage, impulse output
 		$impulseDrive->addThruster($warpNacelle);
@@ -70,17 +72,21 @@ class TrekFederationDeltaFFBeta extends LCV{
 	$this->hitChart = array( //differences are deliberate
 		
 		0=> array(
-			10 => "Structure",
-			13 => "1:Phase Cannon",
+			8 => "Structure",
+		    9 => "0:Shield Projector",
+			12 => "1:Phase Cannon",
+			14 => "2:Light Phase Cannon",
 			17 => "2:Nacelle",
-			18 => "Engine",
-			19 => "Reactor",
-			20 => "Scanner",
+			18 => "0:Engine",
+			19 => "0:Reactor",
+			20 => "0:Scanner",
 		),
 
 		1=> array(
-			10 => "Structure",
-			14 => "1:Phase Cannon",
+			9 => "Structure",
+		    10 => "0:Shield Projector",
+			13 => "1:Phase Cannon",
+			14 => "2:Light Phase Cannon",
 			17 => "2:Nacelle",
 			18 => "0:Engine",
 			19 => "0:Reactor",
@@ -88,8 +94,10 @@ class TrekFederationDeltaFFBeta extends LCV{
 		),
 
 		2=> array(
-			10 => "Structure",
-			12 => "1:Phase Cannon",
+			8 => "Structure",
+		    9 => "0:Shield Projector",
+			11 => "1:Phase Cannon",
+			13 => "2:Light Phase Cannon",
 			17 => "2:Nacelle",
 			18 => "0:Engine",
 			19 => "0:Reactor",

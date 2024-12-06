@@ -33,7 +33,7 @@ class TrekFederationDaedalusUpgrFF extends MediumShip{
         $this->addPrimarySystem(new CnC(3, 8, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 10, 4, 4));
 	$impulseDrive = new TrekImpulseDrive(3,16,0,2,2);
-        $this->addPrimarySystem(new Hangar(3, 4));
+        $this->addPrimarySystem(new Hangar(3, 4, 4));
 
 		$projection = new TrekShieldProjection(1, 10, 3, 270, 90, 'F');//parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
 			$projector = new TrekShieldProjector(0, 4, 1, 2, 270, 90, 'F'); //parameters: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics

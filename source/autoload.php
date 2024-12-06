@@ -2794,6 +2794,7 @@ spl_autoload_register(
 				'trekfederationfreedomupgrff' => '/server/model/ships/ZTrekFederationEarly/TrekFederationFreedomUpgrFF.php',
 				'trekfederationintrepidupgr' => '/server/model/ships/ZTrekFederationEarly/TrekFederationIntrepidUpgr.php',
 				'trekfederationdaedalusupgrff' => '/server/model/ships/ZTrekFederationEarly/TrekFederationDaedalusUpgrFF.php',
+				'trekfederationdeltaffgamma' => '/server/model/ships/ZTrekFederationEarly/TrekFederationDeltaFFGamma.php',
 								
 								
 								
@@ -2827,13 +2828,17 @@ spl_autoload_register(
 				//other factions / playtest
 				'trekmazeriteship' => '/server/model/ships/ZTrekOther/TrekMazeriteShip.php',
 				'trekmazeriteshuttles' => '/server/model/ships/ZTrekOther/TrekMazeriteShuttles.php',
-				'treknausicaanglidersshf' => '/server/model/ships/ZTrekOther/TrekNausicaanGlidersSHF.php',
-				'treknausicaanheavyglider' => '/server/model/ships/ZTrekOther/TrekNausicaanHeavyGlider.php',
+				
 				'treknausicaanvandal' => '/server/model/ships/ZTrekOther/TrekNausicaanVandal.php',
 				'treknausicaanscourge' => '/server/model/ships/ZTrekOther/TrekNausicaanScourge.php',
 				'treknausicaanguramba' => '/server/model/ships/ZTrekOther/TrekNausicaanGuramba.php',				
 				'treknausicaanshefafighter' => '/server/model/ships/ZTrekOther/TrekNausicaanShefaFighter.php',
-				'treknausicaanshefalitayalfighter' => '/server/model/ships/ZTrekOther/TrekNausicaanShefalitayalFighter.php',
+				'treknausicaanshefalitayalfighter' => '/server/model/ships/ZTrekOther/TrekNausicaanShefalitayalFighter.php',				
+				'treknausicaanvandaltos' => '/server/model/ships/ZTrekOther/TrekNausicaanVandalTOS.php',
+				'treknausicaanheavyglider' => '/server/model/ships/ZTrekOther/TrekNausicaanHeavyGlider.php',
+				'treknausicaanheavygliderearly' => '/server/model/ships/ZTrekOther/TrekNausicaanHeavyGliderEarly.php',
+				'treknausicaanglidershf' => '/server/model/ships/ZTrekOther/TrekNausicaanGliderSHF.php',
+				'treknausicaangliderearlyshf' => '/server/model/ships/ZTrekOther/TrekNausicaanGliderEarlySHF.php',
 				
 				'treksulibancellshiplarge' => '/server/model/ships/ZTrekOther/TrekSulibanCellshipLarge.php',
 				'treksulibancellshipmed' => '/server/model/ships/ZTrekOther/TrekSulibanCellshipMed.php',

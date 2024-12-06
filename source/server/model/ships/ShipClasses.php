@@ -199,17 +199,17 @@ class BaseShip {
 		$coreCurr = 0;
 		$coreMax = 0;
 		$coreDmgMultiplier = 0; //for core systems - count damage the same as destruction
-		$coreMultiplier = 0;
+		$coreMultiplier = 0; //for core systems - do not count their value at all (functionality loss of key systems is noted, and heavily so)
 		
 		$thrusterCurr = 0;
 		$thrusterMax = 0;
-		$thrusterMultiplier = 0;
-		$thrusterDmgMultiplier = 0.7; //damaged Thrusters retain most but not all of their value
+		$thrusterMultiplier = 0; //for thrusters - do not count their value at all (functionality loss of thruster sets destruction is noted)
+		$thrusterDmgMultiplier = 0; 
 		
 		$otherCurr = 0;
 		$otherMax = 0;
 		$otherMultiplier = 1;
-		$otherDmgMultiplier = 0.5; //for other systems, we do not know how useful they are after being damaged... let's count them as half value!
+		$otherDmgMultiplier = 0; //for other systems, we do not know how useful they are after being damaged... but examples are hangars and cargo bays - assume destroyed boxes have no value
 
 		$cncPresent = false;
 		$enginePresent = false;
