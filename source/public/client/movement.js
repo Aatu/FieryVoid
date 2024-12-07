@@ -1009,6 +1009,9 @@ shipManager.movement = {
 	            }
 	        }
 	    }
+
+		webglScene.customEvent('SystemDataChanged', { ship: ship, system: mindriderEngine });	    
+	    
 	},
 
 	
