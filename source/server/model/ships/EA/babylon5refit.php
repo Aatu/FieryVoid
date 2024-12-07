@@ -26,7 +26,7 @@ class Babylon5Refit extends StarBaseSixSections{
 		$this->sideDefense = 24;
 
 		$this->imagePath = "img/ships/Babylon5.png";
-		$this->canvasSize = 260; //Enormous Starbase
+		$this->canvasSize = 512; //Enormous Starbase
 
 		$this->locations = array(41, 42, 2, 32, 31, 1);
 
