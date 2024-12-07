@@ -31,14 +31,20 @@ class Norgath extends StarBaseSixSections{
 				15 => "Scanner",
 				16 => "Hangar",	
 				18 => "Reactor",
-				20 => "C&C",
+				20 => "TAG:C&C", //TAG to allow secondary C&C!
 			),
 		);
 
 
 		$this->addPrimarySystem(new Reactor(8, 25, 0, 0));
-		$this->addPrimarySystem(new ProtectedCnC(9, 72, 0, 0)); //2x 8/36
-		//$this->addPrimarySystem(new CnC(8, 36, 0, 0)); 
+//		$this->addPrimarySystem(new ProtectedCnC(9, 72, 0, 0)); //2x 8/36
+		$cnc = new CnC(8, 36, 0, 0);
+		$cnc->startArc = 0;
+		$cnc->endArc = 360;
+        $this->addPrimarySystem($cnc);
+		$cnc = new SecondaryCnC(8, 36, 0, 0);//all-around by default
+        $this->addPrimarySystem($cnc);
+        
 		$this->addPrimarySystem(new Scanner(8, 36, 4, 12));
 		$this->addPrimarySystem(new Scanner(8, 36, 4, 12));
 		$this->addPrimarySystem(new Hangar(8, 6));
