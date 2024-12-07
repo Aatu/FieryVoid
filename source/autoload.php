@@ -3295,7 +3295,8 @@ spl_autoload_register(
 				'thirdspacelanceattackcraft' => '/server/model/ships/thirdspace/ThirdspaceLanceAttackCraft.php',
 				'thirdspacebattlescout' => '/server/model/ships/thirdspace/ThirdspaceBattleScout.php',		
 				'thirdspacecarrier' => '/server/model/ships/thirdspace/ThirdspaceCarrier.php',
-				'thirdspaceselfrepair' => '/server/model/systems/baseSystems.php',	
+				'thirdspaceselfrepair' => '/server/model/systems/baseSystems.php',
+				'vorlonartifact' => '/server/model/ships/thirdspace/VorlonArtifact.php',					
 
 				//Mindriders 
 				'thoughtshield' => '/server/model/weapons/defensive.php',				
