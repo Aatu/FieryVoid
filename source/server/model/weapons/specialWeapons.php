@@ -5109,7 +5109,7 @@ class PsionicConcentrator extends Weapon{
         {
             //maxhealth and power reqirement are fixed; left option to override with hand-written values
             if ( $maxhealth == 0 ){
-                $maxhealth = 7;
+                $maxhealth = 6;
             }
             if ( $powerReq == 0 ){
                 $powerReq = 1;
