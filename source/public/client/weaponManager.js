@@ -1582,6 +1582,8 @@ window.weaponManager = {
         }
 
         webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+        
+        if(gamedata.gamephase == 3 && ship.flight)	webglScene.customEvent("ShipMovementChanged", { ship: ship }); //Redraw movement for Combat Pivots       
     },
 	removeFiringOrderAll: function removeFiringOrderAll(ship, system) { //remove firing orders for ALL similar weapons that have them
 		if (!gamedata.isMyShip(ship)) {
@@ -1610,6 +1612,8 @@ window.weaponManager = {
 		}
 		
         webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+        
+        if(gamedata.gamephase == 3 && ship.flight)	webglScene.customEvent("ShipMovementChanged", { ship: ship }); //Redraw movement for Combat Pivots         
     },
 
 	    
