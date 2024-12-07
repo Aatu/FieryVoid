@@ -1867,6 +1867,7 @@ class AmmoBombRack extends AmmoMissileRackS{
 			$this->ammoClassesArray = array();
 			$this->ammoClassesArray[] =  new AmmoMissileB();
 			$this->ammoClassesArray[] =  new AmmoMissileF();
+			$this->ammoClassesArray[] =  new AmmoMissileD(); //For Narn Dag'Kur			
 			$this->availableAmmoAlreadySet = true;
 		}		
 		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base); //Parent routines take care of the rest
