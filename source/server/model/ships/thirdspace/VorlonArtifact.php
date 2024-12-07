@@ -24,7 +24,8 @@ class VorlonArtifact extends UnevenBaseFourSections{
         
 		$this->turncost = 0;
 		$this->turndelaycost = 0;  
-		$this->nonRotating = true; //some bases do not rotate - this attribute is used in combination with $base or $smallBase		
+		$this->nonRotating = true; //some bases do not rotate - this attribute is used in combination with $base or $smallBase
+		$this->Enormous = true;				
 		
 		/*Thirdspace use their own enhancement set */		
 //		Enhancements::nonstandardEnhancementSet($this, 'ThirdspaceShip');				     
