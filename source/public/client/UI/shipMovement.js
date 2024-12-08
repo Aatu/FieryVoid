@@ -41,7 +41,9 @@ window.UI = {
             UI.shipMovement.sliprightElement = $("#slipright", ui);
 
             UI.shipMovement.pivotleftElement = $("#pivotleft", ui);
+			UI.shipMovement.pivotLeftActiveElement = $("#pivotLeftActive", ui);            
             UI.shipMovement.pivotrightElement = $("#pivotright", ui);
+			UI.shipMovement.pivotRightActiveElement = $("#pivotRightActive", ui);    
 
             UI.shipMovement.rotateleftElement = $("#rotateleft", ui);
             UI.shipMovement.rotaterightElement = $("#rotateright", ui);
@@ -75,7 +77,9 @@ window.UI = {
             UI.shipMovement.slipleftElement.on("click touchstart", UI.shipMovement.slipleftCallback);
 
             UI.shipMovement.pivotleftElement.on("click touchstart", UI.shipMovement.pivotleftCallback);
+			UI.shipMovement.pivotLeftActiveElement.on("click touchstart", UI.shipMovement.pivotleftCallback);            
             UI.shipMovement.pivotrightElement.on("click touchstart", UI.shipMovement.pivotrightCallback);
+			UI.shipMovement.pivotRightActiveElement.on("click touchstart", UI.shipMovement.pivotrightCallback);              
 
             UI.shipMovement.rotateleftElement.on("click touchstart", UI.shipMovement.rotateleftCallback);
             UI.shipMovement.rotaterightElement.on("click touchstart", UI.shipMovement.rotaterightCallback);
@@ -328,7 +332,6 @@ window.UI = {
             }
 
             // TURN INTO PIVOT RIGHT
-
             dis = 70;   
             angle = mathlib.addToDirection(shipHeading, 35);
             var turnPivotRight = UI.shipMovement.turnIntoPivotRightElement;
@@ -337,7 +340,7 @@ window.UI = {
             } else {
                 turnPivotRight.hide();
             }
-
+/*
             dis = 60;
             angle = mathlib.addToDirection(shipHeading, -90);
             var pivotleft = UI.shipMovement.pivotleftElement;
@@ -348,7 +351,28 @@ window.UI = {
             } else {
                 pivotleft.hide();
             }
-
+*/
+			dis = 60;
+			angle = mathlib.addToDirection(shipHeading, -90);
+			var pivotleft = UI.shipMovement.pivotleftElement;
+			if (shipManager.movement.canPivot(ship, false)) {
+			    var icon = "img/pivotleft.png";
+			    if (shipManager.movement.isEndingPivot(ship, false)) {
+			        icon = "img/pivotleft_active.png";
+			        // Show the "Stop Pivoting" active icon
+			        UI.shipMovement.pivotleftElement.hide();  // Hide the regular pivot icon
+			        UI.shipMovement.pivotLeftActiveElement.show();  // Show the active pivot icon
+			    } else {
+			        // Show the regular pivot icon
+			        UI.shipMovement.pivotleftElement.show();
+			        UI.shipMovement.pivotLeftActiveElement.hide();
+			    }
+			    UI.shipMovement.drawUIElement(pivotleft, pos.x, pos.y, s, dis * 1.4, angle, icon, "pivotleftcanvas", shipHeading);
+			} else {
+			    pivotleft.hide();
+			    UI.shipMovement.pivotLeftActiveElement.hide();  // Hide both if pivoting is not allowed
+			}
+/*
             angle = mathlib.addToDirection(shipHeading, 90);
             var pivotright = UI.shipMovement.pivotrightElement;
             if (shipManager.movement.canPivot(ship, true)) {
@@ -358,6 +382,26 @@ window.UI = {
             } else {
                 pivotright.hide();
             }
+*/
+            angle = mathlib.addToDirection(shipHeading, 90);
+			var pivotright = UI.shipMovement.pivotrightElement;
+			if (shipManager.movement.canPivot(ship, true)) {
+			    var icon = "img/pivotright.png";
+			    if (shipManager.movement.isEndingPivot(ship, true)) {
+			        icon = "img/pivotright_active.png";
+			        // Show the "Stop Pivoting" active icon
+			        UI.shipMovement.pivotrightElement.hide();  // Hide the regular pivot icon
+			        UI.shipMovement.pivotRightActiveElement.show();  // Show the active pivot icon
+			    } else {
+			        // Show the regular pivot icon
+			        UI.shipMovement.pivotrightElement.show();
+			        UI.shipMovement.pivotRightActiveElement.hide();
+			    }
+			    UI.shipMovement.drawUIElement(pivotright, pos.x, pos.y, s, dis * 1.4, angle, icon, "pivotrightcanvas", shipHeading);
+			} else {
+			    pivotright.hide();
+			    UI.shipMovement.pivotRightActiveElement.hide();  // Hide both if pivoting is not allowed
+			}
 
             // Base Rotation
             var rotateleft = UI.shipMovement.rotateleftElement;

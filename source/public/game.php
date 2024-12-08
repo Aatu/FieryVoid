@@ -595,11 +595,19 @@
         <div id="pivotright" class="movement-icon" data-movement-type="Pivot Right">
             <canvas id="pivotrightcanvas" width="40" height="40"></canvas>
         </div>
+
+
+		<div id="pivotRightActive" class="movement-icon" data-movement-type="Stop Pivoting">
+		    <canvas id="pivotRightActiveCanvas" width="40" height="40"></canvas>
+		</div>
         
         <div id="pivotleft" class="movement-icon" data-movement-type="Pivot Left">
             <canvas id="pivotleftcanvas" width="40" height="40"></canvas>
         </div>
 
+		<div id="pivotLeftActive" class="movement-icon" data-movement-type="Stop Pivoting">
+		    <canvas id="pivotLeftActiveCanvas" width="40" height="40"></canvas>
+		</div>
 
         <div id="rotateleft" class="movement-icon" data-movement-type="Port Rotation">
             <canvas id="rotateleftcanvas" width="40" height="40"></canvas>
