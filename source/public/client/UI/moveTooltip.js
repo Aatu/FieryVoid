@@ -21,9 +21,9 @@ var moveTooltipHTML = `
 			    // If either active pivot icon is visible, show "Stop Pivoting"
 			    tooltip.find(".movementType").text("Stop Pivoting");
 			}else if ((jQuery("#rollActive").is(":visible")) &&  (iconId === "roll")) {
-			    // If either active pivot icon is visible, show "Stop Pivoting"
+			    // If either active roll icon is visible, show "Stop Rolling"
 			    tooltip.find(".movementType").text("Stop Rolling");
-			} else {
+			}else {
 			    // Otherwise, show the regular movement type
 			    tooltip.find(".movementType").text(movementType); // Default movement type
 			}
