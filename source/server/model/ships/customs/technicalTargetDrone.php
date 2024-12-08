@@ -7,7 +7,7 @@ class technicalTargetDrone extends BaseShip{
 		$this->pointCost = 10;
 		$this->faction = "Custom Ships";
 		$this->phpclass = "technicalTargetDrone";
-		$this->imagePath = "img/ships/Nexus/salbez_cruiser_ai2.png";
+		$this->imagePath = "img/ships/Tanker.png";
 		$this->canvasSize = 145; //img has 200px per side
 //		$this->imagePath = "img/ships/hyach_tachilakor.png";
 		$this->shipClass = "Target Drone - DO NOT USE";
@@ -18,9 +18,9 @@ class technicalTargetDrone extends BaseShip{
 		$this->fighters = array("light"=>12);        
 		$this->turncost = 0.5;
 		$this->turndelaycost = 0.5;
-		$this->accelcost = 2;
+		$this->accelcost = 5;
 		$this->rollcost = 3;
-		$this->pivotcost = 4;
+		$this->pivotcost = 1;
 
 //		$this->critRollMod += 1;
 //		$this->enhancementOptionsDisabled[] = 'VULN_CRIT';
@@ -50,12 +50,12 @@ class technicalTargetDrone extends BaseShip{
 //			$cnc->markCommsFlux();
 //			$this->addPrimarySystem($cnc);
 //		$this->addPrimarySystem(new CnC(5, 20, 0, 0));
-		$engine = new Engine(5, 20, 0, 20, 3);
-			$engine->markEngineFlux();
+		$engine = new Engine(11, 50, 0, 13, 1);
+//			$engine->markEngineFlux();
 			$this->addPrimarySystem($engine);
-		$this->addPrimarySystem(new Engine(5, 50, 0, 20, 3));
-		$this->addPrimarySystem(new Engine(5, 50, 0, 20, 3));
-		$this->addPrimarySystem(new Engine(5, 50, 0, 20, 3));
+//		$this->addPrimarySystem(new Engine(5, 50, 0, 20, 3));
+//		$this->addPrimarySystem(new Engine(5, 50, 0, 20, 3));
+//		$this->addPrimarySystem(new Engine(5, 50, 0, 20, 3));
 		$this->addPrimarySystem(new Hangar(6, 100));
 		$this->addPrimarySystem(new IonFieldGenerator(2, 0, 0, 0, 360));
 		$this->addPrimarySystem(new IonFieldGenerator(2, 0, 0, 0, 360));
@@ -65,8 +65,8 @@ class technicalTargetDrone extends BaseShip{
 		
 //        $this->addFrontSystem(new AntiquatedScanner(3, 20, 6, 6));
 		$this->addFrontSystem(new CnC(6, 40, 0, 0));
-		$this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));
-		$this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));
+		$this->addFrontSystem(new Thruster(4, 10, 0, 14, 1));
+		$this->addFrontSystem(new Thruster(4, 10, 0, 14, 1));
         $this->addFrontSystem(new AmmoMag(5, 9)); 
 //		$this->addFrontSystem(new BSGHybrid(0, 20, 0, 0));
 		//$this->addFrontSystem(new Hangar(4, 6));
@@ -90,7 +90,7 @@ class technicalTargetDrone extends BaseShip{
 /*		$sensors = new Scanner(6, 23, 4, 20);
 			$sensors->markSensorFlux();
 			$this->addFrontSystem($sensors); */
-        $this->addPrimarySystem(new SelfRepair(5, 6, 4)); //armor, structure, output
+ //       $this->addPrimarySystem(new SelfRepair(5, 6, 4)); //armor, structure, output
 
 
 		$this->addPrimarySystem(new SpinalLaser(5, 12, 12, 330, 30));
@@ -131,7 +131,7 @@ class technicalTargetDrone extends BaseShip{
 		$this->hitChart = array(
 			
 			0=> array(
-				20 => "Hangar",
+				20 => "Engine",
 			/*
 				10 => "Structure",
 				13 => "Scanner",
@@ -142,7 +142,7 @@ class technicalTargetDrone extends BaseShip{
 				*/
 			),
 			1=> array(
-				20 => "Scanner",
+				20 => "Primary",
 				/*
 				5 => "Plasma Wave",
 				10 => "Stun Beam",
@@ -151,28 +151,30 @@ class technicalTargetDrone extends BaseShip{
 				*/
 			),
 			2=> array(
-				20=>"Structure",
-				/*
-				5 => "Thruster",
-				8 => "Jump Engine",
-				10 => "Assault Laser",
-				12 => "Twin Array",
-				18 => "Structure",
 				20 => "Primary",
+				/*
+				5 => "Plasma Wave",
+				10 => "Stun Beam",
+				15 => "Scattergun",
+				20 => "3:Thruster", //front targets Port Thruster - but once destroyed, Front Structure shall be next
 				*/
 			),
 			3=> array( //Port
-				20=>"Structure",
+				20 => "Primary",
 				/*
-				10 => "2:Thruster", //Aft Twin Arrays
-				20 => "0:Imperial Laser", //PRIMARY Imperial Lasers
+				5 => "Plasma Wave",
+				10 => "Stun Beam",
+				15 => "Scattergun",
+				20 => "3:Thruster", //front targets Port Thruster - but once destroyed, Front Structure shall be next
 				*/
 			),
 			4=> array( //Stbd
-				20=>"Structure",
+				20 => "Primary",
 				/*
-				10 => "2:Thruster", //Aft Twin Arrays
-				20 => "0:Imperial Laser", //PRIMARY Imperial Lasers
+				5 => "Plasma Wave",
+				10 => "Stun Beam",
+				15 => "Scattergun",
+				20 => "3:Thruster", //front targets Port Thruster - but once destroyed, Front Structure shall be next
 				*/
 			),
 		);
