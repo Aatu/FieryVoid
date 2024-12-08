@@ -2557,7 +2557,7 @@ spl_autoload_register(
 		    	//'skywatch' => '/server/model/ships/orieni/skywatch.php',
 		    	//'skywatch1810' => '/server/model/ships/orieni/skywatch1810.php',
 		    	//'skywatch2003' => '/server/model/ships/orieni/skywatch2003.php',
-		    	'kaedashkada' => '/server/model/ships/llort/Kaedashkada.php',
+//		    	'kaedashkada' => '/server/model/ships/llort/Kaedashkada.php',
 		    	'brostilli' => '/server/model/ships/drazi/Brostilli.php',
 		    	'deathfalcon' => '/server/model/ships/drazi/Deathfalcon.php',
 		    	'deathfalcon2230' => '/server/model/ships/drazi/Deathfalcon2230.php',
