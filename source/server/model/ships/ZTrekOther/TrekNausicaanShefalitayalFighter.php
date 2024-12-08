@@ -42,13 +42,10 @@ class TrekNausicaanShefalitayalFighter extends FighterFlight{
 			$gun->displayName = "Dual Plasma Guns";
 			$fighter->addFrontSystem($gun);
 
-  		        //$largeGun = new PlasmaGun(330, 30); 
-            		//$largeGun->exclusive = true; 
-            		//$fighter->addFrontSystem($largeGun);
-
-            $Disabler = new SWFighterIon(330, 30, 4, 1); //Ion Cannon borrowed from Star Wars
-            $Disabler->exclusive = true; //either this or other weapons!
-            $fighter->addFrontSystem($Disabler);
+            $disabler = new SWFighterIon(330, 30, 4, 1); //Ion Cannon borrowed from Star Wars
+            $disabler->exclusive = true; //either this or other weapons!
+			$disabler->displayName = "Disabler Gun";
+            $fighter->addFrontSystem($disabler);
 
 			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
 			

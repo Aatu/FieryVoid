@@ -53,8 +53,9 @@ class TrekNausicaanGliderSHF extends FighterFlight{
 			$gun->displayName = "Dual Plasma Guns";
 			$fighter->addFrontSystem($gun);
 
-            $Disabler = new SWFighterIon(330, 30, 6, 3); //Ion Cannon borrowed from Star Wars
-            $fighter->addFrontSystem($Disabler);
+            $disabler = new SWFighterIon(330, 30, 4, 3); //Ion Cannon borrowed from Star Wars
+			$disabler->displayName = "Disabler Gun";
+            $fighter->addFrontSystem($disabler);
 
 			$gun = new RogolonLtPlasmaGun(0, 120, 4, 2);
 			$gun->displayName = "Dual Plasma Guns";
