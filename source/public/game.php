@@ -638,6 +638,10 @@
             <canvas id="rollcanvas" width="40" height="40"></canvas>
         </div>
 
+		<div id="rollActive" class="movement-icon" data-movement-type="Roll">
+            <canvas id="rollActivecanvas" width="40" height="40"></canvas>
+        </div>
+
 		<div id="emergencyroll" class="movement-icon" data-movement-type="Emergency Roll">
 		    <canvas id="emergencyrollcanvas" width="40" height="40"></canvas>
 		</div>        	

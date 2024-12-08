@@ -20,6 +20,9 @@ var moveTooltipHTML = `
 			if ((jQuery("#pivotLeftActive").is(":visible") || jQuery("#pivotRightActive").is(":visible")) &&  (iconId === "pivotleft" || iconId === "pivotright")) {
 			    // If either active pivot icon is visible, show "Stop Pivoting"
 			    tooltip.find(".movementType").text("Stop Pivoting");
+			}else if ((jQuery("#rollActive").is(":visible")) &&  (iconId === "roll")) {
+			    // If either active pivot icon is visible, show "Stop Pivoting"
+			    tooltip.find(".movementType").text("Stop Rolling");
 			} else {
 			    // Otherwise, show the regular movement type
 			    tooltip.find(".movementType").text(movementType); // Default movement type
