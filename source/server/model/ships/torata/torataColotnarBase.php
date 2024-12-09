@@ -13,7 +13,7 @@ class TorataColotnarBase extends SmallStarBaseFourSections
 		$this->phpclass = "TorataColotnarBase";
 		$this->shipClass = "Colotnar Defense Base";
 		$this->imagePath = "img/ships/TorataColotnar.png";
-		$this->canvasSize = 200;
+		$this->canvasSize = 350;
 		$this->fighters = array("heavy"=>48);
 		$this->isd = 2256;
 
@@ -29,7 +29,15 @@ class TorataColotnarBase extends SmallStarBaseFourSections
 
 
 		$this->addPrimarySystem(new Reactor(5, 20, 0, 0));
-		$this->addPrimarySystem(new ProtectedCnC(6, 32, 0, 0)); //originally 2 systems with structure 16, armor 5 each
+//		$this->addPrimarySystem(new ProtectedCnC(6, 32, 0, 0)); //originally 2 systems with structure 16, armor 5 each
+
+		$cnc = new CnC(5, 16, 0, 0);
+		$cnc->startArc = 0;
+		$cnc->endArc = 360;
+		$this->addPrimarySystem($cnc);
+		$cnc = new SecondaryCnC(5, 16, 0, 0);//all-around by default
+		$this->addPrimarySystem($cnc);
+
 		$this->addPrimarySystem(new Scanner(5, 20, 5, 7));
 		$this->addPrimarySystem(new Scanner(5, 20, 5, 7));
 		$this->addPrimarySystem(new Hangar(5, 4));
@@ -98,14 +106,14 @@ class TorataColotnarBase extends SmallStarBaseFourSections
 				14 => "Scanner",
 				16 => "Hangar",
 				18 => "Reactor",
-				20 => "C&C",
+				20 => "TAG:C&C",
 			),
 			1=> array(
-				1 => "Pentagon Array",
-				2 => "Plasma Accelerator",
-				4 => "Laser Accelerator",
-				6 => "Particle Accelerator",
-				7 => "Pulse Accelerator",
+				1 => "TAG:Pentagon Array",
+				2 => "TAG:Plasma Accelerator",
+				4 => "TAG:Laser Accelerator",
+				6 => "TAG:Particle Accelerator",
+				7 => "TAG:Pulse Accelerator",
 				8 => "Hangar",
 				10 => "Cargo Bay",
 				11 => "Sub Reactor",
@@ -113,11 +121,11 @@ class TorataColotnarBase extends SmallStarBaseFourSections
 				20 => "Primary",
 			),
 			2=> array(
-				1 => "Pentagon Array",
-				2 => "Plasma Accelerator",
-				4 => "Laser Accelerator",
-				6 => "Particle Accelerator",
-				7 => "Pulse Accelerator",
+				1 => "TAG:Pentagon Array",
+				2 => "TAG:Plasma Accelerator",
+				4 => "TAG:Laser Accelerator",
+				6 => "TAG:Particle Accelerator",
+				7 => "TAG:Pulse Accelerator",
 				8 => "Hangar",
 				10 => "Cargo Bay",
 				11 => "Sub Reactor",
@@ -125,11 +133,11 @@ class TorataColotnarBase extends SmallStarBaseFourSections
 				20 => "Primary",
 			),
 			3=> array(
-				1 => "Pentagon Array",
-				2 => "Plasma Accelerator",
-				4 => "Laser Accelerator",
-				6 => "Particle Accelerator",
-				7 => "Pulse Accelerator",
+				1 => "TAG:Pentagon Array",
+				2 => "TAG:Plasma Accelerator",
+				4 => "TAG:Laser Accelerator",
+				6 => "TAG:Particle Accelerator",
+				7 => "TAG:Pulse Accelerator",
 				8 => "Hangar",
 				10 => "Cargo Bay",
 				11 => "Sub Reactor",
@@ -137,11 +145,11 @@ class TorataColotnarBase extends SmallStarBaseFourSections
 				20 => "Primary",
 			),
 			4=> array(
-				1 => "Pentagon Array",
-				2 => "Plasma Accelerator",
-				4 => "Laser Accelerator",
-				6 => "Particle Accelerator",
-				7 => "Pulse Accelerator",
+				1 => "TAG:Pentagon Array",
+				2 => "TAG:Plasma Accelerator",
+				4 => "TAG:Laser Accelerator",
+				6 => "TAG:Particle Accelerator",
+				7 => "TAG:Pulse Accelerator",
 				8 => "Hangar",
 				10 => "Cargo Bay",
 				11 => "Sub Reactor",

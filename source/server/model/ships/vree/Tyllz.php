@@ -32,14 +32,22 @@ class Tyllz extends StarBaseSixSections
                     14 => "Scanner",
                     17 => "Hangar",
                     19 => "Reactor",
-                    20 => "C&C",
+                    20 => "TAG:C&C",
            		 ),
 		);
 
 
 		$this->addPrimarySystem(new Reactor(5, 25, 0, 0));
 		$this->addPrimarySystem(new Hangar(5, 30));
-		$this->addPrimarySystem(new ProtectedCnC(6, 32, 0, 0));
+//		$this->addPrimarySystem(new ProtectedCnC(6, 32, 0, 0));
+
+		$cnc = new CnC(5, 16, 0, 0);
+		$cnc->startArc = 0;
+		$cnc->endArc = 360;
+		$this->addPrimarySystem($cnc);
+		$cnc = new SecondaryCnC(5, 16, 0, 0);//all-around by default
+		$this->addPrimarySystem($cnc);
+
 		$this->addPrimarySystem(new Scanner(5, 18, 5, 9));
 		$this->addPrimarySystem(new Scanner(5, 18, 5, 9));
 		$this->addPrimarySystem(new AntimatterShredder(4, 0, 0, 0, 360));	         				
