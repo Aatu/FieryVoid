@@ -40,7 +40,7 @@ class MakarTorgeth extends MediumShip{
         
 		$this->addFrontSystem(new EWRocketLauncher(3, 4, 1, 240, 60));
 		$this->addFrontSystem(new Quarters(3, 9));
-		$this->addFrontSystem(new GrapplingClaw(5, 0, 0, 300, 60, 8, false));
+		$this->addFrontSystem(new GrapplingClaw(3, 0, 0, 300, 60, 8, false));
 		$this->addFrontSystem(new EWRocketLauncher(3, 4, 1, 300, 120));
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));

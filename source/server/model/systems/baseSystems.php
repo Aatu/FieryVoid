@@ -1657,6 +1657,19 @@ class Quarters extends ShipSystem{
     }
 }
 
+class DockingCollar extends ShipSystem{
+    public $name = "DockingCollar";
+    public $displayName = "Docking Collar";
+    
+	//Quarters is not important at all!
+	public $repairPriority = 1;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
+    
+    function __construct($armour, $maxhealth){
+        parent::__construct($armour, $maxhealth, 0, 0);
+    }
+}
+
+
 class Magazine extends ShipSystem{
     public $name = "Magazine";
     public $displayName = "Magazine";
@@ -1975,6 +1988,64 @@ class Structure extends ShipSystem{
 	
 } //endof Structure	
 
+/*custon system for Nexus LCVs*/
+class NexusLCVController extends ShipSystem {
+
+    public static $controllerList = array();
+    public $name = "NexusLCVController";
+    public $displayName = "LCV Controller";
+    public $iconPath = "hkControlNode.png";
+    public $boostable = true;
+    public $maxBoostLevel = 2;
+	
+    public static function addControllerNexus($controller){
+	    NexusLCVController::$controllerList[] = $controller; //add controller to list
+    }
+	
+
+    function __construct($armour, $maxhealth, $powerReq, $output ){
+        parent::__construct($armour, $maxhealth, $powerReq, $output );
+        $this->boostEfficiency = $powerReq;
+	    NexusLCVController::addControllerNexus($this);
+    }    
+	
+    public static function getIniBonus($unit){ //get current Initiative bonus; current = actual as of last turn
+	    $iniBonus = 0;
+	    $turn = TacGamedata::$currentTurn-1;
+	    $turn = max(1,$turn);
+	    //strongest system applies
+	    foreach(NexusLCVController::$controllerList as $controller){
+		$controllerShip = $controller->getUnit();
+		if($unit->userid == $controllerShip->userid){ //only for the same player...
+			if ( ($controller->isDestroyed($turn))
+			     || ($controller->isOfflineOnTurn($turn))
+			    ){ continue; }//if controller system is destroyed or offline, no effect
+	    		$iniBonus = max($controller->getOutputOnTurn($turn),$iniBonus); 
+		}
+	    }
+	    $iniBonus = $iniBonus * 5; //d20->d100
+	    $iniBonus = max(0,$iniBonus); 
+	    return $iniBonus;
+    }
+	
+    public function getOutputOnTurn($turn){
+        $output = parent::getOutput();
+        foreach ($this->power as $power){
+            if ($power->turn == $turn && $power->type == 2){
+                $output += $power->amount;
+            }    
+        }
+        return $output;
+    }
+	
+    public function setSystemDataWindow($turn){
+        parent::setSystemDataWindow($turn);     
+        $this->data["Special"] = "Gives indicated Initiative bonus to all friendly Loress-class LCVs.";	     
+        $this->data["Special"] .= "<br>Only strongest bonus applies.";	     	     
+        $this->data["Special"] .= "<br>Any changes are effective on NEXT TURN.";	
+    }
+
+} //end of NexusLCVController
 	
 /*custom system - Drakh Raider Controller*/
 class DrakhRaiderController extends ShipSystem {

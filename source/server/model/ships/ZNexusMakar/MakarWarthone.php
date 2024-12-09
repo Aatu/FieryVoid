@@ -1,18 +1,20 @@
 <?php
-class MakarBrassert extends MediumShip{
+class MakarWarthone extends MediumShip{
 
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 340;
+        $this->pointCost = 370;
         $this->faction = "ZNexus Makar Federation";
-        $this->phpclass = "MakarBrassert";
+        $this->phpclass = "MakarWarthone";
         $this->imagePath = "img/ships/Nexus/makar_brassert2.png";
-        $this->shipClass = "Brassert Frigate";
+        $this->shipClass = "Warthone Strike Frigate";
+			$this->variantOf = "Brassert Frigate";
+			$this->occurence = "rare";
 		$this->unofficial = true;
         $this->canvasSize = 80;
 //        $this->agile = true;
-	    $this->isd = 2009;
+	    $this->isd = 2014;
 
 	    $this->notes = 'Atmospheric capable';
         
@@ -26,7 +28,7 @@ class MakarBrassert extends MediumShip{
         $this->pivotcost = 1;
         $this->iniativebonus = 60;
          
-        $this->addPrimarySystem(new Reactor(4, 16, 0, 0));
+        $this->addPrimarySystem(new Reactor(4, 16, 0, -2));
         $this->addPrimarySystem(new CnC(4, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 16, 3, 6));
         $this->addPrimarySystem(new Engine(4, 16, 0, 8, 2));
@@ -34,11 +36,11 @@ class MakarBrassert extends MediumShip{
         $this->addPrimarySystem(new Thruster(4, 13, 0, 5, 4));        
         $this->addPrimarySystem(new Hangar(2, 1));
         
-		$this->addFrontSystem(new NexusDefenseGun(2, 4, 1, 270, 90));
-		$this->addFrontSystem(new NexusXRayLaser(3, 5, 2, 300, 60));
+		$this->addFrontSystem(new PlasmaTorch(2, 4, 2, 270, 90));
+		$this->addFrontSystem(new PlasmaTorch(2, 4, 2, 300, 60));
 		$this->addFrontSystem(new EWHeavyRocketLauncher(3, 6, 2, 270, 90));
-		$this->addFrontSystem(new NexusXRayLaser(3, 5, 2, 300, 60));
-		$this->addFrontSystem(new NexusDefenseGun(2, 4, 1, 270, 90));
+		$this->addFrontSystem(new PlasmaTorch(2, 4, 2, 300, 60));
+		$this->addFrontSystem(new PlasmaTorch(2, 4, 2, 270, 90));
         $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));
 	    
@@ -62,10 +64,9 @@ class MakarBrassert extends MediumShip{
 		),
 
 		1=> array(
-			4 => "Thruster",
-			6 => "Heavy Rocket Launcher",
-			8 => "Defense Gun",
-			11 => "X-Ray Laser",
+			5 => "Thruster",
+			7 => "Heavy Rocket Launcher",
+			10 => "Plasma Torch",
 			17 => "Structure",
 			20 => "Primary",
 		),

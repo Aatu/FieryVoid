@@ -26,10 +26,12 @@ class QomYominQolAt extends OSAT{
 		
         $this->addPrimarySystem(new Reactor(4, 7, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 7, 2, 5)); 
-        $this->addPrimarySystem(new Thruster(3, 8, 0, 0, 2)); 
-        $this->addPrimarySystem(new SensorSpear(2, 6, 3, 270, 90)); 
-        $this->addPrimarySystem(new SensorSpear(2, 6, 3, 270, 90)); 
-        $this->addPrimarySystem(new NexusLightChargeCannon(1, 4, 1, 0, 360));
+
+        $this->addFrontSystem(new SensorSpear(2, 6, 3, 270, 90)); 
+        $this->addFrontSystem(new SensorSpear(2, 6, 3, 270, 90)); 
+        $this->addFrontSystem(new NexusLightChargeCannon(1, 4, 1, 0, 360));
+
+        $this->addAftSystem(new Thruster(3, 8, 0, 0, 2)); 
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         
@@ -39,12 +41,28 @@ class QomYominQolAt extends OSAT{
 		$this->hitChart = array(
 			0=> array(
 					9 => "Structure",
-					11 => "Thruster",
-					14 => "Sensor Spear",
-					16 => "Light Charge Cannon",
-					18 => "Scanner",
-					20 => "Reactor",
-			)
+					11 => "2:Thruster",
+					14 => "1:Sensor Spear",
+					16 => "1:Light Charge Cannon",
+					18 => "0:Scanner",
+					20 => "0:Reactor",
+			),
+			1=> array(
+					9 => "Structure",
+					11 => "2:Thruster",
+					14 => "1:Sensor Spear",
+					16 => "1:Light Charge Cannon",
+					18 => "0:Scanner",
+					20 => "0:Reactor",
+			),
+			2=> array(
+					9 => "Structure",
+					11 => "2:Thruster",
+					14 => "1:Sensor Spear",
+					16 => "1:Light Charge Cannon",
+					18 => "0:Scanner",
+					20 => "0:Reactor",
+			),
 		);
     
     

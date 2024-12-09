@@ -1,21 +1,19 @@
 <?php
-class QomYominEloquay extends MediumShip{
+class QomYominLightScoutRefit extends MediumShip{
 
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 300;
+        $this->pointCost = 345;
         $this->faction = "ZNexus Makar Federation";
-        $this->phpclass = "QomYominEloquay";
-        $this->imagePath = "img/ships/Nexus/makar_eloquay2.png";
-        $this->shipClass = "Eloquay Drone Frigate";
+        $this->phpclass = "QomYominLightScoutRefit";
+        $this->imagePath = "img/ships/Nexus/makar_sorolma.png";
+        $this->shipClass = "Sorol Ma Light Scout (2015)";
 			$this->variantOf = "Sorol Ma Light Scout";
 			$this->occurence = "common";
 		$this->unofficial = true;
         $this->canvasSize = 80;
-	    $this->isd = 1920;
-
-        $this->fighters = array("normal"=>6);
+	    $this->isd = 2015;
 
 	    $this->notes = '<br>Unreliable Ship:';
  	    $this->notes .= '<br> - Sluggish';
@@ -32,9 +30,9 @@ class QomYominEloquay extends MediumShip{
         $this->pivotcost = 2;
         $this->iniativebonus = 53;
          
-        $this->addPrimarySystem(new Reactor(3, 13, 0, 6));
+        $this->addPrimarySystem(new Reactor(3, 13, 0, 4));
         $this->addPrimarySystem(new CnC(4, 9, 0, 0));
-        $this->addPrimarySystem(new Scanner(3, 12, 5, 5));
+        $this->addPrimarySystem(new ELINTScanner(3, 12, 5, 6));
         $this->addPrimarySystem(new Engine(3, 11, 0, 5, 3));
 		$this->addPrimarySystem(new NexusWaterCaster(3, 4, 1, 0, 360));
         $this->addPrimarySystem(new Thruster(3, 13, 0, 5, 3));
@@ -47,7 +45,7 @@ class QomYominEloquay extends MediumShip{
 		$this->addPrimarySystem($rammingAttack);
         
 		$this->addFrontSystem(new SensorSpear(3, 6, 3, 180, 60));
-		$this->addFrontSystem(new HKControlNode(3, 10, 2, 1));
+		$this->addFrontSystem(new NexusPlasmaCharge(3, 7, 4, 300, 60));
 		$this->addFrontSystem(new SensorSpear(3, 6, 3, 300, 180));
         $this->addFrontSystem(new Thruster(3, 7, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 7, 0, 3, 1));
@@ -59,7 +57,7 @@ class QomYominEloquay extends MediumShip{
 		$this->addAftSystem(new Thruster(3, 10, 0, 3, 2));    
         $this->addAftSystem(new Thruster(3, 10, 0, 3, 2));    
         
-        $this->addPrimarySystem(new Structure(4, 51));
+        $this->addPrimarySystem(new Structure(4, 45));
 
 	//d20 hit chart
 	$this->hitChart = array(
@@ -67,7 +65,7 @@ class QomYominEloquay extends MediumShip{
 		0=> array(
 			8 => "Thruster",
 			10 => "Water Caster",
-			14 => "Scanner",
+			14 => "ELINT Scanner",
 			17 => "Engine",
 			19 => "Reactor",
 			20 => "C&C",
@@ -75,7 +73,7 @@ class QomYominEloquay extends MediumShip{
 
 		1=> array(
 			6 => "Thruster",
-			8 => "HK Control Node",
+			8 => "Plasma Charge",
 			10 => "Sensor Spear",
 			17 => "Structure",
 			20 => "Primary",

@@ -1,23 +1,23 @@
 <?php
-class QomYominTolMor extends FighterFlight{
+class QomYominTelNan extends FighterFlight{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 20*6;
+        $this->pointCost = 29*6;
         $this->faction = "ZNexus Makar Federation";
-        $this->phpclass = "QomYominTolMor";
-        $this->shipClass = "Tol Mor Armed Drone";
+        $this->phpclass = "QomYominTelNan";
+        $this->shipClass = "Tel Nan Armed Drone";
         $this->imagePath = "img/ships/Nexus/makar_tolmor2.png";
 		$this->unofficial = true;
 
-        $this->isd = 1925;
+        $this->isd = 2108;
         
         $this->forwardDefense = 7;
         $this->sideDefense = 7;
         $this->freethrust = 10;
-        $this->offensivebonus = 3;
-        $this->jinkinglimit = 4;
+        $this->offensivebonus = 4;
+        $this->jinkinglimit = 5;
         $this->turncost = 0.33;
 		$this->turndelay = 0;
         
@@ -38,12 +38,12 @@ class QomYominTolMor extends FighterFlight{
 
         for ($i = 0; $i < $toAdd; $i++){            
             $armour = array(1, 1, 0, 0);
-            $fighter = new Fighter("QomYominTolMor", $armour, 5, $this->id);
-            $fighter->displayName = "Tol Mor";
+            $fighter = new Fighter("QomYominTelNan", $armour, 5, $this->id);
+            $fighter->displayName = "Tel Nan";
             $fighter->imagePath = "img/ships/Nexus/makar_tolmor2.png";
             $fighter->iconPath = "img/ships/Nexus/makar_tolmor_large2.png";
 
-	        $light = new NexusLightDefenseGun(300, 60, 1); //$startArc, $endArc, $nrOfShots
+	        $light = new NexusSmallXrayLaser(300, 60, 3, 1); //$startArc, $endArc, $nrOfShots
 	        $fighter->addFrontSystem($light);
 			
 			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack			

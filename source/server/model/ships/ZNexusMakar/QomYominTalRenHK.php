@@ -1,6 +1,6 @@
 <?php
 class QomYominTalRenHK extends FighterFlight{
-    /*Orieni Hunter-Killer - remotely controlled suicide fighter*/
+    /*Makar Hunter-Killer - remotely controlled suicide fighter*/
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
@@ -22,6 +22,8 @@ class QomYominTalRenHK extends FighterFlight{
         $this->turncost = 0.33;
         
     	$this->iniativebonus = 50;//no mistake, this is semi-autonomous unit without pilot - so its Ini is really low!
+
+        $this->dropOutBonus = -2;
         $this->populate();     
         
         HkControlNode::addHKFlight($this);

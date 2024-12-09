@@ -1,18 +1,20 @@
 <?php
-class MakarBrassert extends MediumShip{
+class MakarArtem extends MediumShip{
 
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 340;
+        $this->pointCost = 380;
         $this->faction = "ZNexus Makar Federation";
-        $this->phpclass = "MakarBrassert";
+        $this->phpclass = "MakarArtem";
         $this->imagePath = "img/ships/Nexus/makar_brassert2.png";
-        $this->shipClass = "Brassert Frigate";
+        $this->shipClass = "Artem Torpedo Frigate";
+			$this->variantOf = "Brassert Frigate";
+			$this->occurence = "uncommon";
 		$this->unofficial = true;
         $this->canvasSize = 80;
 //        $this->agile = true;
-	    $this->isd = 2009;
+	    $this->isd = 2052;
 
 	    $this->notes = 'Atmospheric capable';
         
@@ -34,11 +36,9 @@ class MakarBrassert extends MediumShip{
         $this->addPrimarySystem(new Thruster(4, 13, 0, 5, 4));        
         $this->addPrimarySystem(new Hangar(2, 1));
         
-		$this->addFrontSystem(new NexusDefenseGun(2, 4, 1, 270, 90));
-		$this->addFrontSystem(new NexusXRayLaser(3, 5, 2, 300, 60));
+		$this->addFrontSystem(new EWHeavyRocketLauncher(3, 6, 2, 240, 360));
 		$this->addFrontSystem(new EWHeavyRocketLauncher(3, 6, 2, 270, 90));
-		$this->addFrontSystem(new NexusXRayLaser(3, 5, 2, 300, 60));
-		$this->addFrontSystem(new NexusDefenseGun(2, 4, 1, 270, 90));
+		$this->addFrontSystem(new EWHeavyRocketLauncher(3, 6, 2, 0, 120));
         $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));
 	    
@@ -62,10 +62,8 @@ class MakarBrassert extends MediumShip{
 		),
 
 		1=> array(
-			4 => "Thruster",
-			6 => "Heavy Rocket Launcher",
-			8 => "Defense Gun",
-			11 => "X-Ray Laser",
+			5 => "Thruster",
+			9 => "Heavy Rocket Launcher",
 			17 => "Structure",
 			20 => "Primary",
 		),
