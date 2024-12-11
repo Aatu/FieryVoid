@@ -1004,7 +1004,7 @@ class ShipSystem {
     public function addCritical($shipid, $phpclass, $gamedata){
         $crit = new $phpclass(-1, $shipid, $this->id, $phpclass, $gamedata->turn);
         $crit->updated = true;
-        $this->criticals[] =  $crit;
+		$this->setCritical($crit); 
         return $crit;
     }
 	
