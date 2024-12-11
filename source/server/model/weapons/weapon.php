@@ -71,6 +71,7 @@ class Weapon extends ShipSystem
     public $loadingtimeArray = array();
     public $turnsloaded;
     public $turnsloadedArray = array();
+	public $maxVariableShots = 0; //For front end to know how many shots weapon CAN fire where this can be changed after locking in. 	  
 
     public $overloadable = false;
 

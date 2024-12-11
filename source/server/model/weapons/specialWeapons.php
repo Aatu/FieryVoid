@@ -3274,6 +3274,7 @@ class VorlonDischargeGun extends Weapon{
 	public $canChangeShots = true;
 	public $shots = 4;
 	public $defaultShots = 4; //can fire up to 4 shots (if power is available); LET'S DECLARE ALL 4 BY DEFAULT - chance of player wanting full power is higher than conserving energy (if he has energy shortages he'll be stopped by EoT check anyway)
+	public $maxVariableShots = 4; //For front end to know how many shots weapon CAN fire where this can be changed after locking in.	
 	public $intercept = 2; //intercept rating -2
 	
 	public $priority = 8; //light Raking weapon - even highest damaging mode falls into this category (borderline)
@@ -4288,6 +4289,7 @@ class VorlonDischargeCannon extends Weapon{
 	public $canChangeShots = true;
 	public $shots = 4;
 	public $defaultShots = 4; //can fire up to 4 shots (if power is available); LET'S DECLARE ALL 4 BY DEFAULT - chance of player wanting full power is higher than conserving energy (if he has energy shortages he'll be stopped by EoT check anyway)
+	public $maxVariableShots = 4; //For front end to know how many shots weapon CAN fire where this can be changed after locking in.	
 	public $intercept = 2; //intercept rating -2
 	
 	public $priority = 8; //light Raking weapon in lightest mode - heavier modes are definitely heavy Raking

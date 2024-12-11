@@ -101,6 +101,7 @@
         public $grouping = 20;
         
         public $canChangeShots = true;
+
         
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
@@ -151,11 +152,19 @@
         public function onConstructed($ship, $turn, $phase){
             parent::onConstructed($ship, $turn, $phase);
             $this->shots = $this->turnsloaded;
-        }
+        }        
         
         public function getDamage($fireOrder){        return Dice::d(10,2);   }
         public function setMinDamage(){     $this->minDamage = 2; /*- $this->dp;*/      }
         public function setMaxDamage(){     $this->maxDamage = 20; /*- $this->dp;*/      }
+    
+		public function stripForJson()
+		{
+			$strippedSystem = parent::stripForJson();
+			$strippedSystem->maxVariableShots = $this->turnsloaded;
+			return $strippedSystem;
+		}     
+    
     
     } //endof class BallisticTorpedo
 
