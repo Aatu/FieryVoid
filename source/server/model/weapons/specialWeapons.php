@@ -5820,6 +5820,7 @@ class PulsarMine extends Weapon{
     public $useOEW = false;
 	public $noLockPenalty = false;
     public $calledShotMod = 0;
+	public $weaponClass = "Particle";     
     
     public $doNotIntercept = true; 		    		          
     public $uninterceptable = true;
