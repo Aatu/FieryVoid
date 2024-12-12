@@ -2514,6 +2514,7 @@ spl_autoload_register(
 								
 				'vorloncapitalship' => '/server/model/ships/ShipClasses.php',
 				'vorlonassaultfighterflight' => '/server/model/ships/vorlons/vorlonAssaultFighterFlight.php',
+				'vorlonasteroiddefensegrid' => '/server/model/ships/vorlons/vorlonAsteroidDefenseGrid.php',
 				'vorlonheavyfighterflight' => '/server/model/ships/vorlons/vorlonHeavyFighterFlight.php',
 				'vorlontransport' => '/server/model/ships/vorlons/vorlonTransport.php',
 				'vorlonbattledestroyer' => '/server/model/ships/vorlons/vorlonBattleDestroyer.php',

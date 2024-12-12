@@ -27,6 +27,7 @@ class QomYominTolMor extends FighterFlight{
         $this->populate();       
 
         HkControlNode::addHKFlight($this);
+        $this->enhancementOptionsEnabled[] = 'EXT_AMMO'; //To enable extra Ammo for main gun.
 
     }
 

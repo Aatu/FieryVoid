@@ -1034,6 +1034,17 @@ class Enhancements{
 		  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
 	  } 
 	  	  
+	  //Extra Ammo for heavy guns on Fighters with a limited supply, cost: 3 per extra shot, limit: 2	  	
+	  $enhID = 'EXT_HAMMO';	  
+	  if(in_array($enhID, $flight->enhancementOptionsEnabled)){ //option needs to be specifically enabled
+		  $enhName = 'Additional Ammo for Heavy Gun';
+		  $enhLimit = 2;	
+		  $enhPrice = 3; //price per craft, while flight price is per 6-craft flight	  
+		  $enhPriceStep = 0;
+		  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+	  } 
+
+
 	  //Extra Marines for Breaching Pods, cost: 10 per pod, limit: 2	  	
 	  $enhID = 'EXT_MAR';	  
 	  if(in_array($enhID, $flight->enhancementOptionsEnabled)){ //option needs to be specifically enabled
@@ -1292,7 +1303,19 @@ class Enhancements{
 							if(	$sys instanceOf PairedGatlingGun || 
 								$sys instanceOf MatterGun || 
 								$sys instanceOf SlugCannon || 
-								$sys instanceOf GatlingGunFtr){
+								$sys instanceOf GatlingGunFtr ||
+								$sys instanceof NexusAutogun ||
+								$sys instanceof NexusMinigunFtr ||
+								$sys instanceof NexusShatterGunFtr ||
+								$sys instanceof NexusLightDefenseGun){
+							$sys->ammunition += $enhCount;//Increase ammo for these weapons by $enhCount
+							}
+						break;							
+					case 'EXT_HAMMO'://Extra heavy ammo, for fighter with a limited supply.  Max 2 extra shots.
+						foreach($flight->systems as $ftr) foreach($ftr->systems as $sys)
+							//Find relevant weapons 
+							if(	$sys instanceOf NexusAutocannonFtr || 
+								$sys instanceof NexusLightGasGunFtr){
 							$sys->ammunition += $enhCount;//Increase ammo for these weapons by $enhCount
 							}
 						break;							

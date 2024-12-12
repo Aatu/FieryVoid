@@ -4169,14 +4169,14 @@ class VorlonLightningGun extends Weapon{
 		  	parent::criticalPhaseEffects($ship, $gamedata);//Some critical effects like Limpet Bore might destroy weapon in this phase!
 	  	 	    
 			if(!$this->isDestroyed()){
-				$mirror = $this->mirror;
-				foreach($this->criticals as $critical){
-					$mirrorCrit = $critical;
-					$mirrorCrit->updated = true;
-					$mirrorCrit->newCrit = true;
-					$mirrorCrit->systemid = $mirror->id;
-					$mirror->setCritical($mirrorCrit);
-				}
+//				$mirror = $this->mirror;
+//				foreach($this->criticals as $critical){
+//					$mirrorCrit = $critical;
+//					$mirrorCrit->updated = true;
+//					$mirrorCrit->newCrit = true;
+//					$mirrorCrit->systemid = $mirror->id;
+//					$mirror->setCritical($mirrorCrit);
+//				}
 				return;//Lightning gun is not destroyed, all is well.
 			}
 
@@ -4189,8 +4189,22 @@ class VorlonLightningGun extends Weapon{
 			}				
 	    } //endof function criticalPhaseEffects	
 
+		//Now, apply the primary gun's critical to the matching mirror gun
+		public function setCritical($critical, $turn=0){ //Critical already known and passed to this funciton
+			$this->criticals[] = $critical; //Set original critical to Lightning Gun itself
+			$mirror = $this->mirror; //Find the appropriate mirror gun
+			//Get the other variables you need
+			$criticalPhpClass = $critical->phpclass; //What type of crit was set on the original Lightning Gun
+			//Now set the same type of critical for the mirro gun
+			$mirrorCritical = new $criticalPhpClass(-1, $critical->shipid,$this->id, $criticalPhpClass, $critical->turn, $critical->turnend);
+			$mirrorCritical->updated = true; 
+//			$mirrorCritical->newCrit = true; //Probably not needed
+			$mirror->setCritical($mirrorCritical); //And set it
+		}
 
 }//endof class VorlonLightningGun
+
+
 
 
 
@@ -4214,7 +4228,7 @@ class VorlonLightningGun2 extends Weapon{
 	public $uninterceptable = true; //Lightning Cannon is uninterceptable
 	public $intercept = 4; //intercept rating -4
 
-//	public $repairPriority = 0; // As a mirrored system, this should never be repaired
+	public $repairPriority = 0; // As a mirrored system, this should never be repaired
 	
 		//Should never be targeted or counted for CV.	
 		protected $doCountForCombatValue = false;

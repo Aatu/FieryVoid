@@ -1664,8 +1664,8 @@ class DockingCollar extends ShipSystem{
 	//Quarters is not important at all!
 	public $repairPriority = 1;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
     
-    function __construct($armour, $maxhealth){
-        parent::__construct($armour, $maxhealth, 0, 0);
+    function __construct($armour, $maxhealth, $output = 1){
+        parent::__construct($armour, $maxhealth, 0, $output);
     }
 }
 
