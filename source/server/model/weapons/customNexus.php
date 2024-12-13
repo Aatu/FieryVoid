@@ -4005,9 +4005,9 @@ class NexusMauler extends Particle{
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
-        public function getDamage($fireOrder){ return Dice::d(10, 1)+1;   }
-        public function setMinDamage(){     $this->minDamage = 2 ;      }
-        public function setMaxDamage(){     $this->maxDamage = 11 ;      }
+        public function getDamage($fireOrder){ return Dice::d(6, 1)+4;   }
+        public function setMinDamage(){     $this->minDamage = 5 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 10 ;      }
     }
 
 
@@ -6168,7 +6168,7 @@ class NexusHeavyAssaultCannonBattery extends Weapon{
         
         public $loadingtime = 2;
         
-        public $raking = 4;
+        public $raking = 6;
         
         public $rangePenalty = 1.0; //-1 / hex
         public $fireControl = array(-3, 0, 2); // fighters, <mediums, <capitals 
