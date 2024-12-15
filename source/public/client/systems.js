@@ -511,7 +511,7 @@ shipManager.systems = {
 
 		var mayOverheat = shipManager.criticals.countCriticalOnTurn(system, "MayOverheat", gamedata.turn);
 		if(mayOverheat > 0){ 
-			if(mayOverheat === 1) highlight = 'Yellow';
+			if(mayOverheat === 1) highlight = 'Orange';
 			if(mayOverheat === 2) highlight = 'Red';
 			return highlight;				
 		}

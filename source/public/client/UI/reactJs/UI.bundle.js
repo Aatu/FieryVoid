@@ -38805,7 +38805,9 @@ var System = _styledComponents2.default.div.withConfig({
     if (props.firing) {
         return '1px solid #eb5c15';
     } else if (props.highlight === 'Yellow') {
-        return '1px solid #ffff00'; // Some systems get a different border
+        return '1px solid #e1b000'; // Some systems get a different border
+    } else if (props.highlight === 'Orange') {
+        return '1px solid #ff6d3c'; // Some systems get a different border            
     } else if (props.highlight === 'Red') {
         return '1px solid #ff0000'; // Some systems get a different border            
     } else {
