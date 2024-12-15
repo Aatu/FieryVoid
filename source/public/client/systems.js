@@ -509,17 +509,17 @@ shipManager.systems = {
     hasBorderHighlight: function hasBorderHighlight(ship, system) { 
 		var highlight = null;
 
-		var mayOverheat = shipManager.criticals.countCriticalOnTurn(system, "MayOverheat", gamedata.turn);
-		if(mayOverheat > 0){ 
-			if(mayOverheat === 1) highlight = 'Orange';
-			if(mayOverheat === 2) highlight = 'Red';
-			return highlight;				
-		}
-
 		if(shipManager.power.isOverloading(ship, system)){
 			highlight = 'Yellow';			
 			return highlight;
-		}		
+		}	
+
+		var mayOverheat = shipManager.criticals.countCriticalOnTurn(system, "MayOverheat", gamedata.turn);
+		if(mayOverheat > 0){ 
+			if(mayOverheat === 1) highlight = 'Orange';
+			if(mayOverheat === 2) highlight = 'RedBold';
+			return highlight;				
+		}	
 
         return highlight;
     }, 
