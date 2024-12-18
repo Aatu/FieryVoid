@@ -196,7 +196,37 @@
         public function setMinDamage(){     $this->minDamage = 7 ;      }
         public function setMaxDamage(){     $this->maxDamage = 34 ;      }
     }
+
+//CUSTOM weapon
+    class HvyAssaultLaser extends Laser{        
+        public $name = "HvyAssaultLaser";
+        public $displayName = "Heavy Assault Laser";
+        public $animation = "laser";
+        public $animationColor = array(255, 58, 31);//same as Assault Laser
+        public $animationExplosionScale = 0.35;
+        
+        public $loadingtime = 3;
+        
+        public $rangePenalty = 0.33;
+        public $fireControl = array(-4, 3, 3); // fighters, <mediums, <capitals 
     
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+	    //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 8;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 62;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+		}
+
+        public function getDamage($fireOrder){        return Dice::d(10, 5)+4;   }
+        public function setMinDamage(){     $this->minDamage = 9 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 54 ;      }
+
+    }    
+
 //CUSTOM weapon
     class AdvancedAssaultLaser extends Laser{        
         public $name = "advancedAssaultLaser";

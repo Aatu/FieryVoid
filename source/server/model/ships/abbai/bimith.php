@@ -17,7 +17,7 @@ class Bimith extends BaseShip{
         
         $this->turncost = 0.66;
         $this->turndelaycost = 0.66;
-        $this->accelcost = 3;
+        $this->accelcost = 2;
         $this->rollcost = 3;
         $this->pivotcost = 2;
         $this->iniativebonus = 5;

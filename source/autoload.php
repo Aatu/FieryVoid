@@ -2506,9 +2506,9 @@ spl_autoload_register(
 				'maggravreactortechnical' => '/server/model/systems/baseSystems.php',
 				'vorlondischargegun' => '/server/model/weapons/specialWeapons.php',
 				'vorlonlightningcannon' => '/server/model/weapons/specialWeapons.php',
-//				'vorlonlightninggun' => '/server/model/weapons/specialWeapons.php',
-//				'vorlonlightninggun2' => '/server/model/weapons/specialWeapons.php',
-//				'vorlondischargepulsar' => '/server/model/weapons/specialWeapons.php',
+				'vorlonlightninggun' => '/server/model/weapons/specialWeapons.php',
+				'vorlonlightninggun2' => '/server/model/weapons/specialWeapons.php',
+				'vorlondischargepulsar' => '/server/model/weapons/specialWeapons.php',
 				'vorlonltdischargegun' => '/server/model/weapons/specialWeapons.php',
 				'vorlondischargecannon' => '/server/model/weapons/specialWeapons.php',
 								
@@ -2526,7 +2526,7 @@ spl_autoload_register(
 				'vorlonheavycarrier' => '/server/model/ships/vorlons/vorlonHeavyCarrier.php',
 				'vorlondreadnought' => '/server/model/ships/vorlons/vorlonDreadnought.php',
 				'vorlonheavydestroyer' => '/server/model/ships/vorlons/vorlonHeavyDestroyer.php',
-//				'vorlonstrikecruiser' => '/server/model/ships/vorlons/vorlonStrikeCruiser.php',
+				'vorlonstrikecruiser' => '/server/model/ships/vorlons/vorlonStrikeCruiser.php',
 				
 				//old versions of capital ships, to be deleted when games are over
 				/*
@@ -3420,7 +3420,9 @@ spl_autoload_register(
 						'gquan_wi' => '/server/model/ships/whatif/gquan_WI.php',	
 						'vorchan_wi' => '/server/model/ships/whatif/vorchan_WI.php',
 						
-						
+				// For the future
+				'hvyassaultlaser' => '/server/model/weapons/lasers.php',
+
 	
 				//let's end this with unit enhancement class...		    
 				'enhancements' => '/server/model/ships/Enhancements.php'

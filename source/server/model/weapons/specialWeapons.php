@@ -3911,6 +3911,9 @@ class VorlonLightningGun extends Weapon{
 	//technical variables for combined shot
 	public $isCombined = false;
 	public $alreadyConsidered = false;
+
+	private $pairing = null;
+	private $mirror= null;
 	
 	public $loadingtime = 1;
 	public $normalload = 2;
@@ -4168,16 +4171,20 @@ class VorlonLightningGun extends Weapon{
 	    { 
 		  	parent::criticalPhaseEffects($ship, $gamedata);//Some critical effects like Limpet Bore might destroy weapon in this phase!
 	  	 	    
+			//Need to check if a destroyed lightning gun has been repaired and then restore the mirrored lightning gun
 			if(!$this->isDestroyed()){
-//				$mirror = $this->mirror;
-//				foreach($this->criticals as $critical){
-//					$mirrorCrit = $critical;
-//					$mirrorCrit->updated = true;
-//					$mirrorCrit->newCrit = true;
-//					$mirrorCrit->systemid = $mirror->id;
-//					$mirror->setCritical($mirrorCrit);
-//				}
-				return;//Lightning gun is not destroyed, all is well.
+				$mirror = $this->mirror;  // get the associated mirror lightning gun
+				$gunHealth = $mirror->getRemainingHealth(); // If destroyed this is 0, otherwise it should be 1
+				if($gunHealth<1){
+					$mirrorDamage = $mirror->maxhealth;
+					$toBeFixed = $mirrorDamage;
+					$undestroy=true;
+					//actual healing entry
+					$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $mirror->id, -$toBeFixed, 0, 0, -1, false, $undestroy, 'SelfRepair', 'SelfRepair');
+					$damageEntry->updated = true;
+					$mirror->damage[] = $damageEntry;
+				}
+				return;//Lightning gun is not destroyed, all is well, or it was resurrected and brought the mirror gun back online.
 			}
 
 			if($this->isDestroyed()){ //Destroy the mirror gun if the main gun is destroyed
@@ -4196,11 +4203,31 @@ class VorlonLightningGun extends Weapon{
 			//Get the other variables you need
 			$criticalPhpClass = $critical->phpclass; //What type of crit was set on the original Lightning Gun
 			//Now set the same type of critical for the mirro gun
-			$mirrorCritical = new $criticalPhpClass(-1, $critical->shipid,$this->id, $criticalPhpClass, $critical->turn, $critical->turnend);
-			$mirrorCritical->updated = true; 
+			$mirrorCritical = new $criticalPhpClass(-1, $critical->shipid,$mirror->id, $criticalPhpClass, $critical->turn, $critical->turnend);
+////			$mirrorCritical->updated = true; 
 //			$mirrorCritical->newCrit = true; //Probably not needed
 			$mirror->setCritical($mirrorCritical); //And set it
 		}
+
+// add GTS
+    //Overwrite repairCrtical() function in main Lightning Gun system with this.
+    public function repairCritical($critDmg, $turn){
+            //repair critical on Lightning Gun as usual.
+        $critDmg->turnend = $turn;//actual repair 😉
+        $critDmg->forceModify = true; //actually save the repair...
+        $critDmg->updated = true; //actually save the repair cd!...
+
+        $mirrorGun = $this->mirror; //Get details of mirror Lighting Gun system
+
+        foreach($mirrorGun->criticals as $mirrorCritical){ //Search through any criticals in mirror gun, we know there should be a matching critical.
+            if($mirrorCritical->phpclass == $critDmg->phpclass && $critDmg->turn >= $turn){ //Make sure it's same type of critical, and is current.
+                $mirrorCritical->turnend = $turn;//actual repair 😉
+                $mirrorCritical->forceModify = true; //actually save the repair...
+                   $mirrorCritical->updated = true; //actually save the repair cd!...
+                break; //Matching critical repaired, break out of foreach loop and don't search for any more.
+            }
+        }
+    }//endof repairCritical() // end add GTS
 
 }//endof class VorlonLightningGun
 
@@ -4236,6 +4263,7 @@ class VorlonLightningGun2 extends Weapon{
 		public $isTargetable = false; //cannot be targeted ever!	
 
 		private $pairing = null;	//Which lightning gun is it paired with?	
+		private $mirror= null;
 	
 	public $firingMode = 1;	
 	public $firingModes = array(
@@ -4288,7 +4316,9 @@ class VorlonLightningGun2 extends Weapon{
 		}else{
 			$this->data["Special"] .= '<br>';
 		}	    		
-		$this->data["Special"] .= "Uninterceptable. Capable of multiple modes of fire. Higher modes require combining multiple prongs on the same target."; 
+		$this->data["Special"] .= "The mirror gun represents the Lightning Gun's ability to fire twice per turn.";
+		$this->data["Special"] .= "<br>May combine with other mirror guns or regular Lightning Guns for heavier shots.";
+		$this->data["Special"] .= "<br>Uninterceptable. Capable of multiple modes of fire. Higher modes require combining multiple prongs on the same target."; 
 		$this->data["Special"] .= "<br>Accelerator option added only to force explicit player consent for interception. It does not change damage output.";   
 		$this->data["Special"] .= "<br>Firing modes available (Number of prongs/power used per SHOT/damage output (and mode)/range penalty):";  
 		$this->data["Special"] .= "<br> - 1 Prong: 1 Power, 1d5+8 Standard, -5/hex"; 
