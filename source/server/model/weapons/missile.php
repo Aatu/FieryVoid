@@ -1104,7 +1104,7 @@ class AmmoMissileRackS extends Weapon{
 			$this->ammoClassesArray[] =  new AmmoMissileF();
 			$this->ammoClassesArray[] =  new AmmoMissileA();
 			$this->ammoClassesArray[] =  new AmmoMissileP();
-			$this->ammoClassesArray[] =  new AmmoMissileD(); //...though only Alacans and Sorithians use those, as simple Basic missiles are far superior
+			$this->ammoClassesArray[] =  new AmmoMissileD(); //...though only Alacans, Narn and Sorithians use those, as simple Basic missiles are far superior
 			$this->ammoClassesArray[] =  new AmmoMissileC();				
 			$this->ammoClassesArray[] =  new AmmoMissileS();
 			$this->ammoClassesArray[] =  new AmmoMissileJ();			
@@ -1867,6 +1867,7 @@ class AmmoBombRack extends AmmoMissileRackS{
 			$this->ammoClassesArray = array();
 			$this->ammoClassesArray[] =  new AmmoMissileB();
 			$this->ammoClassesArray[] =  new AmmoMissileF();
+			$this->ammoClassesArray[] =  new AmmoMissileD(); //For Narn Dag'Kur			
 			$this->availableAmmoAlreadySet = true;
 		}		
 		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base); //Parent routines take care of the rest
@@ -2046,15 +2047,16 @@ class AmmoMissileRackF extends AmmoMissileRackS {
                     break;
 				
 				case 3: //Firing phase 
-					//if weapon is marked as firing in Rapid mode, make a note of it!
+
 					if($ship->userid == $gameData->forPlayer){ //only own ships, otherwise bad things may happen!
-						if($this->firedInRapidMode){
+					//if weapon is marked as firing in Rapid mode, make a note of it!
+							if($this->firedInRapidMode){
 							$notekey = 'RapidFire';
 							$noteHuman = 'fired in Rapid mode';
 							$noteValue = 'R';
 							$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
 						}
-						
+					//Or, if weapon is marked as firing in Rapid mode, make a note of it!						
 						if($this->firedInLongRangeMode){
 							$notekey = 'LongRanged';
 							$noteHuman = 'fired in Long Range mode';

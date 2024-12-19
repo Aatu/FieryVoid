@@ -1009,6 +1009,9 @@ shipManager.movement = {
 	            }
 	        }
 	    }
+
+		webglScene.customEvent('SystemDataChanged', { ship: ship, system: mindriderEngine });	    
+	    
 	},
 
 	
@@ -1346,7 +1349,32 @@ shipManager.movement = {
 
         return rem;
     }, //endof function getRemainingEngineThrust
-    
+
+
+	getShipsNegativeThrust: function getShipsNegativeThrust() {
+		var shipNames = new Array();
+		var counter = 0;
+
+		for (var i in gamedata.ships) {
+			var ship = gamedata.ships[i];
+
+			if (ship.unavailable) continue;
+
+			if (ship.flight) continue;
+
+			if (ship.userid != gamedata.thisplayer) continue;
+
+			if (shipManager.isDestroyed(ship) || shipManager.power.isPowerless(ship)) continue;
+
+			if (shipManager.movement.getRemainingEngineThrust(ship, shipManager.systems.getSystemByName(ship, "engine")) < 0) {
+				shipNames[counter] = ship.name;
+				counter++;
+			}
+		}
+
+		return shipNames;
+	},
+	    
     
     getFullEngineThrust: function getRemainingEngineThrust(ship) {
         var rem = 0;

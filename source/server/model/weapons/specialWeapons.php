@@ -3274,6 +3274,7 @@ class VorlonDischargeGun extends Weapon{
 	public $canChangeShots = true;
 	public $shots = 4;
 	public $defaultShots = 4; //can fire up to 4 shots (if power is available); LET'S DECLARE ALL 4 BY DEFAULT - chance of player wanting full power is higher than conserving energy (if he has energy shortages he'll be stopped by EoT check anyway)
+	public $maxVariableShots = 4; //For front end to know how many shots weapon CAN fire where this can be changed after locking in.	
 	public $intercept = 2; //intercept rating -2
 	
 	public $priority = 8; //light Raking weapon - even highest damaging mode falls into this category (borderline)
@@ -4288,6 +4289,7 @@ class VorlonDischargeCannon extends Weapon{
 	public $canChangeShots = true;
 	public $shots = 4;
 	public $defaultShots = 4; //can fire up to 4 shots (if power is available); LET'S DECLARE ALL 4 BY DEFAULT - chance of player wanting full power is higher than conserving energy (if he has energy shortages he'll be stopped by EoT check anyway)
+	public $maxVariableShots = 4; //For front end to know how many shots weapon CAN fire where this can be changed after locking in.	
 	public $intercept = 2; //intercept rating -2
 	
 	public $priority = 8; //light Raking weapon in lightest mode - heavier modes are definitely heavy Raking
@@ -5109,7 +5111,7 @@ class PsionicConcentrator extends Weapon{
         {
             //maxhealth and power reqirement are fixed; left option to override with hand-written values
             if ( $maxhealth == 0 ){
-                $maxhealth = 7;
+                $maxhealth = 6;
             }
             if ( $powerReq == 0 ){
                 $powerReq = 1;
@@ -5820,6 +5822,7 @@ class PulsarMine extends Weapon{
     public $useOEW = false;
 	public $noLockPenalty = false;
     public $calledShotMod = 0;
+	public $weaponClass = "Particle";     
     
     public $doNotIntercept = true; 		    		          
     public $uninterceptable = true;
@@ -6728,6 +6731,8 @@ class SecondSight extends Weapon{
 	public $noProjectile = true; //Marker for front end to make projectile invisible for weapons that shouldn't have one.  		
 
 	protected $autoHit = true;//To show 100% hit chance in front end.
+	
+    protected $possibleCriticals = array();	
 	
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
 		if ( $maxhealth == 0 ) $maxhealth = 16;

@@ -38760,7 +38760,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _templateObject = _taggedTemplateLiteral(["\n    position: absolute;\n    bottom: 0;\n    left: 0;\n    width: 100%;\n    height: 7px;\n    border: 2px solid black;\n    box-sizing: border-box;\n    \n    background-color: black;\n\n    :before {\n        content: \"\";\n        position:absolute;\n        width:  ", ";\n        height: 100%;\n        left: 0;\n        bottom: 0;\n        background-color: ", ";\n    }\n"], ["\n    position: absolute;\n    bottom: 0;\n    left: 0;\n    width: 100%;\n    height: 7px;\n    border: 2px solid black;\n    box-sizing: border-box;\n    \n    background-color: black;\n\n    :before {\n        content: \"\";\n        position:absolute;\n        width:  ", ";\n        height: 100%;\n        left: 0;\n        bottom: 0;\n        background-color: ", ";\n    }\n"]),
     _templateObject2 = _taggedTemplateLiteral(["\n    width:100%;\n    height: calc(100% - 5px);\n    color: white;\n    font-family: arial;\n    font-size: 10px;\n    display: flex;\n    align-items: flex-end;\n    justify-content: center;\n    text-shadow: black 0 0 6px, black 0 0 6px;\n"], ["\n    width:100%;\n    height: calc(100% - 5px);\n    color: white;\n    font-family: arial;\n    font-size: 10px;\n    display: flex;\n    align-items: flex-end;\n    justify-content: center;\n    text-shadow: black 0 0 6px, black 0 0 6px;\n"]),
-    _templateObject3 = _taggedTemplateLiteral(["\n    position: relative;\n    box-sizing: border-box;\n    width: 32px;\n    height: 32px;\n    margin: ", ";\n    border: ", ";\n    background-color:  ", ";\n    box-shadow: ", ";\n    background-image: ", ";\n    background-size: cover;\n    filter: ", ";\n    cursor: pointer;\n    \n    ", " {\n        display: ", ";\n    }\n\n\n    :before {\n        content: \"\";\n        position:absolute;\n        width: 100%;\n        height: 100%;\n        opacity: ", ";\n\n        background-color: ", ";\n\n        background-image: ", ";\n    }\n"], ["\n    position: relative;\n    box-sizing: border-box;\n    width: 32px;\n    height: 32px;\n    margin: ", ";\n    border: ", ";\n    background-color:  ", ";\n    box-shadow: ", ";\n    background-image: ", ";\n    background-size: cover;\n    filter: ", ";\n    cursor: pointer;\n    \n    ", " {\n        display: ", ";\n    }\n\n\n    :before {\n        content: \"\";\n        position:absolute;\n        width: 100%;\n        height: 100%;\n        opacity: ", ";\n\n        background-color: ", ";\n\n        background-image: ", ";\n    }\n"]);
+    _templateObject3 = _taggedTemplateLiteral(["\n    position: relative;\n    box-sizing: border-box;\n    width: 32px;\n    height: 32px;\n    margin: ", ";\n   border: ", ";\n    background-color:  ", ";\n    box-shadow: ", ";\n    background-image: ", ";\n    background-size: cover;\n    filter: ", ";\n    cursor: pointer;\n    \n    ", " {\n        display: ", ";\n    }\n\n\n    :before {\n        content: \"\";\n        position:absolute;\n        width: 100%;\n        height: 100%;\n        opacity: ", ";\n\n        background-color: ", ";\n\n        background-image: ", ";\n    }\n"], ["\n    position: relative;\n    box-sizing: border-box;\n    width: 32px;\n    height: 32px;\n    margin: ", ";\n   border: ", ";\n    background-color:  ", ";\n    box-shadow: ", ";\n    background-image: ", ";\n    background-size: cover;\n    filter: ", ";\n    cursor: pointer;\n    \n    ", " {\n        display: ", ";\n    }\n\n\n    :before {\n        content: \"\";\n        position:absolute;\n        width: 100%;\n        height: 100%;\n        opacity: ", ";\n\n        background-color: ", ";\n\n        background-image: ", ";\n    }\n"]);
 
 var _react = require("react");
 
@@ -38804,6 +38804,12 @@ var System = _styledComponents2.default.div.withConfig({
 }, function (props) {
     if (props.firing) {
         return '1px solid #eb5c15';
+    } else if (props.highlight === 'Yellow') {
+        return '1px solid #e1b000'; // Some systems get a different border
+    } else if (props.highlight === 'Orange') {
+        return '1px solid #ff6d3c'; // Some systems get a different border            
+    } else if (props.highlight === 'RedBold') {
+        return '2px solid #ff0000'; // Some systems get a different border            
     } else {
         return '1px solid #496791';
     }
@@ -38966,7 +38972,8 @@ var SystemIcon = function (_React$Component) {
                 System,
                 {
                     scs: scs,
-                    onClick: this.clickSystem.bind(this),
+                    highlight: hasBorderHighlight(ship, system) // Pass criticals here to System                
+                    , onClick: this.clickSystem.bind(this),
                     onMouseOver: this.onSystemMouseOver.bind(this),
                     onMouseOut: this.onSystemMouseOut.bind(this),
                     onContextMenu: this.onContextMenu.bind(this),
@@ -39032,6 +39039,10 @@ var getBackgroundImage = function getBackgroundImage(system) {
 
 var hasCriticals = function hasCriticals(system) {
     return shipManager.criticals.hasCriticals(system);
+};
+
+var hasBorderHighlight = function hasBorderHighlight(ship, system) {
+    return shipManager.systems.hasBorderHighlight(ship, system);
 };
 
 var isSelected = function isSelected(system) {
@@ -40660,7 +40671,7 @@ var canDeBoost = function canDeBoost(ship, system) {
 };
 
 var canAddShots = function canAddShots(ship, system) {
-	return system.weapon && system.canChangeShots && weaponManager.hasFiringOrder(ship, system) && weaponManager.getFiringOrder(ship, system).shots < system.turnsloaded;
+	return system.weapon && system.canChangeShots && weaponManager.hasFiringOrder(ship, system) && weaponManager.getFiringOrder(ship, system).shots < system.maxVariableShots;
 };
 
 var canReduceShots = function canReduceShots(ship, system) {

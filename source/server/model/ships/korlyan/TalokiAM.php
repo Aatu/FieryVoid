@@ -46,7 +46,15 @@ class TalokiAM extends StarBaseSixSections{
 	    $this->enhancementOptionsEnabled[] = 'AMMO_X';//add enhancement options for other missiles - Class-X	    
 	    
 		$this->addPrimarySystem(new Reactor(4, 25, 0, 0));
-		$this->addPrimarySystem(new CnC(4, 32, 0, 0)); 
+//		$this->addPrimarySystem(new CnC(4, 32, 0, 0)); 
+
+		$cnc = new CnC(4, 16, 0, 0);
+		$cnc->startArc = 0;
+		$cnc->endArc = 360;
+        $this->addPrimarySystem($cnc);
+		$cnc = new SecondaryCnC(4, 16, 0, 0);//all-around by default
+        $this->addPrimarySystem($cnc);
+        
 		$this->addPrimarySystem(new Scanner(4, 16, 4, 6));
 		$this->addPrimarySystem(new Scanner(4, 16, 4, 6));
 		$this->addPrimarySystem(new CargoBay(4, 75));
@@ -169,12 +177,12 @@ class TalokiAM extends StarBaseSixSections{
                     14 => "Scanner",
 					18 => "Cargo Bay",
                     19 => "Reactor",
-                    20 => "C&C",
+                    20 => "TAG:C&C",
            		 ),
             1=> array(
                     2 => "Limpet Bore Torpedo",
 					4 => "TAG:Front Proximity Laser",
-					6 => "Particle Cannon",
+					6 => "TAG:Particle Cannon",
 					7 => "Hangar",
 					8 => "Sub Reactor",
                     18 => "Structure",
@@ -183,36 +191,36 @@ class TalokiAM extends StarBaseSixSections{
             2=> array(
                     2 => "Limpet Bore Torpedo",
 					4 => "TAG:Aft Proximity Laser",
-					6 => "Particle Cannon",
+					6 => "TAG:Particle Cannon",
 					7 => "Hangar",
 					8 => "Sub Reactor",
                     18 => "Structure",
                     20 => "Primary",
            		 ),
             31=> array(
-                    3 => "Standard Particle Beam",
-                    7 => "Class-F Missile Rack",
+                    3 => "TAG:Standard Particle Beam",
+                    7 => "TAG:Class-F Missile Rack",
 					8 => "Sub Reactor",
                     18 => "Structure",
                     20 => "Primary",
            		 ),
             32=> array(
-                    3 => "Standard Particle Beam",
-                    7 => "Class-F Missile Rack",
+                    3 => "TAG:Standard Particle Beam",
+                    7 => "TAG:Class-F Missile Rack",
 					8 => "Sub Reactor",
                     18 => "Structure",
                     20 => "Primary",
            		 ),
             41=> array(
-                    3 => "Standard Particle Beam",
-                    7 => "Class-F Missile Rack",
+                    3 => "TAG:Standard Particle Beam",
+                    7 => "TAG:Class-F Missile Rack",
 					8 => "Sub Reactor",
                     18 => "Structure",
                     20 => "Primary",
            		 ),
        		42=> array(
-                    3 => "Standard Particle Beam",
-                    7 => "Class-F Missile Rack",
+                    3 => "TAG:Standard Particle Beam",
+                    7 => "TAG:Class-F Missile Rack",
 					8 => "Sub Reactor",
                     18 => "Structure",
                     20 => "Primary",

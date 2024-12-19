@@ -31,7 +31,7 @@ class KoratylAM extends StarBaseSixSections{
 				16 => "Cargo Bay",
 				17 => "Hangar",
 				19 => "Reactor",
-				20 => "C&C",
+				20 => "TAG:C&C",
 			),
 		);
 
@@ -51,8 +51,15 @@ class KoratylAM extends StarBaseSixSections{
         //$this->enhancementOptionsEnabled[] = 'AMMO_P';//Dilgar were wiped out before Piercing missile was devised                
 
 		$this->addPrimarySystem(new Reactor(5, 25, 0, 0)); 
-		//$this->addPrimarySystem(new CnC(5, 15, 0, 0)); 
-		$this->addPrimarySystem(new ProtectedCnC(6, 30, 0, 0)); //instead of 2 5x15 C&C, make it 1 6x30
+//		$this->addPrimarySystem(new ProtectedCnC(6, 30, 0, 0)); //instead of 2 5x15 C&C, make it 1 6x30
+
+		$cnc = new CnC(5, 15, 0, 0);
+		$cnc->startArc = 0;
+		$cnc->endArc = 360;
+		$this->addPrimarySystem($cnc);
+		$cnc = new SecondaryCnC(5, 15, 0, 0);//all-around by default
+		$this->addPrimarySystem($cnc);
+
 		$this->addPrimarySystem(new Scanner(5, 20, 5, 8));
 		$this->addPrimarySystem(new Scanner(5, 20, 5, 8));
 		$this->addPrimarySystem(new Hangar(5, 4));
@@ -87,10 +94,10 @@ class KoratylAM extends StarBaseSixSections{
 			$loc = $this->locations[$i];
 
 			$this->hitChart[$loc] = array(
-				2 => "Heavy Bolter",
-				4 => "Medium Laser",
-				6 => "Class-S Missile Rack",
-				8 => "Scatter Pulsar",
+				2 => "TAG:Heavy Bolter",
+				4 => "TAG:Medium Laser",
+				6 => "TAG:Class-S Missile Rack",
+				8 => "TAG:Scatter Pulsar",
 				10 => "Cargo Bay",
 				11 => "Hangar",
 				13 => "Sub Reactor",

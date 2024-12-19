@@ -747,13 +747,8 @@ class Engine extends ShipSystem implements SpecialAbility {
     protected $possibleCriticals = array(
 	//official: 15-20 -2, 21-27 either all ahead full or shutdown, 28+ both
         15=>"OutputReduced2",
-        21=>"ForcedOfflineOneTurn",
-        28=>array("ForcedOfflineOneTurn", "OutputReduced2")
-	/*old crits
-        15=>"OutputReduced2",
-        21=>"OutputReduced4",
-        28=>"ForcedOfflineOneTurn"
-		*/
+        21=>"EngineShorted",      
+        28=>array("EngineShorted", "OutputReduced2") 
 		);
     
     function __construct($armour, $maxhealth, $powerReq, $output, $boostEfficiency, $thrustused = 0 ){
@@ -783,50 +778,143 @@ class Engine extends ShipSystem implements SpecialAbility {
     {
         return $this->specialAbilityValue;
     }
-
+/*
+	public function getBoostLevel($turn){
+		$boostLevel = 0;
+		foreach ($this->power as $i){
+				if ($i->turn != $turn) continue;
+				if ($i->type == 2){
+						$boostLevel += $i->amount;
+				}
+		}
+	 		
+		return $boostLevel;
+	}
+*/
 	public function criticalPhaseEffects($ship, $gamedata) {
 		
 		parent::criticalPhaseEffects($ship, $gamedata);//Call parent to apply effects like Limpet Bore.		
-		
+
+		if($this->isDestroyed()) return; //Just to double-check.
+					
 		$hasEngineFlux = $ship->hasSpecialAbility("EngineFlux");
 
 		if ($hasEngineFlux) {
 
 			$roll = Dice::d(20) + 1 + $this->getTotalDamage();  //There is a +1 penalty in addition to any damage
-
+			$finalTurn = $gamedata->turn + 1;
+				
 			if($roll >= 15 && $roll < 21){ // Output reduced by 2 for one turn
-				$finalTurn = $gamedata->turn + 1;
+
 				$crit = new OutputReduced2(-1, $this->unit->id, $this->id, "OutputReduced2", $gamedata->turn, $finalTurn);
 				$crit->updated = true;
 				$crit->newCrit = true; // force save even if crit is not for current turn
 				$this->criticals[] =  $crit;
-			}elseif ($roll >=21){
-				$crit = new ForcedOfflineOneTurn(-1, $this->unit->id, $this->id, "ForcedOfflineOneTurn", $gamedata->turn);
+			}elseif ($roll >= 21 && $roll < 28){ //EngineShorted
+				$crit = new EngineShorted(-1, $this->unit->id, $this->id, "EngineShorted", $gamedata->turn, $finalTurn);
 				$crit->updated = true;
 				$crit->newCrit = true; // force save even if crit is not for current turn
 				$this->criticals[] =  $crit;
+			}elseif ($roll >= 28){ //Both!
+				$crit = new EngineShorted(-1, $this->unit->id, $this->id, "EngineShorted", $gamedata->turn, $finalTurn);
+				$crit->updated = true;
+				$crit->newCrit = true; // force save even if crit is not for current turn
+				$this->criticals[] =  $crit;	
+				//Add second output crit.
+				$crit2 = new OutputReduced2(-1, $this->unit->id, $this->id, "OutputReduced2", $gamedata->turn, $finalTurn);
+				$crit2->updated = true;
+				$crit2->newCrit = true; // force save even if crit is not for current turn
+				$this->criticals[] =  $crit2;							
 			}
-/*this is based on old crit chart!
-			elseif ($roll >=21 && $roll < 28) { // Output reduced by 4 for one turn
-				$finalTurn = $gamedata->turn + 1;
-				$crit = new OutputReduced4(-1, $this->unit->id, $this->id, "OutputReduced4", $gamedata->turn, $finalTurn);
-				$crit->updated = true;
-				$crit->newCrit = true; // force save even if crit is not for current turn
-				$this->criticals[] =  $crit;
-			} elseif ($roll >=28) { // Forced offline for one turn
-				$finalTurn = $gamedata->turn + 1;
-				$crit = new ForcedOfflineOneTurn(-1, $this->unit->id, $this->id, "ForcedOfflineOneTurn", $gamedata->turn);
-				$crit->updated = true;
-				$crit->newCrit = true; // force save even if crit is not for current turn
-				$this->criticals[] =  $crit;
-            }
-*/
-			
 		}
-		
-	}
+				
+	}//endof criticalPhaseEffects
 
-}
+
+	public function doEngineShorted($ship, $gamedata){
+
+		    $roll = Dice::d(20); // Roll the dice		    
+
+		    // Create critical for offline, will always apply regardless of roll.
+		    $crit = new ForcedOfflineOneTurn(-1, $this->unit->id, $this->id, "ForcedOfflineOneTurn", $gamedata->turn);
+		    $crit->updated = true;
+		    $crit->newCrit = true; // Force save even if crit is not for current turn
+		    $this->setCritical($crit);
+
+		    if ($roll < 15) {
+		        // Engine offline next turn, no further actions
+		        return;
+		    }
+
+		    // Engine offline + involuntary acceleration logic
+		    $hasThrusters = Movement::hasMainThruster($ship);
+		    $canAccelerate = Movement::canAccelerate($ship, $gamedata);
+
+		    if (!$hasThrusters) {
+		        // No thrusters, nothing else happens
+		        return;
+		    }
+
+		    if ($canAccelerate) {
+		        // Ship can accelerate, add ControlsStuck critical to be found by setPreturnMovementStatusForShip()
+		        $crit2 = new ControlsStuck(-1, $this->unit->id, $this->id, "ControlsStuck", $gamedata->turn, $gamedata->turn+1);
+		        $crit2->updated = true;
+		        $crit2->newCrit = true;
+		        $this->setCritical($crit2);		                
+		    } else {
+		        // No acceleration possible, damage primary structure
+		        $this->doStressDamageToHull($ship, $gamedata);
+		        
+		    }
+	
+	}//endof doEngineShorted() 
+    
+    protected function doStressDamageToHull($ship, $gamedata){
+    	
+	    // Get primary structure
+	    $primaryStructure = current(array_filter($ship->systems, function($system) {
+	        return $system instanceof Structure && $system->location == 0;
+	    }));
+
+	    if (!$primaryStructure) {
+	        return; // No primary structure found
+	    }   	
+
+    	$damageAble = $this->getOutput(); //Engine output = Damage
+		$maxDamagePossible = $primaryStructure->getRemainingHealth(); //Can't do more than structure's current health.
+		$damageCaused = min($damageAble, $maxDamagePossible); //Don't cause more damage than system's health remaining.		
+		
+
+		//Now create fireOrder to show the damage to the stressed hull.		          
+		$rammingSystem = $ship->getSystemByName("RammingAttack");
+		$newFireOrder = null;
+
+		if ($rammingSystem) { // actually exists! - it should on every ship!
+			$shotsHit = 1;
+					
+			$newFireOrder = new FireOrder(
+				-1, "normal", $ship->id, $ship->id,
+				$rammingSystem->id, -1, $gamedata->turn, 1,
+				100, 100, 1, $shotsHit, 0,
+				0, 0, 'Hull Stress', 10000
+			);
+					
+			$newFireOrder->addToDB = true;
+			$rammingSystem->fireOrders[] = $newFireOrder;
+			$newFireOrder->pubnotes = "<br>This ship's engine malfunctions and tries to accelerate, dealing " . $damageCaused . " damage to the Primary Structure.";			
+		}
+
+		//Now actual damage entry
+	    $isCriticalDamage = $damageCaused >= $primaryStructure->getRemainingHealth();
+
+	    $damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $primaryStructure->id, $damageCaused, 0, 0, -1, $isCriticalDamage, false, "", "Hull Stress");
+	    $damageEntry->updated = true;
+	    $primaryStructure->damage[] = $damageEntry;
+					
+    }//endof doStressDamageToHull()    	
+
+
+}//endof Engine class
 
 
 class MindriderEngine extends Engine{
@@ -4922,9 +5010,9 @@ class MindriderHangar extends ShipSystem{
     public $primary = true;
     public $iconPath = "hangar.png";
     
-	public $isPrimaryTargetable = true; //shouldn't be targetable at all, in fact!
-	public $isTargetable = true; //cannot be targeted ever!
-	protected $doCountForCombatValue = true; //don't count when estimating remaining combat value    
+	public $isPrimaryTargetable = true; //true if hangar has capacity
+	public $isTargetable = true; //true if hangar has capacity
+	protected $doCountForCombatValue = true; //true if hangar has capacity  
 	
 	public static $alreadyCleared = array();    	
 	public static $hangarList = array(); //array of Mindrider Hangars in game
@@ -4941,9 +5029,9 @@ class MindriderHangar extends ShipSystem{
 	    
 	    if($output == 0){
 			$this->iconPath = "hangarTechnical.png";	    	
-			$this->isPrimaryTargetable = false; //shouldn't be targetable at all, in fact!
-			$this->isTargetable = false; //cannot be targeted ever!
-			$this->doCountForCombatValue = false; //don't count when estimating remaining combat value 	    	
+			$this->isPrimaryTargetable = false; //change to false if if hangar has no capacity
+			$this->isTargetable = false; //change to false if if hangar has no capacity
+			$this->doCountForCombatValue = false; //change to false if if hangar has no capacity	    	
 	    }	    
     }
 	

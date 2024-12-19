@@ -32,7 +32,7 @@ class HyachUtaraTor extends StarBaseSixSections{
 				14 => "Computer",
 				16 => "Scanner",
 				18 => "Reactor",
-				20 => "C&C",
+				20 => "TAG:C&C",
 			),
 		);
 
@@ -87,11 +87,11 @@ class HyachUtaraTor extends StarBaseSixSections{
 			$loc = $this->locations[$i];
 
 			$this->hitChart[$loc] = array(
-				1 => "Spinal Laser",
-				2 => "Blast Laser",
-				4 => "Medium Laser",
-				5 => "Maser",
-				6 => "Interdictor",
+				1 => "TAG:Spinal Laser",
+				2 => "TAG:Blast Laser",
+				4 => "TAG:Medium Laser",
+				5 => "TAG:Maser",
+				6 => "TAG:Interdictor",
 				9 => "Cargo Bay",
 				10 => "Sub Reactor",
 				11 => "Hangar",
