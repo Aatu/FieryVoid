@@ -1,0 +1,25 @@
+CUSTOM reevaluation of Yolu
+
+In December 2024 Yolu got reevaluated (generally upwards), to make them a more even match for Tier 1 fleets:
+ Initial comments:
+
+Yuan Dreadnought 2100 -> 2400 (VERY powerful ship, and so diffucult to evaluate; I'm comparing to Shargoti: Yuan has more capital firepower, but less brawling firepower, as well as smaller hangar - and crucially no Jammer)
+Ulana Patrol Cruiser 1200 -> 1360 (Hyflite: 1355)  (absolutely devastating anti-capital firepower, with limited brawling/AF options; closest equivalent would be Bin'Tak, I think, but Ulana is flat more powerful)
+   Udran Command Cruiser 1375 -> 1650 (retains anti-capital firepower of Ulana while also boasting of powerful brawling/AF suite and a token hangar - overall a much more dangerous and flexible ship; Maybe not quite Warlock level, but not far off... and Warlock seems to be underpointed... I place her near Warlock/Sharlin in points)
+Aluin Gunship 1100 -> 1400 (Hyflite: 1350) (very similar to Ulana... except even more antiship firepower, and a bit less antifighter capability - one ship fleet as long as You can keep enemy ships away... I'd say "a bit more than Ulana", it's less flexible but has more raw power)
+Notali Carrier 1000 -> 1150 (Hyflite: 1130) (still powerful antiship but not quite Ulana level, more AF than Ulana - and fighters of course; not so much durability though) 
+Nashana Light Cruiser 950 -> 1150 (very balanced - with solid primary antiship long range battery backed up by quite a lot of Fusion Cannons (including Heavy ones), and a token hangar too; not that far below Ulana, really; that would be my favorite)
+Notai Assault Carrier 950 -> 950 (shouldn't it be Notali variant? yes it should, correcting! and correcting hangar space as well) no fighter hangar and no long range firepower (short range anti-capital guns are there in numbers though :)) - overall notably less valuable than Notali due to lack of range)
+Maltra Scout 900 -> 1000 (Hyflite: 970) (Maltra is much more durable and is a viable close combatant/capital escort in her own right, I'd price that high - closest comparision is Leshath, with a point more EW and Jammer and more guns... but it's 1500 points; still, Jammer is especially useful for a scout, so I wouldn't price Maltra THAT high 🙂 ) 
+Hastan Escort Frigate 800 -> 800 (excellent ship, though overshadowed by Maitau - perhaps reevaluation will make her more appealing; EA Cronos is also officially 800 points, has more heavy guns - and her lesser durability and EW is aided by EWeb; I'd leave her as is for starters actually)
+
+Maitau Pursuit Frigate 600 -> 800 (Hyflite: 785) (at 600 points she's WAY too cheap - not agile, but Medium status, high durability, cruiser's main battery coupled with solid Fusion Cannons for defense and brawling... at 600 it was "ram as many of them as You can before thinking anything else", and it worked!)
+   Maishan Strike Frigate 710 -> 750  (vastly more short/medium range firepower than Maitau, at the price of no long range guns; excellent ship, but it was so far overshadowed by Maitau - reversing price difference should make her much more appealing)
+   Malau Attack Frigate 625 -> 650 (basically Maitau but without range - definitely the least capable of the three, probably because she predates other variants by a hundred years 🙂 )
+
+Utan Heavy Fighters 110 -> 95 (Hyflite: 86) (excellent at killing ships, which Yolu fleet generally need no help at - slow, but well armored and powerful; I think 110 may be too much, but at Tzymm's price level I feel it would become too powerful (...like Tzymm itself 😉 )
+Yonor Breaching Pods 50 -> 50 (even more durable than usual for BPs, so a bit pricier seems fine)
+Nathor Assault Shuttles 40 -> 75 (actually as durable as breaching pods, and with good weapon! - they should be priced accordingly, at 40 points they're actually viable as assault fighters...) 
+
+As declared previously, I'd like to add another unit to the order of battle:
+Utanor Heavy Interceptor (85 points?) - (Common variant of Utan, differences: light gun double->triple mount, no heavy gun, OB 5->6, Thrust 8->10) 

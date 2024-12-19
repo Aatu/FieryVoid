@@ -159,7 +159,7 @@ window.gamedata = {
 			powerRating = 'Tier 1';
 			break;
 		  case 'Yolu Confederation':
-			powerRating = 'Superior';
+			powerRating = 'Superior; can be turned into custom Tier 1 with re-evaluation enhancements';
 			break;
 		  case 'ZBSG Colonials':
 			powerRating = 'Tier 2, custom faction';
