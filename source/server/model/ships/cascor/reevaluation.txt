@@ -62,3 +62,4 @@ My proposal (instead of upgrading existing fighters) is to add a new fighter: at
  - Aft weapon stays, as defensive one
 Intent: this fighter will retain Tiquincc drawbacks (large profile, flimsy) and be poor as interceptor (front guns would be probably decent vs superheavy fightrs though 🙂 , otherwise single Aft gun will be the weapon of choice).
 Against ships, Cascor agility plus 1/2turns weapon will mean it will make precision passes coming from weakly defended aspects, and its weapon should allow these passes to do reasonable damage - but its flimsiness would mean it cannot force its way, relying instead on harassing fighters (which Cascor should have plenty) to put cracks into targets' defensive coverage. WIll need to be escorted, but it should not be a problem for Cascor.
+

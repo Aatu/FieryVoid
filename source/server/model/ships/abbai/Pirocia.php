@@ -47,7 +47,6 @@ class pirocia extends StarBaseSixSections
 		$cnc = new SecondaryCnC(5, 24, 0, 0);//all-around by default
         $this->addPrimarySystem($cnc);
 
-
 		$this->addPrimarySystem(new Reactor(5, 25, 0, 0));
 		$this->addPrimarySystem(new Hangar(5, 14));
 		$this->addPrimarySystem(new Hangar(5, 14));
@@ -93,7 +92,7 @@ class pirocia extends StarBaseSixSections
                     3 => "TAG:Combat Laser",                    
                     5 => "TAG:Quad Array",
                     7 => "TAG:Particle Impeder", 
-                    8 => "TAG:Comm Disruptor",                                                              
+                    8 => "TAG:Shield Projector",                                                              
                     11 => "TAG:Cargo Bay",
                     12 => "TAG:Sub Reactor",
                     18 => "TAG:Outer Structure",

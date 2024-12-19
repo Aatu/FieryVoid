@@ -28,6 +28,7 @@ class ShipSystem {
     
     protected $possibleCriticals = array();
 	
+    public $primary = false; //is this a core system?
     public $isPrimaryTargetable = false; //can this system be targeted by called shot if it's on PRIMARY?	
     public $isTargetable = true; //false means it cannot be targeted at all by called shots! - good for technical systems :)
     
@@ -1004,10 +1005,20 @@ class ShipSystem {
     public function addCritical($shipid, $phpclass, $gamedata){
         $crit = new $phpclass(-1, $shipid, $this->id, $phpclass, $gamedata->turn);
         $crit->updated = true;
-        $this->criticals[] =  $crit;
+		$this->setCritical($crit);
+//        $this->criticals[] =  $crit;
         return $crit;
     }
-	
+
+// add GTS
+	//Standard procedure for repairing a critical, called from selfRepair system.
+    public function repairCritical($critDmg, $turn){
+        $critDmg->turnend = $turn;//actual repair 😉
+        $critDmg->forceModify = true; //actually save the repair...
+        $critDmg->updated = true; //actually save the repair cd!...
+
+    }//endof repairCritical()    
+// end add GTS	
     
     public function hasCritical($type, $turn = false){
         $count = 0;
@@ -1035,6 +1046,14 @@ class ShipSystem {
         
         if ($this->isDestroyed())
             return 0;
+        
+        $output = $this->output;
+        $output += $this->outputMod; //outputMod negative is negative in itself!
+		$output = max(0,$output); //don't let output be negative!
+        return $output;
+    }
+
+    public function getOutputWhenOffline(){        
         
         $output = $this->output;
         $output += $this->outputMod; //outputMod negative is negative in itself!

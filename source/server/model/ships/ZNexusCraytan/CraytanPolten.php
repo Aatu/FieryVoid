@@ -25,6 +25,9 @@ class CraytanPolten extends FighterFlight{
 	    $this->iniativebonus = 12*5;
       
         $this->populate();
+
+        $this->enhancementOptionsEnabled[] = 'EXT_AMMO'; //To enable extra Ammo for main gun.
+
     }
     
     

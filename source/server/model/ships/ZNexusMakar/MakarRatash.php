@@ -7,10 +7,10 @@ class MakarRatash extends MediumShip{
         $this->pointCost = 240;
         $this->faction = "ZNexus Makar Federation";
         $this->phpclass = "MakarRatash";
-        $this->imagePath = "img/ships/Nexus/makarRatash_v3.png";
+        $this->imagePath = "img/ships/Nexus/makar_ratash2.png";
         $this->shipClass = "Ratash Early Frigate";
 		$this->unofficial = true;
-        $this->canvasSize = 80;
+        $this->canvasSize = 90;
         $this->agile = true;
 	    $this->isd = 1888;
 

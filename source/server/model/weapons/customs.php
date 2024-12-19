@@ -2379,15 +2379,15 @@ class GromeHvyRailgun extends Weapon{
    		
 		protected $autoHit = false;//To show 100% hit chance in front end.   			        
    		protected $autoHitArray = array(1=>false, 2=>true);
-   		
-   		
-		private static $alreadyDazzled = array();	
+   			
+		public static $alreadyDazzled = array();
+		public static $alreadyRazzled = array();				
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
         {
 			//maxhealth and power reqirement are fixed; left option to override with hand-written values
 			if ( $maxhealth == 0 ){
-				$maxhealth = 9;
+				$maxhealth = 6;
 			}
 			if ( $powerReq == 0 ){
 				$powerReq = 3;
@@ -2398,7 +2398,7 @@ class GromeHvyRailgun extends Weapon{
         public function setSystemDataWindow($turn){			
             parent::setSystemDataWindow($turn);        
             $this->data["Special"] = "Can fire in two modes:";
-            $this->data["Special"] .= "<br>  Razzle - Deals 12 damage in Flash mode to target, +1 to fighter dropout rolls.";
+            $this->data["Special"] .= "<br>  Razzle - Deals 12 damage in Flash mode to target, -5% to hit for enemy fighters.";
             $this->data["Special"] .= "<br>  Dazzle - Hex targeted, enemy fighters suffer 50% reduction to Offensive Bonus, and enemy ships have -1 EW next turn.";            
             $this->data["Special"] .= "<br>Only one 'Dazzle' effect can apply to an enemy unit each turn.";
             $this->data["Special"] .= "<br>Intercept rating is doubled against ballistics.";            
@@ -2468,19 +2468,16 @@ class GromeHvyRailgun extends Weapon{
 							
 				foreach ($affectedUnits as $targetShip) {	
 					if (!$targetShip->isDestroyed()) { //no point allocating to destroyed ship		
-					//check for overlap - return if this unit was already affected
-						foreach (GaimPhotonBomb::$alreadyDazzled as $affectedID){
-							if ($affectedID == $targetShip->id) return;	
-						}
-				
-					GaimPhotonBomb::$alreadyDazzled[] = $targetShip->id;//add new ID to affected list
-										
+
+						if (isset(GaimPhotonBomb::$alreadyDazzled[$targetShip->id])) return; //target already engaged by Dazzle attack
+						GaimPhotonBomb::$alreadyDazzled[$targetShip->id] = true; //Mark engaged now.
+																
 						if (isset($affectedUnits[$targetShip->id])) { //units on target hex! direction damage is coming from: launch hex
 							$sourceHex = $posLaunch;
 						} else { //other units in range! direction damage is coming from: impact hex
 							$sourceHex = $target;
 						}
-						$this->AOEdamage($targetShip, $shooter, $fireOrder, $sourceHex, 0, $gamedata);										}
+						$this->AOEdamage($targetShip, $shooter, $fireOrder, $sourceHex, 0, $gamedata);													}
 				}
 		        $fireOrder->rolled = max(1, $fireOrder->rolled);//Marks that fire order has been handled, just in case.
 	        
@@ -2511,10 +2508,34 @@ class GromeHvyRailgun extends Weapon{
 				if ($ship instanceof FighterFlight)	{
 					$mod = 1;		
 					$system->critRollMod += $mod;
+
+					$effectHit = 5;//Reduce Offensive Bonus by 5%
+					$allFire = $ship->getAllFireOrders($gamedata->turn);
+					
+					foreach($allFire as $currFireOrder) {
+						if ($currFireOrder->type == 'normal') {
+							if ($currFireOrder->rolled > 0) {
+							}else{
+								if (isset(GaimPhotonBomb::$alreadyRazzled[$ship->id])) return; //target already engaged by Razzle attack
+								$currFireOrder->needed -= $effectHit; //$needed works on d100								
+							}
+						}
+					}
+
+					GaimPhotonBomb::$alreadyRazzled[$ship->id] = true; //Mark engaged now.					
+  					//place effect on first fighter, even if it's already destroyed!
+					$firstFighter = $ship->getSampleFighter();     
+					if($firstFighter){
+						$crit = new tmphitreduction(-1, $ship->id, $firstFighter->id, 'tmphitreduction', $gamedata->turn, $gamedata->turn); 
+						$crit->updated = true;
+						$firstFighter->criticals[] =  $crit;
+					}								
 				} 
 				break;	
 						
 			case 2:	
+				if ($system->advancedArmor) return; //no additional effect on Advanced Armor.
+				
 					$effectHit = 0; //Initialise.
 					$effectHit5 = $effectHit * 5;//For notes only.
 
@@ -2544,10 +2565,10 @@ class GromeHvyRailgun extends Weapon{
 					}else{ //ship - place effect on Scanner next turn!
 						$scanner = $ship->getSystemByName("Scanner");//EW always reduced by 1 for ships.	    
 						if($scanner){
-								$crit = new OutputReduced1(-1, $ship->id, $scanner->id, 'OutputReduced1', $gamedata->turn+1, $gamedata->turn+1); 
-								$crit->updated = true;
-								$scanner->criticals[] =  $crit;
-								$fireOrder->pubnotes .= " Affected ships have their EW reduced by 1 point next turn (does not stack).";										
+							$crit = new OutputReduced1(-1, $ship->id, $scanner->id, 'OutputReduced1', $gamedata->turn+1, $gamedata->turn+1); 
+							$crit->updated = true;
+							$scanner->criticals[] =  $crit;
+							$fireOrder->pubnotes .= " Affected ships have their EW reduced by 1 point next turn (does not stack).";										
 						}
 					}					
 				break;				

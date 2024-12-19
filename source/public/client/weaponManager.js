@@ -1443,7 +1443,7 @@ window.weaponManager = {
         
         //Reset Movement UI after moment of targeting, to prevent cancel of last Combat Pivot AFTER locking target! - DK 10.24
         if(gamedata.gamephase == 3 && selectedShip.flight){
-            UI.shipMovement.drawShipMovementUI(selectedShip);        	 	
+            webglScene.customEvent("ShipMovementChanged", { ship: ship }); //Redraw movement for Combat Pivots         	 	
         }
 		
 		//Add new warning for when people ignore tooltip and try to ram when they possibly shouldn't - DK 10/24
@@ -1582,6 +1582,8 @@ window.weaponManager = {
         }
 
         webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+        
+        if(gamedata.gamephase == 3 && ship.flight)	webglScene.customEvent("ShipMovementChanged", { ship: ship }); //Redraw movement for Combat Pivots       
     },
 	removeFiringOrderAll: function removeFiringOrderAll(ship, system) { //remove firing orders for ALL similar weapons that have them
 		if (!gamedata.isMyShip(ship)) {
@@ -1610,6 +1612,8 @@ window.weaponManager = {
 		}
 		
         webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+        
+        if(gamedata.gamephase == 3 && ship.flight)	webglScene.customEvent("ShipMovementChanged", { ship: ship }); //Redraw movement for Combat Pivots         
     },
 
 	    

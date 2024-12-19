@@ -490,6 +490,7 @@ class Enhancements{
 		  $enhPrice = 0;
 		  
 		  switch($ship->phpclass){
+			  //Cascor reevaluation to catch to Tier 2 (price cuts, generally)
 			  case 'Qoccata': //Cascor Qoccata Supercarrier: 950->875
 				  $enhPrice = -75;
 				  break;
@@ -519,7 +520,46 @@ class Enhancements{
 				  break;
 			  case 'Talacca': //Cascor Talacca Frigate Leader: 500->480
 				  $enhPrice = -20;
-				  break;			  
+				  break;	
+
+			  //Yolu reevaluation to catch to Tier 1 (price increases, generally)
+			  case 'Yuan': //Yolu Yuan Dreadnought: 2100->2400
+				  $enhPrice = 300;
+				  break;
+			  case 'Ulana': //Yolu Ulana Patrol Cruiser: 1200->1360
+				  $enhPrice = 160;
+				  break;
+			  case 'Udran': //Yolu Udran Command Cruiser: 1375->1650
+				  $enhPrice = 275;
+				  break;
+			  case 'Aluin': //Yolu Aluin Gunship: 1100->1400
+				  $enhPrice = 300;
+				  break;
+			  case 'Notali': //Yolu Notali Carrier: 950->1150
+				  $enhPrice = 200;
+				  break;
+			  case 'Notai': //Yolu Notai Assault Carrier: 950->950
+				  $enhPrice = 0; //just so enhancement itself is present
+				  break;
+			  case 'Nashana': //Yolu Nashana Light Cruiser: 950->1150
+				  $enhPrice = 200;
+				  break;
+			  case 'Maltra': //Yolu Maltra Scout: 900->1000
+				  $enhPrice = 100;
+				  break;
+			  case 'Hastan': //Yolu Hastan Escort Frigate: 800->800
+				  $enhPrice = 0;//just so enhancement itself is present
+				  break;
+			  case 'Maitau': //Yolu Maitau Pursuit Frigate: 600->800
+				  $enhPrice = 200;
+				  break;
+			  case 'Maishan': //Yolu Maishan Strike Frigate: 710->750
+				  $enhPrice = 40;
+				  break;
+			  case 'Malau': //Yolu Malau Attack Frigate: 625->650
+				  $enhPrice = 25;
+				  break;
+			  
 			  default:
 				  $enhPrice = 0;
 				  break;
@@ -1034,6 +1074,17 @@ class Enhancements{
 		  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
 	  } 
 	  	  
+	  //Extra Ammo for heavy guns on Fighters with a limited supply, cost: 3 per extra shot, limit: 2	  	
+	  $enhID = 'EXT_HAMMO';	  
+	  if(in_array($enhID, $flight->enhancementOptionsEnabled)){ //option needs to be specifically enabled
+		  $enhName = 'Additional Ammo for Heavy Gun';
+		  $enhLimit = 2;	
+		  $enhPrice = 3; //price per craft, while flight price is per 6-craft flight	  
+		  $enhPriceStep = 0;
+		  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+	  } 
+
+
 	  //Extra Marines for Breaching Pods, cost: 10 per pod, limit: 2	  	
 	  $enhID = 'EXT_MAR';	  
 	  if(in_array($enhID, $flight->enhancementOptionsEnabled)){ //option needs to be specifically enabled
@@ -1149,7 +1200,18 @@ class Enhancements{
 				  break;
 			  case 'Caltus': //Cascor Caltus Torpedo Fighter: 65->40
 				  $enhPrice = -25;
-				  break;	  
+				  break;
+			  
+			  case 'Utan': //Yolu Utan Heavy Fighter: 110->90
+				  $enhPrice = -20;
+				  break;
+			  case 'Yonor': //Yolu Yonor Breaching Pods: 50->50
+				  $enhPrice = 0; //just so there's reevaluation visible
+				  break;
+			  case 'Nathor': //Yolu Nathor Assault Shuttles: 40->75
+				  $enhPrice = 35;
+				  break;
+			  
 			  default:
 				  $enhPrice = 0;
 				  break;
@@ -1292,7 +1354,19 @@ class Enhancements{
 							if(	$sys instanceOf PairedGatlingGun || 
 								$sys instanceOf MatterGun || 
 								$sys instanceOf SlugCannon || 
-								$sys instanceOf GatlingGunFtr){
+								$sys instanceOf GatlingGunFtr ||
+								$sys instanceof NexusAutogun ||
+								$sys instanceof NexusMinigunFtr ||
+								$sys instanceof NexusShatterGunFtr ||
+								$sys instanceof NexusLightDefenseGun){
+							$sys->ammunition += $enhCount;//Increase ammo for these weapons by $enhCount
+							}
+						break;							
+					case 'EXT_HAMMO'://Extra heavy ammo, for fighter with a limited supply.  Max 2 extra shots.
+						foreach($flight->systems as $ftr) foreach($ftr->systems as $sys)
+							//Find relevant weapons 
+							if(	$sys instanceOf NexusAutocannonFtr || 
+								$sys instanceof NexusLightGasGunFtr){
 							$sys->ammunition += $enhCount;//Increase ammo for these weapons by $enhCount
 							}
 						break;							

@@ -27,6 +27,9 @@ class DalithornPinnace extends FighterFlight{
         $this->maxFlightSize = 3;//this is a superheavy fighter originally intended as single unit, limit flight size to 3
 	
 		$this->populate();
+
+        $this->enhancementOptionsEnabled[] = 'EXT_AMMO'; //To enable extra Ammo for light gun(s).
+        $this->enhancementOptionsEnabled[] = 'EXT_HAMMO'; //To enable extra Ammo for heavy gun.
 	
 	}
 

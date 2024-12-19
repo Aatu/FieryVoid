@@ -7,7 +7,7 @@ class MakarHanimat extends BaseShip{
 	$this->pointCost = 520;
 	$this->faction = "ZNexus Makar Federation";
         $this->phpclass = "MakarHanimat";
-        $this->imagePath = "img/ships/Nexus/makarHalicin2.png";
+        $this->imagePath = "img/ships/Nexus/makar_halicin2.png";
         $this->shipClass = "Hanimat Prototype Jumpship";
 			$this->variantOf = "Halicin Cruiser";
 			$this->occurence = "rare";

@@ -7,7 +7,7 @@ class MakarMaleen extends HeavyCombatVessel{
         $this->pointCost = 450;
         $this->faction = "ZNexus Makar Federation";
         $this->phpclass = "MakarMaleen";
-        $this->imagePath = "img/ships/Nexus/makarVengeance2.png";
+        $this->imagePath = "img/ships/Nexus/makar_maleen2.png";
 		$this->canvasSize = 120; //img has 200px per side
         $this->shipClass = "Maleen Heavy Frigate";
 		$this->unofficial = true;

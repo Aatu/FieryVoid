@@ -30,7 +30,6 @@ class Selatra extends StarBaseSixSections{
 			),
 		);
 		
-		
 		/* replaced with proper two C&Cs!
 		$this->addPrimarySystem(new ProtectedCnC(6, 40, 0, 0)); //original: 2x20, armor 5
 		*/
@@ -49,11 +48,9 @@ class Selatra extends StarBaseSixSections{
 		
 		$this->addPrimarySystem(new Structure(5, 88));
 		
-		
 		for ($i = 0; $i < sizeof($this->locations); $i++){
 			$min = 0 + ($i*60);
 			$max = 120 + ($i*60);
-			
 			
 /*some systems need pre-definition to have arcs set for TAGs!*/
 			$struct = Structure::createAsOuter(4, 80,$min,$max);
@@ -71,7 +68,7 @@ class Selatra extends StarBaseSixSections{
 				new SensorSpear(4, 0, 0, $min, $max),
 				new AssaultLaser(4, 6, 4, $min, $max),
 				new AssaultLaser(4, 6, 4, $min, $max),
-				new GraviticShield(4, 6, 0, 2, $min, $max),
+				new GraviticShield(0, 6, 0, 2, $min, $max),
 				/*replaced by TAGged versions
 				new CargoBay(4, 25),
 				new SubReactorUniversal(4, 20, 0, 0),

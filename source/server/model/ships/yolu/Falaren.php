@@ -32,7 +32,7 @@ class Falaren extends StarBaseSixSections
                     13 => "Scanner",
                     16 => "Hangar",
                     18 => "Reactor",
-                    20 => "C&C",
+                    20 => "TAG:C&C",
            		 ),
 		);
 
@@ -41,7 +41,15 @@ class Falaren extends StarBaseSixSections
 		$this->addPrimarySystem(new Hangar(8, 15));
 		$this->addPrimarySystem(new Hangar(8, 15));	
 		$this->addPrimarySystem(new CargoBay(8, 25));				
-		$this->addPrimarySystem(new ProtectedCnC(9, 40, 0, 0));
+//		$this->addPrimarySystem(new ProtectedCnC(9, 40, 0, 0));
+
+		$cnc = new CnC(8, 20, 0, 0);
+		$cnc->startArc = 0;
+		$cnc->endArc = 360;
+		$this->addPrimarySystem($cnc);
+		$cnc = new SecondaryCnC(8, 20, 0, 0);//all-around by default
+		$this->addPrimarySystem($cnc);
+
 		$this->addPrimarySystem(new Scanner(8, 18, 6, 11));
 		$this->addPrimarySystem(new Scanner(8, 18, 6, 11));   
 		
@@ -68,10 +76,10 @@ class Falaren extends StarBaseSixSections
 			$loc = $this->locations[$i];
 
 			$this->hitChart[$loc] = array(
-                    2 => "Molecular Flayer",
-                    5 => "Fusion Cannon",                    
-                    6 => "Fusion Agitator",                
-                    8 => "Destabilizer Beam",
+                    2 => "TAG:Molecular Flayer",
+					5 => "TAG:Fusion Cannon",                    
+					6 => "TAG:Fusion Agitator",                
+					8 => "TAG:Destabilizer Beam",
                     9 => "Sub Reactor",
                     18 => "Structure",
                     20 => "Primary",

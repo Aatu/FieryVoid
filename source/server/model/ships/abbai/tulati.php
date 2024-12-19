@@ -11,7 +11,7 @@ class Tulati extends MediumShip{
         $this->shipClass = "Tulati Frigate";
         $this->canvasSize = 100;
 	    
-	$this->isd = 2180;
+	$this->isd = 2228;
         
         $this->forwardDefense = 13;
         $this->sideDefense = 14;

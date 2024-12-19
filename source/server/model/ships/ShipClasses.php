@@ -185,26 +185,31 @@ class BaseShip {
 		$effectiveValue = 100;
 		$overallModifier = 1;
 
-		$weaponCurr = 0;
-		$weaponMax = 0;
-		$weaponMultiplier = 3;
+		$weaponCurr = 0; //remaining HP
+		$weaponMax = 0; //full HP
+		$weaponMultiplier = 3; //base value
+		$weaponDmgMultiplier = 0.7; //at what rate should damaged boxes be added to healthy boxes; for weapon, damaged weapons retain most but not all of their value
 		$weaponMultiplierMax = 5; //to be used if no weapons are left
 
 		$structCurr = 0;
 		$structMax = 0;
 		$structMultiplier = 2;
+		$structDmgMultiplier = 0; //for Structure, damaged is damaged - count damaged as destroyed
 		
 		$coreCurr = 0;
 		$coreMax = 0;
-		$coreMultiplier = 0;
+		$coreDmgMultiplier = 0; //for core systems - count damage the same as destruction
+		$coreMultiplier = 0; //for core systems - do not count their value at all (functionality loss of key systems is noted, and heavily so)
 		
 		$thrusterCurr = 0;
 		$thrusterMax = 0;
-		$thrusterMultiplier = 0;
+		$thrusterMultiplier = 0; //for thrusters - do not count their value at all (functionality loss of thruster sets destruction is noted)
+		$thrusterDmgMultiplier = 0; 
 		
 		$otherCurr = 0;
 		$otherMax = 0;
 		$otherMultiplier = 1;
+		$otherDmgMultiplier = 0; //for other systems, we do not know how useful they are after being damaged... but examples are hangars and cargo bays - assume destroyed boxes have no value
 
 		$cncPresent = false;
 		$enginePresent = false;
@@ -275,26 +280,29 @@ class BaseShip {
 				      
 			foreach ($this->systems as $system) if($system->getCountForCombatValue()) { //skip technical systems
 				$systemCurr = 0;
+				$systemDmg = 0;
 				$systemMax =  $system->maxhealth;				
 				if (!$system->isDestroyed()) {				
 					$systemCurr = $system->getRemainingHealth();
+					$systemDmg = $systemMax - $systemCurr;
 				}
 
 				//classify system appropriately
 				if ($system instanceOf Structure) { //Structure block
-					$structCurr += $systemCurr;
+					$structCurr += $systemCurr + ($systemDmg * $structDmgMultiplier);
 					$structMax += $systemMax;
 				} else if (($system instanceOf Weapon) || ($system instanceOf ElintScanner)) { //weapon! (count ElInt Scanner as a weapn here)
-					$weaponCurr += $systemCurr;
+					$weaponCurr += $systemCurr + ($systemDmg * $weaponDmgMultiplier);
 					$weaponMax += $systemMax;
 				} else if ($system instanceOf Thruster) { //Thruster
-					$thrusterCurr += $systemCurr;
+					$thrusterCurr += $systemCurr + ($systemDmg * $thrusterDmgMultiplier);
 					$thrusterMax += $systemMax;
-				} else if (!$system->isPrimaryTargetable) { //core system
-					$coreCurr += $systemCurr;
+				//} else if (!$system->isPrimaryTargetable) { //core system} 
+				} else if ($system->primary) { //core system - change the way of assessing this
+					$coreCurr += $systemCurr + ($systemDmg * $coreDmgMultiplier);
 					$coreMax += $systemMax;
 			   	} else { //other systems - not listed in relevant categories, but not core either
-					$otherCurr += $systemCurr;
+					$otherCurr += $systemCurr + ($systemDmg * $otherDmgMultiplier);
 					$otherMax += $systemMax;
 				}
 			}
@@ -1857,6 +1865,14 @@ class BaseShip {
     }
 
 
+	/*19.12.2024 clear Vree section choice - to be called from firing routine*/
+	public function clearVreeHitSectionChoice($shooter_id) {
+		if ($this->VreeHitLocations != true) return false;
+		if (isset($this->activeHitLocations[$shooter_id])) {
+			unset($this->activeHitLocations[$shooter_id]);
+		}
+		return true;
+	}
 
     public function getHitSectionChoice($shooter, $fireOrder, $weapon, $returnDestroyed = false){ //returns value - location! chooses method based on weapon and fire order!
         $foundLocation = 0;
@@ -1871,7 +1887,8 @@ class BaseShip {
     }
     public function getHitSection($shooter, $turn, $returnDestroyed = false){ //returns value - location! DO NOT USE FOR BALLISTICS!
         $foundLocation = 0;
-        if(isset($this->activeHitLocations[$shooter->id]) && ($this->VreeHitLocations != true)){
+		/*19.12.2024: set up Vree hit locations like for anyone else; but clear them after shot (separate call from firing routine!)*/
+        if(isset($this->activeHitLocations[$shooter->id]) /*&& ($this->VreeHitLocations != true)*/){		
             $foundLocation = $this->activeHitLocations[$shooter->id]["loc"];
         }else{
             $loc = $this->doGetHitSection($shooter); //finds array with relevant data!

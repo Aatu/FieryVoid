@@ -20,16 +20,16 @@ class Aldrithupgr extends BaseShip{
         
         $this->turncost = 0.66;
         $this->turndelaycost = 0.66;
-        $this->accelcost = 3;
+        $this->accelcost = 2;
         $this->rollcost = 3;
         $this->pivotcost = 2;
         $this->iniativebonus = 0;
         
         $this->addPrimarySystem(new Reactor(4, 16, 0, -4));
         $this->addPrimarySystem(new CnC(4, 12, 0, 0));
-        $this->addPrimarySystem(new Scanner(4, 16, 4, 7));
+        $this->addPrimarySystem(new Scanner(4, 14, 4, 7));
         $this->addPrimarySystem(new Engine(4, 16, 0, 8, 3));
- 	$this->addPrimarySystem(new Hangar(4, 2));
+		$this->addPrimarySystem(new Hangar(4, 2));
         $this->addPrimarySystem(new ShieldGenerator(4, 14, 4, 3));
    
         $this->addFrontSystem(new AssaultLaser(3, 6, 4, 300, 60));

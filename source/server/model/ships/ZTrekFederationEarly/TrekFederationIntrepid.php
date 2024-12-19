@@ -42,9 +42,9 @@ class TrekFederationIntrepid extends MediumShip{
 			$projection->displayName = "Polarized Hull Plating";
 		$this->addFrontSystem($projection);
 		
-		$this->addFrontSystem(new TrekPhaseCannon(3, 6, 4, 300, 60));
-      		$this->addFrontSystem(new TrekSpatialTorp(2, 6, 1, 300, 60));
-        	$this->addFrontSystem(new TrekSpatialTorp(2, 6, 1, 300, 60));
+		$this->addFrontSystem(new TrekPhaseCannon(3, 0, 0, 300, 60));
+      		$this->addFrontSystem(new TrekSpatialTorp(2, 0, 0, 300, 60));
+        	$this->addFrontSystem(new TrekSpatialTorp(2, 0, 0, 300, 60));
 	    
 		$warpNacelle = new TrekWarpDrive(3, 12, 0, 4); //armor, structure, power usage, impulse output
 		$impulseDrive->addThruster($warpNacelle);
@@ -61,7 +61,7 @@ class TrekFederationIntrepid extends MediumShip{
 			$projection->displayName = "Polarized Hull Plating";
 		$this->addAftSystem($projection);
 		
-        	$this->addAftSystem(new TrekSpatialTorp(2, 6, 1, 120, 240));
+        	$this->addAftSystem(new TrekSpatialTorp(2, 0, 0, 120, 240));
 
 		//technical thrusters - unlimited, like for LCVs		
 		$this->addPrimarySystem(new InvulnerableThruster(99, 1, 0, 99, 3)); //unhitable and with unlimited thrust allowance
@@ -82,23 +82,6 @@ class TrekFederationIntrepid extends MediumShip{
 			17 => "Reactor",
 			20 => "C&C",
 		),
-/*
-		1=> array(
-		    	2 => "Polarized Hull Plating",
-			5 => "Phase Cannon",
-			9 => "Spatial Torpedo",
-			17 => "Structure",
-			20 => "Primary",
-		),
-
-		2=> array(
-		    	2 => "Polarized Hull Plating",
-			9 => "Nacelle",
-			11 => "Spatial Torpedo",
-			17 => "Structure",
-			20 => "Primary",
-		),
-*/
 
 		1=> array(
 		    4 => "Phase Cannon",

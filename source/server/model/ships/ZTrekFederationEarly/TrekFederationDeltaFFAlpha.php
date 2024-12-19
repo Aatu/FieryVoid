@@ -31,7 +31,7 @@ class TrekFederationDeltaFFAlpha extends LCV{
 
 
 	$this->addPrimarySystem(new Reactor(3, 9, 0, 0));
-	$this->addPrimarySystem(new CnC(99, 99, 0, 0)); //C&C should be unhittable anyway
+	$this->addPrimarySystem(new CnC(99, 1, 0, 0)); //C&C should be unhittable anyway
 	    	$sensors = new Scanner(3, 12, 4, 2);
 		$sensors->markLCV(); 
 		$this->addPrimarySystem($sensors);
