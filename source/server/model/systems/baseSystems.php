@@ -1657,6 +1657,19 @@ class Quarters extends ShipSystem{
     }
 }
 
+class DockingCollar extends ShipSystem{
+    public $name = "DockingCollar";
+    public $displayName = "Docking Collar";
+    
+	//Quarters is not important at all!
+	public $repairPriority = 1;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
+    
+    function __construct($armour, $maxhealth, $output = 1){
+        parent::__construct($armour, $maxhealth, 0, $output);
+    }
+}
+
+
 class Magazine extends ShipSystem{
     public $name = "Magazine";
     public $displayName = "Magazine";
@@ -1977,6 +1990,64 @@ class Structure extends ShipSystem{
 	
 } //endof Structure	
 
+/*custon system for Nexus LCVs*/
+class NexusLCVController extends ShipSystem {
+
+    public static $controllerList = array();
+    public $name = "NexusLCVController";
+    public $displayName = "LCV Controller";
+    public $iconPath = "hkControlNode.png";
+    public $boostable = true;
+    public $maxBoostLevel = 2;
+	
+    public static function addControllerNexus($controller){
+	    NexusLCVController::$controllerList[] = $controller; //add controller to list
+    }
+	
+
+    function __construct($armour, $maxhealth, $powerReq, $output ){
+        parent::__construct($armour, $maxhealth, $powerReq, $output );
+        $this->boostEfficiency = $powerReq;
+	    NexusLCVController::addControllerNexus($this);
+    }    
+	
+    public static function getIniBonus($unit){ //get current Initiative bonus; current = actual as of last turn
+	    $iniBonus = 0;
+	    $turn = TacGamedata::$currentTurn-1;
+	    $turn = max(1,$turn);
+	    //strongest system applies
+	    foreach(NexusLCVController::$controllerList as $controller){
+		$controllerShip = $controller->getUnit();
+		if($unit->userid == $controllerShip->userid){ //only for the same player...
+			if ( ($controller->isDestroyed($turn))
+			     || ($controller->isOfflineOnTurn($turn))
+			    ){ continue; }//if controller system is destroyed or offline, no effect
+	    		$iniBonus = max($controller->getOutputOnTurn($turn),$iniBonus); 
+		}
+	    }
+	    $iniBonus = $iniBonus * 5; //d20->d100
+	    $iniBonus = max(0,$iniBonus); 
+	    return $iniBonus;
+    }
+	
+    public function getOutputOnTurn($turn){
+        $output = parent::getOutput();
+        foreach ($this->power as $power){
+            if ($power->turn == $turn && $power->type == 2){
+                $output += $power->amount;
+            }    
+        }
+        return $output;
+    }
+	
+    public function setSystemDataWindow($turn){
+        parent::setSystemDataWindow($turn);     
+        $this->data["Special"] = "Gives indicated Initiative bonus to all friendly Loress-class LCVs.";	     
+        $this->data["Special"] .= "<br>Only strongest bonus applies.";	     	     
+        $this->data["Special"] .= "<br>Any changes are effective on NEXT TURN.";	
+    }
+
+} //end of NexusLCVController
 	
 /*custom system - Drakh Raider Controller*/
 class DrakhRaiderController extends ShipSystem {
@@ -3620,36 +3691,36 @@ class SelfRepair extends ShipSystem{
 		usort($systemList, "self::sortSystemsByRepairPriority");
 		
 
-		
+// Add GTS		
 		//repair criticals (on non-destroyed systems only; also, skip criticals generated this turn!)
-		$critList = array();
-		foreach ($ship->systems as $systemToRepair){//crit fixing may be necessary even on technically undamaged systems	
-			if ($availableRepairPoints<1) break;//cannot repair anything
-			if ($systemToRepair->repairPriority<1) continue;//skip systems that cannot be repaired
-			if ($systemToRepair->isDestroyed($gamedata->turn)) continue;//don't repair criticals on destroyed system...
-			
-			foreach($systemToRepair->criticals as $critDmg) {
-				if($critDmg->repairPriority<1) continue;//if critical cannot be repaired
-				if($critDmg->turn >= $gamedata->turn) continue;//don't repair criticals caused in current (or future!) turn
-				if ($critDmg->oneturn || ($critDmg->turnend > 0)) continue;//temporary criticals (or those already repaired) also cannot be repaired
-				if($critDmg->repairPriority<10) $critDmg->repairPriority += $systemToRepair->repairPriority; //modify priority by priority of system critical is on! 
-				$critList[] = $critDmg;				
-			}		
-		}	
-		$noOfCrits = count($critList);
-		if($noOfCrits>0){
-			usort($critList, "self::sortCriticalsByRepairPriority");
-			foreach ($critList as $critDmg){ //repairable criticals of current system
-				if ($critDmg->repairCost <= $availableRepairPoints){//execute repair!
-					$critDmg->turnend = $gamedata->turn;//actual repair ;)
-					$critDmg->forceModify = true; //actually save the repair...
-					$critDmg->updated = true; //actually save the repair cd!...
-					$availableRepairPoints -= $critDmg->repairCost;
-					$this->usedThisTurn += $critDmg->repairCost;
-				}
-			}
-		}		
+        $critList = array();
+        foreach ($ship->systems as $systemToRepair){//crit fixing may be necessary even on technically undamaged systems
+            if ($availableRepairPoints<1) break;//cannot repair anything
+            if ($systemToRepair->repairPriority<1) continue;//skip systems that cannot be repaired
+            if ($systemToRepair->isDestroyed($gamedata->turn)) continue;//don't repair criticals on destroyed system...
 
+            foreach($systemToRepair->criticals as $critDmg) {
+                if($critDmg->repairPriority<1) continue;//if critical cannot be repaired
+                if($critDmg->turn >= $gamedata->turn) continue;//don't repair criticals caused in current (or future!) turn
+                if ($critDmg->oneturn || ($critDmg->turnend > 0)) continue;//temporary criticals (or those already repaired) also cannot be repaired
+                if($critDmg->repairPriority<10) $critDmg->repairPriority += $systemToRepair->repairPriority; //modify priority by priority of system critical is on! 
+                $critList[] = $critDmg;
+            }
+        }
+		$noOfCrits = count($critList);
+        if($noOfCrits>0){
+            usort($critList, "self::sortCriticalsByRepairPriority");
+            foreach ($critList as $critDmg){ //repairable criticals of current system, already sorted
+                if ($critDmg->repairCost <= $availableRepairPoints){//execute repair!
+                    $system = $ship->getSystemById($critDmg->systemid); //We already have the ship object passed to criticalPhaseEffects(), use it to get the system the foreach loop is considering at this point'
+                    $system->repairCritical($critDmg, $gamedata->turn); // Call our new function in shipSystem class, passing details of the particular critical we're considering, plus $gamedata->turn as it's also needed.
+                    $availableRepairPoints -= $critDmg->repairCost; //Keep these two lines  here, as they amend variable in THIS function (see above)!
+                    $this->usedThisTurn += $critDmg->repairCost; 
+                    //End of work, move onto next critical if there is one.
+                } 
+            }
+        }
+// End add GTS
 		
 		
 		//repair damaged/destroyed systems, possibly undestroying them in the process (cannot repair destroyed Structure and systems attached to it - but this is taken care at the stage of preparing list of repairable systems)
@@ -3668,7 +3739,7 @@ class SelfRepair extends ShipSystem{
 				$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $systemToRepair->id, -$toBeFixed, 0, 0, -1, false, $undestroy, 'SelfRepair', 'SelfRepair');
 				$damageEntry->updated = true;
 				$systemToRepair->damage[] = $damageEntry;
-				//meark repair points used
+				//mark repair points used
 				$availableRepairPoints -= $toBeFixed;
 				$this->usedThisTurn += $toBeFixed;
 			}

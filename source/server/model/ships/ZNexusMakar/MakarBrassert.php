@@ -4,10 +4,10 @@ class MakarBrassert extends MediumShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 350;
+        $this->pointCost = 340;
         $this->faction = "ZNexus Makar Federation";
         $this->phpclass = "MakarBrassert";
-        $this->imagePath = "img/ships/Nexus/makarBrassert3.png";
+        $this->imagePath = "img/ships/Nexus/makar_brassert2.png";
         $this->shipClass = "Brassert Frigate";
 		$this->unofficial = true;
         $this->canvasSize = 80;
@@ -34,16 +34,16 @@ class MakarBrassert extends MediumShip{
         $this->addPrimarySystem(new Thruster(4, 13, 0, 5, 4));        
         $this->addPrimarySystem(new Hangar(2, 1));
         
-		$this->addFrontSystem(new NexusLightXRayLaser(3, 3, 1, 270, 90));
+		$this->addFrontSystem(new NexusDefenseGun(2, 4, 1, 270, 90));
 		$this->addFrontSystem(new NexusXRayLaser(3, 5, 2, 300, 60));
 		$this->addFrontSystem(new EWHeavyRocketLauncher(3, 6, 2, 270, 90));
 		$this->addFrontSystem(new NexusXRayLaser(3, 5, 2, 300, 60));
-		$this->addFrontSystem(new NexusLightXRayLaser(3, 3, 1, 270, 90));
+		$this->addFrontSystem(new NexusDefenseGun(2, 4, 1, 270, 90));
         $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));
 	    
-		$this->addAftSystem(new NexusLightXRayLaser(3, 3, 1, 180, 360));
-		$this->addAftSystem(new NexusLightXRayLaser(3, 3, 1, 0, 180));
+		$this->addAftSystem(new NexusDefenseGun(2, 4, 1, 180, 360));
+		$this->addAftSystem(new NexusDefenseGun(2, 4, 1, 0, 180));
         $this->addAftSystem(new Thruster(3, 12, 0, 4, 2));    
         $this->addAftSystem(new Thruster(3, 12, 0, 4, 2));    
         
@@ -64,7 +64,7 @@ class MakarBrassert extends MediumShip{
 		1=> array(
 			4 => "Thruster",
 			6 => "Heavy Rocket Launcher",
-			8 => "Light X-Ray Laser",
+			8 => "Defense Gun",
 			11 => "X-Ray Laser",
 			17 => "Structure",
 			20 => "Primary",
@@ -72,7 +72,7 @@ class MakarBrassert extends MediumShip{
 
 		2=> array(
 			6 => "Thruster",
-			9 => "Light X-Ray Laser",
+			9 => "Defense Gun",
 			17 => "Structure",
 			20 => "Primary",
 		),

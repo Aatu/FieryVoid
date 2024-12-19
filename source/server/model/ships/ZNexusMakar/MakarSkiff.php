@@ -7,8 +7,8 @@ class MakarSkiff extends LCV{
         $this->pointCost = 40;
         $this->faction = "ZNexus Makar Federation";
         $this->phpclass = "MakarSkiff";
-        $this->imagePath = "img/ships/Nexus/makarSkiff_v3.png";
-		$this->canvasSize = 55; //img has 200px per side
+        $this->imagePath = "img/ships/Nexus/makar_skiff2.png";
+		$this->canvasSize = 70; //img has 200px per side
         $this->shipClass = "Civilian Skiff";
 			$this->variantOf = "Dreft Combat Skiff";
 			$this->occurence = "common";

@@ -70,7 +70,7 @@ class Selatra1989 extends StarBaseSixSections{
 				new SensorSpear(4, 0, 0, $min, $max),
 				new MediumLaser(4, 6, 5, $min, $max),
 				new LaserCutter(4, 6, 4, $min, $max),
-				new GraviticShield(4, 6, 0, 2, $min, $max),
+				new GraviticShield(0, 6, 0, 2, $min, $max),
 				$cargoBay, //new CargoBay(4, 25),
 				$subReactor, //new SubReactorUniversal(4, 20, 0, 0),
 				$struct //new Structure(4, 80)

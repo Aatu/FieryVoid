@@ -7,7 +7,7 @@ class QomYominHauler extends HeavyCombatVesselLeftRight{
         $this->pointCost = 160;
         $this->faction = "ZNexus Makar Federation";
         $this->phpclass = "QomYominHauler";
-        $this->imagePath = "img/ships/Nexus/makarKormu.png";
+        $this->imagePath = "img/ships/Nexus/makar_kormu2.png";
 		$this->canvasSize = 105; //img has 200px per side
         $this->shipClass = "Kormu Cargo Hauler";
 			$this->variantOf = "Srea Tormal Auxiliary Destroyer";
