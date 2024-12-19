@@ -365,8 +365,7 @@ AmmoMissileRackF.prototype.canWeaponInterceptAtAll = function (weapon) {
 };
 
 
-AmmoMissileRackF.prototype.doIndividualNotesTransfer = function () { //prepare individualNotesTransfer variable - if relevant for this particular system
-    // prepare individualNotesTransfer variable - if relevant for this particular system
+AmmoMissileRackF.prototype.doIndividualNotesTransfer = function () { //prepare individualNotesTransfer variable
     // here: transfer information about firing in Rapid mode
     // (e.g., weapon is being fired after 1 turn of arming)
 		var toReturn = false;
@@ -379,7 +378,7 @@ AmmoMissileRackF.prototype.doIndividualNotesTransfer = function () { //prepare i
 				toReturn = true;
 			}
 	
-	// Code below is for Long Ranged shot conditions, trying to get Rapid mode operating first.  		
+	// Code below is for Long Ranged shot conditions.		
 		if (this.turnsloaded == 2) {
 			
 		    var aFireOrder = this.fireOrders[0]; 		    

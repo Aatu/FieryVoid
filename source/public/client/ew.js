@@ -353,8 +353,8 @@ window.ew = {
         }
 
         if (!selected.osat) {
-            if (ship.base) {
-                var primary = shipManager.getPrimaryCnC(ship);
+            if (selected.base) {
+                var primary = shipManager.getPrimaryCnC(selected);
                 if (shipManager.criticals.hasCritical(primary, "RestrictedEW")) {
                     var def = ew.getDefensiveEW(selected);
                     var all = ew.getScannerOutput(selected);

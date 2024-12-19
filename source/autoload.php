@@ -1201,7 +1201,8 @@ spl_autoload_register(
                 'zzunoffshovorbolt' => '/server/model/ships/narn/zzunoffShovorBolt.php',
                 'zzunofftashkaton' => '/server/model/ships/brakiri/zzunoffTashkaton.php',
                 'zzunofftashkavaton' => '/server/model/ships/brakiri/zzunoffTashkavaton.php',
-//                'zzunofftdirk' => '/server/model/ships/narn/zzunoffTdirk.php',
+                'zzunofftdirk' => '/server/model/ships/narn/zzunoffTdirk.php',
+                'zzunofftdirkrefit' => '/server/model/ships/narn/zzunoffTdirkRefit.php',             
                 'zzunofftshon' => '/server/model/ships/narn/zzunoffTshon.php',
                 //'zzunofftshonstealth' => '/server/model/ships/narn/zzunoffTshonStealth.php',
                 'zzunofftvoth' => '/server/model/ships/narn/zzunoffTvoth.php',
@@ -2595,7 +2596,7 @@ spl_autoload_register(
 		    	//'skywatch' => '/server/model/ships/orieni/skywatch.php',
 		    	//'skywatch1810' => '/server/model/ships/orieni/skywatch1810.php',
 		    	//'skywatch2003' => '/server/model/ships/orieni/skywatch2003.php',
-		    	'kaedashkada' => '/server/model/ships/llort/Kaedashkada.php',
+//		    	'kaedashkada' => '/server/model/ships/llort/Kaedashkada.php',
 		    	'brostilli' => '/server/model/ships/drazi/Brostilli.php',
 		    	'deathfalcon' => '/server/model/ships/drazi/Deathfalcon.php',
 		    	'deathfalcon2230' => '/server/model/ships/drazi/Deathfalcon2230.php',
@@ -2629,6 +2630,7 @@ spl_autoload_register(
                 'bulkhead' => '/server/model/systems/baseSystems.php',
                 'packettorpedo' => '/server/model/weapons/torpedo.php',
                 'particleconcentrator' => '/server/model/weapons/specialWeapons.php',
+                'flexpackettorpedo' => '/server/model/weapons/torpedo.php', //Custom Packet Torp variant
 
 				//Gaim ships				
 				'gaimbassari' => '/server/model/ships/gaim/gaimBassari.php',
@@ -2756,7 +2758,6 @@ spl_autoload_register(
 				'folshotaraider' => '/server/model/ships/brakiri_raiders/FolshotARaider.php',
 				'gaimphotonbomb' => '/server/model/weapons/customs.php',
 				'gaimtixtyk' => '/server/model/ships/customs/gaimTixTyk.php',				
-				'gaimtixtykupgrade' => '/server/model/ships/customs/gaimTixTykUpgrade.php',	
 
 				//Star Trek conversions
 				//weapons
@@ -3324,7 +3325,10 @@ spl_autoload_register(
 					 	'gkarith' => '/server/model/ships/narn/Gkarith.php',
 					 	'aegissensorpod' => '/server/model/weapons/specialWeapons.php', 
 						'hyperionaegis' => '/server/model/ships/EA/HyperionAegis.php',	
-						'abbaishieldprojector' => '/server/model/weapons/supportWeapons.php',				 						 	 
+						'abbaishieldprojector' => '/server/model/weapons/supportWeapons.php',
+						'engineshorted' => '/server/model/cricialClasses.php',				 						 	 
+						'controlsstuck' => '/server/model/cricialClasses.php',	
+
 					 							
 				//Thirdspace
 				'psychicfield' => '/server/model/weapons/specialWeapons.php',
@@ -3344,7 +3348,8 @@ spl_autoload_register(
 				'thirdspacelanceattackcraft' => '/server/model/ships/thirdspace/ThirdspaceLanceAttackCraft.php',
 				'thirdspacebattlescout' => '/server/model/ships/thirdspace/ThirdspaceBattleScout.php',		
 				'thirdspacecarrier' => '/server/model/ships/thirdspace/ThirdspaceCarrier.php',
-				'thirdspaceselfrepair' => '/server/model/systems/baseSystems.php',	
+				'thirdspaceselfrepair' => '/server/model/systems/baseSystems.php',
+				'vorlonartifact' => '/server/model/ships/thirdspace/VorlonArtifact.php',					
 
 				//Mindriders 
 				'thoughtshield' => '/server/model/weapons/defensive.php',				

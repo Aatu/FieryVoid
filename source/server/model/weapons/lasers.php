@@ -34,7 +34,11 @@
             }else{
                 $this->data["Special"] .= '<br>';
             }	    
-            $this->data["Special"] .= "Uninterceptable."; 
+            $this->data["Special"] .= "Uninterceptable.";
+            if($this->overloadable){
+            	$this->data["Special"] .= "<br>Can be overcharged during Initial Orders to fire in Sustained mode AFTER a full recharge cycle.";
+            	$this->data["Special"] .= "<br>WARNING - When you start overcharging, the weapon will start its recharge cycle immediately, even if it was fully charged.";            
+            } 
 		}
     }
 
@@ -61,7 +65,15 @@
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
-        
+/*
+        public function setSystemDataWindow($turn){			
+            parent::setSystemDataWindow($turn);        
+			if (!isset($this->data["Special"])) {
+				$this->data["Special"] = '';
+			}else{
+				$this->data["Special"] .= '<br>';
+			}
+*/        
         public function getDamage($fireOrder){        return Dice::d(10, 4)+20;   }
         public function setMinDamage(){     $this->minDamage = 24 ;      }
         public function setMaxDamage(){     $this->maxDamage = 60 ;      }
@@ -164,6 +176,14 @@
             if ( $powerReq == 0 ) $powerReq = 6;
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
+
+		public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+			$this->data["Special"] = 'Uninterceptable.';
+			$this->data["Special"] .= '<br>Can also fire in Piercing Mode.';
+            $this->data["Special"] .= "<br>Can be overcharged during Initial Orders to fire in Sustained mode AFTER a full recharge cycle.";
+            $this->data["Special"] .= "<br>WARNING - When you start overcharging, the weapon will start its recharge cycle immediately, even if it was fully charged.";  			
+		}
         
         public function getDamage($fireOrder){        return Dice::d(10, 4)+12;   }
         public function setMinDamage(){     $this->minDamage = 16 ;      }
@@ -285,6 +305,14 @@
                 parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
             }
 
+		public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+			$this->data["Special"] = 'Uninterceptable.';
+			$this->data["Special"] .= '<br>Can also fire in Piercing Mode.';
+            $this->data["Special"] .= "<br>Can be overcharged during Initial Orders to fire in Sustained mode AFTER a full recharge cycle.";
+            $this->data["Special"] .= "<br>WARNING - When you start overcharging, the weapon will start its recharge cycle immediately, even if it was fully charged.";  			
+		}
+
             public function getDamage($fireOrder){ return Dice::d(10, 4)+15; }
             public function setMinDamage(){ $this->minDamage = 19 ; }
             public function setMaxDamage(){ $this->maxDamage = 55 ; }
@@ -323,6 +351,14 @@
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
+
+		public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+			$this->data["Special"] = 'Uninterceptable.';
+			$this->data["Special"] .= '<br>Can also fire in Piercing Mode.';
+            $this->data["Special"] .= "<br>Can be overcharged during Initial Orders to fire in Sustained mode AFTER a full recharge cycle.";
+            $this->data["Special"] .= "<br>WARNING - When you start overcharging, the weapon will start its recharge cycle immediately, even if it was fully charged.";  			
+		}
 
         public function getDamage($fireOrder){ return Dice::d(10, 4)+18; }
         public function setMinDamage(){ $this->minDamage = 22 ; }

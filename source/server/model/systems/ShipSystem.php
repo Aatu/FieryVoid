@@ -1052,6 +1052,14 @@ class ShipSystem {
 		$output = max(0,$output); //don't let output be negative!
         return $output;
     }
+
+    public function getOutputWhenOffline(){        
+        
+        $output = $this->output;
+        $output += $this->outputMod; //outputMod negative is negative in itself!
+		$output = max(0,$output); //don't let output be negative!
+        return $output;
+    }
     
     
     public function effectCriticals(){ 

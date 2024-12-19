@@ -106,3 +106,40 @@ var LimpetBoreTorpedoBase = function  LimpetBoreTorpedoBase(json, ship) {
 LimpetBoreTorpedoBase.prototype = Object.create(Torpedo.prototype);
 LimpetBoreTorpedoBase.prototype.constructor =  LimpetBoreTorpedoBase;
 
+var FlexPacketTorpedo = function FlexPacketTorpedo(json, ship) {
+    Torpedo.call(this, json, ship);
+};
+FlexPacketTorpedo.prototype = Object.create(Torpedo.prototype);
+FlexPacketTorpedo.prototype.constructor = FlexPacketTorpedo;
+FlexPacketTorpedo.prototype.calculateSpecialRangePenalty = function (distance) {
+
+	if(this.turnsloaded == 1 || this.firedInRapidMode){ //TurnsLoaded for Intial Orders, Rapid marker for rest of turn.
+	    var distancePenalized = Math.max(0,distance - 5); //Normal range penalty in rapid mode
+	    var rangePenalty = this.rangePenalty * distancePenalized;
+	    return rangePenalty;				
+	}else{	
+	    var distancePenalized = Math.max(0,distance - 20); //ignore first 10 hexes
+	    var rangePenalty = this.rangePenalty * distancePenalized;
+	    return rangePenalty;
+	}
+};
+
+FlexPacketTorpedo.prototype.doIndividualNotesTransfer = function () { //prepare individualNotesTransfer variable
+    // here: transfer information about firing in Rapid mode (e.g., weapon is being fired after 1 turn of arming)
+	var toReturn = false;
+ 	this.individualNotesTransfer = Array();	
+  	//Check for fire order and check Initial Orders  	
+    if ((this.fireOrders.length > 0) && (gamedata.gamephase == 1)) {		
+		//Check for 1 turn loaded, as this will mean it has to be fired in Rapid Mode.	
+		if (this.turnsloaded == 1) {
+			this.individualNotesTransfer.push('R');
+			toReturn = true;
+		}	
+	}	
+			
+	return toReturn;
+ 
+};
+
+
+

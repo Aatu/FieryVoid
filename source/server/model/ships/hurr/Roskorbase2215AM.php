@@ -44,7 +44,15 @@ class Roskorbase2215AM extends SmallStarBaseFourSections
 		
 
 		$this->addPrimarySystem(new Reactor(5, 20, 0, 0));
-		$this->addPrimarySystem(new ProtectedCnC(6, 36, 0, 0)); //3x 5/12
+//		$this->addPrimarySystem(new ProtectedCnC(6, 36, 0, 0)); //3x 5/12
+
+		$cnc = new CnC(5, 12, 0, 0); //regular, not Pak C&C - no point with a starbase...
+		$cnc->startArc = 0;
+		$cnc->endArc = 360;
+		$this->addPrimarySystem($cnc);
+		$this->addPrimarySystem(new SecondaryCnC(5, 12, 0, 0));//all-around by default
+		$this->addPrimarySystem(new SecondaryCnC(5, 12, 0, 0));//all-around by default
+	
 		$this->addPrimarySystem(new Scanner(5, 16, 4, 5));
 		$this->addPrimarySystem(new Scanner(5, 16, 4, 5));
 		$this->addPrimarySystem(new Hangar(5, 2));
@@ -112,11 +120,11 @@ class Roskorbase2215AM extends SmallStarBaseFourSections
 				15 => "Scanner",
 				16 => "Hangar",
 				18 => "Reactor",
-				20 => "C&C",
+				20 => "TAG:C&C",
 			),
 			1=> array(
-				3 => "Standard Particle Beam",
-				7 => "Class-SO Missile Rack",
+				3 => "TAG:Standard Particle Beam",
+				7 => "TAG:Class-SO Missile Rack",
 				8 => "Hangar",
 				10 => "Cargo Bay",
 				11 => "Sub Reactor",
@@ -124,8 +132,8 @@ class Roskorbase2215AM extends SmallStarBaseFourSections
 				20 => "Primary",
 			),
 			2=> array(
-				3 => "Standard Particle Beam",
-				7 => "Class-SO Missile Rack",
+				3 => "TAG:Standard Particle Beam",
+				7 => "TAG:Class-SO Missile Rack",
 				8 => "Hangar",
 				10 => "Cargo Bay",
 				11 => "Sub Reactor",
@@ -133,8 +141,8 @@ class Roskorbase2215AM extends SmallStarBaseFourSections
 				20 => "Primary",
 			),
 			3=> array(
-				3 => "Standard Particle Beam",
-				7 => "Class-SO Missile Rack",
+				3 => "TAG:Standard Particle Beam",
+				7 => "TAG:Class-SO Missile Rack",
 				8 => "Hangar",
 				10 => "Cargo Bay",
 				11 => "Sub Reactor",
@@ -142,8 +150,8 @@ class Roskorbase2215AM extends SmallStarBaseFourSections
 				20 => "Primary",
 			),
 			4=> array(
-				3 => "Standard Particle Beam",
-				7 => "Class-SO Missile Rack",
+				3 => "TAG:Standard Particle Beam",
+				7 => "TAG:Class-SO Missile Rack",
 				8 => "Hangar",
 				10 => "Cargo Bay",
 				11 => "Sub Reactor",

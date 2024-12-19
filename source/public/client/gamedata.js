@@ -578,6 +578,21 @@ window.gamedata = {
                 window.confirm.error(negPowerError, function () {});
                 return false;
             }
+			
+			//We have one thurst-boosted weapon in Initial Orders Phase, let's put in a check for it and future - DK 26.11.24
+            shipNames = shipManager.movement.getShipsNegativeThrust();
+
+            if (shipNames.length > 0) {
+                var negThrustError = "The following ships have insufficient Engine Thrust:<br>";
+
+                for (var index in shipNames) {
+                    var name = shipNames[index];
+                    negThrustError += "- " + name + "<br>";
+                }
+                negThrustError += "You need to lower channelled thrust before you can commit the turn.";
+                window.confirm.error(negThrustError, function () {});
+                return false;
+            }
 
             shipNames = shipManager.power.getShipsGraviticShield();
 

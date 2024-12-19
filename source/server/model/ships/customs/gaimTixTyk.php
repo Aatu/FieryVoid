@@ -4,7 +4,7 @@ class gaimTixTyk extends HeavyCombatVesselLeftRight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 575;
+		$this->pointCost = 595;
 		$this->faction = 'Custom Ships';
         $this->phpclass = "gaimTixTyk";
         $this->imagePath = "img/ships/Tixtyk.png";
@@ -28,37 +28,42 @@ class gaimTixTyk extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new Scanner(5, 16, 5, 7));
         $this->addPrimarySystem(new Engine(5, 15, 0, 10, 3));
         $this->addPrimarySystem(new Hangar(5, 8));
-        $this->addPrimarySystem(new GaimPhotonBomb(4, 0, 0, 180, 360));
-        $this->addPrimarySystem(new GaimPhotonBomb(4, 0, 0, 0, 180)); 
                
         $this->addFrontSystem(new Thruster(4, 9, 0, 3, 1));
         $this->addFrontSystem(new Thruster(4, 9, 0, 3, 1));               
         $this->addAftSystem(new Thruster(4, 12, 0, 5, 2));
         $this->addAftSystem(new Thruster(4, 12, 0, 5, 2));        
+        $this->addAftSystem(new TwinArray(3, 6, 2, 90, 270));
+		$this->addAftSystem(new JumpEngine(3, 10, 3, 20));        
 
-        $this->addLeftSystem(new PacketTorpedo(4, 6, 5, 300, 60));
+        $this->addFrontSystem(new FlexPacketTorpedo(4, 0, 0, 300, 60));
         $this->addLeftSystem(new TwinArray(3, 6, 2, 240, 60));
+        $this->addLeftSystem(new GaimPhotonBomb(4, 0, 0, 180, 360));  
         $this->addLeftSystem(new BattleLaser(4, 6, 6, 240, 360));
+     
         $this->addLeftSystem(new Thruster(4, 15, 0, 4, 3));
 		$this->addLeftSystem(new Bulkhead(0, 4));
 
-        $this->addRightSystem(new PacketTorpedo(4, 6, 5, 300, 60));
+//        $this->addRightSystem(new PacketTorpedo(4, 6, 5, 300, 60));
         $this->addRightSystem(new TwinArray(3, 6, 2, 300, 120));
+        $this->addRightSystem(new GaimPhotonBomb(4, 0, 0, 0, 180)); 
         $this->addRightSystem(new BattleLaser(4, 6, 6, 0, 120));
+         
         $this->addRightSystem(new Thruster(4, 15, 0, 4, 4));
 		$this->addRightSystem(new Bulkhead(0, 4));
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addPrimarySystem(new Structure(5, 32));
-        $this->addLeftSystem(new Structure(4, 40));
-        $this->addRightSystem(new Structure(4, 40));
+        $this->addLeftSystem(new Structure(5, 52));
+        $this->addRightSystem(new Structure(5, 52));
 		
 		$this->hitChart = array(
 			0=> array(
 					8 => "Structure",
 					10 => "1:Thruster",
 					12 => "2:Thruster",
-					14 => "Photon Bomb",
+					13 => "Twin Array",
+					14 => "Jump Engine", 
 					15 => "Scanner",
 					16 => "Engine",
 					17 => "Hangar",
@@ -68,16 +73,18 @@ class gaimTixTyk extends HeavyCombatVesselLeftRight{
 			3=> array(
 					3 => "Thruster",
 					5 => "Battle Laser",
-					6 => "Twin Array",
-					8 => "Packet Torpedo",				
+					7 => "Twin Array",
+					9 => "Flexible Packet Torpedo",				
+					11 => "Photon Bomb",
 					18 => "Structure",
 					20 => "Primary",
 			),
 			4=> array(
 					3 => "Thruster",
 					5 => "Battle Laser",
-					6 => "Twin Array",
-					8 => "Packet Torpedo",				
+					7 => "Twin Array",
+					9 => "Flexible Packet Torpedo",				
+					11 => "Photon Bomb",
 					18 => "Structure",
 					20 => "Primary",
 			),
