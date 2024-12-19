@@ -7,7 +7,7 @@ class QomYominAuxDestroyer extends HeavyCombatVesselLeftRight{
         $this->pointCost = 400;
         $this->faction = "ZNexus Makar Federation";
         $this->phpclass = "QomYominAuxDestroyer";
-        $this->imagePath = "img/ships/Nexus/makarSreaTormal.png";
+        $this->imagePath = "img/ships/Nexus/makar_sreatormal2.png";
 		$this->canvasSize = 105; //img has 200px per side
         $this->shipClass = "Srea Tormal Auxiliary Destroyer";
 		$this->unofficial = true;

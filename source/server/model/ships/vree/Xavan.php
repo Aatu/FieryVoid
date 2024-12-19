@@ -117,37 +117,37 @@ class Xavan extends VreeCapital{
             1=> array(
                     4 => "TAG:Thruster",
                     7 => "TAG:Weapon",
-                    17 => "TAG:Outer Structure",
+                    17 => "Structure",
                     20 => "Primary",
            		 ),
             2=> array(
                     4 => "TAG:Thruster",
                     7 => "TAG:Weapon",
-                    17 => "TAG:Outer Structure",
+                    17 => "Structure",
                     20 => "Primary",
            		 ),
             31=> array(
                     4 => "TAG:Thruster",
                     7 => "TAG:Weapon",
-                    17 => "TAG:Outer Structure",
+                    17 => "Structure",
                     20 => "Primary",
            		 ),
             32=> array(
                     4 => "TAG:Thruster",
                     7 => "TAG:Weapon",
-                    17 => "TAG:Outer Structure",
+                    17 => "Structure",
                     20 => "Primary",
            		 ),
             41=> array(
                     4 => "TAG:Thruster",
                     7 => "TAG:Weapon",
-                    17 => "TAG:Outer Structure",
+                    17 => "Structure",
                     20 => "Primary",
            		 ),
        		42=> array(
                     4 => "TAG:Thruster",
                     7 => "TAG:Weapon",
-                    17 => "TAG:Outer Structure",
+                    17 => "Structure",
                     20 => "Primary",
            		 ),
            	);

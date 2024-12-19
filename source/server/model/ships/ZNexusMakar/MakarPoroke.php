@@ -7,12 +7,12 @@ class MakarPoroke extends MediumShip{
         $this->pointCost = 210;
         $this->faction = "ZNexus Makar Federation";
         $this->phpclass = "MakarPoroke";
-        $this->imagePath = "img/ships/Nexus/makarRatash_v3.png";
+        $this->imagePath = "img/ships/Nexus/makar_ratash2.png";
         $this->shipClass = "Poroke Escort Frigate";
 			$this->variantOf = "Ratash Early Frigate";
 			$this->occurence = "common";
 		$this->unofficial = true;
-        $this->canvasSize = 80;
+        $this->canvasSize = 90;
         $this->agile = true;
 	    $this->isd = 1920;
 

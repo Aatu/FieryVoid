@@ -7,7 +7,7 @@ class QomYominAuxCarrier extends HeavyCombatVesselLeftRight{
         $this->pointCost = 300;
         $this->faction = "ZNexus Makar Federation";
         $this->phpclass = "QomYominAuxCarrier";
-        $this->imagePath = "img/ships/Nexus/makarRoquola.png";
+        $this->imagePath = "img/ships/Nexus/makar_roquola2.png";
 		$this->canvasSize = 105; //img has 200px per side
         $this->shipClass = "Roquola Auxiliary Carrier";
 			$this->variantOf = "Srea Tormal Auxiliary Destroyer";

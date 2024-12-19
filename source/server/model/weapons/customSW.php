@@ -269,8 +269,8 @@ class SWDirectWeapon extends Pulse{
 		$damagebonusMin = 2;
 		$damagebonusPerc = 20; //percentage: +20% for first gun, +10% for each one after that; counted from average damage
 		if($this->defaultShots > 2) {
-			$damagebonusMin += $this->defaultShots - 2;//+1 for each barrel after that
-			$damagebonusPerc += 10*($this->defaultShots-2);//+15% for each barrel after that
+			$damagebonusMin += $this->defaultShots - 2;//+1 for each barrel after second
+			$damagebonusPerc += 10*($this->defaultShots-2);//+10% for each barrel after second
 		}
 		$avgDmg = ($this->minDamage+$this->maxDamage) /2;
 		$damagebonusEffect = $this->damagebonus + max($damagebonusMin,ceil($avgDmg*$damagebonusPerc/100));

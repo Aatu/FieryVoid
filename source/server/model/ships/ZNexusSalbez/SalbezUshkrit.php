@@ -43,14 +43,14 @@ class SalbezUshkrit extends BaseShipNoAft{
 		$this->addFrontSystem(new LightLaser(2, 4, 3, 0, 120));
         
 		$this->addLeftSystem(new Thruster(3, 14, 0, 4, 3));
-		$this->addLeftSystem(new LaserCutter(3, 6, 4, 300, 360));
+		$this->addLeftSystem(new LaserCutter(3, 6, 4, 240, 360));
 		$this->addLeftSystem(new LightParticleBeamShip(1, 2, 1, 240, 60));
 		$this->addLeftSystem(new LightParticleBeamShip(1, 2, 1, 180, 360));
 		$this->addLeftSystem(new LightParticleBeamShip(1, 2, 1, 120, 300));
 		$this->addLeftSystem(new LightLaser(2, 4, 3, 120, 300));
 
 		$this->addRightSystem(new Thruster(3, 14, 0, 4, 4));
-		$this->addRightSystem(new LaserCutter(3, 6, 4, 0, 60));
+		$this->addRightSystem(new LaserCutter(3, 6, 4, 0, 120));
 		$this->addRightSystem(new LightParticleBeamShip(1, 2, 1, 300, 120));
 		$this->addRightSystem(new LightParticleBeamShip(1, 2, 1, 0, 180));
 		$this->addRightSystem(new LightParticleBeamShip(1, 2, 1, 60, 240));

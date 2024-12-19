@@ -36,6 +36,12 @@ var AssaultLaser = function AssaultLaser(json, ship) {
 AssaultLaser.prototype = Object.create(Laser.prototype);
 AssaultLaser.prototype.constructor = AssaultLaser;
 
+var HvyAssaultLaser = function HvyAssaultLaser(json, ship) {
+    Laser.call(this, json, ship);
+};
+HvyAssaultLaser.prototype = Object.create(Laser.prototype);
+HvyAssaultLaser.prototype.constructor = HvyAssaultLaser;
+
 var AdvancedAssaultLaser = function AdvancedAssaultLaser(json, ship) {
     Laser.call(this, json, ship);
 };
