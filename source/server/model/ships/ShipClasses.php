@@ -1865,6 +1865,14 @@ class BaseShip {
     }
 
 
+	/*19.12.2024 clear Vree section choice - to be called from firing routine*/
+	public function clearVreeHitSectionChoice($shooter_id) {
+		if ($this->VreeHitLocations != true) return false;
+		if (isset($this->activeHitLocations[$shooter_id])) {
+			unset($this->activeHitLocations[$shooter_id]);
+		}
+		return true;
+	}
 
     public function getHitSectionChoice($shooter, $fireOrder, $weapon, $returnDestroyed = false){ //returns value - location! chooses method based on weapon and fire order!
         $foundLocation = 0;
@@ -1879,7 +1887,8 @@ class BaseShip {
     }
     public function getHitSection($shooter, $turn, $returnDestroyed = false){ //returns value - location! DO NOT USE FOR BALLISTICS!
         $foundLocation = 0;
-        if(isset($this->activeHitLocations[$shooter->id]) && ($this->VreeHitLocations != true)){
+		/*19.12.2024: set up Vree hit locations like for anyone else; but clear them after shot (separate call from firing routine!)*/
+        if(isset($this->activeHitLocations[$shooter->id]) /*&& ($this->VreeHitLocations != true)*/){		
             $foundLocation = $this->activeHitLocations[$shooter->id]["loc"];
         }else{
             $loc = $this->doGetHitSection($shooter); //finds array with relevant data!

@@ -1496,6 +1496,9 @@ class Weapon extends ShipSystem
                 while ($hitsRemaining > 0) {
                     $hitsRemaining--;
                     $fireOrder->shotshit++;
+					//19.12.2024 - clear any previous location for Vree-layout ships; this will be for entire volley - eg. single Pulse, but entire Raking shot
+					$target->clearVreeHitSectionChoice($shooter->id);
+					
                     $this->beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata);
                 }
             }
@@ -1602,7 +1605,7 @@ class Weapon extends ShipSystem
 	    
 		$tmpLocation = $fireOrder->chosenLocation;
 		$launchPos = null;
-			if ($this->ballistic){
+		if ($this->ballistic){
 //			$movement = $shooter->getLastTurnMovement($fireOrder->turn);
 //			$launchPos = mathlib::hexCoToPixel($movement->position);			
 			$launchHex = $this->getFiringHex($gamedata, $fireOrder);	

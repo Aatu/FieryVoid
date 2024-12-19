@@ -17,7 +17,7 @@ class TrekNausicaanShefaFighter extends FighterFlight{
         $this->offensivebonus = 4;
         $this->jinkinglimit = 10;
         $this->turncost = 0.33;
-        $this->iniativebonus = 100;
+        $this->iniativebonus = 18 *5; //default medium fighter
         $this->populate();
     }
 
@@ -29,7 +29,7 @@ class TrekNausicaanShefaFighter extends FighterFlight{
 
         for ($i = 0; $i < $toAdd; $i++){
             $armour = array(2, 1, 1, 1);
-            $fighter = new Fighter("TrekNausicaanShefaFighter", $armour, 9, $this->id);
+            $fighter = new Fighter("TrekNausicaanShefaFighter", $armour, 10, $this->id);
             $fighter->displayName = "Shefa";
             $fighter->imagePath = "img/ships/StarTrek/NausicaanShefalitayal.png";
             $fighter->iconPath = "img/ships/StarTrek/NausicaanShefalitayal_Large.png";
@@ -38,11 +38,6 @@ class TrekNausicaanShefaFighter extends FighterFlight{
 			$gun = new RogolonLtPlasmaGun(330, 30, 4, 1);
 			$gun->displayName = "Light Plasma Gun";
 			$fighter->addFrontSystem($gun);
-
-  		        //$largeGun = new PlasmaGun(330, 30); 
-            		//$largeGun->exclusive = true; 
-            		//$fighter->addFrontSystem($largeGun);
-
             $disabler = new SWFighterIon(330, 30, 3, 1); //Ion Cannon borrowed from Star Wars
             $disabler->exclusive = true; //either this or other weapons!
 			$disabler->displayName = "Disabler Gun";

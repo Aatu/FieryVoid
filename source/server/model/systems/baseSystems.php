@@ -1951,6 +1951,7 @@ class Structure extends ShipSystem{
     
 		if($this->isIndestructible){
 			foreach ($this->damage as $damage ) if(($damage->turn == $gamedata->turn) && ($damage->destroyed)){ 
+				/* update 19.12.2024 - re-read the rules - such structures NEVER fall off!
 				//check all others - if all of them are reduced to 0 - mark them destroyed as well; if not, delete destroyed marker!
 				$structures = $ship->getSystemsByName('Structure', true);
 				$allDestroyed = true;
@@ -1967,8 +1968,9 @@ class Structure extends ShipSystem{
 						$struct->damage[] = $damageEntry;
 					}
 				}else{//unmark this one
+				*/
 					$damage->destroyed = false;
-				}
+				/*}*/
 			}
 		}
     } //endof function criticalPhaseEffects	

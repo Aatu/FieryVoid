@@ -114,7 +114,7 @@ class Kraken extends StarBaseSixSections{
 				6 => "TAG:Battle Laser",
 				8 => "TAG:Cargo Bay",
 				9 => "TAG:Sub Reactor",
-				18 => "TAG:Outer Structure",
+				18 => "Structure",
 				20 => "Primary",
 			);
 			
