@@ -7,7 +7,7 @@ class MakarNarrit extends LCV{
         $this->pointCost = 140;
         $this->faction = "ZNexus Makar Federation";
         $this->phpclass = "MakarNarrit";
-        $this->imagePath = "img/ships/Nexus/makarKrashnor3.png";
+        $this->imagePath = "img/ships/Nexus/makar_krashnor2.png";
 			$this->canvasSize = 70; //img has 200px per side
         $this->shipClass = "Narrit Strike Defender";
 			$this->variantOf = "Krashnor Defender";

@@ -31,6 +31,8 @@ class DalithornMicrosatRefit extends MicroSAT{
 		
         $this->populate();
 		
+        $this->enhancementOptionsEnabled[] = 'EXT_AMMO'; //To enable extra Ammo for main gun.
+
     }
     
     public function populate(){

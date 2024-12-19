@@ -1004,10 +1004,20 @@ class ShipSystem {
     public function addCritical($shipid, $phpclass, $gamedata){
         $crit = new $phpclass(-1, $shipid, $this->id, $phpclass, $gamedata->turn);
         $crit->updated = true;
-        $this->criticals[] =  $crit;
+		$this->setCritical($crit);
+//        $this->criticals[] =  $crit;
         return $crit;
     }
-	
+
+// add GTS
+	//Standard procedure for repairing a critical, called from selfRepair system.
+    public function repairCritical($critDmg, $turn){
+        $critDmg->turnend = $turn;//actual repair 😉
+        $critDmg->forceModify = true; //actually save the repair...
+        $critDmg->updated = true; //actually save the repair cd!...
+
+    }//endof repairCritical()    
+// end add GTS	
     
     public function hasCritical($type, $turn = false){
         $count = 0;

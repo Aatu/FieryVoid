@@ -19,7 +19,7 @@ class SalbezTavertez extends BaseShipNoAft{
         $this->sideDefense = 14;
         
         $this->turncost = 0.66;
-        $this->turndelaycost = 1.0;
+        $this->turndelaycost = 0.66;
         $this->accelcost = 3;
         $this->rollcost = 3;
         $this->pivotcost = 3;
@@ -35,7 +35,7 @@ class SalbezTavertez extends BaseShipNoAft{
         $this->addFrontSystem(new Thruster(2, 10, 0, 3, 1));
         $this->addFrontSystem(new Thruster(2, 10, 0, 3, 1));
 		$this->addFrontSystem(new NexusLightIndustrialLaser(2, 4, 2, 240, 360));
-		$this->addFrontSystem(new NexusIndustrialLaser(2, 6, 3, 300, 60));
+		$this->addFrontSystem(new LaserCutter(2, 6, 4, 300, 60));
 		$this->addFrontSystem(new CargoBay(1, 16));
 		$this->addFrontSystem(new NexusBoltTorpedo(2, 5, 2, 300, 60));
 		$this->addFrontSystem(new NexusLightIndustrialLaser(2, 4, 3, 0, 120));
@@ -70,7 +70,7 @@ class SalbezTavertez extends BaseShipNoAft{
             ),
             1=> array(
                     4 => "Thruster",
-					6 => "Industrial Laser",
+					6 => "Laser Cutter",
 					8 => "Bolt Torpedo",
 					10 => "Light Industrial Laser",
 					12 => "Cargo Bay",

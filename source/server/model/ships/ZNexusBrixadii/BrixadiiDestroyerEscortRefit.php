@@ -11,7 +11,7 @@ class BrixadiiDestroyerEscortRefit extends HeavyCombatVessel{
 			$this->canvasSize = 120; //img has 200px per side
         $this->shipClass = "Destroyer Escort (2108 refit)";
 			$this->variantOf = "Battle Destroyer";
-			$this->occurence = "uncommon";
+			$this->occurence = "common";
 			$this->unofficial = true;
         $this->isd = 2108;
         

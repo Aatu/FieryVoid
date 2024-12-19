@@ -8,7 +8,7 @@ class MakarKalmet extends FighterFlight{
         $this->faction = "ZNexus Makar Federation";
         $this->phpclass = "MakarKalmet";
         $this->shipClass = "Kalmet Armed Shuttle";
-        $this->imagePath = "img/ships/Nexus/makar_kalmet.png";
+        $this->imagePath = "img/ships/Nexus/makar_kalmet2.png";
 		$this->unofficial = true;
 
         $this->isd = 1902;
@@ -25,6 +25,8 @@ class MakarKalmet extends FighterFlight{
         $this->iniativebonus = 60;
         $this->populate();       
 
+        $this->enhancementOptionsEnabled[] = 'EXT_AMMO'; //To enable extra Ammo for main gun.
+
     }
 
     public function populate(){
@@ -37,8 +39,8 @@ class MakarKalmet extends FighterFlight{
             $armour = array(1, 0, 1, 1);
             $fighter = new Fighter("MakarKalmet", $armour, 15, $this->id);
             $fighter->displayName = "Kalmet";
-            $fighter->imagePath = "img/ships/Nexus/makar_kalmet.png";
-            $fighter->iconPath = "img/ships/Nexus/makar_kalmet_large.png";
+            $fighter->imagePath = "img/ships/Nexus/makar_kalmet2.png";
+            $fighter->iconPath = "img/ships/Nexus/makar_kalmet_large2.png";
 
 	        $light = new NexusLightDefenseGun(300, 60, 1); //$startArc, $endArc, $nrOfShots
 	        $fighter->addFrontSystem($light);

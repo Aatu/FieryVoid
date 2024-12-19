@@ -43,10 +43,10 @@ class BALCVCarrier extends BaseShip{
         $this->addFrontSystem(new StdParticleBeam(2, 4, 1, 300, 180));
         $this->addFrontSystem(new CargoBay(4, 15));
         $this->addFrontSystem(new CargoBay(4, 15));
-        $LCVRail = new Catapult(3, 8);
+        $LCVRail = new DockingCollar(3, 8);
         $LCVRail->displayName = "LCV Rail";
         $this->addFrontSystem($LCVRail);
-        $LCVRail = new Catapult(3, 8);
+        $LCVRail = new DockingCollar(3, 8);
         $LCVRail->displayName = "LCV Rail";
         $this->addFrontSystem($LCVRail);
 
@@ -57,13 +57,13 @@ class BALCVCarrier extends BaseShip{
 
         $this->addLeftSystem(new Thruster(3, 13, 0, 5, 3));
         $this->addLeftSystem(new CargoBay(3, 10));
-        $LCVRail = new Catapult(3, 8);
+        $LCVRail = new DockingCollar(3, 8);
         $LCVRail->displayName = "LCV Rail";
         $this->addLeftSystem($LCVRail);
 
         $this->addRightSystem(new Thruster(3, 13, 0, 5, 4));
         $this->addRightSystem(new CargoBay(3, 10));
-        $LCVRail = new Catapult(3, 8);
+        $LCVRail = new DockingCollar(3, 8);
         $LCVRail->displayName = "LCV Rail";
         $this->addRightSystem($LCVRail);
 

@@ -7,7 +7,7 @@ class MakarValkar extends HeavyCombatVessel{
         $this->pointCost = 400;
         $this->faction = "ZNexus Makar Federation";
         $this->phpclass = "MakarValkar";
-        $this->imagePath = "img/ships/Nexus/makarValkar.png";
+        $this->imagePath = "img/ships/Nexus/makar_valkar2.png";
 		$this->canvasSize = 120; //img has 200px per side
         $this->shipClass = "Valkar Carrier";
 			$this->variantOf = "Maleen Heavy Frigate";

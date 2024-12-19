@@ -7,7 +7,7 @@ class QomYominLightScout extends MediumShip{
         $this->pointCost = 330;
         $this->faction = "ZNexus Makar Federation";
         $this->phpclass = "QomYominLightScout";
-        $this->imagePath = "img/ships/Nexus/qomyominLightScout.png";
+        $this->imagePath = "img/ships/Nexus/makar_sorolma.png";
         $this->shipClass = "Sorol Ma Light Scout";
 		$this->unofficial = true;
         $this->canvasSize = 80;
