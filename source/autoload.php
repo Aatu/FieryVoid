@@ -1106,6 +1106,7 @@ spl_autoload_register(
                 'ultralightgraviticbolt' => '/server/model/weapons/gravitic.php',
                 'upgtorotha' => '/server/model/ships/minbari/upgTorotha.php',
                 'utan' => '/server/model/ships/yolu/utan.php',
+                'utanor' => '/server/model/ships/yolu/Zutanor.php',
                 'nathor' => '/server/model/ships/yolu/Nathor.php',
                 'vakar' => '/server/model/ships/narn/vakar.php',
                 'valtor' => '/server/model/ships/centauri_old/valtor.php',
