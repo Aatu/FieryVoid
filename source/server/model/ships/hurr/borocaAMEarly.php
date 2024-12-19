@@ -88,7 +88,7 @@ class borocaAMEarly extends BaseShip{
         		1=> array(
         				4 => "Thruster",
                                 	8 => "Heavy Plasma Cannon",
-                        		11 => "Class-S Missile Rack",
+                        		11 => "Class-SO Missile Rack",
         				18 => "Structure",
         				20 => "Primary",
         		),

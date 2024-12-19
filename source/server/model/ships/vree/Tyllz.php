@@ -87,7 +87,7 @@ class Tyllz extends StarBaseSixSections
                     7 => "TAG:Weapon",                    
                     9 => "Cargo Bay",
                     10 => "Sub Reactor",
-                    18 => "TAG:Outer Structure",
+                    18 => "Structure",
                     20 => "Primary",
 			);
 

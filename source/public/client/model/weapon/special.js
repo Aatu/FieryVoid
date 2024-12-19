@@ -252,15 +252,57 @@ VorlonLightningGun.prototype.initializationUpdate = function() {
     return this;
 };
 
+
+var VorlonLightningGun2 = function VorlonLightningGun2(json, ship) {
+    Weapon.call(this, json, ship);
+};
+VorlonLightningGun2.prototype = Object.create(Weapon.prototype);
+VorlonLightningGun2.prototype.constructor = VorlonLightningGun2;
+VorlonLightningGun2.prototype.initializationUpdate = function() {
+    // Needed because it can change power consumption during firing phase, depending on power and number of shots being changed
+	this.powerReq = 0;
+	var isFiring = weaponManager.hasFiringOrder(this.ship, this);
+    if (isFiring) {
+		var firing = weaponManager.getFiringOrder(this.ship, this);
+		this.powerReq = this.powerRequiredArray[firing.firingMode][1]; //element is array Number of prongs/Power)		
+	}
+    return this;
+};
+
+
+
+
+
+
+
 var VorlonDischargePulsar = function VorlonDischargePulsar(json, ship) {
     Weapon.call(this, json, ship);
 };
 VorlonDischargePulsar.prototype = Object.create(Weapon.prototype);
 VorlonDischargePulsar.prototype.constructor = VorlonDischargePulsar;
+
 VorlonDischargePulsar.prototype.initializationUpdate = function() {
     // Needed because it can change power consumption during firing phase, depending on power and number of shots being changed
-//TO BE ACTUALLY IMPLEMENTED!!!!!!!
+	this.powerReq = 0;
+	var isFiring = weaponManager.hasFiringOrder(this.ship, this);
+    if (isFiring) {
+		var firing = weaponManager.getFiringOrder(this.ship, this);
+		this.powerReq = 4*firing.firingMode;		
+	}
+    return this;
 };
+
+
+
+
+
+
+
+
+
+
+
+
 
 var PsionicConcentrator = function PsionicConcentrator(json, ship) {
     Weapon.call(this, json, ship);

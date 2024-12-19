@@ -21,6 +21,9 @@ class SshelathAlnekra extends FighterFlight{
 
 	$this->iniativebonus = 100;
 	$this->populate();
+
+    $this->enhancementOptionsEnabled[] = 'EXT_AMMO'; //To enable extra Ammo for main gun.
+
 	}
 
     public function populate(){

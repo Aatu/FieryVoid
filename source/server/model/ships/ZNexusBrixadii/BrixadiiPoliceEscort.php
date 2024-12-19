@@ -11,7 +11,7 @@ class BrixadiiPoliceEscort extends LCV{
 			$this->canvasSize = 70; //img has 200px per side
         $this->shipClass = "Police Escort";
 			$this->variantOf = "Police Frigate";
-			$this->occurence = "uncommon";
+			$this->occurence = "common";
 		//$this->variantOf = "Police Frigate";
 		$this->unofficial = true;
 			$this->isd = 2108;

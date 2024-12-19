@@ -8,10 +8,10 @@ class Deliverer extends BaseShip{
         $this->faction = "Deneth Tribes";
         $this->phpclass = "deliverer";
         $this->imagePath = "img/ships/DenethDeliverer.png";
-	$this->canvasSize = 200;
+		$this->canvasSize = 200;
         $this->shipClass = "Deliverer Strike Carrier";
         $this->shipSizeClass = 3;
-	$this->fighters = array("LCVs" => 4);        
+		$this->fighters = array("LCVs" => 4);        
 
         $this->forwardDefense = 15;
         $this->sideDefense = 16;
@@ -31,23 +31,23 @@ class Deliverer extends BaseShip{
         $this->addPrimarySystem(new CnC(5, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 17, 5, 7));
         $this->addPrimarySystem(new Engine(5, 20, 0, 12, 2));
-	$this->addPrimarySystem(new CargoBay(5, 12));
+		$this->addPrimarySystem(new CargoBay(5, 12));
         $this->addPrimarySystem(new Hangar(5, 2));
         $this->addPrimarySystem(new JumpEngine(5, 15, 4, 24));
   
         $this->addFrontSystem(new Thruster(4, 15, 0, 4, 1));
-	$this->addFrontSystem(new Thruster(4, 15, 0, 4, 1));
+		$this->addFrontSystem(new Thruster(4, 15, 0, 4, 1));
         $this->addFrontSystem(new AssaultLaser(4, 6, 4, 300, 60));
-	$this->addFrontSystem(new AssaultLaser(4, 6, 4, 300, 60));
+		$this->addFrontSystem(new AssaultLaser(4, 6, 4, 300, 60));
         $this->addFrontSystem(new TwinArray(2, 6, 2, 240, 60));
         $this->addFrontSystem(new TwinArray(2, 6, 2, 300, 120));
 
-        $LCVRail = new Catapult(3, 8);
+        $LCVRail = new DockingCollar(3, 8);
         $LCVRail->displayName = "LCV Rail";
         $this->addFrontSystem($LCVRail);
-        $LCVRail = new Catapult(3, 8);
+        $LCVRail = new DockingCollar(3, 8);
         $LCVRail->displayName = "LCV Rail";
-	$this->addFrontSystem($LCVRail);
+		$this->addFrontSystem($LCVRail);
 
         $this->addAftSystem(new TwinArray(2, 6, 2, 120, 300));
         $this->addAftSystem(new TwinArray(2, 6, 2, 60, 240));
@@ -55,13 +55,13 @@ class Deliverer extends BaseShip{
         $this->addAftSystem(new Thruster(4, 16, 0, 4, 2));
                 
         $this->addLeftSystem(new Thruster(4, 15, 0, 6, 3));
-        $LCVRail = new Catapult(3, 8);
+        $LCVRail = new DockingCollar(3, 8);
         $LCVRail->displayName = "LCV Rail";        
         $this->addLeftSystem($LCVRail);
         $this->addLeftSystem(new TwinArray(2, 6, 2, 180, 360));
   
         $this->addRightSystem(new Thruster(4, 15, 0, 6, 4));
-        $LCVRail = new Catapult(3, 8);
+        $LCVRail = new DockingCollar(3, 8);
         $LCVRail->displayName = "LCV Rail";        
         $this->addRightSystem($LCVRail);
         $this->addRightSystem(new TwinArray(2, 6, 2, 0, 180));

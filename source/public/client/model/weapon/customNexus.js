@@ -1006,6 +1006,11 @@ var NexusLtEnhPlasmaFtr = function  NexusLtEnhPlasmaFtr(json, ship) {
 NexusLtEnhPlasmaFtr.prototype = Object.create(Weapon.prototype);
 NexusLtEnhPlasmaFtr.prototype.constructor =  NexusLtEnhPlasmaFtr;
 
+var NexusSmallXrayLaser = function  NexusSmallXrayLaser(json, ship) {
+    Plasma.call(this, json, ship);
+};
+NexusSmallXrayLaser.prototype = Object.create(Weapon.prototype);
+NexusSmallXrayLaser.prototype.constructor =  NexusSmallXrayLaser;
 
 
 
@@ -1143,6 +1148,36 @@ NexusPlasmaChargeThrust.prototype.initBoostableInfo = function () {
     }
     return this;
 };
+
+var NexusRAMLauncher = function NexusRAMLauncher(json, ship) {
+    Torpedo.call(this, json, ship);
+};
+NexusRAMLauncher.prototype = Object.create(Torpedo.prototype);
+NexusRAMLauncher.prototype.constructor = NexusRAMLauncher;
+NexusRAMLauncher.prototype.calculateSpecialRangePenalty = function (distance) {
+    var distancePenalized = Math.max(0,distance - 20); //ignore first 20 hexes
+    var rangePenalty = this.rangePenalty * distancePenalized;
+    return rangePenalty;
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /*
 var MultiDefenseLauncher = function  MultiDefenseLauncher(json, ship) {

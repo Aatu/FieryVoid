@@ -28,6 +28,9 @@ class DalithornCutter extends FighterFlight{
 	
 		$this->populate();
 	
+        $this->enhancementOptionsEnabled[] = 'EXT_AMMO'; //To enable extra Ammo for light gun(s).
+        $this->enhancementOptionsEnabled[] = 'EXT_HAMMO'; //To enable extra Ammo for heavy gun.
+
 	}
 
     public function populate(){        

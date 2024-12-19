@@ -225,6 +225,12 @@ var Quarters = function Quarters(json, ship) {
 Quarters.prototype = Object.create(ShipSystem.prototype);
 Quarters.prototype.constructor = Quarters;
 
+var DockingCollar = function DockingCollar(json, ship) {
+    ShipSystem.call(this, json, ship);
+};
+DockingCollar.prototype = Object.create(ShipSystem.prototype);
+DockingCollar.prototype.constructor = DockingCollar;
+
 var Magazine = function Magazine(json, ship) {
     ShipSystem.call(this, json, ship);
 };
@@ -285,6 +291,15 @@ var DrakhRaiderController = function DrakhRaiderController(json, ship) {
 DrakhRaiderController.prototype = Object.create(ShipSystem.prototype);
 DrakhRaiderController.prototype.constructor = DrakhRaiderController;
 DrakhRaiderController.prototype.hasMaxBoost = function () {
+    return true;
+};
+
+var NexusLCVController = function NexusLCVController(json, ship) {
+    ShipSystem.call(this, json, ship);
+};
+NexusLCVController.prototype = Object.create(ShipSystem.prototype);
+NexusLCVController.prototype.constructor = NexusLCVController;
+NexusLCVController.prototype.hasMaxBoost = function () {
     return true;
 };
 
