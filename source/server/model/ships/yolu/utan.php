@@ -4,7 +4,7 @@ class Utan extends FighterFlight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
 	        
-		$this->pointCost = 660;
+		$this->pointCost = 110 *6;
 		$this->faction = "Yolu Confederation";
 		$this->phpclass = "Utan";
 		$this->shipClass = "Utan Heavy Fighters";
