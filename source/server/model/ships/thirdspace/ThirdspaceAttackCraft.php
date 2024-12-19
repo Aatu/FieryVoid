@@ -49,10 +49,10 @@ class ThirdspaceAttackCraft extends LCV{ //Actually an LCV.
 	$this->addPrimarySystem(new ThirdspaceShieldGenerator(5, 6, 0, 10, 4, 2)); //$armor, $maxhealth, $power used, output, maxBoost, boostEfficiency	
     $this->addPrimarySystem(new ThirdspaceSelfRepair(5, 6, 3, 3)); //armor, structure, output, maxBoost  	
 
-	$this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 210, 60));
-	$this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 210, 60));
-	$this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 300, 150));
-	$this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 300, 150));
+	$this->addFrontSystem(new PsionicConcentrator(5, 0, 0, 210, 60));
+	$this->addFrontSystem(new PsionicConcentrator(5, 0, 0, 210, 60));
+	$this->addFrontSystem(new PsionicConcentrator(5, 0, 0, 300, 150));
+	$this->addFrontSystem(new PsionicConcentrator(5, 0, 0, 300, 150));
 			
 	$this->addPrimarySystem(new ThirdspaceShield(2, 60, 60, 0, 360, 'C'));
 				

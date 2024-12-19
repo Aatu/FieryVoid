@@ -27,7 +27,14 @@ class Kromala extends SmallStarBaseFourSections
 		$this->sideDefense = 20;
 
 		$this->addPrimarySystem(new Reactor(5, 26, 0, 0));
-		$this->addPrimarySystem(new ProtectedCnC(5, 40, 0, 0)); //originally 2 systems with structure 20, armor 5 each
+//		$this->addPrimarySystem(new ProtectedCnC(5, 40, 0, 0)); //originally 2 systems with structure 20, armor 5 each
+		$cnc = new CnC(5, 20, 0, 0);
+		$cnc->startArc = 0;
+		$cnc->endArc = 360;
+		$this->addPrimarySystem($cnc);
+		$cnc = new SecondaryCnC(5, 20, 0, 0);//all-around by default
+		$this->addPrimarySystem($cnc);
+				
 		$this->addPrimarySystem(new Scanner(5, 24, 5, 7));
 		$this->addPrimarySystem(new Scanner(5, 24, 5, 7));
 		$this->addPrimarySystem(new Hangar(5, 28));
@@ -83,39 +90,39 @@ class Kromala extends SmallStarBaseFourSections
 				14 => "Scanner",
 				16 => "Hangar",
 				18 => "Reactor",
-				20 => "C&C",
+				20 => "TAG:C&C",
 			),
 			1=> array(
-				2 => "Heavy Plasma Cannon",
-				5 => "Particle Cannon",
-				7 => "Standard Particle Beam",
+				2 => "TAG:Heavy Plasma Cannon",
+				5 => "TAG:Particle Cannon",
+				7 => "TAG:Standard Particle Beam",
 				9 => "Cargo Bay",
 				11 => "Sub Reactor",
 				18 => "Structure",
 				20 => "Primary",
 			),
 			2=> array(
-				2 => "Heavy Plasma Cannon",
-				5 => "Particle Cannon",
-				7 => "Standard Particle Beam",
+				2 => "TAG:Heavy Plasma Cannon",
+				5 => "TAG:vParticle Cannon",
+				7 => "TAG:Standard Particle Beam",
 				9 => "Cargo Bay",
 				11 => "Sub Reactor",
 				18 => "Structure",
 				20 => "Primary",
 			),
 			3=> array(
-				2 => "Heavy Plasma Cannon",
-				5 => "Particle Cannon",
-				7 => "Standard Particle Beam",
+				2 => "TAG:Heavy Plasma Cannon",
+				5 => "TAG:Particle Cannon",
+				7 => "TAG:Standard Particle Beam",
 				9 => "Cargo Bay",
 				11 => "Sub Reactor",
 				18 => "Structure",
 				20 => "Primary",
 			),
 			4=> array(
-				2 => "Heavy Plasma Cannon",
-				5 => "Particle Cannon",
-				7 => "Standard Particle Beam",
+				2 => "TAG:Heavy Plasma Cannon",
+				5 => "TAG:Particle Cannon",
+				7 => "TAG:Standard Particle Beam",
 				9 => "Cargo Bay",
 				11 => "Sub Reactor",
 				18 => "Structure",

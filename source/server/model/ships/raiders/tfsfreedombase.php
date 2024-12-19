@@ -54,8 +54,8 @@ class tfsfreedombase extends SmallStarBaseFourSections{
 			);
 			$loc = $this->locations[$i];
 			$this->hitChart[$loc] = array(
-				1 => "Standard Particle Beam",
-				3 => "Particle Cannon",
+				1 => "TAG:Standard Particle Beam",
+				3 => "TAG:Particle Cannon",
 				8 => "Cargo Bay",
 				9 => "Hangar",
 				10 => "Sub Reactor",

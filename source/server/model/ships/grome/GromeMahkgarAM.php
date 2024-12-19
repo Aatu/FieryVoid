@@ -32,7 +32,7 @@ class GromeMahkgarAM extends StarBaseSixSections{
 				14 => "Targeting Array",
 				16 => "Scanner",
 				18 => "Reactor",
-				20 => "C&C",
+				20 => "TAG:C&C",
 			),
 		);
 
@@ -57,8 +57,14 @@ class GromeMahkgarAM extends StarBaseSixSections{
 	    $this->enhancementOptionsEnabled[] = 'SHELL_HULR';//add enhancement options for ammo - Heavy Ultra Long Range Shell	
 
 		$this->addPrimarySystem(new Reactor(4, 26, 0, 0));
-		$this->addPrimarySystem(new CnC(4, 25, 0, 0)); 
-		$this->addPrimarySystem(new CnC(4, 25, 0, 0)); 
+		
+		$cnc = new CnC(4, 25, 0, 0);
+		$cnc->startArc = 0;
+		$cnc->endArc = 360;
+		$this->addPrimarySystem($cnc);
+		$cnc = new SecondaryCnC(4, 25, 0, 0);//all-around by default
+		$this->addPrimarySystem($cnc);
+		
 		$this->addPrimarySystem(new AntiquatedScanner(4, 24, 6, 6));
 		$this->addPrimarySystem(new AntiquatedScanner(4, 24, 6, 6));
         $this->addPrimarySystem(new GromeTargetingArray(2, 0, 0, 0, 360, 3, false, true)); //Armor, health, power, startarc, endarc, output, escort, base	
@@ -92,10 +98,10 @@ class GromeMahkgarAM extends StarBaseSixSections{
 			$loc = $this->locations[$i];
 
 			$this->hitChart[$loc] = array(
-				2 => "Flak Cannon",
-				4 => "Light Railgun",
-				6 => "Medium Railgun",
-				7 => "Heavy Railgun",
+				2 => "TAG:Flak Cannon",
+				4 => "TAG:Light Railgun",
+				6 => "TAG:Medium Railgun",
+				7 => "TAG:Heavy Railgun",
 				9 => "Cargo Bay",
 				10 => "Hangar",
 				11 => "Sub Reactor",

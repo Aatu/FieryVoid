@@ -29,7 +29,14 @@ class Brostilli extends SmallStarBaseFourSections
 
 
 		$this->addPrimarySystem(new Reactor(6, 26, 0, 4));
-		$this->addPrimarySystem(new ProtectedCnC(7, 40, 0, 0)); //originally 2 systems with structure 20, armor 6 each
+//		$this->addPrimarySystem(new ProtectedCnC(7, 40, 0, 0)); //originally 2 systems with structure 20, armor 6 each
+		$cnc = new CnC(6, 20, 0, 0);
+		$cnc->startArc = 0;
+		$cnc->endArc = 360;
+		$this->addPrimarySystem($cnc);
+		$cnc = new SecondaryCnC(6, 20, 0, 0);//all-around by default
+		$this->addPrimarySystem($cnc);		
+		
 		$this->addPrimarySystem(new Scanner(6, 24, 5, 8));
 		$this->addPrimarySystem(new Scanner(6, 24, 5, 8));
 		$this->addPrimarySystem(new TwinArray(6, 6, 2, 0, 360));
@@ -97,13 +104,13 @@ class Brostilli extends SmallStarBaseFourSections
 				14 => "Twin Array",
 				16 => "Scanner",
 				18 => "Reactor",
-				20 => "C&C",
+				20 => "TAG:C&C",
 			),
 			1=> array(
-				1 => "Heavy Particle Cannon",
-				3 => "Particle Blaster",
-				4 => "Particle Cannon",
-				6 => "Standard Particle Beam",
+				1 => "TAG:Heavy Particle Cannon",
+				3 => "TAG:Particle Blaster",
+				4 => "TAG:Particle Cannon",
+				6 => "TAG:Standard Particle Beam",
 				8 => "Cargo Bay",
 				9 => "Sub Reactor",
 				10 => "Hangar",
@@ -112,10 +119,10 @@ class Brostilli extends SmallStarBaseFourSections
 				20 => "Primary",
 			),
 			2=> array(
-				1 => "Heavy Particle Cannon",
-				3 => "Particle Blaster",
-				4 => "Particle Cannon",
-				6 => "Standard Particle Beam",
+				1 => "TAG:Heavy Particle Cannon",
+				3 => "TAG:Particle Blaster",
+				4 => "TAG:Particle Cannon",
+				6 => "TAG:Standard Particle Beam",
 				8 => "Cargo Bay",
 				9 => "Sub Reactor",
 				10 => "Hangar",
@@ -124,10 +131,10 @@ class Brostilli extends SmallStarBaseFourSections
 				20 => "Primary",
 			),
 			3=> array(
-				1 => "Heavy Particle Cannon",
-				3 => "Particle Blaster",
-				4 => "Particle Cannon",
-				6 => "Standard Particle Beam",
+				1 => "TAG:Heavy Particle Cannon",
+				3 => "TAG:Particle Blaster",
+				4 => "TAG:Particle Cannon",
+				6 => "TAG:Standard Particle Beam",
 				8 => "Cargo Bay",
 				9 => "Sub Reactor",
 				10 => "Hangar",
@@ -136,10 +143,10 @@ class Brostilli extends SmallStarBaseFourSections
 				20 => "Primary",
 			),
 			4=> array(
-				1 => "Heavy Particle Cannon",
-				3 => "Particle Blaster",
-				4 => "Particle Cannon",
-				6 => "Standard Particle Beam",
+				1 => "TAG:Heavy Particle Cannon",
+				3 => "TAG:Particle Blaster",
+				4 => "TAG:Particle Cannon",
+				6 => "TAG:Standard Particle Beam",
 				8 => "Cargo Bay",
 				9 => "Sub Reactor",
 				10 => "Hangar",
