@@ -56,31 +56,21 @@ if (isset($_SESSION["user"])) {
     <!-- <div id="newsHeader">Latest News - September 2020</div> -->
     <div id="newsEntry">
 
-	    <!--
+	    
+       
+		
         <h3> *** Merry Christmas and a Happy New Year! *** </h3>
         <h4><i>may our games be fiery and our lives peaceful</i></h4>
         <br>
-       -->
-		
+	    
 		<big><b>Welcome to Fiery Void, an adaptation of the 'Babylon 5 Wars' tabletop game, by Agents of Gaming!</b></big>
 
-		<br><br>---------- <b>LATEST NEWS - November 2024</b> ----------
-		<br>---------- <b>Major deployment of Douglas' and Geoffrey's work!</b> ----------
+		<br><br>---------- <b>LATEST NEWS - December 2024</b> ----------
 	    <br>
-	    <br><b><u>Mindriders</u> have arrived!</b> - a new Ancient faction!
-		<br><b>Plasma Webs Enhanced</b> - they stay until next turn!
-	    <br><b>Hex Highlights Enhanced</b> - try some ballistics and see the effect yourself!
-	    <br><b>Rule Warnings</b> - Most commonly missed rules (Jump Drive disable, Ramming declarations) got extra warnings
-	    <br><b>Turn Into Pivots / Emergency Roll</b> - enhanced and added, respectively
-	    <br><b>Movement icons Enhanced</b> - Shape improved, tooltips added
-	    <br><b>Improved Game Creation</b> - SimMovement got options, useful links were added, and more!
-	    
-	    <br><b>Nexus Updates</b> - Quite a lot of post-tournament observations applied
-	    <br><b>Bugfixes</b> - As always, there's quite a few of them
-	    
-		 <br><br>---------- <b>update 19th of November</b> ---------- 
-	    <br><b>Point value calculations</b> - remaining point value updated as per online discussion
-	    <br><b>Thirdspace, Mindriders, Nexus</b> - fixes, fixes, polishing!
+	    <br><b>Nexus, Escalation Wars</b> - polishing and enhancements!
+	    <br><b>Yolu</b> - rebalance! Now they are playable as (custom) Tier 1 faction (first attempt, mind You!)
+	    <br><b>Vree fix</b> -  their Raking resistance was taken down a notch!
+	    <br><b>Bugfixes</b> - quite a few of them!
 	    
        <br><br>
 
