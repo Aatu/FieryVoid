@@ -33,7 +33,7 @@ class RingBase extends StarBaseSixSections
                     15 => "Spark Field",
                     17 => "Reactor",
                     18 => "Hangar",
-                    20 => "C&C",
+                    20 => "TAG:C&C",
            		 ),
 		);
 
@@ -41,7 +41,14 @@ class RingBase extends StarBaseSixSections
 		$this->addPrimarySystem(new MagGravReactor(6, 49, 0, 90));
 		$this->addPrimarySystem(new Hangar(6, 16));
 		$this->addPrimarySystem(new Hangar(6, 16));		
-		$this->addPrimarySystem(new ProtectedCnC(6, 40, 0, 0));
+//		$this->addPrimarySystem(new ProtectedCnC(6, 40, 0, 0));
+		$cnc = new CnC(6, 20, 0, 0);
+		$cnc->startArc = 0;
+		$cnc->endArc = 360;
+        $this->addPrimarySystem($cnc);
+		$cnc = new SecondaryCnC(6, 20, 0, 0);//all-around by default
+        $this->addPrimarySystem($cnc);
+        
 		$this->addPrimarySystem(new Scanner(6, 16, 4, 7));
 		$this->addPrimarySystem(new Scanner(6, 16, 4, 7));
 		$this->addPrimarySystem(new CargoBay(6, 36));	
@@ -71,9 +78,9 @@ class RingBase extends StarBaseSixSections
 			$loc = $this->locations[$i];
 
 			$this->hitChart[$loc] = array(
-                    1 => "Resonance Generator",
-                    3 => "EM Pulsar",                   
-                    7 => "Surge Cannon",                    
+                    1 => "TAG:Resonance Generator",
+                    3 => "TAG:EM Pulsar",                   
+                    7 => "TAG:Surge Cannon",                    
                     18 => "Structure",
                     20 => "Primary",
 			);

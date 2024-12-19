@@ -32,7 +32,7 @@ class TrekFederationDaedalusFF extends MediumShip{
         $this->addPrimarySystem(new CnC(3, 8, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 8, 3, 3));
 	$impulseDrive = new TrekImpulseDrive(3,15,0,2,3);
-        $this->addPrimarySystem(new Hangar(3, 4));
+        $this->addPrimarySystem(new Hangar(3, 4, 4));
 /*
 		$polarizedhullplating = new AbsorbtionShield(2,4,3,1,270,90);  //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
 		$polarizedhullplating->displayName = "Polarized Hull Plating";

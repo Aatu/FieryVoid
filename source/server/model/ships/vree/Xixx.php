@@ -88,13 +88,13 @@ class Xixx extends VreeHCV{
             1=> array(
                     4 => "TAG:Thruster",                        
                     8 => "TAG:Weapon", 
-                    17 => "TAG:Outer Structure",
+                    17 => "Structure",
                     20 => "Primary",
            		 ),
             2=> array(
                     4 => "TAG:Thruster",                        
                     8 => "TAG:Weapon", 
-                    17 => "TAG:Outer Structure",
+                    17 => "Structure",
                     20 => "Primary",
            		 ),
            	);

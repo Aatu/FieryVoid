@@ -26,7 +26,7 @@ class Babylon5Refit extends StarBaseSixSections{
 		$this->sideDefense = 24;
 
 		$this->imagePath = "img/ships/Babylon5.png";
-		$this->canvasSize = 260; //Enormous Starbase
+		$this->canvasSize = 512; //Enormous Starbase
 
 		$this->locations = array(41, 42, 2, 32, 31, 1);
 
@@ -105,8 +105,8 @@ class Babylon5Refit extends StarBaseSixSections{
                     20 => "C&C",
            		 ),
             1=> array(
-                    1 => "Standard Particle Beam",
-					3 => "Interceptor II",
+                    1 => "TAG:Standard Particle Beam",
+					3 => "TAG:Interceptor II",
 					4 => "Hangar",
 					6 => "Cargo Bay",
 					7 => "Sub Reactor",
@@ -114,40 +114,40 @@ class Babylon5Refit extends StarBaseSixSections{
                     20 => "Primary",
            		 ),
             2=> array(
-                    1 => "Standard Particle Beam",
-					3 => "Interceptor II",
+                    1 => "TAG:Standard Particle Beam",
+					3 => "TAG:Interceptor II",
 					6 => "Cargo Bay",
 					7 => "Sub Reactor",
                     18 => "Structure",
                     20 => "Primary",
            		 ),
             31=> array(
-                    1 => "Quad Particle Beam",
-                    3 => "Interceptor II",
+                    1 => "TAG:Quad Particle Beam",
+                    3 => "TAG:Interceptor II",
                     6 => "Cargo Bay",
 					7 => "Sub Reactor",
                     18 => "Structure",
                     20 => "Primary",
            		 ),
             32=> array(
-                    1 => "Quad Particle Beam",
-                    3 => "Interceptor II",
+                    1 => "TAG:Quad Particle Beam",
+                    3 => "TAG:Interceptor II",
                     6 => "Cargo Bay",
 					7 => "Sub Reactor",
                     18 => "Structure",
                     20 => "Primary",
            		 ),
             41=> array(
-                    1 => "Quad Particle Beam",
-                    3 => "Interceptor II",
+                    1 => "TAG:Quad Particle Beam",
+                    3 => "TAG:Interceptor II",
                     6 => "Cargo Bay",
 					7 => "Sub Reactor",
                     18 => "Structure",
                     20 => "Primary",
            		 ),
        		42=> array(
-                    1 => "Quad Particle Beam",
-                    3 => "Interceptor II",
+                    1 => "TAG:Quad Particle Beam",
+                    3 => "TAG:Interceptor II",
                     6 => "Cargo Bay",
 					7 => "Sub Reactor",
                     18 => "Structure",

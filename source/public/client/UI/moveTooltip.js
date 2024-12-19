@@ -13,7 +13,20 @@ var moveTooltipHTML = `
             // On hover, display the tooltip with the movement name
             var movementType = jQuery(this).data('movement-type');
             var tooltip = jQuery(moveTooltipHTML);
+    		var iconId = jQuery(this).attr("id");            
             tooltip.find(".movementType").text(movementType);
+
+			// Check if either of the active pivot icons (Stop Pivoting) is visible
+			if ((jQuery("#pivotLeftActive").is(":visible") || jQuery("#pivotRightActive").is(":visible")) &&  (iconId === "pivotleft" || iconId === "pivotright")) {
+			    // If either active pivot icon is visible, show "Stop Pivoting"
+			    tooltip.find(".movementType").text("Stop Pivoting");
+			}else if ((jQuery("#rollActive").is(":visible")) &&  (iconId === "roll")) {
+			    // If either active roll icon is visible, show "Stop Rolling"
+			    tooltip.find(".movementType").text("Stop Rolling");
+			}else {
+			    // Otherwise, show the regular movement type
+			    tooltip.find(".movementType").text(movementType); // Default movement type
+			}
 
             // Set tooltip position and styling
             tooltip.css({

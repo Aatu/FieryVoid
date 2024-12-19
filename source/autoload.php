@@ -1107,6 +1107,7 @@ spl_autoload_register(
                 'ultralightgraviticbolt' => '/server/model/weapons/gravitic.php',
                 'upgtorotha' => '/server/model/ships/minbari/upgTorotha.php',
                 'utan' => '/server/model/ships/yolu/utan.php',
+                'zutanor' => '/server/model/ships/yolu/Zutanor.php',
                 'nathor' => '/server/model/ships/yolu/Nathor.php',
                 'vakar' => '/server/model/ships/narn/vakar.php',
                 'valtor' => '/server/model/ships/centauri_old/valtor.php',
@@ -1200,7 +1201,8 @@ spl_autoload_register(
                 'zzunoffshovorbolt' => '/server/model/ships/narn/zzunoffShovorBolt.php',
                 'zzunofftashkaton' => '/server/model/ships/brakiri/zzunoffTashkaton.php',
                 'zzunofftashkavaton' => '/server/model/ships/brakiri/zzunoffTashkavaton.php',
-//                'zzunofftdirk' => '/server/model/ships/narn/zzunoffTdirk.php',
+                'zzunofftdirk' => '/server/model/ships/narn/zzunoffTdirk.php',
+                'zzunofftdirkrefit' => '/server/model/ships/narn/zzunoffTdirkRefit.php',             
                 'zzunofftshon' => '/server/model/ships/narn/zzunoffTshon.php',
                 //'zzunofftshonstealth' => '/server/model/ships/narn/zzunoffTshonStealth.php',
                 'zzunofftvoth' => '/server/model/ships/narn/zzunoffTvoth.php',
@@ -2594,7 +2596,7 @@ spl_autoload_register(
 		    	//'skywatch' => '/server/model/ships/orieni/skywatch.php',
 		    	//'skywatch1810' => '/server/model/ships/orieni/skywatch1810.php',
 		    	//'skywatch2003' => '/server/model/ships/orieni/skywatch2003.php',
-		    	'kaedashkada' => '/server/model/ships/llort/Kaedashkada.php',
+//		    	'kaedashkada' => '/server/model/ships/llort/Kaedashkada.php',
 		    	'brostilli' => '/server/model/ships/drazi/Brostilli.php',
 		    	'deathfalcon' => '/server/model/ships/drazi/Deathfalcon.php',
 		    	'deathfalcon2230' => '/server/model/ships/drazi/Deathfalcon2230.php',
@@ -2628,6 +2630,7 @@ spl_autoload_register(
                 'bulkhead' => '/server/model/systems/baseSystems.php',
                 'packettorpedo' => '/server/model/weapons/torpedo.php',
                 'particleconcentrator' => '/server/model/weapons/specialWeapons.php',
+                'flexpackettorpedo' => '/server/model/weapons/torpedo.php', //Custom Packet Torp variant
 
 				//Gaim ships				
 				'gaimbassari' => '/server/model/ships/gaim/gaimBassari.php',
@@ -2755,7 +2758,6 @@ spl_autoload_register(
 				'folshotaraider' => '/server/model/ships/brakiri_raiders/FolshotARaider.php',
 				'gaimphotonbomb' => '/server/model/weapons/customs.php',
 				'gaimtixtyk' => '/server/model/ships/customs/gaimTixTyk.php',				
-				'gaimtixtykupgrade' => '/server/model/ships/customs/gaimTixTykUpgrade.php',	
 
 				//Star Trek conversions
 				//weapons
@@ -2779,6 +2781,9 @@ spl_autoload_register(
 				'trekftrphasecannon' => '/server/model/weapons/customTrek.php',
 				'trekftrphotontorpedo' => '/server/model/weapons/customTrek.php',
 				'trekftrphotontorpedoammo' => '/server/model/weapons/customTrek.php',
+				
+				'trekphasedpulsecannon' => '/server/model/weapons/customTrek.php',
+				'trekphasedpulseaccelerator' => '/server/model/weapons/customTrek.php',
 				
 				//systems
                 'trekwarpdrive' => '/server/model/weapons/customTrek.php', //nacelle
@@ -2826,6 +2831,10 @@ spl_autoload_register(
 								
 				'trekfederationdaedalusff' => '/server/model/ships/ZTrekFederationEarly/TrekFederationDaedalusFF.php',
 				'trekfederationfreedomff' => '/server/model/ships/ZTrekFederationEarly/TrekFederationFreedomFF.php',
+				'trekfederationfreedomupgrff' => '/server/model/ships/ZTrekFederationEarly/TrekFederationFreedomUpgrFF.php',
+				'trekfederationintrepidupgr' => '/server/model/ships/ZTrekFederationEarly/TrekFederationIntrepidUpgr.php',
+				'trekfederationdaedalusupgrff' => '/server/model/ships/ZTrekFederationEarly/TrekFederationDaedalusUpgrFF.php',
+				'trekfederationdeltaffgamma' => '/server/model/ships/ZTrekFederationEarly/TrekFederationDeltaFFGamma.php',
 								
 								
 								
@@ -2850,6 +2859,8 @@ spl_autoload_register(
 								
 				'trekvulcandkyrtos' => '/server/model/ships/ZTrekFederationTOS/TrekVulcanDKyrTOS.php',
 				
+				'trekfederationkelvin' => '/server/model/ships/ZTrekFederationTOS/TrekFederationKelvin.php',
+				'trekfederationconstitutionaltcl' => '/server/model/ships/ZTrekFederationTOS/TrekFederationConstitutionAltCL.php',
 				
 				//TNG (Next Generation, Deep Space Nine, Voyager)
 				
@@ -2857,13 +2868,17 @@ spl_autoload_register(
 				//other factions / playtest
 				'trekmazeriteship' => '/server/model/ships/ZTrekOther/TrekMazeriteShip.php',
 				'trekmazeriteshuttles' => '/server/model/ships/ZTrekOther/TrekMazeriteShuttles.php',
-				'treknausicaanglidersshf' => '/server/model/ships/ZTrekOther/TrekNausicaanGlidersSHF.php',
-				'treknausicaanheavyglider' => '/server/model/ships/ZTrekOther/TrekNausicaanHeavyGlider.php',
+				
 				'treknausicaanvandal' => '/server/model/ships/ZTrekOther/TrekNausicaanVandal.php',
 				'treknausicaanscourge' => '/server/model/ships/ZTrekOther/TrekNausicaanScourge.php',
 				'treknausicaanguramba' => '/server/model/ships/ZTrekOther/TrekNausicaanGuramba.php',				
 				'treknausicaanshefafighter' => '/server/model/ships/ZTrekOther/TrekNausicaanShefaFighter.php',
-				'treknausicaanshefalitayalfighter' => '/server/model/ships/ZTrekOther/TrekNausicaanShefalitayalFighter.php',
+				'treknausicaanshefalitayalfighter' => '/server/model/ships/ZTrekOther/TrekNausicaanShefalitayalFighter.php',				
+				'treknausicaanvandaltos' => '/server/model/ships/ZTrekOther/TrekNausicaanVandalTOS.php',
+				'treknausicaanheavyglider' => '/server/model/ships/ZTrekOther/TrekNausicaanHeavyGlider.php',
+				'treknausicaanheavygliderearly' => '/server/model/ships/ZTrekOther/TrekNausicaanHeavyGliderEarly.php',
+				'treknausicaanglidershf' => '/server/model/ships/ZTrekOther/TrekNausicaanGliderSHF.php',
+				'treknausicaangliderearlyshf' => '/server/model/ships/ZTrekOther/TrekNausicaanGliderEarlySHF.php',
 				
 				'treksulibancellshiplarge' => '/server/model/ships/ZTrekOther/TrekSulibanCellshipLarge.php',
 				'treksulibancellshipmed' => '/server/model/ships/ZTrekOther/TrekSulibanCellshipMed.php',
@@ -3310,7 +3325,10 @@ spl_autoload_register(
 					 	'gkarith' => '/server/model/ships/narn/Gkarith.php',
 					 	'aegissensorpod' => '/server/model/weapons/specialWeapons.php', 
 						'hyperionaegis' => '/server/model/ships/EA/HyperionAegis.php',	
-						'abbaishieldprojector' => '/server/model/weapons/supportWeapons.php',				 						 	 
+						'abbaishieldprojector' => '/server/model/weapons/supportWeapons.php',
+						'engineshorted' => '/server/model/cricialClasses.php',				 						 	 
+						'controlsstuck' => '/server/model/cricialClasses.php',	
+
 					 							
 				//Thirdspace
 				'psychicfield' => '/server/model/weapons/specialWeapons.php',
@@ -3330,7 +3348,8 @@ spl_autoload_register(
 				'thirdspacelanceattackcraft' => '/server/model/ships/thirdspace/ThirdspaceLanceAttackCraft.php',
 				'thirdspacebattlescout' => '/server/model/ships/thirdspace/ThirdspaceBattleScout.php',		
 				'thirdspacecarrier' => '/server/model/ships/thirdspace/ThirdspaceCarrier.php',
-				'thirdspaceselfrepair' => '/server/model/systems/baseSystems.php',	
+				'thirdspaceselfrepair' => '/server/model/systems/baseSystems.php',
+				'vorlonartifact' => '/server/model/ships/thirdspace/VorlonArtifact.php',					
 
 				//Mindriders 
 				'thoughtshield' => '/server/model/weapons/defensive.php',				

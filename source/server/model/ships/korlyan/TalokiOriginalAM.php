@@ -48,7 +48,15 @@ class TalokiOriginalAM extends StarBaseSixSections{
 		$this->locations = array(41, 42, 2, 32, 31, 1);
 
 		$this->addPrimarySystem(new Reactor(4, 25, 0, 0));
-		$this->addPrimarySystem(new CnC(4, 32, 0, 0)); 
+//		$this->addPrimarySystem(new CnC(4, 32, 0, 0)); 
+
+		$cnc = new CnC(4, 16, 0, 0);
+		$cnc->startArc = 0;
+		$cnc->endArc = 360;
+        $this->addPrimarySystem($cnc);
+		$cnc = new SecondaryCnC(4, 16, 0, 0);//all-around by default
+        $this->addPrimarySystem($cnc);
+        
 		$this->addPrimarySystem(new Scanner(4, 16, 4, 6));
 		$this->addPrimarySystem(new Scanner(4, 16, 4, 6));
 		$this->addPrimarySystem(new CargoBay(4, 75));
@@ -137,46 +145,46 @@ class TalokiOriginalAM extends StarBaseSixSections{
                     14 => "Scanner",
 					18 => "Cargo Bay",
                     19 => "Reactor",
-                    20 => "C&C",
+                    20 => "TAG:C&C",
            		 ),
             1=> array(
-					5 => "Particle Cannon",
+					5 => "TAG:Particle Cannon",
 					7 => "Hangar",
 					8 => "Sub Reactor",
                     18 => "Structure",
                     20 => "Primary",
            		 ),
             2=> array(
-					5 => "Particle Cannon",
+					5 => "TAG:Particle Cannon",
 					7 => "Hangar",
 					8 => "Sub Reactor",
                     18 => "Structure",
                     20 => "Primary",
            		 ),
             31=> array(
-                    3 => "Standard Particle Beam",
-                    7 => "Class-S Missile Rack",
+                    3 => "TAG:Standard Particle Beam",
+                    7 => "TAG:Class-S Missile Rack",
 					8 => "Sub Reactor",
                     18 => "Structure",
                     20 => "Primary",
            		 ),
             32=> array(
-                    3 => "Standard Particle Beam",
-                    7 => "Class-S Missile Rack",
+                    3 => "TAG:Standard Particle Beam",
+                    7 => "TAG:Class-S Missile Rack",
 					8 => "Sub Reactor",
                     18 => "Structure",
                     20 => "Primary",
            		 ),
             41=> array(
-                    3 => "Standard Particle Beam",
-                    7 => "Class-S Missile Rack",
+                    3 => "TAG:Standard Particle Beam",
+                    7 => "TAG:Class-S Missile Rack",
 					8 => "Sub Reactor",
                     18 => "Structure",
                     20 => "Primary",
            		 ),
        		42=> array(
-                    3 => "Standard Particle Beam",
-                    7 => "Class-S Missile Rack",
+                    3 => "TAG:Standard Particle Beam",
+                    7 => "TAG:Class-S Missile Rack",
 					8 => "Sub Reactor",
                     18 => "Structure",
                     20 => "Primary",
