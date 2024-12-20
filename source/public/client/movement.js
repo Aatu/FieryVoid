@@ -216,7 +216,9 @@ shipManager.movement = {
         if (ship.flight || ship.osat) return false;
         if (shipManager.isDestroyed(ship) || shipManager.isAdrift(ship)) return false;
         if (shipManager.systems.isEngineDestroyed(ship)) return false;
-        if (shipManager.movement.isRolling(ship)) return true; //rolling ship should be always able to stop...
+        var rolling = shipManager.movement.isRolling(ship);	
+        if (!shipManager.movement.isRollingForIcon(ship) && rolling) return false; //Started rolling this movement phase, player should cancel instead.
+	    if (rolling) return true; //rolling ship should be always able to stop...
         if ((!ship.agile) && shipManager.movement.hasRolled(ship) ) {
             return false;
         }
@@ -235,7 +237,9 @@ shipManager.movement = {
         if (ship.flight || ship.osat) return false;
         if (shipManager.isDestroyed(ship) || shipManager.isAdrift(ship)) return false;
         if (shipManager.systems.isEngineDestroyed(ship)) return false;
-        if (shipManager.movement.isRolling(ship)) return true; //rolling ship should be always able to stop...
+        var rolling = shipManager.movement.isRolling(ship);	        	
+        if (!shipManager.movement.isRollingForIcon(ship) && rolling) return false; //Started rolling this movement phase, player should cancel instead.        	
+	    if (rolling) return true; //rolling ship should be always able to stop...
         if ((!ship.agile) && shipManager.movement.hasRolled(ship) ) {
             return false;
         }
@@ -274,7 +278,7 @@ shipManager.movement = {
             at_initiative: shipManager.getIniativeOrder(ship),
             turn: gamedata.turn,
             forced: false,
-            value: 0
+            value: 'thisTurn'
         };
         shipWindowManager.assignThrust(ship);
         ship.rolling = true;
@@ -317,6 +321,19 @@ shipManager.movement = {
         for (var i in ship.movement) {
             var m = ship.movement[i];
             if (m.turn != gamedata.turn) continue;
+            if (m.type == "isRolling") rolling = true;
+            if (m.type == "roll" && m.commit) rolling = !rolling;
+        }
+        return rolling;
+    },
+
+    isRollingForIcon: function isRollingForIcon(ship) {
+        var rolling = false;
+        if (ship.agile) return false;
+        for (var i in ship.movement) {
+            var m = ship.movement[i];
+            if (m.turn != gamedata.turn) continue;
+            if (m.value == 'thisTurn' || m.value == 'emergencyRoll') continue;	
             if (m.type == "isRolling") rolling = true;
             if (m.type == "roll" && m.commit) rolling = !rolling;
         }
