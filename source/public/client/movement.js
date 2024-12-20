@@ -327,6 +327,7 @@ shipManager.movement = {
         return rolling;
     },
 
+    //Only difference between this and isRolling is that this returns 'false' if Roll was initiated on THIS turn!
     isRollingForIcon: function isRollingForIcon(ship) {
         var rolling = false;
         if (ship.agile) return false;
