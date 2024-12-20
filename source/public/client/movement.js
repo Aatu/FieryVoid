@@ -1794,9 +1794,13 @@ shipManager.movement = {
                 if (ship.systems[sys].displayName == "Thruster") {
                     if (ship.systems[sys].direction == thrusterLoc && !ship.systems[sys].destroyed) {
                         if (ship.systems[sys].channeled < ship.systems[sys].output ) { //auto-assignment shall not overhrust
-                            if (ship.systems[sys].criticals.length == 0) {
-                                thrusters.push(ship.systems[sys]);
-                            }
+                            //if (ship.systems[sys].criticals.length == 0) {
+							//Only two criticals matter for thursters, ignore others - DK Dec 2024
+							if(shipManager.criticals.hasCritical(ship.systems[sys], "HalfEfficiency")) continue;
+							if(shipManager.criticals.hasCritical(ship.systems[sys], "FirstThrustIgnored")) continue;
+                                
+							thrusters.push(ship.systems[sys]);
+                            
                         }
                     }
                 }
