@@ -269,12 +269,6 @@ VorlonLightningGun2.prototype.initializationUpdate = function() {
     return this;
 };
 
-
-
-
-
-
-
 var VorlonDischargePulsar = function VorlonDischargePulsar(json, ship) {
     Weapon.call(this, json, ship);
 };
@@ -292,23 +286,17 @@ VorlonDischargePulsar.prototype.initializationUpdate = function() {
     return this;
 };
 
-
-
-
-
-
-
-
-
-
-
-
-
 var PsionicConcentrator = function PsionicConcentrator(json, ship) {
     Weapon.call(this, json, ship);
 };
 PsionicConcentrator.prototype = Object.create(Weapon.prototype);
 PsionicConcentrator.prototype.constructor = PsionicConcentrator;
+
+var PsionicConcentratorLight = function PsionicConcentratorLight(json, ship) {
+    Weapon.call(this, json, ship);
+};
+PsionicConcentratorLight.prototype = Object.create(Weapon.prototype);
+PsionicConcentratorLight.prototype.constructor = PsionicConcentratorLight;
 
 var HeavyPsionicLance = function HeavyPsionicLance(json, ship) {
     Weapon.call(this, json, ship);
@@ -370,15 +358,6 @@ HeavyPsionicLance.prototype.initBoostableInfo = function () {
             break;
 	}
 	
-/*	
-	if (!window.weaponManager.isLoaded(this)) {
-		this.outputDisplay = window.weaponManager.isLoaded(this);
-	} else if (this.data.Boostlevel > 0) {
-		this.outputDisplay = this.data.Boostlevel;
-	} else {
-		this.outputDisplay = '-'; //'0' is not shown!
-	}        
-*/
     return this;
 };
 var PsionicLance = function PsionicLance(json, ship) {

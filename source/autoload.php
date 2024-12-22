@@ -3338,6 +3338,7 @@ spl_autoload_register(
 				'thirdspaceshieldgenerator' => '/server/model/systems/baseSystems.php',				
 				'advancedsingularitydrive' => '/server/model/systems/baseSystems.php',
 				'psionicconcentrator' => '/server/model/weapons/specialWeapons.php',
+				'psionicconcentratorlight' => '/server/model/weapons/specialWeapons.php',				
 				'heavypsioniclance' => 	'/server/model/weapons/specialWeapons.php',
 				'psioniclance' => 	'/server/model/weapons/specialWeapons.php',
 				'psionictorpedo' => '/server/model/weapons/torpedo.php',    
