@@ -9,7 +9,7 @@ class ThirdspaceLanceAttackCraft extends LCV{ //Actually an LCV.
     $this->faction = "Thirdspace";
 	$this->factionAge = 4; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
 	$this->phpclass = "ThirdspaceLanceAttackCraft";
-	$this->shipClass = "Lance Attack Craft";
+	$this->shipClass = "Lance Craft";
 	$this->imagePath = "img/ships/ThirdspaceAttackCraft.png";
 	$this->canvasSize = 80;
 			$this->variantOf = "Attack Craft";
@@ -36,8 +36,8 @@ class ThirdspaceLanceAttackCraft extends LCV{ //Actually an LCV.
 	/*Thirdspace use their own enhancement set */		
 	Enhancements::nonstandardEnhancementSet($this, 'ThirdspaceShip');		
 	    
-	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 1)); //unhittable and with unlimited thrust allowance   
-	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 3)); //unhittable and with unlimited thrust allowance
+	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 3)); //unhittable and with unlimited thrust allowance   
+	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 1)); //unhittable and with unlimited thrust allowance
 	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 2)); //unhittable and with unlimited thrust allowance
 	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 4)); //unhittable and with unlimited thrust allowance
 
