@@ -5501,9 +5501,9 @@ class PsionicConcentrator extends Weapon{
 		      parent::setSystemDataWindow($turn);  
 		      $this->data["Special"] = "Fires 4 shots by default.";
 		      $this->data["Special"] .= "<br>Alternative Firing Modes allow these 4 shots to be combined in 2, or 1, more powerful shot(s) as listed below:";
-		      $this->data["Special"] .= "<br> - 4 shots; 8 - 18 Damage, -2.5 per hex.";
-		      $this->data["Special"] .= "<br> - 2 shots; 18 - 33 Damage, -5 per hex.";	
-		      $this->data["Special"] .= "<br> - 1 shot; 28 - 48 Damage, -10 per hex.";			      		      		      
+		      $this->data["Special"] .= "<br> - 4 shots; 8-18 Damage, -2.5 per hex.";
+		      $this->data["Special"] .= "<br> - 2 shots; 18-33 Damage, -5 per hex.";	
+		      $this->data["Special"] .= "<br> - 1 shot; 29-54 Damage, -10 per hex.";			      		      		      
 		      $this->data["Special"] .= "<br>Each hit causes -1 Power on non-Ancient ships with Reactors for one turn.";
 		      $this->data["Special"] .= "<br>Has +1 modifier to critical hit rolls, and +2 to fighter dropout rolls.";
 	    }	
