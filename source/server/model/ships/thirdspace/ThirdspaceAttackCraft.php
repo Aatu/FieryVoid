@@ -49,10 +49,11 @@ class ThirdspaceAttackCraft extends LCV{ //Actually an LCV.
 	$this->addPrimarySystem(new ThirdspaceShieldGenerator(5, 6, 0, 10, 4, 2)); //$armor, $maxhealth, $power used, output, maxBoost, boostEfficiency	
     $this->addPrimarySystem(new ThirdspaceSelfRepair(5, 6, 3, 3)); //armor, structure, output, maxBoost  	
 
-	$this->addFrontSystem(new PsionicConcentrator(5, 0, 0, 210, 60));
-	$this->addFrontSystem(new PsionicConcentrator(5, 0, 0, 210, 60));
-	$this->addFrontSystem(new PsionicConcentrator(5, 0, 0, 300, 150));
-	$this->addFrontSystem(new PsionicConcentrator(5, 0, 0, 300, 150));
+	$this->addFrontSystem(new PsionicConcentrator(5, 0, 0, 240, 120));
+//	$this->addFrontSystem(new PsionicConcentrator(5, 0, 0, 210, 60));
+//	$this->addFrontSystem(new PsionicConcentrator(5, 0, 0, 210, 60));
+//	$this->addFrontSystem(new PsionicConcentrator(5, 0, 0, 300, 150));
+//	$this->addFrontSystem(new PsionicConcentrator(5, 0, 0, 300, 150));
 			
 	$this->addPrimarySystem(new ThirdspaceShield(2, 60, 60, 0, 360, 'C'));
 				
@@ -60,30 +61,30 @@ class ThirdspaceAttackCraft extends LCV{ //Actually an LCV.
 	    
         $this->hitChart = array(
         		0=> array( //should never happen (but it will!)
-        				7 => "Structure",
-        				10 => "1:Psionic Concentrator",
-						11 => "Shield Generator",   
-						12 => "Self Repair",        				
+        				9 => "Structure",
+        				11 => "1:Psionic Concentrator",
+						12 => "Shield Generator",   
+						13 => "Self Repair",        				
         				14 => "Jump Engine",
         				16 => "Engine",
         				18 => "Reactor",
         				20 => "Scanner",
         		),
         		1=> array( //PRIMARY hit table, effectively
-        				7 => "Structure",
-        				10 => "Psionic Concentrator",
-						11 => "0:Shield Generator",          				
-						12 => "0:Self Repair",        				
+        				9 => "Structure",
+        				11 => "Psionic Concentrator",
+						12 => "0:Shield Generator",          				
+						13 => "0:Self Repair",        				
         				14 => "0:Jump Engine",
         				16 => "0:Engine",
         				18 => "0:Reactor",
         				20 => "0:Scanner",
         		),
         		2=> array( //PRIMARY hit table, effectively
-        				7 => "Structure",
-        				10 => "1:Psionic Concentrator",
-						11 => "0:Shield Generator",          				
-						12 => "0:Self Repair",        				
+        				9 => "Structure",
+        				11 => "1:Psionic Concentrator",
+						12 => "0:Shield Generator",          				
+						13 => "0:Self Repair",        				
         				14 => "0:Jump Engine",
         				16 => "0:Engine",
         				18 => "0:Reactor",
