@@ -28,7 +28,7 @@ class VorlonArtifact extends UnevenBaseFourSections{
 		$this->Enormous = true;				
 		
 		/*Thirdspace use their own enhancement set */		
-//		Enhancements::nonstandardEnhancementSet($this, 'ThirdspaceShip');				     
+		Enhancements::nonstandardEnhancementSet($this, 'ThirdspaceShip');				     
 
         $this->addPrimarySystem(new MagGravReactorTechnical(99, 99, 0, 0));        
 		$this->addPrimarySystem(new PowerCapacitor( 7, 40, 0, 10, false));//armor, structure, power req, output, has petals 
