@@ -83,9 +83,9 @@ class Enhancements{
 
 		case 'ThirdspaceShip':
 			Enhancements::blockStandardEnhancements($unit);
-			$unit->enhancementOptionsEnabled[] = 'IMPR_SR';			
+			$unit->enhancementOptionsEnabled[] = 'IMPR_SR';	
+			$unit->enhancementOptionsEnabled[] = 'IMPR_THSD';						
 			foreach ( $unit->enhancementOptionsDisabled as $key=>$value){ 
-				if($value=='IMPR_ENG'){ unset($unit->enhancementOptionsDisabled[$key]); }
 				if($value=='IMPR_SENS'){ unset($unit->enhancementOptionsDisabled[$key]); }									
 			}					
 			break;	
@@ -270,6 +270,24 @@ class Enhancements{
 			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 		  }
 	  }  	
+
+	  //Improved Thirdspace Shield		    
+	  $enhID = 'IMPR_THSD';
+	  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option needs to be specifically enabled
+		  $enhName = 'Improved Thirdspace Shield';
+		  $enhLimit = 5; //Maximum 5 upgrades.
+		  $shields = 0;
+		  $rating = 0;		  
+		  foreach ($ship->systems as $system){
+			if ($system instanceof ThirdspaceShield){
+		  	$shields++;
+		  	$rating = $system->baseRating;
+		    }
+		  } 
+		  $enhPrice = (50 * $shields);//New rating multiplied by number of shields.
+		  $enhPriceStep = 0;
+		  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
+		  }
 
 	  //Improved Thought Shield for Mindriders		    
 	  $enhID = 'IMPR_TS';
@@ -1605,6 +1623,18 @@ class Enhancements{
 						}  
 						break;	
 
+					case 'IMPR_THSD': //Improved Thirdspace Shield: +1 rating for each Thought Shield
+						foreach ($ship->systems as $system){							
+							if ($system instanceof ThirdspaceShield){
+								$system->baseRating += $enhCount;
+    							$system->maxhealth += $enhCount * 2;
+							}
+							if ($system instanceof ThirdspaceShieldGenerator){
+								$system->output += $enhCount;
+							}							
+						}																	 
+						break;	
+						
 					case 'IMPR_TS': //Improved Thought Shield: +1 rating for each Thought Shield
 						foreach ($ship->systems as $system){							
 							if ($system instanceof ThoughtShield){
@@ -2040,6 +2070,11 @@ class Enhancements{
 								$strippedSystem->critRollMod = $system->critRollMod ;
 							}
 							break;		
+						case 'IMPR_THSD': //improved Thirdspace Shield
+							if ($system instanceof ThirdspaceShield){
+								$strippedSystem->maxhealth = $system->maxhealth ;
+							}													
+							break;	
 						case 'IMPR_TS': //improved Thought Shield
 							if ($system instanceof ThoughtShield){
 								$strippedSystem->maxhealth = $system->maxhealth ;

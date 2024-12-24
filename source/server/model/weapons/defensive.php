@@ -816,32 +816,6 @@ class ThirdspaceShield extends Shield implements DefensiveSystem { //defensive v
 			return $returnValues;
 		} //endof function doProtect
 
-/* //OLD METHOD FOR RESTORING SHIELDS, NOW HANDLED BY THIRDSPACE SHIELD GENERATOR
-		// Effects that happen in the Critical phase (after criticals are rolled) - replenishment from active Generator
-		public function criticalPhaseEffects($ship, $gamedata) {
-		    
-		    parent::criticalPhaseEffects($ship, $gamedata); // Call parent to apply effects like Limpet Bore.
-
-		    // If the shield is destroyed, it does not work
-		    if ($this->isDestroyed()) return; 
-
-		    // Find the shield generator system
-		    $generator = $ship->getSystemByName("ThirdspaceShieldGenerator");	
-		    if (!$generator || $generator->isDestroyed()) return; // Exit if generator does not exist or is destroyed
-
-		    $generatorOutput = $generator->getOutput(); // Generator output, e.g., 15
-		    $maxRegen = $this->baseRating - $this->getRemainingCapacity(); // Calculate how much capacity can be replenished
-
-		    // Calculate the amount to replenish (limited by generator output or max regen possible), Generator will catch any spare output and reallocate.
-		    $toReplenish = min($generatorOutput, $maxRegen);
-
-		    // Only attempt to replenish if there is a positive amount to replenish
-		    if ($toReplenish > 0) {
-		        $this->absorbDamage($ship, $gamedata, -$toReplenish); // Apply regeneration (negative value to heal)
-		    }
-		} // end of function criticalPhaseEffects
-*/
-
 	// this method generates additional non-standard information in the form of individual system notes, in this case: - Initial phase: check setting changes made by user, convert to notes.	
 	public function doIndividualNotesTransfer(){
 	//data received in variable individualNotesTransfer, positive if Shield decreased, negative if Shield increased.
@@ -892,10 +866,24 @@ class ThirdspaceShield extends Shield implements DefensiveSystem { //defensive v
 
 			$startRating = $this->baseRating;
 			$currentRating = $this->getRemainingHealth();
+			
+			//Find and account for any Enhancements
+			foreach ($ship->enhancementOptions as $enhancement) {
+			    $enhID = $enhancement[0];
+				$enhCount = $enhancement[2];		        
+				if($enhCount > 0) {		            
+			        if ($enhID == 'IMPR_THSD'){
+			        	$startRating += $enhCount;						        	
+			        	$currentRating += $enhCount * 2;			        	     	
+					}
+				}	
+			}			
+			
 			$adjustment = $currentRating - $startRating;
 					    	
 			$this->setShields($ship, $gamedata->turn, $adjustment);
 		}
+
 		
 		//Now make any changes as a result of rearrangements by player.					
 	    foreach ($this->individualNotes as $currNote) {
