@@ -113,7 +113,7 @@ window.BallisticIconContainer = function () {
 		if(replay) ballistic = ballistic.fireOrder; //Replay passes slightly different type of data, so adjust ballistic variable here.
 			
         var shooterIcon = iconContainer.getById(ballistic.shooterid);	
-        if(!shooterIcon) shooterIcon = iconContainer.getById(ballistic.shooter.id);
+        if(!shooterIcon) shooterIcon = iconContainer.getById(ballistic.shooter.id); //Do I still need?
 		var targetType = 'hexRed'; //Default red hex if none of the later conditions are true.
         var launchPosition = this.coordinateConverter.fromHexToGame(shooterIcon.getFirstMovementOnTurn(turn).position);
         var text = ""; //Additional variable that can pass text to new BallisticSprite()
