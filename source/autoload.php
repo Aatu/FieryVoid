@@ -3348,6 +3348,7 @@ spl_autoload_register(
 				'thirdspacetorpedoattackcraft' => '/server/model/ships/thirdspace/ThirdspaceTorpedoAttackCraft.php',	
 				'thirdspacelanceattackcraft' => '/server/model/ships/thirdspace/ThirdspaceLanceAttackCraft.php',
 				'thirdspacescoutattackcraft' => '/server/model/ships/thirdspace/ThirdspaceScoutAttackCraft.php',
+				'thirdspacepsychicattackcraft' => '/server/model/ships/thirdspace/ThirdspacePsychicAttackCraft.php',				
 				'thirdspacebattlescout' => '/server/model/ships/thirdspace/ThirdspaceBattleScout.php',		
 				'thirdspacecarrier' => '/server/model/ships/thirdspace/ThirdspaceCarrier.php',
 				'thirdspaceselfrepair' => '/server/model/systems/baseSystems.php',
