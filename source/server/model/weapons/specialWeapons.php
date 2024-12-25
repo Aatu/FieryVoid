@@ -5170,7 +5170,7 @@ class PsychicFieldHandler{
 			foreach($inAoE as $targetID=>$target){		
 				if ($shooter->id == $target->id) continue;//does not threaten self!
 				if ($target->isDestroyed()) continue; //no point allocating	
-				if ($target->faction == "Thirdspace") continue; //No effect on other Thirdspace units.								
+				if ($target->team == $shooter->team) continue; //No effect on units in same team.								
 				if (in_array($target->id,$alreadyTargeted,true)) continue;//each target only once 
 				//add to target list
 				$alreadyTargeted[] = $target->id; //add to list of already targeted units
