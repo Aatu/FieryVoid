@@ -4941,7 +4941,7 @@ class PsychicField extends Weapon{ //Thirdspace weapons that operates similar to
 		
 		if (!($target instanceof FighterFlight)){ //ship - as usual
 			$damage = $this->getFinalDamage($shooter, $target, $pos, $gamedata, $fireOrder);
-			if ($target->team == $shooter->team) $damage = 0; //No effect on other Thirdspace ships.			
+			if ($target->faction == "Thirdspace") $damage = 0; //No effect on other Thirdspace ships.			
 			$this->damage($target, $shooter, $fireOrder,  $gamedata, $damage);
 		}else{//fighter flight - separate hit on each fighter!
 			foreach ($target->systems as $fighter){
@@ -5169,7 +5169,8 @@ class PsychicFieldHandler{
 			$inAoE = $gamedata->getShipsInDistance($shooter, $aoe);
 			foreach($inAoE as $targetID=>$target){		
 				if ($shooter->id == $target->id) continue;//does not threaten self!
-				if ($target->isDestroyed()) continue; //no point allocating				
+				if ($target->isDestroyed()) continue; //no point allocating	
+				if ($target->faction == "Thirdspace") continue; //No effect on other Thirdspace units.								
 				if (in_array($target->id,$alreadyTargeted,true)) continue;//each target only once 
 				//add to target list
 				$alreadyTargeted[] = $target->id; //add to list of already targeted units
