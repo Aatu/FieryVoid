@@ -4860,7 +4860,8 @@ class PsychicField extends Weapon{ //Thirdspace weapons that operates similar to
     public $loadingtime = 1;
 	public $autoFireOnly = true; //this weapon cannot be fired by player
 	public $doNotIntercept = true; //this weapon is a field, "attacks" are just for technical reason
-        
+
+	public $range = 4;        
     public $rangePenalty = 0; //no range penalty, but range itself is limited
     public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals ; not relevant really!
 	
@@ -4894,7 +4895,7 @@ class PsychicField extends Weapon{ //Thirdspace weapons that operates similar to
 		    $this->maxDamage = 1+$boostlevel;
 		    $this->minDamage = max(1,$this->minDamage);
 		    $this->animationExplosionScale = $this->getAoE($turn);
-		    $this->range = $this->getAoE($turn);
+		    $this->range = $this->range + $boostlevel;
 		      parent::setSystemDataWindow($turn);  
 		      $this->data["Special"] = "Automatically affects all enemy units in Range.  Cannot be fired manually."; 
 		      $this->data["Special"] .= "<br>Reduces Fighters' Initiative (5-15 pts), and Hit Chances (5-10%) next turn.";  
@@ -4974,8 +4975,17 @@ class PsychicField extends Weapon{ //Thirdspace weapons that operates similar to
                             $boostLevel += $i->amount;
                     }
 			}
-            return $boostLevel;
-       	
+			
+			$ship = $this->getUnit();
+			foreach ($ship->enhancementOptions as $enhancement) {
+			    $enhID = $enhancement[0];
+				$enhCount = $enhancement[2];		        
+				if($enhCount > 0) {		            
+			        if ($enhID == 'IMPR_PSY') $boostLevel += $enhCount;       	
+				}
+			}			
+			
+            return $boostLevel;     	
 	}
 	
 	//find units in range (other than self), create attacks vs them
@@ -4994,7 +5004,7 @@ class PsychicField extends Weapon{ //Thirdspace weapons that operates similar to
 		$effecttohit = Dice::d(2,1)+$boostlevel;//strength of effect: -5 to -10 base, up to -25 with boost.
 		$effectCrit = $effectIni +2;
 				
-		$fireOrder->pubnotes .= "<br> Enemy ships have Initiative reduced, and suffer a penalty to hit next turn or a potential Critical.  Initiative and Offensive Bonus reduced for enemy fighters.";
+		$fireOrder->pubnotes .= "<br> All enemies units have Initiative reduced and suffer a Hit Penalty next turn. Ships may also suffer a potential Critical.";
 						
 		if ($system->advancedArmor){		
 			$effectIni = ceil($effectIni/2);  	//Other Ancients are somewhat resistant to pyschic attack from Thirdspace Aliens, 50% effect.	
@@ -5029,16 +5039,21 @@ class PsychicField extends Weapon{ //Thirdspace weapons that operates similar to
 					$crit->updated = true;
 			        $CnC->criticals[] =  $crit;
 					}    
-				}else { //Force critical roll if it hits something other than structure.
-					$CnC = $ship->getSystemByName("CnC");			
-					for($i=1; $i<=$effectIni;$i++){
+		}else { //Force critical roll if it hits something other than structure.
+			$CnC = $ship->getSystemByName("CnC");			
+				for($i=1; $i<=$effecttohit;$i++){
+					$crit = new PenaltyToHitOneTurn(-1, $ship->id, $CnC->id, 'PenaltyToHitOneTurn', $gamedata->turn); 
+					$crit->updated = true;
+			        $CnC->criticals[] =  $crit;
+				}
+				for($i=1; $i<=$effectIni;$i++){
 						$crit = new tmpinidown(-1, $ship->id, $CnC->id, 'tmpinidown', $gamedata->turn); 
 						$crit->updated = true;
 				        $CnC->criticals[] =  $crit;			
-					}
-					$system->forceCriticalRoll = true;
-					$system->critRollMod += $effectCrit;	//Add 3-8 modifier depending on $effectIni roll and boost (halved for Ancients). 		
-				}			
+				}
+				$system->forceCriticalRoll = true;
+				$system->critRollMod += $effectCrit;	//Add 3-8 modifier depending on $effectIni roll and boost (halved for Ancients). 		
+		}			
 	} //endof function onDamagedSystem	
 		
 		
@@ -5072,7 +5087,8 @@ class PsychicField extends Weapon{ //Thirdspace weapons that operates similar to
 	public function stripForJson(){
 		$strippedSystem = parent::stripForJson();
 		$strippedSystem->ewBoosted = $this->ewBoosted;
-		$strippedSystem->noProjectile = $this->noProjectile;															
+		$strippedSystem->noProjectile = $this->noProjectile;
+		$strippedSystem->range = $this->range;																	
 		return $strippedSystem;
 	} 
 
@@ -5093,16 +5109,16 @@ class PsychicFieldHandler{
 	}
 	
 	//compares boost levels of fields
-	//	lowest boost first (will potentially do more damage)
+	//	highest boost first
 	//	owner irrelevant, as weapon will damage everything in range except firing unit itself
-	public static function sortByBoost($fieldA, $fieldB){	    
-		if ($fieldA->boostlevel < $fieldB->boostlevel){ //low boost level first
-		    return -1;
-		}else if ($fieldA->boostlevel > $fieldB->boostlevel){
-		    return 1;
-		}else{
-		    return 0;
-		}   
+	public static function sortByBoost($fieldA, $fieldB){
+	    if ($fieldA->boostlevel > $fieldB->boostlevel) { // High boost level first
+	        return -1;
+	    } else if ($fieldA->boostlevel < $fieldB->boostlevel) {
+	        return 1;
+	    } else {
+	        return 0;
+	    }
 	} //endof function sortByBoost
 	
 	

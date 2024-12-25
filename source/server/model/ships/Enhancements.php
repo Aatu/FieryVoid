@@ -186,6 +186,25 @@ class Enhancements{
 			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 		  }
 	  }
+
+	  //Improved PSychic Field for Thirdspace	
+	  $enhID = 'IMPR_PSY';
+	  if(!in_array($enhID, $ship->enhancementOptionsDisabled)){ //option is not disabled
+		  $enhName = 'Improved Psychic Field (+1 range)';
+		  //count Psychic Fields
+		  $count = 0;	 
+		  foreach ($ship->systems as $system){
+			if ($system instanceof PsychicField){
+				$count++;
+			}
+		  }  
+		  if($count > 0){ //ship is actually equipped with a Psychic Field(s)	  
+			  $enhPrice = 300;	
+			  $enhPriceStep = 0; 
+			  $enhLimit = 1;	  
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
+		  }
+	  }
 	  
 		//Improved Reactor: +1/2/3/4 Power (depending on unit size), cost: 10 *Power added (double if ship has power deficit to begin with), limit: o1
 	  $enhID = 'IMPR_REA';
@@ -1577,6 +1596,14 @@ class Enhancements{
 						}
 						break;
 
+					case 'IMPR_PSY': //Improved Psychic Field
+						foreach ($ship->systems as $system){
+							if ($system instanceof PsychicField){
+								$system->range = $system->range;
+							}
+						}  
+						break;
+
 					case 'IMPR_REA': //Improved Reactor: more power output (depending on ship size
 						$strongestSystem = null;
 						$strongestValue = -1;	  
@@ -2063,7 +2090,11 @@ class Enhancements{
 								$strippedSystem->output = $system->output;
 							}
 							break;
-
+						case 'IMPR_PSY': //Spark Curtain - affects output of Spark Field
+							if($system instanceof PsychicField){
+								$strippedSystem->range = $system->range;
+							}
+							break;
 						case 'IMPR_SR': //improved self repair: modifies output of Self Repair
 							if ($system instanceof SelfRepair){ //SelfRepair
 								$strippedSystem->output = $system->output ;

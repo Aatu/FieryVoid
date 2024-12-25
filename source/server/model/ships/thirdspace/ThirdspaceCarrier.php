@@ -35,6 +35,7 @@ class ThirdspaceCarrier extends BaseShip{
 		
 		/*Thirdspace use their own enhancement set */		
 		Enhancements::nonstandardEnhancementSet($this, 'ThirdspaceShip');			       
+		$this->enhancementOptionsEnabled[] = 'IMPR_PSY'; //Ship has Psychic Field, add enhancement.
         
         $this->addPrimarySystem(new AdvancedSingularityDrive(8, 40, 0, 44+10+4));
         $this->addPrimarySystem(new ThirdspaceCnC(8, 32, 0, 0));
