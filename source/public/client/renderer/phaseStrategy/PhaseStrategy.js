@@ -7,7 +7,7 @@ window.PhaseStrategy = function () {
         this.gamedata = null;
         this.shipIconContainer = null;
         this.ewIconContainer = null;
-        this.ballisticIconContainer = null;
+        this.ballisticIconContainer = null;       
         this.shipWindowManager = null;
         this.coordinateConverter = coordinateConverter;
         this.currentlyMouseOveredIds = null;
@@ -84,7 +84,7 @@ window.PhaseStrategy = function () {
         this.shipIconContainer.consumeGamedata(this.gamedata);
         this.animationStrategy.update(this.gamedata);
         this.ewIconContainer.consumeGamedata(this.gamedata, this.shipIconContainer);
-        this.ballisticIconContainer.consumeGamedata(this.gamedata, this.shipIconContainer);
+        this.ballisticIconContainer.consumeGamedata(this.gamedata, this.shipIconContainer);       
         this.redrawMovementUI();
     };
 
@@ -574,6 +574,7 @@ window.PhaseStrategy = function () {
         if (this.animationStrategy) {
             this.animationStrategy.shipMovementChanged(ship);
         }
+        this.ballisticIconContainer.updateLinesForShip(ship, this.shipIconContainer);   
         this.redrawMovementUI(ship);
     };
 
@@ -676,6 +677,38 @@ window.PhaseStrategy = function () {
         }
 
         this.shipWindowManager.update();
+    };
+
+    PhaseStrategy.prototype.onShowFriendlyBallisticLines = function (payload) {
+        showGlobalBallisticLines.call(this, true, gamedata.ships.filter(function(ship){ return gamedata.isMyOrTeamOneShip(ship) }), payload);
+    };
+
+    PhaseStrategy.prototype.onShowEnemyBallisticLines = function (payload) {
+        showGlobalBallisticLines.call(this, false, gamedata.ships.filter(function(ship){ return !gamedata.isMyOrTeamOneShip(ship) }), payload);
+    };
+
+    function showGlobalBallisticLines(friendly, ships, payload) {
+
+        if(friendly){
+        	this.ballisticIconContainer.toggleBallisticLines  (true, ships);        		
+        }else{
+        	this.ballisticIconContainer.toggleBallisticLines  (false, ships);
+        } 
+/* //OLD METHOD where Ballistic Lines only showed whilst button was held down.
+        if (payload.up) {
+        	if(friendly){
+        		this.ballisticIconContainer.hideBallisticLines(true, ships);        		
+        	}else{
+        		this.ballisticIconContainer.hideBallisticLines(false, ships);
+        	}
+        } else {
+        	if(friendly){
+        		this.ballisticIconContainer.showBallisticLines(true, ships);        		
+        	}else{
+        		this.ballisticIconContainer.showBallisticLines(false, ships);
+        	}        	
+        }
+*/      
     };
 
     return PhaseStrategy;

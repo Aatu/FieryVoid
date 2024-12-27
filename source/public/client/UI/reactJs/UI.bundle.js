@@ -36342,14 +36342,21 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _templateObject = _taggedTemplateLiteral(["\n    position: fixed;\n    right:0;\n    top: 60px;\n    z-index: 4;\n"], ["\n    position: fixed;\n    right:0;\n    top: 60px;\n    z-index: 4;\n"]),
+var _templateObject = _taggedTemplateLiteral(["\n    position: fixed;\n    right: 0;\n    top: 60px;\n    z-index: 4;\n"], ["\n    position: fixed;\n    right: 0;\n    top: 60px;\n    z-index: 4;\n"]),
     _templateObject2 = _taggedTemplateLiteral(["\n    display: flex;\n    width: 50px;\n    height: 50px;\n    align-items: center;\n    justify-content: center;\n    font-size: 32px;\n    border-right: none;\n    margin-top: 5px;\n    background-repeat: no-repeat;\n    background-size: cover;\n    ", "\n"], ["\n    display: flex;\n    width: 50px;\n    height: 50px;\n    align-items: center;\n    justify-content: center;\n    font-size: 32px;\n    border-right: none;\n    margin-top: 5px;\n    background-repeat: no-repeat;\n    background-size: cover;\n    ", "\n"]),
     _templateObject3 = _taggedTemplateLiteral(["\n    background-image: url(\"./img/EEW.png\");\n"], ["\n    background-image: url(\"./img/EEW.png\");\n"]),
-    _templateObject4 = _taggedTemplateLiteral(["\n    background-image: url(\"./img/FEW.png\");\n"], ["\n    background-image: url(\"./img/FEW.png\");\n"]);
+    _templateObject4 = _taggedTemplateLiteral(["\n    background-image: url(\"./img/FEW.png\");\n"], ["\n    background-image: url(\"./img/FEW.png\");\n"]),
+    _templateObject5 = _taggedTemplateLiteral(["\n    background-image: url(\"./img/ballisticTarget2.png\");\n"], ["\n    background-image: url(\"./img/ballisticTarget2.png\");\n"]),
+    _templateObject6 = _taggedTemplateLiteral(["\n    background-image: url(\"./img/ballisticLaunch2.png\");\n"], ["\n    background-image: url(\"./img/ballisticLaunch2.png\");\n"]),
+    _templateObject7 = _taggedTemplateLiteral(["\n    position: absolute;\n    background-color: rgba(0, 0, 0, 0.7);\n    color: white;\n    padding: 5px 10px;\n    border-radius: 5px;\n    font-size: 12px;\n    pointer-events: none;\n    z-index: 10;\n    white-space: nowrap; /* Prevent text wrapping */\n"], ["\n    position: absolute;\n    background-color: rgba(0, 0, 0, 0.7);\n    color: white;\n    padding: 5px 10px;\n    border-radius: 5px;\n    font-size: 12px;\n    pointer-events: none;\n    z-index: 10;\n    white-space: nowrap; /* Prevent text wrapping */\n"]);
 
 var _react = require("react");
 
-var React = _interopRequireWildcard(_react);
+var _react2 = _interopRequireDefault(_react);
+
+var _reactDom = require("react-dom");
+
+var _reactDom2 = _interopRequireDefault(_reactDom);
 
 var _styledComponents = require("styled-components");
 
@@ -36358,8 +36365,6 @@ var _styledComponents2 = _interopRequireDefault(_styledComponents);
 var _styled = require("../styled");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _taggedTemplateLiteral(strings, raw) { return Object.freeze(Object.defineProperties(strings, { raw: { value: Object.freeze(raw) } })); }
 
@@ -36372,46 +36377,147 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var EwButtons = function (_React$Component) {
     _inherits(EwButtons, _React$Component);
 
-    function EwButtons() {
+    function EwButtons(props) {
         _classCallCheck(this, EwButtons);
 
-        return _possibleConstructorReturn(this, (EwButtons.__proto__ || Object.getPrototypeOf(EwButtons)).apply(this, arguments));
+        var _this = _possibleConstructorReturn(this, (EwButtons.__proto__ || Object.getPrototypeOf(EwButtons)).call(this, props));
+
+        _this.state = {
+            tooltipVisible: false,
+            tooltipText: "",
+            tooltipPosition: { top: 0, left: 0 }
+        };
+
+        _this.handleMouseEnter = _this.handleMouseEnter.bind(_this);
+        _this.handleMouseLeave = _this.handleMouseLeave.bind(_this);
+        _this.showFriendlyEW = _this.showFriendlyEW.bind(_this);
+        _this.showEnemyEW = _this.showEnemyEW.bind(_this);
+        _this.showFriendlyBallisticLines = _this.showFriendlyBallisticLines.bind(_this);
+        _this.showEnemyBallisticLines = _this.showEnemyBallisticLines.bind(_this);
+        return _this;
     }
 
     _createClass(EwButtons, [{
-        key: "showFriendly",
-        value: function showFriendly(up) {
-            webglScene.customEvent('ShowFriendlyEW', { up: up });
+        key: "showFriendlyEW",
+        value: function showFriendlyEW(up) {
+            webglScene.customEvent("ShowFriendlyEW", { up: up });
         }
     }, {
-        key: "showEnemy",
-        value: function showEnemy(up) {
-            webglScene.customEvent('ShowEnemyEW', { up: up });
+        key: "showEnemyEW",
+        value: function showEnemyEW(up) {
+            webglScene.customEvent("ShowEnemyEW", { up: up });
+        }
+    }, {
+        key: "showFriendlyBallisticLines",
+        value: function showFriendlyBallisticLines(up) {
+            webglScene.customEvent("ShowFriendlyBallisticLines", { up: up });
+        }
+    }, {
+        key: "showEnemyBallisticLines",
+        value: function showEnemyBallisticLines(up) {
+            webglScene.customEvent("ShowEnemyBallisticLines", { up: up });
+        }
+    }, {
+        key: "handleMouseEnter",
+        value: function handleMouseEnter(event) {
+            var buttonType = event.currentTarget.dataset.type; // Get the type of button
+            var tooltipText = "";
+            var offsetX = -60; // Default horizontal offset (left of the button)
+            var offsetY = 0; // Default vertical offset (centered vertically)
+
+            // Determine the tooltip text and offsets based on button type
+            switch (buttonType) {
+                case "friendlyEW":
+                    tooltipText = "Show Friendly EW";
+                    offsetX = -107; // Move further left
+                    offsetY = -5; // Slightly above the center
+                    break;
+                case "enemyEW":
+                    tooltipText = "Show Enemy EW";
+                    offsetX = -100; // Slightly less left
+                    offsetY = -10; // Slightly below the center
+                    break;
+                case "friendlyBallistic":
+                    tooltipText = "Toggle Friendly Ballistics";
+                    offsetX = -140; // Farther left
+                    offsetY = -7; // Higher above
+                    break;
+                case "enemyBallistic":
+                    tooltipText = "Toggle Enemy Ballistics";
+                    offsetX = -135; // Closer to the button
+                    offsetY = -5; // Centered vertically
+                    break;
+                default:
+                    tooltipText = "Unknown Button";
+            }
+
+            // Get button position and apply offsets
+            var buttonRect = event.currentTarget.getBoundingClientRect();
+            this.setState({
+                tooltipVisible: true,
+                tooltipText: tooltipText,
+                tooltipPosition: {
+                    top: buttonRect.top + buttonRect.height / 2 + offsetY,
+                    left: buttonRect.left + offsetX
+                }
+            });
+        }
+    }, {
+        key: "handleMouseLeave",
+        value: function handleMouseLeave() {
+            this.setState({ tooltipVisible: false });
+        }
+    }, {
+        key: "renderTooltip",
+        value: function renderTooltip() {
+            if (!this.state.tooltipVisible) return null;
+
+            return _reactDom2.default.createPortal(_react2.default.createElement(
+                Tooltip,
+                { style: { top: this.state.tooltipPosition.top, left: this.state.tooltipPosition.left } },
+                this.state.tooltipText
+            ), document.body // Render tooltip at the root of the DOM
+            );
         }
     }, {
         key: "render",
         value: function render() {
-            return React.createElement(
+            return _react2.default.createElement(
                 Container,
                 null,
-                React.createElement(FEWButton, {
-                    onMouseDown: this.showFriendly.bind(this, false),
-                    onMouseUp: this.showFriendly.bind(this, true),
-                    onTouchStart: this.showFriendly.bind(this, false),
-                    onTouchEnd: this.showFriendly.bind(this, true)
+                _react2.default.createElement(FEWButton, {
+                    "data-type": "friendlyEW",
+                    onMouseEnter: this.handleMouseEnter.bind(this),
+                    onMouseLeave: this.handleMouseLeave.bind(this),
+                    onMouseDown: this.showFriendlyEW.bind(this, false),
+                    onMouseUp: this.showFriendlyEW.bind(this, true)
                 }),
-                React.createElement(EEWButton, {
-                    onMouseDown: this.showEnemy.bind(this, false),
-                    onMouseUp: this.showEnemy.bind(this, true),
-                    onTouchStart: this.showEnemy.bind(this, false),
-                    onTouchEnd: this.showEnemy.bind(this, true)
-                })
+                _react2.default.createElement(EEWButton, {
+                    "data-type": "enemyEW",
+                    onMouseEnter: this.handleMouseEnter.bind(this),
+                    onMouseLeave: this.handleMouseLeave.bind(this),
+                    onMouseDown: this.showEnemyEW.bind(this, false),
+                    onMouseUp: this.showEnemyEW.bind(this, true)
+                }),
+                _react2.default.createElement(FBButton, {
+                    "data-type": "friendlyBallistic",
+                    onMouseEnter: this.handleMouseEnter.bind(this),
+                    onMouseLeave: this.handleMouseLeave.bind(this),
+                    onMouseDown: this.showFriendlyBallisticLines.bind(this, false)
+                }),
+                _react2.default.createElement(EBButton, {
+                    "data-type": "enemyBallistic",
+                    onMouseEnter: this.handleMouseEnter.bind(this),
+                    onMouseLeave: this.handleMouseLeave.bind(this),
+                    onMouseDown: this.showEnemyBallisticLines.bind(this, false)
+                }),
+                this.renderTooltip()
             );
         }
     }]);
 
     return EwButtons;
-}(React.Component);
+}(_react2.default.Component);
 
 var Container = _styledComponents2.default.div.withConfig({
     displayName: "EwButtons__Container",
@@ -36421,12 +36527,18 @@ var Container = _styledComponents2.default.div.withConfig({
 var MainButton = _styled.ContainerRoundedRightSide.extend(_templateObject2, _styled.Clickable);
 
 var EEWButton = MainButton.extend(_templateObject3);
-
 var FEWButton = MainButton.extend(_templateObject4);
+var EBButton = MainButton.extend(_templateObject5);
+var FBButton = MainButton.extend(_templateObject6);
+
+var Tooltip = _styledComponents2.default.div.withConfig({
+    displayName: "EwButtons__Tooltip",
+    componentId: "al1h4b-1"
+})(_templateObject7);
 
 exports.default = EwButtons;
 
-},{"../styled":75,"react":29,"styled-components":52}],62:[function(require,module,exports){
+},{"../styled":75,"react":29,"react-dom":23,"styled-components":52}],62:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
