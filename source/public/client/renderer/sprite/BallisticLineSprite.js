@@ -67,12 +67,15 @@ window.BallisticLineSprite = function () {
         return this;
     };
 
-    BallisticLineSprite.prototype.destroy = function () {
-        // Dispose of each arrow's material
-        this.mesh.children.forEach(arrow => {
-            arrow.material.dispose();
-        });
-    };
+BallisticLineSprite.prototype.destroy = function () {
+    // Dispose of each arrow's material
+    this.mesh.children.forEach(arrow => {
+        // Check if the arrow has a line (which is the actual 3D object rendered)
+        if (arrow.line && arrow.line.material) {
+            arrow.line.material.dispose(); // Dispose the material of the line
+        }
+    });
+};
 
     return BallisticLineSprite;
 }();

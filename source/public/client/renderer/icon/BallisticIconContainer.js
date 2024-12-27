@@ -316,21 +316,26 @@ window.BallisticIconContainer = function () {
 	//New code to create ballistic lines between laucnhes and targets - Dk 12.24
     BallisticIconContainer.prototype.updateLinesForShip = function (ship, iconContainer) {
 
+		var wasVisible = false;
+
         this.ballisticLineIcons.forEach(function (lineIcon) {
             if (lineIcon.targetId === ship.id) {
                 lineIcon.used = false;
             }
         });
 
-        this.ballisticLineIcons = this.ballisticLineIcons.filter(function (lineIcon) {
-            if (!lineIcon.used && lineIcon.targetId === ship.id) {
-                this.scene.remove(lineIcon.lineSprite.mesh);
-                lineIcon.lineSprite.destroy();
-                return false;
-            }
+		this.ballisticLineIcons = this.ballisticLineIcons.filter((lineIcon) => {
 
-            return true;
-        }, this);
+		    if (!lineIcon.used && lineIcon.targetId === ship.id) {
+		    	
+		    	if (lineIcon.lineSprite.isVisible) wasVisible = true;
+		        this.scene.remove(lineIcon.lineSprite.mesh); // Correctly references `this`
+		        lineIcon.lineSprite.destroy(); // Correctly references `lineIcon.lineSprite`
+		        return false;
+		    }
+		    return true; // Keep the lineIcon if the condition isn't met
+		});
+
 
         var allBallistics = weaponManager.getAllFireOrdersForAllShipsForTurn(gamedata.turn, 'ballistic');			
 	    allBallistics.forEach(function (ballistic) {
@@ -340,8 +345,13 @@ window.BallisticIconContainer = function () {
 
         this.ballisticLineIcons.forEach(function (lineIcon) {
             if (lineIcon.targetId === ship.id) {
-	            lineIcon.lineSprite.hide();
-	            lineIcon.lineSprite.isVisible = false;	 	            
+	            if(!wasVisible){
+	            	lineIcon.lineSprite.hide();
+	            	lineIcon.lineSprite.isVisible = false;	 	            
+            	}else{
+	            	lineIcon.lineSprite.show();
+	            	lineIcon.lineSprite.isVisible = true;	            		
+				}
             }
         });        
 
