@@ -192,6 +192,12 @@ shipManager.systems = {
         }
 		system = system.initializationUpdate(); //very rarely - system needs to update data not on a particular event
 
+		if(system instanceof Weapon && shipManager.criticals.hasCriticals(system)){
+			system.data["Range"];
+			system.data["Damage"] = system.minDamage;
+			if (system.maxDamage > system.minDamage) system.data["Damage"] = system.data["Damage"] + "-" + system.maxDamage;
+		}
+
         if (system.name == "engine") {
             system.addInfo();
         }
