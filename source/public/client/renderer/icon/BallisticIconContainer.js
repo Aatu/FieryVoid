@@ -510,7 +510,7 @@ window.BallisticIconContainer = function () {
 
 		if(isFriendly && isFriendlyLinesVisible){
 			currentIcon.lineSprite.isVisible = true;		
-		}else if(!isFriendly && !isFriendlyLinesVisible){
+		}else if(!isFriendly && isEnemyLinesVisible){
 			currentIcon.lineSprite.isVisible = true;						
 		}else{
 			currentIcon.lineSprite.isVisible = false;			
