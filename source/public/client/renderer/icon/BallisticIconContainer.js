@@ -60,19 +60,45 @@ window.BallisticIconContainer = function () {
 
         
         this.ballisticLineIcons = this.ballisticLineIcons.filter(function (lineIcon) {
-
             if (!lineIcon.used) {
             	if (lineIcon.lineSprite) {
                 	this.scene.remove(lineIcon.lineSprite.mesh);           	
 				}
 			return false;	
 			}	
-	            
-	        if (lineIcon.lineSprite) {
-	            lineIcon.lineSprite.hide();
-	            lineIcon.lineSprite.isVisible = false;	            
-	        }
 
+		var isFriendlyLinesVisible = this.ballisticLineIcons.some(lineIcon => 
+		  lineIcon.lineSprite?.isVisible === true && lineIcon?.isFriendly === true
+		);
+
+		var isEnemyLinesVisible = this.ballisticLineIcons.some(lineIcon => 
+		  lineIcon.lineSprite?.isVisible === true && lineIcon?.isFriendly === false
+		); 
+	            
+		this.ballisticLineIcons.forEach(lineIcon => {
+		  if (lineIcon.lineSprite) {
+		    if (lineIcon.isFriendly) {
+		      // Handle friendly lines
+		      if (isFriendlyLinesVisible) {
+		        lineIcon.lineSprite.show();
+		        lineIcon.lineSprite.isVisible = true;
+		      } else {
+		        lineIcon.lineSprite.hide();
+		        lineIcon.lineSprite.isVisible = false;
+		      }
+		    } else {
+		      // Handle enemy lines
+		      if (isEnemyLinesVisible) {
+		        lineIcon.lineSprite.show();
+		        lineIcon.lineSprite.isVisible = true;
+		      } else {
+		        lineIcon.lineSprite.hide();
+		        lineIcon.lineSprite.isVisible = false;
+		      }
+		    }
+		  }
+		});
+		
             return true;
         }, this);
                 
@@ -276,15 +302,16 @@ window.BallisticIconContainer = function () {
 
 			//Create orange launch icon on firing ship.
 	        var launchSprite = null;
-
-	        if ((!getByLaunchPosition(launchPosition, this.ballisticIcons)) && ballistic.notes != 'Persistent Effect') { //Don't create launch sprite for persistant effects!        	
-		        	if(gamedata.isMyOrTeamOneShip(shooter)){
-						launchSprite = new BallisticSprite(launchPosition, 'hexYellow');       
-			            scene.add(launchSprite.mesh);	        		
-		        	}else{
-						launchSprite = new BallisticSprite(launchPosition, 'hexOrange');       
-			            scene.add(launchSprite.mesh);
-					}
+	        
+			//Don't create launch sprite for duplicates, persistent effects or Direct Fire 
+	        if ((!getByLaunchPosition(launchPosition, this.ballisticIcons)) && ballistic.notes != 'Persistent Effect' && ballistic.type !== 'normal') {        	
+		        if(gamedata.isMyOrTeamOneShip(shooter)){
+					launchSprite = new BallisticSprite(launchPosition, 'hexYellow');       
+			        scene.add(launchSprite.mesh);	        		
+		       	}else{
+					launchSprite = new BallisticSprite(launchPosition, 'hexOrange');       
+			        scene.add(launchSprite.mesh);
+				}
 		    }
 
 	        var targetSprite = null;
@@ -318,6 +345,7 @@ window.BallisticIconContainer = function () {
 
     const getByTargetIdOrTargetPosition = (position, targetId, icons) => icons.find(icon => position && ((icon.position.x === position.x && icon.position.y === position.y) || (targetId !== -1 && icon.targetId === targetId )) )
 
+
     function getBallisticIcon(id) {
         return this.ballisticIcons.filter(function (icon) {
             return icon.id === id;
@@ -339,8 +367,8 @@ window.BallisticIconContainer = function () {
 
 		    if (lineIcon.targetId === ship.id) {	    	
 		    	if (lineIcon.lineSprite.isVisible) wasVisible = true;
-		        this.scene.remove(lineIcon.lineSprite.mesh); // Correctly references `this`
-		        lineIcon.lineSprite.destroy(); // Correctly references `lineIcon.lineSprite`
+		        this.scene.remove(lineIcon.lineSprite.mesh);
+		        lineIcon.lineSprite.destroy();
 		        return false;
 		    }
 		    return true; // Keep the lineIcon if the condition isn't met
@@ -375,10 +403,10 @@ window.BallisticIconContainer = function () {
 		            if (ships.some(ship => ship.id === lineIcon.shooterId)) {
 	            		if (!lineIcon.lineSprite.isVisible){		                	
 		                    lineIcon.lineSprite.show();
-	            			lineIcon.lineSprite.isVisible = true;		                    
+	            			lineIcon.lineSprite.isVisible = true;	                    
 		                }else{
 		                    lineIcon.lineSprite.hide();
-	            			lineIcon.lineSprite.isVisible = false;	 		                    		                	
+	            			lineIcon.lineSprite.isVisible = false;	 		                    		             	
 		                }
 					}    
 	            }	            
@@ -453,6 +481,8 @@ window.BallisticIconContainer = function () {
 			if(modeName == 'ThoughtWave') targetPosition = launchPosition; //Only one weapon needs, for now.
 			
 	        var lineSprite = null;
+	        
+	        var isFriendly = gamedata.isMyOrTeamOneShip(shooter);
 
 	        this.ballisticLineIcons.push({
 	            id: ballistic.id,
@@ -462,10 +492,29 @@ window.BallisticIconContainer = function () {
 //	            targetIcon: targetIcon,
 	            lineSprite: lineSprite =  new BallisticLineSprite(launchPosition, targetPosition, 3 * this.zoomScale, -3, getLineColorByType(type), 0.3),
 	            used: true,
-	            isVisible: false
+	            isFriendly: isFriendly
 	        });
 
 	        scene.add(lineSprite.mesh);
+
+		var isFriendlyLinesVisible = this.ballisticLineIcons.some(lineIcon => 
+		  lineIcon.lineSprite?.isVisible === true && lineIcon?.isFriendly === true
+		);
+
+		var isEnemyLinesVisible = this.ballisticLineIcons.some(lineIcon => 
+		  lineIcon.lineSprite?.isVisible === true && lineIcon?.isFriendly === false
+		);  
+
+		var ballisticIdToFind = ballistic.id;
+		var currentIcon = this.ballisticLineIcons.find(lineIcon => lineIcon.id === ballisticIdToFind );
+
+		if(isFriendly && isFriendlyLinesVisible){
+			currentIcon.lineSprite.isVisible = true;		
+		}else if(!isFriendly && !isFriendlyLinesVisible){
+			currentIcon.lineSprite.isVisible = true;						
+		}else{
+			currentIcon.lineSprite.isVisible = false;			
+		}
 		
     }//endof createBallisticLineIcon()
 
