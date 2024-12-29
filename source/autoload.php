@@ -2737,7 +2737,8 @@ spl_autoload_register(
 				'xotia' => '/server/model/ships/vree/XotiA.php',
 				'xotib' => '/server/model/ships/vree/XotiB.php',
 				'tyllz'	=> '/server/model/ships/vree/Tyllz.php',
-		    						
+				'xaarix'=> '/server/model/ships/vree/Xaarix.php',				
+				'vyreel'=> '/server/model/ships/vree/Vyreel.php',	    						
 				'zshadowxonn' => '/server/model/ships/vree/ZShadowXonn.php', //tournament prize
 												
 				//antimatter-specific criticals
