@@ -1472,7 +1472,7 @@ class SparkField extends Weapon implements DefensiveSystem{
 		
 	public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
 	public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
-    	public $firingModes = array( 1 => "Field"); //just a convenient name for firing mode
+    	public $firingModes = array( 1 => "Spark Field"); //just a convenient name for firing mode
 	public $hextarget = true;
 	
 	protected $targetList = array(); //weapon will hit units on this list rather than target from firing order; filled by SparkFieldHandler!
@@ -2824,7 +2824,7 @@ class IonFieldGenerator extends Weapon{
 	    */
 	
 	public $firingModes = array(
-		1 => "IonStorm"
+		1 => "Ion Storm"
 	);
 		
 	private static $alreadyAffected = array(); //list of IDs of units already affected in this firing phase - to avoid multiplying effects on overlap
@@ -5842,7 +5842,7 @@ class ProximityLaserLauncher extends Weapon{
 			private $pairing = null;	//Which targeter is it paired with?	
 			
 		public $firingModes = array(
-			1 => "Proximity Laser Launcher"
+			1 => "Proximity Laser"
 		);
 			
 		public $repairPriority = 5;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
@@ -7303,7 +7303,7 @@ class SecondSight extends Weapon{
 
 	public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!   
 	public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set! 
-	public $firingModes = array(1=> "SecondSight"); 
+	public $firingModes = array(1=> "Second Sight"); 
 
     public $animation = "ball";
     public $animationExplosionScale = 15;   
@@ -7465,7 +7465,7 @@ class ThoughtWave extends Plasma{
 	public $animationColor = array(188, 55, 130);
 	public $noProjectile = true; //Marker for front end to make projectile invisible for weapons that shouldn't have one.
 	
-	public $firingModes = array(1=> "ThoughtWave"); 	
+	public $firingModes = array(1=> "Thought Wave"); 	
 
 	public $output = 15;//Is actually used as the base hit chance, but can be modified by critical hits.	
 	private $diceRollonTurn = null;	
