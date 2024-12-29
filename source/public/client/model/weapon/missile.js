@@ -470,7 +470,7 @@ var BallisticMineLauncher = function BallisticMineLauncher(json, ship) {
 };
 BallisticMineLauncher.prototype = Object.create(Weapon.prototype);
 BallisticMineLauncher.prototype.constructor = BallisticMineLauncher;
-
+/* //Old method for showing differences in firing mode in hex icon, keep in case I need again.
 //Needed for Ballistic Icon to display properly
 BallisticMineLauncher.prototype.initializationUpdate = function() {
 	var ship = this.ship;	
@@ -480,7 +480,7 @@ BallisticMineLauncher.prototype.initializationUpdate = function() {
 	}			        
 	return this;
 };
-
+*/
 var AbbaiMineLauncher = function AbbaiMineLauncher(json, ship) {
     Weapon.call(this, json, ship);
 };
