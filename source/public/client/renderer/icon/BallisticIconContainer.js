@@ -247,9 +247,9 @@ window.BallisticIconContainer = function () {
 			 
 			//Ballistic Mines etc can have different ammo types, handle separately using damageClass/initializationUpdate method! - DK 10.24
 			if (ballistic.damageclass == 'MultiModeHex') { 
-				targetType = 'hexYellow';
+				targetType = 'hexRed';
 				text = modeName;
-				textColour = "#ffff00";					
+				textColour = "#e6140a";					
 			}
 			
 			//Generic Support icon for these type of weapons. 06.24 - DK			
@@ -272,8 +272,13 @@ window.BallisticIconContainer = function () {
 	        var launchSprite = null;
 
 	        if ((!getByLaunchPosition(launchPosition, this.ballisticIcons)) && ballistic.notes != 'Persistent Effect') { //Don't create launch sprite for persistant effects!
-				launchSprite = new BallisticSprite(launchPosition, 'hexOrange');       
-	            scene.add(launchSprite.mesh);
+	        	if(gamedata.isMyOrTeamOneShip(shooter)){
+					launchSprite = new BallisticSprite(launchPosition, 'hexYellow');       
+		            scene.add(launchSprite.mesh);	        		
+	        	}else{
+					launchSprite = new BallisticSprite(launchPosition, 'hexOrange');       
+		            scene.add(launchSprite.mesh);
+				}
 	        }
 
 	        var targetSprite = null;
@@ -317,17 +322,16 @@ window.BallisticIconContainer = function () {
     BallisticIconContainer.prototype.updateLinesForShip = function (ship, iconContainer) {
 
 		var wasVisible = false;
-
+/*
         this.ballisticLineIcons.forEach(function (lineIcon) {
             if (lineIcon.targetId === ship.id) {
                 lineIcon.used = false;
             }
         });
-
+*/
 		this.ballisticLineIcons = this.ballisticLineIcons.filter((lineIcon) => {
 
-		    if (!lineIcon.used && lineIcon.targetId === ship.id) {
-		    	
+		    if (lineIcon.targetId === ship.id) {	    	
 		    	if (lineIcon.lineSprite.isVisible) wasVisible = true;
 		        this.scene.remove(lineIcon.lineSprite.mesh); // Correctly references `this`
 		        lineIcon.lineSprite.destroy(); // Correctly references `lineIcon.lineSprite`
@@ -354,24 +358,7 @@ window.BallisticIconContainer = function () {
 				}
             }
         });        
-
-/*
-		var lastMove = null;
-		var newPosition = null;
-		lastMove = shipManager.movement.getLastCommitedMove(ship);
-		newPosition = this.coordinateConverter.fromHexToGame(lastMove.position);	
-
-		if(this.ballisticLineIcons){
-	        this.ballisticLineIcons.forEach(function (lineIcon) {
-	            if (lineIcon.lineSprite) {
-	                if (ship.id === lineIcon.targetId) {               	
-						lineIcon.lineSprite.end = newPosition;
-						lineIcon.used = false;
-					}    
-	            }
-	        });
-		}
-*/   
+ 
     };
 
 	//New method that toggles Ballistic Lines on and off.
@@ -465,8 +452,8 @@ window.BallisticIconContainer = function () {
 	            id: ballistic.id,
 	            shooterId: ballistic.shooterid,
 	            targetId: ballistic.targetid,
-	           	shipIcon: shooterIcon,
-	            targetIcon: targetIcon,
+//	           	shipIcon: shooterIcon,
+//	            targetIcon: targetIcon,
 	            lineSprite: lineSprite =  new BallisticLineSprite(launchPosition, targetPosition, 3 * this.zoomScale, -3, getLineColorByType(type), 0.5),
 	            used: true,
 	            isVisible: false
