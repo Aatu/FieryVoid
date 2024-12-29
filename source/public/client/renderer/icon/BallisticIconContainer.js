@@ -12,6 +12,7 @@ window.BallisticIconContainer = function () {
 
     BallisticIconContainer.prototype.consumeGamedata = function (gamedata, iconContainer, replayData = null) {
         this.ballisticIcons.forEach(function (ballisticIcon) {
+        	if(gamedata.gamephase !== 1) ballisticIcon.launchPosition = []; //If not cleared, doesn't always display launch hex between Initial and Movement/Firing without browser refresh - DK 12.24
             ballisticIcon.used = false;
         });
 
@@ -195,7 +196,7 @@ window.BallisticIconContainer = function () {
 					        textColour = "#e6140a";
 	//				        iconImage = "./img/systemicons/SecondSightICON.png"; //Example image to pass			        
 					break;	
-					case 'SecondSight': //Thirdspace Psychic Field
+					case 'Second Sight': //Thirdspace Psychic Field
 					        targetType = 'hexPurple';
 					        text = "Second Sight";
 					        textColour = "#7f00ff";			        
@@ -215,7 +216,7 @@ window.BallisticIconContainer = function () {
 					        text = "Energy Mine";
 					        textColour = "#e6140a";				        
 					break;				
-					case 'IonStorm': //Cascor Ion Field
+					case 'Ion Storm': //Cascor Ion Field
 					        targetType = 'hexPurple';
 					        text = "Ion Field";
 					        textColour = "#7f00ff";				        
@@ -230,12 +231,12 @@ window.BallisticIconContainer = function () {
 					        text = 'Plasma';
 					        textColour = "#787800";				        	
 					break;
-					case 'Proximity Laser Launcher': //KL Proximity Laser
+					case 'Proximity Laser': //KL Proximity Laser
 					        targetType = 'hexRed';
 					        text = "Proximity Laser";
 					        textColour = "#e6140a";		        
 					break;
-					case 'ThoughtWave': //Mindrider Thoughwave
+					case 'Thought Wave': //Mindrider Thoughwave
 					        targetType = 'hexPurple';
 					        text = "Thought Wave";
 					        textColour = "#bc3782"; //Actually a pink-purple, as it blends with luanch hex Orange!
@@ -245,18 +246,23 @@ window.BallisticIconContainer = function () {
 				}
 			} 
 			 
-			//Ballistic Mines etc can have different ammo types, handle separately using damageClass/initializationUpdate method! - DK 10.24
-			if (ballistic.damageclass == 'MultiModeHex') { 
-				targetType = 'hexRed';
-				text = modeName;
-				textColour = "#e6140a";					
-			}
-			
-			//Generic Support icon for these type of weapons. 06.24 - DK			
-			if (ballistic.damageclass == 'support') {
-				targetType = 'hexGreen';
-				iconImage = "./img/allySupport.png";				
-			} 
+		//Ballistic Mines / Support etc need to be handled separately using damageClass/initializationUpdate method! - DK 10.24
+		if(ballistic.damageclass){
+			switch (ballistic.damageclass) {	
+				case 'MultiModeHex': //Hex-Weapons with multiple modes.
+					targetType = 'hexRed';
+					text = modeName;					
+					textColour = "#e6140a";		        
+				break;										
+				
+				case 'Support': //Generic Support icon for these type of weapons. 06.24 - DK	
+					targetType = 'hexGreen';
+//					textColour = "#00dd00";   
+					iconImage = "./img/allySupport.png"; 		        
+				break;
+		
+			}	 
+		} 
 		  		
 	        var targetPosition = null;
 	        var targetIcon = null;
@@ -271,15 +277,15 @@ window.BallisticIconContainer = function () {
 			//Create orange launch icon on firing ship.
 	        var launchSprite = null;
 
-	        if ((!getByLaunchPosition(launchPosition, this.ballisticIcons)) && ballistic.notes != 'Persistent Effect') { //Don't create launch sprite for persistant effects!
-	        	if(gamedata.isMyOrTeamOneShip(shooter)){
-					launchSprite = new BallisticSprite(launchPosition, 'hexYellow');       
-		            scene.add(launchSprite.mesh);	        		
-	        	}else{
-					launchSprite = new BallisticSprite(launchPosition, 'hexOrange');       
-		            scene.add(launchSprite.mesh);
-				}
-	        }
+	        if ((!getByLaunchPosition(launchPosition, this.ballisticIcons)) && ballistic.notes != 'Persistent Effect') { //Don't create launch sprite for persistant effects!        	
+		        	if(gamedata.isMyOrTeamOneShip(shooter)){
+						launchSprite = new BallisticSprite(launchPosition, 'hexYellow');       
+			            scene.add(launchSprite.mesh);	        		
+		        	}else{
+						launchSprite = new BallisticSprite(launchPosition, 'hexOrange');       
+			            scene.add(launchSprite.mesh);
+					}
+		    }
 
 	        var targetSprite = null;
 
@@ -454,7 +460,7 @@ window.BallisticIconContainer = function () {
 	            targetId: ballistic.targetid,
 //	           	shipIcon: shooterIcon,
 //	            targetIcon: targetIcon,
-	            lineSprite: lineSprite =  new BallisticLineSprite(launchPosition, targetPosition, 3 * this.zoomScale, -3, getLineColorByType(type), 0.5),
+	            lineSprite: lineSprite =  new BallisticLineSprite(launchPosition, targetPosition, 3 * this.zoomScale, -3, getLineColorByType(type), 0.3),
 	            used: true,
 	            isVisible: false
 	        });
@@ -472,19 +478,19 @@ window.BallisticIconContainer = function () {
 
     function getLineColorByType(type) {
         if (type == "orange") {
-            return "rgba(250,153,53,0.50)"; 
+            return "rgba(250,153,53)"; 
         } else if (type == "red") {
-            return "rgba(230,20,10,0.50)";
+            return "rgba(230,20,10)";
         } else if (type == "blue") {
-            return "rgba(0,184,230,0.50)";
+            return "rgba(0,184,230)";
         } else if (type == "green") {
-            return "rgba(0, 204, 0,0.50)";
+            return "rgba(0, 204, 0)";
         } else if (type == "yellow") {
-            return "rgba(255, 255, 0,0.50)";
+            return "rgba(255, 255, 0)";
         } else if (type == "purple") {
-            return "rgba(127, 0, 255,0.50)";
+            return "rgba(127, 0, 255)";
         } else {
-            return "rgba(144,185,208,0.80)";
+            return "rgba(144,185,208)";
         }
     }
 
