@@ -678,6 +678,7 @@ class HeavyInterceptorBattery extends InterceptorMkI{
    
 }  //end of class HeavyInterceptorBattery
 
+
 //Adding Thirdspace as unique systems to use different icon and allow modifictions from the Trek systems
 class ThirdspaceShield extends Shield implements DefensiveSystem { //defensive values of zero, but still formally there to display arcs!
 	    public $name = "ThirdspaceShield";
@@ -874,7 +875,11 @@ class ThirdspaceShield extends Shield implements DefensiveSystem { //defensive v
 				if($enhCount > 0) {		            
 			        if ($enhID == 'IMPR_THSD'){
 			        	$startRating += $enhCount;						        	
-			        	$currentRating += $enhCount * 2;			        	     	
+			        	if($ship->shipSizeClass == 3){
+			        		$currentRating += $enhCount * 3;
+						}else{
+			        		$currentRating += $enhCount;							
+						}				        	     	
 					}
 				}	
 			}			

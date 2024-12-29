@@ -1654,7 +1654,11 @@ class Enhancements{
 						foreach ($ship->systems as $system){							
 							if ($system instanceof ThirdspaceShield){
 								$system->baseRating += $enhCount;
-    							$system->maxhealth += $enhCount * 2;
+    							if($ship->shipSizeClass == 3){
+    								$system->maxhealth += $enhCount * 3;
+								}else{
+    								$system->maxhealth += $enhCount;									
+								}	
 							}
 							if ($system instanceof ThirdspaceShieldGenerator){
 								$system->output += $enhCount;
