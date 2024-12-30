@@ -694,21 +694,6 @@ window.PhaseStrategy = function () {
         }else{
         	this.ballisticIconContainer.toggleBallisticLines  (false, ships);
         } 
-/* //OLD METHOD where Ballistic Lines only showed whilst button was held down.
-        if (payload.up) {
-        	if(friendly){
-        		this.ballisticIconContainer.hideBallisticLines(true, ships);        		
-        	}else{
-        		this.ballisticIconContainer.hideBallisticLines(false, ships);
-        	}
-        } else {
-        	if(friendly){
-        		this.ballisticIconContainer.showBallisticLines(true, ships);        		
-        	}else{
-        		this.ballisticIconContainer.showBallisticLines(false, ships);
-        	}        	
-        }
-*/      
     };
 
     return PhaseStrategy;
