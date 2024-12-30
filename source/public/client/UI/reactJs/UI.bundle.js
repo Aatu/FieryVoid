@@ -36821,9 +36821,10 @@ var PlayerSettingsForm = function (_React$Component) {
                         null,
                         "Keys"
                     ),
-                    React.createElement(_common.InputAndLabel, { label: "Key to display all EW", onChange: function onChange() {}, onKeydown: this.getOnKeyDown.call(this, "ShowAllEW"), value: this.getKey.call(this, "ShowAllEW") }),
+                    React.createElement(_common.InputAndLabel, { label: "Key to display ALL EW", onChange: function onChange() {}, onKeydown: this.getOnKeyDown.call(this, "ShowAllEW"), value: this.getKey.call(this, "ShowAllEW") }),
                     React.createElement(_common.InputAndLabel, { label: "Key to display FRIENDLY EW", onChange: function onChange() {}, onKeydown: this.getOnKeyDown.call(this, "ShowFriendlyEW"), value: this.getKey.call(this, "ShowFriendlyEW") }),
                     React.createElement(_common.InputAndLabel, { label: "Key to display ENEMY EW", onChange: function onChange() {}, onKeydown: this.getOnKeyDown.call(this, "ShowEnemyEW"), value: this.getKey.call(this, "ShowEnemyEW") }),
+                    React.createElement(_common.InputAndLabel, { label: "Key to display ALL Ballistics", onChange: function onChange() {}, onKeydown: this.getOnKeyDown.call(this, "ShowAllBallistics"), value: this.getKey.call(this, "ShowAllBallistics") }),
                     React.createElement(
                         _styled.SubTitle,
                         null,

@@ -680,21 +680,29 @@ window.PhaseStrategy = function () {
     };
 
     PhaseStrategy.prototype.onShowFriendlyBallisticLines = function (payload) {
-        showGlobalBallisticLines.call(this, true, gamedata.ships.filter(function(ship){ return gamedata.isMyOrTeamOneShip(ship) }), payload);
+        toggleBallisticLines.call(this, gamedata.ships.filter(function(ship){ return gamedata.isMyOrTeamOneShip(ship) }), payload);
     };
 
     PhaseStrategy.prototype.onShowEnemyBallisticLines = function (payload) {
-        showGlobalBallisticLines.call(this, false, gamedata.ships.filter(function(ship){ return !gamedata.isMyOrTeamOneShip(ship) }), payload);
+        toggleBallisticLines.call(this, gamedata.ships.filter(function(ship){ return !gamedata.isMyOrTeamOneShip(ship) }), payload);
     };
 
-    function showGlobalBallisticLines(friendly, ships, payload) {
-
-        if(friendly){
-        	this.ballisticIconContainer.toggleBallisticLines  (true, ships);        		
-        }else{
-        	this.ballisticIconContainer.toggleBallisticLines  (false, ships);
-        } 
+    PhaseStrategy.prototype.onShowAllBallistics = function (payload) {
+        showAllBallisticLines.call(this, gamedata.ships, payload);
     };
+
+    function toggleBallisticLines(ships, payload) {
+        this.ballisticIconContainer.toggleBallisticLines(ships);
+    };
+
+    function showAllBallisticLines(ships, payload) {
+         if (payload.up) {
+     		this.ballisticIconContainer.hideLines();
+        } else {
+        	this.ballisticIconContainer.showLines();
+        }
+    }   
+
 
     return PhaseStrategy;
 }();

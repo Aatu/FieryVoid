@@ -396,7 +396,7 @@ window.BallisticIconContainer = function () {
     };
 
 	//New method that toggles Ballistic Lines on and off.
-	BallisticIconContainer.prototype.toggleBallisticLines = function (friendly, ships) {
+	BallisticIconContainer.prototype.toggleBallisticLines = function (ships) {
 	    if (this.ballisticLineIcons) {
 	        this.ballisticLineIcons.forEach(function (lineIcon) {
 	            if (lineIcon.lineSprite) {
@@ -414,6 +414,25 @@ window.BallisticIconContainer = function () {
 	    }
 	    return this;
 	};
+
+    BallisticIconContainer.prototype.hideLines = function () {
+        this.ballisticLineIcons.forEach(function (lineIcon) {
+			lineIcon.lineSprite.hide();
+	        lineIcon.lineSprite.isVisible = false;	 	
+        });
+
+        return this;
+    };
+
+    BallisticIconContainer.prototype.showLines = function () {
+        this.ballisticLineIcons.forEach(function (lineIcon) {
+			lineIcon.lineSprite.show();
+	        lineIcon.lineSprite.isVisible = true;	 	
+        });
+
+        return this;
+    };
+	
 
     function createOrUpdateBallisticLines(ballistic, iconContainer, turn, replay = false) {
         var lineIcon = getBallisticLineIcon.call(this, ballistic.id);
