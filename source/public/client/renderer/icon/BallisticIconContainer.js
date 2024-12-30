@@ -189,7 +189,7 @@ window.BallisticIconContainer = function () {
 	        var textColour = ""; //Additional variable that chooses base text colour for new BallisticSprite()
 			var iconImage = null; //Additional variable that can pass images to new BallisticSprite()!
 			
-			//New variables found to enhance Ballistic Icons further! - DK 10.24
+			//New variables to enhance Ballistic Icons further! - DK 10.24
 			var shooter = shooterIcon.ship; //Get shooter info.
 			var modeName = null;
 			
@@ -216,12 +216,6 @@ window.BallisticIconContainer = function () {
 					        text = '!';
 					        textColour = "#787800";				        	
 					break;
-					case 'Psychic Field': //Mindrider Second Sight
-					        targetType = 'hexRed';
-					        text = "Psychic";
-					        textColour = "#e6140a";
-	//				        iconImage = "./img/systemicons/SecondSightICON.png"; //Example image to pass			        
-					break;	
 					case 'Second Sight': //Thirdspace Psychic Field
 					        targetType = 'hexPurple';
 					        text = "Second Sight";
@@ -281,7 +275,7 @@ window.BallisticIconContainer = function () {
 					textColour = "#e6140a";		        
 				break;										
 				
-				case 'Support': //Generic Support icon for these type of weapons. 06.24 - DK	
+				case 'support': //Generic Support icon for these type of weapons. 06.24 - DK	
 					targetType = 'hexGreen';
 //					textColour = "#00dd00";   
 					iconImage = "./img/allySupport.png"; 		        
@@ -317,7 +311,7 @@ window.BallisticIconContainer = function () {
 	        var targetSprite = null;
 
 	        if (!getByTargetIdOrTargetPosition(targetPosition, ballistic.targetId, this.ballisticIcons)) {
-	            if(modeName == 'ThoughtWave') targetPosition = launchPosition;//Don't create target hex for Thougtwave, just create on launch hex.
+	            if(modeName == 'Thought Wave') targetPosition = launchPosition;//Don't create target hex for Thougtwave, just create on launch hex.
 	            if (targetIcon && targetPosition) {
 	                targetSprite =  new BallisticSprite(targetPosition, targetType, text, textColour, iconImage);//'hex');
 	                targetIcon.mesh.add(targetSprite.mesh);
@@ -356,13 +350,7 @@ window.BallisticIconContainer = function () {
     BallisticIconContainer.prototype.updateLinesForShip = function (ship, iconContainer) {
 
 		var wasVisible = false;
-/*
-        this.ballisticLineIcons.forEach(function (lineIcon) {
-            if (lineIcon.targetId === ship.id) {
-                lineIcon.used = false;
-            }
-        });
-*/
+
 		this.ballisticLineIcons = this.ballisticLineIcons.filter((lineIcon) => {
 
 		    if (lineIcon.targetId === ship.id) {	    	
@@ -444,7 +432,7 @@ window.BallisticIconContainer = function () {
 				updateBallisticLineIcon.call(this, lineIcon, ballistic, iconContainer, turn);
 			}	
 	    } else {   	
-	        createBallisticLineIcon.call(this, ballistic, iconContainer, turn, this.scene, replay);
+	        if(ballistic.notes != 'Persistent Effect') createBallisticLineIcon.call(this, ballistic, iconContainer, turn, this.scene, replay);
 	    }
     	
 	}	
@@ -497,7 +485,7 @@ window.BallisticIconContainer = function () {
 				var modeName = weapon.firingModes[ballistic.firingMode]; //Get actual Firing Mode name
 			}	
 
-			if(modeName == 'ThoughtWave') targetPosition = launchPosition; //Only one weapon needs, for now.
+			if(modeName == 'Thought Wave') targetPosition = launchPosition; //Only one weapon needs, for now.
 			
 	        var lineSprite = null;
 	        
@@ -581,37 +569,6 @@ window.BallisticIconContainer = function () {
 	        lineIcon.lineSprite.isVisible = true;            
         }, this);
     };
-
-*/   
-
-/* //OLD METHOD where button just showed lines whilst held down.
-    BallisticIconContainer.prototype.hideBallisticLines = function (friendly, ships) {
-		if(this.ballisticLineIcons){
-	        this.ballisticLineIcons.forEach(function (lineIcon) {
-	            if (lineIcon.lineSprite) {
-	                if (ships.some(ship => ship.id === lineIcon.shooterId)) {
-		                lineIcon.lineSprite.hide();
-	            		lineIcon.lineSprite.isVisible = false;	 		                
-					}    
-	            }
-	        });
-		}
-        return this;
-    };
-
-	BallisticIconContainer.prototype.showBallisticLines = function (friendly, ships) {
-	    if (this.ballisticLineIcons) {
-	        this.ballisticLineIcons.forEach(function (lineIcon) {
-	            if (lineIcon.lineSprite) {
-	                if (ships.some(ship => ship.id === lineIcon.shooterId)) {
-	                    lineIcon.lineSprite.show();
-	            		lineIcon.lineSprite.isVisible = true;
-	                }
-	            }
-	        });
-	    }
-	    return this;
-	};
 */
 
     return BallisticIconContainer;
