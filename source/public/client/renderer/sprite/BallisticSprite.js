@@ -9,40 +9,7 @@ window.BallisticSprite = function () {
     var TEXTURE_HEX_GREEN = null;
     var TEXTURE_HEX_YELLOW = null;
     var TEXTURE_HEX_PURPLE = null;         
-    var TEXTURE_HEX_GREEN_EXCLAMATION = null; // New texture
-    
-/* //Older methods that don't accommodate text/image or just accommodate text inside hex icons
-	function BallisticSprite(position, type, text = "", textColour = "#aaaa00") {
-	    HexagonSprite.call(this, -2);
-
-	    if (!TEXTURE_HEX_ORANGE) {
-	        createTextures(); // Initialize all textures once
-	    }
-	    
-	    this.uniforms.texture.value = chooseTexture(type);
-	    
-
-	    this.setPosition(position);
-	}
-
-
-	function BallisticSprite(position, type, text = "", textColour = "#ffffff") {
-	    HexagonSprite.call(this, -2);
-
-	    // If there is custom text (like Thoughtwave, Ion Field, Plasma Web etc.), create a custom texture
-	    if (text) {
-	        // Ensure textColour defaults to "#aaaa00" if not provided
-	        this.uniforms.texture.value = createTextureWithText(type, text, textColour || "#ffffff");
-	    } else {
-	        if (!TEXTURE_HEX_ORANGE) {
-	            createTextures(); // Initialize all textures once
-	        }
-	        this.uniforms.texture.value = chooseTexture(type);
-	    }
-
-	    this.setPosition(position);
-	}
-*/	
+    var TEXTURE_HEX_GREEN_EXCLAMATION = null; // New texture	
 
     function BallisticSprite(position, type, text = "", textColour = "#ffffff", imageSrc = null) {
         HexagonSprite.call(this, -3);
