@@ -490,7 +490,7 @@ window.BallisticIconContainer = function () {
 	            targetId: ballistic.targetid,
 //	           	shipIcon: shooterIcon,
 //	            targetIcon: targetIcon,
-	            lineSprite: lineSprite =  new BallisticLineSprite(launchPosition, targetPosition, 3 * this.zoomScale, -3, getLineColorByType(type), 0.3),
+	            lineSprite: lineSprite =  new BallisticLineSprite(launchPosition, targetPosition, 3 * this.zoomScale, -3, getLineColorByType(type), 0.6),
 	            used: true,
 	            isFriendly: isFriendly
 	        });

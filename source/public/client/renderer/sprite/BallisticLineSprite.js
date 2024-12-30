@@ -43,6 +43,13 @@ window.BallisticLineSprite = function () {
             this.width*1.8 // Head width (adjustable for visual impact)
         );
 
+        // Modify the arrow material's opacity
+        arrow.line.material.transparent = true;
+        arrow.line.material.opacity = this.opacity;
+//        arrow.cone.material.transparent = true;     //Cause issues with other render if I try to make arrows transparent   
+//        arrow.cone.material.opacity = this.opacity;
+    
+        
         return arrow;
     };
 
@@ -67,15 +74,15 @@ window.BallisticLineSprite = function () {
         return this;
     };
 
-BallisticLineSprite.prototype.destroy = function () {
-    // Dispose of each arrow's material
-    this.mesh.children.forEach(arrow => {
-        // Check if the arrow has a line (which is the actual 3D object rendered)
-        if (arrow.line && arrow.line.material) {
-            arrow.line.material.dispose(); // Dispose the material of the line
-        }
-    });
-};
+    BallisticLineSprite.prototype.destroy = function () {
+        // Dispose of each arrow's material
+        this.mesh.children.forEach(arrow => {
+            // Check if the arrow has a line (which is the actual 3D object rendered)
+            if (arrow.line && arrow.line.material) {
+                arrow.line.material.dispose(); // Dispose the material of the line
+            }
+        });
+    };
 
     return BallisticLineSprite;
 }();
