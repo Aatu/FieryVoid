@@ -679,17 +679,25 @@ window.PhaseStrategy = function () {
         this.shipWindowManager.update();
     };
 
-    PhaseStrategy.prototype.onShowFriendlyBallisticLines = function (payload) {
+    PhaseStrategy.prototype.onToggleFriendlyBallisticLines = function (payload) {
         toggleBallisticLines.call(this, gamedata.ships.filter(function(ship){ return gamedata.isMyOrTeamOneShip(ship) }), payload);
     };
 
-    PhaseStrategy.prototype.onShowEnemyBallisticLines = function (payload) {
+    PhaseStrategy.prototype.onToggleEnemyBallisticLines = function (payload) {
         toggleBallisticLines.call(this, gamedata.ships.filter(function(ship){ return !gamedata.isMyOrTeamOneShip(ship) }), payload);
     };
 
     PhaseStrategy.prototype.onShowAllBallistics = function (payload) {
         showAllBallisticLines.call(this, gamedata.ships, payload);
     };
+    
+    PhaseStrategy.prototype.onShowFriendlyBallistics = function (payload) {
+        showAllBallisticLines.call(this, gamedata.ships.filter(function(ship){ return gamedata.isMyOrTeamOneShip(ship) }), payload);
+    };
+    
+    PhaseStrategy.prototype.onShowEnemyBallistics = function (payload) {
+        showAllBallisticLines.call(this, gamedata.ships.filter(function(ship){ return !gamedata.isMyOrTeamOneShip(ship) }), payload);
+    };        
 
     function toggleBallisticLines(ships, payload) {
         this.ballisticIconContainer.toggleBallisticLines(ships);
@@ -697,9 +705,9 @@ window.PhaseStrategy = function () {
 
     function showAllBallisticLines(ships, payload) {
          if (payload.up) {
-     		this.ballisticIconContainer.hideLines();
+     		this.ballisticIconContainer.hideLines(ships);
         } else {
-        	this.ballisticIconContainer.showLines();
+        	this.ballisticIconContainer.showLines(ships);
         }
     }   
 

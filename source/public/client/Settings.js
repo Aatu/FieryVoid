@@ -7,7 +7,9 @@ this.settings = {
     ShowAllEW: settings.ShowAllEW || {keyCode: 87, shiftKey: false, altKey: false, ctrlKey: false, metaKey:false },
     ShowFriendlyEW: settings.ShowFriendlyEW || {keyCode: 88, shiftKey: false, altKey: false, ctrlKey: false, metaKey:false },
     ShowEnemyEW: settings.ShowEnemyEW || {keyCode: 89, shiftKey: false, altKey: false, ctrlKey: false, metaKey:false },
-    ShowAllBallistics: settings.ShowAllBallistics || {keyCode: 65, shiftKey: false, altKey: false, ctrlKey: false, metaKey: false},
+    ShowAllBallistics: settings.ShowAllBallistics || {keyCode: 66, shiftKey: false, altKey: false, ctrlKey: false, metaKey: false},
+    ShowFriendlyBallistics: settings.ShowFriendlyBallistics || {keyCode: 70, shiftKey: false, altKey: false, ctrlKey: false, metaKey: false},
+    ShowEnemyBallistics: settings.ShowEnemyBallistics || {keyCode: 69, shiftKey: false, altKey: false, ctrlKey: false, metaKey: false},        
     ZoomLevelToStrategic: 0.2
 };
 

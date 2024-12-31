@@ -36392,8 +36392,8 @@ var EwButtons = function (_React$Component) {
         _this.handleMouseLeave = _this.handleMouseLeave.bind(_this);
         _this.showFriendlyEW = _this.showFriendlyEW.bind(_this);
         _this.showEnemyEW = _this.showEnemyEW.bind(_this);
-        _this.showFriendlyBallisticLines = _this.showFriendlyBallisticLines.bind(_this);
-        _this.showEnemyBallisticLines = _this.showEnemyBallisticLines.bind(_this);
+        _this.toggleFriendlyBallisticLines = _this.toggleFriendlyBallisticLines.bind(_this);
+        _this.toggleEnemyBallisticLines = _this.toggleEnemyBallisticLines.bind(_this);
         return _this;
     }
 
@@ -36408,14 +36408,14 @@ var EwButtons = function (_React$Component) {
             webglScene.customEvent("ShowEnemyEW", { up: up });
         }
     }, {
-        key: "showFriendlyBallisticLines",
-        value: function showFriendlyBallisticLines(up) {
-            webglScene.customEvent("ShowFriendlyBallisticLines", { up: up });
+        key: "toggleFriendlyBallisticLines",
+        value: function toggleFriendlyBallisticLines(up) {
+            webglScene.customEvent("ToggleFriendlyBallisticLines", { up: up });
         }
     }, {
-        key: "showEnemyBallisticLines",
-        value: function showEnemyBallisticLines(up) {
-            webglScene.customEvent("ShowEnemyBallisticLines", { up: up });
+        key: "toggleEnemyBallisticLines",
+        value: function toggleEnemyBallisticLines(up) {
+            webglScene.customEvent("ToggleEnemyBallisticLines", { up: up });
         }
     }, {
         key: "handleMouseEnter",
@@ -36503,13 +36503,13 @@ var EwButtons = function (_React$Component) {
                     "data-type": "friendlyBallistic",
                     onMouseEnter: this.handleMouseEnter.bind(this),
                     onMouseLeave: this.handleMouseLeave.bind(this),
-                    onMouseDown: this.showFriendlyBallisticLines.bind(this, false)
+                    onMouseDown: this.toggleFriendlyBallisticLines.bind(this, false)
                 }),
                 _react2.default.createElement(EBButton, {
                     "data-type": "enemyBallistic",
                     onMouseEnter: this.handleMouseEnter.bind(this),
                     onMouseLeave: this.handleMouseLeave.bind(this),
-                    onMouseDown: this.showEnemyBallisticLines.bind(this, false)
+                    onMouseDown: this.toggleEnemyBallisticLines.bind(this, false)
                 }),
                 this.renderTooltip()
             );
@@ -36821,10 +36821,12 @@ var PlayerSettingsForm = function (_React$Component) {
                         null,
                         "Keys"
                     ),
-                    React.createElement(_common.InputAndLabel, { label: "Key to display ALL EW", onChange: function onChange() {}, onKeydown: this.getOnKeyDown.call(this, "ShowAllEW"), value: this.getKey.call(this, "ShowAllEW") }),
-                    React.createElement(_common.InputAndLabel, { label: "Key to display FRIENDLY EW", onChange: function onChange() {}, onKeydown: this.getOnKeyDown.call(this, "ShowFriendlyEW"), value: this.getKey.call(this, "ShowFriendlyEW") }),
-                    React.createElement(_common.InputAndLabel, { label: "Key to display ENEMY EW", onChange: function onChange() {}, onKeydown: this.getOnKeyDown.call(this, "ShowEnemyEW"), value: this.getKey.call(this, "ShowEnemyEW") }),
-                    React.createElement(_common.InputAndLabel, { label: "Key to display ALL Ballistics", onChange: function onChange() {}, onKeydown: this.getOnKeyDown.call(this, "ShowAllBallistics"), value: this.getKey.call(this, "ShowAllBallistics") }),
+                    React.createElement(_common.InputAndLabel, { label: "Key to display ALL Electronic Warfare (EW)", onChange: function onChange() {}, onKeydown: this.getOnKeyDown.call(this, "ShowAllEW"), value: this.getKey.call(this, "ShowAllEW") }),
+                    React.createElement(_common.InputAndLabel, { label: "Key to display allied Electronic Warfare (EW)", onChange: function onChange() {}, onKeydown: this.getOnKeyDown.call(this, "ShowFriendlyEW"), value: this.getKey.call(this, "ShowFriendlyEW") }),
+                    React.createElement(_common.InputAndLabel, { label: "Key to display enemy Electronic Warfare (EW)", onChange: function onChange() {}, onKeydown: this.getOnKeyDown.call(this, "ShowEnemyEW"), value: this.getKey.call(this, "ShowEnemyEW") }),
+                    React.createElement(_common.InputAndLabel, { label: "Key to display ALL ballistics", onChange: function onChange() {}, onKeydown: this.getOnKeyDown.call(this, "ShowAllBallistics"), value: this.getKey.call(this, "ShowAllBallistics") }),
+                    React.createElement(_common.InputAndLabel, { label: "Key to display allied ballistics", onChange: function onChange() {}, onKeydown: this.getOnKeyDown.call(this, "ShowFriendlyBallistics"), value: this.getKey.call(this, "ShowFriendlyBallistics") }),
+                    React.createElement(_common.InputAndLabel, { label: "Key to display enemy ballistics", onChange: function onChange() {}, onKeydown: this.getOnKeyDown.call(this, "ShowEnemyBallistics"), value: this.getKey.call(this, "ShowEnemyBallistics") }),
                     React.createElement(
                         _styled.SubTitle,
                         null,
