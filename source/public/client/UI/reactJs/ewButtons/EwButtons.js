@@ -16,8 +16,8 @@ class EwButtons extends React.Component {
         this.handleMouseLeave = this.handleMouseLeave.bind(this);
         this.showFriendlyEW = this.showFriendlyEW.bind(this);
         this.showEnemyEW = this.showEnemyEW.bind(this);
-        this.showFriendlyBallisticLines = this.showFriendlyBallisticLines.bind(this);
-        this.showEnemyBallisticLines = this.showEnemyBallisticLines.bind(this);
+        this.toggleFriendlyBallisticLines = this.toggleFriendlyBallisticLines.bind(this);
+        this.toggleEnemyBallisticLines = this.toggleEnemyBallisticLines.bind(this);
     }
 
     showFriendlyEW(up) {
@@ -28,12 +28,12 @@ class EwButtons extends React.Component {
         webglScene.customEvent("ShowEnemyEW", { up: up });
     }
 
-    showFriendlyBallisticLines(up) {
-        webglScene.customEvent("ShowFriendlyBallisticLines", { up: up });
+    toggleFriendlyBallisticLines(up) {
+        webglScene.customEvent("ToggleFriendlyBallisticLines", { up: up });
     }
 
-    showEnemyBallisticLines(up) {
-        webglScene.customEvent("ShowEnemyBallisticLines", { up: up });
+    toggleEnemyBallisticLines(up) {
+        webglScene.customEvent("ToggleEnemyBallisticLines", { up: up });
     }
 
 handleMouseEnter(event) {
@@ -116,13 +116,13 @@ handleMouseEnter(event) {
 				    data-type="friendlyBallistic"
 				    onMouseEnter={this.handleMouseEnter.bind(this)}
 				    onMouseLeave={this.handleMouseLeave.bind(this)}
-				    onMouseDown={this.showFriendlyBallisticLines.bind(this, false)}
+				    onMouseDown={this.toggleFriendlyBallisticLines.bind(this, false)}
 				></FBButton>
 				<EBButton  
 				    data-type="enemyBallistic"
 				    onMouseEnter={this.handleMouseEnter.bind(this)}
 				    onMouseLeave={this.handleMouseLeave.bind(this)}
-				    onMouseDown={this.showEnemyBallisticLines.bind(this, false)}
+				    onMouseDown={this.toggleEnemyBallisticLines.bind(this, false)}
 				></EBButton>
                 {this.renderTooltip()}
             </Container>
