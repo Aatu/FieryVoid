@@ -56,11 +56,11 @@ class PlayerSettingsForm extends React.Component {
                 <Paragraph>Change settings for currently used browser and device. Reload the page to apply changed settings.</Paragraph>
                 <SubTitle>Keys</SubTitle>
                 <InputAndLabel label={"Key to display ALL Electronic Warfare (EW)"} onChange={() => { }} onKeydown={this.getOnKeyDown.call(this, "ShowAllEW")} value={this.getKey.call(this, "ShowAllEW")} />
-                <InputAndLabel label={"Key to display allied Electronic Warfare (EW)"} onChange={() => { }} onKeydown={this.getOnKeyDown.call(this, "ShowFriendlyEW")} value={this.getKey.call(this, "ShowFriendlyEW")} />
-                <InputAndLabel label={"Key to display enemy Electronic Warfare (EW)"} onChange={() => { }} onKeydown={this.getOnKeyDown.call(this, "ShowEnemyEW")} value={this.getKey.call(this, "ShowEnemyEW")} />
-                <InputAndLabel label={"Key to display ALL ballistics"} onChange={() => { }} onKeydown={this.getOnKeyDown.call(this, "ShowAllBallistics")} value={this.getKey.call(this, "ShowAllBallistics")} />
-                <InputAndLabel label={"Key to display allied ballistics"} onChange={() => { }} onKeydown={this.getOnKeyDown.call(this, "ShowFriendlyBallistics")} value={this.getKey.call(this, "ShowFriendlyBallistics")} />
-                <InputAndLabel label={"Key to display enemy ballistics"} onChange={() => { }} onKeydown={this.getOnKeyDown.call(this, "ShowEnemyBallistics")} value={this.getKey.call(this, "ShowEnemyBallistics")} />                                
+                <InputAndLabel label={"Key to display FRIENDLY Electronic Warfare (EW)"} onChange={() => { }} onKeydown={this.getOnKeyDown.call(this, "ShowFriendlyEW")} value={this.getKey.call(this, "ShowFriendlyEW")} />
+                <InputAndLabel label={"Key to display ENEMY Electronic Warfare (EW)"} onChange={() => { }} onKeydown={this.getOnKeyDown.call(this, "ShowEnemyEW")} value={this.getKey.call(this, "ShowEnemyEW")} />
+                <InputAndLabel label={"Key to display ALL Ballistics"} onChange={() => { }} onKeydown={this.getOnKeyDown.call(this, "ShowAllBallistics")} value={this.getKey.call(this, "ShowAllBallistics")} />
+                <InputAndLabel label={"Key to display FRIENDLY Ballistics"} onChange={() => { }} onKeydown={this.getOnKeyDown.call(this, "ShowFriendlyBallistics")} value={this.getKey.call(this, "ShowFriendlyBallistics")} />
+                <InputAndLabel label={"Key to display ENEMY Ballistics"} onChange={() => { }} onKeydown={this.getOnKeyDown.call(this, "ShowEnemyBallistics")} value={this.getKey.call(this, "ShowEnemyBallistics")} />                                
                 <SubTitle>Visual</SubTitle>
                 <InputAndLabel placeholder="0" type="number" label={"Zoom level to change to strategic view"} onChange={this.getOnChange.call(this, "ZoomLevelToStrategic")} value={this.get.call(this, "ZoomLevelToStrategic")} />
 

@@ -36822,11 +36822,11 @@ var PlayerSettingsForm = function (_React$Component) {
                         "Keys"
                     ),
                     React.createElement(_common.InputAndLabel, { label: "Key to display ALL Electronic Warfare (EW)", onChange: function onChange() {}, onKeydown: this.getOnKeyDown.call(this, "ShowAllEW"), value: this.getKey.call(this, "ShowAllEW") }),
-                    React.createElement(_common.InputAndLabel, { label: "Key to display allied Electronic Warfare (EW)", onChange: function onChange() {}, onKeydown: this.getOnKeyDown.call(this, "ShowFriendlyEW"), value: this.getKey.call(this, "ShowFriendlyEW") }),
-                    React.createElement(_common.InputAndLabel, { label: "Key to display enemy Electronic Warfare (EW)", onChange: function onChange() {}, onKeydown: this.getOnKeyDown.call(this, "ShowEnemyEW"), value: this.getKey.call(this, "ShowEnemyEW") }),
-                    React.createElement(_common.InputAndLabel, { label: "Key to display ALL ballistics", onChange: function onChange() {}, onKeydown: this.getOnKeyDown.call(this, "ShowAllBallistics"), value: this.getKey.call(this, "ShowAllBallistics") }),
-                    React.createElement(_common.InputAndLabel, { label: "Key to display allied ballistics", onChange: function onChange() {}, onKeydown: this.getOnKeyDown.call(this, "ShowFriendlyBallistics"), value: this.getKey.call(this, "ShowFriendlyBallistics") }),
-                    React.createElement(_common.InputAndLabel, { label: "Key to display enemy ballistics", onChange: function onChange() {}, onKeydown: this.getOnKeyDown.call(this, "ShowEnemyBallistics"), value: this.getKey.call(this, "ShowEnemyBallistics") }),
+                    React.createElement(_common.InputAndLabel, { label: "Key to display FRIENDLY Electronic Warfare (EW)", onChange: function onChange() {}, onKeydown: this.getOnKeyDown.call(this, "ShowFriendlyEW"), value: this.getKey.call(this, "ShowFriendlyEW") }),
+                    React.createElement(_common.InputAndLabel, { label: "Key to display ENEMY Electronic Warfare (EW)", onChange: function onChange() {}, onKeydown: this.getOnKeyDown.call(this, "ShowEnemyEW"), value: this.getKey.call(this, "ShowEnemyEW") }),
+                    React.createElement(_common.InputAndLabel, { label: "Key to display ALL Ballistics", onChange: function onChange() {}, onKeydown: this.getOnKeyDown.call(this, "ShowAllBallistics"), value: this.getKey.call(this, "ShowAllBallistics") }),
+                    React.createElement(_common.InputAndLabel, { label: "Key to display FRIENDLY Ballistics", onChange: function onChange() {}, onKeydown: this.getOnKeyDown.call(this, "ShowFriendlyBallistics"), value: this.getKey.call(this, "ShowFriendlyBallistics") }),
+                    React.createElement(_common.InputAndLabel, { label: "Key to display ENEMY Ballistics", onChange: function onChange() {}, onKeydown: this.getOnKeyDown.call(this, "ShowEnemyBallistics"), value: this.getKey.call(this, "ShowEnemyBallistics") }),
                     React.createElement(
                         _styled.SubTitle,
                         null,
