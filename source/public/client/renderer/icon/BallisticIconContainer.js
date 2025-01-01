@@ -216,7 +216,12 @@ window.BallisticIconContainer = function () {
 					        text = '!';
 					        textColour = "#787800";				        	
 					break;
-					case 'Second Sight': //Thirdspace Psychic Field
+					case 'Psychic Field': //Thirdspace Psychic Field
+					        targetType = 'hexRed';
+					        text = "Psychic";
+					        textColour = "#e6140a";		        
+					break;						
+					case 'Second Sight': //Mindrider Second Sight
 					        targetType = 'hexPurple';
 					        text = "Second Sight";
 					        textColour = "#7f00ff";			        
@@ -461,25 +466,48 @@ window.BallisticIconContainer = function () {
     }	
 
     function createBallisticLineIcon(ballistic, iconContainer, turn, scene, replay = false) {
-		
-	        var shooterIcon = iconContainer.getById(ballistic.shooterid);        
-	        var targetIcon = null;
-	        targetIcon = iconContainer.getById(ballistic.targetid);
 
-			//Get shooter and modeName from it.
-			var shooter = shooterIcon.ship; //Get shooter info.
-			var modeName = null;	
-			if(!shooter.flight){ //Fighters would need to find weaponid differently
-				var weapon = shooter.systems[ballistic.weaponid]; //Find weapon			
-				var modeName = weapon.firingModes[ballistic.firingMode]; //Get actual Firing Mode name
-			}	
-	        	
-			var type = 'white'; //Default blue hex if none of the later conditions are true.
-			if(gamedata.isMyOrTeamOneShip(shooterIcon.ship)){
-				type = 'yellow';				
-			}else{
-				type = 'orange';				
-			}
+	    var shooterIcon = null;		
+	    shooterIcon = iconContainer.getById(ballistic.shooterid);        
+	    var targetIcon = null;
+	    targetIcon = iconContainer.getById(ballistic.targetid);
+
+		//Get Laucnh Position and Target Position
+	    var launchPosition = this.coordinateConverter.fromHexToGame(shooterIcon.getFirstMovementOnTurn(turn).position);
+	        						
+		var targetPosition = null;
+	    if(targetIcon && ballistic.targetId !== -1){
+			targetPosition = this.coordinateConverter.fromHexToGame(targetIcon.getLastMovement(turn).position);
+	    }else{
+	        targetPosition = this.coordinateConverter.fromHexToGame(new hexagon.Offset(ballistic.x, ballistic.y));
+		}
+		//Slightly different method for Replays.	
+		if(replay && targetIcon) targetPosition = this.coordinateConverter.fromHexToGame(targetIcon.getLastMovementOnTurn(turn).position);	
+
+		//Get shooter and modeName from it.
+		var shooter = shooterIcon.ship; //Get shooter info.
+		var modeName = null;	
+		if(!shooter.flight){ //Fighters would need to find weaponid differently
+			var weapon = shooter.systems[ballistic.weaponid]; //Find weapon			
+			var modeName = weapon.firingModes[ballistic.firingMode]; //Get actual Firing Mode name
+		}	
+
+		if(modeName == 'Thought Wave' || modeName == 'Second Sight') targetPosition = launchPosition; //Only one weapon needs, for now.
+	    
+		if (launchPosition == null || targetPosition == null || 
+		    (launchPosition.x === targetPosition.x && 
+		     launchPosition.y === targetPosition.y && 
+		     launchPosition.z === targetPosition.z)) {
+//		    console.warn("Skipped creating line sprite for zero-length line:", ballistic.id);
+		    return;
+		} //New check to NOT create a line if ballistic is in same hex (or positions are null/undefined.
+		    	
+		var type = 'white'; //Default white line if none of the later conditions are true.
+		if(gamedata.isMyOrTeamOneShip(shooterIcon.ship)){
+			type = 'yellow';				
+		}else{
+			type = 'orange';				
+		}
 
 		if(ballistic.type == 'normal'){
 				if(modeName){
@@ -493,11 +521,11 @@ window.BallisticIconContainer = function () {
 						case 'Anti-Fighter Plasma Web': //Pak'ma'ra Plasma Web Offensive
 							type = 'green';				        	
 						break;
-						case 'Second Sight': //Thirdspace Psychic Field
+						case 'Second Sight': //Mindrider Second Sight
 							type = 'purple';			        
 						break;			
 						default:
-						        targetType = 'white';
+						    type = 'white';
 						break;													        
 					}				
 				}	 
@@ -510,18 +538,6 @@ window.BallisticIconContainer = function () {
 				break;
 			}		 
 		}
-			
-			//Get Laucnh Position and Target Position
-	        var launchPosition = this.coordinateConverter.fromHexToGame(shooterIcon.getFirstMovementOnTurn(turn).position);
-	        						
-			var targetPosition = null;
-	        if(targetIcon && ballistic.targetId !== -1){
-				targetPosition = this.coordinateConverter.fromHexToGame(targetIcon.getLastMovement(turn).position);
-	        }else{
-	        	targetPosition = this.coordinateConverter.fromHexToGame(new hexagon.Offset(ballistic.x, ballistic.y));
-			}	
-			if(replay && targetIcon) targetPosition = this.coordinateConverter.fromHexToGame(targetIcon.getLastMovementOnTurn(turn).position);	
-			if(modeName == 'Thought Wave' || modeName == 'Second Sight') targetPosition = launchPosition; //Only one weapon needs, for now.
 			
 	        var lineSprite = null;	        
 	    	var isFriendly = gamedata.isMyOrTeamOneShip(shooter);

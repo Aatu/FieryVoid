@@ -2,31 +2,40 @@
 
 window.BallisticLineSprite = function () {
 
-    function BallisticLineSprite(start, end, lineWidth, z, color, opacity, args) {
-        if (!args) {
-            args = {};
-        }
+function BallisticLineSprite(start, end, lineWidth, z, color, opacity, args) {
+    if (!args) {
+        args = {};
+    }
 
-        this.z = z || -3;
-        this.mesh = new THREE.Object3D(); // Use Object3D to group arrows
-        this.start = start;
-        this.end = end;
-        this.width = lineWidth;
+    this.z = z || -3;
+    this.mesh = new THREE.Object3D(); // Use Object3D to group arrows
+    this.start = start;
+    this.end = end;
+    this.width = lineWidth;
 
-        this.color = color;
-        this.opacity = opacity;
+    this.color = color;
+    this.opacity = opacity;
 
-        this.arrowCount = 12; // Number of arrows in the series (adjustable)
-        this.arrowSpacing = mathlib.distance(start, end) / this.arrowCount; // Space between arrows
+    // Check for zero-length line
+    if (start.x === end.x && start.y === end.y && start.z === end.z) {
+//        console.warn("Attempted to create a BallisticLineSprite with zero-length. Skipping.");
+        this.arrowCount = 0; // No arrows to create
+        return;
+    }
 
-        // Create the series of arrows
-        for (let i = 0; i < this.arrowCount; i++) {
-            let arrow = this.createArrow(start, end, i);
+    this.arrowCount = 12; // Number of arrows in the series (adjustable)
+    this.arrowSpacing = mathlib.distance(start, end) / this.arrowCount; // Space between arrows
+
+    // Create the series of arrows
+    for (let i = 0; i < this.arrowCount; i++) {
+        let arrow = this.createArrow(start, end, i);
+        if (arrow) {
             this.mesh.add(arrow); // Add the arrow to the group
         }
-
-        this.setLineWidth(lineWidth);
     }
+
+    this.setLineWidth(lineWidth);
+}
 
     // Create an individual arrow at a specific position along the line
     BallisticLineSprite.prototype.createArrow = function (start, end, index) {
