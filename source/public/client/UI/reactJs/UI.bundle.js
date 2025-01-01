@@ -40326,12 +40326,23 @@ var SystemInfoButtons = function (_React$Component) {
 		/*Thirdspace Shield increase health*/
 
 	}, {
-		key: "TSShieldIncrease10",
-		value: function TSShieldIncrease10(e) {
+		key: "TSShieldIncrease25",
+		value: function TSShieldIncrease25(e) {
 			e.stopPropagation();e.preventDefault();
 			var _props29 = this.props,
 			    ship = _props29.ship,
 			    system = _props29.system;
+
+			system.doIncrease25();
+			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+		}
+	}, {
+		key: "TSShieldIncrease10",
+		value: function TSShieldIncrease10(e) {
+			e.stopPropagation();e.preventDefault();
+			var _props30 = this.props,
+			    ship = _props30.ship,
+			    system = _props30.system;
 
 			system.doIncrease10();
 			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
@@ -40340,9 +40351,9 @@ var SystemInfoButtons = function (_React$Component) {
 		key: "TSShieldIncrease5",
 		value: function TSShieldIncrease5(e) {
 			e.stopPropagation();e.preventDefault();
-			var _props30 = this.props,
-			    ship = _props30.ship,
-			    system = _props30.system;
+			var _props31 = this.props,
+			    ship = _props31.ship,
+			    system = _props31.system;
 
 			system.doIncrease5();
 			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
@@ -40351,9 +40362,9 @@ var SystemInfoButtons = function (_React$Component) {
 		key: "TSShieldIncrease",
 		value: function TSShieldIncrease(e) {
 			e.stopPropagation();e.preventDefault();
-			var _props31 = this.props,
-			    ship = _props31.ship,
-			    system = _props31.system;
+			var _props32 = this.props,
+			    ship = _props32.ship,
+			    system = _props32.system;
 
 			system.doIncrease();
 			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
@@ -40364,9 +40375,9 @@ var SystemInfoButtons = function (_React$Component) {
 		key: "TSShieldDecrease",
 		value: function TSShieldDecrease(e) {
 			e.stopPropagation();e.preventDefault();
-			var _props32 = this.props,
-			    ship = _props32.ship,
-			    system = _props32.system;
+			var _props33 = this.props,
+			    ship = _props33.ship,
+			    system = _props33.system;
 
 			system.doDecrease();
 			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
@@ -40375,9 +40386,9 @@ var SystemInfoButtons = function (_React$Component) {
 		key: "TSShieldDecrease5",
 		value: function TSShieldDecrease5(e) {
 			e.stopPropagation();e.preventDefault();
-			var _props33 = this.props,
-			    ship = _props33.ship,
-			    system = _props33.system;
+			var _props34 = this.props,
+			    ship = _props34.ship,
+			    system = _props34.system;
 
 			system.doDecrease5();
 			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
@@ -40386,11 +40397,22 @@ var SystemInfoButtons = function (_React$Component) {
 		key: "TSShieldDecrease10",
 		value: function TSShieldDecrease10(e) {
 			e.stopPropagation();e.preventDefault();
-			var _props34 = this.props,
-			    ship = _props34.ship,
-			    system = _props34.system;
+			var _props35 = this.props,
+			    ship = _props35.ship,
+			    system = _props35.system;
 
 			system.doDecrease10();
+			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+		}
+	}, {
+		key: "TSShieldDecrease25",
+		value: function TSShieldDecrease25(e) {
+			e.stopPropagation();e.preventDefault();
+			var _props36 = this.props,
+			    ship = _props36.ship,
+			    system = _props36.system;
+
+			system.doDecrease25();
 			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 		}
 		/*Thirdspace Shield Generator Presets*/
@@ -40399,9 +40421,9 @@ var SystemInfoButtons = function (_React$Component) {
 		key: "TSShieldGenSelect",
 		value: function TSShieldGenSelect(e) {
 			e.stopPropagation();e.preventDefault();
-			var _props35 = this.props,
-			    ship = _props35.ship,
-			    system = _props35.system;
+			var _props37 = this.props,
+			    ship = _props37.ship,
+			    system = _props37.system;
 
 			system.doSelect();
 			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
@@ -40413,9 +40435,9 @@ var SystemInfoButtons = function (_React$Component) {
 		key: "ThoughtShieldIncrease10",
 		value: function ThoughtShieldIncrease10(e) {
 			e.stopPropagation();e.preventDefault();
-			var _props36 = this.props,
-			    ship = _props36.ship,
-			    system = _props36.system;
+			var _props38 = this.props,
+			    ship = _props38.ship,
+			    system = _props38.system;
 
 			system.doIncrease10();
 			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
@@ -40424,9 +40446,9 @@ var SystemInfoButtons = function (_React$Component) {
 		key: "ThoughtShieldIncrease5",
 		value: function ThoughtShieldIncrease5(e) {
 			e.stopPropagation();e.preventDefault();
-			var _props37 = this.props,
-			    ship = _props37.ship,
-			    system = _props37.system;
+			var _props39 = this.props,
+			    ship = _props39.ship,
+			    system = _props39.system;
 
 			system.doIncrease5();
 			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
@@ -40435,9 +40457,9 @@ var SystemInfoButtons = function (_React$Component) {
 		key: "ThoughtShieldIncrease",
 		value: function ThoughtShieldIncrease(e) {
 			e.stopPropagation();e.preventDefault();
-			var _props38 = this.props,
-			    ship = _props38.ship,
-			    system = _props38.system;
+			var _props40 = this.props,
+			    ship = _props40.ship,
+			    system = _props40.system;
 
 			system.doIncrease();
 			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
@@ -40448,9 +40470,9 @@ var SystemInfoButtons = function (_React$Component) {
 		key: "ThoughtShieldDecrease",
 		value: function ThoughtShieldDecrease(e) {
 			e.stopPropagation();e.preventDefault();
-			var _props39 = this.props,
-			    ship = _props39.ship,
-			    system = _props39.system;
+			var _props41 = this.props,
+			    ship = _props41.ship,
+			    system = _props41.system;
 
 			system.doDecrease();
 			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
@@ -40459,9 +40481,9 @@ var SystemInfoButtons = function (_React$Component) {
 		key: "ThoughtShieldDecrease5",
 		value: function ThoughtShieldDecrease5(e) {
 			e.stopPropagation();e.preventDefault();
-			var _props40 = this.props,
-			    ship = _props40.ship,
-			    system = _props40.system;
+			var _props42 = this.props,
+			    ship = _props42.ship,
+			    system = _props42.system;
 
 			system.doDecrease5();
 			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
@@ -40470,9 +40492,9 @@ var SystemInfoButtons = function (_React$Component) {
 		key: "ThoughtShieldDecrease10",
 		value: function ThoughtShieldDecrease10(e) {
 			e.stopPropagation();e.preventDefault();
-			var _props41 = this.props,
-			    ship = _props41.ship,
-			    system = _props41.system;
+			var _props43 = this.props,
+			    ship = _props43.ship,
+			    system = _props43.system;
 
 			system.doDecrease10();
 			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
@@ -40483,9 +40505,9 @@ var SystemInfoButtons = function (_React$Component) {
 		key: "ThoughtShieldGenSelect",
 		value: function ThoughtShieldGenSelect(e) {
 			e.stopPropagation();e.preventDefault();
-			var _props42 = this.props,
-			    ship = _props42.ship,
-			    system = _props42.system;
+			var _props44 = this.props,
+			    ship = _props44.ship,
+			    system = _props44.system;
 
 			system.doSelect();
 			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
@@ -40497,9 +40519,9 @@ var SystemInfoButtons = function (_React$Component) {
 		key: "nextSRsystem",
 		value: function nextSRsystem(e) {
 			e.stopPropagation();e.preventDefault();
-			var _props43 = this.props,
-			    ship = _props43.ship,
-			    system = _props43.system;
+			var _props45 = this.props,
+			    ship = _props45.ship,
+			    system = _props45.system;
 
 			system.getNextSystem();
 			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
@@ -40510,9 +40532,9 @@ var SystemInfoButtons = function (_React$Component) {
 		key: "SRPriorityUp",
 		value: function SRPriorityUp(e) {
 			e.stopPropagation();e.preventDefault();
-			var _props44 = this.props,
-			    ship = _props44.ship,
-			    system = _props44.system;
+			var _props46 = this.props,
+			    ship = _props46.ship,
+			    system = _props46.system;
 
 			system.setRepairPriority(20);
 			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
@@ -40521,9 +40543,9 @@ var SystemInfoButtons = function (_React$Component) {
 		key: "SRPriorityDown",
 		value: function SRPriorityDown(e) {
 			e.stopPropagation();e.preventDefault();
-			var _props45 = this.props,
-			    ship = _props45.ship,
-			    system = _props45.system;
+			var _props47 = this.props,
+			    ship = _props47.ship,
+			    system = _props47.system;
 
 			system.setRepairPriority(0);
 			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
@@ -40532,9 +40554,9 @@ var SystemInfoButtons = function (_React$Component) {
 		key: "SRPriorityCancel",
 		value: function SRPriorityCancel(e) {
 			e.stopPropagation();e.preventDefault();
-			var _props46 = this.props,
-			    ship = _props46.ship,
-			    system = _props46.system;
+			var _props48 = this.props,
+			    ship = _props48.ship,
+			    system = _props48.system;
 
 			system.setRepairPriority(-1);
 			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
@@ -40542,10 +40564,10 @@ var SystemInfoButtons = function (_React$Component) {
 	}, {
 		key: "render",
 		value: function render() {
-			var _props47 = this.props,
-			    ship = _props47.ship,
-			    selectedShip = _props47.selectedShip,
-			    system = _props47.system;
+			var _props49 = this.props,
+			    ship = _props49.ship,
+			    selectedShip = _props49.selectedShip,
+			    system = _props49.system;
 
 
 			if (!canDoAnything) {
@@ -40584,12 +40606,14 @@ var SystemInfoButtons = function (_React$Component) {
 				canSpecunselect(ship, system) && React.createElement(Button, { onClick: this.Specunselect.bind(this), img: "./img/systemicons/Specialistclasses/unselect.png" }),
 				canSpecincrease(ship, system) && React.createElement(Button, { onClick: this.Specincrease.bind(this), img: "./img/systemicons/Specialistclasses/iconPlus.png" }),
 				canSpecdecrease(ship, system) && React.createElement(Button, { onClick: this.Specdecrease.bind(this), img: "./img/systemicons/Specialistclasses/iconMinus.png" }),
+				canTSShieldIncrease(ship, system) && React.createElement(Button, { onClick: this.TSShieldIncrease25.bind(this), img: "./img/systemicons/ShieldGenclasses/iconPlus25.png" }),
 				canTSShieldIncrease(ship, system) && React.createElement(Button, { onClick: this.TSShieldIncrease10.bind(this), img: "./img/systemicons/ShieldGenclasses/iconPlus10.png" }),
 				canTSShieldIncrease(ship, system) && React.createElement(Button, { onClick: this.TSShieldIncrease5.bind(this), img: "./img/systemicons/ShieldGenclasses/iconPlus5.png" }),
 				canTSShieldIncrease(ship, system) && React.createElement(Button, { onClick: this.TSShieldIncrease.bind(this), img: "./img/systemicons/BFCPclasses/iconPlus.png" }),
 				canTSShieldDecrease(ship, system) && React.createElement(Button, { onClick: this.TSShieldDecrease.bind(this), img: "./img/systemicons/BFCPclasses/iconMinus.png" }),
 				canTSShieldDecrease(ship, system) && React.createElement(Button, { onClick: this.TSShieldDecrease5.bind(this), img: "./img/systemicons/ShieldGenclasses/iconMinus5.png" }),
 				canTSShieldDecrease(ship, system) && React.createElement(Button, { onClick: this.TSShieldDecrease10.bind(this), img: "./img/systemicons/ShieldGenclasses/iconMinus10.png" }),
+				canTSShieldDecrease(ship, system) && React.createElement(Button, { onClick: this.TSShieldDecrease25.bind(this), img: "./img/systemicons/ShieldGenclasses/iconMinus25.png" }),
 				canTSShieldGendisplayCurrClass(ship, system) && React.createElement(Button, { title: getTSShieldGencurrClassName(ship, system), img: getTSShieldGencurrClassImg(ship, system) }),
 				canTSShieldGendisplayCurrClass(ship, system) && React.createElement(Button, { title: "prev", onClick: this.prevCurrClass.bind(this), img: "./img/systemicons/Specialistclasses/iconPrev.png" }),
 				canTSShieldGendisplayCurrClass(ship, system) && React.createElement(Button, { title: "next", onClick: this.nextCurrClass.bind(this), img: "./img/systemicons/Specialistclasses/iconNext.png" }),
@@ -40884,7 +40908,7 @@ Object.defineProperty(exports, "__esModule", {
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _templateObject = _taggedTemplateLiteral(["\n    font-size: 12px;\n"], ["\n    font-size: 12px;\n"]),
-    _templateObject2 = _taggedTemplateLiteral(["\n    position: absolute;\n    z-index: 20000;\n    ", "\n    max-width: 200px;\n    text-align: left;\n    opacity:0.8;\n    border: 1px solid #496791;\n    padding-bottom: 3px;\n"], ["\n    position: absolute;\n    z-index: 20000;\n    ", "\n    max-width: 200px;\n    text-align: left;\n    opacity:0.8;\n    border: 1px solid #496791;\n    padding-bottom: 3px;\n"]),
+    _templateObject2 = _taggedTemplateLiteral(["\n    position: absolute;\n    z-index: 20000;\n    ", "\n    max-width: 250px;\n    text-align: left;\n    opacity:0.8;\n    border: 1px solid #496791;\n    padding-bottom: 3px;\n"], ["\n    position: absolute;\n    z-index: 20000;\n    ", "\n    max-width: 250px;\n    text-align: left;\n    opacity:0.8;\n    border: 1px solid #496791;\n    padding-bottom: 3px;\n"]),
     _templateObject3 = _taggedTemplateLiteral(["\n    text-align: left;\n    color: #5e85bc;\n    font-family: arial;\n    font-size: 11px;\n"], ["\n    text-align: left;\n    color: #5e85bc;\n    font-family: arial;\n    font-size: 11px;\n"]),
     _templateObject4 = _taggedTemplateLiteral(["\n    color: white;\n"], ["\n    color: white;\n"]);
 

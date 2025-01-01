@@ -368,6 +368,30 @@ ThirdspaceShield.prototype.doIncrease10 = function () { //
 
 };
 
+ThirdspaceShield.prototype.doIncrease25 = function () { //	
+//Increase this.maxhealth by 10 (or lower if less available) + decrease Shield Generator by same amount.
+	
+ 	var ship = this.ship;	
+	for (var i in ship.systems) {
+		var system = ship.systems[i];
+
+		if (system instanceof ThirdspaceShieldGenerator) {
+			var generator = system; //Find generator
+		}
+	}	
+
+	var shieldHealth = this.currentHealth; 
+	var shieldHeadroom = this.maxhealth - shieldHealth;//How much room for increase does shield have?
+		
+	if(shieldHeadroom >= 25){		
+		this.currentHealth += 25;
+		generator.storedCapacity -= 25;
+	}else{ //Just increase by how much you can!
+		this.currentHealth += shieldHeadroom;
+		generator.storedCapacity -= shieldHeadroom;		
+	}	
+
+};
 
 ThirdspaceShield.prototype.doDecrease = function () { 
 //Reduce this.maxhealth by 5 (or lower if less available) + increase Shield Generator by same amount.
@@ -449,6 +473,33 @@ ThirdspaceShield.prototype.doDecrease10 = function () {
 	
 };
 
+ThirdspaceShield.prototype.doDecrease25 = function () { 
+//Reduce this.maxhealth by 10 (or lower if less available) + increase Shield Generator by same amount.
+	
+ 	var ship = this.ship;	
+	for (var i in ship.systems) {
+		var system = ship.systems[i];
+
+		if (system instanceof ThirdspaceShieldGenerator) {
+			var generator = system; //Find generator
+		}
+	}
+
+	var shieldHealth = this.currentHealth;
+	if(shieldHealth >= 10){		
+		this.currentHealth -= 25;
+		generator.storedCapacity += 25;
+	}else{
+		var shieldIncrement = Math.max(0, shieldHealth);
+		this.currentHealth -= shieldIncrement;
+		generator.storedCapacity += shieldIncrement;		
+	}	
+	
+	if (this.shieldHealth == 0) {
+		this.outputDisplay = '-'; //'0' is not shown!							
+	}	
+	
+};
 
 ThirdspaceShield.prototype.doIndividualNotesTransfer = function () { //prepare individualNotesTransfer variable - if relevant for this particular system
 	this.individualNotesTransfer = Array();
@@ -519,72 +570,6 @@ ThoughtShield.prototype.getDefensiveHitChangeMod = function (target, shooter, we
 
     return defenceMod; // Return the calculated defenceMod
 };
-
-
-/* //OLD VERSION BEFORE OPTIMISATION - LEAVE HERE FOR NOW
-ThoughtShield.prototype.getDefensiveHitChangeMod = function (target, shooter, weapon) {
-
- 	var thisShip = this.ship;
-
-    for (var i in gamedata.ships) {
-        var ship = gamedata.ships[i];
-        
-        if(!ship.phpclass == 'Consortium') continue;  //Only one type of ship can Reinforce Thought Shield 
-    	if(!ship.team == target.team) continue; //And in this ship's team.
-    	if(shipManager.isDestroyed(ship)) continue;	//Not dead!
-
-		//Search Consortium's systems for Shield Reinforcement    		
-		for (var j in ship.systems) {
-			var system = ship.systems[j];
-
-			//Only interested in Shield Reinforcement systems
-			if (system instanceof ShieldReinforcement) {
-					var baseOutput = shipManager.systems.getRemainingHealth(system);
-					var noOfShieldsBoosted = 0;//Initialise	
-					var usedOutput = 0;					
-					
-					//Now check it's fireOrders
-					if(system.fireOrders.length > 0){
-						for(var k in system.fireOrders){
-							var fireOrder = system.fireOrders[k];
-							//Looking for a fireOrder boosting shields and amend defenceMod
-							if(fireOrder.targetid == thisShip.id) this.defenceMod = system.reinforceAmount;	
-								
-							//Also record how much shield power was used so we know how much is left to boost Consortium below
-							var reinforceTarget = gamedata.getShip(fireOrder.targetid);
-							for (var l in reinforceTarget.systems) {//Check all systems for Thought Shield
-								var targetSystem = reinforceTarget.systems[l];
-								
-								if (targetSystem instanceof ThoughtShield) {
-									noOfShieldsBoosted += 1;//Shield found, add it to tally.
-								}
-							}						
-						}
-					}
-				
-					if(ship.id == thisShip.id){ //The Consortium IS the targeted ship!
-						usedOutput = noOfShieldsBoosted * system.reinforceAmount;
-						var remainingOutput = baseOutput - usedOutput;
-						var ownShields = 0;
-						
-						for (var m in thisShip.systems) {//Check all systems for Thought Shield
-							var ownSystem = thisShip.systems[m];
-									
-								if (ownSystem instanceof ThoughtShield) {
-									ownShields += 1;//Shield found, add it to tally.
-								}
-						}
-						
-						this.defenceMod = Math.round(remainingOutput / ownShields);								
-					}	
-			}
-		}    	
-        
-	}
-    
-    return this.defenceMod; //Usually 0, unless reinforced.
-};
-*/
 
 ThoughtShield.prototype.canIncrease = function () { //Can increase if not at max / destroyed.
  //Check if it is at maxHealth / not destroyed etc / Is there spare capacity in Generator?	

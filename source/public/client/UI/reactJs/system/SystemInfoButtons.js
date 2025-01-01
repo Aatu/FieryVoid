@@ -380,6 +380,12 @@ class SystemInfoButtons extends React.Component {
 	}
 	
 	/*Thirdspace Shield increase health*/
+	TSShieldIncrease25(e) {
+        e.stopPropagation(); e.preventDefault();
+		const {ship, system} = this.props;
+		system.doIncrease25();
+		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+	}
 	TSShieldIncrease10(e) {
         e.stopPropagation(); e.preventDefault();
 		const {ship, system} = this.props;
@@ -417,6 +423,12 @@ class SystemInfoButtons extends React.Component {
 		system.doDecrease10();
 		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 	}
+	TSShieldDecrease25(e) {
+        e.stopPropagation(); e.preventDefault();
+		const {ship, system} = this.props;
+		system.doDecrease25();
+		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+	}	
 	/*Thirdspace Shield Generator Presets*/
 	TSShieldGenSelect(e) {
         e.stopPropagation(); e.preventDefault();
@@ -542,12 +554,14 @@ class SystemInfoButtons extends React.Component {
 				{canSpecincrease(ship, system) && <Button onClick={this.Specincrease.bind(this)} img="./img/systemicons/Specialistclasses/iconPlus.png"></Button>}
 				{canSpecdecrease(ship, system) && <Button onClick={this.Specdecrease.bind(this)} img="./img/systemicons/Specialistclasses/iconMinus.png"></Button>}
 
+				{canTSShieldIncrease(ship, system) && <Button onClick={this.TSShieldIncrease25.bind(this)} img="./img/systemicons/ShieldGenclasses/iconPlus25.png"></Button>}
 				{canTSShieldIncrease(ship, system) && <Button onClick={this.TSShieldIncrease10.bind(this)} img="./img/systemicons/ShieldGenclasses/iconPlus10.png"></Button>}
 				{canTSShieldIncrease(ship, system) && <Button onClick={this.TSShieldIncrease5.bind(this)} img="./img/systemicons/ShieldGenclasses/iconPlus5.png"></Button>}	
 				{canTSShieldIncrease(ship, system) && <Button onClick={this.TSShieldIncrease.bind(this)} img="./img/systemicons/BFCPclasses/iconPlus.png"></Button>}				
 				{canTSShieldDecrease(ship, system) && <Button onClick={this.TSShieldDecrease.bind(this)} img="./img/systemicons/BFCPclasses/iconMinus.png"></Button>}				
 				{canTSShieldDecrease(ship, system) && <Button onClick={this.TSShieldDecrease5.bind(this)} img="./img/systemicons/ShieldGenclasses/iconMinus5.png"></Button>}
 				{canTSShieldDecrease(ship, system) && <Button onClick={this.TSShieldDecrease10.bind(this)} img="./img/systemicons/ShieldGenclasses/iconMinus10.png"></Button>}
+				{canTSShieldDecrease(ship, system) && <Button onClick={this.TSShieldDecrease25.bind(this)} img="./img/systemicons/ShieldGenclasses/iconMinus25.png"></Button>}
 				{canTSShieldGendisplayCurrClass(ship, system) && <Button title={getTSShieldGencurrClassName(ship,system)} img={getTSShieldGencurrClassImg(ship,system)}></Button>}
 				{canTSShieldGendisplayCurrClass(ship, system) && <Button title="prev" onClick={this.prevCurrClass.bind(this)} img="./img/systemicons/Specialistclasses/iconPrev.png"></Button>}
 				{canTSShieldGendisplayCurrClass(ship, system) && <Button title="next" onClick={this.nextCurrClass.bind(this)} img="./img/systemicons/Specialistclasses/iconNext.png"></Button>}					{canTSShieldGenSelect(ship, system) && <Button onClick={this.TSShieldGenSelect.bind(this)} img="./img/systemicons/Specialistclasses/select.png"></Button>}		
