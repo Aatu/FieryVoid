@@ -51,6 +51,41 @@ var GraviticShield = function GraviticShield(json, ship) {
 GraviticShield.prototype = Object.create(Shield.prototype);
 GraviticShield.prototype.constructor = GraviticShield;
 
+GraviticShield.prototype.getDefensiveHitChangeMod = function (target, shooter, weapon) {
+    if (!weapon.ballistic) {
+        if (shooter.flight && (mathlib.getDistanceBetweenShipsInHex(target, shooter) == 0)) return 0;
+    }
+
+    var defenceMod = shipManager.systems.getOutput(target, this);; // Default value
+	
+	// New check looking for Abbai Shield Projectors and updating front-end values
+    var thisShip = this.ship;
+	if(thisShip.faction == "Abbai Matriarchate"){
+
+	    gamedata.ships.forEach(ship => {
+	    	if(ship.faction !== "Abbai Matriarchate") return; //Only Abbai have Projectors.
+	        if (ship.team !== target.team) return; // On same team as the target
+	        if (shipManager.isDestroyed(ship)) return; // Skip destroyed ships
+	        if (ship.phpclass == 'alanti' || ship.phpclass == 'pirocia'){  // Only OSAT and Base matter
+		        // Process each system in the current ship
+		        ship.systems.forEach(system => {
+		            if (!(system instanceof AbbaiShieldProjector)) return; // Only Shield Reinforcement systems
+
+		            // Process all fire orders for the system, should only be one.
+		            system.fireOrders.forEach(fireOrder => {
+		                if (fireOrder.targetid === thisShip.id) {
+		                    defenceMod += system.output; // Increase defenceMod for this shield
+		                }
+		            });
+		            
+		        });
+			}    
+	    });         
+	}
+	        
+    return defenceMod;
+};
+
 var ShieldGenerator = function ShieldGenerator(json, ship) {
     ShipSystem.call(this, json, ship);
 };
