@@ -7,8 +7,24 @@ var InterceptorMkI = function InterceptorMkI(json, ship) {
 InterceptorMkI.prototype = Object.create(Weapon.prototype);
 InterceptorMkI.prototype.constructor = InterceptorMkI;
 
+InterceptorMkI.prototype.hasMaxBoost = function () {
+    return true;
+};
+InterceptorMkI.prototype.getMaxBoost = function () {
+    return this.maxBoostLevel;
+};
+
+InterceptorMkI.prototype.initializationUpdate = function() {
+    var boost = shipManager.power.getBoost(this);
+	if(boost > 0){
+		this.data["Intercept"] = "-"; //To inform player.
+		this.data["Fire control (fighter/med/cap)"] = "30/-/-";
+	}
+    return this;
+};
+
 InterceptorMkI.prototype.getDefensiveHitChangeMod = function (target, shooter, weapon) {
-    return shipManager.systems.getOutput(target, this);
+    return this.output;
 };
 
 var InterceptorMkII = function InterceptorMkII(json, ship) {
@@ -16,6 +32,15 @@ var InterceptorMkII = function InterceptorMkII(json, ship) {
 };
 InterceptorMkII.prototype = Object.create(InterceptorMkI.prototype);
 InterceptorMkII.prototype.constructor = InterceptorMkII;
+
+InterceptorMkII.prototype.initializationUpdate = function() {
+    var boost = shipManager.power.getBoost(this);
+	if(boost > 0){
+		this.data["Intercept"] = "-"; //To inform player.
+		this.data["Fire control (fighter/med/cap)"] = "40/-/-";
+	}
+    return this;
+};
 
 var InterceptorPrototype = function InterceptorPrototype(json, ship) {
     InterceptorMkI.call(this, json, ship);
@@ -253,6 +278,15 @@ var HeavyInterceptorBattery = function HeavyInterceptorBattery(json, ship) {
 };
 HeavyInterceptorBattery.prototype = Object.create(InterceptorMkI.prototype);
 HeavyInterceptorBattery.prototype.constructor = HeavyInterceptorBattery;
+
+HeavyInterceptorBattery.prototype.initializationUpdate = function() {
+    var boost = shipManager.power.getBoost(this);
+	if(boost > 0){
+		this.data["Intercept"] = "-"; //To inform player.
+		this.data["Fire control (fighter/med/cap)"] = "50/-/-";
+	}
+    return this;
+};
 
 var Interdictor = function Interdictor(json, ship) {
     Weapon.call(this, json, ship);

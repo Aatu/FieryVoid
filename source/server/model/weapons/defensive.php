@@ -19,7 +19,7 @@
         public $loadingtime = 1;
   
         public $rangePenalty = 2;
-        public $fireControl = array(6, null, null); // fighters, <mediums, <capitals 
+        public $fireControl = array(null, null, null); // fighters, <mediums, <capitals 
         
         public $output = 3;
         
@@ -28,6 +28,10 @@
 
         public $damageType = "Standard"; 
         public $weaponClass = "Particle";
+
+	    public $boostable = true;
+	    public $boostEfficiency = 0;
+	    public $maxBoostLevel = 1;
     
         public function getDefensiveType()
         {
@@ -53,11 +57,37 @@
         public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon){
             return 0;
         }
+
+         protected function getBoostLevel($turn){
+            $boostLevel = 0;
+            foreach ($this->power as $i){
+                if ($i->turn != $turn){
+                   continue;
+                }
+                if ($i->type == 2){
+                    $boostLevel += $i->amount;
+                }
+            }
+            return $boostLevel;
+        }
+
+	    public function beforeFiringOrderResolution($gamedata){		
+		    parent::beforeFiringOrderResolution($gamedata);
+	        if($this->getBoostLevel($gamedata->turn) > 0){
+	            $this->intercept = 0; //If wepaon is boosted for Offensive Mode, cannot intercept!      	
+            	$this->fireControl = array(6, null, null);
+	        }        
+		} //endof function beforeFiringOrderResolution
         
         public function setSystemDataWindow($turn){
             //$this->data["Weapon type"] = "Particle";
             //$this->data["Damage type"] = "Standard";
+            if($this->getBoostLevel($turn) > 0){ //Boosted i.e. switched to Offeensive Mode this turn.
+            	$this->fireControl = array(6, null, null); //To allow Offensive firing.       	
+	            $this->intercept = 0; //If weapon is boosted for Offensive Mode, cannot intercept!            
+            } 
             $this->data["Special"] = "Energy Web: -15 to hit on arc with active Interceptor.";
+            $this->data["Special"] .= "<br>Can be fired offensively at fighters by boosting this system in Initial Orders Phase (at zero cost).  However, system loses Intercept Rating (E-Web is unaffected).";              
             parent::setSystemDataWindow($turn);
         }
 
@@ -68,7 +98,15 @@
         
         public function getDamage($fireOrder){        return Dice::d(10)+5;   }
         public function setMinDamage(){     $this->minDamage = 6 ;      }
-        public function setMaxDamage(){     $this->maxDamage = 15 ;      }               
+        public function setMaxDamage(){     $this->maxDamage = 15 ;      } 
+        
+		public function stripForJson(){
+			$strippedSystem = parent::stripForJson();
+			$strippedSystem->fireControl = $this->fireControl;
+			$strippedSystem->intercept = $this->intercept;								
+			return $strippedSystem;
+		}        
+                      
     } //endof class Interceptor MkI
     
 
@@ -79,11 +117,24 @@
         
         public $output = 4;
         public $intercept = 4;
-        public $fireControl = array(8, null, null);
+        public $fireControl = array(null, null, null);
+
+	    public function beforeFiringOrderResolution($gamedata){		
+		    parent::beforeFiringOrderResolution($gamedata);
+	        if($this->getBoostLevel($gamedata->turn) > 0){
+	            $this->intercept = 0; //If wepaon is boosted for Offensive Mode, cannot intercept!      	
+            	$this->fireControl = array(8, null, null);
+	        }        
+		} //endof function beforeFiringOrderResolution
                         
         public function setSystemDataWindow($turn){
-            parent::setSystemDataWindow($turn);
+        	parent::setSystemDataWindow($turn);
+            if($this->getBoostLevel($turn) > 0){           	
+            	$this->fireControl = array(8, null, null); //To allow Offensive firing.       	
+	            $this->intercept = 0; //If weapon is boosted for Offensive Mode, cannot intercept!            
+            }          
             $this->data["Special"] = "Energy Web: -20 to hit on arc with active Interceptor.";
+            $this->data["Special"] .= "<br>Can be fired offensively at fighters by boosting this system in Initial Orders Phase (at zero cost).  However, system loses Intercept Rating (E-Web is unaffected).";              
         }
     }
     
@@ -98,7 +149,12 @@
                 
         public function setSystemDataWindow($turn){
             parent::setSystemDataWindow($turn);
+            if($this->getBoostLevel($turn) > 0){ //Boosted i.e. switched to Offeensive Mode this turn.
+            	$this->fireControl = array(6, null, null); //To allow Offensive firing.       	
+	            $this->intercept = 0; //If weapon is boosted for Offensive Mode, cannot intercept!            
+            }            
             $this->data["Special"] = "Energy Web: -10 to hit on arc with active Interceptor.";
+            $this->data["Special"] .= "Can be fired offensively at fighters, by boosting this system in Initial Orders Phase (at zero cost).  However, system loses Intercept Rating (E-Web is unaffected).";                        
         }
 
         public function getDamage($fireOrder){        return Dice::d(10)+3;   }
@@ -665,11 +721,24 @@ class HeavyInterceptorBattery extends InterceptorMkI{
         
         public $output = 4;
         public $intercept = 4;
-        public $fireControl = array(10, null, null); 
+        public $fireControl = array(null, null, null); 
+
+	    public function beforeFiringOrderResolution($gamedata){		
+		    parent::beforeFiringOrderResolution($gamedata);
+	        if($this->getBoostLevel($gamedata->turn) > 0){
+	            $this->intercept = 0; //If weapon is boosted for Offensive Mode, cannot intercept!      	
+            	$this->fireControl = array(10, null, null);
+	        }        
+		} //endof function beforeFiringOrderResolution
                                  
         public function setSystemDataWindow($turn){
             parent::setSystemDataWindow($turn);
+            if($this->getBoostLevel($turn) > 0){ //Boosted i.e. switched to Offeensive Mode this turn.
+            	$this->fireControl = array(10, null, null); //To allow Offensive firing.       	
+	            $this->intercept = 0; //If weapon is boosted for Offensive Mode, cannot intercept!            
+            }                         
             $this->data["Special"] = "Energy Web: -20 to hit on arc with active Interceptor.";
+            $this->data["Special"] .= "<br>Can be fired offensively at fighters by boosting this system in Initial Orders Phase (at zero cost).  However, system loses Intercept Rating (E-Web is unaffected).";              
         }
 
         public function getDamage($fireOrder){        return Dice::d(10, 2)+6;   }
