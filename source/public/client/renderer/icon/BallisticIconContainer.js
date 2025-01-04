@@ -360,7 +360,7 @@ window.BallisticIconContainer = function () {
 		var wasVisibleShooter = false; //Variable to track if destroyed lines were visible. If one was, they all were.
 		
 		this.ballisticLineIcons = this.ballisticLineIcons.filter((lineIcon) => {
-			// Destroy lines where the ship is either the target or the shooter.
+			// Destroy lines where the ship is either the target or the shooter.  Ship being checked should only ever be one or the other.
 			if (lineIcon.targetId === ship.id) {
 			    if (lineIcon.lineSprite.isVisible) wasVisibleTarget = true;
 			    this.scene.remove(lineIcon.lineSprite.mesh);
