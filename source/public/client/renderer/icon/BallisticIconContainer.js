@@ -283,7 +283,6 @@ window.BallisticIconContainer = function () {
 				
 				case 'support': //Generic Support icon for these type of weapons. 06.24 - DK	
 					targetType = 'hexGreen';
-//					textColour = "#00dd00";   
 					iconImage = "./img/allySupport.png"; 		        
 				break;
 		
@@ -304,15 +303,15 @@ window.BallisticIconContainer = function () {
 			//Create orange launch icon on firing ship.
 	        var launchSprite = null;
 	        
-			//Don't create launch sprite for duplicates, persistent effects or Direct Fire 
-	        if ((!getByLaunchPosition(launchPosition, this.ballisticIcons)) && ballistic.notes != 'Persistent Effect' && ballistic.type !== 'normal') {        	
-		        if(gamedata.isMyOrTeamOneShip(shooter)){
-					launchSprite = new BallisticSprite(launchPosition, 'hexYellow');       
-			        scene.add(launchSprite.mesh);	        		
-		       	}else{
-					launchSprite = new BallisticSprite(launchPosition, 'hexOrange');       
-			        scene.add(launchSprite.mesh);
-				}
+			//Don't create launch sprite for duplicates, persistent effects or Direct Fire/Support Weapon 
+	        if ((!getByLaunchPosition(launchPosition, this.ballisticIcons)) && ballistic.notes != 'Persistent Effect' && ballistic.type !== 'normal' && ballistic.damageclass !== 'support') {        	
+				    if(gamedata.isMyOrTeamOneShip(shooter)){
+						launchSprite = new BallisticSprite(launchPosition, 'hexYellow');       
+				        scene.add(launchSprite.mesh);	        		
+			       	}else{
+						launchSprite = new BallisticSprite(launchPosition, 'hexOrange');       
+				        scene.add(launchSprite.mesh);
+					}
 		    }
 
 	        var targetSprite = null;
@@ -327,6 +326,7 @@ window.BallisticIconContainer = function () {
 	                scene.add(targetSprite.mesh);
 	            }
 	        }
+
 
 	        this.ballisticIcons.push({
 	            id: ballistic.id,
@@ -353,41 +353,55 @@ window.BallisticIconContainer = function () {
         }).pop();
     }
 
-	//New code to create ballistic lines between laucnhes and targets - Dk 12.24
+	//New code to create ballistic lines between launches and targets - DK 12.24
     BallisticIconContainer.prototype.updateLinesForShip = function (ship, iconContainer) {
 
-		var wasVisible = false;
-
+		var wasVisibleTarget = false; //Variable to track if destroyed lines were visible. If one was, they all were.
+		var wasVisibleShooter = false; //Variable to track if destroyed lines were visible. If one was, they all were.
+		
 		this.ballisticLineIcons = this.ballisticLineIcons.filter((lineIcon) => {
-
-		    if (lineIcon.targetId === ship.id) {	    	
-		    	if (lineIcon.lineSprite.isVisible) wasVisible = true;
-		        this.scene.remove(lineIcon.lineSprite.mesh);
-		        lineIcon.lineSprite.destroy();
-		        return false;
-		    }
-		    return true; // Keep the lineIcon if the condition isn't met
+			// Destroy lines where the ship is either the target or the shooter.
+			if (lineIcon.targetId === ship.id) {
+			    if (lineIcon.lineSprite.isVisible) wasVisibleTarget = true;
+			    this.scene.remove(lineIcon.lineSprite.mesh);
+			    lineIcon.lineSprite.destroy();
+			    return false;
+			}else if (lineIcon.shooterId === ship.id) {
+			    if (lineIcon.lineSprite.isVisible) wasVisibleShooter = true;
+			    this.scene.remove(lineIcon.lineSprite.mesh);
+			    lineIcon.lineSprite.destroy();
+			    return false;
+			}else{		    
+		    	return true; // Keep the lineIcon if the condition isn't met
+			}
 		});
 
-
+		//Now recreate them using usual method.
         var allBallistics = weaponManager.getAllFireOrdersForAllShipsForTurn(gamedata.turn, 'ballistic');			
 	    allBallistics.forEach(function (ballistic) {
 	        createOrUpdateBallisticLines.call(this, ballistic, iconContainer, gamedata.turn);
 	    }, this);
 
-
+		//Check if lines were visible and if so continue to show.
         this.ballisticLineIcons.forEach(function (lineIcon) {
             if (lineIcon.targetId === ship.id) {
-	            if(!wasVisible){
+	            if(!wasVisibleTarget){
 	            	lineIcon.lineSprite.hide();
 	            	lineIcon.lineSprite.isVisible = false;	 	            
             	}else{
 	            	lineIcon.lineSprite.show();
 	            	lineIcon.lineSprite.isVisible = true;	            		
 				}
-            }
+            }else if(lineIcon.shooterId === ship.id) {
+	            if(!wasVisibleShooter){
+	            	lineIcon.lineSprite.hide();
+	            	lineIcon.lineSprite.isVisible = false;	 	            
+            	}else{
+	            	lineIcon.lineSprite.show();
+	            	lineIcon.lineSprite.isVisible = true;	            		
+				}
+			}	
         });        
- 
     };
 
 	//New method that toggles Ballistic Lines on and off.
@@ -451,19 +465,28 @@ window.BallisticIconContainer = function () {
 	    }
     	
 	}	
-	
+
+
     function updateBallisticLineIcon(lineIcon, ballistic, iconContainer, turn) {
         lineIcon.used = true;
 
 		if(ballistic.targetid === -1) return; //No need to update further for AoE ballistics (they don't move) 
+ 
+	    var shooterIcon = null;		
+	    shooterIcon = iconContainer.getById(ballistic.shooterid);        
+	    var targetIcon = null;
+	    targetIcon = iconContainer.getById(ballistic.targetid);
 
-	    var targetIcon = iconContainer.getById(ballistic.targetid);  
-	          
-		var lastMove = shipManager.movement.getLastCommitedMove(targetIcon.ship);
-		var newPosition = this.coordinateConverter.fromHexToGame(lastMove.position);        
+		//Update start and end points for Ballistic Line as required.
+		var shooterLastMove = shipManager.movement.getLastCommitedMove(shooterIcon.ship);
+		var shooterNewPosition = this.coordinateConverter.fromHexToGame(shooterLastMove.position);  	          
+		var targetLastMove = shipManager.movement.getLastCommitedMove(targetIcon.ship);
+		var targetNewPosition = this.coordinateConverter.fromHexToGame(targetLastMove.position);        
 
-        lineIcon.lineSprite.end = newPosition;
+        lineIcon.lineSprite.start = shooterNewPosition;
+        lineIcon.lineSprite.end = targetNewPosition;
     }	
+
 
     function createBallisticLineIcon(ballistic, iconContainer, turn, scene, replay = false) {
 
@@ -472,16 +495,16 @@ window.BallisticIconContainer = function () {
 	    var targetIcon = null;
 	    targetIcon = iconContainer.getById(ballistic.targetid);
 
-		//Get Laucnh Position and Target Position
+		//Get Launch Position and Target Position
 	    var launchPosition = this.coordinateConverter.fromHexToGame(shooterIcon.getFirstMovementOnTurn(turn).position);
 	        						
 		var targetPosition = null;
-	    if(targetIcon && ballistic.targetId !== -1){
+	    if(targetIcon && ballistic.targetid !== -1){
 			targetPosition = this.coordinateConverter.fromHexToGame(targetIcon.getLastMovement(turn).position);
 	    }else{
 	        targetPosition = this.coordinateConverter.fromHexToGame(new hexagon.Offset(ballistic.x, ballistic.y));
 		}
-		//Slightly different method for Replays.	
+		//Slightly different method for Replays.  Could I make a shipManager.movement.getLastCommitedMoveONTURN(targetIcon.ship) function???	
 		if(replay && targetIcon) targetPosition = this.coordinateConverter.fromHexToGame(targetIcon.getLastMovementOnTurn(turn).position);	
 
 		//Get shooter and modeName from it.
@@ -492,8 +515,8 @@ window.BallisticIconContainer = function () {
 			var modeName = weapon.firingModes[ballistic.firingMode]; //Get actual Firing Mode name
 		}	
 
-		if(modeName == 'Thought Wave' || modeName == 'Second Sight') targetPosition = launchPosition; //Only one weapon needs, for now.
-	    
+		if(modeName == 'Thought Wave' || modeName == 'Second Sight') targetPosition = launchPosition; //Only one weapon needs, for now.  
+			
 		if (launchPosition == null || targetPosition == null || 
 		    (launchPosition.x === targetPosition.x && 
 		     launchPosition.y === targetPosition.y && 
@@ -534,7 +557,8 @@ window.BallisticIconContainer = function () {
 		if(ballistic.damageclass){
 			switch (ballistic.damageclass) {	
 				case 'support': //Generic Support icon for these type of weapons. 06.24 - DK	
-					type = 'green';			        
+					type = 'green';
+					launchPosition = this.coordinateConverter.fromHexToGame(shooterIcon.getLastMovement(turn).position); //More important to show where ship support weapon originates, not hex.								        
 				break;
 			}		 
 		}
@@ -553,7 +577,7 @@ window.BallisticIconContainer = function () {
 
 	        scene.add(lineSprite.mesh);
 
-		//Need some checks here to handle when lines are toggled ona nd new ballistic fireORder/line is added
+		//Need some checks here to handle when lines are toggled on and new ballistic fireORder/line is added
 
 		var isFriendlyLinesVisible = this.ballisticLineIcons.some(lineIcon => 
 		  lineIcon.lineSprite?.isVisible === true && lineIcon?.isFriendly === true
