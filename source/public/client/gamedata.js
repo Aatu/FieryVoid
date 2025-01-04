@@ -409,13 +409,26 @@ window.gamedata = {
                 html += "<br>";
             }
             if (hasNoEW.length > 0) {
-                html += "You have not assigned any EW for the following ships: ";
-                html += "<br>";
-                for (var ship in hasNoEW) {
-                    html += hasNoEW[ship].name + " (" + hasNoEW[ship].shipClass + ")";
-                    html += "<br>";
-                }
-                html += "<br>";
+            	//New check to see if Scanne exists / has positive output before giving warning.
+			    for (var i = hasNoEW.length - 1; i >= 0; i--) {
+			        var ship = hasNoEW[i];
+			        var scanner = shipManager.systems.getSystemByName(ship, "scanner");
+
+			        // Check if the scanner is destroyed or output is <= 0
+			        if (!scanner || shipManager.systems.isDestroyed(ship, scanner) || shipManager.systems.getOutput(ship, scanner) <= 0) {
+			            hasNoEW.splice(i, 1); // Remove the ship from the array
+			        }
+			    }
+			    //Now check again and give message if hasNoEW length still over 0.            
+	            if (hasNoEW.length > 0) {         		            	
+	                html += "You have not assigned any EW for the following ships: ";
+	                html += "<br>";
+	                for (var ship in hasNoEW) {
+	                    html += hasNoEW[ship].name + " (" + hasNoEW[ship].shipClass + ")";
+	                    html += "<br>";
+	                }
+	                html += "<br>";
+				}
             }
             if (notLaunching.length > 0) {
                 html += "You have not assigned any ballistic launch for the following ships: ";
