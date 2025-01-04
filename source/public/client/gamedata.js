@@ -409,7 +409,7 @@ window.gamedata = {
                 html += "<br>";
             }
             if (hasNoEW.length > 0) {
-            	//New check to see if Scanne exists / has positive output before giving warning.
+            	//New check to see if Scanner exists / has positive output before giving warning - DK 01/25
 			    for (var i = hasNoEW.length - 1; i >= 0; i--) {
 			        var ship = hasNoEW[i];
 			        var scanner = shipManager.systems.getSystemByName(ship, "scanner");
