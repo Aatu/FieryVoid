@@ -1208,7 +1208,8 @@ spl_autoload_register(
                 'zzunofftshon' => '/server/model/ships/narn/zzunoffTshon.php',
                 //'zzunofftshonstealth' => '/server/model/ships/narn/zzunoffTshonStealth.php',
                 'zzunofftvoth' => '/server/model/ships/narn/zzunoffTvoth.php',
-		    
+                'zzunoffnaroth' => '/server/model/ships/narn/zzunoffNaRoth.php',
+                'zzunoffnaral' => '/server/model/ships/narn/zzunoffNaRal.php',		    
 		 
                 'ochlavitafull' => '/server/model/ships/dilgar/ochlavitaFull.php',   
                 'ochlavitamfull' => '/server/model/ships/dilgar/ochlavitaMFull.php',   
