@@ -92,6 +92,24 @@ shipManager.systems = {
         return output;
     },
 
+    getOutputNoBoost: function getOutputNoBoost(ship, system){
+		if (!system){
+			console.log("ERROR: getOutputNoBoost system missing");
+			console.trace();
+		}
+		
+		if (this.isDestroyed(ship, system))
+			return 0;
+        
+		if (shipManager.power.isOffline(ship, system))
+			return 0;
+		
+		var output = system.output + system.outputMod;
+        	output = Math.max(0,output); //output cannot be negative!
+
+        return output;
+    },
+
     getFighterSystem: function getFighterSystem(ship, fighterid, systemid) {
         for (var i in ship.systems) {
             var fighter = ship.systems[i];

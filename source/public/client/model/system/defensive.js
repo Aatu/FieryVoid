@@ -24,7 +24,7 @@ InterceptorMkI.prototype.initializationUpdate = function() {
 };
 
 InterceptorMkI.prototype.getDefensiveHitChangeMod = function (target, shooter, weapon) {
-    return this.output;
+    return shipManager.systems.getOutputNoBoost(target, this);
 };
 
 var InterceptorMkII = function InterceptorMkII(json, ship) {
