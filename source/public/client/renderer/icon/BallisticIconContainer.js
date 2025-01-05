@@ -317,7 +317,7 @@ window.BallisticIconContainer = function () {
 	        var targetSprite = null;
 
 	        if (!getByTargetIdOrTargetPosition(targetPosition, ballistic.targetId, this.ballisticIcons)) {
-			if(modeName == 'Thought Wave' || modeName == 'Second Sight') targetPosition = launchPosition;//Don't create target hex for Thougtwave, just create on launch hex.
+				if(weapon.noTargetHexIcon) targetPosition = launchPosition;//Don't create target hex for certain weapons.
 	            if (targetIcon && targetPosition) {
 	                targetSprite =  new BallisticSprite(targetPosition, targetType, text, textColour, iconImage);//'hex');
 	                targetIcon.mesh.add(targetSprite.mesh);
@@ -514,8 +514,8 @@ window.BallisticIconContainer = function () {
 			var weapon = shooter.systems[ballistic.weaponid]; //Find weapon			
 			var modeName = weapon.firingModes[ballistic.firingMode]; //Get actual Firing Mode name
 		}	
-
-		if(modeName == 'Thought Wave' || modeName == 'Second Sight') targetPosition = launchPosition; //Only one weapon needs, for now.  
+ 
+		if(weapon.noTargetHexIcon) targetPosition = launchPosition;
 			
 		if (launchPosition == null || targetPosition == null || 
 		    (launchPosition.x === targetPosition.x && 

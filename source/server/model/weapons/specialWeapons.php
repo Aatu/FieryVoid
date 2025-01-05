@@ -7311,6 +7311,7 @@ class SecondSight extends Weapon{
 	public $noProjectile = true; //Marker for front end to make projectile invisible for weapons that shouldn't have one.  		
 
 	protected $autoHit = true;//To show 100% hit chance in front end.
+   	protected $noTargetHexIcon = true; //For Front End Hex icon display.	
 	
     protected $possibleCriticals = array();	
 	
@@ -7426,7 +7427,8 @@ class SecondSight extends Weapon{
     public function stripForJson() {
         $strippedSystem = parent::stripForJson();    
         $strippedSystem->autoHit = $this->autoHit;
-		$strippedSystem->noProjectile = $this->noProjectile;                                 
+		$strippedSystem->noProjectile = $this->noProjectile; 
+		$strippedSystem->noTargetHexIcon = $this->noTargetHexIcon;		                                
         return $strippedSystem;
 	}    
  
@@ -7469,6 +7471,8 @@ class ThoughtWave extends Plasma{
 
 	public $output = 15;//Is actually used as the base hit chance, but can be modified by critical hits.	
 	private $diceRollonTurn = null;	
+   	protected $noTargetHexIcon = true; //For Front End Hex icon display.	
+
 
     protected $possibleCriticals = array(
 	    21=>array("OutputReduced1", "OutputReduced1", "OutputReduced1", "OutputReduced1", "OutputReduced1")
@@ -7650,7 +7654,8 @@ class ThoughtWave extends Plasma{
 
  	public function stripForJson(){
 		$strippedSystem = parent::stripForJson();
-		$strippedSystem->noProjectile = $this->noProjectile;															
+		$strippedSystem->noProjectile = $this->noProjectile;
+		$strippedSystem->noTargetHexIcon = $this->noTargetHexIcon;																			
 		return $strippedSystem;
 	}         
 	
