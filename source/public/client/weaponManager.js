@@ -1372,14 +1372,11 @@ window.weaponManager = {
             if (weapon.ballistic) {
                 type = 'ballistic';
             }
-
-            if (weapon.reinforceAmount > 0){ //22.07.24 - New statement to add check and change reinforce amount for Mindrider Shield Reinforcement!
-				if(!weapon.confirmReinforcement(selectedShip, ship)){
-				    confirm.error("You do not have enough capacity to reinforce allied unit's shields by that amount.");
-      				return;	
-				}	
-            }
-
+			
+			if (weapon.reinforceAmount != null){
+				if(!weapon.checkReinforcement(selectedShip, ship)) return;
+			}
+			
             if (weaponManager.isOnWeaponArc(selectedShip, ship, weapon)) {
                 debug && console.log("is on arc");
                 if (weaponManager.checkIsInRange(selectedShip, ship, weapon)) {
