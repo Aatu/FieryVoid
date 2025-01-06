@@ -408,17 +408,24 @@ window.gamedata = {
                 }
                 html += "<br>";
             }
-            if (hasNoEW.length > 0) {
-            	//New check to see if Scanner exists / has positive output before giving warning - DK 01/25
+			if (hasNoEW.length > 0) {
+			    // New check to see if Scanner exists / has positive output before giving warning - DK 01/25
 			    for (var i = hasNoEW.length - 1; i >= 0; i--) {
 			        var ship = hasNoEW[i];
-			        var scanner = shipManager.systems.getSystemByName(ship, "scanner");
+			        var scanners = shipManager.systems.getSystemListByName(ship, "scanner");
 
-			        // Check if the scanner is destroyed or output is <= 0
-			        if (!scanner || shipManager.systems.isDestroyed(ship, scanner) || shipManager.systems.getOutput(ship, scanner) <= 0) {
-			            hasNoEW.splice(i, 1); // Remove the ship from the array
+			        // Check if all scanners for this ship are either destroyed or have output <= 0
+			        var allScannersDisabled = scanners.every(function(scanner) {
+			            return shipManager.systems.isDestroyed(ship, scanner) || 
+			                   shipManager.systems.getOutput(ship, scanner) <= 0;
+			        });
+
+			        // If all scanners are disabled, remove the ship from hasNoEW
+			        if (allScannersDisabled) {
+			            hasNoEW.splice(i, 1);
 			        }
 			    }
+
 			    //Now check again and give message if hasNoEW length still over 0.            
 	            if (hasNoEW.length > 0) {         		            	
 	                html += "You have not assigned any EW for the following ships: ";
