@@ -300,6 +300,10 @@ window.BallisticIconContainer = function () {
 	            targetPosition = { x: 0, y: 0 };
 	        }
 
+			if(!shooter.flight){ //Don't create target hex for certain ship weapons.
+				if(weapon.noTargetHexIcon) targetPosition = launchPosition;
+			}	
+
 			//Create orange launch icon on firing ship.
 	        var launchSprite = null;
 	        
@@ -316,8 +320,7 @@ window.BallisticIconContainer = function () {
 
 	        var targetSprite = null;
 
-	        if (!getByTargetIdOrTargetPosition(targetPosition, ballistic.targetId, this.ballisticIcons)) {
-				if(weapon.noTargetHexIcon) targetPosition = launchPosition;//Don't create target hex for certain weapons.
+	        if (!getByTargetIdOrTargetPosition(targetPosition, ballistic.targetId, this.ballisticIcons)) {	
 	            if (targetIcon && targetPosition) {
 	                targetSprite =  new BallisticSprite(targetPosition, targetType, text, textColour, iconImage);//'hex');
 	                targetIcon.mesh.add(targetSprite.mesh);
@@ -515,7 +518,9 @@ window.BallisticIconContainer = function () {
 			var modeName = weapon.firingModes[ballistic.firingMode]; //Get actual Firing Mode name
 		}	
  
-		if(weapon.noTargetHexIcon) targetPosition = launchPosition;
+		if(!shooter.flight){ //Don't create target hex for certain ship weapons.
+			if(weapon.noTargetHexIcon) targetPosition = launchPosition;
+		}
 			
 		if (launchPosition == null || targetPosition == null || 
 		    (launchPosition.x === targetPosition.x && 
