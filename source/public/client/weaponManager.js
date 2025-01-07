@@ -1594,20 +1594,40 @@ window.weaponManager = {
         if(gamedata.gamephase == 3 && ship.flight)	webglScene.customEvent("ShipMovementChanged", { ship: ship }); //Redraw movement for Combat Pivots       
     },
 
-    removeFiringOrderMulti: function removeFiringOrderMulti(ship, system) {
-		if (system.fireOrders.length > 0) {
-		    const lastFireOrder = system.fireOrders[system.fireOrders.length - 1];
+	removeFiringOrderMulti: function removeFiringOrderMulti(ship, system, target = null, button = false) {
+	    if (weaponManager.hasFiringOrder(ship, system)) {
+	        // Get the last fire order
+	        var lastFireOrder = system.fireOrders[system.fireOrders.length - 1];
 
-		    if (lastFireOrder.weaponid == system.id && lastFireOrder.turn == gamedata.turn) {
-		        system.fireOrders.pop(); // Remove the last firing order
-		        system.maxVariableShots++; // Increment your counter
-		    }
-		}
+	        if (button) {
+	            // When a button is pressed, check all fire orders
+	            for (var i = system.fireOrders.length - 1; i >= 0; i--) {
+	                var fireOrder = system.fireOrders[i];
+	                // Check if the fire order's target matches the provided target
+	                if (fireOrder.targetid == target?.id) {
+	                    system.fireOrders.splice(i, 1); // Remove the specific fire order
+	                    system.maxVariableShots++; // Increment your counter
+	                    webglScene.customEvent('SplitOrderRemoved', { shooter: ship, target: target });
+	                    break; // Exit the loop after removing one matching fire order
+	                }
+	            }
+	        } else {
+	            // Default case: Remove only the last fire order
+	            if (lastFireOrder.weaponid == system.id && lastFireOrder.turn == gamedata.turn) {
+	                system.fireOrders.pop(); // Remove the last firing order
+	                system.maxVariableShots++; // Increment your counter
+	            }
+	        }
+	    }
 
-        webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
-        
-        if(gamedata.gamephase == 3 && ship.flight)	webglScene.customEvent("ShipMovementChanged", { ship: ship }); //Redraw movement for Combat Pivots       
-    },
+	    // Trigger custom event to notify of system data changes
+	    webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+
+	    // Handle redraw for ship movement in combat phase
+	    if (gamedata.gamephase == 3 && ship.flight) {
+	        webglScene.customEvent("ShipMovementChanged", { ship: ship });
+	    }
+	},
     
 	removeFiringOrderAll: function removeFiringOrderAll(ship, system) { //remove firing orders for ALL similar weapons that have them
 		if (!gamedata.isMyShip(ship)) {
@@ -1664,6 +1684,17 @@ window.weaponManager = {
         return false;
     },
 
+    hasTargetedThisShip: function hasTargetedThisShip(target, system) {
+        for (var i in system.fireOrders) {
+            var fire = system.fireOrders[i];
+            if (fire.weaponid == system.id && fire.turn == gamedata.turn && !fire.rolled && fire.targetid == target.id) {
+                if ((gamedata.gamephase == 1 || gamedata.gamephase == 3) && system.ballistic || gamedata.gamephase == 3 && !system.ballistic) {
+					return true;
+                }
+            }
+        }
+        return false;
+    },
 	    
     shipHasFiringOrder: function shipHasFiringOrder(ship) {
 		for (var i in ship.systems) {

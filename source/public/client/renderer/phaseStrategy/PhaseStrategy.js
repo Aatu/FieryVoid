@@ -679,6 +679,15 @@ window.PhaseStrategy = function () {
         this.shipWindowManager.update();
     };
 
+    PhaseStrategy.prototype.onSplitOrderRemoved = function(payload) {
+
+        if (this.shipTooltip && this.shipTooltip.ships.includes(payload.target) &&  this.shipTooltip.ships.length === 1) {
+            this.shipTooltip.update(payload.target, this.selectedShip);
+        }
+
+        this.shipWindowManager.update();
+    };
+
     PhaseStrategy.prototype.onToggleFriendlyBallisticLines = function (payload) {
         toggleBallisticLines.call(this, gamedata.ships.filter(function(ship){ return gamedata.isMyOrTeamOneShip(ship) }), payload);
     };
