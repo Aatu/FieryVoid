@@ -12,6 +12,80 @@ var BallisticTorpedo = function BallisticTorpedo(json, ship) {
 BallisticTorpedo.prototype = Object.create(Torpedo.prototype);
 BallisticTorpedo.prototype.constructor = BallisticTorpedo;
 
+BallisticTorpedo.prototype.initializationUpdate = function() {
+	if(this.fireOrders.length == 0){
+		this.data["Number of shots"] = this.turnsloaded; 
+	}else{
+		this.data["Number of shots"] = this.maxVariableShots;
+	}
+	return this;
+};
+
+BallisticTorpedo.prototype.doMultipleFireOrders = function (shooter, target) {
+	
+/* //Can be used to restruct only one shot against a ship.
+	var fireOrders = this.fireOrders;
+	for (var i = fireOrders.length - 1; i >= 0; i--) {
+		if(target.shipSizeClass >= 0 && target.id === fireOrders[i].targetid && this.firingMode == 1) return; //Ships cannot be targeted more than once in normal firing mode.
+	}	
+*/		
+	//Don't add Firing Order and give player error message if they are out of ammo.
+	if(this.data["Number of shots"] <= 0){
+		confirm.error("A Ballistic Torpedo launcher does not have enough ammo to target another shot.");		
+		return; //No more shots to allocated!
+	}
+	
+	for (var s = 0; s < this.guns; s++) {
+		var fireid = shooter.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
+                        
+		var calledid = -1;
+/*
+//Ballistic Topredo CANNOT make called shots.
+	    if (system) {
+	        //check if weapon is eligible for called shot!
+            if (!weaponManager.canWeaponCall(this)) continue;
+
+	        // When the system is a subsystem, make all damage go through
+	        // the parent.
+	        while (system.parentId > 0) {
+	        system = shipManager.systems.getSystem(target, system.parentId);
+	    }
+
+	        calledid = system.id;
+	    }
+*/
+	    var damageClass = this.data["Weapon type"].toLowerCase();
+	    var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
+/*
+//Ballisitic Torpedo is, unsurprisingly, always a ballistic weapon :)
+	    if ((chance < 1)&&(!this.ballistic)) {//now ballistics can be launched when hit chance is 0 or less - important for Packet Torpedo!
+		    //debug && console.log("Can't fire, change < 0");
+		    continue;
+	    }
+*/
+
+	    var fire = {
+	        id: fireid,
+	        type: 'ballistic',
+	        shooterid: shooter.id,
+	        targetid: target.id,
+	        weaponid: this.id,
+	        calledid: calledid,
+	        turn: gamedata.turn,
+	        firingMode: this.firingMode,
+	        shots: this.defaultShots,
+	        x: "null",
+	        y: "null",
+	        damageclass: damageClass,
+	        chance: chance
+	        };
+		
+		this.maxVariableShots -= fire.shots;
+			        
+    	return fire;
+	}
+};
+
 var IonTorpedo = function IonTorpedo(json, ship) {
     Torpedo.call(this, json, ship);
 };

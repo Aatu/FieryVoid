@@ -89,13 +89,192 @@
         
         public $trailColor = array(141, 240, 255);
         public $animation = "trail";
+
+        public $priority = 5;
+        
+        public $grouping = 20;
+		
+		public $canSplitShots = true;  
+    	public $calledShotMod = 0; //Cannot make called shots against ships anyway, but shouldn't get modifier when we specificy specific fighters		      
+//        public $canChangeShots = true; //No longer needed.
+
+        
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+            
+        }
+
+      
+        public function firedOnTurn($turn){  
+        	$totalShots = 0; //Counter for shots this turns          
+            foreach ($this->fireOrders as $fire){
+                if ($fire->weaponid == $this->id && $fire->turn == $turn){
+                    $totalShots += $fire->shots;
+                }
+            }
+            return $totalShots;
+        }
+        
+        public function calculateLoading(TacGamedata $gamedata)
+        {
+            $loading = new WeaponLoading($this->turnsloaded, 0, 0, 0, $this->getLoadingTime(), $this->firingMode);
+            $shotsfired = $this->firedOnTurn(TacGamedata::$currentTurn);
+            if (TacGamedata::$currentPhase == 2)
+            {
+                if  
+                ( $this->isOfflineOnTurn(TacGamedata::$currentTurn) )
+                {
+                    $loading = new WeaponLoading(0, 0, 0, 0, $this->getLoadingTime(), $this->firingMode);
+                }
+                else if ($shotsfired)
+                {
+                    $newloading = $this->turnsloaded-$shotsfired;
+                    if ($newloading < 0)
+                        $newloading = 0;
+
+                $loading = new WeaponLoading($newloading, 0, 0, 0, $this->getLoadingTime(), $this->firingMode);
+                }
+            }
+            else if (TacGamedata::$currentPhase == 1)
+            {
+                $newloading = $this->turnsloaded+1;
+                if ($newloading > $this->getNormalLoad())
+                    $newloading = $this->getNormalLoad();
+
+                $loading = new WeaponLoading($newloading, 0, 0, 0, $this->getLoadingTime(), $this->firingMode);
+            }
+
+            return $loading;
+        }//endof calculateLoading()
+
+
+		public function beforeFiringOrderResolution($gamedata) {
+		    $turn = $gamedata->turn; // Assume $turn is accessible from $gamedata
+		    $shipOrders = [];
+		    $fighterOrders = [];
+
+		    // Group fire orders by targetid and type of target
+		    foreach ($this->fireOrders as $fire) {
+		        if ($fire->weaponid == $this->id && $fire->turn == $turn) {
+		            $targetId = $fire->targetid;
+		            $targetShip = $gamedata->getShipById($targetId);
+		            
+		            if ($targetShip instanceof FighterFlight) {                    
+		                if (!isset($fighterOrders[$targetId])) {
+		                    $fighterOrders[$targetId] = [$fire]; // Initialize as an array for multiple orders
+		                } else {
+		                    $fighterOrders[$targetId][] = $fire; // Add to the list of orders for this target
+		                }
+		            } else {            
+		                if (!isset($shipOrders[$targetId])) {
+		                    $shipOrders[$targetId] = $fire;
+		                } else {
+		                    $shipOrders[$targetId]->shots += $fire->shots;
+		                }
+		            }
+		        }
+		    }
+
+		    // Process fighterOrders to ensure unique calledid for each fire order
+		    foreach ($fighterOrders as $targetId => $fires) {
+		        $fighterFlight = $gamedata->getShipById($targetId);
+
+		        // Get a list of undestroyed fighters in the flight
+		        $fighterList = [];
+		        foreach ($fighterFlight->systems as $fighter) {
+		            if (!$fighter->isDestroyed()) {
+		                $fighterList[] = $fighter; // Add to the list of valid fighters
+		            }
+		            array_unshift($fighterList, $fighter); // array_unshift adds element at the beginning of array rather than at the end		    
+		        }
+
+		        // Assign unique calledid to fire orders
+		        $fighterIndex = 0; // Keep track of the current fighter being targeted
+		        foreach ($fires as $fire) {
+		            if (!isset($fighterList[$fighterIndex])) {
+		                break; // If there are no more fighters to assign, stop
+		            }
+		            $fire->calledid = $fighterList[$fighterIndex]->id; // Assign a unique fighter
+		            $fighterIndex++; // Move to the next fighter
+		        }
+		    }
+
+		    // Combine shipOrders and fighterOrders into this->fireOrders
+		    $combinedOrders = [];
+
+		    // Merge shipOrders
+		    if (!empty($shipOrders)) {
+		        $combinedOrders = array_merge($combinedOrders, array_values($shipOrders));
+		    }
+
+		    // Merge fighterOrders
+		    if (!empty($fighterOrders)) {
+		        foreach ($fighterOrders as $orders) {
+		            $combinedOrders = array_merge($combinedOrders, $orders); // Flatten nested arrays
+		        }
+		    }
+
+		    $this->fireOrders = $combinedOrders;
+		    
+		}//endof beforeFiringOrderResolution()
+		
+
+		public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);
+			if (!isset($this->data["Special"])) {
+				$this->data["Special"] = '';
+			}else{
+				$this->data["Special"] .= '<br>';
+			}
+//			$this->data["Number of shots"] = 6;
+			$this->data["Special"] .= ".";
+			$this->data["Special"] .= "<br>.";
+		}
+	
+	        
+        public function onConstructed($ship, $turn, $phase){
+            parent::onConstructed($ship, $turn, $phase);
+            $this->shots = $this->turnsloaded;
+        }        
+        
+        public function getDamage($fireOrder){        return Dice::d(10,2);   }
+        public function setMinDamage(){     $this->minDamage = 2;   }
+        public function setMaxDamage(){     $this->maxDamage = 20;     }
+    
+		public function stripForJson()
+		{
+			$strippedSystem = parent::stripForJson();
+			$strippedSystem->maxVariableShots = $this->turnsloaded;
+			return $strippedSystem;
+		}     
+    
+    
+    } //endof class BallisticTorpedo
+
+
+/*
+   //Old Version of Ballistic Torpedo without split shots
+    class BallisticTorpedo extends Torpedo{
+    
+        public $name = "ballisticTorpedo";
+        public $displayName = "Ballistic Torpedo";
+        public $range = 25;
+        public $loadingtime = 1;
+        public $shots = 6;
+        public $defaultShots = 1;
+        public $normalload = 6;
+        
+        public $fireControl = array(0, 3, 4); // fighters, <mediums, <capitals 
+        
+        public $trailColor = array(141, 240, 255);
+        public $animation = "trail";
 		/*
         public $animationColor = array(227, 148, 55);
         public $animationExplosionScale = 0.25;
         public $projectilespeed = 12;
         public $animationWidth = 4;
         public $trailLength = 40;
-		*/
+		*//*
         public $priority = 5;
         
         public $grouping = 20;
@@ -107,7 +286,8 @@
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
             
         }
-        
+
+		//Need to overwrite to with a counter for each fireOrder and return counter instead.        
         public function firedOnTurn($turn){            
             foreach ($this->fireOrders as $fire){
                 if ($fire->weaponid == $this->id && $fire->turn == $turn){
@@ -155,8 +335,8 @@
         }        
         
         public function getDamage($fireOrder){        return Dice::d(10,2);   }
-        public function setMinDamage(){     $this->minDamage = 2; /*- $this->dp;*/      }
-        public function setMaxDamage(){     $this->maxDamage = 20; /*- $this->dp;*/      }
+        public function setMinDamage(){     $this->minDamage = 2;       }
+        public function setMaxDamage(){     $this->maxDamage = 20;      }
     
 		public function stripForJson()
 		{
@@ -167,7 +347,8 @@
     
     
     } //endof class BallisticTorpedo
-
+    
+*/    
 
 
     class PlasmaWaveTorpedo extends Torpedo{

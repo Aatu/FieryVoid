@@ -1381,51 +1381,57 @@ window.weaponManager = {
                 debug && console.log("is on arc");
                 if (weaponManager.checkIsInRange(selectedShip, ship, weapon)) {
                     debug && console.log("is in range");
-                    weaponManager.removeFiringOrder(selectedShip, weapon);
-                    for (var s = 0; s < weapon.guns; s++) {
-                        var fireid = selectedShip.id + "_" + weapon.id + "_" + (weapon.fireOrders.length + 1);
-                        var calledid = -1;
+                    if(weapon.canSplitShots){
+                    	var fire = weapon.doMultipleFireOrders(selectedShip, ship);
+	                    if(fire) weapon.fireOrders.push(fire);
+						//toUnselect.push(weapon); //It's actually easier to target if you don't! 
+        				webglScene.customEvent('SystemDataChanged', { ship: ship, system: weapon });
+                    }else{
+	                    weaponManager.removeFiringOrder(selectedShip, weapon);
+	                    for (var s = 0; s < weapon.guns; s++) {
+	                        var fireid = selectedShip.id + "_" + weapon.id + "_" + (weapon.fireOrders.length + 1);
+	                        var calledid = -1;
 
-                        if (system) {
-                            //check if weapon is eligible for called shot!
-                            if (!weaponManager.canWeaponCall(weapon)) continue;
+	                        if (system) {
+	                            //check if weapon is eligible for called shot!
+	                            if (!weaponManager.canWeaponCall(weapon)) continue;
 
-                            // When the system is a subsystem, make all damage go through
-                            // the parent.
-                            while (system.parentId > 0) {
-                                system = shipManager.systems.getSystem(ship, system.parentId);
-                            }
+	                            // When the system is a subsystem, make all damage go through
+	                            // the parent.
+	                            while (system.parentId > 0) {
+	                                system = shipManager.systems.getSystem(ship, system.parentId);
+	                            }
 
-                            calledid = system.id;
-                        }
+	                            calledid = system.id;
+	                        }
 
-                        var damageClass = weapon.data["Weapon type"].toLowerCase();
-                        var chance = weaponManager.calculateHitChange(selectedShip, ship, weapon, calledid);
+	                        var damageClass = weapon.data["Weapon type"].toLowerCase();
+	                        var chance = weaponManager.calculateHitChange(selectedShip, ship, weapon, calledid);
 
-                        if ((chance < 1)&&(!weapon.ballistic)) {//now ballistics can be launched when hit chance is 0 or less - important for Packet Torpedo!
-                            //debug && console.log("Can't fire, change < 0");
-                            continue;
-                        }
+	                        if ((chance < 1)&&(!weapon.ballistic)) {//now ballistics can be launched when hit chance is 0 or less - important for Packet Torpedo!
+	                            //debug && console.log("Can't fire, change < 0");
+	                            continue;
+	                        }
 
-                        var fire = {
-                            id: fireid,
-                            type: type,
-                            shooterid: selectedShip.id,
-                            targetid: ship.id,
-                            weaponid: weapon.id,
-                            calledid: calledid,
-                            turn: gamedata.turn,
-                            firingMode: weapon.firingMode,
-                            shots: weapon.defaultShots,
-                            x: "null",
-                            y: "null",
-                            damageclass: damageClass,
-                            chance: chance
-                        };
-                        weapon.fireOrders.push(fire);
-			toUnselect.push(weapon);
-                    }
-
+	                        var fire = {
+	                            id: fireid,
+	                            type: type,
+	                            shooterid: selectedShip.id,
+	                            targetid: ship.id,
+	                            weaponid: weapon.id,
+	                            calledid: calledid,
+	                            turn: gamedata.turn,
+	                            firingMode: weapon.firingMode,
+	                            shots: weapon.defaultShots,
+	                            x: "null",
+	                            y: "null",
+	                            damageclass: damageClass,
+	                            chance: chance
+	                        };
+	                        weapon.fireOrders.push(fire);
+				toUnselect.push(weapon);
+	                    }
+					}
 		    //Marcin Sawicki: moving this statement so only weapons actually declared are unselected
                     //toUnselect.push(weapon);
                 }
@@ -1572,6 +1578,11 @@ window.weaponManager = {
     },
 
     removeFiringOrder: function removeFiringOrder(ship, system) {
+		if(system.canSplitShots){
+			weaponManager.removeFiringOrderMulti(ship, system);
+			return;
+		}
+
         for (var i = system.fireOrders.length - 1; i >= 0; i--) {
             if (system.fireOrders[i].weaponid == system.id) {
                 system.fireOrders.splice(i, 1);
@@ -1582,6 +1593,22 @@ window.weaponManager = {
         
         if(gamedata.gamephase == 3 && ship.flight)	webglScene.customEvent("ShipMovementChanged", { ship: ship }); //Redraw movement for Combat Pivots       
     },
+
+    removeFiringOrderMulti: function removeFiringOrderMulti(ship, system) {
+		if (system.fireOrders.length > 0) {
+		    const lastFireOrder = system.fireOrders[system.fireOrders.length - 1];
+
+		    if (lastFireOrder.weaponid == system.id && lastFireOrder.turn == gamedata.turn) {
+		        system.fireOrders.pop(); // Remove the last firing order
+		        system.maxVariableShots++; // Increment your counter
+		    }
+		}
+
+        webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+        
+        if(gamedata.gamephase == 3 && ship.flight)	webglScene.customEvent("ShipMovementChanged", { ship: ship }); //Redraw movement for Combat Pivots       
+    },
+    
 	removeFiringOrderAll: function removeFiringOrderAll(ship, system) { //remove firing orders for ALL similar weapons that have them
 		if (!gamedata.isMyShip(ship)) {
 			return;
