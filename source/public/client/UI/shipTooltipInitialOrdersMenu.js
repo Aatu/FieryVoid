@@ -26,7 +26,7 @@ window.ShipTooltipInitialOrdersMenu = function () {
         { className: "targetWeapons", condition: [isEnemy, hasShipWeaponsSelected], action: targetWeapons, info: "Target selected weapons on ship" }, 
         { className: "targetWeaponsHex", condition: [hasHexWeaponsSelected], action: targetHexagon, info: "Target selected weapons on hexagon" },
 		{ className: "targetSuppWeapons", condition: [isFriendly, hasShipWeaponsSelected, hasSupportWeaponSelected, notSelf], action: targetWeapons, info: "Target support weapons" },//30 June 2024 - DK - Added for Ally targeting.
-        { className: "removeMultiOrder", condition: [isEnemy, hasShipWeaponsSelected, hasSplitWeaponFiringOrder], action: removeFiringOrderMulti, info: "Remove a Firing Order" } 				        
+        { className: "removeMultiOrder", condition: [isEnemy, hasShipWeaponsSelected, hasSplitWeaponFiringOrder], action: removeFiringOrderMulti, info: "Remove a Ballistic Torpedo" } 				        
     ];
     
 
