@@ -8,8 +8,8 @@ GENERAL NOTES
 	Before using custom units it's good practice to make sure that Your opponent allows that (and if You create a game with such units allowed - say so explicitly in game description!)
 	
 	Semi-custom designs - some units are marked as "semi-custom". This means they're not official designs released by AoG, but for some reason are not considered custom units and can be used in "official only" matches. Common reasons for such units' classification include:
- 	- official units that could not be faithfully ported into FV for technical reasons, but were nonetheless considered important and are present with some changes (eg. Brakiri Tashkat and Shakara)
- 	- units that notably expand fleet build options of faction while keeping close to official designs (eg. Ipsha Jumpsphere allowing tournament-legal fleets not centered on an ElInt, and a few Belt Alliance designs allowing to bring LCVs to the table while conforming to these rules)
+ 	- official units that could not be faithfully ported into FV for technical reasons, but were nonetheless considered important and are present with some changes (e.g.. Brakiri Tashkat and Shakara)
+ 	- units that notably expand fleet build options of faction while keeping close to official designs (eg. Ipsha Jumpsphere allowing tournament-legal fleets not centered on an ELINT, and a few Belt Alliance designs allowing to bring LCVs to the table while conforming to these rules)
  	- units that were released by AoG in expansion released after the company ceased to produce B5Wars related materials, but developed earlier (eg. sourcebook Variants-6)
 	
 	Unit enhancements - Fiery Void allows players to add enhancements to their ships (full list is available in separate file). Keep in mind that unit enhancements are originally optional rule, and enhancements may not be evaluated as well as base hulls (although they're generally pricy compared to their effect!). 
@@ -28,8 +28,8 @@ Gravitic Shield - most Abbai units are equipped with Gravitic Shield. Active shi
 Quad Array - Four separate weapons in a single housing that's prone to overheating. Using more than 2 shots offensively results in one or two 'May Overheat' critical effects the following turn (depending on whether 3 or 4 shots are fired). When this critical is in place, firing weapon again offensively will cause a critical roll at end of turn with the following modifiers; +2 modifier for every shot fired in current turn, and -2 if there is only one ‘May Overheat’ effect.
 Comm Disruptor - weapon reducing target's EW and Initiative for next turn. 
 Particle Impeder - purely defensive weapon, capable of intercepting weapons with "uninterceptable" trait (typically that means Lasers :) ).
-	In addition, it can be boosted by sarificing EW rather than usual Power. Such a boost, in addition to increasing intercept rating of the Impeder, counts as special kind of shielding, reducing hit chance of all incoming weapons (fighter fire included), that can't be flown under and is cumulative with regular shields.
-	It is (by background as well as effect) DEW channeled to a specific arc, that has the added advantage of affecting fighters.
+	In addition, it can be boosted by sacrificing EW rather than usual Power. Such a boost, in addition to increasing intercept rating of the Impeder, counts as special kind of shielding, reducing hit chance of all incoming weapons (fighter fire included), that can't be flown under and is cumulative with regular shields.
+	It is (by background as well as effect) DEW channelled to a specific arc, that has the added advantage of affecting fighters.
 Shield Projector - System only seen on Abbai base and OSATs, can target allies within 10 hexes and boost their Gravitic Shield on that turn.  Fires as a ballistic weapon effectively, with affect being applied during Firing Phase.  Note - Allied unit being boosted MUST be within 5 hexes of the Shield Projector unit by the start of Firing Phase to receive the benefit.
 	
 
@@ -44,7 +44,7 @@ No notable special systems/rules.
 
 
 BRAKIRI SYNDICRACY
-Gravitic Drive - adds a few perks to movement, notably being able to do all maneuvers even while pivoted/pivoting (they use thrusters appropriate for current orientation when pivoted). Also, Gravitic Thrusters ignore first "Efficiency Reduced" reduced critical, increasing their resistance to damage.
+Gravitic Drive - adds a few perks to movement, notably being able to do all manoeuvres even while pivoted/pivoting (they use thrusters appropriate for current orientation when pivoted). Also, Gravitic Thrusters ignore first "Efficiency Reduced" reduced critical, increasing their resistance to damage.
 Corporations - Brakiri are split into competing corporations. On each unit it's noted which Corporation produces a given design (if not - it's assumed that all Corporations have equal access to it). This is irrelevant when fielding national Brakiri fleet, but You have option of fielding single Corporation as well. In this case, You have access only to that Corporation's designs (and common ones), but all restrictions (deployment & variant) are eased by one level. For Variant restrictions this means Rare->Uncommon->Common, for deployment Restricted(10%)->Limited->(33%)->Unlimited.
 	Corporations have access to slightly different technologies and heave their own areas of specialisation, so their individual fleets are usually lacking in some area but have excellent access to something else.
 	In-game checker does not take this rule into account.
@@ -60,8 +60,8 @@ Gravitic Mines - ballistic, hex-targeted weapon that can move units hit.
 CASCOR COMMONWEALTH (official)
 Ionizer - Laser-based primary fighter weapon. Unlike more typical fighter weapons it's uninterceptable, but also cannot itself intercept.
 Ion Field Generator - area-of effect weapon, targeted on a hex rather than ship. Units caught in area of effect have capabilities reduced next turn (reduced Initiative, Power, EW, OB, and has a chance to force shutdown a system).
-Poor acceleration - for ships it's just that, very high acceleration cost. For fighters, it's double acceleration cost - but medium and lighter fighters have unusually high thrust ratings, too. In effect they can't accelerate very well, but are exceptionally maneuvrable even at high speed.
-Ultralight fighters - smallest Cascor fighters are of Ultralight type, which allows them to efficiently fit into hangar space inended for larger fighters.
+Poor acceleration - for ships it's just that, very high acceleration cost. For fighters, it's double acceleration cost - but medium and lighter fighters have unusually high thrust ratings, too. In effect they can't accelerate very well, but are exceptionally manoeuvrable even at high speed.
+Ultralight fighters - smallest Cascor fighters are of Ultralight type, which allows them to efficiently fit into hangar space intended for larger fighters.
 Tiqincc - medium Cascor fighters have tail gun. In tabletop, this gun has -2 penalty when fired together with main gun. In FV it does not.
 
 
@@ -72,12 +72,11 @@ Actual values used are set by Zero_1627 and are NOT result of consensus of playe
 
 
 CENTAURI REPUBLIC
-Ballistic Torpedo - in tabletop this weapon is able to target multiple units. In FV it's lacking this ability. Also, way to fire this weapon is very peculiar (You need to fire, THEN on the weapon itself indicate number of missiles launched).
 Plasma Stream - weapon that permanently reduces armor of systems hit (in FV - every system hit, in tabletop - only those hit by full rakes). Also, counts full armor for every rake, despite Raking mode. 
 Guardian Array - primarily defensive weapon that can intercept fire directed at third party, provided the weapon is between firing unit and it's target.
 	In tabletop, it needs to be shut down to switch between offensive (antifighter) and defensive modes.
 	There is no such requirement in Fiery Void, weapon can intercept or fire offensively at will.
-	Also, definition of "between" was changed. In FV weapon is "between" firing unit and its target if bearing difference on them is at least 120 degrees (2 hexsides).
+	Also, definition of "between" was changed. In FV weapon is "between" firing unit and its target if bearing difference on them is at least 120 degrees (2 hex sides).
 
 
 CENTAURI REPUBLIC (WotCR)
@@ -96,7 +95,7 @@ No very specific technologies (or technologies specific to base faction).
 
 
 CORILLANI THEOCRACY
-The Corillani are unusual in that they operate three independant navies, the Defenders of Corillan (DoC), the Corillani's People's Navy (CPN), and the Orillani Space Force (OSF).  Whilst these forces generally operate independently of one another they can, and will, fight alongside one another.  In practice, there is no restriction on mixing and matching ships from the three different sub-navies during fleet selection. However, when choosing fighters you must take the version of the Tillini which corresponds with the type of faction where hangar space is available i.e. DoC or OSF fighters could not be taken if the only hanger space available was on a CPN ship.
+The Corillani are unusual in that they operate three independent navies, the Defenders of Corillan (DoC), the Corillani's People's Navy (CPN), and the Orillani Space Force (OSF).  Whilst these forces generally operate independently of one another they can, and will, fight alongside one another.  In practice, there is no restriction on mixing and matching ships from the three different sub-navies during fleet selection. However, when choosing fighters you must take the version of the Tillini which corresponds with the type of faction where hangar space is available i.e. DoC or OSF fighters could not be taken if the only hanger space available was on a CPN ship.
 The OSF use the unique Plasma Projector weapon which focuses plasma into tight beam, resulting in a longer range than most plasma weapons and with lower damage degradation.  It deals damage similar to a heavy plasma cannon, however this is applied in raking (8) mode rather than standard mode as with most other plasma weapons.
 Missiles - The Corillani are able to access all missile types except those restricted to specific factions e.g. Kor-Lyan and Orieni.
 
@@ -133,7 +132,7 @@ Missiles - The Dilgar are able to access basic, antifighter, chaff, flash, heavy
 DRAKH
 Custom fleet created by Wolfgang Lackner and Marcin Sawicki, based heavily upon BabCom-published designs by Roman Perner.
 Middle-born - they're Middle-born faction, with civilization far older than even Minbari or Yolu. This has no direct impact on game, unless a particular system treats such a faction differently.
-Shields - they have powerful shields, that can be boosted to be even stronger. They count double against Raking weapons. Cannot be flown under by fighters (unlike standard gravitic/EM shields). They don't decrease unit profile, only reduce damage (also unlike standard gravitic/EM shields). 
+Shields - they have powerful shields, that can be boosted to be even stronger. They count double against Raking weapons. Cannot be flown under by fighters (unlike standard gravitic/EM shields). They don't decrease unit profile, only reduce damage (also unlike standard Gravitic/EM shields). 
 Advanced Armor - gives a plethora of perks, generally reducing damage taken. It reduces or limits special effects of most weapons that have them, and counts as 2 points stronger against ballistics. Ignored by weapons made by Ancients.
 Gravitic Drive - see Brakiri.
 Improved Sensors - halve effectiveness of enemy Jammer.
