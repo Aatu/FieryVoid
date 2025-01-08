@@ -1332,7 +1332,7 @@ shipManager.movement = {
                 if (shipManager.systems.isDestroyed(ship, system)) continue;
 
                 if (system.name == "engine") {
-                    rem += shipManager.systems.getOutput(ship, system);
+                    rem += shipManager.systems.getOutput(ship, system); //Is zero when offline.
                 }
                 if (system.name == "thruster") {
                     rem -= system.thrustwasted;
@@ -1348,7 +1348,7 @@ shipManager.movement = {
 		for (var i in thrustWeaponList) {
 			var currWeapon = thrustWeaponList[i];
 			//is it alive and powered up?
-			if (shipManager.systems.isDestroyed(ship, currWeapon)) continue;
+			if (shipManager.systems.isDestroyed(ship, currWeapon)) continue; //Checks for destroyed and offline are ok!
 			if (shipManager.power.isOffline(ship, currWeapon)) continue;			
 			//current boost
 			var currBoost = shipManager.power.getBoost(currWeapon);
@@ -1370,27 +1370,40 @@ shipManager.movement = {
 
 
 	getShipsNegativeThrust: function getShipsNegativeThrust() {
-		var shipNames = new Array();
-		var counter = 0;
+	    var shipNames = [];
+	    var counter = 0;
 
-		for (var i in gamedata.ships) {
-			var ship = gamedata.ships[i];
+	    for (var i in gamedata.ships) {
+	        var ship = gamedata.ships[i];
 
-			if (ship.unavailable) continue;
+	        if (ship.unavailable) continue;
+	        if (ship.flight) continue;
+	        if (ship.userid != gamedata.thisplayer) continue;
+	        if (shipManager.isDestroyed(ship) || shipManager.power.isPowerless(ship)) continue;
 
-			if (ship.flight) continue;
+	        // Get the list of engine systems
+	        var engines = shipManager.systems.getSystemListByName(ship, "engine");
+	        if (!engines || engines.length === 0) continue; // Skip if no engines are found
 
-			if (ship.userid != gamedata.thisplayer) continue;
+	        // Check if all engines are destroyed or offline
+	        var allEnginesDestroyedOrOffline = engines.every(engine => 
+	            shipManager.systems.isDestroyed(ship, engine) || 
+	            shipManager.power.isOffline(ship, engine)
+	        );
+	        if (allEnginesDestroyedOrOffline) continue; // Skip if all engines are destroyed or offline
 
-			if (shipManager.isDestroyed(ship) || shipManager.power.isPowerless(ship)) continue;
+	        // Check if the remaining thrust is negative for any engine
+	        var hasNegativeThrust = engines.some(engine =>
+	            shipManager.movement.getRemainingEngineThrust(ship, engine) < 0
+	        );
 
-			if (shipManager.movement.getRemainingEngineThrust(ship, shipManager.systems.getSystemByName(ship, "engine")) < 0) {
-				shipNames[counter] = ship.name;
-				counter++;
-			}
-		}
+	        if (hasNegativeThrust) {
+	            shipNames[counter] = ship.name;
+	            counter++;
+	        }
+	    }
 
-		return shipNames;
+	    return shipNames;
 	},
 	    
     
