@@ -1153,7 +1153,7 @@ class SuperHeavyMolecularDisruptor extends Raking
 		
         public $rangePenalty = 0.33;//-1/3 hexes
         public $fireControl = array(0, 2, 4); // fighters, <=mediums, <=capitals 
-        public $fireControlArray = array(1=>array(0,2,4), 2=>array(4, 6, 8), 3=>array(3, 5, 7), 4=>array(2, 4, 6), 5=>array(1, 3, 5) );
+        public $fireControlArray = array(1=>array(0,2,4), 2=>array(4, 6, 8), 3=>array(null, 5, 7), 4=>array(null, 4, 6), 5=>array(null, 3, 5) );
         public $gunsArray = array(1=>1, 2=>1, 3=>3, 4=>6, 5=>9 );
 
 		public $priority = 2;//primary mode being Piercing! otherwise heavy Raking weapon - with armor-ignoring 
