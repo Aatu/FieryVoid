@@ -637,6 +637,7 @@ window.PhaseStrategy = function () {
         if ( system 
 		  && ( system.ballistic
 		    || system.hextarget //same for direct fire hextarget weapons - they use ballistic highlight...
+		    || system.canSplitShots //same for weapon that split shots, ballistic icons used to track these.
 		  )
 		) {
             this.ballisticIconContainer.consumeGamedata(this.gamedata, this.shipIconContainer);
@@ -664,9 +665,16 @@ window.PhaseStrategy = function () {
     };
 
     PhaseStrategy.prototype.onShipTargeted = function(payload) {
-        if (payload.weapons.some(function(weapon) {return weapon.ballistic})) {
+/*        if (payload.weapons.some(function(weapon) {return weapon.ballistic})) {
             this.ballisticIconContainer.consumeGamedata(this.gamedata, this.shipIconContainer);
         }
+*/
+
+		if (payload.weapons.some(function (weapon) {
+		    return weapon.ballistic || weapon.canSplitShots;
+		})) {
+		    this.ballisticIconContainer.consumeGamedata(this.gamedata, this.shipIconContainer);
+		}
 
         if (this.selectedShip === payload.shooter) {
             this.uiManager.showWeaponList({ship: payload.shooter, gamePhase: gamedata.gamephase})
