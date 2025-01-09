@@ -73,6 +73,7 @@ class Weapon extends ShipSystem
     public $turnsloadedArray = array();
 	public $maxVariableShots = 0; //For front end to know how many shots weapon CAN fire for variable-shot weapons. 	  
 	public $canSplitShots = false; //For Front end to allow weapons to target different enemies in same firing round. 
+	public $canSplitShotsArray = array(); 
 
     public $overloadable = false;
 
