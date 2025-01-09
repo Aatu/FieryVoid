@@ -21,7 +21,7 @@ BallisticTorpedo.prototype.initializationUpdate = function() {
 	return this;
 };
 
-BallisticTorpedo.prototype.doMultipleFireOrders = function (shooter, target) {
+BallisticTorpedo.prototype.doMultipleFireOrders = function (shooter, target, system) {
 	
 /* //Can be used to restruct only one shot against a ship.
 	var fireOrders = this.fireOrders;

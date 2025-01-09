@@ -397,7 +397,7 @@ window.weaponManager = {
             }
             $('<div><span class="weapon">' + html + '</span></div>').appendTo(f);
         }
-
+/* //Previous method before I added check for Sweeping Mode to not retarget ships.  Just in case ;)
         for (var i in gamedata.selectedSystems) {
             var weapon = gamedata.selectedSystems[i];
             if (weaponManager.isOnWeaponArc(selectedShip, ship, weapon)) {
@@ -421,6 +421,37 @@ window.weaponManager = {
             }
         }
     },
+*/
+		for (var i in gamedata.selectedSystems) {
+		    var weapon = gamedata.selectedSystems[i];
+		    if (weaponManager.isOnWeaponArc(selectedShip, ship, weapon)) {
+		        if (weaponManager.checkIsInRange(selectedShip, ship, weapon)) {
+		            var value = weapon.firingMode;
+		            value = weapon.firingModes[value];
+		            var keys = Object.keys(weapon.firingModes);
+
+		            // Priority check for "Sweeping" firing mode
+		            if (value === "Sweeping" && ship.shipSizeClass >= 0 && weaponManager.hasTargetedThisShip(ship, weapon)) {
+		                $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="hitchange"> CANNOT TARGET AGAIN</span></div>').appendTo(f);
+		            } else if (calledid != null && !weaponManager.canWeaponCall(weapon)) {
+		                // Called shot, weapon not eligible!
+		                $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="hitchange"> CANNOT CALL SHOT</span></div>').appendTo(f);
+		            } else if (keys.length > 1) {
+		                // Display Firing Mode info when there are multiple firing modes
+		                $('<div><span class="weapon">' + weapon.displayName + '<span class="firingMode"> (' + value + ')</span><span class="hitchange"> - Approx: ' + weaponManager.calculateHitChange(selectedShip, ship, weapon, calledid) + '%</span></div>').appendTo(f);
+		            } else {
+		                // Default case to display the weapon info without firing mode
+		                $('<div><span class="weapon">' + weapon.displayName + '</span><span class="hitchange"> - Approx: ' + weaponManager.calculateHitChange(selectedShip, ship, weapon, calledid) + '%</span></div>').appendTo(f);
+		            }
+		        } else {
+		            $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="hitchange"> NOT IN RANGE</span></div>').appendTo(f);
+		        }
+		    } else {
+		        $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="notInArc"> NOT IN ARC </span></div>').appendTo(f);
+		    }
+		}
+	},
+
 
     canWeaponCall: function canWeaponCall(weapon) {
         //is this weapon eleigible for calling precision shot?...
@@ -1306,6 +1337,7 @@ window.weaponManager = {
         if (shipManager.isDestroyed(selectedShip)) return;
 
         var toUnselect = [];
+        var splitTargeted = [];
         for (var i in gamedata.selectedSystems) {
             var weapon = gamedata.selectedSystems[i];
 
@@ -1382,10 +1414,11 @@ window.weaponManager = {
                 if (weaponManager.checkIsInRange(selectedShip, ship, weapon)) {
                     debug && console.log("is in range");
                     if(weapon.canSplitShots){
-                    	var fire = weapon.doMultipleFireOrders(selectedShip, ship);
+                    	var fire = weapon.doMultipleFireOrders(selectedShip, ship, system);
 	                    if(fire) weapon.fireOrders.push(fire);
 						//toUnselect.push(weapon); //It's actually easier to target if you don't! 
-        				webglScene.customEvent('SystemDataChanged', { ship: ship, system: weapon });
+						splitTargeted.push(weapon); //To be added to toUnselect aray at corect time below. 	                    
+        				webglScene.customEvent('SystemDataChanged', { ship: ship, system: weapon });      				
                     }else{
 	                    weaponManager.removeFiringOrder(selectedShip, weapon);
 	                    for (var s = 0; s < weapon.guns; s++) {
@@ -1442,6 +1475,7 @@ window.weaponManager = {
             weaponManager.unSelectWeapon(selectedShip, toUnselect[i]);
         }
 
+		toUnselect.push(...splitTargeted); //We don't want to unselect, but want these weapons passed to onShipTargeted - DK 01.25
         webglScene.customEvent('ShipTargeted', {shooter: selectedShip, target: ship, weapons: toUnselect})
         
         //Reset Movement UI after moment of targeting, to prevent cancel of last Combat Pivot AFTER locking target! - DK 10.24
@@ -1777,7 +1811,7 @@ window.weaponManager = {
                 return targetingShip; // || targetingHex;
             }));
         }, []).filter(function (fire) {
-            return fire.type === "ballistic";
+			return fire.type === "ballistic" || (fire.type === "normal" && fire.damageclass === "Sweeping"); //Ballistics and Shadow Slicers
         }).map(function (fireOrder) {
             var shooter = gamedata.getShip(fireOrder.shooterid);
             return {
@@ -2019,6 +2053,10 @@ window.weaponManager = {
 				if ((!toReturn) && (type == 'ballistic') && (fireOrder.type == 'normal') && (fireOrder.targetid == -1)) {
 					toReturn = true;
 				}
+				//show split shot direct fire as ballistics, too
+				if ((!toReturn) && (type == 'ballistic') && (fireOrder.type == 'normal') && (fireOrder.damageclass == "Sweeping")) {
+					toReturn = true;
+				}				
 				return toReturn;
                 //return fireOrder.type == type;
             });
