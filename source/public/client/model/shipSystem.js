@@ -214,7 +214,8 @@ Weapon.prototype.changeFiringMode = function () {
 	
 	if (!mathlib.arrayIsEmpty(this.ignoreJinkingArray)) this.ignoreJinking = this.ignoreJinkingArray[this.firingMode];		
 	if (!mathlib.arrayIsEmpty(this.ignoreAllEWArray)) this.ignoreAllEW = this.ignoreAllEWArray[this.firingMode];		
-	
+	if (!mathlib.arrayIsEmpty(this.canSplitShotsArray)) this.canSplitShots = this.canSplitShotsArray[this.firingMode];
+		
 	//Antimatter-specific
 	if (this instanceof AntimatterWeapon){
 		var updateDataPenalty = false; 
