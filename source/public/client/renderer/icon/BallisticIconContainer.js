@@ -539,6 +539,7 @@ window.BallisticIconContainer = function () {
 		}
 
 		if(ballistic.type == 'normal'){
+			    launchPosition = this.coordinateConverter.fromHexToGame(shooterIcon.getLastMovement(turn).position);			
 				if(modeName){
 					switch (modeName) {			
 						case 'Shredder': //Vree Anti-Matter Shredder
@@ -576,7 +577,7 @@ window.BallisticIconContainer = function () {
 	            id: ballistic.id,
 	            shooterId: ballistic.shooterid,
 	            targetId: ballistic.targetid,
-	            lineSprite: lineSprite =  new BallisticLineSprite(launchPosition, targetPosition, 3 * this.zoomScale, -2, getLineColorByType(type), 0.6),
+	            lineSprite: lineSprite =  new BallisticLineSprite(launchPosition, targetPosition, 3 * this.zoomScale, -3, getLineColorByType(type), 0.6),
 	            used: true,
 	            isFriendly: isFriendly
 	        });
