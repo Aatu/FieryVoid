@@ -225,9 +225,9 @@ window.BallisticIconContainer = function () {
 					        targetType = 'hexPurple';
 					        text = "Second Sight";
 					        textColour = "#7f00ff";			        
-					break;			
+					break;								
 					default:
-					        targetType = 'hexYellow';
+					        targetType = 'hexRed';
 					break;													        
 					}				
 				}
@@ -279,13 +279,14 @@ window.BallisticIconContainer = function () {
 					targetType = 'hexRed';
 					text = modeName;					
 					textColour = "#e6140a";		        
-				break;										
-				
+				break;											
 				case 'support': //Generic Support icon for these type of weapons. 06.24 - DK	
 					targetType = 'hexGreen';
 					iconImage = "./img/allySupport.png"; 		        
 				break;
-		
+				case 'Sweeping': //Shadow Slicers
+					    targetType = 'hexPurple';		        
+				break;			
 				}
 			}		 
 		} 
@@ -548,10 +549,7 @@ window.BallisticIconContainer = function () {
 						break;									
 						case 'Anti-Fighter Plasma Web': //Pak'ma'ra Plasma Web Offensive
 							type = 'green';				        	
-						break;
-						case 'Second Sight': //Mindrider Second Sight
-							type = 'purple';			        
-						break;			
+						break;									
 						default:
 						    type = 'white';
 						break;													        
@@ -565,6 +563,9 @@ window.BallisticIconContainer = function () {
 					type = 'green';
 					launchPosition = this.coordinateConverter.fromHexToGame(shooterIcon.getLastMovement(turn).position); //More important to show where ship support weapon originates, not hex.								        
 				break;
+				case 'Sweeping': //Shadow Slicer
+					type = 'purple';			        
+				break;					
 			}		 
 		}
 			
@@ -575,7 +576,7 @@ window.BallisticIconContainer = function () {
 	            id: ballistic.id,
 	            shooterId: ballistic.shooterid,
 	            targetId: ballistic.targetid,
-	            lineSprite: lineSprite =  new BallisticLineSprite(launchPosition, targetPosition, 3 * this.zoomScale, -3, getLineColorByType(type), 0.6),
+	            lineSprite: lineSprite =  new BallisticLineSprite(launchPosition, targetPosition, 3 * this.zoomScale, -2, getLineColorByType(type), 0.6),
 	            used: true,
 	            isFriendly: isFriendly
 	        });
