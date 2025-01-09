@@ -185,17 +185,17 @@ window.BallisticSprite = function () {
 
     function getFillColorByType(type) {
         if (type == "hexOrange") {
-            return "rgba(250,110,5,0.15)";
+            return "rgba(250,110,5,0.10)";
         } else if (type == "hexRed") {
-            return "rgba(230,20,10,0.15)";
+            return "rgba(230,20,10,0.10)";
         } else if (type == "hexBlue") {
-            return "rgba(0,184,230,0.15)";
+            return "rgba(0,184,230,0.10)";
         } else if (type == "hexGreen" || type == "hexGreenExclamation") { // Combine cases
-            return "rgba(0, 204, 0,0.15)";
+            return "rgba(0, 204, 0,0.10)";
         } else if (type == "hexYellow") {
-            return "rgba(255, 255, 0,0.15)";
+            return "rgba(255, 255, 0,0.10)";
         } else if (type == "hexPurple") {
-            return "rgba(127, 0, 255,0.15)";
+            return "rgba(127, 0, 255,0.10)";
         } else {
             return "rgba(144,185,208,0.30)";
         }
