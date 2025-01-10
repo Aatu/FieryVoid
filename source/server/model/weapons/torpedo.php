@@ -230,7 +230,8 @@
 			$this->data["Special"] .= "Can fire at multiple targets, providing it has enough shots available.";
 			$this->data["Special"] .= "<br>To do so, select weapon and target as many enemies as you wish following the normal rules for targeting, then deselect weapon.";
 			$this->data["Special"] .= "<br>Multiple torpedoes from the same launcher against the same ship will be combined into a single Pulse attack with a 20% grouping bonus (Saturation Mode).";	
-			$this->data["Special"] .= "<br>Against enemy fighters flights, each torpedo will always attack a different fighter, providing there is an appropirate target available.";	
+			$this->data["Special"] .= "<br>Against enemy fighters flights, each torpedo will always attack a different fighter, providing there is an appropirate target available.";
+			$this->data["Special"] .= "<br>If there are more torpedoes than fighters, excessive munitions are lost.";		
 		}
 	
 	        
