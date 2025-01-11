@@ -1629,32 +1629,38 @@ window.weaponManager = {
     },
 
 	removeFiringOrderMulti: function removeFiringOrderMulti(ship, system, target = null, button = false) {
-	    if (weaponManager.hasFiringOrder(ship, system)) {
-	        // Get the last fire order
-	        var lastFireOrder = system.fireOrders[system.fireOrders.length - 1];
 
+	    if (weaponManager.hasFiringOrder(ship, system)) {	    	    	
+	        // Remove the fire order for targeted ship
 	        if (button) {
-	            // When a button is pressed, check all fire orders
+	            // When a tooltip button is pressed on targeted enemy ship, check for a matching fireOrder and remove
 	            for (var i = system.fireOrders.length - 1; i >= 0; i--) {
 	                var fireOrder = system.fireOrders[i];
 	                // Check if the fire order's target matches the provided target
 	                if (fireOrder.targetid == target?.id) {
+						if (fireOrder.hitmod > 0) { //Slicers have cumulative hitmod on split shots, when a fireOrder is removed all orders are reclaculated.
+						    system.recalculateFireOrders(ship, i);
+						}	                	
+	                	
 	                    system.fireOrders.splice(i, 1); // Remove the specific fire order
 	                    system.maxVariableShots++; // Increment your counter
 	                    webglScene.customEvent('SplitOrderRemoved', { shooter: ship, target: target });
-	                    break; // Exit the loop after removing one matching fire order
-	                }
+	                    
+	                    break; // Exit the loop after removing one matching fire order and recalculating the rest (if required).
+	                }	                      
 	            }
 	        } else {
-	            // Default case: Remove only the last fire order
+	            // Default case: Remove only the LAST fire order. No need to adjust hitMod as it's the last order anyway.'
+	            var lastFireOrder = system.fireOrders[system.fireOrders.length - 1];
 	            if (lastFireOrder.weaponid == system.id && lastFireOrder.turn == gamedata.turn) {
 	                system.fireOrders.pop(); // Remove the last firing order
 	                system.maxVariableShots++; // Increment your counter
-	            }
+	            }	            
 	        }
+	    
 	    }
 
-	    // Trigger custom event to notify of system data changes
+	    // Trigger custom event to notify of system data changes - call ballisticIconContianer.consumeGamedata()
 	    webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 
 	    // Handle redraw for ship movement in combat phase
@@ -1662,6 +1668,7 @@ window.weaponManager = {
 	        webglScene.customEvent("ShipMovementChanged", { ship: ship });
 	    }
 	},
+
     
 	removeFiringOrderAll: function removeFiringOrderAll(ship, system) { //remove firing orders for ALL similar weapons that have them
 		if (!gamedata.isMyShip(ship)) {

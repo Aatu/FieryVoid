@@ -222,7 +222,8 @@ MolecularSlicerBeamL.prototype.doMultipleFireOrders = function (shooter, target,
 	        y: "null",
 	        damageclass: 'Sweeping',
 	        chance: chance,
-	        hitmod: 5
+	        hitmod: 5,
+	        notes: "Split"
 	        };
 		
 		this.maxVariableShots -= fire.shots;
@@ -236,9 +237,23 @@ MolecularSlicerBeamL.prototype.calculateSpecialHitChanceMod = function (target) 
 	if(this.firingMode == 1){
 		//Check fireOrders length and deduct (length -1 *5)
 		var currentShots = this.fireOrders.length; //
-		mod -= currentShots; //This is called when considering the NEXT shot.  So can just use current legnth as mod.
+		mod -= Math.max(0, currentShots); //This is called when considering the NEXT shot.  So can just use current legnth as mod.
 	}
 	return mod; 
+};
+
+MolecularSlicerBeamL.prototype.recalculateFireOrders = function (shooter, fireOrderNo) {
+
+    for (let i = 0; i < this.fireOrders.length; i++) {
+        const fireOrder = this.fireOrders[i];
+
+        // Ensure we only include fireOrders for the current turn and weapon, and only fireORders AFTER the one we are currently removing.
+        if (fireOrder.weaponid === this.id && fireOrder.turn === gamedata.turn && i > fireOrderNo) {
+        	var target = gamedata.getShip(fireOrder.targetid);
+			fireOrder.chance += fireOrder.hitmod;        	
+        }
+    }    
+
 };
 
 var MolecularSlicerBeamM = function MolecularSlicerBeamM(json, ship) {

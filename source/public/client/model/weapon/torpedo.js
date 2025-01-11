@@ -77,7 +77,9 @@ BallisticTorpedo.prototype.doMultipleFireOrders = function (shooter, target, sys
 	        x: "null",
 	        y: "null",
 	        damageclass: damageClass,
-	        chance: chance
+	        chance: chance,
+			hitmod: 0,	        
+	        notes: "Split"	        
 	        };
 		
 		this.maxVariableShots -= fire.shots;
