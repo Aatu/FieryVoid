@@ -1612,10 +1612,6 @@ window.weaponManager = {
     },
 
     removeFiringOrder: function removeFiringOrder(ship, system) {
-		if(system.canSplitShots){
-			weaponManager.removeFiringOrderMulti(ship, system);
-			return;
-		}
 
         for (var i = system.fireOrders.length - 1; i >= 0; i--) {
             if (system.fireOrders[i].weaponid == system.id) {
@@ -1655,6 +1651,8 @@ window.weaponManager = {
 	            if (lastFireOrder.weaponid == system.id && lastFireOrder.turn == gamedata.turn) {
 	                system.fireOrders.pop(); // Remove the last firing order
 	                system.maxVariableShots++; // Increment your counter
+	                var targetShip = gamedata.getShip(lastFireOrder.targetid);
+	                webglScene.customEvent('SplitOrderRemoved', { shooter: ship, target: targetShip });	                
 	            }	            
 	        }
 	    
