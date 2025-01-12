@@ -335,7 +335,7 @@ if ($simMv == true) { // simultaneous movement
                 <span class ="value points"></span>
                 <span class="smallSize headerSpan">PLAYER:</span>
                 <span class="playername"></span><span class="status">READY</span>
-                <span class="takeslot clickable">Take slot</span>
+                <span class="takeslot clickable">TAKE SLOT</span>
                 <span class="selectslot clickable">SELECT</span>
             </div>
             <div>
