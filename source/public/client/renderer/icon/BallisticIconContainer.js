@@ -8,6 +8,8 @@ window.BallisticIconContainer = function () {
         this.coordinateConverter = coordinateConverter;
         this.scene = scene;
         this.zoomScale = 1;
+        this.hexNumberIcons = [];
+        this.hexNumbersGenerated = false;
     }
 
     BallisticIconContainer.prototype.consumeGamedata = function (gamedata, iconContainer, replayData = null) {
@@ -654,6 +656,65 @@ window.BallisticIconContainer = function () {
         }, this);
     };
 */
+
+BallisticIconContainer.prototype.createHexNumbers = function (scene) {
+
+    // Check if hex numbers are already created
+    if (this.hexNumberIcons.length > 0) {
+        // If the visibility state hasn't changed, do nothing
+        if (this.hexNumbersVisible) {
+            this.hexNumberIcons.forEach(icon => icon.hide());
+        } else {
+            this.hexNumberIcons.forEach(icon => icon.show());
+        }
+
+        this.hexNumbersVisible = !this.hexNumbersVisible;  // Toggle visibility state
+    } else {
+        // Start at (q: -25, r: 19)
+        let startHex = { q: -25, r: 19 };
+        let currentHex = startHex;
+        let number = 1;
+        let textColour = "#ffffff";
+        let hexCreate = null;
+
+        // Array to store HexNumberSprites for later addition to the scene
+        let hexNumberSprites = [];
+
+        while (currentHex.r >= -19) {
+            // Loop through the columns of the current row (from q: -25 to q: 25)
+            for (let q = -25; q <= 25; q++) {
+                currentHex = { q: q, r: currentHex.r };
+                hexCreate = this.coordinateConverter.fromHexToGame(currentHex);
+
+                // Create HexNumberSprite for the current hex
+                let hexNumberSprite = new HexNumberSprite(
+                    hexCreate, 'hexTransparent', String(number).padStart(4, '0'), textColour, 27, 0.8
+                );
+
+                // Store the sprite in the batch array for the current row
+                hexNumberSprites.push(hexNumberSprite);
+
+                // Increment the number for the next sprite
+                number++;
+            }
+
+            // After finishing the row, add all sprites in the batch to the scene
+            this.hexNumberIcons.push(...hexNumberSprites);  // Store the batch in hexNumberIcons
+
+            // Instead of adding sprites one by one, add all to the scene at once
+            scene.add(...hexNumberSprites.map(sprite => sprite.mesh));
+
+            // Reset the batch array for the next row
+            hexNumberSprites = [];
+
+            // Move to the next row (decrease r)
+            currentHex.r--;
+        }
+
+        this.hexNumbersVisible = true;  // Ensure the hex numbers are visible
+    }
+};
+
 
     return BallisticIconContainer;
 }();

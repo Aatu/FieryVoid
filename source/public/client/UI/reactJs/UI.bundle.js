@@ -36348,7 +36348,8 @@ var _templateObject = _taggedTemplateLiteral(["\n    position: fixed;\n    right
     _templateObject4 = _taggedTemplateLiteral(["\n    background-image: url(\"./img/FEW.png\");\n"], ["\n    background-image: url(\"./img/FEW.png\");\n"]),
     _templateObject5 = _taggedTemplateLiteral(["\n    background-image: url(\"./img/ballisticTarget2.png\");\n"], ["\n    background-image: url(\"./img/ballisticTarget2.png\");\n"]),
     _templateObject6 = _taggedTemplateLiteral(["\n    background-image: url(\"./img/ballisticLaunch2.png\");\n"], ["\n    background-image: url(\"./img/ballisticLaunch2.png\");\n"]),
-    _templateObject7 = _taggedTemplateLiteral(["\n    position: absolute;\n    background-color: rgba(0, 0, 0, 0.7);\n    color: white;\n    padding: 5px 10px;\n    border-radius: 5px;\n    font-size: 12px;\n    pointer-events: none;\n    z-index: 10;\n    white-space: nowrap; /* Prevent text wrapping */\n"], ["\n    position: absolute;\n    background-color: rgba(0, 0, 0, 0.7);\n    color: white;\n    padding: 5px 10px;\n    border-radius: 5px;\n    font-size: 12px;\n    pointer-events: none;\n    z-index: 10;\n    white-space: nowrap; /* Prevent text wrapping */\n"]);
+    _templateObject7 = _taggedTemplateLiteral(["\n    background-image: url(\"./img/hexNumber.png\");\n"], ["\n    background-image: url(\"./img/hexNumber.png\");\n"]),
+    _templateObject8 = _taggedTemplateLiteral(["\n    position: absolute;\n    background-color: rgba(0, 0, 0, 0.7);\n    color: white;\n    padding: 5px 10px;\n    border-radius: 5px;\n    font-size: 12px;\n    pointer-events: none;\n    z-index: 10;\n    white-space: nowrap; /* Prevent text wrapping */\n"], ["\n    position: absolute;\n    background-color: rgba(0, 0, 0, 0.7);\n    color: white;\n    padding: 5px 10px;\n    border-radius: 5px;\n    font-size: 12px;\n    pointer-events: none;\n    z-index: 10;\n    white-space: nowrap; /* Prevent text wrapping */\n"]);
 
 var _react = require("react");
 
@@ -36394,6 +36395,7 @@ var EwButtons = function (_React$Component) {
         _this.showEnemyEW = _this.showEnemyEW.bind(_this);
         _this.toggleFriendlyBallisticLines = _this.toggleFriendlyBallisticLines.bind(_this);
         _this.toggleEnemyBallisticLines = _this.toggleEnemyBallisticLines.bind(_this);
+        _this.toggleHexNumbers = _this.toggleHexNumbers.bind(_this);
         return _this;
     }
 
@@ -36416,6 +36418,11 @@ var EwButtons = function (_React$Component) {
         key: "toggleEnemyBallisticLines",
         value: function toggleEnemyBallisticLines(up) {
             webglScene.customEvent("ToggleEnemyBallisticLines", { up: up });
+        }
+    }, {
+        key: "toggleHexNumbers",
+        value: function toggleHexNumbers(up) {
+            webglScene.customEvent("ToggleHexNumbers", { up: up });
         }
     }, {
         key: "handleMouseEnter",
@@ -36444,6 +36451,11 @@ var EwButtons = function (_React$Component) {
                     break;
                 case "enemyBallistic":
                     tooltipText = "Toggle Enemy Ballistics";
+                    offsetX = -135; // Closer to the button
+                    offsetY = -5; // Centered vertically
+                    break;
+                case "hexNumbers":
+                    tooltipText = "Toggle Hex Numbers";
                     offsetX = -135; // Closer to the button
                     offsetY = -5; // Centered vertically
                     break;
@@ -36511,6 +36523,12 @@ var EwButtons = function (_React$Component) {
                     onMouseLeave: this.handleMouseLeave.bind(this),
                     onMouseDown: this.toggleEnemyBallisticLines.bind(this, false)
                 }),
+                _react2.default.createElement(HexButton, {
+                    "data-type": "hexNumbers",
+                    onMouseEnter: this.handleMouseEnter.bind(this),
+                    onMouseLeave: this.handleMouseLeave.bind(this),
+                    onMouseDown: this.toggleHexNumbers.bind(this, false)
+                }),
                 this.renderTooltip()
             );
         }
@@ -36530,11 +36548,12 @@ var EEWButton = MainButton.extend(_templateObject3);
 var FEWButton = MainButton.extend(_templateObject4);
 var EBButton = MainButton.extend(_templateObject5);
 var FBButton = MainButton.extend(_templateObject6);
+var HexButton = MainButton.extend(_templateObject7);
 
 var Tooltip = _styledComponents2.default.div.withConfig({
     displayName: "EwButtons__Tooltip",
     componentId: "al1h4b-1"
-})(_templateObject7);
+})(_templateObject8);
 
 exports.default = EwButtons;
 

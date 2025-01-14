@@ -18,6 +18,7 @@ class EwButtons extends React.Component {
         this.showEnemyEW = this.showEnemyEW.bind(this);
         this.toggleFriendlyBallisticLines = this.toggleFriendlyBallisticLines.bind(this);
         this.toggleEnemyBallisticLines = this.toggleEnemyBallisticLines.bind(this);
+        this.toggleHexNumbers = this.toggleHexNumbers.bind(this);        
     }
 
     showFriendlyEW(up) {
@@ -35,6 +36,11 @@ class EwButtons extends React.Component {
     toggleEnemyBallisticLines(up) {
         webglScene.customEvent("ToggleEnemyBallisticLines", { up: up });
     }
+
+    toggleHexNumbers(up) {
+        webglScene.customEvent("ToggleHexNumbers", { up: up });
+    }
+
 
 handleMouseEnter(event) {
     const buttonType = event.currentTarget.dataset.type; // Get the type of button
@@ -64,6 +70,11 @@ handleMouseEnter(event) {
             offsetX = -135;  // Closer to the button
             offsetY = -5;    // Centered vertically
             break;
+        case "hexNumbers":
+            tooltipText = "Toggle Hex Numbers";
+            offsetX = -135;  // Closer to the button
+            offsetY = -5;    // Centered vertically
+            break;            
         default:
             tooltipText = "Unknown Button";
     }
@@ -124,6 +135,12 @@ handleMouseEnter(event) {
 				    onMouseLeave={this.handleMouseLeave.bind(this)}
 				    onMouseDown={this.toggleEnemyBallisticLines.bind(this, false)}
 				></EBButton>
+				<HexButton  
+				    data-type="hexNumbers"
+				    onMouseEnter={this.handleMouseEnter.bind(this)}
+				    onMouseLeave={this.handleMouseLeave.bind(this)}
+				    onMouseDown={this.toggleHexNumbers.bind(this, false)}
+				></HexButton>				
                 {this.renderTooltip()}
             </Container>
         );
@@ -162,6 +179,9 @@ const EBButton = MainButton.extend`
 `;
 const FBButton = MainButton.extend`
     background-image: url("./img/ballisticLaunch2.png");
+`;
+const HexButton = MainButton.extend`
+    background-image: url("./img/hexNumber.png");
 `;
 
 const Tooltip = styled.div`

@@ -716,6 +716,12 @@ window.PhaseStrategy = function () {
         showAllBallisticLines.call(this, gamedata.ships.filter(function(ship){ return !gamedata.isMyOrTeamOneShip(ship) }), payload);
     };        
 
+
+    PhaseStrategy.prototype.onToggleHexNumbers = function (payload) {
+	    var scene = webglScene.scene;
+		this.ballisticIconContainer.createHexNumbers(scene);
+    }; 
+
     function toggleBallisticLines(ships, payload) {
         this.ballisticIconContainer.toggleBallisticLines(ships);
     };
