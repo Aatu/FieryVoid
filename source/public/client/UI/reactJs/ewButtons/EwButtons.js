@@ -135,12 +135,12 @@ handleMouseEnter(event) {
 				    onMouseLeave={this.handleMouseLeave.bind(this)}
 				    onMouseDown={this.toggleEnemyBallisticLines.bind(this, false)}
 				></EBButton>
-				<HexButton  
-				    data-type="hexNumbers"
-				    onMouseEnter={this.handleMouseEnter.bind(this)}
-				    onMouseLeave={this.handleMouseLeave.bind(this)}
-				    onMouseDown={this.toggleHexNumbers.bind(this, false)}
-				></HexButton>				
+           {/* <HexButton  
+                data-type="hexNumbers"
+                onMouseEnter={this.handleMouseEnter.bind(this)}
+                onMouseLeave={this.handleMouseLeave.bind(this)}
+                onMouseDown={this.toggleHexNumbers.bind(this, false)}
+            ></HexButton> */}				
                 {this.renderTooltip()}
             </Container>
         );
