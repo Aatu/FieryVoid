@@ -1007,9 +1007,7 @@ class SuperHeavyMolecularDisruptor extends Raking
 			$strippedSystem->minDamage = $this->minDamage;
 			$strippedSystem->minDamageArray = $this->minDamageArray;
 			$strippedSystem->maxDamage = $this->maxDamage;
-			$strippedSystem->maxDamageArray = $this->maxDamageArray;
-			$strippedSystem->specialHitChanceCalculation = $this->specialHitChanceCalculation;
-			$strippedSystem->canSplitShots = $this->canSplitShots;										
+			$strippedSystem->maxDamageArray = $this->maxDamageArray;				
 			return $strippedSystem;
 		}
 

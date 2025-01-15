@@ -248,7 +248,6 @@
 		{
 			$strippedSystem = parent::stripForJson();
 			$strippedSystem->maxVariableShots = $this->turnsloaded;
-			$strippedSystem->canSplitShots = $this->canSplitShots;			
 			return $strippedSystem;
 		}     
     
