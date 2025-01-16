@@ -36523,6 +36523,12 @@ var EwButtons = function (_React$Component) {
                     onMouseLeave: this.handleMouseLeave.bind(this),
                     onMouseDown: this.toggleEnemyBallisticLines.bind(this, false)
                 }),
+                _react2.default.createElement(HexButton, {
+                    "data-type": "hexNumbers",
+                    onMouseEnter: this.handleMouseEnter.bind(this),
+                    onMouseLeave: this.handleMouseLeave.bind(this),
+                    onMouseDown: this.toggleHexNumbers.bind(this, false)
+                }),
                 this.renderTooltip()
             );
         }

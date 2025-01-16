@@ -671,7 +671,7 @@ BallisticIconContainer.prototype.createHexNumbers = function (scene) {
         this.hexNumbersVisible = !this.hexNumbersVisible;  // Toggle visibility state
     } else {
         // Start at (q: -25, r: 19)
-        let startHex = { q: -25, r: 19 };
+        let startHex = { q: -22, r: 16 };
         let currentHex = startHex;
         let number = 1;
         let textColour = "#ffffff";
@@ -680,9 +680,9 @@ BallisticIconContainer.prototype.createHexNumbers = function (scene) {
         // Array to store HexNumberSprites for later addition to the scene
         let hexNumberSprites = [];
 
-        while (currentHex.r >= -19) {
+        while (currentHex.r >= -16) {
             // Loop through the columns of the current row (from q: -25 to q: 25)
-            for (let q = -25; q <= 25; q++) {
+            for (let q = -22; q <= 22; q++) {
                 currentHex = { q: q, r: currentHex.r };
                 hexCreate = this.coordinateConverter.fromHexToGame(currentHex);
 
