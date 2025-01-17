@@ -247,7 +247,7 @@ const getBackgroundImage = (system) => {
     }
 }
 
-const hasCriticals = (system) => shipManager.criticals.hasCriticals(system)
+const hasCriticals = (system) => shipManager.criticals.hasCriticalsIcon(system)
 
 const hasBorderHighlight = (ship, system) => shipManager.systems.hasBorderHighlight(ship, system);
 

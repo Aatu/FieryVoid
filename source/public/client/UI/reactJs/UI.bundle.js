@@ -39172,7 +39172,7 @@ var getBackgroundImage = function getBackgroundImage(system) {
 };
 
 var hasCriticals = function hasCriticals(system) {
-    return shipManager.criticals.hasCriticals(system);
+    return shipManager.criticals.hasCriticalsIcon(system);
 };
 
 var hasBorderHighlight = function hasBorderHighlight(ship, system) {
