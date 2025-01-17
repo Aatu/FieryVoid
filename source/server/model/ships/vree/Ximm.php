@@ -44,11 +44,11 @@ class Ximm extends VreeCapital{
     
     	$this->addLeftFrontSystem(new AntiprotonDefender(3, 0, 0, 240, 0));
 		$this->addLeftFrontSystem(new AntiprotonDefender(3, 0, 0, 240, 0)); 
-		$this->addLeftFrontSystem(new StructureTechnical(0, 0, 0, 0));
+//		$this->addLeftFrontSystem(new StructureTechnical(0, 0, 0, 0));
 		
 		$this->addRightFrontSystem(new AntiprotonDefender(3, 0, 0, 0, 120)); 
 		$this->addRightFrontSystem(new AntiprotonDefender(3, 0, 0, 0, 120)); 						        
-		$this->addRightFrontSystem(new StructureTechnical(0, 0, 0, 0));
+//		$this->addRightFrontSystem(new StructureTechnical(0, 0, 0, 0));
 		
 		$this->addLeftAftSystem(new GraviticThruster(4, 14, 0, 8, 3));
 		$this->addLeftAftSystem(new AntiprotonDefender(3, 0, 0, 180, 300));
