@@ -47,8 +47,8 @@ const System = styled.div`
         }else if (props.highlight === 'Yellow') {
             return '1px solid #e1b000'; // Some systems get a different border
         }else if (props.highlight === 'Orange') {
-            return '1px solid #ff6d3c'; // Some systems get a different border            
-        }else if (props.highlight === 'RedBold') {
+            return '2px solid #ff6d3c'; // Some systems get a different border            
+        }else if (props.highlight === 'Red') {
             return '2px solid #ff0000'; // Some systems get a different border            
         }else {
             return '1px solid #496791';

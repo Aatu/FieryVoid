@@ -532,17 +532,20 @@ shipManager.systems = {
 
     hasBorderHighlight: function hasBorderHighlight(ship, system) { 
 		var highlight = null;
-
+		
+		//Try to do these in a certain order to priortise effects, and optimise performance
 		if(shipManager.power.isOverloading(ship, system)){
 			highlight = 'Yellow';			
 			return highlight;
 		}	
 
-		var mayOverheat = shipManager.criticals.countCriticalOnTurn(system, "MayOverheat", gamedata.turn);
-		if(mayOverheat > 0){ 
-			if(mayOverheat === 1) highlight = 'Orange';
-			if(mayOverheat === 2) highlight = 'RedBold';
-			return highlight;				
+		if(ship.faction === "Abbai Matriarchate"){ //Only Abbai need this.
+			var mayOverheat = shipManager.criticals.countCriticalOnTurn(system, "MayOverheat", gamedata.turn);
+			if(mayOverheat > 0){ 
+				if(mayOverheat === 1) highlight = 'Orange';
+				if(mayOverheat === 2) highlight = 'Red';
+				return highlight;				
+			}
 		}	
 
         return highlight;
