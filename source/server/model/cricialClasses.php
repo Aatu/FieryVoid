@@ -15,15 +15,16 @@ class Critical{
 	public $repairCost = 1; //how many self repair points are needed to repair it;
 	//official: all crits cost 1, except C&C cost 4; FV: except C&C and nastier Reactor crits, cost 2; no partial repairs!
 	public $repairPriority = 4;//0-9; lower = lower priority, 0 means it's irrepairable
-	
+    public $forInfo = false; // For crits that actually don't directly affect weapon, but inform player of other statuses
 		
-    public function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0, $param = null){
+    public function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0, $forInfo = false, $param = null){
         $this->id = (int)$id;
         $this->shipid = (int)$shipid;
         $this->systemid = (int)$systemid;
         $this->phpclass = $phpclass;
         $this->turn = (int)$turn;
         $this->turnend = (int)$turnend;
+        $this->forInfo = (bool)$forInfo; // Always store as a boolean        
         $this->setParam($param);
 		if($this->oneturn) $this->turnend = $this->turn + 1; //set appropriate ending for "one turn" criticals, even if not called to explicitly		
     }
@@ -482,12 +483,12 @@ class LimpetBoreTravelling extends Critical{
     }
 } 
 
-//For criticalClass.php		
-class MayOverheat extends Critical { //Critical to allow weapons to roll a critical at the end of following turn if they are at risk of overheating e.g. Quad Array.
+class MayOverheat extends Critical { 
     public $description = "May overheat";
-	public $repairPriority = 0;//Can't repair.'
-    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0) {
-        parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
+    public $repairPriority = 0; // Can't repair.
+    public function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0) {
+        // Always pass $forInfo as true for this crit
+        parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend, true);
     }
 }
 
