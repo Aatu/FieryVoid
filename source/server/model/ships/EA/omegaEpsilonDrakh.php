@@ -17,7 +17,7 @@ class OmegaEpsilonDrakh  extends BaseShip{
         $this->faction = "Earth Alliance (custom)";
         $this->phpclass = "OmegaEpsilonDrakh";
         $this->imagePath = "img/ships/omegaShadow.png";
-        $this->shipClass = "Shadow Omega Destroyer (Epsilon)";
+        $this->shipClass = "Shadow Omega Destroyer (Drakh)";
         $this->shipSizeClass = 3;
         $this->canvasSize = 280;
         $this->fighters = array("normal"=>12);
@@ -33,7 +33,9 @@ class OmegaEpsilonDrakh  extends BaseShip{
 	    
 	$this->unofficial = true; 
         $this->enhancementOptionsDisabled[] = 'SHAD_DIFF'; //no diffuser upgrades for EA ships - they don't have know how to tamper with Shadow systems to that extent!
-		
+
+	$this->variantOf = 'Shadow Omega Destroyer (Epsilon)';
+	$this->occurence = 'common';		
         
         $this->forwardDefense = 16;
         $this->sideDefense = 18;

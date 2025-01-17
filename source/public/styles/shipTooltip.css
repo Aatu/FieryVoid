@@ -99,6 +99,10 @@
     background-image: url("../img/targetSupport.png");
 }
 
+.removeMultiOrder {
+    background-image: url("../img/unfiring.png");
+}
+
 .openSCS {
     background-image: url("../img/openShipDetails.png");
 }

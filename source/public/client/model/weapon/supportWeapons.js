@@ -71,6 +71,24 @@ ShieldReinforcement.prototype.onBoostDecrease = function () {
 	return;	   	
 }    
 
+ShieldReinforcement.prototype.checkReinforcement = function (shooter, target){
+            
+        if (this.reinforceAmount > 0){ //Check and change reinforce amount for Mindrider Shield Reinforcement!
+			if(!this.confirmReinforcement(shooter, target)){
+			    confirm.error("You do not have enough capacity to reinforce allied unit's shields by that amount.");
+	   			return false;	
+			}	
+        }else if(this.reinforceAmount == 0){
+            var html = '';		
+	        html += "WARNING - You have not allocated an amount to reinforce allied ship's shield.";
+	        html += "<br>";
+			confirm.warning(html);	
+			return true;	            	            	
+	    }
+	    
+	    return true;
+}
+
 ShieldReinforcement.prototype.confirmReinforcement = function (shooter, target) {
 
 	var canTarget = true;

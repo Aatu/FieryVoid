@@ -49,7 +49,7 @@ class Xonn extends VreeCapital{
         
 		$this->addLeftFrontSystem(new AntiprotonGun(3, 0, 0, 240, 360));
 		$this->addLeftFrontSystem(new AntiprotonGun(3, 0, 0, 240, 360));
-		$this->addLeftFrontSystem(new StructureTechnical(0, 0, 0, 0));				
+//		$this->addLeftFrontSystem(new StructureTechnical(0, 0, 0, 0));				
 
 		$this->addLeftAftSystem(new GraviticThruster(5, 20, 0, 10, 3));				
 		$this->addLeftAftSystem(new AntiprotonGun(3, 0, 0, 180, 300));
@@ -57,7 +57,7 @@ class Xonn extends VreeCapital{
 		
 		$this->addRightFrontSystem(new AntiprotonGun(3, 0, 0, 0, 120));
 		$this->addRightFrontSystem(new AntiprotonGun(3, 0, 0, 0, 120));	
-		$this->addRightFrontSystem(new StructureTechnical(0, 0, 0, 0));			
+//		$this->addRightFrontSystem(new StructureTechnical(0, 0, 0, 0));			
 
 		$this->addRightAftSystem(new GraviticThruster(5, 20, 0, 10, 4));				
 		$this->addRightAftSystem(new AntiprotonGun(3, 0, 0, 60, 180));

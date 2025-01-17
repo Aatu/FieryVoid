@@ -14,9 +14,9 @@ window.LaserEffect = function () {
 
         this.color = args.color || new THREE.Color(0, 0, 0);
         this.shooter = shooter;
-        this.startOffset = {
-            x: Math.random() * 30 - 10,
-            y: Math.random() * 30 - 10
+        this.startOffset = { //Previously * 30 - 10 - DK 01.25
+            x: Math.random() * 8 - 4,
+            y: Math.random() * 8 - 4
         };
 
         this.weapon = weapon;
@@ -46,8 +46,8 @@ window.LaserEffect = function () {
         //adding width depending on animation size:
         //this.lasers = [createLaser.call(this, this.color, 0.5, 10), createLaser.call(this, new THREE.Color(1, 1, 1), 0.6, 3)];
         var beamWidth = Math.ceil(this.size*0.2);
-        var haloWidth = Math.ceil(this.size*0.5);
-        this.lasers = [createLaser.call(this, this.color, 0.5, haloWidth), createLaser.call(this, new THREE.Color(1, 1, 1), 0.6, beamWidth)];
+        var haloWidth = Math.ceil(this.size*0.3);
+        this.lasers = [createLaser.call(this, this.color, 0.8, haloWidth), createLaser.call(this, new THREE.Color(1, 1, 1), 0.6, beamWidth)];
         
         this.lasers.forEach(function (laser) {
             laser.multiplyOpacity(0);
@@ -142,7 +142,7 @@ window.LaserEffect = function () {
         var startAndEnd = getStartAndEnd.call(this);
         return new LineSprite(startAndEnd.start, startAndEnd.end, widht, 201, color, opacity, {
             blending: THREE.AdditiveBlending,
-            texture: new THREE.TextureLoader().load("img/effect/laser16.png")
+            texture: new THREE.TextureLoader().load("img/effect/laser18.png")
         });
     }
 

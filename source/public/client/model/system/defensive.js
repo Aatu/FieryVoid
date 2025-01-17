@@ -7,8 +7,24 @@ var InterceptorMkI = function InterceptorMkI(json, ship) {
 InterceptorMkI.prototype = Object.create(Weapon.prototype);
 InterceptorMkI.prototype.constructor = InterceptorMkI;
 
+InterceptorMkI.prototype.hasMaxBoost = function () {
+    return true;
+};
+InterceptorMkI.prototype.getMaxBoost = function () {
+    return this.maxBoostLevel;
+};
+
+InterceptorMkI.prototype.initializationUpdate = function() {
+    var boost = shipManager.power.getBoost(this);
+	if(boost > 0){
+		this.data["Intercept"] = "-"; //To inform player.
+		this.data["Fire control (fighter/med/cap)"] = "30/-/-";
+	}
+    return this;
+};
+
 InterceptorMkI.prototype.getDefensiveHitChangeMod = function (target, shooter, weapon) {
-    return shipManager.systems.getOutput(target, this);
+    return shipManager.systems.getOutputNoBoost(target, this);
 };
 
 var InterceptorMkII = function InterceptorMkII(json, ship) {
@@ -16,6 +32,15 @@ var InterceptorMkII = function InterceptorMkII(json, ship) {
 };
 InterceptorMkII.prototype = Object.create(InterceptorMkI.prototype);
 InterceptorMkII.prototype.constructor = InterceptorMkII;
+
+InterceptorMkII.prototype.initializationUpdate = function() {
+    var boost = shipManager.power.getBoost(this);
+	if(boost > 0){
+		this.data["Intercept"] = "-"; //To inform player.
+		this.data["Fire control (fighter/med/cap)"] = "40/-/-";
+	}
+    return this;
+};
 
 var InterceptorPrototype = function InterceptorPrototype(json, ship) {
     InterceptorMkI.call(this, json, ship);
@@ -50,6 +75,41 @@ var GraviticShield = function GraviticShield(json, ship) {
 };
 GraviticShield.prototype = Object.create(Shield.prototype);
 GraviticShield.prototype.constructor = GraviticShield;
+
+GraviticShield.prototype.getDefensiveHitChangeMod = function (target, shooter, weapon) {
+    if (!weapon.ballistic) {
+        if (shooter.flight && (mathlib.getDistanceBetweenShipsInHex(target, shooter) == 0)) return 0;
+    }
+
+    var defenceMod = shipManager.systems.getOutput(target, this);; // Default value
+	
+	// New check looking for Abbai Shield Projectors and updating front-end values
+    var thisShip = this.ship;
+	if(thisShip.faction == "Abbai Matriarchate"){
+
+	    gamedata.ships.forEach(ship => {
+	    	if(ship.faction !== "Abbai Matriarchate") return; //Only Abbai have Projectors.
+	        if (ship.team !== target.team) return; // On same team as the target
+	        if (shipManager.isDestroyed(ship)) return; // Skip destroyed ships
+	        if (ship.phpclass == 'alanti' || ship.phpclass == 'pirocia'){  // Only OSAT and Base matter
+		        // Process each system in the current ship
+		        ship.systems.forEach(system => {
+		            if (!(system instanceof AbbaiShieldProjector)) return; // Only Shield Reinforcement systems
+
+		            // Process all fire orders for the system, should only be one.
+		            system.fireOrders.forEach(fireOrder => {
+		                if (fireOrder.targetid === thisShip.id) {
+		                    defenceMod += system.output; // Increase defenceMod for this shield
+		                }
+		            });
+		            
+		        });
+			}    
+	    });         
+	}
+	        
+    return defenceMod;
+};
 
 var ShieldGenerator = function ShieldGenerator(json, ship) {
     ShipSystem.call(this, json, ship);
@@ -219,6 +279,15 @@ var HeavyInterceptorBattery = function HeavyInterceptorBattery(json, ship) {
 HeavyInterceptorBattery.prototype = Object.create(InterceptorMkI.prototype);
 HeavyInterceptorBattery.prototype.constructor = HeavyInterceptorBattery;
 
+HeavyInterceptorBattery.prototype.initializationUpdate = function() {
+    var boost = shipManager.power.getBoost(this);
+	if(boost > 0){
+		this.data["Intercept"] = "-"; //To inform player.
+		this.data["Fire control (fighter/med/cap)"] = "50/-/-";
+	}
+    return this;
+};
+
 var Interdictor = function Interdictor(json, ship) {
     Weapon.call(this, json, ship);
 };
@@ -368,6 +437,30 @@ ThirdspaceShield.prototype.doIncrease10 = function () { //
 
 };
 
+ThirdspaceShield.prototype.doIncrease25 = function () { //	
+//Increase this.maxhealth by 10 (or lower if less available) + decrease Shield Generator by same amount.
+	
+ 	var ship = this.ship;	
+	for (var i in ship.systems) {
+		var system = ship.systems[i];
+
+		if (system instanceof ThirdspaceShieldGenerator) {
+			var generator = system; //Find generator
+		}
+	}	
+
+	var shieldHealth = this.currentHealth; 
+	var shieldHeadroom = this.maxhealth - shieldHealth;//How much room for increase does shield have?
+		
+	if(shieldHeadroom >= 25){		
+		this.currentHealth += 25;
+		generator.storedCapacity -= 25;
+	}else{ //Just increase by how much you can!
+		this.currentHealth += shieldHeadroom;
+		generator.storedCapacity -= shieldHeadroom;		
+	}	
+
+};
 
 ThirdspaceShield.prototype.doDecrease = function () { 
 //Reduce this.maxhealth by 5 (or lower if less available) + increase Shield Generator by same amount.
@@ -449,6 +542,33 @@ ThirdspaceShield.prototype.doDecrease10 = function () {
 	
 };
 
+ThirdspaceShield.prototype.doDecrease25 = function () { 
+//Reduce this.maxhealth by 10 (or lower if less available) + increase Shield Generator by same amount.
+	
+ 	var ship = this.ship;	
+	for (var i in ship.systems) {
+		var system = ship.systems[i];
+
+		if (system instanceof ThirdspaceShieldGenerator) {
+			var generator = system; //Find generator
+		}
+	}
+
+	var shieldHealth = this.currentHealth;
+	if(shieldHealth >= 10){		
+		this.currentHealth -= 25;
+		generator.storedCapacity += 25;
+	}else{
+		var shieldIncrement = Math.max(0, shieldHealth);
+		this.currentHealth -= shieldIncrement;
+		generator.storedCapacity += shieldIncrement;		
+	}	
+	
+	if (this.shieldHealth == 0) {
+		this.outputDisplay = '-'; //'0' is not shown!							
+	}	
+	
+};
 
 ThirdspaceShield.prototype.doIndividualNotesTransfer = function () { //prepare individualNotesTransfer variable - if relevant for this particular system
 	this.individualNotesTransfer = Array();
@@ -519,72 +639,6 @@ ThoughtShield.prototype.getDefensiveHitChangeMod = function (target, shooter, we
 
     return defenceMod; // Return the calculated defenceMod
 };
-
-
-/* //OLD VERSION BEFORE OPTIMISATION - LEAVE HERE FOR NOW
-ThoughtShield.prototype.getDefensiveHitChangeMod = function (target, shooter, weapon) {
-
- 	var thisShip = this.ship;
-
-    for (var i in gamedata.ships) {
-        var ship = gamedata.ships[i];
-        
-        if(!ship.phpclass == 'Consortium') continue;  //Only one type of ship can Reinforce Thought Shield 
-    	if(!ship.team == target.team) continue; //And in this ship's team.
-    	if(shipManager.isDestroyed(ship)) continue;	//Not dead!
-
-		//Search Consortium's systems for Shield Reinforcement    		
-		for (var j in ship.systems) {
-			var system = ship.systems[j];
-
-			//Only interested in Shield Reinforcement systems
-			if (system instanceof ShieldReinforcement) {
-					var baseOutput = shipManager.systems.getRemainingHealth(system);
-					var noOfShieldsBoosted = 0;//Initialise	
-					var usedOutput = 0;					
-					
-					//Now check it's fireOrders
-					if(system.fireOrders.length > 0){
-						for(var k in system.fireOrders){
-							var fireOrder = system.fireOrders[k];
-							//Looking for a fireOrder boosting shields and amend defenceMod
-							if(fireOrder.targetid == thisShip.id) this.defenceMod = system.reinforceAmount;	
-								
-							//Also record how much shield power was used so we know how much is left to boost Consortium below
-							var reinforceTarget = gamedata.getShip(fireOrder.targetid);
-							for (var l in reinforceTarget.systems) {//Check all systems for Thought Shield
-								var targetSystem = reinforceTarget.systems[l];
-								
-								if (targetSystem instanceof ThoughtShield) {
-									noOfShieldsBoosted += 1;//Shield found, add it to tally.
-								}
-							}						
-						}
-					}
-				
-					if(ship.id == thisShip.id){ //The Consortium IS the targeted ship!
-						usedOutput = noOfShieldsBoosted * system.reinforceAmount;
-						var remainingOutput = baseOutput - usedOutput;
-						var ownShields = 0;
-						
-						for (var m in thisShip.systems) {//Check all systems for Thought Shield
-							var ownSystem = thisShip.systems[m];
-									
-								if (ownSystem instanceof ThoughtShield) {
-									ownShields += 1;//Shield found, add it to tally.
-								}
-						}
-						
-						this.defenceMod = Math.round(remainingOutput / ownShields);								
-					}	
-			}
-		}    	
-        
-	}
-    
-    return this.defenceMod; //Usually 0, unless reinforced.
-};
-*/
 
 ThoughtShield.prototype.canIncrease = function () { //Can increase if not at max / destroyed.
  //Check if it is at maxHealth / not destroyed etc / Is there spare capacity in Generator?	

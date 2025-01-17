@@ -47,7 +47,7 @@ window.ShipEWSprite = function () {
         context.fillStyle = "rgba(144,185,208," + a + ")";
 
         var r1 = getDEWStart();
-        var r2 = getDEWStart() + DEW*3;
+        var r2 = getDEWStart() + DEW*2.5;
 
         graphics.drawFilledCircle(context, TEXTURE_SIZE / 2, TEXTURE_SIZE / 2, r1, r2);
     }

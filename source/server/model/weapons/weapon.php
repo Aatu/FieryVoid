@@ -72,6 +72,8 @@ class Weapon extends ShipSystem
     public $turnsloaded;
     public $turnsloadedArray = array();
 	public $maxVariableShots = 0; //For front end to know how many shots weapon CAN fire for variable-shot weapons. 	  
+	public $canSplitShots = false; //For Front end to allow weapons to target different enemies in same firing round. 
+	public $canSplitShotsArray = array(); 
 
     public $overloadable = false;
 
@@ -142,7 +144,8 @@ class Weapon extends ShipSystem
     public $ballistic = false; //this is a ballistic weapon, not direct fire
     public $ballisticIntercept = false; //can intercept, but only ballistics
     public $hextarget = false; //this weapon is targeted on hex, not unit
-   	public $hextargetArray = array(); //For AntimatterShredder		
+   	public $hextargetArray = array(); //For AntimatterShredder
+   	protected $noTargetHexIcon = false;		
 		
     public $noPrimaryHits = false; //PRIMARY removed from outer charts if true
 	
@@ -295,6 +298,7 @@ class Weapon extends ShipSystem
 			}
 			/*this needs to be sent only if weapon suffered crits!*/
 			if (count($this->criticals)>0) { //if there was a critical, send all potentially changed data; otherwise, they should be standard and don't need to be sent extra!
+				$this->effectCriticals();					
 				$strippedSystem->range = $this->range;
 				$strippedSystem->rangeArray = $this->rangeArray;	
 				$strippedSystem->rangePenalty = $this->rangePenalty;

@@ -9,7 +9,7 @@ class tkharas extends FighterFlight{
 		    $this->faction = "Narn Regime";
         $this->phpclass = "tkharas";
         $this->shipClass = "T'Khar Assault Shuttles";
-		    $this->imagePath = "img/ships/gorith.png";
+		    $this->imagePath = "img/ships/NarnTGhor.png";
         
         $this->forwardDefense = 9;
         $this->sideDefense = 9;
@@ -35,8 +35,8 @@ class tkharas extends FighterFlight{
 			$armour = array(2, 2, 2, 2);
 			$fighter = new Fighter("tkharas", $armour, 8, $this->id);
 			$fighter->displayName = "T'Khar";
-			$fighter->imagePath = "img/ships/gorith.png";
-			$fighter->iconPath = "img/ships/gorith_large.png";
+			$fighter->imagePath = "img/ships/NarnTGhor.png";
+			$fighter->iconPath = "img/ships/NarnTGhor_Large.png";
 			
 			
 			$fighter->addFrontSystem(new PairedParticleGun(330, 30, 5, 1)); //1 gun d6+5

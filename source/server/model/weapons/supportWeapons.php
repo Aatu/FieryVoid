@@ -42,7 +42,7 @@ class AbbaiShieldProjector extends Weapon implements DefensiveSystem{
 	public $isPrimaryTargetable = true; //can this system be targeted by called shot if it's on PRIMARY?
     		
 	public $firingModes = array(
-			1 => "Shield"
+			1 => "Shield Projector"
 		);
 
 	protected $autoHit = true;//To show 100% hit chance in front end.
@@ -259,7 +259,7 @@ class ShieldReinforcement extends Weapon{
 	public $isPrimaryTargetable = false; //can this system be targeted by called shot if it's on PRIMARY?
     		
 	public $firingModes = array(
-			1 => "Reinforce"
+			1 => "Shield Reinforcement"
 		);
 
 	protected $autoHit = true;//To show 100% hit chance in front end.

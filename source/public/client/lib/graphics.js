@@ -185,6 +185,12 @@ window.graphics = {
         graphics.drawHexagon(canvas, x, y, l, leftside, topleft, topright);
     },
 
+drawCenteredHexagonNumber: function drawCenteredHexagonNumber(canvas, x, y, l, number) {
+    var a = l * Math.sin(Math.PI / 6);
+    var b = l * Math.cos(Math.PI / 6);
+
+},
+
     drawHexagon: function drawHexagon(canvas, x, y, l, leftside, topleft, topright) {
         var a = l * Math.sin(30 / 180 * Math.PI);
         var b = l * Math.cos(30 / 180 * Math.PI);

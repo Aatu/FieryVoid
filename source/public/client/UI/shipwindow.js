@@ -634,7 +634,7 @@ window.shipWindowManager = {
 				return grouped;
 			}
 
-			if (group.lenght == 1 && ones.length < 2) {
+			if (group.lenght == 1 && ones.length < 2) { //This actually has a typo, but if you fix it then shipWindows seem to bug :/ DK
 				ones.push(group[i]);
 				deletes.push(i);
 				if (ones.length == 2) {
@@ -729,7 +729,25 @@ window.shipWindowManager = {
 				ulti.push(finals[i]);
 			}
 		}
+		
+		//New method to prevent Vree layout bug - 01/25 DK
+		if (remains.length <= 3 && remains.length > 0) {
+		    var group = [];
+		    for (var i in remains) {
+		        for (var j in remains[i]) {
+		            group.push(remains[i][j]);
+		        }
+		    }
 
+		    // Only push the group if it has elements
+		    if (group.length > 0) {
+		        ulti.push(group);
+		    }
+		} else if (remains.length > 3) {
+		    // Add remaining single-system groups without combining if too many remain
+		    ulti.push(...remains);
+		}		
+/* //Old code that caused Vree ships to bug if only two non-structure systems present in a block - 01/25 DK
 		if (remains.length <= 3) {
 			var group = [];
 			for (var i in remains) {
@@ -741,7 +759,7 @@ window.shipWindowManager = {
 			ulti.push(group);
 			return ulti;
 		}
-
+*/
 		return finals;
 	},
 

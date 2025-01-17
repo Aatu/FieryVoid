@@ -25,7 +25,8 @@ window.ShipTooltipInitialOrdersMenu = function () {
         { className: "removeAllEW", condition: [isSelf, notFlight], action: removeAllEW, info: "Remove All EW" }, 
         { className: "targetWeapons", condition: [isEnemy, hasShipWeaponsSelected], action: targetWeapons, info: "Target selected weapons on ship" }, 
         { className: "targetWeaponsHex", condition: [hasHexWeaponsSelected], action: targetHexagon, info: "Target selected weapons on hexagon" },
-		{ className: "targetSuppWeapons", condition: [isFriendly, hasShipWeaponsSelected, hasSupportWeaponSelected, notSelf], action: targetWeapons, info: "Target support weapons" }//30 June 2024 - DK - Added for Ally targeting.		        
+		{ className: "targetSuppWeapons", condition: [isFriendly, hasShipWeaponsSelected, hasSupportWeaponSelected, notSelf], action: targetWeapons, info: "Target support weapons" },//30 June 2024 - DK - Added for Ally targeting.
+        { className: "removeMultiOrder", condition: [isEnemy, hasShipWeaponsSelected, hasSplitWeaponFiringOrder], action: removeFiringOrderMulti, info: "Remove a Firig Order" } 				        
     ];
     
 
@@ -39,6 +40,12 @@ window.ShipTooltipInitialOrdersMenu = function () {
             return system instanceof Weapon && system.hextarget !== true;
         });
     }
+
+	function hasSplitWeaponFiringOrder() {
+	    return gamedata.selectedSystems.some(function (system) {
+	        return system instanceof Weapon && system.canSplitShots && weaponManager.hasTargetedThisShip(this.targetedShip, system);
+	    }.bind(this)); // Bind `this` to the callback
+	}
 
     function hasHexWeaponsSelected() {
         return gamedata.selectedSystems.some(function (system) {
@@ -55,7 +62,17 @@ window.ShipTooltipInitialOrdersMenu = function () {
         weaponManager.targetHex(this.selectedShip, this.hexagon);
     }
 
-	function hasSupportWeaponSelected() {//30 June 2024 - DK - Added for Ally targeting.	
+	function removeFiringOrderMulti(){
+	    // Loop through selected systems and check for systems that have canSplitShots set to true
+	    gamedata.selectedSystems.forEach(function(system) {
+	        if (system.canSplitShots) {
+	            // Call weaponManager.removeFiringOrderMulti for each system that meets the condition
+	            weaponManager.removeFiringOrderMulti(this.selectedShip, system, this.targetedShip, true);
+	        }
+	    }, this); // Make sure to bind `this` so that `this.selectedShip` is correct
+	}
+
+	function hasSupportWeaponSelected() {//30 June 2024 - DK - Added for Split targeting.	
 	    return gamedata.selectedSystems.some((system) => {
 	        return system.canTargetAllies === true;
 	    });

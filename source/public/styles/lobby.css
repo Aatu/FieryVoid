@@ -35,12 +35,14 @@
 }
 
 .slot .status{
-	color:darkgreen;
+    color: #00d100; /* Bright green */
+    font-weight: bold; /* Makes the text bold */
 }
 
 .slot .playername{
 	font-size:14px;
-	color:#496791;
+	color:#6e9cdc; /* Original value  #496791 */
+    font-weight: bold; /* Makes the text bold */	
 }
 
 .clickable{
@@ -52,6 +54,7 @@
 
 .takeslot{
     color:red;
+    font-weight: bold; /* Makes the text bold */    
 }
 
 .taken .takeslot{
@@ -131,7 +134,7 @@
 }
 
 .value{
-    color:#496791;
+    color:#6e9cdc; /* Original value  #496791 */
     
 }
 

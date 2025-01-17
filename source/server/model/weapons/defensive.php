@@ -19,7 +19,7 @@
         public $loadingtime = 1;
   
         public $rangePenalty = 2;
-        public $fireControl = array(6, null, null); // fighters, <mediums, <capitals 
+        public $fireControl = array(null, null, null); // fighters, <mediums, <capitals 
         
         public $output = 3;
         
@@ -28,6 +28,10 @@
 
         public $damageType = "Standard"; 
         public $weaponClass = "Particle";
+
+	    public $boostable = true;
+	    public $boostEfficiency = 0;
+	    public $maxBoostLevel = 1;
     
         public function getDefensiveType()
         {
@@ -53,11 +57,37 @@
         public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon){
             return 0;
         }
+
+         protected function getBoostLevel($turn){
+            $boostLevel = 0;
+            foreach ($this->power as $i){
+                if ($i->turn != $turn){
+                   continue;
+                }
+                if ($i->type == 2){
+                    $boostLevel += $i->amount;
+                }
+            }
+            return $boostLevel;
+        }
+
+	    public function beforeFiringOrderResolution($gamedata){		
+		    parent::beforeFiringOrderResolution($gamedata);
+	        if($this->getBoostLevel($gamedata->turn) > 0){
+	            $this->intercept = 0; //If wepaon is boosted for Offensive Mode, cannot intercept!      	
+            	$this->fireControl = array(6, null, null);
+	        }        
+		} //endof function beforeFiringOrderResolution
         
         public function setSystemDataWindow($turn){
             //$this->data["Weapon type"] = "Particle";
             //$this->data["Damage type"] = "Standard";
+            if($this->getBoostLevel($turn) > 0){ //Boosted i.e. switched to Offeensive Mode this turn.
+            	$this->fireControl = array(6, null, null); //To allow Offensive firing.       	
+	            $this->intercept = 0; //If weapon is boosted for Offensive Mode, cannot intercept!            
+            } 
             $this->data["Special"] = "Energy Web: -15 to hit on arc with active Interceptor.";
+            $this->data["Special"] .= "<br>Can be fired offensively at fighters by boosting this system in Initial Orders Phase (at zero cost).  However, system loses Intercept Rating (E-Web is unaffected).";              
             parent::setSystemDataWindow($turn);
         }
 
@@ -68,7 +98,15 @@
         
         public function getDamage($fireOrder){        return Dice::d(10)+5;   }
         public function setMinDamage(){     $this->minDamage = 6 ;      }
-        public function setMaxDamage(){     $this->maxDamage = 15 ;      }               
+        public function setMaxDamage(){     $this->maxDamage = 15 ;      } 
+        
+		public function stripForJson(){
+			$strippedSystem = parent::stripForJson();
+			$strippedSystem->fireControl = $this->fireControl;
+			$strippedSystem->intercept = $this->intercept;								
+			return $strippedSystem;
+		}        
+                      
     } //endof class Interceptor MkI
     
 
@@ -79,11 +117,24 @@
         
         public $output = 4;
         public $intercept = 4;
-        public $fireControl = array(8, null, null);
+        public $fireControl = array(null, null, null);
+
+	    public function beforeFiringOrderResolution($gamedata){		
+		    parent::beforeFiringOrderResolution($gamedata);
+	        if($this->getBoostLevel($gamedata->turn) > 0){
+	            $this->intercept = 0; //If wepaon is boosted for Offensive Mode, cannot intercept!      	
+            	$this->fireControl = array(8, null, null);
+	        }        
+		} //endof function beforeFiringOrderResolution
                         
         public function setSystemDataWindow($turn){
-            parent::setSystemDataWindow($turn);
+        	parent::setSystemDataWindow($turn);
+            if($this->getBoostLevel($turn) > 0){           	
+            	$this->fireControl = array(8, null, null); //To allow Offensive firing.       	
+	            $this->intercept = 0; //If weapon is boosted for Offensive Mode, cannot intercept!            
+            }          
             $this->data["Special"] = "Energy Web: -20 to hit on arc with active Interceptor.";
+            $this->data["Special"] .= "<br>Can be fired offensively at fighters by boosting this system in Initial Orders Phase (at zero cost).  However, system loses Intercept Rating (E-Web is unaffected).";              
         }
     }
     
@@ -98,7 +149,12 @@
                 
         public function setSystemDataWindow($turn){
             parent::setSystemDataWindow($turn);
+            if($this->getBoostLevel($turn) > 0){ //Boosted i.e. switched to Offeensive Mode this turn.
+            	$this->fireControl = array(6, null, null); //To allow Offensive firing.       	
+	            $this->intercept = 0; //If weapon is boosted for Offensive Mode, cannot intercept!            
+            }            
             $this->data["Special"] = "Energy Web: -10 to hit on arc with active Interceptor.";
+            $this->data["Special"] .= "Can be fired offensively at fighters, by boosting this system in Initial Orders Phase (at zero cost).  However, system loses Intercept Rating (E-Web is unaffected).";                        
         }
 
         public function getDamage($fireOrder){        return Dice::d(10)+3;   }
@@ -665,11 +721,24 @@ class HeavyInterceptorBattery extends InterceptorMkI{
         
         public $output = 4;
         public $intercept = 4;
-        public $fireControl = array(10, null, null); 
+        public $fireControl = array(null, null, null); 
+
+	    public function beforeFiringOrderResolution($gamedata){		
+		    parent::beforeFiringOrderResolution($gamedata);
+	        if($this->getBoostLevel($gamedata->turn) > 0){
+	            $this->intercept = 0; //If weapon is boosted for Offensive Mode, cannot intercept!      	
+            	$this->fireControl = array(10, null, null);
+	        }        
+		} //endof function beforeFiringOrderResolution
                                  
         public function setSystemDataWindow($turn){
             parent::setSystemDataWindow($turn);
+            if($this->getBoostLevel($turn) > 0){ //Boosted i.e. switched to Offeensive Mode this turn.
+            	$this->fireControl = array(10, null, null); //To allow Offensive firing.       	
+	            $this->intercept = 0; //If weapon is boosted for Offensive Mode, cannot intercept!            
+            }                         
             $this->data["Special"] = "Energy Web: -20 to hit on arc with active Interceptor.";
+            $this->data["Special"] .= "<br>Can be fired offensively at fighters by boosting this system in Initial Orders Phase (at zero cost).  However, system loses Intercept Rating (E-Web is unaffected).";              
         }
 
         public function getDamage($fireOrder){        return Dice::d(10, 2)+6;   }
@@ -677,6 +746,7 @@ class HeavyInterceptorBattery extends InterceptorMkI{
         public function setMaxDamage(){     $this->maxDamage = 26 ;      }
    
 }  //end of class HeavyInterceptorBattery
+
 
 //Adding Thirdspace as unique systems to use different icon and allow modifictions from the Trek systems
 class ThirdspaceShield extends Shield implements DefensiveSystem { //defensive values of zero, but still formally there to display arcs!
@@ -816,32 +886,6 @@ class ThirdspaceShield extends Shield implements DefensiveSystem { //defensive v
 			return $returnValues;
 		} //endof function doProtect
 
-/* //OLD METHOD FOR RESTORING SHIELDS, NOW HANDLED BY THIRDSPACE SHIELD GENERATOR
-		// Effects that happen in the Critical phase (after criticals are rolled) - replenishment from active Generator
-		public function criticalPhaseEffects($ship, $gamedata) {
-		    
-		    parent::criticalPhaseEffects($ship, $gamedata); // Call parent to apply effects like Limpet Bore.
-
-		    // If the shield is destroyed, it does not work
-		    if ($this->isDestroyed()) return; 
-
-		    // Find the shield generator system
-		    $generator = $ship->getSystemByName("ThirdspaceShieldGenerator");	
-		    if (!$generator || $generator->isDestroyed()) return; // Exit if generator does not exist or is destroyed
-
-		    $generatorOutput = $generator->getOutput(); // Generator output, e.g., 15
-		    $maxRegen = $this->baseRating - $this->getRemainingCapacity(); // Calculate how much capacity can be replenished
-
-		    // Calculate the amount to replenish (limited by generator output or max regen possible), Generator will catch any spare output and reallocate.
-		    $toReplenish = min($generatorOutput, $maxRegen);
-
-		    // Only attempt to replenish if there is a positive amount to replenish
-		    if ($toReplenish > 0) {
-		        $this->absorbDamage($ship, $gamedata, -$toReplenish); // Apply regeneration (negative value to heal)
-		    }
-		} // end of function criticalPhaseEffects
-*/
-
 	// this method generates additional non-standard information in the form of individual system notes, in this case: - Initial phase: check setting changes made by user, convert to notes.	
 	public function doIndividualNotesTransfer(){
 	//data received in variable individualNotesTransfer, positive if Shield decreased, negative if Shield increased.
@@ -892,10 +936,28 @@ class ThirdspaceShield extends Shield implements DefensiveSystem { //defensive v
 
 			$startRating = $this->baseRating;
 			$currentRating = $this->getRemainingHealth();
+			
+			//Find and account for any Enhancements
+			foreach ($ship->enhancementOptions as $enhancement) {
+			    $enhID = $enhancement[0];
+				$enhCount = $enhancement[2];		        
+				if($enhCount > 0) {		            
+			        if ($enhID == 'IMPR_THSD'){
+			        	$startRating += $enhCount;						        	
+			        	if($ship->shipSizeClass == 3){
+			        		$currentRating += $enhCount * 3;
+						}else{
+			        		$currentRating += $enhCount;							
+						}				        	     	
+					}
+				}	
+			}			
+			
 			$adjustment = $currentRating - $startRating;
 					    	
 			$this->setShields($ship, $gamedata->turn, $adjustment);
 		}
+
 		
 		//Now make any changes as a result of rearrangements by player.					
 	    foreach ($this->individualNotes as $currNote) {

@@ -8,8 +8,8 @@ window.ReplayPhaseStrategy = function () {
         this.currentTurn = null;
         this.currentPhase = null;
         this.replayTurn = null;
-        this.replayPhase = null;
-		this.hexBallistics = null; //New variable added so that ballisticIcons can be rendered during Replay - DK 10/24        
+        this.replayPhase = null;    
+		this.allBallistics = null;  //New variable added so that ballisticLineIcons can be rendered during Replay - DK 12/24 
 
         this.loading = false;
     }
@@ -216,8 +216,8 @@ window.ReplayPhaseStrategy = function () {
             success: function (data) {
                 gamedata.parseServerData(data); 
                 //New section called at this point so that ballisticIcons can be rendered during Replay - DK 10/24  
-				this.hexBallistics = weaponManager.getAllHexTargetedBallistics()				               
-        		this.ballisticIconContainer.consumeGamedata(this.gamedata, this.shipIconContainer, this.hexBallistics);                       
+				this.allBallistics = weaponManager.getAllFireOrdersForAllShipsForTurn(gamedata.turn, 'ballistic');		
+        		this.ballisticIconContainer.consumeGamedata(this.gamedata, this.shipIconContainer, this.allBallistics);         		
                 stopLoading.call(this);
             }.bind(this),
             error: ajaxInterface.errorAjax

@@ -75,10 +75,17 @@ window.ShipTooltipBallisticsMenu = function () {
 			if (amount > 1) textToDisplay = amount + 'x ' + ball.weapon.displayName;
 			textToDisplay = ball.shooter.name + ', ' + textToDisplay + ' (' + ball.weapon.firingModes[ball.fireOrder.firingMode] + ') ';
 			jQuery(".weapon", ballElement).html(textToDisplay);
-			
-            //jQuery(".weapon", ballElement).html(' ' + ball.weapon.firingModes[ball.fireOrder.firingMode] + ' '); //display mode name as well
-            jQuery(".hitchange", ballElement).html('- Approx: ' + weaponManager.calculataBallisticHitChange(ballisticEntry) + '%' ); 
+			var hitchance = weaponManager.calculataBallisticHitChange(ballisticEntry);
+			var hitchanceNormalMode = ball.fireOrder.chance ?? ball.fireOrder.needed;	//Fireorder hitchance as locked in by Normal mode weapons.
 
+			if(ball.fireOrder.type == "normal" && amount > 1 && ball.fireOrder.hitmod){ //Method only works during targeting Normal types, not in Replay :(
+				var hitChanceLow = hitchance + ball.fireOrder.hitmod;	//To show the difference between lowest and highest hitchances in tooltip.	
+		        jQuery(".hitchange", ballElement).html('- Between: ' + hitChanceLow + '% - ' + hitchanceNormalMode + '%' ); 			
+			}else if(ball.fireOrder.type == "normal"){ //Where there's only 1 normal fireOrder or in Replay
+				jQuery(".hitchange", ballElement).html('- Approx: ' + hitchanceNormalMode + '%' ); 
+			}else{ //Everything else, e.g. all ballistics
+			    jQuery(".hitchange", ballElement).html('- Approx: ' + hitchance + '%' ); 
+			}
             /*
             if (this.allowIntercept) {
                 var interception = weaponManager.getInterception(ball.fireOrder) * 5;

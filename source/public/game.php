@@ -115,7 +115,9 @@
     <script src="client/renderer/sprite/PlainSprite.js"></script>
     <script src="client/renderer/sprite/LineSprite.js"></script>
     <script src="client/renderer/sprite/BallisticSprite.js"></script>
+    <script src="client/renderer/sprite/BallisticLineSprite.js"></script>
     <script src="client/renderer/sprite/TextSprite.js"></script>
+    <script src="client/renderer/sprite/HexNumberSprite.js"></script>    
     
     <script src="client/renderer/icon/ShipIcon.js"></script>
     <script src="client/renderer/icon/FlightIcon.js"></script>
