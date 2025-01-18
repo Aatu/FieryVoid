@@ -8,8 +8,8 @@ class VelraxSathrinRefit2 extends MediumShip{
         $this->faction = "ZNexus Velrax Republic";
         $this->phpclass = "VelraxSathrinRefit2";
         $this->imagePath = "img/ships/Nexus/VelraxSathrin.png";
-        $this->shipClass = "Sathrin Border Frigate (2152 refit)";
-			$this->variantOf = "Sathrin Border Frigate";
+        $this->shipClass = "Sathrin Border Frigate (2152)";
+			$this->variantOf = "Sathrin Border Frigate (2108)";
 			$this->occurence = "common";
 		$this->unofficial = true;
         $this->agile = true;

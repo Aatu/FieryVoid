@@ -10,8 +10,6 @@ class BrixadiiPursuitFrigate2108 extends MediumShip{
         $this->imagePath = "img/ships/Nexus/BrixadiiPursuitFrigate.png";
 			$this->canvasSize = 85; //img has 200px per side
         $this->shipClass = "Pursuit Frigate (2108)";
-			$this->variantOf = "Pursuit Frigate";
-			$this->occurence = "common";
 		$this->unofficial = true;
    		$this->isd = 2108;
         

@@ -10,8 +10,6 @@ class BrixadiiWarship2108 extends BaseShipNoAft{
         $this->imagePath = "img/ships/Nexus/BrixadiiWarship.png";
 			$this->canvasSize = 165; //img has 200px per side
         $this->shipClass = "Warship (2108)";
-			$this->variantOf = "Warship";
-			$this->occurence = "common";
 		$this->unofficial = true;
 		$this->isd = 2108;
          

@@ -10,8 +10,6 @@ class BrixadiiJumpScout2108 extends BaseShipNoAft{
         $this->imagePath = "img/ships/Nexus/BrixadiiWarship.png";
 			$this->canvasSize = 165; //img has 200px per side
         $this->shipClass = "Jump Scout (2108)";
-			$this->variantOf = "Jump Scout";
-			$this->occurence = "common";		
 			$this->limited = 10;
 		$this->unofficial = true;
 		$this->isd = 2108;

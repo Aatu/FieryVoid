@@ -10,8 +10,8 @@ class BrixadiiAttackFrigate2108 extends MediumShip{
         $this->imagePath = "img/ships/Nexus/BrixadiiAttackFrigate.png";
 			$this->canvasSize = 85; //img has 200px per side
         $this->shipClass = "Attack Frigate (2108)";
-			$this->variantOf = "Attack Frigate";
-			$this->occurence = "common";
+//			$this->variantOf = "Attack Frigate";
+//			$this->occurence = "common";
 		$this->unofficial = true;
    		$this->isd = 2108;
         

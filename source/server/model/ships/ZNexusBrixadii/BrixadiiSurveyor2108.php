@@ -10,8 +10,6 @@ class BrixadiiSurveyor2108 extends HeavyCombatVessel{
         $this->imagePath = "img/ships/Nexus/BrixadiiSurveyor.png";
 			$this->canvasSize = 120; //img has 200px per side
         $this->shipClass = "Surveyor (2108)";
-			$this->variantOf = "Surveyor";
-			$this->occurence = "common";
 			$this->limited = 10;
 			$this->unofficial = true;
         $this->isd = 2108;

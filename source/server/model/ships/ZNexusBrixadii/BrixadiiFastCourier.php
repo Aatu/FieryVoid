@@ -5,11 +5,11 @@ class BrixadiiFastCourier extends BaseShipNoAft{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 400;
-		$this->faction = "ZNexus Brixadii Clans";
+		$this->faction = "ZNexus Support Units";
         $this->phpclass = "BrixadiiFastCourier";
         $this->imagePath = "img/ships/Nexus/BrixadiiWarship.png";
 			$this->canvasSize = 165; //img has 200px per side
-        $this->shipClass = "Fast Courier";
+        $this->shipClass = "Brixadii Fast Courier";
 		$this->unofficial = true;
 		$this->isd = 2114;
          

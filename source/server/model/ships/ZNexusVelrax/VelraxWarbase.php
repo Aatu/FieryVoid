@@ -10,8 +10,6 @@ class VelraxWarbase extends SmallStarBaseFourSections{
 		$this->faction = "ZNexus Velrax Republic";
 		$this->phpclass = "VelraxWarbase";
 		$this->shipClass = "Warbase";
-			$this->variantOf = "Command Base";
-			$this->occurence = "common";
 		$this->imagePath = "img/ships/Nexus/VelraxBase.png";
 		$this->canvasSize = 200; 
 		$this->unofficial = true;

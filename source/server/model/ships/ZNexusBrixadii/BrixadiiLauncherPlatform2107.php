@@ -9,8 +9,6 @@ class BrixadiiLauncherPlatform2107 extends OSAT{
         $this->phpclass = "BrixadiiLauncherPlatform2107";
         $this->imagePath = "img/ships/Nexus/BrixadiiSentinelPlatform.png";
         $this->shipClass = "Brixadii Launcher Platform (2107)";
-			$this->variantOf = "Brixadii Launcher Platform";
-			$this->occurence = "common";
 			$this->canvasSize = 175;
 		$this->unofficial = true;
 		$this->isd = 2107;
@@ -26,13 +24,13 @@ class BrixadiiLauncherPlatform2107 extends OSAT{
         $this->iniativebonus = 60;
 
         $this->addPrimarySystem(new OSATCnC(0, 1, 0, 0));
-        $this->addPrimarySystem(new NexusRangedKineticBoxLauncher(3, 10, 0, 270, 90));
-        $this->addPrimarySystem(new NexusRangedKineticBoxLauncher(3, 10, 0, 270, 90));
-        $this->addPrimarySystem(new NexusChaffLauncher(1, 2, 1, 0, 360));
-        $this->addPrimarySystem(new ScatterPulsar(1, 4, 2, 0, 360));
+        $this->addFrontSystem(new NexusRangedKineticBoxLauncher(3, 10, 0, 270, 90));
+        $this->addFrontSystem(new NexusRangedKineticBoxLauncher(3, 10, 0, 270, 90));
+        $this->addFrontSystem(new NexusChaffLauncher(1, 2, 1, 0, 360));
+        $this->addFrontSystem(new ScatterPulsar(1, 4, 2, 0, 360));
         $this->addPrimarySystem(new Reactor(4, 9, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 6, 3, 5));   
-        $this->addPrimarySystem(new Thruster(3, 6, 0, 0, 2));
+        $this->addAftSystem(new Thruster(3, 6, 0, 0, 2));
                 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addPrimarySystem(new Structure(4, 20));
@@ -40,10 +38,10 @@ class BrixadiiLauncherPlatform2107 extends OSAT{
 		$this->hitChart = array(
 			0=> array(
 				8 => "Structure",
-				10 => "Thruster",
-				12 => "Ranged Kinetic Box Launcher",
-				14 => "Chaff Launcher",
-				16 => "Scatter Pulsar",
+				10 => "2:Thruster",
+				12 => "1:Ranged Kinetic Box Launcher",
+				14 => "1:Chaff Launcher",
+				16 => "1:Scatter Pulsar",
 				18 => "Scanner",
 				20 => "Reactor",
 			),

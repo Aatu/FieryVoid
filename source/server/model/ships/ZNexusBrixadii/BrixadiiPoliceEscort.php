@@ -10,7 +10,7 @@ class BrixadiiPoliceEscort extends LCV{
         $this->imagePath = "img/ships/Nexus/BrixadiiPoliceFrigateEarly.png";
 			$this->canvasSize = 70; //img has 200px per side
         $this->shipClass = "Police Escort";
-			$this->variantOf = "Police Frigate";
+			$this->variantOf = "Police Frigate (2108)";
 			$this->occurence = "common";
 		//$this->variantOf = "Police Frigate";
 		$this->unofficial = true;
@@ -30,7 +30,7 @@ class BrixadiiPoliceEscort extends LCV{
         $this->pivotcost = 1;
         $this->iniativebonus = 15*5;
  
-		$this->addFrontSystem(new InvulnerableThruster(99, 99, 0, 99, 1)); //unhitable and with unlimited thrust allowance
+		$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 1)); //unhitable and with unlimited thrust allowance
 		$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 3)); //unhitable and with unlimited thrust allowance
 		$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 2)); //unhitable and with unlimited thrust allowance
 		$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 4)); //unhitable and with unlimited thrust allowance

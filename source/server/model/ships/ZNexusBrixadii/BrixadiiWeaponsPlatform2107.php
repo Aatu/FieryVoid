@@ -10,7 +10,6 @@ class BrixadiiWeaponsPlatform2107 extends OSAT{
         $this->imagePath = "img/ships/Nexus/BrixadiiWeaponsPlatform.png";
 			$this->canvasSize = 175; //img has 100px per side
         $this->shipClass = "Brixadii Weapons Platform (2107)";
-	    $this->variantOf = "Brixadii Weapons Platform";
 		$this->limited = 33;
 		$this->unofficial = true;
 		$this->isd = 2107;
@@ -27,12 +26,12 @@ class BrixadiiWeaponsPlatform2107 extends OSAT{
         $this->iniativebonus = 60;
 
         $this->addPrimarySystem(new OSATCnC(0, 1, 0, 0));
-        $this->addPrimarySystem(new ParticleHammer(1, 12, 6, 300, 60));
-        $this->addPrimarySystem(new NexusChaffLauncher(1, 2, 1, 0, 360));
-        $this->addPrimarySystem(new ScatterPulsar(2, 4, 2, 0, 360));
+        $this->addFrontSystem(new ParticleHammer(1, 12, 6, 300, 60));
+        $this->addFrontSystem(new NexusChaffLauncher(1, 2, 1, 0, 360));
+        $this->addFrontSystem(new ScatterPulsar(2, 4, 2, 0, 360));
         $this->addPrimarySystem(new Reactor(4, 9, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 6, 3, 5));   
-        $this->addPrimarySystem(new Thruster(3, 6, 0, 0, 2));
+        $this->addAftSystem(new Thruster(3, 6, 0, 0, 2));
                 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addPrimarySystem(new Structure(4, 20));
@@ -40,10 +39,10 @@ class BrixadiiWeaponsPlatform2107 extends OSAT{
 		$this->hitChart = array(
 			0=> array(
 				7 => "Structure",
-				9 => "Thruster",
-				13 => "Particle Hammer",
-				14 => "Chaff Launcher",
-				16 => "Scatter Pulsar",
+				9 => "2:Thruster",
+				13 => "1:Particle Hammer",
+				14 => "1:Chaff Launcher",
+				16 => "1:Scatter Pulsar",
 				18 => "Scanner",
 				20 => "Reactor",
 			),

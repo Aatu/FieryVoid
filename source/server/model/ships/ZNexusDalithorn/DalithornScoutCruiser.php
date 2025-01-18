@@ -10,8 +10,6 @@ class DalithornScoutCruiser extends HeavyCombatVessel{
         $this->imagePath = "img/ships/Nexus/Dalithorn_Scout2.png";
 		$this->canvasSize = 125; //img has 200px per side
         $this->shipClass = "Scout Cruiser";
-			$this->variantOf = "Early Scout";
-			$this->occurence = "common";
 		$this->unofficial = true;
         $this->limited = 10;
         $this->isd = 2125;

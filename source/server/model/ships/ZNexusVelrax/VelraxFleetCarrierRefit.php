@@ -8,9 +8,7 @@ class VelraxFleetCarrierRefit extends BaseShip{
 	$this->faction = "ZNexus Velrax Republic";
         $this->phpclass = "VelraxFleetCarrierRefit";
         $this->imagePath = "img/ships/Nexus/VelraxNaresh.png";
-        $this->shipClass = "Naresh Fleet Carrier (2107 Refit)";
-			$this->variantOf = "Naresh Fleet Carrier";
-			$this->occurence = "common";
+        $this->shipClass = "Naresh Fleet Carrier (2107)";
         $this->shipSizeClass = 3;
 		$this->canvasSize = 170; //img has 200px per side
 		$this->limited = 33;

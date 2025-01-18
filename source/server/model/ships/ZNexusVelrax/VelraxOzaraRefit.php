@@ -8,8 +8,8 @@ class VelraxOzaraRefit extends MediumShip{
         $this->faction = "ZNexus Velrax Republic";
         $this->phpclass = "VelraxOzaraRefit";
         $this->imagePath = "img/ships/Nexus/VelraxThristen.png";
-        $this->shipClass = "Ozara Escort (2110 refit)";
-			$this->variantOf = "Thristen Corvette";
+        $this->shipClass = "Ozara Escort (2110)";
+			$this->variantOf = "Thristen Corvette (2109)";
 			$this->occurence = "uncommon";
 		$this->unofficial = true;
         $this->canvasSize = 90;

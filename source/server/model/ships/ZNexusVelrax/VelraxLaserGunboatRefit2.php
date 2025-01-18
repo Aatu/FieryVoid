@@ -9,8 +9,8 @@ class VelraxLaserGunboatRefit2 extends LCV{
         $this->phpclass = "VelraxLaserGunboatRefit2";
         $this->imagePath = "img/ships/Nexus/VelraxGunboat.png";
 			$this->canvasSize = 85; //img has 200px per side
-        $this->shipClass = "Liviss Gunboat (2110 Refit)";
-			$this->variantOf = "Nashran Gunboat";
+        $this->shipClass = "Liviss Gunboat (2110)";
+			$this->variantOf = "Nashran Gunboat (2110)";
 			$this->occurence = "common";
 		$this->unofficial = true;
 			$this->isd = 2110;

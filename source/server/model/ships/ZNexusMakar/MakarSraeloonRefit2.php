@@ -10,8 +10,6 @@ class MakarSraeloonRefit2 extends SmallStarBaseFourSections{
 		$this->faction = "ZNexus Makar Federation";
 		$this->phpclass = "MakarSraeloonRefit2";
 		$this->shipClass = "Sraeloon Station (2108)";
-			$this->variantOf = "Sraeloon Station";
-			$this->occurence = "common";
 		$this->imagePath = "img/ships/Nexus/makar_base.png";
 		$this->canvasSize = 140; 
 		$this->unofficial = true;
