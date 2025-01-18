@@ -1,17 +1,19 @@
 <?php
-class RogolonTovinAM extends HeavyCombatVessel{
+class RogolonTussova extends HeavyCombatVessel{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 400;
+        $this->pointCost = 365;
         $this->faction = "Rogolon Dynasty";
-        $this->phpclass = "RogolonTovinAM";
+        $this->phpclass = "RogolonTussova";
         $this->imagePath = "img/ships/RogolonSmallWarship.png";
-        $this->shipClass = "Tovin Small Warship";
-        $this->occurence = "common";
+        $this->shipClass = "Tussova Close Combat Frigate";
+			$this->variantOf = "Tovin Small Warship";
+			$this->occurence = "rare";
+ 		$this->unofficial = 'S'; //design released after AoG demise
 
-        $this->isd = 1966;
+        $this->isd = 1968;
         
         $this->forwardDefense = 13;
         $this->sideDefense = 15;
@@ -21,15 +23,7 @@ class RogolonTovinAM extends HeavyCombatVessel{
         $this->accelcost = 3;
         $this->rollcost = 2;
         $this->pivotcost = 4;
-        $this->iniativebonus = 25;
-        
-		
-        //ammo magazine itself (AND its missile options)
-        $ammoMagazine = new AmmoMagazine(36); //pass magazine capacity - 12 rounds per class-SO rack, 20 most other shipborne racks, 60 class-B rack and 80 Reload Rack
-        $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
-        $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 36); //add full load of basic missiles
-        $this->enhancementOptionsEnabled[] = 'AMMO_H';//add enhancement options for other missiles - Class-H
-		//Rogolons have ONLY Heavy Missiles available (besides Basic)
+        $this->iniativebonus = 35;
 		
         $this->addPrimarySystem(new Reactor(4, 10, 0, 0));
         $this->addPrimarySystem(new CnC(4, 16, 0, 0));
@@ -41,16 +35,20 @@ class RogolonTovinAM extends HeavyCombatVessel{
         
         $this->addFrontSystem(new Thruster(4, 15, 0, 4, 1));
         $this->addFrontSystem(new Thruster(4, 15, 0, 4, 1));
-		$this->addFrontSystem(new HeavyPlasma(3, 8, 5, 240, 0));
-		$this->addFrontSystem(new HeavyPlasma(3, 8, 5, 0, 120));
-		$this->addFrontSystem(new AmmoMissileRackSO(3, 0, 0, 300, 60, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
-
+		$this->addFrontSystem(new LightPlasma(3, 4, 2, 240, 360));
+		$this->addFrontSystem(new LightPlasma(3, 4, 2, 240, 360));
+		$this->addFrontSystem(new LightPlasma(3, 4, 2, 300, 60));
+		$this->addFrontSystem(new LightPlasma(3, 4, 2, 300, 60));
+		$this->addFrontSystem(new LightPlasma(3, 4, 2, 0, 120));
+		$this->addFrontSystem(new LightPlasma(3, 4, 2, 0, 120));
+		
         $this->addAftSystem(new Thruster(4, 8, 0, 2, 2));
         $this->addAftSystem(new Thruster(4, 8, 0, 2, 2));
         $this->addAftSystem(new Thruster(4, 8, 0, 2, 2));
+        $this->addAftSystem(new Engine(4, 7, 0, 4, 3));
         $this->addAftSystem(new Thruster(4, 8, 0, 2, 2));
-		$this->addAftSystem(new AmmoMissileRackSO(3, 0, 0, 180, 360, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
-		$this->addAftSystem(new AmmoMissileRackSO(3, 0, 0, 0, 180, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+        $this->addAftSystem(new Thruster(4, 8, 0, 2, 2));
+        $this->addAftSystem(new Thruster(4, 8, 0, 2, 2));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 4, 36));
@@ -69,14 +67,13 @@ class RogolonTovinAM extends HeavyCombatVessel{
         	),
         	1=> array(
         		6 => "Thruster",
-        		8 => "Heavy Plasma Cannon",
-        		10 => "Class-SO Missile Rack",
+        		10 => "Light Plasma Cannon",
         		18 => "Structure",
         		20 => "Primary",        			
         	),
         	2=> array(
         		7 => "Thruster",
-        		9 => "Class-SO Missile Rack",
+        		9 => "Engine",
         		18 => "Structure",
         		20 => "Primary",        			
         	),

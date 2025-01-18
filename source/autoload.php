@@ -811,14 +811,21 @@ spl_autoload_register(
                 'rmissilerack' => '/server/model/weapons/missile.php',
 				
 				//Rogolon units
+				'rogolontolovam' => '/server/model/ships/rogolon/rogolonTolovAM.php',
                 'rogolonchelekftr' => '/server/model/ships/rogolon/rogolonChelekFtr.php',
                 'rogolonltplasmacannon' => '/server/model/weapons/plasma.php',
                 'rogolonltplasmagun' => '/server/model/weapons/plasma.php',
                 'rogolonrogon' => '/server/model/ships/rogolon/rogolonRogon.php',
+				'rogolonrogonam' => '/server/model/ships/rogolon/rogolonRogonAM.php',
+				'rogolonrostovam' => '/server/model/ships/rogolon/rogolonRostovAM.php',
                 'rogolonshogalovam' => '/server/model/ships/rogolon/rogolonShogalovAM.php',
                 'rogolontascoam' => '/server/model/ships/rogolon/rogolonTascoAM.php',
                 'rogolontolov' => '/server/model/ships/rogolon/rogolonTolov.php',
+				'rogolontolovam' => '/server/model/ships/rogolon/rogolonTolovAM.php',
                 'rogolontovin' => '/server/model/ships/rogolon/rogolonTovin.php',
+                'rogolontovinam' => '/server/model/ships/rogolon/rogolonTovinAM.php',
+				'rogolontolovam' => '/server/model/ships/rogolon/rogolonTolovAM.php',
+				'rogolontussova' => '/server/model/ships/rogolon/rogolonTussova.php',
                 'rogolonvasturshf' => '/server/model/ships/rogolon/rogolonVasturSHF.php',
                 'rogolonvostorshf' => '/server/model/ships/rogolon/rogolonVostorSHF.php',
 				
@@ -3277,11 +3284,6 @@ spl_autoload_register(
 						'anoroam' => '/server/model/ships/hurr/anoroAM.php',
 						
 						'koetham' => '/server/model/ships/hurr/koethAM.php',
-						
-						//Small Races - Rogolon						
-						'rogolonrogonam' => '/server/model/ships/rogolon/rogolonRogonAM.php',
-						'rogolontolovam' => '/server/model/ships/rogolon/rogolonTolovAM.php',
-						'rogolontovinam' => '/server/model/ships/rogolon/rogolonTovinAM.php',
 						
 						//Orieni
 						'penitentam' => '/server/model/ships/orieni/penitentAM.php',

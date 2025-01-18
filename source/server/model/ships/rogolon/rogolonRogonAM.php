@@ -25,9 +25,9 @@ class RogolonRogonAM extends BaseShip{
         $this->iniativebonus = -5;
         
         //ammo magazine itself (AND its missile options)
-        $ammoMagazine = new AmmoMagazine(120); //pass magazine capacity - 12 rounds per class-SO rack, 20 most other shipborne racks, 60 class-B rack and 80 Reload Rack
+        $ammoMagazine = new AmmoMagazine(72); //pass magazine capacity - 12 rounds per class-SO rack, 20 most other shipborne racks, 60 class-B rack and 80 Reload Rack
         $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
-        $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 120); //add full load of basic missiles
+        $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 72); //add full load of basic missiles
         $this->enhancementOptionsEnabled[] = 'AMMO_H';//add enhancement options for other missiles - Class-H
 		//Rogolons have ONLY Heavy Missiles available (besides Basic)
 		
@@ -36,14 +36,14 @@ class RogolonRogonAM extends BaseShip{
         $this->addPrimarySystem(new CnC(4, 16, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 12, 4, 6));
         $this->addPrimarySystem(new Engine(4, 15, 0, 12, 3));
-	$this->addPrimarySystem(new Hangar(4, 3));
+		$this->addPrimarySystem(new Hangar(4, 3));
         
         $this->addFrontSystem(new Thruster(4, 15, 0, 4, 1));
         $this->addFrontSystem(new Thruster(4, 15, 0, 4, 1));
-	$this->addFrontSystem(new HeavyPlasma(3, 8, 5, 240, 0));
-	$this->addFrontSystem(new HeavyPlasma(3, 8, 5, 0, 120));
-	$this->addFrontSystem(new Catapult(3, 6));
-	$this->addFrontSystem(new Catapult(3, 6));
+		$this->addFrontSystem(new HeavyPlasma(3, 8, 5, 240, 0));
+		$this->addFrontSystem(new HeavyPlasma(3, 8, 5, 0, 120));
+		$this->addFrontSystem(new Catapult(3, 6));
+		$this->addFrontSystem(new Catapult(3, 6));
 
         $this->addAftSystem(new Thruster(4, 8, 0, 2, 2));
         $this->addAftSystem(new Thruster(4, 8, 0, 2, 2));
@@ -52,21 +52,21 @@ class RogolonRogonAM extends BaseShip{
         $this->addAftSystem(new Thruster(4, 8, 0, 2, 2));
         $this->addAftSystem(new Thruster(4, 8, 0, 2, 2));
         $this->addAftSystem(new Thruster(4, 8, 0, 2, 2));
-	$this->addAftSystem(new JumpEngine(4, 16, 4, 24));
+		$this->addAftSystem(new JumpEngine(4, 16, 4, 24));
        
         $this->addLeftSystem(new Thruster(4, 15, 0, 4, 3));
-	$this->addLeftSystem(new Hangar(4, 12));
-	$this->addLeftSystem(new HeavyPlasma(3, 8, 5, 240, 0));
-		$this->addLeftSystem(new AmmoMissileRackS(3, 0, 0, 180, 360, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
-		$this->addLeftSystem(new AmmoMissileRackS(3, 0, 0, 180, 360, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
-		$this->addLeftSystem(new AmmoMissileRackS(3, 0, 0, 180, 360, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+		$this->addLeftSystem(new Hangar(4, 12));
+		$this->addLeftSystem(new HeavyPlasma(3, 8, 5, 240, 0));
+		$this->addLeftSystem(new AmmoMissileRackSO(3, 0, 0, 180, 360, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+		$this->addLeftSystem(new AmmoMissileRackSO(3, 0, 0, 180, 360, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+		$this->addLeftSystem(new AmmoMissileRackSO(3, 0, 0, 180, 360, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
 
         $this->addRightSystem(new Thruster(4, 15, 0, 4, 4));
-	$this->addRightSystem(new Hangar(4, 12));
-	$this->addRightSystem(new HeavyPlasma(3, 8, 5, 0, 120));
-		$this->addRightSystem(new AmmoMissileRackS(3, 0, 0, 0, 180, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
-		$this->addRightSystem(new AmmoMissileRackS(3, 0, 0, 0, 180, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
-		$this->addRightSystem(new AmmoMissileRackS(3, 0, 0, 0, 180, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+		$this->addRightSystem(new Hangar(4, 12));
+		$this->addRightSystem(new HeavyPlasma(3, 8, 5, 0, 120));
+		$this->addRightSystem(new AmmoMissileRackSO(3, 0, 0, 0, 180, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+		$this->addRightSystem(new AmmoMissileRackSO(3, 0, 0, 0, 180, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+		$this->addRightSystem(new AmmoMissileRackSO(3, 0, 0, 0, 180, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 4, 44));
@@ -93,25 +93,26 @@ class RogolonRogonAM extends BaseShip{
         	),
         	2=> array(
         		8 => "Thruster",
-                        10 => "Jump Engine",
+                10 => "Jump Engine",
         		18 => "Structure",
         		20 => "Primary",  
 		),
                 3=> array(
-                        5 => "Thruster",
-                        7 => "Hangar",
+                5 => "Thruster",
+                7 => "Hangar",
         		9 => "Heavy Plasma Cannon",
-        		12 => "Class-S Missile Rack",
-                        18 => "Structure",
-                        20 => "Primary",
+        		12 => "Class-SO Missile Rack",
+                18 => "Structure",
+                20 => "Primary",
                 ),
+				
                 4=> array(
-                        5 => "Thruster",
-                        7 => "Hangar",
+                5 => "Thruster",
+                7 => "Hangar",
         		9 => "Heavy Plasma Cannon",
-        		12 => "Class-S Missile Rack",
-                        18 => "Structure",
-                        20 => "Primary",    			
+        		12 => "Class-SO Missile Rack",
+                18 => "Structure",
+                20 => "Primary",    			
         	),
         );
     }
