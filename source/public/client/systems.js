@@ -531,25 +531,49 @@ shipManager.systems = {
     },    
 
     hasBorderHighlight: function hasBorderHighlight(ship, system) { 
-		var highlight = null;
-		
-		//Try to do these in a certain order to priortise effects, and optimise performance
-		if(shipManager.power.isOverloading(ship, system)){
-			highlight = 'Yellow';			
-			return highlight;
-		}	
+        // Try to prioritise effects and optimise performance. Can only return ONE border highlight colour.
+        
+        // Check Abbai faction-specific conditions
+        if (ship.faction === "Abbai Matriarchate") {
+            const mayOverheat = shipManager.criticals.countCriticalOnTurn(system, "MayOverheat", gamedata.turn);
+            if (mayOverheat === 2) return 'Red';
+            // Uncomment if orange highlight for "MayOverheat === 1" is required
+            // if (mayOverheat === 1) return 'orange';
+        }
+    
+        // Check CnC critical effects (most important first)
+        if (system.name === "cnC") {
+            const cnCCrits = shipManager.criticals.getAllCriticals(system, gamedata.turn);            
+            for (const crit of cnCCrits) {
+                if (["Sabotage", "SabotageElite", "CaptureShip", "CaptureShipElite", 
+                     "RescueMission", "RescueMissionElite", "DefenderLost"].includes(crit.phpclass)) {
+                    return 'Red';
+                }
+            }
+        }
+    
+        // Check critical effects for the current system
+        const allCrits = shipManager.criticals.getAllCriticals(system, gamedata.turn);
+        for (const crit of allCrits) {
+            // Prioritise red effects
+            if (["Sabotage", "SabotageElite", "LimpetBore"].includes(crit.phpclass)) {
+                return 'Red';
+            }
+            // Check orange effects
+            if (["LimpetBoreTravelling", "MayOverheat"].includes(crit.phpclass)) {
+                return 'Orange';
+            }
+        }
+    
+        // Check for overloading systems
+        if (shipManager.power.isOverloading(ship, system)) {
+            return 'Yellow';
+        }
+    
+        // No highlight if none of the conditions are met
+        return null;
+    },
 
-		if(ship.faction === "Abbai Matriarchate"){ //Only Abbai need this.
-			var mayOverheat = shipManager.criticals.countCriticalOnTurn(system, "MayOverheat", gamedata.turn);
-			if(mayOverheat > 0){ 
-				if(mayOverheat === 1) highlight = 'Orange';
-				if(mayOverheat === 2) highlight = 'Red';
-				return highlight;				
-			}
-		}	
-
-        return highlight;
-    }, 
     
     getRemainingHealth: function getRemainingHealth(system) {
         var damage = shipManager.systems.getTotalDamage(system);
