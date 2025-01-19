@@ -201,3 +201,30 @@ var TrekFtrPhotonTorpedoAmmo = function TrekFtrPhotonTorpedoAmmo(json, ship) {
 };
 TrekFtrPhotonTorpedoAmmo.prototype = Object.create(Ammo.prototype);
 TrekFtrPhotonTorpedoAmmo.prototype.constructor = TrekFtrPhotonTorpedoAmmo;
+
+
+
+var TrekEarlyFighterDisabler = function TrekEarlyFighterDisabler(json, ship) {
+    Weapon.call(this, json, ship);
+};
+TrekEarlyFighterDisabler.prototype = Object.create(Weapon.prototype);
+TrekEarlyFighterDisabler.prototype.constructor = TrekEarlyFighterDisabler;
+
+var TrekFighterDisabler = function TrekFighterDisabler(json, ship) {
+    Weapon.call(this, json, ship);
+};
+TrekFighterDisabler.prototype = Object.create(Weapon.prototype);
+TrekFighterDisabler.prototype.constructor = TrekFighterDisabler;
+
+
+var TrekLightDisabler = function TrekLightDisabler(json, ship) {
+    Weapon.call(this, json, ship);
+};
+TrekLightDisabler.prototype = Object.create(Weapon.prototype);
+TrekLightDisabler.prototype.constructor = TrekLightDisabler;
+
+var TrekMediumDisabler = function TrekMediumDisabler(json, ship) {
+    Weapon.call(this, json, ship);
+};
+TrekMediumDisabler.prototype = Object.create(Weapon.prototype);
+TrekMediumDisabler.prototype.constructor = TrekMediumDisabler;

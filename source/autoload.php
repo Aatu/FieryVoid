@@ -2785,6 +2785,14 @@ spl_autoload_register(
 				'trekphasedpulsecannon' => '/server/model/weapons/customTrek.php',
 				'trekphasedpulseaccelerator' => '/server/model/weapons/customTrek.php',
 				
+				'trekion' => '/server/model/weapons/customTrek.php',
+				'trekfighterdisablerbase' => '/server/model/weapons/customTrek.php',
+				'trekearlyfighterdisabler' => '/server/model/weapons/customTrek.php',
+				'trekfighterdisabler' => '/server/model/weapons/customTrek.php',
+				'trekshipdisablerbase' => '/server/model/weapons/customTrek.php',
+				'treklightdisabler' => '/server/model/weapons/customTrek.php',
+				'trekmediumdisabler' => '/server/model/weapons/customTrek.php',
+				
 				//systems
                 'trekwarpdrive' => '/server/model/weapons/customTrek.php', //nacelle
                 'trekimpulsedrive' => '/server/model/weapons/customTrek.php',

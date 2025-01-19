@@ -38,13 +38,12 @@ class TrekNausicaanShefalitayalFighter extends FighterFlight{
             $fighter->iconPath = "img/ships/StarTrek/NausicaanShefalitayal_Large.png";
 
 
-			$gun = new RogolonLtPlasmaGun(330, 30, 4, 2);
-			$gun->displayName = "Dual Plasma Guns";
+			$gun = new RogolonLtPlasmaGun(330, 30, 4, 2);//d3+4, dual mount
+			//$gun->displayName = "Dual Plasma Guns";
 			$fighter->addFrontSystem($gun);
 
-            $disabler = new SWFighterIon(330, 30, 4, 1); //Ion Cannon borrowed from Star Wars
+            $disabler = new TrekFighterDisabler(330, 30, 2, 1); //damage d6+2, single mount
             $disabler->exclusive = true; //either this or other weapons!
-			$disabler->displayName = "Disabler Gun";
             $fighter->addFrontSystem($disabler);
 
 			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack

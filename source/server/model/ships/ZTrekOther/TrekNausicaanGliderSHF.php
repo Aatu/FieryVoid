@@ -4,7 +4,7 @@ class TrekNausicaanGliderSHF extends FighterFlight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 100 *6; //for 6
+        $this->pointCost = 70 *6; //for 6
         $this->faction = "ZTrek Playtest Other Factions";
         $this->phpclass = "TrekNausicaanGliderSHF";
         $this->imagePath = "img/ships/StarTrek/NausicaanGlider.png";
@@ -49,16 +49,17 @@ class TrekNausicaanGliderSHF extends FighterFlight{
             $fighter->imagePath = "img/ships/StarTrek/NausicaanGlider.png";
             $fighter->iconPath = "img/ships/StarTrek/NausicaanGlider_Large.png";
 			
-			$gun = new RogolonLtPlasmaGun(240, 360, 4, 2);
-			$gun->displayName = "Dual Plasma Guns";
+			$gun = new RogolonLtPlasmaGun(240, 360, 4, 2);//d3+4, dual mount
+			//$gun->displayName = "Dual Plasma Guns";
 			$fighter->addFrontSystem($gun);
 
-            $disabler = new SWFighterIon(330, 30, 4, 3); //Ion Cannon borrowed from Star Wars
-			$disabler->displayName = "Disabler Gun";
+
+            $disabler = new TrekFighterDisabler(330, 30, 2, 3); //damage d6+2, triple mount
+            $disabler->exclusive = false; //can be fired together with other weapons!
             $fighter->addFrontSystem($disabler);
 
-			$gun = new RogolonLtPlasmaGun(0, 120, 4, 2);
-			$gun->displayName = "Dual Plasma Guns";
+			$gun = new RogolonLtPlasmaGun(0, 120, 4, 2);//d3+4, dual mount
+			//$gun->displayName = "Dual Plasma Guns";
 			$fighter->addFrontSystem($gun);
 
 			$fighter->addAftSystem(new TrekShieldFtr(2, 6, 3, 2) ); //armor, health, rating, recharge

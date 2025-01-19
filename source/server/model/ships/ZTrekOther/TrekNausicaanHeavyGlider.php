@@ -4,7 +4,7 @@ class TrekNausicaanHeavyGlider extends LCV{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 280;
+        $this->pointCost = 250;
         $this->faction = "ZTrek Playtest Other Factions";
         $this->phpclass = "TrekNausicaanHeavyGlider";
         $this->imagePath = "img/ships/StarTrek/NausicaanHeavyGlider.png";
@@ -48,20 +48,13 @@ class TrekNausicaanHeavyGlider extends LCV{
 	$this->addPrimarySystem($projection);
 
 		$this->addFrontSystem(new EWPointPlasmaGun(3, 5, 2, 180, 30));
-
-		$lightdisabler = new SWLightIon(3, 240, 120, 2);
-		$lightdisabler->displayName = "Light Disabler";
-		$this->addFrontSystem($lightdisabler);
-
-		$disabler = new SWMediumIon(3, 300, 60, 2);
-		$disabler->displayName = "Disabler Gun";
-		$this->addFrontSystem($disabler);	
-
-		$lightdisabler = new SWLightIon(3, 240, 120, 2);
-		$lightdisabler->displayName = "Light Disabler";
-		$this->addFrontSystem($lightdisabler);	
-
 		$this->addFrontSystem(new EWPointPlasmaGun(3, 5, 2, 330, 180));
+
+		$this->addFrontSystem(new TrekLightDisabler(3, 240, 120, 2));
+		$this->addFrontSystem(new TrekLightDisabler(3, 240, 120, 2));
+
+		$this->addFrontSystem(new TrekMediumDisabler(3, 300, 60, 2));
+
 
 		$warpNacelle = new TrekWarpDrive(2, 10, 0, 3); //armor, structure, power usage, impulse output
 		$impulseDrive->addThruster($warpNacelle);
@@ -78,7 +71,7 @@ class TrekNausicaanHeavyGlider extends LCV{
 		
 		0=> array(
 			7 => "Structure",
-			9 => "1:Disabler Gun",
+			9 => "1:Disabler",
 			11 => "1:Light Disabler",
 			13 => "1:Point Plasma Gun",
 			14 => "0:Shield Projector",
@@ -90,7 +83,7 @@ class TrekNausicaanHeavyGlider extends LCV{
 
 		1=> array(
 			7 => "Structure",
-			9 => "1:Disabler Gun",
+			9 => "1:Disabler",
 			11 => "1:Light Disabler",
 			13 => "1:Point Plasma Gun",
 			14 => "0:Shield Projector",
@@ -102,7 +95,7 @@ class TrekNausicaanHeavyGlider extends LCV{
 
 		2=> array(
 			7 => "Structure",
-			9 => "1:Disabler Gun",
+			9 => "1:Disabler",
 			11 => "1:Light Disabler",
 			13 => "1:Point Plasma Gun",
 			14 => "0:Shield Projector",
