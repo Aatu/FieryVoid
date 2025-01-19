@@ -4,7 +4,7 @@ class BrixadiiWarship2108 extends BaseShipNoAft{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 540;
+		$this->pointCost = 555;
 		$this->faction = "ZNexus Brixadii Clans";
         $this->phpclass = "BrixadiiWarship2108";
         $this->imagePath = "img/ships/Nexus/brixadii_warship.png";
@@ -23,7 +23,7 @@ class BrixadiiWarship2108 extends BaseShipNoAft{
         $this->accelcost = 3;
         $this->rollcost = 2;
         $this->pivotcost = 2;
-		$this->iniativebonus = 5;
+		$this->iniativebonus = 10;
          
         $this->addPrimarySystem(new Reactor(5, 20, 0, 0));
         $this->addPrimarySystem(new CnC(5, 20, 0, 0));
@@ -39,28 +39,29 @@ class BrixadiiWarship2108 extends BaseShipNoAft{
 		$this->addFrontSystem(new EnergyPulsar(3, 6, 3, 240, 60));
 		$this->addFrontSystem(new EnergyPulsar(3, 6, 3, 300, 120));
 		$this->addFrontSystem(new HvyParticleProjector(3, 8, 4, 300, 60));
-		$this->addFrontSystem(new NexusKineticBoxLauncher(2, 4, 0, 240, 360));
-		$this->addFrontSystem(new NexusKineticBoxLauncher(2, 4, 0, 0, 120));
+		$this->addFrontSystem(new HvyParticleProjector(3, 8, 4, 300, 60));
         
-		$this->addLeftSystem(new Thruster(3, 7, 0, 4, 3));
-		$this->addLeftSystem(new Thruster(3, 7, 0, 4, 3));
+		$this->addLeftSystem(new Thruster(3, 10, 0, 4, 3));
+		$this->addLeftSystem(new Thruster(3, 10, 0, 4, 3));
+		$this->addLeftSystem(new NexusKineticBoxLauncher(2, 4, 0, 240, 360));
 		$this->addLeftSystem(new ScatterPulsar(2, 4, 2, 180, 360));
 		$this->addLeftSystem(new EnergyPulsar(3, 6, 3, 180, 360));
 		$this->addLeftSystem(new NexusChaffLauncher(1, 2, 1, 180, 360));
 		$this->addLeftSystem(new HvyParticleProjector(3, 8, 4, 240, 360));
 		
-		$this->addRightSystem(new Thruster(3, 7, 0, 4, 4));
-		$this->addRightSystem(new Thruster(3, 7, 0, 4, 4));
+		$this->addRightSystem(new Thruster(3, 10, 0, 4, 4));
+		$this->addRightSystem(new Thruster(3, 10, 0, 4, 4));
+		$this->addRightSystem(new NexusKineticBoxLauncher(2, 4, 0, 0, 120));
 		$this->addRightSystem(new ScatterPulsar(2, 4, 2, 0, 180));
 		$this->addRightSystem(new EnergyPulsar(3, 6, 3, 0, 180));
 		$this->addRightSystem(new NexusChaffLauncher(1, 2, 1, 0, 180));
 		$this->addRightSystem(new HvyParticleProjector(3, 8, 4, 0, 120));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
-        $this->addFrontSystem(new Structure( 4, 45));
-        $this->addLeftSystem(new Structure( 4, 50));
-        $this->addRightSystem(new Structure( 4, 50));
-        $this->addPrimarySystem(new Structure( 5, 40));
+        $this->addFrontSystem(new Structure( 5, 55));
+        $this->addLeftSystem(new Structure( 4, 60));
+        $this->addRightSystem(new Structure( 4, 60));
+        $this->addPrimarySystem(new Structure( 5, 44));
 		
         $this->hitChart = array(
             0=> array(
@@ -77,25 +78,26 @@ class BrixadiiWarship2108 extends BaseShipNoAft{
                     6 => "Thruster",
 					8 => "Heavy Particle Projector",
 					10 => "Energy Pulsar",
-					12 => "Kinetic Box Launcher",
 					18 => "Structure",
                     20 => "Primary",
             ),
             3=> array(
-                    4 => "Thruster",
-					6 => "Heavy Particle Projector",
-					8 => "Scatter Pulsar",
-					10 => "Energy Pulsar",
-					12 => "Chaff Launcher",
+                    3 => "Thruster",
+					5 => "Heavy Particle Projector",
+					6 => "Scatter Pulsar",
+					8 => "Energy Pulsar",
+					10 => "Chaff Launcher",
+					12 => "Kinetic Box Launcher",
                     18 => "Structure",
                     20 => "Primary",
 			),
             4=> array(
-                    4 => "Thruster",
-					6 => "Heavy Particle Projector",
-					8 => "Scatter Pulsar",
-					10 => "Energy Pulsar",
-					12 => "Chaff Launcher",
+                    3 => "Thruster",
+					5 => "Heavy Particle Projector",
+					6 => "Scatter Pulsar",
+					8 => "Energy Pulsar",
+					10 => "Chaff Launcher",
+					12 => "Kinetic Box Launcher",
                     18 => "Structure",
                     20 => "Primary",
             ),

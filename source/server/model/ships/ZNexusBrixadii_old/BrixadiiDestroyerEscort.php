@@ -23,7 +23,7 @@ class BrixadiiDestroyerEscort extends HeavyCombatVessel{
         $this->accelcost = 2;
         $this->rollcost = 2;
         $this->pivotcost = 2;
-        $this->iniativebonus = 35;
+        $this->iniativebonus = 40;
          
         $this->addPrimarySystem(new Reactor(4, 16, 0, 0));
         $this->addPrimarySystem(new CnC(5, 10, 0, 0));
@@ -52,8 +52,8 @@ class BrixadiiDestroyerEscort extends HeavyCombatVessel{
 		$this->addAftSystem(new NexusChaffLauncher(2, 2, 1, 0, 360));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
-        $this->addFrontSystem(new Structure( 3, 45));
-        $this->addAftSystem(new Structure( 3, 42));
+        $this->addFrontSystem(new Structure( 3, 50));
+        $this->addAftSystem(new Structure( 3, 45));
         $this->addPrimarySystem(new Structure( 4, 40));
 
         $this->hitChart = array(

@@ -23,7 +23,7 @@ class BrixadiiFastCourier extends BaseShipNoAft{
         $this->accelcost = 3;
         $this->rollcost = 2;
         $this->pivotcost = 2;
-		$this->iniativebonus = 5;
+		$this->iniativebonus = 10;
          
         $this->addPrimarySystem(new Reactor(5, 18, 0, 0));
         $this->addPrimarySystem(new CnC(5, 12, 0, 0));
@@ -41,25 +41,25 @@ class BrixadiiFastCourier extends BaseShipNoAft{
 		$this->addFrontSystem(new CargoBay(2, 16));
 		$this->addFrontSystem(new CargoBay(2, 16));
         
-		$this->addLeftSystem(new Thruster(3, 7, 0, 4, 3));
-		$this->addLeftSystem(new Thruster(3, 7, 0, 4, 3));
+		$this->addLeftSystem(new Thruster(3, 10, 0, 4, 3));
+		$this->addLeftSystem(new Thruster(3, 10, 0, 4, 3));
 		$this->addLeftSystem(new ScatterPulsar(2, 4, 2, 180, 360));
 		$this->addLeftSystem(new ScatterPulsar(2, 4, 2, 180, 360));
 		$this->addLeftSystem(new NexusChaffLauncher(1, 2, 1, 180, 360));
 		$this->addLeftSystem(new CargoBay(2, 16));
 
-		$this->addRightSystem(new Thruster(3, 7, 0, 4, 4));
-		$this->addRightSystem(new Thruster(3, 7, 0, 4, 4));
+		$this->addRightSystem(new Thruster(3, 10, 0, 4, 4));
+		$this->addRightSystem(new Thruster(3, 10, 0, 4, 4));
 		$this->addRightSystem(new ScatterPulsar(2, 4, 2, 0, 180));
 		$this->addRightSystem(new ScatterPulsar(2, 4, 2, 0, 180));
 		$this->addRightSystem(new NexusChaffLauncher(1, 2, 1, 0, 180));
 		$this->addRightSystem(new CargoBay(2, 16));
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
-        $this->addFrontSystem(new Structure( 4, 45));
-        $this->addLeftSystem(new Structure( 4, 50));
-        $this->addRightSystem(new Structure( 4, 50));
-        $this->addPrimarySystem(new Structure( 5, 40));
+        $this->addFrontSystem(new Structure( 4, 55));
+        $this->addLeftSystem(new Structure( 4, 60));
+        $this->addRightSystem(new Structure( 4, 60));
+        $this->addPrimarySystem(new Structure( 5, 44));
 		
         $this->hitChart = array(
             0=> array(

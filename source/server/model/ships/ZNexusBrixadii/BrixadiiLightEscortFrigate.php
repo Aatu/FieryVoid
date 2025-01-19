@@ -4,7 +4,7 @@ class BrixadiiLightEscortFrigate extends MediumShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 385;
+        $this->pointCost = 395;
         $this->faction = "ZNexus Brixadii Clans";
         $this->phpclass = "BrixadiiLightEscortFrigate";
         $this->imagePath = "img/ships/Nexus/brixadii_light_escort.png";
@@ -51,7 +51,7 @@ class BrixadiiLightEscortFrigate extends MediumShip{
         $this->addAftSystem(new ScatterPulsar(2, 4, 2, 0, 240));
 		$this->addAftSystem(new NexusChaffLauncher(2, 2, 1, 0, 360));
 		
-		$this->addPrimarySystem(new Structure(3, 40));
+		$this->addPrimarySystem(new Structure(4, 40));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
 
