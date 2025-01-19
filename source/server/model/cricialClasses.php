@@ -470,7 +470,7 @@ class LimpetBore extends Critical{
 	public $repairPriority = 0;//Can't repair.'       
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
 		if($turnend == 0) $turnend = $turn + 4;    	
-            parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
+            parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend, true );
     }
 } 
 
@@ -479,7 +479,7 @@ class LimpetBoreTravelling extends Critical{
     public $description = "A Limpet Bore is travelling to attack this system"; 
 	public $repairPriority = 0;//Can't repair.'       
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){  	
-            parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
+            parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend, true );
     }
 } 
 
@@ -497,7 +497,7 @@ class Sabotage extends Critical{
     public $description = "Enemy marine unit is undertaking sabotage operations."; 
 	public $repairPriority = 0;//Can't repair.'       
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){  	
-    parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
+    parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend, true );
     }
 } 
 
@@ -506,7 +506,7 @@ class SabotageElite extends Critical{
     public $description = "Elite marine unit is undertaking sabotage operations."; 
 	public $repairPriority = 0;//Can't repair.'       
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){  	
-    parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
+    parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend, true );
     }
 } 
 
@@ -523,7 +523,7 @@ class CaptureShip extends Critical{
     public $description = "Enemy marines are attempting to capture this ship."; 
 	public $repairPriority = 0;//Can't repair.'       
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){  	
-    parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
+    parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend, true );
     }
 } 
 
@@ -532,7 +532,7 @@ class CaptureShipElite extends Critical{
     public $description = "Elite marines are attempting to capture this ship."; 
 	public $repairPriority = 0;//Can't repair.'       
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){  	
-    parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
+    parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend, true );
     }
 } 
 
@@ -541,7 +541,7 @@ class RescueMission extends Critical{
     public $description = "An Marine unit is conducting a rescue mission."; 
 	public $repairPriority = 0;//Can't repair.'       
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){  	
-    parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
+    parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend, true );
     }
 } 
 
@@ -550,7 +550,7 @@ class RescueMissionElite extends Critical{
     public $description = "An elite Marine unit is conducting a rescue mission."; 
 	public $repairPriority = 0;//Can't repair.'       
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){  	
-    parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
+    parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend, true );
     }
 } 
 
@@ -559,7 +559,7 @@ class DefenderLost extends Critical{
     public $description = "Defender lost."; 
 	public $repairPriority = 0;//Can't repair.'       
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){  	
-    parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
+    parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend, true );
     }
 } 
 
