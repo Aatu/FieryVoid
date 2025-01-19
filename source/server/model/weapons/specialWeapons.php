@@ -6973,6 +6973,7 @@ class GrapplingClaw extends Weapon{
 	public $doNotIntercept = true;			
 
 	public $damageType = "Special";
+	public $damageTypeArray = array(1=> "Special", 2=> "Standard", 3=> "Special");	
 	public $weaponClass = "Matter";
 	public $firingModes = array(
 		1 => "Capture Ship",
