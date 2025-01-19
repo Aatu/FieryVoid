@@ -7,9 +7,9 @@ class BrixadiiSentinelPlatformBase extends OSAT{
 		$this->pointCost = 120;
 		$this->faction = 'ZNexus Brixadii Clans (early)';
         $this->phpclass = "BrixadiiSentinelPlatformBase";
-        $this->imagePath = "img/ships/Nexus/BrixadiiSentinelPlatform.png";
+        $this->imagePath = "img/ships/Nexus/brixadii_osat_dual_mount.png";
         $this->shipClass = "Brixadii Sentinel Platform";
-			$this->canvasSize = 175;
+			$this->canvasSize = 90;
 		$this->unofficial = true;
 		$this->isd = 1960;
         

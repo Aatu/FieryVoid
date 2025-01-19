@@ -7,7 +7,7 @@ class BrixadiiCourier extends LCV{
         $this->pointCost = 35;
         $this->faction = "ZNexus Support Units";
         $this->phpclass = "BrixadiiCourier";
-        $this->imagePath = "img/ships/Nexus/BrixadiiPoliceFrigate.png";
+        $this->imagePath = "img/ships/Nexus/brixadii_police_frigate.png";
 			$this->canvasSize = 70; //img has 200px per side
         $this->shipClass = "Brixadii Courier";
 		//$this->variantOf = "Police Frigate";

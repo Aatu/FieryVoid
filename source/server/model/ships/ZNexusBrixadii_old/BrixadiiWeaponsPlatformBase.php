@@ -7,9 +7,9 @@ class BrixadiiWeaponsPlatformBase extends OSAT{
 		$this->pointCost = 120;
 		$this->faction = 'ZNexus Brixadii Clans (early)';
         $this->phpclass = "BrixadiiWeaponsPlatformBase";
-        $this->imagePath = "img/ships/Nexus/BrixadiiWeaponsPlatform.png";
+        $this->imagePath = "img/ships/Nexus/brixadii_osat_single_mount.png";
         $this->shipClass = "Brixadii Weapons Platform";
-			$this->canvasSize = 175;
+			$this->canvasSize = 90;
 	    $this->limited = 10;
 		$this->unofficial = true;
 		$this->isd = 2059;

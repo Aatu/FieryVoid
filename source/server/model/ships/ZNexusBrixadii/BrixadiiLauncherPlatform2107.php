@@ -7,9 +7,9 @@ class BrixadiiLauncherPlatform2107 extends OSAT{
 		$this->pointCost = 130;
 		$this->faction = 'ZNexus Brixadii Clans';
         $this->phpclass = "BrixadiiLauncherPlatform2107";
-        $this->imagePath = "img/ships/Nexus/BrixadiiSentinelPlatform.png";
+        $this->imagePath = "img/ships/Nexus/brixadii_osat_dual_mount.png";
         $this->shipClass = "Brixadii Launcher Platform (2107)";
-			$this->canvasSize = 175;
+			$this->canvasSize = 90;
 		$this->unofficial = true;
 		$this->isd = 2107;
         

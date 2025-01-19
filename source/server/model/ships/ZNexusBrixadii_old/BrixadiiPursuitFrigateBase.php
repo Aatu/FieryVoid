@@ -7,8 +7,8 @@ class BrixadiiPursuitFrigateBase extends MediumShip{
         $this->pointCost = 300;
         $this->faction = "ZNexus Brixadii Clans (early)";
         $this->phpclass = "BrixadiiPursuitFrigateBase";
-        $this->imagePath = "img/ships/Nexus/BrixadiiPursuitFrigate.png";
-			$this->canvasSize = 85; //img has 200px per side
+        $this->imagePath = "img/ships/Nexus/brixadii_pursuit_frigate.png";
+			$this->canvasSize = 100; //img has 200px per side
         $this->shipClass = "Pursuit Frigate";
 		//$this->variantOf = "Pursuit Frigate";
 		$this->unofficial = true;

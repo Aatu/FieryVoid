@@ -10,8 +10,8 @@ class BrixadiiSupportBase extends SmallStarBaseFourSections{
 		$this->faction = "ZNexus Brixadii Clans (early)";
 		$this->phpclass = "BrixadiiSupportBase";
 		$this->shipClass = "Support Base";
-		$this->imagePath = "img/ships/Nexus/BrixadiiSupportBase.png";
-		$this->canvasSize = 160; 
+		$this->imagePath = "img/ships/Nexus/brixadii_supply_base.png";
+		$this->canvasSize = 140; 
 		$this->unofficial = true;
 		$this->isd = 2014;
 

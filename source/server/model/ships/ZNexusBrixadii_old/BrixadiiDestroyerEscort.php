@@ -7,8 +7,8 @@ class BrixadiiDestroyerEscort extends HeavyCombatVessel{
         $this->pointCost = 400;
         $this->faction = "ZNexus Brixadii Clans (early)";
         $this->phpclass = "BrixadiiDestroyerEscort";
-        $this->imagePath = "img/ships/Nexus/BrixadiiPlasmaDestroyer.png";
-			$this->canvasSize = 120; //img has 200px per side
+        $this->imagePath = "img/ships/Nexus/brixadii_battle_destroyer.png";
+			$this->canvasSize = 125; //img has 200px per side
         $this->shipClass = "Destroyer Escort";
 			$this->variantOf = "Battle Destroyer";
 			$this->occurence = "common";

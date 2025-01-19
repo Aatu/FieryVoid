@@ -12,8 +12,8 @@ class BrixadiiSupportBaseRefit extends SmallStarBaseFourSections{
 		$this->shipClass = "Support Base (2048)";
 			$this->variantOf = "Support Base";
 			$this->occurence = "common";
-		$this->imagePath = "img/ships/Nexus/BrixadiiBase.png";
-		$this->canvasSize = 160; 
+		$this->imagePath = "img/ships/Nexus/brixadii_combat_station.png";
+		$this->canvasSize = 140; 
 		$this->unofficial = true;
 		$this->isd = 2048;
 

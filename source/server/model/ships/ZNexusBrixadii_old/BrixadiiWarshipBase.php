@@ -7,7 +7,7 @@ class BrixadiiWarshipBase extends BaseShipNoAft{
 		$this->pointCost = 490;
 		$this->faction = "ZNexus Brixadii Clans (early)";
         $this->phpclass = "BrixadiiWarshipBase";
-        $this->imagePath = "img/ships/Nexus/BrixadiiWarship.png";
+        $this->imagePath = "img/ships/Nexus/brixadii_warship.png";
 			$this->canvasSize = 165; //img has 200px per side
         $this->shipClass = "Warship";
 		$this->unofficial = true;

@@ -7,7 +7,7 @@ class BrixadiiJumpScout2108 extends BaseShipNoAft{
 		$this->pointCost = 540;
 		$this->faction = "ZNexus Brixadii Clans";
         $this->phpclass = "BrixadiiJumpScout2108";
-        $this->imagePath = "img/ships/Nexus/BrixadiiWarship.png";
+        $this->imagePath = "img/ships/Nexus/brixadii_warship.png";
 			$this->canvasSize = 165; //img has 200px per side
         $this->shipClass = "Jump Scout (2108)";
 			$this->limited = 10;

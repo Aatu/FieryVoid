@@ -7,8 +7,8 @@ class BrixadiiAttackFrigate2108 extends MediumShip{
         $this->pointCost = 380;
         $this->faction = "ZNexus Brixadii Clans";
         $this->phpclass = "BrixadiiAttackFrigate2108";
-        $this->imagePath = "img/ships/Nexus/BrixadiiAttackFrigate.png";
-			$this->canvasSize = 85; //img has 200px per side
+        $this->imagePath = "img/ships/Nexus/brixadii_attack_frigate.png";
+			$this->canvasSize = 100; //img has 200px per side
         $this->shipClass = "Attack Frigate (2108)";
 //			$this->variantOf = "Attack Frigate";
 //			$this->occurence = "common";
