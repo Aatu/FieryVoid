@@ -10,7 +10,7 @@ class MakarGethishanRefit extends HeavyCombatVessel{
         $this->imagePath = "img/ships/Nexus/makar_niskan2.png";
 		$this->canvasSize = 125; //img has 200px per side
         $this->shipClass = "Gethishan Tender (2110)";
-			$this->variantOf = "Niskan Half Cruiser";
+			$this->variantOf = "Niskan Half Cruiser (2109)";
 			$this->occurence = "uncommon";
 		$this->unofficial = true;
         $this->isd = 2050;

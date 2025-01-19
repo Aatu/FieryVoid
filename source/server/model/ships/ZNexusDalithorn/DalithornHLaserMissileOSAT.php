@@ -10,8 +10,6 @@ class DalithornHLaserMissileOSAT extends OSAT{
         $this->imagePath = "img/ships/Nexus/Dalithorn_LaserMissileOSAT2.png";
 			$this->canvasSize = 90; //img has 100px per side
         $this->shipClass = "Heavy Laser Missile OSAT";
-			$this->variantOf = "Laser Missile OSAT";
-			$this->occurence = "common";
 		$this->unofficial = true;
 		$this->isd = 2057;
         

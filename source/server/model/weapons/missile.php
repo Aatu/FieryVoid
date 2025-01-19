@@ -1833,6 +1833,48 @@ class AmmoMissileRackD extends AmmoMissileRackS{
 } //endof class AmmoMissileRackD
 
 
+
+
+
+/*Class-G Missile Rack - custom weapon that looks at central magazine to determine available firing modes (and number of actual rounds available)
+	all functionality prepared in standard class-S rack
+	holds 20 missiles
+*/
+class AmmoMissileRackG extends AmmoMissileRackS{
+	public $name = "ammoMissileRackG";
+    public $displayName = "Guided Missile Rack";
+    public $iconPath = "missile1.png";    
+
+    public $range = 25;
+    public $distanceRange = 65;
+    public $firingMode = 1;
+    public $priority = 6;
+    public $loadingtime = 2; 
+
+    public $useOEW = true;
+    
+	//basic launcher data, before being modified by actual missiles
+	protected $basicFC=array(3,3,3);
+	protected $basicRange=25;
+	protected $basicDistanceRange = 65;
+
+    protected $rackExplosionDamage = 75; //how much damage will this weapon do in case of catastrophic explosion
+    protected $rackExplosionThreshold = 20; //how high roll is needed for rack explosion   
+	
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base=false)
+	{
+		if ( $maxhealth == 0 ) $maxhealth = 6;
+            	if ( $powerReq == 0 ) $powerReq = 0;					
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base); //Parent routines take care of the rest
+	}
+} //endof class AmmoMissileRackG
+
+
+
+
+
+
+
 /*Bomb Rack - weapon that looks at central magazine to determine available firing modes (and number of actual rounds available)
 	all functionality prepared in standard class-S rack
 	holds 8 missiles (Basic Missiles by default at no price (unless filled with actual bombs), the only other option is Flash missiles)

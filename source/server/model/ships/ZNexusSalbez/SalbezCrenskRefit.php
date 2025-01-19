@@ -10,8 +10,6 @@ class SalbezCrenskRefit extends LCV{
         $this->imagePath = "img/ships/Nexus/salbez_crensk3.png";
 			$this->canvasSize = 70; //img has 200px per side
         $this->shipClass = "Cre-nsk Combat Cutter (2143 refit)";
-			$this->variantOf = "Cre-nsk Combat Cutter";
-			$this->occurence = "common";
 		$this->unofficial = true;
 			$this->isd = 2120;
 

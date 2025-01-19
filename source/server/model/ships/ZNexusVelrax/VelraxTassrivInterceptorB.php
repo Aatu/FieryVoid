@@ -8,8 +8,6 @@ class VelraxTassrivInterceptorB extends FighterFlight{
         $this->faction = "ZNexus Velrax Republic";
         $this->phpclass = "VelraxTassrivInterceptorB";
         $this->shipClass = "Tassriv-B Interceptor flight";
-			$this->variantOf = "Tassriv-A Interceptor flight";
-			$this->occurence = "common";
         $this->imagePath = "img/ships/Nexus/VelraxTassriv.png";
 		$this->unofficial = true;
 

@@ -26,11 +26,11 @@ class CircasianMorketOSAT extends OSAT{
         $this->addPrimarySystem(new OSATCnC(0, 1, 0, 0));        
         $this->addPrimarySystem(new Reactor(3, 6, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 6, 2, 4)); 
-        $this->addPrimarySystem(new Thruster(3, 6, 0, 0, 2)); 
-        $this->addPrimarySystem(new EWRangedRocketLauncher(2, 4, 1, 180, 360)); 
-        $this->addPrimarySystem(new EWRangedRocketLauncher(2, 4, 1, 0, 180)); 
-        $this->addPrimarySystem(new EWRangedRocketLauncher(2, 4, 1, 270, 90)); 
-        $this->addPrimarySystem(new LightLaser(1, 4, 3, 0, 360));
+        $this->addAftSystem(new Thruster(3, 6, 0, 0, 2)); 
+        $this->addFrontSystem(new EWRangedRocketLauncher(2, 4, 1, 180, 360)); 
+        $this->addFrontSystem(new EWRangedRocketLauncher(2, 4, 1, 0, 180)); 
+        $this->addFrontSystem(new EWRangedRocketLauncher(2, 4, 1, 270, 90)); 
+        $this->addFrontSystem(new LightLaser(1, 4, 3, 0, 360));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         
@@ -40,11 +40,11 @@ class CircasianMorketOSAT extends OSAT{
 		$this->hitChart = array(
 			0=> array(
 					10 => "Structure",
-					12 => "Thruster",
-					15 => "Ranged Rocket Launcher",
+					12 => "2:Thruster",
+					15 => "1:Ranged Rocket Launcher",
 					17 => "Scanner",
 					19 => "Reactor",
-					20 => "Light Laser",
+					20 => "1:Light Laser",
 			)
 		);
     

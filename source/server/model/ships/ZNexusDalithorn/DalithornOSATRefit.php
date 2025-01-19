@@ -10,8 +10,6 @@ class DalithornOSATRefit extends OSAT{
         $this->imagePath = "img/ships/Nexus/Dalithorn_CoilgunOSAT2.png";
 			$this->canvasSize = 90; //img has 100px per side
         $this->shipClass = "Coilgun OSAT (2111)";
-			$this->variantOf = "Coilgun OSAT";
-			$this->occurence = "common";
 		$this->unofficial = true;
 		$this->isd = 2111;
         

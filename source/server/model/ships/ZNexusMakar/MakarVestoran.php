@@ -10,7 +10,7 @@ class MakarVestoran extends LCV{
         $this->imagePath = "img/ships/Nexus/makar_loress2.png";
 			$this->canvasSize = 70; //img has 200px per side
         $this->shipClass = "Vestoran Escort";
-			$this->variantOf = "Loress Gunboat";
+			$this->variantOf = "Loress Gunboat (2110)";
 			$this->occurence = "common";
 		$this->unofficial = true;
 			$this->isd = 2109;

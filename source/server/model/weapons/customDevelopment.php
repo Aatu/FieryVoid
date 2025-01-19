@@ -39,11 +39,13 @@
 class SatyraShield extends Shield implements DefensiveSystem{
     public $name = "SatyraShield";
     public $displayName = "Satyra Armor";
-    public $iconPath = "shieldInvulnerable.png";
+    public $iconPath = "satyraShieldTechnical.png";
     public $boostable = false; //$this->boostEfficiency and $this->maxBoostLevel in __construct() 
     public $baseOutput = 0; //base output, before boost
 	public $isPrimaryTargetable = false; //can this system be targeted by called shot if it's on PRIMARY?	
 	public $isTargetable = false; //cannot be targeted ever!
+	protected $doCountForCombatValue = false; //don't count when estimating remaining combat value
+
 	
     function __construct($armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc){
         // shieldfactor is handled as output.
@@ -75,8 +77,8 @@ class SatyraShield extends Shield implements DefensiveSystem{
 		parent::setSystemDataWindow($turn);
 		//$this->output = $this->baseOutput + $this->getBoostLevel($turn); //handled in front end
 		$this->data["Basic Strength"] = $this->baseOutput;    
-		$this->data["Special"] = "Note: Satyra armor is resistent to lasers and electromagnetic weapons."; 
-		$this->data["Special"] .= "<br>The 'shield' represents the extra two points of armor the Satyra."; 
+		$this->data["Special"] = "Satyra armor is resistent to lasers and electromagnetic weapons."; 
+		$this->data["Special"] .= "<br>This represents the extra two points of armor the Satyra"; 
 		$this->data["Special"] .= "<br>have available aginst these weapon classes."; 
 	}
 	

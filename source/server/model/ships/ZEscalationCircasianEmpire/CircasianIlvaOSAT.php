@@ -26,10 +26,10 @@ class CircasianIlvaOSAT extends OSAT{
         $this->addPrimarySystem(new OSATCnC(0, 1, 0, 0));        
         $this->addPrimarySystem(new Reactor(3, 8, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 6, 2, 4)); 
-        $this->addPrimarySystem(new Thruster(3, 6, 0, 0, 2)); 
-        $this->addPrimarySystem(new EWRangedDualHeavyRocketLauncher(3, 8, 4, 270, 90)); 
-        $this->addPrimarySystem(new EWRangedDualHeavyRocketLauncher(3, 8, 4, 270, 90)); 
-        $this->addPrimarySystem(new LightLaser(1, 4, 3, 0, 360));
+        $this->addAftSystem(new Thruster(3, 6, 0, 0, 2)); 
+        $this->addFrontSystem(new EWRangedDualHeavyRocketLauncher(3, 8, 4, 270, 90)); 
+        $this->addFrontSystem(new EWRangedDualHeavyRocketLauncher(3, 8, 4, 270, 90)); 
+        $this->addFrontSystem(new LightLaser(1, 4, 3, 0, 360));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         
@@ -39,11 +39,11 @@ class CircasianIlvaOSAT extends OSAT{
 		$this->hitChart = array(
 			0=> array(
 					10 => "Structure",
-					12 => "Thruster",
-					15 => "Ranged Dual Heavy Rocket Launcher",
+					12 => "2:Thruster",
+					15 => "1:Ranged Dual Heavy Rocket Launcher",
 					17 => "Scanner",
 					19 => "Reactor",
-					20 => "Light Laser",
+					20 => "1:Light Laser",
 			)
 		);
     

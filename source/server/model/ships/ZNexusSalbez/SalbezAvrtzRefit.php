@@ -8,9 +8,7 @@ class SalbezAvrtzRefit extends BaseShip{
 		$this->faction = "ZNexus Sal-bez Coalition";
         $this->phpclass = "SalbezAvrtzRefit";
         $this->imagePath = "img/ships/Nexus/salbez_bevtun3.png";
-        $this->shipClass = "Av'rtz Explorer (2122 Refit)";
-			$this->variantOf = "Av'rtz Explorer";
-			$this->occurence = "common";
+        $this->shipClass = "Av'rtz Explorer (2122)";
 //        $this->shipSizeClass = 3;
 		$this->canvasSize = 200; //img has 200px per side
 		$this->unofficial = true;

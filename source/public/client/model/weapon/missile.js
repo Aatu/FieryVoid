@@ -320,6 +320,12 @@ var AmmoMissileRackA = function AmmoMissileRackA(json, ship) {
 AmmoMissileRackA.prototype = Object.create(AmmoMissileRackS.prototype);
 AmmoMissileRackA.prototype.constructor = AmmoMissileRackA;
 
+var AmmoMissileRackG = function AmmoMissileRackG(json, ship) {
+    AmmoMissileRackS.call(this, json, ship);
+};
+AmmoMissileRackG.prototype = Object.create(AmmoMissileRackS.prototype);
+AmmoMissileRackG.prototype.constructor = AmmoMissileRackG;
+
 var AmmoBombRack = function AmmoBombRack(json, ship) {
     Ballistic.call(this, json, ship);//I don't think Bomb Rack ever needs any AmmoMissileRackS function?
 };

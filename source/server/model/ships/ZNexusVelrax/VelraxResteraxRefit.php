@@ -8,8 +8,6 @@ class VelraxResteraxRefit extends FighterFlight{
         $this->faction = "ZNexus Velrax Republic";
         $this->phpclass = "VelraxResteraxRefit";
         $this->shipClass = "Resterax-B Assault flight";
-			$this->variantOf = "Resterax-A Assault flight";
-			$this->occurence = "common";
         $this->imagePath = "img/ships/Nexus/VelraxResterax.png";
 		$this->unofficial = true;
 

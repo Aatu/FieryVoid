@@ -9,7 +9,7 @@ class MakarKamminRefit extends BaseShip{
         $this->phpclass = "MakarKamminRefit";
         $this->imagePath = "img/ships/Nexus/makar_pycirin2.png";
         $this->shipClass = "Kammin Jumpcruiser (2108)";
-			$this->variantOf = "Pycirin Heavy Cruiser";
+			$this->variantOf = "Pycirin Heavy Cruiser (2108)";
 			$this->occurence = "rare";
         $this->shipSizeClass = 3;
 		$this->canvasSize = 175; 

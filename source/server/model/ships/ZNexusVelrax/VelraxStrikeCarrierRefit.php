@@ -8,9 +8,7 @@ class VelraxStrikeCarrierRefit extends BaseShip{
 	$this->faction = "ZNexus Velrax Republic";
         $this->phpclass = "VelraxStrikeCarrierRefit";
         $this->imagePath = "img/ships/Nexus/VelraxResskar.png";
-        $this->shipClass = "Resskar Strike Carrier (2104 Refit)";
-			$this->variantOf = "Resskar Strike Carrier";
-			$this->occurence = "common";
+        $this->shipClass = "Resskar Strike Carrier (2104)";
         $this->shipSizeClass = 3;
 		$this->canvasSize = 170; //img has 200px per side
 		$this->unofficial = true;

@@ -8,7 +8,7 @@ class VelraxHasertAttack extends FighterFlight{
         $this->faction = "ZNexus Velrax Republic";
         $this->phpclass = "VelraxHasertAttack";
         $this->shipClass = "Hasert Attack flight";
-	$this->variantOf = "Tassriv-A Interceptor flight";
+	$this->variantOf = "Tassriv-B Interceptor flight";
 	$this->occurence = "uncommon";
         $this->imagePath = "img/ships/Nexus/VelraxHasert.png";
 	$this->unofficial = true;

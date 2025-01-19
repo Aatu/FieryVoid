@@ -7,11 +7,9 @@ class BrixadiiSurveyor2108 extends HeavyCombatVessel{
         $this->pointCost = 480;
         $this->faction = "ZNexus Brixadii Clans";
         $this->phpclass = "BrixadiiSurveyor2108";
-        $this->imagePath = "img/ships/Nexus/BrixadiiSurveyor.png";
-			$this->canvasSize = 120; //img has 200px per side
+        $this->imagePath = "img/ships/Nexus/brixadii_surveyor.png";
+			$this->canvasSize = 125; //img has 200px per side
         $this->shipClass = "Surveyor (2108)";
-			$this->variantOf = "Surveyor";
-			$this->occurence = "common";
 			$this->limited = 10;
 			$this->unofficial = true;
         $this->isd = 2108;
@@ -24,7 +22,7 @@ class BrixadiiSurveyor2108 extends HeavyCombatVessel{
         $this->accelcost = 2;
         $this->rollcost = 2;
         $this->pivotcost = 2;
-        $this->iniativebonus = 7*5;
+        $this->iniativebonus = 8*5;
          
         $this->addPrimarySystem(new Reactor(4, 16, 0, 0));
         $this->addPrimarySystem(new CnC(5, 10, 0, 0));
@@ -51,8 +49,8 @@ class BrixadiiSurveyor2108 extends HeavyCombatVessel{
 		$this->addAftSystem(new NexusChaffLauncher(1, 2, 1, 0, 360));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
-        $this->addFrontSystem(new Structure( 3, 45));
-        $this->addAftSystem(new Structure( 3, 42));
+        $this->addFrontSystem(new Structure( 4, 50));
+        $this->addAftSystem(new Structure( 3, 45));
         $this->addPrimarySystem(new Structure( 4, 40));
 
         $this->hitChart = array(

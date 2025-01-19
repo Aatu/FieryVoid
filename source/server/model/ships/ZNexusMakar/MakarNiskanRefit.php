@@ -10,8 +10,6 @@ class MakarNiskanRefit extends HeavyCombatVessel{
         $this->imagePath = "img/ships/Nexus/makar_niskan2.png";
 		$this->canvasSize = 125; //img has 200px per side
         $this->shipClass = "Niskan Half Cruiser (2109)";
-			$this->variantOf = "Niskan Half Cruiser";
-			$this->occurence = "common";
 		$this->unofficial = true;
         $this->isd = 2047;
 

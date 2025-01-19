@@ -30,7 +30,10 @@ class SatyraMCVTest extends MediumShip{
         $this->addPrimarySystem(new Scanner(3, 12, 6, 4));
         $this->addPrimarySystem(new Hangar(3, 1));
 		$this->addPrimarySystem(new Engine(4, 18, 0, 7, 3));
-		$this->addPrimarySystem(new SatyraShield(0,1,0,2,0,360)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
+		//Satyra ships are resistent to EM and laser weapons - reflected by this "shield" system
+		$armor = new SatyraShield(0,1,0,2,0,360); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
+			$armor->displayName = 'Durable Hull';
+			$this->addPrimarySystem($armor);
 
 		$this->addFrontSystem(new MolecularDisruptor(3, 10, 8, 330, 30));
 		$this->addFrontSystem(new LaserArray(2, 10, 7, 270, 90));

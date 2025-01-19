@@ -8,9 +8,7 @@ class VelraxSivrinRefit2 extends HeavyCombatVesselLeftRight{
 	$this->faction = "ZNexus Velrax Republic";
         $this->phpclass = "VelraxSivrinRefit2";
         $this->imagePath = "img/ships/Nexus/VelraxSivrin.png";
-        $this->shipClass = "Sivrin Gunship (2106 refit)";
-			$this->variantOf = "Sivrin Gunship";
-			$this->occurence = "common";
+        $this->shipClass = "Sivrin Gunship (2106)";
 		$this->isd = 2106;
         $this->canvasSize = 120;
 

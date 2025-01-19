@@ -9,8 +9,6 @@ class CraytanBrominRefit extends BaseShip{
         $this->phpclass = "CraytanBrominRefit";
         $this->imagePath = "img/ships/Nexus/craytan_epiron.png";
         $this->shipClass = "Bromin Jump Carrier";
-			$this->variantOf = "Epiron Cruiser";
-			$this->occurence = "common";
         $this->shipSizeClass = 3;
 		$this->canvasSize = 160; 
 		$this->unofficial = true;

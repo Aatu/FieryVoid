@@ -9,9 +9,7 @@ class MakarCorrenRefit2 extends OSAT{
         $this->phpclass = "MakarCorrenRefit2";
         $this->imagePath = "img/ships/Nexus/makar_corren2.png";
         $this->canvasSize = 60;
-        $this->shipClass = 'Corren OSAT (2109 refit)';
-			$this->variantOf = "Corren OSAT";
-			$this->occurence = "common";
+        $this->shipClass = 'Corren OSAT (2109)';
         
         $this->isd = 2109;
         $this->unofficial = true;

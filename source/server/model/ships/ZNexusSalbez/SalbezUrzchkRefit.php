@@ -7,9 +7,7 @@ class SalbezUrzchkRefit extends FighterFlight{
         $this->pointCost = 44*6;
         $this->faction = "ZNexus Sal-bez Coalition";
         $this->phpclass = "SalbezUrzchkRefit";
-        $this->shipClass = "Urz'chk Heavy Flight (2102 refit)";
-			$this->variantOf = "Urz'chk Heavy Flight";
-			$this->occurence = "common";
+        $this->shipClass = "Urz'chk Heavy Flight (2102)";
         $this->imagePath = "img/ships/Nexus/salbez_urzchk3.png";
 		$this->unofficial = true;
 
