@@ -847,14 +847,25 @@ class BaseShip {
         $system->setId($i);
         $system->location = $loc;
         $system->setUnit($this);
-						   
 								 
 		$this->systems[$i] = $system;            
 
-		if ($system instanceof Structure)
-			$this->structures[$loc] = $system->id;
-			
-        }
+		if ($system instanceof Structure){
+			$this->structures[$loc] = $system->id;	
+		}else if(($system->startArc ==0)&&($system->endArc ==0)){
+			//if arc is not set - copy from location!
+			if($loc==0){ //PRIMARY
+				$system->startArc = 0;
+				$system->endArc = 360;
+			} else {
+				$location = $this->getLocation($loc);
+				if($location){
+					$system->startArc = $location["min"];
+					$system->endArc = $location["max"];
+				}
+			}
+		}
+	}
         
         protected function addFrontSystem($system){
             $this->addSystem($system, 1);
@@ -1802,6 +1813,15 @@ class BaseShip {
         $locs[] = array("loc" => 2, "min" => 150, "max" => 210, "profile" => $this->forwardDefense);
         $locs[] = array("loc" => 3, "min" => 210, "max" => 330, "profile" => $this->sideDefense);
         return $locs;
+    }
+	
+	    /*outer locations of unit and their arcs, used for assigning incoming fire*/
+    public function getLocation($locId){
+        $locations = $this->getLocations();
+		foreach($locations as $line) if ($line["loc"]==$locId){
+			return $line;
+		}
+		return false; //indicated location not found
     }
 
 
