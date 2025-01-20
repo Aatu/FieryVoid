@@ -77,9 +77,9 @@ class Norgath extends StarBaseSixSections{
 			$loc = $this->locations[$i];
 
 			$this->hitChart[$loc] = array(
-				1 => "TAG:Electro-Pulse Gun",
-				3 => "TAG:Neutron Laser",
-				5 => "TAG:Fusion Cannon",
+				1 => "Electro-Pulse Gun",
+				3 => "Neutron Laser",
+				5 => "Fusion Cannon",
 				6 => "Hangar",
 				8 => "Cargo",
 				9 => "Sub Reactor",
