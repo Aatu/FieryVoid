@@ -4,7 +4,7 @@ class VelraxTassrivInterceptorA extends FighterFlight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 35*6;
+        $this->pointCost = 30*6;
         $this->faction = "ZNexus Velrax Republic (early)";
         $this->phpclass = "VelraxTassrivInterceptorA";
         $this->shipClass = "Tassriv-A Interceptor flight";

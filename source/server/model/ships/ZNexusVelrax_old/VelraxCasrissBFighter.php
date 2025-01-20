@@ -4,7 +4,7 @@ class VelraxCasrissBFighter extends FighterFlight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 30*6;
+        $this->pointCost = 28*6;
         $this->faction = "ZNexus Velrax Republic (early)";
         $this->phpclass = "VelraxCasrissBFighter";
         $this->shipClass = "Casriss-B Interceptor flight";
