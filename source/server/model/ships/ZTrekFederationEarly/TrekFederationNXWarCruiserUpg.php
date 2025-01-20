@@ -5,7 +5,7 @@ class TrekFederationNXWarCruiserUpg extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 400;
-        $this->faction = "ZStarTrek Federation (early)";
+        $this->faction = "ZStarTrek (early) Federation";
         $this->phpclass = "TrekFederationNXWarCruiserUpg";
         $this->imagePath = "img/ships/StarTrek/EnterpriseNX.png";
         $this->shipClass = "NX War Cruiser (upgraded)";
@@ -84,27 +84,28 @@ class TrekFederationNXWarCruiserUpg extends MediumShip{
 	$this->hitChart = array(
 		
 		0=> array(
+			2 => "2:Nacelle",
 			6 => "Magnetic Grappler",
-			9 => "Scanner",
-			12 => "Hangar",
-			15 => "Engine",
+			10 => "Hangar",
+			13 => "Scanner",
+			16 => "Engine",
 			18 => "Reactor",
 			20 => "C&C",
 		),
 
 		1=> array(
-		    	2 => "Shield Projector",
-			7 => "Phase Cannon",
-			10 => "Photonic Torpedo",
+		    2 => "Shield Projector",
+			6 => "Phase Cannon",
+			8 => "Photonic Torpedo",
 			17 => "Structure",
 			20 => "Primary",
 		),
 
 		2=> array(
-		    	2 => "Shield Projector",
-			8 => "Nacelle",
-			10 => "Phase Cannon",
-			12 => "Photonic Torpedo",
+		    2 => "Shield Projector",
+			7 => "Nacelle",
+			9 => "Phase Cannon",
+			11 => "Photonic Torpedo",
 			17 => "Structure",
 			20 => "Primary",
 		),

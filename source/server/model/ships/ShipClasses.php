@@ -850,18 +850,25 @@ class BaseShip {
 								 
 		$this->systems[$i] = $system;            
 
+		
 		if ($system instanceof Structure){
 			$this->structures[$loc] = $system->id;	
-		}else if(($system->startArc ==0)&&($system->endArc ==0)){
+		}else if(($system->startArc ==0)&&($system->endArc ==0)){ //20.01.2025 - add arc equal to section arc, if not set explicitly
 			//if arc is not set - copy from location!
 			if($loc==0){ //PRIMARY
 				$system->startArc = 0;
 				$system->endArc = 360;
 			} else {
-				$location = $this->getLocation($loc);
-				if($location){
-					$system->startArc = $location["min"];
-					$system->endArc = $location["max"];
+				$locations = $this->getLocations();
+				foreach($locations as $line) if ($line["loc"]==$loc){
+					if( ($system->startArc == 0) && ($system->endArc == 0) ){ //for initial values - accept anything
+						$system->startArc = $line["min"];
+						$system->endArc = $line["max"];
+					} else if ($system->endArc == $line["min"]) { //accept end arc extension
+						$system->endArc = $line["max"];
+					} else if ($system->startArc == $line["max"]) { //accept start arc extension
+						$system->startArc = $line["min"];
+					}
 				}
 			}
 		}
@@ -1815,15 +1822,6 @@ class BaseShip {
         return $locs;
     }
 	
-	    /*outer locations of unit and their arcs, used for assigning incoming fire*/
-    public function getLocation($locId){
-        $locations = $this->getLocations();
-		foreach($locations as $line) if ($line["loc"]==$locId){
-			return $line;
-		}
-		return false; //indicated location not found
-    }
-
 
     public function fillLocations($locs){
         foreach ($locs as $key => $loc){

@@ -5,7 +5,7 @@ class AndorianThymasEscort extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 375;
-        $this->faction = "ZStarTrek Federation (early)";
+        $this->faction = "ZStarTrek (early) Federation";
         $this->phpclass = "AndorianThymasEscort";
         $this->imagePath = "img/ships/StarTrek/AndorianThyzon.png";
         $this->shipClass = "Andorian Thymas Escort Frigate";
@@ -90,27 +90,27 @@ class AndorianThymasEscort extends MediumShip{
 	$this->hitChart = array(
 		
 		0=> array(
-			5 => "2:Nacelle",			
-			8 => "Tractor Beam",
-			11 => "Scanner",
-			12 => "Hangar",
+			2 => "2:Nacelle",			
+			5 => "Tractor Beam",
+			9 => "Hangar",
+			12 => "Scanner",
 			15 => "Engine",
 			18 => "Reactor",
 			20 => "C&C",
 		),
 
 		1=> array(
-		    	2 => "Shield Projector",
-			6 => "Light Particle Cannon",
-			7 => "Standard Particle Beam",
+		    2 => "Shield Projector",
+			4 => "Light Particle Cannon",
+			6 => "Standard Particle Beam",
 			17 => "Structure",
 			20 => "Primary",
 		),
 
 		2=> array(
-		    	2 => "Shield Projector",
-			9 => "Nacelle",
-			13 => "Standard Particle Beam",
+		    2 => "Shield Projector",
+			7 => "Nacelle",
+			11 => "Standard Particle Beam",
 			17 => "Structure",
 			20 => "Primary",
 		),

@@ -5,7 +5,7 @@ class VulcanTribuneFlt extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 90 *6; //for 6; a bit add-on for not requiring carrier
-        $this->faction = "ZStarTrek Federation (early)";
+        $this->faction = "ZStarTrek (early) Federation";
         $this->phpclass = "VulcanTribuneFlt";
         $this->shipClass = "Vulcan Tribune flight";
         $this->imagePath = "img/ships/StarTrek/VulcanTribune.png";

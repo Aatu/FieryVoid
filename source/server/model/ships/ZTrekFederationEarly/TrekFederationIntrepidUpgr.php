@@ -5,7 +5,7 @@ class TrekFederationIntrepidUpgr extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 275;
-        $this->faction = "ZStarTrek Federation (early)";
+        $this->faction = "ZStarTrek (early) Federation";
         $this->phpclass = "TrekFederationIntrepidUpgr";
         $this->imagePath = "img/ships/StarTrek/Intrepid.png";
         $this->shipClass = "Intrepid Upgraded";
@@ -79,26 +79,27 @@ class TrekFederationIntrepidUpgr extends MediumShip{
 	$this->hitChart = array(
 		
 		0=> array(
-			6 => "Scanner",
-			8 => "Hangar",
-			14 => "Engine",
-			17 => "Reactor",
+			2 => "2:Nacelle",
+			9 => "Hangar",
+			12 => "Scanner",
+			15 => "Engine",
+			18 => "Reactor",
 			20 => "C&C",
 		),
 
 		1=> array(
 			2 => "Shield Projector",
-			5 => "Phase Cannon",
-			9 => "Photonic Torpedo",
+			4 => "Phase Cannon",
+			7 => "Photonic Torpedo",
 			17 => "Structure",
 			20 => "Primary",
 		),
 
 		2=> array(
-			6 => "Nacelle",
-			8 => "Shield Projector",
-			10 => "Photonic Torpedo",
-			12 => "Light Phase Cannon",
+			5 => "Nacelle",
+			7 => "Shield Projector",
+			9 => "Photonic Torpedo",
+			11 => "Light Phase Cannon",
 			17 => "Structure",
 			20 => "Primary",
 		),

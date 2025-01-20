@@ -5,12 +5,10 @@ class VulcanSurak extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 340;
-        $this->faction = "ZStarTrek Federation (early)";
+        $this->faction = "ZStarTrek (early) Federation";
         $this->phpclass = "VulcanSurak";
         $this->imagePath = "img/ships/StarTrek/VulcanSurak.png";
         $this->shipClass = "Vulcan Surak Light Cruiser";
-			//$this->occurence = "uncommon";
-			//$this->variantOf = "Vulcan Surak Light Cruiser";
 
 	$this->unofficial = true;
         $this->canvasSize = 200;
@@ -84,26 +82,27 @@ class VulcanSurak extends MediumShip{
 	$this->hitChart = array(
 		
 		0=> array(
-			6 => "Tractor Beam",
-			9 => "Scanner",
-			12 => "Hangar",
-			15 => "Engine",
+			4 => "2:Nacelle",
+			7 => "Tractor Beam",
+			10 => "Hangar",
+			13 => "Scanner",
+			16 => "Engine",
 			18 => "Reactor",
 			20 => "C&C",
 		),
 
 		1=> array(
-		    	2 => "Shield Projector",
-			5 => "Phase Cannon",
-			8 => "Photonic Torpedo",
+		    2 => "Shield Projector",
+			4 => "Phase Cannon",
+			7 => "Photonic Torpedo",
 			17 => "Structure",
 			20 => "Primary",
 		),
 
 		2=> array(
-		    	2 => "Shield Projector",
-			9 => "Nacelle",
-			12 => "Phase Cannon",
+		    2 => "Shield Projector",
+			8 => "Nacelle",
+			10 => "Phase Cannon",
 			17 => "Structure",
 			20 => "Primary",
 		),

@@ -2887,13 +2887,14 @@ spl_autoload_register(
 				'treknausicaanheavygliderearly' => '/server/model/ships/ZTrekOther/TrekNausicaanHeavyGliderEarly.php',
 				'treknausicaanglidershf' => '/server/model/ships/ZTrekOther/TrekNausicaanGliderSHF.php',
 				'treknausicaangliderearlyshf' => '/server/model/ships/ZTrekOther/TrekNausicaanGliderEarlySHF.php',
+				'treknausicaanbp' => '/server/model/ships/ZTrekOther/TrekNausicaanBP.php',
 				
-				'treksulibancellshiplarge' => '/server/model/ships/ZTrekOther/TrekSulibanCellshipLarge.php',
-				'treksulibancellshipmed' => '/server/model/ships/ZTrekOther/TrekSulibanCellshipMed.php',
-				'treksulibancellshipsmall' => '/server/model/ships/ZTrekOther/TrekSulibanCellshipSmall.php',
-				'treksulibancarrier' => '/server/model/ships/ZTrekOther/TrekSulibanCarrier.php',
-				'treksulibancruiser' => '/server/model/ships/ZTrekOther/TrekSulibanCruiser.php',
-				'treksulibanhelix' => '/server/model/ships/ZTrekOther/TrekSulibanHelix.php',
+				'treksulibancellshiplarge' => '/server/model/ships/ZTrekSuliban/TrekSulibanCellshipLarge.php',
+				'treksulibancellshipmed' => '/server/model/ships/ZTrekSuliban/TrekSulibanCellshipMed.php',
+				'treksulibancellshipsmall' => '/server/model/ships/ZTrekSuliban/TrekSulibanCellshipSmall.php',
+				'treksulibancarrier' => '/server/model/ships/ZTrekSuliban/TrekSulibanCarrier.php',
+				'treksulibancruiser' => '/server/model/ships/ZTrekSuliban/TrekSulibanCruiser.php',
+				'treksulibanhelix' => '/server/model/ships/ZTrekSuliban/TrekSulibanHelix.php',
 				
 				
 				

@@ -5,7 +5,7 @@ class AndorianKumariGunship extends HeavyCombatVesselLeftRight{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 500;
-	$this->faction = "ZStarTrek Federation (early)";
+	$this->faction = "ZStarTrek (early) Federation";
         $this->phpclass = "AndorianKumariGunship";
         $this->imagePath = "img/ships/StarTrek/AndorianCruiser.png";
         $this->shipClass = "Andorian Kumari Gunship";
@@ -33,8 +33,8 @@ class AndorianKumariGunship extends HeavyCombatVesselLeftRight{
 	$this->addPrimarySystem(new CnC(4, 15, 0, 0));
         $this->addPrimarySystem(new Reactor(4, 22, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 14, 6, 5));
-	$this->addPrimarySystem(new LightParticleCannon(2, 6, 4, 120, 240));
-	$this->addPrimarySystem(new ParticleCannon(4, 8, 6, 330, 30));
+	$this->addAftSystem(new LightParticleCannon(2, 6, 4, 120, 240));
+	$this->addFrontSystem(new ParticleCannon(4, 8, 6, 330, 30));
 	$impulseDrive = new TrekImpulseDrive(4,20,0,2,3); //Impulse Drive is an engine in its own right, in addition to serving as hub for Nacelle output: $armour, $maxhealth, $powerReq, $output, $boostEfficiency
 		
 
@@ -82,26 +82,29 @@ class AndorianKumariGunship extends HeavyCombatVesselLeftRight{
     
             $this->hitChart = array(
             0=> array(
-                    8 => "Structure",
-		    10 => "Particle Cannon",
-                    12 => "Scanner",
-                    15 => "Engine",
-                    17 => "Light Particle Cannon",
-                    19 => "Reactor",
-                    20 => "C&C",
+				1 => "3:Nacelle",	
+				2 => "4:Nacelle",	
+				7 => "Structure",
+				9 => "1:Particle Cannon",
+				11 => "2:Light Particle Cannon",	
+				13 => "Hangar",
+				15 => "Scanner",
+				17 => "Engine",
+				19 => "Reactor",
+				20 => "C&C",
             ),
             3=> array(
 				2 => "Shield Projector",
-				6 => "Nacelle",
-				10 => "Particle Cannon",
+				5 => "Nacelle",
+				9 => "Particle Cannon",
 				11 => "Hangar",
 				18 => "Structure",
 				20 => "Primary",
             ),
             4=> array(
 				2 => "Shield Projector",
-				6 => "Nacelle",
-				10 => "Particle Cannon",
+				5 => "Nacelle",
+				9 => "Particle Cannon",
 				11 => "Hangar",
 				18 => "Structure",
 				20 => "Primary",

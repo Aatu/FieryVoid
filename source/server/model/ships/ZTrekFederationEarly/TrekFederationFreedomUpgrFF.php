@@ -5,7 +5,7 @@ class TrekFederationFreedomUpgrFF extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 300;
-        $this->faction = "ZStarTrek Federation (early)";
+        $this->faction = "ZStarTrek (early) Federation";
         $this->phpclass = "TrekFederationFreedomUpgrFF";
         $this->imagePath = "img/ships/StarTrek/FederationFreedomFF.png";
         $this->shipClass = "Freedom Frigate Upgraded";
@@ -77,26 +77,25 @@ class TrekFederationFreedomUpgrFF extends MediumShip{
 	$this->hitChart = array(
 		
 		0=> array(
-			6 => "Scanner",
-			8 => "Hangar",
-			14 => "Engine",
-			17 => "Reactor",
+			2 => "2:Nacelle",
+			9 => "Hangar",
+			12 => "Scanner",
+			15 => "Engine",
+			18 => "Reactor",
 			20 => "C&C",
 		),
 
-
 		1=> array(
 			2 => "Shield Projector",
-			7 => "Phased Pulse Cannon",
-			9 => "Photonic Torpedo",
+			6 => "Phased Pulse Cannon",
+			8 => "Photonic Torpedo",
 			17 => "Structure",
 			20 => "Primary",
 		),
 
 		2=> array(
 			2 => "Shield Projector",
-			4 => "Phased Pulse Cannon",
-			10 => "Nacelle",
+			8 => "Nacelle",
 			17 => "Structure",
 			20 => "Primary",
 		),
