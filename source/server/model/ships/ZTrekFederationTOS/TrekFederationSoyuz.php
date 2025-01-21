@@ -86,9 +86,10 @@ class TrekFederationSoyuz extends MediumShip{
 		
 		0=> array(
 			2 => "2:Nacelle",
-			9 => "Hangar",
-			12 => "ElInt Scanner",
-			15 => "Engine",
+			8 => "Structure",
+			11 => "Hangar",			
+			14 => "ElInt Scanner",
+			16 => "Engine",
 			18 => "Reactor",
 			20 => "C&C",
 		),

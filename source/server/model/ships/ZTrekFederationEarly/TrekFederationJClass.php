@@ -80,11 +80,12 @@ class TrekFederationJClass extends MediumShip{
 		
 		0=> array(
 			2 => "2:Nacelle",
-			5 => "Plasma Burst",
-			8 => "Hangar",
-			11 => "Engine",
-			14 => "Scanner",
-			17 => "Reactor",
+			7 => "Structure",
+			9 => "Plasma Burst",
+			12 => "Hangar",
+			14 => "Engine",
+			16 => "Scanner",
+			18 => "Reactor",
 			20 => "C&C",
 		),
 		1=> array(

@@ -17,7 +17,7 @@ class TrekNausicaanVandalTOS extends MediumShip{
         $this->canvasSize = 100;
 	$this->isd = 2260;
 	$this->fighters = array("light"=>6,"Shuttlecraft"=>1);
-	$this->customFighter = array("Nausicaan small craft"=>7, "Nausicaan assault craft"=>1); //can deploy small craft with Nausicaan crew
+	$this->customFighter = array("Nausicaan small craft"=>7); //can deploy small craft with Nausicaan crew
         
         $this->forwardDefense = 11;
         $this->sideDefense = 15;
@@ -87,28 +87,29 @@ class TrekNausicaanVandalTOS extends MediumShip{
 	$this->hitChart = array(
 		
 		0=> array(
-			6 => "2:Nacelle",
-			9 => "Hangar",			
-			12 => "Scanner",
-			15 => "Engine",
+			4 => "2:Nacelle",
+			10 => "Structure",
+			12 => "Hangar",			
+			14 => "Scanner",
+			16 => "Engine",
 			18 => "Reactor",
 			20 => "C&C",
 		),
 
 		1=> array(
-		    	2 => "Shield Projector",
+		    2 => "Shield Projector",
 			4 => "Point Plasma Gun",
-			7 => "Plasma Projector",
-			9 => "Plasma Wave",
+			6 => "Plasma Projector",
+			7 => "Plasma Wave",
 			17 => "Structure",
 			20 => "Primary",
 		),
 
 		2=> array(
-		    	2 => "Shield Projector",
+			2 => "Shield Projector",
 			7 => "Nacelle",
-			10 => "Dual Rocket Launcher",
-                    	11 => "Point Plasma Gun",
+			9 => "Dual Rocket Launcher",
+			11 => "Point Plasma Gun",
 			12 => "Light Plasma Projector",
 			18 => "Structure",
 			20 => "Primary",

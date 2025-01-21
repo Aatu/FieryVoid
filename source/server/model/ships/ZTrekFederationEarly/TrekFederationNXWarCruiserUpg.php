@@ -85,9 +85,10 @@ class TrekFederationNXWarCruiserUpg extends MediumShip{
 		
 		0=> array(
 			2 => "2:Nacelle",
-			6 => "Magnetic Grappler",
-			10 => "Hangar",
-			13 => "Scanner",
+			7 => "Structure",
+			9 => "Magnetic Grappler",
+			12 => "Hangar",			
+			14 => "Scanner",
 			16 => "Engine",
 			18 => "Reactor",
 			20 => "C&C",

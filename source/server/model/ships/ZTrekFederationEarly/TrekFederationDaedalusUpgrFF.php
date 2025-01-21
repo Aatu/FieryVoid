@@ -80,9 +80,10 @@ class TrekFederationDaedalusUpgrFF extends MediumShip{
 		
 		0=> array(
 			2 => "2:Nacelle",
-			9 => "Hangar",
-			12 => "Scanner",
-			15 => "Engine",
+			9 => "Structure",
+			12 => "Hangar",			
+			14 => "Scanner",
+			16 => "Engine",
 			18 => "Reactor",
 			20 => "C&C",
 		),

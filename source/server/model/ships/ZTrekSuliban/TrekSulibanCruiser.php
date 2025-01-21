@@ -77,9 +77,10 @@ class TrekSulibanCruiser extends MediumShip{
 		
 		0=> array(
 			4 => "2:Nacelle",
-			9 => "Hangar",			
-			12 => "Scanner",
-			15 => "Engine",
+			10 => "Structure",
+			12 => "Hangar",			
+			14 => "Scanner",
+			16 => "Engine",
 			18 => "Reactor",
 			20 => "C&C",
 		),

@@ -85,11 +85,12 @@ class AndorianThyzon extends MediumShip{
 	$this->hitChart = array(
 		
 		0=> array(
-			2 => "2:Nacelle",			
-			5 => "Tractor Beam",
-			9 => "Hangar",
-			12 => "Scanner",
-			15 => "Engine",
+			2 => "2:Nacelle",
+			7 => "Structure",
+			9 => "Tractor Beam",
+			12 => "Hangar",			
+			14 => "Scanner",
+			16 => "Engine",
 			18 => "Reactor",
 			20 => "C&C",
 		),

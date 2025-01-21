@@ -66,10 +66,10 @@ class TrekNausicaanHeavyGliderEarly extends LCV{
 	$this->hitChart = array(
 		
 		0=> array(
-			8 => "Structure",
-			10 => "1:Light Plasma Projector",
-			12 => "1:Plasma Burst",
-			14 => "0:Shield Projector",
+			10 => "Structure",
+			12 => "1:Light Plasma Projector",
+			14 => "1:Plasma Burst",
+			15 => "0:Shield Projector",
 			17 => "2:Nacelle",
 			18 => "0:Engine",
 			19 => "0:Reactor",
@@ -77,10 +77,10 @@ class TrekNausicaanHeavyGliderEarly extends LCV{
 		),
 
 		1=> array(
-			8 => "Structure",
-			10 => "1:Light Plasma Projector",
-			12 => "1:Plasma Burst",
-			14 => "0:Shield Projector",
+			10 => "Structure",
+			12 => "1:Light Plasma Projector",
+			14 => "1:Plasma Burst",
+			15 => "0:Shield Projector",
 			17 => "2:Nacelle",
 			18 => "0:Engine",
 			19 => "0:Reactor",
@@ -88,10 +88,10 @@ class TrekNausicaanHeavyGliderEarly extends LCV{
 		),
 
 		2=> array(
-			8 => "Structure",
-			10 => "1:Light Plasma Projector",
-			12 => "1:Plasma Burst",
-			14 => "0:Shield Projector",
+			10 => "Structure",
+			12 => "1:Light Plasma Projector",
+			14 => "1:Plasma Burst",
+			15 => "0:Shield Projector",
 			17 => "2:Nacelle",
 			18 => "0:Engine",
 			19 => "0:Reactor",

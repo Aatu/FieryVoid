@@ -4,7 +4,7 @@ class TrekNausicaanGliderSHF extends FighterFlight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 70 *6; //for 6
+        $this->pointCost = 83 *6; //for 6
         $this->faction = "ZTrek Playtest Other Factions";
         $this->phpclass = "TrekNausicaanGliderSHF";
         $this->imagePath = "img/ships/StarTrek/NausicaanGlider.png";
@@ -34,6 +34,9 @@ class TrekNausicaanGliderSHF extends FighterFlight{
         
        	$this->iniativebonus = 14 *5; //default SHF ini
         $this->populate();
+
+		$this->enhancementOptionsEnabled[] = 'ELT_MAR'; //To enable Elite Marines enhancement
+		$this->enhancementOptionsEnabled[] = 'EXT_MAR'; //To enable extra Marines enhancement
     }
 	
 	
@@ -53,7 +56,6 @@ class TrekNausicaanGliderSHF extends FighterFlight{
 			//$gun->displayName = "Dual Plasma Guns";
 			$fighter->addFrontSystem($gun);
 
-
             $disabler = new TrekFighterDisabler(330, 30, 2, 3); //damage d6+2, triple mount
             $disabler->exclusive = false; //can be fired together with other weapons!
             $fighter->addFrontSystem($disabler);
@@ -61,6 +63,9 @@ class TrekNausicaanGliderSHF extends FighterFlight{
 			$gun = new RogolonLtPlasmaGun(0, 120, 4, 2);//d3+4, dual mount
 			//$gun->displayName = "Dual Plasma Guns";
 			$fighter->addFrontSystem($gun);
+			
+			
+			$fighter->addAftSystem(new Marines(0, 360, 0, false)); //startarc, endarc, damagebonus, elite.
 
 			$fighter->addAftSystem(new TrekShieldFtr(2, 6, 3, 2) ); //armor, health, rating, recharge
 			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack

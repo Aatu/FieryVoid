@@ -22,7 +22,7 @@ class TrekNausicaanBP extends FighterFlight
 
         $this->maxFlightSize = 3;//this is an unusual type of 'fighter', limit flight size.      
 		$this->hangarRequired = 'Shuttlecraft'; //for fleet check
-        $this->customFtrName = "Nausicaan assault craft"; //requires hangar space on Nausicaan ships - and requires it to be dedicated to assault craft
+        $this->customFtrName = "Nausicaan small craft"; //requires hangar space on Nausicaan ships - and requires it to be dedicated to assault craft
 		$this->unitSize = 1; 
 
 		$this->iniativebonus = 9 *5;
