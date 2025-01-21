@@ -74,11 +74,12 @@ class TrekFederationSarajevo extends MediumShip{
 	$this->hitChart = array(
 		
 		0=> array(
-		    2 => "2:Nacelle",
-			6 => "Hangar",
-			12 => "Cargo Bay",
-			14 => "Engine",
-			16 => "Scanner",
+			2 => "2:Nacelle",
+			6 => "Structure",
+			10 => "Cargo Bay",
+			12 => "Hangar",			
+			14 => "Scanner",
+			16 => "Engine",
 			18 => "Reactor",
 			20 => "C&C",
 		),

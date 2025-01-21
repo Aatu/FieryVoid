@@ -84,10 +84,11 @@ class VulcanTimur extends MediumShip{
 	$this->hitChart = array(
 		
 		0=> array(
-			4 => "2:Nacelle",
-			7 => "Tractor Beam",
-			10 => "Hangar",
-			13 => "Elint Scanner",
+			2 => "2:Nacelle",
+			7 => "Structure",
+			9 => "Tractor Beam",
+			12 => "Hangar",			
+			14 => "Scanner",
 			16 => "Engine",
 			18 => "Reactor",
 			20 => "C&C",

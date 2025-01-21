@@ -88,11 +88,13 @@ class TrekFederationYClass extends MediumShip{
 	$this->hitChart = array(
 		
 		0=> array(
-			6 => "Scanner",
-			8 => "Plasma Burst",
-			9 => "Hangar",
-			14 => "Engine",
-			17 => "Reactor",
+			2 => "2:Nacelle",
+			6 => "Structure",
+			9 => "Plasma Burst",
+			12 => "Hangar",			
+			14 => "Scanner",
+			16 => "Engine",
+			18 => "Reactor",
 			20 => "C&C",
 		),
 		1=> array(
