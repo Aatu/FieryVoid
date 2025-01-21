@@ -5,7 +5,7 @@ class TrekFederationSoyuz extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 475;
-        $this->faction = "ZStarTrek Federation (TOS)";
+        $this->faction = "ZStarTrek (TOS) Federation";
         $this->phpclass = "TrekFederationSoyuz";
         $this->imagePath = "img/ships/StarTrek/FederationMiranda.png";
         $this->shipClass = "Soyuz Scout";
@@ -85,9 +85,9 @@ class TrekFederationSoyuz extends MediumShip{
 	$this->hitChart = array(
 		
 		0=> array(
-			6 => "2:Nacelle",
-			9 => "ELINT Scanner",
-			12 => "Hangar",
+			2 => "2:Nacelle",
+			9 => "Hangar",
+			12 => "ElInt Scanner",
 			15 => "Engine",
 			18 => "Reactor",
 			20 => "C&C",
@@ -95,15 +95,15 @@ class TrekFederationSoyuz extends MediumShip{
 
 		1=> array(
 			2 => "Shield Projector",
-		    	6 => "Phaser",
-			9 => "Light Phaser",
-			10 => "Tractor Beam",
+		    4 => "Phaser",
+			6 => "Light Phaser",
+			7 => "Tractor Beam",
 			17 => "Structure",
 			20 => "Primary",
 		),
 
 		2=> array(
-		    	5 => "Nacelle",
+		    5 => "Nacelle",
 			7 => "Shield Projector",
 			9 => "Light Phaser",
 			12 => "ELINT Scanner",

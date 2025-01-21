@@ -203,10 +203,13 @@ window.gamedata = {
 		  case 'ZNexus Velrax Republic':
 			powerRating = 'Tier 2, custom faction';
 			break;
-		  case 'ZStarTrek Federation (TOS)':
+		  case 'ZStarTrek (TOS) Federation':
 			powerRating = 'Tier 2, custom faction';
 			break;
-		  case 'ZStarTrek Federation (early)':
+		  case 'ZStarTrek (early) Federation':
+			powerRating = 'Tier 2, custom faction';
+			break;
+		  case 'ZStarTrek (early) Suliban':
 			powerRating = 'Tier 2, custom faction';
 			break;
 		  case 'ZStarWars':

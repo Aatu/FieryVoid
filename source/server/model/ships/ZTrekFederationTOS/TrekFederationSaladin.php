@@ -5,7 +5,7 @@ class TrekFederationSaladin extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 350;
-        $this->faction = "ZStarTrek Federation (TOS)";
+        $this->faction = "ZStarTrek (TOS) Federation";
         $this->phpclass = "TrekFederationSaladin";
         $this->imagePath = "img/ships/StarTrek/FederationSaladin.png";
         $this->shipClass = "Saladin Escort Destroyer";
@@ -79,9 +79,9 @@ class TrekFederationSaladin extends MediumShip{
 	$this->hitChart = array(
 		
 		0=> array(
-			6 => "2:Nacelle",
-			9 => "Scanner",
-			12 => "Hangar",
+			2 => "2:Nacelle",
+			9 => "Hangar",
+			12 => "Scanner",
 			15 => "Engine",
 			18 => "Reactor",
 			20 => "C&C",
@@ -89,15 +89,15 @@ class TrekFederationSaladin extends MediumShip{
 
 		1=> array(
 			2 => "Shield Projector",
-		    	4 => "Phaser",
-			8 => "Light Phaser Lance",
-			10 => "Tractor Beam",
+			4 => "Phaser",
+			7 => "Light Phaser Lance",
+			8 => "Tractor Beam",
 			17 => "Structure",
 			20 => "Primary",
 		),
 
 		2=> array(
-		    	5 => "Nacelle",
+			5 => "Nacelle",
 			7 => "Shield Projector",
 			10 => "Light Phaser Lance",
 			17 => "Structure",
