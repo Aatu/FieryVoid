@@ -135,7 +135,8 @@
     <script src="client/renderer/animationStrategy/animation/ShipMovementAnimation.js"></script>
     <script src="client/renderer/animationStrategy/animation/LogAnimation.js"></script>
     <script src="client/renderer/animationStrategy/animation/CameraPositionAnimation.js"></script>
-    <script src="client/renderer/animationStrategy/animation/ShipDestroyedAnimation.js"></script>
+    <script src="client/renderer/animationStrategy/animation/ShipDestroyedAnimation.js"></script>  
+    <script src="client/renderer/animationStrategy/animation/ShipJumpAnimation.js"></script>
 
     <script src="client/renderer/animationStrategy/animation/FireAnimationHelper.js"></script>
     <script src="client/renderer/animationStrategy/animation/AllWeaponFireAgainstShipAnimation.js"></script>
@@ -153,6 +154,7 @@
     <script src="client/renderer/animationStrategy/animation/effects/TorpedoEffect.js"></script>
     <script src="client/renderer/animationStrategy/animation/effects/ShipExplosion.js"></script>
     <script src="client/renderer/animationStrategy/animation/effects/SystemDestroyedEffect.js"></script>
+    <script src="client/renderer/animationStrategy/animation/effects/ShipJumpPoint.js"></script>  
 
     <script src="client/renderer/phaseStrategy/PhaseStrategy.js"></script>
     <script src="client/renderer/phaseStrategy/DeploymentPhaseStrategy.js"></script>

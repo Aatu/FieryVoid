@@ -90,8 +90,12 @@ window.ReplayAnimationStrategy = function () {
         this.gamedata.ships.filter(function (ship) {
             return shipManager.getTurnDestroyed(ship) === this.turn && !ship.flight;
         }, this).forEach(function (ship) {
-
-            var animation = new ShipDestroyedAnimation(time, this.shipIconContainer.getByShip(ship), this.emitterContainer, this.movementAnimations);
+			var jumped = shipManager.hasJumpedNotDestroyed(ship);
+			if(jumped){
+				var animation = new ShipJumpAnimation(time, this.shipIconContainer.getByShip(ship), this.emitterContainer, this.movementAnimations);	
+			}else{
+            	var animation = new ShipDestroyedAnimation(time, this.shipIconContainer.getByShip(ship), this.emitterContainer, this.movementAnimations);
+			}
             time += animation.getDuration();
             this.animations.push(animation);
         }, this);

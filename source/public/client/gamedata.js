@@ -267,6 +267,7 @@ window.gamedata = {
 
             var hasNoEW = [];
             var selfDestructing = [];
+            var jumping = [];
 			var notLaunching = [];
 			var notSetAA = [];//available Adaptive Armor points remaining!
 			var notSetFC = [];//available BFCP points remaining for Hyach!
@@ -281,6 +282,12 @@ window.gamedata = {
                             for (var pow in myShips[ship].systems[syst].power) {
                                 if (myShips[ship].systems[syst].power[pow].turn == gamedata.turn && myShips[ship].systems[syst].power[pow].type == 2) {
                                     selfDestructing.push(myShips[ship]);
+                                }
+                            }
+                        } else if (myShips[ship].systems[syst].name == "jumpEngine") {
+                            for (var pow in myShips[ship].systems[syst].power) {
+                                if (myShips[ship].systems[syst].power[pow].turn == gamedata.turn && myShips[ship].systems[syst].power[pow].type == 2) {
+                                    jumping.push(myShips[ship]);
                                 }
                             }
                         } else if (myShips[ship].systems[syst].name == "adaptiveArmorController") {
@@ -408,6 +415,15 @@ window.gamedata = {
                 }
                 html += "<br>";
             }
+            if (jumping.length > 0) {
+                html += "You have ordering following ships to JUMP TO HYPERSPACE: ";
+                html += "<br>";
+                for (var ship in jumping) {
+                    html += jumping[ship].name + " (" + jumping[ship].shipClass + ")";
+                    html += "<br>";
+                }
+                html += "<br>";
+            }            
 			if (hasNoEW.length > 0) {
 			    // New check to see if Scanner exists / has positive output before giving warning - DK 01/25
 			    for (var i = hasNoEW.length - 1; i >= 0; i--) {
