@@ -2002,6 +2002,11 @@ class JumpEngine extends ShipSystem{
     public $delay = 0;
     public $primary = true;
     
+    //Make boostable to do 'Jumping Out' effect
+    public $boostable = true; //for reactor overload feature!
+    public $maxBoostLevel = 1;
+    public $boostEfficiency = 0;    
+    
 	//JumpEngine tactically  is not important at all!
 	public $repairPriority = 1;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
     
@@ -2010,9 +2015,75 @@ class JumpEngine extends ShipSystem{
     
         $this->delay = $delay;
     }
+
+    public function isOverloading($turn){
+        foreach ($this->power as $power){
+            if ($power->turn == $turn && $power->type == 2){
+                return true;			
+            }
+        }
+        return false;
+    }
+    
+	public function doHyperspaceJump($ship, $gamedata)
+	{
+		$currHealth = $this->getRemainingHealth();
+		$maxhealth = $this->maxhealth;
+		$healthDiff = $maxhealth - $currHealth;
+	
+		// Calculate the percentage of health missing
+		$missingHealthPercentage = ($healthDiff / $maxhealth) * 100;
+echo "Value of missingHealthPercentage: " . $missingHealthPercentage. "\n";	
+		// Roll a D100
+		$d100Roll = Dice::d(100);
+echo "Value of d100Roll: " . $d100Roll. "\n";		
+		// Determine if the jump fails
+		$jumpFailure = $missingHealthPercentage > 0 && $d100Roll <= $missingHealthPercentage;
+echo "Value of jumpFailure: " . $jumpFailure. "\n";	
+		// Try to create the fire order for logs
+		$rammingSystem = $ship->getSystemByName("RammingAttack");
+		$fireOrderType = $jumpFailure ? 'JumpFailure' : 'HyperspaceJump';
+		$pubNotes = $jumpFailure
+			? "<br>Ship attempts to jump to hyperspace, but damage to the Jump Drive causes the ship to be destroyed."
+			: "<br>Ship activates Jump Drive and enters hyperspace.";
+	
+		if ($rammingSystem) {
+			$newFireOrder = new FireOrder(
+				-1, "normal", $ship->id, $ship->id,
+				$rammingSystem->id, -1, $gamedata->turn, 1,
+				100, 100, 1, 1, 0,
+				0, 0, $fireOrderType, 10001
+			);
+			$newFireOrder->pubnotes = $pubNotes;
+			$newFireOrder->addToDB = true;
+			$rammingSystem->fireOrders[] = $newFireOrder;
+		}
+	
+		// Destroy the primary structure in either event
+		$primaryStruct = $this->unit->getStructureSystem(0);
+		if ($primaryStruct) {
+			$remaining = $primaryStruct->getRemainingHealth();
+			$damageEntry = new DamageEntry(
+				-1, $ship->id, -1, $gamedata->turn,
+				$primaryStruct->id, $remaining, 0, 0, -1, true, false,
+				"", $fireOrderType
+			);
+			$damageEntry->updated = true;
+			$primaryStruct->damage[] = $damageEntry;
+	
+			if ($rammingSystem) {
+				// Add extra data to damage entry
+				$damageEntry->shooterid = $ship->id;
+				$damageEntry->weaponid = $rammingSystem->id;
+			}
+		}
+	}
 	
      public function setSystemDataWindow($turn){
-        $this->data["Special"] = "SHOULD NOT be shut down for power (unless damaged >50% or in desperate circumstances).";
+        $this->data["Special"] = "<br>Boost in Initial Orders to jump to hyperspace at end of turn.";	
+        $this->data["Special"] .= "<br>WARNING - Jumping to hyperspace REMOVES ship from rest of the battle.";
+        $this->data["Special"] .= "<br>If Jump Engine is damaged, ship has a % chance of being destroyed opening jump point.";
+        $this->data["Special"] .= "SHOULD NOT be shut down for power (unless damaged >50% or in desperate circumstances).";									
 		parent::setSystemDataWindow($turn);     
     }
 }

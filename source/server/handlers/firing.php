@@ -536,64 +536,72 @@ class Firing
     public static function fireWeapons($gamedata){	
         $fireOrders  = array();
         foreach ($gamedata->ships as $ship){		
-		/*account for possible reactor overload!*/
-		$reactorList = $ship->getSystemsByName('Reactor');
-		foreach($reactorList as $reactorCurr){
-			//is it overloading?...
-			if( $reactorCurr->isOverloading($gamedata->turn) ){ //primed for self destruct!
-				$remaining =  $reactorCurr->getRemainingHealth();
-				//$armour =  $reactorCurr->armour; //just mark 0 armour
-				$toDo = $remaining;// + $armour;
-				
-				//try to make actual attack to show in log - use Ramming Attack system!				
-				$rammingSystem = $ship->getSystemByName("RammingAttack");
-				if($rammingSystem){ //actually exists! - it should on every ship!				
-					$newFireOrder = new FireOrder(
-						-1, "normal", $ship->id, $ship->id,
-						$rammingSystem->id, -1, $gamedata->turn, 1, 
-						100, 100, 1, 1, 0,
-						0,0,'Plasma',10000
-					);
-					/*new FireOrder(
-						$id, $type, $shooterid, $targetid,
-						$weaponid, $calledid, $turn, $firingMode, $needed,
-						$rolled, $shots, $shotshit, $intercepted, $x, $y, $damageclass, $resolutionOrder
-					);*/
-					$newFireOrder->pubnotes = "Self-destruct";
-					$newFireOrder->addToDB = true;
-					$rammingSystem->fireOrders[] = $newFireOrder;
-				}
-				$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $reactorCurr->id, $toDo, 0, 0, -1, true, false, "", "Plasma");
-				$damageEntry->updated = true;
-				if($rammingSystem){ //add extra data to damage entry - so firing order can be identified!
-                        $damageEntry->shooterid = $ship->id; //additional field
-                        $damageEntry->weaponid = $rammingSystem->id; //additional field
-				}
-				$reactorCurr->damage[] = $damageEntry;
-			}
-		}
-	    /* fighter attacks are taken into account here, but only ramming attacks!
-            if ($ship instanceof FighterFlight){
-                continue;
-            }*/
-            foreach($ship->getAllFireOrders($gamedata->turn) as $fire){
-                if ($fire->type === "intercept" || $fire->type === "selfIntercept"){
-                    continue;
+            /*account for possible reactor overload!*/
+            $reactorList = $ship->getSystemsByName('Reactor');
+            foreach($reactorList as $reactorCurr){
+                //is it overloading?...
+                if( $reactorCurr->isOverloading($gamedata->turn) ){ //primed for self destruct!
+                    $remaining =  $reactorCurr->getRemainingHealth();
+                    //$armour =  $reactorCurr->armour; //just mark 0 armour
+                    $toDo = $remaining;// + $armour;
+                    
+                    //try to make actual attack to show in log - use Ramming Attack system!				
+                    $rammingSystem = $ship->getSystemByName("RammingAttack");
+                    if($rammingSystem){ //actually exists! - it should on every ship!				
+                        $newFireOrder = new FireOrder(
+                            -1, "normal", $ship->id, $ship->id,
+                            $rammingSystem->id, -1, $gamedata->turn, 1, 
+                            100, 100, 1, 1, 0,
+                            0,0,'Plasma',10000
+                        );
+                        /*new FireOrder(
+                            $id, $type, $shooterid, $targetid,
+                            $weaponid, $calledid, $turn, $firingMode, $needed,
+                            $rolled, $shots, $shotshit, $intercepted, $x, $y, $damageclass, $resolutionOrder
+                        );*/
+                        $newFireOrder->pubnotes = "Self-destruct";
+                        $newFireOrder->addToDB = true;
+                        $rammingSystem->fireOrders[] = $newFireOrder;
+                    }
+                    $damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $reactorCurr->id, $toDo, 0, 0, -1, true, false, "", "Plasma");
+                    $damageEntry->updated = true;
+                    if($rammingSystem){ //add extra data to damage entry - so firing order can be identified!
+                            $damageEntry->shooterid = $ship->id; //additional field
+                            $damageEntry->weaponid = $rammingSystem->id; //additional field
+                    }
+                    $reactorCurr->damage[] = $damageEntry;
                 }
-
-                $weapon = $ship->getSystemById($fire->weaponid);
-		if (!($weapon instanceof Weapon)){//...just in case...
-			continue;
-		};
-
-		//fighter attack: only if ramming
-		if ($ship instanceof FighterFlight){
-			if (!$weapon->isRammingAttack) continue;
-		}
-
-                //$fire->priority = $weapon->priority; //fire order priority already set, and may differ from basic weapon priority!
-                $fireOrders[] = $fire;
             }
+            //Check if any ships have activate jump engines
+            $jumpList = $ship->getSystemsByName('Jump Engine');      
+            foreach($jumpList as $jumpEngine){
+                //is it overloading?...
+                if( $jumpEngine->isOverloading($gamedata->turn) ){ //primed for enetering hyperspace!				
+                    $jumpEngine->doHyperspaceJump($ship, $gamedata); //Actually create damage entry to destroy ship.
+                }
+            }		
+            /* fighter attacks are taken into account here, but only ramming attacks!
+                if ($ship instanceof FighterFlight){
+                    continue;
+                }*/
+                foreach($ship->getAllFireOrders($gamedata->turn) as $fire){
+                    if ($fire->type === "intercept" || $fire->type === "selfIntercept"){
+                        continue;
+                    }
+
+                    $weapon = $ship->getSystemById($fire->weaponid);
+            if (!($weapon instanceof Weapon)){//...just in case...
+                continue;
+            };
+
+            //fighter attack: only if ramming
+            if ($ship instanceof FighterFlight){
+                if (!$weapon->isRammingAttack) continue;
+            }
+
+                    //$fire->priority = $weapon->priority; //fire order priority already set, and may differ from basic weapon priority!
+                    $fireOrders[] = $fire;
+                }
         }
         usort($fireOrders, "self::compareFiringOrders");
 	    

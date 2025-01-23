@@ -2347,6 +2347,7 @@ class RammingAttack extends Weapon{
 	public $animation = "trail";
 	public $animationColor =  array(1, 1, 1);
 	public $animationExplosionScale = 0.1; //very small bolt; explosion itself is scaled by damage done anyway!
+	public $noProjectile = true; //Marker for front end to make projectile invisible for weapons that shouldn't have one. 
 	/*
 	public $projectilespeed = 24;
 	public $animationWidth = 1;
