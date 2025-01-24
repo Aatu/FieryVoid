@@ -7,8 +7,8 @@ class VelraxGunboatRefit extends LCV{
         $this->pointCost = 175;
         $this->faction = "ZNexus Velrax Republic (early)";
         $this->phpclass = "VelraxGunboatRefit";
-        $this->imagePath = "img/ships/Nexus/VelraxPlasmaGunboat.png";
-			$this->canvasSize = 85; //img has 200px per side
+        $this->imagePath = "img/ships/Nexus/velraxArcGunboat.png";
+			$this->canvasSize = 70; //img has 200px per side
         $this->shipClass = "Nashran Gunboat (2061)";
 			$this->variantOf = "Nashran Gunboat";
 			$this->occurence = "common";

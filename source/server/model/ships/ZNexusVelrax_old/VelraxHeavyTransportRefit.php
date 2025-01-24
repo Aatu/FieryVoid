@@ -7,12 +7,12 @@ class VelraxHeavyTransportRefit extends HeavyCombatVesselLeftRight{
 	$this->pointCost = 160;
 	$this->faction = "ZNexus Support Units";
         $this->phpclass = "VelraxHeavyTransportRefit";
-        $this->imagePath = "img/ships/Nexus/VelraxVersythe.png";
+        $this->imagePath = "img/ships/Nexus/velraxVersythe.png";
         $this->shipClass = "Velrax Heavy Transport (2108)";
 			$this->variantOf = "Velrax Heavy Transport";
 			$this->occurence = "common";
 	    $this->isd = 2108;
-        $this->canvasSize = 130;
+        $this->canvasSize = 125;
 		$this->unofficial = true;
 
         $this->forwardDefense = 15;

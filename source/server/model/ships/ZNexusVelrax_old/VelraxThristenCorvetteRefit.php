@@ -7,12 +7,12 @@ class VelraxThristenCorvetteRefit extends MediumShip{
         $this->pointCost = 280;
         $this->faction = "ZNexus Velrax Republic (early)";
         $this->phpclass = "VelraxThristenCorvetteRefit";
-        $this->imagePath = "img/ships/Nexus/VelraxThristen.png";
+        $this->imagePath = "img/ships/Nexus/velraxThristen.png";
         $this->shipClass = "Thristen Corvette (2059)";
 			$this->variantOf = "Thristen Corvette";
 			$this->occurence = "common";
 		$this->unofficial = true;
-        $this->canvasSize = 90;
+        $this->canvasSize = 100;
 	    $this->isd = 2059;
 
 	    $this->notes = 'Atmospheric Capable.';

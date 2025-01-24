@@ -7,13 +7,13 @@ class VelraxVersissScout extends HeavyCombatVesselLeftRight{
 	$this->pointCost = 420;
 	$this->faction = "ZNexus Velrax Republic (early)";
         $this->phpclass = "VelraxVersissScout";
-        $this->imagePath = "img/ships/Nexus/VelraxVersiss.png";
+        $this->imagePath = "img/ships/Nexus/velraxVersiss.png";
         $this->shipClass = "Versiss Combat Scout";
 			$this->variantOf = "Versythe Explorer";
 			$this->occurence = "rare";
 	    $this->isd = 2059;
         $this->limited = 10;
-        $this->canvasSize = 130;
+        $this->canvasSize = 125;
 		$this->unofficial = true;
 
         $this->forwardDefense = 15;

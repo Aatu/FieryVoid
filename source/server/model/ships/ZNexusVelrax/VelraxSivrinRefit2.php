@@ -7,10 +7,10 @@ class VelraxSivrinRefit2 extends HeavyCombatVesselLeftRight{
 	$this->pointCost = 425;
 	$this->faction = "ZNexus Velrax Republic";
         $this->phpclass = "VelraxSivrinRefit2";
-        $this->imagePath = "img/ships/Nexus/VelraxSivrin.png";
+        $this->imagePath = "img/ships/Nexus/velraxSivrin.png";
         $this->shipClass = "Sivrin Gunship (2106)";
 		$this->isd = 2106;
-        $this->canvasSize = 120;
+        $this->canvasSize = 125;
 
 		$this->unofficial = true;
 

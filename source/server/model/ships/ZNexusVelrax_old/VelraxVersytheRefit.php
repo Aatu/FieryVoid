@@ -7,13 +7,13 @@ class VelraxVersytheRefit extends HeavyCombatVesselLeftRight{
 	$this->pointCost = 430;
 	$this->faction = "ZNexus Velrax Republic (early)";
         $this->phpclass = "VelraxVersytheRefit";
-        $this->imagePath = "img/ships/Nexus/VelraxVersythe.png";
+        $this->imagePath = "img/ships/Nexus/velraxVersythe.png";
         $this->shipClass = "Versythe Explorer (2070)";
 			$this->variantOf = "Versythe Explorer";
 			$this->occurence = "common";
         $this->limited = 10;
 	    $this->isd = 2061;
-        $this->canvasSize = 130;
+        $this->canvasSize = 125;
 		$this->unofficial = true;
 
         $this->fighters = array("normal"=>6);

@@ -7,12 +7,12 @@ class VelraxOzaraEscort extends MediumShip{
         $this->pointCost = 300;
         $this->faction = "ZNexus Velrax Republic (early)";
         $this->phpclass = "VelraxOzaraEscort";
-        $this->imagePath = "img/ships/Nexus/VelraxThristen.png";
+        $this->imagePath = "img/ships/Nexus/velraxThristen.png";
         $this->shipClass = "Ozara Escort Corvette";
 			$this->variantOf = "Thristen Corvette";
 			$this->occurence = "uncommon";
 		$this->unofficial = true;
-        $this->canvasSize = 90;
+        $this->canvasSize = 100;
 	    $this->isd = 2058;
 
 	    $this->notes = 'Atmospheric Capable.';

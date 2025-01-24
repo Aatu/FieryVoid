@@ -7,10 +7,10 @@ class VelraxHisshrimRefit2 extends HeavyCombatVesselLeftRight{
 	$this->pointCost = 365;
 	$this->faction = "ZNexus Velrax Republic";
         $this->phpclass = "VelraxHisshrimRefit2";
-        $this->imagePath = "img/ships/Nexus/VelraxHisshrim.png";
+        $this->imagePath = "img/ships/Nexus/velraxHisshrim.png";
         $this->shipClass = "Hisshrim Patrol Carrier (2105)";
 	    $this->isd = 2105;
-        $this->canvasSize = 130;
+        $this->canvasSize = 125;
 		$this->unofficial = true;
 
         $this->fighters = array("light"=>6, "heavy"=>6);

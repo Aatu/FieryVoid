@@ -7,13 +7,13 @@ class VelraxSevashCarrier extends MediumShip{
         $this->pointCost = 300;
         $this->faction = "ZNexus Velrax Republic (early)";
         $this->phpclass = "VelraxSevashCarrier";
-        $this->imagePath = "img/ships/Nexus/VelraxSevash.png";
+        $this->imagePath = "img/ships/Nexus/velraxSevash.png";
         $this->shipClass = "Sevash Escort Carrier";
 			$this->variantOf = "Sathrin Border Frigate";
 			$this->occurence = "common";
 		$this->unofficial = true;
         $this->agile = true;
-        $this->canvasSize = 85;
+        $this->canvasSize = 100;
 	    $this->isd = 2062;
 
 	    $this->notes = 'Atmospheric Capable.';

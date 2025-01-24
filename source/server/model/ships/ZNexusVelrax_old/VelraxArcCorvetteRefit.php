@@ -7,12 +7,12 @@ class VelraxArcCorvetteRefit extends MediumShip{
         $this->pointCost = 280;
         $this->faction = "ZNexus Velrax Republic (early)";
         $this->phpclass = "VelraxArcCorvetteRefit";
-        $this->imagePath = "img/ships/Nexus/VelraxMassken.png";
+        $this->imagePath = "img/ships/Nexus/velraxMassken.png";
         $this->shipClass = "Massken Arc Corvette (2059)";
 			$this->variantOf = "Thristen Corvette";
 			$this->occurence = "common";
 		$this->unofficial = true;
-        $this->canvasSize = 90;
+        $this->canvasSize = 100;
 	    $this->isd = 2059;
  
 	    $this->notes = 'Atmospheric Capable.';

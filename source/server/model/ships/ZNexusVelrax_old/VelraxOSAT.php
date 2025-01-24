@@ -7,8 +7,8 @@ class VelraxOSAT extends OSAT{
 		$this->pointCost = 170;
 		$this->faction = 'ZNexus Velrax Republic (early)';
         $this->phpclass = "VelraxOSAT";
-        $this->imagePath = "img/ships/Nexus/VelraxOSAT.png";
-			$this->canvasSize = 80; //img has 100px per side
+        $this->imagePath = "img/ships/Nexus/velraxOSAT.png";
+			$this->canvasSize = 90; //img has 100px per side
         $this->shipClass = "Standard OSAT";
 //	    $this->variantOf = "Brixadii Weapons Platform";
 //		$this->limited = 33;
