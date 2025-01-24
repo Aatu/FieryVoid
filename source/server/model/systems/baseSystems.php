@@ -2033,13 +2033,13 @@ class JumpEngine extends ShipSystem{
 	
 		// Calculate the percentage of health missing
 		$missingHealthPercentage = ($healthDiff / $maxhealth) * 100;
-echo "Value of missingHealthPercentage: " . $missingHealthPercentage. "\n";	
+
 		// Roll a D100
 		$d100Roll = Dice::d(100);
-echo "Value of d100Roll: " . $d100Roll. "\n";		
+	
 		// Determine if the jump fails
 		$jumpFailure = $missingHealthPercentage > 0 && $d100Roll <= $missingHealthPercentage;
-echo "Value of jumpFailure: " . $jumpFailure. "\n";	
+
 		// Try to create the fire order for logs
 		$rammingSystem = $ship->getSystemByName("RammingAttack");
 		$fireOrderType = $jumpFailure ? 'JumpFailure' : 'HyperspaceJump';
