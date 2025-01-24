@@ -184,7 +184,8 @@ MolecularSlicerBeamL.prototype.doMultipleFireOrders = function (shooter, target,
 		var fireid = shooter.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
                         
 		var calledid = -1;
-
+		
+/* //Slicers are Raking or Piercing Damage, cannot called sot!
 	    if (system) {
 	        //check if weapon is eligible for called shot!
             if (!weaponManager.canWeaponCall(this)) continue;
@@ -197,7 +198,7 @@ MolecularSlicerBeamL.prototype.doMultipleFireOrders = function (shooter, target,
 
 	        calledid = system.id;
 	    }
-
+*/
 	    var damageClass = this.data["Weapon type"].toLowerCase();
 	    var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
 
