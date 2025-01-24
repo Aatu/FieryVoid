@@ -184,7 +184,7 @@ MolecularSlicerBeamL.prototype.doMultipleFireOrders = function (shooter, target,
 		var fireid = shooter.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
                         
 		var calledid = -1;
-		
+
 /* //Slicers are Raking or Piercing Damage, cannot called sot!
 	    if (system) {
 	        //check if weapon is eligible for called shot!
@@ -202,12 +202,12 @@ MolecularSlicerBeamL.prototype.doMultipleFireOrders = function (shooter, target,
 	    var damageClass = this.data["Weapon type"].toLowerCase();
 	    var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
 
-
+/* //Slicers are not ballistic!
 	    if ((chance < 1)&&(!this.ballistic)) {//now ballistics can be launched when hit chance is 0 or less - important for Packet Torpedo!
 		    //debug && console.log("Can't fire, change < 0");
 		    continue;
 	    }
-
+*/
 
 	    var fire = {
 	        id: fireid,
