@@ -60,6 +60,7 @@ Factions that point for point will have uphill battle against Tier 1, yet otherw
  - Usuuth (Small races)
  - Star Trek (TOS) Federation  (custom faction - Star Trek universe)
  - Star Wars (custom faction (or rather factions), Star Wars universe - with VERY different playstyle, consider them difficult to fly!)
+ - ZBSG COlonials
 
 
 Tier 3 - Low Performance Competitive
