@@ -906,6 +906,7 @@ spl_autoload_register(
                 'shrike1984' => '/server/model/ships/drazi_old/shrike1984.php',
                 'shyarie' => '/server/model/ships/abbai/shyarie.php',
                 'simultaneousmovementrule' => '/server/model/SimultaneousMovementRule.php',
+                'desperaterule' => '/server/model/DesperateRule.php',                
                 'sitara' => '/server/model/ships/centauri/sitara.php',
                 'skiatha' => '/server/model/ships/abbai/skiatha.php',
                 'skiff' => '/server/model/ships/raiders/skiff.php',

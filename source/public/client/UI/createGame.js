@@ -13,6 +13,7 @@ jQuery(function ($) {
     $("#gamespacecheck").on("click", createGame.doGameSpaceCheck);
     $("#gamespacecheck").on("click", createGame.doFlightCheck);
     $("#movementcheck").on("click", createGame.doMovementCheck);
+    $("#desperatecheck").on("click", createGame.doDesperateCheck);    
     
     $(".setsizeknifefight").on("click", createGame.doSwitchSizeKnifeFight);
     $(".setswitchsizebaseassault").on("click", createGame.doSwitchSizeBaseAssault);    
@@ -114,6 +115,16 @@ window.createGame = {
         }
     },
 */
+
+doDesperateCheck: function doDesperateCheck(data) {
+    var checkval = $("#desperatecheck:checked").val();
+
+    if (checkval == "on") {
+        createGame.rules.desperate = true;
+    } else {
+        delete createGame.rules.desperate;
+    }
+},
 
 doMovementCheck: function doMovementCheck(data) {
     var checkval = $("#movementcheck:checked").val();

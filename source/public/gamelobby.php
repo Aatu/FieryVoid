@@ -222,6 +222,7 @@ if ($gamelobbydata->gamespace == '-1x-1'){ //open map
 }
 
 $simMv = false;
+$desperate = false;
 $initiativeCategories = null;
 
 if ($gamelobbydata->rules) {
@@ -231,6 +232,9 @@ if ($gamelobbydata->rules) {
             $initiativeCategories = $gamelobbydata->rules->callRule('jsonSerialize', []);
         }
     }
+    if ($gamelobbydata->rules->hasRuleName('desperate')) {
+        $desperate = true;
+    }    
 }
 
 if ($simMv == true) { // simultaneous movement
@@ -240,6 +244,12 @@ if ($simMv == true) { // simultaneous movement
     }
 } else { // standard movement
     $optionsUsed .= ', Standard Movement';
+}
+
+if ($desperate == true) { // Desperate rules in play
+    $optionsUsed .= ', Desperate Rules';
+} else { // standard movement
+    $optionsUsed .= ', Normal Rules';
 }
 
 ?>
