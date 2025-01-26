@@ -349,7 +349,7 @@ class Enhancements{
 	  //Markab-specific - Enables 'Religious Fervor' refit to selected vessel which comes with some bonus and some penalties.
 	  $enhID = 'MARK_FERV';	  
 	  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option needs to be specifically enabled
-		  $enhName = 'Religious Fervor';
+		  $enhName = 'Religious Fervor - Only use when Desperate Rules apply';
 		  $enhLimit = 1;	
 		  $enhPrice = 0;
 		  $enhPriceStep = 0;
@@ -1134,7 +1134,7 @@ class Enhancements{
 	  //Markab specific - 'Religious Ferver' refit than provides some benefits along with some penalties.
 	  $enhID = 'FTR_FERV';	  
 	  if(in_array($enhID, $flight->enhancementOptionsEnabled)){ //option needs to be specifically enabled
-		  $enhName = 'Religious Fervor';
+		  $enhName = 'Religious Fervor - Only use when Desperate Rules apply';
 		  $enhLimit = 1;	
 		  $enhPrice = 0;	  
 		  $enhPriceStep = 0;
