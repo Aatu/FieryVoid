@@ -888,11 +888,16 @@ shipManager.power = {
         if (system instanceof JumpEngine) {
 			var healthThreshold = system.maxhealth / 2;
 			var currHealth = shipManager.systems.getRemainingHealth(system);
-            var html = '';		
-			if(currHealth > healthThreshold && (!gamedata.rules.desperate)){
-	                html += "WARNING - Jump Drive should only be deactivated after it’s taken 50% damage or more.";
-	                html += "<br>";
-					confirm.warning(html);
+            var html = '';
+			//Check Jump Drive is over 50% health, and Desperate Rules do not apply to player team or both teams		
+			if(currHealth > healthThreshold){
+				// No warning for ships if desperate rules apply
+				if (gamedata.rules.desperate === undefined || 
+					(gamedata.rules.desperate !== ship.team && gamedata.rules.desperate !== -1)) {
+	                	html += "WARNING - Jump Drive should only be deactivated after it’s taken 50% damage or more.";
+	                	html += "<br>";
+						confirm.warning(html);
+				}		
 	         }         
 		}
 

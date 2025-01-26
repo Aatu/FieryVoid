@@ -2,8 +2,10 @@
 
 class DesperateRule implements JsonSerializable {
 
+    private $appliesToTeams = -1;    
 
-    function __construct($numberOfCategories) {
+    function __construct($appliesToTeams) {
+        $this->appliesToTeams = $appliesToTeams;        
     }
 
     public function getRuleName() {
@@ -11,7 +13,7 @@ class DesperateRule implements JsonSerializable {
     }
 
     public function jsonSerialize() {
-        return true;
+        return $this->appliesToTeams;
     }
 
 }

@@ -224,6 +224,7 @@ if ($gamelobbydata->gamespace == '-1x-1'){ //open map
 $simMv = false;
 $desperate = false;
 $initiativeCategories = null;
+$desperateTeams = null;
 
 if ($gamelobbydata->rules) {
     if ($gamelobbydata->rules->hasRuleName('initiativeCategories')) {
@@ -234,6 +235,9 @@ if ($gamelobbydata->rules) {
     }
     if ($gamelobbydata->rules->hasRuleName('desperate')) {
         $desperate = true;
+        if ($gamelobbydata->rules->hasRule('jsonSerialize')) {
+            $desperateTeams = $gamelobbydata->rules->callRule('jsonSerialize', []);
+        }        
     }    
 }
 
@@ -247,7 +251,16 @@ if ($simMv == true) { // simultaneous movement
 }
 
 if ($desperate == true) { // Desperate rules in play
-    $optionsUsed .= ', Desperate Rules';
+    $teamDisplay = null;
+   
+    if($desperateTeams == 1) {
+            $teamDisplay = "Team 1";
+    }else if($desperateTeams == 2){    
+        $teamDisplay = "Team 2";
+    }else{    
+        $teamDisplay = "Both Teams";
+    }
+    $optionsUsed .= ', Desperate Rules: '. $teamDisplay . '';
 } else { // standard movement
     $optionsUsed .= ', Normal Rules';
 }

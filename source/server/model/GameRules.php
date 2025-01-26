@@ -26,7 +26,7 @@ class GameRules implements JsonSerializable{
 
     private function getDesperateRules($rules) {
         if (isset($rules['desperate'])) {
-            return new DesperateRule($rules['desperate']);
+            return new DesperateRule((int)$rules['desperate']);
         }
 
         return null;

@@ -1484,12 +1484,16 @@ window.weaponManager = {
         }
 		
 		//Add new warning for when people ignore tooltip and try to ram when they possibly shouldn't - DK 10/24
-		if (weapon.isRammingAttack && (!weapon.designedToRam) && (!gamedata.rules.desperate)) { //No warning for ships designed to ram or desperate rules apply!
-	            var html = '';		
-		        html += "WARNING - Ramming Attacks should only be used in scenarios where they are specifically permitted.";
-		        html += "<br>";
-				confirm.warning(html);			
-		}
+        //No warning for ships designed to ram or if desperate rules apply!
+        if (weapon.isRammingAttack && !weapon.designedToRam) { 
+            // No warning for ships designed to ram or if desperate rules apply
+            if (gamedata.rules.desperate === undefined || 
+                (gamedata.rules.desperate !== ship.team && gamedata.rules.desperate !== -1)) {
+                
+                var html = "WARNING - Ramming Attacks should only be used in scenarios where they are specifically permitted.";
+                confirm.warning(html);                    
+            }
+        }
 		
     },
 

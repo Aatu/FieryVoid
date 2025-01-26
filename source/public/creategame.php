@@ -150,7 +150,16 @@ VICTORY CONDITIONS: Last unit on map / Last ship on map / More forces remaining 
         <div>
             <input id="desperatecheck" type="checkbox" name="desperatecheck">USE 'DESPERATE' SCENARIO RULES (e.g. Ramming / Deactivating Jump Drive allowed)
         </div>
-    </div></div>                
+     </div>
+    <div class="slot" id="desperateDropdown" style="display:none;">
+        <label for="desperateSelect">DESPERATE RULES APPLY TO:</label>
+        <select id="desperateSelect" name="desperateCategories">
+            <option value="-1">Both</option>
+            <option value="1">Team 1</option>
+            <option value="2">Team 2</option>
+        </select>
+    </div>
+</div>
                 <div style="margin-top:20px;"><h3>TEAM 1</h3></div>
                 <div id="team1" class="subpanel slotcontainer">
                     
