@@ -2083,7 +2083,7 @@ class JumpEngine extends ShipSystem{
         $this->data["Special"] = "<br>Boost in Initial Orders to jump to hyperspace at end of turn.";	
         $this->data["Special"] .= "<br>WARNING - Jumping to hyperspace REMOVES ship from rest of the battle.";
         $this->data["Special"] .= "<br>If Jump Engine is damaged, ship has a % chance of being destroyed opening jump point.";
-        $this->data["Special"] .= "SHOULD NOT be shut down for power (unless damaged >50% or in desperate circumstances).";									
+        $this->data["Special"] .= "SHOULD NOT be shut down for power (unless damaged >50% or if Desperate rules apply).";									
 		parent::setSystemDataWindow($turn);     
     }
 }

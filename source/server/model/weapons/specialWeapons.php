@@ -2400,7 +2400,7 @@ class RammingAttack extends Weapon{
 		  if($this->designedToRam) {
 			  $this->data["Special"] .= "<br>This unit is specifically designed for ramming and may do so in any scenario.";
 		  }else{
-			  $this->data["Special"] .= "<br>ALLOWED ONLY IN SPECIAL CIRCUMSTANCES, LIKE HOMEWORLD DEFENSE!";
+			  $this->data["Special"] .= "<br>ONLY ALLOED IN WHEN DESPERATE RULES APPLY, OR WITH OTHER PLAYERS CONSENT";
 		  }
 		  $this->data["Special"] .= "<br>Profiles and EW do not matter for hit chance - but unit size and target speed does.";  
 		  $this->data["Special"] .= "<br>	(it's generally easier to ram slow targets and targets larger than ramming units itself)";  
