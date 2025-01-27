@@ -10,7 +10,7 @@ class MakarTramitRefit extends LCV{
         $this->imagePath = "img/ships/Nexus/makar_loress2.png";
 			$this->canvasSize = 70; //img has 200px per side
         $this->shipClass = "Tramit Strike Boat (2110)";
-			$this->variantOf = "Loress Gunboat";
+			$this->variantOf = "Loress Gunboat (2110)";
 			$this->occurence = "rare";
 		$this->unofficial = true;
 			$this->isd = 2110;

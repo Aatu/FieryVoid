@@ -26,6 +26,9 @@ window.gamedata = {
 		  case 'Abbai Matriarchate (WotCR)':
 			powerRating = 'Tier 3';
 			break;
+		  case 'Alacan Republic':
+			powerRating = 'Tier 3';
+			break;
 		  case 'Balosian Underdwellers':
 			powerRating = 'Tier 2';
 			break;
@@ -134,6 +137,9 @@ window.gamedata = {
 		  case 'Raiders':
 			powerRating = 'Tier 2 (directory contains distinct Raider factions in addition to generic Raiders!)';
 			break;
+		  case 'Rogolon Dynasty':
+			powerRating = 'Tier 3';
+			break;
 		  case 'Shadow Association':
 			powerRating = 'Tier Ancients';
 			break;
@@ -185,19 +191,40 @@ window.gamedata = {
 		  case "ZEscalation Sshel'ath Alliance":
 			powerRating = 'Tier 2, custom faction';
 			break;
+		  case 'ZNexus Brixadii Clans (early)':
+			powerRating = 'Tier 3, custom faction';
+			break;
 		  case 'ZNexus Brixadii Clans':
+			powerRating = 'Tier 3, custom faction';
+			break;
+		  case 'ZNexus Support Units':
+			powerRating = 'Designs for scenarios, not a faction, custom';
+			break;
+		  case 'ZNexus Craytan Union (early)':
 			powerRating = 'Tier 3, custom faction';
 			break;
 		  case 'ZNexus Craytan Union':
 			powerRating = 'Tier 3, custom faction';
 			break;
+		  case 'ZNexus Dalithorn Commonwealth (early)':
+			powerRating = 'Tier 3, custom faction';
+			break;
 		  case 'ZNexus Dalithorn Commonwealth':
 			powerRating = 'Tier 3, custom faction';
+			break;
+		  case 'ZNexus Makar Federation (early)':
+			powerRating = 'Tier 3, custom faction, playtest';
 			break;
 		  case 'ZNexus Makar Federation':
 			powerRating = 'Tier 3, custom faction, playtest';
 			break;
+		  case 'ZNexus Sal-bez Coalition (early)':
+			powerRating = 'Tier 3, custom faction';
+			break;
 		  case 'ZNexus Sal-bez Coalition':
+			powerRating = 'Tier 3, custom faction';
+			break;
+		  case 'ZNexus Velrax Republic (early)':
 			powerRating = 'Tier 3, custom faction';
 			break;
 		  case 'ZNexus Velrax Republic':

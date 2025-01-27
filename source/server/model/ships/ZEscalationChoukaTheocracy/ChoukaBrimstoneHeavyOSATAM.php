@@ -34,15 +34,15 @@ class ChoukaBrimstoneHeavyOSATAM extends OSAT
         $this->addPrimarySystem(new OSATCnC(0, 1, 0, 0));		
 		$this->addPrimarySystem(new Reactor(4, 16, 0, 0));
 		$this->addPrimarySystem(new Scanner(4, 12, 5, 5));
-		$this->addPrimarySystem(new Thruster(2, 10, 0, 0, 2));
+		$this->addAftSystem(new Thruster(2, 10, 0, 0, 2));
         $this->addPrimarySystem(new AmmoMissileRackS(3, 0, 0, 240, 360, $ammoMagazine, true)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         $this->addPrimarySystem(new AmmoMissileRackS(3, 0, 0, 240, 360, $ammoMagazine, true)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
-		$this->addPrimarySystem(new EWTwinLaserCannon(2, 8, 4, 270, 90));
-		$this->addPrimarySystem(new EWTwinLaserCannon(2, 8, 4, 270, 90));
-   		$this->addPrimarySystem(new HeavyPlasma(3, 8, 5, 300, 60)); 
-       	$this->addPrimarySystem(new HeavyPlasma(3, 8, 5, 300, 60)); 
-		$this->addPrimarySystem(new EWHeavyPointPlasmaGun(2, 7, 3, 0, 360));
-		$this->addPrimarySystem(new EWHeavyPointPlasmaGun(2, 7, 3, 0, 360));
+		$this->addFrontSystem(new EWTwinLaserCannon(2, 8, 4, 270, 90));
+		$this->addFrontSystem(new EWTwinLaserCannon(2, 8, 4, 270, 90));
+   		$this->addFrontSystem(new HeavyPlasma(3, 8, 5, 300, 60)); 
+       	$this->addFrontSystem(new HeavyPlasma(3, 8, 5, 300, 60)); 
+		$this->addAftSystem(new EWHeavyPointPlasmaGun(2, 7, 3, 0, 360));
+		$this->addAftSystem(new EWHeavyPointPlasmaGun(2, 7, 3, 0, 360));
         $this->addPrimarySystem(new AmmoMissileRackS(3, 0, 0, 0, 120, $ammoMagazine, true)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         $this->addPrimarySystem(new AmmoMissileRackS(3, 0, 0, 0, 120, $ammoMagazine, true)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
 
@@ -53,11 +53,11 @@ class ChoukaBrimstoneHeavyOSATAM extends OSAT
 			$this->hitChart = array(
                 0=> array(
 					6 => "Structure",
-					8 => "Thruster",
-					11 => "Heavy Plasma Cannon",
-					13 => "Twin Laser Cannon",
+					8 => "2:Thruster",
+					11 => "1:Heavy Plasma Cannon",
+					13 => "1:Twin Laser Cannon",
 					15 => "Class-S Missile Rack",
-					16 => "Heavy Point Plasma Gun",
+					16 => "2:Heavy Point Plasma Gun",
 					18 => "Scanner",
 					20 => "Reactor",
                 ),

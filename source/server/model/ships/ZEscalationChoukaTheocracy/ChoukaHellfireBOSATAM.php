@@ -35,11 +35,11 @@ class ChoukaHellfireBOSATAM extends OSAT{
         $this->addPrimarySystem(new OSATCnC(0, 1, 0, 0));
         $this->addPrimarySystem(new Reactor(3, 6, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 6, 4, 4)); 
-        $this->addPrimarySystem(new Thruster(2, 6, 0, 0, 2)); 
-        $this->addPrimarySystem(new HeavyPlasma(2, 8, 5, 300, 60)); 
+        $this->addAftSystem(new Thruster(2, 6, 0, 0, 2)); 
+        $this->addFrontSystem(new HeavyPlasma(2, 8, 5, 300, 60)); 
 		$this->addPrimarySystem(new AmmoMissileRackS(3, 0, 0, 270, 90, $ammoMagazine, true));
-        $this->addPrimarySystem(new LightLaser(0, 4, 3, 180, 360));
-        $this->addPrimarySystem(new LightLaser(0, 4, 3, 0, 180));
+        $this->addFrontSystem(new LightLaser(0, 4, 3, 180, 360));
+        $this->addFrontSystem(new LightLaser(0, 4, 3, 0, 180));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         
@@ -49,10 +49,10 @@ class ChoukaHellfireBOSATAM extends OSAT{
 		$this->hitChart = array(
 			0=> array(
 					9 => "Structure",
-					11 => "Thruster",
-					13 => "Heavy Plasma Cannon",
+					11 => "2:Thruster",
+					13 => "1:Heavy Plasma Cannon",
 					14 => "Class-S Missile Rack",
-          			16 => "Light Laser",
+          			16 => "1:Light Laser",
 					18 => "Scanner",
 					20 => "Reactor",
 			)
