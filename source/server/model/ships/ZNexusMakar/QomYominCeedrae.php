@@ -9,7 +9,7 @@ class QomYominCeedrae extends MediumShip{
         $this->phpclass = "QomYominCeedrae";
         $this->imagePath = "img/ships/Nexus/makar_ceedrae2.png";
         $this->shipClass = "Ceedrae Escort Frigate";
-			$this->variantOf = "Sorol Ma Light Scout";
+			$this->variantOf = "Sorol Ma Light Scout (2015)";
 			$this->occurence = "common";
 		$this->unofficial = true;
         $this->canvasSize = 80;
