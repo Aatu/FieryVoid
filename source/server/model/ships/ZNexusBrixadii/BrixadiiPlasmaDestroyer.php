@@ -76,9 +76,9 @@ class BrixadiiPlasmaDestroyer extends HeavyCombatVessel{
             ),
             2=> array(
                     6 => "Thruster",
-					8 => "Chaff Launcher",
-					10 => "Energy Pulsar",
-					12 => "Scatter Pulsar",
+					7 => "Chaff Launcher",
+					9 => "Energy Pulsar",
+					11 => "Scatter Pulsar",
                     18 => "Structure",
                     20 => "Primary",
             ),

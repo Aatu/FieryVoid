@@ -72,7 +72,7 @@ class BrixadiiBattleDestroyerBase extends HeavyCombatVessel{
             2=> array(
                     7 => "Thruster",
 					9 => "Particle Bolter",
-					19 => "Light Particle Beam",
+					11 => "Light Particle Beam",
                     18 => "Structure",
                     20 => "Primary",
             ),
