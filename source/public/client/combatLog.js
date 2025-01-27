@@ -135,6 +135,7 @@ window.combatLog = {
                 var armour = 0;
                 var damagehtml = "";
                 for (var a in damages[i].damages) {
+                   
                     var d = damages[i].damages[a];
                     var damageDone = d.damage - d.armour;
                     var damageStopped = d.armour;
@@ -166,7 +167,7 @@ window.combatLog = {
 
                 //if (totaldam > 0){ //display fire orders that did no damage, too!
                 //          html += '<li><span class="shiplink victim" data-id="'+ship.id+'" >' + victim.name + '</span> damaged for ' + totaldam + '(+ ' + armour + ' armour). '+ damagehtml+'</li>';
-
+                if(fire.damageclass == "HyperspaceJump") continue; //Do not show damage to Primary Structure when jumping to Hyperspace. 				
                 html += '<li><span class="shiplink victim" data-id="' + ship.id + '" >' + victim.name + '</span> damaged for ' + totaldam + ' (total armour mitigation: ' + armour + ').</li>';
                 if (damagehtml.length > 1) {
                     html += '<li>' + damagehtml + '</li>';

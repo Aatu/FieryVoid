@@ -40,11 +40,11 @@ class Vymish extends MediumShip{
         $this->addPrimarySystem(new AntiprotonDefender(2, 0, 0, 0, 360));
         $this->addPrimarySystem(new AntimatterCannon(2, 0, 0, 0, 360));
 		        
-        $this->addFrontSystem(new AntiprotonDefender(3, 0, 0, 240, 0));
-        $this->addFrontSystem(new AntiprotonDefender(3, 0, 0, 0, 120));
+        $this->addFrontSystem(new AntiprotonDefender(2, 0, 0, 240, 0));
+        $this->addFrontSystem(new AntiprotonDefender(2, 0, 0, 0, 120));
 
-        $this->addAftSystem(new AntiprotonDefender(3, 0, 0, 180, 300));
-        $this->addAftSystem(new AntiprotonDefender(3, 0, 0, 60, 180));        
+        $this->addAftSystem(new AntiprotonDefender(2, 0, 0, 180, 300));
+        $this->addAftSystem(new AntiprotonDefender(2, 0, 0, 60, 180));        
        
 
 		//structures

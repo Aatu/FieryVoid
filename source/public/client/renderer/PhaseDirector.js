@@ -35,6 +35,7 @@ window.phaseDirector = function () {
         this.phaseStrategy.onEvent(name, payload);
         this.shipIconContainer.onEvent(name, payload);
         this.ewIconContainer.onEvent(name, payload);
+        this.ballisticIconContainer.onEvent(name, payload);        
     };
 
     phaseDirector.prototype.render = function (scene, coordinateConverter, zoom) {

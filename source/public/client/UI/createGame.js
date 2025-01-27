@@ -13,6 +13,7 @@ jQuery(function ($) {
     $("#gamespacecheck").on("click", createGame.doGameSpaceCheck);
     $("#gamespacecheck").on("click", createGame.doFlightCheck);
     $("#movementcheck").on("click", createGame.doMovementCheck);
+    $("#desperatecheck").on("click", createGame.doDesperateCheck);    
     
     $(".setsizeknifefight").on("click", createGame.doSwitchSizeKnifeFight);
     $(".setswitchsizebaseassault").on("click", createGame.doSwitchSizeBaseAssault);    
@@ -114,6 +115,38 @@ window.createGame = {
         }
     },
 */
+/*
+doDesperateCheck: function doDesperateCheck(data) {
+    var checkval = $("#desperatecheck:checked").val();
+
+    if (checkval == "on") {
+        createGame.rules.desperate = true;
+    } else {
+        delete createGame.rules.desperate;
+    }
+},
+*/
+doDesperateCheck: function doDesperateCheck(data) {
+    var checkval = $("#desperatecheck:checked").val();
+
+    if (checkval == "on") {
+        // Show the dropdown for selecting initiative categories
+        $("#desperateDropdown").show();
+        // Set the selected value as initiativeCategories when checkbox is checked
+        var selectedValue = $("#desperateSelect").val();
+        createGame.rules.desperate = parseInt(selectedValue, 10);
+        
+        // Add an event listener to update the value if the user changes the dropdown
+        $("#desperateSelect").on('change', function() {
+            createGame.rules.desperate = parseInt($(this).val(), 10);
+        });
+    } else {
+        // Hide the dropdown when the checkbox is unchecked
+        $("#desperateDropdown").hide();
+        // Remove Desperate rule
+        delete createGame.rules.desperate;
+    }
+},
 
 doMovementCheck: function doMovementCheck(data) {
     var checkval = $("#movementcheck:checked").val();

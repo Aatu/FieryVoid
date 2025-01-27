@@ -7,7 +7,7 @@ window.PhaseStrategy = function () {
         this.gamedata = null;
         this.shipIconContainer = null;
         this.ewIconContainer = null;
-        this.ballisticIconContainer = null;
+        this.ballisticIconContainer = null;       
         this.shipWindowManager = null;
         this.coordinateConverter = coordinateConverter;
         this.currentlyMouseOveredIds = null;
@@ -84,7 +84,7 @@ window.PhaseStrategy = function () {
         this.shipIconContainer.consumeGamedata(this.gamedata);
         this.animationStrategy.update(this.gamedata);
         this.ewIconContainer.consumeGamedata(this.gamedata, this.shipIconContainer);
-        this.ballisticIconContainer.consumeGamedata(this.gamedata, this.shipIconContainer);
+        this.ballisticIconContainer.consumeGamedata(this.gamedata, this.shipIconContainer);       
         this.redrawMovementUI();
     };
 
@@ -574,6 +574,7 @@ window.PhaseStrategy = function () {
         if (this.animationStrategy) {
             this.animationStrategy.shipMovementChanged(ship);
         }
+        this.ballisticIconContainer.updateLinesForShip(ship, this.shipIconContainer);   
         this.redrawMovementUI(ship);
     };
 
@@ -636,6 +637,7 @@ window.PhaseStrategy = function () {
         if ( system 
 		  && ( system.ballistic
 		    || system.hextarget //same for direct fire hextarget weapons - they use ballistic highlight...
+		    || system.canSplitShots //same for weapon that split shots, ballistic icons used to track these.
 		  )
 		) {
             this.ballisticIconContainer.consumeGamedata(this.gamedata, this.shipIconContainer);
@@ -663,9 +665,16 @@ window.PhaseStrategy = function () {
     };
 
     PhaseStrategy.prototype.onShipTargeted = function(payload) {
-        if (payload.weapons.some(function(weapon) {return weapon.ballistic})) {
+/*        if (payload.weapons.some(function(weapon) {return weapon.ballistic})) {
             this.ballisticIconContainer.consumeGamedata(this.gamedata, this.shipIconContainer);
         }
+*/
+
+		if (payload.weapons.some(function (weapon) {
+		    return weapon.ballistic || weapon.canSplitShots;
+		})) {
+		    this.ballisticIconContainer.consumeGamedata(this.gamedata, this.shipIconContainer);
+		}
 
         if (this.selectedShip === payload.shooter) {
             this.uiManager.showWeaponList({ship: payload.shooter, gamePhase: gamedata.gamephase})
@@ -677,6 +686,54 @@ window.PhaseStrategy = function () {
 
         this.shipWindowManager.update();
     };
+
+    PhaseStrategy.prototype.onSplitOrderRemoved = function(payload) {
+
+        if (this.shipTooltip && this.shipTooltip.ships.includes(payload.target) &&  this.shipTooltip.ships.length === 1) {
+            this.shipTooltip.update(payload.target, this.selectedShip);
+        }
+
+        this.shipWindowManager.update();
+    };
+
+    PhaseStrategy.prototype.onToggleFriendlyBallisticLines = function (payload) {
+        toggleBallisticLines.call(this, gamedata.ships.filter(function(ship){ return gamedata.isMyOrTeamOneShip(ship) }), payload);
+    };
+
+    PhaseStrategy.prototype.onToggleEnemyBallisticLines = function (payload) {
+        toggleBallisticLines.call(this, gamedata.ships.filter(function(ship){ return !gamedata.isMyOrTeamOneShip(ship) }), payload);
+    };
+
+    PhaseStrategy.prototype.onShowAllBallistics = function (payload) {
+        showAllBallisticLines.call(this, gamedata.ships, payload);
+    };
+    
+    PhaseStrategy.prototype.onShowFriendlyBallistics = function (payload) {
+        showAllBallisticLines.call(this, gamedata.ships.filter(function(ship){ return gamedata.isMyOrTeamOneShip(ship) }), payload);
+    };
+    
+    PhaseStrategy.prototype.onShowEnemyBallistics = function (payload) {
+        showAllBallisticLines.call(this, gamedata.ships.filter(function(ship){ return !gamedata.isMyOrTeamOneShip(ship) }), payload);
+    };        
+
+
+    PhaseStrategy.prototype.onToggleHexNumbers = function (payload) {
+	    var scene = webglScene.scene;
+		this.ballisticIconContainer.createHexNumbers(scene);
+    }; 
+
+    function toggleBallisticLines(ships, payload) {
+        this.ballisticIconContainer.toggleBallisticLines(ships);
+    };
+
+    function showAllBallisticLines(ships, payload) {
+         if (payload.up) {
+     		this.ballisticIconContainer.hideLines(ships);
+        } else {
+        	this.ballisticIconContainer.showLines(ships);
+        }
+    }   
+
 
     return PhaseStrategy;
 }();

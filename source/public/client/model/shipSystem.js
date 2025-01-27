@@ -120,7 +120,7 @@ Weapon.prototype.changeFiringMode = function () {
 	if (!mathlib.arrayIsEmpty(this.minDamageArray)) {
 		this.minDamage = this.minDamageArray[this.firingMode];
 		this.data["Damage"] = this.minDamage;
-		if (this.maxDamage > 0) this.data["Damage"] = this.data["Damage"] + "-" + this.maxDamage;
+		if (this.maxDamage > this.minDamage) this.data["Damage"] = this.data["Damage"] + "-" + this.maxDamage;//> minDamage - DK
 	}
 	if (!mathlib.arrayIsEmpty(this.priorityArray)) {
 		this.priority = this.priorityArray[this.firingMode];
@@ -130,7 +130,7 @@ Weapon.prototype.changeFiringMode = function () {
 	if (!mathlib.arrayIsEmpty(this.rangeDamagePenaltyArray)) this.rangeDamagePenalty = this.rangeDamagePenaltyArray[this.firingMode];
 	if (!mathlib.arrayIsEmpty(this.rangePenaltyArray)) {
 		this.rangePenalty = this.rangePenaltyArray[this.firingMode];
-		this.data["Range penalty"] = this.rangePenalty*5 + " per hex"; //converted to percentage system
+		this.data["Range penalty"] = (this.rangePenalty * 5).toFixed(2) + " per hex"; //2 decimal places - DK 12.24
 	}
 	var changeRange = false;
 	if (!mathlib.arrayIsEmpty(this.rangeArray)) {
@@ -214,7 +214,8 @@ Weapon.prototype.changeFiringMode = function () {
 	
 	if (!mathlib.arrayIsEmpty(this.ignoreJinkingArray)) this.ignoreJinking = this.ignoreJinkingArray[this.firingMode];		
 	if (!mathlib.arrayIsEmpty(this.ignoreAllEWArray)) this.ignoreAllEW = this.ignoreAllEWArray[this.firingMode];		
-	
+	if (!mathlib.arrayIsEmpty(this.canSplitShotsArray)) this.canSplitShots = this.canSplitShotsArray[this.firingMode];
+		
 	//Antimatter-specific
 	if (this instanceof AntimatterWeapon){
 		var updateDataPenalty = false; 

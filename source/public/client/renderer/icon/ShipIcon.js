@@ -356,6 +356,18 @@ window.ShipIcon = function () {
         return movement;
     };
 
+	ShipIcon.prototype.getLastMovementOnTurn = function (turn, ignore) {
+	    var movement = this.movements.filter(function (move) {
+	        return move.turn === turn;
+	    }).pop(); // Use pop() to get the last element in the filtered array
+
+	    if (!movement) {
+	        return this.getLastMovement(); // Fallback to the last movement overall
+	    }
+
+	    return movement;
+	};
+
     ShipIcon.prototype.getMovementBefore = function (move) {
         for (var i in this.movements) {
             if (this.movements[i] === move) {

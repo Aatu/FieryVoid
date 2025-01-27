@@ -464,7 +464,7 @@ UI.shipMovement.rollActiveElement.on("click touchstart", UI.shipMovement.rollCal
 			    emergencyroll.hide();
 			    UI.shipMovement.rollActiveElement.hide(); // Hide the regular roll icon
 			    
-			    if (shipManager.movement.isRolling(ship)) {
+			    if (shipManager.movement.isRollingForIcon(ship)) {
 			        icon = "img/rotate_active.png";
 			        UI.shipMovement.rollActiveElement.show(); // Show the active roll icon
 			        roll.hide();
