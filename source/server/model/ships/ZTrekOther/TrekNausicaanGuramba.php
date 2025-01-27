@@ -15,7 +15,7 @@ class TrekNausicaanGuramba extends BaseShip{
 	    $this->isd = '2272';
 
 	$this->fighters = array("Shuttlecraft"=>4);
-	$this->customFighter = array("Nausicaan small craft"=>4); //can deploy small craft with Nausicaan crew
+	$this->customFighter = array("Nausicaan small craft"=>4); //can deploy small craft with Nausicaan crew, including assault craft
         
         $this->forwardDefense = 17;
         $this->sideDefense = 17;

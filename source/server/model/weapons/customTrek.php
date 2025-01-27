@@ -1716,4 +1716,305 @@ class TrekFtrPhotonTorpedoAmmo extends MissileFB
 }
 
 
+
+/*base class for StarTrek SWIon weapons*/
+/*based upon StarWars Ion weapons, but with a few differences:*/
+/* - no salvo mode*/
+/* - relatively high damage, BUT whatever penetrates armor is halved*/
+/* - any damage penetration results in temporary power shortages*/
+/* - permanent power shortages like SWIon weapons*/
+class TrekIon extends Weapon{
+    public $name = "trekion";
+    public $priority = 10; //Ions usually fire last, to take advantage of induced criticals
+ 
+    public $weaponClass = "SWIon"; //weapon class
+    public $damageType = "Standard"; //and this should remain!
+	public $noOverkill = true;
+	
+    public $animationColor =  array( 80, 150, 250); //scale is derived from damage
+	
+	
+    public function setSystemDataWindow($turn){
+      parent::setSystemDataWindow($turn);
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}
+      $this->data["Special"] .= "Damage after armor is halved.";   
+      $this->data["Special"] .= "<br>No overkill.";
+      $this->data["Special"] .= "<br>Damage dealt is doubled for critical roll."; 
+      $this->data["Special"] .= "<br>High damage may cause permanent power shortages."; 
+    }
+	
+	
+    protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //make vulnerable to next critical
+		if ($system->advancedArmor) return;
+		
+      $dmg = $damage - $armour;
+      if($dmg<=0) return; //no damage was actually done
+      SWIonHandler::addDamage($ship, $system, $dmg);//possibly cause permanent power shortage
+      if($system->isDestroyed()) return; //destroyed system - vulnerability to critical is irrelevant
+      if($system instanceof Structure) return; //structure does not suffer critical hits anyway
+
+      while($dmg>0){
+	      $dmg--;
+	      $system->critRollMod++;
+      }
+    }	
+	
+	
+	//halve damage after armor!
+    protected function beforeDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder)
+    {
+		$damageAfterArmor = $damage-$armour;
+		if($damageAfterArmor<=1) return $damage; //up to 1 damage dealt - leave as is!
+		//...otherwise: halve (rounding up) damage after Armor
+		$damageAfterArmor = ceil($damageAfterArmor/2);
+		return ($armour+$damageAfterArmor);
+    }	
+	
+	
+	//cause immediate but temporary power shortage
+	protected function causeTemporaryShortage($ship,$currTurn, $turns, $count){ //target ship, current turn, how long critical should last, how many criticals should be applied
+		if ($ship->advancedArmor) return;
+		
+		$reactor = $ship->getSystemByName("Reactor");
+		$crit = new OutputReduced1(-1, $ship->id, $reactor->id, "OutputReduced1", $currTurn, $currTurn+$turns);
+		$crit->updated = true;
+		$reactor->setCritical($crit); //$reactor->criticals[] =  $crit;
+		
+		if ($count>1) $this->causeTemporaryShortage($ship,$currTurn,$turns, $count-1); 
+	}
+
+} //end of class TrekIon
+
+
+class TrekFighterDisablerBase extends TrekIon{
+    /*StarTrek fighter Ion weapon*/
+    public $name = "TrekFighterDisablerBase";
+	 
+    public $exclusive = false; //can be always overridden in particular fighter!
+    public $isLinked = true; //indicates that this is linked weapon
+    public $priority = 10;	//always at the end of the queue, due to extra dropout effect
+    protected $damagebonus = 0;
+	
+	
+	function __construct($startArc, $endArc, $damagebonus, $nrOfShots){
+		$this->damagebonus = $damagebonus;
+		$this->intercept = 0;
+		
+		//appropriate icon (number of barrels)...
+		$nr = min(4, $nrOfShots); //images are not unlimited
+		$this->iconPath = "starwars/mjsIonFtr".$nr.".png";
+		
+		//appropriate number of linked weapons:		
+		$this->defaultShots = $nrOfShots;
+		$this->shots = $nrOfShots;
+			
+		parent::__construct(0, 1, 0, $startArc, $endArc, $nrOfShots);
+	}    	  
+    
+    public function getDamage($fireOrder){        return Dice::d(6)+$this->damagebonus;   } //d6+$damagebonus damage, like regular fighter weapons
+    public function setMinDamage(){     $this->minDamage = 1+$this->damagebonus ;      }
+    public function setMaxDamage(){     $this->maxDamage = 6+$this->damagebonus ;      }
+		
+} //end of class TrekFighterDisablerBase
+
+
+
+class TrekEarlyFighterDisabler extends TrekFighterDisablerBase{
+    /*StarTrek fighter Ion weapon*/
+    public $name = "TrekEarlyFighterDisabler";
+    public $displayName = "Early Compact Disabler";	  
+	  
+    public $loadingtime = 2; //1/2 turns
+    public $rangePenalty = 3; //-3/hex - very short range
+    public $fireControl = array(-1, 0, 0); // fighters, <mediums, <capitals
+	
+    public function setSystemDataWindow($turn){
+      parent::setSystemDataWindow($turn);
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}    
+		$this->data["Special"] .= "Causes temporary power shortages: 1 Power for d2 turns."; 
+		$this->data["Special"] .= "<br>If no damage was dealt: 50% chance of 1 Power for 1 turn."; 
+    }
+	
+	
+    protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //call parent, cause temporary shortages
+		parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
+		$length = 1;
+		$amount = 1;
+		if($damage>$armour){//if damage was actually dealt!
+			$length = Dice::d(2);
+		}else{ //armor was not pierced - 50% chance for single turn of drain
+			$amount = Dice::d(2)-1;
+		}
+		if ($amount > 0) $this->causeTemporaryShortage($ship,$gamedata->turn,$length, $amount); //called method will check for Advanced Armor
+    }
+
+	
+} //end of class TrekEarlyFighterDisabler
+
+class TrekFighterDisabler extends TrekFighterDisablerBase{
+    /*StarTrek fighter Ion weapon*/
+    public $name = "TrekFighterDisabler";
+    public $displayName = "Compact Disabler";	  
+	  
+    public $loadingtime = 2; //1/2 turns
+    public $rangePenalty = 2; //-2/hex 
+    public $fireControl = array(0, 1, 1); // fighters, <mediums, <capitals
+	
+    public function setSystemDataWindow($turn){
+      parent::setSystemDataWindow($turn);
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}    
+		$this->data["Special"] .= "Causes temporary power shortages: 1 Power for d2 turns."; 
+		$this->data["Special"] .= "<br>If no damage was dealt: 50% chance of 1 Power for 1 turn."; 
+    }
+	
+	
+    protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //call parent, cause temporary shortages
+		parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
+		$length = 1;
+		$amount = 1;
+		if($damage>$armour){//if damage was actually dealt!
+			$length = Dice::d(2);
+		}else{ //armor was not pierced - 50% chance for single turn of drain
+			$amount = Dice::d(2)-1;
+		}
+		if ($amount > 0) $this->causeTemporaryShortage($ship,$gamedata->turn,$length, $amount); //called method will check for Advanced Armor
+    }
+	
+} //end of class TrekFighterDisabler
+
+
+class TrekShipDisablerBase extends TrekIon{
+    /*StarTrek shipborne Ion weapon*/
+    public $name = "TrekShipDisablerBase";
+	 
+    public $priority = 10;	//always at the end of the queue, due to extra dropout/critical effect and reduced actual damage	
+} //end of class TrekShipDisablerBase
+
+
+class TrekLightDisabler extends TrekShipDisablerBase{
+    //StarTrek lightest shipborne ion cannon 
+    public $name = "TrekLightDisabler";
+    public $displayName = "Light Disabler";
+	
+    public $loadingtime = 1; //1/turn
+    public $rangePenalty = 2; //-2/hex
+    public $fireControl = array(0, 2, 2); // fighters, <mediums, <capitals
+   	
+	function __construct($armor, $startArc, $endArc, $nrOfShots){ //armor, arc and number of weapon in common housing: structure and power data are calculated!
+		//appropriate icon (number of barrels)...
+		$nr = min(4, $nrOfShots); //images are not unlimited
+		$this->iconPath = "starwars/mjsIonLight".$nr.".png";
+		
+		$guns = $nrOfShots;
+		
+		$powerReq = 2;
+		$maxhealth = 5;
+		//more for multiple mount		
+		$maxhealth += $maxhealth*0.25*($nrOfShots-1);
+		$powerReq += $powerReq*0.65*($nrOfShots-1);
+		$maxhealth = ceil($maxhealth);
+		$powerReq = ceil($powerReq);
+		
+		$this->guns = $nrOfShots;
+		
+		parent::__construct($armor, $maxhealth, $powerReq, $startArc, $endArc); 
+	}    
+		
+    public function setSystemDataWindow($turn){
+      parent::setSystemDataWindow($turn);
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}    
+		$this->data["Special"] .= "Causes temporary power shortages: 1 Power for d2 turns."; 
+		$this->data["Special"] .= "If actual damage was done: +1 turn."; 
+    }	
+	
+    protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //call parent, cause temporary shortages
+		parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
+		$length = Dice::d(2);
+		$amount = 1;
+		if($damage>$armour){//if damage was actually dealt!
+			$length += 1;
+		}
+		if ($amount > 0) $this->causeTemporaryShortage($ship,$gamedata->turn,$length, $amount); //called method will check for Advanced Armor
+    }
+	
+	public function getDamage($fireOrder){ return  Dice::d(10)+2;   }
+	public function setMinDamage(){     $this->minDamage = 3 ;      }
+	public function setMaxDamage(){     $this->maxDamage = 12 ;      }
+
+} //end of class TrekLightDisabler
+
+
+class TrekMediumDisabler extends TrekShipDisablerBase{
+    //StarTrek shipborne ion cannon 
+    public $name = "TrekMediumDisabler";
+    public $displayName = "Disabler";
+	
+    public $loadingtime = 2; //1/2 turns
+    public $rangePenalty = 1; //-1/hex
+    public $fireControl = array(1, 3, 3); // fighters, <mediums, <capitals
+   	
+	function __construct($armor, $startArc, $endArc, $nrOfShots){ //armor, arc and number of weapon in common housing: structure and power data are calculated!
+		//appropriate icon (number of barrels)...
+		$nr = min(4, $nrOfShots); //images are not unlimited
+		$this->iconPath = "starwars/mjsIonMedium".$nr.".png";
+		
+		$guns = $nrOfShots;
+		
+		$powerReq = 3;
+		$maxhealth = 7;
+		//more for multiple mount		
+		$maxhealth += $maxhealth*0.25*($nrOfShots-1);
+		$powerReq += $powerReq*0.65*($nrOfShots-1);
+		$maxhealth = ceil($maxhealth);
+		$powerReq = ceil($powerReq);
+		
+		$this->guns = $nrOfShots;
+		
+		parent::__construct($armor, $maxhealth, $powerReq, $startArc, $endArc); 
+	}    
+		
+    public function setSystemDataWindow($turn){
+      parent::setSystemDataWindow($turn);
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}    
+		$this->data["Special"] .= "Causes temporary power shortages: d2 Power for d3 turns."; 
+		$this->data["Special"] .= "If actual damage was done: +1 turn."; 
+    }	
+	
+    protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //call parent, cause temporary shortages
+		parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
+		$length = Dice::d(2);
+		$amount = Dice::d(3);
+		if($damage>$armour){//if damage was actually dealt!
+			$length += 1;
+		}
+		if ($amount > 0) $this->causeTemporaryShortage($ship,$gamedata->turn,$length, $amount); //called method will check for Advanced Armor
+    }
+	
+	public function getDamage($fireOrder){ return  Dice::d(10)+4;   }
+	public function setMinDamage(){     $this->minDamage = 5 ;      }
+	public function setMaxDamage(){     $this->maxDamage = 14 ;      }
+
+} //end of class TrekMediumDisabler
+
+
 ?>

@@ -5,7 +5,7 @@ class TrekFederationNXCruiserV2 extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 300;
-        $this->faction = "ZStarTrek Federation (early)";
+        $this->faction = "ZStarTrek (early) Federation";
         $this->phpclass = "TrekFederationNXCruiserV2";
         $this->imagePath = "img/ships/StarTrek/EnterpriseNX.png";
         $this->shipClass = "NX Cruiser";
@@ -86,48 +86,33 @@ class TrekFederationNXCruiserV2 extends MediumShip{
         $this->addPrimarySystem(new Structure(3, 60));
 
 	//d20 hit chart
-	$this->hitChart = array(
-		
+	$this->hitChart = array(		
 		0=> array(
-			6 => "Magnetic Grappler",
-			9 => "Scanner",
-			12 => "Hangar",
-			15 => "Engine",
+			2 => "2:Nacelle",
+			7 => "Structure",
+			9 => "Magnetic Grappler",
+			12 => "Hangar",			
+			14 => "Scanner",
+			16 => "Engine",
 			18 => "Reactor",
 			20 => "C&C",
 		),
-/*
+
 		1=> array(
-		    1 => "Polarized Hull Plating",
-			5 => "Phase Cannon",
-			8 => "Spatial Torpedo",
+			3 => "Phase Cannon",
+			6 => "Spatial Torpedo",
 			17 => "Structure",
 			20 => "Primary",
 		),
 
 		2=> array(
-		    1 => "Polarized Hull Plating",
-			7 => "Nacelle",
-			9 => "Phase Cannon",
-			11 => "Spatial Torpedo",
-			17 => "Structure",
-			20 => "Primary",
-		),
-*/
-		1=> array(
-		    4 => "Phase Cannon",
-			7 => "Spatial Torpedo",
+		    5 => "Nacelle",
+			7 => "Phase Cannon",
+			9 => "Spatial Torpedo",
 			17 => "Structure",
 			20 => "Primary",
 		),
 
-		2=> array(
-		    7 => "Nacelle",
-			9 => "Phase Cannon",
-			11 => "Spatial Torpedo",
-			17 => "Structure",
-			20 => "Primary",
-		),
 	);
 
         

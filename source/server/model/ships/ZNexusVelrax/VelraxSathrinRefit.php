@@ -7,13 +7,11 @@ class VelraxSathrinRefit extends MediumShip{
         $this->pointCost = 345;
         $this->faction = "ZNexus Velrax Republic";
         $this->phpclass = "VelraxSathrinRefit";
-        $this->imagePath = "img/ships/Nexus/VelraxSathrin.png";
-        $this->shipClass = "Sathrin Border Frigate (2108 refit)";
-			$this->variantOf = "Sathrin Border Frigate";
-			$this->occurence = "common";
+        $this->imagePath = "img/ships/Nexus/velraxSathrin.png";
+        $this->shipClass = "Sathrin Border Frigate (2108)";
 		$this->unofficial = true;
         $this->agile = true;
-        $this->canvasSize = 85;
+        $this->canvasSize = 100;
 	    $this->isd = 2108;
 
 	    $this->notes = 'Atmospheric Capable.';

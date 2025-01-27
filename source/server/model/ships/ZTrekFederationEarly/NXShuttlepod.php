@@ -5,7 +5,7 @@ class NXShuttlepod extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 20 *6; //for 6
-        $this->faction = "ZStarTrek Federation (early)";
+        $this->faction = "ZStarTrek (early) Federation";
         $this->phpclass = "NXShuttlepod";
         $this->shipClass = "Shuttlepod Flight";
         $this->imagePath = "img/ships/StarTrek/NXShuttlepod.png";
@@ -22,7 +22,7 @@ class NXShuttlepod extends FighterFlight{
 		
 		
 		$this->hangarRequired = "Shuttlecraft"; //I took category name from ST wikis
-        $this->customFtrName = "Human small craft"; //requires hangar space on Vulcan ships
+        $this->customFtrName = "Human small craft"; //requires hangar space on human ships
 		$this->unitSize = 1; //counted as singles
         
        	$this->iniativebonus = 14 *5;

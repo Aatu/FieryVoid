@@ -29,12 +29,13 @@ class wlcChlonasVaLothar extends SmallStarBaseThreeSections{
 				13 => "Light Gatling Mattergun",
 				16 => "Scanner",
 				18 => "Reactor",
-				20 => "C&C",
+				20 => "TAG:C&C",
 			),
 		);
 
 		$this->addPrimarySystem(new Reactor(5, 26, 0, 0));
-		$this->addPrimarySystem(new CnC(5, 36, 0, 0)); 
+		$this->addPrimarySystem(new CnC(5, 18, 0, 0)); 
+		$this->addPrimarySystem(new SecondaryCnC(5, 18, 0, 0));
 		$this->addPrimarySystem(new Scanner(5, 16, 6, 7));
 		$this->addPrimarySystem(new Scanner(5, 16, 6, 7));
 		$this->addPrimarySystem(new CustomGatlingMattergunLight(2, 0, 0, 0, 360));
@@ -95,7 +96,7 @@ class wlcChlonasVaLothar extends SmallStarBaseThreeSections{
 				10 => "TAG:Hangar",
 				11 => "TAG:Cargo Bay",
 				12 => "TAG:Sub Reactor",
-				18 => "TAG:Outer Structure",
+				18 => "Structure",
 				20 => "Primary",
 			);
 

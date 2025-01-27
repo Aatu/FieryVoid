@@ -5,7 +5,7 @@ class TrekFederationDeltaFFGamma extends LCV{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 220;
-        $this->faction = "ZStarTrek Federation (early)";
+        $this->faction = "ZStarTrek (early) Federation";
         $this->phpclass = "TrekFederationDeltaFFGamma";
         $this->imagePath = "img/ships/StarTrek/DeltaClass.png";
         $this->shipClass = "Delta Frigate Gamma";
@@ -72,10 +72,10 @@ class TrekFederationDeltaFFGamma extends LCV{
 	$this->hitChart = array( //differences are deliberate
 		
 		0=> array(
-			8 => "Structure",
-		    9 => "0:Shield Projector",
-			12 => "1:Phase Cannon",
-			14 => "2:Light Phase Cannon",
+			10 => "Structure",
+		    12 => "0:Shield Projector",
+			14 => "1:Phase Cannon",
+			16 => "2:Light Phase Cannon",
 			17 => "2:Nacelle",
 			18 => "0:Engine",
 			19 => "0:Reactor",
@@ -83,10 +83,10 @@ class TrekFederationDeltaFFGamma extends LCV{
 		),
 
 		1=> array(
-			9 => "Structure",
-		    10 => "0:Shield Projector",
-			13 => "1:Phase Cannon",
-			14 => "2:Light Phase Cannon",
+			11 => "Structure",
+		    13 => "0:Shield Projector",
+			15 => "1:Phase Cannon",
+			16 => "2:Light Phase Cannon",
 			17 => "2:Nacelle",
 			18 => "0:Engine",
 			19 => "0:Reactor",
@@ -94,10 +94,10 @@ class TrekFederationDeltaFFGamma extends LCV{
 		),
 
 		2=> array(
-			8 => "Structure",
-		    9 => "0:Shield Projector",
-			11 => "1:Phase Cannon",
-			13 => "2:Light Phase Cannon",
+			10 => "Structure",
+		    12 => "0:Shield Projector",
+			13 => "1:Phase Cannon",
+			15 => "2:Light Phase Cannon",
 			17 => "2:Nacelle",
 			18 => "0:Engine",
 			19 => "0:Reactor",

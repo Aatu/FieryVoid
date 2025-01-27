@@ -9,8 +9,6 @@ class QomYominQortalMoroRefit extends BaseShip{
         $this->phpclass = "QomYominQortalMoroRefit";
         $this->imagePath = "img/ships/Nexus/makar_qortalmoro2.png";
         $this->shipClass = "Qortal Moro Explorer (2109)";
-			$this->variantOf = "Qortal Moro Explorer";
-			$this->occurence = "common";
         $this->shipSizeClass = 3;
 		$this->canvasSize = 175; 
 		$this->unofficial = true;

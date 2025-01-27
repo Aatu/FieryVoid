@@ -34,11 +34,11 @@ class technicalTargetDrone extends BaseShip
 
 
 		//ammo magazine itself (AND its missile options)
-		//	$ammoMagazine = new AmmoMagazine(120); //pass magazine capacity
-		//	    $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
-		//	    $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 120); //add full load of basic missiles
-		//	    $this->enhancementOptionsEnabled[] = 'AMMO_L';//add enhancement options for other missiles - Class-L
-		//	    $this->enhancementOptionsEnabled[] = 'AMMO_H';//add enhancement options for other missiles - Class-L
+			$ammoMagazine = new AmmoMagazine(40); //pass magazine capacity
+			    $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
+			    $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 40); //add full load of basic missiles
+			    $this->enhancementOptionsEnabled[] = 'AMMO_L';//add enhancement options for other missiles - Class-L
+			    $this->enhancementOptionsEnabled[] = 'AMMO_H';//add enhancement options for other missiles - Class-L
 		//	    $this->enhancementOptionsEnabled[] = 'AMMO_F';//add enhancement options for other missiles - Class-L
 		//	    $this->enhancementOptionsEnabled[] = 'AMMO_A';//add enhancement options for other missiles - Class-L
 		//	    $this->enhancementOptionsEnabled[] = 'AMMO_P';//add enhancement options for other missiles - Class-P
@@ -72,6 +72,10 @@ class technicalTargetDrone extends BaseShip
 		//        $this->addPrimarySystem(new EMShield(3, 6, 0, 2, 180, 360));
 
 		//        $this->addFrontSystem(new AntiquatedScanner(3, 20, 6, 6));
+		$this->addFrontSystem(new AmmoMissileRackG(3, 0, 0, 300, 60, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+		$this->addFrontSystem(new AmmoMissileRackG(3, 0, 0, 300, 60, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+		$this->addFrontSystem(new AmmoMissileRackS(3, 0, 0, 300, 60, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+		$this->addFrontSystem(new AmmoMissileRackS(3, 0, 0, 300, 60, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
 		$this->addFrontSystem(new CnC(6, 40, 0, 0));
 		$this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));
 		$this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));

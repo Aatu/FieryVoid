@@ -109,7 +109,7 @@ class ColonialBerserkClassCarrierAM extends BaseShip{
 			2=> array(
                     5 => "Thruster",
 					7 => "Rapid Gatling Railgun",
-                    10 => "HyperDrive",
+                    10 => "Hyperdrive",
 					18 => "Structure",
 					20 => "Primary",
 			),

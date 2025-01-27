@@ -9,7 +9,7 @@ class SalbezNarkenRefit extends HeavyCombatVessel{
         $this->phpclass = "SalbezNarkenRefit";
         $this->imagePath = "img/ships/Nexus/salbez_zefjem3.png";
 			$this->canvasSize = 115; //img has 200px per side
-        $this->shipClass = "Nar-ken Scout (2090 refit)";
+        $this->shipClass = "Nar-ken Scout (2090)";
 			$this->variantOf = "Zef'jem Heavy Frigate";
 			$this->occurence = "uncommon";
 			$this->unofficial = true;

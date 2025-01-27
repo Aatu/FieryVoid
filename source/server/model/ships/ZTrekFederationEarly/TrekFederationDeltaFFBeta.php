@@ -5,7 +5,7 @@ class TrekFederationDeltaFFBeta extends LCV{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 170;
-        $this->faction = "ZStarTrek Federation (early)";
+        $this->faction = "ZStarTrek (early) Federation";
         $this->phpclass = "TrekFederationDeltaFFBeta";
         $this->imagePath = "img/ships/StarTrek/DeltaClass.png";
         $this->shipClass = "Delta Frigate Beta";
@@ -70,17 +70,17 @@ class TrekFederationDeltaFFBeta extends LCV{
 	$this->hitChart = array( //differences are deliberate
 		
 		0=> array(
-			10 => "Structure",
-			13 => "1:Phase Cannon",
+			13 => "Structure",
+			15 => "1:Phase Cannon",
 			17 => "2:Nacelle",
-			18 => "Engine",
-			19 => "Reactor",
-			20 => "Scanner",
+			18 => "0:Engine",
+			19 => "0:Reactor",
+			20 => "0:Scanner",
 		),
 
 		1=> array(
-			10 => "Structure",
-			14 => "1:Phase Cannon",
+			13 => "Structure",
+			16 => "1:Phase Cannon",
 			17 => "2:Nacelle",
 			18 => "0:Engine",
 			19 => "0:Reactor",
@@ -88,8 +88,8 @@ class TrekFederationDeltaFFBeta extends LCV{
 		),
 
 		2=> array(
-			10 => "Structure",
-			12 => "1:Phase Cannon",
+			12 => "Structure",
+			14 => "1:Phase Cannon",
 			17 => "2:Nacelle",
 			18 => "0:Engine",
 			19 => "0:Reactor",

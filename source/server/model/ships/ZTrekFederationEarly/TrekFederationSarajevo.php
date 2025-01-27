@@ -5,7 +5,7 @@ class TrekFederationSarajevo extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 180;
-        $this->faction = "ZStarTrek Federation (early)";
+        $this->faction = "ZStarTrek (early) Federation";
         $this->phpclass = "TrekFederationSarajevo";
         $this->imagePath = "img/ships/StarTrek/Sarajevo.png";
         $this->shipClass = "Sarajevo Transport";
@@ -74,15 +74,17 @@ class TrekFederationSarajevo extends MediumShip{
 	$this->hitChart = array(
 		
 		0=> array(
-			5 => "Scanner",
-			8 => "Hangar",
-			13 => "Cargo Bay",
+			2 => "2:Nacelle",
+			6 => "Structure",
+			10 => "Cargo Bay",
+			12 => "Hangar",			
+			14 => "Scanner",
 			16 => "Engine",
-			19 => "Reactor",
+			18 => "Reactor",
 			20 => "C&C",
 		),
 		1=> array(
-		    4 => "Light Phase Cannon",
+		    3 => "Light Phase Cannon",
 			8 => "0:Cargo Bay",
 			17 => "Structure",
 			20 => "Primary",

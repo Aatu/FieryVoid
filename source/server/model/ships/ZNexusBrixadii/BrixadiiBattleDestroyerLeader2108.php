@@ -7,10 +7,10 @@ class BrixadiiBattleDestroyerLeader2108 extends HeavyCombatVessel{
         $this->pointCost = 520;
         $this->faction = "ZNexus Brixadii Clans";
         $this->phpclass = "BrixadiiBattleDestroyerLeader2108";
-        $this->imagePath = "img/ships/Nexus/BrixadiiBDDLeader.png";
-			$this->canvasSize = 120; //img has 200px per side
+        $this->imagePath = "img/ships/Nexus/brixadii_battle_destroyer_leader.png";
+			$this->canvasSize = 125; //img has 200px per side
         $this->shipClass = "Battle Destroyer Leader (2108)";
-        $this->variantOf = "Battle Destroyer";
+        $this->variantOf = "Battle Destroyer (2108)";
 			$this->occurence = "rare";
 			$this->unofficial = true;
         $this->isd = 2108;
@@ -23,7 +23,7 @@ class BrixadiiBattleDestroyerLeader2108 extends HeavyCombatVessel{
         $this->accelcost = 2;
         $this->rollcost = 2;
         $this->pivotcost = 2;
-        $this->iniativebonus = 40;
+        $this->iniativebonus = 45;
          
         $this->addPrimarySystem(new Reactor(4, 19, 0, 0));
         $this->addPrimarySystem(new CnC(5, 16, 0, 0));
@@ -54,8 +54,8 @@ class BrixadiiBattleDestroyerLeader2108 extends HeavyCombatVessel{
 		$this->addAftSystem(new NexusChaffLauncher(2, 2, 1, 0, 360));
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
-        $this->addFrontSystem(new Structure( 3, 45));
-        $this->addAftSystem(new Structure( 3, 42));
+        $this->addFrontSystem(new Structure( 4, 50));
+        $this->addAftSystem(new Structure( 3, 45));
         $this->addPrimarySystem(new Structure( 4, 40));
         
         $this->hitChart = array(
@@ -77,7 +77,7 @@ class BrixadiiBattleDestroyerLeader2108 extends HeavyCombatVessel{
                     20 => "Primary",
             ),
             2=> array(
-                    5 => "Thruster",
+                    6 => "Thruster",
 					7 => "Chaff Launcher",
 					9 => "Energy Pulsar",
                     11 => "Scatter Pulsar",

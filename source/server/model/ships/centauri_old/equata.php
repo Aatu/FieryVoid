@@ -45,10 +45,10 @@ class Equata extends HeavyCombatVessel{
         $this->addAftSystem(new Thruster(4, 14, 0, 4, 2));
         $this->addAftSystem(new Thruster(4, 14, 0, 4, 2));
         $this->addAftSystem(new JumpEngine(3, 15, 3, 25));
-        $this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 0, 180));
-        $this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 0, 180));
         $this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 180, 360));
         $this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 180, 360));
+        $this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 0, 180));
+        $this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 0, 180));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 4, 50));

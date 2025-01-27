@@ -7,13 +7,13 @@ class VelraxVasrevRefit extends MediumShip{
         $this->pointCost = 345;
         $this->faction = "ZNexus Velrax Republic";
         $this->phpclass = "VelraxVasrevRefit";
-        $this->imagePath = "img/ships/Nexus/VelraxSathrin.png";
-        $this->shipClass = "Vasrev Escort Frigate (2108 refit)";
-			$this->variantOf = "Sathrin Border Frigate";
+        $this->imagePath = "img/ships/Nexus/velraxSathrin.png";
+        $this->shipClass = "Vasrev Escort Frigate (2108)";
+			$this->variantOf = "Sathrin Border Frigate (2108)";
 			$this->occurence = "common";
 		$this->unofficial = true;
         $this->agile = true;
-        $this->canvasSize = 85;
+        $this->canvasSize = 100;
 	    $this->isd = 2108;
 
 	    $this->notes = 'Atmospheric Capable.';

@@ -5,7 +5,7 @@ class TrekFederationJClass extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 100;
-        $this->faction = "ZStarTrek Federation (early)";
+        $this->faction = "ZStarTrek (early) Federation";
         $this->phpclass = "TrekFederationJClass";
         $this->imagePath = "img/ships/StarTrek/JClassFreighter.png";
         $this->shipClass = "J-Class Freighter";
@@ -79,11 +79,13 @@ class TrekFederationJClass extends MediumShip{
 	$this->hitChart = array(
 		
 		0=> array(
-			6 => "Scanner",
-			7 => "Plasma Burst",
-			8 => "Hangar",
+			2 => "2:Nacelle",
+			7 => "Structure",
+			9 => "Plasma Burst",
+			12 => "Hangar",
 			14 => "Engine",
-			17 => "Reactor",
+			16 => "Scanner",
+			18 => "Reactor",
 			20 => "C&C",
 		),
 		1=> array(
