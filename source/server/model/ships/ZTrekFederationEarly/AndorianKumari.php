@@ -5,7 +5,7 @@ class AndorianKumari extends HeavyCombatVesselLeftRight{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 465;
-	$this->faction = "ZStarTrek Federation (early)";
+	$this->faction = "ZStarTrek (early) Federation";
         $this->phpclass = "AndorianKumari";
         $this->imagePath = "img/ships/StarTrek/AndorianCruiser.png";
         $this->shipClass = "Andorian Kumari Cruiser";
@@ -79,29 +79,33 @@ class AndorianKumari extends HeavyCombatVesselLeftRight{
     
             $this->hitChart = array(
             0=> array(
-                    8 => "Structure",
-		    10 => "Tractor Beam",
-                    12 => "Scanner",
-                    15 => "Engine",
-                    17 => "Hangar",
-                    19 => "Reactor",
-                    20 => "C&C",
+				1 => "3:Nacelle",	
+				2 => "4:Nacelle",	
+				9 => "Structure",
+				11 => "Tractor Beam",
+				13 => "Hangar",
+				15 => "Scanner",
+				17 => "Engine",
+				19 => "Reactor",
+				20 => "C&C",
             ),
             3=> array(
 				2 => "Shield Projector",
-				6 => "Nacelle",
-				8 => "Particle Cannon",
+				5 => "Nacelle",
+				7 => "Particle Cannon",
 				9 => "Light Particle Cannon",
-				11 => "Standard Particle Beam",
+				10 => "Standard Particle Beam",
+				12 => "Hangar",
 				18 => "Structure",
 				20 => "Primary",
             ),
             4=> array(
 				2 => "Shield Projector",
-				6 => "Nacelle",
-				8 => "Particle Cannon",
+				5 => "Nacelle",
+				7 => "Particle Cannon",
 				9 => "Light Particle Cannon",
-				11 => "Standard Particle Beam",
+				10 => "Standard Particle Beam",
+				12 => "Hangar",
 				18 => "Structure",
 				20 => "Primary",
         		),

@@ -81,9 +81,10 @@ class TrekMazeriteShip extends MediumShip{
 		
 		0=> array(
 			4 => "2:Nacelle",
-			7 => "Hangar",			
-			11 => "Scanner",
-			15 => "Engine",
+			10 => "Structure",
+			12 => "Hangar",			
+			14 => "Scanner",
+			16 => "Engine",
 			18 => "Reactor",
 			20 => "C&C",
 		),

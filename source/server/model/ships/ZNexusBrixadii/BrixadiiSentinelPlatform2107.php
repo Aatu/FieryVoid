@@ -4,14 +4,12 @@ class BrixadiiSentinelPlatform2107 extends OSAT{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 135;
+		$this->pointCost = 130;
 		$this->faction = 'ZNexus Brixadii Clans';
         $this->phpclass = "BrixadiiSentinelPlatform2107";
-        $this->imagePath = "img/ships/Nexus/BrixadiiSentinelPlatform.png";
+        $this->imagePath = "img/ships/Nexus/brixadii_osat_dual_mount.png";
         $this->shipClass = "Brixadii Sentinel Platform (2107)";
-			$this->variantOf = "Brixadii Sentinel Platform";
-			$this->occurence = "common";
-			$this->canvasSize = 175;
+		$this->canvasSize = 90;
 		$this->unofficial = true;
 		$this->isd = 2107;
         
@@ -26,13 +24,13 @@ class BrixadiiSentinelPlatform2107 extends OSAT{
         $this->iniativebonus = 60;
 
         $this->addPrimarySystem(new OSATCnC(0, 1, 0, 0));
-        $this->addPrimarySystem(new HvyParticleProjector(3, 8, 4, 300, 60));
-        $this->addPrimarySystem(new HvyParticleProjector(3, 8, 4, 300, 60));
-        $this->addPrimarySystem(new NexusChaffLauncher(1, 2, 1, 0, 360));
-        $this->addPrimarySystem(new ScatterPulsar(2, 4, 2, 0, 360));
+        $this->addFrontSystem(new HvyParticleProjector(3, 8, 4, 300, 60));
+        $this->addFrontSystem(new HvyParticleProjector(3, 8, 4, 300, 60));
+        $this->addFrontSystem(new NexusChaffLauncher(1, 2, 1, 0, 360));
+        $this->addFrontSystem(new ScatterPulsar(2, 4, 2, 0, 360));
         $this->addPrimarySystem(new Reactor(4, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 6, 3, 5));   
-        $this->addPrimarySystem(new Thruster(3, 6, 0, 0, 2));
+        $this->addAftSystem(new Thruster(3, 6, 0, 0, 2));
                 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addPrimarySystem(new Structure(4, 20));
@@ -40,10 +38,10 @@ class BrixadiiSentinelPlatform2107 extends OSAT{
 		$this->hitChart = array(
 			0=> array(
 				8 => "Structure",
-				10 => "Thruster",
-				13 => "Heavy Particle Projector",
-				14 => "Chaff Launcher",
-				16 => "Scatter Pulsar",
+				10 => "2:Thruster",
+				13 => "1:Heavy Particle Projector",
+				14 => "1:Chaff Launcher",
+				16 => "1:Scatter Pulsar",
 				18 => "Scanner",
 				20 => "Reactor",
 			),

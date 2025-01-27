@@ -5,7 +5,7 @@ class VulcanDkyr extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 625;
-	$this->faction = "ZStarTrek Federation (early)";
+	$this->faction = "ZStarTrek (early) Federation";
         $this->phpclass = "VulcanDkyr";
         $this->imagePath = "img/ships/StarTrek/VulcanDKyr.png";
         $this->shipClass = "Vulcan D'Kyr Heavy Cruiser";
@@ -117,39 +117,40 @@ class VulcanDkyr extends BaseShip{
 	    
         $this->hitChart = array(
             0=> array(
-				8 => "Structure",
-				10 => "Tractor Beam",
-				12 => "Scanner",
-				15 => "Engine",
-				17 => "Hangar",
+				2 => "2:Nacelle",
+				9 => "Structure",
+				11 => "Tractor Beam",
+				13 => "Hangar",
+				15 => "Scanner",
+				17 => "Engine",
 				19 => "Reactor",
 				20 => "C&C",
             ),
             1=> array(
 				2 => "Shield Projector",
-				7 => "Heavy Phase Cannon",
-				10 => "Phase Cannon",
+				6 => "Heavy Phase Cannon",
+				9 => "Phase Cannon",
 				18 => "Structure",
 				20 => "Primary",
             ),
             2=> array(
 				2 => "Shield Projector",
-				9 => "Nacelle",
-				11 => "Light Phase Cannon",
+				8 => "Nacelle",
+				10 => "Light Phase Cannon",
 				18 => "Structure",
 				20 => "Primary",
             ),
             3=> array(
 				2 => "Shield Projector",
-				7 => "Photonic Torpedo",
-				9 => "Light Phase Cannon",
+				6 => "Photonic Torpedo",
+				8 => "Light Phase Cannon",
 				18 => "Structure",
 				20 => "Primary",
             ),
             4=> array(
 				2 => "Shield Projector",
-				7 => "Photonic Torpedo",
-				9 => "Light Phase Cannon",
+				6 => "Photonic Torpedo",
+				8 => "Light Phase Cannon",
 				18 => "Structure",
 				20 => "Primary",
             ),

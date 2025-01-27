@@ -5,7 +5,7 @@ class TellariteAttackVessel extends LCV{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 180;
-		$this->faction = "ZStarTrek Federation (early)";
+		$this->faction = "ZStarTrek (early) Federation";
         $this->phpclass = "TellariteAttackVessel";
         $this->imagePath = "img/ships/StarTrek/TellariteAttackVessel.png";
         $this->shipClass = "Tellarite Attack Vessel";
@@ -67,9 +67,9 @@ class TellariteAttackVessel extends LCV{
 		$this->hitChart = array(
 			
 			0=> array(
-				8 => "Structure",
-				11 => "1:Light Phase Cannon",
-				13 => "0:Shield Projector",
+				11 => "Structure",
+				13 => "1:Early Light Particle Cutter",
+				15 => "0:Shield Projector",
 				17 => "2:Nacelle",
 				18 => "0:Engine",
 				19 => "0:Reactor",
@@ -77,9 +77,9 @@ class TellariteAttackVessel extends LCV{
 			),
 
 			1=> array(
-				8 => "Structure",
-				11 => "1:Light Phase Cannon",
-				13 => "0:Shield Projector",
+				11 => "Structure",
+				14 => "1:Early Light Particle Cutter",
+				16 => "0:Shield Projector",
 				17 => "2:Nacelle",
 				18 => "0:Engine",
 				19 => "0:Reactor",
@@ -87,9 +87,9 @@ class TellariteAttackVessel extends LCV{
 			),
 
 			2=> array(
-				8 => "Structure",
-				11 => "1:Light Phase Cannon",
-				13 => "0:Shield Projector",
+				11 => "Structure",
+				13 => "1:Early Light Particle Cutter",
+				15 => "0:Shield Projector",
 				17 => "2:Nacelle",
 				18 => "0:Engine",
 				19 => "0:Reactor",

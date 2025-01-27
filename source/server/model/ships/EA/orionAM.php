@@ -92,8 +92,8 @@ class OrionAM extends StarBaseSixSections{
 				3 => "TAG:Heavy Particle Cannon",
 				5 => "TAG:Interceptor II",
 				6 => "TAG:Quad Particle Beam",
-				7 => "Hangar",
-				8 => "Sub Reactor",
+				7 => "TAG:Hangar",
+				8 => "TAG:Sub Reactor",
 				18 => "Structure",
 				20 => "Primary",
 			);

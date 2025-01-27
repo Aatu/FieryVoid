@@ -1043,7 +1043,7 @@ class SWLightIon extends SWIon{
 	public function setMinDamage(){     $this->minDamage = 5+$this->damagebonus ;      }
 	public function setMaxDamage(){     $this->maxDamage = 8+$this->damagebonus ;      }
 
-} //end of class SWLightTLaser
+} //end of class SWLightTIon
 
 
 
@@ -1073,7 +1073,7 @@ class SWMediumIon extends SWIon{
 	public function setMinDamage(){     $this->minDamage = 6+$this->damagebonus ;      }
 	public function setMaxDamage(){     $this->maxDamage = 10+$this->damagebonus ;      }
 
-} //end of class SWMediumTLaser
+} //end of class SWMediumTIon
 
 
 
@@ -1104,7 +1104,7 @@ class SWHeavyIon extends SWIon{
 	public function setMinDamage(){     $this->minDamage = 7+$this->damagebonus ;      }
 	public function setMaxDamage(){     $this->maxDamage = 15+$this->damagebonus ;      }
 
-} //end of class SWHeavyTLaser
+} //end of class SWHeavyIon
 
 
 /*shipborne concussion missile launcher - implemented as torpedo

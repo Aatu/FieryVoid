@@ -5,7 +5,7 @@ class TrekFederationExcelsiorEarly extends BaseShipNoAft{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 865;
-	$this->faction = "ZStarTrek Federation (TOS)";
+	$this->faction = "ZStarTrek (TOS) Federation";
         $this->phpclass = "TrekFederationExcelsiorEarly";
         $this->imagePath = "img/ships/StarTrek/FederationExcelsior.png";
         $this->shipClass = "Excelsior Early Cruiser";
@@ -100,34 +100,39 @@ class TrekFederationExcelsiorEarly extends BaseShipNoAft{
 	    
         $this->hitChart = array(
             0=> array(
-				7 => "Structure",
-				9 => "2:Phaser Lance",
-				10 => "2:Photon Torpedo",
-				13 => "Scanner",
-				16 => "Engine",
-				17 => "Hangar",
+				2 => "2:Nacelle",
+				4 => "2:Phaser Lance",
+				6 => "2:Photon Torpedo",
+				11 => "Structure",
+				13 => "Hangar",
+				15 => "Scanner",
+				17 => "Engine",
 				19 => "Reactor",
 				20 => "C&C",
             ),
             1=> array(
 				2 => "Shield Projector",
-				6 => "Phaser Lance",
-				9 => "Photon Torpedo",
-				11 => "Tractor Beam",
+				5 => "Phaser Lance",
+				7 => "Photon Torpedo",
+				8 => "Tractor Beam",
 				18 => "Structure",
 				20 => "Primary",
             ),
             3=> array(
 				2 => "Shield Projector",
 				7 => "Nacelle",
-				10 => "Phaser",
+				9 => "Phaser",
+				10 => "2:Phaser Lance",
+				11 => "2:Photon Torpedo",
 				18 => "Structure",
 				20 => "Primary",
             ),
             4=> array(
 				2 => "Shield Projector",
 				7 => "Nacelle",
-				10 => "Phaser",
+				9 => "Phaser",
+				10 => "2:Phaser Lance",
+				11 => "2:Photon Torpedo",
 				18 => "Structure",
 				20 => "Primary",
             ),

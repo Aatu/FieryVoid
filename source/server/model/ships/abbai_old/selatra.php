@@ -97,7 +97,7 @@ class Selatra extends StarBaseSixSections{
 				6 => "TAG:Gravitic Shield",	
 				8 => "TAG:Cargo Bay",
 				10 => "TAG:Sub Reactor",
-				18 => "TAG:Outer Structure",
+				18 => "Structure",
 				20 => "Primary",
 			);
 			

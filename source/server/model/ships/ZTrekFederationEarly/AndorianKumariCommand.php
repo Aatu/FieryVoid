@@ -5,7 +5,7 @@ class AndorianKumariCommand extends HeavyCombatVesselLeftRight{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 525;
-	$this->faction = "ZStarTrek Federation (early)";
+	$this->faction = "ZStarTrek (early) Federation";
         $this->phpclass = "AndorianKumariCommand";
         $this->imagePath = "img/ships/StarTrek/AndorianCruiser.png";
         $this->shipClass = "Andorian Kumari Command Cruiser";
@@ -33,8 +33,8 @@ class AndorianKumariCommand extends HeavyCombatVesselLeftRight{
 	$this->addPrimarySystem(new CnC(5, 18, 0, 0));
         $this->addPrimarySystem(new Reactor(4, 22, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 15, 6, 6));
-	$this->addPrimarySystem(new StdParticleBeam(2, 4, 2, 60, 300));
-	$this->addPrimarySystem(new ParticleCannon(4, 8, 6, 300, 60));
+	$this->addAftSystem(new StdParticleBeam(2, 4, 2, 60, 300));
+	$this->addFrontSystem(new ParticleCannon(4, 8, 6, 300, 60));
 	$impulseDrive = new TrekImpulseDrive(4,20,0,2,3); //Impulse Drive is an engine in its own right, in addition to serving as hub for Nacelle output: $armour, $maxhealth, $powerReq, $output, $boostEfficiency
 		
 
@@ -84,10 +84,13 @@ class AndorianKumariCommand extends HeavyCombatVesselLeftRight{
     
             $this->hitChart = array(
             0=> array(
+				1 => "3:Nacelle",	
+				2 => "4:Nacelle",	
 				7 => "Structure",
-				10 => "Particle Cannon",
-				12 => "Standard Particle Beam",
-				14 => "Scanner",
+				9 => "1:Particle Cannon",
+				11 => "2:Standard Particle Beam",	
+				13 => "Hangar",
+				15 => "Scanner",
 				17 => "Engine",
 				19 => "Reactor",
 				20 => "C&C",
@@ -97,7 +100,7 @@ class AndorianKumariCommand extends HeavyCombatVesselLeftRight{
 				5 => "Nacelle",
 				7 => "Particle Cannon",
 				9 => "Standard Particle Beam",
-				11 => "Hangar",
+				12 => "Hangar",
 				18 => "Structure",
 				20 => "Primary",
             ),
@@ -106,10 +109,10 @@ class AndorianKumariCommand extends HeavyCombatVesselLeftRight{
 				5 => "Nacelle",
 				7 => "Particle Cannon",
 				9 => "Standard Particle Beam",
-				11 => "Hangar",
+				12 => "Hangar",
 				18 => "Structure",
 				20 => "Primary",
-        		),
+			),
         );
     
     }

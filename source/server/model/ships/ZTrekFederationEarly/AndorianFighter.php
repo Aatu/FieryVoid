@@ -5,7 +5,7 @@ class AndorianFighter extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 38 *6;
-        $this->faction = "ZStarTrek Federation (early)";
+        $this->faction = "ZStarTrek (early) Federation";
         $this->phpclass = "AndorianFighter";
         $this->shipClass = "Andorian Medium Fighters";
 	    $this->imagePath = "img/ships/StarTrek/AndorianFighter.png";

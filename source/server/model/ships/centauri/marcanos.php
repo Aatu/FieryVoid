@@ -78,7 +78,7 @@ class marcanos extends SmallStarBaseFourSections{
 				6 => "TAG:Plasma Accelerator",
 				8 => "TAG:Cargo Bay",
 				9 => "TAG:Sub Reactor",
-				18 => "TAG:Outer Structure",
+				18 => "Structure",
 				20 => "Primary",
 			),
 			2=> array(
@@ -86,7 +86,7 @@ class marcanos extends SmallStarBaseFourSections{
 				6 => "TAG:Plasma Accelerator",
 				8 => "TAG:Cargo Bay",
 				9 => "TAG:Sub Reactor",
-				18 => "TAG:Outer Structure",
+				18 => "Structure",
 				20 => "Primary",
 			),	
 			3=> array(
@@ -94,7 +94,7 @@ class marcanos extends SmallStarBaseFourSections{
 				6 => "TAG:Plasma Accelerator",
 				8 => "TAG:Cargo Bay",
 				9 => "TAG:Sub Reactor",
-				18 => "TAG:Outer Structure",
+				18 => "Structure",
 				20 => "Primary",
 			),
 			4=> array(
@@ -102,7 +102,7 @@ class marcanos extends SmallStarBaseFourSections{
 				6 => "TAG:Plasma Accelerator",
 				8 => "TAG:Cargo Bay",
 				9 => "TAG:Sub Reactor",
-				18 => "TAG:Outer Structure",
+				18 => "Structure",
 				20 => "Primary",
 			),
 			

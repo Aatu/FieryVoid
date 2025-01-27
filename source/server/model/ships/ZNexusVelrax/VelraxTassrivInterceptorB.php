@@ -4,13 +4,11 @@ class VelraxTassrivInterceptorB extends FighterFlight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 39*6;
+        $this->pointCost = 34*6;
         $this->faction = "ZNexus Velrax Republic";
         $this->phpclass = "VelraxTassrivInterceptorB";
         $this->shipClass = "Tassriv-B Interceptor flight";
-			$this->variantOf = "Tassriv-A Interceptor flight";
-			$this->occurence = "common";
-        $this->imagePath = "img/ships/Nexus/VelraxTassriv.png";
+        $this->imagePath = "img/ships/Nexus/velraxTassriv.png";
 		$this->unofficial = true;
 
         $this->isd = 2107;
@@ -38,8 +36,8 @@ class VelraxTassrivInterceptorB extends FighterFlight{
             $armour = array(2, 1, 1, 1);
             $fighter = new Fighter("VelraxTassrivInterceptorA", $armour, 9, $this->id);
             $fighter->displayName = "Tassriv-B";
-            $fighter->imagePath = "img/ships/Nexus/VelraxTassriv.png";
-            $fighter->iconPath = "img/ships/Nexus/VelraxTassriv_Large.png";
+            $fighter->imagePath = "img/ships/Nexus/velraxTassriv.png";
+            $fighter->iconPath = "img/ships/Nexus/velraxTassriv_large.png";
 
 	        $light = new NexusLightIonBolter(330, 30, 0); //$startArc, $endArc, $nrOfShots
 	        $fighter->addFrontSystem($light);

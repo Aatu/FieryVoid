@@ -4,14 +4,14 @@ class BrixadiiAttackFrigate2108 extends MediumShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 380;
+        $this->pointCost = 390;
         $this->faction = "ZNexus Brixadii Clans";
         $this->phpclass = "BrixadiiAttackFrigate2108";
-        $this->imagePath = "img/ships/Nexus/BrixadiiAttackFrigate.png";
-			$this->canvasSize = 85; //img has 200px per side
+        $this->imagePath = "img/ships/Nexus/brixadii_attack_frigate.png";
+			$this->canvasSize = 100; //img has 200px per side
         $this->shipClass = "Attack Frigate (2108)";
-			$this->variantOf = "Attack Frigate";
-			$this->occurence = "common";
+//			$this->variantOf = "Attack Frigate";
+//			$this->occurence = "common";
 		$this->unofficial = true;
    		$this->isd = 2108;
         
@@ -24,7 +24,7 @@ class BrixadiiAttackFrigate2108 extends MediumShip{
         $this->accelcost = 2;
         $this->rollcost = 1;
         $this->pivotcost = 1;
-        $this->iniativebonus = 13*5;
+        $this->iniativebonus = 14*5;
          
         $this->addPrimarySystem(new Reactor(4, 9, 0, 0));
         $this->addPrimarySystem(new CnC(4, 8, 0, 0));
@@ -50,7 +50,7 @@ class BrixadiiAttackFrigate2108 extends MediumShip{
 		$this->addAftSystem(new NexusChaffLauncher(2, 2, 1, 0, 360));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
-        $this->addPrimarySystem(new Structure( 3, 40));
+        $this->addPrimarySystem(new Structure( 4, 40));
         $this->hitChart = array(
             0=> array(
                     9 => "Thruster",
