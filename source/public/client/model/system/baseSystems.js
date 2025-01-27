@@ -243,6 +243,17 @@ var JumpEngine = function JumpEngine(json, ship) {
 JumpEngine.prototype = Object.create(ShipSystem.prototype);
 JumpEngine.prototype.constructor = JumpEngine;
 
+JumpEngine.prototype.initializationUpdate = function () {
+	if(shipManager.power.isBoosted(this.ship, this)) {
+		this.outputDisplay = "JUMP";
+	}
+		return this;
+}	
+
+JumpEngine.prototype.hasMaxBoost = function () {
+    return true;
+};
+
 var Structure = function Structure(json, ship) {
     ShipSystem.call(this, json, ship);
 };

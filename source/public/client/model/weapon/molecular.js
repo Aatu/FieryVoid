@@ -144,18 +144,174 @@ var MolecularSlicerBeamL = function MolecularSlicerBeamL(json, ship) {
 MolecularSlicerBeamL.prototype = Object.create(Weapon.prototype);
 MolecularSlicerBeamL.prototype.constructor = MolecularSlicerBeamL;
 
-var MolecularSlicerBeamM = function MolecularSlicerBeamM(json, ship) {
-    Weapon.call(this, json, ship);
+MolecularSlicerBeamL.prototype.initializationUpdate = function() {
+	var shots = 0; //Initialise
+	
+	switch(this.turnsloaded){
+		case 1:
+			shots = 4;
+		break;
+		case 2:
+			shots = 6;		
+		break;
+		case 3:
+			shots = 8;		
+		break;		
+		default:
+			shots = 8;		
+		break;
+	}		
+
+	this.data["Max number of shots"] = shots;
+	return this;
 };
-MolecularSlicerBeamM.prototype = Object.create(Weapon.prototype);
+
+MolecularSlicerBeamL.prototype.doMultipleFireOrders = function (shooter, target, system) {
+	
+ 	//Used to restruct only one shot against a ship.
+	var fireOrders = this.fireOrders;
+	for (var i = fireOrders.length - 1; i >= 0; i--) {
+		if(target.shipSizeClass >= 0 && target.id === fireOrders[i].targetid && this.firingMode == 1) return; //Ships cannot be targeted more than once when allocating shots.
+	}	
+		
+	//Don't add Firing Order and give player error message if they are out of ammo.
+	if((this.data["Max number of shots"] - this.fireOrders.length) <= 0){
+		confirm.error("Molecular Slicer does not have enough damage dice to target another shot.");		
+		return; //No more shots to allocated!
+	}
+	
+	for (var s = 0; s < this.guns; s++) {
+		var fireid = shooter.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
+                        
+		var calledid = -1;
+
+/* //Slicers are Raking or Piercing Damage, cannot called sot!
+	    if (system) {
+	        //check if weapon is eligible for called shot!
+            if (!weaponManager.canWeaponCall(this)) continue;
+
+	        // When the system is a subsystem, make all damage go through
+	        // the parent.
+	        while (system.parentId > 0) {
+	        system = shipManager.systems.getSystem(target, system.parentId);
+	    }
+
+	        calledid = system.id;
+	    }
+*/
+	    var damageClass = this.data["Weapon type"].toLowerCase();
+	    var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
+
+/* //Slicers are not ballistic!
+	    if ((chance < 1)&&(!this.ballistic)) {//now ballistics can be launched when hit chance is 0 or less - important for Packet Torpedo!
+		    //debug && console.log("Can't fire, change < 0");
+		    continue;
+	    }
+*/
+
+	    var fire = {
+	        id: fireid,
+	        type: 'normal',
+	        shooterid: shooter.id,
+	        targetid: target.id,
+	        weaponid: this.id,
+	        calledid: calledid,
+	        turn: gamedata.turn,
+	        firingMode: this.firingMode,
+	        shots: this.defaultShots,
+	        x: "null",
+	        y: "null",
+	        damageclass: 'Sweeping',
+	        chance: chance,
+	        hitmod: 5,
+	        notes: "Split"
+	        };
+		
+		this.maxVariableShots -= fire.shots;
+			        
+    	return fire;
+	}
+};
+
+MolecularSlicerBeamL.prototype.calculateSpecialHitChanceMod = function (target) {
+	var mod = 0;
+	if(this.firingMode == 1){
+		//Check fireOrders length and deduct (length -1 *5)
+		var currentShots = this.fireOrders.length; //
+		mod -= Math.max(0, currentShots); //This is called when considering the NEXT shot.  So can just use current legnth as mod.
+	}
+	return mod; 
+};
+
+MolecularSlicerBeamL.prototype.recalculateFireOrders = function (shooter, fireOrderNo) {
+
+    for (let i = 0; i < this.fireOrders.length; i++) {
+        const fireOrder = this.fireOrders[i];
+
+        // Ensure we only include fireOrders for the current turn and weapon, and only fireORders AFTER the one we are currently removing.
+        if (fireOrder.weaponid === this.id && fireOrder.turn === gamedata.turn && i > fireOrderNo) {
+        	var target = gamedata.getShip(fireOrder.targetid);
+			fireOrder.chance += fireOrder.hitmod;        	
+        }
+    }    
+
+};
+
+var MolecularSlicerBeamM = function MolecularSlicerBeamM(json, ship) {
+    MolecularSlicerBeamL.call(this, json, ship);
+};
+MolecularSlicerBeamM.prototype = Object.create(MolecularSlicerBeamL.prototype);
 MolecularSlicerBeamM.prototype.constructor = MolecularSlicerBeamM;
 
-var MolecularSlicerBeamH = function MolecularSlicerBeamH(json, ship) {
-    Weapon.call(this, json, ship);
+MolecularSlicerBeamM.prototype.initializationUpdate = function() {
+	var shots = 0; //Initialise
+	
+	switch(this.turnsloaded){
+		case 1:
+			shots = 8;
+		break;
+		case 2:
+			shots = 12;		
+		break;
+		case 3:
+			shots = 16;		
+		break;		
+		default:
+			shots = 16;		
+		break;
+	}		
+
+	this.data["Max number of shots"] = shots;
+	return this;
 };
-MolecularSlicerBeamH.prototype = Object.create(Weapon.prototype);
+
+var MolecularSlicerBeamH = function MolecularSlicerBeamH(json, ship) {
+    MolecularSlicerBeamL.call(this, json, ship);
+};
+MolecularSlicerBeamH.prototype = Object.create(MolecularSlicerBeamL.prototype);
 MolecularSlicerBeamH.prototype.constructor = MolecularSlicerBeamH;
 
+MolecularSlicerBeamH.prototype.initializationUpdate = function() {
+	var shots = 0; //Initialise
+	
+	switch(this.turnsloaded){
+		case 1:
+			shots = 8;
+		break;
+		case 2:
+			shots = 16;		
+		break;
+		case 3:
+			shots = 24;		
+		break;		
+		default:
+			shots = 24;		
+		break;
+	}		
+
+	this.data["Max number of shots"] = shots;
+	return this;
+};
 
 var MultiphasedCutterL = function MultiphasedCutterL(json, ship) {
     Weapon.call(this, json, ship);

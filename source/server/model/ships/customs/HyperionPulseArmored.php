@@ -5,7 +5,7 @@ class HyperionPulseArmored extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 740+12*4;
-		$this->faction = "Custom Ships";
+        $this->faction = "Earth Alliance (custom)";
         $this->phpclass = "HyperionPulseArmored";
         $this->imagePath = "img/ships/hyperion.png";
         $this->shipClass = "Hyperion Pulse Cruiser (Delta) uparmored";

@@ -524,7 +524,10 @@ class BaseShip {
             if($this->faction == "Yolu Confederation"){
                 return $this->doYoluInitiativeBonus($gamedata);
 			}
-			if($this->faction == "Earth Alliance"){
+			if ($this->faction == "Earth Alliance" || 
+				$this->faction == "Earth Alliance (defenses)" || 
+				$this->faction == "Earth Alliance (early)" ||
+				$this->faction == "Earth Alliance (custom)"){
                 return $this->doEAInitiativeBonus($gamedata);
             }
 			if($this->faction == "Raiders"){
@@ -587,7 +590,10 @@ class BaseShip {
          private function doEAInitiativeBonus($gamedata){
             foreach($gamedata->ships as $ship){
                 if(!$ship->isDestroyed()
-                        && ($ship->faction == "Earth Alliance")
+                        && ($ship->faction == "Earth Alliance" || 
+			                $ship->faction == "Earth Alliance (defenses)" || 
+			                $ship->faction == "Earth Alliance (early)" ||
+							$this->faction == "Earth Alliance (custom)")
                         && ($this->userid == $ship->userid)
                         && ($ship instanceof Poseidon)
                         && ($this->id != $ship->id)){
@@ -653,52 +659,52 @@ class BaseShip {
         
         private function doDilgarInitiativeBonus($gamedata){
 
-        $mod = 0;
+	        $mod = 0;
 
-        if($gamedata->turn > 0 && $gamedata->phase >= 0 ){
-            $pixPos = $this->getCoPos();
-            //TODO: Better distance calculation
-            $ships = $gamedata->getShipsInDistance($this, 9);
+	        if($gamedata->turn > 0 && $gamedata->phase >= 0 ){
+	            $pixPos = $this->getCoPos();
+	            //TODO: Better distance calculation
+	            $ships = $gamedata->getShipsInDistance($this, 9);
 
-            foreach($ships as $ship){
-                if( !$ship->isDestroyed()
-                    && ($ship->faction == "Dilgar Imperium")
-                    && ($this->userid == $ship->userid)
-                    && ($ship->shipSizeClass == 3)
-                    && ($this->id != $ship->id)){
-                    $cnc = $ship->getSystemByName("CnC");
-                    $bonus = $cnc->output;
-                    if ($bonus > $mod){
-                        $mod = $bonus;
-                    } else continue;
-                }
-            }
-        }
+	            foreach($ships as $ship){
+	                if( !$ship->isDestroyed()
+	                    && ($ship->faction == "Dilgar Imperium")
+	                    && ($this->userid == $ship->userid)
+	                    && ($ship->shipSizeClass == 3)
+	                    && ($this->id != $ship->id)){
+	                    $cnc = $ship->getSystemByName("CnC");
+	                    $bonus = $cnc->output;
+	                    if ($bonus > $mod){
+	                        $mod = $bonus;
+	                    } else continue;
+	                }
+	            }
+	        }
         //    debug::log($this->phpclass."- bonus: ".$mod);
         return $this->iniativebonus + $mod*5;
-    } //end of doDilgarInitiativeBonus  
+    	} //end of doDilgarInitiativeBonus  
     
     
         private function doPakmaraInitiativeBonus($gamedata){
         	
-        $mod = 0;
-		$alivePakShips = 0;
-			
-			foreach($gamedata->ships as $ship){
-                if(
-                     ($ship->faction == "Pak'ma'ra Confederacy") //Correct faction
-                    && ($this->userid == $ship->userid) //of same player
-                    && (!($ship instanceOf FighterFlight)) //actually a ship
-                    && (!$ship->isDestroyed()) //alive
-                   ){
-                            $alivePakShips++;
-                    }
-					$mod = floor(($alivePakShips)/3); //Divide by three and round down
-                    }
-                
-        //    debug::log($this->phpclass."- bonus: ".$mod);
-        return $this->iniativebonus - $mod*5;
-    } //end of doPakmaraInitiativeBonus    
+	        $mod = 0;
+			$alivePakShips = 0;
+				
+				foreach($gamedata->ships as $ship){
+	                if(
+	                     ($ship->faction == "Pak'ma'ra Confederacy") //Correct faction
+	                    && ($this->userid == $ship->userid) //of same player
+	                    && (!($ship instanceOf FighterFlight)) //actually a ship
+	                    && (!$ship->isDestroyed()) //alive
+	                   ){
+	                            $alivePakShips++;
+	                    }
+						$mod = floor(($alivePakShips)/3); //Divide by three and round down
+	                    }
+	                
+	        //    debug::log($this->phpclass."- bonus: ".$mod);
+	        return $this->iniativebonus - $mod*5;
+    	} //end of doPakmaraInitiativeBonus    
 
 
          private function doHyachInitiativeBonus($gamedata){
