@@ -42,7 +42,6 @@ class BrixadiiSurveyor2108 extends HeavyCombatVessel{
                 
         $this->addAftSystem(new Thruster(3, 14, 0, 4, 2));
         $this->addAftSystem(new Thruster(3, 14, 0, 4, 2));
-		$this->addAftSystem(new CargoBay(1, 16));
 		$this->addAftSystem(new NexusChaffLauncher(1, 2, 1, 0, 360));
 		$this->addAftSystem(new EnergyPulsar(2, 6, 3, 180, 360));
 		$this->addAftSystem(new EnergyPulsar(2, 6, 3, 0, 180));

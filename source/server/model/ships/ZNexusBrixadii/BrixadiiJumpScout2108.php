@@ -39,8 +39,8 @@ class BrixadiiJumpScout2108 extends BaseShipNoAft{
         $this->addFrontSystem(new Thruster(3, 14, 0, 5, 1));
 		$this->addFrontSystem(new EnergyPulsar(3, 6, 3, 240, 60));
 		$this->addFrontSystem(new EnergyPulsar(3, 6, 3, 300, 120));
-		$this->addFrontSystem(new CargoBay(2, 25));
-		$this->addFrontSystem(new CargoBay(2, 25));
+		$this->addFrontSystem(new CargoBay(2, 16));
+		$this->addFrontSystem(new CargoBay(2, 16));
         
 		$this->addLeftSystem(new Thruster(3, 10, 0, 4, 3));
 		$this->addLeftSystem(new Thruster(3, 10, 0, 4, 3));

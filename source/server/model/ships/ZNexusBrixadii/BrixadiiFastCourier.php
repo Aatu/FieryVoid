@@ -38,22 +38,22 @@ class BrixadiiFastCourier extends BaseShipNoAft{
         $this->addFrontSystem(new Thruster(3, 14, 0, 5, 1));
 		$this->addFrontSystem(new EnergyPulsar(3, 6, 3, 240, 60));
 		$this->addFrontSystem(new EnergyPulsar(3, 6, 3, 300, 120));
-		$this->addFrontSystem(new CargoBay(2, 16));
-		$this->addFrontSystem(new CargoBay(2, 16));
+		$this->addFrontSystem(new CargoBay(2, 25));
+		$this->addFrontSystem(new CargoBay(2, 25));
         
 		$this->addLeftSystem(new Thruster(3, 10, 0, 4, 3));
 		$this->addLeftSystem(new Thruster(3, 10, 0, 4, 3));
 		$this->addLeftSystem(new ScatterPulsar(2, 4, 2, 180, 360));
 		$this->addLeftSystem(new ScatterPulsar(2, 4, 2, 180, 360));
 		$this->addLeftSystem(new NexusChaffLauncher(1, 2, 1, 180, 360));
-		$this->addLeftSystem(new CargoBay(2, 16));
+		$this->addLeftSystem(new CargoBay(2, 25));
 
 		$this->addRightSystem(new Thruster(3, 10, 0, 4, 4));
 		$this->addRightSystem(new Thruster(3, 10, 0, 4, 4));
 		$this->addRightSystem(new ScatterPulsar(2, 4, 2, 0, 180));
 		$this->addRightSystem(new ScatterPulsar(2, 4, 2, 0, 180));
 		$this->addRightSystem(new NexusChaffLauncher(1, 2, 1, 0, 180));
-		$this->addRightSystem(new CargoBay(2, 16));
+		$this->addRightSystem(new CargoBay(2, 25));
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 4, 55));
