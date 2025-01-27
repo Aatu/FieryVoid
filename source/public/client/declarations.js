@@ -437,6 +437,27 @@ window.declarations = {
     newText = '<br><big><b><u>';
     newText += 'GAME DESCRIPTION';
     newText += '</b></u></big><br><br>';
+    // Rules in play
+
+    // Check if 'Desperate' exists in gamedata.rules and evaluate its value
+    if (gamedata.rules && 'desperate' in gamedata.rules) {
+        var desperateValue = gamedata.rules.desperate;
+		newText += 'RULES OF ENGAGEMENT: '; 
+        switch (desperateValue) {
+            case 1:
+                newText += 'Desperate rules apply to Team 1.<br><br>';
+                break;
+            case 2:
+                newText += 'Desperate rules apply to Team 2.<br><br>';
+                break;
+            case -1:
+                newText += 'Desperate rules apply to both teams.<br><br>';
+                break;
+            default:
+                newText += 'Normal engagement rules apply.<br><br>';
+                break;
+        }
+    }
     //actual data
     newText += gamedata.description;
     
