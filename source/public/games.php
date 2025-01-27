@@ -79,7 +79,7 @@ if (isset($_SESSION["user"])) {
 	    <br><b>Can boost Jump Engines</b> to order ships to jump to Hyperspace at the end of the turn
 	    <br><b>Desperate Situations</b> - You can indicate in scenario that it's legal to ram and shut down jump drives
 	    <br>
-	    <br><b>and last but not least - <u>A LOT</u> of bugfixes!
+	    <br>and last but not least - <u>A LOT</u> of bugfixes!
 	    
        <br><br>
 
