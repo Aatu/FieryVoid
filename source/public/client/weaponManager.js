@@ -338,7 +338,7 @@ window.weaponManager = {
 			if (system.weapon) {
 				if (gamedata.gamephase != 3 && !system.ballistic) continue; //improper at this moment
 				if (gamedata.gamephase != 1 && system.ballistic) continue;	//improper at this moment
-				if (weaponManager.hasFiringOrder(ship, system)) continue;//already declared, do not touch it!
+				if (weaponManager.hasFiringOrder(ship, system) && !system.canSplitShots) continue;//already declared, do not touch it!
 				
 				if (currentWasSelected){//unselect
 					if (weaponManager.isSelectedWeapon(system)) weaponManager.unSelectWeapon(ship, system);
@@ -397,7 +397,7 @@ window.weaponManager = {
             }
             $('<div><span class="weapon">' + html + '</span></div>').appendTo(f);
         }
-
+/* //Previous method before I added check for Sweeping Mode to not retarget ships.  Just in case ;)
         for (var i in gamedata.selectedSystems) {
             var weapon = gamedata.selectedSystems[i];
             if (weaponManager.isOnWeaponArc(selectedShip, ship, weapon)) {
@@ -421,6 +421,37 @@ window.weaponManager = {
             }
         }
     },
+*/
+		for (var i in gamedata.selectedSystems) {
+		    var weapon = gamedata.selectedSystems[i];
+		    if (weaponManager.isOnWeaponArc(selectedShip, ship, weapon)) {
+		        if (weaponManager.checkIsInRange(selectedShip, ship, weapon)) {
+		            var value = weapon.firingMode;
+		            value = weapon.firingModes[value];
+		            var keys = Object.keys(weapon.firingModes);
+
+		            // Priority check for "Sweeping" firing mode
+		            if (value === "Sweeping" && ship.shipSizeClass >= 0 && weaponManager.hasTargetedThisShip(ship, weapon)) {
+		                $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="hitchange"> CANNOT TARGET AGAIN</span></div>').appendTo(f);
+		            } else if (calledid != null && !weaponManager.canWeaponCall(weapon)) {
+		                // Called shot, weapon not eligible!
+		                $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="hitchange"> CANNOT CALL SHOT</span></div>').appendTo(f);
+		            } else if (keys.length > 1) {
+		                // Display Firing Mode info when there are multiple firing modes
+		                $('<div><span class="weapon">' + weapon.displayName + '<span class="firingMode"> (' + value + ')</span><span class="hitchange"> - Approx: ' + weaponManager.calculateHitChange(selectedShip, ship, weapon, calledid) + '%</span></div>').appendTo(f);
+		            } else {
+		                // Default case to display the weapon info without firing mode
+		                $('<div><span class="weapon">' + weapon.displayName + '</span><span class="hitchange"> - Approx: ' + weaponManager.calculateHitChange(selectedShip, ship, weapon, calledid) + '%</span></div>').appendTo(f);
+		            }
+		        } else {
+		            $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="hitchange"> NOT IN RANGE</span></div>').appendTo(f);
+		        }
+		    } else {
+		        $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="notInArc"> NOT IN ARC </span></div>').appendTo(f);
+		    }
+		}
+	},
+
 
     canWeaponCall: function canWeaponCall(weapon) {
         //is this weapon eleigible for calling precision shot?...
@@ -1306,6 +1337,7 @@ window.weaponManager = {
         if (shipManager.isDestroyed(selectedShip)) return;
 
         var toUnselect = [];
+        var splitTargeted = [];
         for (var i in gamedata.selectedSystems) {
             var weapon = gamedata.selectedSystems[i];
 
@@ -1372,63 +1404,67 @@ window.weaponManager = {
             if (weapon.ballistic) {
                 type = 'ballistic';
             }
-
-            if (weapon.reinforceAmount > 0){ //22.07.24 - New statement to add check and change reinforce amount for Mindrider Shield Reinforcement!
-				if(!weapon.confirmReinforcement(selectedShip, ship)){
-				    confirm.error("You do not have enough capacity to reinforce allied unit's shields by that amount.");
-      				return;	
-				}	
-            }
-
+			
+			if (weapon.reinforceAmount != null){
+				if(!weapon.checkReinforcement(selectedShip, ship)) return;
+			}
+			
             if (weaponManager.isOnWeaponArc(selectedShip, ship, weapon)) {
                 debug && console.log("is on arc");
                 if (weaponManager.checkIsInRange(selectedShip, ship, weapon)) {
                     debug && console.log("is in range");
-                    weaponManager.removeFiringOrder(selectedShip, weapon);
-                    for (var s = 0; s < weapon.guns; s++) {
-                        var fireid = selectedShip.id + "_" + weapon.id + "_" + (weapon.fireOrders.length + 1);
-                        var calledid = -1;
+                    if(weapon.canSplitShots){
+                    	var fire = weapon.doMultipleFireOrders(selectedShip, ship, system);
+	                    if(fire) weapon.fireOrders.push(fire);
+						//toUnselect.push(weapon); //It's actually easier to target if you don't! 
+						splitTargeted.push(weapon); //To be added to toUnselect aray at corect time below. 	                    
+        				webglScene.customEvent('SystemDataChanged', { ship: ship, system: weapon });      				
+                    }else{
+	                    weaponManager.removeFiringOrder(selectedShip, weapon);
+	                    for (var s = 0; s < weapon.guns; s++) {
+	                        var fireid = selectedShip.id + "_" + weapon.id + "_" + (weapon.fireOrders.length + 1);
+	                        var calledid = -1;
 
-                        if (system) {
-                            //check if weapon is eligible for called shot!
-                            if (!weaponManager.canWeaponCall(weapon)) continue;
+	                        if (system) {
+	                            //check if weapon is eligible for called shot!
+	                            if (!weaponManager.canWeaponCall(weapon)) continue;
 
-                            // When the system is a subsystem, make all damage go through
-                            // the parent.
-                            while (system.parentId > 0) {
-                                system = shipManager.systems.getSystem(ship, system.parentId);
-                            }
+	                            // When the system is a subsystem, make all damage go through
+	                            // the parent.
+	                            while (system.parentId > 0) {
+	                                system = shipManager.systems.getSystem(ship, system.parentId);
+	                            }
 
-                            calledid = system.id;
-                        }
+	                            calledid = system.id;
+	                        }
 
-                        var damageClass = weapon.data["Weapon type"].toLowerCase();
-                        var chance = weaponManager.calculateHitChange(selectedShip, ship, weapon, calledid);
+	                        var damageClass = weapon.data["Weapon type"].toLowerCase();
+	                        var chance = weaponManager.calculateHitChange(selectedShip, ship, weapon, calledid);
 
-                        if ((chance < 1)&&(!weapon.ballistic)) {//now ballistics can be launched when hit chance is 0 or less - important for Packet Torpedo!
-                            //debug && console.log("Can't fire, change < 0");
-                            continue;
-                        }
+	                        if ((chance < 1)&&(!weapon.ballistic)) {//now ballistics can be launched when hit chance is 0 or less - important for Packet Torpedo!
+	                            //debug && console.log("Can't fire, change < 0");
+	                            continue;
+	                        }
 
-                        var fire = {
-                            id: fireid,
-                            type: type,
-                            shooterid: selectedShip.id,
-                            targetid: ship.id,
-                            weaponid: weapon.id,
-                            calledid: calledid,
-                            turn: gamedata.turn,
-                            firingMode: weapon.firingMode,
-                            shots: weapon.defaultShots,
-                            x: "null",
-                            y: "null",
-                            damageclass: damageClass,
-                            chance: chance
-                        };
-                        weapon.fireOrders.push(fire);
-			toUnselect.push(weapon);
-                    }
-
+	                        var fire = {
+	                            id: fireid,
+	                            type: type,
+	                            shooterid: selectedShip.id,
+	                            targetid: ship.id,
+	                            weaponid: weapon.id,
+	                            calledid: calledid,
+	                            turn: gamedata.turn,
+	                            firingMode: weapon.firingMode,
+	                            shots: weapon.defaultShots,
+	                            x: "null",
+	                            y: "null",
+	                            damageclass: damageClass,
+	                            chance: chance
+	                        };
+	                        weapon.fireOrders.push(fire);
+				toUnselect.push(weapon);
+	                    }
+					}
 		    //Marcin Sawicki: moving this statement so only weapons actually declared are unselected
                     //toUnselect.push(weapon);
                 }
@@ -1439,6 +1475,7 @@ window.weaponManager = {
             weaponManager.unSelectWeapon(selectedShip, toUnselect[i]);
         }
 
+		toUnselect.push(...splitTargeted); //We don't want to unselect, but want these weapons passed to onShipTargeted - DK 01.25
         webglScene.customEvent('ShipTargeted', {shooter: selectedShip, target: ship, weapons: toUnselect})
         
         //Reset Movement UI after moment of targeting, to prevent cancel of last Combat Pivot AFTER locking target! - DK 10.24
@@ -1447,12 +1484,16 @@ window.weaponManager = {
         }
 		
 		//Add new warning for when people ignore tooltip and try to ram when they possibly shouldn't - DK 10/24
-		if (weapon.isRammingAttack && (!weapon.designedToRam)) { //No warning for ships designed to ram!	
-	            var html = '';		
-		        html += "WARNING - Ramming Attacks should only be used in scenarios where they are specifically permitted.";
-		        html += "<br>";
-				confirm.warning(html);			
-		}
+        //No warning for ships designed to ram or if desperate rules apply!
+        if (weapon.isRammingAttack && !weapon.designedToRam) { 
+            // No warning for ships designed to ram or if desperate rules apply
+            if (gamedata.rules.desperate === undefined || 
+                (gamedata.rules.desperate !== ship.team && gamedata.rules.desperate !== -1)) {
+                
+                var html = "WARNING - Ramming Attacks should only be used in scenarios where they are specifically permitted.";
+                confirm.warning(html);                    
+            }
+        }
 		
     },
 
@@ -1575,6 +1616,7 @@ window.weaponManager = {
     },
 
     removeFiringOrder: function removeFiringOrder(ship, system) {
+
         for (var i = system.fireOrders.length - 1; i >= 0; i--) {
             if (system.fireOrders[i].weaponid == system.id) {
                 system.fireOrders.splice(i, 1);
@@ -1585,6 +1627,51 @@ window.weaponManager = {
         
         if(gamedata.gamephase == 3 && ship.flight)	webglScene.customEvent("ShipMovementChanged", { ship: ship }); //Redraw movement for Combat Pivots       
     },
+
+	removeFiringOrderMulti: function removeFiringOrderMulti(ship, system, target = null, button = false) {
+
+	    if (weaponManager.hasFiringOrder(ship, system)) {	    	    	
+	        // Remove the fire order for targeted ship
+	        if (button) {
+	            // When a tooltip button is pressed on targeted enemy ship, check for a matching fireOrder and remove
+	            for (var i = system.fireOrders.length - 1; i >= 0; i--) {
+	                var fireOrder = system.fireOrders[i];
+	                // Check if the fire order's target matches the provided target
+	                if (fireOrder.targetid == target?.id) {
+						if (fireOrder.hitmod > 0) { //Slicers have cumulative hitmod on split shots, when a fireOrder is removed all orders are reclaculated.
+						    system.recalculateFireOrders(ship, i);
+						}	                	
+	                	
+	                    system.fireOrders.splice(i, 1); // Remove the specific fire order
+	                    system.maxVariableShots++; // Increment your counter
+	                    webglScene.customEvent('SplitOrderRemoved', { shooter: ship, target: target });
+	                    
+	                    break; // Exit the loop after removing one matching fire order and recalculating the rest (if required).
+	                }	                      
+	            }
+	        } else {
+	            // Default case: Remove only the LAST fire order. No need to adjust hitMod as it's the last order anyway.'
+	            var lastFireOrder = system.fireOrders[system.fireOrders.length - 1];
+	            if (lastFireOrder.weaponid == system.id && lastFireOrder.turn == gamedata.turn) {
+	                system.fireOrders.pop(); // Remove the last firing order
+	                system.maxVariableShots++; // Increment your counter
+	                var targetShip = gamedata.getShip(lastFireOrder.targetid);
+	                webglScene.customEvent('SplitOrderRemoved', { shooter: ship, target: targetShip });	                
+	            }	            
+	        }
+	    
+	    }
+
+	    // Trigger custom event to notify of system data changes - call ballisticIconContianer.consumeGamedata()
+	    webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+
+	    // Handle redraw for ship movement in combat phase
+	    if (gamedata.gamephase == 3 && ship.flight) {
+	        webglScene.customEvent("ShipMovementChanged", { ship: ship });
+	    }
+	},
+
+    
 	removeFiringOrderAll: function removeFiringOrderAll(ship, system) { //remove firing orders for ALL similar weapons that have them
 		if (!gamedata.isMyShip(ship)) {
 			return;
@@ -1640,6 +1727,17 @@ window.weaponManager = {
         return false;
     },
 
+    hasTargetedThisShip: function hasTargetedThisShip(target, system) {
+        for (var i in system.fireOrders) {
+            var fire = system.fireOrders[i];
+            if (fire.weaponid == system.id && fire.turn == gamedata.turn && !fire.rolled && fire.targetid == target.id) {
+                if ((gamedata.gamephase == 1 || gamedata.gamephase == 3) && system.ballistic || gamedata.gamephase == 3 && !system.ballistic) {
+					return true;
+                }
+            }
+        }
+        return false;
+    },
 	    
     shipHasFiringOrder: function shipHasFiringOrder(ship) {
 		for (var i in ship.systems) {
@@ -1722,7 +1820,7 @@ window.weaponManager = {
                 return targetingShip; // || targetingHex;
             }));
         }, []).filter(function (fire) {
-            return fire.type === "ballistic";
+			return fire.type === "ballistic" || (fire.type === "normal" && fire.damageclass === "Sweeping"); //Ballistics and Shadow Slicers
         }).map(function (fireOrder) {
             var shooter = gamedata.getShip(fireOrder.shooterid);
             return {
@@ -1964,6 +2062,10 @@ window.weaponManager = {
 				if ((!toReturn) && (type == 'ballistic') && (fireOrder.type == 'normal') && (fireOrder.targetid == -1)) {
 					toReturn = true;
 				}
+				//show split shot direct fire as ballistics, too
+				if ((!toReturn) && (type == 'ballistic') && (fireOrder.type == 'normal') && (fireOrder.damageclass == "Sweeping")) {
+					toReturn = true;
+				}				
 				return toReturn;
                 //return fireOrder.type == type;
             });

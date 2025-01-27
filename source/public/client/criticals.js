@@ -79,6 +79,19 @@ window.shipManager.criticals = {
         return false;
     },
 
+	//New function to give more fleixbility for system icon healthbar - 01/25 DK
+    hasCriticalsIcon: function hasCriticalsIcon(system) {
+        //return system.criticals.length > 0;
+        for (var i in system.criticals) {
+            var crit = system.criticals[i];
+            if ( (crit.turn <= gamedata.turn) && ( (crit.turnend == 0) || (crit.turnend >= gamedata.turn) ) & !crit.forInfo )
+			{
+                return true;
+            }
+        }
+        return false;
+    },
+
     hasCriticalInAnySystem: function hasCriticalInAnySystem(ship, name) {
         var amount = 0;
         for (var a in ship.systems) {

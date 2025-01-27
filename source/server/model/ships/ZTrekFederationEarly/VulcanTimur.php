@@ -5,7 +5,7 @@ class VulcanTimur extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 380;
-        $this->faction = "ZStarTrek Federation (early)";
+        $this->faction = "ZStarTrek (early) Federation";
         $this->phpclass = "VulcanTimur";
         $this->imagePath = "img/ships/StarTrek/VulcanSurak.png";
         $this->shipClass = "Vulcan Ti'Mur Science Vessel";
@@ -84,16 +84,18 @@ class VulcanTimur extends MediumShip{
 	$this->hitChart = array(
 		
 		0=> array(
-			6 => "Tractor Beam",
-			9 => "Elint Scanner",
-			12 => "Hangar",
-			15 => "Engine",
+			2 => "2:Nacelle",
+			7 => "Structure",
+			9 => "Tractor Beam",
+			12 => "Hangar",			
+			14 => "Scanner",
+			16 => "Engine",
 			18 => "Reactor",
 			20 => "C&C",
 		),
 
 		1=> array(
-		    	2 => "Shield Projector",
+		    2 => "Shield Projector",
 			5 => "Phase Cannon",
 			9 => "Cargo Bay",
 			17 => "Structure",
@@ -101,9 +103,9 @@ class VulcanTimur extends MediumShip{
 		),
 
 		2=> array(
-		    	2 => "Shield Projector",
-			9 => "Nacelle",
-			11 => "Phase Cannon",
+		    2 => "Shield Projector",
+			8 => "Nacelle",
+			10 => "Phase Cannon",
 			17 => "Structure",
 			20 => "Primary",
 		),

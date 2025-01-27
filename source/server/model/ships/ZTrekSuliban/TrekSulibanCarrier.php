@@ -5,7 +5,7 @@ class TrekSulibanCarrier extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 450;
-        $this->faction = "ZTrek Playtest Other Factions";
+        $this->faction = "ZStarTrek (early) Suliban";
         $this->phpclass = "TrekSulibanCarrier";
         $this->imagePath = "img/ships/StarTrek/SulibanCarrier.png";
         $this->shipClass = "Suliban Carrier";
@@ -80,8 +80,8 @@ class TrekSulibanCarrier extends HeavyCombatVessel{
 
 		
 		//technical thrusters - unlimited, like for LCVs		
-		$this->addFrontSystem(new InvulnerableThruster(99, 99, 0, 99, 1)); //unhitable and with unlimited thrust allowance
-		$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 2)); //unhitable and with unlimited thrust allowance   
+		$this->addPrimarySystem(new InvulnerableThruster(99, 99, 0, 99, 1)); //unhitable and with unlimited thrust allowance
+		$this->addPrimarySystem(new InvulnerableThruster(99, 99, 0, 99, 2)); //unhitable and with unlimited thrust allowance   
 		$this->addPrimarySystem(new InvulnerableThruster(99, 99, 0, 99, 3)); //unhitable and with unlimited thrust allowance
 		$this->addPrimarySystem(new InvulnerableThruster(99, 99, 0, 99, 4)); //unhitable and with unlimited thrust allowance
         $this->addPrimarySystem($impulseDrive);
@@ -95,28 +95,29 @@ class TrekSulibanCarrier extends HeavyCombatVessel{
 	$this->hitChart = array(
 		
 		0=> array(
-			4 => "2:Nacelle",
-			7 => "Defense Guns",			
-			11 => "Scanner",
-			15 => "Engine",
-			18 => "Reactor",
+			2 => "2:Nacelle",
+			8 => "Structure",
+			11 => "Defense Guns",			
+			14 => "Scanner",
+			17 => "Engine",
+			19 => "Reactor",
 			20 => "C&C",
 		),
 
 		1=> array(
+		    2 => "Shield Projector",
 			4 => "Particle Cutter",
 			6 => "Defense Guns",
-		    	8 => "Shield Projector",
-			11 => "Hangar",	
+			9 => "Hangar",	
 			17 => "Structure",
 			20 => "Primary",
 		),
 
 		2=> array(
-		    	2 => "Shield Projector",
-			4 => "Defense Guns",
-			7 => "Hangar",	
-			11 => "Nacelle",
+			2 => "Shield Projector",
+			5 => "Nacelle",
+			7 => "Defense Guns",
+			10 => "Hangar",	
 			17 => "Structure",
 			20 => "Primary",
 		),

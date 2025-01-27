@@ -5,7 +5,7 @@ class TrekVulcanDkyrTOS extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 840;
-	$this->faction = "ZStarTrek Federation (TOS)";
+	$this->faction = "ZStarTrek (TOS) Federation";
         $this->phpclass = "TrekVulcanDkyrTOS";
         $this->imagePath = "img/ships/StarTrek/VulcanDKyr.png";
         $this->shipClass = "Vulcan D'Kyr Cruiser (TOS era)";
@@ -117,39 +117,40 @@ class TrekVulcanDkyrTOS extends BaseShip{
 	    
         $this->hitChart = array(
             0=> array(
-				8 => "Structure",
-				10 => "Tractor Beam",
-				12 => "Scanner",
-				15 => "Engine",
-				17 => "Hangar",
+				2 => "2:Nacelle",
+				4 => "Tractor Beam",
+				11 => "Structure",
+				13 => "Hangar",
+				15 => "Scanner",
+				17 => "Engine",
 				19 => "Reactor",
 				20 => "C&C",
             ),
             1=> array(
 				2 => "Shield Projector",
-				7 => "Phaser Lance",
-				10 => "Phaser",
+				5 => "Phaser Lance",
+				7 => "Phaser",
 				18 => "Structure",
 				20 => "Primary",
             ),
             2=> array(
 				2 => "Shield Projector",
-				9 => "Nacelle",
-				11 => "Light Phaser Lance",
+				7 => "Nacelle",
+				9 => "Light Phaser Lance",
 				18 => "Structure",
 				20 => "Primary",
             ),
             3=> array(
 				2 => "Shield Projector",
-				7 => "Photon Torpedo",
-				9 => "Light Phaser Lance",
+				5 => "Photon Torpedo",
+				7 => "Light Phaser Lance",
 				18 => "Structure",
 				20 => "Primary",
             ),
             4=> array(
 				2 => "Shield Projector",
-				7 => "Photon Torpedo",
-				9 => "Light Phaser Lance",
+				5 => "Photon Torpedo",
+				7 => "Light Phaser Lance",
 				18 => "Structure",
 				20 => "Primary",
             ),

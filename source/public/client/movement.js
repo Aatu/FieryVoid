@@ -216,7 +216,9 @@ shipManager.movement = {
         if (ship.flight || ship.osat) return false;
         if (shipManager.isDestroyed(ship) || shipManager.isAdrift(ship)) return false;
         if (shipManager.systems.isEngineDestroyed(ship)) return false;
-        if (shipManager.movement.isRolling(ship)) return true; //rolling ship should be always able to stop...
+        var rolling = shipManager.movement.isRolling(ship);	
+        if (!shipManager.movement.isRollingForIcon(ship) && rolling) return false; //Started rolling this movement phase, player should cancel instead.
+	    if (rolling) return true; //rolling ship should be always able to stop...
         if ((!ship.agile) && shipManager.movement.hasRolled(ship) ) {
             return false;
         }
@@ -235,7 +237,9 @@ shipManager.movement = {
         if (ship.flight || ship.osat) return false;
         if (shipManager.isDestroyed(ship) || shipManager.isAdrift(ship)) return false;
         if (shipManager.systems.isEngineDestroyed(ship)) return false;
-        if (shipManager.movement.isRolling(ship)) return true; //rolling ship should be always able to stop...
+        var rolling = shipManager.movement.isRolling(ship);	        	
+        if (!shipManager.movement.isRollingForIcon(ship) && rolling) return false; //Started rolling this movement phase, player should cancel instead.        	
+	    if (rolling) return true; //rolling ship should be always able to stop...
         if ((!ship.agile) && shipManager.movement.hasRolled(ship) ) {
             return false;
         }
@@ -274,7 +278,7 @@ shipManager.movement = {
             at_initiative: shipManager.getIniativeOrder(ship),
             turn: gamedata.turn,
             forced: false,
-            value: 0
+            value: 'thisTurn'
         };
         shipWindowManager.assignThrust(ship);
         ship.rolling = true;
@@ -317,6 +321,20 @@ shipManager.movement = {
         for (var i in ship.movement) {
             var m = ship.movement[i];
             if (m.turn != gamedata.turn) continue;
+            if (m.type == "isRolling") rolling = true;
+            if (m.type == "roll" && m.commit) rolling = !rolling;
+        }
+        return rolling;
+    },
+
+    //Only difference between this and isRolling() is that this returns 'false' if Roll was initiated on THIS turn!
+    isRollingForIcon: function isRollingForIcon(ship) {
+        var rolling = false;
+        if (ship.agile) return false;
+        for (var i in ship.movement) {
+            var m = ship.movement[i];
+            if (m.turn != gamedata.turn) continue;
+            if (m.value == 'thisTurn' || m.value == 'emergencyRoll') continue;	
             if (m.type == "isRolling") rolling = true;
             if (m.type == "roll" && m.commit) rolling = !rolling;
         }
@@ -1314,7 +1332,7 @@ shipManager.movement = {
                 if (shipManager.systems.isDestroyed(ship, system)) continue;
 
                 if (system.name == "engine") {
-                    rem += shipManager.systems.getOutput(ship, system);
+                    rem += shipManager.systems.getOutput(ship, system); //Is zero when offline.
                 }
                 if (system.name == "thruster") {
                     rem -= system.thrustwasted;
@@ -1330,7 +1348,7 @@ shipManager.movement = {
 		for (var i in thrustWeaponList) {
 			var currWeapon = thrustWeaponList[i];
 			//is it alive and powered up?
-			if (shipManager.systems.isDestroyed(ship, currWeapon)) continue;
+			if (shipManager.systems.isDestroyed(ship, currWeapon)) continue; //Checks for destroyed and offline are ok!
 			if (shipManager.power.isOffline(ship, currWeapon)) continue;			
 			//current boost
 			var currBoost = shipManager.power.getBoost(currWeapon);
@@ -1352,27 +1370,40 @@ shipManager.movement = {
 
 
 	getShipsNegativeThrust: function getShipsNegativeThrust() {
-		var shipNames = new Array();
-		var counter = 0;
+	    var shipNames = [];
+	    var counter = 0;
 
-		for (var i in gamedata.ships) {
-			var ship = gamedata.ships[i];
+	    for (var i in gamedata.ships) {
+	        var ship = gamedata.ships[i];
 
-			if (ship.unavailable) continue;
+	        if (ship.unavailable) continue;
+	        if (ship.flight) continue;
+	        if (ship.userid != gamedata.thisplayer) continue;
+	        if (shipManager.isDestroyed(ship) || shipManager.power.isPowerless(ship)) continue;
 
-			if (ship.flight) continue;
+	        // Get the list of engine systems
+	        var engines = shipManager.systems.getSystemListByName(ship, "engine");
+	        if (!engines || engines.length === 0) continue; // Skip if no engines are found
 
-			if (ship.userid != gamedata.thisplayer) continue;
+	        // Check if all engines are destroyed or offline
+	        var allEnginesDestroyedOrOffline = engines.every(engine => 
+	            shipManager.systems.isDestroyed(ship, engine) || 
+	            shipManager.power.isOffline(ship, engine)
+	        );
+	        if (allEnginesDestroyedOrOffline) continue; // Skip if all engines are destroyed or offline
 
-			if (shipManager.isDestroyed(ship) || shipManager.power.isPowerless(ship)) continue;
+	        // Check if the remaining thrust is negative for any engine
+	        var hasNegativeThrust = engines.some(engine =>
+	            shipManager.movement.getRemainingEngineThrust(ship, engine) < 0
+	        );
 
-			if (shipManager.movement.getRemainingEngineThrust(ship, shipManager.systems.getSystemByName(ship, "engine")) < 0) {
-				shipNames[counter] = ship.name;
-				counter++;
-			}
-		}
+	        if (hasNegativeThrust) {
+	            shipNames[counter] = ship.name;
+	            counter++;
+	        }
+	    }
 
-		return shipNames;
+	    return shipNames;
 	},
 	    
     
@@ -1794,9 +1825,13 @@ shipManager.movement = {
                 if (ship.systems[sys].displayName == "Thruster") {
                     if (ship.systems[sys].direction == thrusterLoc && !ship.systems[sys].destroyed) {
                         if (ship.systems[sys].channeled < ship.systems[sys].output ) { //auto-assignment shall not overhrust
-                            if (ship.systems[sys].criticals.length == 0) {
-                                thrusters.push(ship.systems[sys]);
-                            }
+                            //if (ship.systems[sys].criticals.length == 0) {
+							//Only two criticals matter for thursters, ignore others - DK Dec 2024
+							if(shipManager.criticals.hasCritical(ship.systems[sys], "HalfEfficiency")) continue;
+							if(shipManager.criticals.hasCritical(ship.systems[sys], "FirstThrustIgnored")) continue;
+                                
+							thrusters.push(ship.systems[sys]);
+                            
                         }
                     }
                 }

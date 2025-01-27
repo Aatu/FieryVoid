@@ -92,18 +92,19 @@ class TrekNausicaanScourge extends HeavyCombatVessel{
 	    
         $this->hitChart = array(
             0=> array(
-				6 => "2:Nacelle",
-				9 => "Hangar",			
-				12 => "Scanner",
-				15 => "Engine",
+				4 => "2:Nacelle",
+				10 => "Structure",
+				12 => "Hangar",			
+				14 => "Scanner",
+				16 => "Engine",
 				18 => "Reactor",
 				20 => "C&C",
             ),
             1=> array(
 		    	2 => "Shield Projector",
-				5 => "Point Plasma Gun",
-				9 => "Plasma Projector",
-				10 => "Light Plasma Projector",
+				4 => "Point Plasma Gun",
+				6 => "Plasma Projector",
+				7 => "Light Plasma Projector",
 				17 => "Structure",
 				20 => "Primary",
             ),

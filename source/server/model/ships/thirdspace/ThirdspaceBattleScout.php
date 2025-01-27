@@ -35,8 +35,9 @@ class ThirdspaceBattleScout extends BaseShip{
 		
 		/*Thirdspace use their own enhancement set */		
 		Enhancements::nonstandardEnhancementSet($this, 'ThirdspaceShip');			    
+		$this->enhancementOptionsEnabled[] = 'IMPR_PSY'; //Ship has Psychic Field, add enhancement.       
         
-        $this->addPrimarySystem(new AdvancedSingularityDrive(8, 44, 0, 58+12+4));
+        $this->addPrimarySystem(new AdvancedSingularityDrive(8, 44, 0, 66+12+4));
         $this->addPrimarySystem(new ThirdspaceCnC(8, 32, 0, 0));
         $scanner = new ElintScanner(7, 36, 12, 16);
 		$scanner->markThirdspace();
@@ -47,31 +48,31 @@ class ThirdspaceBattleScout extends BaseShip{
 		$this->addPrimarySystem(new ThirdspaceSelfRepair(7, 20, 10, 4)); //armor, structure, output, maxBoost  
 		$this->addPrimarySystem(new JumpEngine(6, 24, 4, 7));//Presumably have access to hyperspace, or possess some other form of FTL travel that this system represents.          		  		
       
-		$this->addPrimarySystem(new ThirdspaceShield(3, 320, 160, 210, 330, 'L'));	
+		$this->addPrimarySystem(new ThirdspaceShield(3, 480, 160, 210, 330, 'L'));	
 
         $this->addFrontSystem(new PsionicTorpedo(5, 0, 0, 240, 0));
         $this->addFrontSystem(new PsionicTorpedo(5, 0, 0, 240, 0));        
         $this->addFrontSystem(new PsionicTorpedo(5, 0, 0, 0, 120));
         $this->addFrontSystem(new PsionicTorpedo(5, 0, 0, 0, 120));        
-        $this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 240, 60));
-        $this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 240, 60));
-        $this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 300, 120));
-        $this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 240, 60));        
-        $this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 300, 120)); 
-        $this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 300, 120));                 	          	
+        $this->addFrontSystem(new PsionicConcentrator(5, 0, 0, 270, 90));
+//        $this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 240, 60));
+//        $this->addFrontSystem(new PsionicConcentrator(5, 0, 0, 300, 120));
+//        $this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 240, 60));        
+//        $this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 300, 120)); 
+//        $this->addFrontSystem(new PsionicConcentrator(4, 0, 0, 300, 120));                 	          	
         $this->addFrontSystem(new GraviticThruster(6, 20, 0, 8, 1));
         $this->addFrontSystem(new GraviticThruster(6, 20, 0, 8, 1));             
 			
-		$this->addPrimarySystem(new ThirdspaceShield(3, 160, 80, 330, 30, 'F'));		
+		$this->addPrimarySystem(new ThirdspaceShield(3, 240, 80, 330, 30, 'F'));		
 
         $this->addAftSystem(new PsionicTorpedo(5, 0, 0, 180, 300));
         $this->addAftSystem(new PsionicTorpedo(5, 0, 0, 60, 180));			
-        $this->addAftSystem(new PsionicConcentrator(4, 0, 0, 120, 300)); 
-        $this->addAftSystem(new PsionicConcentrator(4, 0, 0, 120, 300));
-        $this->addAftSystem(new PsionicConcentrator(4, 0, 0, 60, 240));         
-        $this->addAftSystem(new PsionicConcentrator(4, 0, 0, 120, 300)); 
-        $this->addAftSystem(new PsionicConcentrator(4, 0, 0, 60, 240));        
-        $this->addAftSystem(new PsionicConcentrator(4, 0, 0, 60, 240));                      
+        $this->addAftSystem(new PsionicConcentrator(5, 0, 0, 90, 270)); 
+//        $this->addAftSystem(new PsionicConcentrator(4, 0, 0, 120, 300));
+//        $this->addAftSystem(new PsionicConcentrator(5, 0, 0, 60, 240));         
+//        $this->addAftSystem(new PsionicConcentrator(4, 0, 0, 120, 300)); 
+//        $this->addAftSystem(new PsionicConcentrator(4, 0, 0, 60, 240));        
+//        $this->addAftSystem(new PsionicConcentrator(4, 0, 0, 60, 240));                      
         $this->addAftSystem(new GraviticThruster(5, 24, 0, 8, 2));
         $this->addAftSystem(new GraviticThruster(5, 24, 0, 8, 2));
         $this->addAftSystem(new GraviticThruster(5, 24, 0, 8, 2));
@@ -81,40 +82,40 @@ class ThirdspaceBattleScout extends BaseShip{
         $this->addAftSystem($LCVRail1);                
        
        		
-		$this->addPrimarySystem(new ThirdspaceShield(3, 160, 80, 150, 210, 'A'));
+		$this->addPrimarySystem(new ThirdspaceShield(3, 240, 80, 150, 210, 'A'));
 		$this->addLeftSystem(new PsionicLance(5, 0, 0, 240, 360));
 		$this->addLeftSystem(new PsionicLance(5, 0, 0, 180, 300));   		                  
-        $this->addLeftSystem(new PsionicConcentrator(4, 0, 0, 180, 300));
-        $this->addLeftSystem(new PsionicConcentrator(4, 0, 0, 180, 300));
-        $this->addLeftSystem(new PsionicConcentrator(4, 0, 0, 180, 300));          
-        $this->addLeftSystem(new PsionicConcentrator(4, 0, 0, 240, 360));              
-        $this->addLeftSystem(new PsionicConcentrator(4, 0, 0, 240, 360)); 
-        $this->addLeftSystem(new PsionicConcentrator(4, 0, 0, 240, 360));  
+        $this->addLeftSystem(new PsionicConcentrator(5, 0, 0, 180, 300));
+//        $this->addLeftSystem(new PsionicConcentrator(4, 0, 0, 180, 300));
+//        $this->addLeftSystem(new PsionicConcentrator(4, 0, 0, 180, 300));          
+        $this->addLeftSystem(new PsionicConcentrator(5, 0, 0, 240, 360));              
+//        $this->addLeftSystem(new PsionicConcentrator(4, 0, 0, 240, 360)); 
+//        $this->addLeftSystem(new PsionicConcentrator(4, 0, 0, 240, 360));  
         $this->addLeftSystem(new GraviticThruster(6, 30, 0, 10, 3)); 
         $LCVRail2 = new Catapult(3, 12, 3);
         $LCVRail2->displayName = "LCV Rail";        
         $this->addLeftSystem($LCVRail2);                      
             
             	
-		$this->addPrimarySystem(new ThirdspaceShield(3, 320, 160, 30, 150, 'R'));
+		$this->addPrimarySystem(new ThirdspaceShield(3, 480, 160, 30, 150, 'R'));
  		$this->addRightSystem(new PsionicLance(5, 0, 0, 0, 120));
  		$this->addRightSystem(new PsionicLance(5, 0, 0, 60, 180)); 		
-        $this->addRightSystem(new PsionicConcentrator(4, 0, 0, 60, 180));                  
-        $this->addRightSystem(new PsionicConcentrator(4, 0, 0, 60, 180)); 
-        $this->addRightSystem(new PsionicConcentrator(4, 0, 0, 60, 180));          
-        $this->addRightSystem(new PsionicConcentrator(4, 0, 0, 0, 120));
-        $this->addRightSystem(new PsionicConcentrator(4, 0, 0, 0, 120));
-        $this->addRightSystem(new PsionicConcentrator(4, 0, 0, 0, 120));                                      
+        $this->addRightSystem(new PsionicConcentrator(5, 0, 0, 60, 180));                  
+//        $this->addRightSystem(new PsionicConcentrator(4, 0, 0, 60, 180)); 
+//        $this->addRightSystem(new PsionicConcentrator(4, 0, 0, 60, 180));          
+        $this->addRightSystem(new PsionicConcentrator(5, 0, 0, 0, 120));
+//        $this->addRightSystem(new PsionicConcentrator(4, 0, 0, 0, 120));
+//        $this->addRightSystem(new PsionicConcentrator(4, 0, 0, 0, 120));                                      
         $this->addRightSystem(new GraviticThruster(6, 30, 0, 10, 4)); 
         $LCVRail3 = new Catapult(3, 12, 3);		
         $LCVRail3->displayName = "LCV Rail";							  	
         $this->addRightSystem($LCVRail3); 			                      
               			          
 		//structures
-        $this->addFrontSystem(new Structure(6, 92));
-        $this->addAftSystem(new Structure(6, 108));
-        $this->addLeftSystem(new Structure(6, 112));
-        $this->addRightSystem(new Structure(6, 112));
+        $this->addFrontSystem(new Structure(6, 110));
+        $this->addAftSystem(new Structure(6, 120));
+        $this->addLeftSystem(new Structure(6, 120));
+        $this->addRightSystem(new Structure(6, 120));
         $this->addPrimarySystem(new Structure(6, 86));
 		
 		
@@ -132,31 +133,31 @@ class ThirdspaceBattleScout extends BaseShip{
 			),
 			1=> array( //Fwd
 				6 => "Thruster",
-				9 => "Psionic Torpedo",
-				11 => "Psionic Concentrator",
+				8 => "Psionic Torpedo",
+				10 => "Psionic Concentrator",
 				18 => "Structure",
 				20 => "Primary",
 			),
 			2=> array( //Aft
 				7 => "Thruster",
 				9 => "Psionic Torpedo",				
-				12 => "Psionic Concentrator",
+				11 => "Psionic Concentrator",
 				18 => "Structure",
 				20 => "Primary",
 			),
 			3=> array(
 				4 => "Thruster",
 				6 => "Psionic Lance",
-				9 => "Psionic Concentrator",
-				11 => "LCV Rail",
+				8 => "Psionic Concentrator",
+				10 => "LCV Rail",
 				18 => "Structure",
 				20 => "Primary",
 			),
 			4=> array(
 				4 => "Thruster",
 				6 => "Psionic Lance",
-				9 => "Psionic Concentrator",
-				11 => "LCV Rail",
+				8 => "Psionic Concentrator",
+				10 => "LCV Rail",
 				18 => "Structure",
 				20 => "Primary",
 			),

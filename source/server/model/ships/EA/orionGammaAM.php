@@ -75,7 +75,7 @@ class OrionGammaAM extends StarBaseSixSections{
 
 			$systems = array(
 				new Railgun(4, 9, 6, $min, $max),
-        new AmmoMissileRackL(4, 0, 0, $min, $max, $ammoMagazine, true), //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+       				new AmmoMissileRackL(4, 0, 0, $min, $max, $ammoMagazine, true), //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
 				new InterceptorMKI(4, 4, 1, $min, $max),
 				new StdParticleBeam(4, 4, 1, $min, $max),
 				new Hangar(4, 6, 6),
@@ -92,9 +92,9 @@ class OrionGammaAM extends StarBaseSixSections{
 				2 => "TAG:Railgun",
 				3 => "TAG:Standard Particle Beam",
 				4 => "TAG:Interceptor I",
-				5 => "Hangar",
-				6 => "Cargo Bay",
-				7 => "Sub Reactor",
+				5 => "TAG:Hangar",
+				6 => "TAG:Cargo Bay",
+				7 => "TAG:Sub Reactor",
 				18 => "Structure",
 				20 => "Primary",
 			);

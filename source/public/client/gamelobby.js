@@ -24,7 +24,7 @@ window.gamedata = {
 			powerRating = 'Tier 2';
 			break;
 		  case 'Abbai Matriarchate (WotCR)':
-			powerRating = 'Not balanced';
+			powerRating = 'Tier 3';
 			break;
 		  case 'Alacan Republic':
 			powerRating = 'Tier 3';
@@ -36,16 +36,16 @@ window.gamedata = {
 			powerRating = 'Tier 2';
 			break;
 		  case 'Brakiri Syndicracy':
-			powerRating = 'Tier 1; distinct Corporations can be mixed freely';
+			powerRating = 'Tier 2; distinct Corporations can be mixed freely';
 			break;
 		  case 'Cascor Commonwealth':
-			powerRating = 'Tier 2; can be turned to stronger custom faction by enhancement (still Tier 2)';
+			powerRating = 'Tier 3 (official) or Tier 2 (custom re-pointing enhancement)';
 			break;
 		  case 'Centauri Republic':
 			powerRating = 'Tier 1';
 			break;
 		  case 'Centauri Republic (WotCR)':
-			powerRating = 'Tier 2';
+			powerRating = 'Tier 3';
 			break;
 		  case "Ch'Lonas Cooperative":
 			powerRating = 'Tier 2, custom faction';
@@ -78,7 +78,7 @@ window.gamedata = {
 			powerRating = 'Tier 2';
 			break;
 		  case 'Earth Alliance':
-			powerRating = 'Tier 1 (except Warlock, which is Superior)';
+			powerRating = 'Tier 1 (Not Balanced with Warlock or Shadow Omega)';
 			break;
 		  case 'Earth Alliance (custom)':
 			powerRating = 'custom and non-combatant designs for EA faction';
@@ -87,22 +87,22 @@ window.gamedata = {
 			powerRating = 'fixed tefenses for EA faction';
 			break;
 		  case 'Earth Alliance (early)':
-			powerRating = 'Not balanced';
+			powerRating = 'Tier 3';
 			break;
 		  case 'Gaim Intelligence':
 			powerRating = 'Tier 1';
 			break;
 		  case 'Grome Autocracy':
-			powerRating = 'Not balanced';
+			powerRating = 'Tier 3';
 			break;
 		  case 'Hurr Republic':
-			powerRating = 'Not balanced';
+			powerRating = 'Tier 3';
 			break;
 		  case 'Hyach Gerontocracy':
 			powerRating = 'Tier 1';
 			break;
 		  case 'Ipsha Baronies':
-			powerRating = 'Tier 2 (distinct Baronies cannot be mixed)';
+			powerRating = 'Tier 3 (distinct Baronies cannot be mixed)';
 			break;
 		  case 'Kor-Lyan Kingdoms':
 			powerRating = 'Tier 1';
@@ -111,19 +111,19 @@ window.gamedata = {
 			powerRating = 'Tier 1';
 			break;
 		  case 'Markab Theocracy':
-			powerRating = 'Tier 2';
+			powerRating = 'Tier 3';
 			break;
 		  case 'Minbari Federation':
-			powerRating = 'Tier 1 (all-White Star: Superior)';
+			powerRating = 'Tier 1 (all-White Star: Not Balanced)';
 			break;
 		  case 'Minbari Protectorate':
 			powerRating = 'Tier 1';
 			break;
 		  case 'Mindriders':
-			powerRating = 'Ancients';
+			powerRating = 'Tier Ancients';
 			break;			
 		  case 'Narn Regime':
-			powerRating = 'Tier 1 (if >6 EMine launchers: Superior)';
+			powerRating = 'Tier 1 (Not Balanced with >6 EMine launchers)';
 			break;
 		  case 'Orieni Imperium':
 			powerRating = 'Tier 1';
@@ -141,7 +141,7 @@ window.gamedata = {
 			powerRating = 'Tier 3';
 			break;
 		  case 'Shadow Association':
-			powerRating = 'Ancients';
+			powerRating = 'Tier Ancients';
 			break;
 		  case 'Small Races':
 			powerRating = 'varies by faction, see Tiers file';
@@ -156,22 +156,22 @@ window.gamedata = {
 			powerRating = 'Tier 1';
 			break;
 		  case 'Usuuth Coalition':
-			powerRating = 'Not balanced';
+			powerRating = 'Tier 3';
 			break;
 		  case 'Vorlon Empire':
-			powerRating = 'Ancients';
+			powerRating = 'Tier Ancients';
 			break;
 		  case 'Vree Conglomerate':
 			powerRating = 'Tier 1';
 			break;
 		  case 'Yolu Confederation':
-			powerRating = 'Superior; can be turned into custom Tier 1 with re-evaluation enhancements';
+			powerRating = 'Not Balanced (official) or Tier 1 (custom re-pointing enhancement)';
 			break;
 		  case 'ZBSG Colonials':
 			powerRating = 'Tier 2, custom faction';
 			break;
 		  case 'ZEscalation Blood Sword Raiders':
-			powerRating = 'Tier 2, custom faction';
+			powerRating = 'Tier 3, custom faction';
 			break;
 		  case 'ZEscalation Civilian':
 			powerRating = 'Generic civilian designs for scenarios, not a faction, custom';
@@ -195,7 +195,7 @@ window.gamedata = {
 			powerRating = 'Tier 3, custom faction';
 			break;
 		  case 'ZNexus Brixadii Clans':
-			powerRating = 'Tier 2, custom faction';
+			powerRating = 'Tier 3, custom faction';
 			break;
 		  case 'ZNexus Support Units':
 			powerRating = 'Designs for scenarios, not a faction, custom';
@@ -204,37 +204,40 @@ window.gamedata = {
 			powerRating = 'Tier 3, custom faction';
 			break;
 		  case 'ZNexus Craytan Union':
-			powerRating = 'Tier 2, custom faction';
+			powerRating = 'Tier 3, custom faction';
 			break;
 		  case 'ZNexus Dalithorn Commonwealth (early)':
 			powerRating = 'Tier 3, custom faction';
 			break;
 		  case 'ZNexus Dalithorn Commonwealth':
-			powerRating = 'Tier 2, custom faction';
+			powerRating = 'Tier 3, custom faction';
 			break;
 		  case 'ZNexus Makar Federation (early)':
 			powerRating = 'Tier 3, custom faction, playtest';
 			break;
 		  case 'ZNexus Makar Federation':
-			powerRating = 'Tier 2, custom faction, playtest';
+			powerRating = 'Tier 3, custom faction, playtest';
 			break;
 		  case 'ZNexus Sal-bez Coalition (early)':
 			powerRating = 'Tier 3, custom faction';
 			break;
 		  case 'ZNexus Sal-bez Coalition':
-			powerRating = 'Tier 2, custom faction';
+			powerRating = 'Tier 3, custom faction';
 			break;
 		  case 'ZNexus Velrax Republic (early)':
 			powerRating = 'Tier 3, custom faction';
 			break;
 		  case 'ZNexus Velrax Republic':
+			powerRating = 'Tier 3, custom faction';
+			break;
+		  case 'ZStarTrek (TOS) Federation':
 			powerRating = 'Tier 2, custom faction';
 			break;
-		  case 'ZStarTrek Federation (TOS)':
-			powerRating = 'Tier 2, custom faction';
+		  case 'ZStarTrek (early) Federation':
+			powerRating = 'Tier 3, custom faction';
 			break;
-		  case 'ZStarTrek Federation (early)':
-			powerRating = 'Tier 2, custom faction';
+		  case 'ZStarTrek (early) Suliban':
+			powerRating = 'Tier 3, custom faction';
 			break;
 		  case 'ZStarWars':
 			powerRating = 'Tier 2 (directory contains multiple overlapping factions), custom faction';

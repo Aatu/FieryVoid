@@ -492,10 +492,10 @@ class GromeFlakCannon extends Weapon{
 
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);
-			$this->data["Special"] = "Intercepts all shots from an enemy ship.";
-			$this->data["Special"] .= "<br>Can intercept uninterceptable weapons at 50% effectiveness.";			
-			$this->data["Special"] .= "<br>May also intercept for friendly units (except uninterceptable weapons). Must have friendly and enemy unit in arc and have friendly unit within 5 hexes.";
-			$this->data["Special"] .= "<br>Can also be manually targeted to intercept specific units in Defensive firing mode";
+			$this->data["Special"] = "Intercepts all shots from an enemy ship automatically if not fired.";
+			$this->data["Special"] .= "<br>Will also automatically intercept for friendly units. Must have friendly and enemy unit in arc and have friendly unit within 5 hexes.";
+			$this->data["Special"] .= "<br>Can intercept uninterceptable weapons at 50% effectiveness, but not when intercepting for other units.";			
+			$this->data["Special"] .= "<br>Can also be MANUALLY targeted to intercept specific units in Defensive firing mode";
 			$this->data["Special"] .= "<br>In this mode it will automatically hit and intercept all fire from targeted ship at the Flak Cannon-firing ship (except ballistics).";
 	}
 

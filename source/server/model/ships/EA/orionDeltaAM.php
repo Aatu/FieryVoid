@@ -93,8 +93,8 @@ class OrionDeltaAM extends StarBaseSixSections{
 				2 => "TAG:Heavy Pulse Cannon",
 				3 => "TAG:Railgun",
 				5 => "TAG:Interceptor I",
-				6 => "Hangar",
-				7 => "Sub Reactor",
+				6 => "TAG:Hangar",
+				7 => "TAG:Sub Reactor",
 				18 => "Structure",
 				20 => "Primary",
 			);

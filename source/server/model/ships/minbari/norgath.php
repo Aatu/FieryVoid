@@ -80,9 +80,9 @@ class Norgath extends StarBaseSixSections{
 				1 => "TAG:Electro-Pulse Gun",
 				3 => "TAG:Neutron Laser",
 				5 => "TAG:Fusion Cannon",
-				6 => "Hangar",
-				8 => "Cargo",
-				9 => "Sub Reactor",
+				6 => "TAG:Hangar",
+				8 => "TAG:Cargo",
+				9 => "TAG:Sub Reactor",
 				18 => "Structure",
 				20 => "Primary",
 			);

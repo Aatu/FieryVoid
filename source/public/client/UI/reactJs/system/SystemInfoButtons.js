@@ -100,6 +100,17 @@ class SystemInfoButtons extends React.Component {
 		
         weaponManager.changeShots(ship, system, -1);
 	}
+
+	removeFireOrderMulti(e) {
+        e.stopPropagation(); e.preventDefault();
+		const {ship, system} = this.props;
+		if (!canRemoveFireOrderMulti(ship, system)) {
+            return;
+		}
+		
+        weaponManager.removeFiringOrderMulti(ship, system);
+//        webglScene.customEvent('CloseSystemInfo');
+	}
 	
 	removeFireOrder(e) {
         e.stopPropagation(); e.preventDefault();
@@ -380,6 +391,12 @@ class SystemInfoButtons extends React.Component {
 	}
 	
 	/*Thirdspace Shield increase health*/
+	TSShieldIncrease25(e) {
+        e.stopPropagation(); e.preventDefault();
+		const {ship, system} = this.props;
+		system.doIncrease25();
+		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+	}
 	TSShieldIncrease10(e) {
         e.stopPropagation(); e.preventDefault();
 		const {ship, system} = this.props;
@@ -417,6 +434,12 @@ class SystemInfoButtons extends React.Component {
 		system.doDecrease10();
 		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 	}
+	TSShieldDecrease25(e) {
+        e.stopPropagation(); e.preventDefault();
+		const {ship, system} = this.props;
+		system.doDecrease25();
+		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+	}	
 	/*Thirdspace Shield Generator Presets*/
 	TSShieldGenSelect(e) {
         e.stopPropagation(); e.preventDefault();
@@ -508,49 +531,52 @@ class SystemInfoButtons extends React.Component {
 		
         return (
             <Container>
-				{canOnline(ship, system) && <Button title="power on (R = mass)" onClick={this.online.bind(this)} onContextMenu={this.allOnline.bind(this)} img="./img/on.png"></Button>}
-                {canOffline(ship, system) && <Button title="power off (R = mass for weapons)" onClick={this.offline.bind(this)} onContextMenu={this.allOffline.bind(this)} img="./img/off.png"></Button>}
-                {canOverload(ship, system) && <Button title="overload" onClick={this.overload.bind(this)} img="./img/overload.png"></Button>}
-                {canStopOverload(ship, system) && <Button title="stop overload" nClick={this.stopOverload.bind(this)} img="./img/overloading.png"></Button>}
-                {canDeBoost(ship, system) && <Button title="deboost"onClick={this.deboost.bind(this)} img="./img/minussquare.png"></Button>}
-                {canBoost(ship, system) && <Button title="boost" onClick={this.boost.bind(this)} img="./img/plussquare.png"></Button>}
-                {canAddShots(ship, system) && <Button title="more shots"onClick={this.addShots.bind(this)} img="./img/plussquare.png"></Button>}
-                {canReduceShots(ship, system) && <Button title="less shots" onClick={this.reduceShots.bind(this)} img="./img/minussquare.png"></Button>}
-				{canRemoveFireOrder(ship, system) && <Button title="cancel fire order (R = mass)" onClick={this.removeFireOrder.bind(this)} onContextMenu={this.removeFireOrderAll.bind(this)} img="./img/firing.png"></Button>}
+				{canOnline(ship, system) && <Button title="Power on (RMB = All systems selected)" onClick={this.online.bind(this)} onContextMenu={this.allOnline.bind(this)} img="./img/on.png"></Button>}
+                {canOffline(ship, system) && <Button title="Power off (RMB = All systems selected)" onClick={this.offline.bind(this)} onContextMenu={this.allOffline.bind(this)} img="./img/off.png"></Button>}
+                {canOverload(ship, system) && <Button title="Overload" onClick={this.overload.bind(this)} img="./img/overload.png"></Button>}
+                {canStopOverload(ship, system) && <Button title="Stop overload" nClick={this.stopOverload.bind(this)} img="./img/overloading.png"></Button>}
+                {canDeBoost(ship, system) && <Button title="Remove boost"onClick={this.deboost.bind(this)} img="./img/minussquare.png"></Button>}
+                {canBoost(ship, system) && <Button title="Boost" onClick={this.boost.bind(this)} img="./img/plussquare.png"></Button>}
+                {canAddShots(ship, system) && <Button title="More shots"onClick={this.addShots.bind(this)} img="./img/plussquare.png"></Button>}
+                {canReduceShots(ship, system) && <Button title="Less shots" onClick={this.reduceShots.bind(this)} img="./img/minussquare.png"></Button>}
+				{canRemoveFireOrderMulti(ship, system) && <Button title="Remove a fire order" onClick={this.removeFireOrderMulti.bind(this)} img="./img/unfiringSmall.png"></Button>}
+				{canRemoveFireOrder(ship, system) && <Button title="Remove all fire orders (RMB = All weapons selected)" onClick={this.removeFireOrder.bind(this)} onContextMenu={this.removeFireOrderAll.bind(this)} img="./img/firing.png"></Button>}
 				
 				{canChangeFiringMode(ship, system) && getFiringModesCurr(ship, system)}
 				{canChangeFiringMode(ship, system) && getFiringModes(ship, system, this.changeFiringMode.bind(this), this.allChangeFiringMode.bind(this))}
-				{canSelfIntercept(ship, system) && <Button title="allow interception (R = mass)" onClick={this.declareSelfIntercept.bind(this)} onContextMenu={this.declareSelfInterceptAll.bind(this)} img="./img/selfIntercept.png"></Button>}
+				{canSelfIntercept(ship, system) && <Button title="Allow interception (RMB = All systems selected)" onClick={this.declareSelfIntercept.bind(this)} onContextMenu={this.declareSelfInterceptAll.bind(this)} img="./img/selfIntercept.png"></Button>}
 				
 				{canAAdisplayCurrClass(ship, system) && <Button title={getAAcurrClassName(ship,system)} img={getAAcurrClassImg(ship,system)}></Button>}
-				{canAAdisplayCurrClass(ship, system) && <Button title="next" onClick={this.nextCurrClass.bind(this)} img="./img/systemicons/AAclasses/iconNext.png"></Button>}
+				{canAAdisplayCurrClass(ship, system) && <Button title="Next" onClick={this.nextCurrClass.bind(this)} img="./img/systemicons/AAclasses/iconNext.png"></Button>}
 				{canAAincrease(ship, system) && <Button onClick={this.AAincrease.bind(this)} img="./img/systemicons/AAclasses/iconPlus.png"></Button>}
 				{canAAdecrease(ship, system) && <Button onClick={this.AAdecrease.bind(this)} img="./img/systemicons/AAclasses/iconMinus.png"></Button>}
-				{canAApropagate(ship, system) && <Button title="propagate setting" onClick={this.AApropagate.bind(this)} img="./img/systemicons/AAclasses/iconPropagate.png"></Button>}
+				{canAApropagate(ship, system) && <Button title="Propagate setting" onClick={this.AApropagate.bind(this)} img="./img/systemicons/AAclasses/iconPropagate.png"></Button>}
 				
 				{canBFCPdisplayCurrClass(ship, system) && <Button title={getBFCPcurrClassName(ship,system)} img={getBFCPcurrClassImg(ship,system)}></Button>}
-				{canBFCPdisplayCurrClass(ship, system) && <Button title="next" onClick={this.nextCurrClass.bind(this)} img="./img/systemicons/BFCPclasses/iconNext.png"></Button>}
+				{canBFCPdisplayCurrClass(ship, system) && <Button title="Next" onClick={this.nextCurrClass.bind(this)} img="./img/systemicons/BFCPclasses/iconNext.png"></Button>}
 				{canBFCPincrease(ship, system) && <Button onClick={this.BFCPincrease.bind(this)} img="./img/systemicons/BFCPclasses/iconPlus.png"></Button>}
 				{canBFCPdecrease(ship, system) && <Button onClick={this.BFCPdecrease.bind(this)} img="./img/systemicons/BFCPclasses/iconMinus.png"></Button>}
-				{canBFCPpropagate(ship, system) && <Button title="propagate setting" onClick={this.BFCPpropagate.bind(this)} img="./img/systemicons/BFCPclasses/iconPropagate.png"></Button>}
+				{canBFCPpropagate(ship, system) && <Button title="Propagate setting" onClick={this.BFCPpropagate.bind(this)} img="./img/systemicons/BFCPclasses/iconPropagate.png"></Button>}
 			
 				{canSpecdisplayCurrClass(ship, system) && <Button title={getSpeccurrClassName(ship,system)} img={getSpeccurrClassImg(ship,system)}></Button>}
-				{canSpecdisplayCurrClass(ship, system) && <Button title="prev" onClick={this.prevCurrClass.bind(this)} img="./img/systemicons/Specialistclasses/iconPrev.png"></Button>}
-				{canSpecdisplayCurrClass(ship, system) && <Button title="next" onClick={this.nextCurrClass.bind(this)} img="./img/systemicons/Specialistclasses/iconNext.png"></Button>}
+				{canSpecdisplayCurrClass(ship, system) && <Button title="Previous" onClick={this.prevCurrClass.bind(this)} img="./img/systemicons/Specialistclasses/iconPrev.png"></Button>}
+				{canSpecdisplayCurrClass(ship, system) && <Button title="Next" onClick={this.nextCurrClass.bind(this)} img="./img/systemicons/Specialistclasses/iconNext.png"></Button>}
 				{canSpecselect(ship, system) && <Button onClick={this.Specselect.bind(this)} img="./img/systemicons/Specialistclasses/select.png"></Button>}
 				{canSpecunselect(ship, system) && <Button onClick={this.Specunselect.bind(this)} img="./img/systemicons/Specialistclasses/unselect.png"></Button>}					
 				{canSpecincrease(ship, system) && <Button onClick={this.Specincrease.bind(this)} img="./img/systemicons/Specialistclasses/iconPlus.png"></Button>}
 				{canSpecdecrease(ship, system) && <Button onClick={this.Specdecrease.bind(this)} img="./img/systemicons/Specialistclasses/iconMinus.png"></Button>}
 
+				{canTSShieldIncrease(ship, system) && <Button onClick={this.TSShieldIncrease25.bind(this)} img="./img/systemicons/ShieldGenclasses/iconPlus25.png"></Button>}
 				{canTSShieldIncrease(ship, system) && <Button onClick={this.TSShieldIncrease10.bind(this)} img="./img/systemicons/ShieldGenclasses/iconPlus10.png"></Button>}
 				{canTSShieldIncrease(ship, system) && <Button onClick={this.TSShieldIncrease5.bind(this)} img="./img/systemicons/ShieldGenclasses/iconPlus5.png"></Button>}	
 				{canTSShieldIncrease(ship, system) && <Button onClick={this.TSShieldIncrease.bind(this)} img="./img/systemicons/BFCPclasses/iconPlus.png"></Button>}				
 				{canTSShieldDecrease(ship, system) && <Button onClick={this.TSShieldDecrease.bind(this)} img="./img/systemicons/BFCPclasses/iconMinus.png"></Button>}				
 				{canTSShieldDecrease(ship, system) && <Button onClick={this.TSShieldDecrease5.bind(this)} img="./img/systemicons/ShieldGenclasses/iconMinus5.png"></Button>}
 				{canTSShieldDecrease(ship, system) && <Button onClick={this.TSShieldDecrease10.bind(this)} img="./img/systemicons/ShieldGenclasses/iconMinus10.png"></Button>}
+				{canTSShieldDecrease(ship, system) && <Button onClick={this.TSShieldDecrease25.bind(this)} img="./img/systemicons/ShieldGenclasses/iconMinus25.png"></Button>}
 				{canTSShieldGendisplayCurrClass(ship, system) && <Button title={getTSShieldGencurrClassName(ship,system)} img={getTSShieldGencurrClassImg(ship,system)}></Button>}
-				{canTSShieldGendisplayCurrClass(ship, system) && <Button title="prev" onClick={this.prevCurrClass.bind(this)} img="./img/systemicons/Specialistclasses/iconPrev.png"></Button>}
-				{canTSShieldGendisplayCurrClass(ship, system) && <Button title="next" onClick={this.nextCurrClass.bind(this)} img="./img/systemicons/Specialistclasses/iconNext.png"></Button>}					{canTSShieldGenSelect(ship, system) && <Button onClick={this.TSShieldGenSelect.bind(this)} img="./img/systemicons/Specialistclasses/select.png"></Button>}		
+				{canTSShieldGendisplayCurrClass(ship, system) && <Button title="Previous" onClick={this.prevCurrClass.bind(this)} img="./img/systemicons/Specialistclasses/iconPrev.png"></Button>}
+				{canTSShieldGendisplayCurrClass(ship, system) && <Button title="Next" onClick={this.nextCurrClass.bind(this)} img="./img/systemicons/Specialistclasses/iconNext.png"></Button>}					{canTSShieldGenSelect(ship, system) && <Button onClick={this.TSShieldGenSelect.bind(this)} img="./img/systemicons/Specialistclasses/select.png"></Button>}		
 
 				{canThoughtShieldIncrease(ship, system) && <Button onClick={this.ThoughtShieldIncrease10.bind(this)} img="./img/systemicons/ShieldGenclasses/iconPlus10.png"></Button>}
 				{canThoughtShieldIncrease(ship, system) && <Button onClick={this.ThoughtShieldIncrease5.bind(this)} img="./img/systemicons/ShieldGenclasses/iconPlus5.png"></Button>}	
@@ -559,12 +585,12 @@ class SystemInfoButtons extends React.Component {
 				{canThoughtShieldDecrease(ship, system) && <Button onClick={this.ThoughtShieldDecrease5.bind(this)} img="./img/systemicons/ShieldGenclasses/iconMinus5.png"></Button>}
 				{canThoughtShieldDecrease(ship, system) && <Button onClick={this.ThoughtShieldDecrease10.bind(this)} img="./img/systemicons/ShieldGenclasses/iconMinus10.png"></Button>}
 				{canThoughtShieldGendisplayCurrClass(ship, system) && <Button title={getTSShieldGencurrClassName(ship,system)} img={getTSShieldGencurrClassImg(ship,system)}></Button>}
-				{canThoughtShieldGendisplayCurrClass(ship, system) && <Button title="prev" onClick={this.prevCurrClass.bind(this)} img="./img/systemicons/Specialistclasses/iconPrev.png"></Button>}
-				{canThoughtShieldGendisplayCurrClass(ship, system) && <Button title="next" onClick={this.nextCurrClass.bind(this)} img="./img/systemicons/Specialistclasses/iconNext.png"></Button>}					
+				{canThoughtShieldGendisplayCurrClass(ship, system) && <Button title="Previous" onClick={this.prevCurrClass.bind(this)} img="./img/systemicons/Specialistclasses/iconPrev.png"></Button>}
+				{canThoughtShieldGendisplayCurrClass(ship, system) && <Button title="Next" onClick={this.nextCurrClass.bind(this)} img="./img/systemicons/Specialistclasses/iconNext.png"></Button>}					
 				{canThoughtShieldGenSelect(ship, system) && <Button onClick={this.TSShieldGenSelect.bind(this)} img="./img/systemicons/Specialistclasses/select.png"></Button>}
 
 											 
-				{canSRdisplayCurrSystem(ship, system) && <Button title="next" onClick={this.nextSRsystem.bind(this)} img="./img/systemicons/AAclasses/iconNext.png"></Button>}
+				{canSRdisplayCurrSystem(ship, system) && <Button title="Next" onClick={this.nextSRsystem.bind(this)} img="./img/systemicons/AAclasses/iconNext.png"></Button>}
 				{canSRdisplayCurrSystem(ship, system) && <Button title={getSRdescription(ship,system)} img={getSRicon(ship,system)}></Button>}
 				{canSRdisplayCurrSystem(ship, system) && <Button title="Highest priority" onClick={this.SRPriorityUp.bind(this)} img="./img/iconSRHigh.png"></Button>}
 				{canSRdisplayCurrSystem(ship, system) && <Button title="Disable repair" onClick={this.SRPriorityDown.bind(this)} img="./img/iconSRLow.png"></Button>}
@@ -632,7 +658,7 @@ const getSRicon = (ship,system) => system.getCurrSystemIcon();
 
 export const canDoAnything = (ship, system) => canOffline(ship, system) || canOnline(ship, system) 
 	|| canOverload(ship, system) || canStopOverload(ship, system) || canBoost(ship, system) 
-	|| canDeBoost(ship, system) || canAddShots(ship, system) || canReduceShots(ship, system)
+	|| canDeBoost(ship, system) || canAddShots(ship, system) || canReduceShots(ship, system) || canRemoveFireOrderMulti(ship, system)
 	|| canRemoveFireOrder(ship, system) || canChangeFiringMode(ship, system)
 	|| canSelfIntercept(ship, system) || canAA(ship,system) || canBFCP(ship, system) || canSpec(ship,system) || canTSShield(ship,system) || canThoughtShield(ship,system) || canTSShieldGen(ship,system) || canThoughtShieldGen(ship,system) 
 	|| canSRdisplayCurrSystem(ship,system);
@@ -654,6 +680,7 @@ const canAddShots = (ship, system) => system.weapon && system.canChangeShots && 
 
 const canReduceShots = (ship, system) => system.weapon && system.canChangeShots && weaponManager.hasFiringOrder(ship, system) && weaponManager.getFiringOrder(ship, system).shots > 1; 
 
+const canRemoveFireOrderMulti = (ship, system) => system.weapon && weaponManager.hasFiringOrder(ship, system) && system.canSplitShots;
 const canRemoveFireOrder = (ship, system) => system.weapon && weaponManager.hasFiringOrder(ship, system);
 
 const canChangeFiringMode = (ship, system) => system.weapon  && ((gamedata.gamephase === 1 && system.ballistic) || (gamedata.gamephase === 3 && !system.ballistic)) && !weaponManager.hasFiringOrder(ship, system) && (Object.keys(system.firingModes).length > 1 || system.dualWeapon);
