@@ -5317,7 +5317,7 @@ class NexusHeavyAssaultCannonBattery extends Weapon{
         public $name = "NexusSmallXrayLaser";
         public $iconPath = "NexusLightXRayLaser.png";
         public $displayName = "Small X-Ray Laser";
-        public $animation = "laser";
+        public $animation = "bolt";
         public $animationColor = array(0, 150, 255);
         public $priority = 3;
         public $uninterceptable = true; // This is a laser        

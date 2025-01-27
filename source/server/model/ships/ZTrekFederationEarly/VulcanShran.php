@@ -5,7 +5,7 @@ class VulcanShran extends BaseShipNoAft{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 485;
-	$this->faction = "ZStarTrek Federation (early)";
+	$this->faction = "ZStarTrek (early) Federation";
         $this->phpclass = "VulcanShran";
         $this->imagePath = "img/ships/StarTrek/VulcanShran.png";
         $this->shipClass = "Vulcan Sh'Ran Cruiser";
@@ -99,18 +99,20 @@ class VulcanShran extends BaseShipNoAft{
 	    
         $this->hitChart = array(
             0=> array(
-				8 => "Structure",
-				10 => "Tractor Beam",
-				12 => "Scanner",
-				15 => "Engine",
-				17 => "Hangar",
+				1 => "3:Nacelle",
+				2 => "4:Nacelle",
+				9 => "Structure",
+				11 => "Tractor Beam",
+				13 => "Hangar",
+				15 => "Scanner",
+				17 => "Engine",
 				19 => "Reactor",
 				20 => "C&C",
             ),
             1=> array(
 				2 => "Shield Projector",
-				5 => "Heavy Phase Cannon",
-				9 => "Phase Cannon",
+				4 => "Heavy Phase Cannon",
+				7 => "Phase Cannon",
 				18 => "Structure",
 				20 => "Primary",
             ),
@@ -118,8 +120,8 @@ class VulcanShran extends BaseShipNoAft{
 				2 => "Shield Projector",
 				6 => "Nacelle",
 				8 => "Photonic Torpedo",
-				9 => "Light Phase Cannon",
-				11 => "Phase Cannon",
+				9 => "Phase Cannon",
+				10 => "Light Phase Cannon",
 				18 => "Structure",
 				20 => "Primary",
             ),
@@ -127,8 +129,8 @@ class VulcanShran extends BaseShipNoAft{
 				2 => "Shield Projector",
 				6 => "Nacelle",
 				8 => "Photonic Torpedo",
-				9 => "Light Phase Cannon",
-				11 => "Phase Cannon",
+				9 => "Phase Cannon",
+				10 => "Light Phase Cannon",
 				18 => "Structure",
 				20 => "Primary",
             ),

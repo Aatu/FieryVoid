@@ -84,12 +84,12 @@ class OrionAlphaAM extends StarBaseSixSections{
 			$loc = $this->locations[$i];
 
 			$this->hitChart[$loc] = array(
-				1 => "Class-SO Missile Rack",
-				2 => "Light Particle Beam",
-				3 => "Interceptor Prototype",
-				4 => "Hangar",
-				6 => "Cargo Bay",
-				7 => "Sub Reactor",
+				1 => "TAG:Class-SO Missile Rack",
+				2 => "TAG:Light Particle Beam",
+				3 => "TAG:Interceptor Prototype",
+				4 => "TAG:Hangar",
+				6 => "TAG:Cargo Bay",
+				7 => "TAG:Sub Reactor",
 				18 => "Structure",
 				20 => "Primary",
 			);

@@ -211,7 +211,7 @@ window.AllWeaponFireAgainstShipAnimation = function () {
         var animationType = weapon.animationArray[incomingFire.firingMode] || weapon.animation;
         var animationColor = weapon.animationColorArray[incomingFire.firingMode] || weapon.animationColor;
 		var startLocationTime = startTime;
-		if (weapon.ballistic && (!weapon.hasSpecialLaunchHexCalculation)) {
+		if (weapon.ballistic && (!weapon.hasSpecialLaunchHexCalculation && weapon.fireOrders.targetid !== weapon.fireOrders.shooterid)) {//Some weapons target own ship e.g. Shield Reinforcement)) {
 			startLocationTime = 0;
 		}
 			
@@ -223,15 +223,30 @@ window.AllWeaponFireAgainstShipAnimation = function () {
 		}else { //Everything else
 		    weaponOrigin = getShipPositionAtTime.call(this, this.shipIconContainer.getByShip(incomingFire.shooter), startLocationTime);
 		}
-				
+        //We don't want any explosions when this fireOrder type gets animated.  Separate animation at end of turn will show jump.				
+        if(incomingFire.fireOrder.damageclass == "HyperspaceJump"){ 
+            damage = 0;
+            hit = false;
+        }
+           
+        //Standardise color method and let noProjectile marker work here too - DK 01/25
+        var color;	
+        var hasParticle = true; //Extra variable for Bolt Effect, to remove particle if needed e.g. rammingAttack       	
+		if (weapon.noProjectile) { //Some weapon like Spark Field shouldn't have projectiles - DK - 4 Jan 24
+		    color = new THREE.Color((0 / 255, 0 / 255, 0 / 255));
+            hasParticle = false;
+		} else {
+		    color = new THREE.Color(weapon.animationColor[0] / 255, weapon.animationColor[1] / 255, weapon.animationColor[2] / 255);
+		}
+	
+     
 
-
-	    
         switch (animationType) {
             case "laser":
                 return new LaserEffect(weapon, weaponOrigin, this.shipIconContainer.getByShip(incomingFire.shooter), getShipPositionAtTime.call(this, this.shipIcon, startLocationTime), this.scene, {
                     size: 100 * weapon.animationExplosionScale,		
-                    color: new THREE.Color(animationColor[0] / 255, animationColor[1] / 255, animationColor[2] / 255),
+//                    color: new THREE.Color(animationColor[0] / 255, animationColor[1] / 255, animationColor[2] / 255),
+                    color: color,
                     hit: hit,
                     time: startTime,
                     damage: damage,
@@ -243,7 +258,8 @@ window.AllWeaponFireAgainstShipAnimation = function () {
                     size: 150 * weapon.animationExplosionScale,
                     origin: weaponOrigin,
 		    target: getShotTargetVariance(getShipPositionAtTime.call(this, this.shipIcon, startTime), incomingFire, shotsFired),
-                    color: new THREE.Color(animationColor[0] / 255, animationColor[1] / 255, animationColor[2] / 255),
+//                    color: new THREE.Color(animationColor[0] / 255, animationColor[1] / 255, animationColor[2] / 255),
+                    color: color,
                     hit: hit,
                     damage: damage,
                     time: startTime,
@@ -258,16 +274,18 @@ window.AllWeaponFireAgainstShipAnimation = function () {
                     size: 300 * weapon.animationExplosionScale,
                     origin: weaponOrigin,
                     target: getShotTargetVariance(getShipPositionAtTime.call(this, this.shipIcon, startTime), incomingFire, shotsFired),
-                    color: new THREE.Color(animationColor[0] / 255, animationColor[1] / 255, animationColor[2] / 255),
+//                    color: new THREE.Color(animationColor[0] / 255, animationColor[1] / 255, animationColor[2] / 255),
+                    color: color,
                     hit: hit,
                     damage: damage,
                     time: startTime,
                     damagedNames: damagedNames,
+                    hasParticle: hasParticle,
                     systemDestroyedEffect: this.systemDestroyedEffect
                 });         
         }
     }
-
+/*
     function getSystemNamesDestroyed(incomingFire) {
         return incomingFire.damagesCaused.filter(damage => damage.destroyed)
             .map(damage => ({
@@ -275,6 +293,18 @@ window.AllWeaponFireAgainstShipAnimation = function () {
                 structure: damage.system instanceof Structure
             }));
     }
+*/
+function getSystemNamesDestroyed(incomingFire) {
+    if (incomingFire.fireOrder.damageclass === "HyperspaceJump") {
+        return; // Return nothing if "HyperspaceJump", we don't want the text showing Primary Structure to show.
+    }
+
+    return incomingFire.damagesCaused.filter(damage => damage.destroyed)
+        .map(damage => ({
+            name: shipManager.systems.getDisplayName(damage.system),
+            structure: damage.system instanceof Structure
+        }));
+}
 
     function getShipPositionAtTime(icon, time) {
         return FireAnimationHelper.getShipPositionAtTime(icon, time, this.movementAnimations);

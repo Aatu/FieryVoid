@@ -28,7 +28,8 @@ class VorlonArtifact extends UnevenBaseFourSections{
 		$this->Enormous = true;				
 		
 		/*Thirdspace use their own enhancement set */		
-//		Enhancements::nonstandardEnhancementSet($this, 'ThirdspaceShip');				     
+		Enhancements::nonstandardEnhancementSet($this, 'ThirdspaceShip');				     
+		$this->enhancementOptionsEnabled[] = 'IMPR_PSY'; //Ship has Psychic Field, add enhancement.
 
         $this->addPrimarySystem(new MagGravReactorTechnical(99, 99, 0, 0));        
 		$this->addPrimarySystem(new PowerCapacitor( 7, 40, 0, 10, false));//armor, structure, power req, output, has petals 
@@ -42,24 +43,24 @@ class VorlonArtifact extends UnevenBaseFourSections{
 		$AAC = $this->createAdaptiveArmorController(8, 3, 3); //$AAtotal, $AApertype, $AApreallocated
 		$this->addPrimarySystem( $AAC );      		  		
       
-		$this->addPrimarySystem(new ThirdspaceShield(2, 1600, 400, 210, 330, 'L'));		
+		$this->addPrimarySystem(new ThirdspaceShield(2, 1500, 500, 210, 330, 'L'));		
 
 
 //        $this->addFrontSystem(new GraviticThruster(6, 20, 0, 8, 1));           
 			
-		$this->addPrimarySystem(new ThirdspaceShield(2, 1600, 400, 330, 30, 'F'));		
+		$this->addPrimarySystem(new ThirdspaceShield(2, 1500, 250, 330, 30, 'F'));		
 
 
 //        $this->addAftSystem(new GraviticThruster(5, 24, 0, 8, 2));       
        
        
        	
-		$this->addPrimarySystem(new ThirdspaceShield(2, 1600, 400, 150, 210, 'A'));
+		$this->addPrimarySystem(new ThirdspaceShield(2, 1500, 250, 150, 210, 'A'));
 		
 //        $this->addLeftSystem(new GraviticThruster(6, 30, 0, 10, 3));                 
             
             	
-		$this->addPrimarySystem(new ThirdspaceShield(2, 1600, 400, 30, 150, 'R'));
+		$this->addPrimarySystem(new ThirdspaceShield(2, 1500, 500, 30, 150, 'R'));
 						                  
 //        $this->addRightSystem(new GraviticThruster(6, 30, 0, 10, 4)); 
 	                      

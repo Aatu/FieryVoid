@@ -83,9 +83,9 @@ class Enhancements{
 
 		case 'ThirdspaceShip':
 			Enhancements::blockStandardEnhancements($unit);
-			$unit->enhancementOptionsEnabled[] = 'IMPR_SR';			
+			$unit->enhancementOptionsEnabled[] = 'IMPR_SR';	
+			$unit->enhancementOptionsEnabled[] = 'IMPR_THSD';						
 			foreach ( $unit->enhancementOptionsDisabled as $key=>$value){ 
-				if($value=='IMPR_ENG'){ unset($unit->enhancementOptionsDisabled[$key]); }
 				if($value=='IMPR_SENS'){ unset($unit->enhancementOptionsDisabled[$key]); }									
 			}					
 			break;	
@@ -186,6 +186,25 @@ class Enhancements{
 			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 		  }
 	  }
+
+	  //Improved PSychic Field for Thirdspace	
+	  $enhID = 'IMPR_PSY';
+	  if(!in_array($enhID, $ship->enhancementOptionsDisabled)){ //option is not disabled
+		  $enhName = 'Improved Psychic Field (+1 range)';
+		  //count Psychic Fields
+		  $count = 0;	 
+		  foreach ($ship->systems as $system){
+			if ($system instanceof PsychicField){
+				$count++;
+			}
+		  }  
+		  if($count > 0){ //ship is actually equipped with a Psychic Field(s)	  
+			  $enhPrice = 300;	
+			  $enhPriceStep = 0; 
+			  $enhLimit = 1;	  
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
+		  }
+	  }
 	  
 		//Improved Reactor: +1/2/3/4 Power (depending on unit size), cost: 10 *Power added (double if ship has power deficit to begin with), limit: o1
 	  $enhID = 'IMPR_REA';
@@ -271,6 +290,24 @@ class Enhancements{
 		  }
 	  }  	
 
+	  //Improved Thirdspace Shield		    
+	  $enhID = 'IMPR_THSD';
+	  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option needs to be specifically enabled
+		  $enhName = 'Improved Thirdspace Shield';
+		  $enhLimit = 5; //Maximum 5 upgrades.
+		  $shields = 0;
+		  $rating = 0;		  
+		  foreach ($ship->systems as $system){
+			if ($system instanceof ThirdspaceShield){
+		  	$shields++;
+		  	$rating = $system->baseRating;
+		    }
+		  } 
+		  $enhPrice = (50 * $shields);//New rating multiplied by number of shields.
+		  $enhPriceStep = 0;
+		  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
+		  }
+
 	  //Improved Thought Shield for Mindriders		    
 	  $enhID = 'IMPR_TS';
 	  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option needs to be specifically enabled
@@ -312,7 +349,7 @@ class Enhancements{
 	  //Markab-specific - Enables 'Religious Fervor' refit to selected vessel which comes with some bonus and some penalties.
 	  $enhID = 'MARK_FERV';	  
 	  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option needs to be specifically enabled
-		  $enhName = 'Religious Fervor';
+		  $enhName = 'Religious Fervor - Only use when Desperate Rules apply';
 		  $enhLimit = 1;	
 		  $enhPrice = 0;
 		  $enhPriceStep = 0;
@@ -1097,7 +1134,7 @@ class Enhancements{
 	  //Markab specific - 'Religious Ferver' refit than provides some benefits along with some penalties.
 	  $enhID = 'FTR_FERV';	  
 	  if(in_array($enhID, $flight->enhancementOptionsEnabled)){ //option needs to be specifically enabled
-		  $enhName = 'Religious Fervor';
+		  $enhName = 'Religious Fervor - Only use when Desperate Rules apply';
 		  $enhLimit = 1;	
 		  $enhPrice = 0;	  
 		  $enhPriceStep = 0;
@@ -1559,6 +1596,14 @@ class Enhancements{
 						}
 						break;
 
+					case 'IMPR_PSY': //Improved Psychic Field
+						foreach ($ship->systems as $system){
+							if ($system instanceof PsychicField){
+								$system->range = $system->range;
+							}
+						}  
+						break;
+
 					case 'IMPR_REA': //Improved Reactor: more power output (depending on ship size
 						$strongestSystem = null;
 						$strongestValue = -1;	  
@@ -1605,6 +1650,22 @@ class Enhancements{
 						}  
 						break;	
 
+					case 'IMPR_THSD': //Improved Thirdspace Shield: +1 rating for each Thought Shield
+						foreach ($ship->systems as $system){							
+							if ($system instanceof ThirdspaceShield){
+								$system->baseRating += $enhCount;
+    							if($ship->shipSizeClass == 3){
+    								$system->maxhealth += $enhCount * 3;
+								}else{
+    								$system->maxhealth += $enhCount;									
+								}	
+							}
+							if ($system instanceof ThirdspaceShieldGenerator){
+								$system->output += $enhCount;
+							}							
+						}																	 
+						break;	
+						
 					case 'IMPR_TS': //Improved Thought Shield: +1 rating for each Thought Shield
 						foreach ($ship->systems as $system){							
 							if ($system instanceof ThoughtShield){
@@ -2033,13 +2094,22 @@ class Enhancements{
 								$strippedSystem->output = $system->output;
 							}
 							break;
-
+						case 'IMPR_PSY': //Spark Curtain - affects output of Spark Field
+							if($system instanceof PsychicField){
+								$strippedSystem->range = $system->range;
+							}
+							break;
 						case 'IMPR_SR': //improved self repair: modifies output of Self Repair
 							if ($system instanceof SelfRepair){ //SelfRepair
 								$strippedSystem->output = $system->output ;
 								$strippedSystem->critRollMod = $system->critRollMod ;
 							}
 							break;		
+						case 'IMPR_THSD': //improved Thirdspace Shield
+							if ($system instanceof ThirdspaceShield){
+								$strippedSystem->maxhealth = $system->maxhealth ;
+							}													
+							break;	
 						case 'IMPR_TS': //improved Thought Shield
 							if ($system instanceof ThoughtShield){
 								$strippedSystem->maxhealth = $system->maxhealth ;

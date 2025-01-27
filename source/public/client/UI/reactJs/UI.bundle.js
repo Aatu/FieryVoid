@@ -36342,14 +36342,22 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _templateObject = _taggedTemplateLiteral(["\n    position: fixed;\n    right:0;\n    top: 60px;\n    z-index: 4;\n"], ["\n    position: fixed;\n    right:0;\n    top: 60px;\n    z-index: 4;\n"]),
+var _templateObject = _taggedTemplateLiteral(["\n    position: fixed;\n    right: 0;\n    top: 60px;\n    z-index: 4;\n"], ["\n    position: fixed;\n    right: 0;\n    top: 60px;\n    z-index: 4;\n"]),
     _templateObject2 = _taggedTemplateLiteral(["\n    display: flex;\n    width: 50px;\n    height: 50px;\n    align-items: center;\n    justify-content: center;\n    font-size: 32px;\n    border-right: none;\n    margin-top: 5px;\n    background-repeat: no-repeat;\n    background-size: cover;\n    ", "\n"], ["\n    display: flex;\n    width: 50px;\n    height: 50px;\n    align-items: center;\n    justify-content: center;\n    font-size: 32px;\n    border-right: none;\n    margin-top: 5px;\n    background-repeat: no-repeat;\n    background-size: cover;\n    ", "\n"]),
     _templateObject3 = _taggedTemplateLiteral(["\n    background-image: url(\"./img/EEW.png\");\n"], ["\n    background-image: url(\"./img/EEW.png\");\n"]),
-    _templateObject4 = _taggedTemplateLiteral(["\n    background-image: url(\"./img/FEW.png\");\n"], ["\n    background-image: url(\"./img/FEW.png\");\n"]);
+    _templateObject4 = _taggedTemplateLiteral(["\n    background-image: url(\"./img/FEW.png\");\n"], ["\n    background-image: url(\"./img/FEW.png\");\n"]),
+    _templateObject5 = _taggedTemplateLiteral(["\n    background-image: url(\"./img/ballisticTarget2.png\");\n"], ["\n    background-image: url(\"./img/ballisticTarget2.png\");\n"]),
+    _templateObject6 = _taggedTemplateLiteral(["\n    background-image: url(\"./img/ballisticLaunch2.png\");\n"], ["\n    background-image: url(\"./img/ballisticLaunch2.png\");\n"]),
+    _templateObject7 = _taggedTemplateLiteral(["\n    background-image: url(\"./img/hexNumber.png\");\n"], ["\n    background-image: url(\"./img/hexNumber.png\");\n"]),
+    _templateObject8 = _taggedTemplateLiteral(["\n    position: absolute;\n    background-color: rgba(0, 0, 0, 0.7);\n    color: white;\n    padding: 5px 10px;\n    border-radius: 5px;\n    font-size: 12px;\n    pointer-events: none;\n    z-index: 10;\n    white-space: nowrap; /* Prevent text wrapping */\n"], ["\n    position: absolute;\n    background-color: rgba(0, 0, 0, 0.7);\n    color: white;\n    padding: 5px 10px;\n    border-radius: 5px;\n    font-size: 12px;\n    pointer-events: none;\n    z-index: 10;\n    white-space: nowrap; /* Prevent text wrapping */\n"]);
 
 var _react = require("react");
 
-var React = _interopRequireWildcard(_react);
+var _react2 = _interopRequireDefault(_react);
+
+var _reactDom = require("react-dom");
+
+var _reactDom2 = _interopRequireDefault(_reactDom);
 
 var _styledComponents = require("styled-components");
 
@@ -36358,8 +36366,6 @@ var _styledComponents2 = _interopRequireDefault(_styledComponents);
 var _styled = require("../styled");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _taggedTemplateLiteral(strings, raw) { return Object.freeze(Object.defineProperties(strings, { raw: { value: Object.freeze(raw) } })); }
 
@@ -36372,46 +36378,164 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var EwButtons = function (_React$Component) {
     _inherits(EwButtons, _React$Component);
 
-    function EwButtons() {
+    function EwButtons(props) {
         _classCallCheck(this, EwButtons);
 
-        return _possibleConstructorReturn(this, (EwButtons.__proto__ || Object.getPrototypeOf(EwButtons)).apply(this, arguments));
+        var _this = _possibleConstructorReturn(this, (EwButtons.__proto__ || Object.getPrototypeOf(EwButtons)).call(this, props));
+
+        _this.state = {
+            tooltipVisible: false,
+            tooltipText: "",
+            tooltipPosition: { top: 0, left: 0 }
+        };
+
+        _this.handleMouseEnter = _this.handleMouseEnter.bind(_this);
+        _this.handleMouseLeave = _this.handleMouseLeave.bind(_this);
+        _this.showFriendlyEW = _this.showFriendlyEW.bind(_this);
+        _this.showEnemyEW = _this.showEnemyEW.bind(_this);
+        _this.toggleFriendlyBallisticLines = _this.toggleFriendlyBallisticLines.bind(_this);
+        _this.toggleEnemyBallisticLines = _this.toggleEnemyBallisticLines.bind(_this);
+        _this.toggleHexNumbers = _this.toggleHexNumbers.bind(_this);
+        return _this;
     }
 
     _createClass(EwButtons, [{
-        key: "showFriendly",
-        value: function showFriendly(up) {
-            webglScene.customEvent('ShowFriendlyEW', { up: up });
+        key: "showFriendlyEW",
+        value: function showFriendlyEW(up) {
+            webglScene.customEvent("ShowFriendlyEW", { up: up });
         }
     }, {
-        key: "showEnemy",
-        value: function showEnemy(up) {
-            webglScene.customEvent('ShowEnemyEW', { up: up });
+        key: "showEnemyEW",
+        value: function showEnemyEW(up) {
+            webglScene.customEvent("ShowEnemyEW", { up: up });
+        }
+    }, {
+        key: "toggleFriendlyBallisticLines",
+        value: function toggleFriendlyBallisticLines(up) {
+            webglScene.customEvent("ToggleFriendlyBallisticLines", { up: up });
+        }
+    }, {
+        key: "toggleEnemyBallisticLines",
+        value: function toggleEnemyBallisticLines(up) {
+            webglScene.customEvent("ToggleEnemyBallisticLines", { up: up });
+        }
+    }, {
+        key: "toggleHexNumbers",
+        value: function toggleHexNumbers(up) {
+            webglScene.customEvent("ToggleHexNumbers", { up: up });
+        }
+    }, {
+        key: "handleMouseEnter",
+        value: function handleMouseEnter(event) {
+            var buttonType = event.currentTarget.dataset.type; // Get the type of button
+            var tooltipText = "";
+            var offsetX = -60; // Default horizontal offset (left of the button)
+            var offsetY = 0; // Default vertical offset (centered vertically)
+
+            // Determine the tooltip text and offsets based on button type
+            switch (buttonType) {
+                case "friendlyEW":
+                    tooltipText = "Show Friendly EW";
+                    offsetX = -107; // Move further left
+                    offsetY = -5; // Slightly above the center
+                    break;
+                case "enemyEW":
+                    tooltipText = "Show Enemy EW";
+                    offsetX = -100; // Slightly less left
+                    offsetY = -10; // Slightly below the center
+                    break;
+                case "friendlyBallistic":
+                    tooltipText = "Toggle Friendly Ballistics";
+                    offsetX = -140; // Farther left
+                    offsetY = -7; // Higher above
+                    break;
+                case "enemyBallistic":
+                    tooltipText = "Toggle Enemy Ballistics";
+                    offsetX = -135; // Closer to the button
+                    offsetY = -5; // Centered vertically
+                    break;
+                case "hexNumbers":
+                    tooltipText = "Toggle Hex Numbers";
+                    offsetX = -135; // Closer to the button
+                    offsetY = -5; // Centered vertically
+                    break;
+                default:
+                    tooltipText = "Unknown Button";
+            }
+
+            // Get button position and apply offsets
+            var buttonRect = event.currentTarget.getBoundingClientRect();
+            this.setState({
+                tooltipVisible: true,
+                tooltipText: tooltipText,
+                tooltipPosition: {
+                    top: buttonRect.top + buttonRect.height / 2 + offsetY,
+                    left: buttonRect.left + offsetX
+                }
+            });
+        }
+    }, {
+        key: "handleMouseLeave",
+        value: function handleMouseLeave() {
+            this.setState({ tooltipVisible: false });
+        }
+    }, {
+        key: "renderTooltip",
+        value: function renderTooltip() {
+            if (!this.state.tooltipVisible) return null;
+
+            return _reactDom2.default.createPortal(_react2.default.createElement(
+                Tooltip,
+                { style: { top: this.state.tooltipPosition.top, left: this.state.tooltipPosition.left } },
+                this.state.tooltipText
+            ), document.body // Render tooltip at the root of the DOM
+            );
         }
     }, {
         key: "render",
         value: function render() {
-            return React.createElement(
+            return _react2.default.createElement(
                 Container,
                 null,
-                React.createElement(FEWButton, {
-                    onMouseDown: this.showFriendly.bind(this, false),
-                    onMouseUp: this.showFriendly.bind(this, true),
-                    onTouchStart: this.showFriendly.bind(this, false),
-                    onTouchEnd: this.showFriendly.bind(this, true)
+                _react2.default.createElement(FEWButton, {
+                    "data-type": "friendlyEW",
+                    onMouseEnter: this.handleMouseEnter.bind(this),
+                    onMouseLeave: this.handleMouseLeave.bind(this),
+                    onMouseDown: this.showFriendlyEW.bind(this, false),
+                    onMouseUp: this.showFriendlyEW.bind(this, true)
                 }),
-                React.createElement(EEWButton, {
-                    onMouseDown: this.showEnemy.bind(this, false),
-                    onMouseUp: this.showEnemy.bind(this, true),
-                    onTouchStart: this.showEnemy.bind(this, false),
-                    onTouchEnd: this.showEnemy.bind(this, true)
-                })
+                _react2.default.createElement(EEWButton, {
+                    "data-type": "enemyEW",
+                    onMouseEnter: this.handleMouseEnter.bind(this),
+                    onMouseLeave: this.handleMouseLeave.bind(this),
+                    onMouseDown: this.showEnemyEW.bind(this, false),
+                    onMouseUp: this.showEnemyEW.bind(this, true)
+                }),
+                _react2.default.createElement(FBButton, {
+                    "data-type": "friendlyBallistic",
+                    onMouseEnter: this.handleMouseEnter.bind(this),
+                    onMouseLeave: this.handleMouseLeave.bind(this),
+                    onMouseDown: this.toggleFriendlyBallisticLines.bind(this, false)
+                }),
+                _react2.default.createElement(EBButton, {
+                    "data-type": "enemyBallistic",
+                    onMouseEnter: this.handleMouseEnter.bind(this),
+                    onMouseLeave: this.handleMouseLeave.bind(this),
+                    onMouseDown: this.toggleEnemyBallisticLines.bind(this, false)
+                }),
+                _react2.default.createElement(HexButton, {
+                    "data-type": "hexNumbers",
+                    onMouseEnter: this.handleMouseEnter.bind(this),
+                    onMouseLeave: this.handleMouseLeave.bind(this),
+                    onMouseDown: this.toggleHexNumbers.bind(this, false)
+                }),
+                this.renderTooltip()
             );
         }
     }]);
 
     return EwButtons;
-}(React.Component);
+}(_react2.default.Component);
 
 var Container = _styledComponents2.default.div.withConfig({
     displayName: "EwButtons__Container",
@@ -36421,12 +36545,19 @@ var Container = _styledComponents2.default.div.withConfig({
 var MainButton = _styled.ContainerRoundedRightSide.extend(_templateObject2, _styled.Clickable);
 
 var EEWButton = MainButton.extend(_templateObject3);
-
 var FEWButton = MainButton.extend(_templateObject4);
+var EBButton = MainButton.extend(_templateObject5);
+var FBButton = MainButton.extend(_templateObject6);
+var HexButton = MainButton.extend(_templateObject7);
+
+var Tooltip = _styledComponents2.default.div.withConfig({
+    displayName: "EwButtons__Tooltip",
+    componentId: "al1h4b-1"
+})(_templateObject8);
 
 exports.default = EwButtons;
 
-},{"../styled":75,"react":29,"styled-components":52}],62:[function(require,module,exports){
+},{"../styled":75,"react":29,"react-dom":23,"styled-components":52}],62:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -36709,9 +36840,12 @@ var PlayerSettingsForm = function (_React$Component) {
                         null,
                         "Keys"
                     ),
-                    React.createElement(_common.InputAndLabel, { label: "Key to display all EW", onChange: function onChange() {}, onKeydown: this.getOnKeyDown.call(this, "ShowAllEW"), value: this.getKey.call(this, "ShowAllEW") }),
-                    React.createElement(_common.InputAndLabel, { label: "Key to display FRIENDLY EW", onChange: function onChange() {}, onKeydown: this.getOnKeyDown.call(this, "ShowFriendlyEW"), value: this.getKey.call(this, "ShowFriendlyEW") }),
-                    React.createElement(_common.InputAndLabel, { label: "Key to display ENEMY EW", onChange: function onChange() {}, onKeydown: this.getOnKeyDown.call(this, "ShowEnemyEW"), value: this.getKey.call(this, "ShowEnemyEW") }),
+                    React.createElement(_common.InputAndLabel, { label: "Key to display ALL Electronic Warfare (EW)", onChange: function onChange() {}, onKeydown: this.getOnKeyDown.call(this, "ShowAllEW"), value: this.getKey.call(this, "ShowAllEW") }),
+                    React.createElement(_common.InputAndLabel, { label: "Key to display FRIENDLY Electronic Warfare (EW)", onChange: function onChange() {}, onKeydown: this.getOnKeyDown.call(this, "ShowFriendlyEW"), value: this.getKey.call(this, "ShowFriendlyEW") }),
+                    React.createElement(_common.InputAndLabel, { label: "Key to display ENEMY Electronic Warfare (EW)", onChange: function onChange() {}, onKeydown: this.getOnKeyDown.call(this, "ShowEnemyEW"), value: this.getKey.call(this, "ShowEnemyEW") }),
+                    React.createElement(_common.InputAndLabel, { label: "Key to display ALL Ballistics", onChange: function onChange() {}, onKeydown: this.getOnKeyDown.call(this, "ShowAllBallistics"), value: this.getKey.call(this, "ShowAllBallistics") }),
+                    React.createElement(_common.InputAndLabel, { label: "Key to display FRIENDLY Ballistics", onChange: function onChange() {}, onKeydown: this.getOnKeyDown.call(this, "ShowFriendlyBallistics"), value: this.getKey.call(this, "ShowFriendlyBallistics") }),
+                    React.createElement(_common.InputAndLabel, { label: "Key to display ENEMY Ballistics", onChange: function onChange() {}, onKeydown: this.getOnKeyDown.call(this, "ShowEnemyBallistics"), value: this.getKey.call(this, "ShowEnemyBallistics") }),
                     React.createElement(
                         _styled.SubTitle,
                         null,
@@ -38807,8 +38941,8 @@ var System = _styledComponents2.default.div.withConfig({
     } else if (props.highlight === 'Yellow') {
         return '1px solid #e1b000'; // Some systems get a different border
     } else if (props.highlight === 'Orange') {
-        return '1px solid #ff6d3c'; // Some systems get a different border            
-    } else if (props.highlight === 'RedBold') {
+        return '2px solid #ff6d3c'; // Some systems get a different border            
+    } else if (props.highlight === 'Red') {
         return '2px solid #ff0000'; // Some systems get a different border            
     } else {
         return '1px solid #496791';
@@ -39038,7 +39172,7 @@ var getBackgroundImage = function getBackgroundImage(system) {
 };
 
 var hasCriticals = function hasCriticals(system) {
-    return shipManager.criticals.hasCriticals(system);
+    return shipManager.criticals.hasCriticalsIcon(system);
 };
 
 var hasBorderHighlight = function hasBorderHighlight(ship, system) {
@@ -39835,12 +39969,27 @@ var SystemInfoButtons = function (_React$Component) {
 			weaponManager.changeShots(ship, system, -1);
 		}
 	}, {
-		key: "removeFireOrder",
-		value: function removeFireOrder(e) {
+		key: "removeFireOrderMulti",
+		value: function removeFireOrderMulti(e) {
 			e.stopPropagation();e.preventDefault();
 			var _props11 = this.props,
 			    ship = _props11.ship,
 			    system = _props11.system;
+
+			if (!canRemoveFireOrderMulti(ship, system)) {
+				return;
+			}
+
+			weaponManager.removeFiringOrderMulti(ship, system);
+			//        webglScene.customEvent('CloseSystemInfo');
+		}
+	}, {
+		key: "removeFireOrder",
+		value: function removeFireOrder(e) {
+			e.stopPropagation();e.preventDefault();
+			var _props12 = this.props,
+			    ship = _props12.ship,
+			    system = _props12.system;
 
 			if (!canRemoveFireOrder(ship, system)) {
 				return;
@@ -39853,9 +40002,9 @@ var SystemInfoButtons = function (_React$Component) {
 		key: "removeFireOrderAll",
 		value: function removeFireOrderAll(e) {
 			e.stopPropagation();e.preventDefault();
-			var _props12 = this.props,
-			    ship = _props12.ship,
-			    system = _props12.system;
+			var _props13 = this.props,
+			    ship = _props13.ship,
+			    system = _props13.system;
 
 			if (!canRemoveFireOrder(ship, system)) {
 				return;
@@ -39867,9 +40016,9 @@ var SystemInfoButtons = function (_React$Component) {
 		key: "allChangeFiringMode",
 		value: function allChangeFiringMode(e) {
 			e.stopPropagation();e.preventDefault();
-			var _props13 = this.props,
-			    ship = _props13.ship,
-			    system = _props13.system;
+			var _props14 = this.props,
+			    ship = _props14.ship,
+			    system = _props14.system;
 
 			if (!canChangeFiringMode(ship, system)) {
 				return;
@@ -39924,9 +40073,9 @@ var SystemInfoButtons = function (_React$Component) {
 		key: "changeFiringMode",
 		value: function changeFiringMode(e) {
 			e.stopPropagation();e.preventDefault();
-			var _props14 = this.props,
-			    ship = _props14.ship,
-			    system = _props14.system;
+			var _props15 = this.props,
+			    ship = _props15.ship,
+			    system = _props15.system;
 
 			if (!canChangeFiringMode(ship, system)) {
 				return;
@@ -39941,9 +40090,9 @@ var SystemInfoButtons = function (_React$Component) {
 		key: "declareSelfIntercept",
 		value: function declareSelfIntercept(e) {
 			e.stopPropagation();e.preventDefault();
-			var _props15 = this.props,
-			    ship = _props15.ship,
-			    system = _props15.system;
+			var _props16 = this.props,
+			    ship = _props16.ship,
+			    system = _props16.system;
 
 			if (!canSelfIntercept(ship, system)) {
 				return;
@@ -39957,9 +40106,9 @@ var SystemInfoButtons = function (_React$Component) {
 		key: "declareSelfInterceptAll",
 		value: function declareSelfInterceptAll(e) {
 			e.stopPropagation();e.preventDefault();
-			var _props16 = this.props,
-			    ship = _props16.ship,
-			    system = _props16.system;
+			var _props17 = this.props,
+			    ship = _props17.ship,
+			    system = _props17.system;
 
 			weaponManager.onDeclareSelfInterceptSingleAll(ship, system);
 			webglScene.customEvent('CloseSystemInfo');
@@ -39971,9 +40120,9 @@ var SystemInfoButtons = function (_React$Component) {
 		key: "nextCurrClass",
 		value: function nextCurrClass(e) {
 			e.stopPropagation();e.preventDefault();
-			var _props17 = this.props,
-			    ship = _props17.ship,
-			    system = _props17.system;
+			var _props18 = this.props,
+			    ship = _props18.ship,
+			    system = _props18.system;
 
 			system.nextCurrClass();
 			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
@@ -39982,9 +40131,9 @@ var SystemInfoButtons = function (_React$Component) {
 		key: "prevCurrClass",
 		value: function prevCurrClass(e) {
 			e.stopPropagation();e.preventDefault();
-			var _props18 = this.props,
-			    ship = _props18.ship,
-			    system = _props18.system;
+			var _props19 = this.props,
+			    ship = _props19.ship,
+			    system = _props19.system;
 
 			system.prevCurrClass();
 			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
@@ -39996,9 +40145,9 @@ var SystemInfoButtons = function (_React$Component) {
 		key: "AAincrease",
 		value: function AAincrease(e) {
 			e.stopPropagation();e.preventDefault();
-			var _props19 = this.props,
-			    ship = _props19.ship,
-			    system = _props19.system;
+			var _props20 = this.props,
+			    ship = _props20.ship,
+			    system = _props20.system;
 
 			system.doIncrease();
 			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
@@ -40009,9 +40158,9 @@ var SystemInfoButtons = function (_React$Component) {
 		key: "AAdecrease",
 		value: function AAdecrease(e) {
 			e.stopPropagation();e.preventDefault();
-			var _props20 = this.props,
-			    ship = _props20.ship,
-			    system = _props20.system;
+			var _props21 = this.props,
+			    ship = _props21.ship,
+			    system = _props21.system;
 
 			system.doDecrease();
 			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
@@ -40022,9 +40171,9 @@ var SystemInfoButtons = function (_React$Component) {
 		key: "AApropagate",
 		value: function AApropagate(e) {
 			e.stopPropagation();e.preventDefault();
-			var _props21 = this.props,
-			    ship = _props21.ship,
-			    system = _props21.system;
+			var _props22 = this.props,
+			    ship = _props22.ship,
+			    system = _props22.system;
 
 			var dmgType = system.getCurrDmgType();
 			var allocated = system.getCurrAllocated();
@@ -40084,9 +40233,9 @@ var SystemInfoButtons = function (_React$Component) {
 		key: "BFCPincrease",
 		value: function BFCPincrease(e) {
 			e.stopPropagation();e.preventDefault();
-			var _props22 = this.props,
-			    ship = _props22.ship,
-			    system = _props22.system;
+			var _props23 = this.props,
+			    ship = _props23.ship,
+			    system = _props23.system;
 
 			system.doIncrease();
 			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
@@ -40097,9 +40246,9 @@ var SystemInfoButtons = function (_React$Component) {
 		key: "BFCPdecrease",
 		value: function BFCPdecrease(e) {
 			e.stopPropagation();e.preventDefault();
-			var _props23 = this.props,
-			    ship = _props23.ship,
-			    system = _props23.system;
+			var _props24 = this.props,
+			    ship = _props24.ship,
+			    system = _props24.system;
 
 			system.doDecrease();
 			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
@@ -40110,9 +40259,9 @@ var SystemInfoButtons = function (_React$Component) {
 		key: "BFCPpropagate",
 		value: function BFCPpropagate(e) {
 			e.stopPropagation();e.preventDefault();
-			var _props24 = this.props,
-			    ship = _props24.ship,
-			    system = _props24.system;
+			var _props25 = this.props,
+			    ship = _props25.ship,
+			    system = _props25.system;
 
 			var FCType = system.getCurrFCType();
 			var allocated = system.getCurrAllocated();
@@ -40165,9 +40314,9 @@ var SystemInfoButtons = function (_React$Component) {
 		key: "Specselect",
 		value: function Specselect(e) {
 			e.stopPropagation();e.preventDefault();
-			var _props25 = this.props,
-			    ship = _props25.ship,
-			    system = _props25.system;
+			var _props26 = this.props,
+			    ship = _props26.ship,
+			    system = _props26.system;
 
 			system.doSelect();
 			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
@@ -40176,9 +40325,9 @@ var SystemInfoButtons = function (_React$Component) {
 		key: "Specunselect",
 		value: function Specunselect(e) {
 			e.stopPropagation();e.preventDefault();
-			var _props26 = this.props,
-			    ship = _props26.ship,
-			    system = _props26.system;
+			var _props27 = this.props,
+			    ship = _props27.ship,
+			    system = _props27.system;
 
 			system.doUnselect();
 			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
@@ -40187,9 +40336,9 @@ var SystemInfoButtons = function (_React$Component) {
 		key: "Specincrease",
 		value: function Specincrease(e) {
 			e.stopPropagation();e.preventDefault();
-			var _props27 = this.props,
-			    ship = _props27.ship,
-			    system = _props27.system;
+			var _props28 = this.props,
+			    ship = _props28.ship,
+			    system = _props28.system;
 
 			system.doUse();
 			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
@@ -40200,9 +40349,9 @@ var SystemInfoButtons = function (_React$Component) {
 		key: "Specdecrease",
 		value: function Specdecrease(e) {
 			e.stopPropagation();e.preventDefault();
-			var _props28 = this.props,
-			    ship = _props28.ship,
-			    system = _props28.system;
+			var _props29 = this.props,
+			    ship = _props29.ship,
+			    system = _props29.system;
 
 			system.doDecrease();
 			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
@@ -40211,12 +40360,23 @@ var SystemInfoButtons = function (_React$Component) {
 		/*Thirdspace Shield increase health*/
 
 	}, {
+		key: "TSShieldIncrease25",
+		value: function TSShieldIncrease25(e) {
+			e.stopPropagation();e.preventDefault();
+			var _props30 = this.props,
+			    ship = _props30.ship,
+			    system = _props30.system;
+
+			system.doIncrease25();
+			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+		}
+	}, {
 		key: "TSShieldIncrease10",
 		value: function TSShieldIncrease10(e) {
 			e.stopPropagation();e.preventDefault();
-			var _props29 = this.props,
-			    ship = _props29.ship,
-			    system = _props29.system;
+			var _props31 = this.props,
+			    ship = _props31.ship,
+			    system = _props31.system;
 
 			system.doIncrease10();
 			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
@@ -40225,9 +40385,9 @@ var SystemInfoButtons = function (_React$Component) {
 		key: "TSShieldIncrease5",
 		value: function TSShieldIncrease5(e) {
 			e.stopPropagation();e.preventDefault();
-			var _props30 = this.props,
-			    ship = _props30.ship,
-			    system = _props30.system;
+			var _props32 = this.props,
+			    ship = _props32.ship,
+			    system = _props32.system;
 
 			system.doIncrease5();
 			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
@@ -40236,9 +40396,9 @@ var SystemInfoButtons = function (_React$Component) {
 		key: "TSShieldIncrease",
 		value: function TSShieldIncrease(e) {
 			e.stopPropagation();e.preventDefault();
-			var _props31 = this.props,
-			    ship = _props31.ship,
-			    system = _props31.system;
+			var _props33 = this.props,
+			    ship = _props33.ship,
+			    system = _props33.system;
 
 			system.doIncrease();
 			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
@@ -40249,9 +40409,9 @@ var SystemInfoButtons = function (_React$Component) {
 		key: "TSShieldDecrease",
 		value: function TSShieldDecrease(e) {
 			e.stopPropagation();e.preventDefault();
-			var _props32 = this.props,
-			    ship = _props32.ship,
-			    system = _props32.system;
+			var _props34 = this.props,
+			    ship = _props34.ship,
+			    system = _props34.system;
 
 			system.doDecrease();
 			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
@@ -40260,9 +40420,9 @@ var SystemInfoButtons = function (_React$Component) {
 		key: "TSShieldDecrease5",
 		value: function TSShieldDecrease5(e) {
 			e.stopPropagation();e.preventDefault();
-			var _props33 = this.props,
-			    ship = _props33.ship,
-			    system = _props33.system;
+			var _props35 = this.props,
+			    ship = _props35.ship,
+			    system = _props35.system;
 
 			system.doDecrease5();
 			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
@@ -40271,11 +40431,22 @@ var SystemInfoButtons = function (_React$Component) {
 		key: "TSShieldDecrease10",
 		value: function TSShieldDecrease10(e) {
 			e.stopPropagation();e.preventDefault();
-			var _props34 = this.props,
-			    ship = _props34.ship,
-			    system = _props34.system;
+			var _props36 = this.props,
+			    ship = _props36.ship,
+			    system = _props36.system;
 
 			system.doDecrease10();
+			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+		}
+	}, {
+		key: "TSShieldDecrease25",
+		value: function TSShieldDecrease25(e) {
+			e.stopPropagation();e.preventDefault();
+			var _props37 = this.props,
+			    ship = _props37.ship,
+			    system = _props37.system;
+
+			system.doDecrease25();
 			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 		}
 		/*Thirdspace Shield Generator Presets*/
@@ -40284,9 +40455,9 @@ var SystemInfoButtons = function (_React$Component) {
 		key: "TSShieldGenSelect",
 		value: function TSShieldGenSelect(e) {
 			e.stopPropagation();e.preventDefault();
-			var _props35 = this.props,
-			    ship = _props35.ship,
-			    system = _props35.system;
+			var _props38 = this.props,
+			    ship = _props38.ship,
+			    system = _props38.system;
 
 			system.doSelect();
 			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
@@ -40298,9 +40469,9 @@ var SystemInfoButtons = function (_React$Component) {
 		key: "ThoughtShieldIncrease10",
 		value: function ThoughtShieldIncrease10(e) {
 			e.stopPropagation();e.preventDefault();
-			var _props36 = this.props,
-			    ship = _props36.ship,
-			    system = _props36.system;
+			var _props39 = this.props,
+			    ship = _props39.ship,
+			    system = _props39.system;
 
 			system.doIncrease10();
 			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
@@ -40309,9 +40480,9 @@ var SystemInfoButtons = function (_React$Component) {
 		key: "ThoughtShieldIncrease5",
 		value: function ThoughtShieldIncrease5(e) {
 			e.stopPropagation();e.preventDefault();
-			var _props37 = this.props,
-			    ship = _props37.ship,
-			    system = _props37.system;
+			var _props40 = this.props,
+			    ship = _props40.ship,
+			    system = _props40.system;
 
 			system.doIncrease5();
 			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
@@ -40320,9 +40491,9 @@ var SystemInfoButtons = function (_React$Component) {
 		key: "ThoughtShieldIncrease",
 		value: function ThoughtShieldIncrease(e) {
 			e.stopPropagation();e.preventDefault();
-			var _props38 = this.props,
-			    ship = _props38.ship,
-			    system = _props38.system;
+			var _props41 = this.props,
+			    ship = _props41.ship,
+			    system = _props41.system;
 
 			system.doIncrease();
 			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
@@ -40333,9 +40504,9 @@ var SystemInfoButtons = function (_React$Component) {
 		key: "ThoughtShieldDecrease",
 		value: function ThoughtShieldDecrease(e) {
 			e.stopPropagation();e.preventDefault();
-			var _props39 = this.props,
-			    ship = _props39.ship,
-			    system = _props39.system;
+			var _props42 = this.props,
+			    ship = _props42.ship,
+			    system = _props42.system;
 
 			system.doDecrease();
 			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
@@ -40344,9 +40515,9 @@ var SystemInfoButtons = function (_React$Component) {
 		key: "ThoughtShieldDecrease5",
 		value: function ThoughtShieldDecrease5(e) {
 			e.stopPropagation();e.preventDefault();
-			var _props40 = this.props,
-			    ship = _props40.ship,
-			    system = _props40.system;
+			var _props43 = this.props,
+			    ship = _props43.ship,
+			    system = _props43.system;
 
 			system.doDecrease5();
 			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
@@ -40355,9 +40526,9 @@ var SystemInfoButtons = function (_React$Component) {
 		key: "ThoughtShieldDecrease10",
 		value: function ThoughtShieldDecrease10(e) {
 			e.stopPropagation();e.preventDefault();
-			var _props41 = this.props,
-			    ship = _props41.ship,
-			    system = _props41.system;
+			var _props44 = this.props,
+			    ship = _props44.ship,
+			    system = _props44.system;
 
 			system.doDecrease10();
 			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
@@ -40368,9 +40539,9 @@ var SystemInfoButtons = function (_React$Component) {
 		key: "ThoughtShieldGenSelect",
 		value: function ThoughtShieldGenSelect(e) {
 			e.stopPropagation();e.preventDefault();
-			var _props42 = this.props,
-			    ship = _props42.ship,
-			    system = _props42.system;
+			var _props45 = this.props,
+			    ship = _props45.ship,
+			    system = _props45.system;
 
 			system.doSelect();
 			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
@@ -40382,9 +40553,9 @@ var SystemInfoButtons = function (_React$Component) {
 		key: "nextSRsystem",
 		value: function nextSRsystem(e) {
 			e.stopPropagation();e.preventDefault();
-			var _props43 = this.props,
-			    ship = _props43.ship,
-			    system = _props43.system;
+			var _props46 = this.props,
+			    ship = _props46.ship,
+			    system = _props46.system;
 
 			system.getNextSystem();
 			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
@@ -40395,9 +40566,9 @@ var SystemInfoButtons = function (_React$Component) {
 		key: "SRPriorityUp",
 		value: function SRPriorityUp(e) {
 			e.stopPropagation();e.preventDefault();
-			var _props44 = this.props,
-			    ship = _props44.ship,
-			    system = _props44.system;
+			var _props47 = this.props,
+			    ship = _props47.ship,
+			    system = _props47.system;
 
 			system.setRepairPriority(20);
 			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
@@ -40406,9 +40577,9 @@ var SystemInfoButtons = function (_React$Component) {
 		key: "SRPriorityDown",
 		value: function SRPriorityDown(e) {
 			e.stopPropagation();e.preventDefault();
-			var _props45 = this.props,
-			    ship = _props45.ship,
-			    system = _props45.system;
+			var _props48 = this.props,
+			    ship = _props48.ship,
+			    system = _props48.system;
 
 			system.setRepairPriority(0);
 			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
@@ -40417,9 +40588,9 @@ var SystemInfoButtons = function (_React$Component) {
 		key: "SRPriorityCancel",
 		value: function SRPriorityCancel(e) {
 			e.stopPropagation();e.preventDefault();
-			var _props46 = this.props,
-			    ship = _props46.ship,
-			    system = _props46.system;
+			var _props49 = this.props,
+			    ship = _props49.ship,
+			    system = _props49.system;
 
 			system.setRepairPriority(-1);
 			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
@@ -40427,10 +40598,10 @@ var SystemInfoButtons = function (_React$Component) {
 	}, {
 		key: "render",
 		value: function render() {
-			var _props47 = this.props,
-			    ship = _props47.ship,
-			    selectedShip = _props47.selectedShip,
-			    system = _props47.system;
+			var _props50 = this.props,
+			    ship = _props50.ship,
+			    selectedShip = _props50.selectedShip,
+			    system = _props50.system;
 
 
 			if (!canDoAnything) {
@@ -40440,44 +40611,47 @@ var SystemInfoButtons = function (_React$Component) {
 			return React.createElement(
 				Container,
 				null,
-				canOnline(ship, system) && React.createElement(Button, { title: "power on (R = mass)", onClick: this.online.bind(this), onContextMenu: this.allOnline.bind(this), img: "./img/on.png" }),
-				canOffline(ship, system) && React.createElement(Button, { title: "power off (R = mass for weapons)", onClick: this.offline.bind(this), onContextMenu: this.allOffline.bind(this), img: "./img/off.png" }),
-				canOverload(ship, system) && React.createElement(Button, { title: "overload", onClick: this.overload.bind(this), img: "./img/overload.png" }),
-				canStopOverload(ship, system) && React.createElement(Button, { title: "stop overload", nClick: this.stopOverload.bind(this), img: "./img/overloading.png" }),
-				canDeBoost(ship, system) && React.createElement(Button, { title: "deboost", onClick: this.deboost.bind(this), img: "./img/minussquare.png" }),
-				canBoost(ship, system) && React.createElement(Button, { title: "boost", onClick: this.boost.bind(this), img: "./img/plussquare.png" }),
-				canAddShots(ship, system) && React.createElement(Button, { title: "more shots", onClick: this.addShots.bind(this), img: "./img/plussquare.png" }),
-				canReduceShots(ship, system) && React.createElement(Button, { title: "less shots", onClick: this.reduceShots.bind(this), img: "./img/minussquare.png" }),
-				canRemoveFireOrder(ship, system) && React.createElement(Button, { title: "cancel fire order (R = mass)", onClick: this.removeFireOrder.bind(this), onContextMenu: this.removeFireOrderAll.bind(this), img: "./img/firing.png" }),
+				canOnline(ship, system) && React.createElement(Button, { title: "Power on (RMB = All systems selected)", onClick: this.online.bind(this), onContextMenu: this.allOnline.bind(this), img: "./img/on.png" }),
+				canOffline(ship, system) && React.createElement(Button, { title: "Power off (RMB = All systems selected)", onClick: this.offline.bind(this), onContextMenu: this.allOffline.bind(this), img: "./img/off.png" }),
+				canOverload(ship, system) && React.createElement(Button, { title: "Overload", onClick: this.overload.bind(this), img: "./img/overload.png" }),
+				canStopOverload(ship, system) && React.createElement(Button, { title: "Stop overload", nClick: this.stopOverload.bind(this), img: "./img/overloading.png" }),
+				canDeBoost(ship, system) && React.createElement(Button, { title: "Remove boost", onClick: this.deboost.bind(this), img: "./img/minussquare.png" }),
+				canBoost(ship, system) && React.createElement(Button, { title: "Boost", onClick: this.boost.bind(this), img: "./img/plussquare.png" }),
+				canAddShots(ship, system) && React.createElement(Button, { title: "More shots", onClick: this.addShots.bind(this), img: "./img/plussquare.png" }),
+				canReduceShots(ship, system) && React.createElement(Button, { title: "Less shots", onClick: this.reduceShots.bind(this), img: "./img/minussquare.png" }),
+				canRemoveFireOrderMulti(ship, system) && React.createElement(Button, { title: "Remove a fire order", onClick: this.removeFireOrderMulti.bind(this), img: "./img/unfiringSmall.png" }),
+				canRemoveFireOrder(ship, system) && React.createElement(Button, { title: "Remove all fire orders (RMB = All weapons selected)", onClick: this.removeFireOrder.bind(this), onContextMenu: this.removeFireOrderAll.bind(this), img: "./img/firing.png" }),
 				canChangeFiringMode(ship, system) && getFiringModesCurr(ship, system),
 				canChangeFiringMode(ship, system) && getFiringModes(ship, system, this.changeFiringMode.bind(this), this.allChangeFiringMode.bind(this)),
-				canSelfIntercept(ship, system) && React.createElement(Button, { title: "allow interception (R = mass)", onClick: this.declareSelfIntercept.bind(this), onContextMenu: this.declareSelfInterceptAll.bind(this), img: "./img/selfIntercept.png" }),
+				canSelfIntercept(ship, system) && React.createElement(Button, { title: "Allow interception (RMB = All systems selected)", onClick: this.declareSelfIntercept.bind(this), onContextMenu: this.declareSelfInterceptAll.bind(this), img: "./img/selfIntercept.png" }),
 				canAAdisplayCurrClass(ship, system) && React.createElement(Button, { title: getAAcurrClassName(ship, system), img: getAAcurrClassImg(ship, system) }),
-				canAAdisplayCurrClass(ship, system) && React.createElement(Button, { title: "next", onClick: this.nextCurrClass.bind(this), img: "./img/systemicons/AAclasses/iconNext.png" }),
+				canAAdisplayCurrClass(ship, system) && React.createElement(Button, { title: "Next", onClick: this.nextCurrClass.bind(this), img: "./img/systemicons/AAclasses/iconNext.png" }),
 				canAAincrease(ship, system) && React.createElement(Button, { onClick: this.AAincrease.bind(this), img: "./img/systemicons/AAclasses/iconPlus.png" }),
 				canAAdecrease(ship, system) && React.createElement(Button, { onClick: this.AAdecrease.bind(this), img: "./img/systemicons/AAclasses/iconMinus.png" }),
-				canAApropagate(ship, system) && React.createElement(Button, { title: "propagate setting", onClick: this.AApropagate.bind(this), img: "./img/systemicons/AAclasses/iconPropagate.png" }),
+				canAApropagate(ship, system) && React.createElement(Button, { title: "Propagate setting", onClick: this.AApropagate.bind(this), img: "./img/systemicons/AAclasses/iconPropagate.png" }),
 				canBFCPdisplayCurrClass(ship, system) && React.createElement(Button, { title: getBFCPcurrClassName(ship, system), img: getBFCPcurrClassImg(ship, system) }),
-				canBFCPdisplayCurrClass(ship, system) && React.createElement(Button, { title: "next", onClick: this.nextCurrClass.bind(this), img: "./img/systemicons/BFCPclasses/iconNext.png" }),
+				canBFCPdisplayCurrClass(ship, system) && React.createElement(Button, { title: "Next", onClick: this.nextCurrClass.bind(this), img: "./img/systemicons/BFCPclasses/iconNext.png" }),
 				canBFCPincrease(ship, system) && React.createElement(Button, { onClick: this.BFCPincrease.bind(this), img: "./img/systemicons/BFCPclasses/iconPlus.png" }),
 				canBFCPdecrease(ship, system) && React.createElement(Button, { onClick: this.BFCPdecrease.bind(this), img: "./img/systemicons/BFCPclasses/iconMinus.png" }),
-				canBFCPpropagate(ship, system) && React.createElement(Button, { title: "propagate setting", onClick: this.BFCPpropagate.bind(this), img: "./img/systemicons/BFCPclasses/iconPropagate.png" }),
+				canBFCPpropagate(ship, system) && React.createElement(Button, { title: "Propagate setting", onClick: this.BFCPpropagate.bind(this), img: "./img/systemicons/BFCPclasses/iconPropagate.png" }),
 				canSpecdisplayCurrClass(ship, system) && React.createElement(Button, { title: getSpeccurrClassName(ship, system), img: getSpeccurrClassImg(ship, system) }),
-				canSpecdisplayCurrClass(ship, system) && React.createElement(Button, { title: "prev", onClick: this.prevCurrClass.bind(this), img: "./img/systemicons/Specialistclasses/iconPrev.png" }),
-				canSpecdisplayCurrClass(ship, system) && React.createElement(Button, { title: "next", onClick: this.nextCurrClass.bind(this), img: "./img/systemicons/Specialistclasses/iconNext.png" }),
+				canSpecdisplayCurrClass(ship, system) && React.createElement(Button, { title: "Previous", onClick: this.prevCurrClass.bind(this), img: "./img/systemicons/Specialistclasses/iconPrev.png" }),
+				canSpecdisplayCurrClass(ship, system) && React.createElement(Button, { title: "Next", onClick: this.nextCurrClass.bind(this), img: "./img/systemicons/Specialistclasses/iconNext.png" }),
 				canSpecselect(ship, system) && React.createElement(Button, { onClick: this.Specselect.bind(this), img: "./img/systemicons/Specialistclasses/select.png" }),
 				canSpecunselect(ship, system) && React.createElement(Button, { onClick: this.Specunselect.bind(this), img: "./img/systemicons/Specialistclasses/unselect.png" }),
 				canSpecincrease(ship, system) && React.createElement(Button, { onClick: this.Specincrease.bind(this), img: "./img/systemicons/Specialistclasses/iconPlus.png" }),
 				canSpecdecrease(ship, system) && React.createElement(Button, { onClick: this.Specdecrease.bind(this), img: "./img/systemicons/Specialistclasses/iconMinus.png" }),
+				canTSShieldIncrease(ship, system) && React.createElement(Button, { onClick: this.TSShieldIncrease25.bind(this), img: "./img/systemicons/ShieldGenclasses/iconPlus25.png" }),
 				canTSShieldIncrease(ship, system) && React.createElement(Button, { onClick: this.TSShieldIncrease10.bind(this), img: "./img/systemicons/ShieldGenclasses/iconPlus10.png" }),
 				canTSShieldIncrease(ship, system) && React.createElement(Button, { onClick: this.TSShieldIncrease5.bind(this), img: "./img/systemicons/ShieldGenclasses/iconPlus5.png" }),
 				canTSShieldIncrease(ship, system) && React.createElement(Button, { onClick: this.TSShieldIncrease.bind(this), img: "./img/systemicons/BFCPclasses/iconPlus.png" }),
 				canTSShieldDecrease(ship, system) && React.createElement(Button, { onClick: this.TSShieldDecrease.bind(this), img: "./img/systemicons/BFCPclasses/iconMinus.png" }),
 				canTSShieldDecrease(ship, system) && React.createElement(Button, { onClick: this.TSShieldDecrease5.bind(this), img: "./img/systemicons/ShieldGenclasses/iconMinus5.png" }),
 				canTSShieldDecrease(ship, system) && React.createElement(Button, { onClick: this.TSShieldDecrease10.bind(this), img: "./img/systemicons/ShieldGenclasses/iconMinus10.png" }),
+				canTSShieldDecrease(ship, system) && React.createElement(Button, { onClick: this.TSShieldDecrease25.bind(this), img: "./img/systemicons/ShieldGenclasses/iconMinus25.png" }),
 				canTSShieldGendisplayCurrClass(ship, system) && React.createElement(Button, { title: getTSShieldGencurrClassName(ship, system), img: getTSShieldGencurrClassImg(ship, system) }),
-				canTSShieldGendisplayCurrClass(ship, system) && React.createElement(Button, { title: "prev", onClick: this.prevCurrClass.bind(this), img: "./img/systemicons/Specialistclasses/iconPrev.png" }),
-				canTSShieldGendisplayCurrClass(ship, system) && React.createElement(Button, { title: "next", onClick: this.nextCurrClass.bind(this), img: "./img/systemicons/Specialistclasses/iconNext.png" }),
+				canTSShieldGendisplayCurrClass(ship, system) && React.createElement(Button, { title: "Previous", onClick: this.prevCurrClass.bind(this), img: "./img/systemicons/Specialistclasses/iconPrev.png" }),
+				canTSShieldGendisplayCurrClass(ship, system) && React.createElement(Button, { title: "Next", onClick: this.nextCurrClass.bind(this), img: "./img/systemicons/Specialistclasses/iconNext.png" }),
 				"     ",
 				canTSShieldGenSelect(ship, system) && React.createElement(Button, { onClick: this.TSShieldGenSelect.bind(this), img: "./img/systemicons/Specialistclasses/select.png" }),
 				canThoughtShieldIncrease(ship, system) && React.createElement(Button, { onClick: this.ThoughtShieldIncrease10.bind(this), img: "./img/systemicons/ShieldGenclasses/iconPlus10.png" }),
@@ -40487,10 +40661,10 @@ var SystemInfoButtons = function (_React$Component) {
 				canThoughtShieldDecrease(ship, system) && React.createElement(Button, { onClick: this.ThoughtShieldDecrease5.bind(this), img: "./img/systemicons/ShieldGenclasses/iconMinus5.png" }),
 				canThoughtShieldDecrease(ship, system) && React.createElement(Button, { onClick: this.ThoughtShieldDecrease10.bind(this), img: "./img/systemicons/ShieldGenclasses/iconMinus10.png" }),
 				canThoughtShieldGendisplayCurrClass(ship, system) && React.createElement(Button, { title: getTSShieldGencurrClassName(ship, system), img: getTSShieldGencurrClassImg(ship, system) }),
-				canThoughtShieldGendisplayCurrClass(ship, system) && React.createElement(Button, { title: "prev", onClick: this.prevCurrClass.bind(this), img: "./img/systemicons/Specialistclasses/iconPrev.png" }),
-				canThoughtShieldGendisplayCurrClass(ship, system) && React.createElement(Button, { title: "next", onClick: this.nextCurrClass.bind(this), img: "./img/systemicons/Specialistclasses/iconNext.png" }),
+				canThoughtShieldGendisplayCurrClass(ship, system) && React.createElement(Button, { title: "Previous", onClick: this.prevCurrClass.bind(this), img: "./img/systemicons/Specialistclasses/iconPrev.png" }),
+				canThoughtShieldGendisplayCurrClass(ship, system) && React.createElement(Button, { title: "Next", onClick: this.nextCurrClass.bind(this), img: "./img/systemicons/Specialistclasses/iconNext.png" }),
 				canThoughtShieldGenSelect(ship, system) && React.createElement(Button, { onClick: this.TSShieldGenSelect.bind(this), img: "./img/systemicons/Specialistclasses/select.png" }),
-				canSRdisplayCurrSystem(ship, system) && React.createElement(Button, { title: "next", onClick: this.nextSRsystem.bind(this), img: "./img/systemicons/AAclasses/iconNext.png" }),
+				canSRdisplayCurrSystem(ship, system) && React.createElement(Button, { title: "Next", onClick: this.nextSRsystem.bind(this), img: "./img/systemicons/AAclasses/iconNext.png" }),
 				canSRdisplayCurrSystem(ship, system) && React.createElement(Button, { title: getSRdescription(ship, system), img: getSRicon(ship, system) }),
 				canSRdisplayCurrSystem(ship, system) && React.createElement(Button, { title: "Highest priority", onClick: this.SRPriorityUp.bind(this), img: "./img/iconSRHigh.png" }),
 				canSRdisplayCurrSystem(ship, system) && React.createElement(Button, { title: "Disable repair", onClick: this.SRPriorityDown.bind(this), img: "./img/iconSRLow.png" }),
@@ -40642,7 +40816,7 @@ var getSRicon = function getSRicon(ship, system) {
 };
 
 var canDoAnything = exports.canDoAnything = function canDoAnything(ship, system) {
-	return canOffline(ship, system) || canOnline(ship, system) || canOverload(ship, system) || canStopOverload(ship, system) || canBoost(ship, system) || canDeBoost(ship, system) || canAddShots(ship, system) || canReduceShots(ship, system) || canRemoveFireOrder(ship, system) || canChangeFiringMode(ship, system) || canSelfIntercept(ship, system) || canAA(ship, system) || canBFCP(ship, system) || canSpec(ship, system) || canTSShield(ship, system) || canThoughtShield(ship, system) || canTSShieldGen(ship, system) || canThoughtShieldGen(ship, system) || canSRdisplayCurrSystem(ship, system);
+	return canOffline(ship, system) || canOnline(ship, system) || canOverload(ship, system) || canStopOverload(ship, system) || canBoost(ship, system) || canDeBoost(ship, system) || canAddShots(ship, system) || canReduceShots(ship, system) || canRemoveFireOrderMulti(ship, system) || canRemoveFireOrder(ship, system) || canChangeFiringMode(ship, system) || canSelfIntercept(ship, system) || canAA(ship, system) || canBFCP(ship, system) || canSpec(ship, system) || canTSShield(ship, system) || canThoughtShield(ship, system) || canTSShieldGen(ship, system) || canThoughtShieldGen(ship, system) || canSRdisplayCurrSystem(ship, system);
 };
 
 var canOffline = function canOffline(ship, system) {
@@ -40678,6 +40852,9 @@ var canReduceShots = function canReduceShots(ship, system) {
 	return system.weapon && system.canChangeShots && weaponManager.hasFiringOrder(ship, system) && weaponManager.getFiringOrder(ship, system).shots > 1;
 };
 
+var canRemoveFireOrderMulti = function canRemoveFireOrderMulti(ship, system) {
+	return system.weapon && weaponManager.hasFiringOrder(ship, system) && system.canSplitShots;
+};
 var canRemoveFireOrder = function canRemoveFireOrder(ship, system) {
 	return system.weapon && weaponManager.hasFiringOrder(ship, system);
 };
@@ -40769,7 +40946,7 @@ Object.defineProperty(exports, "__esModule", {
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _templateObject = _taggedTemplateLiteral(["\n    font-size: 12px;\n"], ["\n    font-size: 12px;\n"]),
-    _templateObject2 = _taggedTemplateLiteral(["\n    position: absolute;\n    z-index: 20000;\n    ", "\n    max-width: 200px;\n    text-align: left;\n    opacity:0.8;\n    border: 1px solid #496791;\n    padding-bottom: 3px;\n"], ["\n    position: absolute;\n    z-index: 20000;\n    ", "\n    max-width: 200px;\n    text-align: left;\n    opacity:0.8;\n    border: 1px solid #496791;\n    padding-bottom: 3px;\n"]),
+    _templateObject2 = _taggedTemplateLiteral(["\n    position: absolute;\n    z-index: 20000;\n    ", "\n    max-width: 250px;\n    text-align: left;\n    opacity:0.8;\n    border: 1px solid #496791;\n    padding-bottom: 3px;\n"], ["\n    position: absolute;\n    z-index: 20000;\n    ", "\n    max-width: 250px;\n    text-align: left;\n    opacity:0.8;\n    border: 1px solid #496791;\n    padding-bottom: 3px;\n"]),
     _templateObject3 = _taggedTemplateLiteral(["\n    text-align: left;\n    color: #5e85bc;\n    font-family: arial;\n    font-size: 11px;\n"], ["\n    text-align: left;\n    color: #5e85bc;\n    font-family: arial;\n    font-size: 11px;\n"]),
     _templateObject4 = _taggedTemplateLiteral(["\n    color: white;\n"], ["\n    color: white;\n"]);
 

@@ -1833,6 +1833,48 @@ class AmmoMissileRackD extends AmmoMissileRackS{
 } //endof class AmmoMissileRackD
 
 
+
+
+
+/*Class-G Missile Rack - custom weapon that looks at central magazine to determine available firing modes (and number of actual rounds available)
+	all functionality prepared in standard class-S rack
+	holds 20 missiles
+*/
+class AmmoMissileRackG extends AmmoMissileRackS{
+	public $name = "ammoMissileRackG";
+    public $displayName = "Guided Missile Rack";
+    public $iconPath = "missile1.png";    
+
+    public $range = 25;
+    public $distanceRange = 65;
+    public $firingMode = 1;
+    public $priority = 6;
+    public $loadingtime = 2; 
+
+    public $useOEW = true;
+    
+	//basic launcher data, before being modified by actual missiles
+	protected $basicFC=array(3,3,3);
+	protected $basicRange=25;
+	protected $basicDistanceRange = 65;
+
+    protected $rackExplosionDamage = 75; //how much damage will this weapon do in case of catastrophic explosion
+    protected $rackExplosionThreshold = 20; //how high roll is needed for rack explosion   
+	
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base=false)
+	{
+		if ( $maxhealth == 0 ) $maxhealth = 6;
+            	if ( $powerReq == 0 ) $powerReq = 0;					
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base); //Parent routines take care of the rest
+	}
+} //endof class AmmoMissileRackG
+
+
+
+
+
+
+
 /*Bomb Rack - weapon that looks at central magazine to determine available firing modes (and number of actual rounds available)
 	all functionality prepared in standard class-S rack
 	holds 8 missiles (Basic Missiles by default at no price (unless filled with actual bombs), the only other option is Flash missiles)
@@ -1952,7 +1994,7 @@ class AmmoMissileRackF extends AmmoMissileRackS {
 		parent::setSystemDataWindow($turn);	
 			$this->data["Special"] .= '<br>When fully loaded, can fire Normal mode (with 20 hex range before modifiers), or Long Range (with +15 hexes to normal range, but reduced Fire Control).';
 			$this->data["Special"] .= '<br>NOTE - Weapon will select mode automatically based on the range of your selected target.';			
-			$this->data["Special"] .= '<br>After one turn loading, can fire in Rapid mode (with reduced range and Fire Control) - but NOT after using Long Range mode in previous turn.';
+			$this->data["Special"] .= '<br>After one turn loading, can fire in Rapid mode (with reduced range and Fire Control) - but NOT after using Long Range mode in previous turn (icon will show as greyed out).';
 		}
 
 		
@@ -2085,7 +2127,7 @@ class AmmoMissileRackF extends AmmoMissileRackS {
 			if($currNote->turn == $gamedata->turn-1) if ($currNote->notevalue == 'L'){ //only current round matters!
 				
 			$this->nullFireControl();//Null fire control for weapon, to prevent firing after Long Range shot.
-
+        	$this->iconPath = "ClassFMissileRackTechnical.png";
 		}		
 		//and immediately delete notes themselves, they're no longer needed (this will not touch the database, just memory!)
 //		$this->recalculateFireControl(); //necessary for the variable to affect actual firing		
@@ -2118,7 +2160,7 @@ class AmmoMissileRackF extends AmmoMissileRackS {
 			$strippedSystem->rangeArray = $this->rangeArray;
 			$strippedSystem->firedInRapidMode = $this->firedInRapidMode;			
 			$strippedSystem->firedInLongRangeMode = $this->firedInLongRangeMode;
-			$strippedSystem->noHexTargeting = $this->noHexTargeting;													
+			$strippedSystem->noHexTargeting = $this->noHexTargeting;													$strippedSystem->iconPath = $this->iconPath;			
 			return $strippedSystem;
 		}
 

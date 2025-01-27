@@ -516,6 +516,37 @@ window.shipManager = {
         return false;
     },
 
+	//Used by RelayAnimationStrategy to check if ship has jumped, if so different destroyed sprite
+	hasJumpedNotDestroyed: function (ship) {
+		var hasJumped = false;
+	    // Check if the ship has a jump engine
+	    const jumpEngine = shipManager.systems.getSystemByName(ship, "jumpEngine");
+	    
+	    // If no jump engine, ship cannot jump
+	    if (!jumpEngine) {
+	        return false;
+	    }
+	    
+	    // Check if the jump engine is boosted
+	    var boostedJump = shipManager.power.isBoosted(ship, jumpEngine);
+	    if(!boostedJump) return false; //Hasn't boosted jump engine, it cannot have jumped.
+	    	
+		//Check damage entries, and remove Hyperspace jump entry, to see if ship was 'destroyed' by jumping not actual damage.	    
+		var struct = shipManager.systems.getStructureSystem(ship, 0);
+            var maxHealth = struct.maxhealth;
+            var totalDamage = 0;
+            var thisDamage = null;
+            for (var i in struct.damage) {
+                thisDamage = struct.damage[i];
+                if (thisDamage.damageclass !== 'HyperspaceJump') totalDamage += thisDamage.damage; //Only count non-jump damage, as jumping destroys ship anyway.
+            }
+            
+        if(totalDamage < maxHealth) return true; //The other damage sustained has not destroyed this ship, jumping has.
+        
+        return hasJumped;
+	},
+	
+		
     isDestroyed: function isDestroyed(ship) {
 
         if (ship == null) {
