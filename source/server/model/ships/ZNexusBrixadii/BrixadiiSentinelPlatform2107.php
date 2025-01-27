@@ -4,7 +4,7 @@ class BrixadiiSentinelPlatform2107 extends OSAT{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 135;
+		$this->pointCost = 130;
 		$this->faction = 'ZNexus Brixadii Clans';
         $this->phpclass = "BrixadiiSentinelPlatform2107";
         $this->imagePath = "img/ships/Nexus/brixadii_osat_dual_mount.png";
