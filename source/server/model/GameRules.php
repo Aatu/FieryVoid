@@ -10,7 +10,10 @@ class GameRules implements JsonSerializable{
         if ($movementRules !== null) {
             array_push($this->rules, $movementRules);
         }
-
+        $desperateRules = $this->getDesperateRules($rules);
+        if ($desperateRules !== null) {
+            array_push($this->rules, $desperateRules);
+        }
     }
 
     private function getSimultaneousMovementRules($rules) {
@@ -20,6 +23,14 @@ class GameRules implements JsonSerializable{
 
         return null;
     }
+
+    private function getDesperateRules($rules) {
+        if (isset($rules['desperate'])) {
+            return new DesperateRule((int)$rules['desperate']);
+        }
+
+        return null;
+    }    
 
     public function jsonSerialize() {
         $list = [];

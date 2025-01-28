@@ -5,7 +5,7 @@ class TrekFederationIllustrious extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 500;
-	$this->faction = "ZStarTrek Federation (TOS)";
+	$this->faction = "ZStarTrek (TOS) Federation";
         $this->phpclass = "TrekFederationIllustrious";
         $this->imagePath = "img/ships/StarTrek/Constitution.png";
         $this->shipClass = "Illustrious Battle Carrier";
@@ -88,28 +88,28 @@ class TrekFederationIllustrious extends HeavyCombatVessel{
 	    
         $this->hitChart = array(
             0=> array(
-                    8 => "Structure",
-                    11 => "Scanner",
-                    14 => "Engine",
-                    17 => "Hangar",
-                    19 => "Reactor",
-                    20 => "C&C",
+				2 => "2:Nacelle",
+				9 => "Structure",
+				13 => "Hangar",
+				15 => "Scanner",
+				17 => "Engine",
+				19 => "Reactor",
+				20 => "C&C",
             ),
             1=> array(
 				2 => "Shield Projector",
-				6 => "Photon Torpedo",
-				9 => "Phaser",
-				10 => "Light Phaser",
-				11 => "Tractor Beam",
+				4 => "Photon Torpedo",
+				6 => "Phaser",
+				7 => "Light Phaser",
+				8 => "Tractor Beam",
 				18 => "Structure",
 				20 => "Primary",
             ),
             2=> array(
 				2 => "Shield Projector",
-				4 => "0:Hangar",
-				9 => "Nacelle",
-				11 => "Phaser",
-				12 => "Light Phaser",
+				6 => "Nacelle",
+				8 => "0:Hangar",
+				10 => "Light Phaser",
 				18 => "Structure",
 				20 => "Primary",
             ),

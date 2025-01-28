@@ -463,7 +463,8 @@ spl_autoload_register(
                 'jashakarn' => '/server/model/ships/dilgar/jashakarN.php',
                 'jashakarp' => '/server/model/ships/dilgar/jashakarP.php',
                 'jastat' => '/server/model/ships/narn/jastat.php',
-     		    'jadul' => '/server/model/ships/narn/JaDul.php',       
+     		    'jadul' => '/server/model/ships/narn/JaDul.php',
+     		    'jadan' => '/server/model/ships/narn/JaDan.php',      		           
                 'jenas' => '/server/model/ships/centauri_old/jenas.php',
                 'jonkurfreighter' => '/server/model/ships/dilgar/jonkurFreighter.php',
                 'jonkurrefit' => '/server/model/ships/dilgar/jonkurRefit.php',
@@ -910,6 +911,7 @@ spl_autoload_register(
                 'shrike1984' => '/server/model/ships/drazi_old/shrike1984.php',
                 'shyarie' => '/server/model/ships/abbai/shyarie.php',
                 'simultaneousmovementrule' => '/server/model/SimultaneousMovementRule.php',
+                'desperaterule' => '/server/model/DesperateRule.php',                
                 'sitara' => '/server/model/ships/centauri/sitara.php',
                 'skiatha' => '/server/model/ships/abbai/skiatha.php',
                 'skiff' => '/server/model/ships/raiders/skiff.php',
@@ -1079,6 +1081,7 @@ spl_autoload_register(
                 'tiracaprototype' => '/server/model/ships/abbai/tiracaPrototype.php',
                 'tishat' => '/server/model/ships/minbari/tishat.php',
                 'tkharas' => '/server/model/ships/narn/tkharAS.php',
+                'tghoras' => '/server/model/ships/narn/tghorAS.php',
                 'tloth' => '/server/model/ships/narn/tloth.php',
                 'tmpinidown' => '/server/model/cricialClasses.php',
                 'tmpsensordown' => '/server/model/cricialClasses.php',
@@ -1211,7 +1214,8 @@ spl_autoload_register(
                 'zzunofftshon' => '/server/model/ships/narn/zzunoffTshon.php',
                 //'zzunofftshonstealth' => '/server/model/ships/narn/zzunoffTshonStealth.php',
                 'zzunofftvoth' => '/server/model/ships/narn/zzunoffTvoth.php',
-		    
+                'zzunoffnaroth' => '/server/model/ships/narn/zzunoffNaRoth.php',
+                'zzunoffnaral' => '/server/model/ships/narn/zzunoffNaRal.php',		    
 		 
                 'ochlavitafull' => '/server/model/ships/dilgar/ochlavitaFull.php',   
                 'ochlavitamfull' => '/server/model/ships/dilgar/ochlavitaMFull.php',   
@@ -2767,7 +2771,8 @@ spl_autoload_register(
 				'xotia' => '/server/model/ships/vree/XotiA.php',
 				'xotib' => '/server/model/ships/vree/XotiB.php',
 				'tyllz'	=> '/server/model/ships/vree/Tyllz.php',
-		    						
+				'xaarix'=> '/server/model/ships/vree/Xaarix.php',				
+				'vyreel'=> '/server/model/ships/vree/Vyreel.php',	    						
 				'zshadowxonn' => '/server/model/ships/vree/ZShadowXonn.php', //tournament prize
 												
 				//antimatter-specific criticals
@@ -2814,6 +2819,14 @@ spl_autoload_register(
 				
 				'trekphasedpulsecannon' => '/server/model/weapons/customTrek.php',
 				'trekphasedpulseaccelerator' => '/server/model/weapons/customTrek.php',
+				
+				'trekion' => '/server/model/weapons/customTrek.php',
+				'trekfighterdisablerbase' => '/server/model/weapons/customTrek.php',
+				'trekearlyfighterdisabler' => '/server/model/weapons/customTrek.php',
+				'trekfighterdisabler' => '/server/model/weapons/customTrek.php',
+				'trekshipdisablerbase' => '/server/model/weapons/customTrek.php',
+				'treklightdisabler' => '/server/model/weapons/customTrek.php',
+				'trekmediumdisabler' => '/server/model/weapons/customTrek.php',
 				
 				//systems
                 'trekwarpdrive' => '/server/model/weapons/customTrek.php', //nacelle
@@ -2909,13 +2922,14 @@ spl_autoload_register(
 				'treknausicaanheavygliderearly' => '/server/model/ships/ZTrekOther/TrekNausicaanHeavyGliderEarly.php',
 				'treknausicaanglidershf' => '/server/model/ships/ZTrekOther/TrekNausicaanGliderSHF.php',
 				'treknausicaangliderearlyshf' => '/server/model/ships/ZTrekOther/TrekNausicaanGliderEarlySHF.php',
+				'treknausicaanbp' => '/server/model/ships/ZTrekOther/TrekNausicaanBP.php',
 				
-				'treksulibancellshiplarge' => '/server/model/ships/ZTrekOther/TrekSulibanCellshipLarge.php',
-				'treksulibancellshipmed' => '/server/model/ships/ZTrekOther/TrekSulibanCellshipMed.php',
-				'treksulibancellshipsmall' => '/server/model/ships/ZTrekOther/TrekSulibanCellshipSmall.php',
-				'treksulibancarrier' => '/server/model/ships/ZTrekOther/TrekSulibanCarrier.php',
-				'treksulibancruiser' => '/server/model/ships/ZTrekOther/TrekSulibanCruiser.php',
-				'treksulibanhelix' => '/server/model/ships/ZTrekOther/TrekSulibanHelix.php',
+				'treksulibancellshiplarge' => '/server/model/ships/ZTrekSuliban/TrekSulibanCellshipLarge.php',
+				'treksulibancellshipmed' => '/server/model/ships/ZTrekSuliban/TrekSulibanCellshipMed.php',
+				'treksulibancellshipsmall' => '/server/model/ships/ZTrekSuliban/TrekSulibanCellshipSmall.php',
+				'treksulibancarrier' => '/server/model/ships/ZTrekSuliban/TrekSulibanCarrier.php',
+				'treksulibancruiser' => '/server/model/ships/ZTrekSuliban/TrekSulibanCruiser.php',
+				'treksulibanhelix' => '/server/model/ships/ZTrekSuliban/TrekSulibanHelix.php',
 				
 				
 				
@@ -3364,6 +3378,7 @@ spl_autoload_register(
 				'thirdspaceshieldgenerator' => '/server/model/systems/baseSystems.php',				
 				'advancedsingularitydrive' => '/server/model/systems/baseSystems.php',
 				'psionicconcentrator' => '/server/model/weapons/specialWeapons.php',
+				'psionicconcentratorlight' => '/server/model/weapons/specialWeapons.php',				
 				'heavypsioniclance' => 	'/server/model/weapons/specialWeapons.php',
 				'psioniclance' => 	'/server/model/weapons/specialWeapons.php',
 				'psionictorpedo' => '/server/model/weapons/torpedo.php',    
@@ -3372,6 +3387,8 @@ spl_autoload_register(
 				'thirdspaceattackcraft' => '/server/model/ships/thirdspace/ThirdspaceAttackCraft.php',	
 				'thirdspacetorpedoattackcraft' => '/server/model/ships/thirdspace/ThirdspaceTorpedoAttackCraft.php',	
 				'thirdspacelanceattackcraft' => '/server/model/ships/thirdspace/ThirdspaceLanceAttackCraft.php',
+				'thirdspacescoutattackcraft' => '/server/model/ships/thirdspace/ThirdspaceScoutAttackCraft.php',
+				'thirdspacepsychicattackcraft' => '/server/model/ships/thirdspace/ThirdspacePsychicAttackCraft.php',				
 				'thirdspacebattlescout' => '/server/model/ships/thirdspace/ThirdspaceBattleScout.php',		
 				'thirdspacecarrier' => '/server/model/ships/thirdspace/ThirdspaceCarrier.php',
 				'thirdspaceselfrepair' => '/server/model/systems/baseSystems.php',

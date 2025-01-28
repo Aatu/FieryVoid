@@ -1,19 +1,19 @@
 <?php
-class ApolloStrikeAM extends BaseShip{
+class apolloStrikeAM extends BaseShip{
 
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
 
         $this->pointCost = 875;
         $this->faction = "Earth Alliance (custom)";
-        $this->phpclass = "ApolloStrikeAM";
+        $this->phpclass = "apolloStrikeAM";
         $this->imagePath = "img/ships/apollo.png";
         $this->shipClass = "Apollo Strike Cruiser";
         $this->shipSizeClass = 3;
         $this->canvasSize = 200;
       
-        $this->occurence = "uncommon";
-        $this->variantOf = "Apollo Bombardment Cruiser";
+//        $this->occurence = "uncommon";
+//        $this->variantOf = "Apollo Bombardment Cruiser";
 		$this->unofficial = true;      
       
         $this->fighters = array("normal"=>6);

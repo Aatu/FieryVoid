@@ -5,7 +5,7 @@ class TrekSulibanHelix extends VreeCapital{
 		parent::__construct($id, $userid, $name,  $slot);
 
         $this->pointCost = 1100;
-        $this->faction = "ZTrek Playtest Other Factions";
+        $this->faction = "ZStarTrek (early) Suliban";
         $this->phpclass = "TrekSulibanHelix";
         $this->imagePath = "img/ships/StarTrek/SulibanHelix.png";
         $this->shipClass = "Suliban Helix";
@@ -272,10 +272,10 @@ class TrekSulibanHelix extends VreeCapital{
 	//d20 hit chart
         $this->hitChart = array(
             0=> array(
-                    7 => "Structure",
-                    11 => "Cargo Bay",
-                    14 => "Scanner",
-                    17 => "Engine",
+                    9 => "Structure",
+                    13 => "Cargo Bay",
+                    16 => "Scanner",
+                    18 => "Engine",
                     19 => "Reactor",
                     20 => "C&C",
            		 ),
@@ -283,7 +283,7 @@ class TrekSulibanHelix extends VreeCapital{
                     4 => "TAG:Cargo Bay",
 					6 => "TAG:Shield Projector",
                     10 => "TAG:Weapon",                    
-                    17 => "TAG:Outer Structure",
+                    17 => "Structure",
                     20 => "Primary",
            		 ),
             2=> array(
@@ -291,7 +291,7 @@ class TrekSulibanHelix extends VreeCapital{
 					6 => "TAG:Shield Projector",
                     9 => "TAG:Weapon",            
                     11 => "TAG:Nacelle",                     
-                    17 => "TAG:Outer Structure",
+                    17 => "Structure",
                     20 => "Primary",
            		 ),
             31=> array(
@@ -299,7 +299,7 @@ class TrekSulibanHelix extends VreeCapital{
 					6 => "TAG:Shield Projector",
                     9 => "TAG:Weapon",            
                     11 => "TAG:Nacelle",                     
-                    17 => "TAG:Outer Structure",
+                    17 => "Structure",
                     20 => "Primary",
            		 ),
             32=> array(
@@ -307,7 +307,7 @@ class TrekSulibanHelix extends VreeCapital{
 					6 => "TAG:Shield Projector",
                     9 => "TAG:Weapon",            
                     11 => "TAG:Nacelle",                     
-                    17 => "TAG:Outer Structure",
+                    17 => "Structure",
                     20 => "Primary",
            		 ),
             41=> array(
@@ -315,7 +315,7 @@ class TrekSulibanHelix extends VreeCapital{
 					6 => "TAG:Shield Projector",
                     9 => "TAG:Weapon",            
                     11 => "TAG:Nacelle",                     
-                    17 => "TAG:Outer Structure",
+                    17 => "Structure",
                     20 => "Primary",
            		 ),
        		42=> array(
@@ -323,7 +323,7 @@ class TrekSulibanHelix extends VreeCapital{
 					6 => "TAG:Shield Projector",
                     9 => "TAG:Weapon",            
                     11 => "TAG:Nacelle",                     
-                    17 => "TAG:Outer Structure",
+                    17 => "Structure",
                     20 => "Primary",
            		 ),
            	);

@@ -5,7 +5,7 @@ class TrekSulibanCruiser extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 425;
-        $this->faction = "ZTrek Playtest Other Factions";
+        $this->faction = "ZStarTrek (early) Suliban";
         $this->phpclass = "TrekSulibanCruiser";
         $this->imagePath = "img/ships/StarTrek/SulibanCruiser.png";
         $this->shipClass = "Suliban Cruiser";
@@ -77,23 +77,24 @@ class TrekSulibanCruiser extends MediumShip{
 		
 		0=> array(
 			4 => "2:Nacelle",
-			7 => "Hangar",			
-			11 => "Scanner",
-			15 => "Engine",
+			10 => "Structure",
+			12 => "Hangar",			
+			14 => "Scanner",
+			16 => "Engine",
 			18 => "Reactor",
 			20 => "C&C",
 		),
 
 		1=> array(
-			4 => "Particle Cutter",
-			6 => "Defense Guns",
-		    	7 => "2:Shield Projector",
+			3 => "Particle Cutter",
+			5 => "Defense Guns",
+			6 => "2:Shield Projector",
 			17 => "Structure",
 			20 => "Primary",
 		),
 
 		2=> array(
-		    	2 => "Shield Projector",
+		    2 => "Shield Projector",
 			5 => "Defense Guns",
 			10 => "Nacelle",
 			17 => "Structure",

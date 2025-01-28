@@ -247,41 +247,42 @@ shipManager.power = {
 			var batteryShips = new Array();
 			var counter = 0;
 			for (var i in gamedata.ships) {
-	  var ship = gamedata.ships[i];
-	            if (ship.unavailable) continue;
-	            if (ship.flight) continue;
-	            if (ship.userid != gamedata.thisplayer) continue;
-	            if (!(shipManager.systems.getSystemByName(ship, "PlasmaBattery"))) continue;
-	            if (shipManager.isDestroyed(ship)) continue;
+				var ship = gamedata.ships[i];
+					if(ship.faction !== "Pak'ma'ra Confederacy") continue; //I'm TRYING to be efficient!
+		            if (ship.unavailable) continue;
+		            if (ship.flight) continue;
+		            if (ship.userid != gamedata.thisplayer) continue;
+		            if (!(shipManager.systems.getSystemByName(ship, "PlasmaBattery"))) continue;
+		            if (shipManager.isDestroyed(ship)) continue;
 
-var batteryPowerAvailable = 0;
-//Calculate battery power available (find all batteries that are not destroyed, sum up their contents)
-
-                   for (var i = 0; i < ship.systems.length; i++) {
-                        var currBattery = ship.systems[i];
-              	         if (currBattery.name == "PlasmaBattery" && !(shipManager.systems.isDestroyed(ship, currBattery))){ //only Plasma Batteries which are not destroyed are of interest 
-							batteryPowerAvailable += shipManager.systems.getOutput(ship, currBattery);                                                              
-				}
-			}	
-                          
-var batteryPowerRequired = 0;
-//Calculate battery power required (find all Plasma Webs that are firing offensively without being boosted)			
-					for (var i = 0; i < ship.systems.length; i++) {
-                        var currWeb = ship.systems[i];
- 						if(currWeb.name == "PakmaraPlasmaWeb"){ //only Plasma Webs  are of interest 
- 							for (var k = 0; k < currWeb.fireOrders.length; k++) {
-                            var currFireOrder = currWeb.fireOrders[k];
-                            if ((currFireOrder.firingMode == "2") && (shipManager.power.getBoost(currWeb) == 0)) {
-                               batteryPowerRequired += 1;
-                            }
-					}       	
+				var batteryPowerAvailable = 0;
+				//Calculate battery power available (find all batteries that are not destroyed, sum up their contents)
+	                for (var i = 0; i < ship.systems.length; i++) {
+	                	var currBattery = ship.systems[i];
+	              	    if (currBattery.name == "PlasmaBattery" && !(shipManager.systems.isDestroyed(ship, currBattery))){ //only Plasma Batteries which are not destroyed are of interest 
+						batteryPowerAvailable += shipManager.systems.getOutput(ship, currBattery);                                                              
+					}
 				}	
+	                          
+				var batteryPowerRequired = 0;
+				//Calculate battery power required (find all Plasma Webs that are firing offensively without being boosted)			
+				for (var i = 0; i < ship.systems.length; i++) {
+	                var currWeb = ship.systems[i];
+	 				if(currWeb.name == "PakmaraPlasmaWeb"){ //only Plasma Webs  are of interest 
+	 					for (var k = 0; k < currWeb.fireOrders.length; k++) {
+	                    var currFireOrder = currWeb.fireOrders[k];
+	                        if ((currFireOrder.firingMode == "2") && (shipManager.power.getBoost(currWeb) == 0)) {
+		                        batteryPowerRequired += 1;
+		                    }
+						}       	
+					}	
+				}
+	            
+	            if (batteryPowerAvailable < batteryPowerRequired) {
+	                batteryShips[counter] = ship.name;
+	                counter++;
+	            }
 			}
-            if (batteryPowerAvailable < batteryPowerRequired) {
-                batteryShips[counter] = ship.name;
-                counter++;
-            }
-		}
 		return batteryShips;
 	},	//endof getPlasmaBatteryShipsNegativePower
 	
@@ -668,31 +669,31 @@ var batteryPowerRequired = 0;
 
 
 	checkBoostValid: function checkBoostValid(ship, system) {
+	    var validBoost = true;
 
-		var validBoost = true;
-		
-		if (ship.faction == "Pak'ma'ra Confederacy" && system instanceof Scanner) {
-			
-			var batteryPowerAvailable = 0;
-			var scannerStrength = shipManager.systems.getOutput(ship, system);
-			var reactorSurplus = shipManager.power.getReactorPower(ship, system);
-			
-			//Calculate battery power available (find all batteries that are not destroyed, sum up their contents)
-            for (var i = 0; i < ship.systems.length; i++) {
-                var currBattery = ship.systems[i];
-              	if (currBattery.name == "PlasmaBattery" && !(shipManager.systems.isDestroyed(ship, currBattery))){
-				batteryPowerAvailable += shipManager.systems.getOutput(ship, currBattery);                                                              
-				}
-			}
-			
-			//Check if reactor surplus, minus battery power is enough to boost Scanner.  If not, throw error.	
-			if ((reactorSurplus - batteryPowerAvailable) < (scannerStrength+1)) {
-				confirm.error("Power from Plasma Batteries cannot be used to boost sensors.");
-				validBoost = false;
-			}
-		}
-		
-		return validBoost;
+	    if (ship.faction === "Pak'ma'ra Confederacy" && system instanceof Scanner) {
+	        var batteryPowerAvailable = 0;
+	        var scannerStrength = shipManager.systems.getOutput(ship, system);
+	        var reactorSurplus = shipManager.power.getReactorPower(ship, system);
+
+	        // Calculate total Plasma Battery power available
+	        ship.systems.forEach(currBattery => {
+	            if (currBattery.name === "PlasmaBattery" && !shipManager.systems.isDestroyed(ship, currBattery)) {
+	                batteryPowerAvailable += shipManager.systems.getOutput(ship, currBattery);
+	            }
+	        });
+
+	        var effectiveReactorPower = reactorSurplus - batteryPowerAvailable;
+	        var powerNeeded = scannerStrength + 1;
+
+	        // Validate boost power
+	        if (batteryPowerAvailable > 0 && effectiveReactorPower < powerNeeded) {
+	            confirm.error("Power from Plasma Batteries cannot be used to boost sensors.");
+	            validBoost = false;
+	        }
+	    }
+
+	    return validBoost;
 	},
 	
 
@@ -887,11 +888,16 @@ var batteryPowerRequired = 0;
         if (system instanceof JumpEngine) {
 			var healthThreshold = system.maxhealth / 2;
 			var currHealth = shipManager.systems.getRemainingHealth(system);
-            var html = '';		
+            var html = '';
+			//Check Jump Drive is over 50% health, and Desperate Rules do not apply to player team or both teams		
 			if(currHealth > healthThreshold){
-	                html += "WARNING - Jump Drive should only be deactivated after it’s taken 50% damage or more.";
-	                html += "<br>";
-					confirm.warning(html);
+				// No warning for ships if desperate rules apply
+				if (gamedata.rules.desperate === undefined || 
+					(gamedata.rules.desperate !== ship.team && gamedata.rules.desperate !== -1)) {
+	                	html += "WARNING - Jump Drive should only be deactivated after it’s taken 50% damage or more.";
+	                	html += "<br>";
+						confirm.warning(html);
+				}		
 	         }         
 		}
 

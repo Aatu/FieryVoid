@@ -5,7 +5,7 @@ class TrekFederationMirandaTransport extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 425;
-        $this->faction = "ZStarTrek Federation (TOS)";
+        $this->faction = "ZStarTrek (TOS) Federation";
         $this->phpclass = "TrekFederationMirandaTransport";
         $this->imagePath = "img/ships/StarTrek/FederationMiranda.png";
         $this->shipClass = "Miranda Fast Transport";
@@ -91,11 +91,12 @@ class TrekFederationMirandaTransport extends MediumShip{
 	$this->hitChart = array(
 		
 		0=> array(
-			6 => "2:Nacelle",
-                        7 => "2:Cargo Bay A",
-                        8 => "2:Cargo Bay B",
-			10 => "Scanner",
-			13 => "Hangar",
+			2 => "2:Nacelle",
+			4 => "2:Cargo Bay A",
+			6 => "2:Cargo Bay B",
+			10 => "Structure",
+			12 => "Hangar",
+			14 => "Scanner",
 			16 => "Engine",
 			18 => "Reactor",
 			20 => "C&C",
@@ -103,20 +104,20 @@ class TrekFederationMirandaTransport extends MediumShip{
 
 		1=> array(
 			2 => "Shield Projector",
-                        4 => "2:Cargo Bay A",
-                        6 => "2:Cargo Bay B",
-			10 => "Light Phaser",
-			11 => "Tractor Beam",
+			4 => "2:Cargo Bay A",
+			6 => "2:Cargo Bay B",
+			9 => "Light Phaser",
+			10 => "Tractor Beam",
 			17 => "Structure",
 			20 => "Primary",
 		),
 
 		2=> array(
-		    	5 => "Nacelle",
+		    5 => "Nacelle",
 			7 => "Shield Projector",
-			9 => "Light Phaser",
-                        10 => "Cargo Bay A",
-                        11 => "Cargo Bay B",
+			8 => "Light Phaser",
+			10 => "Cargo Bay A",
+			12 => "Cargo Bay B",
 			17 => "Structure",
 			20 => "Primary",
 		),

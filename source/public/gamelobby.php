@@ -222,7 +222,9 @@ if ($gamelobbydata->gamespace == '-1x-1'){ //open map
 }
 
 $simMv = false;
+$desperate = false;
 $initiativeCategories = null;
+$desperateTeams = null;
 
 if ($gamelobbydata->rules) {
     if ($gamelobbydata->rules->hasRuleName('initiativeCategories')) {
@@ -231,6 +233,12 @@ if ($gamelobbydata->rules) {
             $initiativeCategories = $gamelobbydata->rules->callRule('jsonSerialize', []);
         }
     }
+    if ($gamelobbydata->rules->hasRuleName('desperate')) {
+        $desperate = true;
+        if ($gamelobbydata->rules->hasRule('jsonSerialize')) {
+            $desperateTeams = $gamelobbydata->rules->callRule('jsonSerialize', []);
+        }        
+    }    
 }
 
 if ($simMv == true) { // simultaneous movement
@@ -240,6 +248,21 @@ if ($simMv == true) { // simultaneous movement
     }
 } else { // standard movement
     $optionsUsed .= ', Standard Movement';
+}
+
+if ($desperate == true) { // Desperate rules in play
+    $teamDisplay = null;
+   
+    if($desperateTeams == 1) {
+            $teamDisplay = "Team 1";
+    }else if($desperateTeams == 2){    
+        $teamDisplay = "Team 2";
+    }else{    
+        $teamDisplay = "Both Teams";
+    }
+    $optionsUsed .= ', Desperate Rules: '. $teamDisplay . '';
+} else { // standard movement
+    $optionsUsed .= ', Normal Rules';
 }
 
 ?>
@@ -335,7 +358,7 @@ if ($simMv == true) { // simultaneous movement
                 <span class ="value points"></span>
                 <span class="smallSize headerSpan">PLAYER:</span>
                 <span class="playername"></span><span class="status">READY</span>
-                <span class="takeslot clickable">Take slot</span>
+                <span class="takeslot clickable">TAKE SLOT</span>
                 <span class="selectslot clickable">SELECT</span>
             </div>
             <div>

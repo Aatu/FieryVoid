@@ -269,12 +269,6 @@ VorlonLightningGun2.prototype.initializationUpdate = function() {
     return this;
 };
 
-
-
-
-
-
-
 var VorlonDischargePulsar = function VorlonDischargePulsar(json, ship) {
     Weapon.call(this, json, ship);
 };
@@ -292,23 +286,17 @@ VorlonDischargePulsar.prototype.initializationUpdate = function() {
     return this;
 };
 
-
-
-
-
-
-
-
-
-
-
-
-
 var PsionicConcentrator = function PsionicConcentrator(json, ship) {
     Weapon.call(this, json, ship);
 };
 PsionicConcentrator.prototype = Object.create(Weapon.prototype);
 PsionicConcentrator.prototype.constructor = PsionicConcentrator;
+
+var PsionicConcentratorLight = function PsionicConcentratorLight(json, ship) {
+    Weapon.call(this, json, ship);
+};
+PsionicConcentratorLight.prototype = Object.create(Weapon.prototype);
+PsionicConcentratorLight.prototype.constructor = PsionicConcentratorLight;
 
 var HeavyPsionicLance = function HeavyPsionicLance(json, ship) {
     Weapon.call(this, json, ship);
@@ -370,15 +358,6 @@ HeavyPsionicLance.prototype.initBoostableInfo = function () {
             break;
 	}
 	
-/*	
-	if (!window.weaponManager.isLoaded(this)) {
-		this.outputDisplay = window.weaponManager.isLoaded(this);
-	} else if (this.data.Boostlevel > 0) {
-		this.outputDisplay = this.data.Boostlevel;
-	} else {
-		this.outputDisplay = '-'; //'0' is not shown!
-	}        
-*/
     return this;
 };
 var PsionicLance = function PsionicLance(json, ship) {
@@ -447,23 +426,36 @@ var PsychicField = function PsychicField(json, ship)
 PsychicField.prototype = Object.create( Weapon.prototype );
 PsychicField.prototype.constructor = PsychicField;
 
-PsychicField.prototype.initBoostableInfo = function(){
+PsychicField.prototype.initBoostableInfo = function() {
     // Needed because it can change during initial phase
     // because of adding extra power.
-    if(window.weaponManager.isLoaded(this)){
-        this.range = 4 + 1*shipManager.power.getBoost(this);
+    if (window.weaponManager.isLoaded(this)) {
+    	
+    	if(gamedata.gamephase == 1){
+	        // Use a baseRange property to store the original range if not already defined
+	        if (this.baseRange === undefined) {
+	            this.baseRange = this.range; // Save the initial range value
+	        }
+	        
+        // Calculate the boosted range dynamically without modifying baseRange
+        var boost = shipManager.power.getBoost(this);
+        this.range = this.baseRange + boost;	        
+		}
+
         this.data["Range"] = this.range;
-        this.minDamage = 1 + shipManager.power.getBoost(this);//Psychic Field does flat damage, mainly to prioritise against other fields.
-        this.minDamage = Math.max(1,this.minDamage);
-        this.maxDamage =  1 + shipManager.power.getBoost(this);
+        // Calculate damage based on boost level
+        this.minDamage = 1 + boost; // Psychic Field does flat damage
+        this.minDamage = Math.max(1, this.minDamage); // Ensure minimum damage is at least 1
+        this.maxDamage = 1 + boost;
         this.data["Damage"] = "" + this.minDamage;
-    }
-    else{
+    } else {
+        // Reset any applied boosts if not loaded
         var count = shipManager.power.getBoost(this);
-        for(var i = 0; i < count; i++){
+        for (var i = 0; i < count; i++) {
             shipManager.power.unsetBoost(null, this);
         }
     }
+
     return this;
 }
 PsychicField.prototype.clearBoost = function(){

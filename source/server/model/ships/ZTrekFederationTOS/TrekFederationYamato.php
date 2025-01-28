@@ -5,7 +5,7 @@ class TrekFederationYamato extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 760;
-        $this->faction = "ZStarTrek Federation (TOS)";
+        $this->faction = "ZStarTrek (TOS) Federation";
         $this->phpclass = "TrekFederationYamato";
         $this->imagePath = "img/ships/StarTrek/FederationCarrierYamato.png";
         $this->shipClass = "Yamato Carrier";
@@ -118,18 +118,18 @@ class TrekFederationYamato extends BaseShip{
 	    
         $this->hitChart = array(
             0=> array(
-				8 => "Structure",
-				10 => "2:Nacelle",
-				13 => "Scanner",
+				2 => "2:Nacelle",
+				11 => "Structure",
+				14 => "Scanner",
 				17 => "Engine",
 				19 => "Reactor",
 				20 => "C&C",
             ),
             1=> array(
 				2 => "Shield Projector",
-				5 => "Light Phaser",
-				7 => "Tractor Beam",
-				11 => "Phaser Lance",
+				4 => "Light Phaser",
+				5 => "Tractor Beam",
+				8 => "Phaser Lance",
 				18 => "Structure",
 				20 => "Primary",
             ),
@@ -145,8 +145,8 @@ class TrekFederationYamato extends BaseShip{
 				2 => "Shield Projector",
 				4 => "2:Nacelle",
 				6 => "Photon Torpedo",
-				8 => "Light Phaser",
-				10 => "Phaser",
+				7 => "Light Phaser",
+				9 => "Phaser",
 				18 => "Structure",
 				20 => "Primary",
             ),
@@ -154,8 +154,8 @@ class TrekFederationYamato extends BaseShip{
 				2 => "Shield Projector",
 				4 => "2:Nacelle",
 				6 => "Photon Torpedo",
-				8 => "Light Phaser",
-				10 => "Phaser",
+				7 => "Light Phaser",
+				9 => "Phaser",
 				18 => "Structure",
 				20 => "Primary",
             ),

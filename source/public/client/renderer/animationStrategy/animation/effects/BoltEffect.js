@@ -36,6 +36,8 @@ window.BoltEffect = function () {
         this.fadeInSpeed = 25;
         this.fadeOutSpeed = this.hit ? 0 : 1000;
 
+        this.hasParticle = args.hasParticle; //Some weapons you don't want to show a particle e.g. ramming.
+
         if (this.hit) {
             this.duration -= 25;
 
@@ -58,7 +60,7 @@ window.BoltEffect = function () {
         }
 
         createBoltParticle.call(this, this.size, this.color, this.origin);
-        createBoltParticle.call(this, this.size / 2, { r: 1, g: 1, b: 1 }, mathlib.getPointInDirection(this.size / 4.5, -this.angle, this.origin.x, this.origin.y, true));
+        if(this.hasParticle) createBoltParticle.call(this, this.size / 2, { r: 1, g: 1, b: 1 }, mathlib.getPointInDirection(this.size / 4.5, -this.angle, this.origin.x, this.origin.y, true));
         
         if (args.systemDestroyedEffect) {
             args.systemDestroyedEffect.add(this.target, args.damagedNames, this.time + this.duration)

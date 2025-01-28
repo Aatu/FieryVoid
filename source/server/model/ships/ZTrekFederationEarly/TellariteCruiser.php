@@ -5,7 +5,7 @@ class TellariteCruiser extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 325;
-	$this->faction = "ZStarTrek Federation (early)";
+	$this->faction = "ZStarTrek (early) Federation";
         $this->phpclass = "TellariteCruiser";
         $this->imagePath = "img/ships/StarTrek/TellariteCruiser.png";
         $this->shipClass = "Tellarite Cruiser";
@@ -89,24 +89,25 @@ class TellariteCruiser extends HeavyCombatVessel{
 	    
         $this->hitChart = array(
             0=> array(
-				8 => "Structure",
-				11 => "Scanner",
-				14 => "Engine",
-				16 => "Hangar",
+				2 => "2:Nacelle",
+				10 => "Structure",
+				12 => "Hangar",
+				14 => "Scanner",
+				16 => "Engine",
 				18 => "Reactor",
 				20 => "C&C",
             ),
             1=> array(
 				2 => "Shield Projector",
-				5 => "Particle Cutter",
-				10 => "Light Phase Cannon",
+				4 => "Particle Cutter",
+				7 => "Early Light Particle Cutter",
 				17 => "Structure",
 				20 => "Primary",
             ),
             2=> array(
 				2 => "Shield Projector",
 				8 => "Nacelle",
-				11 => "Light Phase Cannon",
+				11 => "Early Light Particle Cutter",
 				17 => "Structure",
 				20 => "Primary",
             ),

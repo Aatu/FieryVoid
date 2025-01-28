@@ -92,6 +92,24 @@ shipManager.systems = {
         return output;
     },
 
+    getOutputNoBoost: function getOutputNoBoost(ship, system){
+		if (!system){
+			console.log("ERROR: getOutputNoBoost system missing");
+			console.trace();
+		}
+		
+		if (this.isDestroyed(ship, system))
+			return 0;
+        
+		if (shipManager.power.isOffline(ship, system))
+			return 0;
+		
+		var output = system.output + system.outputMod;
+        	output = Math.max(0,output); //output cannot be negative!
+
+        return output;
+    },
+
     getFighterSystem: function getFighterSystem(ship, fighterid, systemid) {
         for (var i in ship.systems) {
             var fighter = ship.systems[i];
@@ -191,6 +209,12 @@ shipManager.systems = {
             system = system.initBoostableInfo();
         }
 		system = system.initializationUpdate(); //very rarely - system needs to update data not on a particular event
+
+		if(system instanceof Weapon && shipManager.criticals.hasCriticals(system)){
+			system.data["Range"];
+			system.data["Damage"] = system.minDamage;
+			if (system.maxDamage > system.minDamage) system.data["Damage"] = system.data["Damage"] + "-" + system.maxDamage;
+		}
 
         if (system.name == "engine") {
             system.addInfo();
@@ -507,22 +531,49 @@ shipManager.systems = {
     },    
 
     hasBorderHighlight: function hasBorderHighlight(ship, system) { 
-		var highlight = null;
+        // Try to prioritise effects and optimise performance. Can only return ONE border highlight colour.
+        
+        // Check Abbai faction-specific conditions
+        if (ship.faction === "Abbai Matriarchate") {
+            const mayOverheat = shipManager.criticals.countCriticalOnTurn(system, "MayOverheat", gamedata.turn);
+            if (mayOverheat === 2) return 'Red';
+            // Uncomment if orange highlight for "MayOverheat === 1" is required
+            // if (mayOverheat === 1) return 'orange';
+        }
+    
+        // Check CnC critical effects (most important first)
+        if (system.name === "cnC") {
+            const cnCCrits = shipManager.criticals.getAllCriticals(system, gamedata.turn);            
+            for (const crit of cnCCrits) {
+                if (["Sabotage", "SabotageElite", "CaptureShip", "CaptureShipElite", 
+                     "RescueMission", "RescueMissionElite", "DefenderLost"].includes(crit.phpclass)) {
+                    return 'Red';
+                }
+            }
+        }
+    
+        // Check critical effects for the current system
+        const allCrits = shipManager.criticals.getAllCriticals(system, gamedata.turn);
+        for (const crit of allCrits) {
+            // Prioritise red effects
+            if (["Sabotage", "SabotageElite", "LimpetBore"].includes(crit.phpclass)) {
+                return 'Red';
+            }
+            // Check orange effects
+            if (["LimpetBoreTravelling", "MayOverheat"].includes(crit.phpclass)) {
+                return 'Orange';
+            }
+        }
+    
+        // Check for overloading systems
+        if (shipManager.power.isOverloading(ship, system)) {
+            return 'Yellow';
+        }
+    
+        // No highlight if none of the conditions are met
+        return null;
+    },
 
-		if(shipManager.power.isOverloading(ship, system)){
-			highlight = 'Yellow';			
-			return highlight;
-		}	
-
-		var mayOverheat = shipManager.criticals.countCriticalOnTurn(system, "MayOverheat", gamedata.turn);
-		if(mayOverheat > 0){ 
-			if(mayOverheat === 1) highlight = 'Orange';
-			if(mayOverheat === 2) highlight = 'RedBold';
-			return highlight;				
-		}	
-
-        return highlight;
-    }, 
     
     getRemainingHealth: function getRemainingHealth(system) {
         var damage = shipManager.systems.getTotalDamage(system);

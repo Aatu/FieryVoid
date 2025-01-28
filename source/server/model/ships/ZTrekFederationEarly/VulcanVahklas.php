@@ -5,7 +5,7 @@ class VulcanVahklas extends LCV{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 290;
-        $this->faction = "ZStarTrek Federation (early)";
+        $this->faction = "ZStarTrek (early) Federation";
         $this->phpclass = "VulcanVahklas";
         $this->imagePath = "img/ships/StarTrek/VulcanVahklas.png";
         $this->shipClass = "Vulcan Vah'Klas Frigate";
@@ -63,10 +63,10 @@ class VulcanVahklas extends LCV{
 	$this->hitChart = array(
 		
 		0=> array(
-			7 => "Structure",
-			10 => "1:Phase Cannon",
-			12 => "1:Light Phase Cannon",
-			14 => "0:Shield Projector",
+			10 => "Structure",
+			12 => "1:Phase Cannon",
+			14 => "1:Light Phase Cannon",
+			16 => "0:Shield Projector",
 			17 => "2:Nacelle",
 			18 => "0:Engine",
 			19 => "0:Reactor",
@@ -74,10 +74,10 @@ class VulcanVahklas extends LCV{
 		),
 
 		1=> array(
-			8 => "Structure",
-			10 => "1:Phase Cannon",
-			12 => "1:Light Phase Cannon",
-			14 => "0:Shield Projector",
+			10 => "Structure",
+			12 => "1:Phase Cannon",
+			14 => "1:Light Phase Cannon",
+			16 => "0:Shield Projector",
 			17 => "2:Nacelle",
 			18 => "0:Engine",
 			19 => "0:Reactor",
@@ -85,10 +85,10 @@ class VulcanVahklas extends LCV{
 		),
 
 		2=> array(
-			8 => "Structure",
-			10 => "1:Phase Cannon",
-			12 => "1:Light Phase Cannon",
-			14 => "0:Shield Projector",
+			10 => "Structure",
+			12 => "1:Phase Cannon",
+			14 => "1:Light Phase Cannon",
+			16 => "0:Shield Projector",
 			17 => "2:Nacelle",
 			18 => "0:Engine",
 			19 => "0:Reactor",

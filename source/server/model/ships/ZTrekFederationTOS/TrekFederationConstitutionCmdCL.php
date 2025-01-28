@@ -5,7 +5,7 @@ class TrekFederationConstitutionCmdCL extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 540;
-	$this->faction = "ZStarTrek Federation (TOS)";
+	$this->faction = "ZStarTrek (TOS) Federation";
         $this->phpclass = "TrekFederationConstitutionCmdCL";
         $this->imagePath = "img/ships/StarTrek/Constitution.png";
         $this->shipClass = "Constitution Command Light Cruiser";
@@ -87,25 +87,26 @@ class TrekFederationConstitutionCmdCL extends HeavyCombatVessel{
 	    
         $this->hitChart = array(
             0=> array(
-                    8 => "Structure",
-                    11 => "Scanner",
-                    14 => "Engine",
-                    16 => "Hangar",
-                    18 => "Reactor",
-                    20 => "C&C",
+				2 => "2:Nacelle",
+				10 => "Structure",
+				13 => "Hangar",
+				15 => "Scanner",
+				17 => "Engine",
+				19 => "Reactor",
+				20 => "C&C",
             ),
             1=> array(
 				2 => "Shield Projector",
-				6 => "Photon Torpedo",
-				10 => "Phaser Lance",
-				11 => "Tractor Beam",
+				4 => "Photon Torpedo",
+				7 => "Phaser Lance",
+				8 => "Tractor Beam",
 				18 => "Structure",
 				20 => "Primary",
             ),
             2=> array(
 				2 => "Shield Projector",
-				9 => "Nacelle",
-				11 => "Phaser",
+				7 => "Nacelle",
+				9 => "Phaser",
 				18 => "Structure",
 				20 => "Primary",
             ),
