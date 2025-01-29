@@ -9,7 +9,7 @@ class SalbezRevTanRefit extends OSAT{
         $this->phpclass = "SalbezRevTanRefit";
         $this->imagePath = "img/ships/Nexus/salbez_revtan3.png";
 			$this->canvasSize = 65; //img has 100px per side
-        $this->shipClass = "Rev'tan OSAT (2151 refit)";
+        $this->shipClass = "Rev'tan OSAT (2151)";
 			$this->variantOf = "Rev'tan OSAT";
 			$this->occurence = "common";
 		$this->unofficial = true;
