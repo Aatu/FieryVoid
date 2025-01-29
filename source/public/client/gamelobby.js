@@ -195,7 +195,7 @@ window.gamedata = {
 			powerRating = 'Tier 3, custom faction';
 			break;
 		  case 'ZNexus Brixadii Clans':
-			powerRating = 'Tier 3, custom faction';
+			powerRating = 'Tier 2, custom faction';
 			break;
 		  case 'ZNexus Support Units':
 			powerRating = 'Designs for scenarios, not a faction, custom';
@@ -204,31 +204,31 @@ window.gamedata = {
 			powerRating = 'Tier 3, custom faction';
 			break;
 		  case 'ZNexus Craytan Union':
-			powerRating = 'Tier 3, custom faction';
+			powerRating = 'Tier 2, custom faction';
 			break;
 		  case 'ZNexus Dalithorn Commonwealth (early)':
 			powerRating = 'Tier 3, custom faction';
 			break;
 		  case 'ZNexus Dalithorn Commonwealth':
-			powerRating = 'Tier 3, custom faction';
+			powerRating = 'Tier 2, custom faction';
 			break;
 		  case 'ZNexus Makar Federation (early)':
 			powerRating = 'Tier 3, custom faction, playtest';
 			break;
 		  case 'ZNexus Makar Federation':
-			powerRating = 'Tier 3, custom faction, playtest';
+			powerRating = 'Tier 2, custom faction, playtest';
 			break;
 		  case 'ZNexus Sal-bez Coalition (early)':
 			powerRating = 'Tier 3, custom faction';
 			break;
 		  case 'ZNexus Sal-bez Coalition':
-			powerRating = 'Tier 3, custom faction';
+			powerRating = 'Tier 2, custom faction';
 			break;
 		  case 'ZNexus Velrax Republic (early)':
 			powerRating = 'Tier 3, custom faction';
 			break;
 		  case 'ZNexus Velrax Republic':
-			powerRating = 'Tier 3, custom faction';
+			powerRating = 'Tier 2, custom faction';
 			break;
 		  case 'ZStarTrek (TOS) Federation':
 			powerRating = 'Tier 2, custom faction';
