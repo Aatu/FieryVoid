@@ -9,9 +9,11 @@ class SalbezCrenskRefit extends LCV{
         $this->phpclass = "SalbezCrenskRefit";
         $this->imagePath = "img/ships/Nexus/salbez_crensk3.png";
 			$this->canvasSize = 70; //img has 200px per side
-        $this->shipClass = "Cre-nsk Combat Cutter (2143 refit)";
+        $this->shipClass = "Cre-nsk Combat Cutter (2143)";
+			$this->variantOf = "Cre-nsk Combat Cutter";
+			$this->occurence = "common";
 		$this->unofficial = true;
-			$this->isd = 2120;
+		$this->isd = 2120;
 
         $this->hangarRequired = ''; //Nexus LCVs are more independent than their B5 counterparts
 	    $this->notes = 'May deploy independently.';
