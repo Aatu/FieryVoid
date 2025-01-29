@@ -8,7 +8,7 @@ class SalbezReshkenRefit extends BaseShip{
 	$this->faction = "ZNexus Sal-bez Coalition";
         $this->phpclass = "SalbezReshkenRefit";
         $this->imagePath = "img/ships/Nexus/salbez_reshken3.png";
-        $this->shipClass = "Resh-ken Command Cruiser (2143 refit)";
+        $this->shipClass = "Resh-ken Command Cruiser (2143)";
 			$this->variantOf = "Jer't'kat Heavy Cruiser";
 			$this->occurence = "rare";
         $this->shipSizeClass = 3;

@@ -8,7 +8,7 @@ class SalbezShvrezRefit extends MediumShip{
         $this->faction = "ZNexus Sal-bez Coalition";
         $this->phpclass = "SalbezShvrezRefit";
         $this->imagePath = "img/ships/Nexus/salbez_shvrez3.png";
-        $this->shipClass = "Shv'rez Frigate (2143 refit)";
+        $this->shipClass = "Shv'rez Frigate (2143)";
 			$this->variantOf = "Shv'rez Frigate";
 			$this->occurence = "common";
 		$this->unofficial = true;

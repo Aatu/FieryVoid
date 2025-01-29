@@ -9,7 +9,7 @@ class SalbezVaschkRefit extends HeavyCombatVessel{
         $this->phpclass = "SalbezVaschkRefit";
         $this->imagePath = "img/ships/Nexus/salbez_vaschk3.png";
 			$this->canvasSize = 135; //img has 200px per side
-        $this->shipClass = "Vas-chk Support Destroyer (2145 Refit)";
+        $this->shipClass = "Vas-chk Support Destroyer (2145)";
 			$this->variantOf = "Vas-ren Destroyer";
 			$this->occurence = "uncommon";
 			$this->unofficial = true;
