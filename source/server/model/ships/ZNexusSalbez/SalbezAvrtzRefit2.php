@@ -9,7 +9,7 @@ class SalbezAvrtzRefit2 extends BaseShip{
         $this->phpclass = "SalbezAvrtzRefit2";
         $this->imagePath = "img/ships/Nexus/salbez_bevtun3.png";
         $this->shipClass = "Av'rtz Explorer (2153)";
-			$this->variantOf = "Av'rtz Explorer";
+			$this->variantOf = "Av'rtz Explorer (2122)";
 			$this->occurence = "common";
 //        $this->shipSizeClass = 3;
 		$this->canvasSize = 200; //img has 200px per side

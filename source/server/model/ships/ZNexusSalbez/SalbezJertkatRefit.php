@@ -8,7 +8,7 @@ class SalbezJertkatRefit extends BaseShip{
 	$this->faction = "ZNexus Sal-bez Coalition";
         $this->phpclass = "SalbezJertkatRefit";
         $this->imagePath = "img/ships/Nexus/salbez_jertkat3.png";
-        $this->shipClass = "Jer't'kat Heavy Cruiser (2143 refit)";
+        $this->shipClass = "Jer't'kat Heavy Cruiser (2143)";
 			$this->variantOf = "Jer't'kat Heavy Cruiser";
 			$this->occurence = "common";
         $this->shipSizeClass = 3;
