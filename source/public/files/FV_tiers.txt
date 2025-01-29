@@ -61,6 +61,12 @@ Factions that point for point will have uphill battle against Tier 1, yet otherw
  - Star Trek (TOS) Federation  (custom faction - Star Trek universe)
  - Star Wars (custom faction (or rather factions), Star Wars universe - with VERY different playstyle, consider them difficult to fly!)
  - ZBSG COlonials
+ - ZNexus Brixadii Clans (custom faction - Nexus universe)
+ - ZNexus Craytan Union (custom faction - Nexus universe)
+ - ZNexus Dalithorn Commonwealth (custom faction - Nexus universe)
+ - ZNexus Makar Federation (custom faction - Nexus universe)
+ - ZNexus Sal-bez Coalition (custom faction - Nexus universe)
+ - ZNexus Velrax Republic (custom faction - Nexus universe)
 
 
 Tier 3 - Low Performance Competitive
@@ -73,13 +79,15 @@ Factions that point for point will have uphill battle against Tier 2, and quite 
  - Hurr
  - Ipsha Baronies
  - Markab Theocracy
+ - Rogolon 
+ - Usuuth
  - ZEscalation Blood Sword Raiders  (custom faction - Escalation Wars universe)
- - ZNexus Brixadii Clans (custom faction - Nexus universe)
- - ZNexus Craytan Union (custom faction - Nexus universe)
- - ZNexus Dalithorn Commonwealth (custom faction - Nexus universe)
- - ZNexus Makar Federation (custom faction - Nexus universe)
- - ZNexus Sal-bez Coalition (custom faction - Nexus universe)
- - ZNexus Velrax Republic (custom faction - Nexus universe)
+ - ZNexus Brixadii Clans (early) (custom faction - Nexus universe)
+ - ZNexus Craytan Union (early) (custom faction - Nexus universe)
+ - ZNexus Dalithorn Commonwealth (early) (custom faction - Nexus universe)
+ - ZNexus Makar Federation (early) (custom faction - Nexus universe)
+ - ZNexus Sal-bez Coalition (early) (custom faction - Nexus universe)
+ - ZNexus Velrax Republic (early) (custom faction - Nexus universe)
  - ZStarTrek Federation (early) (custom faction - Star Trek universe)
  - ZStarTrek Suliban (early) (custom faction - Star Trek universe)
 
