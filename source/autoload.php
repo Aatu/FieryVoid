@@ -3424,7 +3424,8 @@ spl_autoload_register(
 						'testgun2' => '/server/model/weapons/customDevelopment.php',
 						'plasmasiegecannon' => '/server/model/weapons/customDevelopment.php',
 						'impheavylaser' => '/server/model/weapons/customDevelopment.php',
-						'directemine' => '/server/model/weapons/customDevelopment.php',
+						'directemine' => '/server/model/weapons/customDevelopment.php',						
+					'testlaser' => '/server/model/weapons/customs.php',
 
 				//Marine Boarding Actions
 				'marines' => '/server/model/weapons/specialWeapons.php',
