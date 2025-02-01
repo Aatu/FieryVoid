@@ -1502,7 +1502,7 @@ class Weapon extends ShipSystem
                     $hitsRemaining--;
                     $fireOrder->shotshit++;
 					//19.12.2024 - clear any previous location for Vree-layout ships; this will be for entire volley - eg. single Pulse, but entire Raking shot
-					$target->clearVreeHitSectionChoice($shooter->id);
+					$target->clearVreeHitSectionChoice($shooter->id, $fireOrder);
 					
                     $this->beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata);
                 }
