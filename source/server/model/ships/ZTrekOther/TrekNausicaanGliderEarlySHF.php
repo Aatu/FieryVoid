@@ -6,7 +6,7 @@ class TrekNausicaanGliderEarlySHF extends FighterFlight{
         
         $this->pointCost = 62 *6; //for 6
         $this->faction = "ZTrek Playtest Other Factions";
-        $this->phpclass = "TrekNausicaanGliderSHFearly";
+        $this->phpclass = "TrekNausicaanGliderEarlySHF";
         $this->imagePath = "img/ships/StarTrek/NausicaanGlider.png";
         $this->shipClass = "Nausicaan Gliders (Early)";
 		$this->unofficial = true;
@@ -17,8 +17,9 @@ class TrekNausicaanGliderEarlySHF extends FighterFlight{
 		$this->notes = "Warp Engine";
 		$this->notes .= "<br>Takes up two regular fighter slots.";
 
-	$this->hangarRequired = "heavy"; //Nausicaan smaller Gliders require hangar space just like heavy fighters
+	$this->hangarRequired = "light"; //Nausicaan smaller Gliders require hangar space just like fighters - but they can fit to LIGHT fighter hangars!
 	$this->unitSize = 0.5; //one craft requires 2 hangar slots
+        $this->customFtrName = "Nausicaan small craft"; //requires hangar space on Nausicaan ships - and requires it to be dedicated to assault craft
 
 
         $this->forwardDefense = 9;

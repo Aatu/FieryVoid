@@ -9,6 +9,7 @@ class TrekNausicaanVandal extends MediumShip{
         $this->phpclass = "TrekNausicaanVandal";
         $this->imagePath = "img/ships/StarTrek/NausicaanVandal.png";
         $this->shipClass = "Nausicaan Vandal Destroyer";
+	$this->variantOf = "Nausicaan Vandal Destroyer (Upgraded)";
 
 	$this->unofficial = true;
         $this->canvasSize = 100;

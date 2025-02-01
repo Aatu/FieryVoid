@@ -10,7 +10,6 @@ class TrekNausicaanShefalitayalFighter extends FighterFlight{
         $this->shipClass = "Nausicaan Shefalitayal Fighters";
 	    $this->imagePath = "img/ships/StarTrek/NausicaanShefalitayal.png"; // Shefalitayal is name of artist creating this picture
 
-        $this->variantOf = "Nausicaan Shefa Fighters";
 
 	    $this->isd = 2255;
         
@@ -20,7 +19,7 @@ class TrekNausicaanShefalitayalFighter extends FighterFlight{
         $this->offensivebonus = 4;
         $this->jinkinglimit = 10;
         $this->turncost = 0.33;
-        $this->iniativebonus = 18 *5; //default medium fighter
+        $this->iniativebonus = 18 *5; //default medium fighter (despite it's a light fighter :) )
         $this->populate();
     }
 
