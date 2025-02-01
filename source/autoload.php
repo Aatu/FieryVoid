@@ -2760,7 +2760,8 @@ spl_autoload_register(
 				'zftrzeoth' => '/server/model/ships/vree/ZFtrZeoth.php',							
 				'ximm' => '/server/model/ships/vree/Ximm.php',							
 				'xurr' => '/server/model/ships/vree/Xurr.php',							
-				'xonn' => '/server/model/ships/vree/Xonn.php',
+				'xonn' => '/server/model/ships/vree/Xonn.php',	//original - now obsolete					
+				'xonnupdated' => '/server/model/ships/vree/XonnUpdated.php', //with layout changes
 				'xvell' => '/server/model/ships/vree/Xvell.php',
 				'xavan' => '/server/model/ships/vree/Xavan.php',
 				'hybridsaucer' => '/server/model/ships/raiders/HybridSaucer.php',
