@@ -37,7 +37,7 @@
             $this->data["Special"] .= "Uninterceptable.";
             if($this->overloadable){
             	$this->data["Special"] .= "<br>Can be overcharged during Initial Orders to fire in Sustained mode AFTER a full recharge cycle.";
-            	$this->data["Special"] .= "<br>WARNING - When you start overcharging, the weapon will start its recharge cycle immediately, even if it was fully charged.";            
+//            	$this->data["Special"] .= "<br>WARNING - When you start overcharging, the weapon will start its recharge cycle immediately, even if it was fully charged.";            
             } 
 		}
     }
@@ -182,7 +182,7 @@
 			$this->data["Special"] = 'Uninterceptable.';
 			$this->data["Special"] .= '<br>Can also fire in Piercing Mode.';
             $this->data["Special"] .= "<br>Can be overcharged during Initial Orders to fire in Sustained mode AFTER a full recharge cycle.";
-            $this->data["Special"] .= "<br>WARNING - When you start overcharging, the weapon will start its recharge cycle immediately, even if it was fully charged.";  			
+//            $this->data["Special"] .= "<br>WARNING - When you start overcharging, the weapon will start its recharge cycle immediately, even if it was fully charged.";  			
 		}
         
         public function getDamage($fireOrder){        return Dice::d(10, 4)+12;   }
@@ -310,7 +310,7 @@
 			$this->data["Special"] = 'Uninterceptable.';
 			$this->data["Special"] .= '<br>Can also fire in Piercing Mode.';
             $this->data["Special"] .= "<br>Can be overcharged during Initial Orders to fire in Sustained mode AFTER a full recharge cycle.";
-            $this->data["Special"] .= "<br>WARNING - When you start overcharging, the weapon will start its recharge cycle immediately, even if it was fully charged.";  			
+//            $this->data["Special"] .= "<br>WARNING - When you start overcharging, the weapon will start its recharge cycle immediately, even if it was fully charged.";  			
 		}
 
             public function getDamage($fireOrder){ return Dice::d(10, 4)+15; }
@@ -343,7 +343,7 @@
             public $damageTypeArray=array(1=>'Raking', 2=>'Piercing');
             public $fireControlArray = array( 1=>array(1, 4, 5), 2=>array(null,0,1) ); //Raking and Piercing mode
         
-            //public $extraoverloadshots = 3;        
+            public $extraoverloadshots = 3; //3 turns firing in sustained mode.       
             public $extraoverloadshotsArray = array(1=>3, 2=>0); //extra shots from overload are relevant only for Raking mode!
 
         public $rangePenalty = 0.25;
@@ -357,7 +357,7 @@
 			$this->data["Special"] = 'Uninterceptable.';
 			$this->data["Special"] .= '<br>Can also fire in Piercing Mode.';
             $this->data["Special"] .= "<br>Can be overcharged during Initial Orders to fire in Sustained mode AFTER a full recharge cycle.";
-            $this->data["Special"] .= "<br>WARNING - When you start overcharging, the weapon will start its recharge cycle immediately, even if it was fully charged.";  			
+//            $this->data["Special"] .= "<br>WARNING - When you start overcharging, the weapon will start its recharge cycle immediately, even if it was fully charged.";  			
 		}
 
         public function getDamage($fireOrder){ return Dice::d(10, 4)+18; }
