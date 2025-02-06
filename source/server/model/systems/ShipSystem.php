@@ -1253,6 +1253,19 @@ class ShipSystem {
 		$effectiveArmor = $armour;
 		$systemHealth = $this->getRemainingHealth();
 		$systemDestroyed = false;
+
+		//Before we look at armour, make any reductions due to Sustained fire from a previous turn(s)	
+		if ($weapon->isOverloadingOnTurn($gamedata->turn) && $weapon->loadingtime <= $weapon->overloadturns) {		
+			$sustainedSystemsHit = $weapon->getsustainedSystemsHit();
+			if($sustainedSystemsHit != null){			
+				$intSustainedSystemsHit = array_map('intval', $sustainedSystemsHit); // Convert strings to integers					
+				$counts = array_count_values($intSustainedSystemsHit); // Count occurrences
+				
+				$armourPiercedAlready = isset($counts[$this->id]) ? $counts[$this->id] : 0; // Get count for $this->id				
+				$effectiveArmor = max(0, $effectiveArmor - $armourPiercedAlready); //Reduce armour by amount pierced n previous turns by Sustained shots.	
+			}        
+		}
+
 		if($weapon->damageType =='Flash'){//treat only enough damage to destroy system as entire shot! the rest is only overkill 
 			$maxDamageToDeal = $systemHealth +$effectiveArmor;
 			if ($maxDamageToDeal < $effectiveDamage){
@@ -1301,8 +1314,8 @@ class ShipSystem {
 			$effectiveDamage += $receivedArray["dmgDealt"]; //sum of dealt now and in recursive call
 			$remainingDamage = $receivedArray["dmgRemaining"]; //should be 0 unless fighter was destroyed
 			//armor pierced stays the same...
-		}
-		
+		}		
+
 		$returnArray["dmgDealt"] = $effectiveDamage;
 		$returnArray["dmgRemaining"] = $remainingDamage+$overkillDamage; //add damage set aside at the start of the procedure
 		$returnArray["armorPierced"] = $effectiveArmor;
