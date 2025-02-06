@@ -156,8 +156,8 @@ const Container = styled.div`
 
 const MainButton = ContainerRoundedRightSide.extend`
     display: flex;
-    width: 50px;
-    height: 50px;
+    width: 45px;
+    height: 45px;
     align-items: center;
     justify-content: center;
     font-size: 32px;
