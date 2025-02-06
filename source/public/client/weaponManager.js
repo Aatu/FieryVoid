@@ -801,7 +801,21 @@ window.weaponManager = {
 		if(weapon.isBoardingAction){
 			return weaponManager.calculateBoardingAction(shooter, target, weapon);			
 		}
-		
+
+        //New check for sustained weapons, to see if they will auto-hit/auto-miss targets from previous turn.  If conditions not true, normal routine. 
+        if (shipManager.power.isOverloading(shooter, weapon)) {
+            if (weapon.sustainedTarget && Object.keys(weapon.sustainedTarget).length > 0) { // We only care if an overload weapon fired last turn and therefore has a targetId stored in sustainedTarget.
+                // Now check it's Firing Mode 1, not a different target, and wasn't a miss.
+                if (weapon.firingMode !== 1) return 0; // Wrong firing mode selected for a sustained shot.
+                
+                if (!weapon.sustainedTarget.hasOwnProperty(target.id)) {
+                    return 0; // Auto miss - Wrong target
+                } else if (weapon.sustainedTarget[target.id] === 1) { 
+                    return 100; // Auto-hit!
+                }
+            }    
+        }		
+
 		//Weapons like Mass Drivers have special criteria for targets and shooter speed etc.
 		if(weapon.targetsImmobile){ //Target must be en
 			var ownSpeed = shipManager.movement.getSpeed(shooter);
@@ -815,7 +829,7 @@ window.weaponManager = {
 	    var distance = 0;
 	    if (weapon.ballistic){		    
 		var sPosLaunch = weaponManager.getFiringHex(shooter, weapon); 	
-//		var sPosLaunch = shipManager.movement.getPositionAtStartOfTurn(shooter, gamedata.turn); 		    
+//		var sPosLaunch = shipManager.movement.getPositionAtStartOfTurn(shooter, gamedata.turn); //OLD METHOD of getting pos.		    
 		var sPosTarget = shipManager.getShipPosition(target);
 		defence = weaponManager.getShipDefenceValuePos(sPosLaunch, target);
 	        distance = sPosLaunch.distanceTo(sPosTarget).toFixed(2); 
