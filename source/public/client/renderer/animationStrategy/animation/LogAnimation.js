@@ -42,7 +42,7 @@ window.LogAnimation = function () {
 
     LogAnimation.prototype.cleanUp = function () {
         this.entries.forEach(function (entry) {
-            if (entry.fire) {
+            if (entry.fire || entry.ship) {
                 window.combatLog.removeFireOrders(entry.displayed);
             } else {
                 //window.combatLog.removeMoves(entry.movement);
