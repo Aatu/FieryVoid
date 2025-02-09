@@ -2044,8 +2044,8 @@ class JumpEngine extends ShipSystem{
 		$rammingSystem = $ship->getSystemByName("RammingAttack");
 		$fireOrderType = $jumpFailure ? 'JumpFailure' : 'HyperspaceJump';
 		$pubNotes = $jumpFailure
-			? "<br>Ship attempts to jump to hyperspace, but damage to the Jump Drive causes the ship to be destroyed."
-			: "<br>Ship activates Jump Drive and enters hyperspace.";
+			? " attempts to jump to hyperspace, but damage to the Jump Drive causes the ship to be destroyed."
+			: " activates Jump Drive and enters hyperspace.";
 	
 		if ($rammingSystem) {
 			$newFireOrder = new FireOrder(
