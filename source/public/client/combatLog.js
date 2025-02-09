@@ -6,7 +6,7 @@ window.combatLog = {
         $('.logentry').remove();
     },
 
-    logDestroyedShip: function logDestroyedShip(ship) {
+    logDestroyedShip: function logDestroyedShip(ship, jumped) {
 
         var html = '<div class="logentry"><span class="destroyed">';
 
@@ -14,12 +14,21 @@ window.combatLog = {
         // In that case, the toUpperCase goes wrong.
         // Make certain the name is a string.
         if (typeof ship.name == 'string' || ship.name instanceof String) {
-            html += '<span class="shiplink" data-id="' + ship.id + '" >' + ship.name.toUpperCase() + '</span> DESTROYED</span>';
+            if(jumped){
+                html += '<span class="shiplink" data-id="' + ship.id + '" >' + ship.name.toUpperCase() + '</span> <span style="color: green; font-weight: bold;">HAS JUMPED TO HYPERSPACE</span></span>';
+            }else{
+                html += '<span class="shiplink" data-id="' + ship.id + '" >' + ship.name.toUpperCase() + '</span> IS DESTROYED</span>';
+            }    
         } else {
-            html += '<span class="shiplink" data-id="' + ship.id + '" >' + ship.name + '</span> DESTROYED</span>';
+            if(jumped){
+                html += '<span class="shiplink" data-id="' + ship.id + '" >' + ship.name.toUpperCase() + '</span> <span style="color: green; font-weight: bold;">HAS JUMPED TO HYPERSPACE</span></span>';
+            } else {
+                html += '<span class="shiplink" data-id="' + ship.id + '" >' + ship.name + '</span> IS DESTROYED</span>';
+            }    
         }
 
-        $(html).prependTo("#log");
+        $(html).appendTo("#log");  //Changed to append - DK
+        $("#log").scrollTop($("#log")[0].scrollHeight);
     },
 
     logFireOrders: function logFireOrders(orders) {
