@@ -27,8 +27,11 @@ window.combatLog = {
             }    
         }
 
-        $(html).appendTo("#log");  //Changed to append - DK
+        var element = $(html).appendTo("#log");  //Changed to append - DK
+
         $("#log").scrollTop($("#log")[0].scrollHeight);
+        return element;
+        
     },
 
     logFireOrders: function logFireOrders(orders) {
@@ -116,19 +119,27 @@ window.combatLog = {
 		//if (target) shottext = ', ' + ordersChit + '(' +shotshit + ')/' + ordersC + '(' +shots + ') shots hit' + intertext + '.';
 		if (target){
 			if(ordersC != shots){
-			 shottext = ', ' + ordersChit + '(' +shotshit + ')/' + ordersC + '(' +shots + ') shots hit' + intertext + '.';
+			    shottext = ', ' + ordersChit + '(' +shotshit + ')/' + ordersC + '(' +shots + ') shots hit' + intertext + '.';
 			}else{
-			shottext = ', ' + shotshit + '/' + shots + ' shots hit' + intertext + '.';				
+			    shottext = ', ' + shotshit + '/' + shots + ' shots hit' + intertext + '.';				
 			}	
 		}
 		
         var notestext = "";
         if (notes) notestext = '<span class="pubotes">' + notes + '</span>';
 
-        if (mathlib.arrayIsEmpty(weapon.missileArray)) {
-            html += ' firing ' + counttext + weapon.displayName + ' (' + weapon.firingModes[weapon.firingMode] + ') ' + targettext + '. ' + chancetext + shottext + notestext;
-        } else {
-            html += ' firing ' + counttext + weapon.missileArray[weapon.firingMode].displayName + targettext + '. ' + chancetext + shottext + notestext;
+        var shortText = false;
+        if(weaponManager.doShortLogText(fire)) shortText = true;
+
+        //Some orders don't need the full log text, e.g. Reactor overload, hyperspace jump.    
+        if(shortText){
+            html += notestext;
+        }else{
+            if (mathlib.arrayIsEmpty(weapon.missileArray)) {
+                html += ' firing ' + counttext + weapon.displayName + ' (' + weapon.firingModes[weapon.firingMode] + ') ' + targettext + '. ' + chancetext + shottext + notestext;
+            } else {
+                html += ' firing ' + counttext + weapon.missileArray[weapon.firingMode].displayName + targettext + '. ' + chancetext + shottext + notestext;
+            }
         }
 
         html += '<span class="notes"> ' + fire.notes + '</span>';
