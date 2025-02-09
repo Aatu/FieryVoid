@@ -2053,6 +2053,17 @@ window.weaponManager = {
     },
     */
 
+    //Function called in Combat Log animation to check if a particular fireORder needs to use the full log message e.g. Reactor overlaods, Hyperspace jumps
+    doShortLogText: function doShortLogText(fire) {
+        var shortLogText = false;
+
+        //Look for examples of fireORder types that don't need the full Log message.    
+        if(fire.damageclass == "HyperspaceJump") shortLogText = true;  
+
+//  Other possibilites include:   'LimpetBore' 'Sabotage' 'Wreak Havoc'  'Capture' 'Rescue' "Reactor"  "ContainmentBreach" "SelfDestruct" 
+        return shortLogText;
+    },
+
     getAllFireOrdersForAllShipsForTurn: function getAllFireOrdersForAllShipsForTurn(turn, type) {
         var fires = [];
 		var toReturn = false;
