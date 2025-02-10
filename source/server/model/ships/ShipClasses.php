@@ -1901,7 +1901,7 @@ class BaseShip {
 		$fireOrder->chosenLocation = 0;
 		
 		//...and unset expected damage - so allocation is based on _current actual_ damage only (as further incoming shots will be re-assigned as well!)
-		foreach($this->expectedDamage as $key->$value){
+		foreach($this->expectedDamage as $key => $value){
 			$this->expectedDamage[$key] = 0;
 		}
 		
