@@ -552,18 +552,18 @@ class Firing
                             -1, "normal", $ship->id, $ship->id,
                             $rammingSystem->id, -1, $gamedata->turn, 1, 
                             100, 100, 1, 1, 0,
-                            0,0,'Plasma',10000
+                            0,0,'SelfDestruct',10000
                         );
                         /*new FireOrder(
                             $id, $type, $shooterid, $targetid,
                             $weaponid, $calledid, $turn, $firingMode, $needed,
                             $rolled, $shots, $shotshit, $intercepted, $x, $y, $damageclass, $resolutionOrder
                         );*/
-                        $newFireOrder->pubnotes = "Self-destruct";
+                        $newFireOrder->pubnotes = " self-destructs.";
                         $newFireOrder->addToDB = true;
                         $rammingSystem->fireOrders[] = $newFireOrder;
                     }
-                    $damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $reactorCurr->id, $toDo, 0, 0, -1, true, false, "", "Plasma");
+                    $damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $reactorCurr->id, $toDo, 0, 0, -1, true, false, "", "SelfDestruct");
                     $damageEntry->updated = true;
                     if($rammingSystem){ //add extra data to damage entry - so firing order can be identified!
                             $damageEntry->shooterid = $ship->id; //additional field
