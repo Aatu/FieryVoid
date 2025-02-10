@@ -87,7 +87,8 @@
 	            $this->intercept = 0; //If weapon is boosted for Offensive Mode, cannot intercept!            
             } 
             $this->data["Special"] = "Energy Web: -15 to hit on arc with active Interceptor.";
-            $this->data["Special"] .= "<br>Can be fired offensively at fighters by boosting this system in Initial Orders Phase (at zero cost).  However, system loses Intercept Rating (E-Web is unaffected).";              
+            $this->data["Special"] .= "<br>Can be fired offensively at fighters by boosting this system in Initial Orders Phase (at zero cost).";
+            $this->data["Special"] .= "<br>However, when boosted system loses its Intercept Rating (E-Web is unaffected).";             
             parent::setSystemDataWindow($turn);
         }
 
@@ -134,7 +135,8 @@
 	            $this->intercept = 0; //If weapon is boosted for Offensive Mode, cannot intercept!            
             }          
             $this->data["Special"] = "Energy Web: -20 to hit on arc with active Interceptor.";
-            $this->data["Special"] .= "<br>Can be fired offensively at fighters by boosting this system in Initial Orders Phase (at zero cost).  However, system loses Intercept Rating (E-Web is unaffected).";              
+            $this->data["Special"] .= "<br>Can be fired offensively at fighters by boosting this system in Initial Orders Phase (at zero cost).";
+            $this->data["Special"] .= "<br>However, when boosted system loses its Intercept Rating (E-Web is unaffected).";              
         }
     }
     
@@ -154,8 +156,9 @@
 	            $this->intercept = 0; //If weapon is boosted for Offensive Mode, cannot intercept!            
             }            
             $this->data["Special"] = "Energy Web: -10 to hit on arc with active Interceptor.";
-            $this->data["Special"] .= "Can be fired offensively at fighters, by boosting this system in Initial Orders Phase (at zero cost).  However, system loses Intercept Rating (E-Web is unaffected).";                        
-        }
+            $this->data["Special"] .= "<br>Can be fired offensively at fighters by boosting this system in Initial Orders Phase (at zero cost).";
+            $this->data["Special"] .= "<br>However, when boosted system loses its Intercept Rating (E-Web is unaffected).";  
+		}
 
         public function getDamage($fireOrder){        return Dice::d(10)+3;   }
         public function setMinDamage(){     $this->minDamage = 4 ;      }
@@ -738,8 +741,9 @@ class HeavyInterceptorBattery extends InterceptorMkI{
 	            $this->intercept = 0; //If weapon is boosted for Offensive Mode, cannot intercept!            
             }                         
             $this->data["Special"] = "Energy Web: -20 to hit on arc with active Interceptor.";
-            $this->data["Special"] .= "<br>Can be fired offensively at fighters by boosting this system in Initial Orders Phase (at zero cost).  However, system loses Intercept Rating (E-Web is unaffected).";              
-        }
+            $this->data["Special"] .= "<br>Can be fired offensively at fighters by boosting this system in Initial Orders Phase (at zero cost).";
+            $this->data["Special"] .= "<br>However, when boosted system loses its Intercept Rating (E-Web is unaffected).";  
+		 }
 
         public function getDamage($fireOrder){        return Dice::d(10, 2)+6;   }
         public function setMinDamage(){     $this->minDamage = 8 ;      }

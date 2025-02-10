@@ -29,6 +29,9 @@ class TrekNausicaanHeavyGlider extends LCV{
 		$this->hangarRequired = ''; //no hangar required!
 
 
+   		$this->enhancementOptionsEnabled[] = 'ELT_MRN'; //To enable Elite Marines enhancement
+		$this->enhancementOptionsEnabled[] = 'EXT_MRN'; //To enable extra Marines enhancement
+
 		$this->addFrontSystem(new InvulnerableThruster(99, 1, 0, 99, 1)); //unhitable and with unlimited thrust allowance
 		$this->addAftSystem(new InvulnerableThruster(99, 1, 0, 99, 3)); //unhitable and with unlimited thrust allowance
 		$this->addAftSystem(new InvulnerableThruster(99, 1, 0, 99, 2)); //unhitable and with unlimited thrust allowance
@@ -54,6 +57,8 @@ class TrekNausicaanHeavyGlider extends LCV{
 		$this->addFrontSystem(new TrekLightDisabler(3, 240, 120, 2));
 
 		$this->addFrontSystem(new TrekMediumDisabler(3, 300, 60, 2));
+		
+        $this->addFrontSystem(new GrapplingClaw(5, 0, 0, 300, 60, 8, false));
 
 
 		$warpNacelle = new TrekWarpDrive(2, 10, 0, 3); //armor, structure, power usage, impulse output

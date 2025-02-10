@@ -16,7 +16,7 @@ class TrekNausicaanShefaFighter extends FighterFlight{
         $this->sideDefense = 7;
         $this->freethrust = 10;
         $this->offensivebonus = 4;
-        $this->jinkinglimit = 10;
+        $this->jinkinglimit = 8;
         $this->turncost = 0.33;
         $this->iniativebonus = 18 *5; //default medium fighter (despite it's a light fighter :) )
         $this->populate();
