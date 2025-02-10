@@ -82,12 +82,15 @@ if (isset($_SESSION["user"])) {
 	    <br>and last but not least - <u>A LOT</u> of bugfixes!
 	    
        <br><br>
+	    ---- <b>update 1st of February</b> ---------- 
+	    <br><b>Vree layout fix</b> - first they were too tough, then too weak. Now they should take damage properly (at last!)
 
 <!--	        
 		 <br><br>---------- <b>update 20th of January</b> ---------- 
 	    <br><b><u><big>Thirdspace</big></u> arrived</b> - custom faction by Douglas
 	    <br><b>Ammo Magazine for fighters</b> - Dilgar, Hurr
 	    <br><b>Vree and Pak'ma'ra updated</b> - courtesy of Douglas
+       <br><br>
 -->	    
 		
 	    
