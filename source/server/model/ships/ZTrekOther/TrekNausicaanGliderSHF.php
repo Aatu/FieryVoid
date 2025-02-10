@@ -15,7 +15,7 @@ class TrekNausicaanGliderSHF extends FighterFlight{
 		$this->notes = "Warp Engine";
 		$this->notes .= "<br>Takes up two regular fighter slots.";
 
-	$this->hangarRequired = "light"; //Nausicaan smaller Gliders require hangar space just like fighters - but they can fit to LIGHT fighter hangars!
+	$this->hangarRequired = "heavy"; 
 	$this->unitSize = 0.5; //one craft requires 2 hangar slots
         $this->customFtrName = "Nausicaan small craft"; //requires hangar space on Nausicaan ships - and requires it to be dedicated to assault craft
 
