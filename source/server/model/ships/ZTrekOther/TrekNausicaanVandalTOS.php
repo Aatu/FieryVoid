@@ -15,7 +15,7 @@ class TrekNausicaanVandalTOS extends MediumShip{
 
         $this->canvasSize = 100;
 	$this->isd = 2260;
-	$this->fighters = array("light"=>6,"Shuttlecraft"=>1);
+	$this->fighters = array("heavy"=>6,"Shuttlecraft"=>1);
 	$this->customFighter = array("Nausicaan small craft"=>7); //can deploy small craft with Nausicaan crew
         
         $this->forwardDefense = 11;
