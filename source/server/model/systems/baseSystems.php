@@ -456,7 +456,7 @@ class Reactor extends ShipSystem implements SpecialAbility {
 				$chance, $explodeRoll, 1, $shotsHit, 0,
 				0,0,'ContainmentBreach',10000
 			);
-			$newFireOrder->pubnotes = "Containment Breach - reactor explosion. Chance $chance %, roll $explodeRoll.";
+			$newFireOrder->pubnotes = " Containment Breach - reactor explosion. Chance $chance %, roll $explodeRoll.";
 			$newFireOrder->addToDB = true;
 			$rammingSystem->fireOrders[] = $newFireOrder;
 		}
@@ -507,7 +507,7 @@ class Reactor extends ShipSystem implements SpecialAbility {
 				$newFireOrder->addToDB = true;
 				$rammingSystem->fireOrders[] = $newFireOrder;
 			}
-			$newFireOrder->pubnotes .= "Reactor destroyed - entire ship is immolated.";
+			$newFireOrder->pubnotes .= " Reactor destroyed - entire ship is immolated.";
 		}else{
 			$newFireOrder=null;
 		}
@@ -2045,7 +2045,7 @@ class JumpEngine extends ShipSystem{
 		$fireOrderType = $jumpFailure ? 'JumpFailure' : 'HyperspaceJump';
 		$pubNotes = $jumpFailure
 			? " attempts to jump to hyperspace, but damage to the Jump Drive causes the ship to be destroyed."
-			: " activates Jump Drive and enters hyperspace.";
+			: " activates Jump Drive.";
 	
 		if ($rammingSystem) {
 			$newFireOrder = new FireOrder(
