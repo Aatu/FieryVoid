@@ -2057,16 +2057,19 @@ window.weaponManager = {
     doShortLogText: function doShortLogText(fire) {
         var shortLogText = false;
 
-        //Look for examples of fireORder types that don't need the full Log message.    
+        //Look for examples of fireOrder types that don't need the full Log message.    
         if( fire.damageclass == "HyperspaceJump"|| 
             fire.damageclass == "JumpFailure" ||
             fire.damageclass == "SelfDestruct" ||
             fire.damageclass == "ContainmentBreach" ||            
-            fire.damageclass == "Reactor" || 
+            fire.damageclass == "Reactor" ||
+            fire.damageclass == "Sabotage" || 
+            fire.damageclass == "WreakHavoc" || 
+            fire.damageclass == "Capture" || 
+            fire.damageclass == "Rescue" ||                                                  
             fire.damageclass == "LimpetBore"             
         ) shortLogText = true;  
 
-        //  Other possibilites include:   'Sabotage' 'Wreak Havoc'  'Capture' 'Rescue' 
         return shortLogText;
     },
 
