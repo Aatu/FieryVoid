@@ -167,7 +167,7 @@ class ShipSystem {
 							$rammingSystem->fireOrders[] = $newFireOrder;
 						}
 
-					$newFireOrder->pubnotes = "<br>A marine unit attempted to damage " . $this->displayName .", but it was already destroyed.  They will continue sabotage operations on enemy ship.";	
+					$newFireOrder->pubnotes = "<br>A marine unit attempted to damage " . $this->displayName .", but it was already destroyed.  They will continue sabotage operations.";	
 												
 						$cnc = $ship->getSystemByName("CnC");				
 						if($cnc){
@@ -307,7 +307,7 @@ class ShipSystem {
 				-1, "normal", $ship->id, $ship->id,
 				$rammingSystem->id, -1, $gamedata->turn, 1,
 				100, 100, 1, $shotsHit, 0,
-				0, 0, 'Wreak Havoc', 10000
+				0, 0, 'WreakHavoc', 10000
 			);
 					
 			$newFireOrder->addToDB = true;
@@ -332,11 +332,11 @@ class ShipSystem {
 				$newFireOrder->pubnotes = "<br>Roll(Mod): $wreakHavocRoll($rollMod) - A marine unit deals $damageDealt damage to the " . $attackedSystem->displayName .".";
 						
 				if ($damageDealt >= $maxDamage){	//Deals enough to destroy system	        
-					$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $attackedSystem->id, $damageCaused, 0, 0, -1, true, false, "", "Wreak Havoc");
+					$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $attackedSystem->id, $damageCaused, 0, 0, -1, true, false, "", "WreakHavoc");
 					$damageEntry->updated = true;
 					$attackedSystem->damage[] = $damageEntry;			
 				}else{ //Not enough to destroy, just damage system instead.
-					$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $attackedSystem->id, $damageCaused, 0, 0, -1, false, false, "", "Wreak Havoc");
+					$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $attackedSystem->id, $damageCaused, 0, 0, -1, false, false, "", "WreakHavoc");
 					$damageEntry->updated = true;
 					$attackedSystem->damage[] = $damageEntry;
 					$crits = array(); 
@@ -454,7 +454,7 @@ class ShipSystem {
 					$maxDamage = $this->getRemainingHealth();
 					$damageDealt = Dice::d(6, 3) + 2;
 					$damageCaused = min($damageDealt, $maxDamage); //Don't cause more damage than system's health remaining.
-					$newFireOrder->pubnotes = "<br>Roll(Mod): $sabotageRoll($rollMod) - A marine unit causes $damageCaused damage to " . $this->displayName .", they will now continue sabotage operations on enemy ship.";	
+					$newFireOrder->pubnotes = "<br>Roll(Mod): $sabotageRoll($rollMod) - A marine unit causes $damageCaused damage to " . $this->displayName .", they will continue sabotage operations.";	
 				
 					if ($damageDealt >= $maxDamage){	//Deals enough to destroy system	        
 						$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $damageCaused, 0, 0, -1, true, false, "", "Sabotage");
@@ -497,7 +497,7 @@ class ShipSystem {
 					$maxDamage = $this->getRemainingHealth();
 					$damageDealt = Dice::d(6, 1) + 2;
 					$damageCaused = min($damageDealt, $maxDamage); //Don't cause more damage than system's health remaining.
-					$newFireOrder->pubnotes = "<br>Roll(Mod): $sabotageRoll($rollMod) - A marine unit causes $damageCaused damage to " . $this->displayName .", and will continue sabotage operations on enemy ship.";						
+					$newFireOrder->pubnotes = "<br>Roll(Mod): $sabotageRoll($rollMod) - A marine unit causes $damageCaused damage to " . $this->displayName .", and will continue sabotage operations.";						
 						
 						if ($damageDealt >= $maxDamage){	//Deals enough to destroy system	        
 									$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $damageCaused, 0, 0, -1, true, false, "", "Sabotage");
