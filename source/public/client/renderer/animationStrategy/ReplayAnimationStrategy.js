@@ -92,9 +92,11 @@ window.ReplayAnimationStrategy = function () {
         }, this).forEach(function (ship) {
 			var jumped = shipManager.hasJumpedNotDestroyed(ship);
 			if(jumped){
-				var animation = new ShipJumpAnimation(time, this.shipIconContainer.getByShip(ship), this.emitterContainer, this.movementAnimations);	
+				var animation = new ShipJumpAnimation(time, this.shipIconContainer.getByShip(ship), this.emitterContainer, this.movementAnimations);
+                logAnimation.addLogEntryDestroyed(ship, time, true);                   	
 			}else{
             	var animation = new ShipDestroyedAnimation(time, this.shipIconContainer.getByShip(ship), this.emitterContainer, this.movementAnimations);
+                logAnimation.addLogEntryDestroyed(ship, time, false);                
 			}
             time += animation.getDuration();
             this.animations.push(animation);

@@ -5638,7 +5638,7 @@ class PsionicConcentratorLight extends Weapon{
             );
 
     public $fireControl = array(7, 3, 2); // fighters, <mediums, <capitals 
-    public $fireControlArray = array( 1=>array(6, 2, 2), 2=>array(2, 4, 4));
+    public $fireControlArray = array( 1=>array(6, 2, 2), 2=>array(1, 4, 5));	
 
     public $rangePenalty = 1;
     public $rangePenaltyArray = array( 1=>0.5, 2=>1);
