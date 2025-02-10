@@ -2760,7 +2760,8 @@ spl_autoload_register(
 				'zftrzeoth' => '/server/model/ships/vree/ZFtrZeoth.php',							
 				'ximm' => '/server/model/ships/vree/Ximm.php',							
 				'xurr' => '/server/model/ships/vree/Xurr.php',							
-				'xonn' => '/server/model/ships/vree/Xonn.php',
+				'xonn' => '/server/model/ships/vree/Xonn.php',	//original - now obsolete					
+				'xonnupdated' => '/server/model/ships/vree/XonnUpdated.php', //with layout changes
 				'xvell' => '/server/model/ships/vree/Xvell.php',
 				'xavan' => '/server/model/ships/vree/Xavan.php',
 				'hybridsaucer' => '/server/model/ships/raiders/HybridSaucer.php',
@@ -3423,7 +3424,8 @@ spl_autoload_register(
 						'testgun2' => '/server/model/weapons/customDevelopment.php',
 						'plasmasiegecannon' => '/server/model/weapons/customDevelopment.php',
 						'impheavylaser' => '/server/model/weapons/customDevelopment.php',
-						'directemine' => '/server/model/weapons/customDevelopment.php',
+						'directemine' => '/server/model/weapons/customDevelopment.php',						
+					'testlaser' => '/server/model/weapons/customs.php',
 
 				//Marine Boarding Actions
 				'marines' => '/server/model/weapons/specialWeapons.php',
