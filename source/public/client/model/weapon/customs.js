@@ -229,3 +229,10 @@ var GaimPhotonBomb = function GaimPhotonBomb(json, ship) {
 GaimPhotonBomb.prototype = Object.create(Weapon.prototype);
 GaimPhotonBomb.prototype.constructor = GaimPhotonBomb;
 
+
+var TestLaser = function TestLaser(json, ship) {
+    Weapon.call(this, json, ship);
+};
+TestLaser.prototype = Object.create(Weapon.prototype);
+TestLaser.prototype.constructor = TestLaser;
+
