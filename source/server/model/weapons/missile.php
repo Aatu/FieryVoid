@@ -2186,15 +2186,12 @@ class BallisticMineLauncher extends AmmoMissileRackS{
 	protected $basicRange = 30;
 	protected $basicDistanceRange = 60; //Just so scattering past 30 hexes doesn't cause an issue.
 	
-		public $animation = "bolt";
-		public $animationColor = array(245, 90, 90);
+	public $animation = "bolt";
+	public $animationColor = array(245, 90, 90);
     public $animationExplosionScale = 0; //0 means it will be set automatically by standard constructor, based on average damage yield
     public $animationExplosionScaleArray = array();
-		public $animationExplosionType = "AoE";
+	public $animationExplosionType = "AoE";
 		
-//	private $ammoMagazine; //reference to ammo magazine
-//	private $ammoClassesUsed = array();
-				
 
     protected $rackExplosionDamage = 0; //how much damage will this weapon do in case of catastrophic explosion
     protected $rackExplosionThreshold = 21; //Not sure these can explode in same way as Missile Racks.  Set above threshold for now.  
@@ -2252,23 +2249,23 @@ class BallisticMineLauncher extends AmmoMissileRackS{
         $rolled = Dice::d(100);
         $fireOrder->rolled = $rolled; //...and hit, regardless of value rolled
 
- //       $originalFireOrder->shotshit++; //Appears to cause hex shot to hit target sometimes, hex target works ok tho and animation fixed in front end.
-            if ($rolled > 75) { //deviation!
-                $maxdis = $posLaunch->distanceTo($hexTarget);
-                $dis = Dice::d(6); //deviation distance            
-                $dis = min($dis, floor($maxdis));
-                $direction = Dice::d(6)-1; //deviation direction
 
-                $hexTarget = $hexTarget->moveToDirection($direction, $dis);
+        if ($rolled > 75) { //deviation!
+            $maxdis = $posLaunch->distanceTo($hexTarget);
+            $dis = Dice::d(6); //deviation distance            
+            $dis = min($dis, floor($maxdis));
+            $direction = Dice::d(6)-1; //deviation direction
+
+            $hexTarget = $hexTarget->moveToDirection($direction, $dis);
                 
-                $originalFireOrder->pubnotes .= " deviation from " . $originalFireOrder->x . ' ' . $originalFireOrder->y;
-                $originalFireOrder->x = $hexTarget->q; //Update fireOrder
-                $originalFireOrder->y = $hexTarget->r;
-                $originalFireOrder->pubnotes .= " to " . $originalFireOrder->x . ' ' . $originalFireOrder->y;
-                $originalFireOrder->pubnotes .= ". Shot deviates $dis hexes. ";
+            $originalFireOrder->pubnotes .= " deviation from " . $originalFireOrder->x . ' ' . $originalFireOrder->y;
+            $originalFireOrder->x = $hexTarget->q; //Update fireOrder
+            $originalFireOrder->y = $hexTarget->r;
+            $originalFireOrder->pubnotes .= " to " . $originalFireOrder->x . ' ' . $originalFireOrder->y;
+            $originalFireOrder->pubnotes .= ". Shot deviates $dis hexes. ";
                               
-                $updatedFireOrder = $originalFireOrder; //Update fire order with new landing coordinates for next part.
-            }				       
+            $updatedFireOrder = $originalFireOrder; //Update fire order with new landing coordinates for next part.
+        }				       
 			    
 		//Now used updated x and y coordinates after scatter to find ships in range.		    
 	    $finalHexTarget = new OffsetCoordinate($updatedFireOrder->x, $updatedFireOrder->y);
@@ -2280,35 +2277,34 @@ class BallisticMineLauncher extends AmmoMissileRackS{
 		    $mineTarget = $gamedata->getClosestShip($finalHexTarget, $mineRange); //Just find the closest ship, then attack it.			
 		}        
     
-		    if ($mineTarget instanceof BaseShip || $mineTarget instanceof FighterFlight) { // Check if $mineTarget is a valid ship/fighter flight
-						$newFireOrder = new FireOrder(
-							-1, "normal", $shooter->id, $mineTarget->id,
-							$this->id, -1, $gamedata->turn, $originalFireOrder->firingMode, 
-							0, 0, 1, 0, 0, //needed, rolled, shots, shotshit, intercepted
-							0,0,$this->weaponClass,-1 //X, Y, damageclass, resolutionorder
-						);		
-						$newFireOrder->addToDB = true;
-						$this->fireOrders[] = $newFireOrder;
-		    			$originalFireOrder->pubnotes .= "Mine launched. ";						
-						
-		    }else{ //No valid targets.
-		    	$originalFireOrder->pubnotes .= "Mine launched, but no valid target for it to attack. ";
-		    }
+		if ($mineTarget instanceof BaseShip || $mineTarget instanceof FighterFlight) { // Check if $mineTarget is a valid ship/fighter flight
+			$newFireOrder = new FireOrder(
+				-1, "normal", $shooter->id, $mineTarget->id,
+				$this->id, -1, $gamedata->turn, $originalFireOrder->firingMode, 
+				0, 0, 1, 0, 0, //needed, rolled, shots, shotshit, intercepted
+				0,0,$this->weaponClass,-1 //X, Y, damageclass, resolutionorder
+			);		
+			$newFireOrder->addToDB = true;
+			$this->fireOrders[] = $newFireOrder;
+		    $originalFireOrder->pubnotes .= "Mine launched. ";								
+		}else{ //No valid targets.
+			//CAN I GENERATE A NEW NOTE HERE FOR NEXT TURN?
+		    $originalFireOrder->pubnotes .= "Mine launched, but no valid target for it to attack. ";
+		}
 	} //endof beforeFiringOrderResolution
 	
 	    
     public function calculateHitBase($gamedata, $fireOrder)
     {
 		if ($fireOrder->type == 'ballistic') {				
-					$fireOrder->needed = 100;				
-					$fireOrder->updated = true;
-				} else{
-
+			$fireOrder->needed = 100;				
+			$fireOrder->updated = true;
+		} else{
 			//Mine direct shot - default routine will do!
 			$this->hextarget = false;
 			weapon::calculateHitBase($gamedata, $fireOrder);
-			}
-		}	
+		}
+	}	
 
 
 	public function fire($gamedata, $fireOrder){
@@ -2318,33 +2314,34 @@ class BallisticMineLauncher extends AmmoMissileRackS{
 		}else{ //Normal fire routine for direct shots.			
 			$this->hextarget = false;
 		weapon::fire($gamedata, $fireOrder);		
-			}
-		}//endof fire
+		}
+	}//endof fire
 
 
+	public function getFiringHex($gamedata, $fireOrder) {
 
-		public function getFiringHex($gamedata, $fireOrder) {
-
-		    $launchPos = null;
-			$allFireOrders = $this->getFireOrders($gamedata->turn);
-			$newLaunchPos = null;			
+		$launchPos = null;
+		$allFireOrders = $this->getFireOrders($gamedata->turn);
+		$newLaunchPos = null;			
 		    
-            foreach($allFireOrders as $launched){	       	
+        foreach($allFireOrders as $launched){	       	
 
-				if ($launched->targetid == -1) { //Find hex targeted fire order
-	                $hexTarget = new OffsetCoordinate($launched->x, $launched->y);
-	                $newLaunchPos = $hexTarget; //Update variable with launch pos for direct fire.	            
-			        break;				       
-			        }			 
-			} 
+			if ($launched->targetid == -1) { //Find hex targeted fire order
+	            $hexTarget = new OffsetCoordinate($launched->x, $launched->y);
+	            $newLaunchPos = $hexTarget; //Update variable with launch pos for direct fire.	            
+			    break;				       
+			    }			 
+		} 
 			         			        
-			if ($fireOrder->targetid != -1) { //Fireorder is for mine attack, not launcher.
-                $launchPos = $newLaunchPos; 	            			       
-	        }		             			        
+		if ($fireOrder->targetid != -1) { //Fireorder is for mine attack, not launcher.
+            $launchPos = $newLaunchPos; 	            			       
+	    }		             			        
 				
-			if($launchPos == null) $launchPos = parent::getFiringHex($gamedata, $fireOrder); //Go back to normal function for instances when getFiringHex is being called for hex targeted shot. 
-			   return $launchPos;	
-		} //endof getFiringHex    
+		if($launchPos == null) $launchPos = parent::getFiringHex($gamedata, $fireOrder); //Go back to normal function for instances when getFiringHex is being called for hex targeted shot. 
+			return $launchPos;
+
+	} //endof getFiringHex    
+
 
 	public function notActuallyHexTargeted($fireOrder)
 	{
