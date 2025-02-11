@@ -1778,7 +1778,7 @@ window.weaponManager = {
             var fire = fires[i];
             var weapon = shipManager.systems.getSystem(ship, fire.weaponid);
 			//Added Persistent effect check below, as was preventing cancel moves when non-ballistic Plasma Web generated a plasma cloud in Intial Orders - DK 09.24 
-            if (fire.turn == gamedata.turn && !fire.rolled && !weapon.ballistic && fire.notes != 'Persistent Effect') { 
+            if (fire.turn == gamedata.turn && !fire.rolled && !weapon.ballistic && fire.notes != 'PersistentEffect') { 
                 return false;
             }
         }

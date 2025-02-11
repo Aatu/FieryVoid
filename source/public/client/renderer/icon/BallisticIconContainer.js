@@ -167,7 +167,7 @@ window.BallisticIconContainer = function () {
     function createOrUpdateBallistic(ballistic, iconContainer, turn, replay = false) {
         var icon = getBallisticIcon.call(this, ballistic.id);
 
-	    if (icon && ballistic.notes != 'Persistent Effect' && ballistic.notes != 'Split') {//We want Persistent Effects to show up in initial Orders! - DK 09.24
+	    if (icon && ballistic.notes != 'PersistentEffect' && ballistic.notes != 'Split') {//We want Persistent Effects to show up in initial Orders! - DK 09.24
 	        updateBallisticIcon.call(this, icon, ballistic, iconContainer, turn);
 	    } else {   	
 	        createBallisticIcon.call(this, ballistic, iconContainer, turn, this.scene, replay);
@@ -311,7 +311,7 @@ window.BallisticIconContainer = function () {
 	        var launchSprite = null;
 	        
 			//Don't create launch sprite for duplicates, persistent effects or Direct Fire/Support Weapon 
-	        if ((!getByLaunchPosition(launchPosition, this.ballisticIcons)) && ballistic.notes != 'Persistent Effect' && ballistic.type !== 'normal' && ballistic.damageclass !== 'support') {        	
+	        if ((!getByLaunchPosition(launchPosition, this.ballisticIcons)) && ballistic.notes != 'PersistentEffect' && ballistic.type !== 'normal' && ballistic.damageclass !== 'support') {        	
 				    if(gamedata.isMyOrTeamOneShip(shooter)){
 						launchSprite = new BallisticSprite(launchPosition, 'hexYellow');       
 				        scene.add(launchSprite.mesh);	        		
@@ -460,14 +460,14 @@ window.BallisticIconContainer = function () {
     function createOrUpdateBallisticLines(ballistic, iconContainer, turn, replay = false) {
         var lineIcon = getBallisticLineIcon.call(this, ballistic.id);
 
-	    if (lineIcon && ballistic.notes != 'Persistent Effect' && ballistic.notes != 'Split') {//We want Persistent Effects to show up in initial Orders! - DK 09.24
+	    if (lineIcon && ballistic.notes != 'PersistentEffect' && ballistic.notes != 'Split') {//We want Persistent Effects to show up in initial Orders! - DK 09.24
 	        if(replay){
 	        	createBallisticLineIcon.call(this, ballistic, iconContainer, turn, this.scene, replay);	        	   	
 			}else{	
 				updateBallisticLineIcon.call(this, lineIcon, ballistic, iconContainer, turn);
 			}	
 	    } else {   	
-	        if(ballistic.notes != 'Persistent Effect') createBallisticLineIcon.call(this, ballistic, iconContainer, turn, this.scene, replay);
+	        if(ballistic.notes != 'PersistentEffect') createBallisticLineIcon.call(this, ballistic, iconContainer, turn, this.scene, replay);
 	    }
     	
 	}	
