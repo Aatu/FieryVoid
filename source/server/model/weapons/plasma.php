@@ -1421,6 +1421,10 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 								
 		if($cloudFireOrder==null) return; //no appropriate fire order, end of work.  
 
+		// Store the original coordinates
+		$originalX = $cloudFireOrder->x;
+		$originalY = $cloudFireOrder->y;
+
 		//Check through fireOrders, only interested in Persistent Effect orders created in Initial Orders Phase
 		foreach ($firingOrders as $cloudFireOrder) { 		
 			if (($cloudFireOrder->type == "ballistic") &&  ($cloudFireOrder->damageclass == 'PersistentEffectPlasma')) { 	//Double-check.	
@@ -1444,6 +1448,10 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 			}
 		}
 
+		// Restore the original coordinates
+		$cloudFireOrder->notes = 'PlasmaCloud';
+		$cloudFireOrder->x = $originalX;
+		$cloudFireOrder->y = $originalY;
     	
 	}//endof beforeFiringOrderResolution
 
@@ -1537,6 +1545,8 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 						break; //Don't check the others, retrieved in Descending order so first one is the one we want!
 					}
 				}
+
+
 /*
  				//ALTERNATIVE METHOD - Sort through fireOrders and find the one that doesn't match, assign it to this fireOrder!
                 $existingFiringOrders = $this->getFireOrders($gamedata->turn);
@@ -1587,8 +1597,10 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 		
 	public function fire($gamedata, $fireOrder){
 
-		if($fireOrder->type == "ballistic" && $fireOrder->damageclass == 'PersistentEffectPlasma') return; //Don't resolve ballistic 'cloud' fireOrders.	
-	
+		if($fireOrder->type == "ballistic" && $fireOrder->damageclass == 'PersistentEffectPlasma') {
+            Manager::insertSingleFiringOrder($gamedata, $fireOrder); //But do insert to db for replay
+			return; //Don't resolve ballistic 'cloud' fireOrders.
+		}	
 		$shooter = $gamedata->getShipById($fireOrder->shooterid);
 
 		$this->changeFiringMode($fireOrder->firingMode);		

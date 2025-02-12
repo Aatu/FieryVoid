@@ -182,7 +182,11 @@ window.BallisticIconContainer = function () {
 
 
     function createBallisticIcon(ballistic, iconContainer, turn, scene, replay = false) {
-						
+
+			if(replay){
+				if(ballistic.damageclass == 'PersistentEffectPlasma' && ballistic.targetid == -1 && ballistic.notes != 'PlasmaCloud') return;
+			}
+
 	        var shooterIcon = iconContainer.getById(ballistic.shooterid);	
 //	        if(!shooterIcon) shooterIcon = iconContainer.getById(ballistic.shooter.id); //Do I still need?
 			var targetType = 'hexRed'; //Default red hex if none of the later conditions are true.
