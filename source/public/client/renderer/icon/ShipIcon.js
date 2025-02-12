@@ -489,7 +489,7 @@ window.ShipIcon = function () {
         }, this);
     };
 
-
+/* //Old method for displaying BDEW as a circle - Dk 12.2.25
     ShipIcon.prototype.showBDEW = function () {
 
         var BDEW = ew.getBDEW(this.ship);
@@ -511,6 +511,44 @@ window.ShipIcon = function () {
 
         return null;
     };
+*/
+
+    ShipIcon.prototype.showBDEW = function () {
+        var BDEW = ew.getBDEW(this.ship);
+        if (!BDEW || this.BDEWSprite) {
+            return;
+        }
+
+        var hexDistance = window.coordinateConverter.getHexDistance();
+        var dis = 20.6 * hexDistance; //Need the extra 0.6 just to cover the 20th hex visually - DK
+
+        var color = gamedata.isMyShip(this.ship) ? new THREE.Color(160 / 255, 250 / 255, 100 / 255) : new THREE.Color(255 / 255, 157 / 255, 0 / 255);
+
+        // Create a hexagon shape
+        var hexShape = new THREE.Shape();
+        for (let i = 0; i < 6; i++) {
+            let angle = (i * Math.PI) / 3; // 60-degree increments
+            let x = dis * Math.cos(angle);
+            let y = dis * Math.sin(angle);
+            if (i === 0) {
+                hexShape.moveTo(x, y);
+            } else {
+                hexShape.lineTo(x, y);
+            }
+        }
+        hexShape.closePath();
+
+        var geometry = new THREE.ShapeGeometry(hexShape);
+        var material = new THREE.MeshBasicMaterial({ color: color, opacity: 0.2, transparent: true });
+        var hexagon = new THREE.Mesh(geometry, material);
+        hexagon.position.z = -1;
+        
+        this.mesh.add(hexagon);
+        this.BDEWSprite = hexagon;
+
+        return null;
+    };
+
 
     ShipIcon.prototype.hideBDEW = function () {
         this.mesh.remove(this.BDEWSprite);
