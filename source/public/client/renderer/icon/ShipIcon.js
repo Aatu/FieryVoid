@@ -489,7 +489,7 @@ window.ShipIcon = function () {
         }, this);
     };
 
-/* //Old method for displaying BDEW as a circle - Dk 12.2.25
+/* //Old method for displaying BDEW as a circle - DK 12.2.25
     ShipIcon.prototype.showBDEW = function () {
 
         var BDEW = ew.getBDEW(this.ship);
