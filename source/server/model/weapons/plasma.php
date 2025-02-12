@@ -1504,7 +1504,7 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 		        100, 0, 1, 0, 0, // needed, rolled, shots, shotshit, intercepted
 		        $cloudFireOrder->x, $cloudFireOrder->y, $this->weaponClass, -1 // X, Y, damageclass, resolutionorder
 		    );
-
+			$newDamageFireOrder->notes = 'Attack on fighters passing through';
 	        // Store the engagement with coordinates as the key
 	        PakmaraPlasmaWeb::$alreadyEngagedClouded[$target->id][$coordinatesKey] = [
 	            'engaged' => true, // marking engagement
@@ -1570,14 +1570,15 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 		$fireOrder->shots = 1;					
 		$fireOrder->notes .= 'Plasma Web direct shot.';
 
-		if($fireOrder->type == "ballistic" && $fireOrder->damageclass != 'PersistentEffectPlasma') $fireOrder->notes = 'Attack on fighters passing through';
+//		if($fireOrder->type == "ballistic" && $fireOrder->damageclass != 'PersistentEffectPlasma') $fireOrder->notes = 'Attack on fighters passing through';
 				
 		if ($fireOrder->targetid != -1 && $fireOrder->type == "normal") {//Correct any direct fireOrders that targeted a ship.
 			$targetship = $gamedata->getShipById($fireOrder->targetid);
 			//insert correct target coordinates: last turns' target position
+			$targetShip = $gamedata->getShipById($fireOrder->targetid);			
  			$targetpos = $targetShip->getHexPos();
-			$fireOrder->x = $targetPos->q;
-			$fireOrder->y = $targetPos->r;
+			$fireOrder->x = $targetpos->q;
+			$fireOrder->y = $targetpos->r;
 			$fireOrder->targetid = -1; //correct the error
 			$fireOrder->calledid = -1; //just in case
 		} 		
@@ -1586,7 +1587,8 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 		
 	public function fire($gamedata, $fireOrder){
 
-		if($fireOrder->type == "ballistic" && $fireOrder->damageclass == 'PersistentEffectPlasma') return; //Don't resolve ballistic 'cloud' fireOrders.		
+		if($fireOrder->type == "ballistic" && $fireOrder->damageclass == 'PersistentEffectPlasma') return; //Don't resolve ballistic 'cloud' fireOrders.	
+	
 		$shooter = $gamedata->getShipById($fireOrder->shooterid);
 
 		$this->changeFiringMode($fireOrder->firingMode);		
@@ -1776,7 +1778,7 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 		                
 		                // Only proceed if both coordinates are set
 		                if ($xCoordinate !== null && $yCoordinate !== null) {
-		                    
+
 		                    // Create a new FireOrder
 		                    $newFireOrder = new FireOrder(
 		                        -1, "ballistic", $ship->id, -1,
