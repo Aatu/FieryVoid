@@ -12,7 +12,7 @@ MISSILES
 
 General notes: ships usually come preloaded with missiles (usually Basic), and any missiles You buy is on top of that. Also, while amount of any given missile You can buy is limited by magazine size, total amount of missiles is not. 
 This means Your missile magazine may show more missiles available than it can actually hold. However, You cannot actually LAUNCH more missiles than magazine can hold - total number of launches is tracked. So extra missiles will provide You with extra variety (at a price ;) ), but not actual extra missiles.
-This is particularly important for fighters (as ships' cavernous magazines are unlikely to run out during a battle). You are encouraged to observetotal amount of missiles a fighter can have, but if You do not (hether by omission or intentionally) - You will get extra missile variety, but no extra missiles.
+This is particularly important for fighters (as ships' cavernous magazines are unlikely to run out during a battle). You are encouraged to observe total amount of missiles a fighter can have, but if You do not (whether by omission or intentionally) - You will get extra missile variety, but no extra missiles.
 Note that fighters usually start with empty magazine (although some missile entry is present, for technical reasons).
 Any missile available in magazine can be fired by any launcher (that is capable of firing it), missiles are not directly tied to particular mounts. This is different for weapons that do store ammo directly on mount - but such weapons usually can only hold one kind of ammo.
 Missiles (and Navigators, for fighters) are bought as enhancements despite being standard options (for technical reasons).
@@ -21,7 +21,7 @@ Not all tabletop missiles made it to Fiery Void - some proved just too difficult
 
 Shipborne missiles' built-in guidance package is often combined into weapons' Fire control, rather than being kept separate.
 
-Enhancement names for ammo usually contain year available (for primary and other races, if this differs - with primary usually bein Kor-Lyan ;) ). Game does not enforce anything in regard to this information it's up to player to refrain from using anachronic weapons (or not).
+Enhancement names for ammo usually contain year available (for primary and other races, if this differs - with primary usually being Kor-Lyan ;) ). Game does not enforce anything in regard to this information it's up to player to refrain from using anachronic weapons (or not).
 
 SHIPBORNE MISSILES (with normal Range, Damage and Fire Control displayed)
  - class B - Basic Missile - (Range 20 - Damage 20 - Fire Control: +3/+3/+3) --- The name says it all, default loadout present on most ships. All other shipborne missiles have the same data except attributes specifically indicated. Missiles do NOT use firing ships' OEW.
@@ -54,10 +54,10 @@ BOARDING ACTIONS WITH MARINES
 Many factions have access to boarding actions through the use of Breaching Pods, which come equipped with a 'Marines' weapon system and two contingents of Marines aboard as standard.  During the Firing Phase, Pods can attempt to attach to enemy ships in the same hex (and in arc) and deliver Marines to undertake a selection of missions (Sabotage, Capture Ship and Rescue).
 
 ATTACHING A POD:
-In all cases the first step will be the same, attempt to attach a Breaching Pod to the target ship.  Pods automatically attach to enemy ships they are moving faster than, providing the speed difference is not higher that their thrust rating.  Where the enemy ship is moving faster than the Pod they will need to roll for success, with a base chance of 100% and -10% per point of speed difference.  The LLort treat speed difference as one point lower for attaching a pod.
+In all cases the first step will be the same, attempt to attach a Breaching Pod to the target ship.  Pods automatically attach to enemy ships they are moving faster than, providing the speed difference is not higher that their thrust rating.  Where the enemy ship is moving faster than the Pod they will need to roll for success, with a base chance of 100% and -10% per point of speed difference.  The Llort treat speed difference as one point lower for attaching a pod.
 
 DELIVERING THE MARINES:
-Once attached, the Pod will attempt to deliver the Marines, again this part is the same regardless of which mission has been selected.  The Marines have a base chance of 50% of successfully boording the vessel 5 or under on a d10), if they roll over there is a chance that the marines may be lost.  Otherwise they will return to the Pod and can attempt to Board again in future turns.  A number of modifiers are sometimes applied to this roll as well depending on circumstances, and these have been summarised below:
+Once attached, the Pod will attempt to deliver the Marines, again this part is the same regardless of which mission has been selected.  The Marines have a base chance of 50% of successfully boarding the vessel 5 or under on a d10), if they roll over there is a chance that the marines may be lost.  Otherwise they will return to the Pod and can attempt to Board again in future turns.  A number of modifiers are sometimes applied to this roll as well depending on circumstances, and these have been summarised below:
  	+20% success - Yolu-specific bonus
 	+10% success - Elite marines (e.g. Gaim or Narn) / Llort Breaching Pod / Target vessel has Poor Crew / Attempting to board a Primary section after an external section has been destroyed
 	-10% success - Narn or Gaim Defenders / Target vessel has Elite Crew or under the effects of Markab's Religious Fervor
@@ -120,7 +120,7 @@ FIGHTER ENHANCEMENTS (all costs per craft):
 (ammo) * : various missiles that can be bought. Total number of missiles that can be fired will not be higher than magazine capacity, even if more missiles are bought.
 This is an option rather than enhancement.
 
-Expert Motivator (this is a skill one of pilots possesses, rather than a aseparate person):
+Expert Motivator (this is a skill one of pilots possesses, rather than a separate person):
 	Effect: -2 modifier to dropout rolls
 	Cost: 10% of craft price (round up)
 	Limit: 1
@@ -162,7 +162,7 @@ Improved Self Repair:
 IPSHA:
 
 Spark Curtain (completely unofficial, ALTERNATE TIMELINE):
-	Effect: ballistic defense (2+boost) for Spark Field; affects hit chance only
+	Effect: ballistic defence (2+boost) for Spark Field; affects hit chance only
 	Cost: 40 + 10/Spark Field
 	Limit: 1 
 
@@ -187,7 +187,7 @@ Identify Friend or Foe (IFF) System:
 MARKAB:
 
 Religious Fervor:
-	Effect: +1 to hit on all weapons (or +5 OB for fighters), +10 initiative, Defense ratings increased by 10 (e.g. easier to be hit).  Fighters also gain -3 to Dropout.
+	Effect: +1 to hit on all weapons (or +5 OB for fighters), +10 initiative, Defence ratings increased by 10 (e.g. easier to be hit).  Fighters also gain -3 to Dropout.
 	Cost: 0
 	Limit: 1	
 	
@@ -226,7 +226,7 @@ Amethyst Skin Coloring (ship only):
 
 Azure Skin Coloring (ship/fighter):
 	Effect: +1 Shield rating, for all shields.
-	Cost: unit size factor x new shield rating x nuber of emitters
+	Cost: unit size factor x new shield rating x number of emitters
 	Limit: 50% of base shield rating
 	Init size factor is 30 for Enormous units, 25 for Capitals, 20 for anything smaller (including fighters).
 
