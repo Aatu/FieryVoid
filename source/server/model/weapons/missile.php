@@ -2288,9 +2288,12 @@ class BallisticMineLauncher extends AmmoMissileRackS{
 			$this->fireOrders[] = $newFireOrder;
 		    $originalFireOrder->pubnotes .= "Mine launched. ";								
 		}else{ //No valid targets.
-			//CAN I GENERATE A NEW NOTE HERE FOR NEXT TURN?
+			//CAN I GENERATE A NEW NOTE HERE FOR NEXT TURN?  Need to pass finalHexTarget and firingMode.
 		    $originalFireOrder->pubnotes .= "Mine launched, but no valid target for it to attack. ";
 		}
+
+		//FireOrdeers this Turn now dealt with, do fireOrders from any previous turns use new function?
+
 	} //endof beforeFiringOrderResolution
 	
 	    
