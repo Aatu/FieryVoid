@@ -349,7 +349,7 @@ class Enhancements{
 	  //Markab-specific - Enables 'Religious Fervor' refit to selected vessel which comes with some bonus and some penalties.
 	  $enhID = 'MARK_FERV';	  
 	  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option needs to be specifically enabled
-		  $enhName = 'Religious Fervor - Only use when Desperate Rules apply';
+		  $enhName = 'Religious Fervor - Only if Desperate Rules apply';
 		  $enhLimit = 1;	
 		  $enhPrice = 0;
 		  $enhPriceStep = 0;
@@ -627,7 +627,7 @@ class Enhancements{
 			  $enhLimit = $actualCapacity; //effectively limited by magazine capacity	
 			  $enhPrice = $ammoClass->getPrice($ship); 
 			  $enhPriceStep = 0; //flat rate
-			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 			  //special missiles are NOT enhancements
 		  }
 		  $enhID = 'AMMO_L'; //Long Range Missiles
@@ -639,7 +639,7 @@ class Enhancements{
 			  $enhLimit = $actualCapacity;		
 			  $enhPrice = $ammoClass->getPrice($ship); 
 			  $enhPriceStep = 0; //flat rate
-			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 		  }
 		  $enhID = 'AMMO_H'; //Heavy Missiles
 		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
@@ -650,7 +650,7 @@ class Enhancements{
 			  $enhLimit = $actualCapacity;		
 			  $enhPrice = $ammoClass->getPrice($ship); 
 			  $enhPriceStep = 0; //flat rate
-			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 		  }
 		  $enhID = 'AMMO_F'; //Flash Missiles
 		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
@@ -661,7 +661,7 @@ class Enhancements{
 			  $enhLimit = $actualCapacity;		
 			  $enhPrice = $ammoClass->getPrice($ship); 
 			  $enhPriceStep = 0; //flat rate
-			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 		  }
 		  $enhID = 'AMMO_A'; //Antifighter Missiles
 		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
@@ -672,7 +672,7 @@ class Enhancements{
 			  $enhLimit = $actualCapacity;		
 			  $enhPrice = $ammoClass->getPrice($ship); 
 			  $enhPriceStep = 0; //flat rate
-			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 		  }
 		  $enhID = 'AMMO_P'; //Piercing Missiles
 		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
@@ -683,7 +683,7 @@ class Enhancements{
 			  $enhLimit = $actualCapacity;		
 			  $enhPrice = $ammoClass->getPrice($ship); 
 			  $enhPriceStep = 0; //flat rate
-			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 		  }
 		  $enhID = 'AMMO_D'; //Light Missiles
 		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
@@ -694,7 +694,7 @@ class Enhancements{
 			  $enhLimit = $actualCapacity;		
 			  $enhPrice = $ammoClass->getPrice($ship); 
 			  $enhPriceStep = 0; //flat rate
-			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 		  }
 		  $enhID = 'AMMO_I'; //Interceptor Missiles
 		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
@@ -705,7 +705,7 @@ class Enhancements{
 			  $enhLimit = $actualCapacity;		
 			  $enhPrice = $ammoClass->getPrice($ship); 
 			  $enhPriceStep = 0; //flat rate
-			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 		  }
 		  $enhID = 'AMMO_C'; //Chaff Missiles - -15 to hit
 		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
@@ -716,7 +716,7 @@ class Enhancements{
 			  $enhLimit = $actualCapacity;		
 			  $enhPrice = $ammoClass->getPrice($ship); 
 			  $enhPriceStep = 0; //flat rate
-			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 		  }				  
 		  $enhID = 'AMMO_J'; //Jammer Missiles - add BDEW
 		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
@@ -727,7 +727,7 @@ class Enhancements{
 			  $enhLimit = $actualCapacity;
 			  $enhPrice = $ammoClass->getPrice($ship); 
 			  $enhPriceStep = 0; //flat rate
-			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 		  }
 		  $enhID = 'AMMO_K'; //Starburst Missiles - Fire in Pulse mode
 		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
@@ -738,7 +738,7 @@ class Enhancements{
 			  $enhLimit = $actualCapacity;		
 			  $enhPrice = $ammoClass->getPrice($ship); 
 			  $enhPriceStep = 0; //flat rate
-			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 		  }	
 		  $enhID = 'AMMO_M'; //Multiwarhead Missiles
 		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
@@ -749,7 +749,7 @@ class Enhancements{
 			  $enhLimit = $actualCapacity;		
 			  $enhPrice = $ammoClass->getPrice($ship); 
 			  $enhPriceStep = 0; //flat rate
-			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 		  }
 		  $enhID = 'AMMO_KK'; //Kinetic Missiles
 		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
@@ -760,7 +760,7 @@ class Enhancements{
 			  $enhLimit = $actualCapacity;		
 			  $enhPrice = $ammoClass->getPrice($ship); 
 			  $enhPriceStep = 0; //flat rate
-			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 		  }
 		  $enhID = 'AMMO_S'; //Stealth Missiles - Target is hidden
 		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
@@ -771,7 +771,7 @@ class Enhancements{
 			  $enhLimit = $actualCapacity / 10;		//10% limit
 			  $enhPrice = $ammoClass->getPrice($ship); 
 			  $enhPriceStep = 0; //flat rate
-			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 		  }
 		  $enhID = 'AMMO_X'; //HARM Missiles
 		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
@@ -782,7 +782,7 @@ class Enhancements{
 			  $enhLimit = $actualCapacity;		
 			  $enhPrice = $ammoClass->getPrice($ship); 
 			  $enhPriceStep = 0; //flat rate
-			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 		  }
 		  $enhID = 'MINE_BLB'; //Ballistic Launcher Basic Mine
 		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
@@ -793,7 +793,7 @@ class Enhancements{
 			  $enhLimit = $actualCapacity;		
 			  $enhPrice = $ammoClass->getPrice($ship); 
 			  $enhPriceStep = 0; //flat rate
-			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 		  }		
 		  $enhID = 'MINE_BLH'; //Ballistic Launcher Heavy Mine
 		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
@@ -804,7 +804,7 @@ class Enhancements{
 			  $enhLimit = $actualCapacity;		
 			  $enhPrice = $ammoClass->getPrice($ship); 
 			  $enhPriceStep = 0; //flat rate
-			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 		  }
 		  $enhID = 'MINE_BLW'; //Ballistic Launcher Wide-Ranged Mine
 		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
@@ -815,7 +815,7 @@ class Enhancements{
 			  $enhLimit = $actualCapacity;		
 			  $enhPrice = $ammoClass->getPrice($ship); 
 			  $enhPriceStep = 0; //flat rate
-			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 		  }			  	
 		  $enhID = 'MINE_MLB'; //Abbai Mine Launcher Basic Mine
 		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
@@ -826,7 +826,7 @@ class Enhancements{
 			  $enhLimit = $actualCapacity;		
 			  $enhPrice = $ammoClass->getPrice($ship); 
 			  $enhPriceStep = 0; //flat rate
-			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 		  }		
 		  $enhID = 'MINE_MLW'; //Abbai Mine Launcher Wide-Ranged Mine
 		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
@@ -837,7 +837,7 @@ class Enhancements{
 			  $enhLimit = $actualCapacity;		
 			  $enhPrice = $ammoClass->getPrice($ship); 
 			  $enhPriceStep = 0; //flat rate
-			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 		  }	
 
 	//Ammo for Direct Fire Weapons	
@@ -850,7 +850,7 @@ class Enhancements{
 			  $enhLimit = $actualCapacity;		
 			  $enhPrice = $ammoClass->getPrice($ship); 
 			  $enhPriceStep = 0; //flat rate
-			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 		  }			  
 		  $enhID = 'SHELL_MBSC'; //Standard Ammo for Heavy Railgun
 		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
@@ -861,7 +861,7 @@ class Enhancements{
 			  $enhLimit = $actualCapacity;		
 			  $enhPrice = $ammoClass->getPrice($ship); 
 			  $enhPriceStep = 0; //flat rate
-			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 		  }				  
 		  $enhID = 'SHELL_LBSC'; //Standard Ammo for Heavy Railgun
 		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
@@ -872,7 +872,7 @@ class Enhancements{
 			  $enhLimit = $actualCapacity;		
 			  $enhPrice = $ammoClass->getPrice($ship); 
 			  $enhPriceStep = 0; //flat rate
-			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 		  }			  
 		  $enhID = 'SHELL_HFLH'; //Flash Ammo for Heavy Railgun
 		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
@@ -887,7 +887,7 @@ class Enhancements{
 			  }  			  	  		
 			  $enhPrice = $ammoClass->getPrice($ship); 
 			  $enhPriceStep = 0; //flat rate
-			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 		  }			  
 		  $enhID = 'SHELL_MFLH'; //Flash Ammo for Medium Railgun
 		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
@@ -902,7 +902,7 @@ class Enhancements{
 			  }  		
 			  $enhPrice = $ammoClass->getPrice($ship); 
 			  $enhPriceStep = 0; //flat rate
-			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 		  }	
 		  $enhID = 'SHELL_LFLH'; //Flash Ammo for Heavy Railgun
 		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
@@ -917,7 +917,7 @@ class Enhancements{
 			  }  		
 			  $enhPrice = $ammoClass->getPrice($ship); 
 			  $enhPriceStep = 0; //flat rate
-			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 		  }	
 		  $enhID = 'SHELL_HSCT'; //Scatter Ammo for Heavy Railgun
 		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
@@ -932,7 +932,7 @@ class Enhancements{
 			  }  			  	  		
 			  $enhPrice = $ammoClass->getPrice($ship); 
 			  $enhPriceStep = 0; //flat rate
-			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 		  }				    
 		  $enhID = 'SHELL_MSCT'; //Scatter Ammo for Medium Railgun
 		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
@@ -947,7 +947,7 @@ class Enhancements{
 			  }  			  	  		
 			  $enhPrice = $ammoClass->getPrice($ship); 
 			  $enhPriceStep = 0; //flat rate
-			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 		  }	
 		  $enhID = 'SHELL_LSCT'; //Scatter Ammo for Light Railgun
 		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
@@ -962,7 +962,7 @@ class Enhancements{
 			  }  			  	  		
 			  $enhPrice = $ammoClass->getPrice($ship); 
 			  $enhPriceStep = 0; //flat rate
-			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 		  }
 		  $enhID = 'SHELL_HHVY'; //Heavy Ammo for Heavy Railgun
 		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
@@ -977,7 +977,7 @@ class Enhancements{
 			  }  			  	  		
 			  $enhPrice = $ammoClass->getPrice($ship); 
 			  $enhPriceStep = 0; //flat rate
-			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 		  }				    
 		  $enhID = 'SHELL_MHVY'; //Heavy Ammo for Medium Railgun
 		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
@@ -992,7 +992,7 @@ class Enhancements{
 			  }  			  	  		
 			  $enhPrice = $ammoClass->getPrice($ship); 
 			  $enhPriceStep = 0; //flat rate
-			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 		  }	
 		  $enhID = 'SHELL_LHVY'; //Heavy Ammo for Light Railgun
 		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
@@ -1007,7 +1007,7 @@ class Enhancements{
 			  }  			  	  		
 			  $enhPrice = $ammoClass->getPrice($ship); 
 			  $enhPriceStep = 0; //flat rate
-			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 		  }
 		  $enhID = 'SHELL_HLR'; //Long Range Ammo for Heavy Railgun
 		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
@@ -1022,7 +1022,7 @@ class Enhancements{
 			  }  			  	  		
 			  $enhPrice = $ammoClass->getPrice($ship); 
 			  $enhPriceStep = 0; //flat rate
-			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 		  }				    
 		  $enhID = 'SHELL_MLR'; //Long Range Ammo for Medium Railgun
 		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
@@ -1037,7 +1037,7 @@ class Enhancements{
 			  }  			  	  		
 			  $enhPrice = $ammoClass->getPrice($ship); 
 			  $enhPriceStep = 0; //flat rate
-			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 		  }			  
 		  $enhID = 'SHELL_HULR'; //Ultra Long Range Ammo for Heavy Railgun
 		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
@@ -1052,7 +1052,7 @@ class Enhancements{
 			  }  			  	  		
 			  $enhPrice = $ammoClass->getPrice($ship); 
 			  $enhPriceStep = 0; //flat rate
-			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 		  }			    				  			  		  		  			  		  		  						  	  
 	  } //end of magazine-requiring options
 	  
