@@ -1328,8 +1328,7 @@ class AmmoMissileRackS extends Weapon{
 	
 		if(!$this->isDamagedOnTurn($gamedata->turn)) return; //if there is no damage this turn, then no testing for explosion
         $explodes = false;
-//        $roll = Dice::d(20);
-$roll = 20;
+        $roll = Dice::d(20);
         if ($roll >= $this->rackExplosionThreshold) $explodes = true;
         		
         if($explodes){
