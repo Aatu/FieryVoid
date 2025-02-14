@@ -1328,7 +1328,8 @@ class AmmoMissileRackS extends Weapon{
 	
 		if(!$this->isDamagedOnTurn($gamedata->turn)) return; //if there is no damage this turn, then no testing for explosion
         $explodes = false;
-        $roll = Dice::d(20);
+//        $roll = Dice::d(20);
+$roll = 20;
         if ($roll >= $this->rackExplosionThreshold) $explodes = true;
         		
         if($explodes){
@@ -1340,9 +1341,9 @@ class AmmoMissileRackS extends Weapon{
         if (!$this->isDestroyed()){
             $this->noOverkill = true;
             $fireOrder =  new FireOrder(-1, "normal", $ship->id,  $ship->id, $this->id, -1, 
-                    $gamedata->turn, 1, 100, 1, 1, 1, 0, null, null, 'ballistic');//needed, rolled, shots, shotshit, intercepted
+                    $gamedata->turn, 1, 100, 1, 1, 1, 0, null, null, 'MagazineExplosion');//needed, rolled, shots, shotshit, intercepted
 			$fireOrder->addToDB = true;
-			$fireOrder->pubnotes = "Missile magazine explosion (roll $roll)!";
+//			$fireOrder->pubnotes = "Missile magazine explosion (roll $roll)!";
 			$this->fireOrders[] = $fireOrder;							
             $dmgToSelf = 1000; //rely on $noOverkill instead of counting exact amount left - 1000 should be more than enough...
             $this->doDamage($ship, $ship, $this, $dmgToSelf, $fireOrder, null, $gamedata, true, $this->location);
@@ -1352,9 +1353,9 @@ class AmmoMissileRackS extends Weapon{
             $this->noOverkill = false;
             $this->damageType = 'Flash'; //should be Raking by the rules, but Flash is much easier to do - and very fitting for explosion!
             $fireOrder =  new FireOrder(-1, "normal", $ship->id,  $ship->id, $this->id, -1, 
-                    $gamedata->turn, 1, 100, 1, 1, 1, 0, null, null, 'ballistic');
+                    $gamedata->turn, 1, 100, 1, 1, 1, 0, null, null, 'MagazineExplosion');
 			$fireOrder->addToDB = true;
-			$fireOrder->pubnotes = "Missile magazine explosion (roll $roll)!";
+			$fireOrder->pubnotes = "<br>A missile magazine explodes! (Rolled $roll)";
 			$this->fireOrders[] = $fireOrder;					
             $this->doDamage($ship, $ship, $this, $damage, $fireOrder, null, $gamedata, false, $this->location); //show $this as target system - this will ensure its destruction, and Flash mode will take care of the rest
         }

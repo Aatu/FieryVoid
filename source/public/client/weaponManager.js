@@ -2057,7 +2057,7 @@ window.weaponManager = {
     doShortLogText: function doShortLogText(fire) {
         const shortLogTypes = [
             "HyperspaceJump", "JumpFailure", "SelfDestruct", "ContainmentBreach",
-            "Reactor", "Sabotage", "WreakHavoc", "Capture", "Rescue", "LimpetBore"
+            "Reactor", "Sabotage", "WreakHavoc", "Capture", "Rescue", "LimpetBore", "MagazineExplosion"
         ];
     
         return shortLogTypes.includes(fire.damageclass);
