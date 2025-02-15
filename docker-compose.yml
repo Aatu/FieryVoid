@@ -12,7 +12,7 @@ services:
     build:
       context: docker/php
     volumes:
-      - .:/usr/src/fieryvoid
+      - .:/usr/src/current
       - composer:/usr/src/fieryvoid/vendor
       - composercache:/root/.composer
     networks:
