@@ -877,10 +877,11 @@ window.gamedata = {
 		}
 	
 		//Lets just check Asssault shuttle/Breaching Pod capacity separately using their own variables.
-		totalHangarAS = totalHangarAS-hangarConversions; //Deduct any Hangar conversions here.
+		totalHangarAS = totalHangarAS+totalHangarH+totalHangarM-hangarConversions; //Deduct any Hangar conversions here.
 		if (totalFtrAS > 0 || totalHangarAS > 0){ //do not show if there are no Assault Shuttle hangars in this segment
-//			var minASRequired = Math.ceil(totalHangarAS/2); //Commented out alternative code here that could be used to set 50% required for Assault Shuttle ships
-			checkResult +=  " - Assault Shuttles / Breaching Pods: " + totalFtrAS;
+//			var hangarOnlyAS = totalHangarAS-hangarConversions;
+//			var minASRequired = Math.ceil(hangarOnlyAS/2); //Commented out alternative code here that could be used to set 50% required for Assault Shuttle ships
+			checkResult +=  " - Total Assault Shuttles / Breaching Pods: " + totalFtrAS;
 //			checkResult +=  " (allowed between " +minASRequired+ " and " + totalHangarAS + ")";
 			checkResult +=  " (allowed up to " + totalHangarAS + ")";			
 //			if (totalFtrAS > totalHangarAS || totalFtrAS < minASRequired){ //Assault shuttle total is not within limits
