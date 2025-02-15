@@ -360,222 +360,252 @@ window.gamedata = {
 	    var totalHangarM = 0; //hangarspace for medium fighters
 	    var totalHangarL = 0; //hangarspace for light fighters
 	    var totalHangarXL = 0; //hangarspace for ultralight fighters
+		var totalHangarAS = 0;//total Assault Shuttle/Breaching pod slots		
 	    var totalHangarOther = new Array( ); //other hangarspace
 	    var totalFtrH = 0;//total heavy fighters
 	    var totalFtrM = 0;//total medium fighters
 	    var totalFtrL = 0;//total light fighters
 	    var totalFtrXL = 0;//total ultralight fighters
+		var totalFtrAS = 0;//total Assault Shuttle/Breaching pods
+		var hangarConversions = 0; //How many converted hangar slots are there.
 	    var totalFtrOther = new Array( );//total other small craft
 		var smallCraftUsed = new Array( );//small craft sizes that happen to be present, whether as hangar space or actual craft
 		
 		var totalEnhancementsValue = 0;
 
 	    for (var i in gamedata.ships){
-            	var lship = gamedata.ships[i];
-            	if (lship.slot != slotid) continue;
-		if (lship.limited==10){
-			points10 += lship.pointCost;
-			units10 += 1;
-		}
-		if (lship.limited==33){
-			points33 += lship.pointCost;
-			units33 += 1;
-		}		
-		totalEnhancementsValue += lship.pointCostEnh;
-		var vLetter = gamedata.variantLetter(lship);
-		var hull = lship.variantOf; 
-		var hullFound;
-		hullFound = false;
-		if (hull == "") hull = lship.shipClass; //ship is either base itself, or base is indicated in variantOf variable
-		for (var j in  shipTable){
-			var oHull = shipTable[j];
-			if (oHull.name == hull){
-				hullFound = true;
-				oHull.Total++;
-				if(lship.hangarRequired!=''){ //let's require sticking to hull limit if ANY ship of this hull requires it
-	            	oHull.hangarRequired = true;
+			var lship = gamedata.ships[i];
+			if (lship.slot != slotid) continue;
+
+			if (lship.limited==10){
+				points10 += lship.pointCost;
+				units10 += 1;
+			}
+			if (lship.limited==33){
+				points33 += lship.pointCost;
+				units33 += 1;
+			}		
+			totalEnhancementsValue += lship.pointCostEnh;
+			var vLetter = gamedata.variantLetter(lship);
+			var hull = lship.variantOf; 
+			var hullFound;
+			hullFound = false;
+			if (hull == "") hull = lship.shipClass; //ship is either base itself, or base is indicated in variantOf variable
+			for (var j in  shipTable){
+				var oHull = shipTable[j];
+				if (oHull.name == hull){
+					hullFound = true;
+					oHull.Total++;
+					if(lship.hangarRequired!=''){ //let's require sticking to hull limit if ANY ship of this hull requires it
+						oHull.hangarRequired = true;
+					}
+					switch(vLetter) {
+						case 'Q':
+						oHull.Q++;
+						totalR++;
+						uniqueShipPresent = true;
+						break;
+						case 'R':
+						oHull.R++;
+						totalR++;
+						break;
+						case 'U':
+						oHull.U++;
+						totalU++;
+						break;
+						case 'C':
+						oHull.C++;
+						break;
+						default:
+						nHull.X++;
+						}
 				}
+			}
+			if (hullFound == false){
+				var nHull = {name:hull, Total: 1, Q:0, R: 0, U: 0, C: 0, X: 0, isFtr:false, hangarRequired:false };
+					if(lship.flight){
+						nHull.isFtr = lship.flight;
+					}
+					if(lship.hangarRequired!=''){
+						nHull.hangarRequired = true;
+					}
 				switch(vLetter) {
-				    case 'Q':
-					oHull.Q++;
-					totalR++;
+					case 'Q':
+					nHull.Q++;
+					totalR++; //Unique is treated more or less the same as Rare
 					uniqueShipPresent = true;
 					break;
-				    case 'R':
-					oHull.R++;
+					case 'R':
+					nHull.R++;
 					totalR++;
 					break;
-				    case 'U':
-					oHull.U++;
+					case 'U':
+					nHull.U++;
 					totalU++;
 					break;
-				    case 'C':
-					oHull.C++;
+					case 'C':
+					nHull.C++;
 					break;
-				    default:
+					default:
 					nHull.X++;
-			     	}
-			}
-		}
-		if (hullFound == false){
-		    var nHull = {name:hull, Total: 1, Q:0, R: 0, U: 0, C: 0, X: 0, isFtr:false, hangarRequired:false };
-	            if(lship.flight){
-	            	nHull.isFtr = lship.flight;
+					specialVariantPresent = true;
 				}
-				if(lship.hangarRequired!=''){
-	            	nHull.hangarRequired = true;
-				}
-		    switch(vLetter) {
-			    case 'Q':
-				nHull.Q++;
-				totalR++; //Unique is treated more or less the same as Rare
-				uniqueShipPresent = true;
-				break;
-			    case 'R':
-				nHull.R++;
-				totalR++;
-				break;
-			    case 'U':
-				nHull.U++;
-				totalU++;
-				break;
-			    case 'C':
-				nHull.C++;
-				break;
-			    default:
-				nHull.X++;
-				specialVariantPresent = true;
-		     }
-		     shipTable.push(nHull);
-		}
-		if (lship.factionAge > 2){
-			ancientUnitPresent = true;
-		}
-		if(!lship.flight){
-	        	totalShips++;			
-	        	//check for custom hangars
-			if(lship.customFighter){
-				for (var h in lship.customFighter){
-					specialHgrName = h;
-					specialHgrAmt = lship.customFighter[h];
-					specialHangars.push([specialHgrName, specialHgrAmt]);
-				}				
-				//console.table(specialHangars);
+				shipTable.push(nHull);
 			}
-			
-			//check hangar space available...	
-			for(var h in lship.fighters){
-				var amount = lship.fighters[h];
-			    if(h == "normal" || h =="heavy"){
-					totalHangarH += amount;
-			    }else if(h=="medium"){ 
-					totalHangarM += amount;
-			    }else if(h=="light"){ 
-					totalHangarL += amount;
-			    }else if(h=="ultralight"){ 
-					totalHangarXL += amount;
-			    }else{ //something other than fighters
-					var found = false;
-					for(var nh in totalHangarOther){ 					
-						if (totalHangarOther[nh][0] == h){//this is small craft type we're looking for!
-							found = true;
-							totalHangarOther[nh][1] += amount;
+			if (lship.factionAge > 2){
+				ancientUnitPresent = true;
+			}
+			if(!lship.flight){
+					totalShips++;			
+					//check for custom hangars
+				if(lship.customFighter){
+					for (var h in lship.customFighter){
+						specialHgrName = h;
+						specialHgrAmt = lship.customFighter[h];
+						specialHangars.push([specialHgrName, specialHgrAmt]);
+					}				
+					//console.table(specialHangars);
+				}
+
+				// Check if ship has converted Hangar Space before calculating total hangar space
+				for (var enh in lship.enhancementOptions) { 
+					if (lship.enhancementOptions[enh][6]) { // Hangar conversion is an option, ignore others.
+						if (lship.enhancementOptions[enh][1] === "Hangar Conversion") {
+							hangarConversions += lship.enhancementOptions[enh][2];
+/*
+							// Ensure "assault shuttles" exists before subtracting
+							if (lship.fighters.hasOwnProperty("assault shuttles")) {
+								lship.fighters["assault shuttles"] -= convertedSlots;
+							}
+
+							// Ensure "normal" exists before adding
+							if (!lship.fighters.hasOwnProperty("normal")) {
+								lship.fighters["normal"] = 0; // Initialize if missing
+							}
+
+							lship.fighters["normal"] += convertedSlots;
+*/
 						}
 					}
-					if (found != true){ //such craft wasn't encountered yet
-						totalHangarOther.push(new Array(h,amount));
-						smallCraftUsed.push(h);
+				}
+
+				//check hangar space available...	
+				for(var h in lship.fighters){
+					var amount = lship.fighters[h];
+					if(h == "normal" || h =="heavy"){
+						totalHangarH += amount;
+					}else if(h=="medium"){ 
+						totalHangarM += amount;
+					}else if(h=="light"){ 
+						totalHangarL += amount;
+					}else if(h=="ultralight"){ 
+						totalHangarXL += amount;
+					}else if(h=="assault shuttles"){ 
+						totalHangarAS += amount;
+					}else{ //something other than fighters
+						var found = false;
+						for(var nh in totalHangarOther){ 					
+							if (totalHangarOther[nh][0] == h){//this is small craft type we're looking for!
+								found = true;
+								totalHangarOther[nh][1] += amount;
+							}
+						}
+						if (found != true){ //such craft wasn't encountered yet
+							totalHangarOther.push(new Array(h,amount));
+							smallCraftUsed.push(h);
+						}
 					}
-			    }
-		    }
-		    //ship may actually require hangar, too! but this must be specified directly
-			if (lship.hangarRequired != '') { //classify based on explicit info from craft
-				var found = false;
-				for(var nh in totalFtrOther){ 					
-					if (totalFtrOther[nh][0] == lship.hangarRequired){//this is small craft type we're looking for!
-						found = true;
-						totalFtrOther[nh][1] += 1/lship.unitSize; //always 1 craft in this case!
-					}
 				}
-				if (found != true){ //such craft wasn't encountered yet
-					totalFtrOther.push(new Array(lship.hangarRequired,1/lship.unitSize));
-					smallCraftUsed.push(lship.hangarRequired);
-				}
-			}
-		}else{//note presence of fighters
-	            totalShips++; //well, total units anyway... rules say "one other unit present" and indicate that unit may be a fighter flight as well
-			
-			//check for presence of small flights: if for something flight size of 6 is allowed, then anything less counts as small flight
-			if ((lship.flightSize<6)&&(lship.maxFlightSize>=6)) noSmallFlights++;
-			
-			var smallCraftSize = '';			
-			if (lship.hangarRequired != 'fighters' ) { //classify based on explicit info from craft
-				smallCraftSize = lship.hangarRequired;
-			}else{//classify depending on jinking limit...
-				if (lship.jinkinglimit>=99){ //ultralight jinking limit is unlimited
-					smallCraftSize = 'ultralight';
-				}else if (lship.jinkinglimit>=10){
-					smallCraftSize = 'light';
-				}else if (lship.jinkinglimit>=8){
-					smallCraftSize = 'medium';
-				}else if (lship.jinkinglimit>=6){
-					smallCraftSize = 'heavy';
-				}else{
-					smallCraftSize = 'NOT RECOGNIZED';
-				}
-			}
-			//now translate size into hangar space used...
-			if(smallCraftSize !=''){				
-				if(lship.customFtrName){
-					specialFtrAmt = lship.flightSize/lship.unitSize;
-					specialFtrName = lship.customFtrName;
-					specialFighters.push([specialFtrName,specialFtrAmt]);
-				}
-				
-				if(smallCraftSize =="heavy"){
-					totalFtrH += lship.flightSize/lship.unitSize;
-				}else if(smallCraftSize=="medium"){ 
-					totalFtrM += lship.flightSize/lship.unitSize;
-				}else if(smallCraftSize=="light"){ 
-					totalFtrL += lship.flightSize/lship.unitSize;
-				}else if(smallCraftSize=="ultralight"){ 
-					totalFtrXL += lship.flightSize/lship.unitSize;
-				}else{ //something other than standard fighters
+				//ship may actually require hangar, too! but this must be specified directly
+				if (lship.hangarRequired != '') { //classify based on explicit info from craft
 					var found = false;
 					for(var nh in totalFtrOther){ 					
-						if (totalFtrOther[nh][0] == smallCraftSize){//this is small craft type we're looking for!
+						if (totalFtrOther[nh][0] == lship.hangarRequired){//this is small craft type we're looking for!
 							found = true;
-							totalFtrOther[nh][1] += lship.flightSize/lship.unitSize;
+							totalFtrOther[nh][1] += 1/lship.unitSize; //always 1 craft in this case!
 						}
 					}
 					if (found != true){ //such craft wasn't encountered yet
-						totalFtrOther.push(new Array(smallCraftSize,lship.flightSize/lship.unitSize));
-						smallCraftUsed.push(smallCraftSize);
+						totalFtrOther.push(new Array(lship.hangarRequired,1/lship.unitSize));
+						smallCraftUsed.push(lship.hangarRequired);
+					}
+				}
+			}else{//note presence of fighters
+				totalShips++; //well, total units anyway... rules say "one other unit present" and indicate that unit may be a fighter flight as well
+				
+				//check for presence of small flights: if for something flight size of 6 is allowed, then anything less counts as small flight
+				if ((lship.flightSize<6)&&(lship.maxFlightSize>=6)) noSmallFlights++;
+				
+				var smallCraftSize = '';			
+				if (lship.hangarRequired != 'fighters' ) { //classify based on explicit info from craft
+					smallCraftSize = lship.hangarRequired;
+				}else{//classify depending on jinking limit...
+					if (lship.jinkinglimit>=99){ //ultralight jinking limit is unlimited
+						smallCraftSize = 'ultralight';
+					}else if (lship.jinkinglimit>=10){
+						smallCraftSize = 'light';
+					}else if (lship.jinkinglimit>=8){
+						smallCraftSize = 'medium';
+					}else if (lship.jinkinglimit>=6){
+						smallCraftSize = 'heavy';
+					}else{
+						smallCraftSize = 'NOT RECOGNIZED';
+					}
+				}
+				//now translate size into hangar space used...
+				if(smallCraftSize !=''){				
+					if(lship.customFtrName){
+						specialFtrAmt = lship.flightSize/lship.unitSize;
+						specialFtrName = lship.customFtrName;
+						specialFighters.push([specialFtrName,specialFtrAmt]);
+					}
+					
+					if(smallCraftSize =="heavy"){
+						totalFtrH += lship.flightSize/lship.unitSize;
+					}else if(smallCraftSize=="medium"){ 
+						totalFtrM += lship.flightSize/lship.unitSize;
+					}else if(smallCraftSize=="light"){ 
+						totalFtrL += lship.flightSize/lship.unitSize;
+					}else if(smallCraftSize=="ultralight"){ 
+						totalFtrXL += lship.flightSize/lship.unitSize;
+					}else if(smallCraftSize=="assault shuttles"){ 
+						totalFtrAS += lship.flightSize/lship.unitSize;
+					}else{ //something other than standard fighters
+						var found = false;
+						for(var nh in totalFtrOther){ 					
+							if (totalFtrOther[nh][0] == smallCraftSize){//this is small craft type we're looking for!
+								found = true;
+								totalFtrOther[nh][1] += lship.flightSize/lship.unitSize;
+							}
+						}
+						if (found != true){ //such craft wasn't encountered yet
+							totalFtrOther.push(new Array(smallCraftSize,lship.flightSize/lship.unitSize));
+							smallCraftUsed.push(smallCraftSize);
+						}
 					}
 				}
 			}
-		}
-		if (jumpDrivePresent == false){ //if already found there's no point
-			for (var a in lship.systems){
-				var sSystem = lship.systems[a];
-				if (sSystem.name=='jumpEngine') jumpDrivePresent = true;
-			}
-		}
-		if (lship.shipSizeClass >= 3) capitalShips++;
-		if (lship.unofficial == true){ //as opposed to eg. 'S'
-			customShipPresent = true;
-			warningFound = true;
-		}
-		if ((lship.base == true) || (lship.osat == true)) staticPresent = true;	
-		if (lship.isCombatUnit != true)  nonCombatPresent = true;	
-			//check for presence of enhancements
-			if (!enhancementPresent){ //if already found - no point in checking
-				for (var enhNo in lship.enhancementOptions) if (!lship.enhancementOptions[enhNo][6]){ //only if enhancement isn't really an option
-					if (lship.enhancementOptions[enhNo][2] > 0){
-							enhancementPresent = true;
-					}						
+			if (jumpDrivePresent == false){ //if already found there's no point
+				for (var a in lship.systems){
+					var sSystem = lship.systems[a];
+					if (sSystem.name=='jumpEngine') jumpDrivePresent = true;
 				}
 			}
+			if (lship.shipSizeClass >= 3) capitalShips++;
+			if (lship.unofficial == true){ //as opposed to eg. 'S'
+				customShipPresent = true;
+				warningFound = true;
+			}
+			if ((lship.base == true) || (lship.osat == true)) staticPresent = true;	
+			if (lship.isCombatUnit != true)  nonCombatPresent = true;	
+				//check for presence of enhancements
+				if (!enhancementPresent){ //if already found - no point in checking
+					for (var enhNo in lship.enhancementOptions) if (!lship.enhancementOptions[enhNo][6]){ //only if enhancement isn't really an option
+						if (lship.enhancementOptions[enhNo][2] > 0){
+								enhancementPresent = true;
+						}						
+					}
+				}
 	    } //end of loop at ships preparing data
 	    
 	    
@@ -781,16 +811,16 @@ window.gamedata = {
 	    
 	    //fighters!
 		//ultralights count as half a fighter when accounting for hangar space used - IF packed into something other than ultralight hangars...
-	    var totalHangarAvailable = totalHangarH+totalHangarM+totalHangarL+(totalHangarXL/2);
+	    var totalHangarAvailable = totalHangarH+totalHangarM+totalHangarL+(totalHangarXL/2)+hangarConversions;
 	    var minFtrRequired = Math.ceil(totalHangarAvailable/2);
 	    var totalFtrPresent = totalFtrH+totalFtrM+totalFtrL+(totalFtrXL/2);
 	    var totalFtrCurr = 0;
 	    var totalHangarCurr = 0;
 	    checkResult += "<br><b><u>Fighters:</u></b><br>";
-		checkResult +=  " - Total fighters: " + totalFtrPresent;
+		checkResult +=  " - Total Fighters: " + totalFtrPresent;
 	    checkResult +=  " (allowed between " +minFtrRequired+ " and " + totalHangarAvailable + ")";
 		if((totalFtrXL>0) || (totalHangarXL>0)){ //add disclaimer because sums will not add up straight
-			checkResult += " <i>(ultralights counted as half)</i>";
+			checkResult += " <i>(Ultralights counted as half)</i>";
 		}
 		if (totalFtrPresent > totalHangarAvailable || totalFtrPresent < minFtrRequired){ //fighter total is not within limits
 			checkResult += " FAILURE!";
@@ -799,14 +829,14 @@ window.gamedata = {
 			checkResult += " OK";
 		}
 		checkResult += "<br>";	    
-	
+
 		totalFtrCurr = (totalFtrXL/2)+totalFtrL+totalFtrM+totalFtrH;
 		if (totalFtrCurr > 0){ //do not show if there are no fighters in this segment
 			totalHangarCurr = totalHangarH+totalHangarM+totalHangarL + (totalHangarXL/2);
-			checkResult +=  " - Ultralight/Light/Medium/Heavy Fighters: " + totalFtrCurr;
+			checkResult +=  " - Ultralight / Light / Medium / Heavy Fighters: " + totalFtrCurr;
 			checkResult +=  " (allowed up to " + totalHangarCurr + ")";
 			if((totalFtrXL>0) || (totalHangarXL>0)){ //add disclaimer because sums will not add up straight
-				checkResult += " <i>(ultralights counted as half)</i>";
+				checkResult += " <i>(Ultralights counted as half)</i>";
 			}			
 			if (totalFtrCurr > totalHangarCurr){ //fighter total is not within limits
 				checkResult += " TOO MANY!";
@@ -820,7 +850,7 @@ window.gamedata = {
 		totalFtrCurr = totalFtrL+totalFtrM+totalFtrH;
 		if (totalFtrCurr > 0){ //do not show if there are no fighters in this segment
 			totalHangarCurr = totalHangarH+totalHangarM+totalHangarL;
-			checkResult +=  " - Light/Medium/Heavy Fighters: " + totalFtrCurr;
+			checkResult +=  " - Light / Medium / Heavy Fighters: " + totalFtrCurr;
 			checkResult +=  " (allowed up to " + totalHangarCurr + ")";
 			if (totalFtrCurr > totalHangarCurr){ //fighter total is not within limits
 				checkResult += " TOO MANY!";
@@ -834,7 +864,7 @@ window.gamedata = {
 		totalFtrCurr = totalFtrM+totalFtrH;
 		if (totalFtrCurr > 0){ //do not show if there are no fighters in this segment
 			totalHangarCurr = totalHangarH+totalHangarM;
-			checkResult +=  " - Medium/Heavy Fighters: " + totalFtrCurr;
+			checkResult +=  " - Medium / Heavy Fighters: " + totalFtrCurr;
 			checkResult +=  " (allowed up to " + totalHangarCurr + ")";
 			if (totalFtrCurr > totalHangarCurr){ //fighter total is not within limits
 				checkResult += " TOO MANY!";
@@ -858,10 +888,27 @@ window.gamedata = {
 			}
 			checkResult += "<br>";
 		}
-		
+	
+		//Lets just check Asssault shuttle/Breaching Pod capacity separately using their own variables.
+		totalHangarAS = totalHangarAS-hangarConversions; //Deduct any Hangar conversions here.
+		if (totalFtrAS > 0 || totalHangarAS > 0){ //do not show if there are no Assault Shuttle hangars in this segment
+//			var minASRequired = Math.ceil(totalHangarAS/2); //Commented out alternative code here that could be used to set 50% required for Assault Shuttle ships
+			checkResult +=  " - Assault Shuttles / Breaching Pods: " + totalFtrAS;
+//			checkResult +=  " (allowed between " +minASRequired+ " and " + totalHangarAS + ")";
+			checkResult +=  " (allowed up to " + totalHangarAS + ")";			
+//			if (totalFtrAS > totalHangarAS || totalFtrAS < minASRequired){ //Assault shuttle total is not within limits
+			if (totalFtrAS > totalHangarAS){ //Asssault Shuttle total is not within limits
+				checkResult += " FAILURE!";
+				problemFound = true;
+			}else{
+				checkResult += " OK";
+			}
+			checkResult += "<br>";
+		}		
+
 		//small flights (do not show if there aren't any!)
 		if (noSmallFlights > 0){
-			checkResult +=  " - Small Flights (<6 craft): " + noSmallFlights;
+			checkResult +=  " - Small Flights (< 6 craft): " + noSmallFlights;
 			if (noSmallFlights>1){ //fighter total is not within limits
 				checkResult += " TOO MANY! (up to 1 allowed)";
 				problemFound = true;
@@ -870,6 +917,7 @@ window.gamedata = {
 			}
 			checkResult += "<br>";
 		}
+
 
 		if ( specialFighters.length > 0 ){ //do not show if there are no fighters that require special hangars
 			/*let's show details even if there are no hangars at all

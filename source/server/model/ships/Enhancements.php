@@ -44,7 +44,8 @@ class Enhancements{
 		$unit->enhancementOptionsDisabled[] = 'IMPR_THR'; 
 		$unit->enhancementOptionsDisabled[] = 'POOR_TRAIN'; 
 	  }else{ //enhancements for ships
-		$unit->enhancementOptionsDisabled[] = 'ELITE_CREW'; 
+		$unit->enhancementOptionsDisabled[] = 'ELITE_CREW';
+		$unit->enhancementOptionsDisabled[] = 'HANG_CONV';		 
 		$unit->enhancementOptionsDisabled[] = 'IMPR_ENG'; 
 		$unit->enhancementOptionsDisabled[] = 'IMPR_REA'; 
 		$unit->enhancementOptionsDisabled[] = 'IMPR_SENS'; 
@@ -126,6 +127,18 @@ class Enhancements{
 		  //technical ID, human readable name, number taken, maximum number to take, price for one, price increase for each further, is an option (rather than enhancement)
 	  }	 
 
+	  //To convert Assault Shuttles hangar slots to Fighter Slots
+	  if (array_key_exists("assault shuttles", $ship->fighters)) { //Onyl add if ship has Assault Shuttle hangar space! 	  
+	    $enhID = 'HANG_CONV';
+		if(!in_array($enhID, $ship->enhancementOptionsDisabled)){ //Check option is also not disabled.
+				$enhName = 'Hangar Conversion';
+				$enhLimit = $ship->fighters["assault shuttles"]; //The number of assault shuttle slots ship has is max conversion amount.
+				$enhPrice = 5; //Flat 5 pts per slot converted	  
+				$enhPriceStep = 0; //flat rate
+				$ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);	
+		}
+	  }
+
 	  //Elite Marines for Grappling Claws, cost: 40% craft price (round up), limit: 1	  	
 	  $enhID = 'ELT_MRN';	  
 	  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option needs to be specifically enabled
@@ -163,7 +176,7 @@ class Enhancements{
 		  }  
 		  $enhPriceStep = 0; //flat rate
 		  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
-		  }
+		}
 		
 		    
 	  //Improved Engine: +1 Thrust, cost: 12+4/turn cost, round up, limit: up to +50%
@@ -1559,12 +1572,7 @@ class Enhancements{
 						} 						
 						break;						
 
-					case 'ELT_MRN'://Elite marines, mark every Marines system as Elite.
-						foreach ($ship->systems as $system){
-							if ($system instanceof GrapplingClaw){							
-								$system->eliteMarines = true;
-							}
-						}	
+					case 'HANG_CONV'://Hangar Conversion, no actual need to change anything here.  
 						break;	
 
 					case 'EXT_MRN'://Extra marines, increase contingent per Claw by 1.
