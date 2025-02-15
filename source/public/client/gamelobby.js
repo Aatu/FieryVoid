@@ -471,20 +471,7 @@ window.gamedata = {
 				for (var enh in lship.enhancementOptions) { 
 					if (lship.enhancementOptions[enh][6]) { // Hangar conversion is an option, ignore others.
 						if (lship.enhancementOptions[enh][1] === "Hangar Conversion") {
-							hangarConversions += lship.enhancementOptions[enh][2];
-/*
-							// Ensure "assault shuttles" exists before subtracting
-							if (lship.fighters.hasOwnProperty("assault shuttles")) {
-								lship.fighters["assault shuttles"] -= convertedSlots;
-							}
-
-							// Ensure "normal" exists before adding
-							if (!lship.fighters.hasOwnProperty("normal")) {
-								lship.fighters["normal"] = 0; // Initialize if missing
-							}
-
-							lship.fighters["normal"] += convertedSlots;
-*/
+							hangarConversions += lship.enhancementOptions[enh][2]; //Record number of slots converted from Assault Shuttle to Fighters.
 						}
 					}
 				}
@@ -832,7 +819,7 @@ window.gamedata = {
 
 		totalFtrCurr = (totalFtrXL/2)+totalFtrL+totalFtrM+totalFtrH;
 		if (totalFtrCurr > 0){ //do not show if there are no fighters in this segment
-			totalHangarCurr = totalHangarH+totalHangarM+totalHangarL + (totalHangarXL/2);
+			totalHangarCurr = totalHangarH+totalHangarM+totalHangarL + (totalHangarXL/2)+hangarConversions;
 			checkResult +=  " - Ultralight / Light / Medium / Heavy Fighters: " + totalFtrCurr;
 			checkResult +=  " (allowed up to " + totalHangarCurr + ")";
 			if((totalFtrXL>0) || (totalHangarXL>0)){ //add disclaimer because sums will not add up straight
@@ -849,7 +836,7 @@ window.gamedata = {
 	    
 		totalFtrCurr = totalFtrL+totalFtrM+totalFtrH;
 		if (totalFtrCurr > 0){ //do not show if there are no fighters in this segment
-			totalHangarCurr = totalHangarH+totalHangarM+totalHangarL;
+			totalHangarCurr = totalHangarH+totalHangarM+totalHangarL+hangarConversions;
 			checkResult +=  " - Light / Medium / Heavy Fighters: " + totalFtrCurr;
 			checkResult +=  " (allowed up to " + totalHangarCurr + ")";
 			if (totalFtrCurr > totalHangarCurr){ //fighter total is not within limits
@@ -863,7 +850,7 @@ window.gamedata = {
 		
 		totalFtrCurr = totalFtrM+totalFtrH;
 		if (totalFtrCurr > 0){ //do not show if there are no fighters in this segment
-			totalHangarCurr = totalHangarH+totalHangarM;
+			totalHangarCurr = totalHangarH+totalHangarM+hangarConversions;
 			checkResult +=  " - Medium / Heavy Fighters: " + totalFtrCurr;
 			checkResult +=  " (allowed up to " + totalHangarCurr + ")";
 			if (totalFtrCurr > totalHangarCurr){ //fighter total is not within limits
@@ -877,7 +864,7 @@ window.gamedata = {
 	    
 		totalFtrCurr = totalFtrH;
 		if (totalFtrCurr > 0){ //do not show if there are no fighters in this segment
-			totalHangarCurr = totalHangarH;
+			totalHangarCurr = totalHangarH+hangarConversions;
 			checkResult +=  " - Heavy Fighters: " + totalFtrCurr;
 				checkResult +=  " (allowed up to " + totalHangarCurr + ")";
 			if (totalFtrCurr > totalHangarCurr){ //fighter total is not within limits
