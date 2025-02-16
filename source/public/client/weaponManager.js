@@ -1428,8 +1428,9 @@ window.weaponManager = {
                 if (weaponManager.checkIsInRange(selectedShip, ship, weapon)) {
                     debug && console.log("is in range");
                     if(weapon.canSplitShots){
-                    	var fire = weapon.doMultipleFireOrders(selectedShip, ship, system);
-	                    if(fire) weapon.fireOrders.push(fire);
+                        var fire = weapon.doMultipleFireOrders(selectedShip, ship, system);
+                        if (!Array.isArray(fire)) fire = [fire]; // Ensure fire is an array for length check                        
+                        if (fire.length > 0) weapon.fireOrders.push(...fire);
 						//toUnselect.push(weapon); //It's actually easier to target if you don't! 
 						splitTargeted.push(weapon); //To be added to toUnselect aray at corect time below. 	                    
         				webglScene.customEvent('SystemDataChanged', { ship: ship, system: weapon });      				
