@@ -834,7 +834,7 @@ class LightPlasmaBolterFighter extends LinkedWeapon{
     public $trailLength = 12;
     public $animationExplosionScale = 0.25;
 */	
-        public $intercept = 2; //actually this weapon probably SHOULD have interception after all!
+//  public $intercept = 2; //actually this weapon probably SHOULD have interception after all! I don't think so, no other plasma fighter weapon does!
 	public $loadingtime = 1;
 	public $shots = 2;
     public $defaultShots = 2;
