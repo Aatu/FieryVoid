@@ -291,7 +291,8 @@ window.BallisticIconContainer = function () {
 					iconImage = "./img/allySupport.png"; 		        
 				break;
 				case 'Sweeping': //Shadow Slicers
-					    targetType = 'hexPurple';		        
+					targetType = 'hexPurple'; //Default for slicers
+					if(weapon.weaponClass == "Gravitic") targetType = 'hexGreen'; //But now other weapon types use sweeping.			        
 				break;			
 				}
 			}		 
@@ -571,7 +572,8 @@ window.BallisticIconContainer = function () {
 					launchPosition = this.coordinateConverter.fromHexToGame(shooterIcon.getLastMovement(turn).position); //More important to show where ship support weapon originates, not hex.								        
 				break;
 				case 'Sweeping': //Shadow Slicer
-					type = 'purple';			        
+					type = 'purple'; //Default for slicers
+					if(weapon.weaponClass == "Gravitic") type = 'green'; //But now other weapon types use sweeping.									        
 				break;					
 			}		 
 		}
