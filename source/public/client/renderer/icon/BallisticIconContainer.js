@@ -661,6 +661,7 @@ window.BallisticIconContainer = function () {
     };
 */
 
+/* //OLD METHOD FOR GENERATING HEX NUMBERS, WHICH CREATED 2000ish individual sprites.  Leaving for now until new method is tested on main server. 
 BallisticIconContainer.prototype.createHexNumbers = function (scene) {
 
     // Check if hex numbers are already created
@@ -718,7 +719,83 @@ BallisticIconContainer.prototype.createHexNumbers = function (scene) {
         this.hexNumbersVisible = true;  // Ensure the hex numbers are visible
     }
 };
+*/
 
+BallisticIconContainer.prototype.createHexNumbers = function (scene) {
+    if (this.hexNumberMesh) {
+        // Toggle visibility
+        this.hexNumberMesh.visible = !this.hexNumberMesh.visible;
+        return;
+    }
 
+    // Define grid dimensions based on hex count
+    const gridWidth = 72; // Adjust based on your hex layout
+    const gridHeight = 48;
+    const hexSize = 50;
+
+    // Create single large texture with all hex numbers
+    const largeTexture = createLargeHexNumberTexture(gridWidth, gridHeight, hexSize);
+
+    // Hexagon grid dimensions (corrected aspect ratio)
+    const totalWidth = gridWidth * hexSize * 2;
+    const totalHeight = gridHeight * hexSize * Math.sqrt(4);
+
+    // Create a plane to apply the texture (or adjust for hexagonal shape)
+    const geometry = new THREE.PlaneGeometry(totalWidth, totalHeight);
+    const material = new THREE.MeshBasicMaterial({ 
+        map: largeTexture, 
+        transparent: true 
+    });
+
+    this.hexNumberMesh = new THREE.Mesh(geometry, material);
+    this.hexNumberMesh.position.set(502.5, -651, -1); // Adjust as needed	
+    scene.add(this.hexNumberMesh);
+};
+
+function createLargeHexNumberTexture(gridWidth, gridHeight, hexSize, textColour = "#ffffff") {
+	const HEX_WIDTH = Math.sqrt(3) * hexSize;  // Corrected for side-standing hexagons
+	const HEX_HEIGHT = 2 * hexSize; // Corrected for vertical stacking
+	const SCALE_FACTOR = 2;  // Increase resolution for sharp text
+	const TEXTURE_WIDTH = gridWidth * HEX_WIDTH * SCALE_FACTOR;
+	const TEXTURE_HEIGHT = gridHeight * HEX_HEIGHT * SCALE_FACTOR;
+    
+    // Create canvas with refined dimensions
+    const canvas = document.createElement("canvas");
+    canvas.width = TEXTURE_WIDTH;
+    canvas.height = TEXTURE_HEIGHT;
+    const ctx = canvas.getContext("2d");
+
+    // Clear the canvas
+    ctx.clearRect(0, 0, TEXTURE_WIDTH, TEXTURE_HEIGHT);
+
+    // Set text properties
+	const fontSize = Math.floor(hexSize * 0.2 * SCALE_FACTOR);  // Smaller text but sharp
+    ctx.globalAlpha = 0.85;
+    ctx.font = `bold ${fontSize}px Arial`;
+    ctx.fillStyle = textColour;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+	ctx.globalAlpha = 0.6; // 50% transparency
+
+    let number = 1;
+
+	for (let r = 0; r < gridHeight; r++) {
+		for (let q = 0; q < gridWidth; q++) {
+			let x = q * HEX_WIDTH * 1.7315 + HEX_WIDTH / 2; // REDUCED COLUMN SPACING			
+			let y = r * HEX_HEIGHT * 1.5 + HEX_HEIGHT / 2; // INCREASED ROW SPACING
+	
+			// Offset odd rows for staggered hex layout
+			if (r % 2 !== 0) x += HEX_WIDTH * 0.855; 
+	
+			ctx.fillText(String(number).padStart(4, '0'), x, y);
+			number++;
+		}
+	}
+
+    // Convert canvas to a texture
+    const texture = new THREE.Texture(canvas);
+    texture.needsUpdate = true;
+    return texture;
+}
     return BallisticIconContainer;
 }();
