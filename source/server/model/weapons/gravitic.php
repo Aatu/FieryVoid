@@ -550,7 +550,7 @@ class GraviticLance extends Raking{
 	
 	    public $intercept = 0; 
 	
-        public $overloadable = true;
+        public $overloadable = false; //Not actually required and messes with stop overload button.
         public $alwaysoverloading = true;
         public $extraoverloadshots = 2;
         public $overloadturns = 4;
