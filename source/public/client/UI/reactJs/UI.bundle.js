@@ -36419,11 +36419,15 @@ var EwButtons = function (_React$Component) {
                 null,
                 _react2.default.createElement(FEWButton, {
                     onMouseDown: this.showFriendlyEW.bind(this, false),
-                    onMouseUp: this.showFriendlyEW.bind(this, true)
+                    onMouseUp: this.showFriendlyEW.bind(this, true),
+                    onTouchStart: this.showFriendlyEW.bind(this, false),
+                    onTouchEnd: this.showFriendlyEW.bind(this, true)
                 }),
                 _react2.default.createElement(EEWButton, {
                     onMouseDown: this.showEnemyEW.bind(this, false),
-                    onMouseUp: this.showEnemyEW.bind(this, true)
+                    onMouseUp: this.showEnemyEW.bind(this, true),
+                    onTouchStart: this.showEnemyEW.bind(this, false),
+                    onTouchEnd: this.showEnemyEW.bind(this, true)
                 }),
                 _react2.default.createElement(FBButton, {
                     onMouseDown: this.toggleFriendlyBallisticLines.bind(this, false)
