@@ -23,7 +23,7 @@ function BallisticLineSprite(start, end, lineWidth, z, color, opacity, args) {
         return;
     }
 
-    this.arrowCount = 10; // Number of arrows in the series (adjustable)
+    this.arrowCount = 8; // Number of arrows in the series (adjustable)
     this.arrowSpacing = mathlib.distance(start, end) / this.arrowCount; // Space between arrows
 
     // Create the series of arrows
