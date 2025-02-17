@@ -149,6 +149,54 @@ var GraviticLance = function(json, ship) {
 GraviticLance.prototype = Object.create( Weapon.prototype );
 GraviticLance.prototype.constructor = GraviticLance;
 
+GraviticLance.prototype.doMultipleFireOrders = function (shooter, target, system) {
+	/*
+    //Used to restruct only one shot against a ship.
+   var fireOrders = this.fireOrders;
+   for (var i = fireOrders.length - 1; i >= 0; i--) {
+       if(target.shipSizeClass >= 0 && target.id === fireOrders[i].targetid && this.firingMode == 1) return; //Ships cannot be targeted more than once when allocating shots.
+   }	
+*/
+    var shotsOnTarget = this.guns; // Default guns initially.
+    if (this.fireOrders.length == 2) { // Two shots have been locked in, remove the first.
+        this.fireOrders.splice(0, 1); // Remove the first fire order.
+        shotsOnTarget--; //Reduce guns to 1, the one currently being retargeted!
+    }else if(this.fireOrders.length == 1){
+        shotsOnTarget--; //Reduce guns to 1, one shot is already locked and we don't want to target 3 :)        
+    }
+
+    var fireOrdersArray = []; // Store multiple fire orders
+
+    for (var s = 0; s < shotsOnTarget; s++) {
+        var fireid = shooter.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
+        var calledid = -1; //Grav Beams are raking, can never called shot.
+
+        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
+        if(chance < 1) continue;
+
+        var fire = {
+            id: fireid,
+            type: 'normal',
+            shooterid: shooter.id,
+            targetid: target.id,
+            weaponid: this.id,
+            calledid: calledid,
+            turn: gamedata.turn,
+            firingMode: this.firingMode,
+            shots: 1,
+            x: "null",
+            y: "null",
+            damageclass: 'Sweeping', 
+            chance: chance,
+            hitmod: 0,
+            notes: "Split"
+        };
+        
+        fireOrdersArray.push(fire); // Store each fire order
+    }
+    
+    return fireOrdersArray; // Return all fire orders
+};
 
 var GraviticCutter = function GraviticCutter(json, ship) {
     Gravitic.call(this, json, ship);

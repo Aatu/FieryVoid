@@ -39,10 +39,14 @@ class EwButtons extends React.Component {
 				<FEWButton 
 				    onMouseDown={this.showFriendlyEW.bind(this, false)}
 				    onMouseUp={this.showFriendlyEW.bind(this, true)}
+                    onTouchStart={this.showFriendlyEW.bind(this, false)}
+                    onTouchEnd={this.showFriendlyEW.bind(this, true)}                    
 				></FEWButton>
 				<EEWButton  
 				    onMouseDown={this.showEnemyEW.bind(this, false)}
 				    onMouseUp={this.showEnemyEW.bind(this, true)}
+                    onTouchStart={this.showEnemyEW.bind(this, false)}
+                    onTouchEnd={this.showEnemyEW.bind(this, true)}                     
 				></EEWButton>
 				<FBButton 
 				    onMouseDown={this.toggleFriendlyBallisticLines.bind(this, false)}

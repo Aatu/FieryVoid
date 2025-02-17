@@ -1428,8 +1428,9 @@ window.weaponManager = {
                 if (weaponManager.checkIsInRange(selectedShip, ship, weapon)) {
                     debug && console.log("is in range");
                     if(weapon.canSplitShots){
-                    	var fire = weapon.doMultipleFireOrders(selectedShip, ship, system);
-	                    if(fire) weapon.fireOrders.push(fire);
+                        var fire = weapon.doMultipleFireOrders(selectedShip, ship, system);
+                        if (!Array.isArray(fire)) fire = [fire]; // Ensure fire is an array for length check                        
+                        if (fire.length > 0) weapon.fireOrders.push(...fire);
 						//toUnselect.push(weapon); //It's actually easier to target if you don't! 
 						splitTargeted.push(weapon); //To be added to toUnselect aray at corect time below. 	                    
         				webglScene.customEvent('SystemDataChanged', { ship: ship, system: weapon });      				
@@ -1778,7 +1779,7 @@ window.weaponManager = {
             var fire = fires[i];
             var weapon = shipManager.systems.getSystem(ship, fire.weaponid);
 			//Added Persistent effect check below, as was preventing cancel moves when non-ballistic Plasma Web generated a plasma cloud in Intial Orders - DK 09.24 
-            if (fire.turn == gamedata.turn && !fire.rolled && !weapon.ballistic && fire.notes != 'Persistent Effect') { 
+            if (fire.turn == gamedata.turn && !fire.rolled && !weapon.ballistic && fire.notes != 'PersistentEffect') { 
                 return false;
             }
         }
@@ -2057,7 +2058,7 @@ window.weaponManager = {
     doShortLogText: function doShortLogText(fire) {
         const shortLogTypes = [
             "HyperspaceJump", "JumpFailure", "SelfDestruct", "ContainmentBreach",
-            "Reactor", "Sabotage", "WreakHavoc", "Capture", "Rescue", "LimpetBore"
+            "Reactor", "Sabotage", "WreakHavoc", "Capture", "Rescue", "LimpetBore", "MagazineExplosion"
         ];
     
         return shortLogTypes.includes(fire.damageclass);
