@@ -75,6 +75,21 @@ if (isset($_SESSION["user"])) {
 	    <br><b>Updated images</b> mostly civilian ships
 <br>
 	    
+	     <br><br>---------- <b>update 17th of February - by Douglas</b> ---------- 
+	    <br><b><u>Features</u></b>
+	    <br>Hanar Conversion Option added to Fleet Selection. Allow ships with Assault Shuttle slots to convert them to Fighter slots for a cost.
+	    <br>Gravitic Lances can now split their shots when fired as two Graviton Beams.
+<br><b><u>Fixes</u></b>
+	    <br>Fixed Plasma Web cloud location in Replay, when it successfully attacks fighter flights moving through it.
+	    <br>BDEW now displayed more accurately as a hexagon, rather than a circle.
+	    <br>Readded functionality for EW buttons to try and solve issues with mobile browsers.
+	    <br>Reduced y-axis for Knife Fight map size, to make it genuinely 'small' map
+	    <br>Simplified how Ammo enhancements are listed in ‘ship buying’ window.
+	    <br>Updated Combat Log for Magazine Explosion.
+	    <br>Fixed possible bug in Grappling Hook where both ships are travelling at same speed.
+	    <br>Change hex numbering method to render as a single image, hopefully causing less memory use.
+	
+       <br><br>
 <!--	        
 		 <br><br>---------- <b>update 20th of January</b> ---------- 
 	    <br><b><u><big>Thirdspace</big></u> arrived</b> - custom faction by Douglas
