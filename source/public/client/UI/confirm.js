@@ -327,7 +327,7 @@ window.confirm = {
                 //selectAmountItem.data('launchers', confirm.getLaunchersPerFighter(ship));
                 //selectAmountItem.data("firingMode", i);
 
-		if(enhIsOption) enhName = ' <i>(O)</i> ' + enhName; //add (O) at the beginning of name of options (to differentiate them from enhancements)
+		if(enhIsOption) enhName = ' <i>(OPTION)</i> ' + enhName; //add (O) at the beginning of name of options (to differentiate them from enhancements)
             var nameExpanded = enhName + ' (';
 			if(enhLimit>1) nameExpanded += 'up to ' + enhLimit + ' levels, ';
 			nameExpanded += enhPrice + 'PV ';
@@ -349,8 +349,7 @@ window.confirm = {
             $(".plusButton", item).on("click",confirm.doOnPlusEnhancement);
             $(".minusButton", item).on("click",confirm.doOnMinusEnhancement);
         }
-        $('<div class="missileselect"><label>You may select options (marked with <i>(O)</i>) and enhancements. In case of fighter flights, all fighters in flight will be similarly outfitted.<br></label>').prependTo(e);
-        
+        $('<div class="missileselect"><label>Here you may select any available Ammo, Options, and Enhancements.<br><span>(NOTE - For fighter flights, all fighters in flight will be similarly outfitted)</span></label></div>').prependTo(e);
 
         // Do lots of stuff to account for possible buying of missiles.
         var missileOptions = confirm.getMissileOptions(ship);
