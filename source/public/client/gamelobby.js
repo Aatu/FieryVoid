@@ -798,7 +798,104 @@ window.gamedata = {
 	    
 	    //fighters!
 		//ultralights count as half a fighter when accounting for hangar space used - IF packed into something other than ultralight hangars...
-	    var totalHangarAvailable = totalHangarH+totalHangarM+totalHangarL+(totalHangarXL/2)+hangarConversions;
+	    var totalHangarAvailable = totalHangarH+totalHangarM+totalHangarL+(totalHangarXL/2)+totalHangarAS;
+	    var minFtrRequired = Math.ceil((totalHangarAvailable-totalHangarAS)/2);
+	    var totalFtrPresent = totalFtrH+totalFtrM+totalFtrL+(totalFtrXL/2);
+	    var totalFtrCurr = 0;
+	    var totalHangarCurr = 0;
+	    checkResult += "<br><b><u>Fighters:</u></b><br>";
+		checkResult +=  " Total Fighters: " + totalFtrPresent;
+	    checkResult +=  " (allowed between " +minFtrRequired+ " and " + totalHangarAvailable + ")";
+		if((totalFtrXL>0) || (totalHangarXL>0)){ //add disclaimer because sums will not add up straight
+			checkResult += " <i>(Note - Ultralights only use half a hangar slot)</i>";
+		}
+		if (totalFtrPresent > totalHangarAvailable || totalFtrPresent < minFtrRequired){ //fighter total is not within limits
+			checkResult += " FAILURE!";
+			problemFound = true;
+		}else{
+			checkResult += " OK";
+		}
+		checkResult += "<br>";	    
+
+		totalFtrCurr = totalFtrXL+totalFtrL+totalFtrM+totalFtrH;
+		if (totalFtrCurr > 0){ //do not show if there are no fighters in this segment
+			totalHangarCurr = (totalHangarH+totalHangarM+totalHangarL+hangarConversions)*2 + totalHangarXL;
+			checkResult +=  " - Ultralight Fighters: " + totalFtrCurr;
+			checkResult +=  " (allowed up to " + totalHangarCurr + ")";
+//			if((totalFtrXL>0) || (totalHangarXL>0)){ //add disclaimer because sums will not add up straight. No longer required - DK
+//				checkResult += " <i>(Ultralights count as half)</i>";
+//			}			
+			if (totalFtrCurr > totalHangarCurr){ //fighter total is not within limits
+				checkResult += " TOO MANY!";
+				problemFound = true;
+			}else{
+				checkResult += " OK";
+			}
+			checkResult += "<br>";
+		}
+	    
+		totalFtrCurr = totalFtrL+totalFtrM+totalFtrH;
+		if (totalFtrCurr > 0){ //do not show if there are no fighters in this segment
+			totalHangarCurr = totalHangarH+totalHangarM+totalHangarL+hangarConversions;
+			checkResult +=  " - Light Fighters: " + totalFtrCurr;
+			checkResult +=  " (allowed up to " + totalHangarCurr + ")";
+			if (totalFtrCurr > totalHangarCurr){ //fighter total is not within limits
+				checkResult += " TOO MANY!";
+				problemFound = true;
+			}else{
+				checkResult += " OK";
+			}
+			checkResult += "<br>";
+		}
+		
+		totalFtrCurr = totalFtrM+totalFtrH;
+		if (totalFtrCurr > 0){ //do not show if there are no fighters in this segment
+			totalHangarCurr = totalHangarH+totalHangarM+hangarConversions;
+			checkResult +=  " - Medium Fighters: " + totalFtrCurr;
+			checkResult +=  " (allowed up to " + totalHangarCurr + ")";
+			if (totalFtrCurr > totalHangarCurr){ //fighter total is not within limits
+				checkResult += " TOO MANY!";
+				problemFound = true;
+			}else{
+				checkResult += " OK";
+			}
+			checkResult += "<br>";
+		}
+	    
+		totalFtrCurr = totalFtrH;
+		if (totalFtrCurr > 0){ //do not show if there are no fighters in this segment
+			totalHangarCurr = totalHangarH+hangarConversions;
+			checkResult +=  " - Heavy Fighters: " + totalFtrCurr;
+				checkResult +=  " (allowed up to " + totalHangarCurr + ")";
+			if (totalFtrCurr > totalHangarCurr){ //fighter total is not within limits
+				checkResult += " FAILURE!";
+				problemFound = true;
+			}else{
+				checkResult += " OK";
+			}
+			checkResult += "<br>";
+		}
+	
+		//Lets just check Assault shuttle/Breaching Pod capacity separately using their own variables.
+		totalHangarAS = totalHangarAS+totalHangarH+totalHangarM-hangarConversions; //Deduct any Hangar conversions here.
+		if (totalFtrAS > 0 || totalHangarAS > 0){ //do not show if there are no Assault Shuttle hangars in this segment
+//			var hangarOnlyAS = totalHangarAS-hangarConversions;
+//			var minASRequired = Math.ceil(hangarOnlyAS/2); //Commented out alternative code here that could be used to set 50% required for Assault Shuttle ships
+			checkResult +=  " - Assault Shuttles / Breaching Pods: " + totalFtrAS;
+//			checkResult +=  " (allowed between " +minASRequired+ " and " + totalHangarAS + ")";
+			checkResult +=  " (allowed up to " + totalHangarAS + ")";			
+//			if (totalFtrAS > totalHangarAS || totalFtrAS < minASRequired){ //Assault shuttle total is not within limits
+			if (totalFtrAS > totalHangarAS){ //Asssault Shuttle total is not within limits
+				checkResult += " FAILURE!";
+				problemFound = true;
+			}else{
+				checkResult += " OK";
+			}
+			checkResult += "<br>";
+		}		
+		
+/* //Old method of calculating Fighter slots, in case you hate the new one above - DK :)
+ var totalHangarAvailable = totalHangarH+totalHangarM+totalHangarL+(totalHangarXL/2)+hangarConversions;
 	    var minFtrRequired = Math.ceil(totalHangarAvailable/2);
 	    var totalFtrPresent = totalFtrH+totalFtrM+totalFtrL+(totalFtrXL/2);
 	    var totalFtrCurr = 0;
@@ -893,7 +990,7 @@ window.gamedata = {
 			}
 			checkResult += "<br>";
 		}		
-
+*/ 
 		//small flights (do not show if there aren't any!)
 		if (noSmallFlights > 0){
 			checkResult +=  " - Small Flights (< 6 craft): " + noSmallFlights;
