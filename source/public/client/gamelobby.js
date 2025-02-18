@@ -877,9 +877,9 @@ window.gamedata = {
 		}
 	
 		//Lets just check Assault shuttle/Breaching Pod capacity separately using their own variables.
-		totalHangarAS = totalHangarAS+totalHangarH+totalHangarM-hangarConversions; //Deduct any Hangar conversions here.
+		totalHangarAS = totalHangarAS+totalHangarH+totalHangarM; //Deduct any Hangar conversions here.
 		if (totalFtrAS > 0 || totalHangarAS > 0){ //do not show if there are no Assault Shuttle hangars in this segment
-//			var hangarOnlyAS = totalHangarAS-hangarConversions;
+//			var hangarOnlyAS = totalHangarAS;
 //			var minASRequired = Math.ceil(hangarOnlyAS/2); //Commented out alternative code here that could be used to set 50% required for Assault Shuttle ships
 			checkResult +=  " - Assault Shuttles / Breaching Pods: " + totalFtrAS;
 //			checkResult +=  " (allowed between " +minASRequired+ " and " + totalHangarAS + ")";
@@ -893,7 +893,7 @@ window.gamedata = {
 			}
 			checkResult += "<br>";
 		}		
-		
+
 /* //Old method of calculating Fighter slots, in case you hate the new one above - DK :)
  var totalHangarAvailable = totalHangarH+totalHangarM+totalHangarL+(totalHangarXL/2)+hangarConversions;
 	    var minFtrRequired = Math.ceil(totalHangarAvailable/2);
