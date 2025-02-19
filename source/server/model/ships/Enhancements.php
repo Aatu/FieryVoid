@@ -45,7 +45,7 @@ class Enhancements{
 		$unit->enhancementOptionsDisabled[] = 'POOR_TRAIN'; 
 	  }else{ //enhancements for ships
 		$unit->enhancementOptionsDisabled[] = 'ELITE_CREW';
-		$unit->enhancementOptionsDisabled[] = 'HANG_CONV';		 
+		$unit->enhancementOptionsDisabled[] = 'HANG_CON_F';		 
 		$unit->enhancementOptionsDisabled[] = 'IMPR_ENG'; 
 		$unit->enhancementOptionsDisabled[] = 'IMPR_REA'; 
 		$unit->enhancementOptionsDisabled[] = 'IMPR_SENS'; 
@@ -128,10 +128,10 @@ class Enhancements{
 	  }	 
 
 	  //To convert Assault Shuttles hangar slots to Fighter Slots
-	  if (array_key_exists("assault shuttles", $ship->fighters)) { //Onyl add if ship has Assault Shuttle hangar space! 	  
-	    $enhID = 'HANG_CONV';
+	  if (array_key_exists("assault shuttles", $ship->fighters)) { //Only add if ship has Assault Shuttle hangar space! 	  
+	    $enhID = 'HANG_CON_F';
 		if(!in_array($enhID, $ship->enhancementOptionsDisabled)){ //Check option is also not disabled.
-				$enhName = 'Hangar Conversion';
+				$enhName = 'Convert Assault Shuttle slot to Fighter slot';
 				$enhLimit = $ship->fighters["assault shuttles"]; //The number of assault shuttle slots ship has is max conversion amount.
 				$enhPrice = 5; //Flat 5 pts per slot converted	  
 				$enhPriceStep = 0; //flat rate
@@ -1572,7 +1572,7 @@ class Enhancements{
 						} 						
 						break;						
 
-					case 'HANG_CONV'://Hangar Conversion, no actual need to change anything here.  
+					case 'HANG_CON_F'://Hangar Conversion to Fighter slot, no actual need to change anything here.  
 						break;	
 
 					case 'EXT_MRN'://Extra marines, increase contingent per Claw by 1.
