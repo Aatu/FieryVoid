@@ -167,7 +167,53 @@ class Mathlib{
 
         return array("x"=>$x, "y"=>$y);
     }
+
     
+    //New, working in testing at least, function for Pixel To Hex coordinate conversion.
+    public static function pixelCoToHex($px, $py) {
+        $r = (2/3) * $py;
+        $q = ($px / sqrt(3)) + (0.5 * ($r & 1));
+    
+        return self::hexRound($q, $r);
+    }
+    
+    private static function hexRound($q, $r) {
+        $x = $q;
+        $z = $r;
+        $y = -$x - $z;
+    
+        $rx = round($x);
+        $ry = round($y);
+        $rz = round($z);
+    
+        $x_diff = abs($rx - $x);
+        $y_diff = abs($ry - $y);
+        $z_diff = abs($rz - $z);
+    
+        if ($x_diff > $y_diff && $x_diff > $z_diff) {
+            $rx = -$ry - $rz;
+        } elseif ($y_diff > $z_diff) {
+            $ry = -$rx - $rz;
+        } else {
+            $rz = -$rx - $ry;
+        }
+    
+        return array("x" => $rx, "y" => $rz);
+    }
+    
+    //Just a function for testing is pixelCoToHex is working correctly, or could be adjusted for vice versa.
+    public static  function testHexConversion($q, $r){         
+        $pixel = self::hexCoToPixel(new OffsetCoordinate($q, $r));       
+        $hex = self::pixelCoToHex($pixel["x"], $pixel["y"]);        
+            
+        if ($hex["x"] == $q && $hex["y"] == $r) { 
+            echo "PASS: ($q, $r) -> ({$pixel["x"]}, {$pixel["y"]}) -> ({$hex["x"]}, {$hex["y"]})\n"; 
+        }else { 
+            echo "FAIL: ($q, $r) -> ({$pixel["x"]}, {$pixel["y"]}) -> ({$hex["x"]}, {$hex["y"]})\n"; 
+        } 
+    } 
+
+/* //OLD METHOD OF pixelCoToHex() WHICH DIDN@T SEEM TO WORK CORRECTLY ANYWAY - DK 02.25
     //ATTENTION, this is bloody magic! (I don't really know how it works)
     public static function pixelCoToHex($px, $py){
                 
@@ -185,14 +231,15 @@ class Mathlib{
      
         $h = ($x/($b*2))+1; 
         
-        /*
-        if (gamedata.scroll.y % 2 == 0){
-            h = (x/(b*2))+0.5;
+        
+        //if (gamedata.scroll.y % 2 == 0){
+         //   h = (x/(b*2))+0.5;
             
-        }else{
+        //}else{
             
             
-        }*/
+        //}
+        
         $hx = $h;       
         $xmod = $hx - floor($hx);
         if ($xmod > 0.5){
@@ -256,8 +303,8 @@ class Mathlib{
             
         return array("x"=>$hx, "y"=>$hy);
     }
-    
-    
+    */    
+
 }
 
 ?>
