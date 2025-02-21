@@ -456,7 +456,7 @@ UI.shipMovement.rollActiveElement.on("click touchstart", UI.shipMovement.rollCal
 			var roll = UI.shipMovement.rollElement;
 			var emergencyroll = UI.shipMovement.emergencyrollElement;
 			var icon = "";
-			var checkHeading = shipHeading; // Ensure checkHeading is defined.
+	//		var checkHeading = shipHeading; // checkHeading is defined before now.
 			dis += 30; // Increment distance only once.
 
 			if (shipManager.movement.canRoll(ship)) {
