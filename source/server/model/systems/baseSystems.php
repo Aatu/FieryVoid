@@ -987,11 +987,6 @@ class MindriderEngine extends Engine{
 
 			$this->contraction = $contractValue;	
 
-			//Reduce image size if needed! :)
-			$level = floor($this->contraction/3);			
-			$ship->iconPath = "img/ships/MindriderMindsEye' . $level . '.png";
-			$ship->canvasSize = 280-($level *50);
-
 		if($contractValue == 0) return; //No effects this turn, just return.
 
 			$ship->forwardDefense -= $this->contraction;
@@ -1014,7 +1009,11 @@ class MindriderEngine extends Engine{
 		
 			if($this->contraction >= 3){ //Additional effects after 3 levels of contraction.
 				$ship->Enormous = false;
-				
+				//Reduce image size if needed! :)
+				$level = floor($this->contraction/3);			
+				$ship->imagePath = "img/ships/MindriderMindsEye" . $level . ".png";
+				$ship->canvasSize = 280-($level *50);
+
 				$armourBoost = floor($this->contraction/3);
 				
 				foreach ($ship->systems as $system){
