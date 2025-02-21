@@ -45,7 +45,8 @@ class Enhancements{
 		$unit->enhancementOptionsDisabled[] = 'POOR_TRAIN'; 
 	  }else{ //enhancements for ships
 		$unit->enhancementOptionsDisabled[] = 'ELITE_CREW';
-		$unit->enhancementOptionsDisabled[] = 'HANG_CON_F';		 
+		$unit->enhancementOptionsDisabled[] = 'HANG_CON_F';
+		$unit->enhancementOptionsDisabled[] = 'HANG_CON_AS';					 
 		$unit->enhancementOptionsDisabled[] = 'IMPR_ENG'; 
 		$unit->enhancementOptionsDisabled[] = 'IMPR_REA'; 
 		$unit->enhancementOptionsDisabled[] = 'IMPR_SENS'; 
@@ -133,6 +134,21 @@ class Enhancements{
 		if(!in_array($enhID, $ship->enhancementOptionsDisabled)){ //Check option is also not disabled.
 				$enhName = 'Convert Assault Shuttle slot to Fighter slot';
 				$enhLimit = $ship->fighters["assault shuttles"]; //The number of assault shuttle slots ship has is max conversion amount.
+				$enhPrice = 5; //Flat 5 pts per slot converted	  
+				$enhPriceStep = 0; //flat rate
+				$ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);	
+		}
+	  }
+
+	  //To convert Fighter hangar slots to Assault Shuttle Slots
+	  $keysToCheck = ["normal", "heavy", "medium"]; //Light and Ultralight cannot be converted.
+	  $matchingKeys = array_intersect_key($ship->fighters, array_flip($keysToCheck)); // Find matching keys
+	  $totalCount = array_sum($matchingKeys); // Sum up the values of the found keys 
+	  if ($totalCount > 0) { 	  
+	    $enhID = 'HANG_CON_AS';
+		if(!in_array($enhID, $ship->enhancementOptionsDisabled)){ //Check option is also not disabled.
+				$enhName = 'Convert Fighter slot to Assault Shuttle slot';
+				$enhLimit = $totalCount; //The number of assault shuttle slots ship has is max conversion amount.
 				$enhPrice = 5; //Flat 5 pts per slot converted	  
 				$enhPriceStep = 0; //flat rate
 				$ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);	
@@ -1573,6 +1589,9 @@ class Enhancements{
 						break;						
 
 					case 'HANG_CON_F'://Hangar Conversion to Fighter slot, no actual need to change anything here.  
+						break;	
+
+					case 'HANG_CON_AS'://Hangar Conversion to Assault Shuttle slot, no actual need to change anything here.  
 						break;	
 
 					case 'EXT_MRN'://Extra marines, increase contingent per Claw by 1.

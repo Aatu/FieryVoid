@@ -368,6 +368,7 @@ window.gamedata = {
 	    var totalFtrXL = 0;//total ultralight fighters
 		var totalFtrAS = 0;//total Assault Shuttle/Breaching pods
 		var hangarConversionsF = 0; //How many converted hangar slots TO fighter slots.
+		var hangarConversionsAS = 0; //How many converted hangar slots TO Assault Shuttle slots.		
 	    var totalFtrOther = new Array( );//total other small craft
 		var smallCraftUsed = new Array( );//small craft sizes that happen to be present, whether as hangar space or actual craft
 		
@@ -456,8 +457,43 @@ window.gamedata = {
 				ancientUnitPresent = true;
 			}
 			if(!lship.flight){
-					totalShips++;			
-					//check for custom hangars
+					totalShips++;
+					
+				// Check if ship has converted Assault Shuttle Hangar Space to Fighters before calculating total hangar space
+				for (var enh in lship.enhancementOptions) { 
+					if (lship.enhancementOptions[enh][6]) { // Hangar conversion is an option, ignore others.
+						if (lship.enhancementOptions[enh][0] === "HANG_CON_F") {
+							hangarConversionsF += lship.enhancementOptions[enh][2]; //Record number of slots converted from Assault Shuttle to Fighters.
+						}	
+					}
+				}
+
+				// Check if ship has converted Fighter Hangar Space to Assault Shuttles before calculating total hangar space
+				for (var enh in lship.enhancementOptions) { 
+					if (lship.enhancementOptions[enh][6]) { // Hangar conversion is an option, ignore others.
+						if (lship.enhancementOptions[enh][0] === "HANG_CON_AS") {
+							hangarConversionsAS += lship.enhancementOptions[enh][2]; //Record number of slots converted from Fighter to Assault Shuttles.
+							if (lship.customFighter && Object.keys(lship.customFighter).length > 0) {
+								var shipFighters = 0;
+								for (let g in lship.fighters) {
+									shipFighters += lship.fighters[g];
+								}
+								var customFighters = 0;
+								for (let h in lship.customFighter) {
+									customFighters += lship.customFighter[h];
+								}								
+								if((shipFighters-lship.enhancementOptions[enh][2]) <= customFighters){
+									for (var i in lship.customFighter){								
+										lship.customFighter[i] = (shipFighters-lship.enhancementOptions[enh][2]);
+										break; //Let's just amend the first entry, should usually work...										
+									}
+								}	
+							}
+						}
+					}
+				}
+
+				//check for custom hangars
 				if(lship.customFighter){
 					for (var h in lship.customFighter){
 						specialHgrName = h;
@@ -467,14 +503,7 @@ window.gamedata = {
 					//console.table(specialHangars);
 				}
 
-				// Check if ship has converted Hangar Space before calculating total hangar space
-				for (var enh in lship.enhancementOptions) { 
-					if (lship.enhancementOptions[enh][6]) { // Hangar conversion is an option, ignore others.
-						if (lship.enhancementOptions[enh][0] === "HANG_CON_F") {
-							hangarConversionsF += lship.enhancementOptions[enh][2]; //Record number of slots converted from Assault Shuttle to Fighters.
-						}
-					}
-				}
+
 
 				//check hangar space available...	
 				for(var h in lship.fighters){
@@ -798,11 +827,13 @@ window.gamedata = {
 	    
 	    //fighters!
 		//ultralights count as half a fighter when accounting for hangar space used - IF packed into something other than ultralight hangars...
-	    var totalHangarAvailable = totalHangarH+totalHangarM+totalHangarL+(totalHangarXL/2)+hangarConversionsF;
+		var hangarConversionNet = hangarConversionsF-hangarConversionsAS; //Positive is more fighter slots, negative if more AS.
+		var totalHangarAvailable = totalHangarH+totalHangarM+totalHangarL+(totalHangarXL/2)+hangarConversionNet;
 	    var minFtrRequired = Math.ceil(totalHangarAvailable/2);
 	    var totalFtrPresent = totalFtrH+totalFtrM+totalFtrL+(totalFtrXL/2);
 	    var totalFtrCurr = 0;
 	    var totalHangarCurr = 0;
+
 	    checkResult += "<br><b><u>Fighters:</u></b><br>";
 		checkResult +=  "<br> Total Fighters: " + totalFtrPresent;
 	    checkResult +=  " (select between " +minFtrRequired+ " and " + totalHangarAvailable + ")";
@@ -818,11 +849,12 @@ window.gamedata = {
 		checkResult += "<br>";	    
 
 		totalFtrCurr = totalFtrXL;
-		if (totalFtrCurr > 0 || totalHangarXL > 0 || hangarConversionsF > 0){ //do not show if there are no fighters in this segment
-			totalHangarCurr = (totalHangarH+totalHangarM+totalHangarL+hangarConversionsF)*2 + totalHangarXL;
+		totalHangarCurr = (totalHangarH+totalHangarM+totalHangarL+hangarConversionNet)*2 + totalHangarXL;		
+		if (totalFtrCurr > 0 || totalHangarCurr > 0){ //do not show if there are no fighters/hangars in this segment
+//			totalHangarCurr = (totalHangarH+totalHangarM+totalHangarL+hangarConversionNet)*2 + totalHangarXL;
 			checkResult +=  " - Ultralight Fighters: " + totalFtrCurr;
 			checkResult +=  " (allowed up to " + totalHangarCurr + ")";
-			if((totalFtrXL>0) || (totalHangarXL>0)){ //add disclaimer because sums will not add up straight. No longer required - DK
+			if((totalFtrXL>0) || (totalHangarXL>0)){ //add disclaimer because sums will not add up straight.
 				checkResult += " <i>[Ultralights only require half a normal hangar slot]</i>";
 			}			
 			if (totalFtrCurr > totalHangarCurr){ //fighter total is not within limits
@@ -835,8 +867,9 @@ window.gamedata = {
 		}
 	    
 		totalFtrCurr = totalFtrL;
-		if (totalFtrCurr > 0 || totalHangarL > 0 || hangarConversionsF > 0){ //do not show if there are no fighters/hangars in this segment
-			totalHangarCurr = totalHangarH+totalHangarM+totalHangarL+hangarConversionsF;
+		totalHangarCurr = totalHangarH+totalHangarM+totalHangarL+hangarConversionNet;		
+		if (totalFtrCurr > 0 || totalHangarCurr > 0){ //do not show if there are no fighters/hangars in this segment
+//			totalHangarCurr = totalHangarH+totalHangarM+totalHangarL+hangarConversionNet;
 			checkResult +=  " - Light Fighters: " + totalFtrCurr;
 			checkResult +=  " (allowed up to " + totalHangarCurr + ")";
 			if (totalFtrCurr > totalHangarCurr){ //fighter total is not within limits
@@ -849,8 +882,9 @@ window.gamedata = {
 		}
 		
 		totalFtrCurr = totalFtrM;
-		if (totalFtrCurr > 0 || totalHangarM > 0 || hangarConversionsF > 0){ //do not show if there are no fighters/hangars in this segment
-			totalHangarCurr = totalHangarH+totalHangarM+hangarConversionsF;
+		totalHangarCurr = totalHangarH+totalHangarM+hangarConversionNet;		
+		if (totalFtrCurr > 0 || totalHangarCurr > 0){ //do not show if there are no fighters/hangars in this segment
+//			totalHangarCurr = totalHangarH+totalHangarM+hangarConversionNet;
 			checkResult +=  " - Medium Fighters: " + totalFtrCurr;
 			checkResult +=  " (allowed up to " + totalHangarCurr + ")";
 			if (totalFtrCurr > totalHangarCurr){ //fighter total is not within limits
@@ -863,8 +897,9 @@ window.gamedata = {
 		}
 	    
 		totalFtrCurr = totalFtrH;
-		if (totalFtrCurr > 0 || totalHangarH > 0 || hangarConversionsF > 0){ //do not show if there are no fighters/hangars in this segment
-			totalHangarCurr = totalHangarH+hangarConversionsF;
+		totalHangarCurr = totalHangarH+hangarConversionNet;		
+		if (totalFtrCurr > 0 || totalHangarCurr > 0){ //do not show if there are no fighters/hangars in this segment
+//			totalHangarCurr = totalHangarH+hangarConversionNet;				
 			checkResult +=  " - Heavy Fighters: " + totalFtrCurr;
 				checkResult +=  " (allowed up to " + totalHangarCurr + ")";
 			if (totalFtrCurr > totalHangarCurr){ //fighter total is not within limits
@@ -1112,7 +1147,7 @@ window.gamedata = {
 		checkResult += "<br>";		
 
 		//Lets just check Assault shuttle/Breaching Pod capacity separately using their own variables.
-		totalHangarAS = totalHangarAS-hangarConversionsF; //Deduct any Hangar conversions here.
+		totalHangarAS = totalHangarAS-hangarConversionNet; //Deduct any Hangar conversions here.
 		if (totalFtrAS > 0 || totalHangarAS > 0){ //do not show if there are no Assault Shuttles/hangars in this segment
 			checkResult +=  " Total Assault Shuttles / Breaching Pods: " + totalFtrAS;
 			checkResult +=  " (allowed up to " + totalHangarAS + ")";			
