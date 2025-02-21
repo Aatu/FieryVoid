@@ -449,7 +449,7 @@ class SystemInfoButtons extends React.Component {
 	}
 
 
-	/*Thought Shield increase health*/
+	/*Thought Shield now uses TSShield functions above.
 	ThoughtShieldIncrease10(e) {
         e.stopPropagation(); e.preventDefault();
 		const {ship, system} = this.props;
@@ -468,7 +468,7 @@ class SystemInfoButtons extends React.Component {
 		system.doIncrease();
 		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 	}	
-	/*Thought Shield decrease health*/
+
 	ThoughtShieldDecrease(e) {
         e.stopPropagation(); e.preventDefault();
 		const {ship, system} = this.props;
@@ -487,6 +487,7 @@ class SystemInfoButtons extends React.Component {
 		system.doDecrease10();
 		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 	}
+*/		
 	/*Thought Shield Generator Presets*/
 	ThoughtShieldGenSelect(e) {
         e.stopPropagation(); e.preventDefault();
@@ -578,12 +579,14 @@ class SystemInfoButtons extends React.Component {
 				{canTSShieldGendisplayCurrClass(ship, system) && <Button title="Previous" onClick={this.prevCurrClass.bind(this)} img="./img/systemicons/Specialistclasses/iconPrev.png"></Button>}
 				{canTSShieldGendisplayCurrClass(ship, system) && <Button title="Next" onClick={this.nextCurrClass.bind(this)} img="./img/systemicons/Specialistclasses/iconNext.png"></Button>}					{canTSShieldGenSelect(ship, system) && <Button onClick={this.TSShieldGenSelect.bind(this)} img="./img/systemicons/Specialistclasses/select.png"></Button>}		
 
-				{canThoughtShieldIncrease(ship, system) && <Button onClick={this.ThoughtShieldIncrease10.bind(this)} img="./img/systemicons/ShieldGenclasses/iconPlus10.png"></Button>}
-				{canThoughtShieldIncrease(ship, system) && <Button onClick={this.ThoughtShieldIncrease5.bind(this)} img="./img/systemicons/ShieldGenclasses/iconPlus5.png"></Button>}	
-				{canThoughtShieldIncrease(ship, system) && <Button onClick={this.ThoughtShieldIncrease.bind(this)} img="./img/systemicons/BFCPclasses/iconPlus.png"></Button>}				
-				{canThoughtShieldDecrease(ship, system) && <Button onClick={this.ThoughtShieldDecrease.bind(this)} img="./img/systemicons/BFCPclasses/iconMinus.png"></Button>}				
-				{canThoughtShieldDecrease(ship, system) && <Button onClick={this.ThoughtShieldDecrease5.bind(this)} img="./img/systemicons/ShieldGenclasses/iconMinus5.png"></Button>}
-				{canThoughtShieldDecrease(ship, system) && <Button onClick={this.ThoughtShieldDecrease10.bind(this)} img="./img/systemicons/ShieldGenclasses/iconMinus10.png"></Button>}
+				{canThoughtShieldIncrease(ship, system) && <Button onClick={this.TSShieldIncrease25.bind(this)} img="./img/systemicons/ShieldGenclasses/iconPlus25.png"></Button>}
+				{canThoughtShieldIncrease(ship, system) && <Button onClick={this.TSShieldIncrease10.bind(this)} img="./img/systemicons/ShieldGenclasses/iconPlus10.png"></Button>}
+				{canThoughtShieldIncrease(ship, system) && <Button onClick={this.TSShieldIncrease5.bind(this)} img="./img/systemicons/ShieldGenclasses/iconPlus5.png"></Button>}	
+				{canThoughtShieldIncrease(ship, system) && <Button onClick={this.TSShieldIncrease.bind(this)} img="./img/systemicons/BFCPclasses/iconPlus.png"></Button>}				
+				{canThoughtShieldDecrease(ship, system) && <Button onClick={this.TSShieldDecrease.bind(this)} img="./img/systemicons/BFCPclasses/iconMinus.png"></Button>}				
+				{canThoughtShieldDecrease(ship, system) && <Button onClick={this.TSShieldDecrease5.bind(this)} img="./img/systemicons/ShieldGenclasses/iconMinus5.png"></Button>}
+				{canThoughtShieldDecrease(ship, system) && <Button onClick={this.TSShieldDecrease10.bind(this)} img="./img/systemicons/ShieldGenclasses/iconMinus10.png"></Button>}
+				{canThoughtShieldDecrease(ship, system) && <Button onClick={this.TSShieldDecrease25.bind(this)} img="./img/systemicons/ShieldGenclasses/iconMinus25.png"></Button>}				
 				{canThoughtShieldGendisplayCurrClass(ship, system) && <Button title={getTSShieldGencurrClassName(ship,system)} img={getTSShieldGencurrClassImg(ship,system)}></Button>}
 				{canThoughtShieldGendisplayCurrClass(ship, system) && <Button title="Previous" onClick={this.prevCurrClass.bind(this)} img="./img/systemicons/Specialistclasses/iconPrev.png"></Button>}
 				{canThoughtShieldGendisplayCurrClass(ship, system) && <Button title="Next" onClick={this.nextCurrClass.bind(this)} img="./img/systemicons/Specialistclasses/iconNext.png"></Button>}					
