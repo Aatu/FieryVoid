@@ -565,8 +565,11 @@ class MagGravReactorTechnical extends MagGravReactor{
 	public function setSystemDataWindow($turn){
 		$this->data["Output"] = $this->output;
 		parent::setSystemDataWindow($turn);     
-		$this->data["Special"] = "Mag-Gravitic Reactor: provides fixed total power, regardless of destroyed systems.";
-		$this->data["Special"] .= "<br>This system is here for technical purposes only. Cannot be damaged in any way.";
+		$this->data["Special"] = "This system is here for technical purposes only. Cannot be damaged in any way.";
+		$ship = $this->getUnit();
+		//I'm reusing this system in Asteroid unit, but don't want this text here - DK
+		if($ship->factionAge > 2) $this->data["Special"] .= "<br>Mag-Gravitic Reactor: provides fixed total power, regardless of destroyed systems.";
+		
 	}		
 }//endof MagGravReactor		
 
@@ -1570,7 +1573,7 @@ class OSATCnC extends CnC{	//Special technical OSAT CnC system, so criticals eff
 		}else{
 			$this->data["Special"] .= '<br>';
 		}
-		$this->data["Special"] .= "Technical system only, cannot be damaged in any way.";
+		$this->data["Special"] .= "This system is here for technical purposes only. Cannot be damaged in any way.";
 	}
 		
 }//endof OSATCnC
