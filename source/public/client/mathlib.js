@@ -204,6 +204,75 @@ window.mathlib = {
 			default:
 				return 300;
 		}
+	},
+
+	doLinesIntersect: function doLinesIntersect(p1, p2, p3, p4) {
+		function crossProduct(a, b) {
+			return a.x * b.y - a.y * b.x;
+		}
+	
+		let d1 = { x: p2.x - p1.x, y: p2.y - p1.y };
+		let d2 = { x: p4.x - p3.x, y: p4.y - p3.y };
+		let denom = crossProduct(d1, d2);
+	
+		if (denom === 0) return false; // Parallel lines
+	
+		let t = crossProduct({ x: p3.x - p1.x, y: p3.y - p1.y }, d2) / denom;
+		let u = crossProduct({ x: p3.x - p1.x, y: p3.y - p1.y }, d1) / denom;
+	
+		return t >= 0 && t <= 1 && u >= 0 && u <= 1;
+	},
+
+	getHexCorners: function getHexCorners(hex) {
+		let hexSize = window.Config.HEX_SIZE;
+		let shrinkFactor = 0.9999; // Shrink the hexagon just a tiny bit to prevent edge cases.
+	
+		let hexCo = coordinateConverter.fromHexToGame(hex);
+		let cx = hexCo.x;
+		let cy = hexCo.y;
+	
+		// Adjusted angles for pointy-top hexagons
+		let angles = [30, 90, 150, 210, 270, 330].map(a => (a * Math.PI) / 180);
+	
+		// Apply shrink factor to reduce the hexagon size
+		return angles.map(angle => ({
+			x: cx + shrinkFactor * hexSize * Math.cos(angle),
+			y: cy + shrinkFactor * hexSize * Math.sin(angle),
+		}));
+	},
+	
+	checkLineOfSight: function checkLineOfSight(start, end, blockedHexes) {
+		const hexSize = window.Config.HEX_SIZE;
+
+		const startPixel = coordinateConverter.fromHexToGame(start);
+		const endPixel = coordinateConverter.fromHexToGame(end);		
+
+		const lineMinQ = Math.min(start.q, end.q);
+		const lineMaxQ = Math.max(start.q, end.q);
+		const lineMinR = Math.min(start.r, end.r);
+		const lineMaxR = Math.max(start.r, end.r);
+	
+		// Exclude the shooter and target positions from the blocked hexes
+		const filteredBlockedHexes = blockedHexes.filter(hex => !(hex.q === start.q && hex.r === start.r) && !(hex.q === end.q && hex.r === end.r));
+	
+		for (let hex of filteredBlockedHexes) {
+			// Quickly discard hexes that can't intersect
+			if (hex.q < lineMinQ - Config.HEX_SIZE || hex.q > lineMaxQ + Config.HEX_SIZE ||
+				hex.r < lineMinR - Config.HEX_SIZE || hex.r > lineMaxR + Config.HEX_SIZE) {
+				continue;
+			}
+	
+			let corners = this.getHexCorners(hex); // Get precomputed corners
+			for (let i = 0; i < corners.length; i++) {
+				let p1 = corners[i];
+				let p2 = corners[(i + 1) % corners.length];
+	
+				if (this.doLinesIntersect(startPixel, endPixel, p1, p2)) {
+					return false; // Line crosses a hex edge
+				}
+			}
+		}
+		return true;
 	}
 
 };
