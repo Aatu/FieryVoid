@@ -15,7 +15,7 @@ class CraytanUlten extends HeavyCombatVessel{
 		$this->unofficial = true;
         $this->isd = 2124;
 
-        $this->fighters = array("normal"=>6, "assault shuttles"=>2);
+        $this->fighters = array("normal"=>6, "assault shuttles"=>3);
 		
         $this->forwardDefense = 14;
         $this->sideDefense = 15;
@@ -31,7 +31,7 @@ class CraytanUlten extends HeavyCombatVessel{
         $this->addPrimarySystem(new CnC(5, 12, 0, 0));
         $this->addPrimarySystem(new ElintScanner(5, 12, 6, 6));
         $this->addPrimarySystem(new Engine(4, 14, 0, 8, 3));
-        $this->addPrimarySystem(new Hangar(3, 8));
+        $this->addPrimarySystem(new Hangar(3, 9));
         $this->addPrimarySystem(new Thruster(3, 13, 0, 5, 3));
         $this->addPrimarySystem(new Thruster(3, 13, 0, 5, 4));
       
@@ -67,7 +67,7 @@ class CraytanUlten extends HeavyCombatVessel{
             ),
             1=> array(
                     4 => "Thruster",
-                    6 => "Medium Assault Cannon",
+                    6 => "Medium Enhanced Plasma",
                     8 => "ELINT Scatter",
 					10 => "Light Enhanced Plasma",
 					18 => "Structure",

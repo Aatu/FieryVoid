@@ -456,7 +456,7 @@ class Reactor extends ShipSystem implements SpecialAbility {
 				$chance, $explodeRoll, 1, $shotsHit, 0,
 				0,0,'ContainmentBreach',10000
 			);
-			$newFireOrder->pubnotes = "Containment Breach - reactor explosion. Chance $chance %, roll $explodeRoll.";
+			$newFireOrder->pubnotes = " Containment Breach - reactor explosion. Chance $chance %, roll $explodeRoll.";
 			$newFireOrder->addToDB = true;
 			$rammingSystem->fireOrders[] = $newFireOrder;
 		}
@@ -2044,8 +2044,8 @@ class JumpEngine extends ShipSystem{
 		$rammingSystem = $ship->getSystemByName("RammingAttack");
 		$fireOrderType = $jumpFailure ? 'JumpFailure' : 'HyperspaceJump';
 		$pubNotes = $jumpFailure
-			? "<br>Ship attempts to jump to hyperspace, but damage to the Jump Drive causes the ship to be destroyed."
-			: "<br>Ship activates Jump Drive and enters hyperspace.";
+			? " attempts to jump to hyperspace, but damage to the Jump Drive causes the ship to be destroyed."
+			: " activates Jump Drive.";
 	
 		if ($rammingSystem) {
 			$newFireOrder = new FireOrder(
@@ -2120,7 +2120,7 @@ class Structure extends ShipSystem{
     { 
     
 		parent::criticalPhaseEffects($ship, $gamedata);//Call parent to apply effects like Limpet Bore.	    
-    
+		
 		if($this->isIndestructible){
 			foreach ($this->damage as $damage ) if(($damage->turn == $gamedata->turn) && ($damage->destroyed)){ 
 				/* update 19.12.2024 - re-read the rules - such structures NEVER fall off!
@@ -2139,8 +2139,7 @@ class Structure extends ShipSystem{
 						$damageEntry->updated = true;
 						$struct->damage[] = $damageEntry;
 					}
-				}else{//unmark this one
-				*/
+				}else{*/ //unmark this one
 					$damage->destroyed = false;
 				/*}*/
 			}
@@ -5671,7 +5670,7 @@ class AmmoMissileB extends AmmoMissileTemplate{
 	public $modeName = 'Basic';
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'AMMO_B'; //enhancement name to be enabled
-	public $enhancementDescription = '(ammo) Basic Missile'; //enhancement description
+	public $enhancementDescription = '(AMMO) Basic Missile'; //enhancement description
 	public $enhancementPrice = 1;//officially 0, but if it was 0 then there would be no reason not to load it
 	
 	public $rangeMod = 0; //MODIFIER for launch range
@@ -5704,7 +5703,7 @@ class AmmoMissileL extends AmmoMissileTemplate{
 	public $modeName = 'LongRange';
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'AMMO_L'; //enhancement name to be enabled
-	public $enhancementDescription = '(ammo) LongRange Missile (2225)'; //enhancement description
+	public $enhancementDescription = '(AMMO) LongRange Missile'; //enhancement description
 	public $enhancementPrice = 6;
 	
 	public $rangeMod = 10; //MODIFIER for launch range
@@ -5736,7 +5735,7 @@ class AmmoMissileH extends AmmoMissileTemplate{
 	public $modeName = 'Heavy';
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'AMMO_H'; //enhancement name to be enabled
-	public $enhancementDescription = '(ammo) Heavy Missile (2225)'; //enhancement description
+	public $enhancementDescription = '(AMMO) Heavy Missile'; //enhancement description
 	public $enhancementPrice = 4;
 	
 	public $rangeMod = -10; //MODIFIER for launch range
@@ -5767,7 +5766,7 @@ class AmmoMissileF extends AmmoMissileTemplate{
 	public $modeName = 'Flash';
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'AMMO_F'; //enhancement name to be enabled
-	public $enhancementDescription = '(ammo) Flash Missile (2225)'; //enhancement description
+	public $enhancementDescription = '(AMMO) Flash Missile'; //enhancement description
 	public $enhancementPrice = 6;
 	
 	public $rangeMod = 0; //MODIFIER for launch range
@@ -5799,7 +5798,7 @@ class AmmoMissileA extends AmmoMissileTemplate{
 	public $modeName = 'Antifighter';
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'AMMO_A'; //enhancement name to be enabled
-	public $enhancementDescription = '(ammo) Antifighter Missile (2231)'; //enhancement description
+	public $enhancementDescription = '(AMMO) Antifighter Missile'; //enhancement description
 	public $enhancementPrice = 4;
 	
 	public $rangeMod = -5; //MODIFIER for launch range
@@ -5830,7 +5829,7 @@ class AmmoMissileP extends AmmoMissileTemplate{
 	public $modeName = 'Piercing';
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'AMMO_P'; //enhancement name to be enabled
-	public $enhancementDescription = '(ammo) Piercing Missile (2244)'; //enhancement description
+	public $enhancementDescription = '(AMMO) Piercing Missile'; //enhancement description
 	public $enhancementPrice = 16;
 	
 	public $rangeMod = 0; //MODIFIER for launch range
@@ -5862,7 +5861,7 @@ class AmmoMissileD extends AmmoMissileTemplate{
 	public $modeName = 'D - Light';
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'AMMO_D'; //enhancement name to be enabled
-	public $enhancementDescription = '(ammo) Light Missile (2178)'; //enhancement description
+	public $enhancementDescription = '(AMMO) Light Missile'; //enhancement description
 	public $enhancementPrice = 1; //nominally 0 - included in ship price
 	
 	public $rangeMod = -5; //MODIFIER for launch range
@@ -5890,7 +5889,7 @@ class AmmoMissileC extends AmmoMissileTemplate{
 	public $modeName = 'Chaff';
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'AMMO_C'; //enhancement name to be enabled
-	public $enhancementDescription = '(ammo) Chaff Missile (2230)'; //enhancement description
+	public $enhancementDescription = '(AMMO) Chaff Missile'; //enhancement description
 	public $enhancementPrice = 4;
 	
 	public $rangeMod = 0; //MODIFIER for launch range
@@ -5966,7 +5965,7 @@ class AmmoMissileS extends AmmoMissileTemplate{
 	public $modeName = 'Stealth';
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'AMMO_S'; //enhancement name to be enabled
-	public $enhancementDescription = '(ammo) Stealth Missile (2252)'; //enhancement description
+	public $enhancementDescription = '(AMMO) Stealth Missile'; //enhancement description
 	public $enhancementPrice = 5;
 	
 	public $rangeMod = 0; //MODIFIER for launch range
@@ -5996,7 +5995,7 @@ class AmmoMissileI extends AmmoMissileTemplate{
 	public $modeName = 'Interceptor';
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'AMMO_I'; //enhancement name to be enabled
-	public $enhancementDescription = '(ammo) Interceptor Missile (2250/2263)'; //enhancement description
+	public $enhancementDescription = '(AMMO) Interceptor Missile'; //enhancement description
 	public $enhancementPrice = 2; //PV per missile; originally it's 0 for Kor-Lyan and 2 for everyone else
 	
 	public $fireControlMod = array(null, null, null); //MODIFIER for weapon fire control!
@@ -6032,7 +6031,7 @@ class AmmoMissileJ extends AmmoMissileTemplate{
 	public $modeName = 'Jammer';
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'AMMO_J'; //enhancement name to be enabled
-	public $enhancementDescription = '(ammo) Jammer Missile (2239)';
+	public $enhancementDescription = '(AMMO) Jammer Missile';
 	public $enhancementPrice = 8; //PV per missile;
 	
 	public $rangeMod = -5; //MODIFIER for launch range
@@ -6114,7 +6113,7 @@ class AmmoMissileK extends AmmoMissileTemplate{
 	public $modeName = 'K - Starburst';
 	public $size = 2; //how many store slots are required for a single round
 	public $enhancementName = 'AMMO_K'; //enhancement name to be enabled
-	public $enhancementDescription = '(ammo) Starburst Missile (2260/2264)'; //2260 for Kor-Lyan, 2264 for everyone else 
+	public $enhancementDescription = '(AMMO) Starburst Missile'; //2260 for Kor-Lyan, 2264 for everyone else 
 	public $enhancementPrice = 30; //PV per missile; originally it's 20 for Kor-Lyan and 30 for everyone else
 	
 	public $rangeMod = -5; //MODIFIER for launch range
@@ -6171,7 +6170,7 @@ class AmmoMissileM extends AmmoMissileTemplate{
 	public $modeName = 'Multiwarhead';
 	public $size = 2; //how many store slots are required for a single round
 	public $enhancementName = 'AMMO_M'; //enhancement name to be enabled
-	public $enhancementDescription = '(ammo) Multiwarhead Missile (2256)';
+	public $enhancementDescription = '(AMMO) Multiwarhead Missile';
 	public $enhancementPrice = 24; //PV per missile;
 	
 	public $rangeMod = 0; //MODIFIER for launch range
@@ -6289,7 +6288,7 @@ class AmmoMissileKK extends AmmoMissileTemplate{
 	public $modeName = 'Kinetic'; //Technically means both Starburst and Kinetic will show as 'K' in mode selection, but Orieni don't have access to Starburst missiles.
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'AMMO_KK'; //enhancement name to be enabled
-	public $enhancementDescription = '(ammo) Kinetic Missile (1976)'; //enhancement description
+	public $enhancementDescription = '(AMMO) Kinetic Missile'; //enhancement description
 	public $enhancementPrice = 8; //PV per missile;
 	
 	public $rangeMod = 40; //MODIFIER for launch range.  In theory it can travel up to 60 hexes as it's max distance (but the hit chances would be terrible!)
@@ -6329,7 +6328,7 @@ class AmmoMissileX extends AmmoMissileTemplate{
 	public $modeName = 'X - HARM'; //Use X in modeName so that it's not confused with Heavy.
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'AMMO_X'; //enhancement name to be enabled
-	public $enhancementDescription = '(ammo) HARM Missile (2248)'; //enhancement description
+	public $enhancementDescription = '(AMMO) HARM Missile'; //enhancement description
 	public $enhancementPrice = 10; //PV per missile;
 	
 	public $rangeMod = 0; //MODIFIER for launch range.  In theory it can travel up to 60 hexes as it's max distance (but the hit chances would be terrible!)
@@ -6396,7 +6395,7 @@ class AmmoMissileFB extends AmmoMissileTemplate{
 	public $modeName = 'Basic';
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'AMMO_FB'; //enhancement name to be enabled
-	public $enhancementDescription = '(ammo) Fighter Basic Missile (2165)'; //enhancement description
+	public $enhancementDescription = '(AMMO) Fighter Basic Missile'; //enhancement description
 	public $enhancementPrice = 8; //PV per missile
 	
 	public $rangeMod = 0; //MODIFIER for launch range
@@ -6424,7 +6423,7 @@ class AmmoMissileFL extends AmmoMissileTemplate{
 	public $modeName = 'LongRange';
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'AMMO_FL'; //enhancement name to be enabled
-	public $enhancementDescription = '(ammo) Fighter Long Range Missile (2226/2245)'; //2226 for Kor-Lyan, 2245 for everyone else 
+	public $enhancementDescription = '(AMMO) Fighter Long Range Missile'; //2226 for Kor-Lyan, 2245 for everyone else 
 	public $enhancementPrice = 12; //PV per missile; originally it's 10 for Kor-Lyan and 12 for everyone else
 	
 	public $rangeMod = 5; //MODIFIER for launch range
@@ -6460,7 +6459,7 @@ class AmmoMissileFH extends AmmoMissileTemplate{
 	public $modeName = 'Heavy';
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'AMMO_FH'; //enhancement name to be enabled
-	public $enhancementDescription = '(ammo) Fighter Heavy Missile (2226/2245)'; //2226 for Kor-Lyan, 2245 for everyone else 
+	public $enhancementDescription = '(AMMO) Fighter Heavy Missile'; //2226 for Kor-Lyan, 2245 for everyone else 
 	public $enhancementPrice = 12; //PV per missile; originally it's 10 for Kor-Lyan and 12 for everyone else
 	
 	public $rangeMod = -5; //MODIFIER for launch range
@@ -6495,7 +6494,7 @@ class AmmoMissileFY extends AmmoMissileTemplate{
 	public $modeName = 'Dogfight';
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'AMMO_FY'; //enhancement name to be enabled
-	public $enhancementDescription = '(ammo) Dogfight Missile (2165)'; 
+	public $enhancementDescription = '(AMMO) Dogfight Missile'; 
 	public $enhancementPrice = 2; //PV per missile
 	
 	public $rangeMod = -2; //MODIFIER for launch range
@@ -6523,7 +6522,7 @@ class AmmoMissileFD extends AmmoMissileTemplate{
 	public $modeName = 'RDropout'; //R to differentiate from D - on mode change first letter is displayed!
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'AMMO_FD'; //enhancement name to be enabled
-	public $enhancementDescription = '(ammo) Dropout Missile (2221/2245)'; 
+	public $enhancementDescription = '(AMMO) Dropout Missile'; 
 	public $enhancementPrice = 10; //PV per missile; originally it's 8 for Kor-Lyan and 10 for everyone else
 	
 	public $fireControlMod = array(3, 1, 1); //for fighter missiles putting everything into weapon FC would be incorrect - as FC is not used if out of arc... 
@@ -6567,7 +6566,7 @@ class AmmoBLMineB extends AmmoMissileTemplate{
 	public $modeName = 'Basic Mine';
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'MINE_BLB'; //enhancement name to be enabled
-	public $enhancementDescription = '(mine) Basic Mine'; //enhancement description
+	public $enhancementDescription = '(AMMO) Basic Mine'; //enhancement description
 	public $enhancementPrice = 6;
 	
 	public $rangeMod = 0; //MODIFIER for launch range
@@ -6598,7 +6597,7 @@ class AmmoBLMineH extends AmmoMissileTemplate{
 	public $modeName = 'Heavy Mine';
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'MINE_BLH'; //enhancement name to be enabled
-	public $enhancementDescription = '(mine) Heavy Mine'; //enhancement description
+	public $enhancementDescription = '(AMMO) Heavy Mine'; //enhancement description
 	public $enhancementPrice = 6;
 	
 	public $rangeMod = 0; //MODIFIER for launch range
@@ -6628,7 +6627,7 @@ class AmmoBLMineW extends AmmoMissileTemplate{
 	public $modeName = 'Wide Mine';
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'MINE_BLW'; //enhancement name to be enabled
-	public $enhancementDescription = '(mine) Wide-Range Mine'; //enhancement description
+	public $enhancementDescription = '(AMMO) Wide-Range Mine'; //enhancement description
 	public $enhancementPrice = 6;
 	
 	public $rangeMod = 0; //MODIFIER for launch range
@@ -6658,7 +6657,7 @@ class AmmoBistifA extends AmmoMissileTemplate{
 	public $modeName = 'Basic Mine';
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'MINE_MLB'; //enhancement name to be enabled
-	public $enhancementDescription = '(mine) Basic Mine'; //enhancement description
+	public $enhancementDescription = '(AMMO) Basic Mine'; //enhancement description
 	public $enhancementPrice = 8;
 	
 	public $rangeMod = 0; //MODIFIER for launch range
@@ -6687,7 +6686,7 @@ class AmmoBistifB extends AmmoMissileTemplate{
 	public $modeName = 'Wide Mine';
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'MINE_MLW'; //enhancement name to be enabled
-	public $enhancementDescription = '(mine) Wide-Range Mine'; //enhancement description
+	public $enhancementDescription = '(AMMO) Wide-Range Mine'; //enhancement description
 	public $enhancementPrice = 12;
 	
 	public $rangeMod = 0; //MODIFIER for launch range

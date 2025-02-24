@@ -12,10 +12,11 @@ class QomYominTalRenHK extends FighterFlight{
 			$this->variantOf = "Tol Mor Armed Drone";
 			$this->occurence = "uncommon";
         $this->imagePath = "img/ships/Nexus/makar_tolmor2.png";
+		$this->unofficial = true;
         
         $this->isd = 1930;
-        $this->forwardDefense = 7;
-        $this->sideDefense = 7;
+        $this->forwardDefense = 6;
+        $this->sideDefense = 6;
         $this->freethrust = 10;
         $this->offensivebonus = 0;
         $this->jinkinglimit = 4;

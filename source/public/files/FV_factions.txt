@@ -9,8 +9,8 @@ GENERAL NOTES
 	
 	Semi-custom designs - some units are marked as "semi-custom". This means they're not official designs released by AoG, but for some reason are not considered custom units and can be used in "official only" matches. Common reasons for such units' classification include:
  	- official units that could not be faithfully ported into FV for technical reasons, but were nonetheless considered important and are present with some changes (e.g.. Brakiri Tashkat and Shakara)
- 	- units that notably expand fleet build options of faction while keeping close to official designs (eg. Ipsha Jumpsphere allowing tournament-legal fleets not centered on an ELINT, and a few Belt Alliance designs allowing to bring LCVs to the table while conforming to these rules)
- 	- units that were released by AoG in expansion released after the company ceased to produce B5Wars related materials, but developed earlier (eg. sourcebook Variants-6)
+ 	- units that notably expand fleet build options of faction while keeping close to official designs (e.g.. Ipsha Jumpsphere allowing tournament-legal fleets not centred on an ELINT, and a few Belt Alliance designs allowing to bring LCVs to the table while conforming to these rules)
+ 	- units that were released by AoG in expansion released after the company ceased to produce B5Wars related materials, but developed earlier (e.g.. sourcebook Variants-6)
 	
 	Unit enhancements - Fiery Void allows players to add enhancements to their ships (full list is available in separate file). Keep in mind that unit enhancements are originally optional rule, and enhancements may not be evaluated as well as base hulls (although they're generally pricy compared to their effect!). 
 	Before using enhancements for more than rounding out remaining points it's good practice to make sure that Your opponent agrees with that (and if You create a game with enhancements allowed - say so explicitly in game description!).
@@ -49,7 +49,7 @@ Corporations - Brakiri are split into competing corporations. On each unit it's 
 	Corporations have access to slightly different technologies and heave their own areas of specialisation, so their individual fleets are usually lacking in some area but have excellent access to something else.
 	In-game checker does not take this rule into account.
 Gravitic Shield - see ABBAI entry
-Gravitic Bolt/Gravitic Pulsar - weapons that can have boosted output (damage and intercept rating), at the cost of (besides power) adverse effect if actually fired boosted - namely a cooldown period equal to boostlevel used. Additionally, if fired at maximum power, weapon can suffer critical damage.
+Gravitic Bolt/Gravitic Pulsar - weapons that can have boosted output (damage and intercept rating), at the cost of (besides power) adverse effect if actually fired boosted - namely a cooldown period equal to boost level used. Additionally, if fired at maximum power, weapon can suffer critical damage.
 Gravitic Shifter - weapon that rotates target, fired in special firing step before regular fire.
 	Due to technical difficulties this weapon is NOT AVAILABLE in Fiery Void.
 	Ships utilizing this weapon that were deemed important for faction (Tashkat, Tashkava and Shakara) are added as custom designs (Tashkaton, Tashkavaton and Shakaraton, respectively), with Gravitic Cannons in place of original Shifters.
@@ -74,7 +74,7 @@ Actual values used are set by Zero_1627 and are NOT result of consensus of playe
 CENTAURI REPUBLIC
 Plasma Stream - weapon that permanently reduces armor of systems hit (in FV - every system hit, in tabletop - only those hit by full rakes). Also, counts full armor for every rake, despite Raking mode. 
 Guardian Array - primarily defensive weapon that can intercept fire directed at third party, provided the weapon is between firing unit and it's target.
-	In tabletop, it needs to be shut down to switch between offensive (antifighter) and defensive modes.
+	In tabletop, it needs to be shut down to switch between offensive (anti-fighter) and defensive modes.
 	There is no such requirement in Fiery Void, weapon can intercept or fire offensively at will.
 	Also, definition of "between" was changed. In FV weapon is "between" firing unit and its target if bearing difference on them is at least 120 degrees (2 hex sides).
 
@@ -599,46 +599,46 @@ Their volume of fire tends to be low, which causes trouble when facing massed op
  
  
 Tier 1 - High Performance Competitive 
-This is default power level of show era major factions ('Big 4') - mor eor less the 'baseline' of competitive play. Smaller factions may fit here due to their raw power, but usually won't allow flexibility of fleet design offered by major factions.
- - Centauri
- - Dilgar
+This is default power level of show era major factions ('Big 4') - more or less the 'baseline' of competitive play. Smaller factions may fit here due to their raw power, but usually won't allow flexibility of fleet design offered by major factions.
+ - Centauri Republic
+ - Dilgar Imperium
  - Drakh (custom faction; being Middleborn rather than Young race, they exhibit some traits similar to Ancients - not enough to kick them to Ancients grouping though, they are balanced vs Tier 1 Young factions)
- - Drazi
- - EA (barring Warlock and Shadow Omega)
- - Gaim
- - Hyach	
- - Kor-Lyan (note very heavy use of ballistics)
+ - Drazi Freehold
+ - Earth Alliance (barring Warlock and Shadow Omega)
+ - Gaim Intelligence
+ - Hyach Gerontacracy	
+ - Kor-Lyan Kingdoms (note very heavy use of ballistics)
  - Llort
- - Minbari (warning: Jammer is very daunting, expecially to new players - it's easy to feel overwhelmed; at the same time flying Minbari is not easy either. Not recommended (on either side of the table) until You feel You have solid command of the game!)
+ - Minbari (warning: Jammer is very daunting, especially to new players - it's easy to feel overwhelmed; at the same time flying Minbari is not easy either. Not recommended (on either side of the table) until You feel You have solid command of the game!)
  - Minbari Protectorate (while lacking Jammers, they still field quite capable units, but their fleet selection is limited)
- - Narn (barring massed EMines; opinions about what 'massed' means vary, but let's call 6 launchers as upper limit acceptable for Tier 1 - just to have an explicit borderline)
- - Orieni (very tricky - may feel superior due to raw damage output of Hunter-Killers and massed RGRs, while remaining vulnerable against sharp handling by expert oponent)
- - Torata 
- - Vree (warning: their high resilence coupled with all-around, accurate firepower is very daunting!)
+ - Narn Regime (barring massed Energy Mines; opinions about what 'massed' means vary, but let's call 6 launchers as upper limit acceptable for Tier 1 - just to have an explicit borderline)
+ - Orieni Imperium (very tricky - may feel superior due to raw damage output of Hunter-Killers and massed RGRs, while remaining vulnerable against sharp handling by expert opponent)
+ - Torata Regency
+ - Vree (warning: their high resilience coupled with all-around, accurate firepower is very daunting!)
  - Yolu (custom-repointed ones; basically official Yolu with enhancement that modifies their point value, making them more balanced)
 
 
 Tier 2 - Medium Performance Competitive
 Factions that point for point will have uphill battle against Tier 1, yet otherwise are balanced and competitive. Many of them have weaknesses more pronounced than acceptable for Tier 1, too. Should be interesting to play against each other, and if given some extra PV allowance - possibly against Tier 1 as well. Most of these factions do not offer fleet build flexibility of major ones, but may offer very distinct playstyle instead.
- - Abbai
- - Balosian
+ - Abbai Matriarchate
+ - Balosian Underdwellers
  - Belt Alliance
- - Brakiri
+ - Brakiri Syndicracy
  - Cascor (Custom - basically official Cascor with enhancement that modifies their point value, making them more competitive)
- - Ch'Lonas (custom faction)
- - Corillani
- - Deneth
- - Descari
- - Drazi (WotCR)
+ - Ch'Lonas Cooperative (custom faction)
+ - Corillani Theocracy
+ - Deneth Tribes
+ - Descari Committees
+ - Drazi Freehold (WotCR)
  - Escalation Chouka (custom faction - Escalation Wars universe)
  - Escalation Circasian (custom faction - Escalation Wars universe)
  - Escalation Kastan (custom faction - Escalation Wars universe)
  - Escalation Sshel'ath (custom faction - Escalation Wars universe)
- - Pak'ma'ra
+ - Pak'ma'ra Confederacy
  - Raiders (note plethora of background-driven options - Raiders often use a hodgepodge of units and formal FV fleet selection rules don't always do them justice!)
  - Star Trek (TOS) Federation  (custom faction - Star Trek universe)
  - Star Wars (custom faction (or rather factions), Star Wars universe - with VERY different playstyle, consider them difficult to fly!)
- - ZBSG COlonials
+ - ZBSG Colonials
  - ZNexus Brixadii Clans (custom faction - Nexus universe)
  - ZNexus Craytan Union (custom faction - Nexus universe)
  - ZNexus Dalithorn Commonwealth (custom faction - Nexus universe)
@@ -652,13 +652,13 @@ Factions that point for point will have uphill battle against Tier 2, and quite 
  - Abbai Matriarchate (WotCR)
  - Cascor Commonwealth (official)
  - Centauri Republic (WotCR)
- - EA (early)
- - Grome
- - Hurr
+ - Earth Alliance (early)
+ - Grome Auatocracy
+ - Hurr Republic
  - Ipsha Baronies
  - Markab Theocracy
- - Rogolon 
- - Usuuth
+ - Rogolon Dynasty
+ - Usuuth Coalition
  - ZEscalation Blood Sword Raiders  (custom faction - Escalation Wars universe)
  - ZNexus Brixadii Clans (early) (custom faction - Nexus universe)
  - ZNexus Craytan Union (early) (custom faction - Nexus universe)
@@ -674,8 +674,8 @@ Not Balanced
 Factions that are not suitable for competitive play, for various reasons. Too weak, too powerful, with performance varying wildly depending on opponents' capabilities, or just with too narrow fleet selection - they are there to be used in scenarios, campaigns, and to fill out the universe.
  - Alacan (Small Races)
  - EA using Warlock or Shadow Omega
- - ISA (eg. all-White Star fleet - note that it's difficult to fly, too!)
- - Narn using massed EMines 
+ - ISA (e.g.. all-White Star fleet - note that it's difficult to fly, too!)
+ - Narn using massed Energy Mines (generally 6 or more mines)
  - Sorithian (Small Races)
  - Streib (custom faction; their ship design and technology is peculiar enough for them to feel surprisingly Ancient-like when it comes to balancing. Streib are definitely NOT up to fighting actual Ancients though!)
  - Yolu (official)

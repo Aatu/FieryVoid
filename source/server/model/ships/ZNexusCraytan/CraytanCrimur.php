@@ -4,7 +4,7 @@ class CraytanCrimur extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 600;
+	$this->pointCost = 625;
 	$this->faction = "ZNexus Craytan Union";
         $this->phpclass = "CraytanCrimur";
         $this->imagePath = "img/ships/Nexus/craytan_dakran.png";
@@ -32,7 +32,7 @@ class CraytanCrimur extends BaseShip{
         
         $this->addPrimarySystem(new Reactor(5, 20, 0, 0));
         $this->addPrimarySystem(new CnC(5, 19, 0, 0));
-        $this->addPrimarySystem(new Scanner(5, 16, 4, 7));
+        $this->addPrimarySystem(new Scanner(5, 16, 4, 6));
         $this->addPrimarySystem(new Engine(4, 20, 0, 8, 3));
 		$this->addPrimarySystem(new Hangar(4, 8));
 		$this->addPrimarySystem(new Magazine(4, 14));

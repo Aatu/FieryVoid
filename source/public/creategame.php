@@ -96,10 +96,10 @@ VICTORY CONDITIONS: Last unit on map / Last ship on map / More forces remaining 
                                 <span>Height:</span>
                                 <input class ="spacey tinySize" data-validation="^-{0,1}[0-9]+$" data-default ="0" type="text" name="spacey" value="0">   
 				    &nbsp;&nbsp;
-				    <span class="clickable setsizeknifefight">Resize: Knife Fight</span> <!-- button switching map dimensions -->
+				    <span class="clickable setsizeknifefight">Resize: Knife Fight (Small Map)</span> <!-- button switching map dimensions -->
 				    &nbsp;&nbsp;
-				    <span class="clickable setswitchsizebaseassault">Resize: Base Assault</span> <!-- button switching map dimensions -->				    
-				    &nbsp;&nbsp;<span class="clickable setsizestandard">Resize: Standard</span> <!-- button switching map dimensions -->
+				    <span class="clickable setswitchsizebaseassault">Resize: Base Assault (Large Map)</span> <!-- button switching map dimensions -->				    
+				    &nbsp;&nbsp;<span class="clickable setsizestandard">Resize: Standard (Normal Map)</span> <!-- button switching map dimensions -->
                             </span>
                         </div>
                       <!---      <input id="flightSizeCheck" style="margin-top:20px;margin-bottom:10px;" type="checkbox" name="variableFlights">increased Flight size (up to 12 units per flight)

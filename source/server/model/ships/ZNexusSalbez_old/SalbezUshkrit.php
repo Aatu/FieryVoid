@@ -4,7 +4,7 @@ class SalbezUshkrit extends BaseShipNoAft{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 490;
+		$this->pointCost = 500;
 		$this->faction = "ZNexus Sal-bez Coalition (early)";
         $this->phpclass = "SalbezUshkrit";
         $this->imagePath = "img/ships/Nexus/salbez_ushkrit3.png";
@@ -29,7 +29,7 @@ class SalbezUshkrit extends BaseShipNoAft{
          
         $this->addPrimarySystem(new Reactor(3, 22, 0, 0));
         $this->addPrimarySystem(new CnC(4, 24, 0, 0));
-        $this->addPrimarySystem(new Scanner(3, 16, 4, 5));
+        $this->addPrimarySystem(new Scanner(3, 16, 4, 6));
         $this->addPrimarySystem(new Engine(3, 18, 0, 7, 3));
 		$this->addPrimarySystem(new Hangar(1, 8));
 		$this->addPrimarySystem(new Thruster(3, 20, 0, 7, 2));
@@ -38,23 +38,23 @@ class SalbezUshkrit extends BaseShipNoAft{
         $this->addFrontSystem(new Thruster(2, 10, 0, 3, 1));
         $this->addFrontSystem(new Thruster(2, 10, 0, 3, 1));
 		$this->addFrontSystem(new LightLaser(2, 4, 3, 240, 360));
-		$this->addFrontSystem(new NexusHeavyLaserCutter(2, 8, 5, 330, 30));
+		$this->addFrontSystem(new LaserCutter(3, 6, 4, 300, 60));
 		$this->addFrontSystem(new NexusBoltTorpedo(2, 5, 2, 300, 60));
 		$this->addFrontSystem(new LightLaser(2, 4, 3, 0, 120));
         
 		$this->addLeftSystem(new Thruster(3, 14, 0, 4, 3));
-		$this->addLeftSystem(new LaserCutter(3, 6, 4, 240, 360));
+		$this->addLeftSystem(new NexusHeavyLaserCutter(3, 8, 5, 300, 360));
 		$this->addLeftSystem(new LightParticleBeamShip(1, 2, 1, 240, 60));
 		$this->addLeftSystem(new LightParticleBeamShip(1, 2, 1, 180, 360));
+		$this->addLeftSystem(new LightParticleBeamShip(1, 2, 1, 180, 360));
 		$this->addLeftSystem(new LightParticleBeamShip(1, 2, 1, 120, 300));
-		$this->addLeftSystem(new LightLaser(2, 4, 3, 120, 300));
 
 		$this->addRightSystem(new Thruster(3, 14, 0, 4, 4));
-		$this->addRightSystem(new LaserCutter(3, 6, 4, 0, 120));
+		$this->addRightSystem(new NexusHeavyLaserCutter(3, 8, 5, 0, 60));
 		$this->addRightSystem(new LightParticleBeamShip(1, 2, 1, 300, 120));
 		$this->addRightSystem(new LightParticleBeamShip(1, 2, 1, 0, 180));
+		$this->addRightSystem(new LightParticleBeamShip(1, 2, 1, 0, 180));
 		$this->addRightSystem(new LightParticleBeamShip(1, 2, 1, 60, 240));
-		$this->addRightSystem(new LightLaser(2, 4, 3, 60, 240));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 4, 36));
@@ -83,17 +83,15 @@ class SalbezUshkrit extends BaseShipNoAft{
             ),
             3=> array(
                     5 => "Thruster",
-					7 => "Laser Cutter",
-					9 => "Light Particle Beam",
-					11 => "Light Laser",
+					7 => "Heavy Laser Cutter",
+					11 => "Light Particle Beam",
                     18 => "Structure",
                     20 => "Primary",
 			),
             4=> array(
                     5 => "Thruster",
-					7 => "Laser Cutter",
-					9 => "Light Particle Beam",
-					11 => "Light Laser",
+					7 => "Heavy Laser Cutter",
+					11 => "Light Particle Beam",
                     18 => "Structure",
                     20 => "Primary",
             ),

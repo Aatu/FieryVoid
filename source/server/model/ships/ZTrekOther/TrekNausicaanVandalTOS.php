@@ -8,15 +8,14 @@ class TrekNausicaanVandalTOS extends MediumShip{
         $this->faction = "ZTrek Playtest Other Factions";
         $this->phpclass = "TrekNausicaanVandalTOS";
         $this->imagePath = "img/ships/StarTrek/NausicaanVandal.png";
-        $this->shipClass = "Nausicaan Vandal Destroyer upgraded";
+        $this->shipClass = "Nausicaan Vandal Destroyer (Upgraded)";
 
 	$this->unofficial = true;
         $this->occurence = "common";
-	$this->variantOf = "Nausicaan Vandal Destroyer";
 
         $this->canvasSize = 100;
 	$this->isd = 2260;
-	$this->fighters = array("light"=>6,"Shuttlecraft"=>1);
+	$this->fighters = array("heavy"=>6,"Shuttlecraft"=>1);
 	$this->customFighter = array("Nausicaan small craft"=>7); //can deploy small craft with Nausicaan crew
         
         $this->forwardDefense = 11;

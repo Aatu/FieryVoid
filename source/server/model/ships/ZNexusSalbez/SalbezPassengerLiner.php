@@ -4,7 +4,7 @@ class SalbezPassengerLiner extends MediumShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 40;
+        $this->pointCost = 35;
         $this->faction = "ZNexus Support Units";
         $this->phpclass = "SalbezPassengerLiner";
         $this->imagePath = "img/ships/Nexus/salbez_drevnan3.png";
@@ -23,11 +23,11 @@ class SalbezPassengerLiner extends MediumShip{
 //        $this->pivotcost = 2;
         $this->iniativebonus = 10;
          
-        $this->addPrimarySystem(new Reactor(2, 7, 0, 0));
+        $this->addPrimarySystem(new Reactor(2, 8, 0, 0));
         $this->addPrimarySystem(new CnC(3, 5, 0, 0));
         $this->addPrimarySystem(new Scanner(1, 6, 1, 3));
         $this->addPrimarySystem(new Engine(2, 9, 0, 6, 4));
-		$this->addPrimarySystem(new NexusParticleGrid(0, 3, 1, 0, 360));
+		$this->addPrimarySystem(new NexusParticleGrid(2, 3, 1, 0, 360));
         $this->addPrimarySystem(new Thruster(2, 8, 0, 3, 3));
         $this->addPrimarySystem(new Thruster(2, 8, 0, 3, 4));        
         $this->addPrimarySystem(new Hangar(0, 4));

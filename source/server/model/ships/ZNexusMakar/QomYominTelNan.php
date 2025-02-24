@@ -4,7 +4,7 @@ class QomYominTelNan extends FighterFlight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 29*6;
+        $this->pointCost = 33*6;
         $this->faction = "ZNexus Makar Federation";
         $this->phpclass = "QomYominTelNan";
         $this->shipClass = "Tel Nan Armed Drone";
@@ -15,7 +15,7 @@ class QomYominTelNan extends FighterFlight{
         
         $this->forwardDefense = 7;
         $this->sideDefense = 7;
-        $this->freethrust = 10;
+        $this->freethrust = 12;
         $this->offensivebonus = 4;
         $this->jinkinglimit = 5;
         $this->turncost = 0.33;
@@ -38,12 +38,12 @@ class QomYominTelNan extends FighterFlight{
 
         for ($i = 0; $i < $toAdd; $i++){            
             $armour = array(1, 1, 0, 0);
-            $fighter = new Fighter("QomYominTelNan", $armour, 5, $this->id);
+            $fighter = new Fighter("QomYominTelNan", $armour, 7, $this->id);
             $fighter->displayName = "Tel Nan";
             $fighter->imagePath = "img/ships/Nexus/makar_tolmor2.png";
             $fighter->iconPath = "img/ships/Nexus/makar_tolmor_large2.png";
 
-	        $light = new NexusSmallXrayLaser(300, 60, 3, 1); //$startArc, $endArc, $nrOfShots
+	        $light = new NexusSmallXrayLaser(300, 60, 3); //$startArc, $endArc, $nrOfShots
 	        $fighter->addFrontSystem($light);
 			
 			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack			

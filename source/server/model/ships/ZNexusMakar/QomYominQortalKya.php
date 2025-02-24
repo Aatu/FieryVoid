@@ -18,7 +18,7 @@ class QomYominQortalKya extends BaseShip{
 
         $this->fighters = array("normal"=>18);
 
-		$this->isd = 2112;
+		$this->isd = 2109;
 
 	    $this->notes = '<br>Unreliable Ship:';
  	    $this->notes .= '<br> - Sluggish';
@@ -49,12 +49,12 @@ class QomYominQortalKya extends BaseShip{
 		
         $this->addFrontSystem(new Thruster(3, 15, 0, 4, 1));
         $this->addFrontSystem(new Thruster(3, 15, 0, 4, 1));
-		$this->addFrontSystem(new NexusLightBurstBeam(3, 6, 3, 180, 60));
+		$this->addFrontSystem(new NexusLightBurstBeam(3, 4, 3, 180, 60));
 		$this->addFrontSystem(new NexusLightChargeCannon(3, 4, 1, 240, 60));
 		$this->addFrontSystem(new NexusRAMLauncher(3, 8, 4, 300, 60));
 		$this->addFrontSystem(new NexusRAMLauncher(3, 8, 4, 300, 60));
 		$this->addFrontSystem(new NexusLightChargeCannon(3, 4, 1, 300, 120));
-		$this->addFrontSystem(new NexusLightBurstBeam(3, 6, 3, 300, 180));
+		$this->addFrontSystem(new NexusLightBurstBeam(3, 4, 3, 300, 180));
 
         $this->addAftSystem(new Thruster(3, 15, 0, 4, 2));
         $this->addAftSystem(new Thruster(3, 15, 0, 4, 2));
@@ -64,14 +64,14 @@ class QomYominQortalKya extends BaseShip{
 
 		$this->addLeftSystem(new Thruster(3, 15, 0, 5, 3));
 		$this->addLeftSystem(new HKControlNode(3, 10, 2, 2));
-		$this->addLeftSystem(new NexusLightBurstBeam(3, 6, 3, 180, 360));
+		$this->addLeftSystem(new NexusLightBurstBeam(3, 4, 3, 180, 360));
 		$this->addLeftSystem(new NexusWaterCaster(3, 4, 1, 180, 360));
 		$this->addLeftSystem(new NexusLightChargeCannon(3, 4, 1, 180, 360));
 		$this->addLeftSystem(new NexusPlasmaCharge(3, 7, 4, 240, 360));
 
 		$this->addRightSystem(new Thruster(3, 15, 0, 5, 4));
 		$this->addRightSystem(new HKControlNode(3, 10, 2, 2));
-		$this->addRightSystem(new NexusLightBurstBeam(3, 6, 3, 0, 180));
+		$this->addRightSystem(new NexusLightBurstBeam(3, 4, 3, 0, 180));
 		$this->addRightSystem(new NexusWaterCaster(3, 4, 1, 0, 180));
 		$this->addRightSystem(new NexusLightChargeCannon(3, 4, 1, 0, 180));
 		$this->addRightSystem(new NexusPlasmaCharge(3, 7, 4, 0, 120));

@@ -231,9 +231,9 @@ doMovementCheck: function doMovementCheck(data) {
 
     doSwitchSizeKnifeFight: function doSwitchSizeKnifeFight(data) {
 		createGame.gamespace_data.width = 30;
-		createGame.gamespace_data.height = 30;		
+		createGame.gamespace_data.height = 24;		
         $(".spacex").val(30);
-        $(".spacey").val(30);
+        $(".spacey").val(24);
         $(".deptype").val("box");
         $("#team1 .depx").val(-12);
         $("#team2 .depx").val(11);
@@ -241,8 +241,8 @@ doMovementCheck: function doMovementCheck(data) {
         $("#team2 .depy").val(0);
         $("#team1 .depwidth").val(7);
         $("#team2 .depwidth").val(7);
-        $("#team1 .depheight").val(30);
-        $("#team2 .depheight").val(30);
+        $("#team1 .depheight").val(24);
+        $("#team2 .depheight").val(24);
 		//modify ALL SLOTS, rather than flat slots 0 and 1!
 		for (var slotID in createGame.slots) {
 			var slotData = createGame.slots[slotID];

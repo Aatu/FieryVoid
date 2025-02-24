@@ -28,8 +28,8 @@ class SalbezRevTan extends OSAT{
         $this->addPrimarySystem(new OSATCnC(0, 1, 0, 0));
         $this->addPrimarySystem(new MediumLaser(3, 6, 5, 300, 60));
         $this->addPrimarySystem(new NexusRangedSwarmTorpedo(3, 5, 2, 270, 90));
-        $this->addPrimarySystem(new LightParticleBeamShip(2, 2, 1, 0, 360));
-        $this->addPrimarySystem(new LightParticleBeamShip(2, 2, 1, 0, 360));
+        $this->addPrimarySystem(new NexusImprovedParticleBeam(2, 3, 1, 0, 360));
+        $this->addPrimarySystem(new NexusImprovedParticleBeam(2, 3, 1, 0, 360));
         $this->addPrimarySystem(new NexusRangedSwarmTorpedo(3, 5, 2, 270, 90));
         $this->addPrimarySystem(new MediumLaser(3, 6, 5, 300, 60));
         $this->addPrimarySystem(new Reactor(4, 14, 0, 0));
@@ -45,7 +45,7 @@ class SalbezRevTan extends OSAT{
 				10 => "Thruster",
 				12 => "Ranged Swarm Torpedo",
 				14 => "Medium Laser",
-				16 => "Light Particle Beam",
+				16 => "Improved Particle Beam",
 				18 => "Scanner",
 				20 => "Reactor",
 			),

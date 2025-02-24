@@ -8,7 +8,9 @@ class CraytanEpiron extends BaseShip{
 	$this->faction = "ZNexus Craytan Union (early)";
         $this->phpclass = "CraytanEpiron";
         $this->imagePath = "img/ships/Nexus/craytan_epiron.png";
-        $this->shipClass = "Epiron Cruiser";
+        $this->shipClass = "Epiron Cruiser (early)";
+			$this->variantOf = "Epiron Cruiser";
+			$this->occurence = "uncommon";
         $this->shipSizeClass = 3;
 		$this->canvasSize = 160; 
 		$this->unofficial = true;
@@ -35,8 +37,8 @@ class CraytanEpiron extends BaseShip{
 		$this->addPrimarySystem(new Hangar(4, 6));
 		$this->addPrimarySystem(new Magazine(4, 9));
 		
-        $this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));
-        $this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));
+        $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
+        $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
 		$this->addFrontSystem(new NexusLightAssaultCannon(3, 6, 3, 240, 360));
 		$this->addFrontSystem(new NexusLightAssaultCannon(3, 6, 3, 0, 120));
 		$this->addFrontSystem(new NexusLightSentryGun(2, 5, 1, 240, 60));

@@ -37,9 +37,9 @@ class MakarSkoton extends MediumShip{
         $this->addPrimarySystem(new Hangar(2, 1));
         
 		$this->addFrontSystem(new NexusLightXRayLaser(2, 3, 1, 270, 90));
-		$this->addFrontSystem(new NexusLightXRayLaser(2, 3, 1, 300, 60));
+		$this->addFrontSystem(new NexusLightXRayLaser(2, 3, 1, 240, 60));
 		$this->addFrontSystem(new EWHeavyRocketLauncher(3, 6, 2, 270, 90));
-		$this->addFrontSystem(new NexusLightXRayLaser(2, 3, 1, 300, 60));
+		$this->addFrontSystem(new NexusLightXRayLaser(2, 3, 1, 300, 120));
 		$this->addFrontSystem(new NexusLightXRayLaser(2, 3, 1, 270, 90));
         $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));

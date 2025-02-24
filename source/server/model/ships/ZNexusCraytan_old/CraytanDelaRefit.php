@@ -27,7 +27,7 @@ class CraytanDelaRefit extends HeavyCombatVesselLeftRight{
         $this->pivotcost = 4;
         $this->iniativebonus = -10;
          
-        $this->addPrimarySystem(new Reactor(3, 4, 0, 0));
+        $this->addPrimarySystem(new Reactor(3, 6, 0, 0));
         $this->addPrimarySystem(new CnC(4, 6, 0, 0));
         $this->addPrimarySystem(new Scanner(2, 8, 2, 3));
         $this->addPrimarySystem(new Engine(2, 6, 0, 6, 4));

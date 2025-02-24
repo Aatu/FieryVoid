@@ -3,6 +3,8 @@ services:
   mariadb:
     build:
       context: docker/mariadb
+    ports:
+      - "3306:3306"
     volumes:
       - .:/usr/src/fieryvoid
     networks:

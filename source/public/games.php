@@ -65,31 +65,38 @@ if (isset($_SESSION["user"])) {
 -->	    
 		<big><b>Welcome to Fiery Void, an adaptation of the 'Babylon 5 Wars' tabletop game, by Agents of Gaming!</b></big>
 
-		<br><br>---------- <b>LATEST NEWS - January 2025</b> ----------
+		<br><br>---------- <b>LATEST NEWS - February 2025</b> ----------
 	    <br>
-	    <br><b><u>Factions layout:</u></b>
-	    <br><b>Tier rebalance</b> - new competitive Tier structure is in!
-	    <br><b>Small nations</b> - some of them now got separate directories
-	    <br><b>Nexus split</b> - "old" and "new" fleets of Nexus powers are now separate
-	    <br><b><u>Gameplay:</u></b>
-	    <br><b>EA Interceptors change</b> - if boosted, can fire offensively. If not boosted, can fire defensively. Never both.
-	    <br><b>Ballistic launch lines</b> - now You will be able to see where all those missiles are coming from!
-	    <br><b>Ballistic Torpedo reworked</b> - now Tabletop accurate! (can fire at multiple targets) - yay!
-	    <br><b>Slicer Beam reworked</b> - can target multiple ships too!
-	    <br><b>Can boost Jump Engines</b> to order ships to jump to Hyperspace at the end of the turn
-	    <br><b>Desperate Situations</b> - You can indicate in scenario that it's legal to ram and shut down jump drives
-	    <br>
-	    <br>and last but not least - <u>A LOT</u> of bugfixes!
+	    <br><b>Sustained Weapons</b> - now much closer to tabletop original!
+	    <br><b>Unit destruction messages</b> - visible in combat log; also, many log messages were polished
+	    <br><b>Randomiser Wheels</b> - updated to reflect new Tier structure
+	    <br><b>Tooltips removed from EW buttons</b> - will that help mobile devices?
+	    <br><b>Fixes</b> - overloading button and Vree should both work now
+	    <br><b>Updated images</b> mostly civilian ships
+<br>
 	    
+	     <br><br>---------- <b>update 17th of February - by Douglas</b> ---------- 
+	    <br><b><u>Features</u></b>
+	    <br>Hanar Conversion Option added to Fleet Selection. Allow ships with Assault Shuttle slots to convert them to Fighter slots for a cost.
+	    <br>Gravitic Lances can now split their shots when fired as two Graviton Beams.
+<br><b><u>Fixes</u></b>
+	    <br>Fixed Plasma Web cloud location in Replay, when it successfully attacks fighter flights moving through it.
+	    <br>BDEW now displayed more accurately as a hexagon, rather than a circle.
+	    <br>Readded functionality for EW buttons to try and solve issues with mobile browsers.
+	    <br>Reduced y-axis for Knife Fight map size, to make it genuinely 'small' map
+	    <br>Simplified how Ammo enhancements are listed in ‘ship buying’ window.
+	    <br>Updated Combat Log for Magazine Explosion.
+	    <br>Fixed possible bug in Grappling Hook where both ships are travelling at same speed.
+	    <br>Change hex numbering method to render as a single image, hopefully causing less memory use.
+	
        <br><br>
-
 <!--	        
 		 <br><br>---------- <b>update 20th of January</b> ---------- 
 	    <br><b><u><big>Thirdspace</big></u> arrived</b> - custom faction by Douglas
 	    <br><b>Ammo Magazine for fighters</b> - Dilgar, Hurr
 	    <br><b>Vree and Pak'ma'ra updated</b> - courtesy of Douglas
--->	    
-		
+       <br><br>
+-->	
 	    
 
         <br><br>---------- <b>HOW TO GET STARTED</b> ----------

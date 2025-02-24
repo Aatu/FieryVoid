@@ -17,7 +17,7 @@ class SalbezAvrtz extends BaseShip{
         $this->fighters = array("normal"=>12);
 
         $this->Enormous = true;
-		$this->isd = 2080;
+		$this->isd = 2069;
         
         $this->forwardDefense = 17;
         $this->sideDefense = 19;
@@ -68,7 +68,7 @@ class SalbezAvrtz extends BaseShip{
 		$this->addRightSystem(new LightParticleBeamShip(2, 2, 1, 0, 180));
 		$this->addRightSystem(new LightParticleBeamShip(2, 2, 1, 0, 180));
 		$this->addRightSystem(new NexusBoltTorpedo(2, 5, 2, 0, 120));
-        $this->addRightSystem(new Thruster(2, 20, 0, 5, 4));
+        $this->addRightSystem(new Thruster(3, 20, 0, 5, 4));
 		$this->addRightSystem(new CargoBay(2, 15));
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;

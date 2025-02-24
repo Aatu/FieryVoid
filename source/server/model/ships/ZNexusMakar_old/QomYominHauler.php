@@ -38,7 +38,7 @@ class QomYominHauler extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new CnC(2, 9, 0, 0));
         $this->addPrimarySystem(new Scanner(2, 10, 3, 5));
         $this->addPrimarySystem(new Engine(2, 13, 0, 6, 4));
-        $this->addAftSystem(new Thruster(1, 13, 0, 4, 1));
+        $this->addAftSystem(new Thruster(1, 13, 0, 6, 1));
         $this->addAftSystem(new Thruster(2, 15, 0, 8, 2));
       
         $this->addLeftSystem(new Thruster(2, 13, 0, 6, 3));
