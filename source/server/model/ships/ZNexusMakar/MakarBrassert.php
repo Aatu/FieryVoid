@@ -65,7 +65,7 @@ class MakarBrassert extends MediumShip{
 			4 => "Thruster",
 			6 => "Heavy Rocket Launcher",
 			8 => "Defense Gun",
-			11 => "X-Ray Laser",
+			10 => "X-Ray Laser",
 			17 => "Structure",
 			20 => "Primary",
 		),
