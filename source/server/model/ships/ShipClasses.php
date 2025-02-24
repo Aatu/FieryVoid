@@ -1890,11 +1890,21 @@ class BaseShip {
 
 
 	/*19.12.2024 clear Vree section choice - to be called from firing routine*/
-	public function clearVreeHitSectionChoice($shooter_id) {
-		if ($this->VreeHitLocations != true) return false;
-		if (isset($this->activeHitLocations[$shooter_id])) {
+	public function clearVreeHitSectionChoice($shooter_id, $fireOrder) {
+		if ($this->VreeHitLocations != true) return false; //no Vree layout - do nothing
+		
+		if (isset($this->activeHitLocations[$shooter_id])) { //unset location already chosen for this ship
 			unset($this->activeHitLocations[$shooter_id]);
 		}
+		
+		//unset location already stored in fire order, too
+		$fireOrder->chosenLocation = 0;
+		
+		//...and unset expected damage - so allocation is based on _current actual_ damage only (as further incoming shots will be re-assigned as well!)
+		foreach($this->expectedDamage as $key => $value){
+			$this->expectedDamage[$key] = 0;
+		}
+		
 		return true;
 	}
 

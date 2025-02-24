@@ -1502,7 +1502,7 @@ class Weapon extends ShipSystem
                     $hitsRemaining--;
                     $fireOrder->shotshit++;
 					//19.12.2024 - clear any previous location for Vree-layout ships; this will be for entire volley - eg. single Pulse, but entire Raking shot
-					$target->clearVreeHitSectionChoice($shooter->id);
+					$target->clearVreeHitSectionChoice($shooter->id, $fireOrder);
 					
                     $this->beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata);
                 }
@@ -1852,10 +1852,10 @@ full Advanced Armor effects (by rules) for reference:
 
 			//returned array: dmgDealt, dmgRemaining, armorPierced	
 			$damage = $this->beforeDamagedSystem($target, $system, $damage, $armour, $gamedata, $fireOrder);
-			$effects = $system->assignDamageReturnOverkill($target, $shooter, $this, $gamedata, $fireOrder, $damage, $armour, $pos, $damageWasDealt);
+			$effects = $system->assignDamageReturnOverkill($target, $shooter, $this, $gamedata, $fireOrder, $damage, $armour, $pos, $damageWasDealt); //Also applies armor pierced for sustained shots  - DK 02.25
 			$this->onDamagedSystem($target, $system, $effects["dmgDealt"], $effects["armorPierced"], $gamedata, $fireOrder);//weapons that do effects on hitting something
 			$damage = $effects["dmgRemaining"];
-			if ($this->damageType == 'Raking'){ //note armor already pierced so further rakes have it easier
+			if ($this->damageType == 'Raking'){ //note armor already pierced so further rakes have it easier. All Sustained weapons are currently raking, so they can use standard method here - DK
 				$armourIgnored = $armourIgnored + $effects["armorPierced"];
 				$fireOrder->armorIgnored[$system->id] = $armourIgnored;
 			}			
@@ -1999,6 +1999,12 @@ full Advanced Armor effects (by rules) for reference:
 	{
 		return;
 	}
+
+    //Called from core firing routines to check if any armour should be bypassed by a sustained shot.
+    public function getsustainedSystemsHit()
+    {
+        return null;    
+    }     
 
 } //end of class Weapon
 

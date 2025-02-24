@@ -1,17 +1,16 @@
 <?php
-class Xonn extends VreeCapital{
+class XonnUpdated extends VreeCapital{
 
 	function __construct($id, $userid, $name,  $slot){
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 1200;
 		$this->faction = "Vree Conglomerate";
-		$this->phpclass = "Xonn";
+		$this->phpclass = "XonnUpdated";
 		$this->shipClass = "Xonn Dreadnought";
 		$this->isd = 2260;
         $this->limited = 10; //Restricted Deployment
 		
-		$this->variantOf = "OBOLETE"; //to be deleted after it's no longer active use
 
 		$this->shipSizeClass = 3;
 		$this->iniativebonus = 0;
@@ -51,7 +50,7 @@ class Xonn extends VreeCapital{
         
 		$this->addLeftFrontSystem(new AntiprotonGun(3, 0, 0, 240, 360));
 		$this->addLeftFrontSystem(new AntiprotonGun(3, 0, 0, 240, 360));
-		$this->addLeftFrontSystem(new StructureTechnical(0, 0, 0, 0));				
+		//$this->addLeftFrontSystem(new StructureTechnical(0, 0, 0, 0));				
 
 		$this->addLeftAftSystem(new GraviticThruster(5, 20, 0, 10, 3));				
 		$this->addLeftAftSystem(new AntiprotonGun(3, 0, 0, 180, 300));
@@ -59,7 +58,7 @@ class Xonn extends VreeCapital{
 		
 		$this->addRightFrontSystem(new AntiprotonGun(3, 0, 0, 0, 120));
 		$this->addRightFrontSystem(new AntiprotonGun(3, 0, 0, 0, 120));	
-		$this->addRightFrontSystem(new StructureTechnical(0, 0, 0, 0));			
+		//$this->addRightFrontSystem(new StructureTechnical(0, 0, 0, 0));			
 
 		$this->addRightAftSystem(new GraviticThruster(5, 20, 0, 10, 4));				
 		$this->addRightAftSystem(new AntiprotonGun(3, 0, 0, 60, 180));

@@ -167,7 +167,7 @@ window.BallisticIconContainer = function () {
     function createOrUpdateBallistic(ballistic, iconContainer, turn, replay = false) {
         var icon = getBallisticIcon.call(this, ballistic.id);
 
-	    if (icon && ballistic.notes != 'Persistent Effect' && ballistic.notes != 'Split') {//We want Persistent Effects to show up in initial Orders! - DK 09.24
+	    if (icon && ballistic.notes != 'PersistentEffect' && ballistic.notes != 'Split') {//We want Persistent Effects to show up in initial Orders! - DK 09.24
 	        updateBallisticIcon.call(this, icon, ballistic, iconContainer, turn);
 	    } else {   	
 	        createBallisticIcon.call(this, ballistic, iconContainer, turn, this.scene, replay);
@@ -182,7 +182,11 @@ window.BallisticIconContainer = function () {
 
 
     function createBallisticIcon(ballistic, iconContainer, turn, scene, replay = false) {
-						
+
+			if(replay){
+				if(ballistic.damageclass == 'PersistentEffectPlasma' && ballistic.targetid == -1 && ballistic.notes != 'PlasmaCloud') return;
+			}
+
 	        var shooterIcon = iconContainer.getById(ballistic.shooterid);	
 //	        if(!shooterIcon) shooterIcon = iconContainer.getById(ballistic.shooter.id); //Do I still need?
 			var targetType = 'hexRed'; //Default red hex if none of the later conditions are true.
@@ -287,7 +291,8 @@ window.BallisticIconContainer = function () {
 					iconImage = "./img/allySupport.png"; 		        
 				break;
 				case 'Sweeping': //Shadow Slicers
-					    targetType = 'hexPurple';		        
+					targetType = 'hexPurple'; //Default for slicers
+					if(weapon.weaponClass == "Gravitic") targetType = 'hexGreen'; //But now other weapon types use sweeping.			        
 				break;			
 				}
 			}		 
@@ -311,7 +316,7 @@ window.BallisticIconContainer = function () {
 	        var launchSprite = null;
 	        
 			//Don't create launch sprite for duplicates, persistent effects or Direct Fire/Support Weapon 
-	        if ((!getByLaunchPosition(launchPosition, this.ballisticIcons)) && ballistic.notes != 'Persistent Effect' && ballistic.type !== 'normal' && ballistic.damageclass !== 'support') {        	
+	        if ((!getByLaunchPosition(launchPosition, this.ballisticIcons)) && ballistic.notes != 'PersistentEffect' && ballistic.type !== 'normal' && ballistic.damageclass !== 'support') {        	
 				    if(gamedata.isMyOrTeamOneShip(shooter)){
 						launchSprite = new BallisticSprite(launchPosition, 'hexYellow');       
 				        scene.add(launchSprite.mesh);	        		
@@ -460,14 +465,14 @@ window.BallisticIconContainer = function () {
     function createOrUpdateBallisticLines(ballistic, iconContainer, turn, replay = false) {
         var lineIcon = getBallisticLineIcon.call(this, ballistic.id);
 
-	    if (lineIcon && ballistic.notes != 'Persistent Effect' && ballistic.notes != 'Split') {//We want Persistent Effects to show up in initial Orders! - DK 09.24
+	    if (lineIcon && ballistic.notes != 'PersistentEffect' && ballistic.notes != 'Split') {//We want Persistent Effects to show up in initial Orders! - DK 09.24
 	        if(replay){
 	        	createBallisticLineIcon.call(this, ballistic, iconContainer, turn, this.scene, replay);	        	   	
 			}else{	
 				updateBallisticLineIcon.call(this, lineIcon, ballistic, iconContainer, turn);
 			}	
 	    } else {   	
-	        if(ballistic.notes != 'Persistent Effect') createBallisticLineIcon.call(this, ballistic, iconContainer, turn, this.scene, replay);
+	        if(ballistic.notes != 'PersistentEffect') createBallisticLineIcon.call(this, ballistic, iconContainer, turn, this.scene, replay);
 	    }
     	
 	}	
@@ -567,7 +572,8 @@ window.BallisticIconContainer = function () {
 					launchPosition = this.coordinateConverter.fromHexToGame(shooterIcon.getLastMovement(turn).position); //More important to show where ship support weapon originates, not hex.								        
 				break;
 				case 'Sweeping': //Shadow Slicer
-					type = 'purple';			        
+					type = 'purple'; //Default for slicers
+					if(weapon.weaponClass == "Gravitic") type = 'green'; //But now other weapon types use sweeping.									        
 				break;					
 			}		 
 		}
@@ -579,7 +585,7 @@ window.BallisticIconContainer = function () {
 	            id: ballistic.id,
 	            shooterId: ballistic.shooterid,
 	            targetId: ballistic.targetid,
-	            lineSprite: lineSprite =  new BallisticLineSprite(launchPosition, targetPosition, 3 * this.zoomScale, -3, getLineColorByType(type), 0.6),
+	            lineSprite: lineSprite =  new BallisticLineSprite(launchPosition, targetPosition, 3 * this.zoomScale, -3, getLineColorByType(type), 0.4),
 	            used: true,
 	            isFriendly: isFriendly
 	        });
@@ -657,6 +663,7 @@ window.BallisticIconContainer = function () {
     };
 */
 
+/* //OLD METHOD FOR GENERATING HEX NUMBERS, WHICH CREATED 2000ish individual sprites.  Leaving for now until new method is tested on main server. 
 BallisticIconContainer.prototype.createHexNumbers = function (scene) {
 
     // Check if hex numbers are already created
@@ -714,7 +721,83 @@ BallisticIconContainer.prototype.createHexNumbers = function (scene) {
         this.hexNumbersVisible = true;  // Ensure the hex numbers are visible
     }
 };
+*/
 
+BallisticIconContainer.prototype.createHexNumbers = function (scene) {
+    if (this.hexNumberMesh) {
+        // Toggle visibility
+        this.hexNumberMesh.visible = !this.hexNumberMesh.visible;
+        return;
+    }
 
+    // Define grid dimensions based on hex count
+    const gridWidth = 72; // Adjust based on your hex layout
+    const gridHeight = 48;
+    const hexSize = 50;
+
+    // Create single large texture with all hex numbers
+    const largeTexture = createLargeHexNumberTexture(gridWidth, gridHeight, hexSize);
+
+    // Hexagon grid dimensions (corrected aspect ratio)
+    const totalWidth = gridWidth * hexSize * 2;
+    const totalHeight = gridHeight * hexSize * Math.sqrt(4);
+
+    // Create a plane to apply the texture (or adjust for hexagonal shape)
+    const geometry = new THREE.PlaneGeometry(totalWidth, totalHeight);
+    const material = new THREE.MeshBasicMaterial({ 
+        map: largeTexture, 
+        transparent: true 
+    });
+
+    this.hexNumberMesh = new THREE.Mesh(geometry, material);
+    this.hexNumberMesh.position.set(502.5, -651, -1); // Adjust as needed	
+    scene.add(this.hexNumberMesh);
+};
+
+function createLargeHexNumberTexture(gridWidth, gridHeight, hexSize, textColour = "#ffffff") {
+	const HEX_WIDTH = Math.sqrt(3) * hexSize;  // Corrected for side-standing hexagons
+	const HEX_HEIGHT = 2 * hexSize; // Corrected for vertical stacking
+	const SCALE_FACTOR = 2;  // Increase resolution for sharp text
+	const TEXTURE_WIDTH = gridWidth * HEX_WIDTH * SCALE_FACTOR;
+	const TEXTURE_HEIGHT = gridHeight * HEX_HEIGHT * SCALE_FACTOR;
+    
+    // Create canvas with refined dimensions
+    const canvas = document.createElement("canvas");
+    canvas.width = TEXTURE_WIDTH;
+    canvas.height = TEXTURE_HEIGHT;
+    const ctx = canvas.getContext("2d");
+
+    // Clear the canvas
+    ctx.clearRect(0, 0, TEXTURE_WIDTH, TEXTURE_HEIGHT);
+
+    // Set text properties
+	const fontSize = Math.floor(hexSize * 0.2 * SCALE_FACTOR);  // Smaller text but sharp
+    ctx.globalAlpha = 0.85;
+    ctx.font = `bold ${fontSize}px Arial`;
+    ctx.fillStyle = textColour;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+	ctx.globalAlpha = 0.6; // 50% transparency
+
+    let number = 1;
+
+	for (let r = 0; r < gridHeight; r++) {
+		for (let q = 0; q < gridWidth; q++) {
+			let x = q * HEX_WIDTH * 1.7315 + HEX_WIDTH / 2; // REDUCED COLUMN SPACING			
+			let y = r * HEX_HEIGHT * 1.5 + HEX_HEIGHT / 2; // INCREASED ROW SPACING
+	
+			// Offset odd rows for staggered hex layout
+			if (r % 2 !== 0) x += HEX_WIDTH * 0.855; 
+	
+			ctx.fillText(String(number).padStart(4, '0'), x, y);
+			number++;
+		}
+	}
+
+    // Convert canvas to a texture
+    const texture = new THREE.Texture(canvas);
+    texture.needsUpdate = true;
+    return texture;
+}
     return BallisticIconContainer;
 }();

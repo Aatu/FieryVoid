@@ -2622,5 +2622,34 @@ class GromeHvyRailgun extends Weapon{
 } //endof class GaimPhotonBomb
 
 
+    //purely a technical test weapon
+    class TestLaser extends Laser{
+        public $name = "testLaser";
+        public $displayName = "TEST Laser";
+        public $animation = "laser";
+        public $animationColor = array(255, 58, 31);
+        public $priority = 8;
+		public $iconPath = "MultiphasedBeamAccelerator.png";
+        
+        public $loadingtime = 1;
+                
+        public $rangePenalty = 0.1;
+        public $fireControl = array(5, 5, 5); // fighters, <mediums, <capitals
+
+			public $raking = 1;
+    
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc) {
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 5;
+            if ( $powerReq == 0 ) $powerReq = 2;
+                parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+        public function getDamage($fireOrder){        return 5;   }
+        public function setMinDamage(){     $this->minDamage = 5 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 5 ;      }
+    } //TestLaser
+
+
 
 ?>
