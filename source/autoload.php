@@ -3426,6 +3426,7 @@ spl_autoload_register(
 						'impheavylaser' => '/server/model/weapons/customDevelopment.php',
 						'directemine' => '/server/model/weapons/customDevelopment.php',						
 					'testlaser' => '/server/model/weapons/customs.php',
+					'asteroidm' => '/server/model/ships/civilians/asteroidM.php',                    
 
 				//Marine Boarding Actions
 				'marines' => '/server/model/weapons/specialWeapons.php',
