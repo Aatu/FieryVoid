@@ -466,7 +466,7 @@ class AmmoHShellBasic extends AmmoTemplateDirectWeapons{
 	public $modeName = 'Basic Heavy Shell';
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'SHELL_HBSC'; //enhancement name to be enabled
-	public $enhancementDescription = '(Heavy Ammo) Basic Shell'; //enhancement description
+	public $enhancementDescription = '(HEAVY AMMO) Basic Shell'; //enhancement description
 	public $enhancementPrice = 1;//officially 0, but if it was 0 then there would be no reason not to load it
 	
 	public $fireControlMod = array(0, 0, 0); //MODIFIER for weapon fire control!
@@ -501,7 +501,7 @@ class AmmoMShellBasic extends AmmoTemplateDirectWeapons{
 	public $modeName = 'Basic Medium Shell';
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'SHELL_MBSC'; //enhancement name to be enabled
-	public $enhancementDescription = '(Medium Ammo) Basic Shell'; //enhancement description
+	public $enhancementDescription = '(MEDIUM AMMO) Basic Shell'; //enhancement description
 	public $enhancementPrice = 1;//officially 0, but if it was 0 then there would be no reason not to load it
 	
 	public $fireControlMod = array(0, 0, 0); //MODIFIER for weapon fire control!
@@ -536,7 +536,7 @@ class AmmoLShellBasic extends AmmoTemplateDirectWeapons{
 	public $modeName = 'Basic Light Shell';
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'SHELL_LBSC'; //enhancement name to be enabled
-	public $enhancementDescription = '(Light Ammo) Basic Shell'; //enhancement description
+	public $enhancementDescription = '(LIGHT AMMO) Basic Shell'; //enhancement description
 	public $enhancementPrice = 1;//officially 0, but if it was 0 then there would be no reason not to load it
 	
 	public $fireControlMod = array(0, 0, 0); //MODIFIER for weapon fire control!
@@ -571,7 +571,7 @@ class AmmoHShellFlash extends AmmoTemplateDirectWeapons{
 	public $modeName = 'Flash Heavy Shell';
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'SHELL_HFLH'; //enhancement name to be enabled
-	public $enhancementDescription = '(Heavy Ammo) Flash Shell'; //enhancement description
+	public $enhancementDescription = '(HEAVY AMMO) Flash Shell'; //enhancement description
 	public $enhancementPrice = 10;
 	
 	public $fireControlMod = array(0, 0, 0); //MODIFIER for weapon fire control!
@@ -606,7 +606,7 @@ class AmmoMShellFlash extends AmmoTemplateDirectWeapons{
 	public $modeName = 'Flash Medium Shell';
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'SHELL_MFLH'; //enhancement name to be enabled
-	public $enhancementDescription = '(Medium Ammo) Flash Shell'; //enhancement description
+	public $enhancementDescription = '(MEDIUM AMMO) Flash Shell'; //enhancement description
 	public $enhancementPrice = 6;
 	
 	public $fireControlMod = array(0, 0, 0); //MODIFIER for weapon fire control!
@@ -641,7 +641,7 @@ class AmmoLShellFlash extends AmmoTemplateDirectWeapons{
 	public $modeName = 'Flash Light Shell';
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'SHELL_LFLH'; //enhancement name to be enabled
-	public $enhancementDescription = '(Light Ammo) Flash Shell'; //enhancement description
+	public $enhancementDescription = '(LIGHT AMMO) Flash Shell'; //enhancement description
 	public $enhancementPrice = 3;
 	
 	public $fireControlMod = array(0, 0, 0); //MODIFIER for weapon fire control!
@@ -676,7 +676,7 @@ class AmmoHShellScatter extends AmmoTemplateDirectWeapons{
 	public $modeName = 'Scatter Heavy Shell';
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'SHELL_HSCT'; //enhancement name to be enabled
-	public $enhancementDescription = '(Heavy Ammo) Scatter Shell'; //enhancement description
+	public $enhancementDescription = '(HEAVY AMMO) Scatter Shell'; //enhancement description
 	public $enhancementPrice = 10;
 	
 	public $fireControlMod = array(-2, -2, -2); //MODIFIER for weapon fire control!
@@ -734,7 +734,7 @@ class AmmoMShellScatter extends AmmoTemplateDirectWeapons{
 	public $modeName = 'Scatter Medium Shell';
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'SHELL_MSCT'; //enhancement name to be enabled
-	public $enhancementDescription = '(Medium Ammo) Scatter Shell'; //enhancement description
+	public $enhancementDescription = '(MEDIUM AMMO) Scatter Shell'; //enhancement description
 	public $enhancementPrice = 5;
 	
 	public $fireControlMod = array(-2, -2, -2); //MODIFIER for weapon fire control!
@@ -792,7 +792,7 @@ class AmmoLShellScatter extends AmmoTemplateDirectWeapons{
 	public $modeName = 'Scatter Light Shell';
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'SHELL_LSCT'; //enhancement name to be enabled
-	public $enhancementDescription = '(Light Ammo) Scatter Shell'; //enhancement description
+	public $enhancementDescription = '(LIGHT AMMO) Scatter Shell'; //enhancement description
 	public $enhancementPrice = 2;
 	
 	public $fireControlMod = array(-2, -2, -2); //MODIFIER for weapon fire control!
@@ -851,7 +851,7 @@ class AmmoHShellHeavy extends AmmoTemplateDirectWeapons{
 	public $modeName = 'Heavy Shell';
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'SHELL_HHVY'; //enhancement name to be enabled
-	public $enhancementDescription = '(Heavy Ammo) Heavy Shell'; //enhancement description
+	public $enhancementDescription = '(HEAVY AMMO) Heavy Shell'; //enhancement description
 	public $enhancementPrice = 18;
 	
 	public $fireControlMod = array(0, 0, 0); //MODIFIER for weapon fire control!
@@ -886,7 +886,7 @@ class AmmoMShellHeavy extends AmmoTemplateDirectWeapons{
 	public $modeName = 'Heavy Medium Shell';
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'SHELL_MHVY'; //enhancement name to be enabled
-	public $enhancementDescription = '(Medium Ammo) Heavy Shell'; //enhancement description
+	public $enhancementDescription = '(MEDIUM AMMO) Heavy Shell'; //enhancement description
 	public $enhancementPrice = 12;
 	
 	public $fireControlMod = array(0, 0, 0); //MODIFIER for weapon fire control!
@@ -921,7 +921,7 @@ class AmmoLShellHeavy extends AmmoTemplateDirectWeapons{
 	public $modeName = 'Heavy Light Shell';
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'SHELL_LHVY'; //enhancement name to be enabled
-	public $enhancementDescription = '(Light Ammo) Heavy Shell'; //enhancement description
+	public $enhancementDescription = '(LIGHT AMMO) Heavy Shell'; //enhancement description
 	public $enhancementPrice = 6;
 	
 	public $fireControlMod = array(0, 0, 0); //MODIFIER for weapon fire control!
@@ -956,7 +956,7 @@ class AmmoHShellLRange extends AmmoTemplateDirectWeapons{
 	public $modeName = 'Long Range Heavy Shell';
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'SHELL_HLR'; //enhancement name to be enabled
-	public $enhancementDescription = '(Heavy Ammo) Long Range Shell'; //enhancement description
+	public $enhancementDescription = '(HEAVY AMMO) Long Range Shell'; //enhancement description
 	public $enhancementPrice = 4;
 	
 	public $fireControlMod = array(0, 0, 0); //MODIFIER for weapon fire control!
@@ -991,7 +991,7 @@ class AmmoMShellLRange extends AmmoTemplateDirectWeapons{
 	public $modeName = 'Long Range Medium Shell';
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'SHELL_MLR'; //enhancement name to be enabled
-	public $enhancementDescription = '(Medium Ammo) Long Range Shell'; //enhancement description
+	public $enhancementDescription = '(MEDIUM AMMO) Long Range Shell'; //enhancement description
 	public $enhancementPrice = 2;
 	
 	public $fireControlMod = array(0, 0, 0); //MODIFIER for weapon fire control!
@@ -1026,7 +1026,7 @@ class AmmoHShellULRange extends AmmoTemplateDirectWeapons{
 	public $modeName = 'Ultra Long Range Heavy Shell';
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'SHELL_HULR'; //enhancement name to be enabled
-	public $enhancementDescription = '(Heavy Ammo) Ultra Long Range Shell'; //enhancement description
+	public $enhancementDescription = '(HEAVY AMMO) Ultra Long Range Shell'; //enhancement description
 	public $enhancementPrice = 6;
 	
 	public $fireControlMod = array(0, 0, 0); //MODIFIER for weapon fire control!

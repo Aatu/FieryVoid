@@ -11,10 +11,10 @@ Below is list of differences from B5Wars mechanics and known bugs that aren't ex
 USEFUL TRIVIA
  - W - show EW in graphical form
  - X - show friendly EW in graphical form
- - Y - show enemy EW in grapical form
+ - Y - show enemy EW in graphical form
  - If You have ship that shouldn't be there any longer (jumped out, left map...) or just crippled and useless, You may simply get rid of it so it doesn't bog down Your game. In Initial phase You may set its Reactor to overload - it will explode in firing resolution phase!
  - r-click on unit - select the unit (if it's Yours) and bring its control window up.
- - r-click on weapon - select all similar weapons on this unit (eg. to fire all guns in fighter flight, or all Twin Arrays on a Centauri cruiser...)
+ - r-click on weapon - select all similar weapons on this unit (e.g. to fire all guns in fighter flight, or all Twin Arrays on a Centauri cruiser...)
  - r-click on power button - power on/off on all similar systems on this unit
  - r-click mode change - change firing mode on all similar UNDECLARED weapons
  - r-click on defensive fire - enable defensive fire on all similar UNDECLARED weapons
@@ -34,24 +34,24 @@ GAMEPLAY GENERAL IDEAS
 
 
 MOVEMENT
- - Snap turn: it's implemented as consecutive but still separate turns. Turn delay is taken from first one only (so if You wan to shorten snap turn, shorten its first segment). This means even thrust allocation is checked for each hexside separately, not for combined turn.
+ - Snap turn: it's implemented as consecutive but still separate turns. Turn delay is taken from first one only (so if You wan to shorten snap turn, shorten its first segment). This means even thrust allocation is checked for each hex side separately, not for combined turn.
  - Fighters don't get auto-return from pivot.
  - Turn into pivot does not stop pivoting itself. BUT - stopping a pivot right after turning into pivot is free :) (player just has to remember about it...).
 
 
 ELECTRONIC WARFARE
  - CCEW: affects ALL nearby enemy fighters, at full power.
- - Most activities requiring multiple EW points can be done with fractions. Eg. Blanket DEW (1 per 4 points allocated): You may allocate , say, 3 points and get 0.75 points of blanked DEW (around 4%).
- - Disruption EW: ALL target locks are affected equally, by appropriate fraction of power used. Eg. if You use 1 point of DIST and target has 3 locks up, each one of these would be reduced by 0.33 points.
+ - Most activities requiring multiple EW points can be done with fractions. E.g.. Blanket DEW (1 per 4 points allocated): You may allocate , say, 3 points and get 0.75 points of blanked DEW (around 4%).
+ - Disruption EW: ALL target locks are affected equally, by appropriate fraction of power used. E.g. if You use 1 point of DIST and target has 3 locks up, each one of these would be reduced by 0.33 points.
  - Disruption EW: CCEW is treated as one OEW target and affected appropriately.
- - Disruption EW: target locks weaker than 1 point but worth at least half a point provide half-lock (eg. range penalties multiplied by 1.5 instead of being doubled).
+ - Disruption EW: target locks weaker than 1 point but worth at least half a point provide half-lock (e.g.ange penalties multiplied by 1.5 instead of being doubled).
  - Only own DEW can bring profile below 0: this rule is not respected in FV.
 
 
 FIRING AND WEAPONS
  - Firing order of weapons: each weapon has priority number which determines order of firing. Player cannot influence it. It was tried to optimize effectiveness of weapons, but as in B5Wars every player prefers different firing pattern (and also it's influenced by a particular target) - usually it won't be as good as You could achieve manually.
  - Choosing target section: it's done automatically, based on algorithm that takes into account target section profile and remaining boxes of structure. Weapons from the same ship CANNOT be split between multiple sections even if they overlap. Shot into open PRIMARY will not be picked if there is any alternative. 
- - Choosing target system: it's done randomly out of eligible targets if there are multiple ones. UPDATE 13.09.2021: in-arc systems will be hit before off-arc ones (assumes that direction of damage comes from shot, which may be occassionally incorrect (eg. for Flash collateral damage)). 
+ - Choosing target system: it's done randomly out of eligible targets if there are multiple ones. UPDATE 13.09.2021: in-arc systems will be hit before off-arc ones (assumes that direction of damage comes from shot, which may be occasionally incorrect (e.g. for Flash collateral damage)). 
  - Choosing target fighter: there is algorithm that tries to minimize damage done. However, it operates on expected damage instead of actual, and won't take into account most special effects.
  - You can target individual fighters (just target any of its systems). This will be treated as a called shot.
  - Fighter dropouts are done together with critical hits (so AFTER firing at ships, not before)
@@ -60,8 +60,7 @@ FIRING AND WEAPONS
  - Slower-firing weapons You need to manually put in that mode if You want them used for interception. 
  - There is no Ballistics firing subphase. Instead ballistic weapon impact is done in other subphases as appropriate (ship fire, fighters fire at fighters, fighters fire at ships).
  - Fighters can intercept ballistics fired at ship, but they must start and end their movement in that unit's hex except in turn 1 (where they can't start on the same hex).
- - Continuous firing mode: You don't get auto-hits or ignoring pierced armor on second turn of shooting. As a compensation, You're free to choose another target. In effect, what You get is a completely independent second shot.
- - Multi-shot weapons can choose only one target when firing offensively (Twin/Quad Arrays, Heavy Arrays, Ballistic Torpedoes...)
+ - Multi-shot weapons can choose only one target when firing offensively (Twin/Quad Arrays, Heavy Arrays...).  Certain notable exceptions have been added to date, including for Ballistic Torpedoes and Shadow Slicers.
  - Power and missile launches are simultaneous in FV - so disabling Jammer cannot affect missile launch on current turn. Instead, it will affect missile launch on NEXT turn!
  - Multi-mode weapons, switched at power on in B5Wars: simplified and can use any mode at will (Interceptor, Guardian Array).
  - Ramming takes place in ship fire step (even if ramming ship is fighter). So ship fire from guns destroyed by ramming will still happen.
@@ -76,6 +75,6 @@ FIRING AND WEAPONS
 OTHERS
  - Jump Drive: usually it can't be turned off for power unless seriously damaged, but there are scenarios that allow just that. So the game does not force it and it's up to the player to decide whether or not it's allowed.
  - Enormous units: some units in game are Enormous. They are recognized as such, but most appropriate rules are NOT implemented. They're essentially capital ships as far as FV is concerned, except where a particular system specifically checks for it.
-This means that different damage dealing from EMine, targeting from Mass Driver or power from Improved Reactor do take Enormous size into account, but most general rules (like preventing line of sight...) are NOT implemented.
- - UPDATE: ship on the same hex as Enormous unit WILL automatically make a ramming attempt. Fighters are exempt (in tabletop they would have made Skin Dance roll - with high chance of success, and additional bonuses if they succeed; here there are no additional bonuses but they can safely enter Enoormous unit's hex.
+This means that different damage dealing from Energy Mine, targeting from Mass Driver or power from Improved Reactor do take Enormous size into account, but most general rules (like preventing line of sight...) are NOT implemented.
+ - UPDATE: ship on the same hex as Enormous unit WILL automatically make a ramming attempt. Fighters are exempt (in tabletop they would have made Skin Dance roll - with high chance of success, and additional bonuses if they succeed; here there are no additional bonuses but they can safely enter Enormous unit's hex.
 

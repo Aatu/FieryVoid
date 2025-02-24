@@ -7,7 +7,7 @@ class Liner extends BaseShip{
         $this->pointCost = 160;
         $this->faction = "Civilians";
         $this->phpclass = "Liner";
-        $this->imagePath = "img/ships/LuxuryLiner.png";
+        $this->imagePath = "img/ships/LuxuryLiner1.png";
         $this->shipClass = "Luxury Liner";
         $this->shipSizeClass = 3;
 	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
