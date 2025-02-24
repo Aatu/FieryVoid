@@ -1764,6 +1764,7 @@ spl_autoload_register(
 				//Nexus ships - Craytan
                 'craytanaprinan' => '/server/model/ships/ZNexusCraytan_old/CraytanAprinan.php',					
                 'craytanavitun' => '/server/model/ships/ZNexusCraytan_old/CraytanAvitun.php',					
+                'craytanbellan' => '/server/model/ships/ZNexusCraytan/CraytanBellan.php',					
                 'craytanbromin' => '/server/model/ships/ZNexusCraytan_old/CraytanBromin.php',					
                 'craytanbrominrefit' => '/server/model/ships/ZNexusCraytan/CraytanBrominRefit.php',					
                 'craytanmaprin' => '/server/model/ships/ZNexusCraytan_old/CraytanMaprin.php',					
