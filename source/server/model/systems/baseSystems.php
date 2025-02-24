@@ -2010,7 +2010,7 @@ class JumpEngine extends ShipSystem{
     public $boostEfficiency = 0;    
     
 	//JumpEngine tactically  is not important at all!
-	public $repairPriority = 1;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
+	public $repairPriority = 8;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
     
     function __construct($armour, $maxhealth, $powerReq, $delay){
         parent::__construct($armour, $maxhealth, $powerReq, 0);
