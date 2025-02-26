@@ -268,11 +268,11 @@ window.mathlib = {
 				let p2 = corners[(i + 1) % corners.length];
 	
 				if (this.doLinesIntersect(startPixel, endPixel, p1, p2)) {
-					return false; // Line crosses a hex edge
+					return true; // Line crosses a hex edge
 				}
 			}
 		}
-		return true;
+		return false; //LoS is NOT blocked
 	}
 
 };

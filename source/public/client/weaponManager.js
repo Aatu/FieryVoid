@@ -457,13 +457,13 @@ window.weaponManager = {
         // Compute LOS blockage once for all selected weapons
         var blockedLosHex = weaponManager.getBlockedHexes(); //Are there any Enormous units in game, no point checking if no.
 
-        var hasLoS = false; //Default to LoS not blocked.
+        var noLoS = false; //Default to LoS not blocked.
         if (blockedLosHex && blockedLosHex.length > 0) {
             var weapon = gamedata.selectedSystems[0]; // Use the first weapon to get the shooter's position
             var sPosShooter = weaponManager.getFiringHex(selectedShip, weapon);
             var sPosTarget = shipManager.getShipPosition(ship);
             
-            hasLoS = mathlib.checkLineOfSight(sPosShooter, sPosTarget, blockedLosHex);
+            noLoS = mathlib.checkLineOfSight(sPosShooter, sPosTarget, blockedLosHex);
         }
 
         for (var i in gamedata.selectedSystems) {
@@ -475,7 +475,7 @@ window.weaponManager = {
                     value = weapon.firingModes[value];
                     var keys = Object.keys(weapon.firingModes);
 
-                    if (!hasLoS) {
+                    if (noLoS) {
                         // LOS is blocked - only display the blocked message
                         $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="losBlocked"> LINE OF SIGHT BLOCKED</span></div>').appendTo(f);
                     } else {
@@ -1401,16 +1401,16 @@ window.weaponManager = {
 
         var blockedLosHex = weaponManager.getBlockedHexes();
 
-        var hasLos = false;
+        var noLoS = false;
         if (blockedLosHex && blockedLosHex.length > 0) {
             var weapon = gamedata.selectedSystems[0]; // Use the first weapon to get the shooter's position
             var sPosShooter = weaponManager.getFiringHex(selectedShip, weapon);
             var sPosTarget = shipManager.getShipPosition(ship);
             
-            hasLos = mathlib.checkLineOfSight(sPosShooter, sPosTarget, blockedLosHex);
+            noLoS = mathlib.checkLineOfSight(sPosShooter, sPosTarget, blockedLosHex);
         }
 
-        if(!hasLos) return;
+        if(noLoS) return;
 
         var toUnselect = [];
         var splitTargeted = [];
