@@ -4,7 +4,7 @@ class asteroidM  extends MediumShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 0;
+		$this->pointCost = 1;
 		$this->faction = "Civilians";
 		$this->factionAge = 1;        
         $this->phpclass = "asteroidM";
