@@ -8,10 +8,10 @@
 	position:fixed;
     width:555px;
     max-width: 100%;
-    max-height: 85%;
+    max-height: 80%;
 	left:50%;
 	top:50%;
-	opacity: 0.95;
+	opacity: 1;
 	z-index:999999;
 	display:none;
     text-align: center;
