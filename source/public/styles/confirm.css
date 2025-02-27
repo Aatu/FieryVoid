@@ -11,7 +11,7 @@
     max-height: 100%;
 	left:50%;
 	top:50%;
-	opacity:0.85;
+	opacity: 1;
 	z-index:999999;
 	display:none;
     text-align: center;
