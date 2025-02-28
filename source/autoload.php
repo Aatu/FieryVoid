@@ -911,7 +911,8 @@ spl_autoload_register(
                 'shrike1984' => '/server/model/ships/drazi_old/shrike1984.php',
                 'shyarie' => '/server/model/ships/abbai/shyarie.php',
                 'simultaneousmovementrule' => '/server/model/SimultaneousMovementRule.php',
-                'desperaterule' => '/server/model/DesperateRule.php',                
+                'desperaterule' => '/server/model/DesperateRule.php',
+                'asteroidsrule' => '/server/model/AsteroidsRule.php',                                  
                 'sitara' => '/server/model/ships/centauri/sitara.php',
                 'skiatha' => '/server/model/ships/abbai/skiatha.php',
                 'skiff' => '/server/model/ships/raiders/skiff.php',
@@ -3426,7 +3427,9 @@ spl_autoload_register(
 						'impheavylaser' => '/server/model/weapons/customDevelopment.php',
 						'directemine' => '/server/model/weapons/customDevelopment.php',						
 					'testlaser' => '/server/model/weapons/customs.php',
-					'asteroidm' => '/server/model/ships/civilians/asteroidM.php',                    
+	    				'asteroids' => '/server/model/ships/civilians/asteroidS.php',                    
+	    				'asteroidm' => '/server/model/ships/civilians/asteroidM.php',  
+	    				'asteroidl' => '/server/model/ships/civilians/asteroidL.php',  
 
 				//Marine Boarding Actions
 				'marines' => '/server/model/weapons/specialWeapons.php',
