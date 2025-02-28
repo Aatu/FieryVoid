@@ -1,5 +1,5 @@
 <?php
-class asteroidM  extends MediumShip{
+class asteroidS  extends MediumShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
@@ -7,10 +7,10 @@ class asteroidM  extends MediumShip{
 		$this->pointCost = 1;
 		$this->faction = "Civilians";
 		$this->factionAge = 1;        
-        $this->phpclass = "asteroidM";
-        $this->imagePath = "img/ships/AsteroidM.png";
-        $this->canvasSize = 256;
-        $this->shipClass = "Asteroid (Medium)";
+        $this->phpclass = "asteroidS";
+        $this->imagePath = "img/ships/asteroidS.png";
+        $this->canvasSize = 200;
+        $this->shipClass = "Asteroid (Small)";
         $this->shipSizeClass = 3;
         $this->Enormous = true; 
 		$this->iniativebonus = -200; //no voluntary movement anyway
@@ -19,8 +19,8 @@ class asteroidM  extends MediumShip{
 		$this->smallBase = true;
 		$this->nonRotating = true;  //completely immobile, doesn't even rotate
 		
-        $this->forwardDefense = 22;
-        $this->sideDefense = 22;
+        $this->forwardDefense = 20;
+        $this->sideDefense = 20;
         
         //No engine/thrusters!!
         $this->turncost = 0;
@@ -33,7 +33,7 @@ class asteroidM  extends MediumShip{
         $this->addPrimarySystem(new OSATCnC(10, 1, 0, 0)); //Required for some checks.
         $this->addPrimarySystem(new MagGravReactorTechnical(10, 1, 0, 0)); //Required for some checks.
 
-        $this->addPrimarySystem(new Structure(8,  600));
+        $this->addPrimarySystem(new Structure(8,  300));
 
         $this->hitChart = array(
                 0=> array(
