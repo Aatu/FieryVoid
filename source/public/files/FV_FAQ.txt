@@ -74,7 +74,5 @@ FIRING AND WEAPONS
 
 OTHERS
  - Jump Drive: usually it can't be turned off for power unless seriously damaged, but there are scenarios that allow just that. So the game does not force it and it's up to the player to decide whether or not it's allowed.
- - Enormous units: some units in game are Enormous. They are recognized as such, but most appropriate rules are NOT implemented. They're essentially capital ships as far as FV is concerned, except where a particular system specifically checks for it.
-This means that different damage dealing from Energy Mine, targeting from Mass Driver or power from Improved Reactor do take Enormous size into account, but most general rules (like preventing line of sight...) are NOT implemented.
- - UPDATE: ship on the same hex as Enormous unit WILL automatically make a ramming attempt. Fighters are exempt (in tabletop they would have made Skin Dance roll - with high chance of success, and additional bonuses if they succeed; here there are no additional bonuses but they can safely enter Enormous unit's hex.
-
+ - Enormous units: some units in game are Enormous. They are recognized as such, but some rules are NOT implemented. Enormous units block line of sight if any part of a potential shot would pass through any part of the hex they are in.  Ships that end their movement on the same hex as Enormous unit WILL automatically make a ramming attempt, fighters are exempt (in tabletop they would have made Skin Dance roll - with high chance of success, and additional bonuses if they succeed; here there are no additional bonuses but they can safely enter Enormous unit's hex.
+ Different damage dealing from Energy Mine, targeting from Mass Driver or power from Improved Reactor also take Enormous size into account. 
