@@ -223,8 +223,11 @@ if ($gamelobbydata->gamespace == '-1x-1'){ //open map
 
 $simMv = false;
 $desperate = false;
+$asteroids = false;
 $initiativeCategories = null;
 $desperateTeams = null;
+$asteroidsNo = 0;
+
 
 if ($gamelobbydata->rules) {
     if ($gamelobbydata->rules->hasRuleName('initiativeCategories')) {
@@ -238,7 +241,13 @@ if ($gamelobbydata->rules) {
         if ($gamelobbydata->rules->hasRule('jsonSerialize')) {
             $desperateTeams = $gamelobbydata->rules->callRule('jsonSerialize', []);
         }        
-    }    
+    }
+    if ($gamelobbydata->rules->hasRuleName('asteroids')) {
+        $asteroids = true;
+        if ($gamelobbydata->rules->hasRule('jsonSerialize')) {
+            $asteroidsNo = $gamelobbydata->rules->callRule('jsonSerialize', []);
+        }        
+    }         
 }
 
 if ($simMv == true) { // simultaneous movement
@@ -263,6 +272,12 @@ if ($desperate == true) { // Desperate rules in play
     $optionsUsed .= ', Desperate Rules: '. $teamDisplay . '';
 } else { // standard movement
     $optionsUsed .= ', Normal Rules';
+}
+
+if ($asteroids == true) { // Asteroid terrain rules in play
+    $optionsUsed .= ', Asteroids ('. $asteroidsNo . ')';
+} else { // standard movement
+    $optionsUsed .= ', No terrain';
 }
 
 ?>
