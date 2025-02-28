@@ -145,6 +145,21 @@ VICTORY CONDITIONS: Last unit on map / Last ship on map / More forces remaining 
         </select>
     </div>
 </div>
+<div id="asteroids" class="subpanel movementspacecontainer">
+    <div class="slot">
+        <div>
+            <input id="asteroidscheck" type="checkbox" name="asteroidscheck">ADD ASTEROIDS AS TERRAIN (still in Beta)
+        </div>
+     </div>
+    <div class="slot" id="asteroidsDropdown" style="display:none;">
+        <label for="asteroidsSelect">SELECT NUMBER OF ASTEROIDS:</label>
+        <select id="asteroidsSelect" name="asteroidsCategories">
+            <option value="6">Few (6)</option>
+            <option value="12">Several (12)</option>
+            <option value="24">Lots (24)</option>
+        </select>
+    </div>
+</div>
 <div id="desperate" class="subpanel movementspacecontainer">
     <div class="slot">
         <div>
