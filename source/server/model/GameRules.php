@@ -14,6 +14,10 @@ class GameRules implements JsonSerializable{
         if ($desperateRules !== null) {
             array_push($this->rules, $desperateRules);
         }
+        $asteroidsRules = $this->getAsteroidsRules($rules);
+        if ($asteroidsRules !== null) {
+            array_push($this->rules, $asteroidsRules);
+        }        
     }
 
     private function getSimultaneousMovementRules($rules) {
@@ -31,6 +35,14 @@ class GameRules implements JsonSerializable{
 
         return null;
     }    
+
+    private function getAsteroidsRules($rules) {
+        if (isset($rules['asteroids'])) {
+            return new AsteroidsRule((int)$rules['asteroids']);
+        }
+
+        return null;
+    }  
 
     public function jsonSerialize() {
         $list = [];
