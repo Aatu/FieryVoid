@@ -59,7 +59,7 @@ class BuyingGamePhase implements Phase
                 $usedPositions["$x,$y"] = true; // Mark position as used
                 $h = rand(0, 5); // Random height
 
-                $move = new MovementOrder(-1, "start", new OffsetCoordinate($x, $y), 0, 0, 5, $h, $h, true, 1, 0, 0);
+                $move = new MovementOrder(-1, "start", new OffsetCoordinate($x, $y), 0, 0, 0, $h, $h, true, 1, 0, 0);
                 $ship->movement = array($move);
             }
 
@@ -82,13 +82,13 @@ class BuyingGamePhase implements Phase
         while ($counter > 0) {
             $size = Dice::d(3, 1);  //Use a dice to decide a random size of asteroid!
             if($size == 1){
-                $currAsteroid = new asteroidS($gameData->id, -5, "Asteroid" . $counter . "" , $slot);
+                $currAsteroid = new asteroidS($gameData->id, -5, "Asteroid #" . $counter . "", $slot);
                 $dbManager->submitShip($gameData->id, $currAsteroid, -5); //Save themm with a nominal userid of -5, nothing else should use that!                   
             }else if($size == 2){
-                $currAsteroid = new asteroidM($gameData->id, -5, "Asteroid" . $counter . "" , $slot);
+                $currAsteroid = new asteroidS($gameData->id, -5, "Asteroid #" . $counter . "", $slot);
                 $dbManager->submitShip($gameData->id, $currAsteroid, -5); //Save themm with a nominal userid of -5, nothing else should use that!                  
             }else{
-                $currAsteroid = new asteroidL($gameData->id, -5, "Asteroid" . $counter . "" , $slot);
+                $currAsteroid = new asteroidS($gameData->id, -5, "Asteroid #" . $counter . "", $slot);
                 $dbManager->submitShip($gameData->id, $currAsteroid, -5); //Save themm with a nominal userid of -5, nothing else should use that!                    
             }
             $counter--; //Reduce counter   
@@ -213,8 +213,13 @@ class BuyingGamePhase implements Phase
             $dbManager->setPlayerWaitingStatus($gameData->forPlayer, $gameData->id, true);
 
             // Now let's see if we have to add any terrain.
-            if ($gameData->rules->hasRuleName("asteroids") && $slot->slot == 1) { 
-                $numberOfAsteroids = $gameData->rules->callRule("jsonSerialize", []); // Generate all the asteroids from Slot/Player 1 
+            if ($gameData->rules->hasRuleName("asteroids") && $slot->slot == 1) { // Generate all the asteroids from Slot/Player 1 
+                $numberOfAsteroids = 0; //Initialise
+                $asteroidsRule = $gameData->rules->getRuleByName('asteroids');
+                
+                if ($asteroidsRule && method_exists($asteroidsRule, 'jsonSerialize')) {
+                    $numberOfAsteroids = $asteroidsRule->jsonSerialize();
+                }                 
 
                 $this->addAsteroids($gameData, $dbManager, $numberOfAsteroids, $slot->slot);
             }
