@@ -64,6 +64,15 @@ class GameRules implements JsonSerializable{
         return false;
 	}
 
+    public function getRuleByName($name) {
+        foreach ($this->rules as $rule) {
+            if ($rule->getRuleName() == $name) {
+                return $rule; // Return the correct rule instance
+            }
+        }
+        return null; // Return null if no match is found
+    }
+    
 	/*information whether _method_ exists!*/
     public function hasRule($name) {
         foreach ($this->rules as $rule) {
