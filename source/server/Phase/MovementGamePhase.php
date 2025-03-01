@@ -15,8 +15,6 @@ class MovementGamePhase implements Phase
             $dbManager->submitMovement($gameData->id, $ship->id, $gameData->turn, [$newMove]);
         }
 
-        Movement::checkCollisions($gameData);
-
         $gameData->setPhase(3);
         $gameData->setActiveship(-1);
         $dbManager->updateGamedata($gameData);
