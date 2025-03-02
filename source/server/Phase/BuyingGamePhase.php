@@ -43,7 +43,7 @@ class BuyingGamePhase implements Phase
                 // It's an asteroid, so assign a unique random position.
                 $deploymentZone = $this->getGamespace($gameData);
                 $maxX = ($deploymentZone['width'] / 2) - 3;
-                $maxY = ($deploymentZone['height'] / 2) - 3;
+                $maxY = ($deploymentZone['height'] / 2) - 2;
 
                 // Generate a unique random position
                 while (true) {
