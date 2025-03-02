@@ -83,13 +83,13 @@ class BuyingGamePhase implements Phase
             $size = Dice::d(3, 1);  //Use a dice to decide a random size of asteroid!
             if($size == 1){
                 $currAsteroid = new asteroidS($gameData->id, -5, "Asteroid #" . $counter . "", $slot);
-                $dbManager->submitShip($gameData->id, $currAsteroid, -5); //Save themm with a nominal userid of -5, nothing else should use that!                   
+                $dbManager->submitShip($gameData->id, $currAsteroid, -5); //Save them with a nominal userid of -5, nothing else should use that!                   
             }else if($size == 2){
-                $currAsteroid = new asteroidS($gameData->id, -5, "Asteroid #" . $counter . "", $slot);
-                $dbManager->submitShip($gameData->id, $currAsteroid, -5); //Save themm with a nominal userid of -5, nothing else should use that!                  
+                $currAsteroid = new asteroidM($gameData->id, -5, "Asteroid #" . $counter . "", $slot);
+                $dbManager->submitShip($gameData->id, $currAsteroid, -5); //Save them with a nominal userid of -5, nothing else should use that!                  
             }else{
-                $currAsteroid = new asteroidS($gameData->id, -5, "Asteroid #" . $counter . "", $slot);
-                $dbManager->submitShip($gameData->id, $currAsteroid, -5); //Save themm with a nominal userid of -5, nothing else should use that!                    
+                $currAsteroid = new asteroidL($gameData->id, -5, "Asteroid #" . $counter . "", $slot);
+                $dbManager->submitShip($gameData->id, $currAsteroid, -5); //Save them with a nominal userid of -5, nothing else should use that!                    
             }
             $counter--; //Reduce counter   
         }
