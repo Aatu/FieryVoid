@@ -167,7 +167,7 @@ class ShipSystem {
 							$rammingSystem->fireOrders[] = $newFireOrder;
 						}
 
-					$newFireOrder->pubnotes = "<br>SABOTAGE - A marine unit attempted to damage " . $this->displayName .", but it was already destroyed.  They will continue sabotage operations.";	
+					$newFireOrder->pubnotes = "<br>SABOTAGE - Marine attempted to damage " . $this->displayName .", but it was already destroyed.  Sabotage operations continue.";	
 												
 						$cnc = $ship->getSystemByName("CnC");				
 						if($cnc){
@@ -566,14 +566,14 @@ class ShipSystem {
 				}//endof Rolled between 4 or 5		
 						
 				if ($sabotageRoll >= 6 && $sabotageRoll <= 8) { // No damage, try again next turn.						
-					$newFireOrder->pubnotes = "<br>Roll(Mod): $sabotageRoll($rollMod) - SABOTAGE - A marine unit fails to damage " . $this->displayName .". They will try again next turn.";								        	      	
+					$newFireOrder->pubnotes = "<br>Roll(Mod): $sabotageRoll($rollMod) - SABOTAGE - Marine unit fails to damage " . $this->displayName .". They will try again next turn.";								        	      	
 				}//endof Rolled between 6 or 8	
 
 				if ($sabotageRoll >= 9 ) { // Failed and Marines eliminated during Sabotage attempt.					
 					$critical->turnend = $gamedata->turn;//End Marines mission this turn
 					$critical->forceModify = true; //actually save the change.
 					$critical->updated = true; //actually save the change cd!
-					$newFireOrder->pubnotes = "<br>Roll(Mod): $sabotageRoll($rollMod) - SABOTAGE - A marine unit is eliminated attempting to damage " . $this->displayName .".";	
+					$newFireOrder->pubnotes = "<br>Roll(Mod): $sabotageRoll($rollMod) - SABOTAGE - Marine unit eliminated attempting to damage " . $this->displayName .".";	
 					
 					$critical->turnend = $gamedata->turn;//Marines are eliminated.
 					$critical->forceModify = true; //actually save the change.
@@ -620,11 +620,11 @@ class ShipSystem {
 						$newCrit->updated = true;
 				        $cnc->criticals[] =  $newCrit;				
 				}						
-					$newFireOrder->pubnotes = "<br>Roll(Mod): $attackerRoll($attackerRollMod10) - CAPTURE - Attacking marine unit eliminates a defender.";    	      	
+					$newFireOrder->pubnotes = "<br>Roll(Mod): $attackerRoll($attackerRollMod10) - CAPTURE - Marines eliminate a defender.";    	      	
 			}
 					
 			if ($attackerRoll >= 51) {				
-					$newFireOrder->pubnotes = "<br>Roll(Mod): $attackerRoll($attackerRollMod10) - CAPTURE - Attacking marine unit does not eliminate a defender.";
+					$newFireOrder->pubnotes = "<br>Roll(Mod): $attackerRoll($attackerRollMod10) - CAPTURE - Marines do not eliminate a defender.";
 			}				
 
 			//Now defenders strike back!
@@ -636,9 +636,9 @@ class ShipSystem {
 				$critical->turnend = $gamedata->turn;//End Capture crit this turn
 				$critical->forceModify = true; //actually save the change.
 				$critical->updated = true; //actually save the change cd!
-				$newFireOrder->pubnotes .= " The defending crew eliminate an attacking marine unit. Roll(Mod): $defenderRoll($defRollMod10).";	
+				$newFireOrder->pubnotes .= " Defenders eliminate a marine unit. Roll(Mod): $defenderRoll($defRollMod10).";	
 			}else{
-				$newFireOrder->pubnotes .= " The defending crew do not eliminate the attacking marines. Roll(Mod): $defenderRoll($defRollMod10).";					
+				$newFireOrder->pubnotes .= " Defenders do not eliminate any marines. Roll(Mod): $defenderRoll($defRollMod10).";					
 			}
 			
 		$this->checkShipCaptured($critical, $ship, $gamedata);	//Check if last defender eliminated and ship still under attack.
@@ -668,7 +668,7 @@ class ShipSystem {
 		if($cnc){
 			foreach($cnc->criticals as $critDisabled){
 				if($critDisabled->phpclass == "ShipDisabled"  && $critDisabled->turn <= $gamedata->turn){
-				$newFireOrder->pubnotes = "<br>RESCUE - Enemy ship has been captured, a marine unit automatically completes their rescue mission!";					
+				$newFireOrder->pubnotes = "<br>RESCUE - Enemy ship has been captured, marines automatically completes their rescue mission!";					
 					return;//Already captured, no more sabotage!					
 				}
 			}
@@ -682,25 +682,25 @@ class ShipSystem {
 				$critical->turnend = $gamedata->turn;//Success, end mission!
 				$critical->forceModify = true; //actually save the change.
 				$critical->updated = true; //actually save the change cd!
-				$newFireOrder->pubnotes = "<br>Roll(Mod): $rescueRoll($rollMod) - RESCUE - A marine unit successfully complete their rescue mission!";								        	      	
+				$newFireOrder->pubnotes = "<br>Roll(Mod): $rescueRoll($rollMod) - RESCUE - Marines successfully complete their rescue mission!";								        	      	
 		}			
 		
 		if ($rescueRoll >= 3 && $rescueRoll <= 4) { // //Success (more or less), end mission!						
 				$critical->turnend = $gamedata->turn;//Extend Marine mission to next turn.
 				$critical->forceModify = true; //actually save the change.
 				$critical->updated = true; //actually save the change cd!
-				$newFireOrder->pubnotes = "<br>Roll(Mod): $rescueRoll($rollMod) - RESCUE - A marine unit completes their rescue mission, but take heavy causalties.";									        	      	
+				$newFireOrder->pubnotes = "<br>Roll(Mod): $rescueRoll($rollMod) - RESCUE - Marines complete their rescue mission, but take heavy causalties.";									        	      	
 		}			
 
 		if ($rescueRoll >= 5 && $rescueRoll <= 6) { // No result, try again next turn.						
-				$newFireOrder->pubnotes = "<br>Roll(Mod): $rescueRoll($rollMod) - RESCUE - A marine unit fails to complete a rescue mission. They will try again next turn.";								        	      	
+				$newFireOrder->pubnotes = "<br>Roll(Mod): $rescueRoll($rollMod) - RESCUE - Marines fail to complete a rescue mission. They will try again next turn.";								        	      	
 		}
 
 		if ($rescueRoll >= 7 ) { // Failed and Marines eliminated during Rescue attempt.					
 				$critical->turnend = $gamedata->turn;//End Marines mission this turn
 				$critical->forceModify = true; //actually save the change.
 				$critical->updated = true; //actually save the change cd!
-				$newFireOrder->pubnotes = "<br>Roll(Mod): $rescueRoll($rollMod) - RESCUE - A marine unit is eliminated attempting their rescue mission.";							        	      	
+				$newFireOrder->pubnotes = "<br>Roll(Mod): $rescueRoll($rollMod) - RESCUE - Marines are eliminated attempting their rescue mission.";							        	      	
 		}
 				
 	}//endof doRescueMission()
@@ -751,7 +751,7 @@ class ShipSystem {
 					$rammingSystem->fireOrders[] = $newFireOrder;
 				}				
 				
-				$newFireOrder->pubnotes = "<br>Attacking Marines have overcome the defenders and disabled the ship for the rest of the scenario.";	
+				$newFireOrder->pubnotes = "<br>Attacking Marines overcome defenders and disable the ship for the rest of the scenario.";	
 			}										
 		}
 	}//endof checkShipCaptured()
