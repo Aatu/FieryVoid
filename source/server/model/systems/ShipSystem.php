@@ -354,7 +354,7 @@ class ShipSystem {
 				$cnc = $ship->getSystemByName("CnC");
 				$effectInitiative = Dice::d(6,1);//strength of effect: 1d6
 				$effectInitiative5 = $effectInitiative * 5;
-				$newFireOrder->pubnotes = "<br>Roll(Mod): $wreakHavocRoll($rollMod) - WREAK HAVOC - A marine unit has disrupted internal operations, initiative reduced by $effectInitiative5 next turn.";						
+				$newFireOrder->pubnotes = "<br>Roll(Mod): $wreakHavocRoll($rollMod) - WREAK HAVOC - Marines disrupt internal operations, initiative reduced by $effectInitiative5 next turn.";						
 										
 				if($cnc){
 					for($i=1; $i<=$effectInitiative;$i++){
@@ -368,7 +368,7 @@ class ShipSystem {
 			if ($wreakHavocRoll == 3) { //Reduce EW next turn
 				$scanner = $ship->getSystemByName("Scanner");
 				$effectSensors = Dice::d(3,1);//strength of effect: 1d3
-				$newFireOrder->pubnotes = "<br>Roll(Mod): $wreakHavocRoll($rollMod) - WREAK HAVOC - A marine unit has set up a jamming device, EW reduced by $effectSensors next turn.";						
+				$newFireOrder->pubnotes = "<br>Roll(Mod): $wreakHavocRoll($rollMod) - WREAK HAVOC - Marine set up a jamming device, EW reduced by $effectSensors next turn.";						
 										
 				if($scanner){
 					for($i=1; $i<=$effectSensors;$i++){
@@ -382,7 +382,7 @@ class ShipSystem {
 			if ($wreakHavocRoll == 4) { //reduce thrust next turn
 				$engine = $ship->getSystemByName("Engine");
 				$effectEngine = Dice::d(3,1);//strength of effect: 1d3				
-				$newFireOrder->pubnotes = "<br>Roll(Mod): $wreakHavocRoll($rollMod) - WREAK HAVOC - A marine unit has sabotaged engine conduits, thrust reduced by $effectEngine next turn unless ship is gravitic or an OSAT.";					
+				$newFireOrder->pubnotes = "<br>Roll(Mod): $wreakHavocRoll($rollMod) - WREAK HAVOC - Marines sabotage engine conduits, thrust reduced by $effectEngine next turn unless gravitic ship or an OSAT.";					
 				if($ship->gravitic) return; //No effect on Gravitic engines.
 				if($ship instanceof OSAT) return; //OSATs have no engines.					
 
@@ -398,7 +398,7 @@ class ShipSystem {
 
 			if ($wreakHavocRoll == 5) { //Increase hit profile next turn
 				//+1 to hit this ship next turn
-				$newFireOrder->pubnotes = "<br>Roll(Mod): $wreakHavocRoll($rollMod) - WREAK HAVOC - A marine unit has placed a signal emitter on target ship, its profile to incoming fire is increased by 5 next turn.";				
+				$newFireOrder->pubnotes = "<br>Roll(Mod): $wreakHavocRoll($rollMod) - WREAK HAVOC - Marines place a signal emitter on target ship, its defence profile is increased by 5% next turn.";				
 				$cnc = $ship->getSystemByName("CnC");				
 					if($cnc){
 						$crit = new ProfileIncreased(-1, $ship->id, $cnc->id, 'ProfileIncreased', $gamedata->turn+1, $gamedata->turn+1); //Ends next turn.
@@ -408,14 +408,14 @@ class ShipSystem {
 			}//endof Rolled 5
 									
 			if ($wreakHavocRoll >= 6 && $wreakHavocRoll <= 8) { //No effect this turn, try again next turn
-				$newFireOrder->pubnotes = "<br>Roll(Mod): $wreakHavocRoll($rollMod) - WREAK HAVOC - A marine unit fails to sabotage ship this turn. They will try again next turn.";
+				$newFireOrder->pubnotes = "<br>Roll(Mod): $wreakHavocRoll($rollMod) - WREAK HAVOC - Marine fail to sabotage ship this turn. They will try again next turn.";
 			}//endof Rolled between 6 and 8
 
 			if ($wreakHavocRoll >= 9) { // Failed and Marines eliminated during Sabotage attempt.
 				$critical->turnend = $gamedata->turn;//End Marines mission this turn
 				$critical->forceModify = true; //actually save the change.
 				$critical->updated = true; //actually save the change cd!
-				$newFireOrder->pubnotes = "<br>Roll(Mod): $wreakHavocRoll($rollMod) - WREAK HAVOC - A marine unit is eliminated whilst attempting to sabotage enemy ship.";									
+				$newFireOrder->pubnotes = "<br>Roll(Mod): $wreakHavocRoll($rollMod) - WREAK HAVOC - Marines unit eliminated whilst attempting to sabotage enemy ship.";									
 			}//endof Rolled 9 or more
 					 
 	}//endof doWreakHavocMission()
