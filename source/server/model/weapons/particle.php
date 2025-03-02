@@ -2387,8 +2387,8 @@ class MinorThoughtPulsar extends LinkedWeapon{
 			$this->data["Special"] .= "<br> - Rate of Fire - Prioritises extra shots this turn (+1 per 3 Thrust).";
 			$this->data["Special"] .= "<br> - Damage - Prioritises extra Damage this turn (+5 per shot per 3 Thrust).";
 			$this->data["Special"] .= "<br> - Hit Chance - Uses all thrust to improve hit chance (+10% per 3 Thrust).";				
-			$this->data["Special"] .= "<br> - Combo 1 - Prioritises Shots then Damage, then Hitchance.";	
-			$this->data["Special"] .= "<br> - Combo 2 - Prioritises Damage then shots.";				
+			$this->data["Special"] .= "<br> - Combo 1 - Prioritises Damage then shots, then Hitchance.";	
+			$this->data["Special"] .= "<br> - Combo 2 - Prioritises Shots and Damage equally.";				
     }
 
     public function getDamage($fireOrder){         
