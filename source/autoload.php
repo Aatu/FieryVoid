@@ -247,8 +247,9 @@ spl_autoload_register(
                 'disengagedfighter' => '/server/model/cricialClasses.php',
 				'dockingcollar' => '/server/model/systems/baseSystems.php',				
                 'dorono' => '/server/model/ships/hurr/dorono.php',
-                'doublev' => '/server/model/ships/raiders/doubleV.php',
-                'doublev_nav' => '/server/model/ships/raiders/doubleV_nav.php',
+                'doublev' => '/server/model/ships/raiders/doubleV.php', //TO BE DELETED LATER
+//                'doublev_nav' => '/server/model/ships/raiders/doubleV_nav.php', //Deleted old version
+                'doublevam' => '/server/model/ships/raiders/doubleVAM.php',
                 'dragon' => '/server/model/ships/drazi_old/dragon.php',
                 'dragonship' => '/server/model/ships/raiders/dragonship.php',
                 'drikorta' => '/server/model/ships/brakiri/drikorta.php',
@@ -354,7 +355,8 @@ spl_autoload_register(
                 'galleas' => '/server/model/ships/raiders/galleas.php',
                 'galleon' => '/server/model/ships/raiders/galleon.php',
                 'gamerules' => '/server/model/GameRules.php',
-                'gammastarfury' => '/server/model/ships/EA/gammaStarfury.php',
+                'gammastarfury' => '/server/model/ships/EA/gammaStarfury.php', //TO BE DELETED LATER
+                'gammastarfuryam' => '/server/model/ships/EA/gammaStarfuryAM.php',
                 'garasoch' => '/server/model/ships/dilgar/garasoch.php',
                 'garasochd' => '/server/model/ships/dilgar/garasochD.php',
                 'gatlingpulsecannon' => '/server/model/weapons/pulse.php',
