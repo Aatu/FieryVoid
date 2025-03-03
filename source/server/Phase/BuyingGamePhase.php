@@ -13,31 +13,33 @@ class BuyingGamePhase implements Phase
 
         foreach ($servergamedata->ships as $ship){
 
-            $h = 3;
-            if ($ship->team == 1){
-                $t1++;
-                $t = $t1;
-                $h = 0;
-            }else{
-                $t2++;
-                $t = $t2;
-            }
+            if($ship->userid != -5){ //No point doing any of this for Asteroids, they will place separately in next part.
+                $h = 3;
+                if ($ship->team == 1){
+                    $t1++;
+                    $t = $t1;
+                    $h = 0;
+                }else{
+                    $t2++;
+                    $t = $t2;
+                }
 
-            if ($t % 2 == 0){
-                $y = $t/2;
-            }else{
-                $y = (($t-1)/2)*-1;
-            }
+                if ($t % 2 == 0){
+                    $y = $t/2;
+                }else{
+                    $y = (($t-1)/2)*-1;
+                }
 
-            $x = -30;
+                $x = -30;
 
-            if ($ship->team == 2){
-                $x=30;
-            }
-
-            $move = new MovementOrder(-1, "start", new OffsetCoordinate($x, $y), 0, 0, 5, $h, $h, true, 1, 0, 0);
-            $ship->movement = array($move);
-
+                if ($ship->team == 2){
+                    $x=30;
+                }
+                
+                $move = new MovementOrder(-1, "start", new OffsetCoordinate($x, $y), 0, 0, 5, $h, $h, true, 1, 0, 0);
+                $ship->movement = array($move);
+            } 
+                   
             // Now let's see if we have to add any terrain.
             if ($gameData->rules->hasRuleName("asteroids") && $ship->userid == -5) { 
                 // It's an asteroid, so assign a unique random position.
