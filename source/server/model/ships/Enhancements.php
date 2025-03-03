@@ -1309,7 +1309,7 @@ class Enhancements{
 			  $enhLimit = $actualCapacity; //effectively limited by magazine capacity	
 			  $enhPrice = $ammoClass->getPrice($flight); 
 			  $enhPriceStep = 0; //flat rate
-			  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true );
+			  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false );
 			  //variable missiles are NOT enhancements!
 		  }
 		  $enhID = 'AMMO_FL'; //Long Range Fighter Missiles
@@ -1321,7 +1321,7 @@ class Enhancements{
 			  $enhLimit = $actualCapacity;		
 			  $enhPrice = $ammoClass->getPrice($flight); 
 			  $enhPriceStep = 0; //flat rate
-			  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+			  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 		  }
 		  $enhID = 'AMMO_FH'; //Heavy FighterMissiles
 		  if(in_array($enhID, $flight->enhancementOptionsEnabled)){ //option is enabled
@@ -1338,7 +1338,7 @@ class Enhancements{
 			  $enhLimit = $actualCapacity;		
 			  $enhPrice = $ammoClass->getPrice($flight); 
 			  $enhPriceStep = 0; //flat rate
-			  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+			  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 		  }
 		  $enhID = 'AMMO_FY'; //Dogfight FighterMissiles
 		  if(in_array($enhID, $flight->enhancementOptionsEnabled)){ //option is enabled
@@ -1349,7 +1349,7 @@ class Enhancements{
 			  $enhLimit = $actualCapacity;		
 			  $enhPrice = $ammoClass->getPrice($flight); 
 			  $enhPriceStep = 0; //flat rate
-			  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+			  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 		  }
 		  $enhID = 'AMMO_FD'; //Dropout FighterMissiles
 		  if(in_array($enhID, $flight->enhancementOptionsEnabled)){ //option is enabled
@@ -1360,7 +1360,7 @@ class Enhancements{
 			  $enhLimit = $actualCapacity;
 			  $enhPrice = $ammoClass->getPrice($flight); 
 			  $enhPriceStep = 0; //flat rate
-			  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+			  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 		  }
 	  } //end of magazine-requiring options
 	  
