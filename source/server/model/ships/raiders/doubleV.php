@@ -5,7 +5,9 @@ class DoubleV extends FighterFlight{
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 288;
-		$this->faction = "Raiders";
+//		$this->faction = "Raiders";
+$this->faction = "Custom Ships";
+$this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
 		$this->phpclass = "DoubleV";
 		$this->shipClass = "Double-V Medium Flight";
 		$this->imagePath = "img/ships/doubleV.png";

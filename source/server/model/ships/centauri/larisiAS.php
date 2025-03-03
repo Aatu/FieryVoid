@@ -9,7 +9,7 @@ class larisiAS extends FighterFlight{
 		    $this->faction = "Centauri Republic";
         $this->phpclass = "larisias";
         $this->shipClass = "Larisi Assault Shuttles";
-		    $this->imagePath = "img/ships/sentri.png";
+		    $this->imagePath = "img/ships/phalan.png";
         
         $this->forwardDefense = 8;
         $this->sideDefense = 8;

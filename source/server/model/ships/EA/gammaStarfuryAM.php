@@ -1,15 +1,13 @@
 <?php
 
-class GammaStarfury extends FighterFlight{
+class GammaStarfuryAM extends FighterFlight{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 366;
-//        $this->faction = "Earth Alliance";
-$this->faction = "Custom Ships";
-$this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
-        $this->phpclass = "GammaStarfury";
+        $this->faction = "Earth Alliance";
+        $this->phpclass = "GammaStarfuryAM";
         $this->shipClass = "Starfury: Aurora Gamma Heavy flight";
         $this->imagePath = "img/ships/auroraStarfury.png";
 	$this->variantOf = "Starfury: Aurora Heavy flight";	    
@@ -40,20 +38,17 @@ $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be 
             $fighter->imagePath = "img/ships/auroraStarfury.png";
             $fighter->iconPath = "img/ships/auroraStarfury_largei.png";
 
-            $missileRack = new FighterMissileRack(4, 330, 30);
-            $missileRack->firingModes = array(
-                1 => "FY"
-            );
-
-            $missileRack->missileArray = array(
-                1 => new MissileFY(330, 30)
-            );
+            //ammo magazine itself (AND its missile options)
+            $ammoMagazine = new AmmoMagazine(4); //pass magazine capacity - actual number of rounds, NOT number of salvoes
+            $fighter->addAftSystem($ammoMagazine); //fit to ship immediately
+            $ammoMagazine->addAmmoEntry(new AmmoMissileFY(), 0); //add Dogfight missile as an option - but do NOT load any actual missiles at this moment - so weapon data is actually filled with _something_!
+            $this->enhancementOptionsEnabled[] = 'AMMO_FY';//add enhancement options for missiles - Class-FY
 
             $frontGun = new PairedParticleGun(330, 30, 4);
             $frontGun->displayName = "Uni-Pulse Cannon";
-            $fighter->addFrontSystem($missileRack);
             $fighter->addFrontSystem($frontGun);
-		$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack	
+            $fighter->addFrontSystem(new AmmoFighterRack(330, 30, $ammoMagazine, false)); //$startArc, $endArc, $magazine, $base            
+		    $fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack	
             $this->addSystem($fighter);
 	   }
     }

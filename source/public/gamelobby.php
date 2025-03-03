@@ -223,22 +223,36 @@ if ($gamelobbydata->gamespace == '-1x-1'){ //open map
 
 $simMv = false;
 $desperate = false;
+$asteroids = false;
 $initiativeCategories = null;
 $desperateTeams = null;
+$asteroidsNo = 0;
+
 
 if ($gamelobbydata->rules) {
     if ($gamelobbydata->rules->hasRuleName('initiativeCategories')) {
         $simMv = true;
-        if ($gamelobbydata->rules->hasRule('jsonSerialize')) {
-            $initiativeCategories = $gamelobbydata->rules->callRule('jsonSerialize', []);
+        $initiativeRule = $gamelobbydata->rules->getRuleByName('initiativeCategories');
+        if ($initiativeRule && method_exists($initiativeRule, 'jsonSerialize')) {
+            $initiativeCategories = $initiativeRule->jsonSerialize();
         }
     }
+
     if ($gamelobbydata->rules->hasRuleName('desperate')) {
         $desperate = true;
-        if ($gamelobbydata->rules->hasRule('jsonSerialize')) {
-            $desperateTeams = $gamelobbydata->rules->callRule('jsonSerialize', []);
+        $desperateRule = $gamelobbydata->rules->getRuleByName('desperate');
+        if ($desperateRule && method_exists($desperateRule, 'jsonSerialize')) {
+            $desperateTeams = $desperateRule->jsonSerialize();
         }        
-    }    
+    }
+
+    if ($gamelobbydata->rules->hasRuleName('asteroids')) {
+        $asteroids = true;
+        $asteroidsRule = $gamelobbydata->rules->getRuleByName('asteroids');
+        if ($asteroidsRule && method_exists($asteroidsRule, 'jsonSerialize')) {
+            $asteroidsNo = $asteroidsRule->jsonSerialize();
+        }        
+    }         
 }
 
 if ($simMv == true) { // simultaneous movement
@@ -263,6 +277,12 @@ if ($desperate == true) { // Desperate rules in play
     $optionsUsed .= ', Desperate Rules: '. $teamDisplay . '';
 } else { // standard movement
     $optionsUsed .= ', Normal Rules';
+}
+
+if ($asteroids == true) { // Asteroid terrain rules in play
+    $optionsUsed .= ', Asteroids ('. $asteroidsNo . ')';
+} else { // standard movement
+    $optionsUsed .= ', No terrain';
 }
 
 ?>
