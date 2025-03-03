@@ -415,7 +415,7 @@ class ShipSystem {
 				$critical->turnend = $gamedata->turn;//End Marines mission this turn
 				$critical->forceModify = true; //actually save the change.
 				$critical->updated = true; //actually save the change cd!
-				$newFireOrder->pubnotes = "<br>Roll(Mod): $wreakHavocRoll($rollMod) - WREAK HAVOC - Marines unit eliminated whilst attempting to sabotage enemy ship.";									
+				$newFireOrder->pubnotes = "<br>Roll(Mod): $wreakHavocRoll($rollMod) - WREAK HAVOC - Marines eliminated whilst attempting to sabotage enemy ship.";									
 			}//endof Rolled 9 or more
 					 
 	}//endof doWreakHavocMission()
