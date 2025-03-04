@@ -2029,6 +2029,14 @@ class JumpEngine extends ShipSystem{
     
 	public function doHyperspaceJump($ship, $gamedata)
 	{
+		$reactorList = $ship->getSystemsByName('Reactor', true);
+		foreach($reactorList as $reactorCurr){     //Don't do Hyperspace jump for ships that have blown their own reactors!
+			if($reactorCurr->isDestroyed()) return;
+		}
+
+		$primaryStruct = $ship->getStructureSystem(0); //If ship is otherwise destroyed also don't jump.
+		if($primaryStruct->isDestroyed()) return;
+
 		$currHealth = $this->getRemainingHealth();
 		$maxhealth = $this->maxhealth;
 		$healthDiff = $maxhealth - $currHealth;
