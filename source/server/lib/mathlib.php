@@ -176,6 +176,7 @@ class Mathlib{
     
         return self::hexRound($q, $r);
     }
+
     
     private static function hexRound($q, $r) {
         $x = $q;
@@ -201,7 +202,7 @@ class Mathlib{
         return array("x" => $rx, "y" => $rz);
     }
     
-    //Just a function for testing is pixelCoToHex is working correctly, or could be adjusted for vice versa.
+    //Just a function for testing is pixelCoToHex is working correctly, or could be adjusted for vice versa - DK 03.25
     public static  function testHexConversion($q, $r){         
         $pixel = self::hexCoToPixel(new OffsetCoordinate($q, $r));       
         $hex = self::pixelCoToHex($pixel["x"], $pixel["y"]);        
@@ -212,6 +213,89 @@ class Mathlib{
             echo "FAIL: ($q, $r) -> ({$pixel["x"]}, {$pixel["y"]}) -> ({$hex["x"]}, {$hex["y"]})\n"; 
         } 
     } 
+
+
+    private static function crossProduct($a, $b) {
+        return $a['x'] * $b['y'] - $a['y'] * $b['x'];
+    }
+    
+    private static function doLinesIntersect($p1, $p2, $p3, $p4) {
+        $d1 = ['x' => $p2['x'] - $p1['x'], 'y' => $p2['y'] - $p1['y']];
+        $d2 = ['x' => $p4['x'] - $p3['x'], 'y' => $p4['y'] - $p3['y']];
+        
+        $denom = self::crossProduct($d1, $d2);
+        if ($denom == 0) return false; // Parallel lines
+    
+        $t = self::crossProduct(['x' => $p3['x'] - $p1['x'], 'y' => $p3['y'] - $p1['y']], $d2) / $denom;
+        $u = self::crossProduct(['x' => $p3['x'] - $p1['x'], 'y' => $p3['y'] - $p1['y']], $d1) / $denom;
+        
+        return $t >= 0 && $t <= 1 && $u >= 0 && $u <= 1;
+    }
+    
+    private static function getHexCorners($hex, $hexSize) {
+        $shrinkFactor = 0.9999;
+        $hexCo = self::hexCoToPixelLoS($hex);
+       
+        $cx = $hexCo['x'];
+        $cy = $hexCo['y'];
+    
+        $angles = [30, 90, 150, 210, 270, 330];
+        $corners = [];
+        
+        foreach ($angles as $angle) {
+            $radians = deg2rad($angle);
+            $corners[] = [
+                'x' => $cx + $shrinkFactor * $hexSize * cos($radians),
+                'y' => $cy + $shrinkFactor * $hexSize * sin($radians)
+            ];
+        }
+        return $corners;
+    }
+    
+    public static function checkLineOfSight($start, $end, $blockedHexes) {
+        $startPixel = self::hexCoToPixelLoS($start);
+        $endPixel = self::hexCoToPixelLoS($end);
+        $hexSize = 50;        
+
+        //Get variables for bounding box below
+        $lineMinQ = min($start->q, $end->q);
+        $lineMaxQ = max($start->q, $end->q);
+        $lineMinR = min($start->r, $end->r);
+        $lineMaxR = max($start->r, $end->r);
+
+        //Filter out the start and end hexes, as these should not block shots.
+        $filteredBlockedHexes = array_filter($blockedHexes, function ($hex) use ($start, $end) {
+            return !($hex->q == $start->q && $hex->r == $start->r) &&
+                   !($hex->q == $end->q && $hex->r == $end->r);
+        });
+        
+        foreach ($filteredBlockedHexes as $hex) { 
+            //Bounding box to reduce the number of blocked hexes we have to consider.           
+            if ($hex->q < $lineMinQ - $hexSize || $hex->q > $lineMaxQ + $hexSize ||
+                $hex->r < $lineMinR - $hexSize || $hex->r > $lineMaxR + $hexSize) {
+                continue;
+            }
+            //Get the bounadries of the blocking hex.
+            $corners = self::getHexCorners($hex, $hexSize);
+            for ($i = 0; $i < count($corners); $i++) {
+                $p1 = $corners[$i];
+                $p2 = $corners[($i + 1) % count($corners)];
+                //Check if shot intersects with those boundaries.
+                if (self::doLinesIntersect($startPixel, $endPixel, $p1, $p2)) {
+                    return true; // Line crosses a hex edge
+                }
+            }
+        }
+        return false; // LoS is NOT blocked
+    }
+
+    //Separate function for hex to pixel conversions in LoS calculations.  Basially multiplies hexCoToPixel by 50, but this keeps values same as Front End which is helpful for debugging etc.
+    public static function hexCoToPixelLoS(OffsetCoordinate $position, $hexSize = 50) {
+        $x = sqrt(3) * ($position->q - 0.5 * ($position->r & 1)) * $hexSize;
+        $y = (3/2 * $position->r) * $hexSize;
+    
+        return array("x" => $x, "y" => $y);
+    }
 
 /* //OLD METHOD OF pixelCoToHex() WHICH DIDN@T SEEM TO WORK CORRECTLY ANYWAY - DK 02.25
     //ATTENTION, this is bloody magic! (I don't really know how it works)
@@ -303,8 +387,10 @@ class Mathlib{
             
         return array("x"=>$hx, "y"=>$hy);
     }
-    */    
+    */        
+
 
 }
+
 
 ?>
