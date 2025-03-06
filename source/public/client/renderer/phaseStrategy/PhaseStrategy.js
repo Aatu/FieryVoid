@@ -724,6 +724,7 @@ window.PhaseStrategy = function () {
 
     function toggleBallisticLines(ships, payload) {
         this.ballisticIconContainer.toggleBallisticLines(ships);
+        this.ballisticIconContainer.consumeGamedata(this.gamedata, this.shipIconContainer);          
     };
 
     function showAllBallisticLines(ships, payload) {

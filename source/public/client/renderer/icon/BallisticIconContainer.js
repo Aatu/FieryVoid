@@ -364,7 +364,7 @@ window.BallisticIconContainer = function () {
         }).pop();
     }
 
-	//New code to create ballistic lines between launches and targets - DK 12.24
+	//New code to create ballistic lines between launches and targets such as when they are moving - DK 12.24
     BallisticIconContainer.prototype.updateLinesForShip = function (ship, iconContainer) {
 
 		var wasVisibleTarget = false; //Variable to track if destroyed lines were visible. If one was, they all were.
@@ -421,7 +421,7 @@ window.BallisticIconContainer = function () {
 	        this.ballisticLineIcons.forEach(function (lineIcon) {
 	            if (lineIcon.lineSprite) {
 		            if (ships.some(ship => ship.id === lineIcon.shooterId)) {
-	            		if (!lineIcon.lineSprite.isVisible){		                	
+	            		if (!lineIcon.lineSprite.isVisible){									                	
 		                    lineIcon.lineSprite.show();
 	            			lineIcon.lineSprite.isVisible = true;	                    
 		                }else{
@@ -469,7 +469,7 @@ window.BallisticIconContainer = function () {
 	        if(replay){
 	        	createBallisticLineIcon.call(this, ballistic, iconContainer, turn, this.scene, replay);	        	   	
 			}else{	
-				updateBallisticLineIcon.call(this, lineIcon, ballistic, iconContainer, turn);
+				updateBallisticLineIcon.call(this, lineIcon, ballistic, iconContainer, turn);			
 			}	
 	    } else {   	
 	        if(ballistic.notes != 'PersistentEffect') createBallisticLineIcon.call(this, ballistic, iconContainer, turn, this.scene, replay);
@@ -494,6 +494,7 @@ window.BallisticIconContainer = function () {
 		var targetLastMove = shipManager.movement.getLastCommitedMove(targetIcon.ship);
 		var targetNewPosition = this.coordinateConverter.fromHexToGame(targetLastMove.position);        
 
+        this.updateLinesForShip(targetIcon.ship, iconContainer);  		
         lineIcon.lineSprite.start = shooterNewPosition;
         lineIcon.lineSprite.end = targetNewPosition;
     }	
