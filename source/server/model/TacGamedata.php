@@ -752,6 +752,18 @@ class TacGamedata {
 		return false; //this ship was not found
 	}//endof function shipBelongs
 
+    public function getBlockedHexes() {
+        $blockedHexes = [];
+        
+        foreach ($this->ships as $ship) {
+            if ($ship->Enormous) { // Only enormous units block LoS
+                $position = $ship->getHexPos(); 
+                $blockedHexes[] = $position;
+            }
+        }
+      
+        return $blockedHexes;
+    } //endof function getBlockedHexes     
 
 }
 

@@ -1185,14 +1185,16 @@ class Weapon extends ShipSystem
                 //$soew = 0; //fighters CAN receive SOEW (fractional, SOEW calculation takes this into account)
             } else { //ballistics use of OB is more complicated
                 $oew = 0;
+                $losBlocked  = $this->checkLineOfSight($pos, $targetPos, $gamedata); //Defaults false e.g. line of sight NOT blocked.
+
                 //$soew = 0; //fighters CAN receive SOEW (fractional, SOEW calculation takes this into account)
                 if (!($shooter->isDestroyed() || $shooter->getFighterBySystem($fireOrder->weaponid)->isDestroyed())) {
-                    if ($shooter->hasNavigator) {// Fighter has navigator. Flight always benefits from offensive bonus.
+                    if ($shooter->hasNavigator && !$losBlocked ) {// Fighter has navigator and Line of Sight. Flight always benefits from offensive bonus.
                         $oew = $effectiveOB;
                     } else { // Check if target is in current weapon arc
                         $relativeBearing = $shooter->getBearingOnUnit($target);
-                        if (mathlib::isInArc($relativeBearing, $this->startArc, $this->endArc)) {
-                            // Target is in current launcher arc. Flight benefits from offensive bonus.
+                        if (mathlib::isInArc($relativeBearing, $this->startArc, $this->endArc) && !$losBlocked ) {
+                            // Target is in current launcher arc and has Line of Sight. Flight benefits from offensive bonus.
                             // Now check if the fighter is not firing any non-ballistic weapons
                             if (!$this->isFtrFiringNonBallisticWeapons($shooter, $fireOrder)) {
 								$oew = $effectiveOB;
@@ -1288,6 +1290,24 @@ class Weapon extends ShipSystem
 			$firecontrol += $bonusFireControl; //Add to $firecontrol.
 		}
 
+        //Check Line of Sight has been maintained by ship for Ballistic weapons after launch (Fighters checked separately above).
+        if($this->ballistic && (!$shooter instanceof FighterFlight)){
+            if(!$firecontrol <= 0){ //No point checking for LoS if FC is a 0 or lower anyway!
+                $losBlocked  = $this->checkLineOfSight($pos, $targetPos, $gamedata); //Defaults false e.g. line of sight NOT blocked.
+echo "Value of losBlocked: " . $losBlocked . "\n";                 
+                if($losBlocked ){ //Line of Sight is blocked!
+                    if($this instanceof AmmoMissileRackS) { //Only zero LAUNCHER FC on AmmoMissileLaunchers, missiles have own guidance e.g. bonus. 
+                        if (property_exists($this, 'basicFC') && is_array($this->basicFC) && !empty($this->basicFC)) {                         
+                            $firecontrol -= $this->basicFC[$target->getFireControlIndex()];
+echo "Value of firecontrol1: " . $firecontrol . "\n";
+                        }                       
+                    } else { //Everything else e.g. torpedoes, just has it's FC zeroed
+                        $firecontrol = 0; //Null weapon firecontrol when no Line of Sight.
+echo "Value of firecontrol2: " . $firecontrol . "\n";                         
+                    }
+                }
+            }    
+        }        
 
 		if (TargetingArrayHandler::targetingArraysExist()){ //Do Targeting Array exist in game?		
 			$mod += TargetingArrayHandler::getHitBonus($gamedata, $fireOrder, $shooter, $target);
@@ -2005,6 +2025,17 @@ full Advanced Armor effects (by rules) for reference:
     {
         return null;    
     }     
+
+    public function checkLineOfSight($shooterPos, $targetPos, $gamedata) {
+        $blockedLosHex = $gamedata->getBlockedHexes();
+
+        $noLoS = false;
+        if (!empty($blockedLosHex)) {            
+            $noLoS = Mathlib::checkLineOfSight($shooterPos, $targetPos, $blockedLosHex);
+        }
+        
+        return $noLoS;
+    }
 
 } //end of class Weapon
 
