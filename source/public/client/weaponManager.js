@@ -933,10 +933,16 @@ window.weaponManager = {
             var firstFighter = shooter.systems[1];
             var OBcrit = shipManager.criticals.hasCritical(firstFighter, "tmpsensordown");
             oew = shooter.offensivebonus - OBcrit;
-			if (weapon.ballistic && (!shooter.hasNavigator) ){ //for ballistics, if there is no Navigator, use OB only if target is in weapon arc!
-				if (!weaponManager.isOnWeaponArc(shooter, target, weapon)) {
-					oew = 0;
-				}
+			if (weapon.ballistic){ //for ballistics, if there is no Navigator, use OB only if target is in weapon arc!
+                var loSBlocked = false; //Default to LoS not blocked
+                var blockedLosHex = weaponManager.getBlockedHexes(); //Check if there are any hexes that block LoS                
+                if (blockedLosHex && blockedLosHex.length > 0) { //If so, are they blocking this shot? 
+                    loSBlocked = mathlib.checkLineOfSight(sPosLaunch, sPosTarget, blockedLosHex);
+                }   				
+                // If no navigator and out of arc, or if LoS is blocked, set oew to 0
+                if ((!shooter.hasNavigator && !weaponManager.isOnWeaponArc(shooter, target, weapon)) || loSBlocked) {
+                    oew = 0;
+                }
 			}		
             oew = Math.max(0, oew); //OBCrit cannot bring Offensive Bonus below 0
 			if(oew == 0) soew = 0;
@@ -1080,8 +1086,29 @@ window.weaponManager = {
 			var	FCIndex = weaponManager.getFireControlIndex(target); //Find out FC category of the target (0, 1 or 2)
 			bonusfirecontrol = computer.getFCAllocated(FCIndex);  //Use FCIndex to check if Computer has any BFCP allocated to that FC category.
 			firecontrol += bonusfirecontrol; //Add to firecontrol.					
-			}       
-		
+		}       
+
+        // Check Line of Sight for Ballistic weapons after launch (Fighters checked separately above)
+        if (weapon.ballistic && (!shooter.flight)) {
+            if (!(firecontrol <= 0)) { // No point checking for LoS if FC is 0 or lower
+                var loSBlocked = false;
+                var blockedLosHex = weaponManager.getBlockedHexes(); //Check if there are any hexes that block LoS                   
+                loSBlocked = mathlib.checkLineOfSight(sPosLaunch, sPosTarget, blockedLosHex); // Defaults to false (LoS NOT blocked)
+                
+                if (loSBlocked) { // Line of Sight is blocked!
+                    if (weapon instanceof AmmoMissileRackS) { 
+                        // Only zero LAUNCHER FC on AmmoMissileLaunchers; missiles have their own guidance (bonus)
+                        if (weapon.hasOwnProperty('basicFC') && Array.isArray(weapon.basicFC) && weapon.basicFC.length > 0) {                          
+                            firecontrol -= weapon.basicFC[weaponManager.getFireControlIndex(target)];
+                        }                       
+                    } else { 
+                        // Everything else (e.g., torpedoes) just has its FC zeroed
+                        firecontrol = 0; // Null weapon firecontrol when no Line of Sight
+                    }
+                }
+            }    
+        }         
+
         var goal = baseDef - jammermod - noLockMod - rangePenalty + oew + soew + firecontrol + mod;
         var hitChance = Math.round(goal / 20 * 100);
         return hitChance;
@@ -1401,16 +1428,16 @@ window.weaponManager = {
 
         var blockedLosHex = weaponManager.getBlockedHexes();
 
-        var noLoS = false;
+        var loSBlocked = false;
         if (blockedLosHex && blockedLosHex.length > 0) {
             var weapon = gamedata.selectedSystems[0]; // Use the first weapon to get the shooter's position
             var sPosShooter = weaponManager.getFiringHex(selectedShip, weapon);
             var sPosTarget = shipManager.getShipPosition(ship);
             
-            noLoS = mathlib.checkLineOfSight(sPosShooter, sPosTarget, blockedLosHex);
+            loSBlocked = mathlib.checkLineOfSight(sPosShooter, sPosTarget, blockedLosHex);
         }
 
-        if(noLoS) return;
+        if(loSBlocked) return;
 
         var toUnselect = [];
         var splitTargeted = [];
