@@ -1294,16 +1294,14 @@ class Weapon extends ShipSystem
         if($this->ballistic && (!$shooter instanceof FighterFlight)){
             if(!$firecontrol <= 0){ //No point checking for LoS if FC is a 0 or lower anyway!
                 $losBlocked  = $this->checkLineOfSight($pos, $targetPos, $gamedata); //Defaults false e.g. line of sight NOT blocked.
-echo "Value of losBlocked: " . $losBlocked . "\n";                 
+               
                 if($losBlocked ){ //Line of Sight is blocked!
                     if($this instanceof AmmoMissileRackS) { //Only zero LAUNCHER FC on AmmoMissileLaunchers, missiles have own guidance e.g. bonus. 
                         if (property_exists($this, 'basicFC') && is_array($this->basicFC) && !empty($this->basicFC)) {                         
                             $firecontrol -= $this->basicFC[$target->getFireControlIndex()];
-echo "Value of firecontrol1: " . $firecontrol . "\n";
                         }                       
                     } else { //Everything else e.g. torpedoes, just has it's FC zeroed
-                        $firecontrol = 0; //Null weapon firecontrol when no Line of Sight.
-echo "Value of firecontrol2: " . $firecontrol . "\n";                         
+                        $firecontrol = 0; //Null weapon firecontrol when no Line of Sight.                       
                     }
                 }
             }    
