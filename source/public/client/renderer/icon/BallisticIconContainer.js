@@ -8,7 +8,8 @@ window.BallisticIconContainer = function () {
         this.coordinateConverter = coordinateConverter;
         this.scene = scene;
         this.zoomScale = 1;
-        this.linesUpdated = false;
+        this.hexNumberIcons = [];
+        this.hexNumbersGenerated = false;
     }
 
     BallisticIconContainer.prototype.consumeGamedata = function (gamedata, iconContainer, replayData = null) {
@@ -123,6 +124,16 @@ window.BallisticIconContainer = function () {
         } else {
             this.zoomScale = 1;
         }
+/*        
+        //Immediately hide if zooming while lines are up.
+        this.ballisticLineIcons = this.ballisticLineIcons.filter(function (lineIcon) {	           
+	        if (lineIcon.lineSprite) {
+	            lineIcon.lineSprite.hide();
+	            lineIcon.lineSprite.isVisible = false;	 	            
+	        }
+            return true;
+        }, this);        
+*/        
     };
 
 
@@ -483,10 +494,7 @@ window.BallisticIconContainer = function () {
 		var targetLastMove = shipManager.movement.getLastCommitedMove(targetIcon.ship);
 		var targetNewPosition = this.coordinateConverter.fromHexToGame(targetLastMove.position);        
 
-		if(!this.linesUpdated){
-        	this.updateLinesForShip(targetIcon.ship, iconContainer);
-			this.linesUpdated = true; //Only do once, or repeats infinitely!
-		}	  		
+        this.updateLinesForShip(targetIcon.ship, iconContainer);  		
         lineIcon.lineSprite.start = shooterNewPosition;
         lineIcon.lineSprite.end = targetNewPosition;
     }	
