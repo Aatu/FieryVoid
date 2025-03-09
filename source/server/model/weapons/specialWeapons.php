@@ -5981,7 +5981,7 @@ class ProximityLaserLauncher extends Weapon{
 			private $pairing = null;	//Which targeter is it paired with?	
 			
 		public $firingModes = array(
-			1 => "Proximity Laser"
+			1 => "Proximity Launcher"
 		);
 			
 		public $repairPriority = 5;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
