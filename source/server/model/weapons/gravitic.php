@@ -581,24 +581,25 @@ class GraviticLance extends Raking{
             $this->data["Special"] .= '<br>Graviton Beams will both lock onto intial target, but can then be manually split by targeting other enemy ships.';                              
         }
 	
-        public function calculateHitBase(TacGamedata $gamedata, FireOrder $fireOrder){
-            //Check if this is a Sustained weapon firing, and therefore possible automatic hit.    
-            if ($this->isOverloadingOnTurn($gamedata->turn)) {                             
-                // We only care if the overloaded weapon fired last turn and therefore has a targetid stored in sustainedTarget variable.
-                if (!empty($this->sustainedTarget)) { //Check if  sustainedTarget is holding a value.                   
-                    if($this->sustainedTarget[$fireOrder->targetid] == 1) {  // Check if the target id exists in sustainedTarget and it hit last turn.                        
-                        $fireOrder->needed = 100; // Auto-hit!
-                        $fireOrder->updated = true;		                        
-                        $this->uninterceptable = true;
-                        $this->doNotIntercept = true;
-                        $fireOrder->pubnotes .= " Sustained shot automatically hits.";	                         
-                        return;                       
-                    }
-                }
+        public function calculateHitBase(TacGamedata $gamedata, FireOrder $fireOrder) {
+            //Check if this is a Sustained weapon firing, and therefore possible automatic hit. 
+            // We only care if the overloaded weapon fired last turn and therefore has a targetid stored in sustainedTarget variable.
+            if (
+                $this->isOverloadingOnTurn($gamedata->turn) &&
+                isset($this->sustainedTarget[$fireOrder->targetid]) &&
+                $this->sustainedTarget[$fireOrder->targetid] == 1
+            ) {
+                $fireOrder->needed = 100; // Auto-hit!
+                $fireOrder->updated = true;
+                $this->uninterceptable = true;
+                $this->doNotIntercept = true;
+                $fireOrder->pubnotes .= " Sustained shot automatically hits.";
+
+                return;
             }
 
-            parent::calculateHitBase($gamedata, $fireOrder); //Default routine if it's not an auto-hit.
-        }
+            parent::calculateHitBase($gamedata, $fireOrder); // Default routine if not an auto-hit.
+        }   
  
 
         public function generateIndividualNotes($gameData, $dbManager) { 
