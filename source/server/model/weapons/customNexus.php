@@ -2312,8 +2312,18 @@ class NexusShatterGunFtr extends Weapon{
        public function fire($gamedata, $fireOrder){ //note ammo usage
         	//debug::log("fire function");
             parent::fire($gamedata, $fireOrder);
-            $this->ammunition--;
-            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);
+            $ship = $gamedata->getShipById($fireOrder->shooterid);
+            $ammo = $this->ammunition;			
+            $this->ammunition--; //Deduct round just fired
+            //Now need to remove Enhancement bonuses from saved ammo count, as these will be re-added in onConstructed()
+            foreach ($ship->enhancementOptions as $enhancement) {
+                $enhID = $enhancement[0];
+                $enhCount = $enhancement[2];
+                if($enhCount > 0) {
+                    if ($enhID == 'EXT_AMMO') $this->ammunition -= $enhCount;
+                }
+            }        
+            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);			
         }
 
 		public function getDamage($fireOrder){
@@ -2458,8 +2468,18 @@ class NexusShatterGunFtr extends Weapon{
        public function fire($gamedata, $fireOrder){ //note ammo usage
         	//debug::log("fire function");
             parent::fire($gamedata, $fireOrder);
-            $this->ammunition--;
-            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);
+            $ship = $gamedata->getShipById($fireOrder->shooterid);
+            $ammo = $this->ammunition;			
+            $this->ammunition--; //Deduct round just fired
+            //Now need to remove Enhancement bonuses from saved ammo count, as these will be re-added in onConstructed()
+            foreach ($ship->enhancementOptions as $enhancement) {
+                $enhID = $enhancement[0];
+                $enhCount = $enhancement[2];
+                if($enhCount > 0) {
+                    if ($enhID == 'EXT_HAMMO') $this->ammunition -= $enhCount;
+                }
+            }        
+            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);			
         }
 
 	function __construct($startArc, $endArc, $nrOfShots = 1){
@@ -2955,8 +2975,18 @@ class NexusAutocannonFtr extends Matter{
        public function fire($gamedata, $fireOrder){ //note ammo usage
         	//debug::log("fire function");
             parent::fire($gamedata, $fireOrder);
-            $this->ammunition--;
-            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);
+            $ship = $gamedata->getShipById($fireOrder->shooterid);
+            $ammo = $this->ammunition;			
+            $this->ammunition--; //Deduct round just fired
+            //Now need to remove Enhancement bonuses from saved ammo count, as these will be re-added in onConstructed()
+            foreach ($ship->enhancementOptions as $enhancement) {
+                $enhID = $enhancement[0];
+                $enhCount = $enhancement[2];
+                if($enhCount > 0) {
+                    if ($enhID == 'EXT_HAMMO') $this->ammunition -= $enhCount;
+                }
+            }        
+            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);			
         }
 
 	function __construct($startArc, $endArc, $nrOfShots = 1){
@@ -3024,7 +3054,17 @@ class NexusAutogun extends Matter{
        public function fire($gamedata, $fireOrder){ //note ammo usage
         	//debug::log("fire function");
             parent::fire($gamedata, $fireOrder);
-            $this->ammunition--;
+            $ship = $gamedata->getShipById($fireOrder->shooterid);
+            $ammo = $this->ammunition;			
+            $this->ammunition--; //Deduct round just fired
+            //Now need to remove Enhancement bonuses from saved ammo count, as these will be re-added in onConstructed()
+            foreach ($ship->enhancementOptions as $enhancement) {
+                $enhID = $enhancement[0];
+                $enhCount = $enhancement[2];
+                if($enhCount > 0) {
+                    if ($enhID == 'EXT_AMMO') $this->ammunition -= $enhCount;
+                }
+            }        
             Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);			
         }
 
@@ -3708,8 +3748,18 @@ class NexusMinigunFtr extends Weapon{
        public function fire($gamedata, $fireOrder){ //note ammo usage
         	//debug::log("fire function");
             parent::fire($gamedata, $fireOrder);
-            $this->ammunition--;
-            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);
+            $ship = $gamedata->getShipById($fireOrder->shooterid);
+            $ammo = $this->ammunition;			
+            $this->ammunition--; //Deduct round just fired
+            //Now need to remove Enhancement bonuses from saved ammo count, as these will be re-added in onConstructed()
+            foreach ($ship->enhancementOptions as $enhancement) {
+                $enhID = $enhancement[0];
+                $enhCount = $enhancement[2];
+                if($enhCount > 0) {
+                    if ($enhID == 'EXT_AMMO') $this->ammunition -= $enhCount;
+                }
+            }        
+            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);			
         }
 
 		public function getDamage($fireOrder){
@@ -5315,7 +5365,7 @@ class NexusHeavyAssaultCannonBattery extends Weapon{
     class NexusSmallXrayLaser extends LinkedWeapon{
 
         public $name = "NexusSmallXrayLaser";
-        public $iconPath = "NexusLightXRayLaser.png";
+//        public $iconPath = "NexusLightXRayLaser.png";
         public $displayName = "Small X-Ray Laser";
         public $animation = "bolt";
         public $animationColor = array(0, 150, 255);
@@ -5326,16 +5376,17 @@ class NexusHeavyAssaultCannonBattery extends Weapon{
         public $intercept = 2;
 
         public $loadingtime = 1;
-        public $shots = 1;
-        public $defaultShots = 1;
+        public $shots = 2;
+        public $defaultShots = 2;
 
         public $rangePenalty = 2;
         public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
+        private $damagebonus = 0;
 
         public $damageType = "Standard"; 
         public $weaponClass = "Laser"; 
         
-        function __construct($startArc, $endArc, $damagebonus, $nrOfShots = 1){
+        function __construct($startArc, $endArc, $damagebonus, $nrOfShots = 2){
             $this->damagebonus = $damagebonus;
             $this->defaultShots = $nrOfShots;
             $this->shots = $nrOfShots;
@@ -5346,10 +5397,10 @@ class NexusHeavyAssaultCannonBattery extends Weapon{
             if ($damagebonus >= 7) $this->priority++;
 			
             if($nrOfShots === 1){
-                $this->iconPath = "NexusLightXRayLaser.png";
+                $this->iconPath = "NexusSmallXRayLaser1.png";
             }
             if($nrOfShots >2){//no special icon for more than 3 linked weapons
-                $this->iconPath = "lightParticleBeam3.png";
+                $this->iconPath = "NexusSmallXRayLaser3.png";
             }
 			
             parent::__construct(0, 1, 0, $startArc, $endArc);
@@ -6198,6 +6249,43 @@ class NexusHeavyAssaultCannonBattery extends Weapon{
 
 
 // PLASMA WEAPONS
+
+
+class NexusLightMagGun extends Plasma{
+	public $name = "NexusLightMagGun";
+	public $displayName = "Light Mag Gun";
+	public $animation = "bolt";
+	public $animationColor = array(255, 105, 0);
+
+	public $priority = 2;
+		        
+	public $loadingtime = 3;
+			
+	public $rangePenalty = 1;
+	public $fireControl = array(null, 2, 6); // fighters, <=mediums, <=capitals 
+
+	public $damageType = "Flash"; 
+	public $weaponClass = "Plasma"; 
+	public $firingModes = array( 1 => "Flash"); 
+
+	
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+	}
+	
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+	}
+		
+	public function getDamage($fireOrder){   
+		return Dice::d(10,4)+10;   
+	}
+	public function setMinDamage(){     $this->minDamage = 14;      }
+	public function setMaxDamage(){     $this->maxDamage = 50;      }
+}//endof class MagGun
+
+
+
 
 class NexusLightPlasmaGun extends Plasma{
     	public $name = "NexusLightPlasmaGun";
@@ -7580,7 +7668,7 @@ class NexusSwarmTorpedo extends Pulse{
         public $grouping = 25;
         public $maxpulses = 4;
         public $priority = 4;
-	protected $useDie = 2; //die used for base number of hits	
+	protected $useDie = 3; //die used for base number of hits	
         
         public $loadingtime = 2;
         
@@ -7635,7 +7723,7 @@ class NexusRangedSwarmTorpedo extends Pulse{
         public $grouping = 25;
         public $maxpulses = 4;
         public $priority = 4;
-	protected $useDie = 2; //die used for base number of hits	
+	protected $useDie = 3; //die used for base number of hits	
         
         public $loadingtime = 2;
         
@@ -8157,9 +8245,9 @@ public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon){
             parent::__construct(0, 1, 0, $startArc, $endArc);
         }
 
-        public function getDamage($fireOrder){ return Dice::d(10, 1)+1;   }
-        public function setMinDamage(){     $this->minDamage = 2 ;      }
-        public function setMaxDamage(){     $this->maxDamage = 11 ;      }
+        public function getDamage($fireOrder){ return Dice::d(6, 1)+4;   }
+        public function setMinDamage(){     $this->minDamage = 5 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 10 ;      }
 	}// endof NexusParticleGridFtr
 
 
@@ -8294,8 +8382,18 @@ public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon){
        public function fire($gamedata, $fireOrder){ //note ammo usage
         	//debug::log("fire function");
             parent::fire($gamedata, $fireOrder);
-            $this->ammunition--;
-            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);
+            $ship = $gamedata->getShipById($fireOrder->shooterid);
+            $ammo = $this->ammunition;			
+            $this->ammunition--; //Deduct round just fired
+            //Now need to remove Enhancement bonuses from saved ammo count, as these will be re-added in onConstructed()
+            foreach ($ship->enhancementOptions as $enhancement) {
+                $enhID = $enhancement[0];
+                $enhCount = $enhancement[2];
+                if($enhCount > 0) {
+                    if ($enhID == 'EXT_AMMO') $this->ammunition -= $enhCount;
+                }
+            }        
+            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);			
         }
 
         public function getDamage($fireOrder){ return Dice::d(6, 1)+3;   }

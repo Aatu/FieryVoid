@@ -30,6 +30,11 @@ window.LogAnimation = function () {
         calculateDisplay.call(this);
     };
 
+    LogAnimation.prototype.addLogEntryDestroyed = function (ship, time, jumped) {
+        this.entries.push({ time: time, ship: ship, displayed: null, jumped : jumped });
+        calculateDisplay.call(this);
+    };
+
     LogAnimation.prototype.addLogEntryMove = function (movement, time) {
         this.entries.push({ time: time, movement: movement, displayed: null });
         calculateDisplay.call(this);
@@ -37,7 +42,7 @@ window.LogAnimation = function () {
 
     LogAnimation.prototype.cleanUp = function () {
         this.entries.forEach(function (entry) {
-            if (entry.fire) {
+            if (entry.fire || entry.ship) {
                 window.combatLog.removeFireOrders(entry.displayed);
             } else {
                 //window.combatLog.removeMoves(entry.movement);
@@ -48,6 +53,8 @@ window.LogAnimation = function () {
     function tryToHideNext() {
         if (this.nextToHide && this.currentTime < this.nextToHide.time) {
             if (this.nextToHide.fire) {
+                window.combatLog.removeFireOrders(this.nextToHide.displayed);
+            } else if (this.nextToHide.ship){
                 window.combatLog.removeFireOrders(this.nextToHide.displayed);
             } else {
                 //window.combatLog.removeMoves(this.nextToHide.movement);
@@ -61,7 +68,9 @@ window.LogAnimation = function () {
         if (this.nextToDisplay && this.currentTime > this.nextToDisplay.time) {
             if (this.nextToDisplay.fire) {
                 this.nextToDisplay.displayed = window.combatLog.logFireOrders(this.nextToDisplay.fire);
-            } else {
+            }  else if (this.nextToDisplay.ship){
+                this.nextToDisplay.displayed = window.combatLog.logDestroyedShip(this.nextToDisplay.ship, this.nextToDisplay.jumped);
+            }else {
                 //window.combatLog.logMoves(this.nextToDisplay.movement);
             }
 

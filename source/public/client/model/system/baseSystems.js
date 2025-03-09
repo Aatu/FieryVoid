@@ -246,6 +246,8 @@ JumpEngine.prototype.constructor = JumpEngine;
 JumpEngine.prototype.initializationUpdate = function () {
 	if(shipManager.power.isBoosted(this.ship, this)) {
 		this.outputDisplay = "JUMP";
+	}else{
+		this.outputDisplay = this.output;		
 	}
 		return this;
 }	

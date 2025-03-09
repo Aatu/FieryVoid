@@ -592,6 +592,12 @@ var AmmoMag = function AmmoMag(json, ship) {
 AmmoMag.prototype = Object.create(ShipSystem.prototype);
 AmmoMag.prototype.constructor = AmmoMag;
 
+var NexusLightMagGun = function NexusLightMagGun(json, ship) {
+    Weapon.call(this, json, ship);
+};
+NexusLightMagGun.prototype = Object.create(Weapon.prototype);
+NexusLightMagGun.prototype.constructor = NexusLightMagGun;
+
 
 
 

@@ -11,7 +11,7 @@ class MakarRatash extends MediumShip{
         $this->shipClass = "Ratash Early Frigate";
 		$this->unofficial = true;
         $this->canvasSize = 90;
-        $this->agile = true;
+//        $this->agile = true;
 	    $this->isd = 1888;
 
 	    $this->notes = 'Atmospheric capable';

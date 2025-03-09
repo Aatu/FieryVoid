@@ -88,7 +88,7 @@ class MakarKamminRefit extends BaseShip{
 					5 => "Cargo Bay",
 					7 => "Light X-Ray Laser",
 					9 => "X-Ray Laser",
-					11 => "RAM Launcher",
+					11 => "Jump Engine",
 					18 => "Structure",
 					20 => "Primary",
 			),

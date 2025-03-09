@@ -36343,21 +36343,16 @@ Object.defineProperty(exports, "__esModule", {
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _templateObject = _taggedTemplateLiteral(["\n    position: fixed;\n    right: 0;\n    top: 60px;\n    z-index: 4;\n"], ["\n    position: fixed;\n    right: 0;\n    top: 60px;\n    z-index: 4;\n"]),
-    _templateObject2 = _taggedTemplateLiteral(["\n    display: flex;\n    width: 50px;\n    height: 50px;\n    align-items: center;\n    justify-content: center;\n    font-size: 32px;\n    border-right: none;\n    margin-top: 5px;\n    background-repeat: no-repeat;\n    background-size: cover;\n    ", "\n"], ["\n    display: flex;\n    width: 50px;\n    height: 50px;\n    align-items: center;\n    justify-content: center;\n    font-size: 32px;\n    border-right: none;\n    margin-top: 5px;\n    background-repeat: no-repeat;\n    background-size: cover;\n    ", "\n"]),
+    _templateObject2 = _taggedTemplateLiteral(["\n    display: flex;\n    width: 45px;\n    height: 45px;\n    align-items: center;\n    justify-content: center;\n    font-size: 32px;\n    border-right: none;\n    margin-top: 5px;\n    background-repeat: no-repeat;\n    background-size: cover;\n    ", "\n"], ["\n    display: flex;\n    width: 45px;\n    height: 45px;\n    align-items: center;\n    justify-content: center;\n    font-size: 32px;\n    border-right: none;\n    margin-top: 5px;\n    background-repeat: no-repeat;\n    background-size: cover;\n    ", "\n"]),
     _templateObject3 = _taggedTemplateLiteral(["\n    background-image: url(\"./img/EEW.png\");\n"], ["\n    background-image: url(\"./img/EEW.png\");\n"]),
     _templateObject4 = _taggedTemplateLiteral(["\n    background-image: url(\"./img/FEW.png\");\n"], ["\n    background-image: url(\"./img/FEW.png\");\n"]),
     _templateObject5 = _taggedTemplateLiteral(["\n    background-image: url(\"./img/ballisticTarget2.png\");\n"], ["\n    background-image: url(\"./img/ballisticTarget2.png\");\n"]),
     _templateObject6 = _taggedTemplateLiteral(["\n    background-image: url(\"./img/ballisticLaunch2.png\");\n"], ["\n    background-image: url(\"./img/ballisticLaunch2.png\");\n"]),
-    _templateObject7 = _taggedTemplateLiteral(["\n    background-image: url(\"./img/hexNumber.png\");\n"], ["\n    background-image: url(\"./img/hexNumber.png\");\n"]),
-    _templateObject8 = _taggedTemplateLiteral(["\n    position: absolute;\n    background-color: rgba(0, 0, 0, 0.7);\n    color: white;\n    padding: 5px 10px;\n    border-radius: 5px;\n    font-size: 12px;\n    pointer-events: none;\n    z-index: 10;\n    white-space: nowrap; /* Prevent text wrapping */\n"], ["\n    position: absolute;\n    background-color: rgba(0, 0, 0, 0.7);\n    color: white;\n    padding: 5px 10px;\n    border-radius: 5px;\n    font-size: 12px;\n    pointer-events: none;\n    z-index: 10;\n    white-space: nowrap; /* Prevent text wrapping */\n"]);
+    _templateObject7 = _taggedTemplateLiteral(["\n    background-image: url(\"./img/hexNumber.png\");\n"], ["\n    background-image: url(\"./img/hexNumber.png\");\n"]);
 
 var _react = require("react");
 
 var _react2 = _interopRequireDefault(_react);
-
-var _reactDom = require("react-dom");
-
-var _reactDom2 = _interopRequireDefault(_reactDom);
 
 var _styledComponents = require("styled-components");
 
@@ -36383,14 +36378,6 @@ var EwButtons = function (_React$Component) {
 
         var _this = _possibleConstructorReturn(this, (EwButtons.__proto__ || Object.getPrototypeOf(EwButtons)).call(this, props));
 
-        _this.state = {
-            tooltipVisible: false,
-            tooltipText: "",
-            tooltipPosition: { top: 0, left: 0 }
-        };
-
-        _this.handleMouseEnter = _this.handleMouseEnter.bind(_this);
-        _this.handleMouseLeave = _this.handleMouseLeave.bind(_this);
         _this.showFriendlyEW = _this.showFriendlyEW.bind(_this);
         _this.showEnemyEW = _this.showEnemyEW.bind(_this);
         _this.toggleFriendlyBallisticLines = _this.toggleFriendlyBallisticLines.bind(_this);
@@ -36425,111 +36412,32 @@ var EwButtons = function (_React$Component) {
             webglScene.customEvent("ToggleHexNumbers", { up: up });
         }
     }, {
-        key: "handleMouseEnter",
-        value: function handleMouseEnter(event) {
-            var buttonType = event.currentTarget.dataset.type; // Get the type of button
-            var tooltipText = "";
-            var offsetX = -60; // Default horizontal offset (left of the button)
-            var offsetY = 0; // Default vertical offset (centered vertically)
-
-            // Determine the tooltip text and offsets based on button type
-            switch (buttonType) {
-                case "friendlyEW":
-                    tooltipText = "Show Friendly EW";
-                    offsetX = -107; // Move further left
-                    offsetY = -5; // Slightly above the center
-                    break;
-                case "enemyEW":
-                    tooltipText = "Show Enemy EW";
-                    offsetX = -100; // Slightly less left
-                    offsetY = -10; // Slightly below the center
-                    break;
-                case "friendlyBallistic":
-                    tooltipText = "Toggle Friendly Ballistics";
-                    offsetX = -140; // Farther left
-                    offsetY = -7; // Higher above
-                    break;
-                case "enemyBallistic":
-                    tooltipText = "Toggle Enemy Ballistics";
-                    offsetX = -135; // Closer to the button
-                    offsetY = -5; // Centered vertically
-                    break;
-                case "hexNumbers":
-                    tooltipText = "Toggle Hex Numbers";
-                    offsetX = -135; // Closer to the button
-                    offsetY = -5; // Centered vertically
-                    break;
-                default:
-                    tooltipText = "Unknown Button";
-            }
-
-            // Get button position and apply offsets
-            var buttonRect = event.currentTarget.getBoundingClientRect();
-            this.setState({
-                tooltipVisible: true,
-                tooltipText: tooltipText,
-                tooltipPosition: {
-                    top: buttonRect.top + buttonRect.height / 2 + offsetY,
-                    left: buttonRect.left + offsetX
-                }
-            });
-        }
-    }, {
-        key: "handleMouseLeave",
-        value: function handleMouseLeave() {
-            this.setState({ tooltipVisible: false });
-        }
-    }, {
-        key: "renderTooltip",
-        value: function renderTooltip() {
-            if (!this.state.tooltipVisible) return null;
-
-            return _reactDom2.default.createPortal(_react2.default.createElement(
-                Tooltip,
-                { style: { top: this.state.tooltipPosition.top, left: this.state.tooltipPosition.left } },
-                this.state.tooltipText
-            ), document.body // Render tooltip at the root of the DOM
-            );
-        }
-    }, {
         key: "render",
         value: function render() {
             return _react2.default.createElement(
                 Container,
                 null,
                 _react2.default.createElement(FEWButton, {
-                    "data-type": "friendlyEW",
-                    onMouseEnter: this.handleMouseEnter.bind(this),
-                    onMouseLeave: this.handleMouseLeave.bind(this),
                     onMouseDown: this.showFriendlyEW.bind(this, false),
-                    onMouseUp: this.showFriendlyEW.bind(this, true)
+                    onMouseUp: this.showFriendlyEW.bind(this, true),
+                    onTouchStart: this.showFriendlyEW.bind(this, false),
+                    onTouchEnd: this.showFriendlyEW.bind(this, true)
                 }),
                 _react2.default.createElement(EEWButton, {
-                    "data-type": "enemyEW",
-                    onMouseEnter: this.handleMouseEnter.bind(this),
-                    onMouseLeave: this.handleMouseLeave.bind(this),
                     onMouseDown: this.showEnemyEW.bind(this, false),
-                    onMouseUp: this.showEnemyEW.bind(this, true)
+                    onMouseUp: this.showEnemyEW.bind(this, true),
+                    onTouchStart: this.showEnemyEW.bind(this, false),
+                    onTouchEnd: this.showEnemyEW.bind(this, true)
                 }),
                 _react2.default.createElement(FBButton, {
-                    "data-type": "friendlyBallistic",
-                    onMouseEnter: this.handleMouseEnter.bind(this),
-                    onMouseLeave: this.handleMouseLeave.bind(this),
                     onMouseDown: this.toggleFriendlyBallisticLines.bind(this, false)
                 }),
                 _react2.default.createElement(EBButton, {
-                    "data-type": "enemyBallistic",
-                    onMouseEnter: this.handleMouseEnter.bind(this),
-                    onMouseLeave: this.handleMouseLeave.bind(this),
                     onMouseDown: this.toggleEnemyBallisticLines.bind(this, false)
                 }),
                 _react2.default.createElement(HexButton, {
-                    "data-type": "hexNumbers",
-                    onMouseEnter: this.handleMouseEnter.bind(this),
-                    onMouseLeave: this.handleMouseLeave.bind(this),
                     onMouseDown: this.toggleHexNumbers.bind(this, false)
-                }),
-                this.renderTooltip()
+                })
             );
         }
     }]);
@@ -36550,14 +36458,9 @@ var EBButton = MainButton.extend(_templateObject5);
 var FBButton = MainButton.extend(_templateObject6);
 var HexButton = MainButton.extend(_templateObject7);
 
-var Tooltip = _styledComponents2.default.div.withConfig({
-    displayName: "EwButtons__Tooltip",
-    componentId: "al1h4b-1"
-})(_templateObject8);
-
 exports.default = EwButtons;
 
-},{"../styled":75,"react":29,"react-dom":23,"styled-components":52}],62:[function(require,module,exports){
+},{"../styled":75,"react":29,"styled-components":52}],62:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -40614,7 +40517,7 @@ var SystemInfoButtons = function (_React$Component) {
 				canOnline(ship, system) && React.createElement(Button, { title: "Power on (RMB = All systems selected)", onClick: this.online.bind(this), onContextMenu: this.allOnline.bind(this), img: "./img/on.png" }),
 				canOffline(ship, system) && React.createElement(Button, { title: "Power off (RMB = All systems selected)", onClick: this.offline.bind(this), onContextMenu: this.allOffline.bind(this), img: "./img/off.png" }),
 				canOverload(ship, system) && React.createElement(Button, { title: "Overload", onClick: this.overload.bind(this), img: "./img/overload.png" }),
-				canStopOverload(ship, system) && React.createElement(Button, { title: "Stop overload", nClick: this.stopOverload.bind(this), img: "./img/overloading.png" }),
+				canStopOverload(ship, system) && React.createElement(Button, { title: "Stop overload", onClick: this.stopOverload.bind(this), img: "./img/overloading.png" }),
 				canDeBoost(ship, system) && React.createElement(Button, { title: "Remove boost", onClick: this.deboost.bind(this), img: "./img/minussquare.png" }),
 				canBoost(ship, system) && React.createElement(Button, { title: "Boost", onClick: this.boost.bind(this), img: "./img/plussquare.png" }),
 				canAddShots(ship, system) && React.createElement(Button, { title: "More shots", onClick: this.addShots.bind(this), img: "./img/plussquare.png" }),

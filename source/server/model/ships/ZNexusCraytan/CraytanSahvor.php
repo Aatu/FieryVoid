@@ -42,7 +42,7 @@ class CraytanSahvor extends MediumShip{
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
 	    
 		$this->addAftSystem(new NexusLightEnhPlasma(2, 5, 2, 180, 360));
-		$this->addAftSystem(new NexusACIDS(3, 6, 2, 60, 300));
+		$this->addAftSystem(new NexusACIDS(2, 6, 2, 60, 300));
 		$this->addAftSystem(new NexusLightEnhPlasma(2, 5, 2, 0, 180));
         $this->addAftSystem(new Thruster(3, 10, 0, 5, 2));    
         $this->addAftSystem(new Thruster(3, 10, 0, 5, 2));    

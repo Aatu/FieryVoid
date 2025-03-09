@@ -543,7 +543,7 @@ ThirdspaceShield.prototype.doDecrease10 = function () {
 };
 
 ThirdspaceShield.prototype.doDecrease25 = function () { 
-//Reduce this.maxhealth by 10 (or lower if less available) + increase Shield Generator by same amount.
+//Reduce this.maxhealth by 25 (or lower if less available) + increase Shield Generator by same amount.
 	
  	var ship = this.ship;	
 	for (var i in ship.systems) {
@@ -555,7 +555,7 @@ ThirdspaceShield.prototype.doDecrease25 = function () {
 	}
 
 	var shieldHealth = this.currentHealth;
-	if(shieldHealth >= 10){		
+	if(shieldHealth >= 25){		
 		this.currentHealth -= 25;
 		generator.storedCapacity += 25;
 	}else{

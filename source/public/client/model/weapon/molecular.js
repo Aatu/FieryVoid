@@ -183,31 +183,11 @@ MolecularSlicerBeamL.prototype.doMultipleFireOrders = function (shooter, target,
 	for (var s = 0; s < this.guns; s++) {
 		var fireid = shooter.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
                         
-		var calledid = -1;
+		var calledid = -1; //Slicers are Raking or Piercing Damage, cannot called sot!
 
-/* //Slicers are Raking or Piercing Damage, cannot called sot!
-	    if (system) {
-	        //check if weapon is eligible for called shot!
-            if (!weaponManager.canWeaponCall(this)) continue;
-
-	        // When the system is a subsystem, make all damage go through
-	        // the parent.
-	        while (system.parentId > 0) {
-	        system = shipManager.systems.getSystem(target, system.parentId);
-	    }
-
-	        calledid = system.id;
-	    }
-*/
-	    var damageClass = this.data["Weapon type"].toLowerCase();
+//	    var damageClass = this.data["Weapon type"].toLowerCase();
 	    var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
-
-/* //Slicers are not ballistic!
-	    if ((chance < 1)&&(!this.ballistic)) {//now ballistics can be launched when hit chance is 0 or less - important for Packet Torpedo!
-		    //debug && console.log("Can't fire, change < 0");
-		    continue;
-	    }
-*/
+        if(chance < 1) continue;
 
 	    var fire = {
 	        id: fireid,

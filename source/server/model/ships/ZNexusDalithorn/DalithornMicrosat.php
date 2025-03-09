@@ -4,13 +4,13 @@ class DalithornMicrosat extends MicroSAT{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 100*6;
-        $this->faction = "ZNexus Dalithorn Commonwealth";
+        $this->faction = "ZNexus Dalithorn Commonwealth (early)";
         $this->phpclass = "DalithornMicrosat";
         $this->shipClass = "Laser MicroSAT Cluster";
         $this->imagePath = "img/ships/Nexus/Dalithorn_Microsat2.png";
 		$this->unofficial = true;
         
-		$this->isd = 2109;
+		$this->isd = 2087;
 
         $this->canvasSize = 100;
         
@@ -51,9 +51,11 @@ class DalithornMicrosat extends MicroSAT{
 			$fighter->addFrontSystem($hvyGun);
 			$rightgun = new NexusShatterGunFtr(0, 180, 1);
 			$fighter->addFrontSystem($rightgun);
-            
 			
         	$this->addSystem($fighter);
+
+			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
+
        }
     }
     

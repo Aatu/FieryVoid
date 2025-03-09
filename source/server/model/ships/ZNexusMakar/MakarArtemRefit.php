@@ -14,7 +14,7 @@ class MakarArtemRefit extends MediumShip{
 		$this->unofficial = true;
         $this->canvasSize = 80;
 //        $this->agile = true;
-	    $this->isd = 2019;
+	    $this->isd = 2109;
 
 	    $this->notes = 'Atmospheric capable';
         

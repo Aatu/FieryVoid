@@ -13,7 +13,7 @@ class MakarTorgeth extends MediumShip{
 			$this->occurence = "uncommon";
 		$this->unofficial = true;
         $this->canvasSize = 90;
-        $this->agile = true;
+//        $this->agile = true;
 	    $this->isd = 1912;
 
 	    $this->notes = 'Atmospheric capable';

@@ -10,6 +10,8 @@ class Xonn extends VreeCapital{
 		$this->shipClass = "Xonn Dreadnought";
 		$this->isd = 2260;
         $this->limited = 10; //Restricted Deployment
+		
+		$this->variantOf = "OBOLETE"; //to be deleted after it's no longer active use
 
 		$this->shipSizeClass = 3;
 		$this->iniativebonus = 0;

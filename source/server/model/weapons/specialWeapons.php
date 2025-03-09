@@ -5638,7 +5638,7 @@ class PsionicConcentratorLight extends Weapon{
             );
 
     public $fireControl = array(7, 3, 2); // fighters, <mediums, <capitals 
-    public $fireControlArray = array( 1=>array(6, 2, 2), 2=>array(2, 4, 4));
+    public $fireControlArray = array( 1=>array(6, 2, 2), 2=>array(1, 4, 5));	
 
     public $rangePenalty = 1;
     public $rangePenaltyArray = array( 1=>0.5, 2=>1);
@@ -6705,6 +6705,7 @@ class Marines extends Weapon{
 		$targetSpeed = $targetMove->speed;
 		$speedDifference = abs($targetSpeed - $shooterSpeed);//Calculate absolute difference in speed.
 		if($shooter->faction == "Llort") $speedDifference -= 1;//Llort reduce speed difference by 1.
+		if($shooter->faction == "ZNexus Sal-bez Coalition") $speedDifference -= 1;//Llort reduce speed difference by 1.
 			
 		$finalSpeedDifference = max(0, $speedDifference);//Llort bonus could make it -1...
 		
@@ -7024,16 +7025,14 @@ class GrapplingClaw extends Weapon{
 		if($target->factionAge > 2) {//Cannot attach to Ancients.  Might be impossible if Front End chance is also made 0%
 			$fireOrder->pubnotes .= "<br> Grappling Claws cannot attach to Ancient ships.";
 			$fireOrder->needed = 0;
-			$fireOrder->updated = true;
-			$this->dontDeductAmmmo = true;//Marines weren't eliminated, they just weren't delivered.  Don't take ammo from Magazine.	
+			$fireOrder->updated = true;	
 			return; 
 		}
 		
         if($target->iniative > $shooter->iniative){//Should not happen, Front End will prevent.  But just in case.
 			$fireOrder->pubnotes .= "<br> Grappling Claws cannot attach when you have lower Initiative than target.";
 			$fireOrder->needed = 0;
-			$fireOrder->updated = true;
-			$this->dontDeductAmmmo = true;//Marines weren't eliminated, they just weren't delivered.  Don't take ammo from Magazine.	
+			$fireOrder->updated = true;	
 			return; 
 		}  		
 		
@@ -7049,10 +7048,7 @@ class GrapplingClaw extends Weapon{
 
         $hitLoc = null;
         $hitLoc = $target->getHitSection($shooter, $fireOrder->turn);
-        
-        $attachRoll = Dice::d(20);      	
-        	
-		
+
 		if($finalSpeedDifference > 0){//D20 roll needs to be over speed difference.
 			$baseHitChance = 100;//Start with automatic hit.
 			$speedChance = 	$finalSpeedDifference *5;//Each point of speed difference is 5% chance to miss.
@@ -7065,8 +7061,7 @@ class GrapplingClaw extends Weapon{
 		}else{
 			$fireOrder->needed = 100;
 			$fireOrder->updated = true;
-			$fireOrder->chosenLocation = $hitLoc;		
-			$this->dontDeductAmmmo = true;//Marines weren't eliminated, they just weren't delivered.  Don't take ammo from Magazine						
+			$fireOrder->chosenLocation = $hitLoc;							
 			return;
 		}	
 		
@@ -7093,13 +7088,6 @@ class GrapplingClaw extends Weapon{
 		}
 			
 	}
-
-/*
-	private static function recordBoarding($targetId) {
-	    Marines::$boardedThisTurn[] = $targetId;
-	}	
-*/	
-
 
 	private function checkMissionAmount($target, $gamedata, $fireOrder){	
 		$tooMany = false;//Initialise

@@ -19,7 +19,7 @@ class SalbezTavertez extends BaseShipNoAft{
         $this->sideDefense = 14;
         
         $this->turncost = 0.66;
-        $this->turndelaycost = 0.66;
+        $this->turndelaycost = 1.0;
         $this->accelcost = 3;
         $this->rollcost = 3;
         $this->pivotcost = 3;

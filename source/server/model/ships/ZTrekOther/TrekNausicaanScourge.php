@@ -14,7 +14,7 @@ class TrekNausicaanScourge extends HeavyCombatVessel{
 	$this->unofficial = true;
 	    $this->isd = '2262';
 
-	$this->fighters = array("light"=>12,"Shuttlecraft"=>2);
+	$this->fighters = array("heavy"=>12,"Shuttlecraft"=>2);
 		$this->customFighter = array("Nausicaan small craft"=>14); //can deploy small craft with Nausicaan crew
         
         $this->forwardDefense = 13;

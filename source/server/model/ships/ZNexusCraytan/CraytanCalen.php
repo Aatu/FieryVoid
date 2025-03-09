@@ -11,7 +11,7 @@ class CraytanCalen extends LCV{
 			$this->canvasSize = 65; //img has 200px per side
         $this->shipClass = "Calen Gunboat";
 		$this->unofficial = true;
-		$this->isd = 2038;
+		$this->isd = 2126;
 
         $this->hangarRequired = ''; //Nexus LCVs are more independent than their B5 counterparts
 	    $this->notes = 'May deploy independently.';

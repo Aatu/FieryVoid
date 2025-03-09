@@ -61,8 +61,8 @@ class VelraxArcCorvetteRefit2 extends MediumShip{
 
 		1=> array(
 			6 => "Thruster",
-			9 => "Twin Ion Gun",
-			11 => "Plasma Arc",
+			8 => "Twin Ion Gun",
+			10 => "Plasma Arc",
 			17 => "Structure",
 			20 => "Primary",
 		),

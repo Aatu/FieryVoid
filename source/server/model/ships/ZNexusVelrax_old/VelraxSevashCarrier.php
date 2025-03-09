@@ -33,7 +33,7 @@ class VelraxSevashCarrier extends MediumShip{
         $this->addPrimarySystem(new CnC(4, 15, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 14, 5, 5));
         $this->addPrimarySystem(new Engine(3, 12, 0, 8, 3));
-        $this->addPrimarySystem(new Hangar(1, 8));
+        $this->addPrimarySystem(new Hangar(1, 2));
         $this->addPrimarySystem(new Thruster(3, 12, 0, 4, 3));
         $this->addPrimarySystem(new Thruster(3, 12, 0, 4, 4));        
         
@@ -47,7 +47,7 @@ class VelraxSevashCarrier extends MediumShip{
 		$this->addAftSystem(new NexusTwinIonGun(2, 4, 4, 120, 360));
 		$this->addAftSystem(new NexusTwinIonGun(2, 4, 4, 0, 240));
        
-        $this->addPrimarySystem(new Structure(4, 50));
+        $this->addPrimarySystem(new Structure(4, 56));
 
 	//d20 hit chart
 	$this->hitChart = array(

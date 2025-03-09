@@ -13,7 +13,7 @@ class QomYominOoru extends HeavyCombatVesselLeftRight{
 			$this->variantOf = "Ma Yol Heavy Destroyer";
 			$this->occurence = "common";
 		$this->unofficial = true;
-        $this->isd = 2109;
+        $this->isd = 2053;
 
         $this->fighters = array("normal"=>12);
 
@@ -26,8 +26,8 @@ class QomYominOoru extends HeavyCombatVesselLeftRight{
         $this->forwardDefense = 15;
         $this->sideDefense = 15;
         
-        $this->turncost = 1;
-        $this->turndelaycost = 1;
+        $this->turncost = 0.75;
+        $this->turndelaycost = 0.75;
         $this->accelcost = 3;
         $this->rollcost = 3;
         $this->pivotcost = 3;
@@ -64,12 +64,13 @@ class QomYominOoru extends HeavyCombatVesselLeftRight{
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addLeftSystem(new Structure( 4, 48));
-        $this->addRightSystem(new Structure( 3, 48));
+        $this->addRightSystem(new Structure( 4, 48));
         $this->addPrimarySystem(new Structure( 4, 40));
 		
         $this->hitChart = array(
             0=> array(
-                    8 => "Structure",
+                    7 => "Structure",
+					8 => "Hangar",
 					10 => "1:HK Control Node",
                     13 => "2:Thruster",
                     15 => "Scanner",

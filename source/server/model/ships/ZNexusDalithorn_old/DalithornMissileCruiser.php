@@ -81,7 +81,7 @@ class DalithornMissileCruiser extends HeavyCombatVessel{
             2=> array(
                     6 => "Thruster",
 					8 => "Light Gas Gun",
-                    12 => "Laser Missile",
+                    10 => "Laser Missile",
                     18 => "Structure",
                     20 => "Primary",
             ),

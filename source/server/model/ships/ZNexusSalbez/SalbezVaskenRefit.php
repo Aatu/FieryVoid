@@ -43,10 +43,10 @@ class SalbezVaskenRefit extends HeavyCombatVessel{
         $this->addFrontSystem(new NexusImprovedParticleBeam(2, 3, 1, 300, 120));
                 
         $this->addAftSystem(new Thruster(4, 28, 0, 10, 2));
-        $this->addAftSystem(new NexusImprovedParticleBeam(3, 6, 1, 240, 360));
+        $this->addAftSystem(new NexusImprovedParticleBeam(3, 3, 1, 240, 360));
         $this->addAftSystem(new NexusImprovedParticleBeam(2, 3, 1, 90, 270));
         $this->addAftSystem(new NexusImprovedParticleBeam(2, 3, 1, 90, 270));
-        $this->addAftSystem(new NexusImprovedParticleBeam(3, 6, 1, 0, 120));
+        $this->addAftSystem(new NexusImprovedParticleBeam(3, 3, 1, 0, 120));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 4, 35));

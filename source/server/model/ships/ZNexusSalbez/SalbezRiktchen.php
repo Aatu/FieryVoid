@@ -4,7 +4,7 @@ class SalbezRiktchen extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 530;
+	$this->pointCost = 570;
 	$this->faction = "ZNexus Sal-bez Coalition";
         $this->phpclass = "SalbezRiktchen";
         $this->imagePath = "img/ships/Nexus/salbez_riktchen3.png";
@@ -37,11 +37,9 @@ class SalbezRiktchen extends BaseShip{
 		
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
-		$this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 270, 90));
-		$this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 270, 90));
+		$this->addFrontSystem(new NexusImprovedParticleBeam(2, 3, 1, 270, 90));
 		$this->addFrontSystem(new Hangar(3, 6));
-		$this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 270, 90));
-		$this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 270, 90));
+		$this->addFrontSystem(new NexusImprovedParticleBeam(2, 3, 1, 270, 90));
 
         $this->addAftSystem(new Thruster(3, 10, 0, 2, 2));
         $this->addAftSystem(new Thruster(3, 10, 0, 2, 2));
@@ -52,16 +50,16 @@ class SalbezRiktchen extends BaseShip{
 
         $this->addLeftSystem(new MediumLaser(3, 6, 5, 240, 360));
         $this->addLeftSystem(new NexusSwarmTorpedo(3, 5, 2, 240, 360));
-		$this->addLeftSystem(new LightParticleBeamShip(2, 2, 1, 240, 60));
-		$this->addLeftSystem(new LightParticleBeamShip(2, 2, 1, 240, 60));
-		$this->addLeftSystem(new LightParticleBeamShip(2, 2, 1, 120, 300));
+		$this->addLeftSystem(new NexusImprovedParticleBeam(2, 3, 1, 240, 60));
+		$this->addLeftSystem(new NexusImprovedParticleBeam(2, 3, 1, 240, 60));
+		$this->addLeftSystem(new NexusImprovedParticleBeam(2, 3, 1, 120, 300));
         $this->addLeftSystem(new Thruster(3, 15, 0, 4, 3));
 
         $this->addRightSystem(new MediumLaser(3, 6, 5, 0, 120));
         $this->addRightSystem(new NexusSwarmTorpedo(3, 5, 2, 0, 120));
-		$this->addRightSystem(new LightParticleBeamShip(2, 2, 1, 300, 120));
-		$this->addRightSystem(new LightParticleBeamShip(2, 2, 1, 300, 120));
-		$this->addRightSystem(new LightParticleBeamShip(2, 2, 1, 60, 240));
+		$this->addRightSystem(new NexusImprovedParticleBeam(2, 3, 1, 300, 120));
+		$this->addRightSystem(new NexusImprovedParticleBeam(2, 3, 1, 300, 120));
+		$this->addRightSystem(new NexusImprovedParticleBeam(2, 3, 1, 60, 240));
         $this->addRightSystem(new Thruster(3, 15, 0, 4, 4));
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
@@ -83,7 +81,7 @@ class SalbezRiktchen extends BaseShip{
 			1=> array(
 					6 => "Thruster",
 					9 => "Hangar",
-					11 => "Light Particle Beam",
+					11 => "Improved Particle Beam",
 					18 => "Structure",
 					20 => "Primary",
 			),
@@ -97,7 +95,7 @@ class SalbezRiktchen extends BaseShip{
 					5 => "Thruster",
 					7 => "Medium Laser",
 					9 => "Swarm Torpedo",
-					11 => "Light Particle Beam",
+					11 => "Improved Particle Beam",
 					18 => "Structure",
 					20 => "Primary",
 			),
@@ -105,7 +103,7 @@ class SalbezRiktchen extends BaseShip{
 					5 => "Thruster",
 					7 => "Medium Laser",
 					9 => "Swarm Torpedo",
-					11 => "Light Particle Beam",
+					11 => "Improved Particle Beam",
 					18 => "Structure",
 					20 => "Primary",
 			),

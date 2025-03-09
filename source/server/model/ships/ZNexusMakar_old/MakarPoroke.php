@@ -13,7 +13,7 @@ class MakarPoroke extends MediumShip{
 			$this->occurence = "common";
 		$this->unofficial = true;
         $this->canvasSize = 90;
-        $this->agile = true;
+//        $this->agile = true;
 	    $this->isd = 1920;
 
 	    $this->notes = 'Atmospheric capable';
