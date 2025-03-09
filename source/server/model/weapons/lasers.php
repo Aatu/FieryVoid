@@ -98,7 +98,7 @@
         }
 
 
-        public function generateIndividualNotes($gameData, $dbManager) { 
+        public function generateIndividualNotes($gameData, $dbManager) {
             switch($gameData->phase) {
                 case 4: // Post-Firing phase
                     $firingOrders = $this->getFireOrders($gameData->turn); // Get fire orders for this turn
@@ -108,6 +108,8 @@
 
                     $ship = $this->getUnit(); // Ensure ship is defined before use
 
+                    if($this->isDestroyed() || $ship->isDestroyed()) break;                    
+        
                     foreach ($firingOrders as $firingOrder) { //Should only be 1.
                         $didShotHit = $firingOrder->shotshit; //1 or 0 depending on hit or miss.
                         $targetid = $firingOrder->targetid;
@@ -124,21 +126,25 @@
                                 );
                             }
                         }
-
+         
                         if ($didShotHit == 0) {
                             continue; // Shot missed, no need to track damage
                         }
-
+      
                         // Process damage to target systems
                         $target = $gameData->getShipById($targetid);
+                        if (!$target || !is_array($target->systems) || empty($target->systems)) {
+                            continue; // Ensure valid target and systems exist
+                        }
+
                         foreach ($target->systems as $system) {
                             $systemDamageThisTurn = 0;
                             $notes = 0; // Tracks how much armor should be ignored next turn
-
+       
                             foreach ($system->damage as $damage) {
-                            
+                               
                                 if ($damage->turn == $gameData->turn){  // Only consider this turn’s damage
-                                
+                                 
                                     if ($damage->shooterid == $ship->id && $damage->weaponid == $this->id) {
 
                                         $systemDamageThisTurn += $damage->damage; // Accumulate total damage dealt this turn
@@ -152,7 +158,7 @@
                                 } else {
                                     $notes = $systemDamageThisTurn; // Partial armor penetration
                                 }
-
+         
                                 // Create note(s) for armor ignored next turn
                                 while ($notes > 0) {
                                     $notekey = 'systeminfo';
@@ -495,20 +501,22 @@
 
  
 
-            public function generateIndividualNotes($gameData, $dbManager) { 
+            public function generateIndividualNotes($gameData, $dbManager) {
                 switch($gameData->phase) {
                     case 4: // Post-Firing phase
                         $firingOrders = $this->getFireOrders($gameData->turn); // Get fire orders for this turn
                         if (!$firingOrders) {
                             break; // No fire orders, nothing to process
                         }
-            
+    
                         $ship = $this->getUnit(); // Ensure ship is defined before use
+    
+                        if($this->isDestroyed() || $ship->isDestroyed()) break;                    
             
                         foreach ($firingOrders as $firingOrder) { //Should only be 1.
                             $didShotHit = $firingOrder->shotshit; //1 or 0 depending on hit or miss.
                             $targetid = $firingOrder->targetid;
-
+    
                             // Check for sustained mode condition
                             if ($this->isOverloadingOnTurn($gameData->turn) && $this->loadingtime <= $this->overloadturns) {
                                 if (($this->overloadshots - 1) > 0) { // Ensure not the last sustained shot
@@ -521,23 +529,27 @@
                                     );
                                 }
                             }
-            
+             
                             if ($didShotHit == 0) {
                                 continue; // Shot missed, no need to track damage
                             }
-        
+          
                             // Process damage to target systems
                             $target = $gameData->getShipById($targetid);
+                            if (!$target || !is_array($target->systems) || empty($target->systems)) {
+                                continue; // Ensure valid target and systems exist
+                            }
+    
                             foreach ($target->systems as $system) {
                                 $systemDamageThisTurn = 0;
                                 $notes = 0; // Tracks how much armor should be ignored next turn
-        
+           
                                 foreach ($system->damage as $damage) {
-                                
+                                   
                                     if ($damage->turn == $gameData->turn){  // Only consider this turn’s damage
-                                    
+                                     
                                         if ($damage->shooterid == $ship->id && $damage->weaponid == $this->id) {
-
+    
                                             $systemDamageThisTurn += $damage->damage; // Accumulate total damage dealt this turn
                                         }
                                     }
@@ -549,7 +561,7 @@
                                     } else {
                                         $notes = $systemDamageThisTurn; // Partial armor penetration
                                     }
-            
+             
                                     // Create note(s) for armor ignored next turn
                                     while ($notes > 0) {
                                         $notekey = 'systeminfo';
@@ -709,8 +721,10 @@
                     if (!$firingOrders) {
                         break; // No fire orders, nothing to process
                     }
-        
+
                     $ship = $this->getUnit(); // Ensure ship is defined before use
+
+                    if($this->isDestroyed() || $ship->isDestroyed()) break;                    
         
                     foreach ($firingOrders as $firingOrder) { //Should only be 1.
                         $didShotHit = $firingOrder->shotshit; //1 or 0 depending on hit or miss.
@@ -728,21 +742,25 @@
                                 );
                             }
                         }
-        
+         
                         if ($didShotHit == 0) {
                             continue; // Shot missed, no need to track damage
                         }
-    
+      
                         // Process damage to target systems
                         $target = $gameData->getShipById($targetid);
+                        if (!$target || !is_array($target->systems) || empty($target->systems)) {
+                            continue; // Ensure valid target and systems exist
+                        }
+
                         foreach ($target->systems as $system) {
                             $systemDamageThisTurn = 0;
                             $notes = 0; // Tracks how much armor should be ignored next turn
-    
+       
                             foreach ($system->damage as $damage) {
-                            
+                               
                                 if ($damage->turn == $gameData->turn){  // Only consider this turn’s damage
-                                
+                                 
                                     if ($damage->shooterid == $ship->id && $damage->weaponid == $this->id) {
 
                                         $systemDamageThisTurn += $damage->damage; // Accumulate total damage dealt this turn
@@ -756,7 +774,7 @@
                                 } else {
                                     $notes = $systemDamageThisTurn; // Partial armor penetration
                                 }
-        
+         
                                 // Create note(s) for armor ignored next turn
                                 while ($notes > 0) {
                                     $notekey = 'systeminfo';
@@ -1443,15 +1461,17 @@ class LaserAccelerator extends Laser{
         }   
 
 
-        public function generateIndividualNotes($gameData, $dbManager) { 
+        public function generateIndividualNotes($gameData, $dbManager) {
             switch($gameData->phase) {
                 case 4: // Post-Firing phase
                     $firingOrders = $this->getFireOrders($gameData->turn); // Get fire orders for this turn
                     if (!$firingOrders) {
                         break; // No fire orders, nothing to process
                     }
-        
+
                     $ship = $this->getUnit(); // Ensure ship is defined before use
+
+                    if($this->isDestroyed() || $ship->isDestroyed()) break;                    
         
                     foreach ($firingOrders as $firingOrder) { //Should only be 1.
                         $didShotHit = $firingOrder->shotshit; //1 or 0 depending on hit or miss.
@@ -1469,21 +1489,25 @@ class LaserAccelerator extends Laser{
                                 );
                             }
                         }
-        
+         
                         if ($didShotHit == 0) {
                             continue; // Shot missed, no need to track damage
                         }
-    
+      
                         // Process damage to target systems
                         $target = $gameData->getShipById($targetid);
+                        if (!$target || !is_array($target->systems) || empty($target->systems)) {
+                            continue; // Ensure valid target and systems exist
+                        }
+
                         foreach ($target->systems as $system) {
                             $systemDamageThisTurn = 0;
                             $notes = 0; // Tracks how much armor should be ignored next turn
-    
+       
                             foreach ($system->damage as $damage) {
-                            
+                               
                                 if ($damage->turn == $gameData->turn){  // Only consider this turn’s damage
-                                
+                                 
                                     if ($damage->shooterid == $ship->id && $damage->weaponid == $this->id) {
 
                                         $systemDamageThisTurn += $damage->damage; // Accumulate total damage dealt this turn
@@ -1497,7 +1521,7 @@ class LaserAccelerator extends Laser{
                                 } else {
                                     $notes = $systemDamageThisTurn; // Partial armor penetration
                                 }
-        
+         
                                 // Create note(s) for armor ignored next turn
                                 while ($notes > 0) {
                                     $notekey = 'systeminfo';

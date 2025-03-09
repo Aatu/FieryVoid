@@ -167,21 +167,189 @@ class CustomMatterStream extends Matter {
         public $firingModes = array( 1 => "Sustained");	
         public $damageType = "Raking"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
         public $weaponClass = "Matter"; //MANDATORY (first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
-        		
-	public function setSystemDataWindow($turn){
-		parent::setSystemDataWindow($turn);
-		$this->data["Special"] = "Does ".$this->raking." damage per rake.";
-		$this->data["Special"] .= "<br>This weapon is always in Sustained mode";
-	    	$this->data["Special"] .= "<br>Ignores armor, does not overkill.";		
-	}	
-	
+		private $sustainedTarget = array(); //Variable used to track for next turn which ship was fired at in Sustained Mode and whether it was hit.
+        private $sustainedSystemsHit = array(); //Variable for tracking systems that were hit and how much armour they should be reduced by following turn if hit again.
+
+
+	public function setSystemDataWindow($turn){			
+		parent::setSystemDataWindow($turn);        
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}
+		$this->data["Special"] .= 'This weapon is always in sustained mode.';
+		$this->data["Special"] .= '<br>As a Sustained weapon, if the first shot hits then the next turns shot will hit automatically.';
+		$this->data["Special"] .= '<br>Subsequent Sustained shots ignore any armour/shields that have applied to previous shots.';
+		$this->data["Special"] .= "<br>Ignores armor, does not overkill.";			                                                               
+	} 
+
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc) {
             //maxhealth and power reqirement are fixed; left option to override with hand-written values
             if ( $maxhealth == 0 ) $maxhealth = 7;
             if ( $powerReq == 0 ) $powerReq = 6;
                 parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
-	
+
+
+        public function calculateHitBase(TacGamedata $gamedata, FireOrder $fireOrder) {
+            if (
+                $this->isOverloadingOnTurn($gamedata->turn) &&
+                isset($this->sustainedTarget[$fireOrder->targetid]) &&
+                $this->sustainedTarget[$fireOrder->targetid] == 1
+            ) {
+                $fireOrder->needed = 100; // Auto-hit!
+                $fireOrder->updated = true;
+                $this->uninterceptable = true;
+                $this->doNotIntercept = true;
+                $fireOrder->pubnotes .= " Sustained shot automatically hits.";
+        
+                return;
+            }
+        
+            parent::calculateHitBase($gamedata, $fireOrder); // Default routine if not an auto-hit.
+        }
+ 
+
+        public function generateIndividualNotes($gameData, $dbManager) {
+            switch($gameData->phase) {
+                case 4: // Post-Firing phase
+                    $firingOrders = $this->getFireOrders($gameData->turn); // Get fire orders for this turn
+                    if (!$firingOrders) {
+                        break; // No fire orders, nothing to process
+                    }
+
+                    $ship = $this->getUnit(); // Ensure ship is defined before use
+
+                    if($this->isDestroyed() || $ship->isDestroyed()) break;                    
+        
+                    foreach ($firingOrders as $firingOrder) { //Should only be 1.
+                        $didShotHit = $firingOrder->shotshit; //1 or 0 depending on hit or miss.
+                        $targetid = $firingOrder->targetid;
+
+                        // Check for sustained mode condition
+                        if ($this->isOverloadingOnTurn($gameData->turn) && $this->loadingtime <= $this->overloadturns) {
+                            if (($this->overloadshots - 1) > 0) { // Ensure not the last sustained shot
+                                $notekey = 'targetinfo';
+                                $noteHuman = 'ID of Target fired at';
+                                $notevalue = $targetid . ';' . $didShotHit;
+                                $this->individualNotes[] = new IndividualNote(
+                                    -1, TacGamedata::$currentGameID, $gameData->turn, $gameData->phase,
+                                    $ship->id, $this->id, $notekey, $noteHuman, $notevalue
+                                );
+                            }
+                        }
+         
+                        if ($didShotHit == 0) {
+                            continue; // Shot missed, no need to track damage
+                        }
+      
+                        // Process damage to target systems
+                        $target = $gameData->getShipById($targetid);
+                        if (!$target || !is_array($target->systems) || empty($target->systems)) {
+                            continue; // Ensure valid target and systems exist
+                        }
+
+                        foreach ($target->systems as $system) {
+                            $systemDamageThisTurn = 0;
+                            $notes = 0; // Tracks how much armor should be ignored next turn
+       
+                            foreach ($system->damage as $damage) {
+                               
+                                if ($damage->turn == $gameData->turn){  // Only consider this turn’s damage
+                                 
+                                    if ($damage->shooterid == $ship->id && $damage->weaponid == $this->id) {
+
+                                        $systemDamageThisTurn += $damage->damage; // Accumulate total damage dealt this turn
+                                    }
+                                }
+                            }
+            
+                            if ($systemDamageThisTurn > 0) { // Ensure damage was dealt
+                                if ($systemDamageThisTurn >= $system->armour) {
+                                    $notes = $system->armour; // All armor used up
+                                } else {
+                                    $notes = $systemDamageThisTurn; // Partial armor penetration
+                                }
+         
+                                // Create note(s) for armor ignored next turn
+                                while ($notes > 0) {
+                                    $notekey = 'systeminfo';
+                                    $noteHuman = 'ID of System fired at';
+                                    $notevalue = $system->id;
+                                    $this->individualNotes[] = new IndividualNote(
+                                        -1, TacGamedata::$currentGameID, $gameData->turn, $gameData->phase,
+                                        $ship->id, $this->id, $notekey, $noteHuman, $notevalue
+                                    );
+                                    $notes--;
+                                }
+                            }
+                        }
+                    }
+                    break;
+            }
+        } // end of function generateIndividualNotes
+
+
+        public function onIndividualNotesLoaded($gamedata)
+        {
+            // Process rearrangements made by player					
+            foreach ($this->individualNotes as $currNote) {
+                if ($currNote->turn == $gamedata->turn - 1) { // Only interested in last turn’s notes               
+                    if ($currNote->notekey == 'targetinfo') {
+                        if (strpos($currNote->notevalue, ';') === false) {
+                            continue; // Skip notes with invalid format
+                        }
+        
+                        $explodedValue = explode(';', $currNote->notevalue);
+                        if (count($explodedValue) === 2) { // Ensure correct format
+                            $targetId = $explodedValue[0];
+                            $didHit = $explodedValue[1];
+        
+                            $this->sustainedTarget[$targetId] = $didHit; // Store target ID and hit status
+                        }
+                    }
+            
+                    // Process armor reductions
+                    if ($currNote->notekey == 'systeminfo') {
+                        $this->sustainedSystemsHit[] = $currNote->notevalue; // Store system ID
+                    }    
+                }
+            }				
+
+            //and immediately delete notes themselves, they're no longer needed (this will not touch the database, just memory!)
+            $this->individualNotes = array();
+                   
+        }//endof onIndividualNotesLoaded               
+
+        //Called from core firing routines to check if any armour should be bypassed by a sustained shot.
+        public function getsustainedSystemsHit()
+        {
+            if(!empty($this->sustainedSystemsHit) && is_array($this->sustainedSystemsHit)){
+                return $this->sustainedSystemsHit; 
+            } else{
+                return null;
+            }
+        }    
+
+        // Sustained shots only apply shield damage reduction once.
+        public function shieldInteractionDamage($target, $shooter, $pos, $turn, $shield, $mod) {
+            $toReturn = max(0, $mod);
+         
+            // Ensure sustainedTarget is set and not an empty array before checking its keys
+            if (!empty($this->sustainedTarget) && is_array($this->sustainedTarget) && array_key_exists($target->id, $this->sustainedTarget)) {
+                $toReturn = 0;
+            }
+               
+            return $toReturn;
+        }
+
+        public function stripForJson(){
+			$strippedSystem = parent::stripForJson();
+			$strippedSystem->sustainedTarget = $this->sustainedTarget;	//Needed for front end hit calculation                      			
+			return $strippedSystem;
+		}    		
+
         public function isOverloadingOnTurn($turn = null){
             return true;
         }
@@ -189,6 +357,7 @@ class CustomMatterStream extends Matter {
         public function getDamage($fireOrder){        return Dice::d(10, 2)+8;   }
         public function setMinDamage(){     $this->minDamage = 10 ;      }
         public function setMaxDamage(){     $this->maxDamage = 28 ;      }
+
 } //customMatterStream
 
 
@@ -2293,6 +2462,8 @@ class GromeHvyRailgun extends Weapon{
 
         public $rangePenalty = 1; //-1/hex
         public $fireControl = array(3, 3, 3); // fighters, <mediums, <capitals
+        private $sustainedTarget = array(); //To track for next turn which ship was fired at in Sustained Mode and whether it was hit.
+        private $sustainedSystemsHit = array(); //For tracking systems that were hit and how much armour they should be reduced by following turn if hit again. 
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
         {
@@ -2313,9 +2484,169 @@ class GromeHvyRailgun extends Weapon{
 			}else{
 				$this->data["Special"] .= '<br>';
 			}
-            $this->data["Special"] .= "This weapon is always in sustained mode.";
-		}
+            $this->data["Special"] .= 'This weapon is always in sustained mode.';
+            $this->data["Special"] .= '<br>As a Sustained weapon, if the first shot hits then the next turns shot will hit automatically.';
+            $this->data["Special"] .= '<br>Subsequent Sustained shots ignore any armour/shields that have applied to previous shots.';                                                               
+		}                            
 
+
+        public function calculateHitBase(TacGamedata $gamedata, FireOrder $fireOrder) {
+            if (
+                $this->isOverloadingOnTurn($gamedata->turn) &&
+                isset($this->sustainedTarget[$fireOrder->targetid]) &&
+                $this->sustainedTarget[$fireOrder->targetid] == 1
+            ) {
+                $fireOrder->needed = 100; // Auto-hit!
+                $fireOrder->updated = true;
+                $this->uninterceptable = true;
+                $this->doNotIntercept = true;
+                $fireOrder->pubnotes .= " Sustained shot automatically hits.";
+        
+                return;
+            }
+        
+            parent::calculateHitBase($gamedata, $fireOrder); // Default routine if not an auto-hit.
+        }
+ 
+
+        public function generateIndividualNotes($gameData, $dbManager) {
+            switch($gameData->phase) {
+                case 4: // Post-Firing phase
+                    $firingOrders = $this->getFireOrders($gameData->turn); // Get fire orders for this turn
+                    if (!$firingOrders) {
+                        break; // No fire orders, nothing to process
+                    }
+
+                    $ship = $this->getUnit(); // Ensure ship is defined before use
+
+                    if($this->isDestroyed() || $ship->isDestroyed()) break;                    
+        
+                    foreach ($firingOrders as $firingOrder) { //Should only be 1.
+                        $didShotHit = $firingOrder->shotshit; //1 or 0 depending on hit or miss.
+                        $targetid = $firingOrder->targetid;
+
+                        // Check for sustained mode condition
+                        if ($this->isOverloadingOnTurn($gameData->turn) && $this->loadingtime <= $this->overloadturns) {
+                            if (($this->overloadshots - 1) > 0) { // Ensure not the last sustained shot
+                                $notekey = 'targetinfo';
+                                $noteHuman = 'ID of Target fired at';
+                                $notevalue = $targetid . ';' . $didShotHit;
+                                $this->individualNotes[] = new IndividualNote(
+                                    -1, TacGamedata::$currentGameID, $gameData->turn, $gameData->phase,
+                                    $ship->id, $this->id, $notekey, $noteHuman, $notevalue
+                                );
+                            }
+                        }
+         
+                        if ($didShotHit == 0) {
+                            continue; // Shot missed, no need to track damage
+                        }
+      
+                        // Process damage to target systems
+                        $target = $gameData->getShipById($targetid);
+                        if (!$target || !is_array($target->systems) || empty($target->systems)) {
+                            continue; // Ensure valid target and systems exist
+                        }
+
+                        foreach ($target->systems as $system) {
+                            $systemDamageThisTurn = 0;
+                            $notes = 0; // Tracks how much armor should be ignored next turn
+       
+                            foreach ($system->damage as $damage) {
+                               
+                                if ($damage->turn == $gameData->turn){  // Only consider this turn’s damage
+                                 
+                                    if ($damage->shooterid == $ship->id && $damage->weaponid == $this->id) {
+
+                                        $systemDamageThisTurn += $damage->damage; // Accumulate total damage dealt this turn
+                                    }
+                                }
+                            }
+            
+                            if ($systemDamageThisTurn > 0) { // Ensure damage was dealt
+                                if ($systemDamageThisTurn >= $system->armour) {
+                                    $notes = $system->armour; // All armor used up
+                                } else {
+                                    $notes = $systemDamageThisTurn; // Partial armor penetration
+                                }
+         
+                                // Create note(s) for armor ignored next turn
+                                while ($notes > 0) {
+                                    $notekey = 'systeminfo';
+                                    $noteHuman = 'ID of System fired at';
+                                    $notevalue = $system->id;
+                                    $this->individualNotes[] = new IndividualNote(
+                                        -1, TacGamedata::$currentGameID, $gameData->turn, $gameData->phase,
+                                        $ship->id, $this->id, $notekey, $noteHuman, $notevalue
+                                    );
+                                    $notes--;
+                                }
+                            }
+                        }
+                    }
+                    break;
+            }
+        } // end of function generateIndividualNotes
+
+
+        public function onIndividualNotesLoaded($gamedata)
+        {
+            // Process rearrangements made by player					
+            foreach ($this->individualNotes as $currNote) {
+                if ($currNote->turn == $gamedata->turn - 1) { // Only interested in last turn’s notes               
+                    if ($currNote->notekey == 'targetinfo') {
+                        if (strpos($currNote->notevalue, ';') === false) {
+                            continue; // Skip notes with invalid format
+                        }
+        
+                        $explodedValue = explode(';', $currNote->notevalue);
+                        if (count($explodedValue) === 2) { // Ensure correct format
+                            $targetId = $explodedValue[0];
+                            $didHit = $explodedValue[1];
+        
+                            $this->sustainedTarget[$targetId] = $didHit; // Store target ID and hit status
+                        }
+                    }
+            
+                    // Process armor reductions
+                    if ($currNote->notekey == 'systeminfo') {
+                        $this->sustainedSystemsHit[] = $currNote->notevalue; // Store system ID
+                    }    
+                }
+            }				
+
+            //and immediately delete notes themselves, they're no longer needed (this will not touch the database, just memory!)
+            $this->individualNotes = array();
+                   
+        }//endof onIndividualNotesLoaded               
+
+        //Called from core firing routines to check if any armour should be bypassed by a sustained shot.
+        public function getsustainedSystemsHit()
+        {
+            if(!empty($this->sustainedSystemsHit) && is_array($this->sustainedSystemsHit)){
+                return $this->sustainedSystemsHit; 
+            } else{
+                return null;
+            }
+        }    
+
+        // Sustained shots only apply shield damage reduction once.
+        public function shieldInteractionDamage($target, $shooter, $pos, $turn, $shield, $mod) {
+            $toReturn = max(0, $mod);
+         
+            // Ensure sustainedTarget is set and not an empty array before checking its keys
+            if (!empty($this->sustainedTarget) && is_array($this->sustainedTarget) && array_key_exists($target->id, $this->sustainedTarget)) {
+                $toReturn = 0;
+            }
+               
+            return $toReturn;
+        }
+
+        public function stripForJson(){
+			$strippedSystem = parent::stripForJson();
+			$strippedSystem->sustainedTarget = $this->sustainedTarget;	//Needed for front end hit calculation                      			
+			return $strippedSystem;
+		}    
 
         public function isOverloadingOnTurn($turn = null){
             return true;

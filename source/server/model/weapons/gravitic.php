@@ -602,15 +602,17 @@ class GraviticLance extends Raking{
         }   
  
 
-        public function generateIndividualNotes($gameData, $dbManager) { 
+        public function generateIndividualNotes($gameData, $dbManager) {
             switch($gameData->phase) {
                 case 4: // Post-Firing phase
                     $firingOrders = $this->getFireOrders($gameData->turn); // Get fire orders for this turn
                     if (!$firingOrders) {
                         break; // No fire orders, nothing to process
                     }
-        
+
                     $ship = $this->getUnit(); // Ensure ship is defined before use
+
+                    if($this->isDestroyed() || $ship->isDestroyed()) break;                    
         
                     foreach ($firingOrders as $firingOrder) { //Should only be 1.
                         $didShotHit = $firingOrder->shotshit; //1 or 0 depending on hit or miss.
@@ -635,6 +637,10 @@ class GraviticLance extends Raking{
       
                         // Process damage to target systems
                         $target = $gameData->getShipById($targetid);
+                        if (!$target || !is_array($target->systems) || empty($target->systems)) {
+                            continue; // Ensure valid target and systems exist
+                        }
+
                         foreach ($target->systems as $system) {
                             $systemDamageThisTurn = 0;
                             $notes = 0; // Tracks how much armor should be ignored next turn
