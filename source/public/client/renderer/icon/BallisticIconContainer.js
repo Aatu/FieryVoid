@@ -264,7 +264,7 @@ window.BallisticIconContainer = function () {
 					break;
 					case 'Proximity Laser': //KL Proximity Laser
 					        targetType = 'hexRed';
-					        text = "Proximity Laser";
+					        text = "Proximity Launcher";
 					        textColour = "#e6140a";		        
 					break;
 					case 'Thought Wave': //Mindrider Thoughwave
