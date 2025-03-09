@@ -34,10 +34,10 @@ class VelraxRastenCorvetteRefit2 extends MediumShip{
         $this->addPrimarySystem(new Thruster(2, 10, 0, 4, 3));
         $this->addPrimarySystem(new Thruster(2, 10, 0, 4, 4));        
         
-		$this->addFrontSystem(new NexusTwinIonGun(2, 4, 4, 180, 60));
+		$this->addFrontSystem(new NexusTwinIonGun(1, 4, 4, 180, 60));
 		$this->addFrontSystem(new MediumPlasma(2, 5, 3, 300, 60));
 		$this->addFrontSystem(new MediumPlasma(2, 5, 3, 300, 60));
-		$this->addFrontSystem(new NexusTwinIonGun(2, 4, 4, 300, 180));
+		$this->addFrontSystem(new NexusTwinIonGun(1, 4, 4, 300, 180));
         $this->addFrontSystem(new Thruster(2, 12, 0, 4, 1));
 	    
         $this->addAftSystem(new Thruster(2, 9, 0, 4, 2));    

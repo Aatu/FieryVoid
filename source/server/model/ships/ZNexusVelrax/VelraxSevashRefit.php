@@ -33,21 +33,21 @@ class VelraxSevashRefit extends MediumShip{
         $this->addPrimarySystem(new CnC(4, 15, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 14, 5, 5));
         $this->addPrimarySystem(new Engine(3, 12, 0, 8, 3));
-        $this->addPrimarySystem(new Hangar(1, 8));
+        $this->addPrimarySystem(new Hangar(1, 2));
         $this->addPrimarySystem(new Thruster(3, 12, 0, 5, 3));
         $this->addPrimarySystem(new Thruster(3, 12, 0, 5, 4));        
         
 		$this->addFrontSystem(new LaserLance(3, 5, 4, 240, 60));
 		$this->addFrontSystem(new LaserLance(3, 5, 4, 300, 120));
-		$this->addFrontSystem(new NexusTwinIonGun(2, 4, 4, 270, 90));
+		$this->addFrontSystem(new DualIonBolter(2, 4, 4, 270, 90));
         $this->addFrontSystem(new Thruster(2, 12, 0, 4, 1));
 	    
         $this->addAftSystem(new Thruster(3, 9, 0, 5, 2));    
         $this->addAftSystem(new Thruster(3, 9, 0, 5, 2));    
-		$this->addAftSystem(new NexusTwinIonGun(2, 4, 4, 120, 360));
-		$this->addAftSystem(new NexusTwinIonGun(2, 4, 4, 0, 240));
+		$this->addAftSystem(new DualIonBolter(2, 4, 4, 120, 360));
+		$this->addAftSystem(new DualIonBolter(2, 4, 4, 0, 240));
        
-        $this->addPrimarySystem(new Structure(4, 50));
+        $this->addPrimarySystem(new Structure(4, 56));
 
 	//d20 hit chart
 	$this->hitChart = array(
@@ -64,14 +64,14 @@ class VelraxSevashRefit extends MediumShip{
 		1=> array(
 			6 => "Thruster",
 			8 => "Laser Lance",
-			10 => "Twin Ion Gun",
+			10 => "Dual Ion Bolter",
 			17 => "Structure",
 			20 => "Primary",
 		),
 
 		2=> array(
 			7 => "Thruster",
-			10 => "Twin Ion Gun",
+			10 => "Dual Ion Bolter",
 			17 => "Structure",
 			20 => "Primary",
 		),

@@ -11,7 +11,10 @@ class SalbezShvrez extends MediumShip{
         $this->shipClass = "Shv'rez Frigate";
 		$this->unofficial = true;
         $this->canvasSize = 90;
+
 	    $this->isd = 2125;
+
+        $this->fighters = array("assault shuttles"=>1);
         
         $this->forwardDefense = 12;
         $this->sideDefense = 12;

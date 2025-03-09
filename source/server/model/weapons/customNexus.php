@@ -2312,8 +2312,18 @@ class NexusShatterGunFtr extends Weapon{
        public function fire($gamedata, $fireOrder){ //note ammo usage
         	//debug::log("fire function");
             parent::fire($gamedata, $fireOrder);
-            $this->ammunition--;
-            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);
+            $ship = $gamedata->getShipById($fireOrder->shooterid);
+            $ammo = $this->ammunition;			
+            $this->ammunition--; //Deduct round just fired
+            //Now need to remove Enhancement bonuses from saved ammo count, as these will be re-added in onConstructed()
+            foreach ($ship->enhancementOptions as $enhancement) {
+                $enhID = $enhancement[0];
+                $enhCount = $enhancement[2];
+                if($enhCount > 0) {
+                    if ($enhID == 'EXT_AMMO') $this->ammunition -= $enhCount;
+                }
+            }        
+            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);			
         }
 
 		public function getDamage($fireOrder){
@@ -2458,8 +2468,18 @@ class NexusShatterGunFtr extends Weapon{
        public function fire($gamedata, $fireOrder){ //note ammo usage
         	//debug::log("fire function");
             parent::fire($gamedata, $fireOrder);
-            $this->ammunition--;
-            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);
+            $ship = $gamedata->getShipById($fireOrder->shooterid);
+            $ammo = $this->ammunition;			
+            $this->ammunition--; //Deduct round just fired
+            //Now need to remove Enhancement bonuses from saved ammo count, as these will be re-added in onConstructed()
+            foreach ($ship->enhancementOptions as $enhancement) {
+                $enhID = $enhancement[0];
+                $enhCount = $enhancement[2];
+                if($enhCount > 0) {
+                    if ($enhID == 'EXT_HAMMO') $this->ammunition -= $enhCount;
+                }
+            }        
+            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);			
         }
 
 	function __construct($startArc, $endArc, $nrOfShots = 1){
@@ -2955,8 +2975,18 @@ class NexusAutocannonFtr extends Matter{
        public function fire($gamedata, $fireOrder){ //note ammo usage
         	//debug::log("fire function");
             parent::fire($gamedata, $fireOrder);
-            $this->ammunition--;
-            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);
+            $ship = $gamedata->getShipById($fireOrder->shooterid);
+            $ammo = $this->ammunition;			
+            $this->ammunition--; //Deduct round just fired
+            //Now need to remove Enhancement bonuses from saved ammo count, as these will be re-added in onConstructed()
+            foreach ($ship->enhancementOptions as $enhancement) {
+                $enhID = $enhancement[0];
+                $enhCount = $enhancement[2];
+                if($enhCount > 0) {
+                    if ($enhID == 'EXT_HAMMO') $this->ammunition -= $enhCount;
+                }
+            }        
+            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);			
         }
 
 	function __construct($startArc, $endArc, $nrOfShots = 1){
@@ -3024,7 +3054,17 @@ class NexusAutogun extends Matter{
        public function fire($gamedata, $fireOrder){ //note ammo usage
         	//debug::log("fire function");
             parent::fire($gamedata, $fireOrder);
-            $this->ammunition--;
+            $ship = $gamedata->getShipById($fireOrder->shooterid);
+            $ammo = $this->ammunition;			
+            $this->ammunition--; //Deduct round just fired
+            //Now need to remove Enhancement bonuses from saved ammo count, as these will be re-added in onConstructed()
+            foreach ($ship->enhancementOptions as $enhancement) {
+                $enhID = $enhancement[0];
+                $enhCount = $enhancement[2];
+                if($enhCount > 0) {
+                    if ($enhID == 'EXT_AMMO') $this->ammunition -= $enhCount;
+                }
+            }        
             Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);			
         }
 
@@ -3708,8 +3748,18 @@ class NexusMinigunFtr extends Weapon{
        public function fire($gamedata, $fireOrder){ //note ammo usage
         	//debug::log("fire function");
             parent::fire($gamedata, $fireOrder);
-            $this->ammunition--;
-            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);
+            $ship = $gamedata->getShipById($fireOrder->shooterid);
+            $ammo = $this->ammunition;			
+            $this->ammunition--; //Deduct round just fired
+            //Now need to remove Enhancement bonuses from saved ammo count, as these will be re-added in onConstructed()
+            foreach ($ship->enhancementOptions as $enhancement) {
+                $enhID = $enhancement[0];
+                $enhCount = $enhancement[2];
+                if($enhCount > 0) {
+                    if ($enhID == 'EXT_AMMO') $this->ammunition -= $enhCount;
+                }
+            }        
+            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);			
         }
 
 		public function getDamage($fireOrder){
@@ -8332,8 +8382,18 @@ public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon){
        public function fire($gamedata, $fireOrder){ //note ammo usage
         	//debug::log("fire function");
             parent::fire($gamedata, $fireOrder);
-            $this->ammunition--;
-            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);
+            $ship = $gamedata->getShipById($fireOrder->shooterid);
+            $ammo = $this->ammunition;			
+            $this->ammunition--; //Deduct round just fired
+            //Now need to remove Enhancement bonuses from saved ammo count, as these will be re-added in onConstructed()
+            foreach ($ship->enhancementOptions as $enhancement) {
+                $enhID = $enhancement[0];
+                $enhCount = $enhancement[2];
+                if($enhCount > 0) {
+                    if ($enhID == 'EXT_AMMO') $this->ammunition -= $enhCount;
+                }
+            }        
+            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);			
         }
 
         public function getDamage($fireOrder){ return Dice::d(6, 1)+3;   }

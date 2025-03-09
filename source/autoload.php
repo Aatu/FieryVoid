@@ -1931,6 +1931,7 @@ spl_autoload_register(
 
 
 				//Nexus ships - Sal-bez
+                'breachingpodsalbez' => '/server/model/ships/ZNexusSalbez/breachingpodsalbez.php',					
                 'salbezashver' => '/server/model/ships/ZNexusSalbez_old/SalbezAshver.php',					
                 'salbezavrtz' => '/server/model/ships/ZNexusSalbez_old/SalbezAvrtz.php',					
                 'salbezavrtzrefit' => '/server/model/ships/ZNexusSalbez/SalbezAvrtzRefit.php',					
