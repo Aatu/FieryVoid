@@ -97,9 +97,10 @@ VICTORY CONDITIONS: Last unit on map / Last ship on map / More forces remaining 
                                 <input class ="spacey tinySize" data-validation="^-{0,1}[0-9]+$" data-default ="0" type="text" name="spacey" value="0">   
 				    &nbsp;&nbsp;
 				    <span class="clickable setsizeknifefight">Resize: Knife Fight (Small Map)</span> <!-- button switching map dimensions -->
-				    &nbsp;&nbsp;
-				    <span class="clickable setswitchsizebaseassault">Resize: Base Assault (Large Map)</span> <!-- button switching map dimensions -->				    
-				    &nbsp;&nbsp;<span class="clickable setsizestandard">Resize: Standard (Normal Map)</span> <!-- button switching map dimensions -->
+				    &nbsp;&nbsp;				    
+                    <span class="clickable setsizestandard">Resize: Standard (Normal Map)</span> <!-- button switching map dimensions -->
+                    &nbsp;&nbsp;
+				    <span class="clickable setswitchsizebaseassault">Resize: Base Assault (Large Map)</span> <!-- button switching map dimensions -->
                             </span>
                         </div>
                       <!---      <input id="flightSizeCheck" style="margin-top:20px;margin-bottom:10px;" type="checkbox" name="variableFlights">increased Flight size (up to 12 units per flight)
@@ -142,6 +143,23 @@ VICTORY CONDITIONS: Last unit on map / Last ship on map / More forces remaining 
             <option value="10">10</option>
             <option value="11">11</option>
             <option value="12">12</option>
+        </select>
+    </div>
+</div>
+<div id="asteroids" class="subpanel movementspacecontainer">
+    <div class="slot">
+        <div>
+            <input id="asteroidscheck" type="checkbox" name="asteroidscheck">ADD ASTEROIDS AS TERRAIN (still in Beta)
+        </div>
+     </div>
+    <div class="slot" id="asteroidsDropdown" style="display:none;">
+        <label for="asteroidsSelect">SELECT NUMBER OF ASTEROIDS:</label>
+        <select id="asteroidsSelect" name="asteroidsCategories">
+            <option value="3">Few (3)</option>
+            <option value="6">Several (6)</option>
+            <option value="12">Pack (12)</option>
+            <option value="24">Throng (24)</option>
+            <option value="36">Zounds (36)</option>         
         </select>
     </div>
 </div>

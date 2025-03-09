@@ -499,7 +499,7 @@ class BaseShip {
 			$strippedShip->forwardDefense = $this->forwardDefense; 
         	$strippedShip->sideDefense = $this->sideDefense;
 		    $strippedShip->Enormous = $this->Enormous; 
-			$strippedShip->iconPath = $this->iconPath;
+			$strippedShip->imagePath = $this->imagePath;
 			$strippedShip->canvasSize = $this->canvasSize;			 		           	
 		}				
 	

@@ -99,7 +99,7 @@ class SimultaneousMovementRule implements JsonSerializable {
 
     private function hasShipsAtIniative(TacGamedata $gameData, $iniative) {
         return count(array_filter($gameData->ships, function($ship) use ($iniative) {
-            return $ship->iniative == $iniative && !$ship->isDestroyed();
+            return $ship->iniative == $iniative && !$ship->isDestroyed() && $ship->userid != -5;
         })) > 0;
     }
 

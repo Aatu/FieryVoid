@@ -534,7 +534,10 @@ class Firing
 	Marcin Sawicki, October 2017: at this stage, assume all necessary calculations (hit chance, target section), and only raw rolling remains!
 	*/
     public static function fireWeapons($gamedata){	
+        $rammingOrders  = array();
         $fireOrders  = array();
+
+        //Reactor explosions and Ramming Orders first    
         foreach ($gamedata->ships as $ship){		
             /*account for possible reactor overload!*/
             $reactorList = $ship->getSystemsByName('Reactor');
@@ -572,49 +575,60 @@ class Firing
                     $reactorCurr->damage[] = $damageEntry;
                 }
             }
-            //Check if any ships have activate jump engines
-            $jumpList = $ship->getSystemsByName('Jump Engine');      
-            foreach($jumpList as $jumpEngine){
-                //is it overloading?...
-                if( $jumpEngine->isOverloading($gamedata->turn) ){ //primed for enetering hyperspace!				
-                    $jumpEngine->doHyperspaceJump($ship, $gamedata); //Actually create damage entry to destroy ship.
-                }
-            }		
-            /* fighter attacks are taken into account here, but only ramming attacks!
-                if ($ship instanceof FighterFlight){
+
+            //Now fire Ramming Orders before other weapons while we're looking through ships in this section.    
+            foreach($ship->getAllFireOrders($gamedata->turn) as $fire){
+                if ($fire->turn != $gamedata->turn){
                     continue;
-                }*/
-                foreach($ship->getAllFireOrders($gamedata->turn) as $fire){
-                    if ($fire->type === "intercept" || $fire->type === "selfIntercept"){
-                        continue;
-                    }
+                }
 
-                    $weapon = $ship->getSystemById($fire->weaponid);
-            if (!($weapon instanceof Weapon)){//...just in case...
-                continue;
-            };
+                $weapon = $ship->getSystemById($fire->weaponid);
+                if (!$weapon->isRammingAttack) continue; //Only interested in Ramming Attacks!
 
-            //fighter attack: only if ramming
-            if ($ship instanceof FighterFlight){
-                if (!$weapon->isRammingAttack) continue;
+                $rammingOrders[] = $fire;
             }
 
-                    //$fire->priority = $weapon->priority; //fire order priority already set, and may differ from basic weapon priority!
-                    $fireOrders[] = $fire;
+            usort($rammingOrders, "self::compareFiringOrders");            
+
+            foreach ($rammingOrders as $ramming){
+                $ship = $gamedata->getShipById($ramming->shooterid);
+                self::fire($ship, $ramming, $gamedata);
+            }
+        }    
+
+        //Now fire ship weapons.
+        foreach ($gamedata->ships as $ship){	
+
+            if ($ship instanceof FighterFlight) continue; //No fighter attacks handled here now that Ramming Attacks are handled above - DK 03.25      
+            if($ship->isDestroyed()) continue; //Ship could be destroyed by ramming now.
+
+            foreach($ship->getAllFireOrders($gamedata->turn) as $fire){
+                if ($fire->type === "intercept" || $fire->type === "selfIntercept"){
+                    continue;
                 }
-        }
-        usort($fireOrders, "self::compareFiringOrders");
-	    
-        foreach ($fireOrders as $fire){
-                $ship = $gamedata->getShipById($fire->shooterid);
-                //$wpn = $ship->getSystemById($fire->weaponid);
-                //$p = $wpn->priority;
-                // debug::log("resolve --- Ship: ".$ship->shipClass.", id: ".$fire->shooterid." wpn: ".$wpn->displayName.", priority: ".$p." versus: ".$fire->targetid);
-                self::fire($ship, $fire, $gamedata);
+
+                $weapon = $ship->getSystemById($fire->weaponid);
+                if (!($weapon instanceof Weapon)) continue; //...just in case...               
+                if($weapon->isDestroyed($gamedata->turn) && !$weapon->ballistic) continue; //now individual weapons can be destroyed by Ramming before firing, but not ballistics.                
+                if ($weapon->isRammingAttack) continue; //Ramming Attacks have already been resolved.
+
+                //$fire->priority = $weapon->priority; //fire order priority already set, and may differ from basic weapon priority!
+                $fireOrders[] = $fire;
+            }
+        
+            usort($fireOrders, "self::compareFiringOrders");
+            
+            foreach ($fireOrders as $fire){
+                    $ship = $gamedata->getShipById($fire->shooterid);
+                    //$wpn = $ship->getSystemById($fire->weaponid);
+                    //$p = $wpn->priority;
+                    // debug::log("resolve --- Ship: ".$ship->shipClass.", id: ".$fire->shooterid." wpn: ".$wpn->displayName.", priority: ".$p." versus: ".$fire->targetid);
+                    self::fire($ship, $fire, $gamedata);
+            }
         }
 
         // From here on, only fighter units are left.
-	//FIRE fighters at fighters
+	    //FIRE fighters at fighters
         $chosenfires = array();
         foreach ($gamedata->ships as $ship) {
             // Remember: ballistics that have been fired must still be
@@ -630,12 +644,12 @@ class Firing
 
                 $weapon = $ship->getSystemById($fire->weaponid);
 
-		//ramming attacks are already allocated!
-		if ($weapon->isRammingAttack) continue;
-		    
-		//ballistic weapons will still reach their targets, but direct fire from fighters previously destroyed will not happen
-		if ( (!$weapon->ballistic) && ($ship->getFighterBySystem($weapon->id)->isDestroyed()) ) continue;
-		/* simplified above
+                //ramming attacks are already allocated!
+                if ($weapon->isRammingAttack) continue;
+                    
+                //ballistic weapons will still reach their targets, but direct fire from fighters previously destroyed will not happen
+                if ( (!$weapon->ballistic) && ($ship->getFighterBySystem($weapon->id)->isDestroyed()) ) continue;
+		        /* simplified above
                 if (($ship->getFighterBySystem($weapon->id)->isDestroyed() || $ship->isDestroyed() )
                         && !$weapon->ballistic){
                     continue;
@@ -646,55 +660,69 @@ class Firing
             }
         }
         usort($chosenfires, "self::compareFiringOrders");
-	foreach ($chosenfires as $fire){
-		$shooter = $gamedata->getShipById($fire->shooterid);
-		$target = $gamedata->getShipById($fire->targetid);
-		if ( ($target == null) || ($target instanceof FighterFlight) ) {
-			self::fire($shooter, $fire, $gamedata);
-		}
-	}
 
-	//FIRE fighters at ships
-	$chosenfires = array();
-	foreach ($gamedata->ships as $ship) {
-		// Remember: ballistics that have been fired must still be
-		// resolved! So don't continue on destroyed units/fighters.
-		if (!($ship instanceof FighterFlight)) {
-			continue;
-		}
-
-		foreach($ship->getAllFireOrders($gamedata->turn) as $fire){
-			if ($fire->turn != $gamedata->turn){
-				continue;
-			}
-
-			$weapon = $ship->getSystemById($fire->weaponid);
-
-			//ramming attacks are already allocated!
-			if ($weapon->isRammingAttack) continue;
-
-			//ballistic weapons will still reach their targets, but direct fire from fighters previously destroyed will not happen
-			if ( (!$weapon->ballistic) && ($ship->getFighterBySystem($weapon->id)->isDestroyed()) ) continue;
-			/*simplified above	
-			$weapon = $ship->getSystemById($fire->weaponid);
-			if (($ship->getFighterBySystem($weapon->id)->isDestroyed() || $ship->isDestroyed())
-				&& !$weapon->ballistic) {
-				continue;
-			}
-			*/
-			//$fire->priority = $weapon->priority; //fire order priority already declared!
-			$chosenfires[] = $fire;
-		}
-	}
-        usort($chosenfires, "self::compareFiringOrders");
-	//FIRE rest of fighters
-	foreach ($chosenfires as $fire){
-		$shooter = $gamedata->getShipById($fire->shooterid);
-		$target = $gamedata->getShipById($fire->targetid);
-		if  ( ($target != null) && (!($target instanceof FighterFlight)) ) {
-			self::fire($shooter, $fire, $gamedata);
-		}
+        foreach ($chosenfires as $fire){
+            $shooter = $gamedata->getShipById($fire->shooterid);
+            $target = $gamedata->getShipById($fire->targetid);
+            if ( ($target == null) || ($target instanceof FighterFlight) ) {
+                self::fire($shooter, $fire, $gamedata);
+            }
         }
+
+        //FIRE fighters at ships
+        $chosenfires = array();
+        foreach ($gamedata->ships as $ship) {
+                // Remember: ballistics that have been fired must still be
+                // resolved! So don't continue on destroyed units/fighters.
+                if (!($ship instanceof FighterFlight)) {
+                    continue;
+                }
+
+            foreach($ship->getAllFireOrders($gamedata->turn) as $fire){
+                if ($fire->turn != $gamedata->turn){
+                    continue;
+                }
+
+                $weapon = $ship->getSystemById($fire->weaponid);
+
+                //ramming attacks are already allocated!
+                if ($weapon->isRammingAttack) continue;
+
+                //ballistic weapons will still reach their targets, but direct fire from fighters previously destroyed will not happen
+                if ( (!$weapon->ballistic) && ($ship->getFighterBySystem($weapon->id)->isDestroyed()) ) continue;
+                /*simplified above	
+                $weapon = $ship->getSystemById($fire->weaponid);
+                if (($ship->getFighterBySystem($weapon->id)->isDestroyed() || $ship->isDestroyed())
+                    && !$weapon->ballistic) {
+                    continue;
+                }
+                */
+                //$fire->priority = $weapon->priority; //fire order priority already declared!
+                $chosenfires[] = $fire;
+            }
+        }
+        usort($chosenfires, "self::compareFiringOrders");
+        //FIRE rest of fighters
+        foreach ($chosenfires as $fire){
+            $shooter = $gamedata->getShipById($fire->shooterid);
+            $target = $gamedata->getShipById($fire->targetid);
+            if  ( ($target != null) && (!($target instanceof FighterFlight)) ) {
+                self::fire($shooter, $fire, $gamedata);
+            }
+        }
+
+        //Check if any ships have activate jump engines and do this after all other fire (in case they or their jump engine got destroyed)
+        foreach ($gamedata->ships as $ship) {   
+            
+            $jumpList = $ship->getSystemsByName('Jump Engine'); //Won't return if Jump engine destroyed.     
+            foreach($jumpList as $jumpEngine){
+                //is it overloading?...
+                if( $jumpEngine->isOverloading($gamedata->turn) ){ //primed for entering hyperspace!				
+                    $jumpEngine->doHyperspaceJump($ship, $gamedata); //Actually create damage entry to destroy ship.
+                }
+            }
+        }    	
+
     } //endof method fireWeapons
 
 

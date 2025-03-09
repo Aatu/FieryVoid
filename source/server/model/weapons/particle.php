@@ -440,23 +440,22 @@
 		}                            
 
 
-        public function calculateHitBase(TacGamedata $gamedata, FireOrder $fireOrder){
-            //Check if this is a Sustained weapon firing, and therefore possible automatic hit.    
-            if ($this->isOverloadingOnTurn($gamedata->turn)) {                             
-                // We only care if the overloaded weapon fired last turn and therefore has a targetid stored in sustainedTarget variable.
-                if (!empty($this->sustainedTarget)) { //Check if  sustainedTarget is holding a value.                   
-                    if($this->sustainedTarget[$fireOrder->targetid] == 1) {  // Check if the target id exists in sustainedTarget and it hit last turn.                        
-                        $fireOrder->needed = 100; // Auto-hit!
-                        $fireOrder->updated = true;		                        
-                        $this->uninterceptable = true;
-                        $this->doNotIntercept = true;
-                        $fireOrder->pubnotes .= " Sustained shot automatically hits.";	                         
-                        return;                       
-                    }
-                }
+        public function calculateHitBase(TacGamedata $gamedata, FireOrder $fireOrder) {
+            if (
+                $this->isOverloadingOnTurn($gamedata->turn) &&
+                isset($this->sustainedTarget[$fireOrder->targetid]) &&
+                $this->sustainedTarget[$fireOrder->targetid] == 1
+            ) {
+                $fireOrder->needed = 100; // Auto-hit!
+                $fireOrder->updated = true;
+                $this->uninterceptable = true;
+                $this->doNotIntercept = true;
+                $fireOrder->pubnotes .= " Sustained shot automatically hits.";
+        
+                return;
             }
-
-            parent::calculateHitBase($gamedata, $fireOrder); //Default routine if it's not an auto-hit.
+        
+            parent::calculateHitBase($gamedata, $fireOrder); // Default routine if not an auto-hit.
         }
  
 
@@ -467,8 +466,10 @@
                     if (!$firingOrders) {
                         break; // No fire orders, nothing to process
                     }
-        
+
                     $ship = $this->getUnit(); // Ensure ship is defined before use
+
+                    if($this->isDestroyed() || $ship->isDestroyed()) break;                    
         
                     foreach ($firingOrders as $firingOrder) { //Should only be 1.
                         $didShotHit = $firingOrder->shotshit; //1 or 0 depending on hit or miss.
@@ -493,6 +494,10 @@
       
                         // Process damage to target systems
                         $target = $gameData->getShipById($targetid);
+                        if (!$target || !is_array($target->systems) || empty($target->systems)) {
+                            continue; // Ensure valid target and systems exist
+                        }
+
                         foreach ($target->systems as $system) {
                             $systemDamageThisTurn = 0;
                             $notes = 0; // Tracks how much armor should be ignored next turn
@@ -2387,8 +2392,8 @@ class MinorThoughtPulsar extends LinkedWeapon{
 			$this->data["Special"] .= "<br> - Rate of Fire - Prioritises extra shots this turn (+1 per 3 Thrust).";
 			$this->data["Special"] .= "<br> - Damage - Prioritises extra Damage this turn (+5 per shot per 3 Thrust).";
 			$this->data["Special"] .= "<br> - Hit Chance - Uses all thrust to improve hit chance (+10% per 3 Thrust).";				
-			$this->data["Special"] .= "<br> - Combo 1 - Prioritises Shots then Damage, then Hitchance.";	
-			$this->data["Special"] .= "<br> - Combo 2 - Prioritises Damage then shots.";				
+			$this->data["Special"] .= "<br> - Combo 1 - Prioritises Damage then shots, then Hitchance.";	
+			$this->data["Special"] .= "<br> - Combo 2 - Prioritises Shots and Damage equally.";				
     }
 
     public function getDamage($fireOrder){         

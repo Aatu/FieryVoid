@@ -168,18 +168,19 @@ window.ShipIcon = function () {
     };
 
     ShipIcon.prototype.setSelected = function (value) {
-        if (value) {
-            this.ShipSelectedSprite.show();
-            if (!this.selected) {
-                this.mesh.position.z = 100;
+        if(this.ship.userid != -5){ //Don't show sprites for terrain.
+            if (value) {
+                this.ShipSelectedSprite.show();
+                if (!this.selected) {
+                    this.mesh.position.z = 100;
+                }
+            } else {
+                if (this.selected) {
+                    this.mesh.position.z = 0;
+                }
+                this.ShipSelectedSprite.hide();
             }
-        } else {
-            if (this.selected) {
-                this.mesh.position.z = 0;
-            }
-            this.ShipSelectedSprite.hide();
         }
-
         this.selected = value;
     };
 

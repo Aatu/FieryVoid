@@ -78,28 +78,27 @@
 				$this->data["Special"] .= '<br>';
 			}
 */        
-        
-        public function calculateHitBase(TacGamedata $gamedata, FireOrder $fireOrder){
-            //Check if this is a Sustained weapon firing, and therefore possible automatic hit.    
-            if ($this->isOverloadingOnTurn($gamedata->turn)) {                             
-                // We only care if the overloaded weapon fired last turn and therefore has a targetid stored in sustainedTarget variable.
-                if (!empty($this->sustainedTarget)) { //Check if  sustainedTarget is holding a value.                   
-                    if($this->sustainedTarget[$fireOrder->targetid] == 1) {  // Check if the target id exists in sustainedTarget and it hit last turn.                        
-                        $fireOrder->needed = 100; // Auto-hit!
-                        $fireOrder->updated = true;		                        
-                        $this->uninterceptable = true;
-                        $this->doNotIntercept = true;
-                        $fireOrder->pubnotes .= " Sustained shot automatically hits.";	                         
-                        return;                       
-                    }
-                }
+                
+        public function calculateHitBase(TacGamedata $gamedata, FireOrder $fireOrder) {
+            if (
+                $this->isOverloadingOnTurn($gamedata->turn) &&
+                isset($this->sustainedTarget[$fireOrder->targetid]) &&
+                $this->sustainedTarget[$fireOrder->targetid] == 1
+            ) {
+                $fireOrder->needed = 100; // Auto-hit!
+                $fireOrder->updated = true;
+                $this->uninterceptable = true;
+                $this->doNotIntercept = true;
+                $fireOrder->pubnotes .= " Sustained shot automatically hits.";
+
+                return;
             }
 
-            parent::calculateHitBase($gamedata, $fireOrder); //Default routine if it's not an auto-hit.
+            parent::calculateHitBase($gamedata, $fireOrder); // Default routine if not an auto-hit.
         }
 
 
-        public function generateIndividualNotes($gameData, $dbManager) { 
+        public function generateIndividualNotes($gameData, $dbManager) {
             switch($gameData->phase) {
                 case 4: // Post-Firing phase
                     $firingOrders = $this->getFireOrders($gameData->turn); // Get fire orders for this turn
@@ -109,6 +108,8 @@
 
                     $ship = $this->getUnit(); // Ensure ship is defined before use
 
+                    if($this->isDestroyed() || $ship->isDestroyed()) break;                    
+        
                     foreach ($firingOrders as $firingOrder) { //Should only be 1.
                         $didShotHit = $firingOrder->shotshit; //1 or 0 depending on hit or miss.
                         $targetid = $firingOrder->targetid;
@@ -125,21 +126,25 @@
                                 );
                             }
                         }
-
+         
                         if ($didShotHit == 0) {
                             continue; // Shot missed, no need to track damage
                         }
-
+      
                         // Process damage to target systems
                         $target = $gameData->getShipById($targetid);
+                        if (!$target || !is_array($target->systems) || empty($target->systems)) {
+                            continue; // Ensure valid target and systems exist
+                        }
+
                         foreach ($target->systems as $system) {
                             $systemDamageThisTurn = 0;
                             $notes = 0; // Tracks how much armor should be ignored next turn
-
+       
                             foreach ($system->damage as $damage) {
-                            
+                               
                                 if ($damage->turn == $gameData->turn){  // Only consider this turn’s damage
-                                
+                                 
                                     if ($damage->shooterid == $ship->id && $damage->weaponid == $this->id) {
 
                                         $systemDamageThisTurn += $damage->damage; // Accumulate total damage dealt this turn
@@ -153,7 +158,7 @@
                                 } else {
                                     $notes = $systemDamageThisTurn; // Partial armor penetration
                                 }
-
+         
                                 // Create note(s) for armor ignored next turn
                                 while ($notes > 0) {
                                     $notekey = 'systeminfo';
@@ -474,40 +479,44 @@
                 $this->data["Special"] .= '<br>Subsequent Sustained shots ignore any armour/shields that have applied to first shot.';   			
             }
 
-            public function calculateHitBase(TacGamedata $gamedata, FireOrder $fireOrder){
-                //Check if this is a Sustained weapon firing, and therefore possible automatic hit.    
-                if ($this->isOverloadingOnTurn($gamedata->turn)) {                             
-                    // We only care if the overloaded weapon fired last turn and therefore has a targetid stored in sustainedTarget variable.
-                    if (!empty($this->sustainedTarget)) { //Check if  sustainedTarget is holding a value.                   
-                        if($this->sustainedTarget[$fireOrder->targetid] == 1) {  // Check if the target id exists in sustainedTarget and it hit last turn.                        
-                            $fireOrder->needed = 100; // Auto-hit!
-                            $fireOrder->updated = true;		                        
-                            $this->uninterceptable = true;
-                            $this->doNotIntercept = true;
-                            $fireOrder->pubnotes .= " Sustained shot automatically hits.";	                         
-                            return;                       
-                        }
-                    }
-                }
-
-                parent::calculateHitBase($gamedata, $fireOrder); //Default routine if it's not an auto-hit.
-            }
+            public function calculateHitBase(TacGamedata $gamedata, FireOrder $fireOrder) {
+                //Check if this is a Sustained weapon firing, and therefore possible automatic hit. 
+                // We only care if the overloaded weapon fired last turn and therefore has a targetid stored in sustainedTarget variable.
+                if (
+                    $this->isOverloadingOnTurn($gamedata->turn) &&
+                    isset($this->sustainedTarget[$fireOrder->targetid]) &&
+                    $this->sustainedTarget[$fireOrder->targetid] == 1
+                ) {
+                    $fireOrder->needed = 100; // Auto-hit!
+                    $fireOrder->updated = true;
+                    $this->uninterceptable = true;
+                    $this->doNotIntercept = true;
+                    $fireOrder->pubnotes .= " Sustained shot automatically hits.";
     
+                    return;
+                }
+    
+                parent::calculateHitBase($gamedata, $fireOrder); // Default routine if not an auto-hit.
+            }   
 
-            public function generateIndividualNotes($gameData, $dbManager) { 
+ 
+
+            public function generateIndividualNotes($gameData, $dbManager) {
                 switch($gameData->phase) {
                     case 4: // Post-Firing phase
                         $firingOrders = $this->getFireOrders($gameData->turn); // Get fire orders for this turn
                         if (!$firingOrders) {
                             break; // No fire orders, nothing to process
                         }
-            
+    
                         $ship = $this->getUnit(); // Ensure ship is defined before use
+    
+                        if($this->isDestroyed() || $ship->isDestroyed()) break;                    
             
                         foreach ($firingOrders as $firingOrder) { //Should only be 1.
                             $didShotHit = $firingOrder->shotshit; //1 or 0 depending on hit or miss.
                             $targetid = $firingOrder->targetid;
-
+    
                             // Check for sustained mode condition
                             if ($this->isOverloadingOnTurn($gameData->turn) && $this->loadingtime <= $this->overloadturns) {
                                 if (($this->overloadshots - 1) > 0) { // Ensure not the last sustained shot
@@ -520,23 +529,27 @@
                                     );
                                 }
                             }
-            
+             
                             if ($didShotHit == 0) {
                                 continue; // Shot missed, no need to track damage
                             }
-        
+          
                             // Process damage to target systems
                             $target = $gameData->getShipById($targetid);
+                            if (!$target || !is_array($target->systems) || empty($target->systems)) {
+                                continue; // Ensure valid target and systems exist
+                            }
+    
                             foreach ($target->systems as $system) {
                                 $systemDamageThisTurn = 0;
                                 $notes = 0; // Tracks how much armor should be ignored next turn
-        
+           
                                 foreach ($system->damage as $damage) {
-                                
+                                   
                                     if ($damage->turn == $gameData->turn){  // Only consider this turn’s damage
-                                    
+                                     
                                         if ($damage->shooterid == $ship->id && $damage->weaponid == $this->id) {
-
+    
                                             $systemDamageThisTurn += $damage->damage; // Accumulate total damage dealt this turn
                                         }
                                     }
@@ -548,7 +561,7 @@
                                     } else {
                                         $notes = $systemDamageThisTurn; // Partial armor penetration
                                     }
-            
+             
                                     // Create note(s) for armor ignored next turn
                                     while ($notes > 0) {
                                         $notekey = 'systeminfo';
@@ -680,24 +693,25 @@
             $this->data["Special"] .= '<br>Subsequent Sustained shots ignore any armour/shields that have applied to first shot(s).';   		
 		}
 
-        public function calculateHitBase(TacGamedata $gamedata, FireOrder $fireOrder){
-            //Check if this is a Sustained weapon firing, and therefore possible automatic hit.    
-            if ($this->isOverloadingOnTurn($gamedata->turn)) {                             
-                // We only care if the overloaded weapon fired last turn and therefore has a targetid stored in sustainedTarget variable.
-                if (!empty($this->sustainedTarget)) { //Check if  sustainedTarget is holding a value.                   
-                    if($this->sustainedTarget[$fireOrder->targetid] == 1) {  // Check if the target id exists in sustainedTarget and it hit last turn.                        
-                        $fireOrder->needed = 100; // Auto-hit!
-                        $fireOrder->updated = true;		                        
-                        $this->uninterceptable = true;
-                        $this->doNotIntercept = true;
-                        $fireOrder->pubnotes .= " Sustained shot automatically hits.";	                         
-                        return;                       
-                    }
-                }
+        public function calculateHitBase(TacGamedata $gamedata, FireOrder $fireOrder) {
+            //Check if this is a Sustained weapon firing, and therefore possible automatic hit. 
+            // We only care if the overloaded weapon fired last turn and therefore has a targetid stored in sustainedTarget variable.
+            if (
+                $this->isOverloadingOnTurn($gamedata->turn) &&
+                isset($this->sustainedTarget[$fireOrder->targetid]) &&
+                $this->sustainedTarget[$fireOrder->targetid] == 1
+            ) {
+                $fireOrder->needed = 100; // Auto-hit!
+                $fireOrder->updated = true;
+                $this->uninterceptable = true;
+                $this->doNotIntercept = true;
+                $fireOrder->pubnotes .= " Sustained shot automatically hits.";
+
+                return;
             }
 
-            parent::calculateHitBase($gamedata, $fireOrder); //Default routine if it's not an auto-hit.
-        }
+            parent::calculateHitBase($gamedata, $fireOrder); // Default routine if not an auto-hit.
+        }   
 
 
         public function generateIndividualNotes($gameData, $dbManager) {
@@ -707,8 +721,10 @@
                     if (!$firingOrders) {
                         break; // No fire orders, nothing to process
                     }
-        
+
                     $ship = $this->getUnit(); // Ensure ship is defined before use
+
+                    if($this->isDestroyed() || $ship->isDestroyed()) break;                    
         
                     foreach ($firingOrders as $firingOrder) { //Should only be 1.
                         $didShotHit = $firingOrder->shotshit; //1 or 0 depending on hit or miss.
@@ -726,21 +742,25 @@
                                 );
                             }
                         }
-        
+         
                         if ($didShotHit == 0) {
                             continue; // Shot missed, no need to track damage
                         }
-    
+      
                         // Process damage to target systems
                         $target = $gameData->getShipById($targetid);
+                        if (!$target || !is_array($target->systems) || empty($target->systems)) {
+                            continue; // Ensure valid target and systems exist
+                        }
+
                         foreach ($target->systems as $system) {
                             $systemDamageThisTurn = 0;
                             $notes = 0; // Tracks how much armor should be ignored next turn
-    
+       
                             foreach ($system->damage as $damage) {
-                            
+                               
                                 if ($damage->turn == $gameData->turn){  // Only consider this turn’s damage
-                                
+                                 
                                     if ($damage->shooterid == $ship->id && $damage->weaponid == $this->id) {
 
                                         $systemDamageThisTurn += $damage->damage; // Accumulate total damage dealt this turn
@@ -754,7 +774,7 @@
                                 } else {
                                     $notes = $systemDamageThisTurn; // Partial armor penetration
                                 }
-        
+         
                                 // Create note(s) for armor ignored next turn
                                 while ($notes > 0) {
                                     $notekey = 'systeminfo';
@@ -1420,35 +1440,38 @@ class LaserAccelerator extends Laser{
                 $this->data["Special"] .= '<br>Subsequent Sustained shots ignore any armour/shields that have applied to first shot.';    			
         }
 */
-        public function calculateHitBase(TacGamedata $gamedata, FireOrder $fireOrder){
-            //Check if this is a Sustained weapon firing, and therefore possible automatic hit.    
-            if ($this->isOverloadingOnTurn($gamedata->turn)) {                             
-                // We only care if the overloaded weapon fired last turn and therefore has a targetid stored in sustainedTarget variable.
-                if (!empty($this->sustainedTarget)) { //Check if  sustainedTarget is holding a value.                   
-                    if($this->sustainedTarget[$fireOrder->targetid] == 1) {  // Check if the target id exists in sustainedTarget and it hit last turn.                        
-                        $fireOrder->needed = 100; // Auto-hit!
-                        $fireOrder->updated = true;		                        
-                        $this->uninterceptable = true;
-                        $this->doNotIntercept = true;
-                        $fireOrder->pubnotes .= " Sustained shot automatically hits.";	                         
-                        return;                       
-                    }
-                }
+        public function calculateHitBase(TacGamedata $gamedata, FireOrder $fireOrder) {
+            //Check if this is a Sustained weapon firing, and therefore possible automatic hit. 
+            // We only care if the overloaded weapon fired last turn and therefore has a targetid stored in sustainedTarget variable.
+            if (
+                $this->isOverloadingOnTurn($gamedata->turn) &&
+                isset($this->sustainedTarget[$fireOrder->targetid]) &&
+                $this->sustainedTarget[$fireOrder->targetid] == 1
+            ) {
+                $fireOrder->needed = 100; // Auto-hit!
+                $fireOrder->updated = true;
+                $this->uninterceptable = true;
+                $this->doNotIntercept = true;
+                $fireOrder->pubnotes .= " Sustained shot automatically hits.";
+
+                return;
             }
 
-            parent::calculateHitBase($gamedata, $fireOrder); //Default routine if it's not an auto-hit.
-        }
+            parent::calculateHitBase($gamedata, $fireOrder); // Default routine if not an auto-hit.
+        }   
 
 
-        public function generateIndividualNotes($gameData, $dbManager) { 
+        public function generateIndividualNotes($gameData, $dbManager) {
             switch($gameData->phase) {
                 case 4: // Post-Firing phase
                     $firingOrders = $this->getFireOrders($gameData->turn); // Get fire orders for this turn
                     if (!$firingOrders) {
                         break; // No fire orders, nothing to process
                     }
-        
+
                     $ship = $this->getUnit(); // Ensure ship is defined before use
+
+                    if($this->isDestroyed() || $ship->isDestroyed()) break;                    
         
                     foreach ($firingOrders as $firingOrder) { //Should only be 1.
                         $didShotHit = $firingOrder->shotshit; //1 or 0 depending on hit or miss.
@@ -1466,21 +1489,25 @@ class LaserAccelerator extends Laser{
                                 );
                             }
                         }
-        
+         
                         if ($didShotHit == 0) {
                             continue; // Shot missed, no need to track damage
                         }
-    
+      
                         // Process damage to target systems
                         $target = $gameData->getShipById($targetid);
+                        if (!$target || !is_array($target->systems) || empty($target->systems)) {
+                            continue; // Ensure valid target and systems exist
+                        }
+
                         foreach ($target->systems as $system) {
                             $systemDamageThisTurn = 0;
                             $notes = 0; // Tracks how much armor should be ignored next turn
-    
+       
                             foreach ($system->damage as $damage) {
-                            
+                               
                                 if ($damage->turn == $gameData->turn){  // Only consider this turn’s damage
-                                
+                                 
                                     if ($damage->shooterid == $ship->id && $damage->weaponid == $this->id) {
 
                                         $systemDamageThisTurn += $damage->damage; // Accumulate total damage dealt this turn
@@ -1494,7 +1521,7 @@ class LaserAccelerator extends Laser{
                                 } else {
                                     $notes = $systemDamageThisTurn; // Partial armor penetration
                                 }
-        
+         
                                 // Create note(s) for armor ignored next turn
                                 while ($notes > 0) {
                                     $notekey = 'systeminfo';

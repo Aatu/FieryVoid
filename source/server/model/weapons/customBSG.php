@@ -625,38 +625,25 @@ mode and can still intercept for friendly units.*/
 			switch($this->firingMode){
 				case 1:
 
+				//hit chance always 100 - so it always hits and is correctly animated
 				$fireOrder->needed = 100; //auto hit!
 				$fireOrder->updated = true;
-		
-				//while we're at it - we may add appropriate interception orders!		
-				$targetShip = $gamedata->getShipById($fireOrder->targetid);
 
-//				$shipsInRange = $gamedata->getShipsInDistance($targetShip); //all units on target hex
-//				foreach ($shipsInRange as $affectedShip) {
-					$allOrders = $targetShip->getAllFireOrders($gamedata->turn);
-//					$allOrders = $affectedShip->getAllFireOrders($gamedata->turn);
+				//while we're at it - we may add appropriate interception orders!	
+				if ($fireOrder->targetid >= 0) {//actual target is chosen...				
+				$targetShip = $gamedata->getShipById($fireOrder->targetid);
+				$allOrders = $targetShip->getAllFireOrders($gamedata->turn);
+				
 					foreach($allOrders as $subOrder) {
-						if (($subOrder->type == 'normal') && ($subOrder->targetid == $fireOrder->shooterid) ){ //something is firing at protected unit - and is affected!
-							//uninterceptable are affected all right, just those that outright cannot be intercepted - like ramming or mass driver - will not be affected
+						if (($subOrder->type == 'normal') && ($subOrder->targetid == $fireOrder->shooterid) ){ //something is firing at protected unit - except ballistics!
 							$subWeapon = $targetShip->getSystemById($subOrder->weaponid);
-//							$subWeapon = $affectedShip->getSystemById($subOrder->weaponid);
-							if( $subWeapon->doNotIntercept != true ){
-								//apply interception! Note that this weapon is technically not marked as firing defensively - it is marked as firing offensively though! (already)
-								//like firing.php addToInterceptionTotal
-								$subOrder->totalIntercept += $this->getInterceptionMod($gamedata, $subOrder);
+							if(!$subWeapon->doNotIntercept){//just those that outright cannot be intercepted - like ramming or mass driver - will not be affected
+								$subOrder->totalIntercept += $this->getInterceptionMod($gamedata, $subOrder);//50% effectiveness for lasers etc handled here.
 								$subOrder->numInterceptors++;
 							}
 						}
-					}	
-//				}
-		
-				//retarget at hex - this will affect how the weapon is animated/displayed in firing log!
-					//insert correct target coordinates: CURRENT target position
-					$pos = $targetShip->getHexPos();
-					$fireOrder->x = $pos->q;
-					$fireOrder->y = $pos->r;
-					$fireOrder->targetid = -1; //correct the error
-
+					}		
+				}
 				break;
 		
 			case 2:

@@ -1014,7 +1014,8 @@ class AmmoMissileRackS extends Weapon{
     public $priority = 6;
     public $loadingtime = 2;
 	public $normaload = 2;    
-	
+	private $dpArray = array(); //array of damage penalties for all modes! - filled automatically
+
 	protected $availableAmmoAlreadySet = false; //set to true if calling constructor from derived weapon that sets different ammo options
 
     protected $rackExplosionDamage = 75; //how much damage will this weapon do in case of catastrophic explosion
@@ -1259,7 +1260,8 @@ class AmmoMissileRackS extends Weapon{
 		$strippedSystem = parent::stripForJson();
 		$strippedSystem->firingModes = $this->firingModes; 
 		$strippedSystem->damageTypeArray = $this->damageTypeArray; 
-		$strippedSystem->weaponClassArray = $this->weaponClassArray; 
+		$strippedSystem->weaponClassArray = $this->weaponClassArray;
+		$strippedSystem->basicFC = $this->basicFC; 		 
 		$strippedSystem->fireControlArray = $this->fireControlArray; 
 		$strippedSystem->rangeArray = $this->rangeArray; 
 		$strippedSystem->distanceRangeArray = $this->distanceRangeArray; 
