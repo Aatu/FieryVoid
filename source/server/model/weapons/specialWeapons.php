@@ -2424,7 +2424,7 @@ class RammingAttack extends Weapon{
 		$shooter = $this->getUnit();
 
 		//First let's check if any units moved through an Asteroid hex and create an appropriate fireOrder.		
-		if($shooter->userid == -5){ //This userid denotes shooter unit is terrain.
+		if($shooter->userid == -5 && !$shooter->isDestroyed()){ //This userid denotes shooter unit is terrain.
 			$relevantShips = array();
 
 			//Make a list of relevant ships e.g. this ship and enemy fighters in the game.
@@ -2449,7 +2449,7 @@ class RammingAttack extends Weapon{
 					$targetMovement->position->q, $targetMovement->position->r, "TerrainCollision", 10001
 				);
 				$newFireOrder->chosenLocation = $location;				
-				$newFireOrder->pubnotes = "<br>A Ship collided with this Asteroid during its movement!";
+				$newFireOrder->pubnotes = "<br>COLLISION! A Ship collided with this Asteroid during its movement!";
 				$newFireOrder->addToDB = true;
 				$this->fireOrders[] = $newFireOrder;
 			}	
