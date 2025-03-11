@@ -616,12 +616,13 @@ class Enhancements{
 			  case 'Hastan': //Yolu Hastan Escort Frigate: 800->800
 				  $enhPrice = 0;//just so enhancement itself is present
 				  break;
-			  case 'Maitau': //Yolu Maitau Pursuit Frigate: 600->800
-				  $enhPrice = 200;
+			  case 'Maitau': //Yolu Maitau Pursuit Frigate: 600->750
+				  $enhPrice = 150;
 				  break;
-			  case 'Maishan': //Yolu Maishan Strike Frigate: 710->750
+/*			  case 'Maishan': //Yolu Maishan Strike Frigate: 710->750 - None for now.
 				  $enhPrice = 40;
 				  break;
+*/
 			  case 'Malau': //Yolu Malau Attack Frigate: 625->650
 				  $enhPrice = 25;
 				  break;
