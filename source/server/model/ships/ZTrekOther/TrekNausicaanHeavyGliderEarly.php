@@ -71,7 +71,7 @@ class TrekNausicaanHeavyGliderEarly extends LCV{
 		
 		0=> array(
 			9 => "Structure",
-			10 => "Grappling Claw",
+			10 => "1:Grappling Claw",
 			12 => "1:Light Plasma Projector",
 			14 => "1:Plasma Burst",
 			15 => "0:Shield Projector",
@@ -83,7 +83,7 @@ class TrekNausicaanHeavyGliderEarly extends LCV{
 
 		1=> array(
 			9 => "Structure",
-			10 => "Grappling Claw",
+			10 => "1:Grappling Claw",
 			12 => "1:Light Plasma Projector",
 			14 => "1:Plasma Burst",
 			15 => "0:Shield Projector",
@@ -95,7 +95,7 @@ class TrekNausicaanHeavyGliderEarly extends LCV{
 
 		2=> array(
 			9 => "Structure",
-			10 => "Grappling Claw",
+			10 => "1:Grappling Claw",
 			12 => "1:Light Plasma Projector",
 			14 => "1:Plasma Burst",
 			15 => "0:Shield Projector",
