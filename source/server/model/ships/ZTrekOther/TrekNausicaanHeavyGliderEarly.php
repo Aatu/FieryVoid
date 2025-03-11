@@ -53,7 +53,7 @@ class TrekNausicaanHeavyGliderEarly extends LCV{
 		$this->addFrontSystem(new LtPlasmaProjector(2, 6, 3, 240, 120));
 		$this->addFrontSystem(new TrekPlasmaBurst(2, 4, 2, 0, 120));
 		
-        //$this->addFrontSystem(new GrapplingClaw(5, 0, 0, 300, 60, 8, false));
+        $this->addFrontSystem(new GrapplingClaw(5, 0, 0, 300, 60, 8, false));
 	
 
 		$warpNacelle = new TrekWarpDrive(2, 10, 0, 3); //armor, structure, power usage, impulse output
@@ -70,7 +70,8 @@ class TrekNausicaanHeavyGliderEarly extends LCV{
 	$this->hitChart = array(
 		
 		0=> array(
-			10 => "Structure",
+			9 => "Structure",
+			10 => "Grappling Claw",
 			12 => "1:Light Plasma Projector",
 			14 => "1:Plasma Burst",
 			15 => "0:Shield Projector",
@@ -81,7 +82,8 @@ class TrekNausicaanHeavyGliderEarly extends LCV{
 		),
 
 		1=> array(
-			10 => "Structure",
+			9 => "Structure",
+			10 => "Grappling Claw",
 			12 => "1:Light Plasma Projector",
 			14 => "1:Plasma Burst",
 			15 => "0:Shield Projector",
@@ -92,7 +94,8 @@ class TrekNausicaanHeavyGliderEarly extends LCV{
 		),
 
 		2=> array(
-			10 => "Structure",
+			9 => "Structure",
+			10 => "Grappling Claw",
 			12 => "1:Light Plasma Projector",
 			14 => "1:Plasma Burst",
 			15 => "0:Shield Projector",
