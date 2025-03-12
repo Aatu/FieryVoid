@@ -756,7 +756,7 @@ class TacGamedata {
         $blockedHexes = [];
         
         foreach ($this->ships as $ship) {
-            if ($ship->Enormous) { // Only enormous units block LoS
+            if ($ship->Enormous && !$ship->isDestroyed()) { // Only enormous units block LoS
                 $position = $ship->getHexPos(); 
                 $blockedHexes[] = $position;
             }
