@@ -2160,7 +2160,7 @@ window.weaponManager = {
         for (var i in gamedata.ships) {
             var ship = gamedata.ships[i];
     
-            if (ship.Enormous) { //Only enormous units block LoS at present
+            if (ship.Enormous && !shipManager.isDestroyed()) { //Only enormous units block LoS at present
                 var position = shipManager.getShipPosition(ship); 
                 blockedHexes.push(position); 
             }
