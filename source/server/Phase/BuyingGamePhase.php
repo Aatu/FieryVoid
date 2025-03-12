@@ -59,7 +59,7 @@ class BuyingGamePhase implements Phase
                 }
 
                 $usedPositions["$x,$y"] = true; // Mark position as used
-                $h = rand(0, 5); // Random height
+                $h = rand(0, 5); // Random heading/facing
 
                 $move = new MovementOrder(-1, "start", new OffsetCoordinate($x, $y), 0, 0, 0, $h, $h, true, 1, 0, 0);
                 $ship->movement = array($move);
