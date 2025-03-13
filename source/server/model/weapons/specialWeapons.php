@@ -2424,7 +2424,7 @@ class RammingAttack extends Weapon{
 		$shooter = $this->getUnit();
 
 		//First let's check if any units moved through an Asteroid hex and create an appropriate fireOrder.		
-		if($shooter->userid == -5 && !$shooter->isDestroyed()){ //This userid denotes shooter unit is terrain.
+		if($shooter->userid == -5 && !$shooter->isDestroyed()){ //This userid denotes shooter unit is terrain e.g. Asteroids.
 			$relevantShips = array();
 
 			//Make a list of relevant ships e.g. this ship and enemy fighters in the game.
@@ -2490,7 +2490,7 @@ class RammingAttack extends Weapon{
 		foreach ($relevantShips as $ship) { // Look through relevant ships and take appropriate action.					
 			// Now check other movements in the turn.
 			$startMove = $ship->getLastTurnMovement($gamedata->turn);	//initialise as last move in previous turn, in case first move takes ship in asteroid.				
-			$previousPosition = $startMove->position;			 
+			$previousPosition = $startMove->position; //This will change as we go through movements, but need to initialise as where the ship starts this turn.			 
 			$previousFacing = $startMove->getFacingAngle();			
 
 			foreach ($ship->movement as $shipMove) {
@@ -2506,7 +2506,7 @@ class RammingAttack extends Weapon{
 						}
 					}
 		
-					// If the movement type is "end", and ship one Asteroid coordinates, remove the ship from collisiontargets as auto-ram chance with Enormous units will do the work here.
+					// If the movement type is "end", and ship on Asteroid coordinates, remove the ship from collision targets as auto-ram chance with Enormous units will do the work here.
 					if ($shipMove->type == "end" && 
 						isset($collisiontargets[$ship->id]) &&
 						$asteroidPosition->q == $shipMove->position->q &&
