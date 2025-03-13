@@ -2160,7 +2160,7 @@ window.weaponManager = {
         for (var i in gamedata.ships) {
             var ship = gamedata.ships[i];
     
-            if (ship.Enormous && !shipManager.isDestroyed()) { //Only enormous units block LoS at present
+            if (ship.Enormous && !shipManager.isDestroyed(ship)) { //Only enormous units block LoS at present
                 var position = shipManager.getShipPosition(ship); 
                 blockedHexes.push(position); 
             }
@@ -2168,6 +2168,58 @@ window.weaponManager = {
     
         return blockedHexes;
     },        
+
+/*
+    getBlockedHexes: function getBlockedHexes() {
+        var blockedHexes = [];
+
+        for (var i in gamedata.ships) {
+            var ship = gamedata.ships[i];
+
+            if (ship.Enormous && !shipManager.isDestroyed()) { //Only enormous units block LoS at present
+                var position = shipManager.getShipPosition(ship);
+                blockedHexes.push(position);
+            
+                if (ship.Huge == 1) { //Has a radius of 1 around it's centre hex.
+                    var neighbourHexes = mathlib.getNeighbouringHexes(position);
+/*                    
+                    let isOddRow = position.r % 2 !== 0;
+                    let neighborOffsets = isOddRow // Odd rows first, then even. ODD EXAMPLE {q: -1, r: -11} EVEN EXAMPLE {q: -2, r: -12}
+                        ? [ 
+                            [+1,  0], // Right {q: 0, r: -11}
+                            [-1,  0], // Left {q: -2, r: -11}
+                            [ -1, +1], // Upper left {q: -2, r: -10}
+                            [ -1, -1], // Lower Left {q: -2, r: -12}
+                            [0, +1], // Upper Right (shifted) {q: -1, r: -10}
+                            [0, -1]  // Lower Right (shifted) {q: -1, r: -12}
+                        ]
+                        : [
+                            [+1,  0], // Right {q: -1, r: -12}
+                            [-1,  0], // Left {q: -3, r: -12}
+                            [+1, +1], // Upper right {q: -1, r: -11}
+                            [+1, -1], // Down right {q: -1, r: -13}
+                            [0, +1], // Upper Left (shifted) {q: -2, r: -11}
+                            [0, -1]  // Lower Left (shifted) {q: -2, r: -13}
+                        ];
+*/  
+/*  
+                    // Add surrounding hexes
+                    neighbourHexes.forEach(hex => {
+                        let neighbor = {
+                            q: hex.q,
+                            r: hex.r
+                        };
+                        blockedHexes.push(neighbor);
+                    });
+                }
+            
+            }
+
+        }
+
+        return blockedHexes;
+    },
+*/
 
     getAllFireOrdersForAllShipsForTurn: function getAllFireOrdersForAllShipsForTurn(turn, type) {
         var fires = [];
