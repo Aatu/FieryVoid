@@ -3,6 +3,7 @@ class BaseShip {
 
     public $shipSizeClass = 3; //0:Light, 1:Medium, 2:Heavy, 3:Capital, 4:Enormous
     public $Enormous = false; //size class 4 is NOT implemented!!! for semi-Enormous unit, set this variable to True
+    public $Huge = 0; //For massive terrain units, denotes how many hexes radius they have from centre hex.
     public $imagePath, $shipClass;
     public $systems = array();
     public $EW = array();
@@ -2497,7 +2498,10 @@ class LCV extends MediumShip{
 	public $hangarRequired = 'LCVs';
 }
 
-
+class Terrain extends MediumShip{
+	public $shipSizeClass = 5; //5 is used to identify Terrain is certain Front End functions.
+    public $Enormous = true;
+}
 
 
 class MediumShipLeftRight extends MediumShip{

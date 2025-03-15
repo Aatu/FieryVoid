@@ -3429,9 +3429,11 @@ spl_autoload_register(
 						'impheavylaser' => '/server/model/weapons/customDevelopment.php',
 						'directemine' => '/server/model/weapons/customDevelopment.php',						
 					'testlaser' => '/server/model/weapons/customs.php',
+                        'terrain' => '/server/model/ships/ShipClasses.php',                    
 	    				'asteroids' => '/server/model/ships/civilians/asteroidS.php',                    
 	    				'asteroidm' => '/server/model/ships/civilians/asteroidM.php',  
-	    				'asteroidl' => '/server/model/ships/civilians/asteroidL.php',  
+	    				'asteroidl' => '/server/model/ships/civilians/asteroidL.php', 
+	    				'moonsmall' => '/server/model/ships/civilians/moonSmall.php',  
 
 				//Marine Boarding Actions
 				'marines' => '/server/model/weapons/specialWeapons.php',
