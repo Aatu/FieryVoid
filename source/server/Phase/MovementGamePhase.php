@@ -87,7 +87,7 @@ class MovementGamePhase implements Phase
         $nextship = null;
         $firstship = null;
         foreach ($gameData->ships as $ship){
-            if($ship->userid == -5) continue; //Ignore terrain like asteroids.
+            if($ship instanceof Terrain) continue; //Ignore terrain like asteroids.
             if ($firstship == null)
                 $firstship = $ship;
 
