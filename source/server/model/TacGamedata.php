@@ -313,7 +313,7 @@ class TacGamedata {
     public function getFirstShip(){    
         foreach ($this->ships as $ship){
             if ($ship->isDestroyed()) continue;
-            if($ship->userid == -5) continue; //Ignore terrain like asteroids.                            
+            if($ship instanceof Terrain) continue; //Ignore terrain like asteroids.                            
             return $ship;
         }        
         return null;
