@@ -2423,33 +2423,35 @@ class RammingAttack extends Weapon{
 	public function beforeFiringOrderResolution($gamedata){
 		$shooter = $this->getUnit();
 
-		//First let's check if any units moved through an Asteroid hex and create an appropriate fireOrder.		
-		if($shooter->userid == -5 && !$shooter->isDestroyed()){ //This userid denotes shooter unit is terrain e.g. Asteroids.
+		//First let's check if any units moved through this Terrain unit and create appropriate fireOrders.		
+		if(($shooter instanceof Terrain) && !$shooter->isDestroyed()){ //This userid denotes shooter unit is terrain e.g. Asteroids.
 			$relevantShips = array();
 
 			//Make a list of relevant ships e.g. this ship and enemy fighters in the game.
 			foreach($gamedata->ships as $ship){
 				if($ship->isDestroyed()) continue; //Ignore destroyed ships
-				if($ship->userid == -5) continue;	//Don't add Asteroids/Terrain.			
-				if ($ship instanceof FighterFlight) continue; //Not doing fighters, assume they can fly around as per other auto-ram check for Enormous units.	
+				if($ship->userid == -5) continue;	//Don't add other terrain.			
+				if ($ship instanceof FighterFlight && $shooter->Huge == 0) continue; //Not doing fighters execpt for very large terrain, assume they can fly around as per other auto-ram check for Enormous units.	
 				$relevantShips[] = $ship;			
 			}
 
-			$asteroidPosition = $shooter->getHexPos();
-			$collisiontargets = $this->checkForCollisions($relevantShips,  $gamedata, $asteroidPosition);
+			$terrrainPosition = $shooter->getHexPos();
+			$collisiontargets = $this->checkForCollisions($relevantShips,  $gamedata, $terrrainPosition);
 
 			foreach($collisiontargets as $targetid=>$location){
 				$target = $gamedata->getShipById($targetid);
+				$type = "TerrainCollision";
+				if($shooter->Huge > 0 ) $type = "TerrainCrash"; //Larger Terrain, like Moons.
 							
 				$targetMovement = $target->getLastTurnMovement($gamedata->turn+1); 							
 				$newFireOrder = new FireOrder(
 					-1, "normal", $shooter->id, $target->id,
 					$this->id, -1, $gamedata->turn, 1,
 					0, 0, 1, 0, 0,
-					$targetMovement->position->q, $targetMovement->position->r, "TerrainCollision", 10001
+					$targetMovement->position->q, $targetMovement->position->r, $type, 10001
 				);
 				$newFireOrder->chosenLocation = $location;				
-				$newFireOrder->pubnotes = "<br>COLLISION! A Ship collided with this Asteroid during its movement!";
+				$newFireOrder->pubnotes = "<br>COLLISION! A Ship collided with this terrain during its movement!";
 				$newFireOrder->addToDB = true;
 				$this->fireOrders[] = $newFireOrder;
 			}	
@@ -2484,42 +2486,82 @@ class RammingAttack extends Weapon{
 
 	} //endof public function beforeFiringOrderResolution
 
-	private function checkForCollisions($relevantShips, $gamedata, $asteroidPosition){
-	    $collisiontargets = array(); // Initialize array for fighters to be fired at.		
-
-		foreach ($relevantShips as $ship) { // Look through relevant ships and take appropriate action.					
-			// Now check other movements in the turn.
-			$startMove = $ship->getLastTurnMovement($gamedata->turn);	//initialise as last move in previous turn, in case first move takes ship in asteroid.				
-			$previousPosition = $startMove->position; //This will change as we go through movements, but need to initialise as where the ship starts this turn.			 
-			$previousFacing = $startMove->getFacingAngle();			
-
-			foreach ($ship->movement as $shipMove) {
-				if ($shipMove->turn == $gamedata->turn) {
+	private function checkForCollisions($relevantShips, $gamedata, $terrrainPosition){
+	    $collisiontargets = array(); // Initialize array for fighters to be fired at.	
+		$thisShip = $this->getUnit();
 		
-					// Only interested in moves where ship enters a NEW hex!
-					if ($shipMove->type == "move" || $shipMove->type == "slipleft" || $shipMove->type == "slipright") {					
-						// Check if the position matches the asteroids, e.g. zero distance.
-						if ($asteroidPosition->q == $shipMove->position->q && $asteroidPosition->r == $shipMove->position->r) {
-							$relativeBearing = $this->getTempBearing($previousPosition, $asteroidPosition, $ship, $previousFacing);
-							$location = $this->getCollisionLocation($relativeBearing, $ship);
-							$collisiontargets[$ship->id] = $location; // Add to array to be targeted.
+		if ($thisShip->Huge > 0) { //Terrain occupies more than just 1 hex!  Need to check all of its hexes.
+			// Add code that calls a new function, and replicates check below for all hexes within radius.
+			$radiusHexes = mathlib::getNeighbouringHexes($terrrainPosition, $thisShip->Huge);
+	
+			foreach ($relevantShips as $ship) {  // Look through relevant ships' movements and take appropriate action.                 
+				$startMove = $ship->getLastTurnMovement($gamedata->turn);
+				$previousPosition = $startMove->position; //This will change as we go through movements, but need to initialise as where the ship starts this turn.
+				$previousFacing = $startMove->getFacingAngle();
+		
+				foreach ($ship->movement as $shipMove) {
+					if ($shipMove->turn == $gamedata->turn) {
+						if ($shipMove->type == "move" || $shipMove->type == "slipleft" || $shipMove->type == "slipright") {
+							
+							// Check if shipMove position matches any position in $radiusHexes
+							$match = array_filter($radiusHexes, function($hex) use ($shipMove) {
+								return $hex['q'] == $shipMove->position->q && $hex['r'] == $shipMove->position->r;
+							});
+		
+							// Or if it matches the centre position directly
+							if (
+								!empty($match) || 
+								($shipMove->position->q == $terrrainPosition->q && $shipMove->position->r == $terrrainPosition->r)
+							) {
+								// Prevent duplicate ship IDs
+								if (!isset($collisiontargets[$ship->id])) {
+									$relativeBearing = $this->getTempBearing($previousPosition, $terrrainPosition, $ship, $previousFacing);
+									$location = $this->getCollisionLocation($relativeBearing, $ship);
+									$collisiontargets[$ship->id] = $location; // Add to array to be targeted.
+								}
+							}
 						}
-					}
 		
-					// If the movement type is "end", and ship on Asteroid coordinates, remove the ship from collision targets as auto-ram chance with Enormous units will do the work here.
-					if ($shipMove->type == "end" && 
-						isset($collisiontargets[$ship->id]) &&
-						$asteroidPosition->q == $shipMove->position->q &&
-						$asteroidPosition->r == $shipMove->position->r) {
-						unset($collisiontargets[$ship->id]); // Remove from collision targets.
+						$previousPosition = $shipMove->position;
+						$previousFacing = $shipMove->getFacingAngle();
 					}
-
-					$previousPosition = $shipMove->position;
-					$previousFacing = $shipMove->getFacingAngle();
-
 				}
 			}
-		}			
+		}else{
+			foreach ($relevantShips as $ship) { // Look through relevant ships' movements and take appropriate action.					
+				// Now check other movements in the turn.
+				$startMove = $ship->getLastTurnMovement($gamedata->turn);	//initialise as last move in previous turn, in case first move takes ship in asteroid.				
+				$previousPosition = $startMove->position; //This will change as we go through movements, but need to initialise as where the ship starts this turn.			 
+				$previousFacing = $startMove->getFacingAngle();			
+
+				foreach ($ship->movement as $shipMove) {
+					if ($shipMove->turn == $gamedata->turn) {
+			
+						// Only interested in moves where ship enters a NEW hex!
+						if ($shipMove->type == "move" || $shipMove->type == "slipleft" || $shipMove->type == "slipright") {					
+							// Check if the position matches the asteroids, e.g. zero distance.
+							if ($terrrainPosition->q == $shipMove->position->q && $terrrainPosition->r == $shipMove->position->r) {
+								$relativeBearing = $this->getTempBearing($previousPosition, $terrrainPosition, $ship, $previousFacing);
+								$location = $this->getCollisionLocation($relativeBearing, $ship);
+								$collisiontargets[$ship->id] = $location; // Add to array to be targeted.
+							}
+						}
+			
+						// If the movement type is "end", and ship on Asteroid coordinates, remove the ship from collision targets as auto-ram chance with Enormous units will do the work here.
+						if ($shipMove->type == "end" && 
+							isset($collisiontargets[$ship->id]) &&
+							$terrrainPosition->q == $shipMove->position->q &&
+							$terrrainPosition->r == $shipMove->position->r) {
+							unset($collisiontargets[$ship->id]); // Remove from collision targets.
+						}
+
+						$previousPosition = $shipMove->position;
+						$previousFacing = $shipMove->getFacingAngle();
+
+					}
+				}
+			}			
+		}
 
 	    return $collisiontargets;		
 		
@@ -2566,7 +2608,7 @@ class RammingAttack extends Weapon{
 
 	public function calculateHitBase($gamedata, $fireOrder)
 	{
-		if($fireOrder->damageclass == "TerrainCollision"){ //This attack automatically hits.
+		if($fireOrder->damageclass == "TerrainCollision" || $fireOrder->damageclass == "TerrainCrash"){ //These attacks automatically hit.
 			$fireOrder->needed = 100; //always true
 			$fireOrder->updated = true;
 		}else{
@@ -2594,7 +2636,7 @@ class RammingAttack extends Weapon{
 			//$shooter = $gamedata->getShipById($fireOrder->targetid);
 			$shooter = $this->unit; //technically this unit after all
 			$target = $this->unit;
-			if($fireOrder->damageclass != 'TerrainCollision') $fireOrder->chosenLocation = 0;//to be redetermined!
+			if($fireOrder->damageclass != 'TerrainCollision' && $fireOrder->damageclass != 'TerrainCraash') $fireOrder->chosenLocation = 0;//to be redetermined!
 			$damage = $this->getReturnDamage($fireOrder);
         		$damage = $this->getDamageMod($damage, $shooter, $target, $pos, $gamedata);
         		$damage -= $target->getDamageMod($shooter, $pos, $gamedata->turn, $this);

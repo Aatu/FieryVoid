@@ -756,14 +756,25 @@ class TacGamedata {
         $blockedHexes = [];
         
         foreach ($this->ships as $ship) {
-            if ($ship->Enormous && !$ship->isDestroyed()) { // Only enormous units block LoS
+            if($ship->isDestroyed()) continue;
+
+            if ($ship->Enormous) { // Only enormous units block LoS
                 $position = $ship->getHexPos(); 
                 $blockedHexes[] = $position;
-            }
+
+                if($ship->Huge > 0){ //Larger terrain, need to add more than just centre hex.
+                    $neighbourHexes = Mathlib::getNeighbouringHexes($position, $ship->Huge);
+
+                    foreach ($neighbourHexes as $hex){
+                        $blockedHexes[] = $hex;
+                    }
+                }
+            }    
+
         }
       
         return $blockedHexes;
-    } //endof function getBlockedHexes     
+    } //endof function getBlockedHexes       
 
 }
 
