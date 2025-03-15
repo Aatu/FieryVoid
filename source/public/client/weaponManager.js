@@ -457,13 +457,13 @@ window.weaponManager = {
         // Compute LOS blockage once for all selected weapons
         var blockedLosHex = weaponManager.getBlockedHexes(); //Are there any Enormous units in game, no point checking if no.
 
-        var noLoS = false; //Default to LoS not blocked.
+        var loSBlocked = false; //Default to LoS not blocked.
         if (blockedLosHex && blockedLosHex.length > 0) {
             var weapon = gamedata.selectedSystems[0]; // Use the first weapon to get the shooter's position
             var sPosShooter = weaponManager.getFiringHex(selectedShip, weapon);
             var sPosTarget = shipManager.getShipPosition(ship);
             
-            noLoS = mathlib.checkLineOfSight(sPosShooter, sPosTarget, blockedLosHex);
+            loSBlocked = mathlib.checkLineOfSight(sPosShooter, sPosTarget, blockedLosHex);
         }
 
         for (var i in gamedata.selectedSystems) {
@@ -475,7 +475,9 @@ window.weaponManager = {
                     value = weapon.firingModes[value];
                     var keys = Object.keys(weapon.firingModes);
 
-                    if (noLoS) {
+                    if(ship.Huge > 0){ //Cannot Target larger terrain.
+                        $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="losBlocked"> CANNOT TARGET</span></div>').appendTo(f);
+                    }else if (loSBlocked) {
                         // LOS is blocked - only display the blocked message
                         $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="losBlocked"> LINE OF SIGHT BLOCKED</span></div>').appendTo(f);
                     } else {
@@ -2153,7 +2155,7 @@ window.weaponManager = {
     
         return shortLogTypes.includes(fire.damageclass);
     },
-
+/*
     getBlockedHexes: function getBlockedHexes() {
         var blockedHexes = [];
     
@@ -2168,58 +2170,30 @@ window.weaponManager = {
     
         return blockedHexes;
     },        
+*/
 
-/*
     getBlockedHexes: function getBlockedHexes() {
         var blockedHexes = [];
-
+    
         for (var i in gamedata.ships) {
             var ship = gamedata.ships[i];
-
-            if (ship.Enormous && !shipManager.isDestroyed()) { //Only enormous units block LoS at present
+    
+            if (ship.Enormous && !shipManager.isDestroyed(ship)) { // Only enormous units block LoS at present
                 var position = shipManager.getShipPosition(ship);
                 blockedHexes.push(position);
             
-                if (ship.Huge == 1) { //Has a radius of 1 around it's centre hex.
-                    var neighbourHexes = mathlib.getNeighbouringHexes(position);
-/*                    
-                    let isOddRow = position.r % 2 !== 0;
-                    let neighborOffsets = isOddRow // Odd rows first, then even. ODD EXAMPLE {q: -1, r: -11} EVEN EXAMPLE {q: -2, r: -12}
-                        ? [ 
-                            [+1,  0], // Right {q: 0, r: -11}
-                            [-1,  0], // Left {q: -2, r: -11}
-                            [ -1, +1], // Upper left {q: -2, r: -10}
-                            [ -1, -1], // Lower Left {q: -2, r: -12}
-                            [0, +1], // Upper Right (shifted) {q: -1, r: -10}
-                            [0, -1]  // Lower Right (shifted) {q: -1, r: -12}
-                        ]
-                        : [
-                            [+1,  0], // Right {q: -1, r: -12}
-                            [-1,  0], // Left {q: -3, r: -12}
-                            [+1, +1], // Upper right {q: -1, r: -11}
-                            [+1, -1], // Down right {q: -1, r: -13}
-                            [0, +1], // Upper Left (shifted) {q: -2, r: -11}
-                            [0, -1]  // Lower Left (shifted) {q: -2, r: -13}
-                        ];
-*/  
-/*  
-                    // Add surrounding hexes
-                    neighbourHexes.forEach(hex => {
-                        let neighbor = {
-                            q: hex.q,
-                            r: hex.r
-                        };
-                        blockedHexes.push(neighbor);
-                    });
+                if (ship.Huge > 0) { // Has a radius of 1 around its centre hex
+                    var neighbourHexes = mathlib.getNeighbouringHexes(position, ship.Huge); //Only works with ship.Huge = 1 atm
+                    
+                    // Add surrounding hexes directly
+                    blockedHexes.push(...neighbourHexes);
                 }
-            
             }
-
         }
-
+    
         return blockedHexes;
     },
-*/
+
 
     getAllFireOrdersForAllShipsForTurn: function getAllFireOrdersForAllShipsForTurn(turn, type) {
         var fires = [];

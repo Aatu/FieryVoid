@@ -242,7 +242,7 @@ window.mathlib = {
 	},
 	
 	checkLineOfSight: function checkLineOfSight(start, end, blockedHexes) {
-		const hexSize = window.Config.HEX_SIZE;
+//		const hexSize = window.Config.HEX_SIZE;
 
 		const startPixel = coordinateConverter.fromHexToGame(start);
 		const endPixel = coordinateConverter.fromHexToGame(end);		
@@ -273,6 +273,35 @@ window.mathlib = {
 			}
 		}
 		return false; //LoS is NOT blocked
-	}
+	},
+
+	//Radiius value not currently used, but there in case I decide to scale up later.  As is you can just pass position and get the 6 neighbouring hexes
+    getNeighbouringHexes: function getNeighbouringHexes(position, radius = 1) {
+        let isOddRow = position.r % 2 !== 0; //Test hexes ODD (-1,-11) EVEN (-2,-12)
+        let neighborOffsets = isOddRow 
+			? [ 
+				[+1,  0], // Right {q: 0, r: -11}
+				[-1,  0], // Left {q: -2, r: -11}
+				[ -1, +1], // Upper left {q: -2, r: -10}
+				[ -1, -1], // Lower Left {q: -2, r: -12}
+				[0, +1], // Upper Right (shifted) {q: -1, r: -10}
+				[0, -1]  // Lower Right (shifted) {q: -1, r: -12}
+			]
+			: [
+				[+1,  0], // Right {q: -1, r: -12}
+				[-1,  0], // Left {q: -3, r: -12}
+				[+1, +1], // Upper right {q: -1, r: -11}
+				[+1, -1], // Down right {q: -1, r: -13}
+				[0, +1], // Upper Left (shifted) {q: -2, r: -11}
+				[0, -1]  // Lower Left (shifted) {q: -2, r: -13}
+			];
+
+        // Generate neighboring hexes
+        return neighborOffsets.map(offset => ({
+            q: position.q + offset[0],
+            r: position.r + offset[1]
+        }));
+    }
+
 
 };
