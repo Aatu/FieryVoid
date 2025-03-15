@@ -28,7 +28,7 @@ window.BallisticIconContainer = function () {
 	        allBallistics.forEach(function (ballistic) {
 				if(ballistic.turn === gamedata.turn){ 
 		            createOrUpdateBallistic.call(this, ballistic, iconContainer, gamedata.turn, true); 
-		        	createOrUpdateBallisticLines.call(this, ballistic, iconContainer, gamedata.turn, true);	
+		        	createOrUpdateBallisticLines.call(this, ballistic, iconContainer, gamedata.turn, true);
 				}	            
 	        }, this);
 					
@@ -60,7 +60,7 @@ window.BallisticIconContainer = function () {
             return true;
         }, this);
 
-        
+        //Remove old line sprites when they are no longer required or being recreated.
         this.ballisticLineIcons = this.ballisticLineIcons.filter(function (lineIcon) {
             if (!lineIcon.used) {
             	if (lineIcon.lineSprite) {
@@ -69,6 +69,7 @@ window.BallisticIconContainer = function () {
 			return false;	
 			}	
 
+		//This section looks to see if Ballistic Lines are showing at moment consumeGamedata() is called (which is often!)		
 		var isFriendlyLinesVisible = this.ballisticLineIcons.some(lineIcon => 
 		  lineIcon.lineSprite?.isVisible === true && lineIcon?.isFriendly === true
 		);
@@ -103,7 +104,55 @@ window.BallisticIconContainer = function () {
 		
             return true;
         }, this);
-                
+
+		//Now create some icons to illustrate the exact hexes for really large terrain occupy.
+		// Filter for ships with Huge value
+		gamedata.ships
+		.filter(ship => ship.Huge > 0) // Find Huge Terrain
+		.forEach(ship => {
+			if(gamedata.gamephase !== -1){ //Don't generate sprites until Terrain is in place!
+				const position = shipManager.getShipPosition(ship); // Get ship's position
+				var positionGame = this.coordinateConverter.fromHexToGame(position);
+				// Create a sprite at the ship's position
+				const sprite = new BallisticSprite(positionGame, "hexWhite");
+				this.scene.add(sprite.mesh);
+
+				this.ballisticIcons.push({
+					id: -5,
+					shooterId: ship.id,
+					targetId: ship.id,
+					launchPosition: position,
+					position: new hexagon.Offset(positionGame.x, positionGame.y),
+					launchSprite: sprite,
+					targetSprite: null,
+					used: true
+				});
+
+				// Get neighboring hexes based on the ship's size (Huge)
+				const neighbourHexes = mathlib.getNeighbouringHexes(position, ship.Huge);
+
+				// Create sprites for neighboring hexes
+				neighbourHexes.forEach(neighbour => {
+					var neighbourPosGame = this.coordinateConverter.fromHexToGame(neighbour);
+					const neighbourSprite = new BallisticSprite(neighbourPosGame, "hexWhite");
+					this.scene.add(neighbourSprite.mesh);
+
+					this.ballisticIcons.push({
+						id: -5,
+						shooterId: ship.id,
+						targetId: ship.id,
+						launchPosition: neighbour,
+						position: new hexagon.Offset(neighbourPosGame.x, neighbourPosGame.y),
+						launchSprite: neighbourSprite,
+						targetSprite: neighbourSprite,
+						used: true
+					});
+				
+				});
+			}	
+
+		});
+
     };
 
 
@@ -123,17 +172,7 @@ window.BallisticIconContainer = function () {
             }, this);
         } else {
             this.zoomScale = 1;
-        }
-/*        
-        //Immediately hide if zooming while lines are up.
-        this.ballisticLineIcons = this.ballisticLineIcons.filter(function (lineIcon) {	           
-	        if (lineIcon.lineSprite) {
-	            lineIcon.lineSprite.hide();
-	            lineIcon.lineSprite.isVisible = false;	 	            
-	        }
-            return true;
-        }, this);        
-*/        
+        } 
     };
 
 
@@ -290,10 +329,10 @@ window.BallisticIconContainer = function () {
 					targetType = 'hexGreen';
 					iconImage = "./img/allySupport.png"; 		        
 				break;
-				case 'Sweeping': //Shadow Slicers
-					targetType = 'hexPurple'; //Default for slicers
-					if(weapon.weaponClass == "Gravitic") targetType = 'hexGreen'; //But now other weapon types use sweeping.			        
-				break;			
+//				case 'Sweeping': //Shadow Slicers, remove hex target for now and rely on just lines and targeting tooltip I think.
+//					targetType = 'hexPurple'; //Default for slicers
+//					if(weapon.weaponClass == "Gravitic") targetType = 'hexGreen'; //But now other weapon types use sweeping.			        
+//				break;			
 				}
 			}		 
 		} 
