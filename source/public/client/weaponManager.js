@@ -1427,6 +1427,7 @@ window.weaponManager = {
         debug && console.log("weaponManager target ship", ship, system);
 
         if (shipManager.isDestroyed(selectedShip)) return;
+//        if(ship.Huge > 0) return; //Do not allow targeting of laege muti-hex terrain.
 
         var blockedLosHex = weaponManager.getBlockedHexes();
 
