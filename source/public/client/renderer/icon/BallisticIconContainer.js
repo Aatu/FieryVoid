@@ -329,10 +329,10 @@ window.BallisticIconContainer = function () {
 					targetType = 'hexGreen';
 					iconImage = "./img/allySupport.png"; 		        
 				break;
-//				case 'Sweeping': //Shadow Slicers, remove hex target for now and rely on just lines and targeting tooltip I think.
-//					targetType = 'hexPurple'; //Default for slicers
-//					if(weapon.weaponClass == "Gravitic") targetType = 'hexGreen'; //But now other weapon types use sweeping.			        
-//				break;			
+				case 'Sweeping': //Shadow Slicers, remove hex target for now and rely on just lines and targeting tooltip I think.
+					targetType = 'hexPurple'; //Default for slicers
+					if(weapon.weaponClass == "Gravitic") targetType = 'hexGreen'; //But now other weapon types use sweeping.			        
+				break;			
 				}
 			}		 
 		} 
@@ -631,7 +631,7 @@ window.BallisticIconContainer = function () {
 	            id: ballistic.id,
 	            shooterId: ballistic.shooterid,
 	            targetId: ballistic.targetid,
-	            lineSprite: lineSprite =  new BallisticLineSprite(launchPosition, targetPosition, 3 * this.zoomScale, -3, getLineColorByType(type), 0.3),
+	            lineSprite: lineSprite =  new BallisticLineSprite(launchPosition, targetPosition, 3 * this.zoomScale, -3, getLineColorByType(type), 0.4),
 	            used: true,
 	            isFriendly: isFriendly
 	        });
