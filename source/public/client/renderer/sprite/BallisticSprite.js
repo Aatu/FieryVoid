@@ -8,8 +8,9 @@ window.BallisticSprite = function () {
     var TEXTURE_HEX_BLUE = null;
     var TEXTURE_HEX_GREEN = null;
     var TEXTURE_HEX_YELLOW = null;
-    var TEXTURE_HEX_PURPLE = null;         
-    var TEXTURE_HEX_GREEN_EXCLAMATION = null; // New texture	
+    var TEXTURE_HEX_PURPLE = null;
+    var TEXTURE_HEX_WHITE = null;         
+    var TEXTURE_HEX_GREEN_EXCLAMATION = null; // Prolly should remove, old method.
 
     function BallisticSprite(position, type, text = "", textColour = "#ffffff", imageSrc = null) {
         HexagonSprite.call(this, -3);
@@ -44,10 +45,12 @@ window.BallisticSprite = function () {
             return TEXTURE_HEX_GREEN;
         } else if (type == "hexYellow") {
             return TEXTURE_HEX_YELLOW;
-        }  else if (type == "hexPurple") {
+        } else if (type == "hexPurple") {
             return TEXTURE_HEX_PURPLE;
-        } else if (type == "hexGreenExclamation") { // New case
+        } else if (type == "hexGreenExclamation") {
             return TEXTURE_HEX_GREEN_EXCLAMATION;
+        } else if (type == "hexWhite") { // ✅ New case for hexWhite
+            return TEXTURE_HEX_WHITE;
         } else {
             return TEXTURE_SHIP;
         }
@@ -60,8 +63,9 @@ window.BallisticSprite = function () {
         TEXTURE_HEX_BLUE = createTexture('hexBlue');
         TEXTURE_HEX_GREEN = createTexture('hexGreen');
         TEXTURE_HEX_YELLOW = createTexture('hexYellow');
-        TEXTURE_HEX_PURPLE = createTexture('hexPurple');           
+        TEXTURE_HEX_PURPLE = createTexture('hexPurple');
         TEXTURE_HEX_GREEN_EXCLAMATION = createTextureWithText('hexGreen', "!", "#aaaa00");
+        TEXTURE_HEX_WHITE = createTexture('hexWhite'); // ✅ New white hex
     }
 
     function createTexture(type) {
@@ -172,17 +176,19 @@ window.BallisticSprite = function () {
             return "rgba(230,20,10,0.50)";
         } else if (type == "hexBlue") {
             return "rgba(0,184,230,0.50)";
-        } else if (type == "hexGreen" || type == "hexGreenExclamation") { // Combine cases
+        } else if (type == "hexGreen" || type == "hexGreenExclamation") {
             return "rgba(0, 204, 0,0.50)";
         } else if (type == "hexYellow") {
             return "rgba(255, 255, 0,0.50)";
         } else if (type == "hexPurple") {
             return "rgba(127, 0, 255,0.50)";
+        } else if (type == "hexWhite") { // ✅ New white hex stroke
+            return "rgba(255, 255, 255,0.40)";
         } else {
             return "rgba(144,185,208,0.80)";
         }
     }
-
+    
     function getFillColorByType(type) {
         if (type == "hexOrange") {
             return "rgba(250,110,5,0.10)";
@@ -190,12 +196,14 @@ window.BallisticSprite = function () {
             return "rgba(230,20,10,0.10)";
         } else if (type == "hexBlue") {
             return "rgba(0,184,230,0.10)";
-        } else if (type == "hexGreen" || type == "hexGreenExclamation") { // Combine cases
+        } else if (type == "hexGreen" || type == "hexGreenExclamation") {
             return "rgba(0, 204, 0,0.10)";
         } else if (type == "hexYellow") {
             return "rgba(255, 255, 0,0.10)";
         } else if (type == "hexPurple") {
             return "rgba(127, 0, 255,0.10)";
+        } else if (type == "hexWhite") { // ✅ New white hex fill
+            return "rgba(255, 255, 255,0.10)";
         } else {
             return "rgba(144,185,208,0.30)";
         }
