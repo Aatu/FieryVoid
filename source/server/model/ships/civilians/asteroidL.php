@@ -1,5 +1,5 @@
 <?php
-class asteroidL  extends MediumShip{
+class asteroidL  extends Terrain{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
@@ -11,7 +11,6 @@ class asteroidL  extends MediumShip{
         $this->imagePath = "img/ships/asteroidL.png";
         $this->canvasSize = 256;
         $this->shipClass = "Asteroid (Large)";
-        $this->shipSizeClass = 3;
         $this->Enormous = true; 
 		$this->iniativebonus = -200; //no voluntary movement anyway
 	            
