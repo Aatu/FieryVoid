@@ -728,9 +728,9 @@ window.shipManager = {
         var previousInitiative = -100000; // same Ini move together now!
         var order = 0;
 
-        // Filter out destroyed ships and those with userid === -5 e.g. terrain
+        // Filter out destroyed ships and those with shipSizeClass === 5 e.g. terrain
         var validShips = gamedata.ships.filter(function(s) {
-            return !shipManager.isDestroyed(s) && s.userid !== -5;
+            return !shipManager.isDestroyed(s) && s.shipSizeClass !== 5;
         });
 
         for (var i in validShips) {

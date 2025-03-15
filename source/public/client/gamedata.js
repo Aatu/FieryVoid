@@ -196,7 +196,7 @@ window.gamedata = {
     },
     
     isMyOrTeamOneShip: function isMyOrTeamOneShip(ship) {
-        if (ship.userid === -5) {
+        if (ship.shipSizeClass === 5) {
             return false; // Ensure ships with userid -5 are never considered friendly
         }
     
@@ -1008,7 +1008,7 @@ window.gamedata = {
 
         var allShips = gamedata.ships;
         var ships = gamedata.ships.filter(function (ship) {
-            return !shipManager.isDestroyed(ship) && ship.userid != -5;
+            return !shipManager.isDestroyed(ship) && ship.shipSizeClass != 5;
         });
 
        
