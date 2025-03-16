@@ -41,11 +41,17 @@ class BuyingGamePhase implements Phase
             } 
                    
             // Now let's see if we have to add any terrain.
-            if ($gameData->rules->hasRuleName("asteroids") && $ship->userid == -5) { 
+            if (($gameData->rules->hasRuleName("asteroids") || $gameData->rules->hasRuleName("moons")) && $ship->userid == -5)
                 // It's an asteroid, so assign a unique random position.
                 $deploymentZone = $this->getGamespace($gameData);
-                $maxX = ($deploymentZone['width'] / 2) - 3;
-                $maxY = ($deploymentZone['height'] / 2) - 2;
+                if($ship instanceof moonSmall){
+                    $maxX = ($deploymentZone['width'] / 2) - 7;
+                    $maxY = ($deploymentZone['height'] / 2) - 5;                    
+                }else{
+                    $maxX = ($deploymentZone['width'] / 2) - 3;
+                    $maxY = ($deploymentZone['height'] / 2) - 2;
+                }    
+
 
                 // Generate a unique random position
                 while (true) {
@@ -85,17 +91,29 @@ class BuyingGamePhase implements Phase
             $size = Dice::d(3, 1);  //Use a dice to decide a random size of asteroid!
             if($size == 1){
                 $currAsteroid = new asteroidS($gameData->id, -5, "Asteroid #" . $counter . "", $slot);
-                $dbManager->submitShip($gameData->id, $currAsteroid, -5); //Save them with a nominal userid of -5, nothing else should use that!                   
+                $dbManager->submitShip($gameData->id, $currAsteroid, -5); //Save them with a nominal userid of -5, only terrain should use that!                   
             }else if($size == 2){
                 $currAsteroid = new asteroidM($gameData->id, -5, "Asteroid #" . $counter . "", $slot);
-                $dbManager->submitShip($gameData->id, $currAsteroid, -5); //Save them with a nominal userid of -5, nothing else should use that!                  
+                $dbManager->submitShip($gameData->id, $currAsteroid, -5); //Save them with a nominal userid of -5, only terrain should use that!                  
             }else{
                 $currAsteroid = new asteroidL($gameData->id, -5, "Asteroid #" . $counter . "", $slot);
-                $dbManager->submitShip($gameData->id, $currAsteroid, -5); //Save them with a nominal userid of -5, nothing else should use that!                    
+                $dbManager->submitShip($gameData->id, $currAsteroid, -5); //Save them with a nominal userid of -5, nonly terrain should use that!                    
             }
             $counter--; //Reduce counter   
         }
     }        
+
+    public function addMoons($gameData, $dbManager, $numberOfMoons, $slot)
+    {
+        $counter = $numberOfMoons;
+
+        //Create asteroid as units in database.
+        while ($counter > 0) {
+            $currMoon = new moonSmall($gameData->id, -5, "Moon #" . $counter . "", $slot);
+            $dbManager->submitShip($gameData->id, $currMoon, -5); //Save them with a nominal userid of -5, only terrain should use that!        
+            $counter--; //Reduce counter   
+        }
+    }     
 
     public function getGamespace($gameData)
     {
@@ -225,6 +243,18 @@ class BuyingGamePhase implements Phase
 
                 $this->addAsteroids($gameData, $dbManager, $numberOfAsteroids, $slot->slot);
             }
+
+            if ($gameData->rules->hasRuleName("moons") && $slot->slot == 1) { // Generate all the asteroids from Slot/Player 1 
+                $numberOfMoons = 0; //Initialise
+                $moonsRule = $gameData->rules->getRuleByName('moons');
+                
+                if ($moonsRule && method_exists($moonsRule, 'jsonSerialize')) {
+                    $numberOfMoons = $moonsRule->jsonSerialize();
+                }                 
+
+                $this->addMoons($gameData, $dbManager, $numberOfMoons, $slot->slot);
+            }
+
         }
 
         $dbManager->updatePlayerStatus($gameData->id, $gameData->forPlayer, $gameData->phase, $gameData->turn, $seenSlots);

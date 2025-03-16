@@ -14,7 +14,8 @@ jQuery(function ($) {
     $("#gamespacecheck").on("click", createGame.doFlightCheck);
     $("#movementcheck").on("click", createGame.doMovementCheck);
     $("#desperatecheck").on("click", createGame.doDesperateCheck);
-    $("#asteroidscheck").on("click", createGame.doAsteroidsCheck);          
+    $("#asteroidscheck").on("click", createGame.doAsteroidsCheck);
+    $("#moonscheck").on("click", createGame.doMoonsCheck);              
     
     $(".setsizeknifefight").on("click", createGame.doSwitchSizeKnifeFight);
     $(".setswitchsizebaseassault").on("click", createGame.doSwitchSizeBaseAssault);    
@@ -158,6 +159,28 @@ doAsteroidsCheck: function doAsteroidsCheck(data) {
         $("#asteroidsDropdown").hide();
         // Remove asteroids rule
         delete createGame.rules.asteroids;
+    }
+},
+
+doMoonsCheck: function doMoonsCheck(data) {
+    var checkval = $("#moonscheck:checked").val(); // FIXED ID
+
+    if (checkval == "on") {
+        // Show the dropdown for selecting moons
+        $("#moonsDropdown").show();
+        // Set the selected value when checkbox is checked
+        var selectedValue = $("#moonsSelect").val();
+        createGame.rules.moons = parseInt(selectedValue, 10);
+        
+        // Add an event listener to update the value if the user changes the dropdown
+        $("#moonsSelect").on('change', function() {
+            createGame.rules.moons = parseInt($(this).val(), 10);
+        });
+    } else {
+        // Hide the dropdown when the checkbox is unchecked
+        $("#moonsDropdown").hide();
+        // Remove moons rule
+        delete createGame.rules.moons;
     }
 },
 
