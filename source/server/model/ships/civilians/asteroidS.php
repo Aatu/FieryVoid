@@ -28,7 +28,9 @@ class asteroidS  extends Terrain{
         $this->rollcost = 0;
         $this->pivotcost = 0;	
 	    
-         
+        //Block all enhancements for Terrain units when bought
+		Enhancements::nonstandardEnhancementSet($this, 'Terrain');
+        
         $this->addPrimarySystem(new OSATCnC(10, 1, 0, 0)); //Required for some checks.
         $this->addPrimarySystem(new MagGravReactorTechnical(10, 1, 0, 0)); //Required for some checks.
 

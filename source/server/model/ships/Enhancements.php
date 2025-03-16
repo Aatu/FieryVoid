@@ -81,8 +81,12 @@ class Enhancements{
 		case 'ShadowFighter':
 			Enhancements::blockStandardEnhancements($unit);
 			$unit->enhancementOptionsEnabled[] = 'SHAD_CTRL';
-			break;	  
+			break;	
 
+		case 'Terrain':
+			Enhancements::blockStandardEnhancements($unit);
+			break;	  
+	
 		case 'ThirdspaceShip':
 			Enhancements::blockStandardEnhancements($unit);
 			$unit->enhancementOptionsEnabled[] = 'IMPR_SR';	
