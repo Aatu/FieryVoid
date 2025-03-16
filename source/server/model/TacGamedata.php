@@ -765,8 +765,8 @@ class TacGamedata {
                 if($ship->Huge > 0){ //Larger terrain, need to add more than just centre hex.
                     $neighbourHexes = Mathlib::getNeighbouringHexes($position, $ship->Huge);
 
-                    foreach ($neighbourHexes as $hex){
-                        $blockedHexes[] = $hex;
+                    foreach ($neighbourHexes as $hex) {
+                        $blockedHexes[] = new OffsetCoordinate($hex); // Ensure hexes are objects
                     }
                 }
             }    
