@@ -36,7 +36,7 @@ class moonSmall  extends Terrain{
         $this->addPrimarySystem(new OSATCnC(10, 1, 0, 0)); //Required for some checks.
         $this->addPrimarySystem(new MagGravReactorTechnical(10, 1, 0, 0)); //Required for some checks.
 
-        $this->addPrimarySystem(new Structure(8,  1500));
+        $this->addPrimarySystem(new Structure(8,  2000));
 
         $this->hitChart = array(
                 0=> array(
