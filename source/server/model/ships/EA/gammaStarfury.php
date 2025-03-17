@@ -6,7 +6,9 @@ class GammaStarfury extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 366;
-        $this->faction = "Earth Alliance";
+//        $this->faction = "Earth Alliance";
+$this->faction = "Custom Ships";
+$this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
         $this->phpclass = "GammaStarfury";
         $this->shipClass = "Starfury: Aurora Gamma Heavy flight";
         $this->imagePath = "img/ships/auroraStarfury.png";

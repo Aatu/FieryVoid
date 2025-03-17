@@ -367,7 +367,8 @@ window.gamedata = {
 	    var totalFtrL = 0;//total light fighters
 	    var totalFtrXL = 0;//total ultralight fighters
 		var totalFtrAS = 0;//total Assault Shuttle/Breaching pods
-		var hangarConversions = 0; //How many converted hangar slots are there.
+		var hangarConversionsF = 0; //How many converted hangar slots TO fighter slots.
+		var hangarConversionsAS = 0; //How many converted hangar slots TO Assault Shuttle slots.		
 	    var totalFtrOther = new Array( );//total other small craft
 		var smallCraftUsed = new Array( );//small craft sizes that happen to be present, whether as hangar space or actual craft
 		
@@ -456,8 +457,43 @@ window.gamedata = {
 				ancientUnitPresent = true;
 			}
 			if(!lship.flight){
-					totalShips++;			
-					//check for custom hangars
+					totalShips++;
+					
+				// Check if ship has converted Assault Shuttle Hangar Space to Fighters before calculating total hangar space
+				for (var enh in lship.enhancementOptions) { 
+					if (lship.enhancementOptions[enh][6]) { // Hangar conversion is an option, ignore others.
+						if (lship.enhancementOptions[enh][0] === "HANG_CON_F") {
+							hangarConversionsF += lship.enhancementOptions[enh][2]; //Record number of slots converted from Assault Shuttle to Fighters.
+						}	
+					}
+				}
+
+				// Check if ship has converted Fighter Hangar Space to Assault Shuttles before calculating total hangar space
+				for (var enh in lship.enhancementOptions) { 
+					if (lship.enhancementOptions[enh][6]) { // Hangar conversion is an option, ignore others.
+						if (lship.enhancementOptions[enh][0] === "HANG_CON_AS") {
+							hangarConversionsAS += lship.enhancementOptions[enh][2]; //Record number of slots converted from Fighter to Assault Shuttles.
+							if (lship.customFighter && Object.keys(lship.customFighter).length > 0) {
+								var shipFighters = 0;
+								for (let g in lship.fighters) {
+									shipFighters += lship.fighters[g];
+								}
+								var customFighters = 0;
+								for (let h in lship.customFighter) {
+									customFighters += lship.customFighter[h];
+								}								
+								if((shipFighters-lship.enhancementOptions[enh][2]) <= customFighters){
+									for (var i in lship.customFighter){								
+										lship.customFighter[i] = (shipFighters-lship.enhancementOptions[enh][2]);
+										break; //Let's just amend the first entry, should usually work...										
+									}
+								}	
+							}
+						}
+					}
+				}
+
+				//check for custom hangars
 				if(lship.customFighter){
 					for (var h in lship.customFighter){
 						specialHgrName = h;
@@ -467,14 +503,7 @@ window.gamedata = {
 					//console.table(specialHangars);
 				}
 
-				// Check if ship has converted Hangar Space before calculating total hangar space
-				for (var enh in lship.enhancementOptions) { 
-					if (lship.enhancementOptions[enh][6]) { // Hangar conversion is an option, ignore others.
-						if (lship.enhancementOptions[enh][1] === "Hangar Conversion") {
-							hangarConversions += lship.enhancementOptions[enh][2]; //Record number of slots converted from Assault Shuttle to Fighters.
-						}
-					}
-				}
+
 
 				//check hangar space available...	
 				for(var h in lship.fighters){
@@ -626,9 +655,9 @@ window.gamedata = {
 	    
 	    checkResult += " (min. " + capsRequired +")";
 	    if (capitalShips >= capsRequired){ //tournament rules: at least 1; changed for scalability
-		    checkResult += " OK";
+			checkResult += " <span style='color: #33cc33;'>OK</span>";
 	    }else{		    
-		    checkResult += " FAILED!";
+		    checkResult += " <b><span style='color: red;'>FAILED!</span></b>";
 		    problemFound = true;
 	    }
 	    checkResult += "<br>";
@@ -677,29 +706,29 @@ window.gamedata = {
 	    var limit10 = Math.floor(selectedSlot.points*0.1);
 	    var limit33 = Math.floor(selectedSlot.points*0.33);
 	    var oneOverAllowed = false;	    
-	    checkResult += "<br><u><b>Deployment restrictions:</b></u><br>";
+	    checkResult += "<br><u><b>Deployment restrictions:</b></u><br><br>";
 	    checkResult += " - 10% bracket: " + points10 +"/" + limit10 + ": ";
 	    if (points10<=limit10){
-		    checkResult += "OK";
+			checkResult += " <span style='color: #33cc33;'>OK</span>";
 	    }else{		
 		    if(units10==1 && oneOverAllowed == false){ //only 1 unit, and this exception wasn't used yet
 			//oneOverAllowed = true; //re-checked rules, Restricted and Limited pools should be checked separately
-			checkResult += "OK (one single ship is allowed to break limit)";
+			checkResult += "<span style='color: #33cc33;'>OK</span> (one single ship is allowed to break limit)";
 		    }else{
-			checkResult += "FAILED! (too many points in this deployment bracket)";
+			checkResult += "<b><span style='color: red;'>FAILED!</span></b> (too many points in this deployment bracket)";
 		    	problemFound = true;
 		    }
 	    }
 	    checkResult += "<br>";
 	    checkResult += " - 33% bracket: " + points33 +"/" + limit33 + ": ";
 	    if (points33<=limit33){
-		    checkResult += "OK";
+			checkResult += " <span style='color: #33cc33;'>OK</span>";
 	    }else{		
 		    if(units33==1 && oneOverAllowed == false){ //only 1 unit, and this exception wasn't used yet
 			//oneOverAllowed = true;//re-checked rules, Restricted and Limited pools should be checked separately
-			checkResult += "OK (one single ship is allowed to break limit)";
+			checkResult += "<span style='color: #33cc33;'>OK</span> (one single ship is allowed to break limit)";
 		    }else{
-			checkResult += "FAILED! (too many points in this deployment bracket)";
+			checkResult += "<b><span style='color: red;'>FAILED!</span></b> (too many points in this deployment bracket)";
 		    	problemFound = true;
 		    }
 	    }
@@ -727,10 +756,10 @@ window.gamedata = {
 		if (!currHull.hangarRequired){ //actually there MAY be hangarless fighters - they should be limited per hull (well, per flight) just like ships!
 		    	checkResult +=  " (allowed " +limitPerHull+ ")";
 			if (currHull.Total>limitPerHull ){
-				checkResult += " TOO MANY!";
+				checkResult += " <b><span style='color: red;'>TOO MANY!</span></b>";
 				problemFound = true;
 			} else {
-				checkResult += " OK";
+				checkResult += " <span style='color: #33cc33;'>OK</span>";
 			}
 		}
 		checkResult += "<br>";
@@ -740,10 +769,10 @@ window.gamedata = {
 		if (sumVar > 0){
 			checkResult += " - Uncommon/Rare/Unique: " + sumVar + " (allowed " +currUlimit+ ")";
 			if (sumVar>currUlimit){
-				checkResult += " TOO MANY!";
+				checkResult += " <b><span style='color: red;'>TOO MANY!</span></b>";
 				problemFound = true;
 			} else {
-				checkResult += " OK";
+				checkResult += " <span style='color: #33cc33;'>OK</span>";
 			}
 			checkResult += "<br>";
 		}
@@ -751,10 +780,10 @@ window.gamedata = {
 		if (sumVar > 0){
 			checkResult += " - Rare/Unique: " + sumVar + " (allowed " +currRlimit+ ")";
 			if (sumVar>currRlimit){
-				checkResult += " TOO MANY!";
+				checkResult += " <b><span style='color: red;'>TOO MANY!</span></b>";
 				problemFound = true;
 			} else {
-				checkResult += " OK";
+				checkResult += " <span style='color: #33cc33;'>OK</span>";
 			}
 			checkResult += "<br>";
 		}
@@ -780,15 +809,15 @@ window.gamedata = {
 	    }
 	    limitUTotal = Math.max(limitUTotal,2); //always allow at least 2! 
 	    limitRTotal = Math.floor(limitUTotal/2); //limit Rare units per fleet; turnament rules: 1, but it's for 3500 points    
-		var limitUTotalResult = 'OK';
-		var limitRTotalResult = 'OK';
+		var limitUTotalResult = "<span style='color: #33cc33;'>OK</span>";
+		var limitRTotalResult = "<span style='color: #33cc33;'>OK</span>";
 	    if (totalU>limitUTotal){
-			limitUTotalResult = 'TOO MANY!';
+			limitUTotalResult = " <b><span style='color: red;'>TOO MANY!</span></b>";
 			//checkResult += "FAILED: You have " + totalU + " Uncommon units, out of " + limitUTotal + " allowed for fleet.<br><br>" ;
 			problemFound = true;
 	    }
 	    if (totalR>limitRTotal){
-			limitRTotalResult = 'TOO MANY!';
+			limitRTotalResult = " <b><span style='color: red;'>TOO MANY!</span></b>";
 			//checkResult += "FAILED: You have " + totalR + " Rare/Unique units, out of " + limitRTotal + " allowed for fleet.<br><br>" ;
 			problemFound = true;
 	    }
@@ -798,7 +827,93 @@ window.gamedata = {
 	    
 	    //fighters!
 		//ultralights count as half a fighter when accounting for hangar space used - IF packed into something other than ultralight hangars...
-	    var totalHangarAvailable = totalHangarH+totalHangarM+totalHangarL+(totalHangarXL/2)+hangarConversions;
+		var hangarConversionNet = hangarConversionsF-hangarConversionsAS; //Positive is more fighter slots, negative if more AS.
+		var totalHangarAvailable = totalHangarH+totalHangarM+totalHangarL+(totalHangarXL/2)+hangarConversionNet;
+	    var minFtrRequired = Math.ceil(totalHangarAvailable/2);
+	    var totalFtrPresent = totalFtrH+totalFtrM+totalFtrL+(totalFtrXL/2);
+	    var totalFtrCurr = 0;
+	    var totalHangarCurr = 0;
+
+	    checkResult += "<br><b><u>Fighters:</u></b><br>";
+		checkResult +=  "<br> Total Fighters: " + totalFtrPresent;
+	    checkResult +=  " (select between " +minFtrRequired+ " and " + totalHangarAvailable + ")";
+		if((totalFtrXL>0) || (totalHangarXL>0)){ //add disclaimer because sums will not add up straight
+			checkResult += " <i>[Note - Ultralights only use half a hangar slot]</i>";
+		}
+		if (totalFtrPresent > totalHangarAvailable || totalFtrPresent < minFtrRequired){ //fighter total is not within limits
+			checkResult += " <b><span style='color: red;'>FAILURE!</span></b>";
+			problemFound = true;
+		}else{
+			checkResult += " <span style='color: #33cc33;'>OK</span>";
+		}
+		checkResult += "<br>";	    
+
+		totalFtrCurr = totalFtrXL;
+		totalHangarCurr = (totalHangarH+totalHangarM+totalHangarL+hangarConversionNet)*2 + totalHangarXL;		
+		if (totalFtrCurr > 0 || totalHangarCurr > 0){ //do not show if there are no fighters/hangars in this segment
+//			totalHangarCurr = (totalHangarH+totalHangarM+totalHangarL+hangarConversionNet)*2 + totalHangarXL;
+			checkResult +=  " - Ultralight Fighters: " + totalFtrCurr;
+			checkResult +=  " (allowed up to " + totalHangarCurr + ")";
+			if((totalFtrXL>0) || (totalHangarXL>0)){ //add disclaimer because sums will not add up straight.
+				checkResult += " <i>[Ultralights only require half a normal hangar slot]</i>";
+			}			
+			if (totalFtrCurr > totalHangarCurr){ //fighter total is not within limits
+				checkResult += " <b><span style='color: red;'>TOO MANY!</span></b>";
+				problemFound = true;
+			}else{
+				checkResult += " <span style='color: #33cc33;'>OK</span>";
+			}
+			checkResult += "<br>";
+		}
+	    
+		totalFtrCurr = totalFtrL;
+		totalHangarCurr = totalHangarH+totalHangarM+totalHangarL+hangarConversionNet;		
+		if (totalFtrCurr > 0 || totalHangarCurr > 0){ //do not show if there are no fighters/hangars in this segment
+//			totalHangarCurr = totalHangarH+totalHangarM+totalHangarL+hangarConversionNet;
+			checkResult +=  " - Light Fighters: " + totalFtrCurr;
+			checkResult +=  " (allowed up to " + totalHangarCurr + ")";
+			if (totalFtrCurr > totalHangarCurr){ //fighter total is not within limits
+				checkResult += " <b><span style='color: red;'>TOO MANY!</span></b>";
+				problemFound = true;
+			}else{
+				checkResult += " <span style='color: #33cc33;'>OK</span>";
+			}
+			checkResult += "<br>";
+		}
+		
+		totalFtrCurr = totalFtrM;
+		totalHangarCurr = totalHangarH+totalHangarM+hangarConversionNet;		
+		if (totalFtrCurr > 0 || totalHangarCurr > 0){ //do not show if there are no fighters/hangars in this segment
+//			totalHangarCurr = totalHangarH+totalHangarM+hangarConversionNet;
+			checkResult +=  " - Medium Fighters: " + totalFtrCurr;
+			checkResult +=  " (allowed up to " + totalHangarCurr + ")";
+			if (totalFtrCurr > totalHangarCurr){ //fighter total is not within limits
+				checkResult += " <b><span style='color: red;'>TOO MANY!</span></b>";
+				problemFound = true;
+			}else{
+				checkResult += " <span style='color: #33cc33;'>OK</span>";
+			}
+			checkResult += "<br>";
+		}
+	    
+		totalFtrCurr = totalFtrH;
+		totalHangarCurr = totalHangarH+hangarConversionNet;		
+		if (totalFtrCurr > 0 || totalHangarCurr > 0){ //do not show if there are no fighters/hangars in this segment
+//			totalHangarCurr = totalHangarH+hangarConversionNet;				
+			checkResult +=  " - Heavy Fighters: " + totalFtrCurr;
+				checkResult +=  " (allowed up to " + totalHangarCurr + ")";
+			if (totalFtrCurr > totalHangarCurr){ //fighter total is not within limits
+				checkResult += " <b><span style='color: red;'>TOO MANY!</span></b>";
+				problemFound = true;
+			}else{
+				checkResult += " <span style='color: #33cc33;'>OK</span>";
+			}
+			checkResult += "<br>";
+		}
+		
+
+/* //Old method of calculating Fighter slots, in case you hate the new one above - DK :)
+ var totalHangarAvailable = totalHangarH+totalHangarM+totalHangarL+(totalHangarXL/2)+hangarConversionsF;
 	    var minFtrRequired = Math.ceil(totalHangarAvailable/2);
 	    var totalFtrPresent = totalFtrH+totalFtrM+totalFtrL+(totalFtrXL/2);
 	    var totalFtrCurr = 0;
@@ -819,7 +934,7 @@ window.gamedata = {
 
 		totalFtrCurr = (totalFtrXL/2)+totalFtrL+totalFtrM+totalFtrH;
 		if (totalFtrCurr > 0){ //do not show if there are no fighters in this segment
-			totalHangarCurr = totalHangarH+totalHangarM+totalHangarL + (totalHangarXL/2)+hangarConversions;
+			totalHangarCurr = totalHangarH+totalHangarM+totalHangarL + (totalHangarXL/2)+hangarConversionsF;
 			checkResult +=  " - Ultralight / Light / Medium / Heavy Fighters: " + totalFtrCurr;
 			checkResult +=  " (allowed up to " + totalHangarCurr + ")";
 			if((totalFtrXL>0) || (totalHangarXL>0)){ //add disclaimer because sums will not add up straight
@@ -836,7 +951,7 @@ window.gamedata = {
 	    
 		totalFtrCurr = totalFtrL+totalFtrM+totalFtrH;
 		if (totalFtrCurr > 0){ //do not show if there are no fighters in this segment
-			totalHangarCurr = totalHangarH+totalHangarM+totalHangarL+hangarConversions;
+			totalHangarCurr = totalHangarH+totalHangarM+totalHangarL+hangarConversionsF;
 			checkResult +=  " - Light / Medium / Heavy Fighters: " + totalFtrCurr;
 			checkResult +=  " (allowed up to " + totalHangarCurr + ")";
 			if (totalFtrCurr > totalHangarCurr){ //fighter total is not within limits
@@ -850,7 +965,7 @@ window.gamedata = {
 		
 		totalFtrCurr = totalFtrM+totalFtrH;
 		if (totalFtrCurr > 0){ //do not show if there are no fighters in this segment
-			totalHangarCurr = totalHangarH+totalHangarM+hangarConversions;
+			totalHangarCurr = totalHangarH+totalHangarM+hangarConversionsF;
 			checkResult +=  " - Medium / Heavy Fighters: " + totalFtrCurr;
 			checkResult +=  " (allowed up to " + totalHangarCurr + ")";
 			if (totalFtrCurr > totalHangarCurr){ //fighter total is not within limits
@@ -864,7 +979,7 @@ window.gamedata = {
 	    
 		totalFtrCurr = totalFtrH;
 		if (totalFtrCurr > 0){ //do not show if there are no fighters in this segment
-			totalHangarCurr = totalHangarH+hangarConversions;
+			totalHangarCurr = totalHangarH+hangarConversionsF;
 			checkResult +=  " - Heavy Fighters: " + totalFtrCurr;
 				checkResult +=  " (allowed up to " + totalHangarCurr + ")";
 			if (totalFtrCurr > totalHangarCurr){ //fighter total is not within limits
@@ -877,9 +992,9 @@ window.gamedata = {
 		}
 	
 		//Lets just check Asssault shuttle/Breaching Pod capacity separately using their own variables.
-		totalHangarAS = totalHangarAS+totalHangarH+totalHangarM-hangarConversions; //Deduct any Hangar conversions here.
+		totalHangarAS = totalHangarAS+totalHangarH+totalHangarM-hangarConversionsF; //Deduct any Hangar conversions here.
 		if (totalFtrAS > 0 || totalHangarAS > 0){ //do not show if there are no Assault Shuttle hangars in this segment
-//			var hangarOnlyAS = totalHangarAS-hangarConversions;
+//			var hangarOnlyAS = totalHangarAS-hangarConversionsF;
 //			var minASRequired = Math.ceil(hangarOnlyAS/2); //Commented out alternative code here that could be used to set 50% required for Assault Shuttle ships
 			checkResult +=  " - Total Assault Shuttles / Breaching Pods: " + totalFtrAS;
 //			checkResult +=  " (allowed between " +minASRequired+ " and " + totalHangarAS + ")";
@@ -893,15 +1008,15 @@ window.gamedata = {
 			}
 			checkResult += "<br>";
 		}		
-
+*/ 
 		//small flights (do not show if there aren't any!)
 		if (noSmallFlights > 0){
 			checkResult +=  " - Small Flights (< 6 craft): " + noSmallFlights;
 			if (noSmallFlights>1){ //fighter total is not within limits
-				checkResult += " TOO MANY! (up to 1 allowed)";
+				checkResult += " <b><span style='color: red;'>TOO MANY!</span></b> (up to 1 allowed)";
 				problemFound = true;
 			}else{
-				checkResult += " OK";
+				checkResult += " <span style='color: #33cc33;'>OK</span>";
 			}
 			checkResult += "<br>";
 		}
@@ -973,10 +1088,10 @@ window.gamedata = {
 							checkResult +=  " - " + totalSpecialFighters[i][0] + ": " + totalSpecialFighters[i][1];
 							checkResult +=  " (allowed up to " + totalSpecialHangars[j][1] + ")";
 							if (totalSpecialFighters[i][1] > totalSpecialHangars[j][1]){ //fighter total is not within limits
-								checkResult += " FAILURE!";
+								checkResult += " <b><span style='color: red;'>FAILURE!</span></b>";
 								problemFound = true;
 							}else{
-								checkResult += " OK";
+								checkResult += " <span style='color: #33cc33;'>OK</span>";
 							}
 							checkResult += "<br>";
 							match = true;
@@ -984,7 +1099,7 @@ window.gamedata = {
 					}
 					if (match == false) {
 						checkResult +=  " - " + totalSpecialFighters[i][0] + ": " + totalSpecialFighters[i][1];
-						checkResult +=  " (allowed up to 0) FAILURE! <br>";
+						checkResult +=  " (allowed up to 0) <b><span style='color: red;'>FAILURE!</span></b><br>";
 						problemFound = true;
 					}
 				}
@@ -1019,30 +1134,43 @@ window.gamedata = {
 				checkResult +=  " (allowed between " + halfH + " and " + totalHangarCurr + ")";
 			}
 			if (totalFtrCurr > totalHangarCurr){ //small craft total is not within limits
-				checkResult += " TOO MANY!";
+				checkResult += " <b><span style='color: red;'>TOO MANY!</span></b>";
 				problemFound = true;
 			}else if ((scSize == 'Fighter Squadrons') && (totalFtrCurr < totalHangarCurr/2)){
-				checkResult += " FAILURE!";
+				checkResult += " <b><span style='color: red;'>FAILURE!</span></b>";
 				problemFound = true;
 			}else{
-				checkResult += " OK";
+				checkResult += " <span style='color: #33cc33;'>OK</span>";
 			}
 			checkResult += "<br>";				
 		}
 		checkResult += "<br>";		
-			
+
+		//Lets just check Assault shuttle/Breaching Pod capacity separately using their own variables.
+		totalHangarAS = totalHangarAS-hangarConversionNet; //Deduct any Hangar conversions here.
+		if (totalFtrAS > 0 || totalHangarAS > 0){ //do not show if there are no Assault Shuttles/hangars in this segment
+			checkResult +=  " Total Assault Shuttles / Breaching Pods: " + totalFtrAS;
+			checkResult +=  " (allowed up to " + totalHangarAS + ")";			
+			if (totalFtrAS > totalHangarAS){ //Asssault Shuttle total is not within limits
+				checkResult += " <b><span style='color: red;'>FAILURE!</span></b>";
+				problemFound = true;
+			}else{
+				checkResult += " <span style='color: #33cc33;'>OK</span>";
+			}
+			checkResult += "<br>";
+		}		
 	    
 	    if (warningFound){
 		    checkResult = "<u>Unchecked or non-canon elements found - check text for details.</u>"+warningText+"<br><br>"+checkResult;
 	    }
 	    
-	    if (problemFound){
-		    checkResult = "Overall: <b><u>FAILED</u></b>!<br><br>"+checkResult;
-	    }else{
-		    checkResult = "Overall: <b><u>OK</u></b>.<br><br>"+checkResult;
-	    }
+		if (problemFound) {
+			checkResult = "Overall: <b><span style='color: red; font-weight: 850;'>FAILED!</span></b><br><br>" + checkResult;
+		} else {
+			checkResult = "Overall: <b><span style='color: #33cc33;'>OK!</span></b><br><br>" + checkResult;
+		}
 	    
-	    checkResult = "<b>FLEET CORRECTNESS REPORT</b><br>based on tournament rules, modified for scalability.<br><br>"+checkResult;   
+	    checkResult = "<b>FLEET CORRECTNESS REPORT</b><br><i>(Based on tournament rules, modified for scalability)<i><br><br>"+checkResult;   
 	    
 	    //alert(checkResult); //alert will be truncated by browser
 	    var targetDiv = document.getElementById("fleetcheck");

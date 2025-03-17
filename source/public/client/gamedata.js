@@ -156,11 +156,11 @@ window.gamedata = {
             return gamedata.activeship.map(function (id) {
                 return gamedata.getShip(id);
             }).filter(function(ship) { 
-                return Boolean(ship);
+                return ship && ship.userid != -5;
             });
         } else {
             return [gamedata.getShip(gamedata.activeship)].filter(function(ship) { 
-                return Boolean(ship);
+                return ship && ship.userid != -5;
             });
         }
     },
@@ -180,22 +180,28 @@ window.gamedata = {
     },
 
     isMyShip: function isMyShip(ship) {
-        return ship.userid == gamedata.thisplayer;
+        return ship.userid === gamedata.thisplayer && ship.userid !== -5;
     },
-
+    
     isEnemy: function isEnemy(target, shooter) {
         if (!shooter) {
             throw new Error("You need to give shooter for this one");
         }
-
+    
+        if (target.userid === -5) {
+            return true; // Always treat ships with userid -5 as enemies
+        }
+    
         return target.team !== shooter.team;
     },
-
+    
     isMyOrTeamOneShip: function isMyOrTeamOneShip(ship) {
+        if (ship.shipSizeClass === 5) {
+            return false; // Ensure ships with userid -5 are never considered friendly
+        }
+    
         if (gamedata.isPlayerInGame()) {
-            //return gamedata.isMyShip(ship);
-			//properly mark allies here:
-			return ship.team == gamedata.getPlayerTeam();
+            return ship.team === gamedata.getPlayerTeam();
         } else {
             return ship.team === 1;
         }
@@ -1001,9 +1007,9 @@ window.gamedata = {
         ini_gui.appendChild(topicDiv);
 
         var allShips = gamedata.ships;
-        var ships = gamedata.ships.filter(function (ship){
-            return !shipManager.isDestroyed(ship);
-        })
+        var ships = gamedata.ships.filter(function (ship) {
+            return !shipManager.isDestroyed(ship) && ship.shipSizeClass != 5;
+        });
 
        
 

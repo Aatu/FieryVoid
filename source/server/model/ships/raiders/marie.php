@@ -7,7 +7,7 @@ class MaRie extends MediumShip{
 		$this->pointCost = 310;
 		$this->faction = "Raiders";
         $this->phpclass = "MaRie";
-        $this->imagePath = "img/ships/RaiderMa'ri'eCarrier.png"; //need to change
+        $this->imagePath = "img/ships/RaiderMarieCarrier.png"; //need to change
         $this->shipClass = "Ma'Ri'e Light Carrier";
         $this->canvasSize = 100;
         

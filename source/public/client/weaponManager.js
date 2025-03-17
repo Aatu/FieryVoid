@@ -397,7 +397,7 @@ window.weaponManager = {
             }
             $('<div><span class="weapon">' + html + '</span></div>').appendTo(f);
         }
-/* //Previous method before I added check for Sweeping Mode to not retarget ships.  Just in case ;)
+/* //Oldest method before I added check for Sweeping Mode to not retarget ships.  Just in case ;)
         for (var i in gamedata.selectedSystems) {
             var weapon = gamedata.selectedSystems[i];
             if (weaponManager.isOnWeaponArc(selectedShip, ship, weapon)) {
@@ -422,7 +422,10 @@ window.weaponManager = {
         }
     },
 */
-		for (var i in gamedata.selectedSystems) {
+
+/*
+		//Not quite as old version, before I added the Line of Sight check.
+        for (var i in gamedata.selectedSystems) {
 		    var weapon = gamedata.selectedSystems[i];
 		    if (weaponManager.isOnWeaponArc(selectedShip, ship, weapon)) {
 		        if (weaponManager.checkIsInRange(selectedShip, ship, weapon)) {
@@ -450,6 +453,53 @@ window.weaponManager = {
 		        $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="notInArc"> NOT IN ARC </span></div>').appendTo(f);
 		    }
 		}
+*/
+        // Compute LOS blockage once for all selected weapons
+        var blockedLosHex = weaponManager.getBlockedHexes(); //Are there any Enormous units in game, no point checking if no.
+
+        var loSBlocked = false; //Default to LoS not blocked.
+        if (blockedLosHex && blockedLosHex.length > 0) {
+            var weapon = gamedata.selectedSystems[0]; // Use the first weapon to get the shooter's position
+            var sPosShooter = weaponManager.getFiringHex(selectedShip, weapon);
+            var sPosTarget = shipManager.getShipPosition(ship);
+            
+            loSBlocked = mathlib.checkLineOfSight(sPosShooter, sPosTarget, blockedLosHex);
+        }
+
+        for (var i in gamedata.selectedSystems) {
+            var weapon = gamedata.selectedSystems[i];
+
+            if (weaponManager.isOnWeaponArc(selectedShip, ship, weapon)) {
+                if (weaponManager.checkIsInRange(selectedShip, ship, weapon)) {
+                    var value = weapon.firingMode;
+                    value = weapon.firingModes[value];
+                    var keys = Object.keys(weapon.firingModes);
+
+                    if(ship.Huge > 0){ //Cannot Target larger terrain.
+                        $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="losBlocked"> CANNOT TARGET</span></div>').appendTo(f);
+                    }else if (loSBlocked) {
+                        // LOS is blocked - only display the blocked message
+                        $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="losBlocked"> LINE OF SIGHT BLOCKED</span></div>').appendTo(f);
+                    } else {
+                        // LOS is not blocked, show normal hit chance info, check Sweeping weapons first.
+                        if (value === "Sweeping" && ship.shipSizeClass >= 0 && weaponManager.hasTargetedThisShip(ship, weapon)) {
+                            $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="hitchange"> CANNOT TARGET AGAIN</span></div>').appendTo(f);
+                        } else if (calledid != null && !weaponManager.canWeaponCall(weapon)) {
+                            $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="hitchange"> CANNOT CALL SHOT</span></div>').appendTo(f);
+                        } else if (keys.length > 1) {
+                            $('<div><span class="weapon">' + weapon.displayName + '<span class="firingMode"> (' + value + ')</span><span class="hitchange"> - Approx: ' + weaponManager.calculateHitChange(selectedShip, ship, weapon, calledid) + '%</span></div>').appendTo(f);
+                        } else {
+                            $('<div><span class="weapon">' + weapon.displayName + '</span><span class="hitchange"> - Approx: ' + weaponManager.calculateHitChange(selectedShip, ship, weapon, calledid) + '%</span></div>').appendTo(f);
+                        }
+                    }
+                } else {
+                    $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="hitchange"> NOT IN RANGE</span></div>').appendTo(f);
+                }
+            } else {
+                $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="notInArc"> NOT IN ARC </span></div>').appendTo(f);
+            }
+        }
+
 	},
 
 
@@ -736,7 +786,7 @@ window.weaponManager = {
 
     //calculate hit chance for Boarding Action - different procedure
     calculateBoardingAction: function calculateBoardingAction(shooter, target, weapon){
-        if (target.flight) return 0;//Cannot board fighters, null FC stops this but showing 0% is more informative for players!
+        if (target.flight || target.userid == -5) return 0;//Cannot board fighters or terrain, null FC stops this but showing 0% is more informative for players!
 		var jinking = shipManager.movement.getJinking(shooter); //Raider pods can jink, but can't attach at same time.
  		if(jinking > 0) return 0;		
  			       	
@@ -788,14 +838,17 @@ window.weaponManager = {
 					if (weapon.ballistic){	 //standard ballistic calculation						
 						sPosLaunch = shipManager.movement.getPositionAtStartOfTurn(shooter, gamedata.turn);	
 					} else { //Direct fire
-							var sPosLaunch= shipManager.getShipPosition(shooter);
+						sPosLaunch= shipManager.getShipPosition(shooter);
 					}
 		}	      
 		return sPosLaunch;
 	},
 
     calculateHitChange: function calculateHitChange(shooter, target, weapon, calledid) {
-		if (weapon.isRammingAttack) {
+
+		if(weapon.autoHit) return 100; //Some weapons always hit, let's just show 100% chance to prevent confusion at firing. DK - 12 Apr 2024
+
+        if (weapon.isRammingAttack) {
 			return weaponManager.calculateRamChance(shooter, target, weapon, calledid);
 		}
 		if(weapon.isBoardingAction){
@@ -822,8 +875,6 @@ window.weaponManager = {
 			var targetSpeed = shipManager.movement.getSpeed(target);
 			if(!target.Enormous || ownSpeed > 0 || targetSpeed > 0)	return 0;	
 		}
-			
-		if(weapon.autoHit) return 100; //Some weapons always hit, let's just show 100% chance to prevent confusion at firing. DK - 12 Apr 2024
 			
 	    var defence = 0;
 	    var distance = 0;
@@ -884,10 +935,16 @@ window.weaponManager = {
             var firstFighter = shooter.systems[1];
             var OBcrit = shipManager.criticals.hasCritical(firstFighter, "tmpsensordown");
             oew = shooter.offensivebonus - OBcrit;
-			if (weapon.ballistic && (!shooter.hasNavigator) ){ //for ballistics, if there is no Navigator, use OB only if target is in weapon arc!
-				if (!weaponManager.isOnWeaponArc(shooter, target, weapon)) {
-					oew = 0;
-				}
+			if (weapon.ballistic){ //for ballistics, if there is no Navigator, use OB only if target is in weapon arc!
+                var loSBlocked = false; //Default to LoS not blocked
+                var blockedLosHex = weaponManager.getBlockedHexes(); //Check if there are any hexes that block LoS                
+                if (blockedLosHex && blockedLosHex.length > 0) { //If so, are they blocking this shot? 
+                    loSBlocked = mathlib.checkLineOfSight(sPosLaunch, sPosTarget, blockedLosHex);
+                }   				
+                // If no navigator and out of arc, or if LoS is blocked, set oew to 0
+                if ((!shooter.hasNavigator && !weaponManager.isOnWeaponArc(shooter, target, weapon)) || loSBlocked) {
+                    oew = 0;
+                }
 			}		
             oew = Math.max(0, oew); //OBCrit cannot bring Offensive Bonus below 0
 			if(oew == 0) soew = 0;
@@ -1031,8 +1088,29 @@ window.weaponManager = {
 			var	FCIndex = weaponManager.getFireControlIndex(target); //Find out FC category of the target (0, 1 or 2)
 			bonusfirecontrol = computer.getFCAllocated(FCIndex);  //Use FCIndex to check if Computer has any BFCP allocated to that FC category.
 			firecontrol += bonusfirecontrol; //Add to firecontrol.					
-			}       
-		
+		}       
+
+        // Check Line of Sight for Ballistic weapons after launch (Fighters checked separately above)
+        if (weapon.ballistic && (!shooter.flight)) {
+            if (!(firecontrol <= 0)) { // No point checking for LoS if FC is 0 or lower
+                var loSBlocked = false;
+                var blockedLosHex = weaponManager.getBlockedHexes(); //Check if there are any hexes that block LoS                   
+                loSBlocked = mathlib.checkLineOfSight(sPosLaunch, sPosTarget, blockedLosHex); // Defaults to false (LoS NOT blocked)
+                
+                if (loSBlocked) { // Line of Sight is blocked!
+                    if (weapon instanceof AmmoMissileRackS) { 
+                        // Only zero LAUNCHER FC on AmmoMissileLaunchers; missiles have their own guidance (bonus)
+                        if (weapon.hasOwnProperty('basicFC') && Array.isArray(weapon.basicFC) && weapon.basicFC.length > 0) {                          
+                            firecontrol -= weapon.basicFC[weaponManager.getFireControlIndex(target)];
+                        }                       
+                    } else { 
+                        // Everything else (e.g., torpedoes) just has its FC zeroed
+                        firecontrol = 0; // Null weapon firecontrol when no Line of Sight
+                    }
+                }
+            }    
+        }         
+
         var goal = baseDef - jammermod - noLockMod - rangePenalty + oew + soew + firecontrol + mod;
         var hitChance = Math.round(goal / 20 * 100);
         return hitChance;
@@ -1349,6 +1427,20 @@ window.weaponManager = {
         debug && console.log("weaponManager target ship", ship, system);
 
         if (shipManager.isDestroyed(selectedShip)) return;
+//        if(ship.Huge > 0) return; //Do not allow targeting of laege muti-hex terrain.
+
+        var blockedLosHex = weaponManager.getBlockedHexes();
+
+        var loSBlocked = false;
+        if (blockedLosHex && blockedLosHex.length > 0) {
+            var weapon = gamedata.selectedSystems[0]; // Use the first weapon to get the shooter's position
+            var sPosShooter = weaponManager.getFiringHex(selectedShip, weapon);
+            var sPosTarget = shipManager.getShipPosition(ship);
+            
+            loSBlocked = mathlib.checkLineOfSight(sPosShooter, sPosTarget, blockedLosHex);
+        }
+
+        if(loSBlocked) return;
 
         var toUnselect = [];
         var splitTargeted = [];
@@ -1429,7 +1521,7 @@ window.weaponManager = {
                     debug && console.log("is in range");
                     if(weapon.canSplitShots){
                         var fire = weapon.doMultipleFireOrders(selectedShip, ship, system);
-                        if (!Array.isArray(fire)) fire = [fire]; // Ensure fire is an array for length check                        
+                        if (!Array.isArray(fire)) fire = fire ? [fire] : []; // Ensure fire is an array or an empty one                       
                         if (fire.length > 0) weapon.fireOrders.push(...fire);
 						//toUnselect.push(weapon); //It's actually easier to target if you don't! 
 						splitTargeted.push(weapon); //To be added to toUnselect aray at corect time below. 	                    
@@ -2058,11 +2150,51 @@ window.weaponManager = {
     doShortLogText: function doShortLogText(fire) {
         const shortLogTypes = [
             "HyperspaceJump", "JumpFailure", "SelfDestruct", "ContainmentBreach",
-            "Reactor", "Sabotage", "WreakHavoc", "Capture", "Rescue", "LimpetBore", "MagazineExplosion"
+            "Reactor", "Sabotage", "WreakHavoc", "Capture", "Rescue", "LimpetBore", 
+            "MagazineExplosion", "NoHangar", "TerrainCollision"
         ];
     
         return shortLogTypes.includes(fire.damageclass);
     },
+/*
+    getBlockedHexes: function getBlockedHexes() {
+        var blockedHexes = [];
+    
+        for (var i in gamedata.ships) {
+            var ship = gamedata.ships[i];
+    
+            if (ship.Enormous && !shipManager.isDestroyed(ship)) { //Only enormous units block LoS at present
+                var position = shipManager.getShipPosition(ship); 
+                blockedHexes.push(position); 
+            }
+        }
+    
+        return blockedHexes;
+    },        
+*/
+
+    getBlockedHexes: function getBlockedHexes() {
+        var blockedHexes = [];
+    
+        for (var i in gamedata.ships) {
+            var ship = gamedata.ships[i];
+    
+            if (ship.Enormous && !shipManager.isDestroyed(ship)) { // Only enormous units block LoS at present
+                var position = shipManager.getShipPosition(ship);
+                blockedHexes.push(position);
+            
+                if (ship.Huge > 0) { // Has a radius of 1 around its centre hex
+                    var neighbourHexes = mathlib.getNeighbouringHexes(position, ship.Huge); //Only works with ship.Huge = 1 atm
+                    
+                    // Add surrounding hexes directly
+                    blockedHexes.push(...neighbourHexes);
+                }
+            }
+        }
+    
+        return blockedHexes;
+    },
+
 
     getAllFireOrdersForAllShipsForTurn: function getAllFireOrdersForAllShipsForTurn(turn, type) {
         var fires = [];

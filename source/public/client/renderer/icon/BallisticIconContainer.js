@@ -28,7 +28,7 @@ window.BallisticIconContainer = function () {
 	        allBallistics.forEach(function (ballistic) {
 				if(ballistic.turn === gamedata.turn){ 
 		            createOrUpdateBallistic.call(this, ballistic, iconContainer, gamedata.turn, true); 
-		        	createOrUpdateBallisticLines.call(this, ballistic, iconContainer, gamedata.turn, true);	
+		        	createOrUpdateBallisticLines.call(this, ballistic, iconContainer, gamedata.turn, true);
 				}	            
 	        }, this);
 					
@@ -60,7 +60,7 @@ window.BallisticIconContainer = function () {
             return true;
         }, this);
 
-        
+        //Remove old line sprites when they are no longer required or being recreated.
         this.ballisticLineIcons = this.ballisticLineIcons.filter(function (lineIcon) {
             if (!lineIcon.used) {
             	if (lineIcon.lineSprite) {
@@ -69,6 +69,7 @@ window.BallisticIconContainer = function () {
 			return false;	
 			}	
 
+		//This section looks to see if Ballistic Lines are showing at moment consumeGamedata() is called (which is often!)		
 		var isFriendlyLinesVisible = this.ballisticLineIcons.some(lineIcon => 
 		  lineIcon.lineSprite?.isVisible === true && lineIcon?.isFriendly === true
 		);
@@ -103,7 +104,55 @@ window.BallisticIconContainer = function () {
 		
             return true;
         }, this);
-                
+
+		//Now create some icons to illustrate the exact hexes for really large terrain occupy.
+		// Filter for ships with Huge value
+		gamedata.ships
+		.filter(ship => ship.Huge > 0) // Find Huge Terrain
+		.forEach(ship => {
+			if(gamedata.gamephase !== -1){ //Don't generate sprites until Terrain is in place!
+				const position = shipManager.getShipPosition(ship); // Get ship's position
+				var positionGame = this.coordinateConverter.fromHexToGame(position);
+				// Create a sprite at the ship's position
+				const sprite = new BallisticSprite(positionGame, "hexWhite");
+				this.scene.add(sprite.mesh);
+
+				this.ballisticIcons.push({
+					id: -5,
+					shooterId: ship.id,
+					targetId: ship.id,
+					launchPosition: position,
+					position: new hexagon.Offset(positionGame.x, positionGame.y),
+					launchSprite: sprite,
+					targetSprite: null,
+					used: true
+				});
+
+				// Get neighboring hexes based on the ship's size (Huge)
+				const neighbourHexes = mathlib.getNeighbouringHexes(position, ship.Huge);
+
+				// Create sprites for neighboring hexes
+				neighbourHexes.forEach(neighbour => {
+					var neighbourPosGame = this.coordinateConverter.fromHexToGame(neighbour);
+					const neighbourSprite = new BallisticSprite(neighbourPosGame, "hexWhite");
+					this.scene.add(neighbourSprite.mesh);
+
+					this.ballisticIcons.push({
+						id: -5,
+						shooterId: ship.id,
+						targetId: ship.id,
+						launchPosition: neighbour,
+						position: new hexagon.Offset(neighbourPosGame.x, neighbourPosGame.y),
+						launchSprite: neighbourSprite,
+						targetSprite: neighbourSprite,
+						used: true
+					});
+				
+				});
+			}	
+
+		});
+
     };
 
 
@@ -123,17 +172,7 @@ window.BallisticIconContainer = function () {
             }, this);
         } else {
             this.zoomScale = 1;
-        }
-/*        
-        //Immediately hide if zooming while lines are up.
-        this.ballisticLineIcons = this.ballisticLineIcons.filter(function (lineIcon) {	           
-	        if (lineIcon.lineSprite) {
-	            lineIcon.lineSprite.hide();
-	            lineIcon.lineSprite.isVisible = false;	 	            
-	        }
-            return true;
-        }, this);        
-*/        
+        } 
     };
 
 
@@ -264,7 +303,7 @@ window.BallisticIconContainer = function () {
 					break;
 					case 'Proximity Laser': //KL Proximity Laser
 					        targetType = 'hexRed';
-					        text = "Proximity Laser";
+					        text = "Proximity Launcher";
 					        textColour = "#e6140a";		        
 					break;
 					case 'Thought Wave': //Mindrider Thoughwave
@@ -290,7 +329,7 @@ window.BallisticIconContainer = function () {
 					targetType = 'hexGreen';
 					iconImage = "./img/allySupport.png"; 		        
 				break;
-				case 'Sweeping': //Shadow Slicers
+				case 'Sweeping': //Shadow Slicers, remove hex target for now and rely on just lines and targeting tooltip I think.
 					targetType = 'hexPurple'; //Default for slicers
 					if(weapon.weaponClass == "Gravitic") targetType = 'hexGreen'; //But now other weapon types use sweeping.			        
 				break;			
@@ -387,11 +426,13 @@ window.BallisticIconContainer = function () {
 			}
 		});
 
-		//Now recreate them using usual method.
+		//Now recreate line using usual method.
         var allBallistics = weaponManager.getAllFireOrdersForAllShipsForTurn(gamedata.turn, 'ballistic');			
-	    allBallistics.forEach(function (ballistic) {
-	        createOrUpdateBallisticLines.call(this, ballistic, iconContainer, gamedata.turn);
-	    }, this);
+		allBallistics.forEach(function (ballistic) {
+			if (ship.id === ballistic.targetid) {
+				createOrUpdateBallisticLines.call(this, ballistic, iconContainer, gamedata.turn);
+			}
+		}, this);
 
 		//Check if lines were visible and if so continue to show.
         this.ballisticLineIcons.forEach(function (lineIcon) {
@@ -477,25 +518,30 @@ window.BallisticIconContainer = function () {
     	
 	}	
 
-
+	//Called during movement phase to recreate line after a target ship moves.
     function updateBallisticLineIcon(lineIcon, ballistic, iconContainer, turn) {
         lineIcon.used = true;
 
 		if(ballistic.targetid === -1) return; //No need to update further for AoE ballistics (they don't move) 
- 
-	    var shooterIcon = null;		
-	    shooterIcon = iconContainer.getById(ballistic.shooterid);        
-	    var targetIcon = null;
-	    targetIcon = iconContainer.getById(ballistic.targetid);
 
-		//Update start and end points for Ballistic Line as required.
-		var shooterLastMove = shipManager.movement.getLastCommitedMove(shooterIcon.ship);
-		var shooterNewPosition = this.coordinateConverter.fromHexToGame(shooterLastMove.position);  	          
-		var targetLastMove = shipManager.movement.getLastCommitedMove(targetIcon.ship);
-		var targetNewPosition = this.coordinateConverter.fromHexToGame(targetLastMove.position);        
+		var wasVisible = false; //Variable to track if destroyed lines were visible. If one was, they all were.
 
-        lineIcon.lineSprite.start = shooterNewPosition;
-        lineIcon.lineSprite.end = targetNewPosition;
+		// Destroy lines where the ship is either the target or the shooter.  Ship being checked should only ever be one or the other.
+		if (lineIcon.lineSprite.isVisible) wasVisible = true;
+		lineIcon.lineSprite.destroy();
+		this.scene.remove(lineIcon.lineSprite.mesh);
+
+		//Now recreate them using usual method.
+		if(ballistic.notes != 'PersistentEffect') createBallisticLineIcon.call(this, ballistic, iconContainer, gamedata.turn, this.scene);
+
+		//Check if lines were visible and if so continue to show.
+		if(!wasVisible){
+			lineIcon.lineSprite.hide();
+			lineIcon.lineSprite.isVisible = false;	 	            
+		}else{
+			lineIcon.lineSprite.show();
+			lineIcon.lineSprite.isVisible = true;	            		
+		}
     }	
 
 
@@ -661,66 +707,6 @@ window.BallisticIconContainer = function () {
 	        lineIcon.lineSprite.isVisible = true;            
         }, this);
     };
-*/
-
-/* //OLD METHOD FOR GENERATING HEX NUMBERS, WHICH CREATED 2000ish individual sprites.  Leaving for now until new method is tested on main server. 
-BallisticIconContainer.prototype.createHexNumbers = function (scene) {
-
-    // Check if hex numbers are already created
-    if (this.hexNumberIcons.length > 0) {
-        // If the visibility state hasn't changed, do nothing
-        if (this.hexNumbersVisible) {
-            this.hexNumberIcons.forEach(icon => icon.hide());
-        } else {
-            this.hexNumberIcons.forEach(icon => icon.show());
-        }
-
-        this.hexNumbersVisible = !this.hexNumbersVisible;  // Toggle visibility state
-    } else {
-        // Start at (q: -25, r: 19)
-        let startHex = { q: -22, r: 16 };
-        let currentHex = startHex;
-        let number = 1;
-        let textColour = "#ffffff";
-        let hexCreate = null;
-
-        // Array to store HexNumberSprites for later addition to the scene
-        let hexNumberSprites = [];
-
-        while (currentHex.r >= -16) {
-            // Loop through the columns of the current row (from q: -25 to q: 25)
-            for (let q = -22; q <= 22; q++) {
-                currentHex = { q: q, r: currentHex.r };
-                hexCreate = this.coordinateConverter.fromHexToGame(currentHex);
-
-                // Create HexNumberSprite for the current hex
-                let hexNumberSprite = new HexNumberSprite(
-                    hexCreate, 'hexTransparent', String(number).padStart(4, '0'), textColour, 27, 0.8
-                );
-
-                // Store the sprite in the batch array for the current row
-                hexNumberSprites.push(hexNumberSprite);
-
-                // Increment the number for the next sprite
-                number++;
-            }
-
-            // After finishing the row, add all sprites in the batch to the scene
-            this.hexNumberIcons.push(...hexNumberSprites);  // Store the batch in hexNumberIcons
-
-            // Instead of adding sprites one by one, add all to the scene at once
-            scene.add(...hexNumberSprites.map(sprite => sprite.mesh));
-
-            // Reset the batch array for the next row
-            hexNumberSprites = [];
-
-            // Move to the next row (decrease r)
-            currentHex.r--;
-        }
-
-        this.hexNumbersVisible = true;  // Ensure the hex numbers are visible
-    }
-};
 */
 
 BallisticIconContainer.prototype.createHexNumbers = function (scene) {

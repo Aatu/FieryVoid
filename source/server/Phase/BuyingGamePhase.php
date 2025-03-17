@@ -7,49 +7,130 @@ class BuyingGamePhase implements Phase
     {
         $servergamedata = $dbManager->getTacGamedata($gameData->forPlayer, $gameData->id);
 
-
         $t1 = 0;
         $t2 = 0;
+        $usedPositions = array(); // To store assigned (x, y) pairs 
 
         foreach ($servergamedata->ships as $ship){
 
-            $h = 3;
-            if ($ship->team == 1){
-                $t1++;
-                $t = $t1;
-                $h = 0;
-            }else{
-                $t2++;
-                $t = $t2;
+            if($ship->userid != -5){ //No point doing any of this for Asteroids, they will place separately in next part.
+                $h = 3;
+                if ($ship->team == 1){
+                    $t1++;
+                    $t = $t1;
+                    $h = 0;
+                }else{
+                    $t2++;
+                    $t = $t2;
+                }
+
+                if ($t % 2 == 0){
+                    $y = $t/2;
+                }else{
+                    $y = (($t-1)/2)*-1;
+                }
+
+                $x = -30;
+
+                if ($ship->team == 2){
+                    $x=30;
+                }
+                
+                $move = new MovementOrder(-1, "start", new OffsetCoordinate($x, $y), 0, 0, 5, $h, $h, true, 1, 0, 0);
+                $ship->movement = array($move);
+            } 
+                   
+            // Now let's see if we have to add any terrain.
+            if (($gameData->rules->hasRuleName("asteroids") || $gameData->rules->hasRuleName("moons")) && $ship->userid == -5){
+                // It's an asteroid, so assign a unique random position.
+                $deploymentZone = $this->getGamespace($gameData);
+                if($ship instanceof moonSmall){
+                    $maxX = ($deploymentZone['width'] / 2) - 7;
+                    $maxY = ($deploymentZone['height'] / 2) - 5;                    
+                }else{
+                    $maxX = ($deploymentZone['width'] / 2) - 3;
+                    $maxY = ($deploymentZone['height'] / 2) - 2;
+                }    
+
+
+                // Generate a unique random position
+                while (true) {
+                    $x = rand(-$maxX, $maxX);
+                    $y = rand(-$maxY, $maxY);
+                    
+                    if (!isset($usedPositions["$x,$y"])) {
+                        $usedPositions["$x,$y"] = true;
+                        break;
+                    }
+                }
+
+                $usedPositions["$x,$y"] = true; // Mark position as used
+                $h = rand(0, 5); // Random heading/facing
+
+                $move = new MovementOrder(-1, "start", new OffsetCoordinate($x, $y), 0, 0, 0, $h, $h, true, 1, 0, 0);
+                $ship->movement = array($move);
             }
 
-            if ($t % 2 == 0){
-                $y = $t/2;
-            }else{
-                $y = (($t-1)/2)*-1;
-            }
-
-            $x = -30;
-
-            if ($ship->team == 2){
-                $x=30;
-            }
-
-
-
-            $move = new MovementOrder(-1, "start", new OffsetCoordinate($x, $y), 0, 0, 5, $h, $h, true, 1, 0, 0);
-            $ship->movement = array($move);
-
-            foreach ($ship->systems as $system)
-            {
+            foreach ($ship->systems as $system) {
                 $system->setInitialSystemData($ship);
             }
-
         }
 
         $dbManager->setPlayersWaitingStatusInGame($servergamedata->id, false);
         $dbManager->insertShips($servergamedata->id, $servergamedata->ships);
         $dbManager->insertSystemData(SystemData::getAndPurgeAllSystemData());
+
+    }
+
+    public function addAsteroids($gameData, $dbManager, $numberOfAsteroids, $slot)
+    {
+        $counter = $numberOfAsteroids;
+
+        //Create asteroid as units in database.
+        while ($counter > 0) {
+            $size = Dice::d(3, 1);  //Use a dice to decide a random size of asteroid!
+            if($size == 1){
+                $currAsteroid = new asteroidS($gameData->id, -5, "Asteroid #" . $counter . "", $slot);
+                $dbManager->submitShip($gameData->id, $currAsteroid, -5); //Save them with a nominal userid of -5, only terrain should use that!                   
+            }else if($size == 2){
+                $currAsteroid = new asteroidM($gameData->id, -5, "Asteroid #" . $counter . "", $slot);
+                $dbManager->submitShip($gameData->id, $currAsteroid, -5); //Save them with a nominal userid of -5, only terrain should use that!                  
+            }else{
+                $currAsteroid = new asteroidL($gameData->id, -5, "Asteroid #" . $counter . "", $slot);
+                $dbManager->submitShip($gameData->id, $currAsteroid, -5); //Save them with a nominal userid of -5, nonly terrain should use that!                    
+            }
+            $counter--; //Reduce counter   
+        }
+    }        
+
+    public function addMoons($gameData, $dbManager, $numberOfMoons, $slot)
+    {
+        $counter = $numberOfMoons;
+
+        //Create asteroid as units in database.
+        while ($counter > 0) {
+            $currMoon = new moonSmall($gameData->id, -5, "Moon #" . $counter . "", $slot);
+            $dbManager->submitShip($gameData->id, $currMoon, -5); //Save them with a nominal userid of -5, only terrain should use that!        
+            $counter--; //Reduce counter   
+        }
+    }     
+
+    public function getGamespace($gameData)
+    {
+        $gamespace = $gameData->gamespace; // Example value, could also be "-1x-1"
+        $defaultWidth = 60;
+        $defaultHeight = 40;
+        
+        // Extract width and height
+        sscanf($gamespace, "%dx%d", $width, $height);
+        
+        // Check if it's the 'Unlimited' case
+        if ($width == -1 && $height == -1) {
+            $width = $defaultWidth;
+            $height = $defaultHeight;
+        }
+    
+        return ['width' => $width, 'height' => $height];
     }
 
     public function process(TacGamedata $gameData, DBManager $dbManager, Array $ships)
@@ -150,6 +231,30 @@ class BuyingGamePhase implements Phase
             */
                 
             $dbManager->setPlayerWaitingStatus($gameData->forPlayer, $gameData->id, true);
+
+            // Now let's see if we have to add any terrain.
+            if ($gameData->rules->hasRuleName("asteroids") && $slot->slot == 1) { // Generate all the asteroids from Slot/Player 1 
+                $numberOfAsteroids = 0; //Initialise
+                $asteroidsRule = $gameData->rules->getRuleByName('asteroids');
+                
+                if ($asteroidsRule && method_exists($asteroidsRule, 'jsonSerialize')) {
+                    $numberOfAsteroids = $asteroidsRule->jsonSerialize();
+                }                 
+
+                $this->addAsteroids($gameData, $dbManager, $numberOfAsteroids, $slot->slot);
+            }
+
+            if ($gameData->rules->hasRuleName("moons") && $slot->slot == 1) { // Generate all the asteroids from Slot/Player 1 
+                $numberOfMoons = 0; //Initialise
+                $moonsRule = $gameData->rules->getRuleByName('moons');
+                
+                if ($moonsRule && method_exists($moonsRule, 'jsonSerialize')) {
+                    $numberOfMoons = $moonsRule->jsonSerialize();
+                }                 
+
+                $this->addMoons($gameData, $dbManager, $numberOfMoons, $slot->slot);
+            }
+
         }
 
         $dbManager->updatePlayerStatus($gameData->id, $gameData->forPlayer, $gameData->phase, $gameData->turn, $seenSlots);
