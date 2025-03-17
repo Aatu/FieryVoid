@@ -41,7 +41,7 @@ class BuyingGamePhase implements Phase
             } 
                    
             // Now let's see if we have to add any terrain.
-            if (($gameData->rules->hasRuleName("asteroids") || $gameData->rules->hasRuleName("moons")) && $ship->userid == -5)
+            if (($gameData->rules->hasRuleName("asteroids") || $gameData->rules->hasRuleName("moons")) && $ship->userid == -5){
                 // It's an asteroid, so assign a unique random position.
                 $deploymentZone = $this->getGamespace($gameData);
                 if($ship instanceof moonSmall){
