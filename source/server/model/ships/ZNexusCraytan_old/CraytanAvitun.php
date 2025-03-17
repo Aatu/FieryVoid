@@ -54,13 +54,11 @@ class CraytanAvitun extends BaseShip{
         $this->addLeftSystem(new NexusAssaultCannon(4, 8, 5, 300, 360));
 		$this->addLeftSystem(new NexusCIDS(2, 4, 2, 180, 360));
 		$this->addLeftSystem(new LightPlasma(2, 4, 2, 180, 360));
-		$this->addLeftSystem(new CargoBay(2, 12));
         $this->addLeftSystem(new Thruster(4, 15, 0, 5, 3));
 
         $this->addRightSystem(new NexusAssaultCannon(4, 8, 5, 0, 60));
 		$this->addRightSystem(new NexusCIDS(2, 4, 2, 0, 180));
 		$this->addRightSystem(new LightPlasma(2, 4, 2, 0, 180));
-		$this->addRightSystem(new CargoBay(2, 12));
         $this->addRightSystem(new Thruster(4, 15, 0, 5, 4));
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
@@ -95,20 +93,18 @@ class CraytanAvitun extends BaseShip{
 					20 => "Primary",
 			),
 			3=> array(
-					4 => "Thruster",
-					6 => "Cargo Bay",
-					8 => "Close-In Defense System",
-					10 => "Light Plasma Cannon",
-					12 => "Assault Cannon",
+					5 => "Thruster",
+					7 => "Close-In Defense System",
+					9 => "Light Plasma Cannon",
+					11 => "Assault Cannon",
 					18 => "Structure",
 					20 => "Primary",
 			),
 			4=> array(
-					4 => "Thruster",
-					6 => "Cargo Bay",
-					8 => "Close-In Defense System",
-					10 => "Light Plasma Cannon",
-					12 => "Assault Cannon",
+					5 => "Thruster",
+					7 => "Close-In Defense System",
+					9 => "Light Plasma Cannon",
+					11 => "Assault Cannon",
 					18 => "Structure",
 					20 => "Primary",
 			),

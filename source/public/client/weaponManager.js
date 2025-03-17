@@ -801,7 +801,21 @@ window.weaponManager = {
 		if(weapon.isBoardingAction){
 			return weaponManager.calculateBoardingAction(shooter, target, weapon);			
 		}
-		
+
+        //New check for sustained weapons, to see if they will auto-hit/auto-miss targets from previous turn.  If conditions not true, normal routine. 
+        if (shipManager.power.isOverloading(shooter, weapon)) {
+            if (weapon.sustainedTarget && Object.keys(weapon.sustainedTarget).length > 0) { // We only care if an overload weapon fired last turn and therefore has a targetId stored in sustainedTarget.
+                // Now check it's Firing Mode 1, not a different target, and wasn't a miss.
+                if (weapon.firingMode !== 1) return 0; // Wrong firing mode selected for a sustained shot.
+                
+                if (!weapon.sustainedTarget.hasOwnProperty(target.id)) {
+                    return 0; // Auto miss - Wrong target
+                } else if (weapon.sustainedTarget[target.id] === 1) { 
+                    return 100; // Auto-hit!
+                }
+            }    
+        }		
+
 		//Weapons like Mass Drivers have special criteria for targets and shooter speed etc.
 		if(weapon.targetsImmobile){ //Target must be en
 			var ownSpeed = shipManager.movement.getSpeed(shooter);
@@ -815,7 +829,7 @@ window.weaponManager = {
 	    var distance = 0;
 	    if (weapon.ballistic){		    
 		var sPosLaunch = weaponManager.getFiringHex(shooter, weapon); 	
-//		var sPosLaunch = shipManager.movement.getPositionAtStartOfTurn(shooter, gamedata.turn); 		    
+//		var sPosLaunch = shipManager.movement.getPositionAtStartOfTurn(shooter, gamedata.turn); //OLD METHOD of getting pos.		    
 		var sPosTarget = shipManager.getShipPosition(target);
 		defence = weaponManager.getShipDefenceValuePos(sPosLaunch, target);
 	        distance = sPosLaunch.distanceTo(sPosTarget).toFixed(2); 
@@ -1414,8 +1428,9 @@ window.weaponManager = {
                 if (weaponManager.checkIsInRange(selectedShip, ship, weapon)) {
                     debug && console.log("is in range");
                     if(weapon.canSplitShots){
-                    	var fire = weapon.doMultipleFireOrders(selectedShip, ship, system);
-	                    if(fire) weapon.fireOrders.push(fire);
+                        var fire = weapon.doMultipleFireOrders(selectedShip, ship, system);
+                        if (!Array.isArray(fire)) fire = [fire]; // Ensure fire is an array for length check                        
+                        if (fire.length > 0) weapon.fireOrders.push(...fire);
 						//toUnselect.push(weapon); //It's actually easier to target if you don't! 
 						splitTargeted.push(weapon); //To be added to toUnselect aray at corect time below. 	                    
         				webglScene.customEvent('SystemDataChanged', { ship: ship, system: weapon });      				
@@ -1764,7 +1779,7 @@ window.weaponManager = {
             var fire = fires[i];
             var weapon = shipManager.systems.getSystem(ship, fire.weaponid);
 			//Added Persistent effect check below, as was preventing cancel moves when non-ballistic Plasma Web generated a plasma cloud in Intial Orders - DK 09.24 
-            if (fire.turn == gamedata.turn && !fire.rolled && !weapon.ballistic && fire.notes != 'Persistent Effect') { 
+            if (fire.turn == gamedata.turn && !fire.rolled && !weapon.ballistic && fire.notes != 'PersistentEffect') { 
                 return false;
             }
         }
@@ -2038,6 +2053,16 @@ window.weaponManager = {
         });
     },
     */
+
+    //Function called in Combat Log animation to check if a particular fireORder needs to use the full log message e.g. Reactor overlaods, Hyperspace jumps
+    doShortLogText: function doShortLogText(fire) {
+        const shortLogTypes = [
+            "HyperspaceJump", "JumpFailure", "SelfDestruct", "ContainmentBreach",
+            "Reactor", "Sabotage", "WreakHavoc", "Capture", "Rescue", "LimpetBore", "MagazineExplosion"
+        ];
+    
+        return shortLogTypes.includes(fire.damageclass);
+    },
 
     getAllFireOrdersForAllShipsForTurn: function getAllFireOrdersForAllShipsForTurn(turn, type) {
         var fires = [];

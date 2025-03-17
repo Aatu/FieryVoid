@@ -43,7 +43,7 @@ class CraytanRollun extends LCV{
 		$this->addPrimarySystem(new Engine(4, 10, 0, 6, 2));
 
 		$this->addFrontSystem(new NexusCIDS(3, 4, 2, 180, 60));
-		$this->addFrontSystem(new NexusACIDS(3, 6, 2, 300, 60));
+		$this->addFrontSystem(new NexusACIDS(3, 6, 2, 270, 90));
 		$this->addFrontSystem(new NexusCIDS(3, 4, 2, 300, 180));
 	    
         $this->addPrimarySystem(new Structure(4, 30));

@@ -277,9 +277,11 @@ if ($desperate == true) { // Desperate rules in play
 <br>
 <span style="color: #f8f8f8;">Random Fleet Selection</span> 
 <span style="margin-right: 3px;">-</span> 
-<a href="https://old.wheelofnames.com/8fz-ny7" target="_blank" style="color: #ff9500; text-decoration: underline;"><strong>Tier 1</strong></a> 
+<a href="https://old.wheelofnames.com/fx3-uje" target="_blank" style="color: #ff9500; text-decoration: underline;"><strong>Tier 1</strong></a> 
 <strong style="margin: 0 2.5px;">|</strong> 
-<a href="https://old.wheelofnames.com/3ek-kyf" target="_blank" style="color: #ff9500; text-decoration: underline;"><strong>Tier 2</strong></a>
+<a href="https://old.wheelofnames.com/rmq-7ds" target="_blank" style="color: #ff9500; text-decoration: underline;"><strong>Tier 2</strong></a>
+<strong style="margin: 0 2.5px;">|</strong> 
+<a href="https://old.wheelofnames.com/sgd-5zq" target="_blank" style="color: #ff9500; text-decoration: underline;"><strong>Tier 3</strong></a>
 <br><br>
 
 

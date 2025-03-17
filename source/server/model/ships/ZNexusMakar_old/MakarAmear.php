@@ -13,7 +13,7 @@ class MakarAmear extends MediumShip{
 			$this->occurence = "rare";
 		$this->unofficial = true;
         $this->canvasSize = 90;
-        $this->agile = true;
+//        $this->agile = true;
 	    $this->isd = 1928;
 
 	    $this->notes = 'Atmospheric capable';
