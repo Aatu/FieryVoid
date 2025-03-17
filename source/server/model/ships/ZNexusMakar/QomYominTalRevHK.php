@@ -12,6 +12,7 @@ class QomYominTalRevHK extends FighterFlight{
 			$this->variantOf = "Tel Nan Armed Drone";
 			$this->occurence = "uncommon";
         $this->imagePath = "img/ships/Nexus/makar_tolmor2.png";
+		$this->unofficial = true;
         
         $this->isd = 2109;
         $this->forwardDefense = 7;
@@ -35,7 +36,7 @@ class QomYominTalRevHK extends FighterFlight{
         $toAdd = $new - $current;
         for ($i = 0; $i < $toAdd; $i++){   
             $armour = array(1, 1, 0, 0);
-            $fighter = new Fighter("QomYominTalRenHK", $armour, 6, $this->id);
+            $fighter = new Fighter("QomYominTalRenHK", $armour, 8, $this->id);
             $fighter->displayName = "Tal Ren";
             $fighter->imagePath = "img/ships/Nexus/makar_tolmor2.png";
             $fighter->iconPath = "img/ships/Nexus/makar_tolmor_large2.png";

@@ -43,7 +43,7 @@ class QomYominAuxCarrier extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new Scanner(2, 10, 3, 5));
 		$this->addFrontSystem(new EWHeavyRocketLauncher(3, 6, 2, 300, 60));
         $this->addPrimarySystem(new Engine(2, 13, 0, 5, 4));
-        $this->addAftSystem(new Thruster(1, 13, 0, 4, 1));
+        $this->addAftSystem(new Thruster(1, 13, 0, 6, 1));
         $this->addAftSystem(new Thruster(2, 15, 0, 8, 2));
       
         $this->addLeftSystem(new Thruster(2, 13, 0, 6, 3));

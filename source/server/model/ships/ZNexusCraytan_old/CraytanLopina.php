@@ -7,7 +7,7 @@ class CraytanLopina extends BaseShip{
 	$this->pointCost = 490;
 	$this->faction = "ZNexus Craytan Union (early)";
         $this->phpclass = "CraytanLopina";
-        $this->imagePath = "img/ships/Nexus/craytan_epiron.png";
+        $this->imagePath = "img/ships/Nexus/craytan_lopin.png";
         $this->shipClass = "Lopin Explorer";
         $this->shipSizeClass = 3;
 		$this->canvasSize = 160; 
@@ -97,6 +97,7 @@ class CraytanLopina extends BaseShip{
 					6 => "Cargo Bay",
 					8 => "Medium Plasma Cannon",
 					10 => "Close-In Defense System",
+					18 => "Structure",
 					20 => "Primary",
 			),
 			4=> array(
@@ -104,6 +105,7 @@ class CraytanLopina extends BaseShip{
 					6 => "Cargo Bay",
 					8 => "Medium Plasma Cannon",
 					10 => "Close-In Defense System",
+					18 => "Structure",
 					20 => "Primary",
 			),
 		);

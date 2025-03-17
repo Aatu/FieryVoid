@@ -29,7 +29,7 @@ class QomYominQolAta extends OSAT{
 
         $this->addFrontSystem(new SensorSpear(2, 6, 3, 270, 90)); 
         $this->addFrontSystem(new SensorSpear(2, 6, 3, 270, 90)); 
-        $this->addFrontSystem(new NexusLightChargeCannon(1, 4, 1, 0, 360));
+        $this->addFrontSystem(new NexusLightChargeCannon(2, 4, 1, 0, 360));
 
         $this->addAftSystem(new Thruster(3, 8, 0, 0, 2)); 
         
