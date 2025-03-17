@@ -13,7 +13,9 @@ jQuery(function ($) {
     $("#gamespacecheck").on("click", createGame.doGameSpaceCheck);
     $("#gamespacecheck").on("click", createGame.doFlightCheck);
     $("#movementcheck").on("click", createGame.doMovementCheck);
-    $("#desperatecheck").on("click", createGame.doDesperateCheck);    
+    $("#desperatecheck").on("click", createGame.doDesperateCheck);
+    $("#asteroidscheck").on("click", createGame.doAsteroidsCheck);
+    $("#moonscheck").on("click", createGame.doMoonsCheck);              
     
     $(".setsizeknifefight").on("click", createGame.doSwitchSizeKnifeFight);
     $(".setswitchsizebaseassault").on("click", createGame.doSwitchSizeBaseAssault);    
@@ -115,17 +117,7 @@ window.createGame = {
         }
     },
 */
-/*
-doDesperateCheck: function doDesperateCheck(data) {
-    var checkval = $("#desperatecheck:checked").val();
 
-    if (checkval == "on") {
-        createGame.rules.desperate = true;
-    } else {
-        delete createGame.rules.desperate;
-    }
-},
-*/
 doDesperateCheck: function doDesperateCheck(data) {
     var checkval = $("#desperatecheck:checked").val();
 
@@ -145,6 +137,50 @@ doDesperateCheck: function doDesperateCheck(data) {
         $("#desperateDropdown").hide();
         // Remove Desperate rule
         delete createGame.rules.desperate;
+    }
+},
+
+doAsteroidsCheck: function doAsteroidsCheck(data) {
+    var checkval = $("#asteroidscheck:checked").val();
+
+    if (checkval == "on") {
+        // Show the dropdown for selecting initiative categories
+        $("#asteroidsDropdown").show();
+        // Set the selected value as initiativeCategories when checkbox is checked
+        var selectedValue = $("#asteroidsSelect").val();
+        createGame.rules.asteroids = parseInt(selectedValue, 10);
+        
+        // Add an event listener to update the value if the user changes the dropdown
+        $("#asteroidsSelect").on('change', function() {
+            createGame.rules.asteroids = parseInt($(this).val(), 10);
+        });
+    } else {
+        // Hide the dropdown when the checkbox is unchecked
+        $("#asteroidsDropdown").hide();
+        // Remove asteroids rule
+        delete createGame.rules.asteroids;
+    }
+},
+
+doMoonsCheck: function doMoonsCheck(data) {
+    var checkval = $("#moonscheck:checked").val(); // FIXED ID
+
+    if (checkval == "on") {
+        // Show the dropdown for selecting moons
+        $("#moonsDropdown").show();
+        // Set the selected value when checkbox is checked
+        var selectedValue = $("#moonsSelect").val();
+        createGame.rules.moons = parseInt(selectedValue, 10);
+        
+        // Add an event listener to update the value if the user changes the dropdown
+        $("#moonsSelect").on('change', function() {
+            createGame.rules.moons = parseInt($(this).val(), 10);
+        });
+    } else {
+        // Hide the dropdown when the checkbox is unchecked
+        $("#moonsDropdown").hide();
+        // Remove moons rule
+        delete createGame.rules.moons;
     }
 },
 
