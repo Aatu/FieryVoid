@@ -45,7 +45,8 @@ class Enhancements{
 		$unit->enhancementOptionsDisabled[] = 'POOR_TRAIN'; 
 	  }else{ //enhancements for ships
 		$unit->enhancementOptionsDisabled[] = 'ELITE_CREW';
-		$unit->enhancementOptionsDisabled[] = 'HANG_CONV';		 
+		$unit->enhancementOptionsDisabled[] = 'HANG_CON_F';
+		$unit->enhancementOptionsDisabled[] = 'HANG_CON_AS';					 
 		$unit->enhancementOptionsDisabled[] = 'IMPR_ENG'; 
 		$unit->enhancementOptionsDisabled[] = 'IMPR_REA'; 
 		$unit->enhancementOptionsDisabled[] = 'IMPR_SENS'; 
@@ -80,8 +81,12 @@ class Enhancements{
 		case 'ShadowFighter':
 			Enhancements::blockStandardEnhancements($unit);
 			$unit->enhancementOptionsEnabled[] = 'SHAD_CTRL';
-			break;	  
+			break;	
 
+		case 'Terrain':
+			Enhancements::blockStandardEnhancements($unit);
+			break;	  
+	
 		case 'ThirdspaceShip':
 			Enhancements::blockStandardEnhancements($unit);
 			$unit->enhancementOptionsEnabled[] = 'IMPR_SR';	
@@ -128,11 +133,26 @@ class Enhancements{
 	  }	 
 
 	  //To convert Assault Shuttles hangar slots to Fighter Slots
-	  if (array_key_exists("assault shuttles", $ship->fighters)) { //Onyl add if ship has Assault Shuttle hangar space! 	  
-	    $enhID = 'HANG_CONV';
+	  if (array_key_exists("assault shuttles", $ship->fighters)) { //Only add if ship has Assault Shuttle hangar space! 	  
+	    $enhID = 'HANG_CON_F';
 		if(!in_array($enhID, $ship->enhancementOptionsDisabled)){ //Check option is also not disabled.
-				$enhName = 'Hangar Conversion';
+				$enhName = 'Convert Assault Shuttle slot to Fighter slot';
 				$enhLimit = $ship->fighters["assault shuttles"]; //The number of assault shuttle slots ship has is max conversion amount.
+				$enhPrice = 5; //Flat 5 pts per slot converted	  
+				$enhPriceStep = 0; //flat rate
+				$ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);	
+		}
+	  }
+
+	  //To convert Fighter hangar slots to Assault Shuttle Slots
+	  $keysToCheck = ["normal", "heavy", "medium"]; //Light and Ultralight cannot be converted.
+	  $matchingKeys = array_intersect_key($ship->fighters, array_flip($keysToCheck)); // Find matching keys
+	  $totalCount = array_sum($matchingKeys); // Sum up the values of the found keys 
+	  if ($totalCount > 0) { 	  
+	    $enhID = 'HANG_CON_AS';
+		if(!in_array($enhID, $ship->enhancementOptionsDisabled)){ //Check option is also not disabled.
+				$enhName = 'Convert Fighter slot to Assault Shuttle slot';
+				$enhLimit = $totalCount; //The number of assault shuttle slots ship has is max conversion amount.
 				$enhPrice = 5; //Flat 5 pts per slot converted	  
 				$enhPriceStep = 0; //flat rate
 				$ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);	
@@ -600,12 +620,13 @@ class Enhancements{
 			  case 'Hastan': //Yolu Hastan Escort Frigate: 800->800
 				  $enhPrice = 0;//just so enhancement itself is present
 				  break;
-			  case 'Maitau': //Yolu Maitau Pursuit Frigate: 600->800
-				  $enhPrice = 200;
+			  case 'Maitau': //Yolu Maitau Pursuit Frigate: 600->750
+				  $enhPrice = 150;
 				  break;
-			  case 'Maishan': //Yolu Maishan Strike Frigate: 710->750
+/*			  case 'Maishan': //Yolu Maishan Strike Frigate: 710->750 - None for now.
 				  $enhPrice = 40;
 				  break;
+*/
 			  case 'Malau': //Yolu Malau Attack Frigate: 625->650
 				  $enhPrice = 25;
 				  break;
@@ -1293,7 +1314,7 @@ class Enhancements{
 			  $enhLimit = $actualCapacity; //effectively limited by magazine capacity	
 			  $enhPrice = $ammoClass->getPrice($flight); 
 			  $enhPriceStep = 0; //flat rate
-			  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true );
+			  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false );
 			  //variable missiles are NOT enhancements!
 		  }
 		  $enhID = 'AMMO_FL'; //Long Range Fighter Missiles
@@ -1305,7 +1326,7 @@ class Enhancements{
 			  $enhLimit = $actualCapacity;		
 			  $enhPrice = $ammoClass->getPrice($flight); 
 			  $enhPriceStep = 0; //flat rate
-			  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+			  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 		  }
 		  $enhID = 'AMMO_FH'; //Heavy FighterMissiles
 		  if(in_array($enhID, $flight->enhancementOptionsEnabled)){ //option is enabled
@@ -1322,7 +1343,7 @@ class Enhancements{
 			  $enhLimit = $actualCapacity;		
 			  $enhPrice = $ammoClass->getPrice($flight); 
 			  $enhPriceStep = 0; //flat rate
-			  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+			  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 		  }
 		  $enhID = 'AMMO_FY'; //Dogfight FighterMissiles
 		  if(in_array($enhID, $flight->enhancementOptionsEnabled)){ //option is enabled
@@ -1333,7 +1354,7 @@ class Enhancements{
 			  $enhLimit = $actualCapacity;		
 			  $enhPrice = $ammoClass->getPrice($flight); 
 			  $enhPriceStep = 0; //flat rate
-			  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+			  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 		  }
 		  $enhID = 'AMMO_FD'; //Dropout FighterMissiles
 		  if(in_array($enhID, $flight->enhancementOptionsEnabled)){ //option is enabled
@@ -1344,7 +1365,7 @@ class Enhancements{
 			  $enhLimit = $actualCapacity;
 			  $enhPrice = $ammoClass->getPrice($flight); 
 			  $enhPriceStep = 0; //flat rate
-			  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+			  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 		  }
 	  } //end of magazine-requiring options
 	  
@@ -1572,7 +1593,10 @@ class Enhancements{
 						} 						
 						break;						
 
-					case 'HANG_CONV'://Hangar Conversion, no actual need to change anything here.  
+					case 'HANG_CON_F'://Hangar Conversion to Fighter slot, no actual need to change anything here.  
+						break;	
+
+					case 'HANG_CON_AS'://Hangar Conversion to Assault Shuttle slot, no actual need to change anything here.  
 						break;	
 
 					case 'EXT_MRN'://Extra marines, increase contingent per Claw by 1.

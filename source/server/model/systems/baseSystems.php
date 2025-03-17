@@ -565,8 +565,11 @@ class MagGravReactorTechnical extends MagGravReactor{
 	public function setSystemDataWindow($turn){
 		$this->data["Output"] = $this->output;
 		parent::setSystemDataWindow($turn);     
-		$this->data["Special"] = "Mag-Gravitic Reactor: provides fixed total power, regardless of destroyed systems.";
-		$this->data["Special"] .= "<br>This system is here for technical purposes only. Cannot be damaged in any way.";
+		$this->data["Special"] = "This system is here for technical purposes only. Cannot be damaged in any way.";
+		$ship = $this->getUnit();
+		//I'm reusing this system in Asteroid unit, but don't want this text here - DK
+		if($ship->factionAge > 2) $this->data["Special"] .= "<br>Mag-Gravitic Reactor: provides fixed total power, regardless of destroyed systems.";
+		
 	}		
 }//endof MagGravReactor		
 
@@ -987,11 +990,6 @@ class MindriderEngine extends Engine{
 
 			$this->contraction = $contractValue;	
 
-			//Reduce image size if needed! :)
-			$level = floor($this->contraction/3);			
-			$ship->iconPath = "img/ships/MindriderMindsEye' . $level . '.png";
-			$ship->canvasSize = 280-($level *50);
-
 		if($contractValue == 0) return; //No effects this turn, just return.
 
 			$ship->forwardDefense -= $this->contraction;
@@ -1014,7 +1012,11 @@ class MindriderEngine extends Engine{
 		
 			if($this->contraction >= 3){ //Additional effects after 3 levels of contraction.
 				$ship->Enormous = false;
-				
+				//Reduce image size if needed! :)
+				$level = floor($this->contraction/3);			
+				$ship->imagePath = "img/ships/MindriderMindsEye" . $level . ".png";
+				$ship->canvasSize = 280-($level *50);
+
 				$armourBoost = floor($this->contraction/3);
 				
 				foreach ($ship->systems as $system){
@@ -1571,7 +1573,7 @@ class OSATCnC extends CnC{	//Special technical OSAT CnC system, so criticals eff
 		}else{
 			$this->data["Special"] .= '<br>';
 		}
-		$this->data["Special"] .= "Technical system only, cannot be damaged in any way.";
+		$this->data["Special"] .= "This system is here for technical purposes only. Cannot be damaged in any way.";
 	}
 		
 }//endof OSATCnC
@@ -2008,7 +2010,7 @@ class JumpEngine extends ShipSystem{
     public $boostEfficiency = 0;    
     
 	//JumpEngine tactically  is not important at all!
-	public $repairPriority = 1;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
+	public $repairPriority = 8;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
     
     function __construct($armour, $maxhealth, $powerReq, $delay){
         parent::__construct($armour, $maxhealth, $powerReq, 0);
@@ -2027,6 +2029,14 @@ class JumpEngine extends ShipSystem{
     
 	public function doHyperspaceJump($ship, $gamedata)
 	{
+		$reactorList = $ship->getSystemsByName('Reactor', true);
+		foreach($reactorList as $reactorCurr){     //Don't do Hyperspace jump for ships that have blown their own reactors!
+			if($reactorCurr->isDestroyed()) return;
+		}
+
+		$primaryStruct = $ship->getStructureSystem(0); //If ship is otherwise destroyed also don't jump.
+		if($primaryStruct->isDestroyed()) return;
+
 		$currHealth = $this->getRemainingHealth();
 		$maxhealth = $this->maxhealth;
 		$healthDiff = $maxhealth - $currHealth;

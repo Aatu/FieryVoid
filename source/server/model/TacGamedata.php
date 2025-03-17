@@ -312,7 +312,8 @@ class TacGamedata {
     
     public function getFirstShip(){    
         foreach ($this->ships as $ship){
-            if ($ship->isDestroyed()) continue;                
+            if ($ship->isDestroyed()) continue;
+            if($ship instanceof Terrain) continue; //Ignore terrain like asteroids.                            
             return $ship;
         }        
         return null;
@@ -367,31 +368,25 @@ class TacGamedata {
         
     }
     
-    public function getActiveships(){
-
-        if (is_array($this->activeship)){
+    public function getActiveships() {
+        if (is_array($this->activeship)) {
             $ships = [];
-
-
-            foreach ($this->ships as $ship){
-                if (in_array($ship->id, $this->activeship)){
+    
+            foreach ($this->ships as $ship) {
+                if (in_array($ship->id, $this->activeship) && $ship->userid != -5) {
                     array_push($ships, $ship);
                 }
             }
-
-            if (count($ships) === 0) {
-                return [];
-            }
-
-            return $ships;
+    
+            return $ships; // No need to check count; empty array is returned naturally
         }
-
-        foreach ($this->ships as $ship){
-            if ($ship->id == $this->activeship){
+    
+        foreach ($this->ships as $ship) {
+            if ($ship->id == $this->activeship && $ship->userid != -5) {
                 return [$ship];
             }
         }
-        
+    
         return [];
     }
     
@@ -757,6 +752,29 @@ class TacGamedata {
 		return false; //this ship was not found
 	}//endof function shipBelongs
 
+    public function getBlockedHexes() {
+        $blockedHexes = [];
+        
+        foreach ($this->ships as $ship) {
+            if($ship->isDestroyed()) continue;
+
+            if ($ship->Enormous) { // Only enormous units block LoS
+                $position = $ship->getHexPos(); 
+                $blockedHexes[] = $position;
+
+                if($ship->Huge > 0){ //Larger terrain, need to add more than just centre hex.
+                    $neighbourHexes = Mathlib::getNeighbouringHexes($position, $ship->Huge);
+
+                    foreach ($neighbourHexes as $hex) {
+                        $blockedHexes[] = new OffsetCoordinate($hex); // Ensure hexes are objects
+                    }
+                }
+            }    
+
+        }
+      
+        return $blockedHexes;
+    } //endof function getBlockedHexes       
 
 }
 

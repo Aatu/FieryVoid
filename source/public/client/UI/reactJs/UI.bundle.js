@@ -40366,85 +40366,54 @@ var SystemInfoButtons = function (_React$Component) {
 			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 		}
 
-		/*Thought Shield increase health*/
-
-	}, {
-		key: "ThoughtShieldIncrease10",
-		value: function ThoughtShieldIncrease10(e) {
-			e.stopPropagation();e.preventDefault();
-			var _props39 = this.props,
-			    ship = _props39.ship,
-			    system = _props39.system;
-
-			system.doIncrease10();
-			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
-		}
-	}, {
-		key: "ThoughtShieldIncrease5",
-		value: function ThoughtShieldIncrease5(e) {
-			e.stopPropagation();e.preventDefault();
-			var _props40 = this.props,
-			    ship = _props40.ship,
-			    system = _props40.system;
-
-			system.doIncrease5();
-			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
-		}
-	}, {
-		key: "ThoughtShieldIncrease",
-		value: function ThoughtShieldIncrease(e) {
-			e.stopPropagation();e.preventDefault();
-			var _props41 = this.props,
-			    ship = _props41.ship,
-			    system = _props41.system;
-
-			system.doIncrease();
-			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
-		}
-		/*Thought Shield decrease health*/
-
-	}, {
-		key: "ThoughtShieldDecrease",
-		value: function ThoughtShieldDecrease(e) {
-			e.stopPropagation();e.preventDefault();
-			var _props42 = this.props,
-			    ship = _props42.ship,
-			    system = _props42.system;
-
-			system.doDecrease();
-			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
-		}
-	}, {
-		key: "ThoughtShieldDecrease5",
-		value: function ThoughtShieldDecrease5(e) {
-			e.stopPropagation();e.preventDefault();
-			var _props43 = this.props,
-			    ship = _props43.ship,
-			    system = _props43.system;
-
-			system.doDecrease5();
-			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
-		}
-	}, {
-		key: "ThoughtShieldDecrease10",
-		value: function ThoughtShieldDecrease10(e) {
-			e.stopPropagation();e.preventDefault();
-			var _props44 = this.props,
-			    ship = _props44.ship,
-			    system = _props44.system;
-
-			system.doDecrease10();
-			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
-		}
+		/*Thought Shield now uses TSShield functions above.
+  ThoughtShieldIncrease10(e) {
+         e.stopPropagation(); e.preventDefault();
+  	const {ship, system} = this.props;
+  	system.doIncrease10();
+  	webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+  }
+  ThoughtShieldIncrease5(e) {
+         e.stopPropagation(); e.preventDefault();
+  	const {ship, system} = this.props;
+  	system.doIncrease5();
+  	webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+  }	
+  ThoughtShieldIncrease(e) {
+         e.stopPropagation(); e.preventDefault();
+  	const {ship, system} = this.props;
+  	system.doIncrease();
+  	webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+  }	
+  
+  ThoughtShieldDecrease(e) {
+         e.stopPropagation(); e.preventDefault();
+  	const {ship, system} = this.props;
+  	system.doDecrease();
+  	webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+  }
+  ThoughtShieldDecrease5(e) {
+         e.stopPropagation(); e.preventDefault();
+  	const {ship, system} = this.props;
+  	system.doDecrease5();
+  	webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+  }	
+  ThoughtShieldDecrease10(e) {
+         e.stopPropagation(); e.preventDefault();
+  	const {ship, system} = this.props;
+  	system.doDecrease10();
+  	webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+  }
+  */
 		/*Thought Shield Generator Presets*/
 
 	}, {
 		key: "ThoughtShieldGenSelect",
 		value: function ThoughtShieldGenSelect(e) {
 			e.stopPropagation();e.preventDefault();
-			var _props45 = this.props,
-			    ship = _props45.ship,
-			    system = _props45.system;
+			var _props39 = this.props,
+			    ship = _props39.ship,
+			    system = _props39.system;
 
 			system.doSelect();
 			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
@@ -40456,9 +40425,9 @@ var SystemInfoButtons = function (_React$Component) {
 		key: "nextSRsystem",
 		value: function nextSRsystem(e) {
 			e.stopPropagation();e.preventDefault();
-			var _props46 = this.props,
-			    ship = _props46.ship,
-			    system = _props46.system;
+			var _props40 = this.props,
+			    ship = _props40.ship,
+			    system = _props40.system;
 
 			system.getNextSystem();
 			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
@@ -40469,9 +40438,9 @@ var SystemInfoButtons = function (_React$Component) {
 		key: "SRPriorityUp",
 		value: function SRPriorityUp(e) {
 			e.stopPropagation();e.preventDefault();
-			var _props47 = this.props,
-			    ship = _props47.ship,
-			    system = _props47.system;
+			var _props41 = this.props,
+			    ship = _props41.ship,
+			    system = _props41.system;
 
 			system.setRepairPriority(20);
 			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
@@ -40480,9 +40449,9 @@ var SystemInfoButtons = function (_React$Component) {
 		key: "SRPriorityDown",
 		value: function SRPriorityDown(e) {
 			e.stopPropagation();e.preventDefault();
-			var _props48 = this.props,
-			    ship = _props48.ship,
-			    system = _props48.system;
+			var _props42 = this.props,
+			    ship = _props42.ship,
+			    system = _props42.system;
 
 			system.setRepairPriority(0);
 			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
@@ -40491,9 +40460,9 @@ var SystemInfoButtons = function (_React$Component) {
 		key: "SRPriorityCancel",
 		value: function SRPriorityCancel(e) {
 			e.stopPropagation();e.preventDefault();
-			var _props49 = this.props,
-			    ship = _props49.ship,
-			    system = _props49.system;
+			var _props43 = this.props,
+			    ship = _props43.ship,
+			    system = _props43.system;
 
 			system.setRepairPriority(-1);
 			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
@@ -40501,10 +40470,10 @@ var SystemInfoButtons = function (_React$Component) {
 	}, {
 		key: "render",
 		value: function render() {
-			var _props50 = this.props,
-			    ship = _props50.ship,
-			    selectedShip = _props50.selectedShip,
-			    system = _props50.system;
+			var _props44 = this.props,
+			    ship = _props44.ship,
+			    selectedShip = _props44.selectedShip,
+			    system = _props44.system;
 
 
 			if (!canDoAnything) {
@@ -40557,12 +40526,14 @@ var SystemInfoButtons = function (_React$Component) {
 				canTSShieldGendisplayCurrClass(ship, system) && React.createElement(Button, { title: "Next", onClick: this.nextCurrClass.bind(this), img: "./img/systemicons/Specialistclasses/iconNext.png" }),
 				"     ",
 				canTSShieldGenSelect(ship, system) && React.createElement(Button, { onClick: this.TSShieldGenSelect.bind(this), img: "./img/systemicons/Specialistclasses/select.png" }),
-				canThoughtShieldIncrease(ship, system) && React.createElement(Button, { onClick: this.ThoughtShieldIncrease10.bind(this), img: "./img/systemicons/ShieldGenclasses/iconPlus10.png" }),
-				canThoughtShieldIncrease(ship, system) && React.createElement(Button, { onClick: this.ThoughtShieldIncrease5.bind(this), img: "./img/systemicons/ShieldGenclasses/iconPlus5.png" }),
-				canThoughtShieldIncrease(ship, system) && React.createElement(Button, { onClick: this.ThoughtShieldIncrease.bind(this), img: "./img/systemicons/BFCPclasses/iconPlus.png" }),
-				canThoughtShieldDecrease(ship, system) && React.createElement(Button, { onClick: this.ThoughtShieldDecrease.bind(this), img: "./img/systemicons/BFCPclasses/iconMinus.png" }),
-				canThoughtShieldDecrease(ship, system) && React.createElement(Button, { onClick: this.ThoughtShieldDecrease5.bind(this), img: "./img/systemicons/ShieldGenclasses/iconMinus5.png" }),
-				canThoughtShieldDecrease(ship, system) && React.createElement(Button, { onClick: this.ThoughtShieldDecrease10.bind(this), img: "./img/systemicons/ShieldGenclasses/iconMinus10.png" }),
+				canThoughtShieldIncrease(ship, system) && React.createElement(Button, { onClick: this.TSShieldIncrease25.bind(this), img: "./img/systemicons/ShieldGenclasses/iconPlus25.png" }),
+				canThoughtShieldIncrease(ship, system) && React.createElement(Button, { onClick: this.TSShieldIncrease10.bind(this), img: "./img/systemicons/ShieldGenclasses/iconPlus10.png" }),
+				canThoughtShieldIncrease(ship, system) && React.createElement(Button, { onClick: this.TSShieldIncrease5.bind(this), img: "./img/systemicons/ShieldGenclasses/iconPlus5.png" }),
+				canThoughtShieldIncrease(ship, system) && React.createElement(Button, { onClick: this.TSShieldIncrease.bind(this), img: "./img/systemicons/BFCPclasses/iconPlus.png" }),
+				canThoughtShieldDecrease(ship, system) && React.createElement(Button, { onClick: this.TSShieldDecrease.bind(this), img: "./img/systemicons/BFCPclasses/iconMinus.png" }),
+				canThoughtShieldDecrease(ship, system) && React.createElement(Button, { onClick: this.TSShieldDecrease5.bind(this), img: "./img/systemicons/ShieldGenclasses/iconMinus5.png" }),
+				canThoughtShieldDecrease(ship, system) && React.createElement(Button, { onClick: this.TSShieldDecrease10.bind(this), img: "./img/systemicons/ShieldGenclasses/iconMinus10.png" }),
+				canThoughtShieldDecrease(ship, system) && React.createElement(Button, { onClick: this.TSShieldDecrease25.bind(this), img: "./img/systemicons/ShieldGenclasses/iconMinus25.png" }),
 				canThoughtShieldGendisplayCurrClass(ship, system) && React.createElement(Button, { title: getTSShieldGencurrClassName(ship, system), img: getTSShieldGencurrClassImg(ship, system) }),
 				canThoughtShieldGendisplayCurrClass(ship, system) && React.createElement(Button, { title: "Previous", onClick: this.prevCurrClass.bind(this), img: "./img/systemicons/Specialistclasses/iconPrev.png" }),
 				canThoughtShieldGendisplayCurrClass(ship, system) && React.createElement(Button, { title: "Next", onClick: this.nextCurrClass.bind(this), img: "./img/systemicons/Specialistclasses/iconNext.png" }),

@@ -705,7 +705,7 @@ window.shipManager = {
 
         return turn;
     },
-
+/*
     getIniativeOrder: function getIniativeOrder(ship) {
         var previousInitiative = -100000; //same Ini move together now!
         var order = 0;  
@@ -721,6 +721,29 @@ window.shipManager = {
 
         return 0; //should not happen
     },
+*/
+
+    //New getInitiativeOrder function to accommodate terrain units like asteroids.
+    getIniativeOrder: function getIniativeOrder(ship) {
+        var previousInitiative = -100000; // same Ini move together now!
+        var order = 0;
+
+        // Filter out destroyed ships and those with shipSizeClass === 5 e.g. terrain
+        var validShips = gamedata.ships.filter(function(s) {
+            return !shipManager.isDestroyed(s) && s.shipSizeClass !== 5;
+        });
+
+        for (var i in validShips) {
+            if (validShips[i].iniative > previousInitiative) { // new Ini higher than previous!
+                order++;
+                previousInitiative = validShips[i].iniative;
+            }
+            if (validShips[i].id === ship.id) return order;
+        }
+
+        return 0; // should not happen
+    },
+
 
     hasBetterInitive: function hasBetterInitive(a, b) {
         //console.log(a.name);
