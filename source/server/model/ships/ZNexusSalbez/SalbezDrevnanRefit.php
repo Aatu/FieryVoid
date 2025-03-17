@@ -1,17 +1,17 @@
 <?php
-class SalbezDrevnan extends MediumShip{
+class SalbezDrevnanRefit extends MediumShip{
 
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 230;
+        $this->pointCost = 260;
         $this->faction = "ZNexus Sal-bez Coalition";
-        $this->phpclass = "SalbezDrevnan";
+        $this->phpclass = "SalbezDrevnanRefit";
         $this->imagePath = "img/ships/Nexus/salbez_drevnan3.png";
-        $this->shipClass = "Drev-nan Auxiliary Escort";
+        $this->shipClass = "Drev-nan Auxiliary Escort (2120)";
 		$this->unofficial = true;
         $this->canvasSize = 90;
-	    $this->isd = 2101;
+	    $this->isd = 2120;
         
         $this->forwardDefense = 11;
         $this->sideDefense = 13;
@@ -32,14 +32,14 @@ class SalbezDrevnan extends MediumShip{
         $this->addPrimarySystem(new Thruster(2, 8, 0, 5, 4));        
         $this->addPrimarySystem(new Hangar(0, 4));
         
-		$this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 180, 60));
-		$this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 240, 120));
-		$this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 300, 180));
+		$this->addFrontSystem(new NexusImprovedParticleBeam(2, 3, 1, 180, 60));
+		$this->addFrontSystem(new NexusImprovedParticleBeam(2, 3, 1, 240, 120));
+		$this->addFrontSystem(new NexusImprovedParticleBeam(2, 3, 1, 300, 180));
         $this->addFrontSystem(new Thruster(2, 6, 0, 4, 1));
 	    
-		$this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 180, 60));
-		$this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 90, 270));
-		$this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 300, 180));
+		$this->addAftSystem(new NexusImprovedParticleBeam(2, 3, 1, 180, 60));
+		$this->addAftSystem(new NexusImprovedParticleBeam(2, 3, 1, 90, 270));
+		$this->addAftSystem(new NexusImprovedParticleBeam(2, 3, 1, 300, 180));
         $this->addAftSystem(new Thruster(2, 6, 0, 4, 2));    
         $this->addAftSystem(new Thruster(2, 6, 0, 4, 2));    
        
@@ -60,14 +60,14 @@ class SalbezDrevnan extends MediumShip{
 
 		1=> array(
 			5 => "Thruster",
-			9 => "Light Particle Beam",
+			9 => "Improved Particle Beam",
 			17 => "Structure",
 			20 => "Primary",
 		),
 
 		2=> array(
 			5 => "Thruster",
-			9 => "Light Particle Beam",
+			9 => "Improved Particle Beam",
 			17 => "Structure",
 			20 => "Primary",
 		),

@@ -22,8 +22,8 @@ class QomYominMaYol extends HeavyCombatVesselLeftRight{
         $this->forwardDefense = 15;
         $this->sideDefense = 15;
         
-        $this->turncost = 1;
-        $this->turndelaycost = 1;
+        $this->turncost = 0.75;
+        $this->turndelaycost = 0.75;
         $this->accelcost = 3;
         $this->rollcost = 3;
         $this->pivotcost = 3;
@@ -40,7 +40,7 @@ class QomYominMaYol extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new Scanner(4, 16, 3, 6));
 		$this->addFrontSystem(new NexusPlasmaCharge(2, 7, 4, 300, 60));
         $this->addPrimarySystem(new Engine(4, 18, 0, 6, 3));
-        $this->addFrontSystem(new Thruster(3, 13, 0, 6, 1));
+        $this->addAftSystem(new Thruster(3, 13, 0, 6, 1));
         $this->addAftSystem(new Thruster(3, 15, 0, 8, 2));
 		$this->addPrimarySystem(new Hangar(2, 4));
 		
@@ -60,12 +60,13 @@ class QomYominMaYol extends HeavyCombatVesselLeftRight{
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addLeftSystem(new Structure( 4, 45));
-        $this->addRightSystem(new Structure( 3, 45));
+        $this->addRightSystem(new Structure( 4, 45));
         $this->addPrimarySystem(new Structure( 4, 40));
 		
         $this->hitChart = array(
             0=> array(
-                    8 => "Structure",
+                    7 => "Structure",
+					8 => "Hangar",
 					10 => "1:Plasma Charge",
                     13 => "2:Thruster",
                     15 => "Scanner",
