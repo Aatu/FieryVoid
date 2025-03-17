@@ -4,17 +4,17 @@ class SalbezNarkenRefit extends HeavyCombatVessel{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 450;
-        $this->faction = "ZNexus Sal-bez Coalition";
+        $this->pointCost = 420;
+        $this->faction = "ZNexus Sal-bez Coalition (early)";
         $this->phpclass = "SalbezNarkenRefit";
         $this->imagePath = "img/ships/Nexus/salbez_zefjem3.png";
 			$this->canvasSize = 115; //img has 200px per side
-        $this->shipClass = "Nar-ken Scout (2090)";
-			$this->variantOf = "Zef'jem Heavy Frigate";
+        $this->shipClass = "Nar-ken Early Scout (2095)";
+			$this->variantOf = "Nav-ren Prospector";
 			$this->occurence = "uncommon";
 			$this->unofficial = true;
         $this->limited = 33;
-        $this->isd = 2090;
+        $this->isd = 2095;
 		
         $this->forwardDefense = 13;
         $this->sideDefense = 15;
@@ -28,7 +28,7 @@ class SalbezNarkenRefit extends HeavyCombatVessel{
          
         $this->addPrimarySystem(new Reactor(3, 12, 0, 0));
         $this->addPrimarySystem(new CnC(3, 9, 0, 0));
-        $this->addPrimarySystem(new ELINTScanner(3, 10, 3, 5));
+        $this->addPrimarySystem(new ELINTScanner(3, 10, 3, 4));
         $this->addPrimarySystem(new Engine(3, 11, 0, 8, 3));
         $this->addPrimarySystem(new Hangar(1, 2));
         $this->addPrimarySystem(new Thruster(3, 14, 0, 4, 3));
@@ -36,7 +36,7 @@ class SalbezNarkenRefit extends HeavyCombatVessel{
       
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
-        $this->addFrontSystem(new ELINTScanner(3, 10, 3, 4));
+        $this->addFrontSystem(new ELINTScanner(3, 10, 3, 3));
         $this->addFrontSystem(new LightParticleBeamShip(1, 2, 1, 270, 90));
         $this->addFrontSystem(new LightParticleBeamShip(1, 2, 1, 270, 90));
                 

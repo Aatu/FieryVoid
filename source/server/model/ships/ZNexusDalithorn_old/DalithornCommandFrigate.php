@@ -31,14 +31,14 @@ class DalithornCommandFrigate extends MediumShip{
         $this->addPrimarySystem(new Engine(3, 12, 0, 7, 3));
         $this->addPrimarySystem(new Hangar(1, 1));
 		$this->addPrimarySystem(new Magazine(3, 10));
-        $this->addPrimarySystem(new Thruster(2, 11, 0, 4, 3));
-        $this->addPrimarySystem(new Thruster(2, 11, 0, 4, 4));        
+        $this->addPrimarySystem(new Thruster(2, 11, 0, 3, 3));
+        $this->addPrimarySystem(new Thruster(2, 11, 0, 3, 4));        
         
 		$this->addFrontSystem(new NexusLightCoilgun(3, 7, 3, 330, 30));
 		$this->addFrontSystem(new NexusLightGasGun(2, 5, 1, 240, 360));
 		$this->addFrontSystem(new NexusLightGasGun(2, 5, 1, 0, 120));
-        $this->addPrimarySystem(new Thruster(2, 11, 0, 3, 3));
-        $this->addPrimarySystem(new Thruster(2, 11, 0, 3, 4));        
+        $this->addFrontSystem(new Thruster(2, 8, 0, 2, 1));
+        $this->addFrontSystem(new Thruster(2, 8, 0, 2, 1));        
 	    
         $this->addAftSystem(new Thruster(1, 4, 0, 1, 2));    
         $this->addAftSystem(new Thruster(2, 8, 0, 5, 2));    

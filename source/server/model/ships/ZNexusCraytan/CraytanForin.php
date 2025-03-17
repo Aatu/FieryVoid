@@ -10,7 +10,7 @@ class CraytanForin extends HeavyCombatVesselLeftRight{
         $this->imagePath = "img/ships/Nexus/craytan_dela.png";
 		$this->canvasSize = 125; //img has 200px per side
         $this->shipClass = "Forin Auxiliary Carrier";
-			$this->variantOf = "Soren Auxiliary Cruiser";
+			$this->variantOf = "Soren Auxiliary Cruiser (2113)";
 			$this->occurence = "uncommon";
 		$this->unofficial = true;
         $this->isd = 2113;
@@ -38,15 +38,15 @@ class CraytanForin extends HeavyCombatVesselLeftRight{
         $this->addLeftSystem(new Thruster(2, 10, 0, 3, 3));
         $this->addLeftSystem(new Hangar(1, 7));
 		$this->addLeftSystem(new MediumPlasma(2, 5, 3, 300, 60));
-		$this->addLeftSystem(new NexusCIDS(2, 4, 2, 120, 360));
-		$this->addLeftSystem(new NexusCIDS(2, 4, 2, 180, 60));
+		$this->addLeftSystem(new NexusCIDS(2, 4, 2, 240, 60));
+		$this->addLeftSystem(new NexusCIDS(2, 4, 2, 120, 300));
                 
         $this->addRightSystem(new Thruster(2, 10, 0, 3, 2));
         $this->addRightSystem(new Thruster(2, 10, 0, 3, 4));
         $this->addRightSystem(new Hangar(1, 7));
 		$this->addRightSystem(new MediumPlasma(2, 5, 3, 300, 60));
-		$this->addRightSystem(new NexusCIDS(2, 4, 2, 0, 240));
-		$this->addRightSystem(new NexusCIDS(2, 4, 2, 300, 180));
+		$this->addRightSystem(new NexusCIDS(2, 4, 2, 300, 120));
+		$this->addRightSystem(new NexusCIDS(2, 4, 2, 60, 240));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addPrimarySystem(new Structure(3, 40));

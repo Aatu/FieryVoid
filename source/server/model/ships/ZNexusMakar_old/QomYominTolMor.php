@@ -13,14 +13,14 @@ class QomYominTolMor extends FighterFlight{
 
         $this->isd = 1925;
         
-        $this->forwardDefense = 7;
-        $this->sideDefense = 7;
+        $this->forwardDefense = 6;
+        $this->sideDefense = 6;
         $this->freethrust = 10;
         $this->offensivebonus = 3;
         $this->jinkinglimit = 4;
         $this->turncost = 0.33;
 		$this->turndelay = 0;
-        
+
         $this->iniativebonus = 90;
 
         $this->dropOutBonus = -2;

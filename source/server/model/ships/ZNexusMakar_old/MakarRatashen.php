@@ -13,7 +13,7 @@ class MakarRatashen extends MediumShip{
 			$this->occurence = "rare";
 		$this->unofficial = true;
         $this->canvasSize = 90;
-        $this->agile = true;
+ //       $this->agile = true;
 	    $this->isd = 1908;
 
 	    $this->notes = 'Atmospheric capable';

@@ -40,17 +40,17 @@ class SalbezCrensk extends LCV{
 			$this->addPrimarySystem($sensors);
 		$this->addPrimarySystem(new Engine(4, 12, 0, 8, 3));
 
-		$this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 150, 30));
+		$this->addFrontSystem(new NexusImprovedParticleBeam(2, 3, 1, 150, 30));
 		$this->addFrontSystem(new MediumLaser(3, 6, 5, 300, 60));
-		$this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 330, 210));
+		$this->addFrontSystem(new NexusImprovedParticleBeam(2, 3, 1, 330, 210));
     
-        $this->addPrimarySystem(new Structure(4, 32));
+        $this->addPrimarySystem(new Structure(4, 36));
 	    
         $this->hitChart = array(
         		0=> array( 
         				11 => "Structure",
         				13 => "1:Medium Laser",
-        				15 => "1:Light Particle Beam",
+        				15 => "1:Improved Particle Beam",
 						17 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",
@@ -58,7 +58,7 @@ class SalbezCrensk extends LCV{
         		1=> array( //redirect to PRIMARY
         				11 => "Structure",
         				13 => "1:Medium Laser",
-        				15 => "1:Light Particle Beam",
+        				15 => "1:Improved Particle Beam",
 						17 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",
@@ -66,7 +66,7 @@ class SalbezCrensk extends LCV{
         		2=> array( //redirect to PRIMARY
         				11 => "Structure",
         				13 => "1:Medium Laser",
-        				15 => "1:Light Particle Beam",
+        				15 => "1:Improved Particle Beam",
 						17 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",

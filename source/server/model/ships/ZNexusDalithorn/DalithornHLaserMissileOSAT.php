@@ -11,7 +11,7 @@ class DalithornHLaserMissileOSAT extends OSAT{
 			$this->canvasSize = 90; //img has 100px per side
         $this->shipClass = "Heavy Laser Missile OSAT";
 		$this->unofficial = true;
-		$this->isd = 2057;
+		$this->isd = 2109;
         
         $this->forwardDefense = 10;
         $this->sideDefense = 10;

@@ -70,7 +70,7 @@ class VelraxFleetCarrier extends BaseShip{
 		$this->addRightSystem(new Hangar(2, 7));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
-        $this->addFrontSystem(new Structure(4, 50));
+        $this->addFrontSystem(new Structure(4, 56));
         $this->addAftSystem(new Structure(3, 50));
         $this->addLeftSystem(new Structure(3, 60));
         $this->addRightSystem(new Structure(3, 60));
@@ -86,9 +86,10 @@ class VelraxFleetCarrier extends BaseShip{
 					20 => "C&C",
 			),
 			1=> array(
-					6 => "Thruster",
-					8 => "Plasma Wave",
-					10 => "Dart Interceptor",
+					4 => "Thruster",
+					6 => "Plasma Wave",
+					8 => "Dart Interceptor",
+					10 => "Twin Ion Gun",
 					18 => "Structure",
 					20 => "Primary",
 			),

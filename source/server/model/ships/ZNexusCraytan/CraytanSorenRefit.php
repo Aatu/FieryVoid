@@ -9,9 +9,7 @@ class CraytanSorenRefit extends HeavyCombatVesselLeftRight{
         $this->phpclass = "CraytanSorenRefit";
         $this->imagePath = "img/ships/Nexus/craytan_dela.png";
 		$this->canvasSize = 125; //img has 200px per side
-        $this->shipClass = "Soren Auxiliary Cruiser  (2113)";
-			$this->variantOf = "Soren Auxiliary Cruiser";
-			$this->occurence = "rare";
+        $this->shipClass = "Soren Auxiliary Cruiser (2113)";
 		$this->unofficial = true;
         $this->isd = 2113;
 
@@ -37,16 +35,16 @@ class CraytanSorenRefit extends HeavyCombatVesselLeftRight{
         $this->addLeftSystem(new Thruster(2, 10, 0, 3, 2));
         $this->addLeftSystem(new Thruster(2, 10, 0, 3, 3));
         $this->addLeftSystem(new Hangar(2, 1));
+		$this->addLeftSystem(new NexusCIDS(2, 4, 2, 240, 60));
+		$this->addLeftSystem(new NexusCIDS(2, 4, 2, 120, 300));
 		$this->addLeftSystem(new HeavyPlasma(2, 8, 5, 300, 60));
-		$this->addLeftSystem(new NexusCIDS(2, 4, 2, 120, 360));
-		$this->addLeftSystem(new NexusCIDS(2, 4, 2, 180, 60));
                 
         $this->addRightSystem(new Thruster(2, 10, 0, 3, 2));
         $this->addRightSystem(new Thruster(2, 10, 0, 3, 4));
         $this->addRightSystem(new Hangar(2, 1));
+		$this->addRightSystem(new NexusCIDS(2, 4, 2, 300, 120));
+		$this->addRightSystem(new NexusCIDS(2, 4, 2, 60, 240));
 		$this->addRightSystem(new HeavyPlasma(2, 8, 5, 300, 60));
-		$this->addRightSystem(new NexusCIDS(2, 4, 2, 300, 180));
-		$this->addRightSystem(new NexusCIDS(2, 4, 2, 0, 240));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addPrimarySystem(new Structure(3, 40));
@@ -66,8 +64,8 @@ class CraytanSorenRefit extends HeavyCombatVesselLeftRight{
             3=> array(
 					2 => "Connection Strut",
                     6 => "Thruster",
-                    8 => "Heavy Plasma Cannon",
-					10 => "Close-In Defense System",
+                    9 => "Heavy Plasma Cannon",
+					11 => "Close-In Defense System",
 					12 => "Hangar",
 					18 => "Structure",
                     20 => "Primary",
@@ -75,8 +73,8 @@ class CraytanSorenRefit extends HeavyCombatVesselLeftRight{
             4=> array(
 					2 => "Connection Strut",
                     6 => "Thruster",
-                    8 => "Heavy Plasma Cannon",
-					10 => "Close-In Defense System",
+                    9 => "Heavy Plasma Cannon",
+					11 => "Close-In Defense System",
 					12 => "Hangar",
 					18 => "Structure",
                     20 => "Primary",

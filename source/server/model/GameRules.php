@@ -14,6 +14,14 @@ class GameRules implements JsonSerializable{
         if ($desperateRules !== null) {
             array_push($this->rules, $desperateRules);
         }
+        $asteroidsRules = $this->getAsteroidsRules($rules);
+        if ($asteroidsRules !== null) {
+            array_push($this->rules, $asteroidsRules);
+        }
+        $moonsRules = $this->getMoonsRules($rules);
+        if ($moonsRules !== null) {
+            array_push($this->rules, $moonsRules);
+        }                  
     }
 
     private function getSimultaneousMovementRules($rules) {
@@ -31,6 +39,22 @@ class GameRules implements JsonSerializable{
 
         return null;
     }    
+
+    private function getAsteroidsRules($rules) {
+        if (isset($rules['asteroids'])) {
+            return new AsteroidsRule((int)$rules['asteroids']);
+        }
+
+        return null;
+    }  
+
+    private function getMoonsRules($rules) {
+        if (isset($rules['moons'])) {
+            return new MoonsRule((int)$rules['moons']);
+        }
+
+        return null;
+    }  
 
     public function jsonSerialize() {
         $list = [];
@@ -52,6 +76,15 @@ class GameRules implements JsonSerializable{
         return false;
 	}
 
+    public function getRuleByName($name) {
+        foreach ($this->rules as $rule) {
+            if ($rule->getRuleName() == $name) {
+                return $rule; // Return the correct rule instance
+            }
+        }
+        return null; // Return null if no match is found
+    }
+    
 	/*information whether _method_ exists!*/
     public function hasRule($name) {
         foreach ($this->rules as $rule) {

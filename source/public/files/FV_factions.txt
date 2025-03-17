@@ -124,7 +124,7 @@ Pentacan Formation (Inverted Wedge Formation in AoG Wars) - Dilgar ships can ben
 	Fiery Void: only Initiative bonus is used (Initiative rolls are done in standard way, not "one for all"). Command bonus is applied to all ships within 10 hexes of command ship (not cumulative). Strict pentacans are not defined in any way. 		  
 Fighter formation - As long as flight leader (first craft in flight) is alive and uninjured (eg. received no damage), flight has +1 Initiative.
 Fighter pilot tenacity - Dilgar fighters have inherent -2 dropout bonus.
-Mass Driver - many Dilgar ships have Mass Driver fitted. This weapon is functional in FV, but is intended as planetary bombardment weapon of mass destruction and has limited use in space combat (can engage starbases and imobile Enormous ships). It's a Matter weapon that automatically hits Structure. It can be intercepted without degradation (like ballistic weapons are).
+Mass Driver - many Dilgar ships have Mass Driver fitted. This weapon is functional in FV, but is intended as planetary bombardment weapon of mass destruction and has limited use in space combat (can engage starbases and immobile Enormous ships). It's a Matter weapon that automatically hits Structure. It can be intercepted without degradation (like ballistic weapons are).
 Point Pulsar - dedicated weapon intended to make called shots - suffers only half of the regular penalty.
 Missiles - The Dilgar are able to access basic, antifighter, chaff, flash, heavy and long-range missiles.
 
