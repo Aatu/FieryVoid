@@ -535,7 +535,6 @@ class Firing
 	*/
     public static function fireWeapons($gamedata){	
         $rammingOrders  = array();
-        $fireOrders  = array();
 
         //Reactor explosions and Ramming Orders first    
         foreach ($gamedata->ships as $ship){		
@@ -587,15 +586,16 @@ class Firing
 
                 $rammingOrders[] = $fire;
             }
-
-            usort($rammingOrders, "self::compareFiringOrders");            
-
-            foreach ($rammingOrders as $ramming){
-                $ship = $gamedata->getShipById($ramming->shooterid);
-                self::fire($ship, $ramming, $gamedata);
-            }
+         
         }    
+        usort($rammingOrders, "self::compareFiringOrders"); 
 
+        foreach ($rammingOrders as $ramming){
+            $ship = $gamedata->getShipById($ramming->shooterid);
+            self::fire($ship, $ramming, $gamedata);
+        }        
+
+        $fireOrders  = array();  //Array for non-ramming ship fire.      
         //Now fire ship weapons.
         foreach ($gamedata->ships as $ship){	
 
@@ -615,16 +615,17 @@ class Firing
                 //$fire->priority = $weapon->priority; //fire order priority already set, and may differ from basic weapon priority!
                 $fireOrders[] = $fire;
             }
-        
-            usort($fireOrders, "self::compareFiringOrders");
             
-            foreach ($fireOrders as $fire){
-                    $ship = $gamedata->getShipById($fire->shooterid);
-                    //$wpn = $ship->getSystemById($fire->weaponid);
-                    //$p = $wpn->priority;
-                    // debug::log("resolve --- Ship: ".$ship->shipClass.", id: ".$fire->shooterid." wpn: ".$wpn->displayName.", priority: ".$p." versus: ".$fire->targetid);
-                    self::fire($ship, $fire, $gamedata);
-            }
+        }
+        usort($fireOrders, "self::compareFiringOrders");
+
+        //Now fire ship weapons.
+        foreach ($fireOrders as $fire){
+            $ship = $gamedata->getShipById($fire->shooterid);
+            //$wpn = $ship->getSystemById($fire->weaponid);
+            //$p = $wpn->priority;
+            // debug::log("resolve --- Ship: ".$ship->shipClass.", id: ".$fire->shooterid." wpn: ".$wpn->displayName.", priority: ".$p." versus: ".$fire->targetid);
+            self::fire($ship, $fire, $gamedata);
         }
 
         // From here on, only fighter units are left.
