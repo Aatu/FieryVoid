@@ -8,7 +8,7 @@ class asteroidS  extends Terrain{
 		$this->faction = "Civilians";
 		$this->factionAge = 1;        
         $this->phpclass = "asteroidS";
-        $this->imagePath = "img/ships/asteroidS.png";
+        $this->imagePath = "img/ships/AsteroidS1.png";
         $this->canvasSize = 200;
         $this->shipClass = "Asteroid (Small)";
         $this->Enormous = true; 
