@@ -45,7 +45,7 @@ function BallisticLineSprite(start, end, lineWidth, z, color, opacity, args) {
         // Create an ArrowHelper for the arrow
         let arrow = new THREE.ArrowHelper(
             new THREE.Vector3(end.x - start.x, end.y - start.y, 0).normalize(), // Direction vector
-            new THREE.Vector3(position.x, position.y, start.z), // Arrow position
+            new THREE.Vector3(position.x, position.y,-3), // Arrow position
             this.arrowSpacing, // Length of the arrow
             this.color, // Arrow color
             this.width*2, // Head length (adjustable for visual impact)
