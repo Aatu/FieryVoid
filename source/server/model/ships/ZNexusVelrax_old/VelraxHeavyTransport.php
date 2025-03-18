@@ -4,7 +4,7 @@ class VelraxHeavyTransport extends HeavyCombatVesselLeftRight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 120;
+	$this->pointCost = 140;
 	$this->faction = "ZNexus Support Units";
         $this->phpclass = "VelraxHeavyTransport";
         $this->imagePath = "img/ships/Nexus/velraxVersythe.png";

@@ -18,7 +18,7 @@ class DalithornJumpDreadnought extends BaseShip{
 
         $this->fighters = array("superheavy"=>2);
 
-		$this->isd = 2050;
+		$this->isd = 2057;
         
         $this->forwardDefense = 14;
         $this->sideDefense = 15;
@@ -91,15 +91,15 @@ class DalithornJumpDreadnought extends BaseShip{
 					20 => "Primary",
 			),
 			2=> array(
-					6 => "Thruster",
-					8 => "Catapult",
-					10 => "Light Gas Gun",
-					12 => "Shatter Gun",
+					5 => "Thruster",
+					7 => "Catapult",
+					9 => "Light Gas Gun",
+					11 => "Shatter Gun",
 					18 => "Structure",
 					20 => "Primary",
 			),
 			3=> array(
-					5 => "Thruster",
+					4 => "Thruster",
 					6 => "Medium Chemical Laser",
 					8 => "Gas Gun",
 					10 => "Shatter Gun",

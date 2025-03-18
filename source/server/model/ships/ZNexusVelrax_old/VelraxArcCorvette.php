@@ -28,7 +28,7 @@ class VelraxArcCorvette extends MediumShip{
         $this->iniativebonus = 60;
          
         $this->addPrimarySystem(new Reactor(4, 8, 0, 0));
-        $this->addPrimarySystem(new CnC(4, 9, 0, 0));
+        $this->addPrimarySystem(new CnC(4, 8, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 11, 4, 5));
         $this->addPrimarySystem(new Engine(3, 9, 0, 8, 3));
         $this->addPrimarySystem(new Thruster(2, 10, 0, 4, 3));
@@ -59,8 +59,8 @@ class VelraxArcCorvette extends MediumShip{
 
 		1=> array(
 			6 => "Thruster",
-			9 => "Ion Gun",
-			11 => "Plasma Arc",
+			8 => "Ion Gun",
+			10 => "Plasma Arc",
 			17 => "Structure",
 			20 => "Primary",
 		),

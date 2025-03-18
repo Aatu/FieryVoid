@@ -81,7 +81,7 @@ class MakarHanimat extends BaseShip{
         $this->addAftSystem(new Structure(3, 68));
         $this->addLeftSystem(new Structure(3, 80));
         $this->addRightSystem(new Structure(3, 80));
-        $this->addPrimarySystem(new Structure(5, 72));
+        $this->addPrimarySystem(new Structure(3, 72));
 		
 		$this->hitChart = array(
 			0=> array(

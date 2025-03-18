@@ -21,7 +21,7 @@ class CraytanOlipanCombat extends SmallStarBaseFourSections{
 		$this->turncost = 0;
 		$this->turndelaycost = 0;
 
-        $this->fighters = array("assault shuttles"=>12, "normal"=>12);
+        $this->fighters = array("assault shuttles"=>6, "normal"=>18);
 
 		$this->forwardDefense = 19;
 		$this->sideDefense = 19;
