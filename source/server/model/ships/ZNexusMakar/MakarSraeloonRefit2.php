@@ -30,7 +30,7 @@ class MakarSraeloonRefit2 extends SmallStarBaseFourSections{
 		$this->addPrimarySystem(new CnC(4, 24, 0, 0));
 		$this->addPrimarySystem(new Scanner(4, 14, 5, 8));
 		$this->addPrimarySystem(new Hangar(4, 6));
-		$this->addPrimarySystem(new HKControlNode(4, 10, 3, 4));
+		$this->addPrimarySystem(new HKControlNode(4, 15, 3, 4));
 		$this->addPrimarySystem(new NexusPlasmaCharge(4, 7, 4, 0, 360));
 		$this->addPrimarySystem(new NexusWaterCaster(4, 4, 1, 0, 360));
 		$this->addPrimarySystem(new NexusWaterCaster(4, 4, 1, 0, 360));

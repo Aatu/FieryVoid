@@ -65,16 +65,19 @@ if (isset($_SESSION["user"])) {
 -->	    
 		<big><b>Welcome to Fiery Void, an adaptation of the 'Babylon 5 Wars' tabletop game, by Agents of Gaming!</b></big>
 
-		<br><br>---------- <b>LATEST NEWS - February 2025</b> ----------
+		<br><br>---------- <b>LATEST NEWS - March 2025</b> ----------
 	    <br>
-	    <br><b>Sustained Weapons</b> - now much closer to tabletop original!
-	    <br><b>Unit destruction messages</b> - visible in combat log; also, many log messages were polished
-	    <br><b>Randomiser Wheels</b> - updated to reflect new Tier structure
-	    <br><b>Tooltips removed from EW buttons</b> - will that help mobile devices?
-	    <br><b>Fixes</b> - overloading button and Vree should both work now
-	    <br><b>Updated images</b> mostly civilian ships
-<br>
+	    <br>Added option in Create Game to generate random Asteroid and Moos as terrain (in beta, please test!).
+	    <br>Enormous units, including asteroids/Moons, now block Line of Sight. In addition, non-Fighter units moving through Asteroid hexes will take collision damage.
+	    <br>Asteroid/Moon units also available to purchase in Civilians Faction for player scenarios.
+	    <br>Add Fighter to Assault Shuttle Hangar Conversion and further updates to fleet checker.
+	    <br>Ramming attacks (including terrain collision) now resolved before all other weapon fire.
+	    <br>Nexus polishing
+	    <br>A lot of bugfixes and interface improvements
+
 	    
+	
+       <br><br>
 <!--	        
 		 <br><br>---------- <b>update 20th of January</b> ---------- 
 	    <br><b><u><big>Thirdspace</big></u> arrived</b> - custom faction by Douglas

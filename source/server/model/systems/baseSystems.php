@@ -2130,7 +2130,7 @@ class Structure extends ShipSystem{
     { 
     
 		parent::criticalPhaseEffects($ship, $gamedata);//Call parent to apply effects like Limpet Bore.	    
-    
+		
 		if($this->isIndestructible){
 			foreach ($this->damage as $damage ) if(($damage->turn == $gamedata->turn) && ($damage->destroyed)){ 
 				/* update 19.12.2024 - re-read the rules - such structures NEVER fall off!
@@ -2149,8 +2149,7 @@ class Structure extends ShipSystem{
 						$damageEntry->updated = true;
 						$struct->damage[] = $damageEntry;
 					}
-				}else{//unmark this one
-				*/
+				}else{*/ //unmark this one
 					$damage->destroyed = false;
 				/*}*/
 			}

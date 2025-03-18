@@ -76,10 +76,11 @@ class TrekNausicaanHeavyGlider extends LCV{
 		
 		0=> array(
 			9 => "Structure",
-			10 => "1:Disabler",
-			12 => "1:Light Disabler",
-			14 => "1:Point Plasma Gun",
-			15 => "0:Shield Projector",
+  			10 => "1:Grappling Claw",	
+			12 => "1:Disabler",
+			13 => "1:Light Disabler",
+			15 => "1:Point Plasma Gun",
+			16 => "0:Shield Projector",
 			17 => "2:Nacelle",
 			18 => "0:Engine",
 			19 => "0:Reactor",
@@ -88,10 +89,11 @@ class TrekNausicaanHeavyGlider extends LCV{
 
 		1=> array(
 			9 => "Structure",
-			10 => "1:Disabler",
-			12 => "1:Light Disabler",
-			14 => "1:Point Plasma Gun",
-			15 => "0:Shield Projector",
+  			10 => "1:Grappling Claw",	
+			12 => "1:Disabler",
+			13 => "1:Light Disabler",
+			15 => "1:Point Plasma Gun",
+			16 => "0:Shield Projector",
 			17 => "2:Nacelle",
 			18 => "0:Engine",
 			19 => "0:Reactor",
@@ -100,10 +102,11 @@ class TrekNausicaanHeavyGlider extends LCV{
 
 		2=> array(
 			9 => "Structure",
-			10 => "1:Disabler",
-			12 => "1:Light Disabler",
-			14 => "1:Point Plasma Gun",
-			15 => "0:Shield Projector",
+  			10 => "1:Grappling Claw",	
+			12 => "1:Disabler",
+			13 => "1:Light Disabler",
+			15 => "1:Point Plasma Gun",
+			16 => "0:Shield Projector",
 			17 => "2:Nacelle",
 			18 => "0:Engine",
 			19 => "0:Reactor",

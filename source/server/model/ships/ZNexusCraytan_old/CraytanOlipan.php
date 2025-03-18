@@ -71,7 +71,7 @@ class CraytanOlipan extends SmallStarBaseFourSections{
 			0=> array(
 				7 => "Structure",
 				9 => "Magazine",
-				13 => "Cargo Bay",
+				12 => "Cargo Bay",
 				14 => "Hangar",
 				16 => "Scanner",
 				18 => "Reactor",

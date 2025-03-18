@@ -4,7 +4,7 @@ class CraytanPolten extends FighterFlight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	    $this->pointCost = 16*6;
+	    $this->pointCost = 14*6;
 	    $this->faction = "ZNexus Craytan Union (early)";
         $this->phpclass = "CraytanPolten";
         $this->shipClass = "Polten Assault Shuttles";
@@ -37,7 +37,7 @@ class CraytanPolten extends FighterFlight{
         $toAdd = $new - $current;
         for ($i = 0; $i < $toAdd; $i++){
 			
-			$armour = array(2, 2, 2, 2);
+			$armour = array(2, 1, 1, 1);
 			$fighter = new Fighter("Polten", $armour, 12, $this->id);
 			$fighter->displayName = "Polten";
 			$fighter->imagePath = "img/ships/Nexus/craytan_polten.png";
