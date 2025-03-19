@@ -1651,6 +1651,21 @@ window.weaponManager = {
     targetHex: function targetHex(selectedShip, hexpos) {
         if (shipManager.isDestroyed(selectedShip)) return;
 
+        //Check for Line of sight
+        var blockedLosHex = weaponManager.getBlockedHexes();
+        var loSBlocked = false;
+        if (blockedLosHex && blockedLosHex.length > 0) {
+            var weapon = gamedata.selectedSystems[0]; // Use the first weapon to get the shooter's position
+            var sPosShooter = weaponManager.getFiringHex(selectedShip, weapon);
+            
+            loSBlocked = mathlib.checkLineOfSight(sPosShooter, hexpos, blockedLosHex);
+        }
+
+        if(loSBlocked){
+            confirm.error("No line of sight between firing ship and target hex.");	
+            return; //End work if no line of sight.
+        }
+
         var toUnselect = Array();
         for (var i in gamedata.selectedSystems) {
             var weapon = gamedata.selectedSystems[i];
@@ -2183,9 +2198,12 @@ window.weaponManager = {
                 var position = shipManager.getShipPosition(ship);
                 blockedHexes.push(position);
             
-                if (ship.Huge > 0) { // Has a radius of 1 around its centre hex
-                    var neighbourHexes = mathlib.getNeighbouringHexes(position, ship.Huge); //Only works with ship.Huge = 1 atm
-                    
+                if (ship.Huge == 2) { // Has a radius of 1 around its centre hex
+                    var neighbourHexes = mathlib.getPerimeterHexes(position); //Only works with ship.Huge = 2 atm                  
+                    // Add surrounding hexes directly
+                    blockedHexes.push(...neighbourHexes);
+                }else{    
+                    var neighbourHexes = mathlib.getNeighbouringHexes(position); //Only works with ship.Huge = 1 atm               
                     // Add surrounding hexes directly
                     blockedHexes.push(...neighbourHexes);
                 }

@@ -275,8 +275,8 @@ window.mathlib = {
 		return false; //LoS is NOT blocked
 	},
 
-	//Radiius value not currently used, but there in case I decide to scale up later.  As is you can just pass position and get the 6 neighbouring hexes
-    getNeighbouringHexes: function getNeighbouringHexes(position, radius = 1) {
+	//Returns 19 hexes around central position e.g. radius of 1
+	getNeighbouringHexes: function getNeighbouringHexes(position, radius = 1) {
         let isOddRow = position.r % 2 !== 0; //Test hexes ODD (-1,-11) EVEN (-2,-12)
         let neighborOffsets = isOddRow 
 			? [ 
@@ -301,7 +301,26 @@ window.mathlib = {
             q: position.q + offset[0],
             r: position.r + offset[1]
         }));
-    }
+    },
 
+	//Returns 19 hexes around central position e.g. radius of 2
+	getPerimeterHexes: function getPerimeterHexes(position, radius = 2) {
+			let isOddRow = position.r % 2 !== 0;
+			let neighborOffsets = isOddRow 
+				? [[+1, 0], [-1, 0], [-1, +1], [-1, -1], [0, +1], [0, -1],
+				[+2, 0], [+1, -1], [+1, -2], [0, -2], [-1, -2], [-2, -1], 
+				[-2, 0], [-2, +1], [-1, +2], [0, +2], [+1, +2], [+1, +1]]
+
+				: [[+1, 0], [-1, 0], [+1, +1], [+1, -1], [0, +1], [0, -1], 
+				[+2, 0], [+2, -1], [+1, -2], [0, -2], [-1, -2], [-1, -1], 
+				[-2, 0], [-1, +1], [-1, +2], [0, +2], [+1, +2], [+2, +1]];
+	
+			return neighborOffsets.map(offset => ({
+				q: position.q + offset[0],
+				r: position.r + offset[1]
+			}));
+			
+
+	}
 
 };
