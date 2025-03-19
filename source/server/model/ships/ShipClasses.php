@@ -1054,7 +1054,7 @@ class BaseShip {
 						if ($ability=='ReactorFlux'){
 							$this->notes .= '<br>Power Fluctuations';
 						}
-					}if ($reactor instanceof MagGravReactor) {
+					}if ($reactor instanceof MagGravReactor && $this->factionAge >= 3) {
 						$this->notes .= '<br>Mag-Gravitic Reactor';
 					}
 					break; //checking one Engine is enough
