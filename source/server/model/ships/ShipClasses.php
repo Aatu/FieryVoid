@@ -977,6 +977,9 @@ class BaseShip {
 						$this->notes .= 'Ship';
 					}
 					break;
+                case 5: //Terrain
+                        $this->notes .= 'Enormous Terrain';
+                        break;                        
 				default: //should not happen!
 					$this->notes .= 'Unit size not identified!';	
 					break;
