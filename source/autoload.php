@@ -3436,6 +3436,7 @@ spl_autoload_register(
 	    				'asteroidm' => '/server/model/ships/civilians/asteroidM.php',  
 	    				'asteroidl' => '/server/model/ships/civilians/asteroidL.php', 
 	    				'moonsmall' => '/server/model/ships/civilians/moonSmall.php',  
+	    				'moon' => '/server/model/ships/civilians/moon.php',  
 
 				//Marine Boarding Actions
 				'marines' => '/server/model/weapons/specialWeapons.php',
