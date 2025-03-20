@@ -166,7 +166,7 @@ window.BallisticIconContainer = function () {
 		.forEach(ship => {
 			if(gamedata.gamephase !== -1){ //Don't generate sprites until Terrain is in place!
 				const position = shipManager.getShipPosition(ship); // Get ship's position
-				var positionGame = this.coordinateConverter.fromHexToGame(position);
+	/*			var positionGame = this.coordinateConverter.fromHexToGame(position);
 				// Create a sprite at the ship's position
 				const sprite = new BallisticSprite(positionGame, "hexWhite");
 				this.scene.add(sprite.mesh);
@@ -181,14 +181,14 @@ window.BallisticIconContainer = function () {
 					targetSprite: null,
 					used: true
 				});
-
+*/
 
 				let perimeterHexes = [];
 				// Get neighboring hexes based on the ship's size (Huge)
 				if(ship.Huge == 2){
-					perimeterHexes = mathlib.getPerimeterHexes(position);
+					perimeterHexes = mathlib.getPerimeterHexes(position, ship.Huge);
 				}else{
-					perimeterHexes = mathlib.getNeighbouringHexes(position);
+					perimeterHexes = mathlib.getNeighbouringHexes(position, ship.Huge);
 				}	
 
 				// Create sprites for neighboring hexes
