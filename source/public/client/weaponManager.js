@@ -2198,12 +2198,8 @@ window.weaponManager = {
                 var position = shipManager.getShipPosition(ship);
                 blockedHexes.push(position);
             
-                if (ship.Huge == 2) { // Has a radius of 1 around its centre hex
-                    var neighbourHexes = mathlib.getPerimeterHexes(position); //Only works with ship.Huge = 2 atm                  
-                    // Add surrounding hexes directly
-                    blockedHexes.push(...neighbourHexes);
-                }else{    
-                    var neighbourHexes = mathlib.getNeighbouringHexes(position); //Only works with ship.Huge = 1 atm               
+                if (ship.Huge > 0) { // Has a radius of 1 around its centre hex
+                    var neighbourHexes = mathlib.getNeighbouringHexes(position, ship.Huge); //Only works with ship.Huge = 2 atm                  
                     // Add surrounding hexes directly
                     blockedHexes.push(...neighbourHexes);
                 }
