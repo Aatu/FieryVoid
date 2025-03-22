@@ -161,6 +161,7 @@ VICTORY CONDITIONS: Last unit on map / Last ship on map / More forces remaining 
             <option value="3">Few (3)</option>
             <option value="6">Several (6)</option>
             <option value="12">Pack (12)</option>
+            <option value="18">Lots (18)</option>            
             <option value="24">Throng (24)</option>
             <option value="36">Zounds (36)</option>         
         </select>
@@ -178,9 +179,10 @@ VICTORY CONDITIONS: Last unit on map / Last ship on map / More forces remaining 
     <div class="slot" id="moonsDropdown" style="display:none;">
         <label for="moonsSelect">SELECT NUMBER OF MOONS:</label>
         <select id="moonsSelect" name="moonsCategories">
-            <option value="1">One</option>
-            <option value="2">Two</option>
-            <option value="3">Three</option>
+            <option value="1">One Large</option>
+            <option value="2">One Large / One Small</option>
+            <option value="3">One Large / Two Small</option>
+            <option value="4">Four Small</option>            
         </select>
     </div>
 </div>
