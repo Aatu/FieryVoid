@@ -7069,7 +7069,7 @@ class Marines extends Weapon{
 
 				case 2://Sabotage
 
-					if($fireOrder->calledid != -1){//Is a called shot, place crit on system.
+					if($fireOrder->calledid != -1 && !($system instanceof Structure)){//Is a called shot, and not somehow attacking structure, place crit on system.
 							$fireOrder->pubnotes .= "<br>Roll(Mod): $deliveryRoll($rollMod) - A marine unit will attempt to sabotage " . $system->displayName ." system next turn.";
 						if($this->eliteMarines){//Are Marines Elite?
 							$crit = new SabotageElite(-1, $ship->id, $system->id, 'SabotageElite', $gamedata->turn+1); //Takes effect next turn.
@@ -7082,7 +7082,7 @@ class Marines extends Weapon{
 							$system->criticals[] =  $crit;
 							Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note pod attached this turn.	
 						}	
-					}else{ //Has targeted ship generally, not a specific system.  Apply crit to CnC.
+					}else{ //Has targeted ship generally, not a specific system (or somehow retargeted to structure).  Apply crit to CnC.
 						$fireOrder->pubnotes .= "<br>Roll(Mod): $deliveryRoll($rollMod) - A marine unit will attempt sabotage operations on enemy ship next turn.";								
 							if($cnc){
 									if($this->eliteMarines){//Are Marines Elite?
