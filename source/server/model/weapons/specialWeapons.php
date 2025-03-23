@@ -2645,7 +2645,7 @@ class RammingAttack extends Weapon{
 		//preventing double hit on the same target!
 		if($this->checkAlreadyRammed($fireOrder->targetid)){
 			$target = $gamedata->getShipById($fireOrder->targetid);		
-			if($fireOrder->damageclass != 'TerrainCraash' && !$target instanceof FighterFlight)	{//If a TerrainCrash on fighters, we won't several orders to go through, but only then.		
+			if($fireOrder->damageclass != 'TerrainCrash' && !($target instanceof FighterFlight))	{//If a TerrainCrash on fighters, we won't several orders to go through, but only then.		
 				$fireOrder->shotshit = 0;
 				$fireOrder->needed = 0;
 				$fireOrder->rolled = 100;
@@ -7392,7 +7392,7 @@ class GrapplingClaw extends Weapon{
 
 				case 2://Sabotage
 
-					if($fireOrder->calledid != -1){//Is a called shot, place crit on system.
+					if($fireOrder->calledid != -1 && !($system instanceof Structure)){//Is a called shot and not structure, place crit on system.
 							$fireOrder->pubnotes .= "<br>Roll(Mod): $deliveryRoll($rollMod) - A marine unit will attempt to sabotage " . $system->displayName ." system next turn.";
 						if($this->eliteMarines){//Are Marines Elite?
 							$crit = new SabotageElite(-1, $ship->id, $system->id, 'SabotageElite', $gamedata->turn+1); //Takes effect next turn.
