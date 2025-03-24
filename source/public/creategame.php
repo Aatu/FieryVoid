@@ -150,7 +150,7 @@ VICTORY CONDITIONS: Last unit on map / Last ship on map / More forces remaining 
 <div id="asteroids" class="subpanel movementspacecontainer">
     <div class="slot">
         <div>
-            <input id="asteroidscheck" type="checkbox" name="asteroidscheck">GENERATE ASTEROIDS (in Beta)
+            <input id="asteroidscheck" type="checkbox" name="asteroidscheck">GENERATE ASTEROIDS
         </div>
     </div>
     
@@ -171,7 +171,7 @@ VICTORY CONDITIONS: Last unit on map / Last ship on map / More forces remaining 
 <div id="moons" class="subpanel movementspacecontainer">
     <div class="slot">
         <div>
-            <input id="moonscheck" type="checkbox" name="moonscheck">GENERATE MOONS (in Beta)
+            <input id="moonscheck" type="checkbox" name="moonscheck">GENERATE MOONS
         </div>
     </div>    
     
