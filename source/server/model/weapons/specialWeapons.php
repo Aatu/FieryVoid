@@ -7070,7 +7070,7 @@ class Marines extends Weapon{
 
 				case 2://Sabotage
 
-					if($fireOrder->calledid != -1 && !($system instanceof Structure)){//Is a called shot, and not somehow attacking structure, place crit on system.
+					if($fireOrder->calledid != -1 && !($system instanceof Structure) && $system->location != 0){//Is a called shot, and not somehow attacking structure, place crit on system.
 							$fireOrder->pubnotes .= "<br>Roll(Mod): $deliveryRoll($rollMod) - A marine unit will attempt to sabotage " . $system->displayName ." system next turn.";
 						if($this->eliteMarines){//Are Marines Elite?
 							$crit = new SabotageElite(-1, $ship->id, $system->id, 'SabotageElite', $gamedata->turn+1); //Takes effect next turn.
@@ -7393,7 +7393,7 @@ class GrapplingClaw extends Weapon{
 
 				case 2://Sabotage
 
-					if($fireOrder->calledid != -1 && !($system instanceof Structure)){//Is a called shot and not structure, place crit on system.
+					if($fireOrder->calledid != -1 && !($system instanceof Structure) && $system->location != 0){//Is a called shot and not structure, place crit on system.
 							$fireOrder->pubnotes .= "<br>Roll(Mod): $deliveryRoll($rollMod) - A marine unit will attempt to sabotage " . $system->displayName ." system next turn.";
 						if($this->eliteMarines){//Are Marines Elite?
 							$crit = new SabotageElite(-1, $ship->id, $system->id, 'SabotageElite', $gamedata->turn+1); //Takes effect next turn.
