@@ -253,7 +253,9 @@ window.BallisticIconContainer = function () {
 				var weapon = shooter.systems[ballistic.weaponid]; //Find weapon			
 				var modeName = weapon.firingModes[ballistic.firingMode]; //Get actual Firing Mode name, so we can be more specific below!
 			}
-			
+
+			if(modeName == 'Sweeping')	return;	//For Shadow Slicers, Gravs Beams. Let's just rely on lines and targeting tooltip and not clutter with Hex colours.	
+
 			if (ballistic.type == 'normal') { //it's direct fire after all!
 			    launchPosition = this.coordinateConverter.fromHexToGame(shooterIcon.getLastMovement().position);
 				if(modeName){
@@ -341,9 +343,9 @@ window.BallisticIconContainer = function () {
 					iconImage = "./img/allySupport.png"; 		        
 				break;
 				case 'Sweeping': //Shadow Slicers, remove hex target for now and rely on just lines and targeting tooltip I think.
-					targetType = 'hexClear'; //Adding hexes for Sweeping weapons created a bit too much clutter, replace with clear hex.
-//					targetType = 'hexPurple'; //Default for slicers
-//					if(weapon.weaponClass == "Gravitic") targetType = 'hexGreen'; //But now other weapon types use sweeping.			        
+//					targetType = 'hexClear'; //Adding hexes for Sweeping weapons created a bit too much clutter, replace with clear hex.
+					targetType = 'hexPurple'; //Default for slicers
+					if(weapon.weaponClass == "Gravitic") targetType = 'hexGreen'; //But now other weapon types use sweeping.			        
 				break;			
 				}
 			}		 
