@@ -104,7 +104,11 @@ window.SelectFromShips = function () {
     }
 
     function getAllyClass(ship) {
-        return gamedata.isMyOrTeamOneShip(ship) ?  'ally' : 'enemy';
+        if(ship.shipSizeClass == 5){
+            return 'terrain'; //Return a neutral white colour for Terrain.
+        }else{
+            return gamedata.isMyOrTeamOneShip(ship) ?  'ally' : 'enemy';
+        }   
     }
 
     return ShipTooltip;

@@ -352,7 +352,11 @@ body {
 
 .ally.name{
     /*color:#2f5123; I'm making this color much lighter! this dark it's poorly readable*/
-	color:#49942E;;
+	color:#55a837;;
+}
+
+.terrain.name{
+	color:#dedede;
 }
 
 #weaponTargetingContainer{

@@ -1427,7 +1427,7 @@ window.weaponManager = {
         debug && console.log("weaponManager target ship", ship, system);
 
         if (shipManager.isDestroyed(selectedShip)) return;
-//        if(ship.Huge > 0) return; //Do not allow targeting of laege muti-hex terrain.
+        if(ship.Huge > 0) return; //Do not allow targeting of laege muti-hex terrain possible from certain angle).
 
         var blockedLosHex = weaponManager.getBlockedHexes();
 
@@ -1650,6 +1650,21 @@ window.weaponManager = {
 	    
     targetHex: function targetHex(selectedShip, hexpos) {
         if (shipManager.isDestroyed(selectedShip)) return;
+
+        //Check for Line of sight
+        var blockedLosHex = weaponManager.getBlockedHexes();
+        var loSBlocked = false;
+        if (blockedLosHex && blockedLosHex.length > 0) {
+            var weapon = gamedata.selectedSystems[0]; // Use the first weapon to get the shooter's position
+            var sPosShooter = weaponManager.getFiringHex(selectedShip, weapon);
+            
+            loSBlocked = mathlib.checkLineOfSight(sPosShooter, hexpos, blockedLosHex);
+        }
+
+        if(loSBlocked){
+            confirm.error("No line of sight between firing ship and target hex.");	
+            return; //End work if no line of sight.
+        }
 
         var toUnselect = Array();
         for (var i in gamedata.selectedSystems) {
@@ -2184,8 +2199,7 @@ window.weaponManager = {
                 blockedHexes.push(position);
             
                 if (ship.Huge > 0) { // Has a radius of 1 around its centre hex
-                    var neighbourHexes = mathlib.getNeighbouringHexes(position, ship.Huge); //Only works with ship.Huge = 1 atm
-                    
+                    var neighbourHexes = mathlib.getNeighbouringHexes(position, ship.Huge); //Only works with ship.Huge = 2 atm                  
                     // Add surrounding hexes directly
                     blockedHexes.push(...neighbourHexes);
                 }
