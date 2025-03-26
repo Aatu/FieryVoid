@@ -75,7 +75,8 @@ if (isset($_SESSION["user"])) {
 	    <br>Nexus polishing
 	    <br>A lot of bugfixes and interface improvements
 
-	    
+	    <br><br>---------- <b>update 26th of March</b> ---------- 
+	    <br>Updates and fixes (primarily terrain-related)
 	
        <br><br>
 <!--	        
