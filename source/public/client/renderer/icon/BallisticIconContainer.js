@@ -105,53 +105,8 @@ window.BallisticIconContainer = function () {
             return true;
         }, this);
 
-		//Now create some icons to illustrate the exact hexes for really large terrain occupy.
-		// Filter for ships with Huge value
-		gamedata.ships
-		.filter(ship => ship.Huge > 0) // Find Huge Terrain
-		.forEach(ship => {
-			if(gamedata.gamephase !== -1){ //Don't generate sprites until Terrain is in place!
-				const position = shipManager.getShipPosition(ship); // Get ship's position
-				var positionGame = this.coordinateConverter.fromHexToGame(position);
-				// Create a sprite at the ship's position
-				const sprite = new BallisticSprite(positionGame, "hexWhite");
-				this.scene.add(sprite.mesh);
-
-				this.ballisticIcons.push({
-					id: -5,
-					shooterId: ship.id,
-					targetId: ship.id,
-					launchPosition: position,
-					position: new hexagon.Offset(positionGame.x, positionGame.y),
-					launchSprite: sprite,
-					targetSprite: null,
-					used: true
-				});
-
-				// Get neighboring hexes based on the ship's size (Huge)
-				const neighbourHexes = mathlib.getNeighbouringHexes(position, ship.Huge);
-
-				// Create sprites for neighboring hexes
-				neighbourHexes.forEach(neighbour => {
-					var neighbourPosGame = this.coordinateConverter.fromHexToGame(neighbour);
-					const neighbourSprite = new BallisticSprite(neighbourPosGame, "hexWhite");
-					this.scene.add(neighbourSprite.mesh);
-
-					this.ballisticIcons.push({
-						id: -5,
-						shooterId: ship.id,
-						targetId: ship.id,
-						launchPosition: neighbour,
-						position: new hexagon.Offset(neighbourPosGame.x, neighbourPosGame.y),
-						launchSprite: neighbourSprite,
-						targetSprite: neighbourSprite,
-						used: true
-					});
-				
-				});
-			}	
-
-		});
+		//Now create perimter hex icons to illustrate the hexes occupied by really large terrain occupy.
+		generateTerrainHexes.call(this, gamedata);
 
     };
 
@@ -202,6 +157,62 @@ window.BallisticIconContainer = function () {
 
         return this;
     };
+
+
+    function generateTerrainHexes(gamedata) {
+		// Filter for ships with Huge value
+		gamedata.ships
+		.filter(ship => ship.Huge > 0) // Find Huge Terrain
+		.forEach(ship => {
+			if(gamedata.gamephase !== -1){ //Don't generate sprites until Terrain is in place!
+				const position = shipManager.getShipPosition(ship); // Get ship's position
+	/*			var positionGame = this.coordinateConverter.fromHexToGame(position);
+				// Create a sprite at the ship's position
+				const sprite = new BallisticSprite(positionGame, "hexWhite");
+				this.scene.add(sprite.mesh);
+
+				this.ballisticIcons.push({
+					id: -5,
+					shooterId: ship.id,
+					targetId: ship.id,
+					launchPosition: position,
+					position: new hexagon.Offset(positionGame.x, positionGame.y),
+					launchSprite: sprite,
+					targetSprite: null,
+					used: true
+				});
+*/
+
+				let perimeterHexes = [];
+				// Get neighboring hexes based on the ship's size (Huge)
+				if(ship.Huge == 2){
+					perimeterHexes = mathlib.getPerimeterHexes(position, ship.Huge);
+				}else{
+					perimeterHexes = mathlib.getNeighbouringHexes(position, ship.Huge);
+				}	
+
+				// Create sprites for neighboring hexes
+				perimeterHexes.forEach(neighbour => {
+					var neighbourPosGame = this.coordinateConverter.fromHexToGame(neighbour);
+					const neighbourSprite = new BallisticSprite(neighbourPosGame, "hexWhite");
+					this.scene.add(neighbourSprite.mesh);
+
+					this.ballisticIcons.push({
+						id: -5,
+						shooterId: ship.id,
+						targetId: ship.id,
+						launchPosition: neighbour,
+						position: new hexagon.Offset(neighbourPosGame.x, neighbourPosGame.y),
+						launchSprite: neighbourSprite,
+						targetSprite: neighbourSprite,
+						used: true
+					});
+				
+				});
+			}	
+
+		});
+    } //endof generateTerrainHexes()
 
     function createOrUpdateBallistic(ballistic, iconContainer, turn, replay = false) {
         var icon = getBallisticIcon.call(this, ballistic.id);
@@ -330,8 +341,9 @@ window.BallisticIconContainer = function () {
 					iconImage = "./img/allySupport.png"; 		        
 				break;
 				case 'Sweeping': //Shadow Slicers, remove hex target for now and rely on just lines and targeting tooltip I think.
-					targetType = 'hexPurple'; //Default for slicers
-					if(weapon.weaponClass == "Gravitic") targetType = 'hexGreen'; //But now other weapon types use sweeping.			        
+					targetType = 'hexClear'; //Adding hexes for Sweeping weapons created a bit too much clutter, replace with clear hex.
+//					targetType = 'hexPurple'; //Default for slicers
+//					if(weapon.weaponClass == "Gravitic") targetType = 'hexGreen'; //But now other weapon types use sweeping.			        
 				break;			
 				}
 			}		 
