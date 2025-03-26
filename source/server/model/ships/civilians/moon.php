@@ -1,27 +1,28 @@
 <?php
-class asteroidS  extends Terrain{
+class moon  extends Terrain{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 1;
+		$this->pointCost = 10;
 		$this->faction = "Civilians";
 		$this->factionAge = 1;        
-        $this->phpclass = "asteroidS";
-        $this->imagePath = "img/ships/AsteroidS1.png";
-        $this->canvasSize = 200;
-        $this->shipClass = "Asteroid (Small)";
+        $this->phpclass = "moon";
+        $this->imagePath = "img/ships/moon.png";
+        $this->canvasSize = 1024;
+        $this->shipClass = "Moon";
         $this->Enormous = true; 
+        $this->Huge = 2;        
 		$this->iniativebonus = -200; //no voluntary movement anyway
-     
-        $this->notes .= "<br>Ships (but not fighters) entering this hex take collision damage";          
+        $this->notes = "Occupies multiple hexes";
+        $this->notes .= "<br>Units entering terrain's area will automatically ram";       
 	            
 		$this->base = true;
 		$this->smallBase = true;
 		$this->nonRotating = true;  //completely immobile, doesn't even rotate
 		
-        $this->forwardDefense = 20;
-        $this->sideDefense = 20;
+        $this->forwardDefense = 28;
+        $this->sideDefense = 28;
         
         //No engine/thrusters!!
         $this->turncost = 0;
@@ -32,11 +33,11 @@ class asteroidS  extends Terrain{
 	    
         //Block all enhancements for Terrain units when bought
 		Enhancements::nonstandardEnhancementSet($this, 'Terrain');
-        
+
         $this->addPrimarySystem(new OSATCnC(10, 1, 0, 0)); //Required for some checks.
         $this->addPrimarySystem(new MagGravReactorTechnical(10, 1000, 0, 0)); //Required for some checks.
 
-        $this->addPrimarySystem(new Structure(8,  300));
+        $this->addPrimarySystem(new Structure(8,  5000));
 
         $this->hitChart = array(
                 0=> array(

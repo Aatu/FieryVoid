@@ -8,13 +8,14 @@ class moonSmall  extends Terrain{
 		$this->faction = "Civilians";
 		$this->factionAge = 1;        
         $this->phpclass = "moonSmall";
-        $this->imagePath = "img/ships/moon.png";
+        $this->imagePath = "img/ships/moonSmall.png";
         $this->canvasSize = 512;
         $this->shipClass = "Moon (Small)";
         $this->Enormous = true; 
         $this->Huge = 1;        
 		$this->iniativebonus = -200; //no voluntary movement anyway
         $this->notes = "Occupies multiple hexes";
+        $this->notes .= "<br>Units entering terrain's area will automatically ram";       
 	            
 		$this->base = true;
 		$this->smallBase = true;
@@ -34,7 +35,7 @@ class moonSmall  extends Terrain{
 		Enhancements::nonstandardEnhancementSet($this, 'Terrain');
 
         $this->addPrimarySystem(new OSATCnC(10, 1, 0, 0)); //Required for some checks.
-        $this->addPrimarySystem(new MagGravReactorTechnical(10, 1, 0, 0)); //Required for some checks.
+        $this->addPrimarySystem(new MagGravReactorTechnical(10, 1000, 0, 0)); //Required for some checks.
 
         $this->addPrimarySystem(new Structure(8,  2000));
 
