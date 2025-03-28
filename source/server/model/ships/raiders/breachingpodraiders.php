@@ -22,7 +22,7 @@ class breachingpodraiders extends FighterFlight{
 		$this->hangarRequired = 'assault shuttles'; //for fleet check
 		$this->unitSize = 1; 
 
-		$this->iniativebonus = 9*10;
+		$this->iniativebonus = 5*10;
 		$this->notes = "Cannot attach to enemy ships while jinking.";		
 		
         $this->populate();
