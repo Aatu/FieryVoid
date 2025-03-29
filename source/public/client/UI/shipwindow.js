@@ -33,12 +33,20 @@ window.shipWindowManager = {
 	open: function open(ship) {
 
 		var old;
-		if (ship.userid == gamedata.thisplayer) {
-			old = $(".shipwindow.owned:visible");
-		} else {
-			old = $(".shipwindow.enemy:visible");
-		}
 
+		if (gamedata.turn != 0) {
+			if (ship.userid == gamedata.thisplayer) {
+				old = $(".shipwindow.owned:visible");
+			} else {
+				old = $(".shipwindow.enemy:visible");
+			}
+		}else{
+			old = $(".shipwindow:visible");
+		}	
+
+
+//		console.log("Selected old windows:", old);  // Debugging: What is `old` selecting?
+//		console.log("Old windows count:", old.length);
 		var n = ship.shipStatusWindow;
 
 		if (!n) return;
