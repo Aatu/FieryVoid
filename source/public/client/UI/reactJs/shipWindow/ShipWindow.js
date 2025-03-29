@@ -46,7 +46,7 @@ const ShipWindowContainer = styled.div`
 const Header = styled.div`
     background-color: #04161c;
     border-bottom: 1px solid #496791;
-    height: 24px;
+    height: 26px;
     display: flex;
     align-items: center;
     padding: 0 5px;
@@ -54,7 +54,7 @@ const Header = styled.div`
     flex-shrink: 0;
 
     span {
-        font-size: 14px;
+        font-size: 12px;
         padding-right: 10px;
     }
 
