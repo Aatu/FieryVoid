@@ -342,11 +342,11 @@ window.BallisticIconContainer = function () {
 					targetType = 'hexGreen';
 					iconImage = "./img/allySupport.png"; 		        
 				break;
-				case 'Sweeping': //Shadow Slicers, remove hex target for now and rely on just lines and targeting tooltip I think.
-//					targetType = 'hexClear'; //Adding hexes for Sweeping weapons created a bit too much clutter, replace with clear hex.
+/*				case 'Sweeping': //Shadow Slicers, remove hex target for now and rely on just lines and targeting tooltip I think.
+					targetType = 'hexClear'; //Adding hexes for Sweeping weapons created a bit too much clutter, replace with clear hex.
 					targetType = 'hexPurple'; //Default for slicers
 					if(weapon.weaponClass == "Gravitic") targetType = 'hexGreen'; //But now other weapon types use sweeping.			        
-				break;			
+				break;		*/	
 				}
 			}		 
 		} 
