@@ -17,6 +17,7 @@ window.gamedata = {
  	displayedFaction: '',
 	lastShipNumber: 0,
 
+
     getPowerRating: function getPowerRating(factionName) {
 		var powerRating = '';
 		switch(factionName) {
@@ -275,14 +276,27 @@ window.gamedata = {
         }
         a++;
         ship.id = a;
+		
         ship.slot = gamedata.selectedSlot;
         gamedata.ships[a] = ship;
-        var h = $('<div class="ship bought slotid_' + ship.slot + ' shipid_' + ship.id + '" data-shipindex="' + a + '"><span class="shiptype">' + ship.shipClass + '</span><span class="shipname name">' + ship.name + '</span><span class="pointcost">' + ship.pointCost + 'p</span><span class="remove clickable">remove</span></div>');
-        $(".remove", h).bind("click", function () {
+		var h = $('<div class="ship bought slotid_' + ship.slot + ' shipid_' + ship.id + '" data-shipindex="' + ship.id + '">' +
+			'<span class="shiptype">' + ship.shipClass + '</span>' +
+			'<span class="shipname name">' + ship.name + '</span>' +
+			'<span class="pointcost">' + ship.pointCost + 'p</span>' +
+			'<span class="showship clickable">Details</span> ' +
+			' -<span class="remove clickable">Remove</span> ' +
+			'</div>');
+        
+		$(".remove", h).bind("click", function () {
             delete gamedata.ships[a];
             h.remove();
             gamedata.calculateFleet();
         });
+
+		$(".showship", h).on("click", function (e) {
+			gamedata.onShipContextMenu(ship.phpclass, ship.faction, ship.id, true);
+		});
+
         h.appendTo("#fleet");
         gamedata.calculateFleet();
     },
@@ -1182,22 +1196,29 @@ window.gamedata = {
     }, //endof function checkChoices
 	
 
-    constructFleetList: function constructFleetList() {
-        var slotid = gamedata.selectedSlot;
-        var selectedSlot = playerManager.getSlotById(slotid);
+	constructFleetList: function constructFleetList() {
+		var slotid = gamedata.selectedSlot;
+		var selectedSlot = playerManager.getSlotById(slotid);
+	
+		$(".ship.bought").remove();
+		for (var i in gamedata.ships) {
+			// Reset ship ids to avoid ending up with elements with the same id
+			gamedata.ships[i].id = i;	
 
-        $(".ship.bought").remove();
-        for (var i in gamedata.ships) {
-            // Reset ship ids to avoid ending up with elements with the same id
-            // a number of times after you have removed a ship.
-            gamedata.ships[i].id = i;
-
-            var ship = gamedata.ships[i];
-            if (ship.slot != slotid) continue;
-
-            var h = $('<div class="ship bought slotid_' + ship.slot + ' shipid_' + ship.id + '" data-shipindex="' + ship.id + '"><span class="shiptype">' + ship.shipClass + '</span><span class="shipname name">' + ship.name + '</span><span class="pointcost">' + ship.pointCost + 'p</span><span class="remove clickable">remove</span></div>');
-            h.appendTo("#fleet");
-        }
+			var ship = gamedata.ships[i];
+			if (ship.slot != slotid) continue;
+	
+			var h = $('<div class="ship bought slotid_' + ship.slot + ' shipid_' + ship.id + '" data-shipindex="' + ship.id + '">' +
+				'<span class="shiptype">' + ship.shipClass + '</span>' +
+				'<span class="shipname name">' + ship.name + '</span>' +
+				'<span class="pointcost">' + ship.pointCost + 'p</span>' +
+				'<span class="showship clickable">Details</span> ' +
+				' -<span class="remove clickable">Remove</span> ' +
+				'</div>');
+	
+			h.appendTo("#fleet");
+		}
+	
         $(".ship.bought .remove").bind("click", function (e) {
             var id = $(this).parent().data('shipindex');
 
@@ -1213,9 +1234,19 @@ window.gamedata = {
             // to assign new id's to all fleet entries
             gamedata.constructFleetList();
         });
-
-        gamedata.calculateFleet();
-    },
+	
+		$("#fleet").off("click", ".showship").on("click", ".showship", function (e) {
+			var id = $(this).parent().data("shipindex");
+			for (var i in gamedata.ships) {
+				if (gamedata.ships[i].id == id) {
+					gamedata.onShipContextMenu(gamedata.ships[i].phpclass, gamedata.ships[i].faction, gamedata.ships[i].id, true);
+					break;
+				}
+			}
+		});
+	
+		gamedata.calculateFleet();
+	},
 
     calculateFleet: function calculateFleet() {
         var slotid = gamedata.selectedSlot;
@@ -1418,7 +1449,7 @@ window.gamedata = {
 					if (ship.flight && (ship.maxFlightSize != 1)) pointCostFull = pointCostFull + ' (' + pointCostFull/6 + ' ea.)';//for fighters: display price per craft, too!
 					h = $('<div oncontextmenu="return false;" class="ship"><span class="shiptype">'+shipDisplayName+'</span><span class="pointcost">'+pointCostFull+'</span> -<span class="addship clickable">Add to fleet</span> -<span class="showship clickable">Show details</span></div>');
                     $(".addship", h).on("click", this.buyShip.bind(this, ship.phpclass));
-                    $(".showship", h).on("click", gamedata.onShipContextMenu.bind(this, ship.phpclass, faction));
+                    $(".showship", h).on("click", gamedata.onShipContextMenu.bind(this, ship.phpclass, faction, ship.id, false));
                         
                     h.appendTo(targetNode);
 					//search for variants of the base design above...
@@ -1430,7 +1461,7 @@ window.gamedata = {
 						if (shipV.flight && (shipV.maxFlightSize != 1)) pointCostFull = pointCostFull + ' (' + pointCostFull/6 + ' ea.)';//for fighters: display price per craft, too!
 						h = $('<div oncontextmenu="return false;" class="ship"><span class="shiptype">'+shipDisplayName+'</span><span class="pointcost">'+pointCostFull+'</span> -<span class="addship clickable">Add to fleet</span> -<span class="showship clickable">Show details</span></div>');
                         $(".addship", h).on("click",  this.buyShip.bind(this, shipV.phpclass));
-                        $(".showship", h).on("click", gamedata.onShipContextMenu.bind(this, shipV.phpclass, faction));
+                        $(".showship", h).on("click", gamedata.onShipContextMenu.bind(this, shipV.phpclass, faction, ship.id, false));
                         
                         h.appendTo(targetNode);
 					} //end of variant
@@ -1813,9 +1844,15 @@ window.gamedata = {
         this.constructFleetList();
     },
 
-    onShipContextMenu: function onShipContextMenu(phpclass, faction) {
+    onShipContextMenu: function onShipContextMenu(phpclass, faction, id, fleetList) {
+		var ship;	
+		if(fleetList){
+        	ship = gamedata.getFleetShipById(id);
+		}else{
+        	ship = gamedata.getShip(phpclass, faction);
+		}
 
-        var ship = gamedata.getShip(phpclass, faction);
+   //     shipWindowManager.close(ship);		
 
         if (!ship.shipStatusWindow) {
             if (ship.flight) {
@@ -1824,12 +1861,49 @@ window.gamedata = {
                 ship.shipStatusWindow = shipWindowManager.createShipWindow(ship);
             }
 
-            shipWindowManager.setData(ship);
+	//		shipWindowManager.setData(ship);
         }
 
-        shipWindowManager.open(ship);
+		if(fleetList){
+			ship.shipStatusWindow.find(".topbar .value.name").html("");
+			ship.shipStatusWindow.find(".topbar .valueheader.name").html(ship.name);
+			ship.shipStatusWindow.find(".topbar .value.shipclass").html(ship.shipClass);
+		}else{
+			ship.shipStatusWindow.find(".topbar .valueheader.name").html("");
+		}
+
+		//Now add Enhancements and update system info.
+		gamedata.setEnhancementsShip(ship);
+		shipWindowManager.setData(ship);
+/*				
+		for (var i in ship.systems) {
+			var system = ship.systems[i];
+			shipWindowManager.setSystemData(ship, system, ship.shipStatusWindow);
+		}		
+*/
+        shipWindowManager.open(ship);		
         return false;
     },
+
+
+	getFleetShipById: function getFleetShipById(id) {
+		// Ensure that gamedata.ships is an array and id is compared correctly
+		for (var i in gamedata.ships) {
+			if (gamedata.ships[i].id == id) {
+				gamedata.displayedShip = gamedata.ships[i].phpclass;
+				gamedata.displayedFaction = gamedata.ships[i].faction;
+				return gamedata.ships[i];
+			}
+		}
+	},
+
+
+    setShipsFromFaction: function setShipsFromFaction(faction, jsonShips) {
+        gamedata.allShips[faction] = Object.keys(window.staticShips[faction]).map(function(shipClass) {
+            return new Ship(window.staticShips[faction][shipClass]);
+        })
+    },
+
 
     getShip: function getShip(phpclass, faction) {
     	var actPhpclass;
@@ -1855,7 +1929,354 @@ window.gamedata = {
         gamedata.allShips[faction] = Object.keys(window.staticShips[faction]).map(function(shipClass) {
             return new Ship(window.staticShips[faction][shipClass]);
         })
-    }
+    },
+
+	setEnhancementsShip: function setEnhancementsShip(ship) {
+
+		// Ammo magazine is necessary for some options
+		let ammoMagazine = null;
+		for (let magazine of ship.systems) {
+		  if (magazine.name === 'ammoMagazine') {
+			ammoMagazine = magazine;
+			break;
+		  }
+		}
+	
+		for (let entry of ship.enhancementOptions) {
+		  // ID, readableName, numberTaken, limit, price, priceStep
+		  let enhID = entry[0];
+		  let enhCount = entry[2];
+		  let enhDescription = entry[1];
+		  if (enhCount > 0) {
+			if (ship.enhancementTooltip !== "") this.enhancementTooltip += "<br>";
+			ship.enhancementTooltip += enhDescription;
+			if (enhCount > 1) ship.enhancementTooltip += ` (x${enhCount})`;
+	
+			switch (enhID) {
+			  case 'ELITE_CREW':
+				if(!ship.eliteEnh){
+					ship.forwardDefense -= enhCount;
+					ship.sideDefense -= enhCount;
+					ship.iniativebonus += enhCount * 5;
+					ship.critRollMod -= enhCount * 2;
+					ship.toHitBonus += enhCount;
+		
+					// System mods: Scanner
+					let strongestEScan = null;
+					let strongestEScanValue = -1;
+					for (let system of ship.systems) {
+						if (system.name == "scanner") {
+							if (system.output > strongestEScanValue) {
+								strongestEScanValue = system.output;
+								strongestEScan = system;
+							}
+						}
+					}
+					if (strongestEScanValue > 0) {
+						strongestEScan.output += enhCount;
+					}
+		
+					// System mods: Engine
+					let strongestEEngine = null;
+					let strongestEEngVal = -1;
+					for (let system of ship.systems) {
+						if (system.name == "engine") {
+							if (system.output > strongestEEngVal) {
+								strongestEEngVal = system.output;
+								strongestEEngine = system;
+							}
+						}
+					}
+					if (strongestEEngVal > 0) {
+						strongestEEngine.output += enhCount * 2;
+						strongestEEngine.data["Own thrust"] += enhCount * 2;										
+					}
+		
+					// System mods: Reactor
+					let strongestEReact = null;
+					let strongestEReactVal = -1000;
+					for (let system of ship.systems) {
+						if (system.name == "reactor") {
+							if (system.maxhealth > strongestEReactVal) {
+								strongestEReactVal = system.maxhealth;
+							strongestEReact = system;
+							}
+						}
+					}
+					if (strongestEReact != null) {
+						strongestEReact.output += enhCount * 2;
+					}
+		
+					// Modify thruster ratings as well
+					for (let system of ship.systems) {
+						if (system.name == "thruster") {
+							system.output += enhCount;
+						}
+					}
+				}
+				ship.eliteEnh = true;	
+				break;
+	
+			  case 'EXT_MRN':
+				if(ship.mrnEnhShip){
+					for (let system of ship.systems) {
+						if (system.name == "GrapplingClaw") {
+							system.ammunition += enhCount;
+						}
+					}
+				}
+				ship.mrnEnhShip = true;
+				break;
+	
+			  case 'IFF_SYS':
+				ship.IFFSystem = true;
+				break;
+	
+			  case 'IMPR_ENG':
+				if(!ship.engEnh){				
+					let strongestEng = null;
+					let strongestEngVal = -1;
+					for (let system of ship.systems) {
+					if (system.name == "engine") {
+						if (system.output > strongestEngVal) {
+							strongestEngVal = system.output;
+						strongestEng = system;
+						}
+					}
+					}
+					if (strongestEngVal > 0) {
+							strongestEng.output += enhCount;
+							strongestEng.data["Own thrust"]+= enhCount;										  
+					}
+				}
+				ship.engEnh = true;	
+				break;
+	
+			  case 'IMPR_PSY':
+				if(!ship.psyEnh){
+					for (let system of ship.systems) {
+						if (system.name == "PsychicField") {
+							system.data["Range"]+= enhCount;
+						}
+					}
+				}
+				ship.psyEnh = true;
+				break;
+	
+			  case 'IMPR_REA':
+				if(!ship.reaEnh){				
+					let strongestReact = null;
+					let strongestReactValue = -1;
+					for (let system of ship.systems) {
+					if (system.name == "reactor") {
+						if (system.maxhealth > strongestReactValue) {
+							strongestReactValue = system.maxhealth;
+						strongestReact = system;
+						}
+					}
+					}
+					if (strongestReactValue > 0) {
+						let addedPower = 0;
+						if (ship.Enormous === true) {
+							addedPower = 4;
+						} else {
+							addedPower = ship.shipSizeClass;
+						}
+						strongestReact.output += enhCount * addedPower;
+					}					  
+				}
+				ship.reaEnh = true;							
+				break;
+	
+			  case 'IMPR_SENS':
+				if(!ship.sensEnh){				
+					let strongestScan = null;
+					let strongestScanValue = -1;
+					for (let system of ship.systems) {
+					if (system.name == "scanner") {
+						if (system.output > strongestScanValue) {
+							strongestScanValue = system.output;
+						strongestScan = system;
+						}
+					}
+					}
+					if (strongestScanValue > 0) {
+							strongestScan.output += enhCount;	
+					}
+				}
+				ship.sensEnh = true;							
+				break;
+	
+			  case 'IMPR_SR':
+				if(!ship.srEnh){
+					for (let system of ship.systems) {
+						if (system.name == "SelfRepair") {
+							system.output += enhCount;
+						}						
+					}
+				}
+				ship.srEnh = true;
+				break;
+	
+			  case 'IMPR_THSD':
+				if(!ship.thsdEnh){				
+					for (let system of ship.systems) {
+						if (system.name == "ThirdspaceShield") {
+							system.output += enhCount;
+						}
+						if (system.name == "ThirdspaceShieldGenerator") {
+							system.output += enhCount;
+						}
+					}
+				}
+				ship.thsdEnh = true;
+				break;
+	
+			  case 'IMPR_TS':
+				if(!ship.tsEnh){					
+					for (let system of ship.systems) {
+					if (system.name == "ThoughtShield") {
+						system.output += enhCount;
+					}
+					if (system.name == "ThoughtShieldGenerator") {
+						system.output += enhCount;
+					}
+					}
+				}
+				ship.tsEnh = true;					
+				break;
+	
+			  case 'IPSH_EETH':
+				if(!ship.eethEnh){				
+					ship.iniativebonus -= enhCount * 5;
+					ship.turndelaycost += 0.1;
+					for (let system of ship.systems) {
+						if (system.name == "reactor") {
+							system.output = Math.round(system.output * 1.25);
+							system.critRollMod += 4;
+						} else if (system.name == "engine") {
+							system.output += 2;
+							system.data["Own thrust"]+= 1;						
+							system.critRollMod += 4;
+						}
+					}
+				}	
+				ship.eethEnh = true;					
+				break;
+	
+			  case 'IPSH_ESSAN':
+				if(!ship.essanEnh){	
+					for (let system of ship.systems) {
+						if (system.name == "scanner") {
+							system.output -= 1;
+							system.maxhealth -= 2;
+						} else if (system.name == "engine") {
+							system.output += 1;
+							system.data["Own thrust"]+= 1;						
+							system.maxhealth += 2;
+						} else if (system.name == "structure") {
+							if (system.armour < 5) system.armour += 1;
+						}
+					}
+				}	
+				ship.essanEnh = true;
+				break;
+	
+			  case 'MARK_FERV':
+				if(!ship.fervEnh){	
+	//				ship.toHitBonus += enhCount;
+					ship.iniativebonus += enhCount * 10;
+					ship.forwardDefense += enhCount * 2;
+					ship.sideDefense += enhCount * 2;
+					ship.fervEnh = true;
+				}					
+				break;
+	
+			  case 'POOR_CREW':
+				if(!ship.poorEnh){
+					ship.forwardDefense += enhCount;
+					ship.sideDefense += enhCount;
+					ship.iniativebonus -= enhCount * 5;
+	//				ship.critRollMod += enhCount * 2;
+	//				ship.toHitBonus -= enhCount;
+		
+					// System mods: Scanner
+					let strongestPScan = null;
+					let strongestPScanValue = -1;
+					for (let system of ship.systems) {
+					if (system.name == "scanner") {
+						if (system.output > strongestPScanValue) {
+							strongestPScanValue = system.output;
+						strongestPScan = system;
+						}
+					}
+					}
+					if (strongestPScanValue > 0) {
+						strongestPScan.output -= enhCount;
+					}
+		
+					// System mods: Engine
+					let strongestPEng = null;
+					let strongestPEngValue = -1;
+					for (let system of ship.systems) {
+					if (system.name == "engine") {
+						if (system.output > strongestPEngValue) {
+							strongestPEngValue = system.output;
+						strongestPEng = system;
+						}
+					}
+					}
+					if (strongestPEngValue > 0) {
+						strongestPEng.output -= enhCount * 2;
+						strongestPEng.data["Own thrust"] -= enhCount *2;						
+					}
+		
+					// System mods: Reactor
+					let strongestPReact = null;
+					let strongestPReactValue = -1000;
+					for (let system of ship.systems) {
+					if (system.name == "reactor") {
+						if (system.maxhealth > strongestPReactValue) {
+							strongestPReactValue = system.maxhealth;
+						strongestPReact = system;
+						}
+					}
+					}
+					if (strongestPReact != null) {
+						strongestPReact.output -= enhCount;
+					}
+				}
+				ship.poorEnh = true;	
+				break;
+	
+			  case 'SHAD_DIFF':
+				if(!ship.diffEnh){
+					for (let system of ship.systems) {
+						if (system.name == "EnergyDiffuser") {
+							system.output += enhCount;
+						}
+					}
+				}	
+				ship.diffEnh = true;	
+				break;
+	
+			  case 'SHAD_FTRL':
+				if(!ship.ftrlEnh){
+					let struct = shipManager.systems.getStructureSystem(ship, 0);
+					if (struct) {
+						struct.maxhealth -= enhCount;
+					}
+				}	
+				ship.ftrlEnh = true;	
+				break;
+	
+			  // Add more cases as necessary
+	
+			}
+		  }
+		}
+	}
+	
 
 };
 
