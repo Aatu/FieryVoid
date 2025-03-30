@@ -1885,7 +1885,8 @@ window.gamedata = {
 		/*		//Alternative method		
 		for (var i in ship.systems) {
 			var system = ship.systems[i];
-			$(".system_" + system.id).data("shipid", newShipId);			
+			var systemwindow = shipwindow.find(".system_" + system.id);
+			systemwindow.data("shipid", ship.id);		
 			shipWindowManager.setSystemData(ship, system, ship.shipStatusWindow);
 		}		
 */
