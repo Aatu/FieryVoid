@@ -430,7 +430,7 @@ PsychicField.prototype.initBoostableInfo = function() {
     // Needed because it can change during initial phase
     // because of adding extra power.
     if (window.weaponManager.isLoaded(this)) {
-    	
+        var boost = shipManager.power.getBoost(this);    	
     	if(gamedata.gamephase == 1){
 	        // Use a baseRange property to store the original range if not already defined
 	        if (this.baseRange === undefined) {
@@ -438,7 +438,6 @@ PsychicField.prototype.initBoostableInfo = function() {
 	        }
 	        
         // Calculate the boosted range dynamically without modifying baseRange
-        var boost = shipManager.power.getBoost(this);
         this.range = this.baseRange + boost;	        
 		}
 
