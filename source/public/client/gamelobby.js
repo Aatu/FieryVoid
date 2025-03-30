@@ -1952,6 +1952,8 @@ window.gamedata = {
 			break;
 		  }
 		}
+
+		if(ammoMagazine != null) gamedata.setAmmoEnhancements(ship); //Do ammo for ships and fighters in a separate function.
 	
 		for (let entry of ship.enhancementOptions) {
 		  // ID, readableName, numberTaken, limit, price, priceStep
@@ -1964,343 +1966,433 @@ window.gamedata = {
 			if (enhCount > 1) ship.enhancementTooltip += ` (x${enhCount})`;
 	
 			switch (enhID) {
-			  case 'ELITE_CREW':
-				if(!ship.eliteEnh){
-					ship.forwardDefense -= enhCount;
-					ship.sideDefense -= enhCount;
-					ship.iniativebonus += enhCount * 5;
-					ship.critRollMod -= enhCount * 2;
-					ship.toHitBonus += enhCount;
-		
-					// System mods: Scanner
-					let strongestEScan = null;
-					let strongestEScanValue = -1;
-					for (let system of ship.systems) {
-						if (system.name == "scanner") {
-							if (system.output > strongestEScanValue) {
-								strongestEScanValue = system.output;
-								strongestEScan = system;
+			
+				case 'ELITE_CREW':
+					if(!ship.eliteEnh){
+						ship.forwardDefense -= enhCount;
+						ship.sideDefense -= enhCount;
+						ship.iniativebonus += enhCount * 5;
+						ship.critRollMod -= enhCount * 2;
+						ship.toHitBonus += enhCount;
+			
+						// System mods: Scanner
+						let strongestEScan = null;
+						let strongestEScanValue = -1;
+						for (let system of ship.systems) {
+							if (system.name == "scanner") {
+								if (system.output > strongestEScanValue) {
+									strongestEScanValue = system.output;
+									strongestEScan = system;
+								}
 							}
 						}
-					}
-					if (strongestEScanValue > 0) {
-						strongestEScan.output += enhCount;
-					}
-		
-					// System mods: Engine
-					let strongestEEngine = null;
-					let strongestEEngVal = -1;
-					for (let system of ship.systems) {
-						if (system.name == "engine") {
-							if (system.output > strongestEEngVal) {
-								strongestEEngVal = system.output;
-								strongestEEngine = system;
+						if (strongestEScanValue > 0) {
+							strongestEScan.output += enhCount;
+						}
+			
+						// System mods: Engine
+						let strongestEEngine = null;
+						let strongestEEngVal = -1;
+						for (let system of ship.systems) {
+							if (system.name == "engine") {
+								if (system.output > strongestEEngVal) {
+									strongestEEngVal = system.output;
+									strongestEEngine = system;
+								}
 							}
 						}
-					}
-					if (strongestEEngVal > 0) {
-						strongestEEngine.output += enhCount * 2;
-						strongestEEngine.data["Own thrust"] += enhCount * 2;										
-					}
-		
-					// System mods: Reactor
-					let strongestEReact = null;
-					let strongestEReactVal = -1000;
-					for (let system of ship.systems) {
-						if (system.name == "reactor") {
-							if (system.maxhealth > strongestEReactVal) {
-								strongestEReactVal = system.maxhealth;
-							strongestEReact = system;
+						if (strongestEEngVal > 0) {
+							strongestEEngine.output += enhCount * 2;
+							strongestEEngine.data["Own thrust"] += enhCount * 2;										
+						}
+			
+						// System mods: Reactor
+						let strongestEReact = null;
+						let strongestEReactVal = -1000;
+						for (let system of ship.systems) {
+							if (system.name == "reactor") {
+								if (system.maxhealth > strongestEReactVal) {
+									strongestEReactVal = system.maxhealth;
+								strongestEReact = system;
+								}
 							}
 						}
-					}
-					if (strongestEReact != null) {
-						strongestEReact.output += enhCount * 2;
-					}
-		
-					// Modify thruster ratings as well
-					for (let system of ship.systems) {
-						if (system.name == "thruster") {
-							system.output += enhCount;
+						if (strongestEReact != null) {
+							strongestEReact.output += enhCount * 2;
 						}
+			
+						// Modify thruster ratings as well
+						for (let system of ship.systems) {
+							if (system.name == "thruster") {
+								system.output += enhCount;
+							}
+						}
+						ship.notes  += "<br>Elite Crew";						
 					}
-				}
-				ship.eliteEnh = true;	
-				break;
+					ship.eliteEnh = true;	
+					break;
 
 				case 'ELT_MRN':
-					if(!ship.elMrnEnhShip){
+						if(!ship.elMrnEnhShip){
+							for (let system of ship.systems) {
+								if (system.name == "GrapplingClaw") {
+									system.eliteMarines = enhCount;
+									system.data["Elite"] = "Yes"; 
+								}
+							}
+						}
+						ship.elMrnEnhShip = true;
+						break;					
+							
+				case 'EXT_MRN':
+					if(!ship.exMrnEnhShip){
 						for (let system of ship.systems) {
 							if (system.name == "GrapplingClaw") {
-								system.eliteMarines = enhCount;
-								system.data["Elite"] = "Yes"; 
+								system.ammunition += enhCount;
+								system.data["Ammunition"] += enhCount; 
 							}
 						}
 					}
-					ship.elMrnEnhShip = true;
-					break;					
-						
-			  case 'EXT_MRN':
-				if(!ship.exMrnEnhShip){
-					for (let system of ship.systems) {
-						if (system.name == "GrapplingClaw") {
-							system.ammunition += enhCount;
-							system.data["Ammunition"] += enhCount; 
+					ship.exMrnEnhShip = true;
+					break;
+		
+				case 'IFF_SYS':
+					if(!ship.iffEnh){	
+						ship.IFFSystem = true;
+						ship.notes  += "<br>IFF System";
+					}
+					ship.iffEnh = true;					
+					break;
+		
+				case 'IMPR_ENG':
+					if(!ship.engEnh){				
+						let strongestEng = null;
+						let strongestEngVal = -1;
+						for (let system of ship.systems) {
+						if (system.name == "engine") {
+							if (system.output > strongestEngVal) {
+								strongestEngVal = system.output;
+							strongestEng = system;
+							}
+						}
+						}
+						if (strongestEngVal > 0) {
+								strongestEng.output += enhCount;
+								strongestEng.data["Own thrust"]+= enhCount;										  
 						}
 					}
-				}
-				ship.exMrnEnhShip = true;
-				break;
-	
-			  case 'IFF_SYS':
-				ship.IFFSystem = true;
-				break;
-	
-			  case 'IMPR_ENG':
-				if(!ship.engEnh){				
-					let strongestEng = null;
-					let strongestEngVal = -1;
-					for (let system of ship.systems) {
-					if (system.name == "engine") {
-						if (system.output > strongestEngVal) {
-							strongestEngVal = system.output;
-						strongestEng = system;
+					ship.engEnh = true;	
+					break;
+		
+				case 'IMPR_PSY':
+					if(!ship.psyEnh){
+						for (let system of ship.systems) {
+							if (system.name == "PsychicField") {
+								system.data["Range"]+= enhCount;
+								system.range += enhCount;
+							}
 						}
 					}
-					}
-					if (strongestEngVal > 0) {
-							strongestEng.output += enhCount;
-							strongestEng.data["Own thrust"]+= enhCount;										  
-					}
-				}
-				ship.engEnh = true;	
-				break;
-	
-			  case 'IMPR_PSY':
-				if(!ship.psyEnh){
-					for (let system of ship.systems) {
-						if (system.name == "PsychicField") {
-							system.data["Range"]+= enhCount;
-							system.range += enhCount;
-						}
-					}
-				}
-				ship.psyEnh = true;
-				break;
-	
-			  case 'IMPR_REA':
-				if(!ship.reaEnh){				
-					let strongestReact = null;
-					let strongestReactValue = -1;
-					for (let system of ship.systems) {
-					if (system.name == "reactor") {
-						if (system.maxhealth > strongestReactValue) {
-							strongestReactValue = system.maxhealth;
-						strongestReact = system;
-						}
-					}
-					}
-					if (strongestReactValue > 0) {
-						let addedPower = 0;
-						if (ship.Enormous === true) {
-							addedPower = 4;
-						} else {
-							addedPower = ship.shipSizeClass;
-						}
-						strongestReact.output += enhCount * addedPower;
-					}					  
-				}
-				ship.reaEnh = true;							
-				break;
-	
-			  case 'IMPR_SENS':
-				if(!ship.sensEnh){				
-					let strongestScan = null;
-					let strongestScanValue = -1;
-					for (let system of ship.systems) {
-					if (system.name == "scanner") {
-						if (system.output > strongestScanValue) {
-							strongestScanValue = system.output;
-						strongestScan = system;
-						}
-					}
-					}
-					if (strongestScanValue > 0) {
-							strongestScan.output += enhCount;	
-					}
-				}
-				ship.sensEnh = true;							
-				break;
-	
-			  case 'IMPR_SR':
-				if(!ship.srEnh){
-					for (let system of ship.systems) {
-						if (system.name == "SelfRepair") {
-							system.output += enhCount;
-						}						
-					}
-				}
-				ship.srEnh = true;
-				break;
-	
-			  case 'IMPR_THSD':
-				if(!ship.thsdEnh){				
-					for (let system of ship.systems) {
-						if (system.name == "ThirdspaceShield") {
-							system.output += enhCount;
-						}
-						if (system.name == "ThirdspaceShieldGenerator") {
-							system.output += enhCount;
-						}
-					}
-				}
-				ship.thsdEnh = true;
-				break;
-	
-			  case 'IMPR_TS':
-				if(!ship.tsEnh){					
-					for (let system of ship.systems) {
-					if (system.name == "ThoughtShield") {
-						system.output += enhCount;
-					}
-					if (system.name == "ThoughtShieldGenerator") {
-						system.output += enhCount;
-					}
-					}
-				}
-				ship.tsEnh = true;					
-				break;
-	
-			  case 'IPSH_EETH':
-				if(!ship.eethEnh){				
-					ship.iniativebonus -= enhCount * 5;
-					ship.turndelaycost += 0.1;
-					for (let system of ship.systems) {
+					ship.psyEnh = true;
+					break;
+		
+				case 'IMPR_REA':
+					if(!ship.reaEnh){				
+						let strongestReact = null;
+						let strongestReactValue = -1;
+						for (let system of ship.systems) {
 						if (system.name == "reactor") {
-							system.output = Math.round(system.output * 1.25);
-							system.critRollMod += 4;
-						} else if (system.name == "engine") {
-							system.output += 2;
-							system.data["Own thrust"]+= 1;						
-							system.critRollMod += 4;
+							if (system.maxhealth > strongestReactValue) {
+								strongestReactValue = system.maxhealth;
+							strongestReact = system;
+							}
 						}
+						}
+						if (strongestReactValue > 0) {
+							let addedPower = 0;
+							if (ship.Enormous === true) {
+								addedPower = 4;
+							} else {
+								addedPower = ship.shipSizeClass;
+							}
+							strongestReact.output += enhCount * addedPower;
+						}					  
 					}
-				}	
-				ship.eethEnh = true;					
-				break;
-	
-			  case 'IPSH_ESSAN':
-				if(!ship.essanEnh){	
-					for (let system of ship.systems) {
+					ship.reaEnh = true;							
+					break;
+		
+				case 'IMPR_SENS':
+					if(!ship.sensEnh){				
+						let strongestScan = null;
+						let strongestScanValue = -1;
+						for (let system of ship.systems) {
 						if (system.name == "scanner") {
-							system.output -= 1;
-							system.maxhealth -= 2;
-						} else if (system.name == "engine") {
-							system.output += 1;
-							system.data["Own thrust"]+= 1;						
-							system.maxhealth += 2;
-						} else if (system.name == "structure") {
-							if (system.armour < 5) system.armour += 1;
+							if (system.output > strongestScanValue) {
+								strongestScanValue = system.output;
+							strongestScan = system;
+							}
+						}
+						}
+						if (strongestScanValue > 0) {
+								strongestScan.output += enhCount;	
 						}
 					}
-				}	
-				ship.essanEnh = true;
-				break;
-	
-			  case 'MARK_FERV':
-				if(!ship.fervEnh){	
-	//				ship.toHitBonus += enhCount;
-					ship.iniativebonus += enhCount * 10;
-					ship.forwardDefense += enhCount * 2;
-					ship.sideDefense += enhCount * 2;
-					ship.fervEnh = true;
-				}					
-				break;
-	
-			  case 'POOR_CREW':
-				if(!ship.poorEnh){
-					ship.forwardDefense += enhCount;
-					ship.sideDefense += enhCount;
-					ship.iniativebonus -= enhCount * 5;
-	//				ship.critRollMod += enhCount * 2;
-	//				ship.toHitBonus -= enhCount;
+					ship.sensEnh = true;							
+					break;
 		
-					// System mods: Scanner
-					let strongestPScan = null;
-					let strongestPScanValue = -1;
-					for (let system of ship.systems) {
-					if (system.name == "scanner") {
-						if (system.output > strongestPScanValue) {
-							strongestPScanValue = system.output;
-						strongestPScan = system;
+				case 'IMPR_SR':
+					if(!ship.srEnh){
+						for (let system of ship.systems) {
+							if (system.name == "SelfRepair") {
+								system.output += enhCount;
+							}						
 						}
 					}
-					}
-					if (strongestPScanValue > 0) {
-						strongestPScan.output -= enhCount;
-					}
+					ship.srEnh = true;
+					break;
 		
-					// System mods: Engine
-					let strongestPEng = null;
-					let strongestPEngValue = -1;
-					for (let system of ship.systems) {
-					if (system.name == "engine") {
-						if (system.output > strongestPEngValue) {
-							strongestPEngValue = system.output;
-						strongestPEng = system;
+				case 'IMPR_THSD':
+					if(!ship.thsdEnh){				
+						for (let system of ship.systems) {
+							if (system.name == "ThirdspaceShield") {
+								system.output += enhCount;
+							}
+							if (system.name == "ThirdspaceShieldGenerator") {
+								system.output += enhCount;
+							}
 						}
 					}
-					}
-					if (strongestPEngValue > 0) {
-						strongestPEng.output -= enhCount * 2;
-						strongestPEng.data["Own thrust"] -= enhCount *2;						
-					}
+					ship.thsdEnh = true;
+					break;
 		
-					// System mods: Reactor
-					let strongestPReact = null;
-					let strongestPReactValue = -1000;
-					for (let system of ship.systems) {
-					if (system.name == "reactor") {
-						if (system.maxhealth > strongestPReactValue) {
-							strongestPReactValue = system.maxhealth;
-						strongestPReact = system;
-						}
-					}
-					}
-					if (strongestPReact != null) {
-						strongestPReact.output -= enhCount;
-					}
-				}
-				ship.poorEnh = true;	
-				break;
-	
-			  case 'SHAD_DIFF':
-				if(!ship.diffEnh){
-					for (let system of ship.systems) {
-						if (system.name == "EnergyDiffuser") {
+				case 'IMPR_TS':
+					if(!ship.tsEnh){					
+						for (let system of ship.systems) {
+						if (system.name == "ThoughtShield") {
 							system.output += enhCount;
 						}
+						if (system.name == "ThoughtShieldGenerator") {
+							system.output += enhCount;
+						}
+						}
 					}
-				}	
-				ship.diffEnh = true;	
-				break;
-	
-			  case 'SHAD_FTRL':
-				if(!ship.ftrlEnh){
-					let struct = shipManager.systems.getStructureSystem(ship, 0);
-					if (struct) {
-						struct.maxhealth -= enhCount;
+					ship.tsEnh = true;					
+					break;
+		
+				case 'IPSH_EETH':
+					if(!ship.eethEnh){				
+						ship.iniativebonus -= enhCount * 5;
+						ship.turndelaycost += 0.1;
+						for (let system of ship.systems) {
+							if (system.name == "reactor") {
+								system.output = Math.round(system.output * 1.25);
+								system.critRollMod += 4;
+							} else if (system.name == "engine") {
+								system.output += 2;
+								system.data["Own thrust"]+= 1;						
+								system.critRollMod += 4;
+							}
+						}
+					}	
+					ship.eethEnh = true;					
+					break;
+		
+				case 'IPSH_ESSAN':
+					if(!ship.essanEnh){	
+						for (let system of ship.systems) {
+							if (system.name == "scanner") {
+								system.output -= 1;
+								system.maxhealth -= 2;
+							} else if (system.name == "engine") {
+								system.output += 1;
+								system.data["Own thrust"]+= 1;						
+								system.maxhealth += 2;
+							} else if (system.name == "structure") {
+								if (system.armour < 5) system.armour += 1;
+							}
+						}
+					}	
+					ship.essanEnh = true;
+					break;
+		
+				case 'MARK_FERV':
+					if(!ship.fervEnh){	
+						//ship.toHitBonus += enhCount;
+						ship.iniativebonus += enhCount * 10;
+						ship.forwardDefense += enhCount * 2;
+						ship.sideDefense += enhCount * 2;
+						ship.fervEnh = true;
+						ship.notes  += "<br>Markab Fervor";						
+					}					
+					break;
+		
+				case 'POOR_CREW':
+					if(!ship.poorEnh){
+						ship.forwardDefense += enhCount;
+						ship.sideDefense += enhCount;
+						ship.iniativebonus -= enhCount * 5;
+						//ship.critRollMod += enhCount * 2;
+						//ship.toHitBonus -= enhCount;
+			
+						// System mods: Scanner
+						let strongestPScan = null;
+						let strongestPScanValue = -1;
+						for (let system of ship.systems) {
+						if (system.name == "scanner") {
+							if (system.output > strongestPScanValue) {
+								strongestPScanValue = system.output;
+							strongestPScan = system;
+							}
+						}
+						}
+						if (strongestPScanValue > 0) {
+							strongestPScan.output -= enhCount;
+						}
+			
+						// System mods: Engine
+						let strongestPEng = null;
+						let strongestPEngValue = -1;
+						for (let system of ship.systems) {
+						if (system.name == "engine") {
+							if (system.output > strongestPEngValue) {
+								strongestPEngValue = system.output;
+							strongestPEng = system;
+							}
+						}
+						}
+						if (strongestPEngValue > 0) {
+							strongestPEng.output -= enhCount * 2;
+							strongestPEng.data["Own thrust"] -= enhCount *2;						
+						}
+			
+						// System mods: Reactor
+						let strongestPReact = null;
+						let strongestPReactValue = -1000;
+						for (let system of ship.systems) {
+						if (system.name == "reactor") {
+							if (system.maxhealth > strongestPReactValue) {
+								strongestPReactValue = system.maxhealth;
+							strongestPReact = system;
+							}
+						}
+						}
+						if (strongestPReact != null) {
+							strongestPReact.output -= enhCount;
+						}
+						ship.notes  += "<br>Poor Crew";						
 					}
-				}	
-				ship.ftrlEnh = true;	
-				break;
-	
-			  // Add more cases as necessary
+					ship.poorEnh = true;	
+					break;
+		
+				case 'SHAD_DIFF':
+					if(!ship.diffEnh){
+						for (let system of ship.systems) {
+							if (system.name == "EnergyDiffuser") {
+								system.output += enhCount;
+							}
+						}
+					}	
+					ship.diffEnh = true;	
+					break;
+		
+				case 'SHAD_FTRL':
+					if(!ship.ftrlEnh){
+						let struct = shipManager.systems.getStructureSystem(ship, 0);
+						if (struct) {
+							struct.maxhealth -= enhCount;
+						}
+					}	
+					ship.ftrlEnh = true;	
+					break;
+
+				case 'SPARK_CURT':
+					if(!ship.sparkEnh){	
+						for (let system of ship.systems) {
+							if (system.name === "SparkField") {
+								system.output = system.baseOutput;
+								system.data["Spark Curtain"] = "Yes";
+							}
+						}
+					}
+					ship.sparkEnh = true;	
+					break;
+			
+				case 'SLUGGISH':
+					if(!ship.slugEnh){
+						ship.iniativebonus -= enhCount * 5;
+						ship.notes  += "<br>Sluggish";						
+					}
+					ship.slugEnh = true;
+					break;
+			
+				case 'VOR_AMETHS': // Vorlon Amethyst Skin (for ship)
+					if(!ship.amethsEnh){
+						let AActrl = null;
+						for (let system of ship.systems) {
+							if (system.name === 'adaptiveArmorController') {
+								AActrl = system;
+							break;
+							}
+						}
+
+						if (AActrl) {
+							AActrl.AAtotal += enhCount;
+							AActrl.output = AActrl.AAtotal;
+							AActrl.data["Adaptive Armor"] = 0 +  "/" + AActrl.AAtotal; 							
+							AActrl.data[" - per weapon type"] = Math.floor(AActrl.AAtotal / 2); 
+							AActrl.data[" - preassigned"] = 0 +  "/" + Math.floor(AActrl.AAtotal / 2); 
+						}
+					}
+					ship.amethsEnh = true;	
+					break;
+			
+				case 'VOR_AZURS': // Vorlon Azure Skin (for ship) - +1 Shield rating
+					if(!ship.azursEnh){				
+						for (let system of ship.systems) {
+							if (system.name === "eMShield") {
+								system.output += enhCount;
+							}
+						}
+					}
+					ship.azursEnh = true;	
+					break;
+			
+				case 'VOR_CRIMS': // Vorlon Crimson Skin (for ship) - Power Capacitor gains +2 storage points and +1 recharge point
+					if(!ship.crimsEnh){	
+						let capacitor = null;
+						for (let system of ship.systems) {
+							if (system.name === 'powerCapacitor') {
+								capacitor = system;
+							break;
+							}
+						}				
+
+						if (capacitor) {
+							capacitor.output += enhCount;
+							capacitor.data["Power stored/max"] = capacitor.powerMax + (2 * enhCount);
+						}
+					}
+					ship.crimsEnh = true;	
+					break;
+			
+				case 'VULN_CRIT': // Vulnerable to Criticals: +1 Crit roll mod
+				if(!ship.critEnh){					
+					ship.critRollMod += enhCount;
+					ship.notes  += "<br>Vulnerable to Criticals";
+				}
+
+				break;				
+				// Add more cases as necessary
 	
 			}
 		  }
 		}
-	}
+	},
+
+	setAmmoEnhancements: function setAmmoEnhancements(ship) {
+		var turn = gamedata.turn;
+		
+	}	
 	
 
 };
