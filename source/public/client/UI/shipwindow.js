@@ -338,9 +338,11 @@ window.shipWindowManager = {
 
 		$(belowIcon).append(input);
 
+		var tc = ship.turncost.toFixed(2);
+		var td = ship.turndelaycost.toFixed(2);
 	    
         if(!ship.fighter){
-            abilities.push("&nbsp;TC: " + ship.turncost + " TD: " + ship.turndelaycost  );
+            abilities.push("&nbsp;TC: " + tc + " TD: " + td  );
 		var fDef = ship.forwardDefense*5;
 		var sDef = ship.sideDefense*5
 		abilities.push("&nbsp;Profile (F/S): " + fDef + "/" + sDef + "; Ini: " + ship.iniativebonus );
