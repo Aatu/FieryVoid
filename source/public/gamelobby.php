@@ -147,8 +147,14 @@
                     var t = weaponManager.mouseoverSystem;
 
                     var id = t.data("shipid");
-                    var ship = gamedata.getShip(id);
-					
+
+                    //Added button to view actual details of purchased ships, so need ot make sure right ship is called for correct tooltip info - DK 30.3.25 
+                    if(gamedata.fleetWindowOpen){
+                        var ship = gamedata.getFleetShipById(id);
+                    }else{
+                        var ship = gamedata.getShip(id);
+                    }
+
                     var system = null;
 
                     if (t.hasClass("fightersystem")){
