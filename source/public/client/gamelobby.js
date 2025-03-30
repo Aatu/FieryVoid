@@ -1847,15 +1847,16 @@ window.gamedata = {
     },
 
     onShipContextMenu: function onShipContextMenu(phpclass, faction, id, fleetList) {
-		var ship;	
+		var ship;
+
+		//Ship object depends on whether it's generic window based on phpclass, or whether it's from player's fleet list.	
 		if(fleetList){
         	ship = gamedata.getFleetShipById(id);
 		}else{
         	ship = gamedata.getShip(phpclass, faction);
-		}
+		}		
 
-   //     shipWindowManager.close(ship);		
-
+		//Create ship window the first time it is requested ship window
         if (!ship.shipStatusWindow) {
             if (ship.flight) {
                 ship.shipStatusWindow = flightWindowManager.createShipWindow(ship);
@@ -1863,9 +1864,10 @@ window.gamedata = {
                 ship.shipStatusWindow = shipWindowManager.createShipWindow(ship);
             }
 
-	//		shipWindowManager.setData(ship);
+			shipWindowManager.setData(ship);
         }
 
+		//
 		if(fleetList){
 			ship.shipStatusWindow.find(".topbar .value.name").html("");
 			ship.shipStatusWindow.find(".topbar .valueheader.name").html(ship.name);
@@ -1879,9 +1881,11 @@ window.gamedata = {
 		//Now add Enhancements and update system info.
 		gamedata.setEnhancementsShip(ship);
 		shipWindowManager.setData(ship);
-/*				
+
+		/*		//Alternative method		
 		for (var i in ship.systems) {
 			var system = ship.systems[i];
+			$(".system_" + system.id).data("shipid", newShipId);			
 			shipWindowManager.setSystemData(ship, system, ship.shipStatusWindow);
 		}		
 */
@@ -2022,16 +2026,29 @@ window.gamedata = {
 				}
 				ship.eliteEnh = true;	
 				break;
-	
+
+				case 'ELT_MRN':
+					if(!ship.elMrnEnhShip){
+						for (let system of ship.systems) {
+							if (system.name == "GrapplingClaw") {
+								system.eliteMarines = enhCount;
+								system.data["Elite"] = "Yes"; 
+							}
+						}
+					}
+					ship.elMrnEnhShip = true;
+					break;					
+						
 			  case 'EXT_MRN':
-				if(ship.mrnEnhShip){
+				if(!ship.exMrnEnhShip){
 					for (let system of ship.systems) {
 						if (system.name == "GrapplingClaw") {
 							system.ammunition += enhCount;
+							system.data["Ammunition"] += enhCount; 
 						}
 					}
 				}
-				ship.mrnEnhShip = true;
+				ship.exMrnEnhShip = true;
 				break;
 	
 			  case 'IFF_SYS':
@@ -2063,6 +2080,7 @@ window.gamedata = {
 					for (let system of ship.systems) {
 						if (system.name == "PsychicField") {
 							system.data["Range"]+= enhCount;
+							system.range += enhCount;
 						}
 					}
 				}
