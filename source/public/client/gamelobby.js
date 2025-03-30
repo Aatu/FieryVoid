@@ -16,6 +16,7 @@ window.gamedata = {
  	displayedShip: '',
  	displayedFaction: '',
 	lastShipNumber: 0,
+	fleetWindowOpen: false,
 
 
     getPowerRating: function getPowerRating(factionName) {
@@ -275,7 +276,7 @@ window.gamedata = {
             a = i;
         }
         a++;
-        ship.id = a;
+        ship.id = Date.now() + Math.random().toString(36).substr(2, 5);
 		
         ship.slot = gamedata.selectedSlot;
         gamedata.ships[a] = ship;
@@ -1203,7 +1204,8 @@ window.gamedata = {
 		$(".ship.bought").remove();
 		for (var i in gamedata.ships) {
 			// Reset ship ids to avoid ending up with elements with the same id
-			gamedata.ships[i].id = i;	
+			//Unique temp ids assigned when purchaseed now - DK 30.3.31
+	//		gamedata.ships[i].id = Date.now() + Math.random().toString(36).substr(2, 5);	
 
 			var ship = gamedata.ships[i];
 			if (ship.slot != slotid) continue;
@@ -1868,8 +1870,10 @@ window.gamedata = {
 			ship.shipStatusWindow.find(".topbar .value.name").html("");
 			ship.shipStatusWindow.find(".topbar .valueheader.name").html(ship.name);
 			ship.shipStatusWindow.find(".topbar .value.shipclass").html(ship.shipClass);
+			gamedata.fleetWindowOpen = true;
 		}else{
 			ship.shipStatusWindow.find(".topbar .valueheader.name").html("");
+			gamedata.fleetWindowOpen = false;			
 		}
 
 		//Now add Enhancements and update system info.
@@ -1889,12 +1893,14 @@ window.gamedata = {
 	getFleetShipById: function getFleetShipById(id) {
 		// Ensure that gamedata.ships is an array and id is compared correctly
 		for (var i in gamedata.ships) {
-			if (gamedata.ships[i].id == id) {
+			if (gamedata.ships[i].id === id) {
 				gamedata.displayedShip = gamedata.ships[i].phpclass;
 				gamedata.displayedFaction = gamedata.ships[i].faction;
 				return gamedata.ships[i];
 			}
 		}
+		//Or return generic shipu sing default method if can't be found in fleet choices.
+		return gamedata.getShip(id);
 	},
 
 
