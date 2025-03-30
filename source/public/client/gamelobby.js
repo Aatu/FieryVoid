@@ -2027,22 +2027,22 @@ window.gamedata = {
 								system.output += enhCount;
 							}
 						}
-						ship.notes  += "<br>Elite Crew";						
+						ship.notes  += "<br>Elite Crew (" + enhCount + ")";					
 					}
 					ship.eliteEnh = true;	
-					break;
+				break;
 
 				case 'ELT_MRN':
-						if(!ship.elMrnEnhShip){
-							for (let system of ship.systems) {
-								if (system.name == "GrapplingClaw") {
-									system.eliteMarines = enhCount;
-									system.data["Elite"] = "Yes"; 
-								}
+					if(!ship.elMrnEnhShip){
+						for (let system of ship.systems) {
+							if (system.name == "GrapplingClaw") {
+								system.eliteMarines = enhCount;
+								system.data["Elite"] = "Yes"; 
 							}
 						}
-						ship.elMrnEnhShip = true;
-						break;					
+					}
+					ship.elMrnEnhShip = true;
+				break;					
 							
 				case 'EXT_MRN':
 					if(!ship.exMrnEnhShip){
@@ -2054,12 +2054,27 @@ window.gamedata = {
 						}
 					}
 					ship.exMrnEnhShip = true;
-					break;
-		
+				break;
+
+				case 'HANG_CON_F'://Hangar Conversion to Fighter slot, no actual need to change anything here.  
+					if(!ship.hangFEnh){
+						ship.notes  += "<br>Fighter Conversion (" + enhCount + ")";						
+					}
+					ship.hangFEnh = true;
+				break;	
+
+				case 'HANG_CON_AS'://Hangar Conversion to Assault Shuttle slot, no actual need to change anything here.  
+					if(!ship.hangASEnh){
+						ship.notes  += "<br>Shuttle Conversion (" + enhCount + ")";						
+					}
+					ship.hangASEnh = true;	
+				break;	
+						
+						
 				case 'IFF_SYS':
 					if(!ship.iffEnh){	
 						ship.IFFSystem = true;
-						ship.notes  += "<br>IFF System";
+						ship.notes  += "<br>IFF System (" + enhCount + ")";
 					}
 					ship.iffEnh = true;					
 					break;
@@ -2082,7 +2097,7 @@ window.gamedata = {
 						}
 					}
 					ship.engEnh = true;	
-					break;
+				break;
 		
 				case 'IMPR_PSY':
 					if(!ship.psyEnh){
@@ -2094,7 +2109,7 @@ window.gamedata = {
 						}
 					}
 					ship.psyEnh = true;
-					break;
+				break;
 		
 				case 'IMPR_REA':
 					if(!ship.reaEnh){				
@@ -2119,7 +2134,7 @@ window.gamedata = {
 						}					  
 					}
 					ship.reaEnh = true;							
-					break;
+				break;
 		
 				case 'IMPR_SENS':
 					if(!ship.sensEnh){				
@@ -2138,7 +2153,7 @@ window.gamedata = {
 						}
 					}
 					ship.sensEnh = true;							
-					break;
+				break;
 		
 				case 'IMPR_SR':
 					if(!ship.srEnh){
@@ -2149,7 +2164,7 @@ window.gamedata = {
 						}
 					}
 					ship.srEnh = true;
-					break;
+				break;
 		
 				case 'IMPR_THSD':
 					if(!ship.thsdEnh){				
@@ -2163,7 +2178,7 @@ window.gamedata = {
 						}
 					}
 					ship.thsdEnh = true;
-					break;
+				break;
 		
 				case 'IMPR_TS':
 					if(!ship.tsEnh){					
@@ -2177,7 +2192,7 @@ window.gamedata = {
 						}
 					}
 					ship.tsEnh = true;					
-					break;
+				break;
 		
 				case 'IPSH_EETH':
 					if(!ship.eethEnh){				
@@ -2195,7 +2210,7 @@ window.gamedata = {
 						}
 					}	
 					ship.eethEnh = true;					
-					break;
+				break;
 		
 				case 'IPSH_ESSAN':
 					if(!ship.essanEnh){	
@@ -2213,7 +2228,7 @@ window.gamedata = {
 						}
 					}	
 					ship.essanEnh = true;
-					break;
+				break;
 		
 				case 'MARK_FERV':
 					if(!ship.fervEnh){	
@@ -2222,17 +2237,17 @@ window.gamedata = {
 						ship.forwardDefense += enhCount * 2;
 						ship.sideDefense += enhCount * 2;
 						ship.fervEnh = true;
-						ship.notes  += "<br>Markab Fervor";						
+						ship.notes  += "<br>Markab Fervor (" + enhCount + ")";						
 					}					
-					break;
+				break;
 		
 				case 'POOR_CREW':
 					if(!ship.poorEnh){
 						ship.forwardDefense += enhCount;
 						ship.sideDefense += enhCount;
 						ship.iniativebonus -= enhCount * 5;
-						//ship.critRollMod += enhCount * 2;
-						//ship.toHitBonus -= enhCount;
+						ship.critRollMod += enhCount * 2;
+						ship.toHitBonus -= enhCount;
 			
 						// System mods: Scanner
 						let strongestPScan = null;
@@ -2279,10 +2294,10 @@ window.gamedata = {
 						if (strongestPReact != null) {
 							strongestPReact.output -= enhCount;
 						}
-						ship.notes  += "<br>Poor Crew";						
+						ship.notes  += "<br>Poor Crew (" + enhCount + ")";						
 					}
 					ship.poorEnh = true;	
-					break;
+				break;
 		
 				case 'SHAD_DIFF':
 					if(!ship.diffEnh){
@@ -2293,7 +2308,7 @@ window.gamedata = {
 						}
 					}	
 					ship.diffEnh = true;	
-					break;
+				break;
 		
 				case 'SHAD_FTRL':
 					if(!ship.ftrlEnh){
@@ -2303,7 +2318,7 @@ window.gamedata = {
 						}
 					}	
 					ship.ftrlEnh = true;	
-					break;
+				break;
 
 				case 'SPARK_CURT':
 					if(!ship.sparkEnh){	
@@ -2315,15 +2330,15 @@ window.gamedata = {
 						}
 					}
 					ship.sparkEnh = true;	
-					break;
+				break;
 			
 				case 'SLUGGISH':
 					if(!ship.slugEnh){
 						ship.iniativebonus -= enhCount * 5;
-						ship.notes  += "<br>Sluggish";						
+						ship.notes  += "<br>Sluggish (" + enhCount + ")";						
 					}
 					ship.slugEnh = true;
-					break;
+				break;
 			
 				case 'VOR_AMETHS': // Vorlon Amethyst Skin (for ship)
 					if(!ship.amethsEnh){
@@ -2344,7 +2359,7 @@ window.gamedata = {
 						}
 					}
 					ship.amethsEnh = true;	
-					break;
+				break;
 			
 				case 'VOR_AZURS': // Vorlon Azure Skin (for ship) - +1 Shield rating
 					if(!ship.azursEnh){				
@@ -2355,7 +2370,7 @@ window.gamedata = {
 						}
 					}
 					ship.azursEnh = true;	
-					break;
+				break;
 			
 				case 'VOR_CRIMS': // Vorlon Crimson Skin (for ship) - Power Capacitor gains +2 storage points and +1 recharge point
 					if(!ship.crimsEnh){	
@@ -2373,14 +2388,14 @@ window.gamedata = {
 						}
 					}
 					ship.crimsEnh = true;	
-					break;
+				break;
 			
 				case 'VULN_CRIT': // Vulnerable to Criticals: +1 Crit roll mod
-				if(!ship.critEnh){					
-					ship.critRollMod += enhCount;
-					ship.notes  += "<br>Vulnerable to Criticals";
-				}
-
+					if(!ship.vulnEnh){					
+						ship.critRollMod += enhCount;
+						ship.notes  += "<br>Vulnerable to Criticals (" + enhCount + ")";
+					}
+					ship.vulnEnh = true;
 				break;				
 				// Add more cases as necessary
 	
