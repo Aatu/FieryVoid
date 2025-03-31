@@ -211,7 +211,7 @@ window.AllWeaponFireAgainstShipAnimation = function () {
         var animationType = weapon.animationArray[incomingFire.firingMode] || weapon.animation;
         var animationColor = weapon.animationColorArray[incomingFire.firingMode] || weapon.animationColor;
 		var startLocationTime = startTime;
-		if (weapon.ballistic && (!weapon.hasSpecialLaunchHexCalculation && weapon.fireOrders.targetid !== weapon.fireOrders.shooterid)) {//Some weapons target own ship e.g. Shield Reinforcement)) {
+		if (weapon.ballistic && (!weapon.hasSpecialLaunchHexCalculation && incomingFire.fireOrder.targetid !== incomingFire.fireOrder.shooterid)) {//Some weapons target own ship e.g. Shield Reinforcement)) {
 			startLocationTime = 0;
 		}
 			

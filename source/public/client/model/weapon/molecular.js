@@ -162,7 +162,7 @@ MolecularSlicerBeamL.prototype.initializationUpdate = function() {
 		break;
 	}		
 
-	this.data["Max number of shots"] = shots;
+	this.data["Remaining shots"] = shots - this.fireOrders.length;
 	return this;
 };
 
@@ -261,7 +261,7 @@ MolecularSlicerBeamM.prototype.initializationUpdate = function() {
 		break;
 	}		
 
-	this.data["Max number of shots"] = shots;
+	this.data["Remaining shots"] = shots - this.fireOrders.length;
 	return this;
 };
 
@@ -289,7 +289,7 @@ MolecularSlicerBeamH.prototype.initializationUpdate = function() {
 		break;
 	}		
 
-	this.data["Max number of shots"] = shots;
+	this.data["Remaining shots"] = shots - this.fireOrders.length;
 	return this;
 };
 

@@ -225,7 +225,7 @@ window.mathlib = {
 
 	getHexCorners: function getHexCorners(hex) {
 		let hexSize = window.Config.HEX_SIZE;
-		let shrinkFactor = 0.9999; // Shrink the hexagon just a tiny bit to prevent edge cases.
+		let shrinkFactor = 1; // Was previsouly used to shrink hex a little below.
 	
 		let hexCo = coordinateConverter.fromHexToGame(hex);
 		let cx = hexCo.x;

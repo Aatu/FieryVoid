@@ -165,7 +165,7 @@ class BuyingGamePhase implements Phase
     public function addMoons($gameData, $dbManager, $moonValue, $slot)
     {
         $counter = $moonValue; // Should always be at least 1 to get here.
-        $moonIndex = 1; // Proper numbering for naming
+        $moonIndex = 1; // For naming
     
         if ($counter == 1) {    
             // Add a single large Moon
