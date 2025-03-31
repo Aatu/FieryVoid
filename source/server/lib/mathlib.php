@@ -233,7 +233,7 @@ class Mathlib{
     }
     
     private static function getHexCorners($hex, $hexSize) {
-        $shrinkFactor = 0.9999;
+        $shrinkFactor = 1; // Was previsouly used to shrink hex a little below.
         $hexCo = self::hexCoToPixelLoS($hex);
        
         $cx = $hexCo['x'];
