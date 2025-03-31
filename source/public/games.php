@@ -77,6 +77,9 @@ if (isset($_SESSION["user"])) {
 
 	    <br><br>---------- <b>update 26th of March</b> ---------- 
 	    <br>Updates and fixes (primarily terrain-related)
+	    
+	    <br><br>---------- <b>update 31st of March</b> ---------- 
+	    <br>Updates and fixes (primarily Mako initiative toned down)
 	
        <br><br>
 <!--	        
