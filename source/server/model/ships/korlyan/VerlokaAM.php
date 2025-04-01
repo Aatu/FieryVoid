@@ -36,7 +36,7 @@ class VerlokaAM extends BaseShip{
 	    $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
 	    $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 100); //add full load of basic missiles 
 	    $ammoMagazine->addAmmoEntry(new AmmoMissileI(), 80); //add full load of missiles
-//	    $ammoMagazine->addAmmoEntry(new AmmoBLMineB(), 0); //add full load of basic missiles
+	    $ammoMagazine->addAmmoEntry(new AmmoBLMineB(), 0); //add full load of basic missiles
 //	    $ammoMagazine->addAmmoEntry(new AmmoBLMineW(), 0); //add full load of basic missiles 
 //	    $ammoMagazine->addAmmoEntry(new AmmoBLMineH(), 0); //add full load of basic missiles	      	      
 
