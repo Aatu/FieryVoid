@@ -44,9 +44,6 @@ window.shipWindowManager = {
 			old = $(".shipwindow:visible");
 		}	
 
-
-//		console.log("Selected old windows:", old);  // Debugging: What is `old` selecting?
-//		console.log("Old windows count:", old.length);
 		var n = ship.shipStatusWindow;
 
 		if (!n) return;
@@ -1162,7 +1159,8 @@ window.shipWindowManager = {
 
 		var systemwindow = shipwindow.find(".system_" + system.id);
 
-		systemwindow.data("shipid", ship.id); //Sometimes in fleet selection ship.id in systemwindow needs to be updated to show correct tooltip - DK 30.3.25	
+		systemwindow.data("shipid", ship.id); //Sometimes in fleet selection ship.id in systemwindow needs to be updated to show correct tooltip - DK 30.3.25
+			
 		if (systemwindow.length == 0 && system.parentId > -1) {
 			systemwindow = shipwindow.find(".parentsystem_" + system.parentId);
 		}
