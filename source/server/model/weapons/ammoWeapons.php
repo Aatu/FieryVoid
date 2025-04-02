@@ -462,8 +462,8 @@ class AmmoTemplateDirectWeapons{
 //Basic Ammo for Heavy Railgun
 class AmmoHShellBasic extends AmmoTemplateDirectWeapons{	
 	public $name = 'AmmoHShellBasic';
-	public $displayName = 'Basic Heavy Shell'; //should never be shown ;)
-	public $modeName = 'Basic Heavy Shell';
+	public $displayName = 'Heavy Shell'; //should never be shown ;)
+	public $modeName = 'Heavy Shell';
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'SHELL_HBSC'; //enhancement name to be enabled
 	public $enhancementDescription = '(HEAVY AMMO) Basic Shell'; //enhancement description
@@ -497,8 +497,8 @@ class AmmoHShellBasic extends AmmoTemplateDirectWeapons{
 //Basic Ammo for Medium Railgun
 class AmmoMShellBasic extends AmmoTemplateDirectWeapons{	
 	public $name = 'AmmoMShellBasic';
-	public $displayName = 'Basic Medium Shell'; //should never be shown ;)
-	public $modeName = 'Basic Medium Shell';
+	public $displayName = 'Medium Shell'; //should never be shown ;)
+	public $modeName = 'Medium Shell';
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'SHELL_MBSC'; //enhancement name to be enabled
 	public $enhancementDescription = '(MEDIUM AMMO) Basic Shell'; //enhancement description
@@ -532,8 +532,8 @@ class AmmoMShellBasic extends AmmoTemplateDirectWeapons{
 //Basic Ammo for Light Railgun
 class AmmoLShellBasic extends AmmoTemplateDirectWeapons{	
 	public $name = 'AmmoLShellBasic';
-	public $displayName = 'Basic Light Shell'; //should never be shown ;)
-	public $modeName = 'Basic Light Shell';
+	public $displayName = 'Light Shell'; //should never be shown ;)
+	public $modeName = 'Light Shell';
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'SHELL_LBSC'; //enhancement name to be enabled
 	public $enhancementDescription = '(LIGHT AMMO) Basic Shell'; //enhancement description
@@ -567,8 +567,8 @@ class AmmoLShellBasic extends AmmoTemplateDirectWeapons{
 //Flash Ammo for Heavy Railgun
 class AmmoHShellFlash extends AmmoTemplateDirectWeapons{	
 	public $name = 'AmmoHShellFlash';
-	public $displayName = 'Flash Heavy Shell'; //should never be shown ;)
-	public $modeName = 'Flash Heavy Shell';
+	public $displayName = 'Heavy Flash Shell'; //should never be shown ;)
+	public $modeName = 'Heavy Flash Shell';
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'SHELL_HFLH'; //enhancement name to be enabled
 	public $enhancementDescription = '(HEAVY AMMO) Flash Shell'; //enhancement description
@@ -602,8 +602,8 @@ class AmmoHShellFlash extends AmmoTemplateDirectWeapons{
 //Flash Ammo for Medium Railgun
 class AmmoMShellFlash extends AmmoTemplateDirectWeapons{	
 	public $name = 'AmmoMShellFlash';
-	public $displayName = 'Flash Medium Shell'; //should never be shown ;)
-	public $modeName = 'Flash Medium Shell';
+	public $displayName = 'Medium Flash Shell'; //should never be shown ;)
+	public $modeName = 'Medium Flash Shell';
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'SHELL_MFLH'; //enhancement name to be enabled
 	public $enhancementDescription = '(MEDIUM AMMO) Flash Shell'; //enhancement description
@@ -637,8 +637,8 @@ class AmmoMShellFlash extends AmmoTemplateDirectWeapons{
 //Flash Ammo for Light Railgun
 class AmmoLShellFlash extends AmmoTemplateDirectWeapons{	
 	public $name = 'AmmoLShellFlash';
-	public $displayName = 'Flash Light Shell'; //should never be shown ;)
-	public $modeName = 'Flash Light Shell';
+	public $displayName = 'Light Flash Shell'; //should never be shown ;)
+	public $modeName = 'Light Flash Shell';
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'SHELL_LFLH'; //enhancement name to be enabled
 	public $enhancementDescription = '(LIGHT AMMO) Flash Shell'; //enhancement description
@@ -672,8 +672,8 @@ class AmmoLShellFlash extends AmmoTemplateDirectWeapons{
 //Scatter Ammo for Heavy Railgun
 class AmmoHShellScatter extends AmmoTemplateDirectWeapons{	
 	public $name = 'AmmoHShellScatter';
-	public $displayName = 'Scatter Heavy Shell'; //should never be shown ;)
-	public $modeName = 'Scatter Heavy Shell';
+	public $displayName = 'Heavy Scatter Shell'; //should never be shown ;)
+	public $modeName = 'Heavy Scatter Shell';
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'SHELL_HSCT'; //enhancement name to be enabled
 	public $enhancementDescription = '(HEAVY AMMO) Scatter Shell'; //enhancement description
@@ -730,8 +730,8 @@ class AmmoHShellScatter extends AmmoTemplateDirectWeapons{
 //Scatter Ammo for Medium Railgun
 class AmmoMShellScatter extends AmmoTemplateDirectWeapons{	
 	public $name = 'AmmoMShellScatter';
-	public $displayName = 'Scatter Medium Shell'; //should never be shown ;)
-	public $modeName = 'Scatter Medium Shell';
+	public $displayName = 'Medium Scatter Shell'; //should never be shown ;)
+	public $modeName = 'Medium Scatter Shell';
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'SHELL_MSCT'; //enhancement name to be enabled
 	public $enhancementDescription = '(MEDIUM AMMO) Scatter Shell'; //enhancement description
@@ -788,8 +788,8 @@ class AmmoMShellScatter extends AmmoTemplateDirectWeapons{
 //Scatter Ammo for Light Railgun
 class AmmoLShellScatter extends AmmoTemplateDirectWeapons{	
 	public $name = 'AmmoLShellScatter';
-	public $displayName = 'Scatter Light Shell'; //should never be shown ;)
-	public $modeName = 'Scatter Light Shell';
+	public $displayName = 'Light Scatter Shell'; //should never be shown ;)
+	public $modeName = 'Light Scatter Shell';
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'SHELL_LSCT'; //enhancement name to be enabled
 	public $enhancementDescription = '(LIGHT AMMO) Scatter Shell'; //enhancement description
@@ -848,7 +848,7 @@ class AmmoLShellScatter extends AmmoTemplateDirectWeapons{
 class AmmoHShellHeavy extends AmmoTemplateDirectWeapons{	
 	public $name = 'AmmoHShellHeavy';
 	public $displayName = 'Heavy Heavy Shell'; //should never be shown ;)
-	public $modeName = 'Heavy Shell';
+	public $modeName = 'Heavy Heavy Shell';
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'SHELL_HHVY'; //enhancement name to be enabled
 	public $enhancementDescription = '(HEAVY AMMO) Heavy Shell'; //enhancement description
@@ -882,8 +882,8 @@ class AmmoHShellHeavy extends AmmoTemplateDirectWeapons{
 //Heavy Ammo for Medium Railgun
 class AmmoMShellHeavy extends AmmoTemplateDirectWeapons{	
 	public $name = 'AmmoMShellHeavy';
-	public $displayName = 'Heavy Medium Shell'; //should never be shown ;)
-	public $modeName = 'Heavy Medium Shell';
+	public $displayName = 'Medium Heavy Shell'; //should never be shown ;)
+	public $modeName = 'Medium Heavy Shell';
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'SHELL_MHVY'; //enhancement name to be enabled
 	public $enhancementDescription = '(MEDIUM AMMO) Heavy Shell'; //enhancement description
@@ -917,8 +917,8 @@ class AmmoMShellHeavy extends AmmoTemplateDirectWeapons{
 //Heavy Ammo for Light Railgun
 class AmmoLShellHeavy extends AmmoTemplateDirectWeapons{	
 	public $name = 'AmmoLShellHeavy';
-	public $displayName = 'Heavy Light Shell'; //should never be shown ;)
-	public $modeName = 'Heavy Light Shell';
+	public $displayName = 'Light Heavy Shell'; //should never be shown ;)
+	public $modeName = 'Light Heavy Shell';
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'SHELL_LHVY'; //enhancement name to be enabled
 	public $enhancementDescription = '(LIGHT AMMO) Heavy Shell'; //enhancement description
@@ -952,8 +952,8 @@ class AmmoLShellHeavy extends AmmoTemplateDirectWeapons{
 //Long Range Ammo for Heavy Railgun
 class AmmoHShellLRange extends AmmoTemplateDirectWeapons{	
 	public $name = 'AmmoHShellLRange';
-	public $displayName = 'Long Range Heavy Shell'; //should never be shown ;)
-	public $modeName = 'Long Range Heavy Shell';
+	public $displayName = 'Heavy Long Range Shell'; //should never be shown ;)
+	public $modeName = 'Heavy Long Range Shell';
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'SHELL_HLR'; //enhancement name to be enabled
 	public $enhancementDescription = '(HEAVY AMMO) Long Range Shell'; //enhancement description
@@ -987,8 +987,8 @@ class AmmoHShellLRange extends AmmoTemplateDirectWeapons{
 //Long Range Ammo for Medium Railgun
 class AmmoMShellLRange extends AmmoTemplateDirectWeapons{	
 	public $name = 'AmmoMShellLRange';
-	public $displayName = 'Long Range Medium Shell'; //should never be shown ;)
-	public $modeName = 'Long Range Medium Shell';
+	public $displayName = 'Medium Long Range Shell'; //should never be shown ;)
+	public $modeName = 'Medium Long Range Shell';
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'SHELL_MLR'; //enhancement name to be enabled
 	public $enhancementDescription = '(MEDIUM AMMO) Long Range Shell'; //enhancement description
@@ -1022,8 +1022,8 @@ class AmmoMShellLRange extends AmmoTemplateDirectWeapons{
 //Ultra Long Range Ammo for Heavy Railgun
 class AmmoHShellULRange extends AmmoTemplateDirectWeapons{	
 	public $name = 'AmmoHShellULRange';
-	public $displayName = 'Ultra Long Range Heavy Shell'; //should never be shown ;)
-	public $modeName = 'Ultra Long Range Heavy Shell';
+	public $displayName = 'Heavy Ultra Long Range Shell'; //should never be shown ;)
+	public $modeName = 'Heavy Ultra Long Range Shell';
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'SHELL_HULR'; //enhancement name to be enabled
 	public $enhancementDescription = '(HEAVY AMMO) Ultra Long Range Shell'; //enhancement description
