@@ -285,6 +285,7 @@ window.gamedata = {
 			'<span class="shipname name">' + ship.name + '</span>' +
 			'<span class="pointcost">' + ship.pointCost + 'p</span>' +
 			' <span class="showship clickable">Details</span> ' +
+			' -<span class="editship clickable">Edit</span> ' +				
 			' -<span class="remove clickable">Remove</span> ' +
 			'</div>');
         
@@ -296,6 +297,10 @@ window.gamedata = {
 
 		$(".showship", h).on("click", function (e) {
 			gamedata.onShipContextMenu(ship.phpclass, ship.faction, ship.id, true);
+		});
+
+		$(".editship", h).on("click", function (e) {
+			gamedata.editShip(ship);
 		});
 
         h.appendTo("#fleet");
@@ -1214,7 +1219,8 @@ window.gamedata = {
 				'<span class="shiptype">' + ship.shipClass + '</span>' +
 				'<span class="shipname name">' + ship.name + '</span>' +
 				'<span class="pointcost">' + ship.pointCost + 'p</span>' +
-				'<span class="showship clickable">Details</span> ' +
+				' <span class="showship clickable">Details</span> ' +
+				' -<span class="editship clickable">Edit</span> ' +				
 				' -<span class="remove clickable">Remove</span> ' +
 				'</div>');
 	
@@ -1236,7 +1242,11 @@ window.gamedata = {
             // to assign new id's to all fleet entries
             gamedata.constructFleetList();
         });
-	
+
+		$(".editship", h).on("click", function (e) {
+			gamedata.editShip(ship);
+		});		
+
 		$("#fleet").off("click", ".showship").on("click", ".showship", function (e) {
 			var id = $(this).parent().data("shipindex");
 			for (var i in gamedata.ships) {
@@ -1652,6 +1662,7 @@ window.gamedata = {
         //		}
     },
 
+
     doBuyShip: function doBuyShip() {
         var shipclass = $(this).data().shipclass;
         var ship = gamedata.getShipByType(shipclass);
@@ -1763,6 +1774,138 @@ window.gamedata = {
     //
     //            return true;
     //        },
+
+
+
+    editShip: function editShip(ship) {
+        var slotid = gamedata.selectedSlot;
+        var selectedSlot = playerManager.getSlotById(slotid);
+        if (selectedSlot.lastphase == "-2") {
+            window.confirm.error("You have already readied your fleet!", function () {});
+            return false;
+        }
+
+        $(".confirm").remove();
+
+        window.confirm.showShipEdit(ship, gamedata.doEditShip);
+    },	
+
+
+	doEditShip: function doEditShip() {
+        var ship = $(this).data().ship;
+		var name = ship.name;
+
+		//Remove old ship from Fleet List first
+		var id = ship.id;
+		for (var i in gamedata.ships) {
+			if (gamedata.ships[i].id == id) {
+				delete gamedata.ships[i];
+				break;
+			}
+		}
+		$('.ship.bought.shipid_' + id).remove();
+
+		//Now generate a new generate ship to reset Enhancements applied in ship window etc (otehrwise they don't update!)
+		ship = gamedata.getShipByType(ship.phpclass);
+		ship.name = name;	
+        ship.userid = gamedata.thisplayer;			
+
+        if ($(".confirm .totalUnitCostAmount").length > 0) {
+            ship.pointCost = $(".confirm .totalUnitCostAmount").data("value");			
+        }
+
+        if (!gamedata.canAfford(ship)) {
+            $(".confirm").remove();
+            window.confirm.error("You cannot afford that ship!", function () {});
+            return;
+        }
+
+        if (ship.flight) {
+            var flightSize = $(".fighterAmount").html();
+            if (!flightSize) {
+                flightSize = 1;
+            }
+            ship.flightSize = Math.floor(flightSize);
+        }
+	    
+		//do note enhancements bought (if any)
+		var enhNo = 0;
+		var noTaken = 0;
+		var target = $(".selectAmount.shpenh" + enhNo);
+		while(typeof target.data("enhPrice") != 'undefined'){ //as long as there are enhancements defined...
+			noTaken = target.data("count");
+			if(noTaken > 0){ //enhancement picked - note!
+				ship.enhancementOptions[enhNo][2] = noTaken;
+				if(!ship.enhancementOptions[enhNo][6]){ //this is an actual enhancement (as opposed to option) - note value!
+					if (ship.flight){
+						ship.pointCostEnh += target.data("enhCost") * flightSize;
+					} else {
+						ship.pointCostEnh += target.data("enhCost");
+					}
+				}else{ //this is an option - still note value, just separately!
+					if (ship.flight){
+						ship.pointCostEnh2 += target.data("enhCost") * flightSize;
+					} else {
+						ship.pointCostEnh2 += target.data("enhCost");
+					}
+				}
+			}
+			//go to next enhancement
+			enhNo++;
+			target = $(".selectAmount.shpenh" + enhNo);
+		}	    
+
+        if ($(".confirm .selectAmount").length > 0) {
+            if (ship.flight) {
+
+                // and get the amount of launchers on a fighter
+                var nrOfLaunchers = 0;
+
+                for (var j in ship.systems[1].systems) {
+                    var fighterSystem = ship.systems[1].systems[j];
+
+                    if (!mathlib.arrayIsEmpty(fighterSystem.firingModes) && fighterSystem.missileArray != null) {
+                        nrOfLaunchers++;
+                    }
+                }
+
+                // get all selections of missiles
+                var missileOptions = $(".confirm .selectAmount");
+
+                for (var k = 0; k < missileOptions.length; k++) {
+                    var firingMode = $(missileOptions[k]).data("firingMode");
+
+                    // divide the bought missiles over the missileArrays
+                    var boughtAmount = $(".confirm .selectAmount." + firingMode).data("value");
+
+                    // perLauncher should always get you an integer as result. The UI handles
+                    // buying of missiles that way.
+                    var perLauncher = boughtAmount;
+
+                    for (var i in ship.systems) {
+                        var fighter = ship.systems[i];
+
+                        for (var j in fighter.systems) {
+                            var fighterSystem = fighter.systems[j];
+
+                            if (!mathlib.arrayIsEmpty(fighterSystem.firingModes) && fighterSystem.missileArray != null) {
+                                // find the correct index, depending on the firingMode
+                                for (var index in fighterSystem.firingModes) {
+                                    if (fighterSystem.firingModes[index] == firingMode) {
+                                        fighterSystem.missileArray[index].amount = perLauncher;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {}
+        }
+
+        $(".confirm").remove();
+        gamedata.updateFleet(ship);
+    },
+
 
     getShipByType: function getShipByType(type) {
 
@@ -1879,7 +2022,12 @@ window.gamedata = {
 		}
 
 		//Now add Enhancements and update system info.
-		gamedata.setEnhancementsShip(ship);
+		if(ship.flight){
+			gamedata.setEnhancementsFighter(ship);
+		}else{
+			gamedata.setEnhancementsShip(ship);
+		}
+
 		shipWindowManager.setData(ship);
 
 		/*		//Alternative method		
@@ -2405,125 +2553,292 @@ window.gamedata = {
 				switch (enhID) {
 
 					case 'AMMO_B': //Basic Missile - Shouldn't ever be purchasable an an enhancement, but here we are.					
-					if(!ship.ammoBEnh){
-						ammoMagazine.data["Special"] += "<br>- Basic Missiles: " + enhCount;
+						if(!ship.ammoBEnh){
+							//May need a different method as Basic entry already exists in Special data.
+							let special = ammoMagazine.data["Special"];
+							if (special.includes("- Basic Missile: ")) { 
+								special = special.replace(/(- Basic Missile: )\d+/, `$1${enhCount}`);
+								sys.data["Special"] = special;
+							}else{
+								sys.data["Special"] += "<br>- Basic Missile: " + enhCount;
+							}	
+						}	
 						ship.ammoBEnh =  true;
-					}	
 					break;
+
 					case 'AMMO_L': //Long Range Missile
-					if(!ship.ammoLEnh){
-						ammoMagazine.data["Special"] += "<br>- Long Range Missiles: " + enhCount;
+						if(!ship.ammoLEnh){
+							ammoMagazine.data["Special"] += "<br>- Long Range Missile: " + enhCount;
+						}	
 						ship.ammoLEnh =  true;
-					}	
 					break;
+
 					case 'AMMO_H': //Heavy Missile
-					if(!ship.ammoHEnh){
-						ammoMagazine.data["Special"] += "<br>- Heavy Missiles: " + enhCount;
+						if(!ship.ammoHEnh){
+							ammoMagazine.data["Special"] += "<br>- Heavy Missile: " + enhCount;
+						}	
 						ship.ammoHEnh =  true;
-					}	
-						break;
+					break;
+
 					case 'AMMO_F': //Flash Missile
-					if(!ship.ammoFEnh){
-						ammoMagazine.data["Special"] += "<br>- Flash Missiles: " + enhCount;
+						if(!ship.ammoFEnh){
+							ammoMagazine.data["Special"] += "<br>- Flash Missile: " + enhCount;
+						}	
 						ship.ammoFEnh =  true;
-					}	
-						break;
+					break;
+
 					case 'AMMO_A': //Antifighter Missile
-					if(!ship.ammoAEnh){
-						ammoMagazine.data["Special"] += "<br>- Antifighter Missiles: " + enhCount;
+						if(!ship.ammoAEnh){
+							ammoMagazine.data["Special"] += "<br>- Antifighter Missile: " + enhCount;
+						}	
 						ship.ammoAEnh =  true;
-					}	
-						break;
+					break;
+
 					case 'AMMO_P': //Piercing Missile
-					if(!ship.ammoPEnh){
-						ammoMagazine.data["Special"] += "<br>- Piercing Missiles: " + enhCount;
+						if(!ship.ammoPEnh){
+							ammoMagazine.data["Special"] += "<br>- Piercing Missile: " + enhCount;
+						}	
 						ship.ammoPEnh =  true;
-					}	
-						break;
+					break;
+
 					case 'AMMO_D': //Light Missile						
-					if(!ship.ammoDEnh){
-						ammoMagazine.data["Special"] += "<br>- Light Missiles: " + enhCount;
+						if(!ship.ammoDEnh){
+							ammoMagazine.data["Special"] += "<br>- Light Missile: " + enhCount;
+						}	
 						ship.ammoDEnh =  true;
-					}	
-						break;						
+					break;	
+
 					case 'AMMO_I': //Interceptor Missile 						
-					if(!ship.ammoIEnh){
-						ammoMagazine.data["Special"] += "<br>- Interceptor Missiles: " + enhCount;
+						if(!ship.ammoIEnh){
+							ammoMagazine.data["Special"] += "<br>- Interceptor Missile: " + enhCount;
+						}	
 						ship.ammoIEnh =  true;
-					}	
-						break;
+					break;
+
 					case 'AMMO_C': //Chaff Missile						
-					if(!ship.ammoCEnh){
-						ammoMagazine.data["Special"] += "<br>- Chaff Missiles: " + enhCount;
+						if(!ship.ammoCEnh){
+							ammoMagazine.data["Special"] += "<br>- Chaff Missile: " + enhCount;
+						}	
 						ship.ammoCEnh =  true;
-					}	
-						break;	
+					break;	
+
 					case 'AMMO_J': //Jammer Missile						
-					if(!ship.ammoJEnh){
-						ammoMagazine.data["Special"] += "<br>- Jammer Missiles: " + enhCount;
+						if(!ship.ammoJEnh){
+							ammoMagazine.data["Special"] += "<br>- Jammer Missile: " + enhCount;
+						}	
 						ship.ammoJEnh =  true;
-					}	
-						break;
+					break;
+
 					case 'AMMO_K': //Starburst Missile						
-					if(!ship.ammoKEnh){
-						ammoMagazine.data["Special"] += "<br>- Starburst Missiles: " + enhCount;
+						if(!ship.ammoKEnh){
+							ammoMagazine.data["Special"] += "<br>- Starburst Missile: " + enhCount;
+						}	
 						ship.ammoKEnh =  true;
-					}	
-						break;						
+					break;		
+
 					case 'AMMO_M': //Multiwarhead Missile						
-					if(!ship.ammoMEnh){
-						ammoMagazine.data["Special"] += "<br>- Multiwarhead Missiles: " + enhCount;
-						ship.ammoMEnh =  true;
-					}	
-						break;
+						if(!ship.ammoMEnh){
+							ammoMagazine.data["Special"] += "<br>- Multiwarhead Missile: " + enhCount;
+						}	
+						ship.ammoMEnh =  true;					
+					break;
+
 					case 'AMMO_KK': //Kinetic Missile						
-					if(!ship.ammoKKEnh){
-						ammoMagazine.data["Special"] += "<br>- Kinetic Missiles: " + enhCount;
+						if(!ship.ammoKKEnh){
+							ammoMagazine.data["Special"] += "<br>- Kinetic Missile: " + enhCount;
+						}	
 						ship.ammoKKEnh =  true;
-					}	
-						break;
+					break;
+
 					case 'AMMO_S': //Stealth Missile						
-					if(!ship.ammoSEnh){
-						ammoMagazine.data["Special"] += "<br>- Stealth Missiles: " + enhCount;
+						if(!ship.ammoSEnh){
+							ammoMagazine.data["Special"] += "<br>- Stealth Missile: " + enhCount;
+						}	
 						ship.ammoSEnh =  true;
-					}	
-						break;						
+					break;	
+
 					case 'AMMO_X': //HARM Missile						
-					if(!ship.ammoXEnh){
-						ammoMagazine.data["Special"] += "<br>- HARM Missiles: " + enhCount;
+						if(!ship.ammoXEnh){
+							ammoMagazine.data["Special"] += "<br>- HARM Missile: " + enhCount;
+						}	
 						ship.ammoXEnh =  true;
-					}	
-						break;	
+					break;
+
 					case 'MINE_BLB': //Ballistic Launcher Basic Mine						
-					if(!ship.ammoBLBEnh){
-						ammoMagazine.data["Special"] += "<br>- Basic Mines: " + enhCount;
-						ship.ammoBLBEnh =  true;
-					}	
-						break;
+						if(!ship.ammoBLBEnh){
+							//May need a different method as Basic entry already exists in Special data.
+							let special = ammoMagazine.data["Special"];
+							if (special.includes("- Basic Mine: ")) { 
+								special = special.replace(/(- Basic Mine: )\d+/, `$1${enhCount}`);
+								sys.data["Special"] = special;
+							}else{
+								sys.data["Special"] += "<br>- Basic Mine: " + enhCount;
+							}	
+						}	
+						ship.ammoBLBEnh =  true;						
+					break;
+
 					case 'MINE_BLH': //Ballistic Launcher Heavy Mine						
-					if(!ship.ammoBLHEnh){
-						ammoMagazine.data["Special"] += "<br>- Heavy Mines: " + enhCount;
+						if(!ship.ammoBLHEnh){
+							ammoMagazine.data["Special"] += "<br>- Heavy Mine: " + enhCount;
+						}	
 						ship.ammoBLHEnh =  true;
-					}	
-						break;
+					break;
+
 					case 'MINE_BLW': //Ballistic Launcher Wide-Range Mine						
-					if(!ship.ammoBLWEnh){
-						ammoMagazine.data["Special"] += "<br>- Wide-range Mines: " + enhCount;
-						ship.ammoBLWEnh =  true;
-					}	
-						break;
+						if(!ship.ammoBLWEnh){
+							ammoMagazine.data["Special"] += "<br>- Wide-range Mine: " + enhCount;
+						}
+						ship.ammoBLWEnh =  true;							
+					break;
+
 					case 'MINE_MLB': //Abbai Mine Launcher Basic Mine													
-					if(!ship.ammoMLBEnh){
-						ammoMagazine.data["Special"] += "<br>- Basic Mines: " + enhCount;
-						ship.ammoMLBEnh =  true;
-					}	
-						break;	
+						if(!ship.ammoMLBEnh){
+							//May need a different method as Basic entry already exists in Special data.
+							let special = ammoMagazine.data["Special"];
+							if (special.includes("- Basic Mine: ")) { 
+								special = special.replace(/(- Basic Mine: )\d+/, `$1${enhCount}`);
+								sys.data["Special"] = special;
+							}else{
+								sys.data["Special"] += "<br>- Basic Mine: " + enhCount;
+							}	
+						}	
+						ship.ammoMLBEnh =  true;						
+					break;	
+
 					case 'MINE_MLW': //Abbai Mine Launcher Wide-Ranged Mine						
-					if(!ship.ammoMLWEnh){
-						ammoMagazine.data["Special"] += "<br>- Wide-range Mines: " + enhCount;
-						ship.ammoMLWEnh =  true;
-					}	
-						break;
+						if(!ship.ammoMLWEnh){
+							ammoMagazine.data["Special"] += "<br>- Wide-range Mine: " + enhCount;
+						}
+						ship.ammoMLWEnh =  true;	
+					break;
+
+					//AMMO TYPES FOR DIRECT FIRE WEAPONS					
+					case 'SHELL_HBSC': //Standard Ammo for Heavy Railgun						
+						if(!ship.shellHBEnh){
+							//May need a different method as Basic entry already exists in Special data.
+							let special = ammoMagazine.data["Special"];
+							if (special.includes("- Basic Heavy Shell: ")) { 
+								special = special.replace(/(- Basic Heavy Shell: )\d+/, `$1${enhCount}`);
+								sys.data["Special"] = special;
+							}else{
+								sys.data["Special"] += "<br>- Basic Heavy Shell: " + enhCount;
+							}	
+						}	
+						ship.shellHBEnh =  true;
+					break;
+
+					case 'SHELL_MBSC': //Standard Ammo for Medium Railgun						
+						if(!ship.shellMBEnh){
+							//May need a different method as Basic entry already exists in Special data.
+							let special = ammoMagazine.data["Special"];
+							if (special.includes("- Basic Medium Shell: ")) { 
+								special = special.replace(/(- Basic Medium Shell: )\d+/, `$1${enhCount}`);
+								sys.data["Special"] = special;
+							}else{
+								sys.data["Special"] += "<br>- Basic Medium Shell: " + enhCount;
+							}	
+						}	
+						ship.shellMBEnh =  true;
+					break;	
+
+					case 'SHELL_LBSC': //Standard Ammo for Light Railgun						
+						if(!ship.shellLBEnh){
+							//May need a different method as Basic entry already exists in Special data.
+							let special = ammoMagazine.data["Special"];
+							if (special.includes("- Basic Light Shell: ")) { 
+								special = special.replace(/(- Basic Light Shell: )\d+/, `$1${enhCount}`);
+								sys.data["Special"] = special;
+							}else{
+								sys.data["Special"] += "<br>- Basic Light Shell: " + enhCount;
+							}	
+						}	
+						ship.shellLBEnh =  true;
+					break;	
+
+					case 'SHELL_HFLH': //Flash Ammo for Heavy Railgun						
+						if(!ship.ammoHFEnh){
+							ammoMagazine.data["Special"] += "<br>- Heavy Flash Shell: " + enhCount;
+						}
+						ship.ammoHFEnh =  true;
+					break;	
+
+					case 'SHELL_MFLH': //Flash Ammo for Medium Railgun						
+						if(!ship.ammoMFEnh){
+							ammoMagazine.data["Special"] += "<br>- Medium Flash Shell: " + enhCount;
+						}
+						ship.ammoMFEnh =  true;
+					break;	
+
+					case 'SHELL_LFLH': //Flash Ammo for Light Railgun						
+						if(!ship.ammoLFEnh){
+							ammoMagazine.data["Special"] += "<br>- Light Flash Shell: " + enhCount;
+						}
+						ship.ammoLFEnh =  true;
+					break;	
+
+					case 'SHELL_HSCT': //Scatter Ammo for Heavy Railgun						
+						if(!ship.ammoHSEnh){
+							ammoMagazine.data["Special"] += "<br>- Heavy Scatter Shell: " + enhCount;
+						}
+						ship.ammoHSEnh =  true;
+					break;	
+
+					case 'SHELL_MSCT': //Scatter Ammo for Medium Railgun						
+						if(!ship.ammoMSEnh){
+							ammoMagazine.data["Special"] += "<br>- Medium Scatter Shell: " + enhCount;
+						}
+						ship.ammoMSEnh =  true;
+					break;	
+
+					case 'SHELL_LSCT': //Scatter Ammo for Light Railgun						
+						if(!ship.ammoLSEnh){
+							ammoMagazine.data["Special"] += "<br>- Light Scatter Shell: " + enhCount;
+						}
+						ship.ammoLSEnh =  true;
+					break;
+
+					case 'SHELL_HHVY': //Heavy Ammo for Heavy Railgun						
+						if(!ship.ammoHHEnh){
+							ammoMagazine.data["Special"] += "<br>- Heavy Heavy Shell: " + enhCount;
+						}
+						ship.ammoHHEnh =  true;
+					break;
+
+					case 'SHELL_MHVY': //Heavy Ammo for Medium Railgun						
+						if(!ship.ammoMHEnh){
+							ammoMagazine.data["Special"] += "<br>- Medium Heavy Shell: " + enhCount;
+						}
+						ship.ammoMHEnh =  true;
+					break;
+							
+					case 'SHELL_LHVY': //Heavy Ammo for Light Railgun						
+						if(!ship.ammoLHEnh){
+							ammoMagazine.data["Special"] += "<br>- Light Heavy Shell: " + enhCount;
+						}
+						ship.ammoLHEnh =  true;
+					break;																												
+					
+					case 'SHELL_HLR': //Long Range Ammo for Heavy Railgun						
+						if(!ship.ammoHLREnh){
+							ammoMagazine.data["Special"] += "<br>- Heavy Long Range Shell: " + enhCount;
+						}
+						ship.ammoHLREnh =  true;
+					break;		
+
+					case 'SHELL_MLR': //Long Range Ammo for Medium Railgun						
+						if(!ship.ammoMLREnh){
+							ammoMagazine.data["Special"] += "<br>- Medium Long Range Shell: " + enhCount;
+						}
+						ship.ammoMLREnh =  true;
+					break;		
+
+					case 'SHELL_HULR': //Ultra Long Range Ammo for Heavy Railgun						
+						if(!ship.ammoHULREnh){
+							ammoMagazine.data["Special"] += "<br>- Heavy Ultra Long Range Shell: " + enhCount;
+						}
+						ship.ammoHULREnh =  true;
+					break;	
 				}	
 			}		
 
@@ -2531,7 +2846,267 @@ window.gamedata = {
 		  }
 		}
 	},
-	
+
+	setEnhancementsFighter: function setEnhancementsFighter(flight) {
+
+			for (let entry of flight.enhancementOptions) {
+				// ID, readableName, numberTaken, limit, price, priceStep
+				let enhID = entry[0];
+				let enhCount = entry[2];
+				let enhDescription = entry[1];
+				
+				if (enhCount > 0) {
+
+					if (flight.enhancementTooltip !== "") this.enhancementTooltip += "<br>";
+					flight.enhancementTooltip += enhDescription;
+					if (enhCount > 1) flight.enhancementTooltip += ` (x${enhCount})`;	
+		
+					switch (enhID) {
+
+						case 'ELT_MAR': // Elite marines, mark every Marines system as Elite.
+							if(!flight.marEnhFlight){
+								flight.systems.forEach(ftr => {
+									ftr.systems.forEach(sys => {
+										if (sys.name == "Marines") {
+											sys.data["Elite"] = "Yes";
+										}
+									});
+								});
+							}	
+							flight.marEnhFlight = true;	
+						break;
+		
+						case 'ELITE_SW': // Elite Pilot (SW)
+							if(!flight.swEnh){
+								flight.pivotcost = 1;
+								flight.offensivebonus += enhCount;
+								flight.iniativebonus += enhCount * 5;
+								flight.forwardDefense -= enhCount;
+								flight.sideDefense -= enhCount;
+								flight.notes += "<br>Elite Pilot";
+								}
+								flight.swEnh = true;
+						break;
+		
+						case 'EXP_MOTIV': // Expert Motivator
+						if(!flight.motivEnh){
+								flight.notes += "<br>Expert Motivator";
+							}
+							flight.motivEnh = true;
+						break;
+		
+						case 'EXT_AMMO': // Extra ammo
+							if(!flight.exAmmoEnh){
+								flight.systems.forEach(ftr => {
+									ftr.systems.forEach(sys => {
+										if (sys.name == "PairedGatlingGun" || 
+											sys.name == "MatterGun" || 
+											sys.name == "SlugCannon" || 
+											sys.name == "GatlingGunFtr" ||
+											sys.name == "NexusAutogun" ||
+											sys.name == "NexusMinigunFtr" ||
+											sys.name == "NexusShatterGunFtr" ||
+											sys.name == "NexusLightDefenseGun") {
+											sys.data["Ammunition"] += enhCount; 
+										}
+									});
+								});
+							}
+							flight.exAmmoEnh = true;	
+						break;
+		
+						case 'EXT_HAMMO': // Extra heavy ammo
+							if(!flight.exHAmmoEnh){						
+								flight.systems.forEach(ftr => {
+									ftr.systems.forEach(sys => {
+										if (sys.name == "NexusAutocannonFtr" || 
+											sys.name == "NexusLightGasGunFtr") {
+											sys.data["Ammunition"] += enhCount; 
+										}
+									});
+								});
+							}
+							flight.exHAmmoEnh = true;							
+						break;
+		
+						case 'EXT_MAR': // Extra marines
+							if(!flight.marEnhFlight){							
+								flight.systems.forEach(ftr => {
+									ftr.systems.forEach(sys => {
+										if (sys.name == "Marines") {
+											sys.data["Ammunition"] += enhCount; 
+										}
+									});
+								});
+							}		
+							flight.marEnhFlight = true;								
+						break;
+		
+						case 'FTR_FERV': // Markab Religious Fervor
+							if(!flight.fervEnhFlight){							
+								flight.offensivebonus += enhCount;
+								flight.iniativebonus += enhCount * 10;
+								flight.forwardDefense += enhCount * 2;
+								flight.sideDefense += enhCount * 2;
+								flight.critRollMod -= enhCount * 3;
+								flight.notes += "<br>Markab Fervor";								
+							}
+							flight.fervEnhFlight = true;
+						break;
+		
+						case 'IMPR_OB': // Improved Targeting Computer
+							if(!flight.obEnh){
+								flight.offensivebonus += enhCount;							
+								flight.notes += "<br>Improved Targeting Computer";
+							}
+							flight.obEnh = true;
+						break;
+		
+						case 'IMPR_THR': // Improved Thrust
+							if(!flight.thrEnh){
+								flight.freethrust += enhCount;						
+							}
+							flight.thrEnh = true;
+						break;						
+		
+						case 'NAVIGATOR': // Navigator
+							if(!flight.navEnh){						
+								flight.notes += "<br>Navigator";
+							}
+							flight.navEnh = true;
+						break;
+		
+						case 'POOR_TRAIN': // Poor Training
+							if(!flight.poorTrEnh){							
+								flight.critRollMod += enhCount * 2;
+								flight.offensivebonus -= enhCount;
+								flight.freethrust -= enhCount;
+								flight.iniativebonus -= enhCount * 5;
+								flight.forwardDefense += enhCount;
+								flight.sideDefense += enhCount;
+								flight.notes += "<br>Poor Training";								
+							}	
+							flight.poorTrEnh = true;							
+						break;
+		
+						case 'SHAD_CTRL': // Shadow fighter deployed without carrier control
+							if(!flight.shadCtrlEnh){							
+								flight.offensivebonus -= enhCount * 2;
+								flight.iniativebonus -= enhCount * 3 * 5;
+							}	
+							flight.shadCtrlEnh = true;								
+						break;
+		
+						case 'VOR_AZURF': // Vorlon Azure Skin Coloring
+							if(!flight.azurfEnh){						
+								flight.systems.forEach(ftr => {
+									ftr.systems.forEach(sys => {
+										if (sys.name == "FtrShield") {
+											sys.data["Basic Strength"] += enhCount;
+										}
+									});
+								});
+								flight.notes += "<br>Azure Skin Coloring";								
+							}	
+							flight.azurfEnh = true;		
+						break;		
+					
+						//consumable ammunition - add to ALL missile magazines on flight!
+						case 'AMMO_FB': //Basic Fighter Missile
+							if(!flight.fbEnh){
+								flight.systems.forEach(ftr => {
+									ftr.systems.forEach(sys => {
+										if (sys.name == "ammoMagazine") {
+											let special = sys.data["Special"];
+											if (special.includes("- Basic Missile: ")) { 
+												special = special.replace(/(- Basic Missile: )\d+/, `$1${enhCount}`);
+												sys.data["Special"] = special;
+											}else{
+												sys.data["Special"] += "<br>- Basic Missile: " + enhCount;
+											}
+										}
+									});
+								});
+							}
+							flight.fbEnh = true;	
+						break;
+
+						case 'AMMO_FH': //Heavy Fighter Missile
+							if(!flight.fhEnh){
+								flight.systems.forEach(ftr => {
+									ftr.systems.forEach(sys => {
+										if (sys.name == "ammoMagazine") {
+											sys.data["Special"] += "<br>- Heavy Missile: " + enhCount;
+										}
+									});
+								});
+							}
+							flight.fhEnh = true;	
+						break;
+
+						case 'AMMO_FL': //Long Range Fighter Missile
+							if(!flight.flEnh){
+								flight.systems.forEach(ftr => {
+									ftr.systems.forEach(sys => {
+										if (sys.name == "ammoMagazine") {
+											sys.data["Special"] += "<br>- Long Range Missile: " + enhCount;
+										}
+									});
+								});
+							}
+							flight.flEnh = true;	
+						break;
+
+						case 'AMMO_FY': //Dogfight Fighter Missile
+							if(!flight.fyEnh){
+									flight.systems.forEach(ftr => {
+										ftr.systems.forEach(sys => {
+											if (sys.name == "ammoMagazine") {
+												let special = sys.data["Special"];
+												if (special.includes("- Dogfight Missile: ")) { //For some fighter Dogfight are the default
+													special = special.replace(/(- Dogfight Missile: )\d+/, `$1${enhCount}`);
+													sys.data["Special"] = special;
+												}else{
+													sys.data["Special"] += "<br>- Dogfight Missile: " + enhCount;
+												}
+											}
+										});
+									});
+								}
+								flight.fyEnh = true;	
+							break;
+
+						case 'AMMO_FD': //Dropout Fighter Missile
+							if(!flight.fdEnh){
+								flight.systems.forEach(ftr => {
+									ftr.systems.forEach(sys => {
+										if (sys.name == "ammoMagazine") {
+											sys.data["Special"] += "<br>- Dropout Missile: " + enhCount;
+										}
+									});
+								});
+							}
+							flight.fdEnh = true;
+						break;					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					}
+					
+					
+
+
+				}			
+		}
+
+	}	
+
 
 };
 

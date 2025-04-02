@@ -228,12 +228,14 @@ window.flightWindowManager = {
 
 		flightWindowManager.removeSystemClasses(systemwindow);
 
-		if (shipManager.systems.isDestroyed(flight, fighter)) {
-			systemwindow.addClass("destroyed");
-			if (shipManager.criticals.hasCritical(fighter, "DisengagedFighter")) systemwindow.addClass("disengaged");
+		if(gamedata.gamephase != -2){ //Skip in Fleet Selection
+			if (shipManager.systems.isDestroyed(flight, fighter)) {
+				systemwindow.addClass("destroyed");
+				if (shipManager.criticals.hasCritical(fighter, "DisengagedFighter")) systemwindow.addClass("disengaged");
 
-			return;
-		}
+				return;
+			}
+		}	
 
 		for (var i in fighter.systems) {
 			var system = fighter.systems[i];
@@ -241,15 +243,18 @@ window.flightWindowManager = {
 		}
 	},
 
-	setFighterSystemData: function setFighterSystemData(flight, system, shipwindow) {
+	setFighterSystemData: function setFighterSystemData(flight, system, shipwindow) {		
 		var systemwindow = shipwindow.find(".system_" + system.id);
+		systemwindow.data("shipid", flight.id);//Sometimes in fleet selection ship.id in systemwindow needs to be updated to show correct tooltip - DK 30.3.25		
 		var fighter = shipManager.systems.getSystem(flight, systemwindow.data("fighterid"));
 
 		var field = systemwindow.find(".efficiency.value");
 
-		if (shipManager.systems.isDestroyed(flight, fighter)) {
-			systemwindow.addClass("destroyed");
-		}
+		if(gamedata.gamephase != -2){ //Skip in Fleet Selection
+			if (shipManager.systems.isDestroyed(flight, fighter)) {
+				systemwindow.addClass("destroyed");
+			}
+		}	
 
 		if (system.weapon) {
 			var firing = weaponManager.hasFiringOrder(flight, system);
