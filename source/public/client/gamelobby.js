@@ -270,6 +270,29 @@ window.gamedata = {
         return true;
     },
 
+    canAffordEdit: function canAffordEdit(ship) {
+
+        var slotid = gamedata.selectedSlot;
+        var selectedSlot = playerManager.getSlotById(slotid);
+
+        var points = 0;
+        for (var i in gamedata.ships) {
+            var lship = gamedata.ships[i];
+            if (lship.slot != slotid) continue;
+			if(lship.id == ship.id) continue; //DOn't count this ship already in list!
+            points += lship.pointCost;
+        }
+
+        if ($(".confirm .totalUnitCostAmount").length > 0) {
+            ship.pointCost = $(".confirm .totalUnitCostAmount").data("value");			
+        }
+
+        points += ship.pointCost;
+        if (points > selectedSlot.points) return false;
+
+        return true;
+    },	
+
     updateFleet: function updateFleet(ship) {
         var a = 0;
         for (var i in gamedata.ships) {
@@ -1793,7 +1816,23 @@ window.gamedata = {
 
 	doEditShip: function doEditShip() {
         var ship = $(this).data().ship;
-		var name = ship.name;
+		var originalShipData = $(this).data().originalShipData; //Fetch original data before edits?
+
+        if ($(".confirm .totalUnitCostAmount").length > 0) {
+            ship.pointCost = $(".confirm .totalUnitCostAmount").data("value");			
+        }
+		var newPointCost = ship.pointCost;
+
+        if (!gamedata.canAffordEdit(ship)) {
+			//Reset the relevant info on ship before exiting Edit window.
+            ship.name = originalShipData.name;
+            ship.pointCost = originalShipData.pointCost;
+            ship.flightSize = originalShipData.flightSize;
+            ship.enhancementOptions = originalShipData.enhancementOptions ? [...originalShipData.enhancementOptions] : [],			
+            $(".confirm").remove();
+            window.confirm.error("You cannot afford those edits!", function () {});
+            return;
+        }
 
 		//Remove old ship from Fleet List first
 		var id = ship.id;
@@ -1807,18 +1846,10 @@ window.gamedata = {
 
 		//Now generate a new generate ship to reset Enhancements applied in ship window etc (otehrwise they don't update!)
 		ship = gamedata.getShipByType(ship.phpclass);
-		ship.name = name;	
+		var name = $(".confirm input").val();
+		ship.name = name;
+		ship.pointCost = newPointCost;	
         ship.userid = gamedata.thisplayer;			
-
-        if ($(".confirm .totalUnitCostAmount").length > 0) {
-            ship.pointCost = $(".confirm .totalUnitCostAmount").data("value");			
-        }
-
-        if (!gamedata.canAfford(ship)) {
-            $(".confirm").remove();
-            window.confirm.error("You cannot afford that ship!", function () {});
-            return;
-        }
 
         if (ship.flight) {
             var flightSize = $(".fighterAmount").html();
@@ -1947,6 +1978,13 @@ window.gamedata = {
 	onReadyClicked: function onReadyClicked() {
 	    var points = gamedata.calculateFleet();
 
+		var slotid = gamedata.selectedSlot;
+        var selectedSlot = playerManager.getSlotById(slotid);
+        if (selectedSlot.lastphase == "-2") {
+			window.confirm.error("You have already confirmed your fleet for this game!", function () {});
+			return;
+		}					
+		/* //Old method, I've unified it with buyShip and editShip methods above.  Seems ok - DK - Apr 2025
 		//block if player already has confirmed fleet (in any slot)
 		for (var i in gamedata.slots)  { //check all slots
 			var checkSlot = gamedata.slots[i];
@@ -1958,13 +1996,14 @@ window.gamedata = {
 				}
 			}
 		}
-
+		*/
 	    if (points == 0) {
 	        window.confirm.error("You have to buy at least one ship!", function () {});
 	        return;
 	    }
 	    // Pass the submission function as a callback, not invoke it immediately
 	    confirm.confirm("Are you sure you wish to ready your fleet?", function () {
+			selectedSlot.lastphase == -2;			
 	        ajaxInterface.submitGamedata();
 	    });
 	},

@@ -473,6 +473,14 @@ window.confirm = {
     showShipEdit: function showShipEdit(ship, callback) {
         var e = $(this.whtml);
 
+        // Store the original ship state before any edits
+        let originalShipData = {
+            name: ship.name,
+            pointCost: ship.pointCost,
+            flightSize: ship.flightSize,
+            enhancementOptions: ship.enhancementOptions ? [...ship.enhancementOptions] : [],
+        };
+
         //variable flightsize
         var variableSize = confirm.getVariableSize(ship);
         var missileOptions = confirm.getMissileOptions(ship);
@@ -494,8 +502,8 @@ window.confirm = {
 		if (ship.maxFlightSize==3){ //for single-unit flight cost is for a fighter; for usual 6+ flight, for 6 craft (and 6 craft will be set)
 			//but for 3-strong flight cost is still set for 6-strong flight...
 			pointCost = pointCost/2;
-		}
-			
+		}     
+        
 		//ship.pointCost
             $(".totalUnitCostText", totalItem).html("Total unit cost");
             $(".totalUnitCostAmount", totalItem).html(pointCost);
@@ -636,19 +644,22 @@ window.confirm = {
         }
 	    
 	    $('<label>Edit your ' + ship.shipClass + ':</label><input type="text" style="text-align:center" name="shipname" value="' + ship.name + '"></input><br>').prependTo(e);
-		
 
-        
         $(".confirmok", e).on("click", callback);
+
         $(".confirmcancel", e).on("click", function () {
             console.log("remove");
             $(".confirm").remove();
         });
-        $(".confirmok", e).data("ship", ship);
 
-        var a = e.appendTo("body");
-        a.fadeIn(250);
-    },
+        $(".confirmok", e).data("ship", ship);
+        $(".confirmok", e).data("originalShipData", originalShipData);
+
+
+
+var a = e.appendTo("body");
+a.fadeIn(250);
+},
 
 
     getVariableSize: function getVariableSize(ship) {
