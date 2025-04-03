@@ -1923,7 +1923,7 @@ class Enhancements{
 						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoBistifB(), $enhCount, true); //do notify dependent weapons, too!
 						break;
 						
-		//AMMO TYPES FOR DIRECT FIRE WEAPONS					
+					//AMMO TYPES FOR DIRECT FIRE WEAPONS					
 					case 'SHELL_HBSC': //Standard Ammo for Heavy Railgun						
 						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoHShellBasic(), $enhCount, true); //do notify dependent weapons, too!
 						break;							
