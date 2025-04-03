@@ -2139,6 +2139,7 @@ window.gamedata = {
 			break;
 		  }
 		}
+		var totalRounds = 0; //Counter to check and update total round used in magazine (where it matters).	
 
 		for (let entry of ship.enhancementOptions) {
 		  // ID, readableName, numberTaken, limit, price, priceStep
@@ -2584,10 +2585,10 @@ window.gamedata = {
 				break;				
 				// Add more cases as necessary
 
-			}
+			}//end of non-ammo enhancements list
 
 			//If there's a magazine, let's check if any missiles were bought!
-			if(ammoMagazine != null) {
+			if(ammoMagazine != null) {			
 	
 				switch (enhID) {
 
@@ -2597,10 +2598,11 @@ window.gamedata = {
 							let special = ammoMagazine.data["Special"];
 							if (special.includes("- Basic Missile: ")) { 
 								special = special.replace(/(- Basic Missile: )\d+/, `$1${enhCount}`);
-								sys.data["Special"] = special;
+								ammoMagazine.data["Special"] = special;
 							}else{
-								sys.data["Special"] += "<br>- Basic Missile: " + enhCount;
-							}	
+								ammoMagazine.data["Special"] += "<br>- Basic Missile: " + enhCount;
+							}
+							totalRounds += enhCount;	
 						}	
 						ship.ammoBEnh =  true;
 					break;
@@ -2608,6 +2610,7 @@ window.gamedata = {
 					case 'AMMO_L': //Long Range Missile
 						if(!ship.ammoLEnh){
 							ammoMagazine.data["Special"] += "<br>- Long Range Missile: " + enhCount;
+							totalRounds += enhCount;
 						}	
 						ship.ammoLEnh =  true;
 					break;
@@ -2615,6 +2618,7 @@ window.gamedata = {
 					case 'AMMO_H': //Heavy Missile
 						if(!ship.ammoHEnh){
 							ammoMagazine.data["Special"] += "<br>- Heavy Missile: " + enhCount;
+							totalRounds += enhCount;
 						}	
 						ship.ammoHEnh =  true;
 					break;
@@ -2622,6 +2626,7 @@ window.gamedata = {
 					case 'AMMO_F': //Flash Missile
 						if(!ship.ammoFEnh){
 							ammoMagazine.data["Special"] += "<br>- Flash Missile: " + enhCount;
+							totalRounds += enhCount;
 						}	
 						ship.ammoFEnh =  true;
 					break;
@@ -2629,6 +2634,7 @@ window.gamedata = {
 					case 'AMMO_A': //Antifighter Missile
 						if(!ship.ammoAEnh){
 							ammoMagazine.data["Special"] += "<br>- Antifighter Missile: " + enhCount;
+							totalRounds += enhCount;
 						}	
 						ship.ammoAEnh =  true;
 					break;
@@ -2636,6 +2642,7 @@ window.gamedata = {
 					case 'AMMO_P': //Piercing Missile
 						if(!ship.ammoPEnh){
 							ammoMagazine.data["Special"] += "<br>- Piercing Missile: " + enhCount;
+							totalRounds += enhCount;
 						}	
 						ship.ammoPEnh =  true;
 					break;
@@ -2643,6 +2650,7 @@ window.gamedata = {
 					case 'AMMO_D': //Light Missile						
 						if(!ship.ammoDEnh){
 							ammoMagazine.data["Special"] += "<br>- Light Missile: " + enhCount;
+							totalRounds += enhCount;
 						}	
 						ship.ammoDEnh =  true;
 					break;	
@@ -2650,6 +2658,7 @@ window.gamedata = {
 					case 'AMMO_I': //Interceptor Missile 						
 						if(!ship.ammoIEnh){
 							ammoMagazine.data["Special"] += "<br>- Interceptor Missile: " + enhCount;
+							totalRounds += enhCount;
 						}	
 						ship.ammoIEnh =  true;
 					break;
@@ -2657,6 +2666,7 @@ window.gamedata = {
 					case 'AMMO_C': //Chaff Missile						
 						if(!ship.ammoCEnh){
 							ammoMagazine.data["Special"] += "<br>- Chaff Missile: " + enhCount;
+							totalRounds += enhCount;
 						}	
 						ship.ammoCEnh =  true;
 					break;	
@@ -2664,6 +2674,7 @@ window.gamedata = {
 					case 'AMMO_J': //Jammer Missile						
 						if(!ship.ammoJEnh){
 							ammoMagazine.data["Special"] += "<br>- Jammer Missile: " + enhCount;
+							totalRounds += enhCount;
 						}	
 						ship.ammoJEnh =  true;
 					break;
@@ -2671,6 +2682,7 @@ window.gamedata = {
 					case 'AMMO_K': //Starburst Missile						
 						if(!ship.ammoKEnh){
 							ammoMagazine.data["Special"] += "<br>- Starburst Missile: " + enhCount;
+							totalRounds += enhCount;
 						}	
 						ship.ammoKEnh =  true;
 					break;		
@@ -2678,6 +2690,7 @@ window.gamedata = {
 					case 'AMMO_M': //Multiwarhead Missile						
 						if(!ship.ammoMEnh){
 							ammoMagazine.data["Special"] += "<br>- Multiwarhead Missile: " + enhCount;
+							totalRounds += enhCount;
 						}	
 						ship.ammoMEnh =  true;					
 					break;
@@ -2685,6 +2698,7 @@ window.gamedata = {
 					case 'AMMO_KK': //Kinetic Missile						
 						if(!ship.ammoKKEnh){
 							ammoMagazine.data["Special"] += "<br>- Kinetic Missile: " + enhCount;
+							totalRounds += enhCount;
 						}	
 						ship.ammoKKEnh =  true;
 					break;
@@ -2692,6 +2706,7 @@ window.gamedata = {
 					case 'AMMO_S': //Stealth Missile						
 						if(!ship.ammoSEnh){
 							ammoMagazine.data["Special"] += "<br>- Stealth Missile: " + enhCount;
+							totalRounds += enhCount;	
 						}	
 						ship.ammoSEnh =  true;
 					break;	
@@ -2699,6 +2714,7 @@ window.gamedata = {
 					case 'AMMO_X': //HARM Missile						
 						if(!ship.ammoXEnh){
 							ammoMagazine.data["Special"] += "<br>- HARM Missile: " + enhCount;
+							totalRounds += enhCount;
 						}	
 						ship.ammoXEnh =  true;
 					break;
@@ -2709,17 +2725,19 @@ window.gamedata = {
 							let special = ammoMagazine.data["Special"];
 							if (special.includes("- Basic Mine: ")) { 
 								special = special.replace(/(- Basic Mine: )\d+/, `$1${enhCount}`);
-								sys.data["Special"] = special;
+								ammoMagazine.data["Special"] = special;
 							}else{
-								sys.data["Special"] += "<br>- Basic Mine: " + enhCount;
+								ammoMagazine.data["Special"] += "<br>- Basic Mine: " + enhCount;
 							}	
-						}	
+							totalRounds += enhCount;							
+						}						
 						ship.ammoBLBEnh =  true;						
 					break;
 
 					case 'MINE_BLH': //Ballistic Launcher Heavy Mine						
 						if(!ship.ammoBLHEnh){
 							ammoMagazine.data["Special"] += "<br>- Heavy Mine: " + enhCount;
+							totalRounds += enhCount;
 						}	
 						ship.ammoBLHEnh =  true;
 					break;
@@ -2727,6 +2745,7 @@ window.gamedata = {
 					case 'MINE_BLW': //Ballistic Launcher Wide-Range Mine						
 						if(!ship.ammoBLWEnh){
 							ammoMagazine.data["Special"] += "<br>- Wide-range Mine: " + enhCount;
+							totalRounds += enhCount;
 						}
 						ship.ammoBLWEnh =  true;							
 					break;
@@ -2737,10 +2756,11 @@ window.gamedata = {
 							let special = ammoMagazine.data["Special"];
 							if (special.includes("- Basic Mine: ")) { 
 								special = special.replace(/(- Basic Mine: )\d+/, `$1${enhCount}`);
-								sys.data["Special"] = special;
+								ammoMagazine.data["Special"] = special;
 							}else{
-								sys.data["Special"] += "<br>- Basic Mine: " + enhCount;
+								ammoMagazine.data["Special"] += "<br>- Basic Mine: " + enhCount;
 							}	
+							totalRounds += enhCount;
 						}	
 						ship.ammoMLBEnh =  true;						
 					break;	
@@ -2748,6 +2768,7 @@ window.gamedata = {
 					case 'MINE_MLW': //Abbai Mine Launcher Wide-Ranged Mine						
 						if(!ship.ammoMLWEnh){
 							ammoMagazine.data["Special"] += "<br>- Wide-range Mine: " + enhCount;
+							totalRounds += enhCount;
 						}
 						ship.ammoMLWEnh =  true;	
 					break;
@@ -2759,10 +2780,11 @@ window.gamedata = {
 							let special = ammoMagazine.data["Special"];
 							if (special.includes("- Basic Heavy Shell: ")) { 
 								special = special.replace(/(- Basic Heavy Shell: )\d+/, `$1${enhCount}`);
-								sys.data["Special"] = special;
+								ammoMagazine.data["Special"] = special;
 							}else{
-								sys.data["Special"] += "<br>- Basic Heavy Shell: " + enhCount;
-							}	
+								ammoMagazine.data["Special"] += "<br>- Basic Heavy Shell: " + enhCount;
+							}
+							totalRounds += enhCount;	
 						}	
 						ship.shellHBEnh =  true;
 					break;
@@ -2773,10 +2795,11 @@ window.gamedata = {
 							let special = ammoMagazine.data["Special"];
 							if (special.includes("- Basic Medium Shell: ")) { 
 								special = special.replace(/(- Basic Medium Shell: )\d+/, `$1${enhCount}`);
-								sys.data["Special"] = special;
+								ammoMagazine.data["Special"] = special;
 							}else{
-								sys.data["Special"] += "<br>- Basic Medium Shell: " + enhCount;
+								ammoMagazine.data["Special"] += "<br>- Basic Medium Shell: " + enhCount;
 							}	
+							totalRounds += enhCount;
 						}	
 						ship.shellMBEnh =  true;
 					break;	
@@ -2787,10 +2810,11 @@ window.gamedata = {
 							let special = ammoMagazine.data["Special"];
 							if (special.includes("- Basic Light Shell: ")) { 
 								special = special.replace(/(- Basic Light Shell: )\d+/, `$1${enhCount}`);
-								sys.data["Special"] = special;
+								ammoMagazine.data["Special"] = special;
 							}else{
-								sys.data["Special"] += "<br>- Basic Light Shell: " + enhCount;
+								ammoMagazine.data["Special"] += "<br>- Basic Light Shell: " + enhCount;
 							}	
+							totalRounds += enhCount;
 						}	
 						ship.shellLBEnh =  true;
 					break;	
@@ -2798,6 +2822,7 @@ window.gamedata = {
 					case 'SHELL_HFLH': //Flash Ammo for Heavy Railgun						
 						if(!ship.ammoHFEnh){
 							ammoMagazine.data["Special"] += "<br>- Heavy Flash Shell: " + enhCount;
+							totalRounds += enhCount;
 						}
 						ship.ammoHFEnh =  true;
 					break;	
@@ -2805,6 +2830,7 @@ window.gamedata = {
 					case 'SHELL_MFLH': //Flash Ammo for Medium Railgun						
 						if(!ship.ammoMFEnh){
 							ammoMagazine.data["Special"] += "<br>- Medium Flash Shell: " + enhCount;
+							totalRounds += enhCount;
 						}
 						ship.ammoMFEnh =  true;
 					break;	
@@ -2812,6 +2838,7 @@ window.gamedata = {
 					case 'SHELL_LFLH': //Flash Ammo for Light Railgun						
 						if(!ship.ammoLFEnh){
 							ammoMagazine.data["Special"] += "<br>- Light Flash Shell: " + enhCount;
+							totalRounds += enhCount;
 						}
 						ship.ammoLFEnh =  true;
 					break;	
@@ -2819,6 +2846,7 @@ window.gamedata = {
 					case 'SHELL_HSCT': //Scatter Ammo for Heavy Railgun						
 						if(!ship.ammoHSEnh){
 							ammoMagazine.data["Special"] += "<br>- Heavy Scatter Shell: " + enhCount;
+							totalRounds += enhCount;
 						}
 						ship.ammoHSEnh =  true;
 					break;	
@@ -2826,6 +2854,7 @@ window.gamedata = {
 					case 'SHELL_MSCT': //Scatter Ammo for Medium Railgun						
 						if(!ship.ammoMSEnh){
 							ammoMagazine.data["Special"] += "<br>- Medium Scatter Shell: " + enhCount;
+							totalRounds += enhCount;
 						}
 						ship.ammoMSEnh =  true;
 					break;	
@@ -2833,6 +2862,7 @@ window.gamedata = {
 					case 'SHELL_LSCT': //Scatter Ammo for Light Railgun						
 						if(!ship.ammoLSEnh){
 							ammoMagazine.data["Special"] += "<br>- Light Scatter Shell: " + enhCount;
+							totalRounds += enhCount;
 						}
 						ship.ammoLSEnh =  true;
 					break;
@@ -2840,6 +2870,7 @@ window.gamedata = {
 					case 'SHELL_HHVY': //Heavy Ammo for Heavy Railgun						
 						if(!ship.ammoHHEnh){
 							ammoMagazine.data["Special"] += "<br>- Heavy Heavy Shell: " + enhCount;
+							totalRounds += enhCount;
 						}
 						ship.ammoHHEnh =  true;
 					break;
@@ -2847,6 +2878,7 @@ window.gamedata = {
 					case 'SHELL_MHVY': //Heavy Ammo for Medium Railgun						
 						if(!ship.ammoMHEnh){
 							ammoMagazine.data["Special"] += "<br>- Medium Heavy Shell: " + enhCount;
+							totalRounds += enhCount;
 						}
 						ship.ammoMHEnh =  true;
 					break;
@@ -2854,6 +2886,7 @@ window.gamedata = {
 					case 'SHELL_LHVY': //Heavy Ammo for Light Railgun						
 						if(!ship.ammoLHEnh){
 							ammoMagazine.data["Special"] += "<br>- Light Heavy Shell: " + enhCount;
+							totalRounds += enhCount;
 						}
 						ship.ammoLHEnh =  true;
 					break;																												
@@ -2861,6 +2894,7 @@ window.gamedata = {
 					case 'SHELL_HLR': //Long Range Ammo for Heavy Railgun						
 						if(!ship.ammoHLREnh){
 							ammoMagazine.data["Special"] += "<br>- Heavy Long Range Shell: " + enhCount;
+							totalRounds += enhCount;
 						}
 						ship.ammoHLREnh =  true;
 					break;		
@@ -2868,6 +2902,7 @@ window.gamedata = {
 					case 'SHELL_MLR': //Long Range Ammo for Medium Railgun						
 						if(!ship.ammoMLREnh){
 							ammoMagazine.data["Special"] += "<br>- Medium Long Range Shell: " + enhCount;
+							totalRounds += enhCount;
 						}
 						ship.ammoMLREnh =  true;
 					break;		
@@ -2875,18 +2910,44 @@ window.gamedata = {
 					case 'SHELL_HULR': //Ultra Long Range Ammo for Heavy Railgun						
 						if(!ship.ammoHULREnh){
 							ammoMagazine.data["Special"] += "<br>- Heavy Ultra Long Range Shell: " + enhCount;
+							totalRounds += enhCount;
 						}
 						ship.ammoHULREnh =  true;
 					break;	
-				}	
-			}		
+				}//endof ammo listings.
+
+			}//endof if(ammoMagazine) check.		
 
 
-		  }
+		  }//end of enhCount > 0 check
+		
+		}//end of loop through enhancements.
+
+		// Insert update to Total Rounds here.
+		if (ammoMagazine != null) {
+			var specialText = ammoMagazine.data["Special"];
+			if (specialText.includes("Total rounds: ")) { // There will be a number immediately after this text e.g. Total rounds: 180/220        
+				// Extract both the numbers before and after the oblique (`/`)
+				var match = specialText.match(/Total rounds: (\d+)\/(\d+)/);
+				if (match) {
+					var extractedValueBefore = parseInt(match[1], 10); // Number before `/`
+					var extractedValueAfter = parseInt(match[2], 10); // Number after `/`
+
+					// Update the number before the `/` (e.g., add new ammo)
+					if((extractedValueBefore + totalRounds) < extractedValueAfter)	extractedValueBefore += totalRounds; 
+
+					// Replace the old value with the new total
+					specialText = specialText.replace(/(Total rounds: )\d+/, `$1${extractedValueBefore}`);
+					ammoMagazine.data["Special"] = specialText;
+					ammoMagazine.output = extractedValueBefore;
+				}
+			}
 		}
 	},
 
 	setEnhancementsFighter: function setEnhancementsFighter(flight) {
+
+		var totalRounds = 0; //Initialise
 
 			for (let entry of flight.enhancementOptions) {
 				// ID, readableName, numberTaken, limit, price, priceStep
@@ -3063,6 +3124,7 @@ window.gamedata = {
 											}else{
 												sys.data["Special"] += "<br>- Basic Missile: " + enhCount;
 											}
+											totalRounds += enhCount;
 										}
 									});
 								});
@@ -3076,6 +3138,7 @@ window.gamedata = {
 									ftr.systems.forEach(sys => {
 										if (sys.name == "ammoMagazine") {
 											sys.data["Special"] += "<br>- Heavy Missile: " + enhCount;
+											totalRounds += enhCount;
 										}
 									});
 								});
@@ -3089,6 +3152,7 @@ window.gamedata = {
 									ftr.systems.forEach(sys => {
 										if (sys.name == "ammoMagazine") {
 											sys.data["Special"] += "<br>- Long Range Missile: " + enhCount;
+											totalRounds += enhCount;
 										}
 									});
 								});
@@ -3108,6 +3172,7 @@ window.gamedata = {
 												}else{
 													sys.data["Special"] += "<br>- Dogfight Missile: " + enhCount;
 												}
+												totalRounds += enhCount;
 											}
 										});
 									});
@@ -3121,31 +3186,44 @@ window.gamedata = {
 									ftr.systems.forEach(sys => {
 										if (sys.name == "ammoMagazine") {
 											sys.data["Special"] += "<br>- Dropout Missile: " + enhCount;
+											totalRounds += enhCount;
 										}
 									});
 								});
 							}
 							flight.fdEnh = true;
 						break;					
-					
-					
-					
-					
-					
-					
-					
-					
-					
-					}
-					
-					
 
-
+					}//end of swtich function
 				}			
-		}
+		}//end of loop through fighter enhancement options.
 
-	}	
+		// Insert update to Total Rounds here.
+		flight.systems.forEach(ftr => {
+			ftr.systems.forEach(sys => {
+				if (sys.name == "ammoMagazine") {
+					var specialText = sys.data["Special"];
+					if (specialText.includes("Total rounds: ")) { // There will be a number immediately after this text e.g. Total rounds: 180/220        
+						// Extract both the numbers before and after the oblique (`/`)
+						var match = specialText.match(/Total rounds: (\d+)\/(\d+)/);
+						if (match) {
+							var extractedValueBefore = parseInt(match[1], 10); // Number before `/`
+							var extractedValueAfter = parseInt(match[2], 10); // Number after `/`
 
+							// Update the number before the `/` (e.g., add new ammo)
+							if((extractedValueBefore + totalRounds) < extractedValueAfter)	extractedValueBefore += totalRounds; 
+
+							// Replace the old value with the new total
+							specialText = specialText.replace(/(Total rounds: )\d+/, `$1${extractedValueBefore}`);
+							sys.data["Special"] = specialText;
+							sys.output = extractedValueBefore;
+						}
+					}
+				}		
+			});
+		});
+		
+	}//end of setEnhancementsFighter()	
 
 };
 
