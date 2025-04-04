@@ -2695,7 +2695,7 @@ window.gamedata = {
 					case 'AMMO_K': //Starburst Missile						
 						if(!ship.ammoKEnh){
 							ammoMagazine.data["Special"] += "<br>- Starburst Missile: " + enhCount;
-							totalRounds += enhCount;
+							totalRounds += enhCount*2; //Each missile takes up 2 slots
 						}	
 						ship.ammoKEnh =  true;
 					break;		
@@ -2703,7 +2703,7 @@ window.gamedata = {
 					case 'AMMO_M': //Multiwarhead Missile						
 						if(!ship.ammoMEnh){
 							ammoMagazine.data["Special"] += "<br>- Multiwarhead Missile: " + enhCount;
-							totalRounds += enhCount;
+							totalRounds += enhCount*2; //Each missile takes up 2 slots
 						}	
 						ship.ammoMEnh =  true;					
 					break;
