@@ -505,7 +505,7 @@ window.gamedata = {
 				// Check if ship has converted Assault Shuttle Hangar Space to Fighters before calculating total hangar space
 				for (var enh in lship.enhancementOptions) { 
 					if (lship.enhancementOptions[enh][6]) { // Hangar conversion is an option, ignore others.
-						if (lship.enhancementOptions[enh][0] === "HANG_CON_F") {
+						if (lship.enhancementOptions[enh][0] === "HANG_F") {
 							hangarConversionsF += lship.enhancementOptions[enh][2]; //Record number of slots converted from Assault Shuttle to Fighters.
 						}	
 					}
@@ -514,7 +514,7 @@ window.gamedata = {
 				// Check if ship has converted Fighter Hangar Space to Assault Shuttles before calculating total hangar space
 				for (var enh in lship.enhancementOptions) { 
 					if (lship.enhancementOptions[enh][6]) { // Hangar conversion is an option, ignore others.
-						if (lship.enhancementOptions[enh][0] === "HANG_CON_AS") {
+						if (lship.enhancementOptions[enh][0] === "HANG_AS") {
 							hangarConversionsAS += lship.enhancementOptions[enh][2]; //Record number of slots converted from Fighter to Assault Shuttles.
 							if (lship.customFighter && Object.keys(lship.customFighter).length > 0) {
 								var shipFighters = 0;
@@ -2248,14 +2248,14 @@ window.gamedata = {
 					ship.exMrnEnhShip = true;
 				break;
 
-				case 'HANG_CON_F'://Hangar Conversion to Fighter slot, no actual need to change anything here.  
+				case 'HANG_F'://Hangar Conversion to Fighter slot, no actual need to change anything here.  
 					if(!ship.hangFEnh){
 						ship.notes  += "<br>Fighter Conversion (" + enhCount + ")";						
 					}
 					ship.hangFEnh = true;
 				break;	
 
-				case 'HANG_CON_AS'://Hangar Conversion to Assault Shuttle slot, no actual need to change anything here.  
+				case 'HANG_AS'://Hangar Conversion to Assault Shuttle slot, no actual need to change anything here.  
 					if(!ship.hangASEnh){
 						ship.notes  += "<br>Shuttle Conversion (" + enhCount + ")";						
 					}
@@ -2266,7 +2266,7 @@ window.gamedata = {
 				case 'IFF_SYS':
 					if(!ship.iffEnh){	
 						ship.IFFSystem = true;
-						ship.notes  += "<br>IFF System (" + enhCount + ")";
+						ship.notes  += "<br>IFF System";
 					}
 					ship.iffEnh = true;					
 					break;
@@ -2400,6 +2400,7 @@ window.gamedata = {
 								system.critRollMod += 4;
 							}
 						}
+						ship.notes  += "<br>Eethan Refit";
 					}	
 					ship.eethEnh = true;					
 				break;
@@ -2418,6 +2419,7 @@ window.gamedata = {
 								if (system.armour < 5) system.armour += 1;
 							}
 						}
+						ship.notes  += "<br>Essan Refit";
 					}	
 					ship.essanEnh = true;
 				break;
@@ -2429,7 +2431,7 @@ window.gamedata = {
 						ship.forwardDefense += enhCount * 2;
 						ship.sideDefense += enhCount * 2;
 						ship.fervEnh = true;
-						ship.notes  += "<br>Markab Fervor (" + enhCount + ")";						
+						ship.notes  += "<br>Markab Fervor";						
 					}					
 				break;
 		
@@ -2507,6 +2509,7 @@ window.gamedata = {
 						let struct = shipManager.systems.getStructureSystem(ship, 0);
 						if (struct) {
 							struct.maxhealth -= enhCount;
+							ship.notes  += "<br>Fighter Spawned (" + enhCount + ")";							
 						}
 					}	
 					ship.ftrlEnh = true;	
@@ -2520,6 +2523,7 @@ window.gamedata = {
 								system.data["Spark Curtain"] = "Yes";
 							}
 						}
+						ship.notes  += "<br>Spark Curtain";
 					}
 					ship.sparkEnh = true;	
 				break;
@@ -2549,6 +2553,7 @@ window.gamedata = {
 							AActrl.data[" - per weapon type"] = Math.floor(AActrl.AAtotal / 2); 
 							AActrl.data[" - preassigned"] = 0 +  "/" + Math.floor(AActrl.AAtotal / 2); 
 						}
+						ship.notes  += "<br>Amethyst skin";
 					}
 					ship.amethsEnh = true;	
 				break;
@@ -2560,6 +2565,7 @@ window.gamedata = {
 								system.output += enhCount;
 							}
 						}
+						ship.notes  += "<br>Azure skin";
 					}
 					ship.azursEnh = true;	
 				break;
@@ -2578,6 +2584,7 @@ window.gamedata = {
 							capacitor.output += enhCount;
 							capacitor.data["Power stored/max"] = capacitor.powerMax + (2 * enhCount);
 						}
+						ship.notes  += "<br>Crimson skin";
 					}
 					ship.crimsEnh = true;	
 				break;
@@ -2970,7 +2977,7 @@ window.gamedata = {
 					switch (enhID) {
 
 						case 'ELT_MAR': // Elite marines, mark every Marines system as Elite.
-							if(!flight.marEnhFlight){
+							if(!flight.elMarEnhFlight){
 								flight.systems.forEach(ftr => {
 									ftr.systems.forEach(sys => {
 										if (sys.name == "Marines") {
@@ -2979,7 +2986,7 @@ window.gamedata = {
 									});
 								});
 							}	
-							flight.marEnhFlight = true;	
+							flight.elMarEnhFlight = true;	
 						break;
 		
 						case 'ELITE_SW': // Elite Pilot (SW)
@@ -3036,7 +3043,7 @@ window.gamedata = {
 						break;
 		
 						case 'EXT_MAR': // Extra marines
-							if(!flight.marEnhFlight){							
+							if(!flight.exMarEnhFlight){							
 								flight.systems.forEach(ftr => {
 									ftr.systems.forEach(sys => {
 										if (sys.name == "Marines") {
@@ -3045,7 +3052,7 @@ window.gamedata = {
 									});
 								});
 							}		
-							flight.marEnhFlight = true;								
+							flight.exMarEnhFlight = true;								
 						break;
 		
 						case 'FTR_FERV': // Markab Religious Fervor
@@ -3099,6 +3106,7 @@ window.gamedata = {
 							if(!flight.shadCtrlEnh){							
 								flight.offensivebonus -= enhCount * 2;
 								flight.iniativebonus -= enhCount * 3 * 5;
+								flight.notes  += "<br>Uncontrolled";
 							}	
 							flight.shadCtrlEnh = true;								
 						break;
