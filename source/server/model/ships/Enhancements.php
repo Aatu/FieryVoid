@@ -45,8 +45,8 @@ class Enhancements{
 		$unit->enhancementOptionsDisabled[] = 'POOR_TRAIN'; 
 	  }else{ //enhancements for ships
 		$unit->enhancementOptionsDisabled[] = 'ELITE_CREW';
-		$unit->enhancementOptionsDisabled[] = 'HANG_CON_F';
-		$unit->enhancementOptionsDisabled[] = 'HANG_CON_AS';					 
+		$unit->enhancementOptionsDisabled[] = 'HANG_F';
+		$unit->enhancementOptionsDisabled[] = 'HANG_AS';					 
 		$unit->enhancementOptionsDisabled[] = 'IMPR_ENG'; 
 		$unit->enhancementOptionsDisabled[] = 'IMPR_REA'; 
 		$unit->enhancementOptionsDisabled[] = 'IMPR_SENS'; 
@@ -134,7 +134,7 @@ class Enhancements{
 
 	  //To convert Assault Shuttles hangar slots to Fighter Slots
 	  if (array_key_exists("assault shuttles", $ship->fighters)) { //Only add if ship has Assault Shuttle hangar space! 	  
-	    $enhID = 'HANG_CON_F';
+	    $enhID = 'HANG_F';
 		if(!in_array($enhID, $ship->enhancementOptionsDisabled)){ //Check option is also not disabled.
 				$enhName = 'Convert Assault Shuttle slot to Fighter slot';
 				$enhLimit = $ship->fighters["assault shuttles"]; //The number of assault shuttle slots ship has is max conversion amount.
@@ -149,7 +149,7 @@ class Enhancements{
 	  $matchingKeys = array_intersect_key($ship->fighters, array_flip($keysToCheck)); // Find matching keys
 	  $totalCount = array_sum($matchingKeys); // Sum up the values of the found keys 
 	  if ($totalCount > 0) { 	  
-	    $enhID = 'HANG_CON_AS';
+	    $enhID = 'HANG_AS';
 		if(!in_array($enhID, $ship->enhancementOptionsDisabled)){ //Check option is also not disabled.
 				$enhName = 'Convert Fighter slot to Assault Shuttle slot';
 				$enhLimit = $totalCount; //The number of assault shuttle slots ship has is max conversion amount.
@@ -1593,10 +1593,18 @@ class Enhancements{
 						} 						
 						break;						
 
-					case 'HANG_CON_F'://Hangar Conversion to Fighter slot, no actual need to change anything here.  
+					case 'ELT_MRN'://Elite marines, mark every Marines system as Elite.
+						foreach ($ship->systems as $system){
+							if ($system instanceof GrapplingClaw){							
+								$system->eliteMarines = true;
+							}
+						}
 						break;	
 
-					case 'HANG_CON_AS'://Hangar Conversion to Assault Shuttle slot, no actual need to change anything here.  
+					case 'HANG_F'://Hangar Conversion to Fighter slot, no actual need to change anything here.  
+						break;	
+
+					case 'HANG_AS'://Hangar Conversion to Assault Shuttle slot, no actual need to change anything here.  
 						break;	
 
 					case 'EXT_MRN'://Extra marines, increase contingent per Claw by 1.
