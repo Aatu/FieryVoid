@@ -1266,8 +1266,14 @@ window.gamedata = {
             gamedata.constructFleetList();
         });
 
-		$(".editship", h).on("click", function (e) {
-			gamedata.editShip(ship);
+		$("#fleet").off("click", ".editship").on("click", ".editship", function (e) {
+			var id = $(this).parent().data("shipindex");
+			for (var i in gamedata.ships) {
+				if (gamedata.ships[i].id == id) {
+					gamedata.editShip(gamedata.ships[i]);
+					break;
+				}
+			}			
 		});		
 
 		$("#fleet").off("click", ".showship").on("click", ".showship", function (e) {
