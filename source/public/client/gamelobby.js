@@ -308,7 +308,8 @@ window.gamedata = {
 			'<span class="shipname name">' + ship.name + '</span>' +
 			'<span class="pointcost">' + ship.pointCost + 'p</span>' +
 			' <span class="showship clickable">Details</span> ' +
-			' -<span class="editship clickable">Edit</span> ' +				
+			' -<span class="editship clickable">Edit</span> ' +		
+			' -<span class="copyship clickable">Copy</span> ' +							
 			' -<span class="remove clickable">Remove</span> ' +
 			'</div>');
         
@@ -324,6 +325,10 @@ window.gamedata = {
 
 		$(".editship", h).on("click", function (e) {
 			gamedata.editShip(ship);
+		});
+
+		$(".copyship", h).on("click", function (e) {
+			gamedata.copyShip(ship);
 		});
 
         h.appendTo("#fleet");
@@ -1232,6 +1237,7 @@ window.gamedata = {
 		$(".ship.bought").remove();
 		for (var i in gamedata.ships) {
 			// Reset ship ids to avoid ending up with elements with the same id
+
 			//Unique temp ids assigned when purchaseed now - DK 30.3.31
 	//		gamedata.ships[i].id = Date.now() + Math.random().toString(36).substr(2, 5);	
 
@@ -1243,7 +1249,8 @@ window.gamedata = {
 				'<span class="shipname name">' + ship.name + '</span>' +
 				'<span class="pointcost">' + ship.pointCost + 'p</span>' +
 				' <span class="showship clickable">Details</span> ' +
-				' -<span class="editship clickable">Edit</span> ' +				
+				' -<span class="editship clickable">Edit</span> ' +		
+				' -<span class="copyship clickable">Copy</span> ' +								
 				' -<span class="remove clickable">Remove</span> ' +
 				'</div>');
 	
@@ -1266,16 +1273,6 @@ window.gamedata = {
             gamedata.constructFleetList();
         });
 
-		$("#fleet").off("click", ".editship").on("click", ".editship", function (e) {
-			var id = $(this).parent().data("shipindex");
-			for (var i in gamedata.ships) {
-				if (gamedata.ships[i].id == id) {
-					gamedata.editShip(gamedata.ships[i]);
-					break;
-				}
-			}			
-		});		
-
 		$("#fleet").off("click", ".showship").on("click", ".showship", function (e) {
 			var id = $(this).parent().data("shipindex");
 			for (var i in gamedata.ships) {
@@ -1285,7 +1282,27 @@ window.gamedata = {
 				}
 			}
 		});
-	
+
+		$("#fleet").off("click", ".editship").on("click", ".editship", function (e) {
+			var id = $(this).parent().data("shipindex");
+			for (var i in gamedata.ships) {
+				if (gamedata.ships[i].id == id) {
+					gamedata.editShip(gamedata.ships[i]);
+					break;
+				}
+			}			
+		});		
+		
+		$("#fleet").off("click", ".copyship").on("click", ".copyship", function (e) {
+			var id = $(this).parent().data("shipindex");
+			for (var i in gamedata.ships) {
+				if (gamedata.ships[i].id == id) {
+					gamedata.copyShip(gamedata.ships[i]);
+					break;
+				}
+			}			
+		});				
+
 		gamedata.calculateFleet();
 	},
 
@@ -1804,7 +1821,18 @@ window.gamedata = {
     //            return true;
     //        },
 
+    copyShip: function copyShip(ship) {
+        var slotid = gamedata.selectedSlot;
+        var selectedSlot = playerManager.getSlotById(slotid);
+        if (selectedSlot.lastphase == "-2") {
+            window.confirm.error("You have already readied your fleet!", function () {});
+            return false;
+        }
 
+        $(".confirm").remove();
+
+        window.confirm.showShipEdit(ship, gamedata.doCopyShip);
+    },	
 
     editShip: function editShip(ship) {
         var slotid = gamedata.selectedSlot;
@@ -1818,6 +1846,114 @@ window.gamedata = {
 
         window.confirm.showShipEdit(ship, gamedata.doEditShip);
     },	
+
+	doCopyShip: function doCopyShip() {
+        var ship = $(this).data().ship;
+
+        if ($(".confirm .totalUnitCostAmount").length > 0) {
+            ship.pointCost = $(".confirm .totalUnitCostAmount").data("value");			
+        }
+		var newPointCost = ship.pointCost;
+
+        if (!gamedata.canAfford(ship)) {		
+            $(".confirm").remove();
+            window.confirm.error("You cannot afford this ship!", function () {});
+            return;
+        }
+
+		//Now generate a new generate ship to reset Enhancements applied in ship window etc (otehrwise they don't update!)
+		ship = gamedata.getShipByType(ship.phpclass);
+		var name = $(".confirm input").val();
+		
+		ship.name = name;
+		ship.pointCost = newPointCost;	
+        ship.userid = gamedata.thisplayer;			
+
+        if (ship.flight) {
+            var flightSize = $(".fighterAmount").html();
+            if (!flightSize) {
+                flightSize = 1;
+            }
+            ship.flightSize = Math.floor(flightSize);
+        }
+	    
+		//do note enhancements bought (if any)
+		var enhNo = 0;
+		var noTaken = 0;
+		var target = $(".selectAmount.shpenh" + enhNo);
+		while(typeof target.data("enhPrice") != 'undefined'){ //as long as there are enhancements defined...
+			noTaken = target.data("count");
+			if(noTaken > 0){ //enhancement picked - note!
+				ship.enhancementOptions[enhNo][2] = noTaken;
+				if(!ship.enhancementOptions[enhNo][6]){ //this is an actual enhancement (as opposed to option) - note value!
+					if (ship.flight){
+						ship.pointCostEnh += target.data("enhCost") * flightSize;
+					} else {
+						ship.pointCostEnh += target.data("enhCost");
+					}
+				}else{ //this is an option - still note value, just separately!
+					if (ship.flight){
+						ship.pointCostEnh2 += target.data("enhCost") * flightSize;
+					} else {
+						ship.pointCostEnh2 += target.data("enhCost");
+					}
+				}
+			}
+			//go to next enhancement
+			enhNo++;
+			target = $(".selectAmount.shpenh" + enhNo);
+		}	    
+
+        if ($(".confirm .selectAmount").length > 0) {
+            if (ship.flight) {
+
+                // and get the amount of launchers on a fighter
+                var nrOfLaunchers = 0;
+
+                for (var j in ship.systems[1].systems) {
+                    var fighterSystem = ship.systems[1].systems[j];
+
+                    if (!mathlib.arrayIsEmpty(fighterSystem.firingModes) && fighterSystem.missileArray != null) {
+                        nrOfLaunchers++;
+                    }
+                }
+
+                // get all selections of missiles
+                var missileOptions = $(".confirm .selectAmount");
+
+                for (var k = 0; k < missileOptions.length; k++) {
+                    var firingMode = $(missileOptions[k]).data("firingMode");
+
+                    // divide the bought missiles over the missileArrays
+                    var boughtAmount = $(".confirm .selectAmount." + firingMode).data("value");
+
+                    // perLauncher should always get you an integer as result. The UI handles
+                    // buying of missiles that way.
+                    var perLauncher = boughtAmount;
+
+                    for (var i in ship.systems) {
+                        var fighter = ship.systems[i];
+
+                        for (var j in fighter.systems) {
+                            var fighterSystem = fighter.systems[j];
+
+                            if (!mathlib.arrayIsEmpty(fighterSystem.firingModes) && fighterSystem.missileArray != null) {
+                                // find the correct index, depending on the firingMode
+                                for (var index in fighterSystem.firingModes) {
+                                    if (fighterSystem.firingModes[index] == firingMode) {
+                                        fighterSystem.missileArray[index].amount = perLauncher;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {}
+        }
+
+        $(".confirm").remove();
+        gamedata.updateFleet(ship);
+    },
 
 
 	doEditShip: function doEditShip() {
