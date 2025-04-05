@@ -1821,7 +1821,7 @@ window.gamedata = {
     //            return true;
     //        },
 
-    copyShip: function copyShip(ship) {
+    copyShip: function copyShip(copiedShip) {
         var slotid = gamedata.selectedSlot;
         var selectedSlot = playerManager.getSlotById(slotid);
         if (selectedSlot.lastphase == "-2") {
@@ -1831,24 +1831,20 @@ window.gamedata = {
 
         $(".confirm").remove();
 
-        window.confirm.showShipEdit(ship, gamedata.doCopyShip);
+		var shipClass = copiedShip.phpclass;
+		var newShip = gamedata.getShipByType(shipClass);
+
+		newShip.name = copiedShip.name;
+		newShip.pointCost = copiedShip.pointCost;
+		newShip.flightSize = copiedShip.flightSize;
+		newShip.enhancementOptions = copiedShip.enhancementOptions ? [...copiedShip.enhancementOptions] : [],	
+
+        window.confirm.showShipEdit(newShip, gamedata.doCopyShip);
     },	
 
-    editShip: function editShip(ship) {
-        var slotid = gamedata.selectedSlot;
-        var selectedSlot = playerManager.getSlotById(slotid);
-        if (selectedSlot.lastphase == "-2") {
-            window.confirm.error("You have already readied your fleet!", function () {});
-            return false;
-        }
-
-        $(".confirm").remove();
-
-        window.confirm.showShipEdit(ship, gamedata.doEditShip);
-    },	
 
 	doCopyShip: function doCopyShip() {
-        var ship = $(this).data().ship;
+		var ship = $(this).data().ship;
 
         if ($(".confirm .totalUnitCostAmount").length > 0) {
             ship.pointCost = $(".confirm .totalUnitCostAmount").data("value");			
@@ -1857,14 +1853,13 @@ window.gamedata = {
 
         if (!gamedata.canAfford(ship)) {		
             $(".confirm").remove();
-            window.confirm.error("You cannot afford this ship!", function () {});
+            window.confirm.error("You cannot afford those edits!", function () {});
             return;
         }
 
 		//Now generate a new generate ship to reset Enhancements applied in ship window etc (otehrwise they don't update!)
 		ship = gamedata.getShipByType(ship.phpclass);
 		var name = $(".confirm input").val();
-		
 		ship.name = name;
 		ship.pointCost = newPointCost;	
         ship.userid = gamedata.thisplayer;			
@@ -1955,6 +1950,19 @@ window.gamedata = {
         gamedata.updateFleet(ship);
     },
 
+	
+    editShip: function editShip(ship) {
+        var slotid = gamedata.selectedSlot;
+        var selectedSlot = playerManager.getSlotById(slotid);
+        if (selectedSlot.lastphase == "-2") {
+            window.confirm.error("You have already readied your fleet!", function () {});
+            return false;
+        }
+
+        $(".confirm").remove();
+
+        window.confirm.showShipEdit(ship, gamedata.doEditShip);
+    },	
 
 	doEditShip: function doEditShip() {
         var ship = $(this).data().ship;
