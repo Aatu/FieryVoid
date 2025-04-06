@@ -430,12 +430,12 @@ window.BallisticIconContainer = function () {
 			    this.scene.remove(lineIcon.lineSprite.mesh);
 			    lineIcon.lineSprite.destroy();
 			    return false;
-			}else if (lineIcon.shooterId === ship.id) {
+			}/*else if (lineIcon.shooterId === ship.id) { //When would we ever need to destroy origin lines, only target can move...?
 			    if (lineIcon.lineSprite.isVisible) wasVisibleShooter = true;
 			    this.scene.remove(lineIcon.lineSprite.mesh);
 			    lineIcon.lineSprite.destroy();
 			    return false;
-			}else{		    
+			}*/else{		    
 		    	return true; // Keep the lineIcon if the condition isn't met
 			}
 		});
@@ -443,7 +443,8 @@ window.BallisticIconContainer = function () {
 		//Now recreate line using usual method.
         var allBallistics = weaponManager.getAllFireOrdersForAllShipsForTurn(gamedata.turn, 'ballistic');			
 		allBallistics.forEach(function (ballistic) {
-			if (ship.id === ballistic.targetid) {
+//			if (ship.id === ballistic.targetid || ship.id === ballistic.shooterid) {
+			if (ship.id === ballistic.targetid) {				
 				createOrUpdateBallisticLines.call(this, ballistic, iconContainer, gamedata.turn);
 			}
 		}, this);
@@ -458,7 +459,7 @@ window.BallisticIconContainer = function () {
 	            	lineIcon.lineSprite.show();
 	            	lineIcon.lineSprite.isVisible = true;	            		
 				}
-            }else if(lineIcon.shooterId === ship.id) {
+            }/*else if(lineIcon.shooterId === ship.id) {
 	            if(!wasVisibleShooter){
 	            	lineIcon.lineSprite.hide();
 	            	lineIcon.lineSprite.isVisible = false;	 	            
@@ -466,7 +467,7 @@ window.BallisticIconContainer = function () {
 	            	lineIcon.lineSprite.show();
 	            	lineIcon.lineSprite.isVisible = true;	            		
 				}
-			}	
+			}	*/
         });        
     };
 
