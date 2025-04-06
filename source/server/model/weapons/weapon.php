@@ -1185,16 +1185,14 @@ class Weapon extends ShipSystem
                 //$soew = 0; //fighters CAN receive SOEW (fractional, SOEW calculation takes this into account)
             } else { //ballistics use of OB is more complicated
                 $oew = 0;
-                $launchlosBlocked  = $this->checkLineOfSight($launchPos, $targetPos, $gamedata); //Defaults false e.g. line of sight NOT blocked.
-                $currPoS = $shooter->getHexPos();
-                $shooterlosBlocked  = $this->checkLineOfSight($currPoS, $targetPos, $gamedata); //Defaults false e.g. line of sight NOT blocked.
+                $shooterlosBlocked  = $this->checkLineOfSight($pos, $targetPos, $gamedata); //Defaults false e.g. line of sight NOT blocked.
                 //$soew = 0; //fighters CAN receive SOEW (fractional, SOEW calculation takes this into account)
                 if (!($shooter->isDestroyed() || $shooter->getFighterBySystem($fireOrder->weaponid)->isDestroyed())) {
-                    if ($shooter->hasNavigator && !$launchlosBlocked && !$shooterlosBlocked) {// Fighter has navigator and Line of Sight. Flight always benefits from offensive bonus.
+                    if ($shooter->hasNavigator && !$shooterlosBlocked) {// Fighter has navigator and Line of Sight. Flight always benefits from offensive bonus.
                         $oew = $effectiveOB;
                     } else { // Check if target is in current weapon arc
                         $relativeBearing = $shooter->getBearingOnUnit($target);
-                        if (mathlib::isInArc($relativeBearing, $this->startArc, $this->endArc) && !$launchlosBlocked ) {
+                        if (mathlib::isInArc($relativeBearing, $this->startArc, $this->endArc) && !$shooterlosBlocked ) {
                             // Target is in current launcher arc and has Line of Sight. Flight benefits from offensive bonus.
                             // Now check if the fighter is not firing any non-ballistic weapons
                             if (!$this->isFtrFiringNonBallisticWeapons($shooter, $fireOrder)) {
