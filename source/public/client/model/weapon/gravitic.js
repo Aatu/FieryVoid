@@ -150,13 +150,7 @@ GraviticLance.prototype = Object.create( Weapon.prototype );
 GraviticLance.prototype.constructor = GraviticLance;
 
 GraviticLance.prototype.doMultipleFireOrders = function (shooter, target, system) {
-	/*
-    //Used to restruct only one shot against a ship.
-   var fireOrders = this.fireOrders;
-   for (var i = fireOrders.length - 1; i >= 0; i--) {
-       if(target.shipSizeClass >= 0 && target.id === fireOrders[i].targetid && this.firingMode == 1) return; //Ships cannot be targeted more than once when allocating shots.
-   }	
-*/
+
     var shotsOnTarget = this.guns; // Default guns initially.
     if (this.fireOrders.length == 2) { // Two shots have been locked in, remove the first.
         this.fireOrders.splice(0, 1); // Remove the first fire order.
