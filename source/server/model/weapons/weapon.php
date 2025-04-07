@@ -298,7 +298,7 @@ class Weapon extends ShipSystem
 			}
 			/*this needs to be sent only if weapon suffered crits!*/
 			if (count($this->criticals)>0) { //if there was a critical, send all potentially changed data; otherwise, they should be standard and don't need to be sent extra!
-				$this->effectCriticals();					
+//				$this->effectCriticals();//Calling this here caused range penalty crits to apply twice! - DK 7.4.25 				
 				$strippedSystem->range = $this->range;
 				$strippedSystem->rangeArray = $this->rangeArray;	
 				$strippedSystem->rangePenalty = $this->rangePenalty;
