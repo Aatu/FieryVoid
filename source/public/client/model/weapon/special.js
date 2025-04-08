@@ -292,6 +292,67 @@ var PsionicConcentrator = function PsionicConcentrator(json, ship) {
 PsionicConcentrator.prototype = Object.create(Weapon.prototype);
 PsionicConcentrator.prototype.constructor = PsionicConcentrator;
 
+PsionicConcentrator.prototype.doMultipleFireOrders = function (shooter, target, system) {
+
+    var shotsOnTarget = this.guns;
+
+    if (this.fireOrders.length > 0) {
+        if (this.fireOrders.length >= this.guns) {
+            // All guns already fired → retarget just one gun
+            this.fireOrders.splice(0, 1);
+            shotsOnTarget = 1;
+        } else {
+            // Some guns already fired → fire the rest
+            shotsOnTarget = this.guns - this.fireOrders.length;
+        }
+    } 
+
+    var fireOrdersArray = []; // Store multiple fire orders
+
+    for (var s = 0; s < shotsOnTarget; s++) {
+        var fireid = shooter.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
+        var calledid = -1; 
+
+        if (system) {
+            //check if weapon is eligible for called shot!
+//            if (!weaponManager.canWeaponCall(weapon)) continue; //Psi Concentrator IS eligible, no need to check.
+
+            // When the system is a subsystem, make all damage go through
+            // the parent.
+            while (system.parentId > 0) {
+                system = shipManager.systems.getSystem(ship, system.parentId);
+            }
+
+            calledid = system.id;
+        }        
+
+        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
+        if(chance < 1) continue;
+
+        var fire = {
+            id: fireid,
+            type: 'normal',
+            shooterid: shooter.id,
+            targetid: target.id,
+            weaponid: this.id,
+            calledid: calledid,
+            turn: gamedata.turn,
+            firingMode: this.firingMode,
+            shots: 1,
+            x: "null",
+            y: "null",
+            damageclass: 'Sweeping', 
+            chance: chance,
+            hitmod: 0,
+            notes: "Split"
+        };
+        
+        fireOrdersArray.push(fire); // Store each fire order
+    }
+    
+    return fireOrdersArray; // Return all fire orders
+};
+
 var PsionicConcentratorLight = function PsionicConcentratorLight(json, ship) {
     Weapon.call(this, json, ship);
 };

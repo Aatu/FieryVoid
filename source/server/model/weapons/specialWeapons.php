@@ -5707,6 +5707,7 @@ class PsionicConcentrator extends Weapon{
 	public $testRun = false;//testRun = true means hit chance is calculated nominal skipping concentration issues - for subordinate weapon to calculate average hit chance
 	
 	public $repairPriority = 4;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
+	public $canSplitShots = true; //Allows Firing Mode 1 to split shots.	
 
     function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
         {
