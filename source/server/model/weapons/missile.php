@@ -1250,7 +1250,7 @@ class AmmoMissileRackS extends Weapon{
 		//change mode to 1, to call all appropriate routines connected with mode change
 		$this->changeFiringMode(1);		
 		//remember about effecting criticals, too!
-	//	$this->effectCriticals(); //This was applying criticals twice! DK			
+		$this->effectCriticals();			
 	}//endof function recompileFiringModes
 	
 	
