@@ -236,6 +236,7 @@ window.BallisticIconContainer = function () {
 			if(replay){
 				if(ballistic.damageclass == 'PersistentEffectPlasma' && ballistic.targetid == -1 && ballistic.notes != 'PlasmaCloud') return;
 			}
+			if(ballistic.damageclass == 'Sweeping')	return;	//For Shadow Slicers, Gravs Beams etc. Let's just rely on lines and targeting tooltip and not clutter with Hex colours.	
 
 	        var shooterIcon = iconContainer.getById(ballistic.shooterid);	
 //	        if(!shooterIcon) shooterIcon = iconContainer.getById(ballistic.shooter.id); //Do I still need?
@@ -253,8 +254,6 @@ window.BallisticIconContainer = function () {
 				var weapon = shooter.systems[ballistic.weaponid]; //Find weapon			
 				var modeName = weapon.firingModes[ballistic.firingMode]; //Get actual Firing Mode name, so we can be more specific below!
 			}
-
-			if(modeName == 'Sweeping')	return;	//For Shadow Slicers, Gravs Beams. Let's just rely on lines and targeting tooltip and not clutter with Hex colours.	
 
 			if (ballistic.type == 'normal') { //it's direct fire after all!
 			    launchPosition = this.coordinateConverter.fromHexToGame(shooterIcon.getLastMovement().position);
@@ -634,7 +633,11 @@ window.BallisticIconContainer = function () {
 				break;
 				case 'Sweeping': //Shadow Slicer
 					type = 'purple'; //Default for slicers
-					if(weapon.weaponClass == "Gravitic") type = 'green'; //But now other weapon types use sweeping.									        
+					if(weapon.weaponClass == "Gravitic"){
+						type = 'green'; //But now other weapon types use sweeping.
+					}else if(weapon.weaponClass == "Psychic"){
+						type = 'red';
+					}									        
 				break;					
 			}		 
 		}
