@@ -899,7 +899,6 @@ window.gamedata = {
 		totalFtrCurr = totalFtrXL;
 		totalHangarCurr = (totalHangarH+totalHangarM+totalHangarL+hangarConversionNet)*2 + totalHangarXL;		
 		if (totalFtrCurr > 0 || totalHangarCurr > 0){ //do not show if there are no fighters/hangars in this segment
-//			totalHangarCurr = (totalHangarH+totalHangarM+totalHangarL+hangarConversionNet)*2 + totalHangarXL;
 			checkResult +=  " - Ultralight Fighters: " + totalFtrCurr;
 			checkResult +=  " (allowed up to " + totalHangarCurr + ")";
 			if((totalFtrXL>0) || (totalHangarXL>0)){ //add disclaimer because sums will not add up straight.
@@ -917,7 +916,6 @@ window.gamedata = {
 		totalFtrCurr = totalFtrL;
 		totalHangarCurr = totalHangarH+totalHangarM+totalHangarL+hangarConversionNet;		
 		if (totalFtrCurr > 0 || totalHangarCurr > 0){ //do not show if there are no fighters/hangars in this segment
-//			totalHangarCurr = totalHangarH+totalHangarM+totalHangarL+hangarConversionNet;
 			checkResult +=  " - Light Fighters: " + totalFtrCurr;
 			checkResult +=  " (allowed up to " + totalHangarCurr + ")";
 			if (totalFtrCurr > totalHangarCurr){ //fighter total is not within limits
@@ -932,7 +930,6 @@ window.gamedata = {
 		totalFtrCurr = totalFtrM;
 		totalHangarCurr = totalHangarH+totalHangarM+hangarConversionNet;		
 		if (totalFtrCurr > 0 || totalHangarCurr > 0){ //do not show if there are no fighters/hangars in this segment
-//			totalHangarCurr = totalHangarH+totalHangarM+hangarConversionNet;
 			checkResult +=  " - Medium Fighters: " + totalFtrCurr;
 			checkResult +=  " (allowed up to " + totalHangarCurr + ")";
 			if (totalFtrCurr > totalHangarCurr){ //fighter total is not within limits
@@ -946,8 +943,7 @@ window.gamedata = {
 	    
 		totalFtrCurr = totalFtrH;
 		totalHangarCurr = totalHangarH+hangarConversionNet;		
-		if (totalFtrCurr > 0 || totalHangarCurr > 0){ //do not show if there are no fighters/hangars in this segment
-//			totalHangarCurr = totalHangarH+hangarConversionNet;				
+		if (totalFtrCurr > 0 || totalHangarCurr > 0){ //do not show if there are no fighters/hangars in this segment			
 			checkResult +=  " - Heavy Fighters: " + totalFtrCurr;
 				checkResult +=  " (allowed up to " + totalHangarCurr + ")";
 			if (totalFtrCurr > totalHangarCurr){ //fighter total is not within limits
