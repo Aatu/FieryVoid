@@ -452,7 +452,7 @@ class Weapon extends ShipSystem
         $dp = $this->dp;
         //min/max damage arrays are created automatically, so they will always be present
         if ($dp > 0) {
-            $this->effectCriticalDamgeReductions();
+            $this->effectCriticalDamgeReductions($dp);
             /* //Moved to be it's owned function for it can be called separately from setSystemDataWindow() as well as onConstructed() - DK Apr 2025         
             foreach ($this->firingModes as $dmgMode => $modeName) {
                 $mod = $dp * max(2, 0.2 * ($this->maxDamageArray[$dmgMode] - $this->minDamageArray[$dmgMode]));//2 or 20% of variability, whichever is higher
@@ -494,8 +494,7 @@ class Weapon extends ShipSystem
         $this->changeFiringMode($this->firingMode);
     } //endof function effectCriticals
 
-    public function effectCriticalDamgeReductions(){
-        $dp = $this->dp;
+    public function effectCriticalDamgeReductions($dp, $repeat = false){
         //damage penalty: 20% of variance or straight 2, whichever is bigger; hold that as a fraction, however! - low rolls should be affected lefss than high ones, after all        
         foreach ($this->firingModes as $dmgMode => $modeName) {
             $variance = $this->maxDamageArray[$dmgMode] - $this->minDamageArray[$dmgMode];
@@ -629,10 +628,9 @@ class Weapon extends ShipSystem
             if ($crit instanceof ReducedDamage) $this->dp++;
         }
         //Ammo weapons do NOT have their damage values reset by the above fragment, so we have to exclude them from this application of crits or it'll duplicate.
-        if($this->dp > 0  && (!$this instanceof AmmoMissileRackS) && (!$this instanceof AmmoDirectWeapon)){      
-            $this->effectCriticalDamgeReductions(); //Reapply any critical effect to damage values using same method as onConstructed()             
+        if($this->dp > 0){       
+            $this->effectCriticalDamgeReductions($this->dp, true ); //Reapply any critical effect to damage values using same method as onConstructed()             
         } 
-            
 		$this->changeFiringMode(1); //reset mode to basic
             
         if ($this->damageType != '') $this->data["Damage type"] = $this->damageType;
