@@ -5707,6 +5707,7 @@ class PsionicConcentrator extends Weapon{
 	public $testRun = false;//testRun = true means hit chance is calculated nominal skipping concentration issues - for subordinate weapon to calculate average hit chance
 	
 	public $repairPriority = 4;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
+	public $canSplitShots = true; //Allows Firing Mode 1 to split shots.	
 
     function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
         {
@@ -5722,13 +5723,13 @@ class PsionicConcentrator extends Weapon{
 	
 	public function setSystemDataWindow($turn){
 		      parent::setSystemDataWindow($turn);  
-		      $this->data["Special"] = "Fires 4 shots by default.";
-		      $this->data["Special"] .= "<br>Alternative Firing Modes allow these 4 shots to be combined in 2, or 1, more powerful shot(s) as listed below:";
-		      $this->data["Special"] .= "<br> - 4 shots; 8-18 Damage, -2.5 per hex.";
-		      $this->data["Special"] .= "<br> - 2 shots; 18-33 Damage, -5 per hex.";	
-		      $this->data["Special"] .= "<br> - 1 shot; 29-54 Damage, -10 per hex.";			      		      		      
-		      $this->data["Special"] .= "<br>Each hit causes -1 Power on non-Ancient ships with Reactors for one turn.";
+		      $this->data["Special"] = "Fires 4 shots by default, but can combine these into 1 or 2 powerful, shorter-ranged shot(s)";
+//		      $this->data["Special"] .= "<br> - 4 shots; 8-18 Damage, -2.5 per hex.";
+//		      $this->data["Special"] .= "<br> - 2 shots; 18-33 Damage, -5 per hex.";	
+//		      $this->data["Special"] .= "<br> - 1 shot; 29-54 Damage, -10 per hex.";			      		      		      
+		      $this->data["Special"] .= "<br>Any hits drain -1 Power from Younger Race ships for one turn.";
 		      $this->data["Special"] .= "<br>Has +1 modifier to critical hit rolls, and +2 to fighter dropout rolls.";
+		      $this->data["Special"] .= "<br>Can split shots amongst different targets.";			  
 	    }	
 
 

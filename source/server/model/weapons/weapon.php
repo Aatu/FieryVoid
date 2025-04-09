@@ -297,8 +297,7 @@ class Weapon extends ShipSystem
 				$strippedSystem->data = $this->data;
 			}
 			/*this needs to be sent only if weapon suffered crits!*/
-			if (count($this->criticals)>0) { //if there was a critical, send all potentially changed data; otherwise, they should be standard and don't need to be sent extra!
-				$this->effectCriticals();					
+			if (count($this->criticals)>0) { //if there was a critical, send all potentially changed data; otherwise, they should be standard and don't need to be sent extra!				
 				$strippedSystem->range = $this->range;
 				$strippedSystem->rangeArray = $this->rangeArray;	
 				$strippedSystem->rangePenalty = $this->rangePenalty;
@@ -453,7 +452,8 @@ class Weapon extends ShipSystem
         $dp = $this->dp;
         //min/max damage arrays are created automatically, so they will always be present
         if ($dp > 0) {
-            //damage penalty: 20% of variance or straight 2, whichever is bigger; hold that as a fraction, however! - low rolls should be affected lefss than high ones, after all
+            $this->effectCriticalDamgeReductions($dp);
+            /* //Moved to be it's owned function for it can be called separately from setSystemDataWindow() as well as onConstructed() - DK Apr 2025         
             foreach ($this->firingModes as $dmgMode => $modeName) {
                 $mod = $dp * max(2, 0.2 * ($this->maxDamageArray[$dmgMode] - $this->minDamageArray[$dmgMode]));//2 or 20% of variability, whichever is higher
                 $avgDmg = ($this->maxDamageArray[$dmgMode] + $this->minDamageArray[$dmgMode]) / 2;
@@ -465,7 +465,7 @@ class Weapon extends ShipSystem
                 $this->dpArray[$dmgMode] = min(0.9, $this->dpArray[$dmgMode]); //let's not allow to reduce below something ;) - say, max damage reduction is 90%
                 $this->minDamageArray[$dmgMode] = floor($this->minDamageArray[$dmgMode] * (1 - $this->dpArray[$dmgMode]));
                 $this->maxDamageArray[$dmgMode] = floor($this->maxDamageArray[$dmgMode] * (1 - $this->dpArray[$dmgMode]));
-            }
+            } */
         }
 
         //range doesn't have to be an array, but may be
@@ -494,6 +494,26 @@ class Weapon extends ShipSystem
         $this->changeFiringMode($this->firingMode);
     } //endof function effectCriticals
 
+    public function effectCriticalDamgeReductions($dp, $repeat = false){
+        //damage penalty: 20% of variance or straight 2, whichever is bigger; hold that as a fraction, however! - low rolls should be affected lefss than high ones, after all        
+        foreach ($this->firingModes as $dmgMode => $modeName) {
+            $variance = $this->maxDamageArray[$dmgMode] - $this->minDamageArray[$dmgMode];
+            $mod = $dp * max(2, 0.2 * $variance);
+        
+            $avgDmg = ($this->maxDamageArray[$dmgMode] + $this->minDamageArray[$dmgMode]) / 2;
+        
+            if ($avgDmg > 0) {
+                $this->dpArray[$dmgMode] = $mod / $avgDmg;
+            } else {
+                $this->dpArray[$dmgMode] = 1;
+            }
+        
+            $this->dpArray[$dmgMode] = min(0.9, $this->dpArray[$dmgMode]);
+        
+            $this->minDamageArray[$dmgMode] = floor($this->minDamageArray[$dmgMode] * (1 - $this->dpArray[$dmgMode]));
+            $this->maxDamageArray[$dmgMode] = floor($this->maxDamageArray[$dmgMode] * (1 - $this->dpArray[$dmgMode]));
+        }
+    }
 
     public function getNormalLoad()
     {
@@ -600,9 +620,19 @@ class Weapon extends ShipSystem
 			//set AF priority, too!
 			$this->setPriorityAF(); 
 			$this->priorityAFArray[$i] = $this->priorityAF;
-		}
+		} 
+        
+        //We just reset damage arrays, so need to now reapply any Damage Reduced critical effects for System Data Window to display correctly.
+        $this->dp = 0; //Initialise again.
+        foreach ($this->criticals as $crit) { //Are there any appropriate crits?
+            if ($crit instanceof ReducedDamage) $this->dp++;
+        }
+        //Ammo weapons do NOT have their damage values reset by the above fragment, so we have to exclude them from this application of crits or it'll duplicate.
+        if($this->dp > 0){       
+            $this->effectCriticalDamgeReductions($this->dp, true ); //Reapply any critical effect to damage values using same method as onConstructed()             
+        } 
 		$this->changeFiringMode(1); //reset mode to basic
-	
+            
         if ($this->damageType != '') $this->data["Damage type"] = $this->damageType;
         if ($this->weaponClass != '') $this->data["Weapon type"] = $this->weaponClass;
 		
@@ -1185,16 +1215,14 @@ class Weapon extends ShipSystem
                 //$soew = 0; //fighters CAN receive SOEW (fractional, SOEW calculation takes this into account)
             } else { //ballistics use of OB is more complicated
                 $oew = 0;
-                $launchlosBlocked  = $this->checkLineOfSight($launchPos, $targetPos, $gamedata); //Defaults false e.g. line of sight NOT blocked.
-                $currPoS = $shooter->getHexPos();
-                $shooterlosBlocked  = $this->checkLineOfSight($currPoS, $targetPos, $gamedata); //Defaults false e.g. line of sight NOT blocked.
+                $shooterlosBlocked  = $this->checkLineOfSight($pos, $targetPos, $gamedata); //Defaults false e.g. line of sight NOT blocked.
                 //$soew = 0; //fighters CAN receive SOEW (fractional, SOEW calculation takes this into account)
                 if (!($shooter->isDestroyed() || $shooter->getFighterBySystem($fireOrder->weaponid)->isDestroyed())) {
-                    if ($shooter->hasNavigator && !$launchlosBlocked && !$shooterlosBlocked) {// Fighter has navigator and Line of Sight. Flight always benefits from offensive bonus.
+                    if ($shooter->hasNavigator && !$shooterlosBlocked) {// Fighter has navigator and Line of Sight. Flight always benefits from offensive bonus.
                         $oew = $effectiveOB;
                     } else { // Check if target is in current weapon arc
                         $relativeBearing = $shooter->getBearingOnUnit($target);
-                        if (mathlib::isInArc($relativeBearing, $this->startArc, $this->endArc) && !$launchlosBlocked ) {
+                        if (mathlib::isInArc($relativeBearing, $this->startArc, $this->endArc) && !$shooterlosBlocked ) {
                             // Target is in current launcher arc and has Line of Sight. Flight benefits from offensive bonus.
                             // Now check if the fighter is not firing any non-ballistic weapons
                             if (!$this->isFtrFiringNonBallisticWeapons($shooter, $fireOrder)) {

@@ -37,8 +37,8 @@ class VerlokaAM extends BaseShip{
 	    $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 100); //add full load of basic missiles 
 	    $ammoMagazine->addAmmoEntry(new AmmoMissileI(), 80); //add full load of missiles
 	    $ammoMagazine->addAmmoEntry(new AmmoBLMineB(), 0); //add full load of basic missiles
-	    $ammoMagazine->addAmmoEntry(new AmmoBLMineW(), 0); //add full load of basic missiles 
-	    $ammoMagazine->addAmmoEntry(new AmmoBLMineH(), 0); //add full load of basic missiles	      	      
+//	    $ammoMagazine->addAmmoEntry(new AmmoBLMineW(), 0); //add full load of basic missiles 
+//	    $ammoMagazine->addAmmoEntry(new AmmoBLMineH(), 0); //add full load of basic missiles	      	      
 
 	    $this->enhancementOptionsEnabled[] = 'AMMO_A';//add enhancement options for other missiles - Class-A
 	    $this->enhancementOptionsEnabled[] = 'AMMO_C';//add enhancement options for other missiles - Class-C
@@ -55,8 +55,8 @@ class VerlokaAM extends BaseShip{
 		$this->enhancementOptionsEnabled[] = 'MINE_BLW';//add enhancement options for mines - Wide-Range Mines
 		$this->enhancementOptionsEnabled[] = 'MINE_BLH';//add enhancement options for mines - Wide-Range Mines
 		$this->enhancementOptionsEnabled[] = 'IFF_SYS'; //Abilty to choose IFF enhancement.		 		 		  	    	    	    
-	    //$this->enhancementOptionsEnabled[] = 'AMMO_S';//add enhancement options for other missiles - Class-S
-		//Stealth missile removed from Early Kor-Lyan ships, as it's not availablee until 2252	  
+	    $this->enhancementOptionsEnabled[] = 'AMMO_S';//add enhancement options for other missiles - Class-S
+ 
         
         $this->addPrimarySystem(new Reactor(6, 25, 0, 4));
         $this->addPrimarySystem(new CnC(6, 16, 0, 0));

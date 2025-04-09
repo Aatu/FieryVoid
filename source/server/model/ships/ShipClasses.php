@@ -440,6 +440,10 @@ class BaseShip {
 			}
 		}		
 		
+        foreach ($this->systems as $system){
+            if ($system instanceof GrapplingClaw)  $marines += $system->ammunition;
+        }
+
 		$totalMarines = max(0, $marines);
 		
 		return $totalMarines;

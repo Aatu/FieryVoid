@@ -24,7 +24,7 @@
 }
 
 .shipwindow .shipclass{
-    margin-left: 30px;
+    margin-left: 5px;
     font-size: 10px;
     color: white;
 }
@@ -48,12 +48,14 @@
     background-color:#04161c;
     border-bottom:1px solid #496791;
     padding-top:5px;
-    font-size:14px;
+    font-size:13px;
     position:relative;
 }
 
-.shipwindow .topbar .value.name{
-    font-style:italic;
+.shipwindow .topbar .value.name {
+    font-style: normal !important; /* Force normal font style */
+    font-size: 12px; /* Ensure font size is 12px */
+    font-weight: bold; /* Make it bold */
 }
 
 .shipwindow .container{

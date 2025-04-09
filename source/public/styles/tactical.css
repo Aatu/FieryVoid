@@ -400,7 +400,7 @@ body {
 	border-left: 1px solid #496791;
 	position:fixed;
 	bottom:0px;
-	z-index:2;
+	z-index:10;
 	-moz-box-shadow: 5px 5px 10px black;
     -webkit-box-shadow: 5px 5px 10px black;
     box-shadow: 5px 5px 10px black;
@@ -746,7 +746,7 @@ body {
 }
 
 #iniGui {
-    z-index:9999;
+    z-index:10000;
     border:1px solid #496791;
     color:#deebff;
     background-color:#0a3340;
@@ -819,7 +819,7 @@ body {
 #backDiv {
     display: inline-block;
     position: absolute;
-    z-index: 9998;
+    z-index: 10000;
     margin-top: 65px;
     margin-left: 250px;
     width: 55px;
