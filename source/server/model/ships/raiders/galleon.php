@@ -51,7 +51,7 @@ class Galleon extends HeavyCombatVessel{
         $this->addFrontSystem(new Thruster(3, 14, 0, 6, 1));
         $this->addFrontSystem(new ParticleCannon(3, 8, 7, 240, 360));
         $this->addFrontSystem(new MediumPlasma(3, 5, 3, 240, 360));
-        $this->addFrontSystem(new MediumPlasma(3, 6, 3, 0, 120));
+        $this->addFrontSystem(new MediumPlasma(3, 5, 3, 0, 120));
         $this->addFrontSystem(new ParticleCannon(3, 8, 8, 0, 120));
        // $this->addFrontSystem(new CargoBay(3, 80));
 

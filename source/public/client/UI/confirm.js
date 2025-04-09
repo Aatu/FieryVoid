@@ -469,6 +469,199 @@ window.confirm = {
         a.fadeIn(250);
     },
 
+    
+    showShipEdit: function showShipEdit(ship, callback) {
+        var e = $(this.whtml);
+
+        // Store the original ship state before any edits
+        let originalShipData = {
+            name: ship.name,
+            pointCost: ship.pointCost,
+            flightSize: ship.flightSize,
+            enhancementOptions: ship.enhancementOptions ? [...ship.enhancementOptions] : [],
+        };
+
+        //variable flightsize
+        var variableSize = confirm.getVariableSize(ship);
+        var missileOptions = confirm.getMissileOptions(ship);
+
+        //if (variableSize || missileOptions.length > 0 || ship.superheavy) {
+            var totalTemplate = $(".totalUnitCost");
+            var totalItem = totalTemplate.clone(true).prependTo(e);
+
+	    //allow maximum flight size pre-set in design...
+	    if (ship.maxFlightSize!=0){
+		    $(".totalUnitCostAmount").data("maxSize", ship.maxFlightSize);
+	    }else{
+		    if (ship.jinkinglimit > 9) {
+			$(".totalUnitCostAmount").data("maxSize", 12);
+		    } else $(".totalUnitCostAmount").data("maxSize", 9);
+	    }
+	    
+		var pointCost = ship.pointCost;
+		if (ship.maxFlightSize==3){ //for single-unit flight cost is for a fighter; for usual 6+ flight, for 6 craft (and 6 craft will be set)
+			//but for 3-strong flight cost is still set for 6-strong flight...
+			pointCost = pointCost/2;
+		}     
+        
+		//ship.pointCost
+            $(".totalUnitCostText", totalItem).html("Total unit cost");
+            $(".totalUnitCostAmount", totalItem).html(pointCost);
+            $(".totalUnitCostAmount", totalItem).data("value", pointCost);
+
+            $(totalItem).show();
+		
+            $(".totalUnitCostAmount").data("value", pointCost);	    
+        //}
+	    
+        
+    //ship enhancements
+        for(var i in ship.enhancementOptions){
+            //enhancementOption: ID,readableName,numberTaken,limit,price,priceStep	
+            var enhancement = ship.enhancementOptions[i];
+            var enhID = enhancement[0];
+            var enhCount = enhancement[2];
+            var enhName = enhancement[1];
+            var enhLimit = enhancement[3];		
+            var enhPrice = enhancement[4];
+            var enhPriceStep = enhancement[5];
+		    var enhIsOption = enhancement[6];
+
+            var template = $(".missileSelectItem");
+            var item = template.clone(true).prependTo(e);
+
+            var selectAmountItem = $(".selectAmount", item);
+
+                selectAmountItem.html(enhCount);
+                selectAmountItem.addClass("shpenh"+i);
+                selectAmountItem.data('enhID', enhID);
+                selectAmountItem.data('count', enhCount);
+                selectAmountItem.data('enhCost', 0);
+                selectAmountItem.data('min', 0);
+                selectAmountItem.data('max', enhLimit);
+                selectAmountItem.data('enhPrice', enhPrice);
+                selectAmountItem.data('enhPriceStep', enhPriceStep);
+                //selectAmountItem.data('launchers', confirm.getLaunchersPerFighter(ship));
+                //selectAmountItem.data("firingMode", i);
+
+		if(enhIsOption) enhName = ' <i>(OPTION)</i> ' + enhName; //add (O) at the beginning of name of options (to differentiate them from enhancements)
+            var nameExpanded = enhName + ' (';
+			if(enhLimit>1) nameExpanded += 'up to ' + enhLimit + ' levels, ';
+			nameExpanded += enhPrice + 'PV ';
+			//+ ' (up to ' + enhLimit + ' levels, ' + enhPrice + 'PV ';
+            if((enhPriceStep!=0) && (enhLimit>1)){
+                nameExpanded = nameExpanded + ' plus ' + enhPriceStep + 'PV per level';		
+            }
+            nameExpanded = nameExpanded + ')';
+
+            $(".selectText", item).html(nameExpanded);
+            $(item).show();
+
+                    var plusButton = $(".plusButton", item);
+                    plusButton.data("enhNo", i); 
+            var minusButton = $(".minusButton", item);
+                    minusButton.data("enhNo", i);
+
+
+            $(".plusButton", item).on("click",confirm.doOnPlusEnhancement);
+            $(".minusButton", item).on("click",confirm.doOnMinusEnhancement);
+        }
+        $('<div class="missileselect"><label>Here you may select any available Ammo, Options, and Enhancements.<br><span>(NOTE - For fighter flights, all fighters in flight will be similarly outfitted)</span></label></div>').prependTo(e);
+
+        // Do lots of stuff to account for possible buying of missiles.
+        var missileOptions = confirm.getMissileOptions(ship);
+
+        // If it is a fighter, put the option in this pane.
+        // A ship will need some more tricks.
+        if (!mathlib.arrayIsEmpty(missileOptions)) {
+
+            for (var i in missileOptions) {
+                var missileOption = missileOptions[i];
+                var template = $(".missileSelectItem");
+                var item = template.clone(true).prependTo(e);
+
+                var selectAmountItem = $(".selectAmount", item);
+
+                selectAmountItem.html("0");
+                selectAmountItem.addClass(i);
+                selectAmountItem.data('value', 0);
+                selectAmountItem.data('min', 0);
+
+				
+                //if (ship.superheavy) {
+				if (ship.maxFlightSize<3) { //here it's question of single vs multiple craft per flight, not of being superheavy
+                    $(".selectText", item).html(missileOption[0] + ' (maximum amount: ' + missileOption[1] / 6 / (missileOption[3] / 6) + ', cost: ' + missileOption[2] + ')');
+                    $(item).show();
+
+                    selectAmountItem.data('max', Math.round( missileOption[1] / 6 / (missileOption[3] / 6) ));
+                    selectAmountItem.data('cost', missileOption[2]);
+                    selectAmountItem.data('launchers', confirm.getLaunchersPerFighter(ship));
+                    selectAmountItem.data("firingMode", i);
+                } else {
+                    $(".selectText", item).html(missileOption[0] + ' (maximum amount: ' + missileOption[1] / 6 / (missileOption[3] / 6) + ', cost: ' + missileOption[2] + ')');
+                    $(item).show();
+
+                    selectAmountItem.data('max', Math.round(missileOption[1] / 6 / (missileOption[3] / 6)));
+                    selectAmountItem.data('cost', missileOption[2]);
+                    selectAmountItem.data('launchers', confirm.getLaunchersPerFighter(ship));
+                    selectAmountItem.data("firingMode", i);
+                }
+
+                $(".selectText").data("firingMode", i);
+
+                var plusButton = $(".plusButton", item);
+                plusButton.data("firingMode", i);
+                $(".minusButton", item).data("firingMode", i);
+            }
+
+            $('<div class="missileselect"><label>This fighter type can carry fighter missiles.<br>\
+                    Please select the amount you wish to purchase PER MISSILE LAUNCHER.<br></label>').prependTo(e);
+
+            //$(".missileSelectItem .selectButtons .plusButton", e).on("click", confirm.doOnPlusMissile);
+            //$(".missileSelectItem .selectButtons .minusButton", e).on("click", confirm.doOnMinusMissile);
+            //change for enhancements:
+            $(".plusButton", item).on("click",confirm.doOnPlusMissile);
+            $(".minusButton", item).on("click",confirm.doOnMinusMissile);
+        }
+
+        if (variableSize) {
+            var template = $(".missileSelectItem");
+            var item = template.clone(true).prependTo(e);
+            item.addClass("fighterSelectItem");
+
+            $(".selectText", item).html("Number of fighters in this flight:");
+            $(item).show();
+
+            var selectAmountItem = $(".selectAmount", item);
+            selectAmountItem.removeClass("selectAmount").addClass("fighterAmount");
+
+            selectAmountItem.html(ship.flightSize);
+
+            selectAmountItem.data('pV', Math.floor(ship.pointCost / ship.flightSize));
+
+            $(".fighterSelectItem .selectButtons .plusButton", e).on("click", confirm.increaseFlightSize);
+            $(".fighterSelectItem .selectButtons .minusButton", e).on("click", confirm.decreaseFlightSize);
+        }
+	    
+	    $('<label>Edit your ' + ship.shipClass + ':</label><input type="text" style="text-align:center" name="shipname" value="' + ship.name + '"></input><br>').prependTo(e);
+
+        $(".confirmok", e).on("click", callback);
+
+        $(".confirmcancel", e).on("click", function () {
+            console.log("remove");
+            $(".confirm").remove();
+        });
+
+        $(".confirmok", e).data("ship", ship);
+        $(".confirmok", e).data("originalShipData", originalShipData);
+
+
+
+var a = e.appendTo("body");
+a.fadeIn(250);
+},
+
+
     getVariableSize: function getVariableSize(ship) {
         //if (ship.flight && !ship.superheavy) { //superheavy is no longer a good marker
 	if (ship.flight && ship.maxFlightSize!=1) { //max flight size = 1 indicates single superheavy fighter

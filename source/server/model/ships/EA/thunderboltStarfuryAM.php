@@ -7,7 +7,7 @@ class ThunderboltStarfuryAM extends FighterFlight{
         $this->pointCost = 80*6;
         $this->faction = "Earth Alliance";
         $this->phpclass = "ThunderboltStarfuryAM";
-        $this->shipClass = "Starfury: Thunderbolt Heavy flight";
+        $this->shipClass = "Thunderbolt Assault flight";
         $this->imagePath = "img/ships/thunderboltStarfury.png";
         $this->customFtrName = "Thunderbolt";
 		
