@@ -297,8 +297,7 @@ class Weapon extends ShipSystem
 				$strippedSystem->data = $this->data;
 			}
 			/*this needs to be sent only if weapon suffered crits!*/
-			if (count($this->criticals)>0) { //if there was a critical, send all potentially changed data; otherwise, they should be standard and don't need to be sent extra!
-//				$this->effectCriticals();//Calling this here caused range penalty crits to apply twice! - DK 7.4.25 				
+			if (count($this->criticals)>0) { //if there was a critical, send all potentially changed data; otherwise, they should be standard and don't need to be sent extra!				
 				$strippedSystem->range = $this->range;
 				$strippedSystem->rangeArray = $this->rangeArray;	
 				$strippedSystem->rangePenalty = $this->rangePenalty;
@@ -453,7 +452,8 @@ class Weapon extends ShipSystem
         $dp = $this->dp;
         //min/max damage arrays are created automatically, so they will always be present
         if ($dp > 0) {
-            //damage penalty: 20% of variance or straight 2, whichever is bigger; hold that as a fraction, however! - low rolls should be affected lefss than high ones, after all
+            $this->effectCriticalDamgeReductions();
+            /* //Moved to be it's owned function for it can be called separately from setSystemDataWindow() as well as onConstructed() - DK Apr 2025         
             foreach ($this->firingModes as $dmgMode => $modeName) {
                 $mod = $dp * max(2, 0.2 * ($this->maxDamageArray[$dmgMode] - $this->minDamageArray[$dmgMode]));//2 or 20% of variability, whichever is higher
                 $avgDmg = ($this->maxDamageArray[$dmgMode] + $this->minDamageArray[$dmgMode]) / 2;
@@ -465,7 +465,7 @@ class Weapon extends ShipSystem
                 $this->dpArray[$dmgMode] = min(0.9, $this->dpArray[$dmgMode]); //let's not allow to reduce below something ;) - say, max damage reduction is 90%
                 $this->minDamageArray[$dmgMode] = floor($this->minDamageArray[$dmgMode] * (1 - $this->dpArray[$dmgMode]));
                 $this->maxDamageArray[$dmgMode] = floor($this->maxDamageArray[$dmgMode] * (1 - $this->dpArray[$dmgMode]));
-            }
+            } */
         }
 
         //range doesn't have to be an array, but may be
@@ -494,6 +494,27 @@ class Weapon extends ShipSystem
         $this->changeFiringMode($this->firingMode);
     } //endof function effectCriticals
 
+    public function effectCriticalDamgeReductions(){
+        $dp = $this->dp;
+        //damage penalty: 20% of variance or straight 2, whichever is bigger; hold that as a fraction, however! - low rolls should be affected lefss than high ones, after all        
+        foreach ($this->firingModes as $dmgMode => $modeName) {
+            $variance = $this->maxDamageArray[$dmgMode] - $this->minDamageArray[$dmgMode];
+            $mod = $dp * max(2, 0.2 * $variance);
+        
+            $avgDmg = ($this->maxDamageArray[$dmgMode] + $this->minDamageArray[$dmgMode]) / 2;
+        
+            if ($avgDmg > 0) {
+                $this->dpArray[$dmgMode] = $mod / $avgDmg;
+            } else {
+                $this->dpArray[$dmgMode] = 1;
+            }
+        
+            $this->dpArray[$dmgMode] = min(0.9, $this->dpArray[$dmgMode]);
+        
+            $this->minDamageArray[$dmgMode] = floor($this->minDamageArray[$dmgMode] * (1 - $this->dpArray[$dmgMode]));
+            $this->maxDamageArray[$dmgMode] = floor($this->maxDamageArray[$dmgMode] * (1 - $this->dpArray[$dmgMode]));
+        }
+    }
 
     public function getNormalLoad()
     {
@@ -600,9 +621,20 @@ class Weapon extends ShipSystem
 			//set AF priority, too!
 			$this->setPriorityAF(); 
 			$this->priorityAFArray[$i] = $this->priorityAF;
-		}
+		} 
+        
+        //We just reset damage arrays, so need to now reapply any Damage Reduced critical effects for System Data Window to display correctly.
+        $this->dp = 0; //Initialise again.
+        foreach ($this->criticals as $crit) { //Are there any appropriate crits?
+            if ($crit instanceof ReducedDamage) $this->dp++;
+        }
+        //Ammo weapons do NOT have their damage values reset by the above fragment, so we have to exclude them from this application of crits or it'll duplicate.
+        if($this->dp > 0  && (!$this instanceof AmmoMissileRackS) && (!$this instanceof AmmoDirectWeapon)){      
+            $this->effectCriticalDamgeReductions(); //Reapply any critical effect to damage values using same method as onConstructed()             
+        } 
+            
 		$this->changeFiringMode(1); //reset mode to basic
-	
+            
         if ($this->damageType != '') $this->data["Damage type"] = $this->damageType;
         if ($this->weaponClass != '') $this->data["Weapon type"] = $this->weaponClass;
 		
