@@ -554,7 +554,7 @@ body {
     margin-top: 3px;
     float: left;
     padding-left: 5px;
-    width:35%;
+    width:40%;
 }
 
 .fleetlist .shipclass{
@@ -566,19 +566,31 @@ body {
 .fleetlist .shiptype{
     margin-top: 3px;
     float: left;
-    width: 15%;
+    width: 10%;
 }
 
+/* //Apparently not used anymore, and old element is pushing value out of alignment in Info Tab - DK
 .fleetlist .shipstatus{
     margin-top: 3px;
     float: left;
     width: 10%;
+}
+*/
+
+.fleetlist .shipstatus:empty {
+    display: none;
 }
 
 .fleetlist .initiative{
 	margin-top: 3px;
 	float: left;
 	width: 10%;
+}
+
+.fleetlist .value {
+    margin-top: 3px;
+    float: left;
+    width: 10%;
 }
 
 #logcontainer #gameinfo{
