@@ -982,6 +982,7 @@ window.gamedata = {
         gamedata.subphase = 0;
         //shipManager.initShips();
         UI.shipMovement.hide();
+        if(gamedata.gamephase == 1) fleetListManager.reset();       
         fleetListManager.displayFleetLists();
 
         gamedata.setPhaseClass();

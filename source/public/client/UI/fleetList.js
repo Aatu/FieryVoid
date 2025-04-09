@@ -10,6 +10,10 @@ window.fleetListManager = {
 
     displayFleetLists: function displayFleetLists() {
         if (!fleetListManager.initialized) {
+
+        // Clean up previous fleet list entries to avoid duplicates
+        $("#gameinfo .fleetlistentry").remove();
+                    
             var template = $("#logcontainer .fleetlistentry");
 
             // first display the fleet list of the current player
@@ -130,5 +134,10 @@ window.fleetListManager = {
                 $("#" + ship.id + " .initiative").html("destroyed");
             }
         }
-    }
+    },
+
+    reset: function reset() {
+        fleetListManager.initialized = false;
+    }    
+
 };
