@@ -1,5 +1,5 @@
 #replayUI {
-    z-index:10000;
+    z-index:9999;
     border:1px solid #496791;
     color:#deebff;
     background-color:#0a3340;

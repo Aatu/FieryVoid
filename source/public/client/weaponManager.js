@@ -936,16 +936,14 @@ window.weaponManager = {
             var OBcrit = shipManager.criticals.hasCritical(firstFighter, "tmpsensordown");
             oew = shooter.offensivebonus - OBcrit;
 			if (weapon.ballistic){ //for ballistics, if there is no Navigator, use OB only if target is in weapon arc!
-                var launchLoSBlocked = false; //Default to LoS not blocked
                 var shooterLoSBlocked = false;
                 var blockedLosHex = weaponManager.getBlockedHexes(); //Check if there are any hexes that block LoS                
                 if (blockedLosHex && blockedLosHex.length > 0) { //If so, are they blocking this shot? 
-                    launchLoSBlocked = mathlib.checkLineOfSight(sPosLaunch, sPosTarget, blockedLosHex);
                     var shooterPos= shipManager.getShipPosition(shooter);
                     shooterLoSBlocked = mathlib.checkLineOfSight(shooterPos, sPosTarget, blockedLosHex);                    
                 }   				
                 // If no navigator and out of arc, or if LoS is blocked, set oew to 0
-                if ((!shooter.hasNavigator && !weaponManager.isOnWeaponArc(shooter, target, weapon)) || launchLoSBlocked || shooterLoSBlocked) {
+                if ((!shooter.hasNavigator && !weaponManager.isOnWeaponArc(shooter, target, weapon)) || shooterLoSBlocked) {
                     oew = 0;
                 }
 			}		
@@ -1430,7 +1428,7 @@ window.weaponManager = {
         debug && console.log("weaponManager target ship", ship, system);
 
         if (shipManager.isDestroyed(selectedShip)) return;
-        if(ship.Huge > 0) return; //Do not allow targeting of laege muti-hex terrain possible from certain angle).
+        if(ship.Huge > 0) return; //Do not allow targeting of laege muti-hex terrain, previously possible from certain angle.
 
         var blockedLosHex = weaponManager.getBlockedHexes();
 
