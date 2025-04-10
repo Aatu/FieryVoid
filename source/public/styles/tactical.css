@@ -485,8 +485,43 @@ body {
     padding: 0 5px;
 }
 
+#combatLogContainer{
+    overflow-y: scroll;
+    position: absolute;
+    padding: 0 5px;    
+}
+
+#combatLogButtons{	
+        position: absolute; /* Absolute positioning */
+        font-size: 12px;   
+        font-style:normal;
+        font-weight:bold;  
+        color: #597eb1; /* #deebff; */                         
+        top: 0;             /* Align to the top */
+        right: 0;           /* Align to the right */
+        padding-top: 3px;
+        padding-right: 3px; /* Adjust for padding from the right side */
+        z-index: 11;        /* Make sure it's on top */
+}
+
+#combatLogButtons input[type="button"] {
+    font-size: 12px;
+    cursor: pointer;
+    margin-top: 1px;
+    margin-right: 1px; /* Add space between buttons */
+    border: none; /* Remove default border */
+}
+
+
+#combatLogActual{	
+    padding-top: 3px;
+    font-size: 12px;   
+    font-style:normal; 
+}
+
 #declarationsButtons{	
     padding-top: 5px;
+    font-size: 12px;      
 }
 
 #declarationsActual{	

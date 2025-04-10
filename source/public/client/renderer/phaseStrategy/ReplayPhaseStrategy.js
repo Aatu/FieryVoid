@@ -45,13 +45,13 @@ window.ReplayPhaseStrategy = function () {
         this.showAppropriateEW();
 
         infowindow.informPhase(5000, function () {});
-
+        document.getElementById('combatLogContainer').style.display = 'none'; //Hide print Log buttons
         return this;
     };
 
     ReplayPhaseStrategy.prototype.deactivate = function () {
         PhaseStrategy.prototype.deactivate.call(this, true);
-
+        document.getElementById('combatLogContainer').style.display = 'block'; //Show print Log buttons
         return this;
     };
 
