@@ -5,7 +5,13 @@ jQuery(function () {
 
 	
 	$("#expandBotPanel").click(function () {
-		$("#logcontainer").toggleClass('large')
+		$("#logcontainer").toggleClass('large');
+
+		// Manually create a fake element with the right data-select
+		var fakeElement = $("<div>").data("select", "#log");
+
+		// Call onLogUIClicked with that fake element as "this"
+		window.botPanel.onLogUIClicked.call(fakeElement);
 	});
 });
 
