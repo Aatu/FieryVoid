@@ -26,6 +26,7 @@ window.InitialPhaseStrategy = function () {
         gamedata.showCommitButton();
         gamedata.showSurrenderButton();
 
+        combatLog.showCurrent();       
         this.setPhaseHeader("INITIAL ORDERS");
         return this;
     };

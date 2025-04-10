@@ -301,7 +301,7 @@ window.combatLog = {
         $(log).prependTo("#log");
     },
 
-    getTurn: function getTurn() {
+    getDisplayTurn: function getDisplayTurn() {
         if(this.displayedTurn === null){
             return gamedata.turn;
         }else{
@@ -309,13 +309,12 @@ window.combatLog = {
         } 
     },    
 
-
     showPrevious: function showPrevious() {
         if(this.displayedTurn === null) this.displayedTurn = gamedata.turn;
-        var turn = this.displayedTurn-1; //Get the turn we want.
-        this.displayedTurn = turn; //Set new displayedTurn for further requests.
+        var turn = this.displayedTurn - 1;
+        if (turn < 1) return;
+        this.displayedTurn = turn;
 
-        if(this.displayedTurn < 1) return; //Can't go back past Turn 1
         if(this.displayedTurn < gamedata.turn){
             document.getElementById('nextTurnButton').style.display = 'inline-block'; // Display next button when relevant.
             document.getElementById('currentTurnButton').style.display = 'inline-block'; // Display next button when relevant.
@@ -333,7 +332,7 @@ window.combatLog = {
             document.getElementById('nextTurnButton').style.display = 'none'; // Hide next turn button
             document.getElementById('currentTurnButton').style.display = 'none'; //Hide Turn number.            
             document.getElementById('LogActual').style.display = 'none'; //Hide Turn number.
-            return; //Can't go back past current turn. 
+            return; //Can't go forward past current turn. 
         } 
         combatLog.fetchAndShowCombatLog();
     },
@@ -372,47 +371,55 @@ window.combatLog = {
 
 
     groupByShipAndWeapon: function groupByShipAndWeapon(incomingFire) {
-        var grouped = {};        
-        
+        const grouped = {};
+    
         incomingFire.forEach(function (fire) {
-            if (fire.type === "intercept" || fire.type === "selfIntercept") return; // skip this iteration
-        
-            var ship = gamedata.getShip(fire.shooterid);
-            var weapon = shipManager.systems.getSystem(ship, fire.weaponid);
-            var key = fire.shooterid + "-" + weapon.constructor.name + "-" + fire.firingMode + '-' + fire.calledid; //split called shots as well!
-        
-            if (grouped[key]) {
-                grouped[key].push(fire);
-            } else {
-                grouped[key] = [fire];
-            }
+            if (fire.type === "intercept" || fire.type === "selfIntercept") return;
+    
+            const ship = gamedata.getShip(fire.shooterid);
+            const weapon = shipManager.systems.getSystem(ship, fire.weaponid);
+            const key = fire.shooterid + "-" + weapon.constructor.name + "-" + fire.firingMode + '-' + fire.calledid;
+    
+            grouped[key] = grouped[key] || [];
+            grouped[key].push(fire);
         });
-        
-        //can't sort main array directly...
-        var groupedKeys = Object.keys(grouped);        
-        groupedKeys.sort(function (a, b){ 
-            //compare first object in both groups - every group should contain only fire by one shooter from one weapon, and by default at one target
-            var obj1 = grouped[a][0];
-            var obj2 = grouped[b][0];
-			//Marcin Sawicki September 2019: use actual firing resolution order if possible! Same weapons firing at same target should have consecutive resolution more or less	
-	      if (obj1.resolutionOrder > obj2.resolutionOrder){ //shots resolved earlier displayed earlier
-		      return 1;
-	      }else if (obj1.resolutionOrder < obj2.resolutionOrder){ 
-		      return -1;
-	      }		  
-            else if(obj1.shooter.flight && !obj2.shooter.flight){ //fighters after ships
-                return 1;                   
-            }else if(!obj1.shooter.flight && obj2.shooter.flight){ //fighters after ships
-                return -1;                   
-            }else if (obj1.weapon.priority !== obj2.weapon.priority){
-                return obj1.weapon.priority-obj2.weapon.priority; 
+    
+        const groupedKeys = Object.keys(grouped);
+    
+        groupedKeys.sort(function (a, b) {
+            const obj1 = grouped[a][0];
+            const obj2 = grouped[b][0];
+    
+            const s1 = obj1.shooter;
+            const s2 = obj2.shooter;
+            const w1 = obj1.weapon;
+            const w2 = obj2.weapon;
+    
+            // Sort by resolution order first
+            if (obj1.resolutionOrder > obj2.resolutionOrder) {
+                return 1;
+            } else if (obj1.resolutionOrder < obj2.resolutionOrder) {
+                return -1;
             }
-            else {
-                var val = obj1.shooter.id - obj2.shooter.id;
-                if (val == 0) val = obj1.id - obj2.id;
-                return val;
-            } 
-        });        
+    
+            // Fighters after ships
+            if (s1.flight && !s2.flight) {
+                return 1;
+            } else if (!s1.flight && s2.flight) {
+                return -1;
+            }
+    
+            // Weapon priority
+            if (w1.priority !== w2.priority) {
+                return w1.priority - w2.priority;
+            }
+    
+            // Fallback: shooter ID and fire order ID
+            let val = s1.id - s2.id;
+            if (val === 0) val = obj1.id - obj2.id;
+            return val;
+        });
+    
         return groupedKeys.map(function (key) {
             return grouped[key];
         });
@@ -420,7 +427,7 @@ window.combatLog = {
 
     showLog: function showLog(allFireOrders) {
         // Get the current turn from the combat log system
-        var currentTurn = window.combatLog.getTurn();
+        var currentTurn = window.combatLog.getDisplayTurn();
 
         // Update the content of LogActual with the current turn
         var html = '<br><span style="font-size:12px; font-weight:bold; text-decoration:underline;">Turn ' + currentTurn + ':</span>';
