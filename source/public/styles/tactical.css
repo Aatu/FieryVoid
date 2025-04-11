@@ -413,7 +413,7 @@ body {
 }
 
 #logcontainer.large{
-    height: 300px;
+    height: 600px;
 }
 
 #logcontainer.mouseover
@@ -482,13 +482,13 @@ body {
 #declarationsContainer{	
     overflow-y: scroll;
     position: absolute;
-    padding: 0 5px;
+    padding: 0 0px;
 }
 
 #combatLogContainer{
     overflow-y: scroll;
     position: absolute;
-    padding: 0 5px;    
+    padding: 0 0px 0 0px; /* Extra right padding for scrollbar visibility */  
 }
 
 #combatLogButtons{	
@@ -508,7 +508,7 @@ body {
     font-size: 12px;
     cursor: pointer;
     margin-top: 1px;
-    margin-right: 1px; /* Add space between buttons */
+    margin-right: 3px; /* Add space between buttons */
     border: none; /* Remove default border */
 }
 
