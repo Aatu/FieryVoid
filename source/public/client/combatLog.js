@@ -386,13 +386,13 @@ window.combatLog = {
     
         groupedKeys.sort(function (a, b) {
             const obj1 = grouped[a][0];
-            const obj2 = grouped[b][0];
+            const obj2 = grouped[b][0]; 
     
-            const s1 = obj1.shooter;
-            const s2 = obj2.shooter;
-            const w1 = obj1.weapon;
-            const w2 = obj2.weapon;
-    
+            const s1 = gamedata.getShip(obj1.shooterid);
+            const s2 = gamedata.getShip(obj2.shooterid);
+            const w1 = shipManager.systems.getSystem(s1, obj1.weaponid);
+            const w2 = shipManager.systems.getSystem(s2, obj2.weaponid);
+/*    
             // Sort by resolution order first
             if (obj1.resolutionOrder !== obj2.resolutionOrder) {
                 return obj1.resolutionOrder - obj2.resolutionOrder;
@@ -402,7 +402,7 @@ window.combatLog = {
             if (s1.flight !== s2.flight) {
                 return s1.flight ? 1 : -1;
             }
-    
+*/    
             // Weapon priority
             if (w1.priority !== w2.priority) {
                 return w1.priority - w2.priority;
@@ -422,14 +422,23 @@ window.combatLog = {
     showLog: function showLog(allFireOrders) {
         // Get the current turn from the combat log system
         var currentTurn = window.combatLog.getDisplayTurn();
-
-        // Update the content of LogActual with the current turn
-        var html = '<br><span style="font-size:12px; font-weight:bold; text-decoration:underline;">Turn ' + currentTurn + ':</span>';
+    
+        // Start building the log HTML
+        var html = '<br><span style="font-size:12px; font-weight:bold; text-decoration:underline;">Turn ' + currentTurn + ':</span><br>';
+    
+        // Check if the allFireOrders array is empty
+        if (allFireOrders.length === 0) {
+            html += '<span style="font-size:12px;"><br>No fire orders were made this turn!</span>';
+        }
+    
+        // Update the content of LogActual with the current turn and optional message
         document.getElementById('LogActual').innerHTML = html;
-        allFireOrders.forEach(function (logEntry){ //allFireOrders is an array of other arrays.
-            combatLog.logFireOrders(logEntry, true);            
+    
+        // Process fire orders if any
+        allFireOrders.forEach(function (logEntry) { // allFireOrders is an array of other arrays
+            combatLog.logFireOrders(logEntry, true);
         });
-
+    
         // Show the LogActual div
         document.getElementById('LogActual').style.display = 'block'; // Set to 'block' or 'inline-block' depending on your layout
     }
