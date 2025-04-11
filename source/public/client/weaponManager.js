@@ -2244,5 +2244,64 @@ window.weaponManager = {
         }
 
         return fires;
-    }
+    },
+
+    getAllFireOrdersForLogPrint: function getAllFireOrdersForLogPrint(ships, turn) {
+        var fires = [];
+		var toReturn = false;
+		
+        ships.forEach(function (ship) {
+            fires = fires.concat(weaponManager.getAllFireOrdersLog(ship));
+        });
+
+        fires = fires.filter(function (fireOrder) {
+            return fireOrder.turn == turn;
+        });
+
+        return fires;
+    },
+
+    getAllFireOrdersLog: function getAllFireOrdersLog(ship) {
+        var fires = new Array();
+        for (var i in ship.systems) {
+            if (ship.flightSize > 0) { //We can't use ship.flight here, it's not variable passed by combatLog.js in data.ships
+                var fighter = ship.systems[i];
+                for (var a in fighter.systems) {
+                    var system = fighter.systems[a];
+                    var sysFires = weaponManager.getAllFireOrdersFromSystem(system);
+                    if (sysFires) fires = fires.concat(sysFires);
+                }
+            } else {
+                var system = ship.systems[i];
+                var sysFires = weaponManager.getAllFireOrdersFromSystemLog(system);
+                if (sysFires) fires = fires.concat(sysFires);
+            }
+        }
+        return fires;
+    },
+
+    getAllFireOrdersFromSystemLog: function getAllFireOrdersFromSystemLog(system) {
+        if (!system.fireOrders) return;
+
+        var fires = system.fireOrders;
+
+        if (system.dualWeapon || system.duoWeapon) {
+            for (var i in system.weapons) {
+                var weapon = system.weapons[i];
+
+                if (weapon.duoWeapon) {
+                    for (var index in weapon.weapons) {
+                        var subweapon = weapon.weapons[index];
+                        fires = fires.concat(weaponManager.getAllFireOrdersFromSystem(subweapon));
+                    }
+                } else {
+                    fires = fires.concat(weaponManager.getAllFireOrdersFromSystem(weapon));
+                }
+            }
+        }
+
+        return fires;
+    },
+
+
 };

@@ -357,12 +357,10 @@ window.combatLog = {
                 gameid: gamedata.gameid,
                 time: new Date().getTime()
             },
-            success: function (data) {
-                gamedata.setShipsFromJson(data.ships);  //Set ship info to previous turn.               
+            success: function (data) {             
                 var allFireOrders = []; //Initialise
-				allFireOrders = combatLog.groupByShipAndWeapon(weaponManager.getAllFireOrdersForAllShipsForTurn(data.turn)); //Find and group appropriate fire orders.	
-                combatLog.showLog(allFireOrders); //Now print log from selected turn
-                gamedata.setShipsFromJson(gamedata.ships);   //Restore ship info to current turn!       		
+				allFireOrders = combatLog.groupByShipAndWeapon(weaponManager.getAllFireOrdersForLogPrint(data.ships, data.turn)); //Find and group appropriate fire orders.	
+                combatLog.showLog(allFireOrders); //Now print log from selected turn     		
             }.bind(this),
             error: ajaxInterface.errorAjax
         });
