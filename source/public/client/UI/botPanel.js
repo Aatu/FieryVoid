@@ -10,8 +10,11 @@ jQuery(function () {
 		// Manually create a fake element with the right data-select
 		var fakeElement = $("<div>").data("select", "#log");
 
+		gamedata.sliderToggle();
+
 		// Call onLogUIClicked with that fake element as "this"
 		window.botPanel.onLogUIClicked.call(fakeElement);
+		document.getElementById("iniSlider").src = "img/pullIn.png";
 	});
 });
 
