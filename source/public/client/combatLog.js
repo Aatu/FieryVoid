@@ -378,7 +378,7 @@ window.combatLog = {
     
             const ship = gamedata.getShip(fire.shooterid);
             const weapon = shipManager.systems.getSystem(ship, fire.weaponid);
-            const key = fire.shooterid + "-" + weapon.constructor.name + "-" + fire.firingMode + '-' + fire.calledid;
+            const key = `${fire.shooterid}-${weapon.constructor.name}-${fire.firingMode}-${fire.targetid}`;
     
             grouped[key] = grouped[key] || [];
             grouped[key].push(fire);
@@ -396,17 +396,13 @@ window.combatLog = {
             const w2 = obj2.weapon;
     
             // Sort by resolution order first
-            if (obj1.resolutionOrder > obj2.resolutionOrder) {
-                return 1;
-            } else if (obj1.resolutionOrder < obj2.resolutionOrder) {
-                return -1;
+            if (obj1.resolutionOrder !== obj2.resolutionOrder) {
+                return obj1.resolutionOrder - obj2.resolutionOrder;
             }
     
             // Fighters after ships
-            if (s1.flight && !s2.flight) {
-                return 1;
-            } else if (!s1.flight && s2.flight) {
-                return -1;
+            if (s1.flight !== s2.flight) {
+                return s1.flight ? 1 : -1;
             }
     
             // Weapon priority
