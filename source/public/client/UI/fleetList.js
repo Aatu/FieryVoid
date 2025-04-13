@@ -79,7 +79,7 @@ window.fleetListManager = {
 
             switch (ship.shipSizeClass) {
                 case -1:
-                    shiptype = "squadron";
+                    shiptype = "Squadron";
                     break;
                 case 1:
                     shiptype = "MCV";
@@ -88,7 +88,7 @@ window.fleetListManager = {
                     shiptype = "HCV";
                     break;
                 case 3:
-                    shiptype = "capital";
+                    shiptype = "Capital";
                     break;
                 default:
                     break;
@@ -131,7 +131,7 @@ window.fleetListManager = {
                 // ship was destroyed.
                 $("#" + ship.id + " .shipname").removeClass("clickable");
                 $("#" + ship.id).addClass("destroyed");
-                $("#" + ship.id + " .initiative").html("destroyed");
+                $("#" + ship.id + " .initiative").html("Destroyed");
             }
         }
     },

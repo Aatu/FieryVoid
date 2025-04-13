@@ -564,12 +564,13 @@ body {
 }
 
 .fleetlistentry .destroyed{
-    font-style: italic;
+    font-style: normal;
+    color:#b34119;
 }
 
 .fleetheader .headername{
 	font-weight:bold;
-	color:#b34119;
+	color:#deebff;
 }
 
 .fleetheader .playername{
