@@ -2147,8 +2147,9 @@ class TelekineticCutter extends Raking{
 
     public $damageType = "Raking"; 
     public $weaponClass = "Particle";
-    public $firingModes = array( 1 => "Raking");
-        
+    public $firingModes = array( 1 => "Normal", 2=> "Split");
+    public $canSplitShots = false; //Allows Firing Mode 2 to split shots.
+    public $canSplitShotsArray = array(1=>false, 2=>true );        
         
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
 		if ( $maxhealth == 0 ) $maxhealth = 12;
@@ -2156,9 +2157,10 @@ class TelekineticCutter extends Raking{
 		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
 	}
 
-    public function setSystemDataWindow($turn){
-        parent::setSystemDataWindow($turn);
-    }
+    public function setSystemDataWindow($turn){			
+        parent::setSystemDataWindow($turn);   
+        $this->data["Special"] = "Can use 'Split' Firing Mode to target different enemy units.";
+}
 
     public function getDamage($fireOrder){ return Dice::d(10, 4);   }
     public function setMinDamage(){     $this->minDamage = 4 ;      }

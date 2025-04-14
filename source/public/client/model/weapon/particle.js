@@ -339,6 +339,50 @@ var TelekineticCutter = function TelekineticCutter(json, ship) {
 TelekineticCutter.prototype = Object.create(Particle.prototype);
 TelekineticCutter.prototype.constructor = TelekineticCutter;
 
+TelekineticCutter.prototype.doMultipleFireOrders = function (shooter, target, system) {
+
+    var shotsOnTarget = 1; //we're only ever allocating one shot at a time for this weapon.
+
+    if (this.fireOrders.length > 0) {
+        if (this.fireOrders.length >= this.guns) {
+            // All guns already fired → retarget one gun by removing oldest fireorder.
+            this.fireOrders.splice(0, 1);
+        }
+    } 
+
+    var fireOrdersArray = []; // Store multiple fire orders
+
+    for (var s = 0; s < shotsOnTarget; s++) {
+        var fireid = shooter.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
+        var calledid = -1; //Raking, cannot called shot.       
+
+        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
+        if(chance < 1) continue;
+
+        var fire = {
+            id: fireid,
+            type: 'normal',
+            shooterid: shooter.id,
+            targetid: target.id,
+            weaponid: this.id,
+            calledid: calledid,
+            turn: gamedata.turn,
+            firingMode: this.firingMode,
+            shots: 1,
+            x: "null",
+            y: "null",
+            damageclass: 'Sweeping', 
+            chance: chance,
+            hitmod: 0,
+            notes: "Split"
+        };
+        
+        fireOrdersArray.push(fire); // Store each fire order
+    }
+    
+    return fireOrdersArray; // Return all fire orders
+};
+
 var MinorThoughtPulsar = function MinorThoughtPulsar(json, ship) {
     Particle.call(this, json, ship);
 };
