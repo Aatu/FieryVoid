@@ -635,9 +635,13 @@ window.BallisticIconContainer = function () {
 					type = 'purple'; //Default for slicers
 					if(weapon.weaponClass == "Gravitic"){
 						type = 'green'; //But now other weapon types use sweeping.
-					}else if(weapon.weaponClass == "Psychic"){
+					}else if(weapon.weaponClass == "Psychic"){ //Thirdspace Psionic Concentrator
 						type = 'red';
-					}									        
+					}else if(weapon.weaponClass == "Molecular"){ //Shadow Molecular Slicer
+						type = 'blue';
+					}else if(weapon.weaponClass == "Particle"){ //Mindrider Telekinetic Cutter
+						type = 'orange';
+					}													        
 				break;					
 			}		 
 		}
