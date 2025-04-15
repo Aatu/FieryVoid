@@ -58,6 +58,15 @@
 	   public  $iconPath = "quadParticleBeam.png";
         public $guns = 4;
 
+        public $firingModes = array( 1 => "Normal", 2=> "Split");
+        public $canSplitShots = false; //Allows Firing Mode 2 to split shots.
+        public $canSplitShotsArray = array(1=>false, 2=>true );         
+        
+        public function setSystemDataWindow($turn){			
+            parent::setSystemDataWindow($turn);   
+            $this->data["Special"] = "Can use 'Split' Firing Mode to target different enemy units.";
+        }
+
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
 	    if ( $maxhealth == 0 ) $maxhealth = 8;
             if ( $powerReq == 0 ) $powerReq = 4;            
@@ -187,11 +196,20 @@
         public $rangePenalty = 2;
         public $fireControl = array(6, 5, 4); // fighters, <mediums, <capitals
 
+        public $firingModes = array( 1 => "Normal", 2=> "Split");
+        public $canSplitShots = false; //Allows Firing Mode 2 to split shots.
+        public $canSplitShotsArray = array(1=>false, 2=>true );          
+
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
 		if ( $maxhealth == 0 ) $maxhealth = 6;
 		if ( $powerReq == 0 ) $powerReq = 4;
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function setSystemDataWindow($turn){			
+            parent::setSystemDataWindow($turn);   
+            $this->data["Special"] = "Can use 'Split' Firing Mode to target different enemy units.";
         }
 
         public function getDamage($fireOrder){        return Dice::d(10)+4;   }
@@ -222,11 +240,20 @@
         public $rangePenalty = 1;
         public $fireControl = array(2, 3, 4); // fighters, <mediums, <capitals
 
+        public $firingModes = array( 1 => "Normal", 2=> "Split");
+        public $canSplitShots = false; //Allows Firing Mode 2 to split shots.
+        public $canSplitShotsArray = array(1=>false, 2=>true );           
+
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
 		if ( $maxhealth == 0 ) $maxhealth = 8;
 		if ( $powerReq == 0 ) $powerReq = 4;
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function setSystemDataWindow($turn){			
+            parent::setSystemDataWindow($turn);   
+            $this->data["Special"] = "Can use 'Split' Firing Mode to target different enemy units.";
         }
 
         public function getDamage($fireOrder){        return Dice::d(10, 2)+6;   }
@@ -2160,7 +2187,7 @@ class TelekineticCutter extends Raking{
     public function setSystemDataWindow($turn){			
         parent::setSystemDataWindow($turn);   
         $this->data["Special"] = "Can use 'Split' Firing Mode to target different enemy units.";
-}
+    }
 
     public function getDamage($fireOrder){ return Dice::d(10, 4);   }
     public function setMinDamage(){     $this->minDamage = 4 ;      }
