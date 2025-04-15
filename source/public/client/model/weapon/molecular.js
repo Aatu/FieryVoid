@@ -304,6 +304,15 @@ var MultiphasedCutter = function MultiphasedCutter(json, ship) {
 MultiphasedCutter.prototype = Object.create(Weapon.prototype);
 MultiphasedCutter.prototype.constructor = MultiphasedCutter;
 
+MultiphasedCutter.prototype.initializationUpdate = function() {
+	if (this.firingMode == 2) {
+		this.data["Shots Remaining"] = this.guns - this.fireOrders.length;
+	} else {
+		delete this.data["Shots Remaining"];
+	}
+	return this;
+};
+
 MultiphasedCutter.prototype.doMultipleFireOrders = function (shooter, target, system) {
 
     var shotsOnTarget = 1; //we're only ever allocating one shot at a time for this weapon.
