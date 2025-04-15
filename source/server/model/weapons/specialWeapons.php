@@ -5681,23 +5681,25 @@ class PsionicConcentrator extends Weapon{
 	public $intercept = 2; //intercept rating -1     
 
     public $guns = 4;
-    public $gunsArray = array(1=>4, 2=>2, 3=>1);	
+    public $gunsArray = array(1=>4, 2=>2, 3=>1, 4=>4, 5=>2);	
 
     public $priority = 4;
-    public $priorityArray = array(1=>4, 2=>5, 3=>7);
+    public $priorityArray = array(1=>4, 2=>5, 3=>7, 4=>4, 5=>5);
 
 	public $firingMode = 1;	
             public $firingModes = array(
                 1 => "Quad",
                 2 => "Double",
-                3 => "Single",                
+                3 => "Single",
+                4 => "4Split",
+                5 => "2Split",				                
             );
 
-    public $fireControl = array(7, 3, 2); // fighters, <mediums, <capitals 
-    public $fireControlArray = array( 1=>array(6, 2, 2), 2=>array(1, 4, 5), 3=>array(null, 3, 7));
+    public $fireControl = array(6, 2, 2); // fighters, <mediums, <capitals 
+    public $fireControlArray = array( 1=>array(6, 2, 2), 2=>array(1, 4, 5), 3=>array(null, 3, 7), 4=>array(6, 2, 2), 5=>array(1, 4, 5));
 
     public $rangePenalty = 0.5;
-    public $rangePenaltyArray = array( 1=>0.5, 2=>1, 3=>2);
+    public $rangePenaltyArray = array( 1=>0.5, 2=>1, 3=>2, 4=>0.5, 5=>1,);
             
 	public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!   
 	public $weaponClass = "Psychic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!    
@@ -5707,7 +5709,8 @@ class PsionicConcentrator extends Weapon{
 	public $testRun = false;//testRun = true means hit chance is calculated nominal skipping concentration issues - for subordinate weapon to calculate average hit chance
 	
 	public $repairPriority = 4;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
-	public $canSplitShots = true; //Allows Firing Mode 1 to split shots.	
+	public $canSplitShots = true; //Allows Firing Mode 1 to split shots.
+	public $canSplitShotsArray = array(1=>false, 2=>false, 1=>false, 4=>true, 5=>true); 	
 
     function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
         {
@@ -5729,7 +5732,7 @@ class PsionicConcentrator extends Weapon{
 //		      $this->data["Special"] .= "<br> - 1 shot; 29-54 Damage, -10 per hex.";			      		      		      
 		      $this->data["Special"] .= "<br>Any hits drain -1 Power from Younger Race ships for one turn.";
 		      $this->data["Special"] .= "<br>Has +1 modifier to critical hit rolls, and +2 to fighter dropout rolls.";
-		      $this->data["Special"] .= "<br>Can split shots amongst different targets.";			  
+			  $this->data["Special"] .= "Can use 'Split' Firing Modes to target different enemy units.";		  
 	    }	
 
 

@@ -292,6 +292,15 @@ var PsionicConcentrator = function PsionicConcentrator(json, ship) {
 PsionicConcentrator.prototype = Object.create(Weapon.prototype);
 PsionicConcentrator.prototype.constructor = PsionicConcentrator;
 
+PsionicConcentrator.prototype.initializationUpdate = function() {
+	if(this.firingMode == 4 || this.firingMode == 5){
+		this.data["Shots Remaining"] = this.guns - this.fireOrders.length;
+	} else {
+		delete this.data["Shots Remaining"];
+	}
+	return this;
+};
+
 PsionicConcentrator.prototype.doMultipleFireOrders = function (shooter, target, system) {
 
     var shotsOnTarget = this.guns;
@@ -317,8 +326,7 @@ PsionicConcentrator.prototype.doMultipleFireOrders = function (shooter, target, 
             //check if weapon is eligible for called shot!
 //            if (!weaponManager.canWeaponCall(weapon)) continue; //Psi Concentrator IS eligible, no need to check.
 
-            // When the system is a subsystem, make all damage go through
-            // the parent.
+            // When the system is a subsystem, make all damage go through the parent.
             while (system.parentId > 0) {
                 system = shipManager.systems.getSystem(ship, system.parentId);
             }
