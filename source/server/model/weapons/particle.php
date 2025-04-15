@@ -1424,10 +1424,13 @@
         public $rangePenalty = 2;
         public $fireControl = array(6, 5, 4); // fighters, <mediums, <capitals
 
-        public $firingModes = array(1=>'4Quad', 2=>'3Triple', 3=>'2Dual', 4=>'1Single');
-        public $gunsArray = array(1=>4,2=>3,3=>2,4=>1);
+        public $firingModes = array(1=>'4Quad', 2=>'3Triple', 3=>'2Dual', 4=>'Split');
+
+        public $canSplitShots = false; //Allows Firing Mode 2 to split shots.
+        public $canSplitShotsArray = array(1=>false, 2=>false, 3=>false, 4=>true  );          
+        public $gunsArray = array(1=>4,2=>3,3=>2,4=>4);
 	    
-	public $firedThisTurn = false; //to avoid re-rolling criticals!
+	    private $firedThisTurn = false; //to avoid re-rolling criticals!
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             //maxhealth and power reqirement are fixed; left option to override with hand-written values
@@ -1442,11 +1445,11 @@
         
         public function setSystemDataWindow($turn){
             parent::setSystemDataWindow($turn);
-            //$this->output = $this->baseOutput + $this->getBoostLevel($turn); //handled in front end
-            $this->data["Special"] = 'If three or four shots are fired, this weapon may overheat next turn if fired again.';    
-            $this->data["Special"] .= "<br>When this weapon has 'May Overheat' critical(s), firing again will cause a critical roll at end of turn."; 
+            $this->data["Special"] = 'If three or four shots are fired, gains May Overheat critical(s) next turn.';    
+            $this->data["Special"] .= "<br>When weapon has May Overheat critical(s), firing again causes a critical roll at end of turn."; 
             $this->data["Special"] .= "<br>This critical roll has +2 modifier for evey shot fired in current turn, and -2 if there is only one 'May Overheat' critical effect.";  
-            $this->data["Special"] .= "<br>Dual or Single shots will not cause overheating the following turn, nor will defensive fire.";                          
+            $this->data["Special"] .= "<br>Dual or Single shots will not cause overheating the following turn, nor will defensive fire."; 
+            $this->data["Special"] .= "<br>Can use 'Split' Firing Mode to target different enemy units.";                                     
         }
 
 	//Fire function for Quad Array
@@ -1473,7 +1476,7 @@
 			}
 			
 			//Add any new crits for next turn. 
-			if($this->firingMode==1){//Quad 
+			if($this->firingMode==1 || $shotsThisTurn == 4){//Quad 
 						$crit1 = new MayOverheat(-1, $fireOrder->shooterid, $this->id, "MayOverheat", $gamedata->turn, $gamedata->turn+1);
 				        $crit1->updated = true;
 						$crit1->newCrit = true; //force save even if crit is not for current turn
@@ -1481,7 +1484,7 @@
 				        //Add second critical when 4 shots are fired.
 				        $crit2 = clone $crit1;
 				        $this->criticals[] =  $crit2;
-			}else if ($this->firingMode==2){//Triple 
+			}else if ($this->firingMode==2 || $shotsThisTurn == 3){//Triple 
 				$crit = new MayOverheat(-1, $fireOrder->shooterid, $this->id, "MayOverheat", $gamedata->turn, $gamedata->turn+1);
 				        $crit->updated = true;
 						$crit->newCrit = true; //force save even if crit is not for current turn
@@ -1489,32 +1492,7 @@
 			} 
 		 
 		}//end of function Fire
-
-/* //Previous version of Quad Array Fire function, just in case.
-        public function fire($gamedata, $fireOrder){
-            // If fired, Quad Array might overheat and go in shutdown for 1 turn.
-            // Make a crit roll taking into account used firing mode
-            parent::fire($gamedata, $fireOrder);
-            
-	    if ($this->firedThisTurn) return; //crit already accounted for (if necessary)
-			$this->firedThisTurn = true; //to avoid rolling crit for every shot!
-		
-            $chance = 0;
-            if ($this->firingMode==1){//quad
-                $chance = 2; //50%
-            }else if ($this->firingMode==2){//triple
-                $chance = 1; //25%
-            }
-		
-            $roll = Dice::d(4);            
-            if($roll <= $chance){ // It has overheated.
-                $crit = new ForcedOfflineOneTurn(-1, $fireOrder->shooterid, $this->id, "ForcedOfflineOneTurn", $gamedata->turn);
-                $crit->updated = true;
-                $this->criticals[] =  $crit;
-            }
-		
-        }
-  */      
+  
         public function getDamage($fireOrder){        return Dice::d(10)+4;   }
         public function setMinDamage(){     $this->minDamage = 5 ;      }
         public function setMaxDamage(){     $this->maxDamage = 14 ;      }
