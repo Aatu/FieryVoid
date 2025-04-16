@@ -637,7 +637,7 @@ window.BallisticIconContainer = function () {
 						type = 'green'; //But now other weapon types use sweeping.
 					}else if(weapon.weaponClass == "Psychic"){ //Thirdspace Psionic Concentrator
 						type = 'red';
-					}else if(weapon.weaponClass == "Molecular"){ //Shadow Molecular Slicer
+					}else if(weapon.weaponClass == "Molecular" && !weapon instanceof MolecularSlicerBeamL){ //Shadow Slicer
 						type = 'blue';
 					}else if(weapon.weaponClass == "Particle"){ //Mindrider Telekinetic Cutter
 						type = 'orange';
@@ -653,7 +653,7 @@ window.BallisticIconContainer = function () {
 	            id: ballistic.id,
 	            shooterId: ballistic.shooterid,
 	            targetId: ballistic.targetid,
-	            lineSprite: lineSprite =  new BallisticLineSprite(launchPosition, targetPosition, 3 * this.zoomScale, -3, getLineColorByType(type), 0.35),
+	            lineSprite: lineSprite =  new BallisticLineSprite(launchPosition, targetPosition, 3 * this.zoomScale, -3, getLineColorByType(type), 0.5),
 	            used: true,
 	            isFriendly: isFriendly
 	        });
@@ -702,7 +702,7 @@ window.BallisticIconContainer = function () {
         } else if (type == "green") {
             return "rgba(0, 204, 0)";
         } else if (type == "purple") {
-            return "rgba(127, 0, 255)";
+            return "rgba(204, 51, 255)";
         } else if (type == "white") {
             return "rgba(255, 255, 255)";
         } else {
