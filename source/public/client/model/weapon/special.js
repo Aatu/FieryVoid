@@ -305,14 +305,12 @@ PsionicConcentrator.prototype.doMultipleFireOrders = function (shooter, target, 
 
     var shotsOnTarget = this.guns;
 
+    var shotsOnTarget = 1; //we're only ever allocating one shot at a time for this weapon.
+
     if (this.fireOrders.length > 0) {
         if (this.fireOrders.length >= this.guns) {
-            // All guns already fired → retarget just one gun
+            // All guns already fired → retarget one gun by removing oldest fireorder.
             this.fireOrders.splice(0, 1);
-            shotsOnTarget = 1;
-        } else {
-            // Some guns already fired → fire the rest
-            shotsOnTarget = this.guns - this.fireOrders.length;
         }
     } 
 
