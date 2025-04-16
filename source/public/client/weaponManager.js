@@ -1652,21 +1652,6 @@ window.weaponManager = {
     targetHex: function targetHex(selectedShip, hexpos) {
         if (shipManager.isDestroyed(selectedShip)) return;
 
-        //Check for Line of sight
-        var blockedLosHex = weaponManager.getBlockedHexes();
-        var loSBlocked = false;
-        if (blockedLosHex && blockedLosHex.length > 0) {
-            var weapon = gamedata.selectedSystems[0]; // Use the first weapon to get the shooter's position
-            var sPosShooter = weaponManager.getFiringHex(selectedShip, weapon);
-            
-            loSBlocked = mathlib.checkLineOfSight(sPosShooter, hexpos, blockedLosHex);
-        }
-
-        if(loSBlocked){
-            confirm.error("No line of sight between firing ship and target hex.");	
-            return; //End work if no line of sight.
-        }
-
         var toUnselect = Array();
         for (var i in gamedata.selectedSystems) {
             var weapon = gamedata.selectedSystems[i];
@@ -1695,6 +1680,21 @@ window.weaponManager = {
 
             if (weaponManager.checkConflictingFireOrder(selectedShip, weapon)) {
                 continue;
+            }
+
+            //Check for Line of sight
+            var blockedLosHex = weaponManager.getBlockedHexes();
+            var loSBlocked = false;
+            if (blockedLosHex && blockedLosHex.length > 0) {
+                var weapon = gamedata.selectedSystems[0]; // Use the first weapon to get the shooter's position
+                var sPosShooter = weaponManager.getFiringHex(selectedShip, weapon);
+                
+                loSBlocked = mathlib.checkLineOfSight(sPosShooter, hexpos, blockedLosHex);
+            }
+
+            if(loSBlocked){
+                confirm.error("No line of sight between firing ship and target hex.");	
+                return; //End work if no line of sight.
             }
 
             var type = 'normal';
