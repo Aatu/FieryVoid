@@ -74,7 +74,8 @@ window.ShipTooltipBallisticsMenu = function () {
             if (amount > 1) textToDisplay = amount + 'x ' + ball.weapon.displayName;
             textToDisplay = ball.shooter.name + ', ' + textToDisplay + ' (' + ball.weapon.firingModes[ball.fireOrder.firingMode] + ') ';
             jQuery(".weapon", ballElement).html(textToDisplay);
-        
+
+			var hitchance = weaponManager.calculataBallisticHitChange(ballisticEntry);        
             var hitchanceNormalMode = ball.fireOrder.chance ?? ball.fireOrder.needed;
         
             // Build hitchance list manually, based on number of ballistics.
@@ -92,7 +93,7 @@ window.ShipTooltipBallisticsMenu = function () {
             } else if (ball.fireOrder.type == "normal") {
                 jQuery(".hitchange", ballElement).html('- Approx: ' + hitchanceNormalMode + '%');
             } else {
-                jQuery(".hitchange", ballElement).html('- Approx: ' + hitchanceList[0] + '%');
+                jQuery(".hitchange", ballElement).html('- Approx: ' + hitchance + '%');
             }
             /*
 			var hitchance = weaponManager.calculataBallisticHitChange(ballisticEntry);
