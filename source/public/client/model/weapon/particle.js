@@ -72,7 +72,7 @@ QuadArray.prototype = Object.create(Particle.prototype);
 QuadArray.prototype.constructor = QuadArray;
 
 QuadArray.prototype.initializationUpdate = function() {
-	if(this.firingMode == 4){
+	if(this.firingMode == 5){
 		this.data["Shots Remaining"] = this.guns - this.fireOrders.length;
 	} else {
 		delete this.data["Shots Remaining"];
