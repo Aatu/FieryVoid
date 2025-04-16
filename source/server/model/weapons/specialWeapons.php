@@ -5732,7 +5732,7 @@ class PsionicConcentrator extends Weapon{
 //		      $this->data["Special"] .= "<br> - 1 shot; 29-54 Damage, -10 per hex.";			      		      		      
 		      $this->data["Special"] .= "<br>Any hits drain -1 Power from Younger Race ships for one turn.";
 		      $this->data["Special"] .= "<br>Has +1 modifier to critical hit rolls, and +2 to fighter dropout rolls.";
-			  $this->data["Special"] .= "Can use 'Split' Firing Modes to target different enemy units.";		  
+			  $this->data["Special"] .= "Can use '4Split' and '2Split' Firing Modes to target different enemy units.";		  
 	    }	
 
 
