@@ -77,7 +77,7 @@ window.ShipTooltipBallisticsMenu = function () {
         
             var hitchanceNormalMode = ball.fireOrder.chance ?? ball.fireOrder.needed;
         
-            // Build hitchance list manually, based on amount
+            // Build hitchance list manually, based on number of ballistics.
             let hitchanceList = [];
             for (let i = 0; i < ballistics.length; i++) {
                 let hc = ballistics[i].fireOrder.chance;
