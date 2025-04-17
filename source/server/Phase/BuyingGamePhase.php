@@ -115,7 +115,7 @@ class BuyingGamePhase implements Phase
                 }
 
                 // If it's an asteroid, ensure it's not within 2 hexes of any moon
-                if (!($ship instanceof moonSmall) && !($ship instanceof moon)) {
+                if ($ship instanceof asteroidS || $ship instanceof asteroidM || $ship instanceof asteroidL) {
                     $tooCloseToMoon = false;
                     foreach ($moonPositions as [$mx, $my]) {
                         $dx = $x - $mx;
