@@ -162,9 +162,9 @@ VICTORY CONDITIONS: Last unit on map / Last ship on map / More forces remaining 
             <option value="6">Several (6)</option>
             <option value="12">Pack (12)</option>
             <option value="18">Lots (18)</option>            
-            <option value="24">Throng (24)</option>
-            <option value="36">Zounds (36)</option>
-            <option value="48">Legion (48)</option>                      
+            <option value="24">Horde (24)</option>
+            <option value="36">Swarm (36)</option>
+            <option value="48">Zounds (48)</option>                      
         </select>
     </div>
 </div>    
