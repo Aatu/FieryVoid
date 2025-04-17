@@ -5,7 +5,7 @@ class KobolRanger extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
          $this->pointCost = 750;
-        $this->faction = "ZPlaytest 12 Colonies of Kobol (Tier 1)";
+		 $this->faction = "ZPlaytest 12 Colonies of Kobol";
         $this->phpclass = "KobolRanger";
         $this->imagePath = "img/ships/BSG/ColonialRanger.png";
         $this->shipClass = "Ranger Missile Cruiser (Alpha prototype)";
