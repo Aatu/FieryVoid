@@ -192,7 +192,8 @@
             
             
             window.shipWindowManager.addEW = function(){};            
-            
+
+        /* //Old jQuery section, in case my new filtering logic messes anything up - DK   
 		jQuery(function($){            
 			gamedata.parseServerData(<?php print($gamelobbydataJSON); ?>);
 			gamedata.parseFactions(<?php print($factions); ?>);
@@ -204,7 +205,71 @@
 			$('.takeslot').on("click", gamedata.clickTakeslot);
 			ajaxInterface.startPollingGamedata();
 		});
-		
+		*/
+        
+        jQuery(function($){            
+            gamedata.parseServerData(<?php print($gamelobbydataJSON); ?>);
+            gamedata.parseFactions(<?php print($factions); ?>);
+
+            $('.readybutton').on("click", gamedata.onReadyClicked);		
+            $('.checkbutton').on("click", gamedata.checkChoices); //fleet correctness check
+            $('.leave').on("click", gamedata.onLeaveClicked);
+            $('.leaveslot').on("click", gamedata.onLeaveSlotClicked);
+            $('.selectslot').on("click", gamedata.onSelectSlotClicked);
+            $('.takeslot').on("click", gamedata.clickTakeslot);
+
+            // Start polling for updates
+            ajaxInterface.startPollingGamedata();
+
+            // ✅ Unified filter logic for factions based on Tier and Custom
+            function updateTierFilter() {
+                const selectedTiers = $('.tier-filter:checked').map(function () {
+                    return $(this).data('tier');
+                }).get();
+
+                const showCustomFactions = $('#toggleCustomFactions').is(':checked');
+
+                $('.faction').each(function () {
+                    const tier = $(this).data('tier');
+                    const isCustom = $(this).data('custom') === true || $(this).data('custom') === "true";
+
+                    const isVisible = selectedTiers.includes(tier) && (showCustomFactions || !isCustom);
+                    $(this).toggle(isVisible);
+                });
+            }
+
+            // ✅ Listen to Tier and Custom Faction checkboxes
+            $('.tier-filter').on('change', updateTierFilter);
+            $('#toggleCustomFactions').on('change', updateTierFilter);
+
+            // ✅ Initial call
+            updateTierFilter();
+
+            // ✅ Ship filtering that respects faction open state
+            $("#toggleCustomShips").on("change", function () {
+                gamedata.applyCustomShipFilter();
+            });
+
+            // ✅ Select All / None Tier checkboxes + toggle customs
+            $('.tier-select-all').on('click', function () {
+                $('.tier-filter').prop('checked', true);
+                $('#toggleCustomFactions').prop('checked', true).trigger('change');
+                $('#toggleCustomShips').prop('checked', true).trigger('change');
+                updateTierFilter();
+            });
+
+            $('.tier-select-none').on('click', function () {
+                $('.tier-filter').prop('checked', false);
+                $('#toggleCustomFactions').prop('checked', false).trigger('change');
+                $('#toggleCustomShips').prop('checked', false).trigger('change');
+                updateTierFilter();
+            });
+
+            // Optional: initialize custom ship visibility
+            $("#toggleCustomShips").trigger("change");
+        });
+
+
 		</script>
 	</head>
 	<body style="background-image:url(img/maps/<?php print($gamelobbydata->background); ?>)">
@@ -343,29 +408,56 @@ if ($asteroids == false && $moons == false) {
 		</div>
 		<div class="panel large buy" style="display:none;">
 		<div>
-		    <span class="panelheader" style="padding-right:20px;">PURCHASE YOUR FLEET</span>
-		    <span class="panelsubheader current">0</span>
-		    <span class="panelsubheader">/</span>
-		    <span class="panelsubheader max">0</span>
-		    <span class="panelsubheader">points</span>
-		    <span class="panelsmall" style="margin-left: 5px;">(</span> <!-- Added margin-left -->
-		    <span class="panelsmall remaining">0</span>
-		    <span class="panelsmall">points remaining</span>
-		    <span class="panelsmall">)</span>
-		</div>
-			<table class="store" style="width:100%;">
-				<tr><td style="width:40%;vertical-align:top;">
-					<div id="fleet" class="subpanel">
-				</td><td style="width:60%;">
-					<div id="store" class="subpanel">
-				</td></tr>
-			</table>
+        <!-- 🟡 Fleet points summary & Tier checkboxes in one row -->
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+            <div>
+                <span class="panelheader" style="padding-right: 15px;">PURCHASE YOUR FLEET</span>
+                <span class="panelsubheader current">0</span>
+                <span class="panelsubheader">/</span>
+                <span class="panelsubheader max">0</span>
+                <span class="panelsubheader">pts</span>
+                <span class="panelsmall" style="margin-left: 5px;">(</span>
+                <span class="panelsmall remaining">0</span>
+                <span class="panelsmall">pts remain</span>
+                <span class="panelsmall">)</span>
+            </div>
+
+            <div style="text-align: right; font-size: 11px;">
+                <span class="clickable tier-select-all" style="margin-right: 5px;  text-decoration: underline;">Select All</span>
+                <span style="margin-right: 5px;">|</span>          
+                <span class="clickable tier-select-none" style="text-decoration: underline;">Select None</span>
+            </div>
+        </div>
+
+        <div style="text-align: right; margin-top: 3px;">
+            <label style="margin-left: 5px;"><input type="checkbox" class="tier-filter" data-tier="Tier 1" checked> Tier 1</label>
+            <label style="margin-left: 5px;"><input type="checkbox" class="tier-filter" data-tier="Tier 2" checked> Tier 2</label>
+            <label style="margin-left: 5px;"><input type="checkbox" class="tier-filter" data-tier="Tier 3" checked> Tier 3</label>
+            <label style="margin-left: 5px;"><input type="checkbox" class="tier-filter" data-tier="Tier Ancients" checked> Ancients</label>
+            <label style="margin-left: 5px;"><input type="checkbox" id="toggleCustomFactions" checked> Custom Factions</label>
+            <label style="margin-left: 5px;"><input type="checkbox" id="toggleCustomShips" checked> Custom Ships</label>
+        </div>
+
+    <!-- Fleet selection area -->
+    <table class="store" style="width:100%; margin-top: 5px;">
+        <tr>
+            <td style="width:40%; vertical-align: top;">
+                <div id="fleet" class="subpanel"></div>
+            </td>
+            <td style="width:60%;">
+                <div id="store" class="subpanel"></div>
+            </td>
+        </tr>
+    </table>
+</div>
 			
-			<div><span class="clickable readybutton">READY</span>
-				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="clickable checkbutton">CHECK</span> <!--fleet correctness check -->				
-				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="files/FV_FleetChecker.txt" title="details of fleet composition rules" target="_blank">Fleet Checker rules</a><!--fleet correctness check description-->	
-			</div>
-			<div id="fleetcheck" class="panel large" style="display:none;"><p id="fleetchecktxt" style="display:block;"><span></div>
+        <div style="margin-top: 8px;">
+        <span class="clickable readybutton">READY</span>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <span class="clickable checkbutton">CHECK</span>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <a href="files/FV_FleetChecker.txt" title="details of fleet composition rules" target="_blank">Fleet Checker rules</a>
+        </div>
 		
 			
 		</div>
