@@ -410,7 +410,18 @@ if ($asteroids == false && $moons == false) {
 		<div>
         <!-- 🟡 Fleet points summary & Tier checkboxes in one row -->
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
-            <div>
+        <div>
+            <span class="panelheader" style="padding-right: 15px;">PURCHASE YOUR FLEET</span>
+            <span class="panelsubheader current">0</span>
+            <span class="panelsubheader">/</span>
+            <span class="panelsubheader max">0</span><span class="panelsubheader">pts</span>
+            <span class="panelsmall" style="margin-left: 5px;">(</span>
+            <span class="panelsmall remaining">0</span><span class="panelsmall">pts left</span>
+            <span class="panelsmall">)</span>
+        </div>
+
+        <!--
+        <div>
                 <span class="panelheader" style="padding-right: 15px;">PURCHASE YOUR FLEET</span>
                 <span class="panelsubheader current">0</span>
                 <span class="panelsubheader">/</span>
@@ -418,10 +429,10 @@ if ($asteroids == false && $moons == false) {
                 <span class="panelsubheader">pts</span>
                 <span class="panelsmall" style="margin-left: 5px;">(</span>
                 <span class="panelsmall remaining">0</span>
-                <span class="panelsmall">pts remain</span>
+                <span class="panelsmall">pts left</span>
                 <span class="panelsmall">)</span>
             </div>
-
+        -->
             <div style="text-align: right; font-size: 11px;">
                 <span class="clickable tier-select-all" style="margin-right: 5px;  text-decoration: underline;">Select All</span>
                 <span style="margin-right: 5px;">|</span>          
@@ -430,12 +441,12 @@ if ($asteroids == false && $moons == false) {
         </div>
 
         <div style="text-align: right; margin-top: 3px;">
-            <label style="margin-left: 5px;"><input type="checkbox" class="tier-filter" data-tier="Tier 1" checked> Tier 1</label>
-            <label style="margin-left: 5px;"><input type="checkbox" class="tier-filter" data-tier="Tier 2" checked> Tier 2</label>
-            <label style="margin-left: 5px;"><input type="checkbox" class="tier-filter" data-tier="Tier 3" checked> Tier 3</label>
-            <label style="margin-left: 5px;"><input type="checkbox" class="tier-filter" data-tier="Tier Ancients" checked> Ancients</label>
-            <label style="margin-left: 5px;"><input type="checkbox" id="toggleCustomFactions" checked> Custom Factions</label>
-            <label style="margin-left: 5px;"><input type="checkbox" id="toggleCustomShips" checked> Custom Ships</label>
+            <label style="margin-left: 5px;">Tier 1 <input type="checkbox" class="tier-filter" data-tier="Tier 1" checked></label>
+            <label style="margin-left: 5px;">Tier 2 <input type="checkbox" class="tier-filter" data-tier="Tier 2" checked></label>
+            <label style="margin-left: 5px;">Tier 3 <input type="checkbox" class="tier-filter" data-tier="Tier 3" checked></label>
+            <label style="margin-left: 5px;">Ancients <input type="checkbox" class="tier-filter" data-tier="Ancients" checked></label>
+            <label style="margin-left: 5px;">Custom Factions <input type="checkbox" id="toggleCustomFactions" checked></label>
+            <label style="margin-left: 5px;">Custom Ships <input type="checkbox" id="toggleCustomShips" checked></label>
         </div>
 
     <!-- Fleet selection area -->

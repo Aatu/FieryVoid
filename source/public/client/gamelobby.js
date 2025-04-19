@@ -167,7 +167,7 @@ window.gamedata = {
 			powerRating = 'Tier 1';
 			break;
 		  case 'Yolu Confederation':
-			powerRating = 'Tier 1 (Unbalanced with official PV) or  (Tier 1 using re-pointing enhancement)';
+			powerRating = 'Tier 1 (Unbalanced as official PV) or  (Tier 1 with price reevaluation)';
 			break;
 		  case 'ZBSG Colonials':
 			powerRating = 'Tier 2; Custom faction';
@@ -215,10 +215,10 @@ window.gamedata = {
 			powerRating = 'Tier 2; Custom faction';
 			break;
 		  case 'ZNexus Makar Federation (early)':
-			powerRating = 'Tier 3; Custom faction, playtest';
+			powerRating = 'Tier 3; Custom faction, Playtest';
 			break;
 		  case 'ZNexus Makar Federation':
-			powerRating = 'Tier 2; Custom faction, playtest';
+			powerRating = 'Tier 2; Custom faction, Playtest';
 			break;
 		  case 'ZNexus Sal-bez Coalition (early)':
 			powerRating = 'Tier 3; Custom faction';
@@ -233,7 +233,7 @@ window.gamedata = {
 			powerRating = 'Tier 2; Custom faction';
 			break;
 		  case 'ZPlaytest 12 Colonies of Kobol':
-			powerRating = 'Tier 1; Custom faction';
+			powerRating = 'Tier 1; Custom faction, Playtest';
 				break;
 		  case 'ZPlaytest BSG Cylons':
 			powerRating = 'Tier 2; Custom faction';
@@ -248,7 +248,7 @@ window.gamedata = {
 			powerRating = 'Tier 3; Custom faction';
 			break;		
 		  case 'ZStarWars':
-			powerRating = 'Tier 2 (Directory contains multiple overlapping factions), Custom faction';
+			powerRating = 'Tier 2 (Multiple overlapping factions), Custom faction';
 			break;
 		  case 'ZStarWars Clone Wars (Playtest)':
 			powerRating = 'Tier 2 (Multiple overlapping factions), Custom faction';
