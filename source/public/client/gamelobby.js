@@ -59,7 +59,7 @@ window.gamedata = {
 			powerRating = 'Tier 2; Distinct sub-factions should not be mixed';
 			break;
 		  case 'Custom Ships':
-			powerRating = "Custom Designs, not a faction";
+			powerRating = "Custom Designs, not a faction, Tier 1";
 			break;
 		  case 'Deneth Tribes':
 			powerRating = 'Tier 2';
@@ -1411,7 +1411,7 @@ window.gamedata = {
 			
 			// ✅ Extract tier from powerRating to allow Filtering
 			let tierMatch = powerRating.match(/Tier\s*([123]|Ancients)/i);
-			let tier = tierMatch ? "Tier " + tierMatch[1] : "Unknown";		
+			let tier = tierMatch ? "Tier " + tierMatch[1] : "Unknown";
 			
 			//August 2023: I think everyone knows You need to click to expandd - I'm putting power rating to mouseover instead! 
             //var group = $('<div id="' + faction + '" class="' + faction + ' faction shipshidden listempty" data-faction="' + faction + '"><div class="factionname name"><span>' + faction + '</span><span class="tooltip">(click to expand)</span></div>').appendTo("#store");
@@ -1512,6 +1512,7 @@ window.gamedata = {
 			var powerRating = gamedata.getPowerRating(faction);
 			var isCustomFaction = powerRating.toLowerCase().includes("custom");
 			var isCustomShip;
+			var isd;
 
 			
 			//this.orderShipListOnName(shipList); //alphabetical sort
@@ -1528,6 +1529,7 @@ window.gamedata = {
 				for (var index = 0; index < jsonShips[faction].length; index++){
 					ship = shipList[index];
 					isCustomShip = isCustomFaction || ship.unofficial === true;
+					isd = ship.isd;
 					if(desiredSize==4){ //bases and OSATs, size does not matter
 						if((ship.base != true) && (ship.osat != true)) continue; //check if it's a base or OSAT
 				        }else if(desiredSize>0){ //ships (check actual size)
@@ -1542,7 +1544,10 @@ window.gamedata = {
 					shipDisplayName = this.prepareClassName(ship);
 					pointCostFull = ship.pointCost;
 					if (ship.flight && (ship.maxFlightSize != 1)) pointCostFull = pointCostFull + ' (' + pointCostFull/6 + ' ea.)';//for fighters: display price per craft, too!
-					h = $('<div oncontextmenu="return false;" class="ship" data-custom="' + isCustomShip + '"><span class="shiptype">'
+					h = $('<div oncontextmenu="return false;" class="ship" data-custom="' 
+						+ isCustomShip + '" data-isd="' 
+						+ ship.isd 
+						+ '"><span class="shiptype">'
 						+ shipDisplayName + '</span><span class="pointcost">'
 						+ pointCostFull + '</span> -<span class="addship clickable">Add to fleet</span> -<span class="showship clickable">Show details</span></div>');
                     
@@ -1557,7 +1562,11 @@ window.gamedata = {
 						shipDisplayName = this.prepareClassName(shipV);
 						pointCostFull = shipV.pointCost;
 						if (shipV.flight && (shipV.maxFlightSize != 1)) pointCostFull = pointCostFull + ' (' + pointCostFull/6 + ' ea.)';//for fighters: display price per craft, too!
-						h = $('<div oncontextmenu="return false;" class="ship" data-custom="' + isCustomShip + '"><span class="shiptype">'
+						h = $('<div oncontextmenu="return false;" class="ship" data-custom="' 
+							+ isCustomShip 
+							+ '" data-isd="' 
+							+ shipV.isd 
+							+ '"><span class="shiptype">'
 							+ shipDisplayName + '</span><span class="pointcost">'
 							+ pointCostFull + '</span> -<span class="addship clickable">Add to fleet</span> -<span class="showship clickable">Show details</span></div>');
 						
@@ -1616,17 +1625,31 @@ expandFaction: function expandFaction(event) {
 
 applyCustomShipFilter: function () {
     const showCustom = $("#toggleCustomShips").is(":checked");
+    const isdValue = parseInt($("#isdFilter").val(), 10); // parse input as integer
 
     $(".faction").each(function () {
         const $faction = $(this);
         const isHidden = $faction.hasClass("shipshidden");
 
-        $faction.find(".ship[data-custom='true']").each(function () {
-            if (isHidden || !showCustom) {
-                $(this).hide();
-            } else {
-                $(this).show();
+        $faction.find(".ship").each(function () {
+            const $ship = $(this);
+            const isCustom = $ship.data("custom") === true || $ship.data("custom") === "true";
+            const shipISD = parseInt($ship.data("isd"), 10);
+
+            // Start with visible, apply filters below
+            let visible = true;
+
+            // Filter by custom toggle
+            if (!showCustom && isCustom) {
+                visible = false;
             }
+
+            // Filter by ISD if a valid number is entered
+            if (!isNaN(isdValue) && shipISD > isdValue) {
+                visible = false;
+            }
+
+            $ship.toggle(visible && !isHidden);
         });
     });
 },

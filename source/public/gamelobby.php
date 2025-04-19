@@ -262,7 +262,31 @@
                 $('.tier-filter').prop('checked', false);
                 $('#toggleCustomFactions').prop('checked', false).trigger('change');
                 $('#toggleCustomShips').prop('checked', false).trigger('change');
+                $('#isdFilter').val(''); // ✅ Reset ISD filter
+                gamedata.applyCustomShipFilter(); // ✅ Reapply the filter logic
                 updateTierFilter();
+            });
+
+            // Handle ISD textbox input: sanitize and filter
+            $("#isdFilter").on("input", function () {
+                let val = $(this).val().replace(/\D/g, ''); // remove non-digits
+                if (val.length > 4) val = val.slice(0, 4); // limit to 4 digits
+                $(this).val(val);
+
+                gamedata.applyCustomShipFilter();
+            });
+
+            // Trigger filter on Enter key in ISD textbox
+            $("#isdFilter").on("keypress", function (e) {
+                if (e.which === 13) {
+                    gamedata.applyCustomShipFilter();
+                }
+            });
+
+            // Reset ISD filter when clicking "Reset ISD"
+            $(".resetISDFilter").on("click", function () {
+                $("#isdFilter").val('');
+                gamedata.applyCustomShipFilter();
             });
 
             // Optional: initialize custom ship visibility
@@ -434,9 +458,17 @@ if ($asteroids == false && $moons == false) {
             </div>
         -->
             <div style="text-align: right; font-size: 11px;">
-                <span class="clickable tier-select-all" style="margin-right: 5px;  text-decoration: underline;">Select All</span>
+                <span class="clickable tier-select-all" style="margin-right: 5px;  text-decoration: underline;">All Filters</span>
                 <span style="margin-right: 5px;">|</span>          
-                <span class="clickable tier-select-none" style="text-decoration: underline;">Select None</span>
+                <span class="clickable tier-select-none" style="text-decoration: underline; margin-right: 5px;">No Filters</span>
+                <span>|</span>  
+
+                <label style="margin-left: 5px; font-size: 11px;">
+                    <span style="margin-right: 2px;">Sort by ISD:</span>
+                    <input type="text" id="isdFilter" value="" style="width: 35px; height: 12px; text-align: right;">
+                    <span class="clickable resetISDFilter" style="text-decoration: underline; margin-left: 3px;  font-size: 10px;">Reset</span>
+                </label>
+
             </div>
         </div>
 
@@ -444,7 +476,7 @@ if ($asteroids == false && $moons == false) {
             <label style="margin-left: 5px;">Tier 1 <input type="checkbox" class="tier-filter" data-tier="Tier 1" checked></label>
             <label style="margin-left: 5px;">Tier 2 <input type="checkbox" class="tier-filter" data-tier="Tier 2" checked></label>
             <label style="margin-left: 5px;">Tier 3 <input type="checkbox" class="tier-filter" data-tier="Tier 3" checked></label>
-            <label style="margin-left: 5px;">Ancients <input type="checkbox" class="tier-filter" data-tier="Ancients" checked></label>
+            <label style="margin-left: 5px;">Ancients <input type="checkbox" class="tier-filter" data-tier="Tier Ancients" checked></label>
             <label style="margin-left: 5px;">Custom Factions <input type="checkbox" id="toggleCustomFactions" checked></label>
             <label style="margin-left: 5px;">Custom Ships <input type="checkbox" id="toggleCustomShips" checked></label>
         </div>
