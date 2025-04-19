@@ -11,7 +11,8 @@ class smallBase extends SmallStarBaseFourSections{
 		$this->phpclass = "smallBase";
 		$this->shipClass = "Small Base";
 		$this->imagePath = "img/ships/orion.png";
-		$this->fighters = array("heavy"=>6); 
+		$this->fighters = array("heavy"=>6);
+		$this->isd = 2204; 
 
 		$this->shipSizeClass = 3; 
 		$this->iniativebonus = -200; //no voluntary movement anyway

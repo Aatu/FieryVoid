@@ -9,6 +9,7 @@ class Tokrana extends OSAT{
         $this->phpclass = "Tokrana";
         $this->imagePath = "img/ships/tokrana.png";
         $this->shipClass = "Tokrana Satellite";
+        $this->isd = 2216;
         
         $this->forwardDefense = 10;
         $this->sideDefense = 10;

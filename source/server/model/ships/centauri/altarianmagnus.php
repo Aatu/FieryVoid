@@ -12,6 +12,7 @@ class AltarianMagnus extends HeavyCombatVessel{
         $this->variantOf = "Altarian Destroyer";
         $this->fighters = array("medium"=>6);
         $this->occurence = "rare";
+        $this->isd = 2208;
         
         $this->forwardDefense = 14;
         $this->sideDefense = 15;

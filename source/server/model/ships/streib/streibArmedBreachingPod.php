@@ -9,6 +9,7 @@ class StreibArmedBreachingPod extends FighterFlight{
         $this->phpclass = "StreibArmedBreachingPod";
         $this->shipClass = "Armed Breaching Pods";
 	 $this->imagePath = "img/ships/streibbreachingpod.png";
+     $this->isd = 2205;
         
 		$this->unofficial = true;
 	    

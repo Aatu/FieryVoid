@@ -10,6 +10,7 @@ class PirateHunter extends MediumShip{
         $this->imagePath = "img/ships/pirateHunter.png"; //Needs to change maybe?
         $this->shipClass = "Pirate Hunter";
         $this->canvasSize = 100;
+        $this->isd = 2241;
         
         $this->forwardDefense = 12;
         $this->sideDefense = 13;

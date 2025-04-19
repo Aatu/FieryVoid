@@ -10,6 +10,7 @@ class ftrLeteerumAS extends FighterFlight{
         $this->phpclass = "ftrLeteerumAS";
         $this->shipClass = "Leteerum Assault Shuttles";
 		    $this->imagePath = "img/ships/LlortLeteerum.png";
+            $this->isd = 2229;
         
         $this->forwardDefense = 9;
         $this->sideDefense = 9;

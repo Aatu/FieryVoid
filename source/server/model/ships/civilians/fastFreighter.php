@@ -11,6 +11,7 @@ class FastFreighter extends MediumShip{
         $this->shipClass = "Civilian Fast Freighter";
         $this->canvasSize = 100;
 	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
+		$this->isd = 2188;
         
         $this->forwardDefense = 13;
         $this->sideDefense = 15;

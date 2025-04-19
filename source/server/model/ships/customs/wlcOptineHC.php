@@ -5,13 +5,14 @@ class wlcOptineHC extends BaseShip{
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 785;
-		$this->faction = "Centauri Republic (WotCR)";
+        $this->faction = "Custom Ships";
 		$this->phpclass = "wlcOptineHC";
 		$this->imagePath = "img/ships/optine.png";
 		$this->shipClass = "Optine House Cruiser";
 		$this->shipSizeClass = 3;
 		$this->forwardDefense = 16;
 		$this->sideDefense = 18;
+		$this->isd = 1840;
 
 		$this->variantOf = 'Optine Battlecruiser';
 		$this->unofficial = true;

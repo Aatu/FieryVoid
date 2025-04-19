@@ -12,6 +12,7 @@ class wlcChlonasWyLeraB extends OSAT{
         $this->imagePath = "img/ships/ChlonasWyLera.png";
         $this->canvasSize = 70;
         $this->shipClass = "Wy'Lera B OSAT";
+        $this->isd = 2215;
         
         $this->forwardDefense = 10;
         $this->sideDefense = 11;
