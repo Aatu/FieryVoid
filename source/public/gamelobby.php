@@ -255,6 +255,8 @@
                 $('.tier-filter').prop('checked', true);
                 $('#toggleCustomFactions').prop('checked', true).trigger('change');
                 $('#toggleCustomShips').prop('checked', true).trigger('change');
+                $('#isdFilter').val(''); // ✅ Reset ISD filter
+                gamedata.applyCustomShipFilter(); // ✅ Reapply the filter logic
                 updateTierFilter();
             });
 
@@ -267,16 +269,14 @@
                 updateTierFilter();
             });
 
-            // Handle ISD textbox input: sanitize and filter
+            // Sanitize input on each keystroke, but don't apply filter yet
             $("#isdFilter").on("input", function () {
                 let val = $(this).val().replace(/\D/g, ''); // remove non-digits
                 if (val.length > 4) val = val.slice(0, 4); // limit to 4 digits
                 $(this).val(val);
-
-                gamedata.applyCustomShipFilter();
             });
 
-            // Trigger filter on Enter key in ISD textbox
+            // Apply filter only when Enter key is pressed
             $("#isdFilter").on("keypress", function (e) {
                 if (e.which === 13) {
                     gamedata.applyCustomShipFilter();
@@ -464,7 +464,7 @@ if ($asteroids == false && $moons == false) {
                 <span>|</span>  
 
                 <label style="margin-left: 5px; font-size: 11px;">
-                    <span style="margin-right: 2px;">Sort by ISD:</span>
+                    <span style="margin-right: 2px; font-size: 12px;">Filter by ISD:</span>
                     <input type="text" id="isdFilter" value="" style="width: 35px; height: 12px; text-align: right;">
                     <span class="clickable resetISDFilter" style="text-decoration: underline; margin-left: 3px;  font-size: 10px;">Reset</span>
                 </label>
