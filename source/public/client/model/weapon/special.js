@@ -278,10 +278,11 @@ VorlonDischargeGun.prototype.doMultipleSelfIntercept = function(ship) {
 
 
 var VorlonDischargeCannon = function VorlonDischargeCannon(json, ship) {
-    Weapon.call(this, json, ship);
+    VorlonDischargeGun.call(this, json, ship);
 };
-VorlonDischargeCannon.prototype = Object.create(Weapon.prototype);
+VorlonDischargeCannon.prototype = Object.create(VorlonDischargeGun.prototype);
 VorlonDischargeCannon.prototype.constructor = VorlonDischargeCannon;
+/*
 VorlonDischargeCannon.prototype.initializationUpdate = function() {
     // Needed because it can change power consumption during firing phase, depending on power and number of shots being changed
 	this.powerReq = 0;
@@ -292,7 +293,7 @@ VorlonDischargeCannon.prototype.initializationUpdate = function() {
 	}
     return this;
 };
-
+*/
 var VorlonLightningCannon = function VorlonLightningCannon(json, ship) {
     Weapon.call(this, json, ship);
 };
