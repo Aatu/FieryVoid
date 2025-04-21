@@ -184,16 +184,98 @@ var VorlonDischargeGun = function VorlonDischargeGun(json, ship) {
 };
 VorlonDischargeGun.prototype = Object.create(Weapon.prototype);
 VorlonDischargeGun.prototype.constructor = VorlonDischargeGun;
+
 VorlonDischargeGun.prototype.initializationUpdate = function() {
     // Needed because it can change power consumption during firing phase, depending on power and number of shots being changed
 	this.powerReq = 0;
-	var isFiring = weaponManager.hasFiringOrder(this.ship, this);
-    if (isFiring) {
-		var firing = weaponManager.getFiringOrder(this.ship, this);
-		this.powerReq = 2*firing.shots*firing.firingMode;		
-	}
+    if(gamedata.gamephase == 3){     
+        var isFiring = weaponManager.hasFiringOrder(this.ship, this);
+        this.data["Shots Remaining"] = 4 - this.fireOrders.length;
+
+        this.data["Defensive Shots"] = 0;
+        if (isFiring) {
+            for (var i in this.fireOrders) {
+                var fireOrder = this.fireOrders[i];
+                if(fireOrder.type == "selfIntercept") this.data["Defensive Shots"]++; 
+
+                //var firing = weaponManager.getFiringOrder(this.ship, this);
+                this.powerReq += 2*fireOrder.firingMode;        
+            } 
+         
+        }
+    }
     return this;
 };
+
+VorlonDischargeGun.prototype.doMultipleFireOrders = function (shooter, target, system) {
+
+    var shotsOnTarget = 1; //we're only ever allocating one shot at a time for this weapon.
+
+    if (this.fireOrders.length > 0) {
+        if (this.fireOrders.length >= this.guns) {
+            // All guns already fired → retarget one gun by removing oldest fireorder.
+            this.fireOrders.splice(0, 1);
+        }
+    } 
+
+    var fireOrdersArray = []; // Store multiple fire orders
+
+    for (var s = 0; s < shotsOnTarget; s++) {
+        var fireid = shooter.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
+        var calledid = -1; //Raking weapons not eligible for Called Shots
+
+        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
+        if(chance < 1) continue;
+
+        var fire = {
+            id: fireid,
+            type: 'normal',
+            shooterid: shooter.id,
+            targetid: target.id,
+            weaponid: this.id,
+            calledid: calledid,
+            turn: gamedata.turn,
+            firingMode: this.firingMode,
+            shots: 1,
+            x: "null",
+            y: "null",
+            damageclass: 'Sweeping', 
+            chance: chance,
+            hitmod: 0,
+            notes: "Split"
+        };
+        
+        fireOrdersArray.push(fire); // Store each fire order
+    }
+    
+    return fireOrdersArray; // Return all fire orders
+};
+
+VorlonDischargeGun.prototype.doMultipleSelfIntercept = function(ship) {
+
+    for (var s = 0; s < this.data["Shots Remaining"]; s++) {    
+        var fireid = ship.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
+        var fire = {
+        id: fireid,
+        type: "selfIntercept",
+        shooterid: ship.id,
+        targetid: ship.id,
+        weaponid: this.id,
+        calledid: -1,
+        turn: gamedata.turn,
+        firingMode: 1, //So that powerReqd display accurately always.
+        shots: 1,
+        x: "null",
+        y: "null",
+        addToDB: true,
+        damageclass: this.data["Weapon type"].toLowerCase()
+        };
+
+        this.fireOrders.push(fire);
+    } 
+    webglScene.customEvent('SystemDataChanged', { ship: ship, system: this });   
+};
+
 
 var VorlonDischargeCannon = function VorlonDischargeCannon(json, ship) {
     Weapon.call(this, json, ship);
@@ -303,9 +385,7 @@ PsionicConcentrator.prototype.initializationUpdate = function() {
 
 PsionicConcentrator.prototype.doMultipleFireOrders = function (shooter, target, system) {
 
-    var shotsOnTarget = this.guns;
-
-    var shotsOnTarget = 1; //we're only ever allocating one shot at a time for this weapon.
+    var shotsOnTarget = 1; //we're only ever allocating one shot at a time for this weapon in Split mode.
 
     if (this.fireOrders.length > 0) {
         if (this.fireOrders.length >= this.guns) {

@@ -3477,19 +3477,19 @@ class VorlonDischargeGun extends Weapon{
 	public $loadingtime = 1;
 	public $normalload = 2;
 		
-	public $canChangeShots = true;
-	public $shots = 4;
-	public $defaultShots = 4; //can fire up to 4 shots (if power is available); LET'S DECLARE ALL 4 BY DEFAULT - chance of player wanting full power is higher than conserving energy (if he has energy shortages he'll be stopped by EoT check anyway)
-	public $maxVariableShots = 4; //For front end to know how many shots weapon CAN fire where this can be changed after locking in.	
+	//public $canChangeShots = true; //No Longer needed after Split Shots added. 
+	//public $shots = 4;
+	//public $defaultShots = 4; //can fire up to 4 shots (if power is available); LET'S DECLARE ALL 4 BY DEFAULT - chance of player wanting full power is higher than conserving energy (if he has energy shortages he'll be stopped by EoT check anyway)
+	//public $maxVariableShots = 4; //For front end to know how many shots weapon CAN fire where this can be changed after locking in.	
 	public $intercept = 2; //intercept rating -2
 	
 	public $priority = 8; //light Raking weapon - even highest damaging mode falls into this category (borderline)
 	
 	public $firingMode = 1;	
 	public $firingModes = array(
-		1 => "1xPower",
-		2 => "2xPower",
-		3 => "3xPower"
+		1 => "2 Power",
+		2 => "4 Power",
+		3 => "6 Power"
 	);
 	
     public $rangePenalty = 0.5; //-1/2 hexes
@@ -3499,7 +3499,9 @@ class VorlonDischargeGun extends Weapon{
 	public $damageType = "Raking"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
 	public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
 	
-	public $multiplied = false; //technical variable
+//	public $multiplied = false; //technical variable
+	public $canSplitShots = true; //New method, let's just have shots treated as separate shots! - DK
+	public $guns = 4;
 	
 	
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
@@ -3521,13 +3523,15 @@ class VorlonDischargeGun extends Weapon{
 			$this->data["Special"] = '';
 		}else{
 			$this->data["Special"] .= '<br>';
-		}	    		
-		$this->data["Special"] .= "Accelerator option is here only to force explicit player consent for interception. It does not change damage output.";  
-		$this->data["Special"] .= "<br>Firing mode affects damage output (and power used):";  
+		}	    		 
+		$this->data["Special"] .= "Firing mode affects damage output (and power used):";  
 		$this->data["Special"] .= "<br> - 2 power: 2d10+2"; 
 		$this->data["Special"] .= "<br> - 4 power: 3d10+3"; 
 		$this->data["Special"] .= "<br> - 6 power: 4d10+4"; 
-		$this->data["Special"] .= "<br>Weapon can fire up to 4 times (charging power above for each shot) - NEEDS TO BE DECLARED MANUALLY (by default 4 shots are declared but You may decrease this number)."; 
+	//	$this->data["Special"] .= "<br>Weapon can fire up to 4 times (charging power above for each shot) - NEEDS TO BE DECLARED MANUALLY (by default 4 shots are declared but You may decrease this number)."; 
+		$this->data["Special"] .= "<br>Weapon can fire up to 4 times (charging power above for each shot), and can split shots amongst same or different targets.";
+		$this->data["Special"] .= "<br>Player must explicitly select number of shots to intercept. It does not change damage output, and does consume power.";  
+		
 	}
 		
 		
@@ -3590,7 +3594,8 @@ class VorlonDischargeGun extends Weapon{
 	public function calculateHitBase($gamedata, $fireOrder){
 		$capacitor = $this->unit->getSystemByName("PowerCapacitor");
 		if($capacitor){ //else something is wrong - weapon is put on a ship without Power Capacitor!
-			$powerNeeded = 2*$fireOrder->firingMode*$fireOrder->shots;
+	//		$powerNeeded = 2*$fireOrder->firingMode*$fireOrder->shots;
+			$powerNeeded = 2*$fireOrder->firingMode;	//Each shot will have its own Firing Order now - DK
 			$capacitor->doDrawPower($powerNeeded);
 		}
 		parent::calculateHitBase($gamedata, $fireOrder); //standard hit chance calculation
@@ -3622,6 +3627,7 @@ class VorlonDischargeGun extends Weapon{
 	//if fired offensively - make as many attacks as firing order declares shots (and resent number of shots declared to 1 :) )
 	//if defensively - make weapon have 4 GUNS (would be temporary, but enough to assign multiple shots for interception)
 	public function beforeFiringOrderResolution($gamedata){
+		/*//Previous method before split shots ability added.
 		if($this->multiplied==true) return;//shots of this weapon are already multiplied
 		$this->multiplied = true;//shots WILL be multiplied in a moment, mark this
 		//is offensive fire declared?...
@@ -3645,6 +3651,18 @@ class VorlonDischargeGun extends Weapon{
 		}else{//offensive fire NOT declared, multiply guns for interception!
 			$this->guns = 4; //up to 4 intercept shots (if Power is available and weapon is declared eligible)
 		}
+		*/
+		/*
+		//New method with Split Shots
+		foreach($this->fireOrders as $fire){
+			if(($fire->type =='normal') && ($fire->turn == $gamedata->turn)){
+				$shotFired = count($this->fireOrders); //Fire orders will be done as separate orders now, instead of 1 order with multiple SHOTS.
+				$this->guns = 4 - $shotFired; //Max is 4, remove however many shots have been fired (if Power is available and weapon is declared eligible).
+			}else{ //No offensive shots, multiply guns for intercept.			
+				$this->guns = 4; //up to 4 intercept shots (if Power is available and weapon is declared eligible)
+			} 
+		} 
+		*/
 	} //endof function beforeFiringOrderResolution
 
 }//endof class VorlonDischargeGun
