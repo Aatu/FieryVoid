@@ -1329,13 +1329,17 @@ window.weaponManager = {
 		var loadingTimeActual = Math.max(weapon.loadingtime,weapon.normalload);//Accelerator (or multi-mode) weapons may have loading time of 1, yet reach full potential only after longer charging
 	if ( (weapon.intercept < 1) && !(weaponManager.canWeaponInterceptAtAll(weapon)) || (loadingTimeActual <= 1) ) return false;//cannot intercept or quick to recharge anyway and will be auto-assigned
 	if (weapon.ballistic && !(weaponManager.canWeaponInterceptAtAll(weapon))) return false;//no interception using ballistic weapons    
-	if (weaponManager.hasFiringOrder(ship, weapon)) return false;//already declared
+	if (weaponManager.hasFiringOrder(ship, weapon) && !weapon.canSplitShots) return false;//already declared and can't split shots.
 	if (!weaponManager.isLoaded(weapon)) return false;//not ready to fire
 	return true;
     },	
 	
     onDeclareSelfInterceptSingle: function onDeclareSelfInterceptSingle(ship, weapon) {
 	    if(!weaponManager.canSelfInterceptSingle(ship, weapon)) return; //last check whether weapon is eligible for that!
+        if(weapon.canSplitShots) { //Discharge Gun/Slicers use their own logic here, so diverge to their own methods.
+            weapon.doMultipleSelfIntercept(ship);
+            return;
+        }
 	    var fireid = ship.id + "_" + weapon.id + "_" + (weapon.fireOrders.length + 1);
 	    var fire = {
 		id: fireid,

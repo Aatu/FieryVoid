@@ -32,6 +32,14 @@ ShipSystem.prototype.onBoostDecrease = function () {
 				return;
 };    
 
+ShipSystem.prototype.doMultipleFireOrders = function () {
+	return;
+};  
+
+ShipSystem.prototype.doMultipleSelfIntercept = function () {
+	return;
+};  
+
 ShipSystem.prototype.isScanner = function () {
 				return false;
 };
