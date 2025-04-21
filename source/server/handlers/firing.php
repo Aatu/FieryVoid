@@ -69,7 +69,7 @@ class Firing
                     */
 
                         if (
-                            (!$weapon->firedOnTurn($currTurn) || $weapon->canSplitShots || in_array(true, $weapon->canSplitShotsArray, true))
+                            (!$weapon->firedOnTurn($currTurn) || $weapon->canSplitShots)
                             && ($weapon->intercept > 0)
                         ) {
                             if (self::isValidInterceptor($gamedata, $weapon)) {
@@ -245,9 +245,13 @@ class Firing
         while ((count($allInterceptWeapons) > 0)) {//weapons can still intercept!
             $currInterceptor = array_shift($allInterceptWeapons); //most capable interceptor available
 
-            //A split shot weapon may have fired some shots offensively, deduct thiese from intercept guns.                
-            if ($currInterceptor->canSplitShots || in_array(true, $currInterceptor->canSplitShotsArray, true)) {
-                $currInterceptor->guns -= count($currInterceptor->fireOrders); //Deduct any fireOrders from intercept, these are one-turn recharge weapons so don't need to worry about self-intercept orders.                  
+            //A split shot weapon may have fired some shots offensively, deduct these from intercept guns.                
+            if ($currInterceptor->canSplitShots) {
+                $currGuns = $currInterceptor->guns - count($currInterceptor->fireOrders); //Normally we just deduct fireOrders from total guns.
+                foreach($currInterceptor->fireOrders as $fired){ //However, accelerator weapons like Discharge Gun have to be manually set, and this fireOrder shouldn't count against total.
+                    if($fired->type == "selfIntercept") $currGuns++; //So if selfIntercept, add shot back on.
+                }    
+                $currInterceptor->guns = $currGuns; //Deduct fireOrders from intercept.                          
             }
 
             for ($i = 0; $i < $currInterceptor->guns; $i++) { //a single weapon can intercept multiple times...
@@ -289,8 +293,8 @@ class Firing
         }
 	
 	$loadingTimeActual = max($weapon->getLoadingTime(),$weapon->normalload);//Accelerator (or multi-mode) weapons may have loading time of 1, yet reach full potential only after longer charging 
-
-	if ($loadingTimeActual > 1) { 
+        /*  //Old method  
+	    if ($loadingTimeActual > 1) { 
             if (isset($weapon->fireOrders[0])) {
                 if ($weapon->fireOrders[0]->type != "selfIntercept") {
                     return false;
@@ -299,18 +303,46 @@ class Firing
                 return false;
             }
         }                     
+        */   
+        //New Method taking itno account Split Shot weapons.
+        if ($loadingTimeActual > 1) {
+                $hasSelfIntercept = false;
+        
+                // If the weapon can split shots, check all fireOrders
+                if ($weapon->canSplitShots) {
+                    foreach ($weapon->fireOrders as $order) {
+                        if ($order->type == "selfIntercept") {
+                            $hasSelfIntercept = true;
+                            break;
+                        }
+                    }
+                } else {
+                    // Fallback for non-splitting weapons: check only the first
+                    if (isset($weapon->fireOrders[0]) && $weapon->fireOrders[0]->type == "selfIntercept") {
+                        $hasSelfIntercept = true;
+                    }
+                }
+        
+                if (!$hasSelfIntercept) {
+                    return false;
+                }
+        }
 
         //Added new checks for split shots weapons so they don't get ruled out at this moment.   
         if ($loadingTimeActual == 1 
             && $weapon->firedOnTurn($gd->turn) 
-            && !$weapon->canSplitShots 
-            && !in_array(true, $weapon->canSplitShotsArray, true)) { //Retain normal check for weapon that can't split, but leave room for split shot exceptions.
+            && !$weapon->canSplitShots) { //Retain normal check for weapon that can't split, but leave room for split shot exceptions.
             return false;
         }
 
         //Now check if split shot weapons have any spare guns to intercept with.
-        if ($weapon->canSplitShots || in_array(true, $weapon->canSplitShotsArray, true)) { //Weapon that might have fired some shots, but still have some remaining to intercept with.
+        if ($weapon->canSplitShots) { //Weapon that might have fired some shots, but still have some remaining to intercept with.
             $count = count($weapon->fireOrders); //How many fireOrders were made?
+            foreach ($weapon->fireOrders as $order1) {
+                if ($order1->type == "selfIntercept") {
+                    $count--;
+                }
+            }
             if($count >= $weapon->guns){ //If fireOrders have used up all shots, cannot intercept.
                 return false;
             }

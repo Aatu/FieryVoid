@@ -2032,7 +2032,9 @@ full Advanced Armor effects (by rules) for reference:
 		if (isset($this->specialHitChanceCalculationArray[$i])) $this->specialHitChanceCalculation = $this->specialHitChanceCalculationArray[$i];  // DK
 			
 		if (isset($this->interceptArray[$i])) $this->intercept = $this->interceptArray[$i];  // DK		
-		if (isset($this->ballisticInterceptArray[$i])) $this->ballisticIntercept = $this->ballisticInterceptArray[$i];  // DK		
+		if (isset($this->ballisticInterceptArray[$i])) $this->ballisticIntercept = $this->ballisticInterceptArray[$i];  // DK
+        
+		if (isset($this->canSplitShotsArray[$i])) $this->canSplitShots = $this->canSplitShotsArray[$i];  // DK        
 											    
     }//endof function changeFiringMode
 
