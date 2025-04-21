@@ -637,11 +637,13 @@ window.BallisticIconContainer = function () {
 						type = 'green'; //But now other weapon types use sweeping.
 					}else if(weapon.weaponClass == "Psychic"){ //Thirdspace Psionic Concentrator
 						type = 'red';
-					}else if(weapon.weaponClass == "Molecular" && !weapon instanceof MolecularSlicerBeamL){ //Shadow Slicer
+					}else if(weapon.weaponClass == "Molecular" && !(weapon instanceof MolecularSlicerBeamL)){ //Shadow Multiphased Cutters,, leave slicers as purple.
 						type = 'blue';
 					}else if(weapon.weaponClass == "Particle"){ //Mindrider Telekinetic Cutter
 						type = 'orange';
-					}													        
+					}else if(weapon.weaponClass == "Electromagnetic"){ //Vorlon Discharge Gunsb
+						type = 'yellow';
+					}														        
 				break;					
 			}		 
 		}
