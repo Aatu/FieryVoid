@@ -3530,8 +3530,7 @@ class VorlonDischargeGun extends Weapon{
 		$this->data["Special"] .= "<br> - 6 power: 4d10+4"; 
 	//	$this->data["Special"] .= "<br>Weapon can fire up to 4 times (charging power above for each shot) - NEEDS TO BE DECLARED MANUALLY (by default 4 shots are declared but You may decrease this number)."; 
 		$this->data["Special"] .= "<br>Weapon can fire up to 4 times (charging power above for each shot), and can split shots amongst same or different targets.";
-		$this->data["Special"] .= "<br>Player must explicitly select number of shots to intercept. It does not change damage output, and does consume power.";  
-		
+		$this->data["Special"] .= "<br>Player must explicitly select weapon to intercept. Intercepts consume 2 power per shot (refunded if no defensive fire was made).";  	
 	}
 		
 		
