@@ -3529,7 +3529,7 @@ class VorlonDischargeGun extends Weapon{
 		$this->data["Special"] .= "<br> - 4 power: 3d10+3"; 
 		$this->data["Special"] .= "<br> - 6 power: 4d10+4"; 
 	//	$this->data["Special"] .= "<br>Weapon can fire up to 4 times (charging power above for each shot) - NEEDS TO BE DECLARED MANUALLY (by default 4 shots are declared but You may decrease this number)."; 
-		$this->data["Special"] .= "<br>Weapon can fire up to 4 times (charging power per shot), at same or different targets.";
+		$this->data["Special"] .= "<br>Fires up to 4 times (costing power per shot), at same or different targets.";
 		$this->data["Special"] .= "<br>Player must explicitly order weapon to intercept.";
 		$this->data["Special"] .= "<br>Interceping shots consume 2 power per shot (refunded if not used).";   	
 	}
@@ -4930,9 +4930,9 @@ class VorlonDischargeCannon extends Weapon{
 		$this->data["Special"] .= "<br> - 10 power: 6d10+10, Raking(15)"; 
 		$this->data["Special"] .= "<br> - 15 power: 8d10+15, Raking(15)"; 
 		//$this->data["Special"] .= "<br>Weapon can fire up to 4 times (charging power above for each shot) - NEEDS TO BE DECLARED MANUALLY (by default 4 shots are declared but You may decrease this number)."; 
-		$this->data["Special"] .= "<br>Weapon can fire up to 4 times (charging power per shot), at same or different targets.";
+		$this->data["Special"] .= "<br>Fires up to 4 times (costing power per shot), at same or different targets.";
 		$this->data["Special"] .= "<br>Player must explicitly order weapon to intercept.";
-		$this->data["Special"] .= "<br>Interceping shots consume 2 power per shot (refunded if not used).";   	
+		$this->data["Special"] .= "<br>Interceping shots consume 5 power per shot (refunded if not used).";   	
 	}
 		
 		
