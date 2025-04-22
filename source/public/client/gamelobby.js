@@ -59,7 +59,7 @@ window.gamedata = {
 			powerRating = 'Tier 2; Distinct sub-factions should not be mixed';
 			break;
 		  case 'Custom Ships':
-			powerRating = "Custom Designs, not a faction, Tier 1";
+			powerRating = "Custom Designs, not a faction, Tier 3";
 			break;
 		  case 'Deneth Tribes':
 			powerRating = 'Tier 2';
