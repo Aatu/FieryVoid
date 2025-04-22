@@ -41,7 +41,7 @@ ShipSystem.prototype.doMultipleSelfIntercept = function () {
 }; 
 
 ShipSystem.prototype.checkSelfInterceptSystem = function () {
-	return;
+	return false;
 };  
 
 ShipSystem.prototype.isScanner = function () {
