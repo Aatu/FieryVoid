@@ -38,6 +38,10 @@ ShipSystem.prototype.doMultipleFireOrders = function () {
 
 ShipSystem.prototype.doMultipleSelfIntercept = function () {
 	return;
+}; 
+
+ShipSystem.prototype.checkSelfInterceptSystem = function () {
+	return;
 };  
 
 ShipSystem.prototype.isScanner = function () {

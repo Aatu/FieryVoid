@@ -1331,6 +1331,10 @@ window.weaponManager = {
 	if (weapon.ballistic && !(weaponManager.canWeaponInterceptAtAll(weapon))) return false;//no interception using ballistic weapons    
 	if (weaponManager.hasFiringOrder(ship, weapon) && !weapon.canSplitShots) return false;//already declared and can't split shots.
 	if (!weaponManager.isLoaded(weapon)) return false;//not ready to fire
+    if(weapon.canSplitShots){
+        var canSelfIntercept = weapon.checkSelfInterceptSystem(); //Look to weapon itself now, to see if any special criteria should apply.
+        if(!canSelfIntercept) return false;
+    }
 	return true;
     },	
 	

@@ -251,6 +251,11 @@ VorlonDischargeGun.prototype.doMultipleFireOrders = function (shooter, target, s
     return fireOrdersArray; // Return all fire orders
 };
 
+VorlonDischargeGun.prototype.checkSelfInterceptSystem = function() {
+    if(this.data["Shots Remaining"] <= 0) return false;
+    return true;
+};
+
 VorlonDischargeGun.prototype.doMultipleSelfIntercept = function(ship) {
 
     for (var s = 0; s < this.data["Shots Remaining"]; s++) {    
