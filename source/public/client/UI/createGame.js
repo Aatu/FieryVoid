@@ -149,7 +149,7 @@ window.createGame = {
 
         // Draw black background inside the blue outline
         ctx.fillStyle = "black";
-        ctx.fillRect(offsetX-5, offsetY, mapWidth * scale, mapHeight * scale);        
+        ctx.fillRect(offsetX-6, offsetY, mapWidth * scale, mapHeight * scale);        
         
         // Draw deployment zones
         $(".slot").each(function () {
@@ -191,7 +191,7 @@ window.createGame = {
         // Draw map border (blue rectangle)
         ctx.strokeStyle = "#ffffff";
         ctx.lineWidth = 1;
-        ctx.strokeRect(offsetX - 5, offsetY, mapWidth * scale, mapHeight * scale); // Adjusted X offset
+        ctx.strokeRect(offsetX - 6, offsetY, mapWidth * scale, mapHeight * scale); // Adjusted X offset
     },
 
     doFlightCheck: function doFlightCheck(data) {
