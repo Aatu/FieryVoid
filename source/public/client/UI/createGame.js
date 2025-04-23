@@ -149,8 +149,44 @@ window.createGame = {
 
         // Draw black background inside the blue outline
         ctx.fillStyle = "black";
-        ctx.fillRect(offsetX-6, offsetY, mapWidth * scale, mapHeight * scale);        
-        
+        ctx.fillRect(offsetX, offsetY, mapWidth * scale, mapHeight * scale);        
+
+        // Draw dotted white center lines, avoiding cross-over at center
+        ctx.save();
+        ctx.globalAlpha = 0.6; // Semi-transparent
+        ctx.strokeStyle = "white";
+        ctx.lineWidth = 1;
+        ctx.setLineDash([6, 6]); // Dotted pattern: 4px line, 4px gap
+
+        const centerX = offsetX + (mapWidth / 2) * scale;
+        const centerY = offsetY + (mapHeight / 2) * scale;
+
+        // Vertical line: from center up
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY);
+        ctx.lineTo(centerX, offsetY);
+        ctx.stroke();
+
+        // Vertical line: from center down
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY);
+        ctx.lineTo(centerX, offsetY + mapHeight * scale);
+        ctx.stroke();
+
+        // Horizontal line: from center left
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY);
+        ctx.lineTo(offsetX, centerY);
+        ctx.stroke();
+
+        // Horizontal line: from center right
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY);
+        ctx.lineTo(offsetX + mapWidth * scale, centerY);
+        ctx.stroke();
+
+        ctx.restore(); // Restore default dash       
+
         // Draw deployment zones
         $(".slot").each(function () {
             const slot = $(this);
@@ -173,9 +209,9 @@ window.createGame = {
      //       console.log(`SlotID: ${slotId}, x: ${x}, y: ${y}, w: ${w}, h: ${h}, scale: ${scale}`);
      //       console.log(`Drawing at: x=${drawX}, y=${drawY}`);
     
-            ctx.fillRect(drawX, drawY, w * scale, h * scale);
+            ctx.fillRect(drawX+6, drawY, w * scale, h * scale);
             ctx.strokeStyle = "#006600";
-            ctx.strokeRect(drawX, drawY, w * scale, h * scale);
+            ctx.strokeRect(drawX+6, drawY, w * scale, h * scale);
             
             // Draw slot number in the center
             ctx.save(); // Save context state
@@ -184,14 +220,14 @@ window.createGame = {
             ctx.font = `${Math.max(4, Math.floor(4 * scale))}px Arial`; // smaller font with a minimum size
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
-            ctx.fillText(team, drawX + (w * scale) / 2, drawY + (h * scale) / 2);
+            ctx.fillText(team, (drawX+6) + (w * scale) / 2, (drawY+3) + (h * scale) / 2);
             ctx.restore(); // Restore to default state
         });
     
         // Draw map border (blue rectangle)
         ctx.strokeStyle = "#ffffff";
         ctx.lineWidth = 1;
-        ctx.strokeRect(offsetX - 6, offsetY, mapWidth * scale, mapHeight * scale); // Adjusted X offset
+        ctx.strokeRect(offsetX, offsetY, mapWidth * scale, mapHeight * scale); // Adjusted X offset
     },
 
     doFlightCheck: function doFlightCheck(data) {
