@@ -107,6 +107,9 @@ VICTORY CONDITIONS: Last unit on map / Last ship on map / More forces remaining 
                   -->
                     </div>
                 </div>
+
+
+
 <!---
                 <div style="margin-top:20px;"><h3>SIMULTANEOUS MOVEMENT</h3></div>
                 <div id="simultaenousMovement" class="subpanel movementspacecontainer">
@@ -191,7 +194,7 @@ VICTORY CONDITIONS: Last unit on map / Last ship on map / More forces remaining 
 <div id="desperate" class="subpanel movementspacecontainer">
     <div class="slot">
         <div>
-            <input id="desperatecheck" type="checkbox" name="desperatecheck">USE 'DESPERATE' SCENARIO RULES (e.g. Ramming / Deactivating Jump Drive allowed)
+            <input id="desperatecheck" type="checkbox" name="desperatecheck">USE 'DESPERATE' SCENARIO RULES (e.g. Ramming / Deactivating Jump Drive are allowed)
         </div>
      </div>
     <div class="slot" id="desperateDropdown" style="display:none;">
@@ -213,13 +216,18 @@ VICTORY CONDITIONS: Last unit on map / Last ship on map / More forces remaining 
                 <div id="team2" class="subpanel slotcontainer">
                     
                 </div>
-                <div><span class="clickable addslotbutton team2">ADD SLOT</span></div>
+                <div><span class="clickable addslotbutton team2" style="margin-top: 5px;">ADD SLOT</span></div>
                 
 				
 				<input type="hidden" name="docreate" value="true">
                 <input id="createGameData" type="hidden" name="data" value="">
-				<input type="submit" value="Create">
-				
+				<input type="submit" style="margin-top: 5px; margin-bottom: 5px;" value="Create Game">
+
+                <div style="margin-top:5px; text-align: center; text-decoration: underline;"><span>DEPLOYMENT ZONE PREVIEW</span></div>
+                <!--<div id="mapPreviewContainer" style="margin-top: 0px;  text-align: center;"> -->                        
+                <div id="mapPreviewContainer" style="margin-top: 0px;  text-align: center;">
+                    <canvas id="mapPreview" width="420" height="300"></canvas>
+                </div>
 				
 			</form>
 			

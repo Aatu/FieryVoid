@@ -9,7 +9,25 @@ jQuery(function ($) {
     $("input").on("focus", createGame.inputFocus);
     $(".addslotbutton").on("click", createGame.createNewSlot);
     $(".close").on("click", createGame.removeSlot);
-    $("#createGameForm").on("submit", createGame.setData);
+
+    let allowSubmit = false;
+
+    // Only set allowSubmit on real mouse or touch interaction
+    $("#createGameForm input[type='submit']").on("mousedown touchstart", function () {
+        allowSubmit = true;
+    });
+
+    $("#createGameForm").on("submit", function (e) {
+        if (!allowSubmit) {
+            e.preventDefault(); // Block submission from pressing Enter
+            return false;
+        }
+    
+        // Call your original setData function before submitting
+        createGame.setData();
+    
+        allowSubmit = false; // Reset flag after submission
+    });
     $("#gamespacecheck").on("click", createGame.doGameSpaceCheck);
     $("#gamespacecheck").on("click", createGame.doFlightCheck);
     $("#movementcheck").on("click", createGame.doMovementCheck);
@@ -23,12 +41,13 @@ jQuery(function ($) {
 
     createGame.createSlotsFromArray();
 	createGame.doGameSpaceCheck(); //let's run proper map size setting right at the start - to match marking fixed map as defailt
+    createGame.drawMapPreview();
 });
 
 window.createGame = {
     gamespace_data: { width: 42, height: 30 },
     rules: {},
-    slots: Array({ id: 1, team: 1, name: "BLUE", points: 3500, depx: -21, depy: 0, deptype: "box", depwidth: 10, depheight: 30, depavailable: 0 }, { id: 2, team: 2, name: "RED", points: 3500, depx: 21, depy: 0, deptype: "box", depwidth: 10, depheight: 30, depavailable: 0 }),
+    slots: Array({ id: 1, team: 1, name: "TEAM 1", points: 3500, depx: -21, depy: 0, deptype: "box", depwidth: 10, depheight: 30, depavailable: 0 }, { id: 2, team: 2, name: "TEAM 2", points: 3500, depx: 21, depy: 0, deptype: "box", depwidth: 10, depheight: 30, depavailable: 0 }),
     slotid: 2,
 
     mapSelect: function mapSelect() {
@@ -59,11 +78,13 @@ window.createGame = {
 
         if (inputname == "spacex") {
             createGame.gamespace_data.width = parseInt(value);
+            createGame.drawMapPreview();
             return;
         }
 
         if (inputname == "spacey") {
             createGame.gamespace_data.height = parseInt(value);
+            createGame.drawMapPreview();
             return;
         }
 
@@ -98,6 +119,79 @@ window.createGame = {
                 height.show();
             }
         }
+
+        createGame.drawMapPreview();
+    },
+
+    drawMapPreview: function drawMapPreview () {
+        const canvas = document.getElementById("mapPreview");
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return;
+    
+        const isLimited = $("#gamespacecheck").is(":checked");
+    
+        // Use fixed width/height if unlimited is selected
+        const mapWidth = isLimited ? (createGame.gamespace_data.width || 1) : 84;
+        const mapHeight = isLimited ? (createGame.gamespace_data.height || 1) : 60;
+    
+        // Clear canvas
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+        // Margins and scale
+        const margin = 10;
+        const scaleX = (canvas.width - margin * 2) / mapWidth;
+        const scaleY = (canvas.height - margin * 2) / mapHeight;
+        const scale = Math.min(scaleX, scaleY); // Uniform scale
+    
+        // Calculate offset to center the map in the canvas
+        const offsetX = (canvas.width - mapWidth * scale) / 2;
+        const offsetY = (canvas.height - mapHeight * scale) / 2;
+
+        // Draw black background inside the blue outline
+        ctx.fillStyle = "black";
+        ctx.fillRect(offsetX-5, offsetY, mapWidth * scale, mapHeight * scale);        
+        
+        // Draw deployment zones
+        $(".slot").each(function () {
+            const slot = $(this);
+            const slotId = slot.data("slotid");
+            const data = createGame.getSlotData(slotId);
+            if (!data) return;
+            const team = data.team;
+    
+            const x = parseInt(data.depx) || 0;
+            const y = parseInt(data.depy) || 0;
+            const w = parseInt(data.depwidth) || 0;
+            const h = parseInt(data.depheight) || 0;
+    
+            ctx.fillStyle = "rgba(0,255,0,0.35)";
+    
+            // Adjust position to treat (x, y) as center
+            const drawX = offsetX + (x - w / 2 + mapWidth / 2) * scale;
+            const drawY = offsetY + (mapHeight / 2 - y - h / 2) * scale;
+    
+     //       console.log(`SlotID: ${slotId}, x: ${x}, y: ${y}, w: ${w}, h: ${h}, scale: ${scale}`);
+     //       console.log(`Drawing at: x=${drawX}, y=${drawY}`);
+    
+            ctx.fillRect(drawX, drawY, w * scale, h * scale);
+            ctx.strokeStyle = "#006600";
+            ctx.strokeRect(drawX, drawY, w * scale, h * scale);
+            
+            // Draw slot number in the center
+            ctx.save(); // Save context state
+            ctx.globalAlpha = 0.8; // Semi-transparent
+            ctx.fillStyle = "white";
+            ctx.font = `${Math.max(4, Math.floor(4 * scale))}px Arial`; // smaller font with a minimum size
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(team, drawX + (w * scale) / 2, drawY + (h * scale) / 2);
+            ctx.restore(); // Restore to default state
+        });
+    
+        // Draw map border (blue rectangle)
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 1;
+        ctx.strokeRect(offsetX - 5, offsetY, mapWidth * scale, mapHeight * scale); // Adjusted X offset
     },
 
     doFlightCheck: function doFlightCheck(data) {
@@ -213,7 +307,8 @@ doMovementCheck: function doMovementCheck(data) {
         if (checkval == "on") {
             $(".gamespacedefinition .unlimitedspace").addClass("invisible");
             $(".gamespacedefinition .limitedspace").removeClass("invisible");
-
+            createGame.gamespace_data.width = 42; //Reset this
+            createGame.gamespace_data.height = 30;	//reset this
             $(".spacex").val(createGame.gamespace_data.width);
             $(".spacey").val(createGame.gamespace_data.height);
             $(".deptype").val("box");
@@ -262,6 +357,8 @@ doMovementCheck: function doMovementCheck(data) {
             $(".gamespacedefinition .unlimitedspace").removeClass("invisible");
             $(".gamespacedefinition .limitedspace").addClass("invisible");
         }
+
+        createGame.drawMapPreview();
     },
 
 
@@ -298,6 +395,8 @@ doMovementCheck: function doMovementCheck(data) {
 				slotData.depavailable = 0;
 			}
         }
+
+        createGame.drawMapPreview();
 		/*
         createGame.slots[0].depx = -12;
         createGame.slots[1].depx = 11;
@@ -348,10 +447,12 @@ doMovementCheck: function doMovementCheck(data) {
 				slotData.depavailable = 0;
 			}
         }
+
+        createGame.drawMapPreview();
     },
 	
 	
-    doSwitchSizeStandard: function doSwitchSizeKnifeFight(data) {
+    doSwitchSizeStandard: function doSwitchSizeStandard(data) {
 		createGame.gamespace_data.width = 42;
 		createGame.gamespace_data.height = 30;		
         $(".spacex").val(42);
@@ -384,6 +485,8 @@ doMovementCheck: function doMovementCheck(data) {
 				slotData.depavailable = 0;
 			}
         }
+
+        createGame.drawMapPreview();
 		/*
         createGame.slots[0].depx = -19;
         createGame.slots[1].depx = 18;
@@ -434,7 +537,7 @@ doMovementCheck: function doMovementCheck(data) {
     createNewSlot: function createNewSlot(e) {
         var team = $(this).hasClass("team1") ? 1 : 2;
         createGame.slotid++;
-        var data = { id: createGame.slotid, team: team, name: "RED", points: 3500, depx: 0, depy: 0, deptype: "box", depwidth: 0, depheight: 0, depavailable: 0 };
+        var data = { id: createGame.slotid, team: team, name: "TEAM " + team, points: 3500, depx: 0, depy: 0, deptype: "box", depwidth: 0, depheight: 0, depavailable: 0 };
 			//copy data from team data!
 			if (data.team == 1){ //data for team 1
 				data.depx = $("#team1 .depx").val();
@@ -454,6 +557,7 @@ doMovementCheck: function doMovementCheck(data) {
 		
         createGame.slots.push(data);
         createGame.createSlot(data);
+        createGame.drawMapPreview();
     },
 
     getSlotData: function getSlotData(id) {
@@ -480,6 +584,7 @@ doMovementCheck: function doMovementCheck(data) {
             return false;
         }
         createGame.removeSlotData(data.id);
+        createGame.drawMapPreview();
         slot.remove();
     },
 
