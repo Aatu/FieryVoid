@@ -7,7 +7,7 @@ class DBManager
     private $connection = null;
     private $testMode = false;
 
-    function __construct($host, $port = 3306, $database, $username, $password, $testMode = false)
+    function __construct($host, $port, $database, $username, $password, $testMode = false)
     {
         $this->id = uniqid();
         $this->testMode = $testMode;
