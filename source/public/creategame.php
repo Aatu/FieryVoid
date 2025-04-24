@@ -210,24 +210,26 @@ VICTORY CONDITIONS: Last unit on map / Last ship on map / More forces remaining 
                 <div id="team1" class="subpanel slotcontainer">
                     
                 </div>
-                <div><span class="clickable addslotbutton team1">ADD SLOT</span></div>
+                <div><span class="clickable addslotbutton team1" style="margin-left: 5px;">ADD SLOT</span></div>
                 
                 <div><h3>TEAM 2</h3></div>
                 <div id="team2" class="subpanel slotcontainer">
                     
                 </div>
-                <div><span class="clickable addslotbutton team2" style="margin-top: 5px;">ADD SLOT</span></div>
+                <div><span class="clickable addslotbutton team2" style="margin-left: 5px;">ADD SLOT</span></div>
                 
 				
 				<input type="hidden" name="docreate" value="true">
-                <input id="createGameData" type="hidden" name="data" value="">
-				<input type="submit" style="margin-top: 5px; margin-bottom: 5px;" value="Create Game">
 
                 <div style="margin-top:5px; text-align: center; text-decoration: underline;"><span>DEPLOYMENT ZONE PREVIEW</span></div>
                 <!--<div id="mapPreviewContainer" style="margin-top: 0px;  text-align: center;"> -->                        
-                <div id="mapPreviewContainer" style="margin-top: 0px;  text-align: center;">
+                <div id="mapPreviewContainer" style="margin-top: 0px;  margin-bottom: 20px; text-align: center;">
                     <canvas id="mapPreview" width="420" height="300"></canvas>
                 </div>
+
+
+                <input id="createGameData" type="hidden" name="data" value="">
+				<input type="submit" style="margin-top: 0px; margin-bottom: 0px; position:absolute; right:8px; bottom:8px;" value="Create Game">                      
 				
 			</form>
 			
