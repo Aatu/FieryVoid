@@ -68,7 +68,9 @@ class TacGamedata {
    
     public function doSortShips()
     {
-        usort ( $this->ships , "self::sortShips" );
+        usort($this->ships, function ($a, $b) {
+            return $this->sortShips($a, $b); // Call the instance method within the closure
+        });
     }
    
     public function stripForJson() {        
