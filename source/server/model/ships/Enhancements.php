@@ -32,7 +32,7 @@ class Enhancements{
 		Enhancements::setEnhancementOptionsShip($ship);
 	}
 	//sort enhancements - options first, then by name
-	usort($ship->enhancementOptions, "self::compareEnhancements");
+	usort($ship->enhancementOptions, [self::class, 'compareEnhancements']);
   } //endof function setEnhancementOptions
   
   /* block all available enhancements (those that are by default enabled) - ADD ANY NEW STANDARD ENHANCEMENTS HERE!
