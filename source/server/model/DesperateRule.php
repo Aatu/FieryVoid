@@ -12,7 +12,7 @@ class DesperateRule implements JsonSerializable {
         return 'desperate';
     }
 
-    public function jsonSerialize() {
+    public function jsonSerialize(): mixed {
         return $this->appliesToTeams;
     }
 
