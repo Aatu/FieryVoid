@@ -133,7 +133,7 @@ class Weapon extends ShipSystem
     public $firingModes = array(1 => "Standard"); //just a convenient name for firing mode
     public $damageType = ""; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
     public $damageTypeArray = array();
-    public $weaponClass = ""; //MANDATORY (first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
+    public $weaponClass = "Particle"; //MANDATORY (first letter upcase) weapon class - overrides $this->data["Weapon type"] if set! Make Particle default to prevent AA bugs when "" passed.
     public $weaponClassArray = array();
 
     //damage type-related variables
