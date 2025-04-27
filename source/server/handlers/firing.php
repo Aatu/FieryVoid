@@ -229,7 +229,7 @@ class Firing
         $shotsStillComing = null; //just free memory
 
         //sort list of all potential intercepts - most effective first
-        usort($allInterceptWeapons, "self::compareInterceptAbility");
+        usort($allInterceptWeapons, [self::class, 'compareInterceptAbility']);
 
         //assign interception
         while ((count($allInterceptWeapons) > 0)) {//weapons can still intercept!
@@ -299,7 +299,7 @@ class Firing
             //    debug::log($ship->phpclass." has nothing to intercept.");
             return;
         };
-        usort($intercepts, "self::compareIntercepts");
+        usort($intercepts, [self::class, 'compareIntercepts']);
         foreach ($intercepts as $intercept) {
             $intercept->chooseTarget($gd);
         }
@@ -588,7 +588,8 @@ class Firing
             }
          
         }    
-        usort($rammingOrders, "self::compareFiringOrders"); 
+
+        usort($rammingOrders, [self::class, 'compareFiringOrders']);
 
         foreach ($rammingOrders as $ramming){
             $ship = $gamedata->getShipById($ramming->shooterid);
@@ -617,7 +618,7 @@ class Firing
             }
             
         }
-        usort($fireOrders, "self::compareFiringOrders");
+        usort($fireOrders, [self::class, 'compareFiringOrders']);
 
         //Now fire ship weapons.
         foreach ($fireOrders as $fire){
@@ -660,7 +661,7 @@ class Firing
                 $chosenfires[] = $fire;
             }
         }
-        usort($chosenfires, "self::compareFiringOrders");
+        usort($chosenfires, [self::class, 'compareFiringOrders']);
 
         foreach ($chosenfires as $fire){
             $shooter = $gamedata->getShipById($fire->shooterid);
@@ -702,7 +703,7 @@ class Firing
                 $chosenfires[] = $fire;
             }
         }
-        usort($chosenfires, "self::compareFiringOrders");
+        usort($chosenfires, [self::class, 'compareFiringOrders']);
         //FIRE rest of fighters
         foreach ($chosenfires as $fire){
             $shooter = $gamedata->getShipById($fire->shooterid);
