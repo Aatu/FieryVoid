@@ -1396,7 +1396,8 @@ class SparkFieldHandler{
 		}
 		
 		//sort all fields by boost
-		usort(SparkFieldHandler::$sparkFields, "self::sortByBoost");	
+		//usort(SparkFieldHandler::$sparkFields, "self::sortByBoost");
+		usort(self::$sparkFields, [self::class, 'sortByBoost']);	
 	
 		//table of units that are already targeted
 		$alreadyTargeted = array();
@@ -1474,6 +1475,8 @@ class SparkField extends Weapon implements DefensiveSystem{
 	public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
     	public $firingModes = array( 1 => "Spark Field"); //just a convenient name for firing mode
 	public $hextarget = true;
+	public $tohitPenalty = 0;
+	public $damagePenalty = 0;
 	
 	protected $targetList = array(); //weapon will hit units on this list rather than target from firing order; filled by SparkFieldHandler!
 	
@@ -1613,7 +1616,7 @@ class SparkField extends Weapon implements DefensiveSystem{
 
 	public function onConstructed($ship, $turn, $phase){
 		parent::onConstructed($ship, $turn, $phase);
-	$this->tohitPenalty = $this->getOutput();
+		$this->tohitPenalty = $this->getOutput();
 		$this->damagePenalty = 0;
 	}
 	public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){
@@ -5353,7 +5356,8 @@ class PsychicFieldHandler{
 		}
 		
 		//sort all fields by boost
-		usort(PsychicFieldHandler::$psychicFields, "self::sortByBoost");	
+		//usort(PsychicFieldHandler::$psychicFields, "self::sortByBoost");
+		usort(self::$psychicFields, [self::class, 'sortByBoost']);
 	
 		//table of units that are already targeted
 		$alreadyTargeted = array();
@@ -7533,8 +7537,20 @@ class SecondSight extends Weapon{
 				
         if($hasFireOrder==null) return; //no appropriate fire order, end of work
 
-    	
-    	$thisShip = $this->getUnit();  
+		$thisShip = $this->getUnit();  	
+					  
+		//Have Second Sight Wave originate from firinf ship's locations.	
+		$targetPos = $thisShip->getHexPos();
+		$hasFireOrder->x = $targetPos->q;
+		$hasFireOrder->y = $targetPos->r;
+		
+		//Correct any errors.
+		if ($hasFireOrder->targetid != -1) {
+			$hasFireOrder->targetid = -1; //correct the error
+			$hasFireOrder->calledid = -1; //just in case
+		}
+		
+		
     	$allShips = $gamedata->ships;
     	$relevantShips = array();
 
@@ -7582,7 +7598,7 @@ class SecondSight extends Weapon{
 
     public function fire($gamedata, $fireOrder)
     {
-		    $shooter = $gamedata->getShipById($fireOrder->shooterid);        
+		//    $shooter = $gamedata->getShipById($fireOrder->shooterid);        
 	        $rolled = Dice::d(100);
 	        $fireOrder->rolled = $rolled; 
 			$fireOrder->pubnotes .= "<br> Reduces Initiative of all enemy ships.";

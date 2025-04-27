@@ -19,6 +19,7 @@ class AmmoDirectWeapon extends Weapon{
 	
 	//basic weapon data, before being modified by actual ammo.
 	protected $basicFC=array(0,0,0);
+	private $dpArray = array(); //array of damage penalties for all modes! - filled automatically
 	
 	public $firingModes = array(); //equals to available ammo
 	public $damageTypeArray = array(); //indicates that this weapon does damage in Pulse mode
