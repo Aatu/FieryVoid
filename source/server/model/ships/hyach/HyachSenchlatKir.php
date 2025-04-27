@@ -1,6 +1,6 @@
 <?php
 class HyachSenchlatKir extends HeavyCombatVessel{
-
+    public $HyachSpecialists;
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
 

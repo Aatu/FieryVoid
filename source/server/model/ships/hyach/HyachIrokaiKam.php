@@ -1,6 +1,6 @@
 <?php
 class HyachIrokaiKam extends BaseShip{
-    
+	public $HyachSpecialists;    
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
