@@ -9,6 +9,7 @@ class FighterFlight extends BaseShip
     public $systems = array();
     public $agile = true;
     public $turncost;
+    public $turndelay; 
     public $turndelaycost = 0;
     public $accelcost = 1;
     public $rollcost = 1;
