@@ -3,14 +3,15 @@ mysqli_report(MYSQLI_REPORT_ERROR);
 
 class DBManager
 {
-
     private $connection = null;
     private $testMode = false;
+    private $id; // 👈 Add this line
 
     function __construct($host, $port, $database, $username, $password, $testMode = false)
     {
-        $this->id = uniqid();
+        $this->id = uniqid(); // This is now OK
         $this->testMode = $testMode;
+
         if ($this->connection !== null)
             return $this->connection;
 
@@ -22,6 +23,7 @@ class DBManager
 
         mysqli_set_charset($this->connection, 'utf8');
     }
+
 
     private function DBEscape($string)
     {
@@ -356,7 +358,7 @@ class DBManager
         }
     }
 
-    public function createGame($gamename, $background, $slots, $userid, $gamespace, $rules = '{}', $description)
+    public function createGame($gamename, $background, $slots, $userid, $gamespace, $description, $rules = '{}')
     {
         $stmt = $this->connection->prepare("
             INSERT INTO 
