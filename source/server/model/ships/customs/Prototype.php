@@ -32,7 +32,7 @@ class Prototype extends BaseShip{
         $this->rollcost = 2;
         $this->pivotcost = 3;
 	    
-		$this->initiative = 1*5; 
+		$this->iniativebonus = 1*5; 
          
         $this->addPrimarySystem(new Reactor(7, 36, 0, 0));
         $this->addPrimarySystem(new CnC(8, 24, 0, 0));
