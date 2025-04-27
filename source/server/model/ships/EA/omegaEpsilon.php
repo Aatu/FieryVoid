@@ -34,7 +34,7 @@ class OmegaEpsilon  extends BaseShip{
         $this->rollcost = 2;
         $this->pivotcost = 3;
 	    
-		$this->initiative = 0*5; 
+		$this->iniativebonus = 0*5; 
          
         $this->addPrimarySystem(new Reactor(6, 30, 0, 0));
         $this->addPrimarySystem(new CnC(6, 16, 0, 0)); //I'm afraid to put in second C&C, so I combine their structure and increase armor
