@@ -16,11 +16,11 @@ class AlacanCacarasA extends OSAT{
         $this->forwardDefense = 7;
         $this->sideDefense = 7;
         
-        /*$this->turncost = 999;
-        $this->turndelaycost = 999;
-        $this->accelcost = 999;
-        $this->rollcost = 999;
-        $this->pivotcost = 999;	*/
+        $this->turncost = 0;
+        $this->turndelaycost = 0;
+        $this->accelcost = 0;
+        $this->rollcost = 0;
+        $this->pivotcost = 0;	
         $this->iniativebonus = 60;
 
         $this->addFrontSystem(new LightParticleBeamShip(1, 2, 1, 180, 360));
