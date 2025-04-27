@@ -47,7 +47,7 @@ class RakartaLaser extends MediumShip{
 
 		$this->addPrimarySystem(new Structure( 4, 50));
 
-		$this->hitArray = array(
+		$this->hitChart = array(
 			0=> array(	
 					8 => "Thruster",
 					11 => "Scanner",
