@@ -14,7 +14,7 @@ class SimultaneousMovementRule implements JsonSerializable {
         return 'initiativeCategories';
     }
 
-    public function jsonSerialize() {
+    public function jsonSerialize(): mixed {
         return $this->numberOfCategories;
     }
 
