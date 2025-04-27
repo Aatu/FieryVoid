@@ -19,9 +19,9 @@
 	
   $gamelobbydata = Manager::getGameLobbyData( $_SESSION["user"], $gameid);
 
-	if (!$gamelobbydata || $gamelobbydata->status != "LOBBY"){
-		header('Location: games.php');
-  }
+    if (!is_object($gamelobbydata) || $gamelobbydata->status != "LOBBY") {
+        header('Location: games.php');
+    }
   
 	$gamelobbydataJSON = json_encode($gamelobbydata, JSON_NUMERIC_CHECK);
 	
