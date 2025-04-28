@@ -1250,7 +1250,7 @@ class AmmoMissileRackS extends Weapon{
 		//change mode to 1, to call all appropriate routines connected with mode change
 		$this->changeFiringMode(1);		
 		//remember about effecting criticals, too!
-		$this->effectCriticals();			
+	//	$this->effectCriticals(); //This was applying criticals twice! DK			
 	}//endof function recompileFiringModes
 	
 	
@@ -1292,6 +1292,31 @@ class AmmoMissileRackS extends Weapon{
 		return $strippedSystem;
 	} 
 	
+    public function effectCriticalDamgeReductions($dp, $repeat = false){
+		if($repeat) return; //Damage Reduced crit has already been applied, don't apply again!
+
+        //damage penalty: 20% of variance or straight 2, whichever is bigger; hold that as a fraction, however! - low rolls should be affected lefss than high ones, after all        
+        foreach ($this->firingModes as $dmgMode => $modeName) {
+            $variance = $this->maxDamageArray[$dmgMode] - $this->minDamageArray[$dmgMode];
+            $mod = $dp * max(2, 0.2 * $variance);
+        
+            $avgDmg = ($this->maxDamageArray[$dmgMode] + $this->minDamageArray[$dmgMode]) / 2;
+        
+            if ($avgDmg > 0) {
+                $this->dpArray[$dmgMode] = $mod / $avgDmg;
+            } else {
+                $this->dpArray[$dmgMode] = 1;
+            }
+        
+            $this->dpArray[$dmgMode] = min(0.9, $this->dpArray[$dmgMode]);
+        
+            $this->minDamageArray[$dmgMode] = floor($this->minDamageArray[$dmgMode] * (1 - $this->dpArray[$dmgMode]));
+            $this->maxDamageArray[$dmgMode] = floor($this->maxDamageArray[$dmgMode] * (1 - $this->dpArray[$dmgMode]));
+        }
+    }
+
+
+
 	//actually use getDamage() method of ammo!
     public function getDamage($fireOrder)
     {
@@ -1721,7 +1746,7 @@ class AmmoMissileRackO extends AmmoMissileRackS{
     public $distanceRange = 60;
     public $firingMode = 1;
     public $priority = 6;
-    public $loadingtime = 2;
+    public $loadingtime = 3;
 	//basic launcher data, before being modified by actual missiles
 	protected $basicFC=array(2,2,2);
 	protected $basicRange=20;

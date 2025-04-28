@@ -14,7 +14,8 @@ BallisticTorpedo.prototype.constructor = BallisticTorpedo;
 
 BallisticTorpedo.prototype.initializationUpdate = function() {
 	if(this.fireOrders.length == 0){
-		this.data["Number of shots"] = this.turnsloaded; 
+		this.data["Number of shots"] = this.turnsloaded;
+		this.maxVariableShots = this.turnsloaded; 
 	}else{
 		this.data["Number of shots"] = this.maxVariableShots;
 	}
@@ -38,22 +39,8 @@ BallisticTorpedo.prototype.doMultipleFireOrders = function (shooter, target, sys
 	for (var s = 0; s < this.guns; s++) {
 		var fireid = shooter.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
                         
-		var calledid = -1;
-/*
-//Ballistic Topredo CANNOT make called shots.
-	    if (system) {
-	        //check if weapon is eligible for called shot!
-            if (!weaponManager.canWeaponCall(this)) continue;
+		var calledid = -1; //Ballistic Topredo CANNOT make called shots.
 
-	        // When the system is a subsystem, make all damage go through
-	        // the parent.
-	        while (system.parentId > 0) {
-	        system = shipManager.systems.getSystem(target, system.parentId);
-	    }
-
-	        calledid = system.id;
-	    }
-*/
 	    var damageClass = this.data["Weapon type"].toLowerCase();
 	    var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
 /*
@@ -82,7 +69,7 @@ BallisticTorpedo.prototype.doMultipleFireOrders = function (shooter, target, sys
 	        notes: "Split"	        
 	        };
 		
-		this.maxVariableShots -= fire.shots;
+		this.maxVariableShots -= fire.shots; 
 			        
     	return fire;
 	}

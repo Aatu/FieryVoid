@@ -16,6 +16,8 @@ window.gamedata = {
  	displayedShip: '',
  	displayedFaction: '',
 	lastShipNumber: 0,
+	fleetWindowOpen: false,
+
 
     getPowerRating: function getPowerRating(factionName) {
 		var powerRating = '';
@@ -268,21 +270,67 @@ window.gamedata = {
         return true;
     },
 
+    canAffordEdit: function canAffordEdit(ship) {
+
+        var slotid = gamedata.selectedSlot;
+        var selectedSlot = playerManager.getSlotById(slotid);
+
+        var points = 0;
+        for (var i in gamedata.ships) {
+            var lship = gamedata.ships[i];
+            if (lship.slot != slotid) continue;
+			if(lship.id == ship.id) continue; //DOn't count this ship already in list!
+            points += lship.pointCost;
+        }
+
+        if ($(".confirm .totalUnitCostAmount").length > 0) {
+            ship.pointCost = $(".confirm .totalUnitCostAmount").data("value");			
+        }
+
+        points += ship.pointCost;
+        if (points > selectedSlot.points) return false;
+
+        return true;
+    },	
+
     updateFleet: function updateFleet(ship) {
         var a = 0;
         for (var i in gamedata.ships) {
             a = i;
         }
         a++;
-        ship.id = a;
+        ship.id = Date.now() + Math.random().toString(36).substr(2, 5);
+		
         ship.slot = gamedata.selectedSlot;
         gamedata.ships[a] = ship;
-        var h = $('<div class="ship bought slotid_' + ship.slot + ' shipid_' + ship.id + '" data-shipindex="' + a + '"><span class="shiptype">' + ship.shipClass + '</span><span class="shipname name">' + ship.name + '</span><span class="pointcost">' + ship.pointCost + 'p</span><span class="remove clickable">remove</span></div>');
-        $(".remove", h).bind("click", function () {
+		var h = $('<div class="ship bought slotid_' + ship.slot + ' shipid_' + ship.id + '" data-shipindex="' + ship.id + '">' +
+			'<span class="shiptype">' + ship.shipClass + '</span>' +
+			'<span class="shipname name">' + ship.name + '</span>' +
+			'<span class="pointcost">' + ship.pointCost + 'p</span>' +
+			' <span class="showship clickable">Details</span> ' +
+			' -<span class="editship clickable">Edit</span> ' +		
+			' -<span class="copyship clickable">Copy</span> ' +							
+			' -<span class="remove clickable">Remove</span> ' +
+			'</div>');
+        
+		$(".remove", h).bind("click", function () {
             delete gamedata.ships[a];
             h.remove();
             gamedata.calculateFleet();
         });
+
+		$(".showship", h).on("click", function (e) {
+			gamedata.onShipContextMenu(ship.phpclass, ship.faction, ship.id, true);
+		});
+
+		$(".editship", h).on("click", function (e) {
+			gamedata.editShip(ship);
+		});
+
+		$(".copyship", h).on("click", function (e) {
+			gamedata.copyShip(ship);
+		});
+
         h.appendTo("#fleet");
         gamedata.calculateFleet();
     },
@@ -462,7 +510,7 @@ window.gamedata = {
 				// Check if ship has converted Assault Shuttle Hangar Space to Fighters before calculating total hangar space
 				for (var enh in lship.enhancementOptions) { 
 					if (lship.enhancementOptions[enh][6]) { // Hangar conversion is an option, ignore others.
-						if (lship.enhancementOptions[enh][0] === "HANG_CON_F") {
+						if (lship.enhancementOptions[enh][0] === "HANG_F") {
 							hangarConversionsF += lship.enhancementOptions[enh][2]; //Record number of slots converted from Assault Shuttle to Fighters.
 						}	
 					}
@@ -471,7 +519,7 @@ window.gamedata = {
 				// Check if ship has converted Fighter Hangar Space to Assault Shuttles before calculating total hangar space
 				for (var enh in lship.enhancementOptions) { 
 					if (lship.enhancementOptions[enh][6]) { // Hangar conversion is an option, ignore others.
-						if (lship.enhancementOptions[enh][0] === "HANG_CON_AS") {
+						if (lship.enhancementOptions[enh][0] === "HANG_AS") {
 							hangarConversionsAS += lship.enhancementOptions[enh][2]; //Record number of slots converted from Fighter to Assault Shuttles.
 							if (lship.customFighter && Object.keys(lship.customFighter).length > 0) {
 								var shipFighters = 0;
@@ -1182,22 +1230,33 @@ window.gamedata = {
     }, //endof function checkChoices
 	
 
-    constructFleetList: function constructFleetList() {
-        var slotid = gamedata.selectedSlot;
-        var selectedSlot = playerManager.getSlotById(slotid);
+	constructFleetList: function constructFleetList() {
+		var slotid = gamedata.selectedSlot;
+		var selectedSlot = playerManager.getSlotById(slotid);
+	
+		$(".ship.bought").remove();
+		for (var i in gamedata.ships) {
+			// Reset ship ids to avoid ending up with elements with the same id
 
-        $(".ship.bought").remove();
-        for (var i in gamedata.ships) {
-            // Reset ship ids to avoid ending up with elements with the same id
-            // a number of times after you have removed a ship.
-            gamedata.ships[i].id = i;
+			//Unique temp ids assigned when purchaseed now - DK 30.3.31
+	//		gamedata.ships[i].id = Date.now() + Math.random().toString(36).substr(2, 5);	
 
-            var ship = gamedata.ships[i];
-            if (ship.slot != slotid) continue;
-
-            var h = $('<div class="ship bought slotid_' + ship.slot + ' shipid_' + ship.id + '" data-shipindex="' + ship.id + '"><span class="shiptype">' + ship.shipClass + '</span><span class="shipname name">' + ship.name + '</span><span class="pointcost">' + ship.pointCost + 'p</span><span class="remove clickable">remove</span></div>');
-            h.appendTo("#fleet");
-        }
+			var ship = gamedata.ships[i];
+			if (ship.slot != slotid) continue;
+	
+			var h = $('<div class="ship bought slotid_' + ship.slot + ' shipid_' + ship.id + '" data-shipindex="' + ship.id + '">' +
+				'<span class="shiptype">' + ship.shipClass + '</span>' +
+				'<span class="shipname name">' + ship.name + '</span>' +
+				'<span class="pointcost">' + ship.pointCost + 'p</span>' +
+				' <span class="showship clickable">Details</span> ' +
+				' -<span class="editship clickable">Edit</span> ' +		
+				' -<span class="copyship clickable">Copy</span> ' +								
+				' -<span class="remove clickable">Remove</span> ' +
+				'</div>');
+	
+			h.appendTo("#fleet");
+		}
+	
         $(".ship.bought .remove").bind("click", function (e) {
             var id = $(this).parent().data('shipindex');
 
@@ -1214,8 +1273,38 @@ window.gamedata = {
             gamedata.constructFleetList();
         });
 
-        gamedata.calculateFleet();
-    },
+		$("#fleet").off("click", ".showship").on("click", ".showship", function (e) {
+			var id = $(this).parent().data("shipindex");
+			for (var i in gamedata.ships) {
+				if (gamedata.ships[i].id == id) {
+					gamedata.onShipContextMenu(gamedata.ships[i].phpclass, gamedata.ships[i].faction, gamedata.ships[i].id, true);
+					break;
+				}
+			}
+		});
+
+		$("#fleet").off("click", ".editship").on("click", ".editship", function (e) {
+			var id = $(this).parent().data("shipindex");
+			for (var i in gamedata.ships) {
+				if (gamedata.ships[i].id == id) {
+					gamedata.editShip(gamedata.ships[i]);
+					break;
+				}
+			}			
+		});		
+		
+		$("#fleet").off("click", ".copyship").on("click", ".copyship", function (e) {
+			var id = $(this).parent().data("shipindex");
+			for (var i in gamedata.ships) {
+				if (gamedata.ships[i].id == id) {
+					gamedata.copyShip(gamedata.ships[i]);
+					break;
+				}
+			}			
+		});				
+
+		gamedata.calculateFleet();
+	},
 
     calculateFleet: function calculateFleet() {
         var slotid = gamedata.selectedSlot;
@@ -1418,7 +1507,7 @@ window.gamedata = {
 					if (ship.flight && (ship.maxFlightSize != 1)) pointCostFull = pointCostFull + ' (' + pointCostFull/6 + ' ea.)';//for fighters: display price per craft, too!
 					h = $('<div oncontextmenu="return false;" class="ship"><span class="shiptype">'+shipDisplayName+'</span><span class="pointcost">'+pointCostFull+'</span> -<span class="addship clickable">Add to fleet</span> -<span class="showship clickable">Show details</span></div>');
                     $(".addship", h).on("click", this.buyShip.bind(this, ship.phpclass));
-                    $(".showship", h).on("click", gamedata.onShipContextMenu.bind(this, ship.phpclass, faction));
+                    $(".showship", h).on("click", gamedata.onShipContextMenu.bind(this, ship.phpclass, faction, ship.id, false));
                         
                     h.appendTo(targetNode);
 					//search for variants of the base design above...
@@ -1430,7 +1519,7 @@ window.gamedata = {
 						if (shipV.flight && (shipV.maxFlightSize != 1)) pointCostFull = pointCostFull + ' (' + pointCostFull/6 + ' ea.)';//for fighters: display price per craft, too!
 						h = $('<div oncontextmenu="return false;" class="ship"><span class="shiptype">'+shipDisplayName+'</span><span class="pointcost">'+pointCostFull+'</span> -<span class="addship clickable">Add to fleet</span> -<span class="showship clickable">Show details</span></div>');
                         $(".addship", h).on("click",  this.buyShip.bind(this, shipV.phpclass));
-                        $(".showship", h).on("click", gamedata.onShipContextMenu.bind(this, shipV.phpclass, faction));
+                        $(".showship", h).on("click", gamedata.onShipContextMenu.bind(this, shipV.phpclass, faction, ship.id, false));
                         
                         h.appendTo(targetNode);
 					} //end of variant
@@ -1619,6 +1708,7 @@ window.gamedata = {
         //		}
     },
 
+
     doBuyShip: function doBuyShip() {
         var shipclass = $(this).data().shipclass;
         var ship = gamedata.getShipByType(shipclass);
@@ -1731,6 +1821,273 @@ window.gamedata = {
     //            return true;
     //        },
 
+    copyShip: function copyShip(copiedShip) {
+        var slotid = gamedata.selectedSlot;
+        var selectedSlot = playerManager.getSlotById(slotid);
+        if (selectedSlot.lastphase == "-2") {
+            window.confirm.error("You have already readied your fleet!", function () {});
+            return false;
+        }
+
+        $(".confirm").remove();
+
+		var shipClass = copiedShip.phpclass;
+		var newShip = gamedata.getShipByType(shipClass);
+
+		newShip.name = copiedShip.name;
+		newShip.pointCost = copiedShip.pointCost;
+		newShip.flightSize = copiedShip.flightSize;
+		newShip.enhancementOptions = copiedShip.enhancementOptions ? [...copiedShip.enhancementOptions] : [],	
+
+        window.confirm.showShipEdit(newShip, gamedata.doCopyShip);
+    },	
+
+
+	doCopyShip: function doCopyShip() {
+		var ship = $(this).data().ship;
+
+        if ($(".confirm .totalUnitCostAmount").length > 0) {
+            ship.pointCost = $(".confirm .totalUnitCostAmount").data("value");			
+        }
+		var newPointCost = ship.pointCost;
+
+        if (!gamedata.canAfford(ship)) {		
+            $(".confirm").remove();
+            window.confirm.error("You cannot afford those edits!", function () {});
+            return;
+        }
+
+		//Now generate a new generate ship to reset Enhancements applied in ship window etc (otehrwise they don't update!)
+		ship = gamedata.getShipByType(ship.phpclass);
+		var name = $(".confirm input").val();
+		ship.name = name;
+		ship.pointCost = newPointCost;	
+        ship.userid = gamedata.thisplayer;			
+
+        if (ship.flight) {
+            var flightSize = $(".fighterAmount").html();
+            if (!flightSize) {
+                flightSize = 1;
+            }
+            ship.flightSize = Math.floor(flightSize);
+        }
+	    
+		//do note enhancements bought (if any)
+		var enhNo = 0;
+		var noTaken = 0;
+		var target = $(".selectAmount.shpenh" + enhNo);
+		while(typeof target.data("enhPrice") != 'undefined'){ //as long as there are enhancements defined...
+			noTaken = target.data("count");
+			if(noTaken > 0){ //enhancement picked - note!
+				ship.enhancementOptions[enhNo][2] = noTaken;
+				if(!ship.enhancementOptions[enhNo][6]){ //this is an actual enhancement (as opposed to option) - note value!
+					if (ship.flight){
+						ship.pointCostEnh += target.data("enhCost") * flightSize;
+					} else {
+						ship.pointCostEnh += target.data("enhCost");
+					}
+				}else{ //this is an option - still note value, just separately!
+					if (ship.flight){
+						ship.pointCostEnh2 += target.data("enhCost") * flightSize;
+					} else {
+						ship.pointCostEnh2 += target.data("enhCost");
+					}
+				}
+			}
+			//go to next enhancement
+			enhNo++;
+			target = $(".selectAmount.shpenh" + enhNo);
+		}	    
+
+        if ($(".confirm .selectAmount").length > 0) {
+            if (ship.flight) {
+
+                // and get the amount of launchers on a fighter
+                var nrOfLaunchers = 0;
+
+                for (var j in ship.systems[1].systems) {
+                    var fighterSystem = ship.systems[1].systems[j];
+
+                    if (!mathlib.arrayIsEmpty(fighterSystem.firingModes) && fighterSystem.missileArray != null) {
+                        nrOfLaunchers++;
+                    }
+                }
+
+                // get all selections of missiles
+                var missileOptions = $(".confirm .selectAmount");
+
+                for (var k = 0; k < missileOptions.length; k++) {
+                    var firingMode = $(missileOptions[k]).data("firingMode");
+
+                    // divide the bought missiles over the missileArrays
+                    var boughtAmount = $(".confirm .selectAmount." + firingMode).data("value");
+
+                    // perLauncher should always get you an integer as result. The UI handles
+                    // buying of missiles that way.
+                    var perLauncher = boughtAmount;
+
+                    for (var i in ship.systems) {
+                        var fighter = ship.systems[i];
+
+                        for (var j in fighter.systems) {
+                            var fighterSystem = fighter.systems[j];
+
+                            if (!mathlib.arrayIsEmpty(fighterSystem.firingModes) && fighterSystem.missileArray != null) {
+                                // find the correct index, depending on the firingMode
+                                for (var index in fighterSystem.firingModes) {
+                                    if (fighterSystem.firingModes[index] == firingMode) {
+                                        fighterSystem.missileArray[index].amount = perLauncher;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {}
+        }
+
+        $(".confirm").remove();
+        gamedata.updateFleet(ship);
+    },
+
+	
+    editShip: function editShip(ship) {
+        var slotid = gamedata.selectedSlot;
+        var selectedSlot = playerManager.getSlotById(slotid);
+        if (selectedSlot.lastphase == "-2") {
+            window.confirm.error("You have already readied your fleet!", function () {});
+            return false;
+        }
+
+        $(".confirm").remove();
+
+        window.confirm.showShipEdit(ship, gamedata.doEditShip);
+    },	
+
+	doEditShip: function doEditShip() {
+        var ship = $(this).data().ship;
+		var originalShipData = $(this).data().originalShipData; //Fetch original data before edits?
+
+        if ($(".confirm .totalUnitCostAmount").length > 0) {
+            ship.pointCost = $(".confirm .totalUnitCostAmount").data("value");			
+        }
+		var newPointCost = ship.pointCost;
+
+        if (!gamedata.canAffordEdit(ship)) {
+			//Reset the relevant info on ship before exiting Edit window.
+            ship.name = originalShipData.name;
+            ship.pointCost = originalShipData.pointCost;
+            ship.flightSize = originalShipData.flightSize;
+            ship.enhancementOptions = originalShipData.enhancementOptions ? [...originalShipData.enhancementOptions] : [],			
+            $(".confirm").remove();
+            window.confirm.error("You cannot afford those edits!", function () {});
+            return;
+        }
+
+		//Remove old ship from Fleet List first
+		var id = ship.id;
+		for (var i in gamedata.ships) {
+			if (gamedata.ships[i].id == id) {
+				delete gamedata.ships[i];
+				break;
+			}
+		}
+		$('.ship.bought.shipid_' + id).remove();
+
+		//Now generate a new generate ship to reset Enhancements applied in ship window etc (otehrwise they don't update!)
+		ship = gamedata.getShipByType(ship.phpclass);
+		var name = $(".confirm input").val();
+		ship.name = name;
+		ship.pointCost = newPointCost;	
+        ship.userid = gamedata.thisplayer;			
+
+        if (ship.flight) {
+            var flightSize = $(".fighterAmount").html();
+            if (!flightSize) {
+                flightSize = 1;
+            }
+            ship.flightSize = Math.floor(flightSize);
+        }
+	    
+		//do note enhancements bought (if any)
+		var enhNo = 0;
+		var noTaken = 0;
+		var target = $(".selectAmount.shpenh" + enhNo);
+		while(typeof target.data("enhPrice") != 'undefined'){ //as long as there are enhancements defined...
+			noTaken = target.data("count");
+			if(noTaken > 0){ //enhancement picked - note!
+				ship.enhancementOptions[enhNo][2] = noTaken;
+				if(!ship.enhancementOptions[enhNo][6]){ //this is an actual enhancement (as opposed to option) - note value!
+					if (ship.flight){
+						ship.pointCostEnh += target.data("enhCost") * flightSize;
+					} else {
+						ship.pointCostEnh += target.data("enhCost");
+					}
+				}else{ //this is an option - still note value, just separately!
+					if (ship.flight){
+						ship.pointCostEnh2 += target.data("enhCost") * flightSize;
+					} else {
+						ship.pointCostEnh2 += target.data("enhCost");
+					}
+				}
+			}
+			//go to next enhancement
+			enhNo++;
+			target = $(".selectAmount.shpenh" + enhNo);
+		}	    
+
+        if ($(".confirm .selectAmount").length > 0) {
+            if (ship.flight) {
+
+                // and get the amount of launchers on a fighter
+                var nrOfLaunchers = 0;
+
+                for (var j in ship.systems[1].systems) {
+                    var fighterSystem = ship.systems[1].systems[j];
+
+                    if (!mathlib.arrayIsEmpty(fighterSystem.firingModes) && fighterSystem.missileArray != null) {
+                        nrOfLaunchers++;
+                    }
+                }
+
+                // get all selections of missiles
+                var missileOptions = $(".confirm .selectAmount");
+
+                for (var k = 0; k < missileOptions.length; k++) {
+                    var firingMode = $(missileOptions[k]).data("firingMode");
+
+                    // divide the bought missiles over the missileArrays
+                    var boughtAmount = $(".confirm .selectAmount." + firingMode).data("value");
+
+                    // perLauncher should always get you an integer as result. The UI handles
+                    // buying of missiles that way.
+                    var perLauncher = boughtAmount;
+
+                    for (var i in ship.systems) {
+                        var fighter = ship.systems[i];
+
+                        for (var j in fighter.systems) {
+                            var fighterSystem = fighter.systems[j];
+
+                            if (!mathlib.arrayIsEmpty(fighterSystem.firingModes) && fighterSystem.missileArray != null) {
+                                // find the correct index, depending on the firingMode
+                                for (var index in fighterSystem.firingModes) {
+                                    if (fighterSystem.firingModes[index] == firingMode) {
+                                        fighterSystem.missileArray[index].amount = perLauncher;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {}
+        }
+
+        $(".confirm").remove();
+        gamedata.updateFleet(ship);
+    },
+
+
     getShipByType: function getShipByType(type) {
 
         for (var race in gamedata.allShips) {
@@ -1771,6 +2128,13 @@ window.gamedata = {
 	onReadyClicked: function onReadyClicked() {
 	    var points = gamedata.calculateFleet();
 
+		var slotid = gamedata.selectedSlot;
+        var selectedSlot = playerManager.getSlotById(slotid);
+        if (selectedSlot.lastphase == "-2") {
+			window.confirm.error("You have already confirmed your fleet for this game!", function () {});
+			return;
+		}					
+		/* //Old method, I've unified it with buyShip and editShip methods above.  Seems ok - DK - Apr 2025
 		//block if player already has confirmed fleet (in any slot)
 		for (var i in gamedata.slots)  { //check all slots
 			var checkSlot = gamedata.slots[i];
@@ -1782,13 +2146,14 @@ window.gamedata = {
 				}
 			}
 		}
-
+		*/
 	    if (points == 0) {
 	        window.confirm.error("You have to buy at least one ship!", function () {});
 	        return;
 	    }
 	    // Pass the submission function as a callback, not invoke it immediately
 	    confirm.confirm("Are you sure you wish to ready your fleet?", function () {
+			selectedSlot.lastphase == -2;			
 	        ajaxInterface.submitGamedata();
 	    });
 	},
@@ -1813,10 +2178,17 @@ window.gamedata = {
         this.constructFleetList();
     },
 
-    onShipContextMenu: function onShipContextMenu(phpclass, faction) {
+    onShipContextMenu: function onShipContextMenu(phpclass, faction, id, fleetList) {
+		var ship;
 
-        var ship = gamedata.getShip(phpclass, faction);
+		//Ship object depends on whether it's generic window based on phpclass, or whether it's from player's fleet list.	
+		if(fleetList){
+        	ship = gamedata.getFleetShipById(id);
+		}else{
+        	ship = gamedata.getShip(phpclass, faction);
+		}		
 
+		//Create ship window the first time it is requested ship window
         if (!ship.shipStatusWindow) {
             if (ship.flight) {
                 ship.shipStatusWindow = flightWindowManager.createShipWindow(ship);
@@ -1824,12 +2196,62 @@ window.gamedata = {
                 ship.shipStatusWindow = shipWindowManager.createShipWindow(ship);
             }
 
-            shipWindowManager.setData(ship);
+			shipWindowManager.setData(ship);
         }
 
-        shipWindowManager.open(ship);
+		//
+		if(fleetList){
+			ship.shipStatusWindow.find(".topbar .value.name").html("");
+			ship.shipStatusWindow.find(".topbar .valueheader.name").html(ship.name);
+			ship.shipStatusWindow.find(".topbar .value.shipclass").html(ship.shipClass);
+			gamedata.fleetWindowOpen = true;
+		}else{
+			ship.shipStatusWindow.find(".topbar .valueheader.name").html("");
+			gamedata.fleetWindowOpen = false;			
+		}
+
+		//Now add Enhancements and update system info.
+		if(ship.flight){
+			gamedata.setEnhancementsFighter(ship);
+		}else{
+			gamedata.setEnhancementsShip(ship);
+		}
+
+		shipWindowManager.setData(ship);
+
+		/*		//Alternative method		
+		for (var i in ship.systems) {
+			var system = ship.systems[i];
+			var systemwindow = shipwindow.find(".system_" + system.id);
+			systemwindow.data("shipid", ship.id);		
+			shipWindowManager.setSystemData(ship, system, ship.shipStatusWindow);
+		}		
+		*/	
+        shipWindowManager.open(ship);		
         return false;
     },
+
+
+	getFleetShipById: function getFleetShipById(id) {
+		// Ensure that gamedata.ships is an array and id is compared correctly
+		for (var i in gamedata.ships) {
+			if (gamedata.ships[i].id === id) {
+				gamedata.displayedShip = gamedata.ships[i].phpclass;
+				gamedata.displayedFaction = gamedata.ships[i].faction;
+				return gamedata.ships[i];
+			}
+		}
+		//Or return generic shipu sing default method if can't be found in fleet choices.
+		return gamedata.getShip(id);
+	},
+
+
+    setShipsFromFaction: function setShipsFromFaction(faction, jsonShips) {
+        gamedata.allShips[faction] = Object.keys(window.staticShips[faction]).map(function(shipClass) {
+            return new Ship(window.staticShips[faction][shipClass]);
+        })
+    },
+
 
     getShip: function getShip(phpclass, faction) {
     	var actPhpclass;
@@ -1855,7 +2277,1111 @@ window.gamedata = {
         gamedata.allShips[faction] = Object.keys(window.staticShips[faction]).map(function(shipClass) {
             return new Ship(window.staticShips[faction][shipClass]);
         })
-    }
+    },
+
+	setEnhancementsShip: function setEnhancementsShip(ship) {
+
+		// Ammo magazine is necessary for some options
+		let ammoMagazine = null;
+		for (let magazine of ship.systems) {
+		  if (magazine.name === 'ammoMagazine') {
+			ammoMagazine = magazine;
+			break;
+		  }
+		}
+		var totalRounds = 0; //Counter to check and update total round used in magazine (where it matters).	
+
+		for (let entry of ship.enhancementOptions) {
+		  // ID, readableName, numberTaken, limit, price, priceStep
+		  let enhID = entry[0];
+		  let enhCount = entry[2];
+		  let enhDescription = entry[1];
+		  if (enhCount > 0) {
+			if (ship.enhancementTooltip !== "") this.enhancementTooltip += "<br>";
+			ship.enhancementTooltip += enhDescription;
+			if (enhCount > 1) ship.enhancementTooltip += ` (x${enhCount})`;	
+
+			switch (enhID) {
+			
+				case 'ELITE_CREW':
+					if(!ship.eliteEnh){
+						ship.forwardDefense -= enhCount;
+						ship.sideDefense -= enhCount;
+						ship.iniativebonus += enhCount * 5;
+						ship.critRollMod -= enhCount * 2;
+						ship.toHitBonus += enhCount;
+			
+						// System mods: Scanner
+						let strongestEScan = null;
+						let strongestEScanValue = -1;
+						for (let system of ship.systems) {
+							if (system.name == "scanner") {
+								if (system.output > strongestEScanValue) {
+									strongestEScanValue = system.output;
+									strongestEScan = system;
+								}
+							}
+						}
+						if (strongestEScanValue > 0) {
+							strongestEScan.output += enhCount;
+						}
+			
+						// System mods: Engine
+						let strongestEEngine = null;
+						let strongestEEngVal = -1;
+						for (let system of ship.systems) {
+							if (system.name == "engine") {
+								if (system.output > strongestEEngVal) {
+									strongestEEngVal = system.output;
+									strongestEEngine = system;
+								}
+							}
+						}
+						if (strongestEEngVal > 0) {
+							strongestEEngine.output += enhCount * 2;
+							strongestEEngine.data["Own thrust"] += enhCount * 2;										
+						}
+			
+						// System mods: Reactor
+						let strongestEReact = null;
+						let strongestEReactVal = -1000;
+						for (let system of ship.systems) {
+							if (system.name == "reactor") {
+								if (system.maxhealth > strongestEReactVal) {
+									strongestEReactVal = system.maxhealth;
+								strongestEReact = system;
+								}
+							}
+						}
+						if (strongestEReact != null) {
+							strongestEReact.output += enhCount * 2;
+						}
+			
+						// Modify thruster ratings as well
+						for (let system of ship.systems) {
+							if (system.name == "thruster") {
+								system.output += enhCount;
+							}
+						}
+						ship.notes  += "<br>Elite Crew (" + enhCount + ")";					
+					}
+					ship.eliteEnh = true;	
+				break;
+
+				case 'ELT_MRN':
+					if(!ship.elMrnEnhShip){
+						for (let system of ship.systems) {
+							if (system.name == "GrapplingClaw") {
+								system.eliteMarines = enhCount;
+								system.data["Elite"] = "Yes"; 
+							}
+						}
+					}
+					ship.elMrnEnhShip = true;
+				break;					
+							
+				case 'EXT_MRN':
+					if(!ship.exMrnEnhShip){
+						for (let system of ship.systems) {
+							if (system.name == "GrapplingClaw") {
+								system.ammunition += enhCount;
+								system.data["Ammunition"] += enhCount; 
+							}
+						}
+					}
+					ship.exMrnEnhShip = true;
+				break;
+
+				case 'HANG_F'://Hangar Conversion to Fighter slot, no actual need to change anything here.  
+					if(!ship.hangFEnh){
+						ship.notes  += "<br>Fighter Conversion (" + enhCount + ")";						
+					}
+					ship.hangFEnh = true;
+				break;	
+
+				case 'HANG_AS'://Hangar Conversion to Assault Shuttle slot, no actual need to change anything here.  
+					if(!ship.hangASEnh){
+						ship.notes  += "<br>Shuttle Conversion (" + enhCount + ")";						
+					}
+					ship.hangASEnh = true;	
+				break;	
+						
+						
+				case 'IFF_SYS':
+					if(!ship.iffEnh){	
+						ship.IFFSystem = true;
+						ship.notes  += "<br>IFF System";
+					}
+					ship.iffEnh = true;					
+					break;
+		
+				case 'IMPR_ENG':
+					if(!ship.engEnh){				
+						let strongestEng = null;
+						let strongestEngVal = -1;
+						for (let system of ship.systems) {
+						if (system.name == "engine") {
+							if (system.output > strongestEngVal) {
+								strongestEngVal = system.output;
+							strongestEng = system;
+							}
+						}
+						}
+						if (strongestEngVal > 0) {
+								strongestEng.output += enhCount;
+								strongestEng.data["Own thrust"]+= enhCount;										  
+						}
+					}
+					ship.engEnh = true;	
+				break;
+		
+				case 'IMPR_PSY':
+					if(!ship.psyEnh){
+						for (let system of ship.systems) {
+							if (system.name == "PsychicField") {
+								system.data["Range"]+= enhCount;
+								system.range += enhCount;
+							}
+						}
+					}
+					ship.psyEnh = true;
+				break;
+		
+				case 'IMPR_REA':
+					if(!ship.reaEnh){				
+						let strongestReact = null;
+						let strongestReactValue = -1;
+						for (let system of ship.systems) {
+						if (system.name == "reactor") {
+							if (system.maxhealth > strongestReactValue) {
+								strongestReactValue = system.maxhealth;
+							strongestReact = system;
+							}
+						}
+						}
+						if (strongestReactValue > 0) {
+							let addedPower = 0;
+							if (ship.Enormous === true) {
+								addedPower = 4;
+							} else {
+								addedPower = ship.shipSizeClass;
+							}
+							strongestReact.output += enhCount * addedPower;
+						}					  
+					}
+					ship.reaEnh = true;							
+				break;
+		
+				case 'IMPR_SENS':
+					if(!ship.sensEnh){				
+						let strongestScan = null;
+						let strongestScanValue = -1;
+						for (let system of ship.systems) {
+						if (system.name == "scanner") {
+							if (system.output > strongestScanValue) {
+								strongestScanValue = system.output;
+							strongestScan = system;
+							}
+						}
+						}
+						if (strongestScanValue > 0) {
+								strongestScan.output += enhCount;	
+						}
+					}
+					ship.sensEnh = true;							
+				break;
+		
+				case 'IMPR_SR':
+					if(!ship.srEnh){
+						for (let system of ship.systems) {
+							if (system.name == "SelfRepair") {
+								system.output += enhCount;
+							}						
+						}
+					}
+					ship.srEnh = true;
+				break;
+		
+				case 'IMPR_THSD':
+					if(!ship.thsdEnh){				
+						for (let system of ship.systems) {
+							if (system.name == "ThirdspaceShield") {
+								system.output += enhCount;
+							}
+							if (system.name == "ThirdspaceShieldGenerator") {
+								system.output += enhCount;
+							}
+						}
+					}
+					ship.thsdEnh = true;
+				break;
+		
+				case 'IMPR_TS':
+					if(!ship.tsEnh){					
+						for (let system of ship.systems) {
+						if (system.name == "ThoughtShield") {
+							system.output += enhCount;
+						}
+						if (system.name == "ThoughtShieldGenerator") {
+							system.output += enhCount;
+						}
+						}
+					}
+					ship.tsEnh = true;					
+				break;
+		
+				case 'IPSH_EETH':
+					if(!ship.eethEnh){				
+						ship.iniativebonus -= enhCount * 5;
+						ship.turndelaycost += 0.1;
+						for (let system of ship.systems) {
+							if (system.name == "reactor") {
+								system.output = Math.round(system.output * 1.25);
+								system.critRollMod += 4;
+							} else if (system.name == "engine") {
+								system.output += 2;
+								system.data["Own thrust"]+= 1;						
+								system.critRollMod += 4;
+							}
+						}
+						ship.notes  += "<br>Eethan Refit";
+					}	
+					ship.eethEnh = true;					
+				break;
+		
+				case 'IPSH_ESSAN':
+					if(!ship.essanEnh){	
+						for (let system of ship.systems) {
+							if (system.name == "scanner") {
+								system.output -= 1;
+								system.maxhealth -= 2;
+							} else if (system.name == "engine") {
+								system.output += 1;
+								system.data["Own thrust"]+= 1;						
+								system.maxhealth += 2;
+							} else if (system.name == "structure") {
+								if (system.armour < 5) system.armour += 1;
+							}
+						}
+						ship.notes  += "<br>Essan Refit";
+					}	
+					ship.essanEnh = true;
+				break;
+		
+				case 'MARK_FERV':
+					if(!ship.fervEnh){	
+						//ship.toHitBonus += enhCount;
+						ship.iniativebonus += enhCount * 10;
+						ship.forwardDefense += enhCount * 2;
+						ship.sideDefense += enhCount * 2;
+						ship.fervEnh = true;
+						ship.notes  += "<br>Markab Fervor";						
+					}					
+				break;
+		
+				case 'POOR_CREW':
+					if(!ship.poorEnh){
+						ship.forwardDefense += enhCount;
+						ship.sideDefense += enhCount;
+						ship.iniativebonus -= enhCount * 5;
+						ship.critRollMod += enhCount * 2;
+						ship.toHitBonus -= enhCount;
+			
+						// System mods: Scanner
+						let strongestPScan = null;
+						let strongestPScanValue = -1;
+						for (let system of ship.systems) {
+						if (system.name == "scanner") {
+							if (system.output > strongestPScanValue) {
+								strongestPScanValue = system.output;
+							strongestPScan = system;
+							}
+						}
+						}
+						if (strongestPScanValue > 0) {
+							strongestPScan.output -= enhCount;
+						}
+			
+						// System mods: Engine
+						let strongestPEng = null;
+						let strongestPEngValue = -1;
+						for (let system of ship.systems) {
+						if (system.name == "engine") {
+							if (system.output > strongestPEngValue) {
+								strongestPEngValue = system.output;
+							strongestPEng = system;
+							}
+						}
+						}
+						if (strongestPEngValue > 0) {
+							strongestPEng.output -= enhCount * 2;
+							strongestPEng.data["Own thrust"] -= enhCount *2;						
+						}
+			
+						// System mods: Reactor
+						let strongestPReact = null;
+						let strongestPReactValue = -1000;
+						for (let system of ship.systems) {
+						if (system.name == "reactor") {
+							if (system.maxhealth > strongestPReactValue) {
+								strongestPReactValue = system.maxhealth;
+							strongestPReact = system;
+							}
+						}
+						}
+						if (strongestPReact != null) {
+							strongestPReact.output -= enhCount;
+						}
+						ship.notes  += "<br>Poor Crew (" + enhCount + ")";						
+					}
+					ship.poorEnh = true;	
+				break;
+		
+				case 'SHAD_DIFF':
+					if(!ship.diffEnh){
+						for (let system of ship.systems) {
+							if (system.name == "EnergyDiffuser") {
+								system.output += enhCount;
+							}
+						}
+					}	
+					ship.diffEnh = true;	
+				break;
+		
+				case 'SHAD_FTRL':
+					if(!ship.ftrlEnh){
+						let struct = shipManager.systems.getStructureSystem(ship, 0);
+						if (struct) {
+							struct.maxhealth -= enhCount;
+							ship.notes  += "<br>Fighter Spawned (" + enhCount + ")";							
+						}
+					}	
+					ship.ftrlEnh = true;	
+				break;
+
+				case 'SPARK_CURT':
+					if(!ship.sparkEnh){	
+						for (let system of ship.systems) {
+							if (system.name === "SparkField") {
+								system.output = system.baseOutput;
+								system.data["Spark Curtain"] = "Yes";
+							}
+						}
+						ship.notes  += "<br>Spark Curtain";
+					}
+					ship.sparkEnh = true;	
+				break;
+			
+				case 'SLUGGISH':
+					if(!ship.slugEnh){
+						ship.iniativebonus -= enhCount * 5;
+						ship.notes  += "<br>Sluggish (" + enhCount + ")";						
+					}
+					ship.slugEnh = true;
+				break;
+			
+				case 'VOR_AMETHS': // Vorlon Amethyst Skin (for ship)
+					if(!ship.amethsEnh){
+						let AActrl = null;
+						for (let system of ship.systems) {
+							if (system.name === 'adaptiveArmorController') {
+								AActrl = system;
+							break;
+							}
+						}
+
+						if (AActrl) {
+							AActrl.AAtotal += enhCount;
+							AActrl.output = AActrl.AAtotal;
+							AActrl.data["Adaptive Armor"] = 0 +  "/" + AActrl.AAtotal; 							
+							AActrl.data[" - per weapon type"] = Math.floor(AActrl.AAtotal / 2); 
+							AActrl.data[" - preassigned"] = 0 +  "/" + Math.floor(AActrl.AAtotal / 2); 
+						}
+						ship.notes  += "<br>Amethyst skin";
+					}
+					ship.amethsEnh = true;	
+				break;
+			
+				case 'VOR_AZURS': // Vorlon Azure Skin (for ship) - +1 Shield rating
+					if(!ship.azursEnh){				
+						for (let system of ship.systems) {
+							if (system.name === "eMShield") {
+								system.output += enhCount;
+							}
+						}
+						ship.notes  += "<br>Azure skin";
+					}
+					ship.azursEnh = true;	
+				break;
+			
+				case 'VOR_CRIMS': // Vorlon Crimson Skin (for ship) - Power Capacitor gains +2 storage points and +1 recharge point
+					if(!ship.crimsEnh){	
+						let capacitor = null;
+						for (let system of ship.systems) {
+							if (system.name === 'powerCapacitor') {
+								capacitor = system;
+							break;
+							}
+						}				
+
+						if (capacitor) {
+							capacitor.output += enhCount;
+							capacitor.data["Power stored/max"] = capacitor.powerMax + (2 * enhCount);
+						}
+						ship.notes  += "<br>Crimson skin";
+					}
+					ship.crimsEnh = true;	
+				break;
+			
+				case 'VULN_CRIT': // Vulnerable to Criticals: +1 Crit roll mod
+					if(!ship.vulnEnh){					
+						ship.critRollMod += enhCount;
+						ship.notes  += "<br>Vulnerable to Criticals (" + enhCount + ")";
+					}
+					ship.vulnEnh = true;
+				break;				
+				// Add more cases as necessary
+
+			}//end of non-ammo enhancements list
+
+			//If there's a magazine, let's check if any missiles were bought!
+			if(ammoMagazine != null) {			
+	
+				switch (enhID) {
+
+					case 'AMMO_B': //Basic Missile - Shouldn't ever be purchasable an an enhancement, but here we are.					
+						if(!ship.ammoBEnh){
+							//May need a different method as Basic entry already exists in Special data.
+							let special = ammoMagazine.data["Special"];
+							if (special.includes("- Basic Missile: ")) { 
+								special = special.replace(/(- Basic Missile: )\d+/, `$1${enhCount}`);
+								ammoMagazine.data["Special"] = special;
+							}else{
+								ammoMagazine.data["Special"] += "<br>- Basic Missile: " + enhCount;
+							}
+							totalRounds += enhCount;	
+						}	
+						ship.ammoBEnh =  true;
+					break;
+
+					case 'AMMO_L': //Long Range Missile
+						if(!ship.ammoLEnh){
+							ammoMagazine.data["Special"] += "<br>- Long Range Missile: " + enhCount;
+							totalRounds += enhCount;
+						}	
+						ship.ammoLEnh =  true;
+					break;
+
+					case 'AMMO_H': //Heavy Missile
+						if(!ship.ammoHEnh){
+							ammoMagazine.data["Special"] += "<br>- Heavy Missile: " + enhCount;
+							totalRounds += enhCount;
+						}	
+						ship.ammoHEnh =  true;
+					break;
+
+					case 'AMMO_F': //Flash Missile
+						if(!ship.ammoFEnh){
+							ammoMagazine.data["Special"] += "<br>- Flash Missile: " + enhCount;
+							totalRounds += enhCount;
+						}	
+						ship.ammoFEnh =  true;
+					break;
+
+					case 'AMMO_A': //Antifighter Missile
+						if(!ship.ammoAEnh){
+							ammoMagazine.data["Special"] += "<br>- Antifighter Missile: " + enhCount;
+							totalRounds += enhCount;
+						}	
+						ship.ammoAEnh =  true;
+					break;
+
+					case 'AMMO_P': //Piercing Missile
+						if(!ship.ammoPEnh){
+							ammoMagazine.data["Special"] += "<br>- Piercing Missile: " + enhCount;
+							totalRounds += enhCount;
+						}	
+						ship.ammoPEnh =  true;
+					break;
+
+					case 'AMMO_D': //Light Missile						
+						if(!ship.ammoDEnh){
+							ammoMagazine.data["Special"] += "<br>- Light Missile: " + enhCount;
+							totalRounds += enhCount;
+						}	
+						ship.ammoDEnh =  true;
+					break;	
+
+					case 'AMMO_I': //Interceptor Missile 						
+						if(!ship.ammoIEnh){
+							ammoMagazine.data["Special"] += "<br>- Interceptor Missile: " + enhCount;
+							totalRounds += enhCount;
+						}	
+						ship.ammoIEnh =  true;
+					break;
+
+					case 'AMMO_C': //Chaff Missile						
+						if(!ship.ammoCEnh){
+							ammoMagazine.data["Special"] += "<br>- Chaff Missile: " + enhCount;
+							totalRounds += enhCount;
+						}	
+						ship.ammoCEnh =  true;
+					break;	
+
+					case 'AMMO_J': //Jammer Missile						
+						if(!ship.ammoJEnh){
+							ammoMagazine.data["Special"] += "<br>- Jammer Missile: " + enhCount;
+							totalRounds += enhCount;
+						}	
+						ship.ammoJEnh =  true;
+					break;
+
+					case 'AMMO_K': //Starburst Missile						
+						if(!ship.ammoKEnh){
+							ammoMagazine.data["Special"] += "<br>- Starburst Missile: " + enhCount;
+							totalRounds += enhCount*2; //Each missile takes up 2 slots
+						}	
+						ship.ammoKEnh =  true;
+					break;		
+
+					case 'AMMO_M': //Multiwarhead Missile						
+						if(!ship.ammoMEnh){
+							ammoMagazine.data["Special"] += "<br>- Multiwarhead Missile: " + enhCount;
+							totalRounds += enhCount*2; //Each missile takes up 2 slots
+						}	
+						ship.ammoMEnh =  true;					
+					break;
+
+					case 'AMMO_KK': //Kinetic Missile						
+						if(!ship.ammoKKEnh){
+							ammoMagazine.data["Special"] += "<br>- Kinetic Missile: " + enhCount;
+							totalRounds += enhCount;
+						}	
+						ship.ammoKKEnh =  true;
+					break;
+
+					case 'AMMO_S': //Stealth Missile						
+						if(!ship.ammoSEnh){
+							ammoMagazine.data["Special"] += "<br>- Stealth Missile: " + enhCount;
+							totalRounds += enhCount;	
+						}	
+						ship.ammoSEnh =  true;
+					break;	
+
+					case 'AMMO_X': //HARM Missile						
+						if(!ship.ammoXEnh){
+							ammoMagazine.data["Special"] += "<br>- HARM Missile: " + enhCount;
+							totalRounds += enhCount;
+						}	
+						ship.ammoXEnh =  true;
+					break;
+
+					case 'MINE_BLB': //Ballistic Launcher Basic Mine						
+						if(!ship.ammoBLBEnh){
+							//May need a different method as Basic entry already exists in Special data.
+							let special = ammoMagazine.data["Special"];
+							if (special.includes("- Basic Mine: ")) { 
+								special = special.replace(/(- Basic Mine: )\d+/, `$1${enhCount}`);
+								ammoMagazine.data["Special"] = special;
+							}else{
+								ammoMagazine.data["Special"] += "<br>- Basic Mine: " + enhCount;
+							}	
+							totalRounds += enhCount;							
+						}						
+						ship.ammoBLBEnh =  true;						
+					break;
+
+					case 'MINE_BLH': //Ballistic Launcher Heavy Mine						
+						if(!ship.ammoBLHEnh){
+							ammoMagazine.data["Special"] += "<br>- Heavy Mine: " + enhCount;
+							totalRounds += enhCount;
+						}	
+						ship.ammoBLHEnh =  true;
+					break;
+
+					case 'MINE_BLW': //Ballistic Launcher Wide-Range Mine						
+						if(!ship.ammoBLWEnh){
+							ammoMagazine.data["Special"] += "<br>- Wide-range Mine: " + enhCount;
+							totalRounds += enhCount;
+						}
+						ship.ammoBLWEnh =  true;							
+					break;
+
+					case 'MINE_MLB': //Abbai Mine Launcher Basic Mine													
+						if(!ship.ammoMLBEnh){
+							//May need a different method as Basic entry already exists in Special data.
+							let special = ammoMagazine.data["Special"];
+							if (special.includes("- Basic Mine: ")) { 
+								special = special.replace(/(- Basic Mine: )\d+/, `$1${enhCount}`);
+								ammoMagazine.data["Special"] = special;
+							}else{
+								ammoMagazine.data["Special"] += "<br>- Basic Mine: " + enhCount;
+							}	
+							totalRounds += enhCount;
+						}	
+						ship.ammoMLBEnh =  true;						
+					break;	
+
+					case 'MINE_MLW': //Abbai Mine Launcher Wide-Ranged Mine						
+						if(!ship.ammoMLWEnh){
+							ammoMagazine.data["Special"] += "<br>- Wide-range Mine: " + enhCount;
+							totalRounds += enhCount;
+						}
+						ship.ammoMLWEnh =  true;	
+					break;
+
+					//AMMO TYPES FOR DIRECT FIRE WEAPONS					
+					case 'SHELL_HBSC': //Standard Ammo for Heavy Railgun						
+						if(!ship.shellHBEnh){
+							//May need a different method as Basic entry already exists in Special data.
+							let special = ammoMagazine.data["Special"];
+							if (special.includes("- Basic Heavy Shell: ")) { 
+								special = special.replace(/(- Basic Heavy Shell: )\d+/, `$1${enhCount}`);
+								ammoMagazine.data["Special"] = special;
+							}else{
+								ammoMagazine.data["Special"] += "<br>- Basic Heavy Shell: " + enhCount;
+							}
+							totalRounds += enhCount;	
+						}	
+						ship.shellHBEnh =  true;
+					break;
+
+					case 'SHELL_MBSC': //Standard Ammo for Medium Railgun						
+						if(!ship.shellMBEnh){
+							//May need a different method as Basic entry already exists in Special data.
+							let special = ammoMagazine.data["Special"];
+							if (special.includes("- Basic Medium Shell: ")) { 
+								special = special.replace(/(- Basic Medium Shell: )\d+/, `$1${enhCount}`);
+								ammoMagazine.data["Special"] = special;
+							}else{
+								ammoMagazine.data["Special"] += "<br>- Basic Medium Shell: " + enhCount;
+							}	
+							totalRounds += enhCount;
+						}	
+						ship.shellMBEnh =  true;
+					break;	
+
+					case 'SHELL_LBSC': //Standard Ammo for Light Railgun						
+						if(!ship.shellLBEnh){
+							//May need a different method as Basic entry already exists in Special data.
+							let special = ammoMagazine.data["Special"];
+							if (special.includes("- Basic Light Shell: ")) { 
+								special = special.replace(/(- Basic Light Shell: )\d+/, `$1${enhCount}`);
+								ammoMagazine.data["Special"] = special;
+							}else{
+								ammoMagazine.data["Special"] += "<br>- Basic Light Shell: " + enhCount;
+							}	
+							totalRounds += enhCount;
+						}	
+						ship.shellLBEnh =  true;
+					break;	
+
+					case 'SHELL_HFLH': //Flash Ammo for Heavy Railgun						
+						if(!ship.ammoHFEnh){
+							ammoMagazine.data["Special"] += "<br>- Heavy Flash Shell: " + enhCount;
+							totalRounds += enhCount;
+						}
+						ship.ammoHFEnh =  true;
+					break;	
+
+					case 'SHELL_MFLH': //Flash Ammo for Medium Railgun						
+						if(!ship.ammoMFEnh){
+							ammoMagazine.data["Special"] += "<br>- Medium Flash Shell: " + enhCount;
+							totalRounds += enhCount;
+						}
+						ship.ammoMFEnh =  true;
+					break;	
+
+					case 'SHELL_LFLH': //Flash Ammo for Light Railgun						
+						if(!ship.ammoLFEnh){
+							ammoMagazine.data["Special"] += "<br>- Light Flash Shell: " + enhCount;
+							totalRounds += enhCount;
+						}
+						ship.ammoLFEnh =  true;
+					break;	
+
+					case 'SHELL_HSCT': //Scatter Ammo for Heavy Railgun						
+						if(!ship.ammoHSEnh){
+							ammoMagazine.data["Special"] += "<br>- Heavy Scatter Shell: " + enhCount;
+							totalRounds += enhCount;
+						}
+						ship.ammoHSEnh =  true;
+					break;	
+
+					case 'SHELL_MSCT': //Scatter Ammo for Medium Railgun						
+						if(!ship.ammoMSEnh){
+							ammoMagazine.data["Special"] += "<br>- Medium Scatter Shell: " + enhCount;
+							totalRounds += enhCount;
+						}
+						ship.ammoMSEnh =  true;
+					break;	
+
+					case 'SHELL_LSCT': //Scatter Ammo for Light Railgun						
+						if(!ship.ammoLSEnh){
+							ammoMagazine.data["Special"] += "<br>- Light Scatter Shell: " + enhCount;
+							totalRounds += enhCount;
+						}
+						ship.ammoLSEnh =  true;
+					break;
+
+					case 'SHELL_HHVY': //Heavy Ammo for Heavy Railgun						
+						if(!ship.ammoHHEnh){
+							ammoMagazine.data["Special"] += "<br>- Heavy Heavy Shell: " + enhCount;
+							totalRounds += enhCount;
+						}
+						ship.ammoHHEnh =  true;
+					break;
+
+					case 'SHELL_MHVY': //Heavy Ammo for Medium Railgun						
+						if(!ship.ammoMHEnh){
+							ammoMagazine.data["Special"] += "<br>- Medium Heavy Shell: " + enhCount;
+							totalRounds += enhCount;
+						}
+						ship.ammoMHEnh =  true;
+					break;
+							
+					case 'SHELL_LHVY': //Heavy Ammo for Light Railgun						
+						if(!ship.ammoLHEnh){
+							ammoMagazine.data["Special"] += "<br>- Light Heavy Shell: " + enhCount;
+							totalRounds += enhCount;
+						}
+						ship.ammoLHEnh =  true;
+					break;																												
+					
+					case 'SHELL_HLR': //Long Range Ammo for Heavy Railgun						
+						if(!ship.ammoHLREnh){
+							ammoMagazine.data["Special"] += "<br>- Heavy Long Range Shell: " + enhCount;
+							totalRounds += enhCount;
+						}
+						ship.ammoHLREnh =  true;
+					break;		
+
+					case 'SHELL_MLR': //Long Range Ammo for Medium Railgun						
+						if(!ship.ammoMLREnh){
+							ammoMagazine.data["Special"] += "<br>- Medium Long Range Shell: " + enhCount;
+							totalRounds += enhCount;
+						}
+						ship.ammoMLREnh =  true;
+					break;		
+
+					case 'SHELL_HULR': //Ultra Long Range Ammo for Heavy Railgun						
+						if(!ship.ammoHULREnh){
+							ammoMagazine.data["Special"] += "<br>- Heavy Ultra Long Range Shell: " + enhCount;
+							totalRounds += enhCount;
+						}
+						ship.ammoHULREnh =  true;
+					break;	
+				}//endof ammo listings.
+
+			}//endof if(ammoMagazine) check.		
+
+
+		  }//end of enhCount > 0 check
+		
+		}//end of loop through enhancements.
+
+		// Insert update to Total Rounds here.
+		if (ammoMagazine != null) {
+			var specialText = ammoMagazine.data["Special"];
+			if (specialText.includes("Total rounds: ")) { // There will be a number immediately after this text e.g. Total rounds: 180/220        
+				// Extract both the numbers before and after the oblique (`/`)
+				var match = specialText.match(/Total rounds: (\d+)\/(\d+)/);
+				if (match) {
+					var extractedValueBefore = parseInt(match[1], 10); // Number before `/`
+					var extractedValueAfter = parseInt(match[2], 10); // Number after `/`
+
+					// Update the number before the `/` (e.g., add new ammo)
+					if((extractedValueBefore + totalRounds) < extractedValueAfter)	extractedValueBefore += totalRounds; 
+
+					// Replace the old value with the new total
+					specialText = specialText.replace(/(Total rounds: )\d+/, `$1${extractedValueBefore}`);
+					ammoMagazine.data["Special"] = specialText;
+					ammoMagazine.output = extractedValueBefore;
+				}
+			}
+		}
+	},
+
+	setEnhancementsFighter: function setEnhancementsFighter(flight) {
+
+		var totalRounds = 0; //Initialise
+
+			for (let entry of flight.enhancementOptions) {
+				// ID, readableName, numberTaken, limit, price, priceStep
+				let enhID = entry[0];
+				let enhCount = entry[2];
+				let enhDescription = entry[1];
+				
+				if (enhCount > 0) {
+
+					if (flight.enhancementTooltip !== "") this.enhancementTooltip += "<br>";
+					flight.enhancementTooltip += enhDescription;
+					if (enhCount > 1) flight.enhancementTooltip += ` (x${enhCount})`;	
+		
+					switch (enhID) {
+
+						case 'ELT_MAR': // Elite marines, mark every Marines system as Elite.
+							if(!flight.elMarEnhFlight){
+								flight.systems.forEach(ftr => {
+									ftr.systems.forEach(sys => {
+										if (sys.name == "Marines") {
+											sys.data["Elite"] = "Yes";
+										}
+									});
+								});
+							}	
+							flight.elMarEnhFlight = true;	
+						break;
+		
+						case 'ELITE_SW': // Elite Pilot (SW)
+							if(!flight.swEnh){
+								flight.pivotcost = 1;
+								flight.offensivebonus += enhCount;
+								flight.iniativebonus += enhCount * 5;
+								flight.forwardDefense -= enhCount;
+								flight.sideDefense -= enhCount;
+								flight.notes += "<br>Elite Pilot";
+								}
+								flight.swEnh = true;
+						break;
+		
+						case 'EXP_MOTIV': // Expert Motivator
+						if(!flight.motivEnh){
+								flight.notes += "<br>Expert Motivator";
+							}
+							flight.motivEnh = true;
+						break;
+		
+						case 'EXT_AMMO': // Extra ammo
+							if(!flight.exAmmoEnh){
+								flight.systems.forEach(ftr => {
+									ftr.systems.forEach(sys => {
+										if (sys.name == "PairedGatlingGun" || 
+											sys.name == "MatterGun" || 
+											sys.name == "SlugCannon" || 
+											sys.name == "GatlingGunFtr" ||
+											sys.name == "NexusAutogun" ||
+											sys.name == "NexusMinigunFtr" ||
+											sys.name == "NexusShatterGunFtr" ||
+											sys.name == "NexusLightDefenseGun") {
+											sys.data["Ammunition"] += enhCount; 
+										}
+									});
+								});
+							}
+							flight.exAmmoEnh = true;	
+						break;
+		
+						case 'EXT_HAMMO': // Extra heavy ammo
+							if(!flight.exHAmmoEnh){						
+								flight.systems.forEach(ftr => {
+									ftr.systems.forEach(sys => {
+										if (sys.name == "NexusAutocannonFtr" || 
+											sys.name == "NexusLightGasGunFtr") {
+											sys.data["Ammunition"] += enhCount; 
+										}
+									});
+								});
+							}
+							flight.exHAmmoEnh = true;							
+						break;
+		
+						case 'EXT_MAR': // Extra marines
+							if(!flight.exMarEnhFlight){							
+								flight.systems.forEach(ftr => {
+									ftr.systems.forEach(sys => {
+										if (sys.name == "Marines") {
+											sys.data["Ammunition"] += enhCount; 
+										}
+									});
+								});
+							}		
+							flight.exMarEnhFlight = true;								
+						break;
+		
+						case 'FTR_FERV': // Markab Religious Fervor
+							if(!flight.fervEnhFlight){							
+								flight.offensivebonus += enhCount;
+								flight.iniativebonus += enhCount * 10;
+								flight.forwardDefense += enhCount * 2;
+								flight.sideDefense += enhCount * 2;
+								flight.critRollMod -= enhCount * 3;
+								flight.notes += "<br>Markab Fervor";								
+							}
+							flight.fervEnhFlight = true;
+						break;
+		
+						case 'IMPR_OB': // Improved Targeting Computer
+							if(!flight.obEnh){
+								flight.offensivebonus += enhCount;							
+								flight.notes += "<br>Improved Targeting Computer";
+							}
+							flight.obEnh = true;
+						break;
+		
+						case 'IMPR_THR': // Improved Thrust
+							if(!flight.thrEnh){
+								flight.freethrust += enhCount;						
+							}
+							flight.thrEnh = true;
+						break;						
+		
+						case 'NAVIGATOR': // Navigator
+							if(!flight.navEnh){						
+								flight.notes += "<br>Navigator";
+							}
+							flight.navEnh = true;
+						break;
+		
+						case 'POOR_TRAIN': // Poor Training
+							if(!flight.poorTrEnh){							
+								flight.critRollMod += enhCount * 2;
+								flight.offensivebonus -= enhCount;
+								flight.freethrust -= enhCount;
+								flight.iniativebonus -= enhCount * 5;
+								flight.forwardDefense += enhCount;
+								flight.sideDefense += enhCount;
+								flight.notes += "<br>Poor Training";								
+							}	
+							flight.poorTrEnh = true;							
+						break;
+		
+						case 'SHAD_CTRL': // Shadow fighter deployed without carrier control
+							if(!flight.shadCtrlEnh){							
+								flight.offensivebonus -= enhCount * 2;
+								flight.iniativebonus -= enhCount * 3 * 5;
+								flight.notes  += "<br>Uncontrolled";
+							}	
+							flight.shadCtrlEnh = true;								
+						break;
+		
+						case 'VOR_AZURF': // Vorlon Azure Skin Coloring
+							if(!flight.azurfEnh){						
+								flight.systems.forEach(ftr => {
+									ftr.systems.forEach(sys => {
+										if (sys.name == "FtrShield") {
+											sys.data["Basic Strength"] += enhCount;
+										}
+									});
+								});
+								flight.notes += "<br>Azure Skin Coloring";								
+							}	
+							flight.azurfEnh = true;		
+						break;		
+					
+						//consumable ammunition - add to ALL missile magazines on flight!
+						case 'AMMO_FB': //Basic Fighter Missile
+							if(!flight.fbEnh){
+								flight.systems.forEach(ftr => {
+									ftr.systems.forEach(sys => {
+										if (sys.name == "ammoMagazine") {
+											let special = sys.data["Special"];
+											if (special.includes("- Basic Missile: ")) { 
+												special = special.replace(/(- Basic Missile: )\d+/, `$1${enhCount}`);
+												sys.data["Special"] = special;
+											}else{
+												sys.data["Special"] += "<br>- Basic Missile: " + enhCount;
+											}
+											totalRounds += enhCount;
+										}
+									});
+								});
+							}
+							flight.fbEnh = true;	
+						break;
+
+						case 'AMMO_FH': //Heavy Fighter Missile
+							if(!flight.fhEnh){
+								flight.systems.forEach(ftr => {
+									ftr.systems.forEach(sys => {
+										if (sys.name == "ammoMagazine") {
+											sys.data["Special"] += "<br>- Heavy Missile: " + enhCount;
+											totalRounds += enhCount;
+										}
+									});
+								});
+							}
+							flight.fhEnh = true;	
+						break;
+
+						case 'AMMO_FL': //Long Range Fighter Missile
+							if(!flight.flEnh){
+								flight.systems.forEach(ftr => {
+									ftr.systems.forEach(sys => {
+										if (sys.name == "ammoMagazine") {
+											sys.data["Special"] += "<br>- Long Range Missile: " + enhCount;
+											totalRounds += enhCount;
+										}
+									});
+								});
+							}
+							flight.flEnh = true;	
+						break;
+
+						case 'AMMO_FY': //Dogfight Fighter Missile
+							if(!flight.fyEnh){
+									flight.systems.forEach(ftr => {
+										ftr.systems.forEach(sys => {
+											if (sys.name == "ammoMagazine") {
+												let special = sys.data["Special"];
+												if (special.includes("- Dogfight Missile: ")) { //For some fighter Dogfight are the default
+													special = special.replace(/(- Dogfight Missile: )\d+/, `$1${enhCount}`);
+													sys.data["Special"] = special;
+												}else{
+													sys.data["Special"] += "<br>- Dogfight Missile: " + enhCount;
+												}
+												totalRounds += enhCount;
+											}
+										});
+									});
+								}
+								flight.fyEnh = true;	
+							break;
+
+						case 'AMMO_FD': //Dropout Fighter Missile
+							if(!flight.fdEnh){
+								flight.systems.forEach(ftr => {
+									ftr.systems.forEach(sys => {
+										if (sys.name == "ammoMagazine") {
+											sys.data["Special"] += "<br>- Dropout Missile: " + enhCount;
+											totalRounds += enhCount;
+										}
+									});
+								});
+							}
+							flight.fdEnh = true;
+						break;					
+
+					}//end of swtich function
+				}			
+		}//end of loop through fighter enhancement options.
+
+		// Insert update to Total Rounds here.
+		flight.systems.forEach(ftr => {
+			ftr.systems.forEach(sys => {
+				if (sys.name == "ammoMagazine") {
+					var specialText = sys.data["Special"];
+					if (specialText.includes("Total rounds: ")) { // There will be a number immediately after this text e.g. Total rounds: 180/220        
+						// Extract both the numbers before and after the oblique (`/`)
+						var match = specialText.match(/Total rounds: (\d+)\/(\d+)/);
+						if (match) {
+							var extractedValueBefore = parseInt(match[1], 10); // Number before `/`
+							var extractedValueAfter = parseInt(match[2], 10); // Number after `/`
+
+							// Update the number before the `/` (e.g., add new ammo)
+							if((extractedValueBefore + totalRounds) < extractedValueAfter)	extractedValueBefore += totalRounds; 
+
+							// Replace the old value with the new total
+							specialText = specialText.replace(/(Total rounds: )\d+/, `$1${extractedValueBefore}`);
+							sys.data["Special"] = specialText;
+							sys.output = extractedValueBefore;
+						}
+					}
+				}		
+			});
+		});
+		
+	}//end of setEnhancementsFighter()	
 
 };
 
