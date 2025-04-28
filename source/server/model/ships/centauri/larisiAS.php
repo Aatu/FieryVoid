@@ -18,6 +18,7 @@ class larisiAS extends FighterFlight{
         $this->jinkinglimit = 0;
         $this->pivotcost = 2; //shuttles have pivot cost higher
         $this->turncost = 0.33;
+	    $this->isd = 2213;        
         
 		$this->hangarRequired = 'assault shuttles'; //for fleet check
 		    $this->iniativebonus = 9*5;

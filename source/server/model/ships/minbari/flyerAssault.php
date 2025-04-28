@@ -10,6 +10,7 @@ class FlyerAssault extends FighterFlight{
         $this->phpclass = "FlyerAssault";
         $this->shipClass = "Assault Flyers";
     	$this->imagePath = "img/ships/MinbariFlyer.png"; //need Minbari Flyer image!
+        $this->isd = 1750;
         
 		
 		

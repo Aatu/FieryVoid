@@ -58,25 +58,48 @@ window.ShipTooltipBallisticsMenu = function () {
             var ball = grouped[key].ballistic;
             const amount = grouped[key].amount;
             var ballElement = jQuery(template);
-
+        
             var ballisticEntry = getBallisticEntry.call(this, ball);
-			
-			//set correct firing mode, ensuring correct hit chance calculation!
-			var modeIteration = 0;
-			modeIteration = ball.fireOrder.firingMode; //change weapons data to reflect mode actually used
-			if(modeIteration != ball.weapon.firingMode){
-				while(modeIteration != ball.weapon.firingMode){ //will loop until correct mode is found
-					ball.weapon.changeFiringMode();
-				}
-			}
+        
+            // Set correct firing mode
+            var modeIteration = ball.fireOrder.firingMode;
+            if (modeIteration != ball.weapon.firingMode) {
+                while (modeIteration != ball.weapon.firingMode) {
+                    ball.weapon.changeFiringMode();
+                }
+            }
+        
+            // Set display text
+            var textToDisplay = ball.weapon.displayName;
+            if (amount > 1) textToDisplay = amount + 'x ' + ball.weapon.displayName;
+            textToDisplay = ball.shooter.name + ', ' + textToDisplay + ' (' + ball.weapon.firingModes[ball.fireOrder.firingMode] + ') ';
+            jQuery(".weapon", ballElement).html(textToDisplay);
 
-            //jQuery(".weapon", ballElement).html(amount ? amount + 'x ' + ball.weapon.displayName : ball.weapon.displayName); //replaced by more compliated text below
-			var textToDisplay = ball.weapon.displayName;
-			if (amount > 1) textToDisplay = amount + 'x ' + ball.weapon.displayName;
-			textToDisplay = ball.shooter.name + ', ' + textToDisplay + ' (' + ball.weapon.firingModes[ball.fireOrder.firingMode] + ') ';
-			jQuery(".weapon", ballElement).html(textToDisplay);
+			var hitchance = weaponManager.calculataBallisticHitChange(ballisticEntry);        
+            var hitchanceNormalMode = ball.fireOrder.chance ?? ball.fireOrder.needed;
+        
+            // Build hitchance list manually, based on number of ballistics.
+            let hitchanceList = [];
+            for (let i = 0; i < ballistics.length; i++) {
+                let hc = ballistics[i].fireOrder.chance;
+                hitchanceList.push(hc);
+            }
+        
+            const minHitchance = Math.min(...hitchanceList);
+            const maxHitchance = Math.max(...hitchanceList);
+        
+            if (ball.fireOrder.type == "normal" && amount > 1 && minHitchance !== maxHitchance) {
+                jQuery(".hitchange", ballElement).html('- Between: ' + minHitchance + '% - ' + hitchanceNormalMode + '%');
+            } else if (ball.fireOrder.type == "normal") {
+                jQuery(".hitchange", ballElement).html('- Approx: ' + hitchanceNormalMode + '%');
+            } else {
+                jQuery(".hitchange", ballElement).html('- Approx: ' + hitchance + '%');
+            }
+            /*
 			var hitchance = weaponManager.calculataBallisticHitChange(ballisticEntry);
 			var hitchanceNormalMode = ball.fireOrder.chance ?? ball.fireOrder.needed;	//Fireorder hitchance as locked in by Normal mode weapons.
+            var hitChanceLow = hitchance + ball.fireOrder.hitmod;	//To show the difference between lowest and highest hitchances in tooltip.
+            *
 
 			if(ball.fireOrder.type == "normal" && amount > 1 && ball.fireOrder.hitmod){ //Method only works during targeting Normal types, not in Replay :(
 				var hitChanceLow = hitchance + ball.fireOrder.hitmod;	//To show the difference between lowest and highest hitchances in tooltip.	
@@ -86,6 +109,8 @@ window.ShipTooltipBallisticsMenu = function () {
 			}else{ //Everything else, e.g. all ballistics
 			    jQuery(".hitchange", ballElement).html('- Approx: ' + hitchance + '%' ); 
 			}
+
+            */
             /*
             if (this.allowIntercept) {
                 var interception = weaponManager.getInterception(ball.fireOrder) * 5;

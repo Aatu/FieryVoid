@@ -10,9 +10,8 @@ class breachingPodMinbari  extends FighterFlight{
         $this->phpclass = "breachingPodMinbari";
         $this->shipClass = "Ronati Breaching Pods";
     	$this->imagePath = "img/ships/MinbariFlyer.png"; //need Minbari Flyer image!
-        
-		
-		
+        $this->isd = 1750;     
+				
         $this->forwardDefense = 8;
         $this->sideDefense = 8;
         $this->freethrust = 8;

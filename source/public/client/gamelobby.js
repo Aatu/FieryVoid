@@ -38,10 +38,10 @@ window.gamedata = {
 			powerRating = 'Tier 2';
 			break;
 		  case 'Brakiri Syndicracy':
-			powerRating = 'Tier 2; distinct Corporations can be mixed freely';
+			powerRating = 'Tier 2; Distinct Corporations can be mixed freely';
 			break;
 		  case 'Cascor Commonwealth':
-			powerRating = 'Tier 3 (official) or Tier 2 (custom re-pointing enhancement)';
+			powerRating = 'Tier 3 (Official PV) or Tier 2 (Re-pointing enhancement)';
 			break;
 		  case 'Centauri Republic':
 			powerRating = 'Tier 1';
@@ -50,16 +50,16 @@ window.gamedata = {
 			powerRating = 'Tier 3';
 			break;
 		  case "Ch'Lonas Cooperative":
-			powerRating = 'Tier 2, custom faction';
+			powerRating = 'Tier 2; Custom faction';
 			break;
 		  case 'Civilians':
-			powerRating = 'Generic civilian designs for scenarios, not a faction';
+			powerRating = 'Tier 3; Civilian units for scenarios, not a faction';
 			break;
 		  case 'Corillani Theocracy':
-			powerRating = 'Tier 2; distinct sub-factions should not be mixed';
+			powerRating = 'Tier 2; Distinct sub-factions should not be mixed';
 			break;
 		  case 'Custom Ships':
-			powerRating = "Designs that don't fit anywhere else, not a faction";
+			powerRating = "Custom Designs, not a faction, Tier 3";
 			break;
 		  case 'Deneth Tribes':
 			powerRating = 'Tier 2';
@@ -71,7 +71,7 @@ window.gamedata = {
 			powerRating = 'Tier 1';
 			break;
 		  case 'Drakh':
-			powerRating = 'Tier 1, custom faction';
+			powerRating = 'Tier 1, Custom faction';
 			break;
 		  case 'Drazi Freehold':
 			powerRating = 'Tier 1';
@@ -80,13 +80,13 @@ window.gamedata = {
 			powerRating = 'Tier 2';
 			break;
 		  case 'Earth Alliance':
-			powerRating = 'Tier 1 (Not Balanced with Warlock or Shadow Omega)';
+			powerRating = 'Tier 1 (Not Balanced with Warlock)';
 			break;
 		  case 'Earth Alliance (custom)':
-			powerRating = 'custom and non-combatant designs for EA faction';
+			powerRating = 'Tier 1; Custom designs for EA faction';
 			break;
 		  case 'Earth Alliance (defenses)':
-			powerRating = 'fixed tefenses for EA faction';
+			powerRating = 'Tier 1; Fixed defenses for EA faction';
 			break;
 		  case 'Earth Alliance (early)':
 			powerRating = 'Tier 3';
@@ -104,7 +104,7 @@ window.gamedata = {
 			powerRating = 'Tier 1';
 			break;
 		  case 'Ipsha Baronies':
-			powerRating = 'Tier 3 (distinct Baronies cannot be mixed)';
+			powerRating = 'Tier 3 (Distinct Baronies cannot be mixed)';
 			break;
 		  case 'Kor-Lyan Kingdoms':
 			powerRating = 'Tier 1';
@@ -116,7 +116,7 @@ window.gamedata = {
 			powerRating = 'Tier 3';
 			break;
 		  case 'Minbari Federation':
-			powerRating = 'Tier 1 (all-White Star: Not Balanced)';
+			powerRating = 'Tier 1 (All-White Star: Not Balanced)';
 			break;
 		  case 'Minbari Protectorate':
 			powerRating = 'Tier 1';
@@ -131,13 +131,13 @@ window.gamedata = {
 			powerRating = 'Tier 1';
 			break;
 		  case 'Orieni Imperium (defenses)':
-			powerRating = 'fixed tefenses for Orieni faction';
+			powerRating = 'Tier 1; Fixed defenses for Orieni faction';
 			break;
 		  case "Pak'ma'ra Confederacy":
 			powerRating = 'Tier 2';
 			break;
 		  case 'Raiders':
-			powerRating = 'Tier 2 (directory contains distinct Raider factions in addition to generic Raiders!)';
+			powerRating = 'Tier 2 (Raider factions and Generic Raiders)';
 			break;
 		  case 'Rogolon Dynasty':
 			powerRating = 'Tier 3';
@@ -146,13 +146,13 @@ window.gamedata = {
 			powerRating = 'Tier Ancients';
 			break;
 		  case 'Small Races':
-			powerRating = 'varies by faction, see Tiers file';
+			powerRating = 'Tier 3; See Tiers file';
 			break;
 		  case 'Streib':
-			powerRating = 'Not balanced';
+			powerRating = 'Tier 1, Not balanced';
 			break;
 		  case 'Thirdspace':
-			powerRating = 'Ancients, custom faction';
+			powerRating = 'Tier Ancients, Custom faction';
 			break;
 		  case 'Torata Regency':
 			powerRating = 'Tier 1';
@@ -167,83 +167,98 @@ window.gamedata = {
 			powerRating = 'Tier 1';
 			break;
 		  case 'Yolu Confederation':
-			powerRating = 'Not Balanced (official) or Tier 1 (custom re-pointing enhancement)';
+			powerRating = 'Tier 1 (Unbalanced as official PV) or  (Tier 1 with price reevaluation)';
 			break;
 		  case 'ZBSG Colonials':
-			powerRating = 'Tier 2, custom faction';
+			powerRating = 'Tier 2; Custom faction';
 			break;
 		  case 'ZEscalation Blood Sword Raiders':
-			powerRating = 'Tier 3, custom faction';
+			powerRating = 'Tier 3; Custom faction';
 			break;
 		  case 'ZEscalation Civilian':
-			powerRating = 'Generic civilian designs for scenarios, not a faction, custom';
+			powerRating = 'Tier 3; Civilian designs for scenarios, custom';
 			break;
 		  case 'ZEscalation Chouka Raider':
-			powerRating = 'Not balanced, custom faction';
+			powerRating = 'Tier 2; Not balanced, custom faction';
 			break;
 		  case 'ZEscalation Chouka Theocracy':
-			powerRating = 'Tier 2, custom faction';
+			powerRating = 'Tier 2; Custom faction';
 			break;
 		  case 'ZEscalation Circasian Empire':
-			powerRating = 'Tier 2, custom faction';
+			powerRating = 'Tier 2; Custom faction';
 			break;
 		  case 'ZEscalation Kastan Monarchy':
-			powerRating = 'Tier 2, custom faction';
+			powerRating = 'Tier 2; Custom faction';
 			break;
 		  case "ZEscalation Sshel'ath Alliance":
-			powerRating = 'Tier 2, custom faction';
+			powerRating = 'Tier 2; Custom faction';
 			break;
 		  case 'ZNexus Brixadii Clans (early)':
-			powerRating = 'Tier 3, custom faction';
+			powerRating = 'Tier 3; Custom faction';
 			break;
 		  case 'ZNexus Brixadii Clans':
-			powerRating = 'Tier 2, custom faction';
+			powerRating = 'Tier 2; Custom faction';
 			break;
 		  case 'ZNexus Support Units':
-			powerRating = 'Designs for scenarios, not a faction, custom';
+			powerRating = 'Tier 3; Designs for scenarios, Custom';
 			break;
 		  case 'ZNexus Craytan Union (early)':
-			powerRating = 'Tier 3, custom faction';
+			powerRating = 'Tier 3; Custom faction';
 			break;
 		  case 'ZNexus Craytan Union':
-			powerRating = 'Tier 2, custom faction';
+			powerRating = 'Tier 2; Custom faction';
 			break;
 		  case 'ZNexus Dalithorn Commonwealth (early)':
-			powerRating = 'Tier 3, custom faction';
+			powerRating = 'Tier 3; Custom faction';
 			break;
 		  case 'ZNexus Dalithorn Commonwealth':
-			powerRating = 'Tier 2, custom faction';
+			powerRating = 'Tier 2; Custom faction';
 			break;
 		  case 'ZNexus Makar Federation (early)':
-			powerRating = 'Tier 3, custom faction, playtest';
+			powerRating = 'Tier 3; Custom faction, Playtest';
 			break;
 		  case 'ZNexus Makar Federation':
-			powerRating = 'Tier 2, custom faction, playtest';
+			powerRating = 'Tier 2; Custom faction, Playtest';
 			break;
 		  case 'ZNexus Sal-bez Coalition (early)':
-			powerRating = 'Tier 3, custom faction';
+			powerRating = 'Tier 3; Custom faction';
 			break;
 		  case 'ZNexus Sal-bez Coalition':
-			powerRating = 'Tier 2, custom faction';
+			powerRating = 'Tier 2; Custom faction';
 			break;
-		  case 'ZNexus Velrax Republic (early)':
-			powerRating = 'Tier 3, custom faction';
+		  case 'ZNexus Velrax Republic (Early)':
+			powerRating = 'Tier 3; Custom faction';
 			break;
 		  case 'ZNexus Velrax Republic':
-			powerRating = 'Tier 2, custom faction';
+			powerRating = 'Tier 2; Custom faction';
 			break;
+		  case 'ZPlaytest 12 Colonies of Kobol':
+			powerRating = 'Tier 1; Custom faction, Playtest';
+				break;
+		  case 'ZPlaytest BSG Cylons':
+			powerRating = 'Tier 2; Custom faction';
+				break;		
 		  case 'ZStarTrek (TOS) Federation':
-			powerRating = 'Tier 2, custom faction';
+			powerRating = 'Tier 2; Custom faction';
 			break;
 		  case 'ZStarTrek (early) Federation':
-			powerRating = 'Tier 3, custom faction';
+			powerRating = 'Tier 3; Custom faction';
 			break;
 		  case 'ZStarTrek (early) Suliban':
-			powerRating = 'Tier 3, custom faction';
-			break;
+			powerRating = 'Tier 3; Custom faction';
+			break;		
 		  case 'ZStarWars':
-			powerRating = 'Tier 2 (directory contains multiple overlapping factions), custom faction';
+			powerRating = 'Tier 2 (Multiple overlapping factions), Custom faction';
 			break;
+		  case 'ZStarWars Clone Wars (Playtest)':
+			powerRating = 'Tier 2 (Multiple overlapping factions), Custom faction';
+			break;
+		  case 'ZTrek Playtest Other Factions':
+			powerRating = 'Tier 2; Custom faction';
+			break;
+		  case 'ZWhatIF':
+			powerRating = 'Tier 1; Custom faction';
+			break;								
 		  default:
 			powerRating = 'NOT ASSIGNED';
 		}
@@ -899,7 +914,6 @@ window.gamedata = {
 		totalFtrCurr = totalFtrXL;
 		totalHangarCurr = (totalHangarH+totalHangarM+totalHangarL+hangarConversionNet)*2 + totalHangarXL;		
 		if (totalFtrCurr > 0 || totalHangarCurr > 0){ //do not show if there are no fighters/hangars in this segment
-//			totalHangarCurr = (totalHangarH+totalHangarM+totalHangarL+hangarConversionNet)*2 + totalHangarXL;
 			checkResult +=  " - Ultralight Fighters: " + totalFtrCurr;
 			checkResult +=  " (allowed up to " + totalHangarCurr + ")";
 			if((totalFtrXL>0) || (totalHangarXL>0)){ //add disclaimer because sums will not add up straight.
@@ -917,7 +931,6 @@ window.gamedata = {
 		totalFtrCurr = totalFtrL;
 		totalHangarCurr = totalHangarH+totalHangarM+totalHangarL+hangarConversionNet;		
 		if (totalFtrCurr > 0 || totalHangarCurr > 0){ //do not show if there are no fighters/hangars in this segment
-//			totalHangarCurr = totalHangarH+totalHangarM+totalHangarL+hangarConversionNet;
 			checkResult +=  " - Light Fighters: " + totalFtrCurr;
 			checkResult +=  " (allowed up to " + totalHangarCurr + ")";
 			if (totalFtrCurr > totalHangarCurr){ //fighter total is not within limits
@@ -932,7 +945,6 @@ window.gamedata = {
 		totalFtrCurr = totalFtrM;
 		totalHangarCurr = totalHangarH+totalHangarM+hangarConversionNet;		
 		if (totalFtrCurr > 0 || totalHangarCurr > 0){ //do not show if there are no fighters/hangars in this segment
-//			totalHangarCurr = totalHangarH+totalHangarM+hangarConversionNet;
 			checkResult +=  " - Medium Fighters: " + totalFtrCurr;
 			checkResult +=  " (allowed up to " + totalHangarCurr + ")";
 			if (totalFtrCurr > totalHangarCurr){ //fighter total is not within limits
@@ -946,8 +958,7 @@ window.gamedata = {
 	    
 		totalFtrCurr = totalFtrH;
 		totalHangarCurr = totalHangarH+hangarConversionNet;		
-		if (totalFtrCurr > 0 || totalHangarCurr > 0){ //do not show if there are no fighters/hangars in this segment
-//			totalHangarCurr = totalHangarH+hangarConversionNet;				
+		if (totalFtrCurr > 0 || totalHangarCurr > 0){ //do not show if there are no fighters/hangars in this segment			
 			checkResult +=  " - Heavy Fighters: " + totalFtrCurr;
 				checkResult +=  " (allowed up to " + totalHangarCurr + ")";
 			if (totalFtrCurr > totalHangarCurr){ //fighter total is not within limits
@@ -1394,9 +1405,30 @@ window.gamedata = {
 
             factionList[faction] = new Array();
 
-	//August 2023: I think everyone knows You need to click to expandd - I'm putting power rating to mouseover instead! 
+		    // Get the power rating and check for "custom" to allow Filtering
+			var powerRating = gamedata.getPowerRating(faction);
+			var isCustom = powerRating.toLowerCase().includes("custom");
+			
+			// ✅ Extract tier from powerRating to allow Filtering
+			let tierMatch = powerRating.match(/Tier\s*([123]|Ancients)/i);
+			let tier = tierMatch ? "Tier " + tierMatch[1] : "Unknown";
+			
+			//August 2023: I think everyone knows You need to click to expandd - I'm putting power rating to mouseover instead! 
             //var group = $('<div id="' + faction + '" class="' + faction + ' faction shipshidden listempty" data-faction="' + faction + '"><div class="factionname name"><span>' + faction + '</span><span class="tooltip">(click to expand)</span></div>').appendTo("#store");
-	var group = $('<div id="' + faction + '" class="' + faction + ' faction shipshidden listempty" data-faction="' + faction + '"><div class="factionname name"><span>' + faction + '</span><span class="tooltip">'+gamedata.getPowerRating(faction)+'</span></div>').appendTo("#store");
+			//var group = $('<div id="' + faction + '" class="' + faction + ' faction shipshidden listempty" data-faction="' + faction + '"><div class="factionname name"><span>' + faction + '</span><span class="tooltip">'+gamedata.getPowerRating(faction)+'</span></div>').appendTo("#store");
+			
+			//Have added custom and tier data to faction to allow for sorting/filtering. - DK - Apr 2025
+			var group = $('<div id="' 
+				+ faction 
+				+ '" class="' + faction 
+				+ ' faction shipshidden listempty" data-faction="' 
+				+ faction 
+				+ '" data-custom="' + (isCustom ? "true" : "false") 
+				+ '" data-tier="' + tier 
+				+ '"><div class="factionname name"><span>' 
+				+ faction 
+				+ '</span><span class="tooltip">' 
+				+ powerRating + '</span></div>').appendTo("#store");
 
             group.find('.factionname').on("click", this.expandFaction);
         }
@@ -1477,12 +1509,17 @@ window.gamedata = {
 			var shipDisplayName;
 			var shipList = jsonShips[faction];
 			var pointCostFull = '';
+			var powerRating = gamedata.getPowerRating(faction);
+			var isCustomFaction = powerRating.toLowerCase().includes("custom");
+			var isCustomShip;
+			var isd;
+
 			
 			//this.orderShipListOnName(shipList); //alphabetical sort
 			this.orderShipListOnPV(shipList); //perhaps more appropriate here, as alphabetical order will be shot to hell anyway
 			
 			gamedata.setShipsFromFaction(faction, shipList);
-			
+
 			//show separately: immobile objects (bases/OSATs), every ship size, fighters
 			var sizeClassHeaders = ['Fighters','Medium Ships','Heavy Ships', 'Capital Ships', 'Immobile Structures'];
 			for(var desiredSize=4; desiredSize>=0;desiredSize--){
@@ -1491,6 +1528,8 @@ window.gamedata = {
                     		h.appendTo(targetNode);
 				for (var index = 0; index < jsonShips[faction].length; index++){
 					ship = shipList[index];
+					isCustomShip = isCustomFaction || ship.unofficial === true;
+					isd = ship.isd;
 					if(desiredSize==4){ //bases and OSATs, size does not matter
 						if((ship.base != true) && (ship.osat != true)) continue; //check if it's a base or OSAT
 				        }else if(desiredSize>0){ //ships (check actual size)
@@ -1505,8 +1544,14 @@ window.gamedata = {
 					shipDisplayName = this.prepareClassName(ship);
 					pointCostFull = ship.pointCost;
 					if (ship.flight && (ship.maxFlightSize != 1)) pointCostFull = pointCostFull + ' (' + pointCostFull/6 + ' ea.)';//for fighters: display price per craft, too!
-					h = $('<div oncontextmenu="return false;" class="ship"><span class="shiptype">'+shipDisplayName+'</span><span class="pointcost">'+pointCostFull+'</span> -<span class="addship clickable">Add to fleet</span> -<span class="showship clickable">Show details</span></div>');
-                    $(".addship", h).on("click", this.buyShip.bind(this, ship.phpclass));
+					h = $('<div oncontextmenu="return false;" class="ship" data-custom="' 
+						+ isCustomShip + '" data-isd="' 
+						+ ship.isd 
+						+ '"><span class="shiptype">'
+						+ shipDisplayName + '</span><span class="pointcost">'
+						+ pointCostFull + '</span> -<span class="addship clickable">Add to fleet</span> -<span class="showship clickable">Show details</span></div>');
+                    
+					$(".addship", h).on("click", this.buyShip.bind(this, ship.phpclass));
                     $(".showship", h).on("click", gamedata.onShipContextMenu.bind(this, ship.phpclass, faction, ship.id, false));
                         
                     h.appendTo(targetNode);
@@ -1517,8 +1562,15 @@ window.gamedata = {
 						shipDisplayName = this.prepareClassName(shipV);
 						pointCostFull = shipV.pointCost;
 						if (shipV.flight && (shipV.maxFlightSize != 1)) pointCostFull = pointCostFull + ' (' + pointCostFull/6 + ' ea.)';//for fighters: display price per craft, too!
-						h = $('<div oncontextmenu="return false;" class="ship"><span class="shiptype">'+shipDisplayName+'</span><span class="pointcost">'+pointCostFull+'</span> -<span class="addship clickable">Add to fleet</span> -<span class="showship clickable">Show details</span></div>');
-                        $(".addship", h).on("click",  this.buyShip.bind(this, shipV.phpclass));
+						h = $('<div oncontextmenu="return false;" class="ship" data-custom="' 
+							+ isCustomShip 
+							+ '" data-isd="' 
+							+ shipV.isd 
+							+ '"><span class="shiptype">'
+							+ shipDisplayName + '</span><span class="pointcost">'
+							+ pointCostFull + '</span> -<span class="addship clickable">Add to fleet</span> -<span class="showship clickable">Show details</span></div>');
+						
+							$(".addship", h).on("click",  this.buyShip.bind(this, shipV.phpclass));
                         $(".showship", h).on("click", gamedata.onShipContextMenu.bind(this, shipV.phpclass, faction, ship.id, false));
                         
                         h.appendTo(targetNode);
@@ -1530,7 +1582,7 @@ window.gamedata = {
 		} //end of faction
 	}, //endof parseShips
 	
-
+/*
     expandFaction: function expandFaction(event) {
         var clickedElement = $(this);
         var faction = clickedElement.parent().data("faction");
@@ -1547,6 +1599,60 @@ window.gamedata = {
 
         clickedElement.parent().toggleClass("shipshidden");
     },
+*/
+expandFaction: function expandFaction(event) {
+    const clickedElement = $(this);
+    const factionElement = clickedElement.parent();
+    const faction = factionElement.data("faction");
+
+    const isCurrentlyHidden = factionElement.hasClass("shipshidden");
+
+    if (isCurrentlyHidden && factionElement.hasClass("listempty")) {
+        window.ajaxInterface.getShipsForFaction(faction, function (factionShips) {
+            gamedata.parseShips(factionShips);
+            gamedata.applyCustomShipFilter(); // run after ships load
+        });
+
+        factionElement.removeClass("listempty");
+    }
+
+    factionElement.toggleClass("shipshidden");
+
+    // Apply ship filter AFTER visibility toggled
+    gamedata.applyCustomShipFilter();
+},
+
+
+applyCustomShipFilter: function () {
+    const showCustom = $("#toggleCustomShips").is(":checked");
+    const isdValue = parseInt($("#isdFilter").val(), 10); // parse input as integer
+
+    $(".faction").each(function () {
+        const $faction = $(this);
+        const isHidden = $faction.hasClass("shipshidden");
+
+        $faction.find(".ship").each(function () {
+            const $ship = $(this);
+            const isCustom = $ship.data("custom") === true || $ship.data("custom") === "true";
+            const shipISD = parseInt($ship.data("isd"), 10);
+
+            // Start with visible, apply filters below
+            let visible = true;
+
+            // Filter by custom toggle
+            if (!showCustom && isCustom) {
+                visible = false;
+            }
+
+            // Filter by ISD if a valid number is entered
+            if (!isNaN(isdValue) && shipISD > isdValue) {
+                visible = false;
+            }
+
+            $ship.toggle(visible && !isHidden);
+        });
+    });
+},
 
     goToWaiting: function goToWaiting() {},
 

@@ -9,6 +9,7 @@ class Terillon extends MediumShip{
         $this->phpclass = "Terillon";
         $this->imagePath = "img/ships/LlortTerillon.png";
         $this->shipClass = "Terillon Patrol Frigate";
+		$this->isd = 2230;
         $this->agile = true;
 		$this->canvasSize = 100;        
         

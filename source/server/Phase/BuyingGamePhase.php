@@ -104,7 +104,7 @@ class BuyingGamePhase implements Phase
                         $dy = $y - $my;
                         $distance = sqrt($dx * $dx + $dy * $dy); // Euclidean distance
                         
-                        if ($distance < 4) { // Ensure moons are at least 4 hexes apart
+                        if ($distance < 5) { // Ensure moons are at least 5 hexes apart
                             $tooClose = true;
                             break;
                         }
@@ -113,6 +113,24 @@ class BuyingGamePhase implements Phase
                         continue; // Try another position
                     }
                 }
+
+                // If it's an asteroid, ensure it's not within 2 hexes of any moon
+                if ($ship instanceof asteroidS || $ship instanceof asteroidM || $ship instanceof asteroidL) {
+                    $tooCloseToMoon = false;
+                    foreach ($moonPositions as [$mx, $my]) {
+                        $dx = $x - $mx;
+                        $dy = $y - $my;
+                        $distance = sqrt($dx * $dx + $dy * $dy);
+
+                        if ($distance < 3) { // Asteroids must be at least 3 hexes away from any moon
+                            $tooCloseToMoon = true;
+                            break;
+                        }
+                    }
+                    if ($tooCloseToMoon) {
+                        continue; // Try another position
+                    }
+                }                
 
                 // Valid position found
                 $usedPositions["$x,$y"] = true;

@@ -9,6 +9,7 @@ class GODAlphaAM extends OSAT{
         $this->phpclass = "GODAlphaAM";
         $this->imagePath = "img/ships/god.png";
         $this->shipClass = "GOD Heavy Satellite (Alpha)";
+        $this->isd = 2252;
         
         $this->forwardDefense = 12;
         $this->sideDefense = 12;

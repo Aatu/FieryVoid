@@ -15,7 +15,8 @@ class moonSmall  extends Terrain{
         $this->Huge = 1;        
 		$this->iniativebonus = -200; //no voluntary movement anyway
         $this->notes = "Occupies multiple hexes";
-        $this->notes .= "<br>Units entering terrain's area will automatically ram";       
+        $this->notes .= "<br>Units entering terrain's area will automatically ram"; 
+        $this->isd = 0;      
 	            
 		$this->base = true;
 		$this->smallBase = true;

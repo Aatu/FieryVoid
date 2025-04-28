@@ -9,6 +9,7 @@ class Dragon extends FighterFlight{
         $this->phpclass = "Dragon";
         $this->shipClass = "Dragon Light Fighters";
     	$this->imagePath = "img/ships/dragon.png";
+        $this->isd = 1905;
         
         $this->forwardDefense = 6;
         $this->sideDefense = 7;

@@ -9,6 +9,7 @@ class breachingpoddrazi extends FighterFlight{
         $this->phpclass = "breachingpoddrazi";
         $this->shipClass = "Shallana Armed Breaching Pods";
 		    $this->imagePath = "img/ships/drazi/DraziTroshanthi.png";
+            $this->isd = 2052;
         
         $this->forwardDefense = 8;
         $this->sideDefense = 10;

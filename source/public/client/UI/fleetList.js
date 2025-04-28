@@ -10,6 +10,10 @@ window.fleetListManager = {
 
     displayFleetLists: function displayFleetLists() {
         if (!fleetListManager.initialized) {
+
+        // Clean up previous fleet list entries to avoid duplicates
+        $("#gameinfo .fleetlistentry").remove();
+                    
             var template = $("#logcontainer .fleetlistentry");
 
             // first display the fleet list of the current player
@@ -75,7 +79,7 @@ window.fleetListManager = {
 
             switch (ship.shipSizeClass) {
                 case -1:
-                    shiptype = "squadron";
+                    shiptype = "Squadron";
                     break;
                 case 1:
                     shiptype = "MCV";
@@ -84,7 +88,7 @@ window.fleetListManager = {
                     shiptype = "HCV";
                     break;
                 case 3:
-                    shiptype = "capital";
+                    shiptype = "Capital";
                     break;
                 default:
                     break;
@@ -127,8 +131,13 @@ window.fleetListManager = {
                 // ship was destroyed.
                 $("#" + ship.id + " .shipname").removeClass("clickable");
                 $("#" + ship.id).addClass("destroyed");
-                $("#" + ship.id + " .initiative").html("destroyed");
+                $("#" + ship.id + " .initiative").html("Destroyed");
             }
         }
-    }
+    },
+
+    reset: function reset() {
+        fleetListManager.initialized = false;
+    }    
+
 };

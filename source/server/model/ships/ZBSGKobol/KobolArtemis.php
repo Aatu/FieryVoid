@@ -5,7 +5,7 @@ class KobolArtemis extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 1100;
-	$this->faction = "ZPlaytest 12 Colonies of Kobol (Tier 1)";
+	$this->faction = "ZPlaytest 12 Colonies of Kobol";
         $this->phpclass = "KobolArtemis";
         $this->imagePath = "img/ships/BSG/ColonialArtemis.png";
         $this->shipClass = "Artemis Battlestar (Alpha prototype)";

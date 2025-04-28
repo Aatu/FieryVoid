@@ -11,6 +11,7 @@ class Altaron extends HeavyCombatVessel{
         $this->variantOf = "Altarian Destroyer";
         $this->occurence = "uncommon";
         $this->fighters = array("medium"=>6);
+        $this->isd = 2150;
         
         $this->forwardDefense = 14;
         $this->sideDefense = 15;

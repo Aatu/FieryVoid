@@ -13,6 +13,7 @@ class Jumpgate  extends BaseShip{
         $this->shipSizeClass = 3;
         $this->Enormous = false; //classify it as a Capital just so it doesn't auto-ram passing units!
 		$this->iniativebonus = -200; //no voluntary movement anyway
+        $this->isd = 'Variable';
 	            
 		$this->base = true;
 		$this->smallBase = true;

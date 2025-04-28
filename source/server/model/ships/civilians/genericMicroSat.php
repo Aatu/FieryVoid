@@ -5,10 +5,12 @@ class genericMicroSat extends MicroSAT{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 145*6;
-        $this->faction = "Civilians";
+        $this->faction = "Custom Ships";
         $this->phpclass = "genericMicroSat";
         $this->shipClass = "MicroSAT Cluster";
         $this->imagePath = "img/ships/UsuuthDovarum.png";
+        $this->isd = 'Variable';
+
         
 		$this->isd = 'varied';
 		$this->notes = "Generic MicroSAT design";

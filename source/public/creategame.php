@@ -107,6 +107,9 @@ VICTORY CONDITIONS: Last unit on map / Last ship on map / More forces remaining 
                   -->
                     </div>
                 </div>
+
+
+
 <!---
                 <div style="margin-top:20px;"><h3>SIMULTANEOUS MOVEMENT</h3></div>
                 <div id="simultaenousMovement" class="subpanel movementspacecontainer">
@@ -162,8 +165,9 @@ VICTORY CONDITIONS: Last unit on map / Last ship on map / More forces remaining 
             <option value="6">Several (6)</option>
             <option value="12">Pack (12)</option>
             <option value="18">Lots (18)</option>            
-            <option value="24">Throng (24)</option>
-            <option value="36">Zounds (36)</option>         
+            <option value="24">Horde (24)</option>
+            <option value="36">Swarm (36)</option>
+            <option value="48">Zounds (48)</option>                      
         </select>
     </div>
 </div>    
@@ -190,7 +194,7 @@ VICTORY CONDITIONS: Last unit on map / Last ship on map / More forces remaining 
 <div id="desperate" class="subpanel movementspacecontainer">
     <div class="slot">
         <div>
-            <input id="desperatecheck" type="checkbox" name="desperatecheck">USE 'DESPERATE' SCENARIO RULES (e.g. Ramming / Deactivating Jump Drive allowed)
+            <input id="desperatecheck" type="checkbox" name="desperatecheck">USE 'DESPERATE' SCENARIO RULES (e.g. Ramming / Deactivating Jump Drive are allowed)
         </div>
      </div>
     <div class="slot" id="desperateDropdown" style="display:none;">
@@ -206,19 +210,26 @@ VICTORY CONDITIONS: Last unit on map / Last ship on map / More forces remaining 
                 <div id="team1" class="subpanel slotcontainer">
                     
                 </div>
-                <div><span class="clickable addslotbutton team1">ADD SLOT</span></div>
+                <div><span class="clickable addslotbutton team1" style="margin-left: 5px;">ADD SLOT</span></div>
                 
                 <div><h3>TEAM 2</h3></div>
                 <div id="team2" class="subpanel slotcontainer">
                     
                 </div>
-                <div><span class="clickable addslotbutton team2">ADD SLOT</span></div>
+                <div><span class="clickable addslotbutton team2" style="margin-left: 5px;">ADD SLOT</span></div>
                 
 				
 				<input type="hidden" name="docreate" value="true">
+
+                <div style="margin-top:5px; text-align: center; text-decoration: underline;"><span>DEPLOYMENT ZONE PREVIEW</span></div>
+                <!--<div id="mapPreviewContainer" style="margin-top: 0px;  text-align: center;"> -->                        
+                <div id="mapPreviewContainer" style="margin-top: 0px;  margin-bottom: 20px; text-align: center;">
+                    <canvas id="mapPreview" width="420" height="300"></canvas>
+                </div>
+
+
                 <input id="createGameData" type="hidden" name="data" value="">
-				<input type="submit" value="Create">
-				
+				<input type="submit" style="margin-top: 0px; margin-bottom: 0px; position:absolute; right:8px; bottom:8px;" value="Create Game">                      
 				
 			</form>
 			

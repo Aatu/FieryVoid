@@ -11,6 +11,7 @@ class CivilianTanker extends MediumShip{
         $this->shipClass = "Civilian Tanker";
         $this->canvasSize = 100;
 	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
+		$this->isd = 2162;
         
         $this->forwardDefense = 13;
         $this->sideDefense = 14;

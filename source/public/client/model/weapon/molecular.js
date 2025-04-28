@@ -185,7 +185,6 @@ MolecularSlicerBeamL.prototype.doMultipleFireOrders = function (shooter, target,
                         
 		var calledid = -1; //Slicers are Raking or Piercing Damage, cannot called sot!
 
-//	    var damageClass = this.data["Weapon type"].toLowerCase();
 	    var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
         if(chance < 1) continue;
 
@@ -218,7 +217,7 @@ MolecularSlicerBeamL.prototype.calculateSpecialHitChanceMod = function (target) 
 	if(this.firingMode == 1){
 		//Check fireOrders length and deduct (length -1 *5)
 		var currentShots = this.fireOrders.length; //
-		mod -= Math.max(0, currentShots); //This is called when considering the NEXT shot.  So can just use current legnth as mod.
+		mod -= Math.max(0, currentShots); //This is called when considering the NEXT shot.  So can just use current length as mod.
 	}
 	return mod; 
 };
@@ -305,4 +304,65 @@ var MultiphasedCutter = function MultiphasedCutter(json, ship) {
 MultiphasedCutter.prototype = Object.create(Weapon.prototype);
 MultiphasedCutter.prototype.constructor = MultiphasedCutter;
 
+MultiphasedCutter.prototype.initializationUpdate = function() {
+	if (this.firingMode == 2) {
+		this.data["Shots Remaining"] = this.guns - this.fireOrders.length;
+	} else {
+		delete this.data["Shots Remaining"];
+	}
+	return this;
+};
 
+MultiphasedCutter.prototype.doMultipleFireOrders = function (shooter, target, system) {
+
+    var shotsOnTarget = 1; //we're only ever allocating one shot at a time for this weapon.
+
+    if (this.fireOrders.length > 0) {
+        if (this.fireOrders.length >= this.guns) {
+            // All guns already fired → retarget one gun by removing oldest fireorder.
+            this.fireOrders.splice(0, 1);
+        }
+    } 
+
+    var fireOrdersArray = []; // Store multiple fire orders
+
+    for (var s = 0; s < shotsOnTarget; s++) {
+        var fireid = shooter.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
+        var calledid = -1; 
+
+        if (system) {
+            // When the system is a subsystem, make all damage go through
+            // the parent.
+            while (system.parentId > 0) {
+                system = shipManager.systems.getSystem(ship, system.parentId);
+            }
+
+            calledid = system.id;
+        }        
+
+        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
+        if(chance < 1) continue;
+
+        var fire = {
+            id: fireid,
+            type: 'normal',
+            shooterid: shooter.id,
+            targetid: target.id,
+            weaponid: this.id,
+            calledid: calledid,
+            turn: gamedata.turn,
+            firingMode: this.firingMode,
+            shots: 1,
+            x: "null",
+            y: "null",
+            damageclass: 'Sweeping', 
+            chance: chance,
+            hitmod: 0,
+            notes: "Split"
+        };
+        
+        fireOrdersArray.push(fire); // Store each fire order
+    }
+    
+    return fireOrdersArray; // Return all fire orders
+};
