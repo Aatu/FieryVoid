@@ -67,7 +67,7 @@ if (isset($_SESSION["user"])) {
 
 		<br><br>---------- <b>LATEST NEWS - April 2025</b> ----------
 
-	    <br><br><b>Features and Enhancements</div></b>
+	    <br><br><b>Features and Enhancements</b>
 	    <br>Combat Logs for previous turns can now be reviewed without watching Replay.
 	    <br>A new Deployment Zone Preview image has been added to Create Game screen, to show how Deployment Zones settings will look like on game map.
 	    <br>ISD, Tier and Custom filters added to Fleet Selections screen.
