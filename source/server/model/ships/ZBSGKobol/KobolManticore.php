@@ -5,7 +5,7 @@ class KobolManticore extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 350;
-		$this->faction = "ZPlaytest 12 Colonies of Kobol (Tier 1)";
+		$this->faction = "ZPlaytest 12 Colonies of Kobol";
         $this->phpclass = "KobolManticore";
         $this->imagePath = "img/ships/BSG/ColonialManticore.png";
         $this->shipClass = "Manticore Corvette (Beta prototype)";

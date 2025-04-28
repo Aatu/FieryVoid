@@ -5,7 +5,7 @@ class KobolJanus extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
          $this->pointCost = 900;
-        $this->faction = "ZPlaytest 12 Colonies of Kobol (Tier 1)";
+         $this->faction = "ZPlaytest 12 Colonies of Kobol";
         $this->phpclass = "KobolJanus";
         $this->imagePath = "img/ships/BSG/KobolJanus.png";
         $this->shipClass = "Janus Heavy Cruiser (Alpha prototype)";

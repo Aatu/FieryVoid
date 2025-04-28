@@ -5,7 +5,7 @@ class KobolAtlas extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 750;
-	$this->faction = "ZPlaytest 12 Colonies of Kobol (Tier 1)";
+	$this->faction = "ZPlaytest 12 Colonies of Kobol";
         $this->phpclass = "KobolAtlas";
         $this->imagePath = "img/ships/BSG/ColonialAtlas.png";
         $this->shipClass = "Atlas Carrier (Alpha prototype)";

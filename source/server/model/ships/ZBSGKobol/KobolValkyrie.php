@@ -5,7 +5,7 @@ class KobolValkyrie extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
 
         $this->pointCost = 900;
-        $this->faction = "ZPlaytest 12 Colonies of Kobol (Tier 1)";
+		$this->faction = "ZPlaytest 12 Colonies of Kobol";
         $this->phpclass = "KobolValkyrie";
         $this->imagePath = "img/ships/BSG/ColonialOdin2.png";
         $this->shipClass = "Valkyrie Battlestar (Alpha prototype)";
