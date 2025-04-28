@@ -22,6 +22,9 @@ class ChoukaPenitentPatrolShip extends MediumShip{
         $this->rollcost = 1;
         $this->pivotcost = 2;
         $this->iniativebonus = 60;
+
+   		$this->enhancementOptionsEnabled[] = 'ELT_MRN'; //To enable Elite Marines enhancement
+		$this->enhancementOptionsEnabled[] = 'EXT_MRN'; //To enable extra Marines enhancement
         
 		$this->addPrimarySystem(new Reactor(4, 13, 0, 0));
         $this->addPrimarySystem(new CnC(4, 8, 0, 0));
@@ -34,8 +37,8 @@ class ChoukaPenitentPatrolShip extends MediumShip{
         $this->addPrimarySystem(new Thruster(3, 10, 0, 4, 4));        
         
 		$this->addFrontSystem(new EWGraviticTractingRod(3, 300, 60, 1));
-		$this->addFrontSystem(new CustomIndustrialGrappler(2, 5, 0, 300, 60));
-		$this->addFrontSystem(new CustomIndustrialGrappler(2, 5, 0, 300, 60));
+		$this->addFrontSystem(new GrapplingClaw(2, 0, 0, 300, 60, 8, false));
+		$this->addFrontSystem(new GrapplingClaw(2, 0, 0, 300, 60, 8, false));
         $this->addFrontSystem(new HeavyPlasma(3, 8, 5, 300, 60));	
 		$this->addFrontSystem(new EWPointPlasmaGun(2, 3, 2, 180, 360));
 		$this->addFrontSystem(new EWPointPlasmaGun(2, 3, 2, 180, 360));
@@ -69,7 +72,7 @@ class ChoukaPenitentPatrolShip extends MediumShip{
 			5 => "Heavy Plasma Cannon",
 			7 => "Point Plasma Gun",
 			8 => "Gravitic Tracting Rod",
-			10 => "Industrial Grappler",
+			10 => "Grappling Claw",
 			17 => "Structure",
 			20 => "Primary",
 		),
