@@ -22,6 +22,9 @@ class SshelathUshula extends MediumShip{
         $this->rollcost = 1;
         $this->pivotcost = 1;
         $this->iniativebonus = 60;
+
+   		$this->enhancementOptionsEnabled[] = 'ELT_MRN'; //To enable Elite Marines enhancement
+		$this->enhancementOptionsEnabled[] = 'EXT_MRN'; //To enable extra Marines enhancement
         
         $this->addPrimarySystem(new Reactor(6, 7, 0, 0));
         $this->addPrimarySystem(new CnC(6, 8, 0, 0));
@@ -30,12 +33,11 @@ class SshelathUshula extends MediumShip{
         $this->addPrimarySystem(new Hangar(4, 1));
         $this->addPrimarySystem(new Thruster(4, 10, 0, 3, 3));
         $this->addPrimarySystem(new Thruster(4, 10, 0, 3, 4));        
-        
 
 		$this->addFrontSystem(new EWLightGaussCannon(2, 6, 3, 180, 60));
 		$this->addFrontSystem(new EWLightGaussCannon(2, 6, 3, 300, 180));
-		$this->addFrontSystem(new CustomIndustrialGrappler(3, 5, 0, 300, 60));
-		$this->addFrontSystem(new CustomIndustrialGrappler(3, 5, 0, 300, 60));
+		$this->addFrontSystem(new GrapplingClaw(3, 0, 0, 300, 60, 8, false));
+		$this->addFrontSystem(new GrapplingClaw(3, 0, 0, 300, 60, 8, false));
         $this->addFrontSystem(new Thruster(4, 13, 0, 4, 1));
 	    
         $this->addAftSystem(new Thruster(4, 8, 0, 3, 2));    
@@ -57,7 +59,7 @@ class SshelathUshula extends MediumShip{
 
 		1=> array(
 			5 => "Thruster",
-			7 => "Industrial Grappler",
+			7 => "Grappling Claw",
 			10 => "Light Gauss Cannon",
 			17 => "Structure",
 			20 => "Primary",

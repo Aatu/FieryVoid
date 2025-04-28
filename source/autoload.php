@@ -2360,8 +2360,8 @@ spl_autoload_register(
                 'swmoncalmc75' => '/server/model/ships/ZStarWars/swMonCalMC75.php',
 						    
 		 //mining equipment
-		'customminingcutter' => '/server/model/weapons/customs.php',   
-		'customindustrialgrappler' => '/server/model/weapons/customs.php', 
+				'customminingcutter' => '/server/model/weapons/customs.php',   
+				'customindustrialgrappler' => '/server/model/weapons/customs.php', 
                 'customminingbase' => '/server/model/ships/civilians/CustomMiningBase.php',
                 'customminingvessel' => '/server/model/ships/civilians/CustomMiningVessel.php',
 		    
