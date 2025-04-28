@@ -70,9 +70,9 @@ class DalithornLightCruiser extends HeavyCombatVessel{
             ),
             1=> array(
                     4 => "Thruster",
-                    6 => "Coilgun",
-                    8 => "Autocannon",
-					10 => "Protector",
+                    7 => "Coilgun",
+                    9 => "Autocannon",
+					11 => "Protector",
 					18 => "Structure",
                     20 => "Primary",
             ),

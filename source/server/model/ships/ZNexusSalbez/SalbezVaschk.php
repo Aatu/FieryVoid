@@ -4,7 +4,7 @@ class SalbezVaschk extends HeavyCombatVessel{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 440;
+        $this->pointCost = 465;
         $this->faction = "ZNexus Sal-bez Coalition";
         $this->phpclass = "SalbezVaschk";
         $this->imagePath = "img/ships/Nexus/salbez_vaschk3.png";
@@ -35,25 +35,25 @@ class SalbezVaschk extends HeavyCombatVessel{
       
         $this->addFrontSystem(new Thruster(3, 10, 0, 4, 1));
         $this->addFrontSystem(new Thruster(3, 10, 0, 4, 1));
-        $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 240, 60));
-        $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 270, 90));
+        $this->addFrontSystem(new NexusImprovedParticleBeam(2, 3, 1, 240, 60));
+        $this->addFrontSystem(new NexusImprovedParticleBeam(2, 3, 1, 270, 90));
         $this->addFrontSystem(new NexusSwarmTorpedo(3, 5, 2, 300, 60));
         $this->addFrontSystem(new MediumLaser(3, 6, 5, 300, 60));
-        $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 270, 90));
-        $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 300, 120));
+        $this->addFrontSystem(new NexusImprovedParticleBeam(2, 3, 1, 270, 90));
+        $this->addFrontSystem(new NexusImprovedParticleBeam(2, 3, 1, 300, 120));
                 
         $this->addAftSystem(new Thruster(4, 28, 0, 10, 2));
         $this->addAftSystem(new NexusSwarmTorpedo(3, 5, 2, 240, 360));
         $this->addAftSystem(new LightLaser(2, 4, 3, 180, 360));
-        $this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 90, 270));
-        $this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 90, 270));
+        $this->addAftSystem(new NexusImprovedParticleBeam(2, 3, 1, 90, 270));
+        $this->addAftSystem(new NexusImprovedParticleBeam(2, 3, 1, 90, 270));
         $this->addAftSystem(new LightLaser(2, 4, 3, 0, 180));
         $this->addAftSystem(new NexusSwarmTorpedo(3, 5, 2, 0, 120));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 4, 35));
         $this->addAftSystem(new Structure( 4, 34));
-        $this->addPrimarySystem(new Structure( 4, 36));
+        $this->addPrimarySystem(new Structure( 5, 36));
 		
         $this->hitChart = array(
             0=> array(
@@ -69,15 +69,15 @@ class SalbezVaschk extends HeavyCombatVessel{
                     5 => "Thruster",
                     7 => "Medium Laser",
 					9 => "Swarm Torpedo",
-					11 => "Light Particle Beam",
+					11 => "Improved Particle Beam",
 					18 => "Structure",
                     20 => "Primary",
             ),
             2=> array(
-                    6 => "Thruster",
-					8 => "Swarm Torpedo",
-					10 => "Light Laser",
-					12 => "Light Particle Beam",
+                    5 => "Thruster",
+					7 => "Swarm Torpedo",
+					9 => "Light Laser",
+					11 => "Improved Particle Beam",
                     18 => "Structure",
                     20 => "Primary",
             ),

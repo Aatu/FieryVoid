@@ -7,8 +7,6 @@ class DalithornMicrosatRefit extends MicroSAT{
         $this->faction = "ZNexus Dalithorn Commonwealth";
         $this->phpclass = "DalithornMicrosatRefit";
         $this->shipClass = "Laser MicroSAT Cluster (2132)";
-			$this->variantOf = "Laser MicroSAT Cluster";
-			$this->occurence = "common";
         $this->imagePath = "img/ships/Nexus/Dalithorn_Microsat2.png";
 		$this->unofficial = true;
         
@@ -53,9 +51,12 @@ class DalithornMicrosatRefit extends MicroSAT{
 			$fighter->addFrontSystem($hvyGun);
 			$rightgun = new NexusMinigunFtr(0, 180, 1);
 			$fighter->addFrontSystem($rightgun);
-            
 			
         	$this->addSystem($fighter);
+
+
+			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
+
        }
     }
     

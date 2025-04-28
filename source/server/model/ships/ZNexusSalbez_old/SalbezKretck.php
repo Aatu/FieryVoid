@@ -29,7 +29,7 @@ class SalbezKretck extends BaseShipNoAft{
          
         $this->addPrimarySystem(new Reactor(3, 16, 0, 0));
         $this->addPrimarySystem(new CnC(4, 16, 0, 0));
-        $this->addPrimarySystem(new Scanner(3, 16, 4, 5));
+        $this->addPrimarySystem(new Scanner(3, 16, 4, 6));
         $this->addPrimarySystem(new Engine(3, 18, 0, 8, 3));
 		$this->addPrimarySystem(new Hangar(1, 8));
 		$this->addPrimarySystem(new Thruster(3, 20, 0, 7, 2));
@@ -57,7 +57,7 @@ class SalbezKretck extends BaseShipNoAft{
 		$this->addRightSystem(new LightParticleBeamShip(1, 2, 1, 60, 240));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
-        $this->addFrontSystem(new Structure( 3, 36));
+        $this->addFrontSystem(new Structure( 4, 36));
         $this->addLeftSystem(new Structure( 4, 36));
         $this->addRightSystem(new Structure( 4, 36));
         $this->addPrimarySystem(new Structure( 4, 36));

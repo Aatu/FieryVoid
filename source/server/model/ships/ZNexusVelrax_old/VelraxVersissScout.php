@@ -16,8 +16,8 @@ class VelraxVersissScout extends HeavyCombatVesselLeftRight{
         $this->canvasSize = 125;
 		$this->unofficial = true;
 
-        $this->forwardDefense = 15;
-        $this->sideDefense = 15;
+        $this->forwardDefense = 14;
+        $this->sideDefense = 14;
         
         $this->turncost = 0.75;
         $this->turndelaycost = 0.75;
@@ -28,7 +28,7 @@ class VelraxVersissScout extends HeavyCombatVesselLeftRight{
 
         $this->addPrimarySystem(new Reactor(4, 18, 0, 0));
         $this->addPrimarySystem(new CnC(4, 12, 0, 0));
-        $this->addPrimarySystem(new ELINTScanner(3, 16, 6, 6));
+        $this->addPrimarySystem(new ELINTScanner(4, 16, 6, 6));
         $this->addPrimarySystem(new Engine(4, 20, 0, 8, 4));
         $this->addPrimarySystem(new Hangar(2, 2));
         $this->addAftSystem(new Thruster(3, 12, 0, 5, 1));
@@ -66,7 +66,7 @@ class VelraxVersissScout extends HeavyCombatVesselLeftRight{
         				5 => "Thruster",
 						7 => "Laser Spear",
         				9 => "Twin Ion Gun",
-						12 => "ELINT Scanner",
+						11 => "ELINT Scanner",
         				18 => "Structure",
         				20 => "Primary",
         		),
@@ -74,7 +74,7 @@ class VelraxVersissScout extends HeavyCombatVesselLeftRight{
         				5 => "Thruster",
 						7 => "Laser Spear",
         				9 => "Twin Ion Gun",
-						12 => "ELINT Scanner",
+						11 => "ELINT Scanner",
         				18 => "Structure",
         				20 => "Primary",        		),
         );

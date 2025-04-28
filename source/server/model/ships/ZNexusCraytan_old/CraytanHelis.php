@@ -41,7 +41,7 @@ class CraytanHelis extends LCV{
 		$this->addPrimarySystem(new Engine(3, 12, 0, 6, 2));
 
 		$this->addFrontSystem(new NexusCIDS(2, 4, 2, 240, 60));
-		$this->addFrontSystem(new NexusHeavySentryGun(2, 6, 2, 270, 90));
+		$this->addFrontSystem(new NexusHeavySentryGun(2, 6, 3, 270, 90));
 		$this->addFrontSystem(new NexusCIDS(2, 4, 2, 300, 120));
 	    
         $this->addPrimarySystem(new Structure(3, 32));
