@@ -68,6 +68,27 @@ window.SelectFromShips = function () {
     function create() {
         console.log("CREATE select form ships", this.ships)
         this.ships.forEach(function (ship){
+
+
+            if(ship.flight) {
+                var noOfFighters = 0;
+                ship.systems.forEach(ftr => {
+                        if (!shipManager.systems.isDestroyed(ship, ftr)){
+                            noOfFighters++;
+                        }
+                });
+                var name = jQuery('<div class="name value button ' + getAllyClass(ship) + '">(' + noOfFighters + ") "  + ship.name + ' </div>')
+                .on('click', function() {this.phaseStrategy.onShipClicked(ship, this.payload), this.destroy()}.bind(this))
+                .on('mouseover', function() {this.phaseStrategy.onMouseOverShip(ship, this.payload)}.bind(this))
+                .on('mouseout', function() {this.phaseStrategy.onMouseOutShips(ship, this.payload)}.bind(this))
+                name.contextmenu(function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.phaseStrategy.onShipRightClicked(ship, this.payload)
+                }.bind(this))
+                this.element.append(name)
+
+            }else{
             var name = jQuery('<div class="name value button ' + getAllyClass(ship) + '">' + ship.name + ' </div>')
                 .on('click', function() {this.phaseStrategy.onShipClicked(ship, this.payload), this.destroy()}.bind(this))
                 .on('mouseover', function() {this.phaseStrategy.onMouseOverShip(ship, this.payload)}.bind(this))
@@ -78,6 +99,7 @@ window.SelectFromShips = function () {
                     this.phaseStrategy.onShipRightClicked(ship, this.payload)
                 }.bind(this))
             this.element.append(name)
+            }
         }, this)
     }
 
@@ -104,7 +126,11 @@ window.SelectFromShips = function () {
     }
 
     function getAllyClass(ship) {
-        return gamedata.isMyOrTeamOneShip(ship) ?  'ally' : 'enemy';
+        if(ship.shipSizeClass == 5){
+            return 'terrain'; //Return a neutral white colour for Terrain.
+        }else{
+            return gamedata.isMyOrTeamOneShip(ship) ?  'ally' : 'enemy';
+        }   
     }
 
     return ShipTooltip;

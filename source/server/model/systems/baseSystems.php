@@ -5713,7 +5713,7 @@ class AmmoMissileL extends AmmoMissileTemplate{
 	public $modeName = 'LongRange';
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'AMMO_L'; //enhancement name to be enabled
-	public $enhancementDescription = '(AMMO) LongRange Missile'; //enhancement description
+	public $enhancementDescription = '(AMMO) Long Range Missile'; //enhancement description
 	public $enhancementPrice = 6;
 	
 	public $rangeMod = 10; //MODIFIER for launch range

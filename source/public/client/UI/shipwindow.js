@@ -33,11 +33,16 @@ window.shipWindowManager = {
 	open: function open(ship) {
 
 		var old;
-		if (ship.userid == gamedata.thisplayer) {
-			old = $(".shipwindow.owned:visible");
-		} else {
-			old = $(".shipwindow.enemy:visible");
-		}
+
+		if (gamedata.turn != 0) {
+			if (ship.userid == gamedata.thisplayer) {
+				old = $(".shipwindow.owned:visible");
+			} else {
+				old = $(".shipwindow.enemy:visible");
+			}
+		}else{
+			old = $(".shipwindow:visible");
+		}	
 
 		var n = ship.shipStatusWindow;
 
@@ -330,9 +335,11 @@ window.shipWindowManager = {
 
 		$(belowIcon).append(input);
 
+		var tc = ship.turncost.toFixed(2);
+		var td = ship.turndelaycost.toFixed(2);
 	    
         if(!ship.fighter){
-            abilities.push("&nbsp;TC: " + ship.turncost + " TD: " + ship.turndelaycost  );
+            abilities.push("&nbsp;TC: " + tc + " TD: " + td  );
 		var fDef = ship.forwardDefense*5;
 		var sDef = ship.sideDefense*5
 		abilities.push("&nbsp;Profile (F/S): " + fDef + "/" + sDef + "; Ini: " + ship.iniativebonus );
@@ -1152,6 +1159,8 @@ window.shipWindowManager = {
 
 		var systemwindow = shipwindow.find(".system_" + system.id);
 
+		systemwindow.data("shipid", ship.id); //Sometimes in fleet selection ship.id in systemwindow needs to be updated to show correct tooltip - DK 30.3.25
+			
 		if (systemwindow.length == 0 && system.parentId > -1) {
 			systemwindow = shipwindow.find(".parentsystem_" + system.parentId);
 		}

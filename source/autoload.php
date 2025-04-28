@@ -637,9 +637,9 @@ spl_autoload_register(
                 'molecularpulsar' => '/server/model/weapons/pulse.php',
                 'monsoon' => '/server/model/ships/EA/monsoon.php',
                 'morshin' => '/server/model/ships/minbari/morshin.php',
-                'motenai' => '/server/model/ships/abbai_old/motenai.php',
-                'motenai1935' => '/server/model/ships/abbai_old/motenai1935.php',
-                'motenai1980' => '/server/model/ships/abbai_old/motenai1980.php',
+//                'motenai' => '/server/model/ships/abbai_old/motenai.php',
+//                'motenai1935' => '/server/model/ships/abbai_old/motenai1935.php',
+//                'motenai1980' => '/server/model/ships/abbai_old/motenai1980.php',
                 'motenaiam' => '/server/model/ships/abbai_old/motenaiAM.php',
                 'motenai1935am' => '/server/model/ships/abbai_old/motenai1935AM.php',
                 'motenai1980am' => '/server/model/ships/abbai_old/motenai1980AM.php',                
@@ -3419,6 +3419,7 @@ spl_autoload_register(
 	    				'asteroidm' => '/server/model/ships/civilians/asteroidM.php',  
 	    				'asteroidl' => '/server/model/ships/civilians/asteroidL.php', 
 	    				'moonsmall' => '/server/model/ships/civilians/moonSmall.php',  
+	    				'moon' => '/server/model/ships/civilians/moon.php',  
 
 				//Marine Boarding Actions
 				'marines' => '/server/model/weapons/specialWeapons.php',

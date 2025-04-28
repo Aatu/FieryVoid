@@ -13,7 +13,8 @@ class asteroidM  extends Terrain{
         $this->shipClass = "Asteroid (Medium)";
         $this->Enormous = true; 
 		$this->iniativebonus = -200; //no voluntary movement anyway
-	            
+        $this->notes .= "<br>Ships (but not fighters) entering this hex take collision damage";  
+
 		$this->base = true;
 		$this->smallBase = true;
 		$this->nonRotating = true;  //completely immobile, doesn't even rotate
@@ -32,7 +33,7 @@ class asteroidM  extends Terrain{
 		Enhancements::nonstandardEnhancementSet($this, 'Terrain');
                  
         $this->addPrimarySystem(new OSATCnC(10, 1, 0, 0)); //Required for some checks.
-        $this->addPrimarySystem(new MagGravReactorTechnical(10, 1, 0, 0)); //Required for some checks.
+        $this->addPrimarySystem(new MagGravReactorTechnical(10, 1000, 0, 0)); //Required for some checks.
 
         $this->addPrimarySystem(new Structure(8,  600));
 

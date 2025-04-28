@@ -32,7 +32,7 @@ class motenai1935AM extends BaseShip{
 		$ammoMagazine = new AmmoMagazine(30); //pass magazine capacity - 5 rounds per launcher, 30 mines.
 	    $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
 	    $ammoMagazine->addAmmoEntry(new AmmoBistifA(), 0); //add full load of basic missiles
-	    $ammoMagazine->addAmmoEntry(new AmmoBistifB(), 0); //add full load of basic missiles 
+//	    $ammoMagazine->addAmmoEntry(new AmmoBistifB(), 0); //add full load of basic missiles 
 
 		$this->enhancementOptionsEnabled[] = 'MINE_MLB';//add enhancement options for mines - Basic Mines
 		$this->enhancementOptionsEnabled[] = 'MINE_MLW';//add enhancement options for mines - Wide-Range Mines

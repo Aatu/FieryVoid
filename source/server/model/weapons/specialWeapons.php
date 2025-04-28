@@ -2442,18 +2442,40 @@ class RammingAttack extends Weapon{
 				$target = $gamedata->getShipById($targetid);
 				$type = "TerrainCollision";
 				if($shooter->Huge > 0 ) $type = "TerrainCrash"; //Larger Terrain, like Moons.
-							
-				$targetMovement = $target->getLastTurnMovement($gamedata->turn+1); 							
-				$newFireOrder = new FireOrder(
-					-1, "normal", $shooter->id, $target->id,
-					$this->id, -1, $gamedata->turn, 1,
-					0, 0, 1, 0, 0,
-					$targetMovement->position->q, $targetMovement->position->r, $type, 10001
-				);
-				$newFireOrder->chosenLocation = $location;				
-				$newFireOrder->pubnotes = "<br>COLLISION! A Ship collided with this terrain during its movement!";
-				$newFireOrder->addToDB = true;
-				$this->fireOrders[] = $newFireOrder;
+				$targetMovement = $target->getLastTurnMovement($gamedata->turn+1);
+
+				if ($target instanceof FighterFlight && $type === "TerrainCrash") {
+					$first = true; // Flag to track the first entry
+				
+					foreach ($target->systems as $fighter) {                          
+						$newFireOrder = new FireOrder(
+							-1, "normal", $shooter->id, $target->id,
+							$this->id, $fighter->id, $gamedata->turn, 1,
+							0, 0, 1, 0, 0,
+							$targetMovement->position->q, $targetMovement->position->r, $type, 10001
+						);
+						$newFireOrder->chosenLocation = $location;                
+				
+						if ($first) {
+							$newFireOrder->pubnotes = "<br>COLLISION! A fighter unit collided with terrain during its movement!";
+							$first = false; // Set flag to false after first iteration
+						}
+				
+						$newFireOrder->addToDB = true;
+						$this->fireOrders[] = $newFireOrder;
+					}       
+				}else{						
+					$newFireOrder = new FireOrder(
+						-1, "normal", $shooter->id, $target->id,
+						$this->id, -1, $gamedata->turn, 1,
+						0, 0, 1, 0, 0,
+						$targetMovement->position->q, $targetMovement->position->r, $type, 10001
+					);
+					$newFireOrder->chosenLocation = $location;				
+					$newFireOrder->pubnotes = "<br>COLLISION! Ship collided with terrain during its movement!";
+					$newFireOrder->addToDB = true;
+					$this->fireOrders[] = $newFireOrder;
+				}	
 			}	
 		}
 
@@ -2621,17 +2643,19 @@ class RammingAttack extends Weapon{
 		$this->gamedata = $gamedata;
 		
 		//preventing double hit on the same target!
-		if($this->checkAlreadyRammed($fireOrder->targetid)){			
-			$fireOrder->shotshit = 0;
-			$fireOrder->needed = 0;
-			$fireOrder->rolled = 100;
-			$fireOrder->pubnotes .= "TECHNICAL MISS (this collision already happened!)\n";
-			return;
+		if($this->checkAlreadyRammed($fireOrder->targetid)){
+			$target = $gamedata->getShipById($fireOrder->targetid);		
+			if($fireOrder->damageclass != 'TerrainCrash' && !($target instanceof FighterFlight))	{//If a TerrainCrash on fighters, we won't several orders to go through, but only then.		
+				$fireOrder->shotshit = 0;
+				$fireOrder->needed = 0;
+				$fireOrder->rolled = 100;
+				$fireOrder->pubnotes .= "TECHNICAL MISS (this collision already happened!)\n";
+				return;
+			}	
 		}
 		
 		parent::fire($gamedata, $fireOrder);
 		if($fireOrder->shotshit > 0){
-			$this->setAlreadyRammed($fireOrder->targetid); //prevent repeating
 			$pos = null;
 			//$shooter = $gamedata->getShipById($fireOrder->targetid);
 			$shooter = $this->unit; //technically this unit after all
@@ -2654,11 +2678,12 @@ class RammingAttack extends Weapon{
 					100, 100, 1, 1, 0,
 					0,0,'Reactor',10000
 				);
-				$newFireOrder->pubnotes = " Automatic ramming - return damage.";
+				if(!$this->checkAlreadyRammed($fireOrder->targetid)) $newFireOrder->pubnotes = " Automatic ramming - return damage.";
 				$newFireOrder->addToDB = true;
 				$this->fireOrders[] = $newFireOrder;				
 			}
 			$fireOrder->calledid = -1; //just in case!
+			$this->setAlreadyRammed($fireOrder->targetid); //prevent repeating			
 		}
 	} //endof function fire
 
@@ -5682,6 +5707,7 @@ class PsionicConcentrator extends Weapon{
 	public $testRun = false;//testRun = true means hit chance is calculated nominal skipping concentration issues - for subordinate weapon to calculate average hit chance
 	
 	public $repairPriority = 4;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
+	public $canSplitShots = true; //Allows Firing Mode 1 to split shots.	
 
     function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
         {
@@ -5697,13 +5723,13 @@ class PsionicConcentrator extends Weapon{
 	
 	public function setSystemDataWindow($turn){
 		      parent::setSystemDataWindow($turn);  
-		      $this->data["Special"] = "Fires 4 shots by default.";
-		      $this->data["Special"] .= "<br>Alternative Firing Modes allow these 4 shots to be combined in 2, or 1, more powerful shot(s) as listed below:";
-		      $this->data["Special"] .= "<br> - 4 shots; 8-18 Damage, -2.5 per hex.";
-		      $this->data["Special"] .= "<br> - 2 shots; 18-33 Damage, -5 per hex.";	
-		      $this->data["Special"] .= "<br> - 1 shot; 29-54 Damage, -10 per hex.";			      		      		      
-		      $this->data["Special"] .= "<br>Each hit causes -1 Power on non-Ancient ships with Reactors for one turn.";
+		      $this->data["Special"] = "Fires 4 shots by default, but can combine these into 1 or 2 powerful, shorter-ranged shot(s)";
+//		      $this->data["Special"] .= "<br> - 4 shots; 8-18 Damage, -2.5 per hex.";
+//		      $this->data["Special"] .= "<br> - 2 shots; 18-33 Damage, -5 per hex.";	
+//		      $this->data["Special"] .= "<br> - 1 shot; 29-54 Damage, -10 per hex.";			      		      		      
+		      $this->data["Special"] .= "<br>Any hits drain -1 Power from Younger Race ships for one turn.";
 		      $this->data["Special"] .= "<br>Has +1 modifier to critical hit rolls, and +2 to fighter dropout rolls.";
+		      $this->data["Special"] .= "<br>Can split shots amongst different targets.";			  
 	    }	
 
 
@@ -7045,7 +7071,7 @@ class Marines extends Weapon{
 
 				case 2://Sabotage
 
-					if($fireOrder->calledid != -1){//Is a called shot, place crit on system.
+					if($fireOrder->calledid != -1 && !($system instanceof Structure) && $system->location != 0){//Is a called shot, and not somehow attacking structure, place crit on system.
 							$fireOrder->pubnotes .= "<br>Roll(Mod): $deliveryRoll($rollMod) - A marine unit will attempt to sabotage " . $system->displayName ." system next turn.";
 						if($this->eliteMarines){//Are Marines Elite?
 							$crit = new SabotageElite(-1, $ship->id, $system->id, 'SabotageElite', $gamedata->turn+1); //Takes effect next turn.
@@ -7058,7 +7084,7 @@ class Marines extends Weapon{
 							$system->criticals[] =  $crit;
 							Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note pod attached this turn.	
 						}	
-					}else{ //Has targeted ship generally, not a specific system.  Apply crit to CnC.
+					}else{ //Has targeted ship generally, not a specific system (or somehow retargeted to structure).  Apply crit to CnC.
 						$fireOrder->pubnotes .= "<br>Roll(Mod): $deliveryRoll($rollMod) - A marine unit will attempt sabotage operations on enemy ship next turn.";								
 							if($cnc){
 									if($this->eliteMarines){//Are Marines Elite?
@@ -7368,7 +7394,7 @@ class GrapplingClaw extends Weapon{
 
 				case 2://Sabotage
 
-					if($fireOrder->calledid != -1){//Is a called shot, place crit on system.
+					if($fireOrder->calledid != -1 && !($system instanceof Structure) && $system->location != 0){//Is a called shot and not structure, place crit on system.
 							$fireOrder->pubnotes .= "<br>Roll(Mod): $deliveryRoll($rollMod) - A marine unit will attempt to sabotage " . $system->displayName ." system next turn.";
 						if($this->eliteMarines){//Are Marines Elite?
 							$crit = new SabotageElite(-1, $ship->id, $system->id, 'SabotageElite', $gamedata->turn+1); //Takes effect next turn.
