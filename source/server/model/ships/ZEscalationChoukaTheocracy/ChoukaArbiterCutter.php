@@ -23,6 +23,9 @@ class ChoukaArbiterCutter extends MediumShip{
         $this->rollcost = 2;
         $this->pivotcost = 2;
         $this->iniativebonus = 60;
+
+   		$this->enhancementOptionsEnabled[] = 'ELT_MRN'; //To enable Elite Marines enhancement
+		$this->enhancementOptionsEnabled[] = 'EXT_MRN'; //To enable extra Marines enhancement
          
         $this->addPrimarySystem(new Reactor(3, 10, 0, 0));
         $this->addPrimarySystem(new CnC(3, 8, 0, 0));
@@ -33,8 +36,8 @@ class ChoukaArbiterCutter extends MediumShip{
         $this->addPrimarySystem(new Thruster(1, 11, 0, 3, 3));
         $this->addPrimarySystem(new Thruster(1, 11, 0, 3, 4));        
         
-		$this->addFrontSystem(new CustomIndustrialGrappler(2, 5, 0, 300, 60));
-		$this->addFrontSystem(new CustomIndustrialGrappler(2, 5, 0, 300, 60));
+		$this->addFrontSystem(new GrapplingClaw(2, 0, 0, 300, 60, 8, false));
+		$this->addFrontSystem(new GrapplingClaw(2, 0, 0, 300, 60, 8, false));
         $this->addFrontSystem(new LightPlasma(2, 4, 2, 300, 60));
         $this->addFrontSystem(new LightPlasma(2, 4, 2, 300, 60));
 		$this->addFrontSystem(new EWPointPlasmaGun(1, 3, 2, 270, 90));
@@ -66,7 +69,7 @@ class ChoukaArbiterCutter extends MediumShip{
 			3 => "Thruster",
 			5 => "Light Plasma Cannon",
 			7 => "Point Plasma Gun",
-			9 => "Industrial Grappler",
+			9 => "Grappling Claw",
 			17 => "Structure",
 			20 => "Primary",
 		),

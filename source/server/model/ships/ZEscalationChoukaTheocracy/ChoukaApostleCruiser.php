@@ -27,6 +27,9 @@ class ChoukaApostleCruiser extends BaseShip{
         $this->rollcost = 3;
         $this->pivotcost = 5;
         $this->iniativebonus = 0;
+
+   		$this->enhancementOptionsEnabled[] = 'ELT_MRN'; //To enable Elite Marines enhancement
+		$this->enhancementOptionsEnabled[] = 'EXT_MRN'; //To enable extra Marines enhancement
         
         $this->addPrimarySystem(new Reactor(4, 22, 0, 0));
         $this->addPrimarySystem(new CnC(4, 25, 0, 0));
@@ -42,8 +45,8 @@ class ChoukaApostleCruiser extends BaseShip{
 		$this->addFrontSystem(new EWTwinLaserCannon(2, 8, 5, 300, 60));
 		$this->addFrontSystem(new EWTwinLaserCannon(2, 8, 5, 300, 60));
 		$this->addFrontSystem(new EWGraviticTractingRod(4, 300, 60, 1));
-		$this->addFrontSystem(new CustomIndustrialGrappler(3, 5, 0, 300, 60));
-		$this->addFrontSystem(new CustomIndustrialGrappler(3, 5, 0, 300, 60));
+		$this->addFrontSystem(new GrapplingClaw(3, 0, 0, 300, 60, 8, false));
+		$this->addFrontSystem(new GrapplingClaw(3, 0, 0, 300, 60, 8, false));
 		$this->addFrontSystem(new EWHeavyPointPlasmaGun(2, 7, 3, 240, 60));
 		$this->addFrontSystem(new EWHeavyPointPlasmaGun(2, 7, 3, 300, 120));
 
@@ -87,7 +90,7 @@ class ChoukaApostleCruiser extends BaseShip{
 					3 => "Thruster",
 					6 => "Twin Laser Cannon",
 					7 => "Gravitic Tracting Rod",
-					9 => "Industrial Grappler",
+					9 => "Grappling Claw",
 					11 => "Heavy Point Plasma Gun",
 					18 => "Structure",
 					20 => "Primary",
