@@ -10,6 +10,7 @@ class Collector extends BaseShip{
         $this->imagePath = "img/ships/collector.png";
         $this->shipClass = "Collector";
         $this->shipSizeClass = 3;
+        $this->isd = 2259;
         
         $this->forwardDefense = 13;
         $this->sideDefense = 15;

@@ -10,6 +10,7 @@ class genericArmedShuttle extends FighterFlight{
         $this->phpclass = "genericArmedShuttle";
         $this->shipClass = "Armed Shuttles";
 		$this->imagePath = "img/ships/LlortLeteerum.png"; //more appropriate image needed
+        $this->isd = 2160;
         
 		$this->notes = "Usually housed in common shuttle bays (not mentioned in FV). Most ships can take a pair if they have to.";
 		

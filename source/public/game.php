@@ -725,9 +725,11 @@
             <span>SETTINGS</span>
         </div>-->
     </div>
-    <div id="log" class="logPanelEntry">
 
+    <div id="log" class="logPanelEntry">
+    <?php include("combatLog.php"); ?>
     </div>
+    
     <div id="gameinfo" class="logPanelEntry" style="display:none;">
 
     </div>

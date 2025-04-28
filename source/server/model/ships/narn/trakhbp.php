@@ -10,6 +10,7 @@ class trakhbp extends FighterFlight{
         $this->phpclass = "trakhbp";
         $this->shipClass = "T'Rakh Breaching Pods";
 		$this->imagePath = "img/ships/NarnTRakh.png";
+        $this->isd = 2241;
         
         $this->forwardDefense = 9;
         $this->sideDefense = 10;

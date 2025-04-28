@@ -5,7 +5,7 @@ class KobolAdamant extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
          $this->pointCost = 650;
-        $this->faction = "ZPlaytest 12 Colonies of Kobol (Tier 1)";
+         $this->faction = "ZPlaytest 12 Colonies of Kobol";
         $this->phpclass = "KobolAdamant";
         $this->imagePath = "img/ships/BSG/ColonialAdamant.png";
         $this->shipClass = "Adamant Frigate (Alpha prototype)";

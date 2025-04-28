@@ -12,6 +12,7 @@ class Elutarian extends HeavyCombatVessel{
         $this->variantOf = "Altarian Destroyer";
         $this->occurence = "rare";
         $this->fighters = array("medium"=>6);
+        $this->isd = 2235;
         
         $this->forwardDefense = 14;
         $this->sideDefense = 15;

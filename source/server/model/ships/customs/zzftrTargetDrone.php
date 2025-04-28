@@ -8,6 +8,7 @@ class zzftrTargetDrone extends FighterFlight{
         $this->phpclass = "zzftrTargetDrone";
 		$this->shipClass = "Fighter Target Drone - DO NOT USE";
         $this->imagePath = "img/ships/tigerStarfury2.png";
+        $this->isd = 0;
         
 		$this->notes = "DO NOT USE, prone to change!";
 	    

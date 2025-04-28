@@ -631,7 +631,7 @@ ThoughtShield.prototype.getDefensiveHitChangeMod = function (target, shooter, we
                 const ownShields = thisShip.systems.filter(s => s instanceof ThoughtShield).length;
 
                 if (ownShields > 0) {
-                    defenceMod = Math.round(remainingOutput / ownShields);
+                    defenceMod = Math.floor(remainingOutput / ownShields);
                 }
             }
         });

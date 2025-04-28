@@ -11,6 +11,7 @@ class ProtectorateFlyerCombat extends FighterFlight{
         $this->shipClass = "Combat Flyers";
         $this->variantOf = "Assault Flyers";
     	$this->imagePath = "img/ships/MinbariFlyer.png";
+        $this->isd = 1750;
         
 		
         $this->forwardDefense = 9;

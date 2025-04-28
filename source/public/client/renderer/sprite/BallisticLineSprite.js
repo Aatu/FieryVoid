@@ -52,11 +52,13 @@ function BallisticLineSprite(start, end, lineWidth, z, color, opacity, args) {
             this.width*1.8 // Head width (adjustable for visual impact)
         );
 
+        //var arrowOpacity = this.opacity + 0.2;
+
         // Modify the arrow material's opacity
         arrow.line.material.transparent = true;
         arrow.line.material.opacity = this.opacity;
-//        arrow.cone.material.transparent = true;     //Cause issues with other render if I try to make arrows transparent   
-//        arrow.cone.material.opacity = this.opacity;
+        arrow.children[1].material.transparent = true;     //Cause issues with other render if I try to make arrows transparent   
+        arrow.children[1].material.opacity = this.opacity;
     
         
         return arrow;

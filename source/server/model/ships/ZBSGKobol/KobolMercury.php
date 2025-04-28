@@ -5,7 +5,7 @@ class KobolMercury extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 2400;
-	$this->faction = "ZPlaytest 12 Colonies of Kobol (Tier 1)";
+	$this->faction = "ZPlaytest 12 Colonies of Kobol";
         $this->phpclass = "KobolMercury";
         $this->imagePath = "img/ships/BSG/ColonialMercury.png";
         $this->shipClass = "Mercury Battlestar (Beta prototype)";

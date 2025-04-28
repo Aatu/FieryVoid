@@ -440,6 +440,7 @@ class BaseShip {
 			}
 		}		
 		
+        //Add unused Marines from Grappling Claw to bolster defences.
         foreach ($this->systems as $system){
             if ($system instanceof GrapplingClaw)  $marines += $system->ammunition;
         }
