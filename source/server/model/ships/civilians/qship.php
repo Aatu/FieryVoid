@@ -11,6 +11,7 @@ class QShip extends MediumShip{
         $this->shipClass = "Commercial Freighter (Q-Ship)";
         $this->canvasSize = 100;
 	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
+		$this->isd = 2196;
         
         $this->forwardDefense = 13;
         $this->sideDefense = 15;

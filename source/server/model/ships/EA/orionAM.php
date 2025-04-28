@@ -9,6 +9,7 @@ class OrionAM extends StarBaseSixSections{
 		$this->phpclass = "OrionAM";
 		$this->shipClass = "Orion Battle Station";
 		$this->fighters = array("heavy"=>36); 
+		$this->isd = 2240;
 
 		$this->shipSizeClass = 3; //Enormous is not implemented
         $this->Enormous = true;

@@ -13,6 +13,7 @@ class asteroidS  extends Terrain{
         $this->shipClass = "Asteroid (Small)";
         $this->Enormous = true; 
 		$this->iniativebonus = -200; //no voluntary movement anyway
+        $this->isd = 0;     
      
         $this->notes .= "<br>Ships (but not fighters) entering this hex take collision damage";          
 	            

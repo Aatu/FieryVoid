@@ -4,16 +4,17 @@ class wlcChlonasWyLeraA extends OSAT{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 190;
+	      $this->pointCost = 190;
         $this->faction = "Ch'Lonas Cooperative";
         $this->phpclass = "wlcChlonasWyLeraA";
         $this->imagePath = "img/ships/ChlonasWyLera.png";
         $this->canvasSize = 70;
         $this->shipClass = "Wy'Lera A OSAT";
+        $this->isd = 2160;
         
         $this->forwardDefense = 10;
         $this->sideDefense = 11;
-	$this->unofficial = true;
+	      $this->unofficial = true;
         
         $this->turncost = 0;
         $this->turndelaycost = 0;

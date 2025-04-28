@@ -10,6 +10,7 @@ class PrivateerGorith extends FighterFlight{
         $this->shipClass = "Narn Privateer Gorith Medium Fighters";
 		$this->imagePath = "img/ships/gorith.png";
         $this->limited = 33;
+        $this->isd = 2226;
 
 		$this->notes = "Used by Narn privateers, Tirrith Free State, and Junkyard Dogs (1 only)";
         

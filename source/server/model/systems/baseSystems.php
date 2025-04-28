@@ -6281,7 +6281,7 @@ class AmmoMissileM extends AmmoMissileTemplate{
 
 		if (!$validTarget) { //target not valid and no replacement found - make the shot miss!
 			$fireOrder->needed = 0; //set hit chance as 0
-			$fireOrder->pubnotes .= '  No viable target - excess submunition lost';//inform player of situation
+			$fireOrder->pubnotes .= '<br>No viable target - an excess submunition is lost';//inform player of situation
 		}else{ //valid target, will be engaged, note for further shots!
 				$this->engagedFighters[]= $fireOrder->calledid;
 		}	

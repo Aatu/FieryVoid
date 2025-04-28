@@ -12,6 +12,7 @@ class Amar extends HeavyCombatVessel{
         $this->occurence = "uncommon";
         $this->variantOf = "Darkner Fast Attack Frigate";
         $this->fighters = array("medium"=>12);
+        $this->isd = 2252;
 
         $this->forwardDefense = 13;
         $this->sideDefense = 13;

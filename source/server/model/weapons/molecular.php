@@ -1478,6 +1478,10 @@ class SuperHeavyMolecularDisruptor extends Raking
         public $displayName = "Multiphased Cutter";
         
         public $guns = 3; 
+        public $canSplitShots = false; //Allows Firing Mode 2 to split shots.
+		public $canSplitShotsArray = array(1=>false, 2=>true );
+        
+        public $firingModes = array( 1 => "Normal", 2=> "Split");        
     
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             //maxhealth and power reqirement are fixed; left option to override with hand-written values
@@ -1485,6 +1489,14 @@ class SuperHeavyMolecularDisruptor extends Raking
             if ( $powerReq == 0 ) $powerReq = 4;
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
+
+
+		public function setSystemDataWindow($turn){			
+			parent::setSystemDataWindow($turn);   
+			$this->data["Special"] = "Can use 'Split' Firing Mode to target different enemy units.";
+}
+
+
     }//endof class MultiphasedCutter
 
 

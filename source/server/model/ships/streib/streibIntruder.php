@@ -10,6 +10,7 @@ class StreibIntruder extends MediumShip{
         $this->imagePath = "img/ships/intruder.png";
         $this->shipClass = "Intruder";
         $this->canvasSize = 100;
+        $this->isd = 2216;
         
         $this->forwardDefense = 11;
         $this->sideDefense = 13;

@@ -11,6 +11,7 @@ class Vorchar extends HeavyCombatVessel{
         $this->shipClass = "Vorchar Warscout";
         $this->occurence = "uncommon";
         $this->variantOf = "Vorchan Warship";
+		$this->isd = 2177;
         
         $this->forwardDefense = 12;
         $this->sideDefense = 14;

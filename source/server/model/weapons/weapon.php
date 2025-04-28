@@ -133,7 +133,7 @@ class Weapon extends ShipSystem
     public $firingModes = array(1 => "Standard"); //just a convenient name for firing mode
     public $damageType = ""; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
     public $damageTypeArray = array();
-    public $weaponClass = ""; //MANDATORY (first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
+    public $weaponClass = "Particle"; //MANDATORY (first letter upcase) weapon class - overrides $this->data["Weapon type"] if set! Make Particle default to prevent AA bugs when "" passed.
     public $weaponClassArray = array();
 
     //damage type-related variables
@@ -2032,7 +2032,9 @@ full Advanced Armor effects (by rules) for reference:
 		if (isset($this->specialHitChanceCalculationArray[$i])) $this->specialHitChanceCalculation = $this->specialHitChanceCalculationArray[$i];  // DK
 			
 		if (isset($this->interceptArray[$i])) $this->intercept = $this->interceptArray[$i];  // DK		
-		if (isset($this->ballisticInterceptArray[$i])) $this->ballisticIntercept = $this->ballisticInterceptArray[$i];  // DK		
+		if (isset($this->ballisticInterceptArray[$i])) $this->ballisticIntercept = $this->ballisticInterceptArray[$i];  // DK
+        
+		if (isset($this->canSplitShotsArray[$i])) $this->canSplitShots = $this->canSplitShotsArray[$i];  // DK        
 											    
     }//endof function changeFiringMode
 

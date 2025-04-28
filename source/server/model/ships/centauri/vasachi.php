@@ -11,6 +11,7 @@ class Vasachi extends HeavyCombatVessel{
         $this->shipClass = "Vasachi Escort Destroyer";
         $this->occurence = "rare";
         $this->variantOf = "Sulust Escort Destroyer";
+        $this->isd = 2240;
         
         $this->forwardDefense = 14;
         $this->sideDefense = 16;

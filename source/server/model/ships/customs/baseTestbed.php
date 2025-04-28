@@ -12,6 +12,7 @@ class baseTestbed extends SmallStarBaseFourSections{
 		$this->shipClass = "Base Testbed";
 		$this->imagePath = "img/ships/Babylon5.png";
 		$this->fighters = array("heavy"=>6); 
+		$this->isd = 0;
 
 		$this->shipSizeClass = 3; 
 		$this->iniativebonus = -200; //no voluntary movement anyway

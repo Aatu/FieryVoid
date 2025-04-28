@@ -9,6 +9,7 @@ class Frazi extends FighterFlight{
         $this->phpclass = "Frazi";
         $this->shipClass = "Frazi Heavy Fighters";
 		$this->imagePath = "img/ships/frazi.png";
+        $this->isd = 2249;
         
         $this->forwardDefense = 6;
         $this->sideDefense = 8;
