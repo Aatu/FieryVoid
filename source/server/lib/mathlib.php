@@ -233,7 +233,7 @@ class Mathlib{
     }
     
     private static function getHexCorners($hex, $hexSize) {
-        $shrinkFactor = 0.9999;
+        $shrinkFactor = 1; // Was previsouly used to shrink hex a little below.
         $hexCo = self::hexCoToPixelLoS($hex);
        
         $cx = $hexCo['x'];
@@ -297,37 +297,58 @@ class Mathlib{
         return array("x" => $x, "y" => $y);
     }
     
-	//Radiius value not currently used, but there in case I decide to scale up later.  As is you can just pass position and get the 6 neighbouring hexes
     public static function getNeighbouringHexes($position, $radius = 1) {
-        $isOddRow = $position->r % 2 !== 0;
+        if($radius == 1){    
+            $isOddRow = $position->r % 2 !== 0;    
+            $neighborOffsets = $isOddRow 
+                ? [
+                    [+1,  0], // Right
+                    [-1,  0], // Left
+                    [-1, +1], // Upper left
+                    [-1, -1], // Lower left
+                    [0, +1],  // Upper right (shifted)
+                    [0, -1]   // Lower right (shifted)
+                ]
+                : [
+                    [+1,  0], // Right
+                    [-1,  0], // Left
+                    [+1, +1], // Upper right
+                    [+1, -1], // Lower right
+                    [0, +1],  // Upper left (shifted)
+                    [0, -1]   // Lower left (shifted)
+                ];
         
-        $neighborOffsets = $isOddRow 
-            ? [
-                [+1,  0], // Right
-                [-1,  0], // Left
-                [-1, +1], // Upper left
-                [-1, -1], // Lower left
-                [0, +1],  // Upper right (shifted)
-                [0, -1]   // Lower right (shifted)
-            ]
-            : [
-                [+1,  0], // Right
-                [-1,  0], // Left
-                [+1, +1], // Upper right
-                [+1, -1], // Lower right
-                [0, +1],  // Upper left (shifted)
-                [0, -1]   // Lower left (shifted)
-            ];
-    
-        // Generate neighboring hexes
-        $neighbors = array_map(function($offset) use ($position) {
-            return [
-                'q' => $position->q + $offset[0],
-                'r' => $position->r + $offset[1]
-            ];
-        }, $neighborOffsets);
+            // Generate neighboring hexes
+            $neighbors = array_map(function($offset) use ($position) {
+                return [
+                    'q' => $position->q + $offset[0],
+                    'r' => $position->r + $offset[1]
+                ];
+            }, $neighborOffsets);
 
-        return $neighbors;
+            return $neighbors;
+        }else{
+            //Assume Radius 2.
+            $isOddRow = $position->r % 2 !== 0;    
+            $neighborOffsets = $isOddRow 
+                ? [[+1, 0], [-1, 0], [-1, +1], [-1, -1], [0, +1], [0, -1],
+                [+2, 0], [+1, -1], [+1, -2], [0, -2], [-1, -2], [-2, -1], 
+                [-2, 0], [-2, +1], [-1, +2], [0, +2], [+1, +2], [+1, +1]]
+
+                : [[+1, 0], [-1, 0], [+1, +1], [+1, -1], [0, +1], [0, -1], 
+                [+2, 0], [+2, -1], [+1, -2], [0, -2], [-1, -2], [-1, -1], 
+                [-2, 0], [-1, +1], [-1, +2], [0, +2], [+1, +2], [+2, +1]];
+
+            // Generate neighboring hexes
+            $neighbors = array_map(function($offset) use ($position) {
+                return [
+                    'q' => $position->q + $offset[0],
+                    'r' => $position->r + $offset[1]
+                ];
+            }, $neighborOffsets);
+
+            return $neighbors;
+        }    
     }    
 
     

@@ -65,18 +65,24 @@ if (isset($_SESSION["user"])) {
 -->	    
 		<big><b>Welcome to Fiery Void, an adaptation of the 'Babylon 5 Wars' tabletop game, by Agents of Gaming!</b></big>
 
-		<br><br>---------- <b>LATEST NEWS - March 2025</b> ----------
-	    <br>
-	    <br>Added option in Create Game to generate random Asteroid and Moos as terrain (in beta, please test!).
-	    <br>Enormous units, including asteroids/Moons, now block Line of Sight. In addition, non-Fighter units moving through Asteroid hexes will take collision damage.
-	    <br>Asteroid/Moon units also available to purchase in Civilians Faction for player scenarios.
-	    <br>Add Fighter to Assault Shuttle Hangar Conversion and further updates to fleet checker.
-	    <br>Ramming attacks (including terrain collision) now resolved before all other weapon fire.
-	    <br>Nexus polishing
-	    <br>A lot of bugfixes and interface improvements
+		<br><br>---------- <b>LATEST NEWS - April 2025</b> ----------
+
+	    <br><b>Features</b>
+	    <br>Players can now view Details of purchased ships in Fleet Selection screen, including any Ammo/Enhancements bought.
+	    <br>Add fighter count to units name tooltip when multiple flights are stacked on the same hex.
+
+	    <br><b>Bug Fixes / Refinements</b>
+	    <br>Fix to Range Penalty crit being applied twice.
+	    <br>Fixed display and duplication issues with Damage Reduced critical.
+	    <br>Change layering of UI elements to improve experience on mobile browsers.
+	    <br>Fixed Hangar Conversions enhIDs so they can actually be used now.
+	    <br>Elite Marine upgrade for Grappling Claw fixed.
+	    <br>Ships with Grappling Claws will now include non-deployed marines in their marine defenders total.
+	    <br>Renamed some EA fighters for better display / alignment with TT SCS
+	    <br>Renamed some Grome Shells for better display.
+	    <br>Added Split shot mechanic to Psionic Concentrators
 
 	    
-	
        <br><br>
 <!--	        
 		 <br><br>---------- <b>update 20th of January</b> ---------- 

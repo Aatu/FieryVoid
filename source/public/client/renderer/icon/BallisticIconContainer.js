@@ -105,53 +105,8 @@ window.BallisticIconContainer = function () {
             return true;
         }, this);
 
-		//Now create some icons to illustrate the exact hexes for really large terrain occupy.
-		// Filter for ships with Huge value
-		gamedata.ships
-		.filter(ship => ship.Huge > 0) // Find Huge Terrain
-		.forEach(ship => {
-			if(gamedata.gamephase !== -1){ //Don't generate sprites until Terrain is in place!
-				const position = shipManager.getShipPosition(ship); // Get ship's position
-				var positionGame = this.coordinateConverter.fromHexToGame(position);
-				// Create a sprite at the ship's position
-				const sprite = new BallisticSprite(positionGame, "hexWhite");
-				this.scene.add(sprite.mesh);
-
-				this.ballisticIcons.push({
-					id: -5,
-					shooterId: ship.id,
-					targetId: ship.id,
-					launchPosition: position,
-					position: new hexagon.Offset(positionGame.x, positionGame.y),
-					launchSprite: sprite,
-					targetSprite: null,
-					used: true
-				});
-
-				// Get neighboring hexes based on the ship's size (Huge)
-				const neighbourHexes = mathlib.getNeighbouringHexes(position, ship.Huge);
-
-				// Create sprites for neighboring hexes
-				neighbourHexes.forEach(neighbour => {
-					var neighbourPosGame = this.coordinateConverter.fromHexToGame(neighbour);
-					const neighbourSprite = new BallisticSprite(neighbourPosGame, "hexWhite");
-					this.scene.add(neighbourSprite.mesh);
-
-					this.ballisticIcons.push({
-						id: -5,
-						shooterId: ship.id,
-						targetId: ship.id,
-						launchPosition: neighbour,
-						position: new hexagon.Offset(neighbourPosGame.x, neighbourPosGame.y),
-						launchSprite: neighbourSprite,
-						targetSprite: neighbourSprite,
-						used: true
-					});
-				
-				});
-			}	
-
-		});
+		//Now create perimter hex icons to illustrate the hexes occupied by really large terrain occupy.
+		generateTerrainHexes.call(this, gamedata);
 
     };
 
@@ -203,6 +158,62 @@ window.BallisticIconContainer = function () {
         return this;
     };
 
+
+    function generateTerrainHexes(gamedata) {
+		// Filter for ships with Huge value
+		gamedata.ships
+		.filter(ship => ship.Huge > 0) // Find Huge Terrain
+		.forEach(ship => {
+			if(gamedata.gamephase !== -1){ //Don't generate sprites until Terrain is in place!
+				const position = shipManager.getShipPosition(ship); // Get ship's position
+	/*			var positionGame = this.coordinateConverter.fromHexToGame(position);
+				// Create a sprite at the ship's position
+				const sprite = new BallisticSprite(positionGame, "hexWhite");
+				this.scene.add(sprite.mesh);
+
+				this.ballisticIcons.push({
+					id: -5,
+					shooterId: ship.id,
+					targetId: ship.id,
+					launchPosition: position,
+					position: new hexagon.Offset(positionGame.x, positionGame.y),
+					launchSprite: sprite,
+					targetSprite: null,
+					used: true
+				});
+*/
+
+				let perimeterHexes = [];
+				// Get neighboring hexes based on the ship's size (Huge)
+				if(ship.Huge == 2){
+					perimeterHexes = mathlib.getPerimeterHexes(position, ship.Huge);
+				}else{
+					perimeterHexes = mathlib.getNeighbouringHexes(position, ship.Huge);
+				}	
+
+				// Create sprites for neighboring hexes
+				perimeterHexes.forEach(neighbour => {
+					var neighbourPosGame = this.coordinateConverter.fromHexToGame(neighbour);
+					const neighbourSprite = new BallisticSprite(neighbourPosGame, "hexWhite");
+					this.scene.add(neighbourSprite.mesh);
+
+					this.ballisticIcons.push({
+						id: -5,
+						shooterId: ship.id,
+						targetId: ship.id,
+						launchPosition: neighbour,
+						position: new hexagon.Offset(neighbourPosGame.x, neighbourPosGame.y),
+						launchSprite: neighbourSprite,
+						targetSprite: neighbourSprite,
+						used: true
+					});
+				
+				});
+			}	
+
+		});
+    } //endof generateTerrainHexes()
+
     function createOrUpdateBallistic(ballistic, iconContainer, turn, replay = false) {
         var icon = getBallisticIcon.call(this, ballistic.id);
 
@@ -225,6 +236,7 @@ window.BallisticIconContainer = function () {
 			if(replay){
 				if(ballistic.damageclass == 'PersistentEffectPlasma' && ballistic.targetid == -1 && ballistic.notes != 'PlasmaCloud') return;
 			}
+			if(ballistic.damageclass == 'Sweeping')	return;	//For Shadow Slicers, Gravs Beams etc. Let's just rely on lines and targeting tooltip and not clutter with Hex colours.	
 
 	        var shooterIcon = iconContainer.getById(ballistic.shooterid);	
 //	        if(!shooterIcon) shooterIcon = iconContainer.getById(ballistic.shooter.id); //Do I still need?
@@ -242,7 +254,7 @@ window.BallisticIconContainer = function () {
 				var weapon = shooter.systems[ballistic.weaponid]; //Find weapon			
 				var modeName = weapon.firingModes[ballistic.firingMode]; //Get actual Firing Mode name, so we can be more specific below!
 			}
-			
+
 			if (ballistic.type == 'normal') { //it's direct fire after all!
 			    launchPosition = this.coordinateConverter.fromHexToGame(shooterIcon.getLastMovement().position);
 				if(modeName){
@@ -329,10 +341,11 @@ window.BallisticIconContainer = function () {
 					targetType = 'hexGreen';
 					iconImage = "./img/allySupport.png"; 		        
 				break;
-				case 'Sweeping': //Shadow Slicers, remove hex target for now and rely on just lines and targeting tooltip I think.
+/*				case 'Sweeping': //Shadow Slicers, remove hex target for now and rely on just lines and targeting tooltip I think.
+					targetType = 'hexClear'; //Adding hexes for Sweeping weapons created a bit too much clutter, replace with clear hex.
 					targetType = 'hexPurple'; //Default for slicers
 					if(weapon.weaponClass == "Gravitic") targetType = 'hexGreen'; //But now other weapon types use sweeping.			        
-				break;			
+				break;		*/	
 				}
 			}		 
 		} 
@@ -416,12 +429,12 @@ window.BallisticIconContainer = function () {
 			    this.scene.remove(lineIcon.lineSprite.mesh);
 			    lineIcon.lineSprite.destroy();
 			    return false;
-			}else if (lineIcon.shooterId === ship.id) {
+			}/*else if (lineIcon.shooterId === ship.id) { //When would we ever need to destroy origin lines, only target can move...?
 			    if (lineIcon.lineSprite.isVisible) wasVisibleShooter = true;
 			    this.scene.remove(lineIcon.lineSprite.mesh);
 			    lineIcon.lineSprite.destroy();
 			    return false;
-			}else{		    
+			}*/else{		    
 		    	return true; // Keep the lineIcon if the condition isn't met
 			}
 		});
@@ -429,7 +442,8 @@ window.BallisticIconContainer = function () {
 		//Now recreate line using usual method.
         var allBallistics = weaponManager.getAllFireOrdersForAllShipsForTurn(gamedata.turn, 'ballistic');			
 		allBallistics.forEach(function (ballistic) {
-			if (ship.id === ballistic.targetid) {
+//			if (ship.id === ballistic.targetid || ship.id === ballistic.shooterid) {
+			if (ship.id === ballistic.targetid) {				
 				createOrUpdateBallisticLines.call(this, ballistic, iconContainer, gamedata.turn);
 			}
 		}, this);
@@ -444,7 +458,7 @@ window.BallisticIconContainer = function () {
 	            	lineIcon.lineSprite.show();
 	            	lineIcon.lineSprite.isVisible = true;	            		
 				}
-            }else if(lineIcon.shooterId === ship.id) {
+            }/*else if(lineIcon.shooterId === ship.id) {
 	            if(!wasVisibleShooter){
 	            	lineIcon.lineSprite.hide();
 	            	lineIcon.lineSprite.isVisible = false;	 	            
@@ -452,7 +466,7 @@ window.BallisticIconContainer = function () {
 	            	lineIcon.lineSprite.show();
 	            	lineIcon.lineSprite.isVisible = true;	            		
 				}
-			}	
+			}	*/
         });        
     };
 
@@ -619,7 +633,11 @@ window.BallisticIconContainer = function () {
 				break;
 				case 'Sweeping': //Shadow Slicer
 					type = 'purple'; //Default for slicers
-					if(weapon.weaponClass == "Gravitic") type = 'green'; //But now other weapon types use sweeping.									        
+					if(weapon.weaponClass == "Gravitic"){
+						type = 'green'; //But now other weapon types use sweeping.
+					}else if(weapon.weaponClass == "Psychic"){
+						type = 'red';
+					}									        
 				break;					
 			}		 
 		}

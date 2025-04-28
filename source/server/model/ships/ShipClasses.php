@@ -440,6 +440,10 @@ class BaseShip {
 			}
 		}		
 		
+        foreach ($this->systems as $system){
+            if ($system instanceof GrapplingClaw)  $marines += $system->ammunition;
+        }
+
 		$totalMarines = max(0, $marines);
 		
 		return $totalMarines;
@@ -977,6 +981,9 @@ class BaseShip {
 						$this->notes .= 'Ship';
 					}
 					break;
+                case 5: //Terrain
+                        $this->notes .= 'Enormous Terrain';
+                        break;                        
 				default: //should not happen!
 					$this->notes .= 'Unit size not identified!';	
 					break;
@@ -1051,10 +1058,10 @@ class BaseShip {
 						if ($ability=='ReactorFlux'){
 							$this->notes .= '<br>Power Fluctuations';
 						}
-					}if ($reactor instanceof MagGravReactor) {
+					}if ($reactor instanceof MagGravReactor && !$this instanceof Terrain) {
 						$this->notes .= '<br>Mag-Gravitic Reactor';
 					}
-					break; //checking one Engine is enough
+					break; //checking one Reactor is enough
 				}
 			}
 
