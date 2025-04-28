@@ -30,6 +30,9 @@ class SalbezBevtun extends BaseShip{
         $this->rollcost = 3;
         $this->pivotcost = 4;
         $this->iniativebonus = 0;
+
+   		$this->enhancementOptionsEnabled[] = 'ELT_MRN'; //To enable Elite Marines enhancement
+		$this->enhancementOptionsEnabled[] = 'EXT_MRN'; //To enable extra Marines enhancement
         
         $this->addPrimarySystem(new Reactor(3, 24, 0, 0));
         $this->addPrimarySystem(new CnC(3, 16, 0, 0));
@@ -61,7 +64,7 @@ class SalbezBevtun extends BaseShip{
 		$this->addLeftSystem(new NexusParticleGrid(1, 3, 1, 180, 360));
 		$this->addLeftSystem(new NexusParticleGrid(1, 3, 1, 180, 360));
         $this->addLeftSystem(new Thruster(2, 20, 0, 4, 3));
-		$this->addLeftSystem(new CustomIndustrialGrappler(2, 5, 0, 300, 0));
+		$this->addLeftSystem(new GrapplingClaw(2, 0, 0, 300, 0, 8, false));
 		$this->addLeftSystem(new CargoBay(2, 30));
 
         $this->addRightSystem(new NexusIndustrialLaser(2, 6, 3, 0, 120));
@@ -69,7 +72,7 @@ class SalbezBevtun extends BaseShip{
 		$this->addRightSystem(new NexusParticleGrid(1, 3, 1, 0, 180));
 		$this->addRightSystem(new NexusParticleGrid(1, 3, 1, 0, 180));
         $this->addRightSystem(new Thruster(2, 20, 0, 4, 4));
-		$this->addRightSystem(new CustomIndustrialGrappler(2, 5, 0, 0, 60));
+		$this->addRightSystem(new GrapplingClaw(2, 0, 0, 0, 60, 8, false));
 		$this->addRightSystem(new CargoBay(2, 30));
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
@@ -109,7 +112,7 @@ class SalbezBevtun extends BaseShip{
 					5 => "Thruster",
 					7 => "Industrial Laser",
 					9 => "Particle Grid",
-					10 => "Industrial Grappler",
+					10 => "Grappling Claw",
 					12 => "Cargo Bay",
 					18 => "Structure",
 					20 => "Primary",
@@ -118,7 +121,7 @@ class SalbezBevtun extends BaseShip{
 					5 => "Thruster",
 					7 => "Industrial Laser",
 					9 => "Particle Grid",
-					10 => "Industrial Grappler",
+					10 => "Grappling Claw",
 					12 => "Cargo Bay",
 					18 => "Structure",
 					20 => "Primary",
