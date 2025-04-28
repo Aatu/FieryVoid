@@ -11,6 +11,7 @@ class Seltat extends HeavyCombatVessel{
         $this->shipClass = "Seltat Minesweeper";
 	    $this->variantOf = "Kutai Gunship";
         $this->occurence = "uncommon";
+        $this->isd = 2134;
         
         $this->forwardDefense = 14;
         $this->sideDefense = 14;

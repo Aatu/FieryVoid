@@ -11,6 +11,7 @@ class Gkarith extends BaseShip{
         $this->shipClass = "G'Karith Patrol Cruiser";        
         $this->shipSizeClass = 3;
         $this->fighters = array("normal"=>6);
+		$this->isd = 2253;
 	    
 		
         $this->forwardDefense = 15;

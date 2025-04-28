@@ -5,7 +5,7 @@ class KobolBerserk extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 850;
-	$this->faction = "ZPlaytest 12 Colonies of Kobol (Tier 1)";
+	$this->faction = "ZPlaytest 12 Colonies of Kobol";
         $this->phpclass = "KobolBerserk";
         $this->imagePath = "img/ships/BSG/ColonialBerserk.png";
         $this->shipClass = "Berserk Carrier (Alpha prototype)";

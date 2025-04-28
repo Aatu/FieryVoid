@@ -343,8 +343,7 @@
 		public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);
 			$this->data["Special"] = 'Uninterceptable.';
-			$this->data["Special"] .= '<br>Can also fire in Piercing Mode.';
-            $this->data["Special"] .= "<br>Can be overcharged during Initial Orders to fire in Sustained mode AFTER a full recharge cycle.";			
+			$this->data["Special"] .= '<br>Can also fire in Piercing Mode.';			
 		}
         
         public function getDamage($fireOrder){        return Dice::d(10, 4)+12;   }
@@ -1431,15 +1430,7 @@ class LaserAccelerator extends Laser{
             }
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
-/*
-        public function setSystemDataWindow($turn){
-            parent::setSystemDataWindow($turn);
-                $this->data["Special"] = 'Uninterceptable.';
-                $this->data["Special"] .= "<br>Can be overcharged during Initial Orders to fire in Sustained mode AFTER a full recharge cycle.";
-                $this->data["Special"] .= '<br>When firing in Sustained mode, if the first shot hits, next turns shot will hit automatically.';
-                $this->data["Special"] .= '<br>Subsequent Sustained shots ignore any armour/shields that have applied to first shot.';    			
-        }
-*/
+
         public function calculateHitBase(TacGamedata $gamedata, FireOrder $fireOrder) {
             //Check if this is a Sustained weapon firing, and therefore possible automatic hit. 
             // We only care if the overloaded weapon fired last turn and therefore has a targetid stored in sustainedTarget variable.

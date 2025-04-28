@@ -1863,7 +1863,7 @@ class CustomIndustrialGrappler extends Weapon {
         public $name = "customIndustrialGrappler";
         public $displayName = "Industrial Grappler";
 	public $iconPath = "grapplingClaw.png";
-
+    public $weaponClass = "Particle";
         public $loadingtime = 1;        
         public $rangePenalty = 0; //no range penalty to speak about
         public $fireControl = array(null, null, null); // fighters, <mediums, <capitals //no in game effect!

@@ -5,7 +5,7 @@ class KobolMinotaur extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 1300;
-	$this->faction = "ZPlaytest 12 Colonies of Kobol (Tier 1)";
+	$this->faction = "ZPlaytest 12 Colonies of Kobol";
         $this->phpclass = "KobolMinotaur";
         $this->imagePath = "img/ships/BSG/ColonialMinotaur.png";
         $this->shipClass = "Minotaur Gunship (Alpha prototype)";

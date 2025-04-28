@@ -10,6 +10,7 @@ class lakritAS extends FighterFlight{
         $this->phpclass = "lakritAS";
         $this->shipClass = "Lakrit Assault Shuttles";
 		$this->imagePath = "img/ships/phalan.png";
+        $this->isd = 1971;
         
         $this->forwardDefense = 9;
         $this->sideDefense = 9;

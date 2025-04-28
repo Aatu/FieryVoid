@@ -9,6 +9,7 @@ class Roshanthi extends FighterFlight{
         $this->phpclass = "Roshanthi";
         $this->shipClass = "Roshanthi Assault Shuttles";
 		    $this->imagePath = "img/ships/drazi/DraziRoshanthi.png";
+            $this->isd = 1940;
         
         $this->forwardDefense = 8;
         $this->sideDefense = 9;

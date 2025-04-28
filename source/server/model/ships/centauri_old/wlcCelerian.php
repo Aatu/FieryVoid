@@ -5,11 +5,12 @@ class wlcCelerian extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 650;
-        $this->faction = "Centauri Republic (WotCR)";
+        $this->faction = "Custom Ships";
         $this->phpclass = "wlcCelerian";
         $this->imagePath = "img/ships/celerian.png";
         $this->shipClass = "Celerian House Cruiser";
         $this->shipSizeClass = 3;
+        $this->isd = 1850;
 
         $this->variantOf = "Celerian Warcruiser";
 	    $this->unofficial = true;

@@ -1293,7 +1293,7 @@ class AmmoMissileRackS extends Weapon{
 	} 
 	
     public function effectCriticalDamgeReductions($dp, $repeat = false){
-		if($repeat) return; //Damage Reduced crit has already been applied, don't apply again!
+		if($repeat) return; //Damage Reduced crit has already been applied in onConstructed() for this type of weapon, don't apply again!
 
         //damage penalty: 20% of variance or straight 2, whichever is bigger; hold that as a fraction, however! - low rolls should be affected lefss than high ones, after all        
         foreach ($this->firingModes as $dmgMode => $modeName) {
@@ -1746,7 +1746,7 @@ class AmmoMissileRackO extends AmmoMissileRackS{
     public $distanceRange = 60;
     public $firingMode = 1;
     public $priority = 6;
-    public $loadingtime = 2;
+    public $loadingtime = 3;
 	//basic launcher data, before being modified by actual missiles
 	protected $basicFC=array(2,2,2);
 	protected $basicRange=20;

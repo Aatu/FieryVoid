@@ -15,6 +15,7 @@ class technicalTargetDrone extends VreeCapital
 		$this->shipSizeClass = 3;
 		$this->forwardDefense = 20;
 		$this->sideDefense = 20;
+        $this->isd = 0;
 		
 		$this->fighters = array("light"=>12);
 		$this->turncost = 0.5;

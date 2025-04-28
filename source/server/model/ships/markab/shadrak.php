@@ -12,7 +12,8 @@ class Shadrak extends SmallStarBaseFourSections{
 		$this->shipClass = "Shadrak Shrine";
 		$this->imagePath = "img/ships/MarkabShadrakShrine.png";
 		$this->canvasSize = 200; 
-		$this->fighters = array("normal"=>6); 
+		$this->fighters = array("normal"=>6);
+		$this->isd = 2202; 
 
 		$this->shipSizeClass = 3; 
 		$this->iniativebonus = -200; //no voluntary movement anyway

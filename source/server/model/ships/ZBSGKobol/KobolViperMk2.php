@@ -5,7 +5,7 @@ class KobolViperMk2 extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 210;
-        $this->faction = "ZPlaytest 12 Colonies of Kobol (Tier 1)";
+        $this->faction = "ZPlaytest 12 Colonies of Kobol";
         $this->phpclass = "KobolViperMk2";
         $this->shipClass = "Viper Mk-2 flight (Beta)";
         $this->imagePath = "img/ships/BSG/viperMk2.png";

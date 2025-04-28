@@ -9,6 +9,7 @@ class Olgata extends FighterFlight{
         $this->phpclass = "Olgata";
         $this->shipClass = "Olgata Assault Shuttles";
 	    $this->imagePath = "img/ships/Torushka.png";
+        $this->isd = 2226;
         
         $this->forwardDefense = 10;
         $this->sideDefense = 10;

@@ -112,3 +112,8 @@ span.clickable.close {
     margin-top: -15px; /* Adjust this value to raise it */    
     color: #ffffff; /* Optional to make it stand out */
 }
+
+input[type="checkbox"] {
+    position: relative;
+    top: 2px;
+}

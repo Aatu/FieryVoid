@@ -9,6 +9,7 @@ class StreibCombatPod extends FighterFlight{
         $this->phpclass = "StreibCombatPod";
         $this->shipClass = "Combat Pods";
 		$this->imagePath = "img/ships/streibbreachingpod.png";
+        $this->isd = 2205;
         	    
 		$this->notes = 'No marine units carried.';
 		$this->unofficial = true;

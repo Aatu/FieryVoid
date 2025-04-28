@@ -5,7 +5,7 @@ class KobolOrion extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 600;
-		$this->faction = "ZPlaytest 12 Colonies of Kobol (Tier 1)";
+		$this->faction = "ZPlaytest 12 Colonies of Kobol";
         $this->phpclass = "KobolOrion";
         $this->imagePath = "img/ships/BSG/ColonialOrion.png";
         $this->shipClass = "Orion Reconisance Battlestar (Beta prototype)";

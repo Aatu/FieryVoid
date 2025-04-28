@@ -5,7 +5,7 @@ class KobolMarineRaptor extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 420;
-        $this->faction = "ZPlaytest 12 Colonies of Kobol (Tier 1)";
+        $this->faction = "ZPlaytest 12 Colonies of Kobol";
         $this->phpclass = "KobolMarineRaptor";
         $this->shipClass = "Marine Assault Raptor (Alpha prototype)";
 			$this->variantOf = "Raptor C2 (Beta prototype)";

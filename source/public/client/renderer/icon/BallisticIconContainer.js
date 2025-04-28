@@ -313,9 +313,9 @@ window.BallisticIconContainer = function () {
 					        text = 'Plasma';
 					        textColour = "#787800";				        	
 					break;
-					case 'Proximity Laser': //KL Proximity Laser
+					case 'Proximity Launcher': //KL Proximity Laser
 					        targetType = 'hexRed';
-					        text = "Proximity Launcher";
+					        text = "Proximity Laser";
 					        textColour = "#e6140a";		        
 					break;
 					case 'Thought Wave': //Mindrider Thoughwave
@@ -635,9 +635,15 @@ window.BallisticIconContainer = function () {
 					type = 'purple'; //Default for slicers
 					if(weapon.weaponClass == "Gravitic"){
 						type = 'green'; //But now other weapon types use sweeping.
-					}else if(weapon.weaponClass == "Psychic"){
+					}else if(weapon.weaponClass == "Psychic"){ //Thirdspace Psionic Concentrator
 						type = 'red';
-					}									        
+					}else if(weapon.weaponClass == "Molecular" && !(weapon instanceof MolecularSlicerBeamL)){ //Shadow Multiphased Cutters,, leave slicers as purple.
+						type = 'blue';
+					}else if(weapon.weaponClass == "Particle"){ //Mindrider Telekinetic Cutter
+						type = 'orange';
+					}else if(weapon.weaponClass == "Electromagnetic"){ //Vorlon Discharge Gunsb
+						type = 'yellow';
+					}														        
 				break;					
 			}		 
 		}
@@ -649,7 +655,7 @@ window.BallisticIconContainer = function () {
 	            id: ballistic.id,
 	            shooterId: ballistic.shooterid,
 	            targetId: ballistic.targetid,
-	            lineSprite: lineSprite =  new BallisticLineSprite(launchPosition, targetPosition, 3 * this.zoomScale, -3, getLineColorByType(type), 0.4),
+	            lineSprite: lineSprite =  new BallisticLineSprite(launchPosition, targetPosition, 3 * this.zoomScale, -3, getLineColorByType(type), 0.5),
 	            used: true,
 	            isFriendly: isFriendly
 	        });
@@ -698,7 +704,7 @@ window.BallisticIconContainer = function () {
         } else if (type == "green") {
             return "rgba(0, 204, 0)";
         } else if (type == "purple") {
-            return "rgba(127, 0, 255)";
+            return "rgba(204, 51, 255)";
         } else if (type == "white") {
             return "rgba(255, 255, 255)";
         } else {

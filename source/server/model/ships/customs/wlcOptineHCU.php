@@ -4,7 +4,7 @@ class wlcOptineHCU extends BaseShip{
 	function __construct($id, $userid, $name,  $slot){
 		parent::__construct($id, $userid, $name,  $slot);
 		$this->pointCost = 850;
-		$this->faction = "Centauri Republic (WotCR)";
+        $this->faction = "Custom Ships";
 		$this->phpclass = "wlcOptineHCU";
 		$this->imagePath = "img/ships/optine.png";
 		$this->shipClass = "Optine House Cruiser (Upgraded)";
@@ -19,6 +19,7 @@ class wlcOptineHCU extends BaseShip{
 		$this->accelcost = 4;
 		$this->rollcost = 3;
 		$this->pivotcost = 4;
+		$this->isd = 1840;
     
 		$this->notes = 'ALTERNATE UNIVERSE - unit designed for "In ancient times" campaign';
 

@@ -3477,19 +3477,19 @@ class VorlonDischargeGun extends Weapon{
 	public $loadingtime = 1;
 	public $normalload = 2;
 		
-	public $canChangeShots = true;
-	public $shots = 4;
-	public $defaultShots = 4; //can fire up to 4 shots (if power is available); LET'S DECLARE ALL 4 BY DEFAULT - chance of player wanting full power is higher than conserving energy (if he has energy shortages he'll be stopped by EoT check anyway)
-	public $maxVariableShots = 4; //For front end to know how many shots weapon CAN fire where this can be changed after locking in.	
+	//public $canChangeShots = true; //No Longer needed after Split Shots added. 
+	//public $shots = 4;
+	//public $defaultShots = 4; //can fire up to 4 shots (if power is available); LET'S DECLARE ALL 4 BY DEFAULT - chance of player wanting full power is higher than conserving energy (if he has energy shortages he'll be stopped by EoT check anyway)
+	//public $maxVariableShots = 4; //For front end to know how many shots weapon CAN fire where this can be changed after locking in.	
 	public $intercept = 2; //intercept rating -2
 	
 	public $priority = 8; //light Raking weapon - even highest damaging mode falls into this category (borderline)
 	
 	public $firingMode = 1;	
 	public $firingModes = array(
-		1 => "1xPower",
-		2 => "2xPower",
-		3 => "3xPower"
+		1 => "2 Power",
+		2 => "4 Power",
+		3 => "6 Power"
 	);
 	
     public $rangePenalty = 0.5; //-1/2 hexes
@@ -3499,7 +3499,9 @@ class VorlonDischargeGun extends Weapon{
 	public $damageType = "Raking"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
 	public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
 	
-	public $multiplied = false; //technical variable
+//	public $multiplied = false; //technical variable
+	public $canSplitShots = true; //New method, let's just have shots treated as separate shots! - DK
+	public $guns = 4;
 	
 	
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
@@ -3521,13 +3523,15 @@ class VorlonDischargeGun extends Weapon{
 			$this->data["Special"] = '';
 		}else{
 			$this->data["Special"] .= '<br>';
-		}	    		
-		$this->data["Special"] .= "Accelerator option is here only to force explicit player consent for interception. It does not change damage output.";  
-		$this->data["Special"] .= "<br>Firing mode affects damage output (and power used):";  
+		}	    		 
+		$this->data["Special"] .= "Firing mode affects damage output (and power used):";  
 		$this->data["Special"] .= "<br> - 2 power: 2d10+2"; 
 		$this->data["Special"] .= "<br> - 4 power: 3d10+3"; 
 		$this->data["Special"] .= "<br> - 6 power: 4d10+4"; 
-		$this->data["Special"] .= "<br>Weapon can fire up to 4 times (charging power above for each shot) - NEEDS TO BE DECLARED MANUALLY (by default 4 shots are declared but You may decrease this number)."; 
+	//	$this->data["Special"] .= "<br>Weapon can fire up to 4 times (charging power above for each shot) - NEEDS TO BE DECLARED MANUALLY (by default 4 shots are declared but You may decrease this number)."; 
+		$this->data["Special"] .= "<br>Fires up to 4 times (costing power per shot), at same or different targets.";
+		$this->data["Special"] .= "<br>Player must explicitly order weapon to intercept.";
+		$this->data["Special"] .= "<br>Interceping shots consume 2 power per shot (refunded if not used).";   	
 	}
 		
 		
@@ -3590,7 +3594,8 @@ class VorlonDischargeGun extends Weapon{
 	public function calculateHitBase($gamedata, $fireOrder){
 		$capacitor = $this->unit->getSystemByName("PowerCapacitor");
 		if($capacitor){ //else something is wrong - weapon is put on a ship without Power Capacitor!
-			$powerNeeded = 2*$fireOrder->firingMode*$fireOrder->shots;
+	//		$powerNeeded = 2*$fireOrder->firingMode*$fireOrder->shots;
+			$powerNeeded = 2*$fireOrder->firingMode;	//Each shot will have its own Firing Order now - DK
 			$capacitor->doDrawPower($powerNeeded);
 		}
 		parent::calculateHitBase($gamedata, $fireOrder); //standard hit chance calculation
@@ -3618,10 +3623,11 @@ class VorlonDischargeGun extends Weapon{
 		return $powerIsAvailable;
 	}
 
-
+	/*
 	//if fired offensively - make as many attacks as firing order declares shots (and resent number of shots declared to 1 :) )
 	//if defensively - make weapon have 4 GUNS (would be temporary, but enough to assign multiple shots for interception)
 	public function beforeFiringOrderResolution($gamedata){
+		//Previous method before split shots ability added.
 		if($this->multiplied==true) return;//shots of this weapon are already multiplied
 		$this->multiplied = true;//shots WILL be multiplied in a moment, mark this
 		//is offensive fire declared?...
@@ -3645,8 +3651,10 @@ class VorlonDischargeGun extends Weapon{
 		}else{//offensive fire NOT declared, multiply guns for interception!
 			$this->guns = 4; //up to 4 intercept shots (if Power is available and weapon is declared eligible)
 		}
+		
 	} //endof function beforeFiringOrderResolution
-
+	*/
+	
 }//endof class VorlonDischargeGun
 
 
@@ -4867,10 +4875,10 @@ class VorlonDischargeCannon extends Weapon{
 	public $loadingtime = 1;
 	public $normalload = 2;
 		
-	public $canChangeShots = true;
-	public $shots = 4;
-	public $defaultShots = 4; //can fire up to 4 shots (if power is available); LET'S DECLARE ALL 4 BY DEFAULT - chance of player wanting full power is higher than conserving energy (if he has energy shortages he'll be stopped by EoT check anyway)
-	public $maxVariableShots = 4; //For front end to know how many shots weapon CAN fire where this can be changed after locking in.	
+	//public $canChangeShots = true;
+	//public $shots = 4;
+	//public $defaultShots = 4; //can fire up to 4 shots (if power is available); LET'S DECLARE ALL 4 BY DEFAULT - chance of player wanting full power is higher than conserving energy (if he has energy shortages he'll be stopped by EoT check anyway)
+	//public $maxVariableShots = 4; //For front end to know how many shots weapon CAN fire where this can be changed after locking in.	
 	public $intercept = 2; //intercept rating -2
 	
 	public $priority = 8; //light Raking weapon in lightest mode - heavier modes are definitely heavy Raking
@@ -4891,7 +4899,9 @@ class VorlonDischargeCannon extends Weapon{
 	public $damageType = "Raking"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
 	public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
 	
-	public $multiplied = false; //technical variable
+	//public $multiplied = false; //technical variable
+	public $canSplitShots = true; //New method, let's just have shots treated as separate shots! - DK
+	public $guns = 4;
 	
 	
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
@@ -4914,12 +4924,15 @@ class VorlonDischargeCannon extends Weapon{
 		}else{
 			$this->data["Special"] .= '<br>';
 		}	    		
-		$this->data["Special"] .= "Accelerator option is here only to force explicit player consent for interception. It does not change damage output.";  
-		$this->data["Special"] .= "<br>Firing mode affects damage output (and power used), and also fire control (hogher modes become antiship-optimized):";  
+	//	$this->data["Special"] .= "Accelerator option is here only to force explicit player consent for interception. It does not change damage output.";  
+		$this->data["Special"] .= "<br>Firing mode affects damage output (and power used), and also fire control (e.g. higher modes are better against ships):";  
 		$this->data["Special"] .= "<br> - 5 power: 4d10+5, Raking(10)"; 
 		$this->data["Special"] .= "<br> - 10 power: 6d10+10, Raking(15)"; 
 		$this->data["Special"] .= "<br> - 15 power: 8d10+15, Raking(15)"; 
-		$this->data["Special"] .= "<br>Weapon can fire up to 4 times (charging power above for each shot) - NEEDS TO BE DECLARED MANUALLY (by default 4 shots are declared but You may decrease this number)."; 
+		//$this->data["Special"] .= "<br>Weapon can fire up to 4 times (charging power above for each shot) - NEEDS TO BE DECLARED MANUALLY (by default 4 shots are declared but You may decrease this number)."; 
+		$this->data["Special"] .= "<br>Fires up to 4 times (costing power per shot), at same or different targets.";
+		$this->data["Special"] .= "<br>Player must explicitly order weapon to intercept.";
+		$this->data["Special"] .= "<br>Interceping shots consume 5 power per shot (refunded if not used).";   	
 	}
 		
 		
@@ -4982,7 +4995,8 @@ class VorlonDischargeCannon extends Weapon{
 	public function calculateHitBase($gamedata, $fireOrder){
 		$capacitor = $this->unit->getSystemByName("PowerCapacitor");
 		if($capacitor){ //else something is wrong - weapon is put on a ship without Power Capacitor!
-			$powerNeeded = 5*$fireOrder->firingMode*$fireOrder->shots;
+			//$powerNeeded = 5*$fireOrder->firingMode*$fireOrder->shots;
+			$powerNeeded = 5*$fireOrder->firingMode;
 			$capacitor->doDrawPower($powerNeeded);
 		}
 		parent::calculateHitBase($gamedata, $fireOrder); //standard hit chance calculation
@@ -5010,7 +5024,7 @@ class VorlonDischargeCannon extends Weapon{
 		return $powerIsAvailable;
 	}
 
-
+	/*
 	//if fired offensively - make as many attacks as firing order declares shots (and resent number of shots declared to 1 :) )
 	//if defensively - make weapon have 4 GUNS (would be temporary, but enough to assign multiple shots for interception)
 	public function beforeFiringOrderResolution($gamedata){
@@ -5038,6 +5052,7 @@ class VorlonDischargeCannon extends Weapon{
 			$this->guns = 4; //up to 4 intercept shots (if Power is available and weapon is declared eligible)
 		}
 	} //endof function beforeFiringOrderResolution
+	*/ 
 
 }//endof class VorlonDischargeCannon
 
@@ -5681,23 +5696,25 @@ class PsionicConcentrator extends Weapon{
 	public $intercept = 2; //intercept rating -1     
 
     public $guns = 4;
-    public $gunsArray = array(1=>4, 2=>2, 3=>1);	
+    public $gunsArray = array(1=>4, 2=>2, 3=>1, 4=>4, 5=>2);	
 
     public $priority = 4;
-    public $priorityArray = array(1=>4, 2=>5, 3=>7);
+    public $priorityArray = array(1=>4, 2=>5, 3=>7, 4=>4, 5=>5);
 
 	public $firingMode = 1;	
             public $firingModes = array(
                 1 => "Quad",
                 2 => "Double",
-                3 => "Single",                
+                3 => "Single",
+                4 => "4Split",
+                5 => "2Split",				                
             );
 
-    public $fireControl = array(7, 3, 2); // fighters, <mediums, <capitals 
-    public $fireControlArray = array( 1=>array(6, 2, 2), 2=>array(1, 4, 5), 3=>array(null, 3, 7));
+    public $fireControl = array(6, 2, 2); // fighters, <mediums, <capitals 
+    public $fireControlArray = array( 1=>array(6, 2, 2), 2=>array(1, 4, 5), 3=>array(null, 3, 7), 4=>array(6, 2, 2), 5=>array(1, 4, 5));
 
     public $rangePenalty = 0.5;
-    public $rangePenaltyArray = array( 1=>0.5, 2=>1, 3=>2);
+    public $rangePenaltyArray = array( 1=>0.5, 2=>1, 3=>2, 4=>0.5, 5=>1,);
             
 	public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!   
 	public $weaponClass = "Psychic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!    
@@ -5707,7 +5724,8 @@ class PsionicConcentrator extends Weapon{
 	public $testRun = false;//testRun = true means hit chance is calculated nominal skipping concentration issues - for subordinate weapon to calculate average hit chance
 	
 	public $repairPriority = 4;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
-	public $canSplitShots = true; //Allows Firing Mode 1 to split shots.	
+	public $canSplitShots = true; //Allows Firing Mode 1 to split shots.
+	public $canSplitShotsArray = array(1=>false, 2=>false, 1=>false, 4=>true, 5=>true); 	
 
     function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
         {
@@ -5729,7 +5747,7 @@ class PsionicConcentrator extends Weapon{
 //		      $this->data["Special"] .= "<br> - 1 shot; 29-54 Damage, -10 per hex.";			      		      		      
 		      $this->data["Special"] .= "<br>Any hits drain -1 Power from Younger Race ships for one turn.";
 		      $this->data["Special"] .= "<br>Has +1 modifier to critical hit rolls, and +2 to fighter dropout rolls.";
-		      $this->data["Special"] .= "<br>Can split shots amongst different targets.";			  
+			  $this->data["Special"] .= "<br>Can use '4Split' and '2Split' Firing Modes to target different enemy units.";		  
 	    }	
 
 
@@ -7519,60 +7537,72 @@ class SecondSight extends Weapon{
 	} 
 
 
-    public function beforeFiringOrderResolution($gamedata){
+	public function beforeFiringOrderResolution($gamedata){
 
-      $firingOrders = $this->getFireOrders($gamedata->turn);
-    	
-      $hasFireOrder = null;
-              foreach ($firingOrders as $fireOrder) { 
-              	   if ($fireOrder->type == 'normal') { 
-                    $hasFireOrder = $fireOrder;
-                    break; //no need to search further
-                    }
-				}    			
-				
-        if($hasFireOrder==null) return; //no appropriate fire order, end of work
-
-    	
-    	$thisShip = $this->getUnit();  
-    	$allShips = $gamedata->ships;
-    	$relevantShips = array();
-
-		//Make a list of relelvant ships e.g. all enemy ships.
-		foreach($allShips as $ship){
-			if($ship->isDestroyed()) continue;		
-			if ($ship->team == $thisShip->team) continue;	//Ignore friendlies.	
-			$relevantShips[] = $ship;			
-		}
-	
-		foreach($relevantShips as $target){
-			
-			$effectIni = Dice::d(6, 1)+2;
-			if ($target->advancedArmor) $effectIni = 2;
-			
-			if ($target instanceof FighterFlight){  //place effect on first fighter, even if it's already destroyed!
-				$firstFighter = $target->getSampleFighter();
-				if($firstFighter){
-					for($i=1; $i<=$effectIni;$i++){
-						$crit = new tmpinidown(-1, $target->id, $firstFighter->id, 'tmpinidown', $gamedata->turn); 
-						$crit->updated = true;
-				        $firstFighter->criticals[] =  $crit;
-					}
-				}
-			}else{ //ship - place effcet on C&C!
-				$CnC = $target->getSystemByName("CnC");
-				if($CnC){
-					for($i=1; $i<=$effectIni;$i++){
-						$crit = new tmpinidown(-1, $target->id, $CnC->id, 'tmpinidown', $gamedata->turn); 
-						$crit->updated = true;
-				        $CnC->criticals[] =  $crit;
-					}
-				}
-			}			
-
-		}
-    	
-	} //endof beforeFiringOrderResolution
+		$firingOrders = $this->getFireOrders($gamedata->turn);
+		  
+		$hasFireOrder = null;
+				foreach ($firingOrders as $fireOrder) { 
+					   if ($fireOrder->type == 'normal') { 
+					  $hasFireOrder = $fireOrder;
+					  break; //no need to search further
+					  }
+				  }    			
+				  
+		  if($hasFireOrder==null) return; //no appropriate fire order, end of work
+  
+		  $thisShip = $this->getUnit();  	
+						
+		  //Have Second Sight Wave originate from firinf ship's locations.	
+		  $targetPos = $thisShip->getHexPos();
+		  $hasFireOrder->x = $targetPos->q;
+		  $hasFireOrder->y = $targetPos->r;
+		  
+		  //Correct any errors.
+		  if ($hasFireOrder->targetid != -1) {
+			  $hasFireOrder->targetid = -1; //correct the error
+			  $hasFireOrder->calledid = -1; //just in case
+		  }
+		  
+		  
+		  $allShips = $gamedata->ships;
+		  $relevantShips = array();
+  
+		  //Make a list of relelvant ships e.g. all enemy ships.
+		  foreach($allShips as $ship){
+			  if($ship->isDestroyed()) continue;		
+			  if ($ship->team == $thisShip->team) continue;	//Ignore friendlies.	
+			  $relevantShips[] = $ship;			
+		  }
+	  
+		  foreach($relevantShips as $target){
+			  
+			  $effectIni = Dice::d(6, 1)+2;
+			  if ($target->advancedArmor) $effectIni = 2;
+			  
+			  if ($target instanceof FighterFlight){  //place effect on first fighter, even if it's already destroyed!
+				  $firstFighter = $target->getSampleFighter();
+				  if($firstFighter){
+					  for($i=1; $i<=$effectIni;$i++){
+						  $crit = new tmpinidown(-1, $target->id, $firstFighter->id, 'tmpinidown', $gamedata->turn); 
+						  $crit->updated = true;
+						  $firstFighter->criticals[] =  $crit;
+					  }
+				  }
+			  }else{ //ship - place effcet on C&C!
+				  $CnC = $target->getSystemByName("CnC");
+				  if($CnC){
+					  for($i=1; $i<=$effectIni;$i++){
+						  $crit = new tmpinidown(-1, $target->id, $CnC->id, 'tmpinidown', $gamedata->turn); 
+						  $crit->updated = true;
+						  $CnC->criticals[] =  $crit;
+					  }
+				  }
+			  }			
+  
+		  }
+		  
+	  } //endof beforeFiringOrderResolution
 
 	public function calculateHitBase($gamedata, $fireOrder)
 		{

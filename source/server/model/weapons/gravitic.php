@@ -536,17 +536,17 @@ class GraviticLance extends Raking{
 	
 	//actual weapons data
 	    public $raking = 10; 
-        public $priorityArray = array(1=>7, 2=>7);
-        public $gunsArray = array(1=>1, 2=>2); //one Lance, but two Beam shots!
-	    public $uninterceptableArray = array(1=>false, 2=>false);
+        public $priorityArray = array(1=>7, 2=>7, 3=>7);
+        public $gunsArray = array(1=>1, 2=>2, 3=>2); //one Lance, but two Beam shots!
+	    public $uninterceptableArray = array(1=>false, 2=>false, 3=>false);
 	
-        public $loadingtimeArray = array(1=>4, 2=>4); //mode 1 should be the one with longest loading time
-        public $rangePenaltyArray = array(1=>0.2, 2=>0.25); //Lance -1/5 hexes, Beams -1/4 hexes
-        public $fireControlArray = array( 1=>array(-5, 2, 3), 2=>array(-5, 2, 3) ); // fighters, <mediums, <capitals 
+        public $loadingtimeArray = array(1=>4, 2=>4, 3=>4); //mode 1 should be the one with longest loading time
+        public $rangePenaltyArray = array(1=>0.2, 2=>0.25, 3=>0.25); //Lance -1/5 hexes, Beams -1/4 hexes
+        public $fireControlArray = array( 1=>array(-5, 2, 3), 2=>array(-5, 2, 3), 3=>array(-5, 2, 3) ); // fighters, <mediums, <capitals 
 	
-	    public $firingModes = array(1=>'Sustained', 2=>'Beams');
-	    public $damageTypeArray = array(1=>'Raking', 2=>'Raking'); //indicates that this weapon does damage in Pulse mode
-    	public $weaponClassArray = array(1=>'Gravitic', 2=>'Gravitic'); //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!	
+	    public $firingModes = array(1=>'Lance (Sustained)', 2=>'Beams', 3=>'Split Beams');
+	    public $damageTypeArray = array(1=>'Raking', 2=>'Raking', 3=>'Raking'); //indicates that this weapon does damage in Pulse mode
+    	public $weaponClassArray = array(1=>'Gravitic', 2=>'Gravitic', 3=>'Gravitic'); //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!	
 	
 	    public $intercept = 0; 
 	
@@ -556,7 +556,7 @@ class GraviticLance extends Raking{
         public $overloadturns = 4;
 
         public $canSplitShots = false; //Allows Firing Mode 2 to split shots.
-		public $canSplitShotsArray = array(1=>false, 2=>true );
+		public $canSplitShotsArray = array(1=>false, 2=>false, 3=>true );
 
         private $sustainedTarget = array(); //To track for next turn which ship was fired at in Sustained Mode and whether it was hit.
         private $sustainedSystemsHit = array(); //For tracking systems that were hit and how much armour they should be reduced by following turn if hit again.         
@@ -578,7 +578,7 @@ class GraviticLance extends Raking{
 			$this->data["Special"] = 'Can fire as either a Gravitic Lance (Sustained) or two Graviton Beams. ';
             $this->data["Special"] .= '<br>When firing in Sustained mode, if the first shot hits, the shot next turn hits automatically.';
             $this->data["Special"] .= '<br>Subsequent Sustained shots ignore any armour/shields that have applied to first shot.';
-            $this->data["Special"] .= '<br>Graviton Beams will both lock onto intial target, but can then be manually split by targeting other enemy ships.';                              
+            $this->data["Special"] .= "<br>Can use 'Split Beams' Firing Mode to target different enemy units with Graviton Beams.";                                          
         }
 	
         public function calculateHitBase(TacGamedata $gamedata, FireOrder $fireOrder) {
