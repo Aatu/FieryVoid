@@ -7543,7 +7543,7 @@ class SecondSight extends Weapon{
 
 	public function beforeFiringOrderResolution($gamedata){
 
-<<<<<<< HEAD
+
       $firingOrders = $this->getFireOrders($gamedata->turn);
     	
       $hasFireOrder = null;
@@ -7608,72 +7608,6 @@ class SecondSight extends Weapon{
 		}
     	
 	} //endof beforeFiringOrderResolution
-=======
-		$firingOrders = $this->getFireOrders($gamedata->turn);
-		  
-		$hasFireOrder = null;
-				foreach ($firingOrders as $fireOrder) { 
-					   if ($fireOrder->type == 'normal') { 
-					  $hasFireOrder = $fireOrder;
-					  break; //no need to search further
-					  }
-				  }    			
-				  
-		  if($hasFireOrder==null) return; //no appropriate fire order, end of work
-  
-		  $thisShip = $this->getUnit();  	
-						
-		  //Have Second Sight Wave originate from firinf ship's locations.	
-		  $targetPos = $thisShip->getHexPos();
-		  $hasFireOrder->x = $targetPos->q;
-		  $hasFireOrder->y = $targetPos->r;
-		  
-		  //Correct any errors.
-		  if ($hasFireOrder->targetid != -1) {
-			  $hasFireOrder->targetid = -1; //correct the error
-			  $hasFireOrder->calledid = -1; //just in case
-		  }
-		  
-		  
-		  $allShips = $gamedata->ships;
-		  $relevantShips = array();
-  
-		  //Make a list of relelvant ships e.g. all enemy ships.
-		  foreach($allShips as $ship){
-			  if($ship->isDestroyed()) continue;		
-			  if ($ship->team == $thisShip->team) continue;	//Ignore friendlies.	
-			  $relevantShips[] = $ship;			
-		  }
-	  
-		  foreach($relevantShips as $target){
-			  
-			  $effectIni = Dice::d(6, 1)+2;
-			  if ($target->advancedArmor) $effectIni = 2;
-			  
-			  if ($target instanceof FighterFlight){  //place effect on first fighter, even if it's already destroyed!
-				  $firstFighter = $target->getSampleFighter();
-				  if($firstFighter){
-					  for($i=1; $i<=$effectIni;$i++){
-						  $crit = new tmpinidown(-1, $target->id, $firstFighter->id, 'tmpinidown', $gamedata->turn); 
-						  $crit->updated = true;
-						  $firstFighter->criticals[] =  $crit;
-					  }
-				  }
-			  }else{ //ship - place effcet on C&C!
-				  $CnC = $target->getSystemByName("CnC");
-				  if($CnC){
-					  for($i=1; $i<=$effectIni;$i++){
-						  $crit = new tmpinidown(-1, $target->id, $CnC->id, 'tmpinidown', $gamedata->turn); 
-						  $crit->updated = true;
-						  $CnC->criticals[] =  $crit;
-					  }
-				  }
-			  }			
-  
-		  }
-		  
-	  } //endof beforeFiringOrderResolution
->>>>>>> 88ac3669c9c46c9fbe70b34e3a6d7385177679f8
 
 	public function calculateHitBase($gamedata, $fireOrder)
 		{
