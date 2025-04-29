@@ -12,6 +12,7 @@ class lightAuxCarrier extends MediumShip{
 			$this->variantOf = "Commercial Freighter";	    
 			$this->occurence = "common";
         $this->canvasSize = 100;
+		$this->isd = 2160;
 
         $this->fighters = array("normal"=>6);
         

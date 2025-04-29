@@ -9,6 +9,7 @@ class Graemlar extends OSAT{
         $this->phpclass = "Graemlar";
         $this->imagePath = "img/ships/LlortGraemlar.png";
         $this->shipClass = 'Graemlar Defense Satellite';
+        $this->isd = 2223;
         
         $this->forwardDefense = 9;
         $this->sideDefense = 12;

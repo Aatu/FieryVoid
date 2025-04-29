@@ -7,8 +7,9 @@ class ThorunEarly extends FighterFlight{
         $this->pointCost = 264;
         $this->faction = "Dilgar Imperium";
         $this->phpclass = "ThorunEarly";
-        $this->shipClass = "Thorun Dartfighters (early)";
+        $this->shipClass = "Thorun Dartfighters (Early)";
         $this->imagePath = "img/ships/thorun.png";
+        $this->isd = 2150;
         
         $this->variantOf = "Thorun Dartfighters";
 				

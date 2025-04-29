@@ -67,20 +67,24 @@ if (isset($_SESSION["user"])) {
 
 		<br><br>---------- <b>LATEST NEWS - April 2025</b> ----------
 
-	    <br><b>Features</b>
-	    <br>Players can now view Details of purchased ships in Fleet Selection screen, including any Ammo/Enhancements bought.
-	    <br>Add fighter count to units name tooltip when multiple flights are stacked on the same hex.
+	    <br><br><b>Features and Enhancements</b>
+	    <br>Combat Logs for previous turns can now be reviewed without watching Replay.
+	    <br>A new Deployment Zone Preview image has been added to Create Game screen, to show how Deployment Zones settings will look like on game map.
+	    <br>ISD, Tier and Custom filters added to Fleet Selections screen.
+	    <br>Split targeting firing modes rolled out to several new weapons, to allow targeting of different ships on the same turn.
+	    <br>Info Tab will now automatically update Fleet Lists and Fleet Values without needing to refresh the web page.
+	    <br>Nexus and Escalation Wars units receiving ability to board enemy ships.
 
-	    <br><b>Bug Fixes / Refinements</b>
-	    <br>Fix to Range Penalty crit being applied twice.
-	    <br>Fixed display and duplication issues with Damage Reduced critical.
-	    <br>Change layering of UI elements to improve experience on mobile browsers.
-	    <br>Fixed Hangar Conversions enhIDs so they can actually be used now.
-	    <br>Elite Marine upgrade for Grappling Claw fixed.
-	    <br>Ships with Grappling Claws will now include non-deployed marines in their marine defenders total.
-	    <br>Renamed some EA fighters for better display / alignment with TT SCS
-	    <br>Renamed some Grome Shells for better display.
-	    <br>Added Split shot mechanic to Psionic Concentrators
+
+
+	    <br><br><b>Bug Fixes</b>
+	    <br>Fixed Battle Laser system notes / M-Missile public notes.
+	    <br>Fixed Octurion Battleship Twin Array Forward Arcs.
+	    <br>Asteroids should now not be placed within Moon terrain.
+	    <br>Opacity now properly works for Ballistic Line sprites.
+	    <br>Added ISD dates for all official faction ships that were missing these.
+
+
 
 	    
        <br><br>

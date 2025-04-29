@@ -9,6 +9,7 @@ class Tarza extends FighterFlight{
         $this->phpclass = "Tarza";
         $this->shipClass = "Tarza Torpedo Fighters";
 	$this->imagePath = "img/ships/gorith.png";
+    $this->isd = 2255;
         
         $this->forwardDefense = 7;
         $this->sideDefense = 9;

@@ -9,6 +9,7 @@ class Drolla extends FighterFlight{
         $this->phpclass = "Drolla";
         $this->shipClass = "Drolla Assault Shuttles";
 		    $this->imagePath = "img/ships/CorillaniDrolla.png";
+            $this->isd = 2242;
         
         $this->forwardDefense = 8;
         $this->sideDefense = 8;

@@ -11,6 +11,7 @@ class Liner extends BaseShip{
         $this->shipClass = "Luxury Liner";
         $this->shipSizeClass = 3;
 	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
+        $this->isd = 2247;
         
         $this->forwardDefense = 19;
         $this->sideDefense = 19;

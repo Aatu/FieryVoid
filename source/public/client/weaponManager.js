@@ -1329,13 +1329,21 @@ window.weaponManager = {
 		var loadingTimeActual = Math.max(weapon.loadingtime,weapon.normalload);//Accelerator (or multi-mode) weapons may have loading time of 1, yet reach full potential only after longer charging
 	if ( (weapon.intercept < 1) && !(weaponManager.canWeaponInterceptAtAll(weapon)) || (loadingTimeActual <= 1) ) return false;//cannot intercept or quick to recharge anyway and will be auto-assigned
 	if (weapon.ballistic && !(weaponManager.canWeaponInterceptAtAll(weapon))) return false;//no interception using ballistic weapons    
-	if (weaponManager.hasFiringOrder(ship, weapon)) return false;//already declared
+	if (weaponManager.hasFiringOrder(ship, weapon) && !weapon.canSplitShots) return false;//already declared and can't split shots.
 	if (!weaponManager.isLoaded(weapon)) return false;//not ready to fire
+    if(weapon.canSplitShots){
+        var canSelfIntercept = weapon.checkSelfInterceptSystem(); //Look to weapon itself now, to see if any special criteria should apply.
+        if(!canSelfIntercept) return false;
+    }
 	return true;
     },	
 	
     onDeclareSelfInterceptSingle: function onDeclareSelfInterceptSingle(ship, weapon) {
 	    if(!weaponManager.canSelfInterceptSingle(ship, weapon)) return; //last check whether weapon is eligible for that!
+        if(weapon.canSplitShots) { //Discharge Gun/Slicers use their own logic here, so diverge to their own methods.
+            weapon.doMultipleSelfIntercept(ship);
+            return;
+        }
 	    var fireid = ship.id + "_" + weapon.id + "_" + (weapon.fireOrders.length + 1);
 	    var fire = {
 		id: fireid,
@@ -1652,21 +1660,6 @@ window.weaponManager = {
     targetHex: function targetHex(selectedShip, hexpos) {
         if (shipManager.isDestroyed(selectedShip)) return;
 
-        //Check for Line of sight
-        var blockedLosHex = weaponManager.getBlockedHexes();
-        var loSBlocked = false;
-        if (blockedLosHex && blockedLosHex.length > 0) {
-            var weapon = gamedata.selectedSystems[0]; // Use the first weapon to get the shooter's position
-            var sPosShooter = weaponManager.getFiringHex(selectedShip, weapon);
-            
-            loSBlocked = mathlib.checkLineOfSight(sPosShooter, hexpos, blockedLosHex);
-        }
-
-        if(loSBlocked){
-            confirm.error("No line of sight between firing ship and target hex.");	
-            return; //End work if no line of sight.
-        }
-
         var toUnselect = Array();
         for (var i in gamedata.selectedSystems) {
             var weapon = gamedata.selectedSystems[i];
@@ -1695,6 +1688,21 @@ window.weaponManager = {
 
             if (weaponManager.checkConflictingFireOrder(selectedShip, weapon)) {
                 continue;
+            }
+
+            //Check for Line of sight
+            var blockedLosHex = weaponManager.getBlockedHexes();
+            var loSBlocked = false;
+            if (blockedLosHex && blockedLosHex.length > 0) {
+                var weapon = gamedata.selectedSystems[0]; // Use the first weapon to get the shooter's position
+                var sPosShooter = weaponManager.getFiringHex(selectedShip, weapon);
+                
+                loSBlocked = mathlib.checkLineOfSight(sPosShooter, hexpos, blockedLosHex);
+            }
+
+            if(loSBlocked){
+                confirm.error("No line of sight between firing ship and target hex.");	
+                return; //End work if no line of sight.
             }
 
             var type = 'normal';
@@ -2244,5 +2252,64 @@ window.weaponManager = {
         }
 
         return fires;
-    }
+    },
+
+    getAllFireOrdersForLogPrint: function getAllFireOrdersForLogPrint(ships, turn) {
+        var fires = [];
+		var toReturn = false;
+		
+        ships.forEach(function (ship) {
+            fires = fires.concat(weaponManager.getAllFireOrdersLog(ship));
+        });
+
+        fires = fires.filter(function (fireOrder) {
+            return fireOrder.turn == turn;
+        });
+
+        return fires;
+    },
+
+    getAllFireOrdersLog: function getAllFireOrdersLog(ship) {
+        var fires = new Array();
+        for (var i in ship.systems) {
+            if (ship.flightSize > 0) { //We can't use ship.flight here, it's not variable passed by combatLog.js in data.ships
+                var fighter = ship.systems[i];
+                for (var a in fighter.systems) {
+                    var system = fighter.systems[a];
+                    var sysFires = weaponManager.getAllFireOrdersFromSystem(system);
+                    if (sysFires) fires = fires.concat(sysFires);
+                }
+            } else {
+                var system = ship.systems[i];
+                var sysFires = weaponManager.getAllFireOrdersFromSystemLog(system);
+                if (sysFires) fires = fires.concat(sysFires);
+            }
+        }
+        return fires;
+    },
+
+    getAllFireOrdersFromSystemLog: function getAllFireOrdersFromSystemLog(system) {
+        if (!system.fireOrders) return;
+
+        var fires = system.fireOrders;
+
+        if (system.dualWeapon || system.duoWeapon) {
+            for (var i in system.weapons) {
+                var weapon = system.weapons[i];
+
+                if (weapon.duoWeapon) {
+                    for (var index in weapon.weapons) {
+                        var subweapon = weapon.weapons[index];
+                        fires = fires.concat(weaponManager.getAllFireOrdersFromSystem(subweapon));
+                    }
+                } else {
+                    fires = fires.concat(weaponManager.getAllFireOrdersFromSystem(weapon));
+                }
+            }
+        }
+
+        return fires;
+    },
+
+
 };

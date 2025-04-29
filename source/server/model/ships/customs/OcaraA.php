@@ -9,7 +9,7 @@ class OcaraA extends MineClass{
         $this->shipClass = "Ocara-A Mine";
         $this->imagePath = "img/ships/mine.png";
         
-//		$this->isd = 1950;
+		$this->isd = 1950;
        
         $this->forwardDefense = 9;
         $this->sideDefense = 9;

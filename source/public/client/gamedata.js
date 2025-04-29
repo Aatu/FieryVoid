@@ -513,17 +513,21 @@ window.gamedata = {
                 }
 
                 var hasNoFO = [];
+                var hasSplitFO = [];
 
                 for (var ship in myShips) {
                     var fired = 0;
 			var hasReadyGuns = false;
-
+			var hasShotsLeft = false; //For split shot weapons that might not have used al their shots.
                     if (!myShips[ship].flight) {
                         for (var i = 0; i < myShips[ship].systems.length; i++) {
 							var currWeapon = myShips[ship].systems[i];
 							if(!currWeapon.ballistic && currWeapon.weapon && (currWeapon.displayName != "Ramming Attack")){ //ballistic weapons ore of no interest now
 								if (currWeapon.fireOrders.length > 0) {
 									fired = 1;
+                                    if (currWeapon.canSplitShots && currWeapon.fireOrders.length < currWeapon.guns) {
+                                        hasShotsLeft = true;
+                                    }
 									break;
 								}
 								if ( weaponManager.isLoaded(currWeapon) && (!shipManager.systems.isDestroyed(myShips[ship], currWeapon))
@@ -535,6 +539,9 @@ window.gamedata = {
                         }
                         if ((fired == 0) && hasReadyGuns) { //no gun was fired, and there are ready guns
                             hasNoFO.push(myShips[ship]);
+                        }
+                        if (hasShotsLeft) { //Some shots used, but not all.
+                            hasSplitFO.push(myShips[ship]);
                         }
                     } else if (myShips[ship].flight) {
                         for (var i = 0; i < myShips[ship].systems.length; i++) {
@@ -563,15 +570,27 @@ window.gamedata = {
                     }
                 }
 
-                if (hasNoFO.length == 0) {
+                if (hasNoFO.length == 0 && hasSplitFO.length ==0) { //Has no ships with no fireOrders at all.
                     confirm.confirm("Are you sure you wish to COMMIT YOUR FIRE ORDERS?", gamedata.doCommit);
                 } else {
-                    var html = "You have not assigned any fire orders for the following ships: ";
-                    html += "<br>";
-                    for (var ship in hasNoFO) {
-                        html += hasNoFO[ship].name + " (" + hasNoFO[ship].shipClass + ")";
+                    var html = '';
+                    if (hasNoFO.length > 0){
+                        html += "You have not assigned any fire orders for the following ships: ";
                         html += "<br>";
-                    }
+                        for (var ship in hasNoFO) {
+                            html += hasNoFO[ship].name + " (" + hasNoFO[ship].shipClass + ")";
+                            html += "<br>";
+                        }
+                    }    
+                    if (hasSplitFO.length > 0){
+                        html += "<br>";
+                        html += "The following ships have weapons with unused shots: ";
+                        html += "<br>";
+                        for (var ship in hasSplitFO) {
+                            html += hasSplitFO[ship].name + " (" + hasSplitFO[ship].shipClass + ")";
+                            html += "<br>";
+                        }
+                    }    
                     confirm.confirm(html + "<br>Are you sure you wish to COMMIT YOUR FIRE ORDERS?", gamedata.doCommit);
                 }
             } else if (gamedata.gamephase != 4) {
@@ -982,6 +1001,7 @@ window.gamedata = {
         gamedata.subphase = 0;
         //shipManager.initShips();
         UI.shipMovement.hide();
+        if(gamedata.gamephase == 1) fleetListManager.reset();       
         fleetListManager.displayFleetLists();
 
         gamedata.setPhaseClass();

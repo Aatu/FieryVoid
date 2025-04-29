@@ -11,6 +11,7 @@ class TankerTug extends MediumShip{
 		$this->shipClass = "Tanker Tug";
 		$this->canvasSize = 100;
 	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
+		$this->isd = 2195;
 
 		$this->forwardDefense = 12;
 		$this->sideDefense = 12;

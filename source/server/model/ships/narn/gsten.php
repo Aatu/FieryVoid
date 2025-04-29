@@ -12,12 +12,8 @@ class Gsten extends BaseShip{
 			$this->variantOf = "G'Karith Patrol Cruiser";
 			$this->occurence = "rare";	        
         $this->shipSizeClass = 3;
-        //$this->occurence = "special";
-        $this->fighters = array("normal"=>6);
-// 		$this->unofficial = 'S'; //reclassified as Common due to lack of G'Karith, otherwise an official ship
-	    
-//	    $this->notes = "Nominally Rare variant of G'Karith cruiser (not present in FV)";
-	    
+	    $this->isd = 2260;
+        $this->fighters = array("normal"=>6);    
 		
         $this->forwardDefense = 15;
         $this->sideDefense = 16;

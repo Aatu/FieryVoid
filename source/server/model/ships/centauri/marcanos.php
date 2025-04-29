@@ -18,6 +18,7 @@ class marcanos extends SmallStarBaseFourSections{
 		$this->forwardDefense = 18;
 		$this->sideDefense = 18;
 		$this->canvasSize = 200; 
+		$this->isd = 2113;
 		
 		/*replace outer Structures with tagged ones
 		$this->addFrontSystem(new Structure( 4, 90));

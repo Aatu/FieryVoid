@@ -393,7 +393,7 @@ body {
     max-width: 800px;
 	height:150px;
 	opacity:0.85;
-    color: #496791; /* #deebff; */
+    color: #597eb1; /* #deebff; */
     background-color: #04161C;
     border-top: 1px solid #496791;
 	border-right: 1px solid #496791;
@@ -413,7 +413,7 @@ body {
 }
 
 #logcontainer.large{
-    height: 300px;
+    height: 500px;
 }
 
 #logcontainer.mouseover
@@ -482,11 +482,46 @@ body {
 #declarationsContainer{	
     overflow-y: scroll;
     position: absolute;
-    padding: 0 5px;
+    padding: 0 0px;
+}
+
+#combatLogContainer{
+    overflow-y: scroll;
+    position: absolute;
+    padding: 0 0px 0 0px; /* Extra right padding for scrollbar visibility */  
+}
+
+#combatLogButtons{	
+        position: absolute; /* Absolute positioning */
+        font-size: 12px;   
+        font-style:normal;
+        font-weight:bold;  
+        color: #597eb1; /* #deebff; */                         
+        top: 0;             /* Align to the top */
+        right: 0;           /* Align to the right */
+        padding-top: 3px;
+        padding-right: 3px; /* Adjust for padding from the right side */
+        z-index: 11;        /* Make sure it's on top */
+}
+
+#combatLogButtons input[type="button"] {
+    font-size: 12px;
+    cursor: pointer;
+    margin-top: 1px;
+    margin-right: 3px; /* Add space between buttons */
+    border: none; /* Remove default border */
+}
+
+
+#combatLogActual{	
+    padding-top: 3px;
+    font-size: 12px;   
+    font-style:normal; 
 }
 
 #declarationsButtons{	
     padding-top: 5px;
+    font-size: 12px;      
 }
 
 #declarationsActual{	
@@ -529,12 +564,13 @@ body {
 }
 
 .fleetlistentry .destroyed{
-    font-style: italic;
+    font-style: normal;
+    color:#b34119;
 }
 
 .fleetheader .headername{
 	font-weight:bold;
-	color:#b34119;
+	color:#deebff;
 }
 
 .fleetheader .playername{
@@ -554,7 +590,7 @@ body {
     margin-top: 3px;
     float: left;
     padding-left: 5px;
-    width:35%;
+    width:40%;
 }
 
 .fleetlist .shipclass{
@@ -566,19 +602,31 @@ body {
 .fleetlist .shiptype{
     margin-top: 3px;
     float: left;
-    width: 15%;
+    width: 10%;
 }
 
+/* //Apparently not used anymore, and old element is pushing value out of alignment in Info Tab - DK
 .fleetlist .shipstatus{
     margin-top: 3px;
     float: left;
     width: 10%;
+}
+*/
+
+.fleetlist .shipstatus:empty {
+    display: none;
 }
 
 .fleetlist .initiative{
 	margin-top: 3px;
 	float: left;
 	width: 10%;
+}
+
+.fleetlist .value {
+    margin-top: 3px;
+    float: left;
+    width: 10%;
 }
 
 #logcontainer #gameinfo{

@@ -10,6 +10,7 @@ class tkharas extends FighterFlight{
         $this->phpclass = "tkharas";
         $this->shipClass = "T'Khar Assault Shuttles";
 		    $this->imagePath = "img/ships/NarnTGhor.png";
+        $this->isd = 2241;
         
         $this->forwardDefense = 9;
         $this->sideDefense = 9;
