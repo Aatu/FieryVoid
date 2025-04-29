@@ -9,6 +9,7 @@ class Darkner extends HeavyCombatVessel{
         $this->phpclass = "Darkner";
         $this->imagePath = "img/ships/darkner.png";
         $this->shipClass = "Darkner Fast Attack Frigate";
+        $this->isd = 2249;
         
         
         $this->forwardDefense = 13;

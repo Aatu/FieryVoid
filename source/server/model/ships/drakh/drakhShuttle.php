@@ -10,6 +10,7 @@ class DrakhShuttle extends FighterFlight{
         $this->phpclass = "DrakhShuttle";
         $this->shipClass = "Armed Shuttles";
 	 $this->imagePath = "img/ships/DrakhShuttle.png";
+     $this->isd = 2234;
         
         $this->forwardDefense = 9;
         $this->sideDefense = 8;

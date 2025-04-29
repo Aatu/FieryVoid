@@ -9,6 +9,7 @@ class TechnicalTestbed extends MediumShip{
         $this->phpclass = "TechnicalTestbed";
         $this->shipClass = "New Technology Testbed";
         $this->imagePath = "img/ships/olympus.png";
+        $this->isd = 0;
         //$this->canvasSize = 200;
 	    
 	    

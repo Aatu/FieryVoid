@@ -12,6 +12,7 @@ class Darmoti extends HeavyCombatVessel{
         $this->occurence = "uncommon";
         $this->variantOf = "Demos Heavy Warship";
         $this->fighters = array("normal"=>6);
+        $this->isd = 2248;
         
         $this->forwardDefense = 12;
         $this->sideDefense = 14;

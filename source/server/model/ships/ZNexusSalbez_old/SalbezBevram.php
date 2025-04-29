@@ -26,6 +26,9 @@ class SalbezBevram extends SmallStarBaseFourSections{
 		$this->forwardDefense = 17;
 		$this->sideDefense = 17;
 
+   		$this->enhancementOptionsEnabled[] = 'ELT_MRN'; //To enable Elite Marines enhancement
+		$this->enhancementOptionsEnabled[] = 'EXT_MRN'; //To enable extra Marines enhancement
+
 		$this->addPrimarySystem(new Reactor(3, 17, 0, 0));
 		$this->addPrimarySystem(new CnC(3, 10, 0, 0));
 		$this->addPrimarySystem(new Scanner(3, 10, 5, 5));
@@ -36,28 +39,28 @@ class SalbezBevram extends SmallStarBaseFourSections{
 		$this->addFrontSystem(new NexusIndustrialLaser(3, 6, 3, 270, 90));
 		$this->addFrontSystem(new NexusParticleGrid(3, 3, 1, 270, 90));
 		$this->addFrontSystem(new NexusParticleGrid(3, 3, 1, 270, 90));
-		$this->addFrontSystem(new CustomIndustrialGrappler(3, 5, 0, 270, 90));
+		$this->addFrontSystem(new GrapplingClaw(3, 0, 0, 270, 90, 8, false));
 		$this->addFrontSystem(new CargoBay(3, 30));
 
 		$this->addAftSystem(new NexusIndustrialLaser(3, 6, 3, 90, 270));
 		$this->addAftSystem(new NexusIndustrialLaser(3, 6, 3, 90, 270));
 		$this->addAftSystem(new NexusParticleGrid(3, 3, 1, 90, 270));
 		$this->addAftSystem(new NexusParticleGrid(3, 3, 1, 90, 270));
-		$this->addAftSystem(new CustomIndustrialGrappler(3, 5, 0, 90, 270));
+		$this->addAftSystem(new GrapplingClaw(3, 0, 0, 90, 270, 8, false));
 		$this->addAftSystem(new CargoBay(3, 30));
 			
 		$this->addLeftSystem(new NexusIndustrialLaser(3, 6, 3, 180, 360));
 		$this->addLeftSystem(new NexusIndustrialLaser(3, 6, 3, 180, 360));
 		$this->addLeftSystem(new NexusParticleGrid(3, 3, 1, 180, 360));
 		$this->addLeftSystem(new NexusParticleGrid(3, 3, 1, 180, 360));
-		$this->addLeftSystem(new CustomIndustrialGrappler(3, 5, 0, 180, 360));
+		$this->addLeftSystem(new GrapplingClaw(3, 0, 0, 180, 360, 8, false));
 		$this->addLeftSystem(new CargoBay(3, 30));
 
 		$this->addRightSystem(new NexusIndustrialLaser(3, 6, 3, 0, 180));
 		$this->addRightSystem(new NexusIndustrialLaser(3, 6, 3, 0, 180));
 		$this->addRightSystem(new NexusParticleGrid(3, 3, 1, 0, 180));
 		$this->addRightSystem(new NexusParticleGrid(3, 3, 1, 0, 180));
-		$this->addRightSystem(new CustomIndustrialGrappler(3, 5, 0, 0, 180));
+		$this->addRightSystem(new GrapplingClaw(3, 0, 0, 0, 180, 8, false));
 		$this->addRightSystem(new CargoBay(3, 30));
 
 		$this->addFrontSystem(new Structure( 3, 60));
@@ -78,7 +81,7 @@ class SalbezBevram extends SmallStarBaseFourSections{
 			1=> array(
 				3 => "Industrial Laser",
 				5 => "Particle Grid",
-				7 => "Industrial Grappler",
+				7 => "Grappling Claw",
 				10 => "Cargo Bay",
 				18 => "Structure",
 				20 => "Primary",
@@ -86,7 +89,7 @@ class SalbezBevram extends SmallStarBaseFourSections{
 			2=> array(
 				3 => "Industrial Laser",
 				5 => "Particle Grid",
-				7 => "Industrial Grappler",
+				7 => "Grappling Claw",
 				10 => "Cargo Bay",
 				18 => "Structure",
 				20 => "Primary",
@@ -94,7 +97,7 @@ class SalbezBevram extends SmallStarBaseFourSections{
 			3=> array(
 				3 => "Industrial Laser",
 				5 => "Particle Grid",
-				7 => "Industrial Grappler",
+				7 => "Grappling Claw",
 				10 => "Cargo Bay",
 				18 => "Structure",
 				20 => "Primary",
@@ -102,7 +105,7 @@ class SalbezBevram extends SmallStarBaseFourSections{
 			4=> array(
 				3 => "Industrial Laser",
 				5 => "Particle Grid",
-				7 => "Industrial Grappler",
+				7 => "Grappling Claw",
 				10 => "Cargo Bay",
 				18 => "Structure",
 				20 => "Primary",

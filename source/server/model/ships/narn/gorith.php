@@ -9,6 +9,7 @@ class Gorith extends FighterFlight{
         $this->phpclass = "Gorith";
         $this->shipClass = "Gorith Medium Fighters";
 		$this->imagePath = "img/ships/gorith.png";
+        $this->isd = 2210;
         
         $this->forwardDefense = 7;
         $this->sideDefense = 9;

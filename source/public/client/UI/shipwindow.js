@@ -394,7 +394,7 @@ window.shipWindowManager = {
 			}
 
 			if (ship.isd != '') {
-				notes.push("&nbsp;in service: " + ship.isd);
+				notes.push("&nbsp;In-Service (ISD): " + ship.isd);
 			}
 
 

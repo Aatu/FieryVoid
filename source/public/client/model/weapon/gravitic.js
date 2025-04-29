@@ -149,9 +149,18 @@ var GraviticLance = function(json, ship) {
 GraviticLance.prototype = Object.create( Weapon.prototype );
 GraviticLance.prototype.constructor = GraviticLance;
 
+GraviticLance.prototype.initializationUpdate = function() {
+	if(this.firingMode == 3){
+		this.data["Shots Remaining"] = this.guns - this.fireOrders.length;
+	} else {
+		delete this.data["Shots Remaining"];
+	}
+	return this;
+};
+
 GraviticLance.prototype.doMultipleFireOrders = function (shooter, target, system) {
 
-    var shotsOnTarget = this.guns; // Default guns initially.
+    var shotsOnTarget = this.guns; // Default guns initially.  We never want teh palyer to miss firing a shot for such a powerful weapon (and it can't intercept).
     if (this.fireOrders.length == 2) { // Two shots have been locked in, remove the first.
         this.fireOrders.splice(0, 1); // Remove the first fire order.
         shotsOnTarget--; //Reduce guns to 1, the one currently being retargeted!

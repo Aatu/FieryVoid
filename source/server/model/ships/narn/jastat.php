@@ -11,7 +11,7 @@ class JaStat extends StarBaseFiveSections{
 		$this->phpclass = "JaStat";
 		$this->shipClass = "Ja'Stat Warbase";
 		$this->fighters = array("heavy"=>36); 
-// 		$this->unofficial = 'S'; //unavailable official Pulsar Mines replaced with Twin Arrays
+	    $this->isd = 2243;
 
 		$this->shipSizeClass = 3;
         $this->Enormous = true;		

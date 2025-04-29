@@ -9,6 +9,7 @@ class ZFtrZeoth extends FighterFlight{
 		$this->phpclass = "ZFtrZeoth";
         $this->shipClass = "Zeoth Assault Shuttles";
 		$this->imagePath = "img/ships/VreeZeoth.png";
+        $this->isd = 2225;
         
         $this->forwardDefense = 8;
         $this->sideDefense = 8;

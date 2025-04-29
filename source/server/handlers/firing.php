@@ -57,15 +57,25 @@ class Firing
            
             if (!(($ship->unavailable === true) || $ship->isDisabled())) { //ship itself can fight this turn
                 foreach ($ship->systems as $weapon) {               	
-//                    if ((!($weapon instanceof Weapon)) || ($weapon->ballistic)) continue; //not a weapon, or a ballistic weapon   NOTE: changed to allow ballistics to intercept GTS 07 Aug 2022
                     if ((!($weapon instanceof Weapon))) continue; //not a weapon, or a ballistic weapon         
-					if ($weapon->canModesIntercept && (!($weapon->firedOnTurn($currTurn)))) $weapon->switchModeForIntercept(); //To check for intercept values in non-default modes if weapon has appropriate marker and hasn't fired e.g. Intercept Missile etc  
-	                    	
-                    if ((!$weapon->firedOnTurn($currTurn)) && ($weapon->intercept > 0)) {
+					if ($weapon->canModesIntercept && (!($weapon->firedOnTurn($currTurn)))) $weapon->switchModeForIntercept(); //To check for intercept values in non-default modes if weapon has appropriate marker and hasn't fired e.g. Intercept Missile etc                    
+                    
+                    /* //Old method before the additiona of split shot weapons, keep for now
+                    if ((!$weapon->firedOnTurn($currTurn) || $weapon->canSplitShots) && ($weapon->intercept > 0)) {
                         if (self::isValidInterceptor($gamedata, $weapon)) {//not fired this turn, intercept-capable, and valid interceptor                 	
                             $toReturn[] = $weapon;
                         }
                     }
+                    */
+
+                        if (
+                            (!$weapon->firedOnTurn($currTurn) || $weapon->canSplitShots)
+                            && ($weapon->intercept > 0)
+                        ) {
+                            if (self::isValidInterceptor($gamedata, $weapon)) {
+                                $toReturn[] = $weapon;
+                            }
+                        }                        
                 }
             }
         }
@@ -234,6 +244,16 @@ class Firing
         //assign interception
         while ((count($allInterceptWeapons) > 0)) {//weapons can still intercept!
             $currInterceptor = array_shift($allInterceptWeapons); //most capable interceptor available
+
+            //A split shot weapon may have fired some shots offensively, deduct these from intercept guns.                
+            if ($currInterceptor->canSplitShots) {
+                $currGuns = $currInterceptor->guns - count($currInterceptor->fireOrders); //Normally we just deduct fireOrders from total guns.
+                foreach($currInterceptor->fireOrders as $fired){ //However, accelerator weapons like Discharge Gun have to be manually set, and this fireOrder shouldn't count against total.
+                    if($fired->type == "selfIntercept") $currGuns++; //So if selfIntercept, add shot back on.
+                }    
+                $currInterceptor->guns = $currGuns; //Deduct fireOrders from intercept.                          
+            }
+
             for ($i = 0; $i < $currInterceptor->guns; $i++) { //a single weapon can intercept multiple times...
                 //find shot it would be most profitable to intercept with this weapon, and intercept it!
                 $shotToIntercept = self::getBestInterception($gamedata, $currInterceptor, $allIncomingShots);
@@ -273,8 +293,8 @@ class Firing
         }
 	
 	$loadingTimeActual = max($weapon->getLoadingTime(),$weapon->normalload);//Accelerator (or multi-mode) weapons may have loading time of 1, yet reach full potential only after longer charging 
-
-	if ($loadingTimeActual > 1) { 
+        /*  //Old method  
+	    if ($loadingTimeActual > 1) { 
             if (isset($weapon->fireOrders[0])) {
                 if ($weapon->fireOrders[0]->type != "selfIntercept") {
                     return false;
@@ -282,11 +302,51 @@ class Firing
             } else {
                 return false;
             }
+        }                     
+        */   
+        //New Method taking itno account Split Shot weapons.
+        if ($loadingTimeActual > 1) {
+                $hasSelfIntercept = false;
+        
+                // If the weapon can split shots, check all fireOrders
+                if ($weapon->canSplitShots) {
+                    foreach ($weapon->fireOrders as $order) {
+                        if ($order->type == "selfIntercept") {
+                            $hasSelfIntercept = true;
+                            break;
+                        }
+                    }
+                } else {
+                    // Fallback for non-splitting weapons: check only the first
+                    if (isset($weapon->fireOrders[0]) && $weapon->fireOrders[0]->type == "selfIntercept") {
+                        $hasSelfIntercept = true;
+                    }
+                }
+        
+                if (!$hasSelfIntercept) {
+                    return false;
+                }
         }
 
-        if ($loadingTimeActual == 1 && $weapon->firedOnTurn($gd->turn)) {
+        //Added new checks for split shots weapons so they don't get ruled out at this moment.   
+        if ($loadingTimeActual == 1 
+            && $weapon->firedOnTurn($gd->turn) 
+            && !$weapon->canSplitShots) { //Retain normal check for weapon that can't split, but leave room for split shot exceptions.
             return false;
         }
+
+        //Now check if split shot weapons have any spare guns to intercept with.
+        if ($weapon->canSplitShots) { //Weapon that might have fired some shots, but still have some remaining to intercept with.
+            $count = count($weapon->fireOrders); //How many fireOrders were made?
+            foreach ($weapon->fireOrders as $order1) {
+                if ($order1->type == "selfIntercept") {
+                    $count--;
+                }
+            }
+            if($count >= $weapon->guns){ //If fireOrders have used up all shots, cannot intercept.
+                return false;
+            }
+        }        
 
         return true;
     } //endof function isValidInterceptor
@@ -487,8 +547,7 @@ class Firing
                     $weapon->calculateHitBase($gamedata, $fire);
                 }
             }
-            
-//echo "Debug: Intercept at end:  $weapon->intercept\n";     // Add this line for debugging             
+                     
         }
 
         //calculate hit chances for ambiguous firing!

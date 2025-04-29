@@ -5,7 +5,7 @@ class KobolMinerva extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 1700;
-	$this->faction = "ZPlaytest 12 Colonies of Kobol (Tier 1)";
+	$this->faction = "ZPlaytest 12 Colonies of Kobol";
         $this->phpclass = "KobolMinerva";
         $this->imagePath = "img/ships/BSG/ColonialMinerva.png";
         $this->shipClass = "Minerva Battlestar (Alpha prototype)";

@@ -2,6 +2,8 @@
 
 window.combatLog = {
 
+    displayedTurn: null,
+
     onTurnStart: function onTurnStart() {
         $('.logentry').remove();
     },
@@ -34,7 +36,7 @@ window.combatLog = {
         
     },
 
-    logFireOrders: function logFireOrders(orders) {
+    logFireOrders: function logFireOrders(orders, printedLog = false) {
 
         orders = [].concat(orders);
 
@@ -199,11 +201,15 @@ window.combatLog = {
         }
 		
 		
-
-        var element = $(html).appendTo("#log");
-
-        $("#log").scrollTop($("#log")[0].scrollHeight);
-        return element;
+        if(printedLog){ //Different method fo listing depending on whether player is watching a Replay animation or just browsing the printed log :)
+            var targetDiv = document.getElementById("LogActual"); 
+            targetDiv.style.display = "block";
+            targetDiv.innerHTML += html;
+        }else{
+            var element = $(html).appendTo("#log");
+            $("#log").scrollTop($("#log")[0].scrollHeight);
+            return element;
+        }
     },
 
     removeFireOrders: function removeFireOrders(element) {
@@ -293,6 +299,148 @@ window.combatLog = {
 
         //$(details).prependTo("#log");
         $(log).prependTo("#log");
+    },
+
+    getDisplayTurn: function getDisplayTurn() {
+        if(this.displayedTurn === null){
+            return gamedata.turn;
+        }else{
+            return this.displayedTurn; 
+        } 
+    },    
+
+    showPrevious: function showPrevious() {
+        if(this.displayedTurn === null) this.displayedTurn = gamedata.turn;
+        var turn = this.displayedTurn - 1;
+        if (turn < 1) return;
+        this.displayedTurn = turn;
+
+        if(this.displayedTurn < gamedata.turn){
+            document.getElementById('nextTurnButton').style.display = 'inline-block'; // Display next button when relevant.
+            document.getElementById('currentTurnButton').style.display = 'inline-block'; // Display next button when relevant.
+        }
+
+        combatLog.fetchAndShowCombatLog();
+    },    
+
+    showNext: function showNext() {
+        if(this.displayedTurn === null) this.displayedTurn = gamedata.turn;
+        var turn = this.displayedTurn+1; //Get the turn we want.
+        this.displayedTurn = turn; //Set new displayedTurn for further requests.
+        
+        if(this.displayedTurn >= gamedata.turn){
+            document.getElementById('nextTurnButton').style.display = 'none'; // Hide next turn button
+            document.getElementById('currentTurnButton').style.display = 'none'; //Hide Turn number.            
+            document.getElementById('LogActual').style.display = 'none'; //Hide Turn number.
+            return; //Can't go forward past current turn. 
+        } 
+        combatLog.fetchAndShowCombatLog();
+    },
+
+    showCurrent: function showCurrent() {
+        this.displayedTurn = gamedata.turn;
+        
+        document.getElementById('nextTurnButton').style.display = 'none'; // Hide next turn button
+        document.getElementById('currentTurnButton').style.display = 'none'; //Hide Turn number.
+        document.getElementById('LogActual').style.display = 'none'; //Hide Turn number.        
+        document.getElementById('LogActual').innerHTML = '';  //Reset Combat Log text          
+        return; 
+    },    
+
+    fetchAndShowCombatLog: function fetchAndShowCombatLog(){
+        jQuery.ajax({
+            type: 'GET',
+            url: 'replay.php',
+            dataType: 'json',
+            data: {
+                turn: this.displayedTurn,
+                gameid: gamedata.gameid,
+                time: new Date().getTime()
+            },
+            success: function (data) {             
+                var allFireOrders = []; //Initialise
+				allFireOrders = combatLog.groupByShipAndWeapon(weaponManager.getAllFireOrdersForLogPrint(data.ships, data.turn)); //Find and group appropriate fire orders.	
+                combatLog.showLog(allFireOrders); //Now print log from selected turn     		
+            }.bind(this),
+            error: ajaxInterface.errorAjax
+        });
+
+    }, 
+
+
+    groupByShipAndWeapon: function groupByShipAndWeapon(incomingFire) {
+        const grouped = {};
+    
+        incomingFire.forEach(function (fire) {
+            if (fire.type === "intercept" || fire.type === "selfIntercept") return;
+    
+            const ship = gamedata.getShip(fire.shooterid);
+            const weapon = shipManager.systems.getSystem(ship, fire.weaponid);
+            const key = `${fire.shooterid}-${weapon.constructor.name}-${fire.firingMode}-${fire.targetid}`;
+    
+            grouped[key] = grouped[key] || [];
+            grouped[key].push(fire);
+        });
+    
+        const groupedKeys = Object.keys(grouped);
+    
+        groupedKeys.sort(function (a, b) {
+            const obj1 = grouped[a][0];
+            const obj2 = grouped[b][0]; 
+    
+            const s1 = gamedata.getShip(obj1.shooterid);
+            const s2 = gamedata.getShip(obj2.shooterid);
+            const w1 = shipManager.systems.getSystem(s1, obj1.weaponid);
+            const w2 = shipManager.systems.getSystem(s2, obj2.weaponid);
+/*    
+            // Sort by resolution order first
+            if (obj1.resolutionOrder !== obj2.resolutionOrder) {
+                return obj1.resolutionOrder - obj2.resolutionOrder;
+            }
+    
+            // Fighters after ships
+            if (s1.flight !== s2.flight) {
+                return s1.flight ? 1 : -1;
+            }
+*/    
+            // Weapon priority
+            if (w1.priority !== w2.priority) {
+                return w1.priority - w2.priority;
+            }
+    
+            // Fallback: shooter ID and fire order ID
+            let val = s1.id - s2.id;
+            if (val === 0) val = obj1.id - obj2.id;
+            return val;
+        });
+    
+        return groupedKeys.map(function (key) {
+            return grouped[key];
+        });
+    },
+
+    showLog: function showLog(allFireOrders) {
+        // Get the current turn from the combat log system
+        var currentTurn = window.combatLog.getDisplayTurn();
+    
+        // Start building the log HTML
+        var html = '<br><span style="font-size:12px; font-weight:bold; text-decoration:underline;">Turn ' + currentTurn + ':</span><br>';
+    
+        // Check if the allFireOrders array is empty
+        if (allFireOrders.length === 0) {
+            html += '<span style="font-size:12px;"><br>No fire orders were made this turn!</span>';
+        }
+    
+        // Update the content of LogActual with the current turn and optional message
+        document.getElementById('LogActual').innerHTML = html;
+    
+        // Process fire orders if any
+        allFireOrders.forEach(function (logEntry) { // allFireOrders is an array of other arrays
+            combatLog.logFireOrders(logEntry, true);
+        });
+    
+        // Show the LogActual div
+        document.getElementById('LogActual').style.display = 'block'; // Set to 'block' or 'inline-block' depending on your layout
     }
 
 };

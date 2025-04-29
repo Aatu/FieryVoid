@@ -58,6 +58,15 @@
 	   public  $iconPath = "quadParticleBeam.png";
         public $guns = 4;
 
+        public $firingModes = array( 1 => "Normal", 2=> "Split");
+        public $canSplitShots = false; //Allows Firing Mode 2 to split shots.
+        public $canSplitShotsArray = array(1=>false, 2=>true );         
+        
+        public function setSystemDataWindow($turn){			
+            parent::setSystemDataWindow($turn);   
+            $this->data["Special"] = "Can use 'Split' Firing Mode to target different enemy units.";
+        }
+
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
 	    if ( $maxhealth == 0 ) $maxhealth = 8;
             if ( $powerReq == 0 ) $powerReq = 4;            
@@ -187,11 +196,20 @@
         public $rangePenalty = 2;
         public $fireControl = array(6, 5, 4); // fighters, <mediums, <capitals
 
+        public $firingModes = array( 1 => "Normal", 2=> "Split");
+        public $canSplitShots = false; //Allows Firing Mode 2 to split shots.
+        public $canSplitShotsArray = array(1=>false, 2=>true );          
+
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
 		if ( $maxhealth == 0 ) $maxhealth = 6;
 		if ( $powerReq == 0 ) $powerReq = 4;
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function setSystemDataWindow($turn){			
+            parent::setSystemDataWindow($turn);   
+            $this->data["Special"] = "Can use 'Split' Firing Mode to target different enemy units.";
         }
 
         public function getDamage($fireOrder){        return Dice::d(10)+4;   }
@@ -222,11 +240,20 @@
         public $rangePenalty = 1;
         public $fireControl = array(2, 3, 4); // fighters, <mediums, <capitals
 
+        public $firingModes = array( 1 => "Normal", 2=> "Split");
+        public $canSplitShots = false; //Allows Firing Mode 2 to split shots.
+        public $canSplitShotsArray = array(1=>false, 2=>true );           
+
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
 		if ( $maxhealth == 0 ) $maxhealth = 8;
 		if ( $powerReq == 0 ) $powerReq = 4;
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function setSystemDataWindow($turn){			
+            parent::setSystemDataWindow($turn);   
+            $this->data["Special"] = "Can use 'Split' Firing Mode to target different enemy units.";
         }
 
         public function getDamage($fireOrder){        return Dice::d(10, 2)+6;   }
@@ -1397,10 +1424,13 @@
         public $rangePenalty = 2;
         public $fireControl = array(6, 5, 4); // fighters, <mediums, <capitals
 
-        public $firingModes = array(1=>'4Quad', 2=>'3Triple', 3=>'2Dual', 4=>'1Single');
-        public $gunsArray = array(1=>4,2=>3,3=>2,4=>1);
+        public $firingModes = array(1=>'4Quad', 2=>'3Triple', 3=>'2Dual', 4=>'1Single', 5=>'Split');
+
+        public $canSplitShots = false; //Allows Firing Mode 2 to split shots.
+        public $canSplitShotsArray = array(1=>false, 2=>false, 3=>false, 4=>false, 5=>true  );          
+        public $gunsArray = array(1=>4,2=>3,3=>2,4=>1,5=>4);
 	    
-	public $firedThisTurn = false; //to avoid re-rolling criticals!
+	    private $firedThisTurn = false; //to avoid re-rolling criticals!
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             //maxhealth and power reqirement are fixed; left option to override with hand-written values
@@ -1415,11 +1445,11 @@
         
         public function setSystemDataWindow($turn){
             parent::setSystemDataWindow($turn);
-            //$this->output = $this->baseOutput + $this->getBoostLevel($turn); //handled in front end
-            $this->data["Special"] = 'If three or four shots are fired, this weapon may overheat next turn if fired again.';    
-            $this->data["Special"] .= "<br>When this weapon has 'May Overheat' critical(s), firing again will cause a critical roll at end of turn."; 
-            $this->data["Special"] .= "<br>This critical roll has +2 modifier for evey shot fired in current turn, and -2 if there is only one 'May Overheat' critical effect.";  
-            $this->data["Special"] .= "<br>Dual or Single shots will not cause overheating the following turn, nor will defensive fire.";                          
+            $this->data["Special"] = "Can use 'Split' Firing Mode to target different enemy units."; 
+            $this->data["Special"] .= '<br>If three or four shots are fired, gains May Overheat critical(s) next turn.';    
+            $this->data["Special"] .= "<br>When weapon May Overheat, firing offensively causes a critical roll."; 
+            $this->data["Special"] .= "<br>This roll has +2 modifier for evey shot fired in current turn, but -2 if only one 'May Overheat' critical effect.";  
+            $this->data["Special"] .= "<br>Dual or Single shots do not cause overheating the following turn, nor will defensive fire unless 'Split' firing mode was used.";                               
         }
 
 	//Fire function for Quad Array
@@ -1444,9 +1474,9 @@
 			 $crits = array(); 
 			 $crits = $this->testCritical($shooter, $gamedata, $crits);//Added $shooter for ship variable.
 			}
-			
+/*			
 			//Add any new crits for next turn. 
-			if($this->firingMode==1){//Quad 
+			if($this->firingMode==1 || $shotsThisTurn == 4){//Quad 
 						$crit1 = new MayOverheat(-1, $fireOrder->shooterid, $this->id, "MayOverheat", $gamedata->turn, $gamedata->turn+1);
 				        $crit1->updated = true;
 						$crit1->newCrit = true; //force save even if crit is not for current turn
@@ -1454,40 +1484,44 @@
 				        //Add second critical when 4 shots are fired.
 				        $crit2 = clone $crit1;
 				        $this->criticals[] =  $crit2;
-			}else if ($this->firingMode==2){//Triple 
+			}else if ($this->firingMode==2 || $shotsThisTurn == 3){//Triple 
 				$crit = new MayOverheat(-1, $fireOrder->shooterid, $this->id, "MayOverheat", $gamedata->turn, $gamedata->turn+1);
 				        $crit->updated = true;
 						$crit->newCrit = true; //force save even if crit is not for current turn
 				        $this->criticals[] =  $crit;
 			} 
-		 
+*/		 
 		}//end of function Fire
 
-/* //Previous version of Quad Array Fire function, just in case.
-        public function fire($gamedata, $fireOrder){
-            // If fired, Quad Array might overheat and go in shutdown for 1 turn.
-            // Make a crit roll taking into account used firing mode
-            parent::fire($gamedata, $fireOrder);
-            
-	    if ($this->firedThisTurn) return; //crit already accounted for (if necessary)
-			$this->firedThisTurn = true; //to avoid rolling crit for every shot!
+    public function criticalPhaseEffects($ship, $gamedata) { 
+            parent::criticalPhaseEffects($ship, $gamedata);//Some critical effects like Limpet Bore might destroy weapon in this phase        
+
+            if($this->isDestroyed()) return;//Quad Array is destroyed, no further action.
+
+			$shotsThisTurn = count($this->getFireOrders($gamedata->turn)); //How many offensive & defensive shots were fired this turn?
+
+            if($shotsThisTurn == 0) return;//No shots, no further action.            
+
+            $interceptsThisTurn = $this->firedDefensivelyAlready;  //Defensive shots this turn.
+            if($this->firingMode != 5) $shotsThisTurn -= $interceptsThisTurn;  //If split mode wasn't used, don't add automated intercepts.                   
 		
-            $chance = 0;
-            if ($this->firingMode==1){//quad
-                $chance = 2; //50%
-            }else if ($this->firingMode==2){//triple
-                $chance = 1; //25%
-            }
-		
-            $roll = Dice::d(4);            
-            if($roll <= $chance){ // It has overheated.
-                $crit = new ForcedOfflineOneTurn(-1, $fireOrder->shooterid, $this->id, "ForcedOfflineOneTurn", $gamedata->turn);
-                $crit->updated = true;
-                $this->criticals[] =  $crit;
-            }
-		
-        }
-  */      
+        //Add any new crits for next turn. 
+		if($shotsThisTurn == 4){//Quad 
+            $crit1 = new MayOverheat(-1, $ship->id, $this->id, "MayOverheat", $gamedata->turn, $gamedata->turn+1);
+            $crit1->updated = true;
+            $crit1->newCrit = true; //force save even if crit is not for current turn
+            $this->criticals[] =  $crit1;
+            //Add second critical when 4 shots are fired.
+            $crit2 = clone $crit1;
+            $this->criticals[] =  $crit2;
+        }else if ($shotsThisTurn == 3){//Triple 
+            $crit = new MayOverheat(-1, $ship->id, $this->id, "MayOverheat", $gamedata->turn, $gamedata->turn+1);
+            $crit->updated = true;
+            $crit->newCrit = true; //force save even if crit is not for current turn
+            $this->criticals[] =  $crit;
+        }  
+    }    
+                    
         public function getDamage($fireOrder){        return Dice::d(10)+4;   }
         public function setMinDamage(){     $this->minDamage = 5 ;      }
         public function setMaxDamage(){     $this->maxDamage = 14 ;      }
@@ -2147,8 +2181,9 @@ class TelekineticCutter extends Raking{
 
     public $damageType = "Raking"; 
     public $weaponClass = "Particle";
-    public $firingModes = array( 1 => "Raking");
-        
+    public $firingModes = array( 1 => "Normal", 2=> "Split");
+    public $canSplitShots = false; //Allows Firing Mode 2 to split shots.
+    public $canSplitShotsArray = array(1=>false, 2=>true );        
         
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
 		if ( $maxhealth == 0 ) $maxhealth = 12;
@@ -2156,8 +2191,9 @@ class TelekineticCutter extends Raking{
 		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
 	}
 
-    public function setSystemDataWindow($turn){
-        parent::setSystemDataWindow($turn);
+    public function setSystemDataWindow($turn){			
+        parent::setSystemDataWindow($turn);   
+        $this->data["Special"] = "Can use 'Split' Firing Mode to target different enemy units.";
     }
 
     public function getDamage($fireOrder){ return Dice::d(10, 4);   }
