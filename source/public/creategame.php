@@ -229,7 +229,7 @@ VICTORY CONDITIONS: Last unit on map / Last ship on map / More forces remaining 
 
 
                 <input id="createGameData" type="hidden" name="data" value="">
-				<input type="submit" style="margin-top: 0px; margin-bottom: 0px; position:absolute; right:8px; bottom:8px;" value="Create Game">                      
+				<input type="submit" style="margin-top: 0px; margin-bottom: 0px; position:absolute; left:8px; bottom:8px;" value="Create Game">                      
 				
 			</form>
 			

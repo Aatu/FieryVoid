@@ -238,52 +238,53 @@ class CustomMatterStream extends Matter {
                                     $ship->id, $this->id, $notekey, $noteHuman, $notevalue
                                 );
                             }
-                        }
+                        
          
-                        if ($didShotHit == 0) {
-                            continue; // Shot missed, no need to track damage
-                        }
-      
-                        // Process damage to target systems
-                        $target = $gameData->getShipById($targetid);
-                        if (!$target || !is_array($target->systems) || empty($target->systems)) {
-                            continue; // Ensure valid target and systems exist
-                        }
+                            if ($didShotHit == 0) {
+                                continue; // Shot missed, no need to track damage
+                            }
+        
+                            // Process damage to target systems
+                            $target = $gameData->getShipById($targetid);
+                            if (!$target || !is_array($target->systems) || empty($target->systems)) {
+                                continue; // Ensure valid target and systems exist
+                            }
 
-                        foreach ($target->systems as $system) {
-                            $systemDamageThisTurn = 0;
-                            $notes = 0; // Tracks how much armor should be ignored next turn
-       
-                            foreach ($system->damage as $damage) {
-                               
-                                if ($damage->turn == $gameData->turn){  // Only consider this turn’s damage
-                                 
-                                    if ($damage->shooterid == $ship->id && $damage->weaponid == $this->id) {
+                            foreach ($target->systems as $system) {
+                                $systemDamageThisTurn = 0;
+                                $notes = 0; // Tracks how much armor should be ignored next turn
+        
+                                foreach ($system->damage as $damage) {
+                                
+                                    if ($damage->turn == $gameData->turn){  // Only consider this turn’s damage
+                                    
+                                        if ($damage->shooterid == $ship->id && $damage->weaponid == $this->id) {
 
-                                        $systemDamageThisTurn += $damage->damage; // Accumulate total damage dealt this turn
+                                            $systemDamageThisTurn += $damage->damage; // Accumulate total damage dealt this turn
+                                        }
                                     }
                                 }
-                            }
+                
+                                if ($systemDamageThisTurn > 0) { // Ensure damage was dealt
+                                    if ($systemDamageThisTurn >= $system->armour) {
+                                        $notes = $system->armour; // All armor used up
+                                    } else {
+                                        $notes = $systemDamageThisTurn; // Partial armor penetration
+                                    }
             
-                            if ($systemDamageThisTurn > 0) { // Ensure damage was dealt
-                                if ($systemDamageThisTurn >= $system->armour) {
-                                    $notes = $system->armour; // All armor used up
-                                } else {
-                                    $notes = $systemDamageThisTurn; // Partial armor penetration
+                                    // Create note(s) for armor ignored next turn
+                                    while ($notes > 0) {
+                                        $notekey = 'systeminfo';
+                                        $noteHuman = 'ID of System fired at';
+                                        $notevalue = $system->id;
+                                        $this->individualNotes[] = new IndividualNote(
+                                            -1, TacGamedata::$currentGameID, $gameData->turn, $gameData->phase,
+                                            $ship->id, $this->id, $notekey, $noteHuman, $notevalue
+                                        );
+                                        $notes--;
+                                    }
                                 }
-         
-                                // Create note(s) for armor ignored next turn
-                                while ($notes > 0) {
-                                    $notekey = 'systeminfo';
-                                    $noteHuman = 'ID of System fired at';
-                                    $notevalue = $system->id;
-                                    $this->individualNotes[] = new IndividualNote(
-                                        -1, TacGamedata::$currentGameID, $gameData->turn, $gameData->phase,
-                                        $ship->id, $this->id, $notekey, $noteHuman, $notevalue
-                                    );
-                                    $notes--;
-                                }
-                            }
+                            }    
                         }
                     }
                     break;
@@ -2536,52 +2537,53 @@ class GromeHvyRailgun extends Weapon{
                                     $ship->id, $this->id, $notekey, $noteHuman, $notevalue
                                 );
                             }
-                        }
+                        
          
-                        if ($didShotHit == 0) {
-                            continue; // Shot missed, no need to track damage
-                        }
-      
-                        // Process damage to target systems
-                        $target = $gameData->getShipById($targetid);
-                        if (!$target || !is_array($target->systems) || empty($target->systems)) {
-                            continue; // Ensure valid target and systems exist
-                        }
+                            if ($didShotHit == 0) {
+                                continue; // Shot missed, no need to track damage
+                            }
+        
+                            // Process damage to target systems
+                            $target = $gameData->getShipById($targetid);
+                            if (!$target || !is_array($target->systems) || empty($target->systems)) {
+                                continue; // Ensure valid target and systems exist
+                            }
 
-                        foreach ($target->systems as $system) {
-                            $systemDamageThisTurn = 0;
-                            $notes = 0; // Tracks how much armor should be ignored next turn
-       
-                            foreach ($system->damage as $damage) {
-                               
-                                if ($damage->turn == $gameData->turn){  // Only consider this turn’s damage
-                                 
-                                    if ($damage->shooterid == $ship->id && $damage->weaponid == $this->id) {
+                            foreach ($target->systems as $system) {
+                                $systemDamageThisTurn = 0;
+                                $notes = 0; // Tracks how much armor should be ignored next turn
+        
+                                foreach ($system->damage as $damage) {
+                                
+                                    if ($damage->turn == $gameData->turn){  // Only consider this turn’s damage
+                                    
+                                        if ($damage->shooterid == $ship->id && $damage->weaponid == $this->id) {
 
-                                        $systemDamageThisTurn += $damage->damage; // Accumulate total damage dealt this turn
+                                            $systemDamageThisTurn += $damage->damage; // Accumulate total damage dealt this turn
+                                        }
                                     }
                                 }
-                            }
+                
+                                if ($systemDamageThisTurn > 0) { // Ensure damage was dealt
+                                    if ($systemDamageThisTurn >= $system->armour) {
+                                        $notes = $system->armour; // All armor used up
+                                    } else {
+                                        $notes = $systemDamageThisTurn; // Partial armor penetration
+                                    }
             
-                            if ($systemDamageThisTurn > 0) { // Ensure damage was dealt
-                                if ($systemDamageThisTurn >= $system->armour) {
-                                    $notes = $system->armour; // All armor used up
-                                } else {
-                                    $notes = $systemDamageThisTurn; // Partial armor penetration
+                                    // Create note(s) for armor ignored next turn
+                                    while ($notes > 0) {
+                                        $notekey = 'systeminfo';
+                                        $noteHuman = 'ID of System fired at';
+                                        $notevalue = $system->id;
+                                        $this->individualNotes[] = new IndividualNote(
+                                            -1, TacGamedata::$currentGameID, $gameData->turn, $gameData->phase,
+                                            $ship->id, $this->id, $notekey, $noteHuman, $notevalue
+                                        );
+                                        $notes--;
+                                    }
                                 }
-         
-                                // Create note(s) for armor ignored next turn
-                                while ($notes > 0) {
-                                    $notekey = 'systeminfo';
-                                    $noteHuman = 'ID of System fired at';
-                                    $notevalue = $system->id;
-                                    $this->individualNotes[] = new IndividualNote(
-                                        -1, TacGamedata::$currentGameID, $gameData->turn, $gameData->phase,
-                                        $ship->id, $this->id, $notekey, $noteHuman, $notevalue
-                                    );
-                                    $notes--;
-                                }
-                            }
+                            }    
                         }
                     }
                     break;

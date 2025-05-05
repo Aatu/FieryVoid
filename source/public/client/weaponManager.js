@@ -2180,22 +2180,6 @@ window.weaponManager = {
     
         return shortLogTypes.includes(fire.damageclass);
     },
-/*
-    getBlockedHexes: function getBlockedHexes() {
-        var blockedHexes = [];
-    
-        for (var i in gamedata.ships) {
-            var ship = gamedata.ships[i];
-    
-            if (ship.Enormous && !shipManager.isDestroyed(ship)) { //Only enormous units block LoS at present
-                var position = shipManager.getShipPosition(ship); 
-                blockedHexes.push(position); 
-            }
-        }
-    
-        return blockedHexes;
-    },        
-*/
 
     getBlockedHexes: function getBlockedHexes() {
         var blockedHexes = [];

@@ -64,8 +64,13 @@ class Stealth extends ShipSystem implements SpecialAbility{
     }
     
     public function setSystemDataWindow($turn){
-            $this->data["Special"] = "Jammer ability if targeted from over 5 hexes away.";
-        }
+			$unit = $this->getUnit();
+			if($unit instanceof FighterFlight){
+            	$this->data["Special"] = "Jammer ability if targeted from over 5 hexes away.";
+			}else{
+            	$this->data["Special"] = "Jammer ability if targeted from over 10 hexes away.";
+			}	
+	}	
     
     //args for Jammer ability are array("shooter", "target")
     public function getSpecialAbilityValue($args)

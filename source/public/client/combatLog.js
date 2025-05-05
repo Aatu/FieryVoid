@@ -3,6 +3,7 @@
 window.combatLog = {
 
     displayedTurn: null,
+    logCache: {}, // key: turn number, value: processed fire order data
 
     onTurnStart: function onTurnStart() {
         $('.logentry').remove();
@@ -347,25 +348,37 @@ window.combatLog = {
         return; 
     },    
 
-    fetchAndShowCombatLog: function fetchAndShowCombatLog(){
+    fetchAndShowCombatLog: function fetchAndShowCombatLog() {
+        var turn = this.displayedTurn;
+    
+        // Check if this turn's data is already cached
+        if (combatLog.logCache[turn]) {
+            combatLog.showLog(combatLog.logCache[turn]);
+            return;
+        }
+    
         jQuery.ajax({
             type: 'GET',
             url: 'replay.php',
             dataType: 'json',
             data: {
-                turn: this.displayedTurn,
+                turn: turn,
                 gameid: gamedata.gameid,
-                time: new Date().getTime()
+                time: new Date().getTime() // prevent caching by browser
             },
-            success: function (data) {             
-                var allFireOrders = []; //Initialise
-				allFireOrders = combatLog.groupByShipAndWeapon(weaponManager.getAllFireOrdersForLogPrint(data.ships, data.turn)); //Find and group appropriate fire orders.	
-                combatLog.showLog(allFireOrders); //Now print log from selected turn     		
+            success: function (data) {
+                var allFireOrders = combatLog.groupByShipAndWeapon(
+                    weaponManager.getAllFireOrdersForLogPrint(data.ships, data.turn)
+                );
+    
+                // Store in cache
+                combatLog.logCache[turn] = allFireOrders;
+    
+                combatLog.showLog(allFireOrders);
             }.bind(this),
             error: ajaxInterface.errorAjax
         });
-
-    }, 
+    },
 
 
     groupByShipAndWeapon: function groupByShipAndWeapon(incomingFire) {
