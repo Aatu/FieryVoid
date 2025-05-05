@@ -495,15 +495,19 @@ if ($asteroids == false && $moons == false) {
 </div>
 			
         <div style="margin-top: 8px;">
-        <span class="clickable readybutton">READY</span>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        <span class="clickable checkbutton">CHECK</span>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        <a href="files/FV_FleetChecker.txt" title="details of fleet composition rules" target="_blank">Fleet Checker rules</a>
+            <span class="clickable readybutton">READY</span>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <span class="clickable checkbutton">CHECK</span>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <a href="files/FV_FleetChecker.txt" title="details of fleet composition rules" target="_blank">Fleet Checker rules</a>
         </div>
-		
-			
-		</div>
+
+    </div>
+
+        <!-- ✅ Your inserted fleetcheck panel -->
+        <div id="fleetcheck" class="panel large" style="display:none;"><p id="fleetchecktxt" style="display:block;"><span></div>
+
+</div>
                     
         <div id="globalchat" class="panel large" style="height:150px;">
         <?php 

@@ -8,7 +8,7 @@ class Privateerglaive extends FighterFlight{
         $this->faction = "Raiders";
         $this->phpclass = "Privateerglaive";
         $this->shipClass = "Centauri Privateer Glaive Light Fighters";
-	$this->imagePath = "img/ships/glaive.png";
+	$this->imagePath = "img/ships/RaiderGlaive.png";
 	$this->isd = 1995;
 	    
 	$this->notes = "Since 2012 available to all Raiders.";
@@ -35,8 +35,8 @@ class Privateerglaive extends FighterFlight{
 			$armour = array(1, 1, 1, 1);
 			$fighter = new Fighter("glaive", $armour, 8, $this->id);
 			$fighter->displayName = "Glaive";
-			$fighter->imagePath = "img/ships/glaive.png";
-			$fighter->iconPath = "img/ships/glaive_large.png";
+			$fighter->imagePath = "img/ships/RaiderGlaive.png";
+			$fighter->iconPath = "img/ships/RaiderGlaive_large.png";
 			
 			
 			$fighter->addFrontSystem(new PairedPlasmaBlaster(330, 30));

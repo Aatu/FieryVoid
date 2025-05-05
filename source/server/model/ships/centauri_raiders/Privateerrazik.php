@@ -38,8 +38,8 @@ class Privateerrazik extends FighterFlight{
             $armour = array(1, 1, 2, 2);
             $fighter = new Fighter("razik", $armour, 8, $this->id);
             $fighter->displayName = "Razik";
-            $fighter->imagePath = "img/ships/razik.png";
-            $fighter->iconPath = "img/ships/razik_large.png";
+            $fighter->imagePath = "img/ships/CentauriPrivateerRazik.png";
+            $fighter->iconPath = "img/ships/RaiderRazik_large.png";
 
             $fighter->addFrontSystem(new PairedParticleGun(330, 30, 1));
 	    $fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack

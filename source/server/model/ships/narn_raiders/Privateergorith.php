@@ -8,7 +8,7 @@ class PrivateerGorith extends FighterFlight{
 		$this->faction = "Raiders";
         $this->phpclass = "PrivateerGorith";
         $this->shipClass = "Narn Privateer Gorith Medium Fighters";
-		$this->imagePath = "img/ships/gorith.png";
+		$this->imagePath = "img/ships/RaiderGorith.png";
         $this->limited = 33;
         $this->isd = 2226;
 
@@ -36,8 +36,8 @@ class PrivateerGorith extends FighterFlight{
 			$armour = array(2, 2, 2, 2);
 			$fighter = new Fighter("gorith", $armour, 10, $this->id);
 			$fighter->displayName = "Gorith";
-			$fighter->imagePath = "img/ships/gorith.png";
-			$fighter->iconPath = "img/ships/gorith_large.png";
+			$fighter->imagePath = "img/ships/RaiderGorith.png";
+			$fighter->iconPath = "img/ships/RaiderGorith_large.png";
 			
 			
 			$fighter->addFrontSystem(new PairedParticleGun(330, 30, 3));
