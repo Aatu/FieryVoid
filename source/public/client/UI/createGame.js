@@ -156,32 +156,32 @@ window.createGame = {
         ctx.globalAlpha = 0.6; // Semi-transparent
         ctx.strokeStyle = "white";
         ctx.lineWidth = 1;
-        ctx.setLineDash([6, 6]); // Dotted pattern: 4px line, 4px gap
+        ctx.setLineDash([6, 6]); // Dotted pattern: 6px line, 6px gap
 
         const centerX = offsetX + (mapWidth / 2) * scale;
         const centerY = offsetY + (mapHeight / 2) * scale;
 
         // Vertical line: from center up
         ctx.beginPath();
-        ctx.moveTo(centerX, centerY);
-        ctx.lineTo(centerX, offsetY);
+        ctx.moveTo(centerX+6, centerY);
+        ctx.lineTo(centerX+6, offsetY);
         ctx.stroke();
 
         // Vertical line: from center down
         ctx.beginPath();
-        ctx.moveTo(centerX, centerY);
-        ctx.lineTo(centerX, offsetY + mapHeight * scale);
+        ctx.moveTo(centerX+6, centerY);
+        ctx.lineTo(centerX+6, offsetY + mapHeight * scale);
         ctx.stroke();
 
         // Horizontal line: from center left
         ctx.beginPath();
-        ctx.moveTo(centerX, centerY);
+        ctx.moveTo(centerX+6, centerY);
         ctx.lineTo(offsetX, centerY);
         ctx.stroke();
 
         // Horizontal line: from center right
         ctx.beginPath();
-        ctx.moveTo(centerX, centerY);
+        ctx.moveTo(centerX+6, centerY);
         ctx.lineTo(offsetX + mapWidth * scale, centerY);
         ctx.stroke();
 

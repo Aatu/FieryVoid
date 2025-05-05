@@ -8,7 +8,7 @@ class Privateerphalan extends FighterFlight{
         $this->faction = "Raiders";
         $this->phpclass = "Privateerphalan";
         $this->shipClass = "Centauri Privateer Phalan Assault Fighters";
-		$this->imagePath = "img/ships/phalan.png";
+		$this->imagePath = "img/ships/RaiderPhalan.png";
 		$this->isd = 1882;
 		$this->variantOf = "Centauri Privateer Glaive Light Fighters";
 		$this->occurence = "uncommon";
@@ -37,8 +37,8 @@ class Privateerphalan extends FighterFlight{
 		$armour = array(2, 1, 1, 1);
 		$fighter = new Fighter("phalan", $armour, 12, $this->id);
 		$fighter->displayName = "Phalan";
-		$fighter->imagePath = "img/ships/phalan.png";
-		$fighter->iconPath = "img/ships/phalan_large.png";
+		$fighter->imagePath = "img/ships/RaiderPhalan.png";
+		$fighter->iconPath = "img/ships/RaiderPhalan_large.png";
 
 
 		$fighter->addFrontSystem(new PairedPlasmaBlaster(330, 30));

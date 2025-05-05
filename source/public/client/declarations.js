@@ -33,6 +33,7 @@ window.declarations = {
     var dispEWEntry = new dispEWNew();
     for (var i in gamedata.ships){
       var ship = gamedata.ships[i];
+	  if(ship.shipSizeClass == 5) continue;
       if ( (!shipManager.isDestroyed(ship)) || (shipManager.getTurnDestroyed(ship)>=gamedata.turn) ) if( (declarations.GlobalSide=='Own' && declarations.GlobalDisplay=='Source' && gamedata.isMyShip(ship)) //own ship, own ew, by source
         || (declarations.GlobalSide!='Own' && declarations.GlobalDisplay=='Source' && !gamedata.isMyShip(ship)) //enemy ship, enemy EW, by source
         || (declarations.GlobalSide=='Own' && declarations.GlobalDisplay!='Source' && !gamedata.isMyShip(ship)) //enemy ship, own ew, by target
