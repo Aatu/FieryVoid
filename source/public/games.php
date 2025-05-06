@@ -83,6 +83,9 @@ if (isset($_SESSION["user"])) {
 	    <br>Asteroids should now not be placed within Moon terrain.
 	    <br>Opacity now properly works for Ballistic Line sprites.
 	    <br>Added ISD dates for all official faction ships that were missing these.
+	    
+		<br><br>---------- <b>May 2025</b> ----------
+	    <br><b>Bug Fixes Again</b> - fleet checker this time :)
 
 
 
