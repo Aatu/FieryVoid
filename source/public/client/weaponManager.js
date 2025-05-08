@@ -1638,8 +1638,8 @@ window.weaponManager = {
 					}
 				var stealthValue = 0;
                 var stealthDistance = 12; //Default for ships
-                if(shooter.flight) stealthDistance = 4;
-                if(shooter.base) stealthDistance = 24;
+                if(shooter.flight) stealthDistance = 4; //Fighters
+                if(shooter.base) stealthDistance = 24; //Bases
 
 				if (stealthSystem && (distance > stealthDistance) && target.shipSizeClass >= 0){
 				    stealthValue = shipManager.systems.getOutput(target, stealthSystem);

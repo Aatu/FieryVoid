@@ -539,9 +539,9 @@ window.ew = {
 		if( (stealthSystem != null) && (distance > 5) && target.flight) { //stealth-protected fighter at range >5 hexes may gain Stealth properties
 			stealthValue = shipManager.systems.getOutput(target, stealthSystem);
 		}
-        var stealthDistance = 12;
-        if(shooter.flight) stealthDistance = 4;
-        if(shooter.base) stealthDistance = 24;
+        var stealthDistance = 12; //Default for ships
+        if(shooter.flight) stealthDistance = 4; //Fighters
+        if(shooter.base) stealthDistance = 24; //Bases
 		if( (stealthSystem != null) && (distance > stealthDistance) && target.shipSizeClass >= 0) { //stealth-protected ship at range >10 hexes may gain Stealth properties
 			stealthValue = shipManager.systems.getOutput(target, stealthSystem);
 		}		
