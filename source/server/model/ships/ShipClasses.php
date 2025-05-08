@@ -500,7 +500,19 @@ class BaseShip {
 				}					
 			}
 		}
-		
+
+        //Pass increased defence profile to front end directly.
+        $CnC = $this->getSystemByName("CnC");
+        if ($CnC) {
+            $defenceMod = $CnC->hasCritical("ProfileIncreased");
+            if ($defenceMod) {
+                $this->forwardDefense += $defenceMod;
+                $this->sideDefense += $defenceMod;
+                $strippedShip->forwardDefense = $this->forwardDefense; 
+                $strippedShip->sideDefense = $this->sideDefense;
+            }
+        }
+
 		if($this->getSystemByName("MindriderEngine")){//Mind's Eye Contraction needs a few more values to got to Front End.
 			$strippedShip->forwardDefense = $this->forwardDefense; 
         	$strippedShip->sideDefense = $this->sideDefense;
@@ -816,7 +828,10 @@ class BaseShip {
 	    
         foreach ($this->systems as $system){
             $system->onConstructed($this, $turn, $phase);
-            $this->enabledSpecialAbilities = $system->getSpecialAbilityList($this->enabledSpecialAbilities);
+            $abilities = $system->getSpecialAbilityList($this->enabledSpecialAbilities);
+            if (is_array($abilities)) {
+                $this->enabledSpecialAbilities = array_merge($this->enabledSpecialAbilities, $abilities);
+            }
         }
         //fill $this->iniativeadded
         $modifiedbonus = $this->getInitiativebonus( $gamedata ) + $this->getCommonIniModifiers( $gamedata );
@@ -1624,7 +1639,15 @@ class BaseShip {
     return $amount;
 }
 
-
+public function getAllEWExceptDEW($turn){
+    $amount = 0;
+    foreach ($this->EW as $EW){
+        if ($EW->turn != $turn) continue;
+        if ($EW->type == "DEW") continue;
+        $amount += $EW->amount;
+    }
+    return $amount;
+}
 
     public function getFacingAngle(){
         $movement = null;
