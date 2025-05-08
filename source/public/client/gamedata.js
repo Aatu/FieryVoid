@@ -180,12 +180,12 @@ window.gamedata = {
     },
 
     isMyShip: function isMyShip(ship) {
-        if(ship.isTerrain(ship)) return false;
+        if(gamedata.isTerrain(ship)) return false;
         return ship.userid === gamedata.thisplayer;
     },
 
     isMyorMyTeamShip: function isMyShip(ship) {
-        if(ship.isTerrain(ship)) return false;
+        if(gamedata.isTerrain(ship)) return false;
         if(ship.userid === gamedata.thisplayer) return true;
         if(ship.team === gamedata.getPlayerTeam()) return true;
         return false;
