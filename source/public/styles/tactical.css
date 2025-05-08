@@ -796,7 +796,7 @@ body {
 #iniGui {
     z-index:10000;
     border:1px solid #496791;
-    color:#deebff;
+    color:#deebffdc;
     background-color:#0a3340;
     margin-top: 50px;
     width: 250px;
@@ -840,20 +840,26 @@ body {
 }
 
 .iniActiveMoved {
-    border: 1px solid #84A5CE !important;
-    box-shadow: 0px 0px 15px #09F;
+    border: 1px solid #009933 !important;
+    box-shadow: 0px 0px 3px rgb(0, 179, 60);
 }
 
 .iniActive {
-    border: 1px solid #84A5CE !important;
-    background-color: #254E82 !important;
-    box-shadow: 0px 0px 15px #09F;
+    border: 1px solid #009933 !important;
+    background-color: #004d1a !important;
+    box-shadow: 0px 0px 3px rgb(0, 179, 60);
+}
+
+.iniActiveAlly {
+    border: 1px solid #6d95c5 !important;
+    background-color: #162f50 !important;
+    box-shadow: 0px 0px 3px #09F;
 }
 
 .iniActiveEnemy {
-    border: 1px solid #ce9184 !important;
-    background-color: #823425 !important;
-    box-shadow: 0px 0px 15px #ff3700;
+    border: 1px solid #a45341 !important;
+    background-color: #502016 !important;
+    box-shadow: 0px 0px 3px #e63200;
 }
 
 .redIni {
