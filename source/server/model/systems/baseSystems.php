@@ -56,8 +56,10 @@ class Jammer extends ShipSystem implements SpecialAbility{
 class Stealth extends ShipSystem implements SpecialAbility{    
     public $name = "stealth";
     public $displayName = "Stealth systems";
-    public $specialAbilities = array("Jammer");
+    public $specialAbilities = array("Jammer", "Stealth");
     public $primary = true;
+	public $detected = false;
+	//private $detectedOnTurn = false; //Used to track turn when ship is detected for notes.
     
     function __construct($armour, $maxhealth, $powerReq){
         parent::__construct($armour, $maxhealth, $powerReq, 1);
@@ -68,7 +70,11 @@ class Stealth extends ShipSystem implements SpecialAbility{
 			if($unit instanceof FighterFlight){
             	$this->data["Special"] = "Jammer ability if targeted from over 5 hexes away.";
 			}else{
-            	$this->data["Special"] = "Jammer ability if targeted from over 10 hexes away.";
+            	$this->data["Special"] = "Ship is invisible to enemies until reveals itself or is detected.";
+				$this->data["Special"] .= "<br>It is revealed immediately if any EW abilities (other than DEW) are used or fires a weapon.";
+				$this->data["Special"] .= "<br>Can also be detected by enemy ships at start of Firing Phase if in range (See FAQ for full rules).";
+				$this->data["Special"] .= "<br>Once detected ship is revealed it will remain this way unless it breaks line of sight with all enemy ships.";								
+				$this->data["Special"] .= "<br>Jammer ability if targeted over 12 hexes away by ships (Fighters - 4 hexes / Bases 24 hexes).";
 			}	
 	}	
     
@@ -85,7 +91,7 @@ class Stealth extends ShipSystem implements SpecialAbility{
         if (! ($shooter instanceof BaseShip) || ! ($target instanceof BaseShip))
             throw new InvalidArgumentException("Wrong argument type for Stealth getSpecialAbilityValue");
 		
-               $jammerValue = 0; 
+        $jammerValue = 0; 
 		if ($target instanceof FighterFlight){
 			    if (mathlib::getDistanceHex($shooter, $target) > 5) //kicks in for fighters over 5 hexes!
 			        {
@@ -98,8 +104,12 @@ class Stealth extends ShipSystem implements SpecialAbility{
 						}
 			        }
 		}else{ //Ships
-			    if (mathlib::getDistanceHex($shooter, $target) > 10) //kicks in for ships over 10 hexes!
- 					{						
+				$stealthDistance = 12;
+				if($shooter instanceof FighterFlight) $stealthDistance = 4;
+				if($shooter->base) $stealthDistance = 24;
+
+			    if (mathlib::getDistanceHex($shooter, $target) > $stealthDistance) //Define range jammer ability applies depending on shooter.
+ 				{						
 			    	$jammerValue = 1; 
 						//Advanced Sensors negate Jammer, Improved Sensors halve Jammer
 						if ($shooter->hasSpecialAbility("AdvancedSensors")) {
@@ -111,6 +121,259 @@ class Stealth extends ShipSystem implements SpecialAbility{
 			}	
         return $jammerValue;        
     }
+
+	public function generateIndividualNotes($gameData, $dbManager){ //dbManager is necessary for Initial phase only
+        $ship = $this->getUnit();
+		if ($ship instanceof FighterFlight) return; //Fighter units don't need notes, they can't be invisible/detected.
+		if($ship->isDestroyed()) return; //No point generating new notes if ship destroyed.
+
+		$this->onIndividualNotesLoaded($gameData); //Check current detection status.
+
+        switch($gameData->phase){
+			case 1: //Initial Orders - Check for any ballistic launches
+				if(!$this->detected){ //Only check if ship has not been already detected at some point.
+					//Did stealth ship launch any ballistics?
+					$ballisticOrEW = $this->isDetectedInitial($ship, $gameData);
+
+					if($ballisticOrEW){ //There was a ballistic launch this turn.  Create note for ship to be marked detected.
+						//Prepare note for database!		
+						$notekey = 'detected';
+						$noteHuman = 'Ship detected';
+						$noteValue = 1;
+						$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue							
+					}
+				}	
+			break;
+
+			case 4: //Post-Firing phase
+				if(!$this->detected){ //Ship has not already been detected, check if it is detected now.
+					if($this->isDetectedFire($ship, $gameData)){ //Now check if ship just been detected this turn?							//Prepare note for database!		
+						$notekey = 'detected';
+						$noteHuman = 'Ship detected';
+						$noteValue = 1;
+						$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
+					}
+				}else{ //Ship is already detected, but can it now become undetected again by breaking all line of sight? 
+					if($this->isUndetected($ship, $gameData)){ //Line of Sight test
+						//Prepare note for database!		
+						$notekey = 'undetected';
+						$noteHuman = 'Ship undetected';
+						$noteValue = 1;
+						$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
+					}
+
+				}
+			break;			
+					
+        }
+    } //endof function generateIndividualNotes	
+ 	
+
+	public function onIndividualNotesLoaded($gamedata){
+		//Sort notes by turn, and then phase so latest detection note is always last.
+		$this->sortNotes();
+
+		foreach ($this->individualNotes as $currNote){ //Search all notes, they should be process in order so the latest event applies.
+			switch($currNote->notekey){
+				case 'detected': //power that should be stored at this moment
+					if($currNote->notevalue == 1) $this->detected = true;
+				break;
+				case 'undetected': //power that should be stored at this moment
+					if($currNote->notevalue == 1) $this->detected = false;
+				break;								
+			}
+		}
+		//and immediately delete notes themselves, they're no longer needed (this will not touch the database, just memory!)
+		$this->individualNotes = array();		
+	} //endof function onIndividualNotesLoaded
+
+
+	private function sortNotes() {
+		usort($this->individualNotes, function($a, $b) {
+			// Compare by turn first
+			if ($a->turn == $b->turn) {
+				// If turns are equal, compare by phase
+				return ($a->phase < $b->phase) ? -1 : 1;
+			}
+			return ($a->turn < $b->turn) ? -1 : 1;
+		});
+	}
+
+	private function isDetectedInitial($ship, $gameData) {
+		$revealed = false;
+
+		foreach($ship->systems as $weapon){ //Check for weapon fire.
+			if($weapon instanceof Weapon){
+				if($weapon->firedOffensivelyOnTurn($gameData->turn)) {
+					$revealed = true;
+					return $revealed;
+				}	
+			}
+		}
+
+		// If the ship used offensive or ELINT EW, it is revealed
+		$usedEW = $ship->getAllEWExceptDEW($gameData->turn); // Has used any EW except DEW?
+		if($usedEW > 0) $revealed = true;
+
+		return $revealed;
+	}	
+
+	private function isDetectedFire($ship, $gameData) {
+
+		// If the ship has fired this turn, it is revealed
+		foreach($ship->systems as $weapon){ //Check for weapon fire.
+			if($weapon instanceof Weapon){
+				$firingOrders = $weapon->getFireOrders($gameData->turn);
+				foreach ($firingOrders as $fireOrder) { 
+					if($fireOrder->type == "normal"){ //Ballistics already handled in Phase 1.
+						return true; //Just return, fired in Firing Phase revealing itself again even without LoS. Although who know at what without LoS...
+					}	
+				}	
+			}
+		}
+
+		// Check all enemy ships to see if any can detect this ship at end of turn
+		$blockedHexes = $gameData->getBlockedHexes(); //Just do this once outside loop
+		$pos = $ship->getHexPos(); //Just do this once outside loop		
+
+		foreach ($gameData->ships as $otherShip) {
+			// Skip friendly ships
+			if($otherShip->team === $ship->team) continue;
+			if($otherShip->userid == -5) continue; //Ignore Terrain
+			if($otherShip->isDestroyed()) continue; //Ignore destroyed enemy ships.
+	
+			$totalDetection = 0;
+	
+			if (!$otherShip instanceof FighterFlight) {
+				// Not a fighter — use scanner systems
+				foreach($otherShip->systems as $system){
+					if($system instanceof Scanner){
+						if(!$system->isDestroyed()) $totalDetection += $system->output;
+					}
+				}	
+				// Apply detection multiplier based on ship type
+				if ($otherShip->base) {
+					$totalDetection *= 5;
+				} elseif ($otherShip->hasSpecialAbility("ELINT")) {
+					$totalDetection *= 3;				
+					$bonusDSEW = $otherShip->getEWByType("Detect Stealth", $gameData->turn);	
+					$totalDetection += $bonusDSEW*2;
+	
+				} else {
+					$totalDetection *= 2;
+				}
+			} else {
+				// Fighter unit — use offensive bonus
+				$totalDetection = $otherShip->offensivebonus;
+			}
+		
+			// Get distance to the stealth ship and check line of sight
+			$distance = mathlib::getDistanceHex($ship, $otherShip);
+			$otherPos = $otherShip->getHexPos();          
+			$noLoS = !empty($blockedHexes) && Mathlib::checkLineOfSight($pos, $otherPos, $blockedHexes);
+
+
+			// If within detection range, and LoS not blocked the ship is detected
+			if ($totalDetection >= $distance && !$noLoS) {  
+				return true; //Just return, if one ship can see the stealthed ship then all can.
+			}
+		}
+
+		return false; //No other conditions were true, not detected.
+
+	}//endof isDetected()	
+
+	private function isUndetected($ship, $gameData) {
+		$blockedHexes = $gameData->getBlockedHexes(); //Save outside loop as this won't change.
+		$shipPosition = $ship->getHexPos(); //Save outside loop as this won't change.
+		$canStealth = true; //Default to being able to stealth again, then prove if it can't below.
+
+		foreach($ship->systems as $weapon){ //Check for weapon fire.
+			if($weapon instanceof Weapon){
+				$firingOrders = $weapon->getFireOrders($gameData->turn);
+				foreach ($firingOrders as $fireOrder) { 
+					if($fireOrder->type == "normal"){ //Ballistics already handled in Phase 1, and shouldn't prevent re-stealth at end of turn.
+						$canStealth = false;
+						return $canStealth; //Just return, fired in Firing Phase revealing itself again even without LoS. Although who know at what without LoS...
+					}	
+				}	
+			}
+		}
+
+		//Check all enemy ships for line of sight, if none then ship can stealth again.
+		if (!empty($blockedHexes)) {  //No point checking if there are no blocked hexes.
+			foreach($gameData->ships as $enemyShip){
+				if($enemyShip->team == $ship->team) continue; //ignore ships in same team.
+				if($enemyShip->userid == -5) continue; //Ignore Terrain
+				if($enemyShip->isDestroyed()) continue; //Ignore destroyed enemy ships.
+
+				$enemyPosition = $enemyShip->getHexPos();
+				$noLoS = false; //False means LoS not blocked
+			
+				$noLoS = Mathlib::checkLineOfSight($shipPosition, $enemyPosition, $blockedHexes);
+				
+
+				if(!$noLoS){ //The enemy unit can see this ship LoS not blocked.
+					$canStealth = false;
+					return $canStealth; //Just return, only need one enemy ship to have LoS to fail check.
+				}
+			}
+		}	
+ 
+		return $canStealth;
+	}	
+
+
+	public function criticalPhaseEffects($ship, $gamedata) {	
+
+		parent::criticalPhaseEffects($ship, $gamedata); // Call parent to apply base effects.
+	
+		// If Hyach Computer or Scanner is destroyed on Stealth ships, profile is increased by 3/15% permanently.
+		if (!$ship instanceof FighterFlight && !$ship->isDestroyed()) {
+			$scannerDestroyedThisTurn = false;
+			$computerDestroyedThisTurn = false;
+			$scannerPreviouslyDestroyed = false;
+			$computerPreviouslyDestroyed = false;
+	
+			foreach ($ship->systems as $system) {
+				if ($system instanceof Scanner && $system->isDestroyed()) {
+					if ($system->wasDestroyedThisTurn($gamedata->turn)) {
+						$scannerDestroyedThisTurn = true;
+					} else {
+						$scannerPreviouslyDestroyed = true;
+					}
+				}
+				if ($system instanceof HyachComputer && $system->isDestroyed()) {
+					if ($system->wasDestroyedThisTurn($gamedata->turn)) {
+						$computerDestroyedThisTurn = true;
+					} else {
+						$computerPreviouslyDestroyed = true;
+					}
+				}
+			}
+	
+			if (
+				($scannerDestroyedThisTurn || $computerDestroyedThisTurn) &&
+				!$scannerPreviouslyDestroyed && !$computerPreviouslyDestroyed
+			) {
+				$cnc = $ship->getSystemByName("CnC");
+				if ($cnc) {
+					for ($i = 0; $i < 3; $i++) {
+						$crit = new ProfileIncreased(-1, $ship->id, $cnc->id, 'ProfileIncreased', $gamedata->turn + 1);
+						$crit->updated = true;
+						$cnc->criticals[] = $crit;
+					}
+				}
+			}
+		}
+	}//endof function criticalPhaseEffects
+
+	public function stripForJson(){
+        $strippedSystem = parent::stripForJson();
+        $strippedSystem->detected = $this->detected;	        
+        return $strippedSystem;
+    }
+
 } //endof Stealth
 
 class Fighterimprsensors extends ShipSystem implements SpecialAbility{    
@@ -1296,7 +1559,8 @@ class ElintScanner extends Scanner implements SpecialAbility{
         $this->data["Special"] .= "<br> - SDEW: boosts target's DEW (by 1 for 2 points allocated). Range 30 hexes (at both declaration and firing).";		     
         $this->data["Special"] .= "<br> - Blanket Protection: all friendly units within 20 hexes (incl. fighters) get +1 DEW per 4 points allocated. Cannot combine with other ElInt activities.";		     
         $this->data["Special"] .= "<br> - Disruption: Reduces target enemy ships' OEW and CCEW by 1 per 3 points allocated (split evenly between targets, CCEW being counted as one target; cannot bring OEW on a target below 0). Range 30 hexes (at both declaration and firing).";	
-    }
+		$this->data["Special"] .= "<br> - Detect Stealth: Increases stealth detection range of this ship by +2 per point of EW used.";	    
+	}
 	/*
 	public function markImproved(){	parent::markImproved();   }
 	public function markAdvanced(){	parent::markImproved();	}
@@ -2894,7 +3158,7 @@ class HyachSpecialists extends ShipSystem{
 					$this->specAllocatedCount[$explodedKey[1]] = 1;//To show it has been used this turn in system info tooltip.
 						
 				}else if ($explodedKey[1] == 'Targeting'){ //+3% to hit on ALL weapons this turn
-					$ship->toHitBonus += 1;	
+					$ship->toHitBonus += 0.66;	
 					$this->specAllocatedCount[$explodedKey[1]] = 1;
 										
 				}else if ($explodedKey[1] == 'Thruster'){ //Remove limits on Thruster rating, improve Engine efficiency.
@@ -2969,7 +3233,7 @@ class HyachSpecialists extends ShipSystem{
 			$this->data["Special"] .= "<br>  - Sensor: +1 EW and remove a Scanner critical.";
 			$this->data["Special"] .= "<br>  - Power: Extra power and remove a Reactor critical.";
 			$this->data["Special"] .= "<br>  - Repair: Remove two critical effects.";						 			
-			$this->data["Special"] .= "<br>  - Targeting: +5% to hit on all weapons.";
+			$this->data["Special"] .= "<br>  - Targeting: +3% to hit on all weapons.";
 			$this->data["Special"] .= "<br>  - Thruster: No thruster limits and engine efficiency improved.";
 			$this->data["Special"] .= "<br>  - Weapon: All weapons +3 damage this turn.";								 
 	    }else{ //After Initials Orders on Turn 1, reduce data so that it just shows relevant info on Specialists selected.
@@ -2984,7 +3248,7 @@ class HyachSpecialists extends ShipSystem{
 					if ($specialistType == 'Repair') $this->data["Special"] .= '<br>  - '.$specialistType . ' :Remove two critical effects.';
 					if ($specialistType == 'Sensor') $this->data["Special"] .= '<br>  - '.$specialistType . ' :+1 EW and remove a Scanner critical.';
 					if ($specialistType == 'Power') $this->data["Special"] .= '<br>  - '.$specialistType . ' :Extra power and remove a Reactor critical.';
-					if ($specialistType == 'Targeting') $this->data["Special"] .= '<br>  - '.$specialistType . ': +5% to hit on all weapons.';
+					if ($specialistType == 'Targeting') $this->data["Special"] .= '<br>  - '.$specialistType . ': +3% to hit on all weapons.';
 					if ($specialistType == 'Thruster') $this->data["Special"] .= '<br>  - '.$specialistType . ': No thruster limits and engine efficiency improved.';
 					if ($specialistType == 'Weapon') $this->data["Special"] .= '<br>  - '.$specialistType . ': All weapons +3 damage this turn.';						
 				}        
