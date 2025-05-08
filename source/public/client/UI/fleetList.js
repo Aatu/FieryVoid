@@ -119,7 +119,13 @@ window.fleetListManager = {
         }
 
         var shipId = shipNameEntry.dataset["shipid"];
-        window.webglScene.customEvent('ScrollToShip', {shipId: shipId});
+        var ship = gamedata.getShip(shipId);
+
+        if(!gamedata.isMyorMyTeamShip(ship) && shipManager.isStealthShip(ship) && !shipManager.isDetected(ship)){ //Enemy, stealth equipped and undetected
+            return; //Do not scroll to Stealthed ships
+        } else{
+            window.webglScene.customEvent('ScrollToShip', {shipId: shipId});
+        }    
     },
 
     updateFleetList: function updateFleetList() {
