@@ -21,7 +21,13 @@ window.IdleAnimationStrategy = function () {
                 icon.hide();
             } else if (turnDestroyed === null && destroyed) {
                 icon.hide();
-            } else {
+            } else if (shipManager.isStealthShip(ship)) { //Enemy, has stealth ability and not a fighter.
+                if(shipManager.isDetected(ship) || gamedata.isMyorMyTeamShip(ship)){
+                    icon.show();                    
+                }else{
+                    icon.hide();
+                }    
+            }else {
                 icon.show();
             }
 
@@ -31,6 +37,7 @@ window.IdleAnimationStrategy = function () {
         }, this);
         return this;
     };
+
 
     IdleAnimationStrategy.prototype.shipMovementChanged = function (ship) {
         this.shipIconContainer.positionAndFaceShip(ship);
