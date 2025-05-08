@@ -180,7 +180,15 @@ window.gamedata = {
     },
 
     isMyShip: function isMyShip(ship) {
-        return ship.userid === gamedata.thisplayer && ship.userid !== -5;
+        if(ship.isTerrain(ship)) return false;
+        return ship.userid === gamedata.thisplayer;
+    },
+
+    isMyorMyTeamShip: function isMyShip(ship) {
+        if(ship.isTerrain(ship)) return false;
+        if(ship.userid === gamedata.thisplayer) return true;
+        if(ship.team === gamedata.getPlayerTeam()) return true;
+        return false;
     },
     
     isEnemy: function isEnemy(target, shooter) {
@@ -194,7 +202,13 @@ window.gamedata = {
     
         return target.team !== shooter.team;
     },
-    
+
+    isTerrain: function isTerrain(ship) {    
+        if(ship.shipSizeClass == 5 || ship.userid == -5) return true;
+        return false;
+        
+    },    
+
     isMyOrTeamOneShip: function isMyOrTeamOneShip(ship) {
         if (ship.shipSizeClass === 5) {
             return false; // Ensure ships with userid -5 are never considered friendly
@@ -1028,9 +1042,11 @@ window.gamedata = {
 
         ini_gui.appendChild(topicDiv);
 
-        var allShips = gamedata.ships;
-        var ships = gamedata.ships.filter(function (ship) {
-            return !shipManager.isDestroyed(ship) && ship.shipSizeClass != 5;
+        //var allShips = gamedata.ships;
+        var ships = gamedata.ships.filter(function(ship) {
+            return !shipManager.isDestroyed(ship) &&
+                   ship.shipSizeClass != 5 &&
+                   !(!gamedata.isMyorMyTeamShip(ship) && shipManager.isStealthShip(ship) && !shipManager.isDetected(ship));
         });
 
        
@@ -1049,7 +1065,7 @@ window.gamedata = {
                 window.webglScene.customEvent('ScrollToShip', {shipId: this.id});
             })
 
-            var categoryIndex = window.SimultaneousMovementRule.getShipCategoryIndex(ships[i]);
+            //var categoryIndex = window.SimultaneousMovementRule.getShipCategoryIndex(ships[i]);
 
             var td = document.createElement("td");
             td.position = "relative";
@@ -1063,7 +1079,11 @@ window.gamedata = {
 
             if (gamedata.isMyShip(ships[i])) {
                 td.style.color = "green";
-            } else td.style.color = "red";
+            }else if (gamedata.isMyorMyTeamShip(ships[i])){
+                td.style.color = "#6091d2"; // Lighter blue
+            }else {
+                td.style.color = "red";
+            }
 
             tr.appendChild(td);
 
@@ -1085,6 +1105,8 @@ window.gamedata = {
                     td.className = "iniActiveMoved";
                 }else if (active === true && gamedata.isMyShip(ships[i])) {
                     td.className = "iniActive";
+                }else if (active === true && gamedata.isMyorMyTeamShip(ships[i])) {
+                    td.className = "iniActiveAlly";
                 } else if (active === true  && !gamedata.isMyShip(ships[i])){
                     td.className = "iniActiveEnemy";
                 }
