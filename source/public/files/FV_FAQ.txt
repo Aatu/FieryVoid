@@ -84,8 +84,9 @@ STEALTH SHIPS
 - Stealth ships can also be detected at the start of the Firing Phase if they move into an enemy unit’s detection range and it has active sensors/line of sight.  These ranges are as follows: Base (5x Sensor Rating), ELINT Ship (3x Sensor Rating), Other Ship (2x Sensor Rating), Fighter (Offensive Bonus).
 - ELINT ships can further boost their detection range by investing EW points in 'Detect Stealth' ability, which increases their detection range by +2 per EW point spent.
 - Once detected, stealth ships will remain visible, but can become hidden again if they break line of sight with all enemy ships at the end of a turn (and don't otherwise reveal themselves by firing a weapon).
-- Stealth systems also provide a Jammer ability (e.g. always double range penalty as if no-lock).  Against ships this applies to ships from over 12 hexes away (over 4 hexes for fighters, 24 for bases).  Stealth fighters get this no-lock bonus against all enemy fire from over 5 hexes away.
-- Note, Stealth fighters cannot become invisible in the same way as stealth ships.
+- If a stealth ship's scanner or computer system is destroyed it's defence profile will be increased by 15% for the remainder of the battle (represented by criticals on its CnC)
+- Stealth systems also provide a Jammer ability (e.g. always double range penalty as if no-lock).  Against ships this applies to ships from over 12 hexes away (over 4 hexes for fighters, 24 for bases).  Stealth fighters get this no-lock bonus against all enemy fire from over 5 hexes away, and additionally ballistic launches cannot be made against them from more than 5 hexes away.
+- Note, Stealth fighters cannot become invisible in the same way as stealth ships, and only benefit from the jammer/no-lock abilities.
 
 
 OTHER
