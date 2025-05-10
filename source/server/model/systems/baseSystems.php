@@ -3604,14 +3604,14 @@ class AdaptiveArmorController extends ShipSystem{
         parent::setSystemDataWindow($turn); 
 		$this->data["Total AA Assigned"] =  $this->AAtotal_used . '/' . $this->AAtotal;
 		$this->data[" - Maximum per weapon type"] =  $this->AApertype;
-		$this->data[" - Preassigned Amount"] =  $this->AApreallocated_used . '/' . $this->AApreallocated;
+		$this->data[" - Pre-assigned Amount"] =  $this->AApreallocated_used . '/' . $this->AApreallocated;
 		foreach($this->allocatedAA as $dmgType=>$AAallocated){
 			$AAavailable = $this->availableAA[$dmgType];
 			$this->data[' - '.$dmgType] =  $AAallocated . '/' . $AAavailable;
 		}
         $this->data["Special"] = "This system is responsible for Adaptive Armor settings management.";	   
         $this->data["Special"] .= "<br>You may assign AA points in Initial phase.";
-        $this->data["Special"] .= "<br>Pre-set AA points may be used in turn 1 only.";
+        $this->data["Special"] .= "<br>Pre-assigned AA points may be used in Turn 1 only.";
         $this->data["Special"] .= "<br>AA points set in previous turns cannot be unassigned.";
         $this->data["Special"] .= "<br>AA points are unlocked individually down to superheavy fighters - lighter craft unlock AA points as whole flights. Assignment is always individual.";
     }
