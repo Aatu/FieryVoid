@@ -69,6 +69,7 @@ class Stealth extends ShipSystem implements SpecialAbility{
 			$unit = $this->getUnit();
 			if($unit instanceof FighterFlight){
             	$this->data["Special"] = "Jammer ability if targeted from over 5 hexes away.";
+				$this->data["Special"] .= "<br>Cannot be targeted by ballistic weapons at all from over 5 hexes away.";
 			}else{
             	$this->data["Special"] = "Ship is invisible to enemies until reveals itself or is detected.";
 				$this->data["Special"] .= "<br>It is revealed immediately if any EW abilities (other than DEW) are used or fires a weapon.";
@@ -121,6 +122,7 @@ class Stealth extends ShipSystem implements SpecialAbility{
 			}	
         return $jammerValue;        
     }
+
 
 	public function generateIndividualNotes($gameData, $dbManager){ //dbManager is necessary for Initial phase only
         $ship = $this->getUnit();
@@ -199,6 +201,7 @@ class Stealth extends ShipSystem implements SpecialAbility{
 		});
 	}
 
+
 	private function isDetectedInitial($ship, $gameData) {
 		$revealed = false;
 
@@ -217,6 +220,7 @@ class Stealth extends ShipSystem implements SpecialAbility{
 
 		return $revealed;
 	}	
+
 
 	private function isDetectedFire($ship, $gameData) {
 
@@ -282,6 +286,7 @@ class Stealth extends ShipSystem implements SpecialAbility{
 		return false; //No other conditions were true, not detected.
 
 	}//endof isDetected()	
+
 
 	private function isUndetected($ship, $gameData) {
 		$blockedHexes = $gameData->getBlockedHexes(); //Save outside loop as this won't change.
@@ -368,6 +373,7 @@ class Stealth extends ShipSystem implements SpecialAbility{
 		}
 	}//endof function criticalPhaseEffects
 
+
 	public function stripForJson(){
         $strippedSystem = parent::stripForJson();
         $strippedSystem->detected = $this->detected;	        
@@ -375,6 +381,7 @@ class Stealth extends ShipSystem implements SpecialAbility{
     }
 
 } //endof Stealth
+
 
 class Fighterimprsensors extends ShipSystem implements SpecialAbility{    
     public $name = "fighterimprsensors";
@@ -3595,9 +3602,9 @@ class AdaptiveArmorController extends ShipSystem{
 	
     public function setSystemDataWindow($turn){
         parent::setSystemDataWindow($turn); 
-		$this->data["Adaptive Armor"] =  $this->AAtotal_used . '/' . $this->AAtotal;
-		$this->data[" - per weapon type"] =  $this->AApertype;
-		$this->data[" - preassigned"] =  $this->AApreallocated_used . '/' . $this->AApreallocated;
+		$this->data["Total AA Assigned"] =  $this->AAtotal_used . '/' . $this->AAtotal;
+		$this->data[" - Maximum per weapon type"] =  $this->AApertype;
+		$this->data[" - Preassigned Amount"] =  $this->AApreallocated_used . '/' . $this->AApreallocated;
 		foreach($this->allocatedAA as $dmgType=>$AAallocated){
 			$AAavailable = $this->availableAA[$dmgType];
 			$this->data[' - '.$dmgType] =  $AAallocated . '/' . $AAavailable;

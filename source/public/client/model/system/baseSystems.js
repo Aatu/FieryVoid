@@ -353,6 +353,23 @@ AdaptiveArmorController.prototype.nextCurrClass = function () { //get next damag
 	this.currClass = classes[currId];
 	return this.currClass;
 };
+
+AdaptiveArmorController.prototype.prevCurrClass = function () { // get previous damage class for display
+    this.getCurrClass();
+    if (this.currClass == '') return ''; // no damage classes available
+    var classes = Object.keys(this.availableAA);
+    var currId = -1;
+    for (var i = 0; i < classes.length; i++) {
+        if (this.currClass == classes[i]) {
+            currId = i - 1;
+            break; // exit loop
+        }
+    }
+    if (currId < 0) currId = classes.length - 1;
+    this.currClass = classes[currId];
+    return this.currClass;
+};
+
 AdaptiveArmorController.prototype.canIncrease = function () { //check if can increase rating for current class; can do if preallocated points are unused or allocated points are less than available 
 	//always needs to check that allocated are less than maximum and allocated total is less than total maximum
 	this.getCurrClass();
@@ -440,8 +457,8 @@ AdaptiveArmorController.prototype.refreshData = function () { //refresh descript
 		this.data[entryName] = this.allocatedAA[currType] + '/' + this.availableAA[currType];
 	}
 	//fix pre-allocated data, too!
-	this.data[" - preassigned"] =  this.AApreallocated_used + '/' + this.AApreallocated;
-	this.data["Adaptive Armor"] =  this.AAtotal_used + '/' + this.AAtotal;
+	this.data[" - Preassigned Amount"] =  this.AApreallocated_used + '/' + this.AApreallocated;
+	this.data["Total AA Assigned"] =  this.AAtotal_used + '/' + this.AAtotal;
 	
 	//this.preallocated_used =  this.AApreallocated_used;
 };

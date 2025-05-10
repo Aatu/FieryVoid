@@ -40793,6 +40793,7 @@ var SystemInfoButtons = function (_React$Component) {
 				canChangeFiringMode(ship, system) && getFiringModes(ship, system, this.changeFiringMode.bind(this), this.allChangeFiringMode.bind(this)),
 				canSelfIntercept(ship, system) && React.createElement(Button, { title: "Allow interception (RMB = All systems selected)", onClick: this.declareSelfIntercept.bind(this), onContextMenu: this.declareSelfInterceptAll.bind(this), img: "./img/selfIntercept.png" }),
 				canAAdisplayCurrClass(ship, system) && React.createElement(Button, { title: getAAcurrClassName(ship, system), img: getAAcurrClassImg(ship, system) }),
+				canAAdisplayCurrClass(ship, system) && React.createElement(Button, { title: "Previous", onClick: this.prevCurrClass.bind(this), img: "./img/systemicons/Specialistclasses/iconPrev.png" }),
 				canAAdisplayCurrClass(ship, system) && React.createElement(Button, { title: "Next", onClick: this.nextCurrClass.bind(this), img: "./img/systemicons/AAclasses/iconNext.png" }),
 				canAAincrease(ship, system) && React.createElement(Button, { onClick: this.AAincrease.bind(this), img: "./img/systemicons/AAclasses/iconPlus.png" }),
 				canAAdecrease(ship, system) && React.createElement(Button, { onClick: this.AAdecrease.bind(this), img: "./img/systemicons/AAclasses/iconMinus.png" }),
