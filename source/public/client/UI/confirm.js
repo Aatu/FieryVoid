@@ -260,7 +260,88 @@ window.confirm = {
 	}
     },
 	
+
+    // Helper function to select all text on focus
+    selectAllTextOnFocus: function() {
+        var range = document.createRange();
+        range.selectNodeContents(this);
+        var sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+    },
+
+
+    // Helper function to handle input changes
+    handleInputChange: function handleInputChange(e) {
+        var currentText = $(this).text();
+        var value = parseInt(currentText) || 0;
+
+        // Get the min and max limits
+        var min = $(this).data('min');
+        var max = $(this).data('max');
+
+        // Enforce min/max
+        if (value < min) value = min;
+        if (value > max) value = max;
+
+        // Update the displayed and stored value
+        $(this).text(value);
+        $(this).data('value', value);
+        $(this).data('count', value);
+
+        // Move the cursor to the end
+        var range = document.createRange();
+        var sel = window.getSelection();
+        range.selectNodeContents(this);
+        range.collapse(false); // Move to end
+        sel.removeAllRanges();
+        sel.addRange(range);
+
+        // Calculate the enhancement cost
+        var enhPrice = $(this).data('enhPrice');
+        var enhPriceStep = $(this).data('enhPriceStep');
+        var enhCost = (value > 0) ? (value * enhPrice) + ((value - 1) * enhPriceStep) : 0;
+        $(this).data('enhCost', enhCost);
+
+        // Trigger any necessary cost update function
+        confirm.getTotalCost();
+    },
+
+
+    // Helper function to prevent non-numeric input
+    preventNonNumericInput: function preventNonNumericInput(e) {
+        // Allow only numbers, backspace, delete, arrows, and enter
+        if (
+            (e.key >= "0" && e.key <= "9") || 
+            ["Backspace", "Delete", "ArrowLeft", "ArrowRight", "Enter"].includes(e.key)
+        ) {
+            return;
+        }
+        e.preventDefault();
+    },   
     
+// Helper function to handle mouse wheel changes
+handleMouseWheel: function handleMouseWheel(e) {
+    e.preventDefault();
+    var increment = (e.originalEvent.deltaY < 0) ? 1 : -1;
+    var value = parseInt($(this).text()) || 0;
+
+    // Get the min and max limits
+    var min = $(this).data('min');
+    var max = $(this).data('max');
+
+    // Adjust value based on scroll direction
+    value += increment;
+
+    // Enforce min/max
+    if (value < min) value = min;
+    if (value > max) value = max;
+
+    // Update the value and trigger the input change handler
+    $(this).text(value);
+    $(this).data('value', value);
+    $(this).trigger('input'); // Simulate an input change
+},    
         
     showShipBuy: function showShipBuy(ship, callback) {
         var e = $(this.whtml);
@@ -308,26 +389,36 @@ window.confirm = {
             var enhLimit = enhancement[3];		
             var enhPrice = enhancement[4];
             var enhPriceStep = enhancement[5];
-		var enhIsOption = enhancement[6];
+		    var enhIsOption = enhancement[6];
 
             var template = $(".missileSelectItem");
-                    var item = template.clone(true).prependTo(e);
+            var item = template.clone(true).prependTo(e);
 
-                    var selectAmountItem = $(".selectAmount", item);
+            var selectAmountItem = $(".selectAmount", item);
 
-                    selectAmountItem.html("0");
-                    selectAmountItem.addClass("shpenh"+i);
-            selectAmountItem.data('enhID', enhID);
-                    selectAmountItem.data('count', 0);
-                    selectAmountItem.data('enhCost', 0);
-                    selectAmountItem.data('min', 0);
-            selectAmountItem.data('max', enhLimit);
+                selectAmountItem.html("0");
+                selectAmountItem.attr("contenteditable", "true"); // Make it editable - DK 12.5.25
+                selectAmountItem.addClass("shpenh"+i);
+                selectAmountItem.data('enhID', enhID);
+                selectAmountItem.data('count', 0);
+                selectAmountItem.data('enhCost', 0);
+                selectAmountItem.data('min', 0);
+                selectAmountItem.data('max', enhLimit);
                 selectAmountItem.data('enhPrice', enhPrice);
                 selectAmountItem.data('enhPriceStep', enhPriceStep);
                 //selectAmountItem.data('launchers', confirm.getLaunchersPerFighter(ship));
                 //selectAmountItem.data("firingMode", i);
 
-		if(enhIsOption) enhName = ' <i>(OPTION)</i> ' + enhName; //add (O) at the beginning of name of options (to differentiate them from enhancements)
+            // New fucntions to allow player to free type/mousewheel in number fields for enhancements/ammo - DK 12.5.25
+            selectAmountItem.on("focus", confirm.selectAllTextOnFocus);
+
+            selectAmountItem.on("input", confirm.handleInputChange);
+
+            selectAmountItem.on("keydown", confirm.preventNonNumericInput);
+            
+            selectAmountItem.on("wheel", confirm.handleMouseWheel);
+
+		if(enhIsOption) enhName = ' <i>(OPTION)</i> ' + enhName; //add (OPTION) at the beginning of name of options (to differentiate them from enhancements)
             var nameExpanded = enhName + ' (';
 			if(enhLimit>1) nameExpanded += 'up to ' + enhLimit + ' levels, ';
 			nameExpanded += enhPrice + 'PV ';
@@ -469,6 +560,51 @@ window.confirm = {
         a.fadeIn(250);
     },
 
+
+// Helper function to handle input changes (edit mode)
+handleInputChangeEdit: function handleInputChangeEdit(e) {
+    var currentText = $(this).text();
+    var value = parseInt(currentText) || 0;
+    var oldCount = $(this).data('count');
+
+    // Get the min and max limits
+    var min = $(this).data('min');
+    var max = $(this).data('max');
+
+    // Enforce min/max
+    if (value < min) value = min;
+    if (value > max) value = max;
+
+    // Update the displayed and stored value
+    $(this).text(value);
+    $(this).data('value', value);
+    $(this).data('count', value);
+
+    // Move the cursor to the end
+    var range = document.createRange();
+    var sel = window.getSelection();
+    range.selectNodeContents(this);
+    range.collapse(false); // Move to end
+    sel.removeAllRanges();
+    sel.addRange(range);
+
+    // Calculate the enhancement cost
+    var enhPrice = $(this).data('enhPrice');
+    var enhPriceStep = $(this).data('enhPriceStep');
+    var countDifference = value - oldCount;
+
+    // Update the enhancement cost incrementally
+    var enhCost = $(this).data('enhCost') || 0;
+    var costChange = (countDifference > 0) 
+        ? (countDifference * enhPrice) + ((countDifference - 1) * enhPriceStep)
+        : (countDifference * enhPrice) - ((Math.abs(countDifference) - 1) * enhPriceStep);
+    enhCost += costChange;
+    $(this).data('enhCost', enhCost);
+
+    // Trigger any necessary cost update function
+    confirm.getTotalCost();
+},
+
     
     showShipEdit: function showShipEdit(ship, callback) {
         var e = $(this.whtml);
@@ -531,7 +667,7 @@ window.confirm = {
             var item = template.clone(true).prependTo(e);
 
             var selectAmountItem = $(".selectAmount", item);
-
+                    selectAmountItem.attr("contenteditable", "true"); // Make it editable - DK 12.5.25
                 selectAmountItem.html(enhCount);
                 selectAmountItem.addClass("shpenh"+i);
                 selectAmountItem.data('enhID', enhID);
@@ -543,6 +679,15 @@ window.confirm = {
                 selectAmountItem.data('enhPriceStep', enhPriceStep);
                 //selectAmountItem.data('launchers', confirm.getLaunchersPerFighter(ship));
                 //selectAmountItem.data("firingMode", i);
+
+            // New fucntions to allow player to free type in number fields for enhancements/ammo - DK 12.5.25
+            selectAmountItem.on("focus", confirm.selectAllTextOnFocus);
+
+            selectAmountItem.on("input", confirm.handleInputChangeEdit);
+
+            selectAmountItem.on("keydown", confirm.preventNonNumericInput);
+
+            selectAmountItem.on("wheel", confirm.handleMouseWheel);
 
 		if(enhIsOption) enhName = ' <i>(OPTION)</i> ' + enhName; //add (O) at the beginning of name of options (to differentiate them from enhancements)
             var nameExpanded = enhName + ' (';
