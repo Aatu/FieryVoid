@@ -1050,8 +1050,11 @@ shipManager.movement = {
         
 		//is turning affordable in the first place?
 		var speed = shipManager.movement.getSpeed(ship);
-        var turncost = Math.ceil(speed * ship.turncost);		
+        var baseTurnCost = ship.turncost;
+        if(ship.submarine && shipManager.movement.isGoingBackwards(ship)) baseTurnCost = baseTurnCost * 1.33; //Subs have a weird rule about turning backwards.
+        var turncost = Math.ceil(speed * baseTurnCost);
         turncost = Math.max(1,turncost);//turn cost may never be less than 1!
+        
         if (shipManager.movement.getRemainingEngineThrust(ship) < turncost) {
             return false;
         }
@@ -1695,8 +1698,11 @@ shipManager.movement = {
         }
 
         var speed = shipManager.movement.getSpeed(ship);
-        var turncost = Math.ceil(speed * ship.turncost);
+        var baseTurnCost = ship.turncost;
+        if(ship.submarine && shipManager.movement.isGoingBackwards(ship)) baseTurnCost = baseTurnCost * 1.33; //Subs have a weird rule about turning backwards.
+        var turncost = Math.ceil(speed * baseTurnCost);
         turncost = Math.max(1,turncost);//turn cost may never be less than 1!
+        
         if (shipManager.movement.getRemainingEngineThrust(ship) < turncost) {
             return false;
         }
@@ -1900,7 +1906,9 @@ shipManager.movement = {
         var requiredThrust = Array(null, null, null, null, null);
 
         var speed = shipManager.movement.getSpeed(ship);
-        var turncost = Math.ceil(speed * ship.turncost);
+        var baseTurnCost = ship.turncost;
+        if(ship.submarine && shipManager.movement.isGoingBackwards(ship)) baseTurnCost = baseTurnCost * 1.33; //Subs have a weird rule about turning backwards.
+        var turncost = Math.ceil(speed * baseTurnCost);
 
         var side, sideindex, rear, rearindex, any;
 
