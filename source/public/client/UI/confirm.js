@@ -320,28 +320,28 @@ window.confirm = {
         e.preventDefault();
     },   
     
-// Helper function to handle mouse wheel changes
-handleMouseWheel: function handleMouseWheel(e) {
-    e.preventDefault();
-    var increment = (e.originalEvent.deltaY < 0) ? 1 : -1;
-    var value = parseInt($(this).text()) || 0;
+    // Helper function to handle mouse wheel changes
+    handleMouseWheel: function handleMouseWheel(e) {
+        e.preventDefault();
+        var increment = (e.originalEvent.deltaY < 0) ? 1 : -1;
+        var value = parseInt($(this).text()) || 0;
 
-    // Get the min and max limits
-    var min = $(this).data('min');
-    var max = $(this).data('max');
+        // Get the min and max limits
+        var min = $(this).data('min');
+        var max = $(this).data('max');
 
-    // Adjust value based on scroll direction
-    value += increment;
+        // Adjust value based on scroll direction
+        value += increment;
 
-    // Enforce min/max
-    if (value < min) value = min;
-    if (value > max) value = max;
+        // Enforce min/max
+        if (value < min) value = min;
+        if (value > max) value = max;
 
-    // Update the value and trigger the input change handler
-    $(this).text(value);
-    $(this).data('value', value);
-    $(this).trigger('input'); // Simulate an input change
-},    
+        // Update the value and trigger the input change handler
+        $(this).text(value);
+        $(this).data('value', value);
+        $(this).trigger('input'); // Simulate an input change
+    },    
         
     showShipBuy: function showShipBuy(ship, callback) {
         var e = $(this.whtml);
