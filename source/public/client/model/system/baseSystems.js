@@ -457,7 +457,7 @@ AdaptiveArmorController.prototype.refreshData = function () { //refresh descript
 		this.data[entryName] = this.allocatedAA[currType] + '/' + this.availableAA[currType];
 	}
 	//fix pre-allocated data, too!
-	this.data[" - Preassigned Amount"] =  this.AApreallocated_used + '/' + this.AApreallocated;
+	this.data[" - Pre-assigned Amount"] =  this.AApreallocated_used + '/' + this.AApreallocated;
 	this.data["Total AA Assigned"] =  this.AAtotal_used + '/' + this.AAtotal;
 	
 	//this.preallocated_used =  this.AApreallocated_used;
