@@ -112,7 +112,7 @@ window.ReplayAnimationStrategy = function () {
             return (
                 (turnDestroyed !== null && turnDestroyed < this.turn) ||
                 (turnDestroyed === null && destroyed) ||
-                (!gamedata.isMyorMyTeamShip(ship) && shipManager.isStealthShip(ship) && !shipManager.isDetected(ship))
+                (shipManager.shouldBeHidden(ship))
             );
         }, this).forEach(function (ship) {
             this.shipIconContainer.getByShip(ship).hide();

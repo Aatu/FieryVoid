@@ -21,13 +21,9 @@ window.IdleAnimationStrategy = function () {
                 icon.hide();
             } else if (turnDestroyed === null && destroyed) {
                 icon.hide();
-            } else if (shipManager.isStealthShip(ship)) { //Enemy, has stealth ability and not a fighter.
-                if(shipManager.isDetected(ship) || gamedata.isMyorMyTeamShip(ship)){
-                    icon.show();                    
-                }else{
-                    icon.hide();
-                }    
-            }else {
+            } else if (shipManager.shouldBeHidden(ship)) { //Stealth or not deployed yet.
+                icon.hide();
+            } else {
                 icon.show();
             }
 
