@@ -543,7 +543,16 @@ if ($asteroids == false && $moons == false) {
         <div id="fleetcheck" class="panel large" style="display:none;"><p id="fleetchecktxt" style="display:block;"><span></div>
 
 </div>
-                    
+
+    <div id="deploymentPreview" class="panel large" style="margin-top:10px;">
+        <div style="text-align: center; text-decoration: underline; margin-bottom: 10px;">
+            <span>DEPLOYMENT ZONE PREVIEW</span>
+        </div>
+        <div id="mapPreviewContainer" style="margin: 0 auto 20px auto; text-align: center;">
+            <canvas id="mapPreview" width="420" height="300"></canvas>
+        </div>
+    </div>
+
         <div id="globalchat" class="panel large" style="height:150px;">
         <?php 
             $chatgameid = 0;
