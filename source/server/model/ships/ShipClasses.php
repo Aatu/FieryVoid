@@ -27,6 +27,7 @@ class BaseShip {
     public $phpclass;
     public $forwardDefense, $sideDefense;
     public $destroyed = false;
+    public $deploysOnTurn = 1; //Default turn to deploy.
     public $pointCost = 0;
     public $pointCostEnh = 0; //points spent on enhanements (in addition to crafts' own price), DOES NOT include cost of items being only technically enhancements (special missiles, Navigators...)
 	public $pointCostEnh2 = 0; //points spent on non-enhancements - separation actuallly exists only at fleet selection, afterwards it will be always 0 with points added to $pointCostEnh
@@ -72,7 +73,6 @@ class BaseShip {
     public $rolled = false;
     public $rolling = false;
 	public $EMHardened = false; //EM Hardening (Ipsha have it) - some weapons would check for this value!
-	public $jammerMissile = false; //Marker for when ships are affected by Jammer Missile BDEW.
 	
 	public $ignoreManoeuvreMods = false;//New marker for factions like Mindriders that don't take penalties for pivoting etc	
 		
@@ -470,7 +470,8 @@ class BaseShip {
         $strippedShip->EW = $this->EW;
         $strippedShip->movement = $this->movement; 
         $strippedShip->faction = $this->faction; 
-        $strippedShip->phpclass = $this->phpclass; 
+        $strippedShip->phpclass = $this->phpclass;
+        $strippedShip->deploysOnTurn = $this->deploysOnTurn;         
         $strippedShip->systems = array_map( function($system) {return $system->stripForJson();}, $this->systems);
 		
 		$strippedShip->combatValue = $this->calculateCombatValue();
@@ -1074,7 +1075,7 @@ class BaseShip {
 						if ($ability=='ReactorFlux'){
 							$this->notes .= '<br>Power Fluctuations';
 						}
-					}if ($reactor instanceof MagGravReactor && !$this instanceof Terrain) {
+					}if ($reactor instanceof MagGravReactor && !$this->isTerrain()) {
 						$this->notes .= '<br>Mag-Gravitic Reactor';
 					}
 					break; //checking one Reactor is enough
@@ -1733,6 +1734,37 @@ public function getAllEWExceptDEW($turn){
         return true;
     }
 
+	public function isTerrain(){
+        //If any of these conditions is true, indicates Terrain.
+        if($this instanceof Terrain || $this->userid == -5 || $this->shipSizeClass == 5) return true;
+		return false; 
+	}//endof function isTerrain
+
+    public function getTurnDeployed($gamedata){
+
+        if ($gamedata->phase == -1 || $this->osat || $this->base || $this->isTerrain()) return 1; //Don't hide anything in Deployment Phase.  Bases, Terrain and OSATs never 'jump in'.
+
+        //$slot = $gamedata->getSlotById($this->slot);
+        //$depTurn = max($this->deploysOnTurn, $slot->depavailable);
+        $depTurn = $this->deploysOnTurn;
+
+        return $depTurn;
+
+	}//endof function getTurnDeployed    
+/*
+    public function notDeployedYet($gamedata){
+       
+        if($this->deploysOnTurn > $gamedata->turn) return true; //Ships can be set to deploy later.
+
+        //Now check entire slot.
+        $slot = $gamedata->getSlotById($this->slot);
+        $depTurn = $slot->depavailable;
+
+        if($depTurn > $gamedata->turn) return true;
+
+        return false; 
+	}//endof function notDeployedYet
+*/
 
     public function getBearingOnPos($pos){ //returns relative angle from this unit to indicated coordinates
         $tf = $this->getFacingAngle(); //ship facing
@@ -2580,6 +2612,7 @@ class LightShip extends BaseShip{ //is this used anywhere?...
 class OSAT extends MediumShip{
     public $osat = true;
     public $canvasSize = 100;
+	public $enhancementOptionsDisabled = array('DEPLOY'); //Base cannot jump into a scenario!    
 
     public function isDisabled(){
         return false;
@@ -2604,7 +2637,7 @@ class OSAT extends MediumShip{
 class StarBase extends BaseShip{
     public $base = true;
     public $Enormous = true;
-
+	public $enhancementOptionsDisabled = array('DEPLOY'); //Base cannot jump into a scenario! 
 
     public function isDisabled(){
         if ($this->isPowerless())
@@ -2854,6 +2887,7 @@ public function getPiercingLocations($shooter, $pos, $turn, $weapon){
 
 
 class SmallStarBaseFourSections extends BaseShip{ //just change arcs of sections...
+	public $enhancementOptionsDisabled = array('DEPLOY'); //Base cannot jump into a scenario!     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
 
@@ -2893,6 +2927,7 @@ class SmallStarBaseThreeSections extends SmallStarBaseFourSections{
 } //end of StarBaseThreeSections
 
 class UnevenBaseFourSections extends BaseShip{ //4-sided base which has differend fwd and side profile
+	public $enhancementOptionsDisabled = array('DEPLOY'); //Base cannot jump into a scenario!   
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
 
