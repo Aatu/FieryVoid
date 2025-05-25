@@ -1840,7 +1840,7 @@ applyCustomShipFilter: function () {
             }
             ship.flightSize = Math.floor(flightSize);
         }
-	    
+
 		//do note enhancements bought (if any)
 		var enhNo = 0;
 		var noTaken = 0;
@@ -2408,7 +2408,13 @@ applyCustomShipFilter: function () {
 			if (enhCount > 1) ship.enhancementTooltip += ` (x${enhCount})`;	
 
 			switch (enhID) {
-			
+				case 'DEPLOY': // Delayed
+					if(!ship.deployEnh && enhCount > 1){
+							ship.notes += "<br>Deploys on Turn " + enhCount + "";
+						}
+						ship.deployEnh = true;
+				break;		
+
 				case 'ELITE_CREW':
 					if(!ship.eliteEnh){
 						ship.forwardDefense -= enhCount;
@@ -3225,6 +3231,13 @@ applyCustomShipFilter: function () {
 					if (enhCount > 1) flight.enhancementTooltip += ` (x${enhCount})`;	
 		
 					switch (enhID) {
+
+						case 'DEPLOY': // Expert Motivator
+							if(!flight.deployEnh && enhCount > 1){
+								flight.notes += "<br>Deploys on Turn " + enhCount + "";
+							}
+							flight.deployEnh = true;
+						break;
 
 						case 'ELT_MAR': // Elite marines, mark every Marines system as Elite.
 							if(!flight.elMarEnhFlight){

@@ -388,7 +388,42 @@ if ($asteroids == true) { // Asteroid terrain rules in play
     $optionsUsed .= ', Asteroids ('. $asteroidsNo . ')';
 }
 if ($moons == true) { // Moon terrain rules in play
-    $optionsUsed .= ', Moons ('. $moonsNo . ')';
+        switch($moonsNo){
+            case 0:
+                $optionsUsed .= ', Moons (None)';
+            break;            
+            case 1:
+                $optionsUsed .= ', Moons (One Small)';                
+            break;
+            case 2:
+                $optionsUsed .= ', (Two Small)';   
+            break;
+            case 3:
+                $optionsUsed .= ', Moons (Three Small';  
+            break;
+            case 4:
+                $optionsUsed .= ', Moons (Four Small)';  
+            break;
+            case 5:
+                $optionsUsed .= ', Moons (One Large)';   
+            break;
+            case 6:
+                $optionsUsed .= ', Moons (Two Large)';   
+            break;
+            case 7:
+                $optionsUsed .= ', Moons (Three Large)';   
+            break;
+            case 8:
+                $optionsUsed .= ', Moons (One Large / One Small)';   
+            break;
+            case 9:
+                $optionsUsed .= ', Moons (One Large / Two Small)';   
+            break;
+            case 10:
+                $optionsUsed .= ', Moons (One Large / Three Small)';   
+            break;
+
+        }
 }
 
 if ($asteroids == false && $moons == false) { 
@@ -407,11 +442,11 @@ if ($asteroids == false && $moons == false) {
 <br>
 <span style="color: #f8f8f8;">Random Fleet Selection</span> 
 <span style="margin-right: 3px;">-</span> 
-<a href="https://old.wheelofnames.com/fx3-uje" target="_blank" style="color: #ff9500; text-decoration: underline;"><strong>Tier 1</strong></a> 
+<a href="https://old.wheelofnames.com/fx3-uje" target="_blank" style="color:rgb(255, 204, 102); text-decoration: underline;"><strong>Tier 1</strong></a> 
 <strong style="margin: 0 2.5px;">|</strong> 
-<a href="https://old.wheelofnames.com/rmq-7ds" target="_blank" style="color: #ff9500; text-decoration: underline;"><strong>Tier 2</strong></a>
+<a href="https://old.wheelofnames.com/rmq-7ds" target="_blank" style="color:rgb(255, 204, 102); text-decoration: underline;"><strong>Tier 2</strong></a>
 <strong style="margin: 0 2.5px;">|</strong> 
-<a href="https://old.wheelofnames.com/sgd-5zq" target="_blank" style="color: #ff9500; text-decoration: underline;"><strong>Tier 3</strong></a>
+<a href="https://old.wheelofnames.com/sgd-5zq" target="_blank" style="color:rgb(255, 204, 102); text-decoration: underline;"><strong>Tier 3</strong></a>
 <br><br>
 
 
@@ -555,7 +590,7 @@ if ($asteroids == false && $moons == false) {
                 <span class ="value depwidth"></span>
                 <span>Height:</span>
                 <span class ="value depheight"></span>
-                <span>Turn available:</span>
+                <span>Turn Available:</span>
                 <span class ="value depavailable"></span>
             </div>
         </div>
