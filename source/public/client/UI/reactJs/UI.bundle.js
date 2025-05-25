@@ -38429,8 +38429,8 @@ Object.defineProperty(exports, "__esModule", {
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _templateObject = _taggedTemplateLiteral(["\n    width: 114px;\n    min-height: 114px;\n    height: calc(100% - 4px);\n    background-color: #04161C;\n    border: 1px solid #496791;\n    box-sizing: border-box;\n    margin: 2px;\n"], ["\n    width: 114px;\n    min-height: 114px;\n    height: calc(100% - 4px);\n    background-color: #04161C;\n    border: 1px solid #496791;\n    box-sizing: border-box;\n    margin: 2px;\n"]),
-    _templateObject2 = _taggedTemplateLiteral(["\n    widht: 100%;\n    height: 13px;\n    border-bottom: 1px solid #496791;\n    box-sizing: border-box;\n    font-size: 10px;\n    color: white;\n    text-transform: uppercase;\n    padding: 1px 3px;\n    margin: 0;\n"], ["\n    widht: 100%;\n    height: 13px;\n    border-bottom: 1px solid #496791;\n    box-sizing: border-box;\n    font-size: 10px;\n    color: white;\n    text-transform: uppercase;\n    padding: 1px 3px;\n    margin: 0;\n"]),
-    _templateObject3 = _taggedTemplateLiteral(["\n    font-size: 9px;\n    padding: 1px 2px 0px 2px;\n    color: #C6E2FF;\n"], ["\n    font-size: 9px;\n    padding: 1px 2px 0px 2px;\n    color: #C6E2FF;\n"]),
+    _templateObject2 = _taggedTemplateLiteral(["\n    width: 100%;\n    height: 16px;\n    border-bottom: 1px solid #496791;\n    box-sizing: border-box;\n    font-size: 8.5px;\n    color: white;\n    text-transform: uppercase;\n    padding: 2px 2px;\n    margin: 0;\n    line-height: 12px;\n    display: flex;\n    align-items: center;\n    justify-content: flex-start;    \n"], ["\n    width: 100%;\n    height: 16px;\n    border-bottom: 1px solid #496791;\n    box-sizing: border-box;\n    font-size: 8.5px;\n    color: white;\n    text-transform: uppercase;\n    padding: 2px 2px;\n    margin: 0;\n    line-height: 12px;\n    display: flex;\n    align-items: center;\n    justify-content: flex-start;    \n"]),
+    _templateObject3 = _taggedTemplateLiteral(["\n    font-size: 8.5px;\n    padding: 1px 2px 0px 2px;\n    color: #C6E2FF;\n"], ["\n    font-size: 8.5px;\n    padding: 1px 2px 0px 2px;\n    color: #C6E2FF;\n"]),
     _templateObject4 = _taggedTemplateLiteral(["\n    color: white;\n    text-transform: uppercase;\n    margin-right: 5px;\n"], ["\n    color: white;\n    text-transform: uppercase;\n    margin-right: 5px;\n"]),
     _templateObject5 = _taggedTemplateLiteral(["\n    color: #C6E2FF;\n    margin-right: 5px;\n"], ["\n    color: #C6E2FF;\n    margin-right: 5px;\n"]);
 
@@ -38502,7 +38502,7 @@ var ShipWindowEw = function (_React$Component) {
                 React.createElement(
                     Header,
                     null,
-                    "E. Warfare"
+                    "Electronic Warfare"
                 ),
                 getEW(ship)
             );
@@ -38514,6 +38514,22 @@ var ShipWindowEw = function (_React$Component) {
 
 var getEW = function getEW(ship) {
     var list = [];
+    var deployTurn = shipManager.getTurnDeployed(ship);
+    if (deployTurn > gamedata.turn) {
+        //Selected ships is not deployed yet - DK May 2025
+        list.push(React.createElement(
+            Entry,
+            { key: "dew-scs-" + ship.id },
+            React.createElement(
+                EntryHeader,
+                null,
+                React.createElement("br", null),
+                "DEPLOYS ON TURN"
+            ),
+            deployTurn
+        ));
+        return list;
+    }
 
     list.push(React.createElement(
         Entry,
