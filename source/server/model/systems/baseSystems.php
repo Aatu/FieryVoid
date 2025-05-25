@@ -2863,6 +2863,7 @@ class HyachSpecialists extends ShipSystem{
 	
     
     protected $possibleCriticals = array(); //no available criticals - in fact, this system is a technicality and should never be hit
+	//public $deploymentTurn = 1;
     
 
     function __construct( $specTotal  ){ //technical object, does not need typical system attributes (armor, structure...)
@@ -2878,6 +2879,30 @@ class HyachSpecialists extends ShipSystem{
             return $b->repairCost - $a->repairCost; //costlier first!
         }else return $a->id - $b->id;
     } //endof function sortSystemsByRepairPriority
+
+
+	public function doIndividualNotesTransfer(){   
+	    // Example array from Front End:
+	    //     "Defence" => array(1, 2),
+	    //     "Engine" => array(1, 0)  );
+	    
+	    // Data received in variable individualNotesTransfer, further functions will look for it in currchangedSpec
+	    if (is_array($this->individualNotesTransfer)) {
+	        foreach ($this->individualNotesTransfer as $specType => $specValues) {
+	            foreach ($specValues as $specAction) {
+	                if ($specAction === 1) { // Specialist has been selected.
+	                    // Add $specType key to $this->currSelectedSpec
+	                    $this->currSelectedSpec[] = $specType; // Append $specType to $this->currSelectedSpec array
+	                } elseif ($specAction === 2) { // Specialist has been used.
+	                    // Add $specType key to $this->currchangedSpec
+	                    $this->currchangedSpec[] = $specType; // Append $specType to $this->currchangedSpec array
+	                }
+	            }
+	        }
+	    }                                	   
+	    $this->individualNotesTransfer = array(); // Empty, just in case
+	}
+
 
 //	 this method generates additional non-standard informaction in the form of individual system notes in this case: 
 //	 - Initial phase: check setting changes made by user, convert to notes	
@@ -2897,18 +2922,16 @@ class HyachSpecialists extends ShipSystem{
 							}
 						}
 						$this->onIndividualNotesLoaded($gameData);
-	
 
-					if ($gameData->turn==1){
-						
-						foreach ($this->currSelectedSpec as $specialistType) {//Take Front end data on Turn 1 and generate available Specs.
+					
+						foreach ($this->currSelectedSpec as $specialistType) {//Take Front end data on deployment turn and generate available Specs.
 
-						$notekey = 'available;' . $specialistType; //Make those Specialist Types available for rest of game.
-						$noteHuman = 'Specialist available';
-						$noteValue = 1; //Max Specialists is always 1, value not actually used for this type of note.
-						$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
+							$notekey = 'available;' . $specialistType; //Make those Specialist Types available for rest of game.
+							$noteHuman = 'Specialist available';
+							$noteValue = 1; //Max Specialists is always 1, value not actually used for this type of note.
+							$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
 						}
-					}	
+						
 
 															
 						foreach($this->currchangedSpec as $specialistType){//Take Front end data and generate used Specs.
@@ -2951,6 +2974,7 @@ class HyachSpecialists extends ShipSystem{
 
 						            if ($strongestValue > 0) { // Computer actually exists to be enhanced!
 						                $strongestSystem->output += 2;
+										$strongestSystem->BFCPpertype += 1;
 						            }	
 								} 		
 							}
@@ -2958,8 +2982,8 @@ class HyachSpecialists extends ShipSystem{
 					$this->specAllocatedCount[$explodedKey[1]] = 1;//To show it has been used this turn in system info tooltip.
 						
 				}else if ($explodedKey[1] == 'Defence'){ //Ship profiles reduced by 5, intercept ratings +10 ,
-					$ship->forwardDefense -= 1;
-					$ship->sideDefense -= 1;
+					$ship->forwardDefense -= 2;
+					$ship->sideDefense -= 2;
 					
 					foreach ($ship->systems as $system){
 						if ($system instanceof Weapon){
@@ -3017,18 +3041,33 @@ class HyachSpecialists extends ShipSystem{
 					$this->specAllocatedCount[$explodedKey[1]] = 1;//To show it has been used this turn in system info tooltip.
 						
 				}else if ($explodedKey[1] == 'Maneuvering'){ //Reduce Turn Cost and Turn Delay by one step.
+				 	$strongestSystem = null;
+					$strongestValue = -1;
+						foreach ($ship->systems as $system) {
+							if ($system->isDestroyed($gamedata->turn)) continue;//don't need to do anything on destroyed systems.								
+						    if ($system instanceof Engine) {
+						        if ($system->output > $strongestValue) {
+						            $strongestValue = $system->output;
+						            $strongestSystem = $system;
 
+						            if ($strongestValue > 0) { // Engine actually exists to be enhanced!
+						                $specialistBoost = floor($strongestSystem->output * 0.10);
+						                $strongestSystem->output += $specialistBoost;
+						            }	
+								} 
+							}
+						}			
 			            if ($ship->turncost == 0) $ship->turncost = 0;
-			            if ($ship->turncost == 0.5) $ship->turncost = 0.33;
-			            if ($ship->turncost == 0.66) $ship->turncost = 0.5;
-			            if ($ship->turncost == 1) $ship->turncost = 0.66;
-			            if ($ship->turncost == 1.5) $ship->turncost = 1;
+			            if ($ship->turncost == 0.5) $ship->turncost = 0.25;
+			            if ($ship->turncost == 0.66) $ship->turncost = 0.33;
+			            if ($ship->turncost == 1) $ship->turncost = 0.5;
+			            if ($ship->turncost == 1.5) $ship->turncost = 0.75;
 
 			            if ($ship->turndelaycost == 0) $ship->turndelaycost = 0;        
-			            if ($ship->turndelaycost == 0.5) $ship->turndelaycost = 0.33;
-			            if ($ship->turndelaycost == 0.66) $ship->turndelaycost = 0.5;
-			            if ($ship->turndelaycost == 1) $ship->turndelaycost = 0.66;
-			 			if ($ship->turndelaycost == 1.5) $ship->turndelaycost = 1;
+			            if ($ship->turndelaycost == 0.5) $ship->turndelaycost = 0.25;
+			            if ($ship->turndelaycost == 0.66) $ship->turndelaycost = 0.33;
+			            if ($ship->turndelaycost == 1) $ship->turndelaycost = 0.5;
+			 			if ($ship->turndelaycost == 1.5) $ship->turndelaycost = 0.75;
 		 								
 					$this->specAllocatedCount[$explodedKey[1]] = 1;	
 													
@@ -3165,7 +3204,7 @@ class HyachSpecialists extends ShipSystem{
 					$this->specAllocatedCount[$explodedKey[1]] = 1;//To show it has been used this turn in system info tooltip.
 						
 				}else if ($explodedKey[1] == 'Targeting'){ //+3% to hit on ALL weapons this turn
-					$ship->toHitBonus += 0.66;	
+					$ship->toHitBonus += 0.6;	
 					$this->specAllocatedCount[$explodedKey[1]] = 1;
 										
 				}else if ($explodedKey[1] == 'Thruster'){ //Remove limits on Thruster rating, improve Engine efficiency.
@@ -3229,35 +3268,35 @@ class HyachSpecialists extends ShipSystem{
 			}
 		}
 	if 	(TacGamedata::$currentTurn == 1 && TacGamedata::$currentPhase == 1){	//Show all Specialist info on Turn 1 Initial Orders.
-	        $this->data["Special"] = "This is a technical system used for Specialist management.";
-	        $this->data["Special"] .= "<br>On Turn 1 Initial Orders, you must select which Specialists this ship will have available.";        	   
-	        $this->data["Special"] .= "<br>You may then use Specialist(s) by clicking + button in any Initial Orders phase (including Turn 1)."; 
-	        $this->data["Special"] .= "<br>Each Specialists can be used once, with these effects on the turn they are used:";
-			$this->data["Special"] .= "<br>  - Computer: +2 Bonus Fire Control Points."; 
-			$this->data["Special"] .= "<br>  - Defence: Profiles lowered by 5, intercept ratings +10."; 
-			$this->data["Special"] .= "<br>  - Engine: +25% Thrust and remove an Engine critical."; 
-			$this->data["Special"] .= "<br>  - Maneuvering: Turn Cost and Delay reduced.";
-			$this->data["Special"] .= "<br>  - Sensor: +1 EW and remove a Scanner critical.";
-			$this->data["Special"] .= "<br>  - Power: Extra power and remove a Reactor critical.";
+	        $this->data["Special"] = "Technical system for Specialist management.";
+	        $this->data["Special"] .= "<br>On the Turn this ship deploys, select which Specialists this ship will have available.";        	   
+	        $this->data["Special"] .= "<br>Activate Specialist(s) by clicking their '+' button during Initial Orders."; 
+	        $this->data["Special"] .= "<br>Each Specialist can be used once, with these effects on the turn they are used:";
+			$this->data["Special"] .= "<br>  - Computer: +2 BFCP, +1 BFCP per type."; 
+			$this->data["Special"] .= "<br>  - Defence: Profiles lowered by 10%, all intercept ratings +10%."; 
+			$this->data["Special"] .= "<br>  - Engine: +25% Thrust, remove an Engine critical."; 
+			$this->data["Special"] .= "<br>  - Maneuvering: +10% thrust, Halves Turn Cost / Delay.";
+			$this->data["Special"] .= "<br>  - Sensor: +1 EW, remove a Scanner critical.";
+			$this->data["Special"] .= "<br>  - Power: +8-12 power, remove a Reactor critical.";
 			$this->data["Special"] .= "<br>  - Repair: Remove two critical effects.";						 			
-			$this->data["Special"] .= "<br>  - Targeting: +3% to hit on all weapons.";
-			$this->data["Special"] .= "<br>  - Thruster: No thruster limits and engine efficiency improved.";
+			$this->data["Special"] .= "<br>  - Targeting: All weapons +3% to hit.";
+			$this->data["Special"] .= "<br>  - Thruster: No thruster limits and Engine Efficiency improved.";
 			$this->data["Special"] .= "<br>  - Weapon: All weapons +3 damage this turn.";								 
 	    }else{ //After Initials Orders on Turn 1, reduce data so that it just shows relevant info on Specialists selected.
-	        $this->data["Special"] = "This is a technical system used for Specialist management.";       	   
-	        $this->data["Special"] .= "<br>You use Specialist(s) by clicking + button in any Initial Orders phase (including Turn 1)."; 
+	        $this->data["Special"] = "Technical system used for Specialist management.";       	   
+	        $this->data["Special"] .= "<br>Activate Specialist(s) by clicking their '+' button during Initial Orders."; 
 	        $this->data["Special"] .= "<br>Each Specialists can be used once, with these effects on the turn they are used:";
 				foreach($this->allocatedSpec as $specialistType => $specValue) {
-					if ($specialistType == 'Computer') $this->data["Special"] .= '<br>  - '.$specialistType . ': +2 Bonus Fire Control Points.';
-					if ($specialistType == 'Defence') $this->data["Special"] .= '<br>  - '.$specialistType . ': Profiles lowered by 5, intercept ratings +10.';
-					if ($specialistType == 'Engine') $this->data["Special"] .= '<br>  - '.$specialistType . ': +25% Thrust and remove an Engine critical.';
-					if ($specialistType == 'Maneuvering') $this->data["Special"] .= '<br>  - '.$specialistType . ': Turn Cost and Delay reduced.';
-					if ($specialistType == 'Repair') $this->data["Special"] .= '<br>  - '.$specialistType . ' :Remove two critical effects.';
-					if ($specialistType == 'Sensor') $this->data["Special"] .= '<br>  - '.$specialistType . ' :+1 EW and remove a Scanner critical.';
-					if ($specialistType == 'Power') $this->data["Special"] .= '<br>  - '.$specialistType . ' :Extra power and remove a Reactor critical.';
-					if ($specialistType == 'Targeting') $this->data["Special"] .= '<br>  - '.$specialistType . ': +3% to hit on all weapons.';
-					if ($specialistType == 'Thruster') $this->data["Special"] .= '<br>  - '.$specialistType . ': No thruster limits and engine efficiency improved.';
-					if ($specialistType == 'Weapon') $this->data["Special"] .= '<br>  - '.$specialistType . ': All weapons +3 damage this turn.';						
+					if ($specialistType == 'Computer') $this->data["Special"] .= '<br>  -  '.$specialistType . ': +2 BFCP, +1 BFCP per type.';
+					if ($specialistType == 'Defence') $this->data["Special"] .= '<br>  -  '.$specialistType . ': Profiles lowered by 10%, intercept ratings +10%.';
+					if ($specialistType == 'Engine') $this->data["Special"] .= '<br>  -  '.$specialistType . ': +25% Thrust, remove an Engine critical.';
+					if ($specialistType == 'Maneuvering') $this->data["Special"] .= '<br>  -  '.$specialistType . ': +10% thrust, Halves Turn Cost / Delay.';
+					if ($specialistType == 'Repair') $this->data["Special"] .= '<br>  -  '.$specialistType . ' :Remove two critical effects.';
+					if ($specialistType == 'Sensor') $this->data["Special"] .= '<br>  -  '.$specialistType . ' :+1 EW, remove a Scanner critical.';
+					if ($specialistType == 'Power') $this->data["Special"] .= '<br>  -  '.$specialistType . ' :+8-12 power, remove a Reactor critical.';
+					if ($specialistType == 'Targeting') $this->data["Special"] .= '<br>  -  '.$specialistType . ': All weapons +3% to hit.';
+					if ($specialistType == 'Thruster') $this->data["Special"] .= '<br>  -  '.$specialistType . ': No thruster limits and engine efficiency improved.';
+					if ($specialistType == 'Weapon') $this->data["Special"] .= '<br>  -  '.$specialistType . ': All weapons +3 damage this turn.';						
 				}        
 		}         	 	
     }
@@ -3276,29 +3315,7 @@ class HyachSpecialists extends ShipSystem{
         $strippedSystem->specIncreased = $this->specIncreased;                             		
         return $strippedSystem;
     }
-
 	
-	public function doIndividualNotesTransfer(){   
-	    // Example array from Front End:
-	    //     "Defence" => array(1, 2),
-	    //     "Engine" => array(1, 0)  );
-	    
-	    // Data received in variable individualNotesTransfer, further functions will look for it in currchangedSpec
-	    if (is_array($this->individualNotesTransfer)) {
-	        foreach ($this->individualNotesTransfer as $specType => $specValues) {
-	            foreach ($specValues as $specAction) {
-	                if ($specAction === 1) { // Specialist has been selected.
-	                    // Add $specType key to $this->currSelectedSpec
-	                    $this->currSelectedSpec[] = $specType; // Append $specType to $this->currSelectedSpec array
-	                } elseif ($specAction === 2) { // Specialist has been used.
-	                    // Add $specType key to $this->currchangedSpec
-	                    $this->currchangedSpec[] = $specType; // Append $specType to $this->currchangedSpec array
-	                }
-	            }
-	        }
-	    }                                	   
-	    $this->individualNotesTransfer = array(); // Empty, just in case
-	}	
 									
 } //endof HyachSpecialists
 
@@ -3401,6 +3418,8 @@ class AdaptiveArmorController extends ShipSystem{
 	public $allocatedAA = array(); //AA points allocated for given damage type
 	public $availableAA = array(); //AA points available for allocation for given damage type
 	public $currchangedAA = array(); //AA points allocated in front end
+
+	public $pressignedReset = false; //New variable for Front End to reset pre-assigned to 0, so that they can be set on deployment turn - DK - May 2025
 	
 	
     
@@ -3604,14 +3623,16 @@ class AdaptiveArmorController extends ShipSystem{
         parent::setSystemDataWindow($turn); 
 		$this->data["Total AA Assigned"] =  $this->AAtotal_used . '/' . $this->AAtotal;
 		$this->data[" - Maximum per weapon type"] =  $this->AApertype;
-		$this->data[" - Pre-assigned Amount"] =  $this->AApreallocated_used . '/' . $this->AApreallocated;
+		//$this->data[" - Pre-assigned Amount"] =  $this->AApreallocated_used . ' out of ' . $this->AApreallocated;
+		$this->data[" - Pre-assigned remaining"] =  $this->AApreallocated - $this->AApreallocated_used;		
 		foreach($this->allocatedAA as $dmgType=>$AAallocated){
 			$AAavailable = $this->availableAA[$dmgType];
-			$this->data[' - '.$dmgType] =  $AAallocated . '/' . $AAavailable;
+			//$this->data[' - '.$dmgType] =  $AAallocated . '/' . $AAavailable;
+			$this->data[' - '.$dmgType] =  $AAallocated;
 		}
         $this->data["Special"] = "This system is responsible for Adaptive Armor settings management.";	   
-        $this->data["Special"] .= "<br>You may assign AA points in Initial phase.";
-        $this->data["Special"] .= "<br>Pre-assigned AA points may be used in Turn 1 only.";
+        $this->data["Special"] .= "<br>You may assign AA points in Initial Orders phase.";
+        $this->data["Special"] .= "<br>Pre-assigned AA points may only be used on the turn this ship deploys.";
         $this->data["Special"] .= "<br>AA points set in previous turns cannot be unassigned.";
         $this->data["Special"] .= "<br>AA points are unlocked individually down to superheavy fighters - lighter craft unlock AA points as whole flights. Assignment is always individual.";
     }
@@ -6341,7 +6362,7 @@ class AmmoMissileJ extends AmmoMissileTemplate{
 	public $doNotIntercept = true;
 	public $noLockPenalty = false;	               	
     
-	private static $alreadyJammed = array();     	
+	public static $alreadyJammed = array();     	
 
     public function getDamage($fireOrder) //actual function to be called, as with weapon!
     {
@@ -6363,8 +6384,7 @@ class AmmoMissileJ extends AmmoMissileTemplate{
 					$affectedUnits = $gamedata->getShipsInDistance($target, 5);	//Find all ships within 5 hexes.
 				
 					foreach ($affectedUnits as $targetShip) { //Apply Jammer marker to those ships.
-						if (isset(AmmoMissileJ::$alreadyJammed[$targetShip->id])) return; //But not if jammed already.
-						$targetShip->jammerMissile = true;	//Give appropriate marker to ships in range.									                    		
+						if (isset(AmmoMissileJ::$alreadyJammed[$targetShip->id])) return; //But not if jammed already.									                    		
 						AmmoMissileJ::$alreadyJammed[$targetShip->id] = true;//mark jammed already.
 					}
 	}//endof function beforeFiringOrderResolution 
