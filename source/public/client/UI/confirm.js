@@ -342,6 +342,37 @@ window.confirm = {
         $(this).data('value', value);
         $(this).trigger('input'); // Simulate an input change
     },    
+
+handleMouseWheelFighter: function handleMouseWheelFighter(e) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    var $elem = $(this);
+    var current = parseInt($elem.text()) || 0;
+    var max = $(".totalUnitCostAmount").data("maxSize");
+    var direction = (e.originalEvent.deltaY < 0) ? 'up' : 'down';
+
+    if (direction === 'up') {
+        if (current < max) {
+            if (current < 6) {
+                current += 1;
+            } else {
+                current += 3;
+            }
+            if (current > max) current = max;
+        }
+    } else {
+        if (current > 6) {
+            current -= 3;
+        } else if (current > 1) {
+            current -= 1;
+        }
+        if (current < 1) current = 1;
+    }
+
+    $elem.text(current);
+    confirm.getTotalCost();
+},    
         
     showShipBuy: function showShipBuy(ship, callback) {
         var e = $(this.whtml);
@@ -534,6 +565,7 @@ window.confirm = {
 	    }
             selectAmountItem.data('pV', Math.floor(ship.pointCost / 6));
 
+            selectAmountItem.on("wheel", confirm.handleMouseWheelFighter);
             $(".fighterSelectItem .selectButtons .plusButton", e).on("click", confirm.increaseFlightSize);
             $(".fighterSelectItem .selectButtons .minusButton", e).on("click", confirm.decreaseFlightSize);
         }
@@ -819,6 +851,7 @@ handleInputChangeEdit: function handleInputChangeEdit(e) {
 
             selectAmountItem.data('pV', Math.floor(ship.pointCost / ship.flightSize));
 
+            selectAmountItem.on("wheel", confirm.handleMouseWheelFighter);
             $(".fighterSelectItem .selectButtons .plusButton", e).on("click", confirm.increaseFlightSize);
             $(".fighterSelectItem .selectButtons .minusButton", e).on("click", confirm.decreaseFlightSize);
         }
