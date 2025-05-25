@@ -425,7 +425,7 @@ AmmoMissileRackF.prototype.doIndividualNotesTransfer = function () { //prepare i
 
 AmmoMissileRackF.prototype.checkIsInRangeFRack = function (shooter, target, weapon) { 
         var range = weapon.range;
-        var distance = mathlib.getDistanceBetweenShipsInHex(shooter, target).toFixed(2);
+        var distance = 0;
 
         if (weapon.hextarget){//For when this function called by FRack to check range of hex targeted missiles e.g. J-Missiles - DK
 	        var hexpos = {
@@ -434,7 +434,9 @@ AmmoMissileRackF.prototype.checkIsInRangeFRack = function (shooter, target, weap
                         };        	
 			var targetPosition = new hexagon.Offset(hexpos.x, hexpos.y);
 			distance = shipManager.getShipPosition(shooter).distanceTo(targetPosition);        
-		}
+		}else{
+            distance = mathlib.getDistanceBetweenShipsInHex(shooter, target).toFixed(2);
+        }
 		
 	   if (range === 0) return true;
 	   			
