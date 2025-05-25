@@ -66,6 +66,9 @@ window.BallisticIconContainer = function () {
 		//Now create perimter hex icons to illustrate the hexes occupied by really large terrain occupy.
 		generateTerrainHexes.call(this, gamedata);
 
+		//Crearte blue hex icons for where ships are jumping in later.
+		generateReinforcementHexes.call(this, gamedata);
+
     };
 
 
@@ -164,7 +167,7 @@ window.BallisticIconContainer = function () {
         }, this);
     } //endof generateBallisticLines()
 
-	
+
     function generateTerrainHexes(gamedata) {
 		// Filter for ships with Huge value
 		gamedata.ships
@@ -202,6 +205,35 @@ window.BallisticIconContainer = function () {
 
 		});
     } //endof generateTerrainHexes()
+
+
+    function generateReinforcementHexes(gamedata) {
+		// === 2. Handle Not Deployed Ships (Blue Hexes) ===
+		gamedata.ships
+			.filter(ship => shipManager.getTurnDeployed(ship) > gamedata.turn) // Only undeployed ships
+			.filter(ship => gamedata.isMyorMyTeamShip(ship)) // Only own Team ships.		
+			.forEach(ship => {
+				const turnDeploys = shipManager.getTurnDeployed(ship);
+				const position = shipManager.getShipPosition(ship);
+				const posGame = this.coordinateConverter.fromHexToGame(position);
+					const reinforceSprite = new BallisticSprite(posGame, "hexBlue", "Deploys on Turn " + turnDeploys + "");
+					this.scene.add(reinforceSprite.mesh);
+
+					this.ballisticIcons.push({
+						id: -6,
+						shooterId: ship.id,
+						targetId: ship.id,
+						launchPosition: position,
+						position: new hexagon.Offset(position.x, position.y),
+						launchSprite: reinforceSprite,
+						targetSprite: reinforceSprite,
+						used: true
+					});
+
+			});
+	} //endof generateReinforcementHexes()
+
+
 
     function createOrUpdateBallistic(ballistic, iconContainer, turn, replay = false) {
         var icon = getBallisticIcon.call(this, ballistic.id);
@@ -294,7 +326,7 @@ window.BallisticIconContainer = function () {
 					break;
 					case 'Jammer': //Jammer Missile
 						    targetType = 'hexPurple';
-						    text = "Jammer Missile";
+						    text = "Jammer";
 						    textColour = "#7f00ff";		        
 						break;					
 					case 'Anti-Fighter Plasma Web': //Pak'ma'ra Plasma Web Persistent Effect
