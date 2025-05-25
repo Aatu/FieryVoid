@@ -68,7 +68,7 @@ shipManager.movement = {
     },
 
     isMovementReady: function isMovementReady(ship) {
-        return shipManager.movement.getRemainingMovement(ship) == 0 || shipManager.isDestroyed(ship);
+        return shipManager.movement.getRemainingMovement(ship) == 0 || shipManager.isDestroyed(ship) || gamedata.isTerrain(ship) || (shipManager.getTurnDeployed(ship) > gamedata.turn);
     },
 
     checkHasUncommitted: function checkHasUncommitted(ship) {
@@ -1383,6 +1383,9 @@ shipManager.movement = {
 	        if (ship.flight) continue;
 	        if (ship.userid != gamedata.thisplayer) continue;
 	        if (shipManager.isDestroyed(ship) || shipManager.power.isPowerless(ship)) continue;
+
+			var deployTurn = shipManager.getTurnDeployed(ship);
+			if(deployTurn > gamedata.turn) continue;  //Don't bother checking for ships that haven't deployed yet.
 
 	        // Get the list of engine systems
 	        var engines = shipManager.systems.getSystemListByName(ship, "engine");

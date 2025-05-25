@@ -189,6 +189,9 @@ shipManager.power = {
 
 			if (shipManager.isDestroyed(ship) || shipManager.power.isPowerless(ship)) continue;
 
+            var deployTurn = shipManager.getTurnDeployed(ship);
+            if(deployTurn > gamedata.turn) continue;  //Don't bother checking for ships that haven't deployed yet.
+
 			if (!ship.checkShieldGenerator()) {
 				shipNames[counter] = ship.name;
 				counter++;
@@ -208,10 +211,14 @@ shipManager.power = {
 			if (ship.unavailable) continue;
 
 			if (ship.flight) continue;
+			if(gamedata.isTerrain(ship)) continue;
 
 			if (ship.userid != gamedata.thisplayer) continue;
 
 			if (shipManager.isDestroyed(ship) || shipManager.power.isPowerless(ship)) continue;
+
+            var deployTurn = shipManager.getTurnDeployed(ship);
+            if(deployTurn > gamedata.turn) continue;  //Don't bother checking for ships that haven't deployed yet.
 
 			if (shipManager.power.getReactorPower(ship, shipManager.systems.getSystemByName(ship, "reactor")) < 0) {
 				shipNames[counter] = ship.name;
@@ -227,10 +234,12 @@ shipManager.power = {
 			var shipNames = new Array();
 			var counter = 0;
 			for (var i in gamedata.ships) {
-				var ship = gamedata.ships[i];
+				var ship = gamedata.ships[i];			
 				if (ship.unavailable) continue;
 				if (ship.flight) continue;
-				if (ship.userid != gamedata.thisplayer) continue;			
+				if (ship.userid != gamedata.thisplayer) continue;
+				var deployTurn = shipManager.getTurnDeployed(ship);
+				if(deployTurn > gamedata.turn) continue;  //Don't bother checking for ships that haven't deployed yet.							
 				if (!(shipManager.systems.getSystemByName(ship, "powerCapacitor"))) continue;
 				if (shipManager.isDestroyed(ship) || shipManager.power.isPowerless(ship)) continue;
 				if (shipManager.power.getReactorPower(ship, shipManager.systems.getSystemByName(ship, "reactor")) < 0) {
@@ -252,6 +261,8 @@ shipManager.power = {
 		            if (ship.unavailable) continue;
 		            if (ship.flight) continue;
 		            if (ship.userid != gamedata.thisplayer) continue;
+					var deployTurn = shipManager.getTurnDeployed(ship);
+					if(deployTurn > gamedata.turn) continue;  //Don't bother checking for ships that haven't deployed yet.					
 		            if (!(shipManager.systems.getSystemByName(ship, "PlasmaBattery"))) continue;
 		            if (shipManager.isDestroyed(ship)) continue;
 
@@ -324,6 +335,7 @@ shipManager.power = {
 	getReactorPower: function getReactorPower(ship, system) {
 		var fixedPower = false;
 		var output;
+
 
 		if (ship.base) {
 			var reactors = shipManager.power.getAllReactors(ship);
