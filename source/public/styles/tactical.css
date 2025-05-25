@@ -341,10 +341,16 @@ body {
 }
 
 #shipNameContainer .name, .shipNameContainer .name{
-   font-size:18px;
-   font-style:italic;
+   font-size:16px;
+   font-style:normal;
 
 }
+
+.not-deployed {
+    color: #b34119;
+    font-size: 16px;
+} 
+
 
 .enemy.name{
     color:#b34119;
