@@ -204,12 +204,10 @@ window.PhaseStrategy = function () {
     PhaseStrategy.prototype.onHexClicked = function (payload) {};
 
     PhaseStrategy.prototype.onShipsClicked = function (ships, payload) {
-
-        // Filter out ships that are not yours or your team's + are stealth ships + not detected
+        
+        // Filter out ships that are not yours or your team's + are stealth ships + not detected + not deployed yet.
         const filteredShips = ships.filter(ship => 
-            gamedata.isMyorMyTeamShip(ship) || 
-            !shipManager.isStealthShip(ship) || 
-            shipManager.isDetected(ship)
+            !(shipManager.shouldBeHiddenTeam(ship))
         );
 
         if(filteredShips.length === 1){ //only one ship, we have to pretend the stealth ship(s) aren't on same hex!
@@ -220,15 +218,13 @@ window.PhaseStrategy = function () {
                 this.onShipClicked(ship, payload);
             }    
         }else{
-            this.showSelectFromShips(filteredShips, payload);
+            if(filteredShips.length > 0) this.showSelectFromShips(filteredShips, payload); //More than 1, but not 0.  Prevents graphic from appearing and indicating where hidden ships are.
         }
     };
 
     PhaseStrategy.prototype.onShipRightClicked = function (ship) {
-        if(!gamedata.isMyorMyTeamShip(ship)){
-            if(shipManager.isStealthShip(ship) && !shipManager.isDetected(ship)) return;  //Enemy, stealth equipped and undetected - DK May 2025
-        }
-
+        if(shipManager.shouldBeHiddenTeam(ship)) return;  //Enemy, stealth equipped and undetected, or not deployed yet - DK May 2025
+        
         if (this.gamedata.isMyShip(ship)) {
             this.setSelectedShip(ship);
         }
@@ -236,9 +232,7 @@ window.PhaseStrategy = function () {
     };
 
     PhaseStrategy.prototype.onShipClicked = function (ship, payload) {//30 June 2024 - DK - Added for Ally targeting.
-        if(!gamedata.isMyorMyTeamShip(ship)){
-            if(shipManager.isStealthShip(ship) && !shipManager.isDetected(ship)) return;  //Enemy, stealth equipped and undetected - DK May 2025
-        }
+        if(shipManager.shouldBeHidden(ship)) return;  //Enemy, stealth equipped and undetected, or not deployed yet - DK May 2025
 
 		if(this.gamedata.isMyShip(ship) && (!this.gamedata.canTargetAlly(ship))) {
             this.selectShip(ship, payload);
@@ -355,11 +349,7 @@ window.PhaseStrategy = function () {
 PhaseStrategy.prototype.onMouseOverShips = function (ships, payload) {
     // Filter out ships that are not visible or shouldn't show tooltips
     const visibleShips = ships.filter(ship => {
-        if (!gamedata.isMyorMyTeamShip(ship)) {
-            if (shipManager.isStealthShip(ship) && !shipManager.isDetected(ship)) {
-                return false;
-            }
-        }
+        if(shipManager.shouldBeHidden(ship)) return false;  //Enemy, stealth equipped and undetected, or not deployed yet - DK May 2025
         return true;
     });
 
@@ -378,9 +368,7 @@ PhaseStrategy.prototype.onMouseOverShips = function (ships, payload) {
 
     PhaseStrategy.prototype.onMouseOverShip = function (ship, payload) {
 
-        if(!gamedata.isMyorMyTeamShip(ship)){
-            if(shipManager.isStealthShip(ship) && !shipManager.isDetected(ship)) return;  //Enemy, stealth equipped and undetected - DK May 2025
-        }
+        if(shipManager.shouldBeHidden(ship)) return;  //Enemy, stealth equipped and undetected, or not deployed yet - DK May 2025
 
         this.showAppropriateHighlight();
         this.showAppropriateEW();
@@ -692,6 +680,7 @@ PhaseStrategy.prototype.onMouseOverShips = function (ships, payload) {
         var ship = payload.ship;
         var system = payload.system;
         var element = payload.element;
+        if(shipManager.getTurnDeployed(ship) > gamedata.turn) return;
 
         this.showSystemInfo(ship, system, element, true);
         PhaseStrategy.prototype.onSystemDataChanged.call(this, {ship: ship, system: system});
