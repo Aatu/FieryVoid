@@ -418,8 +418,25 @@ window.confirm = {
             
             selectAmountItem.on("wheel", confirm.handleMouseWheel);
 
-		if(enhIsOption) enhName = ' <i>(OPTION)</i> ' + enhName; //add (OPTION) at the beginning of name of options (to differentiate them from enhancements)
-            var nameExpanded = enhName + ' (';
+        var slotid = gamedata.selectedSlot;
+        var slot = playerManager.getSlotById(slotid);
+        var deployTurn = Math.max(1, slot.depavailable); 
+
+		if(enhIsOption && enhID != 'DEPLOY') enhName = " <span style='color:rgb(224, 185, 57) ;'>(OPTION)</span> " + enhName; //add (OPTION) at the beginning of name of options (to differentiate them from enhancements)
+        if(enhIsOption && enhID == 'DEPLOY'){
+            selectAmountItem.html(deployTurn);
+            selectAmountItem.data('min', deployTurn);
+            enhName = " <span style='color:rgb(95, 206, 95);' >(DEPLOYMENT)</span> " + enhName;
+        } 
+        if (enhName.includes('(AMMO)')) {
+            // Remove '(AMMO)' from enhName to prevent duplication
+            enhName = enhName.replace('(AMMO)', '').trim();
+            enhName = " <span style='color:rgb(106, 195, 255)  ;'>(AMMO)</span> " + enhName;
+        }        
+                
+        var nameExpanded = enhName;
+        if(enhID != 'DEPLOY'){
+            nameExpanded = nameExpanded + ' {';
 			if(enhLimit>1) nameExpanded += 'up to ' + enhLimit + ' levels, ';
 			nameExpanded += enhPrice + 'PV ';
 			//+ ' (up to ' + enhLimit + ' levels, ' + enhPrice + 'PV ';
@@ -427,7 +444,7 @@ window.confirm = {
                 nameExpanded = nameExpanded + ' plus ' + enhPriceStep + 'PV per level';		
             }
             nameExpanded = nameExpanded + ')';
-
+        }    
             $(".selectText", item).html(nameExpanded);
             $(item).show();
 
@@ -689,8 +706,25 @@ handleInputChangeEdit: function handleInputChangeEdit(e) {
 
             selectAmountItem.on("wheel", confirm.handleMouseWheel);
 
-		if(enhIsOption) enhName = ' <i>(OPTION)</i> ' + enhName; //add (O) at the beginning of name of options (to differentiate them from enhancements)
-            var nameExpanded = enhName + ' (';
+        var slotid = gamedata.selectedSlot;
+        var slot = playerManager.getSlotById(slotid);
+        var deployTurn = Math.max(1, slot.depavailable);          
+
+		if(enhIsOption && enhID != 'DEPLOY') enhName = " <span style='color:rgb(224, 185, 57) ;'>(OPTION)</span> " + enhName; //add (OPTION) at the beginning of name of options (to differentiate them from enhancements)
+        if(enhIsOption && enhID == 'DEPLOY'){
+            if(enhCount == 0) selectAmountItem.html(deployTurn);
+            selectAmountItem.data('min', deployTurn);
+            enhName = " <span style='color:rgb(95, 206, 95);' >(DEPLOYMENT)</span> " + enhName;
+        } 
+        if (enhName.includes('(AMMO)')) {
+            // Remove '(AMMO)' from enhName to prevent duplication
+            enhName = enhName.replace('(AMMO)', '').trim();
+            enhName = " <span style='color:rgb(106, 195, 255)  ;'>(AMMO)</span> " + enhName;
+        }        
+                
+        var nameExpanded = enhName;
+        if(enhID != 'DEPLOY'){
+            nameExpanded = nameExpanded + ' {';
 			if(enhLimit>1) nameExpanded += 'up to ' + enhLimit + ' levels, ';
 			nameExpanded += enhPrice + 'PV ';
 			//+ ' (up to ' + enhLimit + ' levels, ' + enhPrice + 'PV ';
@@ -698,6 +732,7 @@ handleInputChangeEdit: function handleInputChangeEdit(e) {
                 nameExpanded = nameExpanded + ' plus ' + enhPriceStep + 'PV per level';		
             }
             nameExpanded = nameExpanded + ')';
+        }    
 
             $(".selectText", item).html(nameExpanded);
             $(item).show();
