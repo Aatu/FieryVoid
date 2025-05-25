@@ -730,7 +730,7 @@ window.shipManager = {
 
         // Filter out destroyed ships and those with shipSizeClass === 5 e.g. terrain
         var validShips = gamedata.ships.filter(function(s) {
-            return !shipManager.isDestroyed(s) && s.shipSizeClass !== 5;
+            return !shipManager.isDestroyed(s) && !gamedata.isTerrain(s) && !(shipManager.getTurnDeployed(s) > gamedata.turn);
         });
 
         for (var i in validShips) {
@@ -891,6 +891,8 @@ window.shipManager = {
 			if (ship.unavailable) continue;
 			if (ship.userid != gamedata.thisplayer) continue;					
 			if (shipManager.isDestroyed(ship)) continue;
+            var deployTurn = shipManager.getTurnDeployed(ship);
+			if(deployTurn > gamedata.turn) continue;  //Don't bother checking for ships that haven't deployed yet.
 
 			var left = 0;
 			var right = 0;				
@@ -968,6 +970,45 @@ window.shipManager = {
         return resultTxt;
     },
 
+    //Generic function called from various front end functions.  Checks if ships should be shown/interactable or not.
+    shouldBeHidden: function(ship) {    
+        if(shipManager.getTurnDeployed(ship) > gamedata.turn) return true; //Not deployed yet.
+        if(!gamedata.isMyorMyTeamShip(ship) && shipManager.isStealthShip(ship) && !shipManager.isDetected(ship)) return true; //Enemy, stealth ship and not currently detected
+        return false;
+    },
+    
+    //Sometimes things SHOULDN'T be hidden from own team, e.g. right clicking on Reinforcements before they arrive.
+    shouldBeHiddenTeam: function(ship) {
+        var myTeam = gamedata.isMyorMyTeamShip(ship);     
+        if(shipManager.getTurnDeployed(ship) > gamedata.turn && !myTeam) return true; //Not deployed yet.
+        if(!myTeam && shipManager.isStealthShip(ship) && !shipManager.isDetected(ship)) return true; //Enemy, stealth ship and not currently detected. Always hide.        
+        return false;
+    },
+    
+    getTurnDeployed: function getTurnDeployed(ship) {
+        if (gamedata.gamephase == -1 || ship.osat || ship.base || gamedata.isTerrain(ship)) { //Don't hide anything in Deployment Phase.  Bases and OSATs never 'jump in'.
+            return 1;
+        }else{
+            //var slot = playerManager.getSlotById(ship.slot);
+            //return Math.max(ship.deploysOnTurn, slot.depavailable);
+            return ship.deploysOnTurn;            
+        }     
+    },    
+
+/*
+    //Change to true of false function, incase helpful later, if not delete.
+    notDeployedYet: function notDeployedYet(ship) {
+        //var turnDeploys = 1;
+        if(ship.deploysOnTurn > 1 && gamedata.gamephase != -1) return ship.deploysOnTurn; //Ship itself has been set to deploy later in game.
+        
+        var slot = playerManager.getSlotById(ship.slot);
+        var depTurn = slot.depavailable;
+
+        if(depTurn > 1 && gamedata.gamephase != -1) return depTurn; //Entire slot deploys later.
+
+        return ship.deploysOnTurn;         
+    },
+*/
     //Called in various places to identify a ship as having stealth ability.
     isStealthShip: function(ship) {
         if(shipManager.hasSpecialAbility(ship, "Stealth") && (!ship.flight)) return true;
