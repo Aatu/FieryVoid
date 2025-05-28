@@ -120,36 +120,60 @@ window.BallisticSprite = function () {
 	    return tex;
 	}
 
-    //New function to create the texture with text inside - DK 09.24
     function createTextureWithText(type, text, textColour) {
-        var canvas = HexagonTexture.renderHexGrid(TEXTURE_SIZE, getStrokeColorByType(type), getFillColorByType(type), 10);
-        var ctx = canvas.getContext('2d');
-        
-	    // Set initial font size to the maximum you expect
-	    var fontSize = 130;
-		var initTextColour = textColour;
-		var lightenedColour = lightenColor(initTextColour, 35); // Lighten by 35%
-	    
-	    ctx.font = `bold ${fontSize}px Arial`;
-	    ctx.fillStyle = lightenedColour;
-	    ctx.textAlign = "center";
-	    ctx.textBaseline = "middle";
+        const canvas = HexagonTexture.renderHexGrid(TEXTURE_SIZE, getStrokeColorByType(type), getFillColorByType(type), 10);
+        const ctx = canvas.getContext('2d');
 
-	    // Measure the text width and reduce the font size until it fits
-	    var maxWidth = TEXTURE_SIZE * 0.4; // Adjust max width based on hexagon size (80% of the hexagon width)
-	    var textWidth = ctx.measureText(text).width;
+        let fontSize = 40;
+        const initTextColour = textColour;
+        const lightenedColour = lightenColor(initTextColour, 35);
+        ctx.fillStyle = lightenedColour;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
 
-	    while (textWidth > maxWidth && fontSize > 10) { // Stop reducing at a minimum font size of 10
-	        fontSize -= 5;
-	        ctx.font = `bold ${fontSize}px Arial`;
-	        textWidth = ctx.measureText(text).width;
-	    }        
-        
-        ctx.fillText(text, TEXTURE_SIZE / 2, TEXTURE_SIZE / 2);
 
-        var tex = new THREE.Texture(canvas);
+    const maxWidth = TEXTURE_SIZE * 0.45;
+
+    let lines;
+    do {
+        ctx.font = `bold ${fontSize}px Arial`;
+        lines = wrapText(ctx, text, maxWidth);
+        fontSize -= 5;
+    } while (lines.some(line => ctx.measureText(line).width > maxWidth) && fontSize > 10);
+
+    ctx.font = `bold ${fontSize}px Arial`; // Ensure correct font used after loop
+
+        const lineHeight = fontSize * 1.2;
+        const totalHeight = lines.length * lineHeight;
+        const startY = (TEXTURE_SIZE / 2) - (totalHeight / 2) + (lineHeight / 2);
+
+        lines.forEach((line, index) => {
+            const y = startY + index * lineHeight;
+            ctx.fillText(line, TEXTURE_SIZE / 2, y);
+        });
+
+        const tex = new THREE.Texture(canvas);
         tex.needsUpdate = true;
         return tex;
+    }
+
+    function wrapText(ctx, text, maxWidth) {
+        const words = text.split(" ");
+        const lines = [];
+        let currentLine = words[0];
+
+        for (let i = 1; i < words.length; i++) {
+            const word = words[i];
+            const width = ctx.measureText(currentLine + " " + word).width;
+            if (width < maxWidth) {
+                currentLine += " " + word;
+            } else {
+                lines.push(currentLine);
+                currentLine = word;
+            }
+        }
+        lines.push(currentLine);
+        return lines;
     }
 
 	function lightenColor(hex, percent) { //Need to lighten text so it stands out from hex clouring a little!

@@ -900,8 +900,8 @@ window.weaponManager = {
 
         var baseDef = weaponManager.calculateBaseHitChange(target, defence, shooter, weapon);
         
-        //This part added to count new critical that raises Defence profiles on ships and adds to hit chance - June 2024 DK
-		if(!target.flight) baseDef += shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(target, "cnC"), "ProfileIncreased");		
+        //The correct defence profiles are now passed from the server side - DK 5/5/2025
+		//if(!target.flight) baseDef += shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(target, "cnC"), "ProfileIncreased");		
 
         var soew = 0;
         var dist = 0;
@@ -1636,10 +1636,14 @@ window.weaponManager = {
 					if (jammer && (!shipManager.power.isOfflineOnTurn(target, jammer, (gamedata.turn-1) ))) {//Jammer exists and was enabled last turn.
 						jammerValue = shipManager.systems.getOutput(target, jammer);
 					}
-				var stealthValue = 0;	
-					if (stealthSystem && (mathlib.getDistanceBetweenShipsInHex(shooter, target) > 10 && target.shipSizeClass >= 0)){
-					 stealthValue = shipManager.systems.getOutput(target, stealthSystem);
-					} 
+				var stealthValue = 0;
+                var stealthDistance = 12; //Default for ships
+                if(shooter.flight) stealthDistance = 4; //Fighters
+                if(shooter.base) stealthDistance = 24; //Bases
+
+				if (stealthSystem && (distance > stealthDistance) && target.shipSizeClass >= 0){
+				    stealthValue = shipManager.systems.getOutput(target, stealthSystem);
+				} 
 					
 				if(stealthValue > jammerValue) jammerValue = stealthValue;//larger value is used
 				

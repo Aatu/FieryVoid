@@ -162,6 +162,15 @@ window.ShipTooltip = function () {
 		toDisplay += 'Half-Phased; ';
 		rollPivotModifier -= 50;
 	}
+    if(gamedata.gamephase != -1){
+        if (shipManager.isStealthShip(ship)){
+            if(shipManager.isDetected(ship)) {
+                toDisplay += '<span style="color:red;">Detected</span>; '; //Notify player that their Stealth ship is detected.
+            }else{
+                toDisplay += '<span style="color:green;">Undetected</span>; '; //Notify player that their Stealth ship is detected.            
+            }
+        }
+    }            
 	if (ship.flight === true){		
 		if (shipManager.movement.hasCombatPivoted(ship) && (!ship.ignoreManoeuvreMods)) rollPivotModifier -= 5;
 	}else if (ship.osat){
@@ -200,7 +209,9 @@ window.ShipTooltip = function () {
         //this.addEntryElement('Current turn delay: ' + shipManager.movement.calculateCurrentTurndelay(ship));
 	var currDelay = shipManager.movement.calculateCurrentTurndelay(ship)
         var speed = shipManager.movement.getSpeed(ship);
-        var turncost = Math.ceil(speed * ship.turncost);
+        var baseTurnCost = ship.turncost;
+        if(ship.submarine && shipManager.movement.isGoingBackwards(ship)) baseTurnCost = baseTurnCost * 1.33;
+        var turncost = Math.ceil(speed * baseTurnCost);
         var turnDelayCost = Math.ceil(speed * ship.turndelaycost);
 
         this.addEntryElement('Pivot cost: ' + ship.pivotcost + ' Roll cost: ' + ship.rollcost, ship.flight !== true);
@@ -246,8 +257,10 @@ window.ShipTooltip = function () {
 		}
 
         if (shipManager.isElint(ship)){
+            this.addEntryElement('Detect Stealth: ' + ew.getEWByType('Detect Stealth', ship), ship.flight !== true);
             this.addEntryElement('Blanket DEW: ' + ew.getEWByType('BDEW', ship), ship.flight !== true);
         }
+
 
         this.addEntryElement('DEW: ' + ew.getDefensiveEW(ship) + ' CCEW: ' + ew.getCCEW(ship), ship.flight !== true);
 //      var fDef = weaponManager.calculateBaseHitChange(ship, ship.forwardDefense) * 5;
