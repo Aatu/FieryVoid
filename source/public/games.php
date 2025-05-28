@@ -65,29 +65,20 @@ if (isset($_SESSION["user"])) {
 -->	    
 		<big><b>Welcome to Fiery Void, an adaptation of the 'Babylon 5 Wars' tabletop game, by Agents of Gaming!</b></big>
 
-		<br><br>---------- <b>LATEST NEWS - April 2025</b> ----------
+		<br><br>---------- <b>LATEST NEWS - May 2025</b> ----------
 
 	    <br><br><b>Features and Enhancements</b>
-	    <br>Combat Logs for previous turns can now be reviewed without watching Replay.
-	    <br>A new Deployment Zone Preview image has been added to Create Game screen, to show how Deployment Zones settings will look like on game map.
-	    <br>ISD, Tier and Custom filters added to Fleet Selections screen.
-	    <br>Split targeting firing modes rolled out to several new weapons, to allow targeting of different ships on the same turn.
-	    <br>Info Tab will now automatically update Fleet Lists and Fleet Values without needing to refresh the web page.
-	    <br>Nexus and Escalation Wars units receiving ability to board enemy ships.
-
-
+	    <br>Fleets and ships now have the option to deploy on later in the game than Turn 1. See Fiery Void FAQ for more info.
+	    <br>Added Stealth ability to Hyach Submarines, who will now be invisible to enemies until detected. See Fiery Void FAQ for more info.
+	    <br>Rebalanced Hyach Specialist bonuses.
+	    <br>Player’s own ships will now appear as green in the tactical overlay/initiative list. Allied ships in the same team will appear blue and enemies remain red.
+	    <br>Added Deployment Preview to Fleet Selection screen as well as Create Game.
+	    <br>Several changes to text styles to help improve readability of game info.
 
 	    <br><br><b>Bug Fixes</b>
-	    <br>Fixed Battle Laser system notes / M-Missile public notes.
-	    <br>Fixed Octurion Battleship Twin Array Forward Arcs.
-	    <br>Asteroids should now not be placed within Moon terrain.
-	    <br>Opacity now properly works for Ballistic Line sprites.
-	    <br>Added ISD dates for all official faction ships that were missing these.
+	    <br>Pulsar mine no longer fires when offline.
+	    <br>Tidied up info in Adaptive Armor system data window.
 	    
-		<br><br>---------- <b>May 2025</b> ----------
-	    <br><b>Bug Fixes Again</b> - fleet checker this time :)
-
-
 
 	    
        <br><br>
