@@ -193,19 +193,6 @@
             
             window.shipWindowManager.addEW = function(){};            
 
-        /* //Old jQuery section, in case my new filtering logic messes anything up - DK   
-		jQuery(function($){            
-			gamedata.parseServerData(<?php print($gamelobbydataJSON); ?>);
-			gamedata.parseFactions(<?php print($factions); ?>);
-			$('.readybutton').on("click", gamedata.onReadyClicked);		
-			$('.checkbutton').on("click", gamedata.checkChoices); //fleet correctness check
-			$('.leave').on("click", gamedata.onLeaveClicked);
-			$('.leaveslot').on("click", gamedata.onLeaveSlotClicked);
-			$('.selectslot').on("click", gamedata.onSelectSlotClicked);
-			$('.takeslot').on("click", gamedata.clickTakeslot);
-			ajaxInterface.startPollingGamedata();
-		});
-		*/
         
         jQuery(function($){            
             gamedata.parseServerData(<?php print($gamelobbydataJSON); ?>);
