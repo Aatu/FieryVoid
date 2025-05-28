@@ -329,6 +329,20 @@ var AdaptiveArmorController = function AdaptiveArmorController(json, ship) {
 AdaptiveArmorController.prototype = Object.create(ShipSystem.prototype);
 AdaptiveArmorController.prototype.constructor = AdaptiveArmorController;
 
+AdaptiveArmorController.prototype.initializationUpdate = function () {
+	var ship = this.ship;
+	//var deployTurn = shipManager.getTurnDeployed(ship);
+	//this.deploymentTurn = deployTurn;
+
+	//If a ship deploys later in game, it DOES get a chance to pre-allocate.
+	if(gamedata.turn <= shipManager.getTurnDeployed(ship) && this.pressignedReset == false)  {
+		this.AApreallocated_used = 0 + this.AAtotal_used; //Reset but since propagation can still be done in previous turns, so add total used. 
+		this.data[" - Pre-assigned remaining"] =  this.AApreallocated - this.AApreallocated_used; //Update system data window.			
+		this.pressignedReset = true; //Only do this once.
+	}
+	return this;
+}	
+
 AdaptiveArmorController.prototype.getCurrClass = function () { //get current damage class for display; if none, find first!
     if (this.currClass == ''){
 		var classes = Object.keys(this.availableAA);
@@ -353,6 +367,23 @@ AdaptiveArmorController.prototype.nextCurrClass = function () { //get next damag
 	this.currClass = classes[currId];
 	return this.currClass;
 };
+
+AdaptiveArmorController.prototype.prevCurrClass = function () { // get previous damage class for display
+    this.getCurrClass();
+    if (this.currClass == '') return ''; // no damage classes available
+    var classes = Object.keys(this.availableAA);
+    var currId = -1;
+    for (var i = 0; i < classes.length; i++) {
+        if (this.currClass == classes[i]) {
+            currId = i - 1;
+            break; // exit loop
+        }
+    }
+    if (currId < 0) currId = classes.length - 1;
+    this.currClass = classes[currId];
+    return this.currClass;
+};
+
 AdaptiveArmorController.prototype.canIncrease = function () { //check if can increase rating for current class; can do if preallocated points are unused or allocated points are less than available 
 	//always needs to check that allocated are less than maximum and allocated total is less than total maximum
 	this.getCurrClass();
@@ -412,8 +443,9 @@ AdaptiveArmorController.prototype.doDecrease = function () { //decrease AA usage
 	this.getCurrClass();
 	if (this.currClass == '') return false; //this would mean there are no damage classes whatsover!
 	//in first turn use preallocated points, later regular pool
+	var ship = this.ship;
 	if (this.currchangedAA[this.currClass]>0){
-		if (gamedata.turn == 1){
+		if (gamedata.turn == shipManager.getTurnDeployed(ship)){
 			if (this.AApreallocated_used > 0){
 				this.AApreallocated_used--;
 				this.currchangedAA[this.currClass]--;
@@ -437,11 +469,13 @@ AdaptiveArmorController.prototype.refreshData = function () { //refresh descript
 		currType = classes[i];
 		//entry should exist, just change it to show current values
 		entryName = ' - ' + currType;
-		this.data[entryName] = this.allocatedAA[currType] + '/' + this.availableAA[currType];
+		//this.data[entryName] = this.allocatedAA[currType] + '/' + this.availableAA[currType];
+		this.data[entryName] = this.allocatedAA[currType];
 	}
 	//fix pre-allocated data, too!
-	this.data[" - preassigned"] =  this.AApreallocated_used + '/' + this.AApreallocated;
-	this.data["Adaptive Armor"] =  this.AAtotal_used + '/' + this.AAtotal;
+	//this.data[" - Pre-assigned Amount"] =  this.AApreallocated_used + '/' + this.AApreallocated;
+	this.data[" - Pre-assigned remaining"] =  this.AApreallocated - this.AApreallocated_used;	
+	this.data["Total AA Assigned"] =  this.AAtotal_used + '/' + this.AAtotal;
 	
 	//this.preallocated_used =  this.AApreallocated_used;
 };
@@ -652,8 +686,17 @@ var HyachSpecialists = function HyachSpecialists(json, ship) {
 HyachSpecialists.prototype = Object.create(ShipSystem.prototype);
 HyachSpecialists.prototype.constructor = HyachSpecialists;
 
+HyachSpecialists.prototype.initializationUpdate = function () {
+	//var ship = this.ship;
+	//var deployTurn = shipManager.getTurnDeployed(ship);
+	//this.deploymentTurn = deployTurn;
+
+	return this;
+}	
+
 HyachSpecialists.prototype.getCurrClass = function () {
- if (gamedata.turn === 1 && this.specCurrClass == ''){
+	var ship = this.ship;	
+ 	if ((gamedata.turn === shipManager.getTurnDeployed(ship)) && this.specCurrClass == ''){
 		var classes = Object.keys(this.allSpec);
 		if (classes.length>0){
 			this.specCurrClass = classes[0];
@@ -669,8 +712,8 @@ HyachSpecialists.prototype.getCurrClass = function () {
 HyachSpecialists.prototype.nextCurrClass = function () { //get next class for display
 	this.getCurrClass();
     if (this.specCurrClass == '') return ''; //this would mean there are no classes whatsover!
-    	
-	if (gamedata.turn === 1){
+	var ship = this.ship;    	
+	if (gamedata.turn === shipManager.getTurnDeployed(ship)){
 		var classes = Object.keys(this.allSpec);
 		var currId = -1;	
 		for (var i = 0; i < classes.length; i++) {
@@ -699,8 +742,8 @@ HyachSpecialists.prototype.nextCurrClass = function () { //get next class for di
 HyachSpecialists.prototype.prevCurrClass = function () { //get previous class for display, useful when selecting from 10+ Specialists!
 	this.getCurrClass();
     if (this.specCurrClass == '') return ''; //this would mean there are no classes whatsover!
-    	
-	if (gamedata.turn === 1){
+	var ship = this.ship;    	
+	if (gamedata.turn === shipManager.getTurnDeployed(ship)){
 		var classes = Object.keys(this.allSpec);
 		var currId = -1;	
 		for (var i = 0; i < classes.length; i++) {
@@ -730,8 +773,8 @@ HyachSpecialists.prototype.canSelect = function () { //check if can increase rat
 	//always needs to check that allocated are less than maximum and allocated total is less than total maximum
 	this.getCurrClass();
     if (this.specCurrClass == '') return false; //this would mean there are no Specialist classes whatsover!
-
-	if (gamedata.turn != 1) return false;//Can only be selected on Turn 1.
+	var ship = this.ship;
+	if (gamedata.turn != shipManager.getTurnDeployed(ship)) return false;//Can only be selected on turn the ship deploys.
 
 	var totalSpecSelected = Object.values(this.availableSpec).reduce((accumulator, currentValue) => accumulator + currentValue, 0); 
 	if (totalSpecSelected >= this.specTotal) return false;
@@ -744,10 +787,10 @@ HyachSpecialists.prototype.canSelect = function () { //check if can increase rat
 	return true;
 };
 
-HyachSpecialists.prototype.canUnselect = function () { //can unselect Specialists in Turn 1.
+HyachSpecialists.prototype.canUnselect = function () { //can unselect Specialists on turn the ship deploys.
 	this.getCurrClass();
-	
-	if (gamedata.turn != 1) return false;	
+	var ship = this.ship;	
+	if (gamedata.turn != shipManager.getTurnDeployed(ship)) return false;	
 	if (this.specCurrClass == '') return false; //this would mean there are no Specialists whatsover!
 		
 	if (this.currSelectedSpec[this.specCurrClass]) return true;	//If it's filled, you can unselect.
@@ -964,7 +1007,7 @@ HyachSpecialists.prototype.refreshData = function () {
     var entryName = '';
     var currType = '';
     var usedSpecialists = '';
-
+	var ship = this.ship;
     for (var i = 0; i < classes.length; i++) {
         currType = classes[i];
         entryName = ' - ' + currType;
@@ -972,7 +1015,7 @@ HyachSpecialists.prototype.refreshData = function () {
         if (!this.specAllocatedCount[currType]) this.specAllocatedCount[currType] = 0; //Will show 1 if selected but not used, 0 if selected and used.
         this.data[entryName] = this.availableSpec[currType] - this.specAllocatedCount[currType];
 
-		if (this.availableSpec[currType] == 0 && gamedata.turn == 1 && gamedata.gamephase == 1) { //This way it's removed form list on Turn 1 whenever it's deselected.
+		if (this.availableSpec[currType] == 0 && (gamedata.turn == shipManager.getTurnDeployed(ship)) && gamedata.gamephase == 1) { //This way it's removed form list on Turn 1 whenever it's deselected.
 			delete this.data[entryName]; 
 			}       
         
@@ -985,10 +1028,8 @@ HyachSpecialists.prototype.refreshData = function () {
         }
     }
 
-
-
     var totalSpecSelected = Object.values(this.availableSpec).reduce((accumulator, currentValue) => accumulator + currentValue, 0);
-    if (gamedata.turn == 1 && gamedata.gamephase == 1) { //Show Specialists selected in Turn 1 Initial Orders only, then change to showing Specilists used.
+    if ((gamedata.turn == shipManager.getTurnDeployed(ship)) && gamedata.gamephase == 1) { //Show Specialists selected in Turn 1 Initial Orders only, then change to showing Specilists used.
         this.data["Specialists"] = totalSpecSelected + '/' + this.specTotal;
     } else {
         this.data["Specialists"] = this.specTotal - this.specTotal_used;
@@ -1053,32 +1094,6 @@ HyachSpecialists.prototype.canSelectAnything = function () { //returns true if a
 	return toReturn;
 };//endof HyachSpecialists
 
-/* //No need to Propogate Specialists I think, if it's helpful could add later...
-HyachSpecialists.prototype.canPropagate = function () { //can propagate if set to >0
-	if (this.specCurrClass == '') return false; //this would mean there are no damage classes whatsover!
-	if (this.allocatedSpec[this.specCurrClass]>0) return true;
-	return false;
-}; 
-HyachSpecialists.prototype.getCurrSpecType = function () { //returns current damage type
-	return this.specCurrClass;
-};
-HyachSpecialists.prototype.getCurrAllocated = function () { //returns setting for current damage type
-	if (this.specCurrClass == '') return 0;
-	return this.allocatedSpec[this.specCurrClass];
-}; 
-HyachSpecialists.prototype.setCurrSpecType= function (specTypeToSet) { //sets indicated damage type as current (or sets empty as current)
-	this.specCurrClass = ''; //will do if desired type does not exist here, which is rare but possible
-	var classes = Object.keys(this.availableSpec);
-	var currType = '';
-	for (var i = 0; i < classes.length; i++) {
-		currType = classes[i];
-		if (currType == specTypeToSet){ //exists!
-			this.specCurrClass = currType;
-			return; //no need to loop further
-		}
-	}	
-};//endof HyachSpecialists
-*/
 
 var DiffuserTendril = function DiffuserTendril(json, ship) {
     ShipSystem.call(this, json, ship);

@@ -548,6 +548,7 @@ class SystemInfoButtons extends React.Component {
 				{canSelfIntercept(ship, system) && <Button title="Allow interception (RMB = All systems selected)" onClick={this.declareSelfIntercept.bind(this)} onContextMenu={this.declareSelfInterceptAll.bind(this)} img="./img/selfIntercept.png"></Button>}
 				
 				{canAAdisplayCurrClass(ship, system) && <Button title={getAAcurrClassName(ship,system)} img={getAAcurrClassImg(ship,system)}></Button>}
+				{canAAdisplayCurrClass(ship, system) && <Button title="Previous" onClick={this.prevCurrClass.bind(this)} img="./img/systemicons/Specialistclasses/iconPrev.png"></Button>}
 				{canAAdisplayCurrClass(ship, system) && <Button title="Next" onClick={this.nextCurrClass.bind(this)} img="./img/systemicons/AAclasses/iconNext.png"></Button>}
 				{canAAincrease(ship, system) && <Button onClick={this.AAincrease.bind(this)} img="./img/systemicons/AAclasses/iconPlus.png"></Button>}
 				{canAAdecrease(ship, system) && <Button onClick={this.AAdecrease.bind(this)} img="./img/systemicons/AAclasses/iconMinus.png"></Button>}

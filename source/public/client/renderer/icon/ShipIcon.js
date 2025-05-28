@@ -16,7 +16,10 @@ window.ShipIcon = function () {
         this.defaultPosition = null;
         this.mesh = null;
         this.size = ship.canvasSize;
-        this.mine = gamedata.isMyOrTeamOneShip(ship);
+        //this.mine = gamedata.isMyOrTeamOneShip(ship); //Old, singular variable.
+        this.mine = gamedata.isMyShip(ship);
+        this.ally = gamedata.isMyorMyTeamShip(ship);
+        this.terrain = gamedata.isTerrain(ship);
         this.scene = scene;
         this.shipSprite = null;
         this.shipEWSprite = null;
@@ -217,6 +220,18 @@ window.ShipIcon = function () {
 	    this.shipDirectionOfMovementSprite.hide();
 
 	    this.shipSprite = new window.webglSprite(imagePath, { width: this.size / 2, height: this.size / 2 }, 1);
+        
+        this.shipSprite.setOverlayColor(
+            this.terrain 
+                ? new THREE.Color(0xBE / 255, 0xBE / 255, 0xBE / 255) // Off-white (#dedede)
+                : this.mine 
+                    ? new THREE.Color(160 / 255, 250 / 255, 100 / 255) // Light green
+                    : this.ally 
+                        ? new THREE.Color(51 / 255, 173 / 255, 255 / 255) // Light blue
+                        : new THREE.Color(255 / 255, 40 / 255, 40 / 255) // Red
+        );
+        
+        /* //Old method with just this.mine
         this.shipSprite.setOverlayColor(
             this.ship.shipSizeClass === 5 
                 ? new THREE.Color(0xBE / 255, 0xBE / 255, 0xBE / 255) // Off-white (#dedede)
@@ -224,9 +239,10 @@ window.ShipIcon = function () {
                     ? new THREE.Color(160 / 255, 250 / 255, 100 / 255) // Light green
                     : new THREE.Color(255 / 255, 40 / 255, 40 / 255) // Red
         );
+        */
         this.mesh.add(this.shipSprite.mesh);
 	    
-	//29.03.2022: people called for more visible circles - change from the same as ship image to half again as large (original: this.size / 2, new: this.size*0.75 ); unit icon and arrows size left as previously
+	    //29.03.2022: people called for more visible circles - change from the same as ship image to half again as large (original: this.size / 2, new: this.size*0.75 ); unit icon and arrows size left as previously
 	    var spriteWidth = Math.min(this.size * 0.75, maxWidth);
 	    var spriteHeight = Math.min(this.size * 0.75, maxHeight);
        	    
@@ -234,10 +250,20 @@ window.ShipIcon = function () {
 	    this.mesh.add(this.shipEWSprite.mesh);
 	    this.shipEWSprite.hide();
 
-	    this.ShipSelectedSprite = new window.ShipSelectedSprite({ width: spriteWidth, height: spriteHeight }, -2, this.mine ? 'ally' : 'enemy', true).hide();
+        this.ShipSelectedSprite = new window.ShipSelectedSprite(
+            { width: spriteWidth, height: spriteHeight },
+            -2,
+            this.terrain ? 'terrain' : (this.mine ? 'mine' : (this.ally ? 'ally' : 'enemy')),
+            true
+        ).hide();
 	    this.mesh.add(this.ShipSelectedSprite.mesh);
 
-	    this.ShipSideSprite = new window.ShipSelectedSprite({ width: spriteWidth, height: spriteHeight }, -2, this.mine ? 'ally' : 'enemy', false).hide();
+        this.ShipSideSprite = new window.ShipSelectedSprite(
+            { width: spriteWidth, height: spriteHeight },
+            -2,
+            this.terrain ? 'terrain' : (this.mine ? 'mine' : (this.ally ? 'ally' : 'enemy')),
+            false
+        ).hide();
 	    this.mesh.add(this.ShipSideSprite.mesh);
 
 	    this.NotMovedSprite = new window.ShipSelectedSprite({ width: spriteWidth, height: spriteHeight }, -2, 'neutral', false).hide();

@@ -72,11 +72,35 @@ FIRING AND WEAPONS
  - Piercing attacks can be made without special requirements regarding EW - appropriate penalty is always included in fire control. 
  - Relative position of units on the same hex is not correctly resolved if units start turn on the same hex. As a compensation for this, all targets at range 0 are considered valid for ballistics launch.
  - mode used is always visible in FV. This means, among other things, that opponent immediately knows what kind of missile is launched (in tabletop only a few special missiles disclosed that information before attack phase).
+
+
+DELAYED DEPLOYMENT
+- Fleets and Ships have the option to delay after Turn 1 during Game Creation and Fleet Selection.
+- You can select this option in two ways: 
+	1) In Create Game screen, set 'Turn Available' field to the desired deployment turn for the Player Slot you want to deploy later, all ships will deploy on that turn by default,  
+	2) In Fleet Selection screen, when purchasing individual ships, choose a new value in the 'Deployment' option.  This can be combined with the Player Slot option to deploy later than other ships in the Slot.
+- Ships that have not deployed yet will have a hex marker showing where and when they will appear, enemies will not be able to see this marker.  You can right click on this hex to see late-deploying ship's SCS in case you forget what's deploying there.
+- Ships which would normally have to set systems on Turn 1 and choose to deploy later e.g. Hyach Specialists, Vorlon Adaptive Armor, will set these systems on the turn they deploy.
+- IMPORTANT - If a player's entire fleet is not deployed yet, they will still have to click through Initial Orders and Firing Phase to progress the game.
+- NOTE - Terrain, Bases and OSATS cannot deploy later in the game and will always deploy on Turn 1.
+
  
 TERRAIN
-- You can choose to add Asteroids as terrain in the Create Game menu.  A number of asteroids will be randomly placed across the game space at the start of the game. Alternatively, you can also add them manually from the Civilians faction for specific scenarios
-Asteroids block line of sight between units, and will damage any non-fighter units that move through them during the Movement Phase (Note - This damage is applied at the end of the turn, with other firing and counts as a Ramming attack).  In addition, like all Enormous units they may fully ram any ships with end their movement on the same hex as them (see below).
-- Moons - Similar to Asteroids, except they take up multiple hexes instead of just one.  Any unit moving into a moons area will also automatically crash into it (e.g. ram) during the Firing Phase, instead of just taking collision damage as it passed through.
+- ASTEROIDS - You can choose to add Asteroids as terrain in the Create Game menu.  A number of asteroids will be randomly placed across the game space at the start of the game. Alternatively, you can also add them manually from the Civilians faction for specific scenarios.
+- Terrain blocks line of sight between units, and will damage any non-fighter units that move through them during the Movement Phase (Note - This damage is applied at the end of the turn, with other firing and counts as a Ramming attack).  In addition, like all Enormous units they may fully ram any ships with end their movement on the same hex as them (see below).
+- MOONS - Similar to Asteroids, except they take up multiple hexes instead of just one.  Any unit moving into a moons area will also automatically crash into it (e.g. ram) during the Firing Phase, instead of just taking collision damage as it passed through.
+
+
+STEALTH SHIPS
+- Stealth ships are impossible to detect at long ranges, and will be invisible to enemy player(s) until they reveal themselves or are detected.
+- A stealth ship is revealed if it uses any EW ability other than Defensive EW (DEW) during Initial Orders, or fires any of its weapons.
+- Stealth ships can also be detected at the start of the Firing Phase if they move into an enemy unit’s detection range and it has active sensors/line of sight.  These ranges are as follows: Base (5x Sensor Rating), ELINT Ship (3x Sensor Rating), Other Ship (2x Sensor Rating), Fighter (Offensive Bonus).
+- ELINT ships can further boost their detection range by investing EW points in 'Detect Stealth' ability, which increases their detection range by +2 per EW point spent.
+- Once detected, stealth ships will remain visible, but can become hidden again if they break line of sight with all enemy ships at the end of a turn (and don't otherwise reveal themselves by firing a weapon).
+- If a stealth ship's scanner or computer system is destroyed it's defence profile will be increased by 15% for the remainder of the battle (represented by criticals on its CnC)
+- Stealth systems also provide a Jammer ability (e.g. always double range penalty as if no-lock).  Against ships this applies to other ships targeting from over 12 hexes away (over 4 hexes for fighters, 24 for bases).  Stealth fighters get this no-lock bonus against all enemy fire from over 5 hexes away, and additionally ballistic launches cannot be made against them from more than 5 hexes away.
+- Note, Stealth fighters cannot become invisible in the same way as stealth ships, and only benefit from the jammer/no-lock abilities.
+
 
 OTHER
  - Jump Drive: usually it can't be turned off for power unless seriously damaged, but there are scenarios that allow just that. So the game does not force it and it's up to the player to decide whether or not it's allowed.

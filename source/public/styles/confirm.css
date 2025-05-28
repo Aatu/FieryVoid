@@ -127,6 +127,10 @@
 	font-size:16px;
 }
 
+.confirm.error .ship-name {
+    color: rgba(255, 255, 255, 0.692);
+}
+
 .confirm h2{
     font-size:22px;
     margin:10px;

@@ -193,7 +193,7 @@ window.MovementPhaseStrategy = function () {
     MovementPhaseStrategy.prototype.selectActiveShip = function () {
 
         var ship = gamedata.getMyActiveShips().filter(function(ship) {
-            return !shipManager.movement.isMovementReady(ship) && !shipManager.isDestroyed(ship) && ship.userid != -5;
+            return !shipManager.movement.isMovementReady(ship) && !shipManager.isDestroyed(ship);
         }).pop();
 
         if (ship) {
