@@ -341,10 +341,16 @@ body {
 }
 
 #shipNameContainer .name, .shipNameContainer .name{
-   font-size:18px;
-   font-style:italic;
+   font-size:16px;
+   font-style:normal;
 
 }
+
+.not-deployed {
+    color: #b34119;
+    font-size: 16px;
+} 
+
 
 .enemy.name{
     color:#b34119;
@@ -796,14 +802,14 @@ body {
 #iniGui {
     z-index:10000;
     border:1px solid #496791;
-    color:#deebff;
+    color:#deebffdc;
     background-color:#0a3340;
     margin-top: 50px;
     width: 250px;
     height: auto;
     position: absolute;
     display: inline-block;
-    opacity: 0.8;
+    opacity: 0.9;
     box-shadow: 5px 5px 10px black;
     padding-top:10px;
     padding-bottom: 10px;
@@ -840,20 +846,26 @@ body {
 }
 
 .iniActiveMoved {
-    border: 1px solid #84A5CE !important;
-    box-shadow: 0px 0px 15px #09F;
+    border: 1px solid #2ea86b !important;
+    box-shadow: 0px 0px 4px #3fd58f;
 }
 
 .iniActive {
-    border: 1px solid #84A5CE !important;
-    background-color: #254E82 !important;
-    box-shadow: 0px 0px 15px #09F;
+    border: 1px solid #2ea86b !important;
+    background-color: #163f35 !important;
+    box-shadow: 0px 0px 4px #3fd58f;
+}
+
+.iniActiveAlly {
+    border: 1px solid #6d95c5 !important;
+    background-color: #162f50 !important;
+    box-shadow: 0px 0px 3px #09F;
 }
 
 .iniActiveEnemy {
-    border: 1px solid #ce9184 !important;
-    background-color: #823425 !important;
-    box-shadow: 0px 0px 15px #ff3700;
+    border: 1px solid #c65d4a !important;
+    background-color: #3d1e1b !important;
+    box-shadow: 0px 0px 4px #f07662;
 }
 
 .redIni {

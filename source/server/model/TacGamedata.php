@@ -142,8 +142,15 @@ class TacGamedata {
         
         foreach ($this->ships as $ship)
         {
-            if ($this->slots[$ship->slot]->depavailable > $this->turn)
+            //if ($this->slots[$ship->slot]->depavailable > $this->turn)
+            //$ship->unavailable = true;
+            //Changed to new method for detecting undeployed ships - DK May 2025
+            $turnDeploys = max($ship->deploysOnTurn, $this->slots[$ship->slot]->depavailable);
+            
+            if($turnDeploys > $this->turn){
                 $ship->unavailable = true;
+                $ship->deploysOnTurn = $turnDeploys; //If slot deploy turn was higher than 1, set ship marker accordingly.  Enhancements will increase same marker later if set that way.
+            } 
         }
     }
     
@@ -181,7 +188,7 @@ class TacGamedata {
 
                 $dis = mathlib::getDistanceHex($ship, $ship2);
                 
-                if ($dis<70 || $this->turn < 5){
+                if ($dis<100 || $this->turn < 5){
                     //print($ship->name . " is on distance $dis from " . $ship2->name);
                     return false;
                 }
@@ -313,7 +320,8 @@ class TacGamedata {
     public function getFirstShip(){    
         foreach ($this->ships as $ship){
             if ($ship->isDestroyed()) continue;
-            if($ship instanceof Terrain) continue; //Ignore terrain like asteroids.                            
+            if($ship->isTerrain()) continue; //Ignore terrain like asteroids.
+            if($ship->getTurnDeployed($this) > $this->turn) continue;                          
             return $ship;
         }        
         return null;
@@ -362,7 +370,16 @@ class TacGamedata {
         return $slots;
         
     }
-    
+/*
+	public function getSlotById($id) {
+        
+		foreach ($this->slots as $slot) {
+			if ($slot->slot == $id) return $slot;
+		}
+
+		return null;
+	}    
+*/    
     private function setForPlayer($player){
         $this->forPlayer = $player;
         
@@ -373,7 +390,7 @@ class TacGamedata {
             $ships = [];
     
             foreach ($this->ships as $ship) {
-                if (in_array($ship->id, $this->activeship) && $ship->userid != -5) {
+                if (in_array($ship->id, $this->activeship) && !$ship->isTerrain() && ($ship->getTurnDeployed($this) <= $this->turn)) {
                     array_push($ships, $ship);
                 }
             }
@@ -382,7 +399,7 @@ class TacGamedata {
         }
     
         foreach ($this->ships as $ship) {
-            if ($ship->id == $this->activeship && $ship->userid != -5) {
+            if ($ship->id == $this->activeship && !$ship->isTerrain() && ($ship->getTurnDeployed($this) <= $this->turn)) {
                 return [$ship];
             }
         }

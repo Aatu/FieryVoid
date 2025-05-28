@@ -137,6 +137,17 @@ window.ew = {
         return amount;
     },
 
+    getAllEWExceptDEW: function getAllEWExceptDEW(ship) { //Required for HARM missile hit calculations
+        var amount = 0;
+        for (var i in ship.EW) {
+            var entry = ship.EW[i];
+            if (entry.turn != gamedata.turn) continue;
+            if (entry.type == "DEW") continue;
+            amount += entry.amount;           	
+        }
+        return amount;
+    },
+
     getNumOfOffensiveTargets: function getNumOfOffensiveTargets(ship) {
         var amount = 0;
         for (var i in ship.EW) {
@@ -325,6 +336,34 @@ window.ew = {
         return null;
     },
 
+    getDetectSEW: function getDetectSEW(ship) {
+
+        for (var i in ship.EW) {
+            var EWentry = ship.EW[i];
+            if (EWentry.turn != gamedata.turn) continue;
+
+            if (EWentry.type == "Detect Stealth") {
+                return EWentry.amount;
+            }
+        }
+
+        return 0;
+    },
+
+    getDetectSEWentry: function geDetectSEWentry(ship) {
+
+        for (var i in ship.EW) {
+            var EWentry = ship.EW[i];
+            if (EWentry.turn != gamedata.turn) continue;
+
+            if (EWentry.type == "Detect Stealth") {
+                return EWentry;
+            }
+        }
+
+        return null;
+    },
+
     getEntryByTargetAndType: function getEntryByTargetAndType(ship, target, type, turn) {
         return ship.EW.filter(function (entry) {
             return entry.shipid === ship.id && (target === null || entry.targetid === target.id) && entry.type === type && entry.turn === turn;
@@ -408,7 +447,9 @@ window.ew = {
 
         if (entry == "CCEW") {
             ship.EW.push({ shipid: ship.id, type: "CCEW", amount: 1, targetid: -1, turn: gamedata.turn });
-        } else if (entry == "BDEW") {
+        } else if (entry == "Detect Stealth") {
+            ship.EW.push({ shipid: ship.id, type: "Detect Stealth", amount: 1, targetid: -1, turn: gamedata.turn });
+        }else if (entry == "BDEW") {
             if (ew.getEWByType("DIST", ship) > 0 || ew.getEWByType("SOEW", ship) > 0 || ew.getEWByType("SDEW", ship) > 0) {
                 window.confirm.error("You cannot use blanket protection together with other ELINT functions.", function () {});
                 return;
@@ -493,11 +534,15 @@ window.ew = {
 		}
 		var stealthSystem = shipManager.systems.getSystemByName(target, "stealth");
 		var stealthValue = 0;
+        var distance = mathlib.getDistanceBetweenShipsInHex(shooter, target);
 		//Amended this section to accommodate Hyach Stealth ships - DK 18.3.24				
-		if( (stealthSystem != null) && (mathlib.getDistanceBetweenShipsInHex(shooter, target) > 5) && target.flight) { //stealth-protected fighter at range >5 hexes may gain Stealth properties
+		if( (stealthSystem != null) && (distance > 5) && target.flight) { //stealth-protected fighter at range >5 hexes may gain Stealth properties
 			stealthValue = shipManager.systems.getOutput(target, stealthSystem);
 		}
-		if( (stealthSystem != null) && (mathlib.getDistanceBetweenShipsInHex(shooter, target) > 10) && target.shipSizeClass >= 0) { //stealth-protected ship at range >10 hexes may gain Stealth properties
+        var stealthDistance = 12; //Default for ships
+        if(shooter.flight) stealthDistance = 4; //Fighters
+        if(shooter.base) stealthDistance = 24; //Bases
+		if( (stealthSystem != null) && (distance > stealthDistance) && target.shipSizeClass >= 0) { //stealth-protected ship at range >10 hexes may gain Stealth properties
 			stealthValue = shipManager.systems.getOutput(target, stealthSystem);
 		}		
 		

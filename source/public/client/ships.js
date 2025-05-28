@@ -730,7 +730,7 @@ window.shipManager = {
 
         // Filter out destroyed ships and those with shipSizeClass === 5 e.g. terrain
         var validShips = gamedata.ships.filter(function(s) {
-            return !shipManager.isDestroyed(s) && s.shipSizeClass !== 5;
+            return !shipManager.isDestroyed(s) && !gamedata.isTerrain(s) && !(shipManager.getTurnDeployed(s) > gamedata.turn);
         });
 
         for (var i in validShips) {
@@ -891,6 +891,8 @@ window.shipManager = {
 			if (ship.unavailable) continue;
 			if (ship.userid != gamedata.thisplayer) continue;					
 			if (shipManager.isDestroyed(ship)) continue;
+            var deployTurn = shipManager.getTurnDeployed(ship);
+			if(deployTurn > gamedata.turn) continue;  //Don't bother checking for ships that haven't deployed yet.
 
 			var left = 0;
 			var right = 0;				
@@ -966,6 +968,124 @@ window.shipManager = {
         }
 
         return resultTxt;
-    }
+    },
+
+    //Generic function called from various front end functions.  Checks if ships should be shown/interactable or not.
+    shouldBeHidden: function(ship) {    
+        if(shipManager.getTurnDeployed(ship) > gamedata.turn) return true; //Not deployed yet.
+        if(!gamedata.isMyorMyTeamShip(ship) && shipManager.isStealthShip(ship) && !shipManager.isDetected(ship)) return true; //Enemy, stealth ship and not currently detected
+        return false;
+    },
     
+    //Sometimes things SHOULDN'T be hidden from own team, e.g. right clicking on Reinforcements before they arrive.
+    shouldBeHiddenTeam: function(ship) {
+        var myTeam = gamedata.isMyorMyTeamShip(ship);     
+        if(shipManager.getTurnDeployed(ship) > gamedata.turn && !myTeam) return true; //Not deployed yet.
+        if(!myTeam && shipManager.isStealthShip(ship) && !shipManager.isDetected(ship)) return true; //Enemy, stealth ship and not currently detected. Always hide.        
+        return false;
+    },
+    
+    getTurnDeployed: function getTurnDeployed(ship) {
+        if (gamedata.gamephase == -1 || ship.osat || ship.base || gamedata.isTerrain(ship)) { //Don't hide anything in Deployment Phase.  Bases and OSATs never 'jump in'.
+            return 1;
+        }else{
+            //var slot = playerManager.getSlotById(ship.slot);
+            //return Math.max(ship.deploysOnTurn, slot.depavailable);
+            return ship.deploysOnTurn;            
+        }     
+    },    
+
+/*
+    //Change to true of false function, incase helpful later, if not delete.
+    notDeployedYet: function notDeployedYet(ship) {
+        //var turnDeploys = 1;
+        if(ship.deploysOnTurn > 1 && gamedata.gamephase != -1) return ship.deploysOnTurn; //Ship itself has been set to deploy later in game.
+        
+        var slot = playerManager.getSlotById(ship.slot);
+        var depTurn = slot.depavailable;
+
+        if(depTurn > 1 && gamedata.gamephase != -1) return depTurn; //Entire slot deploys later.
+
+        return ship.deploysOnTurn;         
+    },
+*/
+    //Called in various places to identify a ship as having stealth ability.
+    isStealthShip: function(ship) {
+        if(shipManager.hasSpecialAbility(ship, "Stealth") && (!ship.flight)) return true;
+        return false;
+    },
+  
+    markAsDetected: function(ship) {
+        var stealthSystem = shipManager.systems.getSystemByName(ship, "stealth");
+        if(stealthSystem) stealthSystem.detected = true;
+    }, 
+
+    //Main Front End check on whether a stealth ship is detected or not, called in various places.
+    isDetected: function(ship) {
+        if(gamedata.gamephase == -1) return true;  //Do not hide in Deployment Phase.        
+        var stealthSystem = shipManager.systems.getSystemByName(ship, "stealth");
+        if(stealthSystem && stealthSystem.detected) return true; //Already detected.
+
+        // If the ship used offensive or ELINT EW, it is revealed
+        const usedEW = ew.getAllEWExceptDEW(ship); //Has used any EW abilities except DEW?
+        if (usedEW > 0){
+            return true; //If so, revealed.
+        }            
+
+        if(gamedata.gamephase != 3) return false;  //Cannot try to detect based on distance until end of Movement e.g. Firing Phase.
+
+        // Check all enemy ships to see if any can detect this ship
+        for (const otherShip of gamedata.ships) {
+            // Skip friendly ships
+            if (otherShip.team === ship.team) continue;
+
+            let totalDetection = 0;
+
+            if (!otherShip.flight) {
+                // Not a fighter — use scanner systems for detection
+                const standardScanners = shipManager.systems.getSystemListByName(otherShip, "scanner");
+                const elintScanners = shipManager.systems.getSystemListByName(otherShip, "elintScanner");
+                const scanners = [...standardScanners, ...elintScanners];
+
+                for (const scanner of scanners) {
+                    if (!shipManager.systems.isDestroyed(otherShip, scanner)) {
+                        totalDetection += scanner.output;
+                    }
+                }
+
+                // Apply detection multiplier based on ship type
+                if (otherShip.base) {
+                    totalDetection *= 5;
+                } else if (shipManager.hasSpecialAbility(otherShip, "ELINT")) {
+                    totalDetection *= 3;
+                    //Then add any Detect Stealth bonus here.
+                    var bonusDSEW = ew.getEWByType("Detect Stealth", otherShip);
+                    totalDetection += bonusDSEW * 2;
+                } else {
+                    totalDetection *= 2;
+                }
+            } else {
+                // Fighter unit — use offensive bonus
+                totalDetection = otherShip.offensivebonus;
+            }
+
+            // Get distance to the stealth ship and check line of sight
+            const distance = parseFloat(mathlib.getDistanceBetweenShipsInHex(ship, otherShip));
+            var loSBlocked = false;
+            var blockedLosHex = weaponManager.getBlockedHexes(); //Check if there are any hexes that block LoS
+            var shipPos= shipManager.getShipPosition(ship);
+            var otherShipPos= shipManager.getShipPosition(otherShip);                   
+            loSBlocked = mathlib.checkLineOfSight(shipPos, otherShipPos, blockedLosHex); // Defaults to false (LoS NOT blocked)            
+
+            // If within detection range, the ship is revealed
+            if (totalDetection >= distance && !loSBlocked) { //In range and LoS not blocked.
+                shipManager.markAsDetected(ship);
+                return true; //Just return, if one ship can see the stealthed ship then all can.
+            }
+        }
+
+        // No one detected the ship
+        return false;
+    }
+
 };

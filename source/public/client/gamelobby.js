@@ -17,6 +17,7 @@ window.gamedata = {
  	displayedFaction: '',
 	lastShipNumber: 0,
 	fleetWindowOpen: false,
+	gamespace: '',
 
 
     getPowerRating: function getPowerRating(factionName) {
@@ -1433,9 +1434,132 @@ window.gamedata = {
             group.find('.factionname').on("click", this.expandFaction);
         }
 
-        gamedata.allShips = factionList;
+        gamedata.allShips = factionList;		
     },
+ 
+ drawMapPreview: function drawMapPreview () {
+        const canvas = document.getElementById("mapPreview");
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return;
     
+        //const isLimited = $("#gamespacecheck").is(":checked");
+    
+        // Use fixed width/height if unlimited is selected
+        var mapWidth = 0;
+        var mapHeight = 0;
+
+		const match = gamedata.gamespace?.match(/^(-?\d+)x(-?\d+)$/);
+		if (match) {
+			mapWidth = parseInt(match[1]);
+			mapHeight = parseInt(match[2]);
+		}
+
+		if(mapWidth == -1) mapWidth = 84;
+		if(mapHeight == -1) mapHeight = 60;		
+
+        // Clear canvas
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+        // Margins and scale
+        const margin = 10;
+        const scaleX = (canvas.width - margin * 2) / mapWidth;
+        const scaleY = (canvas.height - margin * 2) / mapHeight;
+        const scale = Math.min(scaleX, scaleY); // Uniform scale
+    
+        // Calculate offset to center the map in the canvas
+        const offsetX = (canvas.width - mapWidth * scale) / 2;
+        const offsetY = (canvas.height - mapHeight * scale) / 2;
+
+        // Draw black background inside the blue outline
+        ctx.fillStyle = "black";
+        ctx.fillRect(offsetX, offsetY, mapWidth * scale, mapHeight * scale);        
+
+        // Draw dotted white center lines, avoiding cross-over at center
+        ctx.save();
+        ctx.globalAlpha = 0.6; // Semi-transparent
+        ctx.strokeStyle = "white";
+        ctx.lineWidth = 1;
+        ctx.setLineDash([6, 6]); // Dotted pattern: 6px line, 6px gap
+
+        const centerX = offsetX + (mapWidth / 2) * scale;
+        const centerY = offsetY + (mapHeight / 2) * scale;
+
+        // Vertical line: from center up
+        ctx.beginPath();
+        ctx.moveTo(centerX+6, centerY);
+        ctx.lineTo(centerX+6, offsetY);
+        ctx.stroke();
+
+        // Vertical line: from center down
+        ctx.beginPath();
+        ctx.moveTo(centerX+6, centerY);
+        ctx.lineTo(centerX+6, offsetY + mapHeight * scale);
+        ctx.stroke();
+
+        // Horizontal line: from center left
+        ctx.beginPath();
+        ctx.moveTo(centerX+6, centerY);
+        ctx.lineTo(offsetX, centerY);
+        ctx.stroke();
+
+        // Horizontal line: from center right
+        ctx.beginPath();
+        ctx.moveTo(centerX+6, centerY);
+        ctx.lineTo(offsetX + mapWidth * scale, centerY);
+        ctx.stroke();
+
+        ctx.restore(); // Restore default dash       
+
+        // Draw deployment zones
+        $(".slot").each(function () {
+            const slot = $(this);
+            const slotId = slot.data("slotid");
+            const data = gamedata.getSlotData(slotId);
+            if (!data) return;
+            const team = data.team;
+    
+            const x = parseInt(data.depx) || 0;
+            const y = parseInt(data.depy) || 0;
+            const w = parseInt(data.depwidth) || 0;
+            const h = parseInt(data.depheight) || 0;
+    
+            ctx.fillStyle = "rgba(0,255,0,0.35)";
+    
+            // Adjust position to treat (x, y) as center
+            const drawX = offsetX + (x - w / 2 + mapWidth / 2) * scale;
+            const drawY = offsetY + (mapHeight / 2 - y - h / 2) * scale;
+    
+     //       console.log(`SlotID: ${slotId}, x: ${x}, y: ${y}, w: ${w}, h: ${h}, scale: ${scale}`);
+     //       console.log(`Drawing at: x=${drawX}, y=${drawY}`);
+    
+            ctx.fillRect(drawX+6, drawY, w * scale, h * scale);
+            ctx.strokeStyle = "#006600";
+            ctx.strokeRect(drawX+6, drawY, w * scale, h * scale);
+            
+            // Draw slot number in the center
+            ctx.save(); // Save context state
+            ctx.globalAlpha = 0.8; // Semi-transparent
+            ctx.fillStyle = "white";
+            ctx.font = `${Math.max(4, Math.floor(4 * scale))}px Arial`; // smaller font with a minimum size
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(team, (drawX+6) + (w * scale) / 2, (drawY+3) + (h * scale) / 2);
+            ctx.restore(); // Restore to default state
+        });
+    
+        // Draw map border (blue rectangle)
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 1;
+        ctx.strokeRect(offsetX, offsetY, mapWidth * scale, mapHeight * scale); // Adjusted X offset
+    },
+
+    getSlotData: function getSlotData(id) {
+        for (var i in gamedata.slots) {
+            var slot = gamedata.slots[i];
+            if (slot.slot == id) return slot;
+        }
+    },
+
 	/*old, simple version*/
 	/*
 	parseShips: function(jsonShips){
@@ -1673,6 +1797,7 @@ applyCustomShipFilter: function () {
         gamedata.thisplayer = serverdata.forPlayer;
         gamedata.maxpoints = serverdata.points;
         gamedata.status = serverdata.status;
+    	gamedata.gamespace = serverdata.gamespace; 	
 
         if (gamedata.status == "ACTIVE") {
             window.location = "game.php?gameid=" + gamedata.gameid;
@@ -1681,6 +1806,7 @@ applyCustomShipFilter: function () {
         this.createSlots();
         this.enableBuy();
         this.constructFleetList();
+		this.drawMapPreview(); 		
     },
 
     createNewSlot: function createNewSlot(data) {
@@ -1840,7 +1966,7 @@ applyCustomShipFilter: function () {
             }
             ship.flightSize = Math.floor(flightSize);
         }
-	    
+
 		//do note enhancements bought (if any)
 		var enhNo = 0;
 		var noTaken = 0;
@@ -2408,7 +2534,13 @@ applyCustomShipFilter: function () {
 			if (enhCount > 1) ship.enhancementTooltip += ` (x${enhCount})`;	
 
 			switch (enhID) {
-			
+				case 'DEPLOY': // Delayed
+					if(!ship.deployEnh && enhCount > 1){
+							ship.notes += "<br>Deploys on Turn " + enhCount + "";
+						}
+						ship.deployEnh = true;
+				break;		
+
 				case 'ELITE_CREW':
 					if(!ship.eliteEnh){
 						ship.forwardDefense -= enhCount;
@@ -3225,6 +3357,13 @@ applyCustomShipFilter: function () {
 					if (enhCount > 1) flight.enhancementTooltip += ` (x${enhCount})`;	
 		
 					switch (enhID) {
+
+						case 'DEPLOY': // Expert Motivator
+							if(!flight.deployEnh && enhCount > 1){
+								flight.notes += "<br>Deploys on Turn " + enhCount + "";
+							}
+							flight.deployEnh = true;
+						break;
 
 						case 'ELT_MAR': // Elite marines, mark every Marines system as Elite.
 							if(!flight.elMarEnhFlight){

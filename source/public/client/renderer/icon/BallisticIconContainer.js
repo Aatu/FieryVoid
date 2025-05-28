@@ -60,53 +60,14 @@ window.BallisticIconContainer = function () {
             return true;
         }, this);
 
-        //Remove old line sprites when they are no longer required or being recreated.
-        this.ballisticLineIcons = this.ballisticLineIcons.filter(function (lineIcon) {
-            if (!lineIcon.used) {
-            	if (lineIcon.lineSprite) {
-                	this.scene.remove(lineIcon.lineSprite.mesh);           	
-				}
-			return false;	
-			}	
-
-		//This section looks to see if Ballistic Lines are showing at moment consumeGamedata() is called (which is often!)		
-		var isFriendlyLinesVisible = this.ballisticLineIcons.some(lineIcon => 
-		  lineIcon.lineSprite?.isVisible === true && lineIcon?.isFriendly === true
-		);
-
-		var isEnemyLinesVisible = this.ballisticLineIcons.some(lineIcon => 
-		  lineIcon.lineSprite?.isVisible === true && lineIcon?.isFriendly === false
-		); 
-	            
-		this.ballisticLineIcons.forEach(lineIcon => {
-		  if (lineIcon.lineSprite) {
-		    if (lineIcon.isFriendly) {
-		      // Handle friendly lines
-		      if (isFriendlyLinesVisible) {
-		        lineIcon.lineSprite.show();
-		        lineIcon.lineSprite.isVisible = true;
-		      } else {
-		        lineIcon.lineSprite.hide();
-		        lineIcon.lineSprite.isVisible = false;
-		      }
-		    } else {
-		      // Handle enemy lines
-		      if (isEnemyLinesVisible) {
-		        lineIcon.lineSprite.show();
-		        lineIcon.lineSprite.isVisible = true;
-		      } else {
-		        lineIcon.lineSprite.hide();
-		        lineIcon.lineSprite.isVisible = false;
-		      }
-		    }
-		  }
-		});
-		
-            return true;
-        }, this);
+		//Now create perimter hex icons to illustrate the hexes occupied by really large terrain occupy.
+		generateBallisticLines.call(this);
 
 		//Now create perimter hex icons to illustrate the hexes occupied by really large terrain occupy.
 		generateTerrainHexes.call(this, gamedata);
+
+		//Crearte blue hex icons for where ships are jumping in later.
+		generateReinforcementHexes.call(this, gamedata);
 
     };
 
@@ -159,6 +120,54 @@ window.BallisticIconContainer = function () {
     };
 
 
+    function generateBallisticLines() {
+        //Remove old line sprites when they are no longer required or being recreated.
+        this.ballisticLineIcons = this.ballisticLineIcons.filter(function (lineIcon) {
+            if (!lineIcon.used) {
+            	if (lineIcon.lineSprite) {
+                	this.scene.remove(lineIcon.lineSprite.mesh);           	
+				}
+			return false;	
+			}	
+
+		//This section looks to see if Ballistic Lines are showing at moment consumeGamedata() is called (which is often!)		
+		var isFriendlyLinesVisible = this.ballisticLineIcons.some(lineIcon => 
+		  lineIcon.lineSprite?.isVisible === true && lineIcon?.isFriendly === true
+		);
+
+		var isEnemyLinesVisible = this.ballisticLineIcons.some(lineIcon => 
+		  lineIcon.lineSprite?.isVisible === true && lineIcon?.isFriendly === false
+		); 
+	            
+		this.ballisticLineIcons.forEach(lineIcon => {
+		  if (lineIcon.lineSprite) {
+		    if (lineIcon.isFriendly) {
+		      // Handle friendly lines
+		      if (isFriendlyLinesVisible) {
+		        lineIcon.lineSprite.show();
+		        lineIcon.lineSprite.isVisible = true;
+		      } else {
+		        lineIcon.lineSprite.hide();
+		        lineIcon.lineSprite.isVisible = false;
+		      }
+		    } else {
+		      // Handle enemy lines
+		      if (isEnemyLinesVisible) {
+		        lineIcon.lineSprite.show();
+		        lineIcon.lineSprite.isVisible = true;
+		      } else {
+		        lineIcon.lineSprite.hide();
+		        lineIcon.lineSprite.isVisible = false;
+		      }
+		    }
+		  }
+		});
+		
+            return true;
+        }, this);
+    } //endof generateBallisticLines()
+
+
     function generateTerrainHexes(gamedata) {
 		// Filter for ships with Huge value
 		gamedata.ships
@@ -166,23 +175,6 @@ window.BallisticIconContainer = function () {
 		.forEach(ship => {
 			if(gamedata.gamephase !== -1){ //Don't generate sprites until Terrain is in place!
 				const position = shipManager.getShipPosition(ship); // Get ship's position
-	/*			var positionGame = this.coordinateConverter.fromHexToGame(position);
-				// Create a sprite at the ship's position
-				const sprite = new BallisticSprite(positionGame, "hexWhite");
-				this.scene.add(sprite.mesh);
-
-				this.ballisticIcons.push({
-					id: -5,
-					shooterId: ship.id,
-					targetId: ship.id,
-					launchPosition: position,
-					position: new hexagon.Offset(positionGame.x, positionGame.y),
-					launchSprite: sprite,
-					targetSprite: null,
-					used: true
-				});
-*/
-
 				let perimeterHexes = [];
 				// Get neighboring hexes based on the ship's size (Huge)
 				if(ship.Huge == 2){
@@ -213,6 +205,35 @@ window.BallisticIconContainer = function () {
 
 		});
     } //endof generateTerrainHexes()
+
+
+    function generateReinforcementHexes(gamedata) {
+		// === 2. Handle Not Deployed Ships (Blue Hexes) ===
+		gamedata.ships
+			.filter(ship => shipManager.getTurnDeployed(ship) > gamedata.turn) // Only undeployed ships
+			.filter(ship => gamedata.isMyorMyTeamShip(ship)) // Only own Team ships.		
+			.forEach(ship => {
+				const turnDeploys = shipManager.getTurnDeployed(ship);
+				const position = shipManager.getShipPosition(ship);
+				const posGame = this.coordinateConverter.fromHexToGame(position);
+					const reinforceSprite = new BallisticSprite(posGame, "hexBlue", "Deploys on Turn " + turnDeploys + "");
+					this.scene.add(reinforceSprite.mesh);
+
+					this.ballisticIcons.push({
+						id: -6,
+						shooterId: ship.id,
+						targetId: ship.id,
+						launchPosition: position,
+						position: new hexagon.Offset(position.x, position.y),
+						launchSprite: reinforceSprite,
+						targetSprite: reinforceSprite,
+						used: true
+					});
+
+			});
+	} //endof generateReinforcementHexes()
+
+
 
     function createOrUpdateBallistic(ballistic, iconContainer, turn, replay = false) {
         var icon = getBallisticIcon.call(this, ballistic.id);
@@ -305,7 +326,7 @@ window.BallisticIconContainer = function () {
 					break;
 					case 'Jammer': //Jammer Missile
 						    targetType = 'hexPurple';
-						    text = "Jammer Missile";
+						    text = "Jammer";
 						    textColour = "#7f00ff";		        
 						break;					
 					case 'Anti-Fighter Plasma Web': //Pak'ma'ra Plasma Web Persistent Effect
@@ -458,15 +479,7 @@ window.BallisticIconContainer = function () {
 	            	lineIcon.lineSprite.show();
 	            	lineIcon.lineSprite.isVisible = true;	            		
 				}
-            }/*else if(lineIcon.shooterId === ship.id) {
-	            if(!wasVisibleShooter){
-	            	lineIcon.lineSprite.hide();
-	            	lineIcon.lineSprite.isVisible = false;	 	            
-            	}else{
-	            	lineIcon.lineSprite.show();
-	            	lineIcon.lineSprite.isVisible = true;	            		
-				}
-			}	*/
+            }
         });        
     };
 

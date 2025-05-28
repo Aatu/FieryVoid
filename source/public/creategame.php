@@ -150,43 +150,41 @@ VICTORY CONDITIONS: Last unit on map / Last ship on map / More forces remaining 
     </div>
 </div>
 
-<div id="asteroids" class="subpanel movementspacecontainer">
+<div id="terrain" class="subpanel movementspacecontainer">
     <div class="slot">
         <div>
-            <input id="asteroidscheck" type="checkbox" name="asteroidscheck">GENERATE ASTEROIDS
+            <input id="terraincheck" type="checkbox" name="terraincheck">ADD TERRAIN
         </div>
     </div>
-    
-    <!-- Asteroids Dropdown -->
+
     <div class="slot" id="asteroidsDropdown" style="display:none;">
         <label for="asteroidsSelect">SELECT NUMBER OF ASTEROIDS:</label>
         <select id="asteroidsSelect" name="asteroidsCategories">
+            <option value="0">None</option>              
             <option value="3">Few (3)</option>
             <option value="6">Several (6)</option>
             <option value="12">Pack (12)</option>
-            <option value="18">Lots (18)</option>            
+            <option value="18">Lots (18)</option>
             <option value="24">Horde (24)</option>
             <option value="36">Swarm (36)</option>
-            <option value="48">Zounds (48)</option>                      
+            <option value="48">Zounds (48)</option>
         </select>
     </div>
-</div>    
 
-<div id="moons" class="subpanel movementspacecontainer">
-    <div class="slot">
-        <div>
-            <input id="moonscheck" type="checkbox" name="moonscheck">GENERATE MOONS
-        </div>
-    </div>    
-    
-    <!-- Moons Dropdown -->
     <div class="slot" id="moonsDropdown" style="display:none;">
         <label for="moonsSelect">SELECT NUMBER OF MOONS:</label>
         <select id="moonsSelect" name="moonsCategories">
-            <option value="1">One Large</option>
-            <option value="2">One Large / One Small</option>
-            <option value="3">One Large / Two Small</option>
-            <option value="4">Four Small</option>            
+            <option value="0">None</option>           
+            <option value="1">One Small</option>
+            <option value="2">Two Small</option> 
+            <option value="3">Three Small</option>
+            <option value="4">Four Small</option>                                    
+            <option value="5">One Large</option>
+            <option value="6">Two Large</option>
+            <option value="7">Three Large</option>                         
+            <option value="8">One Large / One Small</option>
+            <option value="9">One Large / Two Small</option>
+            <option value="10">One Large / Three Small</option>                                
         </select>
     </div>
 </div>
@@ -281,7 +279,7 @@ VICTORY CONDITIONS: Last unit on map / Last ship on map / More forces remaining 
                     <span>X:</span>
                     <input class ="depx tinySize" data-validation="^-{0,1}[0-9]+$" data-default ="0" type="text" name="depx" value="0">
                     <span>Y:</span>
-                    <input class ="depy tinySize" type="text" name="depy" value="0">
+                    <input class ="depy tinySize" type="text" name="depy" value="1">
                     <span>Type</span>
                     <select class="deptype" name="deptype">
                         <option value="box">box</option>
@@ -293,14 +291,15 @@ VICTORY CONDITIONS: Last unit on map / Last ship on map / More forces remaining 
                     <span class="depwidthheader">Width:</span>
                     <input class ="depwidth tinySize" type="text" name="depwidth" value="0">
                 	<span class="depheightheader">Height:</span>
-                	<input class="depheight tinySize" type="text" name="depheight" value="0">                    
+                	<input class="depheight tinySize" type="text" name="depheight" value="0">
+                    <span>Turn Available:</span>
+                    <input class ="depavailable tinySize" type="text" name="depavailable" value="0">                    
             		<!-- Add a Flexbox container here to align REMOVE SLOT to the right-->
             		<div class="flex-container">
                 	<span class="clickable close">REMOVE SLOT</span>            
                     
-                    <!-- options to deploy later do not work correctly, I'm disabling them
-                    <span>Turn available:</span>
-                    <input class ="depavailable tinySize" type="text" name="depavailable" value="0">-->
+                    
+
                 </div>
             </div>
         </div>

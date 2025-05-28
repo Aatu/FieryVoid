@@ -122,7 +122,7 @@ class BuyingGamePhase implements Phase
                         $dy = $y - $my;
                         $distance = sqrt($dx * $dx + $dy * $dy);
 
-                        if ($distance < 3) { // Asteroids must be at least 3 hexes away from any moon
+                        if ($distance < 4) { // Asteroids must be at least 3 hexes away from any moon
                             $tooCloseToMoon = true;
                             break;
                         }
@@ -182,14 +182,28 @@ class BuyingGamePhase implements Phase
 
     public function addMoons($gameData, $dbManager, $moonValue, $slot)
     {
-        $counter = $moonValue; // Should always be at least 1 to get here.
+        $counter = $moonValue; // Should always be at least 1 to get here. 1-10.
         $moonIndex = 1; // For naming
     
-        if ($counter == 1) {    
-            // Add a single large Moon
-            $currMoon = new moon($gameData->id, -5, "Moon #$moonIndex", $slot);
-            $dbManager->submitShip($gameData->id, $currMoon, -5);
-        } else if ($counter > 1 && $counter < 4) {  
+        if ($counter >= 1 && $counter < 5) {    
+            // Add a small Moons only
+            while ($counter > 0) {
+                $currMoon = new moonSmall($gameData->id, -5, "Moon #$moonIndex", $slot);
+                $dbManager->submitShip($gameData->id, $currMoon, -5);
+                $counter--; 
+                $moonIndex++;
+            }     
+        }else if ($counter >= 5 && $counter < 8) {
+            $counter -= 4;  //Adjust so we don't over-generate.     
+            // Add a large Moons only
+            while ($counter > 0) {
+                $currMoon = new moon($gameData->id, -5, "Moon #$moonIndex", $slot);
+                $dbManager->submitShip($gameData->id, $currMoon, -5);
+                $counter--; 
+                $moonIndex++;
+            }    
+        }else if ($counter >= 8 && $counter < 11) { 
+            $counter -= 6; //Adjust so we don't over-generate.  
             // Add a big Moon first
             $currMoon = new moon($gameData->id, -5, "Moon #$moonIndex", $slot);
             $dbManager->submitShip($gameData->id, $currMoon, -5);
@@ -203,15 +217,7 @@ class BuyingGamePhase implements Phase
                 $counter--; 
                 $moonIndex++; 
             }
-        } else if ($counter == 4) { 
-            // Exactly three small moons
-            while ($counter > 0) {
-                $currMoon = new moonSmall($gameData->id, -5, "Moon #$moonIndex", $slot);
-                $dbManager->submitShip($gameData->id, $currMoon, -5);
-                $counter--; 
-                $moonIndex++; 
-            }
-        }    
+        }   
     } 
 
     public function getGamespace($gameData)
