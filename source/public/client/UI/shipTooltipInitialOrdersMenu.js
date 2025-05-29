@@ -15,13 +15,15 @@ window.ShipTooltipInitialOrdersMenu = function () {
         { className: "addOEW", condition: [isEnemy, sourceNotFlight], action: addOEW, info: "Add OEW" }, 
         { className: "removeOEW", condition: [isEnemy, sourceNotFlight], action: removeOEW, info: "Remove OEW" }, 
         { className: "addDIST", condition: [isEnemy, isElint, notFlight, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck], action: getAddOEW('DIST'), info: "Add DIST" }, 
-        { className: "removeDIST", condition: [isEnemy, isElint, notFlight, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck], action: getRemoveOEW('DIST'), info: "Remove DIST" }, 
+        { className: "removeDIST", condition: [isEnemy, isElint, notFlight, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck, hasDIST], action: getRemoveOEW('DIST'), info: "Remove DIST" }, 
         { className: "addSOEW", condition: [isFriendly, isElint, notFlight, notSelf, isInElintDistance(30), doesNotHaveBDEW], action: getAddOEW('SOEW'), info: "Add SOEW" }, 
-        { className: "removeSOEW", condition: [isFriendly, isElint, notFlight, notSelf, isInElintDistance(30), doesNotHaveBDEW], action: getRemoveOEW('SOEW'), info: "Remove SOEW" }, 
+        { className: "removeSOEW", condition: [isFriendly, isElint, notFlight, notSelf, isInElintDistance(30), doesNotHaveBDEW, hasSOEW], action: getRemoveOEW('SOEW'), info: "Remove SOEW" }, 
         { className: "addSDEW", condition: [isFriendly, isElint, notFlight, notSelf, isInElintDistance(30), doesNotHaveBDEW], action: getAddOEW('SDEW'), info: "Add SDEW" }, 
-        { className: "removeSDEW", condition: [isFriendly, isElint, notFlight, notSelf, isInElintDistance(30), doesNotHaveBDEW], action: getRemoveOEW('SDEW'), info: "Remove SDEW" }, 
-        { className: "addBDEW", condition: [isSelf, isElint, notFlight, doesNotHaveOtherElintEWThanBDEW], action: addBDEW, info: "add BDEW" }, 
-        { className: "removeBDEW", condition: [isSelf, isElint, notFlight, doesNotHaveOtherElintEWThanBDEW], action: removeBDEW, info: "remove BDEW" }, 
+        { className: "removeSDEW", condition: [isFriendly, isElint, notFlight, notSelf, isInElintDistance(30), doesNotHaveBDEW, hasSDEW], action: getRemoveOEW('SDEW'), info: "Remove SDEW" }, 
+        { className: "addBDEW", condition: [isSelf, isElint, notFlight, doesNotHaveOtherElintEWThanBDEW], action: addBDEW, info: "Add BDEW" }, 
+        { className: "removeBDEW", condition: [isSelf, isElint, notFlight, doesNotHaveOtherElintEWThanBDEW, hasBDEW], action: removeBDEW, info: "Remove BDEW" },
+        { className: "addDetectSEW", condition: [isSelf, isElint, notFlight, doesNotHaveBDEW], action: addDetectSEW, info: "Add Detect Stealth" }, 
+        { className: "removeDetectSEW", condition: [isSelf, isElint, notFlight, doesNotHaveBDEW, hasDSEW], action: removeDetectSEW, info: "Remove Detect Stealth" },    
         { className: "removeAllEW", condition: [isSelf, notFlight], action: removeAllEW, info: "Remove All EW" }, 
         { className: "targetWeapons", condition: [isEnemy, hasShipWeaponsSelected], action: targetWeapons, info: "Target selected weapons on ship" }, 
         { className: "targetWeaponsHex", condition: [hasHexWeaponsSelected], action: targetHexagon, info: "Target selected weapons on hexagon" },
@@ -109,7 +111,22 @@ window.ShipTooltipInitialOrdersMenu = function () {
         if (!entry) return;
         ew.deassignEW(this.selectedShip, entry);
     }
-    
+
+    function addDetectSEW() {
+        var entry = ew.getEntryByTargetAndType(this.selectedShip, null, "Detect Stealth", this.turn);
+
+        if (!entry) {
+            ew.assignEW(this.selectedShip, "Detect Stealth");
+        } else {
+            ew.assignEW(this.selectedShip, entry);
+        }
+    }
+
+    function removeDetectSEW() {
+        var entry = ew.getEntryByTargetAndType(this.selectedShip, null, "Detect Stealth", this.turn);
+        if (!entry) return;
+        ew.deassignEW(this.selectedShip, entry);
+    }    
     
     function removeAllEW() {
         ew.removeEW(this.selectedShip);
@@ -196,8 +213,16 @@ window.ShipTooltipInitialOrdersMenu = function () {
     }
 
     function doesNotHaveOtherElintEWThanBDEW() {
-        return ew.getEWByType("SDEW", this.selectedShip) === 0 && ew.getEWByType("DIST", this.selectedShip) === 0 && ew.getEWByType("SOEW", this.selectedShip) === 0;
+        return ew.getEWByType("SDEW", this.selectedShip) === 0 && ew.getEWByType("DIST", this.selectedShip) === 0 && ew.getEWByType("SOEW", this.selectedShip) === 0 && ew.getEWByType("Detect Stealth", this.selectedShip) === 0;
     }
+
+    function hasOEW() { return ew.getEWByType("OEW", this.selectedShip) > 0; }
+    function hasCCEW() { return ew.getEWByType("CCEW", this.selectedShip) > 0; }
+    function hasSDEW() { return ew.getEWByType("SDEW", this.selectedShip) > 0; }
+    function hasSOEW() { return ew.getEWByType("SOEW", this.selectedShip) > 0; }
+    function hasBDEW() { return ew.getEWByType("BDEW", this.selectedShip) > 0; }
+    function hasDIST() { return ew.getEWByType("DIST", this.selectedShip) > 0; }
+    function hasDSEW() { return ew.getEWByType("Detect Stealth", this.selectedShip) > 0; }
 		
     function advSensorsCheck() { /*check whether source ship has Advanced Sensors OR target ship does NOT have Advanced Sensors*/
 	return ( shipManager.hasSpecialAbility(this.selectedShip, "AdvancedSensors") || (!(shipManager.hasSpecialAbility(this.targetedShip, "AdvancedSensors"))) ) 

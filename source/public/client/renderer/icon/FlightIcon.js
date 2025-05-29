@@ -113,10 +113,10 @@ window.FlightIcon = function () {
         this.shipEWSprite = new window.ShipEWSprite({ width: this.size*0.75, height: this.size*0.75 }, -1);
         this.mesh.add(this.shipEWSprite.mesh);
 
-        this.ShipSelectedSprite = new window.ShipSelectedSprite({ width: this.size*0.75, height: this.size*0.75 }, -2, this.mine ? 'ally' : 'enemy', true).hide();
+        this.ShipSelectedSprite = new window.ShipSelectedSprite({ width: this.size*0.75, height: this.size*0.75 }, -2, this.terrain ? 'terrain' : (this.mine ? 'mine' : (this.ally ? 'ally' : 'enemy')), true).hide();
         this.mesh.add(this.ShipSelectedSprite.mesh);
 
-        this.ShipSideSprite = new window.ShipSelectedSprite({ width: this.size*0.75, height: this.size*0.75 }, -2, this.mine ? 'ally' : 'enemy', false).hide();
+        this.ShipSideSprite = new window.ShipSelectedSprite({ width: this.size*0.75, height: this.size*0.75 }, -2, this.terrain ? 'terrain' : (this.mine ? 'mine' : (this.ally ? 'ally' : 'enemy')), false).hide();
         this.mesh.add(this.ShipSideSprite.mesh);
 
         this.NotMovedSprite = new window.ShipSelectedSprite({ width: this.size*0.75, height: this.size*0.75 }, -2, 'neutral', false).hide();

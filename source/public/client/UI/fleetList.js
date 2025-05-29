@@ -55,7 +55,7 @@ window.fleetListManager = {
 
         for (var i in gamedata.ships) {
             var ship = gamedata.ships[i];
-
+            if(gamedata.isTerrain(ship)) continue;
             if (ship.userid == slot.playerid) {
                 shipArray.push(ship);
             }
@@ -119,7 +119,13 @@ window.fleetListManager = {
         }
 
         var shipId = shipNameEntry.dataset["shipid"];
-        window.webglScene.customEvent('ScrollToShip', {shipId: shipId});
+        var ship = gamedata.getShip(shipId);
+
+        if(shipManager.shouldBeHidden(ship)){ //Enemy, stealth equipped and undetected, or not deployed yet.
+            return; //Do not scroll to Stealthed ships
+        } else{
+            window.webglScene.customEvent('ScrollToShip', {shipId: shipId});
+        }    
     },
 
     updateFleetList: function updateFleetList() {

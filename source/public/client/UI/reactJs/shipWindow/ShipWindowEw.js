@@ -15,20 +15,24 @@ const EwContainer = styled.div`
 `;
 
 const Header = styled.div`
-    widht: 100%;
-    height: 13px;
+    width: 100%;
+    height: 16px;
     border-bottom: 1px solid #496791;
     box-sizing: border-box;
-    font-size: 10px;
+    font-size: 8.5px;
     color: white;
     text-transform: uppercase;
-    padding: 1px 3px;
+    padding: 2px 2px;
     margin: 0;
+    line-height: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;    
 `
 
 
 const Entry = styled.div`
-    font-size: 9px;
+    font-size: 8.5px;
     padding: 1px 2px 0px 2px;
     color: #C6E2FF;
 `;
@@ -53,7 +57,7 @@ class ShipWindowEw extends React.Component{
 
         return (
             <EwContainer>
-                <Header>E. Warfare</Header>
+                <Header>Electronic Warfare</Header>
                 {getEW(ship)}
             </EwContainer>
         );
@@ -63,17 +67,26 @@ class ShipWindowEw extends React.Component{
 
 const getEW = ship => {
     let list = [];
+	let deployTurn = shipManager.getTurnDeployed(ship);
+    if(deployTurn > gamedata.turn){ //Selected ships is not deployed yet - DK May 2025
+        list.push(<Entry key={`dew-scs-${ship.id}`}><EntryHeader><br></br>DEPLOYS ON TURN</EntryHeader>{deployTurn}</Entry>);       
+        return list;  
+    }  
 
     list.push(<Entry key={`dew-scs-${ship.id}`}><EntryHeader>DEW:</EntryHeader>{ew.getDefensiveEW(ship)}</Entry>);
     var CCEWamount = Math.max(0,ew.getCCEW(ship) - ew.getDistruptionEW(ship));
     list.push(<Entry key={`ccew-scs-${ship.id}`}><EntryHeader>CCEW:</EntryHeader>{CCEWamount}</Entry>);
 
    	let bdew = ew.getBDEW(ship) * 0.25;
+   	let DetectSEW = ew.getDetectSEW(ship);
 
 	if(shipManager.hasSpecialAbility(ship, "ConstrainedEW")) bdew = ew.getBDEW(ship) * 0.2;
 	    
     if (bdew) {
         list.push(<Entry key={`bdew-scs-${ship.id}`}><EntryHeader>BDEW:</EntryHeader>{bdew.toFixed(2)}</Entry>);
+    }
+    if (DetectSEW) {
+        list.push(<Entry key={`DetectSEW-scs-${ship.id}`}><EntryHeader>Detect Stealth:</EntryHeader>{DetectSEW}</Entry>);
     }
 
     list = list.concat(ship.EW

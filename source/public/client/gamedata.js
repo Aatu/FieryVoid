@@ -151,16 +151,15 @@ window.gamedata = {
     */
     
     getActiveShips: function getActiveShips() {
-
-        if (Array.isArray(gamedata.activeship)){
+        if (Array.isArray(gamedata.activeship)) {
             return gamedata.activeship.map(function (id) {
                 return gamedata.getShip(id);
             }).filter(function(ship) { 
-                return ship && ship.userid != -5;
+                return ship && !gamedata.isTerrain(ship) && !(shipManager.getTurnDeployed(ship) > gamedata.turn);
             });
         } else {
             return [gamedata.getShip(gamedata.activeship)].filter(function(ship) { 
-                return ship && ship.userid != -5;
+                return ship && !gamedata.isTerrain(ship) && !(shipManager.getTurnDeployed(ship) > gamedata.turn);
             });
         }
     },
@@ -180,7 +179,16 @@ window.gamedata = {
     },
 
     isMyShip: function isMyShip(ship) {
-        return ship.userid === gamedata.thisplayer && ship.userid !== -5;
+        if(gamedata.isTerrain(ship) && (gamedata.gamephase !== -1)) return false; //Players can purchase Terrain, and will need to select to deploy it.
+        return ship.userid === gamedata.thisplayer;
+    },
+
+    isMyorMyTeamShip: function isMyShip(ship) {
+        if(gamedata.isTerrain(ship) && (gamedata.gamephase !== -1)) return false; //Players can purchase Terrain, and will need to select to deploy it. 
+        if(ship.userid === gamedata.thisplayer) return true;
+        if(ship.team === gamedata.getPlayerTeam()) return true;
+      
+        return false;
     },
     
     isEnemy: function isEnemy(target, shooter) {
@@ -194,10 +202,16 @@ window.gamedata = {
     
         return target.team !== shooter.team;
     },
-    
+
+    isTerrain: function isTerrain(ship) {    
+        if(ship.shipSizeClass == 5 || ship.userid == -5) return true;
+        return false;
+        
+    },    
+
     isMyOrTeamOneShip: function isMyOrTeamOneShip(ship) {
-        if (ship.shipSizeClass === 5) {
-            return false; // Ensure ships with userid -5 are never considered friendly
+        if (gamedata.isTerrain(ship)) {
+            return false; // Ensure terrain units are never considered friendly
         }
     
         if (gamedata.isPlayerInGame()) {
@@ -206,6 +220,7 @@ window.gamedata = {
             return ship.team === 1;
         }
     },
+
 
     canTargetAlly: function canTargetAlly(ship) {//30 June 2024 - DK - Added for Ally targeting.
         for (var i in gamedata.selectedSystems) {        	
@@ -266,7 +281,10 @@ window.gamedata = {
             for (var ship in gamedata.ships) {
                 if (gamedata.ships[ship].userid == gamedata.thisplayer) {
                     if (!shipManager.isDestroyed(gamedata.ships[ship])) {
-                        myShips.push(gamedata.ships[ship]);
+                        var deployTurn = shipManager.getTurnDeployed(gamedata.ships[ship]);
+                        if(deployTurn <= gamedata.turn){   //Don't bother checking for ships that haven't deployed yet. 
+                            myShips.push(gamedata.ships[ship]);
+                        }    
                     }
                 }
             }
@@ -279,7 +297,8 @@ window.gamedata = {
 			var notSetFC = [];//available BFCP points remaining for Hyach!
 			var powerSurplus = [];//power surplus
 
-            for (var ship in myShips) {
+            for (var ship in myShips) {              
+
                 if (!myShips[ship].flight) {
 
                     //loop at systems looking for overloading reactor(s)
@@ -416,7 +435,8 @@ window.gamedata = {
                 html += "You have ordering following ships to SELF DESTRUCT: ";
                 html += "<br>";
                 for (var ship in selfDestructing) {
-                    html += selfDestructing[ship].name + " (" + selfDestructing[ship].shipClass + ")";
+                    //html += selfDestructing[ship].name + " (" + selfDestructing[ship].shipClass + ")";
+                    html += '<span class="ship-name">' + selfDestructing[ship].name + ' (' + selfDestructing[ship].shipClass + ')</span>';                   
                     html += "<br>";
                 }
                 html += "<br>";
@@ -425,7 +445,8 @@ window.gamedata = {
                 html += "You have ordering following ships to JUMP TO HYPERSPACE: ";
                 html += "<br>";
                 for (var ship in jumping) {
-                    html += jumping[ship].name + " (" + jumping[ship].shipClass + ")";
+                    //html += jumping[ship].name + " (" + jumping[ship].shipClass + ")";
+                    html += '<span class="ship-name">' + jumping[ship].name + ' (' + jumping[ship].shipClass + ')</span>';                     
                     html += "<br>";
                 }
                 html += "<br>";
@@ -455,7 +476,8 @@ window.gamedata = {
 	                html += "You have not assigned any EW for the following ships: ";
 	                html += "<br>";
 	                for (var ship in hasNoEW) {
-	                    html += hasNoEW[ship].name + " (" + hasNoEW[ship].shipClass + ")";
+	                    //html += hasNoEW[ship].name + " (" + hasNoEW[ship].shipClass + ")";
+                        html += '<span class="ship-name">' + hasNoEW[ship].name + ' (' + hasNoEW[ship].shipClass + ')</span>';                            
 	                    html += "<br>";
 	                }
 	                html += "<br>";
@@ -465,7 +487,8 @@ window.gamedata = {
                 html += "You have not assigned any ballistic launch for the following ships: ";
                 html += "<br>";
                 for (var ship in notLaunching) {
-                    html += notLaunching[ship].name + " (" + notLaunching[ship].shipClass + ")";
+                    //html += notLaunching[ship].name + " (" + notLaunching[ship].shipClass + ")";
+                    html += '<span class="ship-name">' + notLaunching[ship].name + ' (' + notLaunching[ship].shipClass + ')</span>'; 
                     html += "<br>";
                 }
                 html += "<br>";
@@ -474,7 +497,8 @@ window.gamedata = {
                 html += "You have not assigned available AA points for the following units: ";
                 html += "<br>";
                 for (var ship in notSetAA) {
-                    html += notSetAA[ship].name + " (" + notSetAA[ship].shipClass + ")";
+                    //html += notSetAA[ship].name + " (" + notSetAA[ship].shipClass + ")";
+                    html += '<span class="ship-name">' + notSetAA[ship].name + ' (' + notSetAA[ship].shipClass + ')</span>';                     
                     html += "<br>";
                 }
                 html += "<br>";
@@ -483,18 +507,20 @@ window.gamedata = {
                 html += "You have not assigned available BFCP points for the following units: ";
                 html += "<br>";
                 for (var ship in notSetFC) {
-                    html += notSetFC[ship].name + " (" + notSetFC[ship].shipClass + ")";
+                    //html += notSetFC[ship].name + " (" + notSetFC[ship].shipClass + ")";
+                    html += '<span class="ship-name">' + notSetFC[ship].name + ' (' + notSetFC[ship].shipClass + ')</span>'; 
                     html += "<br>";
                 }
                 html += "<br>";
             }                         
             if (powerSurplus.length > 0) {
-                html += "Followed ships have unassigned Power reserves: ";
+                html += "The following ships have unassigned Power reserves: ";
                 html += "<br>";
                 for (var ship in powerSurplus) {
 			//show actual surplus, too - like: Surplusser (PowerShip) - <10>
 					var surplusVal = shipManager.power.getReactorPower(powerSurplus[ship], shipManager.systems.getSystemByName(powerSurplus[ship], "reactor"));
-                    html += powerSurplus[ship].name + " (" + powerSurplus[ship].shipClass + "): <b>&#60;" + surplusVal + '&#62;</b>';
+                    //html += powerSurplus[ship].name + " (" + powerSurplus[ship].shipClass + "): <b>&#60;" + surplusVal + '&#62;</b>';
+                    html += '<span class="ship-name">' + powerSurplus[ship].name + ' (' + powerSurplus[ship].shipClass + '): <b>&#60;' + surplusVal + '&#62;</b></span>';
                     html += "<br>";
                 }
                 html += "<br>";
@@ -509,7 +535,10 @@ window.gamedata = {
                 for (var ship in gamedata.ships) {
                     if (gamedata.ships[ship].userid == gamedata.thisplayer) {
                         if (!shipManager.isDestroyed(gamedata.ships[ship])) {
-                            myShips.push(gamedata.ships[ship]);
+                            var deployTurn = shipManager.getTurnDeployed(gamedata.ships[ship]);
+                            if(deployTurn <= gamedata.turn){   //Don't bother checking for ships that haven't deployed yet. 
+                                myShips.push(gamedata.ships[ship]);
+                            } 
                         }
                     }
                 }
@@ -580,7 +609,8 @@ window.gamedata = {
                         html += "You have not assigned any fire orders for the following ships: ";
                         html += "<br>";
                         for (var ship in hasNoFO) {
-                            html += hasNoFO[ship].name + " (" + hasNoFO[ship].shipClass + ")";
+                            //html += hasNoFO[ship].name + " (" + hasNoFO[ship].shipClass + ")";
+                            html += '<span class="ship-name">' + hasNoFO[ship].name + ' (' + hasNoFO[ship].shipClass + ')</span>'; 
                             html += "<br>";
                         }
                     }    
@@ -589,7 +619,8 @@ window.gamedata = {
                         html += "The following ships have weapons with unused shots: ";
                         html += "<br>";
                         for (var ship in hasSplitFO) {
-                            html += hasSplitFO[ship].name + " (" + hasSplitFO[ship].shipClass + ")";
+                            //html += hasSplitFO[ship].name + " (" + hasSplitFO[ship].shipClass + ")";
+                            html += '<span class="ship-name">' + hasSplitFO[ship].name + ' (' + hasSplitFO[ship].shipClass + ')</span>';                             
                             html += "<br>";
                         }
                     }    
@@ -635,9 +666,10 @@ window.gamedata = {
 
                 for (var index in shipNames) {
                     var name = shipNames[index];
-                    negPowerError += "- " + name + "<br>";
+                    //negPowerError += "- " + name + "<br>";
+                    negPowerError += '<span class="ship-name">- ' + name + '</span><br>';                    
                 }
-                negPowerError += "You need to turn off systems before you can commit the turn.";
+                negPowerError += "<br>You need to turn off systems before you can commit the turn.";
                 window.confirm.error(negPowerError, function () {});
                 return false;
             }
@@ -650,9 +682,10 @@ window.gamedata = {
 
                 for (var index in shipNames) {
                     var name = shipNames[index];
-                    negThrustError += "- " + name + "<br>";
+                    //negThrustError += "- " + name + "<br>";
+                    negThrustError += '<span class="ship-name">- ' + name + '</span><br>'; 
                 }
-                negThrustError += "You need to lower channelled thrust before you can commit the turn.";
+                negThrustError += "<br>You need to lower channelled thrust before you can commit the turn.";
                 window.confirm.error(negThrustError, function () {});
                 return false;
             }
@@ -664,9 +697,10 @@ window.gamedata = {
 
                 for (var i in shipNames) {
                     var shipName = shipNames[i];
-                    tooManyShieldsError += "- " + shipName + "<br>";
+                    //tooManyShieldsError += "- " + shipName + "<br>";
+                    tooManyShieldsError += '<span class="ship-name">- ' + shipName + '</span><br>';                     
                 }
-                tooManyShieldsError += "You need to turn off shields or boost your shield generator before you can commit the turn.";
+                tooManyShieldsError += "<br>You need to turn off shields or boost your shield generator before you can commit the turn.";
                 window.confirm.error(tooManyShieldsError, function () {});
                 return false;
             }
@@ -678,9 +712,10 @@ window.gamedata = {
 
                 for (var i in shipNames) {
                     var shipName = shipNames[i];
-                    tooManyBFCPError += "- " + shipName + "<br>";
+                    //tooManyBFCPError += "- " + shipName + "<br>";
+                    tooManyBFCPError += '<span class="ship-name">- ' + shipName + '</span><br>'; 
                 }
-                tooManyBFCPError += "You need to decrease the number of allocated BFCPs.";
+                tooManyBFCPError += "<br>You need to decrease the number of allocated BFCPs.";
                 window.confirm.error(tooManyBFCPError, function () {});
                 return false;
             }		
@@ -692,9 +727,10 @@ window.gamedata = {
                 
                 for (var i in shipNames) {
                     var shipName = shipNames[i];
-                    specialistsError += "- " + shipName + "<br>";
+                    //specialistsError += "- " + shipName + "<br>";
+                    specialistsError += '<span class="ship-name">- ' + shipName + '</span><br>'; 
                 }
-                specialistsError += "You need to choose Specialists for these ships.";
+                specialistsError += "<br>You need to choose Specialists for these ships.";
                 window.confirm.error(specialistsError, function () {});
                 return false;                
 			}		
@@ -706,9 +742,10 @@ window.gamedata = {
 
                 for (var i in shipNames) {
                     var shipName = shipNames[i];
-                    shieldCapacityError += "- " + shipName + "<br>";
+                    //shieldCapacityError += "- " + shipName + "<br>";
+                    shieldCapacityError += '<span class="ship-name">- ' + shipName + '</span><br>';
                 }
-                shieldCapacityError += "You need to change their allocation of shield power.";
+                shieldCapacityError += "<br>You need to change their allocation of shield power.";
                 window.confirm.error(shieldCapacityError, function () {});
                 return false;
             }	
@@ -718,7 +755,10 @@ window.gamedata = {
             for (var ship in gamedata.ships) {
                 if (gamedata.ships[ship].userid == gamedata.thisplayer) {
                     if (!shipManager.isDestroyed(gamedata.ships[ship])) {
-                        myShips.push(gamedata.ships[ship]);
+                        var deployTurn = shipManager.getTurnDeployed(gamedata.ships[ship]);
+                        if(deployTurn <= gamedata.turn){   //Don't bother checking for ships that haven't deployed yet. 
+                            myShips.push(gamedata.ships[ship]);
+                        } 
                     }
                 }
             }
@@ -775,25 +815,28 @@ window.gamedata = {
 		
 	    var errorText = '';
             if (EWIncorrect.length > 0) {
-                errorText += "Following ships have too many EW points set:<br>";
+                errorText += "The following ships have too many EW points set:<br>";
                 for (var shipID in EWIncorrect) {
-                    errorText += EWIncorrect[shipID].name + " (" + EWIncorrect[shipID].shipClass + ")";
+                    //errorText += EWIncorrect[shipID].name + " (" + EWIncorrect[shipID].shipClass + ")";
+                    errorText += '<span class="ship-name">' + EWIncorrect[shipID].name + ' (' + EWIncorrect[shipID].shipClass + ')</span>'; 
                     errorText += "<br>";
                 }
                 errorText += "<br>";
             }
             if (EWRestrictedIncorrect.length > 0) {
-                errorText += "Following ships have too many EW points set:<br>";
+                errorText += "The following ships have too many EW points set:<br>";
                 for (var shipID in EWRestrictedIncorrect) {
-                    errorText += EWRestrictedIncorrect[shipID].name + " (" + EWRestrictedIncorrect[shipID].shipClass + ")";
+                    //errorText += EWRestrictedIncorrect[shipID].name + " (" + EWRestrictedIncorrect[shipID].shipClass + ")";
+                    errorText += '<span class="ship-name">' + EWRestrictedIncorrect[shipID].name + ' (' + EWRestrictedIncorrect[shipID].shipClass + ')</span>';                     
                     errorText += "<br>";
                 }
                 errorText += "<br>";
             }
             if (EWLCVIncorrect.length > 0) {
-                errorText += "Following LCVs have too many EW points set on non-OEW:<br>";
+                errorText += "The following LCVs have too many EW points set on non-OEW:<br>";
                 for (var shipID in EWLCVIncorrect) {
-                    errorText += EWLCVIncorrect[shipID].name + " (" + EWLCVIncorrect[shipID].shipClass + ")";
+                    //errorText += EWLCVIncorrect[shipID].name + " (" + EWLCVIncorrect[shipID].shipClass + ")";
+                    errorText += '<span class="ship-name">' + EWLCVIncorrect[shipID].name + ' (' + EWLCVIncorrect[shipID].shipClass + ')</span>'; 
                     errorText += "<br>";
                 }
                 errorText += "<br>";
@@ -801,18 +844,20 @@ window.gamedata = {
 		
 		
             if (ammoMagazineError.length > 0) {
-                errorText += "Following units are trying to launch more ordnance than available (see Ammunition Magazine):<br>";
+                errorText += "The following units are trying to launch more ordnance than available (see Ammunition Magazine):<br>";
                 for (var shipID in ammoMagazineError) {
-                    errorText += ammoMagazineError[shipID].name + " (" + ammoMagazineError[shipID].shipClass + ")";
+                    //errorText += ammoMagazineError[shipID].name + " (" + ammoMagazineError[shipID].shipClass + ")";
+                    errorText += '<span class="ship-name">' + ammoMagazineError[shipID].name + ' (' + ammoMagazineError[shipID].shipClass + ')</span>'; 
                     errorText += "<br>";
                 }
                 errorText += "<br>";
             }
 		
             if (derelictFiring.length > 0) {
-                errorText += "Following units are derelict and should be considered shut down - cancel all firing orders:<br>";
+                errorText += "The following units are derelict and should be considered shut down - cancel all firing orders:<br>";
                 for (var shipID in derelictFiring) {
-                    errorText += derelictFiring[shipID].name + " (" + derelictFiring[shipID].shipClass + ")";
+                    //errorText += derelictFiring[shipID].name + " (" + derelictFiring[shipID].shipClass + ")";
+                    errorText += '<span class="ship-name">' + derelictFiring[shipID].name + ' (' + derelictFiring[shipID].shipClass + ')</span>'; 
                     errorText += "<br>";
                 }
                 errorText += "<br>";
@@ -844,12 +889,13 @@ window.gamedata = {
 			        
 			        if (active.some(activeShip => activeShip.id == ship.id)) {
 			            foundActiveShip = true;
-			            mustPivotError += "- " + ship.name + "<br>";
+			            //mustPivotError += "- " + ship.name + "<br>";
+                        mustPivotError += '<span class="ship-name">- ' + ship.name + '</span><br>';
 			        }
 			    }
 
 			    if (foundActiveShip) {
-			        mustPivotError += "You need to order them to pivot.";
+			        mustPivotError += "<br>You need to order them to pivot.";
 			        window.confirm.error(mustPivotError, function () {});
 			        return false;
 			    }
@@ -865,7 +911,8 @@ window.gamedata = {
                 var negPowerError = "The following ships have insufficient power:<br>";
                 for (var index in shipNames) {
                     var name = shipNames[index];
-                    negPowerError += "- " + name + "<br>";
+                    //negPowerError += "- " + name + "<br>";
+                    negPowerError += '<span class="ship-name">- ' + name + '</span><br>';
                 }
                 negPowerError += "You need to reduce your firing declarations before you can commit the turn.";
                 window.confirm.error(negPowerError, function () {});
@@ -878,7 +925,8 @@ window.gamedata = {
                 var negPowerError = "The following ships have insufficient plasma battery power:<br>";
                 for (var index in batteryShips) {
                     var name = batteryShips[index];
-                    negPowerError += "- " + name + "<br>";
+                    //negPowerError += "- " + name + "<br>";
+                    negPowerError += '<span class="ship-name">- ' + name + '</span><br>';                    
                 }
                 negPowerError += "You need to reduce the number of unboosted Plasma Webs firing in Offensive Mode before you can commit the turn.";
                 window.confirm.error(negPowerError, function () {});
@@ -892,7 +940,10 @@ window.gamedata = {
 		    for (var ship in gamedata.ships) {
 			if (gamedata.ships[ship].userid == gamedata.thisplayer) {
 			    if (!shipManager.isDestroyed(gamedata.ships[ship])) {
-				myShips.push(gamedata.ships[ship]);
+                    var deployTurn = shipManager.getTurnDeployed(gamedata.ships[ship]);
+                    if(deployTurn <= gamedata.turn){   //Don't bother checking for ships that haven't deployed yet. 
+                        myShips.push(gamedata.ships[ship]);
+                    } 
 			    }
 			}
 		    }				
@@ -907,9 +958,10 @@ window.gamedata = {
 			}
 		}
 		if (ammoMagazineError.length > 0) {
-			var ammoMagError = "Following units are trying to fire more ordnance than available (see Ammunition Magazine):<br>";
+			var ammoMagError = "The following units are trying to fire more ordnance than available (see Ammunition Magazine):<br>";
 			for (var shipID in ammoMagazineError) {
-			    ammoMagError += ammoMagazineError[shipID].name + " (" + ammoMagazineError[shipID].shipClass + ")";
+			    //ammoMagError += ammoMagazineError[shipID].name + " (" + ammoMagazineError[shipID].shipClass + ")";
+                ammoMagError += '<span class="ship-name">' + ammoMagazineError[shipID].name + ' (' + ammoMagazineError[shipID].shipClass + ')</span>'; 
 			    ammoMagError += "<br>";
 			}
                 	ammoMagError += "You need to reduce number of shots (or change mode) before you can commit the turn.";
@@ -1028,9 +1080,11 @@ window.gamedata = {
 
         ini_gui.appendChild(topicDiv);
 
-        var allShips = gamedata.ships;
-        var ships = gamedata.ships.filter(function (ship) {
-            return !shipManager.isDestroyed(ship) && ship.shipSizeClass != 5;
+        //var allShips = gamedata.ships;
+        var ships = gamedata.ships.filter(function(ship) {
+            return !shipManager.isDestroyed(ship) &&
+                   !gamedata.isTerrain(ship) &&
+                   !shipManager.shouldBeHidden(ship);
         });
 
        
@@ -1049,7 +1103,7 @@ window.gamedata = {
                 window.webglScene.customEvent('ScrollToShip', {shipId: this.id});
             })
 
-            var categoryIndex = window.SimultaneousMovementRule.getShipCategoryIndex(ships[i]);
+            //var categoryIndex = window.SimultaneousMovementRule.getShipCategoryIndex(ships[i]);
 
             var td = document.createElement("td");
             td.position = "relative";
@@ -1063,7 +1117,11 @@ window.gamedata = {
 
             if (gamedata.isMyShip(ships[i])) {
                 td.style.color = "green";
-            } else td.style.color = "red";
+            }else if (gamedata.isMyorMyTeamShip(ships[i])){
+                td.style.color = "#6091d2"; // Lighter blue
+            }else {
+                td.style.color = "red";
+            }
 
             tr.appendChild(td);
 
@@ -1085,6 +1143,8 @@ window.gamedata = {
                     td.className = "iniActiveMoved";
                 }else if (active === true && gamedata.isMyShip(ships[i])) {
                     td.className = "iniActive";
+                }else if (active === true && gamedata.isMyorMyTeamShip(ships[i])) {
+                    td.className = "iniActiveAlly";
                 } else if (active === true  && !gamedata.isMyShip(ships[i])){
                     td.className = "iniActiveEnemy";
                 }

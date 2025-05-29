@@ -86,7 +86,8 @@
 		}else{
             $FDEW = $FDEW * 0.25;
 		}    
-			if(($target->jammerMissile) && $FDEW < 2) $FDEW = 2; //Jammer Missiles provide 2 BDEW to all ships in range, but not in combination with normal BDEW!
+			//if(($target->jammerMissile) && $FDEW < 2) $FDEW = 2; //Jammer Missiles provide 2 BDEW to all ships in range, but not in combination with normal BDEW!
+			if(isset(AmmoMissileJ::$alreadyJammed[$target->id]) && $FDEW < 2) $FDEW = 2; //Jammer Missiles provide 2 BDEW to all ships in range, but not in combination with normal BDEW!            
 				            
             return $FDEW;
         }

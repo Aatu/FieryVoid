@@ -90,6 +90,10 @@ window.InitialPhaseStrategy = function () {
     InitialPhaseStrategy.prototype.targetShip = function (ship, payload) {
         //TODO: Targeting ship with ballistic weapons
         //TODO: Targeting ship with support EW (defensive or offensive)
+        if(shipManager.getTurnDeployed(this.selectedShip) > gamedata.turn){ //Selected ships is not deployed yet - DK May 2025
+            this.showShipTooltip(ship, payload, menu, false);
+            return;  
+        }    
         var position = this.coordinateConverter.fromGameToHex(this.shipIconContainer.getByShip(ship).getPosition());
         var menu = new ShipTooltipInitialOrdersMenu(this.selectedShip, ship, this.gamedata.turn, position);
         this.showShipTooltip(ship, payload, menu, false);

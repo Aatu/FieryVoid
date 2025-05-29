@@ -86,6 +86,16 @@
 
 }
 
+.addDetectSEW {
+    background-image: url("../img/addDetectSEW.png");
+
+}
+
+.removeDetectSEW {
+    background-image: url("../img/removeDetectSEW.png");
+
+}
+
 .targetWeapons {
     background-image: url("../img/targetShip.png");
 }

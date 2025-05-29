@@ -32,8 +32,9 @@ jQuery(function ($) {
     $("#gamespacecheck").on("click", createGame.doFlightCheck);
     $("#movementcheck").on("click", createGame.doMovementCheck);
     $("#desperatecheck").on("click", createGame.doDesperateCheck);
-    $("#asteroidscheck").on("click", createGame.doAsteroidsCheck);
-    $("#moonscheck").on("click", createGame.doMoonsCheck);              
+    //$("#asteroidscheck").on("click", createGame.doAsteroidsCheck);
+    //$("#moonscheck").on("click", createGame.doMoonsCheck);              
+    $("#terraincheck").on("click", createGame.doTerrainCheck);
     
     $(".setsizeknifefight").on("click", createGame.doSwitchSizeKnifeFight);
     $(".setswitchsizebaseassault").on("click", createGame.doSwitchSizeBaseAssault);    
@@ -47,7 +48,7 @@ jQuery(function ($) {
 window.createGame = {
     gamespace_data: { width: 42, height: 30 },
     rules: {},
-    slots: Array({ id: 1, team: 1, name: "TEAM 1", points: 3500, depx: -21, depy: 0, deptype: "box", depwidth: 10, depheight: 30, depavailable: 0 }, { id: 2, team: 2, name: "TEAM 2", points: 3500, depx: 21, depy: 0, deptype: "box", depwidth: 10, depheight: 30, depavailable: 0 }),
+    slots: Array({ id: 1, team: 1, name: "TEAM 1", points: 3500, depx: -21, depy: 0, deptype: "box", depwidth: 10, depheight: 30, depavailable: 1 }, { id: 2, team: 2, name: "TEAM 2", points: 3500, depx: 21, depy: 0, deptype: "box", depwidth: 10, depheight: 30, depavailable: 1 }),
     slotid: 2,
 
     mapSelect: function mapSelect() {
@@ -270,46 +271,43 @@ doDesperateCheck: function doDesperateCheck(data) {
     }
 },
 
-doAsteroidsCheck: function doAsteroidsCheck(data) {
-    var checkval = $("#asteroidscheck:checked").val();
+
+doTerrainCheck: function doTerrainCheck(data) {    
+    // Simulate both checks by triggering them directly
+    createGame.doAsteroidsCheck(data);
+    createGame.doMoonsCheck(data);
+},
+
+doAsteroidsCheck: function () {
+    var checkval = $("#terraincheck:checked").val(); // use terraincheck instead
 
     if (checkval == "on") {
-        // Show the dropdown for selecting initiative categories
         $("#asteroidsDropdown").show();
-        // Set the selected value as initiativeCategories when checkbox is checked
         var selectedValue = $("#asteroidsSelect").val();
         createGame.rules.asteroids = parseInt(selectedValue, 10);
-        
-        // Add an event listener to update the value if the user changes the dropdown
-        $("#asteroidsSelect").on('change', function() {
+
+        $("#asteroidsSelect").off('change').on('change', function () {
             createGame.rules.asteroids = parseInt($(this).val(), 10);
         });
     } else {
-        // Hide the dropdown when the checkbox is unchecked
         $("#asteroidsDropdown").hide();
-        // Remove asteroids rule
         delete createGame.rules.asteroids;
     }
 },
 
-doMoonsCheck: function doMoonsCheck(data) {
-    var checkval = $("#moonscheck:checked").val(); // FIXED ID
+doMoonsCheck: function () {
+    var checkval = $("#terraincheck:checked").val(); // use terraincheck instead
 
     if (checkval == "on") {
-        // Show the dropdown for selecting moons
         $("#moonsDropdown").show();
-        // Set the selected value when checkbox is checked
         var selectedValue = $("#moonsSelect").val();
         createGame.rules.moons = parseInt(selectedValue, 10);
-        
-        // Add an event listener to update the value if the user changes the dropdown
-        $("#moonsSelect").on('change', function() {
+
+        $("#moonsSelect").off('change').on('change', function () {
             createGame.rules.moons = parseInt($(this).val(), 10);
         });
     } else {
-        // Hide the dropdown when the checkbox is unchecked
         $("#moonsDropdown").hide();
-        // Remove moons rule
         delete createGame.rules.moons;
     }
 },
@@ -365,14 +363,14 @@ doMovementCheck: function doMovementCheck(data) {
 					slotData.depwidth = $("#team1 .depwidth").val();
 					slotData.depheight = $("#team1 .depheight").val();
 					slotData.deptype = $(".deptype").val();
-					slotData.depavailable = 0;
+					slotData.depavailable = 1;
 				} else { //data for team 2
 					slotData.depx = $("#team2 .depx").val();
 					slotData.depy = $("#team2 .depy").val();
 					slotData.depwidth = $("#team2 .depwidth").val();
 					slotData.depheight = $("#team2 .depheight").val();
 					slotData.deptype = $(".deptype").val();
-					slotData.depavailable = 0;
+					slotData.depavailable = 1;
 				}
 			}
 			/*
@@ -421,14 +419,14 @@ doMovementCheck: function doMovementCheck(data) {
 				slotData.depwidth = $("#team1 .depwidth").val();
 				slotData.depheight = $("#team1 .depheight").val();
 				slotData.deptype = $(".deptype").val();
-				slotData.depavailable = 0;
+				slotData.depavailable = 1;
 			} else { //data for team 2
 				slotData.depx = $("#team2 .depx").val();
 				slotData.depy = $("#team2 .depy").val();
 				slotData.depwidth = $("#team2 .depwidth").val();
 				slotData.depheight = $("#team2 .depheight").val();
 				slotData.deptype = $(".deptype").val();
-				slotData.depavailable = 0;
+				slotData.depavailable = 1;
 			}
         }
 
@@ -473,14 +471,14 @@ doMovementCheck: function doMovementCheck(data) {
 				slotData.depwidth = $("#team1 .depwidth").val();
 				slotData.depheight = $("#team1 .depheight").val();
 				slotData.deptype = $(".deptype").val();
-				slotData.depavailable = 0;
+				slotData.depavailable = 1;
 			} else { //data for team 2
 				slotData.depx = $("#team2 .depx").val();
 				slotData.depy = $("#team2 .depy").val();
 				slotData.depwidth = $("#team2 .depwidth").val();
 				slotData.depheight = $("#team2 .depheight").val();
 				slotData.deptype = $(".deptype").val();
-				slotData.depavailable = 0;
+				slotData.depavailable = 1;
 			}
         }
 
@@ -511,14 +509,14 @@ doMovementCheck: function doMovementCheck(data) {
 				slotData.depwidth = $("#team1 .depwidth").val();
 				slotData.depheight = $("#team1 .depheight").val();
 				slotData.deptype = $(".deptype").val();
-				slotData.depavailable = 0;
+				slotData.depavailable = 1;
 			} else { //data for team 2
 				slotData.depx = $("#team2 .depx").val();
 				slotData.depy = $("#team2 .depy").val();
 				slotData.depwidth = $("#team2 .depwidth").val();
 				slotData.depheight = $("#team2 .depheight").val();
 				slotData.deptype = $(".deptype").val();
-				slotData.depavailable = 0;
+				slotData.depavailable = 1;
 			}
         }
 
@@ -573,7 +571,7 @@ doMovementCheck: function doMovementCheck(data) {
     createNewSlot: function createNewSlot(e) {
         var team = $(this).hasClass("team1") ? 1 : 2;
         createGame.slotid++;
-        var data = { id: createGame.slotid, team: team, name: "TEAM " + team, points: 3500, depx: 0, depy: 0, deptype: "box", depwidth: 0, depheight: 0, depavailable: 0 };
+        var data = { id: createGame.slotid, team: team, name: "TEAM " + team, points: 3500, depx: 0, depy: 0, deptype: "box", depwidth: 0, depheight: 0, depavailable: 1 };
 			//copy data from team data!
 			if (data.team == 1){ //data for team 1
 				data.depx = $("#team1 .depx").val();
@@ -581,14 +579,14 @@ doMovementCheck: function doMovementCheck(data) {
 				data.depwidth = $("#team1 .depwidth").val();
 				data.depheight = $("#team1 .depheight").val();
 				data.deptype = $(".deptype").val();
-				data.depavailable = 0;
+				data.depavailable = 1;
 			} else { //data for team 2
 				data.depx = $("#team2 .depx").val();
 				data.depy = $("#team2 .depy").val();
 				data.depwidth = $("#team2 .depwidth").val();
 				data.depheight = $("#team2 .depheight").val();
 				data.deptype = $(".deptype").val();
-				data.depavailable = 0;
+				data.depavailable = 1;
 			}
 		
         createGame.slots.push(data);

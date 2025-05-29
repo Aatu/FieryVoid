@@ -75,7 +75,8 @@ class SimultaneousMovementRule implements JsonSerializable {
         }
 
         if ($lastIndex === null) {
-            throw new Exception("Unable to find ships for movement?");
+            //throw new Exception("Unable to find ships for movement?");
+            return []; //With delayed deployment it is now possible to find no ships, so return empty array and this will be handled in InitialOrderStrategy->advance()
         }
 
         return [];
@@ -97,11 +98,14 @@ class SimultaneousMovementRule implements JsonSerializable {
         }
     }
 
-    private function hasShipsAtIniative(TacGamedata $gameData, $iniative) {
-        return count(array_filter($gameData->ships, function($ship) use ($iniative) {
-            return $ship->iniative == $iniative && !$ship->isDestroyed() && $ship->userid != -5;
-        })) > 0;
-    }
+private function hasShipsAtIniative(TacGamedata $gameData, $iniative) {
+    return count(array_filter($gameData->ships, function($ship) use ($iniative, $gameData) {
+        return $ship->iniative == $iniative 
+            && !$ship->isDestroyed() 
+            && !$ship->isTerrain() 
+            && $ship->getTurnDeployed($gameData) <= $gameData->turn;
+    })) > 0;
+}
 
     public function processMovement(TacGamedata $gameData, DBManager $dbManager, Array $ships) {
         $myActiveShips = $this->mapShipsToIds($gameData->getMyActiveShips());

@@ -3,24 +3,42 @@
 class InitialOrdersGamePhase implements Phase
 {
 
-    public function advance(TacGamedata $gameData, DBManager $dbManager)
-    {
-        
-        $dbManager->setPlayersWaitingStatusInGame($gameData->id, true);
-        $gameData->setPhase(2);
-        if ($gameData->rules->hasRule("getNewActiveShip")) {
-            $activeShipIds = $gameData->rules->callRule("getNewActiveShip", [$gameData, null]);
-            $gameData->setActiveship($activeShipIds);
-            $gameData->rules->callRule("setActiveShipPlayersNotWaiting", [$gameData, $dbManager]);
-        } else {
-            $ship = $gameData->getFirstShip();
-            $dbManager->setPlayerWaitingStatus($ship->userid, $gameData->id, false);
-            $gameData->setActiveship($ship->id);
-        }
-				
-        $dbManager->updateGamedata($gameData);
+public function advance(TacGamedata $gameData, DBManager $dbManager)
+{
+    $dbManager->setPlayersWaitingStatusInGame($gameData->id, true);
+    $gameData->setPhase(2);
 
+    if ($gameData->rules->hasRule("getNewActiveShip")) {
+        $activeShipIds = $gameData->rules->callRule("getNewActiveShip", [$gameData, null]);
+
+        // Check if there are any active ships to assign
+        if (empty($activeShipIds)) {
+            // No ships available to activate in Movement Phase, move to Firing Phase
+            $gameData->setPhase(3);
+            $gameData->setActiveship(-1);
+            $dbManager->updateGamedata($gameData);
+            $dbManager->setPlayersWaitingStatusInGame($gameData->id, false);  
+            return;
+        }
+
+        $gameData->setActiveship($activeShipIds);
+        $gameData->rules->callRule("setActiveShipPlayersNotWaiting", [$gameData, $dbManager]);
+    } else {
+        $ship = $gameData->getFirstShip();
+        if ($ship === null) {
+            // No ships found in getFirstShip move to Firing Phase
+            $gameData->setPhase(3);
+            $gameData->setActiveship(-1);
+            $dbManager->updateGamedata($gameData);
+            $dbManager->setPlayersWaitingStatusInGame($gameData->id, false);  
+            return;
+        }
+        $dbManager->setPlayerWaitingStatus($ship->userid, $gameData->id, false);
+        $gameData->setActiveship($ship->id);
     }
+
+    $dbManager->updateGamedata($gameData);
+}
 
     public function process(TacGamedata $gameData, DBManager $dbManager, Array $ships)
     {
