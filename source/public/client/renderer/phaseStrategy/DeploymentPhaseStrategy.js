@@ -77,9 +77,12 @@ window.DeploymentPhaseStrategy = function () {
 
     function showEnemyDeploymentAreas(deploymentSprites, gamedata) {
         var team = gamedata.getPlayerTeam();
+        var slot = gamedata.getPlayerSlot();
         deploymentSprites.forEach(function (icon) {
             if (icon.team != team) {
                 icon.enemySprite.show();
+            }else if (icon.team == team && icon.slotId != "" + slot + "") { //Let's try and also show the blue ally box.
+                icon.allySprite.show();                 
             }
         });
     }
