@@ -1517,23 +1517,30 @@ window.gamedata = {
             const data = gamedata.getSlotData(slotId);
             if (!data) return;
             const team = data.team;
+			const player = gamedata.thisplayer;
+			var playerTeam = gamedata.getPlayerTeam(slotId);
     
             const x = parseInt(data.depx) || 0;
             const y = parseInt(data.depy) || 0;
             const w = parseInt(data.depwidth) || 0;
             const h = parseInt(data.depheight) || 0;
     
-            ctx.fillStyle = "rgba(0,255,0,0.35)";
-    
+            if (data.playerid == player){
+				ctx.fillStyle = "rgba(0,255,0,0.35)";
+				ctx.strokeStyle = "#006600"; 
+			} else if (data.team == playerTeam){
+				ctx.fillStyle = "rgba(100,170,250, 0.35)";
+				ctx.strokeStyle = "#033063";
+			} else {
+				ctx.fillStyle = "rgba(250, 100, 100, 0.35)";
+				ctx.strokeStyle = "#630303";
+			} 	
             // Adjust position to treat (x, y) as center
             const drawX = offsetX + (x - w / 2 + mapWidth / 2) * scale;
             const drawY = offsetY + (mapHeight / 2 - y - h / 2) * scale;
     
-     //       console.log(`SlotID: ${slotId}, x: ${x}, y: ${y}, w: ${w}, h: ${h}, scale: ${scale}`);
-     //       console.log(`Drawing at: x=${drawX}, y=${drawY}`);
-    
             ctx.fillRect(drawX+6, drawY, w * scale, h * scale);
-            ctx.strokeStyle = "#006600";
+
             ctx.strokeRect(drawX+6, drawY, w * scale, h * scale);
             
             // Draw slot number in the center
@@ -1551,6 +1558,13 @@ window.gamedata = {
         ctx.strokeStyle = "#ffffff";
         ctx.lineWidth = 1;
         ctx.strokeRect(offsetX, offsetY, mapWidth * scale, mapHeight * scale); // Adjusted X offset
+    },
+
+    getPlayerTeam: function getPlayerTeam(id) {
+        for (var i in gamedata.slots) {
+            var slot = gamedata.slots[i];
+            if (slot.playerid == gamedata.thisplayer) return slot.team;
+        }
     },
 
     getSlotData: function getSlotData(id) {
