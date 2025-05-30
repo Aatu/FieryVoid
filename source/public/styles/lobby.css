@@ -131,12 +131,13 @@
 
 .leaveslot{
     position:absolute;
-    border:1px solid #496791;
+    border:1px solid #DEEBFF;
+    /*border:1px solid #496791;*/
     width:10px;
     height:10px;
     right:5px;
     top:4px;
-    background-image:url(../img/close.png);
+    background-image:url(../img/close1.png);
     cursor:pointer;
 }
 

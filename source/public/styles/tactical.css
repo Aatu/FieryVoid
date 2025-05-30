@@ -356,7 +356,7 @@ body {
     color:#b34119;
 }
 
-.ally.name{
+.mine.name{
     /*color:#2f5123; I'm making this color much lighter! this dark it's poorly readable*/
 	color:#55a837;;
 }
@@ -364,6 +364,11 @@ body {
 .terrain.name{
 	color:#dedede;
 }
+
+.ally.name{
+	color:#33adff;
+}
+
 
 #weaponTargetingContainer{
 	display:none;

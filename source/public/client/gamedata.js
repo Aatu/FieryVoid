@@ -1015,6 +1015,13 @@ window.gamedata = {
         }
     },
 
+    getPlayerSlot: function getPlayerSlot() {
+        for (var i in gamedata.slots) {
+            var slot = gamedata.slots[i];
+            if (slot.playerid == gamedata.thisplayer) return slot.slot;
+        }
+    },    
+
     getPlayerNameById: function getPlayerNameById(id) {
         for (var i in gamedata.slots) {
             var slot = gamedata.slots[i];
@@ -1288,6 +1295,12 @@ window.gamedata = {
             var ship = jsonShips[i];
             gamedata.ships[i] = new Ship(ship);
         }
-    }
+    },
+
+    checkPlayerHasDeployedShips: function checkPlayerHasDeployedShips() {
+        return gamedata.ships.some(ship =>
+            shipManager.getTurnDeployed(ship) <= gamedata.turn && gamedata.isMyShip(ship) && !gamedata.isTerrain(ship)
+        );
+    },
 
 };

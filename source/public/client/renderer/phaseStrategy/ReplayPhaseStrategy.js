@@ -171,7 +171,7 @@ window.ReplayPhaseStrategy = function () {
     function getInitialReplayTurn() {
 
         if (this.currentTurn === 1 && this.currentPhase <= 1) {
-            throw new Error("Activating replay too early");
+            return 0;
         }
 
         if (this.currentPhase === 1) {
@@ -182,7 +182,7 @@ window.ReplayPhaseStrategy = function () {
     }
 
     function turnBack() {
-        if (this.replayTurn === 1 || this.loading) {
+        if (this.replayTurn <= 1 || this.loading) {
             return;
         }
 
