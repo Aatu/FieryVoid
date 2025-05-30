@@ -1916,14 +1916,24 @@ applyCustomShipFilter: function () {
         var slot = $(".slot").has($(this));
         var slotid = slot.data("slotid");
 	    
-	//block if player already has confirmed fleet (in this slot)
-	if (slot.lastphase == "-2") { 
-		window.confirm.error("You have already confirmed Your fleet for this game!", function () {});
-		return;
-	}
-	    
-	ajaxInterface.submitSlotAction("leaveslot", slotid);
-	window.location = "games.php";
+		//block if player already has confirmed fleet (in this slot)
+		if (slot.lastphase == "-2") { 
+			window.confirm.error("You have already confirmed Your fleet for this game!", function () {});
+			return;
+		}
+			
+		ajaxInterface.submitSlotAction("leaveslot", slotid);
+
+		var hasOtherSlots = 0; 
+		for (var i in gamedata.slots)  { //check all slots
+			var checkSlot = gamedata.slots[i];
+			if (checkSlot.playerid == gamedata.thisplayer) { //this slot has ready fleet
+				hasOtherSlots ++;
+			}
+		}	
+		//Will count current slot, so we're looking for two or more.
+		if(hasOtherSlots <= 1) window.location = "games.php"; //Leave to main lobby if layer has not other slots here.
+
     },
 
     enableBuy: function enableBuy() {
