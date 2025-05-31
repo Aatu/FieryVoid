@@ -124,9 +124,9 @@ window.DeploymentPhaseStrategy = function () {
 
             var deploymentData = getDeploymentData(slot);
 
-            var ownSprite = new DeploymentIcon(deploymentData.position, deploymentData.size, 'own', scene, deploymentData.avail);
-            var allySprite = new DeploymentIcon(deploymentData.position, deploymentData.size, 'ally', scene, deploymentData.avail);
-            var enemySprite = new DeploymentIcon(deploymentData.position, deploymentData.size, 'enemy', scene, deploymentData.avail);
+            var ownSprite = new DeploymentIcon(deploymentData.position, deploymentData.size, 'own', scene);
+            var allySprite = new DeploymentIcon(deploymentData.position, deploymentData.size, 'ally', scene);
+            var enemySprite = new DeploymentIcon(deploymentData.position, deploymentData.size, 'enemy', scene);
 
             return {
                 slotId: key,
@@ -169,13 +169,11 @@ window.DeploymentPhaseStrategy = function () {
             width: window.HexagonMath.getHexWidth() * slot.depwidth,
             height: window.HexagonMath.getHexRowHeight() * slot.depheight
         };
-        var available = slot.depavailable;
 
         //position.x -= window.coordinateConverter.getHexWidth() / 2;
         return {
             position: position,
-            size: size,
-            avail: available
+            size: size
         };
     }
 

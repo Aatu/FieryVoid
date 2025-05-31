@@ -2,7 +2,7 @@
 
 window.DeploymentIcon = function () {
 
-    function DeploymentIcon(position, size, type, scene, avail) {
+    function DeploymentIcon(position, size, type, scene) {
         this.z = -2;
         this.mesh = null;
         this.size = size;
@@ -19,7 +19,7 @@ window.DeploymentIcon = function () {
         var borders = new window.BoxSprite(size, lineWidth, this.z, this.color, this.opacity);
         this.mesh.add(borders.mesh);
 
-        var plain = new window.PlainSprite({ width: size.width + lineWidth, height: size.height + lineWidth }, this.z, this.color, this.opacity * 0.5, avail);
+        var plain = new window.PlainSprite({ width: size.width + lineWidth, height: size.height + lineWidth }, this.z, this.color, this.opacity * 0.5);
         this.mesh.add(plain.mesh);
         scene.add(this.mesh);
         this.hide();
