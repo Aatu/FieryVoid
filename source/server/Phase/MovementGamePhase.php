@@ -6,7 +6,7 @@ class MovementGamePhase implements Phase
     {
         //Have to load new gamedata, because the old object does not have moves for ships that were just submitted
         foreach ($dbManager->getTacGamedata($gameData->forPlayer, $gameData->id)->ships as $ship) {
-            if ($ship->isDestroyed() || $ship->base || $ship->smallBase || $ship->isTerrain() || ($ship->getTurnDeployed($gameData) > $gameData->turn))  {
+            if ($ship->isDestroyed() || $ship->base || $ship->smallBase || $ship->isTerrain() || ($ship->getTurnDeployed($gameData->phase) > $gameData->turn))  {
                 continue;
             }
 
@@ -88,7 +88,7 @@ class MovementGamePhase implements Phase
         $firstship = null;
         foreach ($gameData->ships as $ship){
             if($ship->isTerrain()) continue; //Ignore terrain like asteroids.
-            if($ship->getTurnDeployed($gameData) > $gameData->turn) continue;
+            if($ship->getTurnDeployed($gameData->phase) > $gameData->turn) continue;
             if ($firstship == null)
                 $firstship = $ship;
 

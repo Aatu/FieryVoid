@@ -321,7 +321,7 @@ class TacGamedata {
         foreach ($this->ships as $ship){
             if ($ship->isDestroyed()) continue;
             if($ship->isTerrain()) continue; //Ignore terrain like asteroids.
-            if($ship->getTurnDeployed($this) > $this->turn) continue;                          
+            if($ship->getTurnDeployed($this->phase) > $this->turn) continue;                          
             return $ship;
         }        
         return null;
@@ -390,7 +390,7 @@ class TacGamedata {
             $ships = [];
     
             foreach ($this->ships as $ship) {
-                if (in_array($ship->id, $this->activeship) && !$ship->isTerrain() && ($ship->getTurnDeployed($this) <= $this->turn)) {
+                if (in_array($ship->id, $this->activeship) && !$ship->isTerrain() && ($ship->getTurnDeployed($this->phase) <= $this->turn)) {
                     array_push($ships, $ship);
                 }
             }
@@ -399,7 +399,7 @@ class TacGamedata {
         }
     
         foreach ($this->ships as $ship) {
-            if ($ship->id == $this->activeship && !$ship->isTerrain() && ($ship->getTurnDeployed($this) <= $this->turn)) {
+            if ($ship->id == $this->activeship && !$ship->isTerrain() && ($ship->getTurnDeployed($this->phase) <= $this->turn)) {
                 return [$ship];
             }
         }
@@ -792,6 +792,19 @@ class TacGamedata {
       
         return $blockedHexes;
     } //endof function getBlockedHexes       
+
+    //A check for Phase Strategies in case there are no ships deployed at all, in which case just proceed to next phase. 
+    public function areDeployedShips() {
+        foreach ($this->ships as $ship) {
+            if (
+                $ship->getTurnDeployed($this->phase) <= $this->turn &&
+                !$ship->isTerrain()
+            ) {
+                return true; //Found at least one ship, return true and proceed as normal with phase.
+            }
+        }
+        return false; //There are no deployed, non-Terrain ship at this time.
+    }
 
 }
 
