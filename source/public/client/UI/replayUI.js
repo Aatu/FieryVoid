@@ -46,28 +46,31 @@ window.ReplayUI = function () {
     }
 
     ReplayUI.prototype.activate = function () {
+    // Wipe any previous instances, just to be sure
+    jQuery("#replayUI").remove();
+    jQuery("#activateReplay").remove();
 
-        this.element = jQuery('body').prepend(template);
+    this.element = jQuery('body').prepend(template);
 
-        if (this.replayActive) {
-            $("#replayUI").addClass('active').removeClass('inactive');
-        } else {
-            $("#replayUI").addClass('inactive').removeClass('active');
-        }
+    if (this.replayActive) {
+        $("#replayUI").addClass('active').removeClass('inactive');
+    } else {
+        $("#replayUI").addClass('inactive').removeClass('active');
+    }
 
-        $("#replayUI #activateReplay").on("click", this.startReplay.bind(this));
-        $("#replayUI #deactivateReplay").on("click", this.endReplay);
+    $("#replayUI #activateReplay").on("click", this.startReplay.bind(this));
+    $("#replayUI #deactivateReplay").on("click", this.endReplay);
 
-        jQuery("#replayUI #play").on("click", this.play);
-        jQuery("#replayUI #pause").on("click", this.pause);
-        jQuery("#replayUI #back").on("click", this.back);
-        jQuery("#replayUI #turnForward").on("click", this.turnForward);
-        jQuery("#replayUI #turnBack").on("click", this.turnBack);
-        jQuery("#replayUI #toMovement").on("click", this.toMovementPhase);
-        jQuery("#replayUI #toFiring").on("click", this.toFiringPhase);
+    jQuery("#replayUI #play").on("click", this.play);
+    jQuery("#replayUI #pause").on("click", this.pause);
+    jQuery("#replayUI #back").on("click", this.back);
+    jQuery("#replayUI #turnForward").on("click", this.turnForward);
+    jQuery("#replayUI #turnBack").on("click", this.turnBack);
+    jQuery("#replayUI #toMovement").on("click", this.toMovementPhase);
+    jQuery("#replayUI #toFiring").on("click", this.toFiringPhase);
 
-        return this;
-    };
+    return this;
+};
 
     ReplayUI.prototype.deactivate = function () {
 
