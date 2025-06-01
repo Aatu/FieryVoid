@@ -90,9 +90,12 @@ window.DeploymentPhaseStrategy = function () {
         var team = gamedata.getPlayerTeam();
         var slot = gamedata.getPlayerSlot();
         deploymentSprites.forEach(function (icon) {
-            if (icon.team == team && icon.slotId != "" + slot + "") { //Let's try and also show the blue ally box.
+            if (icon.team == team && icon.slotId != "" + slot + "" && icon.playerid != gamedata.thisplayer) {
+                // Let's try and also show the blue ally box.
                 icon.allySprite.show();                 
-            }
+            } else if (icon.team == team && icon.slotId != "" + slot + "" && icon.playerid == gamedata.thisplayer) {
+                icon.ownSprite.show();   
+            }    
         });
     }
 
@@ -134,7 +137,8 @@ window.DeploymentPhaseStrategy = function () {
                 isValidDeploymentPosition: getValidDeploymentCallback(slot, deploymentData),
                 ownSprite: ownSprite,
                 allySprite: allySprite,
-                enemySprite: enemySprite
+                enemySprite: enemySprite,
+                playerid: deploymentData.playerid
             };
         });
     }
@@ -170,12 +174,14 @@ window.DeploymentPhaseStrategy = function () {
             height: window.HexagonMath.getHexRowHeight() * slot.depheight
         };
         var available = slot.depavailable;
+        var playerid = slot.playerid;
 
         //position.x -= window.coordinateConverter.getHexWidth() / 2;
         return {
             position: position,
             size: size,
-            avail: available
+            avail: available,
+            playerid: playerid
         };
     }
 
