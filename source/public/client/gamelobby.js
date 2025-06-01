@@ -1902,7 +1902,7 @@ applyCustomShipFilter: function () {
 		var checkSlot = gamedata.slots[i];
 		if (checkSlot.lastphase == "-2") { //this slot has ready fleet
 			var player = playerManager.getPlayerInSlot(checkSlot);
-			if (player.id == gamedata.thisplayer){
+			if (player.id == gamedata.thisplayer && checkSlot == slot){
 				window.confirm.error("You have already confirmed Your fleet for this game!", function () {});
 				return;
 			}
