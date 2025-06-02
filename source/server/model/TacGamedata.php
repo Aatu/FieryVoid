@@ -149,7 +149,7 @@ class TacGamedata {
             
             if($turnDeploys > $this->turn){
                 $ship->unavailable = true;
-                $ship->deploysOnTurn = $turnDeploys; //If slot deploy turn was higher than 1, set ship marker accordingly.  Enhancements will increase same marker later if set that way.
+                $ship->deploysOnTurn = $turnDeploys; //If slot deploy turn was higher than 1, set ship marker accordingly.  Ship enhancements will reset marker later if deploy turn was actually set higher for ship.
             } 
         }
     }
@@ -791,9 +791,10 @@ class TacGamedata {
         }
       
         return $blockedHexes;
-    } //endof function getBlockedHexes       
+    } //endof function getBlockedHexes
+           
 
-    //A check for Phase Strategies in case there are no ships deployed at all, in which case just proceed to next phase. 
+    //A check for Manager in case there are no ships deployed at all, in which case just proceed to next phase. 
     public function areDeployedShips() {
         foreach ($this->ships as $ship) {
             if (
@@ -805,6 +806,43 @@ class TacGamedata {
         }
         return false; //There are no deployed, non-Terrain ship at this time.
     }
+/*
+    
+    public function areDeployedShipsSlot($slot) {      
+        foreach ($this->ships as $ship) {              
+            if (
+                $ship->getTurnDeployed($this->phase) <= $this->turn &&
+                $ship->slot == $slot &&
+                !$ship->isTerrain()
+            ) {
+                return true; //Found at least one ship, return true and proceed as normal with phase.
+            }
+        }
+        return false; //There are no deployed, non-Terrain ship at this time.
+    }    
+*/
+
+    //Called during DeplymentPhase->advance.  Checks what the lowest deployment turn is across all ships in slot.  
+    //Ship deployment turns are already amended by slot->depavailable in $gamedata->markUnavailable ships by this point, so method account for slot delay as well.
+    public function getMinTurnDeployedSlot($slot) {
+        $minTurn = null;
+
+        foreach ($this->ships as $ship) {
+            if ($ship->slot != $slot || $ship->isTerrain()) {
+                continue;
+            }
+
+            $shipsDeploys = $ship->getTurnDeployed($this->phase);
+
+            if ($minTurn === null || $shipsDeploys < $minTurn) {
+                $minTurn = $shipsDeploys;
+            }
+        }
+
+        // Return 0 if no valid ships were found; otherwise return the lowest turn.
+        return ($minTurn === null) ? 1 : $minTurn;
+    }
+
 
 }
 
