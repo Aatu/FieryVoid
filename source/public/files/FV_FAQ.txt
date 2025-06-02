@@ -49,7 +49,7 @@ ELECTRONIC WARFARE
  - Disruption EW: CCEW is treated as one OEW target and affected appropriately.
  - Disruption EW: target locks weaker than 1 point but worth at least half a point provide half-lock (e.g. range penalties multiplied by 1.5 instead of being doubled).
  - Only own DEW can bring profile below 0: this rule is not respected in FV.
-- ELINT ships can boost their Stealth Detection range by investing EW points in 'Detect Stealth' ability, which increases their detection range by +2 per EW point spent.
+ - ELINT ships can boost their Stealth Detection range by investing EW points in 'Detect Stealth' ability, which increases their detection range by +2 per EW point spent.
 
 
 FIRING AND WEAPONS
@@ -82,7 +82,7 @@ DELAYED DEPLOYMENT
 	2) In Fleet Selection screen, when purchasing individual ships, choose a new value in the 'Deployment' option.  This can be combined with the Player Slot option to deploy later than other ships in the Slot.
 - Ships that have not deployed yet will have a hex marker showing where and when they will appear, enemies will not be able to see this marker.  You can right click on this hex to see late-deploying ship's SCS in case you forget what's deploying there.
 - Ships which would normally have to set systems on Turn 1 and choose to deploy later e.g. Hyach Specialists, Vorlon Adaptive Armor, will set these systems on the turn they deploy.
-- IMPORTANT - If a player's entire fleet is not deployed yet, they will still have to click through Initial Orders and Firing Phase to progress the game.
+- IMPORTANT - If a player's entire fleet does not deploy at start of game, they will still have to click through Initial Orders on Turn 1 to initiate the game. After this, the game will proceed automatically until the player has units in play.
 - NOTE - Terrain, Bases and OSATS cannot deploy later in the game and will always deploy on Turn 1.
 
  
