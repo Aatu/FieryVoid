@@ -18,7 +18,15 @@ class MovementGamePhase implements Phase
         $gameData->setPhase(3);
         $gameData->setActiveship(-1);
         $dbManager->updateGamedata($gameData);
-        $dbManager->setPlayersWaitingStatusInGame($gameData->id, false);        
+        $dbManager->setPlayersWaitingStatusInGame($gameData->id, false);
+
+        foreach($gameData->slots as $slot){
+            //if(!$gameData->areDeployedShipsSlot($slot->slot)){
+            if($slot->depavailable > $gameData->turn){
+                $dbManager->updatePlayerStatusSlot($gameData->id, $slot->playerid, $slot->slot, 3, $gameData->turn);
+            }     
+        }   
+                  
     }
 
 	/*old version - before changes - in case of need of rollback*/
