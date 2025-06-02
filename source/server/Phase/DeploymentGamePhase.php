@@ -10,10 +10,10 @@ class DeploymentGamePhase implements Phase
         $dbManager->updateGamedata($gameData);
 
         foreach($gameData->slots as $slot){
-            $minTurnDeploy = $gameData->getMinTurnDeployedSlot($slot->slot);
+            $minTurnDeploy = $gameData->getMinTurnDeployedSlot($slot->slot, $slot->depavailable);
             if($minTurnDeploy > 1){ //Entire slot deploys after turn 1.
                 //Set lastphase, and lastTurn for slot to firing phase on turn before first ship deploys. 
-                $dbManager->updatePlayerStatusDeploy($gameData->id, $slot->playerid, $slot->slot, -1, $gameData->turn, $minTurnDeploy);
+                $dbManager->updatePlayerStatusDeploy($gameData->id, $slot->playerid, $slot->slot, 1, $gameData->turn, $minTurnDeploy);
             }     
         } 
     }

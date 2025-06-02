@@ -824,7 +824,7 @@ class TacGamedata {
 
     //Called during DeplymentPhase->advance.  Checks what the lowest deployment turn is across all ships in slot.  
     //Ship deployment turns are already amended by slot->depavailable in $gamedata->markUnavailable ships by this point, so method account for slot delay as well.
-    public function getMinTurnDeployedSlot($slot) {
+    public function getMinTurnDeployedSlot($slot, $depavailable) {
         $minTurn = null;
 
         foreach ($this->ships as $ship) {
@@ -839,7 +839,9 @@ class TacGamedata {
             }
         }
 
-        // Return 0 if no valid ships were found; otherwise return the lowest turn.
+        if($minTurn < $depavailable) $minTurn = $depavailable;  //Ship->deploysOnTurn is not filled with slot value yet so manually assign here.
+
+        // Return slot value if no valid ships were found; otherwise return the lowest turn.
         return ($minTurn === null) ? 1 : $minTurn;
     }
 
