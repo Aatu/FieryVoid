@@ -433,6 +433,7 @@ class Manager{
         
     }
 
+    /* //Old method that didn't skip if no deployed ships - DK 2/6/25
     public static function advanceGameState($playerid, $gameid){
         try{
             if (!self::$dbManager->checkIfPhaseReady($gameid))
@@ -492,6 +493,90 @@ class Manager{
             throw $e;
         }
     }
+*/
+
+    public static function advanceGameState($playerid, $gameid){
+        try{
+           if (!self::$dbManager->checkIfPhaseReady($gameid))
+                return;
+		
+            if (!self::$dbManager->getGameSubmitLock($gameid))
+            {
+                //Debug::log("Advance gamestate, Did not get lock. playerid: $playerid");
+                return;
+            }
+
+
+
+            
+            $starttime = time();
+            
+            //Debug("GAME: $gameid Starting to advance gamedata. playerid: $playerid");
+            
+            self::$dbManager->startTransaction();
+		
+            $gamedata = self::$dbManager->getTacGamedata($playerid, $gameid);
+
+            SystemData::initSystemData($gamedata->turn, $gamedata->id);
+
+            $phase = $gamedata->getPhase();
+            if (!$gamedata->areDeployedShips()) {               
+                while (!$gamedata->areDeployedShips() && $gamedata->status != "FINISHED") {
+                    $phase = $gamedata->getPhase();
+
+                    if ($phase instanceof BuyingGamePhase){
+                        $phase->advance($gamedata, self::$dbManager);
+                        self::changeTurn($gamedata);
+                    } else if ($phase instanceof DeploymentGamePhase){
+                        $phase->advance($gamedata, self::$dbManager);
+                    } else if ($phase instanceof InitialOrdersGamePhase){
+                        $phase->advance($gamedata, self::$dbManager);
+                    } else if ($phase instanceof MovementGamePhase){
+                        $phase->advance($gamedata, self::$dbManager);
+                    } else if ($phase instanceof FireGamePhase){
+                        $phase->advance($gamedata, self::$dbManager);
+                        self::changeTurn($gamedata);
+                    }
+
+                    $phase = $gamedata->getPhase();
+
+                    if ($gamedata->turn > 200) break; //Safety break just in case.
+                }
+            } else {
+                if ($phase instanceof BuyingGamePhase){
+                    $phase->advance($gamedata, self::$dbManager);
+                    self::changeTurn($gamedata);
+                } else if ($phase instanceof DeploymentGamePhase){
+                    $phase->advance($gamedata, self::$dbManager);
+                } else if ($phase instanceof InitialOrdersGamePhase){
+                    $phase->advance($gamedata, self::$dbManager);
+                }else if ($phase instanceof MovementGamePhase){
+                    $phase->advance($gamedata, self::$dbManager);
+                }else if ($phase instanceof FireGamePhase){
+                    $phase->advance($gamedata, self::$dbManager);
+                    self::changeTurn($gamedata);
+                }
+            }  
+            if (TacGamedata::$currentPhase > 0){
+                foreach ($gamedata->ships as $ship){
+                    foreach ($ship->systems as $system){
+                        $system->onAdvancingGamedata($ship, $gamedata);
+                    }
+                }
+                
+                self::$dbManager->updateSystemData(SystemData::getAndPurgeAllSystemData());
+            }
+            self::$dbManager->endTransaction(false);
+            self::$dbManager->releaseGameSubmitLock($gameid);
+        }
+        catch(Exception $e)
+        {
+            self::$dbManager->endTransaction(true);
+            self::$dbManager->releaseGameSubmitLock($gameid);
+            throw $e;
+        }
+    }
+       
 
     private static function changeTurn($gamedata){
     
