@@ -704,6 +704,43 @@ class DBManager
 
     }
 
+    //Used to skip Slot forward through phases if it has no ships deployed.
+    public function updatePlayerStatusSlot($gameid, $userid, $slot, $phase, $turn)
+    {
+        try { 
+
+            $sql = "UPDATE `B5CGM`.`tac_playeringame`
+                    SET `lastturn` = $turn,
+                        `lastphase` = $phase,
+                        `lastactivity` = NOW()
+                    WHERE gameid = $gameid
+                    AND playerid = $userid
+                    AND slot = $slot";
+
+            $this->update($sql);
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
+
+        //Update depavailable at start of game.
+        public function updatePlayerStatusDeploy($gameid, $userid, $slot, $phase, $turn, $minDeploy)
+    {
+        try { 
+            $sql = "UPDATE `B5CGM`.`tac_playeringame`
+                    SET `lastturn` = $turn,
+                        `lastphase` = $phase,
+                        `depavailable` = $minDeploy,
+                        `lastactivity` = NOW()
+                    WHERE gameid = $gameid
+                    AND playerid = $userid
+                    AND slot = $slot";
+
+            $this->update($sql);
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
     
     public function setPlayerWaitingStatus($playerid, $gameid, $waiting)
     {
