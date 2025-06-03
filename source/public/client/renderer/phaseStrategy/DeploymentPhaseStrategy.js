@@ -93,9 +93,9 @@ window.DeploymentPhaseStrategy = function () {
             if (icon.team == team && icon.slotId != "" + slot + "" && icon.playerid != gamedata.thisplayer) {
                 // Let's try and also show the blue ally box.
                 icon.allySprite.show();                 
-            } else if (icon.team == team && icon.slotId != "" + slot + "" && icon.playerid == gamedata.thisplayer) {
-                icon.ownSprite.show();   
-            }    
+            } //else if (icon.team == team && icon.slotId != "" + slot + "" && icon.playerid == gamedata.thisplayer) {
+                //icon.ownSprite.show();   
+           // }    
         });
     }
 
