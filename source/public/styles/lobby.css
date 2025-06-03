@@ -147,6 +147,7 @@
 }
 
 .selectslot{
+        color:#ffaa00;   
     display:none;
 }
 
@@ -156,7 +157,6 @@
 }
 
 .slot.selected .selectslot{
-    
     display:none;
 }
 
