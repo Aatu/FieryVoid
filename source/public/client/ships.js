@@ -986,7 +986,16 @@ window.shipManager = {
     },
     
     getTurnDeployed: function getTurnDeployed(ship) {
-        if (gamedata.gamephase == -1 || ship.osat || ship.base || gamedata.isTerrain(ship)) { //Don't hide anything in Deployment Phase.  Bases and OSATs never 'jump in'.
+        //Don't hide anything in Deployment Phase.  
+        if (gamedata.gamephase == -1){
+            if(!ajaxInterface.submiting){ //We check ajaxInterface.submitting to make sure ship icons update after committing Deployment where whole slot is delayed.
+                return 1;
+            }else{
+                var slot = playerManager.getSlotById(ship.slot);
+                return Math.max(ship.deploysOnTurn, slot.depavailable);
+            }    
+        }    
+        if(ship.osat || ship.base || gamedata.isTerrain(ship)) { //Bases and OSATs never 'jump in', it's no LoGH out there ;)
             return 1;
         }else{
             return ship.deploysOnTurn;            
