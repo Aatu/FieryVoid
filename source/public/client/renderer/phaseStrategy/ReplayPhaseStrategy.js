@@ -171,7 +171,7 @@ window.ReplayPhaseStrategy = function () {
     function getInitialReplayTurn() {
 
         if (this.currentTurn === 1 && this.currentPhase <= 1) {
-            return 0;
+            return 1;
         }
 
         if (this.currentPhase === 1) {
