@@ -1855,6 +1855,10 @@ applyCustomShipFilter: function () {
                 slotElement.data("playerid", player.id);
                 slotElement.addClass("taken");
                 $(".playername", slotElement).html(player.name);
+				
+				//Only show select button if it's a viable option
+				if(slot.playerid == gamedata.thisPlayer && slot.playerid !== gamedata.selectedSlot) $(".selectslot", slotElement).show();
+				if(slot.playerid !== gamedata.thisplayer) $(".selectslot", slotElement).hide();
 
                 if (slot.lastphase == "-2") {
                     slotElement.addClass("ready");
