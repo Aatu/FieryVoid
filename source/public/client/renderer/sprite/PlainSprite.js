@@ -47,7 +47,7 @@ PlainSprite.prototype.addTextSprite = function(avail) {
     var material = new THREE.SpriteMaterial({
         map: texture,
         transparent: true,
-        opacity: 0.1,
+        opacity: 0.15,
         depthTest: false,
         depthWrite: false
     });
