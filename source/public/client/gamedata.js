@@ -1005,6 +1005,7 @@ window.gamedata = {
         }
     },
 
+
     autoCommitOnMovement: function autoCommitOnMovement(ship) {
         //if (ship.base) {
             //combatLog.logMoves(ship);
@@ -1089,8 +1090,15 @@ window.gamedata = {
         gamedata.subphase = 0;
         //shipManager.initShips();
         UI.shipMovement.hide();
-        if(gamedata.gamephase == 1) fleetListManager.reset();       
-        fleetListManager.displayFleetLists();
+        if(gamedata.gamephase == 1){
+            //To recalculate fleet list values in Info Tab without refreshing page
+            fleetListManager.reset();
+            fleetListManager.displayFleetLists();
+        }else{    
+            //To refresh whether player has committed their orders when a new phase begins.
+            fleetListManager.refreshed = false;
+            fleetListManager.displayFleetLists();            
+        }    
 
         gamedata.setPhaseClass();
         //		window.helper.doUpdateHelpContent(gamedata.gamephase,0);        

@@ -5,44 +5,43 @@ jQuery(function () {});
 window.fleetListManager = {
 
     initialized: false,
+    refreshed: true,
 
     prepare: function prepare() {},
 
     displayFleetLists: function displayFleetLists() {
-        if (!fleetListManager.initialized) {
-
-        // Clean up previous fleet list entries to avoid duplicates
+    if (!fleetListManager.initialized) {
         $("#gameinfo .fleetlistentry").remove();
-                    
-            var template = $("#logcontainer .fleetlistentry");
+        const template = $("#logcontainer .fleetlistentry");
 
-            // first display the fleet list of the current player
-            for (var i in gamedata.slots) {
-                var slot = gamedata.slots[i];
-
-                if (slot.playerid != gamedata.thisplayer) {
-                    continue;
-                }
-
+        for (const i in gamedata.slots) {
+            const slot = gamedata.slots[i];
+            if (slot.playerid === gamedata.thisplayer) {
                 fleetListManager.createFleetList(slot, template);
             }
-
-            // now display the rest
-            for (var i in gamedata.slots) {
-                var slot = gamedata.slots[i];
-
-                if (slot.playerid == gamedata.thisplayer) {
-                    continue;
-                }
-
-                fleetListManager.createFleetList(slot, template);
-            }
-
-            fleetListManager.initialized = true;
         }
 
-        fleetListManager.updateFleetList();
-    },
+        for (const i in gamedata.slots) {
+            const slot = gamedata.slots[i];
+            if (slot.playerid !== gamedata.thisplayer) {
+                fleetListManager.createFleetList(slot, template);
+            }
+        }
+
+        fleetListManager.initialized = true;
+    } else if (!fleetListManager.refreshed) { //Just refresh whether orders committed or not.
+        // Only update turnTaken text if refreshing
+        for (const i in gamedata.slots) {
+            const slot = gamedata.slots[i];
+            fleetListManager.updateTurnTakenInFleetHeader(slot);
+        }
+
+        // Reset the flag
+        fleetListManager.refreshed = true;
+    }
+
+    fleetListManager.updateFleetList();
+},
 
 createFleetList: function createFleetList(slot, template) {
     var shipArray = new Array();
@@ -131,15 +130,49 @@ createFleetList: function createFleetList(slot, template) {
         fleetlistline.appendTo(fleetlisttable);
     }
 
-    // Update fleet header with value totals
-    fleetlistentry.find(".fleetheader").html(
-        "<span class='headername'>FLEET LIST - </span>" +
-        "<span class='playername'>" + slot.playername + ", fleet value: " + totalCurrValue + " / " + totalBaseValue + " CP </span>"
-    );
+    var turnTaken = "<span style='color:red'>&nbsp;(Not committed orders)</span>";
+    if (slot.waiting) turnTaken = "<span style='color:green'>&nbsp;(Orders committed)</span>";
+
+
+// Update fleet header with value totals
+fleetlistentry.find(".fleetheader").html(
+    "<span class='headername'>FLEET LIST - </span>" +
+    "<span class='playername'>" + slot.playername + 
+    ", fleet value: " + totalCurrValue + " / " + totalBaseValue + 
+    " CP <span class='turnTaken'>" + turnTaken + "</span></span>"
+);
 
     // Add ship click handler
     $(".clickable", fleetlistentry).on("click", fleetListManager.doScrollToShip);
 },
+
+
+    updateTurnTakenInFleetHeader: function updateTurnTakenInFleetHeader(slot) {
+        const container = $(".slot_" + slot.slot); // Target the correct fleet list block
+        const header = container.find(".fleetheader .turnTaken");
+
+        if (!header.length) return; // Just in case something went wrong
+
+        const html = slot.waiting
+            ? "<span style='color:green'>&nbsp;(Orders committed)</span>"
+            : "<span style='color:red'>&nbsp;(Not committed orders)</span>";
+
+        header.html(html);
+    },
+
+    updateFleetReadiness: function updateFleetReadiness(playerId) {
+
+        for (const i in gamedata.slots) {
+            const slot = gamedata.slots[i];
+            if (slot.playerid === playerId) {
+                slot.waiting = true; //Set this manually for front end to know, gamedata will not refect it yet with page refresh
+                fleetListManager.refreshed = false;
+                fleetListManager.displayFleetLists();                
+            }
+        }
+
+    }, 
+
 
     doScrollToShip: function doScrollToShip(e) {
         e.stopPropagation();
@@ -175,6 +208,6 @@ createFleetList: function createFleetList(slot, template) {
 
     reset: function reset() {
         fleetListManager.initialized = false;
-    }    
+    },      
 
 };
