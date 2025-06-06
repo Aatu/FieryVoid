@@ -429,11 +429,11 @@ if ($asteroids == false && $moons == false) {
 <br>
 <span style="color: #f8f8f8;">Random Fleet Selection</span> 
 <span style="margin-right: 3px;">-</span> 
-<a href="https://old.wheelofnames.com/fx3-uje" target="_blank" style="color:rgb(255, 204, 102); text-decoration: underline;"><strong>Tier 1</strong></a> 
+<a href="https://old.wheelofnames.com/fx3-uje" target="_blank" style="color:rgb(255, 170, 0); text-decoration: underline;"><strong>Tier 1</strong></a> 
 <strong style="margin: 0 2.5px;">|</strong> 
-<a href="https://old.wheelofnames.com/rmq-7ds" target="_blank" style="color:rgb(255, 204, 102); text-decoration: underline;"><strong>Tier 2</strong></a>
+<a href="https://old.wheelofnames.com/rmq-7ds" target="_blank" style="color:rgb(255, 170, 0);  text-decoration: underline;"><strong>Tier 2</strong></a>
 <strong style="margin: 0 2.5px;">|</strong> 
-<a href="https://old.wheelofnames.com/sgd-5zq" target="_blank" style="color:rgb(255, 204, 102); text-decoration: underline;"><strong>Tier 3</strong></a>
+<a href="https://old.wheelofnames.com/sgd-5zq" target="_blank" style="color:rgb(255, 170, 0);  text-decoration: underline;"><strong>Tier 3</strong></a>
 <br><br>
 
 

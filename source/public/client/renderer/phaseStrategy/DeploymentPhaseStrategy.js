@@ -23,6 +23,7 @@ window.DeploymentPhaseStrategy = function () {
         this.selectFirstOwnShipOrActiveShip();
 
         showEnemyDeploymentAreas(this.deploymentSprites, gamedata);
+        showAlliedDeploymentAreas(this.deploymentSprites, gamedata);
 
         this.setPhaseHeader("DEPLOYMENT");
         return this;
@@ -77,10 +78,24 @@ window.DeploymentPhaseStrategy = function () {
 
     function showEnemyDeploymentAreas(deploymentSprites, gamedata) {
         var team = gamedata.getPlayerTeam();
+        var slot = gamedata.getPlayerSlot();
         deploymentSprites.forEach(function (icon) {
             if (icon.team != team) {
                 icon.enemySprite.show();
             }
+        });
+    }
+
+    function showAlliedDeploymentAreas(deploymentSprites, gamedata) {
+        var team = gamedata.getPlayerTeam();
+        var slot = gamedata.getPlayerSlot();
+        deploymentSprites.forEach(function (icon) {
+            if (icon.team == team && icon.slotId != "" + slot + "" && icon.playerid != gamedata.thisplayer) {
+                // Let's try and also show the blue ally box.
+                icon.allySprite.show();                 
+            } //else if (icon.team == team && icon.slotId != "" + slot + "" && icon.playerid == gamedata.thisplayer) {
+                //icon.ownSprite.show();   
+           // }    
         });
     }
 
@@ -112,9 +127,9 @@ window.DeploymentPhaseStrategy = function () {
 
             var deploymentData = getDeploymentData(slot);
 
-            var ownSprite = new DeploymentIcon(deploymentData.position, deploymentData.size, 'own', scene);
-            var allySprite = new DeploymentIcon(deploymentData.position, deploymentData.size, 'ally', scene);
-            var enemySprite = new DeploymentIcon(deploymentData.position, deploymentData.size, 'enemy', scene);
+            var ownSprite = new DeploymentIcon(deploymentData.position, deploymentData.size, 'own', scene, deploymentData.avail);
+            var allySprite = new DeploymentIcon(deploymentData.position, deploymentData.size, 'ally', scene, deploymentData.avail);
+            var enemySprite = new DeploymentIcon(deploymentData.position, deploymentData.size, 'enemy', scene, deploymentData.avail);
 
             return {
                 slotId: key,
@@ -122,7 +137,8 @@ window.DeploymentPhaseStrategy = function () {
                 isValidDeploymentPosition: getValidDeploymentCallback(slot, deploymentData),
                 ownSprite: ownSprite,
                 allySprite: allySprite,
-                enemySprite: enemySprite
+                enemySprite: enemySprite,
+                playerid: deploymentData.playerid
             };
         });
     }
@@ -157,11 +173,15 @@ window.DeploymentPhaseStrategy = function () {
             width: window.HexagonMath.getHexWidth() * slot.depwidth,
             height: window.HexagonMath.getHexRowHeight() * slot.depheight
         };
+        var available = slot.depavailable;
+        var playerid = slot.playerid;
 
         //position.x -= window.coordinateConverter.getHexWidth() / 2;
         return {
             position: position,
-            size: size
+            size: size,
+            avail: available,
+            playerid: playerid
         };
     }
 

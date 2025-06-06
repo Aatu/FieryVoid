@@ -41,8 +41,8 @@ class GODAlphaAM extends OSAT{
         $this->addFrontSystem(new AmmoMissileRackB(3, 0, 0, 270, 90, $ammoMagazine, true)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         $this->addFrontSystem(new AmmoMissileRackB(3, 0, 0, 270, 90, $ammoMagazine, true)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         $this->addFrontSystem(new AmmoMissileRackB(3, 0, 0, 270, 90, $ammoMagazine, true)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
-        $this->addFrontSystem(new HeavyLaser(3, 8, 0, 300, 60));
-        $this->addFrontSystem(new HeavyLaser(3, 8, 0, 300, 60));
+        $this->addFrontSystem(new HeavyLaser(3, 8, 6, 300, 60));
+        $this->addFrontSystem(new HeavyLaser(3, 8, 6, 300, 60));
         $this->addAftSystem(new LightPulse(2, 4, 2, 180, 360));
         $this->addAftSystem(new LightPulse(2, 4, 2, 180, 360));
         $this->addAftSystem(new LightPulse(2, 4, 2, 0, 180));

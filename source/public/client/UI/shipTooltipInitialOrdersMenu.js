@@ -11,9 +11,9 @@ window.ShipTooltipInitialOrdersMenu = function () {
 
     ShipTooltipInitialOrdersMenu.buttons = [
         { className: "addCCEW", condition: [isSelf, notFlight], action: addCCEW, info: "Add CCEW" }, 
-        { className: "removeCCEW", condition: [isSelf, notFlight], action: removeCCEW, info: "Remove CCEW" }, 
+        { className: "removeCCEW", condition: [isSelf, notFlight, hasCCEW], action: removeCCEW, info: "Remove CCEW" }, 
         { className: "addOEW", condition: [isEnemy, sourceNotFlight], action: addOEW, info: "Add OEW" }, 
-        { className: "removeOEW", condition: [isEnemy, sourceNotFlight], action: removeOEW, info: "Remove OEW" }, 
+        { className: "removeOEW", condition: [isEnemy, sourceNotFlight, hasOEW], action: removeOEW, info: "Remove OEW" }, 
         { className: "addDIST", condition: [isEnemy, isElint, notFlight, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck], action: getAddOEW('DIST'), info: "Add DIST" }, 
         { className: "removeDIST", condition: [isEnemy, isElint, notFlight, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck, hasDIST], action: getRemoveOEW('DIST'), info: "Remove DIST" }, 
         { className: "addSOEW", condition: [isFriendly, isElint, notFlight, notSelf, isInElintDistance(30), doesNotHaveBDEW], action: getAddOEW('SOEW'), info: "Add SOEW" }, 
@@ -216,12 +216,12 @@ window.ShipTooltipInitialOrdersMenu = function () {
         return ew.getEWByType("SDEW", this.selectedShip) === 0 && ew.getEWByType("DIST", this.selectedShip) === 0 && ew.getEWByType("SOEW", this.selectedShip) === 0 && ew.getEWByType("Detect Stealth", this.selectedShip) === 0;
     }
 
-    function hasOEW() { return ew.getEWByType("OEW", this.selectedShip) > 0; }
+    function hasOEW() { return ew.getEWByType("OEW", this.selectedShip, this.targetedShip) > 0; }
     function hasCCEW() { return ew.getEWByType("CCEW", this.selectedShip) > 0; }
-    function hasSDEW() { return ew.getEWByType("SDEW", this.selectedShip) > 0; }
-    function hasSOEW() { return ew.getEWByType("SOEW", this.selectedShip) > 0; }
+    function hasSDEW() { return ew.getEWByType("SDEW", this.selectedShip, this.targetedShip) > 0; }    
+    function hasSOEW() { return ew.getEWByType("SOEW", this.selectedShip, this.targetedShip) > 0; }
     function hasBDEW() { return ew.getEWByType("BDEW", this.selectedShip) > 0; }
-    function hasDIST() { return ew.getEWByType("DIST", this.selectedShip) > 0; }
+    function hasDIST() { return ew.getEWByType("DIST", this.selectedShip, this.targetedShip) > 0; }
     function hasDSEW() { return ew.getEWByType("Detect Stealth", this.selectedShip) > 0; }
 		
     function advSensorsCheck() { /*check whether source ship has Advanced Sensors OR target ship does NOT have Advanced Sensors*/

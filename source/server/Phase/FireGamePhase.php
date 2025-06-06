@@ -35,6 +35,16 @@ class FireGamePhase implements Phase
         $dbManager->submitCriticals($servergamedata->id,  $servergamedata->getUpdatedCriticals(), $servergamedata->turn);
 		
         $dbManager->setPlayersWaitingStatusInGame($servergamedata->id, false);
+
+        foreach($gameData->slots as $slot){
+            //$minTurnDeploy = $gameData->getMinTurnDeployedSlot($slot->slot); //Could change to depavailable if I set that during deployment.
+            //if($minTurnDeploy > $gameData->turn+1){ //Entire slot deploys after turn 1.
+            if($slot->depavailable > $gameData->turn+1){            
+                //Set lastphase, and lastTurn for slot to intial phase on next turn. 
+                $dbManager->updatePlayerStatusSlot($gameData->id, $slot->playerid, $slot->slot, 1, $gameData->turn+1);
+            }     
+        } 
+
     }
 
     public function process(TacGamedata $gameData, DBManager $dbManager, Array $ships)
