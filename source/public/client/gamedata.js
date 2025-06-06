@@ -528,8 +528,35 @@ window.gamedata = {
             confirm.confirm(html + "<br>Are you sure you wish to COMMIT YOUR INITIAL ORDERS?", gamedata.doCommit);
         }
 
-        //CHECK for NO DIRECT FIRE
-        else if (gamedata.gamephase == 3) {
+        else if (gamedata.gamephase == 2) {
+            var zeroSpeedShips = [];
+            var activeShips = gamedata.getActiveShips();
+
+            for (var i in activeShips) {
+                var ship = activeShips[i];
+                if (shipManager.movement.canChangeSpeed(ship, true) && ship.userid == gamedata.thisplayer) {
+                    zeroSpeedShips.push(ship);
+                }
+            }
+
+            if (zeroSpeedShips.length > 0) {
+                var html = '';
+                html += "<br>";
+                html += "The following ships can still move: <br>";
+                
+                for (var j in zeroSpeedShips) {
+                    var movingShip = zeroSpeedShips[j];
+                    html += '<span class="ship-name">' + movingShip.name + '</span><br>';
+                }
+            }
+
+            confirm.confirm(
+                html + "<br>Are you sure you wish to COMMIT YOUR MOVEMENT ORDERS?",
+                gamedata.doCommit
+            );
+
+        //CHECK for NO DIRECT FIRE            
+        }else if (gamedata.gamephase == 3) {
                 var myShips = [];
 
                 for (var ship in gamedata.ships) {
