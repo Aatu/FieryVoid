@@ -216,12 +216,12 @@ window.ShipTooltipInitialOrdersMenu = function () {
         return ew.getEWByType("SDEW", this.selectedShip) === 0 && ew.getEWByType("DIST", this.selectedShip) === 0 && ew.getEWByType("SOEW", this.selectedShip) === 0 && ew.getEWByType("Detect Stealth", this.selectedShip) === 0;
     }
 
-    function hasOEW() { return ew.getEWByType("OEW", this.selectedShip) > 0; }
+    function hasOEW() { return ew.getEWByType("OEW", this.selectedShip, this.targetedShip) > 0; }
     function hasCCEW() { return ew.getEWByType("CCEW", this.selectedShip) > 0; }
-    function hasSDEW() { return ew.getEWByType("SDEW", this.selectedShip) > 0; }
-    function hasSOEW() { return ew.getEWByType("SOEW", this.selectedShip) > 0; }
+    function hasSDEW() { return ew.getEWByType("SDEW", this.selectedShip, this.targetedShip) > 0; }    
+    function hasSOEW() { return ew.getEWByType("SOEW", this.selectedShip, this.targetedShip) > 0; }
     function hasBDEW() { return ew.getEWByType("BDEW", this.selectedShip) > 0; }
-    function hasDIST() { return ew.getEWByType("DIST", this.selectedShip) > 0; }
+    function hasDIST() { return ew.getEWByType("DIST", this.selectedShip, this.targetedShip) > 0; }
     function hasDSEW() { return ew.getEWByType("Detect Stealth", this.selectedShip) > 0; }
 		
     function advSensorsCheck() { /*check whether source ship has Advanced Sensors OR target ship does NOT have Advanced Sensors*/
