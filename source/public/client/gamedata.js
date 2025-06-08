@@ -183,7 +183,7 @@ window.gamedata = {
         return ship.userid === gamedata.thisplayer;
     },
 
-    isMyorMyTeamShip: function isMyShip(ship) {
+    isMyorMyTeamShip: function isMyorMyTeamShip(ship) {
         if(gamedata.isTerrain(ship) && (gamedata.gamephase !== -1)) return false; //Players can purchase Terrain, and will need to select to deploy it. 
         if(ship.userid === gamedata.thisplayer) return true;
         if(ship.team === gamedata.getPlayerTeam()) return true;
