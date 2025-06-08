@@ -80,8 +80,20 @@ if (isset($_SESSION["user"])) {
 	    <br>Tidied up info in Adaptive Armor system data window.
 	    
 
+		 <br><br>---------- <b>fix 6th of June</b> ---------- 
+	    <br>Fighter overlay colour fix for Allied units / Added appropriate colour to tooltip texts too.
+	    <br>Deployment zones for allies will appear blue in Fleet Selection and Deployment Phase.
+	    <br>Added minimum deployment turn graphic to Deployment Zones.
+	    <br>Fixed issue when Replay was clicked on Turn 1, but before Movement Phase had started.
+	    <br>Allow players to select another Team slot after they’ve already readied a slot in the same team during Fleet Selection.
+	    <br>Fix bug with Info Tab entries when one player is occupying multiple team slots.
+	    <br>Added status note to Info Tab indicating whether other players have committed their orders yet.
+	    <br>Amended EW buttons so they only show their respective reduction buttons when needed.
+	    <br>Added new player warning during Movement for ships moving Speed 0 that have no Movement orders.
+
 	    
-       <br><br>
+	    
+       <br><br><br>
 <!--	        
 		 <br><br>---------- <b>update 20th of January</b> ---------- 
 	    <br><b><u><big>Thirdspace</big></u> arrived</b> - custom faction by Douglas
