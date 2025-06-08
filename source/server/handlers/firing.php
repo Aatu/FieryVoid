@@ -529,7 +529,7 @@ class Firing
                     continue;
                 }		
                
-		$weapon->changeFiringMode($fire->firingMode); //For Chaff Missile
+		        $weapon->changeFiringMode($fire->firingMode); //For Chaff Missile
 		
 		    
                 $fire->priority = $weapon->priority;

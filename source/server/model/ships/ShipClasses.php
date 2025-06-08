@@ -1743,9 +1743,9 @@ public function getAllEWExceptDEW($turn){
 		return false; 
 	}//endof function isTerrain
 
-    public function getTurnDeployed($gamedata){
+    public function getTurnDeployed($phase){
 
-        if ($gamedata->phase == -1 || $this->osat || $this->base || $this->isTerrain()) return 1; //Don't hide anything in Deployment Phase.  Bases, Terrain and OSATs never 'jump in'.
+        if ($phase == -1 || $this->osat || $this->base || $this->isTerrain()) return 1; //Don't hide anything in Deployment Phase.  Bases, Terrain and OSATs never 'jump in'.
 
         //$slot = $gamedata->getSlotById($this->slot);
         //$depTurn = max($this->deploysOnTurn, $slot->depavailable);
@@ -1753,7 +1753,9 @@ public function getAllEWExceptDEW($turn){
 
         return $depTurn;
 
-	}//endof function getTurnDeployed    
+	}//endof function getTurnDeployed  
+
+
 /*
     public function notDeployedYet($gamedata){
        

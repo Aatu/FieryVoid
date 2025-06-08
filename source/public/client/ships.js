@@ -986,39 +986,43 @@ window.shipManager = {
     },
     
     getTurnDeployed: function getTurnDeployed(ship) {
-        if (gamedata.gamephase == -1 || ship.osat || ship.base || gamedata.isTerrain(ship)) { //Don't hide anything in Deployment Phase.  Bases and OSATs never 'jump in'.
+        //Don't hide anything in Deployment Phase.  
+        if (gamedata.gamephase == -1){
+            if(!ajaxInterface.submiting){ //We check ajaxInterface.submitting to make sure ship icons update after committing Deployment where whole slot is delayed.
+                return 1;
+            }else{
+                var slot = playerManager.getSlotById(ship.slot);
+                return Math.max(ship.deploysOnTurn, slot.depavailable);
+            }    
+        }    
+        if(ship.osat || ship.base || gamedata.isTerrain(ship)) { //Bases and OSATs never 'jump in', it's no LoGH out there ;)
             return 1;
         }else{
-            //var slot = playerManager.getSlotById(ship.slot);
-            //return Math.max(ship.deploysOnTurn, slot.depavailable);
             return ship.deploysOnTurn;            
         }     
     },    
-
+ 
 /*
-    //Change to true of false function, incase helpful later, if not delete.
-    notDeployedYet: function notDeployedYet(ship) {
-        //var turnDeploys = 1;
-        if(ship.deploysOnTurn > 1 && gamedata.gamephase != -1) return ship.deploysOnTurn; //Ship itself has been set to deploy later in game.
-        
-        var slot = playerManager.getSlotById(ship.slot);
-        var depTurn = slot.depavailable;
+    //True or false function, in case helpful later, if not delete.
+    notDeployedYet: function notDeployedYet(deploysOnTurn) {
+        if(deploysOnTurn > 1 && gamedata.gamephase != -1) return true; //Ship has been set to deploy later in game.
 
-        if(depTurn > 1 && gamedata.gamephase != -1) return depTurn; //Entire slot deploys later.
-
-        return ship.deploysOnTurn;         
+        return false;         
     },
 */
+
     //Called in various places to identify a ship as having stealth ability.
     isStealthShip: function(ship) {
         if(shipManager.hasSpecialAbility(ship, "Stealth") && (!ship.flight)) return true;
         return false;
     },
   
+
     markAsDetected: function(ship) {
         var stealthSystem = shipManager.systems.getSystemByName(ship, "stealth");
         if(stealthSystem) stealthSystem.detected = true;
     }, 
+
 
     //Main Front End check on whether a stealth ship is detected or not, called in various places.
     isDetected: function(ship) {

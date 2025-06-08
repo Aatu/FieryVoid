@@ -706,6 +706,43 @@ class DBManager
 
     }
 
+    //Used to skip Slot forward through phases if it has no ships deployed.
+    public function updatePlayerStatusSlot($gameid, $userid, $slot, $phase, $turn)
+    {
+        try { 
+
+            $sql = "UPDATE `B5CGM`.`tac_playeringame`
+                    SET `lastturn` = $turn,
+                        `lastphase` = $phase,
+                        `lastactivity` = NOW()
+                    WHERE gameid = $gameid
+                    AND playerid = $userid
+                    AND slot = $slot";
+
+            $this->update($sql);
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
+
+        //Update depavailable at start of game.
+        public function updatePlayerStatusDeploy($gameid, $userid, $slot, $phase, $turn, $minDeploy)
+    {
+        try { 
+            $sql = "UPDATE `B5CGM`.`tac_playeringame`
+                    SET `lastturn` = $turn,
+                        `lastphase` = $phase,
+                        `depavailable` = $minDeploy,
+                        `lastactivity` = NOW()
+                    WHERE gameid = $gameid
+                    AND playerid = $userid
+                    AND slot = $slot";
+
+            $this->update($sql);
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
     
     public function setPlayerWaitingStatus($playerid, $gameid, $waiting)
     {
@@ -1146,7 +1183,7 @@ class DBManager
         }
 
     }
-
+/* //OLD VERSION WITHOUT WAITING VARIABLE - DK June 2025
     public function getSlotsInGame($gameid)
     {
 
@@ -1174,6 +1211,47 @@ class DBManager
         }
         return $slots;
     }
+*/
+
+
+    public function getSlotsInGame($gameid)
+    {
+        $slots = array();
+
+        $stmt = $this->connection->prepare("
+            SELECT 
+                playerid, slot, teamid, lastturn, lastphase, name, points,
+                depx, depy, deptype, depwidth, depheight, depavailable,
+                p.username, waiting
+            FROM 
+                tac_playeringame pg
+            LEFT JOIN 
+                player p ON p.id = pg.playerid
+            WHERE 
+                gameid = ?
+        ");
+
+        if ($stmt) {
+            $stmt->bind_param('i', $gameid);
+            $stmt->bind_result(
+                $playerid, $slot, $teamid, $lastturn, $lastphase, $name, $points,
+                $depx, $depy, $deptype, $depwidth, $depheight, $depavailable,
+                $username, $waiting // ✅ include waiting
+            );
+            $stmt->execute();
+            while ($stmt->fetch()) {
+                $slots[$slot] = new PlayerSlot(
+                    $playerid, $slot, $teamid, $lastturn, $lastphase, $name, $points,
+                    $depx, $depy, $deptype, $depwidth, $depheight, $depavailable,
+                    $username, $waiting // ✅ pass waiting
+                );
+            }
+            $stmt->close();
+        }
+
+        return $slots;
+    }
+
 
     public function getSlotById($slotid, $gameid)
     {
@@ -1181,7 +1259,7 @@ class DBManager
 
         $stmt = $this->connection->prepare("
             SELECT 
-                playerid, slot, teamid, lastturn, lastphase, name, points, depx, depy, deptype, depwidth, depheight, depavailable, p.username
+                playerid, slot, teamid, lastturn, lastphase, name, points, depx, depy, deptype, depwidth, depheight, depavailable, p.username, waiting
             FROM 
                 tac_playeringame pg
             LEFT JOIN 
@@ -1194,10 +1272,10 @@ class DBManager
 
         if ($stmt) {
             $stmt->bind_param('ii', $gameid, $slotid);
-            $stmt->bind_result($playerid, $slot, $teamid, $lastturn, $lastphase, $name, $points, $depx, $depy, $deptype, $depwidth, $depheight, $depavailable, $username);
+            $stmt->bind_result($playerid, $slot, $teamid, $lastturn, $lastphase, $name, $points, $depx, $depy, $deptype, $depwidth, $depheight, $depavailable, $username, $waiting);
             $stmt->execute();
             while ($stmt->fetch()) {
-                $slot = new PlayerSlot($playerid, $slot, $teamid, $lastturn, $lastphase, $name, $points, $depx, $depy, $deptype, $depwidth, $depheight, $depavailable, $username);
+                $slot = new PlayerSlot($playerid, $slot, $teamid, $lastturn, $lastphase, $name, $points, $depx, $depy, $deptype, $depwidth, $depheight, $depavailable, $username, $waiting);
             }
             $stmt->close();
         }

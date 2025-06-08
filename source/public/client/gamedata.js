@@ -183,7 +183,7 @@ window.gamedata = {
         return ship.userid === gamedata.thisplayer;
     },
 
-    isMyorMyTeamShip: function isMyShip(ship) {
+    isMyorMyTeamShip: function isMyorMyTeamShip(ship) {
         if(gamedata.isTerrain(ship) && (gamedata.gamephase !== -1)) return false; //Players can purchase Terrain, and will need to select to deploy it. 
         if(ship.userid === gamedata.thisplayer) return true;
         if(ship.team === gamedata.getPlayerTeam()) return true;
@@ -528,8 +528,35 @@ window.gamedata = {
             confirm.confirm(html + "<br>Are you sure you wish to COMMIT YOUR INITIAL ORDERS?", gamedata.doCommit);
         }
 
-        //CHECK for NO DIRECT FIRE
-        else if (gamedata.gamephase == 3) {
+        else if (gamedata.gamephase == 2) {
+            var zeroSpeedShips = [];
+            var activeShips = gamedata.getActiveShips();
+
+            for (var i in activeShips) {
+                var ship = activeShips[i];
+                if (shipManager.movement.canChangeSpeed(ship, true) && ship.userid == gamedata.thisplayer) {
+                    zeroSpeedShips.push(ship);
+                }
+            }
+
+            if (zeroSpeedShips.length > 0) {
+                var html = '';
+                html += "<br>";
+                html += "The following ships can still move: <br>";
+                
+                for (var j in zeroSpeedShips) {
+                    var movingShip = zeroSpeedShips[j];
+                    html += '<span class="ship-name">' + movingShip.name + '</span><br>';
+                }
+            }
+
+            confirm.confirm(
+                html + "<br>Are you sure you wish to COMMIT YOUR MOVEMENT ORDERS?",
+                gamedata.doCommit
+            );
+
+        //CHECK for NO DIRECT FIRE            
+        }else if (gamedata.gamephase == 3) {
                 var myShips = [];
 
                 for (var ship in gamedata.ships) {
@@ -978,6 +1005,7 @@ window.gamedata = {
         }
     },
 
+
     autoCommitOnMovement: function autoCommitOnMovement(ship) {
         //if (ship.base) {
             //combatLog.logMoves(ship);
@@ -1014,6 +1042,13 @@ window.gamedata = {
             if (slot.playerid == gamedata.thisplayer) return slot.team;
         }
     },
+
+    getPlayerSlot: function getPlayerSlot() {
+        for (var i in gamedata.slots) {
+            var slot = gamedata.slots[i];
+            if (slot.playerid == gamedata.thisplayer) return slot.slot;
+        }
+    },    
 
     getPlayerNameById: function getPlayerNameById(id) {
         for (var i in gamedata.slots) {
@@ -1055,8 +1090,15 @@ window.gamedata = {
         gamedata.subphase = 0;
         //shipManager.initShips();
         UI.shipMovement.hide();
-        if(gamedata.gamephase == 1) fleetListManager.reset();       
-        fleetListManager.displayFleetLists();
+        if(gamedata.gamephase == 1){
+            //To recalculate fleet list values in Info Tab without refreshing page
+            fleetListManager.reset();
+            fleetListManager.displayFleetLists();
+        }else{    
+            //To refresh whether player has committed their orders when a new phase begins.
+            fleetListManager.refreshed = false;
+            fleetListManager.displayFleetLists();            
+        }    
 
         gamedata.setPhaseClass();
         //		window.helper.doUpdateHelpContent(gamedata.gamephase,0);        
@@ -1288,6 +1330,12 @@ window.gamedata = {
             var ship = jsonShips[i];
             gamedata.ships[i] = new Ship(ship);
         }
-    }
+    },
+
+    checkPlayerHasDeployedShips: function checkPlayerHasDeployedShips() {
+        return gamedata.ships.some(ship =>
+            shipManager.getTurnDeployed(ship) <= gamedata.turn && gamedata.isMyShip(ship) && !gamedata.isTerrain(ship)
+        );
+    },
 
 };

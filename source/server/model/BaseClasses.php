@@ -24,6 +24,7 @@ class WeaponLoading
     }
 }
 
+/* Old version without 'waiting' variable - DK June 2025
 class PlayerSlot{
     public $slot, $team, $lastturn, $lastphase, $name, $points, $depx, $depy, $deptype, $depwidth, $depheight, $depavailable, $playerid, $playername;
     
@@ -45,6 +46,35 @@ class PlayerSlot{
         $this->playername = $playername;
     }
     
+}
+*/
+
+class PlayerSlot {
+    public $slot, $team, $lastturn, $lastphase, $name, $points;
+    public $depx, $depy, $deptype, $depwidth, $depheight, $depavailable;
+    public $playerid, $playername, $waiting; // ✅ include $waiting
+
+    function __construct(
+        $playerid, $slot, $team, $lastturn, $lastphase, $name, $points,
+        $depx, $depy, $deptype, $depwidth, $depheight, $depavailable,
+        $playername, $waiting // ✅ added here
+    ) {
+        $this->playerid = $playerid;
+        $this->slot = $slot;
+        $this->team = $team;
+        $this->lastturn = $lastturn;
+        $this->lastphase = $lastphase;
+        $this->name = $name;
+        $this->points = $points;
+        $this->depx = $depx;
+        $this->depy = $depy;
+        $this->deptype = $deptype;
+        $this->depwidth = $depwidth;
+        $this->depheight = $depheight;
+        $this->depavailable = $depavailable;
+        $this->playername = $playername;
+        $this->waiting = $waiting; // ✅ assignment
+    }
 }
 
 class PlayerSlotFromJSON extends PlayerSlot{
