@@ -1089,6 +1089,17 @@ class Weapon extends ShipSystem
 		if ($this->isRammingAttack) return $this->calculateHitBaseRam($gamedata, $fireOrder);
         $shooter = $gamedata->getShipById($fireOrder->shooterid);
         $target = $gamedata->getShipById($fireOrder->targetid);
+
+        if($target == null){ //Somehow a hex targeted weapon made it to the normal fire function, don't proceed as it'll bug out.
+                    $fireOrder->needed = 0; // Auto-miss!
+                    $fireOrder->updated = true;
+                    $this->uninterceptable = true;
+                    $this->doNotIntercept = true;
+                    $fireOrder->pubnotes .= "<br>ERROR: Null target shot attempted in normal fire routines.";
+    
+                    return;
+                }
+
         $pos = $shooter->getHexPos();
 		$targetPos = $target->getHexPos();
         $jammermod = 0;
@@ -1491,6 +1502,7 @@ class Weapon extends ShipSystem
     {
         $shooter = $gamedata->getShipById($fireOrder->shooterid);
         $target = $gamedata->getShipById($fireOrder->targetid);
+        if($target == null) return; //Somehow a hex targetted weapon made it to the normal fire function, don't proceed.
 
         $fireOrder->needed -= $fireOrder->totalIntercept;
         $notes = "Interception: " . $fireOrder->totalIntercept . " sources:" . $fireOrder->numInterceptors . ", final to hit: " . $fireOrder->needed;
