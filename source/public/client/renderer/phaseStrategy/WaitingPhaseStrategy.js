@@ -16,6 +16,8 @@ window.WaitingPhaseStrategy = function () {
         console.log("enabled waiting phase strategy");
         gamedata.hideCommitButton();
 
+        fleetListManager.updateFleetReadiness(gamedata.thisplayer); //Mark player as 'Has committed orders' in Info Tab
+
         ajaxInterface.startPollingGamedata();
 
         this.setPhaseHeader("WAITING FOR TURN...");

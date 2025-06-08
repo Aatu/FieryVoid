@@ -183,7 +183,7 @@ MolecularSlicerBeamL.prototype.doMultipleFireOrders = function (shooter, target,
 	for (var s = 0; s < this.guns; s++) {
 		var fireid = shooter.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
                         
-		var calledid = -1; //Slicers are Raking or Piercing Damage, cannot called sot!
+		var calledid = -1; //Slicers are Raking or Piercing Damage, cannot called shot!
 
 	    var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
         if(chance < 1) continue;
