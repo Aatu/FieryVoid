@@ -531,6 +531,7 @@ window.gamedata = {
         else if (gamedata.gamephase == 2) {
             var zeroSpeedShips = [];
             var activeShips = gamedata.getActiveShips();
+            var html = '';
 
             for (var i in activeShips) {
                 var ship = activeShips[i];
@@ -540,7 +541,6 @@ window.gamedata = {
             }
 
             if (zeroSpeedShips.length > 0) {
-                var html = '';
                 html += "<br>";
                 html += "The following ships can still move: <br>";
                 
