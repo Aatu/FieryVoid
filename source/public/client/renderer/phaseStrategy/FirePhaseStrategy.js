@@ -21,6 +21,7 @@ window.FirePhaseStrategy = function () {
         this.selectFirstOwnShipOrActiveShip();
 
         gamedata.showCommitButton();
+        weaponManager.ramWarning = false; //Reset ram warning.
 
         this.setPhaseHeader("FIRE ORDERS");
         this.showAppropriateHighlight();

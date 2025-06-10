@@ -6,6 +6,7 @@ window.weaponManager = {
     mouseoverSystem: null,
     currentSystem: null,
     currentShip: null,
+    ramWarning: false,
 
     getWeaponCurrentLoading: function getWeaponCurrentLoading(weapon) {
 		/*obsolete
@@ -1601,11 +1602,11 @@ window.weaponManager = {
 		
 		//Add new warning for when people ignore tooltip and try to ram when they possibly shouldn't - DK 10/24
         //No warning for ships designed to ram or if desperate rules apply!
-        if (weapon.isRammingAttack && !weapon.designedToRam) { 
+        if (weapon.isRammingAttack && !weapon.designedToRam && !weaponManager.ramWarning) { 
             // No warning for ships designed to ram or if desperate rules apply
             if (gamedata.rules.desperate === undefined || 
                 (gamedata.rules.desperate !== ship.team && gamedata.rules.desperate !== -1)) {
-                
+                weaponManager.ramWarning = true;                
                 var html = "WARNING - Ramming Attacks should only be used in scenarios where they are specifically permitted.";
                 confirm.warning(html);                    
             }
