@@ -1175,7 +1175,7 @@ shipManager.movement = {
     },
 
     canChangeSpeed: function canChangeSpeed(ship, accel) {
-        if (ship.osat || ship.base) {
+        if (ship.osat || ship.base || gamedata.isTerrain(ship.shipSizeClass, ship.userid)) {
             return false;
         }
         if (gamedata.gamephase == -1 && ship.deploymove) return true;

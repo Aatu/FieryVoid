@@ -60,7 +60,7 @@ createFleetList: function createFleetList(slot, template) {
     // Build list of ships for this player
     for (var i in gamedata.ships) {
         var ship = gamedata.ships[i];
-        if (gamedata.isTerrain(ship)) continue;
+        if (gamedata.isTerrain(ship.shipSizeClass, ship.userid)) continue;
         if (ship.userid == slot.playerid && ship.slot == slot.slot) {
             shipArray.push(ship);
         }
