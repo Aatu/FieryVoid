@@ -2649,9 +2649,36 @@ class RammingAttack extends Weapon{
 			$fireOrder->needed = 100; //always true
 			$fireOrder->updated = true;
 		}else{
-			parent::calculateHitBase($gamedata, $fireOrder);
+			parent::calculateHitBase($gamedata, $fireOrder);			
 		}
 	}
+
+	private function getRamHitLocation($ship, $gamedata, $shipPosition){	
+				if($ship->getSpeed() == 0) return 1; //Just return front location as standard if Ship is not moving.			
+				// Now check other movements in the turn.
+				$startMove = $ship->getLastTurnMovement($gamedata->turn);	//initialise as last move in previous turn, in case first move takes ship in asteroid.				
+				$previousPosition = $startMove->position; //This will change as we go through movements, but need to initialise as where the ship starts this turn.			 
+				$previousFacing = $startMove->getFacingAngle();	
+				$location = 0;		
+
+				foreach ($ship->movement as $shipMove) {
+					if ($shipMove->turn == $gamedata->turn) {
+			
+						// Only interested in moves where ship enters a NEW hex!
+						if ($shipMove->type == "move" || $shipMove->type == "slipleft" || $shipMove->type == "slipright") {					
+							// Check if the position matches the asteroids, e.g. zero distance.
+							if ($shipPosition->q == $shipMove->position->q && $shipPosition->r == $shipMove->position->r) {
+								$relativeBearing = $this->getTempBearing($previousPosition, $shipPosition, $ship, $previousFacing);
+								$location = $this->getCollisionLocation($relativeBearing, $ship);
+							}
+						}
+						$previousPosition = $shipMove->position;
+						$previousFacing = $shipMove->getFacingAngle();
+					}
+				}
+				
+				return $location;
+	}//endof getRamHitLocation()
 
 	public function fire($gamedata, $fireOrder){
 		// If hit, firing unit itself suffers damage, too (based on ramming factor of target)!
@@ -2670,13 +2697,15 @@ class RammingAttack extends Weapon{
 		}
 		
 		parent::fire($gamedata, $fireOrder);
+
 		if($fireOrder->shotshit > 0){
 			$pos = null;
 			//$shooter = $gamedata->getShipById($fireOrder->targetid);
 			$shooter = $this->unit; //technically this unit after all
 			$target = $this->unit;
+			$targetPos = $target->getHexPos();
 
-			if($fireOrder->damageclass != 'TerrainCollision' && $fireOrder->damageclass != 'TerrainCrash') $fireOrder->chosenLocation = 0;//to be redetermined!
+			if($fireOrder->damageclass != 'TerrainCollision' && $fireOrder->damageclass != 'TerrainCrash') $fireOrder->chosenLocation = $this->getRamHitLocation($shooter, $gamedata, $targetPos);//to be redetermined!
 			$damage = $this->getReturnDamage($fireOrder);
         		$damage = $this->getDamageMod($damage, $shooter, $target, $pos, $gamedata);
         		$damage -= $target->getDamageMod($shooter, $pos, $gamedata->turn, $this);
@@ -2692,7 +2721,7 @@ class RammingAttack extends Weapon{
 					-1, "normal", $shooter->id, $target->id,
 					$this->id, -1, $gamedata->turn, 1, 
 					100, 100, 1, 1, 0,
-					0,0,'Reactor',10000
+					0,0,'AutoRam',10000
 				);
 				if(!$this->checkAlreadyRammed($fireOrder->targetid)) $newFireOrder->pubnotes = " Automatic ramming - return damage.";
 				$newFireOrder->addToDB = true;
