@@ -6139,7 +6139,7 @@ class ProximityLaserLauncher extends Weapon{
 	        $shooter = $gamedata->getShipById($fireOrder->shooterid);        
 	        $rolled = Dice::d(100);
 	        $fireOrder->rolled = $rolled; 
-			$fireOrder->pubnotes .= "Automatically hits."; 
+			//$fireOrder->pubnotes .= "Automatically hits."; 
 			if($rolled <= $fireOrder->needed){//HIT!
 				$fireOrder->shotshit++;			
 			}else{ //MISS!  Should never happen.
@@ -6251,15 +6251,29 @@ $this->data["Special"] .= "<br>WILL AUTOMATICALLY MISS UNLESS FIRED TOGETHER WIT
 
 		public function calculateHitBase($gamedata, $fireOrder)
 		{
-			parent::calculateHitBase($gamedata, $fireOrder);
-
 			$launcherFireOrder = $this->launcher->getFireOrders($gamedata->turn);
 						
 			if(empty($launcherFireOrder)){//Launcher hasn't fired, laser automatically misses.	
 				$fireOrder->needed = 0; //auto-miss.
 				$fireOrder->updated = true;
-				$fireOrder->pubnotes .= "<br>A Proximity Launcher was not fired, it's laser shot automatically missed.";				
+				$fireOrder->pubnotes .= "<br>A Proximity Launcher was not fired, it's laser shot automatically missed.";
+				return;				
+			}
+
+			$target = $gamedata->getShipById($fireOrder->targetid);
+			$pos = $this->getFiringHex($gamedata, $fireOrder);		
+			$targetPos = $target->getHexPos();			
+			$losBlocked = $this->checkLineOfSight($pos, $targetPos, $gamedata);
+
+			if($losBlocked){//Laser does not have Line of Sight from it's firing position
+				$fireOrder->needed = 0; //auto-miss.
+				$fireOrder->updated = true;
+				$fireOrder->pubnotes .= "<br>A Proximity Laser did not have line of sight from its firing position.";
+				return;				
 			}	
+
+			parent::calculateHitBase($gamedata, $fireOrder);		
+
 		}//endof calculateHitBase()
 
 		
