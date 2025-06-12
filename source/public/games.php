@@ -91,7 +91,12 @@ if (isset($_SESSION["user"])) {
 	    <br>Amended EW buttons so they only show their respective reduction buttons when needed.
 	    <br>Added new player warning during Movement for ships moving Speed 0 that have no Movement orders.
 
-	    
+		 <br><br>---------- <b>hotfixes 12th of June</b> ---------- 
+	    <br>Prevent 'undefined' message appearing in Movement commit check
+	    <br>Ramming locations should now be selected correctly while colliding with terrain.
+	    <br>Proximity Laser now checks Line of Sight correctly / Fixed Proximity Laser arcs for Senchlat Kir.
+	    <br>Targeting tooltip no longer shows % chance for hex targeted weapons.
+	    <br>Direct fire weapons will no longer occasionally target hexes.
 	    
        <br><br><br>
 <!--	        
