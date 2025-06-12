@@ -68,7 +68,7 @@ shipManager.movement = {
     },
 
     isMovementReady: function isMovementReady(ship) {
-        return shipManager.movement.getRemainingMovement(ship) == 0 || shipManager.isDestroyed(ship) || gamedata.isTerrain(ship) || (shipManager.getTurnDeployed(ship) > gamedata.turn);
+        return shipManager.movement.getRemainingMovement(ship) == 0 || shipManager.isDestroyed(ship) || gamedata.isTerrain(ship.shipSizeClass, ship.userid) || (shipManager.getTurnDeployed(ship) > gamedata.turn);
     },
 
     checkHasUncommitted: function checkHasUncommitted(ship) {
@@ -1175,7 +1175,7 @@ shipManager.movement = {
     },
 
     canChangeSpeed: function canChangeSpeed(ship, accel) {
-        if (ship.osat || ship.base) {
+        if (ship.osat || ship.base || gamedata.isTerrain(ship.shipSizeClass, ship.userid)) {
             return false;
         }
         if (gamedata.gamephase == -1 && ship.deploymove) return true;

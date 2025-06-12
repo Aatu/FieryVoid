@@ -730,7 +730,7 @@ window.shipManager = {
 
         // Filter out destroyed ships and those with shipSizeClass === 5 e.g. terrain
         var validShips = gamedata.ships.filter(function(s) {
-            return !shipManager.isDestroyed(s) && !gamedata.isTerrain(s) && !(shipManager.getTurnDeployed(s) > gamedata.turn);
+            return !shipManager.isDestroyed(s) && !gamedata.isTerrain(s.shipSizeClass, s.userid) && !(shipManager.getTurnDeployed(s) > gamedata.turn);
         });
 
         for (var i in validShips) {
@@ -995,21 +995,26 @@ window.shipManager = {
                 return Math.max(ship.deploysOnTurn, slot.depavailable);
             }    
         }    
-        if(ship.osat || ship.base || gamedata.isTerrain(ship)) { //Bases and OSATs never 'jump in', it's no LoGH out there ;)
+        if(ship.osat || ship.base || gamedata.isTerrain(ship.shipSizeClass, ship.userid)) { //Bases and OSATs never 'jump in', it's no LoGH out there ;)
             return 1;
         }else{
             return ship.deploysOnTurn;            
         }     
     },    
  
-/*
-    //True or false function, in case helpful later, if not delete.
-    notDeployedYet: function notDeployedYet(deploysOnTurn) {
-        if(deploysOnTurn > 1 && gamedata.gamephase != -1) return true; //Ship has been set to deploy later in game.
 
+    //True or false function, e.g. for possible use after Deployment Phase commit to reload window if needed (so icons appear correctly).
+    playerHasDeployedShips: function playerHasDeployedShips(playerid) {
+       for (const ship of gamedata.ships) {
+            if(ship.userid !== playerid) continue;
+    
+            var slot = playerManager.getSlotById(ship.slot);
+            var deploys = Math.max(ship.deploysOnTurn, slot.depavailable);
+            if(deploys <= gamedata.turn) return true;
+        }
         return false;         
     },
-*/
+
 
     //Called in various places to identify a ship as having stealth ability.
     isStealthShip: function(ship) {

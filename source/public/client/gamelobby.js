@@ -3654,7 +3654,13 @@ applyCustomShipFilter: function () {
 			});
 		});
 		
-	}//end of setEnhancementsFighter()	
+	},//end of setEnhancementsFighter()	
+
+    isTerrain: function isTerrain(shipSizeClass, userid) {    
+        if(shipSizeClass == 5 || userid == -5) return true;
+        return false;
+        
+    },   
 
 };
 
