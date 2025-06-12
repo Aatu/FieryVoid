@@ -386,7 +386,7 @@ if ($moons == true) { // Moon terrain rules in play
                 $optionsUsed .= ', (Two Small)';   
             break;
             case 3:
-                $optionsUsed .= ', Moons (Three Small';  
+                $optionsUsed .= ', Moons (Three Small)';  
             break;
             case 4:
                 $optionsUsed .= ', Moons (Four Small)';  

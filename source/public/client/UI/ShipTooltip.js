@@ -336,7 +336,7 @@ window.ShipTooltip = function () {
             return gamedata.isMyOrTeamOneShip(ship) ?  'ally' : 'enemy';
         }*/
        //Let's make allied team ships blue text, and terrain white - DK May 2025
-       return gamedata.isTerrain(ship) ? 'terrain' : (gamedata.isMyShip(ship) ? 'mine' : (gamedata.isMyorMyTeamShip(ship) ? 'ally' : 'enemy'));    
+       return gamedata.isTerrain(ship.shipSizeClass, ship.userid) ? 'terrain' : (gamedata.isMyShip(ship) ? 'mine' : (gamedata.isMyorMyTeamShip(ship) ? 'ally' : 'enemy'));    
     }
 
     return ShipTooltip;

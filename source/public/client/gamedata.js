@@ -155,11 +155,11 @@ window.gamedata = {
             return gamedata.activeship.map(function (id) {
                 return gamedata.getShip(id);
             }).filter(function(ship) { 
-                return ship && !gamedata.isTerrain(ship) && !(shipManager.getTurnDeployed(ship) > gamedata.turn);
+                return ship && !gamedata.isTerrain(ship.shipSizeClass, ship.userid) && !(shipManager.getTurnDeployed(ship) > gamedata.turn);
             });
         } else {
             return [gamedata.getShip(gamedata.activeship)].filter(function(ship) { 
-                return ship && !gamedata.isTerrain(ship) && !(shipManager.getTurnDeployed(ship) > gamedata.turn);
+                return ship && !gamedata.isTerrain(ship.shipSizeClass, ship.userid) && !(shipManager.getTurnDeployed(ship) > gamedata.turn);
             });
         }
     },
@@ -179,12 +179,12 @@ window.gamedata = {
     },
 
     isMyShip: function isMyShip(ship) {
-        if(gamedata.isTerrain(ship) && (gamedata.gamephase !== -1)) return false; //Players can purchase Terrain, and will need to select to deploy it.
+        if(gamedata.isTerrain(ship.shipSizeClass, ship.userid) && (gamedata.gamephase !== -1)) return false; //Players can purchase Terrain, and will need to select to deploy it.
         return ship.userid === gamedata.thisplayer;
     },
 
-    isMyorMyTeamShip: function isMyShip(ship) {
-        if(gamedata.isTerrain(ship) && (gamedata.gamephase !== -1)) return false; //Players can purchase Terrain, and will need to select to deploy it. 
+    isMyorMyTeamShip: function isMyorMyTeamShip(ship) {
+        if(gamedata.isTerrain(ship.shipSizeClass, ship.userid) && (gamedata.gamephase !== -1)) return false; //Players can purchase Terrain, and will need to select to deploy it. 
         if(ship.userid === gamedata.thisplayer) return true;
         if(ship.team === gamedata.getPlayerTeam()) return true;
       
@@ -203,14 +203,14 @@ window.gamedata = {
         return target.team !== shooter.team;
     },
 
-    isTerrain: function isTerrain(ship) {    
-        if(ship.shipSizeClass == 5 || ship.userid == -5) return true;
+    isTerrain: function isTerrain(shipSizeClass, userid) {    
+        if(shipSizeClass == 5 || userid == -5) return true;
         return false;
         
     },    
 
     isMyOrTeamOneShip: function isMyOrTeamOneShip(ship) {
-        if (gamedata.isTerrain(ship)) {
+        if (gamedata.isTerrain(ship.shipSizeClass, ship.userid)) {
             return false; // Ensure terrain units are never considered friendly
         }
     
@@ -531,6 +531,7 @@ window.gamedata = {
         else if (gamedata.gamephase == 2) {
             var zeroSpeedShips = [];
             var activeShips = gamedata.getActiveShips();
+            var html = '';
 
             for (var i in activeShips) {
                 var ship = activeShips[i];
@@ -540,7 +541,6 @@ window.gamedata = {
             }
 
             if (zeroSpeedShips.length > 0) {
-                var html = '';
                 html += "<br>";
                 html += "The following ships can still move: <br>";
                 
@@ -1125,7 +1125,7 @@ window.gamedata = {
         //var allShips = gamedata.ships;
         var ships = gamedata.ships.filter(function(ship) {
             return !shipManager.isDestroyed(ship) &&
-                   !gamedata.isTerrain(ship) &&
+                   !gamedata.isTerrain(ship.shipSizeClass, ship.userid) &&
                    !shipManager.shouldBeHidden(ship);
         });
 
@@ -1334,7 +1334,7 @@ window.gamedata = {
 
     checkPlayerHasDeployedShips: function checkPlayerHasDeployedShips() {
         return gamedata.ships.some(ship =>
-            shipManager.getTurnDeployed(ship) <= gamedata.turn && gamedata.isMyShip(ship) && !gamedata.isTerrain(ship)
+            shipManager.getTurnDeployed(ship) <= gamedata.turn && gamedata.isMyShip(ship) && !gamedata.isTerrain(ship.shipSizeClass, ship.userid)
         );
     },
 

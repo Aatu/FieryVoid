@@ -1502,7 +1502,12 @@ class Weapon extends ShipSystem
     {
         $shooter = $gamedata->getShipById($fireOrder->shooterid);
         $target = $gamedata->getShipById($fireOrder->targetid);
-        if($target == null) return; //Somehow a hex targetted weapon made it to the normal fire function, don't proceed.
+        if($target == null) {
+            $rolled = Dice::d(100);
+            $fireOrder->notes .= " FIRING SHOT: rolled: $rolled, needed: $$fireOrder->needed\n";
+            $fireOrder->rolled = $rolled; //I think this is needed to generate a combat log note.           
+            return; //Somehow a hex targeted weapon made it to the normal fire function, don't proceed.
+        }    
 
         $fireOrder->needed -= $fireOrder->totalIntercept;
         $notes = "Interception: " . $fireOrder->totalIntercept . " sources:" . $fireOrder->numInterceptors . ", final to hit: " . $fireOrder->needed;
