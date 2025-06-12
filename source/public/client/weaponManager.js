@@ -480,8 +480,11 @@ window.weaponManager = {
                     }else if (loSBlocked) {
                         // LOS is blocked - only display the blocked message
                         $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="losBlocked"> LINE OF SIGHT BLOCKED</span></div>').appendTo(f);
+                    }else if (weapon.hextarget) {
+                        // Don't show hit chance if targeting the hex.
+                        $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="losBlocked"> HEX TARGETED</span></div>').appendTo(f);
                     } else {
-                        // LOS is not blocked, show normal hit chance info, check Sweeping weapons first.
+                        // LOS is not blocked, not hex targeted, show normal hit chance info, check Sweeping weapons first.
                         if (value === "Sweeping" && ship.shipSizeClass >= 0 && weaponManager.hasTargetedThisShip(ship, weapon)) {
                             $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="hitchange"> CANNOT TARGET AGAIN</span></div>').appendTo(f);
                         } else if (calledid != null && !weaponManager.canWeaponCall(weapon)) {
