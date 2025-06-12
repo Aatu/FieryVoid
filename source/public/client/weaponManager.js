@@ -1701,7 +1701,6 @@ window.weaponManager = {
             var blockedLosHex = weaponManager.getBlockedHexes();
             var loSBlocked = false;
             if (blockedLosHex && blockedLosHex.length > 0) {
-                var weapon = gamedata.selectedSystems[0]; // Use the first weapon to get the shooter's position
                 var sPosShooter = weaponManager.getFiringHex(selectedShip, weapon);
                 
                 loSBlocked = mathlib.checkLineOfSight(sPosShooter, hexpos, blockedLosHex);
