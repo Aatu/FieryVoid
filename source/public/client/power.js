@@ -211,7 +211,7 @@ shipManager.power = {
 			if (ship.unavailable) continue;
 
 			if (ship.flight) continue;
-			if(gamedata.isTerrain(ship)) continue;
+			if(gamedata.isTerrain(ship.shipSizeClass, ship.userid)) continue;
 
 			if (ship.userid != gamedata.thisplayer) continue;
 
