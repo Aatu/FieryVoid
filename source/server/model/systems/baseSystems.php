@@ -243,7 +243,7 @@ class Stealth extends ShipSystem implements SpecialAbility{
 		foreach ($gameData->ships as $otherShip) {
 			// Skip friendly ships
 			if($otherShip->team === $ship->team) continue;
-			if($otherShip->userid == -5) continue; //Ignore Terrain
+			if($otherShip->isTerrain()) continue; //Ignore Terrain
 			if($otherShip->isDestroyed()) continue; //Ignore destroyed enemy ships.
 	
 			$totalDetection = 0;
