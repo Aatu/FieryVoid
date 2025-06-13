@@ -290,10 +290,11 @@ window.weaponManager = {
                 }
             }
         }
-
-        gamedata.selectedSystems.push(weapon);
-        shipWindowManager.setDataForSystem(ship, weapon);
+        shipWindowManager.setDataForSystem(ship, weapon);   
         webglScene.customEvent('WeaponSelected', { ship: ship, weapon: weapon });
+        //Moved to AFTER onWeaponSelected() in Fire phase strategy, to prevent prevent error when selecting a weapon and friendly fighter flight is selected unit - DK 6.25        
+        gamedata.selectedSystems.push(weapon); 
+     
     },
 
     isSelectedWeapon: function isSelectedWeapon(weapon) {
