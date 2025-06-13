@@ -291,7 +291,7 @@ window.BallisticIconContainer = function () {
 					break;									
 					case 'Anti-Fighter Plasma Web': //Pak'ma'ra Plasma Web Offensive
 					        targetType = 'hexGreen';
-					        text = '!';
+					        text = 'Plasma';
 					        textColour = "#787800";				        	
 					break;
 					case 'Psychic Field': //Thirdspace Psychic Field
