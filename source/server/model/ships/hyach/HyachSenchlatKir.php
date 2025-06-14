@@ -55,7 +55,7 @@ class HyachSenchlatKir extends HeavyCombatVessel{
         $this->addFrontSystem(new Maser(2, 6, 3, 270, 90));
 			$TargeterC = new ProximityLaser(3, 0, 0, 0, 360, 'C');
 			$LauncherC = new ProximityLaserLauncher(0, 1, 0, 300, 60, 'C'); 
-			$TargeterC->addLauncher($LauncherB);
+			$TargeterC->addLauncher($LauncherC);
 			$this->addFrontSystem($TargeterC);
 			$this->addFrontSystem($LauncherC);
 		$TargeterC->addTag("Front Proximity Laser");				
