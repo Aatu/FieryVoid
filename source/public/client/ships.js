@@ -1041,7 +1041,7 @@ window.shipManager = {
             return true; //If so, revealed.
         }            
 
-        if(gamedata.gamephase != 3) return false;  //Cannot try to detect based on distance during Movement
+        if(gamedata.gamephase != 3) return false;  //Cannot only try to detect at start of Firing Phase
 
         // Check all enemy ships to see if any can detect this ship
         for (const otherShip of gamedata.ships) {
@@ -1052,14 +1052,14 @@ window.shipManager = {
             let totalDetection = 0;
 
             if (!otherShip.flight) {
-                if(shipManager.isDisabled(otherShip)) continue; //Skip disabled                
+                if(shipManager.isDisabled(otherShip)) continue; //Skip disabled ships               
                 // Not a fighter — use scanner systems for detection
                 const standardScanners = shipManager.systems.getSystemListByName(otherShip, "scanner");
                 const elintScanners = shipManager.systems.getSystemListByName(otherShip, "elintScanner");
                 const scanners = [...standardScanners, ...elintScanners];
 
                 for (const scanner of scanners) {
-                    if (!shipManager.systems.isDestroyed(otherShip, scanner)) {
+                    if (!shipManager.systems.isDestroyed(otherShip, scanner) && !shipManager.power.isOfflineOnTurn(otherShip, scanner, gamedata.turn)) {
                         totalDetection += scanner.output;
                     }
                 }
