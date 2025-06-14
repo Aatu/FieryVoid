@@ -593,12 +593,13 @@ window.BallisticIconContainer = function () {
 
 		//Get shooter and modeName from it.
 		var shooter = shooterIcon.ship; //Get shooter info.
-		var modeName = null;	
+		var modeName = null;
+		var weapon = null;	
 		if(!shooter.flight){ //Fighters would need to find weaponid differently
-			var weapon = shooter.systems[ballistic.weaponid]; //Find weapon			
-			var modeName = weapon.firingModes[ballistic.firingMode]; //Get actual Firing Mode name
+			weapon = shooter.systems[ballistic.weaponid]; //Find weapon			
+			modeName = weapon.firingModes[ballistic.firingMode]; //Get actual Firing Mode name
 		}	
- 
+
 		if(!shooter.flight){ //Don't create target hex for certain ship weapons.
 			if(weapon.noTargetHexIcon) targetPosition = launchPosition;
 		}
@@ -616,6 +617,13 @@ window.BallisticIconContainer = function () {
 			type = 'yellow';				
 		}else{
 			type = 'orange';				
+		}
+
+		//Create line for Proximity Laser from launcher targeted hex.
+		if(weapon.hasSpecialLaunchHexCalculation){
+			var launcherHex = weapon.getFiringHex(shooter, weapon);
+			launchPosition = this.coordinateConverter.fromHexToGame(launcherHex);
+			type = 'red';
 		}
 
 		if(ballistic.type == 'normal'){
