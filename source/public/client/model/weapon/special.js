@@ -647,7 +647,7 @@ ProximityLaser.prototype.getFiringHex = function(shooter, weapon){ //Need to cal
 
 			sPosLaunch = new hexagon.Offset(aFireOrder.x, aFireOrder.y); 
 		} else{
-		sPosLaunch = shipManager.movement.getPositionAtStartOfTurn(shooter, gamedata.turn); 	
+		    sPosLaunch = shipManager.movement.getPositionAtStartOfTurn(shooter, gamedata.turn); 	
 		}	
 	return sPosLaunch;
 	
