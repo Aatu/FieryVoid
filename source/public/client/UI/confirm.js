@@ -684,11 +684,12 @@ handleInputChangeEdit: function handleInputChangeEdit(e) {
 	    }
 	    
 		var pointCost = ship.pointCost;
+        /*
 		if (ship.maxFlightSize==3){ //for single-unit flight cost is for a fighter; for usual 6+ flight, for 6 craft (and 6 craft will be set)
 			//but for 3-strong flight cost is still set for 6-strong flight...
 			pointCost = pointCost/2;
 		}     
-        
+        */
 		//ship.pointCost
             $(".totalUnitCostText", totalItem).html("Total unit cost");
             $(".totalUnitCostAmount", totalItem).html(pointCost);

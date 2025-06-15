@@ -6122,9 +6122,8 @@ class ProximityLaserLauncher extends Weapon{
 		public function setSystemDataWindow($turn){
 			parent::setSystemDataWindow($turn);        
 			$this->data["Special"] = "Proximity Launcher " . $this->pairing ."."; 
-			$this->data["Special"] .= "<br>Use this Launcher to select the hex from where its paired Proximity Laser will fire.";	 
-			$this->data["Special"] .= "<br>IMPORTANT - The paired Proximity Laser should be targeted at the same time as this launcher is fired.";
-			$this->data["Special"] .= "<br>HAS NO EFFECT UNLESS FIRED WITH PROXIMITY LASER " . $this->pairing ."."; 		 			
+			$this->data["Special"] .= "<br>Use to select hex from where Proximity Laser " . $this->pairing ." will fire.";	 
+			$this->data["Special"] .= "<br>IMPORTANT - No effect unless Proximity Laser " . $this->pairing ." targeted at the same time as launcher is fired.";		 			
 		}	
 		
 		public function calculateHitBase($gamedata, $fireOrder)
@@ -6202,12 +6201,10 @@ class ProximityLaserLauncher extends Weapon{
 		public function setSystemDataWindow($turn){
 			parent::setSystemDataWindow($turn);  
 			$this->data["Special"] = "Paired with Proximity Launcher ". $this->pairing ."."; 
-			$this->data["Special"] .= "<br>Use the paired Proximity Launcher system to target a hex, this will be the location from where this weapon will fire at its target in Firing Phase.";
-			$this->data["Special"] .= "<br>Range Penalty will be calculated from the hex the Launcher hits, not from this ship.";
-			$this->data["Special"] .= "<br>This weapon does not need an EW lock, and does not benefit from OEW.";				
-			$this->data["Special"] .= "<br>IMPORTANT - The paired Proximity Launcher should be fired at the same time as this weapon is targeted.";
-//			$this->data["Special"] .= "<br>WILL FIRE FROM SHIP UNLESS FIRED TOGETHER WITH PROXIMITY LAUNCHER " . $this->pairing .".";
-$this->data["Special"] .= "<br>WILL AUTOMATICALLY MISS UNLESS FIRED TOGETHER WITH PROXIMITY LAUNCHER " . $this->pairing .".";						
+			$this->data["Special"] .= "<br>Use Proximity Launcher ". $this->pairing ." to target a hex, laser will fire from this location.";
+			$this->data["Special"] .= "<br>Range Penalty is calculated from Launcher target, not from this ship.";
+			$this->data["Special"] .= "<br>Does not need an EW lock, and does not benefit from OEW.";				
+			$this->data["Special"] .= "<br>IMPORTANT - Automatically misses if Proximity Launcher ". $this->pairing ." not fired as well.";					
 	        $this->data["Ammunition"] = $this->ammunition;		
 		}	
 
