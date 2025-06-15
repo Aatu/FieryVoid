@@ -1698,26 +1698,27 @@ window.weaponManager = {
                 continue;
             }
 
-            //Check for Line of sight
-            var blockedLosHex = weaponManager.getBlockedHexes();
-            var loSBlocked = false;
-            if (blockedLosHex && blockedLosHex.length > 0) {
-                var sPosShooter = weaponManager.getFiringHex(selectedShip, weapon);
-                
-                loSBlocked = mathlib.checkLineOfSight(sPosShooter, hexpos, blockedLosHex);
-            }
-
-            if(loSBlocked){
-                confirm.error("No line of sight between firing ship and target hex.");	
-                return; //End work if no line of sight.
-            }
-
             var type = 'normal';
             if (weapon.ballistic) {
                 type = 'ballistic';
             }
 
             if (weaponManager.isPosOnWeaponArc(selectedShip, hexpos, weapon)) {
+
+                //Check for Line of sight
+                var blockedLosHex = weaponManager.getBlockedHexes();
+                var loSBlocked = false;
+                if (blockedLosHex && blockedLosHex.length > 0) {
+                    var sPosShooter = weaponManager.getFiringHex(selectedShip, weapon);
+                    
+                    loSBlocked = mathlib.checkLineOfSight(sPosShooter, hexpos, blockedLosHex);
+                }
+
+                if(loSBlocked){
+                    confirm.error("No line of sight between firing ship and target hex.");	
+                    return; //End work if no line of sight.
+                }
+
                 if (weapon.range === 0 || shipManager.getShipPosition(selectedShip).distanceTo(hexpos) <= weapon.range) {
                     weaponManager.removeFiringOrder(selectedShip, weapon);
                     for (var s = 0; s < weapon.guns; s++) {
@@ -2300,6 +2301,12 @@ window.weaponManager = {
         }
 
         return fires;
+    },
+
+    hasHexWeaponsSelected: function hasHexWeaponsSelected() {
+        return gamedata.selectedSystems.some(function (system) {
+            return system instanceof Weapon && system.hextarget === true;
+        });
     },
 
 
