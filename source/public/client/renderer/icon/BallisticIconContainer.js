@@ -620,7 +620,7 @@ window.BallisticIconContainer = function () {
 		}
 
 		//Create line for Proximity Laser from launcher targeted hex.
-		if(weapon.hasSpecialLaunchHexCalculation){
+		if (weapon && weapon.hasSpecialLaunchHexCalculation) {
 			var launcherHex = weapon.getFiringHex(shooter, weapon);
 			launchPosition = this.coordinateConverter.fromHexToGame(launcherHex);
 			type = 'red';
