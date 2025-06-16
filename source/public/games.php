@@ -97,6 +97,10 @@ if (isset($_SESSION["user"])) {
 	    <br>Proximity Laser now checks Line of Sight correctly / Fixed Proximity Laser arcs for Senchlat Kir.
 	    <br>Targeting tooltip no longer shows % chance for hex targeted weapons.
 	    <br>Direct fire weapons will no longer occasionally target hexes.
+
+
+		 <br><br>---------- <b>hotfixes 16th of June</b> ---------- 
+	    <br>Hotfix - Stealth and LoS issues
 	    
        <br><br><br>
 <!--	        
