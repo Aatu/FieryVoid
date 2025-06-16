@@ -177,10 +177,10 @@ class Stealth extends ShipSystem implements SpecialAbility{
 
 		foreach ($this->individualNotes as $currNote){ //Search all notes, they should be process in order so the latest event applies.
 			switch($currNote->notekey){
-				case 'detected': //power that should be stored at this moment
+				case 'detected': 
 					if($currNote->notevalue == 1) $this->detected = true;
 				break;
-				case 'undetected': //power that should be stored at this moment
+				case 'undetected': 
 					if($currNote->notevalue == 1) $this->detected = false;
 				break;								
 			}
@@ -223,7 +223,6 @@ class Stealth extends ShipSystem implements SpecialAbility{
 
 
 	private function isDetectedFire($ship, $gameData) {
-
 		// If the ship has fired this turn, it is revealed
 		foreach($ship->systems as $weapon){ //Check for weapon fire.
 			if($weapon instanceof Weapon){
@@ -243,16 +242,17 @@ class Stealth extends ShipSystem implements SpecialAbility{
 		foreach ($gameData->ships as $otherShip) {
 			// Skip friendly ships
 			if($otherShip->team === $ship->team) continue;
-			if($otherShip->userid == -5) continue; //Ignore Terrain
+			if($otherShip->isTerrain()) continue; //Ignore Terrain
 			if($otherShip->isDestroyed()) continue; //Ignore destroyed enemy ships.
 	
 			$totalDetection = 0;
 	
 			if (!$otherShip instanceof FighterFlight) {
+				if($otherShip->isDisabled()) continue;
 				// Not a fighter — use scanner systems
 				foreach($otherShip->systems as $system){
 					if($system instanceof Scanner){
-						if(!$system->isDestroyed()) $totalDetection += $system->output;
+						if(!$system->isDestroyed() && !$system->isOfflineOnTurn()) $totalDetection += $system->output;
 					}
 				}	
 				// Apply detection multiplier based on ship type
@@ -276,7 +276,6 @@ class Stealth extends ShipSystem implements SpecialAbility{
 			$otherPos = $otherShip->getHexPos();          
 			$noLoS = !empty($blockedHexes) && Mathlib::checkLineOfSight($pos, $otherPos, $blockedHexes);
 
-
 			// If within detection range, and LoS not blocked the ship is detected
 			if ($totalDetection >= $distance && !$noLoS) {  
 				return true; //Just return, if one ship can see the stealthed ship then all can.
@@ -288,42 +287,45 @@ class Stealth extends ShipSystem implements SpecialAbility{
 	}//endof isDetected()	
 
 
-	private function isUndetected($ship, $gameData) {
+	private function isUndetected($ship, $gameData) {		
 		$blockedHexes = $gameData->getBlockedHexes(); //Save outside loop as this won't change.
 		$shipPosition = $ship->getHexPos(); //Save outside loop as this won't change.
 		$canStealth = true; //Default to being able to stealth again, then prove if it can't below.
-
-		foreach($ship->systems as $weapon){ //Check for weapon fire.
-			if($weapon instanceof Weapon){
-				$firingOrders = $weapon->getFireOrders($gameData->turn);
-				foreach ($firingOrders as $fireOrder) { 
-					if($fireOrder->type == "normal"){ //Ballistics already handled in Phase 1, and shouldn't prevent re-stealth at end of turn.
-						$canStealth = false;
-						return $canStealth; //Just return, fired in Firing Phase revealing itself again even without LoS. Although who know at what without LoS...
-					}	
-				}	
-			}
-		}
 
 		//Check all enemy ships for line of sight, if none then ship can stealth again.
 		if (!empty($blockedHexes)) {  //No point checking if there are no blocked hexes.
 			foreach($gameData->ships as $enemyShip){
 				if($enemyShip->team == $ship->team) continue; //ignore ships in same team.
-				if($enemyShip->userid == -5) continue; //Ignore Terrain
+				if($enemyShip->isTerrain()) continue; //Ignore Terrain
 				if($enemyShip->isDestroyed()) continue; //Ignore destroyed enemy ships.
 
 				$enemyPosition = $enemyShip->getHexPos();
 				$noLoS = false; //False means LoS not blocked
 			
-				$noLoS = Mathlib::checkLineOfSight($shipPosition, $enemyPosition, $blockedHexes);
-				
+				$noLoS = Mathlib::checkLineOfSight($shipPosition, $enemyPosition, $blockedHexes);				
 
 				if(!$noLoS){ //The enemy unit can see this ship LoS not blocked.
 					$canStealth = false;
 					return $canStealth; //Just return, only need one enemy ship to have LoS to fail check.
 				}
 			}
+		}else{//Just return false, nothing to block LoS.			
+			$canStealth = false;
+			return $canStealth; 
 		}	
+
+		//Check for weapon fire.
+		foreach($ship->systems as $weapon){ 
+			if($weapon instanceof Weapon){
+				$firingOrders = $weapon->getFireOrders($gameData->turn);
+				foreach ($firingOrders as $fireOrder) { 
+					if($fireOrder->type == "normal"){ //Ballistics already handled in Phase 1, and shouldn't prevent re-stealth at end of turn.						
+						$canStealth = false;
+						return $canStealth; //Just return, fired in Firing Phase revealing itself again even without LoS. Although who know at what without LoS...
+					}	
+				}	
+			}
+		}
  
 		return $canStealth;
 	}	

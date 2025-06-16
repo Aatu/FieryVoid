@@ -1041,23 +1041,25 @@ window.shipManager = {
             return true; //If so, revealed.
         }            
 
-        if(gamedata.gamephase != 3) return false;  //Cannot try to detect based on distance until end of Movement e.g. Firing Phase.
+        if(gamedata.gamephase != 3) return false;  //Cannot only try to detect at start of Firing Phase
 
         // Check all enemy ships to see if any can detect this ship
         for (const otherShip of gamedata.ships) {
-            // Skip friendly ships
-            if (otherShip.team === ship.team) continue;
+            if (otherShip.team === ship.team) continue; // Skip friendly ships
+            if (gamedata.isTerrain(otherShip.shipSizeClass, otherShip.userid)) continue; //Skip Terrain 
+            if(shipManager.isDestroyed(otherShip)) continue; //Skip destroyed
 
             let totalDetection = 0;
 
             if (!otherShip.flight) {
+                if(shipManager.isDisabled(otherShip)) continue; //Skip disabled ships               
                 // Not a fighter — use scanner systems for detection
                 const standardScanners = shipManager.systems.getSystemListByName(otherShip, "scanner");
                 const elintScanners = shipManager.systems.getSystemListByName(otherShip, "elintScanner");
                 const scanners = [...standardScanners, ...elintScanners];
 
                 for (const scanner of scanners) {
-                    if (!shipManager.systems.isDestroyed(otherShip, scanner)) {
+                    if (!shipManager.systems.isDestroyed(otherShip, scanner) && !shipManager.power.isOfflineOnTurn(otherShip, scanner, gamedata.turn)) {
                         totalDetection += scanner.output;
                     }
                 }
@@ -1075,7 +1077,7 @@ window.shipManager = {
                 }
             } else {
                 // Fighter unit — use offensive bonus
-                totalDetection = otherShip.offensivebonus;
+                if(otherShip.offensivebonus) totalDetection = otherShip.offensivebonus;
             }
 
             // Get distance to the stealth ship and check line of sight
