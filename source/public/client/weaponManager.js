@@ -290,10 +290,11 @@ window.weaponManager = {
                 }
             }
         }
-
-        gamedata.selectedSystems.push(weapon);
-        shipWindowManager.setDataForSystem(ship, weapon);
+        shipWindowManager.setDataForSystem(ship, weapon);   
         webglScene.customEvent('WeaponSelected', { ship: ship, weapon: weapon });
+        //Moved to AFTER onWeaponSelected() in Fire phase strategy, to prevent prevent error when selecting a weapon and friendly fighter flight is selected unit - DK 6.25        
+        gamedata.selectedSystems.push(weapon); 
+     
     },
 
     isSelectedWeapon: function isSelectedWeapon(weapon) {
@@ -477,7 +478,7 @@ window.weaponManager = {
 
                     if(ship.Huge > 0){ //Cannot Target larger terrain.
                         $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="losBlocked"> CANNOT TARGET</span></div>').appendTo(f);
-                    }else if (loSBlocked) {
+                    }else if (loSBlocked && !weapon.hasSpecialLaunchHexCalculation) {
                         // LOS is blocked - only display the blocked message
                         $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="losBlocked"> LINE OF SIGHT BLOCKED</span></div>').appendTo(f);
                     }else if (weapon.hextarget) {
@@ -1452,12 +1453,12 @@ window.weaponManager = {
             loSBlocked = mathlib.checkLineOfSight(sPosShooter, sPosTarget, blockedLosHex);
         }
 
-        if(loSBlocked) return;
-
         var toUnselect = [];
         var splitTargeted = [];
         for (var i in gamedata.selectedSystems) {
             var weapon = gamedata.selectedSystems[i];
+
+            if(loSBlocked && !weapon.hasSpecialLaunchHexCalculation) continue;
 
             if (shipManager.systems.isDestroyed(selectedShip, weapon) || !weaponManager.isLoaded(weapon)) {
                 debug && console.log("Weapon destroyed or not loaded");
@@ -1697,26 +1698,27 @@ window.weaponManager = {
                 continue;
             }
 
-            //Check for Line of sight
-            var blockedLosHex = weaponManager.getBlockedHexes();
-            var loSBlocked = false;
-            if (blockedLosHex && blockedLosHex.length > 0) {
-                var sPosShooter = weaponManager.getFiringHex(selectedShip, weapon);
-                
-                loSBlocked = mathlib.checkLineOfSight(sPosShooter, hexpos, blockedLosHex);
-            }
-
-            if(loSBlocked){
-                confirm.error("No line of sight between firing ship and target hex.");	
-                return; //End work if no line of sight.
-            }
-
             var type = 'normal';
             if (weapon.ballistic) {
                 type = 'ballistic';
             }
 
             if (weaponManager.isPosOnWeaponArc(selectedShip, hexpos, weapon)) {
+
+                //Check for Line of sight
+                var blockedLosHex = weaponManager.getBlockedHexes();
+                var loSBlocked = false;
+                if (blockedLosHex && blockedLosHex.length > 0) {
+                    var sPosShooter = weaponManager.getFiringHex(selectedShip, weapon);
+                    
+                    loSBlocked = mathlib.checkLineOfSight(sPosShooter, hexpos, blockedLosHex);
+                }
+
+                if(loSBlocked){
+                    confirm.error("No line of sight between firing ship and target hex.");	
+                    return; //End work if no line of sight.
+                }
+
                 if (weapon.range === 0 || shipManager.getShipPosition(selectedShip).distanceTo(hexpos) <= weapon.range) {
                     weaponManager.removeFiringOrder(selectedShip, weapon);
                     for (var s = 0; s < weapon.guns; s++) {
@@ -2299,6 +2301,12 @@ window.weaponManager = {
         }
 
         return fires;
+    },
+
+    hasHexWeaponsSelected: function hasHexWeaponsSelected() {
+        return gamedata.selectedSystems.some(function (system) {
+            return system instanceof Weapon && system.hextarget === true;
+        });
     },
 
 
