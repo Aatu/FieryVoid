@@ -72,54 +72,6 @@ window.BallisticIconContainer = function () {
     };
 
 
-    BallisticIconContainer.prototype.onEvent = function (name, payload) {
-        var target = this['on' + name];
-        if (target && typeof target == 'function') {
-            target.call(this, payload);
-        }
-    };
-
-    BallisticIconContainer.prototype.onZoomEvent = function (payload) {
-        var zoom = payload.zoom;
-        if (zoom <= 0.5) {
-            this.zoomScale = 2 * zoom;
-            this.ballisticLineIcons.forEach(function (lineIcon) {
-                lineIcon.lineSprite.setLineWidth(this.zoomScale * 2);
-            }, this);
-        } else {
-            this.zoomScale = 1;
-        } 
-    };
-
-
-
-    BallisticIconContainer.prototype.hide = function () {
-        this.ballisticIcons.forEach(function (icon) {
-            if (icon.launchSprite) {
-                icon.launchSprite.hide();
-            }
-            if (icon.targetSprite) {
-                icon.targetSprite.hide();
-            }
-        });
-
-        return this;
-    };
-
-    BallisticIconContainer.prototype.show = function () {
-        this.ballisticIcons.forEach(function (icon) {
-            if (icon.launchSprite) {
-                icon.launchSprite.show();
-            }
-            if (icon.targetSprite) {
-                icon.targetSprite.show();
-            }
-        });
-
-        return this;
-    };
-
-
     function generateBallisticLines() {
         //Remove old line sprites when they are no longer required or being recreated.
         this.ballisticLineIcons = this.ballisticLineIcons.filter(function (lineIcon) {
@@ -246,10 +198,197 @@ window.BallisticIconContainer = function () {
     	
 	}		
 
-
     function updateBallisticIcon(icon, ballistic, iconContainer, turn) {
         icon.used = true;
     }
+
+    const getByLaunchPosition = (position, icons) => icons.find(icon => icon.launchPosition.x === position.x && icon.launchPosition.y === position.y)
+
+    const getByTargetIdOrTargetPosition = (position, targetId, icons) => icons.find(icon => position && ((icon.position.x === position.x && icon.position.y === position.y) || (targetId !== -1 && icon.targetId === targetId )) )
+
+    BallisticIconContainer.prototype.hide = function () {
+        this.ballisticIcons.forEach(function (icon) {
+            if (icon.launchSprite) {
+                icon.launchSprite.hide();
+            }
+            if (icon.targetSprite) {
+                icon.targetSprite.hide();
+            }
+        });
+
+        return this;
+    };
+
+    BallisticIconContainer.prototype.show = function () {
+        this.ballisticIcons.forEach(function (icon) {
+            if (icon.launchSprite) {
+                icon.launchSprite.show();
+            }
+            if (icon.targetSprite) {
+                icon.targetSprite.show();
+            }
+        });
+
+        return this;
+    };	
+
+    BallisticIconContainer.prototype.onEvent = function (name, payload) {
+        var target = this['on' + name];
+        if (target && typeof target == 'function') {
+            target.call(this, payload);
+        }
+    };
+
+    BallisticIconContainer.prototype.onZoomEvent = function (payload) {
+        var zoom = payload.zoom;
+        if (zoom <= 0.5) {
+            this.zoomScale = 2 * zoom;
+            this.ballisticLineIcons.forEach(function (lineIcon) {
+                lineIcon.lineSprite.setLineWidth(this.zoomScale * 2);
+            }, this);
+        } else {
+            this.zoomScale = 1;
+        } 
+    };
+
+    function getBallisticIcon(id) {
+        return this.ballisticIcons.filter(function (icon) {
+            return icon.id === id;
+        }).pop();
+    }
+
+
+    function createOrUpdateBallisticLines(ballistic, iconContainer, turn, replay = false) {
+        var lineIcon = getBallisticLineIcon.call(this, ballistic.id);
+
+	    if (lineIcon && ballistic.notes != 'PersistentEffect' && ballistic.notes != 'Split') {//We want Persistent Effects to show up in initial Orders! - DK 09.24
+	        if(replay){
+	        	createBallisticLineIcon.call(this, ballistic, iconContainer, turn, this.scene, replay);	        	   	
+			}else{	
+				updateBallisticLineIcon.call(this, lineIcon, ballistic, iconContainer, turn);
+			}	
+	    } else {   	
+	        if(ballistic.notes != 'PersistentEffect') createBallisticLineIcon.call(this, ballistic, iconContainer, turn, this.scene, replay);
+	    }
+    	
+	}	
+
+
+    function updateBallisticLineIcon(lineIcon, ballistic, iconContainer, turn) {
+        lineIcon.used = true;
+
+		if(ballistic.targetid === -1) return; //No need to update further for AoE ballistics (they don't move) 
+
+		var wasVisible = false; //Variable to track if destroyed lines were visible. If one was, they all were.
+
+		// Destroy lines where the ship is either the target or the shooter.  Ship being checked should only ever be one or the other.
+		if (lineIcon.lineSprite.isVisible) wasVisible = true;
+		lineIcon.lineSprite.destroy();
+		this.scene.remove(lineIcon.lineSprite.mesh);
+
+		//Now recreate them using usual method.
+		if(ballistic.notes != 'PersistentEffect') createBallisticLineIcon.call(this, ballistic, iconContainer, gamedata.turn, this.scene);
+
+		//Check if lines were visible and if so continue to show.
+		if(!wasVisible){
+			lineIcon.lineSprite.hide();
+			lineIcon.lineSprite.isVisible = false;	 	            
+		}else{
+			lineIcon.lineSprite.show();
+			lineIcon.lineSprite.isVisible = true;	            		
+		}
+    }	
+
+	//New method that toggles Ballistic Lines on and off.
+	BallisticIconContainer.prototype.toggleBallisticLines = function (ships) {
+	    if (this.ballisticLineIcons) {
+	        this.ballisticLineIcons.forEach(function (lineIcon) {
+	            if (lineIcon.lineSprite) {
+		            if (ships.some(ship => ship.id === lineIcon.shooterId)) {
+	            		if (!lineIcon.lineSprite.isVisible){		                	
+		                    lineIcon.lineSprite.show();
+	            			lineIcon.lineSprite.isVisible = true;	                    
+		                }else{
+		                    lineIcon.lineSprite.hide();
+	            			lineIcon.lineSprite.isVisible = false;	 		                    		             	
+		                }
+					}    
+	            }	            
+	        });
+	    }
+	    return this;
+	};
+
+    BallisticIconContainer.prototype.hideLines = function (ships) {
+        this.ballisticLineIcons.forEach(function (lineIcon) {
+	        if (lineIcon.lineSprite) {
+		        if (ships.some(ship => ship.id === lineIcon.shooterId)) {
+					lineIcon.lineSprite.hide();
+	        		lineIcon.lineSprite.isVisible = false;
+				}
+			}			 	
+        });
+
+        return this;
+    };
+
+    BallisticIconContainer.prototype.showLines = function (ships) {
+        this.ballisticLineIcons.forEach(function (lineIcon) {
+	        if (lineIcon.lineSprite) {
+		        if (ships.some(ship => ship.id === lineIcon.shooterId)) {        	
+					lineIcon.lineSprite.show();
+			        lineIcon.lineSprite.isVisible = true;
+				}
+			}		        	 	
+        });
+
+        return this;
+    };
+
+	//Called during movement phase to recreate line after a target ship moves.
+    BallisticIconContainer.prototype.updateLinesForShip = function (ship, iconContainer) {
+
+		var wasVisibleTarget = false; //Variable to track if destroyed lines were visible. If one was, they all were.
+		//var wasVisibleShooter = false; //Variable to track if destroyed lines were visible. If one was, they all were.
+		
+		this.ballisticLineIcons = this.ballisticLineIcons.filter((lineIcon) => {
+			// Destroy lines where the ship is either the target or the shooter.  Ship being checked should only ever be one or the other.
+			if (lineIcon.targetId === ship.id) {
+			    if (lineIcon.lineSprite.isVisible) wasVisibleTarget = true;
+			    this.scene.remove(lineIcon.lineSprite.mesh);
+			    lineIcon.lineSprite.destroy();
+			    return false;
+			}/*else if (lineIcon.shooterId === ship.id) { //When would we ever need to destroy origin lines, only target can move...?
+			    if (lineIcon.lineSprite.isVisible) wasVisibleShooter = true;
+			    this.scene.remove(lineIcon.lineSprite.mesh);
+			    lineIcon.lineSprite.destroy();
+			    return false;
+			}*/else{		    
+		    	return true; // Keep the lineIcon if the condition isn't met
+			}
+		});
+
+		//Now recreate line using usual method.
+        var allBallistics = weaponManager.getAllFireOrdersForAllShipsForTurn(gamedata.turn, 'ballistic');			
+		allBallistics.forEach(function (ballistic) {
+			if (ship.id === ballistic.targetid) {				
+				createOrUpdateBallisticLines.call(this, ballistic, iconContainer, gamedata.turn);
+			}
+		}, this);
+
+		//Check if lines were visible and if so continue to show.
+        this.ballisticLineIcons.forEach(function (lineIcon) {
+            if (lineIcon.targetId === ship.id) {
+	            if(!wasVisibleTarget){
+	            	lineIcon.lineSprite.hide();
+	            	lineIcon.lineSprite.isVisible = false;	 	            
+            	}else{
+	            	lineIcon.lineSprite.show();
+	            	lineIcon.lineSprite.isVisible = true;	            		
+				}
+            }
+        });        
+    };
 
 
     function createBallisticIcon(ballistic, iconContainer, turn, scene, replay = false) {
@@ -260,7 +399,6 @@ window.BallisticIconContainer = function () {
 			if(ballistic.damageclass == 'Sweeping')	return;	//For Shadow Slicers, Gravs Beams etc. Let's just rely on lines and targeting tooltip and not clutter with Hex colours.	
 
 	        var shooterIcon = iconContainer.getById(ballistic.shooterid);	
-//	        if(!shooterIcon) shooterIcon = iconContainer.getById(ballistic.shooter.id); //Do I still need?
 			var targetType = 'hexRed'; //Default red hex if none of the later conditions are true.
 	        var launchPosition = this.coordinateConverter.fromHexToGame(shooterIcon.getFirstMovementOnTurn(turn).position);
 	        var text = ""; //Additional variable that can pass text to new BallisticSprite()
@@ -342,8 +480,7 @@ window.BallisticIconContainer = function () {
 					case 'Thought Wave': //Mindrider Thoughwave
 					        targetType = 'hexPurple';
 					        text = "Thought Wave";
-					        textColour = "#bc3782"; //Actually a pink-purple, as it blends with luanch hex Orange!
-	//				        iconImage = "./img/systemicons/ThoughtWaveICON.png";  //Example image to pass	 		        
+					        textColour = "#bc3782"; //Actually a pink-purple, as it blends with luanch hex Orange!	 		        
 					break;													        
 					}				
 				}
@@ -362,11 +499,6 @@ window.BallisticIconContainer = function () {
 					targetType = 'hexGreen';
 					iconImage = "./img/allySupport.png"; 		        
 				break;
-/*				case 'Sweeping': //Shadow Slicers, remove hex target for now and rely on just lines and targeting tooltip I think.
-					targetType = 'hexClear'; //Adding hexes for Sweeping weapons created a bit too much clutter, replace with clear hex.
-					targetType = 'hexPurple'; //Default for slicers
-					if(weapon.weaponClass == "Gravitic") targetType = 'hexGreen'; //But now other weapon types use sweeping.			        
-				break;		*/	
 				}
 			}		 
 		} 
@@ -426,153 +558,10 @@ window.BallisticIconContainer = function () {
 		
     }//endof createBallisticIcon()
 
-    const getByLaunchPosition = (position, icons) => icons.find(icon => icon.launchPosition.x === position.x && icon.launchPosition.y === position.y)
-
-    const getByTargetIdOrTargetPosition = (position, targetId, icons) => icons.find(icon => position && ((icon.position.x === position.x && icon.position.y === position.y) || (targetId !== -1 && icon.targetId === targetId )) )
-
-
-    function getBallisticIcon(id) {
-        return this.ballisticIcons.filter(function (icon) {
-            return icon.id === id;
-        }).pop();
-    }
-
-	//New code to create ballistic lines between launches and targets - DK 12.24
-    BallisticIconContainer.prototype.updateLinesForShip = function (ship, iconContainer) {
-
-		var wasVisibleTarget = false; //Variable to track if destroyed lines were visible. If one was, they all were.
-		var wasVisibleShooter = false; //Variable to track if destroyed lines were visible. If one was, they all were.
-		
-		this.ballisticLineIcons = this.ballisticLineIcons.filter((lineIcon) => {
-			// Destroy lines where the ship is either the target or the shooter.  Ship being checked should only ever be one or the other.
-			if (lineIcon.targetId === ship.id) {
-			    if (lineIcon.lineSprite.isVisible) wasVisibleTarget = true;
-			    this.scene.remove(lineIcon.lineSprite.mesh);
-			    lineIcon.lineSprite.destroy();
-			    return false;
-			}/*else if (lineIcon.shooterId === ship.id) { //When would we ever need to destroy origin lines, only target can move...?
-			    if (lineIcon.lineSprite.isVisible) wasVisibleShooter = true;
-			    this.scene.remove(lineIcon.lineSprite.mesh);
-			    lineIcon.lineSprite.destroy();
-			    return false;
-			}*/else{		    
-		    	return true; // Keep the lineIcon if the condition isn't met
-			}
-		});
-
-		//Now recreate line using usual method.
-        var allBallistics = weaponManager.getAllFireOrdersForAllShipsForTurn(gamedata.turn, 'ballistic');			
-		allBallistics.forEach(function (ballistic) {
-//			if (ship.id === ballistic.targetid || ship.id === ballistic.shooterid) {
-			if (ship.id === ballistic.targetid) {				
-				createOrUpdateBallisticLines.call(this, ballistic, iconContainer, gamedata.turn);
-			}
-		}, this);
-
-		//Check if lines were visible and if so continue to show.
-        this.ballisticLineIcons.forEach(function (lineIcon) {
-            if (lineIcon.targetId === ship.id) {
-	            if(!wasVisibleTarget){
-	            	lineIcon.lineSprite.hide();
-	            	lineIcon.lineSprite.isVisible = false;	 	            
-            	}else{
-	            	lineIcon.lineSprite.show();
-	            	lineIcon.lineSprite.isVisible = true;	            		
-				}
-            }
-        });        
-    };
-
-	//New method that toggles Ballistic Lines on and off.
-	BallisticIconContainer.prototype.toggleBallisticLines = function (ships) {
-	    if (this.ballisticLineIcons) {
-	        this.ballisticLineIcons.forEach(function (lineIcon) {
-	            if (lineIcon.lineSprite) {
-		            if (ships.some(ship => ship.id === lineIcon.shooterId)) {
-	            		if (!lineIcon.lineSprite.isVisible){		                	
-		                    lineIcon.lineSprite.show();
-	            			lineIcon.lineSprite.isVisible = true;	                    
-		                }else{
-		                    lineIcon.lineSprite.hide();
-	            			lineIcon.lineSprite.isVisible = false;	 		                    		             	
-		                }
-					}    
-	            }	            
-	        });
-	    }
-	    return this;
-	};
-
-    BallisticIconContainer.prototype.hideLines = function (ships) {
-        this.ballisticLineIcons.forEach(function (lineIcon) {
-	        if (lineIcon.lineSprite) {
-		        if (ships.some(ship => ship.id === lineIcon.shooterId)) {
-					lineIcon.lineSprite.hide();
-	        		lineIcon.lineSprite.isVisible = false;
-				}
-			}			 	
-        });
-
-        return this;
-    };
-
-    BallisticIconContainer.prototype.showLines = function (ships) {
-        this.ballisticLineIcons.forEach(function (lineIcon) {
-	        if (lineIcon.lineSprite) {
-		        if (ships.some(ship => ship.id === lineIcon.shooterId)) {        	
-					lineIcon.lineSprite.show();
-			        lineIcon.lineSprite.isVisible = true;
-				}
-			}		        	 	
-        });
-
-        return this;
-    };
-	
-
-    function createOrUpdateBallisticLines(ballistic, iconContainer, turn, replay = false) {
-        var lineIcon = getBallisticLineIcon.call(this, ballistic.id);
-
-	    if (lineIcon && ballistic.notes != 'PersistentEffect' && ballistic.notes != 'Split') {//We want Persistent Effects to show up in initial Orders! - DK 09.24
-	        if(replay){
-	        	createBallisticLineIcon.call(this, ballistic, iconContainer, turn, this.scene, replay);	        	   	
-			}else{	
-				updateBallisticLineIcon.call(this, lineIcon, ballistic, iconContainer, turn);
-			}	
-	    } else {   	
-	        if(ballistic.notes != 'PersistentEffect') createBallisticLineIcon.call(this, ballistic, iconContainer, turn, this.scene, replay);
-	    }
-    	
-	}	
-
-	//Called during movement phase to recreate line after a target ship moves.
-    function updateBallisticLineIcon(lineIcon, ballistic, iconContainer, turn) {
-        lineIcon.used = true;
-
-		if(ballistic.targetid === -1) return; //No need to update further for AoE ballistics (they don't move) 
-
-		var wasVisible = false; //Variable to track if destroyed lines were visible. If one was, they all were.
-
-		// Destroy lines where the ship is either the target or the shooter.  Ship being checked should only ever be one or the other.
-		if (lineIcon.lineSprite.isVisible) wasVisible = true;
-		lineIcon.lineSprite.destroy();
-		this.scene.remove(lineIcon.lineSprite.mesh);
-
-		//Now recreate them using usual method.
-		if(ballistic.notes != 'PersistentEffect') createBallisticLineIcon.call(this, ballistic, iconContainer, gamedata.turn, this.scene);
-
-		//Check if lines were visible and if so continue to show.
-		if(!wasVisible){
-			lineIcon.lineSprite.hide();
-			lineIcon.lineSprite.isVisible = false;	 	            
-		}else{
-			lineIcon.lineSprite.show();
-			lineIcon.lineSprite.isVisible = true;	            		
-		}
-    }	
-
 
     function createBallisticLineIcon(ballistic, iconContainer, turn, scene, replay = false) {
+
+	    if (ballistic.targetid === -1 && ballistic.x == "null" && ballistic.y == "null") return; // Skip creation of enemy hidden weapons, can cause visual bugs.
 
 	    var shooterIcon = null;		
 	    shooterIcon = iconContainer.getById(ballistic.shooterid);        
@@ -581,13 +570,15 @@ window.BallisticIconContainer = function () {
 
 		//Get Launch Position and Target Position
 	    var launchPosition = this.coordinateConverter.fromHexToGame(shooterIcon.getFirstMovementOnTurn(turn).position);
-	        						
+
 		var targetPosition = null;
+
 	    if(targetIcon && ballistic.targetid !== -1){
 			targetPosition = this.coordinateConverter.fromHexToGame(targetIcon.getLastMovement(turn).position);
 	    }else{
 	        targetPosition = this.coordinateConverter.fromHexToGame(new hexagon.Offset(ballistic.x, ballistic.y));
 		}
+
 		//Slightly different method for Replays.  Could I make a shipManager.movement.getLastCommitedMoveONTURN(targetIcon.ship) function???	
 		if(replay && targetIcon) targetPosition = this.coordinateConverter.fromHexToGame(targetIcon.getLastMovementOnTurn(turn).position);	
 
@@ -603,14 +594,14 @@ window.BallisticIconContainer = function () {
 		if(!shooter.flight){ //Don't create target hex for certain ship weapons.
 			if(weapon.noTargetHexIcon) targetPosition = launchPosition;
 		}
-			
+
+		//Don't create a line if ballistic is in same hex (or positions are null/undefined.
 		if (launchPosition == null || targetPosition == null || 
 		    (launchPosition.x === targetPosition.x && 
 		     launchPosition.y === targetPosition.y && 
 		     launchPosition.z === targetPosition.z)) {
-//		    console.warn("Skipped creating line sprite for zero-length line:", ballistic.id);
 		    return;
-		} //New check to NOT create a line if ballistic is in same hex (or positions are null/undefined.
+		} 
 		    	
 		var type = 'white'; //Default white line if none of the later conditions are true.
 		if(gamedata.isMyOrTeamOneShip(shooterIcon.ship)){
@@ -621,7 +612,7 @@ window.BallisticIconContainer = function () {
 
 		//Create line for Proximity Laser from launcher targeted hex.
 		if (weapon && weapon.hasSpecialLaunchHexCalculation) {
-			var launcherHex = weapon.getFiringHex(shooter, weapon);
+			var launcherHex = weaponManager.getFiringHex(shooter, weapon);
 			launchPosition = this.coordinateConverter.fromHexToGame(launcherHex);
 			type = 'red';
 		}
