@@ -392,6 +392,252 @@ window.BallisticIconContainer = function () {
 
 
 	//To create coloured hexes signifying ballistic launches and other effects.
+	function createBallisticIcon(ballistic, iconContainer, turn, scene, replay = false) {
+		if (replay) {
+			if (ballistic.damageclass === 'PersistentEffectPlasma' && ballistic.targetid === -1 && ballistic.notes !== 'PlasmaCloud') return;
+		}
+
+		if (ballistic.damageclass === 'Sweeping') return;
+
+		const shooterIcon = iconContainer.getById(ballistic.shooterid);
+		if (!shooterIcon) return;
+
+		const shooter = shooterIcon.ship;
+		let targetType = 'hexRed';
+		let text = "";
+		let textColour = "";
+		let iconImage = null;
+		let launchPosition = this.coordinateConverter.fromHexToGame(
+			ballistic.type === 'normal'
+				? shooterIcon.getLastMovement().position
+				: shooterIcon.getFirstMovementOnTurn(turn).position
+		);
+
+		let weapon = null;
+		let modeName = null;
+
+		if (!shooter.flight && ballistic.weaponid in shooter.systems) {
+			weapon = shooter.systems[ballistic.weaponid];
+			modeName = weapon?.firingModes?.[ballistic.firingMode] || null;
+		}
+
+		// Mode-specific icon logic
+		if (modeName) {
+			const modeMap = {
+				'Shredder':        { type: 'hexBlue',  text: 'Shredder',       color: '#00b8e6' },
+				'Defensive Plasma Web': { type: 'hexGreen', color: '',             color: '#787800' },
+				'Anti-Fighter Plasma Web': { type: 'hexGreen', text: 'Plasma',     color: '#787800' },
+				'Psychic Field':   { type: 'hexRed',   text: 'Psychic',        color: '#e6140a' },
+				'Second Sight':    { type: 'hexPurple',text: 'Second Sight',   color: '#7f00ff' },
+				'Energy Mine':     { type: 'hexRed',   text: 'Energy Mine',    color: '#e6140a' },
+				'Ion Storm':       { type: 'hexPurple',text: 'Ion Field',      color: '#7f00ff' },
+				'Jammer':          { type: 'hexPurple',text: 'Jammer',         color: '#7f00ff' },
+				'Proximity Launcher': { type: 'hexRed',text: 'Proximity Laser',color: '#e6140a' },
+				'Thought Wave':    { type: 'hexPurple',text: 'Thought Wave',   color: '#bc3782' }
+			};
+
+			const match = modeMap[modeName];
+			if (match) {
+				targetType = match.type;
+				text = match.text || text;
+				textColour = match.color || textColour;
+			}
+		}
+
+		// Damage class-based override logic
+		if (ballistic.damageclass && modeName) {
+			switch (ballistic.damageclass) {
+				case 'MultiModeHex':
+					targetType = 'hexRed';
+					text = modeName;
+					textColour = '#e6140a';
+					break;
+				case 'support':
+					targetType = 'hexGreen';
+					iconImage = './img/allySupport.png';
+					break;
+			}
+		}
+
+		let targetPosition = null;
+		let targetIcon = null;
+
+		if (ballistic.targetid === -1 && ballistic.x !== "null" && ballistic.y !== "null") {
+			targetPosition = this.coordinateConverter.fromHexToGame(new hexagon.Offset(ballistic.x, ballistic.y));
+		} else if (ballistic.targetid && ballistic.targetid !== -1) {
+			targetIcon = iconContainer.getById(ballistic.targetid);
+			targetPosition = { x: 0, y: 0 }; // placeholder — the mesh will handle it
+		}
+
+		if (!shooter.flight && weapon?.noTargetHexIcon) {
+			targetPosition = launchPosition;
+		}
+
+		// LAUNCH SPRITE
+		let launchSprite = null;
+		if (
+			!getByLaunchPosition(launchPosition, this.ballisticIcons) &&
+			ballistic.notes !== 'PersistentEffect' &&
+			ballistic.type !== 'normal' &&
+			ballistic.damageclass !== 'support'
+		) {
+			const launchType = gamedata.isMyOrTeamOneShip(shooter) ? 'hexYellow' : 'hexOrange';
+			launchSprite = new BallisticSprite(launchPosition, launchType);
+			scene.add(launchSprite.mesh);
+		}
+
+		// TARGET SPRITE
+		let targetSprite = null;
+		if (!getByTargetIdOrTargetPosition(targetPosition, ballistic.targetId, this.ballisticIcons)) {
+			if (targetPosition) {
+				targetSprite = new BallisticSprite(targetPosition, targetType, text, textColour, iconImage);
+				if (targetIcon) {
+					targetIcon.mesh.add(targetSprite.mesh);
+				} else {
+					scene.add(targetSprite.mesh);
+				}
+			}
+		}
+
+		this.ballisticIcons.push({
+			id: ballistic.id,
+			shooterId: ballistic.shooterid,
+			targetId: ballistic.targetid,
+			launchPosition,
+			position: new hexagon.Offset(ballistic.x, ballistic.y),
+			launchSprite,
+			targetSprite,
+			used: true
+		});
+	}
+
+
+	//To create ballistic lines between launches and targets.
+	function createBallisticLineIcon(ballistic, iconContainer, turn, scene, replay = false) {
+
+		if (ballistic.targetid === -1 && ballistic.x == "null" && ballistic.y == "null") return; // Skip creation of enemy hidden weapons, can cause visual bugs.
+
+		const shooterIcon = iconContainer.getById(ballistic.shooterid);
+		const targetIcon = iconContainer.getById(ballistic.targetid);
+		if (!shooterIcon) return;
+
+		let shooter = shooterIcon.ship;
+		let weapon = !shooter.flight ? shooter.systems[ballistic.weaponid] : null;
+		let modeName = weapon?.firingModes?.[ballistic.firingMode] ?? null;
+
+		// Get launch position (may be overwritten later)
+		let launchPosition = this.coordinateConverter.fromHexToGame(shooterIcon.getFirstMovementOnTurn(turn)?.position);
+		let targetPosition;
+
+		// Determine target position
+		if (replay && targetIcon) {
+			targetPosition = this.coordinateConverter.fromHexToGame(targetIcon.getLastMovementOnTurn(turn)?.position);
+		} else if (targetIcon && ballistic.targetid !== -1) {
+			targetPosition = this.coordinateConverter.fromHexToGame(targetIcon.getLastMovement(turn)?.position);
+		} else {
+			targetPosition = this.coordinateConverter.fromHexToGame(new hexagon.Offset(ballistic.x, ballistic.y));
+		}
+
+		// Handle special case where target hex is not used
+		if (weapon?.noTargetHexIcon) {
+			targetPosition = launchPosition;
+		}
+
+		// If either position is invalid or same, skip drawing
+		if (!launchPosition || !targetPosition || (
+			launchPosition.x === targetPosition.x &&
+			launchPosition.y === targetPosition.y &&
+			launchPosition.z === targetPosition.z
+		)) {
+			return;
+		}
+
+		// Determine line color type
+		let type = gamedata.isMyOrTeamOneShip(shooter) ? 'yellow' : 'orange';
+
+		// Override for special launcher hex logic
+		if (weapon?.hasSpecialLaunchHexCalculation) {
+			const launcherHex = weaponManager.getFiringHex(shooter, weapon);
+			launchPosition = this.coordinateConverter.fromHexToGame(launcherHex);
+			type = 'red';
+		}
+
+		// Handle specific modeName cases
+		if (ballistic.type === 'normal') {
+			launchPosition = this.coordinateConverter.fromHexToGame(shooterIcon.getLastMovement(turn)?.position);
+
+			const modeColorMap = {
+				'Shredder': 'blue',
+				'Defensive Plasma Web': 'green',
+				'Anti-Fighter Plasma Web': 'green'
+			};
+
+			if (modeColorMap[modeName]) {
+				type = modeColorMap[modeName];
+			} else {
+				type = 'white';
+			}
+		}
+
+		// Handle damage class overrides
+		if (ballistic.damageclass) {
+			switch (ballistic.damageclass) {
+				case 'support':
+					type = 'green';
+					launchPosition = this.coordinateConverter.fromHexToGame(shooterIcon.getLastMovement(turn)?.position);
+					break;
+
+				case 'Sweeping':
+					type = 'purple';
+					if (weapon?.weaponClass === 'Gravitic') type = 'green';
+					else if (weapon?.weaponClass === 'Psychic') type = 'red';
+					else if (weapon?.weaponClass === 'Molecular' && !(weapon instanceof MolecularSlicerBeamL)) type = 'blue';
+					else if (weapon?.weaponClass === 'Particle') type = 'orange';
+					else if (weapon?.weaponClass === 'Electromagnetic') type = 'yellow';
+					break;
+			}
+		}
+
+		const lineSprite = new BallisticLineSprite(
+			launchPosition,
+			targetPosition,
+			3 * this.zoomScale,
+			-3,
+			getLineColorByType(type),
+			0.5
+		);
+
+		const isFriendly = gamedata.isMyOrTeamOneShip(shooter);
+
+		this.ballisticLineIcons.push({
+			id: ballistic.id,
+			shooterId: ballistic.shooterid,
+			targetId: ballistic.targetid,
+			lineSprite: lineSprite,
+			used: true,
+			isFriendly: isFriendly
+		});
+
+		scene.add(lineSprite.mesh);
+
+		// Control line visibility based on team and current toggle state
+		const isFriendlyLinesVisible = this.ballisticLineIcons.some(
+			icon => icon.lineSprite?.isVisible && icon.isFriendly
+		);
+		const isEnemyLinesVisible = this.ballisticLineIcons.some(
+			icon => icon.lineSprite?.isVisible && !icon.isFriendly
+		);
+
+		const currentIcon = this.ballisticLineIcons.find(icon => icon.id === ballistic.id);
+		if (currentIcon) {
+			currentIcon.lineSprite.isVisible =
+				(isFriendly && isFriendlyLinesVisible) ||
+				(!isFriendly && isEnemyLinesVisible);
+		}
+	}
+
+	
+/*	
     function createBallisticIcon(ballistic, iconContainer, turn, scene, replay = false) {
 
 			if(replay){
@@ -558,131 +804,7 @@ window.BallisticIconContainer = function () {
     
 		
     }//endof createBallisticIcon()
-
-
-	//To create ballistic lines between launches and targets.
-	function createBallisticLineIcon(ballistic, iconContainer, turn, scene, replay = false) {
-
-		if (ballistic.targetid === -1 && ballistic.x == "null" && ballistic.y == "null") return; // Skip creation of enemy hidden weapons, can cause visual bugs.
-
-		const shooterIcon = iconContainer.getById(ballistic.shooterid);
-		const targetIcon = iconContainer.getById(ballistic.targetid);
-		if (!shooterIcon) return;
-
-		let shooter = shooterIcon.ship;
-		let weapon = !shooter.flight ? shooter.systems[ballistic.weaponid] : null;
-		let modeName = weapon?.firingModes?.[ballistic.firingMode] ?? null;
-
-		// Get launch position (may be overwritten later)
-		let launchPosition = this.coordinateConverter.fromHexToGame(shooterIcon.getFirstMovementOnTurn(turn)?.position);
-		let targetPosition;
-
-		// Determine target position
-		if (replay && targetIcon) {
-			targetPosition = this.coordinateConverter.fromHexToGame(targetIcon.getLastMovementOnTurn(turn)?.position);
-		} else if (targetIcon && ballistic.targetid !== -1) {
-			targetPosition = this.coordinateConverter.fromHexToGame(targetIcon.getLastMovement(turn)?.position);
-		} else {
-			targetPosition = this.coordinateConverter.fromHexToGame(new hexagon.Offset(ballistic.x, ballistic.y));
-		}
-
-		// Handle special case where target hex is not used
-		if (weapon?.noTargetHexIcon) {
-			targetPosition = launchPosition;
-		}
-
-		// If either position is invalid or same, skip drawing
-		if (!launchPosition || !targetPosition || (
-			launchPosition.x === targetPosition.x &&
-			launchPosition.y === targetPosition.y &&
-			launchPosition.z === targetPosition.z
-		)) {
-			return;
-		}
-
-		// Determine line color type
-		let type = gamedata.isMyOrTeamOneShip(shooter) ? 'yellow' : 'orange';
-
-		// Override for special launcher hex logic
-		if (weapon?.hasSpecialLaunchHexCalculation) {
-			const launcherHex = weaponManager.getFiringHex(shooter, weapon);
-			launchPosition = this.coordinateConverter.fromHexToGame(launcherHex);
-			type = 'red';
-		}
-
-		// Handle specific modeName cases
-		if (ballistic.type === 'normal') {
-			launchPosition = this.coordinateConverter.fromHexToGame(shooterIcon.getLastMovement(turn)?.position);
-
-			const modeColorMap = {
-				'Shredder': 'blue',
-				'Defensive Plasma Web': 'green',
-				'Anti-Fighter Plasma Web': 'green'
-			};
-
-			if (modeColorMap[modeName]) {
-				type = modeColorMap[modeName];
-			} else {
-				type = 'white';
-			}
-		}
-
-		// Handle damage class overrides
-		if (ballistic.damageclass) {
-			switch (ballistic.damageclass) {
-				case 'support':
-					type = 'green';
-					launchPosition = this.coordinateConverter.fromHexToGame(shooterIcon.getLastMovement(turn)?.position);
-					break;
-
-				case 'Sweeping':
-					type = 'purple';
-					if (weapon?.weaponClass === 'Gravitic') type = 'green';
-					else if (weapon?.weaponClass === 'Psychic') type = 'red';
-					else if (weapon?.weaponClass === 'Molecular' && !(weapon instanceof MolecularSlicerBeamL)) type = 'blue';
-					else if (weapon?.weaponClass === 'Particle') type = 'orange';
-					else if (weapon?.weaponClass === 'Electromagnetic') type = 'yellow';
-					break;
-			}
-		}
-
-		const lineSprite = new BallisticLineSprite(
-			launchPosition,
-			targetPosition,
-			3 * this.zoomScale,
-			-3,
-			getLineColorByType(type),
-			0.5
-		);
-
-		const isFriendly = gamedata.isMyOrTeamOneShip(shooter);
-
-		this.ballisticLineIcons.push({
-			id: ballistic.id,
-			shooterId: ballistic.shooterid,
-			targetId: ballistic.targetid,
-			lineSprite: lineSprite,
-			used: true,
-			isFriendly: isFriendly
-		});
-
-		scene.add(lineSprite.mesh);
-
-		// Control line visibility based on team and current toggle state
-		const isFriendlyLinesVisible = this.ballisticLineIcons.some(
-			icon => icon.lineSprite?.isVisible && icon.isFriendly
-		);
-		const isEnemyLinesVisible = this.ballisticLineIcons.some(
-			icon => icon.lineSprite?.isVisible && !icon.isFriendly
-		);
-
-		const currentIcon = this.ballisticLineIcons.find(icon => icon.id === ballistic.id);
-		if (currentIcon) {
-			currentIcon.lineSprite.isVisible =
-				(isFriendly && isFriendlyLinesVisible) ||
-				(!isFriendly && isEnemyLinesVisible);
-		}
-	}
+*/
 
 /*
     function createBallisticLineIcon(ballistic, iconContainer, turn, scene, replay = false) {
