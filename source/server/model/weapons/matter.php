@@ -177,7 +177,7 @@
 		}
 		$this->data["Special"] .= "Weapon misses automatically except vs Speed 0 Enormous units. "     
 			."<br>Weapon also misses automatically if launching unit speed is > 0. "  
-			."<br>Weapon always hits Structure."
+			."<br>When weapon hits a target, will always damage its structure."
 			."<br>Weapon can be intercepted without degradation (like ballistics)."; 
 	}	    
 
