@@ -3,50 +3,35 @@
 window.BallisticIconContainer = function () {
 
     function BallisticIconContainer(coordinateConverter, scene) {
-        this.ballisticIcons = [];
-        this.ballisticLineIcons = []
         this.coordinateConverter = coordinateConverter;
         this.scene = scene;
         this.zoomScale = 1;
+        this.ballisticIcons = [];
+        this.ballisticLineIcons = [];
         this.hexNumberIcons = [];
         this.hexNumbersGenerated = false;
     }
 
     BallisticIconContainer.prototype.consumeGamedata = function (gamedata, iconContainer, replayData = null) {
-        this.ballisticIcons.forEach(function (ballisticIcon) {
-        	if(gamedata.gamephase !== 1) ballisticIcon.launchPosition = []; //If not cleared, doesn't always display launch hex between Initial and Movement/Firing without browser refresh - DK 12.24
-            ballisticIcon.used = false;
+        this.ballisticIcons.forEach(icon => {
+            if (gamedata.gamephase !== 1) icon.launchPosition = [];
+            icon.used = false;
         });
 
-        this.ballisticLineIcons.forEach(function (lineIcon) {
-            lineIcon.used = false;
+        this.ballisticLineIcons.forEach(icon => icon.used = false);
+
+        const ballistics = replayData ?? weaponManager.getAllFireOrdersForAllShipsForTurn(gamedata.turn, 'ballistic');
+
+        ballistics.forEach(ballistic => {
+            if (ballistic.turn === gamedata.turn || !replayData) {
+                createOrUpdateBallistic.call(this, ballistic, iconContainer, gamedata.turn, !!replayData);
+                createOrUpdateBallisticLines.call(this, ballistic, iconContainer, gamedata.turn, !!replayData);
+            }
         });
-               
-		if(replayData){ //Pass true marker for Replay
-			var allBallistics = replayData;
-			
-	        allBallistics.forEach(function (ballistic) {
-				if(ballistic.turn === gamedata.turn){ 
-		            createOrUpdateBallistic.call(this, ballistic, iconContainer, gamedata.turn, true); 
-		        	createOrUpdateBallisticLines.call(this, ballistic, iconContainer, gamedata.turn, true);
-				}	            
-	        }, this);
-					
-		} else {
-        	var allBallistics = weaponManager.getAllFireOrdersForAllShipsForTurn(gamedata.turn, 'ballistic');			
-	        allBallistics.forEach(function (ballistic) {
-	            createOrUpdateBallistic.call(this, ballistic, iconContainer, gamedata.turn);
-	            createOrUpdateBallisticLines.call(this, ballistic, iconContainer, gamedata.turn);
-	        }, this);
-		}
-		
-        this.ballisticIcons = this.ballisticIcons.filter(function (icon) {
+
+        this.ballisticIcons = this.ballisticIcons.filter(icon => {
             if (!icon.used) {
-                
-                if (icon.launchSprite) {
-                    this.scene.remove(icon.launchSprite.mesh);
-                }
-
+                if (icon.launchSprite) this.scene.remove(icon.launchSprite.mesh);
                 if (icon.targetSprite) {
                     if (icon.targetId !== -1) {
                         iconContainer.getById(icon.targetId).mesh.remove(icon.targetSprite.mesh);
@@ -56,199 +41,134 @@ window.BallisticIconContainer = function () {
                 }
                 return false;
             }
-
             return true;
-        }, this);
+        });
 
-		//Now create perimter hex icons to illustrate the hexes occupied by really large terrain occupy.
-		generateBallisticLines.call(this);
-
-		//Now create perimter hex icons to illustrate the hexes occupied by really large terrain occupy.
-		generateTerrainHexes.call(this, gamedata);
-
-		//Crearte blue hex icons for where ships are jumping in later.
-		generateReinforcementHexes.call(this, gamedata);
-
+        generateBallisticLines.call(this);
+        generateTerrainHexes.call(this, gamedata);
+        generateReinforcementHexes.call(this, gamedata);
     };
 
 
     function generateBallisticLines() {
-        //Remove old line sprites when they are no longer required or being recreated.
-        this.ballisticLineIcons = this.ballisticLineIcons.filter(function (lineIcon) {
-            if (!lineIcon.used) {
-            	if (lineIcon.lineSprite) {
-                	this.scene.remove(lineIcon.lineSprite.mesh);           	
-				}
-			return false;	
-			}	
+        const oldIcons = this.ballisticLineIcons;
+        const isFriendlyLinesVisible = oldIcons.some(icon => icon.lineSprite?.isVisible && icon.isFriendly);
+        const isEnemyLinesVisible = oldIcons.some(icon => icon.lineSprite?.isVisible && !icon.isFriendly);
 
-		//This section looks to see if Ballistic Lines are showing at moment consumeGamedata() is called (which is often!)		
-		var isFriendlyLinesVisible = this.ballisticLineIcons.some(lineIcon => 
-		  lineIcon.lineSprite?.isVisible === true && lineIcon?.isFriendly === true
-		);
+        this.ballisticLineIcons = oldIcons.filter(icon => {
+            if (!icon.used) {
+                if (icon.lineSprite) this.scene.remove(icon.lineSprite.mesh);
+                return false;
+            }
 
-		var isEnemyLinesVisible = this.ballisticLineIcons.some(lineIcon => 
-		  lineIcon.lineSprite?.isVisible === true && lineIcon?.isFriendly === false
-		); 
-	            
-		this.ballisticLineIcons.forEach(lineIcon => {
-		  if (lineIcon.lineSprite) {
-		    if (lineIcon.isFriendly) {
-		      // Handle friendly lines
-		      if (isFriendlyLinesVisible) {
-		        lineIcon.lineSprite.show();
-		        lineIcon.lineSprite.isVisible = true;
-		      } else {
-		        lineIcon.lineSprite.hide();
-		        lineIcon.lineSprite.isVisible = false;
-		      }
-		    } else {
-		      // Handle enemy lines
-		      if (isEnemyLinesVisible) {
-		        lineIcon.lineSprite.show();
-		        lineIcon.lineSprite.isVisible = true;
-		      } else {
-		        lineIcon.lineSprite.hide();
-		        lineIcon.lineSprite.isVisible = false;
-		      }
-		    }
-		  }
-		});
-		
+            if (icon.lineSprite) {
+                const shouldBeVisible = icon.isFriendly ? isFriendlyLinesVisible : isEnemyLinesVisible;
+                icon.lineSprite[shouldBeVisible ? 'show' : 'hide']();
+                icon.lineSprite.isVisible = shouldBeVisible;
+            }
+
             return true;
-        }, this);
-    } //endof generateBallisticLines()
+        });
+    }
 
 
     function generateTerrainHexes(gamedata) {
-		// Filter for ships with Huge value
-		gamedata.ships
-		.filter(ship => ship.Huge > 0) // Find Huge Terrain
-		.forEach(ship => {
-			if(gamedata.gamephase !== -1){ //Don't generate sprites until Terrain is in place!
-				const position = shipManager.getShipPosition(ship); // Get ship's position
-				let perimeterHexes = [];
-				// Get neighboring hexes based on the ship's size (Huge)
-				if(ship.Huge == 2){
-					perimeterHexes = mathlib.getPerimeterHexes(position, ship.Huge);
-				}else{
-					perimeterHexes = mathlib.getNeighbouringHexes(position, ship.Huge);
-				}	
+        if (gamedata.gamephase === -1) return;
 
-				// Create sprites for neighboring hexes
-				perimeterHexes.forEach(neighbour => {
-					var neighbourPosGame = this.coordinateConverter.fromHexToGame(neighbour);
-					const neighbourSprite = new BallisticSprite(neighbourPosGame, "hexWhite");
-					this.scene.add(neighbourSprite.mesh);
+        gamedata.ships.filter(ship => ship.Huge > 0).forEach(ship => {
+            const position = shipManager.getShipPosition(ship);
+            const perimeterHexes = (ship.Huge === 2)
+                ? mathlib.getPerimeterHexes(position, ship.Huge)
+                : mathlib.getNeighbouringHexes(position, ship.Huge);
 
-					this.ballisticIcons.push({
-						id: -5,
-						shooterId: ship.id,
-						targetId: ship.id,
-						launchPosition: neighbour,
-						position: new hexagon.Offset(neighbourPosGame.x, neighbourPosGame.y),
-						launchSprite: neighbourSprite,
-						targetSprite: neighbourSprite,
-						used: true
-					});
-				
-				});
-			}	
+            perimeterHexes.forEach(neighbour => {
+                const pos = this.coordinateConverter.fromHexToGame(neighbour);
+                const sprite = new BallisticSprite(pos, "hexWhite");
+                this.scene.add(sprite.mesh);
 
-		});
-    } //endof generateTerrainHexes()
+                this.ballisticIcons.push({
+                    id: -5,
+                    shooterId: ship.id,
+                    targetId: ship.id,
+                    launchPosition: neighbour,
+                    position: new hexagon.Offset(pos.x, pos.y),
+                    launchSprite: sprite,
+                    targetSprite: sprite,
+                    used: true
+                });
+            });
+        });
+    }
 
 
     function generateReinforcementHexes(gamedata) {
-		// === 2. Handle Not Deployed Ships (Blue Hexes) ===
-		gamedata.ships
-			.filter(ship => shipManager.getTurnDeployed(ship) > gamedata.turn) // Only undeployed ships
-			.filter(ship => gamedata.isMyorMyTeamShip(ship)) // Only own Team ships.		
-			.forEach(ship => {
-				const turnDeploys = shipManager.getTurnDeployed(ship);
-				const position = shipManager.getShipPosition(ship);
-				const posGame = this.coordinateConverter.fromHexToGame(position);
-					const reinforceSprite = new BallisticSprite(posGame, "hexBlue", "Deploys on Turn " + turnDeploys + "");
-					this.scene.add(reinforceSprite.mesh);
+        gamedata.ships
+            .filter(ship => shipManager.getTurnDeployed(ship) > gamedata.turn)
+            .filter(ship => gamedata.isMyorMyTeamShip(ship))
+            .forEach(ship => {
+                const pos = shipManager.getShipPosition(ship);
+                const posGame = this.coordinateConverter.fromHexToGame(pos);
+                const turnDeploys = shipManager.getTurnDeployed(ship);
+                const sprite = new BallisticSprite(posGame, "hexBlue", `Deploys on Turn ${turnDeploys}`);
+                this.scene.add(sprite.mesh);
 
-					this.ballisticIcons.push({
-						id: -6,
-						shooterId: ship.id,
-						targetId: ship.id,
-						launchPosition: position,
-						position: new hexagon.Offset(position.x, position.y),
-						launchSprite: reinforceSprite,
-						targetSprite: reinforceSprite,
-						used: true
-					});
-
-			});
-	} //endof generateReinforcementHexes()
-
+                this.ballisticIcons.push({
+                    id: -6,
+                    shooterId: ship.id,
+                    targetId: ship.id,
+                    launchPosition: pos,
+                    position: new hexagon.Offset(pos.x, pos.y),
+                    launchSprite: sprite,
+                    targetSprite: sprite,
+                    used: true
+                });
+            });
+    }
 
 
     function createOrUpdateBallistic(ballistic, iconContainer, turn, replay = false) {
-        var icon = getBallisticIcon.call(this, ballistic.id);
+        const icon = getBallisticIcon.call(this, ballistic.id);
 
-	    if (icon && ballistic.notes != 'PersistentEffect' && ballistic.notes != 'Split') {//We want Persistent Effects to show up in initial Orders! - DK 09.24
-	        updateBallisticIcon.call(this, icon, ballistic, iconContainer, turn);
-	    } else {   	
-	        createBallisticIcon.call(this, ballistic, iconContainer, turn, this.scene, replay);
-	    }
-    	
-	}		
+        if (icon && !['PersistentEffect', 'Split'].includes(ballistic.notes)) {
+            updateBallisticIcon.call(this, icon, ballistic, iconContainer, turn);
+        } else {
+            createBallisticIcon.call(this, ballistic, iconContainer, turn, this.scene, replay);
+        }
+    }		
 
-    function updateBallisticIcon(icon, ballistic, iconContainer, turn) {
+    function updateBallisticIcon(icon) {
         icon.used = true;
     }
 
-    const getByLaunchPosition = (position, icons) => icons.find(icon => icon.launchPosition.x === position.x && icon.launchPosition.y === position.y)
-
-    const getByTargetIdOrTargetPosition = (position, targetId, icons) => icons.find(icon => position && ((icon.position.x === position.x && icon.position.y === position.y) || (targetId !== -1 && icon.targetId === targetId )) )
 
     BallisticIconContainer.prototype.hide = function () {
-        this.ballisticIcons.forEach(function (icon) {
-            if (icon.launchSprite) {
-                icon.launchSprite.hide();
-            }
-            if (icon.targetSprite) {
-                icon.targetSprite.hide();
-            }
+        this.ballisticIcons.forEach(icon => {
+            icon.launchSprite?.hide();
+            icon.targetSprite?.hide();
         });
-
         return this;
     };
 
     BallisticIconContainer.prototype.show = function () {
-        this.ballisticIcons.forEach(function (icon) {
-            if (icon.launchSprite) {
-                icon.launchSprite.show();
-            }
-            if (icon.targetSprite) {
-                icon.targetSprite.show();
-            }
+        this.ballisticIcons.forEach(icon => {
+            icon.launchSprite?.show();
+            icon.targetSprite?.show();
         });
-
         return this;
-    };	
-
-    BallisticIconContainer.prototype.onEvent = function (name, payload) {
-        var target = this['on' + name];
-        if (target && typeof target == 'function') {
-            target.call(this, payload);
-        }
     };
 
-    BallisticIconContainer.prototype.onZoomEvent = function (payload) {
-        var zoom = payload.zoom;
+    BallisticIconContainer.prototype.onEvent = function (name, payload) {
+        const handler = this['on' + name];
+        if (typeof handler === 'function') handler.call(this, payload);
+    };
+
+    BallisticIconContainer.prototype.onZoomEvent = function ({ zoom }) {
+        this.zoomScale = zoom <= 0.5 ? 2 * zoom : 1;
         if (zoom <= 0.5) {
-            this.zoomScale = 2 * zoom;
-            this.ballisticLineIcons.forEach(function (lineIcon) {
-                lineIcon.lineSprite.setLineWidth(this.zoomScale * 2);
-            }, this);
-        } else {
-            this.zoomScale = 1;
-        } 
+            this.ballisticLineIcons.forEach(icon => {
+                icon.lineSprite.setLineWidth(this.zoomScale * 2);
+            });
+        }
     };
 
     function getBallisticIcon(id) {
@@ -257,138 +177,112 @@ window.BallisticIconContainer = function () {
         }).pop();
     }
 
+    function getBallisticLineIcon(id) {
+        return this.ballisticLineIcons.find(icon => icon.id === id);
+    }
+
 
     function createOrUpdateBallisticLines(ballistic, iconContainer, turn, replay = false) {
-        var lineIcon = getBallisticLineIcon.call(this, ballistic.id);
+        const icon = getBallisticLineIcon.call(this, ballistic.id);
 
-	    if (lineIcon && ballistic.notes != 'PersistentEffect' && ballistic.notes != 'Split') {//We want Persistent Effects to show up in initial Orders! - DK 09.24
-	        if(replay){
-	        	createBallisticLineIcon.call(this, ballistic, iconContainer, turn, this.scene, replay);	        	   	
-			}else{	
-				updateBallisticLineIcon.call(this, lineIcon, ballistic, iconContainer, turn);
-			}	
-	    } else {   	
-	        if(ballistic.notes != 'PersistentEffect') createBallisticLineIcon.call(this, ballistic, iconContainer, turn, this.scene, replay);
-	    }
-    	
-	}	
+        if (icon && !['PersistentEffect', 'Split'].includes(ballistic.notes)) {
+            if (replay) {
+                createBallisticLineIcon.call(this, ballistic, iconContainer, turn, this.scene, true);
+            } else {
+                updateBallisticLineIcon.call(this, icon, ballistic, iconContainer, turn);
+            }
+        } else if (ballistic.notes !== 'PersistentEffect') {
+            createBallisticLineIcon.call(this, ballistic, iconContainer, turn, this.scene, replay);
+        }
+    }
 
 
     function updateBallisticLineIcon(lineIcon, ballistic, iconContainer, turn) {
         lineIcon.used = true;
+        if (ballistic.targetid === -1) return;
 
-		if(ballistic.targetid === -1) return; //No need to update further for AoE ballistics (they don't move) 
+        const wasVisible = lineIcon.lineSprite.isVisible;
+        lineIcon.lineSprite.destroy();
+        this.scene.remove(lineIcon.lineSprite.mesh);
 
-		var wasVisible = false; //Variable to track if destroyed lines were visible. If one was, they all were.
+        createBallisticLineIcon.call(this, ballistic, iconContainer, gamedata.turn, this.scene);
 
-		// Destroy lines where the ship is either the target or the shooter.  Ship being checked should only ever be one or the other.
-		if (lineIcon.lineSprite.isVisible) wasVisible = true;
-		lineIcon.lineSprite.destroy();
-		this.scene.remove(lineIcon.lineSprite.mesh);
-
-		//Now recreate them using usual method.
-		if(ballistic.notes != 'PersistentEffect') createBallisticLineIcon.call(this, ballistic, iconContainer, gamedata.turn, this.scene);
-
-		//Check if lines were visible and if so continue to show.
-		if(!wasVisible){
-			lineIcon.lineSprite.hide();
-			lineIcon.lineSprite.isVisible = false;	 	            
-		}else{
-			lineIcon.lineSprite.show();
-			lineIcon.lineSprite.isVisible = true;	            		
-		}
+        lineIcon.lineSprite[wasVisible ? 'show' : 'hide']();
+        lineIcon.lineSprite.isVisible = wasVisible;
     }	
 
-	//New method that toggles Ballistic Lines on and off.
-	BallisticIconContainer.prototype.toggleBallisticLines = function (ships) {
-	    if (this.ballisticLineIcons) {
-	        this.ballisticLineIcons.forEach(function (lineIcon) {
-	            if (lineIcon.lineSprite) {
-		            if (ships.some(ship => ship.id === lineIcon.shooterId)) {
-	            		if (!lineIcon.lineSprite.isVisible){		                	
-		                    lineIcon.lineSprite.show();
-	            			lineIcon.lineSprite.isVisible = true;	                    
-		                }else{
-		                    lineIcon.lineSprite.hide();
-	            			lineIcon.lineSprite.isVisible = false;	 		                    		             	
-		                }
-					}    
-	            }	            
-	        });
-	    }
-	    return this;
-	};
+
+    BallisticIconContainer.prototype.toggleBallisticLines = function (ships) {
+        const shipIds = ships.map(s => s.id);
+        this.ballisticLineIcons.forEach(icon => {
+            if (shipIds.includes(icon.shooterId) && icon.lineSprite) {
+                const visible = icon.lineSprite.isVisible;
+                icon.lineSprite[visible ? 'hide' : 'show']();
+                icon.lineSprite.isVisible = !visible;
+            }
+        });
+        return this;
+    };
 
     BallisticIconContainer.prototype.hideLines = function (ships) {
-        this.ballisticLineIcons.forEach(function (lineIcon) {
-	        if (lineIcon.lineSprite) {
-		        if (ships.some(ship => ship.id === lineIcon.shooterId)) {
-					lineIcon.lineSprite.hide();
-	        		lineIcon.lineSprite.isVisible = false;
-				}
-			}			 	
+        const shipIds = ships.map(s => s.id);
+        this.ballisticLineIcons.forEach(icon => {
+            if (shipIds.includes(icon.shooterId) && icon.lineSprite) {
+                icon.lineSprite.hide();
+                icon.lineSprite.isVisible = false;
+            }
         });
-
         return this;
     };
 
     BallisticIconContainer.prototype.showLines = function (ships) {
-        this.ballisticLineIcons.forEach(function (lineIcon) {
-	        if (lineIcon.lineSprite) {
-		        if (ships.some(ship => ship.id === lineIcon.shooterId)) {        	
-					lineIcon.lineSprite.show();
-			        lineIcon.lineSprite.isVisible = true;
-				}
-			}		        	 	
+        const shipIds = ships.map(s => s.id);
+        this.ballisticLineIcons.forEach(icon => {
+            if (shipIds.includes(icon.shooterId) && icon.lineSprite) {
+                icon.lineSprite.show();
+                icon.lineSprite.isVisible = true;
+            }
         });
+        return this;
+    };
+
+	//Called during movement phase to recreate lines after a target ship moves.
+    BallisticIconContainer.prototype.updateLinesForShip = function (ship, iconContainer) {
+        let visible = false;
+
+        this.ballisticLineIcons = this.ballisticLineIcons.filter(icon => {
+            if (icon.targetId === ship.id) {
+                if (icon.lineSprite.isVisible) visible = true;
+                this.scene.remove(icon.lineSprite.mesh);
+                icon.lineSprite.destroy();
+                return false;
+            }
+            return true;
+        });
+
+        const allBallistics = weaponManager.getAllFireOrdersForAllShipsForTurn(gamedata.turn, 'ballistic');
+        allBallistics.forEach(ballistic => {
+            if (ballistic.targetid === ship.id) {
+                createOrUpdateBallisticLines.call(this, ballistic, iconContainer, gamedata.turn);
+            }
+        });
+
+        if (visible) {
+            this.ballisticLineIcons.forEach(icon => {
+                if (icon.targetId === ship.id && icon.lineSprite) {
+                    icon.lineSprite.show();
+                    icon.lineSprite.isVisible = true;
+                }
+            });
+        }
 
         return this;
     };
 
-	//Called during movement phase to recreate line after a target ship moves.
-    BallisticIconContainer.prototype.updateLinesForShip = function (ship, iconContainer) {
 
-		var wasVisibleTarget = false; //Variable to track if destroyed lines were visible. If one was, they all were.
-		//var wasVisibleShooter = false; //Variable to track if destroyed lines were visible. If one was, they all were.
-		
-		this.ballisticLineIcons = this.ballisticLineIcons.filter((lineIcon) => {
-			// Destroy lines where the ship is either the target or the shooter.  Ship being checked should only ever be one or the other.
-			if (lineIcon.targetId === ship.id) {
-			    if (lineIcon.lineSprite.isVisible) wasVisibleTarget = true;
-			    this.scene.remove(lineIcon.lineSprite.mesh);
-			    lineIcon.lineSprite.destroy();
-			    return false;
-			}/*else if (lineIcon.shooterId === ship.id) { //When would we ever need to destroy origin lines, only target can move...?
-			    if (lineIcon.lineSprite.isVisible) wasVisibleShooter = true;
-			    this.scene.remove(lineIcon.lineSprite.mesh);
-			    lineIcon.lineSprite.destroy();
-			    return false;
-			}*/else{		    
-		    	return true; // Keep the lineIcon if the condition isn't met
-			}
-		});
 
-		//Now recreate line using usual method.
-        var allBallistics = weaponManager.getAllFireOrdersForAllShipsForTurn(gamedata.turn, 'ballistic');			
-		allBallistics.forEach(function (ballistic) {
-			if (ship.id === ballistic.targetid) {				
-				createOrUpdateBallisticLines.call(this, ballistic, iconContainer, gamedata.turn);
-			}
-		}, this);
 
-		//Check if lines were visible and if so continue to show.
-        this.ballisticLineIcons.forEach(function (lineIcon) {
-            if (lineIcon.targetId === ship.id) {
-	            if(!wasVisibleTarget){
-	            	lineIcon.lineSprite.hide();
-	            	lineIcon.lineSprite.isVisible = false;	 	            
-            	}else{
-	            	lineIcon.lineSprite.show();
-	            	lineIcon.lineSprite.isVisible = true;	            		
-				}
-            }
-        });        
-    };
+// OPTMISED BELOW HERE--------------------------------------------------------------------------------------------------------------------------------------------
 
 
 	//To create coloured hexes signifying ballistic launches and other effects.
@@ -636,7 +530,492 @@ window.BallisticIconContainer = function () {
 		}
 	}
 
+    const getByLaunchPosition = (position, icons) => icons.find(icon => icon.launchPosition.x === position.x && icon.launchPosition.y === position.y)
+
+    const getByTargetIdOrTargetPosition = (position, targetId, icons) => icons.find(icon => position && ((icon.position.x === position.x && icon.position.y === position.y) || (targetId !== -1 && icon.targetId === targetId )) )
+
+    function getLineColorByType(type) {
+        if (type == "orange") {
+            return "rgba(250,153,53)"; 
+        } else if (type == "yellow") {
+            return "rgba(255, 255, 0)";
+        } else if (type == "red") {
+            return "rgba(230,20,10)";
+        } else if (type == "blue") {
+            return "rgba(0,184,230)";
+        } else if (type == "green") {
+            return "rgba(0, 204, 0)";
+        } else if (type == "purple") {
+            return "rgba(204, 51, 255)";
+        } else if (type == "white") {
+            return "rgba(255, 255, 255)";
+        } else {
+            return "rgba(144,185,208)";
+        }
+    }
+
+BallisticIconContainer.prototype.createHexNumbers = function (scene) {
+    if (this.hexNumberMesh) {
+        // Toggle visibility
+        this.hexNumberMesh.visible = !this.hexNumberMesh.visible;
+        return;
+    }
+
+    // Define grid dimensions based on hex count
+    const gridWidth = 72; // Adjust based on your hex layout
+    const gridHeight = 48;
+    const hexSize = 50;
+
+    // Create single large texture with all hex numbers
+    const largeTexture = createLargeHexNumberTexture(gridWidth, gridHeight, hexSize);
+
+    // Hexagon grid dimensions (corrected aspect ratio)
+    const totalWidth = gridWidth * hexSize * 2;
+    const totalHeight = gridHeight * hexSize * Math.sqrt(4);
+
+    // Create a plane to apply the texture (or adjust for hexagonal shape)
+    const geometry = new THREE.PlaneGeometry(totalWidth, totalHeight);
+    const material = new THREE.MeshBasicMaterial({ 
+        map: largeTexture, 
+        transparent: true 
+    });
+
+    this.hexNumberMesh = new THREE.Mesh(geometry, material);
+    this.hexNumberMesh.position.set(502.5, -651, -1); // Adjust as needed	
+    scene.add(this.hexNumberMesh);
+};
+
+function createLargeHexNumberTexture(gridWidth, gridHeight, hexSize, textColour = "#ffffff") {
+	const HEX_WIDTH = Math.sqrt(3) * hexSize;  // Corrected for side-standing hexagons
+	const HEX_HEIGHT = 2 * hexSize; // Corrected for vertical stacking
+	const SCALE_FACTOR = 2;  // Increase resolution for sharp text
+	const TEXTURE_WIDTH = gridWidth * HEX_WIDTH * SCALE_FACTOR;
+	const TEXTURE_HEIGHT = gridHeight * HEX_HEIGHT * SCALE_FACTOR;
+    
+    // Create canvas with refined dimensions
+    const canvas = document.createElement("canvas");
+    canvas.width = TEXTURE_WIDTH;
+    canvas.height = TEXTURE_HEIGHT;
+    const ctx = canvas.getContext("2d");
+
+    // Clear the canvas
+    ctx.clearRect(0, 0, TEXTURE_WIDTH, TEXTURE_HEIGHT);
+
+    // Set text properties
+	const fontSize = Math.floor(hexSize * 0.2 * SCALE_FACTOR);  // Smaller text but sharp
+    ctx.globalAlpha = 0.85;
+    ctx.font = `bold ${fontSize}px Arial`;
+    ctx.fillStyle = textColour;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+	ctx.globalAlpha = 0.6; // 50% transparency
+
+    let number = 1;
+
+	for (let r = 0; r < gridHeight; r++) {
+		for (let q = 0; q < gridWidth; q++) {
+			let x = q * HEX_WIDTH * 1.7315 + HEX_WIDTH / 2; // REDUCED COLUMN SPACING			
+			let y = r * HEX_HEIGHT * 1.5 + HEX_HEIGHT / 2; // INCREASED ROW SPACING
 	
+			// Offset odd rows for staggered hex layout
+			if (r % 2 !== 0) x += HEX_WIDTH * 0.855; 
+	
+			ctx.fillText(String(number).padStart(4, '0'), x, y);
+			number++;
+		}
+	}
+
+    // Convert canvas to a texture
+    const texture = new THREE.Texture(canvas);
+    texture.needsUpdate = true;
+    return texture;
+}
+    return BallisticIconContainer;
+}();
+
+/*//All the old unoptimised code, keep here until I'm sure the new stuff above works! - DK June 25
+window.BallisticIconContainer = function () {
+
+    function BallisticIconContainer(coordinateConverter, scene) {
+        this.ballisticIcons = [];
+        this.ballisticLineIcons = []
+        this.coordinateConverter = coordinateConverter;
+        this.scene = scene;
+        this.zoomScale = 1;
+        this.hexNumberIcons = [];
+        this.hexNumbersGenerated = false;
+    }
+
+    BallisticIconContainer.prototype.consumeGamedata = function (gamedata, iconContainer, replayData = null) {
+        this.ballisticIcons.forEach(function (ballisticIcon) {
+        	if(gamedata.gamephase !== 1) ballisticIcon.launchPosition = []; //If not cleared, doesn't always display launch hex between Initial and Movement/Firing without browser refresh - DK 12.24
+            ballisticIcon.used = false;
+        });
+
+        this.ballisticLineIcons.forEach(function (lineIcon) {
+            lineIcon.used = false;
+        });
+               
+		if(replayData){ //True marker is passed when Replay
+			var allBallistics = replayData;
+			
+	        allBallistics.forEach(function (ballistic) {
+				if(ballistic.turn === gamedata.turn){ 
+		            createOrUpdateBallistic.call(this, ballistic, iconContainer, gamedata.turn, true); 
+		        	createOrUpdateBallisticLines.call(this, ballistic, iconContainer, gamedata.turn, true);
+				}	            
+	        }, this);
+					
+		} else {
+        	var allBallistics = weaponManager.getAllFireOrdersForAllShipsForTurn(gamedata.turn, 'ballistic');			
+	        allBallistics.forEach(function (ballistic) {
+	            createOrUpdateBallistic.call(this, ballistic, iconContainer, gamedata.turn);
+	            createOrUpdateBallisticLines.call(this, ballistic, iconContainer, gamedata.turn);
+	        }, this);
+		}
+		
+        this.ballisticIcons = this.ballisticIcons.filter(function (icon) {
+            if (!icon.used) {
+                
+                if (icon.launchSprite) {
+                    this.scene.remove(icon.launchSprite.mesh);
+                }
+
+                if (icon.targetSprite) {
+                    if (icon.targetId !== -1) {
+                        iconContainer.getById(icon.targetId).mesh.remove(icon.targetSprite.mesh);
+                    } else {
+                        this.scene.remove(icon.targetSprite.mesh);
+                    }
+                }
+                return false;
+            }
+
+            return true;
+        }, this);
+
+		//Now create ballistic lines
+		generateBallisticLines.call(this);
+		//Now create hex icons to illustrate large terrain.
+		generateTerrainHexes.call(this, gamedata);
+		//Create blue hex icons for where ships are deploying later.
+		generateReinforcementHexes.call(this, gamedata);
+
+    };
+
+
+    function generateBallisticLines() {
+        //Remove old line sprites when they are no longer required or being recreated.
+        this.ballisticLineIcons = this.ballisticLineIcons.filter(function (lineIcon) {
+            if (!lineIcon.used) {
+            	if (lineIcon.lineSprite) {
+                	this.scene.remove(lineIcon.lineSprite.mesh);           	
+				}
+			return false;	
+			}	
+
+		//This section looks to see if Ballistic Lines are showing at moment consumeGamedata() is called.
+		var isFriendlyLinesVisible = this.ballisticLineIcons.some(lineIcon => 
+		  lineIcon.lineSprite?.isVisible === true && lineIcon?.isFriendly === true
+		);
+
+		var isEnemyLinesVisible = this.ballisticLineIcons.some(lineIcon => 
+		  lineIcon.lineSprite?.isVisible === true && lineIcon?.isFriendly === false
+		); 
+	            
+		this.ballisticLineIcons.forEach(lineIcon => {
+		  if (lineIcon.lineSprite) {
+		    if (lineIcon.isFriendly) {
+		      // Handle friendly lines
+		      if (isFriendlyLinesVisible) {
+		        lineIcon.lineSprite.show();
+		        lineIcon.lineSprite.isVisible = true;
+		      } else {
+		        lineIcon.lineSprite.hide();
+		        lineIcon.lineSprite.isVisible = false;
+		      }
+		    } else {
+		      // Handle enemy lines
+		      if (isEnemyLinesVisible) {
+		        lineIcon.lineSprite.show();
+		        lineIcon.lineSprite.isVisible = true;
+		      } else {
+		        lineIcon.lineSprite.hide();
+		        lineIcon.lineSprite.isVisible = false;
+		      }
+		    }
+		  }
+		});
+		
+            return true;
+        }, this);
+    }
+
+
+    function generateTerrainHexes(gamedata) {
+		// Filter for ships with Huge value
+		gamedata.ships
+		.filter(ship => ship.Huge > 0) // Find Huge Terrain
+		.forEach(ship => {
+			if(gamedata.gamephase !== -1){ //Don't generate sprites until Terrain is in place!
+				const position = shipManager.getShipPosition(ship); // Get ship's position
+				let perimeterHexes = [];
+				// Get neighboring hexes based on the ship's size (Huge)
+				if(ship.Huge == 2){
+					perimeterHexes = mathlib.getPerimeterHexes(position, ship.Huge);
+				}else{
+					perimeterHexes = mathlib.getNeighbouringHexes(position, ship.Huge);
+				}	
+
+				// Create sprites for neighboring hexes
+				perimeterHexes.forEach(neighbour => {
+					var neighbourPosGame = this.coordinateConverter.fromHexToGame(neighbour);
+					const neighbourSprite = new BallisticSprite(neighbourPosGame, "hexWhite");
+					this.scene.add(neighbourSprite.mesh);
+
+					this.ballisticIcons.push({
+						id: -5,
+						shooterId: ship.id,
+						targetId: ship.id,
+						launchPosition: neighbour,
+						position: new hexagon.Offset(neighbourPosGame.x, neighbourPosGame.y),
+						launchSprite: neighbourSprite,
+						targetSprite: neighbourSprite,
+						used: true
+					});
+				
+				});
+			}	
+
+		});
+    }
+
+
+    function generateReinforcementHexes(gamedata) {
+		// === 2. Handle Not Deployed Ships (Blue Hexes) ===
+		gamedata.ships
+			.filter(ship => shipManager.getTurnDeployed(ship) > gamedata.turn) // Only undeployed ships
+			.filter(ship => gamedata.isMyorMyTeamShip(ship)) // Only own Team ships.		
+			.forEach(ship => {
+				const turnDeploys = shipManager.getTurnDeployed(ship);
+				const position = shipManager.getShipPosition(ship);
+				const posGame = this.coordinateConverter.fromHexToGame(position);
+					const reinforceSprite = new BallisticSprite(posGame, "hexBlue", "Deploys on Turn " + turnDeploys + "");
+					this.scene.add(reinforceSprite.mesh);
+
+					this.ballisticIcons.push({
+						id: -6,
+						shooterId: ship.id,
+						targetId: ship.id,
+						launchPosition: position,
+						position: new hexagon.Offset(position.x, position.y),
+						launchSprite: reinforceSprite,
+						targetSprite: reinforceSprite,
+						used: true
+					});
+
+			});
+	}
+
+
+
+    function createOrUpdateBallistic(ballistic, iconContainer, turn, replay = false) {
+        var icon = getBallisticIcon.call(this, ballistic.id);
+
+	    if (icon && ballistic.notes != 'PersistentEffect' && ballistic.notes != 'Split') {//We want Persistent Effects to show up in initial Orders! - DK 09.24
+	        updateBallisticIcon.call(this, icon, ballistic, iconContainer, turn);
+	    } else {   	
+	        createBallisticIcon.call(this, ballistic, iconContainer, turn, this.scene, replay);
+	    }
+    	
+	}		
+
+    function updateBallisticIcon(icon, ballistic, iconContainer, turn) {
+        icon.used = true;
+    }
+
+    const getByLaunchPosition = (position, icons) => icons.find(icon => icon.launchPosition.x === position.x && icon.launchPosition.y === position.y)
+
+    const getByTargetIdOrTargetPosition = (position, targetId, icons) => icons.find(icon => position && ((icon.position.x === position.x && icon.position.y === position.y) || (targetId !== -1 && icon.targetId === targetId )) )
+
+    BallisticIconContainer.prototype.hide = function () {
+        this.ballisticIcons.forEach(function (icon) {
+            if (icon.launchSprite) {
+                icon.launchSprite.hide();
+            }
+            if (icon.targetSprite) {
+                icon.targetSprite.hide();
+            }
+        });
+
+        return this;
+    };
+
+    BallisticIconContainer.prototype.show = function () {
+        this.ballisticIcons.forEach(function (icon) {
+            if (icon.launchSprite) {
+                icon.launchSprite.show();
+            }
+            if (icon.targetSprite) {
+                icon.targetSprite.show();
+            }
+        });
+
+        return this;
+    };	
+
+    BallisticIconContainer.prototype.onEvent = function (name, payload) {
+        var target = this['on' + name];
+        if (target && typeof target == 'function') {
+            target.call(this, payload);
+        }
+    };
+
+    BallisticIconContainer.prototype.onZoomEvent = function (payload) {
+        var zoom = payload.zoom;
+        if (zoom <= 0.5) {
+            this.zoomScale = 2 * zoom;
+            this.ballisticLineIcons.forEach(function (lineIcon) {
+                lineIcon.lineSprite.setLineWidth(this.zoomScale * 2);
+            }, this);
+        } else {
+            this.zoomScale = 1;
+        } 
+    };
+
+    function getBallisticIcon(id) {
+        return this.ballisticIcons.filter(function (icon) {
+            return icon.id === id;
+        }).pop();
+    }
+
+
+    function createOrUpdateBallisticLines(ballistic, iconContainer, turn, replay = false) {
+        var lineIcon = getBallisticLineIcon.call(this, ballistic.id);
+
+	    if (lineIcon && ballistic.notes != 'PersistentEffect' && ballistic.notes != 'Split') {//We want Persistent Effects to show up in initial Orders! - DK 09.24
+	        if(replay){
+	        	createBallisticLineIcon.call(this, ballistic, iconContainer, turn, this.scene, replay);	        	   	
+			}else{	
+				updateBallisticLineIcon.call(this, lineIcon, ballistic, iconContainer, turn);
+			}	
+	    } else {   	
+	        if(ballistic.notes != 'PersistentEffect') createBallisticLineIcon.call(this, ballistic, iconContainer, turn, this.scene, replay);
+	    }
+    	
+	}	
+
+
+    function updateBallisticLineIcon(lineIcon, ballistic, iconContainer, turn) {
+        lineIcon.used = true;
+
+		if(ballistic.targetid === -1) return; //No need to update further for AoE ballistics (they don't move) 
+
+		var wasVisible = false; //Variable to track if destroyed lines were visible. If one was, they all were.
+
+		// Destroy lines where the ship is either the target.
+		if (lineIcon.lineSprite.isVisible) wasVisible = true;
+		lineIcon.lineSprite.destroy();
+		this.scene.remove(lineIcon.lineSprite.mesh);
+
+		//Now recreate them.
+		if(ballistic.notes != 'PersistentEffect') createBallisticLineIcon.call(this, ballistic, iconContainer, gamedata.turn, this.scene);
+
+		//Check if lines were visible and if so continue to show.
+		if(!wasVisible){
+			lineIcon.lineSprite.hide();
+			lineIcon.lineSprite.isVisible = false;	 	            
+		}else{
+			lineIcon.lineSprite.show();
+			lineIcon.lineSprite.isVisible = true;	            		
+		}
+    }	
+
+	//New method that toggles Ballistic Lines on and off.
+	BallisticIconContainer.prototype.toggleBallisticLines = function (ships) {
+	    if (this.ballisticLineIcons) {
+	        this.ballisticLineIcons.forEach(function (lineIcon) {
+	            if (lineIcon.lineSprite) {
+		            if (ships.some(ship => ship.id === lineIcon.shooterId)) {
+	            		if (!lineIcon.lineSprite.isVisible){		                	
+		                    lineIcon.lineSprite.show();
+	            			lineIcon.lineSprite.isVisible = true;	                    
+		                }else{
+		                    lineIcon.lineSprite.hide();
+	            			lineIcon.lineSprite.isVisible = false;	 		                    		             	
+		                }
+					}    
+	            }	            
+	        });
+	    }
+	    return this;
+	};
+
+    BallisticIconContainer.prototype.hideLines = function (ships) {
+        this.ballisticLineIcons.forEach(function (lineIcon) {
+	        if (lineIcon.lineSprite) {
+		        if (ships.some(ship => ship.id === lineIcon.shooterId)) {
+					lineIcon.lineSprite.hide();
+	        		lineIcon.lineSprite.isVisible = false;
+				}
+			}			 	
+        });
+
+        return this;
+    };
+
+    BallisticIconContainer.prototype.showLines = function (ships) {
+        this.ballisticLineIcons.forEach(function (lineIcon) {
+	        if (lineIcon.lineSprite) {
+		        if (ships.some(ship => ship.id === lineIcon.shooterId)) {        	
+					lineIcon.lineSprite.show();
+			        lineIcon.lineSprite.isVisible = true;
+				}
+			}		        	 	
+        });
+
+        return this;
+    };
+
+	//Called during movement phase to recreate lines after a target ship moves.
+    BallisticIconContainer.prototype.updateLinesForShip = function (ship, iconContainer) {
+
+		var wasVisibleTarget = false; //Variable to track if destroyed lines were visible. If one was, they all were.
+		
+		this.ballisticLineIcons = this.ballisticLineIcons.filter((lineIcon) => {
+			// Destroy lines where the ship is the target.
+			if (lineIcon.targetId === ship.id) {
+			    if (lineIcon.lineSprite.isVisible) wasVisibleTarget = true;
+			    this.scene.remove(lineIcon.lineSprite.mesh);
+			    lineIcon.lineSprite.destroy();
+			    return false;
+			}else{		    
+		    	return true;
+			}
+		});
+
+		//Now recreate line using usual method.
+        var allBallistics = weaponManager.getAllFireOrdersForAllShipsForTurn(gamedata.turn, 'ballistic');			
+		allBallistics.forEach(function (ballistic) {
+			if (ship.id === ballistic.targetid) {				
+				createOrUpdateBallisticLines.call(this, ballistic, iconContainer, gamedata.turn);
+			}
+		}, this);
+
+		//Check if lines were visible and if so continue to show.
+        this.ballisticLineIcons.forEach(function (lineIcon) {
+            if (lineIcon.targetId === ship.id) {
+	            if(!wasVisibleTarget){
+	            	lineIcon.lineSprite.hide();
+	            	lineIcon.lineSprite.isVisible = false;	 	            
+            	}else{
+	            	lineIcon.lineSprite.show();
+	            	lineIcon.lineSprite.isVisible = true;	            		
+				}
+            }
+        });        
+    };
+*/
 /*	
     function createBallisticIcon(ballistic, iconContainer, turn, scene, replay = false) {
 
@@ -944,33 +1323,15 @@ window.BallisticIconContainer = function () {
 		}
 		
     }//endof createBallisticLineIcon()
-*/
+
 
     function getBallisticLineIcon(id) {
         return this.ballisticLineIcons.filter(function (lineIcon) {
             return lineIcon.id === id;
         }).pop();
     }
+*/
 
-    function getLineColorByType(type) {
-        if (type == "orange") {
-            return "rgba(250,153,53)"; 
-        } else if (type == "yellow") {
-            return "rgba(255, 255, 0)";
-        } else if (type == "red") {
-            return "rgba(230,20,10)";
-        } else if (type == "blue") {
-            return "rgba(0,184,230)";
-        } else if (type == "green") {
-            return "rgba(0, 204, 0)";
-        } else if (type == "purple") {
-            return "rgba(204, 51, 255)";
-        } else if (type == "white") {
-            return "rgba(255, 255, 255)";
-        } else {
-            return "rgba(144,185,208)";
-        }
-    }
 
 /* //Future functions that I might need/use - DK 12.24
     BallisticIconContainer.prototype.showForShip = function (ship) {
@@ -992,82 +1353,3 @@ window.BallisticIconContainer = function () {
         }, this);
     };
 */
-
-BallisticIconContainer.prototype.createHexNumbers = function (scene) {
-    if (this.hexNumberMesh) {
-        // Toggle visibility
-        this.hexNumberMesh.visible = !this.hexNumberMesh.visible;
-        return;
-    }
-
-    // Define grid dimensions based on hex count
-    const gridWidth = 72; // Adjust based on your hex layout
-    const gridHeight = 48;
-    const hexSize = 50;
-
-    // Create single large texture with all hex numbers
-    const largeTexture = createLargeHexNumberTexture(gridWidth, gridHeight, hexSize);
-
-    // Hexagon grid dimensions (corrected aspect ratio)
-    const totalWidth = gridWidth * hexSize * 2;
-    const totalHeight = gridHeight * hexSize * Math.sqrt(4);
-
-    // Create a plane to apply the texture (or adjust for hexagonal shape)
-    const geometry = new THREE.PlaneGeometry(totalWidth, totalHeight);
-    const material = new THREE.MeshBasicMaterial({ 
-        map: largeTexture, 
-        transparent: true 
-    });
-
-    this.hexNumberMesh = new THREE.Mesh(geometry, material);
-    this.hexNumberMesh.position.set(502.5, -651, -1); // Adjust as needed	
-    scene.add(this.hexNumberMesh);
-};
-
-function createLargeHexNumberTexture(gridWidth, gridHeight, hexSize, textColour = "#ffffff") {
-	const HEX_WIDTH = Math.sqrt(3) * hexSize;  // Corrected for side-standing hexagons
-	const HEX_HEIGHT = 2 * hexSize; // Corrected for vertical stacking
-	const SCALE_FACTOR = 2;  // Increase resolution for sharp text
-	const TEXTURE_WIDTH = gridWidth * HEX_WIDTH * SCALE_FACTOR;
-	const TEXTURE_HEIGHT = gridHeight * HEX_HEIGHT * SCALE_FACTOR;
-    
-    // Create canvas with refined dimensions
-    const canvas = document.createElement("canvas");
-    canvas.width = TEXTURE_WIDTH;
-    canvas.height = TEXTURE_HEIGHT;
-    const ctx = canvas.getContext("2d");
-
-    // Clear the canvas
-    ctx.clearRect(0, 0, TEXTURE_WIDTH, TEXTURE_HEIGHT);
-
-    // Set text properties
-	const fontSize = Math.floor(hexSize * 0.2 * SCALE_FACTOR);  // Smaller text but sharp
-    ctx.globalAlpha = 0.85;
-    ctx.font = `bold ${fontSize}px Arial`;
-    ctx.fillStyle = textColour;
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-	ctx.globalAlpha = 0.6; // 50% transparency
-
-    let number = 1;
-
-	for (let r = 0; r < gridHeight; r++) {
-		for (let q = 0; q < gridWidth; q++) {
-			let x = q * HEX_WIDTH * 1.7315 + HEX_WIDTH / 2; // REDUCED COLUMN SPACING			
-			let y = r * HEX_HEIGHT * 1.5 + HEX_HEIGHT / 2; // INCREASED ROW SPACING
-	
-			// Offset odd rows for staggered hex layout
-			if (r % 2 !== 0) x += HEX_WIDTH * 0.855; 
-	
-			ctx.fillText(String(number).padStart(4, '0'), x, y);
-			number++;
-		}
-	}
-
-    // Convert canvas to a texture
-    const texture = new THREE.Texture(canvas);
-    texture.needsUpdate = true;
-    return texture;
-}
-    return BallisticIconContainer;
-}();
