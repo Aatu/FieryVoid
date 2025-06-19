@@ -9,7 +9,7 @@ class asteroidS  extends Terrain{
 		$this->factionAge = 1;        
         $this->phpclass = "asteroidS";
         $this->imagePath = "img/ships/AsteroidS1.png";
-        $this->canvasSize = 200;
+        $this->canvasSize = 256;
         $this->shipClass = "Asteroid (Small)";
         $this->Enormous = true; 
 		$this->iniativebonus = -200; //no voluntary movement anyway
