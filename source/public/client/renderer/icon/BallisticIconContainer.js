@@ -391,6 +391,7 @@ window.BallisticIconContainer = function () {
     };
 
 
+	//To create coloured hexes signifying ballistic launches and other effects.
     function createBallisticIcon(ballistic, iconContainer, turn, scene, replay = false) {
 
 			if(replay){
@@ -559,6 +560,7 @@ window.BallisticIconContainer = function () {
     }//endof createBallisticIcon()
 
 
+	//To create ballistic lines between launches and targets.
     function createBallisticLineIcon(ballistic, iconContainer, turn, scene, replay = false) {
 
 	    if (ballistic.targetid === -1 && ballistic.x == "null" && ballistic.y == "null") return; // Skip creation of enemy hidden weapons, can cause visual bugs.
