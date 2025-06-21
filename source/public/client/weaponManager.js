@@ -455,23 +455,23 @@ window.weaponManager = {
 		    }
 		}
 */
-        // Compute LOS blockage once for all selected weapons
-        var blockedLosHex = weaponManager.getBlockedHexes(); //Are there any Enormous units in game, no point checking if no.
-
+        var blockedLosHex = weaponManager.getBlockedHexes(); //Are there any blocked hexes, no point checking if no.
         var loSBlocked = false; //Default to LoS not blocked.
-        if (blockedLosHex && blockedLosHex.length > 0) {
-            var weapon = gamedata.selectedSystems[0]; // Use the first weapon to get the shooter's position
-            var sPosShooter = weaponManager.getFiringHex(selectedShip, weapon);
-            var sPosTarget = shipManager.getShipPosition(ship);
-            
-            loSBlocked = mathlib.checkLineOfSight(sPosShooter, sPosTarget, blockedLosHex);
-        }
 
         for (var i in gamedata.selectedSystems) {
             var weapon = gamedata.selectedSystems[i];
 
             if (weaponManager.isOnWeaponArc(selectedShip, ship, weapon)) {
                 if (weaponManager.checkIsInRange(selectedShip, ship, weapon)) {
+
+                    //Only need to check first weapon e.g. i == 0
+                    if (blockedLosHex && blockedLosHex.length > 0 && i == 0) {
+                        var sPosShooter = weaponManager.getFiringHex(selectedShip, weapon);
+                        var sPosTarget = shipManager.getShipPosition(ship);
+                        
+                        loSBlocked = mathlib.checkLineOfSight(sPosShooter, sPosTarget, blockedLosHex);
+                    }
+
                     var value = weapon.firingMode;
                     value = weapon.firingModes[value];
                     var keys = Object.keys(weapon.firingModes);
