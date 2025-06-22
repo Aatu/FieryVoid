@@ -1711,7 +1711,7 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 			$this->data["Special"] .= '<br>Applies -10 Intercept against all enemy fire from hex, and -2 damage against Antimatter, Laser and Particle attacks.';
 			$this->data["Special"] .= '<br>For Ballistic weapons, target hex from where shot was launched.';			
 			$this->data["Special"] .= '<br>ANTI-FIGHTER - Creates plasma cloud dealing D6+2 Plasma damage to all fighters in hex.';
-			$this->data["Special"] .= '<br>Requires 1 extra power, from boosted in Initial Orders or Batteries.';
+			$this->data["Special"] .= '<br>Requires 1 extra power, from boosting in Initial Orders or Batteries.';
 			$this->data["Special"] .= '<br>Cloud remains during next Movement Phase, damaging fighters moving through it.';			
 			$this->data["Special"] .= '<br>Plasma Webs are NOT cumulative, each effect applies only once.';		 
 	 }
