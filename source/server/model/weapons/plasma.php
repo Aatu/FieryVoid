@@ -1707,9 +1707,9 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 			}else{
 				$this->data["Special"] .= '<br>';
 			}
-			$this->data["Special"] .= 'DEFENSIVE - Fire at hex with enemy ships during the Firing Phase.';
-			$this->data["Special"] .= '<br>Applies -10 Intercept against enemy fire from hex, and -2 damage against Antimatter, Laser and Particle attacks.';
-			$this->data["Special"] .= '<br>For Ballistic weapons, target the hex from where shot was launched.';			
+			$this->data["Special"] .= 'DEFENSIVE - Fires at hex during the Firing Phase.';
+			$this->data["Special"] .= '<br>Applies -10 Intercept against any enemy fire from hex, and -2 damage against Antimatter, Laser and Particle attacks.';
+			$this->data["Special"] .= '<br>For Ballistic weapons, target hex from where shot was launched.';			
 			$this->data["Special"] .= '<br>ANTI-FIGHTER - Creates a cloud dealing D6+2 Plasma damage to all fighters in hex.';
 			$this->data["Special"] .= '<br>Cloud remains during next Movement Phase, damaging any fighters that move through it.';			
 			$this->data["Special"] .= '<br>Requires 1 extra power, from being boosted or Batteries.';
