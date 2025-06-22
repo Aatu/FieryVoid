@@ -1440,7 +1440,7 @@ window.weaponManager = {
         debug && console.log("weaponManager target ship", ship, system);
 
         if (shipManager.isDestroyed(selectedShip)) return;
-        if(ship.Huge > 0) return; //Do not allow targeting of large muti-hex terrain, previously possible from certain angle.
+        if(ship.Huge > 0) return; //Do not allow targeting of large muti-hex terrain.
 
         var blockedLosHex = weaponManager.getBlockedHexes();
         var loSBlocked = false;
@@ -1458,7 +1458,7 @@ window.weaponManager = {
         for (var i in gamedata.selectedSystems) {
             var weapon = gamedata.selectedSystems[i];
 
-            //Only need to check first weapon e.g. i == 0
+            //Only need to check first weapon
             if (blockedLosHex && blockedLosHex.length > 0 && !loSBlocked) {
                 var sPosShooter = weaponManager.getFiringHex(selectedShip, weapon);
                 var sPosTarget = shipManager.getShipPosition(ship);
