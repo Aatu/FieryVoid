@@ -2782,7 +2782,10 @@ public function onIndividualNotesLoaded($gamedata)
              
         //calculate $this->BFCPtotal_used,
         $this->BFCPtotal_used = 0;
- 		$this->BFCPtotal_used = array_sum($this->allocatedBFCP);  
+ 		//$this->BFCPtotal_used = array_sum($this->allocatedBFCP); //Amended during PHP8 update - DK 25.6.25
+         foreach( $this->allocatedBFCP as $alloc){
+             if ( (isset($alloc)) && (is_numeric($alloc)))    $this->BFCPtotal_used += $alloc;
+        }		  
  		  
  }//endof onIndividualNotesLoaded
  
