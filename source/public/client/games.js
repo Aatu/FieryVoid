@@ -18,7 +18,7 @@ window.gamedata = {
 				div.className = "game slot clickable";
 
 				var link = document.createElement("a");
-				link.setAttribute("href", "http://fieryvoid.net/game.php?gameid=" + id);
+				link.setAttribute("href", "game.php?gameid=" + id); //Amended during PHP8 update - DK 25.6.25
 				//link.innerHTML = "Anonymous Match" + " @ Turn " + data[i].turn;
 				link.innerHTML = data[i].name + " @ Turn " + data[i].turn;
 
