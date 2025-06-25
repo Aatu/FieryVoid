@@ -372,10 +372,24 @@ PhaseStrategy.prototype.onMouseOverShips = function (ships, payload) {
 
         this.showAppropriateHighlight();
         this.showAppropriateEW();
-
+        
+/*      //trying to allow hex targeting more easily where there are friendly units located.
+        var menu = null;
+        var hasHex = weaponManager.hasHexWeaponsSelected()
+        if(hasHex && this.gamedata.isMyorMyTeamShip(ship)) {
+            if(this.gamedata.gamephase == 3){
+                menu = new ShipTooltipFireMenu(this.selectedShip, ship, this.gamedata.turn);
+            }
+            if(this.gamedata.gamephase == 1){
+                var position = this.coordinateConverter.fromGameToHex(this.shipIconContainer.getByShip(ship).getPosition());
+                menu = new ShipTooltipInitialOrdersMenu(this.selectedShip, ship, this.gamedata.turn, position);
+            }
+        }
+*/
         var icon = this.shipIconContainer.getById(ship.id);
         if (!this.shipTooltip || !this.shipTooltip.menu) {
-            this.showShipTooltip(ship, payload, null, true);
+            this.showShipTooltip(ship, payload, null, true);            
+            //this.showShipTooltip(ship, payload, menu, true);
         }
 
         if (this.shipTooltip && this.shipTooltip.ships.includes(ship) &&  this.shipTooltip.ships.length === 1) {
