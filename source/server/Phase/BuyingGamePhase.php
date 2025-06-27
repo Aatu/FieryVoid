@@ -337,6 +337,17 @@ class BuyingGamePhase implements Phase
                 
             $dbManager->setPlayerWaitingStatus($gameData->forPlayer, $gameData->id, true);
 
+            if ($gameData->rules->hasRuleName("moons") && $slot->slot == 1) { // Generate all moons from Slot/Player 1 
+                $moonValue = 0; //Initialise
+                $moonsRule = $gameData->rules->getRuleByName('moons');
+                
+                if ($moonsRule && method_exists($moonsRule, 'jsonSerialize')) {
+                    $moonValue = $moonsRule->jsonSerialize();
+                }                 
+
+                $this->addMoons($gameData, $dbManager, $moonValue, $slot->slot);
+            }
+
             // Now let's see if we have to add any terrain.
             if ($gameData->rules->hasRuleName("asteroids") && $slot->slot == 1) { // Generate all the asteroids from Slot/Player 1 
                 $numberOfAsteroids = 0; //Initialise
@@ -347,17 +358,6 @@ class BuyingGamePhase implements Phase
                 }                 
 
                 $this->addAsteroids($gameData, $dbManager, $numberOfAsteroids, $slot->slot);
-            }
-
-            if ($gameData->rules->hasRuleName("moons") && $slot->slot == 1) { // Generate all moons from Slot/Player 1 
-                $moonValue = 0; //Initialise
-                $moonsRule = $gameData->rules->getRuleByName('moons');
-                
-                if ($moonsRule && method_exists($moonsRule, 'jsonSerialize')) {
-                    $moonValue = $moonsRule->jsonSerialize();
-                }                 
-
-                $this->addMoons($gameData, $dbManager, $moonValue, $slot->slot);
             }
 
         }

@@ -643,7 +643,8 @@ ProximityLaser.prototype.getFiringHex = function(shooter, weapon){ //Need to cal
 	var sPosLaunch; 
     var launcher = this.launcher;
     var ship = this.ship;
-    var launcherOrder = weaponManager.getFiringOrder(ship, launcher)
+    //var launcherOrder = weaponManager.getFiringOrder(ship, launcher)
+    var launcherOrder = launcher.fireOrders[0] || weaponManager.getFiringOrder(ship, launcher);
 
 	   	if (launcherOrder)	{	// check that launcher has firing orders.  
 			sPosLaunch = new hexagon.Offset(launcherOrder.x, launcherOrder.y); 
