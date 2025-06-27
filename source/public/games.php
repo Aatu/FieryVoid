@@ -102,6 +102,13 @@ if (isset($_SESSION["user"])) {
 		 <br><br>---------- <b>hotfixes 16th of June</b> ---------- 
 	    <br>Hotfix - Stealth and LoS issues
 	    
+		 <br><br>---------- <b>hotfixes 27th of June</b> ---------- 
+	    <br>Optimised BallisticIcon and BallisticLines code.
+	    <br>Update Asteroid and Small Moon terrain images.
+	    <br>Updated system notes for several weapons to improve clarity.
+	    <br>Improved Front End LoS checks.
+
+	    
        <br><br><br>
 <!--	        
 		 <br><br>---------- <b>update 20th of January</b> ---------- 
