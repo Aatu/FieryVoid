@@ -455,23 +455,23 @@ window.weaponManager = {
 		    }
 		}
 */
-        // Compute LOS blockage once for all selected weapons
-        var blockedLosHex = weaponManager.getBlockedHexes(); //Are there any Enormous units in game, no point checking if no.
-
+        var blockedLosHex = weaponManager.getBlockedHexes(); //Are there any blocked hexes, no point checking if no.
         var loSBlocked = false; //Default to LoS not blocked.
-        if (blockedLosHex && blockedLosHex.length > 0) {
-            var weapon = gamedata.selectedSystems[0]; // Use the first weapon to get the shooter's position
-            var sPosShooter = weaponManager.getFiringHex(selectedShip, weapon);
-            var sPosTarget = shipManager.getShipPosition(ship);
-            
-            loSBlocked = mathlib.checkLineOfSight(sPosShooter, sPosTarget, blockedLosHex);
-        }
 
         for (var i in gamedata.selectedSystems) {
             var weapon = gamedata.selectedSystems[i];
 
             if (weaponManager.isOnWeaponArc(selectedShip, ship, weapon)) {
                 if (weaponManager.checkIsInRange(selectedShip, ship, weapon)) {
+
+
+                    if (blockedLosHex.length > 0 && !loSBlocked) {
+                        var sPosShooter = weaponManager.getFiringHex(selectedShip, weapon);
+                        var sPosTarget = shipManager.getShipPosition(ship);
+                        //If one weapon has blocked LoS, they all do so change value outside loop
+                        loSBlocked = mathlib.checkLineOfSight(sPosShooter, sPosTarget, blockedLosHex);
+                    }
+
                     var value = weapon.firingMode;
                     value = weapon.firingModes[value];
                     var keys = Object.keys(weapon.firingModes);
@@ -1440,11 +1440,11 @@ window.weaponManager = {
         debug && console.log("weaponManager target ship", ship, system);
 
         if (shipManager.isDestroyed(selectedShip)) return;
-        if(ship.Huge > 0) return; //Do not allow targeting of laege muti-hex terrain, previously possible from certain angle.
+        if(ship.Huge > 0) return; //Do not allow targeting of large muti-hex terrain.
 
         var blockedLosHex = weaponManager.getBlockedHexes();
-
         var loSBlocked = false;
+        /*
         if (blockedLosHex && blockedLosHex.length > 0) {
             var weapon = gamedata.selectedSystems[0]; // Use the first weapon to get the shooter's position
             var sPosShooter = weaponManager.getFiringHex(selectedShip, weapon);
@@ -1452,11 +1452,19 @@ window.weaponManager = {
             
             loSBlocked = mathlib.checkLineOfSight(sPosShooter, sPosTarget, blockedLosHex);
         }
-
+        */
         var toUnselect = [];
         var splitTargeted = [];
         for (var i in gamedata.selectedSystems) {
             var weapon = gamedata.selectedSystems[i];
+
+            //Only need to check first weapon
+            if (blockedLosHex && blockedLosHex.length > 0 && !loSBlocked) {
+                var sPosShooter = weaponManager.getFiringHex(selectedShip, weapon);
+                var sPosTarget = shipManager.getShipPosition(ship);
+                    
+                loSBlocked = mathlib.checkLineOfSight(sPosShooter, sPosTarget, blockedLosHex);
+            }
 
             if(loSBlocked && !weapon.hasSpecialLaunchHexCalculation) continue;
 

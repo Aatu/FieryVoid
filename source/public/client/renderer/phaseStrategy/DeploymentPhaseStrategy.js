@@ -36,6 +36,7 @@ window.DeploymentPhaseStrategy = function () {
             icon.enemySprite.hide();
             icon.allySprite.hide();
         });
+        //if(!shipManager.playerHasDeployedShips(gamedata.thisplayer)) window.location.reload(); //You can refresh screen if player has no ships, but not sure it's really necesary.
     };
 
     DeploymentPhaseStrategy.prototype.onHexClicked = function (payload) {
