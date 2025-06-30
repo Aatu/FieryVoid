@@ -134,9 +134,20 @@ VICTORY CONDITIONS: Last unit on map / Last ship on map / More forces remaining 
         <label for="initiativeSelect">NUMBER OF INITIATIVE GROUPS:</label>
         <select id="initiativeSelect" name="initiativeCategories">
             <!-- Dropdown options from 1 to 12 -->
+<?php 
+for($i=1;$i<=12;$i++){ 
+    $selected = '';
+    
+    if($i==SimultaneousMovementRule::$defaultNoOfCategories){ //is this value set as default?
+        $selected = 'selected';
+    }
+    
+print("<option value=\"".$i."\" ".$selected." >".$i."</option>");
+}          
+/* previous approach: html:
             <option value="1">1</option>
             <option value="2">2</option>
-            <option value="3">3</option>
+            <option value="3">3</option> 
             <option value="4">4</option>
             <option value="5">5</option>
             <option value="6" selected>6</option> <!-- Default selection -->
@@ -146,6 +157,8 @@ VICTORY CONDITIONS: Last unit on map / Last ship on map / More forces remaining 
             <option value="10">10</option>
             <option value="11">11</option>
             <option value="12">12</option>
+*/            
+?>
         </select>
     </div>
 </div>
