@@ -83,7 +83,7 @@ VICTORY CONDITIONS: Last unit on map / Last ship on map / More forces remaining 
                 <div id="gamespace" class="subpanel gamespacecontainer">
                     <div class="slot" >
                         <div>
-                            <input id="gamespacecheck" type="checkbox" name="fixedgamespace" checked>USE LIMITED GAME SPACE
+                            <input id="gamespacecheck" type="checkbox" name="fixedgamespace" checked>SET MAP BOUNDARIES
                         </div>
                         <div class="gamespacedefinition" style="height:24px;vertical-align:middle;position:relative">
                             <span class="smallSize headerSpan">GAME SPACE SIZE:</span>
@@ -211,7 +211,7 @@ print("<option value=\"".$i."\" ".$selected." >".$i."</option>");
     <div class="slot" id="desperateDropdown" style="display:none;">
         <label for="desperateSelect">DESPERATE RULES APPLY TO:</label>
         <select id="desperateSelect" name="desperateCategories">
-            <option value="-1">Both</option>
+            <option value="-1">Both teams</option>
             <option value="1">Team 1</option>
             <option value="2">Team 2</option>
         </select>
