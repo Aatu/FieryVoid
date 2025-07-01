@@ -80,7 +80,7 @@ a:hover { text-decoration: underline; }
   width: 200px;
   text-align: center; 
   box-sizing: border-box;
-  height: 30px;          /* or whatever height you prefer */
+  height: 28px;          /* or whatever height you prefer */
   line-height: 18px;     /* vertically center the text */     
 }
 
@@ -92,7 +92,7 @@ a:hover { text-decoration: underline; }
   width: 200px;
   text-align: center; 
   box-sizing: border-box;
-  height: 30px;          /* or whatever height you prefer */
+  height: 28px;          /* or whatever height you prefer */
   line-height: 18px;     /* vertically center the text */  
 }
 .btn:hover { opacity: 0.9; }
