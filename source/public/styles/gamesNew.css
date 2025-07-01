@@ -6,7 +6,7 @@ body {
   color: #e0e7ef;
   line-height: 1.5;
 }
-a { color: #8bcaf2; text-decoration: none; }
+a { color: #DEEBFF; text-decoration: none; }
 a:hover { text-decoration: underline; }
 
 /* Layout */
@@ -36,7 +36,7 @@ a:hover { text-decoration: underline; }
 
 .resources { margin-bottom: 15px; font-size: 1.1em;}
 .resources h3 { margin-right: 5px; margin-left: -1px; font-size: 1.4em; border-bottom: 2px solid #215a7a; padding-bottom: 2px; margin-bottom: 10px;}
-.resources a { margin-right: 5px; margin-left: 5px; font-size: 1.3em;} 
+.resources a { margin-right: 5px; margin-left: 5px; font-size: 1.3em; color: #8bcaf2} 
 
 .links a { margin-right: 5px; margin-left: 5px; padding-bottom: 2px; font-size: 1.1em;}
 
@@ -105,6 +105,15 @@ a:hover { text-decoration: underline; }
 	-moz-box-shadow: 0px 0px 1px #4a6a7a;
     -webkit-box-shadow: 0px 0px 1px #4a6a7a;
     box-shadow: 0px 0px 1px #4a6a7a;
+}
+
+.top-right-links a:hover {
+  text-decoration: underline;
+}
+
+.create-col .btn {
+  display: block;
+  margin-bottom: 8px;
 }
 
 /* Chat */
