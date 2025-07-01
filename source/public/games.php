@@ -81,36 +81,36 @@ if (isset($_SESSION["user"])) {
     <h2>Welcome to <strong>Fiery Void!</strong></h2>
     <p class="lead">An adaptation of the “Babylon 5 Wars” tabletop game, by Agents of Gaming!</p>
 
-    <div class="resources">
-      <h3>Get Started</h3>
-      <a href="files/Fiery_Void_-_How_to_Play.docx">Starter Guide</a> | 
-      <a href="https://www.youtube.com/...">Video Tutorials</a> | 
-      <a href="https://discord.gg/...">Discord</a> | 
-      <a href="https://www.facebook.com/groups/...">Facebook</a>
+<div class="resources">
+  <h3>Get Started</h3>
+  <a href="files/Fiery_Void_-_How_to_Play.docx" target="_blank" rel="noopener noreferrer">Starter Guide</a> | 
+  <a href="https://www.youtube.com/playlist?list=PLTGKagm5KkMxB8oKBiIUeoBQTRYz2z0-3" target="_blank" rel="noopener noreferrer">Video Tutorials</a> | 
+  <a href="https://discord.gg/4jXarWusp4" target="_blank" rel="noopener noreferrer">Discord</a> | 
+  <a href="https://www.facebook.com/groups/fieryvoid" target="_blank" rel="noopener noreferrer">Facebook</a>
+</div>
+
+
+<div class="resources">
+      <h3>Rules & Info</h3>
+      <div class="links">     
+        <div><a href="files/FV_factions.txt" target="_blank" rel="noopener noreferrer">Factions & Tier List:</a> Overview of the factions and their approximate strengths available in Fiery Void.</div>
+        <div><a href="files/FV_FAQ.txt" target="_blank" rel="noopener noreferrer">FAQ:</a> Aide Memoire of rules, differences from B5 Wars, known bugs!</div>
+        <div><a href="files/enhancements_list.txt" target="_blank" rel="noopener noreferrer">Systems & Enhancements List:</a> Details of enhancements and other common systems available e.g. Boarding / Missiles.</div>
+        <div><a href="http://b5warsvault.wikidot.com/" target="_blank" rel="noopener noreferrer">Babylon 5 Wars Vault:</a> Huge amount of Babylon 5 Wars rules and info.</div>
+      </div> 
     </div>
 
-    <div class="news-section">
+    <div class="resources">
       <h3>Latest Updates — June 2025</h3>
       <ul class="updates-list">
-        <li><strong>Features & Enhancements:</strong> Fleets/ships can deploy after Turn 1; Hyach subs now have Stealth; Specialist rebalances; & more.</li>
-        <li><strong>Bug Fixes:</strong> Pulsar mine fixed, tooltip/text readability improved, etc.</li>
-        <li><strong>Fixes (6 Jun):</strong> Overlay colors, deployment zone tweaks, UI fixes.</li>
-        <li><strong>Hotfixes (12 & 16 Jun):</strong> Movement/LOS fixes, targeting tooltip updates.</li>
-        <li><strong>Hotfix (27 Jun):</strong> Optimized visuals, terrain updates, LoS checks improved.</li>
+        <li>Features & Enhancements: Fleets/ships can deploy after Turn 1; Hyach subs now have Stealth; Specialist rebalances; & more.</li>
+        <li>6 Jun - Overlay colors, deployment zone tweaks, UI fixes. Pulsar mine fixed, tooltip/text readability improved.</li>
+        <li>16 Jun- Movement/LOS fixes, targeting tooltip updates.</li>
+        <li>27 Jun - Optimized visuals, terrain updates, LoS checks improved.</li>
       </ul>
     </div>
 
-    <div class="resources">
-      <h3>Rules & Info</h3>
-      <div class="links">     
-        <div><a href="files/FV_factions.txt">Factions & Tier List:</a> Overview of rules and systems of the fleets available in Fiery Void.</div>
-        <div><a href="files/FV_FAQ.txt">FAQ:</a> Differences from B5 Wars, known bugs!</div>
-        <div><a href="files/enhancements_list.txt"> Enhancements:</a>Details of enhancements and other common systems e.g. Boarding / Missiles.</div>
-        <div><a href="http://b5warsvault.wikidot.com/"> B5Wars Vault & Rules:</a> LOTS of other Babylon 5 Wars stuff.</div>
-      </div>  
-    </div>
-
-    <p class="noteGames">Remember - If anything weird happens, press <kbd>Ctrl+F5</kbd> to reload page!  If that doesn't work report bugs via Discord or Facebook links above.</p>
+    <p class="noteGames">Remember - If anything weird happens, press <kbd>Ctrl+F5</kbd> to reload page!  If that doesn't work report bugs via Discord link above.</p>
   </section>
 
   <section class="games-panel">
@@ -122,7 +122,7 @@ if (isset($_SESSION["user"])) {
         </div>
       </div>
       <div>
-        <h3>GAMES TO JOIN</h3>
+        <h3>JOIN GAMES</h3>
         <div class="gamecontainer lobby subpanel">
           <div class="notfound">No starting games</div>
         </div>
@@ -134,7 +134,7 @@ if (isset($_SESSION["user"])) {
       </div>
       <div class="create-col">
         <a class="btn btn-success create-game-btn" href="creategame.php">Create Game</a>
-        <button class="btn btn-primary" onclick="loadFireList()">Recent Games</button>
+        <button class="btn btn-secondary" onclick="loadFireList()">Recent Games</button>
       </div>
     </div>
   </section>
