@@ -38,9 +38,9 @@ a:hover { text-decoration: underline; }
 .resources h3 { margin-right: 5px; margin-left: -1px; font-size: 1.4em; border-bottom: 2px solid #215a7a; padding-bottom: 2px; margin-bottom: 10px;}
 .resources a { margin-right: 5px; margin-left: 5px; font-size: 1.3em; color: #8bcaf2} 
 
-.links a { margin-right: 5px; margin-left: 5px; padding-bottom: 2px; font-size: 1.1em;}
+.links a { margin-right: 5px; margin-left: 5px; margin-bottom: 0px; padding-bottom: 2px; font-size: 1.1em;}
 
-.updates-list { list-style: disc inside; margin-left: 20px; margin-bottom: 15px; font-size: 1.1em;}
+.updates-list { list-style: disc inside; margin-left: 20px; margin-bottom: 10px; font-size: 1.1em;}
 
 
 /* Games Grid */
@@ -100,16 +100,16 @@ a:hover { text-decoration: underline; }
 
 .waitingForTurn
 {
-    border:1px solid #84a5ce !important;
+  border:1px solid #84a5ce !important;
 	background-color:#254e82 !important;
 	-moz-box-shadow: 0px 0px 1px #4a6a7a;
-    -webkit-box-shadow: 0px 0px 1px #4a6a7a;
-    box-shadow: 0px 0px 1px #4a6a7a;
+  -webkit-box-shadow: 0px 0px 1px #4a6a7a;
+  box-shadow: 0px 0px 1px #4a6a7a;
 }
 
 .create-col .btn {
   display: block;
-  margin-bottom: 10px;
+  margin-bottom: 9px;
 }
 
 /* Chat */
