@@ -24,35 +24,7 @@ if (isset($_SESSION["user"])) {
   <script src="client/player.js"></script>
   <script src="client/mathlib.js"></script>
   <script src="client/UI/confirm.js"></script>
-  <style>
-    .top-right-links {
-      position: absolute;
-      top: 10px;
-      right: 130px;
-      font-size: 14px;
-    }
-    .top-right-links a {
-      color: #ccf;
-      text-decoration: none;
-      margin-right: 10px;
-    }
-    .top-right-links a:hover {
-      text-decoration: underline;
-    }
-    .games-grid.four-cols {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 20px;
-    }
-    .create-col .btn {
-      display: block;
-      margin-bottom: 10px;
-    }
-    .note.error {
-      color: red;
-      font-weight: bold;
-    }
-  </style>
+  
   <script>
     jQuery($ => {
       gamedata.parseServerData(<?php echo $games; ?>);
