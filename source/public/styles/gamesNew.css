@@ -107,13 +107,9 @@ a:hover { text-decoration: underline; }
     box-shadow: 0px 0px 1px #4a6a7a;
 }
 
-.top-right-links a:hover {
-  text-decoration: underline;
-}
-
 .create-col .btn {
   display: block;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 /* Chat */
