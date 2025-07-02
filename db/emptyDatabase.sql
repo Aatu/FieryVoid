@@ -451,7 +451,17 @@ CREATE TABLE `tac_systemdata` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 
-
+--
+-- Table structure for table `tac_saved_list` - list of saved fleet lists
+--
+DROP TABLE IF EXISTS `tac_saved_list`;
+CREATE TABLE `tac_saved_list` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` text DEFAULT NULL,
+  `creator` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci
+  
 
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
