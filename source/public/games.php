@@ -65,10 +65,10 @@ if (isset($_SESSION["user"])) {
 <div class="resources">
       <h3>Rules & Info</h3>
       <div class="links">     
-        <div><a href="files/FV_factions.txt" target="_blank" rel="noopener noreferrer">Factions & Tier List:</a> Overview of the factions and their approximate strengths available in Fiery Void.</div>
-        <div><a href="files/FV_FAQ.txt" target="_blank" rel="noopener noreferrer">FAQ:</a> Aide Memoire of rules, differences from B5 Wars, known bugs!</div>
-        <div><a href="files/enhancements_list.txt" target="_blank" rel="noopener noreferrer">Systems & Enhancements List:</a> Details of enhancements and other common systems available e.g. Boarding / Missiles.</div>
-        <div><a href="http://b5warsvault.wikidot.com/" target="_blank" rel="noopener noreferrer">Babylon 5 Wars Vault:</a> Huge amount of Babylon 5 Wars rules and info.</div>
+        <div><a href="files/FV_factions.txt" target="_blank" rel="noopener noreferrer">Factions & Tiers:</a> Overview of Fiery Void factions and their approximate strengths.</div>
+        <div><a href="files/FV_FAQ.txt" target="_blank" rel="noopener noreferrer">Fiery Void FAQ:</a> Aide Memoire of rules and differences from Babylon 5 Wars.</div>
+        <div><a href="files/enhancements_list.txt" target="_blank" rel="noopener noreferrer">Systems & Enhancements:</a> Details of common systems and unit enhancements e.g. Boarding Actions / Missiles.</div>
+        <div><a href="http://b5warsvault.wikidot.com/" target="_blank" rel="noopener noreferrer">Babylon 5 Wars Vault:</a> Huge amount of Babylon 5 Wars rules and info!</div>
       </div> 
     </div>
 
