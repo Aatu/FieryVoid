@@ -23,7 +23,7 @@ a:hover { text-decoration: underline; }
 }
 
 .logo { height: 50px; }
-.container { max-width: 1200px; margin: 20px auto; padding: 0 20px; }
+.container { max-width: 1300px; margin: 20px auto; padding: 0 20px; }
 .news-panel, .games-panel, .chat-panel {
   background: rgba(23, 39, 54, 0.85); /* 0.85 is 85% opacity */
   padding: 20px;
@@ -52,7 +52,9 @@ a:hover { text-decoration: underline; }
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px,1fr));
   gap: 15px;
-  text-align: center;    
+  text-align: center;
+  font-size: 1.1em; 
+line-height: 1.5;       
 }
 .games-grid h3 { margin-bottom: 10px; }
 .game-list {
@@ -81,7 +83,7 @@ a:hover { text-decoration: underline; }
   color: white;
   font-size: 1.2em;   
   border: 1px solid #7298a7;
-  width: 200px;
+  width: 220px;
   text-align: center; 
   box-sizing: border-box;
   height: 28px;          /* or whatever height you prefer */
@@ -93,7 +95,7 @@ a:hover { text-decoration: underline; }
   color: white;
   font-size: 1.2em;  
   border: 1px solid #66b266;
-  width: 200px;
+  width: 220px;
   text-align: center; 
   box-sizing: border-box;
   height: 28px;          /* or whatever height you prefer */
