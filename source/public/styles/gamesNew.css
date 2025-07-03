@@ -43,8 +43,8 @@ a:hover { text-decoration: underline; }
 .resources a { margin-right: 5px; margin-left: 5px; font-size: 1.3em; color: #8bcaf2} 
 
 .links a { margin-right: 5px; margin-left: 5px; margin-bottom: 0px; padding-bottom: 2px; font-size: 1.1em;}
-
-.updates-list { list-style: disc inside; margin-left: 20px; margin-bottom: 10px; font-size: 1.1em;}
+.links { margin-right: 5px; margin-left: 5px; margin-bottom: 0px; padding-bottom: 2px; font-size: 1.1em;}
+.updates-list { list-style: disc inside; margin-left: 20px; margin-bottom: 10px; font-size: 1em;}
 
 
 /* Games Grid */
@@ -53,7 +53,7 @@ a:hover { text-decoration: underline; }
   grid-template-columns: repeat(auto-fit, minmax(280px,1fr));
   gap: 15px;
   text-align: center;
-  font-size: 1.1em; 
+  font-size: 1em; 
 line-height: 1.5;       
 }
 .games-grid h3 { margin-bottom: 10px; }
