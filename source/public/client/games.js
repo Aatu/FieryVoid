@@ -50,7 +50,7 @@ window.gamedata = {
 
 	createGames: function createGames() {
 
-		var gamehtml = '<div class="game slot clickable" data-gameid="{gameid}"><span class="name">{gamename}</span><span class="value players">players: {players}/{maxplayers}</span></div>';
+		var gamehtml = '<div class="game slot clickable" data-gameid="{gameid}"><span class="name">{gamename}</span><br><span class="value players">Players: {players}/{maxplayers}</span></div>';
 		var activefound = false;
 		var lobbyfound = false;
 		console.log("GAMES LOLS", this.games)
@@ -87,7 +87,7 @@ window.gamedata = {
 					gameDOM.appendTo($('.gamecontainer.lobby'));
 					$('.gamecontainer.lobby').addClass("found");
 				} else {
-					$('.players', gameDOM).html("players: " + game.playerCount + "/" + game.slots);
+					$('.players', gameDOM).html("Players: " + game.playerCount + "/" + game.slots);
 				}
 				lobbyfound = true;
 			}
