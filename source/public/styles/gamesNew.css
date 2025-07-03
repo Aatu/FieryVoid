@@ -23,7 +23,7 @@ a:hover { text-decoration: underline; }
 }
 
 .logo { height: 50px; }
-.container { max-width: 1300px; margin: 20px auto; padding: 0 20px; }
+.container { max-width: 1200px; margin: 20px auto; padding: 0 20px; }
 .news-panel, .games-panel, .chat-panel {
   background: rgba(23, 39, 54, 0.9); /* 0.85 is 85% opacity */
   padding: 20px;
