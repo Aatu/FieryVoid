@@ -101,6 +101,23 @@ line-height: 1.5;
   height: 28px;          /* or whatever height you prefer */
   line-height: 18px;     /* vertically center the text */  
 }
+
+.btn-success-lobby {
+  position:absolute; 
+  left:8px; 
+  bottom:8px;  
+  background: #3c7a3c;
+  color: white;
+  font-size: 1.2em;  
+  border: 1px solid #66b266;
+  width: 150px;
+  text-align: center; 
+  box-sizing: border-box;
+  height: 24px;          /* or whatever height you prefer */
+  line-height: 13px;     /* vertically center the text */  
+}
+
+
 .btn:hover { opacity: 0.9; }
 .create-game-btn { margin-top: 15px; }
 

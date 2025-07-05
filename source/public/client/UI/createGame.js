@@ -13,7 +13,7 @@ jQuery(function ($) {
     let allowSubmit = false;
 
     // Only set allowSubmit on real mouse or touch interaction
-    $("#createGameForm input[type='submit']").on("mousedown touchstart", function () {
+    $("#createGameForm button[type='submit']").on("mousedown touchstart", function () {
         allowSubmit = true;
     });
 

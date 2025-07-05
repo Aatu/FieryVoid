@@ -62,6 +62,14 @@ a.link:hover
 	margin:0px auto 10px auto;
 }
 
+.panel.large.create{
+	width:1000px;
+	margin:0px auto 10px auto;
+  background: rgba(23, 39, 54, 0.9); /* 0.85 is 85% opacity */
+  border: 1px solid #215a7a;
+  box-shadow: 0px 0px 0px #4a6a7a;
+}
+
 
 .panelheader{
 	font-size:20px;

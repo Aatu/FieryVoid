@@ -32,6 +32,7 @@
 		<link href="styles/base.css" rel="stylesheet" type="text/css">
         <link href="styles/confirm.css" rel="stylesheet" type="text/css">
         <link href="styles/lobby.css" rel="stylesheet" type="text/css">
+        <link href="styles/gamesNew.css" rel="stylesheet" type="text/css">        
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
 <!--		<script src="client/helper.js"></script>-->
         <script src="client/mathlib.js"></script>
@@ -39,13 +40,21 @@
         <script src="client/UI/createGame.js"></script>
 	</head>
 	<body class="creategame">
-	
-        <img src="img/logo.png">
+  <header class="header">
+    <img src="img/logo.png" alt="Fiery Void Logo" class="logo">
+    <div class="top-right-row">
+      <a href="chpass.php">Change password</a>
+      <span>|</span>
+      <a href="reg.php">Register New Account</a>
+      <a href="logout.php" class="btn btn-primary">Logout</a>
+    </div>
+  </header>
 <!--        <div class="helphide" style="float:right" onclick="window.helper.onClickHelpHide()">
         <img id="helphideimg" src="img/greyvir.jpg" height="30" width="30">	
         </div>-->
-		<div class="panel large">
-			<div class="panelheader">	<span>CREATE GAME</span>	</div>
+  <main class="container">
+    <section class="panel large create">
+      <div class="panelheader"><span>CREATE GAME</span></div>
 			<form id="createGameForm" method="post">
 			
 				<div><span>Name:</span></div>
@@ -109,17 +118,6 @@ VICTORY CONDITIONS: Last unit on map / Last ship on map / More forces remaining 
                 </div>
 
 
-
-<!---
-                <div style="margin-top:20px;"><h3>SIMULTANEOUS MOVEMENT</h3></div>
-                <div id="simultaenousMovement" class="subpanel movementspacecontainer">
-                    <div class="slot" >
-                        <div>
-                            <input id="movementcheck" type="checkbox" name="movementcheck">USE SIMULTANEOUS MOVEMENT
-                        </div>
-                    </div>
-                </div>
--->
 <div style="margin-top:20px;">
     <h3>GAME OPTIONS</h3>
     </div>
@@ -144,20 +142,7 @@ for($i=1;$i<=12;$i++){
     
 print("<option value=\"".$i."\" ".$selected." >".$i."</option>");
 }          
-/* previous approach: html:
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option> 
-            <option value="4">4</option>
-            <option value="5">5</option>
-            <option value="6" selected>6</option> <!-- Default selection -->
-            <option value="7">7</option>
-            <option value="8">8</option>
-            <option value="9">9</option>
-            <option value="10">10</option>
-            <option value="11">11</option>
-            <option value="12">12</option>
-*/            
+      
 ?>
         </select>
     </div>
@@ -240,19 +225,16 @@ print("<option value=\"".$i."\" ".$selected." >".$i."</option>");
 
 
                 <input id="createGameData" type="hidden" name="data" value="">
-				<input type="submit" style="margin-top: 0px; margin-bottom: 0px; position:absolute; left:8px; bottom:8px;" value="Create Game">                      
+
+                <button type="submit" class="btn btn-success-lobby create-game-btn">
+                    Create Game
+                </button>                  
 				
 			</form>
 			
 		</div>
         
-        <div id="globalchat" class="panel large" style="height:150px;">
-        <?php 
-            $chatgameid = 0;
-            $chatelement = "#globalchat";
-            include("chat.php")
-        ?>
-        </div>
+
 
 
 
@@ -316,5 +298,19 @@ print("<option value=\"".$i."\" ".$selected." >".$i."</option>");
                 </div>
             </div>
         </div>
-	</body>
+    </section>
+
+        <div id="globalchat" class="panel large" style="height:150px;">
+        <?php 
+            $chatgameid = 0;
+            $chatelement = "#globalchat";
+            include("chat.php")
+        ?>
+        </div>
+
+  </main>
+
+
+
+</body>
 </html>
