@@ -48,7 +48,7 @@
 
 .slot .playername{
 	font-size:14px;
-	color:#6e9cdc; /* Original value  #496791 */
+	color:#DEEBFF; /* Original value  #496791 */
     font-weight: bold; /* Makes the text bold */	
 }
 
@@ -161,10 +161,10 @@
 }
 
 .slot.selected{
-    background-color:#123D73 !important;
-	-moz-box-shadow: 0px 0px 15px #0099ff;
-    -webkit-box-shadow: 0px 0px 15px #0099ff;
-    box-shadow: 0px 0px 3px #0099ff;
+    background-color:#123D73;
+	-moz-box-shadow: 0px 0px 1px #0099ff;
+    -webkit-box-shadow: 0px 0px 1px #0099ff;
+    box-shadow: 0px 0px 1px #0099ff;
     
 }
 

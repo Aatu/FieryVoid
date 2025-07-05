@@ -44,6 +44,7 @@
 		<link href="styles/base.css" rel="stylesheet" type="text/css">
 		<link href="styles/lobby.css" rel="stylesheet" type="text/css">
 		<link href="styles/confirm.css" rel="stylesheet" type="text/css">
+        <link href="styles/gamesNew.css" rel="stylesheet" type="text/css">          
         <link href="styles/shipwindow.css" rel="stylesheet" type="text/css">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
         <script src="client/lib/jquery-ui-1.8.15.custom.min.js"></script>
@@ -284,14 +285,25 @@
 		</script>
 	</head>
 	<body style="background-image:url(img/maps/<?php print($gamelobbydata->background); ?>)">
-	
-        <img src="img/logo.png">
+
+  <header class="header">
+    <img src="img/logo.png" alt="Fiery Void Logo" class="logo">
+    <div class="top-right-row">
+      <a href="chpass.php">Change password</a>
+      <span>|</span>
+      <a href="reg.php">Register New Account</a>
+      <a href="logout.php" class="btn btn-primary">Logout</a>
+    </div>
+  </header>
 <!--        <div class="helphide" style="float:right" onclick="window.helper.onClickHelpHide()">
         <img id="helphideimg" src="img/greyvir.jpg" height="30" width="30">	
         </div>-->
-		<div class="panel large">
-			<div class="logout"><a href="logout.php">LOGOUT</a></div>
-			<div class="">	<span class="panelheader">GAME:</span><span class="panelsubheader"><?php print($gamelobbydata->name); ?></span>	</div>
+<main class="container"></main>        
+		<div class="panel large lobby">
+            <div class="">
+                <span class="panelheader">GAME:</span>
+                <span class="panelsubheader"> <?php print($gamelobbydata->name); ?></span>
+            </div>
 			<div><span> <?php print($gamelobbydata->description); ?> </span></div>
 <?php
 //define options list
@@ -449,10 +461,10 @@ if ($asteroids == false && $moons == false) {
             <!--<div class="slot" data-slotid="2" data-playerid=""><span>SLOT 2:</span></div>
 			-->
 			
-			<span class="clickable leave">LEAVE GAME</span>
+			<span class="btn btn-secondary-lobby leave">Leave Game</span>
 			
 		</div>
-		<div class="panel large buy" style="display:none;">
+		<div class="panel large lobby buy" style="display:none;">
 		<div>
         <!-- 🟡 Fleet points summary & Tier checkboxes in one row -->
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
@@ -466,19 +478,6 @@ if ($asteroids == false && $moons == false) {
             <span class="panelsmall">)</span>
         </div>
 
-        <!--
-        <div>
-                <span class="panelheader" style="padding-right: 15px;">PURCHASE YOUR FLEET</span>
-                <span class="panelsubheader current">0</span>
-                <span class="panelsubheader">/</span>
-                <span class="panelsubheader max">0</span>
-                <span class="panelsubheader">pts</span>
-                <span class="panelsmall" style="margin-left: 5px;">(</span>
-                <span class="panelsmall remaining">0</span>
-                <span class="panelsmall">pts left</span>
-                <span class="panelsmall">)</span>
-            </div>
-        -->
             <div style="text-align: right; font-size: 11px;">
                 <span class="clickable tier-select-all" style="margin-right: 5px;  text-decoration: underline;">All Filters</span>
                 <span style="margin-right: 5px;">|</span>          
@@ -487,7 +486,7 @@ if ($asteroids == false && $moons == false) {
 
                 <label style="margin-left: 5px; font-size: 11px;">
                     <span style="margin-right: 2px; font-size: 12px;">Filter by ISD:</span>
-                    <input type="text" id="isdFilter" value="" style="width: 35px; height: 12px; text-align: right;">
+                    <input type="text" id="isdFilter" value="" style="width: 40px; height: 17px; text-align: right;">
                     <span class="clickable resetISDFilter" style="text-decoration: underline; margin-left: 3px;  font-size: 10px;">Reset</span>
                 </label>
 
@@ -517,21 +516,21 @@ if ($asteroids == false && $moons == false) {
 </div>
 			
         <div style="margin-top: 8px;">
-            <span class="clickable readybutton">READY</span>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            <span class="clickable checkbutton">CHECK</span>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            <a href="files/FV_FleetChecker.txt" title="details of fleet composition rules" target="_blank">Fleet Checker rules</a>
+            <span class="btn btn-success-lobby readybutton">READY</span>
+            &nbsp;&nbsp;
+            <span class="btn btn-primary-lobby checkbutton">CHECK</span>
+            &nbsp;
+            <a href="files/FV_FleetChecker.txt" title="Details of fleet composition rules" target="_blank">Fleet Checker rules</a>
         </div>
 
     </div>
 
         <!-- ✅ Your inserted fleetcheck panel -->
-        <div id="fleetcheck" class="panel large" style="display:none;"><p id="fleetchecktxt" style="display:block;"><span></div>
+        <div id="fleetcheck" class="panel large lobby" style="display:none;"><p id="fleetchecktxt" style="display:block;"><span></div>
 
 </div>
 
-    <div id="deploymentPreview" class="panel large" style="margin-top:10px;">
+    <div id="deploymentPreview" class="panel large lobby" style="margin-top:10px;">
         <div style="text-align: center; text-decoration: underline; margin-bottom: 10px;">
             <span>DEPLOYMENT ZONE PREVIEW</span>
         </div>
@@ -540,7 +539,7 @@ if ($asteroids == false && $moons == false) {
         </div>
     </div>
 
-        <div id="globalchat" class="panel large" style="height:150px;">
+        <div id="globalchat" class="panel large lobby" style="height:150px;">
         <?php 
             $chatgameid = 0;
             $chatelement = "#globalchat";
@@ -884,7 +883,8 @@ if ($asteroids == false && $moons == false) {
             <span class="totalUnitCostText"></span>
             <span class="totalUnitCostAmount"></span>
         </span>
-    </div>                                    
+    </div>   
+    </main>	                                     
 	</body>
 
 

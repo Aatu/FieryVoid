@@ -1,5 +1,5 @@
 /* Reset & Typography */
-* { margin: 0; padding: 0; box-sizing: border-box; }
+* { }
 body {
   font-family: Arial, sans-serif;
   
@@ -18,14 +18,14 @@ a:hover { text-decoration: underline; }
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: rgba(23, 39, 54, 0.80); /* 0.85 is 85% opacity */
+  background: rgba(23, 39, 54, 0.80);
   padding: 5px 10px;
 }
 
 .logo { height: 50px; }
 .container { max-width: 1200px; margin: 20px auto; padding: 0 20px; }
 .news-panel, .games-panel, .chat-panel {
-  background: rgba(23, 39, 54, 0.9); /* 0.85 is 85% opacity */
+  background: rgba(23, 39, 54, 0.9);
   padding: 20px;
   border-radius: 5px;
   margin-bottom: 10px;
@@ -102,7 +102,7 @@ line-height: 1.5;
   line-height: 18px;     /* vertically center the text */  
 }
 
-.btn-success-lobby {
+.btn-success-create {
   position:absolute; 
   left:8px; 
   bottom:8px;  
@@ -114,9 +114,52 @@ line-height: 1.5;
   text-align: center; 
   box-sizing: border-box;
   height: 24px;          /* or whatever height you prefer */
-  line-height: 13px;     /* vertically center the text */  
+  line-height: 13px;     /* vertically center the text */
+    margin-top: 20px;  
 }
 
+.btn-success-lobby {
+
+  left:8px; 
+  bottom:8px;  
+  background: #3c7a3c;
+  color: white;
+  font-size: 1.2em;  
+  border: 1px solid #66b266;
+  width: 100px;
+  text-align: center; 
+  box-sizing: border-box;
+  height: 22px;          /* or whatever height you prefer */
+  line-height: 11px;     /* vertically center the text */  
+}
+
+.btn-primary-lobby {
+  background: #215a7a;
+  color: white;
+  width: 100px;  
+  font-size: 1.2em;   
+  border: 1px solid #7298a7;
+  
+  text-align: center; 
+  box-sizing: border-box;
+  height: 22px;          /* or whatever height you prefer */
+  line-height: 11px;     /* vertically center the text */  
+
+}
+
+.btn-secondary-lobby {
+  background: #215a7a;
+  color: white;
+  font-size: 1.1em;   
+  border: 1px solid #7298a7;
+  width: 120px;
+  text-align: center; 
+  box-sizing: border-box;
+  height: 20px;          /* or whatever height you prefer */
+  line-height: 9px;     /* vertically center the text */ 
+  margin-top: 5px;
+  margin-left: 5px;      
+}
 
 .btn:hover { opacity: 0.9; }
 .create-game-btn { margin-top: 15px; }
