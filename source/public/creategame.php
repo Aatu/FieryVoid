@@ -226,7 +226,7 @@ print("<option value=\"".$i."\" ".$selected." >".$i."</option>");
 
                 <input id="createGameData" type="hidden" name="data" value="">
 
-                <button type="submit" class="btn btn-success-lobby create-game-btn">
+                <button type="submit" class="btn btn-success-create create-game-btn">
                     Create Game
                 </button>                  
 				
@@ -300,7 +300,7 @@ print("<option value=\"".$i."\" ".$selected." >".$i."</option>");
         </div>
     </section>
 
-        <div id="globalchat" class="panel large" style="height:150px;">
+        <div id="globalchat" class="panel large create" style="height:150px;">
         <?php 
             $chatgameid = 0;
             $chatelement = "#globalchat";
