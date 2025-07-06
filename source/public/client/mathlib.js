@@ -264,8 +264,8 @@ window.mathlib = {
 
 			// Filter out obviously non-intersecting hexes (based on hex grid, not pixels!)
 			if (
-				hex.q < lineMinQ - 5 || hex.q > lineMaxQ + 5 ||
-				hex.r < lineMinR - 5 || hex.r > lineMaxR + 5
+				hex.q < lineMinQ - 3 || hex.q > lineMaxQ + 3 ||
+				hex.r < lineMinR - 3 || hex.r > lineMaxR + 3
 			) {
 				continue;
 			}
