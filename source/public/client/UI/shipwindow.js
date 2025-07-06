@@ -31,7 +31,6 @@ window.shipWindowManager = {
 	},
 
 	open: function open(ship) {
-
 		var old;
 
 		if (gamedata.turn != 0) {
@@ -40,23 +39,38 @@ window.shipWindowManager = {
 			} else {
 				old = $(".shipwindow.enemy:visible");
 			}
-		}else{
+		} else {
 			old = $(".shipwindow:visible");
-		}	
+		}
 
 		var n = ship.shipStatusWindow;
 
 		if (!n) return;
 
-		if (n.css("display") == "block") return;
+		if (gamedata.turn != 0) if (n.css("display") == "block") return;
 
 		if (old.length) {
 			old.hide();
-			n.css("top", old.css("top")).css("left", old.css("left"));
+
+			if (gamedata.turn != 0) {
+				old.hide();
+				n.css("top", old.css("top")).css("left", old.css("left"));
+			} else {
+				// Set position explicitly in buy phase
+				n.css("top", old.css("top"));
+
+				// Reset both sides before applying only one
+				n.removeClass("left right"); // optionally clear positioning classes
+
+				if (ship.userid == 0) {
+					n.css("left", "30px");  // left side for store ship
+				} else {
+					n.css("right", "30px"); // right side for fleet ship
+				}
+			}
 		}
 
 		this.updateNotes(ship);
-
 		n.show();
 	},
 
@@ -91,21 +105,30 @@ window.shipWindowManager = {
 			shipwindow.addClass("enemy");
 		}
 
-		if (gamedata.getPlayerTeam) {
-			if ( gamedata.getPlayerTeam() === 1) {
-				if (ship.userid == gamedata.thisplayer) {
-					shipwindow.addClass("left");
+		//In Buy Phase manually set where window opens.
+		if(gamedata.phase == 0){
+			if(ship.userid == 0){
+				shipwindow.addClass("left");
+			}else{
+				shipwindow.addClass("right");
+			}
+		}else{	
+			if (gamedata.getPlayerTeam) {
+				if ( gamedata.getPlayerTeam() === 1) {
+					if (ship.userid == gamedata.thisplayer) {
+						shipwindow.addClass("left");
+					} else {
+						shipwindow.addClass("right");
+					}
 				} else {
-					shipwindow.addClass("right");
-				}
-			} else {
-				if (ship.userid == gamedata.thisplayer) {
-					shipwindow.addClass("right");
-				} else {
-					shipwindow.addClass("left");
+					if (ship.userid == gamedata.thisplayer) {
+						shipwindow.addClass("right");
+					} else {
+						shipwindow.addClass("left");
+					}
 				}
 			}
-		}
+		}	
 
 		shipwindow.data("ship", ship.id);
 		shipwindow.addClass("ship_" + ship.id);
