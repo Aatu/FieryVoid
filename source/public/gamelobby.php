@@ -480,21 +480,21 @@ if ($asteroids == false && $moons == false) {
         </div>
     </div>
 
-            <div style="font-size: 11px; margin-top: 3px; margin-left: 5px;">
-                <span class="clickable tier-select-all" style="margin-right: 5px; text-decoration: underline;">All Filters</span>
+            <div style="margin-top: 3px; margin-left: 5px; font-size: 11px;">
+                <span class="clickable tier-select-all" style="margin-right: 5px; text-decoration: underline; color: #8bcaf2;">All Filters</span>
                 <span style="margin-right: 5px;">|</span>          
-                <span class="clickable tier-select-none" style="text-decoration: underline; margin-right: 5px;">No Filters</span>
+                <span class="clickable tier-select-none" style="text-decoration: underline; margin-right: 5px; color: #8bcaf2;">No Filters</span>
                 <span>|</span>  
 
-                <label style="margin-left: 5px; margin-top: 3px; font-size: 12px;">
-                    <span style="margin-right: 2px; font-size: 12px;">Filter by ISD:</span>
+                <label style="margin-left: 5px; margin-top: 3px;">
+                    <span style="margin-right: 2px;">Filter by ISD:</span>
                     <input type="text" id="isdFilter" value="" style="width: 36px; height: 14px; text-align: right;">
-                    <span class="clickable resetISDFilter" style="text-decoration: underline; margin-left: 3px; font-size: 10px;">Reset</span>
+                    <span class="clickable resetISDFilter" style="text-decoration: underline; margin-left: 3px; font-size: 10px; color: #8bcaf2;">Reset ISD</span>
                 </label>
             </div>
 
 
-        <div style="text-align: left; margin-top: 3px;">
+        <div style="text-align: left; margin-top: 3px; font-size: 11px;">
             <label style="margin-left: 5px;">Tier 1 <input type="checkbox" class="tier-filter" data-tier="Tier 1" checked></label>
             <label style="margin-left: 5px;">Tier 2 <input type="checkbox" class="tier-filter" data-tier="Tier 2" checked></label>
             <label style="margin-left: 5px;">Tier 3 <input type="checkbox" class="tier-filter" data-tier="Tier 3" checked></label>
