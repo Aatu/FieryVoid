@@ -147,6 +147,12 @@ line-height: 1.5;
 
 }
 
+.button-container {
+  display: flex;
+  justify-content: flex-end; /* Push child(ren) to the right */
+  width: 100%; /* or however wide you want */
+}
+
 .btn-secondary-lobby {
   background: #215a7a;
   color: white;
@@ -157,8 +163,8 @@ line-height: 1.5;
   box-sizing: border-box;
   height: 20px;          /* or whatever height you prefer */
   line-height: 9px;     /* vertically center the text */ 
-  margin-top: 5px;
-  margin-left: 5px;      
+  margin-top: 8px;
+  margin-right: 10px;    
 }
 
 .btn:hover { opacity: 0.9; }

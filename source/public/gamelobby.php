@@ -289,9 +289,6 @@
   <header class="header">
     <img src="img/logo.png" alt="Fiery Void Logo" class="logo">
     <div class="top-right-row">
-      <a href="chpass.php">Change password</a>
-      <span>|</span>
-      <a href="reg.php">Register New Account</a>
       <a href="logout.php" class="btn btn-primary">Logout</a>
     </div>
   </header>
@@ -450,50 +447,57 @@ if ($asteroids == false && $moons == false) {
 
 
 	    
-			<div><span>TEAM 1</span></div>
+			<div><span style= "font-size: 16px; font-weight: bold;">TEAM 1</span></div>
 			<div id="team1" class="subpanel slotcontainer">
 			</div>
 			
-			<div><span>TEAM 2</span></div>
+			<div><span style= "font-size: 16px; font-weight: bold; margin-top: 3px;">TEAM 2</span></div>
 			<div id="team2" class="subpanel slotcontainer">
             </div>
             
             <!--<div class="slot" data-slotid="2" data-playerid=""><span>SLOT 2:</span></div>
 			-->
 			
-			<span class="btn btn-secondary-lobby leave">Leave Game</span>
+            <div class="button-container">
+                <span class="btn btn-secondary-lobby leave">Leave Game</span>
+            </div>
 			
 		</div>
 		<div class="panel large lobby buy" style="display:none;">
 		<div>
         <!-- 🟡 Fleet points summary & Tier checkboxes in one row -->
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
-        <div>
-            <span class="panelheader" style="padding-right: 15px;">PURCHASE YOUR FLEET</span>
-            <span class="panelsubheader current">0</span>
-            <span class="panelsubheader">/</span>
-            <span class="panelsubheader max">0</span><span class="panelsubheader">pts</span>
-            <span class="panelsmall" style="margin-left: 5px;">(</span>
-            <span class="panelsmall remaining">0</span><span class="panelsmall">pts left</span>
-            <span class="panelsmall">)</span>
-        </div>
+<div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+    <!-- Left-aligned: PURCHASE YOUR FLEET -->
+    <div>
+        <span class="panelheader" style="margin-left: 5px; padding-right: 15px;">PURCHASE YOUR FLEET</span>
+    </div>  
 
-            <div style="text-align: right; font-size: 11px;">
-                <span class="clickable tier-select-all" style="margin-right: 5px;  text-decoration: underline;">All Filters</span>
+    <!-- Right-aligned: point stats -->
+    <div>
+        <span class="panelsubheader current">0</span>
+        <span class="panelsubheader">/</span>
+        <span class="panelsubheader max">0</span><span class="panelsubheader">pts</span>
+        <span class="panelsmall" style="margin-left: 5px;">(</span>
+        <span class="panelsmall remaining">0</span><span class="panelsmall">pts remaining</span>
+        <span class="panelsmall">)</span>
+    </div>
+</div>
+
+            <div style="font-size: 11px; margin-top: 3px; margin-left: 5px;">
+                <span class="clickable tier-select-all" style="margin-right: 5px; text-decoration: underline;">All Filters</span>
                 <span style="margin-right: 5px;">|</span>          
                 <span class="clickable tier-select-none" style="text-decoration: underline; margin-right: 5px;">No Filters</span>
                 <span>|</span>  
 
-                <label style="margin-left: 5px; font-size: 11px;">
+                <label style="margin-left: 5px; margin-top: 3px; font-size: 11px;">
                     <span style="margin-right: 2px; font-size: 12px;">Filter by ISD:</span>
-                    <input type="text" id="isdFilter" value="" style="width: 40px; height: 17px; text-align: right;">
-                    <span class="clickable resetISDFilter" style="text-decoration: underline; margin-left: 3px;  font-size: 10px;">Reset</span>
+                    <input type="text" id="isdFilter" value="" style="width: 36px; height: 14px; text-align: right;">
+                    <span class="clickable resetISDFilter" style="text-decoration: underline; margin-left: 3px; font-size: 9px;">Reset</span>
                 </label>
-
             </div>
         </div>
 
-        <div style="text-align: right; margin-top: 3px;">
+        <div style="text-align: left; margin-top: 3px;">
             <label style="margin-left: 5px;">Tier 1 <input type="checkbox" class="tier-filter" data-tier="Tier 1" checked></label>
             <label style="margin-left: 5px;">Tier 2 <input type="checkbox" class="tier-filter" data-tier="Tier 2" checked></label>
             <label style="margin-left: 5px;">Tier 3 <input type="checkbox" class="tier-filter" data-tier="Tier 3" checked></label>
@@ -505,17 +509,17 @@ if ($asteroids == false && $moons == false) {
     <!-- Fleet selection area -->
     <table class="store" style="width:100%; margin-top: 5px;">
         <tr>
-            <td style="width:40%; vertical-align: top;">
-                <div id="fleet" class="subpanel"></div>
-            </td>
-            <td style="width:60%;">
+            <td style="width:50%;">
                 <div id="store" class="subpanel"></div>
+            </td>            
+            <td style="width:50%; vertical-align: top;">
+                <div id="fleet" class="subpanel"></div>
             </td>
         </tr>
     </table>
 </div>
 			
-        <div style="margin-top: 8px;">
+        <div style="text-align: right; margin-top: 8px;">
             <span class="btn btn-success-lobby readybutton">READY</span>
             &nbsp;&nbsp;
             <span class="btn btn-primary-lobby checkbutton">CHECK</span>

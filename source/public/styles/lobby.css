@@ -161,7 +161,7 @@
 }
 
 .slot.selected{
-    background-color:#123D73;
+    background-color:rgb(18, 61, 115, 0.7);
 	-moz-box-shadow: 0px 0px 1px #0099ff;
     -webkit-box-shadow: 0px 0px 1px #0099ff;
     box-shadow: 0px 0px 1px #0099ff;

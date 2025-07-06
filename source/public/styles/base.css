@@ -44,9 +44,10 @@ a.link:hover
 }
 
 .subpanel{
-	padding:5px;
+	padding:2px;
 	background-color:#04161C;
 	border:1px solid #37465a;
+	margin-top: 2px;	
 }
 
 .panel.news {
