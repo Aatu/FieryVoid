@@ -1230,7 +1230,7 @@ window.gamedata = {
 			checkResult = "Overall: <b><span style='color: #33cc33;'>OK!</span></b><br><br>" + checkResult;
 		}
 	    
-	    checkResult = "<b>FLEET CORRECTNESS REPORT</b><br><i>(Based on tournament rules, modified for scalability)<i><br><br>"+checkResult;   
+		checkResult = "<span style='font-size:14px; font-weight:bold; text-decoration: underline;'>FLEET CORRECTNESS REPORT</span><br><i>(Based on tournament rules, modified for scalability)</i><br><br>" + checkResult;  
 	    
 	    //alert(checkResult); //alert will be truncated by browser
 	    var targetDiv = document.getElementById("fleetcheck");
@@ -1238,7 +1238,7 @@ window.gamedata = {
 	    var targetSpan = document.getElementById("fleetchecktxt");
 	    targetSpan.innerHTML = checkResult;	    
 	    
-	    alert("Fleet check updated!");
+	    //alert("Fleet check updated!");
     }, //endof function checkChoices
 	
 
@@ -2479,14 +2479,6 @@ applyCustomShipFilter: function () {
 
 		shipWindowManager.setData(ship);
 
-		/*		//Alternative method		
-		for (var i in ship.systems) {
-			var system = ship.systems[i];
-			var systemwindow = shipwindow.find(".system_" + system.id);
-			systemwindow.data("shipid", ship.id);		
-			shipWindowManager.setSystemData(ship, system, ship.shipStatusWindow);
-		}		
-		*/	
         shipWindowManager.open(ship);		
         return false;
     },

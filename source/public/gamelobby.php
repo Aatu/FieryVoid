@@ -427,31 +427,31 @@ if ($asteroids == false && $moons == false) {
 }
 
 ?>
-<div><span><b>Options:</b> <?php print($optionsUsed); ?> </span></div>
+<div><span style="color: #f8f8f8; font-size: 12px;"><b>Options:</b> <?php print($optionsUsed); ?> </span></div>
 
 <br>
-<a href="files/FV_factions.txt" target="_blank" style="text-decoration: underline;">Fiery Void Factions & Tier List</a> 
-- Overview of rules and systems of the fleets available in Fiery Void
+<a href="files/FV_factions.txt" target="_blank" style="text-decoration: underline; font-size: 14px; color: #8bcaf2;">Factions & Tiers</a> 
+- Overview of Fiery Void factions and their approximate strengths.
 <br>
-<a href="files/enhancements_list.txt" target="_blank" style="text-decoration: underline;">Common Systems & Enhancement List</a> 
-- Details of enhancements and other common systems e.g. Boarding / Missiles
+<a href="files/enhancements_list.txt" target="_blank" style="text-decoration: underline; font-size: 14px; color: #8bcaf2;">Systems & Enhancements</a> 
+- Details of common systems and unit enhancements e.g. Boarding Actions / Missiles.
 <br>
-<span style="color: #f8f8f8;">Random Fleet Selection</span> 
+<span style="color: #f8f8f8; font-size: 14px;">Random Fleet Selectors</span> 
 <span style="margin-right: 3px;">-</span> 
-<a href="https://old.wheelofnames.com/fx3-uje" target="_blank" style="color:rgb(255, 170, 0); text-decoration: underline;"><strong>Tier 1</strong></a> 
+<a href="https://old.wheelofnames.com/fx3-uje" target="_blank" style="color: #8bcaf2; text-decoration: underline; font-size: 14px;">Tier 1</a> 
 <strong style="margin: 0 2.5px;">|</strong> 
-<a href="https://old.wheelofnames.com/rmq-7ds" target="_blank" style="color:rgb(255, 170, 0);  text-decoration: underline;"><strong>Tier 2</strong></a>
+<a href="https://old.wheelofnames.com/rmq-7ds" target="_blank" style="color: #8bcaf2; text-decoration: underline; font-size: 14px;">Tier 2</a>
 <strong style="margin: 0 2.5px;">|</strong> 
-<a href="https://old.wheelofnames.com/sgd-5zq" target="_blank" style="color:rgb(255, 170, 0);  text-decoration: underline;"><strong>Tier 3</strong></a>
+<a href="https://old.wheelofnames.com/sgd-5zq" target="_blank" style="color: #8bcaf2;  text-decoration: underline; font-size: 14px;">Tier 3</a>
 <br><br>
 
 
 	    
-			<div><span style= "font-size: 16px; font-weight: bold;">TEAM 1</span></div>
+			<div><span style= "font-size: 14px; font-weight: bold;">TEAM 1</span></div>
 			<div id="team1" class="subpanel slotcontainer">
 			</div>
 			
-			<div><span style= "font-size: 16px; font-weight: bold; margin-top: 3px;">TEAM 2</span></div>
+			<div><span style= "font-size: 14px; font-weight: bold; margin-top: 5px;">TEAM 2</span></div>
 			<div id="team2" class="subpanel slotcontainer">
             </div>
             
@@ -463,25 +463,22 @@ if ($asteroids == false && $moons == false) {
             </div>
 			
 		</div>
-		<div class="panel large lobby buy" style="display:none;">
-		<div>
-        <!-- 🟡 Fleet points summary & Tier checkboxes in one row -->
-<div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
-    <!-- Left-aligned: PURCHASE YOUR FLEET -->
-    <div>
-        <span class="panelheader" style="margin-left: 5px; padding-right: 15px;">PURCHASE YOUR FLEET</span>
-    </div>  
+<div class="panel large lobby buy" style="display:none;">
 
-    <!-- Right-aligned: point stats -->
-    <div>
-        <span class="panelsubheader current">0</span>
-        <span class="panelsubheader">/</span>
-        <span class="panelsubheader max">0</span><span class="panelsubheader">pts</span>
-        <span class="panelsmall" style="margin-left: 5px;">(</span>
-        <span class="panelsmall remaining">0</span><span class="panelsmall">pts remaining</span>
-        <span class="panelsmall">)</span>
+    <!-- Header row -->
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+        <div>
+            <span class="panelheader" style="margin-left: 5px; padding-right: 15px;">PURCHASE YOUR FLEET</span>
+        </div>  
+        <div>
+            <span class="panelsubheader current">0</span>
+            <span class="panelsubheader">/</span>
+            <span class="panelsubheader max">0</span><span class="panelsubheader">pts</span>
+            <span class="panelsmall" style="margin-left: 5px;">(</span>
+            <span class="panelsmall remaining">0</span><span class="panelsmall">pts remaining</span>
+            <span class="panelsmall">)</span>
+        </div>
     </div>
-</div>
 
             <div style="font-size: 11px; margin-top: 3px; margin-left: 5px;">
                 <span class="clickable tier-select-all" style="margin-right: 5px; text-decoration: underline;">All Filters</span>
@@ -489,13 +486,13 @@ if ($asteroids == false && $moons == false) {
                 <span class="clickable tier-select-none" style="text-decoration: underline; margin-right: 5px;">No Filters</span>
                 <span>|</span>  
 
-                <label style="margin-left: 5px; margin-top: 3px; font-size: 11px;">
+                <label style="margin-left: 5px; margin-top: 3px; font-size: 12px;">
                     <span style="margin-right: 2px; font-size: 12px;">Filter by ISD:</span>
                     <input type="text" id="isdFilter" value="" style="width: 36px; height: 14px; text-align: right;">
-                    <span class="clickable resetISDFilter" style="text-decoration: underline; margin-left: 3px; font-size: 9px;">Reset</span>
+                    <span class="clickable resetISDFilter" style="text-decoration: underline; margin-left: 3px; font-size: 10px;">Reset</span>
                 </label>
             </div>
-        </div>
+
 
         <div style="text-align: left; margin-top: 3px;">
             <label style="margin-left: 5px;">Tier 1 <input type="checkbox" class="tier-filter" data-tier="Tier 1" checked></label>
@@ -506,28 +503,28 @@ if ($asteroids == false && $moons == false) {
             <label style="margin-left: 5px;">Custom Ships <input type="checkbox" id="toggleCustomShips" checked></label>
         </div>
 
-    <!-- Fleet selection area -->
-    <table class="store" style="width:100%; margin-top: 5px;">
-        <tr>
-            <td style="width:50%;">
-                <div id="store" class="subpanel"></div>
-            </td>            
-            <td style="width:50%; vertical-align: top;">
-                <div id="fleet" class="subpanel"></div>
-            </td>
-        </tr>
-    </table>
-</div>
+        <!-- Fleet selection area -->
+        <table class="store" style="width:100%; margin-top: 5px;">
+            <tr>
+                <td style="width:50%;">
+                    <div id="store" class="subpanel"></div>
+                </td>            
+                <td style="width:50%; vertical-align: top;">
+                    <div id="fleet" class="subpanel"></div>
+                </td>
+            </tr>
+        </table>
+
 			
         <div style="text-align: right; margin-top: 8px;">
-            <span class="btn btn-success-lobby readybutton">READY</span>
-            &nbsp;&nbsp;
-            <span class="btn btn-primary-lobby checkbutton">CHECK</span>
-            &nbsp;
             <a href="files/FV_FleetChecker.txt" title="Details of fleet composition rules" target="_blank">Fleet Checker rules</a>
+            &nbsp;            
+            <span class="btn btn-primary-lobby checkbutton">CHECK</span>
+            &nbsp;&nbsp;
+            <span class="btn btn-success-lobby readybutton">READY</span>
         </div>
 
-    </div>
+    </div> <!-- Final closing of the .buy panel -->
 
         <!-- ✅ Your inserted fleetcheck panel -->
         <div id="fleetcheck" class="panel large lobby" style="display:none;"><p id="fleetchecktxt" style="display:block;"><span></div>
@@ -536,7 +533,7 @@ if ($asteroids == false && $moons == false) {
 
     <div id="deploymentPreview" class="panel large lobby" style="margin-top:10px;">
         <div style="text-align: center; text-decoration: underline; margin-bottom: 10px;">
-            <span>DEPLOYMENT ZONE PREVIEW</span>
+            <span style="font-size: 14px;  font-weight: bold;">DEPLOYMENT ZONE PREVIEW</span>
         </div>
         <div id="mapPreviewContainer" style="margin: 0 auto 20px auto; text-align: center;">
             <canvas id="mapPreview" width="420" height="300"></canvas>
