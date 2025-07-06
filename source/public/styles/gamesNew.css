@@ -99,7 +99,7 @@ line-height: 1.5;
   text-align: center; 
   box-sizing: border-box;
   height: 28px;          /* or whatever height you prefer */
-  line-height: 18px;     /* vertically center the text */  
+  line-height: 16px;     /* vertically center the text */  
 }
 
 .btn-success-create {
@@ -163,8 +163,8 @@ line-height: 1.5;
   box-sizing: border-box;
   height: 20px;          /* or whatever height you prefer */
   line-height: 9px;     /* vertically center the text */ 
-  margin-top: 8px;
-  margin-right: 10px;    
+  margin-top: 6px;
+  margin-right: 5px;    
 }
 
 .btn:hover { opacity: 0.9; }
