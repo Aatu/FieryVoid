@@ -255,7 +255,8 @@ class Mathlib{
     public static function checkLineOfSight($start, $end, $blockedHexes) {
         $startPixel = self::hexCoToPixelLoS($start);
         $endPixel = self::hexCoToPixelLoS($end);
-        $hexSize = 50;        
+        $hexSize = 50;
+        $filterRadius = 5;                
 
         //Get variables for bounding box below
         $lineMinQ = min($start->q, $end->q);
@@ -271,8 +272,8 @@ class Mathlib{
         
         foreach ($filteredBlockedHexes as $hex) { 
             //Bounding box to reduce the number of blocked hexes we have to consider.           
-            if ($hex->q < $lineMinQ - $hexSize || $hex->q > $lineMaxQ + $hexSize ||
-                $hex->r < $lineMinR - $hexSize || $hex->r > $lineMaxR + $hexSize) {
+            if ($hex->q < $lineMinQ - $filterRadius || $hex->q > $lineMaxQ + $filterRadius ||
+                $hex->r < $lineMinR - $filterRadius || $hex->r > $lineMaxR + $filterRadius) {
                 continue;
             }
             //Get the bounadries of the blocking hex.
@@ -327,8 +328,8 @@ class Mathlib{
             }, $neighborOffsets);
 
             return $neighbors;
-        }else{
-            //Assume Radius 2.
+        }else if($radius == 2){
+            //Radius 2.
             $isOddRow = $position->r % 2 !== 0;    
             $neighborOffsets = $isOddRow 
                 ? [[+1, 0], [-1, 0], [-1, +1], [-1, -1], [0, +1], [0, -1],
