@@ -276,11 +276,13 @@ class Mathlib{
                 $hex->r < $lineMinR - $filterRadius || $hex->r > $lineMaxR + $filterRadius) {
                 continue;
             }
-            //Get the bounadries of the blocking hex.
+            //Get the boundaries of the blocking hex.
             $corners = self::getHexCorners($hex, $hexSize);
-            for ($i = 0; $i < count($corners); $i++) {
+            $cornerCount = count($corners);
+
+            for ($i = 0; $i < $cornerCount; $i++) {
                 $p1 = $corners[$i];
-                $p2 = $corners[($i + 1) % count($corners)];
+                $p2 = $corners[($i + 1) % $cornerCount];
                 //Check if shot intersects with those boundaries.
                 if (self::doLinesIntersect($startPixel, $endPixel, $p1, $p2)) {
                     return true; // Line crosses a hex edge
