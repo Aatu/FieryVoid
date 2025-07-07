@@ -113,28 +113,28 @@
         </div>
 				
 				
-                <div class="createsubheader">GAME SPACE</div>
+                <div class="createsubheader">GAME SPACE:</div>
                 <div id="gamespace" class="subpanel gamespacecontainer">
                     <div class="slot" >
                         <div>
                             <input id="gamespacecheck" type="checkbox" name="fixedgamespace" checked>SET MAP BOUNDARIES
                         </div>
-                        <div class="gamespacedefinition" style="height:24px;vertical-align:middle;position:relative">
-                            <span class="smallSize headerSpan">GAME SPACE SIZE:</span>
+                        <div class="gamespacedefinition" style="height:24px;vertical-align:middle;position:relative;">
+                            <span class="smallSize headerSpan" style="margin-top: 5px; margin-left: 5px">MAP DIMENSIONS:</span>
                             <span class="unlimitedspace">
-                                <span>Unlimited</span>
+                                <span>UNLIMITED</span>
                             </span>
                             <span class="limitedspace invisible">
-                                <span>Width:</span>
+                                <span>WIDTH:</span>
                                 <input class ="spacex tinySize" data-validation="^-{0,1}[0-9]+$" data-default ="0" type="text" name="spacex" value="0">
-                                <span>Height:</span>
+                                <span>HEIGHT:</span>
                                 <input class ="spacey tinySize" data-validation="^-{0,1}[0-9]+$" data-default ="0" type="text" name="spacey" value="0">   
 				    &nbsp;&nbsp;
-				    <span class="clickable setsizeknifefight">Resize: Knife Fight (Small Map)</span> <!-- button switching map dimensions -->
+				    <span>RESIZE MAP:</span><span class="clickable setsizeknifefight" style = "text-decoration: underline; color: #8bcaf2">KNIFE FIGHT (SMALL MAP)</span> <!-- button switching map dimensions -->
 				    &nbsp;&nbsp;				    
-                    <span class="clickable setsizestandard">Resize: Standard (Normal Map)</span> <!-- button switching map dimensions -->
+                    <span class="clickable setsizestandard" style = "text-decoration: underline; color: #8bcaf2">STANDARD (NORMAL MAP)</span> <!-- button switching map dimensions -->
                     &nbsp;&nbsp;
-				    <span class="clickable setswitchsizebaseassault">Resize: Base Assault (Large Map)</span> <!-- button switching map dimensions -->
+                    <span class="clickable setswitchsizebaseassault" style = "text-decoration: underline; color: #8bcaf2">BASE ASSAULT (LARGE MAP)</span> <!-- button switching map dimensions -->
                             </span>
                         </div>
                       <!---      <input id="flightSizeCheck" style="margin-top:20px;margin-bottom:10px;" type="checkbox" name="variableFlights">increased Flight size (up to 12 units per flight)
@@ -142,8 +142,7 @@
                     </div>
                 </div>
 
-
-<div class="createsubheader">GAME OPTIONS</div>
+<div class="createsubheader">GAME OPTIONS:</div>
 
 <div id="simultaenousMovement" class="subpanel movementspacecontainer">
     <div class="slot">
@@ -213,7 +212,7 @@ print("<option value=\"".$i."\" ".$selected." >".$i."</option>");
 <div id="desperate" class="subpanel movementspacecontainer">
     <div class="slot">
         <div>
-            <input id="desperatecheck" type="checkbox" name="desperatecheck">USE 'DESPERATE' SCENARIO RULES (e.g. Ramming / Deactivating Jump Drive are allowed)
+            <input id="desperatecheck" type="checkbox" name="desperatecheck">USE 'DESPERATE' SCENARIO RULES
         </div>
      </div>
     <div class="slot" id="desperateDropdown" style="display:none;">
@@ -225,22 +224,22 @@ print("<option value=\"".$i."\" ".$selected." >".$i."</option>");
         </select>
     </div>
 </div>
-                <div class="createsubheader">TEAM 1</div>
+                <div class="createsubheader">TEAM 1:</div>
                 <div id="team1" class="subpanel slotcontainer">
                     
                 </div>
-                <div><span class="clickable addslotbutton team1" style="margin-left: 5px; margin-top:5px;">ADD SLOT</span></div>
+                <div><span class="clickable addslotbutton team1" style="margin-left: 5px; margin-top:5px; color: #8bcaf2">ADD SLOT</span></div>
                 
-                <div class="createsubheader">TEAM 2</div>
+                <div class="createsubheader">TEAM 2:</div>
                 <div id="team2" class="subpanel slotcontainer">
                     
                 </div>
-                <div><span class="clickable addslotbutton team2" style="margin-left: 5px; margin-top:5px;">ADD SLOT</span></div>
+                <div><span class="clickable addslotbutton team2" style="margin-left: 5px; margin-top:5px; color: #8bcaf2">ADD SLOT</span></div>
                 
 				
 				<input type="hidden" name="docreate" value="true">
 
-                <div style="margin-top:5px; text-align: center;"><span style="font-size: 14px;  font-weight: bold;  text-decoration: underline;">DEPLOYMENT ZONE PREVIEW</span></div>
+                <div style="margin-top:5px; text-align: center;"><span style="font-size: 14px;  font-weight: bold;">DEPLOYMENT ZONE PREVIEW:</span></div>
                 <!--<div id="mapPreviewContainer" style="margin-top: 0px;  text-align: center;"> -->                        
                 <div id="mapPreviewContainer" style="margin-top: 0px;  margin-bottom: 20px; text-align: center;">
                     <canvas id="mapPreview" width="420" height="300"></canvas>
@@ -292,29 +291,29 @@ print("<option value=\"".$i."\" ".$selected." >".$i."</option>");
                     <span class="smallSize headerSpan">POINTS:</span>
                     <input class ="points smallSize" type="text" name="points" value="0">
                 </div>
-                <div>
+                <div style="margin-top: 5px">
                     <span class="smallSize headerSpan">DEPLOYMENT:</span>
                     <span>X:</span>
                     <input class ="depx tinySize" data-validation="^-{0,1}[0-9]+$" data-default ="0" type="text" name="depx" value="0">
                     <span>Y:</span>
                     <input class ="depy tinySize" type="text" name="depy" value="1">
-                    <span>Type</span>
-                    <select class="deptype" name="deptype">
-                        <option value="box">box</option>
-						<!-- options other than 'box' do not work correctly, I'm disabling them
+                <!--<span>Type</span>
+				    <select class="deptype" name="deptype" style="margin-right: 5px">
+                        <option value="box">Box</option>
+                        options other than 'box' do not work correctly, I'm disabling them
                         <option value="circle">circle</option>
                         <option value="distance">distance</option>
-						-->
-                    </select>
-                    <span class="depwidthheader">Width:</span>
+						
+                    </select>-->
+                    <span class="depwidthheader">WIDTH:</span>
                     <input class ="depwidth tinySize" type="text" name="depwidth" value="0">
-                	<span class="depheightheader">Height:</span>
+                	<span class="depheightheader">HEIGHT:</span>
                 	<input class="depheight tinySize" type="text" name="depheight" value="0">
-                    <span>Turn Available:</span>
+                    <span>TURN AVAILABLE:</span>
                     <input class ="depavailable tinySize" type="text" name="depavailable" value="0">                    
             		<!-- Add a Flexbox container here to align REMOVE SLOT to the right-->
             		<div class="flex-container">
-                	<span class="clickable close">REMOVE SLOT</span>            
+                	<span class="clickable close" style="color: #8bcaf2">REMOVE SLOT</span>            
                     
                     
 
