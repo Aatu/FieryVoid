@@ -1,7 +1,7 @@
 /* Reset & Typography */
 * { }
 body {
-  font-family: Arial, sans-serif;
+  font-family: Arial;
   
   background: url('/img/webBackgrounds/lp8.jpg') no-repeat center center fixed;
   background-size: cover;
@@ -163,7 +163,7 @@ line-height: 1.5;
   box-sizing: border-box;
   height: 20px;          /* or whatever height you prefer */
   line-height: 9px;     /* vertically center the text */ 
-  margin-top: 6px;
+  margin-top: 10px;
   margin-right: 5px;    
 }
 
@@ -243,6 +243,96 @@ line-height: 1.5;
 .gamecontainer.found .notfound{
 	display:none;
 }
+
+/*Create Game/Game Lobby form*/
+.scenario-form {
+  max-width: 700px;
+  margin-top: 5px;  
+  margin-bottom: 0px;
+  padding: 5px;
+  background: rgba(23, 39, 54, 0.00);
+}
+
+.scenario-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.scenario-row label {
+  flex: 0 0 200px;
+  font-weight: bold;
+  font-size: 1em;
+}
+
+.scenario-row input {
+  flex: 1;
+  padding: 5px;
+  font-size: 1em;
+  border: 1px solid #ccc;
+  border-radius: 4px; 
+}
+
+.scenario-description {
+    white-space: normal;
+    background: rgba(23, 39, 54, 0.00);
+	  color:#DEEBFF;
+    padding: 5px 10px 10px 0px;
+    border-radius: 6px;
+    line-height: 1.6;
+    font-family: sans-serif;
+}
+
+.scenario-description strong {
+	  color:#DEEBFF;
+}
+
+.createheader {
+	  color:#DEEBFF;
+    display: block;
+    font-size: 1.17em;
+    margin-block-start: 0.5em;
+    margin-block-end: 0.5em;
+    margin-inline-start: 0px;
+    margin-inline-end: 0px;
+    font-weight: bold;
+    unicode-bidi: isolate;
+    margin-top: 20px;
+    margin-bottom: 10px;
+    border-bottom: 2px solid #215a7a;                        
+}
+
+.createsubheader {
+	  color:#DEEBFF;
+    display: block;
+    font-size: 1.17em;
+    margin-block-start: 0.5em;
+    margin-block-end: 0.5em;
+    margin-inline-start: 0px;
+    margin-inline-end: 0px;
+    font-weight: bold;
+    unicode-bidi: isolate;
+    margin-top: 15px;
+    margin-bottom: 5px;
+    margin-left: 5px;                         
+}
+
+.lobbyheader {
+	  color:#DEEBFF;
+    display: block;
+    font-size: 1.17em;
+    margin-block-start: 0.5em;
+    margin-block-end: 0.5em;
+    margin-inline-start: 0px;
+    margin-inline-end: 0px;
+    font-weight: bold;
+    unicode-bidi: isolate;
+    margin-top: 10px;
+    margin-bottom: 8px;
+    border-bottom: 2px solid #215a7a;                       
+}
+
+
 
 /* Utility */
 kbd { background: #1b2530; padding: 2px 4px; border-radius: 3px; }
