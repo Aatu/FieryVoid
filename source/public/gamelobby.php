@@ -298,10 +298,47 @@
 <main class="container"></main>        
 		<div class="panel large lobby">
             <div class="">
-                <span class="panelheader">GAME:</span>
+                <span class="panelheader">GAME NAME: </span>
                 <span class="panelsubheader"> <?php print($gamelobbydata->name); ?></span>
             </div>
-			<div><span> <?php print($gamelobbydata->description); ?> </span></div>
+
+
+    <div class="lobbyheader">SCENARIO DESCRIPTION</div>
+
+    <div class="scenario-description">
+    <?php
+    $desc = $gamelobbydata->description;
+
+    // Replace <br> tags with newlines to normalize input
+    $desc = str_replace(['<br>', '<br/>', '<br />'], "\n", $desc);
+
+    // Remove the header line if it exists
+    $desc = preg_replace('/^\*{3}.*\*{3}\s*/m', '', $desc);
+
+    // Split into lines
+    $lines = preg_split("/\r\n|\n|\r/", trim($desc));
+
+    foreach ($lines as $line) {
+        // Trim whitespace for safety
+        $line = trim($line);
+        if ($line === '') continue; // skip empty lines
+
+        // Try to split on the first colon
+        $pos = strpos($line, ':');
+        if ($pos !== false) {
+            $label = trim(substr($line, 0, $pos));
+            $value = trim(substr($line, $pos + 1));
+
+            // Bold the label regardless of case (you can add uppercase check if you want)
+            echo '<strong>' . htmlspecialchars($label) . ':</strong>&nbsp; ' . htmlspecialchars($value) . '<br>';
+        } else {
+            // Just print line if no colon found
+            echo htmlspecialchars($line) . '<br>';
+        }
+    }
+    ?>
+    </div>
+
 <?php
 //define options list
 $optionsUsed = '';
@@ -376,8 +413,8 @@ if ($desperate == true) { // Desperate rules in play
         $teamDisplay = "Both Teams";
     }
     $optionsUsed .= ', Desperate Rules ('. $teamDisplay . ')';
-} else { // standard movement
-    $optionsUsed .= ', Normal Rules';
+} else { // standard rules
+    $optionsUsed .= '';
 }
 
 if ($asteroids == true) { // Asteroid terrain rules in play
@@ -427,31 +464,33 @@ if ($asteroids == false && $moons == false) {
 }
 
 ?>
-<div><span style="color: #f8f8f8; font-size: 12px;"><b>Options:</b> <?php print($optionsUsed); ?> </span></div>
+<div><span style="font-size: 12px;"><strong>OPTIONS SELECTED: </strong> <?php print($optionsUsed); ?> </span></div>
 
-<br>
+<div class="lobbyheader" style="margin-bottom: 10px; margin-top: 15px">RULES & INFO</div>
+
 <a href="files/FV_factions.txt" target="_blank" style="text-decoration: underline; font-size: 14px; color: #8bcaf2;">Factions & Tiers</a> 
-- Overview of Fiery Void factions and their approximate strengths.
+<span style="font-size: 14px;"> - Overview of Fiery Void factions and their approximate strengths.</span>
 <br>
 <a href="files/enhancements_list.txt" target="_blank" style="text-decoration: underline; font-size: 14px; color: #8bcaf2;">Systems & Enhancements</a> 
-- Details of common systems and unit enhancements e.g. Boarding Actions / Missiles.
+<span style="font-size: 14px;"> - Details of common systems and unit enhancements e.g. Boarding Actions / Missiles.</span>
 <br>
-<span style="color: #f8f8f8; font-size: 14px;">Random Fleet Selectors</span> 
-<span style="margin-right: 3px;">-</span> 
+
 <a href="https://old.wheelofnames.com/fx3-uje" target="_blank" style="color: #8bcaf2; text-decoration: underline; font-size: 14px;">Tier 1</a> 
 <strong style="margin: 0 2.5px;">|</strong> 
 <a href="https://old.wheelofnames.com/rmq-7ds" target="_blank" style="color: #8bcaf2; text-decoration: underline; font-size: 14px;">Tier 2</a>
 <strong style="margin: 0 2.5px;">|</strong> 
 <a href="https://old.wheelofnames.com/sgd-5zq" target="_blank" style="color: #8bcaf2;  text-decoration: underline; font-size: 14px;">Tier 3</a>
+<span style="margin-left: 3px; margin-right: 3px;">-</span>
+<span style="font-size: 14px;">Random Fleet Selectors</span> 
 <br><br>
 
 
 	    
-			<div><span style= "font-size: 14px; font-weight: bold;">TEAM 1</span></div>
+            <div class="createsubheader" style = "margin-top: 0px; margin-bottom: 5px; margin-left: 1px;">TEAM 1:</div>
 			<div id="team1" class="subpanel slotcontainer">
 			</div>
 			
-			<div><span style= "font-size: 14px; font-weight: bold; margin-top: 5px;">TEAM 2</span></div>
+            <div class="createsubheader" style = "margin-top: 5px; margin-bottom: 5px; margin-left: 1px;">TEAM 2:</div>
 			<div id="team2" class="subpanel slotcontainer">
             </div>
             
