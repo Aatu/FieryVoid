@@ -115,9 +115,9 @@ a:hover{
     align-items: flex-start; /* Vertically aligns elements */
 }
 
-.depheightheader, .depheight {
+.depheightheader, .depwidthheader, .depheight {
     margin: 0; /* Reset margins */
-    margin-right: 10px; 
+    margin-right: 0px; 
 }
 
 span.clickable.close {
