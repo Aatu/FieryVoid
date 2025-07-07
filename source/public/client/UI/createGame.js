@@ -622,10 +622,31 @@ doMovementCheck: function doMovementCheck(data) {
         slot.remove();
     },
 
+    getScenarioDescriptionFromFields: function getScenarioDescriptionFromFields() {
+    const fields = [
+        { label: 'REQUIREMENTS', id: 'req' },
+        { label: 'CUSTOM FACTIONS', id: 'customfactions' },
+        { label: 'CUSTOM UNITS IN OFFICIAL FACTIONS', id: 'customunits' },
+        { label: 'ENHANCEMENTS', id: 'enhancements' },
+        { label: 'EXPECTED POWER LEVEL', id: 'tier' },
+        { label: 'FORBIDDEN FACTIONS', id: 'forbidden' },
+        { label: 'MAP BORDERS', id: 'borders' },
+        { label: 'CALLED SHOTS', id: 'called' },
+        { label: 'VICTORY CONDITIONS', id: 'victory' }
+    ];
+
+    let result = '*** SCENARIO DESCRIPTION ***\n';
+    for (const field of fields) {
+        const value = document.getElementById(field.id).value.trim();
+        result += `${field.label}: ${value}\n`;
+    }
+    return result;
+    },
+
     setData: function setData() {
         var gamename = $("#gamename").val();
         var background = $("#mapselect").val();
-        var description = $("#description").val();
+        var description = createGame.getScenarioDescriptionFromFields();
         var gamespace = "-1x-1";
         var flight = "";
 
