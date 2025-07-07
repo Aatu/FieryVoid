@@ -51,41 +51,69 @@
         </div>-->
   <main class="container">
     <section class="panel large create">
-      <div class="panelheader"><span>CREATE GAME</span></div>
+      <div class="panelheader"><span>CREATE YOUR GAME</span></div>
 			<form id="createGameForm" method="post">
 			
-				<div><span>Name:</span></div>
-				<input id="gamename" type="text" name="gamename" value="<?php print($defaultGameName); ?>">
+        <div class="createheader" style = "margin-top: 10px">GAME NAME:</div>
+
+				<input id="gamename" style= "margin-left: 0px" type="text" name="gamename" value="<?php print($defaultGameName); ?>">
 						
-				<div><span>Background:</span></div>
-				<select id="mapselect" name="background">
+        <div class="createheader">CHOOSE A BACKGROUND:</div>
+				<select id="mapselect" name="background" style= "margin-left: 0px">
 					<!--<option id="default_option" value="default">select ...</option>-->
 					<?php
-						
+						natsort($maps); // Natural sort: sorts "1", "2", ..., "10", "11"
 						foreach ($maps as $name){							
 							print("<option value=\"".$name."\">".$name."</option>");
 						}
 					
 					?>
 				</select>
-				<div><span>Scenario description:</span></div>
-				<textarea id="description" name="description" rows="10" cols="100">
-*** BELOW ARE COMMON PICKUP BATTLE OPTIONS - PICK YOUR OWN, OR FILL IN SOMETHING ELSE! ***
-----------------------------
-REQUIREMENTS: Pass the fleet checker / something else
-CUSTOM FACTIONS: Allowed / Not allowed
-CUSTOM UNITS IN OFFICIAL FACTIONS: Allowed / Not allowed
-ENHANCEMENTS: Allowed / Allowed up to 100 points / Not allowed
-EXPECTED POWER LEVEL: Tier 1 / Tier 2 / something else
-FORBIDDEN FACTIONS: None 
-MAP BORDERS: Unit leaving map is destroyed / Unit ending movement out of map is destroyed
-CALLED SHOTS: Allowed / Not allowed
-VICTORY CONDITIONS: Last unit on map / Last ship on map / More forces remaining after turn X
-------------------------
-				</textarea>
+
+
+        <div class="createheader" style = "margin-bottom: 15px">SCENARIO DESCRIPTION:</div>
+
+        <div class="scenario-form">
+        <div class="scenario-row">
+            <label for="req">REQUIREMENTS:</label>
+            <input type="text" id="req" value="Pass the fleet checker / Other">
+        </div>
+        <div class="scenario-row">
+            <label for="customfactions">CUSTOM FACTIONS:</label>
+            <input type="text" id="customfactions" value="Allowed / Not allowed">
+        </div>
+        <div class="scenario-row">
+            <label for="customunits">CUSTOM UNITS IN OFFICIAL FACTIONS:</label>
+            <input type="text" id="customunits" value="Allowed / Not allowed">
+        </div>
+        <div class="scenario-row">
+            <label for="enhancements">ENHANCEMENTS:</label>
+            <input type="text" id="enhancements" value="Allowed / Up to X points / Not allowed">
+        </div>
+        <div class="scenario-row">
+            <label for="tier">EXPECTED POWER LEVEL:</label>
+            <input type="text" id="tier" value="Tier 1 / Tier 2 / Tier 3 / Ancient / Other">
+        </div>
+        <div class="scenario-row">
+            <label for="forbidden">FORBIDDEN FACTIONS:</label>
+            <input type="text" id="forbidden" value="None">
+        </div>
+        <div class="scenario-row">
+            <label for="borders">MAP BORDERS:</label>
+            <input type="text" id="borders" value="Unit leaving map is destroyed / Unit ending movement out of map is destroyed">
+        </div>
+        <div class="scenario-row">
+            <label for="called">CALLED SHOTS:</label>
+            <input type="text" id="called" value="Allowed / Not allowed">
+        </div>
+        <div class="scenario-row">
+            <label for="victory">VICTORY CONDITIONS:</label>
+            <input type="text" id="victory" value="Last unit on map / Last ship on map / More forces remaining after Turn X">
+        </div>
+        </div>
 				
 				
-                <div style="margin-top:20px;"><h3>GAME SPACE</h3></div>
+                <div class="createsubheader">GAME SPACE</div>
                 <div id="gamespace" class="subpanel gamespacecontainer">
                     <div class="slot" >
                         <div>
@@ -115,9 +143,7 @@ VICTORY CONDITIONS: Last unit on map / Last ship on map / More forces remaining 
                 </div>
 
 
-<div style="margin-top:20px;">
-    <h3>GAME OPTIONS</h3>
-    </div>
+<div class="createsubheader">GAME OPTIONS</div>
 
 <div id="simultaenousMovement" class="subpanel movementspacecontainer">
     <div class="slot">
@@ -199,22 +225,22 @@ print("<option value=\"".$i."\" ".$selected." >".$i."</option>");
         </select>
     </div>
 </div>
-                <div style="margin-top:20px;"><h3>TEAM 1</h3></div>
+                <div class="createsubheader">TEAM 1</div>
                 <div id="team1" class="subpanel slotcontainer">
                     
                 </div>
-                <div><span class="clickable addslotbutton team1" style="margin-left: 5px;">ADD SLOT</span></div>
+                <div><span class="clickable addslotbutton team1" style="margin-left: 5px; margin-top:5px;">ADD SLOT</span></div>
                 
-                <div><h3>TEAM 2</h3></div>
+                <div class="createsubheader">TEAM 2</div>
                 <div id="team2" class="subpanel slotcontainer">
                     
                 </div>
-                <div><span class="clickable addslotbutton team2" style="margin-left: 5px;">ADD SLOT</span></div>
+                <div><span class="clickable addslotbutton team2" style="margin-left: 5px; margin-top:5px;">ADD SLOT</span></div>
                 
 				
 				<input type="hidden" name="docreate" value="true">
 
-                <div style="margin-top:5px; text-align: center; text-decoration: underline;"><span>DEPLOYMENT ZONE PREVIEW</span></div>
+                <div style="margin-top:5px; text-align: center;"><span style="font-size: 14px;  font-weight: bold;  text-decoration: underline;">DEPLOYMENT ZONE PREVIEW</span></div>
                 <!--<div id="mapPreviewContainer" style="margin-top: 0px;  text-align: center;"> -->                        
                 <div id="mapPreviewContainer" style="margin-top: 0px;  margin-bottom: 20px; text-align: center;">
                     <canvas id="mapPreview" width="420" height="300"></canvas>
@@ -260,7 +286,7 @@ print("<option value=\"".$i."\" ".$selected." >".$i."</option>");
         <div id="slottemplatecontainer" style="display:none;">
             <div class="slot" >
                 <div class="close"></div>
-                <div>
+                <div style="margin-top:5px; margin-bottom:5px;">
                     <span class="smallSize headerSpan">NAME:</span>
                     <input class ="name mediumSize" type="text" name="name" value="BLUE">
                     <span class="smallSize headerSpan">POINTS:</span>
