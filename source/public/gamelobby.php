@@ -619,8 +619,8 @@ if ($asteroids == false && $moons == false) {
                 <span class ="value depx"></span>
                 <span>Y:</span>
                 <span class ="value depy"></span>
-                <span>Type:</span>
-                <span class ="value deptype"></span>
+                <!---<span>Type:</span>
+                <span class ="value deptype"></span> --->
                 <span>Width:</span>
                 <span class ="value depwidth"></span>
                 <span>Height:</span>
