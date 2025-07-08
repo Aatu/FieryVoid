@@ -46,7 +46,7 @@ a:hover { text-decoration: underline; }
 
 .links a { margin-right: 5px; margin-left: 5px; margin-bottom: 0px; padding-bottom: 2px; font-size: 1em;}
 .links { font-size: 1.1em;}
-.updates-list { list-style: disc inside; margin-left: -20px; margin-bottom: 10px; font-size: 1.1em;}
+.updates-list { list-style: disc inside; margin-left: -20px; margin-bottom: 10px; font-size: 1em;}
 
 
 /* Games Grid */
