@@ -28,7 +28,7 @@ a:hover { text-decoration: underline; }
 .container { max-width: 1200px; margin: 20px auto; padding: 0 20px; }
 .news-panel, .games-panel, .chat-panel {
   background: rgba(23, 39, 54, 0.9);
-  padding: 15px 15px 5px 15px;
+  padding: 15px 15px 0px 15px;
   border-radius: 5px;
   margin-bottom: 10px;
   border: 1px solid #215a7a;
@@ -40,7 +40,7 @@ a:hover { text-decoration: underline; }
 
 .news-section h3 { margin-bottom: 15px; border-bottom: 2px solid #215a7a; padding-bottom: 2px; font-size: 1.4em; }
 
-.resources { margin-bottom: 15px; font-size: 1.1em;}
+.resources { margin-bottom: 10px; font-size: 1.1em;}
 .resources h3 { margin-right: 5px; margin-left: -1px; font-size: 1.4em; border-bottom: 2px solid #215a7a; padding-bottom: 2px; margin-bottom: 10px;}
 .resources a { margin-right: 5px; margin-left: 5px; font-size: 1.2em; color: #8bcaf2} 
 
