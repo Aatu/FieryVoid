@@ -119,10 +119,10 @@
                         <div>
                             <input id="gamespacecheck" type="checkbox" name="fixedgamespace" checked>SET MAP BOUNDARIES
                         </div>
-                        <div class="gamespacedefinition" style="height:24px;vertical-align:middle;position:relative;">
+                        <div class="gamespacedefinition">
                             <span class="smallSize headerSpan" style="margin-top: 5px; margin-left: 5px">MAP DIMENSIONS:</span>
                             <span class="unlimitedspace">
-                                <span>UNLIMITED</span>
+                                <span>NO BOUNDARIES</span>
                             </span>
                             <span class="limitedspace invisible">
                                 <span>WIDTH:</span>
@@ -130,7 +130,7 @@
                                 <span>HEIGHT:</span>
                                 <input class ="spacey tinySize" data-validation="^-{0,1}[0-9]+$" data-default ="0" type="text" name="spacey" value="0">   
 				    &nbsp;&nbsp;
-				    <span>RESIZE MAP:</span><span class="clickable setsizeknifefight" style = "text-decoration: underline; color: #8bcaf2">KNIFE FIGHT (SMALL MAP)</span> <!-- button switching map dimensions -->
+				    <span style = "margin-left: 25px;">RESIZE MAP:</span><span class="clickable setsizeknifefight" style = "text-decoration: underline; color: #8bcaf2">KNIFE FIGHT (SMALL MAP)</span> <!-- button switching map dimensions -->
 				    &nbsp;&nbsp;				    
                     <span class="clickable setsizestandard" style = "text-decoration: underline; color: #8bcaf2">STANDARD (NORMAL MAP)</span> <!-- button switching map dimensions -->
                     &nbsp;&nbsp;
@@ -239,7 +239,7 @@ print("<option value=\"".$i."\" ".$selected." >".$i."</option>");
 				
 				<input type="hidden" name="docreate" value="true">
 
-                <div style="margin-top:5px; text-align: center;"><span style="font-size: 14px;  font-weight: bold;">DEPLOYMENT ZONE PREVIEW:</span></div>
+                <div class="createsubheader" style="margin-top:5px; text-align: center;"><span>DEPLOYMENT ZONE PREVIEW:</span></div>
                 <!--<div id="mapPreviewContainer" style="margin-top: 0px;  text-align: center;"> -->                        
                 <div id="mapPreviewContainer" style="margin-top: 0px;  margin-bottom: 20px; text-align: center;">
                     <canvas id="mapPreview" width="420" height="300"></canvas>
