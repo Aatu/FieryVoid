@@ -41,9 +41,9 @@ if (isset($_SESSION["user"])) {
 <header class="header">
   <img src="img/logo.png" alt="Fiery Void Logo" class="logo">
   <div class="top-right-row">
-    <a href="chpass.php">Change password</a>
-    <span>|</span>
     <a href="reg.php">Register New Account</a>
+    <span>|</span>
+    <a href="chpass.php">Change password</a>    
     <a href="logout.php" class="btn btn-primary">Logout</a>
   </div>
 </header>
