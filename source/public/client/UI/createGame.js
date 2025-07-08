@@ -225,9 +225,10 @@ window.createGame = {
             ctx.restore(); // Restore to default state
         });
     
-        // Draw map border (blue rectangle)
-        ctx.strokeStyle = "#ffffff";
+        // Draw map border (rectangle)
+        ctx.strokeStyle = "#215a7a";
         ctx.lineWidth = 1;
+        ctx.globalAlpha = 0.8; // Semi-transparent        
         ctx.strokeRect(offsetX, offsetY, mapWidth * scale, mapHeight * scale); // Adjusted X offset
     },
 

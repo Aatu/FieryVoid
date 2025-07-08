@@ -115,7 +115,7 @@ line-height: 1.5;
   box-sizing: border-box;
   height: 24px;          /* or whatever height you prefer */
   line-height: 13px;     /* vertically center the text */
-    margin-top: 20px;  
+  margin-top: 20px;  
 }
 
 .btn-success-lobby {
@@ -246,7 +246,7 @@ line-height: 1.5;
 
 /*Create Game/Game Lobby form*/
 .scenario-form {
-  max-width: 700px;
+  max-width: 750px;
   margin-top: 5px;  
   margin-bottom: 0px;
   padding: 5px;
@@ -260,7 +260,7 @@ line-height: 1.5;
 }
 
 .scenario-row label {
-  flex: 0 0 200px;
+  flex: 0 0 150px;
   font-weight: bold;
   font-size: 1em;
 }
@@ -285,6 +285,14 @@ line-height: 1.5;
 
 .scenario-description strong {
 	  color:#DEEBFF;
+}
+
+
+.gamespacedefinition {
+    height: 24px;
+    position: relative;
+    margin-top: 5px;
+    margin-bottom: 0px;
 }
 
 .createheader {
