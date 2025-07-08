@@ -37,7 +37,7 @@ if (isset($_SESSION["user"])) {
   </script>
 </head>
 
-<body  style="background: url('img/webBackgrounds/lp8.jpg') no-repeat center center fixed; background-size: cover;">
+<body  style="background: url('./img/webBackgrounds/lp8.jpg') no-repeat center center fixed; background-size: cover;">
 <header class="header">
   <img src="img/logo.png" alt="Fiery Void Logo" class="logo">
   <div class="top-right-row">
