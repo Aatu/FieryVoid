@@ -37,11 +37,11 @@ if (isset($_SESSION["user"])) {
   </script>
 </head>
 
-<body>
+<body  style="background: url('img/webBackgrounds/lp8.jpg') no-repeat center center fixed; background-size: cover;">
 <header class="header">
   <img src="img/logo.png" alt="Fiery Void Logo" class="logo">
   <div class="top-right-row">
-    <a href="reg.php">Register New Account</a>
+    <a href="reg.php">Register new account</a>
     <span>|</span>
     <a href="chpass.php">Change password</a>    
     <a href="logout.php" class="btn btn-primary">Logout</a>

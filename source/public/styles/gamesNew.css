@@ -1,12 +1,14 @@
 /* Reset & Typography */
-* { }
+* { 
+  font-family: Arial;  
+}
 body {
   font-family: Arial;
-  
+  /*
   background: url('https://fieryvoid.eu/game/source/public/img/webBackgrounds/lp8.jpg') no-repeat center center fixed;
   background-size: cover;
-  
-  /*background: #000000;*/
+  background: #000000;
+  */
   color: #e0e7ef;
   line-height: 1.5;
 }
@@ -211,7 +213,7 @@ line-height: 1.5;
 }
 
 .create-col .create-game-btn {
-  margin-top: 1rem;
+  margin-top: 1.8rem;
 }
 
 /* Top-left account links */
