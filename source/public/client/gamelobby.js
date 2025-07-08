@@ -1555,7 +1555,7 @@ window.gamedata = {
         });
     
         // Draw map border (blue rectangle)
-        ctx.strokeStyle = "#ffffff";
+        ctx.strokeStyle = "#215a7a";
         ctx.lineWidth = 1;
         ctx.strokeRect(offsetX, offsetY, mapWidth * scale, mapHeight * scale); // Adjusted X offset
     },

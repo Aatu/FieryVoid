@@ -571,9 +571,7 @@ if ($asteroids == false && $moons == false) {
 </div>
 
     <div id="deploymentPreview" class="panel large lobby" style="margin-top:10px;">
-        <div style="text-align: center; text-decoration: underline; margin-bottom: 10px;">
-            <span style="font-size: 14px;  font-weight: bold;">DEPLOYMENT ZONE PREVIEW</span>
-        </div>
+        <div class="createsubheader" style="margin-top:5px; text-align: center;"><span>DEPLOYMENT ZONE PREVIEW:</span></div>
         <div id="mapPreviewContainer" style="margin: 0 auto 20px auto; text-align: center;">
             <canvas id="mapPreview" width="420" height="300"></canvas>
         </div>
