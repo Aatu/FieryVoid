@@ -75,10 +75,10 @@ if (isset($_SESSION["user"])) {
     <div class="resources">
       <h3>Latest Updates — June 2025</h3>
       <ul class="updates-list">
-        <li>Features & Enhancements: Fleets/ships can deploy after Turn 1; Hyach subs now have Stealth; Specialist rebalances; & more.</li>
-        <li>6 Jun - Overlay colors, deployment zone tweaks, UI fixes. Pulsar mine fixed, tooltip/text readability improved.</li>
-        <li>16 Jun- Movement/LOS fixes, targeting tooltip updates.</li>
-        <li>27 Jun - Optimized visuals, terrain updates, LoS checks improved.</li>
+        <li><strong>Features & Enhancements</strong> - Fleets/ships can deploy after Turn 1; Hyach subs now have Stealth; Specialist rebalances; & more.</li>
+        <li><strong>6 Jun</strong> - Overlay colors, deployment zone tweaks, UI fixes. Pulsar mine fixed, tooltip/text readability improved.</li>
+        <li><strong>16 Jun</strong>- Movement/LOS fixes, targeting tooltip updates.</li>
+        <li><strong>27 Jun</strong> - Optimized visuals, terrain updates, LoS checks improved.</li>
       </ul>
     </div>
 

@@ -26,9 +26,17 @@ a:hover { text-decoration: underline; }
 
 .logo { height: 50px; }
 .container { max-width: 1200px; margin: 20px auto; padding: 0 20px; }
-.news-panel, .games-panel, .chat-panel {
+.news-panel, .chat-panel {
   background: rgba(23, 39, 54, 0.9);
-  padding: 15px 15px 0px 15px;
+  padding: 0px 15px 0px 15px;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  border: 1px solid #215a7a;
+}
+
+.games-panel{
+  background: rgba(23, 39, 54, 0.9);
+  padding: 5px 15px 15px 15px;
   border-radius: 5px;
   margin-bottom: 10px;
   border: 1px solid #215a7a;
