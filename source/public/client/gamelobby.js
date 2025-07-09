@@ -2911,7 +2911,7 @@ applyCustomShipFilter: function () {
 						let struct = shipManager.systems.getStructureSystem(ship, 0);
 						if (struct) {
 							struct.maxhealth -= enhCount;
-							ship.notes  += "<br>Fighter Spawned (" + enhCount + ")";							
+							ship.notes  += "<br>" + enhCount + " fighter(s) spawned";							
 						}
 					}	
 					ship.ftrlEnh = true;	
