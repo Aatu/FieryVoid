@@ -28,7 +28,7 @@ a:hover { text-decoration: underline; }
 .container { max-width: 1200px; margin: 20px auto; padding: 0 20px; }
 .news-panel, .chat-panel {
   background: rgba(23, 39, 54, 0.9);
-  padding: 0px 15px 0px 15px;
+  padding: 0px 30px 5px 30px;
   border-radius: 5px;
   margin-bottom: 10px;
   border: 1px solid #215a7a;
@@ -54,8 +54,10 @@ a:hover { text-decoration: underline; }
 
 .links a { margin-right: 5px; margin-left: 5px; margin-bottom: 0px; padding-bottom: 2px; font-size: 1em;}
 .links { font-size: 1em;}
+
 .updates-list { list-style: disc inside; margin-left: -20px; margin-bottom: 10px; font-size: 1em;}
 
+.noteGames { margin-top: 0px; margin-left: 18px; font-size: 1em; color: #a0b8c8; font-weight: normal;}
 
 /* Games Grid */
 .games-grid {
@@ -354,4 +356,3 @@ line-height: 1.5;
 
 /* Utility */
 kbd { background: #1b2530; padding: 2px 4px; border-radius: 3px; }
-.noteGames { margin-top: 0px; margin-left: 20px; font-size: 1em; color: #a0b8c8; font-weight: normal;}
