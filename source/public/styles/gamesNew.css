@@ -219,7 +219,7 @@ line-height: 1.5;
   flex-direction: column;
   align-items: start;
   justify-content: flex-start;
-  padding-top: 1rem;
+  padding-top: 1.05rem;
 }
 
 .create-col .create-game-btn {
