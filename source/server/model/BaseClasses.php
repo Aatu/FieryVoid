@@ -89,7 +89,7 @@ class PlayerSlotFromJSON extends PlayerSlot{
         $this->points = $json["points"];
         $this->depx = $json["depx"];
         $this->depy = $json["depy"];
-        $this->deptype = "Box";
+        $this->deptype = "box";
         $this->depwidth = $json["depwidth"];
         $this->depheight = $json["depheight"];
         $this->depavailable = $json["depavailable"];

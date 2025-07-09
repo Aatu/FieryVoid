@@ -48,7 +48,7 @@ jQuery(function ($) {
 window.createGame = {
     gamespace_data: { width: 42, height: 30 },
     rules: {},
-    slots: Array({ id: 1, team: 1, name: "TEAM 1", points: 3500, depx: -21, depy: 0, deptype: "Box", depwidth: 10, depheight: 30, depavailable: 1 }, { id: 2, team: 2, name: "TEAM 2", points: 3500, depx: 21, depy: 0, deptype: "Box", depwidth: 10, depheight: 30, depavailable: 1 }),
+    slots: Array({ id: 1, team: 1, name: "TEAM 1", points: 3500, depx: -21, depy: 0, deptype: "box", depwidth: 10, depheight: 30, depavailable: 1 }, { id: 2, team: 2, name: "TEAM 2", points: 3500, depx: 21, depy: 0, deptype: "box", depwidth: 10, depheight: 30, depavailable: 1 }),
     slotid: 2,
 
     mapSelect: function mapSelect() {
@@ -100,7 +100,7 @@ window.createGame = {
             var height = $(".depheightheader", slot);
             var inputHeight = $(".depheight", slot);
 
-            if (value == "Box") {
+            if (value == "box") {
                 width.html("Width:");
                 height.html("Height:");
                 inputHeight.show();
@@ -346,7 +346,7 @@ doMovementCheck: function doMovementCheck(data) {
             createGame.gamespace_data.height = 30;	//reset this
             $(".spacex").val(createGame.gamespace_data.width);
             $(".spacey").val(createGame.gamespace_data.height);
-            $(".deptype").val("Box");
+            $(".deptype").val("box");
             $("#team1 .depx").val(-19);
             $("#team2 .depx").val(18);
             $("#team1 .depy").val(0);
@@ -454,7 +454,7 @@ doMovementCheck: function doMovementCheck(data) {
 		createGame.gamespace_data.height = 40;		
         $(".spacex").val(60);
         $(".spacey").val(40);
-        $(".deptype").val("Box");
+        $(".deptype").val("box");
         $("#team1 .depx").val(-28);
         $("#team2 .depx").val(27);
         $("#team1 .depy").val(0);
@@ -492,7 +492,7 @@ doMovementCheck: function doMovementCheck(data) {
 		createGame.gamespace_data.height = 30;		
         $(".spacex").val(42);
         $(".spacey").val(30);
-        $(".deptype").val("Box");
+        $(".deptype").val("box");
         $("#team1 .depx").val(-19);
         $("#team2 .depx").val(18);
         $("#team1 .depy").val(0);
@@ -563,7 +563,7 @@ doMovementCheck: function doMovementCheck(data) {
 
         $(".depx", slot).val(data.depx);
         $(".depy", slot).val(data.depy);
-        $(".deptype", slot).val("Box"); //Option removed so just pass "box" as default - DK
+        $(".deptype", slot).val("box"); //Option removed so just pass "box" as default - DK
         $(".depwidth", slot).val(data.depwidth);
         $(".depheight", slot).val(data.depheight);
         $(".depavailable", slot).val(data.depavailable);
@@ -579,14 +579,14 @@ doMovementCheck: function doMovementCheck(data) {
 				data.depy = $("#team1 .depy").val();
 				data.depwidth = $("#team1 .depwidth").val();
 				data.depheight = $("#team1 .depheight").val();
-				data.deptype = "Box";
+				data.deptype = "box";
 				data.depavailable = 1;
 			} else { //data for team 2
 				data.depx = $("#team2 .depx").val();
 				data.depy = $("#team2 .depy").val();
 				data.depwidth = $("#team2 .depwidth").val();
 				data.depheight = $("#team2 .depheight").val();
-				data.deptype = "Box";
+				data.deptype = "box";
 				data.depavailable = 1;
 			}
 		
@@ -626,14 +626,15 @@ doMovementCheck: function doMovementCheck(data) {
     getScenarioDescriptionFromFields: function getScenarioDescriptionFromFields() {
     const fields = [
         { label: 'REQUIREMENTS', id: 'req' },
-        { label: 'CUSTOM FACTIONS', id: 'customfactions' },
-        { label: 'CUSTOM UNITS IN OFFICIAL FACTIONS', id: 'customunits' },
+        { label: 'CUSTOM FACTIONS / UNITS', id: 'customfactions' },
+        //{ label: 'CUSTOM UNITS IN OFFICIAL FACTIONS', id: 'customunits' },
         { label: 'ENHANCEMENTS', id: 'enhancements' },
         { label: 'EXPECTED POWER LEVEL', id: 'tier' },
         { label: 'FORBIDDEN FACTIONS', id: 'forbidden' },
         { label: 'MAP BORDERS', id: 'borders' },
         { label: 'CALLED SHOTS', id: 'called' },
-        { label: 'VICTORY CONDITIONS', id: 'victory' }
+        { label: 'VICTORY CONDITIONS', id: 'victory' },
+        { label: 'ADDITIONAL INFO', id: 'other' }
     ];
 
     let result = '*** SCENARIO DESCRIPTION ***\n';

@@ -75,20 +75,8 @@
 
         <div class="scenario-form">
         <div class="scenario-row">
-            <label for="req">REQUIREMENTS:</label>
+            <label for="req">FLEET REQUIREMENTS:</label>
             <input type="text" id="req" value="Pass the fleet checker / Other">
-        </div>
-        <div class="scenario-row">
-            <label for="customfactions">CUSTOM FACTIONS:</label>
-            <input type="text" id="customfactions" value="Allowed / Not allowed">
-        </div>
-        <div class="scenario-row">
-            <label for="customunits">CUSTOM UNITS IN OFFICIAL FACTIONS:</label>
-            <input type="text" id="customunits" value="Allowed / Not allowed">
-        </div>
-        <div class="scenario-row">
-            <label for="enhancements">ENHANCEMENTS:</label>
-            <input type="text" id="enhancements" value="Allowed / Up to X points / Not allowed">
         </div>
         <div class="scenario-row">
             <label for="tier">EXPECTED POWER LEVEL:</label>
@@ -97,19 +85,39 @@
         <div class="scenario-row">
             <label for="forbidden">FORBIDDEN FACTIONS:</label>
             <input type="text" id="forbidden" value="None">
+        </div>                
+        <div class="scenario-row">
+            <label for="customfactions">CUSTOM FACTIONS / UNITS:</label>
+            <input type="text" id="customfactions" value="Allowed / Not allowed">
         </div>
+        <!--<div class="scenario-row">
+            <label for="customunits">CUSTOM UNITS IN OFFICIAL FACTIONS:</label>
+            <input type="text" id="customunits" value="Allowed / Not allowed">
+        </div>-->
+        <div class="scenario-row">
+            <label for="enhancements">ENHANCEMENTS:</label>
+            <input type="text" id="enhancements" value="Allowed / Up to X points / Not allowed">
+        </div>
+
         <div class="scenario-row">
             <label for="borders">MAP BORDERS:</label>
             <input type="text" id="borders" value="Unit leaving map is destroyed / Unit ending movement out of map is destroyed">
         </div>
         <div class="scenario-row">
             <label for="called">CALLED SHOTS:</label>
-            <input type="text" id="called" value="Allowed / Not allowed">
+            <select id="called">
+                <option value="Allowed" selected>Allowed</option>
+                <option value="Not allowed">Not allowed</option>
+            </select>
         </div>
         <div class="scenario-row">
             <label for="victory">VICTORY CONDITIONS:</label>
             <input type="text" id="victory" value="Last unit on map / Last ship on map / More forces remaining after Turn X">
         </div>
+        <div class="scenario-row">
+            <label for="other">ADDITIONAL INFO:</label>
+            <textarea id="other" rows="3" style="width: 100%; resize: vertical;"></textarea>
+        </div>     
         </div>
 				
 				
@@ -297,10 +305,9 @@ print("<option value=\"".$i."\" ".$selected." >".$i."</option>");
                     <input class ="depx tinySize" data-validation="^-{0,1}[0-9]+$" data-default ="0" type="text" name="depx" value="0">
                     <span>Y:</span>
                     <input class ="depy tinySize" type="text" name="depy" value="1">
-                <!--<span>Type</span>
+                <!--<span>Type</span> options other than 'box' do not work correctly, I'm disabling them
 				    <select class="deptype" name="deptype" style="margin-right: 5px">
-                        <option value="box">Box</option>
-                        options other than 'box' do not work correctly, I'm disabling them
+                        <option value="box">box</option>
                         <option value="circle">circle</option>
                         <option value="distance">distance</option>
 						
