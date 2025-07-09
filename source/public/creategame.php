@@ -138,7 +138,7 @@
                                 <span>HEIGHT:</span>
                                 <input class ="spacey tinySize" data-validation="^-{0,1}[0-9]+$" data-default ="0" type="text" name="spacey" value="0">   
 				    &nbsp;&nbsp;
-				    <span style = "margin-left: 25px;">RESIZE MAP:</span><span class="clickable setsizeknifefight" style = "text-decoration: underline; color: #8bcaf2">KNIFE FIGHT (SMALL MAP)</span> <!-- button switching map dimensions -->
+				    <span style = "margin-left: 40px;">RESIZE MAP:</span><span class="clickable setsizeknifefight" style = "text-decoration: underline; color: #8bcaf2">KNIFE FIGHT (SMALL MAP)</span> <!-- button switching map dimensions -->
 				    &nbsp;&nbsp;				    
                     <span class="clickable setsizestandard" style = "text-decoration: underline; color: #8bcaf2">STANDARD (NORMAL MAP)</span> <!-- button switching map dimensions -->
                     &nbsp;&nbsp;
