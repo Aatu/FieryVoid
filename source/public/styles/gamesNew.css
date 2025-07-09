@@ -219,11 +219,11 @@ line-height: 1.5;
   flex-direction: column;
   align-items: start;
   justify-content: flex-start;
-  padding-top: 1.05rem;
+  padding-top: 1rem;
 }
 
 .create-col .create-game-btn {
-  margin-top: 1.8rem;
+  margin-top: 1.85rem;
 }
 
 /* Top-left account links */
