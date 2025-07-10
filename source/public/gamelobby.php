@@ -545,11 +545,11 @@ if ($asteroids == false && $moons == false) {
         <!-- Fleet selection area -->
         <table class="store" style="width:100%; margin-top: 5px;">
             <tr>
-                <td style="width:50%;">
+                <td style="width:45%;">
                     <div id="store" class="subpanel"></div>
                 </td>            
-                <td style="width:50%; vertical-align: top;">
-                    <div id="fleet" class="subpanel"></div>
+                <td style="width:55%; vertical-align: top;">
+                    <div id="fleet" class="subpanel" style="text-align: right;"></div>
                 </td>
             </tr>
         </table>
