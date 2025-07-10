@@ -459,12 +459,16 @@ handleMouseWheelFighter: function handleMouseWheelFighter(e) {
             selectAmountItem.data('min', deployTurn);
             enhName = " <span style='color:rgb(95, 206, 95);' >(DEPLOYMENT)</span> " + enhName;
         } 
-        if (enhName.includes('(AMMO)')) {
-            // Remove '(AMMO)' from enhName to prevent duplication
-            enhName = enhName.replace('(AMMO)', '').trim();
-            enhName = " <span style='color:rgb(106, 195, 255)  ;'>(AMMO)</span> " + enhName;
-        }        
-                
+
+        const ammoTypes = ['(HEAVY AMMO)', '(MEDIUM AMMO)', '(LIGHT AMMO)', '(AMMO)'];
+        for (const type of ammoTypes) {
+            if (enhName.includes(type)) {
+                enhName = enhName.replace(type, '').trim();
+                enhName = ` <span style="color:rgb(106, 195, 255);">${type}</span> ` + enhName;
+                break; // Assuming only one ammo type appears in the string
+            }
+        }    
+
         var nameExpanded = enhName;
         if(enhID != 'DEPLOY'){
             nameExpanded = nameExpanded + ' {';
@@ -749,11 +753,15 @@ handleInputChangeEdit: function handleInputChangeEdit(e) {
             selectAmountItem.data('min', deployTurn);
             enhName = " <span style='color:rgb(95, 206, 95);' >(DEPLOYMENT)</span> " + enhName;
         } 
-        if (enhName.includes('(AMMO)')) {
-            // Remove '(AMMO)' from enhName to prevent duplication
-            enhName = enhName.replace('(AMMO)', '').trim();
-            enhName = " <span style='color:rgb(106, 195, 255)  ;'>(AMMO)</span> " + enhName;
-        }        
+
+        const ammoTypes = ['(HEAVY AMMO)', '(MEDIUM AMMO)', '(LIGHT AMMO)', '(AMMO)'];
+        for (const type of ammoTypes) {
+            if (enhName.includes(type)) {
+                enhName = enhName.replace(type, '').trim();
+                enhName = ` <span style="color:rgb(106, 195, 255);">${type}</span> ` + enhName;
+                break; // Assuming only one ammo type appears in the string
+            }
+        }       
                 
         var nameExpanded = enhName;
         if(enhID != 'DEPLOY'){
