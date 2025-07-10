@@ -194,8 +194,8 @@ body {
 }
 
 #phaseheader .value.activeship{
-    font-style:italic;
-    color:#496791;
+    color:#aabcd4;
+    margin-left: 15px;     
 }
 
 .finished{
@@ -857,20 +857,23 @@ body {
 
 .iniActive {
     border: 1px solid #2ea86b !important;
-    background-color: #163f35 !important;
-    box-shadow: 0px 0px 4px #3fd58f;
+    background-color: rgb(22, 63, 53, 0.9) !important;
+    box-shadow: 0px 0px 3px #3fd58f;
+    color: #e6e6e6;    
 }
 
 .iniActiveAlly {
     border: 1px solid #6d95c5 !important;
-    background-color: #162f50 !important;
+    background-color: rgb(22, 47, 80, 0.9) !important;
     box-shadow: 0px 0px 3px #09F;
+    color: #d9d9d9;    
 }
 
 .iniActiveEnemy {
     border: 1px solid #c65d4a !important;
-    background-color: #3d1e1b !important;
-    box-shadow: 0px 0px 4px #f07662;
+    background-color: rgb(61, 30, 27, 0.9) !important;
+    box-shadow: 0px 0px 3px #f07662;
+    color: #d9d9d9;    
 }
 
 .redIni {
