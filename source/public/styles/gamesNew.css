@@ -138,24 +138,25 @@ line-height: 1.5;
   color: white;
   font-size: 1.2em;  
   border: 1px solid #66b266;
-  width: 100px;
+  width: 120px;
   text-align: center; 
   box-sizing: border-box;
-  height: 22px;          /* or whatever height you prefer */
-  line-height: 11px;     /* vertically center the text */  
+  height: 24px;          /* or whatever height you prefer */
+  line-height: 13px;     /* vertically center the text */  
 }
 
 .btn-primary-lobby {
+  bottom:8px;    
   background: #215a7a;
   color: white;
-  width: 100px;  
+  width: 120px;  
   font-size: 1.2em;   
   border: 1px solid #7298a7;
   
   text-align: center; 
   box-sizing: border-box;
-  height: 22px;          /* or whatever height you prefer */
-  line-height: 11px;     /* vertically center the text */  
+  height: 24px;          /* or whatever height you prefer */
+  line-height: 13px;     /* vertically center the text */  
 
 }
 
