@@ -701,7 +701,7 @@ window.gamedata = {
                 return false;
             }
 			
-			//We have one thurst-boosted weapon in Initial Orders Phase, let's put in a check for it and future - DK 26.11.24
+			//We have one thrust-boosted weapon in Initial Orders Phase, let's put in a check for it and future - DK 26.11.24
             shipNames = shipManager.movement.getShipsNegativeThrust();
 
             if (shipNames.length > 0) {
