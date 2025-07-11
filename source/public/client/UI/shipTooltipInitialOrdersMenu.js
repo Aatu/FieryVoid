@@ -179,11 +179,11 @@ window.ShipTooltipInitialOrdersMenu = function () {
     }
 
     function isEnemy() {
-        return this.selectedShip && !gamedata.isMyShip(this.targetedShip);
+        return this.selectedShip && !gamedata.isMyorMyTeamShip(this.targetedShip);
     }
 
     function isFriendly() {
-        return gamedata.isMyShip(this.targetedShip);
+        return gamedata.isMyorMyTeamShip(this.targetedShip);
     }
 
     function isElint() {
