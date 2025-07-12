@@ -11,7 +11,7 @@ window.ShipTooltipInitialOrdersMenu = function () {
 
     ShipTooltipInitialOrdersMenu.buttons = [
         { className: "addCCEW", condition: [isSelf, notFlight], action: addCCEW, info: "Add CCEW" }, 
-        { className: "removeCCEW", condition: [isSelf, notFlight, hasCCEW], action: removeCCEW, info: "Remove CCEW" }, 
+        { className: "removeCCEW", condition: [isSelf, notFlight], action: removeCCEW, info: "Remove CCEW" }, 
         { className: "addOEW", condition: [isEnemy, sourceNotFlight], action: addOEW, info: "Add OEW" }, 
         { className: "removeOEW", condition: [isEnemy, sourceNotFlight], action: removeOEW, info: "Remove OEW" }, 
         { className: "addDIST", condition: [isEnemy, isElint, notFlight, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck], action: getAddOEW('DIST'), info: "Add DIST" }, 
