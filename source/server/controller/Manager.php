@@ -60,13 +60,14 @@ class Manager{
         try {
             self::initDBManager();
             
-            if ($targetGameId &&  is_numeric($targetGameId) && $targetGameId > 0 ){
+            if ($targetGameId && is_numeric($targetGameId) && $targetGameId > 0) {
                 return self::getTacGamedata($targetGameId, $userid, 0, 0, -1);
             }
-        }
-        catch(Exception $e) {
+        } catch(Exception $e) {
             Debug::error($e);
         }
+    
+        return null; // Always return *something*
     }
     
     public static function getTacGames($userid){
@@ -159,7 +160,7 @@ class Manager{
         try {
             self::initDBManager();
             self::$dbManager->startTransaction();
-            $gameid = self::$dbManager->createGame($gamename, $background, $slots, $userid, $gamespace, json_encode($rules), $description);
+            $gameid = self::$dbManager->createGame($gamename, $background, $slots, $userid, $gamespace, $description, json_encode($rules));
             //SystemData::initSystemData(0, $gameid);
             self::takeSlot($userid, $gameid, 1);
             self::$dbManager->endTransaction(false);
@@ -645,141 +646,172 @@ class Manager{
         self::$dbManager->submitIniative($gamedata->id, $gamedata->turn, $gamedata->ships);
     }
     
-    private static function getShipsFromJSON($json){
-
+    private static function getShipsFromJSON($json) {
         $ships = array();
         $array = json_decode($json, true);
-        if (!is_array($array))
-			return $ships;
-			
+        if (!is_array($array)) return $ships;
+    
         foreach ($array as $value) {
-                    
             $movements = array();
-            if (isset($value["movement"]) && is_array($value["movement"])){
-                foreach($value["movement"] as $i=>$move){
+            if (isset($value["movement"]) && is_array($value["movement"])) {
+                foreach($value["movement"] as $i => $move) {
                     $movement = new MovementOrder(
-                        $move["id"],
-                        $move["type"],
-                        new OffsetCoordinate($move["position"]),
-                        $move["xOffset"],
-                        $move["yOffset"],
-                        $move["speed"],
-                        $move["heading"],
-                        $move["facing"],
-                        $move["preturn"],
-                        $move["turn"],
-                        $move["value"],
-                        $move["at_initiative"]
+                        $move["id"] ?? -1,
+                        $move["type"] ?? null,
+                        new OffsetCoordinate($move["position"] ?? [0, 0]),
+                        $move["xOffset"] ?? 0,
+                        $move["yOffset"] ?? 0,
+                        $move["speed"] ?? 0,
+                        $move["heading"] ?? 0,
+                        $move["facing"] ?? 0,
+                        $move["preturn"] ?? false,
+                        $move["turn"] ?? 0,
+                        $move["value"] ?? 0,
+                        $move["at_initiative"] ?? false
                     );
-                    $movement->requiredThrust = $move["requiredThrust"];
-                    $movement->assignedThrust = $move["assignedThrust"];
-                    
+                    $movement->requiredThrust = $move["requiredThrust"] ?? 0;
+                    $movement->assignedThrust = $move["assignedThrust"] ?? 0;
+    
                     $movements[$i] = $movement;
                 }
             }
-            
+    
             $EW = array();
-            
-            if (isset($value["EW"]) && is_array($value["EW"])){
-                foreach($value["EW"] as $i=>$EWdata){
-                    $EWentry = new EWentry(-1, $EWdata["shipid"], $EWdata["turn"], $EWdata["type"], $EWdata["amount"], $EWdata["targetid"]);
+            if (isset($value["EW"]) && is_array($value["EW"])) {
+                foreach($value["EW"] as $i => $EWdata) {
+                    $EWentry = new EWentry(
+                        -1,
+                        $EWdata["shipid"] ?? -1,
+                        $EWdata["turn"] ?? 0,
+                        $EWdata["type"] ?? "",
+                        $EWdata["amount"] ?? 0,
+                        $EWdata["targetid"] ?? null
+                    );
                     $EW[$i] = $EWentry;
                 }
             }
-            
+    
+            $className = $value["phpclass"] ?? null;
+            if (!$className) continue; // skip if class not defined
+    
             /** @var BaseShip $ship */
-            $ship = new $value["phpclass"]($value["id"], $value["userid"], $value['name'], $value["slot"]);       
-			$ship->pointCostEnh = $value["pointCostEnh"]+$value["pointCostEnh2"]; //merge enhancements and options into one value! - Options not saved separately
-            $ship->setMovements($movements);    
+            $ship = new $className(
+                $value["id"] ?? -1,
+                $value["userid"] ?? -1,
+                $value["name"] ?? "Unnamed",
+                $value["slot"] ?? 0
+            );
+    
+            $ship->pointCostEnh = ($value["pointCostEnh"] ?? 0) + ($value["pointCostEnh2"] ?? 0);
+            $ship->setMovements($movements);
             $ship->EW = $EW;
-
-            if ($ship instanceof FighterFlight){
-                $ship->flightSize = $value["flightSize"];  
+    
+            if ($ship instanceof FighterFlight) {
+                $ship->flightSize = $value["flightSize"] ?? 1;
                 $ship->populate();
             }
-
-
-	    //unit enhancements
-		$ship->enhancementOptions = $value["enhancementOptions"];
-		
-            $systems = isset($value["systems"]) ? $value["systems"] : [];
-            foreach($systems as $i=>$system){
-                //$sys = $ship->getSystemById($system['id']);
+    
+            $ship->enhancementOptions = $value["enhancementOptions"] ?? [];
+    
+            $systems = $value["systems"] ?? [];
+            foreach ($systems as $i => $system) {
                 $sys = $ship->getSystemById($i);
-
-                
-                if (isset($system["power"]) &&is_array($system["power"]))
-                {
-                    foreach ($system["power"] as $a=>$power)
-                    {
-                        $powerEntry = new PowerManagementEntry($power["id"], $power["shipid"], $power["systemid"], $power["type"], $power["turn"], $power["amount"]);
-                        if (isset($sys)){
+    
+                if (isset($system["power"]) && is_array($system["power"])) {
+                    foreach ($system["power"] as $power) {
+                        $powerEntry = new PowerManagementEntry(
+                            $power["id"] ?? -1,
+                            $power["shipid"] ?? -1,
+                            $power["systemid"] ?? -1,
+                            $power["type"] ?? "",
+                            $power["turn"] ?? 0,
+                            $power["amount"] ?? 0
+                        );
+                        if ($sys) {
                             $sys->setPower($powerEntry);
                         }
                     }
                 }
-                
-                if (isset($system["fireOrders"]) &&is_array($system["fireOrders"]))
-                {
-                    $fires = Array();
-                    foreach($system["fireOrders"] as $i=>$fo){
-                        $fireOrder = new FireOrder(-1, $fo["type"], $fo["shooterid"], $fo["targetid"], $fo["weaponid"], $fo["calledid"], $fo["turn"], $fo["firingMode"], 0, 0, $fo["shots"], 0, 0, $fo["x"], $fo["y"], $fo["damageclass"]);
-                        if (isset($sys)){
+    
+                if (isset($system["fireOrders"]) && is_array($system["fireOrders"])) {
+                    $fires = [];
+                    foreach($system["fireOrders"] as $fo) {
+                        $fireOrder = new FireOrder(
+                            -1,
+                            $fo["type"] ?? "",
+                            $fo["shooterid"] ?? -1,
+                            $fo["targetid"] ?? -1,
+                            $fo["weaponid"] ?? -1,
+                            $fo["calledid"] ?? -1,
+                            $fo["turn"] ?? 0,
+                            $fo["firingMode"] ?? 1,
+                            0, 0, $fo["shots"] ?? 0, 0, 0,
+                            $fo["x"] ?? 0,
+                            $fo["y"] ?? 0,
+                            $fo["damageclass"] ?? null
+                        );
+                        if ($sys) {
                             $fires[] = $fireOrder;
                         }
                     }
-                    
-                    $sys->setFireOrders($fires);
+                    if ($sys) $sys->setFireOrders($fires);
                 }
-                
-                if (isset($system["systems"]) && is_array($system["systems"]))
-                {
-                    foreach ($system["systems"] as $fightersys)
-                    {
-                        $fig = $sys->getSystemById($fightersys['id']);
-                        if (isset($fightersys["fireOrders"]) && is_array($fightersys["fireOrders"]))
-                        {
-                            $fires = Array();
-                            foreach($fightersys["fireOrders"] as $i=>$fo)
-                            {
-                                $fireOrder = new FireOrder(-1, $fo["type"], $fo["shooterid"], $fo["targetid"], $fo["weaponid"], $fo["calledid"], $fo["turn"], $fo["firingMode"], 0, 0, $fo["shots"], 0, 0, $fo["x"], $fo["y"], $fo["damageclass"]);
-                                if (isset($fig)){
-                                    $fires[] = $fireOrder;
-                                }
+    
+                if (isset($system["systems"]) && is_array($system["systems"])) {
+                    foreach ($system["systems"] as $fightersys) {
+                        $fig = $sys ? $sys->getSystemById($fightersys["id"] ?? -1) : null;
+                        if (!$fig) continue;
+    
+                        if (isset($fightersys["fireOrders"]) && is_array($fightersys["fireOrders"])) {
+                            $fires = [];
+                            foreach($fightersys["fireOrders"] as $fo) {
+                                $fireOrder = new FireOrder(
+                                    -1,
+                                    $fo["type"] ?? "",
+                                    $fo["shooterid"] ?? -1,
+                                    $fo["targetid"] ?? -1,
+                                    $fo["weaponid"] ?? -1,
+                                    $fo["calledid"] ?? -1,
+                                    $fo["turn"] ?? 0,
+                                    $fo["firingMode"] ?? 1,
+                                    0, 0, $fo["shots"] ?? 0, 0, 0,
+                                    $fo["x"] ?? 0,
+                                    $fo["y"] ?? 0,
+                                    $fo["damageclass"] ?? null
+                                );
+                                $fires[] = $fireOrder;
                             }
-                            
-                            // plopje
-                            if(isset($fightersys["ammo"])){
-                                foreach($fightersys["ammo"] as $i=>$ammo){
-                                    if(isset($ammo)){
+    
+                            // ammo transfer
+                            if (isset($fightersys["ammo"])) {
+                                foreach ($fightersys["ammo"] as $i => $ammo) {
+                                    if (isset($ammo)) {
                                         $fig->setAmmo($i, $ammo);
                                     }
                                 }
-                            }							
-
+                            }
+    
                             $fig->setFireOrders($fires);
-                        }               
-
-
-						//receive individually transferred fighter system data, if any								
-						if(isset($fightersys["individualNotesTransfer"])){ //may be not set if game is being created - in this case only data for 1 fighter is transferred
-							$fig->individualNotesTransfer = $fightersys["individualNotesTransfer"];
-							$fig->doIndividualNotesTransfer();	
-						}				
-						
+                        }
+    
+                        if (isset($fightersys["individualNotesTransfer"])) {
+                            $fig->individualNotesTransfer = $fightersys["individualNotesTransfer"];
+                            $fig->doIndividualNotesTransfer();
+                        }
                     }
                 }
-				//receive individually transferred system data, if any
-				if(isset($system["individualNotesTransfer"])){ //may be not set if game is being created - in this case only data for 1 fighter is transferred
-					$sys->individualNotesTransfer = $system["individualNotesTransfer"];
-					$sys->doIndividualNotesTransfer();
-				}
+    
+                if (isset($system["individualNotesTransfer"])) {
+                    if ($sys) {
+                        $sys->individualNotesTransfer = $system["individualNotesTransfer"];
+                        $sys->doIndividualNotesTransfer();
+                    }
+                }
             }
-
-
-            $ships[(int)$value["id"]] = $ship;
+    
+            $ships[(int)($value["id"] ?? count($ships))] = $ship;
         }
-        
+    
         return $ships;
     }
 

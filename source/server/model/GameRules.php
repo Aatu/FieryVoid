@@ -56,13 +56,13 @@ class GameRules implements JsonSerializable{
         return null;
     }  
 
-    public function jsonSerialize() {
+    public function jsonSerialize(): mixed {
         $list = [];
-
+    
         foreach ($this->rules as $rule) {
             $list[$rule->getRuleName()] = $rule;
         }
-        
+    
         return $list;
     }
 	

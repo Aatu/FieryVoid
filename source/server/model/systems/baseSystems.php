@@ -2782,7 +2782,10 @@ public function onIndividualNotesLoaded($gamedata)
              
         //calculate $this->BFCPtotal_used,
         $this->BFCPtotal_used = 0;
- 		$this->BFCPtotal_used = array_sum($this->allocatedBFCP);  
+ 		//$this->BFCPtotal_used = array_sum($this->allocatedBFCP); //Amended during PHP8 update - DK 25.6.25
+         foreach( $this->allocatedBFCP as $alloc){
+             if ( (isset($alloc)) && (is_numeric($alloc)))    $this->BFCPtotal_used += $alloc;
+        }		  
  		  
  }//endof onIndividualNotesLoaded
  
@@ -3104,7 +3107,7 @@ class HyachSpecialists extends ShipSystem{
 									$noOfCrits = count($critList);							
 									$critRepairs = 1;							
 									if($noOfCrits>0){
-										usort($critList, "self::sortCriticalsByRepairPriority");			
+										usort($critList, [self::class, 'sortCriticalsByRepairPriority']);			
 										foreach ($critList as $critDmg){ //repairable criticals of current system
 											if ($critRepairs > 0){//Can still repair!
 //												if ($critDmg->phpclass == )
@@ -3142,7 +3145,7 @@ class HyachSpecialists extends ShipSystem{
 					$noOfCrits = count($critList);
 					$critRepairs = 2;
 					if($noOfCrits>0){
-						usort($critList, "self::sortCriticalsByRepairPriority");
+						usort($critList, [self::class, 'sortCriticalsByRepairPriority']);
 		
 						foreach ($critList as $critDmg){ //repairable criticals of current system
 							if ($critRepairs > 0){//Can still repair!
@@ -3186,7 +3189,7 @@ class HyachSpecialists extends ShipSystem{
 									$noOfCrits = count($critList);							
 									$critRepairs = 1;							
 									if($noOfCrits>0){
-										usort($critList, "self::sortCriticalsByRepairPriority");		
+										usort($critList, [self::class, 'sortCriticalsByRepairPriority']);		
 										foreach ($critList as $critDmg){ //repairable criticals of current system
 											if ($critRepairs > 0){//Can still repair!
 												$critDmg->turnend = $gamedata->turn-1;//actual repair. Use previous turn so it disappears after Intitial Orders (but would effect then, time to repair etc.
@@ -4155,7 +4158,7 @@ class SelfRepair extends ShipSystem{
 			
 			$systemList[] = $system;			
 		}
-		usort($systemList, "self::sortSystemsByRepairPriority");
+		usort($systemList, [self::class, 'sortSystemsByRepairPriority']);
 		
 
 // Add GTS		
@@ -4176,7 +4179,8 @@ class SelfRepair extends ShipSystem{
         }
 		$noOfCrits = count($critList);
         if($noOfCrits>0){
-            usort($critList, "self::sortCriticalsByRepairPriority");
+			usort($critList, [self::class, 'sortCriticalsByRepairPriority']);
+			
             foreach ($critList as $critDmg){ //repairable criticals of current system, already sorted
                 if ($critDmg->repairCost <= $availableRepairPoints){//execute repair!
                     $system = $ship->getSystemById($critDmg->systemid); //We already have the ship object passed to criticalPhaseEffects(), use it to get the system the foreach loop is considering at this point'
@@ -4802,6 +4806,7 @@ class PowerCapacitor extends ShipSystem{
     
 	//power held
 	public $powerCurr = 0;
+	private $powerMax = 0;
 	public $capacityBonus = 0; //additional capacity - potentially set by enhancements
 	public $powerReceivedFromFrontEnd = 0; //communication variable	
 	public $powerReceivedFromBackEnd = 0; //communication variable
@@ -5682,6 +5687,7 @@ class AmmoMagazine extends ShipSystem {
 	public $output = 0;
 	
 	private $interceptorUsed = 0;//Communication variable.	
+	private $ammoAlreadyUsed = array();
 		
     
     function __construct($capacity){ //magazine capacity

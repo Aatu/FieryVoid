@@ -3,6 +3,7 @@
 class Pulse extends Weapon{        
         public $grouping = 20;
         public $maxpulses = 6;
+        public $maxpulsesArray = array();
         public $rof = 4;
         public $priority = 5;
 	public $damageType = 'Pulse'; //indicates that this weapon does damage in Pulse mode

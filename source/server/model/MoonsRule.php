@@ -12,7 +12,7 @@ class MoonsRule implements JsonSerializable {
         return 'moons';
     }
 
-    public function jsonSerialize() {
+    public function jsonSerialize(): mixed {
         return $this->numberOfMoons;
     }
 

@@ -9,7 +9,7 @@ class ShipSystem {
 	public $outputDisplay = ''; //if not empty - overrides default on-icon display text
     public $outputType = null;
     public $specialAbilities = array();
-    
+	public $specialAbilityValue = null;
     public $damage = array();
     public $outputMod = 0;
     public $boostable = false;

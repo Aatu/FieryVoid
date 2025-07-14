@@ -255,7 +255,8 @@ class Mathlib{
     public static function checkLineOfSight($start, $end, $blockedHexes) {
         $startPixel = self::hexCoToPixelLoS($start);
         $endPixel = self::hexCoToPixelLoS($end);
-        $hexSize = 50;        
+        $hexSize = 50;
+        $filterRadius = 5;                
 
         //Get variables for bounding box below
         $lineMinQ = min($start->q, $end->q);
@@ -271,15 +272,17 @@ class Mathlib{
         
         foreach ($filteredBlockedHexes as $hex) { 
             //Bounding box to reduce the number of blocked hexes we have to consider.           
-            if ($hex->q < $lineMinQ - $hexSize || $hex->q > $lineMaxQ + $hexSize ||
-                $hex->r < $lineMinR - $hexSize || $hex->r > $lineMaxR + $hexSize) {
+            if ($hex->q < $lineMinQ - $filterRadius || $hex->q > $lineMaxQ + $filterRadius ||
+                $hex->r < $lineMinR - $filterRadius || $hex->r > $lineMaxR + $filterRadius) {
                 continue;
             }
-            //Get the bounadries of the blocking hex.
+            //Get the boundaries of the blocking hex.
             $corners = self::getHexCorners($hex, $hexSize);
-            for ($i = 0; $i < count($corners); $i++) {
+            $cornerCount = count($corners);
+
+            for ($i = 0; $i < $cornerCount; $i++) {
                 $p1 = $corners[$i];
-                $p2 = $corners[($i + 1) % count($corners)];
+                $p2 = $corners[($i + 1) % $cornerCount];
                 //Check if shot intersects with those boundaries.
                 if (self::doLinesIntersect($startPixel, $endPixel, $p1, $p2)) {
                     return true; // Line crosses a hex edge
@@ -327,8 +330,8 @@ class Mathlib{
             }, $neighborOffsets);
 
             return $neighbors;
-        }else{
-            //Assume Radius 2.
+        }else if($radius == 2){
+            //Radius 2.
             $isOddRow = $position->r % 2 !== 0;    
             $neighborOffsets = $isOddRow 
                 ? [[+1, 0], [-1, 0], [-1, +1], [-1, -1], [0, +1], [0, -1],

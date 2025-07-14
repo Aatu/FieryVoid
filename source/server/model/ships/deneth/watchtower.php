@@ -10,7 +10,7 @@ class Watchtower extends SmallStarBaseFourSections{
 		$this->fighters = array("normal"=>30, "LCVs"=>4); 
 		$this->shipSizeClass = 3; //this is Capital base
 		$this->base = true;
-		$this->smallbase = true;
+		$this->smallBase = true;
 		$this->iniativebonus = -200; //no voluntary movement anyway
 		$this->turncost = 0;
 		$this->turndelaycost = 0;
