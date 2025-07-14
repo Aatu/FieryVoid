@@ -73,16 +73,15 @@ if (isset($_SESSION["user"])) {
     </div>
 
     <div class="resources">
-      <h3>Latest Updates — June 2025</h3>
+      <h3>Latest Updates — July 2025</h3>
       <ul class="updates-list">
-        <li><strong>Features & Enhancements</strong> - Fleets/ships can deploy after Turn 1; Hyach subs now have Stealth; Specialist rebalances; & more.</li>
-        <li><strong>6 Jun</strong> - Overlay colors, deployment zone tweaks, UI fixes. Pulsar mine fixed, tooltip/text readability improved.</li>
-        <li><strong>16 Jun</strong>- Movement/LOS fixes, targeting tooltip updates.</li>
-        <li><strong>27 Jun</strong> - Optimized visuals, terrain updates, LoS checks improved.</li>
+        <li><strong>Features</strong> - Welcome to Fiery Void's new home!</li>
+        <strong>14 July</strong> - Webpage refresh / Image improvements</li>
+        <!--<li><strong>6 Jun</strong> - Overlay colors, deployment zone tweaks, UI fixes. Pulsar mine fixed, tooltip/text readability improved.</li>-->
       </ul>
     </div>
 
-    <p class="noteGames">Remember - If anything weird happens, press <kbd>Ctrl+F5</kbd> to reload page!  If that doesn't work report bugs via Discord link above.</p>
+    <p class="noteGames">Remember - When anything weird happens, press <kbd>Ctrl+F5</kbd> to reload page!  If that doesn't work report bugs via Discord link above.</p>
   </section>
 
   <section class="games-panel">
