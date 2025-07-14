@@ -65,49 +65,13 @@ if (isset($_SESSION["user"])) {
 -->	    
 		<big><b>Welcome to Fiery Void, an adaptation of the 'Babylon 5 Wars' tabletop game, by Agents of Gaming!</b></big>
 
-		<br><br>---------- <b>LATEST NEWS - May 2025</b> ----------
-
-	    <br><br><b>Features and Enhancements</b>
-	    <br>Fleets and ships now have the option to deploy on later in the game than Turn 1. See Fiery Void FAQ for more info.
-	    <br>Added Stealth ability to Hyach Submarines, who will now be invisible to enemies until detected. See Fiery Void FAQ for more info.
-	    <br>Rebalanced Hyach Specialist bonuses.
-	    <br>Player’s own ships will now appear as green in the tactical overlay/initiative list. Allied ships in the same team will appear blue and enemies remain red.
-	    <br>Added Deployment Preview to Fleet Selection screen as well as Create Game.
-	    <br>Several changes to text styles to help improve readability of game info.
-
-	    <br><br><b>Bug Fixes</b>
-	    <br>Pulsar mine no longer fires when offline.
-	    <br>Tidied up info in Adaptive Armor system data window.
+		<br><br>---------- <big><b>WE ARE MOVING!</b></big> ----------
 	    
-
-		 <br><br>---------- <b>fix 6th of June</b> ---------- 
-	    <br>Fighter overlay colour fix for Allied units / Added appropriate colour to tooltip texts too.
-	    <br>Deployment zones for allies will appear blue in Fleet Selection and Deployment Phase.
-	    <br>Added minimum deployment turn graphic to Deployment Zones.
-	    <br>Fixed issue when Replay was clicked on Turn 1, but before Movement Phase had started.
-	    <br>Allow players to select another Team slot after they’ve already readied a slot in the same team during Fleet Selection.
-	    <br>Fix bug with Info Tab entries when one player is occupying multiple team slots.
-	    <br>Added status note to Info Tab indicating whether other players have committed their orders yet.
-	    <br>Amended EW buttons so they only show their respective reduction buttons when needed.
-	    <br>Added new player warning during Movement for ships moving Speed 0 that have no Movement orders.
-
-		 <br><br>---------- <b>hotfixes 12th of June</b> ---------- 
-	    <br>Prevent 'undefined' message appearing in Movement commit check
-	    <br>Ramming locations should now be selected correctly while colliding with terrain.
-	    <br>Proximity Laser now checks Line of Sight correctly / Fixed Proximity Laser arcs for Senchlat Kir.
-	    <br>Targeting tooltip no longer shows % chance for hex targeted weapons.
-	    <br>Direct fire weapons will no longer occasionally target hexes.
-
-
-		 <br><br>---------- <b>hotfixes 16th of June</b> ---------- 
-	    <br>Hotfix - Stealth and LoS issues
+<br><br><a href="https://fieryvoid.eu/testInstance/source/public/games.php">The new Fiery Void!</a>
 	    
-		 <br><br>---------- <b>hotfixes 27th of June</b> ---------- 
-	    <br>Optimised BallisticIcon and BallisticLines code.
-	    <br>Update Asteroid and Small Moon terrain images.
-	    <br>Updated system notes for several weapons to improve clarity.
-	    <br>Improved Front End LoS checks.
-
+	    <br><br>Our existing server can no longer accept necessary updates, and we have decided to move to a new one. It can be reached using address above - this is, from this moemnt on, new iteration of Fiery Void. Despite a few drawbacks (foremost among them - admin as green as they come ;) ), we hope You will enjoy new experience (continuously updated by Douglas!).
+	    <br><br>Old server (as in, this one) will be up and running for some time, so You may finish existing games here. New ones should be starting on new one though! Player accounts have been copied, so You should be able to log in using Your old credentials without any fuss - unless You have changed password very recently (in this case, call for help, I will reset it), or have brand new account period (in this case You need a new account on new server, too).
+	    <br><br>Welcome to new environment, and have fun as always!
 	    
        <br><br><br>
 <!--	        
@@ -185,7 +149,7 @@ if (isset($_SESSION["user"])) {
                 </div>
             </td>
             <td>
-                <a class="link" href="creategame.php">CREATE GAME</a>
+                <!-- DEACTIVATE! <a class="link" href="creategame.php">CREATE GAME</a> -->
                 <input type="button" id="loadFireButton" onclick="loadFireList()" value="LOAD RECENTLY ACTIVE">
 
             </td>
