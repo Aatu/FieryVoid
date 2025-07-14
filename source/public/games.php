@@ -82,7 +82,7 @@ if (isset($_SESSION["user"])) {
        <br><br>
 -->	
 	    
-
+<!--	not needed when we're moving...
         <br><br>---------- <b>HOW TO GET STARTED</b> ----------
 		<br><a href="files/Fiery_Void_-_How_to_Play.docx">How to Play Fiery Void</a> - Text tutorial (friendlier than full blown game manual - to help you get started quickly!)
 		<br><a href="https://www.youtube.com/watch?v=pOLp4RF9cjY&list=PLTGKagm5KkMxB8oKBiIUeoBQTRYz2z0-3" target=\"_blank\">Video tutorials</a> - Video tutorials are also available on YouTube!
@@ -100,7 +100,7 @@ if (isset($_SESSION["user"])) {
 		<br><br>---------- <b>ACCOUNT MANAGEMENT</b> ----------
         <br><a href="chpass.php">Change password</a> of your account
 		or <a href="reg.php">Register</a> new player account
-		
+		-->
 		        
 <!--		
         <br><br>---------- <b>LINKS</b> ----------
