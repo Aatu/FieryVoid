@@ -65,9 +65,9 @@ if (isset($_SESSION["user"])) {
 -->	    
 		<big><b>Welcome to Fiery Void, an adaptation of the 'Babylon 5 Wars' tabletop game, by Agents of Gaming!</b></big>
 
-		<br><br>---------- <big><b>WE ARE MOVING!</b></big> ----------
+		<br><br>---------- <big><big><b>WE ARE MOVING!</b></big></big> ----------
 	    
-<br><br><a href="https://fieryvoid.eu/testInstance/source/public/games.php">The new Fiery Void!</a>
+<br><br><a href="https://fieryvoid.eu/testInstance/source/public/games.php"><big><font color="red"><u>Link to the new Fiery Void!</u></font></big></a>
 	    
 	    <br><br>Our existing server can no longer accept necessary updates, and we have decided to move to a new one. It can be reached using address above - this is, from this moemnt on, new iteration of Fiery Void. Despite a few drawbacks (foremost among them - admin as green as they come ;) ), we hope You will enjoy new experience (continuously updated by Douglas!).
 	    <br><br>Old server (as in, this one) will be up and running for some time, so You may finish existing games here. New ones should be starting on new one though! Player accounts have been copied, so You should be able to log in using Your old credentials without any fuss - unless You have changed password very recently (in this case, call for help, I will reset it), or have brand new account period (in this case You need a new account on new server, too).
