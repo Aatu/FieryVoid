@@ -75,8 +75,8 @@ if (isset($_SESSION["user"])) {
     <div class="resources">
       <h3>Latest Updates — July 2025</h3>
       <ul class="updates-list">
-        <li><strong>Features</strong> - Welcome to Fiery Void's new home!</li>
-        <strong>14 July</strong> - Webpage refresh / Image improvements</li>
+        <li><strong>Features</strong> - Fiery Void has a new home!</li>
+        <li><strong>14 July</strong> - Webpage refresh / Image improvements</li>
         <!--<li><strong>6 Jun</strong> - Overlay colors, deployment zone tweaks, UI fixes. Pulsar mine fixed, tooltip/text readability improved.</li>-->
       </ul>
     </div>
