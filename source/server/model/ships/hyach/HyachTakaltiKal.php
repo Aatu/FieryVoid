@@ -1,7 +1,7 @@
 <?php
 class HyachTakaltiKal extends OSAT
 {
-
+	public $HyachSpecialists;
 	function __construct($id, $userid, $name,  $slot)
 	{
 		parent::__construct($id, $userid, $name,  $slot);

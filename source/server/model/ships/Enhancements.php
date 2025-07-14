@@ -32,7 +32,7 @@ class Enhancements{
 		Enhancements::setEnhancementOptionsShip($ship);
 	}
 	//sort enhancements - options first, then by name
-	usort($ship->enhancementOptions, "self::compareEnhancements");
+	usort($ship->enhancementOptions, [self::class, 'compareEnhancements']);
   } //endof function setEnhancementOptions
   
   /* block all available enhancements (those that are by default enabled) - ADD ANY NEW STANDARD ENHANCEMENTS HERE!
@@ -437,7 +437,7 @@ class Enhancements{
 	  //Shadow fighter launched: -1 PRIMARY Structure, limit: hangar capacity
 	  $enhID = 'SHAD_FTRL';
 	  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
-		  $enhName = 'Fighter launched';
+		  $enhName = 'Spawn a Medium Fighter';
 		  //find total hangar capacity
 		  $capacity = 0;	  
 		  foreach ($ship->fighters as $name => $count){

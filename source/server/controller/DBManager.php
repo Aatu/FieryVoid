@@ -3,14 +3,15 @@ mysqli_report(MYSQLI_REPORT_ERROR);
 
 class DBManager
 {
-
     private $connection = null;
     private $testMode = false;
+    private $id; // 👈 Add this line
 
-    function __construct($host, $port = 3306, $database, $username, $password, $testMode = false)
+    function __construct($host, $port, $database, $username, $password, $testMode = false)
     {
-        $this->id = uniqid();
+        $this->id = uniqid(); // This is now OK
         $this->testMode = $testMode;
+
         if ($this->connection !== null)
             return $this->connection;
 
@@ -22,6 +23,7 @@ class DBManager
 
         mysqli_set_charset($this->connection, 'utf8');
     }
+
 
     private function DBEscape($string)
     {
@@ -156,7 +158,7 @@ class DBManager
         $sql = "INSERT INTO `B5CGM`.`tac_ship` VALUES(null, $userid, $gameid, '" . $this->DBEscape($ship->name) . "', '" . $ship->phpclass . "', 0, 0, 0, 0, 0, $ship->slot, $ship->pointCostEnh)";
 		*/
 		$enhCostTotal = $ship->pointCostEnh + $ship->pointCostEnh2;
-        $sql = "INSERT INTO `B5CGM`.`tac_ship` VALUES(null, $userid, $gameid, '" . $this->DBEscape($ship->name) . "', '" . $ship->phpclass . "', 0, 0, 0, 0, 0, $ship->slot, $enhCostTotal)";
+        $sql = "INSERT INTO `tac_ship` VALUES(null, $userid, $gameid, '" . $this->DBEscape($ship->name) . "', '" . $ship->phpclass . "', 0, 0, 0, 0, 0, $ship->slot, $enhCostTotal)";
 		
         //   Debug::log($sql);
         $id = $this->insert($sql);
@@ -167,7 +169,7 @@ class DBManager
 
 	public function submitEnhancement($gameid, $shipid, $enhid, $numbertaken, $enhname){	
 		try{
-			$sql = "INSERT INTO `B5CGM`.`tac_enhancements` (gameid, shipid, enhid, numbertaken,enhname) 
+			$sql = "INSERT INTO `tac_enhancements` (gameid, shipid, enhid, numbertaken,enhname) 
 				VALUES($gameid, $shipid, '$enhid', $numbertaken, '".$this->DBEscape($enhname)."' )";
 			$this->insert($sql);
 		}catch(Exception $e) {
@@ -179,7 +181,7 @@ class DBManager
 
     public function submitFlightSize($gameid, $shipid, $flightSize)
     {
-        $sql = "INSERT INTO `B5CGM`.`tac_flightsize` (gameid, shipid, flightsize)
+        $sql = "INSERT INTO `tac_flightsize` (gameid, shipid, flightsize)
             VALUES ($gameid, $shipid, $flightSize)";
 
         $id = $this->insert($sql);
@@ -232,7 +234,7 @@ class DBManager
 
         try {
 
-            $sql = "DELETE FROM `B5CGM`.`tac_ship` WHERE tacgameid = $gameid AND playerid = $userid";
+            $sql = "DELETE FROM `tac_ship` WHERE tacgameid = $gameid AND playerid = $userid";
             if ($slotid)
                 $sql .= " AND slot = $slotid";
 
@@ -255,7 +257,7 @@ class DBManager
     {
 
         try {
-            $sql = "SELECT * FROM `B5CGM`.`tac_game` g join `B5CGM`.`tac_playeringame` p on g.id = p.gameid where p.playerid = $userid and g.status = 'LOBBY';";
+            $sql = "SELECT * FROM `tac_game` g join `tac_playeringame` p on g.id = p.gameid where p.playerid = $userid and g.status = 'LOBBY';";
 
             $result = $this->query($sql);
 
@@ -282,7 +284,7 @@ class DBManager
                 return false;
 
             //already in slot on other team?
-            $sql = "SELECT * FROM `B5CGM`.`tac_playeringame` WHERE gameid = $gameid AND teamid != " . $slot->team . " AND playerid = $userid";
+            $sql = "SELECT * FROM `tac_playeringame` WHERE gameid = $gameid AND teamid != " . $slot->team . " AND playerid = $userid";
             if ($this->found($sql)) {
                 $this->leaveSlot($userid, $gameid);
             }
@@ -356,7 +358,7 @@ class DBManager
         }
     }
 
-    public function createGame($gamename, $background, $slots, $userid, $gamespace, $rules = '{}', $description)
+    public function createGame($gamename, $background, $slots, $userid, $gamespace, $description, $rules = '{}')
     {
         $stmt = $this->connection->prepare("
             INSERT INTO 
@@ -415,11 +417,11 @@ class DBManager
 				if ($critical->forceModify){ //modification of critical that already exists in database - modifying turn end! (the only thing modifiable)
 					$turnend = $critical->turnend;
 					$critid = $critical->id;
-					$sql = "UPDATE `B5CGM`.`tac_critical` SET turnend = " . $turnend . " where id = " . $critid . "";
+					$sql = "UPDATE `tac_critical` SET turnend = " . $turnend . " where id = " . $critid . "";
 				} else if ( $critical->id < 1 ){ //actual new critical
 					//important to use $critical->turn: critical does NOT need to have turn equal to current! 
 					//this is importnat for criticals that need to have limited time window yet last longer than 1 turn (go out 1 turn after issuing - so issue must be later)
-					$sql = "INSERT INTO `B5CGM`.`tac_critical` VALUES(null, $gameid, " . $critical->shipid . ", " . $critical->systemid . ",'" . $critical->phpclass . "'," . $critical->turn . ", " . $critical->turnend . ",'" . $critical->param . "')";
+					$sql = "INSERT INTO `tac_critical` VALUES(null, $gameid, " . $critical->shipid . ", " . $critical->systemid . ",'" . $critical->phpclass . "'," . $critical->turn . ", " . $critical->turnend . ",'" . $critical->param . "')";
 				} else continue;
                 $this->update($sql);
             }
@@ -504,7 +506,7 @@ class DBManager
             if ($fire->type != "ballistic" && $phase == 1)
                 continue;
 
-            $sql = "INSERT INTO `B5CGM`.`tac_fireorder` VALUES (null, '" . $fire->type . "', " . $fire->shooterid . ", " . $fire->targetid . ", " . $fire->weaponid . ", " . $fire->calledid . ", " . $fire->turn . ", "
+            $sql = "INSERT INTO `tac_fireorder` VALUES (null, '" . $fire->type . "', " . $fire->shooterid . ", " . $fire->targetid . ", " . $fire->weaponid . ", " . $fire->calledid . ", " . $fire->turn . ", "
                 . $fire->firingMode . ", " . $fire->needed . ", " . $fire->rolled . ", $gameid, '" . $fire->notes . "', " . $fire->shotshit . ", " . $fire->shots . ", '" . $fire->pubnotes . "', 0, '" . $fire->x . "', '" . $fire->y . "', '" . $fire->damageclass . "', '" . $fire->resolutionOrder . "')";
 
             $this->update($sql);
@@ -522,7 +524,7 @@ class DBManager
                     continue;
 
                 //$id, $shipid, $systemid, $type, $turn, $amount
-                $sql = "INSERT INTO `B5CGM`.`tac_power` VALUES( null, " . $power->shipid . ", " . $gameid . ", " . $power->systemid . ", " . $power->type . ", " . $turn .
+                $sql = "INSERT INTO `tac_power` VALUES( null, " . $power->shipid . ", " . $gameid . ", " . $power->systemid . ", " . $power->type . ", " . $turn .
                     ", " . $power->amount . ")";
 
                 $this->update($sql);
@@ -643,7 +645,7 @@ class DBManager
                         $shooterid = $damage->shooterid; //additional field
                         $weaponid = $damage->weaponid; //additional field
                         //targetid = -1 if weapon is hex targeted!
-                        $sql1 = "SELECT * FROM `B5CGM`.`tac_fireorder` where gameid = $gameid and turn = $turn and shooterid = $shooterid and (targetid = $targetid or targetid = -1) and weaponid = $weaponid and shotshit >0";
+                        $sql1 = "SELECT * FROM `tac_fireorder` where gameid = $gameid and turn = $turn and shooterid = $shooterid and (targetid = $targetid or targetid = -1) and weaponid = $weaponid and shotshit >0";
                         $result = $this->query($sql1);
                         if ($result == null || sizeof($result) == 0){  //nothing, keep -1 as ID
                         }else{
@@ -654,7 +656,7 @@ class DBManager
                 }
 
                 //$id, $shipid, $gameid, $turn, $systemid, $damage, $armour, $shields;
-                $sql = "INSERT INTO `B5CGM`.`tac_damage` VALUES( null, ".$damage->shipid.", ".$gameid.", ".$damage->systemid.", ".$turn.", ".$damage->damage.
+                $sql = "INSERT INTO `tac_damage` VALUES( null, ".$damage->shipid.", ".$gameid.", ".$damage->systemid.", ".$turn.", ".$damage->damage.
                     ", ".$damage->armour. ", ".$damage->shields.", ".$fireID .", ".$des.", ".$undes.", '".$damage->pubnotes."', '".$damage->damageclass."')";
 
 
@@ -676,7 +678,7 @@ class DBManager
                 //$unmodified = $ship->unmodifiedIniative === null ? 'NULL' : $ship->unmodifiedIniative;
 				//I THINK unmodified ini should mean INI bonus...
 				$unmodified = $ship->unmodifiedIniative === null ? $ship->iniativebonus : $ship->unmodifiedIniative;				
-                $sql = "INSERT INTO `B5CGM`.`tac_iniative` VALUES($gameid, " . $ship->id . ", $turn, " . $ship->iniative . ", " . $unmodified .")";
+                $sql = "INSERT INTO `tac_iniative` VALUES($gameid, " . $ship->id . ", $turn, " . $ship->iniative . ", " . $unmodified .")";
                 $this->update($sql);
             }
         } catch (Exception $e) {
@@ -688,7 +690,7 @@ class DBManager
     public function updatePlayerStatus($gameid, $userid, $phase, $turn, $slots = null)
     {
         try {
-            $sql = "UPDATE `B5CGM`.`tac_playeringame` SET `lastturn` = $turn, `lastphase` = $phase, `lastactivity` = NOW() WHERE"
+            $sql = "UPDATE `tac_playeringame` SET `lastturn` = $turn, `lastphase` = $phase, `lastactivity` = NOW() WHERE"
                 . " gameid = $gameid AND playerid = $userid";
 
             if ($slots) {
@@ -709,7 +711,7 @@ class DBManager
     {
         try { 
 
-            $sql = "UPDATE `B5CGM`.`tac_playeringame`
+            $sql = "UPDATE `tac_playeringame`
                     SET `lastturn` = $turn,
                         `lastphase` = $phase,
                         `lastactivity` = NOW()
@@ -727,7 +729,7 @@ class DBManager
         public function updatePlayerStatusDeploy($gameid, $userid, $slot, $phase, $turn, $minDeploy)
     {
         try { 
-            $sql = "UPDATE `B5CGM`.`tac_playeringame`
+            $sql = "UPDATE `tac_playeringame`
                     SET `lastturn` = $turn,
                         `lastphase` = $phase,
                         `depavailable` = $minDeploy,
@@ -821,7 +823,7 @@ class DBManager
                 if ($entry->turn != $turn)
                     continue;
 
-                $sql = "INSERT INTO `B5CGM`.`tac_ew` VALUES (null, $gameid, " . $entry->shipid . ", $turn, '" . $entry->type . "', " . $entry->amount . ", " . $entry->targetid . ")";
+                $sql = "INSERT INTO `tac_ew` VALUES (null, $gameid, " . $entry->shipid . ", $turn, '" . $entry->type . "', " . $entry->amount . ", " . $entry->targetid . ")";
 
                 $this->insert($sql);
             }
@@ -1152,7 +1154,7 @@ class DBManager
 
     public function getTacGame($gameid, $playerid)
     {
-         $sql = "SELECT * FROM `B5CGM`.`tac_game` where id = $gameid";
+         $sql = "SELECT * FROM `tac_game` where id = $gameid";
     
 
         $games = array();
@@ -1898,7 +1900,7 @@ class DBManager
 
     public function submitSingleFireorder($gameid, $fireOrder)
     {
-            $sql = "INSERT INTO `B5CGM`.`tac_fireorder` VALUES (null, '" . $fireOrder->type . "', " . $fireOrder->shooterid . ", " . $fireOrder->targetid . ", " . $fireOrder->weaponid . ", " . $fireOrder->calledid . ", " . $fireOrder->turn . ", "
+            $sql = "INSERT INTO `tac_fireorder` VALUES (null, '" . $fireOrder->type . "', " . $fireOrder->shooterid . ", " . $fireOrder->targetid . ", " . $fireOrder->weaponid . ", " . $fireOrder->calledid . ", " . $fireOrder->turn . ", "
                 . $fireOrder->firingMode . ", " . $fireOrder->needed . ", " . $fireOrder->rolled . ", $gameid, '" . $fireOrder->notes . "', " . $fireOrder->shotshit . ", " . $fireOrder->shots . ", '" . $fireOrder->pubnotes . "', 0, '" . $fireOrder->x . "', '" . $fireOrder->y . "', '" . $fireOrder->damageclass . "', '" . $fireOrder->resolutionOrder . "')";
 
             $this->update($sql);

@@ -52,7 +52,7 @@ window.ShipTooltipFireMenu = function () {
     }
 
     function isFriendly() {//30 June 2024 - DK - Added for Ally targeting.
-        return gamedata.isMyShip(this.targetedShip);
+        return gamedata.isMyorMyTeamShip(this.targetedShip);
     }
 
     function notSelf() {//30 June 2024 - DK - Added for Ally targeting.

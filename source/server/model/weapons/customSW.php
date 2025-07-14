@@ -109,6 +109,7 @@ class SWFtrBallisticLauncher extends FighterMissileRack //this is generic launch
 	public $noPrimaryHits = true; //cannot hit PRIMARY from outer table
 	
 	protected $useDie = 2; //die used for base number of hits
+	public $maxpulses = 0;
 	
     
     public function setSystemDataWindow($turn){
@@ -321,6 +322,8 @@ class SWBallisticWeapon extends Torpedo{
     public $damageType = "Pulse"; //and this should remain!
     public $weaponClass = "Ballistic"; //and may be easily overridden
 	public $noPrimaryHits = true; //cannot hit PRIMARY from outer table
+	public $maxpulses = 0;  
+	
    
 	//animation for capital concussion missile - others need to change things
         public $animation = "torpedo";

@@ -478,7 +478,7 @@ window.weaponManager = {
 
                     if(ship.Huge > 0){ //Cannot Target larger terrain.
                         $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="losBlocked"> CANNOT TARGET</span></div>').appendTo(f);
-                    }else if (loSBlocked && !weapon.hasSpecialLaunchHexCalculation) {
+                    }else if (loSBlocked) {
                         // LOS is blocked - only display the blocked message
                         $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="losBlocked"> LINE OF SIGHT BLOCKED</span></div>').appendTo(f);
                     }else if (weapon.hextarget) {
@@ -1466,7 +1466,7 @@ window.weaponManager = {
                 loSBlocked = mathlib.checkLineOfSight(sPosShooter, sPosTarget, blockedLosHex);
             }
 
-            if(loSBlocked && !weapon.hasSpecialLaunchHexCalculation) continue;
+            if(loSBlocked) continue;
 
             if (shipManager.systems.isDestroyed(selectedShip, weapon) || !weaponManager.isLoaded(weapon)) {
                 debug && console.log("Weapon destroyed or not loaded");

@@ -701,7 +701,7 @@ window.gamedata = {
                 return false;
             }
 			
-			//We have one thurst-boosted weapon in Initial Orders Phase, let's put in a check for it and future - DK 26.11.24
+			//We have one thrust-boosted weapon in Initial Orders Phase, let's put in a check for it and future - DK 26.11.24
             shipNames = shipManager.movement.getShipsNegativeThrust();
 
             if (shipNames.length > 0) {
@@ -1176,7 +1176,7 @@ window.gamedata = {
             span.style.textAlign = "center";
             span.style.fontSize = "12px";
             span.innerHTML += "<p style='margin-top: 6px; margin-bottom: 6px; font-size: 12px'>" + ships[i].name;
-            span.innerHTML += "<p style='margin-top: 6px; margin-bottom: 6px; font-style: italic; font-weight: bold'>" + ships[i].shipClass;
+            span.innerHTML += "<p style='margin-top: 6px; margin-bottom: 6px; font-weight: bold; font-size: 11px'>" + ships[i].shipClass;
 
             var active = window.SimultaneousMovementRule.isActiveMovementShip(ships[i]);
             if (active !== null) {

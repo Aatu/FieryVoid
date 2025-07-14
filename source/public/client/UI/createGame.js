@@ -13,7 +13,7 @@ jQuery(function ($) {
     let allowSubmit = false;
 
     // Only set allowSubmit on real mouse or touch interaction
-    $("#createGameForm input[type='submit']").on("mousedown touchstart", function () {
+    $("#createGameForm button[type='submit']").on("mousedown touchstart", function () {
         allowSubmit = true;
     });
 
@@ -225,9 +225,10 @@ window.createGame = {
             ctx.restore(); // Restore to default state
         });
     
-        // Draw map border (blue rectangle)
-        ctx.strokeStyle = "#ffffff";
+        // Draw map border (rectangle)
+        ctx.strokeStyle = "#215a7a";
         ctx.lineWidth = 1;
+        ctx.globalAlpha = 0.8; // Semi-transparent        
         ctx.strokeRect(offsetX, offsetY, mapWidth * scale, mapHeight * scale); // Adjusted X offset
     },
 
@@ -562,7 +563,7 @@ doMovementCheck: function doMovementCheck(data) {
 
         $(".depx", slot).val(data.depx);
         $(".depy", slot).val(data.depy);
-        $(".deptype", slot).val(data.deptype);
+        $(".deptype", slot).val("box"); //Option removed so just pass "box" as default - DK
         $(".depwidth", slot).val(data.depwidth);
         $(".depheight", slot).val(data.depheight);
         $(".depavailable", slot).val(data.depavailable);
@@ -578,14 +579,14 @@ doMovementCheck: function doMovementCheck(data) {
 				data.depy = $("#team1 .depy").val();
 				data.depwidth = $("#team1 .depwidth").val();
 				data.depheight = $("#team1 .depheight").val();
-				data.deptype = $(".deptype").val();
+				data.deptype = "box";
 				data.depavailable = 1;
 			} else { //data for team 2
 				data.depx = $("#team2 .depx").val();
 				data.depy = $("#team2 .depy").val();
 				data.depwidth = $("#team2 .depwidth").val();
 				data.depheight = $("#team2 .depheight").val();
-				data.deptype = $(".deptype").val();
+				data.deptype = "box";
 				data.depavailable = 1;
 			}
 		
@@ -622,10 +623,32 @@ doMovementCheck: function doMovementCheck(data) {
         slot.remove();
     },
 
+    getScenarioDescriptionFromFields: function getScenarioDescriptionFromFields() {
+    const fields = [
+        { label: 'REQUIREMENTS', id: 'req' },
+        { label: 'CUSTOM FACTIONS / UNITS', id: 'customfactions' },
+        //{ label: 'CUSTOM UNITS IN OFFICIAL FACTIONS', id: 'customunits' },
+        { label: 'ENHANCEMENTS', id: 'enhancements' },
+        { label: 'EXPECTED POWER LEVEL', id: 'tier' },
+        { label: 'FORBIDDEN FACTIONS', id: 'forbidden' },
+        { label: 'MAP BORDERS', id: 'borders' },
+        { label: 'CALLED SHOTS', id: 'called' },
+        { label: 'VICTORY CONDITIONS', id: 'victory' },
+        { label: 'ADDITIONAL INFO', id: 'other' }
+    ];
+
+    let result = '*** SCENARIO DESCRIPTION ***\n';
+    for (const field of fields) {
+        const value = document.getElementById(field.id).value.trim();
+        result += `${field.label}: ${value}\n`;
+    }
+    return result;
+    },
+
     setData: function setData() {
         var gamename = $("#gamename").val();
         var background = $("#mapselect").val();
-        var description = $("#description").val();
+        var description = createGame.getScenarioDescriptionFromFields();
         var gamespace = "-1x-1";
         var flight = "";
 

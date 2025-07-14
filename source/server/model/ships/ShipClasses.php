@@ -7,6 +7,8 @@ class BaseShip {
     public $imagePath, $shipClass;
     public $systems = array();
     public $EW = array();
+    public array $structures = [];
+    public array $locations = [];
     public $fighters = array();
 	public $customFighter = array(); //array for fighters with special hangar requirements - see Balvarix/Rutarian for usage
     public $hitChart = array();
@@ -33,7 +35,8 @@ class BaseShip {
 	public $pointCostEnh2 = 0; //points spent on non-enhancements - separation actuallly exists only at fleet selection, afterwards it will be always 0 with points added to $pointCostEnh
 	public $combatValue = 100; //current combat value, as percentage of original
     public $faction = null;
-	public $factionAge = 1; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial 
+	public $factionAge = 1; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
+    public $isd = 0; 
     public $slot;
     public $unavailable = false;
     public $minesweeperbonus = 0;
@@ -97,7 +100,7 @@ class BaseShip {
 	public $unitSize = 1; //typically ships are berthed in dedicated space, 1 per slot - but other arrangements are certainly possible.
 	
 	protected $adaptiveArmorController = null; //Adaptive Armor Controller object (if present)
-	public $IFFSystem = false;	    
+	public $IFFSystem = false;   
 	    
         function __construct($id, $userid, $name, $slot){
             $this->id = (int)$id;
