@@ -56,24 +56,38 @@ include_once 'global.php';
 		<title>FieryVoid</title>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 		<link href="styles/base.css" rel="stylesheet" type="text/css">
+        <link href="styles/gamesNew.css" rel="stylesheet" type="text/css">        
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
 <!--		<script src="client/helper.js"></script>-->
 	</head>
-	<body>
+    <body  style="background: url('./img/webBackgrounds/lp5.jpg') no-repeat center center fixed; background-size: cover;">
 <!--        <div class="helphide" style="float:right"> <div id="helphideimg"></div>
         </div>-->
-		<div class="panel" style="width:500px;margin:auto;">
-			<form method="post">
+        <img src="img/logo.png">
+        
+		<div class="news-panel" style="width:500px; margin:auto; margin-top: 50px; padding: 15px 15px 15px 15px;">
+			<form style="margin-right: 0px;" method="post">
                 <div class="error"><span><?php print($error); ?></span></div>
 				<table>
-				<tr><td><label>Secret phrase:<br>(If you don't know it, click on these links to ask in our <b><a href="https://discord.gg/Pmmdfz4NbC"><u>Discord</u></a></b> or <b><a href="https://www.facebook.com/groups/fieryvoid"><u>Facebook</u></a></b> groups!)</label></td><td><input type="text" name="secret"></td></tr>
-				<tr><td><label>Username:</label></td><td><input type="text" name="user"></input></td></tr>
-				<tr><td><label>Password:</label></td><td><input type="password" name="pass"></input></td></tr>
-                <tr><td><label>Retype password:</label></td><td><input type="password" name="pass2"></input></td></tr>
+				<tr><td><label style="font-weight: bold;">
+                        Secret phrase:
+                        <br><span style="font-weight: normal;">
+                            (If not sure, ask in our 
+                            <b><a style="color: #8bcaf2" href="https://discord.gg/Pmmdfz4NbC"><u>Discord</u></a></b> or 
+                            <b><a style="color: #8bcaf2" href="https://www.facebook.com/groups/fieryvoid"><u>Facebook</u></a></b> groups)
+                        </span>
+                        </label>
+                    </td><td><input style="text-align: right; margin-bottom: 15px; margin-left: 30px;" type="text" name="secret"></td>
+                </tr>
+				<tr><td><label style="font-weight: bold;">Username:</label></td><td><input style="text-align: right; margin-bottom: 0px; margin-left: 30px;" type="text" name="user"></input></td></tr>
+				<tr><td><label style="font-weight: bold;">Password:</label></td><td><input style="text-align: right; margin-bottom: 0px; margin-left: 30px;" type="password" name="pass"></input></td></tr>
+                <tr><td><label style="font-weight: bold;">Re-type password:</label></td><td><input style="text-align: right; margin-bottom: 0px; margin-left: 30px;" type="password" name="pass2"></input></td></tr>
 				</table>
-				<div><input type="submit" value="Register"></submit></div>
-				
+                <div style="text-align: right;">
+                    <input type="submit" class="btn btn-primary" style="margin-top: 10px; margin-bottom: 0px; margin-right: 5px;" value="Register">
+                </div>                		
 			</form>
+
 		</div>
 
 <!--        <div id="globalhelp" class="helppanel">
