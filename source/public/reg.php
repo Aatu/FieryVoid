@@ -24,11 +24,11 @@ if (isset($_POST["user"]) && isset($_POST["pass"]) && isset($_POST["pass2"])){
     // global $secret_phrase;
     
     if ($pass != $pass2 || $pass == ""){
-        $error = "Both passwords must be set and must match!";
+        $error = "<span style='color: red; margin-left: 3px'>Both passwords must be set and must match!</span>";
     // }else if($secret != $secret_phrase){
     //     $error = "Secret phrase is wrong";
     }else if ($user == ""){
-        $error = "Username must be set!";
+        $error = "<span style='color: red; margin-left: 3px'>Username must be set!</span>";
     }else{
         $result = Manager::registerPlayer($_POST["user"], $_POST["pass"]);
 
@@ -43,7 +43,7 @@ if (isset($_POST["user"]) && isset($_POST["pass"]) && isset($_POST["pass2"])){
         }else if ($result === null){
             $error = "An internal server error occurred!";
         }else{
-            $error = "Username is already taken.";
+            $error = "<span style='color: red; margin-left: 3px'>That username is already taken!</span>";
         }
     }
 }
