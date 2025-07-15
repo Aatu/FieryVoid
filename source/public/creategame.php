@@ -329,7 +329,7 @@ print("<option value=\"".$i."\" ".$selected." >".$i."</option>");
         </div>
     </section>
 
-        <div id="globalchat" class="panel large create" style="height:150px;">
+        <div id="globalchat" class="panel large create" style="height:250px;">
         <?php 
             $chatgameid = 0;
             $chatelement = "#globalchat";

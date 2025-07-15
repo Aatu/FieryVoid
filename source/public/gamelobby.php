@@ -577,7 +577,7 @@ if ($asteroids == false && $moons == false) {
         </div>
     </div>
 
-        <div id="globalchat" class="panel large lobby" style="height:150px;">
+        <div id="globalchat" class="panel large lobby" style="height:250px;">
         <?php 
             $chatgameid = 0;
             $chatelement = "#globalchat";

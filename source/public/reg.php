@@ -65,7 +65,7 @@ if (isset($_POST["user"]) && isset($_POST["pass"]) && isset($_POST["pass2"])){
         <img src="img/logo.png">
         
 		<div class="reg-panel">
-            <div class="resources" style="font-weight: bold;">Register your account below:</div>
+            <div class="resources" style="font-weight: bold;  font-size: 1.1em;">Register your account below:</div>
 
 			<form style="margin-right: 0px;" method="post">
                 <div class="error"><span><?php print($error); ?></span></div>
@@ -84,9 +84,9 @@ if (isset($_POST["user"]) && isset($_POST["pass"]) && isset($_POST["pass2"])){
                 </tr>
                 -->
 
-				<tr><td><label style="font-weight: normal;">Username:</label></td><td><input style="text-align: right; margin-bottom: 0px; margin-left: 55px;" type="text" name="user"></input></td></tr>
-				<tr><td><label style="font-weight: normal;">Password:</label></td><td><input style="text-align: right; margin-bottom: 0px; margin-left: 55px;" type="password" name="pass"></input></td></tr>
-                <tr><td><label style="font-weight: normal;">Re-type password:</label></td><td><input style="text-align: right; margin-bottom: 0px; margin-left: 55px;" type="password" name="pass2"></input></td></tr>
+				<tr><td><label style="font-weight: normal;">Username:</label></td><td><input style="text-align: left; margin-bottom: 0px; margin-left: 60px;" type="text" name="user"></input></td></tr>
+				<tr><td><label style="font-weight: normal;">Password:</label></td><td><input style="text-align: left; margin-bottom: 0px; margin-left: 60px;" type="password" name="pass"></input></td></tr>
+                <tr><td><label style="font-weight: normal;">Re-type password:</label></td><td><input style="text-align: left; margin-bottom: 0px; margin-left: 60px;" type="password" name="pass2"></input></td></tr>
 				</table>
                 <div style="text-align: right;">
                     <input type="submit" class="btn btn-primary" style="margin-top: 10px; margin-bottom: 0px; margin-right: 5px;" value="Register">

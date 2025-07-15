@@ -111,7 +111,7 @@ if (isset($_SESSION["user"])) {
     </div>
   </section>
 
-  <div id="globalchat" class="chat-panel" style="height:150px;">
+  <div id="globalchat" class="chat-panel" style="height:250px;">
     <?php
     $chatgameid = 0;
     $chatelement = "#globalchat";

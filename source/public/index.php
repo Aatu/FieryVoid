@@ -35,12 +35,12 @@
 <!--        <div class="helphide" style="float:right"> <div id="helphideimg"></div>
         </div>-->
 		<div class="reg-panel">
-			<a style="color: #8bcaf2" href="./reg.php"><b><u>Register a new account</u></b></a>
-			<span style="font-weight: bold;"> or log in below:</span>
+			<a style="color: #8bcaf2; font-size: 1.1em;" href="./reg.php"><b><u>Register new account</u></b></a>
+			<span style="font-weight: bold; font-size: 1.1em;"> or log in below:</span>
 			<form method="post">
-				<table style="text-align: center; margin-left: 30px; margin-top: 10px; ">
-				<tr><td><label style="margin-left: 30px; margin-right: 20px; font-weight: bold;">Username:</label></td><td><input style="text-align: right;" type="text" name="user"></input></td></tr>
-				<tr><td><label style="margin-left: 30px; margin-right: 20px; font-weight: bold;">Password:</label></td><td><input style="text-align: right;" type="password" name="pass"></input></td></tr>
+				<table style="text-align: center; margin-left: 30px; margin-top: 5px; ">
+				<tr><td><label style="margin-left: 30px; margin-right: 20px; font-weight: bold;">Username:</label></td><td><input style="text-align: left;" type="text" name="user"></input></td></tr>
+				<tr><td><label style="margin-left: 30px; margin-right: 20px; font-weight: bold;">Password:</label></td><td><input style="text-align: left;" type="password" name="pass"></input></td></tr>
 				</table>
                 <div style="text-align: right;">
                     <input type="submit" class="btn btn-primary" style="margin-top: 10px; margin-bottom: 0px; margin-right: 25px;" value="Login">
