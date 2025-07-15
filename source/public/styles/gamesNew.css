@@ -34,6 +34,17 @@ a:hover { text-decoration: underline; }
   border: 1px solid #215a7a;
 }
 
+.reg-panel {
+  background: rgba(23, 39, 54, 0.9);
+  border-radius: 5px;
+  border: 2px solid #215a7a;
+  width:350px; 
+  margin:auto; 
+  margin-top: 50px; 
+  padding: 15px 15px 15px 15px;
+}
+
+
 .games-panel{
   background: rgba(23, 39, 54, 0.9);
   padding: 5px 15px 15px 15px;

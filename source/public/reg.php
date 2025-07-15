@@ -12,42 +12,41 @@ include_once 'global.php';
 	}
 */	
 	
-    $error = "";
-	if (isset($_POST["user"]) && isset($_POST["pass"]) && isset($_POST["pass2"]) && isset($_POST["secret"])){
+$error = "";
+// Secret phrase requirement commented out:
+if (isset($_POST["user"]) && isset($_POST["pass"]) && isset($_POST["pass2"])){
+// if (isset($_POST["user"]) && isset($_POST["pass"]) && isset($_POST["pass2"]) && isset($_POST["secret"])){
 		
-        $user = trim($_POST["user"]);
-        $pass = trim($_POST["pass"]);
-        $pass2 = $_POST["pass2"];
-        $secret = $_POST["secret"];
-        global $secret_phrase;
-        
-        if ($pass != $pass2 || $pass == ""){
-            $error = "Both passwords must be set and must match!";
-        }else if($secret != $secret_phrase){
-            $error = "Secret phrase is wrong";
-        }else if ($user == ""){
-            $error = "Username must be set!";
-        }else{
-            
-            $result = Manager::registerPlayer($_POST["user"], $_POST["pass"]);
+    $user = trim($_POST["user"]);
+    $pass = trim($_POST["pass"]);
+    $pass2 = $_POST["pass2"];
+    // $secret = $_POST["secret"];
+    // global $secret_phrase;
+    
+    if ($pass != $pass2 || $pass == ""){
+        $error = "Both passwords must be set and must match!";
+    // }else if($secret != $secret_phrase){
+    //     $error = "Secret phrase is wrong";
+    }else if ($user == ""){
+        $error = "Username must be set!";
+    }else{
+        $result = Manager::registerPlayer($_POST["user"], $_POST["pass"]);
 
-            if ($result === true){
-                $userid = Manager::authenticatePlayer($_POST["user"], $_POST["pass"]);
-		
-                if ($userid != false){
-                    $_SESSION["user"] = $userid['id'];
-                    $_SESSION["access"] = $userid['access'];
-                    header('Location: games.php');
-
-                }
-            }else if ($result === null){
-                $error = "An internal server error occurred!";
-            }else{
-                $error = "Username is already taken.";
+        if ($result === true){
+            $userid = Manager::authenticatePlayer($_POST["user"], $_POST["pass"]);
+	
+            if ($userid != false){
+                $_SESSION["user"] = $userid['id'];
+                $_SESSION["access"] = $userid['access'];
+                header('Location: games.php');
             }
+        }else if ($result === null){
+            $error = "An internal server error occurred!";
+        }else{
+            $error = "Username is already taken.";
         }
-		
-	}
+    }
+}
 ?>
 
 <!DOCTYPE HTML>
@@ -65,10 +64,14 @@ include_once 'global.php';
         </div>-->
         <img src="img/logo.png">
         
-		<div class="news-panel" style="width:500px; margin:auto; margin-top: 50px; padding: 15px 15px 15px 15px;">
+		<div class="reg-panel">
+            <div class="resources" style="font-weight: bold;">Register your account below:</div>
+
 			<form style="margin-right: 0px;" method="post">
                 <div class="error"><span><?php print($error); ?></span></div>
 				<table>
+				
+                <!-- Secret phrase field commented out:
 				<tr><td><label style="font-weight: bold;">
                         Secret phrase:
                         <br><span style="font-weight: normal;">
@@ -79,9 +82,11 @@ include_once 'global.php';
                         </label>
                     </td><td><input style="text-align: right; margin-bottom: 15px; margin-left: 30px;" type="text" name="secret"></td>
                 </tr>
-				<tr><td><label style="font-weight: bold;">Username:</label></td><td><input style="text-align: right; margin-bottom: 0px; margin-left: 30px;" type="text" name="user"></input></td></tr>
-				<tr><td><label style="font-weight: bold;">Password:</label></td><td><input style="text-align: right; margin-bottom: 0px; margin-left: 30px;" type="password" name="pass"></input></td></tr>
-                <tr><td><label style="font-weight: bold;">Re-type password:</label></td><td><input style="text-align: right; margin-bottom: 0px; margin-left: 30px;" type="password" name="pass2"></input></td></tr>
+                -->
+
+				<tr><td><label style="font-weight: normal;">Username:</label></td><td><input style="text-align: right; margin-bottom: 0px; margin-left: 55px;" type="text" name="user"></input></td></tr>
+				<tr><td><label style="font-weight: normal;">Password:</label></td><td><input style="text-align: right; margin-bottom: 0px; margin-left: 55px;" type="password" name="pass"></input></td></tr>
+                <tr><td><label style="font-weight: normal;">Re-type password:</label></td><td><input style="text-align: right; margin-bottom: 0px; margin-left: 55px;" type="password" name="pass2"></input></td></tr>
 				</table>
                 <div style="text-align: right;">
                     <input type="submit" class="btn btn-primary" style="margin-top: 10px; margin-bottom: 0px; margin-right: 5px;" value="Register">
