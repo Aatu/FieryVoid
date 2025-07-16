@@ -379,7 +379,7 @@ window.gamedata = {
 		//block if player already has confirmed fleet (in any slot)
 		for (var i in gamedata.slots)  { //check all slots
 			var checkSlot = gamedata.slots[i];
-			if (checkSlot.lastphase == "-2") { //this slot has ready fleet
+			if (checkSlot.lastphase >= "-2") { //this slot has ready fleet
 				var player = playerManager.getPlayerInSlot(checkSlot);
 				if (player.id == gamedata.thisplayer){
 					window.confirm.error("You have already confirmed Your fleet for this game!", function () {});
@@ -1857,10 +1857,14 @@ applyCustomShipFilter: function () {
                 $(".playername", slotElement).html(player.name);
 				
 				//Only show select button if it's a viable option
-				if(slot.playerid == gamedata.thisPlayer && slot.playerid !== gamedata.selectedSlot) $(".selectslot", slotElement).show();
-				if(slot.playerid !== gamedata.thisplayer) $(".selectslot", slotElement).hide();
+				if(slot.playerid == gamedata.thisplayer && slot.slot !== gamedata.selectedSlot) $(".selectslot", slotElement).show();
 
-                if (slot.lastphase == "-2") {
+				if (slot.playerid == gamedata.thisplayer && slot.slot == gamedata.selectedSlot || 
+					slot.playerid !== gamedata.thisplayer)
+					$(".selectslot", slotElement).hide();				
+				//if() $(".selectslot", slotElement).hide();
+
+                if (slot.lastphase >= "-2") {
                     slotElement.addClass("ready");
                 }
 
@@ -1904,7 +1908,7 @@ applyCustomShipFilter: function () {
 	//block if player already has confirmed fleet (in any slot)
 	for (var i in gamedata.slots)  { //check all slots
 		var checkSlot = gamedata.slots[i];
-		if (checkSlot.lastphase == "-2") { //this slot has ready fleet
+		if (checkSlot.lastphase >= "-2") { //this slot has ready fleet
 			var player = playerManager.getPlayerInSlot(checkSlot);
 			if (player.id == gamedata.thisplayer && checkSlot == slot){
 				window.confirm.error("You have already confirmed Your fleet for this game!", function () {});
@@ -1921,7 +1925,7 @@ applyCustomShipFilter: function () {
         var slotid = slot.data("slotid");
 	    
 		//block if player already has confirmed fleet (in this slot)
-		if (slot.lastphase == "-2") { 
+		if (slot.lastphase >= "-2") { 
 			window.confirm.error("You have already confirmed Your fleet for this game!", function () {});
 			return;
 		}
@@ -1954,7 +1958,7 @@ applyCustomShipFilter: function () {
 
         var slotid = gamedata.selectedSlot;
         var selectedSlot = playerManager.getSlotById(slotid);
-        if (selectedSlot.lastphase == "-2") {
+        if (selectedSlot.lastphase >= "-2") {
             window.confirm.error("This slot has already bought a fleet!", function () {});
             return false;
         }
@@ -2084,7 +2088,7 @@ applyCustomShipFilter: function () {
     copyShip: function copyShip(copiedShip) {
         var slotid = gamedata.selectedSlot;
         var selectedSlot = playerManager.getSlotById(slotid);
-        if (selectedSlot.lastphase == "-2") {
+        if (selectedSlot.lastphase >= "-2") {
             window.confirm.error("You have already readied your fleet!", function () {});
             return false;
         }
@@ -2214,7 +2218,7 @@ applyCustomShipFilter: function () {
     editShip: function editShip(ship) {
         var slotid = gamedata.selectedSlot;
         var selectedSlot = playerManager.getSlotById(slotid);
-        if (selectedSlot.lastphase == "-2") {
+        if (selectedSlot.lastphase >= "-2") {
             window.confirm.error("You have already readied your fleet!", function () {});
             return false;
         }
@@ -2390,7 +2394,7 @@ applyCustomShipFilter: function () {
 
 		var slotid = gamedata.selectedSlot;
         var selectedSlot = playerManager.getSlotById(slotid);
-        if (selectedSlot.lastphase == "-2") {
+        if (selectedSlot.lastphase >= "-2") {
 			window.confirm.error("You have already confirmed your fleet for this game!", function () {});
 			return;
 		}					
@@ -2413,7 +2417,7 @@ applyCustomShipFilter: function () {
 	    }
 	    // Pass the submission function as a callback, not invoke it immediately
 	    confirm.confirm("Are you sure you wish to ready your fleet?", function () {
-			selectedSlot.lastphase == -2;			
+			selectedSlot.lastphase = -2; //Apparently this makes 'READY' appear in slot.			
 	        ajaxInterface.submitGamedata();
 	    });
 	},
@@ -2430,13 +2434,22 @@ applyCustomShipFilter: function () {
         if (slot.playerid == gamedata.thisplayer) gamedata.selectSlot(slot);
     },
 
-    selectSlot: function selectSlot(slot) {
-        $(".slot").removeClass("selected");
+	selectSlot: function selectSlot(slot) {
+		// Find previously selected slot and re-show its selectslot element
+		var previous = $(".slot.selected");
+		if (previous.length) {
+			previous.removeClass("selected");
+			$(".selectslot", previous).show();  // Immediately show the select button back
+		}
 
-        $(".slot.slotid_" + slot.slot).addClass("selected");
-        gamedata.selectedSlot = slot.slot;
-        this.constructFleetList();
-    },
+		// Select the new slot and hide its selectslot element
+		var current = $(".slot.slotid_" + slot.slot);
+		current.addClass("selected");
+		$(".selectslot", current).hide(); // Hide the select button for the selected slot
+
+		gamedata.selectedSlot = slot.slot;
+		this.constructFleetList();
+	},
 
     onShipContextMenu: function onShipContextMenu(phpclass, faction, id, fleetList) {
 		var ship;
