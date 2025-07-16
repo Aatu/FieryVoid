@@ -451,14 +451,17 @@ handleMouseWheelFighter: function handleMouseWheelFighter(e) {
 
         var slotid = gamedata.selectedSlot;
         var slot = playerManager.getSlotById(slotid);
-        var deployTurn = Math.max(1, slot.depavailable); 
+        //var deployTurn = Math.max(1, slot.depavailable); 
 
-		if(enhIsOption && enhID != 'DEPLOY') enhName = " <span style='color:rgb(224, 185, 57) ;'>(OPTION)</span> " + enhName; //add (OPTION) at the beginning of name of options (to differentiate them from enhancements)
-        if(enhIsOption && enhID == 'DEPLOY'){
+        //Add (OPTION) at the beginning of name of options (to differentiate them from enhancements)
+        if(enhIsOption) enhName = " <span style='color:rgb(224, 185, 57) ;'>(OPTION)</span> " + enhName; 
+		//if(enhIsOption && enhID != 'DEPLOY') enhName = " <span style='color:rgb(224, 185, 57) ;'>(OPTION)</span> " + enhName;
+
+        /*if(enhIsOption && enhID == 'DEPLOY'){
             selectAmountItem.html(deployTurn);
             selectAmountItem.data('min', deployTurn);
             enhName = " <span style='color:rgb(95, 206, 95);' >(DEPLOYMENT)</span> " + enhName;
-        } 
+        } */
 
         const ammoTypes = ['(HEAVY AMMO)', '(MEDIUM AMMO)', '(LIGHT AMMO)', '(AMMO)'];
         for (const type of ammoTypes) {
@@ -470,7 +473,7 @@ handleMouseWheelFighter: function handleMouseWheelFighter(e) {
         }    
 
         var nameExpanded = enhName;
-        if(enhID != 'DEPLOY'){
+        //if(enhID != 'DEPLOY'){
             nameExpanded = nameExpanded + ' {';
 			if(enhLimit>1) nameExpanded += 'up to ' + enhLimit + ' levels, ';
 			nameExpanded += enhPrice + 'PV ';
@@ -479,7 +482,7 @@ handleMouseWheelFighter: function handleMouseWheelFighter(e) {
                 nameExpanded = nameExpanded + ' plus ' + enhPriceStep + 'PV per level';		
             }
             nameExpanded = nameExpanded + ')';
-        }    
+        //}    
             $(".selectText", item).html(nameExpanded);
             $(item).show();
 
@@ -745,14 +748,18 @@ handleInputChangeEdit: function handleInputChangeEdit(e) {
 
         var slotid = gamedata.selectedSlot;
         var slot = playerManager.getSlotById(slotid);
-        var deployTurn = Math.max(1, slot.depavailable);          
+        //var deployTurn = Math.max(1, slot.depavailable);          
 
-		if(enhIsOption && enhID != 'DEPLOY') enhName = " <span style='color:rgb(224, 185, 57) ;'>(OPTION)</span> " + enhName; //add (OPTION) at the beginning of name of options (to differentiate them from enhancements)
+        //add (OPTION) at the beginning of name of options (to differentiate them from enhancements)
+        if(enhIsOption) enhName = " <span style='color:rgb(224, 185, 57) ;'>(OPTION)</span> " + enhName; 
+		//if(enhIsOption && enhID != 'DEPLOY') enhName = " <span style='color:rgb(224, 185, 57) ;'>(OPTION)</span> " + enhName;
+
+        /*
         if(enhIsOption && enhID == 'DEPLOY'){
             if(enhCount == 0) selectAmountItem.html(deployTurn);
             selectAmountItem.data('min', deployTurn);
             enhName = " <span style='color:rgb(95, 206, 95);' >(DEPLOYMENT)</span> " + enhName;
-        } 
+        } */
 
         const ammoTypes = ['(HEAVY AMMO)', '(MEDIUM AMMO)', '(LIGHT AMMO)', '(AMMO)'];
         for (const type of ammoTypes) {
@@ -764,7 +771,7 @@ handleInputChangeEdit: function handleInputChangeEdit(e) {
         }       
                 
         var nameExpanded = enhName;
-        if(enhID != 'DEPLOY'){
+        //if(enhID != 'DEPLOY'){
             nameExpanded = nameExpanded + ' {';
 			if(enhLimit>1) nameExpanded += 'up to ' + enhLimit + ' levels, ';
 			nameExpanded += enhPrice + 'PV ';
@@ -773,7 +780,7 @@ handleInputChangeEdit: function handleInputChangeEdit(e) {
                 nameExpanded = nameExpanded + ' plus ' + enhPriceStep + 'PV per level';		
             }
             nameExpanded = nameExpanded + ')';
-        }    
+        //}    
 
             $(".selectText", item).html(nameExpanded);
             $(item).show();
