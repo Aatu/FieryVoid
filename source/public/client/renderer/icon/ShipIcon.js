@@ -287,11 +287,17 @@ window.ShipIcon = function () {
 
         var lastMovement = null;
 
-        movements.filter(function (movement) {
+        /*movements.filter(function (movement) { //This seemed to cause issues when I added Deployment Zones outside Turn 1 - DK
             return movement.type !== 'start';
         }).filter(function (movement) {
             return movement.commit;
-        }).forEach(function (movement) {
+        }).forEach(function (movement) { */
+
+        //Replacement code below
+        Object.values(movements)
+            .filter(movement => movement.type !== 'start')
+            .filter(movement => movement.commit)
+            .forEach(movement => {
 
             if (lastMovement && movement.turn !== lastMovement.turn) {
 
