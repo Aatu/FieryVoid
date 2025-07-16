@@ -46,7 +46,7 @@ window.BallisticIconContainer = function () {
 
         generateBallisticLines.call(this);
         generateTerrainHexes.call(this, gamedata);
-        generateReinforcementHexes.call(this, gamedata);
+        //generateReinforcementHexes.call(this, gamedata);
     };
 
     function generateBallisticLines() {
@@ -98,9 +98,10 @@ window.BallisticIconContainer = function () {
         });
     }
 
+	/*
     function generateReinforcementHexes(gamedata) {
         gamedata.ships
-            .filter(ship => shipManager.getTurnDeployed(ship) > gamedata.turn)
+            .filter(ship => shipManager.getTurnDeployedIcon(ship) > gamedata.turn)
             .filter(ship => gamedata.isMyorMyTeamShip(ship))
             .forEach(ship => {
                 const pos = shipManager.getShipPosition(ship);
@@ -121,7 +122,7 @@ window.BallisticIconContainer = function () {
                 });
             });
     }
-
+	*/
 
     function createOrUpdateBallistic(ballistic, iconContainer, turn, replay = false) {
         const icon = getBallisticIcon.call(this, ballistic.id);
