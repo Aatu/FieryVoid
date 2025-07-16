@@ -276,6 +276,9 @@ class Manager{
                     return null;
                 //print(var_dump($gamedata));
                 $gamedata->prepareForPlayer();
+                //Line below skips deployment Phase on Turn 1 for late-deploying slots - DK                
+                if($gamedata->turn == 1 && $gamedata->phase == -1) Manager::updateLateDeployments($gamedata);  
+
             }else{
                 return null;
             }
@@ -403,7 +406,7 @@ class Manager{
             //print(var_dump($ships));
 
             if ($phase instanceof BuyingGamePhase){
-                $phase->process($gdS, self::$dbManager, $ships);
+                $phase->process($gdS, self::$dbManager, $ships, $slotid); // slotid passed here
             } else if ($phase instanceof DeploymentGamePhase){
                 $phase->process($gdS, self::$dbManager, $ships);
             } else if ($phase instanceof InitialOrdersGamePhase){
@@ -500,16 +503,13 @@ class Manager{
         try{
            if (!self::$dbManager->checkIfPhaseReady($gameid))
                 return;
-		
+            
             if (!self::$dbManager->getGameSubmitLock($gameid))
             {
                 //Debug::log("Advance gamestate, Did not get lock. playerid: $playerid");
                 return;
             }
-
-
-
-            
+           
             $starttime = time();
             
             //Debug("GAME: $gameid Starting to advance gamedata. playerid: $playerid");
@@ -527,7 +527,7 @@ class Manager{
 
                     if ($phase instanceof BuyingGamePhase){
                         $phase->advance($gamedata, self::$dbManager);
-                        self::changeTurn($gamedata);
+                        self::changeTurn($gamedata);                                            
                     } else if ($phase instanceof DeploymentGamePhase){
                         $phase->advance($gamedata, self::$dbManager);
                     } else if ($phase instanceof InitialOrdersGamePhase){
@@ -577,18 +577,37 @@ class Manager{
             throw $e;
         }
     }
-       
+  
+
+    //New function called in Manager::getTacGamedata() to search for slots that skip Deployment on Turn 1 - DK July 2025 
+    public static function updateLateDeployments($gamedata){
+        foreach($gamedata->slots as $slot){    
+            if($slot->depavailable > 1){
+                $depTurn = $gamedata->getMinTurnDeployedSlot($slot->slot, $slot->depavailable);
+                if($depTurn > 1){ //Bases and Terrain will need to deploy on Turn 1 still
+                    //Set lastphase, and lastTurn for slot to intial phase on next turn.                
+                    self::$dbManager->updatePlayerStatusSlot($gamedata->id, $slot->playerid, $slot->slot, -1, 1);
+                }        
+            }    
+        }           
+    }    
+
 
     private static function changeTurn($gamedata){
     
         $gamedata->setTurn( $gamedata->turn+1 );
+        
+        /* //Old method which only create Deployment Phases on Turn 1.
         if ($gamedata->turn === 1)
         {
             $gamedata->setPhase(-1); 
         }else{
             $gamedata->setPhase(1); 
         }
-        
+        */
+        //Now we always try and make a Deployment Phase, but slots will be set to skip it in FireGamePhase if they are not are scheduled to deploy.        
+        $gamedata->setPhase(-1); 
+
         $gamedata->setActiveship(-1);
 
         if (($gamedata->turn > 1 && $gamedata->isFinished()) || ($gamedata->status === "SURRENDERED")){
