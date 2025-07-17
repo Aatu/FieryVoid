@@ -55,7 +55,7 @@ if (isset($_SESSION["user"])) {
 
 <div class="resources">
   <h3>Get Started</h3>
-  <a href="files/Fiery_Void_-_How_to_Play.docx" target="_blank" rel="noopener noreferrer">Starter Guide</a> | 
+  <a href="./howtoplay.php" target="_blank" rel="noopener noreferrer">Starter Guide</a> | 
   <a href="https://www.youtube.com/playlist?list=PLTGKagm5KkMxB8oKBiIUeoBQTRYz2z0-3" target="_blank" rel="noopener noreferrer">Video Tutorials</a> | 
   <a href="https://discord.gg/4jXarWusp4" target="_blank" rel="noopener noreferrer">Discord</a> | 
   <a href="https://www.facebook.com/groups/fieryvoid" target="_blank" rel="noopener noreferrer">Facebook</a>
