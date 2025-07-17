@@ -1,3 +1,6 @@
+@import url('https://fonts.googleapis.com/css2?family=Audiowide&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bruno+Ace+SC&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Orbitron&display=swap');
 /* Reset & Typography */
 * { 
   font-family: Arial;  
@@ -44,6 +47,26 @@ a:hover { text-decoration: underline; }
   padding: 15px 15px 10px 15px;
 }
 
+.faq-panel {
+  background: rgba(23, 39, 54, 0.9);
+  border-radius: 5px;
+  border: 2px solid #215a7a;
+  width:350px; 
+  margin:auto; 
+  margin-top: 50px; 
+  padding: 15px 15px 10px 15px;
+  width:1200px;
+}
+
+.faq-panel h2 { font-family: "Bruno Ace SC", sans-serif; font-size: 20px; margin-bottom: 0px; margin-top: 25px; color: #8bcaf2}
+.faq-panel h3 { font-family: "Orbitron", sans-serif; margin-bottom: 15px; border-bottom: 2px solid #215a7a; padding-bottom: 2px; font-size: 16px; }
+.faq-panel a { margin-right: 5px; margin-left: 5px; font-size: 12px; color: #8bcaf2}
+.faq-panel p { margin-bottom: 10px; font-size: 12px;}
+.faq-panel ul  { list-style: disc inside; margin-bottom: 0px; font-size: 12px; line-height: 1.8;}
+.faq-panel li  { margin-bottom: 0px; font-size: 12px; line-height: 1.8;}
+.faq-panel .circle-list {
+    list-style-type: circle;
+}
 
 .games-panel{
   background: rgba(23, 39, 54, 0.9);
