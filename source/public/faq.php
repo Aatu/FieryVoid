@@ -43,14 +43,12 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
     </p>
 
 <h2>DIFFERENCES FROM BABYLON 5 WARS</h2>
-
-    <h3>General</h3>
     <ul>
         <li>Alot has been automated in Fiery Void compared to B5 Wars, such as dice rolling, and players have a little less control over certain minutiae, but overall the game is more streamlined.</li>
         <li>By default the game is played in a fixed, rectangular map. It does not enforce anything about the boundaries — it’s up to the players to ensure ships leaving the map behave as disengaged.</li>
         <li>Fiery Void does not enforce fleet design rules. Fleet requirement rules can be checked using the Check button during Fleet Selection.</li>
         <li>The game mechanics are based on d100 rolls (instead of d20), so most values are displayed as percentages (e.g., 1 point on a d20 equates to 5%).</li>
-        <li>There is no separate Power and Electronic Warfare (EW) phase as there was in B5 Wars. These are combined into a single Initial Orders phase, along with ballistic firing, which happens after the Initiative roll.</li>
+        <li>There are no separate Power and Electronic Warfare (EW) phase. These are combined into a single Initial Orders phase, along with ballistic firing, which happens after the Initiative roll.</li>
     </ul>
 
     <h3>Electronic Warfare (EW)</h3>

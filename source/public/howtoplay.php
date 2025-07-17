@@ -34,7 +34,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         <li><a href="#joining-starting-game">Joining a Game</a></li>
         <li><a href="#creating-a-game">Creating a Game</a></li>
         <li><a href="#selecting-your-fleet">Selecting Your Fleet</a></li>
-        <li><a href="#ship-control-sheet">Ship Tooltips & Ship Control Sheets (SCS)</a></li>
+        <li><a href="#ship-control-sheet">Ship Tooltip & Ship Control Sheets (SCS)</a></li>
         <li><a href="#deployment">Deployment</a></li>
         <li><a href="#game-turn">The Game Turn</a></li>
         <li><a href="#initial-orders">Phase 1: Initial Orders</a>
@@ -89,14 +89,14 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
     <p>Default game settings are:</p> 
         <ul>
             <li>Gamespace: 42 by 32 hexes.</li>            
-            <li>TEAM 1: Name: Blue; Points 3500; Deployment X -21 Y 0; Width 10; Height 30; Deploys on Turn: 1</li>
-            <li>TEAM 2: Name: Red; Points 3500; Deployment X 21 Y 0; Width 10; Height 30; Deploys on Turn: 1</li>
+            <li>Team 1 Slot: Points 3500; Deployment X: -21 Y: 0; Width 10; Height 30; Deploys on Turn: 1</li>
+            <li>Team 2 Slot: Points 3500; Deployment X: 21 Y: 0; Width 10; Height 30; Deploys on Turn: 1</li>
         </ul>    
     <p>These defaults are fine for your first game so just click on the ‘Create Game’ button and you will be taken to the Fleet Selection screen.  The creator of the game is automatically assigned to the first slot. </p>
     <p>More advanced game settings:</p>
         <ul>
             <li>If you want a larger map, try clicking 'Base Assault' or unchecking 'Set Map Boundaries'.  This will give more room to maneuver, but will give ships/races with long range weapons a relative advantage.</li>            
-            <li>You may click on the 'ADD SLOT' button, to add another player slot to either Team.  This can be repeated for more players or to create a reinforcement slot that will arrive for the same player later in the game.</li>
+            <li>You may click on the 'Add Sot' button, to add another player slot to either Team.  This can be used to add more players to the game, or to simply create a reinforcement slot for yourself when part of you fleet is arriving later in the game.</li>
         </ul>       
     <a class="back-to-top" href="#top">↩ Back to Top</a>
 
@@ -136,7 +136,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
     <a class="back-to-top" href="#top">↩ Back to Top</a>
 
 
-    <h3 id="ship-control-sheet">SHIP TOOLTIPS & SHIP CONTROL SHEETS (SCS)</h3>
+    <h3 id="ship-control-sheet">SHIP TOOLTIP & SHIP CONTROL SHEETS (SCS)</h3>
 
     <h4 id="shiptooltip">Ship Tooltip:</h4>
     <p style="margin-bottom: 0px;">Hovering the mouse over a ship's or selecting it with left-click will display its tooltip, which provides the following information:</p>
