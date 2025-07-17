@@ -49,7 +49,16 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                 <li><a href="#jinking">Jinking</a></li>
             </ul>
         </li>
-        <li><a href="#firing-phase">Phase 3: Firing Orders</a></li>                                                      
+        <li><a href="#firing-phase">Phase 3: Firing Orders</a>  
+            <ul class="sub-list">
+                <li><a href="#selectingweapons">Selecting Weapons</a></li>
+                <li><a href="#hitchances">Hit Chances</a></li>
+                <li><a href="#designatingfire">Designating Fire</a></li>
+                <li><a href="#firingmode">Firing Mode</a></li>
+                <li><a href="#defensivefire">Defensive Fire</a></li>
+                <li><a href="#combatpivots">Combat Pivots</a></li>
+            </ul>      
+      </li>                                                      
         <!-- Add more sections here -->
     </ul>
 
@@ -332,7 +341,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
       <li>Repeat these three steps by for each weapon you want to fire on this turn, targeting the same or different enemy ships.</li>        
     </ul>
 
-   <h4 id="firingmode">Firing Modes:</h4>
+   <h4 id="firingmode">Firing Modes:</h4> 
     <ul>    
       <li>Some weapons have alternate fire modes (e.g. a Battle Laser can fire in either Raking or Piercing mode).  Where this is the case, left-clicking on the weapon icon will show a letters at the top right of the weapon.</li>  
       <li>Click on the right-most letter to cycle through the alternate modes.</li>      
