@@ -46,12 +46,11 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
 
     <h3>General</h3>
     <ul>
-        <li>Alot has been automated in Fiery Void compared to B5 Wars, such as dice rolling and players have somewhat less control over the minutiae of certain things, but the game is more streamlined.</li>
-        <li>Deployment: Players may deploy anywhere in the designated Deployment Zone, choosing any direction of movement and a speed between 0 and 10.</li>
-        <li>Fixed map: The game allows displaying the boundaries of a fixed, rectangular map. It does not enforce anything about it — it’s up to the player to ensure ships leaving the map behave as disengaged.</li>
+        <li>Alot has been automated in Fiery Void compared to B5 Wars, such as dice rolling, and players have a little less control over certain minutiae, but overall the game is more streamlined.</li>
+        <li>By default the game is played in a fixed, rectangular map. It does not enforce anything about the boundaries — it’s up to the players to ensure ships leaving the map behave as disengaged.</li>
         <li>Fiery Void does not enforce fleet design rules. Fleet requirement rules can be checked using the Check button during Fleet Selection.</li>
         <li>The game mechanics are based on d100 rolls (instead of d20), so most values are displayed as percentages (e.g., 1 point on a d20 equates to 5%).</li>
-        <li>There is no separate Power and EW phase as there was in B5 Wars. These are combined into a single Initial Orders phase, along with ballistic firing, which happens after the Initiative roll.</li>
+        <li>There is no separate Power and Electronic Warfare (EW) phase as there was in B5 Wars. These are combined into a single Initial Orders phase, along with ballistic firing, which happens after the Initiative roll.</li>
     </ul>
 
     <h3>Electronic Warfare (EW)</h3>

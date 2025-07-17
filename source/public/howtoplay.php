@@ -37,7 +37,13 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         <li><a href="#ship-control-sheet">Ship Tooltips & Ship Control Sheets (SCS)</a></li>
         <li><a href="#deployment">Deployment</a></li>
         <li><a href="#game-turn">The Game Turn</a></li>
-        <li><a href="#initial-orders">Phase 1: Initial Orders</a></li>
+        <li><a href="#initial-orders">Phase 1: Initial Orders</a>
+            <ul class="sub-list">
+                <li><a href="#ew">Electronic Warfare</a></li>
+                <li><a href="#ballistics">Ballistic Weapons</a></li>
+                <li><a href="#power">Power Management</a></li>
+            </ul>      
+        </li>
         <li><a href="#movement-phase">Phase 2: Movement Orders</a>
             <ul class="sub-list">
                 <li><a href="#adjustspeed">Adjust Speed</a></li>
@@ -121,7 +127,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
 
     <p>Note: it is very unlikely that you will get exactly to the maximum point value allowed, but you should be able to get within 100 points of it. You can also use enhancements for specific ships to use up any remaining points and thus maximise your fleet’s strength.</p>
 
-    <p>Once you are satisfied with your fleet, click “Ready” in the bottom right of the screen, and confirm you wish to commit your fleet.</p>
+    <p>Once you are satisfied with your fleet, click 'Ready' in the bottom right of the screen, and confirm you wish to commit your fleet.</p>
 
     <p>Once all slots in a game have readied up, the game will begin.</p>
 
@@ -131,17 +137,19 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
 
 
     <h3 id="ship-control-sheet">SHIP TOOLTIPS & SHIP CONTROL SHEETS (SCS)</h3>
-    <p><strong>Ship Info:</strong> Hovering the mouse over a ship's picture on the starmap gives the following tooltip information:</p>
 
+    <h4 id="shiptooltip">Ship Tooltip:</h4>
+    <p style="margin-bottom: 0px;">Hovering the mouse over a ship's or selecting it with left-click will display its tooltip, which provides the following information:</p>
     <ul>
         <li><strong>Ship name:</strong> The name that the player assigned to the ship during list building.</li>
-        <li><strong>Forward-Aft / Side Defense Rating (current and base):</strong> This is the % chance for shots to hit that ship, before other adjustments. If the ship has any Defensive EW assigned, the “current” number will be less than the “base” number by 5% per point of Defensive EW.</li>
-        <li><strong>Turn Cost and Turn Delay ratings:</strong> Multiply Cost by the ship's current speed to know how much Thrust to turn the ship one hexagon side. Multiply Delay by the ship's current speed to know how many hexes the ship must travel after turning, before it can turn again.</li>
-        <li><strong>Initiative Order:</strong> The current initiative order of this ship. First in initiative order will have to move first. Initiative is rolled on d100 + any adjustments for ship type etc. Most capital ships have no bonus, but smaller ships and fighters have significant bonuses equal to the B5 Wars “initiative bonus” x 5.</li>
-        <li><strong>Speed (Acceleration rating), and any current Turn Delay:</strong> The number of hexes that the ship will currently move, unless it accelerates or decelerates. In brackets is the thrust cost to increase or decrease Speed by +/- 1 hex / turn. If the ship has any carry-over turn delay from a previous turn, this will be listed in brackets here.</li>
+        <li><strong>Defense Rating (Front-Aft/Sides):</strong> The % chance for shots to hit that ship, before other adjustments. If the ship has any Defensive EW assigned, the “current” number will be less than the “base” number by 5% per point of EW.</li>
+        <li><strong>Turn Cost / Turn Delay:</strong> Value that is multiplied by a ship's current speed to know how much Thrust is required to turn the ship by one hexagon side, and how many hexes it'll have to before it can turn again.</li>
+        <li><strong>Initiative Order:</strong> The initiative order of this ship on this turn. Initiative is rolled on d100 + any adjustments for ship type etc, with lower initiative causing ships to move earlier.</li>
+        <li><strong>Speed (Acceleration rating):</strong> Current number of hexes that the ship will move during Movement Phase, unless it accelerates or decelerates. In brackets is the thrust cost to increase or decrease Speed by 1. If the ship has any carry-over turn delay from a previous turn, this will also be listed.</li>
     </ul> 
 
-    <p><strong>Ship Control Sheet (SCS):</strong> Right-clicking on a ship brings up that ship's SCS, displaying all of its systems as icons in a schematic. The front of the ship is shown at the top of the schematic. Weapons are red, other systems are generally blue with some exceptions.</p>
+    <h4 id="shiptooltip" style="margin-top: 10px;">Ship Control Sheet (SCS):</h4>    
+    <p>Right-clicking on a ship brings up its SCS, which displays all of its systems as icons in a pop-out window. The front of the ship is shown at the top of the schematic. Weapons systems are red, other systems are generally blue with some exceptions.</p>
 
     <p>The remaining structure of each system is indicated graphically by a dark green bar along the bottom of the icon. The bar turns orange for critically damaged systems whereas destroyed systems have an empty bar, and the entire icon is dimmed. Powered down systems have a lightning bolt superimposed on the icon.</p>
 
@@ -153,7 +161,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
 
     <p>Opening the SCS is necessary to adjust power settings in the Initial Orders phase, and to fire weapons in the Fire Orders phase.</p>
 
-    <p>Right-clicking on a fighter flight brings up a schematic of the flight, showing the information for each fighter (structure remaining / total structure; whether the fighter was destroyed or disengaged from damage).</p>
+    <p>Right-clicking on a fighter flight will simialrly bring up a schematic of the flight, showing the information for each fighter (structure remaining / total structure; whether the fighter was destroyed or disengaged from damage).</p>
 
     <p>Hovering the mouse over the weapon(s) of a fighter brings up the detailed weapon information.</p>
     <a class="back-to-top" href="#top">↩ Back to Top</a>
@@ -164,7 +172,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
 
     <p>After starting a game, you will enter the Deployment Phase. To deploy a ship, select it by left-clicking on it (a circle will indicate that it has been selected) and place it in your deployment zone by left-clicking on a hex inside that zone.</p>
 
-    <p>You may then change the ship's starting speed by clicking on the + or – beside the “5” forward green arrow. You may also start in a direction other than pointed at the enemy if you like, by clicking on the curved green arrows.</p>
+    <p>You may then change the ship's starting speed (betwen 0 and 10) by clicking on the + or – beside the “5” forward green arrow. You may also start in a direction other than pointed at the enemy if you like, by clicking on the curved green arrows.</p>
 
     <p>Fighter flights must be deployed on the map. Fiery Void does not allow ships to actually carry fighters in their hangars.</p>
 
@@ -199,7 +207,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
     <p>You may also adjust what systems are turned off (for extra power), and use any extra power to boost systems such as your sensor and/or engines. By default, the power settings for each ship will remain identical to the previous turn's settings and all EW will initially be assigned to Defensive EW.</p>
     <p>Once you are finished with Initial Orders for all ships, click the green checkmark in the title bar and confirm in the popup box. The title will show “Waiting for turn”. After all players have committed, the game proceeds to the Movement Phase starting with the first initiative ship.</p>
     
-    <h4 id="ew">Assigning EW:</h4>
+    <h4 id="ew">Electronic Warfare (EW):</h4>
     <p>Select (left-click) a ship. The ship's EW assignments will be displayed in it's tooltip or in a box at the right of its SCS.</p>
 
     <p>When you have one of your ships selected, you will see <b>Defensive EW</b> (DEW) and <b>Close Combat EW</b> (CCEW). DEW makes your ship harder to hit (by everything except fighters), while CCEW gives you a bonus to hit any fighters that come within 10 hexes. Selecting an enemy ship will show the <b>Offensive EW</b> buttons and allow you to lock onto them.</p>
@@ -211,7 +219,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
     <p>Electronic Warfare Tips: 
     <ul>
     <li>It's wise to lock on to no more than 1-3 enemy ships at a time.</li>
-    <li>Some captains prefer to alternate between “turtling” (full defensive EW) and “Hard-Lock” (all EW assigned as Offensive EW to a single target), especially at long range.</li>
+    <li>Some captains prefer to alternate between “turtling” (full defensive EW) and 'Hard-Lock' (all EW assigned as Offensive EW to a single target), especially at long range.</li>
     <li>Others prefer a balanced approach (half Defensive EW, 1-2 points OEW on 2-3 targets).</li>
     <li>A few points of CCEW is a good idea if enemy fighters are present, even as a deterrent.</li>
     </ul></p>
@@ -225,8 +233,8 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
 
     <p>You can toggle Ballistic Lines on/off using the buttons on the right-hand side of the screen. Enemy ballistic attacks become visible after both players commit their Initial Orders.</p>
 
-    <h4 id="power">Adjusting Power Settings (Optional):</h4>
-    <p>New players can skip this step unless required by critical hits.  Power adjustments are useful but can be risky if done incorrectly. If you decide to try anyway, here's how to adjust your ship's power:</p>
+    <h4 id="power">Power Management:</h4>
+    <p>this step is usually optional and new players should probably skip it in the beginning.  Power management is certainly useful when done correctly, but can backfire if done incorrectly. If you decide you want to try it anyway, here's how to go about managing a ship's power:</p>
     <ul>
       <li>Right-click on a ship to open the SCS.</li>
       <li>Left-click on systems to turn them off (using the red ‘power button’).</li>
