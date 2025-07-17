@@ -27,7 +27,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
   <section class="faq-panel">
     <h2 id="top" style="margin-top: 5px">HOW TO PLAY FIERY VOID</h2>
 
-    <h3 id="creating-account" style="margin-top: 25px">TABLE OF CONTENTS</h3>
+    <h3 id="contents" style="margin-top: 25px">TABLE OF CONTENTS</h3>
 
     <ul class = index-list>
         <li><a href="#creating-account">Creating an Account</a></li>

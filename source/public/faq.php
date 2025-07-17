@@ -43,7 +43,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
     </p>
 
 <h2>DIFFERENCES FROM BABYLON 5 WARS</h2>
-    <ul>
+    <ul style="margin-top: 10px;">
         <li>Alot has been automated in Fiery Void compared to B5 Wars, such as dice rolling, and players have a little less control over certain minutiae, but overall the game is more streamlined.</li>
         <li>By default the game is played in a fixed, rectangular map. It does not enforce anything about the boundaries — it’s up to the players to ensure ships leaving the map behave as disengaged.</li>
         <li>Fiery Void does not enforce fleet design rules. Fleet requirement rules can be checked using the Check button during Fleet Selection.</li>
@@ -86,11 +86,52 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
 
     <h2>INFO ON SPECIFIC MECHANICS</h2>
 
-    <h3>Delayed Deployment</h3>
+    <h3 style="margin-top: 10px;">Delayed Deployment</h3>
     <ul>
         <li>You can select this option in the Create Game screen by setting the <b>'Deploys on Turn'</b> field in a player slot to the Turn number you wish it to deploy, or ‘jump in’.</li>
         <li>Ships which would normally have to set systems on Turn 1 and choose to deploy later (e.g. Hyach Specialists, Vorlon Adaptive Armor) will set these systems on the turn they deploy instead.</li>
         <li>Terrain, Bases, and OSATS cannot deploy later in the game and will always deploy on Turn 1 even if the slot is set to deploy later.</li>
+    </ul>
+
+    <h3>Boarding Actions & Marines</h3>
+    <ul>
+        <li>Many factions have access to Breaching Pods, which come equipped with a marines that can undertake boarding actions.</li>
+        <li>During the Firing Phase, Pods can attempt to attach to enemy ships in the same hex (and in arc) and deliver Marines to undertake a selection of missions (Sabotage, Capture Ship and Rescue).</li>
+        <li>Pods first roll to attach, but this is automatic if they are moving faster than the target ship, so long as speed difference is not higher than pods thrust rating.  Llort have +1 to attach roll.</li>
+        <li>Once attached, the Pod will roll again to deliver the Marines, with a base chance of 50% to successfully boarding the vessel.  Unsuccessful marines may be lost or return safely their pod.</li>
+                        
+        
+        <li>A number of modifiers can apply to the delivery roll, summarised below:
+            <ul class="circle-list">
+                <li>+20% success - Yolu-specific bonus</li>
+                <li>+10% success - Elite marines / Llort / Target has Poor Crew / Directly boarding Primary section of target</li>
+                <li>-10% success - Narn or Gaim Defenders / Target has Elite Crew or Markab's Religious Fervor</li>
+                <li>Fighter: Offensive Bonus</li>
+            </ul>
+        </li>
+        <li>Marines that successfully board a vessel will then attempt to carry out their intended missions from the end of the following turn.  These rolls also can attract several modifiers:
+            <ul class="circle-list">
+                <li>+10% success - Elite Marines / Target vessel has Poor Crew</li>
+                <li>-10% success - Narn or Gaim Defenders / Target has Elite Crew or Markab's Religious Fervor</li>
+                <li>For Sabotage and Rescue missions only - Additional -10% for every two turns that Marines are active aboard the enemy vessel.</li>
+            </ul>
+        </li>
+        <li>Details of each of the three types of marine mission are summarised below:
+            <ul class="circle-list">
+                <li><strong>Capture:</strong>Marines will fight the defending marine contingents directly (defenders are shown in CnC tooltip!).  
+                This invovles two dice rolls, one to see if marines eliminate a defender (50% base chance) and a second to see if marines are eliminated (25% base chance).  
+                If the attacking marines manage to defeat all defenders, the enemy ship is immediately be disabled for the remainder of the battle so long as there are still at least one attacking marine unit on board.
+                </li>
+                <li><strong>Sabotage:</strong>Marines can either attempt to damage a specific system on an enemy ships (by making a called shot against it using the usual rules) or disrupt the ship more generally (e.g. minor damage to a Primary system, EW/Initiative/Thrust/Defence Profile penalties) by targeting it in the normal fashion.  
+                In both cases, Marines that are successfully delivered will roll on a d10 the following turn to see how successful their mission has been.  
+                Note - Marines which target a specific system and are successful in destroying it will then continue to Sabotage the ship generally providing they have not been eliminated.</li>
+                <li><strong>Rescue:</strong>For scenarios only, Marines will attach their pod and attempt to board as normal.  Then, from the following turn, the Combat Log will provide players with updates on the progress of their Rescue mission.</li>
+            </ul>
+        </li>
+
+        <li>Pods first roll to attach, but this is automatic if they are moving faster than the target ship, so long as speed difference is not higher than pods thrust rating.  Llort have +1 to attach roll.</li>
+        <li>Once attached, the Pod will roll again to deliver the Marines, with a base chance of 50% to successfully boarding the vessel.  Unsuccessful marines may be lost or return safely their pod.</li>
+
     </ul>
 
     <h3>Enormous Units</h3>
