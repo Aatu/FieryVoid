@@ -58,12 +58,13 @@ a:hover { text-decoration: underline; }
   width:1200px;
 }
 
-.faq-panel h2 { font-family: "Bruno Ace SC", sans-serif; font-size: 20px; margin-bottom: 0px; margin-top: 25px; color: #8bcaf2}
-.faq-panel h3 { font-family: "Orbitron", sans-serif; margin-bottom: 15px; border-bottom: 2px solid #215a7a; padding-bottom: 2px; font-size: 16px; }
+.faq-panel h2 { color: #00b8e6; font-family: "Bruno Ace SC", sans-serif; font-size: 24px; border-bottom: 3px solid #00b8e6; margin-bottom: 0px; margin-top: 25px;}
+.faq-panel h3 { font-family: "Orbitron", sans-serif; margin-bottom: 15px; border-bottom: 2px solid #00b8e6; padding-bottom: 2px; font-size: 16px; }
+.faq-panel h4 { margin-top: 10px; margin-bottom: 5px; border-bottom: 1px solid #215a7a; padding-bottom: 2px; font-size: 14px; }
 .faq-panel a { margin-right: 5px; margin-left: 5px; font-size: 12px; color: #8bcaf2}
-.faq-panel p { margin-bottom: 10px; font-size: 12px;}
-.faq-panel ul  { list-style: disc inside; margin-bottom: 0px; font-size: 12px; line-height: 1.8;}
-.faq-panel li  { margin-bottom: 0px; font-size: 12px; line-height: 1.8;}
+.faq-panel p { margin-bottom: 10px; font-size: 13px;}
+.faq-panel ul  { list-style: disc inside; margin-bottom: 0px; font-size: 13px; line-height: 1.8;}
+.faq-panel li  { margin-bottom: 0px; font-size: 13px; line-height: 1.8;}
 .faq-panel .circle-list {
     list-style-type: circle;
 }
@@ -72,11 +73,56 @@ a:hover { text-decoration: underline; }
     font-size: 14px;
 }
 
+/* Line from main section to sub-list */
+.index-list > li > .sub-list::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0.3em;
+    width: 1px;
+    height: 100%;
+    background: #215a7a;;
+}
+
+.faq-panel .sub-list a {
+    font-size: 12px;
+    color: white;
+}
+
+/* Right-angle lines to each sub-item */
+.sub-list li {
+    position: relative;
+    padding-left: 1.5em;
+    margin-bottom: 0.5em;
+    list-style-type: none;    
+}
+
+.sub-list li::before {
+    content: "";
+    position: absolute;
+    top: 13px;
+    left: 0;
+    width: 1em;
+    height: 2px;
+    background: #215a7a;
+}
+
+.sub-list li::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1px;
+    height: 13px;
+    background: #215a7a;
+}
+
 .back-to-top {
     font-size: 12px;
     display: block;
     margin-top: 10px;
-    margin-bottom: 20px;
+    margin-bottom: 5px;
+    text-align: right
 }
 
 .games-panel{
