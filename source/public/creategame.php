@@ -316,7 +316,7 @@ print("<option value=\"".$i."\" ".$selected." >".$i."</option>");
                     <input class ="depwidth tinySize" type="text" name="depwidth" value="0">
                 	<span class="depheightheader">HEIGHT:</span>
                 	<input class="depheight tinySize" type="text" name="depheight" value="0">
-                    <span>TURN AVAILABLE:</span>
+                    <span>DEPLOYS ON TURN:</span>
                     <input class ="depavailable tinySize" type="text" name="depavailable" value="0">                    
             		<!-- Add a Flexbox container here to align REMOVE SLOT to the right-->
             		<div class="flex-container">

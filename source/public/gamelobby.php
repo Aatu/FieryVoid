@@ -623,7 +623,7 @@ if ($asteroids == false && $moons == false) {
                 <span class ="value depwidth"></span>
                 <span>Height:</span>
                 <span class ="value depheight"></span>
-                <span>Turn Available:</span>
+                <span>Deploys on Turn:</span>
                 <span class ="value depavailable"></span>
             </div>
         </div>
