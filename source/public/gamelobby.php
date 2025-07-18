@@ -471,8 +471,10 @@ if ($asteroids == false && $moons == false) {
 <a href="files/FV_factions.txt" target="_blank" style="text-decoration: underline; font-size: 14px; color: #8bcaf2;">Factions & Tiers</a> 
 <span style="font-size: 14px;"> - Overview of Fiery Void factions and their approximate strengths.</span>
 <br>
-<a href="files/enhancements_list.txt" target="_blank" style="text-decoration: underline; font-size: 14px; color: #8bcaf2;">Systems & Enhancements</a> 
-<span style="font-size: 14px;"> - Details of common systems and unit enhancements e.g. Boarding Actions / Missiles.</span>
+<a href="./ammo-options-enhancements.php" target="_blank" rel="noopener noreferrer" style="text-decoration: underline; font-size: 14px; color: #8bcaf2;">Ammo, Options & Enhancements:</a> 
+<span style="font-size: 14px;"></span> - Details of all the extras available to units e.g. Missiles.</span>
+<!--<a href="files/enhancements_list.txt" target="_blank" style="text-decoration: underline; font-size: 14px; color: #8bcaf2;">Systems & Enhancements</a> 
+<span style="font-size: 14px;"> - Details of common systems and unit enhancements e.g. Boarding Actions / Missiles.</span> -->
 <br>
 
 <a href="https://old.wheelofnames.com/fx3-uje" target="_blank" style="color: #8bcaf2; text-decoration: underline; font-size: 14px;">Tier 1</a> 
