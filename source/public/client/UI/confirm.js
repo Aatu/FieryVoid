@@ -401,7 +401,7 @@ handleMouseWheelFighter: function handleMouseWheelFighter(e) {
 		}
 			
 		//ship.pointCost
-            $(".totalUnitCostText", totalItem).html("Total unit cost");
+            $(".totalUnitCostText", totalItem).html("Total cost");
             $(".totalUnitCostAmount", totalItem).html(pointCost);
             $(".totalUnitCostAmount", totalItem).data("value", pointCost);
 
@@ -474,12 +474,12 @@ handleMouseWheelFighter: function handleMouseWheelFighter(e) {
 
         var nameExpanded = enhName;
         //if(enhID != 'DEPLOY'){
-            nameExpanded = nameExpanded + ' {';
+            nameExpanded = nameExpanded + ' (';
 			if(enhLimit>1) nameExpanded += 'up to ' + enhLimit + ' levels, ';
-			nameExpanded += enhPrice + 'PV ';
+			nameExpanded += enhPrice + 'pts';
 			//+ ' (up to ' + enhLimit + ' levels, ' + enhPrice + 'PV ';
             if((enhPriceStep!=0) && (enhLimit>1)){
-                nameExpanded = nameExpanded + ' plus ' + enhPriceStep + 'PV per level';		
+                nameExpanded = nameExpanded + ' plus ' + enhPriceStep + 'pts per level';		
             }
             nameExpanded = nameExpanded + ')';
         //}    
@@ -698,7 +698,7 @@ handleInputChangeEdit: function handleInputChangeEdit(e) {
 		}     
         */
 		//ship.pointCost
-            $(".totalUnitCostText", totalItem).html("Total unit cost");
+            $(".totalUnitCostText", totalItem).html("Total cost");
             $(".totalUnitCostAmount", totalItem).html(pointCost);
             $(".totalUnitCostAmount", totalItem).data("value", pointCost);
 
@@ -774,10 +774,10 @@ handleInputChangeEdit: function handleInputChangeEdit(e) {
         //if(enhID != 'DEPLOY'){
             nameExpanded = nameExpanded + ' {';
 			if(enhLimit>1) nameExpanded += 'up to ' + enhLimit + ' levels, ';
-			nameExpanded += enhPrice + 'PV ';
+			nameExpanded += enhPrice + 'pts';
 			//+ ' (up to ' + enhLimit + ' levels, ' + enhPrice + 'PV ';
             if((enhPriceStep!=0) && (enhLimit>1)){
-                nameExpanded = nameExpanded + ' plus ' + enhPriceStep + 'PV per level';		
+                nameExpanded = nameExpanded + ' plus ' + enhPriceStep + 'pts per level';		
             }
             nameExpanded = nameExpanded + ')';
         //}    
