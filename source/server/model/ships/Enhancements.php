@@ -1252,7 +1252,7 @@ class Enhancements{
 	  //Shadow fighter deployed without carrier control: -2 OB, -3(15) Ini, cost: 0, limit: 1
 	  $enhID = 'SHAD_CTRL';	  
 	  if(in_array($enhID, $flight->enhancementOptionsEnabled)){ //option needs to be specifically enabled
-		  $enhName = 'Uncontrolled';
+		  $enhName = 'Uncontrolled Fighter';
 		  $enhLimit = 1;	
 		  $enhPrice = 0;	  
 		  $enhPriceStep = 0;
