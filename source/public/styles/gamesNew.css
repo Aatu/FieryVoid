@@ -84,8 +84,28 @@ a:hover { text-decoration: underline; }
 }
 
 .faq-panel .sub-list a {
-    font-size: 12px;
+    font-size: 14px;
     color: white;
+}
+
+.index-container {
+    display: flex;
+    gap: 40px;
+}
+
+.faction-list {
+    flex: 1;
+    list-style: none;
+    padding-left: 0;
+    font-size: 16px;    
+}
+
+.faction-list a {
+    font-size: 16px;    
+}
+
+.faction-list li {
+    margin-bottom: 8px;
 }
 
 /* Right-angle lines to each sub-item */
@@ -101,8 +121,8 @@ a:hover { text-decoration: underline; }
     position: absolute;
     top: 13px;
     left: 0;
-    width: 1em;
-    height: 2px;
+    width: 0.9em;
+    height: 1px;
     background: #8bcaf2;
 }
 
@@ -111,7 +131,7 @@ a:hover { text-decoration: underline; }
     position: absolute;
     top: 0;
     left: 0;
-    width: 1px;
+    width: 0.05em;
     height: 13px;
     background: #8bcaf2;
 }
