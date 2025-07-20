@@ -15,7 +15,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
 </head>
 <body style="background: url('./img/webBackgrounds/faq.jpg') no-repeat center center fixed; background-size: cover;">
 
-<header class="header">
+<header class="pageheader">
   <img src="img/logo.png" alt="Fiery Void Logo" class="logo">
   <div class="top-right-row">
     <a href="games.php">Back to Game Lobby</a>
@@ -25,9 +25,9 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
 
 <main class="container">
   <section class="faq-panel">
-    <h2 style="margin-top: 5px">ABOUT FIERY VOID</h2>
+    <h2 style="margin-top: 5px">FIERY VOID FAQ</h2>
     <p>
-        This is a browser-based adaptation of the <strong>Babylon 5 Wars</strong> tabletop game, by Agents of Gaming (bowing heads to you, AoG!).
+        This is an online adaptation of the <strong>Babylon 5 Wars</strong> tabletop game, by Agents of Gaming (bowing heads to you, AoG!).
     </p>
     <p>
         Therefore, there is no game manual for Fiery Void itself — all rules are readily available under the name <strong>Advent of Galactic Wars</strong>, hosted at <a href="http://b5warsvault.wikidot.com/" target="_blank" rel="noopener noreferrer">B5Wars Vault</a> (see Links section!). If you know these rules, you should essentially be able to play Fiery Void (after coming to grips with the online interface).
@@ -86,7 +86,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
 
     <h2>INFO ON SPECIFIC MECHANICS</h2>
 
-    <h3 style="margin-top: 10px;">Delayed Deployment</h3>
+    <h3 style="margin-top: 15px;">Delayed Deployment</h3>
     <ul>
         <li>You can select this option in the Create Game screen by setting the <b>'Deploys on Turn'</b> field in a player slot to the Turn number you wish it to deploy, or ‘jump in’.</li>
         <li>Ships which would normally have to set systems on Turn 1 and choose to deploy later (e.g. Hyach Specialists, Vorlon Adaptive Armor) will set these systems on the turn they deploy instead.</li>

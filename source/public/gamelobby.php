@@ -286,7 +286,7 @@
 	</head>
 	<body style="background-image:url(img/maps/<?php print($gamelobbydata->background); ?>)">
 
-  <header class="header">
+  <header class="pageheader">
     <img src="img/logo.png" alt="Fiery Void Logo" class="logo">
     <div class="top-right-row">
       <a href="logout.php" class="btn btn-primary">Logout</a>
@@ -468,11 +468,11 @@ if ($asteroids == false && $moons == false) {
 
 <div class="lobbyheader" style="margin-bottom: 10px; margin-top: 15px">RULES & INFO</div>
 
-<a href="files/FV_factions.txt" target="_blank" style="text-decoration: underline; font-size: 14px; color: #8bcaf2;">Factions & Tiers</a> 
+<a href="./factions-tiers.php" target="_blank" style="text-decoration: underline; font-size: 14px; color: #8bcaf2;">Fiery Void: Factions & Tiers</a> 
 <span style="font-size: 14px;"> - Overview of Fiery Void factions and their approximate strengths.</span>
 <br>
 <a href="./ammo-options-enhancements.php" target="_blank" rel="noopener noreferrer" style="text-decoration: underline; font-size: 14px; color: #8bcaf2;">Ammo, Options & Enhancements:</a> 
-<span style="font-size: 14px;"></span> - Details of all the extras available to units e.g. Missiles.</span>
+<span style="font-size: 14px;"></span> - Details of all the extras available to Fiery Void units e.g. Missiles.</span>
 <!--<a href="files/enhancements_list.txt" target="_blank" style="text-decoration: underline; font-size: 14px; color: #8bcaf2;">Systems & Enhancements</a> 
 <span style="font-size: 14px;"> - Details of common systems and unit enhancements e.g. Boarding Actions / Missiles.</span> -->
 <br>
@@ -579,7 +579,7 @@ if ($asteroids == false && $moons == false) {
         </div>
     </div>
 
-        <div id="globalchat" class="panel large lobby" style="height:250px;">
+        <div id="globalchat" class="panel large lobby" style="height:200px;">
         <?php 
             $chatgameid = 0;
             $chatelement = "#globalchat";

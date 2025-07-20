@@ -40,7 +40,7 @@
         <script src="client/UI/createGame.js"></script>
 	</head>
 	<body class="creategame">
-  <header class="header">
+  <header class="pageheader">
     <img src="img/logo.png" alt="Fiery Void Logo" class="logo">
     <div class="top-right-row">
       <a href="logout.php" class="btn btn-primary">Logout</a>
@@ -329,7 +329,7 @@ print("<option value=\"".$i."\" ".$selected." >".$i."</option>");
         </div>
     </section>
 
-        <div id="globalchat" class="panel large create" style="height:250px;">
+        <div id="globalchat" class="panel large create" style="height:200px;">
         <?php 
             $chatgameid = 0;
             $chatelement = "#globalchat";

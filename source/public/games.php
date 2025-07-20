@@ -38,7 +38,7 @@ if (isset($_SESSION["user"])) {
 </head>
 
 <body  style="background: url('./img/webBackgrounds/games.jpg') no-repeat center center fixed; background-size: cover;">
-<header class="header">
+<header class="pageheader">
   <img src="img/logo.png" alt="Fiery Void Logo" class="logo">
   <div class="top-right-row">
     <a href="reg.php">Register new account</a>
@@ -55,7 +55,7 @@ if (isset($_SESSION["user"])) {
 
 <div class="resources">
   <h3>Get Started</h3>
-  <a href="./howtoplay.php" target="_blank" rel="noopener noreferrer">Starter Guide</a> | 
+  <a href="./starterGuide.php" target="_blank" rel="noopener noreferrer">Starter Guide</a> | 
   <a href="https://www.youtube.com/playlist?list=PLTGKagm5KkMxB8oKBiIUeoBQTRYz2z0-3" target="_blank" rel="noopener noreferrer">Video Tutorials</a> | 
   <a href="https://discord.gg/4jXarWusp4" target="_blank" rel="noopener noreferrer">Discord</a> | 
   <a href="https://www.facebook.com/groups/fieryvoid" target="_blank" rel="noopener noreferrer">Facebook</a>
@@ -65,9 +65,9 @@ if (isset($_SESSION["user"])) {
 <div class="resources">
       <h3>Rules & Info</h3>
       <div class="links">     
-        <div><a href="./factions-tiers.php" target="_blank" rel="noopener noreferrer">Factions & Tier Listings:</a> Overview of Fiery Void factions and their approximate strengths.</div>
+        <div><a href="./factions-tiers.php" target="_blank" rel="noopener noreferrer">Fiery Void: Factions & Tiers:</a> Overview of Fiery Void factions and their approximate strengths.</div>
         <div><a href="./faq.php" target="_blank" rel="noopener noreferrer">Fiery Void FAQ:</a> Aide Memoire of rules and differences from Babylon 5 Wars.</div>
-        <div><a href="./ammo-options-enhancements.php" target="_blank" rel="noopener noreferrer">Ammo, Options & Enhancements:</a> Details of all the extras available to units e.g. Missiles.</div>
+        <div><a href="./ammo-options-enhancements.php" target="_blank" rel="noopener noreferrer">Ammo, Options & Enhancements:</a> Details of all the extras available to Fiery Void units e.g. Missiles.</div>
         <div><a href="http://b5warsvault.wikidot.com/" target="_blank" rel="noopener noreferrer">Babylon 5 Wars Vault:</a> Huge amount of Babylon 5 Wars rules and info!</div>
       </div> 
     </div>
@@ -111,7 +111,7 @@ if (isset($_SESSION["user"])) {
     </div>
   </section>
 
-  <div id="globalchat" class="chat-panel" style="height:250px;">
+  <div id="globalchat" class="chat-panel" style="height:200px;">
     <?php
     $chatgameid = 0;
     $chatelement = "#globalchat";
