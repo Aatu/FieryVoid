@@ -47,6 +47,7 @@ a.link:hover
 	padding:2px;
 	background-color:#04161C;
 	border:1px solid #37465a;
+  border-radius: 5px;	
 	margin-top: 2px;	
 }
 

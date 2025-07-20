@@ -16,6 +16,7 @@
 
 .slot{
     border: 1px solid #215a7a;
+  	border-radius: 5px;    
 	color:#DEEBFF;
 	padding: 3px 5px;
     position:relative;
