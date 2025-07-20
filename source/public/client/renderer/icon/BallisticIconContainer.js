@@ -46,7 +46,7 @@ window.BallisticIconContainer = function () {
 
         generateBallisticLines.call(this);
         generateTerrainHexes.call(this, gamedata);
-        //generateReinforcementHexes.call(this, gamedata);
+        generateReinforcementHexes.call(this, gamedata);
     };
 
     function generateBallisticLines() {
@@ -98,16 +98,16 @@ window.BallisticIconContainer = function () {
         });
     }
 
-	/*
+	
     function generateReinforcementHexes(gamedata) {
         gamedata.ships
-            .filter(ship => shipManager.getTurnDeployedIcon(ship) > gamedata.turn)
-            .filter(ship => gamedata.isMyorMyTeamShip(ship))
+            .filter(ship => shipManager.getTurnDeployed(ship) == gamedata.turn && gamedata.turn > 1 && gamedata.gamephase > -1)
+            //.filter(ship => gamedata.isMyorMyTeamShip(ship))
             .forEach(ship => {
                 const pos = shipManager.getShipPosition(ship);
                 const posGame = this.coordinateConverter.fromHexToGame(pos);
-                const turnDeploys = shipManager.getTurnDeployed(ship);
-                const sprite = new BallisticSprite(posGame, "hexBlue", `Deploys on Turn ${turnDeploys}`);
+                //const turnDeploys = shipManager.getTurnDeployed(ship);
+                const sprite = new BallisticSprite(posGame, "hexBlue", `Jump Point`);
                 this.scene.add(sprite.mesh);
 
                 this.ballisticIcons.push({
@@ -122,7 +122,7 @@ window.BallisticIconContainer = function () {
                 });
             });
     }
-	*/
+	
 
     function createOrUpdateBallistic(ballistic, iconContainer, turn, replay = false) {
         const icon = getBallisticIcon.call(this, ballistic.id);
