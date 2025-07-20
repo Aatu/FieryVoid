@@ -15,7 +15,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
 </head>
 <body style="background: url('./img/webBackgrounds/aoe.jpg') no-repeat center center fixed; background-size: cover;">
 
-<header class="header">
+<header class="pageheader">
   <img src="img/logo.png" alt="Fiery Void Logo" class="logo">
   <div class="top-right-row">
     <a href="games.php">Back to Game Lobby</a>
@@ -35,7 +35,8 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                 <li><a href="#shipbornemissiles">Shipborne Missiles</a></li>
                 <li><a href="#fightermissiles">Fighter Missiles</a></li>
             </ul>
-        </li>             
+        </li>
+        <li><a href="#shells">Grome Shells</a></li>                        
         <li><a href="#enhancements">Basic Enhancements</a>
            <ul class="sub-list">
                 <li><a href="#shipenhancements">Ship Enhancements</a></li>
@@ -57,10 +58,11 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
     <!--<p>On this page, you'll find information about the various Ammo, Options and Enhancements that are available to the different factions in Fiery Void</p> -->
 
     <h3 id="missiles" style="margin-top: 20px;">Missiles</h3>
-    <p>Many factions in Fiery Void use missiles, and ships will generally come preloaded with basic ammo for their respective launchers, any missiles you buy at Fleet Selection will be in additiona to these. 
+    <p>Many factions in Fiery Void use missiles, and when you purchase a missile-carrying ship in Fleet Selection you will have the chance to purchase any missile ammo that faction has available. 
+    Ships will generally come preloaded with basic ammo for their respective launchers, so any missiles types you buy at Fleet Selection will be in additiona to these. 
     Note -  while amount of any given missile You can buy is limited by magazine size, total amount of missiles is not. 
     This means your ammo magazine may show more missiles available than it can actually hold but you cannot actually launch more missiles than magazine total. 
-    So the extra missiles purchased provide you with extra variety, but not actual extra missiles.</p>
+    Essentially, the extra missiles purchased provide you with extra variety, but not actual extra missiles in your magazine!.</p>
 
     <p>Any missile available in magazine can be fired by any launcher (that is capable of firing it), missiles are not directly tied to particular mounts. This is different for weapons that do store ammo directly on mount - but such weapons usually can only hold one kind of ammo. 
     This is particularly important for fighters (as ships' cavernous magazines are unlikely to run out during a battle). 
@@ -96,6 +98,19 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
       <li><strong>Class FH - Heavy Fighter Missile(2226/2245)</strong> - Range 5 - Damage 15 - Fire Control: +1/+3/+3 - Limited to 1 per fighter (2 per Super Heavy Fighter),</li>  
       <li><strong>Class FL - Long Range Fighter Missile (2226/2245)</strong> - Range 15 - Damage 8 - Fire Control: +3/+3/+3,</li>   
       <li><strong>Class FY - Dogfight Missile (2165)</strong> - Range 8 - Damage 6 - Fire Control: +3/+3/+3 - Cannot snap-fire in Fiery Void.</li>  
+    </ul>
+    <a class="back-to-top" href="#top">↩ Back to Top</a>
+
+    <h3 id="shells" style="margin-top: 20px;">Grome Shells</h3>
+    <p>The Grome are unique in that they have access to a several types of shell for their railguns.  These can be purchased along with a ship in the same way as missiles in Fleet Selection.
+      Whilst the amount of damage dealt will change depending on the size of railgun (Light, Medium or Heavy), the bonus effect provided by a shell will always be the same.
+    </p>
+    <ul>  
+      <li><strong>Flash Shell</strong> - Deals Plasma damage in Flash mode,</li> 
+      <li><strong>Scatter Shell</strong> - Gives pulse properties weapon with 1 shot by default, but with a grouping bonus of 25 i.e. for each 25% rolled under the % hit chance, an extra shot will hit target,</li>      
+      <li><strong>Heavy Shell</strong> - Deals extra damage,</li>  
+      <li><strong>Long Range Shell</strong> - Medium and Heavy Railguns only.  Improves range penalty, but lowers damage,</li>   
+      <li><strong>Ultra Long Range Shell</strong> - Heavy Railguns only.  Further increases range but with even lower damage.</li>  
     </ul>
     <a class="back-to-top" href="#top">↩ Back to Top</a>
 
