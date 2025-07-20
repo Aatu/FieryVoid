@@ -15,7 +15,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
 </head>
 <body style="background: url('./img/webBackgrounds/howtoplay.jpg') no-repeat center center fixed; background-size: cover;">
 
-<header class="header">
+<header class="pageheader">
   <img src="img/logo.png" alt="Fiery Void Logo" class="logo">
   <div class="top-right-row">
     <a href="games.php">Back to Game Lobby</a>
@@ -131,7 +131,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
 
     <p>Once all slots in a game have readied up, the game will begin.</p>
 
-    <p>If you haven’t loaded automatically after readying, return to the main page and click on the relevant game name in the ‘Your Active Games’ list. You will see a starmap with boxes designating deployment zones, and with each of your ships / fighter flights pictured.</p>
+    <p>If you haven’t loaded automatically after readying, return to the main page and click on the relevant game name in the ‘Your Active Games’ list to get started.</p>
 
     <a class="back-to-top" href="#top">↩ Back to Top</a>
 
@@ -139,7 +139,8 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
     <h3 id="ship-control-sheet">SHIP TOOLTIP & SHIP CONTROL SHEETS (SCS)</h3>
 
     <h4 id="shiptooltip">Ship Tooltip:</h4>
-    <p style="margin-bottom: 0px;">Hovering the mouse over a ship's or selecting it with left-click will display its tooltip, which provides the following information:</p>
+    <p style="margin-bottom: 0px;">Now that you've started a game, let's look at the main ways you'll get information about your ships.
+    Hovering the mouse over a ship's or selecting it with left-click will display its tooltip, which provides the following information:</p>
     <ul>
         <li><strong>Ship name:</strong> The name that the player assigned to the ship during list building.</li>
         <li><strong>Defense Rating (Front-Aft/Sides):</strong> The % chance for shots to hit that ship, before other adjustments. If the ship has any Defensive EW assigned, the “current” number will be less than the “base” number by 5% per point of EW.</li>
