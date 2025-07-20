@@ -91,6 +91,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
       <li><strong>Class X - HARM Missile (2248)</strong> - Range 20 - Damage 0 - Fire Control: -/+3/+3 - Hit chance increased by 5% per point OEW and CCEW target is using, causes -1d6 scanner output next turn.</li>       
     </ul>
     <a class="back-to-top" href="#top">↩ Back to Top</a>
+    
     <h4 id="fightermissiles" style="margin-top: 20px; margin-bottom: 15px;">Fighter Missiles:</h4>       
     <ul>  
       <li><strong>Class FB - Basic Fighter Missile (2165)</strong> - Range 10 - Damage 10 - Fire Control: +3/+3/+3,</li> 
