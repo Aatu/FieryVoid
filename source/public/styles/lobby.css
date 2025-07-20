@@ -110,6 +110,14 @@
 	text-decoration:underline;
 }
 
+.faction-display-name.custom-faction {
+    color: rgba(255, 255, 0, 0.788); /* Or any other color you want for custom factions */
+}
+
+.highlight-custom-ship {
+    color: rgba(255, 255, 0, 0.788); /* or any color you prefer */
+}
+
 .mediumSize{
     width:200px;
     text-align: center;
