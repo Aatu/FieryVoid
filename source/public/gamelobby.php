@@ -307,7 +307,7 @@
   <header class="pageheader">
     <img src="img/logo.png" alt="Fiery Void Logo" class="logo">
     <div class="top-right-row">
-      <a href="games.php">Back to Game Lobby</a>        
+      <a href="games.php">Back to Lobby</a>        
       <a href="logout.php" class="btn btn-primary">Logout</a>
     </div>
   </header>
@@ -487,22 +487,22 @@ if ($asteroids == false && $moons == false) {
 
 <div class="lobbyheader" style="margin-bottom: 10px; margin-top: 15px">RULES & INFO</div>
 
-<a href="./factions-tiers.php" target="_blank" style="text-decoration: underline; font-size: 16px; color: #8bcaf2;">Fiery Void: Factions & Tiers</a> 
-<span style="font-size: 16px;"> - Overview of Fiery Void factions and their approximate strengths.</span>
+<a href="./factions-tiers.php" target="_blank" style="text-decoration: underline; font-size: 14px; color: #8bcaf2;">Fiery Void: Factions & Tiers</a> 
+<span style="font-size: 14px;"> - Overview of Fiery Void factions and their approximate strengths.</span>
 <br>
-<a href="./ammo-options-enhancements.php" target="_blank" rel="noopener noreferrer" style="text-decoration: underline; font-size: 16px; color: #8bcaf2;">Ammo, Options & Enhancements</a> 
-<span style="font-size: 16px;"> - Details of all the extras available to Fiery Void units e.g. Missiles.</span>
+<a href="./ammo-options-enhancements.php" target="_blank" rel="noopener noreferrer" style="text-decoration: underline; font-size: 14px; color: #8bcaf2;">Ammo, Options & Enhancements</a> 
+<span style="font-size: 14px;"> - Details of all the extras available to Fiery Void units e.g. Missiles.</span>
 <!--<a href="files/enhancements_list.txt" target="_blank" style="text-decoration: underline; font-size: 14px; color: #8bcaf2;">Systems & Enhancements</a> 
 <span style="font-size: 14px;"> - Details of common systems and unit enhancements e.g. Boarding Actions / Missiles.</span> -->
 <br>
 
-<a href="https://old.wheelofnames.com/fx3-uje" target="_blank" style="color: #8bcaf2; text-decoration: underline; font-size: 16px;">Tier 1</a> 
+<a href="https://old.wheelofnames.com/fx3-uje" target="_blank" style="color: #8bcaf2; text-decoration: underline; font-size: 14px;">Tier 1</a> 
 <strong style="margin: 0 3px; font-size: 16px;">|</strong> 
-<a href="https://old.wheelofnames.com/rmq-7ds" target="_blank" style="color: #8bcaf2; text-decoration: underline; font-size: 16px;">Tier 2</a>
+<a href="https://old.wheelofnames.com/rmq-7ds" target="_blank" style="color: #8bcaf2; text-decoration: underline; font-size: 14px;">Tier 2</a>
 <strong style="margin: 0 3px; font-size: 16px;">|</strong> 
-<a href="https://old.wheelofnames.com/sgd-5zq" target="_blank" style="color: #8bcaf2;  text-decoration: underline; font-size: 16px;">Tier 3</a>
+<a href="https://old.wheelofnames.com/sgd-5zq" target="_blank" style="color: #8bcaf2;  text-decoration: underline; font-size: 14px;">Tier 3</a>
 <span style="margin-left: 3px; margin-right: 3px;">-</span>
-<span style="font-size: 16px;">Random Fleet Selection Wheels</span> 
+<span style="font-size: 14px;">Random Fleet Selection Wheels</span> 
 <br><br>
 
 
