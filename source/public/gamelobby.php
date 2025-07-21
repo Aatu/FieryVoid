@@ -210,30 +210,47 @@
             ajaxInterface.startPollingGamedata();
 
             // ✅ Unified filter logic for factions based on Tier and Custom
-function updateTierFilter() {
-    const selectedTiers = $('.tier-filter:checked').map(function () {
-        return $(this).data('tier');
-    }).get();
+        function updateTierFilter() {
+            const selectedTiers = $('.tier-filter:checked').map(function () {
+                return $(this).data('tier');
+            }).get();
 
-    const showCustom = $('#toggleCustom').is(':checked');
+            const showCustom = $('#toggleCustom').is(':checked');
 
-    $('.faction').each(function () {
-        const tier = $(this).data('tier');
-        const isCustom = $(this).data('custom') === true || $(this).data('custom') === "true";
+            $('.faction').each(function () {
+                const tier = $(this).data('tier');
+                const isCustom = $(this).data('custom') === true || $(this).data('custom') === "true";
 
-        const isVisible = selectedTiers.includes(tier) && (showCustom || !isCustom);
-        $(this).toggle(isVisible);
-    });
-}
+                const isVisible = selectedTiers.includes(tier) && (showCustom || !isCustom);
+                $(this).toggle(isVisible);
+            });
+
+            // Hide/show group headers depending on whether any following factions are visible
+            $('.factiongroup-header').each(function () {
+                let header = $(this);
+                let hasVisibleFaction = false;
+
+                let next = header.next();
+                while (next.length && !next.hasClass('factiongroup-header')) {
+                    if (next.hasClass('faction') && next.is(':visible')) {
+                        hasVisibleFaction = true;
+                        break;
+                    }
+                    next = next.next();
+                }
+
+                header.toggle(hasVisibleFaction);
+            });
+        }
 
             // ✅ Listen to Tier and Custom Faction checkboxes
             $('.tier-filter').on('change', updateTierFilter);
 
 
-$('#toggleCustom').on('change', function () {
-    updateTierFilter();
-    gamedata.applyCustomShipFilter();
-});
+            $('#toggleCustom').on('change', function () {
+                updateTierFilter();
+                gamedata.applyCustomShipFilter();
+            });
 
 
 
@@ -242,21 +259,21 @@ $('#toggleCustom').on('change', function () {
 
 
             // ✅ Select All / None Tier checkboxes + toggle customs
-$('.tier-select-all').on('click', function () {
-    $('.tier-filter').prop('checked', true);
-    $('#toggleCustom').prop('checked', true).trigger('change');
-    $('#isdFilter').val('');
-    gamedata.applyCustomShipFilter();
-    updateTierFilter();
-});
+            $('.tier-select-all').on('click', function () {
+                $('.tier-filter').prop('checked', true);
+                $('#toggleCustom').prop('checked', true).trigger('change');
+                $('#isdFilter').val('');
+                gamedata.applyCustomShipFilter();
+                updateTierFilter();
+            });
 
-$('.tier-select-none').on('click', function () {
-    $('.tier-filter').prop('checked', false);
-    $('#toggleCustom').prop('checked', false).trigger('change');
-    $('#isdFilter').val('');
-    gamedata.applyCustomShipFilter();
-    updateTierFilter();
-});
+            $('.tier-select-none').on('click', function () {
+                $('.tier-filter').prop('checked', false);
+                $('#toggleCustom').prop('checked', false).trigger('change');
+                $('#isdFilter').val('');
+                gamedata.applyCustomShipFilter();
+                updateTierFilter();
+            });
 
             // Sanitize input on each keystroke, but don't apply filter yet
             $("#isdFilter").on("input", function () {
@@ -480,9 +497,9 @@ if ($asteroids == false && $moons == false) {
 <br>
 
 <a href="https://old.wheelofnames.com/fx3-uje" target="_blank" style="color: #8bcaf2; text-decoration: underline; font-size: 14px;">Tier 1</a> 
-<strong style="margin: 0 2.5px;">|</strong> 
+<strong style="margin: 0 2.5px; font-size: 16px;">|</strong> 
 <a href="https://old.wheelofnames.com/rmq-7ds" target="_blank" style="color: #8bcaf2; text-decoration: underline; font-size: 14px;">Tier 2</a>
-<strong style="margin: 0 2.5px;">|</strong> 
+<strong style="margin: 0 2.5px; font-size: 16px;">|</strong> 
 <a href="https://old.wheelofnames.com/sgd-5zq" target="_blank" style="color: #8bcaf2;  text-decoration: underline; font-size: 14px;">Tier 3</a>
 <span style="margin-left: 3px; margin-right: 3px;">-</span>
 <span style="font-size: 14px;">Random Fleet Selectors</span> 
@@ -518,7 +535,7 @@ if ($asteroids == false && $moons == false) {
             <span class="panelsubheader">/</span>
             <span class="panelsubheader max">0</span><span class="panelsubheader">pts</span>
             <span class="panelsmall" style="margin-left: 5px;">(</span>
-            <span class="panelsmall remaining">0</span><span class="panelsmall">pts remaining</span>
+            <span class="panelsmall remaining">0</span><span class="panelsmall">pts left</span>
             <span class="panelsmall">)</span>
         </div>
     </div>
