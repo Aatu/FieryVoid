@@ -36,10 +36,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
            <ul class="sub-list">
                 <li><a href="#centauri">CENTAURI REPUBLIC</a></li>
                 <li><a href="#dilgar">DILGAR IMPERIUM</a></li>                
-                <li><a href="#ea">EARTH ALLIANCE</a></li>
-                <li><a href="#minbari">MINBARI FEDERATION</a></li>
-                <li><a href="#narn">NARN REGIME</a></li>
-                <li><a href="#orieni">ORIENI IMPERIUM</a></li>                   
+                <li><a href="#ea">EARTH ALLIANCE</a></li>                  
                 <li><a href="#league">LEAGUE OF NON-ALIGNED WORLDS</a>
                     <ul class="sub-sub-list" style="padding-inline-start: 20px;">
                         <li><a href="#abbai">Abbai Matriachate</a></li>
@@ -58,6 +55,9 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                         <li><a href="#vree">Vree Conglomerate</a></li>                                                                     
                     </ul>            
                 </li>
+                <li><a href="#minbari">MINBARI FEDERATION</a></li>
+                <li><a href="#narn">NARN REGIME</a></li>
+                <li><a href="#orieni">ORIENI IMPERIUM</a></li>                 
                 <li><a href="#raiders">RAIDERS & PRIVATEERS</a></li>                               
             </ul>
         </li>
