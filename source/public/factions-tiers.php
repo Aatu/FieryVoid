@@ -94,13 +94,14 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         <li><a href="#otherfactions">OTHER FACTIONS</a>
            <ul class="sub-list">
                 <li><a href="#civilians">CIVILIANS</a></li>
-                <li><a href="#custom">CUSTOM SHIPS</a></li>
+                <li><a href="#terrain">STREIB</a></li>                
                 <li><a href="#terrain">TERRAIN</a></li>
             </ul>
         </li>                               
         <li><a href="#customfactions">CUSTOM FACTIONS</a>
            <ul class="sub-list">
-                <li><a href="#bsg">BSG</a></li>  
+                <li><a href="#bsg">BSG</a></li>
+                <li><a href="#custom">CUSTOM SHIPS</a></li>                  
                 <li><a href="#nexus">NEXUS</a></li>
                 <li><a href="#escalation">ESCALATION WARS</a></li>
                 <li><a href="#starwars">STAR WARS</a></li>
@@ -991,8 +992,8 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         Not a real faction, but rather a convenient place to store all the various non-combatant scenario units.</p>                                                                                     
     <a class="back-to-top" href="#top">↩ Back to Top</a> 
 
-    <h4 id="customs" style="">CUSTOM SHIPS</h4>
-    <p>A place to store customs ships, either because they are unofficial designs created by players, or one-off campaign/scenario ships. Not a real faction.</p>                                                                                     
+    <h4 id="streib" style="">STREIB</h4>
+    <p>Very strangely balanced faction which relies on disruption more than straight-up damage.  Their strange tactics and increibly high armour makes them unsuitable for pick-up games.</p>                                                                                     
     <a class="back-to-top" href="#top">↩ Back to Top</a> 
 
     <h4 id="terrain" style="">TERRAIN</h4>
@@ -1016,6 +1017,10 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
     <h5>Raptor</h5>
         <li>The Raptor super-heavy fighter is a support unit that provides +5 initiative to friendly Colonial fighters.</li>                            
     <a class="back-to-top" href="#top">↩ Back to Top</a>
+
+    <h4 id="customs" style="">CUSTOM SHIPS</h4>
+    <p>A place to store customs ships, either because they are unofficial designs created by players, or one-off campaign/scenario ships. Not a real faction.</p>                                                                                     
+    <a class="back-to-top" href="#top">↩ Back to Top</a> 
 
 
     <h4 id="escalationwars" style="">ESCALATION WARS</h4>
