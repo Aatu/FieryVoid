@@ -30,6 +30,13 @@
     margin-left: 15px;
 }
 
+.scenariolabel{
+    font-weight:bold;
+    font-size:12px; 
+    margin:2px 0px; 
+    color: #a3c0f5;
+}
+
 .slot span{
 	padding-right:5px;
 }
@@ -78,6 +85,13 @@
 	margin-left:20px;
 }
 
+.factiongroup-header{
+    font-weight:bold;
+    font-size:16px; 
+    margin:8px 5px; 
+    color: #6495ED;
+} 
+
 .store .faction
 {
     cursor:pointer;
@@ -114,8 +128,9 @@
 }
 
 .highlight-custom-ship {
-    color: rgba(255, 255, 0, 0.767); /* Or any other color you want for custom factions */
+    color: rgba(255, 255, 0, 0.767); /* Or any other color you want for custom factions  #FFA080 */
 }
+
 
 .mediumSize{
     width:200px;
@@ -156,7 +171,7 @@
 }
 
 .selectslot{
-    color:#ffaa00;   
+    color:#FFA080;   
     display:none;
 }
 
