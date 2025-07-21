@@ -24,10 +24,10 @@ window.gamedata = {
 		var powerRating = '';
 		switch(factionName) {
 		  case 'Abbai Matriarchate':
-			powerRating = 'Tier 2; Major Faction';
+			powerRating = 'Tier 2; League Faction';
 			break;
 		  case 'Abbai Matriarchate (WotCR)':
-			powerRating = 'Tier 3; Major Faction';
+			powerRating = 'Tier 3; League Faction';
 			break;
 		  case 'Alacan Republic':
 			powerRating = 'Tier 3; Minor Faction';
@@ -39,10 +39,10 @@ window.gamedata = {
 			powerRating = 'Tier 2; Minor Faction';
 			break;
 		  case 'Brakiri Syndicracy':
-			powerRating = 'Tier 2; Major Faction';
+			powerRating = 'Tier 2; League Faction';
 			break;
 		  case 'Cascor Commonwealth':
-			powerRating = 'Tier 3; Major Faction';
+			powerRating = 'Tier 3; League Faction';
 			break;
 		  case 'Centauri Republic':
 			powerRating = 'Tier 1; Major Faction';
@@ -60,7 +60,7 @@ window.gamedata = {
 			powerRating = 'Tier 2; Minor Faction';
 			break;
 		  case 'Custom Ships':
-			powerRating = "Custom Designs, not a faction";
+			powerRating = "Tier Other, Custom";
 			break;
 		  case 'Deneth Tribes':
 			powerRating = 'Tier 2; Minor Faction';
@@ -75,10 +75,10 @@ window.gamedata = {
 			powerRating = 'Tier 1, Minor Custom faction';
 			break;
 		  case 'Drazi Freehold':
-			powerRating = 'Tier 1; Major Faction';
+			powerRating = 'Tier 1; League Faction';
 			break;
 		  case 'Drazi Freehold (WotCR)':
-			powerRating = 'Tier 2; Major Faction';
+			powerRating = 'Tier 2; League Faction';
 			break;
 		  case 'Earth Alliance':
 			powerRating = 'Tier 1; Major Faction';
@@ -93,22 +93,22 @@ window.gamedata = {
 			powerRating = 'Tier 3; Major Faction';
 			break;
 		  case 'Gaim Intelligence':
-			powerRating = 'Tier 1; Major Faction';
+			powerRating = 'Tier 1; League Faction';
 			break;
 		  case 'Grome Autocracy':
-			powerRating = 'Tier 3; Major Faction';
+			powerRating = 'Tier 3; League Faction';
 			break;
 		  case 'Hurr Republic':
-			powerRating = 'Tier 3; Major Faction';
+			powerRating = 'Tier 3; League Faction';
 			break;
 		  case 'Hyach Gerontocracy':
-			powerRating = 'Tier 1; Major Faction';
+			powerRating = 'Tier 1; League Faction';
 			break;
 		  case 'Ipsha Baronies':
-			powerRating = 'Tier 3; Major Faction';
+			powerRating = 'Tier 3; League Faction';
 			break;
 		  case 'Kor-Lyan Kingdoms':
-			powerRating = 'Tier 1; Major Faction';
+			powerRating = 'Tier 1; League Faction';
 			break;
 		  case 'Llort': //actually no full name in the sourcebook (RPP1), it's just Llort!
 			powerRating = 'Tier 1; Minor Faction';
@@ -135,7 +135,7 @@ window.gamedata = {
 			powerRating = 'Tier 1; Major Faction';
 			break;
 		  case "Pak'ma'ra Confederacy":
-			powerRating = 'Tier 2; Major Faction';
+			powerRating = 'Tier 2; League Faction';
 			break;
 		  case 'Raiders':
 			powerRating = 'Tier 2; Major Faction';
@@ -159,7 +159,7 @@ window.gamedata = {
 			powerRating = 'Tier Ancients, Custom faction';
 			break;
 		  case 'Torata Regency':
-			powerRating = 'Tier 1; Major Faction';
+			powerRating = 'Tier 1; League Faction';
 			break;
 		  case 'Usuuth Coalition':
 			powerRating = 'Tier 3; Minor Faction';
@@ -168,7 +168,7 @@ window.gamedata = {
 			powerRating = 'Tier Ancients';
 			break;
 		  case 'Vree Conglomerate':
-			powerRating = 'Tier 1; Major Faction';
+			powerRating = 'Tier 1; League Faction';
 			break;
 		  case 'Yolu Confederation':
 			powerRating = 'Tier 1; Minor Faction';
@@ -180,10 +180,10 @@ window.gamedata = {
 			powerRating = 'Tier 3; Custom faction';
 			break;
 		  case 'ZEscalation Civilian':
-			powerRating = 'Tier 3; Civilian designs for scenarios, custom';
+			powerRating = 'Tier Other, Custom';
 			break;
 		  case 'ZEscalation Chouka Raider':
-			powerRating = 'Tier 2; Not balanced, custom faction';
+			powerRating = 'Tier 2; Not balanced, Custom faction';
 			break;
 		  case 'ZEscalation Chouka Theocracy':
 			powerRating = 'Tier 2; Custom faction';
@@ -1449,6 +1449,7 @@ parseFactions: function parseFactions(jsonFactions) {
 
     const groups = {
         "Major Factions": [],
+        "League of Non-Aligned Worlds": [],		
         "Minor Factions": [],
         "Ancients": [],
         "Other Factions": [],
@@ -1461,9 +1462,10 @@ parseFactions: function parseFactions(jsonFactions) {
         const isCustom = lowerPower.includes("custom");
 
         // ✅ Grouping prioritizes Minor > Major > Ancients > Other > Custom
-        let groupName = "Other Factions";
+        let groupName = "Other Factions";	
         if (lowerPower.includes("minor")) groupName = "Minor Factions";
         else if (lowerPower.includes("major")) groupName = "Major Factions";
+        else if (lowerPower.includes("league")) groupName = "League of Non-Aligned Worlds";			
         else if (lowerPower.includes("ancients")) groupName = "Ancients";
         else if (isCustom) groupName = "Custom Factions";
 
@@ -1474,7 +1476,7 @@ parseFactions: function parseFactions(jsonFactions) {
     }
 
     // ✅ Fixed order of groups
-    const groupOrder = ["Major Factions", "Minor Factions", "Ancients", "Other Factions", "Custom Factions"];
+    const groupOrder = ["Major Factions", "League of Non-Aligned Worlds", "Minor Factions", "Ancients", "Other Factions", "Custom Factions"];
 
     for (let groupName of groupOrder) {
         const entries = groups[groupName];
