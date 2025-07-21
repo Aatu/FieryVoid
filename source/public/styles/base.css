@@ -91,7 +91,7 @@ a.link:hover
 }
 
 .panelsmall {
-    font-size:14px; /* Reduces the font size to 80% of the original */
+    font-size:15px; 
 /*    color: #00caca;    Example color (cyan), choose your desired color */
 	color:#a3c0f5;
 	font-weight: 525;

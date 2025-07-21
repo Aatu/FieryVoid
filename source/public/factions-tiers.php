@@ -37,30 +37,30 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                 <li><a href="#centauri">CENTAURI REPUBLIC</a></li>
                 <li><a href="#dilgar">DILGAR IMPERIUM</a></li>                
                 <li><a href="#ea">EARTH ALLIANCE</a></li>                  
-                <li><a href="#league">LEAGUE OF NON-ALIGNED WORLDS</a>
-                    <ul class="sub-sub-list" style="padding-inline-start: 20px;">
-                        <li><a href="#abbai">Abbai Matriachate</a></li>
-                        <li><a href="#brakiri">Brakiri Syndicracy</a></li>
-                        <li><a href="#cascor">Cascor Commonwealth</a></li>
-                        <li><a href="#drazi">Drazi Freehold</a></li>   
-                        <li><a href="#gaim">Gaim Intelligence</a></li>
-                        <li><a href="#grome">Grome Autocracy</a></li>
-                        <li><a href="#hurr">Hurr Republic</a></li>
-                        <li><a href="#hyach">Hyach Gerontocracy</a></li> 
-                        <li><a href="#ipsha">Ipsha Baronies</a></li>                                                   
-                        <li><a href="#korlyan">Kor-Lyan Kingdoms</a></li>
-                        <li><a href="#markab">Markab Theocracy</a></li>
-                        <li><a href="#pakmara">Pak'ma'ra Confederacy</a></li>                
-                        <li><a href="#torata">Torata Regency</a></li>  
-                        <li><a href="#vree">Vree Conglomerate</a></li>                                                                     
-                    </ul>            
-                </li>
                 <li><a href="#minbari">MINBARI FEDERATION</a></li>
                 <li><a href="#narn">NARN REGIME</a></li>
                 <li><a href="#orieni">ORIENI IMPERIUM</a></li>                 
                 <li><a href="#raiders">RAIDERS & PRIVATEERS</a></li>                               
             </ul>
         </li>
+            <li><a href="#league">LEAGUE OF NON-ALIGNED WORLDS</a>
+            <!--<ul class="sub-sub-list" style="padding-inline-start: 20px;">-->
+           <ul class="sub-list">   
+                <li><a href="#abbai">ABBAI MATRIARCHATE</a></li>
+                <li><a href="#brakiri">BRAKIRI SYNDICRACY</a></li>
+                <li><a href="#cascor">CASCOR COMMONWEALTH</a></li>
+                <li><a href="#drazi">DRAZI FREEHOLD</a></li>   
+                <li><a href="#gaim">GAIM INTELLIGENCE</a></li>
+                <li><a href="#grome">GROME AUTOCRACY</a></li>
+                <li><a href="#hurr">HURR REPUBLIC</a></li>
+                <li><a href="#hyach">HYACH GERONTOCRACY</a></li> 
+                <li><a href="#ipsha">IPSHA BARONIES</a></li>                                                   
+                <li><a href="#korlyan">KOR-LYAN KINGDOMS</a></li>
+                <li><a href="#pakmara">PAK'MA'RA CONFEDERACY</a></li>                
+                <li><a href="#torata">TORATA REGENCY</a></li>  
+                <li><a href="#vree">VREE CONGLOMERATE</a></li>                                                                     
+            </ul>            
+        </li>        
     </ul>    
     <ul class="faction-list">          
         <li><a href="#minorfactions">MINOR FACTIONS</a>
@@ -193,10 +193,128 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
     <a class="back-to-top" href="#top">↩ Back to Top</a>
 
 
+<h4 id="minbari" style="">MINBARI FEDERATION</h4>
+    <p>The oldest of the Younger Races and the most technoloigcally advanced.  This is demonstrated by their powerful Jammer system, and high damage weaponry.  
+    Minbari fleets have few apparent weaknesses at first, but the cost of their ships means they will usually be out-numbered on the battlefield which can be a distinct disadvantage.</p>        
+        <h5>Jammer</h5>
+            <li>A powerful defensive technology, it prevents enemies from gaining a ‘lock-on’ with their Electronic Warfare, meaning that range penalties against Jammer-protected units are always doubled.  
+            It also halves ballistic weapons launch range. Minbari themselves ignore Jammer, as do races equipped with Advanced Scanners e.g. Ancients.  
+            Note, on Minbari fighters, Jammer protection does not stack with jinking.</li> 
+       <h5>Gravitic Drives</h5>
+            <li>Allows ships to undertake manoeuvres even while pivoted/pivoting using thrusters appropriate for their current orientation.  
+            Gravitic Thrusters also ignore the first "Efficiency Reduced" reduced critical they receive, increasing their resistance to damage.</li>
+       <h5>Antimatter Converter</h5>
+            <li>A weapon which deals damage based on how well it hits its target e.g. hit chance minus the dice result on its roll to hit.  
+            Uses Flash mode, so 25% damage is caused to other units on the same hex as any target hit.</li>
+       <h5>Gravitic Net</h5>
+            <li>In B5 Wars this weapon was used to move a target, and was fired before regular weapon declaration.	
+            This weapon is not implemented in Fiery Void yet, and any ships that were equipped with it use replacement weapons and are marked a ‘Semi-Custom’.</li>
+       <h5>Electro-Pulse Gun</h5>
+            <li>Very short range, slow firing weapon that only affects fighters. However, it can make called shots at no penalty.</li>
+       <h5>White Stars</h5>
+            <li>The mainstay of Army of Light is available on Minbari fleet list. It's difficult to handle, but in skilled hands extremely potent unit, 
+            equipped with Vorlon (see their list) technologies nominally beyond reach of Younger Races (e.g. Adaptive Armor, EM Shields, and in case of Command variant - even self repair).</li>
+            <li>White Stars may be used as ISA/Army of Light/White Star Fleet as well. Such a fleet is NOT tournament legal, and for good reason - but may be an interesting scenario piece (or challenge). 
+            It's also far too strong to be used in regular pickup battles without asking you opponenet first!
+            When used in this way, only White Stars (and any Combat Flyers they can carry) can be deployed.  Be warned though - in skilled hands such a fleet is simply overwhelming.</li>                                                                         
+
+
+    <h4 id="minbari" style="">MINBARI PROTECTORATE</h4>
+    <p>This is a part of the Minbari Federation, but consists of several non-Minbari members that are overseen by the Federation. They have a degree of autonomy, 
+    including providing local defense to their worlds.</p>
+    <p>The Protectorate uses older Minbari hulls with the notable difference being that units do not come equipped with the Jammer system. 
+    The Tinashi is their most modern hull along with a handful of Nials.</p>
+    <p>The Protectorate generally uses the Tishat medium fighter. Their fleet options are rather limited based on the number of hulls and lacking ways to bring fighters outside a Morshin carrier. 
+    Their one noted conflict is the Pseudo-War with the Imperial Star Legion raider group.</p>                                                                   
+    <a class="back-to-top" href="#top">↩ Back to Top</a>
+
+
+    <h4 id="narn" style="">NARN REGIME</h4>
+    <p>A former Centauri colony, the Narn Regime is now a galactic power in it's own right.  What their vessels lack in ourright technology they makes up for powerful weaponry and sheer survivability.</p>        
+        <h5>Energy Mines</h5>
+            <li>A hex-targeted weapon, which causes heavy damage to everything on hex hit and splash to everything in adjacent hexes, including allied units.  Devastating against fighters, and when used en masse (6+ Energy Mine launchers can easily saturate an area).</li>
+            <li>Opponents will not be able to see where you have targeted your Energy Mines until after firing is resolved, just the fact that they've been launched. Launched mines also have a 25% chance to scatter or dissipate harmlessly.</li> 
+        <h5>Pulsar Mines</h5>
+            <li>An automated short-range weapon that fires at passing fighters.  The weapon will automatically track enemy fighters during the Movement Phase, and attack any that came within arc and range during their movement in the Firing Phase.  It can fire up to 18 shots per turn.</li> 
+    <a class="back-to-top" href="#top">↩ Back to Top</a>            
+
+
+    <h4 id="orieni" style="">ORIENI IMPERIUM</h4>
+    <p>The arch-nemesis during the Wars of the Centauri Republic, Orieni fleets are typified by the large amount of matter weaponry they bring, their large range of medium ships and their Hunter-Killer drones.
+     A peculiar faction in many ways as it can both feel oppresive to play against due to their damage potential, but also difficult to win with if you are not experienced with them.   
+    </p>        
+        <h5>Hunter-Killer (HK) Drones</h5>
+            <li>Orieni long-range weapon of choice, and probably their most outstanding feature. They're essentially large missiles with a degree of control, using fighter rules and attacking by ramming enemies.</li>
+            <li> Hunter-Killers are controlled by Control Nodes on Orieni ships. If there is insufficient control HKs can operate autonomously, which this limits their performance by applying a significant Initiative penalty.
+            This loss of control is exercised proportionally - e.g. if there are 12 HKs on map and only 6 can be fully controlled, then all 12 receive half the penalties., but no other penalties. 
+            In addition, HKs suffer Initiative penalties during the first 2 turns of the game (but start deployed like any other fighter).    
+            </li>
+            <li>When attempting to ram enemies, Hunter-Killers receive a penalty to their hit chance based on their own speed (the faster they are moving, the worse this). 
+            Note - As ramming attacks happen before other firing, HKs that achieved ramming distance cannot be shot down before they attempt to ram.
+            </li>                        
+        <h5>Light Gatling Railgun</h5>
+            <li>Orieni Templar's gun is Matter-based,making it a threat to even the biggest ships. The downside is it's limited to 6 shots before running out of ammunition.  More ammunition can be bought as an enhancements during Fleet Selection.</li> 
+        <h5>Strike Force</h5>
+            <li>The Orieni military is split into a few branches and a few ships have different limitations when deployed as part of Strike Force detachment instead of the regular navy, Hand of the Blessed. </li>
+            <li>Assume any force led by Paragon to be Strike Force, while lesser command ships lead Hand of the Blessed. Note - The in-game fleet checker does not take this rule into account.</li>                                          
+    <a class="back-to-top" href="#top">↩ Back to Top</a>
+
+
+    <h4 id="raiders" style="">RAIDERS & PRIVATEERS</h4>
+    <p>The Raiders & Privateers faction is not a single faction with a standardized force list. Instead it represents the various kinds of pirates, privateers, and wanderers in the Babylon 5
+    universe.</p>
+    <p>Specific raider groups will be listed in the unit name, e.g. ‘Centauri Privateer’, meaning that  any unit without a faction prefix is considered a generic raider and can be fielded by any faction. 
+        It is near-impossible to create a Fleet Checker for all of the various combinations within this faction, 
+        so a bit of player responsibility is required in order to choose an appropriate fleet. Summaries of the Raider groups in Fiery Void are listed below:</p>
+       <h5>Brakiri Shokhan</h5>
+            <li>The Shokhan grew out of various Brakiri groups that did not integrate into the modern Brakiri society. Many Shokhan operate purely as raiders, 
+                but it is suspected that some receive outside support from Brakiri corporations or other entities and fulfill the role of privateers and sometimes mercenaries.</li>
+            <li>The Shokhan have three Brakiri specific ships. They also operate a limited selection of generic raider units including the Aspar, Galleas, Hawk, Ma'Ri'e, Felucca, and Xebec. 
+                The Delta-V and Folshot-A are the two fighter designs operated by the Shokhan.</li>   
+       <h5>Centauri Privateers</h5>
+            <li>Generally led by lesser nobles of the great houses or those from minor houses looking to advance, Centauri privateers have existed throughout the Centauri's time in space. 
+                Originally, they operated against other Houses, but focused more on the edges of Centauri space as other powers were discovered. </li>
+            <li>In addition to Centauri hulls, these privateers use a limited selection of the generic raider hulls, including the Ma'Ri'e, Ma'Ri'u, Pinnace, Uid'Ac'e, Felucca, and Xebec. 
+                Centauri privateers use Delta-Vs almost exclusively, but have restricted access to Razik fighters or older Centauri fighters like the Glaive and Phalen.</li>
+       <h5>Drazi Hunters</h5>
+            <li>Derived from the Drazi penchant of hunting, it is typically assembled from Drazi disaffected with traditional Drazi society. 
+                The Hunters operate more as a raider group than privateers, they are not officially endorsed by the Drazi. However, their members are welcome in Drazi space to a limited degree.</li>
+            <li>They operate three units of Drazi design as well as a few generic raider hulls. These are the Aspar (limited), Galleon, Hawk, Ma'Ri'e, Pinnace, and Wolf Raider (limited). 
+                Drazi Hunters only employ Cobra and Delta-V fighters.</li>                     
+       <h5>Independent Mercenaries League (IML)</h5>
+            <li>The IML formed during the Dilgar War, originally by Belt Alliance forces out of work. They have been supported since then by various League powers 
+                and typically have better access to technology than traditional raider groups.</li>
+            <li>The IML fields three unique units, the Attack Cruiser,  Armed Transport, and Missile Frigate along with variants of each.</li>
+            <li>The IML use Armed Shuttles and Delta-Vs almost exclusively, but have restricted access to Star Snakes and Lellat fighters.</li>   
+       <h5>Imperial Star Legion</h5>
+            <li>A raider group that supported the Army of Light int he Shadow War, but then had bigger plans for the future and wound up fighting the Minbari Protectorate.</li>
+            <li>They operate several converted hulls from the main powers including a Lias, two Tethys, a Kutai, a Mograth, two Vorchans, two Sho'Kos, and a Thentus.</li>
+            <li>The Junkyard Dogs primarily used ArmedShuttles, Delta-Vs, and Double-Vs but may also field a flight of Raziks or Goriths.</li>                                                         
+       <h5>Junkyard Dogs (JYD)</h5>
+            <li>This group operates primarily within Centauri, Earth, and Narn space and in addition to generic raider hulls.</li>
+            <li>The Legion has three unique hulls, the Starjammer, Gladius, and Augustus and is characterized by using heavy weapons and fielding fusion cannons.</li>
+            <li>The Legion operated all of the generic raider units at various times in their existence. The Legion uses Delta-Vs and Double-Vs fighters exclusively.</li>   
+       <h5>Narn Privateers</h5>
+            <li>Formed out of Narn elements considered too radical or unruly to integrate with the newly free Narn Regime, the Narn sent these privateers out to continue to strike at the Centauri. 
+                The more organized groups received greater support from the Narn Regime and fulfilled many missions ranging from traditional raiding to intelligence gathering.</li>
+            <li>Narn privateers operate three specific Narn units as well as a selection of generic raider designs. These include the Brigantine (limited), Hawk, Ma'Ri'u, Pinnace, and Xebec. 
+            They primarily use Delta-V and Double-V fighters and a restricted number of Narn Goriths.
+            </li>   
+       <h5>Tirrith Free State (TFS)</h5>
+            <li>Born out of an EA base built in the Tirrith system from the Dilgar War, the raiders that took over the base ultimately formed an independent star system at the confluence of multiple powers. 
+                The TFS is now less of a raider group and more a tiny nation.</li>
+            <li>The TFS has three unique hulls including the Blockade Runner, System Monitor, and Freedom Base. Beyond this, the TFS will utilize any generic raider unit.</li>
+            <li>The majority of TFS fighters are Delta-Vs, but they can field Armed Shuttles, Double-Vs, Goriths, Star Snakes, and Koists. The TFS only use Drazi Dudroma defense satellites.</li>   
+        <a class="back-to-top" href="#top">↩ Back to Top</a>
+
+
+
     <h4 id="league" style="">LEAGUE OF NON-ALIGNED WORLDS</h4>
     <p>The League of Non-Aligned Worlds is an group of 14 playable factions that were released through the Bablyon 5 Wars books, Militaries of the League 1 and 2. 
-    The factions have a huge variety of special abilites and playstyles, and whilst their relative power level varies dramatically from faction to faction they all be alot of fun to play.   
+    The factions have a huge variety of special abilites and playstyles, and whilst their relative power level varies dramatically from faction to faction they can all be alot of fun to play.   
     </p> 
+    <a class="back-to-top" href="#top">↩ Back to Top</a>
+
 
     <h4 id="abbai" style="">ABBAI MATRIARCHATE</h4>
        <h5>Gravitic Shield</h5>
@@ -517,122 +635,6 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                 which had the limitation that all weapons in one turret had to engage targets within 60 degrees of each other - and upon being hit, a turret may become locked. 
                 These limitations are not present in Fiery Void.</li>                                                 
     <a class="back-to-top" href="#top">↩ Back to Top</a>
-
-<h4 id="minbari" style="">MINBARI FEDERATION</h4>
-    <p>The oldest of the Younger Races and the most technoloigcally advanced.  This is demonstrated by their powerful Jammer system, and high damage weaponry.  
-    Minbari fleets have few apparent weaknesses at first, but the cost of their ships means they will usually be out-numbered on the battlefield which can be a distinct disadvantage.</p>        
-        <h5>Jammer</h5>
-            <li>A powerful defensive technology, it prevents enemies from gaining a ‘lock-on’ with their Electronic Warfare, meaning that range penalties against Jammer-protected units are always doubled.  
-            It also halves ballistic weapons launch range. Minbari themselves ignore Jammer, as do races equipped with Advanced Scanners e.g. Ancients.  
-            Note, on Minbari fighters, Jammer protection does not stack with jinking.</li> 
-       <h5>Gravitic Drives</h5>
-            <li>Allows ships to undertake manoeuvres even while pivoted/pivoting using thrusters appropriate for their current orientation.  
-            Gravitic Thrusters also ignore the first "Efficiency Reduced" reduced critical they receive, increasing their resistance to damage.</li>
-       <h5>Antimatter Converter</h5>
-            <li>A weapon which deals damage based on how well it hits its target e.g. hit chance minus the dice result on its roll to hit.  
-            Uses Flash mode, so 25% damage is caused to other units on the same hex as any target hit.</li>
-       <h5>Gravitic Net</h5>
-            <li>In B5 Wars this weapon was used to move a target, and was fired before regular weapon declaration.	
-            This weapon is not implemented in Fiery Void yet, and any ships that were equipped with it use replacement weapons and are marked a ‘Semi-Custom’.</li>
-       <h5>Electro-Pulse Gun</h5>
-            <li>Very short range, slow firing weapon that only affects fighters. However, it can make called shots at no penalty.</li>
-       <h5>White Stars</h5>
-            <li>The mainstay of Army of Light is available on Minbari fleet list. It's difficult to handle, but in skilled hands extremely potent unit, 
-            equipped with Vorlon (see their list) technologies nominally beyond reach of Younger Races (e.g. Adaptive Armor, EM Shields, and in case of Command variant - even self repair).</li>
-            <li>White Stars may be used as ISA/Army of Light/White Star Fleet as well. Such a fleet is NOT tournament legal, and for good reason - but may be an interesting scenario piece (or challenge). 
-            It's also far too strong to be used in regular pickup battles without asking you opponenet first!
-            When used in this way, only White Stars (and any Combat Flyers they can carry) can be deployed.  Be warned though - in skilled hands such a fleet is simply overwhelming.</li>                                                                         
-
-
-    <h4 id="minbari" style="">MINBARI PROTECTORATE</h4>
-    <p>This is a part of the Minbari Federation, but consists of several non-Minbari members that are overseen by the Federation. They have a degree of autonomy, 
-    including providing local defense to their worlds.</p>
-    <p>The Protectorate uses older Minbari hulls with the notable difference being that units do not come equipped with the Jammer system. 
-    The Tinashi is their most modern hull along with a handful of Nials.</p>
-    <p>The Protectorate generally uses the Tishat medium fighter. Their fleet options are rather limited based on the number of hulls and lacking ways to bring fighters outside a Morshin carrier. 
-    Their one noted conflict is the Pseudo-War with the Imperial Star Legion raider group.</p>                                                                   
-    <a class="back-to-top" href="#top">↩ Back to Top</a>
-
-
-    <h4 id="narn" style="">NARN REGIME</h4>
-    <p>A former Centauri colony, the Narn Regime is now a galactic power in it's own right.  What their vessels lack in ourright technology they makes up for powerful weaponry and sheer survivability.</p>        
-        <h5>Energy Mines</h5>
-            <li>A hex-targeted weapon, which causes heavy damage to everything on hex hit and splash to everything in adjacent hexes, including allied units.  Devastating against fighters, and when used en masse (6+ Energy Mine launchers can easily saturate an area).</li>
-            <li>Opponents will not be able to see where you have targeted your Energy Mines until after firing is resolved, just the fact that they've been launched. Launched mines also have a 25% chance to scatter or dissipate harmlessly.</li> 
-        <h5>Pulsar Mines</h5>
-            <li>An automated short-range weapon that fires at passing fighters.  The weapon will automatically track enemy fighters during the Movement Phase, and attack any that came within arc and range during their movement in the Firing Phase.  It can fire up to 18 shots per turn.</li> 
-    <a class="back-to-top" href="#top">↩ Back to Top</a>            
-
-
-    <h4 id="orieni" style="">ORIENI IMPERIUM</h4>
-    <p>The arch-nemesis during the Wars of the Centauri Republic, Orieni fleets are typified by the large amount of matter weaponry they bring, their large range of medium ships and their Hunter-Killer drones.
-     A peculiar faction in many ways as it can both feel oppresive to play against due to their damage potential, but also difficult to win with if you are not experienced with them.   
-    </p>        
-        <h5>Hunter-Killer (HK) Drones</h5>
-            <li>Orieni long-range weapon of choice, and probably their most outstanding feature. They're essentially large missiles with a degree of control, using fighter rules and attacking by ramming enemies.</li>
-            <li> Hunter-Killers are controlled by Control Nodes on Orieni ships. If there is insufficient control HKs can operate autonomously, which this limits their performance by applying a significant Initiative penalty.
-            This loss of control is exercised proportionally - e.g. if there are 12 HKs on map and only 6 can be fully controlled, then all 12 receive half the penalties., but no other penalties. 
-            In addition, HKs suffer Initiative penalties during the first 2 turns of the game (but start deployed like any other fighter).    
-            </li>
-            <li>When attempting to ram enemies, Hunter-Killers receive a penalty to their hit chance based on their own speed (the faster they are moving, the worse this). 
-            Note - As ramming attacks happen before other firing, HKs that achieved ramming distance cannot be shot down before they attempt to ram.
-            </li>                        
-        <h5>Light Gatling Railgun</h5>
-            <li>Orieni Templar's gun is Matter-based,making it a threat to even the biggest ships. The downside is it's limited to 6 shots before running out of ammunition.  More ammunition can be bought as an enhancements during Fleet Selection.</li> 
-        <h5>Strike Force</h5>
-            <li>The Orieni military is split into a few branches and a few ships have different limitations when deployed as part of Strike Force detachment instead of the regular navy, Hand of the Blessed. </li>
-            <li>Assume any force led by Paragon to be Strike Force, while lesser command ships lead Hand of the Blessed. Note - The in-game fleet checker does not take this rule into account.</li>                                          
-    <a class="back-to-top" href="#top">↩ Back to Top</a>
-
-
-    <h4 id="raiders" style="">RAIDERS & PRIVATEERS</h4>
-    <p>The Raiders & Privateers faction is not a single faction with a standardized force list. Instead it represents the various kinds of pirates, privateers, and wanderers in the Babylon 5
-    universe.</p>
-    <p>Specific raider groups will be listed in the unit name, e.g. ‘Centauri Privateer’, meaning that  any unit without a faction prefix is considered a generic raider and can be fielded by any faction. 
-        It is near-impossible to create a Fleet Checker for all of the various combinations within this faction, 
-        so a bit of player responsibility is required in order to choose an appropriate fleet. Summaries of the Raider groups in Fiery Void are listed below:</p>
-       <h5>Brakiri Shokhan</h5>
-            <li>The Shokhan grew out of various Brakiri groups that did not integrate into the modern Brakiri society. Many Shokhan operate purely as raiders, 
-                but it is suspected that some receive outside support from Brakiri corporations or other entities and fulfill the role of privateers and sometimes mercenaries.</li>
-            <li>The Shokhan have three Brakiri specific ships. They also operate a limited selection of generic raider units including the Aspar, Galleas, Hawk, Ma'Ri'e, Felucca, and Xebec. 
-                The Delta-V and Folshot-A are the two fighter designs operated by the Shokhan.</li>   
-       <h5>Centauri Privateers</h5>
-            <li>Generally led by lesser nobles of the great houses or those from minor houses looking to advance, Centauri privateers have existed throughout the Centauri's time in space. 
-                Originally, they operated against other Houses, but focused more on the edges of Centauri space as other powers were discovered. </li>
-            <li>In addition to Centauri hulls, these privateers use a limited selection of the generic raider hulls, including the Ma'Ri'e, Ma'Ri'u, Pinnace, Uid'Ac'e, Felucca, and Xebec. 
-                Centauri privateers use Delta-Vs almost exclusively, but have restricted access to Razik fighters or older Centauri fighters like the Glaive and Phalen.</li>
-       <h5>Drazi Hunters</h5>
-            <li>Derived from the Drazi penchant of hunting, it is typically assembled from Drazi disaffected with traditional Drazi society. 
-                The Hunters operate more as a raider group than privateers, they are not officially endorsed by the Drazi. However, their members are welcome in Drazi space to a limited degree.</li>
-            <li>They operate three units of Drazi design as well as a few generic raider hulls. These are the Aspar (limited), Galleon, Hawk, Ma'Ri'e, Pinnace, and Wolf Raider (limited). 
-                Drazi Hunters only employ Cobra and Delta-V fighters.</li>                     
-       <h5>Independent Mercenaries League (IML)</h5>
-            <li>The IML formed during the Dilgar War, originally by Belt Alliance forces out of work. They have been supported since then by various League powers 
-                and typically have better access to technology than traditional raider groups.</li>
-            <li>The IML fields three unique units, the Attack Cruiser,  Armed Transport, and Missile Frigate along with variants of each.</li>
-            <li>The IML use Armed Shuttles and Delta-Vs almost exclusively, but have restricted access to Star Snakes and Lellat fighters.</li>   
-       <h5>Imperial Star Legion</h5>
-            <li>A raider group that supported the Army of Light int he Shadow War, but then had bigger plans for the future and wound up fighting the Minbari Protectorate.</li>
-            <li>They operate several converted hulls from the main powers including a Lias, two Tethys, a Kutai, a Mograth, two Vorchans, two Sho'Kos, and a Thentus.</li>
-            <li>The Junkyard Dogs primarily used ArmedShuttles, Delta-Vs, and Double-Vs but may also field a flight of Raziks or Goriths.</li>                                                         
-       <h5>Junkyard Dogs (JYD)</h5>
-            <li>This group operates primarily within Centauri, Earth, and Narn space and in addition to generic raider hulls.</li>
-            <li>The Legion has three unique hulls, the Starjammer, Gladius, and Augustus and is characterized by using heavy weapons and fielding fusion cannons.</li>
-            <li>The Legion operated all of the generic raider units at various times in their existence. The Legion uses Delta-Vs and Double-Vs fighters exclusively.</li>   
-       <h5>Narn Privateers</h5>
-            <li>Formed out of Narn elements considered too radical or unruly to integrate with the newly free Narn Regime, the Narn sent these privateers out to continue to strike at the Centauri. 
-                The more organized groups received greater support from the Narn Regime and fulfilled many missions ranging from traditional raiding to intelligence gathering.</li>
-            <li>Narn privateers operate three specific Narn units as well as a selection of generic raider designs. These include the Brigantine (limited), Hawk, Ma'Ri'u, Pinnace, and Xebec. 
-            They primarily use Delta-V and Double-V fighters and a restricted number of Narn Goriths.
-            </li>   
-       <h5>Tirrith Free State (TFS)</h5>
-            <li>Born out of an EA base built in the Tirrith system from the Dilgar War, the raiders that took over the base ultimately formed an independent star system at the confluence of multiple powers. 
-                The TFS is now less of a raider group and more a tiny nation.</li>
-            <li>The TFS has three unique hulls including the Blockade Runner, System Monitor, and Freedom Base. Beyond this, the TFS will utilize any generic raider unit.</li>
-            <li>The majority of TFS fighters are Delta-Vs, but they can field Armed Shuttles, Double-Vs, Goriths, Star Snakes, and Koists. The TFS only use Drazi Dudroma defense satellites.</li>   
-        <a class="back-to-top" href="#top">↩ Back to Top</a>
-
-
 
 
 

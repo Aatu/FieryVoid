@@ -88,7 +88,7 @@
 .factiongroup-header{
     font-weight:bold;
     font-size:16px; 
-    margin:8px 5px; 
+    margin:6px 5px; 
     color: #6495ED;
 } 
 
@@ -98,7 +98,7 @@
 }
 
 .store .factionname{
-	font-size:14px;
+	font-size:15px;
 }
 
 .store .ship{
@@ -125,12 +125,13 @@
 
 .faction-display-name.custom-faction {
     color: rgba(255, 255, 0, 0.774); /* Or any other color you want for custom factions */
+    /*color: #FFA080;*/  
 }
 
 .highlight-custom-ship {
     color: rgba(255, 255, 0, 0.767); /* Or any other color you want for custom factions  #FFA080 */
+    /*color: #FFA080;*/
 }
-
 
 .mediumSize{
     width:200px;
