@@ -54,7 +54,7 @@ window.gamedata = {
 			powerRating = 'Tier 2; Custom faction';
 			break;
 		  case 'Civilians':
-			powerRating = 'Tier 3; Civilian units for scenarios, not a faction';
+			powerRating = 'Tier Other';
 			break;
 		  case 'Corillani Theocracy':
 			powerRating = 'Tier 2; Distinct sub-factions should not be mixed';
@@ -150,7 +150,10 @@ window.gamedata = {
 			powerRating = 'Tier 3; See Tiers file';
 			break;
 		  case 'Streib':
-			powerRating = 'Tier 1, Not balanced';
+			powerRating = 'Tier Other, Not balanced';
+			break;
+		  case 'Terrain':
+			powerRating = 'Tier Other';
 			break;
 		  case 'Thirdspace':
 			powerRating = 'Tier Ancients, Custom faction';
@@ -320,8 +323,8 @@ window.gamedata = {
         ship.slot = gamedata.selectedSlot;
         gamedata.ships[a] = ship;
 		var h = $('<div class="ship bought slotid_' + ship.slot + ' shipid_' + ship.id + '" data-shipindex="' + ship.id + '">' +
-			'<span class="shiptype">' + ship.shipClass + '</span>' +
-			'<span class="shipname name">' + ship.name + '</span>' +
+				'<span class="shipname name" style="color:#a3c0f5;">' + ship.name + '</span>' +				
+				'<span class="shiptype">' + ship.shipClass + '</span>' +
 			'<span class="pointcost">' + ship.pointCost + 'p</span>' +
 			' <span class="showship clickable">Details</span> ' +
 			' -<span class="editship clickable">Edit</span> ' +		
@@ -1257,8 +1260,8 @@ window.gamedata = {
 			if (ship.slot != slotid) continue;
 	
 			var h = $('<div class="ship bought slotid_' + ship.slot + ' shipid_' + ship.id + '" data-shipindex="' + ship.id + '">' +
+				'<span class="shipname name" style="color:#a3c0f5;">' + ship.name + '</span>' +				
 				'<span class="shiptype">' + ship.shipClass + '</span>' +
-				'<span class="shipname name">' + ship.name + '</span>' +
 				'<span class="pointcost">' + ship.pointCost + 'p</span>' +
 				' <span class="showship clickable">Details</span> ' +
 				' -<span class="editship clickable">Edit</span> ' +		
@@ -1411,7 +1414,7 @@ window.gamedata = {
 			var isCustom = powerRating.toLowerCase().includes("custom");
 			
 			// ✅ Extract tier from powerRating to allow Filtering
-			let tierMatch = powerRating.match(/Tier\s*([123]|Ancients)/i);
+			let tierMatch = powerRating.match(/Tier\s*([123]|Ancients|Other)/i);
 			let tier = tierMatch ? "Tier " + tierMatch[1] : "Unknown";
 			
 			//August 2023: I think everyone knows You need to click to expandd - I'm putting power rating to mouseover instead! 
@@ -1426,7 +1429,9 @@ window.gamedata = {
 				+ faction 
 				+ '" data-custom="' + (isCustom ? "true" : "false") 
 				+ '" data-tier="' + tier 
-				+ '"><div class="factionname name"><span>' 
+				+ '"><div class="factionname name"><span class="faction-display-name' 
+				+ (isCustom ? ' custom-faction' : '') 
+				+ '">' 
 				+ faction 
 				+ '</span><span class="tooltip">' 
 				+ powerRating + '</span></div>').appendTo("#store");
@@ -1437,6 +1442,7 @@ window.gamedata = {
         gamedata.allShips = factionList;		
     },
  
+	
  drawMapPreview: function drawMapPreview () {
         const canvas = document.getElementById("mapPreview");
         const ctx = canvas.getContext("2d");
@@ -1667,6 +1673,7 @@ window.gamedata = {
 				for (var index = 0; index < jsonShips[faction].length; index++){
 					ship = shipList[index];
 					isCustomShip = isCustomFaction || ship.unofficial === true;
+					let customShipHighlight = (!isCustomFaction && ship.unofficial === true) ? ' highlight-custom-ship' : '';	
 					isd = ship.isd;
 					if(desiredSize==4){ //bases and OSATs, size does not matter
 						if((ship.base != true) && (ship.osat != true)) continue; //check if it's a base or OSAT
@@ -1682,12 +1689,12 @@ window.gamedata = {
 					shipDisplayName = this.prepareClassName(ship);
 					pointCostFull = ship.pointCost;
 					if (ship.flight && (ship.maxFlightSize != 1)) pointCostFull = pointCostFull + ' (' + pointCostFull/6 + ' ea.)';//for fighters: display price per craft, too!
-					h = $('<div oncontextmenu="return false;" class="ship" data-custom="' 
-						+ isCustomShip + '" data-isd="' 
-						+ ship.isd 
-						+ '"><span class="shiptype">'
-						+ shipDisplayName + '</span><span class="pointcost">'
-						+ pointCostFull + '</span> -<span class="addship clickable">Add to fleet</span> -<span class="showship clickable">Show details</span></div>');
+h = $('<div oncontextmenu="return false;" class="ship" data-custom="' 
+    + isCustomShip + '" data-isd="' 
+    + ship.isd 
+    + '"><span class="shiptype' + customShipHighlight + '">'
+    + shipDisplayName + '</span><span class="pointcost">'
+    + pointCostFull + '</span> -<span class="addship clickable">Add to fleet</span> -<span class="showship clickable">Show details</span></div>');
                     
 					$(".addship", h).on("click", this.buyShip.bind(this, ship.phpclass));
                     $(".showship", h).on("click", gamedata.onShipContextMenu.bind(this, ship.phpclass, faction, ship.id, false));
@@ -1700,13 +1707,13 @@ window.gamedata = {
 						shipDisplayName = this.prepareClassName(shipV);
 						pointCostFull = shipV.pointCost;
 						if (shipV.flight && (shipV.maxFlightSize != 1)) pointCostFull = pointCostFull + ' (' + pointCostFull/6 + ' ea.)';//for fighters: display price per craft, too!
-						h = $('<div oncontextmenu="return false;" class="ship" data-custom="' 
-							+ isCustomShip 
-							+ '" data-isd="' 
-							+ shipV.isd 
-							+ '"><span class="shiptype">'
-							+ shipDisplayName + '</span><span class="pointcost">'
-							+ pointCostFull + '</span> -<span class="addship clickable">Add to fleet</span> -<span class="showship clickable">Show details</span></div>');
+h = $('<div oncontextmenu="return false;" class="ship" data-custom="' 
+    + isCustomShip 
+    + '" data-isd="' 
+    + shipV.isd 
+    + '"><span class="shiptype' + customShipHighlight + '">'
+    + shipDisplayName + '</span><span class="pointcost">'
+    + pointCostFull + '</span> -<span class="addship clickable">Add to fleet</span> -<span class="showship clickable">Show details</span></div>');
 						
 							$(".addship", h).on("click",  this.buyShip.bind(this, shipV.phpclass));
                         $(".showship", h).on("click", gamedata.onShipContextMenu.bind(this, shipV.phpclass, faction, ship.id, false));
@@ -1762,8 +1769,8 @@ expandFaction: function expandFaction(event) {
 
 
 applyCustomShipFilter: function () {
-    const showCustom = $("#toggleCustomShips").is(":checked");
-    const isdValue = parseInt($("#isdFilter").val(), 10); // parse input as integer
+    const showCustom = $("#toggleCustom").is(":checked");
+    const isdValue = parseInt($("#isdFilter").val(), 10);
 
     $(".faction").each(function () {
         const $faction = $(this);
@@ -1774,18 +1781,10 @@ applyCustomShipFilter: function () {
             const isCustom = $ship.data("custom") === true || $ship.data("custom") === "true";
             const shipISD = parseInt($ship.data("isd"), 10);
 
-            // Start with visible, apply filters below
             let visible = true;
 
-            // Filter by custom toggle
-            if (!showCustom && isCustom) {
-                visible = false;
-            }
-
-            // Filter by ISD if a valid number is entered
-            if (!isNaN(isdValue) && shipISD > isdValue) {
-                visible = false;
-            }
+            if (!showCustom && isCustom) visible = false;
+            if (!isNaN(isdValue) && shipISD > isdValue) visible = false;
 
             $ship.toggle(visible && !isHidden);
         });

@@ -210,52 +210,53 @@
             ajaxInterface.startPollingGamedata();
 
             // ✅ Unified filter logic for factions based on Tier and Custom
-            function updateTierFilter() {
-                const selectedTiers = $('.tier-filter:checked').map(function () {
-                    return $(this).data('tier');
-                }).get();
+function updateTierFilter() {
+    const selectedTiers = $('.tier-filter:checked').map(function () {
+        return $(this).data('tier');
+    }).get();
 
-                const showCustomFactions = $('#toggleCustomFactions').is(':checked');
+    const showCustom = $('#toggleCustom').is(':checked');
 
-                $('.faction').each(function () {
-                    const tier = $(this).data('tier');
-                    const isCustom = $(this).data('custom') === true || $(this).data('custom') === "true";
+    $('.faction').each(function () {
+        const tier = $(this).data('tier');
+        const isCustom = $(this).data('custom') === true || $(this).data('custom') === "true";
 
-                    const isVisible = selectedTiers.includes(tier) && (showCustomFactions || !isCustom);
-                    $(this).toggle(isVisible);
-                });
-            }
+        const isVisible = selectedTiers.includes(tier) && (showCustom || !isCustom);
+        $(this).toggle(isVisible);
+    });
+}
 
             // ✅ Listen to Tier and Custom Faction checkboxes
             $('.tier-filter').on('change', updateTierFilter);
-            $('#toggleCustomFactions').on('change', updateTierFilter);
+
+
+$('#toggleCustom').on('change', function () {
+    updateTierFilter();
+    gamedata.applyCustomShipFilter();
+});
+
+
 
             // ✅ Initial call
             updateTierFilter();
 
-            // ✅ Ship filtering that respects faction open state
-            $("#toggleCustomShips").on("change", function () {
-                gamedata.applyCustomShipFilter();
-            });
 
             // ✅ Select All / None Tier checkboxes + toggle customs
-            $('.tier-select-all').on('click', function () {
-                $('.tier-filter').prop('checked', true);
-                $('#toggleCustomFactions').prop('checked', true).trigger('change');
-                $('#toggleCustomShips').prop('checked', true).trigger('change');
-                $('#isdFilter').val(''); // ✅ Reset ISD filter
-                gamedata.applyCustomShipFilter(); // ✅ Reapply the filter logic
-                updateTierFilter();
-            });
+$('.tier-select-all').on('click', function () {
+    $('.tier-filter').prop('checked', true);
+    $('#toggleCustom').prop('checked', true).trigger('change');
+    $('#isdFilter').val('');
+    gamedata.applyCustomShipFilter();
+    updateTierFilter();
+});
 
-            $('.tier-select-none').on('click', function () {
-                $('.tier-filter').prop('checked', false);
-                $('#toggleCustomFactions').prop('checked', false).trigger('change');
-                $('#toggleCustomShips').prop('checked', false).trigger('change');
-                $('#isdFilter').val(''); // ✅ Reset ISD filter
-                gamedata.applyCustomShipFilter(); // ✅ Reapply the filter logic
-                updateTierFilter();
-            });
+$('.tier-select-none').on('click', function () {
+    $('.tier-filter').prop('checked', false);
+    $('#toggleCustom').prop('checked', false).trigger('change');
+    $('#isdFilter').val('');
+    gamedata.applyCustomShipFilter();
+    updateTierFilter();
+});
 
             // Sanitize input on each keystroke, but don't apply filter yet
             $("#isdFilter").on("input", function () {
@@ -278,7 +279,7 @@
             });
 
             // Optional: initialize custom ship visibility
-            $("#toggleCustomShips").trigger("change");
+            $("#toggleCustom").trigger("change");
         });
 
 
@@ -289,6 +290,7 @@
   <header class="pageheader">
     <img src="img/logo.png" alt="Fiery Void Logo" class="logo">
     <div class="top-right-row">
+      <a href="games.php">Back to Game Lobby</a>        
       <a href="logout.php" class="btn btn-primary">Logout</a>
     </div>
   </header>
@@ -521,27 +523,30 @@ if ($asteroids == false && $moons == false) {
         </div>
     </div>
 
-            <div style="margin-top: 3px; margin-left: 5px; font-size: 11px;">
+            <div style="margin-top: 3px; margin-left: 5px; font-size: 12px;">
                 <span class="clickable tier-select-all" style="margin-right: 5px; text-decoration: underline; color: #8bcaf2;">All Filters</span>
-                <span style="margin-right: 5px;">|</span>          
+                <span style="margin-right: 5px; font-size: 16px;  font-weight: bold">|</span>          
                 <span class="clickable tier-select-none" style="text-decoration: underline; margin-right: 5px; color: #8bcaf2;">No Filters</span>
-                <span>|</span>  
+                <span style="font-size: 16px;  font-weight: bold">|</span>  
 
                 <label style="margin-left: 5px; margin-top: 3px;">
                     <span style="margin-right: 2px;">Filter by ISD:</span>
                     <input type="text" id="isdFilter" value="" style="width: 36px; height: 14px; text-align: right;">
-                    <span class="clickable resetISDFilter" style="text-decoration: underline; margin-left: 3px; font-size: 10px; color: #8bcaf2;">Reset ISD</span>
+                    <span class="clickable resetISDFilter" style="text-decoration: underline; margin-left: 3px; font-size: 11px; color: #8bcaf2;">Reset ISD</span>
                 </label>
             </div>
 
 
-        <div style="text-align: left; margin-top: 3px; font-size: 11px;">
+        <div style="text-align: left; margin-top: 3px; font-size: 12px;">
             <label style="margin-left: 5px;">Tier 1 <input type="checkbox" class="tier-filter" data-tier="Tier 1" checked></label>
             <label style="margin-left: 5px;">Tier 2 <input type="checkbox" class="tier-filter" data-tier="Tier 2" checked></label>
             <label style="margin-left: 5px;">Tier 3 <input type="checkbox" class="tier-filter" data-tier="Tier 3" checked></label>
             <label style="margin-left: 5px;">Ancients <input type="checkbox" class="tier-filter" data-tier="Tier Ancients" checked></label>
-            <label style="margin-left: 5px;">Custom Factions <input type="checkbox" id="toggleCustomFactions" checked></label>
-            <label style="margin-left: 5px;">Custom Ships <input type="checkbox" id="toggleCustomShips" checked></label>
+            <label style="margin-left: 5px;">Other <input type="checkbox" class="tier-filter" data-tier="Tier Other"></label>
+            <span style="margin-left: 6px; margin-right: 6px; font-size: 16px; font-weight: bold">|</span>
+            <label style="margin-left: 5px;">Show Custom<input type="checkbox" id="toggleCustom" class="yellow-tick"></label>                    
+            <!--<label style="margin-left: 5px;">Custom Factions <input type="checkbox" id="toggleCustomFactions"></label>-->
+            <!--<label style="margin-left: 5px;">Custom Ships <input type="checkbox" id="toggleCustomShips"></label>-->
         </div>
 
         <!-- Fleet selection area -->

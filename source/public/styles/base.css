@@ -132,3 +132,8 @@ input[type="checkbox"] {
     position: relative;
     top: 2px;
 }
+
+input[type="checkbox"].yellow-tick:checked {
+    accent-color: yellow;
+}
+

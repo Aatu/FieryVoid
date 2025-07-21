@@ -93,10 +93,9 @@
 }
 
 .store .shipsizehdr{
-	color:#6495ED;
+	color:#6495ED;  
 	margin-left:10px;
 	font-size:12px;
-	font-style: italic;
 }
 
 .store .ship .clickable{
@@ -111,11 +110,11 @@
 }
 
 .faction-display-name.custom-faction {
-    color: rgba(255, 255, 0, 0.788); /* Or any other color you want for custom factions */
+    color: rgba(255, 255, 0, 0.774); /* Or any other color you want for custom factions */
 }
 
 .highlight-custom-ship {
-    color: rgba(255, 255, 0, 0.788); /* or any color you prefer */
+    color: rgba(255, 255, 0, 0.767); /* Or any other color you want for custom factions */
 }
 
 .mediumSize{
