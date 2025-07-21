@@ -483,7 +483,7 @@ if ($asteroids == false && $moons == false) {
 }
 
 ?>
-<div><span style="font-size: 12px;"><strong>OPTIONS SELECTED: </strong> <?php print($optionsUsed); ?> </span></div>
+<div><span class="scenariolabel">OPTIONS SELECTED: </span> <span><?php print($optionsUsed); ?> </span></div>
 
 <div class="lobbyheader" style="margin-bottom: 10px; margin-top: 15px">RULES & INFO</div>
 
