@@ -75,9 +75,11 @@ if (isset($_SESSION["user"])) {
     <div class="resources">
       <h3>Latest Updates — July 2025</h3>
       <ul class="updates-list">
-        <li>Fiery Void has a new home!</li>
-        <li>Webpage refresh / Image improvements</li>
-        <li>Simultaneous Movement: Initiative categories adjusted</li> 
+        <li>Ship slots that are set to Deploy later in game will no longer deploy on Turn 1, but instead have their own Deployment phase on appropriate turn to better simulate fleets 'jumping in from hyperspace'.</li>
+        <li>The option to deploy individual ships in a slot later has been removed, please use a separate slot for all delayed deployments.</li>
+        <li>The 'Starter Guide', 'Fiery Void FAQ', 'Factions & Tiers', 'Ammo, Options & Enhancements' documents have been updated and moved online.  You can access the new versions through the usual links above. </li>
+        <li>The Fleet Selection screen has recieved another update in continuing efforts to make this more user friendly.</li>
+        <li>Simultaneous Movement: Initiative categories adjusted.</li> 
         <!--<li><strong>6 Jun</strong> - Overlay colors, deployment zone tweaks, UI fixes. Pulsar mine fixed, tooltip/text readability improved.</li>-->
       </ul>
     </div>
