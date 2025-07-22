@@ -26,6 +26,20 @@ window.DeploymentPhaseStrategy = function () {
         showAlliedDeploymentAreas(this.deploymentSprites, gamedata);
 
         this.setPhaseHeader("DEPLOYMENT");
+
+        //Show commit button Deployment Phase if player has no ships, should never actually happen as server will skip Deployment Phases for these slots.
+        if (!shipManager.playerHasDeployedShips(gamedata.thisplayer)) {
+            if(this.selectedShip) this.deselectShip(this.selectedShip);
+            gamedata.showCommitButton();
+            /*//Can auto-click it if we want.
+
+            // Can simulate clicking confirm if needed.
+            setTimeout(() => {
+                $(".confirmok").trigger("click");
+            }, 50); // Adjust delay if needed */
+            
+        }
+
         return this;
     };
 
@@ -36,13 +50,24 @@ window.DeploymentPhaseStrategy = function () {
             icon.enemySprite.hide();
             icon.allySprite.hide();
         });
-        //if(!shipManager.playerHasDeployedShips(gamedata.thisplayer)) window.location.reload(); //You can refresh screen if player has no ships, but not sure it's really necesary.
+        //You can refresh screen if player has no ships, but not sure it's really necessary.        
+        //if(!shipManager.playerHasDeployedShips(gamedata.thisplayer)) window.location.reload(); 
+    };
+
+    DeploymentPhaseStrategy.prototype.selectFirstOwnShipOrActiveShip = function () {
+        var ship = gamedata.getFirstFriendlyShipDeployment();
+        
+        //TODO: what about active ship?
+        if (ship) {
+            this.setSelectedShip(ship);
+        }
     };
 
     DeploymentPhaseStrategy.prototype.onHexClicked = function (payload) {
         var hex = payload.hex;
 
-        if (!this.selectedShip) {
+        if (!this.selectedShip || (shipManager.getTurnDeployed(this.selectedShip) < gamedata.turn)) {
+            //No selected ship or ship has ALREADY deployed so don't allow re-deployment!
             return;
         }
 
@@ -61,6 +86,9 @@ window.DeploymentPhaseStrategy = function () {
 
     DeploymentPhaseStrategy.prototype.setSelectedShip = function (ship) {
         PhaseStrategy.prototype.setSelectedShip.call(this, ship);
+        var depTurn = shipManager.getTurnDeployed(ship);
+        if(depTurn < gamedata.turn) return;       
+
         showDeploymentArea(ship, this.deploymentSprites, this.gamedata);
 
         var hex = this.coordinateConverter.fromGameToHex(this.shipIconContainer.getByShip(ship).getPosition());
@@ -81,7 +109,7 @@ window.DeploymentPhaseStrategy = function () {
         var team = gamedata.getPlayerTeam();
         var slot = gamedata.getPlayerSlot();
         deploymentSprites.forEach(function (icon) {
-            if (icon.team != team) {
+            if (icon.team != team && icon.available >= gamedata.turn) {
                 icon.enemySprite.show();
             }
         });
@@ -91,7 +119,7 @@ window.DeploymentPhaseStrategy = function () {
         var team = gamedata.getPlayerTeam();
         var slot = gamedata.getPlayerSlot();
         deploymentSprites.forEach(function (icon) {
-            if (icon.team == team && icon.slotId != "" + slot + "" && icon.playerid != gamedata.thisplayer) {
+            if (icon.team == team && icon.slotId != "" + slot + "" && icon.playerid != gamedata.thisplayer  && icon.available >= gamedata.turn) {
                 // Let's try and also show the blue ally box.
                 icon.allySprite.show();                 
             } //else if (icon.team == team && icon.slotId != "" + slot + "" && icon.playerid == gamedata.thisplayer) {
@@ -139,7 +167,8 @@ window.DeploymentPhaseStrategy = function () {
                 ownSprite: ownSprite,
                 allySprite: allySprite,
                 enemySprite: enemySprite,
-                playerid: deploymentData.playerid
+                playerid: deploymentData.playerid,
+                available: deploymentData.available
             };
         });
     }
@@ -176,13 +205,15 @@ window.DeploymentPhaseStrategy = function () {
         };
         var available = slot.depavailable;
         var playerid = slot.playerid;
+        var depavailable = slot.depavailable;
 
         //position.x -= window.coordinateConverter.getHexWidth() / 2;
         return {
             position: position,
             size: size,
             avail: available,
-            playerid: playerid
+            playerid: playerid,
+            available: depavailable
         };
     }
 
@@ -193,6 +224,8 @@ window.DeploymentPhaseStrategy = function () {
             if (!gamedata.isMyShip(ship)) {
                 continue;
             }
+
+            if(shipManager.getTurnDeployed(ship) != gamedata.turn) continue; //We're only validating ships that deploy this turn!
 
             if (!validateDeploymentPosition(ship, null, deploymentSprites)) {
                 return false;

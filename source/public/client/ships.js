@@ -977,39 +977,31 @@ window.shipManager = {
         return false;
     },
     
-    //Sometimes things SHOULDN'T be hidden from own team, e.g. right clicking on Reinforcements before they arrive.
-    shouldBeHiddenTeam: function(ship) {
-        var myTeam = gamedata.isMyorMyTeamShip(ship);     
-        if(shipManager.getTurnDeployed(ship) > gamedata.turn && !myTeam) return true; //Not deployed yet.
-        if(!myTeam && shipManager.isStealthShip(ship) && !shipManager.isDetected(ship)) return true; //Enemy, stealth ship and not currently detected. Always hide.        
-        return false;
-    },
-    
+
     getTurnDeployed: function getTurnDeployed(ship) {
-        //Don't hide anything in Deployment Phase.  
-        if (gamedata.gamephase == -1){
-            if(!ajaxInterface.submiting){ //We check ajaxInterface.submitting to make sure ship icons update after committing Deployment where whole slot is delayed.
-                return 1;
+          
+        if(ship.osat || ship.base || gamedata.isTerrain(ship.shipSizeClass, ship.userid)) {
+            return 1; //Bases and OSATs never 'jump in', returns Turn 1.
+        }/*else if (gamedata.gamephase == -1 && slot.depavailable == gamedata.turn){
+            if(!ajaxInterface.submiting){
+                return gamedata.turn;
             }else{
-                var slot = playerManager.getSlotById(ship.slot);
-                return Math.max(ship.deploysOnTurn, slot.depavailable);
-            }    
-        }    
-        if(ship.osat || ship.base || gamedata.isTerrain(ship.shipSizeClass, ship.userid)) { //Bases and OSATs never 'jump in', it's no LoGH out there ;)
-            return 1;
-        }else{
-            return ship.deploysOnTurn;            
+                return slot.depavailable;                 
+            } 
+        }*/else{    
+           //return Math.max(ship.deploysOnTurn, slot.depavailable);
+            var slot = playerManager.getSlotById(ship.slot);   
+            return slot.depavailable;                       
         }     
     },    
- 
 
-    //True or false function, e.g. for possible use after Deployment Phase commit to reload window if needed (so icons appear correctly).
+
+    //True or false function, e.g. for possible use in Deployment Phase to show commit button in case needed.
     playerHasDeployedShips: function playerHasDeployedShips(playerid) {
        for (const ship of gamedata.ships) {
             if(ship.userid !== playerid) continue;
     
-            var slot = playerManager.getSlotById(ship.slot);
-            var deploys = Math.max(ship.deploysOnTurn, slot.depavailable);
+            var deploys = shipManager.getTurnDeployed(ship);
             if(deploys <= gamedata.turn) return true;
         }
         return false;         

@@ -132,15 +132,16 @@ createFleetList: function createFleetList(slot, template) {
 
     var turnTaken = "<span style='color:red'>&nbsp;(Not committed orders)</span>";
     if (slot.waiting) turnTaken = "<span style='color:green'>&nbsp;(Orders committed)</span>";
+    var deploys = "";
+    if(slot.depavailable > gamedata.turn) deploys = "<span style='color: #00b8e6'>[Deploys on Turn " + slot.depavailable + "]&nbsp;</span>";
 
-
-// Update fleet header with value totals
-fleetlistentry.find(".fleetheader").html(
-    "<span class='headername'>FLEET LIST - </span>" +
-    "<span class='playername'>" + slot.playername + 
-    ", fleet value: " + totalCurrValue + " / " + totalBaseValue + 
-    " CP <span class='turnTaken'>" + turnTaken + "</span></span>"
-);
+    // Update fleet header with value totals
+    fleetlistentry.find(".fleetheader").html(
+        deploys + "<span class='headername'>FLEET LIST - </span>" +
+        "<span class='playername'>" + slot.playername + 
+        ", fleet value: " + totalCurrValue + " / " + totalBaseValue + " CP" +
+         "<span class='turnTaken'>" + turnTaken + "</span>"
+    );
 
     // Add ship click handler
     $(".clickable", fleetlistentry).on("click", fleetListManager.doScrollToShip);

@@ -133,6 +133,19 @@ window.gamedata = {
         }
     },
 
+    getFirstFriendlyShipDeployment: function getFirstFriendlyShipDeployment() {
+        for (var i in gamedata.ships) {
+            var ship = gamedata.ships[i];
+            
+            if(shipManager.getTurnDeployed(ship) > gamedata.turn) continue;
+
+            if (gamedata.isMyShip(ship)) {
+                return ship;
+            }
+        }
+    },
+
+
     getFirstEnemyShip: function getFirstEnemyShip() {
         for (var i in gamedata.ships) {
             var ship = gamedata.ships[i];

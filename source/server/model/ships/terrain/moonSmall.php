@@ -1,22 +1,22 @@
 <?php
-class moon  extends Terrain{
+class moonSmall  extends Terrain{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 10;
-		$this->faction = "Civilians";
+		$this->pointCost = 5;
+		$this->faction = "Terrain";
 		$this->factionAge = 1;        
-        $this->phpclass = "moon";
-        $this->imagePath = "img/ships/moon.png";
-        $this->canvasSize = 1024;
-        $this->shipClass = "Moon";
+        $this->phpclass = "moonSmall";
+        $this->imagePath = "img/ships/moonSmall.png";
+        $this->canvasSize = 512;
+        $this->shipClass = "Moon (Small)";
         $this->Enormous = true; 
-        $this->Huge = 2;        
+        $this->Huge = 1;        
 		$this->iniativebonus = -200; //no voluntary movement anyway
         $this->notes = "Occupies multiple hexes";
-        $this->notes .= "<br>Units entering terrain's area will automatically ram";
-        $this->isd = 0;            
+        $this->notes .= "<br>Units entering terrain's area will automatically ram"; 
+        $this->isd = 0;      
 	            
 		$this->base = true;
 		$this->smallBase = true;
@@ -38,7 +38,7 @@ class moon  extends Terrain{
         $this->addPrimarySystem(new OSATCnC(10, 1, 0, 0)); //Required for some checks.
         $this->addPrimarySystem(new MagGravReactorTechnical(10, 1000, 0, 0)); //Required for some checks.
 
-        $this->addPrimarySystem(new Structure(8,  5000));
+        $this->addPrimarySystem(new Structure(8,  2000));
 
         $this->hitChart = array(
                 0=> array(
