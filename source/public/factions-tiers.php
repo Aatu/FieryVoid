@@ -1134,8 +1134,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
     <p>Factions that point for point will have a difficult time competing against Tier 1 opponents, yet otherwise are balanced and competitive. 
         Many of them have weaknesses more pronounced than Tier 1 factions but may offer a very distinct playstyle instead. </p>
     <p>Should be interesting to play against each other, and if given some extra PV allowance - possibly against Tier 1 as well.</p>           
-       <li>Abbai Matriarchate</li>
-       <li></li>
+        <li>Abbai Matriarchate</li>
         <li>Balosian Underdwellers</li>
         <li>Belt Alliance</li>
         <li>Brakiri Syndicracy</li>
@@ -1152,7 +1151,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
     <h4 id="tier3" style="">TIER 3 - LOW COMPETITIVENESS </h4>
     <p>Factions that point for point will have uphill battle against Tier 2, and quite often have glaring holes in their capabilities that can easily be exploited by a more advanced opponent. 
         Yet, they can be competitive against each other, and can offer an interesting change of pace compared to more capable factions.</p>    
-        <li> Abbai Matriarchate (WotCR)</li>
+        <li>Abbai Matriarchate (WotCR)</li>
         <li>Cascor Commonwealth (without PV reevaluation)</li>
         <li>Centauri Republic (WotCR)</li>
         <li>Earth Alliance (Early)</li>
