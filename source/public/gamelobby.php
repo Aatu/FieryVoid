@@ -210,48 +210,74 @@
             ajaxInterface.startPollingGamedata();
 
             // ✅ Unified filter logic for factions based on Tier and Custom
-        function updateTierFilter() {
-            const selectedTiers = $('.tier-filter:checked').map(function () {
-                return $(this).data('tier');
-            }).get();
+function updateTierFilter() {
+    const selectedTiers = $('.tier-filter:checked').map(function () {
+        return $(this).data('tier');
+    }).get();
 
-            const showCustom = $('#toggleCustom').is(':checked');
+    const showCustom = $('#toggleCustom').is(':checked');
+    const customMode = $('#customSelect').val();
 
-            $('.faction').each(function () {
-                const tier = $(this).data('tier');
-                const isCustom = $(this).data('custom') === true || $(this).data('custom') === "true";
+    $('.faction').each(function () {
+        const tier = $(this).data('tier');
+        const isCustom = $(this).data('custom') === true || $(this).data('custom') === "true";
 
-                const isVisible = selectedTiers.includes(tier) && (showCustom || !isCustom);
-                $(this).toggle(isVisible);
-            });
+        let isVisible = false;
 
-            // Hide/show group headers depending on whether any following factions are visible
-            $('.factiongroup-header').each(function () {
-                let header = $(this);
-                let hasVisibleFaction = false;
-
-                let next = header.next();
-                while (next.length && !next.hasClass('factiongroup-header')) {
-                    if (next.hasClass('faction') && next.is(':visible')) {
-                        hasVisibleFaction = true;
-                        break;
-                    }
-                    next = next.next();
+        if (selectedTiers.includes(tier)) {
+            if (showCustom) {
+                if (customMode === 'showOnlyCustom') {
+                    isVisible = isCustom;
+                } else {
+                    isVisible = true; // show both custom and non-custom
                 }
-
-                header.toggle(hasVisibleFaction);
-            });
+            } else {
+                isVisible = !isCustom; // hide custom if toggle unchecked
+            }
         }
+
+        $(this).toggle(isVisible);
+    });
+
+    // Group headers visibility stays unchanged
+    $('.factiongroup-header').each(function () {
+        let header = $(this);
+        let hasVisibleFaction = false;
+        let next = header.next();
+        while (next.length && !next.hasClass('factiongroup-header')) {
+            if (next.hasClass('faction') && next.is(':visible')) {
+                hasVisibleFaction = true;
+                break;
+            }
+            next = next.next();
+        }
+        header.toggle(hasVisibleFaction);
+    });
+}
 
             // ✅ Listen to Tier and Custom Faction checkboxes
             $('.tier-filter').on('change', updateTierFilter);
 
-
+            /*
             $('#toggleCustom').on('change', function () {
                 updateTierFilter();
                 gamedata.applyCustomShipFilter();
             });
+            */
+            $('#toggleCustom').on('change', function () {
+                if ($(this).is(':checked')) {
+                    $('#customDropdown').show();
+                } else {
+                    $('#customDropdown').hide();
+                }
+                updateTierFilter();
+                gamedata.applyCustomShipFilter();
+            });
 
+            $('#customSelect').on('change', function () {
+                updateTierFilter();
+                gamedata.applyCustomShipFilter();
+            });
 
 
             // ✅ Initial call
@@ -262,6 +288,7 @@
             $('.tier-select-all').on('click', function () {
                 $('.tier-filter').prop('checked', true);
                 $('#toggleCustom').prop('checked', true).trigger('change');
+                $('#customSelect').val('showCustom'); // ✅ reset custom dropdown to Show Customs                
                 $('#isdFilter').val('');
                 gamedata.applyCustomShipFilter();
                 updateTierFilter();
@@ -317,8 +344,8 @@
 <main class="container"></main>        
 		<div class="panel large lobby">
             <div class="">
-                <span class="panelheader">GAME NAME: </span>
-                <span class="panelsubheader"> <?php print($gamelobbydata->name); ?></span>
+                <!--<span class="panelheader">GAME NAME: </span>-->
+                <span class="panelsubheader" style="font-size: 18px"> <?php print($gamelobbydata->name); ?></span>
             </div>
 
 
@@ -561,7 +588,13 @@ if ($asteroids == false && $moons == false) {
             <label style="margin-left: 5px;">Ancients <input type="checkbox" class="tier-filter" data-tier="Tier Ancients" checked></label>
             <label style="margin-left: 5px;">Other <input type="checkbox" class="tier-filter" data-tier="Tier Other"></label>
             <span style="margin-left: 6px; margin-right: 6px; font-size: 16px; font-weight: bold">|</span>
-            <label style="margin-left: 5px;">Show Custom<input type="checkbox" id="toggleCustom" class="yellow-tick"></label>                    
+            <label style="margin-left: 5px;">Show Custom<input type="checkbox" id="toggleCustom" class="yellow-tick"></label>
+            <span id="customDropdown" style="display:none; margin-left: 10px;">
+                <select id="customSelect" name="customFilterMode">
+                    <option value="showCustom">Show Customs</option>
+                    <option value="showOnlyCustom">Show Only Customs</option>
+                </select>
+            </span>                    
             <!--<label style="margin-left: 5px;">Custom Factions <input type="checkbox" id="toggleCustomFactions"></label>-->
             <!--<label style="margin-left: 5px;">Custom Ships <input type="checkbox" id="toggleCustomShips"></label>-->
         </div>
