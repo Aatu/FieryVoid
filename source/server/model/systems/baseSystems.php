@@ -4615,6 +4615,7 @@ class ShadowPilot extends CnC{
 /*Phasing Drive - essentially a jump engine that destroys ship if damaged while half-phasing*/
 class PhasingDrive extends JumpEngine{
     public $displayName = "Phasing Drive";
+	public $iconPath = "PhasingDrive.png";	
     
 	//JumpEngine enables half phasing, so I'm torn about priority... I'll increase to 2 over Jump Engine's 1
 	public $repairPriority = 2;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
@@ -4626,7 +4627,7 @@ class PhasingDrive extends JumpEngine{
 		}else{
 			$this->data["Special"] .= '<br>';
 		}
-		$this->data["Special"] .= 'If damaged while half-phasing - entire ship is destroyed.';
+		$this->data["Special"] .= 'If damaged while Half-Phasing - the entire ship is destroyed.';
     }
 	
 	//destroy ship if damaged while half-phaseing
