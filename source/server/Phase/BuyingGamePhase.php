@@ -238,12 +238,20 @@ class BuyingGamePhase implements Phase
         return ['width' => $width, 'height' => $height];
     }
 
-    public function process(TacGamedata $gameData, DBManager $dbManager, Array $ships)
+    public function process(TacGamedata $gameData, DBManager $dbManager, Array $ships, $slotid = 0)
     {
+
+        // Optional sanity check (good for debugging)
+        if ($slotid > 0 && !in_array($slotid, array_map(fn($s) => $s->slot, $gameData->slots))) {
+            throw new Exception("Invalid slotid");
+        }
 
         $seenSlots = array();
         foreach($gameData->slots as $slot)
         {
+            // ✅ Skip slots that are not the requested one (if $slotid > 0)
+            if ($slotid > 0 && $slot->slot != $slotid) continue;
+
             if ($gameData->hasAlreadySubmitted($gameData->forPlayer, $slot->slot))
                 continue;
 

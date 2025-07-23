@@ -1477,7 +1477,7 @@ shipManager.movement = {
             if (move.turn == gamedata.turn) return move;
         }
     },
-
+/*
     getPositionAtStartOfTurn: function getPositionAtStartOfTurn(ship, currentTurn) {
         if (currentTurn === undefined) {
             currentTurn = gamedata.turn;
@@ -1496,6 +1496,46 @@ shipManager.movement = {
         
         return new hexagon.Offset(move.position);
     },
+*/
+    //New function as sometimes fighter movements were erroring during late Deployment phases when called from isEscorting - DK Jul 2025
+    getPositionAtStartOfTurn: function getPositionAtStartOfTurn(ship, currentTurn) {
+        if (currentTurn === undefined) {
+            currentTurn = gamedata.turn;
+        }
+
+        // Get all valid keys and sort them descending
+        const keys = Object.keys(ship.movement)
+            .map(k => parseInt(k))
+            .filter(k => !isNaN(k))
+            .sort((a, b) => b - a); // descending
+
+        let move = null;
+        let moveNo = -1;
+
+        for (let idx of keys) {
+            let candidate = ship.movement[idx];
+            if (candidate.turn < currentTurn) {
+                move = candidate;
+                moveNo = idx;
+                break;
+            }
+        }
+
+        if (!move && keys.length > 0) {
+            // If no move from earlier turn, fall back to earliest move (likely deployment)
+            moveNo = keys[0];
+            move = ship.movement[moveNo];
+        }
+
+        // Handle 'start' type edge case
+        const nextMove = ship.movement[keys.find(k => k > moveNo)];
+        if (move?.type === 'start' && nextMove) {
+            move = nextMove;
+        }
+
+        return new hexagon.Offset(move.position);
+    },
+
 
     getPreviousLocation: function getPreviousLocation(ship) {
         var oPos = shipManager.getShipPosition(ship);

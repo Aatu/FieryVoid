@@ -111,7 +111,7 @@ private function hasShipsAtIniative(TacGamedata $gameData, $iniative) {
         return $ship->iniative == $iniative 
             && !$ship->isDestroyed() 
             && !$ship->isTerrain() 
-            && $ship->getTurnDeployed($gameData->phase) <= $gameData->turn;
+            && $ship->getTurnDeployed($gameData) <= $gameData->turn;
     })) > 0;
 }
 

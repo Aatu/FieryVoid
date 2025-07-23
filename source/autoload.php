@@ -3415,11 +3415,11 @@ spl_autoload_register(
 						'directemine' => '/server/model/weapons/customDevelopment.php',						
 					'testlaser' => '/server/model/weapons/customs.php',
                         'terrain' => '/server/model/ships/ShipClasses.php',                    
-	    				'asteroids' => '/server/model/ships/civilians/asteroidS.php',                    
-	    				'asteroidm' => '/server/model/ships/civilians/asteroidM.php',  
-	    				'asteroidl' => '/server/model/ships/civilians/asteroidL.php', 
-	    				'moonsmall' => '/server/model/ships/civilians/moonSmall.php',  
-	    				'moon' => '/server/model/ships/civilians/moon.php',  
+	    				'asteroids' => '/server/model/ships/terrain/asteroidS.php',                    
+	    				'asteroidm' => '/server/model/ships/terrain/asteroidM.php',  
+	    				'asteroidl' => '/server/model/ships/terrain/asteroidL.php', 
+	    				'moonsmall' => '/server/model/ships/terrain/moonSmall.php',  
+	    				'moon' => '/server/model/ships/terrain/moon.php',  
 
 				//Marine Boarding Actions
 				'marines' => '/server/model/weapons/specialWeapons.php',

@@ -24,151 +24,154 @@ window.gamedata = {
 		var powerRating = '';
 		switch(factionName) {
 		  case 'Abbai Matriarchate':
-			powerRating = 'Tier 2';
+			powerRating = 'Tier 2; League Faction';
 			break;
 		  case 'Abbai Matriarchate (WotCR)':
-			powerRating = 'Tier 3';
+			powerRating = 'Tier 3; League Faction';
 			break;
 		  case 'Alacan Republic':
-			powerRating = 'Tier 3';
+			powerRating = 'Tier 3; Minor Faction';
 			break;
 		  case 'Balosian Underdwellers':
-			powerRating = 'Tier 2';
+			powerRating = 'Tier 2; Minor Faction';
 			break;
 		  case 'Belt Alliance':
-			powerRating = 'Tier 2';
+			powerRating = 'Tier 2; Minor Faction';
 			break;
 		  case 'Brakiri Syndicracy':
-			powerRating = 'Tier 2; Distinct Corporations can be mixed freely';
+			powerRating = 'Tier 2; League Faction';
 			break;
 		  case 'Cascor Commonwealth':
-			powerRating = 'Tier 3 (Official PV) or Tier 2 (Re-pointing enhancement)';
+			powerRating = 'Tier 3; League Faction';
 			break;
 		  case 'Centauri Republic':
-			powerRating = 'Tier 1';
+			powerRating = 'Tier 1; Major Faction';
 			break;
 		  case 'Centauri Republic (WotCR)':
-			powerRating = 'Tier 3';
+			powerRating = 'Tier 3; Major Faction';
 			break;
 		  case "Ch'Lonas Cooperative":
-			powerRating = 'Tier 2; Custom faction';
+			powerRating = 'Tier 2; Minor Custom Faction';
 			break;
 		  case 'Civilians':
-			powerRating = 'Tier 3; Civilian units for scenarios, not a faction';
+			powerRating = 'Tier Other';
 			break;
 		  case 'Corillani Theocracy':
-			powerRating = 'Tier 2; Distinct sub-factions should not be mixed';
+			powerRating = 'Tier 2; Minor Faction';
 			break;
 		  case 'Custom Ships':
-			powerRating = "Custom Designs, not a faction, Tier 3";
+			powerRating = "Tier Other, Custom";
 			break;
 		  case 'Deneth Tribes':
-			powerRating = 'Tier 2';
+			powerRating = 'Tier 2; Minor Faction';
 			break;
 		  case 'Descari Committees':
-			powerRating = 'Tier 2';
+			powerRating = 'Tier 2; Minor Faction';
 			break;
 		  case 'Dilgar Imperium':
-			powerRating = 'Tier 1';
+			powerRating = 'Tier 1; Major Faction';
 			break;
 		  case 'Drakh':
-			powerRating = 'Tier 1, Custom faction';
+			powerRating = 'Tier 1, Minor Custom faction';
 			break;
 		  case 'Drazi Freehold':
-			powerRating = 'Tier 1';
+			powerRating = 'Tier 1; League Faction';
 			break;
 		  case 'Drazi Freehold (WotCR)':
-			powerRating = 'Tier 2';
+			powerRating = 'Tier 2; League Faction';
 			break;
 		  case 'Earth Alliance':
-			powerRating = 'Tier 1 (Not Balanced with Warlock)';
+			powerRating = 'Tier 1; Major Faction';
 			break;
 		  case 'Earth Alliance (custom)':
-			powerRating = 'Tier 1; Custom designs for EA faction';
+			powerRating = 'Tier 1; Major Custom Faction';
 			break;
 		  case 'Earth Alliance (defenses)':
-			powerRating = 'Tier 1; Fixed defenses for EA faction';
+			powerRating = 'Tier 1; Major Faction';
 			break;
 		  case 'Earth Alliance (early)':
-			powerRating = 'Tier 3';
+			powerRating = 'Tier 3; Major Faction';
 			break;
 		  case 'Gaim Intelligence':
-			powerRating = 'Tier 1';
+			powerRating = 'Tier 1; League Faction';
 			break;
 		  case 'Grome Autocracy':
-			powerRating = 'Tier 3';
+			powerRating = 'Tier 3; League Faction';
 			break;
 		  case 'Hurr Republic':
-			powerRating = 'Tier 3';
+			powerRating = 'Tier 3; League Faction';
 			break;
 		  case 'Hyach Gerontocracy':
-			powerRating = 'Tier 1';
+			powerRating = 'Tier 1; League Faction';
 			break;
 		  case 'Ipsha Baronies':
-			powerRating = 'Tier 3 (Distinct Baronies cannot be mixed)';
+			powerRating = 'Tier 3; League Faction';
 			break;
 		  case 'Kor-Lyan Kingdoms':
-			powerRating = 'Tier 1';
+			powerRating = 'Tier 1; League Faction';
 			break;
 		  case 'Llort': //actually no full name in the sourcebook (RPP1), it's just Llort!
-			powerRating = 'Tier 1';
+			powerRating = 'Tier 1; Minor Faction';
 			break;
 		  case 'Markab Theocracy':
-			powerRating = 'Tier 3';
+			powerRating = 'Tier 3; Minor Faction';
 			break;
 		  case 'Minbari Federation':
-			powerRating = 'Tier 1 (All-White Star: Not Balanced)';
+			powerRating = 'Tier 1; Major Faction';
 			break;
 		  case 'Minbari Protectorate':
-			powerRating = 'Tier 1';
+			powerRating = 'Tier 1; Major Faction';
 			break;
 		  case 'Mindriders':
 			powerRating = 'Tier Ancients';
 			break;			
 		  case 'Narn Regime':
-			powerRating = 'Tier 1 (Not Balanced with >6 EMine launchers)';
+			powerRating = 'Tier 1; Major Faction';
 			break;
 		  case 'Orieni Imperium':
-			powerRating = 'Tier 1';
+			powerRating = 'Tier 1; Major Faction';
 			break;
 		  case 'Orieni Imperium (defenses)':
-			powerRating = 'Tier 1; Fixed defenses for Orieni faction';
+			powerRating = 'Tier 1; Major Faction';
 			break;
 		  case "Pak'ma'ra Confederacy":
-			powerRating = 'Tier 2';
+			powerRating = 'Tier 2; League Faction';
 			break;
 		  case 'Raiders':
-			powerRating = 'Tier 2 (Raider factions and Generic Raiders)';
+			powerRating = 'Tier 2; Major Faction';
 			break;
 		  case 'Rogolon Dynasty':
-			powerRating = 'Tier 3';
+			powerRating = 'Tier 3; Minor Faction';
 			break;
 		  case 'Shadow Association':
 			powerRating = 'Tier Ancients';
 			break;
 		  case 'Small Races':
-			powerRating = 'Tier 3; See Tiers file';
+			powerRating = 'Tier 3; Minor Faction';
 			break;
 		  case 'Streib':
-			powerRating = 'Tier 1, Not balanced';
+			powerRating = 'Tier Other';
+			break;
+		  case 'Terrain':
+			powerRating = 'Tier Other';
 			break;
 		  case 'Thirdspace':
 			powerRating = 'Tier Ancients, Custom faction';
 			break;
 		  case 'Torata Regency':
-			powerRating = 'Tier 1';
+			powerRating = 'Tier 1; League Faction';
 			break;
 		  case 'Usuuth Coalition':
-			powerRating = 'Tier 3';
+			powerRating = 'Tier 3; Minor Faction';
 			break;
 		  case 'Vorlon Empire':
 			powerRating = 'Tier Ancients';
 			break;
 		  case 'Vree Conglomerate':
-			powerRating = 'Tier 1';
+			powerRating = 'Tier 1; League Faction';
 			break;
 		  case 'Yolu Confederation':
-			powerRating = 'Tier 1 (Unbalanced as official PV) or  (Tier 1 with price reevaluation)';
+			powerRating = 'Tier 1; Minor Faction';
 			break;
 		  case 'ZBSG Colonials':
 			powerRating = 'Tier 2; Custom faction';
@@ -177,10 +180,10 @@ window.gamedata = {
 			powerRating = 'Tier 3; Custom faction';
 			break;
 		  case 'ZEscalation Civilian':
-			powerRating = 'Tier 3; Civilian designs for scenarios, custom';
+			powerRating = 'Tier Other, Custom';
 			break;
 		  case 'ZEscalation Chouka Raider':
-			powerRating = 'Tier 2; Not balanced, custom faction';
+			powerRating = 'Tier 2; Not balanced, Custom faction';
 			break;
 		  case 'ZEscalation Chouka Theocracy':
 			powerRating = 'Tier 2; Custom faction';
@@ -249,10 +252,10 @@ window.gamedata = {
 			powerRating = 'Tier 3; Custom faction';
 			break;		
 		  case 'ZStarWars':
-			powerRating = 'Tier 2 (Multiple overlapping factions), Custom faction';
+			powerRating = 'Tier 2, Custom faction';
 			break;
 		  case 'ZStarWars Clone Wars (Playtest)':
-			powerRating = 'Tier 2 (Multiple overlapping factions), Custom faction';
+			powerRating = 'Tier 2, Custom faction';
 			break;
 		  case 'ZTrek Playtest Other Factions':
 			powerRating = 'Tier 2; Custom faction';
@@ -320,8 +323,8 @@ window.gamedata = {
         ship.slot = gamedata.selectedSlot;
         gamedata.ships[a] = ship;
 		var h = $('<div class="ship bought slotid_' + ship.slot + ' shipid_' + ship.id + '" data-shipindex="' + ship.id + '">' +
-			'<span class="shiptype">' + ship.shipClass + '</span>' +
-			'<span class="shipname name">' + ship.name + '</span>' +
+				'<span class="shipname name" style="color:#a3c0f5;">' + ship.name + '</span>' +				
+				'<span class="shiptype">' + ship.shipClass + '</span>' +
 			'<span class="pointcost">' + ship.pointCost + 'p</span>' +
 			' <span class="showship clickable">Details</span> ' +
 			' -<span class="editship clickable">Edit</span> ' +		
@@ -379,7 +382,7 @@ window.gamedata = {
 		//block if player already has confirmed fleet (in any slot)
 		for (var i in gamedata.slots)  { //check all slots
 			var checkSlot = gamedata.slots[i];
-			if (checkSlot.lastphase == "-2") { //this slot has ready fleet
+			if (checkSlot.lastphase >= "-2") { //this slot has ready fleet
 				var player = playerManager.getPlayerInSlot(checkSlot);
 				if (player.id == gamedata.thisplayer){
 					window.confirm.error("You have already confirmed Your fleet for this game!", function () {});
@@ -1257,8 +1260,8 @@ window.gamedata = {
 			if (ship.slot != slotid) continue;
 	
 			var h = $('<div class="ship bought slotid_' + ship.slot + ' shipid_' + ship.id + '" data-shipindex="' + ship.id + '">' +
+				'<span class="shipname name" style="color:#a3c0f5;">' + ship.name + '</span>' +				
 				'<span class="shiptype">' + ship.shipClass + '</span>' +
-				'<span class="shipname name">' + ship.name + '</span>' +
 				'<span class="pointcost">' + ship.pointCost + 'p</span>' +
 				' <span class="showship clickable">Details</span> ' +
 				' -<span class="editship clickable">Edit</span> ' +		
@@ -1397,6 +1400,7 @@ window.gamedata = {
         }
     },
 
+	/*
     parseFactions: function parseFactions(jsonFactions) {
         this.orderStringList(jsonFactions);
         var factionList = new Array();
@@ -1411,7 +1415,7 @@ window.gamedata = {
 			var isCustom = powerRating.toLowerCase().includes("custom");
 			
 			// ✅ Extract tier from powerRating to allow Filtering
-			let tierMatch = powerRating.match(/Tier\s*([123]|Ancients)/i);
+			let tierMatch = powerRating.match(/Tier\s*([123]|Ancients|Other)/i);
 			let tier = tierMatch ? "Tier " + tierMatch[1] : "Unknown";
 			
 			//August 2023: I think everyone knows You need to click to expandd - I'm putting power rating to mouseover instead! 
@@ -1426,7 +1430,9 @@ window.gamedata = {
 				+ faction 
 				+ '" data-custom="' + (isCustom ? "true" : "false") 
 				+ '" data-tier="' + tier 
-				+ '"><div class="factionname name"><span>' 
+				+ '"><div class="factionname name"><span class="faction-display-name' 
+				+ (isCustom ? ' custom-faction' : '') 
+				+ '">' 
 				+ faction 
 				+ '</span><span class="tooltip">' 
 				+ powerRating + '</span></div>').appendTo("#store");
@@ -1436,7 +1442,72 @@ window.gamedata = {
 
         gamedata.allShips = factionList;		
     },
- 
+ */
+parseFactions: function parseFactions(jsonFactions) {
+    $("#store").empty();
+    let factionList = [];
+
+    const groups = {
+        "Major Factions": [],
+        "League of Non-Aligned Worlds": [],		
+        "Minor Factions": [],
+        "Ancients": [],
+        "Other Factions": [],
+        "Custom Factions": []
+    };
+
+    for (let faction of jsonFactions) {
+        const powerRating = gamedata.getPowerRating(faction);
+        const lowerPower = powerRating.toLowerCase();
+        const isCustom = lowerPower.includes("custom");
+
+        // ✅ Grouping prioritizes Minor > Major > Ancients > Other > Custom
+        let groupName = "Other Factions";	
+        if (lowerPower.includes("minor")) groupName = "Minor Factions";
+        else if (lowerPower.includes("major")) groupName = "Major Factions";
+        else if (lowerPower.includes("league")) groupName = "League of Non-Aligned Worlds";			
+        else if (lowerPower.includes("ancients")) groupName = "Ancients";
+        else if (isCustom) groupName = "Custom Factions";
+
+        const tierMatch = powerRating.match(/Tier\s*([123]|Ancients|Other)/i);
+        const tier = tierMatch ? "Tier " + tierMatch[1] : "Unknown";
+
+        groups[groupName].push({ faction, powerRating, isCustom, tier });
+    }
+
+    // ✅ Fixed order of groups
+    const groupOrder = ["Major Factions", "League of Non-Aligned Worlds", "Minor Factions", "Ancients", "Other Factions", "Custom Factions"];
+
+    for (let groupName of groupOrder) {
+        const entries = groups[groupName];
+        if (entries.length === 0) continue;
+
+        const groupHeader = $('<div class="factiongroup-header" data-tier="' + groupName + '">' + groupName + '</div>').appendTo("#store");
+
+        entries.sort((a, b) => a.faction.localeCompare(b.faction));
+
+        entries.forEach(({ faction, powerRating, isCustom, tier }) => {
+            factionList.push(faction);
+
+            const group = $('<div id="' + faction +
+                '" class="' + faction +
+                ' faction shipshidden listempty" data-faction="' + faction +
+                '" data-custom="' + (isCustom ? "true" : "false") +
+                '" data-tier="' + tier +
+                '"><div class="factionname name"><span class="faction-display-name' +
+                (isCustom ? ' custom-faction' : '') + '">' + faction +
+                '</span><span class="tooltip">' + powerRating +
+                '</span></div></div>');
+
+            group.find('.factionname').on("click", this.expandFaction);
+
+            $("#store").append(group);
+        });
+    }
+
+    gamedata.allShips = factionList;
+},
+	
  drawMapPreview: function drawMapPreview () {
         const canvas = document.getElementById("mapPreview");
         const ctx = canvas.getContext("2d");
@@ -1667,6 +1738,7 @@ window.gamedata = {
 				for (var index = 0; index < jsonShips[faction].length; index++){
 					ship = shipList[index];
 					isCustomShip = isCustomFaction || ship.unofficial === true;
+					let customShipHighlight = (!isCustomFaction && ship.unofficial === true) ? ' highlight-custom-ship' : '';	
 					isd = ship.isd;
 					if(desiredSize==4){ //bases and OSATs, size does not matter
 						if((ship.base != true) && (ship.osat != true)) continue; //check if it's a base or OSAT
@@ -1685,7 +1757,7 @@ window.gamedata = {
 					h = $('<div oncontextmenu="return false;" class="ship" data-custom="' 
 						+ isCustomShip + '" data-isd="' 
 						+ ship.isd 
-						+ '"><span class="shiptype">'
+						+ '"><span class="shiptype' + customShipHighlight + '">'
 						+ shipDisplayName + '</span><span class="pointcost">'
 						+ pointCostFull + '</span> -<span class="addship clickable">Add to fleet</span> -<span class="showship clickable">Show details</span></div>');
                     
@@ -1704,7 +1776,7 @@ window.gamedata = {
 							+ isCustomShip 
 							+ '" data-isd="' 
 							+ shipV.isd 
-							+ '"><span class="shiptype">'
+							+ '"><span class="shiptype' + customShipHighlight + '">'
 							+ shipDisplayName + '</span><span class="pointcost">'
 							+ pointCostFull + '</span> -<span class="addship clickable">Add to fleet</span> -<span class="showship clickable">Show details</span></div>');
 						
@@ -1760,10 +1832,12 @@ expandFaction: function expandFaction(event) {
     gamedata.applyCustomShipFilter();
 },
 
-
+/*
 applyCustomShipFilter: function () {
     const showCustom = $("#toggleCustomShips").is(":checked");
     const isdValue = parseInt($("#isdFilter").val(), 10); // parse input as integer
+    const showCustom = $("#toggleCustom").is(":checked");
+    const isdValue = parseInt($("#isdFilter").val(), 10);
 
     $(".faction").each(function () {
         const $faction = $(this);
@@ -1786,11 +1860,36 @@ applyCustomShipFilter: function () {
             if (!isNaN(isdValue) && shipISD > isdValue) {
                 visible = false;
             }
+            if (!showCustom && isCustom) visible = false;
+            if (!isNaN(isdValue) && shipISD > isdValue) visible = false;
 
             $ship.toggle(visible && !isHidden);
         });
-    });
-},
+*/
+
+	//Function called by Custom and ISD filters.
+	applyCustomShipFilter: function () {
+		const showCustom = $("#toggleCustom").is(":checked");
+		const isdValue = parseInt($("#isdFilter").val(), 10);
+
+		$(".faction").each(function () {
+			const $faction = $(this);
+			const isHidden = $faction.hasClass("shipshidden");
+
+			$faction.find(".ship").each(function () {
+				const $ship = $(this);
+				const isCustom = $ship.data("custom") === true || $ship.data("custom") === "true";
+				const shipISD = parseInt($ship.data("isd"), 10);
+
+				let visible = true;
+
+				if (!showCustom && isCustom) visible = false;
+				if (!isNaN(isdValue) && shipISD > isdValue) visible = false;
+
+				$ship.toggle(visible && !isHidden);
+			});
+		});
+	},
 
     goToWaiting: function goToWaiting() {},
 
@@ -1857,10 +1956,14 @@ applyCustomShipFilter: function () {
                 $(".playername", slotElement).html(player.name);
 				
 				//Only show select button if it's a viable option
-				if(slot.playerid == gamedata.thisPlayer && slot.playerid !== gamedata.selectedSlot) $(".selectslot", slotElement).show();
-				if(slot.playerid !== gamedata.thisplayer) $(".selectslot", slotElement).hide();
+				if(slot.playerid == gamedata.thisplayer && slot.slot !== gamedata.selectedSlot) $(".selectslot", slotElement).show();
 
-                if (slot.lastphase == "-2") {
+				if (slot.playerid == gamedata.thisplayer && slot.slot == gamedata.selectedSlot || 
+					slot.playerid !== gamedata.thisplayer)
+					$(".selectslot", slotElement).hide();				
+				//if() $(".selectslot", slotElement).hide();
+
+                if (slot.lastphase >= "-2") {
                     slotElement.addClass("ready");
                 }
 
@@ -1904,7 +2007,7 @@ applyCustomShipFilter: function () {
 	//block if player already has confirmed fleet (in any slot)
 	for (var i in gamedata.slots)  { //check all slots
 		var checkSlot = gamedata.slots[i];
-		if (checkSlot.lastphase == "-2") { //this slot has ready fleet
+		if (checkSlot.lastphase >= "-2") { //this slot has ready fleet
 			var player = playerManager.getPlayerInSlot(checkSlot);
 			if (player.id == gamedata.thisplayer && checkSlot == slot){
 				window.confirm.error("You have already confirmed Your fleet for this game!", function () {});
@@ -1921,7 +2024,7 @@ applyCustomShipFilter: function () {
         var slotid = slot.data("slotid");
 	    
 		//block if player already has confirmed fleet (in this slot)
-		if (slot.lastphase == "-2") { 
+		if (slot.lastphase >= "-2") { 
 			window.confirm.error("You have already confirmed Your fleet for this game!", function () {});
 			return;
 		}
@@ -1954,7 +2057,7 @@ applyCustomShipFilter: function () {
 
         var slotid = gamedata.selectedSlot;
         var selectedSlot = playerManager.getSlotById(slotid);
-        if (selectedSlot.lastphase == "-2") {
+        if (selectedSlot.lastphase >= "-2") {
             window.confirm.error("This slot has already bought a fleet!", function () {});
             return false;
         }
@@ -2084,7 +2187,7 @@ applyCustomShipFilter: function () {
     copyShip: function copyShip(copiedShip) {
         var slotid = gamedata.selectedSlot;
         var selectedSlot = playerManager.getSlotById(slotid);
-        if (selectedSlot.lastphase == "-2") {
+        if (selectedSlot.lastphase >= "-2") {
             window.confirm.error("You have already readied your fleet!", function () {});
             return false;
         }
@@ -2214,7 +2317,7 @@ applyCustomShipFilter: function () {
     editShip: function editShip(ship) {
         var slotid = gamedata.selectedSlot;
         var selectedSlot = playerManager.getSlotById(slotid);
-        if (selectedSlot.lastphase == "-2") {
+        if (selectedSlot.lastphase >= "-2") {
             window.confirm.error("You have already readied your fleet!", function () {});
             return false;
         }
@@ -2390,7 +2493,7 @@ applyCustomShipFilter: function () {
 
 		var slotid = gamedata.selectedSlot;
         var selectedSlot = playerManager.getSlotById(slotid);
-        if (selectedSlot.lastphase == "-2") {
+        if (selectedSlot.lastphase >= "-2") {
 			window.confirm.error("You have already confirmed your fleet for this game!", function () {});
 			return;
 		}					
@@ -2413,7 +2516,7 @@ applyCustomShipFilter: function () {
 	    }
 	    // Pass the submission function as a callback, not invoke it immediately
 	    confirm.confirm("Are you sure you wish to ready your fleet?", function () {
-			selectedSlot.lastphase == -2;			
+			selectedSlot.lastphase = -2; //Apparently this makes 'READY' appear in slot.			
 	        ajaxInterface.submitGamedata();
 	    });
 	},
@@ -2430,13 +2533,22 @@ applyCustomShipFilter: function () {
         if (slot.playerid == gamedata.thisplayer) gamedata.selectSlot(slot);
     },
 
-    selectSlot: function selectSlot(slot) {
-        $(".slot").removeClass("selected");
+	selectSlot: function selectSlot(slot) {
+		// Find previously selected slot and re-show its selectslot element
+		var previous = $(".slot.selected");
+		if (previous.length) {
+			previous.removeClass("selected");
+			$(".selectslot", previous).show();  // Immediately show the select button back
+		}
 
-        $(".slot.slotid_" + slot.slot).addClass("selected");
-        gamedata.selectedSlot = slot.slot;
-        this.constructFleetList();
-    },
+		// Select the new slot and hide its selectslot element
+		var current = $(".slot.slotid_" + slot.slot);
+		current.addClass("selected");
+		$(".selectslot", current).hide(); // Hide the select button for the selected slot
+
+		gamedata.selectedSlot = slot.slot;
+		this.constructFleetList();
+	},
 
     onShipContextMenu: function onShipContextMenu(phpclass, faction, id, fleetList) {
 		var ship;

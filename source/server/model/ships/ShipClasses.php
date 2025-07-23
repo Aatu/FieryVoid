@@ -29,7 +29,7 @@ class BaseShip {
     public $phpclass;
     public $forwardDefense, $sideDefense;
     public $destroyed = false;
-    public $deploysOnTurn = 1; //Default turn to deploy.
+    //public $deploysOnTurn = 1; //Default turn to deploy.
     public $pointCost = 0;
     public $pointCostEnh = 0; //points spent on enhanements (in addition to crafts' own price), DOES NOT include cost of items being only technically enhancements (special missiles, Navigators...)
 	public $pointCostEnh2 = 0; //points spent on non-enhancements - separation actuallly exists only at fleet selection, afterwards it will be always 0 with points added to $pointCostEnh
@@ -474,7 +474,7 @@ class BaseShip {
         $strippedShip->movement = $this->movement; 
         $strippedShip->faction = $this->faction; 
         $strippedShip->phpclass = $this->phpclass;
-        $strippedShip->deploysOnTurn = $this->deploysOnTurn;         
+        //$strippedShip->deploysOnTurn = $this->deploysOnTurn;         
         $strippedShip->systems = array_map( function($system) {return $system->stripForJson();}, $this->systems);
 		
 		$strippedShip->combatValue = $this->calculateCombatValue();
@@ -1741,35 +1741,19 @@ public function getAllEWExceptDEW($turn){
         //If any of these conditions is true, indicates Terrain.
         if($this instanceof Terrain || $this->userid == -5 || $this->shipSizeClass == 5) return true;
 		return false; 
-	}//endof function isTerrain
+	}
 
-    public function getTurnDeployed($phase){
+    public function getTurnDeployed($gamedata){
 
-        if ($phase == -1 || $this->osat || $this->base || $this->isTerrain()) return 1; //Don't hide anything in Deployment Phase.  Bases, Terrain and OSATs never 'jump in'.
+        if ($this->osat || $this->base || $this->isTerrain()) return 1; //Bases, Terrain and OSATs never 'jump in'.
 
-        //$slot = $gamedata->getSlotById($this->slot);
-        //$depTurn = max($this->deploysOnTurn, $slot->depavailable);
-        $depTurn = $this->deploysOnTurn;
-
-        return $depTurn;
-
-	}//endof function getTurnDeployed  
-
-
-/*
-    public function notDeployedYet($gamedata){
-       
-        if($this->deploysOnTurn > $gamedata->turn) return true; //Ships can be set to deploy later.
-
-        //Now check entire slot.
         $slot = $gamedata->getSlotById($this->slot);
         $depTurn = $slot->depavailable;
 
-        if($depTurn > $gamedata->turn) return true;
+        return $depTurn;
 
-        return false; 
-	}//endof function notDeployedYet
-*/
+	} 
+
 
     public function getBearingOnPos($pos){ //returns relative angle from this unit to indicated coordinates
         $tf = $this->getFacingAngle(); //ship facing
@@ -1796,7 +1780,6 @@ public function getAllEWExceptDEW($turn){
     }
 
 
-
     public function doGetHitSectionBearing($relativeBearing){ //pick section hit from given bearing; return array with all data!
         $locs = $this->getLocations();
         $valid = array();
@@ -1816,7 +1799,6 @@ public function getAllEWExceptDEW($turn){
         $result = $this->doGetHitSectionBearing($relativeBearing);
         return $result;
     }
-
 
 
     public function doGetHitSection($shooter){   //pick section hit from given unit; return array with all data!

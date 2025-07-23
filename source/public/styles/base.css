@@ -47,6 +47,7 @@ a.link:hover
 	padding:2px;
 	background-color:#04161C;
 	border:1px solid #37465a;
+  	border-radius: 5px;	
 	margin-top: 2px;	
 }
 
@@ -85,13 +86,15 @@ a.link:hover
 .panelsubheader{
 	font-size:20px;
 /*	color:#496791; Seemed a bit too dark to read well - DK */
-	color:#6896d2;
+
+	color: #DEEBFF;	
 }
 
 .panelsmall {
-    font-size:14px; /* Reduces the font size to 80% of the original */
+    font-size:15px; 
 /*    color: #00caca;    Example color (cyan), choose your desired color */
-	color: #DEEBFF;
+	color:#a3c0f5;
+	font-weight: 525;
 }
 
 a{
@@ -131,3 +134,8 @@ input[type="checkbox"] {
     position: relative;
     top: 2px;
 }
+
+input[type="checkbox"].yellow-tick:checked {
+    accent-color: yellow;
+}
+

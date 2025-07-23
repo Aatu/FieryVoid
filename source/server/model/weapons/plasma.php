@@ -1438,7 +1438,8 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 				//Make a list of relevant ships e.g. this ship and enemy fighters in the game.
 				foreach($allShips as $ship){
 					if (!$ship instanceof FighterFlight) continue; //Ignore ships.
-					if($ship->isDestroyed()) continue;//Ignore destroyed flights.							
+					if($ship->isDestroyed()) continue;//Ignore destroyed flights.
+					if($ship->getTurnDeployed($gamedata) > $gamedata->turn) continue; //Ship not deployed yet.												
 					$relevantShips[] = $ship;			
 				}
 

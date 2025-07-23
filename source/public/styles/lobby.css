@@ -16,6 +16,7 @@
 
 .slot{
     border: 1px solid #215a7a;
+  	border-radius: 5px;    
 	color:#DEEBFF;
 	padding: 3px 5px;
     position:relative;
@@ -27,6 +28,13 @@
 #moonsDropdown,
 #desperateDropdown {
     margin-left: 15px;
+}
+
+.scenariolabel{
+    font-weight:bold;
+    font-size:12px; 
+    margin:2px 0px; 
+    color: #a3c0f5;
 }
 
 .slot span{
@@ -77,13 +85,21 @@
 	margin-left:20px;
 }
 
+.factiongroup-header{
+    font-weight:bold;
+    font-size:16px; 
+    margin:6px 5px; 
+    color: #6495ED;
+    font-family: "Bruno Ace SC", sans-serif;    
+} 
+
 .store .faction
 {
     cursor:pointer;
 }
 
 .store .factionname{
-	font-size:14px;
+	font-size:15px;
 }
 
 .store .ship{
@@ -92,10 +108,9 @@
 }
 
 .store .shipsizehdr{
-	color:#6495ED;
+	color:#6495ED;  
 	margin-left:10px;
 	font-size:12px;
-	font-style: italic;
 }
 
 .store .ship .clickable{
@@ -107,6 +122,16 @@
 	cursor:pointer;
 	color:#DEEBFF;
 	text-decoration:underline;
+}
+
+.faction-display-name.custom-faction {
+    color: rgba(255, 255, 0, 0.774); /* Or any other color you want for custom factions */
+    /*color: #FFA080;*/  
+}
+
+.highlight-custom-ship {
+    color: rgba(255, 255, 0, 0.767); /* Or any other color you want for custom factions  #FFA080 */
+    /*color: #FFA080;*/
 }
 
 .mediumSize{
@@ -148,7 +173,7 @@
 }
 
 .selectslot{
-    color:#ffaa00;   
+    color:#FFA080;   
     display:none;
 }
 
