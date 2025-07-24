@@ -128,6 +128,7 @@ class Stealth extends ShipSystem implements SpecialAbility{
         $ship = $this->getUnit();
 		if ($ship instanceof FighterFlight) return; //Fighter units don't need notes, they can't be invisible/detected.
 		if($ship->isDestroyed()) return; //No point generating new notes if ship destroyed.
+		if($ship->getTurnDeployed($gameData) > $gameData->turn)	return; //Ship not deployed yet.		
 
 		$this->onIndividualNotesLoaded($gameData); //Check current detection status.
 
@@ -4615,7 +4616,6 @@ class ShadowPilot extends CnC{
 /*Phasing Drive - essentially a jump engine that destroys ship if damaged while half-phasing*/
 class PhasingDrive extends JumpEngine{
     public $displayName = "Phasing Drive";
-	public $iconPath = "PhasingDrive.png";	
     
 	//JumpEngine enables half phasing, so I'm torn about priority... I'll increase to 2 over Jump Engine's 1
 	public $repairPriority = 2;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
@@ -4627,7 +4627,7 @@ class PhasingDrive extends JumpEngine{
 		}else{
 			$this->data["Special"] .= '<br>';
 		}
-		$this->data["Special"] .= 'If damaged while Half-Phasing - the entire ship is destroyed.';
+		$this->data["Special"] .= 'If damaged while half-phasing - entire ship is destroyed.';
     }
 	
 	//destroy ship if damaged while half-phaseing
