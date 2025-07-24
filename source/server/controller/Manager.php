@@ -558,7 +558,9 @@ class Manager{
                     self::changeTurn($gamedata);
                 }
             }  
-            if (TacGamedata::$currentPhase > 0){
+            //if (TacGamedata::$currentPhase > 0){
+            //Keep original logic here for Turn 1, but then adjust to accommodate Deployment phases AFTER Turn 1
+            if ($gamedata->turn == 1 && TacGamedata::$currentPhase > 0 || $gamedata->turn > 1 && TacGamedata::$currentPhase >= -1){            
                 foreach ($gamedata->ships as $ship){
                     foreach ($ship->systems as $system){
                         $system->onAdvancingGamedata($ship, $gamedata);

@@ -128,6 +128,7 @@ class Stealth extends ShipSystem implements SpecialAbility{
         $ship = $this->getUnit();
 		if ($ship instanceof FighterFlight) return; //Fighter units don't need notes, they can't be invisible/detected.
 		if($ship->isDestroyed()) return; //No point generating new notes if ship destroyed.
+		if($ship->getTurnDeployed($gameData) > $gameData->turn)	return; //Ship not deployed yet.		
 
 		$this->onIndividualNotesLoaded($gameData); //Check current detection status.
 

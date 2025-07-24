@@ -799,7 +799,7 @@ class Weapon extends ShipSystem
             } else if (!$this->isOverloadingOnTurn(TacGamedata::$currentTurn)) {
                 return new WeaponLoading($this->getTurnsloaded(), 0, $this->getLoadedAmmo(), 0, $this->getLoadingTime(), $this->firingMode);
             }
-        }  else if ($phase == 1) {
+        }  else if ($phase == -1) {
             $weaponLoading = $this->calculateLoadingFromLastTurn($gamedata);
             $this->setLoading($weaponLoading);
 
