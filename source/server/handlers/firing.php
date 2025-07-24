@@ -202,6 +202,7 @@ class Firing
         $allInterceptWeapons = array();
         $allIncomingShots = array();
         foreach ($gamedata->ships as $ship) {
+            if($ship->getTurnDeployed($gamedata) > $gamedata->turn)	continue; //Ship not deployed yet. Remove to avoid problems.            
             $interceptWeapons = self::getUnassignedInterceptors($gamedata, $ship);
             $allInterceptWeapons = array_merge($allInterceptWeapons, $interceptWeapons);
             $incomingShots = $ship->getAllFireOrders($gamedata->turn);
@@ -401,6 +402,8 @@ class Firing
         $target = $gd->getShipById($fire->targetid);
         $interceptingShip = $weapon->getUnit();
         $firingweapon = $shooter->getSystemById($fire->weaponid);
+        
+        //if($interceptingShip->getTurnDeployed($gd) > $gd->turn)	return; //Ship not deployed yet.		
 
         if ($firingweapon->doNotIntercept){ //some attacks simply aren't subject to interception - like being in a field, or ramming attacks
             //Debug::log("Target weapon cannot be intercepted\n");
