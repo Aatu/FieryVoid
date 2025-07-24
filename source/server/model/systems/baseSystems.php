@@ -1994,7 +1994,7 @@ class SecondaryCnC extends ShipSystem{
 			//add Secondary C&C destruction - without actual damage, just desstruction, so it can be tied to original weapon impact without affecting damage done numbers
 			$damageEntry = new DamageEntry(-1, $damage->shipid, -1, $damage->turn, $this->id, 0, 0, 0, $damage->fireorderid, true, false, "Secondary C&C - marking destroyed", $damage->damageclass, $damage->shooterid, $damage->weaponid);
 			$damageEntry->updated = true;
-			$struct->damage[] = $damageEntry;
+			$this->damage[] = $damageEntry;
 		}
     } //endof function criticalPhaseEffects	
 	
