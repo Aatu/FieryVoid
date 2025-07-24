@@ -235,7 +235,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
     <p>You can toggle Ballistic Lines on/off using the buttons on the right-hand side of the screen. Enemy ballistic attacks become visible after both players commit their Initial Orders.</p>
 
     <h4 id="power">Power Management:</h4>
-    <p>this step is usually optional and new players should probably skip it in the beginning.  Power management is certainly useful when done correctly, but can backfire if done incorrectly. If you decide you want to try it anyway, here's how to go about managing a ship's power:</p>
+    <p>This step is usually optional and new players should probably skip it in the beginning.  Power management is certainly useful when done correctly, but can backfire if done incorrectly. If you decide you want to try it anyway, here's how to go about managing a ship's power:</p>
     <ul>
       <li>Right-click on a ship to open the SCS.</li>
       <li>Left-click on systems to turn them off (using the red ‘power button’).</li>
