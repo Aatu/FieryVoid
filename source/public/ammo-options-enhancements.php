@@ -185,8 +185,8 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
 
     <h4 id="fighterenhancements" style="margin-top: 15px;">Fighter Enhancements:</h4>
 
-    <p><strong>Note</strong> - All costs listed below are on per fighter basis e.g. you pay for each fighters in the flight.</p>
-
+    <ul>
+      <p><strong>Note</strong> - All costs listed below are on per fighter basis e.g. you pay for each fighters in the flight.</p>
       <li><strong>Expert Motivator</strong>
         <ul class="circle-list">
             <li>Effect: -2 modifier to flight's dropout rolls</li>
@@ -231,14 +231,14 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             <li>Notes: Custom Star Wars faction only.</li>            
         </ul>      
       </li>           
-      
+    </ul>      
     <a class="back-to-top" href="#top">↩ Back to Top</a>    
 
 
     <h3 id="factionenhancements" style="margin-top: 15px;">Faction Enhancements:</h3>
 
     <h4 id="ancients" style="margin-top: 15px;">Ancients:</h4>
-
+      <ul>
         <li><strong>Improved Self Repair</strong>
             <ul class="circle-list">
                 <li>Effect: +1 rating for every Self Repair system on ship</li>
@@ -246,9 +246,9 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                 <li>Limit: 50% of weakest Self Repair rating on ship (rounded down)</li>
             </ul>      
         </li> 
-
+      </ul>
     <h4 id="ipsha" style="margin-top: 15px;">Ipsha:</h4>
-
+      <ul>
         <li><strong>Spark Curtain</strong>
             <ul class="circle-list">
                 <li>Effect: Ballistic hit chance reduced by 2 + any boost level for Spark Field</li>
@@ -275,10 +275,10 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                 <li>Notes: Eethan Barony-specific variant rather than enhancement. Represents Power Pod upgrade, remade as a ship upgrade rather than add-on system.</li>              
             </ul>      
         </li>       
-
+      </ul>
 
     <h4 id="markab" style="margin-top: 15px;">Markab:</h4>
-
+      <ul>
         <li><strong>Religious Fervor</strong>
             <ul class="circle-list">
                 <li>Effect: +1 to hit on all weapons (or +5 OB for fighters), +10 initiative, fighters  gain -3 to Dropout; but defence ratings increased by 10.  </li>
@@ -286,11 +286,12 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                 <li>Limit: 1</li>
                 <li>Notes: Should be taken when 'Desperate Rules' should apply to Markab player.</li>             
             </ul>      
-        </li>  
+        </li>
+      </ul>    
     <a class="back-to-top" href="#top">↩ Back to Top</a>
 
     <h4 id="shadows" style="margin-top: 15px;">Shadows:</h4>
-
+      <ul>
         <li><strong>Increased Diffuser Capability</strong>
             <ul class="circle-list">
                 <li>Effect: +1 rating, for every Diffuser on ship</li>
@@ -316,9 +317,9 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                 <li>Notes: Not an actual enhancement - used to denote fighter does not have corresponding 'Launched Fighter' enhancement on a Shadow ship.</li>            
             </ul>      
         </li>        
-
+      </ul>
     <h4 id="vorlons" style="margin-top: 15px;">Vorlons:</h4>
-
+      <ul>
         <li><strong>Amethyst Skin Coloring</strong>
             <ul class="circle-list">
                 <li>Effect: +1 Adaptive Armor (AA) point, AA allowance per weapon type and AA pre-assigned amount are increased on every even total.</li>
@@ -343,7 +344,8 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                 <li>Points Cost: 20 * new Capacitor recharge rate</li>
                 <li>Limit: 6</li>
             </ul>      
-          </li>          
+          </li>
+      </ul>            
     <a class="back-to-top" href="#top">↩ Back to Top</a>
 
 
