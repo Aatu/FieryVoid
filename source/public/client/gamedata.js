@@ -343,10 +343,10 @@ window.gamedata = {
                         continue;
                     }
 			
-			//checking for power surplus
-			if (shipManager.power.getReactorPower(myShips[ship], shipManager.systems.getSystemByName(myShips[ship], "reactor"))>0){
-				powerSurplus.push(myShips[ship]);
-			}
+                //checking for power surplus
+                if (shipManager.power.getReactorPower(myShips[ship], shipManager.systems.getSystemByName(myShips[ship], "reactor"))>0){
+                    powerSurplus.push(myShips[ship]);
+                }
 			
                     if (gamedata.turn == 1) {
                         if (myShips[ship].EW.length == 0) {
@@ -588,8 +588,8 @@ window.gamedata = {
 
                 for (var ship in myShips) {
                     var fired = 0;
-			var hasReadyGuns = false;
-			var hasShotsLeft = false; //For split shot weapons that might not have used al their shots.
+                    var hasReadyGuns = false;
+                    var hasShotsLeft = false; //For split shot weapons that might not have used al their shots.
                     if (!myShips[ship].flight) {
                         for (var i = 0; i < myShips[ship].systems.length; i++) {
 							var currWeapon = myShips[ship].systems[i];
