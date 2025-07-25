@@ -210,10 +210,10 @@
             ajaxInterface.startPollingGamedata();
 
             // ✅ Unified filter logic for factions based on Tier and Custom
-function updateTierFilter() {
-    const selectedTiers = $('.tier-filter:checked').map(function () {
-        return $(this).data('tier');
-    }).get();
+    function updateTierFilter() {
+        const selectedTiers = $('.tier-filter:checked').map(function () {
+            return $(this).data('tier');
+        }).get();
 
     const showCustom = $('#toggleCustom').is(':checked');
     const customMode = $('#customSelect').val();

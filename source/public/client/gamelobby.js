@@ -2017,6 +2017,7 @@ applyCustomShipFilter: function () {
 	}
 	    
         ajaxInterface.submitSlotAction("takeslot", slotid);
+        location.reload(); // ✅ reload the page after taking the slot		
     },
 
     onLeaveSlotClicked: function onLeaveSlotClicked() {
