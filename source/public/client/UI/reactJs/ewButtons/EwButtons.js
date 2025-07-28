@@ -15,7 +15,8 @@ class EwButtons extends React.Component {
         this.showEnemyEW = this.showEnemyEW.bind(this);
         this.toggleFriendlyBallisticLines = this.toggleFriendlyBallisticLines.bind(this);
         this.toggleEnemyBallisticLines = this.toggleEnemyBallisticLines.bind(this);
-        this.toggleLoS = this.toggleLoS.bind(this);               
+        this.toggleLoS = this.toggleLoS.bind(this);
+        this.externalToggleLoS = this.externalToggleLoS.bind(this); // 🔁 bind this method too                       
         this.toggleHexNumbers = this.toggleHexNumbers.bind(this);
         this.externalToggleHexNumbers = this.externalToggleHexNumbers.bind(this); // 🔁 bind this method too
                     
@@ -23,13 +24,21 @@ class EwButtons extends React.Component {
 
     componentDidMount() {
         // 🔔 Listen for external toggle
-        window.addEventListener("HexNumbersToggled", this.externalToggleHexNumbers);
+        window.addEventListener("LoSToggled", this.externalToggleLoS); 
+        window.addEventListener("HexNumbersToggled", this.externalToggleHexNumbers);       
     }
 
     componentWillUnmount() {
         // 🧹 Clean up listener
-        window.removeEventListener("HexNumbersToggled", this.externalToggleHexNumbers);
+        window.removeEventListener("LoSToggled", this.externalToggleLoS); 
+        window.removeEventListener("HexNumbersToggled", this.externalToggleHexNumbers);       
     }
+
+    externalToggleLoS() {
+        this.setState({
+            losToggled: gamedata.showLoS
+        });
+    } 
 
     externalToggleHexNumbers() {
         this.setState((prevState) => ({
@@ -58,21 +67,22 @@ class EwButtons extends React.Component {
         const newValue = !this.state.losToggled;
         this.setState({ losToggled: newValue });        
         webglScene.customEvent("ToggleLoS", { up: up });
+        // 🔔 Notify other components (like this one) of the toggle
+        window.dispatchEvent(new CustomEvent("LoSToggled"));        
     }
 
-toggleHexNumbers(up) {
-    if (up) return;
+    toggleHexNumbers(up) {
+        if (up) return;
 
-    const newValue = !this.state.hexToggled;
-    this.setState({ hexToggled: newValue });
+        const newValue = !this.state.hexToggled;
+        this.setState({ hexToggled: newValue });
 
-    // 🔁 Keep external logic (like PhaseStrategy) in sync
-    webglScene.customEvent("ToggleHexNumbers", { up: up });
+        // 🔁 Keep external logic (like PhaseStrategy) in sync
+        webglScene.customEvent("ToggleHexNumbers", { up: up });
 
-    // 🔔 Notify other components (like this one) of the toggle
-    window.dispatchEvent(new CustomEvent("HexNumbersToggled"));
-}
-
+        // 🔔 Notify other components (like this one) of the toggle
+        window.dispatchEvent(new CustomEvent("HexNumbersToggled"));
+    }
 
 
     render() {

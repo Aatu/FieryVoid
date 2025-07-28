@@ -10,6 +10,7 @@ this.settings = {
     ShowAllBallistics: settings.ShowAllBallistics || {keyCode: 66, shiftKey: false, altKey: false, ctrlKey: false, metaKey: false},
     ShowFriendlyBallistics: settings.ShowFriendlyBallistics || {keyCode: 70, shiftKey: false, altKey: false, ctrlKey: false, metaKey: false},
     ShowEnemyBallistics: settings.ShowEnemyBallistics || {keyCode: 69, shiftKey: false, altKey: false, ctrlKey: false, metaKey: false},
+    ToggleLoS: settings.ToggleLoS || {keyCode: 76, shiftKey: false, altKey: false, ctrlKey: false, metaKey: false},     
     ToggleHexNumbers: settings.ToggleHexNumbers || {keyCode: 72, shiftKey: false, altKey: false, ctrlKey: false, metaKey: false},             
     ZoomLevelToStrategic: 0.2
 };

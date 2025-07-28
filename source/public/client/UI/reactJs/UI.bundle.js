@@ -36672,6 +36672,7 @@ var EwButtons = function (_React$Component) {
         _this.toggleFriendlyBallisticLines = _this.toggleFriendlyBallisticLines.bind(_this);
         _this.toggleEnemyBallisticLines = _this.toggleEnemyBallisticLines.bind(_this);
         _this.toggleLoS = _this.toggleLoS.bind(_this);
+        _this.externalToggleLoS = _this.externalToggleLoS.bind(_this); // 🔁 bind this method too                       
         _this.toggleHexNumbers = _this.toggleHexNumbers.bind(_this);
         _this.externalToggleHexNumbers = _this.externalToggleHexNumbers.bind(_this); // 🔁 bind this method too
 
@@ -36682,13 +36683,22 @@ var EwButtons = function (_React$Component) {
         key: "componentDidMount",
         value: function componentDidMount() {
             // 🔔 Listen for external toggle
+            window.addEventListener("LoSToggled", this.externalToggleLoS);
             window.addEventListener("HexNumbersToggled", this.externalToggleHexNumbers);
         }
     }, {
         key: "componentWillUnmount",
         value: function componentWillUnmount() {
             // 🧹 Clean up listener
+            window.removeEventListener("LoSToggled", this.externalToggleLoS);
             window.removeEventListener("HexNumbersToggled", this.externalToggleHexNumbers);
+        }
+    }, {
+        key: "externalToggleLoS",
+        value: function externalToggleLoS() {
+            this.setState({
+                losToggled: gamedata.showLoS
+            });
         }
     }, {
         key: "externalToggleHexNumbers",
@@ -36726,6 +36736,8 @@ var EwButtons = function (_React$Component) {
             var newValue = !this.state.losToggled;
             this.setState({ losToggled: newValue });
             webglScene.customEvent("ToggleLoS", { up: up });
+            // 🔔 Notify other components (like this one) of the toggle
+            window.dispatchEvent(new CustomEvent("LoSToggled"));
         }
     }, {
         key: "toggleHexNumbers",
@@ -37093,6 +37105,7 @@ var PlayerSettingsForm = function (_React$Component) {
                     React.createElement(_common.InputAndLabel, { label: "Key to display ALL Ballistics", onChange: function onChange() {}, onKeydown: this.getOnKeyDown.call(this, "ShowAllBallistics"), value: this.getKey.call(this, "ShowAllBallistics") }),
                     React.createElement(_common.InputAndLabel, { label: "Key to display FRIENDLY Ballistics", onChange: function onChange() {}, onKeydown: this.getOnKeyDown.call(this, "ShowFriendlyBallistics"), value: this.getKey.call(this, "ShowFriendlyBallistics") }),
                     React.createElement(_common.InputAndLabel, { label: "Key to display ENEMY Ballistics", onChange: function onChange() {}, onKeydown: this.getOnKeyDown.call(this, "ShowEnemyBallistics"), value: this.getKey.call(this, "ShowEnemyBallistics") }),
+                    React.createElement(_common.InputAndLabel, { label: "Key to toggle LINE OF SIGHT indicators", onChange: function onChange() {}, onKeydown: this.getOnKeyDown.call(this, "ToggleLoS"), value: this.getKey.call(this, "ToggleLoS") }),
                     React.createElement(_common.InputAndLabel, { label: "Key to toggle HEX numbers", onChange: function onChange() {}, onKeydown: this.getOnKeyDown.call(this, "ToggleHexNumbers"), value: this.getKey.call(this, "ToggleHexNumbers") }),
                     React.createElement(
                         _styled.SubTitle,

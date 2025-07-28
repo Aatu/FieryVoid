@@ -765,12 +765,16 @@ PhaseStrategy.prototype.onMouseOverShips = function (ships, payload) {
     };        
 
     PhaseStrategy.prototype.onToggleLoS = function (payload) {
+
+        if (payload.up) return; // Prevent repeating on key hold or keyup
+
 	    if(!gamedata.showLoS){
             gamedata.showLoS = true;
         }else{
             gamedata.showLoS = false;
             mathlib.clearLosSprite();            
-        }    
+        } 
+        window.dispatchEvent(new CustomEvent("LoSToggled"));           
     }; 
 
     PhaseStrategy.prototype.onToggleHexNumbers = function (payload) {
