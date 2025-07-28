@@ -23,6 +23,7 @@ window.gamedata = {
     selectedSlot: null,
     gamespace: null,
     replay: false,
+    showLoS: false,
 
     mouseOverShipId: -1,
 

@@ -189,6 +189,7 @@ window.mathlib = {
 		return heading;
 	},
 
+
 	hexFacingToAngle: function hexFacingToAngle(d) {
 		switch (d) {
 			case 0:
@@ -205,6 +206,7 @@ window.mathlib = {
 				return 300;
 		}
 	},
+
 
 	doLinesIntersect: function(p1, p2, p3, p4) {
 		const EPSILON = 1e-10;
@@ -247,6 +249,7 @@ window.mathlib = {
 		return t >= -EPSILON && t <= 1 + EPSILON && u >= -EPSILON && u <= 1 + EPSILON;
 	},
 
+
 	getHexCorners: function getHexCorners(hex) {
 		const hexSize = window.Config.HEX_SIZE;
 		const shrinkFactor = 1; // Set to <1 if you want shrunken hexes for LoS testing
@@ -264,6 +267,7 @@ window.mathlib = {
 		}));
 	},
 		
+
 	checkLineOfSight: function checkLineOfSight(start, end, blockedHexes) {
 		const startPixel = coordinateConverter.fromHexToGame(start);
 		const endPixel = coordinateConverter.fromHexToGame(end);
@@ -281,9 +285,9 @@ window.mathlib = {
 		const lineMinR = Math.min(start.r, end.r);
 		const lineMaxR = Math.max(start.r, end.r);
 
-//var startPixel = coordinateConverter.fromHexToGame({ q: 8, r: 2 });
-//var endPixel = coordinateConverter.fromHexToGame({ q: 7, r: 1 });
-//var blockedCorners = mathlib.getHexCorners({ q: 8, r: 1 });
+		//var startPixel = coordinateConverter.fromHexToGame({ q: 8, r: 2 });
+		//var endPixel = coordinateConverter.fromHexToGame({ q: 7, r: 1 });
+		//var blockedCorners = mathlib.getHexCorners({ q: 8, r: 1 });
 
 		for (let hex of filteredBlockedHexes) {
 			// Optional: guard against malformed data
@@ -303,18 +307,73 @@ window.mathlib = {
 				const p2 = corners[(i + 1) % corners.length];
 
 				if (this.doLinesIntersect(startPixel, endPixel, p1, p2)) {
-//mathlib.drawLine3D(startPixel, endPixel, 0xff00ff); // Magenta line if blocked
-//mathlib.drawHexOutline3D(corners, 0xff0000); // Red hex border					
+					//if(gamedata.showLoS) mathlib.drawLine3D(startPixel, endPixel, 0xff00ff); // Magenta line if blocked
+					//if(gamedata.showLoS) mathlib.drawHexOutline3D(corners, 0xff00ff); // Magenta hex border					
 					return true; // Line of sight is blocked
 				}
 			}
 		}
 
-//mathlib.drawLine3D(startPixel, endPixel, 0x87ceeb); // Blue line
-
+		//if(gamedata.showLoS) mathlib.drawLine3D(startPixel, endPixel, 0x87ceeb); // Blue line
 		return false; // Line of sight is clear
 	},
 
+
+	checkLineOfSightSprite: function checkLineOfSightSprite(start, end, blockedHexes) {
+		const startPixel = coordinateConverter.fromHexToGame(start);
+		const endPixel = coordinateConverter.fromHexToGame(end);
+
+		// Normalize all blocked hexes to plain {q, r} objects
+		const normalizedBlockedHexes = blockedHexes.map(hex => ({ q: hex.q, r: hex.r }));
+
+		// Filter out the start and end positions
+		const filteredBlockedHexes = normalizedBlockedHexes.filter(
+			hex => !(hex.q === start.q && hex.r === start.r) && !(hex.q === end.q && hex.r === end.r)
+		);
+
+		const lineMinQ = Math.min(start.q, end.q);
+		const lineMaxQ = Math.max(start.q, end.q);
+		const lineMinR = Math.min(start.r, end.r);
+		const lineMaxR = Math.max(start.r, end.r);
+
+		for (let hex of filteredBlockedHexes) {
+			// Optional: guard against malformed data
+			if (typeof hex.q !== 'number' || typeof hex.r !== 'number') continue;
+
+			// Filter out obviously non-intersecting hexes (based on hex grid, not pixels!)
+			if (
+				hex.q < lineMinQ - 3 || hex.q > lineMaxQ + 3 ||
+				hex.r < lineMinR - 3 || hex.r > lineMaxR + 3
+			) {
+				continue;
+			}
+
+			const corners = this.getHexCorners(hex);
+			for (let i = 0; i < corners.length; i++) {
+				const p1 = corners[i];
+				const p2 = corners[(i + 1) % corners.length];
+
+				if (this.doLinesIntersect(startPixel, endPixel, p1, p2)) {
+					mathlib.drawLine3D(startPixel, endPixel, 0xff00ff); // Magenta line if blocked
+					mathlib.drawHexOutline3D(corners, 0xff00ff); // Magenta hex border					
+					return true; // Line of sight is blocked
+				}
+			}
+		}
+
+		mathlib.drawLine3D(startPixel, endPixel, 0x00ffff); // Blue line for clear LoS
+		return false; // Line of sight is clear
+	},
+
+
+	//Called in Phase Strategy to show LoS lines if LoS is toggled on.
+	showLoS: function showLoS(shooter, target){
+		var start = shipManager.getShipPosition(shooter);
+		var end = shipManager.getShipPosition(target);
+		var blockedHexes = weaponManager.getBlockedHexes();
+		
+		mathlib.checkLineOfSightSprite(start, end, blockedHexes);
+	},
 	
 	clearLosSprite: function clearLosSprite() {
 	const LosSprite = window.LosSprite;
@@ -363,7 +422,7 @@ window.mathlib = {
 	},
 
 
-	//Uses game/pixel coorindates not hex!
+	//Uses game/pixel coordinates not hex!
 	drawRuler: function drawRuler(p1, p2, color = 0x87ceeb) {
 		if (!window.LosSprite) {
 			window.LosSprite = new THREE.Group();

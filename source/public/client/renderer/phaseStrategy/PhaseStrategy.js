@@ -275,6 +275,7 @@ window.PhaseStrategy = function () {
 
         this.selectedShip = null;
         this.uiManager.hideWeaponList();
+        if(gamedata.showLoS) mathlib.clearLosSprite();        
     };
 
     PhaseStrategy.prototype.targetShip = function (ship, payload) {
@@ -345,6 +346,7 @@ window.PhaseStrategy = function () {
     PhaseStrategy.prototype.onMouseOutShips = function (ships, payload) {
         this.showAppropriateHighlight();
         this.showAppropriateEW();
+        if(window.LosSprite) mathlib.clearLosSprite();
     };
 
 PhaseStrategy.prototype.onMouseOverShips = function (ships, payload) {
@@ -396,7 +398,7 @@ PhaseStrategy.prototype.onMouseOverShips = function (ships, payload) {
         if (this.shipTooltip && this.shipTooltip.ships.includes(ship) &&  this.shipTooltip.ships.length === 1) {
             this.shipTooltip.update(ship, this.selectedShip);
         }
-
+        if(gamedata.showLoS) mathlib.showLoS(this.selectedShip, ship)
         this.showShipEW(ship);
         icon.showSideSprite(true);
         icon.showBDEW();
@@ -762,6 +764,14 @@ PhaseStrategy.prototype.onMouseOverShips = function (ships, payload) {
         showAllBallisticLines.call(this, gamedata.ships.filter(function(ship){ return !gamedata.isMyOrTeamOneShip(ship) }), payload);
     };        
 
+    PhaseStrategy.prototype.onToggleLoS = function (payload) {
+	    if(!gamedata.showLoS){
+            gamedata.showLoS = true;
+        }else{
+            gamedata.showLoS = false;
+            mathlib.clearLosSprite();            
+        }    
+    }; 
 
     PhaseStrategy.prototype.onToggleHexNumbers = function (payload) {
 	    var scene = webglScene.scene;
