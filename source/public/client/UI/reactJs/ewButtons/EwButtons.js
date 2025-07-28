@@ -156,7 +156,8 @@ const LoSButton = MainButton.extend`
     background-image: url("./img/los1.png");
     filter: ${props => props.toggled ? 'brightness(1.6) sepia(0.85) hue-rotate(60deg) saturate(4)' : 'none'};
     border: 1px solid ${props => props.toggled ? 'limegreen' : '1px solid #496791'};
-    border-right: none; /* keep this to preserve your original layout */    
+    border-right: none; /* keep this to preserve your original layout */
+    box-shadow: 0px 0px 0px black;        
 `;
 const HexButton = MainButton.extend`
     background-image: url("./img/hexNumber.png");
