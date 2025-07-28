@@ -307,14 +307,14 @@ window.mathlib = {
 				const p2 = corners[(i + 1) % corners.length];
 
 				if (this.doLinesIntersect(startPixel, endPixel, p1, p2)) {
-					//if(gamedata.showLoS) mathlib.drawLine3D(startPixel, endPixel, 0xff00ff); // Magenta line if blocked
-					//if(gamedata.showLoS) mathlib.drawHexOutline3D(corners, 0xff00ff); // Magenta hex border					
+					//if(gamedata.showLoS) mathlib.drawLine(startPixel, endPixel, 0xff00ff); // Magenta line if blocked
+					//if(gamedata.showLoS) mathlib.drawHex(corners, 0xff00ff); // Magenta hex border					
 					return true; // Line of sight is blocked
 				}
 			}
 		}
 
-		//if(gamedata.showLoS) mathlib.drawLine3D(startPixel, endPixel, 0x87ceeb); // Blue line
+		//if(gamedata.showLoS) mathlib.drawLine(startPixel, endPixel, 0x87ceeb); // Blue line
 		return false; // Line of sight is clear
 	},
 
@@ -354,14 +354,16 @@ window.mathlib = {
 				const p2 = corners[(i + 1) % corners.length];
 
 				if (this.doLinesIntersect(startPixel, endPixel, p1, p2)) {
-					mathlib.drawLine3D(startPixel, endPixel, 0xdc143c); // Magenta line if blocked
-					mathlib.drawHexOutline3D(corners, 0xdc143c, 0xdc143c); // Magenta hex border					
+					mathlib.drawRuler(startPixel, endPixel, 0xdc143c); // Crimson line if blocked
+					mathlib.drawHex(corners, 0xdc143c, 0xdc143c); // Crimson hex border
+					//var loSBlockedSprite = new BallisticSprite(hex, 'hexRed', "", "", './img/cancel.png', 100);
+					//window.LosSprite.add(loSBlockedSprite);										
 					return true; // Line of sight is blocked
 				}
 			}
 		}
 
-		mathlib.drawLine3D(startPixel, endPixel, 0x00ffff); // Blue line for clear LoS
+		mathlib.drawRuler(startPixel, endPixel, 0x00ffff); // Blue line for clear LoS
 		return false; // Line of sight is clear
 	},
 
@@ -389,8 +391,8 @@ window.mathlib = {
 		}
 	},
 
-
-	drawLine3D: function drawLine3D(p1, p2, color = 0x00ffff) {
+	/* //Draws a simple line between two positions, replace by drawRuler() below.
+	drawLine: function drawLine(p1, p2, color = 0x00ffff) {
 
 		// Run once, at init or before drawing loop
 		if (!window.LosSprite) {
@@ -411,52 +413,52 @@ window.mathlib = {
 
 		return line;
 	},
+	*/
 
+	drawHex: function drawHex(corners, color = 0xff0000, fillColor = null) {
+		if (!corners || corners.length < 6) return;
 
-drawHexOutline3D: function drawHexOutline3D(corners, color = 0xff0000, fillColor = null) {
-	if (!corners || corners.length < 6) return;
+		// === Create the shape ===
+		const shape = new THREE.Shape();
+		shape.moveTo(corners[0].x, corners[0].y);
+		for (let i = 1; i < corners.length; i++) {
+			shape.lineTo(corners[i].x, corners[i].y);
+		}
+		shape.lineTo(corners[0].x, corners[0].y); // Close the shape
 
-	// === Create the shape ===
-	const shape = new THREE.Shape();
-	shape.moveTo(corners[0].x, corners[0].y);
-	for (let i = 1; i < corners.length; i++) {
-		shape.lineTo(corners[i].x, corners[i].y);
-	}
-	shape.lineTo(corners[0].x, corners[0].y); // Close the shape
+		const z = 100; // Ensure it's rendered behind other overlays
 
-	const z = 100; // Ensure it's rendered behind other overlays
+		// === Add fill if specified ===
+		if (fillColor !== null) {
+			const fillGeometry = new THREE.ShapeGeometry(shape);
+			const fillMaterial = new THREE.MeshBasicMaterial({
+				color: fillColor,
+				transparent: true,
+				opacity: 0.3, // Adjust fill visibility
+				side: THREE.DoubleSide
+			});
+			const fillMesh = new THREE.Mesh(fillGeometry, fillMaterial);
+			fillMesh.position.z = z; // Place it below the outline
+			window.LosSprite.add(fillMesh);
+		}
 
-	// === Add fill if specified ===
-	if (fillColor !== null) {
-		const fillGeometry = new THREE.ShapeGeometry(shape);
-		const fillMaterial = new THREE.MeshBasicMaterial({
-			color: fillColor,
-			transparent: true,
-			opacity: 0.3, // Adjust fill visibility
-			side: THREE.DoubleSide
-		});
-		const fillMesh = new THREE.Mesh(fillGeometry, fillMaterial);
-		fillMesh.position.z = z; // Place it below the outline
-		window.LosSprite.add(fillMesh);
-	}
+		// === Add outline as thick Line or Mesh ===
+		const outlinePoints = corners.map(c => new THREE.Vector2(c.x, c.y));
+		const outlineGeometry = new THREE.BufferGeometry().setFromPoints([
+			...outlinePoints.map(p => new THREE.Vector3(p.x, p.y, 10)),
+			new THREE.Vector3(corners[0].x, corners[0].y, 10) // Close loop
+		]);
 
-	// === Add outline as thick Line or Mesh ===
-	const outlinePoints = corners.map(c => new THREE.Vector2(c.x, c.y));
-	const outlineGeometry = new THREE.BufferGeometry().setFromPoints([
-		...outlinePoints.map(p => new THREE.Vector3(p.x, p.y, 10)),
-		new THREE.Vector3(corners[0].x, corners[0].y, 10) // Close loop
-	]);
+		const outlineMaterial = new THREE.LineBasicMaterial({ color });
+		const outline = new THREE.Line(outlineGeometry, outlineMaterial);
+		window.LosSprite.add(outline);
 
-	const outlineMaterial = new THREE.LineBasicMaterial({ color });
-	const outline = new THREE.Line(outlineGeometry, outlineMaterial);
-	window.LosSprite.add(outline);
-
-	return outline;
-},
+		return outline;
+	},
 
 
 	//Uses game/pixel coordinates not hex!
-	drawRuler: function drawRuler(p1, p2, color = 0x87ceeb) {
+	drawRuler: function drawRuler(p1, p2, color = 0x00ffff) {
 		if (!window.LosSprite) {
 			window.LosSprite = new THREE.Group();
 			window.webglScene.scene.add(window.LosSprite);
@@ -489,7 +491,7 @@ drawHexOutline3D: function drawHexOutline3D(corners, color = 0xff0000, fillColor
 		const ctx = canvas.getContext('2d');
 
 		// Style similar to your existing system
-		let fontSize = 80;
+		let fontSize = 110;
 		ctx.fillStyle = 'white'; // Or any color you prefer
 		ctx.textAlign = "center";
 		ctx.textBaseline = "middle";
@@ -506,8 +508,8 @@ drawHexOutline3D: function drawHexOutline3D(corners, color = 0xff0000, fillColor
 		const sprite = new THREE.Sprite(spriteMaterial);
 
 		// Position the label at the midpoint, above the line
-		sprite.position.set(midX, midY, 12); // z = 12 so it sits above line
-		sprite.scale.set(20, 20, 1); // Tune this size as needed
+		sprite.position.set(midX, midY, 500); // z = 12 so it sits above line
+		sprite.scale.set(30, 30, 1); // Tune this size as needed
 
 		window.LosSprite.add(sprite);
 
