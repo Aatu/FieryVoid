@@ -206,22 +206,45 @@ window.mathlib = {
 		}
 	},
 
-	doLinesIntersect: function doLinesIntersect(p1, p2, p3, p4) {
+	doLinesIntersect: function(p1, p2, p3, p4) {
+		const EPSILON = 1e-10;
+
 		function crossProduct(a, b) {
 			return a.x * b.y - a.y * b.x;
 		}
 
-		const d1 = { x: p2.x - p1.x, y: p2.y - p1.y };
-		const d2 = { x: p4.x - p3.x, y: p4.y - p3.y };
+		function subtract(a, b) {
+			return { x: a.x - b.x, y: a.y - b.y };
+		}
+
+		function isBetween(a, b, c) {
+			return (
+				Math.min(a.x, c.x) - EPSILON <= b.x && b.x <= Math.max(a.x, c.x) + EPSILON &&
+				Math.min(a.y, c.y) - EPSILON <= b.y && b.y <= Math.max(a.y, c.y) + EPSILON
+			);
+		}
+
+		const d1 = subtract(p2, p1);
+		const d2 = subtract(p4, p3);
 		const denom = crossProduct(d1, d2);
+		const diff = subtract(p3, p1);
 
-		if (denom === 0) return false; // Lines are parallel
+		// Check for colinear
+		if (Math.abs(denom) < EPSILON) {
+			if (Math.abs(crossProduct(diff, d1)) > EPSILON) return false;
+			// Colinear — check overlap
+			return (
+				isBetween(p1, p3, p2) ||
+				isBetween(p1, p4, p2) ||
+				isBetween(p3, p1, p4) ||
+				isBetween(p3, p2, p4)
+			);
+		}
 
-		const t = crossProduct({ x: p3.x - p1.x, y: p3.y - p1.y }, d2) / denom;
-		const u = crossProduct({ x: p3.x - p1.x, y: p3.y - p1.y }, d1) / denom;
+		const t = crossProduct(diff, d2) / denom;
+		const u = crossProduct(diff, d1) / denom;
 
-		// If t and u are between 0 and 1, the line segments intersect
-		return t >= 0 && t <= 1 && u >= 0 && u <= 1;
+		return t >= -EPSILON && t <= 1 + EPSILON && u >= -EPSILON && u <= 1 + EPSILON;
 	},
 
 	getHexCorners: function getHexCorners(hex) {
@@ -258,6 +281,10 @@ window.mathlib = {
 		const lineMinR = Math.min(start.r, end.r);
 		const lineMaxR = Math.max(start.r, end.r);
 
+//var startPixel = coordinateConverter.fromHexToGame({ q: 8, r: 2 });
+//var endPixel = coordinateConverter.fromHexToGame({ q: 7, r: 1 });
+//var blockedCorners = mathlib.getHexCorners({ q: 8, r: 1 });
+
 		for (let hex of filteredBlockedHexes) {
 			// Optional: guard against malformed data
 			if (typeof hex.q !== 'number' || typeof hex.r !== 'number') continue;
@@ -276,13 +303,125 @@ window.mathlib = {
 				const p2 = corners[(i + 1) % corners.length];
 
 				if (this.doLinesIntersect(startPixel, endPixel, p1, p2)) {
+//mathlib.drawLine3D(startPixel, endPixel, 0xff00ff); // Magenta line if blocked
+//mathlib.drawHexOutline3D(corners, 0xff0000); // Red hex border					
 					return true; // Line of sight is blocked
 				}
 			}
 		}
 
+//mathlib.drawLine3D(startPixel, endPixel, 0x87ceeb); // Blue line
+
 		return false; // Line of sight is clear
 	},
+
+	
+	clearLosSprite: function clearLosSprite() {
+	const LosSprite = window.LosSprite;
+	while (LosSprite.children.length > 0) {
+		const child = LosSprite.children[0];
+		LosSprite.remove(child);
+		if (child.geometry) child.geometry.dispose();
+		if (child.material) child.material.dispose();
+	}
+	},
+
+
+	drawLine3D: function drawLine3D(p1, p2, color = 0x00ffff) {
+
+		// Run once, at init or before drawing loop
+		if (!window.LosSprite) {
+		window.LosSprite = new THREE.Group();
+		window.webglScene.scene.add(window.LosSprite);
+		}
+
+		mathlib.clearLosSprite();
+
+		const material = new THREE.LineBasicMaterial({ color });
+		const points = [
+			new THREE.Vector3(p1.x, p1.y, 10),
+			new THREE.Vector3(p2.x, p2.y, 10)
+		];
+		const geometry = new THREE.BufferGeometry().setFromPoints(points);
+		const line = new THREE.Line(geometry, material);
+		window.LosSprite.add(line);
+
+		return line;
+	},
+
+
+	drawHexOutline3D: function drawHexOutline3D(corners, color = 0xff0000) {
+		//mathlib.clearLosSprite();
+
+		const material = new THREE.LineBasicMaterial({ color });
+		const points = corners.map(c => new THREE.Vector3(c.x, c.y, 10));
+		points.push(points[0]);
+		const geometry = new THREE.BufferGeometry().setFromPoints(points);
+		const lineLoop = new THREE.Line(geometry, material);
+		window.LosSprite.add(lineLoop);
+		return lineLoop;
+	},
+
+
+	//Uses game/pixel coorindates not hex!
+	drawRuler: function drawRuler(p1, p2, color = 0x87ceeb) {
+		if (!window.LosSprite) {
+			window.LosSprite = new THREE.Group();
+			window.webglScene.scene.add(window.LosSprite);
+		}
+
+		mathlib.clearLosSprite();
+
+		// Create and add the line
+		const material = new THREE.LineBasicMaterial({ color });
+		const points = [
+			new THREE.Vector3(p1.x, p1.y, 10),
+			new THREE.Vector3(p2.x, p2.y, 10)
+		];
+		const geometry = new THREE.BufferGeometry().setFromPoints(points);
+		const line = new THREE.Line(geometry, material);
+		window.LosSprite.add(line);
+
+		// Calculate midpoint and distance
+		const midX = (p1.x + p2.x) / 2;
+		const midY = (p1.y + p2.y) / 2;
+		const distance = coordinateConverter.fromGameToHex(p1).distanceTo(
+			coordinateConverter.fromGameToHex(p2)
+		);
+
+		// === Create distance label using same approach as your hex text ===
+		const canvas = document.createElement('canvas');
+		const TEXTURE_SIZE = 128;
+		canvas.width = TEXTURE_SIZE;
+		canvas.height = TEXTURE_SIZE;
+		const ctx = canvas.getContext('2d');
+
+		// Style similar to your existing system
+		let fontSize = 80;
+		ctx.fillStyle = 'white'; // Or any color you prefer
+		ctx.textAlign = "center";
+		ctx.textBaseline = "middle";
+
+		const distanceText = distance.toFixed(0);
+		ctx.font = `bold ${fontSize}px Arial`;
+		ctx.fillText(distanceText, TEXTURE_SIZE / 2, TEXTURE_SIZE / 2);
+
+		// Create sprite from texture
+		const texture = new THREE.Texture(canvas);
+		texture.needsUpdate = true;
+
+		const spriteMaterial = new THREE.SpriteMaterial({ map: texture, transparent: true });
+		const sprite = new THREE.Sprite(spriteMaterial);
+
+		// Position the label at the midpoint, above the line
+		sprite.position.set(midX, midY, 12); // z = 12 so it sits above line
+		sprite.scale.set(20, 20, 1); // Tune this size as needed
+
+		window.LosSprite.add(sprite);
+
+		return line;
+	},
+
 
 	//Returns 19 hexes around central position e.g. radius of 1
 	getNeighbouringHexes: function getNeighbouringHexes(position, radius = 1) {
