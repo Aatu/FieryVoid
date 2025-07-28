@@ -36673,10 +36673,33 @@ var EwButtons = function (_React$Component) {
         _this.toggleEnemyBallisticLines = _this.toggleEnemyBallisticLines.bind(_this);
         _this.toggleLoS = _this.toggleLoS.bind(_this);
         _this.toggleHexNumbers = _this.toggleHexNumbers.bind(_this);
+        _this.externalToggleHexNumbers = _this.externalToggleHexNumbers.bind(_this); // 🔁 bind this method too
+
         return _this;
     }
 
     _createClass(EwButtons, [{
+        key: "componentDidMount",
+        value: function componentDidMount() {
+            // 🔔 Listen for external toggle
+            window.addEventListener("HexNumbersToggled", this.externalToggleHexNumbers);
+        }
+    }, {
+        key: "componentWillUnmount",
+        value: function componentWillUnmount() {
+            // 🧹 Clean up listener
+            window.removeEventListener("HexNumbersToggled", this.externalToggleHexNumbers);
+        }
+    }, {
+        key: "externalToggleHexNumbers",
+        value: function externalToggleHexNumbers() {
+            this.setState(function (prevState) {
+                return {
+                    hexToggled: !prevState.hexToggled
+                };
+            });
+        }
+    }, {
         key: "showFriendlyEW",
         value: function showFriendlyEW(up) {
             webglScene.customEvent("ShowFriendlyEW", { up: up });
@@ -36707,10 +36730,16 @@ var EwButtons = function (_React$Component) {
     }, {
         key: "toggleHexNumbers",
         value: function toggleHexNumbers(up) {
-            if (up) return; // Optional: prevent onMouseUp firing if needed
+            if (up) return;
+
             var newValue = !this.state.hexToggled;
             this.setState({ hexToggled: newValue });
+
+            // 🔁 Keep external logic (like PhaseStrategy) in sync
             webglScene.customEvent("ToggleHexNumbers", { up: up });
+
+            // 🔔 Notify other components (like this one) of the toggle
+            window.dispatchEvent(new CustomEvent("HexNumbersToggled"));
         }
     }, {
         key: "render",
@@ -37064,6 +37093,7 @@ var PlayerSettingsForm = function (_React$Component) {
                     React.createElement(_common.InputAndLabel, { label: "Key to display ALL Ballistics", onChange: function onChange() {}, onKeydown: this.getOnKeyDown.call(this, "ShowAllBallistics"), value: this.getKey.call(this, "ShowAllBallistics") }),
                     React.createElement(_common.InputAndLabel, { label: "Key to display FRIENDLY Ballistics", onChange: function onChange() {}, onKeydown: this.getOnKeyDown.call(this, "ShowFriendlyBallistics"), value: this.getKey.call(this, "ShowFriendlyBallistics") }),
                     React.createElement(_common.InputAndLabel, { label: "Key to display ENEMY Ballistics", onChange: function onChange() {}, onKeydown: this.getOnKeyDown.call(this, "ShowEnemyBallistics"), value: this.getKey.call(this, "ShowEnemyBallistics") }),
+                    React.createElement(_common.InputAndLabel, { label: "Key to toggle HEX numbers", onChange: function onChange() {}, onKeydown: this.getOnKeyDown.call(this, "ToggleHexNumbers"), value: this.getKey.call(this, "ToggleHexNumbers") }),
                     React.createElement(
                         _styled.SubTitle,
                         null,

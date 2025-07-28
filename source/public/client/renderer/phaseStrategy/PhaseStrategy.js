@@ -774,8 +774,12 @@ PhaseStrategy.prototype.onMouseOverShips = function (ships, payload) {
     }; 
 
     PhaseStrategy.prototype.onToggleHexNumbers = function (payload) {
+
+        if (payload.up) return; // Prevent repeating on key hold or keyup
+
 	    var scene = webglScene.scene;
 		this.ballisticIconContainer.createHexNumbers(scene);
+        window.dispatchEvent(new CustomEvent("HexNumbersToggled"));
     }; 
 
     function toggleBallisticLines(ships, payload) {

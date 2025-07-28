@@ -16,7 +16,25 @@ class EwButtons extends React.Component {
         this.toggleFriendlyBallisticLines = this.toggleFriendlyBallisticLines.bind(this);
         this.toggleEnemyBallisticLines = this.toggleEnemyBallisticLines.bind(this);
         this.toggleLoS = this.toggleLoS.bind(this);               
-        this.toggleHexNumbers = this.toggleHexNumbers.bind(this);        
+        this.toggleHexNumbers = this.toggleHexNumbers.bind(this);
+        this.externalToggleHexNumbers = this.externalToggleHexNumbers.bind(this); // 🔁 bind this method too
+                    
+    }
+
+    componentDidMount() {
+        // 🔔 Listen for external toggle
+        window.addEventListener("HexNumbersToggled", this.externalToggleHexNumbers);
+    }
+
+    componentWillUnmount() {
+        // 🧹 Clean up listener
+        window.removeEventListener("HexNumbersToggled", this.externalToggleHexNumbers);
+    }
+
+    externalToggleHexNumbers() {
+        this.setState((prevState) => ({
+            hexToggled: !prevState.hexToggled
+        }));
     }
 
     showFriendlyEW(up) {
@@ -42,12 +60,20 @@ class EwButtons extends React.Component {
         webglScene.customEvent("ToggleLoS", { up: up });
     }
 
-    toggleHexNumbers(up) {
-        if (up) return; // Optional: prevent onMouseUp firing if needed
-        const newValue = !this.state.hexToggled;
-        this.setState({ hexToggled: newValue });         
-        webglScene.customEvent("ToggleHexNumbers", { up: up });
-    }
+toggleHexNumbers(up) {
+    if (up) return;
+
+    const newValue = !this.state.hexToggled;
+    this.setState({ hexToggled: newValue });
+
+    // 🔁 Keep external logic (like PhaseStrategy) in sync
+    webglScene.customEvent("ToggleHexNumbers", { up: up });
+
+    // 🔔 Notify other components (like this one) of the toggle
+    window.dispatchEvent(new CustomEvent("HexNumbersToggled"));
+}
+
+
 
     render() {
         return (
