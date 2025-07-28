@@ -7,7 +7,8 @@ class EwButtons extends React.Component {
         super(props);
 
     this.state = {
-        losToggled: false
+        losToggled: false,
+        hexToggled: false
     };
 
         this.showFriendlyEW = this.showFriendlyEW.bind(this);
@@ -42,6 +43,9 @@ class EwButtons extends React.Component {
     }
 
     toggleHexNumbers(up) {
+        if (up) return; // Optional: prevent onMouseUp firing if needed
+        const newValue = !this.state.hexToggled;
+        this.setState({ hexToggled: newValue });         
         webglScene.customEvent("ToggleHexNumbers", { up: up });
     }
 
@@ -70,7 +74,8 @@ class EwButtons extends React.Component {
                     toggled={this.state.losToggled}  
 				    onMouseDown={this.toggleLoS.bind(this, false)}
 				></LoSButton>	                
-				<HexButton  
+				<HexButton
+                    toggled={this.state.hexToggled}   
 				    onMouseDown={this.toggleHexNumbers.bind(this, false)}
 				></HexButton>				
             </Container>
@@ -93,7 +98,7 @@ const MainButton = ContainerRoundedRightSide.extend`
     justify-content: center;
     font-size: 32px;
     border-right: none;
-    margin-top: 5px;
+    margin-top: 3px;
     background-repeat: no-repeat;
     background-size: cover;
     ${Clickable}
@@ -119,6 +124,9 @@ const LoSButton = MainButton.extend`
 `;
 const HexButton = MainButton.extend`
     background-image: url("./img/hexNumber.png");
+    filter: ${props => props.toggled ? 'brightness(1.6) sepia(0.85) hue-rotate(60deg) saturate(4)' : 'none'};
+    border: 1px solid ${props => props.toggled ? 'limegreen' : '1px solid #496791'};
+    border-right: none; /* keep this to preserve your original layout */     
 `;
 
 export default EwButtons;

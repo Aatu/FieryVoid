@@ -36626,13 +36626,13 @@ Object.defineProperty(exports, "__esModule", {
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _templateObject = _taggedTemplateLiteral(["\n    position: fixed;\n    right: 0;\n    top: 60px;\n    z-index: 4;\n"], ["\n    position: fixed;\n    right: 0;\n    top: 60px;\n    z-index: 4;\n"]),
-    _templateObject2 = _taggedTemplateLiteral(["\n    display: flex;\n    width: 45px;\n    height: 45px;\n    align-items: center;\n    justify-content: center;\n    font-size: 32px;\n    border-right: none;\n    margin-top: 5px;\n    background-repeat: no-repeat;\n    background-size: cover;\n    ", "\n"], ["\n    display: flex;\n    width: 45px;\n    height: 45px;\n    align-items: center;\n    justify-content: center;\n    font-size: 32px;\n    border-right: none;\n    margin-top: 5px;\n    background-repeat: no-repeat;\n    background-size: cover;\n    ", "\n"]),
+    _templateObject2 = _taggedTemplateLiteral(["\n    display: flex;\n    width: 45px;\n    height: 45px;\n    align-items: center;\n    justify-content: center;\n    font-size: 32px;\n    border-right: none;\n    margin-top: 3px;\n    background-repeat: no-repeat;\n    background-size: cover;\n    ", "\n"], ["\n    display: flex;\n    width: 45px;\n    height: 45px;\n    align-items: center;\n    justify-content: center;\n    font-size: 32px;\n    border-right: none;\n    margin-top: 3px;\n    background-repeat: no-repeat;\n    background-size: cover;\n    ", "\n"]),
     _templateObject3 = _taggedTemplateLiteral(["\n    background-image: url(\"./img/EEW.png\");\n"], ["\n    background-image: url(\"./img/EEW.png\");\n"]),
     _templateObject4 = _taggedTemplateLiteral(["\n    background-image: url(\"./img/FEW.png\");\n"], ["\n    background-image: url(\"./img/FEW.png\");\n"]),
     _templateObject5 = _taggedTemplateLiteral(["\n    background-image: url(\"./img/ballisticTarget2.png\");\n"], ["\n    background-image: url(\"./img/ballisticTarget2.png\");\n"]),
     _templateObject6 = _taggedTemplateLiteral(["\n    background-image: url(\"./img/ballisticLaunch2.png\");\n"], ["\n    background-image: url(\"./img/ballisticLaunch2.png\");\n"]),
     _templateObject7 = _taggedTemplateLiteral(["\n    background-image: url(\"./img/los.png\");\n    filter: ", ";\n    border: 1px solid ", ";\n    border-right: none; /* keep this to preserve your original layout */    \n"], ["\n    background-image: url(\"./img/los.png\");\n    filter: ", ";\n    border: 1px solid ", ";\n    border-right: none; /* keep this to preserve your original layout */    \n"]),
-    _templateObject8 = _taggedTemplateLiteral(["\n    background-image: url(\"./img/hexNumber.png\");\n"], ["\n    background-image: url(\"./img/hexNumber.png\");\n"]);
+    _templateObject8 = _taggedTemplateLiteral(["\n    background-image: url(\"./img/hexNumber.png\");\n    filter: ", ";\n    border: 1px solid ", ";\n    border-right: none; /* keep this to preserve your original layout */     \n"], ["\n    background-image: url(\"./img/hexNumber.png\");\n    filter: ", ";\n    border: 1px solid ", ";\n    border-right: none; /* keep this to preserve your original layout */     \n"]);
 
 var _react = require("react");
 
@@ -36663,7 +36663,8 @@ var EwButtons = function (_React$Component) {
         var _this = _possibleConstructorReturn(this, (EwButtons.__proto__ || Object.getPrototypeOf(EwButtons)).call(this, props));
 
         _this.state = {
-            losToggled: false
+            losToggled: false,
+            hexToggled: false
         };
 
         _this.showFriendlyEW = _this.showFriendlyEW.bind(_this);
@@ -36706,6 +36707,9 @@ var EwButtons = function (_React$Component) {
     }, {
         key: "toggleHexNumbers",
         value: function toggleHexNumbers(up) {
+            if (up) return; // Optional: prevent onMouseUp firing if needed
+            var newValue = !this.state.hexToggled;
+            this.setState({ hexToggled: newValue });
             webglScene.customEvent("ToggleHexNumbers", { up: up });
         }
     }, {
@@ -36737,6 +36741,7 @@ var EwButtons = function (_React$Component) {
                     onMouseDown: this.toggleLoS.bind(this, false)
                 }),
                 _react2.default.createElement(HexButton, {
+                    toggled: this.state.hexToggled,
                     onMouseDown: this.toggleHexNumbers.bind(this, false)
                 })
             );
@@ -36762,7 +36767,11 @@ var LoSButton = MainButton.extend(_templateObject7, function (props) {
 }, function (props) {
     return props.toggled ? 'limegreen' : '1px solid #496791';
 });
-var HexButton = MainButton.extend(_templateObject8);
+var HexButton = MainButton.extend(_templateObject8, function (props) {
+    return props.toggled ? 'brightness(1.6) sepia(0.85) hue-rotate(60deg) saturate(4)' : 'none';
+}, function (props) {
+    return props.toggled ? 'limegreen' : '1px solid #496791';
+});
 
 exports.default = EwButtons;
 
