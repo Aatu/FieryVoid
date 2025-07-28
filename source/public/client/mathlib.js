@@ -354,8 +354,8 @@ window.mathlib = {
 				const p2 = corners[(i + 1) % corners.length];
 
 				if (this.doLinesIntersect(startPixel, endPixel, p1, p2)) {
-					mathlib.drawLine3D(startPixel, endPixel, 0xff00ff); // Magenta line if blocked
-					mathlib.drawHexOutline3D(corners, 0xff00ff); // Magenta hex border					
+					mathlib.drawLine3D(startPixel, endPixel, 0xdc143c); // Magenta line if blocked
+					mathlib.drawHexOutline3D(corners, 0xdc143c, 0xdc143c); // Magenta hex border					
 					return true; // Line of sight is blocked
 				}
 			}
@@ -409,17 +409,46 @@ window.mathlib = {
 	},
 
 
-	drawHexOutline3D: function drawHexOutline3D(corners, color = 0xff0000) {
-		//mathlib.clearLosSprite();
+drawHexOutline3D: function drawHexOutline3D(corners, color = 0xff0000, fillColor = null) {
+	if (!corners || corners.length < 6) return;
 
-		const material = new THREE.LineBasicMaterial({ color });
-		const points = corners.map(c => new THREE.Vector3(c.x, c.y, 10));
-		points.push(points[0]);
-		const geometry = new THREE.BufferGeometry().setFromPoints(points);
-		const lineLoop = new THREE.Line(geometry, material);
-		window.LosSprite.add(lineLoop);
-		return lineLoop;
-	},
+	// === Create the shape ===
+	const shape = new THREE.Shape();
+	shape.moveTo(corners[0].x, corners[0].y);
+	for (let i = 1; i < corners.length; i++) {
+		shape.lineTo(corners[i].x, corners[i].y);
+	}
+	shape.lineTo(corners[0].x, corners[0].y); // Close the shape
+
+	const z = 100; // Ensure it's rendered behind other overlays
+
+	// === Add fill if specified ===
+	if (fillColor !== null) {
+		const fillGeometry = new THREE.ShapeGeometry(shape);
+		const fillMaterial = new THREE.MeshBasicMaterial({
+			color: fillColor,
+			transparent: true,
+			opacity: 0.3, // Adjust fill visibility
+			side: THREE.DoubleSide
+		});
+		const fillMesh = new THREE.Mesh(fillGeometry, fillMaterial);
+		fillMesh.position.z = z; // Place it below the outline
+		window.LosSprite.add(fillMesh);
+	}
+
+	// === Add outline as thick Line or Mesh ===
+	const outlinePoints = corners.map(c => new THREE.Vector2(c.x, c.y));
+	const outlineGeometry = new THREE.BufferGeometry().setFromPoints([
+		...outlinePoints.map(p => new THREE.Vector3(p.x, p.y, 10)),
+		new THREE.Vector3(corners[0].x, corners[0].y, 10) // Close loop
+	]);
+
+	const outlineMaterial = new THREE.LineBasicMaterial({ color });
+	const outline = new THREE.Line(outlineGeometry, outlineMaterial);
+	window.LosSprite.add(outline);
+
+	return outline;
+},
 
 
 	//Uses game/pixel coordinates not hex!
