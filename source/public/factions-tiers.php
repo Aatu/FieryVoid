@@ -102,7 +102,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
            <ul class="sub-list">
                 <li><a href="#bsg">BSG</a></li>
                 <li><a href="#custom">CUSTOM SHIPS</a></li>                  
-                <li><a href="#nexus">NEXUS</a></li>
+                <li><a href="#nexus">NEXUS UNIVERSE</a></li>
                 <li><a href="#escalation">ESCALATION WARS</a></li>
                 <li><a href="#starwars">STAR WARS</a></li>
                 <li><a href="#startrek">STAR TREK</a></li>                                           
@@ -1019,7 +1019,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
     <a class="back-to-top" href="#top">↩ Back to Top</a>
 
     <h4 id="customs" style="">CUSTOM SHIPS</h4>
-    <p>A place to store customs ships, either because they are unofficial designs created by players, or one-off campaign/scenario ships. Not a real faction.</p>                                                                                     
+    <p>A place to store customs ships from the Babylon 5 Wars setting, either because they are unofficial designs created by players or one-off campaign/scenario ships. Not a real faction.</p>                                                                                     
     <a class="back-to-top" href="#top">↩ Back to Top</a> 
 
 
@@ -1032,15 +1032,165 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
     <a class="back-to-top" href="#top">↩ Back to Top</a>
 
 
-    <h4 id="nexus" style="">NEXUS</h4>
+    <h4 id="nexus" style="">NEXUS UNIVERSE</h4>
     <p>The Nexus setting is designed by Jeremy and Geoffrey Stano. 
-        The current factions in Fiery Void (and described below) are the Brixadii Clans, Union of Craytan States, Dalithorn Commonwealth, Federation of Makar, Sal-bez Coalition, and the Velrax Republic. </p>
-    <p>By design, Nexus is a lower tech setting. It is characterized by more basic weapons and lower sensor values. Over time the factions evolve better units and these are available to play as well. </p>
-    <p>The Nexus factions can be sub-divided into four "tech levels" or "tech eras", of which the first three are available in Fiery Void. 
+        The current factions in Fiery Void (and described below) are the Brixadii Clans, Union of Craytan States, Dalithorn Commonwealth, 
+        Federation of Makar, Sal-bez Coalition, and the Velrax Republic. 
+        The Polaren should make their first appearance by the end of 2025. </p>
+    <p>By design, Nexus is a lower tech setting. It is characterized by more basic weapons and lower sensor values. 
+        Over time the factions evolve better units and these are available to play as well. 
+        The Nexus factions can be sub-divided into four "tech levels" or "tech eras", of which the first three are available in Fiery Void. 
         These tech levels correspond to various conflicts each faction faced and were major drivers in the evolution of the Nexus fleets. 
-        In general, the earliest units are equivalent to "The Rest" or low "Tier 2" factions. The most advanced units are strong "Tier 2" designs. </p>
-    <p>The Nexus factions also make extensive use of refits. Specialized weapons for each faction are shown.</p>
+        The specific years in question are listed in the faction descriptions. 
+        In general, the first two tech levels fit into Tier 3. The third tech level brings the Nexus factions into the low end of Tier 2.</p>
+    <p>One feature unique to Nexus compared to the standard B5 factions is that Nexus LCVs are more functional. 
+        Nexus LCVs can always be deployed independently in a force. LCV tenders do exist, but are primarily geared towards transporting and repairing LCVs. 
+        However, some afford bonuses to the LCVs if the tender is in combat with its LCVs.</p>    
+    <p>Details for Nexus Universe factions can be accessed using the links below:</p>
+        <ul style="font-size: 16px">
+            <li><a href="#brixadii">BRIXADII CLANS</a></li>
+            <li><a href="#crayton">UNION OF CRAYTON STATES</a></li>                
+            <li><a href="#dalithorn">DALITHORN COMMONWEALTH</a></li>
+            <li><a href="#makar">FEDERATION OF MAKAR</a></li>
+            <li><a href="#salbez">SAL-BEZ COALITION</a></li>   
+            <li><a href="#velrax">VELRAX REPUBLIC</a></li>                                                                      
+        </ul>     
     <a class="back-to-top" href="#top">↩ Back to Top</a>
+
+    <h4 id="brixadii" style="">BRIXADII CLANS</h4>
+        <p>The Brixadii Clans are a spinward power within the Nexus sector, having fought with the Dalithorn Commonwealth early on and having hostile relations with the Velrax Republic.</p>
+        <p>Brixadii's technology is primarily focused around particle weapons. These are rugged, easy to repair, and low mass. 
+            The Clans have begun to specialize in pulsar technology as this affords superior mass to damage ratios. This last point is important as the key feature that defines the Clans are their extremely maneuverable ships. 
+            They have few longer-ranged weapons, but prefer high-speed firing passes or getting in close and using maneuverability to get advantageous shots. 
+            They do not field fighters and therefore rely on their rapid firing weapons, wide arcs, and light combat vessels to deal with fighters.</p>
+
+        <h5>Chaff Launcher</h5>
+            <li>Technically fired at an enemy ship, it will always hit (causing no damage or adverse effects) and apply interception to ALL fire from target hex at chaff-protected unit (including nominally uninterceptable weapons).</li>
+        <h5>Tech Levels</h5>
+            <ul class="circle-list">
+                <li>Tech Level 1: Pre-contact through the Jump War (up through the 2050s).</li>
+                <li>Tech Level 2: Jump War era through the War of Ascendancy (2050s through the 2110s).</li> 
+                <li>Tech Level 3: War of Ascendancy through the First War of Control (2110s through 2150s).</li>                  
+            </ul>  
+      <a class="back-to-top" href="#nexus">↩ Back to Nexus Universe</a>
+
+    <h4 id="crayton" style="">UNION OF CRAYTON STATES</h4>
+        <p>The Craytan are an early opponent of the Sal-bez Coalition due in part to a botched first contact by the Sal-bez. The Craytan share a lot in common with the Dalithorn Commonwealth from a technological standpoint. Many of their systems are air-breathing weapons converted for use in space. While basic, but the Craytan have found these to be effective for their needs. 
+            Plasma would become a specialization as an improvement over the older, ammunition-based systems.</p>
+        <p>The Craytan initially focused on using armed shuttles that are more akin to an assault shuttle. 
+            The Craytan's reasoning was that the shuttle will be used in non-combat situations far more than combat situations. 
+            As such, most Craytan ships are allowed to swap Polten Armed Shuttles in place of standard shuttles. 
+            These will be fielded in traditional flights when deployed in Fiery Void. 
+            The initial conflict with the Sal-bez would show the limitations of the Polten, but the Craytan would choose to create a more advanced design in support of a fighter class. 
+            The Craytan also utilize the “projectile” weapon class. 
+            Functionally they are not different from particle weapons, but are treated differently for various shields and advanced armor.</p>
+
+        <h5>Assault Cannons</h5>
+            <li>The larger versions are designed to fire a small, dense projectile with enough velocity to generate a piercing effect. 
+                It suffers from a slow rate of fire and limited arcs, but it is the longest ranged weapon available to the Craytan. It has remained in service due to its simplicity. 
+                The light version fires faster and has wider arcs, but loses the piercing ability due to a slower projectile.</li>
+
+        <h5>Close-In Defense System (CIDS)</h5>
+            <li>This, along with an advanced version (ACIDS), operates much like a Scattergun. Each does a random number of shots (4 or 6) and only one shot can intercept an incoming shot. This represents the CIDS firing a tremendous volume of small projectiles. 
+                It relies on volume of fire over specifically aiming at a target.</li>
+                
+        <h5>Enhanced Plasma</h5>
+            <li>As the Craytan advanced they developed multiple improvements to the standard plasma cannon. These enhanced plasma cannons have superior range, rate of fire, and damage loss compared to standard plasma cannons. 
+                They are an intermediary step between plasma cannons and plasma bolters. </li>                 
+
+        <h5>Tech Levels</h5>
+            <ul class="circle-list">
+                <li>Tech Level 1: Pre-contact through the Craytan War (up through 2105).</li>
+                <li>Tech Level 2: Craytan War era through the Daybreak War era (2090s through 2130s).</li> 
+                <li>Tech Level 3: Daybreak War era through the First War of Control (2130s through 2150s).</li>                  
+            </ul>  
+    <a class="back-to-top" href="#nexus">↩ Back to Nexus Universe</a>
+
+    <h4 id="dalithorn" style="">DALITHORN COMMONWEALTH</h4>
+        <p>The Dalithorn Commonwealth are likely the lowest tech of the main Nexus powers. 
+            They managed to leverage their position across a major trade route to keep their sovereignty up to the later years of the First War of Control in the 2150s.</p>
+        <p>They primarily use terrestrial weapons converted for use in space combat. While individually weak, many of the weapons are treated as matter weapons, allowing the Dalithorn to cause damage against most targets. 
+            When desired, many of the smaller weapons have a concentrated mode that produces a few, harder hitting shots, at the expense of some fire control. 
+            This is often useful against shielded targets. While simple, a number of their weapons are still effective, such as the gas gun. 
+            The Commonwealth does not use fighters in the traditional sense. They only field super-heavy fighters, but these are typically slow. 
+            However, their size and armament allow them to serve as area of denial platforms against enemy fighters or as serviceable anti-ship units.</p>    
+        <h5>Protector</h5>
+            <li>A specialized, flak-style system to defend their ships. This can intercept for friendly units and is capable of intercepting lasers.</li>
+
+        <h5>Laser Missile</h5>
+            <li>A ballistic weapon that triggers a bomb-pumped laser near the target. It is intercepted as a normal, non-ballistic as the target attempts to shoot down the missile before it triggers.</li>
+ 
+        <h5>Tech Levels</h5>
+            <ul class="circle-list">
+                <li>Tech Level 1: Pre-contact through the Jump War (up through the 2050s).</li>
+                <li>Tech Level 2: Jump War era through the War of Ascendancy era (2050s through the 2110s).</li> 
+                <li>Tech Level 3: War of Ascendancy through the First War of Control (2110s through th 2150s).</li>                  
+            </ul>              
+    <a class="back-to-top" href="#nexus">↩ Back to Nexus Universe</a>
+
+    <h4 id="makar" style="">FEDERATION OF MAKAR</h4>
+        <p>The Makar Federation is made up of two species from the homeworld of Makar; a blend of 'home' from both languages. The Federation consists of the land dwelling Hitat and the squid-like Qom Yomin. 
+            The Hitat make up the majority of the Federation's combat forces, but the Qom Yomin contribute a variety of support units. Additionally, being aquatic, Qom Yomin ships have larger ramming values if they are rammed. 
+            The Makar have been shaped by the Reshmiyar Invasion and their subsequent rebellion that took place early in their space faring history.</p> 
+
+        <h5>Water Caster</h5>
+            <li>Qom Yomin vessels have the ability to spray some of their onboard water to intercept incoming shots. This functions much like a plasma web, but with no offensive ability.</li>
+
+        <h5>Plasma Charge</h5>
+            <li>Another special Qom Yomin weapon. Qom Yomin ships have low thrust, but extra power. This can be used to charge this weapon or to increase thrust.</li>
+        
+        <h5>Drones</h5>
+            <li>Except for a couple exceptions, the Makar use armed drones as fighters and hunter-killers. These are almost always on Qom Yomin vessels.</li> 
+
+        <h5>Tech Levels</h5>
+            <ul class="circle-list">
+                <li>Tech Level 1: Pre-contact through the Jump War (up through the 2050s).</li>
+                <li>Tech Level 2: Jump War era through the War of Ascendancy era (2050s through the 2110s).</li> 
+                <li>Tech Level 3: War of Ascendancy through the First War of Control (2110s through th 2150s).</li>                  
+            </ul> 
+    <a class="back-to-top" href="#nexus">↩ Back to Nexus Universe</a>
+
+    <h4 id="salbez" style="">SAL-BEZ COALITION</h4>
+        <p>The Sal-bez Coalition is an insectoid race that started as a typical queen / worker societ, but during the Enlightenment of Fire, the Sal-bez won their freedom. They are now a fiercely individualistic society. 
+            The Coalition did not have a traditional military upon reaching for the stars and their early units are exclusively civilian designs using industrial systems as makeshift weapons.</p>
+        <p>As the Sal-bez grew (and discovered several technology caches from a previous power), they began to field purpose-built combat vessels that would ultimately lead to the Coalition becoming one of the most powerful of the Nexus factions. 
+            If you are used to using the traditional B5 powers, the Sal-bez are the most similar without a lot of different systems or rules.</p>     
+
+        <h5>Swarm Torpedo</h5>
+            <li>One of the most iconic systems developed by the Sal-bez for their later generation of ships. It fires multiple, small ballistics at a target, which has led to its common name of swarm torpedo. 
+                This system provides both long-range firepower and can strip systems off a target to enable more effective damage from follow-up laser hits.</li>
+
+        <h5>Tech Levels</h5>
+            <ul class="circle-list">
+                <li>Tech Level 1: Pre-contact through the Craytan War (up through 2105).</li>
+                <li>Tech Level 2: Craytan War era through the Polaren Conflict (2090s through the 2120s).</li> 
+                <li>Tech Level 3: Polaren Conflict era through the First War of Control (2120s through the 2150s).</li>                  
+            </ul> 
+    <a class="back-to-top" href="#nexus">↩ Back to Nexus Universe</a>
+
+    <h4 id="velrax" style="">VELRAX REPUBLIC</h4>
+        <p>The Velrax Republic is potentially the most aggressive faction within the Nexus setting. 
+            They engaged the Brixadii Clans, Dalithorn Commonwealth, and Makar Federation by the early 2100s. 
+            The Velrax are the most prolific users of fighters, which are supported with a rigid fleet structure.</p>
+        <p>The Velrax field well armed "strike" carriers supported by anti-ship focused "gunships". Everything revolves around supporting their fighter operations. 
+            The carriers utilize plasma waves to break up enemy forces at range, and gunships with plasma and lasers to single out anti-fighter units. 
+            Also, some Velrax carry plasma arcs used to strip armor off their targets to make them more vulnerable to laser and fighter fire. 
+            Their heavy fighter mounts a potent anti-ship gun that was retrofitted to some of the interceptor fighters when they realized that their opponents did not use fighters extensively.</p>     
+
+        <h5>Plasma Arc</h5>
+            <li>Small, raking plasma weapon that is designed to strip armor from the target.</li>
+        
+        <h5>Dart/Streak Interceptors</h5>
+            <li>These are small torpedoes that can accept OEW and are used to engage enemy fighters.</li>
+
+        <h5>Tech Levels</h5>
+            <ul class="circle-list">
+                <li>Tech Level 1: Pre-contact through expansion era (up through 2050s).</li>
+                <li>Tech Level 2: Expansion era through the War of Ascendancy (2050s through 2110s).</li> 
+                <li>Tech Level 3: War of Ascendancy era through the First War of Control (2110s through 2150s).</li>                  
+            </ul> 
+    <a class="back-to-top" href="#nexus">↩ Back to Nexus Universe</a>
+
 
 
     <h4 id="startrek" style="">STAR TREK</h4>
