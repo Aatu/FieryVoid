@@ -6,10 +6,15 @@ class EwButtons extends React.Component {
     constructor(props) {
         super(props);
 
+    this.state = {
+        losToggled: false
+    };
+
         this.showFriendlyEW = this.showFriendlyEW.bind(this);
         this.showEnemyEW = this.showEnemyEW.bind(this);
         this.toggleFriendlyBallisticLines = this.toggleFriendlyBallisticLines.bind(this);
         this.toggleEnemyBallisticLines = this.toggleEnemyBallisticLines.bind(this);
+        this.toggleLoS = this.toggleLoS.bind(this);               
         this.toggleHexNumbers = this.toggleHexNumbers.bind(this);        
     }
 
@@ -27,6 +32,13 @@ class EwButtons extends React.Component {
 
     toggleEnemyBallisticLines(up) {
         webglScene.customEvent("ToggleEnemyBallisticLines", { up: up });
+    }
+
+    toggleLoS(up) {
+        if (up) return; // Optional: prevent onMouseUp firing if needed
+        const newValue = !this.state.losToggled;
+        this.setState({ losToggled: newValue });        
+        webglScene.customEvent("ToggleLoS", { up: up });
     }
 
     toggleHexNumbers(up) {
@@ -54,6 +66,10 @@ class EwButtons extends React.Component {
 				<EBButton  
 				    onMouseDown={this.toggleEnemyBallisticLines.bind(this, false)}
 				></EBButton>
+				<LoSButton
+                    toggled={this.state.losToggled}  
+				    onMouseDown={this.toggleLoS.bind(this, false)}
+				></LoSButton>	                
 				<HexButton  
 				    onMouseDown={this.toggleHexNumbers.bind(this, false)}
 				></HexButton>				
@@ -94,6 +110,12 @@ const EBButton = MainButton.extend`
 `;
 const FBButton = MainButton.extend`
     background-image: url("./img/ballisticLaunch2.png");
+`;
+const LoSButton = MainButton.extend`
+    background-image: url("./img/los.png");
+    filter: ${props => props.toggled ? 'brightness(1.6) sepia(0.85) hue-rotate(60deg) saturate(4)' : 'none'};
+    border: 1px solid ${props => props.toggled ? 'limegreen' : '1px solid #496791'};
+    border-right: none; /* keep this to preserve your original layout */    
 `;
 const HexButton = MainButton.extend`
     background-image: url("./img/hexNumber.png");

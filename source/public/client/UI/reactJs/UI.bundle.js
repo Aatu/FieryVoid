@@ -36631,7 +36631,8 @@ var _templateObject = _taggedTemplateLiteral(["\n    position: fixed;\n    right
     _templateObject4 = _taggedTemplateLiteral(["\n    background-image: url(\"./img/FEW.png\");\n"], ["\n    background-image: url(\"./img/FEW.png\");\n"]),
     _templateObject5 = _taggedTemplateLiteral(["\n    background-image: url(\"./img/ballisticTarget2.png\");\n"], ["\n    background-image: url(\"./img/ballisticTarget2.png\");\n"]),
     _templateObject6 = _taggedTemplateLiteral(["\n    background-image: url(\"./img/ballisticLaunch2.png\");\n"], ["\n    background-image: url(\"./img/ballisticLaunch2.png\");\n"]),
-    _templateObject7 = _taggedTemplateLiteral(["\n    background-image: url(\"./img/hexNumber.png\");\n"], ["\n    background-image: url(\"./img/hexNumber.png\");\n"]);
+    _templateObject7 = _taggedTemplateLiteral(["\n    background-image: url(\"./img/los.png\");\n    filter: ", ";\n    border: 1px solid ", ";\n    border-right: none; /* keep this to preserve your original layout */    \n"], ["\n    background-image: url(\"./img/los.png\");\n    filter: ", ";\n    border: 1px solid ", ";\n    border-right: none; /* keep this to preserve your original layout */    \n"]),
+    _templateObject8 = _taggedTemplateLiteral(["\n    background-image: url(\"./img/hexNumber.png\");\n"], ["\n    background-image: url(\"./img/hexNumber.png\");\n"]);
 
 var _react = require("react");
 
@@ -36661,10 +36662,15 @@ var EwButtons = function (_React$Component) {
 
         var _this = _possibleConstructorReturn(this, (EwButtons.__proto__ || Object.getPrototypeOf(EwButtons)).call(this, props));
 
+        _this.state = {
+            losToggled: false
+        };
+
         _this.showFriendlyEW = _this.showFriendlyEW.bind(_this);
         _this.showEnemyEW = _this.showEnemyEW.bind(_this);
         _this.toggleFriendlyBallisticLines = _this.toggleFriendlyBallisticLines.bind(_this);
         _this.toggleEnemyBallisticLines = _this.toggleEnemyBallisticLines.bind(_this);
+        _this.toggleLoS = _this.toggleLoS.bind(_this);
         _this.toggleHexNumbers = _this.toggleHexNumbers.bind(_this);
         return _this;
     }
@@ -36688,6 +36694,14 @@ var EwButtons = function (_React$Component) {
         key: "toggleEnemyBallisticLines",
         value: function toggleEnemyBallisticLines(up) {
             webglScene.customEvent("ToggleEnemyBallisticLines", { up: up });
+        }
+    }, {
+        key: "toggleLoS",
+        value: function toggleLoS(up) {
+            if (up) return; // Optional: prevent onMouseUp firing if needed
+            var newValue = !this.state.losToggled;
+            this.setState({ losToggled: newValue });
+            webglScene.customEvent("ToggleLoS", { up: up });
         }
     }, {
         key: "toggleHexNumbers",
@@ -36718,6 +36732,10 @@ var EwButtons = function (_React$Component) {
                 _react2.default.createElement(EBButton, {
                     onMouseDown: this.toggleEnemyBallisticLines.bind(this, false)
                 }),
+                _react2.default.createElement(LoSButton, {
+                    toggled: this.state.losToggled,
+                    onMouseDown: this.toggleLoS.bind(this, false)
+                }),
                 _react2.default.createElement(HexButton, {
                     onMouseDown: this.toggleHexNumbers.bind(this, false)
                 })
@@ -36739,7 +36757,12 @@ var EEWButton = MainButton.extend(_templateObject3);
 var FEWButton = MainButton.extend(_templateObject4);
 var EBButton = MainButton.extend(_templateObject5);
 var FBButton = MainButton.extend(_templateObject6);
-var HexButton = MainButton.extend(_templateObject7);
+var LoSButton = MainButton.extend(_templateObject7, function (props) {
+    return props.toggled ? 'brightness(1.6) sepia(0.85) hue-rotate(60deg) saturate(4)' : 'none';
+}, function (props) {
+    return props.toggled ? 'limegreen' : '1px solid #496791';
+});
+var HexButton = MainButton.extend(_templateObject8);
 
 exports.default = EwButtons;
 
