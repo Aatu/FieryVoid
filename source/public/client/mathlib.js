@@ -376,13 +376,17 @@ window.mathlib = {
 	},
 	
 	clearLosSprite: function clearLosSprite() {
-	const LosSprite = window.LosSprite;
-	while (LosSprite.children.length > 0) {
-		const child = LosSprite.children[0];
-		LosSprite.remove(child);
-		if (child.geometry) child.geometry.dispose();
-		if (child.material) child.material.dispose();
-	}
+		const LosSprite = window.LosSprite;
+		if (!LosSprite || !LosSprite.children || !Array.isArray(LosSprite.children)) {
+			return;
+		}
+
+		while (LosSprite.children.length > 0) {
+			const child = LosSprite.children[0];
+			LosSprite.remove(child);
+			if (child.geometry) child.geometry.dispose();
+			if (child.material) child.material.dispose();
+		}
 	},
 
 
