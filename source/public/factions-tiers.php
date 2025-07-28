@@ -821,7 +821,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         <li>These Projections must have a Mindrider ship with appropriate hangar capacity present in the game, or they will destabilise and drop out at the end of the turn where this is no longer the case.  
             E.g. two Thoughtforce vessels can sustain 24 Projections. 
             During a battle, if one of the Thoughtforce ships is destroyed then the number of Thought Projections that can be sustained would drop to 12, and any Projection over 12 would instantly drop out.</li>      
-    <h5>Minor Thought Pulsar/h5>
+    <h5>Minor Thought Pulsar</h5>
         <li>Fighter weapon for Mindriders, will be automatically boosted with unused Thrust when fired in Firing phase (one boost for every 3 unused Thrust), instead of this being done manually as in Tabletop.</li>
         <li>The type of boost will be decided by the Firing Mode selected and includes bonuses to Rate of Fire, Damage, Hit Chance, or a combination of these three benefits.</li>                                               
     <a class="back-to-top" href="#top">↩ Back to Top</a>
@@ -864,10 +864,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         <li>Slicers in FV also have alternative firing modes with a preset number of shots (3, 6 or 9) which can be used to target several shots at a single ship.</li>                                                                 
     <h5>Phasing Pulse Cannon</h5>
         <li>Pulse weapons that completely ignore any kind of shield or shield-like defense used by Younger races. 
-            Note that EM shields, like those used on the White Star, are treated as Ancient even when used on Younger Race ships.</li>
-        <li>To do so, boost the Shield Reinforcement system to the level of reinforcement you'd like and then target ally ships in the Initial Orders phase.  
-            All shields on a ship must be reinforced equally, at a cost of 1 output per level of reinforcement per shield (e.g. reinforcing a Thoughtforce vessel with 4 shields by 3 levels would cost 12 output, 3 * 4).  
-            Any unspent output will instead be used to reinforce the vessel equipped with the Shield Reinforcement system.</li>      
+            Note that EM shields, like those used on the White Star, are treated as Ancient even when used on Younger Race ships.</li>      
     <h5>Vortex Disruptor</h5>
         <li>A weapon that destabilizes hyperspace vortexes, preventing enemy escape. 
             As FV has no actual hyperspace vortexes, the weapon is purely scenario-related - to be fired at hex where vortex opening is declared.</li>
@@ -1132,8 +1129,8 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
        
     <h4 id="tier2" style="">TIER 2 - MEDIUM COMPETITIVENESS</h4>
     <p>Factions that point for point will have a difficult time competing against Tier 1 opponents, yet otherwise are balanced and competitive. 
-        Many of them have weaknesses more pronounced than Tier 1 factions but may offer a very distinct playstyle instead. </p>
-    <p>Should be interesting to play against each other, and if given some extra PV allowance - possibly against Tier 1 as well.</p>           
+        Many of them have weaknesses more pronounced than Tier 1 factions but may offer a very distinct playstyle instead. 
+        Should be interesting to play against each other, and if given some extra PV allowance - possibly against Tier 1 as well.</p>           
         <li>Abbai Matriarchate</li>
         <li>Balosian Underdwellers</li>
         <li>Belt Alliance</li>
