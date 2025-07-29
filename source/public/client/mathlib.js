@@ -285,6 +285,7 @@ window.mathlib = {
 		const lineMinR = Math.min(start.r, end.r);
 		const lineMaxR = Math.max(start.r, end.r);
 
+		//Debugging variables
 		//var startPixel = coordinateConverter.fromHexToGame({ q: 8, r: 2 });
 		//var endPixel = coordinateConverter.fromHexToGame({ q: 7, r: 1 });
 		//var blockedCorners = mathlib.getHexCorners({ q: 8, r: 1 });
@@ -307,18 +308,66 @@ window.mathlib = {
 				const p2 = corners[(i + 1) % corners.length];
 
 				if (this.doLinesIntersect(startPixel, endPixel, p1, p2)) {
-					//if(gamedata.showLoS) mathlib.drawLine(startPixel, endPixel, 0xff00ff); // Magenta line if blocked
-					//if(gamedata.showLoS) mathlib.drawHex(corners, 0xff00ff); // Magenta hex border					
+					//if(gamedata.showLoS) mathlib.drawLine(startPixel, endPixel, 0xff00ff); // Magenta line if blocked for debugging
+					//if(gamedata.showLoS) mathlib.drawHex(corners, 0xff00ff); // Magenta hex border for debugging					
 					return true; // Line of sight is blocked
 				}
 			}
 		}
 
-		//if(gamedata.showLoS) mathlib.drawLine(startPixel, endPixel, 0x87ceeb); // Blue line
+		//if(gamedata.showLoS) mathlib.drawLine(startPixel, endPixel, 0x87ceeb); // Blue line for debugging
 		return false; // Line of sight is clear
 	},
 
 
+	/* //Draws a simple line between two positions, replace by drawRuler() below but maybe useful for something else - DK
+	drawLine: function drawLine(p1, p2, color = 0x00ffff) {
+
+		// Run once, at init or before drawing loop
+		if (!window.LosSprite) {
+		window.LosSprite = new THREE.Group();
+		window.webglScene.scene.add(window.LosSprite);
+		}
+
+		mathlib.clearLosSprite();
+
+		const material = new THREE.LineBasicMaterial({ color });
+		const points = [
+			new THREE.Vector3(p1.x, p1.y, 10),
+			new THREE.Vector3(p2.x, p2.y, 10)
+		];
+		const geometry = new THREE.BufferGeometry().setFromPoints(points);
+		const line = new THREE.Line(geometry, material);
+		window.LosSprite.add(line);
+
+		return line;
+	},
+	*/
+
+//Called in Phase Strategy to show Ruler if LoS is toggled on.
+	showLoS: function showLoS(shooter, targetHex){
+		var start = shipManager.getShipPosition(shooter);
+		//var end = shipManager.getShipPosition(target);
+		var blockedHexes = weaponManager.getBlockedHexes();
+		
+		mathlib.checkLineOfSightSprite(start, targetHex, blockedHexes);
+	},
+	
+	clearLosSprite: function clearLosSprite() {
+		const LosSprite = window.LosSprite;
+		if (!LosSprite || !LosSprite.children || !Array.isArray(LosSprite.children)) {
+			return;
+		}
+
+		while (LosSprite.children.length > 0) {
+			const child = LosSprite.children[0];
+			LosSprite.remove(child);
+			if (child.geometry) child.geometry.dispose();
+			if (child.material) child.material.dispose();
+		}
+	},
+
+	//Alternative version of LoS check function, that calls Ruler and LoS visuals.  Separated to avoid having to show this is other places that call checkLineofSight() e.g. weapons.
 	checkLineOfSightSprite: function checkLineOfSightSprite(start, end, blockedHexes) {
 		const startPixel = coordinateConverter.fromHexToGame(start);
 		const endPixel = coordinateConverter.fromHexToGame(end);
@@ -367,54 +416,7 @@ window.mathlib = {
 		return false; // Line of sight is clear
 	},
 
-
-	//Called in Phase Strategy to show LoS lines if LoS is toggled on.
-	showLoS: function showLoS(shooter, targetHex){
-		var start = shipManager.getShipPosition(shooter);
-		//var end = shipManager.getShipPosition(target);
-		var blockedHexes = weaponManager.getBlockedHexes();
-		
-		mathlib.checkLineOfSightSprite(start, targetHex, blockedHexes);
-	},
-	
-	clearLosSprite: function clearLosSprite() {
-		const LosSprite = window.LosSprite;
-		if (!LosSprite || !LosSprite.children || !Array.isArray(LosSprite.children)) {
-			return;
-		}
-
-		while (LosSprite.children.length > 0) {
-			const child = LosSprite.children[0];
-			LosSprite.remove(child);
-			if (child.geometry) child.geometry.dispose();
-			if (child.material) child.material.dispose();
-		}
-	},
-
-	/* //Draws a simple line between two positions, replace by drawRuler() below.
-	drawLine: function drawLine(p1, p2, color = 0x00ffff) {
-
-		// Run once, at init or before drawing loop
-		if (!window.LosSprite) {
-		window.LosSprite = new THREE.Group();
-		window.webglScene.scene.add(window.LosSprite);
-		}
-
-		mathlib.clearLosSprite();
-
-		const material = new THREE.LineBasicMaterial({ color });
-		const points = [
-			new THREE.Vector3(p1.x, p1.y, 10),
-			new THREE.Vector3(p2.x, p2.y, 10)
-		];
-		const geometry = new THREE.BufferGeometry().setFromPoints(points);
-		const line = new THREE.Line(geometry, material);
-		window.LosSprite.add(line);
-
-		return line;
-	},
-	*/
-
+	//Called by checkLineOfSightSprite() above
 	drawHex: function drawHex(corners, color = 0xff0000, fillColor = null) {
 		if (!corners || corners.length < 6) return;
 
@@ -457,7 +459,7 @@ window.mathlib = {
 	},
 
 
-	//Uses game/pixel coordinates not hex!
+	//Note - Uses game/pixel coordinates not hex!  Called by checkLineOfSightSprite() above
 	drawRuler: function drawRuler(p1, p2, color = 0x00ffff) {
 		if (!window.LosSprite) {
 			window.LosSprite = new THREE.Group();
