@@ -48,7 +48,9 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                 <li><a href="#ancients">Ancients</a></li>
                 <li><a href="#ipsha">Ipsha</a></li>
                 <li><a href="#markab">Markab</a></li>
-                <li><a href="#shadows">Shadows</a></li>   
+                <li><a href="#mindriders">The Mindriders</a></li>                  
+                <li><a href="#shadows">Shadows</a></li>
+                <li><a href="#thirdspace">Thirdspace</a></li>                    
                 <li><a href="#vorlons">Vorlons</a></li>                  
             </ul>     
       </li>                                                                 
@@ -123,19 +125,26 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
 
     <h4 id="shipenhancements" style="margin-top: 20px; margin-bottom: 15px;">Ship Enhancements:</h4>
     <ul>  
-      <li><strong>Elite Crew:</strong>
+      <li><strong>Elite Crew</strong>
         <ul class="circle-list">
             <li>Effect: +1 to hit with all weapons, +5 Initiative, +2 Engine, +1 Sensors, +2 Reactor power, -5% Defence Rating, -2 to critical results</li>
             <li>Points Cost: +40% of ship cost (second time: +60%)</li>
             <li>Limit: 2</li>
         </ul>      
       </li>
+      <li><strong>Hangar Conversions</strong>
+        <ul class="circle-list">
+            <li>Convert either a fighter slot into an assault shuttle slot, or vice versa</li>
+            <li>Points Cost: 5pts per slot converted</li>
+            <li>Limit: Equal to the number of assault shuttle/fighter slots</li>
+        </ul>      
+      </li>      
     <li><strong>Identify Friend or Foe (IFF) System</strong>
         <ul class="circle-list">
-            <li>Effect: Prevent ballistic mines from attacking friendly units.</li>
+            <li>Effect: Prevent ballistic mines from attacking friendly units</li>
             <li>Points Cost: 4 pts per Ballistic Mine Launcher</li>
             <li>Limit: 1</li>
-            <li>Notes: Only available to ships equipped with Ballistic Mine Launchers.</li>              
+            <li>Notes: Only available to ships equipped with Ballistic Mine Launchers</li>              
         </ul>      
       </li>      
       <li><strong>Improved Engine</strong>
@@ -155,7 +164,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
       <li><strong>Improved Sensor Array</strong>
         <ul class="circle-list">
             <li>Effect: +1 Scanner rating</li>
-            <li>Points Cost: New Scanner rating * 5 (doubled for ElInt Sensors / Advanced Sensors)</li>
+            <li>Points Cost: New Scanner rating * 5 (doubled for Elint Sensors / Advanced Sensors)</li>
             <li>Limit: 1</li>
         </ul>      
       </li>       
@@ -166,7 +175,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             <li>Limit: 2</li>
         </ul>      
       </li> 
-      <li><strong>Sluggish </strong>
+      <li><strong>Sluggish</strong>
         <ul class="circle-list">
             <li>Effect: -5 Initiative</li>
             <li>Points Cost: -6 per step</li>
@@ -208,7 +217,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             <li>Limit: </li>
         </ul>      
       </li>  
-      <li><strong>Navigator </strong>
+      <li><strong>Navigator</strong>
         <ul class="circle-list">
             <li>Effect: Navigator provides 360 degree missile guidance, +5 Initiative</li>
             <li>Points Cost: 10</li>
@@ -223,7 +232,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         </ul>      
       </li>
 
-      <li><strong>Elite Pilot </strong>
+      <li><strong>Elite Pilot</strong>
         <ul class="circle-list">
             <li>Effect: Pivot cost is reduced by one thrust. Initiative +5. Offensive Bonuns +1. Profile -1</li>
             <li>Points Cost: -10% of craft price (rounded up)</li>
@@ -247,6 +256,8 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             </ul>      
         </li> 
       </ul>
+    <a class="back-to-top" href="#top">↩ Back to Top</a>
+          
     <h4 id="ipsha" style="margin-top: 15px;">Ipsha:</h4>
       <ul>
         <li><strong>Spark Curtain</strong>
@@ -260,7 +271,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
 
         <li><strong>Essan Barony Refit</strong>
             <ul class="circle-list">
-                <li>Effect: Engine gains +1 thrust and +2 structure boxes, but Scanner lose 1 output and -2 structure boxes, Structure gains +1 armor on all sections (up to 5 max.)</li>
+                <li>Effect: Engine gains +1 thrust and +2 structure boxes, but Scanner lose 1 output and -2 structure boxes, Structure gains +1 armor on all sections (up to 5 max)</li>
                 <li>Points Cost: 0</li>
                 <li>Limit: 1</li>
                 <li>Notes: Essan Barony-specific variant rather than enhancement.</li>              
@@ -276,15 +287,28 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             </ul>      
         </li>       
       </ul>
+    <a class="back-to-top" href="#top">↩ Back to Top</a>      
 
     <h4 id="markab" style="margin-top: 15px;">Markab:</h4>
       <ul>
         <li><strong>Religious Fervor</strong>
             <ul class="circle-list">
-                <li>Effect: +1 to hit on all weapons (or +5 OB for fighters), +10 initiative, fighters  gain -3 to Dropout; but defence ratings increased by 10.  </li>
+                <li>Effect: +1 to hit on all weapons (or +5 OB for fighters), +10 initiative, fighters  gain -3 to Dropout; but defence ratings increased by 10</li>
                 <li>Points Cost: 0</li>
                 <li>Limit: 1</li>
                 <li>Notes: Should be taken when 'Desperate Rules' should apply to Markab player.</li>             
+            </ul>      
+        </li>
+      </ul>    
+    <a class="back-to-top" href="#top">↩ Back to Top</a>
+
+    <h4 id="mindriders" style="margin-top: 15px;">The Mindriders:</h4>
+      <ul>
+        <li><strong>Improved Thought Shields</strong>
+            <ul class="circle-list">
+                <li>Effect: +1 to all Thought Shield ratings on vessel</li>
+                <li>Points Cost: New total Thought Shield Rating * 2</li>
+                <li>Limit: 5</li>           
             </ul>      
         </li>
       </ul>    
@@ -295,16 +319,16 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         <li><strong>Increased Diffuser Capability</strong>
             <ul class="circle-list">
                 <li>Effect: +1 rating, for every Diffuser on ship</li>
-                <li>Points Cost: N total diffuser capacity * 2.5 (further steps are increased by 2.5 points for each Diffuser)</li>
+                <li>Points Cost: Total diffuser capacity * 2.5 (further steps are increased by 2.5 points for each Diffuser)</li>
                 <li>Limit: 5</li>
             </ul>      
           </li>        
 
-        <li><strong>Launched fighter</strong>
+        <li><strong>Launched Fighter</strong>
             <ul class="circle-list">
-                <li>Effect: </li>
-                <li>Points Cost: </li>
-                <li>Limit: </li>
+                <li>Effect: N/A </li>
+                <li>Points Cost: 0pts</li>
+                <li>Limit: Equal to number of fighters ship can launch</li>
                 <li>Notes: Not an actual enhancement - used to denote ship has launched a fighter (and reduces ship's Structure by 1).</li>            
             </ul>      
           </li>  
@@ -318,29 +342,43 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             </ul>      
         </li>        
       </ul>
+    <a class="back-to-top" href="#top">↩ Back to Top</a>
+
+    <h4 id="thirdspace" style="margin-top: 15px;">Thirdspace:</h4>
+      <ul>
+        <li><strong>Improved Psychic Field</strong>
+            <ul class="circle-list">
+                <li>Effect: +1 range on Psychi Field</li>
+                <li>Points Cost: 300pts</li>
+                <li>Limit: 1</li>
+            </ul>      
+          </li>              
+      </ul>   
+    <a class="back-to-top" href="#top">↩ Back to Top</a>
+
     <h4 id="vorlons" style="margin-top: 15px;">Vorlons:</h4>
       <ul>
         <li><strong>Amethyst Skin Coloring</strong>
             <ul class="circle-list">
                 <li>Effect: +1 Adaptive Armor (AA) point, AA allowance per weapon type and AA pre-assigned amount are increased on every even total.</li>
-                <li>Points Cost: 20% of new AA total multiplied by total structure of ship.</li>
-                <li>Limit: 50% of base AA rating.</li>
+                <li>Points Cost: 20% of new AA total multiplied by total structure of ship</li>
+                <li>Limit: 50% of base AA rating</li>
               <li>Notes: Ships only.</li>             
             </ul>      
           </li> 
 
-        <li><strong>Azure Skin Coloring </strong>
+        <li><strong>Azure Skin Coloring</strong>
             <ul class="circle-list">
                 <li>Effect: 1 Shield rating, for all EM shields.</li>
                 <li>Points Cost: Unit 'size factor' (see below) multiplied by new EM Shield rating multiplied by number of shield emitters</li>
-                <li>Limit: 50% of base EM Shield rating.</li>
+                <li>Limit: 50% of base EM Shield rating</li>
                 <li>Notes: 'Size factor' is 30 for Enormous units, 25 for Capitals and 20 for anything smaller.</li>             
             </ul>      
           </li>  
 
         <li><strong>Crimson Skin Coloring</strong>
             <ul class="circle-list">
-                <li>Effect: Power Capacitor gains +2 storage points and +1 recharge point.</li>
+                <li>Effect: Power Capacitor gains +2 storage points and +1 recharge point</li>
                 <li>Points Cost: 20 * new Capacitor recharge rate</li>
                 <li>Limit: 6</li>
             </ul>      
