@@ -369,12 +369,12 @@ window.mathlib = {
 
 
 	//Called in Phase Strategy to show LoS lines if LoS is toggled on.
-	showLoS: function showLoS(shooter, target){
+	showLoS: function showLoS(shooter, targetHex){
 		var start = shipManager.getShipPosition(shooter);
-		var end = shipManager.getShipPosition(target);
+		//var end = shipManager.getShipPosition(target);
 		var blockedHexes = weaponManager.getBlockedHexes();
 		
-		mathlib.checkLineOfSightSprite(start, end, blockedHexes);
+		mathlib.checkLineOfSightSprite(start, targetHex, blockedHexes);
 	},
 	
 	clearLosSprite: function clearLosSprite() {
@@ -467,7 +467,11 @@ window.mathlib = {
 		mathlib.clearLosSprite();
 
 		// Create and add the line
-		const material = new THREE.LineBasicMaterial({ color });
+		const material = new THREE.LineBasicMaterial({
+			color: color,
+			transparent: true,
+			opacity: 0.8
+		});
 		const points = [
 			new THREE.Vector3(p1.x, p1.y, 10),
 			new THREE.Vector3(p2.x, p2.y, 10)
@@ -483,39 +487,59 @@ window.mathlib = {
 			coordinateConverter.fromGameToHex(p2)
 		);
 
-		// === Create distance label using same approach as your hex text ===
+		// === Create distance label ===
 		const canvas = document.createElement('canvas');
 		const TEXTURE_SIZE = 128;
 		canvas.width = TEXTURE_SIZE;
 		canvas.height = TEXTURE_SIZE;
 		const ctx = canvas.getContext('2d');
 
-		// Style similar to your existing system
 		let fontSize = 110;
-		ctx.fillStyle = 'white'; // Or any color you prefer
+		ctx.fillStyle = 'white';
 		ctx.textAlign = "center";
 		ctx.textBaseline = "middle";
-
 		const distanceText = distance.toFixed(0);
 		ctx.font = `bold ${fontSize}px Arial`;
 		ctx.fillText(distanceText, TEXTURE_SIZE / 2, TEXTURE_SIZE / 2);
 
-		// Create sprite from texture
 		const texture = new THREE.Texture(canvas);
 		texture.needsUpdate = true;
-
 		const spriteMaterial = new THREE.SpriteMaterial({ map: texture, transparent: true });
 		const sprite = new THREE.Sprite(spriteMaterial);
-
-		// Position the label at the midpoint, above the line
-		sprite.position.set(midX, midY, 500); // z = 12 so it sits above line
-		sprite.scale.set(30, 30, 1); // Tune this size as needed
-
+		sprite.position.set(midX, midY, 500);
+		sprite.scale.set(30, 30, 1);
 		window.LosSprite.add(sprite);
+
+		// === Create small circular marker at end of ruler (p2) ===
+		function hexToRgba(hex, alpha = 1) {
+			const r = (hex >> 16) & 255;
+			const g = (hex >> 8) & 255;
+			const b = hex & 255;
+			return `rgba(${r},${g},${b},${alpha})`;
+		}
+
+		const markerCanvas = document.createElement('canvas');
+		markerCanvas.width = 64;
+		markerCanvas.height = 64;
+		const markerCtx = markerCanvas.getContext('2d');
+
+		markerCtx.beginPath();
+		markerCtx.arc(32, 32, 18, 0, 2 * Math.PI);
+		markerCtx.fillStyle = hexToRgba(color); // uses same color as line
+		markerCtx.fill();
+
+		const markerTexture = new THREE.Texture(markerCanvas);
+		markerTexture.needsUpdate = true;
+
+		const markerMaterial = new THREE.SpriteMaterial({ map: markerTexture, transparent: true });
+		const markerSprite = new THREE.Sprite(markerMaterial);
+		markerSprite.position.set(p2.x, p2.y, 12); // just above the line
+		markerSprite.scale.set(18, 18, 1); // adjust size if needed
+
+		window.LosSprite.add(markerSprite);
 
 		return line;
 	},
-
 
 	//Returns 19 hexes around central position e.g. radius of 1
 	getNeighbouringHexes: function getNeighbouringHexes(position, radius = 1) {
