@@ -12,6 +12,7 @@ if (isset($_SESSION["user"])) {
 <html lang="en">
 <head>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">  
   <title>Fiery Void - Games</title>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
   <link href="styles/base.css" rel="stylesheet" type="text/css">

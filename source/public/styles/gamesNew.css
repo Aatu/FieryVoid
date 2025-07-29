@@ -36,25 +36,18 @@ a:hover { text-decoration: underline; }
   border: 1px solid #215a7a;
 }
 
-.reg-panel {
+.reg-panel, .faq-panel {
   background: rgba(23, 39, 54, 0.9);
   border-radius: 5px;
   border: 2px solid #215a7a;
-  width:350px; 
-  margin:auto; 
-  margin-top: 50px; 
+  width: 350px;
+  margin: 50px auto 10px auto;
   padding: 15px 15px 10px 15px;
 }
 
 .faq-panel {
-  background: rgba(23, 39, 54, 0.9);
-  border-radius: 5px;
-  border: 2px solid #215a7a;
-  width:350px; 
-  margin:auto; 
-  margin-top: 40px; 
-  padding: 15px 15px 10px 15px;
-  width:1200px;
+  width: 1200px; /* Keep this, but allow media query to override it */
+  margin-top: 40px;
 }
 
 .faq-panel h2 { /*color: #00a3cc;*/ font-family: "Bruno Ace SC", sans-serif; font-size: 26px; border-bottom: 3px solid #008fb3; margin-bottom: 0px; margin-top: 25px;}
@@ -385,8 +378,10 @@ line-height: 1.5;
 .top-right-row {
   display: flex;
   align-items: center;
-  gap: 12px;
+  flex-wrap: wrap;       /* allow wrap if it gets too tight */
+  gap: 8px;              /* smaller gap looks better on small screens */
   font-size: 14px;
+}
 }
 
 .top-right-row a {
@@ -506,3 +501,65 @@ line-height: 1.5;
 
 /* Utility */
 kbd { background: #1b2530; padding: 2px 4px; border-radius: 3px; }
+
+@media screen and (max-width: 600px) {
+  .container {
+    padding: 0 10px;
+  }
+
+  .pageheader {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .logo {
+    height: 40px;
+    margin-bottom: 10px;
+  }
+
+  .news-panel,
+  .chat-panel,
+  .reg-panel,
+  .faq-panel {
+    width: 100%;
+    padding: 10px 15px;
+    margin-top: 15px;
+  }
+
+  .faq-panel {
+    margin-top: 20px;
+  }
+
+  .btn,
+  .btn-primary,
+  .btn-secondary,
+  .btn-success,
+  .btn-success-create,
+  .btn-success-lobby,
+  .btn-primary-lobby,
+  .btn-secondary-lobby {
+    font-size: 1em;
+    width: auto;
+    min-width: 100px;
+    height: auto;
+    line-height: normal;
+    padding: 6px 10px;
+  }
+
+  .button-container {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .top-right-row {
+    justify-content: flex-end; /* or center, depending on preference */
+    font-size: 13px;
+    gap: 6px;
+  }
+
+  .top-right-row .btn {
+    padding: 4px 8px;
+    font-size: 0.95em;
+  }
+
+}
