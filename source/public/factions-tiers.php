@@ -103,7 +103,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                 <li><a href="#bsg">BSG</a></li>
                 <li><a href="#custom">CUSTOM SHIPS</a></li>                  
                 <li><a href="#nexus">NEXUS UNIVERSE</a></li>
-                <li><a href="#escalation">ESCALATION WARS</a></li>
+                <li><a href="#escalationwars">ESCALATION WARS</a></li>
                 <li><a href="#starwars">STAR WARS</a></li>
                 <li><a href="#startrek">STAR TREK</a></li>                                           
             </ul>     
@@ -1024,12 +1024,81 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
 
 
     <h4 id="escalationwars" style="">ESCALATION WARS</h4>
-    <p>Created by Tyrel Lohr and released as an unofficial supplement for the Babylon 5 Wars game system, Escalation Wars includes several new races and raider factions including:</p>
-    <li><strong>The Circasians:</strong> An upstart race, the Circasians have struggled to take their place in the galactic community. Utilizing less advanced technologies, the Circasian miltary has been tempered by several trials by fire.</li>
-    <li><strong>The Chouka:</strong> A race of methane-breathing religious zealots, the Chouka wanted little to do with the outside world before their war with the Circasians. The Chouka's large warships double as executive couriers and transports for the ruling religious elite.</li>
-    <li><strong>The Sshel'ath:</strong> An unusual race of fibric aliens who have the ability to partially rearrange their body structures. The Sshel'ath operate an extensive suite of laser weapons and missiles, as well as maintaining one of the largest orbital satellite networks in known space.</li>
-    <li><strong>The Raiders:</strong> The Chouka Raiders, Unsheathed Claw, and Blood Swords were the most powerful raider adversaries the Circasians had during their raider wars. Relive the frontier battles between the Circasian patrol fleets and the opportunistic raider forces.</li>
+    <p>The Escalation Wars setting was developed by Tyrel Lohr. The units available in Fiery Void represent a small segment of the setting that focused on the early rise of the Circasian Empire. Given this focus, the available Escalation Wars units are generally lower tech compared to the standard Babylon 5 forces. 
+       The earliest forces are Tier 3 in strength, but the later designs are in the Tier 2 bracket. Details for Escalation Wars factions can be accessed using these links:</p>
+        <ul style="font-size: 16px">
+            <li><a href="#bloodsword">BLOOD SWORD RAIDERS</a></li>
+            <li><a href="#choukaraiders">CHOUKA RAIDERS</a></li>                
+            <li><a href="#chouka">CHOUKA THEOCRACY</a></li>
+            <li><a href="#circasian">CIRCASIAN EMPIRE</a></li>
+            <li><a href="#kastan">KASTAN IMPERIAN MONARCHY</a></li>   
+            <li><a href="#sshelath">SSHEL'ATH ALLIANCE</a></li>                                                                      
+        </ul>  
     <a class="back-to-top" href="#top">↩ Back to Top</a>
+
+
+    <h4 id="bloodsword" style="">BLOOD SWORD RAIDERS</h4>
+        <p>The Blood Swords were a pirate group active during the Circasian "Raider Wars" time period. They were a serious threat to the trade routes near the Thaline node of the Outward sector trade routes due to the size and capabilities of their warships. 
+            The raiders were eventually defeated by the Circasians, and their defeat marked the unofficial end of the Raider Wars.</p>
+    <a class="back-to-top" href="#escalationwars">↩ Back to Escalation Wars</a>
+
+    <h4 id="choukaraiders" style="">CHOUKA RAIDERS</h4>
+        <p>This group of raiders operated in and around Chouka controlled territories and were directly financed by the Chouka Theocracy. 
+            They were an early threat to the Circasian Empire as it expanded its own sphere of influence. These raiders operate cast-off Chouka military and civilian ships and fighters. 
+            Their weapons are sourced from the Chouka, along with limited supplies from other black market sources. 
+            Because of their ties to the Chouka government, these raiders are fairly well armed compared to the Circasian and Chouka fleets and are comparable to other low tech raiders in the B5 universe.</p>
+    <a class="back-to-top" href="#escalationwars">↩ Back to Nexus Universe</a>
+
+    <h4 id="chouka" style="">CHOUKA THEOCRACY</h4>
+        <p>The Chouka Theocracy was a minor regional power in the Escalation Wars universe, and the Circasian's opponents in their first major interstellar war. 
+            The Chouka were more technologically advanced than the Circasians, but lacked the tactical experience and fleet assets to combat the more numerous and maneuverable Circasian fleet.</p>
+        <p>The ships included here are the Chouka spacecraft that served during the Chouka War period. They are armed with a mix of plasma and laser weapons, with older Chouka ships relying on plasma weapons while their newer ships rely on lasers in the anti-shipping role. 
+            Plasma weapons continued to be used for anti-fighter work into the Chouka War period, however.</p>    
+        <h5>Point Plasma Guns</h5>
+            <li>A specialized, flak-style system to defend their ships. This can intercept for friendly units and is capable of intercepting lasers.</li>
+        <h5>Gravitic Tracting Rod</h5>
+            <li>This rare device was only found on the Apostle Holy Cruiser. It was used to tractor on to smaller craft and draw them closer to dock with the ship for boarding. 
+                In Fiery Void, the Tracting Rod instead gives the target an initiative a thrust penalty.</li>
+        <h5>Light Energy Mine</h5>
+            <li>This is a smaller version of the Energy Mine used by the Narn. It has a shorter range (25 hexes) and does less damage (10/5) than the conventional Energy Mine.</li>                
+    <a class="back-to-top" href="#escalationwars">↩ Back to Nexus Universe</a>
+
+    <h4 id="circasian" style="">CIRCASIAN EMPIRE</h4>
+        <p>The Circasians are one of the two central powers in the Escalation Wars milieu. These Dilgar-like humanoids started as a small minor power surrounded by other, more established empires but through political maneuvering and conquest they were able to eventually carve out a major imperium of their own. 
+            The ships included here are low tech units the Circasians used during the Chouka War period. 
+            These vessels are principally armed with light particle, plasma, and laser weapons. Anything more powerful is beyond their level of technology at the start of the war. </p>    
+        <h5>Rockets</h5>
+            <li>The Circasians made use of these primitive torpedo launchers on their early ships. These weapons are treated like Torpedoes and benefit from OEW.</li>
+        <h5>Particle Lance</h5>
+            <li>An avenue of advanced R&D before the war, this weapon was an attempt to develop a heavier version of the Light Particle Cannon. 
+                Like the Gravitic Lance, this weapon is capable of firing as one more powerful weapon or as two weaker Light Particle Cannons.</li>              
+    <a class="back-to-top" href="#escalationwars">↩ Back to Nexus Universe</a>
+
+    <h4 id="kastan" style="">KASTAN IMPERIAN MONARCHY</h4>
+        <p>The Kastan inhabit a remote location of hyperspace deep within the Rapids of Rodirra, a treacherous section of hyperspace that makes travel to or from the Kastan territories difficult at best (and impossible at worst). 
+            Navigating the rapids has forced the Kastan to be superb pilots.</p>
+        <p>The Kastan have had limited interactions with their neighbours, although they do engage in trade and have been known to sell out their services as mercenaries. 
+            Most of their active political ambitions have focused on the coreward sectors, having fought back against an invasion by the Ingalli in recent history.</p>    
+        <h5>Laser Bolt</h5>
+            <li>The Kastan developed an effective short range anti-fighter laser weapon for their ships.</li>
+        <h5>Pulse Torpedo</h5>
+            <li>This weapon fires a number of small munitions at a target, designed to strip targets of weapons and external systems prior to closing to close range.</li>               
+    <a class="back-to-top" href="#escalationwars">↩ Back to Nexus Universe</a>
+    
+    <h4 id="sshelath" style="">SSHEL'ATH ALLIANCE</h4>
+        <p>The Sshel'ath Alliance was formed out of the civil war between the two largest Sshel'ath factions. The early Alliance focused on growth of the homeworld, as they were blocked by the more established Chouka Theocracy and Novon Trade Lords. Two conflicts with the Novon showed that action against this faction  was ill-advised. 
+            It was not until the later Circasian defeat of the Chouka that the Sshel'ath managed to expand into and capture several Chouka worlds.</p>
+        <p>The Sshel'ath themselves are made of intertwined mass of rope-like elastic fibers, which allow for limited rearrangement of their body's form. 
+            Only their faces are inelastic and they are highly resistant to radiation.</p>    
+        <h5>Gatling Laser</h5>
+            <li>Evolved from the basic light laser cannon, the gatling laser fires several short, discreet volleys in pulse mode.</li>
+        <h5>Electromagnetic Torpedo</h5>
+            <li>The EM Torpedo was developed to counter Novon shields. This ballistic weapon releases a large electromagnetic pulse and can destroy or short out enemy systems.</li>
+        <h5>Electron Polarizer</h5>
+            <li>A flash mode electromagnetic weapon, this can destroy or short out numerous systems on a target.</li>                
+    <a class="back-to-top" href="#escalationwars">↩ Back to Nexus Universe</a>    
+
+
 
 
     <h4 id="nexus" style="">NEXUS UNIVERSE</h4>
