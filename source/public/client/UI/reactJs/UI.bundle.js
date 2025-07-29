@@ -37105,7 +37105,7 @@ var PlayerSettingsForm = function (_React$Component) {
                     React.createElement(_common.InputAndLabel, { label: "Key to display ALL Ballistics", onChange: function onChange() {}, onKeydown: this.getOnKeyDown.call(this, "ShowAllBallistics"), value: this.getKey.call(this, "ShowAllBallistics") }),
                     React.createElement(_common.InputAndLabel, { label: "Key to display FRIENDLY Ballistics", onChange: function onChange() {}, onKeydown: this.getOnKeyDown.call(this, "ShowFriendlyBallistics"), value: this.getKey.call(this, "ShowFriendlyBallistics") }),
                     React.createElement(_common.InputAndLabel, { label: "Key to display ENEMY Ballistics", onChange: function onChange() {}, onKeydown: this.getOnKeyDown.call(this, "ShowEnemyBallistics"), value: this.getKey.call(this, "ShowEnemyBallistics") }),
-                    React.createElement(_common.InputAndLabel, { label: "Key to toggle LINE OF SIGHT indicators", onChange: function onChange() {}, onKeydown: this.getOnKeyDown.call(this, "ToggleLoS"), value: this.getKey.call(this, "ToggleLoS") }),
+                    React.createElement(_common.InputAndLabel, { label: "Key to toggle RULER tool", onChange: function onChange() {}, onKeydown: this.getOnKeyDown.call(this, "ToggleLoS"), value: this.getKey.call(this, "ToggleLoS") }),
                     React.createElement(_common.InputAndLabel, { label: "Key to toggle HEX numbers", onChange: function onChange() {}, onKeydown: this.getOnKeyDown.call(this, "ToggleHexNumbers"), value: this.getKey.call(this, "ToggleHexNumbers") }),
                     React.createElement(
                         _styled.SubTitle,
