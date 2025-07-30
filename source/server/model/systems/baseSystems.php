@@ -4986,7 +4986,7 @@ capacitor is completely emptied.
 		$this->data["Power regeneration"] =  'Initial phase only';
         $this->data["Special"] = "This system is responsible for generating and storing power (Reactor is nearby for technical purposes).";	   
 		if ($this->boostable){
-			$this->data["Special"] .= "<br>You may boost this system (open petals) to increase recharge rate by 50% - at the cost of treating all armor values as 2 points lower.";
+			$this->data["Special"] .= "<br>You may open ship petals by boosting this system, increasing generation by 50% on the following turn - however all primary systems lose 2 Armour and Defence Profiles increase 5% for the current turn.";
 		}
 		$this->data["Special"] .= "<br>Destroying Capacitor disables (but does not destroy) the ship.";
     }
