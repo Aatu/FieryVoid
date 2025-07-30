@@ -428,7 +428,7 @@ window.mathlib = {
 		}
 		shape.lineTo(corners[0].x, corners[0].y); // Close the shape
 
-		const z = 100; // Ensure it's rendered behind other overlays
+		const z = 500;
 
 		// === Add fill if specified ===
 		if (fillColor !== null) {
@@ -447,8 +447,8 @@ window.mathlib = {
 		// === Add outline as thick Line or Mesh ===
 		const outlinePoints = corners.map(c => new THREE.Vector2(c.x, c.y));
 		const outlineGeometry = new THREE.BufferGeometry().setFromPoints([
-			...outlinePoints.map(p => new THREE.Vector3(p.x, p.y, 10)),
-			new THREE.Vector3(corners[0].x, corners[0].y, 10) // Close loop
+			...outlinePoints.map(p => new THREE.Vector3(p.x, p.y, 500)),
+			new THREE.Vector3(corners[0].x, corners[0].y, 500) // Close loop
 		]);
 
 		const outlineMaterial = new THREE.LineBasicMaterial({ color });
