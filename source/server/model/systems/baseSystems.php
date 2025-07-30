@@ -840,6 +840,7 @@ class MagGravReactorTechnical extends MagGravReactor{
 */		
 	protected $doCountForCombatValue = false;
     public $iconPath = "reactorTechnical.png";
+	public $isTargetable = false; //cannot be targeted ever!	
 	public function setSystemDataWindow($turn){
 		$this->data["Output"] = $this->output;
 		parent::setSystemDataWindow($turn);     
@@ -4946,6 +4947,34 @@ capacitor is completely emptied.
 					break;			
 			}
 		}
+
+		//We can apply petal effects here so they are visible for player (note, criticals don't seem to get saved to database here, prolly because $dbManager->submitCriticals isn't called)			
+		if($gamedata->phase == 2 || $gamedata->phase == 3){
+	
+			$boostlevel = $this->getBoostLevel($gamedata->turn);
+			if ($boostlevel <1) return; //not boosted - no crit!
+			$ship = $this->unit;
+			foreach($ship->systems as $system){
+				if($system->location == 0 && $system->isTargetable){	//Only targetable primary systems get reduced armor
+					$crit = new ArmorReduced(-1, $ship->id, $system->id, "ArmorReduced", $gamedata->turn, $gamedata->turn);
+					$crit->updated = true;
+					//$crit->inEffect = true;
+					$system->criticals[] =  $crit;
+					$crit = new ArmorReduced(-1, $ship->id, $system->id, "ArmorReduced", $gamedata->turn, $gamedata->turn);
+					$crit->updated = true;
+					//$crit->inEffect = true;
+					$system->criticals[] =  $crit;
+				}
+			}
+			$cnc = $ship->getSystemByName("CnC"); //Now find CnC and increase profile by 5% using a spearate crit
+			if($cnc){				 		
+				$crit = new ProfileIncreased(-1, $ship->id, $cnc->id, "ProfileIncreased", $gamedata->turn, $gamedata->turn);
+				$crit->updated = true;
+				//$crit->inEffect = true;
+				$cnc->criticals[] =  $crit;
+			}									
+		}	
+
 	} //endof function onIndividualNotesLoaded
 	
 	
@@ -4963,6 +4992,7 @@ capacitor is completely emptied.
     }
 	
 	public function beforeFiringOrderResolution($gamedata){ //actually mark armor reduced temporary critical if Petals are open
+		/* //Moved to onIndividualNotesLoaded() to apply full TT effects.
 		$boostlevel = $this->getBoostLevel($gamedata->turn);
 		if ($boostlevel <1) return; //not boosted - no crit!
 		$ship = $this->unit;
@@ -4976,6 +5006,33 @@ capacitor is completely emptied.
 			$crit->inEffect = true;
 			$system->criticals[] =  $crit;
 		}
+		*/
+			//Actually make sure petal effects are applied.	
+			$boostlevel = $this->getBoostLevel($gamedata->turn);
+			if ($boostlevel <1) return; //not boosted - no crit!
+			$ship = $this->unit;
+			foreach($ship->systems as $system){
+				if($system->location == 0 && $system->isTargetable){	//Only targetable primary systems get reduced armor
+					$crit = new ArmorReduced(-1, $ship->id, $system->id, "ArmorReduced", $gamedata->turn, $gamedata->turn);
+					$crit->updated = true;
+					$crit->inEffect = true;
+					$system->criticals[] =  $crit;
+					$crit = new ArmorReduced(-1, $ship->id, $system->id, "ArmorReduced", $gamedata->turn, $gamedata->turn);
+					$crit->updated = true;
+					$crit->inEffect = true;
+					$system->criticals[] =  $crit;
+				}
+			}
+			$cnc = $ship->getSystemByName("CnC"); //Now find CnC and increase profile by 5% using a spearate crit
+			if($cnc){				 		
+				$crit = new ProfileIncreased(-1, $ship->id, $cnc->id, "ProfileIncreased", $gamedata->turn, $gamedata->turn);
+				$crit->updated = true;
+				$crit->inEffect = true;
+				$cnc->criticals[] =  $crit;
+			}			
+		
+
+
 	}	
 	
         private function getBoostLevel($turn){
