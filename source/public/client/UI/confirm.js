@@ -201,65 +201,65 @@ window.confirm = {
     
 
     doOnPlusEnhancement: function(e){
-	e.stopPropagation();  
+        e.stopPropagation();  
 
-	var button = $(this);
-	var enhNo = button.data("enhNo");
-	var target = $(".selectAmount.shpenh" + enhNo);
-	    
-	var noTaken = target.data("count");
-	var enhLimit = target.data("max");	
-	var enhPrice = target.data("enhPrice");	
-	var enhPriceStep = target.data("enhPriceStep");	
+        var button = $(this);
+        var enhNo = button.data("enhNo");
+        var target = $(".selectAmount.shpenh" + enhNo);
+            
+        var noTaken = target.data("count");
+        var enhLimit = target.data("max");	
+        var enhPrice = target.data("enhPrice");	
+        var enhPriceStep = target.data("enhPriceStep");	
 
-	if(noTaken < enhLimit){ //increase possible
-		var newCount = noTaken+1;
-		target.data("count", newCount);
-		target.html(newCount);
-		var cost = enhPrice + (noTaken*enhPriceStep); //base value, plus additional price charged for further levels
-		var newCost = target.data("enhCost")+cost;	
-		target.data("enhCost", newCost);
-		
-		//options cost - remembering they're included in enhancements cost as well!
-		if (target.data("enhIsOption")){
-			cost = enhPrice + (noTaken*enhPriceStep); //base value, plus additional price charged for further levels
-			newCost = target.data("enhOptionCost")+cost;		
-			target.data("enhOptionCost", newCost);
-		}
-		
-		confirm.getTotalCost();
-	}
+        if(noTaken < enhLimit){ //increase possible
+            var newCount = noTaken+1;
+            target.data("count", newCount);
+            target.html(newCount);
+            var cost = enhPrice + (noTaken*enhPriceStep); //base value, plus additional price charged for further levels
+            var newCost = target.data("enhCost")+cost;	
+            target.data("enhCost", newCost);
+            
+            //options cost - remembering they're included in enhancements cost as well!
+            if (target.data("enhIsOption")){
+                cost = enhPrice + (noTaken*enhPriceStep); //base value, plus additional price charged for further levels
+                newCost = target.data("enhOptionCost")+cost;		
+                target.data("enhOptionCost", newCost);
+            }
+            
+            confirm.getTotalCost();
+        }
     },
 
     doOnMinusEnhancement: function(e){
-	e.stopPropagation();  
+        e.stopPropagation();  
 
-	var button = $(this);
-	var enhNo = button.data("enhNo");
-	var target = $(".selectAmount.shpenh" + enhNo);
-	    
-	var noTaken = target.data("count");
-	var enhLimit = target.data("max");	
-	var enhPrice = target.data("enhPrice");	
-	var enhPriceStep = target.data("enhPriceStep");	
+        var button = $(this);
+        var enhNo = button.data("enhNo");
+        var target = $(".selectAmount.shpenh" + enhNo);
+            
+        var noTaken = target.data("count");
+        var enhLimit = target.data("max");	
+        var enhPrice = target.data("enhPrice");	
+        var enhPriceStep = target.data("enhPriceStep");	
 
-	if(noTaken > 0){ //decrease possible
-		var newCount = noTaken-1;
-		target.data("count", newCount);
-		target.html(newCount);
-		var cost = enhPrice + (newCount*enhPriceStep); //base value, plus additional price charged for further levels
-		var newCost = target.data("enhCost")-cost;		
-		target.data("enhCost", newCost);
-		
-		//options cost - remembering they're included in enhancements cost as well!
-		if (target.data("enhIsOption")){
-			cost = enhPrice + (newCount*enhPriceStep); //base value, plus additional price charged for further levels
-			newCost = target.data("enhOptionCost")-cost;		
-			target.data("enhOptionCost", newCost);
-		}
-		
-		confirm.getTotalCost();
-	}
+        if(noTaken > 0){ //decrease possible
+            var newCount = noTaken-1;
+            target.data("count", newCount);
+            target.html(newCount);
+            var cost = enhPrice + (newCount*enhPriceStep); //base value, plus additional price charged for further levels
+            var newCost = target.data("enhCost")-cost;		
+            target.data("enhCost", newCost);
+            
+            //options cost - remembering they're included in enhancements cost as well!
+            if (target.data("enhIsOption")){
+                cost = enhPrice + (newCount*enhPriceStep); //base value, plus additional price charged for further levels
+                newCost = target.data("enhOptionCost")-cost;		
+                target.data("enhOptionCost", newCost);
+            }
+            
+            confirm.getTotalCost();
+        }
     },
 	
 
@@ -377,29 +377,29 @@ window.confirm = {
     },    
 
     handleMouseWheelMissile: function(e) {
-    e.preventDefault();
-    e.stopPropagation();
+        e.preventDefault();
+        e.stopPropagation();
 
-    var $amt   = $(this);
-    var current = $amt.data('value');
-    var min     = $amt.data('min');
-    var max     = $amt.data('max');
-    var dir     = (e.originalEvent.deltaY < 0) ? +1 : -1;
+        var $amt   = $(this);
+        var current = $amt.data('value');
+        var min     = $amt.data('min');
+        var max     = $amt.data('max');
+        var dir     = (e.originalEvent.deltaY < 0) ? +1 : -1;
 
-    // adjust by 1 missile per wheel‑click
-    current = current + dir;
+        // adjust by 1 missile per wheel‑click
+        current = current + dir;
 
-    // clamp
-    if (current < min) current = min;
-    if (current > max) current = max;
+        // clamp
+        if (current < min) current = min;
+        if (current > max) current = max;
 
-    // write both text & data
-    $amt
-        .text(current)
-        .data('value', current);
+        // write both text & data
+        $amt
+            .text(current)
+            .data('value', current);
 
-    // recalc total cost / ammo
-    confirm.getTotalCost();
+        // recalc total cost / ammo
+        confirm.getTotalCost();
     },
 
     showShipBuy: function showShipBuy(ship, callback) {
@@ -662,33 +662,53 @@ handleInputChangeEdit: function handleInputChangeEdit(e) {
     if (value < min) value = min;
     if (value > max) value = max;
 
-    // Update the displayed and stored value
+    // Update displayed value
     $(this).text(value);
     $(this).data('value', value);
     $(this).data('count', value);
 
-    // Move the cursor to the end
+    // Move cursor to end
     var range = document.createRange();
     var sel = window.getSelection();
     range.selectNodeContents(this);
-    range.collapse(false); // Move to end
+    range.collapse(false);
     sel.removeAllRanges();
     sel.addRange(range);
 
-    // Calculate the enhancement cost
     var enhPrice = $(this).data('enhPrice');
     var enhPriceStep = $(this).data('enhPriceStep');
-    var countDifference = value - oldCount;
 
-    // Update the enhancement cost incrementally
-    var enhCost = $(this).data('enhCost') || 0;
-    var costChange = (countDifference > 0) 
-        ? (countDifference * enhPrice) + ((countDifference - 1) * enhPriceStep)
-        : (countDifference * enhPrice) - ((Math.abs(countDifference) - 1) * enhPriceStep);
-    enhCost += costChange;
-    $(this).data('enhCost', enhCost);
+    // Compute old cost
+    var oldCost = 0;
+    for (let i = 0; i < oldCount; i++) {
+        oldCost += enhPrice + (i * enhPriceStep);
+    }
 
-    // Trigger any necessary cost update function
+    // Compute new cost
+    var newCost = 0;
+    for (let i = 0; i < value; i++) {
+        newCost += enhPrice + (i * enhPriceStep);
+    }
+
+    // Update cost data
+    var totalEnhCost = ($(this).data('enhCost') || 0) - oldCost + newCost;
+    $(this).data('enhCost', totalEnhCost);
+
+    // Same logic for enhancement options, if applicable
+    if ($(this).data("enhIsOption")) {
+        var oldOptionCost = 0;
+        var newOptionCost = 0;
+        for (let i = 0; i < oldCount; i++) {
+            oldOptionCost += enhPrice + (i * enhPriceStep);
+        }
+        for (let i = 0; i < value; i++) {
+            newOptionCost += enhPrice + (i * enhPriceStep);
+        }
+
+        var totalOptionCost = ($(this).data('enhOptionCost') || 0) - oldOptionCost + newOptionCost;
+        $(this).data('enhOptionCost', totalOptionCost);
+    }
+
     confirm.getTotalCost();
 },
 
