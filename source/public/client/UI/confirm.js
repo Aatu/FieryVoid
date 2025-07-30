@@ -648,69 +648,69 @@ window.confirm = {
     },
 
 
-// Helper function to handle input changes (edit mode)
-handleInputChangeEdit: function handleInputChangeEdit(e) {
-    var currentText = $(this).text();
-    var value = parseInt(currentText) || 0;
-    var oldCount = $(this).data('count');
+    // Helper function to handle input changes (edit mode)
+    handleInputChangeEdit: function handleInputChangeEdit(e) {
+        var currentText = $(this).text();
+        var value = parseInt(currentText) || 0;
+        var oldCount = $(this).data('count');
 
-    // Get the min and max limits
-    var min = $(this).data('min');
-    var max = $(this).data('max');
+        // Get the min and max limits
+        var min = $(this).data('min');
+        var max = $(this).data('max');
 
-    // Enforce min/max
-    if (value < min) value = min;
-    if (value > max) value = max;
+        // Enforce min/max
+        if (value < min) value = min;
+        if (value > max) value = max;
 
-    // Update displayed value
-    $(this).text(value);
-    $(this).data('value', value);
-    $(this).data('count', value);
+        // Update displayed value
+        $(this).text(value);
+        $(this).data('value', value);
+        $(this).data('count', value);
 
-    // Move cursor to end
-    var range = document.createRange();
-    var sel = window.getSelection();
-    range.selectNodeContents(this);
-    range.collapse(false);
-    sel.removeAllRanges();
-    sel.addRange(range);
+        // Move cursor to end
+        var range = document.createRange();
+        var sel = window.getSelection();
+        range.selectNodeContents(this);
+        range.collapse(false);
+        sel.removeAllRanges();
+        sel.addRange(range);
 
-    var enhPrice = $(this).data('enhPrice');
-    var enhPriceStep = $(this).data('enhPriceStep');
+        var enhPrice = $(this).data('enhPrice');
+        var enhPriceStep = $(this).data('enhPriceStep');
 
-    // Compute old cost
-    var oldCost = 0;
-    for (let i = 0; i < oldCount; i++) {
-        oldCost += enhPrice + (i * enhPriceStep);
-    }
-
-    // Compute new cost
-    var newCost = 0;
-    for (let i = 0; i < value; i++) {
-        newCost += enhPrice + (i * enhPriceStep);
-    }
-
-    // Update cost data
-    var totalEnhCost = ($(this).data('enhCost') || 0) - oldCost + newCost;
-    $(this).data('enhCost', totalEnhCost);
-
-    // Same logic for enhancement options, if applicable
-    if ($(this).data("enhIsOption")) {
-        var oldOptionCost = 0;
-        var newOptionCost = 0;
+        // Compute old cost
+        var oldCost = 0;
         for (let i = 0; i < oldCount; i++) {
-            oldOptionCost += enhPrice + (i * enhPriceStep);
+            oldCost += enhPrice + (i * enhPriceStep);
         }
+
+        // Compute new cost
+        var newCost = 0;
         for (let i = 0; i < value; i++) {
-            newOptionCost += enhPrice + (i * enhPriceStep);
+            newCost += enhPrice + (i * enhPriceStep);
         }
 
-        var totalOptionCost = ($(this).data('enhOptionCost') || 0) - oldOptionCost + newOptionCost;
-        $(this).data('enhOptionCost', totalOptionCost);
-    }
+        // Update cost data
+        var totalEnhCost = ($(this).data('enhCost') || 0) - oldCost + newCost;
+        $(this).data('enhCost', totalEnhCost);
 
-    confirm.getTotalCost();
-},
+        // Same logic for enhancement options, if applicable
+        if ($(this).data("enhIsOption")) {
+            var oldOptionCost = 0;
+            var newOptionCost = 0;
+            for (let i = 0; i < oldCount; i++) {
+                oldOptionCost += enhPrice + (i * enhPriceStep);
+            }
+            for (let i = 0; i < value; i++) {
+                newOptionCost += enhPrice + (i * enhPriceStep);
+            }
+
+            var totalOptionCost = ($(this).data('enhOptionCost') || 0) - oldOptionCost + newOptionCost;
+            $(this).data('enhOptionCost', totalOptionCost);
+        }
+
+        confirm.getTotalCost();
+    },
 
     
     showShipEdit: function showShipEdit(ship, callback) {
