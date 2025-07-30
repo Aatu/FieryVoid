@@ -33,10 +33,10 @@ window.confirm = {
 
                                 if (returnArray[weapon.firingModes[k]]) {
                                     var maxAmount = returnArray[weapon.firingModes[k]][1];
-                                    returnArray[weapon.firingModes[k]] = ['Type ' + missile.missileClass + ' - ' + missile.displayName, maxAmount + weapon.maxAmount, missile.cost, numberOfLaunchers];
+                                    returnArray[weapon.firingModes[k]] = ['Type ' + missile.missileClass + ' - ' + missile.displayName, maxAmount + weapon.maxAmount, missile.cost, numberOfLaunchers, missile.amount];
                                     numberOfLaunchers++;
                                 } else {
-                                    returnArray[weapon.firingModes[k]] = ['Type ' + missile.missileClass + ' - ' + missile.displayName, weapon.maxAmount, missile.cost, numberOfLaunchers];
+                                    returnArray[weapon.firingModes[k]] = ['Type ' + missile.missileClass + ' - ' + missile.displayName, weapon.maxAmount, missile.cost, numberOfLaunchers, missile.amount];
                                     numberOfLaunchers++;
                                 }
                             }
@@ -126,9 +126,11 @@ window.confirm = {
         }
 
         var missileType = $(".selectText").data("firingMode");
+        var initialMissileAmount = $(".selectAmount." + missileType).data("initialValue");  //Sometime when editing this will already have an amount build into fighter cost.      
         var missileAmount = $(".selectAmount." + missileType).data("value");
         var launchers = $(".selectAmount." + missileType).data("launchers");
         var missileCost = $(".selectAmount." + missileType).data("cost");
+        var initialMissilesCost = (initialMissileAmount * missileCost * flightSize) * launchers || 0; //Work out what we have to deduct during Edit.        
 
         if (!missileAmount) {
             missileAmount = 0;
@@ -142,7 +144,7 @@ window.confirm = {
 
         //	console.log(flightSize, fighterCost, missileAmount, launchers, missileCost);
 
-        var totalCost = flightSize * (fighterCost + launchers * missileAmount * missileCost);
+        var totalCost = flightSize * (fighterCost + launchers * missileAmount * missileCost)-initialMissilesCost;
 
         //add enhancement cost	   
         var enhCost = 0;
@@ -343,37 +345,63 @@ window.confirm = {
         $(this).trigger('input'); // Simulate an input change
     },    
 
-handleMouseWheelFighter: function handleMouseWheelFighter(e) {
+    handleMouseWheelFighter: function handleMouseWheelFighter(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        var $elem = $(this);
+        var current = parseInt($elem.text()) || 0;
+        var max = $(".totalUnitCostAmount").data("maxSize");
+        var direction = (e.originalEvent.deltaY < 0) ? 'up' : 'down';
+
+        if (direction === 'up') {
+            if (current < max) {
+                if (current < 6) {
+                    current += 1;
+                } else {
+                    current += 3;
+                }
+                if (current > max) current = max;
+            }
+        } else {
+            if (current > 6) {
+                current -= 3;
+            } else if (current > 1) {
+                current -= 1;
+            }
+            if (current < 1) current = 1;
+        }
+
+        $elem.text(current);
+        confirm.getTotalCost();
+    },    
+
+    handleMouseWheelMissile: function(e) {
     e.preventDefault();
     e.stopPropagation();
 
-    var $elem = $(this);
-    var current = parseInt($elem.text()) || 0;
-    var max = $(".totalUnitCostAmount").data("maxSize");
-    var direction = (e.originalEvent.deltaY < 0) ? 'up' : 'down';
+    var $amt   = $(this);
+    var current = $amt.data('value');
+    var min     = $amt.data('min');
+    var max     = $amt.data('max');
+    var dir     = (e.originalEvent.deltaY < 0) ? +1 : -1;
 
-    if (direction === 'up') {
-        if (current < max) {
-            if (current < 6) {
-                current += 1;
-            } else {
-                current += 3;
-            }
-            if (current > max) current = max;
-        }
-    } else {
-        if (current > 6) {
-            current -= 3;
-        } else if (current > 1) {
-            current -= 1;
-        }
-        if (current < 1) current = 1;
-    }
+    // adjust by 1 missile per wheel‑click
+    current = current + dir;
 
-    $elem.text(current);
+    // clamp
+    if (current < min) current = min;
+    if (current > max) current = max;
+
+    // write both text & data
+    $amt
+        .text(current)
+        .data('value', current);
+
+    // recalc total cost / ammo
     confirm.getTotalCost();
-},    
-        
+    },
+
     showShipBuy: function showShipBuy(ship, callback) {
         var e = $(this.whtml);
 
@@ -514,6 +542,7 @@ handleMouseWheelFighter: function handleMouseWheelFighter(e) {
                 selectAmountItem.html("0");
                 selectAmountItem.addClass(i);
                 selectAmountItem.data('value', 0);
+                selectAmountItem.data('initialValue', 0); // store initial value for diff calculation                
                 selectAmountItem.data('min', 0);
 
 				
@@ -551,6 +580,8 @@ handleMouseWheelFighter: function handleMouseWheelFighter(e) {
             //change for enhancements:
             $(".plusButton", item).on("click",confirm.doOnPlusMissile);
             $(".minusButton", item).on("click",confirm.doOnMinusMissile);
+            // **NEW**: bind wheel to our new handler
+            selectAmountItem.on("wheel", confirm.handleMouseWheelMissile);            
         }
 
         if (variableSize) {
@@ -734,6 +765,7 @@ handleInputChangeEdit: function handleInputChangeEdit(e) {
                 selectAmountItem.data('max', enhLimit);
                 selectAmountItem.data('enhPrice', enhPrice);
                 selectAmountItem.data('enhPriceStep', enhPriceStep);
+                
                 //selectAmountItem.data('launchers', confirm.getLaunchersPerFighter(ship));
                 //selectAmountItem.data("firingMode", i);
 
@@ -772,7 +804,7 @@ handleInputChangeEdit: function handleInputChangeEdit(e) {
                 
         var nameExpanded = enhName;
         //if(enhID != 'DEPLOY'){
-            nameExpanded = nameExpanded + ' {';
+            nameExpanded = nameExpanded + ' (';
 			if(enhLimit>1) nameExpanded += 'up to ' + enhLimit + ' levels, ';
 			nameExpanded += enhPrice + 'pts';
 			//+ ' (up to ' + enhLimit + ' levels, ' + enhPrice + 'PV ';
@@ -801,56 +833,57 @@ handleInputChangeEdit: function handleInputChangeEdit(e) {
 
         // If it is a fighter, put the option in this pane.
         // A ship will need some more tricks.
-        if (!mathlib.arrayIsEmpty(missileOptions)) {
+if (!mathlib.arrayIsEmpty(missileOptions)) {
 
-            for (var i in missileOptions) {
-                var missileOption = missileOptions[i];
-                var template = $(".missileSelectItem");
-                var item = template.clone(true).prependTo(e);
+    for (var i in missileOptions) {
+        var missileOption = missileOptions[i];
+        var template = $(".missileSelectItem");
+        var item = template.clone(true).prependTo(e);
 
-                var selectAmountItem = $(".selectAmount", item);
+        var selectAmountItem = $(".selectAmount", item);
 
-                selectAmountItem.html("0");
-                selectAmountItem.addClass(i);
-                selectAmountItem.data('value', 0);
-                selectAmountItem.data('min', 0);
+        // --- SET INITIAL MISSILE COUNT here ---
+        // missileOption[4] assumed to be initial missile count baked into fighter cost
+        var initialMissileCount = missileOption[4] || 0;
 
-				
-                //if (ship.superheavy) {
-				if (ship.maxFlightSize<3) { //here it's question of single vs multiple craft per flight, not of being superheavy
-                    $(".selectText", item).html(missileOption[0] + ' (maximum amount: ' + missileOption[1] / 6 / (missileOption[3] / 6) + ', cost: ' + missileOption[2] + ')');
-                    $(item).show();
+        selectAmountItem.html(initialMissileCount); // show initial count in UI
+        selectAmountItem.addClass(i);
+        selectAmountItem.data('value', initialMissileCount);      // current value
+        selectAmountItem.data('initialValue', initialMissileCount); // store initial value for diff calculation
+        selectAmountItem.data('min', 0);
 
-                    selectAmountItem.data('max', Math.round( missileOption[1] / 6 / (missileOption[3] / 6) ));
-                    selectAmountItem.data('cost', missileOption[2]);
-                    selectAmountItem.data('launchers', confirm.getLaunchersPerFighter(ship));
-                    selectAmountItem.data("firingMode", i);
-                } else {
-                    $(".selectText", item).html(missileOption[0] + ' (maximum amount: ' + missileOption[1] / 6 / (missileOption[3] / 6) + ', cost: ' + missileOption[2] + ')');
-                    $(item).show();
+        if (ship.maxFlightSize < 3) {
+            $(".selectText", item).html(missileOption[0] + ' (maximum amount: ' + missileOption[1] / 6 / (missileOption[3] / 6) + ', cost: ' + missileOption[2] + ')');
+            $(item).show();
 
-                    selectAmountItem.data('max', Math.round(missileOption[1] / 6 / (missileOption[3] / 6)));
-                    selectAmountItem.data('cost', missileOption[2]);
-                    selectAmountItem.data('launchers', confirm.getLaunchersPerFighter(ship));
-                    selectAmountItem.data("firingMode", i);
-                }
+            selectAmountItem.data('max', Math.round(missileOption[1] / 6 / (missileOption[3] / 6)));
+            selectAmountItem.data('cost', missileOption[2]);
+            selectAmountItem.data('launchers', confirm.getLaunchersPerFighter(ship));
+            selectAmountItem.data("firingMode", i);
+        } else {
+            $(".selectText", item).html(missileOption[0] + ' (maximum amount: ' + missileOption[1] / 6 / (missileOption[3] / 6) + ', cost: ' + missileOption[2] + ')');
+            $(item).show();
 
-                $(".selectText").data("firingMode", i);
-
-                var plusButton = $(".plusButton", item);
-                plusButton.data("firingMode", i);
-                $(".minusButton", item).data("firingMode", i);
-            }
-
-            $('<div class="missileselect"><label>This fighter type can carry fighter missiles.<br>\
-                    Please select the amount you wish to purchase PER MISSILE LAUNCHER.<br></label>').prependTo(e);
-
-            //$(".missileSelectItem .selectButtons .plusButton", e).on("click", confirm.doOnPlusMissile);
-            //$(".missileSelectItem .selectButtons .minusButton", e).on("click", confirm.doOnMinusMissile);
-            //change for enhancements:
-            $(".plusButton", item).on("click",confirm.doOnPlusMissile);
-            $(".minusButton", item).on("click",confirm.doOnMinusMissile);
+            selectAmountItem.data('max', Math.round(missileOption[1] / 6 / (missileOption[3] / 6)));
+            selectAmountItem.data('cost', missileOption[2]);
+            selectAmountItem.data('launchers', confirm.getLaunchersPerFighter(ship));
+            selectAmountItem.data("firingMode", i);
         }
+
+        $(".selectText").data("firingMode", i);
+
+        var plusButton = $(".plusButton", item);
+        plusButton.data("firingMode", i);
+        $(".minusButton", item).data("firingMode", i);
+    }
+
+    $('<div class="missileselect"><label>This fighter type can carry fighter missiles.<br>\
+            Please select the amount you wish to purchase PER MISSILE LAUNCHER.<br></label>').prependTo(e);
+
+    $(".plusButton", item).on("click",confirm.doOnPlusMissile);
+    $(".minusButton", item).on("click",confirm.doOnMinusMissile);
+    selectAmountItem.on("wheel", confirm.handleMouseWheelMissile);            
+}
 
         if (variableSize) {
             var template = $(".missileSelectItem");
