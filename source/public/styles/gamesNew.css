@@ -506,10 +506,15 @@ kbd { background: #1b2530; padding: 2px 4px; border-radius: 3px; }
     padding: 0 10px;
   }
 
-  .pageheader {
-    flex-direction: column;
-    align-items: flex-start;
-  }
+.pageheader {
+  display: flex;           /* Ensure it's a flex container */
+  flex-direction: column;  /* Stack logo + links vertically */
+  align-items: flex-start;   /* Right-align the content */
+  justify-content: flex-start;
+  width: 100%;             /* 🔹 Stretch full width */
+  box-sizing: border-box;  /* Include padding in width */
+  padding: 0 10px;         /* Optional: horizontal breathing room */
+}
 
   .logo {
     height: 40px;
@@ -519,7 +524,9 @@ kbd { background: #1b2530; padding: 2px 4px; border-radius: 3px; }
   .news-panel,
   .chat-panel,
   .reg-panel,
-  .faq-panel {
+  .faq-panel,
+  .games-panel,
+  #globalchat {
     width: 100%;
     padding: 10px 15px;
     margin-top: 15px;
