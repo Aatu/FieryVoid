@@ -1506,6 +1506,11 @@ parseFactions: function parseFactions(jsonFactions) {
     }
 
     gamedata.allShips = factionList;
+
+    if (typeof window.updateTierFilter === "function") {
+        window.updateTierFilter();  // ✅ Auto-filter after parsing
+    }
+
 },
 	
  drawMapPreview: function drawMapPreview () {
@@ -2000,25 +2005,36 @@ applyCustomShipFilter: function () {
         $(".depavailable", slot).html(data.depavailable);
     },
 
-    clickTakeslot: function clickTakeslot() {
-        var slot = $(".slot").has($(this));
-        var slotid = slot.data("slotid");
-	    
-	//block if player already has confirmed fleet (in any slot)
+clickTakeslot: function clickTakeslot() {
+    var slot = $(".slot").has($(this));
+    var slotid = slot.data("slotid");
+
+    // block if player already has confirmed fleet (in any slot)
 	for (var i in gamedata.slots)  { //check all slots
-		var checkSlot = gamedata.slots[i];
+        var checkSlot = gamedata.slots[i];
 		if (checkSlot.lastphase >= "-2") { //this slot has ready fleet
-			var player = playerManager.getPlayerInSlot(checkSlot);
-			if (player.id == gamedata.thisplayer && checkSlot == slot){
-				window.confirm.error("You have already confirmed Your fleet for this game!", function () {});
-				return;
-			}
-		}
-	}
-	    
-        ajaxInterface.submitSlotAction("takeslot", slotid);
-        location.reload(); // ✅ reload the page after taking the slot		
-    },
+            var player = playerManager.getPlayerInSlot(checkSlot);
+            if (player.id == gamedata.thisplayer && checkSlot == slot) {
+                window.confirm.error("You have already confirmed Your fleet for this game!", function () {});
+                return;
+            }
+        }
+    }
+
+    // ✅ Submit slot action first
+    ajaxInterface.submitSlotAction("takeslot", slotid, function () {
+        // ✅ After success, reload factions only
+        $.getJSON("getFactions.php")
+            .done(function (factions) {
+                gamedata.parseFactions(factions); // rebuild headers/groups
+        		//updateTierFilter();               // ✅ immediately reapply filters				
+            })
+            .fail(function () {
+                console.error("Failed to load factions. Falling back to page reload.");
+                location.reload(); // fallback if something goes wrong
+            });
+    });
+},
 
     onLeaveSlotClicked: function onLeaveSlotClicked() {
         var slot = $(".slot").has($(this));

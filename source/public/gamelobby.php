@@ -210,50 +210,50 @@
             ajaxInterface.startPollingGamedata();
 
             // ✅ Unified filter logic for factions based on Tier and Custom
-    function updateTierFilter() {
-        const selectedTiers = $('.tier-filter:checked').map(function () {
-            return $(this).data('tier');
-        }).get();
+            window.updateTierFilter = function() {   // ✅ Now global
+                const selectedTiers = $('.tier-filter:checked').map(function () {
+                    return $(this).data('tier');
+                }).get();
 
-    const showCustom = $('#toggleCustom').is(':checked');
-    const customMode = $('#customSelect').val();
+                const showCustom = $('#toggleCustom').is(':checked');
+                const customMode = $('#customSelect').val();
 
-    $('.faction').each(function () {
-        const tier = $(this).data('tier');
-        const isCustom = $(this).data('custom') === true || $(this).data('custom') === "true";
+                $('.faction').each(function () {
+                    const tier = $(this).data('tier');
+                    const isCustom = $(this).data('custom') === true || $(this).data('custom') === "true";
 
-        let isVisible = false;
+                    let isVisible = false;
 
-        if (selectedTiers.includes(tier)) {
-            if (showCustom) {
-                if (customMode === 'showOnlyCustom') {
-                    isVisible = isCustom;
-                } else {
-                    isVisible = true; // show both custom and non-custom
-                }
-            } else {
-                isVisible = !isCustom; // hide custom if toggle unchecked
+                    if (selectedTiers.includes(tier)) {
+                        if (showCustom) {
+                            if (customMode === 'showOnlyCustom') {
+                                isVisible = isCustom;
+                            } else {
+                                isVisible = true; // show both custom and non-custom
+                            }
+                        } else {
+                            isVisible = !isCustom; // hide custom if toggle unchecked
+                        }
+                    }
+
+                    $(this).toggle(isVisible);
+                });
+
+                // Group headers visibility stays unchanged
+                $('.factiongroup-header').each(function () {
+                    let header = $(this);
+                    let hasVisibleFaction = false;
+                    let next = header.next();
+                    while (next.length && !next.hasClass('factiongroup-header')) {
+                        if (next.hasClass('faction') && next.is(':visible')) {
+                            hasVisibleFaction = true;
+                            break;
+                        }
+                        next = next.next();
+                    }
+                    header.toggle(hasVisibleFaction);
+                });
             }
-        }
-
-        $(this).toggle(isVisible);
-    });
-
-    // Group headers visibility stays unchanged
-    $('.factiongroup-header').each(function () {
-        let header = $(this);
-        let hasVisibleFaction = false;
-        let next = header.next();
-        while (next.length && !next.hasClass('factiongroup-header')) {
-            if (next.hasClass('faction') && next.is(':visible')) {
-                hasVisibleFaction = true;
-                break;
-            }
-            next = next.next();
-        }
-        header.toggle(hasVisibleFaction);
-    });
-}
 
             // ✅ Listen to Tier and Custom Faction checkboxes
             $('.tier-filter').on('change', updateTierFilter);
