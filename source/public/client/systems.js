@@ -434,7 +434,7 @@ shipManager.systems = {
 			for (var i in gamedata.ships) {
 				var ship = gamedata.ships[i];
                 var deployTurn = shipManager.getTurnDeployed(ship);
-
+			    if(gamedata.isTerrain(ship.shipSizeClass, ship.userid)) continue;
                 if(deployTurn > gamedata.turn) continue;  //Don't bother checking for ships that haven't deployed yet.
 				if (ship.unavailable) continue;
 				if (ship.flight) continue;
@@ -458,8 +458,8 @@ shipManager.systems = {
 
 				for (var i in gamedata.ships) {
                     var ship = gamedata.ships[i];
-
-                    var deployTurn = shipManager.getTurnDeployed(ship);
+			        if(gamedata.isTerrain(ship.shipSizeClass, ship.userid)) continue;                    
+                    var deployTurn = shipManager.getTurnDeployed(ship);                    
                     if(deployTurn !== gamedata.turn) continue;   //Don't bother checking for ships that haven't deployed yet.
 
                     if (shipManager.isDestroyed(ship)) continue;
@@ -484,6 +484,7 @@ shipManager.systems = {
 			var counter = 0;
 			for (var i in gamedata.ships) {
 				var ship = gamedata.ships[i];
+			    if(gamedata.isTerrain(ship.shipSizeClass, ship.userid)) continue;                
 				if (ship.unavailable) continue;
 				if (ship.flight) continue;
 				if (ship.userid != gamedata.thisplayer) continue;

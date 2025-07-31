@@ -180,7 +180,7 @@ shipManager.power = {
 
 		for (var i in gamedata.ships) {
 			var ship = gamedata.ships[i];
-
+			if(gamedata.isTerrain(ship.shipSizeClass, ship.userid)) continue;
 			if (ship.unavailable) continue;
 
 			if (ship.flight) continue;
@@ -234,7 +234,8 @@ shipManager.power = {
 			var shipNames = new Array();
 			var counter = 0;
 			for (var i in gamedata.ships) {
-				var ship = gamedata.ships[i];			
+				var ship = gamedata.ships[i];
+				if(gamedata.isTerrain(ship.shipSizeClass, ship.userid)) continue;							
 				if (ship.unavailable) continue;
 				if (ship.flight) continue;
 				if (ship.userid != gamedata.thisplayer) continue;
@@ -257,7 +258,7 @@ shipManager.power = {
 			var counter = 0;
 			for (var i in gamedata.ships) {
 				var ship = gamedata.ships[i];
-					if(ship.faction !== "Pak'ma'ra Confederacy") continue; //I'm TRYING to be efficient!
+					if(ship.faction !== "Pak'ma'ra Confederacy") continue;
 		            if (ship.unavailable) continue;
 		            if (ship.flight) continue;
 		            if (ship.userid != gamedata.thisplayer) continue;

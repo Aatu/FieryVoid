@@ -294,7 +294,7 @@ window.gamedata = {
 
             for (var ship in gamedata.ships) {
                 if (gamedata.ships[ship].userid == gamedata.thisplayer) {
-                    if (!shipManager.isDestroyed(gamedata.ships[ship])) {
+                    if (!shipManager.isDestroyed(gamedata.ships[ship]) && !gamedata.isTerrain(gamedata.ships[ship].shipSizeClass, gamedata.ships[ship].userid)) {
                         var deployTurn = shipManager.getTurnDeployed(gamedata.ships[ship]);
                         if(deployTurn <= gamedata.turn){   //Don't bother checking for ships that haven't deployed yet. 
                             myShips.push(gamedata.ships[ship]);
@@ -549,9 +549,11 @@ window.gamedata = {
 
             for (var i in activeShips) {
                 var ship = activeShips[i];
-                if (shipManager.movement.canChangeSpeed(ship, true) && ship.userid == gamedata.thisplayer) {
-                    zeroSpeedShips.push(ship);
-                }
+                if(!gamedata.isTerrain(ship.shipSizeClass, ship.userid)){
+                    if (shipManager.movement.canChangeSpeed(ship, true) && ship.userid == gamedata.thisplayer) {
+                        zeroSpeedShips.push(ship);
+                    }
+                }    
             }
 
             if (zeroSpeedShips.length > 0) {
@@ -575,7 +577,7 @@ window.gamedata = {
 
                 for (var ship in gamedata.ships) {
                     if (gamedata.ships[ship].userid == gamedata.thisplayer) {
-                        if (!shipManager.isDestroyed(gamedata.ships[ship])) {
+                        if (!shipManager.isDestroyed(gamedata.ships[ship]) && !gamedata.isTerrain(gamedata.ships[ship].shipSizeClass, gamedata.ships[ship].userid)) {
                             var deployTurn = shipManager.getTurnDeployed(gamedata.ships[ship]);
                             if(deployTurn <= gamedata.turn){   //Don't bother checking for ships that haven't deployed yet. 
                                 myShips.push(gamedata.ships[ship]);
@@ -795,7 +797,7 @@ window.gamedata = {
 
             for (var ship in gamedata.ships) {
                 if (gamedata.ships[ship].userid == gamedata.thisplayer) {
-                    if (!shipManager.isDestroyed(gamedata.ships[ship])) {
+                    if (!shipManager.isDestroyed(gamedata.ships[ship]) && !gamedata.isTerrain(gamedata.ships[ship].shipSizeClass, gamedata.ships[ship].userid)) {
                         var deployTurn = shipManager.getTurnDeployed(gamedata.ships[ship]);
                         if(deployTurn <= gamedata.turn){   //Don't bother checking for ships that haven't deployed yet. 
                             myShips.push(gamedata.ships[ship]);
@@ -980,7 +982,7 @@ window.gamedata = {
 		var myShips = [];
 		    for (var ship in gamedata.ships) {
 			if (gamedata.ships[ship].userid == gamedata.thisplayer) {
-			    if (!shipManager.isDestroyed(gamedata.ships[ship])) {
+			    if (!shipManager.isDestroyed(gamedata.ships[ship]) && !gamedata.isTerrain(gamedata.ships[ship].shipSizeClass, gamedata.ships[ship].userid)) {
                     var deployTurn = shipManager.getTurnDeployed(gamedata.ships[ship]);
                     if(deployTurn <= gamedata.turn){   //Don't bother checking for ships that haven't deployed yet. 
                         myShips.push(gamedata.ships[ship]);

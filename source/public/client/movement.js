@@ -1378,7 +1378,7 @@ shipManager.movement = {
 
 	    for (var i in gamedata.ships) {
 	        var ship = gamedata.ships[i];
-
+			if(gamedata.isTerrain(ship.shipSizeClass, ship.userid)) continue;
 	        if (ship.unavailable) continue;
 	        if (ship.flight) continue;
 	        if (ship.userid != gamedata.thisplayer) continue;
