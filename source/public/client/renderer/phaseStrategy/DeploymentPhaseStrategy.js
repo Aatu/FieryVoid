@@ -84,6 +84,16 @@ window.DeploymentPhaseStrategy = function () {
         }
     };
 
+    DeploymentPhaseStrategy.prototype.onShipClicked = function (ship, payload) {//30 June 2024 - DK - Added for Ally targeting.
+        if(shipManager.shouldBeHidden(ship)) return;  //Stealth equipped and undetected enemy, or not deployed yet - DK May 2025
+
+		if(this.gamedata.isMyShip(ship) && (shipManager.getTurnDeployed(ship) == gamedata.turn)) { //Own ship and deploys this turn, just select it.
+            this.selectShip(ship, payload);    
+        } else { //Netiehr of the above is true, allow to deploy.  Even on hexes occupied by ships that deployed earlier in game.
+            this.onHexClicked(payload);
+        }
+    };    
+
     DeploymentPhaseStrategy.prototype.setSelectedShip = function (ship) {
         PhaseStrategy.prototype.setSelectedShip.call(this, ship);
         var depTurn = shipManager.getTurnDeployed(ship);
