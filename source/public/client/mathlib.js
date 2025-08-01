@@ -346,8 +346,13 @@ window.mathlib = {
 
 //Called in Phase Strategy to show Ruler if LoS is toggled on.
 	showLoS: function showLoS(shooter, targetHex){
-		var start = shipManager.getShipPosition(shooter);
-		//var end = shipManager.getShipPosition(target);
+		var start = null;
+		if(shooter == null){
+			var firstShip = gamedata.getFirstFriendlyShip();
+			start = shipManager.getShipPosition(firstShip);			
+		} else {
+			start = shipManager.getShipPosition(shooter);
+		}	
 		var blockedHexes = weaponManager.getBlockedHexes();
 		
 		mathlib.checkLineOfSightSprite(start, targetHex, blockedHexes);
