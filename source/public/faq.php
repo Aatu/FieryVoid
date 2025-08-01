@@ -149,8 +149,8 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
 
         <h3  id="delayed">Delayed Deployment</h3>
         <ul>
-            <li>You can select this option in the Create Game screen by setting the <b>'Deploys on Turn'</b> field in a player slot to the Turn number you wish it to deploy, or ‘jump in’.  
-            Ships cannot jump into hexes already occupied by a unit(s), so make sure you make the Deployment Zone large enough.</li>
+            <li>You can select this option in the Create Game screen, by setting the <b>'Deploys on Turn'</b> field in a Player Slot to the Turn you wish that slot to deploy, or ‘jump in’.  
+            Ships cannot jump into hexes occupied by terrain or Enormous units, so make sure you make the Deployment Zone large enough!</li>
             <li>Ships which would normally have to set systems on Turn 1 and choose to deploy later (e.g. Hyach Specialists, Vorlon Adaptive Armor) will set these systems on the turn they deploy instead.</li>
             <li>Terrain, Bases, and OSATS cannot deploy later in the game and will always deploy on Turn 1 even if the slot is set to deploy later.</li>
         </ul>
