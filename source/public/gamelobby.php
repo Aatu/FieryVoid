@@ -345,7 +345,7 @@
 		<div class="panel large lobby">
             <div class="">
                 <!--<span class="panelheader">GAME NAME: </span>-->
-                <span class="panelsubheader" style="font-size: 24px; color: #a3c0f5;"> <?php print($gamelobbydata->name); ?></span>
+                <span class="panelsubheader" style="font-size: 24px; color: #e0e7ef;"> <?php print($gamelobbydata->name); ?></span>
             </div>
 
 
