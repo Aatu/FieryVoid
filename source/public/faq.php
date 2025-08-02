@@ -147,6 +147,16 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         </ul>
         <a class="back-to-top" href="#top">↩ Back to Top</a>
 
+        <h3  id="delayed">Called Shots</h3>
+        <ul>
+            <li>Called Shots are possible in Fiery Void, providing the weapon selected is able to do s. For example ballistic weapons cannot do so, witht he exception of the Kor-Lyans Limpet Bore Torpedo.</li>  
+            <li>To make a called shot, select the weapon you want to fire then bring up the enemies SCS by right-clicking on their ship. Find the system you wish to target and click on it.  
+            Providing all the other conditions are met e.g. system can be targetd by called shots, is in arc of the firing ship etc.  
+            This system will now be targeted and your weapon icon will highlight orange as usual to indicated it's locked in.</li>
+            <li>Called Shots are usually made with a -40% chance to hit for most weapons, although some have bonuses towards this like the Dilgar's Point Pulsar.</li>            
+        </ul>
+        <a class="back-to-top" href="#top">↩ Back to Top</a>
+
         <h3  id="delayed">Delayed Deployment</h3>
         <ul>
             <li>You can select this option in the Create Game screen, by setting the <b>'Deploys on Turn'</b> field in a Player Slot to the Turn you wish that slot to deploy, or ‘jump in’.  
@@ -199,6 +209,8 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         <h3 id="terrain" >Terrain</h3>
         <ul>
             <li><b>Asteroids:</b> Added in Create Game or manually from Terrain faction list. They block line of sight and cause ramming damage to non-fighters moving through them (damage applies end of turn).</li>
+            <li><b>Manual Placement:</b>If you want to have full control over where Terrain is placed, you can create a new player slot for yourself at game creation and pick the terrain you want from the Terrain faction in Other.  
+            Then, providing you have set an appropriately wide deployment zone, you can just place these like any other ship on Turn 1.</li>            
             <li><b>Moons:</b> Larger than asteroids (multiple hexes). Units moving into a moon's area automatically crash into it during the Firing Phase.</li>
         </ul>
         <a class="back-to-top" href="#top">↩ Back to Top</a>
