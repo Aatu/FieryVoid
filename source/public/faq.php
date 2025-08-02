@@ -32,10 +32,11 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
     <ul class = index-list>
         <li><a href="#general">GENERAL NOTES</a> </li>
         <li><a href="#differences">DIFFERENCES FROM BABYLON 5 WARS</a></li>                        
-        <li><a href="#mechanics">INFO ON SPECIFIC MECHANICS</a>
+        <li><a href="#mechanics">INFO ON ADVANCED MECHANICS</a>
            <ul class="sub-list">
                 <li><a href="#boarding">Boarding Actions & Marines</a></li>
-                <li><a href="#delayed">Delayed Deployment</a></li>
+                <li><a href="#called">Delayed Deployment</a></li>                
+                <li><a href="#delayed">Called Shots</a></li>
                 <li><a href="#enormous">Enormous Units</a></li>
                 <li><a href="#jump">Jump Drives</a></li>   
                 <li><a href="#stealth">Stealth Ships</a></li>
@@ -105,7 +106,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         <a class="back-to-top" href="#top">↩ Back to Top</a>
 
 
-    <h2 id="mechanics">INFO ON SPECIFIC MECHANICS</h2>
+    <h2 id="mechanics">INFO ON ADVANCED MECHANICS</h2>
 
         <h3 id="boarding" style="margin-top: 15px;">Boarding Actions & Marines</h3>
         <ul>
@@ -147,7 +148,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         </ul>
         <a class="back-to-top" href="#top">↩ Back to Top</a>
 
-        <h3  id="delayed">Called Shots</h3>
+        <h3  id="called">Called Shots</h3>
         <ul>
             <li>Called Shots are possible in Fiery Void, providing the weapon selected is able to do s. For example ballistic weapons cannot do so, witht he exception of the Kor-Lyans Limpet Bore Torpedo.</li>  
             <li>To make a called shot, select the weapon you want to fire then bring up the enemies SCS by right-clicking on their ship. Find the system you wish to target and click on it.  
