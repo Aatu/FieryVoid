@@ -35,8 +35,8 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         <li><a href="#mechanics">INFO ON ADVANCED MECHANICS</a>
            <ul class="sub-list">
                 <li><a href="#boarding">Boarding Actions & Marines</a></li>
-                <li><a href="#called">Delayed Deployment</a></li>                
-                <li><a href="#delayed">Called Shots</a></li>
+                <li><a href="#called">Called Shots</a></li>
+                <li><a href="#delayed">Delayed Deployment</a></li>                
                 <li><a href="#enormous">Enormous Units</a></li>
                 <li><a href="#jump">Jump Drives</a></li>   
                 <li><a href="#stealth">Stealth Ships</a></li>
