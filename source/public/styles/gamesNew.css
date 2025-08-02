@@ -566,6 +566,7 @@ kbd { background: #1b2530; padding: 2px 4px; border-radius: 3px; }
   .top-right-row .btn {
     padding: 4px 8px;
     font-size: 0.95em;
+    text-align: center;    
   }
 
 }
