@@ -2397,17 +2397,26 @@ clickTakeslot: function clickTakeslot() {
 			noTaken = target.data("count");
 			if(noTaken > 0){ //enhancement picked - note!
 				ship.enhancementOptions[enhNo][2] = noTaken;
+				var originalCost = 0;
 				if(!ship.enhancementOptions[enhNo][6]){ //this is an actual enhancement (as opposed to option) - note value!
 					if (ship.flight){
-						ship.pointCostEnh += target.data("enhCost") * flightSize;
+						originalCost = originalShipData.enhancementOptions[enhNo][2] * target.data("enhPrice") * flightSize;						
+						originalCost += target.data("enhCost") * flightSize; //Add new enhancement, could be negative if enhancements have been removed.
+						ship.pointCostEnh = originalCost;						
 					} else {
-						ship.pointCostEnh += target.data("enhCost");
+						originalCost = originalShipData.enhancementOptions[enhNo][2] * target.data("enhPrice");						
+						originalCost += target.data("enhCost"); //Add new enhancement, could be negative if enhancements have been removed.
+						ship.pointCostEnh = originalCost;
 					}
 				}else{ //this is an option - still note value, just separately!
 					if (ship.flight){
-						ship.pointCostEnh2 += target.data("enhCost") * flightSize;
+						originalCost = originalShipData.enhancementOptions[enhNo][2] * target.data("enhPrice") * flightSize;						
+						originalCost += target.data("enhCost") * flightSize; //Add new enhancement, could be negative if enhancements have been removed.
+						ship.pointCostEnh2 = originalCost;
 					} else {
-						ship.pointCostEnh2 += target.data("enhCost");
+						originalCost = originalShipData.enhancementOptions[enhNo][2] * target.data("enhPrice");						
+						originalCost += target.data("enhCost"); //Add new enhancement, could be negative if enhancements have been removed.
+						ship.pointCostEnh2 = originalCost;
 					}
 				}
 			}
