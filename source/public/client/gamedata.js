@@ -210,8 +210,8 @@ window.gamedata = {
             throw new Error("You need to give shooter for this one");
         }
     
-        if (target.userid === -5) {
-            return true; // Always treat ships with userid -5 as enemies
+        if (gamedata.isTerrain(target.shipSizeClass, target.userid)) {
+            return true; // Always treat Terrain as enemies
         }
     
         return target.team !== shooter.team;
