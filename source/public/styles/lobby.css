@@ -196,8 +196,8 @@
 }
 
 .value{
-    color:#6e9cdc; /* Original value  #496791 */
-    
+    /*color:#6e9cdc; Original value  #496791 */
+    color: #81a7ec;      
 }
 
 .selectslot{
