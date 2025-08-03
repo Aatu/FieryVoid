@@ -36,7 +36,7 @@
     font-weight:bold;
     font-size:12px; 
     margin:2px 0px; 
-    color: #a3c0f5;
+    color: #81a7ec; 
 }
 
 .slot span{
@@ -106,7 +106,7 @@
 }
 
 .store .ship{
-    color: #6495ED; 
+    color: #81a7ec; 
 	/*color:#8080FF;old purple*/    
     margin-right: 5px;     
 }
