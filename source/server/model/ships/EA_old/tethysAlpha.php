@@ -5,7 +5,7 @@ class TethysAlpha extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 275;
-		$this->faction = "Earth Alliance (early)";
+        $this->faction = "Earth Alliance (Early)";
         $this->phpclass = "TethysAlpha";
         $this->imagePath = "img/ships/tethys.png";
         $this->shipClass = "Tethys Police Cutter (Alpha)";

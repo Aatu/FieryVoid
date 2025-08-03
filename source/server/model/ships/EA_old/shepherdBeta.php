@@ -5,7 +5,7 @@ class ShepherdBeta extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 180;
-	$this->faction = 'Earth Alliance (early)';//"EA defenses";
+        $this->faction = "Earth Alliance (Early)";
         $this->phpclass = "ShepherdBeta";
         $this->imagePath = "img/ships/shepherd.png";
         $this->shipClass = "Shepherd Fighter Transport (Beta)";
