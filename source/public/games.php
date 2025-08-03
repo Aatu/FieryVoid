@@ -80,7 +80,8 @@ if (isset($_SESSION["user"])) {
         <li><strong>Line of Sight Bugfixes</strong> - Methods reviewed and tightened for fringe cases that may have led to incorrect results.</li>
         <li><strong>Documentation</strong> - Faction Guide, FAQ and Enhancement documents received further updates.</li>
         <li><strong>Vorlon Petals</strong> - Opening petals now better refelct B5 Wars rules.</li>
-        <li><strong>Styles</strong> - New website's styles continue to be refined and improved, notably in the Info Tab and for mobile browsers.</li>                                           
+        <li><strong>Styles</strong> - New website's styles continue to be refined and improved, notably in the Info Tab and for mobile browsers.</li>
+        <li><strong>Bug Fixes/Improvements</strong> - Too many to list, keep the reports coming!</li>                                                    
         <!--<li><strong>6 Jun</strong> - Overlay colors, deployment zone tweaks, UI fixes. Pulsar mine fixed, tooltip/text readability improved.</li>-->
       </ul>
     </div>
