@@ -1,12 +1,27 @@
 <?php
-include_once 'global.php';
-if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
+declare(strict_types=1);
+
+// Start output buffer with Brotli or Gzip if available
+if (!headers_sent() && !ini_get('zlib.output_compression')) {
+    if (extension_loaded('brotli') && function_exists('ob_brotlihandler')) {
+        ob_start('ob_brotlihandler');
+    } elseif (function_exists('ob_gzhandler')) {
+        ob_start('ob_gzhandler');
+    } else {
+        ob_start();
+    }
+}
+
+require_once __DIR__ . '/global.php';
+
+// Redirect if not logged in
+if (empty($_SESSION["user"])) {
     header('Location: index.php');
+    exit;
 }
-$games = "[]";
-if (isset($_SESSION["user"])) {
-    $games = json_encode(Manager::getTacGames($_SESSION["user"]), JSON_NUMERIC_CHECK);
-}
+
+$userid = (int)$_SESSION["user"];
+$games = json_encode(Manager::getTacGames($userid), JSON_NUMERIC_CHECK);
 ?>
 <!DOCTYPE html>
 <html lang="en">
