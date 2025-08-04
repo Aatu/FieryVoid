@@ -74,12 +74,12 @@ if (isset($_SESSION["user"])) {
     </div>
 
     <div class="resources">
-      <h3>Latest Updates — July 2025</h3>
+      <h3>Latest Updates — August 2025</h3>
       <ul class="updates-list">
-        <li><strong>Ruler/LoS Tool Added</strong> - New ruler and line of sight checker added to game, access by clicking side button or pressing 'R' key.</li>        
+        <li><strong>Ruler/LoS Tool Added</strong> - New ruler and line of sight checker added to game, access by clicking side button or pressing the 'R' key.</li>        
         <li><strong>Line of Sight Bugfixes</strong> - Methods reviewed and tightened for fringe cases that may have led to incorrect results.</li>
         <li><strong>Documentation</strong> - Faction Guide, FAQ and Enhancement documents received further updates.</li>
-        <li><strong>Vorlon Petals</strong> - Opening petals now better refelct B5 Wars rules.</li>
+        <li><strong>Vorlon Petals</strong> - Opening petals now better reflect B5 Wars rules.</li>
         <li><strong>Styles</strong> - New website's styles continue to be refined and improved, notably in the Info Tab and for mobile browsers.</li>
         <li><strong>Bug Fixes/Improvements</strong> - Too many to list, keep the reports coming!</li>                                                    
         <!--<li><strong>6 Jun</strong> - Overlay colors, deployment zone tweaks, UI fixes. Pulsar mine fixed, tooltip/text readability improved.</li>-->
