@@ -1,18 +1,17 @@
 <?php
-declare(strict_types=1);
 
-// Start output buffer with Brotli or Gzip if available
+// Start output buffer with Brotli/Gzip support
 if (!headers_sent() && !ini_get('zlib.output_compression')) {
-    if (extension_loaded('brotli') && function_exists('ob_brotlihandler')) {
-        ob_start('ob_brotlihandler');
-    } elseif (function_exists('ob_gzhandler')) {
-        ob_start('ob_gzhandler');
-    } else {
-        ob_start();
-    }
+    ob_start();
 }
 
-require_once __DIR__ . '/global.php';
+// Load global config and classes
+require_once 'global.php';
+
+// Sessions
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 // Redirect if not logged in
 if (empty($_SESSION["user"])) {
@@ -20,6 +19,7 @@ if (empty($_SESSION["user"])) {
     exit;
 }
 
+// Fetch games for logged-in user
 $userid = (int)$_SESSION["user"];
 $games = json_encode(Manager::getTacGames($userid), JSON_NUMERIC_CHECK);
 ?>
