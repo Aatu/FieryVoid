@@ -5,7 +5,8 @@ class GODAlphaAM extends OSAT{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 700;
-		$this->faction = "Earth Alliance (defenses)";
+		//$this->faction = "Earth Alliance (defenses)";
+        $this->faction = "Earth Alliance";       
         $this->phpclass = "GODAlphaAM";
         $this->imagePath = "img/ships/god.png";
         $this->shipClass = "GOD Heavy Satellite (Alpha)";
