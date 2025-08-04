@@ -1,7 +1,20 @@
-<?php 
+<?php
+    /*
     ob_start("ob_gzhandler"); 
     include_once 'global.php';
-    
+    */
+
+    declare(strict_types=1);
+
+    if (!headers_sent() && !ini_get('zlib.output_compression')) {
+        ob_start('ob_gzhandler');
+    } else {
+        ob_start();
+    }
+
+    require_once 'global.php'; // ✅ Critical dependency
+
+
 	$gameid = 1;
 	$thisplayer = -1;
 
@@ -785,6 +798,6 @@
 
 </html>
 
-<?php 
+<?php
     ob_end_flush();
 ?>

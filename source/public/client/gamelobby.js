@@ -2021,7 +2021,7 @@ clickTakeslot: function clickTakeslot() {
         }
     }
 
-    // ✅ Submit slot action first
+    /*// ✅ Submit slot action first
     ajaxInterface.submitSlotAction("takeslot", slotid, function () {
         // ✅ After success, reload factions only
         $.getJSON("getFactions.php")
@@ -2034,11 +2034,10 @@ clickTakeslot: function clickTakeslot() {
                 location.reload(); // fallback if something goes wrong
             });
     });
-	/*
+	*/
 	ajaxInterface.submitSlotAction("takeslot", slotid, function () {
 		gamedata.reloadFactions();
 	});
-	*/
 },
 
 reloadFactions: function reloadFactions() {
@@ -2089,11 +2088,11 @@ reloadFactions: function reloadFactions() {
 			return;
 		}
 			
-		ajaxInterface.submitSlotAction("leaveslot", slotid);
-		/*ajaxInterface.submitSlotAction("leaveslot", slotid, function () {
+		//ajaxInterface.submitSlotAction("leaveslot", slotid);
+		ajaxInterface.submitSlotAction("leaveslot", slotid, function () {
 			reloadFactions();
 		});
-		*/
+
 
 		var hasOtherSlots = 0; 
 		for (var i in gamedata.slots)  { //check all slots
