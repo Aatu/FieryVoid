@@ -100,10 +100,10 @@ window.BallisticIconContainer = function () {
 
 	
     function generateReinforcementHexes(gamedata) {
+ 		if(gamedata.gamephase == -1) return;
+
         gamedata.ships
-			//.filter(ship => !ship.flight) 
-            .filter(ship => shipManager.getTurnDeployed(ship) == gamedata.turn && gamedata.turn > 1 && gamedata.gamephase > -1)
-            //.filter(ship => gamedata.isMyorMyTeamShip(ship))
+            .filter(ship => shipManager.getTurnDeployed(ship) == gamedata.turn && gamedata.turn > 1 && !shipManager.shouldBeHidden(ship))
             .forEach(ship => {
                 const pos = shipManager.getShipPosition(ship);
                 const posGame = this.coordinateConverter.fromHexToGame(pos);
