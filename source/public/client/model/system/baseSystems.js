@@ -136,8 +136,8 @@ CnC.prototype.constructor = CnC;
 
 CnC.prototype.initializationUpdate = function() {
     var ship = this.ship;
-    if(ship.factionAge > 2){
-        this.data["Marine Units"] = 'n/a';	
+    if(ship.factionAge > 2 || gamedata.isTerrain(ship.shipSizeClass, ship.userid)){
+        this.data["Marine Units"] = 'N/A';	
     } else {	
         this.data["Marine Units"] = this.marines || 0; // Ensure marines is defined
     }

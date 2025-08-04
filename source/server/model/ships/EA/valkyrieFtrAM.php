@@ -5,7 +5,7 @@ class ValkyrieFtrAM extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 300;
-        $this->faction = "Earth Alliance (custom)";
+        $this->faction = "Earth Alliance (Custom)";
         $this->phpclass = "ValkyrieFtrAM";
         $this->shipClass = "EA Valkyrie Aerospace Medium flight";
         $this->imagePath = "img/ships/valkyrieFtr.png";

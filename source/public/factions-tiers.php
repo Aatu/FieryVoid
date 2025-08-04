@@ -102,8 +102,8 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
            <ul class="sub-list">
                 <li><a href="#bsg">BSG</a></li>
                 <li><a href="#custom">CUSTOM SHIPS</a></li>                  
-                <li><a href="#nexus">NEXUS</a></li>
-                <li><a href="#escalation">ESCALATION WARS</a></li>
+                <li><a href="#nexus">NEXUS UNIVERSE</a></li>
+                <li><a href="#escalationwars">ESCALATION WARS</a></li>
                 <li><a href="#starwars">STAR WARS</a></li>
                 <li><a href="#startrek">STAR TREK</a></li>                                           
             </ul>     
@@ -821,7 +821,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         <li>These Projections must have a Mindrider ship with appropriate hangar capacity present in the game, or they will destabilise and drop out at the end of the turn where this is no longer the case.  
             E.g. two Thoughtforce vessels can sustain 24 Projections. 
             During a battle, if one of the Thoughtforce ships is destroyed then the number of Thought Projections that can be sustained would drop to 12, and any Projection over 12 would instantly drop out.</li>      
-    <h5>Minor Thought Pulsar/h5>
+    <h5>Minor Thought Pulsar</h5>
         <li>Fighter weapon for Mindriders, will be automatically boosted with unused Thrust when fired in Firing phase (one boost for every 3 unused Thrust), instead of this being done manually as in Tabletop.</li>
         <li>The type of boost will be decided by the Firing Mode selected and includes bonuses to Rate of Fire, Damage, Hit Chance, or a combination of these three benefits.</li>                                               
     <a class="back-to-top" href="#top">↩ Back to Top</a>
@@ -864,10 +864,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         <li>Slicers in FV also have alternative firing modes with a preset number of shots (3, 6 or 9) which can be used to target several shots at a single ship.</li>                                                                 
     <h5>Phasing Pulse Cannon</h5>
         <li>Pulse weapons that completely ignore any kind of shield or shield-like defense used by Younger races. 
-            Note that EM shields, like those used on the White Star, are treated as Ancient even when used on Younger Race ships.</li>
-        <li>To do so, boost the Shield Reinforcement system to the level of reinforcement you'd like and then target ally ships in the Initial Orders phase.  
-            All shields on a ship must be reinforced equally, at a cost of 1 output per level of reinforcement per shield (e.g. reinforcing a Thoughtforce vessel with 4 shields by 3 levels would cost 12 output, 3 * 4).  
-            Any unspent output will instead be used to reinforce the vessel equipped with the Shield Reinforcement system.</li>      
+            Note that EM shields, like those used on the White Star, are treated as Ancient even when used on Younger Race ships.</li>      
     <h5>Vortex Disruptor</h5>
         <li>A weapon that destabilizes hyperspace vortexes, preventing enemy escape. 
             As FV has no actual hyperspace vortexes, the weapon is purely scenario-related - to be fired at hex where vortex opening is declared.</li>
@@ -951,7 +948,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         <li>Produces power for Vorlon ships and can hold Power between turns up to its maximum capacity.  Some key points to note about it are:
                 <ul class="circle-list">
                     <li>New power is produced in the Initial Orders phase,</li>
-                    <li>Opening petals by boosting Power Capacitor will reduce the armor of all the ship’s systems by 2, but adds 50% to power generation the following turn,</li> 
+                    <li>Opening petals by boosting Power Capacitor will reduce the armor of all the ship’s primary systems by 2 and increase Defence Profiles by 5%, but adds 50% to power generation the following turn,</li> 
                     <li>Capacitor destruction would leave the ship powerless, but doesn't cause a catastrophic explosion like Reactor destruction.  In FV it will leave ship powerless (as the Capacitor is the main power source on Vorlon ships), 
                         add Power reduction critical to Reactor (so ship goes out of control) and Self Repair system so that the damage isn't just repaired in a few turns.</li>                  
                 </ul>            
@@ -1022,28 +1019,247 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
     <a class="back-to-top" href="#top">↩ Back to Top</a>
 
     <h4 id="customs" style="">CUSTOM SHIPS</h4>
-    <p>A place to store customs ships, either because they are unofficial designs created by players, or one-off campaign/scenario ships. Not a real faction.</p>                                                                                     
+    <p>A place to store customs ships from the Babylon 5 Wars setting, either because they are unofficial designs created by players or one-off campaign/scenario ships. Not a real faction.</p>                                                                                     
     <a class="back-to-top" href="#top">↩ Back to Top</a> 
 
 
     <h4 id="escalationwars" style="">ESCALATION WARS</h4>
-    <p>Created by Tyrel Lohr and released as an unofficial supplement for the Babylon 5 Wars game system, Escalation Wars includes several new races and raider factions including:</p>
-    <li><strong>The Circasians:</strong> An upstart race, the Circasians have struggled to take their place in the galactic community. Utilizing less advanced technologies, the Circasian miltary has been tempered by several trials by fire.</li>
-    <li><strong>The Chouka:</strong> A race of methane-breathing religious zealots, the Chouka wanted little to do with the outside world before their war with the Circasians. The Chouka's large warships double as executive couriers and transports for the ruling religious elite.</li>
-    <li><strong>The Sshel'ath:</strong> An unusual race of fibric aliens who have the ability to partially rearrange their body structures. The Sshel'ath operate an extensive suite of laser weapons and missiles, as well as maintaining one of the largest orbital satellite networks in known space.</li>
-    <li><strong>The Raiders:</strong> The Chouka Raiders, Unsheathed Claw, and Blood Swords were the most powerful raider adversaries the Circasians had during their raider wars. Relive the frontier battles between the Circasian patrol fleets and the opportunistic raider forces.</li>
+    <p>The Escalation Wars setting was developed by Tyrel Lohr. The units available in Fiery Void represent a small segment of the setting that focused on the early rise of the Circasian Empire. Given this focus, the available Escalation Wars units are generally lower tech compared to the standard Babylon 5 forces. 
+       The earliest forces are Tier 3 in strength, but the later designs are in the Tier 2 bracket. Details for Escalation Wars factions can be accessed using these links:</p>
+        <ul style="font-size: 16px">
+            <li><a href="#bloodsword">BLOOD SWORD RAIDERS</a></li>
+            <li><a href="#choukaraiders">CHOUKA RAIDERS</a></li>                
+            <li><a href="#chouka">CHOUKA THEOCRACY</a></li>
+            <li><a href="#circasian">CIRCASIAN EMPIRE</a></li>
+            <li><a href="#kastan">KASTAN IMPERIAN MONARCHY</a></li>   
+            <li><a href="#sshelath">SSHEL'ATH ALLIANCE</a></li>                                                                      
+        </ul>  
     <a class="back-to-top" href="#top">↩ Back to Top</a>
 
 
-    <h4 id="nexus" style="">NEXUS</h4>
+    <h4 id="bloodsword" style="">BLOOD SWORD RAIDERS</h4>
+        <p>The Blood Swords were a pirate group active during the Circasian "Raider Wars" time period. They were a serious threat to the trade routes near the Thaline node of the Outward sector trade routes due to the size and capabilities of their warships. 
+            The raiders were eventually defeated by the Circasians, and their defeat marked the unofficial end of the Raider Wars.</p>
+    <a class="back-to-top" href="#escalationwars">↩ Back to Escalation Wars</a>
+
+    <h4 id="choukaraiders" style="">CHOUKA RAIDERS</h4>
+        <p>This group of raiders operated in and around Chouka controlled territories and were directly financed by the Chouka Theocracy. 
+            They were an early threat to the Circasian Empire as it expanded its own sphere of influence. These raiders operate cast-off Chouka military and civilian ships and fighters. 
+            Their weapons are sourced from the Chouka, along with limited supplies from other black market sources. 
+            Because of their ties to the Chouka government, these raiders are fairly well armed compared to the Circasian and Chouka fleets and are comparable to other low tech raiders in the B5 universe.</p>
+    <a class="back-to-top" href="#escalationwars">↩ Back to Nexus Universe</a>
+
+    <h4 id="chouka" style="">CHOUKA THEOCRACY</h4>
+        <p>The Chouka Theocracy was a minor regional power in the Escalation Wars universe, and the Circasian's opponents in their first major interstellar war. 
+            The Chouka were more technologically advanced than the Circasians, but lacked the tactical experience and fleet assets to combat the more numerous and maneuverable Circasian fleet.</p>
+        <p>The ships included here are the Chouka spacecraft that served during the Chouka War period. They are armed with a mix of plasma and laser weapons, with older Chouka ships relying on plasma weapons while their newer ships rely on lasers in the anti-shipping role. 
+            Plasma weapons continued to be used for anti-fighter work into the Chouka War period, however.</p>    
+        <h5>Point Plasma Guns</h5>
+            <li>A specialized, flak-style system to defend their ships. This can intercept for friendly units and is capable of intercepting lasers.</li>
+        <h5>Gravitic Tracting Rod</h5>
+            <li>This rare device was only found on the Apostle Holy Cruiser. It was used to tractor on to smaller craft and draw them closer to dock with the ship for boarding. 
+                In Fiery Void, the Tracting Rod instead gives the target an initiative a thrust penalty.</li>
+        <h5>Light Energy Mine</h5>
+            <li>This is a smaller version of the Energy Mine used by the Narn. It has a shorter range (25 hexes) and does less damage (10/5) than the conventional Energy Mine.</li>                
+    <a class="back-to-top" href="#escalationwars">↩ Back to Nexus Universe</a>
+
+    <h4 id="circasian" style="">CIRCASIAN EMPIRE</h4>
+        <p>The Circasians are one of the two central powers in the Escalation Wars milieu. These Dilgar-like humanoids started as a small minor power surrounded by other, more established empires but through political maneuvering and conquest they were able to eventually carve out a major imperium of their own. 
+            The ships included here are low tech units the Circasians used during the Chouka War period. 
+            These vessels are principally armed with light particle, plasma, and laser weapons. Anything more powerful is beyond their level of technology at the start of the war. </p>    
+        <h5>Rockets</h5>
+            <li>The Circasians made use of these primitive torpedo launchers on their early ships. These weapons are treated like Torpedoes and benefit from OEW.</li>
+        <h5>Particle Lance</h5>
+            <li>An avenue of advanced R&D before the war, this weapon was an attempt to develop a heavier version of the Light Particle Cannon. 
+                Like the Gravitic Lance, this weapon is capable of firing as one more powerful weapon or as two weaker Light Particle Cannons.</li>              
+    <a class="back-to-top" href="#escalationwars">↩ Back to Nexus Universe</a>
+
+    <h4 id="kastan" style="">KASTAN IMPERIAN MONARCHY</h4>
+        <p>The Kastan inhabit a remote location of hyperspace deep within the Rapids of Rodirra, a treacherous section of hyperspace that makes travel to or from the Kastan territories difficult at best (and impossible at worst). 
+            Navigating the rapids has forced the Kastan to be superb pilots.</p>
+        <p>The Kastan have had limited interactions with their neighbours, although they do engage in trade and have been known to sell out their services as mercenaries. 
+            Most of their active political ambitions have focused on the coreward sectors, having fought back against an invasion by the Ingalli in recent history.</p>    
+        <h5>Laser Bolt</h5>
+            <li>The Kastan developed an effective short range anti-fighter laser weapon for their ships.</li>
+        <h5>Pulse Torpedo</h5>
+            <li>This weapon fires a number of small munitions at a target, designed to strip targets of weapons and external systems prior to closing to close range.</li>               
+    <a class="back-to-top" href="#escalationwars">↩ Back to Nexus Universe</a>
+    
+    <h4 id="sshelath" style="">SSHEL'ATH ALLIANCE</h4>
+        <p>The Sshel'ath Alliance was formed out of the civil war between the two largest Sshel'ath factions. The early Alliance focused on growth of the homeworld, as they were blocked by the more established Chouka Theocracy and Novon Trade Lords. Two conflicts with the Novon showed that action against this faction  was ill-advised. 
+            It was not until the later Circasian defeat of the Chouka that the Sshel'ath managed to expand into and capture several Chouka worlds.</p>
+        <p>The Sshel'ath themselves are made of intertwined mass of rope-like elastic fibers, which allow for limited rearrangement of their body's form. 
+            Only their faces are inelastic and they are highly resistant to radiation.</p>    
+        <h5>Gatling Laser</h5>
+            <li>Evolved from the basic light laser cannon, the gatling laser fires several short, discreet volleys in pulse mode.</li>
+        <h5>Electromagnetic Torpedo</h5>
+            <li>The EM Torpedo was developed to counter Novon shields. This ballistic weapon releases a large electromagnetic pulse and can destroy or short out enemy systems.</li>
+        <h5>Electron Polarizer</h5>
+            <li>A flash mode electromagnetic weapon, this can destroy or short out numerous systems on a target.</li>                
+    <a class="back-to-top" href="#escalationwars">↩ Back to Nexus Universe</a>    
+
+
+
+
+    <h4 id="nexus" style="">NEXUS UNIVERSE</h4>
     <p>The Nexus setting is designed by Jeremy and Geoffrey Stano. 
-        The current factions in Fiery Void (and described below) are the Brixadii Clans, Union of Craytan States, Dalithorn Commonwealth, Federation of Makar, Sal-bez Coalition, and the Velrax Republic. </p>
-    <p>By design, Nexus is a lower tech setting. It is characterized by more basic weapons and lower sensor values. Over time the factions evolve better units and these are available to play as well. </p>
-    <p>The Nexus factions can be sub-divided into four "tech levels" or "tech eras", of which the first three are available in Fiery Void. 
+        The current factions in Fiery Void (and described below) are the Brixadii Clans, Union of Craytan States, Dalithorn Commonwealth, 
+        Federation of Makar, Sal-bez Coalition, and the Velrax Republic. 
+        The Polaren should make their first appearance by the end of 2025. </p>
+    <p>By design, Nexus is a lower tech setting. It is characterized by more basic weapons and lower sensor values. 
+        Over time the factions evolve better units and these are available to play as well. 
+        The Nexus factions can be sub-divided into four "tech levels" or "tech eras", of which the first three are available in Fiery Void. 
         These tech levels correspond to various conflicts each faction faced and were major drivers in the evolution of the Nexus fleets. 
-        In general, the earliest units are equivalent to "The Rest" or low "Tier 2" factions. The most advanced units are strong "Tier 2" designs. </p>
-    <p>The Nexus factions also make extensive use of refits. Specialized weapons for each faction are shown.</p>
+        The specific years in question are listed in the faction descriptions. 
+        In general, the first two tech levels fit into Tier 3. The third tech level brings the Nexus factions into the low end of Tier 2.</p>
+    <p>One feature unique to Nexus compared to the standard B5 factions is that Nexus LCVs are more functional. 
+        Nexus LCVs can always be deployed independently in a force. LCV tenders do exist, but are primarily geared towards transporting and repairing LCVs. 
+        However, some afford bonuses to the LCVs if the tender is in combat with its LCVs.</p>    
+    <p>Details for Nexus Universe factions can be accessed using the links below:</p>
+        <ul style="font-size: 16px">
+            <li><a href="#brixadii">BRIXADII CLANS</a></li>
+            <li><a href="#crayton">UNION OF CRAYTON STATES</a></li>                
+            <li><a href="#dalithorn">DALITHORN COMMONWEALTH</a></li>
+            <li><a href="#makar">FEDERATION OF MAKAR</a></li>
+            <li><a href="#salbez">SAL-BEZ COALITION</a></li>   
+            <li><a href="#velrax">VELRAX REPUBLIC</a></li>                                                                      
+        </ul>     
     <a class="back-to-top" href="#top">↩ Back to Top</a>
+
+    <h4 id="brixadii" style="">BRIXADII CLANS</h4>
+        <p>The Brixadii Clans are a spinward power within the Nexus sector, having fought with the Dalithorn Commonwealth early on and having hostile relations with the Velrax Republic.</p>
+        <p>Brixadii's technology is primarily focused around particle weapons. These are rugged, easy to repair, and low mass. 
+            The Clans have begun to specialize in pulsar technology as this affords superior mass to damage ratios. This last point is important as the key feature that defines the Clans are their extremely maneuverable ships. 
+            They have few longer-ranged weapons, but prefer high-speed firing passes or getting in close and using maneuverability to get advantageous shots. 
+            They do not field fighters and therefore rely on their rapid firing weapons, wide arcs, and light combat vessels to deal with fighters.</p>
+
+        <h5>Chaff Launcher</h5>
+            <li>Technically fired at an enemy ship, it will always hit (causing no damage or adverse effects) and apply interception to ALL fire from target hex at chaff-protected unit (including nominally uninterceptable weapons).</li>
+        <h5>Tech Levels</h5>
+            <ul class="circle-list">
+                <li>Tech Level 1: Pre-contact through the Jump War (up through the 2050s).</li>
+                <li>Tech Level 2: Jump War era through the War of Ascendancy (2050s through the 2110s).</li> 
+                <li>Tech Level 3: War of Ascendancy through the First War of Control (2110s through 2150s).</li>                  
+            </ul>  
+      <a class="back-to-top" href="#nexus">↩ Back to Nexus Universe</a>
+
+    <h4 id="crayton" style="">UNION OF CRAYTON STATES</h4>
+        <p>The Craytan are an early opponent of the Sal-bez Coalition due in part to a botched first contact by the Sal-bez. The Craytan share a lot in common with the Dalithorn Commonwealth from a technological standpoint. Many of their systems are air-breathing weapons converted for use in space. While basic, but the Craytan have found these to be effective for their needs. 
+            Plasma would become a specialization as an improvement over the older, ammunition-based systems.</p>
+        <p>The Craytan initially focused on using armed shuttles that are more akin to an assault shuttle. 
+            The Craytan's reasoning was that the shuttle will be used in non-combat situations far more than combat situations. 
+            As such, most Craytan ships are allowed to swap Polten Armed Shuttles in place of standard shuttles. 
+            These will be fielded in traditional flights when deployed in Fiery Void. 
+            The initial conflict with the Sal-bez would show the limitations of the Polten, but the Craytan would choose to create a more advanced design in support of a fighter class. 
+            The Craytan also utilize the “projectile” weapon class. 
+            Functionally they are not different from particle weapons, but are treated differently for various shields and advanced armor.</p>
+
+        <h5>Assault Cannons</h5>
+            <li>The larger versions are designed to fire a small, dense projectile with enough velocity to generate a piercing effect. 
+                It suffers from a slow rate of fire and limited arcs, but it is the longest ranged weapon available to the Craytan. It has remained in service due to its simplicity. 
+                The light version fires faster and has wider arcs, but loses the piercing ability due to a slower projectile.</li>
+
+        <h5>Close-In Defense System (CIDS)</h5>
+            <li>This, along with an advanced version (ACIDS), operates much like a Scattergun. Each does a random number of shots (4 or 6) and only one shot can intercept an incoming shot. This represents the CIDS firing a tremendous volume of small projectiles. 
+                It relies on volume of fire over specifically aiming at a target.</li>
+                
+        <h5>Enhanced Plasma</h5>
+            <li>As the Craytan advanced they developed multiple improvements to the standard plasma cannon. These enhanced plasma cannons have superior range, rate of fire, and damage loss compared to standard plasma cannons. 
+                They are an intermediary step between plasma cannons and plasma bolters. </li>                 
+
+        <h5>Tech Levels</h5>
+            <ul class="circle-list">
+                <li>Tech Level 1: Pre-contact through the Craytan War (up through 2105).</li>
+                <li>Tech Level 2: Craytan War era through the Daybreak War era (2090s through 2130s).</li> 
+                <li>Tech Level 3: Daybreak War era through the First War of Control (2130s through 2150s).</li>                  
+            </ul>  
+    <a class="back-to-top" href="#nexus">↩ Back to Nexus Universe</a>
+
+    <h4 id="dalithorn" style="">DALITHORN COMMONWEALTH</h4>
+        <p>The Dalithorn Commonwealth are likely the lowest tech of the main Nexus powers. 
+            They managed to leverage their position across a major trade route to keep their sovereignty up to the later years of the First War of Control in the 2150s.</p>
+        <p>They primarily use terrestrial weapons converted for use in space combat. While individually weak, many of the weapons are treated as matter weapons, allowing the Dalithorn to cause damage against most targets. 
+            When desired, many of the smaller weapons have a concentrated mode that produces a few, harder hitting shots, at the expense of some fire control. 
+            This is often useful against shielded targets. While simple, a number of their weapons are still effective, such as the gas gun. 
+            The Commonwealth does not use fighters in the traditional sense. They only field super-heavy fighters, but these are typically slow. 
+            However, their size and armament allow them to serve as area of denial platforms against enemy fighters or as serviceable anti-ship units.</p>    
+        <h5>Protector</h5>
+            <li>A specialized, flak-style system to defend their ships. This can intercept for friendly units and is capable of intercepting lasers.</li>
+
+        <h5>Laser Missile</h5>
+            <li>A ballistic weapon that triggers a bomb-pumped laser near the target. It is intercepted as a normal, non-ballistic as the target attempts to shoot down the missile before it triggers.</li>
+ 
+        <h5>Tech Levels</h5>
+            <ul class="circle-list">
+                <li>Tech Level 1: Pre-contact through the Jump War (up through the 2050s).</li>
+                <li>Tech Level 2: Jump War era through the War of Ascendancy era (2050s through the 2110s).</li> 
+                <li>Tech Level 3: War of Ascendancy through the First War of Control (2110s through th 2150s).</li>                  
+            </ul>              
+    <a class="back-to-top" href="#nexus">↩ Back to Nexus Universe</a>
+
+    <h4 id="makar" style="">FEDERATION OF MAKAR</h4>
+        <p>The Makar Federation is made up of two species from the homeworld of Makar; a blend of 'home' from both languages. The Federation consists of the land dwelling Hitat and the squid-like Qom Yomin. 
+            The Hitat make up the majority of the Federation's combat forces, but the Qom Yomin contribute a variety of support units. Additionally, being aquatic, Qom Yomin ships have larger ramming values if they are rammed. 
+            The Makar have been shaped by the Reshmiyar Invasion and their subsequent rebellion that took place early in their space faring history.</p> 
+
+        <h5>Water Caster</h5>
+            <li>Qom Yomin vessels have the ability to spray some of their onboard water to intercept incoming shots. This functions much like a plasma web, but with no offensive ability.</li>
+
+        <h5>Plasma Charge</h5>
+            <li>Another special Qom Yomin weapon. Qom Yomin ships have low thrust, but extra power. This can be used to charge this weapon or to increase thrust.</li>
+        
+        <h5>Drones</h5>
+            <li>Except for a couple exceptions, the Makar use armed drones as fighters and hunter-killers. These are almost always on Qom Yomin vessels.</li> 
+
+        <h5>Tech Levels</h5>
+            <ul class="circle-list">
+                <li>Tech Level 1: Pre-contact through the Jump War (up through the 2050s).</li>
+                <li>Tech Level 2: Jump War era through the War of Ascendancy era (2050s through the 2110s).</li> 
+                <li>Tech Level 3: War of Ascendancy through the First War of Control (2110s through th 2150s).</li>                  
+            </ul> 
+    <a class="back-to-top" href="#nexus">↩ Back to Nexus Universe</a>
+
+    <h4 id="salbez" style="">SAL-BEZ COALITION</h4>
+        <p>The Sal-bez Coalition is an insectoid race that started as a typical queen / worker societ, but during the Enlightenment of Fire, the Sal-bez won their freedom. They are now a fiercely individualistic society. 
+            The Coalition did not have a traditional military upon reaching for the stars and their early units are exclusively civilian designs using industrial systems as makeshift weapons.</p>
+        <p>As the Sal-bez grew (and discovered several technology caches from a previous power), they began to field purpose-built combat vessels that would ultimately lead to the Coalition becoming one of the most powerful of the Nexus factions. 
+            If you are used to using the traditional B5 powers, the Sal-bez are the most similar without a lot of different systems or rules.</p>     
+
+        <h5>Swarm Torpedo</h5>
+            <li>One of the most iconic systems developed by the Sal-bez for their later generation of ships. It fires multiple, small ballistics at a target, which has led to its common name of swarm torpedo. 
+                This system provides both long-range firepower and can strip systems off a target to enable more effective damage from follow-up laser hits.</li>
+
+        <h5>Tech Levels</h5>
+            <ul class="circle-list">
+                <li>Tech Level 1: Pre-contact through the Craytan War (up through 2105).</li>
+                <li>Tech Level 2: Craytan War era through the Polaren Conflict (2090s through the 2120s).</li> 
+                <li>Tech Level 3: Polaren Conflict era through the First War of Control (2120s through the 2150s).</li>                  
+            </ul> 
+    <a class="back-to-top" href="#nexus">↩ Back to Nexus Universe</a>
+
+    <h4 id="velrax" style="">VELRAX REPUBLIC</h4>
+        <p>The Velrax Republic is potentially the most aggressive faction within the Nexus setting. 
+            They engaged the Brixadii Clans, Dalithorn Commonwealth, and Makar Federation by the early 2100s. 
+            The Velrax are the most prolific users of fighters, which are supported with a rigid fleet structure.</p>
+        <p>The Velrax field well armed "strike" carriers supported by anti-ship focused "gunships". Everything revolves around supporting their fighter operations. 
+            The carriers utilize plasma waves to break up enemy forces at range, and gunships with plasma and lasers to single out anti-fighter units. 
+            Also, some Velrax carry plasma arcs used to strip armor off their targets to make them more vulnerable to laser and fighter fire. 
+            Their heavy fighter mounts a potent anti-ship gun that was retrofitted to some of the interceptor fighters when they realized that their opponents did not use fighters extensively.</p>     
+
+        <h5>Plasma Arc</h5>
+            <li>Small, raking plasma weapon that is designed to strip armor from the target.</li>
+        
+        <h5>Dart/Streak Interceptors</h5>
+            <li>These are small torpedoes that can accept OEW and are used to engage enemy fighters.</li>
+
+        <h5>Tech Levels</h5>
+            <ul class="circle-list">
+                <li>Tech Level 1: Pre-contact through expansion era (up through 2050s).</li>
+                <li>Tech Level 2: Expansion era through the War of Ascendancy (2050s through 2110s).</li> 
+                <li>Tech Level 3: War of Ascendancy era through the First War of Control (2110s through 2150s).</li>                  
+            </ul> 
+    <a class="back-to-top" href="#nexus">↩ Back to Nexus Universe</a>
+
 
 
     <h4 id="startrek" style="">STAR TREK</h4>
@@ -1132,8 +1348,8 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
        
     <h4 id="tier2" style="">TIER 2 - MEDIUM COMPETITIVENESS</h4>
     <p>Factions that point for point will have a difficult time competing against Tier 1 opponents, yet otherwise are balanced and competitive. 
-        Many of them have weaknesses more pronounced than Tier 1 factions but may offer a very distinct playstyle instead. </p>
-    <p>Should be interesting to play against each other, and if given some extra PV allowance - possibly against Tier 1 as well.</p>           
+        Many of them have weaknesses more pronounced than Tier 1 factions but may offer a very distinct playstyle instead. 
+        Should be interesting to play against each other, and if given some extra PV allowance - possibly against Tier 1 as well.</p>           
         <li>Abbai Matriarchate</li>
         <li>Balosian Underdwellers</li>
         <li>Belt Alliance</li>

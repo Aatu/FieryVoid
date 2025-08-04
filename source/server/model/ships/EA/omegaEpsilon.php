@@ -6,7 +6,7 @@ class OmegaEpsilon  extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 2200;
-        $this->faction = "Earth Alliance (custom)";
+        $this->faction = "Earth Alliance (Custom)";
         $this->phpclass = "omegaEpsilon";
         $this->imagePath = "img/ships/omegaShadow.png";
         $this->shipClass = "Shadow Omega Destroyer (Epsilon)";

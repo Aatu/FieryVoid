@@ -213,12 +213,9 @@ class Mathlib{
             echo "FAIL: ($q, $r) -> ({$pixel["x"]}, {$pixel["y"]}) -> ({$hex["x"]}, {$hex["y"]})\n"; 
         } 
     } 
+ 
 
-
-    private static function crossProduct($a, $b) {
-        return $a['x'] * $b['y'] - $a['y'] * $b['x'];
-    }
-    
+    /*
     private static function doLinesIntersect($p1, $p2, $p3, $p4) {
         $d1 = ['x' => $p2['x'] - $p1['x'], 'y' => $p2['y'] - $p1['y']];
         $d2 = ['x' => $p4['x'] - $p3['x'], 'y' => $p4['y'] - $p3['y']];
@@ -231,7 +228,56 @@ class Mathlib{
         
         return $t >= 0 && $t <= 1 && $u >= 0 && $u <= 1;
     }
-    
+    */
+
+
+    private static function crossProduct($a, $b) {
+        return $a['x'] * $b['y'] - $a['y'] * $b['x'];
+    }
+
+    private static function subtract($a, $b) {
+        return ['x' => $a['x'] - $b['x'], 'y' => $a['y'] - $b['y']];
+    }
+
+    private static function isBetween($a, $b, $c, $EPSILON) {
+        return (
+            min($a['x'], $c['x']) - $EPSILON <= $b['x'] && $b['x'] <= max($a['x'], $c['x']) + $EPSILON &&
+            min($a['y'], $c['y']) - $EPSILON <= $b['y'] && $b['y'] <= max($a['y'], $c['y']) + $EPSILON
+        );
+    }   
+
+
+    private static function doLinesIntersect($p1, $p2, $p3, $p4) {
+        $EPSILON = 1e-10;
+        /*
+        function crossProduct($a, $b) {
+            return $a['x'] * $b['y'] - $a['y'] * $b['x'];
+        }
+        */
+
+        $d1 = self::subtract($p2, $p1);
+        $d2 = self::subtract($p4, $p3);
+        $denom = self::crossProduct($d1, $d2);
+        $diff = self::subtract($p3, $p1);
+
+        if (abs($denom) < $EPSILON) {
+            if (abs(self::crossProduct($diff, $d1)) > $EPSILON) return false;
+            // Colinear — check for overlap
+            return (
+                self::isBetween($p1, $p3, $p2, $EPSILON) ||
+                self::isBetween($p1, $p4, $p2, $EPSILON) ||
+                self::isBetween($p3, $p1, $p4, $EPSILON) ||
+                self::isBetween($p3, $p2, $p4, $EPSILON)
+            );
+        }
+
+        $t = self::crossProduct($diff, $d2) / $denom;
+        $u = self::crossProduct($diff, $d1) / $denom;
+
+        return $t >= -$EPSILON && $t <= 1 + $EPSILON && $u >= -$EPSILON && $u <= 1 + $EPSILON;
+    }
+
+
     private static function getHexCorners($hex, $hexSize) {
         $shrinkFactor = 1; // Was previsouly used to shrink hex a little below.
         $hexCo = self::hexCoToPixelLoS($hex);

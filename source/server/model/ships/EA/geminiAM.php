@@ -3,7 +3,7 @@ class GeminiAM extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);       
 		$this->pointCost = 1025;
-		$this->faction = "Earth Alliance (custom)";
+        $this->faction = "Earth Alliance (Custom)";
 		$this->phpclass = "GeminiAM";
 		$this->shipClass = "Gemini Fleet Destroyer";
 		$this->shipSizeClass = 3;

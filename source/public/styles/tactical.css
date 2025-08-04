@@ -569,10 +569,11 @@ body {
 }
 
 .fleetlistentry{
-    padding-top: 5px;
+    padding-top: 10px;
     padding-left: 5px;
+    padding-bottom: 5px;    
     float: left;
-    width: 90%;
+    width: 98%;
 }
 
 .fleetlistentry .destroyed{
@@ -602,19 +603,20 @@ body {
     margin-top: 3px;
     float: left;
     padding-left: 5px;
-    width:40%;
+    width:30%;
 }
 
 .fleetlist .shipclass{
     margin-top: 3px;
     float: left;
-    width:25%;
+    width:30%;
 }
 
 .fleetlist .shiptype{
     margin-top: 3px;
     float: left;
     width: 10%;
+    text-align: center;    
 }
 
 /* //Apparently not used anymore, and old element is pushing value out of alignment in Info Tab - DK
@@ -632,13 +634,15 @@ body {
 .fleetlist .initiative{
 	margin-top: 3px;
 	float: left;
+    text-align: center;
 	width: 10%;
 }
 
 .fleetlist .value {
     margin-top: 3px;
     float: left;
-    width: 10%;
+    width: 15%;
+    text-align: center;        
 }
 
 #logcontainer #gameinfo{

@@ -44,18 +44,21 @@ window.ajaxInterface = {
         gamedata.goToWaiting();
     },
 
-    submitSlotAction: function submitSlotAction(action, slotid) {
-        ajaxInterface.submiting = true;
+submitSlotAction: function submitSlotAction(action, slotid, callback) {
+    ajaxInterface.submiting = true;
 
-        $.ajax({
-            type: 'POST',
-            url: 'slot.php',
-            dataType: 'json',
-            data: { action: action, gameid: gamedata.gameid, slotid: slotid },
-            success: ajaxInterface.successSubmit,
-            error: ajaxInterface.errorAjax
-        });
-    },
+    $.ajax({
+        type: 'POST',
+        url: 'slot.php',
+        dataType: 'json',
+        data: { action: action, gameid: gamedata.gameid, slotid: slotid },
+        success: function (response) {
+            ajaxInterface.successSubmit(response);
+            if (typeof callback === "function") callback(response);
+        },
+        error: ajaxInterface.errorAjax
+    });
+},
 
     construcGamedata: function construcGamedata() {
 

@@ -5,7 +5,7 @@ class RaptorFtr extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 54;
-	$this->faction = "Earth Alliance (early)";
+        $this->faction = "Earth Alliance (Early)";
         $this->phpclass = "RaptorFtr";
         $this->shipClass = "Raptor Aerospace Fighter";
 		$this->imagePath = "img/ships/raptor.png";

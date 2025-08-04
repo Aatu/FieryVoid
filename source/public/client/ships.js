@@ -785,6 +785,7 @@ window.shipManager = {
 		return 1;
     },
 
+    //Only used for Deployment checks to prevent ships deploying on same hex (or now allow for later Deployments) - DK
     getShipsInSameHex: function getShipsInSameHex(ship, pos1) {
 
         if (!pos1) var pos1 = shipManager.getShipPosition(ship);
@@ -795,13 +796,32 @@ window.shipManager = {
 
             if (shipManager.isDestroyed(ship2)) continue;
 
-            //if (ship.id = ship2.d)
-            //  continue;
+            //Let's allow ships that deploy on later turns to deploy on same hex as existing units - DK
+            var depTurn = shipManager.getTurnDeployed(ship2);            
+            if (depTurn !== gamedata.turn && !ship2.Enormous) continue;
 
             var pos2 = shipManager.getShipPosition(ship2);
 
+            //But never let ships Deployment on unoccupied parts of Huge terrain.
+            if(ship2.Huge > 0 && ship2.Huge < 3){ //Between 1 and 2, Moons basically - DK
+                //var s2pos = shipManager.getShipPosition(ship2);
+                var distance = pos1.distanceTo(pos2);
+                if(distance > 0 && distance <= ship2.Huge){ 
+                    shipsInHex.push(ship2);
+                    confirm.error("You cannot deploy on terrain.");                                         
+                }    
+            }
+
+            //if (ship.id = ship2.d)
+            //  continue;
+
             if (pos1.equals(pos2)) {
-                shipsInHex.push(ship2);
+                if(gamedata.isTerrain(ship2.shipSizeClass, ship2.userid)){
+                    shipsInHex.push(ship2);
+                    confirm.error("You cannot deploy on terrain.");  
+                }else{
+                    shipsInHex.push(ship2);
+                }    
             }
         }
 

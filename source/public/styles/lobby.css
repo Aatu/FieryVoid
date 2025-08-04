@@ -36,7 +36,7 @@
     font-weight:bold;
     font-size:12px; 
     margin:2px 0px; 
-    color: #a3c0f5;
+    color: #81a7ec; 
 }
 
 .slot span{
@@ -91,7 +91,7 @@
     font-weight:bold;
     font-size:16px; 
     margin:6px 5px; 
-    color: #6495ED;
+    color: #6495ED;   
     font-family: "Bruno Ace SC", sans-serif;    
 } 
 
@@ -99,20 +99,46 @@
 {
     cursor:pointer;
 }
-
 .store .factionname{
 	font-size:15px;
+	color:#f2f7ff;
+    font-weight: 525;   
 }
 
 .store .ship{
-	color:#8080FF;
-    margin-right: 15px;     
+    color: #81a7ec; 
+	/*color:#8080FF;old purple*/    
+    margin-right: 5px;     
 }
 
 .store .shipsizehdr{
-	color:#6495ED;  
+	color:#d0dbec;
 	margin-left:10px;
 	font-size:12px;
+
+}
+
+.store .storeship{
+	/*color:#a3c0f5;*/
+    color: #81a7ec;    
+    margin-right: 5px;
+    margin-left: 20px;          
+}
+
+.store .variant{
+	/*color:#8989fd; */
+    color: #578bec;       
+    margin-right: 15px;
+    margin-left: 20px;     
+}
+
+.shipname{
+	color:#DEEBFF;       
+}
+
+.store .clickable{
+	cursor:pointer;
+	color:#DEEBFF;
 }
 
 .store .ship .clickable{
@@ -170,8 +196,8 @@
 }
 
 .value{
-    color:#6e9cdc; /* Original value  #496791 */
-    
+    /*color:#6e9cdc; Original value  #496791 */
+    color: #81a7ec;      
 }
 
 .selectslot{

@@ -12,6 +12,7 @@ if (isset($_SESSION["user"])) {
 <html lang="en">
 <head>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">  
   <title>Fiery Void - Games</title>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
   <link href="styles/base.css" rel="stylesheet" type="text/css">
@@ -66,7 +67,7 @@ if (isset($_SESSION["user"])) {
       <h3>Rules & Info</h3>
       <div class="links">     
         <div><a href="./factions-tiers.php" target="_blank" rel="noopener noreferrer">Fiery Void: Factions & Tiers:</a> Overview of Fiery Void factions and their relative strengths.</div>
-        <div><a href="./faq.php" target="_blank" rel="noopener noreferrer">Fiery Void FAQ:</a> Aide Memoire of rules and differences from Babylon 5 Wars.</div>
+        <div><a href="./faq.php" target="_blank" rel="noopener noreferrer">Fiery Void FAQ:</a> Aide Memoire of specific rules and the differences from Babylon 5 Wars.</div>
         <div><a href="./ammo-options-enhancements.php" target="_blank" rel="noopener noreferrer">Ammo, Options & Enhancements:</a> Details of all the extras available to Fiery Void units e.g. Missiles.</div>
         <div><a href="http://b5warsvault.wikidot.com/" target="_blank" rel="noopener noreferrer">Babylon 5 Wars Vault:</a> Huge amount of Babylon 5 Wars rules and info!</div>
       </div> 
@@ -75,11 +76,12 @@ if (isset($_SESSION["user"])) {
     <div class="resources">
       <h3>Latest Updates — July 2025</h3>
       <ul class="updates-list">
-        <li>Starter Guide, Fiery Void FAQ, Factions & Tiers, Ammo, Options & Enhancements documents have been updated. Access the new versions through the links above.</li>         
-        <li>Slots set to deploy later no longer deploy on Turn 1, but have their own Deployment phase on the appropriate turn to better simulate fleets 'jumping in from hyperspace'.</li>
-        <li>The option to deploy individual ships in a slot later has been removed, please use a separate slot for all delayed deployments.</li>
-        <li>Fleet Selection screen has received another update in continuing efforts to make this more user friendly.</li>
-        <li>Simultaneous Movement: Initiative categories adjusted to be more intuitive for players, default Simultaneous Movement bracket set to 8 from 6.</li> 
+        <li><strong>Ruler/LoS Tool Added</strong> - New ruler and line of sight checker added to game, access by clicking side button or pressing 'R' key.</li>        
+        <li><strong>Line of Sight Bugfixes</strong> - Methods reviewed and tightened for fringe cases that may have led to incorrect results.</li>
+        <li><strong>Documentation</strong> - Faction Guide, FAQ and Enhancement documents received further updates.</li>
+        <li><strong>Vorlon Petals</strong> - Opening petals now better refelct B5 Wars rules.</li>
+        <li><strong>Styles</strong> - New website's styles continue to be refined and improved, notably in the Info Tab and for mobile browsers.</li>
+        <li><strong>Bug Fixes/Improvements</strong> - Too many to list, keep the reports coming!</li>                                                    
         <!--<li><strong>6 Jun</strong> - Overlay colors, deployment zone tweaks, UI fixes. Pulsar mine fixed, tooltip/text readability improved.</li>-->
       </ul>
     </div>
