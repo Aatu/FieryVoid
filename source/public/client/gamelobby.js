@@ -1772,8 +1772,10 @@ parseFactions: function parseFactions(jsonFactions) {
                     h.appendTo(targetNode);
 					//search for variants of the base design above...
 					for (var indexV = 0; indexV < jsonShips[faction].length; indexV++){
-						shipV = shipList[indexV];
+						shipV = shipList[indexV];													
 						if(shipV.variantOf != ship.shipClass) continue;//that's not a variant of current base ship
+						isCustomShip = isCustomFaction || shipV.unofficial === true;
+						let customShipHighlight = (!isCustomFaction && shipV.unofficial === true) ? ' highlight-custom-ship' : '';						
 						shipDisplayName = this.prepareClassName(shipV);
 						pointCostFull = shipV.pointCost;
 						if (shipV.flight && (shipV.maxFlightSize != 1)) pointCostFull = pointCostFull + ' (' + pointCostFull/6 + ' ea.)';//for fighters: display price per craft, too!
