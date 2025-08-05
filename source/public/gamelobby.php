@@ -529,7 +529,7 @@ if ($asteroids == false && $moons == false) {
 <strong style="margin: 0 3px; font-size: 16px;">|</strong> 
 <a href="https://old.wheelofnames.com/sgd-5zq" target="_blank" style="color: #8bcaf2;  text-decoration: underline; font-size: 14px;">Tier 3</a>
 <span style="margin-left: 3px; margin-right: 3px;">-</span>
-<span style="font-size: 14px;">Random Fleet Selection Wheels</span> 
+<span style="font-size: 14px;">Random Faction Wheels</span> 
 <br><br>
 
 
