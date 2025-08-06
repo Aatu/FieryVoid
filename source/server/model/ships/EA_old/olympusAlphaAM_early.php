@@ -5,7 +5,7 @@ class OlympusAlphaAM_early extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 500;
-        $this->faction = "Earth Alliance (early)";
+        $this->faction = "Earth Alliance (Early)";
         $this->phpclass = "OlympusAlphaAM_early";
         $this->imagePath = "img/ships/olympus.png";
         $this->shipClass = "Olympus Corvette (Alpha)";

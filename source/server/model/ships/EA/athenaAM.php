@@ -3,7 +3,7 @@ class AthenaAM extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
 		$this->pointCost = 1900;
-        $this->faction = "Earth Alliance (custom)"; 
+        $this->faction = "Earth Alliance (Custom)";
 		$this->phpclass = "AthenaAM";
 		$this->imagePath = "img/ships/warlock.png";
 		$this->shipClass = "Athena Battleship";

@@ -77,7 +77,7 @@ createFleetList: function createFleetList(slot, template) {
     fleetlistentry.find(".fleetlistline").remove();
 
     // Create and append the header row
-    fleetlistline.html("<span><span class='shipname header'>Ship Name</span><span class='shipclass header'>Ship Class</span><span class='shiptype header'>Type</span><span class='initiative header'>Initiative</span><span class='value header'>Value (current/base)</span></span>");
+    fleetlistline.html("<span><span class='shipname header'>Ship Name</span><span class='shipclass header'>Ship Class</span><span class='shiptype header'>Type</span><span class='initiative header'>Initiative</span><span class='value header'>Current Value</span></span>");
     fleetlistline.appendTo(fleetlisttable);
 
     var totalBaseValue = 0;
@@ -120,7 +120,7 @@ createFleetList: function createFleetList(slot, template) {
         fleetlistline.html(
             "<span id='" + ship.id + "'>" +
             "<span class='shipname clickable' data-shipid='" + ship.id + "'>" + ship.name + "</span>" +
-            "<span class='shipclass'>" + ship.phpclass + "</span>" +
+            "<span class='shipclass'>" + ship.shipClass + "</span>" +
             "<span class='shiptype'>" + shiptype + "</span>" +
             "<span class='initiative'>" + shipManager.getIniativeOrder(ship) + "</span>" +
             "<span class='value'>" + currValue + '/' + baseValue + "CP</span>" +
@@ -130,8 +130,8 @@ createFleetList: function createFleetList(slot, template) {
         fleetlistline.appendTo(fleetlisttable);
     }
 
-    var turnTaken = "<span style='color:red'>&nbsp;(Not committed orders)</span>";
-    if (slot.waiting) turnTaken = "<span style='color:green'>&nbsp;(Orders committed)</span>";
+    var turnTaken = "<span style='color:red'>&nbsp;&nbsp;[Not committed orders]</span>";
+    if (slot.waiting) turnTaken = "<span style='color:green'>&nbsp;&nbsp;[Orders committed]</span>";
     var deploys = "";
     if(slot.depavailable > gamedata.turn) deploys = "<span style='color: #00b8e6'>[Deploys on Turn " + slot.depavailable + "]&nbsp;</span>";
 

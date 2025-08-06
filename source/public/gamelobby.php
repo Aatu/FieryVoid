@@ -210,50 +210,50 @@
             ajaxInterface.startPollingGamedata();
 
             // ✅ Unified filter logic for factions based on Tier and Custom
-    function updateTierFilter() {
-        const selectedTiers = $('.tier-filter:checked').map(function () {
-            return $(this).data('tier');
-        }).get();
+            window.updateTierFilter = function() {   // ✅ Now global
+                const selectedTiers = $('.tier-filter:checked').map(function () {
+                    return $(this).data('tier');
+                }).get();
 
-    const showCustom = $('#toggleCustom').is(':checked');
-    const customMode = $('#customSelect').val();
+                const showCustom = $('#toggleCustom').is(':checked');
+                const customMode = $('#customSelect').val();
 
-    $('.faction').each(function () {
-        const tier = $(this).data('tier');
-        const isCustom = $(this).data('custom') === true || $(this).data('custom') === "true";
+                $('.faction').each(function () {
+                    const tier = $(this).data('tier');
+                    const isCustom = $(this).data('custom') === true || $(this).data('custom') === "true";
 
-        let isVisible = false;
+                    let isVisible = false;
 
-        if (selectedTiers.includes(tier)) {
-            if (showCustom) {
-                if (customMode === 'showOnlyCustom') {
-                    isVisible = isCustom;
-                } else {
-                    isVisible = true; // show both custom and non-custom
-                }
-            } else {
-                isVisible = !isCustom; // hide custom if toggle unchecked
+                    if (selectedTiers.includes(tier)) {
+                        if (showCustom) {
+                            if (customMode === 'showOnlyCustom') {
+                                isVisible = isCustom;
+                            } else {
+                                isVisible = true; // show both custom and non-custom
+                            }
+                        } else {
+                            isVisible = !isCustom; // hide custom if toggle unchecked
+                        }
+                    }
+
+                    $(this).toggle(isVisible);
+                });
+
+                // Group headers visibility stays unchanged
+                $('.factiongroup-header').each(function () {
+                    let header = $(this);
+                    let hasVisibleFaction = false;
+                    let next = header.next();
+                    while (next.length && !next.hasClass('factiongroup-header')) {
+                        if (next.hasClass('faction') && next.is(':visible')) {
+                            hasVisibleFaction = true;
+                            break;
+                        }
+                        next = next.next();
+                    }
+                    header.toggle(hasVisibleFaction);
+                });
             }
-        }
-
-        $(this).toggle(isVisible);
-    });
-
-    // Group headers visibility stays unchanged
-    $('.factiongroup-header').each(function () {
-        let header = $(this);
-        let hasVisibleFaction = false;
-        let next = header.next();
-        while (next.length && !next.hasClass('factiongroup-header')) {
-            if (next.hasClass('faction') && next.is(':visible')) {
-                hasVisibleFaction = true;
-                break;
-            }
-            next = next.next();
-        }
-        header.toggle(hasVisibleFaction);
-    });
-}
 
             // ✅ Listen to Tier and Custom Faction checkboxes
             $('.tier-filter').on('change', updateTierFilter);
@@ -345,7 +345,7 @@
 		<div class="panel large lobby">
             <div class="">
                 <!--<span class="panelheader">GAME NAME: </span>-->
-                <span class="panelsubheader" style="font-size: 24px; color: #a3c0f5;"> <?php print($gamelobbydata->name); ?></span>
+                <span class="panelsubheader" style="font-size: 24px; color: #e0e7ef;"> <?php print($gamelobbydata->name); ?></span>
             </div>
 
 
@@ -529,7 +529,7 @@ if ($asteroids == false && $moons == false) {
 <strong style="margin: 0 3px; font-size: 16px;">|</strong> 
 <a href="https://old.wheelofnames.com/sgd-5zq" target="_blank" style="color: #8bcaf2;  text-decoration: underline; font-size: 14px;">Tier 3</a>
 <span style="margin-left: 3px; margin-right: 3px;">-</span>
-<span style="font-size: 14px;">Random Fleet Selection Wheels</span> 
+<span style="font-size: 14px;">Random Faction Wheels</span> 
 <br><br>
 
 

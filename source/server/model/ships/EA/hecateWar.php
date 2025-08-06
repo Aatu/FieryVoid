@@ -5,7 +5,7 @@ class HecateWar extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 800;
-        $this->faction = "Earth Alliance (custom)";
+        $this->faction = "Earth Alliance (Custom)";
         $this->phpclass = "HecateWar";
         $this->imagePath = "img/ships/hyperion.png";
         $this->shipClass = "Hecate War Cruiser (Rho)";

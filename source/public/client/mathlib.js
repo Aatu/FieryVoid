@@ -189,6 +189,7 @@ window.mathlib = {
 		return heading;
 	},
 
+
 	hexFacingToAngle: function hexFacingToAngle(d) {
 		switch (d) {
 			case 0:
@@ -206,23 +207,48 @@ window.mathlib = {
 		}
 	},
 
-	doLinesIntersect: function doLinesIntersect(p1, p2, p3, p4) {
+
+	doLinesIntersect: function(p1, p2, p3, p4) {
+		const EPSILON = 1e-10;
+
 		function crossProduct(a, b) {
 			return a.x * b.y - a.y * b.x;
 		}
 
-		const d1 = { x: p2.x - p1.x, y: p2.y - p1.y };
-		const d2 = { x: p4.x - p3.x, y: p4.y - p3.y };
+		function subtract(a, b) {
+			return { x: a.x - b.x, y: a.y - b.y };
+		}
+
+		function isBetween(a, b, c) {
+			return (
+				Math.min(a.x, c.x) - EPSILON <= b.x && b.x <= Math.max(a.x, c.x) + EPSILON &&
+				Math.min(a.y, c.y) - EPSILON <= b.y && b.y <= Math.max(a.y, c.y) + EPSILON
+			);
+		}
+
+		const d1 = subtract(p2, p1);
+		const d2 = subtract(p4, p3);
 		const denom = crossProduct(d1, d2);
+		const diff = subtract(p3, p1);
 
-		if (denom === 0) return false; // Lines are parallel
+		// Check for colinear
+		if (Math.abs(denom) < EPSILON) {
+			if (Math.abs(crossProduct(diff, d1)) > EPSILON) return false;
+			// Colinear — check overlap
+			return (
+				isBetween(p1, p3, p2) ||
+				isBetween(p1, p4, p2) ||
+				isBetween(p3, p1, p4) ||
+				isBetween(p3, p2, p4)
+			);
+		}
 
-		const t = crossProduct({ x: p3.x - p1.x, y: p3.y - p1.y }, d2) / denom;
-		const u = crossProduct({ x: p3.x - p1.x, y: p3.y - p1.y }, d1) / denom;
+		const t = crossProduct(diff, d2) / denom;
+		const u = crossProduct(diff, d1) / denom;
 
-		// If t and u are between 0 and 1, the line segments intersect
-		return t >= 0 && t <= 1 && u >= 0 && u <= 1;
+		return t >= -EPSILON && t <= 1 + EPSILON && u >= -EPSILON && u <= 1 + EPSILON;
 	},
+
 
 	getHexCorners: function getHexCorners(hex) {
 		const hexSize = window.Config.HEX_SIZE;
@@ -241,7 +267,113 @@ window.mathlib = {
 		}));
 	},
 		
+
 	checkLineOfSight: function checkLineOfSight(start, end, blockedHexes) {
+		const startPixel = coordinateConverter.fromHexToGame(start);
+		const endPixel = coordinateConverter.fromHexToGame(end);
+
+		// Normalize all blocked hexes to plain {q, r} objects
+		const normalizedBlockedHexes = blockedHexes.map(hex => ({ q: hex.q, r: hex.r }));
+
+		// Filter out the start and end positions
+		const filteredBlockedHexes = normalizedBlockedHexes.filter(
+			hex => !(hex.q === start.q && hex.r === start.r) && !(hex.q === end.q && hex.r === end.r)
+		);
+
+		const lineMinQ = Math.min(start.q, end.q);
+		const lineMaxQ = Math.max(start.q, end.q);
+		const lineMinR = Math.min(start.r, end.r);
+		const lineMaxR = Math.max(start.r, end.r);
+
+		//Debugging variables
+		//var startPixel = coordinateConverter.fromHexToGame({ q: 8, r: 2 });
+		//var endPixel = coordinateConverter.fromHexToGame({ q: 7, r: 1 });
+		//var blockedCorners = mathlib.getHexCorners({ q: 8, r: 1 });
+
+		for (let hex of filteredBlockedHexes) {
+			// Optional: guard against malformed data
+			if (typeof hex.q !== 'number' || typeof hex.r !== 'number') continue;
+
+			// Filter out obviously non-intersecting hexes (based on hex grid, not pixels!)
+			if (
+				hex.q < lineMinQ - 3 || hex.q > lineMaxQ + 3 ||
+				hex.r < lineMinR - 3 || hex.r > lineMaxR + 3
+			) {
+				continue;
+			}
+
+			const corners = this.getHexCorners(hex);
+			for (let i = 0; i < corners.length; i++) {
+				const p1 = corners[i];
+				const p2 = corners[(i + 1) % corners.length];
+
+				if (this.doLinesIntersect(startPixel, endPixel, p1, p2)) {
+					//if(gamedata.showLoS) mathlib.drawLine(startPixel, endPixel, 0xff00ff); // Magenta line if blocked for debugging
+					//if(gamedata.showLoS) mathlib.drawHex(corners, 0xff00ff); // Magenta hex border for debugging					
+					return true; // Line of sight is blocked
+				}
+			}
+		}
+
+		//if(gamedata.showLoS) mathlib.drawLine(startPixel, endPixel, 0x87ceeb); // Blue line for debugging
+		return false; // Line of sight is clear
+	},
+
+
+	/* //Draws a simple line between two positions, replace by drawRuler() below but maybe useful for something else - DK
+	drawLine: function drawLine(p1, p2, color = 0x00ffff) {
+
+		// Run once, at init or before drawing loop
+		if (!window.LosSprite) {
+		window.LosSprite = new THREE.Group();
+		window.webglScene.scene.add(window.LosSprite);
+		}
+
+		mathlib.clearLosSprite();
+
+		const material = new THREE.LineBasicMaterial({ color });
+		const points = [
+			new THREE.Vector3(p1.x, p1.y, 10),
+			new THREE.Vector3(p2.x, p2.y, 10)
+		];
+		const geometry = new THREE.BufferGeometry().setFromPoints(points);
+		const line = new THREE.Line(geometry, material);
+		window.LosSprite.add(line);
+
+		return line;
+	},
+	*/
+
+//Called in Phase Strategy to show Ruler if LoS is toggled on.
+	showLoS: function showLoS(shooter, targetHex){
+		var start = null;
+		if(shooter == null){
+			var firstShip = gamedata.getFirstFriendlyShip();
+			start = shipManager.getShipPosition(firstShip);			
+		} else {
+			start = shipManager.getShipPosition(shooter);
+		}	
+		var blockedHexes = weaponManager.getBlockedHexes();
+		
+		mathlib.checkLineOfSightSprite(start, targetHex, blockedHexes);
+	},
+	
+	clearLosSprite: function clearLosSprite() {
+		const LosSprite = window.LosSprite;
+		if (!LosSprite || !LosSprite.children || !Array.isArray(LosSprite.children)) {
+			return;
+		}
+
+		while (LosSprite.children.length > 0) {
+			const child = LosSprite.children[0];
+			LosSprite.remove(child);
+			if (child.geometry) child.geometry.dispose();
+			if (child.material) child.material.dispose();
+		}
+	},
+
+	//Alternative version of LoS check function, that calls Ruler and LoS visuals.  Separated to avoid having to show this is other places that call checkLineofSight() e.g. weapons.
+	checkLineOfSightSprite: function checkLineOfSightSprite(start, end, blockedHexes) {
 		const startPixel = coordinateConverter.fromHexToGame(start);
 		const endPixel = coordinateConverter.fromHexToGame(end);
 
@@ -276,12 +408,144 @@ window.mathlib = {
 				const p2 = corners[(i + 1) % corners.length];
 
 				if (this.doLinesIntersect(startPixel, endPixel, p1, p2)) {
+					mathlib.drawRuler(startPixel, endPixel, 0xdc143c); // Crimson line if blocked
+					mathlib.drawHex(corners, 0xdc143c, 0xdc143c); // Crimson hex border
+					//var loSBlockedSprite = new BallisticSprite(hex, 'hexRed', "", "", './img/cancel.png', 100);
+					//window.LosSprite.add(loSBlockedSprite);										
 					return true; // Line of sight is blocked
 				}
 			}
 		}
 
+		mathlib.drawRuler(startPixel, endPixel, 0x00ffff); // Blue line for clear LoS
 		return false; // Line of sight is clear
+	},
+
+	//Called by checkLineOfSightSprite() above
+	drawHex: function drawHex(corners, color = 0xff0000, fillColor = null) {
+		if (!corners || corners.length < 6) return;
+
+		// === Create the shape ===
+		const shape = new THREE.Shape();
+		shape.moveTo(corners[0].x, corners[0].y);
+		for (let i = 1; i < corners.length; i++) {
+			shape.lineTo(corners[i].x, corners[i].y);
+		}
+		shape.lineTo(corners[0].x, corners[0].y); // Close the shape
+
+		const z = 500;
+
+		// === Add fill if specified ===
+		if (fillColor !== null) {
+			const fillGeometry = new THREE.ShapeGeometry(shape);
+			const fillMaterial = new THREE.MeshBasicMaterial({
+				color: fillColor,
+				transparent: true,
+				opacity: 0.3, // Adjust fill visibility
+				side: THREE.DoubleSide
+			});
+			const fillMesh = new THREE.Mesh(fillGeometry, fillMaterial);
+			fillMesh.position.z = z; // Place it below the outline
+			window.LosSprite.add(fillMesh);
+		}
+
+		// === Add outline as thick Line or Mesh ===
+		const outlinePoints = corners.map(c => new THREE.Vector2(c.x, c.y));
+		const outlineGeometry = new THREE.BufferGeometry().setFromPoints([
+			...outlinePoints.map(p => new THREE.Vector3(p.x, p.y, 500)),
+			new THREE.Vector3(corners[0].x, corners[0].y, 500) // Close loop
+		]);
+
+		const outlineMaterial = new THREE.LineBasicMaterial({ color });
+		const outline = new THREE.Line(outlineGeometry, outlineMaterial);
+		window.LosSprite.add(outline);
+
+		return outline;
+	},
+
+
+	//Note - Uses game/pixel coordinates not hex!  Called by checkLineOfSightSprite() above
+	drawRuler: function drawRuler(p1, p2, color = 0x00ffff) {
+		if (!window.LosSprite) {
+			window.LosSprite = new THREE.Group();
+			window.webglScene.scene.add(window.LosSprite);
+		}
+
+		mathlib.clearLosSprite();
+
+		// Create and add the line
+		const material = new THREE.LineBasicMaterial({
+			color: color,
+			transparent: true,
+			opacity: 0.8
+		});
+		const points = [
+			new THREE.Vector3(p1.x, p1.y, 10),
+			new THREE.Vector3(p2.x, p2.y, 10)
+		];
+		const geometry = new THREE.BufferGeometry().setFromPoints(points);
+		const line = new THREE.Line(geometry, material);
+		window.LosSprite.add(line);
+
+		// Calculate midpoint and distance
+		const midX = (p1.x + p2.x) / 2;
+		const midY = (p1.y + p2.y) / 2;
+		const distance = coordinateConverter.fromGameToHex(p1).distanceTo(
+			coordinateConverter.fromGameToHex(p2)
+		);
+
+		// === Create distance label ===
+		const canvas = document.createElement('canvas');
+		const TEXTURE_SIZE = 128;
+		canvas.width = TEXTURE_SIZE;
+		canvas.height = TEXTURE_SIZE;
+		const ctx = canvas.getContext('2d');
+
+		let fontSize = 110;
+		ctx.fillStyle = 'white';
+		ctx.textAlign = "center";
+		ctx.textBaseline = "middle";
+		const distanceText = distance.toFixed(0);
+		ctx.font = `bold ${fontSize}px Arial`;
+		ctx.fillText(distanceText, TEXTURE_SIZE / 2, TEXTURE_SIZE / 2);
+
+		const texture = new THREE.Texture(canvas);
+		texture.needsUpdate = true;
+		const spriteMaterial = new THREE.SpriteMaterial({ map: texture, transparent: true });
+		const sprite = new THREE.Sprite(spriteMaterial);
+		sprite.position.set(midX, midY, 500);
+		sprite.scale.set(30, 30, 1);
+		window.LosSprite.add(sprite);
+
+		// === Create small circular marker at end of ruler (p2) ===
+		function hexToRgba(hex, alpha = 1) {
+			const r = (hex >> 16) & 255;
+			const g = (hex >> 8) & 255;
+			const b = hex & 255;
+			return `rgba(${r},${g},${b},${alpha})`;
+		}
+
+		const markerCanvas = document.createElement('canvas');
+		markerCanvas.width = 64;
+		markerCanvas.height = 64;
+		const markerCtx = markerCanvas.getContext('2d');
+
+		markerCtx.beginPath();
+		markerCtx.arc(32, 32, 18, 0, 2 * Math.PI);
+		markerCtx.fillStyle = hexToRgba(color); // uses same color as line
+		markerCtx.fill();
+
+		const markerTexture = new THREE.Texture(markerCanvas);
+		markerTexture.needsUpdate = true;
+
+		const markerMaterial = new THREE.SpriteMaterial({ map: markerTexture, transparent: true });
+		const markerSprite = new THREE.Sprite(markerMaterial);
+		markerSprite.position.set(p2.x, p2.y, 12); // just above the line
+		markerSprite.scale.set(18, 18, 1); // adjust size if needed
+
+		window.LosSprite.add(markerSprite);
+
+		return line;
 	},
 
 	//Returns 19 hexes around central position e.g. radius of 1
