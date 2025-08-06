@@ -72,7 +72,7 @@ window.gamedata = {
 			powerRating = 'Tier 1; Major Faction';
 			break;
 		  case 'Drakh':
-			powerRating = 'Tier 1, Minor Custom faction';
+			powerRating = 'Tier 1, Major Custom faction';
 			break;
 		  case 'Drazi Freehold':
 			powerRating = 'Tier 1; League Faction';
