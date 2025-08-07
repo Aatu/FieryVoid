@@ -706,7 +706,7 @@ class DBManager
 
     }
 
-    //Used to skip Slot forward through phases if it has no ships deployed.
+    //Used to skip Slot forward through phases if it has no ships deployed. Updates specific slot, not just ALL player's slots as updatePlayerStatus() does.
     public function updatePlayerStatusSlot($gameid, $userid, $slot, $phase, $turn)
     {
         try { 
