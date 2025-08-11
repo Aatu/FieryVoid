@@ -40,38 +40,6 @@ class BuyingGamePhase implements Phase
                 $move = new MovementOrder(-1, "start", new OffsetCoordinate($x, $y), 0, 0, 5, $h, $h, true, 1, 0, 0);
                 $ship->movement = array($move);
             } 
-    /*               
-            // Now let's see if we have to add any terrain.
-            if (($gameData->rules->hasRuleName("asteroids") || $gameData->rules->hasRuleName("moons")) && $ship->userid == -5){
-                // It's aterrain, so assign a unique random position.
-                $deploymentZone = $this->getGamespace($gameData);
-                if($ship instanceof moonSmall || $ship instanceof moon){
-                    $maxX = ($deploymentZone['width'] / 2) - 6;
-                    $maxY = ($deploymentZone['height'] / 2) - 4;                    
-                }else{
-                    $maxX = ($deploymentZone['width'] / 2) - 3;
-                    $maxY = ($deploymentZone['height'] / 2) - 2;
-                }    
-
-
-                // Generate a unique random position
-                while (true) {
-                    $x = rand(-$maxX, $maxX);
-                    $y = rand(-$maxY, $maxY);
-                    
-                    if (!isset($usedPositions["$x,$y"])) {
-                        $usedPositions["$x,$y"] = true;
-                        break;
-                    }
-                }
-
-                $usedPositions["$x,$y"] = true; // Mark position as used
-                $h = rand(0, 5); // Random heading/facing
-
-                $move = new MovementOrder(-1, "start", new OffsetCoordinate($x, $y), 0, 0, 0, $h, $h, true, 1, 0, 0);
-                $ship->movement = array($move);
-            }
-*/
 
         // Now let's see if we have to add any terrain.
         if (($gameData->rules->hasRuleName("asteroids") || $gameData->rules->hasRuleName("moons")) && $ship->userid == -5) {
@@ -104,7 +72,7 @@ class BuyingGamePhase implements Phase
                         $dy = $y - $my;
                         $distance = sqrt($dx * $dx + $dy * $dy); // Euclidean distance
                         
-                        if ($distance < 5) { // Ensure moons are at least 5 hexes apart
+                        if ($distance < 6) { // Ensure moons are at least 6 hexes apart
                             $tooClose = true;
                             break;
                         }
