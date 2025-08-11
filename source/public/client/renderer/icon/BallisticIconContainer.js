@@ -109,7 +109,6 @@ window.BallisticIconContainer = function () {
             .forEach(ship => {
                 const pos = shipManager.getShipPosition(ship);
                 const posGame = this.coordinateConverter.fromHexToGame(pos);
-                //const turnDeploys = shipManager.getTurnDeployed(ship);
                 const sprite = new BallisticSprite(posGame, "hexBlue", `Reinforcement`);
                 this.scene.add(sprite.mesh);
 
