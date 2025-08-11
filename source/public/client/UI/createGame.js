@@ -31,9 +31,7 @@ jQuery(function ($) {
     $("#gamespacecheck").on("click", createGame.doGameSpaceCheck);
     $("#gamespacecheck").on("click", createGame.doFlightCheck);
     $("#movementcheck").on("click", createGame.doMovementCheck);
-    $("#desperatecheck").on("click", createGame.doDesperateCheck);
-    //$("#asteroidscheck").on("click", createGame.doAsteroidsCheck);
-    //$("#moonscheck").on("click", createGame.doMoonsCheck);              
+    $("#desperatecheck").on("click", createGame.doDesperateCheck);             
     $("#terraincheck").on("click", createGame.doTerrainCheck);
     
     $(".setsizeknifefight").on("click", createGame.doSwitchSizeKnifeFight);
