@@ -39,6 +39,7 @@ window.InitialPhaseStrategy = function () {
     };
 
     InitialPhaseStrategy.prototype.onHexClicked = function (payload) {
+        PhaseStrategy.prototype.onHexClicked.call(this, payload);        
         if (!this.selectedShip) {
             return;
         }

@@ -345,14 +345,12 @@ window.mathlib = {
 	*/
 
 //Called in Phase Strategy to show Ruler if LoS is toggled on.
-	showLoS: function showLoS(shooter, targetHex){
-		var start = null;
-		if(shooter == null){
+	showLoS: function showLoS(start, targetHex){
+
+		if(start == null){
 			var firstShip = gamedata.getFirstFriendlyShip();
 			start = shipManager.getShipPosition(firstShip);			
-		} else {
-			start = shipManager.getShipPosition(shooter);
-		}	
+		}
 		var blockedHexes = weaponManager.getBlockedHexes();
 		
 		mathlib.checkLineOfSightSprite(start, targetHex, blockedHexes);
@@ -480,8 +478,8 @@ window.mathlib = {
 			opacity: 0.8
 		});
 		const points = [
-			new THREE.Vector3(p1.x, p1.y, 10),
-			new THREE.Vector3(p2.x, p2.y, 10)
+			new THREE.Vector3(p1.x, p1.y, 100),
+			new THREE.Vector3(p2.x, p2.y, 100)
 		];
 		const geometry = new THREE.BufferGeometry().setFromPoints(points);
 		const line = new THREE.Line(geometry, material);
@@ -540,7 +538,7 @@ window.mathlib = {
 
 		const markerMaterial = new THREE.SpriteMaterial({ map: markerTexture, transparent: true });
 		const markerSprite = new THREE.Sprite(markerMaterial);
-		markerSprite.position.set(p2.x, p2.y, 12); // just above the line
+		markerSprite.position.set(p2.x, p2.y, 102); // just above the line
 		markerSprite.scale.set(18, 18, 1); // adjust size if needed
 
 		window.LosSprite.add(markerSprite);

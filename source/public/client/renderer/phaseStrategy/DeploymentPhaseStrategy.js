@@ -64,6 +64,7 @@ window.DeploymentPhaseStrategy = function () {
     };
 
     DeploymentPhaseStrategy.prototype.onHexClicked = function (payload) {
+        PhaseStrategy.prototype.onHexClicked.call(this, payload);           
         var hex = payload.hex;
 
         if (!this.selectedShip || (shipManager.getTurnDeployed(this.selectedShip) < gamedata.turn)) {

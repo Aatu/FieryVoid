@@ -29,6 +29,8 @@ window.PhaseStrategy = function () {
         this.onDoneCallback = null;
 
         this.systemInfoState = null;
+        this._lastHoveredHex = null;
+        this._startHexRuler = null;
 
         this.uiManager = new window.UIManager($("body")[0]);
     }
@@ -201,7 +203,13 @@ window.PhaseStrategy = function () {
         }
     };
 
-    PhaseStrategy.prototype.onHexClicked = function (payload) {};
+    PhaseStrategy.prototype.onHexClicked = function (payload) {
+        if (gamedata.showLoS) { 
+            this._startHexRuler = null; //reset.
+            mathlib.clearLosSprite();                   
+            this._startHexRuler = payload.hex;
+        }    
+    };
 
     PhaseStrategy.prototype.onShipsClicked = function (ships, payload) {
         
@@ -235,10 +243,20 @@ window.PhaseStrategy = function () {
     PhaseStrategy.prototype.onShipClicked = function (ship, payload) {//30 June 2024 - DK - Added for Ally targeting.
         if(shipManager.shouldBeHidden(ship)) return;  //Stealth equipped and undetected enemy, or not deployed yet - DK May 2025
 
+
+        
 		if(this.gamedata.isMyShip(ship) && (!this.gamedata.canTargetAlly(ship))) {
             this.selectShip(ship, payload);
+            if (gamedata.showLoS) { 
+                this._startHexRuler = null; //reset.
+                mathlib.clearLosSprite();                   
+            }               
         } else {
             this.targetShip(ship, payload);
+            if (gamedata.showLoS) { 
+                this._startHexRuler = shipManager.getShipPosition(ship);
+                mathlib.clearLosSprite();                   
+            }             
         }
     };
 
@@ -316,8 +334,8 @@ window.PhaseStrategy = function () {
                     // Update with a copy of hex coords (avoid referencing the same object)
                     this._lastHoveredHex = { q: payload.hex.q, r: payload.hex.r };
 
-                    // Show line on new hex
-                    mathlib.showLoS(this.selectedShip, payload.hex);
+                    mathlib.showLoS(this._startHexRuler, payload.hex);
+
                 }
             } else {
                 // If hovering a ship, reset _lastHoveredHex so next hex hover triggers showLoS
@@ -379,7 +397,7 @@ window.PhaseStrategy = function () {
 
     PhaseStrategy.prototype.onMouseOverShips = function (ships, payload) {
         // Filter out ships that are not visible or shouldn't show tooltips
-        if(gamedata.showLoS) mathlib.showLoS(this.selectedShip, payload.hex)
+        if(gamedata.showLoS) mathlib.showLoS(this._startHexRuler, payload.hex)
 
         const visibleShips = ships.filter(ship => {
             if(shipManager.shouldBeHidden(ship)) return false;  //Enemy, stealth equipped and undetected, or not deployed yet - DK May 2025
@@ -401,7 +419,7 @@ window.PhaseStrategy = function () {
 
     PhaseStrategy.prototype.onMouseOverShip = function (ship, payload) {
         
-        if(gamedata.showLoS) mathlib.showLoS(this.selectedShip, payload.hex);
+        if(gamedata.showLoS) mathlib.showLoS(this._startHexRuler, payload.hex);
 
         if(shipManager.shouldBeHidden(ship)) return;  //Enemy, stealth equipped and undetected, or not deployed yet - DK May 2025
 
@@ -803,11 +821,12 @@ window.PhaseStrategy = function () {
 
         if (!gamedata.showLoS) {
             gamedata.showLoS = true;
-
+            if(this._startHexRuler == null) this._startHexRuler = shipManager.getShipPosition(this.selectedShip);
             const hex = this._lastHoveredHex || { q: 0, r: 0 };
-            mathlib.showLoS(this.selectedShip, hex);
+            mathlib.showLoS(this._startHexRuler, hex);
         } else {
             gamedata.showLoS = false;
+            this._startHexRuler = null; //reset.            
             mathlib.clearLosSprite();
         }
 
