@@ -545,8 +545,8 @@ window.mathlib = {
 
 		return line;
 	},
-
-	//Returns 19 hexes around central position e.g. radius of 1
+/*
+	//Returns 7 or 19 hexes around central position e.g. radius of 1 or 2
 	getNeighbouringHexes: function getNeighbouringHexes(position, radius = 1) {
 		if(radius == 1){
 			let isOddRow = position.r % 2 !== 0; //Test hexes ODD (-1,-11) EVEN (-2,-12)
@@ -608,5 +608,94 @@ window.mathlib = {
 				r: position.r + offset[1]
 			}));
 	}
+*/
+
+// parity-aware 6 neighbours for your odd-row offset system
+offsetNeighbors: function offsetNeighbors(pos) {
+    const q = pos.q, r = pos.r;
+    const isOdd = (r % 2) !== 0;
+    if (isOdd) {
+        return [
+            { q: q + 1, r: r     }, // right
+            { q: q - 1, r: r     }, // left
+            { q: q - 1, r: r + 1 }, // upper-left (odd row)
+            { q: q - 1, r: r - 1 }, // lower-left (odd row)
+            { q: q    , r: r + 1 }, // upper-right (shifted)
+            { q: q    , r: r - 1 }  // lower-right (shifted)
+        ];
+    } else {
+        return [
+            { q: q + 1, r: r     }, // right
+            { q: q - 1, r: r     }, // left
+            { q: q + 1, r: r + 1 }, // upper-right (even row)
+            { q: q + 1, r: r - 1 }, // lower-right (even row)
+            { q: q    , r: r + 1 }, // upper-left (shifted)
+            { q: q    , r: r - 1 }  // lower-left (shifted)
+        ];
+    }
+},
+
+// Returns all hexes with distance <= radius (excluding center)
+getNeighbouringHexes: function getNeighbouringHexes(position, radius = 0) {
+    if (radius <= 0) return [];
+
+    const seen = new Set();
+    const key = p => `${p.q},${p.r}`;
+
+    // mark center visited
+    seen.add(key(position));
+
+    // frontier starts at center
+    let frontier = [ { q: position.q, r: position.r } ];
+    const results = [];
+
+    // expand ring by ring
+    for (let d = 1; d <= radius; d++) {
+        const next = [];
+        for (const node of frontier) {
+            const neighs = mathlib.offsetNeighbors(node);
+            for (const n of neighs) {
+                const k = key(n);
+                if (!seen.has(k)) {
+                    seen.add(k);
+                    next.push(n);
+                    results.push(n); // accumulate all nodes within <= radius
+                }
+            }
+        }
+        frontier = next;
+    }
+
+    return results; // array of {q,r} (same set your hardcoded radius=1/2 returned)
+},
+
+// Returns only the perimeter hexes at exactly distance == radius
+getPerimeterHexes: function getPerimeterHexes(position, radius = 0) {
+    if (radius <= 0) return [];
+
+    const seen = new Set();
+    const key = p => `${p.q},${p.r}`;
+    seen.add(key(position));
+
+    let frontier = [ { q: position.q, r: position.r } ];
+
+    for (let d = 1; d <= radius; d++) {
+        const next = [];
+        for (const node of frontier) {
+            const neighs = mathlib.offsetNeighbors(node);
+            for (const n of neighs) {
+                const k = key(n);
+                if (!seen.has(k)) {
+                    seen.add(k);
+                    next.push(n);
+                }
+            }
+        }
+        frontier = next;
+    }
+
+    return frontier; // only the outer ring (distance == radius)
+}
+
 
 };

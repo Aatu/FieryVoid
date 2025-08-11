@@ -345,7 +345,66 @@ class Mathlib{
     
         return array("x" => $x, "y" => $y);
     }
-    
+        
+    public static function getNeighbouringHexes($position, $radius = 1) {
+        if ($radius <= 0) return [];
+
+        // Helper: get neighbours in odd-row offset coordinates
+        $getOffsetNeighbors = function($pos) {
+            $isOddRow = ($pos['r'] % 2) !== 0;
+            if ($isOddRow) {
+                return [
+                    ['q' => $pos['q'] + 1, 'r' => $pos['r']],      // Right
+                    ['q' => $pos['q'] - 1, 'r' => $pos['r']],      // Left
+                    ['q' => $pos['q'] - 1, 'r' => $pos['r'] + 1],  // Upper left
+                    ['q' => $pos['q'] - 1, 'r' => $pos['r'] - 1],  // Lower left
+                    ['q' => $pos['q'],     'r' => $pos['r'] + 1],  // Upper right (shifted)
+                    ['q' => $pos['q'],     'r' => $pos['r'] - 1]   // Lower right (shifted)
+                ];
+            } else {
+                return [
+                    ['q' => $pos['q'] + 1, 'r' => $pos['r']],      // Right
+                    ['q' => $pos['q'] - 1, 'r' => $pos['r']],      // Left
+                    ['q' => $pos['q'] + 1, 'r' => $pos['r'] + 1],  // Upper right
+                    ['q' => $pos['q'] + 1, 'r' => $pos['r'] - 1],  // Lower right
+                    ['q' => $pos['q'],     'r' => $pos['r'] + 1],  // Upper left (shifted)
+                    ['q' => $pos['q'],     'r' => $pos['r'] - 1]   // Lower left (shifted)
+                ];
+            }
+        };
+
+        // Use associative array as visited set
+        $seen = [];
+        $key = function($p) { return $p['q'] . ',' . $p['r']; };
+
+        // Mark center visited
+        $center = ['q' => $position->q, 'r' => $position->r];
+        $seen[$key($center)] = true;
+
+        $frontier = [$center];
+        $results = [];
+
+        // Expand outward by rings
+        for ($d = 1; $d <= $radius; $d++) {
+            $next = [];
+            foreach ($frontier as $node) {
+                foreach ($getOffsetNeighbors($node) as $n) {
+                    $k = $key($n);
+                    if (!isset($seen[$k])) {
+                        $seen[$k] = true;
+                        $next[] = $n;
+                        $results[] = $n; // store all within <= radius
+                    }
+                }
+            }
+            $frontier = $next;
+        }
+
+        return $results;
+    }
+
+
+    /*
     public static function getNeighbouringHexes($position, $radius = 1) {
         if($radius == 1){    
             $isOddRow = $position->r % 2 !== 0;    
@@ -399,6 +458,8 @@ class Mathlib{
             return $neighbors;
         }    
     }    
+    */
+
 
     
 /* //OLD METHOD OF pixelCoToHex() WHICH DIDN@T SEEM TO WORK CORRECTLY ANYWAY - DK 02.25

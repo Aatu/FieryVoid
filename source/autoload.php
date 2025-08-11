@@ -3416,7 +3416,8 @@ spl_autoload_register(
 	    				'asteroidm' => '/server/model/ships/terrain/asteroidM.php',  
 	    				'asteroidl' => '/server/model/ships/terrain/asteroidL.php', 
 	    				'moonsmall' => '/server/model/ships/terrain/moonSmall.php',  
-	    				'moon' => '/server/model/ships/terrain/moon.php',  
+	    				'moon' => '/server/model/ships/terrain/moon.php',
+                        'moonlarge' => '/server/model/ships/terrain/moonLarge.php',    
 
 				//Marine Boarding Actions
 				'marines' => '/server/model/weapons/specialWeapons.php',

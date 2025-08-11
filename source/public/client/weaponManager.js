@@ -2203,12 +2203,12 @@ window.weaponManager = {
         for (var i in gamedata.ships) {
             var ship = gamedata.ships[i];
     
-            if (ship.Enormous && !shipManager.isDestroyed(ship)) { // Only enormous units block LoS at present
+            if (ship.Enormous && !shipManager.isDestroyed(ship)) { // Only enormous or Huge units block LoS.
                 var position = shipManager.getShipPosition(ship);
                 blockedHexes.push(position);
             
-                if (ship.Huge > 0) { // Has a radius of 1 around its centre hex
-                    var neighbourHexes = mathlib.getNeighbouringHexes(position, ship.Huge); //Only works with ship.Huge = 2 atm                  
+                if (ship.Huge > 0) { // Occupies more than 1 hex
+                    var neighbourHexes = mathlib.getNeighbouringHexes(position, ship.Huge);                  
                     // Add surrounding hexes directly
                     blockedHexes.push(...neighbourHexes);
                 }

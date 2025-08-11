@@ -71,13 +71,15 @@ window.BallisticIconContainer = function () {
     }
 
     function generateTerrainHexes(gamedata) {
-        if (gamedata.gamephase === -1) return;
+        if (gamedata.gamephase === -1) return; //Don't bother during Deployment phase.
 
         gamedata.ships.filter(ship => ship.Huge > 0).forEach(ship => {
             const position = shipManager.getShipPosition(ship);
-            const perimeterHexes = (ship.Huge === 2)
+            /*const perimeterHexes = (ship.Huge === 2)
                 ? mathlib.getPerimeterHexes(position, ship.Huge)
                 : mathlib.getNeighbouringHexes(position, ship.Huge);
+			*/
+			const perimeterHexes = mathlib.getPerimeterHexes(position, ship.Huge); //Position + radius passed.
 
             perimeterHexes.forEach(neighbour => {
                 const pos = this.coordinateConverter.fromHexToGame(neighbour);
