@@ -8,7 +8,7 @@ class moon  extends Terrain{
 		$this->faction = "Terrain";
 		$this->factionAge = 1;        
         $this->phpclass = "moon";
-        $this->imagePath = "img/ships/moon.png";
+        $this->imagePath = "img/ships/moonMedium.png";
         $this->canvasSize = 1024;
         $this->shipClass = "Moon";
         $this->Enormous = true; 
