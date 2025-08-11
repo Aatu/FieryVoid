@@ -205,10 +205,15 @@ window.PhaseStrategy = function () {
 
     PhaseStrategy.prototype.onHexClicked = function (payload) {
         if (gamedata.showLoS) { 
-            this._startHexRuler = null; //reset.
-            mathlib.clearLosSprite();                   
-            this._startHexRuler = payload.hex;
-        }    
+            if(payload.button == 2){ //Right click, just clear and reset to this.selectedShip
+                this._startHexRuler = null; //reset.
+                mathlib.clearLosSprite();                 
+            }else{
+                this._startHexRuler = null; //reset start point on any other type of click
+                mathlib.clearLosSprite();                   
+                this._startHexRuler = payload.hex;
+            }    
+        }
     };
 
     PhaseStrategy.prototype.onShipsClicked = function (ships, payload) {
