@@ -208,9 +208,9 @@ window.createGame = {
      //       console.log(`SlotID: ${slotId}, x: ${x}, y: ${y}, w: ${w}, h: ${h}, scale: ${scale}`);
      //       console.log(`Drawing at: x=${drawX}, y=${drawY}`);
     
-            ctx.fillRect(drawX+6, drawY, w * scale, h * scale);
+            ctx.fillRect(drawX+4, drawY, w * scale, h * scale);
             ctx.strokeStyle = "#006600";
-            ctx.strokeRect(drawX+6, drawY, w * scale, h * scale);
+            ctx.strokeRect(drawX+4, drawY, w * scale, h * scale);
             
             // Draw slot number in the center
             ctx.save(); // Save context state
