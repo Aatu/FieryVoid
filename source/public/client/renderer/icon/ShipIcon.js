@@ -97,12 +97,16 @@ window.ShipIcon = function () {
 
     ShipIcon.prototype.setFacing = function (facing) {
 		var facingActual = mathlib.degreeToRadian(facing);
-		this.shipDirectionOfProwSprite.mesh.rotation.z = facingActual;
-        this.shipSprite.mesh.rotation.z = facingActual;//mathlib.degreeToRadian(facing);
+        if(!this.terrain){
+            this.shipDirectionOfProwSprite.mesh.rotation.z = facingActual;
+            this.shipSprite.mesh.rotation.z = facingActual;//mathlib.degreeToRadian(facing);
+        }
     };
 
     ShipIcon.prototype.setHeading = function (heading) {
-        this.shipDirectionOfMovementSprite.mesh.rotation.z = mathlib.degreeToRadian(heading);
+        if(!this.terrain){        
+            this.shipDirectionOfMovementSprite.mesh.rotation.z = mathlib.degreeToRadian(heading);
+        }
     };
 
 	//this function is never used actually... and certainly shouldn't use provided heading as it's GET method
