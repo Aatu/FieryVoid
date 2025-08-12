@@ -141,7 +141,9 @@ window.DeploymentPhaseStrategy = function () {
 
     function showDeploymentArea(ship, deploymentSprites, gamedata) {
         var icon = getSlotById(ship.slot, deploymentSprites);
-        if (gamedata.isMyShip(ship)) {
+        if (gamedata.isTerrain(ship.shipSizeClass, ship.userid)) {
+            icon.terrainSprite.show();
+        } else if (gamedata.isMyShip(ship)) {
             icon.ownSprite.show();
         } else {
             icon.enemySprite.show();
@@ -153,6 +155,7 @@ window.DeploymentPhaseStrategy = function () {
         icon.ownSprite.hide();
         icon.enemySprite.hide();
         icon.allySprite.hide();
+        icon.terrainSprite.hide();
     }
 
     function getSlotById(slotId, deploymentSprites) {
@@ -170,6 +173,10 @@ window.DeploymentPhaseStrategy = function () {
             var ownSprite = new DeploymentIcon(deploymentData.position, deploymentData.size, 'own', scene, deploymentData.avail);
             var allySprite = new DeploymentIcon(deploymentData.position, deploymentData.size, 'ally', scene, deploymentData.avail);
             var enemySprite = new DeploymentIcon(deploymentData.position, deploymentData.size, 'enemy', scene, deploymentData.avail);
+            
+            var mapData = getMapData();
+
+            var terrainSprite = new DeploymentIcon(mapData.position, mapData.size, 'terrain', scene, 1);
 
             return {
                 slotId: key,
@@ -178,6 +185,7 @@ window.DeploymentPhaseStrategy = function () {
                 ownSprite: ownSprite,
                 allySprite: allySprite,
                 enemySprite: enemySprite,
+                terrainSprite: terrainSprite,
                 playerid: deploymentData.playerid,
                 available: deploymentData.available
             };
@@ -199,6 +207,40 @@ window.DeploymentPhaseStrategy = function () {
             };
 
             return Math.abs(offsetPosition.x) < Math.floor(deploymentData.size.width / 2) && Math.abs(offsetPosition.y) < Math.floor(deploymentData.size.height / 2);
+        };
+    }
+
+    function validateTerrainDeployment(hex) {
+            var mapData = getMapData();
+            var hexPositionInGame = window.coordinateConverter.fromHexToGame(hex);
+
+            var offsetPosition = {
+                x: mapData.position.x - hexPositionInGame.x,
+                y: mapData.position.y - hexPositionInGame.y
+            };
+
+            return Math.abs(offsetPosition.x) < Math.floor(mapData.size.width / 2) && Math.abs(offsetPosition.y) < Math.floor(mapData.size.height / 2);
+    }    
+
+    function getMapData() {
+
+        var mapHeight = 0;
+        var mapWidth = 0;
+
+        const match = gamedata.gamespace?.match(/^(-?\d+)x(-?\d+)$/);
+        if (match) {
+            mapHeight = parseInt(match[2]) * window.Config.HEX_SIZE * 1.5;
+            mapWidth = (parseInt(match[1])) * window.Config.HEX_SIZE * 1.73;
+        }
+
+		if(mapHeight <= 0) mapHeight = 48 * window.Config.HEX_SIZE * 1.5;		
+		if(mapWidth <= 0) mapWidth = 72 * window.Config.HEX_SIZE * 1.73;
+
+
+        //position.x -= window.coordinateConverter.getHexWidth() / 2;
+        return {
+            position: {x: -40, y: 0},
+            size: {height: mapHeight,width: mapWidth},
         };
     }
 
@@ -250,9 +292,12 @@ window.DeploymentPhaseStrategy = function () {
         if (!hex) {
             hex = new hexagon.Offset(shipManager.getShipPosition(ship));
         }
-
-        var icon = getSlotById(ship.slot, deploymentSprites);
-        return icon.isValidDeploymentPosition(hex);
+        if(gamedata.isTerrain(ship.shipSizeClass, ship.userid)) {//return true;
+            return validateTerrainDeployment(hex);
+        }else{    
+            var icon = getSlotById(ship.slot, deploymentSprites);
+            return icon.isValidDeploymentPosition(hex);
+        }
         /*
          var slot = deployment.getValidDeploymentArea(ship);
         hexpos = hexgrid.hexCoToPixel(hexpos.x, hexpos.y);

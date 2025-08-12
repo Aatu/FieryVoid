@@ -9,7 +9,7 @@ window.DeploymentIcon = function () {
         this.color = getColorByType(type);
         this.opacity = 0.5;        
         if(type == "terrain"){
-            this.opacity = 0.3;
+            this.opacity = 0.2;
         }
 
         this.mesh = new THREE.Object3D();

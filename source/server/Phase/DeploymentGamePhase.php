@@ -40,7 +40,7 @@ class DeploymentGamePhase implements Phase
     }
 
     private static function validateDeploymentArea($gamedata, $ship, $move){
-
+        if($ship->isTerrain()) return true; //When manually placing Terrain, they can go anywhere.
         $slot = $gamedata->slots[$ship->slot];
         $hexpos = Mathlib::hexCoToPixel($move->position);
 
