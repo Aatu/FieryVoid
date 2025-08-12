@@ -1,12 +1,27 @@
 <?php
-include_once 'global.php';
-if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
+
+// Start output buffer with Brotli/Gzip support
+if (!headers_sent() && !ini_get('zlib.output_compression')) {
+    ob_start();
+}
+
+// Load global config and classes
+require_once 'global.php';
+
+// Sessions
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// Redirect if not logged in
+if (empty($_SESSION["user"])) {
     header('Location: index.php');
+    exit;
 }
-$games = "[]";
-if (isset($_SESSION["user"])) {
-    $games = json_encode(Manager::getTacGames($_SESSION["user"]), JSON_NUMERIC_CHECK);
-}
+
+// Fetch games for logged-in user
+$userid = (int)$_SESSION["user"];
+$games = json_encode(Manager::getTacGames($userid), JSON_NUMERIC_CHECK);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -74,14 +89,14 @@ if (isset($_SESSION["user"])) {
     </div>
 
     <div class="resources">
-      <h3>Latest Updates — July 2025</h3>
+      <h3>Latest Updates — August 2025</h3>
       <ul class="updates-list">
-        <li><strong>Ruler/LoS Tool Added</strong> - New ruler and line of sight checker added to game, access by clicking side button or pressing 'R' key.</li>        
-        <li><strong>Line of Sight Bugfixes</strong> - Methods reviewed and tightened for fringe cases that may have led to incorrect results.</li>
-        <li><strong>Documentation</strong> - Faction Guide, FAQ and Enhancement documents received further updates.</li>
-        <li><strong>Vorlon Petals</strong> - Opening petals now better refelct B5 Wars rules.</li>
-        <li><strong>Styles</strong> - New website's styles continue to be refined and improved, notably in the Info Tab and for mobile browsers.</li>
-        <li><strong>Bug Fixes/Improvements</strong> - Too many to list, keep the reports coming!</li>                                                    
+        <li><strong>Ruler / LoS Tool</strong> - New ruler and line of sight checker added to game, access by clicking side button or pressing the 'R' key.</li>        
+        <li><strong>Line of Sight</strong> - Methods reviewed and tightened for fringe cases that may have led to incorrect results.</li>
+        <li><strong>Rules & Info</strong> - Faction Guide, FAQ and Enhancement documents received further updates.</li>
+        <li><strong>Vorlon Petals</strong> - Opening petals / boosting Power Capacitor now better reflects B5 Wars TT rules.</li>
+        <li><strong>Styles</strong> - Styles on the new website continue to be refined, for example in the Info Tab and for mobile browsers.</li>
+        <li><strong>Bug Fixes</strong> - Too many to list, keep the reports coming!</li>                                                    
         <!--<li><strong>6 Jun</strong> - Overlay colors, deployment zone tweaks, UI fixes. Pulsar mine fixed, tooltip/text readability improved.</li>-->
       </ul>
     </div>

@@ -313,11 +313,15 @@ class Manager{
 
             if (!$force && $gdS->waiting && !$gdS->changed && $gdS->status != "LOBBY")
                 return "{}";
-
+            /* //OLD VERION
             $json = json_encode($gdS->stripForJson(), JSON_NUMERIC_CHECK);
-
-
             //Debug("GAME: $gameid Player: $userid requesting gamedata. RETURNING NEW JSON");
+            return $json;
+            */
+            //NEW VERSION FOR PHP 8 - Aug 2025
+            $data = $gdS->stripForJson();
+            $json = json_encode($data, JSON_NUMERIC_CHECK | JSON_PARTIAL_OUTPUT_ON_ERROR);
+            unset($data); // free memory early
             return $json;
 
         }
@@ -668,6 +672,15 @@ class Manager{
     }
     
     private static function getShipsFromJSON($json) {
+
+        // Defensive: if input is already an array, skip json_decode
+        if (is_array($json)) {
+            $array = $json;
+        } else {
+            $array = json_decode($json, true);
+        }
+
+
         $ships = array();
         $array = json_decode($json, true);
         if (!is_array($array)) return $ships;

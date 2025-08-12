@@ -724,7 +724,7 @@ class DBManager
             throw $e;
         }
     }
-
+/*
         //Update depavailable at start of game.
         public function updatePlayerStatusDeploy($gameid, $userid, $slot, $phase, $turn, $minDeploy)
     {
@@ -743,7 +743,7 @@ class DBManager
             throw $e;
         }
     }
-    
+*/    
     public function setPlayerWaitingStatus($playerid, $gameid, $waiting)
     {
         try {

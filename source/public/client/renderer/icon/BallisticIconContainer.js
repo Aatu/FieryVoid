@@ -100,10 +100,10 @@ window.BallisticIconContainer = function () {
 
 	
     function generateReinforcementHexes(gamedata) {
+ 		if(gamedata.gamephase == -1) return;
+
         gamedata.ships
-			//.filter(ship => !ship.flight) 
-            .filter(ship => shipManager.getTurnDeployed(ship) == gamedata.turn && gamedata.turn > 1 && gamedata.gamephase > -1)
-            //.filter(ship => gamedata.isMyorMyTeamShip(ship))
+            .filter(ship => shipManager.getTurnDeployed(ship) == gamedata.turn && gamedata.turn > 1 && !shipManager.shouldBeHidden(ship))
             .forEach(ship => {
                 const pos = shipManager.getShipPosition(ship);
                 const posGame = this.coordinateConverter.fromHexToGame(pos);
@@ -494,35 +494,41 @@ window.BallisticIconContainer = function () {
 
 	//Called during movement phase to recreate lines after a target ship moves.
     BallisticIconContainer.prototype.updateLinesForShip = function (ship, iconContainer) {
-        let visible = false;
 
-        this.ballisticLineIcons = this.ballisticLineIcons.filter(icon => {
-            if (icon.targetId === ship.id) {
-                if (icon.lineSprite.isVisible) visible = true;
-                this.scene.remove(icon.lineSprite.mesh);
-                icon.lineSprite.destroy();
-                return false;
+		var wasVisibleTarget = false; //Variable to track if destroyed lines were visible. If one was, they all were.
+		
+		this.ballisticLineIcons = this.ballisticLineIcons.filter((lineIcon) => {
+			// Destroy lines where the ship is the target.
+			if (lineIcon.targetId === ship.id) {
+			    if (lineIcon.lineSprite.isVisible) wasVisibleTarget = true;
+			    this.scene.remove(lineIcon.lineSprite.mesh);
+			    lineIcon.lineSprite.destroy();
+			    return false;
+			}else{		    
+		    	return true;
+			}
+		});
+
+		//Now recreate line using usual method.
+        var allBallistics = weaponManager.getAllFireOrdersForAllShipsForTurn(gamedata.turn, 'ballistic');			
+		allBallistics.forEach(function (ballistic) {
+			if (ship.id === ballistic.targetid) {				
+				createOrUpdateBallisticLines.call(this, ballistic, iconContainer, gamedata.turn);
+			}
+		}, this);
+
+		//Check if lines were visible and if so continue to show.
+        this.ballisticLineIcons.forEach(function (lineIcon) {
+            if (lineIcon.targetId === ship.id) {
+	            if(!wasVisibleTarget){
+	            	lineIcon.lineSprite.hide();
+	            	lineIcon.lineSprite.isVisible = false;	 	            
+            	}else{
+	            	lineIcon.lineSprite.show();
+	            	lineIcon.lineSprite.isVisible = true;	            		
+				}
             }
-            return true;
-        });
-
-        const allBallistics = weaponManager.getAllFireOrdersForAllShipsForTurn(gamedata.turn, 'ballistic');
-        allBallistics.forEach(ballistic => {
-            if (ballistic.targetid === ship.id) {
-                createOrUpdateBallisticLines.call(this, ballistic, iconContainer, gamedata.turn);
-            }
-        });
-
-        if (visible) {
-            this.ballisticLineIcons.forEach(icon => {
-                if (icon.targetId === ship.id && icon.lineSprite) {
-                    icon.lineSprite.show();
-                    icon.lineSprite.isVisible = true;
-                }
-            });
-        }
-
-        return this;
+        });        
     };
 
     function getBallisticLineIcon(id) {

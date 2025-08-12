@@ -144,15 +144,10 @@ class TacGamedata {
         
         foreach ($this->ships as $ship)
         {
-            //if ($this->slots[$ship->slot]->depavailable > $this->turn)
-            //$ship->unavailable = true;
-            //Changed to new method for detecting undeployed ships - DK May 2025
-            //$turnDeploys = max($ship->deploysOnTurn, $this->slots[$ship->slot]->depavailable);
-            $turnDeploys = $this->slots[$ship->slot]->depavailable;
+            $turnDeploys = $ship->getTurnDeployed($this);
             
             if($turnDeploys > $this->turn){
                 $ship->unavailable = true;
-                //$ship->deploysOnTurn = $turnDeploys; //If slot deploy turn was higher than 1, set ship marker accordingly.  Ship enhancements will reset marker later if deploy turn was actually set higher for ship.
             } 
         }
     }

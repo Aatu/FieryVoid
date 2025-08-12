@@ -8,6 +8,7 @@ window.ajaxInterface = {
     submiting: false,
     //	fastpolling: false,
 
+    /* //OLD VERSION
     getShipsForFaction: function getShipsForFaction(factionRequest, getFactionShipsCallback) {
         $.ajax({
             type: 'POST',
@@ -18,12 +19,36 @@ window.ajaxInterface = {
             error: ajaxInterface.errorAjax
         });
     },
+    */
 
+    //NEW VERSION FOR PHP 8    
+    getShipsForFaction: function getShipsForFaction(factionRequest, getFactionShipsCallback) {
+        fetch('gamelobbyloader.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ faction: factionRequest })
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('Network response was not ok');
+            return response.json();
+        })
+        .then(data => {
+            if (data.error) {
+                ajaxInterface.errorAjax(null, null, data.error);
+                return;
+            }
+            getFactionShipsCallback(data);
+        })
+        .catch(error => {
+            ajaxInterface.errorAjax(null, null, error.message);
+        });
+    },
 
     react: function react() {
         alert("callback");
     },
 
+/* //OLD VERSION
     submitGamedata: function submitGamedata() {
 
         if (ajaxInterface.submiting) return;
@@ -43,7 +68,51 @@ window.ajaxInterface = {
 
         gamedata.goToWaiting();
     },
+*/
 
+//New version - DK July 2025
+submitGamedata: function submitGamedata() {
+    if (ajaxInterface.submiting) return;
+
+    ajaxInterface.submiting = true;
+
+    // ✅ Build the payload using your existing function
+    const gd = ajaxInterface.construcGamedata();
+
+    // ✅ Force ships into a proper JSON string
+    if (typeof gd.ships !== 'string') {
+        gd.ships = JSON.stringify(gd.ships);
+    }
+
+    // ✅ Use JSON to avoid PHP array serialization quirks
+    $.ajax({
+        type: 'POST',
+        url: 'gamedata.php',
+        contentType: 'application/json; charset=utf-8', // ✅ send JSON body
+        dataType: 'json',                               // ✅ expect JSON back
+        data: JSON.stringify(gd),                       // ✅ encode full payload
+        timeout: 15000,                                 // ✅ prevent long hangs
+        success: function (response) {
+            ajaxInterface.submiting = false;
+
+            if (response && response.error) {
+                console.error("Submit failed:", response);
+                ajaxInterface.errorAjax(null, null, response.error);
+            } else {
+                ajaxInterface.successSubmit(response);
+            }
+        },
+        error: function (xhr, status, error) {
+            ajaxInterface.submiting = false;
+            ajaxInterface.errorAjax(xhr, status, error);
+        }
+    });
+
+    // ✅ Indicate we’re waiting for the server response
+    gamedata.goToWaiting();
+},
+
+/* //OLD VERSION
 submitSlotAction: function submitSlotAction(action, slotid, callback) {
     ajaxInterface.submiting = true;
 
@@ -59,6 +128,53 @@ submitSlotAction: function submitSlotAction(action, slotid, callback) {
         error: ajaxInterface.errorAjax
     });
 },
+*/
+
+//New version for PHP8
+submitSlotAction: function submitSlotAction(action, slotid, callback) {
+    if (ajaxInterface.submiting) return;
+    ajaxInterface.submiting = true;
+
+    $.ajax({
+        type: 'POST',
+        url: 'slot.php',
+        dataType: 'json', // ✅ Expect JSON
+        data: { 
+            action: action,
+            gameid: gamedata.gameid,
+            slotid: slotid 
+        },
+        timeout: 15000, // ✅ prevent hanging requests
+    })
+    .done(function (response, textStatus, xhr) {
+        ajaxInterface.submiting = false;
+
+        // ✅ Handle HTTP-level errors first
+        if (xhr.status !== 200) {
+            console.error(`Slot action failed [${xhr.status}]`);
+            ajaxInterface.errorAjax(xhr, textStatus, response?.error || "Server error");
+            return;
+        }
+
+        // ✅ Handle application-level errors
+        if (response && response.error) {
+            console.warn("Slot action error:", response.error);
+            ajaxInterface.errorAjax(xhr, textStatus, response.error);
+            return;
+        }
+
+        // ✅ Normal success
+        ajaxInterface.successSubmit(response);
+        if (typeof callback === "function") callback(response);
+    })
+    .fail(function (xhr, textStatus, errorThrown) {
+        ajaxInterface.submiting = false;
+        let message = errorThrown || textStatus || "Unknown network error";
+        console.error("Slot action AJAX fail:", message, xhr.responseText);
+        ajaxInterface.errorAjax(xhr, textStatus, message);
+    });
+},
+
 
     construcGamedata: function construcGamedata() {
 
@@ -72,8 +188,8 @@ submitSlotAction: function submitSlotAction(action, slotid, callback) {
                 'slot': ship.slot,
                 'id': ship.id,
                 'name': ship.name,
-				'pointCostEnh': ship.pointCostEnh,
-				'pointCostEnh2': ship.pointCostEnh2
+				'pointCostEnh': Math.round(ship.pointCostEnh),
+				'pointCostEnh2': Math.round(ship.pointCostEnh2)
             };
             newShip.movement = Array();
             newShip.EW = Array();
@@ -192,6 +308,8 @@ submitSlotAction: function submitSlotAction(action, slotid, callback) {
         return gd;
     },
 
+
+    //Not sure what this one is for, not used as far as I can see... - DK
     construcGamedata2: function construcGamedata2() {
 
         var tidyships = jQuery.extend(true, {}, gamedata.ships);

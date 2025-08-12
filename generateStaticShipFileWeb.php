@@ -1,97 +1,79 @@
 <?php
-/*11.12.2021 - remade so every faction is compiled separately (one of programmers encountered memory allocation problems)
-.bak file saved just in case
-*/
-	
-ob_start("ob_gzhandler"); 	
-include_once './source/public/global.php';
+declare(strict_types=1);
 
+/**
+ * generateStaticShipFileWeb.php
+ * Generates static JS files for all ships, split per faction.
+ * Updated for PHP 8 + Apache + Brotli/Gzip
+ */
 
-/*
-$factionTest = ShipLoader::getAllShips("Minbari");
-	print("TEST HERE");
-	print("\n");
-	return;
-*/
-
-
-//$ships = ShipLoader::getAllShips(null);
-$allFactions = ShipLoader::getAllFactions();
-
-
-/* original - everything in one file
-foreach ($ships as $faction) {
-    foreach ($faction as $ship) {
-        //print(gettype($ship));
-        if ($ship && $ship instanceof BaseShip) {
-            print("generating: ");
-			print($ship->faction);
-			print(" ");
-			print($ship->phpclass);
-			print("\n");
-            $data[$ship->faction][$ship->phpclass] = $ship;
-        }
-    }
+//// ─── Output Compression ─────────────────────────────────────────────
+if (!headers_sent() && !ini_get('zlib.output_compression')) {
+    // Apache with mod_brotli will auto-handle Brotli if client supports it.
+    // ob_gzhandler is safe fallback for gzip/deflate.
+    ob_start('ob_gzhandler');
+} else {
+    ob_start();
 }
-file_put_contents('./source/public/static/ships.js', 'window.staticShips = ' . json_encode($data));
-*/
 
+//// ─── Includes ──────────────────────────────────────────────────────
+require_once __DIR__ . '/source/public/global.php';
 
-
-$fileBase = './source/public/static/ships';
+//// ─── Config ────────────────────────────────────────────────────────
+$fileBase = __DIR__ . '/source/public/static/ships';
 $factionNo = 0;
 
-
-
-foreach($allFactions as $factionName){
-	$data = [];
-	
-	$shipsCurr = ShipLoader::getAllShips($factionName);
-	
-	print("<br/><br/>");
-	print($factionName);
-	print(": \n");
-
-	// attempting to split into multiple smaller files (so intermediate caches don't notice)
-	foreach ($shipsCurr as $factionKey=>$shipsOfFaction) foreach ($shipsOfFaction as $ship) {
-		if ($ship && $ship instanceof BaseShip) {
-		    /*
-			print("generating: ");
-			print($ship->faction);
-			print(" ");
-			print($ship->phpclass);
-			print("\n");
-			*/
-			print("<br/> - ");
-			print($ship->phpclass);
-			print("\n");
-			$data[$ship->phpclass] = $ship;
-		}
-	}
-	
-	
-	$shipsCurr = ''; //just clear memory...
-	
-	$factionNo++;
-	$fileName = $fileBase . $factionNo . '.js';
-	$varBase = "window.staticShips";
-	$varBase .= '["' . $factionName . '"]='; 
-	file_put_contents($fileName, $varBase  . json_encode($data) . ';');
+//// ─── Fetch All Factions ─────────────────────────────────────────────
+$allFactions = ShipLoader::getAllFactions();
+if (!$allFactions) {
+    exit("<b>Error:</b> No factions found.");
 }
 
+//// ─── Generate Per-Faction JS Files ──────────────────────────────────
+foreach ($allFactions as $factionName) {
+    $data = [];
 
-//set up "file 0" with variable definition
-$fileName = $fileBase . '0.js';
-file_put_contents($fileName, 'window.staticShips = {};');
+    $shipsCurr = ShipLoader::getAllShips($factionName);
+    echo "<br/><br/><strong>$factionName</strong>:<br/>\n";
 
+    foreach ($shipsCurr as $factionKey => $shipsOfFaction) {
+        foreach ($shipsOfFaction as $ship) {
+            if ($ship && $ship instanceof BaseShip) {
+                // Debug output
+                echo " &nbsp; - {$ship->phpclass}<br/>\n";
 
-//add base file - with includes:
-//<script src="static/ships.php"></script>
-$fileName = $fileBase . '.php';
+                // Store only what is needed for the static cache
+                $data[$ship->phpclass] = $ship;
+            }
+        }
+    }
+
+    // Free memory after each faction
+    unset($shipsCurr);
+
+    // Write faction file
+    $factionNo++;
+    $fileName = "{$fileBase}{$factionNo}.js";
+    $varBase = "window.staticShips[\"{$factionName}\"]=";
+    file_put_contents($fileName, $varBase . json_encode($data, JSON_PARTIAL_OUTPUT_ON_ERROR | JSON_UNESCAPED_UNICODE) . ';');
+
+    unset($data); // Free memory
+}
+
+//// ─── Base Files ─────────────────────────────────────────────────────
+
+// JS file 0 initializes the variable
+file_put_contents("{$fileBase}0.js", 'window.staticShips = {};');
+
+// PHP file includes all JS files sequentially
 $includeText = '';
-for ($i=0;$i<=$factionNo;$i++){
-	$includeText .= '<script src="static/ships' . $i . '.js"></script>';
+for ($i = 0; $i <= $factionNo; $i++) {
+    $includeText .= '<script src="static/ships' . $i . '.js"></script>' . PHP_EOL;
 }
-file_put_contents($fileName, $includeText);
+file_put_contents("{$fileBase}.php", $includeText);
 
-print("<br/><br/>\n <big>ships generated!</big>\n\n");
+//// ─── Output Result ─────────────────────────────────────────────────
+echo "<br/><br/><big>Ships generated for {$factionNo} factions!</big><br/>\n";
+
+ob_end_flush();
+exit;

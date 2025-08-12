@@ -72,7 +72,7 @@ window.gamedata = {
 			powerRating = 'Tier 1; Major Faction';
 			break;
 		  case 'Drakh':
-			powerRating = 'Tier 1, Minor Custom faction';
+			powerRating = 'Tier 1, Major Custom faction';
 			break;
 		  case 'Drazi Freehold':
 			powerRating = 'Tier 1; League Faction';
@@ -1772,8 +1772,10 @@ parseFactions: function parseFactions(jsonFactions) {
                     h.appendTo(targetNode);
 					//search for variants of the base design above...
 					for (var indexV = 0; indexV < jsonShips[faction].length; indexV++){
-						shipV = shipList[indexV];
+						shipV = shipList[indexV];													
 						if(shipV.variantOf != ship.shipClass) continue;//that's not a variant of current base ship
+						isCustomShip = isCustomFaction || shipV.unofficial === true;
+						let customShipHighlight = (!isCustomFaction && shipV.unofficial === true) ? ' highlight-custom-ship' : '';						
 						shipDisplayName = this.prepareClassName(shipV);
 						pointCostFull = shipV.pointCost;
 						if (shipV.flight && (shipV.maxFlightSize != 1)) pointCostFull = pointCostFull + ' (' + pointCostFull/6 + ' ea.)';//for fighters: display price per craft, too!
@@ -2021,7 +2023,7 @@ clickTakeslot: function clickTakeslot() {
         }
     }
 
-    // ✅ Submit slot action first
+    /*// ✅ Submit slot action first
     ajaxInterface.submitSlotAction("takeslot", slotid, function () {
         // ✅ After success, reload factions only
         $.getJSON("getFactions.php")
@@ -2034,11 +2036,10 @@ clickTakeslot: function clickTakeslot() {
                 location.reload(); // fallback if something goes wrong
             });
     });
-	/*
+	*/
 	ajaxInterface.submitSlotAction("takeslot", slotid, function () {
 		gamedata.reloadFactions();
 	});
-	*/
 },
 
 reloadFactions: function reloadFactions() {
@@ -2089,11 +2090,11 @@ reloadFactions: function reloadFactions() {
 			return;
 		}
 			
-		ajaxInterface.submitSlotAction("leaveslot", slotid);
-		/*ajaxInterface.submitSlotAction("leaveslot", slotid, function () {
+		//ajaxInterface.submitSlotAction("leaveslot", slotid);
+		ajaxInterface.submitSlotAction("leaveslot", slotid, function () {
 			reloadFactions();
 		});
-		*/
+
 
 		var hasOtherSlots = 0; 
 		for (var i in gamedata.slots)  { //check all slots

@@ -14,7 +14,6 @@ class DeploymentGamePhase implements Phase
             $minTurnDeploy = $gameData->getMinTurnDeployedSlot($slot->slot, $slot->depavailable);
             if($minTurnDeploy > $gameData->turn){ //Entire slot deploys after current turn
                 //Set lastphase, and lastTurn to skip Initial Orders on this turn
-                //$dbManager->updatePlayerStatusDeploy($gameData->id, $slot->playerid, $slot->slot, 1, $gameData->turn, $minTurnDeploy);
                 $dbManager->updatePlayerStatusSlot($gameData->id, $slot->playerid, $slot->slot, 1, $gameData->turn);                
             }     
         } 

@@ -1,4 +1,108 @@
-<?php 
+<?php
+if (!headers_sent() && !ini_get('zlib.output_compression')) {
+    ob_start();
+}
+
+header('Content-Type: application/json; charset=utf-8');
+
+require_once 'global.php';
+
+/* //SAFER VERSION DEPENDING ON APACHE SETTINGS
+declare(strict_types=1);
+
+// ✅ Output compression (safe)
+if (!headers_sent() && !ini_get('zlib.output_compression')) {
+    ob_start('ob_gzhandler');
+} else {
+    ob_start();
+}
+
+header('Content-Type: application/json; charset=utf-8');
+
+require_once 'global.php';
+*/
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+$playerid = $_SESSION['user'] ?? null;
+session_write_close(); // ✅ release lock
+
+// Handle JSON POST
+if ($_SERVER['REQUEST_METHOD'] === 'POST' &&
+    isset($_SERVER["CONTENT_TYPE"]) &&
+    strpos($_SERVER["CONTENT_TYPE"], "application/json") !== false) {
+
+    $input = json_decode(file_get_contents('php://input'), true);
+    if (is_array($input)) {
+        $_POST = $input;
+    }
+}
+
+try {
+    if (isset($_POST["gameid"])) {
+        if (!$playerid) {
+            throw new Exception("Not logged in.");
+        }
+
+        $gameid     = $_POST["gameid"];
+        $turn       = $_POST["turn"] ?? 0;
+        $phase      = $_POST["phase"] ?? 0;
+        $activeship = $_POST["activeship"] ?? [];
+        $status     = $_POST["status"] ?? '';
+        $slotid     = $_POST["slotid"] ?? 0;
+
+        // ✅ Always pass ships as JSON string to Manager
+        $ships = $_POST["ships"] ?? '[]';
+        if (is_array($ships)) {
+            $ships = json_encode($ships);
+        }
+
+        $ret = Manager::submitTacGamedata(
+            $gameid,
+            $playerid,
+            $turn,
+            $phase,
+            $activeship,
+            $ships,  // ✅ Manager expects string
+            $status,
+            $slotid
+        );
+
+    } elseif (isset($_GET["gameid"])) {
+        $gameid     = $_GET["gameid"];
+        $turn       = $_GET["turn"] ?? 0;
+        $phase      = $_GET["phase"] ?? 0;
+        $activeship = $_GET["activeship"] ?? [];
+        $force      = isset($_GET["force"]);
+
+        $ret = Manager::getTacGamedataJSON(
+            $gameid,
+            $playerid,
+            $turn,
+            $phase,
+            $activeship,
+            $force
+        );
+
+    } else {
+        $ret = '{"error":"Omitting required data"}';
+    }
+
+} catch (Exception $e) {
+    $logid = Debug::error($e);
+    $ret = json_encode([
+        "error" => $e->getMessage(),
+        "code"  => $e->getCode(),
+        "logid" => $logid
+    ]);
+}
+
+echo $ret;
+ob_end_flush();
+exit;
+
+/* //Old version
 	ob_start("ob_gzhandler"); 
     include_once 'global.php';
 
@@ -38,3 +142,4 @@
 	print($ret);
 
 	ob_end_flush();
+*/

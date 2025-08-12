@@ -5,7 +5,8 @@ class OrionGammaAM extends StarBaseSixSections{
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 1900;
-		$this->faction = "Earth Alliance (defenses)";
+		//$this->faction = "Earth Alliance (defenses)";
+        $this->faction = "Earth Alliance";       
 		$this->phpclass = "OrionGammaAM";
 		$this->shipClass = "Orion Battle Station (Gamma)";
 		$this->fighters = array("heavy"=>36); 
