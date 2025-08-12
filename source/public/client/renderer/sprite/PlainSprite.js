@@ -10,7 +10,7 @@ window.PlainSprite = function () {
         this.mesh = createPlane.call(this, size, color, opacity);
 
         // If avail is provided, create and add a text sprite on top
-        if (typeof avail === 'number') {
+        if (typeof avail === 'number' && avail > 1) {
             this.addTextSprite(avail);
         }
     }
