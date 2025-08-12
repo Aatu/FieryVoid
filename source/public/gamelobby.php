@@ -586,7 +586,7 @@ if ($asteroids == false && $moons == false) {
             <label style="margin-left: 5px;">Tier 2 <input type="checkbox" class="tier-filter" data-tier="Tier 2" checked></label>
             <label style="margin-left: 5px;">Tier 3 <input type="checkbox" class="tier-filter" data-tier="Tier 3" checked></label>
             <label style="margin-left: 5px;">Ancients <input type="checkbox" class="tier-filter" data-tier="Tier Ancients" checked></label>
-            <label style="margin-left: 5px;">Other <input type="checkbox" class="tier-filter" data-tier="Tier Other"></label>
+            <label style="margin-left: 5px;">Other <input type="checkbox" class="tier-filter" data-tier="Tier Other" checked></label>
             <span style="margin-left: 6px; margin-right: 6px; font-size: 16px; font-weight: bold">|</span>
             <label style="margin-left: 5px;">Show Custom<input type="checkbox" id="toggleCustom" class="yellow-tick"></label>
             <span id="customDropdown" style="display:none; margin-left: 10px;">
