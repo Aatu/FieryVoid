@@ -14,7 +14,7 @@ class BuyingGamePhase implements Phase
 
         foreach ($servergamedata->ships as $ship){
 
-            if($ship->userid != -5){ //No point doing any of this for Asteroids, they will place separately in next part.
+            if($ship->userid != -5){ //No point doing any of this for generated, they will place separately in next part.
                 $h = 3;
                 if ($ship->team == 1){
                     $t1++;
