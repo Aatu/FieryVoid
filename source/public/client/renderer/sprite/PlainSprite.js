@@ -37,7 +37,7 @@ PlainSprite.prototype.addTextSprite = function(avail) {
     ctx.font = 'bold 48px Arial';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText("Turn " + avail + "+", canvas.width / 2, canvas.height / 2);
+    ctx.fillText("Turn " + avail, canvas.width / 2, canvas.height / 2);
 
     var texture = new THREE.CanvasTexture(canvas);
     texture.minFilter = THREE.LinearFilter;
