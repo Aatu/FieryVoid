@@ -89,20 +89,24 @@ window.ShipIcon = function () {
     };
 
 	//shouldn't use provided heading as it's GET method
-    ShipIcon.prototype.getFacing = function (facing) {
-		var facingActual = this.shipSprite.mesh.rotation.z;
-		this.shipDirectionOfProwSprite.mesh.rotation.z = facingActual;
+    ShipIcon.prototype.getFacing = function (facing) {        
+        var facingActual = this.shipSprite.mesh.rotation.z;
+        if(!this.terrain) this.shipDirectionOfProwSprite.mesh.rotation.z = facingActual;
         return mathlib.radianToDegree(facingActual);
     };
 
     ShipIcon.prototype.setFacing = function (facing) {
-		var facingActual = mathlib.degreeToRadian(facing);
-		this.shipDirectionOfProwSprite.mesh.rotation.z = facingActual;
-        this.shipSprite.mesh.rotation.z = facingActual;//mathlib.degreeToRadian(facing);
+     
+    var facingActual = mathlib.degreeToRadian(facing);
+    if(!this.terrain) this.shipDirectionOfProwSprite.mesh.rotation.z = facingActual;  //No sprite for Terrain 
+    this.shipSprite.mesh.rotation.z = facingActual;//mathlib.degreeToRadian(facing);
+        
     };
 
     ShipIcon.prototype.setHeading = function (heading) {
-        this.shipDirectionOfMovementSprite.mesh.rotation.z = mathlib.degreeToRadian(heading);
+        if(!this.terrain){ //No sprite for Terrain  
+            this.shipDirectionOfMovementSprite.mesh.rotation.z = mathlib.degreeToRadian(heading);
+        }
     };
 
 	//this function is never used actually... and certainly shouldn't use provided heading as it's GET method
@@ -156,16 +160,20 @@ window.ShipIcon = function () {
     ShipIcon.prototype.setHighlighted = function (value) {
         if (value) {
             this.mesh.position.z = 500;
-            this.shipDirectionOfProwSprite.show();
-            this.shipDirectionOfMovementSprite.show();
+            if(!this.terrain){ //No sprite for Terrain  
+                this.shipDirectionOfProwSprite.show();
+                this.shipDirectionOfMovementSprite.show();
+            }
         } else {
             if (this.selected) {
                 this.mesh.position.z = 100;
             } else {
                 this.mesh.position.z = 0;
             }
-            this.shipDirectionOfProwSprite.hide();
-            this.shipDirectionOfMovementSprite.hide();
+            if(!this.terrain){ //No sprite for Terrain  
+                this.shipDirectionOfProwSprite.hide();
+                this.shipDirectionOfMovementSprite.hide();
+            }
         }
 
         this.selected = value;
@@ -210,15 +218,15 @@ window.ShipIcon = function () {
 
 	    var spriteWidthDirection = Math.min(this.size / 1.5, maxWidth-25);
 	    var spriteHeightDirection = Math.min(this.size / 1.5, maxHeight-25);
+        if(!this.terrain){ //No sprite for Terrain
+            this.shipDirectionOfProwSprite = new window.webglSprite('./img/directionOfProw.png', { width: spriteWidthDirection, height: spriteHeightDirection }, -2);
+            this.mesh.add(this.shipDirectionOfProwSprite.mesh);
+            this.shipDirectionOfProwSprite.hide();
 
-	    this.shipDirectionOfProwSprite = new window.webglSprite('./img/directionOfProw.png', { width: spriteWidthDirection, height: spriteHeightDirection }, -2);
-	    this.mesh.add(this.shipDirectionOfProwSprite.mesh);
-	    this.shipDirectionOfProwSprite.hide();
-
-	    this.shipDirectionOfMovementSprite = new window.webglSprite('./img/directionOfMovement.png', { width: spriteWidthDirection, height: spriteHeightDirection }, -2);
-	    this.mesh.add(this.shipDirectionOfMovementSprite.mesh);
-	    this.shipDirectionOfMovementSprite.hide();
-
+            this.shipDirectionOfMovementSprite = new window.webglSprite('./img/directionOfMovement.png', { width: spriteWidthDirection, height: spriteHeightDirection }, -2);
+            this.mesh.add(this.shipDirectionOfMovementSprite.mesh);
+            this.shipDirectionOfMovementSprite.hide();
+        }    
 	    this.shipSprite = new window.webglSprite(imagePath, { width: this.size / 2, height: this.size / 2 }, 1);
         
         this.shipSprite.setOverlayColor(
