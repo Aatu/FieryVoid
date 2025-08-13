@@ -2708,7 +2708,7 @@ class RammingAttack extends Weapon{
 			$target = $this->unit;
 			$targetPos = $target->getHexPos();
 
-			if($fireOrder->damageclass != 'TerrainCollision' && $fireOrder->damageclass != 'TerrainCrash') $fireOrder->chosenLocation = $this->getRamHitLocation($shooter, $gamedata, $targetPos);//to be redetermined!
+			$fireOrder->chosenLocation = $this->getRamHitLocation($shooter, $gamedata, $targetPos);//to be redetermined!		
 			$damage = $this->getReturnDamage($fireOrder);
         		$damage = $this->getDamageMod($damage, $shooter, $target, $pos, $gamedata);
         		$damage -= $target->getDamageMod($shooter, $pos, $gamedata->turn, $this);
@@ -2726,6 +2726,7 @@ class RammingAttack extends Weapon{
 					100, 100, 1, 1, 0,
 					0,0,'AutoRam',10000
 				);
+				$fireOrder->chosenLocation = $this->getRamHitLocation($shooter, $gamedata, $targetPos);//to be redetermined!				
 				if(!$this->checkAlreadyRammed($fireOrder->targetid)) $newFireOrder->pubnotes = " Automatic ramming - return damage.";
 				$newFireOrder->addToDB = true;
 				$this->fireOrders[] = $newFireOrder;				
