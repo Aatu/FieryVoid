@@ -47,11 +47,11 @@ class BuyingGamePhase implements Phase
                 $deploymentZone = $this->getGamespace($gameData);
                 
                 if ($ship instanceof moonSmall || $ship instanceof moon || $ship instanceof moonLarge) {
-                    $maxX = ($deploymentZone['width'] / 2) - 7;
-                    $maxY = ($deploymentZone['height'] / 2) - 5;  
+                    $maxX = ($deploymentZone['width'] / 2) - 6;
+                    $maxY = ($deploymentZone['height'] / 2) - 4;  
                 } else {
-                    $maxX = ($deploymentZone['width'] / 2) - 3;
-                    $maxY = ($deploymentZone['height'] / 2) - 2;
+                    $maxX = ($deploymentZone['width'] / 2) - 2;
+                    $maxY = ($deploymentZone['height'] / 2) - 1;
                 }    
 
                 // Generate a unique random position
@@ -72,7 +72,7 @@ class BuyingGamePhase implements Phase
                             $dy = $y - $my;
                             $distance = sqrt($dx * $dx + $dy * $dy); // Euclidean distance
                             
-                            if ($distance < 6) { // Ensure moons are at least 6 hexes apart
+                            if ($distance < 7) { // Ensure moons are at least 6 hexes apart
                                 $tooClose = true;
                                 break;
                             }
