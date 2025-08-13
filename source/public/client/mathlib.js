@@ -478,8 +478,8 @@ window.mathlib = {
 			opacity: 0.8
 		});
 		const points = [
-			new THREE.Vector3(p1.x, p1.y, 100),
-			new THREE.Vector3(p2.x, p2.y, 100)
+			new THREE.Vector3(p1.x, p1.y, 501),
+			new THREE.Vector3(p2.x, p2.y, 501)
 		];
 		const geometry = new THREE.BufferGeometry().setFromPoints(points);
 		const line = new THREE.Line(geometry, material);
@@ -511,7 +511,7 @@ window.mathlib = {
 		texture.needsUpdate = true;
 		const spriteMaterial = new THREE.SpriteMaterial({ map: texture, transparent: true });
 		const sprite = new THREE.Sprite(spriteMaterial);
-		sprite.position.set(midX, midY, 500);
+		sprite.position.set(midX, midY, 501);
 		sprite.scale.set(30, 30, 1);
 		window.LosSprite.add(sprite);
 
@@ -538,7 +538,7 @@ window.mathlib = {
 
 		const markerMaterial = new THREE.SpriteMaterial({ map: markerTexture, transparent: true });
 		const markerSprite = new THREE.Sprite(markerMaterial);
-		markerSprite.position.set(p2.x, p2.y, 102); // just above the line
+		markerSprite.position.set(p2.x, p2.y, 501); // just above the line
 		markerSprite.scale.set(18, 18, 1); // adjust size if needed
 
 		window.LosSprite.add(markerSprite);

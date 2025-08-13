@@ -159,7 +159,7 @@ window.ShipIcon = function () {
 
     ShipIcon.prototype.setHighlighted = function (value) {
         if (value) {
-            this.mesh.position.z = 500;
+            this.mesh.position.z = 499;
             if(!this.terrain){ //No sprite for Terrain  
                 this.shipDirectionOfProwSprite.show();
                 this.shipDirectionOfMovementSprite.show();
