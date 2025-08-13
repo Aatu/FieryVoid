@@ -156,20 +156,16 @@ window.ShipIcon = function () {
     ShipIcon.prototype.setHighlighted = function (value) {
         if (value) {
             this.mesh.position.z = 500;
-            if(!this.terrain){
-                this.shipDirectionOfProwSprite.show();
-                this.shipDirectionOfMovementSprite.show();
-            }
+            this.shipDirectionOfProwSprite.show();
+            this.shipDirectionOfMovementSprite.show();
         } else {
             if (this.selected) {
                 this.mesh.position.z = 100;
             } else {
                 this.mesh.position.z = 0;
             }
-            if(!this.terrain){            
-                this.shipDirectionOfProwSprite.hide();
-                this.shipDirectionOfMovementSprite.hide();
-            }
+            this.shipDirectionOfProwSprite.hide();
+            this.shipDirectionOfMovementSprite.hide();
         }
 
         this.selected = value;
@@ -215,15 +211,14 @@ window.ShipIcon = function () {
 	    var spriteWidthDirection = Math.min(this.size / 1.5, maxWidth-25);
 	    var spriteHeightDirection = Math.min(this.size / 1.5, maxHeight-25);
 
-        if(!this.terrain){
-            this.shipDirectionOfProwSprite = new window.webglSprite('./img/directionOfProw.png', { width: spriteWidthDirection, height: spriteHeightDirection }, -2);
-            this.mesh.add(this.shipDirectionOfProwSprite.mesh);
-            this.shipDirectionOfProwSprite.hide();
+	    this.shipDirectionOfProwSprite = new window.webglSprite('./img/directionOfProw.png', { width: spriteWidthDirection, height: spriteHeightDirection }, -2);
+	    this.mesh.add(this.shipDirectionOfProwSprite.mesh);
+	    this.shipDirectionOfProwSprite.hide();
 
-            this.shipDirectionOfMovementSprite = new window.webglSprite('./img/directionOfMovement.png', { width: spriteWidthDirection, height: spriteHeightDirection }, -2);
-            this.mesh.add(this.shipDirectionOfMovementSprite.mesh);
-            this.shipDirectionOfMovementSprite.hide();
-        }    
+	    this.shipDirectionOfMovementSprite = new window.webglSprite('./img/directionOfMovement.png', { width: spriteWidthDirection, height: spriteHeightDirection }, -2);
+	    this.mesh.add(this.shipDirectionOfMovementSprite.mesh);
+	    this.shipDirectionOfMovementSprite.hide();
+
 	    this.shipSprite = new window.webglSprite(imagePath, { width: this.size / 2, height: this.size / 2 }, 1);
         
         this.shipSprite.setOverlayColor(
@@ -592,10 +587,8 @@ window.ShipIcon = function () {
         var heading = mathlib.hexFacingToAngle(movement.heading);
 
         this.setPosition(gamePosition);
-        if(!this.terrain){
-            this.setFacing(-facing);
-            this.setHeading(-heading);
-        }    
+        this.setFacing(-facing);
+        this.setHeading(-heading);
 
     };
 
