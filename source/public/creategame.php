@@ -186,7 +186,7 @@ print("<option value=\"".$i."\" ".$selected." >".$i."</option>");
     </div>
 
     <div class="slot" id="asteroidsDropdown" style="display:none;">
-        <label for="asteroidsSelect">SELECT NUMBER OF ASTEROIDS:</label>
+        <label for="asteroidsSelect">NUMBER OF ASTEROIDS:</label>
         <select id="asteroidsSelect" name="asteroidsCategories">
             <option value="0">None</option>              
             <option value="3">Few (3)</option>
@@ -198,7 +198,7 @@ print("<option value=\"".$i."\" ".$selected." >".$i."</option>");
             <option value="48">Zounds (48)</option>
         </select>
     </div>
-
+<!--
     <div class="slot" id="moonsDropdown" style="display:none;">
         <label for="moonsSelect">SELECT NUMBER OF MOONS:</label>
         <select id="moonsSelect" name="moonsCategories">
@@ -207,15 +207,45 @@ print("<option value=\"".$i."\" ".$selected." >".$i."</option>");
             <option value="2">Two Small</option> 
             <option value="3">Three Small</option>
             <option value="4">Four Small</option>                                    
-            <option value="5">One Large</option>
-            <option value="6">Two Large</option>
-            <option value="7">Three Large</option>                         
-            <option value="8">One Large / One Small</option>
-            <option value="9">One Large / Two Small</option>
-            <option value="10">One Large / Three Small</option>                                
+            <option value="5">One Medium</option>
+            <option value="6">Two Medium</option>
+            <option value="7">Three Medium</option>                         
+            <option value="8">One Medium / One Small</option>
+            <option value="9">One Medium / Two Small</option>
+            <option value="10">One Medium / Three Small</option>
+            <option value="11">One Large / One Small</option>
+            <option value="12">One Large / One Medium</option>
+            <option value="13">One Large / One Medium / One Small</option>                                               
         </select>
     </div>
 </div>
+-->
+
+<div class="slot" id="moonsDropdown" style="display:none;">
+    <label for="moonsSmallSelect">SMALL MOONS:</label>
+    <select id="moonsSmallSelect" name="moonsSmall">
+        <option value="0">None</option>
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+    </select>
+    <br>
+    <label for="moonsMediumSelect">MEDIUM MOONS:</label>
+    <select id="moonsMediumSelect" name="moonsMedium">
+        <option value="0">None</option>
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+    </select>
+    <br>
+    <label for="moonsLargeSelect">LARGE MOONS:</label>
+    <select id="moonsLargeSelect" name="moonsLarge">
+        <option value="0">None</option>
+        <option value="1">1</option>
+    </select>
+</div>
+
 
 <div id="desperate" class="subpanel movementspacecontainer">
     <div class="slot">

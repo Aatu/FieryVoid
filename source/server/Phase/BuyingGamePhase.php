@@ -41,80 +41,80 @@ class BuyingGamePhase implements Phase
                 $ship->movement = array($move);
             } 
 
-        // Now let's see if we have to add any terrain.
-        if (($gameData->rules->hasRuleName("asteroids") || $gameData->rules->hasRuleName("moons")) && $ship->userid == -5) {
-            // It's an asteroid or moon, so assign a unique random position.
-            $deploymentZone = $this->getGamespace($gameData);
-            
-            if ($ship instanceof moonSmall || $ship instanceof moon) {
-                $maxX = ($deploymentZone['width'] / 2) - 7;
-                $maxY = ($deploymentZone['height'] / 2) - 5;  
-            } else {
-                $maxX = ($deploymentZone['width'] / 2) - 3;
-                $maxY = ($deploymentZone['height'] / 2) - 2;
-            }    
-
-            // Generate a unique random position
-            while (true) {
-                $x = rand(-$maxX, $maxX);
-                $y = rand(-$maxY, $maxY);
+            // Now let's see if we have to add any terrain.
+            if (($gameData->rules->hasRuleName("asteroids") || $gameData->rules->hasRuleName("moons")) && $ship->userid == -5) {
+                // It's an asteroid or moon, so assign a unique random position.
+                $deploymentZone = $this->getGamespace($gameData);
                 
-                // Check for occupied hexes (applies to all)
-                if (isset($usedPositions["$x,$y"])) {
-                    continue; // Position is already taken
-                }
+                if ($ship instanceof moonSmall || $ship instanceof moon || $ship instanceof moonLarge) {
+                    $maxX = ($deploymentZone['width'] / 2) - 7;
+                    $maxY = ($deploymentZone['height'] / 2) - 5;  
+                } else {
+                    $maxX = ($deploymentZone['width'] / 2) - 3;
+                    $maxY = ($deploymentZone['height'] / 2) - 2;
+                }    
 
-                // If it's a moon, ensure it's not within 4 hexes of another moon
-                if ($ship instanceof moonSmall || $ship instanceof moon) {
-                    $tooClose = false;
-                    foreach ($moonPositions as [$mx, $my]) {
-                        $dx = $x - $mx;
-                        $dy = $y - $my;
-                        $distance = sqrt($dx * $dx + $dy * $dy); // Euclidean distance
-                        
-                        if ($distance < 6) { // Ensure moons are at least 6 hexes apart
-                            $tooClose = true;
-                            break;
+                // Generate a unique random position
+                while (true) {
+                    $x = rand(-$maxX, $maxX);
+                    $y = rand(-$maxY, $maxY);
+                    
+                    // Check for occupied hexes (applies to all)
+                    if (isset($usedPositions["$x,$y"])) {
+                        continue; // Position is already taken
+                    }
+
+                    // If it's a moon, ensure it's not within 4 hexes of another moon
+                    if ($ship instanceof moonSmall || $ship instanceof moon || $ship instanceof moonLarge) {
+                        $tooClose = false;
+                        foreach ($moonPositions as [$mx, $my]) {
+                            $dx = $x - $mx;
+                            $dy = $y - $my;
+                            $distance = sqrt($dx * $dx + $dy * $dy); // Euclidean distance
+                            
+                            if ($distance < 6) { // Ensure moons are at least 6 hexes apart
+                                $tooClose = true;
+                                break;
+                            }
+                        }
+                        if ($tooClose) {
+                            continue; // Try another position
                         }
                     }
-                    if ($tooClose) {
-                        continue; // Try another position
-                    }
-                }
 
-                // If it's an asteroid, ensure it's not within 2 hexes of any moon
-                if ($ship instanceof asteroidS || $ship instanceof asteroidM || $ship instanceof asteroidL) {
-                    $tooCloseToMoon = false;
-                    foreach ($moonPositions as [$mx, $my]) {
-                        $dx = $x - $mx;
-                        $dy = $y - $my;
-                        $distance = sqrt($dx * $dx + $dy * $dy);
+                    // If it's an asteroid, ensure it's not within 2 hexes of any moon
+                    if ($ship instanceof asteroidS || $ship instanceof asteroidM || $ship instanceof asteroidL) {
+                        $tooCloseToMoon = false;
+                        foreach ($moonPositions as [$mx, $my]) {
+                            $dx = $x - $mx;
+                            $dy = $y - $my;
+                            $distance = sqrt($dx * $dx + $dy * $dy);
 
-                        if ($distance < 4) { // Asteroids must be at least 3 hexes away from any moon
-                            $tooCloseToMoon = true;
-                            break;
+                            if ($distance < 4) { // Asteroids must be at least 3 hexes away from any moon
+                                $tooCloseToMoon = true;
+                                break;
+                            }
                         }
-                    }
-                    if ($tooCloseToMoon) {
-                        continue; // Try another position
-                    }
-                }                
+                        if ($tooCloseToMoon) {
+                            continue; // Try another position
+                        }
+                    }                
 
-                // Valid position found
-                $usedPositions["$x,$y"] = true;
-                
-                // If it's a moon, store its position
-                if ($ship instanceof moonSmall || $ship instanceof moon) {
-                    $moonPositions[] = [$x, $y];
+                    // Valid position found
+                    $usedPositions["$x,$y"] = true;
+                    
+                    // If it's a moon, store its position
+                    if ($ship instanceof moonSmall || $ship instanceof moon || $ship instanceof moonLarge) {
+                        $moonPositions[] = [$x, $y];
+                    }
+
+                    break;
                 }
 
-                break;
+                $h = rand(0, 5); // Random heading/facing
+                $move = new MovementOrder(-1, "start", new OffsetCoordinate($x, $y), 0, 0, 0, $h, $h, true, 1, 0, 0);
+                $ship->movement = array($move);
             }
-
-            $h = rand(0, 5); // Random heading/facing
-            $move = new MovementOrder(-1, "start", new OffsetCoordinate($x, $y), 0, 0, 0, $h, $h, true, 1, 0, 0);
-            $ship->movement = array($move);
-        }
 
             foreach ($ship->systems as $system) {
                 $system->setInitialSystemData($ship);
@@ -147,7 +147,7 @@ class BuyingGamePhase implements Phase
             $counter--; //Reduce counter   
         }
     }        
-
+/*
     public function addMoons($gameData, $dbManager, $moonValue, $slot)
     {
         $counter = $moonValue; // Should always be at least 1 to get here. 1-10.
@@ -187,6 +187,32 @@ class BuyingGamePhase implements Phase
             }
         }   
     } 
+*/
+public function addMoons($gameData, $dbManager, $smallCount, $mediumCount, $largeCount, $slot)
+{
+    $moonIndex = 1;
+
+    // Small
+    for ($i = 0; $i < $smallCount; $i++) {
+        $currMoon = new moonSmall($gameData->id, -5, "Moon #$moonIndex", $slot);
+        $dbManager->submitShip($gameData->id, $currMoon, -5);
+        $moonIndex++;
+    }
+
+    // Medium
+    for ($i = 0; $i < $mediumCount; $i++) {
+        $currMoon = new moon($gameData->id, -5, "Moon #$moonIndex", $slot);
+        $dbManager->submitShip($gameData->id, $currMoon, -5);
+        $moonIndex++;
+    }
+
+    // Large
+    for ($i = 0; $i < $largeCount; $i++) {
+        $currMoon = new moonLarge($gameData->id, -5, "Moon #$moonIndex", $slot);
+        $dbManager->submitShip($gameData->id, $currMoon, -5);
+        $moonIndex++;
+    }
+}
 
     public function getGamespace($gameData)
     {
@@ -312,7 +338,7 @@ class BuyingGamePhase implements Phase
             */
                 
             $dbManager->setPlayerWaitingStatus($gameData->forPlayer, $gameData->id, true);
-
+            /*
             if ($gameData->rules->hasRuleName("moons") && $slot->slot == 1) { // Generate all moons from Slot/Player 1 
                 $moonValue = 0; //Initialise
                 $moonsRule = $gameData->rules->getRuleByName('moons');
@@ -322,6 +348,16 @@ class BuyingGamePhase implements Phase
                 }                 
 
                 $this->addMoons($gameData, $dbManager, $moonValue, $slot->slot);
+            }
+            */
+            if ($gameData->rules->hasRuleName("moons") && $slot->slot == 1) {
+                $moonData = $gameData->rules->getRuleByName('moons')->jsonSerialize();
+
+                $small  = (int)($moonData['small']  ?? 0);
+                $medium = (int)($moonData['medium'] ?? 0);
+                $large  = (int)($moonData['large']  ?? 0);
+
+                $this->addMoons($gameData, $dbManager, $small, $medium, $large, $slot->slot);
             }
 
             // Now let's see if we have to add any terrain.

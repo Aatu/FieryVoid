@@ -293,7 +293,7 @@ doAsteroidsCheck: function () {
         delete createGame.rules.asteroids;
     }
 },
-
+/*
 doMoonsCheck: function () {
     var checkval = $("#terraincheck:checked").val(); // use terraincheck instead
 
@@ -308,6 +308,37 @@ doMoonsCheck: function () {
     } else {
         $("#moonsDropdown").hide();
         delete createGame.rules.moons;
+    }
+},
+*/
+
+doMoonsCheck: function () {
+    const enabled = $("#terraincheck").is(":checked");
+
+    if (enabled) {
+        $("#moonsDropdown").show();
+
+        const small  = parseInt($("#moonsSmallSelect").val(), 10)  || 0;
+        const medium = parseInt($("#moonsMediumSelect").val(), 10) || 0;
+        const large  = parseInt($("#moonsLargeSelect").val(), 10)  || 0;
+
+        // single array/object with the 3 values
+        createGame.rules.moons = { small, medium, large };
+
+        // namespaced handlers avoid duplicate bindings
+        $("#moonsSmallSelect").off('change.moons').on('change.moons', function () {
+            createGame.rules.moons.small = parseInt(this.value, 10) || 0;
+        });
+        $("#moonsMediumSelect").off('change.moons').on('change.moons', function () {
+            createGame.rules.moons.medium = parseInt(this.value, 10) || 0;
+        });
+        $("#moonsLargeSelect").off('change.moons').on('change.moons', function () {
+            createGame.rules.moons.large = parseInt(this.value, 10) || 0;
+        });
+
+    } else {
+        $("#moonsDropdown").hide();
+        delete createGame.rules.moons; // remove the whole rule when disabled
     }
 },
 
