@@ -405,7 +405,8 @@ $asteroidsNo = 0;
 $moonData = [];
 
 
-if ($gamelobbydata->rules) {  
+if ($gamelobbydata->rules) {
+//var_dump($gamelobbydata->rules);    
     if ($gamelobbydata->rules->hasRuleName('initiativeCategories')) {
         $simMv = true;
         $initiativeRule = $gamelobbydata->rules->getRuleByName('initiativeCategories');
