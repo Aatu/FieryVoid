@@ -22,7 +22,7 @@ a:hover { text-decoration: underline; }
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: rgba(23, 39, 54, 0.80);
+  background: rgba(23, 39, 54, 0.7);
   padding: 5px 10px;
 }
 
