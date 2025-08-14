@@ -348,8 +348,9 @@ window.mathlib = {
 	showLoS: function showLoS(start, targetHex){
 
 		if(start == null){
-			var firstShip = gamedata.getFirstFriendlyShip();
-			start = shipManager.getShipPosition(firstShip);			
+			//var firstShip = gamedata.getFirstFriendlyShip();
+			//start = shipManager.getShipPosition(firstShip);
+			return; //No start selectd yet, or tool just activated.			
 		}
 		var blockedHexes = weaponManager.getBlockedHexes();
 		

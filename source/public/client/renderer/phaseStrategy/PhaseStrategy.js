@@ -242,6 +242,13 @@ window.PhaseStrategy = function () {
         if (this.gamedata.isMyShip(ship)) {
             this.setSelectedShip(ship);
         }
+        //Needs to have a separate method here, since this count as a hex clicked apparently.
+        if (gamedata.showLoS) {         
+            this._startHexRuler = null; //reset start point on right-clicking ship
+            mathlib.clearLosSprite();                   
+            //this._startHexRuler = shipManager.getShipPosition(ship);
+        }    
+
         this.shipWindowManager.open(ship);
     };
 
@@ -253,7 +260,7 @@ window.PhaseStrategy = function () {
 		if(this.gamedata.isMyShip(ship) && (!this.gamedata.canTargetAlly(ship))) {
             this.selectShip(ship, payload);
             if (gamedata.showLoS) { 
-                this._startHexRuler = null; //reset.
+                this._startHexRuler = shipManager.getShipPosition(ship);
                 mathlib.clearLosSprite();                   
             }               
         } else {
@@ -826,7 +833,7 @@ window.PhaseStrategy = function () {
 
         if (!gamedata.showLoS) {
             gamedata.showLoS = true;
-            if(this._startHexRuler == null) this._startHexRuler = shipManager.getShipPosition(this.selectedShip);
+            //if(this._startHexRuler == null) this._startHexRuler = shipManager.getShipPosition(this.selectedShip);
             const hex = this._lastHoveredHex || { q: 0, r: 0 };
             mathlib.showLoS(this._startHexRuler, hex);
         } else {
