@@ -463,7 +463,6 @@ window.mathlib = {
 	},
 
 
-	//Note - Uses game/pixel coordinates not hex!  Called by checkLineOfSightSprite() above
 	drawRuler: function drawRuler(p1, p2, color = 0x00ffff) {
 		if (!window.LosSprite) {
 			window.LosSprite = new THREE.Group();
@@ -516,33 +515,39 @@ window.mathlib = {
 		sprite.scale.set(30, 30, 1);
 		window.LosSprite.add(sprite);
 
-		// === Create small circular marker at end of ruler (p2) ===
-		function hexToRgba(hex, alpha = 1) {
-			const r = (hex >> 16) & 255;
-			const g = (hex >> 8) & 255;
-			const b = hex & 255;
-			return `rgba(${r},${g},${b},${alpha})`;
+		// === Helper for circular markers ===
+		function createMarker(x, y) {
+			function hexToRgba(hex, alpha = 1) {
+				const r = (hex >> 16) & 255;
+				const g = (hex >> 8) & 255;
+				const b = hex & 255;
+				return `rgba(${r},${g},${b},${alpha})`;
+			}
+
+			const markerCanvas = document.createElement('canvas');
+			markerCanvas.width = 64;
+			markerCanvas.height = 64;
+			const markerCtx = markerCanvas.getContext('2d');
+
+			markerCtx.beginPath();
+			markerCtx.arc(32, 32, 18, 0, 2 * Math.PI);
+			markerCtx.fillStyle = hexToRgba(color);
+			markerCtx.fill();
+
+			const markerTexture = new THREE.Texture(markerCanvas);
+			markerTexture.needsUpdate = true;
+
+			const markerMaterial = new THREE.SpriteMaterial({ map: markerTexture, transparent: true });
+			const markerSprite = new THREE.Sprite(markerMaterial);
+			markerSprite.position.set(x, y, 501);
+			markerSprite.scale.set(18, 18, 1);
+
+			window.LosSprite.add(markerSprite);
 		}
 
-		const markerCanvas = document.createElement('canvas');
-		markerCanvas.width = 64;
-		markerCanvas.height = 64;
-		const markerCtx = markerCanvas.getContext('2d');
-
-		markerCtx.beginPath();
-		markerCtx.arc(32, 32, 18, 0, 2 * Math.PI);
-		markerCtx.fillStyle = hexToRgba(color); // uses same color as line
-		markerCtx.fill();
-
-		const markerTexture = new THREE.Texture(markerCanvas);
-		markerTexture.needsUpdate = true;
-
-		const markerMaterial = new THREE.SpriteMaterial({ map: markerTexture, transparent: true });
-		const markerSprite = new THREE.Sprite(markerMaterial);
-		markerSprite.position.set(p2.x, p2.y, 501); // just above the line
-		markerSprite.scale.set(18, 18, 1); // adjust size if needed
-
-		window.LosSprite.add(markerSprite);
+		// Add marker at both ends
+		createMarker(p1.x, p1.y);
+		createMarker(p2.x, p2.y);
 
 		return line;
 	},
