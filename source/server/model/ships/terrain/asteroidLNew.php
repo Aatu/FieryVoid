@@ -1,17 +1,16 @@
 <?php
-class asteroidM  extends Terrain{
+class asteroidLNew  extends Terrain{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 2;
-		$this->faction = "Terrain";
-	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list        
+		$this->pointCost = 3;
+		$this->faction = "Terrain";       
 		$this->factionAge = 1;        
-        $this->phpclass = "asteroidM";
-        $this->imagePath = "img/ships/AsteroidM.png";
+        $this->phpclass = "asteroidLNew";
+        $this->imagePath = "img/ships/AsteroidL1.png";
         $this->canvasSize = 256;
-        $this->shipClass = "Asteroid (Medium)";
+        $this->shipClass = "Asteroid (Large)";
         $this->Enormous = true; 
 		$this->iniativebonus = -200; //no voluntary movement anyway
         $this->notes .= "<br>Ships (but not fighters) entering this hex take collision damage";
@@ -21,8 +20,8 @@ class asteroidM  extends Terrain{
 		$this->smallBase = true;
 		$this->nonRotating = true;  //completely immobile, doesn't even rotate
 		
-        $this->forwardDefense = 22;
-        $this->sideDefense = 22;
+        $this->forwardDefense = 24;
+        $this->sideDefense = 24;
         
         //No engine/thrusters!!
         $this->turncost = 0;
@@ -35,9 +34,9 @@ class asteroidM  extends Terrain{
 		Enhancements::nonstandardEnhancementSet($this, 'Terrain');
                  
         $this->addPrimarySystem(new OSATCnC(10, 1, 0, 0)); //Required for some checks.
-        $this->addPrimarySystem(new MagGravReactorTechnical(10, 1000, 0, 0)); //Required for some checks.
+        //$this->addPrimarySystem(new MagGravReactorTechnical(10, 1000, 0, 0)); //Required for some checks.
 
-        $this->addPrimarySystem(new Structure(8,  600));
+        $this->addPrimarySystem(new Structure(8,  900));
 
         $this->hitChart = array(
                 0=> array(

@@ -6,6 +6,7 @@ class moon  extends Terrain{
         
 		$this->pointCost = 10;
 		$this->faction = "Terrain";
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list        
 		$this->factionAge = 1;        
         $this->phpclass = "moon";
         $this->imagePath = "img/ships/moonMedium.png";

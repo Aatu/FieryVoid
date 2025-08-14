@@ -1,28 +1,29 @@
 <?php
-class asteroidM  extends Terrain{
+class moonSmallNew  extends Terrain{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 2;
-		$this->faction = "Terrain";
-	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list        
+		$this->pointCost = 5;
+		$this->faction = "Terrain";      
 		$this->factionAge = 1;        
-        $this->phpclass = "asteroidM";
-        $this->imagePath = "img/ships/AsteroidM.png";
-        $this->canvasSize = 256;
-        $this->shipClass = "Asteroid (Medium)";
+        $this->phpclass = "moonSmallNew";
+        $this->imagePath = "img/ships/moonSmall.png";
+        $this->canvasSize = 512;
+        $this->shipClass = "Moon (Small)";
         $this->Enormous = true; 
+        $this->Huge = 1;        
 		$this->iniativebonus = -200; //no voluntary movement anyway
-        $this->notes .= "<br>Ships (but not fighters) entering this hex take collision damage";
-        $this->isd = 0;       
-
+        $this->notes = "Occupies multiple hexes";
+        $this->notes .= "<br>Units entering terrain's hexes will automatically ram"; 
+        $this->isd = 0;      
+	            
 		$this->base = true;
 		$this->smallBase = true;
 		$this->nonRotating = true;  //completely immobile, doesn't even rotate
 		
-        $this->forwardDefense = 22;
-        $this->sideDefense = 22;
+        $this->forwardDefense = 28;
+        $this->sideDefense = 28;
         
         //No engine/thrusters!!
         $this->turncost = 0;
@@ -33,11 +34,11 @@ class asteroidM  extends Terrain{
 	    
         //Block all enhancements for Terrain units when bought
 		Enhancements::nonstandardEnhancementSet($this, 'Terrain');
-                 
-        $this->addPrimarySystem(new OSATCnC(10, 1, 0, 0)); //Required for some checks.
-        $this->addPrimarySystem(new MagGravReactorTechnical(10, 1000, 0, 0)); //Required for some checks.
 
-        $this->addPrimarySystem(new Structure(8,  600));
+        $this->addPrimarySystem(new OSATCnC(10, 1, 0, 0)); //Required for some checks.
+        //$this->addPrimarySystem(new MagGravReactorTechnical(10, 1000, 0, 0)); //Required for some checks.
+
+        $this->addPrimarySystem(new Structure(8,  maxhealth: 2500));
 
         $this->hitChart = array(
                 0=> array(

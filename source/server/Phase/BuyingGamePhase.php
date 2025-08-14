@@ -46,7 +46,7 @@ class BuyingGamePhase implements Phase
                 // It's an asteroid or moon, so assign a unique random position.
                 $deploymentZone = $this->getGamespace($gameData);
                 
-                if ($ship instanceof moonSmall || $ship instanceof moon || $ship instanceof moonLarge) {
+                if ($ship instanceof moonSmallNew || $ship instanceof moonNew || $ship instanceof moonLarge) {
                     $maxX = ($deploymentZone['width'] / 2) - 6;
                     $maxY = ($deploymentZone['height'] / 2) - 4;  
                 } else {
@@ -65,7 +65,7 @@ class BuyingGamePhase implements Phase
                     }
 
                     // If it's a moon, ensure it's not within 4 hexes of another moon
-                    if ($ship instanceof moonSmall || $ship instanceof moon || $ship instanceof moonLarge) {
+                    if ($ship instanceof moonSmallNew || $ship instanceof moonNew || $ship instanceof moonLarge) {
                         $tooClose = false;
                         foreach ($moonPositions as [$mx, $my]) {
                             $dx = $x - $mx;
@@ -83,7 +83,7 @@ class BuyingGamePhase implements Phase
                     }
 
                     // If it's an asteroid, ensure it's not within 2 hexes of any moon
-                    if ($ship instanceof asteroidS || $ship instanceof asteroidM || $ship instanceof asteroidL) {
+                    if ($ship instanceof asteroidSNew || $ship instanceof asteroidMNew || $ship instanceof asteroidLNew) {
                         $tooCloseToMoon = false;
                         foreach ($moonPositions as [$mx, $my]) {
                             $dx = $x - $mx;
@@ -104,7 +104,7 @@ class BuyingGamePhase implements Phase
                     $usedPositions["$x,$y"] = true;
                     
                     // If it's a moon, store its position
-                    if ($ship instanceof moonSmall || $ship instanceof moon || $ship instanceof moonLarge) {
+                    if ($ship instanceof moonSmallNew || $ship instanceof moonNew || $ship instanceof moonLarge) {
                         $moonPositions[] = [$x, $y];
                     }
 
@@ -135,13 +135,13 @@ class BuyingGamePhase implements Phase
         while ($counter > 0) {
             $size = Dice::d(3, 1);  //Use a dice to decide a random size of asteroid!
             if($size == 1){
-                $currAsteroid = new asteroidS($gameData->id, -5, "Asteroid #" . $counter . "", $slot);
+                $currAsteroid = new asteroidSNew($gameData->id, -5, "Asteroid #" . $counter . "", $slot);
                 $dbManager->submitShip($gameData->id, $currAsteroid, -5); //Save them with a nominal userid of -5, only terrain should use that!                   
             }else if($size == 2){
-                $currAsteroid = new asteroidM($gameData->id, -5, "Asteroid #" . $counter . "", $slot);
+                $currAsteroid = new asteroidMNew($gameData->id, -5, "Asteroid #" . $counter . "", $slot);
                 $dbManager->submitShip($gameData->id, $currAsteroid, -5); //Save them with a nominal userid of -5, only terrain should use that!                  
             }else{
-                $currAsteroid = new asteroidL($gameData->id, -5, "Asteroid #" . $counter . "", $slot);
+                $currAsteroid = new asteroidLNew($gameData->id, -5, "Asteroid #" . $counter . "", $slot);
                 $dbManager->submitShip($gameData->id, $currAsteroid, -5); //Save them with a nominal userid of -5, nonly terrain should use that!                    
             }
             $counter--; //Reduce counter   
@@ -194,14 +194,14 @@ public function addMoons($gameData, $dbManager, $smallCount, $mediumCount, $larg
 
     // Small
     for ($i = 0; $i < $smallCount; $i++) {
-        $currMoon = new moonSmall($gameData->id, -5, "Moon #$moonIndex", $slot);
+        $currMoon = new moonSmallNew($gameData->id, -5, "Moon #$moonIndex", $slot);
         $dbManager->submitShip($gameData->id, $currMoon, -5);
         $moonIndex++;
     }
 
     // Medium
     for ($i = 0; $i < $mediumCount; $i++) {
-        $currMoon = new moon($gameData->id, -5, "Moon #$moonIndex", $slot);
+        $currMoon = new moonNew($gameData->id, -5, "Moon #$moonIndex", $slot);
         $dbManager->submitShip($gameData->id, $currMoon, -5);
         $moonIndex++;
     }

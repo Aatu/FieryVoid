@@ -1,14 +1,13 @@
 <?php
-class asteroidM  extends Terrain{
+class asteroidMNew  extends Terrain{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 2;
-		$this->faction = "Terrain";
-	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list        
+		$this->faction = "Terrain";      
 		$this->factionAge = 1;        
-        $this->phpclass = "asteroidM";
+        $this->phpclass = "asteroidMNew";
         $this->imagePath = "img/ships/AsteroidM.png";
         $this->canvasSize = 256;
         $this->shipClass = "Asteroid (Medium)";
@@ -35,7 +34,7 @@ class asteroidM  extends Terrain{
 		Enhancements::nonstandardEnhancementSet($this, 'Terrain');
                  
         $this->addPrimarySystem(new OSATCnC(10, 1, 0, 0)); //Required for some checks.
-        $this->addPrimarySystem(new MagGravReactorTechnical(10, 1000, 0, 0)); //Required for some checks.
+        //$this->addPrimarySystem(new MagGravReactorTechnical(10, 1000, 0, 0)); //Required for some checks.
 
         $this->addPrimarySystem(new Structure(8,  600));
 
