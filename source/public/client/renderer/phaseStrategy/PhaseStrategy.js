@@ -447,7 +447,7 @@ window.PhaseStrategy = function () {
         var icon = this.shipIconContainer.getById(ship.id);
         if (!this.shipTooltip || !this.shipTooltip.menu) {
             //this.showShipTooltip(ship, payload, null, true);            
-            this.showShipTooltip(ship, payload, menu, true);
+            if(!gamedata.isTerrain(ship.shipSizeClass, ship.userid)) this.showShipTooltip(ship, payload, menu, true);
         }
 
         if (this.shipTooltip && this.shipTooltip.ships.includes(ship) &&  this.shipTooltip.ships.length === 1) {
