@@ -106,7 +106,7 @@
 .factiongroup-header{
     font-weight:bold;
     font-size:16px; 
-    margin:6px 5px; 
+    margin:8px 5px; 
     color: #6495ED;   
     font-family: "Bruno Ace SC", sans-serif;    
 } 
@@ -129,9 +129,9 @@
 
 .store .shipsizehdr{
 	color:#d0dbec;
-	margin-left:10px;
+	margin-left:6px;
+	margin-top:3px;    
 	font-size:12px;
-
 }
 
 .store .storeship{
