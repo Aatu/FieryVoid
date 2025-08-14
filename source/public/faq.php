@@ -183,6 +183,15 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         </ul>
         <a class="back-to-top" href="#top">↩ Back to Top</a>
 
+        <h3 id="ruler" >Ruler Tool</h3>
+        <ul>
+        <li>This tool helps players measure distance between any two hexes on the game map, and also indicates whether line of sight is blocked or not between the two hexes chosen.</li>
+        <li>To use the tool, just activate it by pressing 'R' key, or clicking on the 'eye' button on the right-hand side of the screen. 
+            ONce activated, left click on the hex from where you would like it to start measuring from, then move the mouse around the map to check distance and line of sight to other hexes.  
+            Right-clicking with the mouse will reset the start hex.</li>
+        </ul>
+        <a class="back-to-top" href="#top">↩ Back to Top</a>
+
         <h3 id="stealth" >Stealth Ships</h3>
         <ul>
             <li>Stealth ships are invisible at long ranges until they reveal themselves or are detected.</li>
@@ -224,7 +233,8 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             <li><b>Y</b> - Show enemy EW.</li>
             <li><b>F</b> - Show friendly ballistic fire.</li>
             <li><b>E</b> - Show enemy ballistic fire.</li>
-            <li><b># button</b> - Display hex numbers.</li>
+            <li><b>H</b> - Display hex numbers.</li>
+            <li><b>R</b> - Toggle Ruler Tool.</li>            
             <li>Set a ship’s reactor to overload in Initial Orders to self-destruct at the end of the turn.</li>
             <li><b>Right-click actions:</b>
                 <ul class="circle-list">
