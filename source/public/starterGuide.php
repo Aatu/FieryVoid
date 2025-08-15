@@ -13,7 +13,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
   <link href="styles/lobby.css" rel="stylesheet" type="text/css">
   <link href="styles/gamesNew.css" rel="stylesheet" type="text/css">    
 </head>
-<body style="background: url('./img/webBackgrounds/howtoplay.jpg') no-repeat center center fixed; background-size: cover;">
+<body style="background: url('./img/maps/24.PurpleArch.jpg') no-repeat center center fixed; background-size: cover;">
 
 <header class="pageheader">
   <img src="img/logo.png" alt="Fiery Void Logo" class="logo">

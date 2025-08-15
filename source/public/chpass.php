@@ -50,7 +50,7 @@
         <link href="styles/gamesNew.css" rel="stylesheet" type="text/css">   		
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
 	</head>
-    <body  style="background: url('./img/webBackgrounds/login.jpg') no-repeat center center fixed; background-size: cover;">
+    <body  style="background: url('./img/maps/14.PlanetsNear.jpg') no-repeat center center fixed; background-size: cover;">
         <img src="img/logo.png">		
 
 		<div class="reg-panel" style="margin-top: 40px; padding: 15px 15px 10px 15px">
