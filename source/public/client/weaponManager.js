@@ -6,6 +6,7 @@ window.weaponManager = {
     mouseoverSystem: null,
     currentSystem: null,
     currentShip: null,
+    ramWarning: false,
 
     getWeaponCurrentLoading: function getWeaponCurrentLoading(weapon) {
 		/*obsolete
@@ -1617,9 +1618,11 @@ window.weaponManager = {
             // No warning for ships designed to ram or if desperate rules apply
             if (gamedata.rules.desperate === undefined || 
                 (gamedata.rules.desperate !== ship.team && gamedata.rules.desperate !== -1)) {
-                
-                var html = "WARNING - Ramming Attacks should only be used in scenarios where they are specifically permitted.";
-                confirm.warning(html);                    
+                if(!weaponManager.ramWarning){
+                    var html = "WARNING - Ramming Attacks should only be used in scenarios where they are specifically permitted.";
+                    weaponManager.ramWarning = true;
+                    confirm.warning(html);                    
+                }    
             }
         }
 		
