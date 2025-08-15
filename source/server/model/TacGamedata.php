@@ -852,9 +852,9 @@ private function setWaiting() {
         foreach ($this->ships as $ship) {
             if (
                 $ship->getTurnDeployed($this) <= $this->turn &&
-                !$ship->isTerrain()
+                !$ship->userid !== -5
             ) {
-                return true; //Found at least one ship, return true and proceed as normal with phase.
+                return true; //Found at least one player-owned ship, return true and proceed as normal with phase.
             }
         }
         return false; //There are no deployed, non-Terrain ship at this time.

@@ -6,6 +6,7 @@ class asteroidS  extends Terrain{
         
 		$this->pointCost = 1;
 		$this->faction = "Terrain";
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list        
 		$this->factionAge = 1;        
         $this->phpclass = "asteroidS";
         $this->imagePath = "img/ships/AsteroidS1.png";

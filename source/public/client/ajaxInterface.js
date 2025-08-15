@@ -195,7 +195,7 @@ submitSlotAction: function submitSlotAction(action, slotid, callback) {
             newShip.EW = Array();
             newShip.systems = Array();
 
-            if (gamedata.isMyShip(ship)) {
+            if (ship.userid === gamedata.thisplayer) {
                 for (var a = ship.movement.length - 1; a >= 0; a--) {
                     var move = ship.movement[a];
                     if (move.turn == gamedata.turn) {

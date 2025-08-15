@@ -2673,13 +2673,14 @@ class RammingAttack extends Weapon{
 							if ($shipPosition->q == $shipMove->position->q && $shipPosition->r == $shipMove->position->r) {
 								$relativeBearing = $this->getTempBearing($previousPosition, $shipPosition, $ship, $previousFacing);
 								$location = $this->getCollisionLocation($relativeBearing, $ship);
+								return $location; //Found the first one, just return.
 							}
 						}
 						$previousPosition = $shipMove->position;
 						$previousFacing = $shipMove->getFacingAngle();
 					}
 				}
-				
+								
 				return $location;
 	}//endof getRamHitLocation()
 
@@ -2708,7 +2709,7 @@ class RammingAttack extends Weapon{
 			$target = $this->unit;
 			$targetPos = $target->getHexPos();
 
-			if($fireOrder->damageclass != 'TerrainCollision' && $fireOrder->damageclass != 'TerrainCrash') $fireOrder->chosenLocation = $this->getRamHitLocation($shooter, $gamedata, $targetPos);//to be redetermined!
+			$fireOrder->chosenLocation = $this->getRamHitLocation($target, $gamedata, $targetPos);
 			$damage = $this->getReturnDamage($fireOrder);
         		$damage = $this->getDamageMod($damage, $shooter, $target, $pos, $gamedata);
         		$damage -= $target->getDamageMod($shooter, $pos, $gamedata->turn, $this);
@@ -2717,7 +2718,7 @@ class RammingAttack extends Weapon{
 				if ($ftr->isDestroyed()) return; //do not allocate to already destroyed fighter!!! it would cause the game to randomly choose another one, which would be incorrect
 				$fireOrder->calledid = $ftr->id;
 			}
-			
+
 			$this->damage($target, $shooter, $fireOrder,  $gamedata, $damage);
 			if($fireOrder->id < 0 && $fireOrder->damageclass != 'TerrainCollision'){ //for automatic firing orders return damage will not be correctly assigned; create a virtual firing order for this damage to be displayed unless is a collision during movement.
 				$newFireOrder = new FireOrder(
@@ -2725,7 +2726,8 @@ class RammingAttack extends Weapon{
 					$this->id, -1, $gamedata->turn, 1, 
 					100, 100, 1, 1, 0,
 					0,0,'AutoRam',10000
-				);
+				);				
+				$newFireOrder->chosenLocation = $this->getRamHitLocation($target, $gamedata, $targetPos);								
 				if(!$this->checkAlreadyRammed($fireOrder->targetid)) $newFireOrder->pubnotes = " Automatic ramming - return damage.";
 				$newFireOrder->addToDB = true;
 				$this->fireOrders[] = $newFireOrder;				
@@ -5496,7 +5498,7 @@ class PsychicFieldHandler{
                 $this->data["Special"] .= '<br>';
             } 
             //Raking(20) is already described in Raking class           
-            $this->data["Special"] .= "<br>Uninterceptable.";  
+            $this->data["Special"] .= "Uninterceptable.";  
             $this->data["Special"] .= '<br>Can be boosted with EW for an extra +2d10 +8 damage per point of EW used, up to three times.';
 		    $this->data["Special"] .= "<br>This EW does not count towards your OEW lock on a target.";	            
 		    $this->data["Special"] .= "<br>Has +1 modifier to critical hit rolls, and +2 to fighter dropout rolls.";               

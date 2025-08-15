@@ -6,16 +6,17 @@ class moon  extends Terrain{
         
 		$this->pointCost = 10;
 		$this->faction = "Terrain";
+	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list        
 		$this->factionAge = 1;        
         $this->phpclass = "moon";
-        $this->imagePath = "img/ships/moon.png";
+        $this->imagePath = "img/ships/moonMedium.png";
         $this->canvasSize = 1024;
-        $this->shipClass = "Moon";
+        $this->shipClass = "Moon (Medium)";
         $this->Enormous = true; 
         $this->Huge = 2;        
 		$this->iniativebonus = -200; //no voluntary movement anyway
         $this->notes = "Occupies multiple hexes";
-        $this->notes .= "<br>Units entering terrain's area will automatically ram";
+        $this->notes .= "<br>Units entering terrain's hexes will automatically ram";
         $this->isd = 0;            
 	            
 		$this->base = true;

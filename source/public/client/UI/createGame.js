@@ -31,9 +31,7 @@ jQuery(function ($) {
     $("#gamespacecheck").on("click", createGame.doGameSpaceCheck);
     $("#gamespacecheck").on("click", createGame.doFlightCheck);
     $("#movementcheck").on("click", createGame.doMovementCheck);
-    $("#desperatecheck").on("click", createGame.doDesperateCheck);
-    //$("#asteroidscheck").on("click", createGame.doAsteroidsCheck);
-    //$("#moonscheck").on("click", createGame.doMoonsCheck);              
+    $("#desperatecheck").on("click", createGame.doDesperateCheck);             
     $("#terraincheck").on("click", createGame.doTerrainCheck);
     
     $(".setsizeknifefight").on("click", createGame.doSwitchSizeKnifeFight);
@@ -210,9 +208,9 @@ window.createGame = {
      //       console.log(`SlotID: ${slotId}, x: ${x}, y: ${y}, w: ${w}, h: ${h}, scale: ${scale}`);
      //       console.log(`Drawing at: x=${drawX}, y=${drawY}`);
     
-            ctx.fillRect(drawX+6, drawY, w * scale, h * scale);
+            ctx.fillRect(drawX+4, drawY, w * scale, h * scale);
             ctx.strokeStyle = "#006600";
-            ctx.strokeRect(drawX+6, drawY, w * scale, h * scale);
+            ctx.strokeRect(drawX+4, drawY, w * scale, h * scale);
             
             // Draw slot number in the center
             ctx.save(); // Save context state
@@ -295,7 +293,7 @@ doAsteroidsCheck: function () {
         delete createGame.rules.asteroids;
     }
 },
-
+/*
 doMoonsCheck: function () {
     var checkval = $("#terraincheck:checked").val(); // use terraincheck instead
 
@@ -310,6 +308,37 @@ doMoonsCheck: function () {
     } else {
         $("#moonsDropdown").hide();
         delete createGame.rules.moons;
+    }
+},
+*/
+
+doMoonsCheck: function () {
+    const enabled = $("#terraincheck").is(":checked");
+
+    if (enabled) {
+        $("#moonsDropdown").show();
+
+        const small  = parseInt($("#moonsSmallSelect").val(), 10)  || 0;
+        const medium = parseInt($("#moonsMediumSelect").val(), 10) || 0;
+        const large  = parseInt($("#moonsLargeSelect").val(), 10)  || 0;
+
+        // single array/object with the 3 values
+        createGame.rules.moons = { small, medium, large };
+
+        // namespaced handlers avoid duplicate bindings
+        $("#moonsSmallSelect").off('change.moons').on('change.moons', function () {
+            createGame.rules.moons.small = parseInt(this.value, 10) || 0;
+        });
+        $("#moonsMediumSelect").off('change.moons').on('change.moons', function () {
+            createGame.rules.moons.medium = parseInt(this.value, 10) || 0;
+        });
+        $("#moonsLargeSelect").off('change.moons').on('change.moons', function () {
+            createGame.rules.moons.large = parseInt(this.value, 10) || 0;
+        });
+
+    } else {
+        $("#moonsDropdown").hide();
+        delete createGame.rules.moons; // remove the whole rule when disabled
     }
 },
 

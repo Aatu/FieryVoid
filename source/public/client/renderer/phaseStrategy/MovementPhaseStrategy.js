@@ -75,7 +75,9 @@ window.MovementPhaseStrategy = function () {
         this.shipWindowManager.open(ship);
     };
 
-    MovementPhaseStrategy.prototype.onHexClicked = function (payload) {};
+    MovementPhaseStrategy.prototype.onHexClicked = function (payload) {
+        PhaseStrategy.prototype.onHexClicked.call(this, payload);   
+    };
 
     MovementPhaseStrategy.prototype.selectShip = function (ship, payload) {
         if (gamedata.getMyActiveShips().includes(ship)) {

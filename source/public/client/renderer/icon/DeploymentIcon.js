@@ -7,7 +7,10 @@ window.DeploymentIcon = function () {
         this.mesh = null;
         this.size = size;
         this.color = getColorByType(type);
-        this.opacity = 0.5;
+        this.opacity = 0.5;        
+        if(type == "terrain"){
+            this.opacity = 0.2;
+        }
 
         this.mesh = new THREE.Object3D();
         this.mesh.position.x = position.x;
@@ -21,6 +24,7 @@ window.DeploymentIcon = function () {
 
         var plain = new window.PlainSprite({ width: size.width + lineWidth, height: size.height + lineWidth }, this.z, this.color, this.opacity * 0.5, avail);
         this.mesh.add(plain.mesh);
+
         scene.add(this.mesh);
         this.hide();
     }
@@ -38,6 +42,8 @@ window.DeploymentIcon = function () {
             return new THREE.Color(160 / 255, 250 / 255, 100 / 255);
         } else if (type == "ally") {
             return new THREE.Color(100 / 255, 170 / 255, 250 / 255);
+        } else if (type == "terrain") {
+            return new THREE.Color(255 / 255, 255 / 255, 255 / 255);
         } else {
             return new THREE.Color(250 / 255, 100 / 255, 100 / 255);
         }

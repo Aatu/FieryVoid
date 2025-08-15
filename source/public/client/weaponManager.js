@@ -6,6 +6,7 @@ window.weaponManager = {
     mouseoverSystem: null,
     currentSystem: null,
     currentShip: null,
+    ramWarning: false,
 
     getWeaponCurrentLoading: function getWeaponCurrentLoading(weapon) {
 		/*obsolete
@@ -1617,9 +1618,11 @@ window.weaponManager = {
             // No warning for ships designed to ram or if desperate rules apply
             if (gamedata.rules.desperate === undefined || 
                 (gamedata.rules.desperate !== ship.team && gamedata.rules.desperate !== -1)) {
-                
-                var html = "WARNING - Ramming Attacks should only be used in scenarios where they are specifically permitted.";
-                confirm.warning(html);                    
+                if(!weaponManager.ramWarning){
+                    var html = "WARNING - Ramming Attacks should only be used in scenarios where they are specifically permitted.";
+                    weaponManager.ramWarning = true;
+                    confirm.warning(html);                    
+                }    
             }
         }
 		
@@ -2203,12 +2206,12 @@ window.weaponManager = {
         for (var i in gamedata.ships) {
             var ship = gamedata.ships[i];
     
-            if (ship.Enormous && !shipManager.isDestroyed(ship)) { // Only enormous units block LoS at present
+            if (ship.Enormous && !shipManager.isDestroyed(ship)) { // Only enormous or Huge units block LoS.
                 var position = shipManager.getShipPosition(ship);
                 blockedHexes.push(position);
             
-                if (ship.Huge > 0) { // Has a radius of 1 around its centre hex
-                    var neighbourHexes = mathlib.getNeighbouringHexes(position, ship.Huge); //Only works with ship.Huge = 2 atm                  
+                if (ship.Huge > 0) { // Occupies more than 1 hex
+                    var neighbourHexes = mathlib.getNeighbouringHexes(position, ship.Huge);                  
                     // Add surrounding hexes directly
                     blockedHexes.push(...neighbourHexes);
                 }

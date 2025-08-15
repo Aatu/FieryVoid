@@ -59,7 +59,7 @@ if (isset($_POST["user"]) && isset($_POST["pass"]) && isset($_POST["pass2"])){
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
 <!--		<script src="client/helper.js"></script>-->
 	</head>
-    <body  style="background: url('./img/webBackgrounds/reg.jpg') no-repeat center center fixed; background-size: cover;">
+    <body  style="background: url('./img/maps/20.Pillars.jpg') no-repeat center center fixed; background-size: cover;">
 <!--        <div class="helphide" style="float:right"> <div id="helphideimg"></div>
         </div>-->
         <img src="img/logo.png">

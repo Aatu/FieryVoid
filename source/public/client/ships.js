@@ -567,21 +567,23 @@ window.shipManager = {
                 if (shipManager.systems.isDestroyed(ship, stru)) {
                     return true;
                 }
-
-                var react = shipManager.systems.getSystemByName(ship, "reactor");
-                if (shipManager.systems.isDestroyed(ship, react)) {
-                    return true;
-                }
+                if(!gamedata.isTerrain(ship.shipSizeClass, ship.userid)){
+                    var react = shipManager.systems.getSystemByName(ship, "reactor");
+                    if (shipManager.systems.isDestroyed(ship, react)) {
+                        return true;
+                    }
+                }    
             } else {
                 var stru = shipManager.systems.getStructureSystem(ship, 0);
                 if (shipManager.systems.isDestroyed(ship, stru)) {
                     return true;
                 }
-
-                var mainReactor = shipManager.systems.getSystemByNameInLoc(ship, "reactor", 0);
-                if (shipManager.systems.isDestroyed(ship, mainReactor)) {
-                    return true;
-                }
+                if(!gamedata.isTerrain(ship.shipSizeClass, ship.userid)){
+                    var mainReactor = shipManager.systems.getSystemByNameInLoc(ship, "reactor", 0);
+                    if (shipManager.systems.isDestroyed(ship, mainReactor)) {
+                        return true;
+                    }
+                }    
             }
         }
 
@@ -803,7 +805,7 @@ window.shipManager = {
             var pos2 = shipManager.getShipPosition(ship2);
 
             //But never let ships Deployment on unoccupied parts of Huge terrain.
-            if(ship2.Huge > 0 && ship2.Huge < 3){ //Between 1 and 2, Moons basically - DK
+            if(ship2.Huge > 0 && ship2.Huge <= 3){ //Between 1 and 3, Moons basically - DK
                 //var s2pos = shipManager.getShipPosition(ship2);
                 var distance = pos1.distanceTo(pos2);
                 if(distance > 0 && distance <= ship2.Huge){ 
