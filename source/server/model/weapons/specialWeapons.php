@@ -5498,7 +5498,7 @@ class PsychicFieldHandler{
                 $this->data["Special"] .= '<br>';
             } 
             //Raking(20) is already described in Raking class           
-            $this->data["Special"] .= "<br>Uninterceptable.";  
+            $this->data["Special"] .= "Uninterceptable.";  
             $this->data["Special"] .= '<br>Can be boosted with EW for an extra +2d10 +8 damage per point of EW used, up to three times.';
 		    $this->data["Special"] .= "<br>This EW does not count towards your OEW lock on a target.";	            
 		    $this->data["Special"] .= "<br>Has +1 modifier to critical hit rolls, and +2 to fighter dropout rolls.";               
