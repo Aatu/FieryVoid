@@ -351,7 +351,7 @@ spl_autoload_register(
                 'ftrurchin' => '/server/model/ships/ipsha/ftrUrchin.php',
                 'fusionagitator' => '/server/model/weapons/molecular.php',
                 'fusioncannon' => '/server/model/weapons/molecular.php',
-                'fwellgon' => '/server/model/ships/llort/fwellgon.php',
+                //'fwellgon' => '/server/model/ships/llort/fwellgon.php',
                 'galleas' => '/server/model/ships/raiders/galleas.php',
                 'galleon' => '/server/model/ships/raiders/galleon.php',
                 'gamerules' => '/server/model/GameRules.php',
