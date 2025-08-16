@@ -7,7 +7,226 @@ if (! isset($chatelement))
     throw new Exception("\$chatelement is missing!");
 
 ?>
+<link href="styles/chat.css" rel="stylesheet" type="text/css">
+<script>
+(function(){
+    jQuery(function(){
+        chat.initChat();
+    });
 
+    var chat = {
+
+        polling: false,
+        requesting: false,
+        lastid: 0,
+        lastTimeChecked: "",
+        lastTimeStamp: "",
+        focus: false,
+        message: "",
+        gameid: <?php print($chatgameid) ?>,
+        playerid: <?php print(isset($_SESSION["user"]) ? $_SESSION["user"] : '""') ?>,
+        chatElement: <?php print("'$chatelement'") ?>,
+
+        initChat: function(){
+            $(chat.chatElement + " .chatinput").on("keydown", chat.onKeyUp);
+            $(chat.chatElement + " .chatinput").on("focus", chat.onFocus);
+            $(chat.chatElement + " .chatinput").on("blur", chat.onBlur);
+            $(chat.chatElement).on('onshow', chat.resizeChat);
+
+            var h = $(chat.chatElement + " .chatcontainer").height();
+            $(chat.chatElement + " .chatMessages").css("height", (h-20)+"px");
+            var c = $(chat.chatElement + " .chatMessages");
+            c.scrollTop(c[0].scrollHeight);
+
+            chat.startPolling();
+            chat.getLastTimeChecked();
+        },
+
+        resizeChat: function(){
+            chat.setLastTimeChecked();
+            chat.removeNewMessageTag();
+            var h = $(chat.chatElement + " .chatcontainer").height();
+            $(chat.chatElement + " .chatMessages").css("height", (h-20)+"px");
+            var c = $(chat.chatElement + " .chatMessages");
+            c.scrollTop(c[0].scrollHeight);
+            chat.getLastTimeChecked();
+        },
+
+        onFocus: function(){
+            if (window.windowEvents) windowEvents.chatfocus = true;
+        },
+
+        onBlur: function(){
+            if (window.windowEvents) windowEvents.chatfocus = false;
+        },
+
+        onKeyUp: function(e){
+            e.stopPropagation();
+            if (e.keyCode == 13){
+                var input = $(this);
+                var value = input.val();
+                if (value.length === 0) return;
+
+                input.val("");
+                chat.submitChatMessage(value);
+            }
+        },
+
+        parseChatData: function(data){
+            var c = $(chat.chatElement + " .chatMessages");
+            var scroll = false;
+
+            for (var i in data){
+                var message = data[i];
+                var mine = message.userid == chat.playerid ? " mine" : "";
+                var ingame = chat.gameid == 0 ? '<span class="chatglobal"></span>' : '<span class="chatingame"></span>';
+
+                if(message.userid != chat.playerid){
+                    chat.lastTimeStamp = message.time;
+                }
+
+                var e = $('<div class="chatmessage">'+ingame+
+                          '<span class="chattime">('+message.time+')</span> '+
+                          '<span class="chatuser'+mine+'">'+message.username+': </span>'+
+                          '<span class="chattext">'+message.message+'</span></div>');
+                e.appendTo(c);
+                chat.lastid = message.id;
+                scroll = true;
+            }
+
+            if(chat.checkTimesForLightup(chat.lastTimeStamp, chat.lastTimeChecked)){
+                var thisChat = chat.gameid == 0 ? "globalChatTab" : "chatTab";
+                if(document.getElementById(thisChat) && 
+                   !document.getElementById(thisChat).classList.contains("selected")){
+                    document.getElementById(thisChat).classList.add("newMessage");
+                }
+            }
+
+            if(scroll) c.scrollTop(c[0].scrollHeight);
+        },
+
+        checkTimesForLightup: function(timeStamp, lastChecked){
+            if(!timeStamp || !lastChecked) return false;
+            return chat.compareTimes(chat.parseTime(timeStamp), chat.parseTime(lastChecked)) > 0;
+        },
+
+        parseTime: function(timeString){
+            return [
+                parseInt(timeString.substring(0,4)),
+                parseInt(timeString.substring(5,7)),
+                parseInt(timeString.substring(8,10)),
+                parseInt(timeString.substring(11,13)),
+                parseInt(timeString.substring(14,16)),
+                parseInt(timeString.substring(17))
+            ];
+        },
+
+        compareTimes: function(timeArray1, timeArray2){
+            for(var i in timeArray1){
+                if(timeArray1[i] > timeArray2[i]) return 1;
+                if(timeArray1[i] < timeArray2[i]) return -1;
+            }
+            return 0;
+        },
+
+        startPolling: function(){
+            if(chat.polling) return;
+            chat.polling = true;
+            setTimeout(chat.requestChatdata, 5000);
+        },
+
+        removeNewMessageTag: function(){
+            var el = chat.gameid == 0 ? "globalChatTab" : "chatTab";
+            document.getElementById(el)?.classList.remove("newMessage");
+        },
+
+        setLastTimeChecked: function(){
+            $.ajax({
+                type: 'POST',
+                url: 'playerChatInfo.php',
+                dataType: 'json',
+                data: { gameid: chat.gameid },
+                success: chat.successSetLastTimeChecked,
+                error: function(){ setTimeout(chat.setLastTimeChecked, 5000); }
+            });
+        },
+
+        getLastTimeChecked: function(){
+            $.ajax({
+                type: 'GET',
+                url: 'playerChatInfo.php',
+                dataType: 'json',
+                data: { gameid: chat.gameid },
+                success: chat.successGetLastTimeChecked,
+                error: function(){ setTimeout(chat.getLastTimeChecked, 5000); }
+            });
+        },
+
+        successSetLastTimeChecked: function(data){
+            if(data.error) window.confirm.exception(data, function(){});
+        },
+
+        successGetLastTimeChecked: function(data){
+            if(data.error) window.confirm.exception(data, function(){});
+            else chat.lastTimeChecked = data.lastCheckGame;
+        },
+
+        submitChatMessage: function(message){
+            chat.message = message;
+            $.ajax({
+                type: 'POST',
+                url: 'chatdata.php',
+                dataType: 'json',
+                data: { gameid: chat.gameid, message: message },
+                success: chat.successSubmit,
+                error: function(){ $.ajax(this); }
+            });
+            chat.setLastTimeChecked();
+        },
+
+        requestChatdata: function(){
+            if(chat.requesting) return;
+            chat.requesting = true;
+            $.ajax({
+                type: 'GET',
+                url: 'chatdata.php',
+                dataType: 'json',
+                data: { gameid: chat.gameid, lastid: chat.lastid },
+                success: chat.successRequest,
+                error: function(){ setTimeout(chat.requestChatdata, 5000); }
+            });
+        },
+
+        successRequest: function(data){
+            chat.requesting = false;
+            if(data.error){
+                window.confirm.exception(data, function(){});
+                chat.requesting = true;
+            }else{
+                chat.parseChatData(data);
+                setTimeout(chat.requestChatdata, 5000);
+            }
+        },
+
+        successSubmit: function(data){
+            if(data.error) window.confirm.exception(data, function(){});
+        },
+
+    }
+})();
+</script>
+
+<div class="chatcontainer">
+    <div class="chatMessages"></div>
+    <div class="chatinputTd">
+        <input class="chatinput" value="" name="chatinput">
+    </div>
+</div>
+
+
+
+
+<!--
 <link href="styles/chat.css" rel="stylesheet" type="text/css">
 <script>
    
@@ -326,3 +545,4 @@ if (! isset($chatelement))
         <input class="chatinput" value="" name="chatinput">
     </div>
 </div>
+-->
