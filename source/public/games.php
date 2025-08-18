@@ -93,6 +93,7 @@ $games = json_encode(Manager::getTacGames($userid), JSON_NUMERIC_CHECK);
       <ul class="updates-list">
         <li><strong>Ruler / LoS Tool</strong> - New Ruler and Line of Sight tool added to game, access via side button or pressing 'R' and moving/clicking mouse on map</li>        
         <li><strong>Terrain Updates</strong> - More flexible Terrain options in Create Game. Terrain purchased in Fleet Selection can now be placed anywhere on map. New Moon (Large) added.</li>
+        <li><strong>Surrendering</strong> - Games will no longer automatically end when any one player surrenders.  Instead, games will end when all players in one team have surrendered.</li>           
         <li><strong>Rules & Info</strong> - Faction Guide, FAQ and Enhancement documents received further updates.</li>        
         <li><strong>Line of Sight Errors</strong> - Methods reviewed and tightened up for fringe cases that may have led to incorrect results.</li>
         <li><strong>Vorlon Petals</strong> - Opening petals / boosting Power Capacitor now better reflects B5 Wars TT rules.</li>
