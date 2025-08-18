@@ -1750,8 +1750,11 @@ public function getAllEWExceptDEW($turn){
         $slot = $gamedata->getSlotById($this->slot);
         $depTurn = $slot->depavailable;
 
-        return $depTurn;
-
+        if($slot->status == "SURRENDERED"){
+            $depTurn = 999; //Artifically high number, so surrendered ships are no longer considered by game! - DK
+        }
+        
+        return $depTurn;           
 	} 
 
 

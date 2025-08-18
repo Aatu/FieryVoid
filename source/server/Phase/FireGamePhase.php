@@ -40,10 +40,10 @@ class FireGamePhase implements Phase
        foreach($gameData->slots as $slot){           
             if ($slot->depavailable == $gameData->turn+1){
                 //Slot is deploying next turn, ensure that database know it completed this Firing Phase
-                $dbManager->updatePlayerStatusSlot($gameData->id, $slot->playerid, $slot->slot, 3, $gameData->turn);                
+                $dbManager->updatePlayerSlotPhase($gameData->id, $slot->playerid, $slot->slot, 3, $gameData->turn);                
             }else {
                 //If not deploying next turn, set slot to skip that phase.  Manager::changeTurn always tries to create new Deplyment Phase.
-                $dbManager->updatePlayerStatusSlot($gameData->id, $slot->playerid, $slot->slot, -1, $gameData->turn+1);                
+                $dbManager->updatePlayerSlotPhase($gameData->id, $slot->playerid, $slot->slot, -1, $gameData->turn+1);                
             }        
         } 
     }

@@ -387,12 +387,58 @@ class Manager{
 
             SystemData::initSystemData($gdS->turn, $gdS->id);
 
+            /* //OLD APPROACH
             if ($status == "SURRENDERED" && $gdS->status !== "SURRENDERED"){
                 self::$dbManager->updateGameStatus($gameid, $status);
             } else if ($gdS->status === "SURRENDERED") {
                 return "{}";
             }
-            
+            */
+
+            //New slot-based appraoch to surrendering - DK - Aug 2025
+            if ($status == "SURRENDERED") {
+                // Step 1: Update this player's slot status when they surrender
+                self::$dbManager->updateSlotStatus($gameid, $userid, $status); 
+            }
+
+            if ($gdS->status !== "SURRENDERED") {
+                // Step 2: Track alive teams
+                $aliveTeams = [];
+                $slots = self::$dbManager->getSlotsInGame($gameid);
+
+                foreach ($slots as $slot) {
+
+                    if ($slot->team === null) {
+                        continue; // skip unassigned (shouldn't happen)
+                    }
+
+                    if (!isset($aliveTeams[$slot->team])) {
+                        $aliveTeams[$slot->team] = false; // assume dead until proven alive
+                    }
+
+                    if ($slot->status !== "SURRENDERED") {
+                        $aliveTeams[$slot->team] = true; // team still alive
+                    }
+                }
+
+                // Step 3: Count alive teams
+                $aliveCount = 0;
+                foreach ($aliveTeams as $isAlive) {
+                    if ($isAlive) {
+                        $aliveCount++;
+                    }
+                }
+
+                // Step 4: End game if one or zero teams remain
+                if ($aliveCount <= 1) {
+                    self::$dbManager->updateGameStatus($gameid, "SURRENDERED"); 
+                }
+            } else {
+                return "{}";
+            }
+
+
+
             if ($gameid != $gdS->id || $turn != $gdS->turn || $phase != $gdS->phase)
                 throw new Exception("Unexpected orders");
 
@@ -592,7 +638,7 @@ class Manager{
                 $depTurn = $gamedata->getMinTurnDeployedSlot($slot->slot, $slot->depavailable);
                 if($depTurn > 1){ //Bases and Terrain will need to deploy on Turn 1 still
                     //Set lastphase, and lastTurn for slot to intial phase on next turn.                
-                    self::$dbManager->updatePlayerStatusSlot($gamedata->id, $slot->playerid, $slot->slot, -1, 1);
+                    self::$dbManager->updatePlayerSlotPhase($gamedata->id, $slot->playerid, $slot->slot, -1, 1);
                 }        
             }    
         }           

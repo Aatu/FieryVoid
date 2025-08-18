@@ -310,6 +310,24 @@ class DBManager
         $stmt = $this->connection->prepare("
             INSERT INTO 
                 tac_playeringame
+            (
+                gameid,
+                slot,
+                playerid,
+                teamid,
+                lastturn,
+                lastphase,
+                name,
+                points,
+                depx,
+                depy,
+                deptype,
+                depwidth,
+                depheight,
+                depavailable,
+                waiting,
+                status
+            )
             VALUES
             (
                 ?,
@@ -318,8 +336,6 @@ class DBManager
                 ?,
                 ?,
                 ?,
-                now(),
-                null,
                 ?,
                 ?,
                 ?,
@@ -328,15 +344,15 @@ class DBManager
                 ?,
                 ?,
                 ?,
-                false
+                false,
+                ?
             )
-
         ");
 
         if ($stmt) {
             foreach ($slots as $slot) {
                 $stmt->bind_param(
-                    'iiiiiisiiisiii',
+                    'iiiiiisiiisiiis', // ✅ added an extra 's' for status at the end
                     $gameid,
                     $slot->slot,
                     $slot->playerid,
@@ -350,7 +366,8 @@ class DBManager
                     $slot->deptype,
                     $slot->depwidth,
                     $slot->depheight,
-                    $slot->depavailable
+                    $slot->depavailable,
+                    $slot->status // ✅ NEW
                 );
                 $stmt->execute();
             }
@@ -707,7 +724,7 @@ class DBManager
     }
 
     //Used to skip Slot forward through phases if it has no ships deployed. Updates specific slot, not just ALL player's slots as updatePlayerStatus() does.
-    public function updatePlayerStatusSlot($gameid, $userid, $slot, $phase, $turn)
+    public function updatePlayerSlotPhase($gameid, $userid, $slot, $phase, $turn)
     {
         try { 
 
@@ -1183,7 +1200,7 @@ class DBManager
         }
 
     }
-/* //OLD VERSION WITHOUT WAITING VARIABLE - DK June 2025
+/* //OLD VERSION WITHOUT WAITING/STATUS VARIABLES - DK June 2025
     public function getSlotsInGame($gameid)
     {
 
@@ -1222,7 +1239,7 @@ class DBManager
             SELECT 
                 playerid, slot, teamid, lastturn, lastphase, name, points,
                 depx, depy, deptype, depwidth, depheight, depavailable,
-                p.username, waiting
+                p.username, waiting, status
             FROM 
                 tac_playeringame pg
             LEFT JOIN 
@@ -1236,14 +1253,14 @@ class DBManager
             $stmt->bind_result(
                 $playerid, $slot, $teamid, $lastturn, $lastphase, $name, $points,
                 $depx, $depy, $deptype, $depwidth, $depheight, $depavailable,
-                $username, $waiting // ✅ include waiting
+                $username, $waiting, $status // ✅ added status
             );
             $stmt->execute();
             while ($stmt->fetch()) {
                 $slots[$slot] = new PlayerSlot(
                     $playerid, $slot, $teamid, $lastturn, $lastphase, $name, $points,
                     $depx, $depy, $deptype, $depwidth, $depheight, $depavailable,
-                    $username, $waiting // ✅ pass waiting
+                    $username, $waiting, $status // ✅ pass status into PlayerSlot
                 );
             }
             $stmt->close();
@@ -1259,7 +1276,9 @@ class DBManager
 
         $stmt = $this->connection->prepare("
             SELECT 
-                playerid, slot, teamid, lastturn, lastphase, name, points, depx, depy, deptype, depwidth, depheight, depavailable, p.username, waiting
+                playerid, slot, teamid, lastturn, lastphase, name, points,
+                depx, depy, deptype, depwidth, depheight, depavailable,
+                p.username, waiting, status
             FROM 
                 tac_playeringame pg
             LEFT JOIN 
@@ -1272,10 +1291,18 @@ class DBManager
 
         if ($stmt) {
             $stmt->bind_param('ii', $gameid, $slotid);
-            $stmt->bind_result($playerid, $slot, $teamid, $lastturn, $lastphase, $name, $points, $depx, $depy, $deptype, $depwidth, $depheight, $depavailable, $username, $waiting);
+            $stmt->bind_result(
+                $playerid, $slot, $teamid, $lastturn, $lastphase, $name, $points,
+                $depx, $depy, $deptype, $depwidth, $depheight, $depavailable,
+                $username, $waiting, $status // ✅ added status
+            );
             $stmt->execute();
             while ($stmt->fetch()) {
-                $slot = new PlayerSlot($playerid, $slot, $teamid, $lastturn, $lastphase, $name, $points, $depx, $depy, $deptype, $depwidth, $depheight, $depavailable, $username, $waiting);
+                $slot = new PlayerSlot(
+                    $playerid, $slot, $teamid, $lastturn, $lastphase, $name, $points,
+                    $depx, $depy, $deptype, $depwidth, $depheight, $depavailable,
+                    $username, $waiting, $status // ✅ pass status
+                );
             }
             $stmt->close();
         }
@@ -2138,6 +2165,27 @@ class DBManager
             throw $e;
         }
     }
+
+    public function updateSlotStatus($gameid, $playerid, $status)
+    {
+        try {
+            if ($stmt = $this->connection->prepare(
+                "UPDATE 
+                    tac_playeringame 
+                SET
+                    status = ?
+                WHERE 
+                    gameid = ? AND playerid = ?"
+            )) {
+                $stmt->bind_param('sii', $status, $gameid, $playerid);
+                $stmt->execute();
+                $stmt->close();
+            }
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
+
 
     public function releasePlayerSubmitLock($gameid, $playerid)
     {

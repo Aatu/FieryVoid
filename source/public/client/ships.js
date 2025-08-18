@@ -1004,16 +1004,16 @@ window.shipManager = {
           
         if(ship.osat || ship.base || gamedata.isTerrain(ship.shipSizeClass, ship.userid)) {
             return 1; //Bases and OSATs never 'jump in', returns Turn 1.
-        }/*else if (gamedata.gamephase == -1 && slot.depavailable == gamedata.turn){
-            if(!ajaxInterface.submiting){
-                return gamedata.turn;
-            }else{
-                return slot.depavailable;                 
-            } 
-        }*/else{    
+        }else{    
            //return Math.max(ship.deploysOnTurn, slot.depavailable);
-            var slot = playerManager.getSlotById(ship.slot);   
-            return slot.depavailable;                       
+            var slot = playerManager.getSlotById(ship.slot);
+            var depTurn = slot.depavailable;
+
+            if(slot.status == "SURRENDERED" && gamedata.status !== "SURRENDERED"){
+                depTurn = 999; //Artifically high number, so surrendered ships are no longer shown by game until one full team has surrendered! - DK
+            }
+
+            return depTurn;                       
         }     
     },    
 

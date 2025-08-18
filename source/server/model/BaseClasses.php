@@ -52,12 +52,12 @@ class PlayerSlot{
 class PlayerSlot {
     public $slot, $team, $lastturn, $lastphase, $name, $points;
     public $depx, $depy, $deptype, $depwidth, $depheight, $depavailable;
-    public $playerid, $playername, $waiting; // ✅ include $waiting
+    public $playerid, $playername, $waiting, $status; // ✅ include $waiting, status
 
     function __construct(
         $playerid, $slot, $team, $lastturn, $lastphase, $name, $points,
         $depx, $depy, $deptype, $depwidth, $depheight, $depavailable,
-        $playername, $waiting // ✅ added here
+        $playername, $waiting, $status
     ) {
         $this->playerid = $playerid;
         $this->slot = $slot;
@@ -73,7 +73,8 @@ class PlayerSlot {
         $this->depheight = $depheight;
         $this->depavailable = $depavailable;
         $this->playername = $playername;
-        $this->waiting = $waiting; // ✅ assignment
+        $this->waiting = $waiting;
+        $this->status = $status; // ✅ store new property        
     }
 }
 
