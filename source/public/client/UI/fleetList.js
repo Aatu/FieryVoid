@@ -131,8 +131,10 @@ createFleetList: function createFleetList(slot, template) {
     }
 
     var turnTaken = "<span style='color:red'>&nbsp;&nbsp;[Not committed orders]</span>";
-    if(slot.status == "SURRENDERED"){
-        turnTaken = "<span style='color:red'>&nbsp;&nbsp;[SURRENDERED]</span>"; //Check surrendered first.
+    if(slot.surrendered !== null){
+        if(slot.surrendered <= gamedata.turn){ //Surrendered on this turn or before.
+            turnTaken = "<span style='color:red'>&nbsp;&nbsp;[SURRENDERED]</span>"; //Check surrendered first.
+        }
     }else if (slot.waiting){
         turnTaken = "<span style='color:green'>&nbsp;&nbsp;[Orders committed]</span>";
     } 

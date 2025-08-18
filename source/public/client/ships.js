@@ -1009,10 +1009,11 @@ window.shipManager = {
             var slot = playerManager.getSlotById(ship.slot);
             var depTurn = slot.depavailable;
 
-            if(slot.status == "SURRENDERED" && gamedata.status !== "SURRENDERED"){
-                depTurn = 999; //Artifically high number, so surrendered ships are no longer shown by game until one full team has surrendered! - DK
+        if(slot.surrendered !== null){
+            if(slot.surrendered <= gamedata.turn){ //Surrendered on this turn or before.
+                    depTurn = 999; //Artifically high number, so surrendered ships are no longer shown by game until one full team has surrendered! - DK
             }
-
+        }    
             return depTurn;                       
         }     
     },    

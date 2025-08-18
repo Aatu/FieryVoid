@@ -397,8 +397,8 @@ class Manager{
 
             //New slot-based appraoch to surrendering - DK - Aug 2025
             if ($status == "SURRENDERED") {
-                // Step 1: Update this player's slot status when they surrender
-                self::$dbManager->updateSlotStatus($gameid, $userid, $status); 
+                // Step 1: Update this player's slot surrendered value with game turn when they surrender
+                self::$dbManager->updateSlotSurrendered($gameid, $userid, $gdS->turn); 
             }
 
             if ($gdS->status !== "SURRENDERED") {
@@ -416,7 +416,7 @@ class Manager{
                         $aliveTeams[$slot->team] = false; // assume dead until proven alive
                     }
 
-                    if ($slot->status !== "SURRENDERED") {
+                    if ($slot->surrendered === null) { //Null is default, indicates they've never surrendered.
                         $aliveTeams[$slot->team] = true; // team still alive
                     }
                 }

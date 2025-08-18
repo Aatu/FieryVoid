@@ -12,7 +12,7 @@ class DeploymentGamePhase implements Phase
         //Checks for late-deploying slots to see if next phases skipped - DK 
         foreach($gameData->slots as $slot){
             $minTurnDeploy = $gameData->getMinTurnDeployedSlot($slot->slot, $slot->depavailable);
-            if($minTurnDeploy > $gameData->turn || $slot->status == "SURRENDERED"){ //Entire slot deploys after current turn or has Surrendered.
+            if($minTurnDeploy > $gameData->turn || ($slot->surrendered !== null && $slot->surrendered <= $gameData->turn)){ //Entire slot deploys after current turn or has Surrendered.
                 //Set lastphase, and lastTurn to skip Initial Orders on this turn
                 $dbManager->updatePlayerSlotPhase($gameData->id, $slot->playerid, $slot->slot, 1, $gameData->turn);                
             }     

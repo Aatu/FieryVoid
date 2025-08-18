@@ -22,7 +22,7 @@ class MovementGamePhase implements Phase
 
         foreach($gameData->slots as $slot){
             $minTurnDeploy = $gameData->getMinTurnDeployedSlot($slot->slot, $slot->depavailable);
-            if($minTurnDeploy > $gameData->turn || $slot->status == "SURRENDERED"){ //Slot has no units that deploy until after current turn
+            if($minTurnDeploy > $gameData->turn || ($slot->surrendered !== null && $slot->surrendered <= $gameData->turn)){ //Slot has no units deployed or has surrendered.
                 $dbManager->updatePlayerSlotPhase($gameData->id, $slot->playerid, $slot->slot, 3, $gameData->turn);
             }     
         }   

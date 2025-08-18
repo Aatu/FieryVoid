@@ -326,7 +326,7 @@ class DBManager
                 depheight,
                 depavailable,
                 waiting,
-                status
+                surrendered
             )
             VALUES
             (
@@ -352,7 +352,7 @@ class DBManager
         if ($stmt) {
             foreach ($slots as $slot) {
                 $stmt->bind_param(
-                    'iiiiiisiiisiiis', // ✅ added an extra 's' for status at the end
+                    'iiiiiisiiisiiii', // ✅ added an extra 'i' for status at the end
                     $gameid,
                     $slot->slot,
                     $slot->playerid,
@@ -367,7 +367,7 @@ class DBManager
                     $slot->depwidth,
                     $slot->depheight,
                     $slot->depavailable,
-                    $slot->status // ✅ NEW
+                    $slot->surrendered // ✅ NEW
                 );
                 $stmt->execute();
             }
@@ -1239,7 +1239,7 @@ class DBManager
             SELECT 
                 playerid, slot, teamid, lastturn, lastphase, name, points,
                 depx, depy, deptype, depwidth, depheight, depavailable,
-                p.username, waiting, status
+                p.username, waiting, surrendered
             FROM 
                 tac_playeringame pg
             LEFT JOIN 
@@ -1253,14 +1253,14 @@ class DBManager
             $stmt->bind_result(
                 $playerid, $slot, $teamid, $lastturn, $lastphase, $name, $points,
                 $depx, $depy, $deptype, $depwidth, $depheight, $depavailable,
-                $username, $waiting, $status // ✅ added status
+                $username, $waiting, $surrendered // ✅ added surrendered
             );
             $stmt->execute();
             while ($stmt->fetch()) {
                 $slots[$slot] = new PlayerSlot(
                     $playerid, $slot, $teamid, $lastturn, $lastphase, $name, $points,
                     $depx, $depy, $deptype, $depwidth, $depheight, $depavailable,
-                    $username, $waiting, $status // ✅ pass status into PlayerSlot
+                    $username, $waiting, $surrendered // ✅ pass surrendered into PlayerSlot
                 );
             }
             $stmt->close();
@@ -1278,7 +1278,7 @@ class DBManager
             SELECT 
                 playerid, slot, teamid, lastturn, lastphase, name, points,
                 depx, depy, deptype, depwidth, depheight, depavailable,
-                p.username, waiting, status
+                p.username, waiting, surrendered
             FROM 
                 tac_playeringame pg
             LEFT JOIN 
@@ -1294,14 +1294,14 @@ class DBManager
             $stmt->bind_result(
                 $playerid, $slot, $teamid, $lastturn, $lastphase, $name, $points,
                 $depx, $depy, $deptype, $depwidth, $depheight, $depavailable,
-                $username, $waiting, $status // ✅ added status
+                $username, $waiting, $surrendered // ✅ added surrendered
             );
             $stmt->execute();
             while ($stmt->fetch()) {
                 $slot = new PlayerSlot(
                     $playerid, $slot, $teamid, $lastturn, $lastphase, $name, $points,
                     $depx, $depy, $deptype, $depwidth, $depheight, $depavailable,
-                    $username, $waiting, $status // ✅ pass status
+                    $username, $waiting, $surrendered // ✅ pass surrendered
                 );
             }
             $stmt->close();
@@ -2166,18 +2166,18 @@ class DBManager
         }
     }
 
-    public function updateSlotStatus($gameid, $playerid, $status)
+    public function updateSlotSurrendered($gameid, $playerid, $surrendered)
     {
         try {
             if ($stmt = $this->connection->prepare(
                 "UPDATE 
                     tac_playeringame 
                 SET
-                    status = ?
+                    surrendered = ?
                 WHERE 
                     gameid = ? AND playerid = ?"
             )) {
-                $stmt->bind_param('sii', $status, $gameid, $playerid);
+                $stmt->bind_param('iii', $surrendered, $gameid, $playerid);
                 $stmt->execute();
                 $stmt->close();
             }
