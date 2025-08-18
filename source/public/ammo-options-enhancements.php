@@ -110,7 +110,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
     </p>
     <ul>  
       <li><strong>Flash Shell</strong> - Deals Plasma damage in Flash mode,</li> 
-      <li><strong>Scatter Shell</strong> - Gives pulse properties weapon with 1 shot by default, but with a grouping bonus of 25 i.e. for each 25% rolled under the % hit chance, an extra shot will hit target,</li>      
+      <li><strong>Scatter Shell</strong> - Gives Pulse properties to weapon with one shot by default, but with a grouping bonus of 25 i.e. for each 25% rolled under the % hit chance, an extra shot will hit target,</li>      
       <li><strong>Heavy Shell</strong> - Deals extra damage,</li>  
       <li><strong>Long Range Shell</strong> - Medium and Heavy Railguns only.  Improves range penalty, but lowers damage,</li>   
       <li><strong>Ultra Long Range Shell</strong> - Heavy Railguns only.  Further increases range but with even lower damage.</li>  

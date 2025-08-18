@@ -402,10 +402,11 @@ $moons = false;
 $initiativeCategories = null;
 $desperateTeams = null;
 $asteroidsNo = 0;
-$moonsNo = 0;
+$moonData = [];
 
 
 if ($gamelobbydata->rules) {
+//var_dump($gamelobbydata->rules);    
     if ($gamelobbydata->rules->hasRuleName('initiativeCategories')) {
         $simMv = true;
         $initiativeRule = $gamelobbydata->rules->getRuleByName('initiativeCategories');
@@ -434,7 +435,7 @@ if ($gamelobbydata->rules) {
         $moons = true;
         $moonsRule = $gamelobbydata->rules->getRuleByName('moons');
         if ($moonsRule && method_exists($moonsRule, 'jsonSerialize')) {
-            $moonsNo = $moonsRule->jsonSerialize();
+            $moonData = $moonsRule->jsonSerialize();
         }        
     }       
 }
@@ -467,42 +468,26 @@ if ($asteroids == true) { // Asteroid terrain rules in play
     $optionsUsed .= ', Asteroids ('. $asteroidsNo . ')';
 }
 if ($moons == true) { // Moon terrain rules in play
-        switch($moonsNo){
-            case 0:
-                $optionsUsed .= ', Moons (None)';
-            break;            
-            case 1:
-                $optionsUsed .= ', Moons (One Small)';                
-            break;
-            case 2:
-                $optionsUsed .= ', (Two Small)';   
-            break;
-            case 3:
-                $optionsUsed .= ', Moons (Three Small)';  
-            break;
-            case 4:
-                $optionsUsed .= ', Moons (Four Small)';  
-            break;
-            case 5:
-                $optionsUsed .= ', Moons (One Large)';   
-            break;
-            case 6:
-                $optionsUsed .= ', Moons (Two Large)';   
-            break;
-            case 7:
-                $optionsUsed .= ', Moons (Three Large)';   
-            break;
-            case 8:
-                $optionsUsed .= ', Moons (One Large / One Small)';   
-            break;
-            case 9:
-                $optionsUsed .= ', Moons (One Large / Two Small)';   
-            break;
-            case 10:
-                $optionsUsed .= ', Moons (One Large / Three Small)';   
-            break;
 
+    $small  = $moonData['small']  ?? 0;
+    $medium = $moonData['medium'] ?? 0;
+    $large  = $moonData['large']  ?? 0;
+
+        function formatMoonCount($count, $type) {
+            if ($count <= 0) return null;
+            return $count . ' ' . $type;
         }
+
+        // Build each part with pluralization
+    $moonParts = array_filter([
+        formatMoonCount($small,  'Small'),
+        formatMoonCount($medium, 'Medium'),
+        formatMoonCount($large,  'Large'),
+    ]);
+
+    $optionsUsed .= empty($moonParts)
+        ? ', Moons (None)'
+        : ', Moons (' . implode(', ', $moonParts) . ')';
 }
 
 if ($asteroids == false && $moons == false) { 
@@ -586,7 +571,7 @@ if ($asteroids == false && $moons == false) {
             <label style="margin-left: 5px;">Tier 2 <input type="checkbox" class="tier-filter" data-tier="Tier 2" checked></label>
             <label style="margin-left: 5px;">Tier 3 <input type="checkbox" class="tier-filter" data-tier="Tier 3" checked></label>
             <label style="margin-left: 5px;">Ancients <input type="checkbox" class="tier-filter" data-tier="Tier Ancients" checked></label>
-            <label style="margin-left: 5px;">Other <input type="checkbox" class="tier-filter" data-tier="Tier Other"></label>
+            <label style="margin-left: 5px;">Other <input type="checkbox" class="tier-filter" data-tier="Tier Other" checked></label>
             <span style="margin-left: 6px; margin-right: 6px; font-size: 16px; font-weight: bold">|</span>
             <label style="margin-left: 5px;">Show Custom<input type="checkbox" id="toggleCustom" class="yellow-tick"></label>
             <span id="customDropdown" style="display:none; margin-left: 10px;">

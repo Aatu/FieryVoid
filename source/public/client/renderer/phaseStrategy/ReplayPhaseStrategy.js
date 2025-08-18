@@ -65,7 +65,9 @@ window.ReplayPhaseStrategy = function () {
 
     ReplayPhaseStrategy.prototype.done = function () {};
 
-    ReplayPhaseStrategy.prototype.onHexClicked = function (payload) {};
+    ReplayPhaseStrategy.prototype.onHexClicked = function (payload) {
+        PhaseStrategy.prototype.onHexClicked.call(this, payload);           
+    };
 
     ReplayPhaseStrategy.prototype.selectShip = function (ship, payload) {
         var menu = new ShipTooltipMenu(this.selectedShip, ship, this.gamedata.turn);

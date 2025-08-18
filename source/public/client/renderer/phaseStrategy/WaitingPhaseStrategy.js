@@ -32,7 +32,9 @@ window.WaitingPhaseStrategy = function () {
         return this;
     };
 
-    WaitingPhaseStrategy.prototype.onHexClicked = function (payload) {};
+    WaitingPhaseStrategy.prototype.onHexClicked = function (payload) {
+        PhaseStrategy.prototype.onHexClicked.call(this, payload);           
+    };
 
     WaitingPhaseStrategy.prototype.selectShip = function (ship, payload) {
         var menu = new ShipTooltipMenu(this.selectedShip, ship, this.gamedata.turn);

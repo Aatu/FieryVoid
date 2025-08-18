@@ -38,7 +38,8 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                 <li><a href="#called">Called Shots</a></li>
                 <li><a href="#delayed">Delayed Deployment</a></li>                
                 <li><a href="#enormous">Enormous Units</a></li>
-                <li><a href="#jump">Jump Drives</a></li>   
+                <li><a href="#jump">Jump Drives</a></li>
+                <li><a href="#ruler">Ruler Tool</a></li>                    
                 <li><a href="#stealth">Stealth Ships</a></li>
                 <li><a href="#terrain">Terrain</a></li>  
                 <li><a href="#useful">Useful Controls</a></li>                                                    
@@ -179,6 +180,16 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         <ul>
             <li>The Jump Drive system usually cannot be turned off unless seriously damaged, but some scenarios allow it.</li>
             <li>The game warns the player when attempting to deactivate this system improperly (e.g., without Desperate rules or 50%+ damage).</li>
+            <li>Ships equipped with Jump Drives can boost this system during Initial Orders to 'jump out' of the scenario at the end of the turn.  Doing will remove then from the rest of the scenario, and ships with damaged jump drives may be destroyed as they jump.  The latter situation will be reflected in the Combat Log for that turn.</li>            
+        </ul>
+        <a class="back-to-top" href="#top">↩ Back to Top</a>
+
+        <h3 id="ruler" >Ruler Tool</h3>
+        <ul>
+        <li>This tool helps players measure distance between any two hexes on the game map, and also indicates whether line of sight is blocked or not between the two hexes chosen.</li>
+        <li>To use the tool, just activate it by pressing 'R' key, or clicking on the 'eye' button on the right-hand side of the screen. 
+            ONce activated, left click on the hex from where you would like it to start measuring from, then move the mouse around the map to check distance and line of sight to other hexes.  
+            Right-clicking with the mouse will reset the start hex.</li>
         </ul>
         <a class="back-to-top" href="#top">↩ Back to Top</a>
 
@@ -223,7 +234,8 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             <li><b>Y</b> - Show enemy EW.</li>
             <li><b>F</b> - Show friendly ballistic fire.</li>
             <li><b>E</b> - Show enemy ballistic fire.</li>
-            <li><b># button</b> - Display hex numbers.</li>
+            <li><b>H</b> - Display hex numbers.</li>
+            <li><b>R</b> - Toggle Ruler Tool.</li>            
             <li>Set a ship’s reactor to overload in Initial Orders to self-destruct at the end of the turn.</li>
             <li><b>Right-click actions:</b>
                 <ul class="circle-list">

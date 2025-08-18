@@ -6,6 +6,7 @@ class moonSmall  extends Terrain{
         
 		$this->pointCost = 5;
 		$this->faction = "Terrain";
+	    $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list        
 		$this->factionAge = 1;        
         $this->phpclass = "moonSmall";
         $this->imagePath = "img/ships/moonSmall.png";
@@ -15,7 +16,7 @@ class moonSmall  extends Terrain{
         $this->Huge = 1;        
 		$this->iniativebonus = -200; //no voluntary movement anyway
         $this->notes = "Occupies multiple hexes";
-        $this->notes .= "<br>Units entering terrain's area will automatically ram"; 
+        $this->notes .= "<br>Units entering terrain's hexes will automatically ram"; 
         $this->isd = 0;      
 	            
 		$this->base = true;
@@ -38,7 +39,7 @@ class moonSmall  extends Terrain{
         $this->addPrimarySystem(new OSATCnC(10, 1, 0, 0)); //Required for some checks.
         $this->addPrimarySystem(new MagGravReactorTechnical(10, 1000, 0, 0)); //Required for some checks.
 
-        $this->addPrimarySystem(new Structure(8,  2000));
+        $this->addPrimarySystem(new Structure(8,  maxhealth: 2500));
 
         $this->hitChart = array(
                 0=> array(

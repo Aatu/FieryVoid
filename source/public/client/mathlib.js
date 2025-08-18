@@ -345,14 +345,13 @@ window.mathlib = {
 	*/
 
 //Called in Phase Strategy to show Ruler if LoS is toggled on.
-	showLoS: function showLoS(shooter, targetHex){
-		var start = null;
-		if(shooter == null){
-			var firstShip = gamedata.getFirstFriendlyShip();
-			start = shipManager.getShipPosition(firstShip);			
-		} else {
-			start = shipManager.getShipPosition(shooter);
-		}	
+	showLoS: function showLoS(start, targetHex){
+
+		if(start == null){
+			//var firstShip = gamedata.getFirstFriendlyShip();
+			//start = shipManager.getShipPosition(firstShip);
+			return; //No start selectd yet, or tool just activated.			
+		}
 		var blockedHexes = weaponManager.getBlockedHexes();
 		
 		mathlib.checkLineOfSightSprite(start, targetHex, blockedHexes);
@@ -464,7 +463,6 @@ window.mathlib = {
 	},
 
 
-	//Note - Uses game/pixel coordinates not hex!  Called by checkLineOfSightSprite() above
 	drawRuler: function drawRuler(p1, p2, color = 0x00ffff) {
 		if (!window.LosSprite) {
 			window.LosSprite = new THREE.Group();
@@ -480,8 +478,8 @@ window.mathlib = {
 			opacity: 0.8
 		});
 		const points = [
-			new THREE.Vector3(p1.x, p1.y, 10),
-			new THREE.Vector3(p2.x, p2.y, 10)
+			new THREE.Vector3(p1.x, p1.y, 501),
+			new THREE.Vector3(p2.x, p2.y, 501)
 		];
 		const geometry = new THREE.BufferGeometry().setFromPoints(points);
 		const line = new THREE.Line(geometry, material);
@@ -513,42 +511,48 @@ window.mathlib = {
 		texture.needsUpdate = true;
 		const spriteMaterial = new THREE.SpriteMaterial({ map: texture, transparent: true });
 		const sprite = new THREE.Sprite(spriteMaterial);
-		sprite.position.set(midX, midY, 500);
+		sprite.position.set(midX, midY, 501);
 		sprite.scale.set(30, 30, 1);
 		window.LosSprite.add(sprite);
 
-		// === Create small circular marker at end of ruler (p2) ===
-		function hexToRgba(hex, alpha = 1) {
-			const r = (hex >> 16) & 255;
-			const g = (hex >> 8) & 255;
-			const b = hex & 255;
-			return `rgba(${r},${g},${b},${alpha})`;
+		// === Helper for circular markers ===
+		function createMarker(x, y) {
+			function hexToRgba(hex, alpha = 1) {
+				const r = (hex >> 16) & 255;
+				const g = (hex >> 8) & 255;
+				const b = hex & 255;
+				return `rgba(${r},${g},${b},${alpha})`;
+			}
+
+			const markerCanvas = document.createElement('canvas');
+			markerCanvas.width = 64;
+			markerCanvas.height = 64;
+			const markerCtx = markerCanvas.getContext('2d');
+
+			markerCtx.beginPath();
+			markerCtx.arc(32, 32, 18, 0, 2 * Math.PI);
+			markerCtx.fillStyle = hexToRgba(color);
+			markerCtx.fill();
+
+			const markerTexture = new THREE.Texture(markerCanvas);
+			markerTexture.needsUpdate = true;
+
+			const markerMaterial = new THREE.SpriteMaterial({ map: markerTexture, transparent: true });
+			const markerSprite = new THREE.Sprite(markerMaterial);
+			markerSprite.position.set(x, y, 501);
+			markerSprite.scale.set(18, 18, 1);
+
+			window.LosSprite.add(markerSprite);
 		}
 
-		const markerCanvas = document.createElement('canvas');
-		markerCanvas.width = 64;
-		markerCanvas.height = 64;
-		const markerCtx = markerCanvas.getContext('2d');
-
-		markerCtx.beginPath();
-		markerCtx.arc(32, 32, 18, 0, 2 * Math.PI);
-		markerCtx.fillStyle = hexToRgba(color); // uses same color as line
-		markerCtx.fill();
-
-		const markerTexture = new THREE.Texture(markerCanvas);
-		markerTexture.needsUpdate = true;
-
-		const markerMaterial = new THREE.SpriteMaterial({ map: markerTexture, transparent: true });
-		const markerSprite = new THREE.Sprite(markerMaterial);
-		markerSprite.position.set(p2.x, p2.y, 12); // just above the line
-		markerSprite.scale.set(18, 18, 1); // adjust size if needed
-
-		window.LosSprite.add(markerSprite);
+		// Add marker at both ends
+		createMarker(p1.x, p1.y);
+		createMarker(p2.x, p2.y);
 
 		return line;
 	},
-
-	//Returns 19 hexes around central position e.g. radius of 1
+/*
+	//Returns 7 or 19 hexes around central position e.g. radius of 1 or 2
 	getNeighbouringHexes: function getNeighbouringHexes(position, radius = 1) {
 		if(radius == 1){
 			let isOddRow = position.r % 2 !== 0; //Test hexes ODD (-1,-11) EVEN (-2,-12)
@@ -610,5 +614,94 @@ window.mathlib = {
 				r: position.r + offset[1]
 			}));
 	}
+*/
+
+// parity-aware 6 neighbours for your odd-row offset system
+offsetNeighbors: function offsetNeighbors(pos) {
+    const q = pos.q, r = pos.r;
+    const isOdd = (r % 2) !== 0;
+    if (isOdd) {
+        return [
+            { q: q + 1, r: r     }, // right
+            { q: q - 1, r: r     }, // left
+            { q: q - 1, r: r + 1 }, // upper-left (odd row)
+            { q: q - 1, r: r - 1 }, // lower-left (odd row)
+            { q: q    , r: r + 1 }, // upper-right (shifted)
+            { q: q    , r: r - 1 }  // lower-right (shifted)
+        ];
+    } else {
+        return [
+            { q: q + 1, r: r     }, // right
+            { q: q - 1, r: r     }, // left
+            { q: q + 1, r: r + 1 }, // upper-right (even row)
+            { q: q + 1, r: r - 1 }, // lower-right (even row)
+            { q: q    , r: r + 1 }, // upper-left (shifted)
+            { q: q    , r: r - 1 }  // lower-left (shifted)
+        ];
+    }
+},
+
+// Returns all hexes with distance <= radius (excluding center)
+getNeighbouringHexes: function getNeighbouringHexes(position, radius = 0) {
+    if (radius <= 0) return [];
+
+    const seen = new Set();
+    const key = p => `${p.q},${p.r}`;
+
+    // mark center visited
+    seen.add(key(position));
+
+    // frontier starts at center
+    let frontier = [ { q: position.q, r: position.r } ];
+    const results = [];
+
+    // expand ring by ring
+    for (let d = 1; d <= radius; d++) {
+        const next = [];
+        for (const node of frontier) {
+            const neighs = mathlib.offsetNeighbors(node);
+            for (const n of neighs) {
+                const k = key(n);
+                if (!seen.has(k)) {
+                    seen.add(k);
+                    next.push(n);
+                    results.push(n); // accumulate all nodes within <= radius
+                }
+            }
+        }
+        frontier = next;
+    }
+
+    return results; // array of {q,r} (same set your hardcoded radius=1/2 returned)
+},
+
+// Returns only the perimeter hexes at exactly distance == radius
+getPerimeterHexes: function getPerimeterHexes(position, radius = 0) {
+    if (radius <= 0) return [];
+
+    const seen = new Set();
+    const key = p => `${p.q},${p.r}`;
+    seen.add(key(position));
+
+    let frontier = [ { q: position.q, r: position.r } ];
+
+    for (let d = 1; d <= radius; d++) {
+        const next = [];
+        for (const node of frontier) {
+            const neighs = mathlib.offsetNeighbors(node);
+            for (const n of neighs) {
+                const k = key(n);
+                if (!seen.has(k)) {
+                    seen.add(k);
+                    next.push(n);
+                }
+            }
+        }
+        frontier = next;
+    }
+
+    return frontier; // only the outer ring (distance == radius)
+}
+
 
 };

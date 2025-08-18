@@ -47,7 +47,7 @@ class GameRules implements JsonSerializable{
 
         return null;
     }  
-
+/*
     private function getMoonsRules($rules) {
         if (isset($rules['moons'])) {
             return new MoonsRule((int)$rules['moons']);
@@ -55,6 +55,32 @@ class GameRules implements JsonSerializable{
 
         return null;
     }  
+*/
+
+private function getMoonsRules($rules) {
+    if (!isset($rules['moons'])) {
+        return null;
+    }
+
+    $m = $rules['moons'];
+
+    // Support either assoc array or stdClass
+    if (is_object($m)) {
+        $m = (array)$m;
+    }
+    if (!is_array($m)) {
+        return null;
+    }
+
+    $small  = (int)($m['small']  ?? 0);
+    $medium = (int)($m['medium'] ?? 0);
+    $large  = (int)($m['large']  ?? 0);
+
+    // If you only want to add the rule when at least one > 0, uncomment:
+    // if ($small === 0 && $medium === 0 && $large === 0) return null;
+
+    return new MoonsRule($small, $medium, $large);
+}
 
     public function jsonSerialize(): mixed {
         $list = [];
