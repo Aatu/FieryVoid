@@ -90,7 +90,7 @@ class ShipSystem {
 			}
 		}	
 
-		if($ship->getSystemByName("MindriderEngine")){ //Mind's Eye COntraction CAN increase armour!
+		if($ship->getSystemByName("MindriderEngine")){ //Mind's Eye Contraction CAN increase armour!
 			$strippedSystem->armour = $this->armour;
 		}			
 							
