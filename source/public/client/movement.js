@@ -1503,17 +1503,20 @@ shipManager.movement = {
             currentTurn = gamedata.turn;
         }
 
-        // Get all valid keys and sort them descending
+        // Normalize keys into sorted array (ascending numerically)
         const keys = Object.keys(ship.movement)
             .map(k => parseInt(k))
             .filter(k => !isNaN(k))
-            .sort((a, b) => b - a); // descending
+            .sort((a, b) => a - b); 
 
         let move = null;
         let moveNo = -1;
 
-        for (let idx of keys) {
+        // Walk backward from last key
+        for (let i = keys.length - 1; i >= 0; i--) {
+            let idx = keys[i];
             let candidate = ship.movement[idx];
+
             if (candidate.turn < currentTurn) {
                 move = candidate;
                 moveNo = idx;
@@ -1521,16 +1524,18 @@ shipManager.movement = {
             }
         }
 
+        // Fallback: if none from earlier turns, take earliest move available
         if (!move && keys.length > 0) {
-            // If no move from earlier turn, fall back to earliest move (likely deployment)
             moveNo = keys[0];
             move = ship.movement[moveNo];
         }
 
-        // Handle 'start' type edge case
-        const nextMove = ship.movement[keys.find(k => k > moveNo)];
-        if (move?.type === 'start' && nextMove) {
-            move = nextMove;
+        // Handle 'start' edge case
+        if (move && move.type === 'start') {
+            let nextIndex = keys.find(k => k > moveNo);
+            if (nextIndex !== undefined) {
+                move = ship.movement[nextIndex];
+            }
         }
 
         return new hexagon.Offset(move.position);

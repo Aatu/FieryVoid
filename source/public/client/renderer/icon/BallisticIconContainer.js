@@ -107,7 +107,8 @@ window.BallisticIconContainer = function () {
         gamedata.ships
             .filter(ship => shipManager.getTurnDeployed(ship) == gamedata.turn && gamedata.turn > 1 && !shipManager.shouldBeHidden(ship))
             .forEach(ship => {
-                const pos = shipManager.getShipPosition(ship);
+				const pos = shipManager.movement.getPositionAtStartOfTurn(ship, gamedata.turn);
+
                 const posGame = this.coordinateConverter.fromHexToGame(pos);
                 const sprite = new BallisticSprite(posGame, "hexBlue", `Reinforcement`);
                 this.scene.add(sprite.mesh);

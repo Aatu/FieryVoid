@@ -326,6 +326,7 @@ CREATE TABLE `tac_playeringame` (
   `depheight` int(11) DEFAULT NULL,
   `depavailable` int(11) DEFAULT NULL,
   `waiting` boolean DEFAULT TRUE,
+  `surrendered` int(11) DEFAULT NULL,  
   PRIMARY KEY (`gameid`,`slot`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;

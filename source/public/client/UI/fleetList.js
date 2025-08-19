@@ -130,8 +130,15 @@ createFleetList: function createFleetList(slot, template) {
         fleetlistline.appendTo(fleetlisttable);
     }
 
-    var turnTaken = "<span style='color:red'>&nbsp;&nbsp;[Not committed orders]</span>";
-    if (slot.waiting) turnTaken = "<span style='color:green'>&nbsp;&nbsp;[Orders committed]</span>";
+    var turnTaken = "<span style='color:orange'>&nbsp;&nbsp;[Not committed orders]</span>";
+    if(slot.surrendered !== null){
+        if(slot.surrendered <= gamedata.turn){ //Surrendered on this turn or before.
+            turnTaken = "<span style='color:red'>&nbsp;&nbsp;[Surrendered on Turn " + slot.surrendered + "]</span>"; //Check surrendered first.
+        }
+    }else if (slot.waiting){
+        turnTaken = "<span style='color:green'>&nbsp;&nbsp;[Orders committed]</span>";
+    } 
+    
     var deploys = "";
     if(slot.depavailable > gamedata.turn) deploys = "<span style='color: #00b8e6'>[Deploys on Turn " + slot.depavailable + "]&nbsp;</span>";
 
