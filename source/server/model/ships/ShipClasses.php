@@ -100,7 +100,7 @@ class BaseShip {
 	public $unitSize = 1; //typically ships are berthed in dedicated space, 1 per slot - but other arrangements are certainly possible.
 	
 	protected $adaptiveArmorController = null; //Adaptive Armor Controller object (if present)
-	public $IFFSystem = false;   
+	protected $IFFSystem = false;   
 	    
         function __construct($id, $userid, $name, $slot){
             $this->id = (int)$id;
@@ -113,6 +113,14 @@ class BaseShip {
 		public function getAdvancedArmor(){
 			return $this->advancedArmor;    
 	    }
+
+		public function getIFFSystem(){
+			return $this->IFFSystem;    
+	    }
+       
+		public function setIFFSystem(){
+			$this->IFFSystem = true;    
+	    }            
 		
 		public function getAdaptiveArmorController(){
 			return $this->adaptiveArmorController;    
@@ -219,7 +227,7 @@ class BaseShip {
 		$enginePresent = false;
 		$scannerPresent = false;
 		
-		//destroyed ship gets no value
+		//destroyed ship gets no value CHANGE WITH JUMP ENGINE CHECK?
 		if($this->isDestroyed()) $effectiveValue = 0;
 
 		/*moved

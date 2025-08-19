@@ -2297,8 +2297,9 @@ class BallisticMineLauncher extends AmmoMissileRackS{
 		//Now used updated x and y coordinates after scatter to find ships in range.		    
 	    $finalHexTarget = new OffsetCoordinate($updatedFireOrder->x, $updatedFireOrder->y);
         $mineRange = $this->mineRangeArray[$originalFireOrder->firingMode];
-        
-		if ($shooter->IFFSystem){ ////Returns true if ship has the Identify Friend or Foe Enhancment.
+        $IFFSystem = $shooter->getIFFSystem();
+		
+		if ($IFFSystem){ ////Returns true if ship has the Identify Friend or Foe Enhancment.
 		    $mineTarget = $gamedata->getClosestEnemyShip($shooter, $finalHexTarget, $mineRange); //Find the closest enemy ship only, then attack it.
 		}else{	
 		    $mineTarget = $gamedata->getClosestShip($finalHexTarget, $mineRange); //Just find the closest ship, then attack it.			

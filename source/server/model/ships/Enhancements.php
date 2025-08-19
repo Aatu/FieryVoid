@@ -1663,7 +1663,7 @@ class Enhancements{
 												
 					case 'IFF_SYS': //Add IFF system for Mine Launcher ships.
 						//Mark true
-						$ship->IFFSystem = true;
+						$ship->setIFFSystem();
 						break;
 								
 					case 'IMPR_ENG': //Improved Engine: +1 Engine output (strongest Engine), may be taken multiple times
