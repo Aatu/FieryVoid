@@ -22,7 +22,7 @@ class ShipSystem {
 
     public $data = array();
     public $critData = array();
-    public $destructionAnimated = false;
+    //public $destructionAnimated = false;
     public $imagePath, $iconPath;
     public $critRollMod = 0; //penalty tu critical damage roll: positive means crit is more likely, negative less likely (for this system)
     
