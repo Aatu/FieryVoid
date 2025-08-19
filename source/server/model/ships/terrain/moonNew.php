@@ -4,7 +4,7 @@ class moonNew  extends Terrain{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 10;
+		$this->pointCost = 5;
 		$this->faction = "Terrain";      
 		$this->factionAge = 1;        
         $this->phpclass = "moonNew";
