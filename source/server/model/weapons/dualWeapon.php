@@ -1,5 +1,5 @@
 <?php
-
+/*
 class DualWeapon extends Weapon{
     
     
@@ -59,7 +59,7 @@ class DualWeapon extends Weapon{
         $this->weapons[$firingMode]->fire($gamedata, $fireOrder);
     }
 */
-    
+/*    
     public function onConstructed($ship, $turn, $phase){
         parent::onConstructed($ship, $turn, $phase);
         foreach ($this->weapons as $weapon){
@@ -198,7 +198,7 @@ class DualWeapon extends Weapon{
         SystemData::addDataForSystem($this->id, 0, $ship->id, $data->toJSON());
     }
 }
-
+*/
 
 /*no longer used
 class LaserPulseArray extends DualWeapon{

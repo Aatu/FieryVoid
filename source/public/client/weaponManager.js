@@ -58,6 +58,10 @@ window.weaponManager = {
         if (gamedata.gamephase != 1 && system.ballistic) return;
 
         if (ship.userid == gamedata.thisplayer) {
+            weaponManager.cancelFire(ship, system);
+        }    
+        /* Cleaned 19.8.25 - DK		            
+        if (ship.userid == gamedata.thisplayer) {
             if (!system.duoWeapon) {
                 weaponManager.cancelFire(ship, system);
             } else {
@@ -72,6 +76,7 @@ window.weaponManager = {
                 }
             }
         }
+        */    
     },
 
     cancelFire: function cancelFire(ship, system) {
@@ -158,7 +163,7 @@ window.weaponManager = {
             if (gamedata.selectedSystems[i] == weapon) {
                 gamedata.selectedSystems.splice(i, 1);
             }
-
+            /* Cleaned 19.8.25 - DK		
             if (weapon.duoWeapon) {
                 for (var j in weapon.weapons) {
                     var subweapon = weapon.weapons[j];
@@ -166,6 +171,7 @@ window.weaponManager = {
                     weaponManager.unSelectWeapon(ship, subweapon);
                 }
             }
+            */    
         }
 
         shipWindowManager.setDataForSystem(ship, weapon);
@@ -1865,7 +1871,7 @@ window.weaponManager = {
                 }
             }
         }
-
+        /* Cleaned 19.8.25 - DK
         if (system.duoWeapon) {
             for (var i in system.weapons) {
                 if (weaponManager.hasFiringOrder(ship, system.weapons[i])) {
@@ -1873,7 +1879,7 @@ window.weaponManager = {
                 }
             }
         }
-
+        */
         return false;
     },
 
@@ -2054,7 +2060,7 @@ window.weaponManager = {
         if (!system.weapon) return;
 
         var fires = system.fireOrders;
-
+        /* Cleaned 19.8.25 - DK
         if (system.dualWeapon || system.duoWeapon) {
             for (var i in system.weapons) {
                 var weapon = system.weapons[i];
@@ -2069,6 +2075,7 @@ window.weaponManager = {
                 }
             }
         }
+        */    
 
         return fires;
     },
@@ -2295,7 +2302,7 @@ window.weaponManager = {
         if (!system.fireOrders) return;
 
         var fires = system.fireOrders;
-
+        /* Cleaned 19.8.25 - DK
         if (system.dualWeapon || system.duoWeapon) {
             for (var i in system.weapons) {
                 var weapon = system.weapons[i];
@@ -2310,7 +2317,7 @@ window.weaponManager = {
                 }
             }
         }
-
+        */
         return fires;
     },
 
