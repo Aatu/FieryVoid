@@ -405,7 +405,7 @@ body {
     max-width: 800px;
 	height:150px;
 	opacity:0.85;
-    color: #658fc9; /* #deebff; */
+    color: #7ba2ea; /* #deebff; */
     background-color: #04161C;
     border-top: 1px solid #496791;
 	border-right: 1px solid #496791;
@@ -578,13 +578,13 @@ body {
 
 .fleetlistentry .destroyed{
     font-style: normal;
-    color:#b34119;
+    color:#c54120;
 }
 
 .fleetlistentry .jumped{
     font-style: normal;
     /*color:#00d100;*/
-    color: #00b8e6;    
+    color: #cc8500;    
 }
 
 .fleetheader .headername{
@@ -604,7 +604,7 @@ body {
     font-weight: bold;
     text-decoration: underline;
     text-transform: uppercase;
-    color: #81a6ece7;    
+    color: #a7c1f1;    
 }
 
 .fleetlist .shipname{
@@ -698,11 +698,11 @@ body {
 }
 #log .logheader{
 	font-weight:bold;
-	color:#b34119;
+	color:#c54120;
 }
 
 #log .damage{
-	color:#7c2814;
+	color:#c54120;
 }
 
 #log .shiplink{
