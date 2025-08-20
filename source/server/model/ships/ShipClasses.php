@@ -227,8 +227,23 @@ class BaseShip {
 		$enginePresent = false;
 		$scannerPresent = false;
 		
-		//destroyed ship gets no value CHANGE WITH JUMP ENGINE CHECK?
-		if($this->isDestroyed()) $effectiveValue = 0;
+		//destroyed ship gets no value UNLESS it successfully jumped to Hyperspace
+		if($this->isDestroyed()){
+            if(!$this instanceof FighterFlight && !$this->base && !$this->osat){            
+                $jumpEngine = $this->getSystemByName("JumpEngine");
+                // Check if the ship has a jump engine                
+                if ($jumpEngine) {                
+                    //Check if it's jumped, instead of being destroyed.
+                    if($jumpEngine->hasJumped()){                   
+                        //Do NOT zero $effectiveValue if ship has jumped.               
+                        $effectiveValue = $jumpEngine->getCVBeforeJump();                    
+                        return $effectiveValue;
+                    }    
+                }
+            }     
+            //No jump engine, or hasn't jumped, set value to 0 as normal.
+            $effectiveValue = 0;               
+        }    
 
 		/*moved
 		$cnc = $this->getSystemByName("CnC");
@@ -460,7 +475,7 @@ class BaseShip {
 		
 		return $totalMarines;
 	}
-	
+
 	
     public function stripForJson() {
         $strippedShip = new stdClass();

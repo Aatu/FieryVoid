@@ -130,13 +130,13 @@ createFleetList: function createFleetList(slot, template) {
         fleetlistline.appendTo(fleetlisttable);
     }
 
-    var turnTaken = "<span style='color:orange'>&nbsp;&nbsp;[Not committed orders]</span>";
+    var turnTaken = "<span style='color:orange'>&nbsp;&nbsp;[Waiting for Orders]</span>";
     if(slot.surrendered !== null){
         if(slot.surrendered <= gamedata.turn){ //Surrendered on this turn or before.
             turnTaken = "<span style='color:red'>&nbsp;&nbsp;[Surrendered on Turn " + slot.surrendered + "]</span>"; //Check surrendered first.
         }
     }else if (slot.waiting){
-        turnTaken = "<span style='color:green'>&nbsp;&nbsp;[Orders committed]</span>";
+        turnTaken = "<span style='color:green;'>&nbsp;&nbsp;[Orders committed]</span>";
     } 
     
     var deploys = "";
@@ -146,7 +146,7 @@ createFleetList: function createFleetList(slot, template) {
     fleetlistentry.find(".fleetheader").html(
         deploys + "<span class='headername'>FLEET LIST - </span>" +
         "<span class='playername'>" + slot.playername + 
-        ", fleet value: " + totalCurrValue + " / " + totalBaseValue + " CP" +
+        " - Fleet Value: " + totalCurrValue + " / " + totalBaseValue + " CP" +
          "<span class='turnTaken'>" + turnTaken + "</span>"
     );
 
@@ -162,8 +162,8 @@ createFleetList: function createFleetList(slot, template) {
         if (!header.length) return; // Just in case something went wrong
 
         const html = slot.waiting
-            ? "<span style='color:green'>&nbsp;(Orders committed)</span>"
-            : "<span style='color:red'>&nbsp;(Not committed orders)</span>";
+            ? "<span style='color:green'>&nbsp;&nbsp;[Orders committed]</span>"
+            : "<span style='color:orange'>&nbsp;&nbsp;[Waiting for Orders]</span>";
 
         header.html(html);
     },
@@ -203,13 +203,18 @@ createFleetList: function createFleetList(slot, template) {
     updateFleetList: function updateFleetList() {
         for (var i in gamedata.ships) {
             var ship = gamedata.ships[i];
-
+            var name = ship.name;
             if (shipManager.isDestroyed(ship)) {
                 // Remove action listener and make everything italic to indicate the
                 // ship was destroyed.
                 $("#" + ship.id + " .shipname").removeClass("clickable");
-                $("#" + ship.id).addClass("destroyed");
-                $("#" + ship.id + " .initiative").html("Destroyed");
+                if(shipManager.hasJumpedNotDestroyed(ship)){
+                    $("#" + ship.id).addClass("jumped");
+                    $("#" + ship.id + " .initiative").html("Jumped");                     
+                } else {                
+                    $("#" + ship.id).addClass("destroyed");
+                    $("#" + ship.id + " .initiative").html("Destroyed");                    
+                }
             }
         }
     },
