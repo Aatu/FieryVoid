@@ -26,7 +26,8 @@ window.InitialPhaseStrategy = function () {
         gamedata.showCommitButton();
         gamedata.showSurrenderButton();
 
-        combatLog.showCurrent(); //Reset Combat Log printouts.       
+        combatLog.showCurrent(); //Reset Combat Log printouts.
+        fleetListManager.updateFleetList();               
         this.setPhaseHeader("INITIAL ORDERS");
         return this;
     };
