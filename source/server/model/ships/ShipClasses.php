@@ -501,7 +501,7 @@ class BaseShip {
         $strippedShip->movement = $this->movement; 
         $strippedShip->faction = $this->faction; 
         $strippedShip->phpclass = $this->phpclass;
-        //$strippedShip->deploysOnTurn = $this->deploysOnTurn;         
+        
         $strippedShip->systems = array_map( function($system) {return $system->stripForJson();}, $this->systems);
 		
 		$strippedShip->combatValue = $this->calculateCombatValue();
