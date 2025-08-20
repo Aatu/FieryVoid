@@ -18,13 +18,13 @@ window.combatLog = {
         // Make certain the name is a string.
         if (typeof ship.name == 'string' || ship.name instanceof String) {
             if(jumped){
-                html += '<span class="shiplink" data-id="' + ship.id + '" >' + ship.name.toUpperCase() + '</span> <span style="color: #00b8e6; font-weight: bold;">HAS JUMPED TO HYPERSPACE</span></span>';
+                html += '<span class="shiplink" data-id="' + ship.id + '" >' + ship.name.toUpperCase() + '</span> <span style="color: green; font-weight: bold;">HAS JUMPED TO HYPERSPACE</span></span>';
             }else{
                 html += '<span class="shiplink" data-id="' + ship.id + '" >' + ship.name.toUpperCase() + '</span> IS DESTROYED</span>';
             }    
         } else {
             if(jumped){
-                html += '<span class="shiplink" data-id="' + ship.id + '" >' + ship.name.toUpperCase() + '</span> <span style="color: #00b8e6; font-weight: bold;">HAS JUMPED TO HYPERSPACE</span></span>';
+                html += '<span class="shiplink" data-id="' + ship.id + '" >' + ship.name.toUpperCase() + '</span> <span style="color: green; font-weight: bold;">HAS JUMPED TO HYPERSPACE</span></span>';
             } else {
                 html += '<span class="shiplink" data-id="' + ship.id + '" >' + ship.name + '</span> IS DESTROYED</span>';
             }    
