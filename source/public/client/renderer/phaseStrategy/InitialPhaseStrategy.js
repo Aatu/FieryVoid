@@ -27,7 +27,7 @@ window.InitialPhaseStrategy = function () {
         gamedata.showSurrenderButton();
 
         combatLog.showCurrent(); //Reset Combat Log printouts.
-        fleetListManager.updateFleetList();               
+        fleetListManager.updateFleetList(); //marked destroyed/jumped ships               
         this.setPhaseHeader("INITIAL ORDERS");
         return this;
     };
