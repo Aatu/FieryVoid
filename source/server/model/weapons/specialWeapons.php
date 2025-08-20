@@ -9,8 +9,9 @@
 class WeaponEM  {	
 	public static function isTargetEMResistant($ship,$system = null){ //returns true if target has either AdvancedArmor or EM Hardening (which, for simplicity, in FV is treated as AA would be for EM weapons)
 		if($ship){
+			$EMHardened = $ship->getEMHardened();
 			if($ship->advancedArmor) return true;
-			if($ship->EMHardened) return true;
+			if($EMHardened) return true;
 		}else if ($system){
 			if($system->advancedArmor) return true;
 		}

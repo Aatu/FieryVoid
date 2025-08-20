@@ -75,7 +75,7 @@ class BaseShip {
     public $id, $userid, $name, $campaignX, $campaignY;
     public $rolled = false;
     public $rolling = false;
-	public $EMHardened = false; //EM Hardening (Ipsha have it) - some weapons would check for this value!
+	protected $EMHardened = false; //EM Hardening (Ipsha have it) - some weapons would check for this value!
 	
 	public $ignoreManoeuvreMods = false;//New marker for factions like Mindriders that don't take penalties for pivoting etc	
 		
@@ -112,6 +112,10 @@ class BaseShip {
 		
 		public function getAdvancedArmor(){
 			return $this->advancedArmor;    
+	    }
+
+		public function getEMHardened(){
+			return $this->EMHardened;    
 	    }
 
 		public function getIFFSystem(){
