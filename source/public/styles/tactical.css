@@ -405,7 +405,7 @@ body {
     max-width: 800px;
 	height:150px;
 	opacity:0.85;
-    color: #5d82b6; /* #deebff; */
+    color: #658fc9; /* #deebff; */
     background-color: #04161C;
     border-top: 1px solid #496791;
 	border-right: 1px solid #496791;
@@ -584,7 +584,7 @@ body {
 .fleetlistentry .jumped{
     font-style: normal;
     /*color:#00d100;*/
-    color:green;    
+    color: #00b8e6;    
 }
 
 .fleetheader .headername{
@@ -603,7 +603,8 @@ body {
 .fleetlist .header{
     font-weight: bold;
     text-decoration: underline;
-    text-transform: uppercase;    
+    text-transform: uppercase;
+    color: #81a6ece7;    
 }
 
 .fleetlist .shipname{
