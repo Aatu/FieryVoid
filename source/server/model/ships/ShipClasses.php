@@ -72,7 +72,8 @@ class BaseShip {
     protected $VreeHitLocations = false; //Value to indicate that all gunfire from the same ship may not hit same side on Vree capital ships	
    
     //following values from DB
-    public $id, $userid, $name, $campaignX, $campaignY;
+    public $id, $userid, $name;
+    protected $campaignX, $campaignY; //Not used as far as I can tell, just null entries in db.    
     public $rolled = false;
     public $rolling = false;
 	protected $EMHardened = false; //EM Hardening (Ipsha have it) - some weapons would check for this value!
