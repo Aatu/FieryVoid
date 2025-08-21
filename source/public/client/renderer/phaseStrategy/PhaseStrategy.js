@@ -223,6 +223,11 @@ window.PhaseStrategy = function () {
             !(shipManager.shouldBeHidden(ship))
         );
 
+        if (gamedata.showLoS) { 
+            this._startHexRuler = payload.hex;
+            mathlib.clearLosSprite();                   
+        }  
+
         if(filteredShips.length === 1){ //only one ship, we have to pretend the stealth ship(s) aren't on same hex!
             var ship = filteredShips[0];
             if(payload.button === 2){
