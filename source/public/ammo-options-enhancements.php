@@ -348,7 +348,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
       <ul>
         <li><strong>Improved Psychic Field</strong>
             <ul class="circle-list">
-                <li>Effect: +1 range on Psychi Field</li>
+                <li>Effect: +1 range on Psychic Field</li>
                 <li>Points Cost: 300pts</li>
                 <li>Limit: 1</li>
             </ul>      
