@@ -126,14 +126,14 @@ window.BallisticIconContainer = function () {
     }
 	
 
-	function generateSplashHexes(id, position, shooterid, targetid, size, color) {
+	function generateSplashHexes(id, position, shooterid, targetid, size, type) {
 
 			let targetHex = this.coordinateConverter.fromGameToHex(position);
 			const perimeterHexes = mathlib.getPerimeterHexes(targetHex, size); //Position + radius passed.
 
             perimeterHexes.forEach(neighbour => {
                 const pos = this.coordinateConverter.fromHexToGame(neighbour);
-                const sprite = new BallisticSprite(pos, color, "", "#ffffff", null);
+                const sprite = new BallisticSprite(pos, type);
                 this.scene.add(sprite.mesh);
 
                 this.ballisticIcons.push({
@@ -153,8 +153,9 @@ window.BallisticIconContainer = function () {
 
     function createOrUpdateBallistic(ballistic, iconContainer, turn, replay = false) {
         const icon = getBallisticIcon.call(this, ballistic.id);
-
-        if (icon && !['PersistentEffect', 'Split'].includes(ballistic.notes) && !icon.splash) {
+		
+		//Sometimes need to force creation of hex sprites, e.g. for persistent effects or splash damage.
+        if (icon && !['PersistentEffect', 'Split'].includes(ballistic.notes) && !icon.splash) { 
             updateBallisticIcon.call(this, icon, ballistic, iconContainer, turn);
         } else {
             createBallisticIcon.call(this, ballistic, iconContainer, turn, this.scene, replay);
