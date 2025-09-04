@@ -100,6 +100,33 @@ window.BallisticIconContainer = function () {
         });
     }
 
+	//        		generateSplashHexes.call(this, match.type, 1, match.color);
+	function generateSplashHexes(id, position, shooterid, targetid, size, color, opacity = 2) {
+        //if (gamedata.gamephase === -1) return; //Don't bother during Deployment phase.
+
+			let targetHex = this.coordinateConverter.fromGameToHex(position);
+			const perimeterHexes = mathlib.getPerimeterHexes(targetHex, size); //Position + radius passed.
+
+            perimeterHexes.forEach(neighbour => {
+                const pos = this.coordinateConverter.fromHexToGame(neighbour);
+                const sprite = new BallisticSprite(pos, color, "", "#ffffff", null, opacity);
+				sprite.material.opacity = 0.1;
+                this.scene.add(sprite.mesh);
+
+                this.ballisticIcons.push({
+                    id: -4,
+                    shooterId: shooterid,
+                    targetId: targetid,
+                    launchPosition: neighbour,
+                    position: new hexagon.Offset(pos.x, pos.y),
+                    launchSprite: sprite,
+                    targetSprite: sprite,
+                    used: true,
+					splash: true
+                });
+            });
+    }
+
 	
     function generateReinforcementHexes(gamedata) {
  		if(gamedata.gamephase == -1) return;
@@ -130,7 +157,7 @@ window.BallisticIconContainer = function () {
     function createOrUpdateBallistic(ballistic, iconContainer, turn, replay = false) {
         const icon = getBallisticIcon.call(this, ballistic.id);
 
-        if (icon && !['PersistentEffect', 'Split'].includes(ballistic.notes)) {
+        if (icon && !['PersistentEffect', 'Split'].includes(ballistic.notes) && !icon.splash) {
             updateBallisticIcon.call(this, icon, ballistic, iconContainer, turn);
         } else {
             createBallisticIcon.call(this, ballistic, iconContainer, turn, this.scene, replay);
@@ -168,6 +195,21 @@ window.BallisticIconContainer = function () {
 			modeName = weapon?.firingModes?.[ballistic.firingMode] || null;
 		}
 
+		let targetPosition = null;
+		let targetIcon = null;
+		let splash = false;
+
+		if (ballistic.targetid === -1 && ballistic.x !== "null" && ballistic.y !== "null") {
+			targetPosition = this.coordinateConverter.fromHexToGame(new hexagon.Offset(ballistic.x, ballistic.y));
+		} else if (ballistic.targetid && ballistic.targetid !== -1) {
+			targetIcon = iconContainer.getById(ballistic.targetid);
+			targetPosition = { x: 0, y: 0 }; // placeholder — the mesh will handle it
+		}
+
+		if (!shooter.flight && weapon?.noTargetHexIcon) {
+			targetPosition = launchPosition;
+		}
+
 		// Mode-specific icon logic
 		if (modeName) {
 			const modeMap = {
@@ -188,38 +230,31 @@ window.BallisticIconContainer = function () {
 				targetType = match.type;
 				text = match.text || text;
 				textColour = match.color || textColour;
+
+				// Call splash hex generation for special cases
+				if (modeName === 'Shredder' || modeName === 'Energy Mine') {
+					if(gamedata.thisplayer === shooter.userid || replay){
+						generateSplashHexes.call(this, ballistic.id, targetPosition, ballistic.shooterid, ballistic.targetid, 1, match.type, );
+						splash = true;
+					}	
+				}	
+			}
+
+			// Damage class-based override logic
+			if (ballistic.damageclass && modeName) {
+				switch (ballistic.damageclass) {
+					case 'MultiModeHex':
+						targetType = 'hexRed';
+						text = modeName;
+						textColour = '#e6140a';
+						break;
+					case 'support':
+						targetType = 'hexGreen';
+						iconImage = './img/allySupport.png';
+						break;
+				}
 			}
 		}
-
-		// Damage class-based override logic
-		if (ballistic.damageclass && modeName) {
-			switch (ballistic.damageclass) {
-				case 'MultiModeHex':
-					targetType = 'hexRed';
-					text = modeName;
-					textColour = '#e6140a';
-					break;
-				case 'support':
-					targetType = 'hexGreen';
-					iconImage = './img/allySupport.png';
-					break;
-			}
-		}
-
-		let targetPosition = null;
-		let targetIcon = null;
-
-		if (ballistic.targetid === -1 && ballistic.x !== "null" && ballistic.y !== "null") {
-			targetPosition = this.coordinateConverter.fromHexToGame(new hexagon.Offset(ballistic.x, ballistic.y));
-		} else if (ballistic.targetid && ballistic.targetid !== -1) {
-			targetIcon = iconContainer.getById(ballistic.targetid);
-			targetPosition = { x: 0, y: 0 }; // placeholder — the mesh will handle it
-		}
-
-		if (!shooter.flight && weapon?.noTargetHexIcon) {
-			targetPosition = launchPosition;
-		}
-
 		// LAUNCH SPRITE
 		let launchSprite = null;
 		if (
@@ -254,7 +289,8 @@ window.BallisticIconContainer = function () {
 			position: new hexagon.Offset(ballistic.x, ballistic.y),
 			launchSprite,
 			targetSprite,
-			used: true
+			used: true,
+			splash: true
 		});
 	}
 		
