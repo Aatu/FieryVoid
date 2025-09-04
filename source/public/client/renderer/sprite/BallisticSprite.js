@@ -57,13 +57,13 @@ window.BallisticSprite = function () {
     }
 
     function createTextures(opacity) {
-        TEXTURE_HEX_ORANGE = createTexture('hexOrange');
+        TEXTURE_HEX_ORANGE = createTexture('hexOrange', opacity);
         TEXTURE_HEX_RED = createTexture('hexRed', opacity);
         TEXTURE_SHIP = createTexture('ship');
-        TEXTURE_HEX_BLUE = createTexture('hexBlue');
+        TEXTURE_HEX_BLUE = createTexture('hexBlue', opacity);
         TEXTURE_HEX_GREEN = createTexture('hexGreen');
         TEXTURE_HEX_YELLOW = createTexture('hexYellow');
-        TEXTURE_HEX_PURPLE = createTexture('hexPurple');
+        TEXTURE_HEX_PURPLE = createTexture('hexPurple', opacity);
         TEXTURE_HEX_WHITE = createTexture('hexWhite');
         TEXTURE_HEX_CLEAR = createTexture('hexClear'); // ✅ New hexClear texture
     }
@@ -202,7 +202,7 @@ function getStrokeColorByType(type, opacity = 0.5) {
     switch (type) {
         case "hexOrange": return `rgba(250,110,5,${opacity})`;
         case "hexRed":    return `rgba(230,20,10,${opacity})`;
-        case "hexBlue":   return `rgba(0,184,230,${opacity})`;
+        case "hexBlue":   return `rgba(0,184,230,${opacity*0.7})`;
         case "hexGreen":  return `rgba(0,204,0,${opacity})`;
         case "hexYellow": return `rgba(255,255,0,${opacity})`;
         case "hexPurple": return `rgba(127,0,255,${opacity})`;
