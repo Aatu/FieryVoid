@@ -232,9 +232,11 @@ window.BallisticIconContainer = function () {
 				textColour = match.color || textColour;
 
 				// Call splash hex generation for special cases
-				if (modeName === 'Shredder' || modeName === 'Energy Mine') {
+				if (modeName === 'Shredder' || modeName === 'Energy Mine' || modeName === 'Ion Storm') {
 					if(gamedata.thisplayer === shooter.userid || replay){
-						generateSplashHexes.call(this, ballistic.id, targetPosition, ballistic.shooterid, ballistic.targetid, 1, match.type, );
+						var opacity = 2; //Will divide opacity value by 2 when making sprite
+						if(modeName === 'Shredder') opacity = 10; //The blue is very bright, divide by more!
+						generateSplashHexes.call(this, ballistic.id, targetPosition, ballistic.shooterid, ballistic.targetid, 1, match.type, opacity);
 						splash = true;
 					}	
 				}	
