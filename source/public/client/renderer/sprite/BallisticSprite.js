@@ -198,7 +198,7 @@ window.BallisticSprite = function () {
         } else if (type == "hexRed") {
             return "rgba(230,20,10,0.50)";
         } else if (type == "hexBlue") {
-            return "rgba(0,184,230,0.35)";
+            return "rgba(0,184,230,0.4)";
         } else if (type == "hexGreen") {
             return "rgba(0, 204, 0,0.50)";
         } else if (type == "hexYellow") {
