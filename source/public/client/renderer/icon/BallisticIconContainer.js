@@ -100,34 +100,6 @@ window.BallisticIconContainer = function () {
         });
     }
 
-	//        		generateSplashHexes.call(this, match.type, 1, match.color);
-	function generateSplashHexes(id, position, shooterid, targetid, size, color, opacity = 2) {
-        //if (gamedata.gamephase === -1) return; //Don't bother during Deployment phase.
-
-			let targetHex = this.coordinateConverter.fromGameToHex(position);
-			const perimeterHexes = mathlib.getPerimeterHexes(targetHex, size); //Position + radius passed.
-
-            perimeterHexes.forEach(neighbour => {
-                const pos = this.coordinateConverter.fromHexToGame(neighbour);
-                const sprite = new BallisticSprite(pos, color, "", "#ffffff", null, opacity);
-				sprite.material.opacity = 0.1;
-                this.scene.add(sprite.mesh);
-
-                this.ballisticIcons.push({
-                    id: -4,
-                    shooterId: shooterid,
-                    targetId: targetid,
-                    launchPosition: neighbour,
-                    position: new hexagon.Offset(pos.x, pos.y),
-                    launchSprite: sprite,
-                    targetSprite: sprite,
-                    used: true,
-					splash: true
-                });
-            });
-    }
-
-	
     function generateReinforcementHexes(gamedata) {
  		if(gamedata.gamephase == -1) return;
 
@@ -153,6 +125,34 @@ window.BallisticIconContainer = function () {
             });
     }
 	
+
+	function generateSplashHexes(id, position, shooterid, targetid, size, color, opacity = 2) {
+
+			let targetHex = this.coordinateConverter.fromGameToHex(position);
+			const perimeterHexes = mathlib.getPerimeterHexes(targetHex, size); //Position + radius passed.
+
+            perimeterHexes.forEach(neighbour => {
+                const pos = this.coordinateConverter.fromHexToGame(neighbour);
+                const sprite = new BallisticSprite(pos, color, "", "#ffffff", null, opacity);
+				sprite.mesh.material.transparent = true;
+				sprite.mesh.material.opacity = 0.1;				
+				//sprite.material.opacity = 0.1;
+                this.scene.add(sprite.mesh);
+
+                this.ballisticIcons.push({
+                    id: -4,
+                    shooterId: shooterid,
+                    targetId: targetid,
+                    launchPosition: neighbour,
+                    position: new hexagon.Offset(pos.x, pos.y),
+                    launchSprite: sprite,
+                    targetSprite: sprite,
+                    used: true,
+					splash: true
+                });
+            });
+    }
+
 
     function createOrUpdateBallistic(ballistic, iconContainer, turn, replay = false) {
         const icon = getBallisticIcon.call(this, ballistic.id);
@@ -234,7 +234,14 @@ window.BallisticIconContainer = function () {
 				// Call splash hex generation for special cases
 				if (modeName === 'Shredder' || modeName === 'Energy Mine' || modeName === 'Ion Storm') {
 					if(gamedata.thisplayer === shooter.userid || replay){
-						generateSplashHexes.call(this, ballistic.id, targetPosition, ballistic.shooterid, ballistic.targetid, 1, match.type, 2);
+						var size = 1;
+						if(modeName === 'Ion Storm'){
+							generateSplashHexes.call(this, ballistic.id, targetPosition, ballistic.shooterid, ballistic.targetid, size, match.type, 2);
+							size = 2;
+							generateSplashHexes.call(this, ballistic.id, targetPosition, ballistic.shooterid, ballistic.targetid, size, match.type, 2);							
+						}else{ 
+							generateSplashHexes.call(this, ballistic.id, targetPosition, ballistic.shooterid, ballistic.targetid, size, match.type, 2);
+						}
 						splash = true;
 					}	
 				}	
