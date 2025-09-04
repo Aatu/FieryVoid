@@ -126,17 +126,14 @@ window.BallisticIconContainer = function () {
     }
 	
 
-	function generateSplashHexes(id, position, shooterid, targetid, size, color, opacity = 2) {
+	function generateSplashHexes(id, position, shooterid, targetid, size, color) {
 
 			let targetHex = this.coordinateConverter.fromGameToHex(position);
 			const perimeterHexes = mathlib.getPerimeterHexes(targetHex, size); //Position + radius passed.
 
             perimeterHexes.forEach(neighbour => {
                 const pos = this.coordinateConverter.fromHexToGame(neighbour);
-                const sprite = new BallisticSprite(pos, color, "", "#ffffff", null, opacity);
-				sprite.mesh.material.transparent = true;
-				sprite.mesh.material.opacity = 0.1;				
-				//sprite.material.opacity = 0.1;
+                const sprite = new BallisticSprite(pos, color, "", "#ffffff", null);
                 this.scene.add(sprite.mesh);
 
                 this.ballisticIcons.push({
@@ -231,20 +228,37 @@ window.BallisticIconContainer = function () {
 				text = match.text || text;
 				textColour = match.color || textColour;
 
-				// Call splash hex generation for special cases
-				if (modeName === 'Shredder' || modeName === 'Energy Mine' || modeName === 'Ion Storm') {
-					if(gamedata.thisplayer === shooter.userid || replay){
-						var size = 1;
-						if(modeName === 'Ion Storm'){
-							generateSplashHexes.call(this, ballistic.id, targetPosition, ballistic.shooterid, ballistic.targetid, size, match.type, 2);
-							size = 2;
-							generateSplashHexes.call(this, ballistic.id, targetPosition, ballistic.shooterid, ballistic.targetid, size, match.type, 2);							
-						}else{ 
-							generateSplashHexes.call(this, ballistic.id, targetPosition, ballistic.shooterid, ballistic.targetid, size, match.type, 2);
-						}
-						splash = true;
-					}	
-				}	
+			// Call splash hex generation for cases where weapon affects more than one hex
+			if (['Shredder', 'Energy Mine', 'Ion Storm', 'Jammer'].includes(modeName)) {
+				if (gamedata.thisplayer === shooter.userid || replay) {
+					let sizes = [];
+
+					switch (modeName) {
+						case 'Ion Storm':
+							sizes = [1, 2];
+							break;
+						case 'Jammer':
+							sizes = [5];
+							break;
+						default: // Shredder / Energy Mine
+							sizes = [1];
+					}
+
+					sizes.forEach(size => {
+						generateSplashHexes.call(
+							this,
+							ballistic.id,
+							targetPosition,
+							ballistic.shooterid,
+							ballistic.targetid,
+							size,
+							match.type
+						);
+					});
+
+					splash = true;
+				}
+			}
 			}
 
 			// Damage class-based override logic
