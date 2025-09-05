@@ -1530,6 +1530,8 @@ class SparkField extends Weapon implements DefensiveSystem{
 	        $fireOrder->updated = true;
 		$fireOrder->chosenLocation = 0;//so it's recalculated later every time! - as location chosen here is completely incorrect for target 
 		$fireOrder->needed = 100; //this weapon simply causes damage, hit is automatic
+		$range = $this->getAoE($gamedata->turn);
+		$fireOrder->pubnotes = "<br>Spark Field damages all units within " . $range . " hexes.";
 	}
 	
 	public function fire($gamedata, $fireOrder){
@@ -5191,6 +5193,8 @@ class PsychicField extends Weapon{ //Thirdspace weapons that operates similar to
 	    $fireOrder->updated = true;
 		$fireOrder->chosenLocation = 0;//so it's recalculated later every time! - as location chosen here is completely incorrect for target 
 		$fireOrder->needed = 100; //hit is automatic
+		$range = $this->getAoE($gamedata->turn);
+		$fireOrder->pubnotes = "<br>Psychic Field effects all units within " . $range . " hexes.";		
 	}
 	
 	public function fire($gamedata, $fireOrder){
@@ -5271,7 +5275,7 @@ class PsychicField extends Weapon{ //Thirdspace weapons that operates similar to
 		$effecttohit = Dice::d(2,1)+$boostlevel;//strength of effect: -5 to -10 base, up to -25 with boost.
 		$effectCrit = $effectIni +2;
 				
-		$fireOrder->pubnotes .= "<br> All enemies units have Initiative reduced and suffer a Hit Penalty next turn. Ships may also suffer a potential Critical.";
+		//$fireOrder->pubnotes .= "<br> All enemies units have Initiative reduced and suffer a Hit Penalty next turn. Ships may also suffer a potential Critical.";
 						
 		if ($system->advancedArmor){		
 			$effectIni = ceil($effectIni/2);  	//Other Ancients are somewhat resistant to pyschic attack from Thirdspace Aliens, 50% effect.	
