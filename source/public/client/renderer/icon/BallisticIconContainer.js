@@ -134,6 +134,8 @@ window.BallisticIconContainer = function () {
             perimeterHexes.forEach(neighbour => {
                 const pos = this.coordinateConverter.fromHexToGame(neighbour);
                 const sprite = new BallisticSprite(pos, type);
+				sprite.uniforms.opacity.value = 0.7; //Make them a bit less bright than main hex sprites.
+				
                 this.scene.add(sprite.mesh);
 
                 this.ballisticIcons.push({
