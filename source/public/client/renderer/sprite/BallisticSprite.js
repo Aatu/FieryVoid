@@ -194,17 +194,17 @@ window.BallisticSprite = function () {
 
     function getStrokeColorByType(type) {
         if (type == "hexOrange") {
-            return "rgba(250,110,5,0.50)"; 
+            return "rgba(250,110,5,0.40)"; 
         } else if (type == "hexRed") {
-            return "rgba(230,20,10,0.50)";
+            return "rgba(230,20,10,0.40)";
         } else if (type == "hexBlue") {
-            return "rgba(0,184,230,0.4)";
+            return "rgba(0,184,230,0.40)";
         } else if (type == "hexGreen") {
-            return "rgba(0, 204, 0,0.50)";
+            return "rgba(0, 204, 0,0.40)";
         } else if (type == "hexYellow") {
-            return "rgba(255, 255, 0,0.50)";
+            return "rgba(255, 255, 0,0.40)";
         } else if (type == "hexPurple") {
-            return "rgba(127, 0, 255,0.50)";
+            return "rgba(127, 0, 255,0.40)";
         } else if (type == "hexWhite") { 
             return "rgba(255, 255, 255,0.40)";
         } else if (type == "hexClear") { // ✅ No stroke color
