@@ -832,7 +832,6 @@ window.PhaseStrategy = function () {
 
         if (!gamedata.showLoS) {
             gamedata.showLoS = true;
-            //if(this._startHexRuler == null) this._startHexRuler = shipManager.getShipPosition(this.selectedShip);
             const hex = this._lastHoveredHex || { q: 0, r: 0 };
             mathlib.showLoS(this._startHexRuler, hex);
         } else {
