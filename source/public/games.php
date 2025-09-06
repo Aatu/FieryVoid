@@ -89,15 +89,12 @@ $games = json_encode(Manager::getTacGames($userid), JSON_NUMERIC_CHECK);
     </div>
 
     <div class="resources">
-      <h3>Latest Updates — August 2025</h3>
+      <h3>Latest Updates — September 2025</h3>
       <ul class="updates-list">
-        <li><strong>Ruler / LoS Tool</strong> - New Ruler and Line of Sight tool added to game, access via side button or pressing 'R' and moving/clicking mouse on map</li>        
-        <li><strong>Terrain Updates</strong> - More flexible Terrain options in Create Game. Terrain purchased in Fleet Selection can now be placed anywhere on map. New Moon (Large) added.</li>
-        <li><strong>Surrendering</strong> - Games will no longer automatically end when any one player surrenders.  Instead, games will end when all players in one team have surrendered.</li>           
-        <li><strong>Rules & Info</strong> - Faction Guide, FAQ and Enhancement documents received further updates.</li>        
-        <li><strong>Line of Sight Errors</strong> - Methods reviewed and tightened up for fringe cases that may have led to incorrect results.</li>
-        <li><strong>Vorlon Petals</strong> - Opening petals / boosting Power Capacitor now better reflects B5 Wars TT rules.</li>
-        <li><strong>Bug Fixes</strong> - Too many to list, keep the reports coming!</li>                                                    
+        <li><strong>Splash Daamge</strong> - Weapons which affcet more than one hex will now display this visually e.g. Narn Energy Mines.</li>
+        <li><strong>Ships Images</strong> - Several factions have received improvements to their ship sprites including Alacans, Markab and Vree.</li>                 
+        <li><strong>Combat Values for Jumped Ships</strong> - When a ship jumps to hyperspace, the Info Tab will now note this and it's Combat Value at the point of jump.</li>          
+        <li><strong>Bug Fixes</strong> - Some minor optimisations, plus other small fixes. Thanks for the reports!</li>                                                    
         <!--<li><strong>6 Jun</strong> - Overlay colors, deployment zone tweaks, UI fixes. Pulsar mine fixed, tooltip/text readability improved.</li>-->
       </ul>
     </div>
