@@ -30,7 +30,7 @@ class gaimTixTyk extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new Hangar(4, 8));
 
 		
-        $this->addFrontSystem(new PacketTorpedo(4, 0, 0, 300, 60));		
+        //$this->addFrontSystem(new PacketTorpedo(4, 0, 0, 300, 60));		
         $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
         $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));               
         $this->addAftSystem(new Thruster(4, 12, 0, 5, 2));
@@ -38,7 +38,7 @@ class gaimTixTyk extends HeavyCombatVesselLeftRight{
         $this->addAftSystem(new TwinArray(3, 6, 2, 90, 270));
 		$this->addAftSystem(new JumpEngine(3, 10, 3, 20));        
 
-        $this->addLeftSystem(new PacketTorpedo(4, 0, 0, 240, 360));         
+        $this->addLeftSystem(new PacketTorpedo(4, 0, 0, 240, 60));         
         $this->addLeftSystem(new BattleLaser(4, 6, 6, 240, 60));       		
         $this->addLeftSystem(new GaimPhotonBomb(4, 0, 0, 180, 360));  
         $this->addLeftSystem(new TwinArray(3, 6, 2, 240, 60));
@@ -49,7 +49,7 @@ class gaimTixTyk extends HeavyCombatVesselLeftRight{
 //        $this->addRightSystem(new PacketTorpedo(4, 6, 5, 300, 60));
         $this->addRightSystem(new AssaultLaser(4, 6, 4, 0, 120));
         $this->addRightSystem(new AssaultLaser(4, 6, 4, 0, 120));		
-        $this->addRightSystem(new PacketTorpedo(4, 0, 0, 0, 120));
+        $this->addRightSystem(new PacketTorpedo(4, 0, 0, 300, 120));
         $this->addRightSystem(new GaimPhotonBomb(4, 0, 0, 0, 180)); 
         $this->addRightSystem(new TwinArray(3, 6, 2, 300, 120));
          
