@@ -94,7 +94,8 @@ $games = json_encode(Manager::getTacGames($userid), JSON_NUMERIC_CHECK);
         <li><strong>Splash Daamge</strong> - Weapons which affect more than one hex will now display this visually e.g. Narn Energy Mines.</li>
         <li><strong>Ships Images</strong> - Several factions have received improvements to their ship sprites including Alacans, Markab and Vree.</li>                 
         <li><strong>Combat Values for Jumped Ships</strong> - When a ship jumps to hyperspace, the Info Tab will now note this and it's Combat Value at the point of jump.</li>          
-        <li><strong>Bug Fixes</strong> - Some minor optimisations, plus other small fixes. Thanks for the reports!</li>                                                    
+        <li><strong>Bugged Games in Lobby</strong> - To prevent game sbugging out, you can no longer leave a game after you've readied a fleet and someone else is in the lobby.</li>         
+        <li><strong>General Fixes</strong> - Some minor optimisations, plus other small fixes. Thanks for the reports!</li>                                                    
         <!--<li><strong>6 Jun</strong> - Overlay colors, deployment zone tweaks, UI fixes. Pulsar mine fixed, tooltip/text readability improved.</li>-->
       </ul>
     </div>
