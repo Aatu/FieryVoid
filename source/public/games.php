@@ -91,10 +91,10 @@ $games = json_encode(Manager::getTacGames($userid), JSON_NUMERIC_CHECK);
     <div class="resources">
       <h3>Latest Updates — September 2025</h3>
       <ul class="updates-list">
-        <li><strong>Splash Daamge</strong> - Weapons which affect more than one hex will now display this visually e.g. Narn Energy Mines.</li>
-        <li><strong>Ships Images</strong> - Several factions have received improvements to their ship sprites including Alacans, Markab and Vree.</li>                 
-        <li><strong>Combat Values for Jumped Ships</strong> - When a ship jumps to hyperspace, the Info Tab will now note this and it's Combat Value at the point of jump.</li>          
-        <li><strong>Bugged Games in Lobby</strong> - To prevent games bugging out, you can no longer leave a game after you've readied a fleet and someone else is in the lobby.</li>         
+        <li><strong>Splash Damage</strong> - Weapons which affect more than one hex will now display this visually e.g. Narn Energy Mines.</li>
+        <li><strong>Jumped Ships</strong> - When a ship jumps to hyperspace, the Info Tab will note this and display its Combat Value at the point of jump.</li>         
+        <li><strong>Ship Images</strong> - Several factions have received improvements to their ship sprites including Alacans, Markab and Vree.</li>                          
+        <li><strong>Bugged Lobby Games</strong> - You can no longer leave games in Fleet Selection after you've readied a fleet and someone else is in the lobby.</li>         
         <li><strong>General Fixes</strong> - Some minor optimisations, plus other small fixes. Thanks for the reports!</li>                                                    
         <!--<li><strong>6 Jun</strong> - Overlay colors, deployment zone tweaks, UI fixes. Pulsar mine fixed, tooltip/text readability improved.</li>-->
       </ul>
