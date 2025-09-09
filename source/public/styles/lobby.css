@@ -213,11 +213,12 @@
 */
 .leaveslot{
     position:absolute;
-    right:6px;          /* sits to the left of the 10px icon at right:5px */
-    top:2px;             /* align vertically with the icon */
+    right:5px;          /* sits to the left of the 10px icon at right:5px */
+    top:1px;             /* align vertically with the icon */
     font-size:11px;
-    color:#DEEBFF;
+    color:#8bcaf2;
     cursor:pointer;      /* so it feels clickable like the icon */
+	/*text-decoration:underline;  */  
     /* optional: font-weight: bold; */
 }
 
