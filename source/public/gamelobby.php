@@ -642,7 +642,7 @@ if ($asteroids == false && $moons == false) {
                     
     <div id="slottemplatecontainer" style="display:none;">
         <div class="slot" >
-            <div class="leaveslot"></div>
+            <div class="leaveslot">Leave Slot</div>
             <div>
                 <span class="smallSize headerSpan">NAME:</span>
                 <span class ="value name"></span>

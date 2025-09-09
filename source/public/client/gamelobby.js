@@ -385,7 +385,7 @@ window.gamedata = {
 			if (checkSlot.lastphase >= "-2") { //this slot has ready fleet
 				var player = playerManager.getPlayerInSlot(checkSlot);
 				if (player.id == gamedata.thisplayer){
-					window.confirm.error("You have already confirmed Your fleet for this game!", function () {});
+					window.confirm.error("You have already confirmed your fleet for this game!", function () {});
 					return;
 				}
 			}
@@ -1917,10 +1917,10 @@ applyCustomShipFilter: function () {
 
                 if (player.id == gamedata.thisplayer) {
                     if (gamedata.selectedSlot == null) gamedata.selectedSlot = slot.slot;
-                    $(".leaveslot", slotElement).show();
-                } else $(".leaveslot", slotElement).hide();
+					$(".leaveslot, .leaveslot-label", slotElement).show();
+                } else $(".leaveslot, .leaveslot-label", slotElement).hide();
             } else {
-                $(".leaveslot", slotElement).hide();
+                $(".leaveslot, .leaveslot-label", slotElement).hide();
 
                 slotElement.attr("data-playerid", "");
                 slotElement.removeClass("taken");
@@ -1948,72 +1948,74 @@ applyCustomShipFilter: function () {
         $(".depavailable", slot).html(data.depavailable);
     },
 
-clickTakeslot: function clickTakeslot() {
-    var slot = $(".slot").has($(this));
-    var slotid = slot.data("slotid");
+	clickTakeslot: function clickTakeslot() {
+		var slot = $(".slot").has($(this));
+		var slotid = slot.data("slotid");
 
-    // block if player already has confirmed fleet (in any slot)
-	for (var i in gamedata.slots)  { //check all slots
-        var checkSlot = gamedata.slots[i];
-		if (checkSlot.lastphase >= "-2") { //this slot has ready fleet
-            var player = playerManager.getPlayerInSlot(checkSlot);
-            if (player.id == gamedata.thisplayer && checkSlot == slot) {
-                window.confirm.error("You have already confirmed Your fleet for this game!", function () {});
-                return;
-            }
-        }
-    }
+		// block if player already has confirmed fleet (in any slot)
+		for (var i in gamedata.slots)  { //check all slots
+			var checkSlot = gamedata.slots[i];
+			if (checkSlot.lastphase >= "-2") { //this slot has ready fleet
+				var player = playerManager.getPlayerInSlot(checkSlot);
+				if (player.id == gamedata.thisplayer && checkSlot == slot) {
+					window.confirm.error("You have already confirmed your fleet for this game!", function () {});
+					return;
+				}
+			}
+		}
 
-	ajaxInterface.submitSlotAction("takeslot", slotid, function () {
-		gamedata.reloadFactions();
-	});
-},
+		ajaxInterface.submitSlotAction("takeslot", slotid, function () {
+			gamedata.reloadFactions();
+		});
+	},
 
-reloadFactions: function reloadFactions() {
-    $.ajax({
-        type: 'GET',
-        url: 'getFactions.php',
-        dataType: 'json',    // ✅ Expect JSON
-        cache: false,        // ✅ Avoid stale results in some browsers
-        timeout: 15000       // ✅ Network protection
-    })
-    .done(function (factions, textStatus, xhr) {
-        // ✅ HTTP status check
-        if (xhr.status !== 200) {
-            console.error(`Failed to load factions. HTTP ${xhr.status}`);
-            location.reload(); // fallback
-            return;
-        }
+	reloadFactions: function reloadFactions() {
+		$.ajax({
+			type: 'GET',
+			url: 'getFactions.php',
+			dataType: 'json',    // ✅ Expect JSON
+			cache: false,        // ✅ Avoid stale results in some browsers
+			timeout: 15000       // ✅ Network protection
+		})
+		.done(function (factions, textStatus, xhr) {
+			// ✅ HTTP status check
+			if (xhr.status !== 200) {
+				console.error(`Failed to load factions. HTTP ${xhr.status}`);
+				location.reload(); // fallback
+				return;
+			}
 
-        // ✅ Validate JSON
-        if (!factions || typeof factions !== 'object') {
-            console.error("Invalid factions JSON received:", factions);
-            location.reload(); // fallback
-            return;
-        }
+			// ✅ Validate JSON
+			if (!factions || typeof factions !== 'object') {
+				console.error("Invalid factions JSON received:", factions);
+				location.reload(); // fallback
+				return;
+			}
 
-        // ✅ Update UI
-        gamedata.parseFactions(factions);  // rebuild headers/groups
-        //updateTierFilter();               // ✅ reapply filters if needed
-    })
-    .fail(function (xhr, textStatus, errorThrown) {
-        let message = errorThrown || textStatus || "Unknown network error";
-        console.error("Failed to load factions:", message, xhr.responseText);
+			// ✅ Update UI
+			gamedata.parseFactions(factions);  // rebuild headers/groups
+			//updateTierFilter();               // ✅ reapply filters if needed
+		})
+		.fail(function (xhr, textStatus, errorThrown) {
+			let message = errorThrown || textStatus || "Unknown network error";
+			console.error("Failed to load factions:", message, xhr.responseText);
 
-        // ✅ Fallback to hard reload to recover
-        location.reload();
-    });
-},
+			// ✅ Fallback to hard reload to recover
+			location.reload();
+		});
+	},
 
 
 
     onLeaveSlotClicked: function onLeaveSlotClicked() {
         var slot = $(".slot").has($(this));
         var slotid = slot.data("slotid");
-	    
+
+		var slotFull = playerManager.getSlotById(slotid);		
+
 		//block if player already has confirmed fleet (in this slot)
-		if (slot.lastphase >= "-2") { 
-			window.confirm.error("You have already confirmed Your fleet for this game!", function () {});
+		if (slotFull.lastphase >= "-2") { 
+			window.confirm.error("You have already confirmed your fleet for this game!", function () {});
 			return;
 		}
 			
@@ -2501,7 +2503,40 @@ reloadFactions: function reloadFactions() {
 	},
 
     onLeaveClicked: function onLeaveClicked() {
-        window.location = "gamelobby.php?gameid=" + gamedata.gameid + "&leave=true";
+
+		var safeToLeave = true;
+	
+		for (var i in gamedata.slots) {
+			var slot = gamedata.slots[i];
+			if(slot.playerid !== null &&slot.playerid !== gamedata.thisplayer) safeToLeave = false;
+		}
+	
+		if(!safeToLeave) {
+			//Leave all slots that the player has.
+			var mySlots = gamedata.getMySlots();
+			for(var i in mySlots) {
+				var slot = mySlots[i];
+				if (slot.lastphase >= "-2") { 
+					window.confirm.error("You have already confirmed a fleet for this game, you cannot now leave!", function () {});
+					return;
+				}else{
+					window.location = "gamelobby.php?gameid=" + gamedata.gameid + "&leave=true";					
+				}
+			}
+		}else{	
+			window.location = "gamelobby.php?gameid=" + gamedata.gameid + "&leave=true";
+		}
+		
+        //window.location = "gamelobby.php?gameid=" + gamedata.gameid + "&leave=true";
+    },
+
+    getMySlots: function getMySlots() {
+        var mySlots = [];
+        for (var i in gamedata.slots) {
+            var slot = gamedata.slots[i];
+            if (slot && slot.playerid == gamedata.thisplayer) mySlots.push(slot);
+        }
+        return mySlots;
     },
 
     onSelectSlotClicked: function onSelectSlotClicked(e) {
