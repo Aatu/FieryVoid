@@ -2015,7 +2015,7 @@ applyCustomShipFilter: function () {
 
 		//block if player already has confirmed fleet (in this slot)
 		if (slotFull.lastphase >= "-2") { 
-			window.confirm.error("You have already confirmed your fleet for this game!", function () {});
+			window.confirm.error("You have already confirmed your fleet for this slot!", function () {});
 			return;
 		}
 			
