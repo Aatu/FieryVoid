@@ -1400,49 +1400,7 @@ window.gamedata = {
         }
     },
 
-	/*
-    parseFactions: function parseFactions(jsonFactions) {
-        this.orderStringList(jsonFactions);
-        var factionList = new Array();
 
-        for (var i in jsonFactions) {
-            var faction = jsonFactions[i];
-
-            factionList[faction] = new Array();
-
-		    // Get the power rating and check for "custom" to allow Filtering
-			var powerRating = gamedata.getPowerRating(faction);
-			var isCustom = powerRating.toLowerCase().includes("custom");
-			
-			// ✅ Extract tier from powerRating to allow Filtering
-			let tierMatch = powerRating.match(/Tier\s*([123]|Ancients|Other)/i);
-			let tier = tierMatch ? "Tier " + tierMatch[1] : "Unknown";
-			
-			//August 2023: I think everyone knows You need to click to expandd - I'm putting power rating to mouseover instead! 
-            //var group = $('<div id="' + faction + '" class="' + faction + ' faction shipshidden listempty" data-faction="' + faction + '"><div class="factionname name"><span>' + faction + '</span><span class="tooltip">(click to expand)</span></div>').appendTo("#store");
-			//var group = $('<div id="' + faction + '" class="' + faction + ' faction shipshidden listempty" data-faction="' + faction + '"><div class="factionname name"><span>' + faction + '</span><span class="tooltip">'+gamedata.getPowerRating(faction)+'</span></div>').appendTo("#store");
-			
-			//Have added custom and tier data to faction to allow for sorting/filtering. - DK - Apr 2025
-			var group = $('<div id="' 
-				+ faction 
-				+ '" class="' + faction 
-				+ ' faction shipshidden listempty" data-faction="' 
-				+ faction 
-				+ '" data-custom="' + (isCustom ? "true" : "false") 
-				+ '" data-tier="' + tier 
-				+ '"><div class="factionname name"><span class="faction-display-name' 
-				+ (isCustom ? ' custom-faction' : '') 
-				+ '">' 
-				+ faction 
-				+ '</span><span class="tooltip">' 
-				+ powerRating + '</span></div>').appendTo("#store");
-
-            group.find('.factionname').on("click", this.expandFaction);
-        }
-
-        gamedata.allShips = factionList;		
-    },
- */
 parseFactions: function parseFactions(jsonFactions) {
     $("#store").empty();
     let factionList = [];
@@ -1799,24 +1757,7 @@ parseFactions: function parseFactions(jsonFactions) {
 		} //end of faction
 	}, //endof parseShips
 	
-/*
-    expandFaction: function expandFaction(event) {
-        var clickedElement = $(this);
-        var faction = clickedElement.parent().data("faction");
 
-        if (clickedElement.parent().hasClass("shipshidden")) {
-            if (clickedElement.parent().hasClass("listempty")) {
-                window.ajaxInterface.getShipsForFaction(faction, function (factionShips) {
-                    gamedata.parseShips(factionShips);
-                });
-
-                clickedElement.parent().removeClass("listempty");
-            }
-        }
-
-        clickedElement.parent().toggleClass("shipshidden");
-    },
-*/
 expandFaction: function expandFaction(event) {
     const clickedElement = $(this);
     const factionElement = clickedElement.parent();
@@ -2023,20 +1964,6 @@ clickTakeslot: function clickTakeslot() {
         }
     }
 
-    /*// ✅ Submit slot action first
-    ajaxInterface.submitSlotAction("takeslot", slotid, function () {
-        // ✅ After success, reload factions only
-        $.getJSON("getFactions.php")
-            .done(function (factions) {
-                gamedata.parseFactions(factions); // rebuild headers/groups
-        		//updateTierFilter();               // ✅ immediately reapply filters				
-            })
-            .fail(function () {
-                console.error("Failed to load factions. Falling back to page reload.");
-                location.reload(); // fallback if something goes wrong
-            });
-    });
-	*/
 	ajaxInterface.submitSlotAction("takeslot", slotid, function () {
 		gamedata.reloadFactions();
 	});
@@ -2129,11 +2056,8 @@ reloadFactions: function reloadFactions() {
 
         $(".confirm").remove();
 
-        //		if (gamedata.canAfford(ship)){
         window.confirm.showShipBuy(ship, gamedata.doBuyShip);
-        //		}else{
-        //			window.confirm.error("You cannot afford that ship!", function(){});
-        //		}
+
     },
 
 
@@ -2241,13 +2165,6 @@ reloadFactions: function reloadFactions() {
         gamedata.updateFleet(ship);
     },
 
-    //        arrayIsEmpty: function(array){
-    //            for(var i in array){
-    //                return false;
-    //            }
-    //
-    //            return true;
-    //        },
 
     copyShip: function copyShip(copiedShip) {
         var slotid = gamedata.selectedSlot;
@@ -2571,19 +2488,7 @@ reloadFactions: function reloadFactions() {
 			window.confirm.error("You have already confirmed your fleet for this game!", function () {});
 			return;
 		}					
-		/* //Old method, I've unified it with buyShip and editShip methods above.  Seems ok - DK - Apr 2025
-		//block if player already has confirmed fleet (in any slot)
-		for (var i in gamedata.slots)  { //check all slots
-			var checkSlot = gamedata.slots[i];
-			if (checkSlot.lastphase == "-2") { //this slot has ready fleet
-				var player = playerManager.getPlayerInSlot(checkSlot);
-				if (player.id == gamedata.thisplayer){
-					window.confirm.error("You have already confirmed Your fleet for this game!", function () {});
-					return;
-				}
-			}
-		}
-		*/
+
 	    if (points == 0) {
 	        window.confirm.error("You have to buy at least one ship!", function () {});
 	        return;
