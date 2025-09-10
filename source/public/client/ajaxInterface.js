@@ -472,16 +472,16 @@ submitSlotAction: function submitSlotAction(action, slotid, callback) {
         var time = 6000;
 
         if (ajaxInterface.pollcount > 10) {
-            time = 6000;
+            time = 12000;
         }
 
         if (ajaxInterface.pollcount > 100) {
             //        	ajaxInterface.fastpolling = false;
-            time = 30000;
+            time = 50000;
         }
 
         if (ajaxInterface.pollcount > 200) {
-            time = 300000;
+            time = 500000;
         }
 
         if (ajaxInterface.pollcount > 300) {
