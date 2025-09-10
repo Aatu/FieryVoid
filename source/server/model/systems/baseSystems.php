@@ -2290,7 +2290,9 @@ class JumpEngine extends ShipSystem{
     public $boostEfficiency = 0;    
     
 	//JumpEngine tactically  is not important at all!
-	public $repairPriority = 8;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
+	public $repairPriority = 6;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
+
+	private $preJumpValue = 0; //Will be used to store ship's Combat Value at the moment it jumped.
     
     function __construct($armour, $maxhealth, $powerReq, $delay){
         parent::__construct($armour, $maxhealth, $powerReq, 0);
@@ -2334,8 +2336,8 @@ class JumpEngine extends ShipSystem{
 		$rammingSystem = $ship->getSystemByName("RammingAttack");
 		$fireOrderType = $jumpFailure ? 'JumpFailure' : 'HyperspaceJump';
 		$pubNotes = $jumpFailure
-			? " attempts to jump to hyperspace, but damage to the Jump Drive causes the ship to be destroyed."
-			: " activates Jump Drive.";
+			? " attempts to jump to hyperspace, but damage to the Jump Drive causes the ship to be destroyed (" . $missingHealthPercentage . "% chance of failure)."
+			: " successfully jumps to hyperspace (" . $missingHealthPercentage . "% chance of failure).";
 	
 		if ($rammingSystem) {
 			$newFireOrder = new FireOrder(
@@ -2348,7 +2350,15 @@ class JumpEngine extends ShipSystem{
 			$newFireOrder->addToDB = true;
 			$rammingSystem->fireOrders[] = $newFireOrder;
 		}
-	
+
+		//Create note BEFORE we destroy the primary structure, so CV is not automatically zeroed.
+		if($fireOrderType == 'HyperspaceJump'){										
+			$notekey = 'jumped';
+			$noteHuman = 'jumped';
+			$noteValue = $ship->calculateCombatValue();
+			$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gamedata->turn,$gamedata->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
+		}		
+
 		// Destroy the primary structure in either event
 		$primaryStruct = $this->unit->getStructureSystem(0);
 		if ($primaryStruct) {
@@ -2367,8 +2377,37 @@ class JumpEngine extends ShipSystem{
 				$damageEntry->weaponid = $rammingSystem->id;
 			}
 		}
+
 	}
-	
+
+	public function onIndividualNotesLoaded($gamedata){
+		foreach ($this->individualNotes as $currNote) {			    	
+			//Insert the noteValue (e.g. combatValue when ship jumped) in appropriate variable
+			$this->preJumpValue = $currNote->notevalue;
+		}				
+	}//endof onIndividualNotesLoaded
+
+
+	public function hasJumped() {		
+		$ship = $this->getUnit();
+
+		//Check damage entries, and remove Hyperspace jump entry, to see if ship was 'destroyed' by jumping not actual damage.	    
+		$struct = $ship->getStructureSystem(0);       
+        $maxHealth = $struct->maxhealth;
+        $totalDamage = 0;
+        foreach ($struct->damage as $entry) {
+            if ($entry->damageclass !== 'HyperspaceJump') $totalDamage += $entry->damage; //Only count non-jump damage, as jumping destroys ship anyway.
+        }
+             
+        if($totalDamage < $maxHealth) return true; //The other damage sustained has not destroyed this ship, jumping has.
+		
+        return false;
+	}   	
+
+	public function getCVBeforeJump() {		
+        return $this->preJumpValue;
+	}   	
+
      public function setSystemDataWindow($turn){
         $this->data["Special"] = "<br>Boost in Initial Orders to jump to hyperspace at end of turn.";	
         $this->data["Special"] .= "<br>WARNING - Jumping to hyperspace REMOVES ship from rest of the battle.";

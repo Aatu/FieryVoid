@@ -198,17 +198,28 @@
 .slot input{
     margin-right:5px;
 }
-
+/*
 .leaveslot{
     position:absolute;
     border:1px solid #DEEBFF;
-    /*border:1px solid #496791;*/
+
     width:10px;
     height:10px;
     right:5px;
     top:4px;
     background-image:url(../img/close1.png);
     cursor:pointer;
+}
+*/
+.leaveslot{
+    position:absolute;
+    right:5px;          /* sits to the left of the 10px icon at right:5px */
+    top:1px;             /* align vertically with the icon */
+    font-size:11px;
+    color:#8bcaf2;
+    cursor:pointer;      /* so it feels clickable like the icon */
+	/*text-decoration:underline;  */  
+    /* optional: font-weight: bold; */
 }
 
 .value{

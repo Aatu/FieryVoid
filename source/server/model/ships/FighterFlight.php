@@ -53,7 +53,8 @@ class FighterFlight extends BaseShip
     public $fireOrders = array();
 
     //following values from DB
-    public $id, $userid, $name, $campaignX, $campaignY;
+    public $id, $userid, $name;
+    protected $campaignX, $campaignY; //Not used as far as I can tell, just null entries in db.  
     public $rolled = false;
     public $rolling = false;
     public $team;

@@ -132,7 +132,7 @@ if (! isset($chatelement))
         startPolling: function(){
             if(chat.polling) return;
             chat.polling = true;
-            setTimeout(chat.requestChatdata, 5000);
+            setTimeout(chat.requestChatdata, 8000);
         },
 
         removeNewMessageTag: function(){
@@ -147,7 +147,7 @@ if (! isset($chatelement))
                 dataType: 'json',
                 data: { gameid: chat.gameid },
                 success: chat.successSetLastTimeChecked,
-                error: function(){ setTimeout(chat.setLastTimeChecked, 5000); }
+                error: function(){ setTimeout(chat.setLastTimeChecked, 8000); }
             });
         },
 
@@ -158,7 +158,7 @@ if (! isset($chatelement))
                 dataType: 'json',
                 data: { gameid: chat.gameid },
                 success: chat.successGetLastTimeChecked,
-                error: function(){ setTimeout(chat.getLastTimeChecked, 5000); }
+                error: function(){ setTimeout(chat.getLastTimeChecked, 8000); }
             });
         },
 
@@ -193,7 +193,7 @@ if (! isset($chatelement))
                 dataType: 'json',
                 data: { gameid: chat.gameid, lastid: chat.lastid },
                 success: chat.successRequest,
-                error: function(){ setTimeout(chat.requestChatdata, 5000); }
+                error: function(){ setTimeout(chat.requestChatdata, 8000); }
             });
         },
 
@@ -204,7 +204,7 @@ if (! isset($chatelement))
                 chat.requesting = true;
             }else{
                 chat.parseChatData(data);
-                setTimeout(chat.requestChatdata, 5000);
+                setTimeout(chat.requestChatdata, 8000);
             }
         },
 

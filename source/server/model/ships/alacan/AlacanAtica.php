@@ -7,7 +7,7 @@ class AlacanAtica extends BaseShip{
 	$this->pointCost = 600;
 	$this->faction = "Alacan Republic";
         $this->phpclass = "AlacanAtica";
-        $this->imagePath = "img/ships/AlacanAtica.png";
+        $this->imagePath = "img/ships/AlacanAtrimis.png";
         $this->shipClass = "Atica Command Cruiser";
 		$this->variantOf = "Atrimis Cruiser";
 		$this->occurence = "unique";

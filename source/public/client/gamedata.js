@@ -1119,7 +1119,7 @@ window.gamedata = {
         gamedata.setPhaseClass();
         //		window.helper.doUpdateHelpContent(gamedata.gamephase,0);        
 
-        fleetListManager.updateFleetList();
+        //fleetListManager.updateFleetList(); //No need to call again, called in fleetListManager.displayFleetLists()
     },
 
     drawIniGUI: function drawIniGUI() {

@@ -17,7 +17,7 @@ window.HexNumberSprite = function () {
 
 
     HexNumberSprite.prototype = Object.create(HexagonSprite.prototype);
-
+/*
 function createTextureWithText(type, text, textColour, textSize) {
 
     var canvas = HexagonTexture.renderNumberGrid(TEXTURE_SIZE, 10);
@@ -51,6 +51,6 @@ function createTextureWithText(type, text, textColour, textSize) {
 
     return tex;
 }
-
+*/
     return HexNumberSprite;
 }();

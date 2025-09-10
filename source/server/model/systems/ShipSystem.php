@@ -22,7 +22,7 @@ class ShipSystem {
 
     public $data = array();
     public $critData = array();
-    public $destructionAnimated = false;
+    //public $destructionAnimated = false; //Not used anywhere, commented out.
     public $imagePath, $iconPath;
     public $critRollMod = 0; //penalty tu critical damage roll: positive means crit is more likely, negative less likely (for this system)
     
@@ -90,7 +90,7 @@ class ShipSystem {
 			}
 		}	
 
-		if($ship->getSystemByName("MindriderEngine")){ //Mind's Eye COntraction CAN increase armour!
+		if($ship->getSystemByName("MindriderEngine")){ //Mind's Eye Contraction CAN increase armour!
 			$strippedSystem->armour = $this->armour;
 		}			
 							
@@ -1168,10 +1168,10 @@ class ShipSystem {
     public function isOfflineOnTurn($turn = null){
         if ($turn === null)
             $turn = TacGamedata::$currentTurn;
-        
+        /* Cleaned 19.8.25 - DK	        
         if ($this->parentSystem && $this->parentSystem instanceof DualWeapon)
             return $this->parentSystem->isOfflineOnTurn($turn);
-    
+		*/
         foreach ($this->power as $power){
             if ($power->type == 1 && $power->turn == $turn){
                 return true;

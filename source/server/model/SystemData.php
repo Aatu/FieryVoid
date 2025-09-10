@@ -49,7 +49,7 @@ class SystemData
             $turn = self::$currentTurn;
         }
 
-        // with new dualWeapon implementation: ignore subsystem
+        // with new dualWeapon implementation: ignore subsystem - Not removed with other dualWeapon code - DK
         if (!isset(self::$allData[$systemid."_0_".$shipid."_".$turn]))
         {
             $systemdata = new SystemData($systemid, $subsystem, $shipid, self::$currentGameId, $turn);

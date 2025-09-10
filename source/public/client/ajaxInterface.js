@@ -355,6 +355,7 @@ submitSlotAction: function submitSlotAction(action, slotid, callback) {
                         systems[a] = { 'id': system.id, 'systems': fighterSystems };
                     } else {
                         var fires = Array();
+        				/* Cleaned 19.8.25 - DK	                        
                         if (system.dualWeapon) {
                             for (var c in system.weapons) {
                                 var weapon = system.weapons[c];
@@ -367,6 +368,7 @@ submitSlotAction: function submitSlotAction(action, slotid, callback) {
                                 fires = fires.concat(weapon.fireOrders);
                             }
                         } else {
+                        */    
                             for (var b = system.fireOrders.length - 1; b >= 0; b--) {
                                 var fire = system.fireOrders[b];
                                 if (fire.turn < gamedata.turn) {
@@ -374,7 +376,7 @@ submitSlotAction: function submitSlotAction(action, slotid, callback) {
                                 }
                             }
                             fires = system.fireOrders;
-                        }
+                        //}
 
                         for (var b = system.power.length - 1; b >= 0; b--) {
                             var power = system.power[b];
@@ -470,16 +472,16 @@ submitSlotAction: function submitSlotAction(action, slotid, callback) {
         var time = 6000;
 
         if (ajaxInterface.pollcount > 10) {
-            time = 6000;
+            time = 12000;
         }
 
         if (ajaxInterface.pollcount > 100) {
             //        	ajaxInterface.fastpolling = false;
-            time = 30000;
+            time = 50000;
         }
 
         if (ajaxInterface.pollcount > 200) {
-            time = 300000;
+            time = 500000;
         }
 
         if (ajaxInterface.pollcount > 300) {

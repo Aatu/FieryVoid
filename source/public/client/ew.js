@@ -640,7 +640,8 @@ window.ew = {
             var elint = elints[i];
 
             //if(ship.faction != elint.faction)
-            if (ship.userid != elint.userid) continue;
+            //if (ship.userid != elint.userid) continue;
+            if (ship.team != elint.team) continue;            
 
             if (!ew.checkInELINTDistance(ship, elint, 20)) continue;
 
