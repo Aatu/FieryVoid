@@ -6,7 +6,6 @@ window.ajaxInterface = {
     pollActive: false,
     pollcount: 0,
     submiting: false,
-    //	fastpolling: false,
 
     /* //OLD VERSION
     getShipsForFaction: function getShipsForFaction(factionRequest, getFactionShipsCallback) {
@@ -469,28 +468,32 @@ submitSlotAction: function submitSlotAction(action, slotid, callback) {
 
         ajaxInterface.pollcount++;
 
-        var time = 6000;
+        // detect if running locally
+        var isLocal = (location.hostname === "localhost" || location.hostname === "127.0.0.1");
+
+        // base poll time
+        var time = isLocal ? 2000 : 10000; // local = 2s, remote = 10s
+
+
+        if (ajaxInterface.pollcount > 3) {
+            time = isLocal ? 2000 : 20000; // local faster, remote 20s           
+        }
 
         if (ajaxInterface.pollcount > 10) {
-            time = 12000;
+            time = isLocal ? 4000 : 60000; //Increased from 6 secs to 1 min
         }
 
-        if (ajaxInterface.pollcount > 100) {
-            //        	ajaxInterface.fastpolling = false;
-            time = 50000;
+        if (ajaxInterface.pollcount > 40) { //Decreased from 100 polls e.g. 
+           time = isLocal ? 6000 : 1800000; //Increased from 50 secs to 30 mins
         }
-
-        if (ajaxInterface.pollcount > 200) {
+/*
+        if (ajaxInterface.pollcount > 80) {
             time = 500000;
         }
-
+*/
         if (ajaxInterface.pollcount > 300) {
             return;
         }
-
-        //        if (ajaxInterface.fastpolling) {
-        //         	time=1000;
-        //        }
 
         ajaxInterface.poll = setTimeout(ajaxInterface.pollGamedata, time);
     },
