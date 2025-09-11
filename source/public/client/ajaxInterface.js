@@ -472,15 +472,15 @@ submitSlotAction: function submitSlotAction(action, slotid, callback) {
         var isLocal = (location.hostname === "localhost" || location.hostname === "127.0.0.1");
 
         // base poll time
-        var time = isLocal ? 2000 : 10000; // local = 2s, remote = 10s
+        var time = isLocal ? 3000 : 10000; // local = 2s, remote = 10s
 
 
         if (ajaxInterface.pollcount > 3) {
-            time = isLocal ? 2000 : 20000; // local faster, remote 20s           
+            time = isLocal ? 4000 : 20000; // local faster, remote 20s           
         }
 
         if (ajaxInterface.pollcount > 10) {
-            time = isLocal ? 4000 : 60000; //Increased from 6 secs to 1 min
+            time = isLocal ? 6000 : 60000; //Increased from 6 secs to 1 min
         }
 
         if (ajaxInterface.pollcount > 40) { //Decreased from 100 polls e.g. 
