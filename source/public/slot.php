@@ -1,25 +1,4 @@
 <?php
-/**
- * slot.php – Handles slot actions (take/leave) and returns updated game data.
- * Modernized for PHP 8 + Apache
- */
-/* //SAFER VERSION DEPENDING ON APACHE SETTINGS
-declare(strict_types=1);
-
-// ✅ Output compression (safe)
-if (!headers_sent() && !ini_get('zlib.output_compression')) {
-    ob_start('ob_gzhandler');
-} else {
-    ob_start();
-}
-
-header('Content-Type: application/json; charset=utf-8');
-
-require_once 'global.php';
-*/
-if (!headers_sent() && !ini_get('zlib.output_compression')) {
-    ob_start();  // buffer output, no gzip
-}
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -41,7 +20,6 @@ $ret = [
 if (!$playerid) {
     http_response_code(401);
     echo json_encode(['error' => 'Not logged in.'], JSON_UNESCAPED_UNICODE);
-    ob_end_flush();
     exit;
 }
 
@@ -53,7 +31,6 @@ $slotid = isset($_POST['slotid']) ? (int)$_POST['slotid'] : 0;
 if (!$action || !$gameid) {
     http_response_code(400);
     echo json_encode(['error' => 'Missing required parameters.'], JSON_UNESCAPED_UNICODE);
-    ob_end_flush();
     exit;
 }
 
@@ -102,7 +79,6 @@ if (!is_string($ret)) {
 }
 
 echo $ret;
-ob_end_flush();
 exit;
 
 
