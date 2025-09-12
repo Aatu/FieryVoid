@@ -1,9 +1,5 @@
 <?php 
 
-if (!headers_sent() && !ini_get('zlib.output_compression')) {
-    ob_start();
-}
-
 header('Content-Type: application/json; charset=utf-8');
 
 require_once 'global.php';
@@ -67,5 +63,4 @@ try {
     ]);
 }
 
-ob_end_flush();
 exit;

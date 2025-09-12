@@ -5,12 +5,6 @@
  * Modernized for PHP 8 + Apache
  */
 
-$__fv_buffering = false;
-if (!headers_sent() && !ini_get('zlib.output_compression')) {
-    ob_start();
-    $__fv_buffering = true;
-}
-
 header('Content-Type: application/json; charset=utf-8');
 
 require_once 'global.php';
@@ -63,7 +57,7 @@ try {
     ], JSON_UNESCAPED_UNICODE);
 }
 
-if ($__fv_buffering) { ob_end_flush(); }
+
 exit;
 /* //OLD version
 include_once 'global.php';

@@ -1,10 +1,5 @@
 <?php
 
-// Start output buffer with Brotli/Gzip support
-if (!headers_sent() && !ini_get('zlib.output_compression')) {
-    ob_start();
-}
-
 // Load global config and classes
 require_once 'global.php';
 

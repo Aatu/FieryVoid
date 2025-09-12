@@ -1,9 +1,5 @@
 <?php 
 
-// Start output buffer with Brotli/Gzip support
-if (!headers_sent() && !ini_get('zlib.output_compression')) {
-    ob_start();
-}
 
 // Debugging (remove or adjust for production)
 ini_set('display_errors', 1);
