@@ -452,6 +452,53 @@ submitSlotAction: function submitSlotAction(action, slotid, callback) {
         ajaxInterface.pollActive = false;
     },
 
+pollGamedata: function pollGamedata() {
+
+    if (!ajaxInterface.pollActive) {
+        ajaxInterface.stopPolling();
+        return;
+    }
+
+    if (gamedata.waiting == false) {
+        ajaxInterface.stopPolling();
+        return;
+    }
+
+    if (!ajaxInterface.submiting) ajaxInterface.requestGamedata();
+
+    ajaxInterface.pollcount++;
+
+    // detect environment
+    var isLocal = (location.hostname === "localhost" || location.hostname === "127.0.0.1");
+    var phase = gamedata.gamephase;
+
+    var time;
+
+    // --- base timings depending on mode ---
+    if (isLocal) {
+        // Local testing timings
+        time = 3000;
+    } else if (phase === -2) {
+        // Phase -2 timings (customize as you like)
+        time = 8000;
+        if (ajaxInterface.pollcount > 10) time = 10000;
+        if (ajaxInterface.pollcount > 40) time = 15000;
+    } else {
+        // In-Game timings
+        time = 10000;
+        if (ajaxInterface.pollcount > 3)  time = 20000;
+        if (ajaxInterface.pollcount > 10) time = 60000;
+        if (ajaxInterface.pollcount > 40) time = 1800000;
+    }
+
+    if (ajaxInterface.pollcount > 300) {
+        return;
+    }
+
+    ajaxInterface.poll = setTimeout(ajaxInterface.pollGamedata, time);
+},
+
+    /*
     pollGamedata: function pollGamedata() {
 
         if (!ajaxInterface.pollActive) {
@@ -486,18 +533,18 @@ submitSlotAction: function submitSlotAction(action, slotid, callback) {
         if (ajaxInterface.pollcount > 40) { //Decreased from 100 polls e.g. 
            time = isLocal ? 6000 : 1800000; //Increased from 50 secs to 30 mins
         }
-/*
-        if (ajaxInterface.pollcount > 80) {
-            time = 500000;
-        }
-*/
+
+        //if (ajaxInterface.pollcount > 80) {
+        //    time = 500000;
+        //}
+
         if (ajaxInterface.pollcount > 300) {
             return;
         }
 
         ajaxInterface.poll = setTimeout(ajaxInterface.pollGamedata, time);
     },
-
+*/
     startPollingGames: function startPollingGames() {
         ajaxInterface.pollGames();
     },
