@@ -2486,6 +2486,8 @@ applyCustomShipFilter: function () {
 
 		var slotid = gamedata.selectedSlot;
         var selectedSlot = playerManager.getSlotById(slotid);
+        var slotElement = $('.slot.slotid_' + selectedSlot.slot);	
+
         if (selectedSlot.lastphase >= "-2") {
 			window.confirm.error("You have already confirmed your fleet for this game!", function () {});
 			return;
@@ -2499,7 +2501,9 @@ applyCustomShipFilter: function () {
 	    confirm.confirm("Are you sure you wish to ready your fleet?", function () {
 			selectedSlot.lastphase = -2; //Apparently this makes 'READY' appear in slot.			
 	        ajaxInterface.submitGamedata();
+			slotElement.addClass("ready");			
 	    });
+
 	},
 
     onLeaveClicked: function onLeaveClicked() {
