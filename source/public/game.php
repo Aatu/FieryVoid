@@ -1,7 +1,6 @@
 <?php
     require_once 'global.php'; // ✅ Critical dependency
 
-
 	$gameid = 1;
 	$thisplayer = -1;
 

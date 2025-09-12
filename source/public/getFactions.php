@@ -9,20 +9,6 @@ header('Content-Type: application/json; charset=utf-8');
 
 require_once 'global.php';
 
-/* //SAFER VERSION DEPENDING ON APACHE SETTINGS
-declare(strict_types=1);
-
-// ✅ Enable safe output buffering with gzip if possible
-if (!headers_sent() && !ini_get('zlib.output_compression')) {
-    ob_start('ob_gzhandler');
-} else {
-    ob_start();
-}
-
-header('Content-Type: application/json; charset=utf-8');
-
-require_once 'global.php';
-*/
 // ✅ Start session safely and release early to avoid blocking concurrent AJAX
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
