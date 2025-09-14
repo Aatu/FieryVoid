@@ -199,7 +199,8 @@
             gamedata.parseServerData(<?php print($gamelobbydataJSON); ?>);
             gamedata.parseFactions(<?php print($factions); ?>);
 
-            $('.readybutton').on("click", gamedata.onReadyClicked);		
+            $('.readybutton').on("click", gamedata.onReadyClicked);
+            $('.savebutton').on("click", gamedata.onSaveClicked)            		
             $('.checkbutton').on("click", gamedata.checkChoices); //fleet correctness check
             $('.leave').on("click", gamedata.onLeaveClicked);
             $('.leaveslot').on("click", gamedata.onLeaveSlotClicked);
@@ -566,23 +567,59 @@ if ($asteroids == false && $moons == false) {
             </div>
 
 
-        <div style="text-align: left; margin-top: 3px; font-size: 12px;">
-            <label style="margin-left: 5px;">Tier 1 <input type="checkbox" class="tier-filter" data-tier="Tier 1" checked></label>
-            <label style="margin-left: 5px;">Tier 2 <input type="checkbox" class="tier-filter" data-tier="Tier 2" checked></label>
-            <label style="margin-left: 5px;">Tier 3 <input type="checkbox" class="tier-filter" data-tier="Tier 3" checked></label>
-            <label style="margin-left: 5px;">Ancients <input type="checkbox" class="tier-filter" data-tier="Tier Ancients" checked></label>
-            <label style="margin-left: 5px;">Other <input type="checkbox" class="tier-filter" data-tier="Tier Other" checked></label>
-            <span style="margin-left: 6px; margin-right: 6px; font-size: 16px; font-weight: bold">|</span>
-            <label style="margin-left: 5px;">Show Custom<input type="checkbox" id="toggleCustom" class="yellow-tick"></label>
-            <span id="customDropdown" style="display:none; margin-left: 10px;">
-                <select id="customSelect" name="customFilterMode">
-                    <option value="showCustom">Show Customs</option>
-                    <option value="showOnlyCustom">Show Only Customs</option>
-                </select>
-            </span>                    
-            <!--<label style="margin-left: 5px;">Custom Factions <input type="checkbox" id="toggleCustomFactions"></label>-->
-            <!--<label style="margin-left: 5px;">Custom Ships <input type="checkbox" id="toggleCustomShips"></label>-->
+    <div style="display:flex; align-items:center; font-size:12px; margin-top:3px; flex-wrap:nowrap;">
+        <label style="margin-left:5px;">Tier 1 <input type="checkbox" class="tier-filter" data-tier="Tier 1" checked></label>
+        <label style="margin-left:5px;">Tier 2 <input type="checkbox" class="tier-filter" data-tier="Tier 2" checked></label>
+        <label style="margin-left:5px;">Tier 3 <input type="checkbox" class="tier-filter" data-tier="Tier 3" checked></label>
+        <label style="margin-left:5px;">Ancients <input type="checkbox" class="tier-filter" data-tier="Tier Ancients" checked></label>
+        <label style="margin-left:5px;">Other <input type="checkbox" class="tier-filter" data-tier="Tier Other" checked></label>
+
+        <span style="margin-left:6px; margin-right:6px; font-size:16px; font-weight:bold;">|</span>
+
+        <label style="margin-left:5px;">Show Custom<input type="checkbox" id="toggleCustom" class="yellow-tick"></label>
+        <span id="customDropdown" style="display:none; margin-left:10px;">
+            <select id="customSelect" name="customFilterMode">
+                <option value="showCustom">Show Customs</option>
+                <option value="showOnlyCustom">Show Only Customs</option>
+            </select>
+        </span>  
+
+        <!-- Custom Saved Fleet Dropdown -->
+        <div style="position:relative; margin-left:auto; font-size:12px;">
+            <div id="fleetDropdownButton" class="fleet-dropdown-btn">
+                Load a Saved Fleet
+            </div>
+            <div id="fleetDropdownList" class="fleet-dropdown-list">
+                <!-- populated dynamically -->
+            </div>
         </div>
+    </div>
+
+    <script>
+        let cachedFleets = [];
+        // References
+        const fleetDropdownButton = document.getElementById('fleetDropdownButton');
+        const fleetDropdownList = document.getElementById('fleetDropdownList');
+
+        // Initialize cache once on page load
+        ajaxInterface.getSavedFleets(function(fleets) {
+            cachedFleets = fleets;
+            gamedata.populateFleetDropdown();
+        });        
+
+        // Toggle dropdown visibility
+        fleetDropdownButton.addEventListener('click', () => {
+            fleetDropdownList.style.display = fleetDropdownList.style.display === 'block' ? 'none' : 'block';
+        });
+
+        // Close dropdown if clicked outside
+        document.addEventListener('click', (e) => {
+            if (!fleetDropdownButton.contains(e.target) && !fleetDropdownList.contains(e.target)) {
+                fleetDropdownList.style.display = 'none';
+            }
+        });
+
+    </script>
 
         <!-- Fleet selection area -->
         <table class="store" style="width:100%; margin-top: 5px;">
@@ -602,6 +639,8 @@ if ($asteroids == false && $moons == false) {
             &nbsp;            
             <span class="btn btn-primary-lobby checkbutton">CHECK</span>
             &nbsp;&nbsp;
+            <span class="btn btn-primary-lobby savebutton">SAVE FLEET</span>
+            &nbsp;&nbsp;            
             <span class="btn btn-success-lobby readybutton">READY</span>
         </div>
 
