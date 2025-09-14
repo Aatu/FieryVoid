@@ -208,6 +208,222 @@ class DBManager
         $stmt->close();
     }
 
+
+
+    public function submitSavedList($name, $userid, $points) {
+        $sql = "INSERT INTO tac_saved_list (name, userid, points) VALUES (?, ?, ?)";
+        $stmt = $this->connection->prepare($sql);
+
+        if (!$stmt) {
+            throw new Exception("DB error in submitSavedList (prepare): " . $this->connection->error);
+        }
+
+        if (!$stmt->bind_param("sii", $name, $userid, $points)) {
+            throw new Exception("DB error in submitSavedList (bind): " . $stmt->error);
+        }
+
+        if (!$stmt->execute()) {
+            throw new Exception("DB error in submitSavedList (execute): " . $stmt->error);
+        }
+
+        $newId = $this->connection->insert_id;
+
+        $stmt->close();
+
+        return $newId; // ✅ return the auto-generated ID
+    }
+
+    public function submitSavedShip($listId, $userid, $ship) 
+    {
+        // Ensure the ship has a valid name
+        $shipName = $ship->name ?: 'NAMELESS UNIT';
+        $flightsize = $ship->flightSize ?? 1;
+		$enhCostTotal = $ship->pointCostEnh + $ship->pointCostEnh2;
+
+        $sql = "INSERT INTO tac_saved_ship 
+                (userid, listid, name, phpclass, flightsize, enhvalue)
+                VALUES (?, ?, ?, ?, ?, ?)";
+
+        $stmt = $this->connection->prepare($sql);
+        if (!$stmt) {
+            throw new Exception("DB prepare failed: " . $this->connection->error);
+        }
+
+        $stmt->bind_param(
+            "iissii", 
+            $userid,
+            $listId,
+            $shipName,
+            $ship->phpclass,
+            $flightsize,
+            $enhCostTotal
+        );
+
+        if (!$stmt->execute()) {
+            throw new Exception("DB execute failed: " . $stmt->error);
+        }
+
+        $id = $stmt->insert_id;
+        $stmt->close();
+
+        return $id;
+    }
+
+	public function submitSavedEnhancement($listId, $shipid, $enhid, $numbertaken, $enhname){	
+		try{
+			$sql = "INSERT INTO `tac_saved_enh` (listId, shipid, enhid, numbertaken,enhname) 
+				VALUES($listId, $shipid, '$enhid', $numbertaken, '".$this->DBEscape($enhname)."' )";
+			$this->insert($sql);
+		}catch(Exception $e) {
+			$this->endTransaction(true);
+			throw $e;
+		}
+	} //endof function submitEnhancement
+
+    public function submitSavedAmmo($listid, $shipid, $systemid, $firingMode, $ammoAmount)
+    {
+        $stmt = $this->connection->prepare("
+            INSERT INTO tac_saved_ammo
+                (listid, shipid, systemid, firingmode, ammo)
+            VALUES (?, ?, ?, ?, ?)
+            ON DUPLICATE KEY UPDATE 
+                ammo = VALUES(ammo)
+        ");
+
+        $stmt->bind_param(
+            'iiiii',
+            $listid, $shipid, $systemid, $firingMode, $ammoAmount
+        );
+        $stmt->execute();
+        $stmt->close();
+    }
+
+
+    public function getSavedFleets($userid) {
+        $savedFleets = [];
+        $stmt = $this->connection->prepare(
+            "SELECT id, name, userid, points
+            FROM tac_saved_list
+            WHERE userid = ? OR userid = 0
+            ORDER BY userid DESC, name ASC" // optional: user fleets first
+        );
+        if ($stmt) {
+            $stmt->bind_param('i', $userid);
+            $stmt->execute();
+            $stmt->bind_result($id, $name, $fleetUserId, $points); // renamed to avoid variable clash
+            while ($stmt->fetch()) {
+                $savedFleets[] = [
+                    'id' => $id,
+                    'name' => $name,
+                    'userid' => $fleetUserId,
+                    'points' => $points
+                ];
+            }
+            $stmt->close();
+        }
+        return $savedFleets;
+    }
+
+    public function getSavedShips($listid)
+    {
+        $ships = array();
+
+        $stmt = $this->connection->prepare(
+            "SELECT
+                id, userid, name, phpclass, flightsize, enhvalue
+            FROM
+                tac_saved_ship 
+            WHERE
+                listid = ?
+            "
+        );
+
+        if ($stmt) {
+            $stmt->bind_param('i', $listid);
+            $stmt->bind_result($shipid, $userid, $name, $phpclass, $flightsize, $enhvalue);
+            $stmt->execute();
+            while ($stmt->fetch()) {
+                $ship = new $phpclass($shipid, $userid, $name, 1);
+                if($ship instanceof FighterFlight) $ship->flightSize = $flightsize;
+				$ship->pointCostEnh = $enhvalue;
+                $ships[] = $ship;
+            }
+            $stmt->close();
+        }
+
+        return $ships;
+    }
+
+
+    public function getSavedEnhancementsForShip($shipid){
+        $Enhancements = array();
+        $stmt = $this->connection->prepare( //enhname will be used for info tooltip!
+                "SELECT 
+                    enhid, numbertaken, enhname
+                FROM 
+                    tac_saved_enh 
+                WHERE 
+                    shipid = ?
+                "
+            );
+            if ($stmt)
+            {
+                $stmt->bind_param('i', $shipid);
+                $stmt->bind_result($enhID, $numbertaken, $description);
+                $stmt->execute();
+                while ($stmt->fetch())
+                {
+                $Enhancements[] = array($enhID,$numbertaken,$description);
+                }
+                $stmt->close();                
+            }
+        return $Enhancements;
+    }
+
+       public function getSavedAmmoForShip($shipid){
+        $ammoEntry = array();
+        $stmt = $this->connection->prepare( //enhname will be used for info tooltip!
+                "SELECT 
+                    systemid, firingmode, ammo
+                FROM 
+                    tac_saved_ammo 
+                WHERE 
+                    shipid = ?
+                "
+            );
+            if ($stmt)
+            {
+                $stmt->bind_param('i', $shipid);
+                $stmt->bind_result($systemid, $firingmode, $ammo);
+                $stmt->execute();
+                while ($stmt->fetch())
+                {
+                    $ammoEntry[] = array($systemid,$firingmode,$ammo);
+                }
+                $stmt->close();                
+            }
+        return $ammoEntry;
+    }
+
+
+    public function deleteSavedFleet($id) {
+        try{
+            $stmt = $this->connection->prepare(
+                "DELETE FROM 
+                    tac_saved_list
+                WHERE
+                    id = ?"
+            );
+            if ($stmt) {
+                $stmt->bind_param('i', $id);
+                $stmt->execute();
+                $stmt->close();
+            }
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
+
     public function deleteEmptyGames()
     {
         $ids = array();
