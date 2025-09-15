@@ -432,7 +432,6 @@ CREATE TABLE `tac_individual_notes` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 
-
 --
 -- Table structure for table `tac_systemdata`
 --
@@ -450,6 +449,92 @@ CREATE TABLE `tac_systemdata` (
   PRIMARY KEY (`systemid`,`subsystem`,`gameid`,`shipid`, `turn`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+
+--
+-- Table structure for table `tac_saved_list`
+--
+
+DROP TABLE IF EXISTS `tac_saved_list`;
+
+CREATE TABLE `tac_saved_list` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` text DEFAULT NULL,
+  `userid` int(11) DEFAULT NULL,
+  `points` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `userid_key` (`userid`)
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+
+--
+-- Table structure for table `tac_saved_ship`
+--
+
+DROP TABLE IF EXISTS `tac_saved_ship`;
+
+CREATE TABLE `tac_saved_ship` (
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
+  `userid` INT(11) NOT NULL,
+  `listid` INT(11) NOT NULL,
+  `name` VARCHAR(200) NOT NULL,
+  `phpclass` VARCHAR(45) NOT NULL,
+  `flightsize` INT(11) NOT NULL DEFAULT 0,
+  `enhvalue` INT(11) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`),
+  KEY `listid_key` (`listid`),
+  CONSTRAINT `fk_ship_list`
+    FOREIGN KEY (`listid`) REFERENCES `tac_saved_list` (`id`)
+    ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+
+--
+-- Table structure for table `tac_saved_enh`
+--
+
+DROP TABLE IF EXISTS `tac_saved_enh`;
+
+CREATE TABLE `tac_saved_enh` (
+  `listid` INT(11) NOT NULL,
+  `shipid` INT(11) NOT NULL,
+  `enhid` VARCHAR(10) NOT NULL,
+  `numbertaken` INT(11) NOT NULL,
+  `enhname` VARCHAR(255) NOT NULL,
+  PRIMARY KEY (`listid`,`shipid`,`enhid`),
+  KEY `idx_shipid` (`shipid`),
+  KEY `idx_listid` (`listid`),
+  CONSTRAINT `fk_enh_ship`
+    FOREIGN KEY (`shipid`) REFERENCES `tac_saved_ship` (`id`)
+    ON DELETE CASCADE,
+  CONSTRAINT `fk_enh_list`
+    FOREIGN KEY (`listid`) REFERENCES `tac_saved_list` (`id`)
+    ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+
+--
+-- Table structure for table `tac_saved_ammo`
+--
+
+DROP TABLE IF EXISTS `tac_saved_ammo`;
+
+CREATE TABLE `tac_saved_ammo` (
+  `listid` INT(11) NOT NULL,
+  `shipid` INT(11) NOT NULL,
+  `systemid` INT(11) NOT NULL,
+  `firingmode` INT(11) NOT NULL,
+  `ammo` INT(11) NOT NULL,
+  PRIMARY KEY (`listid`,`shipid`,`systemid`,`firingmode`),
+  KEY `idx_shipid` (`shipid`),
+  KEY `idx_listid` (`listid`),
+  CONSTRAINT `fk_ammo_ship`
+    FOREIGN KEY (`shipid`) REFERENCES `tac_saved_ship` (`id`)
+    ON DELETE CASCADE,
+  CONSTRAINT `fk_ammo_list`
+    FOREIGN KEY (`listid`) REFERENCES `tac_saved_list` (`id`)
+    ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 
 
