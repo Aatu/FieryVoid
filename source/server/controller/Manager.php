@@ -463,60 +463,6 @@ class Manager{
             return [];
         }
     }   
-/*
-    public static function loadSavedFleet($listid) {
-        
-        $ships = [];
-        $enhancementsByShip = [];
-        $ammoByShip = [];
-        
-        try {
-            self::initDBManager(); 
-            self::$dbManager->startTransaction();
-
-            $ships = self::$dbManager->getSavedShips($listid);
-
-            foreach($ships as $ship){
-                $enhancementsByShip[$ship->id] = self::$dbManager->getSavedEnhancementsForShip($ship->id);
-                $ammoByShip[$ship->id] = self::$dbManager->getSavedAmmoForShip($ship->id);
-            }
-
-            self::$dbManager->endTransaction(false);
-
-        } catch (Exception $e) {
-            self::$dbManager->endTransaction(true);
-            $logid = Debug::error($e);
-            return [];
-        }
-
-		//Add enhancements   
-        foreach ($ships as $ship){
-            $shipEnh = $enhancementsByShip[$ship->id] ?? [];
-            if (count($shipEnh) === 0) continue;
-            foreach ($shipEnh as $enhEntry) {
-                $enhID       = $enhEntry[0]; // same as enhid
-                $numberTaken = $enhEntry[1]; // amount
-
-                if (isset($ship->enhancementOptions[$enhID]) && $numberTaken > 0) {
-                    // Only update the number taken
-                    $ship->enhancementOptions[$enhID][2] = $numberTaken;
-                }
-            }
-           
-            //Add Ammo
-            $shipAmmo = $ammoByShip[$ship->id] ?? [];
-            foreach ($shipAmmo as $ammoEntry) {
-                list($systemid, $firingmode, $amount) = $ammoEntry;
-                $system = $ship->getSystemById($systemid);
-                if ($system) {
-                    $system->setAmmo($firingmode, $amount);
-                }
-            }
-        }    
-            
-        return $ships;
-    }   
-*/
 
 
 public static function loadSavedFleet(int $listid): array
@@ -608,47 +554,7 @@ public static function loadSavedFleet(int $listid): array
         if (!is_array($array)) return $ships;
     
         foreach ($array as $value) {
-            /*
-            $movements = array();
-            if (isset($value["movement"]) && is_array($value["movement"])) {
-                foreach($value["movement"] as $i => $move) {
-                    $movement = new MovementOrder(
-                        $move["id"] ?? -1,
-                        $move["type"] ?? null,
-                        new OffsetCoordinate($move["position"] ?? [0, 0]),
-                        $move["xOffset"] ?? 0,
-                        $move["yOffset"] ?? 0,
-                        $move["speed"] ?? 0,
-                        $move["heading"] ?? 0,
-                        $move["facing"] ?? 0,
-                        $move["preturn"] ?? false,
-                        $move["turn"] ?? 0,
-                        $move["value"] ?? 0,
-                        $move["at_initiative"] ?? false
-                    );
-                    $movement->requiredThrust = $move["requiredThrust"] ?? 0;
-                    $movement->assignedThrust = $move["assignedThrust"] ?? 0;
-    
-                    $movements[$i] = $movement;
-                }
-            }
-    
-            $EW = array();
-            if (isset($value["EW"]) && is_array($value["EW"])) {
-                foreach($value["EW"] as $i => $EWdata) {
-                    $EWentry = new EWentry(
-                        -1,
-                        $EWdata["shipid"] ?? -1,
-                        $EWdata["turn"] ?? 0,
-                        $EWdata["type"] ?? "",
-                        $EWdata["amount"] ?? 0,
-                        $EWdata["targetid"] ?? null
-                    );
-                    $EW[$i] = $EWentry;
-                }
-            }
-            */
-
+           
             $className = $value["phpclass"] ?? null;
             if (!$className) continue; // skip if class not defined
     
@@ -661,8 +567,6 @@ public static function loadSavedFleet(int $listid): array
             );
     
             $ship->pointCostEnh = ($value["pointCostEnh"] ?? 0) + ($value["pointCostEnh2"] ?? 0);
-            //$ship->setMovements($movements);
-            //$ship->EW = $EW;
     
             if ($ship instanceof FighterFlight) {
                 $ship->flightSize = $value["flightSize"] ?? 1;
@@ -674,73 +578,12 @@ public static function loadSavedFleet(int $listid): array
             $systems = $value["systems"] ?? [];
             foreach ($systems as $i => $system) {
                 $sys = $ship->getSystemById($i);
-                /*
-                if (isset($system["power"]) && is_array($system["power"])) {
-                    foreach ($system["power"] as $power) {
-                        $powerEntry = new PowerManagementEntry(
-                            $power["id"] ?? -1,
-                            $power["shipid"] ?? -1,
-                            $power["systemid"] ?? -1,
-                            $power["type"] ?? "",
-                            $power["turn"] ?? 0,
-                            $power["amount"] ?? 0
-                        );
-                        if ($sys) {
-                            $sys->setPower($powerEntry);
-                        }
-                    }
-                }
-                */    
-                /*
-                if (isset($system["fireOrders"]) && is_array($system["fireOrders"])) {
-                    $fires = [];
-                    foreach($system["fireOrders"] as $fo) {
-                        $fireOrder = new FireOrder(
-                            -1,
-                            $fo["type"] ?? "",
-                            $fo["shooterid"] ?? -1,
-                            $fo["targetid"] ?? -1,
-                            $fo["weaponid"] ?? -1,
-                            $fo["calledid"] ?? -1,
-                            $fo["turn"] ?? 0,
-                            $fo["firingMode"] ?? 1,
-                            0, 0, $fo["shots"] ?? 0, 0, 0,
-                            $fo["x"] ?? 0,
-                            $fo["y"] ?? 0,
-                            $fo["damageclass"] ?? null
-                        );
-                        if ($sys) {
-                            $fires[] = $fireOrder;
-                        }
-                    }
-                    if ($sys) $sys->setFireOrders($fires);
-                }
-                */
+                
                 if (isset($system["systems"]) && is_array($system["systems"])) {
                     foreach ($system["systems"] as $fightersys) {
                         $fig = $sys ? $sys->getSystemById($fightersys["id"] ?? -1) : null;
                         if (!$fig) continue;
-                        /*    
-                        if (isset($fightersys["fireOrders"]) && is_array($fightersys["fireOrders"])) {
-                            $fires = [];
-                            foreach($fightersys["fireOrders"] as $fo) {
-                                $fireOrder = new FireOrder(
-                                    -1,
-                                    $fo["type"] ?? "",
-                                    $fo["shooterid"] ?? -1,
-                                    $fo["targetid"] ?? -1,
-                                    $fo["weaponid"] ?? -1,
-                                    $fo["calledid"] ?? -1,
-                                    $fo["turn"] ?? 0,
-                                    $fo["firingMode"] ?? 1,
-                                    0, 0, $fo["shots"] ?? 0, 0, 0,
-                                    $fo["x"] ?? 0,
-                                    $fo["y"] ?? 0,
-                                    $fo["damageclass"] ?? null
-                                );
-                                $fires[] = $fireOrder;
-                            }
-                            */
+                        
                             // ammo transfer
                             if (isset($fightersys["ammo"])) {
                                 foreach ($fightersys["ammo"] as $i => $ammo) {
@@ -750,24 +593,9 @@ public static function loadSavedFleet(int $listid): array
                                 }
                             }
     
-                            //$fig->setFireOrders($fires);
-                        //}
-                        /*
-                        if (isset($fightersys["individualNotesTransfer"])) {
-                            $fig->individualNotesTransfer = $fightersys["individualNotesTransfer"];
-                            $fig->doIndividualNotesTransfer();
-                        }
-                        */
+                        
                     }
-                }
-                /*
-                if (isset($system["individualNotesTransfer"])) {
-                    if ($sys) {
-                        $sys->individualNotesTransfer = $system["individualNotesTransfer"];
-                        $sys->doIndividualNotesTransfer();
-                    }
-                }
-                */    
+                } 
             }
     
             $ships[(int)($value["id"] ?? count($ships))] = $ship;
@@ -775,8 +603,6 @@ public static function loadSavedFleet(int $listid): array
     
         return $ships;
     }
-
-
 
 
     public static function submitTacGamedata($gameid, $userid, $turn, $phase, $activeship, $ships, $status, $slotid = 0){
