@@ -722,6 +722,8 @@ window.confirm = {
             pointCost: ship.pointCost,
             flightSize: ship.flightSize,
             enhancementOptions: ship.enhancementOptions ? [...ship.enhancementOptions] : [],
+            pointCostEnh: ship.pointCostEnh,
+            pointCostEnh2: ship.pointCostEnh2
         };
 
         //variable flightsize

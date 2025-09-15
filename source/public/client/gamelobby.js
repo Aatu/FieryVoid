@@ -2236,10 +2236,10 @@ applyCustomShipFilter: function () {
 			newShip = gamedata.getShipByType(shipClass);
 		}	
 		
-		copiedShip.name = copiedShip.name;
-		copiedShip.pointCost = copiedShip.pointCost;
-		copiedShip.flightSize = copiedShip.flightSize;
-		copiedShip.enhancementOptions = copiedShip.enhancementOptions ? [...copiedShip.enhancementOptions] : [],	
+		newShip.name = copiedShip.name;
+		newShip.pointCost = copiedShip.pointCost;
+		newShip.flightSize = copiedShip.flightSize;
+		newShip.enhancementOptions = copiedShip.enhancementOptions ? [...copiedShip.enhancementOptions] : [],	
 
         window.confirm.showShipEdit(newShip, gamedata.doCopyShip);
     },	
@@ -2388,7 +2388,9 @@ applyCustomShipFilter: function () {
             ship.name = originalShipData.name;
             ship.pointCost = originalShipData.pointCost;
             ship.flightSize = originalShipData.flightSize;
-            ship.enhancementOptions = originalShipData.enhancementOptions ? [...originalShipData.enhancementOptions] : [],			
+            ship.enhancementOptions = originalShipData.enhancementOptions ? [...originalShipData.enhancementOptions] : [],
+			ship.pointCostEnh = originalShipData.pointCostEnh;
+			ship.pointCostEnh2 = originalShipData.pointCostEnh2;						
             $(".confirm").remove();
             window.confirm.error("You cannot afford those edits!", function () {});
             return;
@@ -2405,16 +2407,12 @@ applyCustomShipFilter: function () {
 		$('.ship.bought.shipid_' + id).remove();
 
 		//Now generate a new generate ship to reset Enhancements applied in ship window etc (otehrwise they don't update!)
-		ship = new Ship(ship);
-		if(ship.loaded){
-			for(var e in ship.enhancementOptions){
-				ship.enhancementOptions[e][2] = 0; //Need to reset manually for loaded ships.				
-			}
-		}
 
 		var name = $(".confirm input").val();
 		ship.name = name;
-		ship.pointCost = newPointCost;	
+		ship.pointCost = newPointCost;
+		ship.pointCostEnh = originalShipData.pointCostEnh;
+		ship.pointCostEnh2 = originalShipData.pointCostEnh2;			
         ship.userid = gamedata.thisplayer;			
 
         if (ship.flight) {
@@ -2427,32 +2425,35 @@ applyCustomShipFilter: function () {
 	    
 		//do note enhancements bought (if any)
 		var enhNo = 0;
-		var noTaken = 0;
+		var hadTaken = 0;
+		var nowTaken = 0;
 		var target = $(".selectAmount.shpenh" + enhNo);
 		while(typeof target.data("enhPrice") != 'undefined'){ //as long as there are enhancements defined...
-			noTaken = target.data("count");
-			if(noTaken > 0){ //enhancement picked - note!
-				ship.enhancementOptions[enhNo][2] = noTaken;
+			hadTaken = originalShipData.enhancementOptions[enhNo][2];
+			nowTaken = target.data("count");
+			if(nowTaken > 0 || hadTaken > 0){ //enhancement picked - note!
+				ship.enhancementOptions[enhNo][2] = nowTaken;
 				var originalCost = 0;
+				var newCost = 0;
 				if(!ship.enhancementOptions[enhNo][6]){ //this is an actual enhancement (as opposed to option) - note value!
 					if (ship.flight){
-						originalCost = originalShipData.enhancementOptions[enhNo][2] * target.data("enhPrice") * flightSize;						
-						originalCost += target.data("enhCost") * flightSize; //Add new enhancement, could be negative if enhancements have been removed.
-						ship.pointCostEnh = originalCost;						
+						//originalCost = originalShipData.enhancementOptions[enhNo][2] * target.data("enhPrice") * flightSize;						
+						newCost = (nowTaken - hadTaken) * target.data("enhCost") * flightSize; //Add new enhancement, could be negative if enhancements have been removed.
+						ship.pointCostEnh += newCost - originalCost;						
 					} else {
-						originalCost = originalShipData.enhancementOptions[enhNo][2] * target.data("enhPrice");						
-						originalCost += target.data("enhCost"); //Add new enhancement, could be negative if enhancements have been removed.
-						ship.pointCostEnh = originalCost;
+						//originalCost = originalShipData.enhancementOptions[enhNo][2] * target.data("enhPrice");						
+						newCost = (nowTaken - hadTaken) * target.data("enhPrice"); //Add new enhancement, could be negative if enhancements have been removed.
+						ship.pointCostEnh += newCost;
 					}
 				}else{ //this is an option - still note value, just separately!
 					if (ship.flight){
-						originalCost = originalShipData.enhancementOptions[enhNo][2] * target.data("enhPrice") * flightSize;						
-						originalCost += target.data("enhCost") * flightSize; //Add new enhancement, could be negative if enhancements have been removed.
-						ship.pointCostEnh2 = originalCost;
+						//originalCost = originalShipData.enhancementOptions[enhNo][2] * target.data("enhPrice") * flightSize;						
+						newCost =  (nowTaken - hadTaken) * target.data("enhCost") * flightSize; //Add new enhancement, could be negative if enhancements have been removed.
+						ship.pointCostEnh2 += newCost - originalCost;
 					} else {
-						originalCost = originalShipData.enhancementOptions[enhNo][2] * target.data("enhPrice");						
-						originalCost += target.data("enhCost"); //Add new enhancement, could be negative if enhancements have been removed.
-						ship.pointCostEnh2 = originalCost;
+						//originalCost = originalShipData.enhancementOptions[enhNo][2] * target.data("enhPrice");						
+						newCost =  (nowTaken - hadTaken) * target.data("enhCost"); //Add new enhancement, could be negative if enhancements have been removed.
+						ship.pointCostEnh2 += newCost - originalCost;
 					}
 				}
 			}
