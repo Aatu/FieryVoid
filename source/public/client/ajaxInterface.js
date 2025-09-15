@@ -699,28 +699,6 @@ submitSlotAction: function submitSlotAction(action, slotid, callback) {
             ajaxInterface.requestAllGames();
         }
     },
-/*
-    requestGamedata: function requestGamedata() {
-        if (ajaxInterface.submiting) return; // 🚫 skip if still running
-        ajaxInterface.submiting = true;
-
-        $.ajax({
-            type: 'GET',
-            url: 'gamedata.php',
-            dataType: 'json',
-            data: {
-                turn: gamedata.turn,
-                phase: gamedata.gamephase,
-                activeship: gamedata.activeship,
-                gameid: gamedata.gameid,
-                playerid: gamedata.thisplayer,
-                time: new Date().getTime()
-            },
-            success: ajaxInterface.successRequest,
-            error: ajaxInterface.errorAjax
-        });
-    },
-*/
 
     requestGamedata: function requestGamedata() {
         // prevent overlap if already running
@@ -793,6 +771,30 @@ submitSlotAction: function submitSlotAction(action, slotid, callback) {
         });
     },
     */
+
+    /* //OLD VERSION REQUESTGAMEDATA()
+    requestGamedata: function requestGamedata() {
+        if (ajaxInterface.submiting) return; // 🚫 skip if still running
+        ajaxInterface.submiting = true;
+
+        $.ajax({
+            type: 'GET',
+            url: 'gamedata.php',
+            dataType: 'json',
+            data: {
+                turn: gamedata.turn,
+                phase: gamedata.gamephase,
+                activeship: gamedata.activeship,
+                gameid: gamedata.gameid,
+                playerid: gamedata.thisplayer,
+                time: new Date().getTime()
+            },
+            success: ajaxInterface.successRequest,
+            error: ajaxInterface.errorAjax
+        });
+    },
+*/
+
 
     /* //OLD VERSION SUBMITGAMEDATA()
         submitGamedata: function submitGamedata() {
