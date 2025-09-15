@@ -2644,7 +2644,7 @@ applyCustomShipFilter: function () {
 	populateFleetDropdown: function populateFleetDropdown() {
 		fleetDropdownList.innerHTML = '';
 
-        let filteredFleets = gamedata.filterSavedFleet(cachedFleets);
+		let filteredFleets = gamedata.filterSavedFleet(cachedFleets);
 
 		if (!filteredFleets || filteredFleets.length === 0) {
 			const empty = document.createElement('div');
@@ -2691,26 +2691,28 @@ applyCustomShipFilter: function () {
 			pointsSpan.style.color = '#555';
 			pointsSpan.style.textAlign = 'right';
 
-			// Delete button
-			const deleteBtn = document.createElement('span');
-			deleteBtn.textContent = '✖';
-			deleteBtn.style.color = 'red';
-			deleteBtn.style.cursor = 'pointer';
-			deleteBtn.addEventListener('click', (e) => {
-				e.stopPropagation();
-				confirm.confirm(
-					"Are you sure you wish to delete this saved fleet?",
-					() => gamedata.deleteSavedFleet(fleet.id, fleet.name)
-				);
-			});
-
 			const spacer = document.createElement('span');
 			spacer.style.flexGrow = '1';
 
 			item.appendChild(nameSpan);
 			item.appendChild(spacer);
 			item.appendChild(pointsSpan);
-			item.appendChild(deleteBtn);
+
+			// ✅ Only show delete button if not a default fleet
+			if (fleet.userid !== 0) {
+				const deleteBtn = document.createElement('span');
+				deleteBtn.textContent = '✖';
+				deleteBtn.style.color = 'red';
+				deleteBtn.style.cursor = 'pointer';
+				deleteBtn.addEventListener('click', (e) => {
+					e.stopPropagation();
+					confirm.confirm(
+						"Are you sure you wish to delete this saved fleet?",
+						() => gamedata.deleteSavedFleet(fleet.id, fleet.name)
+					);
+				});
+				item.appendChild(deleteBtn);
+			}
 
 			fleetDropdownList.appendChild(item);
 		};
@@ -2727,7 +2729,7 @@ applyCustomShipFilter: function () {
 			divider.style.margin = '0px 0';
 			fleetDropdownList.appendChild(divider);
 
-			// Render default fleets
+			// Render default fleets (no delete button shown)
 			defaultFleets.forEach(renderFleetItem);
 		}
 	},
