@@ -634,7 +634,7 @@ submitSlotAction: function submitSlotAction(action, slotid, callback) {
         }
 
         var dontPollYet = false;
-        var time;  
+        var time = 5000;  
 
         // detect environment
         var isLocal = (location.hostname === "localhost" || location.hostname === "127.0.0.1");
