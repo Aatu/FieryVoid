@@ -102,17 +102,24 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
 
 
     <h3 id="selecting-your-fleet">SELECTING YOUR FLEET</h3>
-    <p>Select your ships from the ‘Purchase Your Fleet’ section on the left, click on a Faction name to see their list of ships.</p>
+    <p>Select your ships from the ‘Purchase Your Fleet’ section on the left, click on any Faction name to expand it and see their list of ships. The point cost of each ship is displayed beside it, and any variants a ship has will be listed underneath in a darker font. 
+      You can click on ‘Details’ to bring up its Ship Control Sheet (see “SCS- Ship Control Sheet” in the section below for details on how to interpret the SCS).</p>
 
-    <p>The point cost of each ship is displayed beside it. You can click on ‘Details’ to bring up its Ship Control Sheet (see “SCS- Ship Control Sheet” in the section below for details on how to interpret the SCS).</p>
+    <p>Left-click ‘Add to Fleet’ to begin adding a ship to your fleet. A pop-up window will appear which allows you to re-name the ship and select any options or enhancements available 
+      to that type of ship/faction (usually at a points cost). Click on the green tick to confirm and add this ship to your fleet.</p>
 
-    <p>Left-click ‘Add to Fleet’ to begin adding a ship to your fleet. A pop-up window will appear which allows you to re-name the ship and select any options or enhancements available to that type of ship/faction (usually at a points cost). Click on the green tick to confirm and add this ship to your fleet.</p>
+    <p>The purchased ship should now appear in the list of ships on the right, and the running points total should increase to reflect the points from the ship. 
+      You can view details, Edit, Copy or Remove the purchased ship using the buttons provided next to the purchased ship. Fighter flights are selected on their own, and you can adjust the number of fighters in a flight, 
+      usually full flights are better unless you are min-maxing the points available towards the end of your fleet building.</p>
 
-    <p>The purchased ship should now appear in the list of ships on the right, and the running points total should increase to reflect the points from the ship. You can view details, edit, copy or remove the purchased ship using the buttons provided.</p>
+    <p>There is also the option to load a pre-made fleet if you just want to get started quickly. Simply click on 'Load a Saved Fleet', select one of the default fleets provided there, then click ready.
+     As you get more familiar with Fiery Void, you can also add your own saved fleets to this list by selecting the units you want in your fleet and hitting the 'Save Fleet' button to the left of 'Ready'.
+     Your saved fleet will then be added to the dropdown list in 'Load a Saved Fleet'. 
+    </p>      
 
-    <p>Fighter flights are selected on their own, and you can adjust the number of fighters in a flight, usually full flights are better unless you are points-trimming the end of your fleet.</p>
-
-    <p>There are a few conventions for building fleets, which are not forced, but which should generally be adhered to in pick-up games unless specified otherwise. These are often referred to as ‘tournament rules’:</p>
+    <p>There are a few conventions for building fleets, which are not forced, but which should generally be adhered to in pick-up games unless specified otherwise. 
+      These are often referred to as ‘tournament rules’ and you can check if your fleet meets these requirements you can click on the ‘Check’ button at any time to see a summary of your fleet's validity.  
+      The main features of these rules are:</p>
 
     <ul>
         <li>Each side should have at least one capital ship.</li>
@@ -123,15 +130,10 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         <li>Only a single flight of fighters per side may be less than 6 in number.</li>
     </ul>
 
-    <p>To check if your fleet meets these requirements you can click on the ‘Check’ button at any time, and will see a summary of your fleet's validity.</p>
-
     <p>Note: it is very unlikely that you will get exactly to the maximum point value allowed, but you should be able to get within 100 points of it. You can also use enhancements for specific ships to use up any remaining points and thus maximise your fleet’s strength.</p>
 
-    <p>Once you are satisfied with your fleet, click 'Ready' in the bottom right of the screen, and confirm you wish to commit your fleet.</p>
-
-    <p>Once all slots in a game have readied up, the game will begin.</p>
-
-    <p>If you haven’t loaded automatically after readying, return to the main page and click on the relevant game name in the ‘Your Active Games’ list to get started.</p>
+    <p>Once you are satisfied with your fleet, click 'Ready' in the bottom right of the screen, and confirm you wish to commit your fleet. 
+      When all slots in a game have readied up, the game should begin. If you doesn't loaded automatically after all players have readied, simply return to the main page and click on the relevant game name in the ‘Your Active Games’ list to get started.</p>
 
     <a class="back-to-top" href="#top">↩ Back to Top</a>
 
