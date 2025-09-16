@@ -1261,7 +1261,7 @@ window.confirm = {
         $('<label>Enter Fleet Name:</label><input type="text" style="text-align:center" name="fleetname" value="' + defaultName + '"></input><br>').prependTo(e);
 
         // Checkbox for "public" option
-        $('<label style="display:block; margin-top:8px; font-size: 12px"><input type="checkbox" id="fleetPublicCheckbox"> Tick this box to allow others to access this fleet with its ID</label><br>')
+        $('<label style="display:block; margin-top:8px; font-size: 12px"><input type="checkbox" id="fleetPublicCheckbox"> Tick this box to allow others to access this fleet via its ID</label><br>')
             .insertAfter(e.find("input[name='fleetname']"));
 
         $(".confirmok", e).on("click", callback);

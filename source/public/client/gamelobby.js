@@ -2527,64 +2527,81 @@ expandFaction: function expandFaction(event) {
 		const userFleets = filteredFleets.filter(f => f.userid !== 0);
 		const defaultFleets = filteredFleets.filter(f => f.userid === 0);
 
-		// Helper to render a fleet item
-		const renderFleetItem = (fleet) => {
-			const item = document.createElement('div');
-			item.style.display = 'flex';
-			item.style.justifyContent = 'space-between';
-			item.style.alignItems = 'center';
-			item.style.padding = '2px 6px';
-			item.style.cursor = 'pointer';
-			item.style.borderBottom = '1px solid #eee';
+// Helper to render a fleet item
+const renderFleetItem = (fleet) => {
+    const item = document.createElement('div');
+    item.style.display = 'flex';
+    item.style.justifyContent = 'space-between';
+    item.style.alignItems = 'center';
+    item.style.padding = '2px 6px';
+    item.style.cursor = 'pointer';
+    item.style.borderBottom = '1px solid #eee';
 
-			// Hover effect
-			item.addEventListener('mouseenter', () => item.style.background = '#f0f0f0');
-			item.addEventListener('mouseleave', () => item.style.background = 'white');
+    // Hover effect
+    item.addEventListener('mouseenter', () => item.style.background = '#f0f0f0');
+    item.addEventListener('mouseleave', () => item.style.background = 'white');
 
-			// Fleet name
-			const nameSpan = document.createElement('span');
-			if (fleet.userid !== 0) {nameSpan.textContent = fleet.name + ' (#' + fleet.id +')';}
-			else{ nameSpan.textContent = fleet.name;}
-			nameSpan.addEventListener('click', () => {
-				confirm.confirm("Load your '" + fleet.name + "' fleet?", () => {
-					gamedata.loadSavedFleet(fleet.id);
-					fleetDropdownList.style.display = 'none';
-					fleetDropdownButton.textContent = 'Load a Saved Fleet';
-				});
-			});
+    // ✅ Load fleet if you click anywhere on item (except lock/delete)
+    item.addEventListener('click', () => {
+        confirm.confirm("Load your '" + fleet.name + "' fleet?", () => {
+            gamedata.loadSavedFleet(fleet.id);
+            fleetDropdownList.style.display = 'none';
+            fleetDropdownButton.textContent = 'Load a Saved Fleet';
+        });
+    });
 
-			// Points
-			const pointsSpan = document.createElement('span');
-			pointsSpan.textContent = `${fleet.points}pts`;
-			pointsSpan.style.margin = '0 6px';
-			pointsSpan.style.color = '#555';
-			pointsSpan.style.textAlign = 'right';
+    // Padlock
+    const lockSpan = document.createElement('span');
+    lockSpan.className = fleet.isPublic ? 'fa-solid fa-unlock' : 'fa-solid fa-lock';
+    lockSpan.style.color = fleet.isPublic ? 'green' : 'orange';
+    lockSpan.style.marginRight = '6px';
+    lockSpan.style.cursor = 'pointer';
+    lockSpan.addEventListener('click', (e) => {
+        e.stopPropagation(); // prevent fleet load
+        const newStatus = fleet.isPublic ? 0 : 1;
+        confirm.confirm(
+            "Are you sure you wish to change this fleets availability?",
+            () => gamedata.changeFleetPublic(fleet.id, newStatus)
+        );
+    });
 
-			const spacer = document.createElement('span');
-			spacer.style.flexGrow = '1';
+    // Fleet name
+    const nameSpan = document.createElement('span');
+    nameSpan.textContent = (fleet.userid !== 0) ? fleet.name + ' (#' + fleet.id +')' : fleet.name;
 
-			item.appendChild(nameSpan);
-			item.appendChild(spacer);
-			item.appendChild(pointsSpan);
+    // Points
+    const pointsSpan = document.createElement('span');
+    pointsSpan.textContent = `${fleet.points}pts`;
+    pointsSpan.style.margin = '0 6px';
+    pointsSpan.style.color = '#555';
+    pointsSpan.style.textAlign = 'right';
 
-			// ✅ Only show delete button if not a default fleet
-			if (fleet.userid !== 0) {
-				const deleteBtn = document.createElement('span');
-				deleteBtn.textContent = '✖';
-				deleteBtn.style.color = 'red';
-				deleteBtn.style.cursor = 'pointer';
-				deleteBtn.addEventListener('click', (e) => {
-					e.stopPropagation();
-					confirm.confirm(
-						"Are you sure you wish to delete this saved fleet?",
-						() => gamedata.deleteSavedFleet(fleet.id, fleet.name)
-					);
-				});
-				item.appendChild(deleteBtn);
-			}
+    const spacer = document.createElement('span');
+    spacer.style.flexGrow = '1';
 
-			fleetDropdownList.appendChild(item);
-		};
+    if (fleet.userid !== 0) item.appendChild(lockSpan);
+    item.appendChild(nameSpan);
+    item.appendChild(spacer);
+    item.appendChild(pointsSpan);
+
+    // Delete button (only for non-default fleets)
+    if (fleet.userid !== 0) {
+        const deleteBtn = document.createElement('span');
+        deleteBtn.textContent = '✖';
+        deleteBtn.style.color = 'red';
+        deleteBtn.style.cursor = 'pointer';
+        deleteBtn.addEventListener('click', (e) => {
+            e.stopPropagation(); // prevent fleet load
+            confirm.confirm(
+                "Are you sure you wish to delete this saved fleet?",
+                () => gamedata.deleteSavedFleet(fleet.id, fleet.name)
+            );
+        });
+        item.appendChild(deleteBtn);
+    }
+
+    fleetDropdownList.appendChild(item);
+};
 
 		// Render user fleets first
 		userFleets.forEach(renderFleetItem);
@@ -2649,7 +2666,7 @@ expandFaction: function expandFaction(event) {
 				//confirm.warning("Fleet loaded!");
 			} else {
 				if(response.ships) console.error("Load failed:", response.ships);
-				confirm.warning("Failed to load fleet, Fleet ID may not exist.");
+				confirm.warning("Failed to load fleet, ID may not exist.");
 			}
 		});		 	
     },
@@ -2684,6 +2701,21 @@ expandFaction: function expandFaction(event) {
 		gamedata.populateFleetDropdown();		
     },
 
+
+    changeFleetPublic: function changeFleetPublic(listId) {
+		ajaxInterface.changeFleetPublic(listId, function(response) {
+			//console.log("AJAX response:", ships); // debug raw response
+			if (response && response.success) {
+				var setting = response.newStatus ? 'shared' : 'private';
+				fleetDropdownButton.textContent = 'Load a Saved Fleet';
+				gamedata.populateFleetDropdown(cachedFleets);				
+				confirm.warning("Fleet availability changed to " + setting + "!");
+			} else {
+				console.error("Load failed:", ships);
+				confirm.warning("Failed to change fleet availability");
+			}
+		});		 	
+    },	
 
 
 	deleteSavedFleet: function(listId, fleetName) {

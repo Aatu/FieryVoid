@@ -440,6 +440,36 @@ class DBManager
         return $ammoEntry;
     }
 
+    public function changeAvailabilityFleet(int $id): int {
+        try {
+            // Toggle the value
+            $stmt = $this->connection->prepare(
+                "UPDATE tac_saved_list
+                SET isPublic = CASE WHEN isPublic = 1 THEN 0 ELSE 1 END
+                WHERE id = ?"
+            );
+            $stmt->bind_param('i', $id);
+            $stmt->execute();
+            $stmt->close();
+
+            // Fetch the new value
+            $stmt = $this->connection->prepare(
+                "SELECT isPublic FROM tac_saved_list WHERE id = ?"
+            );
+            $stmt->bind_param('i', $id);
+            $stmt->execute();
+
+            $newValue = 0;
+            $stmt->bind_result($newValue);
+            $stmt->fetch();
+            $stmt->close();
+
+            return (int) $newValue;
+
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
 
     public function deleteSavedFleet($id) {
         try{

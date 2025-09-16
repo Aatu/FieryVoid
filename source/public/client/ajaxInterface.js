@@ -79,7 +79,8 @@ window.ajaxInterface = {
     },
 
     submitSavedFleet: function submitSavedFleet(fleetname, isPublic, callback) {
-
+        if (ajaxInterface.submiting) return;
+        ajaxInterface.submiting = true;
         // Build the payload using your existing function
         const saveData = ajaxInterface.constructSavedShips(fleetname, isPublic);
 
@@ -226,6 +227,9 @@ window.ajaxInterface = {
 
 
 	getSavedFleets: function getSavedFleets(callback) {
+        if (ajaxInterface.submiting) return;
+        ajaxInterface.submiting = true;
+
 		$.ajax({
 			type: 'GET',
 			url: 'getSavedFleets.php',
@@ -234,17 +238,22 @@ window.ajaxInterface = {
 			timeout: 15000
 		})
 		.done(function(response) {
+            ajaxInterface.submiting = false;            
 			if (!response || !response.fleets) return callback([]);
 
 			callback(response.fleets);
 		})
 		.fail(function(xhr, textStatus, errorThrown) {
+            ajaxInterface.submiting = false;            
 			console.error("Failed to load fleets:", errorThrown || textStatus);
 			callback([]);
 		});
 	},
 
     loadSavedFleet: function loadSavedFleet(listId, callback) {
+        if (ajaxInterface.submiting) return;
+        ajaxInterface.submiting = true;
+
         $.ajax({
             type: 'POST', // POST to match PHP JSON reading
             url: 'loadSavedFleet.php',
@@ -255,16 +264,53 @@ window.ajaxInterface = {
             timeout: 15000
         })
         .done(function(response) {
+            ajaxInterface.submiting = false;             
 			if (!response || !response.ships) return callback([]);
             callback(response);
         })
         .fail(function(xhr, textStatus, errorThrown) {
+            ajaxInterface.submiting = false;             
             console.error("Failed to load fleet:", textStatus, errorThrown);
             callback([]);
         });
     },
 
+
+    changeFleetPublic: function changeFleetPublic(id, callback) {
+        if (ajaxInterface.submiting) return;
+        ajaxInterface.submiting = true;      
+        // Send the POST request
+        $.ajax({
+            type: 'POST',
+            url: 'changeAvailabilityFleet.php',
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'json',
+            data: JSON.stringify({id: id}),
+            timeout: 15000,
+            success: function(response) {
+                ajaxInterface.submiting = false;
+
+                if (response && response.error) {
+                    console.error("Submit failed:", response);
+                    ajaxInterface.errorAjax(null, null, response.error);
+                }
+
+                // ✅ Call the callback if provided
+                if (typeof callback === 'function') {
+                    callback(response);
+                }
+            },
+            error: function(xhr, status, error) {
+                ajaxInterface.submiting = false;
+                ajaxInterface.errorAjax(xhr, status, error);
+            }
+        });
+	},
+
+
     deleteSavedFleet: function deleteSavedFleet(id, callback) {
+        if (ajaxInterface.submiting) return;
+        ajaxInterface.submiting = true;        
         // Send the POST request
         $.ajax({
             type: 'POST',

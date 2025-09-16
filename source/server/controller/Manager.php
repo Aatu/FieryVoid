@@ -559,6 +559,30 @@ class Manager{
         }
     }   
 
+    public static function changeAvailabilityFleet($id): array {
+        try {
+            self::initDBManager(); 
+            self::$dbManager->startTransaction();
+
+            $newStatus = self::$dbManager->changeAvailabilityFleet($id);
+
+            self::$dbManager->endTransaction(false);
+            return [
+                'id'        => $id,
+                'success'   => true,
+                'newStatus' => $newStatus
+            ];
+        } catch (Exception $e) {
+            self::$dbManager->endTransaction(true);
+            $logid = Debug::error($e);
+            return [
+                'id'      => $id,
+                'success' => false,
+                'error'   => 'Failed to toggle fleet availability.'
+            ];
+        }
+    }
+
 
     private static function getSavedShipsFromJSON($json, $userid) {
 
