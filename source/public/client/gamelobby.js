@@ -2623,7 +2623,7 @@ expandFaction: function expandFaction(event) {
     loadSavedFleetById: function loadSavedFleetById(listId) {
 		ajaxInterface.loadSavedFleet(listId, function(response) {
 			//console.log("AJAX response:", response.ships); // debug raw response
-			if(response.list && !response.list.isPublic){
+			if(response.list && !response.list.isPublic && response.list.userid !== gamedata.thisplayer){
 				confirm.warning("Fleet cannot be loaded as it was not set-up to be shared by its owner");
 				return;							
 			}
