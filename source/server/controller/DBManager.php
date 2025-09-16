@@ -210,15 +210,18 @@ class DBManager
 
 
 
-    public function submitSavedList($name, $userid, $points) {
-        $sql = "INSERT INTO tac_saved_list (name, userid, points) VALUES (?, ?, ?)";
+    public function submitSavedList($name, $userid, $points, $isPublic) {
+        // ✅ Force $isPublic into 0 or 1
+        $isPublic = !empty($isPublic) ? 1 : 0;
+
+        $sql = "INSERT INTO tac_saved_list (name, userid, points, isPublic) VALUES (?, ?, ?, ?)";
         $stmt = $this->connection->prepare($sql);
 
         if (!$stmt) {
             throw new Exception("DB error in submitSavedList (prepare): " . $this->connection->error);
         }
 
-        if (!$stmt->bind_param("sii", $name, $userid, $points)) {
+        if (!$stmt->bind_param("siii", $name, $userid, $points, $isPublic)) {
             throw new Exception("DB error in submitSavedList (bind): " . $stmt->error);
         }
 
@@ -298,11 +301,11 @@ class DBManager
         $stmt->close();
     }
 
-
+    //All rows from tac_saved_list for a given userid
     public function getSavedFleets($userid) {
         $savedFleets = [];
         $stmt = $this->connection->prepare(
-            "SELECT id, name, userid, points
+            "SELECT id, name, userid, points, isPublic
             FROM tac_saved_list
             WHERE userid = ? OR userid = 0
             ORDER BY userid DESC, name ASC" // optional: user fleets first
@@ -310,18 +313,50 @@ class DBManager
         if ($stmt) {
             $stmt->bind_param('i', $userid);
             $stmt->execute();
-            $stmt->bind_result($id, $name, $fleetUserId, $points); // renamed to avoid variable clash
+            $stmt->bind_result($id, $name, $fleetUserId, $points, $isPublic); // renamed to avoid variable clash
             while ($stmt->fetch()) {
                 $savedFleets[] = [
                     'id' => $id,
                     'name' => $name,
                     'userid' => $fleetUserId,
-                    'points' => $points
+                    'points' => $points,
+                    'isPublic' => $isPublic
                 ];
             }
             $stmt->close();
         }
         return $savedFleets;
+    }
+
+    //Just one row from tac_saved_list
+    public function getSavedFleet($id) {
+        $savedFleet = null;
+
+        $stmt = $this->connection->prepare(
+            "SELECT id, name, userid, points, isPublic
+            FROM tac_saved_list
+            WHERE id = ?"
+        );
+
+        if ($stmt) {
+            $stmt->bind_param('i', $id);
+            $stmt->execute();
+            $stmt->bind_result($id, $name, $userid, $points, $isPublic);
+
+            if ($stmt->fetch()) {
+                $savedFleet = [
+                    'id' => $id,
+                    'name' => $name,
+                    'userid' => $userid,
+                    'points' => $points,
+                    'isPublic' => (bool) $isPublic
+                ];
+            }
+
+            $stmt->close();
+        }
+
+        return $savedFleet;
     }
 
     public function getSavedShips($listid)

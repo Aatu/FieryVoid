@@ -78,10 +78,10 @@ window.ajaxInterface = {
         gamedata.goToWaiting();
     },
 
-    submitSavedFleet: function submitSavedFleet(fleetname, callback) {
+    submitSavedFleet: function submitSavedFleet(fleetname, isPublic, callback) {
 
         // Build the payload using your existing function
-        const saveData = ajaxInterface.constructSavedShips(fleetname);
+        const saveData = ajaxInterface.constructSavedShips(fleetname, isPublic);
 
         // Ensure ships is a JSON string
         if (typeof saveData.ships !== 'string') {
@@ -131,7 +131,7 @@ window.ajaxInterface = {
         });
     },
 
-    constructSavedShips: function constructSavedShips(fleetname) {
+    constructSavedShips: function constructSavedShips(fleetname, isPublic) {
 
         var saveships = Array();
         var points = 0;
@@ -217,6 +217,7 @@ window.ajaxInterface = {
             name: fleetname,
             userid: gamedata.thisplayer,
             points: points,
+            isPublic: isPublic,
             ships: saveships,
         };
 
@@ -243,7 +244,7 @@ window.ajaxInterface = {
 		});
 	},
 
-    loadSavedFleet: function deleteSavedFleet(listId, callback) {
+    loadSavedFleet: function loadSavedFleet(listId, callback) {
         $.ajax({
             type: 'POST', // POST to match PHP JSON reading
             url: 'loadSavedFleet.php',
@@ -255,7 +256,7 @@ window.ajaxInterface = {
         })
         .done(function(response) {
 			if (!response || !response.ships) return callback([]);
-            callback(response.ships);
+            callback(response);
         })
         .fail(function(xhr, textStatus, errorThrown) {
             console.error("Failed to load fleet:", textStatus, errorThrown);

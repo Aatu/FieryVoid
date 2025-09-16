@@ -462,9 +462,10 @@ CREATE TABLE `tac_saved_list` (
   `name` text DEFAULT NULL,
   `userid` int(11) DEFAULT NULL,
   `points` int(11) DEFAULT NULL,
+  `isPublic` tinyint(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),
   KEY `userid_key` (`userid`)
-) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=51 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci
 
 
 --

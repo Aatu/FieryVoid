@@ -29,7 +29,8 @@ try {
 
         $name   = $_POST["name"] ?? null;
         $userid = $playerid; // always trust session, not client input
-        $points = isset($_POST["points"]) ? (int)$_POST["points"] : null;      
+        $points = isset($_POST["points"]) ? (int)$_POST["points"] : null;
+        $isPublic = $_POST["isPublic"] ?? 0;              
 
         // ✅ Always pass ships as JSON string to Manager
         $ships = $_POST["ships"] ?? '[]';
@@ -41,6 +42,7 @@ try {
             $name,
             $userid,
             $points,
+            $isPublic,            
             $ships,
         );
     }else {

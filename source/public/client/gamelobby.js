@@ -2477,18 +2477,19 @@ expandFaction: function expandFaction(event) {
     },
 
 	doSaveFleet: function doSaveFleet() {
-		var fleetname = $(".confirm input").val();
+		var fleetname = $(".confirm input[name='fleetname']").val();
+		var isPublic = $("#fleetPublicCheckbox").is(":checked"); // ✅ true/false
+
 		$(".confirm").remove();
 
 		// Submit fleet, then refresh list when done
-		ajaxInterface.submitSavedFleet(fleetname, function() {
-			// Fetch updated fleets
+		ajaxInterface.submitSavedFleet(fleetname, isPublic, function(response) {
 			ajaxInterface.getSavedFleets(function(fleets) {
 				cachedFleets = fleets;
 				gamedata.populateFleetDropdown(cachedFleets);
 			});
 
-			confirm.warning(fleetname + " saved!.");
+			confirm.warning(fleetname + " saved!. <br>(ID #" + response.listId + ")")
 		});
 	},
 
@@ -2542,7 +2543,8 @@ expandFaction: function expandFaction(event) {
 
 			// Fleet name
 			const nameSpan = document.createElement('span');
-			nameSpan.textContent = fleet.name;
+			if (fleet.userid !== 0) {nameSpan.textContent = fleet.name + ' (#' + fleet.id +')';}
+			else{ nameSpan.textContent = fleet.name;}
 			nameSpan.addEventListener('click', () => {
 				confirm.confirm("Load your '" + fleet.name + "' fleet?", () => {
 					gamedata.loadSavedFleet(fleet.id);
@@ -2603,12 +2605,12 @@ expandFaction: function expandFaction(event) {
 
 
     loadSavedFleet: function loadSavedFleet(listId) {
-		ajaxInterface.loadSavedFleet(listId, function(ships) {
-			console.log("AJAX response:", ships); // debug raw response
+		ajaxInterface.loadSavedFleet(listId, function(response) {
+			//console.log("AJAX response:", ships); // debug raw response
 
-			if (ships && Array.isArray(ships)) {
-				gamedata.doLoadFleet(ships);
-				fleetDropdownButton.textContent = '< Load a Saved Fleet >';
+			if (response.ships && Array.isArray(response.ships) && response.ships.length > 0) {
+				gamedata.doLoadFleet(response.ships);
+				fleetDropdownButton.textContent = 'Load a Saved Fleet';
 				//confirm.warning("Fleet loaded!");
 			} else {
 				console.error("Load failed:", ships);
@@ -2617,13 +2619,47 @@ expandFaction: function expandFaction(event) {
 		});		 	
     },
 
+
+    loadSavedFleetById: function loadSavedFleetById(listId) {
+		ajaxInterface.loadSavedFleet(listId, function(response) {
+			//console.log("AJAX response:", response.ships); // debug raw response
+			if(response.list && !response.list.isPublic){
+				confirm.warning("Fleet cannot be loaded as it was not set-up to be shared by its owner");
+				return;							
+			}
+				
+			//Need to add a check here of points here as it's not checked via Saved Fleet List, and return error if it's over what's allowed.
+			const slot = playerManager.getSlotById(gamedata.selectedSlot);
+
+            var spentPoints = 0;
+            for (var i in gamedata.ships) {
+                var lship = gamedata.ships[i];
+                if (lship.slot != gamedata.selectedSlot) continue;
+                spentPoints += lship.pointCost;
+            }
+            const pointsAvailable = slot.points - spentPoints;
+			if(response.list && pointsAvailable < response.list.points){
+				confirm.warning("Failed to load fleet, you do not have enough points available (" + response.list.points + "pts needed)");
+				return;				
+			}
+
+			if (response.ships && Array.isArray(response.ships) && response.ships.length > 0) {
+				gamedata.doLoadFleet(response.ships);
+				fleetDropdownButton.textContent = 'Load a Saved Fleet';
+				//confirm.warning("Fleet loaded!");
+			} else {
+				if(response.ships) console.error("Load failed:", response.ships);
+				confirm.warning("Failed to load fleet, Fleet ID may not exist.");
+			}
+		});		 	
+    },
+
     doLoadFleet: function doLoadFleet(fleet) {
 
 		for(var i in fleet){
-			var listShip = fleet[i].ship;
+			var listShip = fleet[i];
 			var ship = new Ship(listShip);
 
-			//ship.name = listShip.name;
 			ship.userid = gamedata.thisplayer;
 			ship.slot = gamedata.selectedSlot;//Will load as slot 1, assign here.
 			ship.loaded = true;
@@ -2641,14 +2677,6 @@ expandFaction: function expandFaction(event) {
 				window.confirm.error("You cannot afford that ship!", function () {});
 				return;
 			}
-			
-			if (ship.flight) {
-				var flightSize = ship.flightSize;
-				if (!flightSize) {
-					flightSize = 1;
-				}
-				ship.flightSize = Math.floor(flightSize);
-			}
 			*/
         	gamedata.updateFleet(ship);		
 		}
@@ -2664,7 +2692,7 @@ expandFaction: function expandFaction(event) {
 				// ✅ Only update UI after server confirms deletion
 				cachedFleets = cachedFleets.filter(f => f.id !== listId);
 				gamedata.populateFleetDropdown(cachedFleets);
-				fleetDropdownButton.textContent = 'Load a Saved Fleet';
+				//fleetDropdownButton.textContent = 'Load a Saved Fleet';
 				confirm.warning(fleetName + " deleted!");
 			} else {
 				console.error("Delete failed:", response);

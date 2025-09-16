@@ -359,18 +359,22 @@ class Manager{
         }
     }
        
-    public static function submitSavedFleet($name, $userid, $points, $ships) {
+    public static function submitSavedFleet($name, $userid, $points, $isPublic, $ships) {
         try {
             self::initDBManager();  
             $starttime = time();
 
+            // ✅ Decode ships first, before DB work
             $ships = self::getSavedShipsFromJSON($ships, $userid);
-            if (sizeof($ships) == 0) throw new Exception("Ship data missing");
+            if (sizeof($ships) == 0) {
+                throw new Exception("Ship data missing");
+            }
 
+            // ✅ Only start the DB transaction once we know we have valid data
             self::$dbManager->startTransaction();
 
-            // ✅ Save fleet and get the new ID
-            $listId = self::$dbManager->submitSavedList($name, $userid, $points);
+            // Save fleet
+            $listId = self::$dbManager->submitSavedList($name, $userid, $points, $isPublic);
 
             // ✅ Now you can associate ships, enhancements, ammo with $listId
             foreach ($ships as $ship) {
@@ -430,22 +434,23 @@ class Manager{
                             }
                         }
                     }                                   
+                }
+
+                self::$dbManager->endTransaction(false);
+
+                $endtime = time();
+                return json_encode([
+                    'listId' => $listId,
+                    'success' => true
+                ]);
+
+            } catch (Exception $e) {
+                self::$dbManager->endTransaction(true);
+                $logid = Debug::error($e);
+                return '{"error": "' .$e->getMessage() . '", "code":"'.$e->getCode().'", "logid":"'.$logid.'"}';
             }
+    }
 
-            self::$dbManager->endTransaction(false);
-
-            $endtime = time();
-            return json_encode([
-                'listId' => $listId,
-                'success' => true
-            ]);
-
-        } catch (Exception $e) {
-            self::$dbManager->endTransaction(true);
-            $logid = Debug::error($e);
-            return '{"error": "' .$e->getMessage() . '", "code":"'.$e->getCode().'", "logid":"'.$logid.'"}';
-        }
-    } 
 
     public static function getSavedFleets($userid) {
         try {
@@ -465,65 +470,73 @@ class Manager{
     }   
 
 
-public static function loadSavedFleet(int $listid): array
-{
-    $fleet = [];
-    $enhancementsByShip = [];
-    $ammoByShip = [];
+    public static function loadSavedFleet(int $listid): array
+    {
 
-    try {
-        self::initDBManager();
-        self::$dbManager->startTransaction();
+        $fleet = [];
+        $enhancementsByShip = [];
+        $ammoByShip = [];
+        //$fleetPoints = 0;
 
-        // Load all ships for this fleet
-        $ships = self::$dbManager->getSavedShips($listid);
-
-        // Load enhancements and ammo for all ships
-        foreach ($ships as $ship) {
-            $enhancementsByShip[$ship->id] = self::$dbManager->getSavedEnhancementsForShip($ship->id);
-            $ammoByShip[$ship->id] = self::$dbManager->getSavedAmmoForShip($ship->id);
-        }
-
-        self::$dbManager->endTransaction(false);
-
-        foreach ($ships as $ship) {
-            //Add enhancements   
-            Enhancements::setEnhancementOptions($ship); //Creates the list of possible Enhancements for this ship
-            $shipEnh = $enhancementsByShip[$ship->id] ?? []; 
-            foreach ($shipEnh as $enhEntry) {
-                $enhID       = $enhEntry[0]; // ID string              
-                $numberTaken = $enhEntry[1]; // amount  
-                foreach ($ship->enhancementOptions as &$option) {
-                    if ($option[0] === $enhID) {
-                        $option[2] = $numberTaken;
-                    }
-                }
-            } 
+        try {
+            self::initDBManager();
+            self::$dbManager->startTransaction();
             
-            //Add Ammo
-            $shipAmmo = $ammoByShip[$ship->id] ?? [];
-            foreach ($shipAmmo as $ammoEntry) {
-                list($systemid, $firingmode, $amount) = $ammoEntry;
-                $system = $ship->getSystemById($systemid);
-                if ($system) {
-                    $system->setAmmo($firingmode, $amount);
-                }
+            $list = self::$dbManager->getSavedFleet($listid);
+            // Load all ships for this fleet
+            $ships = self::$dbManager->getSavedShips($listid);
+
+            // Load enhancements and ammo for all ships
+            foreach ($ships as $ship) {
+                $enhancementsByShip[$ship->id] = self::$dbManager->getSavedEnhancementsForShip($ship->id);
+                $ammoByShip[$ship->id] = self::$dbManager->getSavedAmmoForShip($ship->id);
             }
 
-            // Final ship array
-            $fleet[] = [
-                'ship' => $ship,
-            ];
-        }    
+            self::$dbManager->endTransaction(false);
 
-    } catch (Exception $e) {
-        self::$dbManager->endTransaction(true);
-        Debug::error($e);
-        return []; // safe fallback
+            foreach ($ships as $ship) {
+                //$shipCost = $ship->pointCost + $ship->pointCostEnh + $ship->pointCostEnh2;
+                //if($ship instanceof FighterFlight) $shipCost = $shipCost/$ship->flightSize;
+                //$fleetPoints += $shipCost;
+
+                // Add enhancements
+                Enhancements::setEnhancementOptions($ship);
+                $shipEnh = $enhancementsByShip[$ship->id] ?? [];
+                foreach ($shipEnh as $enhEntry) {
+                    $enhID       = $enhEntry[0];
+                    $numberTaken = $enhEntry[1];
+                    foreach ($ship->enhancementOptions as &$option) {
+                        if ($option[0] === $enhID) {
+                            $option[2] = $numberTaken;
+                        }
+                    }
+                }
+
+                // Add Ammo
+                $shipAmmo = $ammoByShip[$ship->id] ?? [];
+                foreach ($shipAmmo as $ammoEntry) {
+                    list($systemid, $firingmode, $amount) = $ammoEntry;
+                    $system = $ship->getSystemById($systemid);
+                    if ($system) {
+                        $system->setAmmo($firingmode, $amount);
+                    }
+                }
+
+                $fleet[] = $ship; // store ship directly, no extra 'ship' key
+            }
+
+        } catch (Exception $e) {
+            self::$dbManager->endTransaction(true);
+            Debug::error($e);
+            return []; // safe fallback
+        }
+
+        // Return top-level array with points and ships
+        return [
+            'list' => $list,
+            'ships'  => $fleet
+        ];
     }
-
-    return $fleet;
-}
 
 
     public static function deleteSavedFleet($id) {

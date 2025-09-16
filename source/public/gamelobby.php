@@ -584,15 +584,25 @@ if ($asteroids == false && $moons == false) {
             </select>
         </span>  
 
-        <!-- Custom Saved Fleet Dropdown -->
-        <div style="position:relative; margin-left:auto; font-size:12px;">
-            <div id="fleetDropdownButton" class="fleet-dropdown-btn">
-                Load a Saved Fleet
-            </div>
-            <div id="fleetDropdownList" class="fleet-dropdown-list">
-                <!-- populated dynamically -->
+
+        <div style="display:flex; align-items:center; margin-left:auto; font-size:12px; gap:6px;">
+            <label style="margin-left: 5px; margin-top: 3px; display:flex; align-items:center;">
+                <span style="margin-right: 2px; font-size: 12px;">Load Fleet by #ID:</span>
+                <input type="text" id="fleetIdInput" value="" class="fleetIdInput">
+            </label>
+
+            <!-- Custom Saved Fleet Dropdown -->
+            <div style="position:relative; margin-left:auto; font-size:12px;">
+                <div id="fleetDropdownButton" class="fleet-dropdown-btn">
+                    Load a Saved Fleet
+                </div>
+                <div id="fleetDropdownList" class="fleet-dropdown-list">
+                    <!-- populated dynamically -->
+                </div>
             </div>
         </div>
+
+
     </div>
 
     <script>
@@ -616,6 +626,27 @@ if ($asteroids == false && $moons == false) {
         document.addEventListener('click', (e) => {
             if (!fleetDropdownButton.contains(e.target) && !fleetDropdownList.contains(e.target)) {
                 fleetDropdownList.style.display = 'none';
+            }
+        });
+
+        const fleetInput = document.getElementById("fleetIdInput");
+
+        // Sanitize input on each keystroke: allow only digits
+        fleetInput.addEventListener("input", function() {
+            // Remove any non-digit characters
+            this.value = this.value.replace(/\D/g, "");
+        });
+
+        // Trigger load on Enter key
+        fleetInput.addEventListener("keydown", function(event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                const fleetId = this.value.trim();
+                if (fleetId !== "" && !isNaN(fleetId)) {
+                    gamedata.loadSavedFleetById(parseInt(fleetId, 10));
+                } else {
+                    console.warn("Please enter a valid numeric Fleet ID.");
+                }
             }
         });
 

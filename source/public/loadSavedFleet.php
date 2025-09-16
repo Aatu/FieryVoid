@@ -16,14 +16,12 @@ try {
     }
 
     // Load ships from Manager
-    $ships = Manager::loadSavedFleet($listid);
-
-    // Ensure JSON-safe output
-    if (!is_array($ships)) $ships = [];
+    $fleetData = Manager::loadSavedFleet($listid);
 
     echo json_encode([
         'success' => true,
-        'ships'   => $ships
+        'list' => $fleetData['list'],
+        'ships'   => $fleetData['ships'],
     ], JSON_NUMERIC_CHECK);
 
 } catch (Exception $e) {

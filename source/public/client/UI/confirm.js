@@ -1246,31 +1246,29 @@ window.confirm = {
 
     showSaveFleet: function showSaveFleet(callback) {
         var e = $(this.whtml);
-	    
-        /* try to make default unit name other than nameless */
-        var fullName = '';
-        var points = 0;
-
-        //var selectedSlot = playerManager.getSlotById(gamedata.selectedSlot);
-
+        
+        /*
         var points = 0;
         for (var i in gamedata.ships) {
             var lship = gamedata.ships[i];
             if (lship.slot != gamedata.selectedSlot) continue;
             points += lship.pointCost;
         }
+        */
+        var defaultName = '<Unnamed Fleet>';
 
-        fullName = 'Unnamed Fleet';
+        // Fleet name input
+        $('<label>Enter Fleet Name:</label><input type="text" style="text-align:center" name="fleetname" value="' + defaultName + '"></input><br>').prependTo(e);
 
-        /*end of preparing default name*/
-	    $('<label>Enter Fleet Name:</label><input type="text" style="text-align:center" name="fleetname" value="' + fullName + '"></input><br>').prependTo(e);
+        // Checkbox for "public" option
+        $('<label style="display:block; margin-top:8px; font-size: 12px"><input type="checkbox" id="fleetPublicCheckbox"> Tick this box to allow others to access this fleet with its ID</label><br>')
+            .insertAfter(e.find("input[name='fleetname']"));
 
         $(".confirmok", e).on("click", callback);
         $(".confirmcancel", e).on("click", function () {
             console.log("remove");
             $(".confirm").remove();
         });
-        $(".confirmok", e).data("fleetname");
 
         var a = e.appendTo("body");
         a.fadeIn(250);
