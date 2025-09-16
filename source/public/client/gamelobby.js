@@ -1893,7 +1893,7 @@ expandFaction: function expandFaction(event) {
 			cache: false,        // ✅ Avoid stale results in some browsers
 			timeout: 15000       // ✅ Network protection
 		})
-		.done(function (factions, textStatus, xhr) {
+		.done(function (factions, textStatus, xhr) {		
 			// ✅ HTTP status check
 			if (xhr.status !== 200) {
 				console.error(`Failed to load factions. HTTP ${xhr.status}`);
@@ -1911,7 +1911,7 @@ expandFaction: function expandFaction(event) {
 			// ✅ Update UI
 			gamedata.parseFactions(factions);  // rebuild headers/groups
 		})
-		.fail(function (xhr, textStatus, errorThrown) {
+		.fail(function (xhr, textStatus, errorThrown) {		
 			let message = errorThrown || textStatus || "Unknown network error";
 			console.error("Failed to load factions:", message, xhr.responseText);
 
@@ -2495,17 +2495,21 @@ expandFaction: function expandFaction(event) {
 
 	filterSavedFleet: function filterSavedFleet(cachedFleets) {
 			const slot = playerManager.getSlotById(gamedata.selectedSlot);
+			if(slot){ //sometimes slot hasn't been selected yet.
+				var slotPoints = slot.points ?? 0;
+				var spentPoints = 0;
+				for (var i in gamedata.ships) {
+					var lship = gamedata.ships[i];
+					if (lship.slot != gamedata.selectedSlot) continue;
+					spentPoints += lship.pointCost;
+				}
+				const pointsAvailable = slotPoints - spentPoints;
 
-            var spentPoints = 0;
-            for (var i in gamedata.ships) {
-                var lship = gamedata.ships[i];
-                if (lship.slot != gamedata.selectedSlot) continue;
-                spentPoints += lship.pointCost;
-            }
-            const pointsAvailable = slot.points - spentPoints;
-
-			const filtered = cachedFleets.filter(fleet => fleet.points <= pointsAvailable);
-			return filtered;
+				const filtered = cachedFleets.filter(fleet => fleet.points <= pointsAvailable);
+				return filtered;
+			}else{
+				return cachedFleets;				
+			}	
 	},		
 
     // Populate dropdown list
