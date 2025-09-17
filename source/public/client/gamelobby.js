@@ -2631,11 +2631,12 @@ expandFaction: function expandFaction(event) {
 		// Add a divider if default fleets exist
 		if (defaultFleets.length > 0) {
 			const divider = document.createElement('div');
-			divider.textContent = '--------------------------';
+			divider.textContent = '---------------------------------------------------------------------------';
 			divider.style.textAlign = 'center';
-			divider.style.color = '#888';
+			divider.style.color = '#2b2b2bff';
 			divider.style.margin = '0px 0';
-			divider.style.fontSize = '8px';			
+			divider.style.fontSize = '8px';
+			divider.style.borderBottom = '1px solid #eee';						
 			fleetDropdownList.appendChild(divider);
 
 			// Render default fleets (no delete button shown)
