@@ -2716,7 +2716,6 @@ const renderFleetItem = (fleet) => {
 				for(var i in cachedFleets){
 					var fleet = cachedFleets[i];
 					if(fleet.id == response.id) cachedFleets[i].isPublic = response.newStatus;
-					break;
 				}
 
 				fleetDropdownButton.textContent = 'Load a Saved Fleet';
