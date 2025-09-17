@@ -2558,7 +2558,7 @@ expandFaction: function expandFaction(event) {
 			const lockSpan = document.createElement('span');
 			lockSpan.className = fleet.isPublic ? 'fa-solid fa-unlock' : 'fa-solid fa-lock';
 			lockSpan.style.color = fleet.isPublic ? 'green' : 'orange';
-			lockSpan.style.marginRight = '6px';
+			lockSpan.style.marginRight = '4px';		
 			lockSpan.style.cursor = 'pointer';
 
 			// ✅ Make the clickable area bigger and isolated
@@ -2580,7 +2580,9 @@ expandFaction: function expandFaction(event) {
 			// Fleet name
 			const nameSpan = document.createElement('span');
 			nameSpan.textContent = (fleet.userid !== 0) ? fleet.name + ' (#' + fleet.id +')' : fleet.name;
-
+			if (fleet.userid == 0) {
+				nameSpan.style.marginLeft = '6px';				
+			}	
 			// Points
 			const pointsSpan = document.createElement('span');
 			pointsSpan.textContent = `${fleet.points}pts`;
@@ -2633,6 +2635,7 @@ expandFaction: function expandFaction(event) {
 			divider.style.textAlign = 'center';
 			divider.style.color = '#888';
 			divider.style.margin = '0px 0';
+			divider.style.fontSize = '8px';			
 			fleetDropdownList.appendChild(divider);
 
 			// Render default fleets (no delete button shown)
