@@ -378,7 +378,8 @@
             $value = trim(substr($line, $pos + 1));
 
             // Bold the label regardless of case (you can add uppercase check if you want)
-            echo '<span class="scenariolabel">' . htmlspecialchars($label) . ':</span>&nbsp; ' . htmlspecialchars($value) . '<br>';
+        echo '<span class="scenariolabel">' . htmlspecialchars($label) . ':</span>&nbsp; ' .
+            '<span class="scenariovalue">' . htmlspecialchars($value) . '</span><br>';
         } else {
             // Just print line if no colon found
             echo htmlspecialchars($line) . '<br>';

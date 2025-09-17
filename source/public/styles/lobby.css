@@ -49,6 +49,13 @@
 
 
 .scenariolabel{
+
+    font-size:12px; 
+    margin:2px 0px; 
+    color: #DEEBFF; 
+}
+
+.scenariovalue{
     font-weight:bold;
     font-size:12px; 
     margin:2px 0px; 
