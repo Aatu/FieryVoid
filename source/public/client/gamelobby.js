@@ -2537,7 +2537,7 @@ expandFaction: function expandFaction(event) {
 			item.style.display = 'flex';
 			item.style.justifyContent = 'space-between';
 			item.style.alignItems = 'center';
-			item.style.padding = '2px 6px';
+			item.style.padding = '2px 2px';
 			item.style.cursor = 'pointer';
 			item.style.borderBottom = '1px solid #eee';
 

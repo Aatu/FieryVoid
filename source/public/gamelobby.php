@@ -588,7 +588,7 @@ if ($asteroids == false && $moons == false) {
 
 
         <div style="display:flex; align-items:center; margin-left:auto; font-size:12px; gap:6px;">
-            <label style="margin-left: 5px; margin-top: 3px; display:flex; align-items:center;">
+            <label style="margin-left: 5px; margin-top: 0px; display:flex; align-items:center;">
                 <span style="margin-right: 2px; font-size: 12px;">Load Fleet by #ID:</span>
                 <input type="text" id="fleetIdInput" value="" class="fleetIdInput">
             </label>
