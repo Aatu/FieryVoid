@@ -2565,8 +2565,8 @@ expandFaction: function expandFaction(event) {
 			lockSpan.style.display = 'inline-flex';
 			lockSpan.style.alignItems = 'center';
 			lockSpan.style.justifyContent = 'center';
-			lockSpan.style.width = '20px';
-			lockSpan.style.height = '20px';
+			lockSpan.style.width = '25px';
+			lockSpan.style.height = '25px';
 
 			lockSpan.addEventListener('click', (e) => {
 				e.stopPropagation();
@@ -2607,8 +2607,8 @@ expandFaction: function expandFaction(event) {
 			deleteBtn.style.display = 'inline-flex';
 			deleteBtn.style.alignItems = 'center';
 			deleteBtn.style.justifyContent = 'center';
-			deleteBtn.style.width = '20px';
-			deleteBtn.style.height = '20px';
+			deleteBtn.style.width = '25px';
+			deleteBtn.style.height = '25px';
 
 			deleteBtn.addEventListener('click', (e) => {
 				e.stopPropagation();
