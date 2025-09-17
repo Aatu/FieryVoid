@@ -2711,6 +2711,14 @@ const renderFleetItem = (fleet) => {
 			//console.log("AJAX response:", ships); // debug raw response
 			if (response && response.success) {
 				var setting = response.newStatus ? 'shared' : 'private';
+
+				//Fleet selection doesn't poll anymore, so need to change it manually on front end so padlock displays correctly. 
+				for(var i in cachedFleets){
+					var fleet = cachedFleets[i];
+					if(fleet.id == response.id) cachedFleets[i].isPublic = response.newStatus;
+					break;
+				}
+
 				fleetDropdownButton.textContent = 'Load a Saved Fleet';
 				gamedata.populateFleetDropdown(cachedFleets);				
 				confirm.warning("Fleet availability changed to " + setting + "!");
