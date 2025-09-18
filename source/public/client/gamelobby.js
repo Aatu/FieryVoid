@@ -2660,8 +2660,16 @@ expandFaction: function expandFaction(event) {
 		});		 	
     },
 
-
     loadSavedFleetById: function loadSavedFleetById(listId) {
+		confirm.confirm("Load saved fleet with #ID " + listId +  "?", () => {
+			gamedata.doLoadSavedFleetById(listId);
+			fleetDropdownList.style.display = 'none';
+			fleetDropdownButton.textContent = 'Load a Saved Fleet';
+		});	 	
+    },
+
+
+    doLoadSavedFleetById: function doLoadSavedFleetById(listId) {
 		ajaxInterface.loadSavedFleet(listId, function(response) {
 			//console.log("AJAX response:", response.ships); // debug raw response
 			if(response.list && !response.list.isPublic && response.list.userid !== gamedata.thisplayer){
