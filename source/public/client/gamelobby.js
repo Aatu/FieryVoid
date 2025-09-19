@@ -336,6 +336,7 @@ window.gamedata = {
             delete gamedata.ships[a];
             h.remove();
             gamedata.calculateFleet();
+			gamedata.populateFleetDropdown();			
         });
 
 		$(".showship", h).on("click", function (e) {
@@ -353,6 +354,53 @@ window.gamedata = {
         h.appendTo("#fleet");
         gamedata.calculateFleet();
     },
+
+    updateLoadedFleet: function updateLoadedFleet(ships) {
+		for(var k in ships){
+			var ship = ships[k]	
+			var a = 0;
+			for (var i in gamedata.ships) {
+				a = i;
+			}
+			a++;
+			ship.id = Date.now() + Math.random().toString(36).substr(2, 5);
+			
+			ship.slot = gamedata.selectedSlot;
+			gamedata.ships[a] = ship;
+			var h = $('<div class="ship bought slotid_' + ship.slot + ' shipid_' + ship.id + '" data-shipindex="' + ship.id + '">' +
+					'<span class="shipname name">' + ship.name + '</span>' +				
+					'<span class="shiptype">' + ship.shipClass + '</span>' +
+				'<span class="pointcost">' + ship.pointCost + 'p</span>' +
+				' <span class="showship clickable">Details</span> ' +
+				' -<span class="editship clickable">Edit</span> ' +		
+				' -<span class="copyship clickable">Copy</span> ' +							
+				' -<span class="remove clickable">Remove</span> ' +
+				'</div>');
+			
+			$(".remove", h).bind("click", function () {
+				delete gamedata.ships[a];
+				h.remove();
+				gamedata.calculateFleet();
+				gamedata.populateFleetDropdown();			
+			});
+
+			$(".showship", h).on("click", function (e) {
+				gamedata.onShipContextMenu(ship.phpclass, ship.faction, ship.id, true);
+			});
+
+			$(".editship", h).on("click", function (e) {
+				gamedata.editShip(ship);
+			});
+
+			$(".copyship", h).on("click", function (e) {
+				gamedata.copyShip(ship);
+			});
+
+			h.appendTo("#fleet");
+		}
+        gamedata.calculateFleet();
+    },
+
 	
 	/*returns ship variant as a single letter*/
 	variantLetter: function(ship){
@@ -974,104 +1022,6 @@ window.gamedata = {
 			checkResult += "<br>";
 		}
 		
-
-/* //Old method of calculating Fighter slots, in case you hate the new one above - DK :)
- var totalHangarAvailable = totalHangarH+totalHangarM+totalHangarL+(totalHangarXL/2)+hangarConversionsF;
-	    var minFtrRequired = Math.ceil(totalHangarAvailable/2);
-	    var totalFtrPresent = totalFtrH+totalFtrM+totalFtrL+(totalFtrXL/2);
-	    var totalFtrCurr = 0;
-	    var totalHangarCurr = 0;
-	    checkResult += "<br><b><u>Fighters:</u></b><br>";
-		checkResult +=  " - Total Fighters: " + totalFtrPresent;
-	    checkResult +=  " (allowed between " +minFtrRequired+ " and " + totalHangarAvailable + ")";
-		if((totalFtrXL>0) || (totalHangarXL>0)){ //add disclaimer because sums will not add up straight
-			checkResult += " <i>(Ultralights counted as half)</i>";
-		}
-		if (totalFtrPresent > totalHangarAvailable || totalFtrPresent < minFtrRequired){ //fighter total is not within limits
-			checkResult += " FAILURE!";
-			problemFound = true;
-		}else{
-			checkResult += " OK";
-		}
-		checkResult += "<br>";	    
-
-		totalFtrCurr = (totalFtrXL/2)+totalFtrL+totalFtrM+totalFtrH;
-		if (totalFtrCurr > 0){ //do not show if there are no fighters in this segment
-			totalHangarCurr = totalHangarH+totalHangarM+totalHangarL + (totalHangarXL/2)+hangarConversionsF;
-			checkResult +=  " - Ultralight / Light / Medium / Heavy Fighters: " + totalFtrCurr;
-			checkResult +=  " (allowed up to " + totalHangarCurr + ")";
-			if((totalFtrXL>0) || (totalHangarXL>0)){ //add disclaimer because sums will not add up straight
-				checkResult += " <i>(Ultralights counted as half)</i>";
-			}			
-			if (totalFtrCurr > totalHangarCurr){ //fighter total is not within limits
-				checkResult += " TOO MANY!";
-				problemFound = true;
-			}else{
-				checkResult += " OK";
-			}
-			checkResult += "<br>";
-		}
-	    
-		totalFtrCurr = totalFtrL+totalFtrM+totalFtrH;
-		if (totalFtrCurr > 0){ //do not show if there are no fighters in this segment
-			totalHangarCurr = totalHangarH+totalHangarM+totalHangarL+hangarConversionsF;
-			checkResult +=  " - Light / Medium / Heavy Fighters: " + totalFtrCurr;
-			checkResult +=  " (allowed up to " + totalHangarCurr + ")";
-			if (totalFtrCurr > totalHangarCurr){ //fighter total is not within limits
-				checkResult += " TOO MANY!";
-				problemFound = true;
-			}else{
-				checkResult += " OK";
-			}
-			checkResult += "<br>";
-		}
-		
-		totalFtrCurr = totalFtrM+totalFtrH;
-		if (totalFtrCurr > 0){ //do not show if there are no fighters in this segment
-			totalHangarCurr = totalHangarH+totalHangarM+hangarConversionsF;
-			checkResult +=  " - Medium / Heavy Fighters: " + totalFtrCurr;
-			checkResult +=  " (allowed up to " + totalHangarCurr + ")";
-			if (totalFtrCurr > totalHangarCurr){ //fighter total is not within limits
-				checkResult += " TOO MANY!";
-				problemFound = true;
-			}else{
-				checkResult += " OK";
-			}
-			checkResult += "<br>";
-		}
-	    
-		totalFtrCurr = totalFtrH;
-		if (totalFtrCurr > 0){ //do not show if there are no fighters in this segment
-			totalHangarCurr = totalHangarH+hangarConversionsF;
-			checkResult +=  " - Heavy Fighters: " + totalFtrCurr;
-				checkResult +=  " (allowed up to " + totalHangarCurr + ")";
-			if (totalFtrCurr > totalHangarCurr){ //fighter total is not within limits
-				checkResult += " FAILURE!";
-				problemFound = true;
-			}else{
-				checkResult += " OK";
-			}
-			checkResult += "<br>";
-		}
-	
-		//Lets just check Asssault shuttle/Breaching Pod capacity separately using their own variables.
-		totalHangarAS = totalHangarAS+totalHangarH+totalHangarM-hangarConversionsF; //Deduct any Hangar conversions here.
-		if (totalFtrAS > 0 || totalHangarAS > 0){ //do not show if there are no Assault Shuttle hangars in this segment
-//			var hangarOnlyAS = totalHangarAS-hangarConversionsF;
-//			var minASRequired = Math.ceil(hangarOnlyAS/2); //Commented out alternative code here that could be used to set 50% required for Assault Shuttle ships
-			checkResult +=  " - Total Assault Shuttles / Breaching Pods: " + totalFtrAS;
-//			checkResult +=  " (allowed between " +minASRequired+ " and " + totalHangarAS + ")";
-			checkResult +=  " (allowed up to " + totalHangarAS + ")";			
-//			if (totalFtrAS > totalHangarAS || totalFtrAS < minASRequired){ //Assault shuttle total is not within limits
-			if (totalFtrAS > totalHangarAS){ //Asssault Shuttle total is not within limits
-				checkResult += " FAILURE!";
-				problemFound = true;
-			}else{
-				checkResult += " OK";
-			}
-			checkResult += "<br>";
-		}		
-*/ 
 		//small flights (do not show if there aren't any!)
 		if (noSmallFlights > 0){
 			checkResult +=  " - Small Flights (< 6 craft): " + noSmallFlights;
@@ -1286,6 +1236,7 @@ window.gamedata = {
             // This is done to update it immediately and more importantly,
             // to assign new id's to all fleet entries
             gamedata.constructFleetList();
+			gamedata.populateFleetDropdown();			
         });
 
 		$("#fleet").off("click", ".showship").on("click", ".showship", function (e) {
@@ -1780,41 +1731,6 @@ expandFaction: function expandFaction(event) {
     gamedata.applyCustomShipFilter();
 },
 
-/*
-applyCustomShipFilter: function () {
-    const showCustom = $("#toggleCustomShips").is(":checked");
-    const isdValue = parseInt($("#isdFilter").val(), 10); // parse input as integer
-    const showCustom = $("#toggleCustom").is(":checked");
-    const isdValue = parseInt($("#isdFilter").val(), 10);
-
-    $(".faction").each(function () {
-        const $faction = $(this);
-        const isHidden = $faction.hasClass("shipshidden");
-
-        $faction.find(".ship").each(function () {
-            const $ship = $(this);
-            const isCustom = $ship.data("custom") === true || $ship.data("custom") === "true";
-            const shipISD = parseInt($ship.data("isd"), 10);
-
-            // Start with visible, apply filters below
-            let visible = true;
-
-            // Filter by custom toggle
-            if (!showCustom && isCustom) {
-                visible = false;
-            }
-
-            // Filter by ISD if a valid number is entered
-            if (!isNaN(isdValue) && shipISD > isdValue) {
-                visible = false;
-            }
-            if (!showCustom && isCustom) visible = false;
-            if (!isNaN(isdValue) && shipISD > isdValue) visible = false;
-
-            $ship.toggle(visible && !isHidden);
-        });
-*/
-
 	//Function called by Custom and ISD filters.
 	applyCustomShipFilter: function () {
 		const showCustom = $("#toggleCustom").is(":checked");
@@ -1977,7 +1893,7 @@ applyCustomShipFilter: function () {
 			cache: false,        // ✅ Avoid stale results in some browsers
 			timeout: 15000       // ✅ Network protection
 		})
-		.done(function (factions, textStatus, xhr) {
+		.done(function (factions, textStatus, xhr) {		
 			// ✅ HTTP status check
 			if (xhr.status !== 200) {
 				console.error(`Failed to load factions. HTTP ${xhr.status}`);
@@ -1994,9 +1910,8 @@ applyCustomShipFilter: function () {
 
 			// ✅ Update UI
 			gamedata.parseFactions(factions);  // rebuild headers/groups
-			//updateTierFilter();               // ✅ reapply filters if needed
 		})
-		.fail(function (xhr, textStatus, errorThrown) {
+		.fail(function (xhr, textStatus, errorThrown) {		
 			let message = errorThrown || textStatus || "Unknown network error";
 			console.error("Failed to load factions:", message, xhr.responseText);
 
@@ -2165,6 +2080,7 @@ applyCustomShipFilter: function () {
 
         $(".confirm").remove();
         gamedata.updateFleet(ship);
+		gamedata.populateFleetDropdown();		
     },
 
 
@@ -2179,8 +2095,14 @@ applyCustomShipFilter: function () {
         $(".confirm").remove();
 
 		var shipClass = copiedShip.phpclass;
-		var newShip = gamedata.getShipByType(shipClass);
-
+		var newShip;
+		
+		if(copiedShip.loaded){
+			newShip = new Ship(copiedShip);		
+		}else{
+			newShip = gamedata.getShipByType(shipClass);
+		}	
+		
 		newShip.name = copiedShip.name;
 		newShip.pointCost = copiedShip.pointCost;
 		newShip.flightSize = copiedShip.flightSize;
@@ -2204,8 +2126,15 @@ applyCustomShipFilter: function () {
             return;
         }
 
-		//Now generate a new generate ship to reset Enhancements applied in ship window etc (otehrwise they don't update!)
-		ship = gamedata.getShipByType(ship.phpclass);
+		//Now generate a new ship to reset Enhancements applied in ship window etc (otherwise they don't update!)
+		if(ship.loaded){
+			for(var e in ship.enhancementOptions){
+				ship.enhancementOptions[e][2] = 0; //Need to reset manually for loaded ships.
+				ship.pointCostEnh = 0;				
+			}
+		}else{
+			ship = new Ship(ship);			
+		}		
 		var name = $(".confirm input").val();
 		ship.name = name;
 		ship.pointCost = newPointCost;	
@@ -2295,6 +2224,7 @@ applyCustomShipFilter: function () {
 
         $(".confirm").remove();
         gamedata.updateFleet(ship);
+		gamedata.populateFleetDropdown();		
     },
 
 	
@@ -2325,7 +2255,9 @@ applyCustomShipFilter: function () {
             ship.name = originalShipData.name;
             ship.pointCost = originalShipData.pointCost;
             ship.flightSize = originalShipData.flightSize;
-            ship.enhancementOptions = originalShipData.enhancementOptions ? [...originalShipData.enhancementOptions] : [],			
+            ship.enhancementOptions = originalShipData.enhancementOptions ? [...originalShipData.enhancementOptions] : [],
+			ship.pointCostEnh = originalShipData.pointCostEnh;
+			ship.pointCostEnh2 = originalShipData.pointCostEnh2;						
             $(".confirm").remove();
             window.confirm.error("You cannot afford those edits!", function () {});
             return;
@@ -2342,10 +2274,12 @@ applyCustomShipFilter: function () {
 		$('.ship.bought.shipid_' + id).remove();
 
 		//Now generate a new generate ship to reset Enhancements applied in ship window etc (otehrwise they don't update!)
-		ship = gamedata.getShipByType(ship.phpclass);
+
 		var name = $(".confirm input").val();
 		ship.name = name;
-		ship.pointCost = newPointCost;	
+		ship.pointCost = newPointCost;
+		ship.pointCostEnh = originalShipData.pointCostEnh;
+		ship.pointCostEnh2 = originalShipData.pointCostEnh2;			
         ship.userid = gamedata.thisplayer;			
 
         if (ship.flight) {
@@ -2358,32 +2292,35 @@ applyCustomShipFilter: function () {
 	    
 		//do note enhancements bought (if any)
 		var enhNo = 0;
-		var noTaken = 0;
+		var hadTaken = 0;
+		var nowTaken = 0;
 		var target = $(".selectAmount.shpenh" + enhNo);
 		while(typeof target.data("enhPrice") != 'undefined'){ //as long as there are enhancements defined...
-			noTaken = target.data("count");
-			if(noTaken > 0){ //enhancement picked - note!
-				ship.enhancementOptions[enhNo][2] = noTaken;
+			hadTaken = originalShipData.enhancementOptions[enhNo][2];
+			nowTaken = target.data("count");
+			if(nowTaken > 0 || hadTaken > 0){ //enhancement picked - note!
+				ship.enhancementOptions[enhNo][2] = nowTaken;
 				var originalCost = 0;
+				var newCost = 0;
 				if(!ship.enhancementOptions[enhNo][6]){ //this is an actual enhancement (as opposed to option) - note value!
 					if (ship.flight){
-						originalCost = originalShipData.enhancementOptions[enhNo][2] * target.data("enhPrice") * flightSize;						
-						originalCost += target.data("enhCost") * flightSize; //Add new enhancement, could be negative if enhancements have been removed.
-						ship.pointCostEnh = originalCost;						
+						//originalCost = originalShipData.enhancementOptions[enhNo][2] * target.data("enhPrice") * flightSize;						
+						newCost = (nowTaken - hadTaken) * target.data("enhCost") * flightSize; //Add new enhancement, could be negative if enhancements have been removed.
+						ship.pointCostEnh += newCost - originalCost;						
 					} else {
-						originalCost = originalShipData.enhancementOptions[enhNo][2] * target.data("enhPrice");						
-						originalCost += target.data("enhCost"); //Add new enhancement, could be negative if enhancements have been removed.
-						ship.pointCostEnh = originalCost;
+						//originalCost = originalShipData.enhancementOptions[enhNo][2] * target.data("enhPrice");						
+						newCost = (nowTaken - hadTaken) * target.data("enhPrice"); //Add new enhancement, could be negative if enhancements have been removed.
+						ship.pointCostEnh += newCost;
 					}
 				}else{ //this is an option - still note value, just separately!
 					if (ship.flight){
-						originalCost = originalShipData.enhancementOptions[enhNo][2] * target.data("enhPrice") * flightSize;						
-						originalCost += target.data("enhCost") * flightSize; //Add new enhancement, could be negative if enhancements have been removed.
-						ship.pointCostEnh2 = originalCost;
+						//originalCost = originalShipData.enhancementOptions[enhNo][2] * target.data("enhPrice") * flightSize;						
+						newCost =  (nowTaken - hadTaken) * target.data("enhCost") * flightSize; //Add new enhancement, could be negative if enhancements have been removed.
+						ship.pointCostEnh2 += newCost - originalCost;
 					} else {
-						originalCost = originalShipData.enhancementOptions[enhNo][2] * target.data("enhPrice");						
-						originalCost += target.data("enhCost"); //Add new enhancement, could be negative if enhancements have been removed.
-						ship.pointCostEnh2 = originalCost;
+						//originalCost = originalShipData.enhancementOptions[enhNo][2] * target.data("enhPrice");						
+						newCost =  (nowTaken - hadTaken) * target.data("enhCost"); //Add new enhancement, could be negative if enhancements have been removed.
+						ship.pointCostEnh2 += newCost - originalCost;
 					}
 				}
 			}
@@ -2441,6 +2378,7 @@ applyCustomShipFilter: function () {
 
         $(".confirm").remove();
         gamedata.updateFleet(ship);
+		gamedata.populateFleetDropdown();		
     },
 
 
@@ -2499,7 +2437,7 @@ applyCustomShipFilter: function () {
 	    }
 	    // Pass the submission function as a callback, not invoke it immediately
 	    confirm.confirm("Are you sure you wish to ready your fleet?", function () {
-			selectedSlot.lastphase = -2; //Apparently this makes 'READY' appear in slot.			
+			selectedSlot.lastphase = -2;			
 	        ajaxInterface.submitGamedata();
 			slotElement.addClass("ready");			
 	    });
@@ -2512,11 +2450,10 @@ applyCustomShipFilter: function () {
 	
 		for (var i in gamedata.slots) {
 			var slot = gamedata.slots[i];
-			if(slot.playerid !== null &&slot.playerid !== gamedata.thisplayer) safeToLeave = false;
+			if(slot.playerid !== null && slot.playerid !== gamedata.thisplayer) safeToLeave = false;
 		}
 	
 		if(!safeToLeave) {
-			//Leave all slots that the player has.
 			var mySlots = gamedata.getMySlots();
 			for(var i in mySlots) {
 				var slot = mySlots[i];
@@ -2530,9 +2467,311 @@ applyCustomShipFilter: function () {
 		}else{	
 			window.location = "gamelobby.php?gameid=" + gamedata.gameid + "&leave=true";
 		}
-		
-        //window.location = "gamelobby.php?gameid=" + gamedata.gameid + "&leave=true";
+
     },
+
+    onSaveClicked: function onSaveClicked() {
+        $(".confirm").remove();
+
+        confirm.showSaveFleet(gamedata.doSaveFleet);
+    },
+
+	doSaveFleet: function doSaveFleet() {
+		var fleetname = $(".confirm input[name='fleetname']").val();
+		var isPublic = $("#fleetPublicCheckbox").is(":checked"); // ✅ true/false
+
+		$(".confirm").remove();
+
+		// Submit fleet, then refresh list when done
+		ajaxInterface.submitSavedFleet(fleetname, isPublic, function(response) {
+			ajaxInterface.getSavedFleets(function(fleets) {
+				cachedFleets = fleets;
+				gamedata.populateFleetDropdown(cachedFleets);
+			});
+
+			confirm.warning(fleetname + " saved!. <br>(ID #" + response.listId + ")")
+		});
+	},
+
+	filterSavedFleet: function filterSavedFleet(cachedFleets) {
+			const slot = playerManager.getSlotById(gamedata.selectedSlot);
+			if(slot){ //sometimes slot hasn't been selected yet.
+				var slotPoints = slot.points ?? 0;
+				var spentPoints = 0;
+				for (var i in gamedata.ships) {
+					var lship = gamedata.ships[i];
+					if (lship.slot != gamedata.selectedSlot) continue;
+					spentPoints += lship.pointCost;
+				}
+				const pointsAvailable = slotPoints - spentPoints;
+
+				const filtered = cachedFleets.filter(fleet => fleet.points <= pointsAvailable);
+				return filtered;
+			}else{
+				return cachedFleets;				
+			}	
+	},		
+
+    // Populate dropdown list
+	populateFleetDropdown: function populateFleetDropdown() {
+		fleetDropdownList.innerHTML = '';
+
+		let filteredFleets = gamedata.filterSavedFleet(cachedFleets);
+
+		if (!filteredFleets || filteredFleets.length === 0) {
+			const empty = document.createElement('div');
+			empty.textContent = '< No saved fleets available >';
+			empty.style.textAlign = 'center';
+			empty.style.padding = '4px 6px';
+			fleetDropdownList.appendChild(empty);
+			return;
+		}
+
+		// Split fleets into user and default
+		const userFleets = filteredFleets.filter(f => f.userid !== 0);
+		const defaultFleets = filteredFleets.filter(f => f.userid === 0);
+
+		// Helper to render a fleet item
+		const renderFleetItem = (fleet) => {
+			const item = document.createElement('div');
+			item.style.display = 'flex';
+			item.style.justifyContent = 'space-between';
+			item.style.alignItems = 'center';
+			item.style.padding = '2px 2px';
+			item.style.cursor = 'pointer';
+			item.style.borderBottom = '1px solid #eee';
+
+			// Hover effect
+			item.addEventListener('mouseenter', () => item.style.background = '#f0f0f0');
+			item.addEventListener('mouseleave', () => item.style.background = 'white');
+
+			// ✅ Load fleet if you click anywhere on item (except lock/delete)
+			item.addEventListener('click', () => {
+				confirm.confirm("Load your '" + fleet.name + "' fleet?", () => {
+					gamedata.loadSavedFleet(fleet.id);
+					fleetDropdownList.style.display = 'none';
+					fleetDropdownButton.textContent = 'Load a Saved Fleet';
+				});
+			});
+
+			// Padlock
+			const lockSpan = document.createElement('span');
+			lockSpan.className = fleet.isPublic ? 'fa-solid fa-unlock' : 'fa-solid fa-lock';
+			lockSpan.style.color = fleet.isPublic ? 'green' : 'orange';
+			lockSpan.style.marginRight = '4px';		
+			lockSpan.style.cursor = 'pointer';
+
+			// ✅ Make the clickable area bigger and isolated
+			lockSpan.style.display = 'inline-flex';
+			lockSpan.style.alignItems = 'center';
+			lockSpan.style.justifyContent = 'center';
+			lockSpan.style.width = '25px';
+			lockSpan.style.height = '25px';
+
+			lockSpan.addEventListener('click', (e) => {
+				e.stopPropagation();
+				const newStatus = fleet.isPublic ? 0 : 1;
+				confirm.confirm(
+					"Are you sure you wish to change this fleet's availability?",
+					() => gamedata.changeFleetPublic(fleet.id, newStatus)
+				);
+			});
+
+			// Fleet name
+			const nameSpan = document.createElement('span');
+			nameSpan.textContent = (fleet.userid !== 0) ? fleet.name + ' (#' + fleet.id +')' : fleet.name;
+			if (fleet.userid == 0) {
+				nameSpan.style.marginLeft = '6px';				
+			}	
+			// Points
+			const pointsSpan = document.createElement('span');
+			pointsSpan.textContent = `${fleet.points}pts`;
+			pointsSpan.style.margin = '0 6px';
+			pointsSpan.style.color = '#555';
+			pointsSpan.style.textAlign = 'right';
+
+			const spacer = document.createElement('span');
+			spacer.style.flexGrow = '1';
+
+			if (fleet.userid !== 0) item.appendChild(lockSpan);
+			item.appendChild(nameSpan);
+			item.appendChild(spacer);
+			item.appendChild(pointsSpan);
+
+			// Delete button (only for non-default fleets)
+			if (fleet.userid !== 0) {
+			const deleteBtn = document.createElement('span');
+			deleteBtn.textContent = '✖';
+			deleteBtn.style.color = 'red';
+			deleteBtn.style.cursor = 'pointer';
+
+			// ✅ Isolate the clickable area
+			deleteBtn.style.display = 'inline-flex';
+			deleteBtn.style.alignItems = 'center';
+			deleteBtn.style.justifyContent = 'center';
+			deleteBtn.style.width = '25px';
+			deleteBtn.style.height = '25px';
+
+			deleteBtn.addEventListener('click', (e) => {
+				e.stopPropagation();
+				confirm.confirm(
+					"Are you sure you wish to delete this saved fleet?",
+					() => gamedata.deleteSavedFleet(fleet.id, fleet.name)
+				);
+			});
+				item.appendChild(deleteBtn);
+			}
+
+			fleetDropdownList.appendChild(item);
+		};
+
+		// Render user fleets first
+		userFleets.forEach(renderFleetItem);
+
+		// Add a divider if default fleets exist
+		if (defaultFleets.length > 0) {
+			const divider = document.createElement('div');
+			divider.textContent = '---------------------------------------------------------------------------';
+			divider.style.textAlign = 'center';
+			divider.style.color = '#2b2b2bff';
+			divider.style.margin = '0px 0';
+			divider.style.fontSize = '8px';
+			divider.style.borderBottom = '1px solid #eee';						
+			fleetDropdownList.appendChild(divider);
+
+			// Render default fleets (no delete button shown)
+			defaultFleets.forEach(renderFleetItem);
+		}
+	},
+
+
+    loadSavedFleet: function loadSavedFleet(listId) {
+		ajaxInterface.loadSavedFleet(listId, function(response) {
+			//console.log("AJAX response:", ships); // debug raw response
+
+			if (response.ships && Array.isArray(response.ships) && response.ships.length > 0) {
+				gamedata.doLoadFleet(response.ships);
+				fleetDropdownButton.textContent = 'Load a Saved Fleet';
+				//confirm.warning("Fleet loaded!");
+			} else {
+				console.error("Load failed:", ships);
+				confirm.warning("Failed to load fleet.");
+			}
+		});		 	
+    },
+
+    loadSavedFleetById: function loadSavedFleetById(listId) {
+		confirm.confirm("Load saved fleet with #ID " + listId +  "?", () => {
+			gamedata.doLoadSavedFleetById(listId);
+			fleetDropdownList.style.display = 'none';
+			fleetDropdownButton.textContent = 'Load a Saved Fleet';
+		});	 	
+    },
+
+
+    doLoadSavedFleetById: function doLoadSavedFleetById(listId) {
+		ajaxInterface.loadSavedFleet(listId, function(response) {
+			//console.log("AJAX response:", response.ships); // debug raw response
+			if(response.list && !response.list.isPublic && response.list.userid !== gamedata.thisplayer){
+				confirm.warning("Fleet cannot be loaded as it was not set-up to be shared by its owner");
+				return;							
+			}
+				
+			//Need to add a check here of points here as it's not checked via Saved Fleet List, and return error if it's over what's allowed.
+			const slot = playerManager.getSlotById(gamedata.selectedSlot);
+
+            var spentPoints = 0;
+            for (var i in gamedata.ships) {
+                var lship = gamedata.ships[i];
+                if (lship.slot != gamedata.selectedSlot) continue;
+                spentPoints += lship.pointCost;
+            }
+            const pointsAvailable = slot.points - spentPoints;
+			if(response.list && pointsAvailable < response.list.points){
+				confirm.warning("Failed to load fleet, you do not have enough points available (" + response.list.points + "pts needed)");
+				return;				
+			}
+
+			if (response.ships && Array.isArray(response.ships) && response.ships.length > 0) {
+				gamedata.doLoadFleet(response.ships);
+				fleetDropdownButton.textContent = 'Load a Saved Fleet';
+				//confirm.warning("Fleet loaded!");
+			} else {
+				if(response.ships) console.error("Load failed:", response.ships);
+				confirm.warning("Failed to load fleet, ID may not exist.");
+			}
+		});		 	
+    },
+
+    doLoadFleet: function doLoadFleet(fleet) {
+
+		for(var i in fleet){
+			var listShip = fleet[i];
+			var ship = new Ship(listShip);
+
+			ship.userid = gamedata.thisplayer;
+			ship.slot = gamedata.selectedSlot;//Will load as slot 1, assign here.
+			ship.loaded = true;
+			
+			if(ship.flight){
+				ship.pointCost = ship.pointCost/6 * ship.flightSize;				
+			}
+			
+			if (ship.pointCostEnh > 0) {
+				ship.pointCost = ship.pointCost + ship.pointCostEnh;			
+			}
+			/* //Fleet shouldn't load if it can't be afforded.
+			if (!gamedata.canAfford(ship)) {
+				$(".confirm").remove();
+				window.confirm.error("You cannot afford that ship!", function () {});
+				return;
+			}
+			*/
+        	gamedata.updateFleet(ship);		
+		}
+	
+		gamedata.populateFleetDropdown();		
+    },
+
+
+    changeFleetPublic: function changeFleetPublic(listId) {
+		ajaxInterface.changeFleetPublic(listId, function(response) {
+			//console.log("AJAX response:", ships); // debug raw response
+			if (response && response.success) {
+				var setting = response.newStatus ? 'shared' : 'private';
+
+				//Fleet selection doesn't poll anymore, so need to change it manually on front end so padlock displays correctly. 
+				for(var i in cachedFleets){
+					var fleet = cachedFleets[i];
+					if(fleet.id == response.id) cachedFleets[i].isPublic = response.newStatus;
+				}
+
+				fleetDropdownButton.textContent = 'Load a Saved Fleet';
+				gamedata.populateFleetDropdown(cachedFleets);				
+				confirm.warning("Fleet availability changed to " + setting + "!");
+			} else {
+				console.error("Load failed:", ships);
+				confirm.warning("Failed to change fleet availability");
+			}
+		});		 	
+    },	
+
+
+	deleteSavedFleet: function(listId, fleetName) {
+		ajaxInterface.deleteSavedFleet(listId, function(response) {
+			if (response && response.success) {
+				// ✅ Only update UI after server confirms deletion
+				cachedFleets = cachedFleets.filter(f => f.id !== listId);
+				gamedata.populateFleetDropdown(cachedFleets);
+				//fleetDropdownButton.textContent = 'Load a Saved Fleet';
+				confirm.warning(fleetName + " deleted!");
+			} else {
+				console.error("Delete failed:", response);
+				confirm.warning("Failed to delete " + fleetName + ".");
+			}
+		});
+	},
+
 
     getMySlots: function getMySlots() {
         var mySlots = [];
@@ -2566,6 +2805,13 @@ applyCustomShipFilter: function () {
 
 		gamedata.selectedSlot = slot.slot;
 		this.constructFleetList();
+
+        // Initialize saved fleet cache again in case PV is different in new slot
+        ajaxInterface.getSavedFleets(function(fleets) {
+            cachedFleets = fleets;
+            gamedata.populateFleetDropdown();
+        });      
+
 	},
 
     onShipContextMenu: function onShipContextMenu(phpclass, faction, id, fleetList) {

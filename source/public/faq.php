@@ -39,7 +39,8 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                 <li><a href="#delayed">Delayed Deployment</a></li>                
                 <li><a href="#enormous">Enormous Units</a></li>
                 <li><a href="#jump">Jump Drives</a></li>
-                <li><a href="#ruler">Ruler Tool</a></li>                    
+                <li><a href="#ruler">Ruler Tool</a></li>
+                <li><a href="#savedfleets">Saved Fleets</a></li>                                    
                 <li><a href="#stealth">Stealth Ships</a></li>
                 <li><a href="#terrain">Terrain</a></li>  
                 <li><a href="#useful">Useful Controls</a></li>                                                    
@@ -191,6 +192,16 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             Right-clicking with the mouse will reset the start hex.</li>
         </ul>
         <a class="back-to-top" href="#top">↩ Back to Top</a>
+
+        <h3 id="savedfleets" >Saved Fleets</h3>
+        <ul>
+            <li><b>Saving a Fleet:</b> While in Fleet Selection you can save any fleet that you are making for later.  Simply select your fleet as normal and when you're happy with your force click the 'Save Fleet' button and confirm your choice.
+             Your saved fleet will then become available in this and future sessions (providing you have sufficient points avaialble) via the 'Load a Saved Fleet' dropdown button.</li>
+            <li><b>Sharing Fleets and Loading with ID:</b> Each saved fleet in Fiery Void has a unique ID, providing the fleet is marked as 'Shared' (and you can set this when you save a fleet or toggle it with the padlock symbol) you can give this ID to another player. 
+            They can then load the saved fleet by entering the fleet ID in the 'Load fleet by #ID' field and pressing Enter key.</li>
+        </ul>
+        <a class="back-to-top" href="#top">↩ Back to Top</a>
+
 
         <h3 id="stealth" >Stealth Ships</h3>
         <ul>

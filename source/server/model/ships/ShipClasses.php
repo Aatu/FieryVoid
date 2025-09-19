@@ -642,8 +642,8 @@ class BaseShip {
                 if(!$ship->isDestroyed()
                         && ($ship->faction == "Earth Alliance" || 
 			                $ship->faction == "Earth Alliance (defenses)" || 
-			                $ship->faction == "Earth Alliance (early)" ||
-							$this->faction == "Earth Alliance (custom)")
+			                $ship->faction == "Earth Alliance (Early)" ||
+							$ship->faction == "Earth Alliance (Custom)")
                         && ($this->userid == $ship->userid)
                         && ($ship instanceof Poseidon)
                         && ($this->id != $ship->id)){
@@ -653,30 +653,6 @@ class BaseShip {
 			return $this->iniativebonus;
         }               
 
-
-/*         private function doRaidersInitiativeBonus($gamedata){
-
-			$mod = 0;
-
-			if($gamedata->turn > 0 && $gamedata->phase >= 0 ){
-				$pixPos = $this->getCoPos();
-				//TODO: Better distance calculation
-				$ships = $gamedata->getShipsInDistance($this, 5);
-
-				foreach($gamedata->ships as $ship){
-					if(!$ship->isDestroyed()
-							&& ($ship->faction == "Raiders")
-							&& ($this->userid == $ship->userid)
-							&& ($ship instanceof LegionStarjammer)
-							&& ($this->id != $ship->id)){
-						//return ($this->iniativebonus+5);
-						$mod = 5;
-					}
-				}
-				return $this->iniativebonus + $mod; 
-			}  
-		 } */
- 
 
         private function doRaidersInitiativeBonus($gamedata){
 
@@ -704,7 +680,6 @@ class BaseShip {
         //    debug::log($this->phpclass."- bonus: ".$mod);
         return $this->iniativebonus + $mod*5;
     }
-
  
         
         private function doDilgarInitiativeBonus($gamedata){
