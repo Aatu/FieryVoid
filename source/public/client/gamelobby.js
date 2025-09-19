@@ -2133,7 +2133,7 @@ expandFaction: function expandFaction(event) {
 				ship.pointCostEnh = 0;				
 			}
 		}else{
-			ship = new Ship(ship);			
+			ship = gamedata.getShipByType(ship.phpclass);			
 		}		
 		var name = $(".confirm input").val();
 		ship.name = name;
@@ -2272,8 +2272,6 @@ expandFaction: function expandFaction(event) {
 			}
 		}
 		$('.ship.bought.shipid_' + id).remove();
-
-		//Now generate a new generate ship to reset Enhancements applied in ship window etc (otehrwise they don't update!)
 
 		var name = $(".confirm input").val();
 		ship.name = name;
