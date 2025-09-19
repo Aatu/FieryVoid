@@ -331,12 +331,18 @@ AdaptiveArmorController.prototype.constructor = AdaptiveArmorController;
 
 AdaptiveArmorController.prototype.initializationUpdate = function () {
 	var ship = this.ship;
+
 	var deployTurn = 1;
 	if(gamedata.gamephase == -2){//Buying phase
-		var currSlot = playerManager.getSlotById(gamedata.selectedSlot);
+		var currSlot = playerManager.getSlotById(gamedata.selectedSlot);		
 		deployTurn = currSlot.depavailable;	
-	}else{		
-		deployTurn = shipManager.getTurnDeployed(ship)
+	}else{
+		var currSlot = 0;
+		for(var i in gamedata.ships){
+			var checkShip = gamedata.ships[i];
+			if(ship.flightid == checkShip.id) ship = checkShip;
+		}		
+		deployTurn = shipManager.getTurnDeployed(ship);	
 	}	
 	//If a ship deploys later in game, it DOES get a chance to pre-allocate.
 	if(gamedata.turn <= deployTurn && this.pressignedReset == false)  {
