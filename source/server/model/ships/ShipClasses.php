@@ -72,10 +72,11 @@ class BaseShip {
     protected $VreeHitLocations = false; //Value to indicate that all gunfire from the same ship may not hit same side on Vree capital ships	
    
     //following values from DB
-    public $id, $userid, $name, $campaignX, $campaignY;
+    public $id, $userid, $name;
+    protected $campaignX, $campaignY; //Not used as far as I can tell, just null entries in db.    
     public $rolled = false;
     public $rolling = false;
-	public $EMHardened = false; //EM Hardening (Ipsha have it) - some weapons would check for this value!
+	protected $EMHardened = false; //EM Hardening (Ipsha have it) - some weapons would check for this value!
 	
 	public $ignoreManoeuvreMods = false;//New marker for factions like Mindriders that don't take penalties for pivoting etc	
 		
@@ -100,7 +101,7 @@ class BaseShip {
 	public $unitSize = 1; //typically ships are berthed in dedicated space, 1 per slot - but other arrangements are certainly possible.
 	
 	protected $adaptiveArmorController = null; //Adaptive Armor Controller object (if present)
-	public $IFFSystem = false;   
+	protected $IFFSystem = false;   
 	    
         function __construct($id, $userid, $name, $slot){
             $this->id = (int)$id;
@@ -113,6 +114,18 @@ class BaseShip {
 		public function getAdvancedArmor(){
 			return $this->advancedArmor;    
 	    }
+
+		public function getEMHardened(){
+			return $this->EMHardened;    
+	    }
+
+		public function getIFFSystem(){
+			return $this->IFFSystem;    
+	    }
+       
+		public function setIFFSystem(){
+			$this->IFFSystem = true;    
+	    }            
 		
 		public function getAdaptiveArmorController(){
 			return $this->adaptiveArmorController;    
@@ -219,8 +232,23 @@ class BaseShip {
 		$enginePresent = false;
 		$scannerPresent = false;
 		
-		//destroyed ship gets no value
-		if($this->isDestroyed()) $effectiveValue = 0;
+		//destroyed ship gets no value UNLESS it successfully jumped to Hyperspace
+		if($this->isDestroyed()){
+            if(!$this instanceof FighterFlight && !$this->base && !$this->osat){            
+                $jumpEngine = $this->getSystemByName("JumpEngine");
+                // Check if the ship has a jump engine                
+                if ($jumpEngine) {                
+                    //Check if it's jumped, instead of being destroyed.
+                    if($jumpEngine->hasJumped()){                   
+                        //Do NOT zero $effectiveValue if ship has jumped.               
+                        $effectiveValue = $jumpEngine->getCVBeforeJump();                    
+                        return $effectiveValue;
+                    }    
+                }
+            }     
+            //No jump engine, or hasn't jumped, set value to 0 as normal.
+            $effectiveValue = 0;               
+        }    
 
 		/*moved
 		$cnc = $this->getSystemByName("CnC");
@@ -452,7 +480,7 @@ class BaseShip {
 		
 		return $totalMarines;
 	}
-	
+
 	
     public function stripForJson() {
         $strippedShip = new stdClass();
@@ -474,7 +502,7 @@ class BaseShip {
         $strippedShip->movement = $this->movement; 
         $strippedShip->faction = $this->faction; 
         $strippedShip->phpclass = $this->phpclass;
-        //$strippedShip->deploysOnTurn = $this->deploysOnTurn;         
+        
         $strippedShip->systems = array_map( function($system) {return $system->stripForJson();}, $this->systems);
 		
 		$strippedShip->combatValue = $this->calculateCombatValue();
@@ -1750,8 +1778,13 @@ public function getAllEWExceptDEW($turn){
         $slot = $gamedata->getSlotById($this->slot);
         $depTurn = $slot->depavailable;
 
-        return $depTurn;
-
+        if($slot->surrendered !== null){
+            if($slot->surrendered <= $gamedata->turn){ //Surrendered on this turn or before, no longer present in game.
+                $depTurn = 999; //Artifically high number, so surrendered ships are no longer considered by game! - DK
+            }
+        }    
+        
+        return $depTurn;           
 	} 
 
 

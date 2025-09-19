@@ -133,19 +133,18 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             </li>
             <li>Details of each of the three types of marine mission are summarised below:
                 <ul class="circle-list">
-                    <li><strong>Capture:</strong>Marines will fight the defending marine contingents directly (defenders are shown in CnC tooltip!).  
+                    <li><strong>Capture: </strong>Marines will fight the defending marine contingents directly (defenders are shown in CnC tooltip!).  
                     This invovles two dice rolls, one to see if marines eliminate a defender (50% base chance) and a second to see if marines are eliminated (25% base chance).  
                     If the attacking marines manage to defeat all defenders, the enemy ship is immediately be disabled for the remainder of the battle so long as there are still at least one attacking marine unit on board.
                     </li>
-                    <li><strong>Sabotage:</strong>Marines can either attempt to damage a specific system on an enemy ships (by making a called shot against it using the usual rules) or disrupt the ship more generally (e.g. minor damage to a Primary system, EW/Initiative/Thrust/Defence Profile penalties) by targeting it in the normal fashion.  
+                    <li><strong>Sabotage: </strong>Marines can either attempt to damage a specific system on an enemy ships (by making a called shot against it using the usual rules) or disrupt the ship more generally (e.g. minor damage to a Primary system, EW/Initiative/Thrust/Defence Profile penalties) by targeting it in the normal fashion.  
                     In both cases, Marines that are successfully delivered will roll on a d10 the following turn to see how successful their mission has been.  
                     Note - Marines which target a specific system and are successful in destroying it will then continue to Sabotage the ship generally providing they have not been eliminated.</li>
-                    <li><strong>Rescue:</strong>For scenarios only, Marines will attach their pod and attempt to board as normal.  Then, from the following turn, the Combat Log will provide players with updates on the progress of their Rescue mission.</li>
+                    <li><strong>Rescue: </strong>For scenarios only, Marines will attach their pod and attempt to board as normal.  Then, from the following turn, the Combat Log will provide players with updates on the progress of their Rescue mission.</li>
                 </ul>
             </li>
 
-            <li>Pods first roll to attach, but this is automatic if they are moving faster than the target ship, so long as speed difference is not higher than pods thrust rating.  Llort have +1 to attach roll.</li>
-            <li>Once attached, the Pod will roll again to deliver the Marines, with a base chance of 50% to successfully boarding the vessel.  Unsuccessful marines may be lost or return safely their pod.</li>
+            <li>Note - Unlike Tabletop where Pods STAY attached to enemy units, this is not the case in FV and they are free to move the following turn.</li>
         </ul>
         <a class="back-to-top" href="#top">↩ Back to Top</a>
 
@@ -221,7 +220,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         <h3 id="terrain" >Terrain</h3>
         <ul>
             <li><b>Asteroids:</b> Added in Create Game or manually from Terrain faction list. They block line of sight and cause ramming damage to non-fighters moving through them (damage applies end of turn).</li>
-            <li><b>Manual Placement:</b>If you want to have full control over where Terrain is placed, you can create a new player slot for yourself at game creation and pick the terrain you want from the Terrain faction in Other.  
+            <li><b>Manual Placement:</b> If you want to have full control over where Terrain is placed, you can create a new player slot for yourself at game creation and pick the terrain you want from the Terrain faction in Other.  
             Then, providing you have set an appropriately wide deployment zone, you can just place these like any other ship on Turn 1.</li>            
             <li><b>Moons:</b> Larger than asteroids (multiple hexes). Units moving into a moon's area automatically crash into it during the Firing Phase.</li>
         </ul>

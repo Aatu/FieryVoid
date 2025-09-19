@@ -9,7 +9,7 @@ class Romak extends MediumShip{
         $this->phpclass = "Romak";
         $this->imagePath = "img/ships/MarkabPoliceShip.png"; //change
         $this->shipClass = "Romak Escort Frigate";
-        //$this->canvasSize = 100;
+        $this->canvasSize = 120;
 	    
 	    $this->isd = 2000;
         

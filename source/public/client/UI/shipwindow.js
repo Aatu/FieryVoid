@@ -829,20 +829,22 @@ window.shipWindowManager = {
 					}
 				} else {
 					shipWindowManager.setSystemData(ship, system, shipwindow);
-
+        			/* Cleaned 19.8.25 - DK	
 					if (system.dualWeapon && system.weapons) {
 						var dualsystem = system.weapons[system.firingMode];
 						shipWindowManager.setSystemData(ship, dualsystem, shipwindow);
-
+							
 						if (system.duoWeapon) {
 							for (var i in system.weapons) {
 								var subweapon = system.weapons[i];
 								shipWindowManager.setSystemData(ship, subweapon, shipwindow);
 							}
 						}
+							
 					} else {
-						shipWindowManager.setSystemData(ship, system, shipwindow);
-					}
+					*/	
+					shipWindowManager.setSystemData(ship, system, shipwindow);
+					//}
 
 					//if (system.name == "scanner"){
 					if (system.isScanner()) {
@@ -866,7 +868,7 @@ window.shipWindowManager = {
 
 				for (var i in ship.systems) {
 					var system = ship.systems[i];
-
+        			/* Cleaned 19.8.25 - DK		
 					if (system.dualWeapon) {
 						for (var index in system.weapons) {
 							var weapon = system.weapons[index];
@@ -888,8 +890,9 @@ window.shipWindowManager = {
 							}
 						}
 					} else {
-						shipWindowManager.setSystemData(ship, system, shipwindow);
-					}
+					*/	
+					shipWindowManager.setSystemData(ship, system, shipwindow);
+					//}
 				}
 			}
 		}
@@ -991,14 +994,15 @@ window.shipWindowManager = {
 
 		var template = $("#systemtemplatecontainer .system.regular");
 		var systemwindow = template.clone(true).appendTo(destination);
-
+        /* Cleaned 19.8.25 - DK		
 		if (system.duoWeapon) {
 			shipWindowManager.addDuoSystem(ship, system, systemwindow);
 		} else if (system.dualWeapon) {
 			shipWindowManager.addDualSystem(ship, system, systemwindow);
 		} else {
-			shipWindowManager.addRegularSystem(ship, system, systemwindow);
-		}
+		*/	
+		shipWindowManager.addRegularSystem(ship, system, systemwindow);
+		//}
 	},
 
 	addRegularSystem: function addRegularSystem(ship, system, systemwindow) {
@@ -1051,6 +1055,7 @@ window.shipWindowManager = {
 		systemwindow.find(".mode").on("click", shipWindowManager.onModeClicked);
 	},
 
+    /* Cleaned 19.8.25 - DK		
 	addDualSystem: function addDualSystem(ship, system, dualwindow) {
 		var dualsystem = system.weapons[system.firingMode];
 
@@ -1142,7 +1147,7 @@ window.shipWindowManager = {
 		duowindow.find(".holdfire").on("click", window.weaponManager.onHoldfireClicked);
 		$(".system .icon .UI .mode").on("click", shipWindowManager.onModeClicked);
 	},
-
+	*/
 	removeSystemClasses: function removeSystemClasses(systemwindow) {
 		var classes = Array("destroyed", "loading", "selected", "firing", "duofiring", "critical", "canoffline", "offline", "canboost", "boosted", "canoverload", "overload", "forcedoffline", "modes", "ballistic", "selfIntercept");
 
@@ -1174,11 +1179,12 @@ window.shipWindowManager = {
 		}
 
 		shipManager.systems.initializeSystem(system);
-
+        /* Cleaned 19.8.25 - DK	
 		if (system.dualWeapon && system.weapons != null) {
 			var weapon = system.weapons[system.firingMode];
 			shipManager.systems.initializeSystem(weapon);
 		}
+		*/	
 
 		var systemwindow = shipwindow.find(".system_" + system.id);
 
@@ -1210,6 +1216,7 @@ window.shipWindowManager = {
 
 		if (shipManager.systems.isDestroyed(ship, system)) {
 			if (system.parentId > 0) {
+				/* Cleaned 19.8.25 - DK		
 				if (shipManager.systems.getSystem(ship, system.parentId).duoWeapon) {
 					// create an iconMask at the top of the DOM for the system.
 					var iconmask_element = document.createElement('div');
@@ -1220,6 +1227,7 @@ window.shipWindowManager = {
 
 				parentWindow.addClass("destroyed");
 			} else {
+			*/	
 				systemwindow.addClass("destroyed");
 			}
 			return;
@@ -1240,6 +1248,7 @@ window.shipWindowManager = {
 
 			// To avoid double overlay of loading icon mask in case of a
 			// duoWeapon in a dualWeapon
+        	/* Cleaned 19.8.25 - DK					
 			if (!weaponManager.isLoaded(system) && !(system.duoWeapon && system.parentId > 0)) {
 				systemwindow.addClass("loading");
 			} else {
@@ -1270,6 +1279,32 @@ window.shipWindowManager = {
 				systemwindow.removeClass("firing");
 				systemwindow.removeClass("selfIntercept");
 			}
+			*/
+//
+			if (!weaponManager.isLoaded(system)) {
+				systemwindow.addClass("loading");
+			} else {
+				systemwindow.removeClass("loading");
+			}
+
+			// Mark as selected weapon
+			if (weaponManager.isSelectedWeapon(system)) {
+				systemwindow.addClass("selected");
+			} else {
+				systemwindow.removeClass("selected");
+			}
+
+			// Firing states
+			if (firing && firing !== "self" && !systemwindow.hasClass("loading")) {
+				systemwindow.addClass("firing");
+			} else if (firing === "self") {
+				systemwindow.addClass("firing");
+				systemwindow.addClass("selfIntercept");
+			} else {
+				firing = false;
+				systemwindow.removeClass("firing");
+				systemwindow.removeClass("selfIntercept");
+			}
 
 			if (system.ballistic) {
 				systemwindow.addClass("ballistic");
@@ -1277,7 +1312,8 @@ window.shipWindowManager = {
 				systemwindow.removeClass("ballistic");
 			}
 
-			if (!firing && (Object.keys(system.firingModes).length > 1 || system.dualWeapon)) {
+			//if (!firing && (Object.keys(system.firingModes).length > 1 || system.dualWeapon)) { //Cleaned 19.8.25 - DK	
+			if (!firing && (Object.keys(system.firingModes).length > 1)) {			
 				if (system.parentId >= 0) {
 					var parentSystem = shipManager.systems.getSystem(ship, system.parentId);
 
@@ -1316,6 +1352,7 @@ window.shipWindowManager = {
 
 				field.html(fire.shots + "/" + system.shots);
 			} else if (!firing) {
+        		/* Cleaned 19.8.25 - DK						
 				if (system.duoWeapon) {
 					var UI_active = systemwindow.find(".UI").hasClass("active");
 
@@ -1325,10 +1362,11 @@ window.shipWindowManager = {
 						systemwindow.find(".UI").addClass("active");
 					}
 				} else {
+				
 					if (system.dualWeapon && system.weapons) {
 						system = system.weapons[system.firingMode];
 					}
-
+				*/	
 					var load = weaponManager.getWeaponCurrentLoading(system);
 					var loadingtime = system.loadingtime;
 
@@ -1351,7 +1389,7 @@ window.shipWindowManager = {
 					} else {
 						field.html(load + overloadturns + "/" + loadingtime);
 					}
-				}
+				//}
 			}
 		} else if (system.name == "thruster") {
 			systemwindow.data("direction", system.direction);

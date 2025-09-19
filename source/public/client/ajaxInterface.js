@@ -6,7 +6,6 @@ window.ajaxInterface = {
     pollActive: false,
     pollcount: 0,
     submiting: false,
-    //	fastpolling: false,
 
     /* //OLD VERSION
     getShipsForFaction: function getShipsForFaction(factionRequest, getFactionShipsCallback) {
@@ -355,6 +354,7 @@ submitSlotAction: function submitSlotAction(action, slotid, callback) {
                         systems[a] = { 'id': system.id, 'systems': fighterSystems };
                     } else {
                         var fires = Array();
+        				/* Cleaned 19.8.25 - DK	                        
                         if (system.dualWeapon) {
                             for (var c in system.weapons) {
                                 var weapon = system.weapons[c];
@@ -367,6 +367,7 @@ submitSlotAction: function submitSlotAction(action, slotid, callback) {
                                 fires = fires.concat(weapon.fireOrders);
                             }
                         } else {
+                        */    
                             for (var b = system.fireOrders.length - 1; b >= 0; b--) {
                                 var fire = system.fireOrders[b];
                                 if (fire.turn < gamedata.turn) {
@@ -374,7 +375,7 @@ submitSlotAction: function submitSlotAction(action, slotid, callback) {
                                 }
                             }
                             fires = system.fireOrders;
-                        }
+                        //}
 
                         for (var b = system.power.length - 1; b >= 0; b--) {
                             var power = system.power[b];
@@ -451,6 +452,53 @@ submitSlotAction: function submitSlotAction(action, slotid, callback) {
         ajaxInterface.pollActive = false;
     },
 
+pollGamedata: function pollGamedata() {
+
+    if (!ajaxInterface.pollActive) {
+        ajaxInterface.stopPolling();
+        return;
+    }
+
+    if (gamedata.waiting == false) {
+        ajaxInterface.stopPolling();
+        return;
+    }
+
+    if (!ajaxInterface.submiting) ajaxInterface.requestGamedata();
+
+    ajaxInterface.pollcount++;
+
+    // detect environment
+    var isLocal = (location.hostname === "localhost" || location.hostname === "127.0.0.1");
+    var phase = gamedata.gamephase;
+
+    var time;
+
+    // --- base timings depending on mode ---
+    if (isLocal) {
+        // Local testing timings
+        time = 3000;
+    } else if (phase === -2) {
+        // Phase -2 timings (customize as you like)
+        time = 8000;
+        if (ajaxInterface.pollcount > 10) time = 10000;
+        if (ajaxInterface.pollcount > 40) time = 15000;
+    } else {
+        // In-Game timings
+        time = 10000;
+        if (ajaxInterface.pollcount > 3)  time = 20000;
+        if (ajaxInterface.pollcount > 10) time = 60000;
+        if (ajaxInterface.pollcount > 40) time = 1800000;
+    }
+
+    if (ajaxInterface.pollcount > 300) {
+        return;
+    }
+
+    ajaxInterface.poll = setTimeout(ajaxInterface.pollGamedata, time);
+},
+
+    /*
     pollGamedata: function pollGamedata() {
 
         if (!ajaxInterface.pollActive) {
@@ -467,32 +515,36 @@ submitSlotAction: function submitSlotAction(action, slotid, callback) {
 
         ajaxInterface.pollcount++;
 
-        var time = 6000;
+        // detect if running locally
+        var isLocal = (location.hostname === "localhost" || location.hostname === "127.0.0.1");
+
+        // base poll time
+        var time = isLocal ? 3000 : 10000; // local = 2s, remote = 10s
+
+
+        if (ajaxInterface.pollcount > 3) {
+            time = isLocal ? 4000 : 20000; // local faster, remote 20s           
+        }
 
         if (ajaxInterface.pollcount > 10) {
-            time = 6000;
+            time = isLocal ? 6000 : 60000; //Increased from 6 secs to 1 min
         }
 
-        if (ajaxInterface.pollcount > 100) {
-            //        	ajaxInterface.fastpolling = false;
-            time = 30000;
+        if (ajaxInterface.pollcount > 40) { //Decreased from 100 polls e.g. 
+           time = isLocal ? 6000 : 1800000; //Increased from 50 secs to 30 mins
         }
 
-        if (ajaxInterface.pollcount > 200) {
-            time = 300000;
-        }
+        //if (ajaxInterface.pollcount > 80) {
+        //    time = 500000;
+        //}
 
         if (ajaxInterface.pollcount > 300) {
             return;
         }
 
-        //        if (ajaxInterface.fastpolling) {
-        //         	time=1000;
-        //        }
-
         ajaxInterface.poll = setTimeout(ajaxInterface.pollGamedata, time);
     },
-
+*/
     startPollingGames: function startPollingGames() {
         ajaxInterface.pollGames();
     },

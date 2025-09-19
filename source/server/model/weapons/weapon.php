@@ -97,8 +97,8 @@ class Weapon extends ShipSystem
     public $freeinterceptspecial = false;  //has its own routine for handling decision whether it's capable of interception - for freeintercept only?
     public $hidetarget = false;
 	public $hidetargetArray = array();  //for weapons that do not show their target
-    public $duoWeapon = false;
-    public $dualWeapon = false;
+    //public $duoWeapon = false; 
+    //public $dualWeapon = false;
     public $canChangeShots = false;
     public $isPrimaryTargetable = true; //can this system be targeted by called shot if it's on PRIMARY?
 	public $isRammingAttack = false; //true means hit chance calculations are completely different, relying on speed
@@ -290,7 +290,6 @@ class Weapon extends ShipSystem
 			$strippedSystem->extraoverloadshots = $this->extraoverloadshots;
 			$strippedSystem->extraoverloadshotsArray = $this->extraoverloadshotsArray;
 			$strippedSystem->fireOrders = $this->fireOrders;
-			$strippedSystem->canModesIntercept = $this->canModesIntercept;//For weapons which intercept not using their default mode e.g. interceptor missiles - DK
 			
 			if(isset($this->ammunition)){
 				$strippedSystem->ammunition = $this->ammunition;

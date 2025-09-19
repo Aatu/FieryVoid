@@ -822,10 +822,11 @@ shipManager.power = {
 
 	offlineAll: function offlineAll(ship, system) {
 		var array = [];
-
+        /* Cleaned 19.8.25 - DK
 		if (system.duoWeapon || system.dualWeapon) {
 			return;
 		}
+		*/
 
 		for (var i = 0; i < ship.systems.length; i++) {
 			if (system.displayName === ship.systems[i].displayName) {
@@ -920,10 +921,11 @@ shipManager.power = {
 	onlineAll: function onlineAll(ship, system) {
 		var array = [];
 
-
+        /* Cleaned 19.8.25 - DK
 		if (system.duoWeapon || system.dualWeapon) {
 			return;
 		}
+		*/	
 
 		for (var i = 0; i < ship.systems.length; i++) {
 			if (system.displayName === ship.systems[i].displayName) {
@@ -967,7 +969,7 @@ shipManager.power = {
 		if (system.name == "shieldGenerator" || system instanceof ThirdspaceShieldGenerator) {
 			system.onTurnOn(ship);
 		}
-
+        /* Cleaned 19.8.25 - DK		
 		if (system.dualWeapon || system.duoWeapon) {
 			for (var i in system.weapons) {
 				var weapon = system.weapons[i];
@@ -985,7 +987,7 @@ shipManager.power = {
 				}
 			}
 		}
-
+		*/
 		shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
         webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 	},

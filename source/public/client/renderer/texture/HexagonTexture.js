@@ -55,7 +55,7 @@ window.HexagonTexture = function () {
     function createCanvas(width, height, debug) {
         return window.AbstractCanvas.create(width, height, debug);
     }
-
+/*
 HexagonTexture.prototype.renderNumberGrid = function (canvasSize, repeat) {
     var hexSize = canvasSize / 4;
     var width = canvasSize;
@@ -84,7 +84,7 @@ HexagonTexture.prototype.renderNumberGrid = function (canvasSize, repeat) {
 
     return canvas;
 };
-
+*/
     HexagonTexture.prototype.getTexture = function (canvas, gridWidth, gridHeight) {
 
         if (gridWidth == undefined) {

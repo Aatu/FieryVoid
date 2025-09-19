@@ -153,7 +153,7 @@ shipManager.systems = {
                     }
                 }
             }
-
+            /* Cleaned 19.8.25 - DK
             if (system.duoWeapon || system.dualWeapon) {
                 for (var i in system.weapons) {
                     var weapon = system.weapons[i];
@@ -175,13 +175,14 @@ shipManager.systems = {
                     }
                 }
             }
+            */
         }
 
         return null;
     },
 
     initializeSystem: function initializeSystem(system) {
-
+        /* Cleaned 19.8.25 - DK		        
         if (system.dualWeapon && system.weapons == null) {
             return system;
         }
@@ -204,7 +205,7 @@ shipManager.systems = {
             selectedWeapon.destroyed = system.destroyed;
             return selectedWeapon;
         }
-
+        */
         if (system.boostable) {
             system = system.initBoostableInfo();
         }

@@ -92,8 +92,8 @@
         <script src="client/model/weapon/aoe.js"></script>
         <script src="client/model/weapon/molecular.js"></script>
         <script src="client/model/weapon/antimatter.js"></script>
-        <script src="client/model/weapon/dualWeapon.js"></script>
-        <script src="client/model/weapon/duoWeapon.js"></script>
+        <!--<script src="client/model/weapon/dualWeapon.js"></script>-->
+        <!--<script src="client/model/weapon/duoWeapon.js"></script>-->
         <script src="client/model/weapon/gravitic.js"></script>
         <script src="client/model/weapon/missile.js"></script>
         <script src="client/model/weapon/ion.js"></script>
@@ -642,7 +642,7 @@ if ($asteroids == false && $moons == false) {
                     
     <div id="slottemplatecontainer" style="display:none;">
         <div class="slot" >
-            <div class="leaveslot"></div>
+            <div class="leaveslot">Leave Slot</div>
             <div>
                 <span class="smallSize headerSpan">NAME:</span>
                 <span class ="value name"></span>

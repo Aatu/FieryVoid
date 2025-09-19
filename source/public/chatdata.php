@@ -12,8 +12,10 @@ if (!headers_sent() && !ini_get('zlib.output_compression')) {
 header('Content-Type: application/json; charset=utf-8');
 */
 
+$__fv_buffering = false;
 if (!headers_sent() && !ini_get('zlib.output_compression')) {
     ob_start();
+    $__fv_buffering = true;
 }
 
 header('Content-Type: application/json; charset=utf-8');
@@ -33,7 +35,7 @@ session_write_close(); // allow concurrent AJAX
 if (!$playerid) {
     http_response_code(401);
     echo json_encode(['error' => 'Not logged in.'], JSON_UNESCAPED_UNICODE);
-    ob_end_flush();
+    if ($__fv_buffering) { ob_end_flush(); }
     exit;
 }
 
@@ -83,7 +85,7 @@ try {
     ]);
 }
 
-ob_end_flush();
+if ($__fv_buffering) { ob_end_flush(); }
 exit;
 
 

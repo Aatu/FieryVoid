@@ -223,6 +223,11 @@ window.PhaseStrategy = function () {
             !(shipManager.shouldBeHidden(ship))
         );
 
+        if (gamedata.showLoS) { 
+            this._startHexRuler = payload.hex;
+            mathlib.clearLosSprite();                   
+        }  
+
         if(filteredShips.length === 1){ //only one ship, we have to pretend the stealth ship(s) aren't on same hex!
             var ship = filteredShips[0];
             if(payload.button === 2){
@@ -246,7 +251,6 @@ window.PhaseStrategy = function () {
         if (gamedata.showLoS) {         
             this._startHexRuler = null; //reset start point on right-clicking ship
             mathlib.clearLosSprite();                   
-            //this._startHexRuler = shipManager.getShipPosition(ship);
         }    
 
         this.shipWindowManager.open(ship);
@@ -255,20 +259,15 @@ window.PhaseStrategy = function () {
     PhaseStrategy.prototype.onShipClicked = function (ship, payload) {//30 June 2024 - DK - Added for Ally targeting.
         if(shipManager.shouldBeHidden(ship)) return;  //Stealth equipped and undetected enemy, or not deployed yet - DK May 2025
 
-
+        if (gamedata.showLoS) { 
+            this._startHexRuler = payload.hex;
+            mathlib.clearLosSprite();                   
+        }     
         
 		if(this.gamedata.isMyShip(ship) && (!this.gamedata.canTargetAlly(ship))) {
-            this.selectShip(ship, payload);
-            if (gamedata.showLoS) { 
-                this._startHexRuler = shipManager.getShipPosition(ship);
-                mathlib.clearLosSprite();                   
-            }               
+            this.selectShip(ship, payload);             
         } else {
-            this.targetShip(ship, payload);
-            if (gamedata.showLoS) { 
-                this._startHexRuler = shipManager.getShipPosition(ship);
-                mathlib.clearLosSprite();                   
-            }             
+            this.targetShip(ship, payload);        
         }
     };
 
@@ -833,7 +832,6 @@ window.PhaseStrategy = function () {
 
         if (!gamedata.showLoS) {
             gamedata.showLoS = true;
-            //if(this._startHexRuler == null) this._startHexRuler = shipManager.getShipPosition(this.selectedShip);
             const hex = this._lastHoveredHex || { q: 0, r: 0 };
             mathlib.showLoS(this._startHexRuler, hex);
         } else {

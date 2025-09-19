@@ -1,6 +1,8 @@
 <?php
+$__fv_buffering = false;
 if (!headers_sent() && !ini_get('zlib.output_compression')) {
     ob_start();
+    $__fv_buffering = true;    
 }
 
 header('Content-Type: application/json; charset=utf-8');
@@ -99,7 +101,7 @@ try {
 }
 
 echo $ret;
-ob_end_flush();
+if ($__fv_buffering) { ob_end_flush(); }
 exit;
 
 /* //Old version

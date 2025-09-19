@@ -96,7 +96,7 @@
         </div>-->
         <div class="scenario-row">
             <label for="enhancements">ENHANCEMENTS:</label>
-            <input type="text" id="enhancements" value="Allowed / Up to X points / Not allowed">
+            <input type="text" id="enhancements" value="Allowed / Up to 100 points / Not allowed">
         </div>
 
         <div class="scenario-row">
@@ -112,7 +112,7 @@
         </div>
         <div class="scenario-row">
             <label for="victory">VICTORY CONDITIONS:</label>
-            <input type="text" id="victory" value="Last unit on map / Last ship on map / More forces remaining after Turn X">
+            <input type="text" id="victory" value="Last unit on map / Last ship on map / More forces remaining after Turn 12">
         </div>
         <div class="scenario-row">
             <label for="other">ADDITIONAL INFO:</label>

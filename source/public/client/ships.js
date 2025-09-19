@@ -516,7 +516,7 @@ window.shipManager = {
         return false;
     },
 
-	//Used by RelayAnimationStrategy to check if ship has jumped, if so different destroyed sprite
+	//Used by RelayAnimationStrategy/fleetList to check if ship has jumped, if so different destroyed sprite/entry
 	hasJumpedNotDestroyed: function (ship) {
 		var hasJumped = false;
 	    // Check if the ship has a jump engine
@@ -527,9 +527,9 @@ window.shipManager = {
 	        return false;
 	    }
 	    
-	    // Check if the jump engine is boosted
-	    var boostedJump = shipManager.power.isBoosted(ship, jumpEngine);
-	    if(!boostedJump) return false; //Hasn't boosted jump engine, it cannot have jumped.
+	   // Check if the jump engine is boosted
+	   //var boostedJump = shipManager.power.isBoosted(ship, jumpEngine);
+	   //if(!boostedJump) return false; //Hasn't boosted jump engine, it cannot have jumped.
 	    	
 		//Check damage entries, and remove Hyperspace jump entry, to see if ship was 'destroyed' by jumping not actual damage.	    
 		var struct = shipManager.systems.getStructureSystem(ship, 0);
@@ -1004,16 +1004,17 @@ window.shipManager = {
           
         if(ship.osat || ship.base || gamedata.isTerrain(ship.shipSizeClass, ship.userid)) {
             return 1; //Bases and OSATs never 'jump in', returns Turn 1.
-        }/*else if (gamedata.gamephase == -1 && slot.depavailable == gamedata.turn){
-            if(!ajaxInterface.submiting){
-                return gamedata.turn;
-            }else{
-                return slot.depavailable;                 
-            } 
-        }*/else{    
+        }else{    
            //return Math.max(ship.deploysOnTurn, slot.depavailable);
-            var slot = playerManager.getSlotById(ship.slot);   
-            return slot.depavailable;                       
+            var slot = playerManager.getSlotById(ship.slot);
+            var depTurn = slot.depavailable;
+
+        if(slot.surrendered !== null){
+            if(slot.surrendered <= gamedata.turn){ //Surrendered on this turn or before.
+                    depTurn = 999; //Artifically high number, so surrendered ships are no longer shown by game until one full team has surrendered! - DK
+            }
+        }    
+            return depTurn;                       
         }     
     },    
 

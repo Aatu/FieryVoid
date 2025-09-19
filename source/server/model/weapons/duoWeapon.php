@@ -1,5 +1,5 @@
 <?php
-
+/*
 class DuoWeapon extends Weapon{
     
     
@@ -136,5 +136,5 @@ class DuoWeapon extends Weapon{
         SystemData::addDataForSystem($this->id, 0, $ship->id, $data->toJSON());
     }
 }
-
+*/
 ?>
