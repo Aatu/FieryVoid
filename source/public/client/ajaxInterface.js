@@ -485,7 +485,7 @@ submitSlotAction: function submitSlotAction(action, slotid, callback) {
                             for (var index in system.missileArray) {
                                 var amount = system.missileArray[index].amount;
                                 ammoArray[index] = amount;
-                                newShip.pointCostEnh2 += system.missileArray[index].cost * amount * ship.flightSize;                                  
+                                newShip.pointCostEnh2 += system.missileArray[index].cost * amount;                                  
                             }
                         }
 						//changed to accomodate new variable for individual data transfer to server - in a generic way
