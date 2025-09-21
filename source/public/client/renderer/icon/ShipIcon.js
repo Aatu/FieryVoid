@@ -117,12 +117,35 @@ window.ShipIcon = function () {
     ShipIcon.prototype.setOverlayColorAlpha = function (alpha) {
         this.shipSprite.setOverlayColorAlpha(alpha);
     };
-
+    //No longer called 
+    /*
     ShipIcon.prototype.getMovements = function (turn) {
         return this.movements.filter(function (movement) {
             return turn === undefined || movement.turn === turn;
         }, this);
     };
+    */
+
+    //New function to fix pivot facing bug in Replay 
+    ShipIcon.prototype.getMovementsReplay = function (turn) {
+        if (turn === undefined) {
+            return this.movements; // fallback: return everything
+        }
+
+        // movements from the requested turn
+        let currentTurnMoves = this.movements.filter(m => m.turn === turn);
+
+        // find the last movement from the previous turn
+        let prevTurnMoves = this.movements.filter(m => m.turn === turn - 1);
+        let lastPrevMove = prevTurnMoves.length > 0 ? prevTurnMoves[prevTurnMoves.length - 1] : null;
+
+        // return combined
+        if (lastPrevMove) {
+            return [lastPrevMove, ...currentTurnMoves];
+        }
+        return currentTurnMoves;
+    };
+
 
     ShipIcon.prototype.setScale = function (width, height) {
         this.mesh.scale.set(width, height, 1);
