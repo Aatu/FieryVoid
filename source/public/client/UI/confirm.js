@@ -1255,7 +1255,7 @@ window.confirm = {
             points += lship.pointCost;
         }
         */
-        var defaultName = '<Unnamed Fleet>';
+        var defaultName = 'Unnamed Fleet';
 
         // Fleet name input
         $('<label>Enter Fleet Name:</label><input type="text" style="text-align:center" name="fleetname" value="' + defaultName + '"></input><br>').prependTo(e);
