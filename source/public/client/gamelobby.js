@@ -2715,7 +2715,7 @@ expandFaction: function expandFaction(event) {
 				ship.pointCost = ship.pointCost/6 * ship.flightSize;				
 			}
 			
-			if (ship.pointCostEnh > 0) {
+			if (ship.pointCostEnh !== 0) {
 				ship.pointCost = ship.pointCost + ship.pointCostEnh;			
 			}
 			/* //Fleet shouldn't load if it can't be afforded.
