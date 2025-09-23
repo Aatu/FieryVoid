@@ -2298,13 +2298,12 @@ expandFaction: function expandFaction(event) {
 			nowTaken = target.data("count");
 			if(nowTaken > 0 || hadTaken > 0){ //enhancement picked - note!
 				ship.enhancementOptions[enhNo][2] = nowTaken;
-				var originalCost = 0;
 				var newCost = 0;
 				if(!ship.enhancementOptions[enhNo][6]){ //this is an actual enhancement (as opposed to option) - note value!
 					if (ship.flight){
 						//originalCost = originalShipData.enhancementOptions[enhNo][2] * target.data("enhPrice") * flightSize;						
-						newCost = (nowTaken - hadTaken) * target.data("enhCost") * flightSize; //Add new enhancement, could be negative if enhancements have been removed.
-						ship.pointCostEnh += newCost - originalCost;						
+						newCost = (nowTaken - hadTaken) * target.data("enhPrice") * flightSize; //Add new enhancement, could be negative if enhancements have been removed.
+						ship.pointCostEnh += newCost;						
 					} else {
 						//originalCost = originalShipData.enhancementOptions[enhNo][2] * target.data("enhPrice");						
 						newCost = (nowTaken - hadTaken) * target.data("enhPrice"); //Add new enhancement, could be negative if enhancements have been removed.
@@ -2313,12 +2312,12 @@ expandFaction: function expandFaction(event) {
 				}else{ //this is an option - still note value, just separately!
 					if (ship.flight){
 						//originalCost = originalShipData.enhancementOptions[enhNo][2] * target.data("enhPrice") * flightSize;						
-						newCost =  (nowTaken - hadTaken) * target.data("enhCost") * flightSize; //Add new enhancement, could be negative if enhancements have been removed.
-						ship.pointCostEnh2 += newCost - originalCost;
+						newCost =  (nowTaken - hadTaken) * target.data("enhPrice") * flightSize; //Add new enhancement, could be negative if enhancements have been removed.
+						ship.pointCostEnh2 += newCost;
 					} else {
 						//originalCost = originalShipData.enhancementOptions[enhNo][2] * target.data("enhPrice");						
-						newCost =  (nowTaken - hadTaken) * target.data("enhCost"); //Add new enhancement, could be negative if enhancements have been removed.
-						ship.pointCostEnh2 += newCost - originalCost;
+						newCost =  (nowTaken - hadTaken) * target.data("enhPrice"); //Add new enhancement, could be negative if enhancements have been removed.
+						ship.pointCostEnh2 += newCost;
 					}
 				}
 			}
