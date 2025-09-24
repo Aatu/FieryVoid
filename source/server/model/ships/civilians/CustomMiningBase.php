@@ -132,7 +132,7 @@ class CustomMiningBase extends SmallStarBaseFourSections{
 				6 => "TAG:Industrial Grappler",
 				8 => "TAG:Cargo Bay",
 				10 => "TAG:Hangar",
-				18 => "TAG:Outer Structure",
+				18 => "Outer Structure",
 				20 => "Primary",
 			),
 			2=> array(
@@ -141,7 +141,7 @@ class CustomMiningBase extends SmallStarBaseFourSections{
 				6 => "TAG:Industrial Grappler",
 				8 => "TAG:Cargo Bay",
 				10 => "TAG:Hangar",
-				18 => "TAG:Outer Structure",
+				18 => "Outer Structure",
 				20 => "Primary",
 			),	
 			3=> array(
@@ -150,7 +150,7 @@ class CustomMiningBase extends SmallStarBaseFourSections{
 				6 => "TAG:Industrial Grappler",
 				8 => "TAG:Cargo Bay",
 				10 => "TAG:Hangar",
-				18 => "TAG:Outer Structure",
+				18 => "Outer Structure",
 				20 => "Primary",
 			),
 			4=> array(
@@ -159,7 +159,7 @@ class CustomMiningBase extends SmallStarBaseFourSections{
 				6 => "TAG:Industrial Grappler",
 				8 => "TAG:Cargo Bay",
 				10 => "TAG:Hangar",
-				18 => "TAG:Outer Structure",
+				18 => "Outer Structure",
 				20 => "Primary",
 			),
 		);

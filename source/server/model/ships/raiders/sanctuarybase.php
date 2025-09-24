@@ -49,20 +49,33 @@ class SanctuaryBase extends StarBaseSixSections{
 		for ($i = 0; $i < sizeof($this->locations); $i++){
 			$min = 0 + ($i*60);
 			$max = 120 + ($i*60);
+
+			$struct = Structure::createAsOuter(3, 76,$min,$max);
+			$hangar = new Hangar(3, 1);
+			$hangar->startArc = $min;
+			$hangar->endArc = $max;			
+			$cargoBay = new CargoBay(3, 36);
+			$cargoBay->startArc = $min;
+			$cargoBay->endArc = $max;
+			$subReactor = new SubReactorUniversal(5, 8, 0, 0);
+			$subReactor->startArc = $min;
+			$subReactor->endArc = $max;
+
 			$systems = array(
 				new StdParticleBeam(3, 4, 1, $min, $max),
 				new StdParticleBeam(3, 4, 1, $min, $max),
-				new Hangar(3, 1),
-				new SubReactorUniversal(3, 8, 0, 0),
-				new CargoBay(3, 36),
-				new Structure(3, 76)
+				$hangar,
+				$subReactor,
+				$cargoBay,
+				$struct
 			);
+			
 			$loc = $this->locations[$i];
 			$this->hitChart[$loc] = array(
 				3 => "TAG:Standard Particle Beam",
-				7 => "Cargo",
-				8 => "Hangar",
-				9 => "Sub Reactor",
+				7 => "TAG:Cargo",
+				8 => "TAG:Hangar",
+				9 => "TAG:Sub Reactor",
 				18 => "Structure",
 				20 => "Primary",
 			);

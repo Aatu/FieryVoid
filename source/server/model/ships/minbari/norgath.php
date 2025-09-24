@@ -60,17 +60,28 @@ class Norgath extends StarBaseSixSections{
 			$min = 0 + ($i*60);
 			$max = 120 + ($i*60);
 
+			$struct = Structure::createAsOuter(6, 180,$min,$max);
+			$cargoBay = new CargoBay(6, 25);
+			$cargoBay->startArc = $min;
+			$cargoBay->endArc = $max;			
+			$hangar = new Hangar(6, 6, 6);
+			$hangar->startArc = $min;
+			$hangar->endArc = $max;
+			$subReactor = new SubReactorUniversal(6, 30, 0, 0);
+			$subReactor->startArc = $min;
+			$subReactor->endArc = $max;
+
 			$systems = array(
-				new CargoBay(6, 25),
+				$cargoBay,
 				new ElectroPulseGun(6, 6, 3, $min, $max),
 				new NeutronLaser(6, 10, 6, $min, $max),
 				new NeutronLaser(6, 10, 6, $min, $max),
 				new FusionCannon(6, 8, 1, $min, $max),
 				new FusionCannon(6, 8, 1, $min, $max),
 				new FusionCannon(6, 8, 1, $min, $max),
-				new Hangar(6, 6, 6),
-				new SubReactorUniversal(6, 30, 0, 0),
-				new Structure(6, 180)
+				$hangar,
+				$subReactor,
+				$struct
 			);
 
 

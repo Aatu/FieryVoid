@@ -42,38 +42,70 @@ class ChoukaPenanceBaseAM extends SmallStarBaseFourSections{
         $this->addFrontSystem(new AmmoMissileRackS(3, 0, 0, 270, 90, $ammoMagazine, true)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
 		$this->addFrontSystem(new MediumPlasma(3, 5, 3, 270, 90));
 		$this->addFrontSystem(new MediumPlasma(3, 5, 3, 270, 90));
-		$this->addFrontSystem(new CargoBay(3, 15));
-		$this->addFrontSystem(new CargoBay(3, 15));
+		//$this->addFrontSystem(new CargoBay(3, 15));
+		//$this->addFrontSystem(new CargoBay(3, 15));
 
+			$cargoBay = new CargoBay(3, 15);
+			$cargoBay->startArc = 270;
+			$cargoBay->endArc = 90;
+			$this->addFrontSystem($cargoBay);
+			$this->addFrontSystem($cargoBay);
+						
 		$this->addAftSystem(new EWHeavyPointPlasmaGun(3, 7, 3, 90, 270));
         $this->addAftSystem(new AmmoMissileRackS(3, 0, 0, 90, 270, $ammoMagazine, true)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         $this->addAftSystem(new AmmoMissileRackS(3, 0, 0, 90, 270, $ammoMagazine, true)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
 		$this->addAftSystem(new MediumPlasma(3, 5, 3, 90, 270));
 		$this->addAftSystem(new MediumPlasma(3, 5, 3, 90, 270));
-		$this->addAftSystem(new CargoBay(3, 15));
-		$this->addAftSystem(new CargoBay(3, 15));
+		//$this->addAftSystem(new CargoBay(3, 15));
+		//$this->addAftSystem(new CargoBay(3, 15));
 
+			$cargoBay = new CargoBay(3, 15);
+			$cargoBay->startArc = 90;
+			$cargoBay->endArc = 270;
+			$this->addAftSystem($cargoBay);
+			$this->addAftSystem($cargoBay);
+						
 		$this->addLeftSystem(new EWHeavyPointPlasmaGun(3, 7, 3, 180, 360));
         $this->addLeftSystem(new AmmoMissileRackS(3, 0, 0, 180, 360, $ammoMagazine, true)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         $this->addLeftSystem(new AmmoMissileRackS(3, 0, 0, 180, 360, $ammoMagazine, true)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
 		$this->addLeftSystem(new MediumPlasma(3, 5, 3, 180, 360));
 		$this->addLeftSystem(new MediumPlasma(3, 5, 3, 180, 360));
-		$this->addLeftSystem(new CargoBay(3, 15));
-		$this->addLeftSystem(new CargoBay(3, 15));
+		//$this->addLeftSystem(new CargoBay(3, 15));
+		//$this->addLeftSystem(new CargoBay(3, 15));
 
+			$cargoBay = new CargoBay(3, 15);
+			$cargoBay->startArc = 180;
+			$cargoBay->endArc = 360;
+			$this->addLeftSystem($cargoBay);
+			$this->addLeftSystem($cargoBay);
+						
 		$this->addRightSystem(new EWHeavyPointPlasmaGun(3, 7, 3, 0, 180));
         $this->addRightSystem(new AmmoMissileRackS(3, 0, 0, 0, 180, $ammoMagazine, true)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         $this->addRightSystem(new AmmoMissileRackS(3, 0, 0, 0, 180, $ammoMagazine, true)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
 		$this->addRightSystem(new MediumPlasma(3, 5, 3, 0, 180));
 		$this->addRightSystem(new MediumPlasma(3, 5, 3, 0, 180));
-		$this->addRightSystem(new CargoBay(3, 15));
-		$this->addRightSystem(new CargoBay(3, 15));
+		//$this->addRightSystem(new CargoBay(3, 15));
+		//$this->addRightSystem(new CargoBay(3, 15));
 
+			$cargoBay = new CargoBay(3, 15);
+			$cargoBay->startArc = 0;
+			$cargoBay->endArc = 180;
+			$this->addRightSystem($cargoBay);
+			$this->addRightSystem($cargoBay);
+						
+		/*replaced by TAGed versions!
 		$this->addFrontSystem(new Structure( 3, 50));
 		$this->addAftSystem(new Structure( 3, 50));
 		$this->addLeftSystem(new Structure( 3, 50));
 		$this->addRightSystem(new Structure( 3, 50));
 		$this->addPrimarySystem(new Structure( 4, 64));
+		*/
+		$this->addPrimarySystem(new Structure( 3, 64));//needs to be called first for some reason - static call apparently fails for the first time...
+		$this->addFrontSystem(Structure::createAsOuter(3, 50, 270,90));
+		$this->addAftSystem(Structure::createAsOuter(3, 50, 90, 270));
+		$this->addLeftSystem(Structure::createAsOuter(3, 50, 180, 360));
+		$this->addRightSystem(Structure::createAsOuter(3, 50, 0, 180));
+
 		
 		$this->hitChart = array(			
 			0=> array(
@@ -84,34 +116,34 @@ class ChoukaPenanceBaseAM extends SmallStarBaseFourSections{
 				20 => "C&C",
 			),
 			1=> array(
-				3 => "Medium Plasma Cannon",
-				5 => "Heavy Point Plasma Gun",
-				9 => "Cargo Bay",
-				11 => "Class-S Missile Rack",
+				3 => "TAG:Medium Plasma Cannon",
+				5 => "TAG:Heavy Point Plasma Gun",
+				9 => "TAG:Cargo Bay",
+				11 => "TAG:Class-S Missile Rack",
 				18 => "Structure",
 				20 => "Primary",
 			),
 			2=> array(
-				3 => "Medium Plasma Cannon",
-				5 => "Heavy Point Plasma Gun",
-				9 => "Cargo Bay",
-				11 => "Class-S Missile Rack",
+				3 => "TAG:Medium Plasma Cannon",
+				5 => "TAG:Heavy Point Plasma Gun",
+				9 => "TAG:Cargo Bay",
+				11 => "TAG:Class-S Missile Rack",
 				18 => "Structure",
 				20 => "Primary",
 			),	
 			3=> array(
-				3 => "Medium Plasma Cannon",
-				5 => "Heavy Point Plasma Gun",
-				9 => "Cargo Bay",
-				11 => "Class-S Missile Rack",
+				3 => "TAG:Medium Plasma Cannon",
+				5 => "TAG:Heavy Point Plasma Gun",
+				9 => "TAG:Cargo Bay",
+				11 => "TAG:Class-S Missile Rack",
 				18 => "Structure",
 				20 => "Primary",
 			),
 			4=> array(
-				3 => "Medium Plasma Cannon",
-				5 => "Heavy Point Plasma Gun",
-				9 => "Cargo Bay",
-				11 => "Class-S Missile Rack",
+				3 => "TAG:Medium Plasma Cannon",
+				5 => "TAG:Heavy Point Plasma Gun",
+				9 => "TAG:Cargo Bay",
+				11 => "TAG:Class-S Missile Rack",
 				18 => "Structure",
 				20 => "Primary",
 			),

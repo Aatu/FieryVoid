@@ -43,34 +43,34 @@ class ProtectorateCivilianBase extends SmallStarBaseFourSections{
 				20 => "C&C",
 			),
 			1=> array(
-				2 => "Fusion Cannon",
-				7 => "Cargo Bay",
-				8 => "Hangar",
-				9 => "Sub Reactor",
+				2 => "TAG:Fusion Cannon",
+				7 => "TAG:Cargo Bay",
+				8 => "TAG:Hangar",
+				9 => "TAG:Sub Reactor",
 				18 => "Structure",
 				20 => "Primary",
 			),
 			2=> array(
-				2 => "Fusion Cannon",
-				7 => "Cargo Bay",
-				8 => "Hangar",
-				9 => "Sub Reactor",
+				2 => "TAG:Fusion Cannon",
+				7 => "TAG:Cargo Bay",
+				8 => "TAG:Hangar",
+				9 => "TAG:Sub Reactor",
 				18 => "Structure",
 				20 => "Primary",
 			),	
 			3=> array(
-				2 => "Fusion Cannon",
-				7 => "Cargo Bay",
-				8 => "Hangar",
-				9 => "Sub Reactor",
+				2 => "TAG:Fusion Cannon",
+				7 => "TAG:Cargo Bay",
+				8 => "TAG:Hangar",
+				9 => "TAG:Sub Reactor",
 				18 => "Structure",
 				20 => "Primary",
 			),
 			4=> array(
-				2 => "Fusion Cannon",
-				7 => "Cargo Bay",
-				8 => "Hangar",
-				9 => "Sub Reactor",
+				2 => "TAG:Fusion Cannon",
+				7 => "TAG:Cargo Bay",
+				8 => "TAG:Hangar",
+				9 => "TAG:Sub Reactor",
 				18 => "Structure",
 				20 => "Primary",
 			),
@@ -85,28 +85,79 @@ class ProtectorateCivilianBase extends SmallStarBaseFourSections{
 
 		$this->addFrontSystem(new FusionCannon(3, 8, 1, 270, 90));
 		$this->addFrontSystem(new FusionCannon(3, 8, 1, 270, 90));
-		$this->addFrontSystem(new Hangar(3, 1));
-		$this->addFrontSystem(new CargoBay(3, 36));
-		$this->addFrontSystem(new SubReactorUniversal(3, 6, 0, 0));
+		//$this->addFrontSystem(new Hangar(3, 1));
+		//$this->addFrontSystem(new CargoBay(3, 36));
+		//$this->addFrontSystem(new SubReactorUniversal(3, 6, 0, 0));
+
+			$hangar = new Hangar(3, 1);
+			$hangar->startArc = 270;
+			$hangar->endArc = 90;
+			$this->addFrontSystem($hangar);
+			$cargoBay = new CargoBay(3, 36);
+			$cargoBay->startArc = 270;
+			$cargoBay->endArc = 90;
+			$this->addFrontSystem($cargoBay);
+			$subReactor = new SubReactorUniversal(3, 6, 0, 0);
+			$subReactor->startArc = 270;
+			$subReactor->endArc = 90;
+			$this->addFrontSystem($subReactor);	
 
 		$this->addAftSystem(new FusionCannon(3, 8, 1, 90, 270));
 		$this->addAftSystem(new FusionCannon(3, 8, 1, 90, 270));
-		$this->addAftSystem(new Hangar(3, 1));
-		$this->addAftSystem(new CargoBay(3, 36));
-		$this->addAftSystem(new SubReactorUniversal(3, 6, 0, 0));
+		//$this->addAftSystem(new Hangar(3, 1));
+		//$this->addAftSystem(new CargoBay(3, 36));
+		//$this->addAftSystem(new SubReactorUniversal(3, 6, 0, 0));
+
+			$hangar = new Hangar(3, 1);
+			$hangar->startArc = 90;
+			$hangar->endArc = 270;
+			$this->addAftSystem($hangar);
+			$cargoBay = new CargoBay(3, 36);
+			$cargoBay->startArc = 90;
+			$cargoBay->endArc = 270;
+			$this->addAftSystem($cargoBay);
+			$subReactor = new SubReactorUniversal(3, 6, 0, 0);
+			$subReactor->startArc = 90;
+			$subReactor->endArc = 270;
+			$this->addAftSystem($subReactor);		
 		
 		$this->addRightSystem(new FusionCannon(3, 8, 1, 0, 180));
 		$this->addRightSystem(new FusionCannon(3, 8, 1, 0, 180));
-		$this->addRightSystem(new Hangar(3, 1));
-		$this->addRightSystem(new CargoBay(3, 36));
-		$this->addRightSystem(new SubReactorUniversal(3, 6, 0, 0));
+		//$this->addRightSystem(new Hangar(3, 1));
+		//$this->addRightSystem(new CargoBay(3, 36));
+		//$this->addRightSystem(new SubReactorUniversal(3, 6, 0, 0));
+
+			$hangar = new Hangar(3, 1);
+			$hangar->startArc = 0;
+			$hangar->endArc = 180;
+			$this->addRightSystem($hangar);
+			$cargoBay = new CargoBay(3, 36);
+			$cargoBay->startArc = 0;
+			$cargoBay->endArc = 180;
+			$this->addRightSystem($cargoBay);
+			$subReactor = new SubReactorUniversal(3, 6, 0, 0);
+			$subReactor->startArc = 0;
+			$subReactor->endArc = 180;
+			$this->addRightSystem($subReactor);
 		
 		$this->addLeftSystem(new FusionCannon(3, 8, 1, 180, 0));
 		$this->addLeftSystem(new FusionCannon(3, 8, 1, 180, 0));
-		$this->addLeftSystem(new Hangar(3, 1));
-		$this->addLeftSystem(new CargoBay(3, 36));
-		$this->addLeftSystem(new SubReactorUniversal(3, 6, 0, 0));
-		
+		//$this->addLeftSystem(new Hangar(3, 1));
+		//$this->addLeftSystem(new CargoBay(3, 36));
+		//$this->addLeftSystem(new SubReactorUniversal(3, 6, 0, 0));
+
+			$hangar = new Hangar(3, 1);
+			$hangar->startArc = 180;
+			$hangar->endArc = 360;
+			$this->addLeftSystem($hangar);
+			$cargoBay = new CargoBay(3, 36);
+			$cargoBay->startArc = 180;
+			$cargoBay->endArc = 360;
+			$this->addLeftSystem($cargoBay);
+			$subReactor = new SubReactorUniversal(3, 6, 0, 0);
+			$subReactor->startArc = 180;
+			$subReactor->endArc = 360;
+			$this->addLeftSystem($subReactor);		
 		}
     }
 ?>

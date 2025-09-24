@@ -113,7 +113,7 @@ class JaStat extends StarBaseFiveSections{
 				8 => "TAG:Cargo Bay",
 				9 => "TAG:Sub Reactor",
 				10 => "TAG:Hangar",
-				18 => "TAG:Outer Structure",
+				18 => "Outer Structure",
 				20 => "Primary",
 			);
 

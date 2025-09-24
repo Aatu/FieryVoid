@@ -42,41 +42,84 @@ class DalithornWarStation extends SmallStarBaseFourSections{
 		$this->addFrontSystem(new NexusAutocannon(4, 4, 1, 270, 90));
 		$this->addFrontSystem(new NexusAutocannon(4, 4, 1, 270, 90));
 		$this->addFrontSystem(new NexusMinigun(4, 4, 1, 270, 90));
-		$this->addFrontSystem(new Catapult(4, 6));
-		$this->addFrontSystem(new CargoBay(4, 12));
+		//$this->addFrontSystem(new Catapult(4, 6));
+		//$this->addFrontSystem(new CargoBay(4, 12));
 
+			$cargoBay = new CargoBay(4, 12);
+			$cargoBay->startArc = 270;
+			$cargoBay->endArc = 90;
+			$this->addFrontSystem($cargoBay);
+			$catapult = new Catapult(4, 6);
+			$catapult->startArc = 270;
+			$catapult->endArc = 90;
+			$this->addFrontSystem($catapult);
+					
 		$this->addAftSystem(new NexusHeavyCoilgun(4, 12, 5, 120, 240));
 		$this->addAftSystem(new NexusGasGun(4, 7, 2, 90, 270));
 		$this->addAftSystem(new NexusHeavyLaserMissile(4, 6, 3, 90, 270));
 		$this->addAftSystem(new NexusAutocannon(4, 4, 1, 90, 270));
 		$this->addAftSystem(new NexusAutocannon(4, 4, 1, 90, 270));
 		$this->addAftSystem(new NexusMinigun(4, 4, 1, 90, 270));
-		$this->addAftSystem(new Catapult(4, 6));
-		$this->addAftSystem(new CargoBay(4, 12));
-			
+		//$this->addAftSystem(new Catapult(4, 6));
+		//$this->addAftSystem(new CargoBay(4, 12));
+
+			$cargoBay = new CargoBay(4, 12);
+			$cargoBay->startArc = 90;
+			$cargoBay->endArc = 270;
+			$this->addAftSystem($cargoBay);
+			$catapult = new Catapult(4, 6);
+			$catapult->startArc = 90;
+			$catapult->endArc = 270;
+			$this->addAftSystem($catapult);
+					
 		$this->addLeftSystem(new NexusHeavyCoilgun(4, 12, 5, 210, 330));
 		$this->addLeftSystem(new NexusGasGun(4, 7, 2, 180, 360));
 		$this->addLeftSystem(new NexusHeavyLaserMissile(4, 6, 3, 180, 360));
 		$this->addLeftSystem(new NexusAutocannon(4, 4, 1, 180, 360));
 		$this->addLeftSystem(new NexusAutocannon(4, 4, 1, 180, 360));
 		$this->addLeftSystem(new NexusMinigun(4, 4, 1, 180, 360));
-		$this->addLeftSystem(new Catapult(4, 6));
-		$this->addLeftSystem(new CargoBay(4, 12));
+		//$this->addLeftSystem(new Catapult(4, 6));
+		//$this->addLeftSystem(new CargoBay(4, 12));
 
+			$cargoBay = new CargoBay(4, 12);
+			$cargoBay->startArc = 180;
+			$cargoBay->endArc = 360;
+			$this->addLeftSystem($cargoBay);
+			$catapult = new Catapult(4, 6);
+			$catapult->startArc = 180;
+			$catapult->endArc = 360;
+			$this->addLeftSystem($catapult);
+		
 		$this->addRightSystem(new NexusHeavyCoilgun(4, 12, 5, 30, 150));
 		$this->addRightSystem(new NexusGasGun(4, 7, 2, 0, 180));
 		$this->addRightSystem(new NexusHeavyLaserMissile(4, 6, 3, 0, 180));
 		$this->addRightSystem(new NexusAutocannon(4, 4, 1, 0, 180));
 		$this->addRightSystem(new NexusAutocannon(4, 4, 1, 0, 180));
 		$this->addRightSystem(new NexusMinigun(4, 4, 1, 0, 180));
-		$this->addRightSystem(new Catapult(4, 6));
-		$this->addRightSystem(new CargoBay(4, 12));
+		//$this->addRightSystem(new Catapult(4, 6));
+		//$this->addRightSystem(new CargoBay(4, 12));
 
+			$cargoBay = new CargoBay(4, 12);
+			$cargoBay->startArc = 0;
+			$cargoBay->endArc = 180;
+			$this->addRightSystem($cargoBay);
+			$catapult = new Catapult(4, 6);
+			$catapult->startArc = 0;
+			$catapult->endArc = 180;
+			$this->addRightSystem($catapult);
+		
+		/*replaced by TAGed versions!
 		$this->addFrontSystem(new Structure( 4, 64));
 		$this->addAftSystem(new Structure( 4, 64));
 		$this->addLeftSystem(new Structure( 4, 64));
 		$this->addRightSystem(new Structure( 4, 64));
 		$this->addPrimarySystem(new Structure( 4, 80));
+		*/
+		$this->addPrimarySystem(new Structure( 4, 80));//needs to be called first for some reason - static call apparently fails for the first time...
+		$this->addFrontSystem(Structure::createAsOuter(4, 64, 270,90));
+		$this->addAftSystem(Structure::createAsOuter(4, 64, 90, 270));
+		$this->addLeftSystem(Structure::createAsOuter(4, 64, 180, 360));
+		$this->addRightSystem(Structure::createAsOuter(4, 64, 0, 180));	
 		
 		$this->hitChart = array(			
 			0=> array(
@@ -89,46 +132,46 @@ class DalithornWarStation extends SmallStarBaseFourSections{
 				20 => "C&C",
 			),
 			1=> array(
-				2 => "Heavy Coilgun",
-				4 => "Autocannon",
-				5 => "Catapult",
-				7 => "Gas Gun",
-				9 => "Heavy Laser Missile",
-				10 => "Minigun",
-				12 => "Cargo Bay",
+				2 => "TAG:Heavy Coilgun",
+				4 => "TAG:Autocannon",
+				5 => "TAG:Catapult",
+				7 => "TAG:Gas Gun",
+				9 => "TAG:Heavy Laser Missile",
+				10 => "TAG:Minigun",
+				12 => "TAG:Cargo Bay",
 				18 => "Structure",
 				20 => "Primary",
 			),
 			2=> array(
-				2 => "Heavy Coilgun",
-				4 => "Autocannon",
-				5 => "Catapult",
-				7 => "Gas Gun",
-				9 => "Heavy Laser Missile",
-				10 => "Minigun",
-				12 => "Cargo Bay",
+				2 => "TAG:Heavy Coilgun",
+				4 => "TAG:Autocannon",
+				5 => "TAG:Catapult",
+				7 => "TAG:Gas Gun",
+				9 => "TAG:Heavy Laser Missile",
+				10 => "TAG:Minigun",
+				12 => "TAG:Cargo Bay",
 				18 => "Structure",
 				20 => "Primary",
 			),	
 			3=> array(
-				2 => "Heavy Coilgun",
-				4 => "Autocannon",
-				5 => "Catapult",
-				7 => "Gas Gun",
-				9 => "Heavy Laser Missile",
-				10 => "Minigun",
-				12 => "Cargo Bay",
+				2 => "TAG:Heavy Coilgun",
+				4 => "TAG:Autocannon",
+				5 => "TAG:Catapult",
+				7 => "TAG:Gas Gun",
+				9 => "TAG:Heavy Laser Missile",
+				10 => "TAG:Minigun",
+				12 => "TAG:Cargo Bay",
 				18 => "Structure",
 				20 => "Primary",
 			),
 			4=> array(
-				2 => "Heavy Coilgun",
-				4 => "Autocannon",
-				5 => "Catapult",
-				7 => "Gas Gun",
-				9 => "Heavy Laser Missile",
-				10 => "Minigun",
-				12 => "Cargo Bay",
+				2 => "TAG:Heavy Coilgun",
+				4 => "TAG:Autocannon",
+				5 => "TAG:Catapult",
+				7 => "TAG:Gas Gun",
+				9 => "TAG:Heavy Laser Missile",
+				10 => "TAG:Minigun",
+				12 => "TAG:Cargo Bay",
 				18 => "Structure",
 				20 => "Primary",
 			),

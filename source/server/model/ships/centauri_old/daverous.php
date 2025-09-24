@@ -54,7 +54,7 @@ class daverous extends SmallStarBaseFourSections{
 				5 => "TAG:Tactical Laser",
 				9 => "TAG:Cargo Bay",
 				10 => "TAG:Sub Reactor",
-				18 => "TAG:Outer Structure",
+				18 => "Outer Structure",
 				20 => "Primary",
 			),
 			2=> array(
@@ -62,7 +62,7 @@ class daverous extends SmallStarBaseFourSections{
 				5 => "TAG:Tactical Laser",
 				9 => "TAG:Cargo Bay",
 				10 => "TAG:Sub Reactor",
-				18 => "TAG:Outer Structure",
+				18 => "Outer Structure",
 				20 => "Primary",
 			),	
 			3=> array(
@@ -70,7 +70,7 @@ class daverous extends SmallStarBaseFourSections{
 				5 => "TAG:Tactical Laser",
 				9 => "TAG:Cargo Bay",
 				10 => "TAG:Sub Reactor",
-				18 => "TAG:Outer Structure",
+				18 => "Outer Structure",
 				20 => "Primary",
 			),
 			4=> array(
@@ -78,7 +78,7 @@ class daverous extends SmallStarBaseFourSections{
 				5 => "TAG:Tactical Laser",
 				9 => "TAG:Cargo Bay",
 				10 => "TAG:Reactor",
-				18 => "TAG:Outer Structure",
+				18 => "Outer Structure",
 				20 => "Primary",
 			),
 			

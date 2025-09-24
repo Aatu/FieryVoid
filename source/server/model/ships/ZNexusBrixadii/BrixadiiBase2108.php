@@ -40,39 +40,82 @@ class BrixadiiBase2108 extends SmallStarBaseFourSections{
 		$this->addFrontSystem(new EnergyPulsar(4, 6, 3, 270, 90));
 		$this->addFrontSystem(new EnergyPulsar(4, 6, 3, 270, 90));
 		$this->addFrontSystem(new NexusRangedKineticBoxLauncher(4, 10, 0, 270, 90));
-		$this->addFrontSystem(new Quarters(4, 12));
-		$this->addFrontSystem(new CargoBay(4, 10));
+		//$this->addFrontSystem(new Quarters(4, 12));
+		//$this->addFrontSystem(new CargoBay(4, 10));
 
+			$cargoBay = new CargoBay(4, 10);
+			$cargoBay->startArc = 270;
+			$cargoBay->endArc = 90;
+			$this->addFrontSystem($cargoBay);
+			$quarters = new Quarters(4, 12);
+			$quarters->startArc = 270;
+			$quarters->endArc = 90;
+			$this->addFrontSystem($quarters);
+							
 		$this->addAftSystem(new HvyParticleProjector(4, 8, 4, 90, 270));
 		$this->addAftSystem(new NexusChaffLauncher(4, 2, 1, 90, 270));
 		$this->addAftSystem(new EnergyPulsar(4, 6, 3, 90, 270));
 		$this->addAftSystem(new EnergyPulsar(4, 6, 3, 90, 270));
 		$this->addAftSystem(new NexusRangedKineticBoxLauncher(4, 10, 0, 90, 270));
-		$this->addAftSystem(new Quarters(4, 12));
-		$this->addAftSystem(new CargoBay(4, 10));
-			
+		//$this->addAftSystem(new Quarters(4, 12));
+		//$this->addAftSystem(new CargoBay(4, 10));
+
+			$cargoBay = new CargoBay(4, 10);
+			$cargoBay->startArc = 90;
+			$cargoBay->endArc = 270;
+			$this->addAftSystem($cargoBay);
+			$quarters = new Quarters(4, 12);
+			$quarters->startArc = 90;
+			$quarters->endArc = 270;
+			$this->addAftSystem($quarters);
+							
 		$this->addLeftSystem(new HvyParticleProjector(4, 8, 4, 180, 360));
 		$this->addLeftSystem(new NexusChaffLauncher(4, 2, 1, 180, 360));
 		$this->addLeftSystem(new EnergyPulsar(4, 6, 3, 180, 360));
 		$this->addLeftSystem(new EnergyPulsar(4, 6, 3, 180, 360));
 		$this->addLeftSystem(new NexusRangedKineticBoxLauncher(4, 10, 0, 180, 360));
-		$this->addLeftSystem(new Quarters(4, 12));
-		$this->addLeftSystem(new CargoBay(4, 10));
+		//$this->addLeftSystem(new Quarters(4, 12));
+		//$this->addLeftSystem(new CargoBay(4, 10));
 
+			$cargoBay = new CargoBay(4, 10);
+			$cargoBay->startArc = 180;
+			$cargoBay->endArc = 360;
+			$this->addLeftSystem($cargoBay);
+			$quarters = new Quarters(4, 12);
+			$quarters->startArc = 180;
+			$quarters->endArc = 360;
+			$this->addLeftSystem($quarters);
+				
 		$this->addRightSystem(new HvyParticleProjector(4, 8, 4, 0, 180));
 		$this->addRightSystem(new NexusChaffLauncher(4, 2, 1, 0, 180));
 		$this->addRightSystem(new EnergyPulsar(4, 6, 3, 0, 180));
 		$this->addRightSystem(new EnergyPulsar(4, 6, 3, 0, 180));
 		$this->addRightSystem(new NexusRangedKineticBoxLauncher(4, 10, 0, 0, 180));
-		$this->addRightSystem(new Quarters(4, 12));
-		$this->addRightSystem(new CargoBay(4, 10));
+		//$this->addRightSystem(new Quarters(4, 12));
+		//$this->addRightSystem(new CargoBay(4, 10));
 
+			$cargoBay = new CargoBay(4, 10);
+			$cargoBay->startArc = 0;
+			$cargoBay->endArc = 180;
+			$this->addRightSystem($cargoBay);
+			$quarters = new Quarters(4, 12);
+			$quarters->startArc = 0;
+			$quarters->endArc = 180;
+			$this->addRightSystem($quarters);
+				
+		/*replaced by TAGed versions!
 		$this->addFrontSystem(new Structure( 4, 60));
 		$this->addAftSystem(new Structure( 4, 60));
 		$this->addLeftSystem(new Structure( 4, 60));
 		$this->addRightSystem(new Structure( 4, 60));
 		$this->addPrimarySystem(new Structure( 5, 88));
-		
+		*/
+		$this->addPrimarySystem(new Structure( 5, 88));//needs to be called first for some reason - static call apparently fails for the first time...
+		$this->addFrontSystem(Structure::createAsOuter(4, 60, 270,90));
+		$this->addAftSystem(Structure::createAsOuter(4, 60, 90, 270));
+		$this->addLeftSystem(Structure::createAsOuter(4, 60, 180, 360));
+		$this->addRightSystem(Structure::createAsOuter(4, 60, 0, 180));		
+				
 		$this->hitChart = array(			
 			0=> array(
 				6 => "Structure",
@@ -84,42 +127,42 @@ class BrixadiiBase2108 extends SmallStarBaseFourSections{
 				20 => "C&C",
 			),
 			1=> array(
-				1 => "Chaff Launcher",
-				3 => "Heavy Particle Projector",
-				6 => "Cargo Bay",
-				8 => "Energy Pulsar",
-				10 => "Ranged Kinetic Box Launcher",
-				12 => "Quarters",
+				1 => "TAG:Chaff Launcher",
+				3 => "TAG:Heavy Particle Projector",
+				6 => "TAG:Cargo Bay",
+				8 => "TAG:Energy Pulsar",
+				10 => "TAG:Ranged Kinetic Box Launcher",
+				12 => "TAG:Quarters",
 				18 => "Structure",
 				20 => "Primary",
 			),
 			2=> array(
-				1 => "Chaff Launcher",
-				3 => "Heavy Particle Projector",
-				6 => "Cargo Bay",
-				8 => "Energy Pulsar",
-				10 => "Ranged Kinetic Box Launcher",
-				12 => "Quarters",
+				1 => "TAG:Chaff Launcher",
+				3 => "TAG:Heavy Particle Projector",
+				6 => "TAG:Cargo Bay",
+				8 => "TAG:Energy Pulsar",
+				10 => "TAG:Ranged Kinetic Box Launcher",
+				12 => "TAG:Quarters",
 				18 => "Structure",
 				20 => "Primary",
 			),	
 			3=> array(
-				1 => "Chaff Launcher",
-				3 => "Heavy Particle Projector",
-				6 => "Cargo Bay",
-				8 => "Energy Pulsar",
-				10 => "Ranged Kinetic Box Launcher",
-				12 => "Quarters",
+				1 => "TAG:Chaff Launcher",
+				3 => "TAG:Heavy Particle Projector",
+				6 => "TAG:Cargo Bay",
+				8 => "TAG:Energy Pulsar",
+				10 => "TAG:Ranged Kinetic Box Launcher",
+				12 => "TAG:Quarters",
 				18 => "Structure",
 				20 => "Primary",
 			),
 			4=> array(
-				1 => "Chaff Launcher",
-				3 => "Heavy Particle Projector",
-				6 => "Cargo Bay",
-				8 => "Energy Pulsar",
-				10 => "Ranged Kinetic Box Launcher",
-				12 => "Quarters",
+				1 => "TAG:Chaff Launcher",
+				3 => "TAG:Heavy Particle Projector",
+				6 => "TAG:Cargo Bay",
+				8 => "TAG:Energy Pulsar",
+				10 => "TAG:Ranged Kinetic Box Launcher",
+				12 => "TAG:Quarters",
 				18 => "Structure",
 				20 => "Primary",
 			),
