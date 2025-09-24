@@ -114,7 +114,8 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         <ul>
             <li>Many factions have access to Breaching Pods, which come equipped with a marines that can undertake boarding actions.</li>
             <li>During the Firing Phase, Pods can attempt to attach to enemy ships in the same hex (and in arc) and deliver Marines to undertake a selection of missions (Sabotage, Capture Ship and Rescue).</li>
-            <li>Pods first roll to attach, but this is automatic if they are moving faster than the target ship, so long as speed difference is not higher than pods thrust rating.  Llort have +1 to attach roll.</li>
+            <li>Pods first roll to attach, but this is automatic if they are moving faster than the target ship so long as speed difference is not higher than pods thrust rating.  
+                If the target is moving faster, each point of speed difference is -10% chance to attach.  The Llort have +1 to attach rolls.</li>
             <li>Once attached, the Pod will roll again to deliver the Marines, with a base chance of 50% to successfully boarding the vessel.  Unsuccessful marines may be lost or return safely their pod.</li>                           
             
             <li>A number of modifiers can apply to the delivery roll, summarised below:
