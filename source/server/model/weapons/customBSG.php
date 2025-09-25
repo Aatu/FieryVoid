@@ -769,6 +769,7 @@ class SensorSpearFtr extends Weapon{
         public $animationExplosionScale = 0.25;
         public $animationWidth = 10;
         public $animationWidth2 = 0.5;
+		private $damagebonus = 0; 
 
         function __construct($startArc, $endArc, $damagebonus, $nrOfShots = 1){
             $this->damagebonus = $damagebonus;
@@ -845,6 +846,7 @@ class SensorSpikeFtr extends Weapon{
         public $animationExplosionScale = 0.25;
         public $animationWidth = 10;
         public $animationWidth2 = 0.5;
+		private $damagebonus = 0; 
 
         function __construct($startArc, $endArc, $damagebonus, $nrOfShots = 1){
             $this->damagebonus = $damagebonus;
@@ -914,6 +916,7 @@ class CommJammerFtr extends Weapon{
 	
 	public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
 	public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
+	private $damagebonus = 0; 
    
 	   
 	//let's animate this as a very wide beam...
@@ -1158,11 +1161,12 @@ class BSGLtKineticEnergyWeaponVA extends Pulse{
         public $intercept = 2;
 		public $ballisticIntercept = true; //can intercept ballistic weapons only
         public $priority = 3; 
-	public $damagebonus = 0;
+		private $damagebonus = 0; 
         
         public $rangePenalty = 2; //-2/hex
         public $fireControl = array(-1, 0, 0); // fighters, <mediums, <capitals
-	public $fireControlArray = array(1=>array(-1, 0, 0), 2=>array(1, 0, 0)); 
+	public $fireControlArray = array(1=>array(-1, 0, 0), 2=>array(1, 0, 0));
+
 	
 	
         public $firingModes = array(
@@ -1236,7 +1240,7 @@ class BSGHypergunVA extends Pulse{
         public $intercept = 2;
 		public $ballisticIntercept = true; //can intercept ballistic weapons only
         public $priority = 5; 
-		public $damagebonus = 0;
+		private $damagebonus = 0; 
         
         public $rangePenalty = 2; //-2/hex
         public $fireControl = array(-1, 0, 0); // fighters, <mediums, <capitals

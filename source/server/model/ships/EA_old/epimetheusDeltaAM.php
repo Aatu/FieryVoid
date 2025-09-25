@@ -5,7 +5,7 @@ class EpimetheusDeltaAM extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 540;
-        $this->faction = "Earth Alliance (early)";
+        $this->faction = "Earth Alliance (Early)";
         $this->phpclass = "EpimetheusDeltaAM";
         $this->imagePath = "img/ships/epimetheus.png";
         $this->shipClass = "Epimetheus Jump Cruiser (Delta)";

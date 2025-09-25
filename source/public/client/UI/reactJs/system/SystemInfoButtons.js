@@ -548,6 +548,7 @@ class SystemInfoButtons extends React.Component {
 				{canSelfIntercept(ship, system) && <Button title="Allow interception (RMB = All systems selected)" onClick={this.declareSelfIntercept.bind(this)} onContextMenu={this.declareSelfInterceptAll.bind(this)} img="./img/selfIntercept.png"></Button>}
 				
 				{canAAdisplayCurrClass(ship, system) && <Button title={getAAcurrClassName(ship,system)} img={getAAcurrClassImg(ship,system)}></Button>}
+				{canAAdisplayCurrClass(ship, system) && <Button title="Previous" onClick={this.prevCurrClass.bind(this)} img="./img/systemicons/Specialistclasses/iconPrev.png"></Button>}
 				{canAAdisplayCurrClass(ship, system) && <Button title="Next" onClick={this.nextCurrClass.bind(this)} img="./img/systemicons/AAclasses/iconNext.png"></Button>}
 				{canAAincrease(ship, system) && <Button onClick={this.AAincrease.bind(this)} img="./img/systemicons/AAclasses/iconPlus.png"></Button>}
 				{canAAdecrease(ship, system) && <Button onClick={this.AAdecrease.bind(this)} img="./img/systemicons/AAclasses/iconMinus.png"></Button>}
@@ -686,7 +687,7 @@ const canReduceShots = (ship, system) => system.weapon && system.canChangeShots 
 const canRemoveFireOrderMulti = (ship, system) => system.weapon && weaponManager.hasFiringOrder(ship, system) && system.canSplitShots;
 const canRemoveFireOrder = (ship, system) => system.weapon && weaponManager.hasFiringOrder(ship, system);
 
-const canChangeFiringMode = (ship, system) => system.weapon  && ((gamedata.gamephase === 1 && system.ballistic) || (gamedata.gamephase === 3 && !system.ballistic)) && !weaponManager.hasFiringOrder(ship, system) && (Object.keys(system.firingModes).length > 1 || system.dualWeapon);
+const canChangeFiringMode = (ship, system) => system.weapon  && ((gamedata.gamephase === 1 && system.ballistic) || (gamedata.gamephase === 3 && !system.ballistic)) && !weaponManager.hasFiringOrder(ship, system) && (Object.keys(system.firingModes).length > 1);
 
 //can declare eligibility for interception: charged, recharge time >1 turn, intercept rating >0, no firing order
 const canSelfIntercept = (ship, system) => system.weapon && weaponManager.canSelfInterceptSingle(ship, system);

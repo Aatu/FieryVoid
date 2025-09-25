@@ -7,7 +7,7 @@ class AlacanAzan extends HeavyCombatVessel{
 	$this->pointCost = 425;
 	$this->faction = "Alacan Republic";
         $this->phpclass = "AlacanAzan";
-        $this->imagePath = "img/ships/AlacanAzan.png";
+        $this->imagePath = "img/ships/AlacanAzafac.png";
         $this->shipClass = "Azan Auxiliary Cruiser";
 		$this->variantOf = "Azafac Armed Freighter";
 		$this->occurence = "common";

@@ -21,6 +21,8 @@ window.IdleAnimationStrategy = function () {
                 icon.hide();
             } else if (turnDestroyed === null && destroyed) {
                 icon.hide();
+            } else if (shipManager.shouldBeHidden(ship)) { //Stealth or not deployed yet.
+                icon.hide();
             } else {
                 icon.show();
             }
@@ -31,6 +33,7 @@ window.IdleAnimationStrategy = function () {
         }, this);
         return this;
     };
+
 
     IdleAnimationStrategy.prototype.shipMovementChanged = function (ship) {
         this.shipIconContainer.positionAndFaceShip(ship);

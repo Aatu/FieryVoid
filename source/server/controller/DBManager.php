@@ -3,14 +3,15 @@ mysqli_report(MYSQLI_REPORT_ERROR);
 
 class DBManager
 {
-
     private $connection = null;
     private $testMode = false;
+    private $id; // 👈 Add this line
 
-    function __construct($host, $port = 3306, $database, $username, $password, $testMode = false)
+    function __construct($host, $port, $database, $username, $password, $testMode = false)
     {
-        $this->id = uniqid();
+        $this->id = uniqid(); // This is now OK
         $this->testMode = $testMode;
+
         if ($this->connection !== null)
             return $this->connection;
 
@@ -22,6 +23,7 @@ class DBManager
 
         mysqli_set_charset($this->connection, 'utf8');
     }
+
 
     private function DBEscape($string)
     {
@@ -156,7 +158,7 @@ class DBManager
         $sql = "INSERT INTO `B5CGM`.`tac_ship` VALUES(null, $userid, $gameid, '" . $this->DBEscape($ship->name) . "', '" . $ship->phpclass . "', 0, 0, 0, 0, 0, $ship->slot, $ship->pointCostEnh)";
 		*/
 		$enhCostTotal = $ship->pointCostEnh + $ship->pointCostEnh2;
-        $sql = "INSERT INTO `B5CGM`.`tac_ship` VALUES(null, $userid, $gameid, '" . $this->DBEscape($ship->name) . "', '" . $ship->phpclass . "', 0, 0, 0, 0, 0, $ship->slot, $enhCostTotal)";
+        $sql = "INSERT INTO `tac_ship` VALUES(null, $userid, $gameid, '" . $this->DBEscape($ship->name) . "', '" . $ship->phpclass . "', 0, 0, 0, 0, 0, $ship->slot, $enhCostTotal)";
 		
         //   Debug::log($sql);
         $id = $this->insert($sql);
@@ -167,7 +169,7 @@ class DBManager
 
 	public function submitEnhancement($gameid, $shipid, $enhid, $numbertaken, $enhname){	
 		try{
-			$sql = "INSERT INTO `B5CGM`.`tac_enhancements` (gameid, shipid, enhid, numbertaken,enhname) 
+			$sql = "INSERT INTO `tac_enhancements` (gameid, shipid, enhid, numbertaken,enhname) 
 				VALUES($gameid, $shipid, '$enhid', $numbertaken, '".$this->DBEscape($enhname)."' )";
 			$this->insert($sql);
 		}catch(Exception $e) {
@@ -179,7 +181,7 @@ class DBManager
 
     public function submitFlightSize($gameid, $shipid, $flightSize)
     {
-        $sql = "INSERT INTO `B5CGM`.`tac_flightsize` (gameid, shipid, flightsize)
+        $sql = "INSERT INTO `tac_flightsize` (gameid, shipid, flightsize)
             VALUES ($gameid, $shipid, $flightSize)";
 
         $id = $this->insert($sql);
@@ -204,6 +206,287 @@ class DBManager
         );
         $stmt->execute();
         $stmt->close();
+    }
+
+
+
+    public function submitSavedList($name, $userid, $points, $isPublic) {
+        // ✅ Force $isPublic into 0 or 1
+        $isPublic = !empty($isPublic) ? 1 : 0;
+
+        $sql = "INSERT INTO tac_saved_list (name, userid, points, isPublic) VALUES (?, ?, ?, ?)";
+        $stmt = $this->connection->prepare($sql);
+
+        if (!$stmt) {
+            throw new Exception("DB error in submitSavedList (prepare): " . $this->connection->error);
+        }
+
+        if (!$stmt->bind_param("siii", $name, $userid, $points, $isPublic)) {
+            throw new Exception("DB error in submitSavedList (bind): " . $stmt->error);
+        }
+
+        if (!$stmt->execute()) {
+            throw new Exception("DB error in submitSavedList (execute): " . $stmt->error);
+        }
+
+        $newId = $this->connection->insert_id;
+
+        $stmt->close();
+
+        return $newId; // ✅ return the auto-generated ID
+    }
+
+    public function submitSavedShip($listId, $userid, $ship) 
+    {
+        // Ensure the ship has a valid name
+        $shipName = $ship->name ?: 'NAMELESS UNIT';
+        $flightsize = $ship->flightSize ?? 1;
+		$enhCostTotal = $ship->pointCostEnh + $ship->pointCostEnh2;
+
+        $sql = "INSERT INTO tac_saved_ship 
+                (userid, listid, name, phpclass, flightsize, enhvalue)
+                VALUES (?, ?, ?, ?, ?, ?)";
+
+        $stmt = $this->connection->prepare($sql);
+        if (!$stmt) {
+            throw new Exception("DB prepare failed: " . $this->connection->error);
+        }
+
+        $stmt->bind_param(
+            "iissii", 
+            $userid,
+            $listId,
+            $shipName,
+            $ship->phpclass,
+            $flightsize,
+            $enhCostTotal
+        );
+
+        if (!$stmt->execute()) {
+            throw new Exception("DB execute failed: " . $stmt->error);
+        }
+
+        $id = $stmt->insert_id;
+        $stmt->close();
+
+        return $id;
+    }
+
+	public function submitSavedEnhancement($listId, $shipid, $enhid, $numbertaken, $enhname){	
+		try{
+			$sql = "INSERT INTO `tac_saved_enh` (listId, shipid, enhid, numbertaken,enhname) 
+				VALUES($listId, $shipid, '$enhid', $numbertaken, '".$this->DBEscape($enhname)."' )";
+			$this->insert($sql);
+		}catch(Exception $e) {
+			$this->endTransaction(true);
+			throw $e;
+		}
+	} //endof function submitEnhancement
+
+    public function submitSavedAmmo($listid, $shipid, $systemid, $firingMode, $ammoAmount)
+    {
+        $stmt = $this->connection->prepare("
+            INSERT INTO tac_saved_ammo
+                (listid, shipid, systemid, firingmode, ammo)
+            VALUES (?, ?, ?, ?, ?)
+            ON DUPLICATE KEY UPDATE 
+                ammo = VALUES(ammo)
+        ");
+
+        $stmt->bind_param(
+            'iiiii',
+            $listid, $shipid, $systemid, $firingMode, $ammoAmount
+        );
+        $stmt->execute();
+        $stmt->close();
+    }
+
+    //All rows from tac_saved_list for a given userid
+    public function getSavedFleets($userid) {
+        $savedFleets = [];
+        $stmt = $this->connection->prepare(
+            "SELECT id, name, userid, points, isPublic
+            FROM tac_saved_list
+            WHERE userid = ? OR userid = 0
+            ORDER BY userid DESC, name ASC" // optional: user fleets first
+        );
+        if ($stmt) {
+            $stmt->bind_param('i', $userid);
+            $stmt->execute();
+            $stmt->bind_result($id, $name, $fleetUserId, $points, $isPublic); // renamed to avoid variable clash
+            while ($stmt->fetch()) {
+                $savedFleets[] = [
+                    'id' => $id,
+                    'name' => $name,
+                    'userid' => $fleetUserId,
+                    'points' => $points,
+                    'isPublic' => $isPublic
+                ];
+            }
+            $stmt->close();
+        }
+        return $savedFleets;
+    }
+
+    //Just one row from tac_saved_list
+    public function getSavedFleet($id) {
+        $savedFleet = null;
+
+        $stmt = $this->connection->prepare(
+            "SELECT id, name, userid, points, isPublic
+            FROM tac_saved_list
+            WHERE id = ?"
+        );
+
+        if ($stmt) {
+            $stmt->bind_param('i', $id);
+            $stmt->execute();
+            $stmt->bind_result($id, $name, $userid, $points, $isPublic);
+
+            if ($stmt->fetch()) {
+                $savedFleet = [
+                    'id' => $id,
+                    'name' => $name,
+                    'userid' => $userid,
+                    'points' => $points,
+                    'isPublic' => (bool) $isPublic
+                ];
+            }
+
+            $stmt->close();
+        }
+
+        return $savedFleet;
+    }
+
+    public function getSavedShips($listid)
+    {
+        $ships = array();
+
+        $stmt = $this->connection->prepare(
+            "SELECT
+                id, userid, name, phpclass, flightsize, enhvalue
+            FROM
+                tac_saved_ship 
+            WHERE
+                listid = ?
+            "
+        );
+
+        if ($stmt) {
+            $stmt->bind_param('i', $listid);
+            $stmt->bind_result($shipid, $userid, $name, $phpclass, $flightsize, $enhvalue);
+            $stmt->execute();
+            while ($stmt->fetch()) {
+                $ship = new $phpclass($shipid, $userid, $name, 1);
+                if($ship instanceof FighterFlight) $ship->flightSize = $flightsize;
+				$ship->pointCostEnh = $enhvalue;
+                $ships[] = $ship;
+            }
+            $stmt->close();
+        }
+
+        return $ships;
+    }
+
+
+    public function getSavedEnhancementsForShip($shipid){
+        $Enhancements = array();
+        $stmt = $this->connection->prepare( //enhname will be used for info tooltip!
+                "SELECT 
+                    enhid, numbertaken, enhname
+                FROM 
+                    tac_saved_enh 
+                WHERE 
+                    shipid = ?
+                "
+            );
+            if ($stmt)
+            {
+                $stmt->bind_param('i', $shipid);
+                $stmt->bind_result($enhID, $numbertaken, $description);
+                $stmt->execute();
+                while ($stmt->fetch())
+                {
+                $Enhancements[] = array($enhID,$numbertaken,$description);
+                }
+                $stmt->close();                
+            }
+        return $Enhancements;
+    }
+
+       public function getSavedAmmoForShip($shipid){
+        $ammoEntry = array();
+        $stmt = $this->connection->prepare( //enhname will be used for info tooltip!
+                "SELECT 
+                    systemid, firingmode, ammo
+                FROM 
+                    tac_saved_ammo 
+                WHERE 
+                    shipid = ?
+                "
+            );
+            if ($stmt)
+            {
+                $stmt->bind_param('i', $shipid);
+                $stmt->bind_result($systemid, $firingmode, $ammo);
+                $stmt->execute();
+                while ($stmt->fetch())
+                {
+                    $ammoEntry[] = array($systemid,$firingmode,$ammo);
+                }
+                $stmt->close();                
+            }
+        return $ammoEntry;
+    }
+
+    public function changeAvailabilityFleet(int $id): int {
+        try {
+            // Toggle the value
+            $stmt = $this->connection->prepare(
+                "UPDATE tac_saved_list
+                SET isPublic = CASE WHEN isPublic = 1 THEN 0 ELSE 1 END
+                WHERE id = ?"
+            );
+            $stmt->bind_param('i', $id);
+            $stmt->execute();
+            $stmt->close();
+
+            // Fetch the new value
+            $stmt = $this->connection->prepare(
+                "SELECT isPublic FROM tac_saved_list WHERE id = ?"
+            );
+            $stmt->bind_param('i', $id);
+            $stmt->execute();
+
+            $newValue = 0;
+            $stmt->bind_result($newValue);
+            $stmt->fetch();
+            $stmt->close();
+
+            return (int) $newValue;
+
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
+
+    public function deleteSavedFleet($id) {
+        try{
+            $stmt = $this->connection->prepare(
+                "DELETE FROM 
+                    tac_saved_list
+                WHERE
+                    id = ?"
+            );
+            if ($stmt) {
+                $stmt->bind_param('i', $id);
+                $stmt->execute();
+                $stmt->close();
+            }
+        } catch (Exception $e) {
+            throw $e;
+        }
     }
 
     public function deleteEmptyGames()
@@ -232,7 +515,7 @@ class DBManager
 
         try {
 
-            $sql = "DELETE FROM `B5CGM`.`tac_ship` WHERE tacgameid = $gameid AND playerid = $userid";
+            $sql = "DELETE FROM `tac_ship` WHERE tacgameid = $gameid AND playerid = $userid";
             if ($slotid)
                 $sql .= " AND slot = $slotid";
 
@@ -255,7 +538,7 @@ class DBManager
     {
 
         try {
-            $sql = "SELECT * FROM `B5CGM`.`tac_game` g join `B5CGM`.`tac_playeringame` p on g.id = p.gameid where p.playerid = $userid and g.status = 'LOBBY';";
+            $sql = "SELECT * FROM `tac_game` g join `tac_playeringame` p on g.id = p.gameid where p.playerid = $userid and g.status = 'LOBBY';";
 
             $result = $this->query($sql);
 
@@ -282,7 +565,7 @@ class DBManager
                 return false;
 
             //already in slot on other team?
-            $sql = "SELECT * FROM `B5CGM`.`tac_playeringame` WHERE gameid = $gameid AND teamid != " . $slot->team . " AND playerid = $userid";
+            $sql = "SELECT * FROM `tac_playeringame` WHERE gameid = $gameid AND teamid != " . $slot->team . " AND playerid = $userid";
             if ($this->found($sql)) {
                 $this->leaveSlot($userid, $gameid);
             }
@@ -308,6 +591,24 @@ class DBManager
         $stmt = $this->connection->prepare("
             INSERT INTO 
                 tac_playeringame
+            (
+                gameid,
+                slot,
+                playerid,
+                teamid,
+                lastturn,
+                lastphase,
+                name,
+                points,
+                depx,
+                depy,
+                deptype,
+                depwidth,
+                depheight,
+                depavailable,
+                waiting,
+                surrendered
+            )
             VALUES
             (
                 ?,
@@ -316,8 +617,6 @@ class DBManager
                 ?,
                 ?,
                 ?,
-                now(),
-                null,
                 ?,
                 ?,
                 ?,
@@ -326,15 +625,15 @@ class DBManager
                 ?,
                 ?,
                 ?,
-                false
+                false,
+                ?
             )
-
         ");
 
         if ($stmt) {
             foreach ($slots as $slot) {
                 $stmt->bind_param(
-                    'iiiiiisiiisiii',
+                    'iiiiiisiiisiiii', // ✅ added an extra 'i' for status at the end
                     $gameid,
                     $slot->slot,
                     $slot->playerid,
@@ -348,7 +647,8 @@ class DBManager
                     $slot->deptype,
                     $slot->depwidth,
                     $slot->depheight,
-                    $slot->depavailable
+                    $slot->depavailable,
+                    $slot->surrendered // ✅ NEW
                 );
                 $stmt->execute();
             }
@@ -356,7 +656,7 @@ class DBManager
         }
     }
 
-    public function createGame($gamename, $background, $slots, $userid, $gamespace, $rules = '{}', $description)
+    public function createGame($gamename, $background, $slots, $userid, $gamespace, $description, $rules = '{}')
     {
         $stmt = $this->connection->prepare("
             INSERT INTO 
@@ -415,11 +715,11 @@ class DBManager
 				if ($critical->forceModify){ //modification of critical that already exists in database - modifying turn end! (the only thing modifiable)
 					$turnend = $critical->turnend;
 					$critid = $critical->id;
-					$sql = "UPDATE `B5CGM`.`tac_critical` SET turnend = " . $turnend . " where id = " . $critid . "";
+					$sql = "UPDATE `tac_critical` SET turnend = " . $turnend . " where id = " . $critid . "";
 				} else if ( $critical->id < 1 ){ //actual new critical
 					//important to use $critical->turn: critical does NOT need to have turn equal to current! 
 					//this is importnat for criticals that need to have limited time window yet last longer than 1 turn (go out 1 turn after issuing - so issue must be later)
-					$sql = "INSERT INTO `B5CGM`.`tac_critical` VALUES(null, $gameid, " . $critical->shipid . ", " . $critical->systemid . ",'" . $critical->phpclass . "'," . $critical->turn . ", " . $critical->turnend . ",'" . $critical->param . "')";
+					$sql = "INSERT INTO `tac_critical` VALUES(null, $gameid, " . $critical->shipid . ", " . $critical->systemid . ",'" . $critical->phpclass . "'," . $critical->turn . ", " . $critical->turnend . ",'" . $critical->param . "')";
 				} else continue;
                 $this->update($sql);
             }
@@ -504,7 +804,7 @@ class DBManager
             if ($fire->type != "ballistic" && $phase == 1)
                 continue;
 
-            $sql = "INSERT INTO `B5CGM`.`tac_fireorder` VALUES (null, '" . $fire->type . "', " . $fire->shooterid . ", " . $fire->targetid . ", " . $fire->weaponid . ", " . $fire->calledid . ", " . $fire->turn . ", "
+            $sql = "INSERT INTO `tac_fireorder` VALUES (null, '" . $fire->type . "', " . $fire->shooterid . ", " . $fire->targetid . ", " . $fire->weaponid . ", " . $fire->calledid . ", " . $fire->turn . ", "
                 . $fire->firingMode . ", " . $fire->needed . ", " . $fire->rolled . ", $gameid, '" . $fire->notes . "', " . $fire->shotshit . ", " . $fire->shots . ", '" . $fire->pubnotes . "', 0, '" . $fire->x . "', '" . $fire->y . "', '" . $fire->damageclass . "', '" . $fire->resolutionOrder . "')";
 
             $this->update($sql);
@@ -522,7 +822,7 @@ class DBManager
                     continue;
 
                 //$id, $shipid, $systemid, $type, $turn, $amount
-                $sql = "INSERT INTO `B5CGM`.`tac_power` VALUES( null, " . $power->shipid . ", " . $gameid . ", " . $power->systemid . ", " . $power->type . ", " . $turn .
+                $sql = "INSERT INTO `tac_power` VALUES( null, " . $power->shipid . ", " . $gameid . ", " . $power->systemid . ", " . $power->type . ", " . $turn .
                     ", " . $power->amount . ")";
 
                 $this->update($sql);
@@ -643,7 +943,7 @@ class DBManager
                         $shooterid = $damage->shooterid; //additional field
                         $weaponid = $damage->weaponid; //additional field
                         //targetid = -1 if weapon is hex targeted!
-                        $sql1 = "SELECT * FROM `B5CGM`.`tac_fireorder` where gameid = $gameid and turn = $turn and shooterid = $shooterid and (targetid = $targetid or targetid = -1) and weaponid = $weaponid and shotshit >0";
+                        $sql1 = "SELECT * FROM `tac_fireorder` where gameid = $gameid and turn = $turn and shooterid = $shooterid and (targetid = $targetid or targetid = -1) and weaponid = $weaponid and shotshit >0";
                         $result = $this->query($sql1);
                         if ($result == null || sizeof($result) == 0){  //nothing, keep -1 as ID
                         }else{
@@ -654,7 +954,7 @@ class DBManager
                 }
 
                 //$id, $shipid, $gameid, $turn, $systemid, $damage, $armour, $shields;
-                $sql = "INSERT INTO `B5CGM`.`tac_damage` VALUES( null, ".$damage->shipid.", ".$gameid.", ".$damage->systemid.", ".$turn.", ".$damage->damage.
+                $sql = "INSERT INTO `tac_damage` VALUES( null, ".$damage->shipid.", ".$gameid.", ".$damage->systemid.", ".$turn.", ".$damage->damage.
                     ", ".$damage->armour. ", ".$damage->shields.", ".$fireID .", ".$des.", ".$undes.", '".$damage->pubnotes."', '".$damage->damageclass."')";
 
 
@@ -676,7 +976,7 @@ class DBManager
                 //$unmodified = $ship->unmodifiedIniative === null ? 'NULL' : $ship->unmodifiedIniative;
 				//I THINK unmodified ini should mean INI bonus...
 				$unmodified = $ship->unmodifiedIniative === null ? $ship->iniativebonus : $ship->unmodifiedIniative;				
-                $sql = "INSERT INTO `B5CGM`.`tac_iniative` VALUES($gameid, " . $ship->id . ", $turn, " . $ship->iniative . ", " . $unmodified .")";
+                $sql = "INSERT INTO `tac_iniative` VALUES($gameid, " . $ship->id . ", $turn, " . $ship->iniative . ", " . $unmodified .")";
                 $this->update($sql);
             }
         } catch (Exception $e) {
@@ -688,7 +988,7 @@ class DBManager
     public function updatePlayerStatus($gameid, $userid, $phase, $turn, $slots = null)
     {
         try {
-            $sql = "UPDATE `B5CGM`.`tac_playeringame` SET `lastturn` = $turn, `lastphase` = $phase, `lastactivity` = NOW() WHERE"
+            $sql = "UPDATE `tac_playeringame` SET `lastturn` = $turn, `lastphase` = $phase, `lastactivity` = NOW() WHERE"
                 . " gameid = $gameid AND playerid = $userid";
 
             if ($slots) {
@@ -704,7 +1004,44 @@ class DBManager
 
     }
 
-    
+    //Used to skip Slot forward through phases if it has no ships deployed. Updates specific slot, not just ALL player's slots as updatePlayerStatus() does.
+    public function updatePlayerSlotPhase($gameid, $userid, $slot, $phase, $turn)
+    {
+        try { 
+
+            $sql = "UPDATE `tac_playeringame`
+                    SET `lastturn` = $turn,
+                        `lastphase` = $phase,
+                        `lastactivity` = NOW()
+                    WHERE gameid = $gameid
+                    AND playerid = $userid
+                    AND slot = $slot";
+
+            $this->update($sql);
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
+/*
+        //Update depavailable at start of game.
+        public function updatePlayerStatusDeploy($gameid, $userid, $slot, $phase, $turn, $minDeploy)
+    {
+        try { 
+            $sql = "UPDATE `tac_playeringame`
+                    SET `lastturn` = $turn,
+                        `lastphase` = $phase,
+                        `depavailable` = $minDeploy,
+                        `lastactivity` = NOW()
+                    WHERE gameid = $gameid
+                    AND playerid = $userid
+                    AND slot = $slot";
+
+            $this->update($sql);
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
+*/    
     public function setPlayerWaitingStatus($playerid, $gameid, $waiting)
     {
         try {
@@ -784,7 +1121,7 @@ class DBManager
                 if ($entry->turn != $turn)
                     continue;
 
-                $sql = "INSERT INTO `B5CGM`.`tac_ew` VALUES (null, $gameid, " . $entry->shipid . ", $turn, '" . $entry->type . "', " . $entry->amount . ", " . $entry->targetid . ")";
+                $sql = "INSERT INTO `tac_ew` VALUES (null, $gameid, " . $entry->shipid . ", $turn, '" . $entry->type . "', " . $entry->amount . ", " . $entry->targetid . ")";
 
                 $this->insert($sql);
             }
@@ -1115,7 +1452,7 @@ class DBManager
 
     public function getTacGame($gameid, $playerid)
     {
-         $sql = "SELECT * FROM `B5CGM`.`tac_game` where id = $gameid";
+         $sql = "SELECT * FROM `tac_game` where id = $gameid";
     
 
         $games = array();
@@ -1144,7 +1481,7 @@ class DBManager
         }
 
     }
-
+/* //OLD VERSION WITHOUT WAITING/STATUS VARIABLES - DK June 2025
     public function getSlotsInGame($gameid)
     {
 
@@ -1172,6 +1509,47 @@ class DBManager
         }
         return $slots;
     }
+*/
+
+
+    public function getSlotsInGame($gameid)
+    {
+        $slots = array();
+
+        $stmt = $this->connection->prepare("
+            SELECT 
+                playerid, slot, teamid, lastturn, lastphase, name, points,
+                depx, depy, deptype, depwidth, depheight, depavailable,
+                p.username, waiting, surrendered
+            FROM 
+                tac_playeringame pg
+            LEFT JOIN 
+                player p ON p.id = pg.playerid
+            WHERE 
+                gameid = ?
+        ");
+
+        if ($stmt) {
+            $stmt->bind_param('i', $gameid);
+            $stmt->bind_result(
+                $playerid, $slot, $teamid, $lastturn, $lastphase, $name, $points,
+                $depx, $depy, $deptype, $depwidth, $depheight, $depavailable,
+                $username, $waiting, $surrendered // ✅ added surrendered
+            );
+            $stmt->execute();
+            while ($stmt->fetch()) {
+                $slots[$slot] = new PlayerSlot(
+                    $playerid, $slot, $teamid, $lastturn, $lastphase, $name, $points,
+                    $depx, $depy, $deptype, $depwidth, $depheight, $depavailable,
+                    $username, $waiting, $surrendered // ✅ pass surrendered into PlayerSlot
+                );
+            }
+            $stmt->close();
+        }
+
+        return $slots;
+    }
+
 
     public function getSlotById($slotid, $gameid)
     {
@@ -1179,7 +1557,9 @@ class DBManager
 
         $stmt = $this->connection->prepare("
             SELECT 
-                playerid, slot, teamid, lastturn, lastphase, name, points, depx, depy, deptype, depwidth, depheight, depavailable, p.username
+                playerid, slot, teamid, lastturn, lastphase, name, points,
+                depx, depy, deptype, depwidth, depheight, depavailable,
+                p.username, waiting, surrendered
             FROM 
                 tac_playeringame pg
             LEFT JOIN 
@@ -1192,10 +1572,18 @@ class DBManager
 
         if ($stmt) {
             $stmt->bind_param('ii', $gameid, $slotid);
-            $stmt->bind_result($playerid, $slot, $teamid, $lastturn, $lastphase, $name, $points, $depx, $depy, $deptype, $depwidth, $depheight, $depavailable, $username);
+            $stmt->bind_result(
+                $playerid, $slot, $teamid, $lastturn, $lastphase, $name, $points,
+                $depx, $depy, $deptype, $depwidth, $depheight, $depavailable,
+                $username, $waiting, $surrendered // ✅ added surrendered
+            );
             $stmt->execute();
             while ($stmt->fetch()) {
-                $slot = new PlayerSlot($playerid, $slot, $teamid, $lastturn, $lastphase, $name, $points, $depx, $depy, $deptype, $depwidth, $depheight, $depavailable, $username);
+                $slot = new PlayerSlot(
+                    $playerid, $slot, $teamid, $lastturn, $lastphase, $name, $points,
+                    $depx, $depy, $deptype, $depwidth, $depheight, $depavailable,
+                    $username, $waiting, $surrendered // ✅ pass surrendered
+                );
             }
             $stmt->close();
         }
@@ -1820,7 +2208,7 @@ class DBManager
 
     public function submitSingleFireorder($gameid, $fireOrder)
     {
-            $sql = "INSERT INTO `B5CGM`.`tac_fireorder` VALUES (null, '" . $fireOrder->type . "', " . $fireOrder->shooterid . ", " . $fireOrder->targetid . ", " . $fireOrder->weaponid . ", " . $fireOrder->calledid . ", " . $fireOrder->turn . ", "
+            $sql = "INSERT INTO `tac_fireorder` VALUES (null, '" . $fireOrder->type . "', " . $fireOrder->shooterid . ", " . $fireOrder->targetid . ", " . $fireOrder->weaponid . ", " . $fireOrder->calledid . ", " . $fireOrder->turn . ", "
                 . $fireOrder->firingMode . ", " . $fireOrder->needed . ", " . $fireOrder->rolled . ", $gameid, '" . $fireOrder->notes . "', " . $fireOrder->shotshit . ", " . $fireOrder->shots . ", '" . $fireOrder->pubnotes . "', 0, '" . $fireOrder->x . "', '" . $fireOrder->y . "', '" . $fireOrder->damageclass . "', '" . $fireOrder->resolutionOrder . "')";
 
             $this->update($sql);
@@ -2058,6 +2446,27 @@ class DBManager
             throw $e;
         }
     }
+
+    public function updateSlotSurrendered($gameid, $playerid, $surrendered)
+    {
+        try {
+            if ($stmt = $this->connection->prepare(
+                "UPDATE 
+                    tac_playeringame 
+                SET
+                    surrendered = ?
+                WHERE 
+                    gameid = ? AND playerid = ?"
+            )) {
+                $stmt->bind_param('iii', $surrendered, $gameid, $playerid);
+                $stmt->execute();
+                $stmt->close();
+            }
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
+
 
     public function releasePlayerSubmitLock($gameid, $playerid)
     {

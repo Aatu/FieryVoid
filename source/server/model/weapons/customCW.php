@@ -872,6 +872,7 @@ class CWShield extends Shield implements DefensiveSystem{
 
         public $damageType = "Standard"; 
         public $weaponClass = "Laser"; 
+        private $damagebonus = 0;
         
         function __construct($startArc, $endArc, $damagebonus, $nrOfShots = 2){
             $this->damagebonus = $damagebonus;

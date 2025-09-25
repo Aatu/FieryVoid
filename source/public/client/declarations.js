@@ -33,6 +33,8 @@ window.declarations = {
     var dispEWEntry = new dispEWNew();
     for (var i in gamedata.ships){
       var ship = gamedata.ships[i];
+	  if(gamedata.isTerrain(ship.shipSizeClass, ship.userid)) continue;
+	  if(shipManager.shouldBeHidden(ship)) continue; //Enemy, stealth equipped and undetected, or not deployed yet.	  
       if ( (!shipManager.isDestroyed(ship)) || (shipManager.getTurnDestroyed(ship)>=gamedata.turn) ) if( (declarations.GlobalSide=='Own' && declarations.GlobalDisplay=='Source' && gamedata.isMyShip(ship)) //own ship, own ew, by source
         || (declarations.GlobalSide!='Own' && declarations.GlobalDisplay=='Source' && !gamedata.isMyShip(ship)) //enemy ship, enemy EW, by source
         || (declarations.GlobalSide=='Own' && declarations.GlobalDisplay!='Source' && !gamedata.isMyShip(ship)) //enemy ship, own ew, by target
@@ -459,7 +461,7 @@ window.declarations = {
         }
     }
     //actual data
-    newText += gamedata.description;
+	newText += gamedata.description.replace(/\n/g, "<br>");
     
     //display text
     var targetDiv = document.getElementById("declarationsActual"); 

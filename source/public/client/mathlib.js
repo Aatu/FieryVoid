@@ -189,6 +189,7 @@ window.mathlib = {
 		return heading;
 	},
 
+
 	hexFacingToAngle: function hexFacingToAngle(d) {
 		switch (d) {
 			case 0:
@@ -206,76 +207,352 @@ window.mathlib = {
 		}
 	},
 
-	doLinesIntersect: function doLinesIntersect(p1, p2, p3, p4) {
+
+	doLinesIntersect: function(p1, p2, p3, p4) {
+		const EPSILON = 1e-10;
+
 		function crossProduct(a, b) {
 			return a.x * b.y - a.y * b.x;
 		}
-	
-		let d1 = { x: p2.x - p1.x, y: p2.y - p1.y };
-		let d2 = { x: p4.x - p3.x, y: p4.y - p3.y };
-		let denom = crossProduct(d1, d2);
-	
-		if (denom === 0) return false; // Parallel lines
-	
-		let t = crossProduct({ x: p3.x - p1.x, y: p3.y - p1.y }, d2) / denom;
-		let u = crossProduct({ x: p3.x - p1.x, y: p3.y - p1.y }, d1) / denom;
-	
-		return t >= 0 && t <= 1 && u >= 0 && u <= 1;
+
+		function subtract(a, b) {
+			return { x: a.x - b.x, y: a.y - b.y };
+		}
+
+		function isBetween(a, b, c) {
+			return (
+				Math.min(a.x, c.x) - EPSILON <= b.x && b.x <= Math.max(a.x, c.x) + EPSILON &&
+				Math.min(a.y, c.y) - EPSILON <= b.y && b.y <= Math.max(a.y, c.y) + EPSILON
+			);
+		}
+
+		const d1 = subtract(p2, p1);
+		const d2 = subtract(p4, p3);
+		const denom = crossProduct(d1, d2);
+		const diff = subtract(p3, p1);
+
+		// Check for colinear
+		if (Math.abs(denom) < EPSILON) {
+			if (Math.abs(crossProduct(diff, d1)) > EPSILON) return false;
+			// Colinear — check overlap
+			return (
+				isBetween(p1, p3, p2) ||
+				isBetween(p1, p4, p2) ||
+				isBetween(p3, p1, p4) ||
+				isBetween(p3, p2, p4)
+			);
+		}
+
+		const t = crossProduct(diff, d2) / denom;
+		const u = crossProduct(diff, d1) / denom;
+
+		return t >= -EPSILON && t <= 1 + EPSILON && u >= -EPSILON && u <= 1 + EPSILON;
 	},
+
 
 	getHexCorners: function getHexCorners(hex) {
-		let hexSize = window.Config.HEX_SIZE;
-		let shrinkFactor = 1; // Was previsouly used to shrink hex a little below.
-	
-		let hexCo = coordinateConverter.fromHexToGame(hex);
-		let cx = hexCo.x;
-		let cy = hexCo.y;
-	
-		// Adjusted angles for pointy-top hexagons
-		let angles = [30, 90, 150, 210, 270, 330].map(a => (a * Math.PI) / 180);
-	
-		// Apply shrink factor to reduce the hexagon size
+		const hexSize = window.Config.HEX_SIZE;
+		const shrinkFactor = 1; // Set to <1 if you want shrunken hexes for LoS testing
+
+		const center = coordinateConverter.fromHexToGame(hex);
+		const { x: cx, y: cy } = center;
+
+		// Angles for pointy-topped hexes, in radians
+		const angles = [30, 90, 150, 210, 270, 330].map(deg => deg * Math.PI / 180);
+
+		// Return the 6 corners around the hex center
 		return angles.map(angle => ({
 			x: cx + shrinkFactor * hexSize * Math.cos(angle),
-			y: cy + shrinkFactor * hexSize * Math.sin(angle),
+			y: cy + shrinkFactor * hexSize * Math.sin(angle)
 		}));
 	},
-	
-	checkLineOfSight: function checkLineOfSight(start, end, blockedHexes) {
-//		const hexSize = window.Config.HEX_SIZE;
+		
 
+	checkLineOfSight: function checkLineOfSight(start, end, blockedHexes) {
 		const startPixel = coordinateConverter.fromHexToGame(start);
-		const endPixel = coordinateConverter.fromHexToGame(end);		
+		const endPixel = coordinateConverter.fromHexToGame(end);
+
+		// Normalize all blocked hexes to plain {q, r} objects
+		const normalizedBlockedHexes = blockedHexes.map(hex => ({ q: hex.q, r: hex.r }));
+
+		// Filter out the start and end positions
+		const filteredBlockedHexes = normalizedBlockedHexes.filter(
+			hex => !(hex.q === start.q && hex.r === start.r) && !(hex.q === end.q && hex.r === end.r)
+		);
 
 		const lineMinQ = Math.min(start.q, end.q);
 		const lineMaxQ = Math.max(start.q, end.q);
 		const lineMinR = Math.min(start.r, end.r);
 		const lineMaxR = Math.max(start.r, end.r);
-	
-		// Exclude the shooter and target positions from the blocked hexes
-		const filteredBlockedHexes = blockedHexes.filter(hex => !(hex.q === start.q && hex.r === start.r) && !(hex.q === end.q && hex.r === end.r));
-	
+
+		//Debugging variables
+		//var startPixel = coordinateConverter.fromHexToGame({ q: 8, r: 2 });
+		//var endPixel = coordinateConverter.fromHexToGame({ q: 7, r: 1 });
+		//var blockedCorners = mathlib.getHexCorners({ q: 8, r: 1 });
+
 		for (let hex of filteredBlockedHexes) {
-			// Quickly discard hexes that can't intersect
-			if (hex.q < lineMinQ - Config.HEX_SIZE || hex.q > lineMaxQ + Config.HEX_SIZE ||
-				hex.r < lineMinR - Config.HEX_SIZE || hex.r > lineMaxR + Config.HEX_SIZE) {
+			// Optional: guard against malformed data
+			if (typeof hex.q !== 'number' || typeof hex.r !== 'number') continue;
+
+			// Filter out obviously non-intersecting hexes (based on hex grid, not pixels!)
+			if (
+				hex.q < lineMinQ - 3 || hex.q > lineMaxQ + 3 ||
+				hex.r < lineMinR - 3 || hex.r > lineMaxR + 3
+			) {
 				continue;
 			}
-	
-			let corners = this.getHexCorners(hex); // Get precomputed corners
+
+			const corners = this.getHexCorners(hex);
 			for (let i = 0; i < corners.length; i++) {
-				let p1 = corners[i];
-				let p2 = corners[(i + 1) % corners.length];
-	
+				const p1 = corners[i];
+				const p2 = corners[(i + 1) % corners.length];
+
 				if (this.doLinesIntersect(startPixel, endPixel, p1, p2)) {
-					return true; // Line crosses a hex edge
+					//if(gamedata.showLoS) mathlib.drawLine(startPixel, endPixel, 0xff00ff); // Magenta line if blocked for debugging
+					//if(gamedata.showLoS) mathlib.drawHex(corners, 0xff00ff); // Magenta hex border for debugging					
+					return true; // Line of sight is blocked
 				}
 			}
 		}
-		return false; //LoS is NOT blocked
+
+		//if(gamedata.showLoS) mathlib.drawLine(startPixel, endPixel, 0x87ceeb); // Blue line for debugging
+		return false; // Line of sight is clear
 	},
 
-	//Returns 19 hexes around central position e.g. radius of 1
+
+	/* //Draws a simple line between two positions, replace by drawRuler() below but maybe useful for something else - DK
+	drawLine: function drawLine(p1, p2, color = 0x00ffff) {
+
+		// Run once, at init or before drawing loop
+		if (!window.LosSprite) {
+		window.LosSprite = new THREE.Group();
+		window.webglScene.scene.add(window.LosSprite);
+		}
+
+		mathlib.clearLosSprite();
+
+		const material = new THREE.LineBasicMaterial({ color });
+		const points = [
+			new THREE.Vector3(p1.x, p1.y, 10),
+			new THREE.Vector3(p2.x, p2.y, 10)
+		];
+		const geometry = new THREE.BufferGeometry().setFromPoints(points);
+		const line = new THREE.Line(geometry, material);
+		window.LosSprite.add(line);
+
+		return line;
+	},
+	*/
+
+//Called in Phase Strategy to show Ruler if LoS is toggled on.
+	showLoS: function showLoS(start, targetHex){
+
+		if(start == null){
+			//var firstShip = gamedata.getFirstFriendlyShip();
+			//start = shipManager.getShipPosition(firstShip);
+			return; //No start selectd yet, or tool just activated.			
+		}
+		var blockedHexes = weaponManager.getBlockedHexes();
+		
+		mathlib.checkLineOfSightSprite(start, targetHex, blockedHexes);
+	},
+	
+	clearLosSprite: function clearLosSprite() {
+		const LosSprite = window.LosSprite;
+		if (!LosSprite || !LosSprite.children || !Array.isArray(LosSprite.children)) {
+			return;
+		}
+
+		while (LosSprite.children.length > 0) {
+			const child = LosSprite.children[0];
+			LosSprite.remove(child);
+			if (child.geometry) child.geometry.dispose();
+			if (child.material) child.material.dispose();
+		}
+	},
+
+	//Alternative version of LoS check function, that calls Ruler and LoS visuals.  Separated to avoid having to show this is other places that call checkLineofSight() e.g. weapons.
+	checkLineOfSightSprite: function checkLineOfSightSprite(start, end, blockedHexes) {
+		const startPixel = coordinateConverter.fromHexToGame(start);
+		const endPixel = coordinateConverter.fromHexToGame(end);
+
+		// Normalize all blocked hexes to plain {q, r} objects
+		const normalizedBlockedHexes = blockedHexes.map(hex => ({ q: hex.q, r: hex.r }));
+
+		// Filter out the start and end positions
+		const filteredBlockedHexes = normalizedBlockedHexes.filter(
+			hex => !(hex.q === start.q && hex.r === start.r) && !(hex.q === end.q && hex.r === end.r)
+		);
+
+		const lineMinQ = Math.min(start.q, end.q);
+		const lineMaxQ = Math.max(start.q, end.q);
+		const lineMinR = Math.min(start.r, end.r);
+		const lineMaxR = Math.max(start.r, end.r);
+
+		for (let hex of filteredBlockedHexes) {
+			// Optional: guard against malformed data
+			if (typeof hex.q !== 'number' || typeof hex.r !== 'number') continue;
+
+			// Filter out obviously non-intersecting hexes (based on hex grid, not pixels!)
+			if (
+				hex.q < lineMinQ - 3 || hex.q > lineMaxQ + 3 ||
+				hex.r < lineMinR - 3 || hex.r > lineMaxR + 3
+			) {
+				continue;
+			}
+
+			const corners = this.getHexCorners(hex);
+			for (let i = 0; i < corners.length; i++) {
+				const p1 = corners[i];
+				const p2 = corners[(i + 1) % corners.length];
+
+				if (this.doLinesIntersect(startPixel, endPixel, p1, p2)) {
+					mathlib.drawRuler(startPixel, endPixel, 0xdc143c); // Crimson line if blocked
+					mathlib.drawHex(corners, 0xdc143c, 0xdc143c); // Crimson hex border
+					//var loSBlockedSprite = new BallisticSprite(hex, 'hexRed', "", "", './img/cancel.png', 100);
+					//window.LosSprite.add(loSBlockedSprite);										
+					return true; // Line of sight is blocked
+				}
+			}
+		}
+
+		mathlib.drawRuler(startPixel, endPixel, 0x00ffff); // Blue line for clear LoS
+		return false; // Line of sight is clear
+	},
+
+	//Called by checkLineOfSightSprite() above
+	drawHex: function drawHex(corners, color = 0xff0000, fillColor = null) {
+		if (!corners || corners.length < 6) return;
+
+		// === Create the shape ===
+		const shape = new THREE.Shape();
+		shape.moveTo(corners[0].x, corners[0].y);
+		for (let i = 1; i < corners.length; i++) {
+			shape.lineTo(corners[i].x, corners[i].y);
+		}
+		shape.lineTo(corners[0].x, corners[0].y); // Close the shape
+
+		const z = 500;
+
+		// === Add fill if specified ===
+		if (fillColor !== null) {
+			const fillGeometry = new THREE.ShapeGeometry(shape);
+			const fillMaterial = new THREE.MeshBasicMaterial({
+				color: fillColor,
+				transparent: true,
+				opacity: 0.3, // Adjust fill visibility
+				side: THREE.DoubleSide
+			});
+			const fillMesh = new THREE.Mesh(fillGeometry, fillMaterial);
+			fillMesh.position.z = z; // Place it below the outline
+			window.LosSprite.add(fillMesh);
+		}
+
+		// === Add outline as thick Line or Mesh ===
+		const outlinePoints = corners.map(c => new THREE.Vector2(c.x, c.y));
+		const outlineGeometry = new THREE.BufferGeometry().setFromPoints([
+			...outlinePoints.map(p => new THREE.Vector3(p.x, p.y, 500)),
+			new THREE.Vector3(corners[0].x, corners[0].y, 500) // Close loop
+		]);
+
+		const outlineMaterial = new THREE.LineBasicMaterial({ color });
+		const outline = new THREE.Line(outlineGeometry, outlineMaterial);
+		window.LosSprite.add(outline);
+
+		return outline;
+	},
+
+
+	drawRuler: function drawRuler(p1, p2, color = 0x00ffff) {
+		if (!window.LosSprite) {
+			window.LosSprite = new THREE.Group();
+			window.webglScene.scene.add(window.LosSprite);
+		}
+
+		mathlib.clearLosSprite();
+
+		// Create and add the line
+		const material = new THREE.LineBasicMaterial({
+			color: color,
+			transparent: true,
+			opacity: 0.8
+		});
+		const points = [
+			new THREE.Vector3(p1.x, p1.y, 501),
+			new THREE.Vector3(p2.x, p2.y, 501)
+		];
+		const geometry = new THREE.BufferGeometry().setFromPoints(points);
+		const line = new THREE.Line(geometry, material);
+		window.LosSprite.add(line);
+
+		// Calculate midpoint and distance
+		const midX = (p1.x + p2.x) / 2;
+		const midY = (p1.y + p2.y) / 2;
+		const distance = coordinateConverter.fromGameToHex(p1).distanceTo(
+			coordinateConverter.fromGameToHex(p2)
+		);
+
+		// === Create distance label ===
+		const canvas = document.createElement('canvas');
+		const TEXTURE_SIZE = 128;
+		canvas.width = TEXTURE_SIZE;
+		canvas.height = TEXTURE_SIZE;
+		const ctx = canvas.getContext('2d');
+
+		let fontSize = 110;
+		ctx.fillStyle = 'white';
+		ctx.textAlign = "center";
+		ctx.textBaseline = "middle";
+		const distanceText = distance.toFixed(0);
+		ctx.font = `bold ${fontSize}px Arial`;
+		ctx.fillText(distanceText, TEXTURE_SIZE / 2, TEXTURE_SIZE / 2);
+
+		const texture = new THREE.Texture(canvas);
+		texture.needsUpdate = true;
+		const spriteMaterial = new THREE.SpriteMaterial({ map: texture, transparent: true });
+		const sprite = new THREE.Sprite(spriteMaterial);
+		sprite.position.set(midX, midY, 501);
+		sprite.scale.set(30, 30, 1);
+		window.LosSprite.add(sprite);
+
+		// === Helper for circular markers ===
+		function createMarker(x, y) {
+			function hexToRgba(hex, alpha = 1) {
+				const r = (hex >> 16) & 255;
+				const g = (hex >> 8) & 255;
+				const b = hex & 255;
+				return `rgba(${r},${g},${b},${alpha})`;
+			}
+
+			const markerCanvas = document.createElement('canvas');
+			markerCanvas.width = 64;
+			markerCanvas.height = 64;
+			const markerCtx = markerCanvas.getContext('2d');
+
+			markerCtx.beginPath();
+			markerCtx.arc(32, 32, 18, 0, 2 * Math.PI);
+			markerCtx.fillStyle = hexToRgba(color);
+			markerCtx.fill();
+
+			const markerTexture = new THREE.Texture(markerCanvas);
+			markerTexture.needsUpdate = true;
+
+			const markerMaterial = new THREE.SpriteMaterial({ map: markerTexture, transparent: true });
+			const markerSprite = new THREE.Sprite(markerMaterial);
+			markerSprite.position.set(x, y, 501);
+			markerSprite.scale.set(18, 18, 1);
+
+			window.LosSprite.add(markerSprite);
+		}
+
+		// Add marker at both ends
+		createMarker(p1.x, p1.y);
+		createMarker(p2.x, p2.y);
+
+		return line;
+	},
+/*
+	//Returns 7 or 19 hexes around central position e.g. radius of 1 or 2
 	getNeighbouringHexes: function getNeighbouringHexes(position, radius = 1) {
 		if(radius == 1){
 			let isOddRow = position.r % 2 !== 0; //Test hexes ODD (-1,-11) EVEN (-2,-12)
@@ -302,8 +579,8 @@ window.mathlib = {
 				q: position.q + offset[0],
 				r: position.r + offset[1]
 			}));
-		}else{
-			//Assume Radius 2.
+		}else if(radius == 2){
+			//Radius 2.
 			let isOddRow = position.r % 2 !== 0;
 			let neighborOffsets = isOddRow 
 				? [[+1, 0], [-1, 0], [-1, +1], [-1, -1], [0, +1], [0, -1],
@@ -337,5 +614,94 @@ window.mathlib = {
 				r: position.r + offset[1]
 			}));
 	}
+*/
+
+// parity-aware 6 neighbours for your odd-row offset system
+offsetNeighbors: function offsetNeighbors(pos) {
+    const q = pos.q, r = pos.r;
+    const isOdd = (r % 2) !== 0;
+    if (isOdd) {
+        return [
+            { q: q + 1, r: r     }, // right
+            { q: q - 1, r: r     }, // left
+            { q: q - 1, r: r + 1 }, // upper-left (odd row)
+            { q: q - 1, r: r - 1 }, // lower-left (odd row)
+            { q: q    , r: r + 1 }, // upper-right (shifted)
+            { q: q    , r: r - 1 }  // lower-right (shifted)
+        ];
+    } else {
+        return [
+            { q: q + 1, r: r     }, // right
+            { q: q - 1, r: r     }, // left
+            { q: q + 1, r: r + 1 }, // upper-right (even row)
+            { q: q + 1, r: r - 1 }, // lower-right (even row)
+            { q: q    , r: r + 1 }, // upper-left (shifted)
+            { q: q    , r: r - 1 }  // lower-left (shifted)
+        ];
+    }
+},
+
+// Returns all hexes with distance <= radius (excluding center)
+getNeighbouringHexes: function getNeighbouringHexes(position, radius = 0) {
+    if (radius <= 0) return [];
+
+    const seen = new Set();
+    const key = p => `${p.q},${p.r}`;
+
+    // mark center visited
+    seen.add(key(position));
+
+    // frontier starts at center
+    let frontier = [ { q: position.q, r: position.r } ];
+    const results = [];
+
+    // expand ring by ring
+    for (let d = 1; d <= radius; d++) {
+        const next = [];
+        for (const node of frontier) {
+            const neighs = mathlib.offsetNeighbors(node);
+            for (const n of neighs) {
+                const k = key(n);
+                if (!seen.has(k)) {
+                    seen.add(k);
+                    next.push(n);
+                    results.push(n); // accumulate all nodes within <= radius
+                }
+            }
+        }
+        frontier = next;
+    }
+
+    return results; // array of {q,r} (same set your hardcoded radius=1/2 returned)
+},
+
+// Returns only the perimeter hexes at exactly distance == radius
+getPerimeterHexes: function getPerimeterHexes(position, radius = 0) {
+    if (radius <= 0) return [];
+
+    const seen = new Set();
+    const key = p => `${p.q},${p.r}`;
+    seen.add(key(position));
+
+    let frontier = [ { q: position.q, r: position.r } ];
+
+    for (let d = 1; d <= radius; d++) {
+        const next = [];
+        for (const node of frontier) {
+            const neighs = mathlib.offsetNeighbors(node);
+            for (const n of neighs) {
+                const k = key(n);
+                if (!seen.has(k)) {
+                    seen.add(k);
+                    next.push(n);
+                }
+            }
+        }
+        frontier = next;
+    }
+
+    return frontier; // only the outer ring (distance == radius)
+}
+
 
 };

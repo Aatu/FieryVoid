@@ -56,16 +56,28 @@ class Jammer extends ShipSystem implements SpecialAbility{
 class Stealth extends ShipSystem implements SpecialAbility{    
     public $name = "stealth";
     public $displayName = "Stealth systems";
-    public $specialAbilities = array("Jammer");
+    public $specialAbilities = array("Jammer", "Stealth");
     public $primary = true;
+	public $detected = false;
+	//private $detectedOnTurn = false; //Used to track turn when ship is detected for notes.
     
     function __construct($armour, $maxhealth, $powerReq){
         parent::__construct($armour, $maxhealth, $powerReq, 1);
     }
     
     public function setSystemDataWindow($turn){
-            $this->data["Special"] = "Jammer ability if targeted from over 5 hexes away.";
-        }
+			$unit = $this->getUnit();
+			if($unit instanceof FighterFlight){
+            	$this->data["Special"] = "Jammer ability if targeted from over 5 hexes away.";
+				$this->data["Special"] .= "<br>Cannot be targeted by ballistic weapons at all from over 5 hexes away.";
+			}else{
+            	$this->data["Special"] = "Ship is invisible to enemies until reveals itself or is detected.";
+				$this->data["Special"] .= "<br>It is revealed immediately if any EW abilities (other than DEW) are used or fires a weapon.";
+				$this->data["Special"] .= "<br>Can also be detected by enemy ships at start of Firing Phase if in range (See FAQ for full rules).";
+				$this->data["Special"] .= "<br>Once detected ship is revealed it will remain this way unless it breaks line of sight with all enemy ships.";								
+				$this->data["Special"] .= "<br>Jammer ability if targeted over 12 hexes away by ships (Fighters - 4 hexes / Bases 24 hexes).";
+			}	
+	}	
     
     //args for Jammer ability are array("shooter", "target")
     public function getSpecialAbilityValue($args)
@@ -80,7 +92,7 @@ class Stealth extends ShipSystem implements SpecialAbility{
         if (! ($shooter instanceof BaseShip) || ! ($target instanceof BaseShip))
             throw new InvalidArgumentException("Wrong argument type for Stealth getSpecialAbilityValue");
 		
-               $jammerValue = 0; 
+        $jammerValue = 0; 
 		if ($target instanceof FighterFlight){
 			    if (mathlib::getDistanceHex($shooter, $target) > 5) //kicks in for fighters over 5 hexes!
 			        {
@@ -93,8 +105,12 @@ class Stealth extends ShipSystem implements SpecialAbility{
 						}
 			        }
 		}else{ //Ships
-			    if (mathlib::getDistanceHex($shooter, $target) > 10) //kicks in for ships over 10 hexes!
- 					{						
+				$stealthDistance = 12;
+				if($shooter instanceof FighterFlight) $stealthDistance = 4;
+				if($shooter->base) $stealthDistance = 24;
+
+			    if (mathlib::getDistanceHex($shooter, $target) > $stealthDistance) //Define range jammer ability applies depending on shooter.
+ 				{						
 			    	$jammerValue = 1; 
 						//Advanced Sensors negate Jammer, Improved Sensors halve Jammer
 						if ($shooter->hasSpecialAbility("AdvancedSensors")) {
@@ -106,7 +122,269 @@ class Stealth extends ShipSystem implements SpecialAbility{
 			}	
         return $jammerValue;        
     }
+
+
+	public function generateIndividualNotes($gameData, $dbManager){ //dbManager is necessary for Initial phase only
+        $ship = $this->getUnit();
+		if ($ship instanceof FighterFlight) return; //Fighter units don't need notes, they can't be invisible/detected.
+		if($ship->isDestroyed()) return; //No point generating new notes if ship destroyed.
+		if($ship->getTurnDeployed($gameData) > $gameData->turn)	return; //Ship not deployed yet.		
+
+		$this->onIndividualNotesLoaded($gameData); //Check current detection status.
+
+        switch($gameData->phase){
+			case 1: //Initial Orders - Check for any ballistic launches
+				if(!$this->detected){ //Only check if ship has not been already detected at some point.
+					//Did stealth ship launch any ballistics?
+					$ballisticOrEW = $this->isDetectedInitial($ship, $gameData);
+
+					if($ballisticOrEW){ //There was a ballistic launch this turn.  Create note for ship to be marked detected.
+						//Prepare note for database!		
+						$notekey = 'detected';
+						$noteHuman = 'Ship detected';
+						$noteValue = 1;
+						$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue							
+					}
+				}	
+			break;
+
+			case 4: //Post-Firing phase
+				if(!$this->detected){ //Ship has not already been detected, check if it is detected now.
+					if($this->isDetectedFire($ship, $gameData)){ //Now check if ship just been detected this turn?							//Prepare note for database!		
+						$notekey = 'detected';
+						$noteHuman = 'Ship detected';
+						$noteValue = 1;
+						$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
+					}
+				}else{ //Ship is already detected, but can it now become undetected again by breaking all line of sight? 
+					if($this->isUndetected($ship, $gameData)){ //Line of Sight test
+						//Prepare note for database!		
+						$notekey = 'undetected';
+						$noteHuman = 'Ship undetected';
+						$noteValue = 1;
+						$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
+					}
+
+				}
+			break;			
+					
+        }
+    } //endof function generateIndividualNotes	
+ 	
+
+	public function onIndividualNotesLoaded($gamedata){
+		//Sort notes by turn, and then phase so latest detection note is always last.
+		$this->sortNotes();
+
+		foreach ($this->individualNotes as $currNote){ //Search all notes, they should be process in order so the latest event applies.
+			switch($currNote->notekey){
+				case 'detected': 
+					if($currNote->notevalue == 1) $this->detected = true;
+				break;
+				case 'undetected': 
+					if($currNote->notevalue == 1) $this->detected = false;
+				break;								
+			}
+		}
+		//and immediately delete notes themselves, they're no longer needed (this will not touch the database, just memory!)
+		$this->individualNotes = array();		
+	} //endof function onIndividualNotesLoaded
+
+
+	private function sortNotes() {
+		usort($this->individualNotes, function($a, $b) {
+			// Compare by turn first
+			if ($a->turn == $b->turn) {
+				// If turns are equal, compare by phase
+				return ($a->phase < $b->phase) ? -1 : 1;
+			}
+			return ($a->turn < $b->turn) ? -1 : 1;
+		});
+	}
+
+
+	private function isDetectedInitial($ship, $gameData) {
+		$revealed = false;
+
+		foreach($ship->systems as $weapon){ //Check for weapon fire.
+			if($weapon instanceof Weapon){
+				if($weapon->firedOffensivelyOnTurn($gameData->turn)) {
+					$revealed = true;
+					return $revealed;
+				}	
+			}
+		}
+
+		// If the ship used offensive or ELINT EW, it is revealed
+		$usedEW = $ship->getAllEWExceptDEW($gameData->turn); // Has used any EW except DEW?
+		if($usedEW > 0) $revealed = true;
+
+		return $revealed;
+	}	
+
+
+	private function isDetectedFire($ship, $gameData) {
+		// If the ship has fired this turn, it is revealed
+		foreach($ship->systems as $weapon){ //Check for weapon fire.
+			if($weapon instanceof Weapon){
+				$firingOrders = $weapon->getFireOrders($gameData->turn);
+				foreach ($firingOrders as $fireOrder) { 
+					if($fireOrder->type == "normal"){ //Ballistics already handled in Phase 1.
+						return true; //Just return, fired in Firing Phase revealing itself again even without LoS. Although who know at what without LoS...
+					}	
+				}	
+			}
+		}
+
+		// Check all enemy ships to see if any can detect this ship at end of turn
+		$blockedHexes = $gameData->getBlockedHexes(); //Just do this once outside loop
+		$pos = $ship->getHexPos(); //Just do this once outside loop		
+
+		foreach ($gameData->ships as $otherShip) {
+			// Skip friendly ships
+			if($otherShip->team === $ship->team) continue;
+			if($otherShip->isTerrain()) continue; //Ignore Terrain
+			if($otherShip->isDestroyed()) continue; //Ignore destroyed enemy ships.
+	
+			$totalDetection = 0;
+	
+			if (!$otherShip instanceof FighterFlight) {
+				if($otherShip->isDisabled()) continue;
+				// Not a fighter — use scanner systems
+				foreach($otherShip->systems as $system){
+					if($system instanceof Scanner){
+						if(!$system->isDestroyed() && !$system->isOfflineOnTurn()) $totalDetection += $system->output;
+					}
+				}	
+				// Apply detection multiplier based on ship type
+				if ($otherShip->base) {
+					$totalDetection *= 5;
+				} elseif ($otherShip->hasSpecialAbility("ELINT")) {
+					$totalDetection *= 3;				
+					$bonusDSEW = $otherShip->getEWByType("Detect Stealth", $gameData->turn);	
+					$totalDetection += $bonusDSEW*2;
+	
+				} else {
+					$totalDetection *= 2;
+				}
+			} else {
+				// Fighter unit — use offensive bonus
+				$totalDetection = $otherShip->offensivebonus;
+			}
+		
+			// Get distance to the stealth ship and check line of sight
+			$distance = mathlib::getDistanceHex($ship, $otherShip);
+			$otherPos = $otherShip->getHexPos();          
+			$noLoS = !empty($blockedHexes) && Mathlib::checkLineOfSight($pos, $otherPos, $blockedHexes);
+
+			// If within detection range, and LoS not blocked the ship is detected
+			if ($totalDetection >= $distance && !$noLoS) {  
+				return true; //Just return, if one ship can see the stealthed ship then all can.
+			}
+		}
+
+		return false; //No other conditions were true, not detected.
+
+	}//endof isDetected()	
+
+
+	private function isUndetected($ship, $gameData) {		
+		$blockedHexes = $gameData->getBlockedHexes(); //Save outside loop as this won't change.
+		$shipPosition = $ship->getHexPos(); //Save outside loop as this won't change.
+		$canStealth = true; //Default to being able to stealth again, then prove if it can't below.
+
+		//Check all enemy ships for line of sight, if none then ship can stealth again.
+		if (!empty($blockedHexes)) {  //No point checking if there are no blocked hexes.
+			foreach($gameData->ships as $enemyShip){
+				if($enemyShip->team == $ship->team) continue; //ignore ships in same team.
+				if($enemyShip->isTerrain()) continue; //Ignore Terrain
+				if($enemyShip->isDestroyed()) continue; //Ignore destroyed enemy ships.
+
+				$enemyPosition = $enemyShip->getHexPos();
+				$noLoS = false; //False means LoS not blocked
+			
+				$noLoS = Mathlib::checkLineOfSight($shipPosition, $enemyPosition, $blockedHexes);				
+
+				if(!$noLoS){ //The enemy unit can see this ship LoS not blocked.
+					$canStealth = false;
+					return $canStealth; //Just return, only need one enemy ship to have LoS to fail check.
+				}
+			}
+		}else{//Just return false, nothing to block LoS.			
+			$canStealth = false;
+			return $canStealth; 
+		}	
+
+		//Check for weapon fire.
+		foreach($ship->systems as $weapon){ 
+			if($weapon instanceof Weapon){
+				$firingOrders = $weapon->getFireOrders($gameData->turn);
+				foreach ($firingOrders as $fireOrder) { 
+					if($fireOrder->type == "normal"){ //Ballistics already handled in Phase 1, and shouldn't prevent re-stealth at end of turn.						
+						$canStealth = false;
+						return $canStealth; //Just return, fired in Firing Phase revealing itself again even without LoS. Although who know at what without LoS...
+					}	
+				}	
+			}
+		}
+ 
+		return $canStealth;
+	}	
+
+
+	public function criticalPhaseEffects($ship, $gamedata) {	
+
+		parent::criticalPhaseEffects($ship, $gamedata); // Call parent to apply base effects.
+	
+		// If Hyach Computer or Scanner is destroyed on Stealth ships, profile is increased by 3/15% permanently.
+		if (!$ship instanceof FighterFlight && !$ship->isDestroyed()) {
+			$scannerDestroyedThisTurn = false;
+			$computerDestroyedThisTurn = false;
+			$scannerPreviouslyDestroyed = false;
+			$computerPreviouslyDestroyed = false;
+	
+			foreach ($ship->systems as $system) {
+				if ($system instanceof Scanner && $system->isDestroyed()) {
+					if ($system->wasDestroyedThisTurn($gamedata->turn)) {
+						$scannerDestroyedThisTurn = true;
+					} else {
+						$scannerPreviouslyDestroyed = true;
+					}
+				}
+				if ($system instanceof HyachComputer && $system->isDestroyed()) {
+					if ($system->wasDestroyedThisTurn($gamedata->turn)) {
+						$computerDestroyedThisTurn = true;
+					} else {
+						$computerPreviouslyDestroyed = true;
+					}
+				}
+			}
+	
+			if (
+				($scannerDestroyedThisTurn || $computerDestroyedThisTurn) &&
+				!$scannerPreviouslyDestroyed && !$computerPreviouslyDestroyed
+			) {
+				$cnc = $ship->getSystemByName("CnC");
+				if ($cnc) {
+					for ($i = 0; $i < 3; $i++) {
+						$crit = new ProfileIncreased(-1, $ship->id, $cnc->id, 'ProfileIncreased', $gamedata->turn + 1);
+						$crit->updated = true;
+						$cnc->criticals[] = $crit;
+					}
+				}
+			}
+		}
+	}//endof function criticalPhaseEffects
+
+
+	public function stripForJson(){
+        $strippedSystem = parent::stripForJson();
+        $strippedSystem->detected = $this->detected;	        
+        return $strippedSystem;
+    }
+
 } //endof Stealth
+
 
 class Fighterimprsensors extends ShipSystem implements SpecialAbility{    
     public $name = "fighterimprsensors";
@@ -562,6 +840,7 @@ class MagGravReactorTechnical extends MagGravReactor{
 */		
 	protected $doCountForCombatValue = false;
     public $iconPath = "reactorTechnical.png";
+	public $isTargetable = false; //cannot be targeted ever!	
 	public function setSystemDataWindow($turn){
 		$this->data["Output"] = $this->output;
 		parent::setSystemDataWindow($turn);     
@@ -1291,7 +1570,8 @@ class ElintScanner extends Scanner implements SpecialAbility{
         $this->data["Special"] .= "<br> - SDEW: boosts target's DEW (by 1 for 2 points allocated). Range 30 hexes (at both declaration and firing).";		     
         $this->data["Special"] .= "<br> - Blanket Protection: all friendly units within 20 hexes (incl. fighters) get +1 DEW per 4 points allocated. Cannot combine with other ElInt activities.";		     
         $this->data["Special"] .= "<br> - Disruption: Reduces target enemy ships' OEW and CCEW by 1 per 3 points allocated (split evenly between targets, CCEW being counted as one target; cannot bring OEW on a target below 0). Range 30 hexes (at both declaration and firing).";	
-    }
+		$this->data["Special"] .= "<br> - Detect Stealth: Increases stealth detection range of this ship by +2 per point of EW used.";	    
+	}
 	/*
 	public function markImproved(){	parent::markImproved();   }
 	public function markAdvanced(){	parent::markImproved();	}
@@ -1715,7 +1995,7 @@ class SecondaryCnC extends ShipSystem{
 			//add Secondary C&C destruction - without actual damage, just desstruction, so it can be tied to original weapon impact without affecting damage done numbers
 			$damageEntry = new DamageEntry(-1, $damage->shipid, -1, $damage->turn, $this->id, 0, 0, 0, $damage->fireorderid, true, false, "Secondary C&C - marking destroyed", $damage->damageclass, $damage->shooterid, $damage->weaponid);
 			$damageEntry->updated = true;
-			$struct->damage[] = $damageEntry;
+			$this->damage[] = $damageEntry;
 		}
     } //endof function criticalPhaseEffects	
 	
@@ -2010,7 +2290,9 @@ class JumpEngine extends ShipSystem{
     public $boostEfficiency = 0;    
     
 	//JumpEngine tactically  is not important at all!
-	public $repairPriority = 8;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
+	public $repairPriority = 6;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
+
+	private $preJumpValue = 0; //Will be used to store ship's Combat Value at the moment it jumped.
     
     function __construct($armour, $maxhealth, $powerReq, $delay){
         parent::__construct($armour, $maxhealth, $powerReq, 0);
@@ -2054,8 +2336,8 @@ class JumpEngine extends ShipSystem{
 		$rammingSystem = $ship->getSystemByName("RammingAttack");
 		$fireOrderType = $jumpFailure ? 'JumpFailure' : 'HyperspaceJump';
 		$pubNotes = $jumpFailure
-			? " attempts to jump to hyperspace, but damage to the Jump Drive causes the ship to be destroyed."
-			: " activates Jump Drive.";
+			? " attempts to jump to hyperspace, but damage to the Jump Drive causes the ship to be destroyed (" . $missingHealthPercentage . "% chance of failure)."
+			: " successfully jumps to hyperspace (" . $missingHealthPercentage . "% chance of failure).";
 	
 		if ($rammingSystem) {
 			$newFireOrder = new FireOrder(
@@ -2068,7 +2350,15 @@ class JumpEngine extends ShipSystem{
 			$newFireOrder->addToDB = true;
 			$rammingSystem->fireOrders[] = $newFireOrder;
 		}
-	
+
+		//Create note BEFORE we destroy the primary structure, so CV is not automatically zeroed.
+		if($fireOrderType == 'HyperspaceJump'){										
+			$notekey = 'jumped';
+			$noteHuman = 'jumped';
+			$noteValue = $ship->calculateCombatValue();
+			$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gamedata->turn,$gamedata->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
+		}		
+
 		// Destroy the primary structure in either event
 		$primaryStruct = $this->unit->getStructureSystem(0);
 		if ($primaryStruct) {
@@ -2087,8 +2377,37 @@ class JumpEngine extends ShipSystem{
 				$damageEntry->weaponid = $rammingSystem->id;
 			}
 		}
+
 	}
-	
+
+	public function onIndividualNotesLoaded($gamedata){
+		foreach ($this->individualNotes as $currNote) {			    	
+			//Insert the noteValue (e.g. combatValue when ship jumped) in appropriate variable
+			$this->preJumpValue = $currNote->notevalue;
+		}				
+	}//endof onIndividualNotesLoaded
+
+
+	public function hasJumped() {		
+		$ship = $this->getUnit();
+
+		//Check damage entries, and remove Hyperspace jump entry, to see if ship was 'destroyed' by jumping not actual damage.	    
+		$struct = $ship->getStructureSystem(0);       
+        $maxHealth = $struct->maxhealth;
+        $totalDamage = 0;
+        foreach ($struct->damage as $entry) {
+            if ($entry->damageclass !== 'HyperspaceJump') $totalDamage += $entry->damage; //Only count non-jump damage, as jumping destroys ship anyway.
+        }
+             
+        if($totalDamage < $maxHealth) return true; //The other damage sustained has not destroyed this ship, jumping has.
+		
+        return false;
+	}   	
+
+	public function getCVBeforeJump() {		
+        return $this->preJumpValue;
+	}   	
+
      public function setSystemDataWindow($turn){
         $this->data["Special"] = "<br>Boost in Initial Orders to jump to hyperspace at end of turn.";	
         $this->data["Special"] .= "<br>WARNING - Jumping to hyperspace REMOVES ship from rest of the battle.";
@@ -2504,7 +2823,10 @@ public function onIndividualNotesLoaded($gamedata)
              
         //calculate $this->BFCPtotal_used,
         $this->BFCPtotal_used = 0;
- 		$this->BFCPtotal_used = array_sum($this->allocatedBFCP);  
+ 		//$this->BFCPtotal_used = array_sum($this->allocatedBFCP); //Amended during PHP8 update - DK 25.6.25
+         foreach( $this->allocatedBFCP as $alloc){
+             if ( (isset($alloc)) && (is_numeric($alloc)))    $this->BFCPtotal_used += $alloc;
+        }		  
  		  
  }//endof onIndividualNotesLoaded
  
@@ -2587,6 +2909,7 @@ class HyachSpecialists extends ShipSystem{
 	
     
     protected $possibleCriticals = array(); //no available criticals - in fact, this system is a technicality and should never be hit
+	//public $deploymentTurn = 1;
     
 
     function __construct( $specTotal  ){ //technical object, does not need typical system attributes (armor, structure...)
@@ -2602,6 +2925,30 @@ class HyachSpecialists extends ShipSystem{
             return $b->repairCost - $a->repairCost; //costlier first!
         }else return $a->id - $b->id;
     } //endof function sortSystemsByRepairPriority
+
+
+	public function doIndividualNotesTransfer(){   
+	    // Example array from Front End:
+	    //     "Defence" => array(1, 2),
+	    //     "Engine" => array(1, 0)  );
+	    
+	    // Data received in variable individualNotesTransfer, further functions will look for it in currchangedSpec
+	    if (is_array($this->individualNotesTransfer)) {
+	        foreach ($this->individualNotesTransfer as $specType => $specValues) {
+	            foreach ($specValues as $specAction) {
+	                if ($specAction === 1) { // Specialist has been selected.
+	                    // Add $specType key to $this->currSelectedSpec
+	                    $this->currSelectedSpec[] = $specType; // Append $specType to $this->currSelectedSpec array
+	                } elseif ($specAction === 2) { // Specialist has been used.
+	                    // Add $specType key to $this->currchangedSpec
+	                    $this->currchangedSpec[] = $specType; // Append $specType to $this->currchangedSpec array
+	                }
+	            }
+	        }
+	    }                                	   
+	    $this->individualNotesTransfer = array(); // Empty, just in case
+	}
+
 
 //	 this method generates additional non-standard informaction in the form of individual system notes in this case: 
 //	 - Initial phase: check setting changes made by user, convert to notes	
@@ -2621,18 +2968,16 @@ class HyachSpecialists extends ShipSystem{
 							}
 						}
 						$this->onIndividualNotesLoaded($gameData);
-	
 
-					if ($gameData->turn==1){
-						
-						foreach ($this->currSelectedSpec as $specialistType) {//Take Front end data on Turn 1 and generate available Specs.
+					
+						foreach ($this->currSelectedSpec as $specialistType) {//Take Front end data on deployment turn and generate available Specs.
 
-						$notekey = 'available;' . $specialistType; //Make those Specialist Types available for rest of game.
-						$noteHuman = 'Specialist available';
-						$noteValue = 1; //Max Specialists is always 1, value not actually used for this type of note.
-						$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
+							$notekey = 'available;' . $specialistType; //Make those Specialist Types available for rest of game.
+							$noteHuman = 'Specialist available';
+							$noteValue = 1; //Max Specialists is always 1, value not actually used for this type of note.
+							$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
 						}
-					}	
+						
 
 															
 						foreach($this->currchangedSpec as $specialistType){//Take Front end data and generate used Specs.
@@ -2675,6 +3020,7 @@ class HyachSpecialists extends ShipSystem{
 
 						            if ($strongestValue > 0) { // Computer actually exists to be enhanced!
 						                $strongestSystem->output += 2;
+										$strongestSystem->BFCPpertype += 1;
 						            }	
 								} 		
 							}
@@ -2682,8 +3028,8 @@ class HyachSpecialists extends ShipSystem{
 					$this->specAllocatedCount[$explodedKey[1]] = 1;//To show it has been used this turn in system info tooltip.
 						
 				}else if ($explodedKey[1] == 'Defence'){ //Ship profiles reduced by 5, intercept ratings +10 ,
-					$ship->forwardDefense -= 1;
-					$ship->sideDefense -= 1;
+					$ship->forwardDefense -= 2;
+					$ship->sideDefense -= 2;
 					
 					foreach ($ship->systems as $system){
 						if ($system instanceof Weapon){
@@ -2741,18 +3087,33 @@ class HyachSpecialists extends ShipSystem{
 					$this->specAllocatedCount[$explodedKey[1]] = 1;//To show it has been used this turn in system info tooltip.
 						
 				}else if ($explodedKey[1] == 'Maneuvering'){ //Reduce Turn Cost and Turn Delay by one step.
+				 	$strongestSystem = null;
+					$strongestValue = -1;
+						foreach ($ship->systems as $system) {
+							if ($system->isDestroyed($gamedata->turn)) continue;//don't need to do anything on destroyed systems.								
+						    if ($system instanceof Engine) {
+						        if ($system->output > $strongestValue) {
+						            $strongestValue = $system->output;
+						            $strongestSystem = $system;
 
+						            if ($strongestValue > 0) { // Engine actually exists to be enhanced!
+						                $specialistBoost = floor($strongestSystem->output * 0.10);
+						                $strongestSystem->output += $specialistBoost;
+						            }	
+								} 
+							}
+						}			
 			            if ($ship->turncost == 0) $ship->turncost = 0;
-			            if ($ship->turncost == 0.5) $ship->turncost = 0.33;
-			            if ($ship->turncost == 0.66) $ship->turncost = 0.5;
-			            if ($ship->turncost == 1) $ship->turncost = 0.66;
-			            if ($ship->turncost == 1.5) $ship->turncost = 1;
+			            if ($ship->turncost == 0.5) $ship->turncost = 0.25;
+			            if ($ship->turncost == 0.66) $ship->turncost = 0.33;
+			            if ($ship->turncost == 1) $ship->turncost = 0.5;
+			            if ($ship->turncost == 1.5) $ship->turncost = 0.75;
 
 			            if ($ship->turndelaycost == 0) $ship->turndelaycost = 0;        
-			            if ($ship->turndelaycost == 0.5) $ship->turndelaycost = 0.33;
-			            if ($ship->turndelaycost == 0.66) $ship->turndelaycost = 0.5;
-			            if ($ship->turndelaycost == 1) $ship->turndelaycost = 0.66;
-			 			if ($ship->turndelaycost == 1.5) $ship->turndelaycost = 1;
+			            if ($ship->turndelaycost == 0.5) $ship->turndelaycost = 0.25;
+			            if ($ship->turndelaycost == 0.66) $ship->turndelaycost = 0.33;
+			            if ($ship->turndelaycost == 1) $ship->turndelaycost = 0.5;
+			 			if ($ship->turndelaycost == 1.5) $ship->turndelaycost = 0.75;
 		 								
 					$this->specAllocatedCount[$explodedKey[1]] = 1;	
 													
@@ -2787,7 +3148,7 @@ class HyachSpecialists extends ShipSystem{
 									$noOfCrits = count($critList);							
 									$critRepairs = 1;							
 									if($noOfCrits>0){
-										usort($critList, "self::sortCriticalsByRepairPriority");			
+										usort($critList, [self::class, 'sortCriticalsByRepairPriority']);			
 										foreach ($critList as $critDmg){ //repairable criticals of current system
 											if ($critRepairs > 0){//Can still repair!
 //												if ($critDmg->phpclass == )
@@ -2825,7 +3186,7 @@ class HyachSpecialists extends ShipSystem{
 					$noOfCrits = count($critList);
 					$critRepairs = 2;
 					if($noOfCrits>0){
-						usort($critList, "self::sortCriticalsByRepairPriority");
+						usort($critList, [self::class, 'sortCriticalsByRepairPriority']);
 		
 						foreach ($critList as $critDmg){ //repairable criticals of current system
 							if ($critRepairs > 0){//Can still repair!
@@ -2869,7 +3230,7 @@ class HyachSpecialists extends ShipSystem{
 									$noOfCrits = count($critList);							
 									$critRepairs = 1;							
 									if($noOfCrits>0){
-										usort($critList, "self::sortCriticalsByRepairPriority");		
+										usort($critList, [self::class, 'sortCriticalsByRepairPriority']);		
 										foreach ($critList as $critDmg){ //repairable criticals of current system
 											if ($critRepairs > 0){//Can still repair!
 												$critDmg->turnend = $gamedata->turn-1;//actual repair. Use previous turn so it disappears after Intitial Orders (but would effect then, time to repair etc.
@@ -2889,7 +3250,7 @@ class HyachSpecialists extends ShipSystem{
 					$this->specAllocatedCount[$explodedKey[1]] = 1;//To show it has been used this turn in system info tooltip.
 						
 				}else if ($explodedKey[1] == 'Targeting'){ //+3% to hit on ALL weapons this turn
-					$ship->toHitBonus += 1;	
+					$ship->toHitBonus += 0.6;	
 					$this->specAllocatedCount[$explodedKey[1]] = 1;
 										
 				}else if ($explodedKey[1] == 'Thruster'){ //Remove limits on Thruster rating, improve Engine efficiency.
@@ -2953,35 +3314,35 @@ class HyachSpecialists extends ShipSystem{
 			}
 		}
 	if 	(TacGamedata::$currentTurn == 1 && TacGamedata::$currentPhase == 1){	//Show all Specialist info on Turn 1 Initial Orders.
-	        $this->data["Special"] = "This is a technical system used for Specialist management.";
-	        $this->data["Special"] .= "<br>On Turn 1 Initial Orders, you must select which Specialists this ship will have available.";        	   
-	        $this->data["Special"] .= "<br>You may then use Specialist(s) by clicking + button in any Initial Orders phase (including Turn 1)."; 
-	        $this->data["Special"] .= "<br>Each Specialists can be used once, with these effects on the turn they are used:";
-			$this->data["Special"] .= "<br>  - Computer: +2 Bonus Fire Control Points."; 
-			$this->data["Special"] .= "<br>  - Defence: Profiles lowered by 5, intercept ratings +10."; 
-			$this->data["Special"] .= "<br>  - Engine: +25% Thrust and remove an Engine critical."; 
-			$this->data["Special"] .= "<br>  - Maneuvering: Turn Cost and Delay reduced.";
-			$this->data["Special"] .= "<br>  - Sensor: +1 EW and remove a Scanner critical.";
-			$this->data["Special"] .= "<br>  - Power: Extra power and remove a Reactor critical.";
+	        $this->data["Special"] = "Technical system for Specialist management.";
+	        $this->data["Special"] .= "<br>On the Turn this ship deploys, select which Specialists this ship will have available.";        	   
+	        $this->data["Special"] .= "<br>Activate Specialist(s) by clicking their '+' button during Initial Orders."; 
+	        $this->data["Special"] .= "<br>Each Specialist can be used once, with these effects on the turn they are used:";
+			$this->data["Special"] .= "<br>  - Computer: +2 BFCP, +1 BFCP per type."; 
+			$this->data["Special"] .= "<br>  - Defence: Profiles lowered by 10%, all intercept ratings +10%."; 
+			$this->data["Special"] .= "<br>  - Engine: +25% Thrust, remove an Engine critical."; 
+			$this->data["Special"] .= "<br>  - Maneuvering: +10% thrust, Halves Turn Cost / Delay.";
+			$this->data["Special"] .= "<br>  - Sensor: +1 EW, remove a Scanner critical.";
+			$this->data["Special"] .= "<br>  - Power: +8-12 power, remove a Reactor critical.";
 			$this->data["Special"] .= "<br>  - Repair: Remove two critical effects.";						 			
-			$this->data["Special"] .= "<br>  - Targeting: +5% to hit on all weapons.";
-			$this->data["Special"] .= "<br>  - Thruster: No thruster limits and engine efficiency improved.";
+			$this->data["Special"] .= "<br>  - Targeting: All weapons +3% to hit.";
+			$this->data["Special"] .= "<br>  - Thruster: No thruster limits and Engine Efficiency improved.";
 			$this->data["Special"] .= "<br>  - Weapon: All weapons +3 damage this turn.";								 
 	    }else{ //After Initials Orders on Turn 1, reduce data so that it just shows relevant info on Specialists selected.
-	        $this->data["Special"] = "This is a technical system used for Specialist management.";       	   
-	        $this->data["Special"] .= "<br>You use Specialist(s) by clicking + button in any Initial Orders phase (including Turn 1)."; 
+	        $this->data["Special"] = "Technical system used for Specialist management.";       	   
+	        $this->data["Special"] .= "<br>Activate Specialist(s) by clicking their '+' button during Initial Orders."; 
 	        $this->data["Special"] .= "<br>Each Specialists can be used once, with these effects on the turn they are used:";
 				foreach($this->allocatedSpec as $specialistType => $specValue) {
-					if ($specialistType == 'Computer') $this->data["Special"] .= '<br>  - '.$specialistType . ': +2 Bonus Fire Control Points.';
-					if ($specialistType == 'Defence') $this->data["Special"] .= '<br>  - '.$specialistType . ': Profiles lowered by 5, intercept ratings +10.';
-					if ($specialistType == 'Engine') $this->data["Special"] .= '<br>  - '.$specialistType . ': +25% Thrust and remove an Engine critical.';
-					if ($specialistType == 'Maneuvering') $this->data["Special"] .= '<br>  - '.$specialistType . ': Turn Cost and Delay reduced.';
-					if ($specialistType == 'Repair') $this->data["Special"] .= '<br>  - '.$specialistType . ' :Remove two critical effects.';
-					if ($specialistType == 'Sensor') $this->data["Special"] .= '<br>  - '.$specialistType . ' :+1 EW and remove a Scanner critical.';
-					if ($specialistType == 'Power') $this->data["Special"] .= '<br>  - '.$specialistType . ' :Extra power and remove a Reactor critical.';
-					if ($specialistType == 'Targeting') $this->data["Special"] .= '<br>  - '.$specialistType . ': +5% to hit on all weapons.';
-					if ($specialistType == 'Thruster') $this->data["Special"] .= '<br>  - '.$specialistType . ': No thruster limits and engine efficiency improved.';
-					if ($specialistType == 'Weapon') $this->data["Special"] .= '<br>  - '.$specialistType . ': All weapons +3 damage this turn.';						
+					if ($specialistType == 'Computer') $this->data["Special"] .= '<br>  -  '.$specialistType . ': +2 BFCP, +1 BFCP per type.';
+					if ($specialistType == 'Defence') $this->data["Special"] .= '<br>  -  '.$specialistType . ': Profiles lowered by 10%, intercept ratings +10%.';
+					if ($specialistType == 'Engine') $this->data["Special"] .= '<br>  -  '.$specialistType . ': +25% Thrust, remove an Engine critical.';
+					if ($specialistType == 'Maneuvering') $this->data["Special"] .= '<br>  -  '.$specialistType . ': +10% thrust, Halves Turn Cost / Delay.';
+					if ($specialistType == 'Repair') $this->data["Special"] .= '<br>  -  '.$specialistType . ' :Remove two critical effects.';
+					if ($specialistType == 'Sensor') $this->data["Special"] .= '<br>  -  '.$specialistType . ' :+1 EW, remove a Scanner critical.';
+					if ($specialistType == 'Power') $this->data["Special"] .= '<br>  -  '.$specialistType . ' :+8-12 power, remove a Reactor critical.';
+					if ($specialistType == 'Targeting') $this->data["Special"] .= '<br>  -  '.$specialistType . ': All weapons +3% to hit.';
+					if ($specialistType == 'Thruster') $this->data["Special"] .= '<br>  -  '.$specialistType . ': No thruster limits and engine efficiency improved.';
+					if ($specialistType == 'Weapon') $this->data["Special"] .= '<br>  -  '.$specialistType . ': All weapons +3 damage this turn.';						
 				}        
 		}         	 	
     }
@@ -3000,29 +3361,7 @@ class HyachSpecialists extends ShipSystem{
         $strippedSystem->specIncreased = $this->specIncreased;                             		
         return $strippedSystem;
     }
-
 	
-	public function doIndividualNotesTransfer(){   
-	    // Example array from Front End:
-	    //     "Defence" => array(1, 2),
-	    //     "Engine" => array(1, 0)  );
-	    
-	    // Data received in variable individualNotesTransfer, further functions will look for it in currchangedSpec
-	    if (is_array($this->individualNotesTransfer)) {
-	        foreach ($this->individualNotesTransfer as $specType => $specValues) {
-	            foreach ($specValues as $specAction) {
-	                if ($specAction === 1) { // Specialist has been selected.
-	                    // Add $specType key to $this->currSelectedSpec
-	                    $this->currSelectedSpec[] = $specType; // Append $specType to $this->currSelectedSpec array
-	                } elseif ($specAction === 2) { // Specialist has been used.
-	                    // Add $specType key to $this->currchangedSpec
-	                    $this->currchangedSpec[] = $specType; // Append $specType to $this->currchangedSpec array
-	                }
-	            }
-	        }
-	    }                                	   
-	    $this->individualNotesTransfer = array(); // Empty, just in case
-	}	
 									
 } //endof HyachSpecialists
 
@@ -3125,6 +3464,8 @@ class AdaptiveArmorController extends ShipSystem{
 	public $allocatedAA = array(); //AA points allocated for given damage type
 	public $availableAA = array(); //AA points available for allocation for given damage type
 	public $currchangedAA = array(); //AA points allocated in front end
+
+	public $pressignedReset = false; //New variable for Front End to reset pre-assigned to 0, so that they can be set on deployment turn - DK - May 2025
 	
 	
     
@@ -3326,16 +3667,18 @@ class AdaptiveArmorController extends ShipSystem{
 	
     public function setSystemDataWindow($turn){
         parent::setSystemDataWindow($turn); 
-		$this->data["Adaptive Armor"] =  $this->AAtotal_used . '/' . $this->AAtotal;
-		$this->data[" - per weapon type"] =  $this->AApertype;
-		$this->data[" - preassigned"] =  $this->AApreallocated_used . '/' . $this->AApreallocated;
+		$this->data["Total AA Assigned"] =  $this->AAtotal_used . '/' . $this->AAtotal;
+		$this->data[" - Maximum per weapon type"] =  $this->AApertype;
+		//$this->data[" - Pre-assigned Amount"] =  $this->AApreallocated_used . ' out of ' . $this->AApreallocated;
+		$this->data[" - Pre-assigned remaining"] =  $this->AApreallocated - $this->AApreallocated_used;		
 		foreach($this->allocatedAA as $dmgType=>$AAallocated){
 			$AAavailable = $this->availableAA[$dmgType];
-			$this->data[' - '.$dmgType] =  $AAallocated . '/' . $AAavailable;
+			//$this->data[' - '.$dmgType] =  $AAallocated . '/' . $AAavailable;
+			$this->data[' - '.$dmgType] =  $AAallocated;
 		}
         $this->data["Special"] = "This system is responsible for Adaptive Armor settings management.";	   
-        $this->data["Special"] .= "<br>You may assign AA points in Initial phase.";
-        $this->data["Special"] .= "<br>Pre-set AA points may be used in turn 1 only.";
+        $this->data["Special"] .= "<br>You may assign AA points in Initial Orders phase.";
+        $this->data["Special"] .= "<br>Pre-assigned AA points may only be used on the turn this ship deploys.";
         $this->data["Special"] .= "<br>AA points set in previous turns cannot be unassigned.";
         $this->data["Special"] .= "<br>AA points are unlocked individually down to superheavy fighters - lighter craft unlock AA points as whole flights. Assignment is always individual.";
     }
@@ -3856,7 +4199,7 @@ class SelfRepair extends ShipSystem{
 			
 			$systemList[] = $system;			
 		}
-		usort($systemList, "self::sortSystemsByRepairPriority");
+		usort($systemList, [self::class, 'sortSystemsByRepairPriority']);
 		
 
 // Add GTS		
@@ -3877,7 +4220,8 @@ class SelfRepair extends ShipSystem{
         }
 		$noOfCrits = count($critList);
         if($noOfCrits>0){
-            usort($critList, "self::sortCriticalsByRepairPriority");
+			usort($critList, [self::class, 'sortCriticalsByRepairPriority']);
+			
             foreach ($critList as $critDmg){ //repairable criticals of current system, already sorted
                 if ($critDmg->repairCost <= $availableRepairPoints){//execute repair!
                     $system = $ship->getSystemById($critDmg->systemid); //We already have the ship object passed to criticalPhaseEffects(), use it to get the system the foreach loop is considering at this point'
@@ -4503,6 +4847,7 @@ class PowerCapacitor extends ShipSystem{
     
 	//power held
 	public $powerCurr = 0;
+	private $powerMax = 0;
 	public $capacityBonus = 0; //additional capacity - potentially set by enhancements
 	public $powerReceivedFromFrontEnd = 0; //communication variable	
 	public $powerReceivedFromBackEnd = 0; //communication variable
@@ -4641,6 +4986,34 @@ capacitor is completely emptied.
 					break;			
 			}
 		}
+
+		//We can apply petal effects here so they are visible for player (note, criticals don't seem to get saved to database here, prolly because $dbManager->submitCriticals isn't called)			
+		if($gamedata->phase == 2 || $gamedata->phase == 3){
+	
+			$boostlevel = $this->getBoostLevel($gamedata->turn);
+			if ($boostlevel <1) return; //not boosted - no crit!
+			$ship = $this->unit;
+			foreach($ship->systems as $system){
+				if($system->location == 0 && $system->isTargetable){	//Only targetable primary systems get reduced armor
+					$crit = new ArmorReduced(-1, $ship->id, $system->id, "ArmorReduced", $gamedata->turn, $gamedata->turn);
+					$crit->updated = true;
+					//$crit->inEffect = true;
+					$system->criticals[] =  $crit;
+					$crit = new ArmorReduced(-1, $ship->id, $system->id, "ArmorReduced", $gamedata->turn, $gamedata->turn);
+					$crit->updated = true;
+					//$crit->inEffect = true;
+					$system->criticals[] =  $crit;
+				}
+			}
+			$cnc = $ship->getSystemByName("CnC"); //Now find CnC and increase profile by 5% using a spearate crit
+			if($cnc){				 		
+				$crit = new ProfileIncreased(-1, $ship->id, $cnc->id, "ProfileIncreased", $gamedata->turn, $gamedata->turn);
+				$crit->updated = true;
+				//$crit->inEffect = true;
+				$cnc->criticals[] =  $crit;
+			}									
+		}	
+
 	} //endof function onIndividualNotesLoaded
 	
 	
@@ -4652,12 +5025,13 @@ capacitor is completely emptied.
 		$this->data["Power regeneration"] =  'Initial phase only';
         $this->data["Special"] = "This system is responsible for generating and storing power (Reactor is nearby for technical purposes).";	   
 		if ($this->boostable){
-			$this->data["Special"] .= "<br>You may boost this system (open petals) to increase recharge rate by 50% - at the cost of treating all armor values as 2 points lower.";
+			$this->data["Special"] .= "<br>You may open ship petals by boosting this system, increasing generation by 50% on the following turn - however all primary systems lose 2 Armour and Defence Profiles increase 5% for the current turn.";
 		}
 		$this->data["Special"] .= "<br>Destroying Capacitor disables (but does not destroy) the ship.";
     }
 	
 	public function beforeFiringOrderResolution($gamedata){ //actually mark armor reduced temporary critical if Petals are open
+		/* //Moved to onIndividualNotesLoaded() to apply full TT effects.
 		$boostlevel = $this->getBoostLevel($gamedata->turn);
 		if ($boostlevel <1) return; //not boosted - no crit!
 		$ship = $this->unit;
@@ -4671,6 +5045,33 @@ capacitor is completely emptied.
 			$crit->inEffect = true;
 			$system->criticals[] =  $crit;
 		}
+		*/
+			//Actually make sure petal effects are applied.	
+			$boostlevel = $this->getBoostLevel($gamedata->turn);
+			if ($boostlevel <1) return; //not boosted - no crit!
+			$ship = $this->unit;
+			foreach($ship->systems as $system){
+				if($system->location == 0 && $system->isTargetable){	//Only targetable primary systems get reduced armor
+					$crit = new ArmorReduced(-1, $ship->id, $system->id, "ArmorReduced", $gamedata->turn, $gamedata->turn);
+					$crit->updated = true;
+					$crit->inEffect = true;
+					$system->criticals[] =  $crit;
+					$crit = new ArmorReduced(-1, $ship->id, $system->id, "ArmorReduced", $gamedata->turn, $gamedata->turn);
+					$crit->updated = true;
+					$crit->inEffect = true;
+					$system->criticals[] =  $crit;
+				}
+			}
+			$cnc = $ship->getSystemByName("CnC"); //Now find CnC and increase profile by 5% using a spearate crit
+			if($cnc){				 		
+				$crit = new ProfileIncreased(-1, $ship->id, $cnc->id, "ProfileIncreased", $gamedata->turn, $gamedata->turn);
+				$crit->updated = true;
+				$crit->inEffect = true;
+				$cnc->criticals[] =  $crit;
+			}			
+		
+
+
 	}	
 	
         private function getBoostLevel($turn){
@@ -5383,6 +5784,7 @@ class AmmoMagazine extends ShipSystem {
 	public $output = 0;
 	
 	private $interceptorUsed = 0;//Communication variable.	
+	private $ammoAlreadyUsed = array();
 		
     
     function __construct($capacity){ //magazine capacity
@@ -6065,7 +6467,7 @@ class AmmoMissileJ extends AmmoMissileTemplate{
 	public $doNotIntercept = true;
 	public $noLockPenalty = false;	               	
     
-	private static $alreadyJammed = array();     	
+	public static $alreadyJammed = array();     	
 
     public function getDamage($fireOrder) //actual function to be called, as with weapon!
     {
@@ -6087,8 +6489,7 @@ class AmmoMissileJ extends AmmoMissileTemplate{
 					$affectedUnits = $gamedata->getShipsInDistance($target, 5);	//Find all ships within 5 hexes.
 				
 					foreach ($affectedUnits as $targetShip) { //Apply Jammer marker to those ships.
-						if (isset(AmmoMissileJ::$alreadyJammed[$targetShip->id])) return; //But not if jammed already.
-						$targetShip->jammerMissile = true;	//Give appropriate marker to ships in range.									                    		
+						if (isset(AmmoMissileJ::$alreadyJammed[$targetShip->id])) return; //But not if jammed already.									                    		
 						AmmoMissileJ::$alreadyJammed[$targetShip->id] = true;//mark jammed already.
 					}
 	}//endof function beforeFiringOrderResolution 

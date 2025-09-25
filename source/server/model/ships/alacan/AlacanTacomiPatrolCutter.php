@@ -4,14 +4,14 @@ class AlacanTacomiPatrolCutter extends MediumShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 300;
-	$this->faction = "Alacan Republic";
+	    $this->pointCost = 300;
+	    $this->faction = "Alacan Republic";
         $this->phpclass = "AlacanTacomiPatrolCutter";
         $this->imagePath = "img/ships/AlacanTacomi.png";
-			$this->canvasSize = 125; //img has 125px per side
+		$this->canvasSize = 100; //img has 125px per side
         $this->shipClass = "Tacomi Patrol Cutter";
 
-	$this->isd = 2208;
+	    $this->isd = 2208;
         
         $this->forwardDefense = 12;
         $this->sideDefense = 12;

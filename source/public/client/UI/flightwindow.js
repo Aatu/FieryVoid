@@ -13,25 +13,46 @@ window.flightWindowManager = {
 	},
 
 	open: function open(ship) {
-
 		var old;
-		if (ship.userid == gamedata.thisplayer) {
-			old = $(".shipwindow.owned:visible");
+
+		if (gamedata.turn != 0) {
+			if (ship.userid == gamedata.thisplayer) {
+				old = $(".shipwindow.owned:visible");
+			} else {
+				old = $(".shipwindow.enemy:visible");
+			}
 		} else {
-			old = $(".shipwindow.enemy:visible");
+			old = $(".shipwindow:visible");
 		}
 
 		var n = ship.shipStatusWindow;
 
 		if (!n) return;
 
-		if (n.css("display") == "block") return;
+		if (gamedata.turn != 0) if (n.css("display") == "block") return;
 
 		if (old.length) {
 			old.hide();
-			n.css("top", old.css("top")).css("left", old.css("left"));
+
+			if (gamedata.turn != 0) {
+				old.hide();
+				n.css("top", old.css("top")).css("left", old.css("left"));
+			} else {
+				// Set position explicitly in buy phase
+				n.css("top", old.css("top"));
+
+				// Reset both sides before applying only one
+				n.removeClass("left right"); // optionally clear positioning classes
+
+				if (ship.userid == 0) {
+					n.css("left", "30px");  // left side for store ship
+				} else {
+					n.css("right", "30px"); // right side for fleet ship
+				}
+			}
 		}
 
+		this.updateNotes(ship);
 		n.show();
 	},
 
@@ -61,12 +82,23 @@ window.flightWindowManager = {
 
 		shipwindow.draggable();
 
-		if (ship.userid == gamedata.thisplayer) {
-			shipwindow.addClass("owned");
-			shipwindow.css("left", "50px");
-		} else {
-			shipwindow.addClass("enemy");
-			shipwindow.css("right", "50px");
+		//In Buy Phase manually set where window opens.
+		if(gamedata.phase == 0){
+			if(ship.userid == 0){
+				shipwindow.addClass("owned");
+				shipwindow.addClass("left");
+			}else{
+				shipwindow.addClass("enemy");
+				shipwindow.addClass("right");
+			}
+		}else{	
+			if (ship.userid == gamedata.thisplayer) {
+				shipwindow.addClass("owned");
+				shipwindow.css("left", "50px");
+			} else {
+				shipwindow.addClass("enemy");
+				shipwindow.css("right", "50px");
+			}
 		}
 
 		shipwindow.data("ship", ship.id);

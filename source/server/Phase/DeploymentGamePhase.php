@@ -8,6 +8,15 @@ class DeploymentGamePhase implements Phase
 
         $dbManager->setPlayersWaitingStatusInGame($gameData->id, false);
         $dbManager->updateGamedata($gameData);
+
+        //Checks for late-deploying slots to see if next phases skipped - DK 
+        foreach($gameData->slots as $slot){
+            $minTurnDeploy = $gameData->getMinTurnDeployedSlot($slot->slot, $slot->depavailable);
+            if($minTurnDeploy > $gameData->turn || ($slot->surrendered !== null && $slot->surrendered <= $gameData->turn)){ //Entire slot deploys after current turn or has Surrendered.
+                //Set lastphase, and lastTurn to skip Initial Orders on this turn
+                $dbManager->updatePlayerSlotPhase($gameData->id, $slot->playerid, $slot->slot, 1, $gameData->turn);                
+            }     
+        } 
     }
 
     public function process(TacGamedata $gameData, DBManager $dbManager, Array $ships)
@@ -31,7 +40,7 @@ class DeploymentGamePhase implements Phase
     }
 
     private static function validateDeploymentArea($gamedata, $ship, $move){
-
+        if($ship->isTerrain()) return true; //When manually placing Terrain, they can go anywhere.
         $slot = $gamedata->slots[$ship->slot];
         $hexpos = Mathlib::hexCoToPixel($move->position);
 
@@ -90,28 +99,34 @@ class DeploymentGamePhase implements Phase
             if ($ship->userid !== $gamedata->forPlayer)
                 continue;
 
+
+            $depTurn = $ship->getTurnDeployed($gamedata);
+
             $moves = array();
             $found = false;
-            foreach ($ship->movement as $move)
-            {
-                if ($found)
-                    throw new Exception("Deployment validation failed: Found more than one deployment entry for ship $ship->name.");
-
-                if ($move->type == "deploy")
+            
+            if($depTurn == $gamedata->turn){ //Is ship deploying this turn?
+                foreach ($ship->movement as $move)
                 {
-                    $found = true;
-                    $servership = $gamedata->getShipById($ship->id);
-                    if (self::validateDeploymentArea($gamedata, $servership, $move))
+                    if ($found)
+                        throw new Exception("Deployment validation failed: Found more than one deployment entry for ship $ship->name.");
+
+                    if ($move->type == "deploy")
                     {
-                        $moves[] = $move;
-                        $servership->movement[] = $move;
-                    }else{
-                        throw new Exception("Deployment validation failed: Illegal placement. Ship: " . $ship->name . "(".$move->position->q .",".$move->position->r.")");
+                        $found = true;
+                        $servership = $gamedata->getShipById($ship->id);
+                        if (self::validateDeploymentArea($gamedata, $servership, $move))
+                        {
+                            $moves[] = $move;
+                            $servership->movement[] = $move;
+                        }else{
+                            throw new Exception("Deployment validation failed: Illegal placement. Ship: " . $ship->name . "(".$move->position->q .",".$move->position->r.")");
+                        }
                     }
                 }
             }
 
-            if (!$found)
+            if (!$found && $depTurn == $gamedata->turn) //Throw if not found and slot has deployed.
                 throw new Exception("Deployment validation failed: Entry not found for ship $ship->name.");
 
             $shipIdMoves[$ship->id] = $moves;

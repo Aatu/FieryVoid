@@ -34,7 +34,7 @@ class Utan extends FighterFlight{
         for ($i = 0; $i < $toAdd; $i++){
             $armour = array(5, 4, 4, 4);
             $fighter = new Fighter("utan", $armour, 15, $this->id);
-            $fighter->displayName = "Utan Heavy Fighter";
+            $fighter->displayName = "Utan";
             $fighter->imagePath = "img/ships/utan.png";
             $fighter->iconPath = "img/ships/utan_large.png";
 

@@ -443,6 +443,7 @@ class RogolonLtPlasmaGun extends LinkedWeapon{
         public $rangeDamagePenalty = 1;
 		public $damageBonus = 5;
 		public $priority = 5;
+		public $intercept = 0;//Changed June 2024 nothing in TT rules to say this can intercept. DK		
 
     	public $damageType = "Standard"; 
     	public $weaponClass = "Plasma"; 
@@ -450,8 +451,8 @@ class RogolonLtPlasmaGun extends LinkedWeapon{
 	function __construct($startArc, $endArc, $damageBonus=5, $nrOfShots = 2){
             $this->shots = $nrOfShots;
             $this->defaultShots = $nrOfShots;
-	    $this->damageBonus = $damageBonus;
-            $this->intercept = $nrOfShots;	
+	    	$this->damageBonus = $damageBonus;
+            //$this->intercept = $nrOfShots;	//Not for this weapon.
 	    
         if($nrOfShots === 1){
 			$this->iconPath = "lightPlasma.png";
@@ -550,7 +551,7 @@ class LightPlasmaAccelerator extends LinkedWeapon{
 		public $trailLengtharray = array(1=>10, 2=>15);
         */
 	
-        public $intercept = 2; //this weapon can intercept, surprisingly...
+        public $intercept = 0;
 		public $priority = 5;
         public $priorityArray = array(1=>5, 2=>6); //even standard shot can deal high damage due to being Plasma; charged shot is devastating
         
@@ -571,7 +572,7 @@ class LightPlasmaAccelerator extends LinkedWeapon{
 		function __construct($startArc, $endArc, $nrOfShots = 2){
 			$this->defaultShots = $nrOfShots;
 			$this->shots = $nrOfShots;
-			$this->intercept = $nrOfShots;
+			//$this->intercept = $nrOfShots;
 			parent::__construct(0, 1, 0, $startArc, $endArc);
 		}	
 
@@ -834,7 +835,7 @@ class LightPlasmaBolterFighter extends LinkedWeapon{
     public $trailLength = 12;
     public $animationExplosionScale = 0.25;
 */	
-//  public $intercept = 2; //actually this weapon probably SHOULD have interception after all! I don't think so, no other plasma fighter weapon does!
+  	public $intercept = 0; //actually this weapon probably SHOULD have interception after all! I don't think so, no other plasma fighter weapon does!
 	public $loadingtime = 1;
 	public $shots = 2;
     public $defaultShots = 2;
@@ -852,7 +853,7 @@ class LightPlasmaBolterFighter extends LinkedWeapon{
 		function __construct($startArc, $endArc, $nrOfShots = 2){
 			$this->defaultShots = $nrOfShots;
 			$this->shots = $nrOfShots;
-            		$this->intercept = $nrOfShots;
+            //$this->intercept = $nrOfShots;
 
 			parent::__construct(0, 1, 0, $startArc, $endArc);
 		}	
@@ -1437,7 +1438,8 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 				//Make a list of relevant ships e.g. this ship and enemy fighters in the game.
 				foreach($allShips as $ship){
 					if (!$ship instanceof FighterFlight) continue; //Ignore ships.
-					if($ship->isDestroyed()) continue;//Ignore destroyed flights.							
+					if($ship->isDestroyed()) continue;//Ignore destroyed flights.
+					if($ship->getTurnDeployed($gamedata) > $gamedata->turn) continue; //Ship not deployed yet.												
 					$relevantShips[] = $ship;			
 				}
 
@@ -1707,13 +1709,13 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 			}else{
 				$this->data["Special"] .= '<br>';
 			}
-			$this->data["Special"] .= 'DEFENSIVE - Fire at hex with enemy ships during the Firing Phase.';
-			$this->data["Special"] .= '<br>Applies -10 Intercept against enemy fire from hex, and -2 damage against Antimatter, Laser and Particle attacks.';
-			$this->data["Special"] .= '<br>For Ballistic weapons, target the hex from where shot was launched.';			
-			$this->data["Special"] .= '<br>ANTI-FIGHTER - Creates a cloud dealing D6+2 Plasma damage to all fighters in hex.';
-			$this->data["Special"] .= '<br>Cloud remains during next Movement Phase, damaging any fighters that move through it.';			
-			$this->data["Special"] .= '<br>Requires 1 extra power, from being boosted or Batteries.';
-			$this->data["Special"] .= '<br>NOTE - Plasma Webs are not cumulative, effects only apply once.';		 
+			$this->data["Special"] .= 'DEFENSIVE - Fires at hex during the Firing Phase.';
+			$this->data["Special"] .= '<br>Applies -10 Intercept against all enemy fire from hex, and -2 damage against Antimatter, Laser and Particle attacks.';
+			$this->data["Special"] .= '<br>For Ballistic weapons, target hex from where shot was launched.';			
+			$this->data["Special"] .= '<br>ANTI-FIGHTER - Creates plasma cloud dealing D6+2 Plasma damage to all fighters in hex.';
+			$this->data["Special"] .= '<br>Requires 1 extra power, by boosting in Initial Orders or Batteries.';
+			$this->data["Special"] .= '<br>Cloud remains during next Movement Phase, damaging fighters moving through it.';			
+			$this->data["Special"] .= '<br>Plasma Webs are NOT cumulative, each effect applies only once.';		 
 	 }
 
 

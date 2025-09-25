@@ -168,7 +168,7 @@ MolecularSlicerBeamL.prototype.initializationUpdate = function() {
 
 MolecularSlicerBeamL.prototype.doMultipleFireOrders = function (shooter, target, system) {
 	
- 	//Used to restruct only one shot against a ship.
+ 	//Used to restrict only one shot against a ship.
 	var fireOrders = this.fireOrders;
 	for (var i = fireOrders.length - 1; i >= 0; i--) {
 		if(target.shipSizeClass >= 0 && target.id === fireOrders[i].targetid && this.firingMode == 1) return; //Ships cannot be targeted more than once when allocating shots.
@@ -183,7 +183,7 @@ MolecularSlicerBeamL.prototype.doMultipleFireOrders = function (shooter, target,
 	for (var s = 0; s < this.guns; s++) {
 		var fireid = shooter.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
                         
-		var calledid = -1; //Slicers are Raking or Piercing Damage, cannot called sot!
+		var calledid = -1; //Slicers are Raking or Piercing Damage, cannot called shot!
 
 	    var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
         if(chance < 1) continue;
@@ -203,7 +203,7 @@ MolecularSlicerBeamL.prototype.doMultipleFireOrders = function (shooter, target,
 	        damageclass: 'Sweeping',
 	        chance: chance,
 	        hitmod: 5,
-	        notes: "Split"
+	        notes: "Split" //Use notes to determine damage in backe nd?
 	        };
 		
 		this.maxVariableShots -= fire.shots;

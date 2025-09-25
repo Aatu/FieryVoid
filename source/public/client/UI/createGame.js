@@ -13,7 +13,7 @@ jQuery(function ($) {
     let allowSubmit = false;
 
     // Only set allowSubmit on real mouse or touch interaction
-    $("#createGameForm input[type='submit']").on("mousedown touchstart", function () {
+    $("#createGameForm button[type='submit']").on("mousedown touchstart", function () {
         allowSubmit = true;
     });
 
@@ -31,9 +31,8 @@ jQuery(function ($) {
     $("#gamespacecheck").on("click", createGame.doGameSpaceCheck);
     $("#gamespacecheck").on("click", createGame.doFlightCheck);
     $("#movementcheck").on("click", createGame.doMovementCheck);
-    $("#desperatecheck").on("click", createGame.doDesperateCheck);
-    $("#asteroidscheck").on("click", createGame.doAsteroidsCheck);
-    $("#moonscheck").on("click", createGame.doMoonsCheck);              
+    $("#desperatecheck").on("click", createGame.doDesperateCheck);             
+    $("#terraincheck").on("click", createGame.doTerrainCheck);
     
     $(".setsizeknifefight").on("click", createGame.doSwitchSizeKnifeFight);
     $(".setswitchsizebaseassault").on("click", createGame.doSwitchSizeBaseAssault);    
@@ -47,7 +46,7 @@ jQuery(function ($) {
 window.createGame = {
     gamespace_data: { width: 42, height: 30 },
     rules: {},
-    slots: Array({ id: 1, team: 1, name: "TEAM 1", points: 3500, depx: -21, depy: 0, deptype: "box", depwidth: 10, depheight: 30, depavailable: 0 }, { id: 2, team: 2, name: "TEAM 2", points: 3500, depx: 21, depy: 0, deptype: "box", depwidth: 10, depheight: 30, depavailable: 0 }),
+    slots: Array({ id: 1, team: 1, name: "TEAM 1", points: 3500, depx: -21, depy: 0, deptype: "box", depwidth: 10, depheight: 30, depavailable: 1 }, { id: 2, team: 2, name: "TEAM 2", points: 3500, depx: 21, depy: 0, deptype: "box", depwidth: 10, depheight: 30, depavailable: 1 }),
     slotid: 2,
 
     mapSelect: function mapSelect() {
@@ -156,32 +155,32 @@ window.createGame = {
         ctx.globalAlpha = 0.6; // Semi-transparent
         ctx.strokeStyle = "white";
         ctx.lineWidth = 1;
-        ctx.setLineDash([6, 6]); // Dotted pattern: 4px line, 4px gap
+        ctx.setLineDash([6, 6]); // Dotted pattern: 6px line, 6px gap
 
         const centerX = offsetX + (mapWidth / 2) * scale;
         const centerY = offsetY + (mapHeight / 2) * scale;
 
         // Vertical line: from center up
         ctx.beginPath();
-        ctx.moveTo(centerX, centerY);
-        ctx.lineTo(centerX, offsetY);
+        ctx.moveTo(centerX+6, centerY);
+        ctx.lineTo(centerX+6, offsetY);
         ctx.stroke();
 
         // Vertical line: from center down
         ctx.beginPath();
-        ctx.moveTo(centerX, centerY);
-        ctx.lineTo(centerX, offsetY + mapHeight * scale);
+        ctx.moveTo(centerX+6, centerY);
+        ctx.lineTo(centerX+6, offsetY + mapHeight * scale);
         ctx.stroke();
 
         // Horizontal line: from center left
         ctx.beginPath();
-        ctx.moveTo(centerX, centerY);
+        ctx.moveTo(centerX+6, centerY);
         ctx.lineTo(offsetX, centerY);
         ctx.stroke();
 
         // Horizontal line: from center right
         ctx.beginPath();
-        ctx.moveTo(centerX, centerY);
+        ctx.moveTo(centerX+6, centerY);
         ctx.lineTo(offsetX + mapWidth * scale, centerY);
         ctx.stroke();
 
@@ -209,9 +208,9 @@ window.createGame = {
      //       console.log(`SlotID: ${slotId}, x: ${x}, y: ${y}, w: ${w}, h: ${h}, scale: ${scale}`);
      //       console.log(`Drawing at: x=${drawX}, y=${drawY}`);
     
-            ctx.fillRect(drawX+6, drawY, w * scale, h * scale);
+            ctx.fillRect(drawX+4, drawY, w * scale, h * scale);
             ctx.strokeStyle = "#006600";
-            ctx.strokeRect(drawX+6, drawY, w * scale, h * scale);
+            ctx.strokeRect(drawX+4, drawY, w * scale, h * scale);
             
             // Draw slot number in the center
             ctx.save(); // Save context state
@@ -224,9 +223,10 @@ window.createGame = {
             ctx.restore(); // Restore to default state
         });
     
-        // Draw map border (blue rectangle)
-        ctx.strokeStyle = "#ffffff";
+        // Draw map border (rectangle)
+        ctx.strokeStyle = "#215a7a";
         ctx.lineWidth = 1;
+        ctx.globalAlpha = 0.8; // Semi-transparent        
         ctx.strokeRect(offsetX, offsetY, mapWidth * scale, mapHeight * scale); // Adjusted X offset
     },
 
@@ -270,47 +270,75 @@ doDesperateCheck: function doDesperateCheck(data) {
     }
 },
 
-doAsteroidsCheck: function doAsteroidsCheck(data) {
-    var checkval = $("#asteroidscheck:checked").val();
+
+doTerrainCheck: function doTerrainCheck(data) {    
+    // Simulate both checks by triggering them directly
+    createGame.doAsteroidsCheck(data);
+    createGame.doMoonsCheck(data);
+},
+
+doAsteroidsCheck: function () {
+    var checkval = $("#terraincheck:checked").val(); // use terraincheck instead
 
     if (checkval == "on") {
-        // Show the dropdown for selecting initiative categories
         $("#asteroidsDropdown").show();
-        // Set the selected value as initiativeCategories when checkbox is checked
         var selectedValue = $("#asteroidsSelect").val();
         createGame.rules.asteroids = parseInt(selectedValue, 10);
-        
-        // Add an event listener to update the value if the user changes the dropdown
-        $("#asteroidsSelect").on('change', function() {
+
+        $("#asteroidsSelect").off('change').on('change', function () {
             createGame.rules.asteroids = parseInt($(this).val(), 10);
         });
     } else {
-        // Hide the dropdown when the checkbox is unchecked
         $("#asteroidsDropdown").hide();
-        // Remove asteroids rule
         delete createGame.rules.asteroids;
     }
 },
-
-doMoonsCheck: function doMoonsCheck(data) {
-    var checkval = $("#moonscheck:checked").val(); // FIXED ID
+/*
+doMoonsCheck: function () {
+    var checkval = $("#terraincheck:checked").val(); // use terraincheck instead
 
     if (checkval == "on") {
-        // Show the dropdown for selecting moons
         $("#moonsDropdown").show();
-        // Set the selected value when checkbox is checked
         var selectedValue = $("#moonsSelect").val();
         createGame.rules.moons = parseInt(selectedValue, 10);
-        
-        // Add an event listener to update the value if the user changes the dropdown
-        $("#moonsSelect").on('change', function() {
+
+        $("#moonsSelect").off('change').on('change', function () {
             createGame.rules.moons = parseInt($(this).val(), 10);
         });
     } else {
-        // Hide the dropdown when the checkbox is unchecked
         $("#moonsDropdown").hide();
-        // Remove moons rule
         delete createGame.rules.moons;
+    }
+},
+*/
+
+doMoonsCheck: function () {
+    const enabled = $("#terraincheck").is(":checked");
+
+    if (enabled) {
+        $("#moonsDropdown").show();
+
+        const small  = parseInt($("#moonsSmallSelect").val(), 10)  || 0;
+        const medium = parseInt($("#moonsMediumSelect").val(), 10) || 0;
+        const large  = parseInt($("#moonsLargeSelect").val(), 10)  || 0;
+
+        // single array/object with the 3 values
+        createGame.rules.moons = { small, medium, large };
+
+        // namespaced handlers avoid duplicate bindings
+        $("#moonsSmallSelect").off('change.moons').on('change.moons', function () {
+            createGame.rules.moons.small = parseInt(this.value, 10) || 0;
+        });
+        $("#moonsMediumSelect").off('change.moons').on('change.moons', function () {
+            createGame.rules.moons.medium = parseInt(this.value, 10) || 0;
+        });
+        $("#moonsLargeSelect").off('change.moons').on('change.moons', function () {
+            createGame.rules.moons.large = parseInt(this.value, 10) || 0;
+        });
+
+    } else {
+        $("#moonsDropdown").hide();
+        delete createGame.rules.moons; // remove the whole rule when disabled
     }
 },
 
@@ -365,14 +393,14 @@ doMovementCheck: function doMovementCheck(data) {
 					slotData.depwidth = $("#team1 .depwidth").val();
 					slotData.depheight = $("#team1 .depheight").val();
 					slotData.deptype = $(".deptype").val();
-					slotData.depavailable = 0;
+					slotData.depavailable = 1;
 				} else { //data for team 2
 					slotData.depx = $("#team2 .depx").val();
 					slotData.depy = $("#team2 .depy").val();
 					slotData.depwidth = $("#team2 .depwidth").val();
 					slotData.depheight = $("#team2 .depheight").val();
 					slotData.deptype = $(".deptype").val();
-					slotData.depavailable = 0;
+					slotData.depavailable = 1;
 				}
 			}
 			/*
@@ -421,14 +449,14 @@ doMovementCheck: function doMovementCheck(data) {
 				slotData.depwidth = $("#team1 .depwidth").val();
 				slotData.depheight = $("#team1 .depheight").val();
 				slotData.deptype = $(".deptype").val();
-				slotData.depavailable = 0;
+				slotData.depavailable = 1;
 			} else { //data for team 2
 				slotData.depx = $("#team2 .depx").val();
 				slotData.depy = $("#team2 .depy").val();
 				slotData.depwidth = $("#team2 .depwidth").val();
 				slotData.depheight = $("#team2 .depheight").val();
 				slotData.deptype = $(".deptype").val();
-				slotData.depavailable = 0;
+				slotData.depavailable = 1;
 			}
         }
 
@@ -473,14 +501,14 @@ doMovementCheck: function doMovementCheck(data) {
 				slotData.depwidth = $("#team1 .depwidth").val();
 				slotData.depheight = $("#team1 .depheight").val();
 				slotData.deptype = $(".deptype").val();
-				slotData.depavailable = 0;
+				slotData.depavailable = 1;
 			} else { //data for team 2
 				slotData.depx = $("#team2 .depx").val();
 				slotData.depy = $("#team2 .depy").val();
 				slotData.depwidth = $("#team2 .depwidth").val();
 				slotData.depheight = $("#team2 .depheight").val();
 				slotData.deptype = $(".deptype").val();
-				slotData.depavailable = 0;
+				slotData.depavailable = 1;
 			}
         }
 
@@ -511,14 +539,14 @@ doMovementCheck: function doMovementCheck(data) {
 				slotData.depwidth = $("#team1 .depwidth").val();
 				slotData.depheight = $("#team1 .depheight").val();
 				slotData.deptype = $(".deptype").val();
-				slotData.depavailable = 0;
+				slotData.depavailable = 1;
 			} else { //data for team 2
 				slotData.depx = $("#team2 .depx").val();
 				slotData.depy = $("#team2 .depy").val();
 				slotData.depwidth = $("#team2 .depwidth").val();
 				slotData.depheight = $("#team2 .depheight").val();
 				slotData.deptype = $(".deptype").val();
-				slotData.depavailable = 0;
+				slotData.depavailable = 1;
 			}
         }
 
@@ -564,7 +592,7 @@ doMovementCheck: function doMovementCheck(data) {
 
         $(".depx", slot).val(data.depx);
         $(".depy", slot).val(data.depy);
-        $(".deptype", slot).val(data.deptype);
+        $(".deptype", slot).val("box"); //Option removed so just pass "box" as default - DK
         $(".depwidth", slot).val(data.depwidth);
         $(".depheight", slot).val(data.depheight);
         $(".depavailable", slot).val(data.depavailable);
@@ -573,22 +601,22 @@ doMovementCheck: function doMovementCheck(data) {
     createNewSlot: function createNewSlot(e) {
         var team = $(this).hasClass("team1") ? 1 : 2;
         createGame.slotid++;
-        var data = { id: createGame.slotid, team: team, name: "TEAM " + team, points: 3500, depx: 0, depy: 0, deptype: "box", depwidth: 0, depheight: 0, depavailable: 0 };
+        var data = { id: createGame.slotid, team: team, name: "TEAM " + team, points: 3500, depx: 0, depy: 0, deptype: "box", depwidth: 0, depheight: 0, depavailable: 1 };
 			//copy data from team data!
 			if (data.team == 1){ //data for team 1
 				data.depx = $("#team1 .depx").val();
 				data.depy = $("#team1 .depy").val();
 				data.depwidth = $("#team1 .depwidth").val();
 				data.depheight = $("#team1 .depheight").val();
-				data.deptype = $(".deptype").val();
-				data.depavailable = 0;
+				data.deptype = "box";
+				data.depavailable = 1;
 			} else { //data for team 2
 				data.depx = $("#team2 .depx").val();
 				data.depy = $("#team2 .depy").val();
 				data.depwidth = $("#team2 .depwidth").val();
 				data.depheight = $("#team2 .depheight").val();
-				data.deptype = $(".deptype").val();
-				data.depavailable = 0;
+				data.deptype = "box";
+				data.depavailable = 1;
 			}
 		
         createGame.slots.push(data);
@@ -624,10 +652,32 @@ doMovementCheck: function doMovementCheck(data) {
         slot.remove();
     },
 
+    getScenarioDescriptionFromFields: function getScenarioDescriptionFromFields() {
+    const fields = [
+        { label: 'REQUIREMENTS', id: 'req' },
+        { label: 'CUSTOM FACTIONS / UNITS', id: 'customfactions' },
+        //{ label: 'CUSTOM UNITS IN OFFICIAL FACTIONS', id: 'customunits' },
+        { label: 'ENHANCEMENTS', id: 'enhancements' },
+        { label: 'EXPECTED POWER LEVEL', id: 'tier' },
+        { label: 'FORBIDDEN FACTIONS', id: 'forbidden' },
+        { label: 'MAP BORDERS', id: 'borders' },
+        { label: 'CALLED SHOTS', id: 'called' },
+        { label: 'VICTORY CONDITIONS', id: 'victory' },
+        { label: 'ADDITIONAL INFO', id: 'other' }
+    ];
+
+    let result = '*** SCENARIO DESCRIPTION ***\n';
+    for (const field of fields) {
+        const value = document.getElementById(field.id).value.trim();
+        result += `${field.label}: ${value}\n`;
+    }
+    return result;
+    },
+
     setData: function setData() {
         var gamename = $("#gamename").val();
         var background = $("#mapselect").val();
-        var description = $("#description").val();
+        var description = createGame.getScenarioDescriptionFromFields();
         var gamespace = "-1x-1";
         var flight = "";
 

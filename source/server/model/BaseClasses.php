@@ -24,6 +24,7 @@ class WeaponLoading
     }
 }
 
+/* Old version without 'waiting' variable - DK June 2025
 class PlayerSlot{
     public $slot, $team, $lastturn, $lastphase, $name, $points, $depx, $depy, $deptype, $depwidth, $depheight, $depavailable, $playerid, $playername;
     
@@ -46,6 +47,36 @@ class PlayerSlot{
     }
     
 }
+*/
+
+class PlayerSlot {
+    public $slot, $team, $lastturn, $lastphase, $name, $points;
+    public $depx, $depy, $deptype, $depwidth, $depheight, $depavailable;
+    public $playerid, $playername, $waiting, $surrendered; // ✅ include $waiting, surrendered
+
+    function __construct(
+        $playerid, $slot, $team, $lastturn, $lastphase, $name, $points,
+        $depx, $depy, $deptype, $depwidth, $depheight, $depavailable,
+        $playername, $waiting, $surrendered
+    ) {
+        $this->playerid = $playerid;
+        $this->slot = $slot;
+        $this->team = $team;
+        $this->lastturn = $lastturn;
+        $this->lastphase = $lastphase;
+        $this->name = $name;
+        $this->points = $points;
+        $this->depx = $depx;
+        $this->depy = $depy;
+        $this->deptype = $deptype;
+        $this->depwidth = $depwidth;
+        $this->depheight = $depheight;
+        $this->depavailable = $depavailable;
+        $this->playername = $playername;
+        $this->waiting = $waiting;
+        $this->surrendered = $surrendered; // ✅ store new property        
+    }
+}
 
 class PlayerSlotFromJSON extends PlayerSlot{
     
@@ -59,7 +90,7 @@ class PlayerSlotFromJSON extends PlayerSlot{
         $this->points = $json["points"];
         $this->depx = $json["depx"];
         $this->depy = $json["depy"];
-        $this->deptype = $json["deptype"];
+        $this->deptype = "box";
         $this->depwidth = $json["depwidth"];
         $this->depheight = $json["depheight"];
         $this->depavailable = $json["depavailable"];
@@ -155,6 +186,7 @@ class DamageEntry{
     
     public $shooterid, $weaponid;//Marcin Sawicki: additional variables, usually useless, but needed to identify fire order whose ID is not known at the moment of dealing damage
 	public $undestroyed;//for self-repair - add ability to restore sdestroyed system to function
+    public $damageclass;
     
     function __construct($id, $shipid, $gameid, $turn, $systemid, $damage, $armour, $shields, $fireorderid, $destroyed, $undestroyed, $pubnotes, $damageclass = null, $shooterid = null, $weaponid = null){
         $this->id = $id;
@@ -222,8 +254,8 @@ class FireOrder{
         $shots = 1, 
         $shotshit = 0, 
         $intercepted = 0, 
-        $x, 
-        $y,
+        $x = 0, 
+        $y =0,
         $damageclass = null,
         $resolutionOrder = -1
     ){
@@ -271,7 +303,7 @@ class PowerManagementEntry{
 
 
 class Ballistic{
-    public $fireOrderId, $position, $id, $facing, $targetpos, $targetid, $shooterid, $weaponid, $shots;
+    public $fireOrderId, $position, $id, $facing, $targetposition, $targetid, $shooterid, $weaponid, $shots;
         
     function __construct($id, $fireid, $position, $facing, $targetpos, $targetid, $shooterid, $weaponid, $shots){
         $this->id = (int)$id;

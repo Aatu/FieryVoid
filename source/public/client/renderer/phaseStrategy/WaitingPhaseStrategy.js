@@ -16,6 +16,8 @@ window.WaitingPhaseStrategy = function () {
         console.log("enabled waiting phase strategy");
         gamedata.hideCommitButton();
 
+        fleetListManager.updateFleetReadiness(gamedata.thisplayer); //Mark player as 'Has committed orders' in Info Tab
+
         ajaxInterface.startPollingGamedata();
 
         this.setPhaseHeader("WAITING FOR TURN...");
@@ -30,7 +32,9 @@ window.WaitingPhaseStrategy = function () {
         return this;
     };
 
-    WaitingPhaseStrategy.prototype.onHexClicked = function (payload) {};
+    WaitingPhaseStrategy.prototype.onHexClicked = function (payload) {
+        PhaseStrategy.prototype.onHexClicked.call(this, payload);           
+    };
 
     WaitingPhaseStrategy.prototype.selectShip = function (ship, payload) {
         var menu = new ShipTooltipMenu(this.selectedShip, ship, this.gamedata.turn);

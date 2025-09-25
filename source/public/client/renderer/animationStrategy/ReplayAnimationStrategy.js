@@ -105,7 +105,15 @@ window.ReplayAnimationStrategy = function () {
         this.gamedata.ships.filter(function (ship) {
             var turnDestroyed = shipManager.getTurnDestroyed(ship);
             var destroyed = shipManager.isDestroyed(ship);
-            return ((turnDestroyed !== null && turnDestroyed < this.turn) || (turnDestroyed === null && destroyed));
+        
+            // Hide if:
+            // - destroyed this or a previous turn
+            // - OR is an undetected stealth ship
+            return (
+                (turnDestroyed !== null && turnDestroyed < this.turn) ||
+                (turnDestroyed === null && destroyed) ||
+                (shipManager.shouldBeHidden(ship))
+            );
         }, this).forEach(function (ship) {
             this.shipIconContainer.getByShip(ship).hide();
         }, this);
@@ -126,6 +134,14 @@ window.ReplayAnimationStrategy = function () {
 
     function animateMovement(time) {
         this.gamedata.ships.forEach(function (ship) {
+
+            // Filter out enemy stealth ships that are undetected
+            if (!gamedata.isMyorMyTeamShip(ship)) {
+                if (shipManager.isStealthShip(ship) && !shipManager.isDetected(ship)) {
+                    return; // Skip this ship
+                }
+            }
+
             var icon = this.shipIconContainer.getByShip(ship);
 
             var animation = new ShipMovementAnimation(icon, this.turn, this.shipIconContainer);

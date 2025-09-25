@@ -516,7 +516,7 @@ window.shipManager = {
         return false;
     },
 
-	//Used by RelayAnimationStrategy to check if ship has jumped, if so different destroyed sprite
+	//Used by RelayAnimationStrategy/fleetList to check if ship has jumped, if so different destroyed sprite/entry
 	hasJumpedNotDestroyed: function (ship) {
 		var hasJumped = false;
 	    // Check if the ship has a jump engine
@@ -527,9 +527,9 @@ window.shipManager = {
 	        return false;
 	    }
 	    
-	    // Check if the jump engine is boosted
-	    var boostedJump = shipManager.power.isBoosted(ship, jumpEngine);
-	    if(!boostedJump) return false; //Hasn't boosted jump engine, it cannot have jumped.
+	   // Check if the jump engine is boosted
+	   //var boostedJump = shipManager.power.isBoosted(ship, jumpEngine);
+	   //if(!boostedJump) return false; //Hasn't boosted jump engine, it cannot have jumped.
 	    	
 		//Check damage entries, and remove Hyperspace jump entry, to see if ship was 'destroyed' by jumping not actual damage.	    
 		var struct = shipManager.systems.getStructureSystem(ship, 0);
@@ -567,21 +567,23 @@ window.shipManager = {
                 if (shipManager.systems.isDestroyed(ship, stru)) {
                     return true;
                 }
-
-                var react = shipManager.systems.getSystemByName(ship, "reactor");
-                if (shipManager.systems.isDestroyed(ship, react)) {
-                    return true;
-                }
+                if(!gamedata.isTerrain(ship.shipSizeClass, ship.userid)){
+                    var react = shipManager.systems.getSystemByName(ship, "reactor");
+                    if (shipManager.systems.isDestroyed(ship, react)) {
+                        return true;
+                    }
+                }    
             } else {
                 var stru = shipManager.systems.getStructureSystem(ship, 0);
                 if (shipManager.systems.isDestroyed(ship, stru)) {
                     return true;
                 }
-
-                var mainReactor = shipManager.systems.getSystemByNameInLoc(ship, "reactor", 0);
-                if (shipManager.systems.isDestroyed(ship, mainReactor)) {
-                    return true;
-                }
+                if(!gamedata.isTerrain(ship.shipSizeClass, ship.userid)){
+                    var mainReactor = shipManager.systems.getSystemByNameInLoc(ship, "reactor", 0);
+                    if (shipManager.systems.isDestroyed(ship, mainReactor)) {
+                        return true;
+                    }
+                }    
             }
         }
 
@@ -730,7 +732,7 @@ window.shipManager = {
 
         // Filter out destroyed ships and those with shipSizeClass === 5 e.g. terrain
         var validShips = gamedata.ships.filter(function(s) {
-            return !shipManager.isDestroyed(s) && s.shipSizeClass !== 5;
+            return !shipManager.isDestroyed(s) && !gamedata.isTerrain(s.shipSizeClass, s.userid) && !(shipManager.getTurnDeployed(s) > gamedata.turn);
         });
 
         for (var i in validShips) {
@@ -785,6 +787,7 @@ window.shipManager = {
 		return 1;
     },
 
+    //Only used for Deployment checks to prevent ships deploying on same hex (or now allow for later Deployments) - DK
     getShipsInSameHex: function getShipsInSameHex(ship, pos1) {
 
         if (!pos1) var pos1 = shipManager.getShipPosition(ship);
@@ -795,13 +798,32 @@ window.shipManager = {
 
             if (shipManager.isDestroyed(ship2)) continue;
 
-            //if (ship.id = ship2.d)
-            //  continue;
+            //Let's allow ships that deploy on later turns to deploy on same hex as existing units - DK
+            var depTurn = shipManager.getTurnDeployed(ship2);            
+            if (depTurn !== gamedata.turn && !ship2.Enormous) continue;
 
             var pos2 = shipManager.getShipPosition(ship2);
 
+            //But never let ships Deployment on unoccupied parts of Huge terrain.
+            if(ship2.Huge > 0 && ship2.Huge <= 3){ //Between 1 and 3, Moons basically - DK
+                //var s2pos = shipManager.getShipPosition(ship2);
+                var distance = pos1.distanceTo(pos2);
+                if(distance > 0 && distance <= ship2.Huge){ 
+                    shipsInHex.push(ship2);
+                    confirm.error("You cannot deploy on terrain.");                                         
+                }    
+            }
+
+            //if (ship.id = ship2.d)
+            //  continue;
+
             if (pos1.equals(pos2)) {
-                shipsInHex.push(ship2);
+                if(gamedata.isTerrain(ship2.shipSizeClass, ship2.userid)){
+                    shipsInHex.push(ship2);
+                    confirm.error("You cannot deploy on terrain.");  
+                }else{
+                    shipsInHex.push(ship2);
+                }    
             }
         }
 
@@ -891,6 +913,8 @@ window.shipManager = {
 			if (ship.unavailable) continue;
 			if (ship.userid != gamedata.thisplayer) continue;					
 			if (shipManager.isDestroyed(ship)) continue;
+            var deployTurn = shipManager.getTurnDeployed(ship);
+			if(deployTurn > gamedata.turn) continue;  //Don't bother checking for ships that haven't deployed yet.
 
 			var left = 0;
 			var right = 0;				
@@ -966,6 +990,128 @@ window.shipManager = {
         }
 
         return resultTxt;
-    }
+    },
+
+    //Generic function called from various front end functions.  Checks if ships should be shown/interactable or not.
+    shouldBeHidden: function(ship) {    
+        if(shipManager.getTurnDeployed(ship) > gamedata.turn) return true; //Not deployed yet.
+        if(!gamedata.isMyorMyTeamShip(ship) && shipManager.isStealthShip(ship) && !shipManager.isDetected(ship)) return true; //Enemy, stealth ship and not currently detected
+        return false;
+    },
     
+
+    getTurnDeployed: function getTurnDeployed(ship) {
+          
+        if(ship.osat || ship.base || gamedata.isTerrain(ship.shipSizeClass, ship.userid)) {
+            return 1; //Bases and OSATs never 'jump in', returns Turn 1.
+        }else{    
+           //return Math.max(ship.deploysOnTurn, slot.depavailable);
+            var slot = playerManager.getSlotById(ship.slot);
+            var depTurn = slot.depavailable;
+
+        if(slot.surrendered !== null){
+            if(slot.surrendered <= gamedata.turn){ //Surrendered on this turn or before.
+                    depTurn = 999; //Artifically high number, so surrendered ships are no longer shown by game until one full team has surrendered! - DK
+            }
+        }    
+            return depTurn;                       
+        }     
+    },    
+
+
+    //True or false function, e.g. for possible use in Deployment Phase to show commit button in case needed.
+    playerHasDeployedShips: function playerHasDeployedShips(playerid) {
+       for (const ship of gamedata.ships) {
+            if(ship.userid !== playerid) continue;
+    
+            var deploys = shipManager.getTurnDeployed(ship);
+            if(deploys <= gamedata.turn) return true;
+        }
+        return false;         
+    },
+
+
+    //Called in various places to identify a ship as having stealth ability.
+    isStealthShip: function(ship) {
+        if(shipManager.hasSpecialAbility(ship, "Stealth") && (!ship.flight)) return true;
+        return false;
+    },
+  
+
+    markAsDetected: function(ship) {
+        var stealthSystem = shipManager.systems.getSystemByName(ship, "stealth");
+        if(stealthSystem) stealthSystem.detected = true;
+    }, 
+
+
+    //Main Front End check on whether a stealth ship is detected or not, called in various places.
+    isDetected: function(ship) {
+        if(gamedata.gamephase == -1) return true;  //Do not hide in Deployment Phase.        
+        var stealthSystem = shipManager.systems.getSystemByName(ship, "stealth");
+        if(stealthSystem && stealthSystem.detected) return true; //Already detected.
+
+        // If the ship used offensive or ELINT EW, it is revealed
+        const usedEW = ew.getAllEWExceptDEW(ship); //Has used any EW abilities except DEW?
+        if (usedEW > 0){
+            return true; //If so, revealed.
+        }            
+
+        if(gamedata.gamephase != 3) return false;  //Cannot only try to detect at start of Firing Phase
+
+        // Check all enemy ships to see if any can detect this ship
+        for (const otherShip of gamedata.ships) {
+            if (otherShip.team === ship.team) continue; // Skip friendly ships
+            if (gamedata.isTerrain(otherShip.shipSizeClass, otherShip.userid)) continue; //Skip Terrain 
+            if(shipManager.isDestroyed(otherShip)) continue; //Skip destroyed
+
+            let totalDetection = 0;
+
+            if (!otherShip.flight) {
+                if(shipManager.isDisabled(otherShip)) continue; //Skip disabled ships               
+                // Not a fighter — use scanner systems for detection
+                const standardScanners = shipManager.systems.getSystemListByName(otherShip, "scanner");
+                const elintScanners = shipManager.systems.getSystemListByName(otherShip, "elintScanner");
+                const scanners = [...standardScanners, ...elintScanners];
+
+                for (const scanner of scanners) {
+                    if (!shipManager.systems.isDestroyed(otherShip, scanner) && !shipManager.power.isOfflineOnTurn(otherShip, scanner, gamedata.turn)) {
+                        totalDetection += scanner.output;
+                    }
+                }
+
+                // Apply detection multiplier based on ship type
+                if (otherShip.base) {
+                    totalDetection *= 5;
+                } else if (shipManager.hasSpecialAbility(otherShip, "ELINT")) {
+                    totalDetection *= 3;
+                    //Then add any Detect Stealth bonus here.
+                    var bonusDSEW = ew.getEWByType("Detect Stealth", otherShip);
+                    totalDetection += bonusDSEW * 2;
+                } else {
+                    totalDetection *= 2;
+                }
+            } else {
+                // Fighter unit — use offensive bonus
+                if(otherShip.offensivebonus) totalDetection = otherShip.offensivebonus;
+            }
+
+            // Get distance to the stealth ship and check line of sight
+            const distance = parseFloat(mathlib.getDistanceBetweenShipsInHex(ship, otherShip));
+            var loSBlocked = false;
+            var blockedLosHex = weaponManager.getBlockedHexes(); //Check if there are any hexes that block LoS
+            var shipPos= shipManager.getShipPosition(ship);
+            var otherShipPos= shipManager.getShipPosition(otherShip);                   
+            loSBlocked = mathlib.checkLineOfSight(shipPos, otherShipPos, blockedLosHex); // Defaults to false (LoS NOT blocked)            
+
+            // If within detection range, the ship is revealed
+            if (totalDetection >= distance && !loSBlocked) { //In range and LoS not blocked.
+                shipManager.markAsDetected(ship);
+                return true; //Just return, if one ship can see the stealthed ship then all can.
+            }
+        }
+
+        // No one detected the ship
+        return false;
+    }
+
 };

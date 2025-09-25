@@ -19,9 +19,9 @@
 	
   $gamelobbydata = Manager::getGameLobbyData( $_SESSION["user"], $gameid);
 
-	if (!$gamelobbydata || $gamelobbydata->status != "LOBBY"){
-		header('Location: games.php');
-  }
+    if (!is_object($gamelobbydata) || $gamelobbydata->status != "LOBBY") {
+        header('Location: games.php');
+    }
   
 	$gamelobbydataJSON = json_encode($gamelobbydata, JSON_NUMERIC_CHECK);
 	
@@ -44,9 +44,11 @@
 		<link href="styles/base.css" rel="stylesheet" type="text/css">
 		<link href="styles/lobby.css" rel="stylesheet" type="text/css">
 		<link href="styles/confirm.css" rel="stylesheet" type="text/css">
+        <link href="styles/gamesNew.css" rel="stylesheet" type="text/css">          
         <link href="styles/shipwindow.css" rel="stylesheet" type="text/css">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
         <script src="client/lib/jquery-ui-1.8.15.custom.min.js"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">        
 		
 		<!-- replaced by php include below
         <script src="static/ships.js"></script>
@@ -91,8 +93,8 @@
         <script src="client/model/weapon/aoe.js"></script>
         <script src="client/model/weapon/molecular.js"></script>
         <script src="client/model/weapon/antimatter.js"></script>
-        <script src="client/model/weapon/dualWeapon.js"></script>
-        <script src="client/model/weapon/duoWeapon.js"></script>
+        <!--<script src="client/model/weapon/dualWeapon.js"></script>-->
+        <!--<script src="client/model/weapon/duoWeapon.js"></script>-->
         <script src="client/model/weapon/gravitic.js"></script>
         <script src="client/model/weapon/missile.js"></script>
         <script src="client/model/weapon/ion.js"></script>
@@ -193,25 +195,13 @@
             
             window.shipWindowManager.addEW = function(){};            
 
-        /* //Old jQuery section, in case my new filtering logic messes anything up - DK   
-		jQuery(function($){            
-			gamedata.parseServerData(<?php print($gamelobbydataJSON); ?>);
-			gamedata.parseFactions(<?php print($factions); ?>);
-			$('.readybutton').on("click", gamedata.onReadyClicked);		
-			$('.checkbutton').on("click", gamedata.checkChoices); //fleet correctness check
-			$('.leave').on("click", gamedata.onLeaveClicked);
-			$('.leaveslot').on("click", gamedata.onLeaveSlotClicked);
-			$('.selectslot').on("click", gamedata.onSelectSlotClicked);
-			$('.takeslot').on("click", gamedata.clickTakeslot);
-			ajaxInterface.startPollingGamedata();
-		});
-		*/
         
         jQuery(function($){            
             gamedata.parseServerData(<?php print($gamelobbydataJSON); ?>);
             gamedata.parseFactions(<?php print($factions); ?>);
 
-            $('.readybutton').on("click", gamedata.onReadyClicked);		
+            $('.readybutton').on("click", gamedata.onReadyClicked);
+            $('.savebutton').on("click", gamedata.onSaveClicked)            		
             $('.checkbutton').on("click", gamedata.checkChoices); //fleet correctness check
             $('.leave').on("click", gamedata.onLeaveClicked);
             $('.leaveslot').on("click", gamedata.onLeaveSlotClicked);
@@ -222,50 +212,95 @@
             ajaxInterface.startPollingGamedata();
 
             // ✅ Unified filter logic for factions based on Tier and Custom
-            function updateTierFilter() {
+            window.updateTierFilter = function() {   // ✅ Now global
                 const selectedTiers = $('.tier-filter:checked').map(function () {
                     return $(this).data('tier');
                 }).get();
 
-                const showCustomFactions = $('#toggleCustomFactions').is(':checked');
+                const showCustom = $('#toggleCustom').is(':checked');
+                const customMode = $('#customSelect').val();
 
                 $('.faction').each(function () {
                     const tier = $(this).data('tier');
                     const isCustom = $(this).data('custom') === true || $(this).data('custom') === "true";
 
-                    const isVisible = selectedTiers.includes(tier) && (showCustomFactions || !isCustom);
+                    let isVisible = false;
+
+                    if (selectedTiers.includes(tier)) {
+                        if (showCustom) {
+                            if (customMode === 'showOnlyCustom') {
+                                isVisible = isCustom;
+                            } else {
+                                isVisible = true; // show both custom and non-custom
+                            }
+                        } else {
+                            isVisible = !isCustom; // hide custom if toggle unchecked
+                        }
+                    }
+
                     $(this).toggle(isVisible);
+                });
+
+                // Group headers visibility stays unchanged
+                $('.factiongroup-header').each(function () {
+                    let header = $(this);
+                    let hasVisibleFaction = false;
+                    let next = header.next();
+                    while (next.length && !next.hasClass('factiongroup-header')) {
+                        if (next.hasClass('faction') && next.is(':visible')) {
+                            hasVisibleFaction = true;
+                            break;
+                        }
+                        next = next.next();
+                    }
+                    header.toggle(hasVisibleFaction);
                 });
             }
 
             // ✅ Listen to Tier and Custom Faction checkboxes
             $('.tier-filter').on('change', updateTierFilter);
-            $('#toggleCustomFactions').on('change', updateTierFilter);
+
+            /*
+            $('#toggleCustom').on('change', function () {
+                updateTierFilter();
+                gamedata.applyCustomShipFilter();
+            });
+            */
+            $('#toggleCustom').on('change', function () {
+                if ($(this).is(':checked')) {
+                    $('#customDropdown').show();
+                } else {
+                    $('#customDropdown').hide();
+                }
+                updateTierFilter();
+                gamedata.applyCustomShipFilter();
+            });
+
+            $('#customSelect').on('change', function () {
+                updateTierFilter();
+                gamedata.applyCustomShipFilter();
+            });
+
 
             // ✅ Initial call
             updateTierFilter();
 
-            // ✅ Ship filtering that respects faction open state
-            $("#toggleCustomShips").on("change", function () {
-                gamedata.applyCustomShipFilter();
-            });
 
             // ✅ Select All / None Tier checkboxes + toggle customs
             $('.tier-select-all').on('click', function () {
                 $('.tier-filter').prop('checked', true);
-                $('#toggleCustomFactions').prop('checked', true).trigger('change');
-                $('#toggleCustomShips').prop('checked', true).trigger('change');
-                $('#isdFilter').val(''); // ✅ Reset ISD filter
-                gamedata.applyCustomShipFilter(); // ✅ Reapply the filter logic
+                $('#toggleCustom').prop('checked', true).trigger('change');
+                $('#customSelect').val('showCustom'); // ✅ reset custom dropdown to Show Customs                
+                $('#isdFilter').val('');
+                gamedata.applyCustomShipFilter();
                 updateTierFilter();
             });
 
             $('.tier-select-none').on('click', function () {
                 $('.tier-filter').prop('checked', false);
-                $('#toggleCustomFactions').prop('checked', false).trigger('change');
-                $('#toggleCustomShips').prop('checked', false).trigger('change');
-                $('#isdFilter').val(''); // ✅ Reset ISD filter
-                gamedata.applyCustomShipFilter(); // ✅ Reapply the filter logic
+                $('#toggleCustom').prop('checked', false).trigger('change');
+                $('#isdFilter').val('');
+                gamedata.applyCustomShipFilter();
                 updateTierFilter();
             });
 
@@ -290,22 +325,69 @@
             });
 
             // Optional: initialize custom ship visibility
-            $("#toggleCustomShips").trigger("change");
+            $("#toggleCustom").trigger("change");
         });
 
 
 		</script>
 	</head>
 	<body style="background-image:url(img/maps/<?php print($gamelobbydata->background); ?>)">
-	
-        <img src="img/logo.png">
+
+  <header class="pageheader">
+    <img src="img/logo.png" alt="Fiery Void Logo" class="logo">
+    <div class="top-right-row">
+      <a href="games.php">Back to Lobby</a>        
+      <a href="logout.php" class="btn btn-primary">Logout</a>
+    </div>
+  </header>
 <!--        <div class="helphide" style="float:right" onclick="window.helper.onClickHelpHide()">
         <img id="helphideimg" src="img/greyvir.jpg" height="30" width="30">	
         </div>-->
-		<div class="panel large">
-			<div class="logout"><a href="logout.php">LOGOUT</a></div>
-			<div class="">	<span class="panelheader">GAME:</span><span class="panelsubheader"><?php print($gamelobbydata->name); ?></span>	</div>
-			<div><span> <?php print($gamelobbydata->description); ?> </span></div>
+<main class="container"></main>        
+		<div class="panel large lobby">
+            <div class="">
+                <!--<span class="panelheader">GAME NAME: </span>-->
+                <span class="panelsubheader" style="font-size: 24px; color: #e0e7ef;"> <?php print($gamelobbydata->name); ?></span>
+            </div>
+
+
+    <div class="lobbyheader">SCENARIO DESCRIPTION</div>
+
+    <div class="scenario-description">
+    <?php
+    $desc = $gamelobbydata->description;
+
+    // Replace <br> tags with newlines to normalize input
+    $desc = str_replace(['<br>', '<br/>', '<br />'], "\n", $desc);
+
+    // Remove the header line if it exists
+    $desc = preg_replace('/^\*{3}.*\*{3}\s*/m', '', $desc);
+
+    // Split into lines
+    $lines = preg_split("/\r\n|\n|\r/", trim($desc));
+
+    foreach ($lines as $line) {
+        // Trim whitespace for safety
+        $line = trim($line);
+        if ($line === '') continue; // skip empty lines
+
+        // Try to split on the first colon
+        $pos = strpos($line, ':');
+        if ($pos !== false) {
+            $label = trim(substr($line, 0, $pos));
+            $value = trim(substr($line, $pos + 1));
+
+            // Bold the label regardless of case (you can add uppercase check if you want)
+        echo '<span class="scenariolabel">' . htmlspecialchars($label) . ':</span>&nbsp; ' .
+            '<span class="scenariovalue">' . htmlspecialchars($value) . '</span><br>';
+        } else {
+            // Just print line if no colon found
+            echo htmlspecialchars($line) . '<br>';
+        }
+    }
+    ?>
+    </div>
+
 <?php
 //define options list
 $optionsUsed = '';
@@ -323,10 +405,11 @@ $moons = false;
 $initiativeCategories = null;
 $desperateTeams = null;
 $asteroidsNo = 0;
-$moonsNo = 0;
+$moonData = [];
 
 
 if ($gamelobbydata->rules) {
+//var_dump($gamelobbydata->rules);    
     if ($gamelobbydata->rules->hasRuleName('initiativeCategories')) {
         $simMv = true;
         $initiativeRule = $gamelobbydata->rules->getRuleByName('initiativeCategories');
@@ -355,7 +438,7 @@ if ($gamelobbydata->rules) {
         $moons = true;
         $moonsRule = $gamelobbydata->rules->getRuleByName('moons');
         if ($moonsRule && method_exists($moonsRule, 'jsonSerialize')) {
-            $moonsNo = $moonsRule->jsonSerialize();
+            $moonData = $moonsRule->jsonSerialize();
         }        
     }       
 }
@@ -380,15 +463,34 @@ if ($desperate == true) { // Desperate rules in play
         $teamDisplay = "Both Teams";
     }
     $optionsUsed .= ', Desperate Rules ('. $teamDisplay . ')';
-} else { // standard movement
-    $optionsUsed .= ', Normal Rules';
+} else { // standard rules
+    $optionsUsed .= '';
 }
 
 if ($asteroids == true) { // Asteroid terrain rules in play
     $optionsUsed .= ', Asteroids ('. $asteroidsNo . ')';
 }
 if ($moons == true) { // Moon terrain rules in play
-    $optionsUsed .= ', Moons ('. $moonsNo . ')';
+
+    $small  = $moonData['small']  ?? 0;
+    $medium = $moonData['medium'] ?? 0;
+    $large  = $moonData['large']  ?? 0;
+
+        function formatMoonCount($count, $type) {
+            if ($count <= 0) return null;
+            return $count . ' ' . $type;
+        }
+
+        // Build each part with pluralization
+    $moonParts = array_filter([
+        formatMoonCount($small,  'Small'),
+        formatMoonCount($medium, 'Medium'),
+        formatMoonCount($large,  'Large'),
+    ]);
+
+    $optionsUsed .= empty($moonParts)
+        ? ', Moons (None)'
+        : ', Moons (' . implode(', ', $moonParts) . ')';
 }
 
 if ($asteroids == false && $moons == false) { 
@@ -396,46 +498,54 @@ if ($asteroids == false && $moons == false) {
 }
 
 ?>
-<div><span><b>Options:</b> <?php print($optionsUsed); ?> </span></div>
+<div><span class="scenariolabel">OPTIONS SELECTED: </span> <span><?php print($optionsUsed); ?> </span></div>
 
+<div class="lobbyheader" style="margin-bottom: 10px; margin-top: 15px">RULES & INFO</div>
+
+<a href="./factions-tiers.php" target="_blank" style="text-decoration: underline; font-size: 14px; color: #8bcaf2;">Fiery Void: Factions & Tiers</a> 
+<span style="font-size: 14px;"> - Overview of Fiery Void factions and their approximate strengths.</span>
 <br>
-<a href="files/FV_factions.txt" target="_blank" style="text-decoration: underline;">Fiery Void Factions & Tier List</a> 
-- Overview of rules and systems of the fleets available in Fiery Void
+<a href="./ammo-options-enhancements.php" target="_blank" rel="noopener noreferrer" style="text-decoration: underline; font-size: 14px; color: #8bcaf2;">Ammo, Options & Enhancements</a> 
+<span style="font-size: 14px;"> - Details of all the extras available to Fiery Void units e.g. Missiles.</span>
+<!--<a href="files/enhancements_list.txt" target="_blank" style="text-decoration: underline; font-size: 14px; color: #8bcaf2;">Systems & Enhancements</a> 
+<span style="font-size: 14px;"> - Details of common systems and unit enhancements e.g. Boarding Actions / Missiles.</span> -->
 <br>
-<a href="files/enhancements_list.txt" target="_blank" style="text-decoration: underline;">Common Systems & Enhancement List</a> 
-- Details of enhancements and other common systems e.g. Boarding / Missiles
-<br>
-<span style="color: #f8f8f8;">Random Fleet Selection</span> 
-<span style="margin-right: 3px;">-</span> 
-<a href="https://old.wheelofnames.com/fx3-uje" target="_blank" style="color: #ff9500; text-decoration: underline;"><strong>Tier 1</strong></a> 
-<strong style="margin: 0 2.5px;">|</strong> 
-<a href="https://old.wheelofnames.com/rmq-7ds" target="_blank" style="color: #ff9500; text-decoration: underline;"><strong>Tier 2</strong></a>
-<strong style="margin: 0 2.5px;">|</strong> 
-<a href="https://old.wheelofnames.com/sgd-5zq" target="_blank" style="color: #ff9500; text-decoration: underline;"><strong>Tier 3</strong></a>
+
+<a href="https://old.wheelofnames.com/fx3-uje" target="_blank" style="color: #8bcaf2; text-decoration: underline; font-size: 14px;">Tier 1</a> 
+<strong style="margin: 0 3px; font-size: 16px;">|</strong> 
+<a href="https://old.wheelofnames.com/rmq-7ds" target="_blank" style="color: #8bcaf2; text-decoration: underline; font-size: 14px;">Tier 2</a>
+<strong style="margin: 0 3px; font-size: 16px;">|</strong> 
+<a href="https://old.wheelofnames.com/sgd-5zq" target="_blank" style="color: #8bcaf2;  text-decoration: underline; font-size: 14px;">Tier 3</a>
+<span style="margin-left: 3px; margin-right: 3px;">-</span>
+<span style="font-size: 14px;">Random Faction Wheels</span> 
 <br><br>
 
 
 	    
-			<div><span>TEAM 1</span></div>
+            <div class="createsubheader" style = "margin-top: 0px; margin-bottom: 5px; margin-left: 1px;">TEAM 1:</div>
 			<div id="team1" class="subpanel slotcontainer">
 			</div>
 			
-			<div><span>TEAM 2</span></div>
+            <div class="createsubheader" style = "margin-top: 5px; margin-bottom: 5px; margin-left: 1px;">TEAM 2:</div>
 			<div id="team2" class="subpanel slotcontainer">
             </div>
             
             <!--<div class="slot" data-slotid="2" data-playerid=""><span>SLOT 2:</span></div>
 			-->
 			
-			<span class="clickable leave">LEAVE GAME</span>
+            <div class="button-container">
+                <span class="btn btn-secondary-lobby leave">Leave Game</span>
+            </div>
 			
 		</div>
-		<div class="panel large buy" style="display:none;">
-		<div>
-        <!-- 🟡 Fleet points summary & Tier checkboxes in one row -->
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+<div class="panel large lobby buy" style="display:none;">
+
+    <!-- Header row -->
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
         <div>
-            <span class="panelheader" style="padding-right: 15px;">PURCHASE YOUR FLEET</span>
+            <span class="panelheader" style="margin-left: 5px; padding-right: 15px;">PURCHASE YOUR FLEET</span>
+        </div>  
+        <div>
             <span class="panelsubheader current">0</span>
             <span class="panelsubheader">/</span>
             <span class="panelsubheader max">0</span><span class="panelsubheader">pts</span>
@@ -443,69 +553,145 @@ if ($asteroids == false && $moons == false) {
             <span class="panelsmall remaining">0</span><span class="panelsmall">pts left</span>
             <span class="panelsmall">)</span>
         </div>
+    </div>
 
-        <!--
-        <div>
-                <span class="panelheader" style="padding-right: 15px;">PURCHASE YOUR FLEET</span>
-                <span class="panelsubheader current">0</span>
-                <span class="panelsubheader">/</span>
-                <span class="panelsubheader max">0</span>
-                <span class="panelsubheader">pts</span>
-                <span class="panelsmall" style="margin-left: 5px;">(</span>
-                <span class="panelsmall remaining">0</span>
-                <span class="panelsmall">pts left</span>
-                <span class="panelsmall">)</span>
-            </div>
-        -->
-            <div style="text-align: right; font-size: 11px;">
-                <span class="clickable tier-select-all" style="margin-right: 5px;  text-decoration: underline;">All Filters</span>
-                <span style="margin-right: 5px;">|</span>          
-                <span class="clickable tier-select-none" style="text-decoration: underline; margin-right: 5px;">No Filters</span>
-                <span>|</span>  
+            <div style="margin-top: 3px; margin-left: 5px; font-size: 12px;">
+                <span class="clickable tier-select-all" style="margin-right: 5px; text-decoration: underline; color: #8bcaf2;">All Filters</span>
+                <span style="margin-right: 5px; font-size: 16px;  font-weight: bold">|</span>          
+                <span class="clickable tier-select-none" style="text-decoration: underline; margin-right: 5px; color: #8bcaf2;">No Filters</span>
+                <span style="font-size: 16px;  font-weight: bold">|</span>  
 
-                <label style="margin-left: 5px; font-size: 11px;">
-                    <span style="margin-right: 2px; font-size: 12px;">Filter by ISD:</span>
-                    <input type="text" id="isdFilter" value="" style="width: 35px; height: 12px; text-align: right;">
-                    <span class="clickable resetISDFilter" style="text-decoration: underline; margin-left: 3px;  font-size: 10px;">Reset</span>
+                <label style="margin-left: 5px; margin-top: 3px;">
+                    <span style="margin-right: 2px;">Filter by ISD:</span>
+                    <input type="text" id="isdFilter" value="" style="width: 36px; height: 14px; text-align: right;">
+                    <span class="clickable resetISDFilter" style="text-decoration: underline; margin-left: 3px; font-size: 11px; color: #8bcaf2;">Reset ISD</span>
                 </label>
+            </div>
 
+
+    <div style="display:flex; align-items:center; font-size:12px; margin-top:3px; flex-wrap:nowrap;">
+        <label style="margin-left:5px;">Tier 1 <input type="checkbox" class="tier-filter" data-tier="Tier 1" checked></label>
+        <label style="margin-left:5px;">Tier 2 <input type="checkbox" class="tier-filter" data-tier="Tier 2" checked></label>
+        <label style="margin-left:5px;">Tier 3 <input type="checkbox" class="tier-filter" data-tier="Tier 3" checked></label>
+        <label style="margin-left:5px;">Ancients <input type="checkbox" class="tier-filter" data-tier="Tier Ancients" checked></label>
+        <label style="margin-left:5px;">Other <input type="checkbox" class="tier-filter" data-tier="Tier Other" checked></label>
+
+        <span style="margin-left:6px; margin-right:6px; font-size:16px; font-weight:bold;">|</span>
+
+        <label style="margin-left:5px;">Show Custom<input type="checkbox" id="toggleCustom" class="yellow-tick"></label>
+        <span id="customDropdown" style="display:none; margin-left:10px;">
+            <select id="customSelect" name="customFilterMode">
+                <option value="showCustom">Show Customs</option>
+                <option value="showOnlyCustom">Show Only Customs</option>
+            </select>
+        </span>  
+
+
+        <div style="display:flex; align-items:center; margin-left:auto; font-size:12px; gap:6px;">
+            <label style="margin-left: 5px; margin-top: 0px; display:flex; align-items:center;">
+                <span style="margin-right: 2px; font-size: 12px;">Load Fleet by #ID:</span>
+                <input type="text" id="fleetIdInput" value="" class="fleetIdInput">
+            </label>
+
+            <!-- Custom Saved Fleet Dropdown -->
+            <div style="position:relative; margin-left:auto; font-size:12px;">
+                <div id="fleetDropdownButton" class="fleet-dropdown-btn">
+                    Load a Saved Fleet
+                </div>
+                <div id="fleetDropdownList" class="fleet-dropdown-list">
+                    <!-- populated dynamically -->
+                </div>
             </div>
         </div>
 
-        <div style="text-align: right; margin-top: 3px;">
-            <label style="margin-left: 5px;">Tier 1 <input type="checkbox" class="tier-filter" data-tier="Tier 1" checked></label>
-            <label style="margin-left: 5px;">Tier 2 <input type="checkbox" class="tier-filter" data-tier="Tier 2" checked></label>
-            <label style="margin-left: 5px;">Tier 3 <input type="checkbox" class="tier-filter" data-tier="Tier 3" checked></label>
-            <label style="margin-left: 5px;">Ancients <input type="checkbox" class="tier-filter" data-tier="Tier Ancients" checked></label>
-            <label style="margin-left: 5px;">Custom Factions <input type="checkbox" id="toggleCustomFactions" checked></label>
-            <label style="margin-left: 5px;">Custom Ships <input type="checkbox" id="toggleCustomShips" checked></label>
+
+    </div>
+
+    <script>
+        let cachedFleets = [];
+        // References
+        const fleetDropdownButton = document.getElementById('fleetDropdownButton');
+        const fleetDropdownList = document.getElementById('fleetDropdownList');
+
+        // Initialize cache once on page load
+        ajaxInterface.getSavedFleets(function(fleets) {
+            cachedFleets = fleets;
+            gamedata.populateFleetDropdown();
+        });        
+
+        // Toggle dropdown visibility
+        fleetDropdownButton.addEventListener('click', () => {
+            fleetDropdownList.style.display = fleetDropdownList.style.display === 'block' ? 'none' : 'block';
+        });
+
+        // Close dropdown if clicked outside
+        document.addEventListener('click', (e) => {
+            if (!fleetDropdownButton.contains(e.target) && !fleetDropdownList.contains(e.target)) {
+                fleetDropdownList.style.display = 'none';
+            }
+        });
+
+        const fleetInput = document.getElementById("fleetIdInput");
+
+        // Sanitize input on each keystroke: allow only digits
+        fleetInput.addEventListener("input", function() {
+            // Remove any non-digit characters
+            this.value = this.value.replace(/\D/g, "");
+        });
+
+        // Trigger load on Enter key
+        fleetInput.addEventListener("keydown", function(event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                const fleetId = this.value.trim();
+                if (fleetId !== "" && !isNaN(fleetId)) {
+                    gamedata.loadSavedFleetById(parseInt(fleetId, 10));
+                } else {
+                    console.warn("Please enter a valid numeric Fleet ID.");
+                }
+            }
+        });
+
+    </script>
+
+        <!-- Fleet selection area -->
+        <table class="store" style="width:100%; margin-top: 5px;">
+            <tr>
+                <td style="width:45%;">
+                    <div id="store" class="subpanel"></div>
+                </td>            
+                <td style="width:55%; vertical-align: top;">
+                    <div id="fleet" class="subpanel" style="text-align: right;"></div>
+                </td>
+            </tr>
+        </table>
+
+			
+        <div style="text-align: right; margin-top: 8px;">
+            <a href="files/FV_FleetChecker.txt" title="Details of fleet composition rules" target="_blank">Fleet Checker rules</a>
+            &nbsp;            
+            <span class="btn btn-primary-lobby checkbutton">CHECK</span>
+            &nbsp;&nbsp;
+            <span class="btn btn-primary-lobby savebutton">SAVE FLEET</span>
+            &nbsp;&nbsp;            
+            <span class="btn btn-success-lobby readybutton">READY</span>
         </div>
 
-    <!-- Fleet selection area -->
-    <table class="store" style="width:100%; margin-top: 5px;">
-        <tr>
-            <td style="width:40%; vertical-align: top;">
-                <div id="fleet" class="subpanel"></div>
-            </td>
-            <td style="width:60%;">
-                <div id="store" class="subpanel"></div>
-            </td>
-        </tr>
-    </table>
+    </div> <!-- Final closing of the .buy panel -->
+
+        <!-- ✅ Your inserted fleetcheck panel -->
+        <div id="fleetcheck" class="panel large lobby" style="display:none;"><p id="fleetchecktxt" style="display:block;"><span></div>
+
 </div>
-			
-        <div style="margin-top: 8px;">
-        <span class="clickable readybutton">READY</span>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        <span class="clickable checkbutton">CHECK</span>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        <a href="files/FV_FleetChecker.txt" title="details of fleet composition rules" target="_blank">Fleet Checker rules</a>
+
+    <div id="deploymentPreview" class="panel large lobby" style="margin-top:10px;">
+        <div class="createsubheader" style="margin-top:5px; text-align: center;"><span>DEPLOYMENT ZONE PREVIEW:</span></div>
+        <div id="mapPreviewContainer" style="margin: 0 auto 20px auto; text-align: center;">
+            <canvas id="mapPreview" width="420" height="300"></canvas>
         </div>
-		
-			
-		</div>
-                    
-        <div id="globalchat" class="panel large" style="height:150px;">
+    </div>
+
+        <div id="globalchat" class="panel large lobby" style="height:200px;">
         <?php 
             $chatgameid = 0;
             $chatelement = "#globalchat";
@@ -528,7 +714,7 @@ if ($asteroids == false && $moons == false) {
                     
     <div id="slottemplatecontainer" style="display:none;">
         <div class="slot" >
-            <div class="leaveslot"></div>
+            <div class="leaveslot">Leave Slot</div>
             <div>
                 <span class="smallSize headerSpan">NAME:</span>
                 <span class ="value name"></span>
@@ -545,13 +731,13 @@ if ($asteroids == false && $moons == false) {
                 <span class ="value depx"></span>
                 <span>Y:</span>
                 <span class ="value depy"></span>
-                <span>Type:</span>
-                <span class ="value deptype"></span>
+                <!---<span>Type:</span>
+                <span class ="value deptype"></span> --->
                 <span>Width:</span>
                 <span class ="value depwidth"></span>
                 <span>Height:</span>
                 <span class ="value depheight"></span>
-                <span>Turn available:</span>
+                <span>Deploys on Turn:</span>
                 <span class ="value depavailable"></span>
             </div>
         </div>
@@ -849,7 +1035,8 @@ if ($asteroids == false && $moons == false) {
             <span class="totalUnitCostText"></span>
             <span class="totalUnitCostAmount"></span>
         </span>
-    </div>                                    
+    </div>   
+    </main>	                                     
 	</body>
 
 

@@ -171,7 +171,7 @@ class ShadowCruiser extends MediumShip{
         $this->addPrimarySystem(new Structure( 6, 40));
 		
 		/*systems on Shadow ships CANNOT be targeted by called shots!*/
-		$this->notes .= "<br>cannot be targeted by called shots.";
+		$this->notes .= "<br>Cannot be targeted by called shots.";
 		foreach ($this->systems as $sys){
 			$sys->isPrimaryTargetable = false; 
 			$sys->isTargetable = false; //cannot be targeted ever!

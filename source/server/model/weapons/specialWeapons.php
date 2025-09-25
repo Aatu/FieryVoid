@@ -9,8 +9,9 @@
 class WeaponEM  {	
 	public static function isTargetEMResistant($ship,$system = null){ //returns true if target has either AdvancedArmor or EM Hardening (which, for simplicity, in FV is treated as AA would be for EM weapons)
 		if($ship){
+			$EMHardened = $ship->getEMHardened();
 			if($ship->advancedArmor) return true;
-			if($ship->EMHardened) return true;
+			if($EMHardened) return true;
 		}else if ($system){
 			if($system->advancedArmor) return true;
 		}
@@ -1396,7 +1397,8 @@ class SparkFieldHandler{
 		}
 		
 		//sort all fields by boost
-		usort(SparkFieldHandler::$sparkFields, "self::sortByBoost");	
+		//usort(SparkFieldHandler::$sparkFields, "self::sortByBoost");
+		usort(self::$sparkFields, [self::class, 'sortByBoost']);	
 	
 		//table of units that are already targeted
 		$alreadyTargeted = array();
@@ -1406,7 +1408,10 @@ class SparkFieldHandler{
 		foreach(SparkFieldHandler::$sparkFields as $field){			
 			if ($field->isDestroyed($gamedata->turn-1)) continue; //destroyed field does not attack
 			if ($field->isOfflineOnTurn($gamedata->turn)) continue; //disabled field does not attack
-			$shooter = $field->getUnit();      
+			$shooter = $field->getUnit();
+			$deployTurn = $shooter->getTurnDeployed($gamedata);		
+			if($deployTurn > $gamedata->turn) continue;  //Ship not deployed yet, don't fire weapon!
+
 			$targetPos = $shooter->getCoPos();
 			$movementThisTurn = $shooter->getLastTurnMovement($gamedata->turn+1);
 			$fire = new FireOrder(-1, 'normal', $shooter->id, -1, $field->id, -1, $gamedata->turn, 
@@ -1418,7 +1423,9 @@ class SparkFieldHandler{
 			$inAoE = $gamedata->getShipsInDistance($shooter, $aoe);
 			foreach($inAoE as $targetID=>$target){		
 				if ($shooter->id == $target->id) continue;//does not threaten self!
-				if ($target->isDestroyed()) continue; //no point allocating				
+				if ($target->isDestroyed()) continue; //no point allocating	
+				if ($target->isTerrain()) continue;				
+				if ($target->getTurnDeployed($gamedata) > $gamedata->turn) continue;  //Ignore targets that are not deployed yet!							
 				if (in_array($target->id,$alreadyTargeted,true)) continue;//each target only once 
 				//add to target list
 				$alreadyTargeted[] = $target->id; //add to list of already targeted units
@@ -1474,6 +1481,8 @@ class SparkField extends Weapon implements DefensiveSystem{
 	public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
     	public $firingModes = array( 1 => "Spark Field"); //just a convenient name for firing mode
 	public $hextarget = true;
+	public $tohitPenalty = 0;
+	public $damagePenalty = 0;
 	
 	protected $targetList = array(); //weapon will hit units on this list rather than target from firing order; filled by SparkFieldHandler!
 	
@@ -1521,6 +1530,8 @@ class SparkField extends Weapon implements DefensiveSystem{
 	        $fireOrder->updated = true;
 		$fireOrder->chosenLocation = 0;//so it's recalculated later every time! - as location chosen here is completely incorrect for target 
 		$fireOrder->needed = 100; //this weapon simply causes damage, hit is automatic
+		$range = $this->getAoE($gamedata->turn);
+		$fireOrder->pubnotes = "<br>Spark Field damages all units within " . $range . " hexes.";
 	}
 	
 	public function fire($gamedata, $fireOrder){
@@ -1534,7 +1545,7 @@ class SparkField extends Weapon implements DefensiveSystem{
 		foreach($this->targetList as $target){
 			$this->beforeDamage($target, $shooter, $fireOrder, null, $gamedata);			
 		}
-        	$notes = "this weapon simply causes damage, hit is automatic"; //replace usual note
+        	$notes = "This weapon simply causes damage, hit is automatic"; //replace usual note
 		$fireOrder->notes = $notes;
 		TacGamedata::$lastFiringResolutionNo++;    //note for further shots
 		$fireOrder->resolutionOrder = TacGamedata::$lastFiringResolutionNo;//mark order in which firing was handled!
@@ -1559,6 +1570,11 @@ class SparkField extends Weapon implements DefensiveSystem{
 	
 	//find units in range (other than self), create attacks vs them
 	public function beforeFiringOrderResolution($gamedata){
+		$ship = $this->getUnit();
+		$deployTurn = $ship->getTurnDeployed($gamedata);		
+		if($deployTurn > $gamedata->turn) return;  //Ship not deployed yet, don't fire weapon!
+
+
 		SparkFieldHandler::createFiringOrders($gamedata);		
 	}
 	
@@ -1613,7 +1629,7 @@ class SparkField extends Weapon implements DefensiveSystem{
 
 	public function onConstructed($ship, $turn, $phase){
 		parent::onConstructed($ship, $turn, $phase);
-	$this->tohitPenalty = $this->getOutput();
+		$this->tohitPenalty = $this->getOutput();
 		$this->damagePenalty = 0;
 	}
 	public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){
@@ -2419,19 +2435,22 @@ class RammingAttack extends Weapon{
 	}
 	*/
 	
-	 //find Enormous units on the same hex (other than self), create automatic attacks vs them
+	 //Create firing orders for collisions, then find Enormous units on the same hex (other than self), create automatic attacks vs them
 	public function beforeFiringOrderResolution($gamedata){
 		$shooter = $this->getUnit();
+		$deployTurn = $shooter->getTurnDeployed($gamedata);
+		if($deployTurn > $gamedata->turn) return;  //Ship not deployed yet, don't ram anything!			
 
 		//First let's check if any units moved through this Terrain unit and create appropriate fireOrders.		
-		if(($shooter instanceof Terrain) && !$shooter->isDestroyed()){ //This userid denotes shooter unit is terrain e.g. Asteroids.
+		if(($shooter->isTerrain()) && !$shooter->isDestroyed()){ //This userid denotes shooter unit is terrain e.g. Asteroids.
 			$relevantShips = array();
 
 			//Make a list of relevant ships e.g. this ship and enemy fighters in the game.
 			foreach($gamedata->ships as $ship){
 				if($ship->isDestroyed()) continue; //Ignore destroyed ships
-				if($ship->userid == -5) continue;	//Don't add other terrain.			
-				if ($ship instanceof FighterFlight && $shooter->Huge == 0) continue; //Not doing fighters execpt for very large terrain, assume they can fly around as per other auto-ram check for Enormous units.	
+				if($ship->isTerrain()) continue;	//Don't add other terrain.
+				if($ship->getTurnDeployed($gamedata) > $gamedata->turn)	continue; //Ship not deployed yet.		
+				if ($ship instanceof FighterFlight && $shooter->Huge == 0) continue; //Not doing fighters except for very large terrain, assume they can fly around as per other auto-ram check for Enormous units.	
 				$relevantShips[] = $ship;			
 			}
 
@@ -2490,13 +2509,15 @@ class RammingAttack extends Weapon{
 			if(!$target->Enormous) continue; //auto-ram Enormous units
 			if($targetID == $shooter->id) continue; //do not ram self
 			if($target->isDestroyed()) continue; //destroyed unit does not ram... and neither is rammed
+			$deployTurn = $target->getTurnDeployed($gamedata);
+			if($deployTurn > $gamedata->turn) continue;  //Ship not deployed yet, don't ram it!			
 			//don’t repeat manual ramming order
 			$alreadyDeclared = false;
 			foreach ($alreadyFiringAt as $existingFiringOrder){
 				if($existingFiringOrder->targetid == $targetID) $alreadyDeclared = true;
 			}
 			If($alreadyDeclared) continue;
-			//unit on the same hex is Enormous, not self, and not being rammed by this unit already – auto-ram it!
+			//unit on the same hex is Enormous, not self, not destroyed, has deployed and not being rammed by this unit already – auto-ram it!
 			$movementThisTurn = $shooter->getLastTurnMovement($gamedata->turn+1);
 			$fire = new FireOrder(-1, 'normal', $shooter->id, $targetID, $this->id, -1, $gamedata->turn,
 				1, 0, 0, 1, 0, 0, $movementThisTurn->position->q,  $movementThisTurn->position->r, $this->weaponClass
@@ -2508,13 +2529,13 @@ class RammingAttack extends Weapon{
 
 	} //endof public function beforeFiringOrderResolution
 
-	private function checkForCollisions($relevantShips, $gamedata, $terrrainPosition){
+	private function checkForCollisions($relevantShips, $gamedata, $terrainPosition){
 	    $collisiontargets = array(); // Initialize array for fighters to be fired at.	
 		$thisShip = $this->getUnit();
 		
 		if ($thisShip->Huge > 0) { //Terrain occupies more than just 1 hex!  Need to check all of its hexes.
 			// Add code that calls a new function, and replicates check below for all hexes within radius.
-			$radiusHexes = mathlib::getNeighbouringHexes($terrrainPosition, $thisShip->Huge);
+			$radiusHexes = mathlib::getNeighbouringHexes($terrainPosition, $thisShip->Huge);
 	
 			foreach ($relevantShips as $ship) {  // Look through relevant ships' movements and take appropriate action.                 
 				$startMove = $ship->getLastTurnMovement($gamedata->turn);
@@ -2533,11 +2554,11 @@ class RammingAttack extends Weapon{
 							// Or if it matches the centre position directly
 							if (
 								!empty($match) || 
-								($shipMove->position->q == $terrrainPosition->q && $shipMove->position->r == $terrrainPosition->r)
+								($shipMove->position->q == $terrainPosition->q && $shipMove->position->r == $terrainPosition->r)
 							) {
 								// Prevent duplicate ship IDs
 								if (!isset($collisiontargets[$ship->id])) {
-									$relativeBearing = $this->getTempBearing($previousPosition, $terrrainPosition, $ship, $previousFacing);
+									$relativeBearing = $this->getTempBearing($previousPosition, $terrainPosition, $ship, $previousFacing);
 									$location = $this->getCollisionLocation($relativeBearing, $ship);
 									$collisiontargets[$ship->id] = $location; // Add to array to be targeted.
 								}
@@ -2562,8 +2583,8 @@ class RammingAttack extends Weapon{
 						// Only interested in moves where ship enters a NEW hex!
 						if ($shipMove->type == "move" || $shipMove->type == "slipleft" || $shipMove->type == "slipright") {					
 							// Check if the position matches the asteroids, e.g. zero distance.
-							if ($terrrainPosition->q == $shipMove->position->q && $terrrainPosition->r == $shipMove->position->r) {
-								$relativeBearing = $this->getTempBearing($previousPosition, $terrrainPosition, $ship, $previousFacing);
+							if ($terrainPosition->q == $shipMove->position->q && $terrainPosition->r == $shipMove->position->r) {
+								$relativeBearing = $this->getTempBearing($previousPosition, $terrainPosition, $ship, $previousFacing);
 								$location = $this->getCollisionLocation($relativeBearing, $ship);
 								$collisiontargets[$ship->id] = $location; // Add to array to be targeted.
 							}
@@ -2572,8 +2593,8 @@ class RammingAttack extends Weapon{
 						// If the movement type is "end", and ship on Asteroid coordinates, remove the ship from collision targets as auto-ram chance with Enormous units will do the work here.
 						if ($shipMove->type == "end" && 
 							isset($collisiontargets[$ship->id]) &&
-							$terrrainPosition->q == $shipMove->position->q &&
-							$terrrainPosition->r == $shipMove->position->r) {
+							$terrainPosition->q == $shipMove->position->q &&
+							$terrainPosition->r == $shipMove->position->r) {
 							unset($collisiontargets[$ship->id]); // Remove from collision targets.
 						}
 
@@ -2634,9 +2655,37 @@ class RammingAttack extends Weapon{
 			$fireOrder->needed = 100; //always true
 			$fireOrder->updated = true;
 		}else{
-			parent::calculateHitBase($gamedata, $fireOrder);
+			parent::calculateHitBase($gamedata, $fireOrder);			
 		}
 	}
+
+	private function getRamHitLocation($ship, $gamedata, $shipPosition){	
+				if($ship->getSpeed() == 0) return 1; //Just return front location as standard if Ship is not moving.			
+				// Now check other movements in the turn.
+				$startMove = $ship->getLastTurnMovement($gamedata->turn);	//initialise as last move in previous turn, in case first move takes ship in asteroid.				
+				$previousPosition = $startMove->position; //This will change as we go through movements, but need to initialise as where the ship starts this turn.			 
+				$previousFacing = $startMove->getFacingAngle();	
+				$location = 0;		
+
+				foreach ($ship->movement as $shipMove) {
+					if ($shipMove->turn == $gamedata->turn) {
+			
+						// Only interested in moves where ship enters a NEW hex!
+						if ($shipMove->type == "move" || $shipMove->type == "slipleft" || $shipMove->type == "slipright") {					
+							// Check if the position matches the asteroids, e.g. zero distance.
+							if ($shipPosition->q == $shipMove->position->q && $shipPosition->r == $shipMove->position->r) {
+								$relativeBearing = $this->getTempBearing($previousPosition, $shipPosition, $ship, $previousFacing);
+								$location = $this->getCollisionLocation($relativeBearing, $ship);
+								return $location; //Found the first one, just return.
+							}
+						}
+						$previousPosition = $shipMove->position;
+						$previousFacing = $shipMove->getFacingAngle();
+					}
+				}
+								
+				return $location;
+	}//endof getRamHitLocation()
 
 	public function fire($gamedata, $fireOrder){
 		// If hit, firing unit itself suffers damage, too (based on ramming factor of target)!
@@ -2655,12 +2704,15 @@ class RammingAttack extends Weapon{
 		}
 		
 		parent::fire($gamedata, $fireOrder);
+
 		if($fireOrder->shotshit > 0){
 			$pos = null;
 			//$shooter = $gamedata->getShipById($fireOrder->targetid);
 			$shooter = $this->unit; //technically this unit after all
 			$target = $this->unit;
-			if($fireOrder->damageclass != 'TerrainCollision' && $fireOrder->damageclass != 'TerrainCraash') $fireOrder->chosenLocation = 0;//to be redetermined!
+			$targetPos = $target->getHexPos();
+
+			$fireOrder->chosenLocation = $this->getRamHitLocation($target, $gamedata, $targetPos);
 			$damage = $this->getReturnDamage($fireOrder);
         		$damage = $this->getDamageMod($damage, $shooter, $target, $pos, $gamedata);
         		$damage -= $target->getDamageMod($shooter, $pos, $gamedata->turn, $this);
@@ -2669,15 +2721,16 @@ class RammingAttack extends Weapon{
 				if ($ftr->isDestroyed()) return; //do not allocate to already destroyed fighter!!! it would cause the game to randomly choose another one, which would be incorrect
 				$fireOrder->calledid = $ftr->id;
 			}
-			
+
 			$this->damage($target, $shooter, $fireOrder,  $gamedata, $damage);
 			if($fireOrder->id < 0 && $fireOrder->damageclass != 'TerrainCollision'){ //for automatic firing orders return damage will not be correctly assigned; create a virtual firing order for this damage to be displayed unless is a collision during movement.
 				$newFireOrder = new FireOrder(
 					-1, "normal", $shooter->id, $target->id,
 					$this->id, -1, $gamedata->turn, 1, 
 					100, 100, 1, 1, 0,
-					0,0,'Reactor',10000
-				);
+					0,0,'AutoRam',10000
+				);				
+				$newFireOrder->chosenLocation = $this->getRamHitLocation($target, $gamedata, $targetPos);								
 				if(!$this->checkAlreadyRammed($fireOrder->targetid)) $newFireOrder->pubnotes = " Automatic ramming - return damage.";
 				$newFireOrder->addToDB = true;
 				$this->fireOrders[] = $newFireOrder;				
@@ -5131,7 +5184,7 @@ class PsychicField extends Weapon{ //Thirdspace weapons that operates similar to
 	
 	public function getAoE($turn){
 		$boostlevel = $this->getBoostLevel($turn);
-		$aoe = 4+$boostlevel;
+		$aoe = $this->range + $boostlevel;
 		return $aoe;
 	}
 	
@@ -5140,6 +5193,8 @@ class PsychicField extends Weapon{ //Thirdspace weapons that operates similar to
 	    $fireOrder->updated = true;
 		$fireOrder->chosenLocation = 0;//so it's recalculated later every time! - as location chosen here is completely incorrect for target 
 		$fireOrder->needed = 100; //hit is automatic
+		$range = $this->getAoE($gamedata->turn);
+		$fireOrder->pubnotes = "<br>Psychic Field effects all units within " . $range . " hexes.";		
 	}
 	
 	public function fire($gamedata, $fireOrder){
@@ -5196,27 +5251,22 @@ class PsychicField extends Weapon{ //Thirdspace weapons that operates similar to
                             $boostLevel += $i->amount;
                     }
 			}
-			
-			$ship = $this->getUnit();
-			foreach ($ship->enhancementOptions as $enhancement) {
-			    $enhID = $enhancement[0];
-				$enhCount = $enhancement[2];		        
-				if($enhCount > 0) {		            
-			        if ($enhID == 'IMPR_PSY') $boostLevel += $enhCount;       	
-				}
-			}			
-			
+
             return $boostLevel;     	
 	}
 	
 	//find units in range (other than self), create attacks vs them
 	public function beforeFiringOrderResolution($gamedata){
+		$ship = $this->getUnit();
+		$deployTurn = $ship->getTurnDeployed($gamedata);		
+		if($deployTurn > $gamedata->turn) return;  //Ship not deployed yet, don't fire weapon!
+
 		PsychicFieldHandler::createFiringOrders($gamedata);		
 	}
 
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!	
 		$shooter = $gamedata->getShipById($fireOrder->shooterid);
-		if ($ship->team == $shooter->team) return; //No effect on other Thirdspace ships.
+		if ($ship->team == $shooter->team) return; //No effect on own team.
 		if (isset($this->alreadyEngaged[$ship->id])) return; // Ignore flights that have already been had crits applied.
 			
 		$boostlevel = $this->getBoostLevel($gamedata->turn);
@@ -5225,7 +5275,7 @@ class PsychicField extends Weapon{ //Thirdspace weapons that operates similar to
 		$effecttohit = Dice::d(2,1)+$boostlevel;//strength of effect: -5 to -10 base, up to -25 with boost.
 		$effectCrit = $effectIni +2;
 				
-		$fireOrder->pubnotes .= "<br> All enemies units have Initiative reduced and suffer a Hit Penalty next turn. Ships may also suffer a potential Critical.";
+		//$fireOrder->pubnotes .= "<br> All enemies units have Initiative reduced and suffer a Hit Penalty next turn. Ships may also suffer a potential Critical.";
 						
 		if ($system->advancedArmor){		
 			$effectIni = ceil($effectIni/2);  	//Other Ancients are somewhat resistant to pyschic attack from Thirdspace Aliens, 50% effect.	
@@ -5368,7 +5418,8 @@ class PsychicFieldHandler{
 		}
 		
 		//sort all fields by boost
-		usort(PsychicFieldHandler::$psychicFields, "self::sortByBoost");	
+		//usort(PsychicFieldHandler::$psychicFields, "self::sortByBoost");
+		usort(self::$psychicFields, [self::class, 'sortByBoost']);
 	
 		//table of units that are already targeted
 		$alreadyTargeted = array();
@@ -5378,7 +5429,10 @@ class PsychicFieldHandler{
 		foreach(PsychicFieldHandler::$psychicFields as $field){			
 			if ($field->isDestroyed($gamedata->turn-1)) continue; //destroyed field does not attack
 			if ($field->isOfflineOnTurn($gamedata->turn)) continue; //disabled field does not attack
-			$shooter = $field->getUnit();      
+			$shooter = $field->getUnit();  
+			$deployTurn = $shooter->getTurnDeployed($gamedata);		
+			if($deployTurn > $gamedata->turn) continue;  //Ship not deployed yet, don't fire weapon!			
+			
 			$targetPos = $shooter->getCoPos();
 			$movementThisTurn = $shooter->getLastTurnMovement($gamedata->turn+1);
 			$fire = new FireOrder(-1, 'normal', $shooter->id, -1, $field->id, -1, $gamedata->turn, 
@@ -5391,7 +5445,9 @@ class PsychicFieldHandler{
 			foreach($inAoE as $targetID=>$target){		
 				if ($shooter->id == $target->id) continue;//does not threaten self!
 				if ($target->isDestroyed()) continue; //no point allocating	
-				if ($target->team == $shooter->team) continue; //No effect on units in same team.								
+				if ($target->team == $shooter->team) continue; //No effect on units in same team.
+				if ($target->isTerrain()) continue;
+				if ($target->getTurnDeployed($gamedata) > $gamedata->turn) continue;  //Ignore targets that are not deployed yet!									
 				if (in_array($target->id,$alreadyTargeted,true)) continue;//each target only once 
 				//add to target list
 				$alreadyTargeted[] = $target->id; //add to list of already targeted units
@@ -5447,7 +5503,7 @@ class PsychicFieldHandler{
                 $this->data["Special"] .= '<br>';
             } 
             //Raking(20) is already described in Raking class           
-            $this->data["Special"] .= "<br>Uninterceptable.";  
+            $this->data["Special"] .= "Uninterceptable.";  
             $this->data["Special"] .= '<br>Can be boosted with EW for an extra +2d10 +8 damage per point of EW used, up to three times.';
 		    $this->data["Special"] .= "<br>This EW does not count towards your OEW lock on a target.";	            
 		    $this->data["Special"] .= "<br>Has +1 modifier to critical hit rolls, and +2 to fighter dropout rolls.";               
@@ -5741,10 +5797,7 @@ class PsionicConcentrator extends Weapon{
 	
 	public function setSystemDataWindow($turn){
 		      parent::setSystemDataWindow($turn);  
-		      $this->data["Special"] = "Fires 4 shots by default, but can combine these into 1 or 2 powerful, shorter-ranged shot(s)";
-//		      $this->data["Special"] .= "<br> - 4 shots; 8-18 Damage, -2.5 per hex.";
-//		      $this->data["Special"] .= "<br> - 2 shots; 18-33 Damage, -5 per hex.";	
-//		      $this->data["Special"] .= "<br> - 1 shot; 29-54 Damage, -10 per hex.";			      		      		      
+		      $this->data["Special"] = "Fires 4 shots by default, but can combine these into 1 or 2 powerful, shorter-ranged shot(s)";			      		      		      
 		      $this->data["Special"] .= "<br>Any hits drain -1 Power from Younger Race ships for one turn.";
 		      $this->data["Special"] .= "<br>Has +1 modifier to critical hit rolls, and +2 to fighter dropout rolls.";
 			  $this->data["Special"] .= "<br>Can use '4Split' and '2Split' Firing Modes to target different enemy units.";		  
@@ -5787,15 +5840,12 @@ class PsionicConcentrator extends Weapon{
 			
 			case 1:
 				return Dice::d(6, 2)+6;								
-			break;
 							
 			case 2:
 				return Dice::d(6, 3)+15;								
-			break;
 			
 			case 3:
 				return Dice::d(6, 5)+24;								
-			break;
 		}
 
 	}
@@ -5992,11 +6042,9 @@ class PsionicConcentratorLight extends Weapon{
 		
 			case 1:
 				return Dice::d(6, 2)+6;							
-			break;
 							
 			case 2:
 				return Dice::d(6, 3)+15;							
-			break;
 		}
 	}
 	
@@ -6085,9 +6133,8 @@ class ProximityLaserLauncher extends Weapon{
 		public function setSystemDataWindow($turn){
 			parent::setSystemDataWindow($turn);        
 			$this->data["Special"] = "Proximity Launcher " . $this->pairing ."."; 
-			$this->data["Special"] .= "<br>Use this Launcher to select the hex from where its paired Proximity Laser will fire.";	 
-			$this->data["Special"] .= "<br>IMPORTANT - The paired Proximity Laser should be targeted at the same time as this launcher is fired.";
-			$this->data["Special"] .= "<br>HAS NO EFFECT UNLESS FIRED WITH PROXIMITY LASER " . $this->pairing ."."; 		 			
+			$this->data["Special"] .= "<br>Use to select hex from where Proximity Laser " . $this->pairing ." will fire.";	 
+			$this->data["Special"] .= "<br>IMPORTANT - No effect unless Proximity Laser " . $this->pairing ." targeted at the same time as launcher is fired.";		 			
 		}	
 		
 		public function calculateHitBase($gamedata, $fireOrder)
@@ -6102,7 +6149,7 @@ class ProximityLaserLauncher extends Weapon{
 	        $shooter = $gamedata->getShipById($fireOrder->shooterid);        
 	        $rolled = Dice::d(100);
 	        $fireOrder->rolled = $rolled; 
-			$fireOrder->pubnotes .= "Automatically hits."; 
+			//$fireOrder->pubnotes .= "Automatically hits."; 
 			if($rolled <= $fireOrder->needed){//HIT!
 				$fireOrder->shotshit++;			
 			}else{ //MISS!  Should never happen.
@@ -6165,12 +6212,10 @@ class ProximityLaserLauncher extends Weapon{
 		public function setSystemDataWindow($turn){
 			parent::setSystemDataWindow($turn);  
 			$this->data["Special"] = "Paired with Proximity Launcher ". $this->pairing ."."; 
-			$this->data["Special"] .= "<br>Use the paired Proximity Launcher system to target a hex, this will be the location from where this weapon will fire at its target in Firing Phase.";
-			$this->data["Special"] .= "<br>Range Penalty will be calculated from the hex the Launcher hits, not from this ship.";
-			$this->data["Special"] .= "<br>This weapon does not need an EW lock, and does not benefit from OEW.";				
-			$this->data["Special"] .= "<br>IMPORTANT - The paired Proximity Launcher should be fired at the same time as this weapon is targeted.";
-//			$this->data["Special"] .= "<br>WILL FIRE FROM SHIP UNLESS FIRED TOGETHER WITH PROXIMITY LAUNCHER " . $this->pairing .".";
-$this->data["Special"] .= "<br>WILL AUTOMATICALLY MISS UNLESS FIRED TOGETHER WITH PROXIMITY LAUNCHER " . $this->pairing .".";						
+			$this->data["Special"] .= "<br>Use Proximity Launcher ". $this->pairing ." to target a hex, laser will fire from this location.";
+			$this->data["Special"] .= "<br>Range Penalty is calculated from Launcher target, not from this ship.";
+			$this->data["Special"] .= "<br>Does not need an EW lock, and does not benefit from OEW.";				
+			$this->data["Special"] .= "<br>IMPORTANT - Automatically misses if Proximity Launcher ". $this->pairing ." not fired as well.";					
 	        $this->data["Ammunition"] = $this->ammunition;		
 		}	
 
@@ -6214,15 +6259,29 @@ $this->data["Special"] .= "<br>WILL AUTOMATICALLY MISS UNLESS FIRED TOGETHER WIT
 
 		public function calculateHitBase($gamedata, $fireOrder)
 		{
-			parent::calculateHitBase($gamedata, $fireOrder);
-
 			$launcherFireOrder = $this->launcher->getFireOrders($gamedata->turn);
 						
 			if(empty($launcherFireOrder)){//Launcher hasn't fired, laser automatically misses.	
 				$fireOrder->needed = 0; //auto-miss.
 				$fireOrder->updated = true;
-				$fireOrder->pubnotes .= "<br>A Proximity Launcher was not fired, it's laser shot automatically missed.";				
+				$fireOrder->pubnotes .= "<br>A Proximity Launcher was not fired, it's laser shot automatically missed.";
+				return;				
+			}
+
+			$target = $gamedata->getShipById($fireOrder->targetid);
+			$pos = $this->getFiringHex($gamedata, $fireOrder);		
+			$targetPos = $target->getHexPos();			
+			$losBlocked = $this->checkLineOfSight($pos, $targetPos, $gamedata);
+
+			if($losBlocked){//Laser does not have Line of Sight from it's firing position
+				$fireOrder->needed = 0; //auto-miss.
+				$fireOrder->updated = true;
+				$fireOrder->pubnotes .= "<br>A Proximity Laser did not have line of sight from its firing position.";
+				return;				
 			}	
+
+			parent::calculateHitBase($gamedata, $fireOrder);		
+
 		}//endof calculateHitBase()
 
 		
@@ -6652,18 +6711,22 @@ class PulsarMine extends Weapon{
 
     public function beforeFiringOrderResolution($gamedata){
     	
-    	$thisShip = $this->getUnit();
-    	
     	if($this->isDestroyed($gamedata->turn)) return;//Pulsar Mine is destroyed
-    	  
-    	$allShips = $gamedata->ships;
+		if($this->isOfflineOnTurn($gamedata->turn)) return; //Pulsar Mine is offline
+
+		$thisShip = $this->getUnit();
+		$deployTurn = $thisShip->getTurnDeployed($gamedata);
+		if($deployTurn > $gamedata->turn) return;  //Ship not deployed yet, don't fire weapon!
+
+    	$allShips = $gamedata->ships;  
     	$relevantShips = array();
 
 		//Make a list of relelvant ships e.g. this ship and enemy fighters in the game.
 		foreach($allShips as $ship){
-			if($ship->isDestroyed()) continue;
+			if ($ship->isDestroyed()) continue;
 			if (!$ship instanceof FighterFlight && ($ship->id != $thisShip->id)) continue; //Ignore ships EXCEPT this one!			
 			if ($ship instanceof FighterFlight && $ship->team == $thisShip->team) continue;	//Ignore flights that are friendly.	
+			if ($ship->getTurnDeployed($gamedata) > $gamedata->turn) continue;  //Ignore fighters that are not deployed yet!			
 			$relevantShips[] = $ship;			
 		}
 	
@@ -7539,6 +7602,7 @@ class SecondSight extends Weapon{
 
 	public function beforeFiringOrderResolution($gamedata){
 
+
 		$firingOrders = $this->getFireOrders($gamedata->turn);
 		  
 		$hasFireOrder = null;
@@ -7568,10 +7632,12 @@ class SecondSight extends Weapon{
 		  $allShips = $gamedata->ships;
 		  $relevantShips = array();
   
-		  //Make a list of relelvant ships e.g. all enemy ships.
+		  //Make a list of relevant ships e.g. all enemy ships.
 		  foreach($allShips as $ship){
 			  if($ship->isDestroyed()) continue;		
-			  if ($ship->team == $thisShip->team) continue;	//Ignore friendlies.	
+			  if ($ship->team == $thisShip->team) continue;	//Ignore friendlies.
+			  if ($ship->isTerrain()) continue;			  
+			  if ($ship->getTurnDeployed($gamedata) > $gamedata->turn) continue;  //Ignore targets that are not deployed yet!			  	
 			  $relevantShips[] = $ship;			
 		  }
 	  
@@ -7612,7 +7678,7 @@ class SecondSight extends Weapon{
 
     public function fire($gamedata, $fireOrder)
     {
-		    $shooter = $gamedata->getShipById($fireOrder->shooterid);        
+		//    $shooter = $gamedata->getShipById($fireOrder->shooterid);        
 	        $rolled = Dice::d(100);
 	        $fireOrder->rolled = $rolled; 
 			$fireOrder->pubnotes .= "<br> Reduces Initiative of all enemy ships.";
@@ -7748,7 +7814,9 @@ class ThoughtWave extends Plasma{
 		//Make a list of relelvant ships e.g. all enemy ships.
 		foreach($allShips as $ship){
 			if($ship->isDestroyed()) continue;		
-			if ($ship->faction == "Mindriders") continue;//Mindriders not affected.	
+			if ($ship->faction == "Mindriders") continue;//Mindriders not affected.
+			if ($ship->isTerrain()) continue;				
+			if ($ship->getTurnDeployed($gamedata) > $gamedata->turn) continue;  //Ignore targets that are not deployed yet!				
 			$relevantShips[] = $ship;			
 		}
 	

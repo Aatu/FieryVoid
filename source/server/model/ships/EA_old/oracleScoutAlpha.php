@@ -5,7 +5,7 @@ class OracleScoutAlpha extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 425;
-	$this->faction = "Earth Alliance (early)";
+        $this->faction = "Earth Alliance (Early)";
         $this->phpclass = "OracleScoutAlpha";
         $this->imagePath = "img/ships/oracle.png";
         $this->shipClass = "Oracle Explorer (Alpha)";

@@ -75,7 +75,9 @@ window.MovementPhaseStrategy = function () {
         this.shipWindowManager.open(ship);
     };
 
-    MovementPhaseStrategy.prototype.onHexClicked = function (payload) {};
+    MovementPhaseStrategy.prototype.onHexClicked = function (payload) {
+        PhaseStrategy.prototype.onHexClicked.call(this, payload);   
+    };
 
     MovementPhaseStrategy.prototype.selectShip = function (ship, payload) {
         if (gamedata.getMyActiveShips().includes(ship)) {
@@ -193,7 +195,7 @@ window.MovementPhaseStrategy = function () {
     MovementPhaseStrategy.prototype.selectActiveShip = function () {
 
         var ship = gamedata.getMyActiveShips().filter(function(ship) {
-            return !shipManager.movement.isMovementReady(ship) && !shipManager.isDestroyed(ship) && ship.userid != -5;
+            return !shipManager.movement.isMovementReady(ship) && !shipManager.isDestroyed(ship);
         }).pop();
 
         if (ship) {

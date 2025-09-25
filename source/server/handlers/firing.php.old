@@ -519,9 +519,10 @@ class FiringOld{
             //Debug::log("Fire is intercept\n");
             return false;
         }
+        /* Cleaned 19.8.25 - DK		        
         if ($weapon instanceof DualWeapon)
             $weapon->getFiringWeapon($fire);
-        
+        */
         if ($weapon->intercept == 0){
             //Debug::log("Weapon has intercept of zero\n");
             return false;

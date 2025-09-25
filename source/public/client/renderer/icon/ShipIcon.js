@@ -4,6 +4,7 @@ window.ShipIcon = function () {
 
     var directionOfMovementTexture = new THREE.TextureLoader().load('./img/directionOfMovement.png');
     var directionOfProwTexture = new THREE.TextureLoader().load('./img/directionOfProw.png');
+    const THRUSTER_TEXTURE = new THREE.TextureLoader().load("./img/systemicons/thrusterICON1.png");
 
     function ShipIcon(ship, scene) {
 
@@ -15,7 +16,10 @@ window.ShipIcon = function () {
         this.defaultPosition = null;
         this.mesh = null;
         this.size = ship.canvasSize;
-        this.mine = gamedata.isMyOrTeamOneShip(ship);
+        //this.mine = gamedata.isMyOrTeamOneShip(ship); //Old, singular variable.
+        this.mine = gamedata.isMyShip(ship);
+        this.ally = gamedata.isMyorMyTeamShip(ship);
+        this.terrain = gamedata.isTerrain(ship.shipSizeClass, ship.userid);
         this.scene = scene;
         this.shipSprite = null;
         this.shipEWSprite = null;
@@ -85,20 +89,24 @@ window.ShipIcon = function () {
     };
 
 	//shouldn't use provided heading as it's GET method
-    ShipIcon.prototype.getFacing = function (facing) {
-		var facingActual = this.shipSprite.mesh.rotation.z;
-		this.shipDirectionOfProwSprite.mesh.rotation.z = facingActual;
+    ShipIcon.prototype.getFacing = function (facing) {        
+        var facingActual = this.shipSprite.mesh.rotation.z;
+        if(!this.terrain) this.shipDirectionOfProwSprite.mesh.rotation.z = facingActual;
         return mathlib.radianToDegree(facingActual);
     };
 
     ShipIcon.prototype.setFacing = function (facing) {
-		var facingActual = mathlib.degreeToRadian(facing);
-		this.shipDirectionOfProwSprite.mesh.rotation.z = facingActual;
-        this.shipSprite.mesh.rotation.z = facingActual;//mathlib.degreeToRadian(facing);
+     
+    var facingActual = mathlib.degreeToRadian(facing);
+    if(!this.terrain) this.shipDirectionOfProwSprite.mesh.rotation.z = facingActual;  //No sprite for Terrain 
+    this.shipSprite.mesh.rotation.z = facingActual;//mathlib.degreeToRadian(facing);
+        
     };
 
     ShipIcon.prototype.setHeading = function (heading) {
-        this.shipDirectionOfMovementSprite.mesh.rotation.z = mathlib.degreeToRadian(heading);
+        if(!this.terrain){ //No sprite for Terrain  
+            this.shipDirectionOfMovementSprite.mesh.rotation.z = mathlib.degreeToRadian(heading);
+        }
     };
 
 	//this function is never used actually... and certainly shouldn't use provided heading as it's GET method
@@ -109,12 +117,35 @@ window.ShipIcon = function () {
     ShipIcon.prototype.setOverlayColorAlpha = function (alpha) {
         this.shipSprite.setOverlayColorAlpha(alpha);
     };
-
+    //No longer called 
+    /*
     ShipIcon.prototype.getMovements = function (turn) {
         return this.movements.filter(function (movement) {
             return turn === undefined || movement.turn === turn;
         }, this);
     };
+    */
+
+    //New function to fix pivot facing bug in Replay 
+    ShipIcon.prototype.getMovementsReplay = function (turn) {
+        if (turn === undefined) {
+            return this.movements; // fallback: return everything
+        }
+
+        // movements from the requested turn
+        let currentTurnMoves = this.movements.filter(m => m.turn === turn);
+
+        // find the last movement from the previous turn
+        let prevTurnMoves = this.movements.filter(m => m.turn === turn - 1);
+        let lastPrevMove = prevTurnMoves.length > 0 ? prevTurnMoves[prevTurnMoves.length - 1] : null;
+
+        // return combined
+        if (lastPrevMove) {
+            return [lastPrevMove, ...currentTurnMoves];
+        }
+        return currentTurnMoves;
+    };
+
 
     ShipIcon.prototype.setScale = function (width, height) {
         this.mesh.scale.set(width, height, 1);
@@ -151,17 +182,21 @@ window.ShipIcon = function () {
 
     ShipIcon.prototype.setHighlighted = function (value) {
         if (value) {
-            this.mesh.position.z = 500;
-            this.shipDirectionOfProwSprite.show();
-            this.shipDirectionOfMovementSprite.show();
+            this.mesh.position.z = 499;
+            if(!this.terrain){ //No sprite for Terrain  
+                this.shipDirectionOfProwSprite.show();
+                this.shipDirectionOfMovementSprite.show();
+            }
         } else {
             if (this.selected) {
                 this.mesh.position.z = 100;
             } else {
                 this.mesh.position.z = 0;
             }
-            this.shipDirectionOfProwSprite.hide();
-            this.shipDirectionOfMovementSprite.hide();
+            if(!this.terrain){ //No sprite for Terrain  
+                this.shipDirectionOfProwSprite.hide();
+                this.shipDirectionOfMovementSprite.hide();
+            }
         }
 
         this.selected = value;
@@ -206,16 +241,28 @@ window.ShipIcon = function () {
 
 	    var spriteWidthDirection = Math.min(this.size / 1.5, maxWidth-25);
 	    var spriteHeightDirection = Math.min(this.size / 1.5, maxHeight-25);
+        if(!this.terrain){ //No sprite for Terrain
+            this.shipDirectionOfProwSprite = new window.webglSprite('./img/directionOfProw.png', { width: spriteWidthDirection, height: spriteHeightDirection }, -2);
+            this.mesh.add(this.shipDirectionOfProwSprite.mesh);
+            this.shipDirectionOfProwSprite.hide();
 
-	    this.shipDirectionOfProwSprite = new window.webglSprite('./img/directionOfProw.png', { width: spriteWidthDirection, height: spriteHeightDirection }, -2);
-	    this.mesh.add(this.shipDirectionOfProwSprite.mesh);
-	    this.shipDirectionOfProwSprite.hide();
-
-	    this.shipDirectionOfMovementSprite = new window.webglSprite('./img/directionOfMovement.png', { width: spriteWidthDirection, height: spriteHeightDirection }, -2);
-	    this.mesh.add(this.shipDirectionOfMovementSprite.mesh);
-	    this.shipDirectionOfMovementSprite.hide();
-
+            this.shipDirectionOfMovementSprite = new window.webglSprite('./img/directionOfMovement.png', { width: spriteWidthDirection, height: spriteHeightDirection }, -2);
+            this.mesh.add(this.shipDirectionOfMovementSprite.mesh);
+            this.shipDirectionOfMovementSprite.hide();
+        }    
 	    this.shipSprite = new window.webglSprite(imagePath, { width: this.size / 2, height: this.size / 2 }, 1);
+        
+        this.shipSprite.setOverlayColor(
+            this.terrain 
+                ? new THREE.Color(0xBE / 255, 0xBE / 255, 0xBE / 255) // Off-white (#dedede)
+                : this.mine 
+                    ? new THREE.Color(160 / 255, 250 / 255, 100 / 255) // Light green
+                    : this.ally 
+                        ? new THREE.Color(51 / 255, 173 / 255, 255 / 255) // Light blue
+                        : new THREE.Color(255 / 255, 40 / 255, 40 / 255) // Red
+        );
+        
+        /* //Old method with just this.mine
         this.shipSprite.setOverlayColor(
             this.ship.shipSizeClass === 5 
                 ? new THREE.Color(0xBE / 255, 0xBE / 255, 0xBE / 255) // Off-white (#dedede)
@@ -223,9 +270,10 @@ window.ShipIcon = function () {
                     ? new THREE.Color(160 / 255, 250 / 255, 100 / 255) // Light green
                     : new THREE.Color(255 / 255, 40 / 255, 40 / 255) // Red
         );
+        */
         this.mesh.add(this.shipSprite.mesh);
 	    
-	//29.03.2022: people called for more visible circles - change from the same as ship image to half again as large (original: this.size / 2, new: this.size*0.75 ); unit icon and arrows size left as previously
+	    //29.03.2022: people called for more visible circles - change from the same as ship image to half again as large (original: this.size / 2, new: this.size*0.75 ); unit icon and arrows size left as previously
 	    var spriteWidth = Math.min(this.size * 0.75, maxWidth);
 	    var spriteHeight = Math.min(this.size * 0.75, maxHeight);
        	    
@@ -233,10 +281,20 @@ window.ShipIcon = function () {
 	    this.mesh.add(this.shipEWSprite.mesh);
 	    this.shipEWSprite.hide();
 
-	    this.ShipSelectedSprite = new window.ShipSelectedSprite({ width: spriteWidth, height: spriteHeight }, -2, this.mine ? 'ally' : 'enemy', true).hide();
+        this.ShipSelectedSprite = new window.ShipSelectedSprite(
+            { width: spriteWidth, height: spriteHeight },
+            -2,
+            this.terrain ? 'terrain' : (this.mine ? 'mine' : (this.ally ? 'ally' : 'enemy')),
+            true
+        ).hide();
 	    this.mesh.add(this.ShipSelectedSprite.mesh);
 
-	    this.ShipSideSprite = new window.ShipSelectedSprite({ width: spriteWidth, height: spriteHeight }, -2, this.mine ? 'ally' : 'enemy', false).hide();
+        this.ShipSideSprite = new window.ShipSelectedSprite(
+            { width: spriteWidth, height: spriteHeight },
+            -2,
+            this.terrain ? 'terrain' : (this.mine ? 'mine' : (this.ally ? 'ally' : 'enemy')),
+            false
+        ).hide();
 	    this.mesh.add(this.ShipSideSprite.mesh);
 
 	    this.NotMovedSprite = new window.ShipSelectedSprite({ width: spriteWidth, height: spriteHeight }, -2, 'neutral', false).hide();
@@ -260,11 +318,17 @@ window.ShipIcon = function () {
 
         var lastMovement = null;
 
-        movements.filter(function (movement) {
+        /*movements.filter(function (movement) { //This seemed to cause issues when I added Deployment Zones outside Turn 1 - DK
             return movement.type !== 'start';
         }).filter(function (movement) {
             return movement.commit;
-        }).forEach(function (movement) {
+        }).forEach(function (movement) { */
+
+        //Replacement code below
+        Object.values(movements)
+            .filter(movement => movement.type !== 'start')
+            .filter(movement => movement.commit)
+            .forEach(movement => {
 
             if (lastMovement && movement.turn !== lastMovement.turn) {
 
@@ -398,97 +462,76 @@ window.ShipIcon = function () {
         return null;
     };
 
-	ShipIcon.prototype.showWeaponArc = function (ship, weapon) {
-	    var hexDistance = window.coordinateConverter.getHexDistance();
-
-	    if (weapon instanceof Thruster) { //When 'weapon' system is a Thruster, displays small thruster icon on approriate location in relation to ship  - DK 10/24
-	        var graphicSize = 32; // Adjust the size of your graphic as needed
-	        var textureLoader = new THREE.TextureLoader();
-
-	        textureLoader.load("./img/systemicons/thrusterICON1.png", (graphicTexture) => {
-	            // Create a PlaneGeometry for the graphic
-	            var geometry = new THREE.PlaneGeometry(graphicSize, graphicSize);
-	            var material = new THREE.MeshBasicMaterial({
-	                map: graphicTexture,
-	                transparent: true,
-	                opacity: 0.75 // Set the desired opacity
-	            });
-
-	            // Create a Mesh with the geometry and material
-	            var meshGraphic = new THREE.Mesh(geometry, material);
-
-	            // Get the ship's current facing angle
-	            var shipFacing = this.getFacing(); // Get facing in degrees
-
-	            // Determine the offset based on weapon.direction
-	            var offsetDistance = 80; // Adjust this value as needed for positioning
-	            var offsetX = 0;
-	            var offsetY = 0;
-				var rolled = shipManager.movement.isRolled(ship);
-				var rollAdd = 0;
-				if(rolled) rollAdd = 180;			
-				
-	            switch (weapon.direction) {
-	                case 1:
-	                    offsetX = Math.cos(mathlib.degreeToRadian(shipFacing)) * offsetDistance;
-	                    offsetY = Math.sin(mathlib.degreeToRadian(shipFacing)) * offsetDistance;
-	                    break;
-	                case 2:
-	                    offsetX = Math.cos(mathlib.degreeToRadian(shipFacing + 180)) * offsetDistance; // Back
-	                    offsetY = Math.sin(mathlib.degreeToRadian(shipFacing + 180)) * offsetDistance;
-	                    break;
-	                case 3:
-	                    offsetX = Math.cos(mathlib.degreeToRadian(shipFacing + 90 + rollAdd)) * offsetDistance; 
-	                    offsetY = Math.sin(mathlib.degreeToRadian(shipFacing + 90 + rollAdd)) * offsetDistance;
-	                    break;
-	                case 4:
-	                    offsetX = Math.cos(mathlib.degreeToRadian(shipFacing + 270 + rollAdd)) * offsetDistance; 
-	                    offsetY = Math.sin(mathlib.degreeToRadian(shipFacing + 270 + rollAdd)) * offsetDistance;
-	                    break;
-	                default:
-	                    offsetX = 0; 
-	                    offsetY = 0;
-	                    break;
-	            }
-
-	            // Calculate the final position
-	            meshGraphic.position.set(offsetX, offsetY, 1); 
-
-	            // Set rotation for the graphic to match the ship's facing
-	            var arcs = shipManager.systems.getArcs(ship, weapon);
-	            var arcLength = arcs.start === arcs.end ? 360 : mathlib.getArcLength(arcs.start, arcs.end);
-	            var arcFacing = mathlib.addToDirection(arcs.end, arcLength * -0.5);
-
-	            // Calculate the rotation
-				meshGraphic.rotation.z = mathlib.degreeToRadian(-mathlib.addToDirection(arcFacing, -this.getFacing()));            	
-
-	            // Add the mesh graphic to the parent mesh
-	            this.mesh.add(meshGraphic);
-
-	            // Optional: If you need to track it for later removal
-	            this.weaponArcs.push(meshGraphic);
-	        }, undefined, (error) => {
-	            console.error("Error loading texture:", error);
-	        });
-	    } else { //Normal code to show weapon arc.
-	        var dis = weapon.rangePenalty === 0 ? hexDistance * weapon.range : 50 / weapon.rangePenalty * hexDistance;
-	        var arcs = shipManager.systems.getArcs(ship, weapon);
-	        var arcLength = arcs.start === arcs.end ? 360 : mathlib.getArcLength(arcs.start, arcs.end);
-	        
-	        var arcStart = mathlib.addToDirection(0, arcLength * -0.5);
-	        var arcFacing = mathlib.addToDirection(arcs.end, arcLength * -0.5);
-
-	        var geometry = new THREE.CircleGeometry(dis, 32, mathlib.degreeToRadian(arcStart), mathlib.degreeToRadian(arcLength));
-	        var material = new THREE.MeshBasicMaterial({ color: new THREE.Color("rgb(20,80,128)"), opacity: 0.5, transparent: true });
-	        var circle = new THREE.Mesh(geometry, material);
-	        circle.rotation.z = mathlib.degreeToRadian(-mathlib.addToDirection(arcFacing, -this.getFacing()));
-	        circle.position.z = -1;
-	        this.mesh.add(circle);
-	        this.weaponArcs.push(circle);
-	    }
-
-	    return null;
-	};
+    ShipIcon.prototype.showWeaponArc = function (ship, weapon) {
+        var hexDistance = window.coordinateConverter.getHexDistance();
+    
+        if (weapon instanceof Thruster) {
+            var graphicSize = 32;
+            var geometry = new THREE.PlaneGeometry(graphicSize, graphicSize);
+            var material = new THREE.MeshBasicMaterial({
+                map: THRUSTER_TEXTURE, // Use the preloaded texture
+                transparent: true,
+                opacity: 0.7
+            });
+    
+            var meshGraphic = new THREE.Mesh(geometry, material);
+    
+            var shipFacing = this.getFacing();
+            var offsetDistance = 80;
+            var offsetX = 0;
+            var offsetY = 0;
+            var rolled = shipManager.movement.isRolled(ship);
+            var rollAdd = rolled ? 180 : 0;
+    
+            switch (weapon.direction) {
+                case 1:
+                    offsetX = Math.cos(mathlib.degreeToRadian(shipFacing)) * offsetDistance;
+                    offsetY = Math.sin(mathlib.degreeToRadian(shipFacing)) * offsetDistance;
+                    break;
+                case 2:
+                    offsetX = Math.cos(mathlib.degreeToRadian(shipFacing + 180)) * offsetDistance;
+                    offsetY = Math.sin(mathlib.degreeToRadian(shipFacing + 180)) * offsetDistance;
+                    break;
+                case 3:
+                    offsetX = Math.cos(mathlib.degreeToRadian(shipFacing + 90 + rollAdd)) * offsetDistance;
+                    offsetY = Math.sin(mathlib.degreeToRadian(shipFacing + 90 + rollAdd)) * offsetDistance;
+                    break;
+                case 4:
+                    offsetX = Math.cos(mathlib.degreeToRadian(shipFacing + 270 + rollAdd)) * offsetDistance;
+                    offsetY = Math.sin(mathlib.degreeToRadian(shipFacing + 270 + rollAdd)) * offsetDistance;
+                    break;
+                default:
+                    offsetX = 0;
+                    offsetY = 0;
+            }
+    
+            meshGraphic.position.set(offsetX, offsetY, 1);
+    
+            var arcs = shipManager.systems.getArcs(ship, weapon);
+            var arcLength = arcs.start === arcs.end ? 360 : mathlib.getArcLength(arcs.start, arcs.end);
+            var arcFacing = mathlib.addToDirection(arcs.end, arcLength * -0.5);
+            meshGraphic.rotation.z = mathlib.degreeToRadian(-mathlib.addToDirection(arcFacing, -this.getFacing()));
+    
+            this.mesh.add(meshGraphic);
+            this.weaponArcs.push(meshGraphic);
+        } else {
+            var dis = weapon.rangePenalty === 0 ? hexDistance * weapon.range : 50 / weapon.rangePenalty * hexDistance;
+            var arcs = shipManager.systems.getArcs(ship, weapon);
+            var arcLength = arcs.start === arcs.end ? 360 : mathlib.getArcLength(arcs.start, arcs.end);
+            var arcStart = mathlib.addToDirection(0, arcLength * -0.5);
+            var arcFacing = mathlib.addToDirection(arcs.end, arcLength * -0.5);
+    
+            var geometry = new THREE.CircleGeometry(dis, 32, mathlib.degreeToRadian(arcStart), mathlib.degreeToRadian(arcLength));
+            var material = new THREE.MeshBasicMaterial({ color: new THREE.Color("rgb(20,80,128)"), opacity: 0.5, transparent: true });
+            var circle = new THREE.Mesh(geometry, material);
+            circle.rotation.z = mathlib.degreeToRadian(-mathlib.addToDirection(arcFacing, -this.getFacing()));
+            circle.position.z = -1;
+            this.mesh.add(circle);
+            this.weaponArcs.push(circle);
+        }
+    
+        return null;
+    };
 
     ShipIcon.prototype.hideWeaponArcs = function () {
         this.weaponArcs.forEach(function (arc) {

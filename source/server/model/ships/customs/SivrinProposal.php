@@ -32,7 +32,7 @@ class SivrinProposal extends HeavyCombatVesselLeftRight{
         $this->addAftSystem(new Thruster(3, 15, 0, 4, 1));
         $this->addAftSystem(new Thruster(4, 20, 0, 8, 2));
 		$plasma = new MediumPlasma(3, 5, 3, 300, 60);
-		$plasma->addTag = "Plasma Weapon";		
+		$plasma->addTag("Plasma Weapon");	
 		$this->addFrontSystem($plasma);
 		
 
@@ -40,7 +40,7 @@ class SivrinProposal extends HeavyCombatVesselLeftRight{
         $this->addLeftSystem(new NexusLaserSpear(3, 5, 3, 240, 360));
         $this->addLeftSystem(new NexusTwinIonGun(2, 4, 4, 180, 360));
 		$plasma = new MediumPlasma(3, 5, 3, 180, 360);
-		$plasma->addTag = "Plasma Weapon";		
+		$plasma->addTag("Plasma Weapon");	
 		$this->addLeftSystem($plasma);
         $this->addLeftSystem(new Thruster(3, 12, 0, 4, 3));
 
@@ -48,7 +48,7 @@ class SivrinProposal extends HeavyCombatVesselLeftRight{
         $this->addRightSystem(new NexusLaserSpear(3, 5, 3, 0, 120));
         $this->addRightSystem(new NexusTwinIonGun(2, 4, 4, 0, 180));
 		$plasma = new MediumPlasma(3, 5, 3, 0, 180);
-		$plasma->addTag = "Plasma Weapon";		
+		$plasma->addTag("Plasma Weapon");	
 		$this->addRightSystem($plasma);		
         $this->addRightSystem(new Thruster(3, 12, 0, 4, 4));
 

@@ -17,8 +17,8 @@ class Delphi extends BaseShip{
         $this->forwardDefense = 15;
         $this->sideDefense = 16;
 
-        $this->turncost = 1.25;
-        $this->turndelaycost = 1.25;
+        $this->turncost = 1.33;
+        $this->turndelaycost = 1.33;
         $this->accelcost = 3;
         $this->rollcost = 2;
         $this->pivotcost = 3;

@@ -18,7 +18,7 @@ window.gamedata = {
 				div.className = "game slot clickable";
 
 				var link = document.createElement("a");
-				link.setAttribute("href", "http://fieryvoid.net/game.php?gameid=" + id);
+				link.setAttribute("href", "game.php?gameid=" + id); //Amended during PHP8 update - DK 25.6.25
 				//link.innerHTML = "Anonymous Match" + " @ Turn " + data[i].turn;
 				link.innerHTML = data[i].name + " @ Turn " + data[i].turn;
 
@@ -28,8 +28,8 @@ window.gamedata = {
 			}
 		} else {
 			var div = document.createElement("div");
-			div.className = "game slot clickable";
-			div.innerHTML = "No Ongoing Fire Phase found";
+			div.className = "notfound";
+			div.innerHTML = "No recent games";
 
 			target.appendChild(div);
 		}
@@ -50,7 +50,7 @@ window.gamedata = {
 
 	createGames: function createGames() {
 
-		var gamehtml = '<div class="game slot clickable" data-gameid="{gameid}"><span class="name">{gamename}</span><span class="value players">players: {players}/{maxplayers}</span></div>';
+		var gamehtml = '<div class="game slot clickable" data-gameid="{gameid}"><span class="name">{gamename}</span><br><span class="value players">Players: {players}/{maxplayers}</span></div>';
 		var activefound = false;
 		var lobbyfound = false;
 		console.log("GAMES LOLS", this.games)
@@ -87,7 +87,7 @@ window.gamedata = {
 					gameDOM.appendTo($('.gamecontainer.lobby'));
 					$('.gamecontainer.lobby').addClass("found");
 				} else {
-					$('.players', gameDOM).html("players: " + game.playerCount + "/" + game.slots);
+					$('.players', gameDOM).html("Players: " + game.playerCount + "/" + game.slots);
 				}
 				lobbyfound = true;
 			}

@@ -9,7 +9,7 @@ class HyachDovoch extends FighterFlight
 		$this->pointCost = 70 *6;
 		$this->faction = "Hyach Gerontocracy";
 		$this->phpclass = "HyachDovoch";
-		$this->shipClass = "Dartha Medium Fighters (with Dovoch)";
+		$this->shipClass = "Dartha Medium Fighters (w/Dovoch)";
 			$this->variantOf = "Dartha Medium Fighters";
 			$this->occurence = "common";		
 		$this->imagePath = "img/ships/HyachDartha.png";

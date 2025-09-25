@@ -1,6 +1,6 @@
 <?php
 class ThoughtProjections extends FighterFlight{
-    
+	public $mindrider = true;    
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         

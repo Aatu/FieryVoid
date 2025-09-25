@@ -6,7 +6,7 @@ class OmegaEpsilon  extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 2200;
-        $this->faction = "Earth Alliance (custom)";
+        $this->faction = "Earth Alliance (Custom)";
         $this->phpclass = "omegaEpsilon";
         $this->imagePath = "img/ships/omegaShadow.png";
         $this->shipClass = "Shadow Omega Destroyer (Epsilon)";
@@ -34,7 +34,7 @@ class OmegaEpsilon  extends BaseShip{
         $this->rollcost = 2;
         $this->pivotcost = 3;
 	    
-		$this->initiative = 0*5; 
+		$this->iniativebonus = 0*5; 
          
         $this->addPrimarySystem(new Reactor(6, 30, 0, 0));
         $this->addPrimarySystem(new CnC(6, 16, 0, 0)); //I'm afraid to put in second C&C, so I combine their structure and increase armor

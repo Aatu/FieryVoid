@@ -68,7 +68,7 @@ shipManager.movement = {
     },
 
     isMovementReady: function isMovementReady(ship) {
-        return shipManager.movement.getRemainingMovement(ship) == 0 || shipManager.isDestroyed(ship);
+        return shipManager.movement.getRemainingMovement(ship) == 0 || shipManager.isDestroyed(ship) || gamedata.isTerrain(ship.shipSizeClass, ship.userid) || (shipManager.getTurnDeployed(ship) > gamedata.turn);
     },
 
     checkHasUncommitted: function checkHasUncommitted(ship) {
@@ -1050,8 +1050,11 @@ shipManager.movement = {
         
 		//is turning affordable in the first place?
 		var speed = shipManager.movement.getSpeed(ship);
-        var turncost = Math.ceil(speed * ship.turncost);		
+        var baseTurnCost = ship.turncost;
+        if(ship.submarine && shipManager.movement.isGoingBackwards(ship)) baseTurnCost = baseTurnCost * 1.33; //Subs have a weird rule about turning backwards.
+        var turncost = Math.ceil(speed * baseTurnCost);
         turncost = Math.max(1,turncost);//turn cost may never be less than 1!
+        
         if (shipManager.movement.getRemainingEngineThrust(ship) < turncost) {
             return false;
         }
@@ -1172,7 +1175,7 @@ shipManager.movement = {
     },
 
     canChangeSpeed: function canChangeSpeed(ship, accel) {
-        if (ship.osat || ship.base) {
+        if (ship.osat || ship.base || gamedata.isTerrain(ship.shipSizeClass, ship.userid)) {
             return false;
         }
         if (gamedata.gamephase == -1 && ship.deploymove) return true;
@@ -1375,11 +1378,14 @@ shipManager.movement = {
 
 	    for (var i in gamedata.ships) {
 	        var ship = gamedata.ships[i];
-
+			if(gamedata.isTerrain(ship.shipSizeClass, ship.userid)) continue;
 	        if (ship.unavailable) continue;
 	        if (ship.flight) continue;
 	        if (ship.userid != gamedata.thisplayer) continue;
 	        if (shipManager.isDestroyed(ship) || shipManager.power.isPowerless(ship)) continue;
+
+			var deployTurn = shipManager.getTurnDeployed(ship);
+			if(deployTurn > gamedata.turn) continue;  //Don't bother checking for ships that haven't deployed yet.
 
 	        // Get the list of engine systems
 	        var engines = shipManager.systems.getSystemListByName(ship, "engine");
@@ -1471,7 +1477,7 @@ shipManager.movement = {
             if (move.turn == gamedata.turn) return move;
         }
     },
-
+/*
     getPositionAtStartOfTurn: function getPositionAtStartOfTurn(ship, currentTurn) {
         if (currentTurn === undefined) {
             currentTurn = gamedata.turn;
@@ -1490,6 +1496,51 @@ shipManager.movement = {
         
         return new hexagon.Offset(move.position);
     },
+*/
+    //New function as sometimes fighter movements were erroring during late Deployment phases when called from isEscorting - DK Jul 2025
+    getPositionAtStartOfTurn: function getPositionAtStartOfTurn(ship, currentTurn) {
+        if (currentTurn === undefined) {
+            currentTurn = gamedata.turn;
+        }
+
+        // Normalize keys into sorted array (ascending numerically)
+        const keys = Object.keys(ship.movement)
+            .map(k => parseInt(k))
+            .filter(k => !isNaN(k))
+            .sort((a, b) => a - b); 
+
+        let move = null;
+        let moveNo = -1;
+
+        // Walk backward from last key
+        for (let i = keys.length - 1; i >= 0; i--) {
+            let idx = keys[i];
+            let candidate = ship.movement[idx];
+
+            if (candidate.turn < currentTurn) {
+                move = candidate;
+                moveNo = idx;
+                break;
+            }
+        }
+
+        // Fallback: if none from earlier turns, take earliest move available
+        if (!move && keys.length > 0) {
+            moveNo = keys[0];
+            move = ship.movement[moveNo];
+        }
+
+        // Handle 'start' edge case
+        if (move && move.type === 'start') {
+            let nextIndex = keys.find(k => k > moveNo);
+            if (nextIndex !== undefined) {
+                move = ship.movement[nextIndex];
+            }
+        }
+
+        return new hexagon.Offset(move.position);
+    },
+
 
     getPreviousLocation: function getPreviousLocation(ship) {
         var oPos = shipManager.getShipPosition(ship);
@@ -1695,8 +1746,11 @@ shipManager.movement = {
         }
 
         var speed = shipManager.movement.getSpeed(ship);
-        var turncost = Math.ceil(speed * ship.turncost);
+        var baseTurnCost = ship.turncost;
+        if(ship.submarine && shipManager.movement.isGoingBackwards(ship)) baseTurnCost = baseTurnCost * 1.33; //Subs have a weird rule about turning backwards.
+        var turncost = Math.ceil(speed * baseTurnCost);
         turncost = Math.max(1,turncost);//turn cost may never be less than 1!
+        
         if (shipManager.movement.getRemainingEngineThrust(ship) < turncost) {
             return false;
         }
@@ -1900,7 +1954,9 @@ shipManager.movement = {
         var requiredThrust = Array(null, null, null, null, null);
 
         var speed = shipManager.movement.getSpeed(ship);
-        var turncost = Math.ceil(speed * ship.turncost);
+        var baseTurnCost = ship.turncost;
+        if(ship.submarine && shipManager.movement.isGoingBackwards(ship)) baseTurnCost = baseTurnCost * 1.33; //Subs have a weird rule about turning backwards.
+        var turncost = Math.ceil(speed * baseTurnCost);
 
         var side, sideindex, rear, rearindex, any;
 

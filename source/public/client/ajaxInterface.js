@@ -6,56 +6,387 @@ window.ajaxInterface = {
     pollActive: false,
     pollcount: 0,
     submiting: false,
-    //	fastpolling: false,
 
+
+    //NEW VERSION FOR PHP 8    
     getShipsForFaction: function getShipsForFaction(factionRequest, getFactionShipsCallback) {
-        $.ajax({
-            type: 'POST',
-            url: 'gamelobbyloader.php',
-            dataType: 'json',
-            data: { faction: factionRequest },
-            success: getFactionShipsCallback,
-            error: ajaxInterface.errorAjax
+        fetch('gamelobbyloader.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ faction: factionRequest })
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('Network response was not ok');
+            return response.json();
+        })
+        .then(data => {
+            if (data.error) {
+                ajaxInterface.errorAjax(null, null, data.error);
+                return;
+            }
+            getFactionShipsCallback(data);
+        })
+        .catch(error => {
+            ajaxInterface.errorAjax(null, null, error.message);
         });
     },
-
 
     react: function react() {
         alert("callback");
     },
 
-    submitGamedata: function submitGamedata() {
 
+    //New version - DK July 2025
+    submitGamedata: function submitGamedata() {
         if (ajaxInterface.submiting) return;
 
         ajaxInterface.submiting = true;
 
-        var gd = ajaxInterface.construcGamedata();
+        // ✅ Build the payload using your existing function
+        const gd = ajaxInterface.construcGamedata();
 
+        // ✅ Force ships into a proper JSON string
+        if (typeof gd.ships !== 'string') {
+            gd.ships = JSON.stringify(gd.ships);
+        }
+
+        // ✅ Use JSON to avoid PHP array serialization quirks
         $.ajax({
             type: 'POST',
             url: 'gamedata.php',
-            dataType: 'json',
-            data: gd,
-            success: ajaxInterface.successSubmit,
-            error: ajaxInterface.errorAjax
+            contentType: 'application/json; charset=utf-8', // ✅ send JSON body
+            dataType: 'json',                               // ✅ expect JSON back
+            data: JSON.stringify(gd),                       // ✅ encode full payload
+            timeout: 15000,                                 // ✅ prevent long hangs
+            success: function (response) {
+                ajaxInterface.submiting = false;
+
+                if (response && response.error) {
+                    console.error("Submit failed:", response);
+                    ajaxInterface.errorAjax(null, null, response.error);
+                } else {
+                    ajaxInterface.successSubmit(response);
+                }
+            },
+            error: function (xhr, status, error) {
+                ajaxInterface.submiting = false;
+                ajaxInterface.errorAjax(xhr, status, error);
+            }
         });
 
+        // ✅ Indicate we’re waiting for the server response
         gamedata.goToWaiting();
     },
 
-    submitSlotAction: function submitSlotAction(action, slotid) {
+    submitSavedFleet: function submitSavedFleet(fleetname, isPublic, callback) {
+        if (ajaxInterface.submiting) return;
+        ajaxInterface.submiting = true;
+        // Build the payload using your existing function
+        const saveData = ajaxInterface.constructSavedShips(fleetname, isPublic);
+
+        // Ensure ships is a JSON string
+        if (typeof saveData.ships !== 'string') {
+            saveData.ships = JSON.stringify(saveData.ships);
+        }
+
+        // Ensure there’s at least one ship
+        let shipsArray;
+        try {
+            shipsArray = JSON.parse(saveData.ships);
+        } catch (e) {
+            shipsArray = [];
+        }
+
+        if (!Array.isArray(shipsArray) || shipsArray.length === 0) {
+            window.confirm.error("You must have at least one ship before saving!", function () {});
+            return; // stop execution
+        }
+
+        // Send the POST request
+        $.ajax({
+            type: 'POST',
+            url: 'saveFleet.php',
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'json',
+            data: JSON.stringify(saveData),
+            timeout: 15000,
+            success: function(response) {
+                ajaxInterface.submiting = false;
+
+                if (response && response.error) {
+                    console.error("Submit failed:", response);
+                    ajaxInterface.errorAjax(null, null, response.error);
+                } else {
+                    ajaxInterface.successSubmit(response);
+
+                    // ✅ Call the callback if provided
+                    if (typeof callback === 'function') {
+                        callback(response);
+                    }
+                }
+            },
+            error: function(xhr, status, error) {
+                ajaxInterface.submiting = false;
+                ajaxInterface.errorAjax(xhr, status, error);
+            }
+        });
+    },
+
+    constructSavedShips: function constructSavedShips(fleetname, isPublic) {
+
+        var saveships = Array();
+        var points = 0;
+
+        for (var i in gamedata.ships) {
+            var lship = gamedata.ships[i];
+            if (lship.slot != gamedata.selectedSlot) continue;
+            points += lship.pointCost;
+        }
+
+        for (var i in gamedata.ships) {
+            var ship = gamedata.ships[i];
+            var newShip = {
+                'phpclass': ship.phpclass,
+                'userid': ship.userid,
+                'id': ship.id,
+                'name': ship.name,
+				'pointCostEnh': Math.round(ship.pointCostEnh),
+				'pointCostEnh2': Math.round(ship.pointCostEnh2)
+            };
+
+            newShip.systems = Array();
+
+            if (ship.userid === gamedata.thisplayer) {
+
+                var systems = Array();
+
+                for (var a in ship.systems) {
+                    var system = ship.systems[a];
+
+                    if (ship.flight) {
+
+                        var fighterSystems = Array();
+
+                        for (var c in system.systems) {
+                            var fightersystem = system.systems[c];
+                            var ammoArray = Array();
+  
+                            if (fightersystem.missileArray != null) {
+                                for (var index in fightersystem.missileArray) {
+                                    var amount = fightersystem.missileArray[index].amount;
+                                    ammoArray[index] = amount;
+                                    newShip.pointCostEnh2 += fightersystem.missileArray[index].cost * amount * ship.flightSize;                                    
+                                }
+                            }
+							
+							//fightersystem.doIndividualNotesTransfer();
+							fighterSystems[c] = { 'id': fightersystem.id, 'fireOrders': fightersystem.fireOrders, 'ammo': ammoArray, "individualNotesTransfer": fightersystem.individualNotesTransfer };
+                        }
+						//system.doIndividualNotesTransfer();
+						systems[a] = { 'id': system.id, 'systems': fighterSystems, "individualNotesTransfer": system.individualNotesTransfer };
+                    } else {
+                        var ammoArray = Array();
+                        var fires = Array();
+                        systems[a] = { 'id': system.id, 'power': system.power, 'fireOrders': fires };
+
+                        if (system.missileArray != null) {
+                            for (var index in system.missileArray) {
+                                var amount = system.missileArray[index].amount;
+                                ammoArray[index] = amount;
+                                newShip.pointCostEnh2 += system.missileArray[index].cost * amount;
+                            }
+                        }
+						//system.doIndividualNotesTransfer();
+						systems[a] = { 'id': system.id, 'power': system.power, 'fireOrders': fires, 'ammo': ammoArray, "individualNotesTransfer": system.individualNotesTransfer };
+                    }
+                }
+
+                newShip.systems = systems;
+
+                if (ship.flight) {
+                    newShip.flightSize = ship.flightSize;
+                }
+                
+                //unit enhancements
+                newShip.enhancementOptions = ship.enhancementOptions;
+
+                saveships.push(newShip);
+            }
+        }
+
+        var saveData = {
+            name: fleetname,
+            userid: gamedata.thisplayer,
+            points: points,
+            isPublic: isPublic,
+            ships: saveships,
+        };
+
+        return saveData;
+    },
+
+
+	getSavedFleets: function getSavedFleets(callback) {
+        if (ajaxInterface.submiting) return;
+        ajaxInterface.submiting = true;
+
+		$.ajax({
+			type: 'GET',
+			url: 'getSavedFleets.php',
+			dataType: 'json',
+			cache: false,
+			timeout: 15000
+		})
+		.done(function(response) {
+            ajaxInterface.submiting = false;            
+			if (!response || !response.fleets) return callback([]);
+
+			callback(response.fleets);
+		})
+		.fail(function(xhr, textStatus, errorThrown) {
+            ajaxInterface.submiting = false;            
+			console.error("Failed to load fleets:", errorThrown || textStatus);
+			callback([]);
+		});
+	},
+
+    loadSavedFleet: function loadSavedFleet(listId, callback) {
+        if (ajaxInterface.submiting) return;
         ajaxInterface.submiting = true;
 
         $.ajax({
-            type: 'POST',
-            url: 'slot.php',
+            type: 'POST', // POST to match PHP JSON reading
+            url: 'loadSavedFleet.php',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ listid: listId }),
             dataType: 'json',
-            data: { action: action, gameid: gamedata.gameid, slotid: slotid },
-            success: ajaxInterface.successSubmit,
-            error: ajaxInterface.errorAjax
+            cache: false,
+            timeout: 15000
+        })
+        .done(function(response) {
+            ajaxInterface.submiting = false;             
+			if (!response || !response.ships) return callback([]);
+            callback(response);
+        })
+        .fail(function(xhr, textStatus, errorThrown) {
+            ajaxInterface.submiting = false;             
+            console.error("Failed to load fleet:", textStatus, errorThrown);
+            callback([]);
         });
     },
+
+
+    changeFleetPublic: function changeFleetPublic(id, callback) {
+        if (ajaxInterface.submiting) return;
+        ajaxInterface.submiting = true;      
+        // Send the POST request
+        $.ajax({
+            type: 'POST',
+            url: 'changeAvailabilityFleet.php',
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'json',
+            data: JSON.stringify({id: id}),
+            timeout: 15000,
+            success: function(response) {
+                ajaxInterface.submiting = false;
+
+                if (response && response.error) {
+                    console.error("Submit failed:", response);
+                    ajaxInterface.errorAjax(null, null, response.error);
+                }
+
+                // ✅ Call the callback if provided
+                if (typeof callback === 'function') {
+                    callback(response);
+                }
+            },
+            error: function(xhr, status, error) {
+                ajaxInterface.submiting = false;
+                ajaxInterface.errorAjax(xhr, status, error);
+            }
+        });
+	},
+
+
+    deleteSavedFleet: function deleteSavedFleet(id, callback) {
+        if (ajaxInterface.submiting) return;
+        ajaxInterface.submiting = true;        
+        // Send the POST request
+        $.ajax({
+            type: 'POST',
+            url: 'deleteSavedFleet.php',
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'json',
+            data: JSON.stringify({id: id}),
+            timeout: 15000,
+            success: function(response) {
+                ajaxInterface.submiting = false;
+
+                if (response && response.error) {
+                    console.error("Submit failed:", response);
+                    ajaxInterface.errorAjax(null, null, response.error);
+                } else {
+                    ajaxInterface.successSubmit(response);
+
+                    // ✅ Call the callback if provided
+                    if (typeof callback === 'function') {
+                        callback(response);
+                    }
+                }
+            },
+            error: function(xhr, status, error) {
+                ajaxInterface.submiting = false;
+                ajaxInterface.errorAjax(xhr, status, error);
+            }
+        });
+	},
+
+
+//New version for PHP8
+submitSlotAction: function submitSlotAction(action, slotid, callback) {
+    if (ajaxInterface.submiting) return;
+    ajaxInterface.submiting = true;
+
+    $.ajax({
+        type: 'POST',
+        url: 'slot.php',
+        dataType: 'json', // ✅ Expect JSON
+        data: { 
+            action: action,
+            gameid: gamedata.gameid,
+            slotid: slotid 
+        },
+        timeout: 15000, // ✅ prevent hanging requests
+    })
+    .done(function (response, textStatus, xhr) {
+        ajaxInterface.submiting = false;
+
+        // ✅ Handle HTTP-level errors first
+        if (xhr.status !== 200) {
+            console.error(`Slot action failed [${xhr.status}]`);
+            ajaxInterface.errorAjax(xhr, textStatus, response?.error || "Server error");
+            return;
+        }
+
+        // ✅ Handle application-level errors
+        if (response && response.error) {
+            console.warn("Slot action error:", response.error);
+            ajaxInterface.errorAjax(xhr, textStatus, response.error);
+            return;
+        }
+
+        // ✅ Normal success
+        ajaxInterface.successSubmit(response);
+        if (typeof callback === "function") callback(response);
+    })
+    .fail(function (xhr, textStatus, errorThrown) {
+        ajaxInterface.submiting = false;
+        let message = errorThrown || textStatus || "Unknown network error";
+        console.error("Slot action AJAX fail:", message, xhr.responseText);
+        ajaxInterface.errorAjax(xhr, textStatus, message);
+    });
+},
+
 
     construcGamedata: function construcGamedata() {
 
@@ -69,14 +400,14 @@ window.ajaxInterface = {
                 'slot': ship.slot,
                 'id': ship.id,
                 'name': ship.name,
-				'pointCostEnh': ship.pointCostEnh,
-				'pointCostEnh2': ship.pointCostEnh2
+				'pointCostEnh': Math.round(ship.pointCostEnh),
+				'pointCostEnh2': Math.round(ship.pointCostEnh2)
             };
             newShip.movement = Array();
             newShip.EW = Array();
             newShip.systems = Array();
 
-            if (gamedata.isMyShip(ship)) {
+            if (ship.userid === gamedata.thisplayer) {
                 for (var a = ship.movement.length - 1; a >= 0; a--) {
                     var move = ship.movement[a];
                     if (move.turn == gamedata.turn) {
@@ -115,6 +446,7 @@ window.ajaxInterface = {
                                 for (var index in fightersystem.missileArray) {
                                     var amount = fightersystem.missileArray[index].amount;
                                     ammoArray[index] = amount;
+                                    newShip.pointCostEnh2 += fightersystem.missileArray[index].cost * amount * ship.flightSize;  
                                 }
                             }
 							
@@ -153,6 +485,7 @@ window.ajaxInterface = {
                             for (var index in system.missileArray) {
                                 var amount = system.missileArray[index].amount;
                                 ammoArray[index] = amount;
+                                newShip.pointCostEnh2 += system.missileArray[index].cost * amount;                                  
                             }
                         }
 						//changed to accomodate new variable for individual data transfer to server - in a generic way
@@ -189,6 +522,8 @@ window.ajaxInterface = {
         return gd;
     },
 
+
+    //Not sure what this one is for, not used as far as I can see... - DK
     construcGamedata2: function construcGamedata2() {
 
         var tidyships = jQuery.extend(true, {}, gamedata.ships);
@@ -234,6 +569,7 @@ window.ajaxInterface = {
                         systems[a] = { 'id': system.id, 'systems': fighterSystems };
                     } else {
                         var fires = Array();
+        				/* Cleaned 19.8.25 - DK	                        
                         if (system.dualWeapon) {
                             for (var c in system.weapons) {
                                 var weapon = system.weapons[c];
@@ -246,6 +582,7 @@ window.ajaxInterface = {
                                 fires = fires.concat(weapon.fireOrders);
                             }
                         } else {
+                        */    
                             for (var b = system.fireOrders.length - 1; b >= 0; b--) {
                                 var fire = system.fireOrders[b];
                                 if (fire.turn < gamedata.turn) {
@@ -253,7 +590,7 @@ window.ajaxInterface = {
                                 }
                             }
                             fires = system.fireOrders;
-                        }
+                        //}
 
                         for (var b = system.power.length - 1; b >= 0; b--) {
                             var power = system.power[b];
@@ -321,6 +658,7 @@ window.ajaxInterface = {
 
         ajaxInterface.pollActive = true;
         ajaxInterface.pollcount = 0;
+
         ajaxInterface.pollGamedata();
     },
 
@@ -342,35 +680,57 @@ window.ajaxInterface = {
             return;
         }
 
-        if (!ajaxInterface.submiting) ajaxInterface.requestGamedata();
+        var dontPollYet = false;
+        var time = 5000;  
 
-        ajaxInterface.pollcount++;
+        // detect environment
+        var isLocal = (location.hostname === "localhost" || location.hostname === "127.0.0.1");
+        var phase = gamedata.gamephase;        
 
-        var time = 6000;
-
-        if (ajaxInterface.pollcount > 10) {
-            time = 6000;
+        if(gamedata.gamephase == -2){
+            for (var i in gamedata.slots) {
+                var slot = gamedata.slots[i];		
+                if(slot.playerid !== null && slot.playerid == gamedata.thisplayer && slot.lastphase == "-3"){
+                    dontPollYet = true;
+                    break;       
+                }      
+            }
         }
+        
+        if(!dontPollYet || isLocal){
+            if (!ajaxInterface.submiting) ajaxInterface.requestGamedata();
 
-        if (ajaxInterface.pollcount > 100) {
-            //        	ajaxInterface.fastpolling = false;
-            time = 30000;
+            ajaxInterface.pollcount++;
+
+            // --- base timings depending on mode ---
+            if (isLocal) {
+                // Local testing timings
+                time = 3000;
+            } else if (phase === -2) {
+                // Phase -2 timings (customize as you like)
+                time = 5000;
+                if (ajaxInterface.pollcount > 1) time = 10000;
+                if (ajaxInterface.pollcount > 3)  time = 20000;                
+                if (ajaxInterface.pollcount > 40) time = 30000;
+            } else {
+                // In-Game timings
+                time = 5000;
+                if (ajaxInterface.pollcount > 1)  time = 10000;
+                if (ajaxInterface.pollcount > 3)  time = 20000;
+                if (ajaxInterface.pollcount > 10) time = 60000;
+                if (ajaxInterface.pollcount > 40) time = 1800000;
+            }
+
+            if (ajaxInterface.pollcount > 300) {
+                return;
+            }
+        }else{
+            time = 8000;        
         }
-
-        if (ajaxInterface.pollcount > 200) {
-            time = 300000;
-        }
-
-        if (ajaxInterface.pollcount > 300) {
-            return;
-        }
-
-        //        if (ajaxInterface.fastpolling) {
-        //         	time=1000;
-        //        }
 
         ajaxInterface.poll = setTimeout(ajaxInterface.pollGamedata, time);
     },
+
 
     startPollingGames: function startPollingGames() {
         ajaxInterface.pollGames();
@@ -388,7 +748,80 @@ window.ajaxInterface = {
     },
 
     requestGamedata: function requestGamedata() {
+        // prevent overlap if already running
+        if (ajaxInterface.submiting) return;
 
+        ajaxInterface.submiting = true;
+
+        $.ajax({
+            type: 'GET',
+            url: 'gamedata.php',
+            dataType: 'json',
+            data: {
+                turn: gamedata.turn,
+                phase: gamedata.gamephase,
+                activeship: gamedata.activeship,
+                gameid: gamedata.gameid,
+                playerid: gamedata.thisplayer,
+                time: Date.now()
+            },
+            success: ajaxInterface.successRequest,
+            error: ajaxInterface.errorAjax,
+            complete: function () {
+                // always clear flag, even on error/timeout
+                ajaxInterface.submiting = false;
+            }
+        });
+    },
+
+    requestAllGames: function requestAllGames() {
+        // prevent overlap if already running
+        if (ajaxInterface.submiting) return;
+        ajaxInterface.submiting = true;
+
+        $.ajax({
+            type: 'GET',
+            url: 'allgames.php',
+            dataType: 'json',
+            data: {},
+            success: ajaxInterface.successRequest,
+            error: ajaxInterface.errorAjax,
+            complete: function () {
+                // always clear flag, even on error/timeout
+                ajaxInterface.submiting = false;
+            }            
+        });
+    },
+
+    getFirePhaseGames: function getFirePhaseGames() {
+
+        $.ajax({
+            type: 'GET',
+            url: 'firePhaseGames.php',
+            dataType: 'json',
+            data: {},
+            success: gamedata.createFireDiv,
+            error: ajaxInterface.errorAjax
+        });
+    }
+
+
+    /* //OLD VERSION GETSHIPSFORFACTION()
+    getShipsForFaction: function getShipsForFaction(factionRequest, getFactionShipsCallback) {
+        $.ajax({
+            type: 'POST',
+            url: 'gamelobbyloader.php',
+            dataType: 'json',
+            data: { faction: factionRequest },
+            success: getFactionShipsCallback,
+            error: ajaxInterface.errorAjax
+        });
+    },
+    */
+
+    /* //OLD VERSION REQUESTGAMEDATA()
+    requestGamedata: function requestGamedata() {
+        if (ajaxInterface.submiting) return; // 🚫 skip if still running
         ajaxInterface.submiting = true;
 
         $.ajax({
@@ -407,30 +840,95 @@ window.ajaxInterface = {
             error: ajaxInterface.errorAjax
         });
     },
+*/
 
-    requestAllGames: function requestAllGames() {
 
+    /* //OLD VERSION SUBMITGAMEDATA()
+        submitGamedata: function submitGamedata() {
+
+            if (ajaxInterface.submiting) return;
+
+            ajaxInterface.submiting = true;
+
+            var gd = ajaxInterface.construcGamedata();
+
+            $.ajax({
+                type: 'POST',
+                url: 'gamedata.php',
+                dataType: 'json',
+                data: gd,
+                success: ajaxInterface.successSubmit,
+                error: ajaxInterface.errorAjax
+            });
+
+            gamedata.goToWaiting();
+        },
+    */
+
+    /* //OLD VERSION OF SUBMITSLOTACTION()
+    submitSlotAction: function submitSlotAction(action, slotid, callback) {
         ajaxInterface.submiting = true;
 
         $.ajax({
-            type: 'GET',
-            url: 'allgames.php',
+            type: 'POST',
+            url: 'slot.php',
             dataType: 'json',
-            data: {},
-            success: ajaxInterface.successRequest,
+            data: { action: action, gameid: gamedata.gameid, slotid: slotid },
+            success: function (response) {
+                ajaxInterface.successSubmit(response);
+                if (typeof callback === "function") callback(response);
+            },
             error: ajaxInterface.errorAjax
         });
     },
+    */
 
-    getFirePhaseGames: function getFirePhaseGames() {
+    /* //OLD VERSION OF POLLGAMEDATA()
+    pollGamedata: function pollGamedata() {
 
-        $.ajax({
-            type: 'GET',
-            url: 'firePhaseGames.php',
-            dataType: 'json',
-            data: {},
-            success: gamedata.createFireDiv,
-            error: ajaxInterface.errorAjax
-        });
-    }
+        if (!ajaxInterface.pollActive) {
+            ajaxInterface.stopPolling();
+            return;
+        }
+
+        if (gamedata.waiting == false) {
+            ajaxInterface.stopPolling();
+            return;
+        }
+
+        if (!ajaxInterface.submiting) ajaxInterface.requestGamedata();
+
+        ajaxInterface.pollcount++;
+
+        // detect if running locally
+        var isLocal = (location.hostname === "localhost" || location.hostname === "127.0.0.1");
+
+        // base poll time
+        var time = isLocal ? 3000 : 10000; // local = 2s, remote = 10s
+
+
+        if (ajaxInterface.pollcount > 3) {
+            time = isLocal ? 4000 : 20000; // local faster, remote 20s           
+        }
+
+        if (ajaxInterface.pollcount > 10) {
+            time = isLocal ? 6000 : 60000; //Increased from 6 secs to 1 min
+        }
+
+        if (ajaxInterface.pollcount > 40) { //Decreased from 100 polls e.g. 
+           time = isLocal ? 6000 : 1800000; //Increased from 50 secs to 30 mins
+        }
+
+        //if (ajaxInterface.pollcount > 80) {
+        //    time = 500000;
+        //}
+
+        if (ajaxInterface.pollcount > 300) {
+            return;
+        }
+
+        ajaxInterface.poll = setTimeout(ajaxInterface.pollGamedata, time);
+    },
+    */
+
 };

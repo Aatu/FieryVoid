@@ -641,13 +641,15 @@ ProximityLaser.prototype.constructor = ProximityLaser;
 
 ProximityLaser.prototype.getFiringHex = function(shooter, weapon){ //Need to calculate hit chance from where Launcher targets.	
 	var sPosLaunch; 
+    var launcher = this.launcher;
+    var ship = this.ship;
+    //var launcherOrder = weaponManager.getFiringOrder(ship, launcher)
+    var launcherOrder = launcher.fireOrders[0] || weaponManager.getFiringOrder(ship, launcher);
 
-	   	if (this.launcher.fireOrders.length > 0)	{	// check that launcher has firing orders.
-			var aFireOrder = this.launcher.fireOrders[0]; 		    
-
-			sPosLaunch = new hexagon.Offset(aFireOrder.x, aFireOrder.y); 
+	   	if (launcherOrder)	{	// check that launcher has firing orders.  
+			sPosLaunch = new hexagon.Offset(launcherOrder.x, launcherOrder.y); 
 		} else{
-		sPosLaunch = shipManager.movement.getPositionAtStartOfTurn(shooter, gamedata.turn); 	
+		    sPosLaunch = shipManager.movement.getPositionAtStartOfTurn(shooter, gamedata.turn); 	
 		}	
 	return sPosLaunch;
 	

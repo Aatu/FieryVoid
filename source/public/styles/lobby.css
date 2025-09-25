@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Bruno+Ace+SC&display=swap');
+
 .shipwindow{
     position:fixed !important;
 }
@@ -15,11 +17,49 @@
 }
 
 .slot{
-	border:1px solid #DEEBFF;
+    border: 1px solid #215a7a;
+  	border-radius: 5px;    
 	color:#DEEBFF;
 	padding: 3px 5px;
     position:relative;
-    margin-bottom:5px;
+    margin-bottom:2px;
+}
+
+#movementDropdown, 
+#asteroidsDropdown,
+#desperateDropdown {
+    margin-left: 15px;
+}
+
+#moonsDropdown {
+    margin-left: 15px; 
+}
+
+#moonsDropdown label {
+    display: inline-block;
+    width: 140px;  /* Fixed width so dropdowns align */
+    margin-bottom: 5px;
+    margin-top: 5px;    
+}
+
+#moonsDropdown select {
+    width: 70px; /* Adjust dropdown width */
+    margin-bottom: 6px;
+}
+
+
+.scenariolabel{
+
+    font-size:12px; 
+    margin:2px 0px; 
+    color: #DEEBFF; 
+}
+
+.scenariovalue{
+    font-weight:bold;
+    font-size:12px; 
+    margin:2px 0px; 
+    color: #81a7ec; 
 }
 
 .slot span{
@@ -41,7 +81,7 @@
 
 .slot .playername{
 	font-size:14px;
-	color:#6e9cdc; /* Original value  #496791 */
+	color:#DEEBFF; /* Original value  #496791 */
     font-weight: bold; /* Makes the text bold */	
 }
 
@@ -70,24 +110,58 @@
 	margin-left:20px;
 }
 
+.factiongroup-header{
+    font-weight:bold;
+    font-size:16px; 
+    margin:8px 5px; 
+    color: #6495ED;   
+    font-family: "Bruno Ace SC", sans-serif;    
+} 
+
 .store .faction
 {
     cursor:pointer;
 }
-
 .store .factionname{
-	font-size:14px;
+	font-size:15px;
+	color:#f2f7ff;
+    font-weight: 525;   
 }
 
 .store .ship{
-	color:#8080FF;
+    color: #81a7ec; 
+	/*color:#8080FF;old purple*/    
+    margin-right: 5px;     
 }
 
 .store .shipsizehdr{
-	color:#6495ED;
-	margin-left:10px;
+	color:#d0dbec;
+	margin-left:6px;
+	margin-top:2px;    
 	font-size:12px;
-	font-style: italic;
+}
+
+.store .storeship{
+	/*color:#a3c0f5;*/
+    color: #81a7ec;    
+    margin-right: 5px;
+    margin-left: 20px;          
+}
+
+.store .variant{
+	/*color:#8989fd; */
+    color: #578bec;       
+    margin-right: 15px;
+    margin-left: 20px;     
+}
+
+.shipname{
+	color:#DEEBFF;       
+}
+
+.store .clickable{
+	cursor:pointer;
+	color:#DEEBFF;
 }
 
 .store .ship .clickable{
@@ -99,6 +173,16 @@
 	cursor:pointer;
 	color:#DEEBFF;
 	text-decoration:underline;
+}
+
+.faction-display-name.custom-faction {
+    color: rgba(255, 255, 0, 0.774); /* Or any other color you want for custom factions */
+    /*color: #FFA080;*/  
+}
+
+.highlight-custom-ship {
+    color: rgba(255, 255, 0, 0.767); /* Or any other color you want for custom factions  #FFA080 */
+    /*color: #FFA080;*/
 }
 
 .mediumSize{
@@ -121,24 +205,37 @@
 .slot input{
     margin-right:5px;
 }
-
+/*
 .leaveslot{
     position:absolute;
-    border:1px solid #496791;
+    border:1px solid #DEEBFF;
+
     width:10px;
     height:10px;
     right:5px;
     top:4px;
-    background-image:url(../img/close.png);
+    background-image:url(../img/close1.png);
     cursor:pointer;
+}
+*/
+.leaveslot{
+    position:absolute;
+    right:5px;          /* sits to the left of the 10px icon at right:5px */
+    top:1px;             /* align vertically with the icon */
+    font-size:11px;
+    color:#8bcaf2;
+    cursor:pointer;      /* so it feels clickable like the icon */
+	/*text-decoration:underline;  */  
+    /* optional: font-weight: bold; */
 }
 
 .value{
-    color:#6e9cdc; /* Original value  #496791 */
-    
+    /*color:#6e9cdc; Original value  #496791 */
+    color: #81a7ec;      
 }
 
 .selectslot{
+    color:#FFA080;   
     display:none;
 }
 
@@ -148,15 +245,14 @@
 }
 
 .slot.selected .selectslot{
-    
     display:none;
 }
 
 .slot.selected{
-    background-color:#123D73 !important;
-	-moz-box-shadow: 0px 0px 15px #0099ff;
-    -webkit-box-shadow: 0px 0px 15px #0099ff;
-    box-shadow: 0px 0px 15px #0099ff;
+    background-color:rgb(18, 61, 115, 0.7);
+	-moz-box-shadow: 0px 0px 1px #0099ff;
+    -webkit-box-shadow: 0px 0px 1px #0099ff;
+    box-shadow: 0px 0px 1px #0099ff;
     
 }
 
@@ -181,5 +277,67 @@
 .store .factionname:hover .tooltip
 {
     display:inline;
+}
+
+.fleet-dropdown-container {
+    position: relative;
+    margin-left: auto;
+    font-size: 12px;
+}
+
+/* Dropdown button */
+.fleet-dropdown-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px 6px;
+    border: 1px solid #7298a7;
+    border-radius: 4px;
+    background: #215a7a;
+    cursor: pointer;
+    min-width: 160px;
+    color: #DEEBFF;
+    user-select: none; /* optional, prevents text selection */
+    position: relative; /* allow ::after to be absolutely positioned */
+    font-size: 1.1em;    
+    text-decoration: bold;
+}
+
+/* Arrow for the dropdown button */
+.fleet-dropdown-btn::after {
+    content: "▼";
+    font-size: 12px;
+    color: #DEEBFF;
+    position: absolute;
+    right: 6px;  /* distance from the right edge */
+    top: 50%;
+    transform: translateY(-50%); /* vertical centering */
+    pointer-events: none;
+}
+
+/* Dropdown list */
+#fleetDropdownList {
+    display: none; /* hidden by default */
+    position: absolute;
+    right: 0;
+    top: 100%;
+    background: white;
+    border: 1px solid #215a7a;
+    border-radius: 3px;
+    z-index: 1000;
+    min-width: 300px;
+    max-height: 200px;
+    overflow-y: auto;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    font-size: 12px;
+    color: #000000ff;
+}
+
+.fleetIdInput{
+    width: 40px; 
+    height: 16px; 
+    text-align: right; 
+    margin-right: 5px;
+    margin-left: 2px;    
 }
 

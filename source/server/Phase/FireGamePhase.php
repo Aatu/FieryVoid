@@ -35,6 +35,17 @@ class FireGamePhase implements Phase
         $dbManager->submitCriticals($servergamedata->id,  $servergamedata->getUpdatedCriticals(), $servergamedata->turn);
 		
         $dbManager->setPlayersWaitingStatusInGame($servergamedata->id, false);
+
+       //Checks for late-deploying slots to see if next phases skipped - DK 
+       foreach($gameData->slots as $slot){           
+            if ($slot->depavailable == $gameData->turn+1){
+                //Slot is deploying next turn, ensure that database know it completed this Firing Phase
+                $dbManager->updatePlayerSlotPhase($gameData->id, $slot->playerid, $slot->slot, 3, $gameData->turn);                
+            }else {
+                //If not deploying next turn, set slot to skip that phase.  Manager::changeTurn always tries to create new Deplyment Phase.
+                $dbManager->updatePlayerSlotPhase($gameData->id, $slot->playerid, $slot->slot, -1, $gameData->turn+1);                
+            }        
+        } 
     }
 
     public function process(TacGamedata $gameData, DBManager $dbManager, Array $ships)
@@ -55,9 +66,7 @@ class FireGamePhase implements Phase
                 $dbManager->submitFireorders($gameData->id, $ship->getAllFireOrders(), $gameData->turn, $gameData->phase);
             }
 
-        }
-		
-		
+        }		
 
         $dbManager->updatePlayerStatus($gameData->id, $gameData->forPlayer, $gameData->phase, $gameData->turn);
         $dbManager->setPlayerWaitingStatus($gameData->forPlayer, $gameData->id, true);

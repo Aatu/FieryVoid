@@ -68,7 +68,9 @@ class TacGamedata {
    
     public function doSortShips()
     {
-        usort ( $this->ships , "self::sortShips" );
+        usort($this->ships, function ($a, $b) {
+            return $this->sortShips($a, $b); // Call the instance method within the closure
+        });
     }
    
     public function stripForJson() {        
@@ -142,8 +144,11 @@ class TacGamedata {
         
         foreach ($this->ships as $ship)
         {
-            if ($this->slots[$ship->slot]->depavailable > $this->turn)
+            $turnDeploys = $ship->getTurnDeployed($this);
+            
+            if($turnDeploys > $this->turn){
                 $ship->unavailable = true;
+            } 
         }
     }
     
@@ -181,7 +186,7 @@ class TacGamedata {
 
                 $dis = mathlib::getDistanceHex($ship, $ship2);
                 
-                if ($dis<70 || $this->turn < 5){
+                if ($dis<100 || $this->turn < 5){
                     //print($ship->name . " is on distance $dis from " . $ship2->name);
                     return false;
                 }
@@ -313,7 +318,8 @@ class TacGamedata {
     public function getFirstShip(){    
         foreach ($this->ships as $ship){
             if ($ship->isDestroyed()) continue;
-            if($ship instanceof Terrain) continue; //Ignore terrain like asteroids.                            
+            if($ship->isTerrain()) continue; //Ignore terrain like asteroids.
+            if($ship->getTurnDeployed($this) > $this->turn) continue;                          
             return $ship;
         }        
         return null;
@@ -362,6 +368,15 @@ class TacGamedata {
         return $slots;
         
     }
+
+	public function getSlotById($id) {
+        
+		foreach ($this->slots as $slot) {
+			if ($slot->slot == $id) return $slot;
+		}
+
+		return null;
+	}    
     
     private function setForPlayer($player){
         $this->forPlayer = $player;
@@ -373,7 +388,7 @@ class TacGamedata {
             $ships = [];
     
             foreach ($this->ships as $ship) {
-                if (in_array($ship->id, $this->activeship) && $ship->userid != -5) {
+                if (in_array($ship->id, $this->activeship) && !$ship->isTerrain() && ($ship->getTurnDeployed($this) <= $this->turn)) {
                     array_push($ships, $ship);
                 }
             }
@@ -382,7 +397,7 @@ class TacGamedata {
         }
     
         foreach ($this->ships as $ship) {
-            if ($ship->id == $this->activeship && $ship->userid != -5) {
+            if ($ship->id == $this->activeship && !$ship->isTerrain() && ($ship->getTurnDeployed($this) <= $this->turn)) {
                 return [$ship];
             }
         }
@@ -660,7 +675,7 @@ class TacGamedata {
             $ship->currentturndelay = Movement::getTurnDelay($ship);
         }
     }
-
+/*
     private function setWaiting(){
     
         $player = $this->getSlotsByPlayerId($this->forPlayer);
@@ -686,6 +701,45 @@ class TacGamedata {
             $this->waiting = false;
         }
     }
+*/
+
+// This helped when a player controlled multiple slots.
+private function setWaiting() {
+    $slots = $this->getSlotsByPlayerId($this->forPlayer);
+
+    if (empty($slots)) {
+        $this->waiting = false;
+        return;
+    }
+
+    // Default to true; we'll disqualify later if needed
+    $this->waiting = true;
+
+    foreach ($slots as $slot) {
+
+        if ($this->phase === -1 || $this->phase === 1 || $this->phase === 3 || $this->phase === 4) {
+            // If even one slot hasn't finished this turn+phase, player isn't done
+            if (!($slot->lastturn == $this->turn && $slot->lastphase == $this->phase)) {
+                $this->waiting = false;
+                return;
+            }
+
+        } else if ($this->phase == 2) {
+            // If any slot has active ships, player is not waiting
+            $activeShips = $this->getMyActiveShips();
+            if (count($activeShips) > 0) {
+                $this->waiting = false;
+                return;
+            }
+
+        } else {
+            // For any other phases, default to not waiting
+            $this->waiting = false;
+            return;
+        }
+    }
+}
+
 
     private function getIsWaitingForThisPlayer(){
         $slots = $this->getSlotsByPlayerId($this->forPlayer);
@@ -774,7 +828,38 @@ class TacGamedata {
         }
       
         return $blockedHexes;
-    } //endof function getBlockedHexes       
+    } //endof function getBlockedHexes
+           
+
+    public function getMinTurnDeployedSlot($slotid, $depavailable) {
+        //Check for any bases/OSATs/Terrain, these will mean players still needs to Deploy even if slot->depavailable is set for a higher turn.        
+        foreach ($this->ships as $ship) {
+            if ($ship->slot != $slotid) {
+                continue;
+            }
+            if($ship->userid == -5) continue; //Skip generated terrain.
+            if ($this->phase == -1 && $ship->isTerrain()) return 1; //Player has bought terrain that needs manually placed.
+            if ($ship->osat || $ship->base) return 1;
+        }
+
+        // Return slot value if no valid ships were found; otherwise return the lowest turn.
+        return $depavailable;
+    }
+
+
+    //A check for Manager in case there are no ships deployed at all, in which case just proceed to next phase. 
+    public function areDeployedShips() {
+        foreach ($this->ships as $ship) {
+            if (
+                $ship->getTurnDeployed($this) <= $this->turn &&
+                !$ship->userid !== -5
+            ) {
+                return true; //Found at least one player-owned ship, return true and proceed as normal with phase.
+            }
+        }
+        return false; //There are no deployed, non-Terrain ship at this time.
+    }
+
 
 }
 

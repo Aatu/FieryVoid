@@ -1,6 +1,6 @@
 <?php
 class HyachSenchlatKir extends HeavyCombatVessel{
-
+    public $HyachSpecialists;
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
 
@@ -39,13 +39,13 @@ class HyachSenchlatKir extends HeavyCombatVessel{
 			$this->addPrimarySystem( $HyachSpecialists );	
 
         $this->addFrontSystem(new GraviticThruster(4, 9, 0, 3, 1));
-			$TargeterA = new ProximityLaser(3, 0, 0, 240, 60, 'A');
+			$TargeterA = new ProximityLaser(3, 0, 0, 0, 360, 'A');
 			$LauncherA = new ProximityLaserLauncher(0, 1, 0, 240, 60, 'A'); 
 			$TargeterA->addLauncher($LauncherA);
 			$this->addFrontSystem($TargeterA);
 			$this->addFrontSystem($LauncherA);
 		$TargeterA->addTag("Front Proximity Laser");				
-			$TargeterB = new ProximityLaser(3, 0, 0, 300, 60, 'B');
+			$TargeterB = new ProximityLaser(3, 0, 0, 0, 360, 'B');
 			$LauncherB = new ProximityLaserLauncher(0, 1, 0, 300, 60, 'B'); 
 			$TargeterB->addLauncher($LauncherB);
 			$this->addFrontSystem($TargeterB);
@@ -53,13 +53,13 @@ class HyachSenchlatKir extends HeavyCombatVessel{
 		$TargeterB->addTag("Front Proximity Laser");				
         $this->addFrontSystem(new Interdictor(2, 4, 1, 270, 90));
         $this->addFrontSystem(new Maser(2, 6, 3, 270, 90));
-			$TargeterC = new ProximityLaser(3, 0, 0, 300, 60, 'C');
+			$TargeterC = new ProximityLaser(3, 0, 0, 0, 360, 'C');
 			$LauncherC = new ProximityLaserLauncher(0, 1, 0, 300, 60, 'C'); 
-			$TargeterC->addLauncher($LauncherB);
+			$TargeterC->addLauncher($LauncherC);
 			$this->addFrontSystem($TargeterC);
 			$this->addFrontSystem($LauncherC);
 		$TargeterC->addTag("Front Proximity Laser");				
-			$TargeterD = new ProximityLaser(3, 0, 0, 300, 120, 'D');
+			$TargeterD = new ProximityLaser(3, 0, 0, 0, 360, 'D');
 			$LauncherD = new ProximityLaserLauncher(0, 1, 0, 300, 120, 'D'); 
 			$TargeterD->addLauncher($LauncherD);
 			$this->addFrontSystem($TargeterD);
@@ -67,7 +67,7 @@ class HyachSenchlatKir extends HeavyCombatVessel{
 		$TargeterD->addTag("Front Proximity Laser");				
         $this->addFrontSystem(new GraviticThruster(4, 9, 0, 3, 1));
 
-			$TargeterE = new ProximityLaser(3, 0, 0, 120, 300, 'E');
+			$TargeterE = new ProximityLaser(3, 0, 0, 0, 360, 'E');
 			$LauncherE = new ProximityLaserLauncher(0, 1, 0, 120, 300, 'E'); 
 			$TargeterE->addLauncher($LauncherE);
 			$this->addAftSystem($TargeterE);
@@ -75,7 +75,7 @@ class HyachSenchlatKir extends HeavyCombatVessel{
 		$TargeterE->addTag("Aft Proximity Laser");				
         $this->addAftSystem(new GraviticThruster(4, 32, 0, 10, 2));
         $this->addAftSystem(new Interdictor(2, 4, 1, 90, 270));
-			$TargeterF = new ProximityLaser(3, 0, 0, 60, 240, 'F');
+			$TargeterF = new ProximityLaser(3, 0, 0, 0, 360, 'F');
 			$LauncherF = new ProximityLaserLauncher(0, 1, 0, 60, 240, 'F'); 
 			$TargeterF->addLauncher($LauncherF);
 			$this->addAftSystem($TargeterF);

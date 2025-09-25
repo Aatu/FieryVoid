@@ -425,6 +425,7 @@ AmmoMissileRackF.prototype.doIndividualNotesTransfer = function () { //prepare i
 
 AmmoMissileRackF.prototype.checkIsInRangeFRack = function (shooter, target, weapon) { 
         var range = weapon.range;
+        var distance = 0;
 
         if (weapon.hextarget){//For when this function called by FRack to check range of hex targeted missiles e.g. J-Missiles - DK
 	        var hexpos = {
@@ -432,17 +433,17 @@ AmmoMissileRackF.prototype.checkIsInRangeFRack = function (shooter, target, weap
                             y: weapon.fireOrders[0].y,
                         };        	
 			var targetPosition = new hexagon.Offset(hexpos.x, hexpos.y);
-			var distance = shipManager.getShipPosition(shooter).distanceTo(targetPosition);        
-		}else{//Normal method
-			var distance = mathlib.getDistanceBetweenShipsInHex(shooter, target).toFixed(2);			
-		}
+			distance = shipManager.getShipPosition(shooter).distanceTo(targetPosition);        
+		}else{
+            distance = mathlib.getDistanceBetweenShipsInHex(shooter, target).toFixed(2);
+        }
 		
 	   if (range === 0) return true;
 	   			
        if(!weapon.hextarget){		
 	        var stealthSystem = shipManager.systems.getSystemByName(target, "stealth");
 
-        if (stealthSystem && distance > 5 && weapon.ballistic && target.flight) { //Shouldn't happen, as fighters with stealth can't be targeted over 5 hexes.
+        if (stealthSystem && distance > 5 && weapon.ballistic && target.flight) { //Fighters with stealth can't be targeted over 5 hexes.
             return false;
         }
 
@@ -454,9 +455,13 @@ AmmoMissileRackF.prototype.checkIsInRangeFRack = function (shooter, target, weap
 						jammerValue = shipManager.systems.getOutput(target, jammer);
 					}
 				var stealthValue = 0;	
-					if (stealthSystem && (mathlib.getDistanceBetweenShipsInHex(shooter, target) > 10 && target.shipSizeClass >= 0)){
-					 stealthValue = shipManager.systems.getOutput(target, stealthSystem);
-					} 
+                var stealthDistance = 12; //Default for ships
+                if(shooter.flight) stealthDistance = 4; //Fighters
+                if(shooter.base) stealthDistance = 24; //Bases
+
+				if (stealthSystem && (distance > stealthDistance) && target.shipSizeClass >= 0){
+				    stealthValue = shipManager.systems.getOutput(target, stealthSystem);
+				} 
 					
 				if(stealthValue > jammerValue) jammerValue = stealthValue;//larger value is used
 				

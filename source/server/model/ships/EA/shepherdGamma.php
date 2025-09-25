@@ -5,7 +5,7 @@ class ShepherdGamma extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 220;
-	$this->faction = 'Earth Alliance (custom)';
+        $this->faction = "Earth Alliance (Custom)";
         $this->phpclass = "ShepherdGamma";
         $this->imagePath = "img/ships/shepherd.png";
         $this->shipClass = "Shepherd Fighter Transport (Gamma)";

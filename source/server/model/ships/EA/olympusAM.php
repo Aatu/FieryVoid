@@ -55,11 +55,11 @@ class OlympusAM extends HeavyCombatVessel{
         $this->addFrontSystem(new MediumPulse(3, 6, 3, 0, 120));
         $this->addFrontSystem(new MediumPulse(3, 6, 3, 0, 120));
         $this->addFrontSystem(new InterceptorMkI(2, 4, 1, 270, 90));
-        $this->addFrontSystem(new RailGun(4, 9, 6, 0, 0));
+        $this->addFrontSystem(new RailGun(4, 9, 6, 0, 360));
 		
         $this->addAftSystem(new AmmoMissileRackS(3, 0, 0, 240, 360, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         $this->addAftSystem(new AmmoMissileRackS(3, 0, 0, 0, 120, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
-        $this->addAftSystem(new RailGun(4, 9, 6, 0, 0));
+        $this->addAftSystem(new RailGun(4, 9, 6, 0, 360));
         $this->addAftSystem(new InterceptorMkI(2, 4, 1, 90, 270));
         $this->addAftSystem(new Thruster(4, 7, 0, 2, 2));
         $this->addAftSystem(new Thruster(4, 7, 0, 2, 2));

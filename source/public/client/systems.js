@@ -153,7 +153,7 @@ shipManager.systems = {
                     }
                 }
             }
-
+            /* Cleaned 19.8.25 - DK
             if (system.duoWeapon || system.dualWeapon) {
                 for (var i in system.weapons) {
                     var weapon = system.weapons[i];
@@ -175,13 +175,14 @@ shipManager.systems = {
                     }
                 }
             }
+            */
         }
 
         return null;
     },
 
     initializeSystem: function initializeSystem(system) {
-
+        /* Cleaned 19.8.25 - DK		        
         if (system.dualWeapon && system.weapons == null) {
             return system;
         }
@@ -204,7 +205,7 @@ shipManager.systems = {
             selectedWeapon.destroyed = system.destroyed;
             return selectedWeapon;
         }
-
+        */
         if (system.boostable) {
             system = system.initBoostableInfo();
         }
@@ -433,6 +434,9 @@ shipManager.systems = {
 			var counter = 0;
 			for (var i in gamedata.ships) {
 				var ship = gamedata.ships[i];
+                var deployTurn = shipManager.getTurnDeployed(ship);
+			    if(gamedata.isTerrain(ship.shipSizeClass, ship.userid)) continue;
+                if(deployTurn > gamedata.turn) continue;  //Don't bother checking for ships that haven't deployed yet.
 				if (ship.unavailable) continue;
 				if (ship.flight) continue;
 				if (ship.userid != gamedata.thisplayer) continue;			
@@ -452,22 +456,26 @@ shipManager.systems = {
 	getUnusedSpecialists: function getUnusedSpecialists() {
 			var shipNames = new Array();
 			var counter = 0;
-				if (gamedata.turn == 1)	{
-					for (var i in gamedata.ships) {
-					var ship = gamedata.ships[i];
-				
-					if (ship.unavailable) continue;
-					if (ship.flight) continue;
-					if (ship.userid != gamedata.thisplayer) continue;			
-					if (!(shipManager.systems.getSystemByName(ship, "hyachSpecialists"))) continue; //Does it Specialists?
-					if (shipManager.isDestroyed(ship)) continue;
-					var specialists = (shipManager.systems.getSystemByName(ship, "hyachSpecialists"));						
-						if (specialists.canSelectAnything()){ //Can anymore Specialists be selected?
-							shipNames[counter] = ship.name;
-							counter++;
-						}
-					}
-				}	
+
+				for (var i in gamedata.ships) {
+                    var ship = gamedata.ships[i];
+			        if(gamedata.isTerrain(ship.shipSizeClass, ship.userid)) continue;                    
+                    var deployTurn = shipManager.getTurnDeployed(ship);                    
+                    if(deployTurn !== gamedata.turn) continue;   //Don't bother checking for ships that haven't deployed yet.
+
+                    if (shipManager.isDestroyed(ship)) continue;
+                    if (ship.unavailable) continue;
+                    if (ship.flight) continue;
+                    if (ship.userid != gamedata.thisplayer) continue;	 		
+                    if (!(shipManager.systems.getSystemByName(ship, "hyachSpecialists"))) continue; //Does it Specialists?
+
+                    var specialists = (shipManager.systems.getSystemByName(ship, "hyachSpecialists"));						
+                        if (specialists.canSelectAnything()){ //Can anymore Specialists be selected?
+                            shipNames[counter] = ship.name;
+                            counter++;
+                        }
+				}
+					
 			return shipNames;
 		},	//endof getUnusedSpecialists
 
@@ -477,10 +485,14 @@ shipManager.systems = {
 			var counter = 0;
 			for (var i in gamedata.ships) {
 				var ship = gamedata.ships[i];
+			    if(gamedata.isTerrain(ship.shipSizeClass, ship.userid)) continue;                
 				if (ship.unavailable) continue;
 				if (ship.flight) continue;
 				if (ship.userid != gamedata.thisplayer) continue;
-				
+
+                var deployTurn = shipManager.getTurnDeployed(ship);
+				if(deployTurn > gamedata.turn) continue;  //Don't bother checking for ships that haven't deployed yet.
+
 				// Check for either ThirdspaceShieldGenerator or ThoughtShieldGenerator
 				var generator = shipManager.systems.getSystemByName(ship, "ThirdspaceShieldGenerator") || 
 								shipManager.systems.getSystemByName(ship, "ThoughtShieldGenerator");

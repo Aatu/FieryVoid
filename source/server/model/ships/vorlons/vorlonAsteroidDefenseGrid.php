@@ -7,8 +7,9 @@ class vorlonAsteroidDefenseGrid extends OSAT{
 		$this->pointCost = 1000;
 		$this->faction = "Vorlon Empire";
         $this->phpclass = "vorlonAsteroidDefenseGrid";
-        $this->imagePath = "img/ships/VorlonAsteroidGrid.png";
+        $this->imagePath = "img/ships/AsteroidS1.png";
         $this->shipClass = "Asteroid Defense Grid";
+        $this->canvasSize = 200;
 
 	    $this->isd = 'Ancient';
 		$this->factionAge = 3; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
