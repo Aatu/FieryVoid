@@ -1343,7 +1343,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
        <li>Orieni Imperium</li>
        <li>Torata Regency</li>
        <li>Vree Conglomerate</li>
-       <li>Yolu Confederation</li>
+       <li>Yolu Confederation (with 'Points Re-Evaluation' enhancement)</li>
     <a class="back-to-top" href="#top">↩ Back to Top</a>           
        
     <h4 id="tier2" style="">TIER 2 - MEDIUM COMPETITIVENESS</h4>
@@ -1382,6 +1382,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
     <h4 id="unbalanced" style="">UNBALANCED FLEETS</h4>
     <p>Of course, in a game as complex as Fiery Void, there was always going to be certain factions, or unit combinations, that are just too unbalanced to provide for a enjoyable pick-up game.  
         Below is a list that is considered by the community to fall into that category:</p>
+       <li>Ancients (see 'Ancients' section)</li>        
        <li>Alacan (with Rotia swarms)</li>
        <li>Earth Alliance when using Warlock Advanced Destroyer or Shadow Omega Destroyer,</li>
        <li>Interstellar Alliance's all-White Star fleet,</li>

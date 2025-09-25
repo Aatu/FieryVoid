@@ -358,7 +358,290 @@ class Manager{
             return '{"error": "' .$e->getMessage() . '", "code":"'.$e->getCode().'", "logid":"'.$logid.'"}';
         }
     }
+       
+    public static function submitSavedFleet($name, $userid, $points, $isPublic, $ships) {
+        try {
+            self::initDBManager();  
+            $starttime = time();
+
+            // ✅ Decode ships first, before DB work
+            $ships = self::getSavedShipsFromJSON($ships, $userid);
+            if (sizeof($ships) == 0) {
+                throw new Exception("Ship data missing");
+            }
+
+            // ✅ Only start the DB transaction once we know we have valid data
+            self::$dbManager->startTransaction();
+
+            // Save fleet
+            $listId = self::$dbManager->submitSavedList($name, $userid, $points, $isPublic);
+
+            // ✅ Now you can associate ships, enhancements, ammo with $listId
+            foreach ($ships as $ship) {
+                $shipId = self::$dbManager->submitSavedShip($listId, $userid, $ship);
+                    
+                foreach($ship->enhancementOptions as $enhancementEntry){ //ID,readableName,numberTaken,limit,price,priceStep
+                    $enhID = $enhancementEntry[0];
+                    $enhName = $enhancementEntry[1];
+                    $enhNo = $enhancementEntry[2];
+                    if ($enhNo > 0){ //actually taken
+                        self::$dbManager->submitSavedEnhancement($listId, $shipId, $enhID, $enhNo, $enhName);
+                    }
+                }
+                
+                if($ship instanceof FighterFlight){
+                        $firstFighter = $ship->systems[1];
+                        $ammo = false;
+
+                        foreach ($firstFighter->systems as $weapon){
+                            if(isset($weapon->missileArray)){
+                                $ammo = $weapon->missileArray[1]->amount;
+                                break;
+                            }
+                        }
+
+                        if ($ammo){
+                            foreach($ship->systems as $fighter){
+                                foreach ($fighter->systems as $weapon){
+                                    if(isset($weapon->missileArray)){
+                                        $weapon->missileArray[1]->amount = $ammo;
+                                         self::$dbManager->submitSavedAmmo($listId, $shipId, $weapon->id, $weapon->firingMode, $ammo);
+                                    }
+                                }
+                            }
+                        }
+                        else{//Marcin Sawicki: generalized version of gun ammo initialization for fighters (not for missile launchers!)
+                            foreach($ship->systems as $fighter){
+                                foreach($fighter->systems as $weapon){
+                                    if(isset($weapon->ammunition) && (!isset($weapon->missileArray)) && ($weapon->ammunition > 0) ){
+                                         self::$dbManager->submitSavedAmmo($listId, $shipId, $weapon->id, $weapon->firingMode, $weapon->ammunition);
+                                    }
+                                }
+                            }
+                        }
+                    }else{
+                        foreach($ship->systems as $systemIndex=>$system){
+                            if(isset($system->missileArray)){
+                                // this system has a missileArray. It uses ammo
+                                foreach($system->missileArray as $firingMode=>$ammo){
+                                     self::$dbManager->submitSavedAmmo($listId, $shipId, $system->id, $firingMode, $ammo->amount);
+                                }
+                            }
+                            else if($system instanceof Weapon) { //count ammo for other weapons as well!
+                                if(isset($system->ammunition) && ($system->ammunition > 0)){
+                                     self::$dbManager->submitSavedAmmo($listId, $shipId, $system->id, $system->firingMode, $system->ammunition);
+                                }
+                            }
+                        }
+                    }                                   
+                }
+
+                self::$dbManager->endTransaction(false);
+
+                $endtime = time();
+                return json_encode([
+                    'listId' => $listId,
+                    'success' => true
+                ]);
+
+            } catch (Exception $e) {
+                self::$dbManager->endTransaction(true);
+                $logid = Debug::error($e);
+                return '{"error": "' .$e->getMessage() . '", "code":"'.$e->getCode().'", "logid":"'.$logid.'"}';
+            }
+    }
+
+
+    public static function getSavedFleets($userid) {
+        try {
+            self::initDBManager(); 
+            self::$dbManager->startTransaction();
+
+            $fleets = self::$dbManager->getSavedFleets($userid);
+
+            self::$dbManager->endTransaction(false);
+            return $fleets;
+
+        } catch (Exception $e) {
+            self::$dbManager->endTransaction(true);
+            $logid = Debug::error($e);
+            return [];
+        }
+    }   
+
+
+    public static function loadSavedFleet(int $listid): array
+    {
+
+        $fleet = [];
+        $enhancementsByShip = [];
+        $ammoByShip = [];
+        //$fleetPoints = 0;
+
+        try {
+            self::initDBManager();
+            self::$dbManager->startTransaction();
             
+            $list = self::$dbManager->getSavedFleet($listid);
+            // Load all ships for this fleet
+            $ships = self::$dbManager->getSavedShips($listid);
+
+            // Load enhancements and ammo for all ships
+            foreach ($ships as $ship) {
+                $enhancementsByShip[$ship->id] = self::$dbManager->getSavedEnhancementsForShip($ship->id);
+                $ammoByShip[$ship->id] = self::$dbManager->getSavedAmmoForShip($ship->id);
+            }
+
+            self::$dbManager->endTransaction(false);
+
+            foreach ($ships as $ship) {
+                //$shipCost = $ship->pointCost + $ship->pointCostEnh + $ship->pointCostEnh2;
+                //if($ship instanceof FighterFlight) $shipCost = $shipCost/$ship->flightSize;
+                //$fleetPoints += $shipCost;
+
+                // Add enhancements
+                Enhancements::setEnhancementOptions($ship);
+                $shipEnh = $enhancementsByShip[$ship->id] ?? [];
+                foreach ($shipEnh as $enhEntry) {
+                    $enhID       = $enhEntry[0];
+                    $numberTaken = $enhEntry[1];
+                    foreach ($ship->enhancementOptions as &$option) {
+                        if ($option[0] === $enhID) {
+                            $option[2] = $numberTaken;
+                        }
+                    }
+                }
+
+                // Add Ammo
+                $shipAmmo = $ammoByShip[$ship->id] ?? [];
+                foreach ($shipAmmo as $ammoEntry) {
+                    list($systemid, $firingmode, $amount) = $ammoEntry;
+                    $system = $ship->getSystemById($systemid);
+                    if ($system) {
+                        $system->setAmmo($firingmode, $amount);
+                    }
+                }
+
+                $fleet[] = $ship; // store ship directly, no extra 'ship' key
+            }
+
+        } catch (Exception $e) {
+            self::$dbManager->endTransaction(true);
+            Debug::error($e);
+            return []; // safe fallback
+        }
+
+        // Return top-level array with points and ships
+        return [
+            'list' => $list,
+            'ships'  => $fleet
+        ];
+    }
+
+
+    public static function deleteSavedFleet($id) {
+        try {
+            self::initDBManager(); 
+            self::$dbManager->startTransaction();
+
+            self::$dbManager->deleteSavedFleet($id);
+
+            self::$dbManager->endTransaction(false);
+            return json_encode([
+                'id' => $id,
+                'success' => true
+            ]);
+
+        } catch (Exception $e) {
+            self::$dbManager->endTransaction(true);
+            $logid = Debug::error($e);
+            return [];
+        }
+    }   
+
+    public static function changeAvailabilityFleet($id): array {
+        try {
+            self::initDBManager(); 
+            self::$dbManager->startTransaction();
+
+            $newStatus = self::$dbManager->changeAvailabilityFleet($id);
+
+            self::$dbManager->endTransaction(false);
+            return [
+                'id'        => $id,
+                'success'   => true,
+                'newStatus' => $newStatus
+            ];
+        } catch (Exception $e) {
+            self::$dbManager->endTransaction(true);
+            $logid = Debug::error($e);
+            return [
+                'id'      => $id,
+                'success' => false,
+                'error'   => 'Failed to toggle fleet availability.'
+            ];
+        }
+    }
+
+
+    private static function getSavedShipsFromJSON($json, $userid) {
+
+        $ships = array();
+        $array = json_decode($json, true);
+        if (!is_array($array)) return $ships;
+    
+        foreach ($array as $value) {
+           
+            $className = $value["phpclass"] ?? null;
+            if (!$className) continue; // skip if class not defined
+    
+            /** @var BaseShip $ship */
+            $ship = new $className(
+                $value["id"] ?? -1,
+                $userid ?? -1,
+                $value["name"] ?? "Unnamed",
+                $value["slot"] ?? 0
+            );
+    
+            $ship->pointCostEnh = ($value["pointCostEnh"] ?? 0) + ($value["pointCostEnh2"] ?? 0);
+    
+            if ($ship instanceof FighterFlight) {
+                $ship->flightSize = $value["flightSize"] ?? 1;
+                $ship->populate();
+            }
+    
+            $ship->enhancementOptions = $value["enhancementOptions"] ?? [];
+    
+            $systems = $value["systems"] ?? [];
+            foreach ($systems as $i => $system) {
+                $sys = $ship->getSystemById($i);
+                
+                if (isset($system["systems"]) && is_array($system["systems"])) {
+                    foreach ($system["systems"] as $fightersys) {
+                        $fig = $sys ? $sys->getSystemById($fightersys["id"] ?? -1) : null;
+                        if (!$fig) continue;
+                        
+                            // ammo transfer
+                            if (isset($fightersys["ammo"])) {
+                                foreach ($fightersys["ammo"] as $i => $ammo) {
+                                    if (isset($ammo)) {
+                                        $fig->setAmmo($i, $ammo);
+                                    }
+                                }
+                            }
+    
+                        
+                    }
+                } 
+            }
+    
+            $ships[(int)($value["id"] ?? count($ships))] = $ship;
+        }
+    
+        return $ships;
+    }
+
+
     public static function submitTacGamedata($gameid, $userid, $turn, $phase, $activeship, $ships, $status, $slotid = 0){
         try {
         

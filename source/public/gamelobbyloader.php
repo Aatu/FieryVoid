@@ -1,27 +1,8 @@
 <?php 
 
-if (!headers_sent() && !ini_get('zlib.output_compression')) {
-    ob_start();
-}
-
 header('Content-Type: application/json; charset=utf-8');
 
 require_once 'global.php';
-
-/* //SAFER VERSION DEPENDING ON APACHE SETTINGS
-declare(strict_types=1);
-
-// ✅ Output compression (safe)
-if (!headers_sent() && !ini_get('zlib.output_compression')) {
-    ob_start('ob_gzhandler');
-} else {
-    ob_start();
-}
-
-header('Content-Type: application/json; charset=utf-8');
-
-require_once 'global.php';
-*/
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -67,5 +48,4 @@ try {
     ]);
 }
 
-ob_end_flush();
 exit;
