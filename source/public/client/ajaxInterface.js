@@ -8,10 +8,11 @@ window.ajaxInterface = {
     submiting: false,
 
     //new variables for home screeen to manage ajax requests
-    submitingGames: false,
-    queueGames: [],
-    lastRequestTimeGames: 0,
-    debounceDelayGames: 200, // ms    
+    submitingGames: false,        // defensive flag
+    currentRequest: null,         // currently processing
+    nextRequest: null,            // last queued while busy
+    lastRequestTimeGames: 0,      // track debounce
+    debounceDelayGames: 300,      // ms  
 
     //new variables for Fleet Selection screeen to manage ajax requests        
     currentFaction: null,       // currently processing
@@ -19,34 +20,35 @@ window.ajaxInterface = {
     lastClickTime: {},          // track per-faction last click
     debounceDelay: 300,         // ms
 
- getShipsForFaction: function(factionRequest, callback) {
+
+    getShipsForFaction: function(factionRequest, callback) {
         const now = Date.now();
 
         // Debounce: ignore if clicked too soon after last click on this faction
-        if (this.lastClickTime[factionRequest] &&
-            now - this.lastClickTime[factionRequest] < this.debounceDelay) {
+        if (ajaxInterface.lastClickTime[factionRequest] &&
+            now - ajaxInterface.lastClickTime[factionRequest] < ajaxInterface.debounceDelay) {
             return;
         }
-        this.lastClickTime[factionRequest] = now;
+        ajaxInterface.lastClickTime[factionRequest] = now;
 
         // Defensive check: if already marked submitting, do nothing
-        if (this.submiting) {
+        if (ajaxInterface.submiting) {
             // save last requested faction to process after current finishes
-            this.nextFaction = { factionRequest, callback };
+            ajaxInterface.nextFaction = { factionRequest, callback };
             return;
         }
 
         // Already processing this faction: do nothing
-        if (factionRequest === this.currentFaction) return;
+        if (factionRequest === ajaxInterface.currentFaction) return;
 
         // No request in-flight, send immediately
         this._sendRequest(factionRequest, callback);
     },
 
     _sendRequest: function(factionRequest, callback) {
-        this.currentFaction = factionRequest;
-        this.nextFaction = null;
-        this.submiting = true;   // defensive flag
+        ajaxInterface.currentFaction = factionRequest;
+        ajaxInterface.nextFaction = null;
+        ajaxInterface.submiting = true;   // defensive flag
 
         console.log("Requesting faction:", factionRequest);
 
@@ -61,22 +63,22 @@ window.ajaxInterface = {
         })
         .then(data => {
             if (data.error) {
-                this.errorAjax(null, null, data.error);
+                ajaxInterface.errorAjax(null, null, data.error);
             } else {
                 callback(data);
             }
         })
-        .catch(error => this.errorAjax(null, null, error.message))
+        .catch(error => ajaxInterface.errorAjax(null, null, error.message))
         .finally(() => {
             // Finished current request
-            this.currentFaction = null;
-            this.submiting = false; // clear defensive flag
+            ajaxInterface.currentFaction = null;
+            ajaxInterface.submiting = false; // clear defensive flag
 
             // If a request was queued during processing, send it now
-            if (this.nextFaction) {
-                const { factionRequest: nextF, callback: nextCb } = this.nextFaction;
-                this.nextFaction = null;
-                this._sendRequest(nextF, nextCb);
+            if (ajaxInterface.nextFaction) {
+                const { factionRequest: nextF, callback: nextCb } = ajaxInterface.nextFaction;
+                ajaxInterface.nextFaction = null;
+                ajaxInterface._sendRequest(nextF, nextCb);
             }
         });
     },
@@ -803,35 +805,40 @@ submitSlotAction: function submitSlotAction(action, slotid, callback) {
         });
     },
 
-
-    startPollingGames: function() {
-        this.pollGames();
-    },
-    
+    // Polling entry point for home screen
     pollGames: function() {
         if (gamedata.waiting === false) return;
         if (!gamedata.animating) {
             animation.animateWaiting();
-            this.requestAllGames();
+            ajaxInterface.requestAllGames();
         }
     },
 
-    requestAllGames: function requestAllGames() {
+    requestAllGames: function() {
         const now = Date.now();
 
         // Debounce rapid triggers
-        if (now - this.lastRequestTimeGames < this.debounceDelayGames) return;
-        this.lastRequestTimeGames = now;
+        if (now - ajaxInterface.lastRequestTimeGames < ajaxInterface.debounceDelayGames) return;
+        ajaxInterface.lastRequestTimeGames = now;
 
-        // If a request is running, enqueue one extra
-        if (this.submitingGames) {
-            if (this.queueGames.length === 0) {
-                this.queueGames.push({});
-            }
+        // Defensive check: prevent overlap if already running
+        if (ajaxInterface.submitingGames) {
+            // Queue only the last requested call
+            ajaxInterface.nextRequest = {};
             return;
         }
 
-        this.submitingGames = true;
+        // Mark as submitting (defensive)
+        ajaxInterface.submitingGames = true;
+        ajaxInterface.submiting = true;  // your original flag
+
+        // Send the AJAX request
+        ajaxInterface._sendGameRequest();
+    },
+
+    _sendGameRequest: function() {
+        ajaxInterface.currentRequest = {};  // placeholder for inflight request
+        ajaxInterface.nextRequest = null;
 
         $.ajax({
             type: 'GET',
@@ -841,12 +848,15 @@ submitSlotAction: function submitSlotAction(action, slotid, callback) {
             success: ajaxInterface.successRequest,
             error: ajaxInterface.errorAjax,
             complete: () => {
-                this.submitingGames = false;
+                // Clear flags when request finishes
+                ajaxInterface.submitingGames = false;
+                ajaxInterface.submiting = false;
+                ajaxInterface.currentRequest = null;
 
-                // Run queued request if any
-                if (this.queueGames.length > 0) {
-                    this.queueGames.shift();
-                    this.requestAllGames();
+                // If a request was queued while this ran, send it now
+                if (ajaxInterface.nextRequest) {
+                    ajaxInterface.nextRequest = null;
+                    ajaxInterface._sendRequest();
                 }
             }
         });
