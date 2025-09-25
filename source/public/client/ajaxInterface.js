@@ -6,19 +6,47 @@ window.ajaxInterface = {
     pollActive: false,
     pollcount: 0,
     submiting: false,
-    queue: [],
-    queuedFactions: new Set(), // track what’s already in queue    
-    currentFaction: null,
-    lastRequestTime: {},   // track last request time per faction
-    debounceDelay: 200,    // ms
 
-    processNext: function() {
-        if (ajaxInterface.submiting || this.queue.length === 0) return;
+    //new variables for home screeen to manage ajax requests
+    submitingGames: false,
+    queueGames: [],
+    lastRequestTimeGames: 0,
+    debounceDelayGames: 200, // ms    
 
-        const { factionRequest, callback } = this.queue.shift();
-        this.queuedFactions.delete(factionRequest);
+    //new variables for Fleet Selection screeen to manage ajax requests        
+    currentFaction: null,       // currently processing
+    nextFaction: null,          // last requested while busy
+    lastClickTime: {},          // track per-faction last click
+    debounceDelay: 300,         // ms
+
+ getShipsForFaction: function(factionRequest, callback) {
+        const now = Date.now();
+
+        // Debounce: ignore if clicked too soon after last click on this faction
+        if (this.lastClickTime[factionRequest] &&
+            now - this.lastClickTime[factionRequest] < this.debounceDelay) {
+            return;
+        }
+        this.lastClickTime[factionRequest] = now;
+
+        // Defensive check: if already marked submitting, do nothing
+        if (this.submiting) {
+            // save last requested faction to process after current finishes
+            this.nextFaction = { factionRequest, callback };
+            return;
+        }
+
+        // Already processing this faction: do nothing
+        if (factionRequest === this.currentFaction) return;
+
+        // No request in-flight, send immediately
+        this._sendRequest(factionRequest, callback);
+    },
+
+    _sendRequest: function(factionRequest, callback) {
         this.currentFaction = factionRequest;
-        ajaxInterface.submiting = true;
+        this.nextFaction = null;
+        this.submiting = true;   // defensive flag
 
         console.log("Requesting faction:", factionRequest);
 
@@ -34,73 +62,25 @@ window.ajaxInterface = {
         .then(data => {
             if (data.error) {
                 this.errorAjax(null, null, data.error);
-                return;
+            } else {
+                callback(data);
             }
-            callback(data);
         })
-        .catch(error => {
-            this.errorAjax(null, null, error.message);
-        })
+        .catch(error => this.errorAjax(null, null, error.message))
         .finally(() => {
-            ajaxInterface.submiting = false;
+            // Finished current request
             this.currentFaction = null;
-            this.processNext(); // strictly process one after the other
-        });
-    },
+            this.submiting = false; // clear defensive flag
 
-
-    getShipsForFaction: function(factionRequest, callback) {
-        // skip if faction is currently processing
-        if (factionRequest === this.currentFaction) return;
-
-        // skip if faction is already queued
-        if (this.queuedFactions.has(factionRequest)) return;
-
-        this.queue.push({ factionRequest, callback });
-        this.queuedFactions.add(factionRequest);
-
-        // Only kick off if idle
-        if (!ajaxInterface.submiting) {
-            this.processNext();
-        }
-    },
-
-    //NEW VERSION FOR PHP 8   
-    /* 
-    getShipsForFaction: function getShipsForFaction(factionRequest, getFactionShipsCallback) {
-        if (ajaxInterface.submiting) return;
-
-        ajaxInterface.submiting = true;
-
-        fetch('gamelobbyloader.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ faction: factionRequest })
-        })
-        .then(response => {
-            if (!response.ok) throw new Error('Network response was not ok');
-            ajaxInterface.submiting = false;            
-            return response.json();
-        })
-        .then(data => {
-            if (data.error) {
-                ajaxInterface.submiting = false;                
-                ajaxInterface.errorAjax(null, null, data.error);
-                return;
+            // If a request was queued during processing, send it now
+            if (this.nextFaction) {
+                const { factionRequest: nextF, callback: nextCb } = this.nextFaction;
+                this.nextFaction = null;
+                this._sendRequest(nextF, nextCb);
             }
-            ajaxInterface.submiting = false;            
-            getFactionShipsCallback(data);
-        })
-        .catch(error => {
-            ajaxInterface.submiting = false;            
-            ajaxInterface.errorAjax(null, null, error.message);
         });
     },
 
-    react: function react() {
-        alert("callback");
-    },
-    */
 
     //New version - DK July 2025
     submitGamedata: function submitGamedata() {
@@ -796,22 +776,6 @@ submitSlotAction: function submitSlotAction(action, slotid, callback) {
         ajaxInterface.poll = setTimeout(ajaxInterface.pollGamedata, time);
     },
 
-
-    startPollingGames: function startPollingGames() {
-        ajaxInterface.pollGames();
-    },
-
-    pollGames: function pollGames() {
-        if (gamedata.waiting === false) return;
-
-        if (!gamedata.animating) {
-
-            animation.animateWaiting();
-
-            ajaxInterface.requestAllGames();
-        }
-    },
-
     requestGamedata: function requestGamedata() {
         // prevent overlap if already running
         if (ajaxInterface.submiting) return;
@@ -839,10 +803,35 @@ submitSlotAction: function submitSlotAction(action, slotid, callback) {
         });
     },
 
+
+    startPollingGames: function() {
+        this.pollGames();
+    },
+    
+    pollGames: function() {
+        if (gamedata.waiting === false) return;
+        if (!gamedata.animating) {
+            animation.animateWaiting();
+            this.requestAllGames();
+        }
+    },
+
     requestAllGames: function requestAllGames() {
-        // prevent overlap if already running
-        if (ajaxInterface.submiting) return;
-        ajaxInterface.submiting = true;
+        const now = Date.now();
+
+        // Debounce rapid triggers
+        if (now - this.lastRequestTimeGames < this.debounceDelayGames) return;
+        this.lastRequestTimeGames = now;
+
+        // If a request is running, enqueue one extra
+        if (this.submitingGames) {
+            if (this.queueGames.length === 0) {
+                this.queueGames.push({});
+            }
+            return;
+        }
+
+        this.submitingGames = true;
 
         $.ajax({
             type: 'GET',
@@ -851,12 +840,18 @@ submitSlotAction: function submitSlotAction(action, slotid, callback) {
             data: {},
             success: ajaxInterface.successRequest,
             error: ajaxInterface.errorAjax,
-            complete: function () {
-                // always clear flag, even on error/timeout
-                ajaxInterface.submiting = false;
-            }            
+            complete: () => {
+                this.submitingGames = false;
+
+                // Run queued request if any
+                if (this.queueGames.length > 0) {
+                    this.queueGames.shift();
+                    this.requestAllGames();
+                }
+            }
         });
     },
+
 
     getFirePhaseGames: function getFirePhaseGames() {
 
@@ -994,6 +989,45 @@ submitSlotAction: function submitSlotAction(action, slotid, callback) {
 
         ajaxInterface.poll = setTimeout(ajaxInterface.pollGamedata, time);
     },
+
+
+    //NEW-OLD VERSION FOR PHP 8   
+    /* 
+    getShipsForFaction: function getShipsForFaction(factionRequest, getFactionShipsCallback) {
+        if (ajaxInterface.submiting) return;
+
+        ajaxInterface.submiting = true;
+
+        fetch('gamelobbyloader.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ faction: factionRequest })
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('Network response was not ok');
+            ajaxInterface.submiting = false;            
+            return response.json();
+        })
+        .then(data => {
+            if (data.error) {
+                ajaxInterface.submiting = false;                
+                ajaxInterface.errorAjax(null, null, data.error);
+                return;
+            }
+            ajaxInterface.submiting = false;            
+            getFactionShipsCallback(data);
+        })
+        .catch(error => {
+            ajaxInterface.submiting = false;            
+            ajaxInterface.errorAjax(null, null, error.message);
+        });
+    },
+
+    react: function react() {
+        alert("callback");
+    },
+    
+
     */
 
 };
