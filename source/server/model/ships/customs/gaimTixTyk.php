@@ -4,50 +4,54 @@ class gaimTixTyk extends HeavyCombatVesselLeftRight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 595;
+		$this->pointCost = 615;
 		$this->faction = 'Custom Ships';
         $this->phpclass = "gaimTixTyk";
         $this->imagePath = "img/ships/Tixtyk.png";
-        $this->shipClass = "Tixtyk Heavy Destroyer";
+        $this->shipClass = "Tixtyk Line Destroyer";
 		$this->fighters = array("normal"=>6);        
         
 		$this->isd = 2266;
 		
-        $this->forwardDefense = 14;
+        $this->forwardDefense = 15;
         $this->sideDefense = 12;
         
         $this->turncost = 0.66;
-        $this->turndelaycost = 0.666;
+        $this->turndelaycost = 0.66;
         $this->accelcost = 3;
         $this->rollcost = 3;
         $this->pivotcost = 2;
         $this->iniativebonus = 30;
 
-        $this->addPrimarySystem(new Reactor(5, 17, 0, 3));
+        $this->addPrimarySystem(new Reactor(5, 20, 0, 2));
         $this->addPrimarySystem(new CnC(5, 12, 0, 0));
-        $this->addPrimarySystem(new Scanner(5, 16, 5, 7));
+        $this->addPrimarySystem(new Scanner(5, 16, 6, 7));
         $this->addPrimarySystem(new Engine(5, 15, 0, 10, 3));
-        $this->addPrimarySystem(new Hangar(5, 8));
-               
-        $this->addFrontSystem(new Thruster(4, 9, 0, 3, 1));
-        $this->addFrontSystem(new Thruster(4, 9, 0, 3, 1));               
+        $this->addPrimarySystem(new Hangar(4, 8));
+
+		
+        //$this->addFrontSystem(new PacketTorpedo(4, 0, 0, 300, 60));		
+        $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
+        $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));               
         $this->addAftSystem(new Thruster(4, 12, 0, 5, 2));
         $this->addAftSystem(new Thruster(4, 12, 0, 5, 2));        
         $this->addAftSystem(new TwinArray(3, 6, 2, 90, 270));
 		$this->addAftSystem(new JumpEngine(3, 10, 3, 20));        
 
-        $this->addFrontSystem(new FlexPacketTorpedo(4, 0, 0, 300, 60));
-        $this->addLeftSystem(new TwinArray(3, 6, 2, 240, 60));
+        $this->addLeftSystem(new PacketTorpedo(4, 0, 0, 240, 60));         
+        $this->addLeftSystem(new BattleLaser(4, 6, 6, 240, 60));       		
         $this->addLeftSystem(new GaimPhotonBomb(4, 0, 0, 180, 360));  
-        $this->addLeftSystem(new BattleLaser(4, 6, 6, 240, 360));
+        $this->addLeftSystem(new TwinArray(3, 6, 2, 240, 60));
      
         $this->addLeftSystem(new Thruster(4, 15, 0, 4, 3));
 		$this->addLeftSystem(new Bulkhead(0, 4));
 
 //        $this->addRightSystem(new PacketTorpedo(4, 6, 5, 300, 60));
-        $this->addRightSystem(new TwinArray(3, 6, 2, 300, 120));
+        $this->addRightSystem(new AssaultLaser(4, 6, 4, 0, 120));
+        $this->addRightSystem(new AssaultLaser(4, 6, 4, 60, 180));		
+        $this->addRightSystem(new PacketTorpedo(4, 0, 0, 300, 120));
         $this->addRightSystem(new GaimPhotonBomb(4, 0, 0, 0, 180)); 
-        $this->addRightSystem(new BattleLaser(4, 6, 6, 0, 120));
+        $this->addRightSystem(new TwinArray(3, 6, 2, 300, 120));
          
         $this->addRightSystem(new Thruster(4, 15, 0, 4, 4));
 		$this->addRightSystem(new Bulkhead(0, 4));
@@ -71,21 +75,21 @@ class gaimTixTyk extends HeavyCombatVesselLeftRight{
 					20 => "C&C",
 			),
 			3=> array(
-					3 => "Thruster",
-					5 => "Battle Laser",
-					7 => "Twin Array",
-					9 => "Flexible Packet Torpedo",				
-					11 => "Photon Bomb",
-					18 => "Structure",
+					4 => "Thruster",
+					6 => "Battle Laser",
+					8 => "Packet Torpedo",
+					10 => "Twin Array",				
+					12 => "Photon Bomb",
+					19 => "Structure",
 					20 => "Primary",
 			),
 			4=> array(
-					3 => "Thruster",
-					5 => "Battle Laser",
-					7 => "Twin Array",
-					9 => "Flexible Packet Torpedo",				
-					11 => "Photon Bomb",
-					18 => "Structure",
+					4 => "Thruster",
+					7 => "Assault Laser",
+					8 => "Packet Torpedo",
+					10 => "Twin Array",				
+					12 => "Photon Bomb",
+					19 => "Structure",
 					20 => "Primary",
 			),
 		);

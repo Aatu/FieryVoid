@@ -23,6 +23,7 @@ window.gamedata = {
     selectedSlot: null,
     gamespace: null,
     replay: false,
+    showLoS: false,
 
     mouseOverShipId: -1,
 
@@ -133,6 +134,19 @@ window.gamedata = {
         }
     },
 
+    getFirstFriendlyShipDeployment: function getFirstFriendlyShipDeployment() {
+        for (var i in gamedata.ships) {
+            var ship = gamedata.ships[i];
+            
+            if(shipManager.getTurnDeployed(ship) > gamedata.turn) continue;
+
+            if (gamedata.isMyShip(ship)) {
+                return ship;
+            }
+        }
+    },
+
+
     getFirstEnemyShip: function getFirstEnemyShip() {
         for (var i in gamedata.ships) {
             var ship = gamedata.ships[i];
@@ -196,8 +210,8 @@ window.gamedata = {
             throw new Error("You need to give shooter for this one");
         }
     
-        if (target.userid === -5) {
-            return true; // Always treat ships with userid -5 as enemies
+        if (gamedata.isTerrain(target.shipSizeClass, target.userid)) {
+            return true; // Always treat Terrain as enemies
         }
     
         return target.team !== shooter.team;
@@ -280,7 +294,7 @@ window.gamedata = {
 
             for (var ship in gamedata.ships) {
                 if (gamedata.ships[ship].userid == gamedata.thisplayer) {
-                    if (!shipManager.isDestroyed(gamedata.ships[ship])) {
+                    if (!shipManager.isDestroyed(gamedata.ships[ship]) && !gamedata.isTerrain(gamedata.ships[ship].shipSizeClass, gamedata.ships[ship].userid)) {
                         var deployTurn = shipManager.getTurnDeployed(gamedata.ships[ship]);
                         if(deployTurn <= gamedata.turn){   //Don't bother checking for ships that haven't deployed yet. 
                             myShips.push(gamedata.ships[ship]);
@@ -330,10 +344,10 @@ window.gamedata = {
                         continue;
                     }
 			
-			//checking for power surplus
-			if (shipManager.power.getReactorPower(myShips[ship], shipManager.systems.getSystemByName(myShips[ship], "reactor"))>0){
-				powerSurplus.push(myShips[ship]);
-			}
+                //checking for power surplus
+                if (shipManager.power.getReactorPower(myShips[ship], shipManager.systems.getSystemByName(myShips[ship], "reactor"))>0){
+                    powerSurplus.push(myShips[ship]);
+                }
 			
                     if (gamedata.turn == 1) {
                         if (myShips[ship].EW.length == 0) {
@@ -535,9 +549,11 @@ window.gamedata = {
 
             for (var i in activeShips) {
                 var ship = activeShips[i];
-                if (shipManager.movement.canChangeSpeed(ship, true) && ship.userid == gamedata.thisplayer) {
-                    zeroSpeedShips.push(ship);
-                }
+                if(!gamedata.isTerrain(ship.shipSizeClass, ship.userid)){
+                    if (shipManager.movement.canChangeSpeed(ship, true) && ship.userid == gamedata.thisplayer) {
+                        zeroSpeedShips.push(ship);
+                    }
+                }    
             }
 
             if (zeroSpeedShips.length > 0) {
@@ -561,7 +577,7 @@ window.gamedata = {
 
                 for (var ship in gamedata.ships) {
                     if (gamedata.ships[ship].userid == gamedata.thisplayer) {
-                        if (!shipManager.isDestroyed(gamedata.ships[ship])) {
+                        if (!shipManager.isDestroyed(gamedata.ships[ship]) && !gamedata.isTerrain(gamedata.ships[ship].shipSizeClass, gamedata.ships[ship].userid)) {
                             var deployTurn = shipManager.getTurnDeployed(gamedata.ships[ship]);
                             if(deployTurn <= gamedata.turn){   //Don't bother checking for ships that haven't deployed yet. 
                                 myShips.push(gamedata.ships[ship]);
@@ -575,8 +591,8 @@ window.gamedata = {
 
                 for (var ship in myShips) {
                     var fired = 0;
-			var hasReadyGuns = false;
-			var hasShotsLeft = false; //For split shot weapons that might not have used al their shots.
+                    var hasReadyGuns = false;
+                    var hasShotsLeft = false; //For split shot weapons that might not have used al their shots.
                     if (!myShips[ship].flight) {
                         for (var i = 0; i < myShips[ship].systems.length; i++) {
 							var currWeapon = myShips[ship].systems[i];
@@ -701,7 +717,7 @@ window.gamedata = {
                 return false;
             }
 			
-			//We have one thurst-boosted weapon in Initial Orders Phase, let's put in a check for it and future - DK 26.11.24
+			//We have one thrust-boosted weapon in Initial Orders Phase, let's put in a check for it and future - DK 26.11.24
             shipNames = shipManager.movement.getShipsNegativeThrust();
 
             if (shipNames.length > 0) {
@@ -781,7 +797,7 @@ window.gamedata = {
 
             for (var ship in gamedata.ships) {
                 if (gamedata.ships[ship].userid == gamedata.thisplayer) {
-                    if (!shipManager.isDestroyed(gamedata.ships[ship])) {
+                    if (!shipManager.isDestroyed(gamedata.ships[ship]) && !gamedata.isTerrain(gamedata.ships[ship].shipSizeClass, gamedata.ships[ship].userid)) {
                         var deployTurn = shipManager.getTurnDeployed(gamedata.ships[ship]);
                         if(deployTurn <= gamedata.turn){   //Don't bother checking for ships that haven't deployed yet. 
                             myShips.push(gamedata.ships[ship]);
@@ -966,7 +982,7 @@ window.gamedata = {
 		var myShips = [];
 		    for (var ship in gamedata.ships) {
 			if (gamedata.ships[ship].userid == gamedata.thisplayer) {
-			    if (!shipManager.isDestroyed(gamedata.ships[ship])) {
+			    if (!shipManager.isDestroyed(gamedata.ships[ship]) && !gamedata.isTerrain(gamedata.ships[ship].shipSizeClass, gamedata.ships[ship].userid)) {
                     var deployTurn = shipManager.getTurnDeployed(gamedata.ships[ship]);
                     if(deployTurn <= gamedata.turn){   //Don't bother checking for ships that haven't deployed yet. 
                         myShips.push(gamedata.ships[ship]);
@@ -1103,7 +1119,7 @@ window.gamedata = {
         gamedata.setPhaseClass();
         //		window.helper.doUpdateHelpContent(gamedata.gamephase,0);        
 
-        fleetListManager.updateFleetList();
+        //fleetListManager.updateFleetList(); //No need to call again, called in fleetListManager.displayFleetLists()
     },
 
     drawIniGUI: function drawIniGUI() {
@@ -1176,7 +1192,7 @@ window.gamedata = {
             span.style.textAlign = "center";
             span.style.fontSize = "12px";
             span.innerHTML += "<p style='margin-top: 6px; margin-bottom: 6px; font-size: 12px'>" + ships[i].name;
-            span.innerHTML += "<p style='margin-top: 6px; margin-bottom: 6px; font-style: italic; font-weight: bold'>" + ships[i].shipClass;
+            span.innerHTML += "<p style='margin-top: 6px; margin-bottom: 6px; font-weight: bold; font-size: 11px'>" + ships[i].shipClass;
 
             var active = window.SimultaneousMovementRule.isActiveMovementShip(ships[i]);
             if (active !== null) {

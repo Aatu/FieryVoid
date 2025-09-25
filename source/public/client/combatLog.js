@@ -18,13 +18,13 @@ window.combatLog = {
         // Make certain the name is a string.
         if (typeof ship.name == 'string' || ship.name instanceof String) {
             if(jumped){
-                html += '<span class="shiplink" data-id="' + ship.id + '" >' + ship.name.toUpperCase() + '</span> <span style="color: green; font-weight: bold;">HAS JUMPED TO HYPERSPACE</span></span>';
+                html += '<span class="shiplink" data-id="' + ship.id + '" >' + ship.name.toUpperCase() + '</span> <span style="color: #cc8500; font-weight: bold;">HAS JUMPED TO HYPERSPACE</span></span>';
             }else{
                 html += '<span class="shiplink" data-id="' + ship.id + '" >' + ship.name.toUpperCase() + '</span> IS DESTROYED</span>';
             }    
         } else {
             if(jumped){
-                html += '<span class="shiplink" data-id="' + ship.id + '" >' + ship.name.toUpperCase() + '</span> <span style="color: green; font-weight: bold;">HAS JUMPED TO HYPERSPACE</span></span>';
+                html += '<span class="shiplink" data-id="' + ship.id + '" >' + ship.name.toUpperCase() + '</span> <span style="color: #cc8500; font-weight: bold;">HAS JUMPED TO HYPERSPACE</span></span>';
             } else {
                 html += '<span class="shiplink" data-id="' + ship.id + '" >' + ship.name + '</span> IS DESTROYED</span>';
             }    
@@ -188,9 +188,11 @@ window.combatLog = {
                     damagehtml += first + '<span class="damage">' + comma + ' ' + shipManager.systems.getDisplayName(system) + '</span>';
                 }
 
-                //if (totaldam > 0){ //display fire orders that did no damage, too!
+                //if (totaldam > 0){ //display fire orders that did no damage, too! - MS
                 //          html += '<li><span class="shiplink victim" data-id="'+ship.id+'" >' + victim.name + '</span> damaged for ' + totaldam + '(+ ' + armour + ' armour). '+ damagehtml+'</li>';
-                if(fire.damageclass == "HyperspaceJump") continue; //Do not show damage to Primary Structure when jumping to Hyperspace. 				
+
+                if(fire.damageclass == "HyperspaceJump") continue; //Do not show damage to Primary Structure when jumping to Hyperspace. 
+
                 html += '<li><span class="shiplink victim" data-id="' + ship.id + '" >' + victim.name + '</span> damaged for ' + totaldam + ' (total armour mitigation: ' + armour + ').</li>';
                 if (damagehtml.length > 1) {
                     html += '<li>' + damagehtml + '</li>';
@@ -202,7 +204,7 @@ window.combatLog = {
         }
 		
 		
-        if(printedLog){ //Different method fo listing depending on whether player is watching a Replay animation or just browsing the printed log :)
+        if(printedLog){ //Different method of listing depending on whether player is watching a Replay animation or just browsing the printed log :)
             var targetDiv = document.getElementById("LogActual"); 
             targetDiv.style.display = "block";
             targetDiv.innerHTML += html;

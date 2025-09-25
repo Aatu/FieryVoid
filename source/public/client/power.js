@@ -180,7 +180,7 @@ shipManager.power = {
 
 		for (var i in gamedata.ships) {
 			var ship = gamedata.ships[i];
-
+			if(gamedata.isTerrain(ship.shipSizeClass, ship.userid)) continue;
 			if (ship.unavailable) continue;
 
 			if (ship.flight) continue;
@@ -234,7 +234,8 @@ shipManager.power = {
 			var shipNames = new Array();
 			var counter = 0;
 			for (var i in gamedata.ships) {
-				var ship = gamedata.ships[i];			
+				var ship = gamedata.ships[i];
+				if(gamedata.isTerrain(ship.shipSizeClass, ship.userid)) continue;							
 				if (ship.unavailable) continue;
 				if (ship.flight) continue;
 				if (ship.userid != gamedata.thisplayer) continue;
@@ -257,7 +258,7 @@ shipManager.power = {
 			var counter = 0;
 			for (var i in gamedata.ships) {
 				var ship = gamedata.ships[i];
-					if(ship.faction !== "Pak'ma'ra Confederacy") continue; //I'm TRYING to be efficient!
+					if(ship.faction !== "Pak'ma'ra Confederacy") continue;
 		            if (ship.unavailable) continue;
 		            if (ship.flight) continue;
 		            if (ship.userid != gamedata.thisplayer) continue;
@@ -821,10 +822,11 @@ shipManager.power = {
 
 	offlineAll: function offlineAll(ship, system) {
 		var array = [];
-
+        /* Cleaned 19.8.25 - DK
 		if (system.duoWeapon || system.dualWeapon) {
 			return;
 		}
+		*/
 
 		for (var i = 0; i < ship.systems.length; i++) {
 			if (system.displayName === ship.systems[i].displayName) {
@@ -919,10 +921,11 @@ shipManager.power = {
 	onlineAll: function onlineAll(ship, system) {
 		var array = [];
 
-
+        /* Cleaned 19.8.25 - DK
 		if (system.duoWeapon || system.dualWeapon) {
 			return;
 		}
+		*/	
 
 		for (var i = 0; i < ship.systems.length; i++) {
 			if (system.displayName === ship.systems[i].displayName) {
@@ -966,7 +969,7 @@ shipManager.power = {
 		if (system.name == "shieldGenerator" || system instanceof ThirdspaceShieldGenerator) {
 			system.onTurnOn(ship);
 		}
-
+        /* Cleaned 19.8.25 - DK		
 		if (system.dualWeapon || system.duoWeapon) {
 			for (var i in system.weapons) {
 				var weapon = system.weapons[i];
@@ -984,7 +987,7 @@ shipManager.power = {
 				}
 			}
 		}
-
+		*/
 		shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
         webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 	},

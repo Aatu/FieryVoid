@@ -12,7 +12,7 @@ class genericMicroSat extends MicroSAT{
         $this->isd = 'Variable';
 
         
-		$this->isd = 'varied';
+		$this->isd = 2200;
 		$this->notes = "Generic MicroSAT design";
 		
 		$this->unofficial = true;

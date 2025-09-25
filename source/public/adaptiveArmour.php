@@ -1,4 +1,76 @@
-<?php ob_start("ob_gzhandler"); 
+<?php 
+
+header('Content-Type: application/json; charset=utf-8');
+
+
+// --- Includes ---
+require_once 'global.php';
+require_once __DIR__ . '/server/lib/Debug.php'; // Ensure debug logging still works
+
+// --- Validate required parameters ---
+$gameid = isset($_GET['gameid']) ? (int)$_GET['gameid'] : 0;
+$shipid = isset($_GET['shipid']) ? (int)$_GET['shipid'] : 0;
+$turn   = isset($_GET['turn'])   ? (int)$_GET['turn']   : 0;
+
+if ($gameid <= 0 || $shipid <= 0) {
+    http_response_code(400);
+    echo json_encode(['error' => 'Missing or invalid gameid/shipid.']);
+    ob_end_flush();
+    exit;
+}
+
+try {
+    // --- Database connection ---
+    $dsn = sprintf('mysql:host=%s;dbname=%s;charset=utf8mb4', 
+                   $database_host ?? 'localhost', 
+                   $database_name ?? 'B5CGM');
+
+    $link = new PDO($dsn, $database_user ?? 'root', $database_pass ?? '', [
+        PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+    ]);
+
+    Debug::log('DB connection successful');
+
+    // --- Prepare and execute query ---
+    $stmt = $link->prepare("
+        SELECT *
+        FROM tac_adaptivearmour
+        WHERE gameid = :gameid
+          AND shipid = :shipid
+    ");
+    $stmt->execute([
+        ':gameid' => $gameid,
+        ':shipid' => $shipid,
+    ]);
+
+    $row = $stmt->fetch();
+
+    if ($row) {
+        // Optional: Log for debugging
+        Debug::log('Adaptive armour row found for game '.$gameid.', ship '.$shipid);
+        echo json_encode($row, JSON_NUMERIC_CHECK | JSON_UNESCAPED_UNICODE);
+    } else {
+        Debug::log('No adaptive armour found for game '.$gameid.', ship '.$shipid);
+        echo json_encode(['status' => 'empty']);
+    }
+
+} catch (Throwable $e) {
+    $logid = Debug::error($e);
+    http_response_code(500);
+    echo json_encode([
+        'error' => $e->getMessage(),
+        'logid' => $logid
+    ]);
+}
+
+
+exit;
+
+/* //OLD VERSION
+
+
+ob_start("ob_gzhandler"); 
     include_once 'global.php';
 
 
@@ -47,7 +119,7 @@
 	else 
 		debug::log("no connection");
 
-
+*/
 /*
 
         while($stmt->fetch()){
@@ -67,5 +139,6 @@
 
 	
 //	print(json_encode($ret));
-    
+/*    
 ?>
+*/

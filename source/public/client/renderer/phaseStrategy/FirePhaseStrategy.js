@@ -33,6 +33,7 @@ window.FirePhaseStrategy = function () {
     };
 
     FirePhaseStrategy.prototype.onHexClicked = function (payload) {
+        PhaseStrategy.prototype.onHexClicked.call(this, payload);           
         var hex = payload.hex;
 
         if (!this.selectedShip) {

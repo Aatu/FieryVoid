@@ -169,11 +169,12 @@ body {
 #phaseheader{
     z-index:10000;
     border:1px solid #496791;
+    border-radius: 8px;    
     color:#deebff;
     background-color:#0a3340;
     position:absolute;
     top:-3px;
-    left:-3px;
+    left:-4px;
     height:25px;
     width:700px;
     opacity:0.85;
@@ -194,8 +195,8 @@ body {
 }
 
 #phaseheader .value.activeship{
-    font-style:italic;
-    color:#496791;
+    color:#aabcd4;
+    margin-left: 15px;     
 }
 
 .finished{
@@ -211,7 +212,7 @@ body {
 
 .uitable{
     position:absolute;
-    top:5px;
+    top:2px;
     right:10px;
 }
 .uitable td{
@@ -404,7 +405,7 @@ body {
     max-width: 800px;
 	height:150px;
 	opacity:0.85;
-    color: #597eb1; /* #deebff; */
+    color: #7ba2ea; /* #deebff; */
     background-color: #04161C;
     border-top: 1px solid #496791;
 	border-right: 1px solid #496791;
@@ -568,15 +569,22 @@ body {
 }
 
 .fleetlistentry{
-    padding-top: 5px;
+    padding-top: 10px;
     padding-left: 5px;
+    padding-bottom: 5px;    
     float: left;
-    width: 90%;
+    width: 98%;
 }
 
 .fleetlistentry .destroyed{
     font-style: normal;
-    color:#b34119;
+    color:#c54120;
+}
+
+.fleetlistentry .jumped{
+    font-style: normal;
+    /*color:#00d100;*/
+    color: #cc8500;    
 }
 
 .fleetheader .headername{
@@ -595,25 +603,28 @@ body {
 .fleetlist .header{
     font-weight: bold;
     text-decoration: underline;
+    text-transform: uppercase;
+    color: #a7c1f1;    
 }
 
 .fleetlist .shipname{
     margin-top: 3px;
     float: left;
     padding-left: 5px;
-    width:40%;
+    width:30%;
 }
 
 .fleetlist .shipclass{
     margin-top: 3px;
     float: left;
-    width:25%;
+    width:30%;
 }
 
 .fleetlist .shiptype{
     margin-top: 3px;
     float: left;
     width: 10%;
+    text-align: center;    
 }
 
 /* //Apparently not used anymore, and old element is pushing value out of alignment in Info Tab - DK
@@ -631,13 +642,15 @@ body {
 .fleetlist .initiative{
 	margin-top: 3px;
 	float: left;
+    text-align: center;
 	width: 10%;
 }
 
 .fleetlist .value {
     margin-top: 3px;
     float: left;
-    width: 10%;
+    width: 15%;
+    text-align: center;        
 }
 
 #logcontainer #gameinfo{
@@ -685,11 +698,11 @@ body {
 }
 #log .logheader{
 	font-weight:bold;
-	color:#b34119;
+	color:#c54120;
 }
 
 #log .damage{
-	color:#7c2814;
+	color:#c54120;
 }
 
 #log .shiplink{
@@ -857,20 +870,23 @@ body {
 
 .iniActive {
     border: 1px solid #2ea86b !important;
-    background-color: #163f35 !important;
-    box-shadow: 0px 0px 4px #3fd58f;
+    background-color: rgb(22, 63, 53, 0.9) !important;
+    box-shadow: 0px 0px 3px #3fd58f;
+    color: #e6e6e6;    
 }
 
 .iniActiveAlly {
     border: 1px solid #6d95c5 !important;
-    background-color: #162f50 !important;
+    background-color: rgb(22, 47, 80, 0.9) !important;
     box-shadow: 0px 0px 3px #09F;
+    color: #d9d9d9;    
 }
 
 .iniActiveEnemy {
     border: 1px solid #c65d4a !important;
-    background-color: #3d1e1b !important;
-    box-shadow: 0px 0px 4px #f07662;
+    background-color: rgb(61, 30, 27, 0.9) !important;
+    box-shadow: 0px 0px 3px #f07662;
+    color: #d9d9d9;    
 }
 
 .redIni {

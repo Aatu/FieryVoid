@@ -128,6 +128,7 @@ class Stealth extends ShipSystem implements SpecialAbility{
         $ship = $this->getUnit();
 		if ($ship instanceof FighterFlight) return; //Fighter units don't need notes, they can't be invisible/detected.
 		if($ship->isDestroyed()) return; //No point generating new notes if ship destroyed.
+		if($ship->getTurnDeployed($gameData) > $gameData->turn)	return; //Ship not deployed yet.		
 
 		$this->onIndividualNotesLoaded($gameData); //Check current detection status.
 
@@ -839,6 +840,7 @@ class MagGravReactorTechnical extends MagGravReactor{
 */		
 	protected $doCountForCombatValue = false;
     public $iconPath = "reactorTechnical.png";
+	public $isTargetable = false; //cannot be targeted ever!	
 	public function setSystemDataWindow($turn){
 		$this->data["Output"] = $this->output;
 		parent::setSystemDataWindow($turn);     
@@ -1993,7 +1995,7 @@ class SecondaryCnC extends ShipSystem{
 			//add Secondary C&C destruction - without actual damage, just desstruction, so it can be tied to original weapon impact without affecting damage done numbers
 			$damageEntry = new DamageEntry(-1, $damage->shipid, -1, $damage->turn, $this->id, 0, 0, 0, $damage->fireorderid, true, false, "Secondary C&C - marking destroyed", $damage->damageclass, $damage->shooterid, $damage->weaponid);
 			$damageEntry->updated = true;
-			$struct->damage[] = $damageEntry;
+			$this->damage[] = $damageEntry;
 		}
     } //endof function criticalPhaseEffects	
 	
@@ -2288,7 +2290,9 @@ class JumpEngine extends ShipSystem{
     public $boostEfficiency = 0;    
     
 	//JumpEngine tactically  is not important at all!
-	public $repairPriority = 8;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
+	public $repairPriority = 6;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
+
+	private $preJumpValue = 0; //Will be used to store ship's Combat Value at the moment it jumped.
     
     function __construct($armour, $maxhealth, $powerReq, $delay){
         parent::__construct($armour, $maxhealth, $powerReq, 0);
@@ -2332,8 +2336,8 @@ class JumpEngine extends ShipSystem{
 		$rammingSystem = $ship->getSystemByName("RammingAttack");
 		$fireOrderType = $jumpFailure ? 'JumpFailure' : 'HyperspaceJump';
 		$pubNotes = $jumpFailure
-			? " attempts to jump to hyperspace, but damage to the Jump Drive causes the ship to be destroyed."
-			: " activates Jump Drive.";
+			? " attempts to jump to hyperspace, but damage to the Jump Drive causes the ship to be destroyed (" . $missingHealthPercentage . "% chance of failure)."
+			: " successfully jumps to hyperspace (" . $missingHealthPercentage . "% chance of failure).";
 	
 		if ($rammingSystem) {
 			$newFireOrder = new FireOrder(
@@ -2346,7 +2350,15 @@ class JumpEngine extends ShipSystem{
 			$newFireOrder->addToDB = true;
 			$rammingSystem->fireOrders[] = $newFireOrder;
 		}
-	
+
+		//Create note BEFORE we destroy the primary structure, so CV is not automatically zeroed.
+		if($fireOrderType == 'HyperspaceJump'){										
+			$notekey = 'jumped';
+			$noteHuman = 'jumped';
+			$noteValue = $ship->calculateCombatValue();
+			$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gamedata->turn,$gamedata->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
+		}		
+
 		// Destroy the primary structure in either event
 		$primaryStruct = $this->unit->getStructureSystem(0);
 		if ($primaryStruct) {
@@ -2365,8 +2377,37 @@ class JumpEngine extends ShipSystem{
 				$damageEntry->weaponid = $rammingSystem->id;
 			}
 		}
+
 	}
-	
+
+	public function onIndividualNotesLoaded($gamedata){
+		foreach ($this->individualNotes as $currNote) {			    	
+			//Insert the noteValue (e.g. combatValue when ship jumped) in appropriate variable
+			$this->preJumpValue = $currNote->notevalue;
+		}				
+	}//endof onIndividualNotesLoaded
+
+
+	public function hasJumped() {		
+		$ship = $this->getUnit();
+
+		//Check damage entries, and remove Hyperspace jump entry, to see if ship was 'destroyed' by jumping not actual damage.	    
+		$struct = $ship->getStructureSystem(0);       
+        $maxHealth = $struct->maxhealth;
+        $totalDamage = 0;
+        foreach ($struct->damage as $entry) {
+            if ($entry->damageclass !== 'HyperspaceJump') $totalDamage += $entry->damage; //Only count non-jump damage, as jumping destroys ship anyway.
+        }
+             
+        if($totalDamage < $maxHealth) return true; //The other damage sustained has not destroyed this ship, jumping has.
+		
+        return false;
+	}   	
+
+	public function getCVBeforeJump() {		
+        return $this->preJumpValue;
+	}   	
+
      public function setSystemDataWindow($turn){
         $this->data["Special"] = "<br>Boost in Initial Orders to jump to hyperspace at end of turn.";	
         $this->data["Special"] .= "<br>WARNING - Jumping to hyperspace REMOVES ship from rest of the battle.";
@@ -2782,7 +2823,10 @@ public function onIndividualNotesLoaded($gamedata)
              
         //calculate $this->BFCPtotal_used,
         $this->BFCPtotal_used = 0;
- 		$this->BFCPtotal_used = array_sum($this->allocatedBFCP);  
+ 		//$this->BFCPtotal_used = array_sum($this->allocatedBFCP); //Amended during PHP8 update - DK 25.6.25
+         foreach( $this->allocatedBFCP as $alloc){
+             if ( (isset($alloc)) && (is_numeric($alloc)))    $this->BFCPtotal_used += $alloc;
+        }		  
  		  
  }//endof onIndividualNotesLoaded
  
@@ -3104,7 +3148,7 @@ class HyachSpecialists extends ShipSystem{
 									$noOfCrits = count($critList);							
 									$critRepairs = 1;							
 									if($noOfCrits>0){
-										usort($critList, "self::sortCriticalsByRepairPriority");			
+										usort($critList, [self::class, 'sortCriticalsByRepairPriority']);			
 										foreach ($critList as $critDmg){ //repairable criticals of current system
 											if ($critRepairs > 0){//Can still repair!
 //												if ($critDmg->phpclass == )
@@ -3142,7 +3186,7 @@ class HyachSpecialists extends ShipSystem{
 					$noOfCrits = count($critList);
 					$critRepairs = 2;
 					if($noOfCrits>0){
-						usort($critList, "self::sortCriticalsByRepairPriority");
+						usort($critList, [self::class, 'sortCriticalsByRepairPriority']);
 		
 						foreach ($critList as $critDmg){ //repairable criticals of current system
 							if ($critRepairs > 0){//Can still repair!
@@ -3186,7 +3230,7 @@ class HyachSpecialists extends ShipSystem{
 									$noOfCrits = count($critList);							
 									$critRepairs = 1;							
 									if($noOfCrits>0){
-										usort($critList, "self::sortCriticalsByRepairPriority");		
+										usort($critList, [self::class, 'sortCriticalsByRepairPriority']);		
 										foreach ($critList as $critDmg){ //repairable criticals of current system
 											if ($critRepairs > 0){//Can still repair!
 												$critDmg->turnend = $gamedata->turn-1;//actual repair. Use previous turn so it disappears after Intitial Orders (but would effect then, time to repair etc.
@@ -4155,7 +4199,7 @@ class SelfRepair extends ShipSystem{
 			
 			$systemList[] = $system;			
 		}
-		usort($systemList, "self::sortSystemsByRepairPriority");
+		usort($systemList, [self::class, 'sortSystemsByRepairPriority']);
 		
 
 // Add GTS		
@@ -4176,7 +4220,8 @@ class SelfRepair extends ShipSystem{
         }
 		$noOfCrits = count($critList);
         if($noOfCrits>0){
-            usort($critList, "self::sortCriticalsByRepairPriority");
+			usort($critList, [self::class, 'sortCriticalsByRepairPriority']);
+			
             foreach ($critList as $critDmg){ //repairable criticals of current system, already sorted
                 if ($critDmg->repairCost <= $availableRepairPoints){//execute repair!
                     $system = $ship->getSystemById($critDmg->systemid); //We already have the ship object passed to criticalPhaseEffects(), use it to get the system the foreach loop is considering at this point'
@@ -4802,6 +4847,7 @@ class PowerCapacitor extends ShipSystem{
     
 	//power held
 	public $powerCurr = 0;
+	private $powerMax = 0;
 	public $capacityBonus = 0; //additional capacity - potentially set by enhancements
 	public $powerReceivedFromFrontEnd = 0; //communication variable	
 	public $powerReceivedFromBackEnd = 0; //communication variable
@@ -4940,6 +4986,34 @@ capacitor is completely emptied.
 					break;			
 			}
 		}
+
+		//We can apply petal effects here so they are visible for player (note, criticals don't seem to get saved to database here, prolly because $dbManager->submitCriticals isn't called)			
+		if($gamedata->phase == 2 || $gamedata->phase == 3){
+	
+			$boostlevel = $this->getBoostLevel($gamedata->turn);
+			if ($boostlevel <1) return; //not boosted - no crit!
+			$ship = $this->unit;
+			foreach($ship->systems as $system){
+				if($system->location == 0 && $system->isTargetable){	//Only targetable primary systems get reduced armor
+					$crit = new ArmorReduced(-1, $ship->id, $system->id, "ArmorReduced", $gamedata->turn, $gamedata->turn);
+					$crit->updated = true;
+					//$crit->inEffect = true;
+					$system->criticals[] =  $crit;
+					$crit = new ArmorReduced(-1, $ship->id, $system->id, "ArmorReduced", $gamedata->turn, $gamedata->turn);
+					$crit->updated = true;
+					//$crit->inEffect = true;
+					$system->criticals[] =  $crit;
+				}
+			}
+			$cnc = $ship->getSystemByName("CnC"); //Now find CnC and increase profile by 5% using a spearate crit
+			if($cnc){				 		
+				$crit = new ProfileIncreased(-1, $ship->id, $cnc->id, "ProfileIncreased", $gamedata->turn, $gamedata->turn);
+				$crit->updated = true;
+				//$crit->inEffect = true;
+				$cnc->criticals[] =  $crit;
+			}									
+		}	
+
 	} //endof function onIndividualNotesLoaded
 	
 	
@@ -4951,12 +5025,13 @@ capacitor is completely emptied.
 		$this->data["Power regeneration"] =  'Initial phase only';
         $this->data["Special"] = "This system is responsible for generating and storing power (Reactor is nearby for technical purposes).";	   
 		if ($this->boostable){
-			$this->data["Special"] .= "<br>You may boost this system (open petals) to increase recharge rate by 50% - at the cost of treating all armor values as 2 points lower.";
+			$this->data["Special"] .= "<br>You may open ship petals by boosting this system, increasing generation by 50% on the following turn - however all primary systems lose 2 Armour and Defence Profiles increase 5% for the current turn.";
 		}
 		$this->data["Special"] .= "<br>Destroying Capacitor disables (but does not destroy) the ship.";
     }
 	
 	public function beforeFiringOrderResolution($gamedata){ //actually mark armor reduced temporary critical if Petals are open
+		/* //Moved to onIndividualNotesLoaded() to apply full TT effects.
 		$boostlevel = $this->getBoostLevel($gamedata->turn);
 		if ($boostlevel <1) return; //not boosted - no crit!
 		$ship = $this->unit;
@@ -4970,6 +5045,33 @@ capacitor is completely emptied.
 			$crit->inEffect = true;
 			$system->criticals[] =  $crit;
 		}
+		*/
+			//Actually make sure petal effects are applied.	
+			$boostlevel = $this->getBoostLevel($gamedata->turn);
+			if ($boostlevel <1) return; //not boosted - no crit!
+			$ship = $this->unit;
+			foreach($ship->systems as $system){
+				if($system->location == 0 && $system->isTargetable){	//Only targetable primary systems get reduced armor
+					$crit = new ArmorReduced(-1, $ship->id, $system->id, "ArmorReduced", $gamedata->turn, $gamedata->turn);
+					$crit->updated = true;
+					$crit->inEffect = true;
+					$system->criticals[] =  $crit;
+					$crit = new ArmorReduced(-1, $ship->id, $system->id, "ArmorReduced", $gamedata->turn, $gamedata->turn);
+					$crit->updated = true;
+					$crit->inEffect = true;
+					$system->criticals[] =  $crit;
+				}
+			}
+			$cnc = $ship->getSystemByName("CnC"); //Now find CnC and increase profile by 5% using a spearate crit
+			if($cnc){				 		
+				$crit = new ProfileIncreased(-1, $ship->id, $cnc->id, "ProfileIncreased", $gamedata->turn, $gamedata->turn);
+				$crit->updated = true;
+				$crit->inEffect = true;
+				$cnc->criticals[] =  $crit;
+			}			
+		
+
+
 	}	
 	
         private function getBoostLevel($turn){
@@ -5682,6 +5784,7 @@ class AmmoMagazine extends ShipSystem {
 	public $output = 0;
 	
 	private $interceptorUsed = 0;//Communication variable.	
+	private $ammoAlreadyUsed = array();
 		
     
     function __construct($capacity){ //magazine capacity

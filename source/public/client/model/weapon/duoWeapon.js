@@ -1,5 +1,5 @@
 "use strict";
-
+/*
 var DuoWeapon = function DuoWeapon(json, ship) {
     Weapon.call(this, json, ship);
 };
@@ -12,3 +12,4 @@ var DuoGravitonBeam = function DuoGravitonBeam(json, ship) {
 
 DuoGravitonBeam.prototype = Object.create(DuoWeapon.prototype);
 DuoGravitonBeam.prototype.constructor = DuoGravitonBeam;
+*/

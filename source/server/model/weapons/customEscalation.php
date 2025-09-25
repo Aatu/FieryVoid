@@ -367,7 +367,8 @@ class EWHeavyGatlingLaser extends Pulse{
         public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
 
         public $damageType = "Standard"; 
-        public $weaponClass = "Laser"; 
+        public $weaponClass = "Laser";
+        private $damagebonus = 0;  
         
         function __construct($startArc, $endArc, $damagebonus, $nrOfShots = 2){
             $this->damagebonus = $damagebonus;
@@ -431,6 +432,7 @@ class EWHeavyGatlingLaser extends Pulse{
 
         public $damageType = "Standard"; 
         public $weaponClass = "Laser"; 
+        private $damagebonus = 0; 
         
         function __construct($startArc, $endArc, $damagebonus, $nrOfShots = 2){
             $this->damagebonus = $damagebonus;

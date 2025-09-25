@@ -6,6 +6,7 @@ window.weaponManager = {
     mouseoverSystem: null,
     currentSystem: null,
     currentShip: null,
+    ramWarning: false,
 
     getWeaponCurrentLoading: function getWeaponCurrentLoading(weapon) {
 		/*obsolete
@@ -57,6 +58,10 @@ window.weaponManager = {
         if (gamedata.gamephase != 1 && system.ballistic) return;
 
         if (ship.userid == gamedata.thisplayer) {
+            weaponManager.cancelFire(ship, system);
+        }    
+        /* Cleaned 19.8.25 - DK		            
+        if (ship.userid == gamedata.thisplayer) {
             if (!system.duoWeapon) {
                 weaponManager.cancelFire(ship, system);
             } else {
@@ -71,6 +76,7 @@ window.weaponManager = {
                 }
             }
         }
+        */    
     },
 
     cancelFire: function cancelFire(ship, system) {
@@ -157,7 +163,7 @@ window.weaponManager = {
             if (gamedata.selectedSystems[i] == weapon) {
                 gamedata.selectedSystems.splice(i, 1);
             }
-
+            /* Cleaned 19.8.25 - DK		
             if (weapon.duoWeapon) {
                 for (var j in weapon.weapons) {
                     var subweapon = weapon.weapons[j];
@@ -165,6 +171,7 @@ window.weaponManager = {
                     weaponManager.unSelectWeapon(ship, subweapon);
                 }
             }
+            */    
         }
 
         shipWindowManager.setDataForSystem(ship, weapon);
@@ -478,7 +485,7 @@ window.weaponManager = {
 
                     if(ship.Huge > 0){ //Cannot Target larger terrain.
                         $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="losBlocked"> CANNOT TARGET</span></div>').appendTo(f);
-                    }else if (loSBlocked && !weapon.hasSpecialLaunchHexCalculation) {
+                    }else if (loSBlocked) {
                         // LOS is blocked - only display the blocked message
                         $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="losBlocked"> LINE OF SIGHT BLOCKED</span></div>').appendTo(f);
                     }else if (weapon.hextarget) {
@@ -1466,7 +1473,7 @@ window.weaponManager = {
                 loSBlocked = mathlib.checkLineOfSight(sPosShooter, sPosTarget, blockedLosHex);
             }
 
-            if(loSBlocked && !weapon.hasSpecialLaunchHexCalculation) continue;
+            if(loSBlocked) continue;
 
             if (shipManager.systems.isDestroyed(selectedShip, weapon) || !weaponManager.isLoaded(weapon)) {
                 debug && console.log("Weapon destroyed or not loaded");
@@ -1617,9 +1624,11 @@ window.weaponManager = {
             // No warning for ships designed to ram or if desperate rules apply
             if (gamedata.rules.desperate === undefined || 
                 (gamedata.rules.desperate !== ship.team && gamedata.rules.desperate !== -1)) {
-                
-                var html = "WARNING - Ramming Attacks should only be used in scenarios where they are specifically permitted.";
-                confirm.warning(html);                    
+                if(!weaponManager.ramWarning){
+                    var html = "WARNING - Ramming Attacks should only be used in scenarios where they are specifically permitted.";
+                    weaponManager.ramWarning = true;
+                    confirm.warning(html);                    
+                }    
             }
         }
 		
@@ -1862,7 +1871,7 @@ window.weaponManager = {
                 }
             }
         }
-
+        /* Cleaned 19.8.25 - DK
         if (system.duoWeapon) {
             for (var i in system.weapons) {
                 if (weaponManager.hasFiringOrder(ship, system.weapons[i])) {
@@ -1870,7 +1879,7 @@ window.weaponManager = {
                 }
             }
         }
-
+        */
         return false;
     },
 
@@ -2051,7 +2060,7 @@ window.weaponManager = {
         if (!system.weapon) return;
 
         var fires = system.fireOrders;
-
+        /* Cleaned 19.8.25 - DK
         if (system.dualWeapon || system.duoWeapon) {
             for (var i in system.weapons) {
                 var weapon = system.weapons[i];
@@ -2066,6 +2075,7 @@ window.weaponManager = {
                 }
             }
         }
+        */    
 
         return fires;
     },
@@ -2191,7 +2201,7 @@ window.weaponManager = {
         const shortLogTypes = [
             "HyperspaceJump", "JumpFailure", "SelfDestruct", "ContainmentBreach",
             "Reactor", "Sabotage", "WreakHavoc", "Capture", "Rescue", "LimpetBore", 
-            "MagazineExplosion", "NoHangar", "TerrainCollision"
+            "MagazineExplosion", "NoHangar", "TerrainCollision", "HalfPhase"
         ];
     
         return shortLogTypes.includes(fire.damageclass);
@@ -2203,12 +2213,12 @@ window.weaponManager = {
         for (var i in gamedata.ships) {
             var ship = gamedata.ships[i];
     
-            if (ship.Enormous && !shipManager.isDestroyed(ship)) { // Only enormous units block LoS at present
+            if (ship.Enormous && !shipManager.isDestroyed(ship)) { // Only enormous or Huge units block LoS.
                 var position = shipManager.getShipPosition(ship);
                 blockedHexes.push(position);
             
-                if (ship.Huge > 0) { // Has a radius of 1 around its centre hex
-                    var neighbourHexes = mathlib.getNeighbouringHexes(position, ship.Huge); //Only works with ship.Huge = 2 atm                  
+                if (ship.Huge > 0) { // Occupies more than 1 hex
+                    var neighbourHexes = mathlib.getNeighbouringHexes(position, ship.Huge);                  
                     // Add surrounding hexes directly
                     blockedHexes.push(...neighbourHexes);
                 }
@@ -2292,7 +2302,7 @@ window.weaponManager = {
         if (!system.fireOrders) return;
 
         var fires = system.fireOrders;
-
+        /* Cleaned 19.8.25 - DK
         if (system.dualWeapon || system.duoWeapon) {
             for (var i in system.weapons) {
                 var weapon = system.weapons[i];
@@ -2307,7 +2317,7 @@ window.weaponManager = {
                 }
             }
         }
-
+        */
         return fires;
     },
 

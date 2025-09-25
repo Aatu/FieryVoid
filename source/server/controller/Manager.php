@@ -60,13 +60,14 @@ class Manager{
         try {
             self::initDBManager();
             
-            if ($targetGameId &&  is_numeric($targetGameId) && $targetGameId > 0 ){
+            if ($targetGameId && is_numeric($targetGameId) && $targetGameId > 0) {
                 return self::getTacGamedata($targetGameId, $userid, 0, 0, -1);
             }
-        }
-        catch(Exception $e) {
+        } catch(Exception $e) {
             Debug::error($e);
         }
+    
+        return null; // Always return *something*
     }
     
     public static function getTacGames($userid){
@@ -159,7 +160,7 @@ class Manager{
         try {
             self::initDBManager();
             self::$dbManager->startTransaction();
-            $gameid = self::$dbManager->createGame($gamename, $background, $slots, $userid, $gamespace, json_encode($rules), $description);
+            $gameid = self::$dbManager->createGame($gamename, $background, $slots, $userid, $gamespace, $description, json_encode($rules));
             //SystemData::initSystemData(0, $gameid);
             self::takeSlot($userid, $gameid, 1);
             self::$dbManager->endTransaction(false);
@@ -275,6 +276,9 @@ class Manager{
                     return null;
                 //print(var_dump($gamedata));
                 $gamedata->prepareForPlayer();
+                //Line below skips deployment Phase on Turn 1 for late-deploying slots - DK                
+                if($gamedata->turn == 1 && $gamedata->phase == -1) Manager::updateLateDeployments($gamedata);  
+
             }else{
                 return null;
             }
@@ -309,11 +313,15 @@ class Manager{
 
             if (!$force && $gdS->waiting && !$gdS->changed && $gdS->status != "LOBBY")
                 return "{}";
-
+            /* //OLD VERION
             $json = json_encode($gdS->stripForJson(), JSON_NUMERIC_CHECK);
-
-
             //Debug("GAME: $gameid Player: $userid requesting gamedata. RETURNING NEW JSON");
+            return $json;
+            */
+            //NEW VERSION FOR PHP 8 - Aug 2025
+            $data = $gdS->stripForJson();
+            $json = json_encode($data, JSON_NUMERIC_CHECK | JSON_PARTIAL_OUTPUT_ON_ERROR);
+            unset($data); // free memory early
             return $json;
 
         }
@@ -350,7 +358,290 @@ class Manager{
             return '{"error": "' .$e->getMessage() . '", "code":"'.$e->getCode().'", "logid":"'.$logid.'"}';
         }
     }
+       
+    public static function submitSavedFleet($name, $userid, $points, $isPublic, $ships) {
+        try {
+            self::initDBManager();  
+            $starttime = time();
+
+            // ✅ Decode ships first, before DB work
+            $ships = self::getSavedShipsFromJSON($ships, $userid);
+            if (sizeof($ships) == 0) {
+                throw new Exception("Ship data missing");
+            }
+
+            // ✅ Only start the DB transaction once we know we have valid data
+            self::$dbManager->startTransaction();
+
+            // Save fleet
+            $listId = self::$dbManager->submitSavedList($name, $userid, $points, $isPublic);
+
+            // ✅ Now you can associate ships, enhancements, ammo with $listId
+            foreach ($ships as $ship) {
+                $shipId = self::$dbManager->submitSavedShip($listId, $userid, $ship);
+                    
+                foreach($ship->enhancementOptions as $enhancementEntry){ //ID,readableName,numberTaken,limit,price,priceStep
+                    $enhID = $enhancementEntry[0];
+                    $enhName = $enhancementEntry[1];
+                    $enhNo = $enhancementEntry[2];
+                    if ($enhNo > 0){ //actually taken
+                        self::$dbManager->submitSavedEnhancement($listId, $shipId, $enhID, $enhNo, $enhName);
+                    }
+                }
+                
+                if($ship instanceof FighterFlight){
+                        $firstFighter = $ship->systems[1];
+                        $ammo = false;
+
+                        foreach ($firstFighter->systems as $weapon){
+                            if(isset($weapon->missileArray)){
+                                $ammo = $weapon->missileArray[1]->amount;
+                                break;
+                            }
+                        }
+
+                        if ($ammo){
+                            foreach($ship->systems as $fighter){
+                                foreach ($fighter->systems as $weapon){
+                                    if(isset($weapon->missileArray)){
+                                        $weapon->missileArray[1]->amount = $ammo;
+                                         self::$dbManager->submitSavedAmmo($listId, $shipId, $weapon->id, $weapon->firingMode, $ammo);
+                                    }
+                                }
+                            }
+                        }
+                        else{//Marcin Sawicki: generalized version of gun ammo initialization for fighters (not for missile launchers!)
+                            foreach($ship->systems as $fighter){
+                                foreach($fighter->systems as $weapon){
+                                    if(isset($weapon->ammunition) && (!isset($weapon->missileArray)) && ($weapon->ammunition > 0) ){
+                                         self::$dbManager->submitSavedAmmo($listId, $shipId, $weapon->id, $weapon->firingMode, $weapon->ammunition);
+                                    }
+                                }
+                            }
+                        }
+                    }else{
+                        foreach($ship->systems as $systemIndex=>$system){
+                            if(isset($system->missileArray)){
+                                // this system has a missileArray. It uses ammo
+                                foreach($system->missileArray as $firingMode=>$ammo){
+                                     self::$dbManager->submitSavedAmmo($listId, $shipId, $system->id, $firingMode, $ammo->amount);
+                                }
+                            }
+                            else if($system instanceof Weapon) { //count ammo for other weapons as well!
+                                if(isset($system->ammunition) && ($system->ammunition > 0)){
+                                     self::$dbManager->submitSavedAmmo($listId, $shipId, $system->id, $system->firingMode, $system->ammunition);
+                                }
+                            }
+                        }
+                    }                                   
+                }
+
+                self::$dbManager->endTransaction(false);
+
+                $endtime = time();
+                return json_encode([
+                    'listId' => $listId,
+                    'success' => true
+                ]);
+
+            } catch (Exception $e) {
+                self::$dbManager->endTransaction(true);
+                $logid = Debug::error($e);
+                return '{"error": "' .$e->getMessage() . '", "code":"'.$e->getCode().'", "logid":"'.$logid.'"}';
+            }
+    }
+
+
+    public static function getSavedFleets($userid) {
+        try {
+            self::initDBManager(); 
+            self::$dbManager->startTransaction();
+
+            $fleets = self::$dbManager->getSavedFleets($userid);
+
+            self::$dbManager->endTransaction(false);
+            return $fleets;
+
+        } catch (Exception $e) {
+            self::$dbManager->endTransaction(true);
+            $logid = Debug::error($e);
+            return [];
+        }
+    }   
+
+
+    public static function loadSavedFleet(int $listid): array
+    {
+
+        $fleet = [];
+        $enhancementsByShip = [];
+        $ammoByShip = [];
+        //$fleetPoints = 0;
+
+        try {
+            self::initDBManager();
+            self::$dbManager->startTransaction();
             
+            $list = self::$dbManager->getSavedFleet($listid);
+            // Load all ships for this fleet
+            $ships = self::$dbManager->getSavedShips($listid);
+
+            // Load enhancements and ammo for all ships
+            foreach ($ships as $ship) {
+                $enhancementsByShip[$ship->id] = self::$dbManager->getSavedEnhancementsForShip($ship->id);
+                $ammoByShip[$ship->id] = self::$dbManager->getSavedAmmoForShip($ship->id);
+            }
+
+            self::$dbManager->endTransaction(false);
+
+            foreach ($ships as $ship) {
+                //$shipCost = $ship->pointCost + $ship->pointCostEnh + $ship->pointCostEnh2;
+                //if($ship instanceof FighterFlight) $shipCost = $shipCost/$ship->flightSize;
+                //$fleetPoints += $shipCost;
+
+                // Add enhancements
+                Enhancements::setEnhancementOptions($ship);
+                $shipEnh = $enhancementsByShip[$ship->id] ?? [];
+                foreach ($shipEnh as $enhEntry) {
+                    $enhID       = $enhEntry[0];
+                    $numberTaken = $enhEntry[1];
+                    foreach ($ship->enhancementOptions as &$option) {
+                        if ($option[0] === $enhID) {
+                            $option[2] = $numberTaken;
+                        }
+                    }
+                }
+
+                // Add Ammo
+                $shipAmmo = $ammoByShip[$ship->id] ?? [];
+                foreach ($shipAmmo as $ammoEntry) {
+                    list($systemid, $firingmode, $amount) = $ammoEntry;
+                    $system = $ship->getSystemById($systemid);
+                    if ($system) {
+                        $system->setAmmo($firingmode, $amount);
+                    }
+                }
+
+                $fleet[] = $ship; // store ship directly, no extra 'ship' key
+            }
+
+        } catch (Exception $e) {
+            self::$dbManager->endTransaction(true);
+            Debug::error($e);
+            return []; // safe fallback
+        }
+
+        // Return top-level array with points and ships
+        return [
+            'list' => $list,
+            'ships'  => $fleet
+        ];
+    }
+
+
+    public static function deleteSavedFleet($id) {
+        try {
+            self::initDBManager(); 
+            self::$dbManager->startTransaction();
+
+            self::$dbManager->deleteSavedFleet($id);
+
+            self::$dbManager->endTransaction(false);
+            return json_encode([
+                'id' => $id,
+                'success' => true
+            ]);
+
+        } catch (Exception $e) {
+            self::$dbManager->endTransaction(true);
+            $logid = Debug::error($e);
+            return [];
+        }
+    }   
+
+    public static function changeAvailabilityFleet($id): array {
+        try {
+            self::initDBManager(); 
+            self::$dbManager->startTransaction();
+
+            $newStatus = self::$dbManager->changeAvailabilityFleet($id);
+
+            self::$dbManager->endTransaction(false);
+            return [
+                'id'        => $id,
+                'success'   => true,
+                'newStatus' => $newStatus
+            ];
+        } catch (Exception $e) {
+            self::$dbManager->endTransaction(true);
+            $logid = Debug::error($e);
+            return [
+                'id'      => $id,
+                'success' => false,
+                'error'   => 'Failed to toggle fleet availability.'
+            ];
+        }
+    }
+
+
+    private static function getSavedShipsFromJSON($json, $userid) {
+
+        $ships = array();
+        $array = json_decode($json, true);
+        if (!is_array($array)) return $ships;
+    
+        foreach ($array as $value) {
+           
+            $className = $value["phpclass"] ?? null;
+            if (!$className) continue; // skip if class not defined
+    
+            /** @var BaseShip $ship */
+            $ship = new $className(
+                $value["id"] ?? -1,
+                $userid ?? -1,
+                $value["name"] ?? "Unnamed",
+                $value["slot"] ?? 0
+            );
+    
+            $ship->pointCostEnh = ($value["pointCostEnh"] ?? 0) + ($value["pointCostEnh2"] ?? 0);
+    
+            if ($ship instanceof FighterFlight) {
+                $ship->flightSize = $value["flightSize"] ?? 1;
+                $ship->populate();
+            }
+    
+            $ship->enhancementOptions = $value["enhancementOptions"] ?? [];
+    
+            $systems = $value["systems"] ?? [];
+            foreach ($systems as $i => $system) {
+                $sys = $ship->getSystemById($i);
+                
+                if (isset($system["systems"]) && is_array($system["systems"])) {
+                    foreach ($system["systems"] as $fightersys) {
+                        $fig = $sys ? $sys->getSystemById($fightersys["id"] ?? -1) : null;
+                        if (!$fig) continue;
+                        
+                            // ammo transfer
+                            if (isset($fightersys["ammo"])) {
+                                foreach ($fightersys["ammo"] as $i => $ammo) {
+                                    if (isset($ammo)) {
+                                        $fig->setAmmo($i, $ammo);
+                                    }
+                                }
+                            }
+    
+                        
+                    }
+                } 
+            }
+    
+            $ships[(int)($value["id"] ?? count($ships))] = $ship;
+        }
+    
+        return $ships;
+    }
+
+
     public static function submitTacGamedata($gameid, $userid, $turn, $phase, $activeship, $ships, $status, $slotid = 0){
         try {
         
@@ -379,12 +670,58 @@ class Manager{
 
             SystemData::initSystemData($gdS->turn, $gdS->id);
 
+            /* //OLD APPROACH
             if ($status == "SURRENDERED" && $gdS->status !== "SURRENDERED"){
                 self::$dbManager->updateGameStatus($gameid, $status);
             } else if ($gdS->status === "SURRENDERED") {
                 return "{}";
             }
-            
+            */
+
+            //New slot-based appraoch to surrendering - DK - Aug 2025
+            if ($status == "SURRENDERED") {
+                // Step 1: Update this player's slot surrendered value with game turn when they surrender
+                self::$dbManager->updateSlotSurrendered($gameid, $userid, $gdS->turn); 
+            }
+
+            if ($gdS->status !== "SURRENDERED") {
+                // Step 2: Track alive teams
+                $aliveTeams = [];
+                $slots = self::$dbManager->getSlotsInGame($gameid);
+
+                foreach ($slots as $slot) {
+
+                    if ($slot->team === null) {
+                        continue; // skip unassigned (shouldn't happen)
+                    }
+
+                    if (!isset($aliveTeams[$slot->team])) {
+                        $aliveTeams[$slot->team] = false; // assume dead until proven alive
+                    }
+
+                    if ($slot->surrendered === null) { //Null is default, indicates they've never surrendered.
+                        $aliveTeams[$slot->team] = true; // team still alive
+                    }
+                }
+
+                // Step 3: Count alive teams
+                $aliveCount = 0;
+                foreach ($aliveTeams as $isAlive) {
+                    if ($isAlive) {
+                        $aliveCount++;
+                    }
+                }
+
+                // Step 4: End game if one or zero teams remain
+                if ($aliveCount <= 1) {
+                    self::$dbManager->updateGameStatus($gameid, "SURRENDERED"); 
+                }
+            } else {
+                return "{}";
+            }
+
+
+
             if ($gameid != $gdS->id || $turn != $gdS->turn || $phase != $gdS->phase)
                 throw new Exception("Unexpected orders");
 
@@ -402,7 +739,7 @@ class Manager{
             //print(var_dump($ships));
 
             if ($phase instanceof BuyingGamePhase){
-                $phase->process($gdS, self::$dbManager, $ships);
+                $phase->process($gdS, self::$dbManager, $ships, $slotid); // slotid passed here
             } else if ($phase instanceof DeploymentGamePhase){
                 $phase->process($gdS, self::$dbManager, $ships);
             } else if ($phase instanceof InitialOrdersGamePhase){
@@ -499,16 +836,13 @@ class Manager{
         try{
            if (!self::$dbManager->checkIfPhaseReady($gameid))
                 return;
-		
+            
             if (!self::$dbManager->getGameSubmitLock($gameid))
             {
                 //Debug::log("Advance gamestate, Did not get lock. playerid: $playerid");
                 return;
             }
-
-
-
-            
+           
             $starttime = time();
             
             //Debug("GAME: $gameid Starting to advance gamedata. playerid: $playerid");
@@ -526,7 +860,7 @@ class Manager{
 
                     if ($phase instanceof BuyingGamePhase){
                         $phase->advance($gamedata, self::$dbManager);
-                        self::changeTurn($gamedata);
+                        self::changeTurn($gamedata);                                            
                     } else if ($phase instanceof DeploymentGamePhase){
                         $phase->advance($gamedata, self::$dbManager);
                     } else if ($phase instanceof InitialOrdersGamePhase){
@@ -557,7 +891,9 @@ class Manager{
                     self::changeTurn($gamedata);
                 }
             }  
-            if (TacGamedata::$currentPhase > 0){
+            //if (TacGamedata::$currentPhase > 0){
+            //Keep original logic here for Turn 1, but then adjust to accommodate Deployment phases AFTER Turn 1
+            if ($gamedata->turn == 1 && TacGamedata::$currentPhase > 0 || $gamedata->turn > 1 && TacGamedata::$currentPhase >= -1){            
                 foreach ($gamedata->ships as $ship){
                     foreach ($ship->systems as $system){
                         $system->onAdvancingGamedata($ship, $gamedata);
@@ -576,18 +912,37 @@ class Manager{
             throw $e;
         }
     }
-       
+  
+
+    //New function called in Manager::getTacGamedata() to search for slots that skip Deployment on Turn 1 - DK July 2025 
+    public static function updateLateDeployments($gamedata){
+        foreach($gamedata->slots as $slot){    
+            if($slot->depavailable > 1){
+                $depTurn = $gamedata->getMinTurnDeployedSlot($slot->slot, $slot->depavailable);
+                if($depTurn > 1){ //Bases and Terrain will need to deploy on Turn 1 still
+                    //Set lastphase, and lastTurn for slot to intial phase on next turn.                
+                    self::$dbManager->updatePlayerSlotPhase($gamedata->id, $slot->playerid, $slot->slot, -1, 1);
+                }        
+            }    
+        }           
+    }    
+
 
     private static function changeTurn($gamedata){
     
         $gamedata->setTurn( $gamedata->turn+1 );
+        
+        /* //Old method which only create Deployment Phases on Turn 1.
         if ($gamedata->turn === 1)
         {
             $gamedata->setPhase(-1); 
         }else{
             $gamedata->setPhase(1); 
         }
-        
+        */
+        //Now we always try and make a Deployment Phase, but slots will be set to skip it in FireGamePhase if they are not are scheduled to deploy.        
+        $gamedata->setPhase(-1); 
+
         $gamedata->setActiveship(-1);
 
         if (($gamedata->turn > 1 && $gamedata->isFinished()) || ($gamedata->status === "SURRENDERED")){
@@ -645,141 +1000,181 @@ class Manager{
         self::$dbManager->submitIniative($gamedata->id, $gamedata->turn, $gamedata->ships);
     }
     
-    private static function getShipsFromJSON($json){
+    private static function getShipsFromJSON($json) {
+
+        // Defensive: if input is already an array, skip json_decode
+        if (is_array($json)) {
+            $array = $json;
+        } else {
+            $array = json_decode($json, true);
+        }
+
 
         $ships = array();
         $array = json_decode($json, true);
-        if (!is_array($array))
-			return $ships;
-			
+        if (!is_array($array)) return $ships;
+    
         foreach ($array as $value) {
-                    
             $movements = array();
-            if (isset($value["movement"]) && is_array($value["movement"])){
-                foreach($value["movement"] as $i=>$move){
+            if (isset($value["movement"]) && is_array($value["movement"])) {
+                foreach($value["movement"] as $i => $move) {
                     $movement = new MovementOrder(
-                        $move["id"],
-                        $move["type"],
-                        new OffsetCoordinate($move["position"]),
-                        $move["xOffset"],
-                        $move["yOffset"],
-                        $move["speed"],
-                        $move["heading"],
-                        $move["facing"],
-                        $move["preturn"],
-                        $move["turn"],
-                        $move["value"],
-                        $move["at_initiative"]
+                        $move["id"] ?? -1,
+                        $move["type"] ?? null,
+                        new OffsetCoordinate($move["position"] ?? [0, 0]),
+                        $move["xOffset"] ?? 0,
+                        $move["yOffset"] ?? 0,
+                        $move["speed"] ?? 0,
+                        $move["heading"] ?? 0,
+                        $move["facing"] ?? 0,
+                        $move["preturn"] ?? false,
+                        $move["turn"] ?? 0,
+                        $move["value"] ?? 0,
+                        $move["at_initiative"] ?? false
                     );
-                    $movement->requiredThrust = $move["requiredThrust"];
-                    $movement->assignedThrust = $move["assignedThrust"];
-                    
+                    $movement->requiredThrust = $move["requiredThrust"] ?? 0;
+                    $movement->assignedThrust = $move["assignedThrust"] ?? 0;
+    
                     $movements[$i] = $movement;
                 }
             }
-            
+    
             $EW = array();
-            
-            if (isset($value["EW"]) && is_array($value["EW"])){
-                foreach($value["EW"] as $i=>$EWdata){
-                    $EWentry = new EWentry(-1, $EWdata["shipid"], $EWdata["turn"], $EWdata["type"], $EWdata["amount"], $EWdata["targetid"]);
+            if (isset($value["EW"]) && is_array($value["EW"])) {
+                foreach($value["EW"] as $i => $EWdata) {
+                    $EWentry = new EWentry(
+                        -1,
+                        $EWdata["shipid"] ?? -1,
+                        $EWdata["turn"] ?? 0,
+                        $EWdata["type"] ?? "",
+                        $EWdata["amount"] ?? 0,
+                        $EWdata["targetid"] ?? null
+                    );
                     $EW[$i] = $EWentry;
                 }
             }
-            
+    
+            $className = $value["phpclass"] ?? null;
+            if (!$className) continue; // skip if class not defined
+    
             /** @var BaseShip $ship */
-            $ship = new $value["phpclass"]($value["id"], $value["userid"], $value['name'], $value["slot"]);       
-			$ship->pointCostEnh = $value["pointCostEnh"]+$value["pointCostEnh2"]; //merge enhancements and options into one value! - Options not saved separately
-            $ship->setMovements($movements);    
+            $ship = new $className(
+                $value["id"] ?? -1,
+                $value["userid"] ?? -1,
+                $value["name"] ?? "Unnamed",
+                $value["slot"] ?? 0
+            );
+    
+            $ship->pointCostEnh = ($value["pointCostEnh"] ?? 0) + ($value["pointCostEnh2"] ?? 0);
+            $ship->setMovements($movements);
             $ship->EW = $EW;
-
-            if ($ship instanceof FighterFlight){
-                $ship->flightSize = $value["flightSize"];  
+    
+            if ($ship instanceof FighterFlight) {
+                $ship->flightSize = $value["flightSize"] ?? 1;
                 $ship->populate();
             }
-
-
-	    //unit enhancements
-		$ship->enhancementOptions = $value["enhancementOptions"];
-		
-            $systems = isset($value["systems"]) ? $value["systems"] : [];
-            foreach($systems as $i=>$system){
-                //$sys = $ship->getSystemById($system['id']);
+    
+            $ship->enhancementOptions = $value["enhancementOptions"] ?? [];
+    
+            $systems = $value["systems"] ?? [];
+            foreach ($systems as $i => $system) {
                 $sys = $ship->getSystemById($i);
-
-                
-                if (isset($system["power"]) &&is_array($system["power"]))
-                {
-                    foreach ($system["power"] as $a=>$power)
-                    {
-                        $powerEntry = new PowerManagementEntry($power["id"], $power["shipid"], $power["systemid"], $power["type"], $power["turn"], $power["amount"]);
-                        if (isset($sys)){
+    
+                if (isset($system["power"]) && is_array($system["power"])) {
+                    foreach ($system["power"] as $power) {
+                        $powerEntry = new PowerManagementEntry(
+                            $power["id"] ?? -1,
+                            $power["shipid"] ?? -1,
+                            $power["systemid"] ?? -1,
+                            $power["type"] ?? "",
+                            $power["turn"] ?? 0,
+                            $power["amount"] ?? 0
+                        );
+                        if ($sys) {
                             $sys->setPower($powerEntry);
                         }
                     }
                 }
-                
-                if (isset($system["fireOrders"]) &&is_array($system["fireOrders"]))
-                {
-                    $fires = Array();
-                    foreach($system["fireOrders"] as $i=>$fo){
-                        $fireOrder = new FireOrder(-1, $fo["type"], $fo["shooterid"], $fo["targetid"], $fo["weaponid"], $fo["calledid"], $fo["turn"], $fo["firingMode"], 0, 0, $fo["shots"], 0, 0, $fo["x"], $fo["y"], $fo["damageclass"]);
-                        if (isset($sys)){
+    
+                if (isset($system["fireOrders"]) && is_array($system["fireOrders"])) {
+                    $fires = [];
+                    foreach($system["fireOrders"] as $fo) {
+                        $fireOrder = new FireOrder(
+                            -1,
+                            $fo["type"] ?? "",
+                            $fo["shooterid"] ?? -1,
+                            $fo["targetid"] ?? -1,
+                            $fo["weaponid"] ?? -1,
+                            $fo["calledid"] ?? -1,
+                            $fo["turn"] ?? 0,
+                            $fo["firingMode"] ?? 1,
+                            0, 0, $fo["shots"] ?? 0, 0, 0,
+                            $fo["x"] ?? 0,
+                            $fo["y"] ?? 0,
+                            $fo["damageclass"] ?? null
+                        );
+                        if ($sys) {
                             $fires[] = $fireOrder;
                         }
                     }
-                    
-                    $sys->setFireOrders($fires);
+                    if ($sys) $sys->setFireOrders($fires);
                 }
-                
-                if (isset($system["systems"]) && is_array($system["systems"]))
-                {
-                    foreach ($system["systems"] as $fightersys)
-                    {
-                        $fig = $sys->getSystemById($fightersys['id']);
-                        if (isset($fightersys["fireOrders"]) && is_array($fightersys["fireOrders"]))
-                        {
-                            $fires = Array();
-                            foreach($fightersys["fireOrders"] as $i=>$fo)
-                            {
-                                $fireOrder = new FireOrder(-1, $fo["type"], $fo["shooterid"], $fo["targetid"], $fo["weaponid"], $fo["calledid"], $fo["turn"], $fo["firingMode"], 0, 0, $fo["shots"], 0, 0, $fo["x"], $fo["y"], $fo["damageclass"]);
-                                if (isset($fig)){
-                                    $fires[] = $fireOrder;
-                                }
+    
+                if (isset($system["systems"]) && is_array($system["systems"])) {
+                    foreach ($system["systems"] as $fightersys) {
+                        $fig = $sys ? $sys->getSystemById($fightersys["id"] ?? -1) : null;
+                        if (!$fig) continue;
+    
+                        if (isset($fightersys["fireOrders"]) && is_array($fightersys["fireOrders"])) {
+                            $fires = [];
+                            foreach($fightersys["fireOrders"] as $fo) {
+                                $fireOrder = new FireOrder(
+                                    -1,
+                                    $fo["type"] ?? "",
+                                    $fo["shooterid"] ?? -1,
+                                    $fo["targetid"] ?? -1,
+                                    $fo["weaponid"] ?? -1,
+                                    $fo["calledid"] ?? -1,
+                                    $fo["turn"] ?? 0,
+                                    $fo["firingMode"] ?? 1,
+                                    0, 0, $fo["shots"] ?? 0, 0, 0,
+                                    $fo["x"] ?? 0,
+                                    $fo["y"] ?? 0,
+                                    $fo["damageclass"] ?? null
+                                );
+                                $fires[] = $fireOrder;
                             }
-                            
-                            // plopje
-                            if(isset($fightersys["ammo"])){
-                                foreach($fightersys["ammo"] as $i=>$ammo){
-                                    if(isset($ammo)){
+    
+                            // ammo transfer
+                            if (isset($fightersys["ammo"])) {
+                                foreach ($fightersys["ammo"] as $i => $ammo) {
+                                    if (isset($ammo)) {
                                         $fig->setAmmo($i, $ammo);
                                     }
                                 }
-                            }							
-
+                            }
+    
                             $fig->setFireOrders($fires);
-                        }               
-
-
-						//receive individually transferred fighter system data, if any								
-						if(isset($fightersys["individualNotesTransfer"])){ //may be not set if game is being created - in this case only data for 1 fighter is transferred
-							$fig->individualNotesTransfer = $fightersys["individualNotesTransfer"];
-							$fig->doIndividualNotesTransfer();	
-						}				
-						
+                        }
+    
+                        if (isset($fightersys["individualNotesTransfer"])) {
+                            $fig->individualNotesTransfer = $fightersys["individualNotesTransfer"];
+                            $fig->doIndividualNotesTransfer();
+                        }
                     }
                 }
-				//receive individually transferred system data, if any
-				if(isset($system["individualNotesTransfer"])){ //may be not set if game is being created - in this case only data for 1 fighter is transferred
-					$sys->individualNotesTransfer = $system["individualNotesTransfer"];
-					$sys->doIndividualNotesTransfer();
-				}
+    
+                if (isset($system["individualNotesTransfer"])) {
+                    if ($sys) {
+                        $sys->individualNotesTransfer = $system["individualNotesTransfer"];
+                        $sys->doIndividualNotesTransfer();
+                    }
+                }
             }
-
-
-            $ships[(int)$value["id"]] = $ship;
+    
+            $ships[(int)($value["id"] ?? count($ships))] = $ship;
         }
-        
+    
         return $ships;
     }
 

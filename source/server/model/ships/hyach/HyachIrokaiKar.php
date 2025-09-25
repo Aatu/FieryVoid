@@ -1,10 +1,10 @@
 <?php
 class HyachIrokaiKar extends BaseShip{
-    
+	public $HyachSpecialists;    
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 1025;
+	$this->pointCost = 950;
 	$this->faction = "Hyach Gerontocracy";
         $this->phpclass = "HyachIrokaiKar";
         $this->imagePath = "img/ships/HyachIrokaiKam.png";

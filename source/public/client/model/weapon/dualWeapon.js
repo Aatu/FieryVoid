@@ -1,5 +1,5 @@
 "use strict";
-
+/*
 var DualWeapon = function DualWeapon(json, ship) {
     Weapon.call(this, json, ship);
 };
@@ -11,3 +11,4 @@ var LaserPulseArray = function LaserPulseArray(json, ship) {
 };
 LaserPulseArray.prototype = Object.create(DualWeapon.prototype);
 LaserPulseArray.prototype.constructor = LaserPulseArray;
+*/

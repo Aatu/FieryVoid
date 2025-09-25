@@ -144,7 +144,7 @@ window.ShipMovementAnimation = function () {
         result.done = done;
         return result;
     }
-
+/*
     function buildCurves(shipIcon, turn) {
         var moves = shipIcon.getMovements(turn);
 
@@ -165,6 +165,78 @@ window.ShipMovementAnimation = function () {
             return { move: move, curve: curve, turnAngle: turnData.turnAngle, startAngle: turnData.startAngle, endAngle: turnData.endAngle, length: calculateCurveLength(curve) };
         }, this);
     }
+*/
+function buildCurves(shipIcon, turn) {
+    var moves = shipIcon.getMovementsReplay(turn);
+
+    // Filter out moves that don't actually change anything
+    moves = moves.filter(function (move, i, arr) {
+        var prev = i > 0 ? arr[i - 1] : null;
+
+        // If no previous, always keep the first
+        if (!prev) return true;
+
+        var posChanged = !prev.position.equals(move.position); // assumes .equals() exists for Offset
+        var facingChanged = prev.facing !== move.facing;
+        var headingChanged = prev.heading !== move.heading;
+
+        return posChanged || facingChanged || headingChanged;
+    });
+
+    if (moves.length <= 1) {
+        return [];
+    }
+
+    return moves.map(function (move, i) {
+        var start;
+
+        if (i === 0) {
+            if (turn === 1 && Array.isArray(move.oldFacings) && move.oldFacings.length > 0) {
+                // For Turn 1 only → synthesize a "start" from oldFacings/oldHeadings
+                start = {
+                    position: move.position,
+                    facing: move.oldFacings[0],
+                    heading: (Array.isArray(move.oldHeadings) && move.oldHeadings.length > 0)
+                        ? move.oldHeadings[0]
+                        : undefined,
+                    turn: 0
+                };
+            } else {
+                // For Turn ≥ 2, getMovementsReplay already gave us the last prev-turn move
+                start = moves[i - 1] || null;
+            }
+        } else {
+            start = moves[i - 1];
+        }
+
+        var next = moves[i + 1] ? moves[i + 1] : null;
+
+        var movementPoints = getMovementPoints.call(
+            this,
+            move.position,
+            next ? next.position : null,
+            start ? start.position : null
+        );
+
+        var curve = buildCurve(
+            movementPoints.start,
+            movementPoints.end,
+            movementPoints.control
+        );
+
+        var turnData = calculateTurn(start, move);
+
+        return {
+            move: move,
+            curve: curve,
+            turnAngle: turnData.turnAngle,
+            startAngle: turnData.startAngle,
+            endAngle: turnData.endAngle,
+            length: calculateCurveLength(curve)
+        };
+    }, this);
+}
+
 
     function calculateCurveLength(curve) {
         var start = curve.getPoint(0);

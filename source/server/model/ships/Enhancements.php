@@ -32,7 +32,7 @@ class Enhancements{
 		Enhancements::setEnhancementOptionsShip($ship);
 	}
 	//sort enhancements - options first, then by name
-	usort($ship->enhancementOptions, "self::compareEnhancements");
+	usort($ship->enhancementOptions, [self::class, 'compareEnhancements']);
   } //endof function setEnhancementOptions
   
   /* block all available enhancements (those that are by default enabled) - ADD ANY NEW STANDARD ENHANCEMENTS HERE!
@@ -85,7 +85,7 @@ class Enhancements{
 
 		case 'Terrain':
 			Enhancements::blockStandardEnhancements($unit);
-			$unit->enhancementOptionsDisabled[] = 'DEPLOY'; //Terrain cannot jump into a scenario!  
+			//$unit->enhancementOptionsDisabled[] = 'DEPLOY'; //Terrain cannot jump into a scenario!  
 			break;	  
 	
 		case 'ThirdspaceShip':
@@ -120,15 +120,15 @@ class Enhancements{
 
 	  //Add option to delay the deployment of a ship, set as Enhancement so selection is remembered in the game itself.	
 	  //DO NOT PLACE ANY OPTIONS (E.G. ENH[6] = TRUE) ALPHABETICALLY BEFORE THIS!
-	  $enhID = 'DEPLOY';
-	  if(!in_array($enhID, $ship->enhancementOptionsDisabled)){ //option is not disabled
+	  /*$enhID = 'DEPLOY';
+	  if(!in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is not disabled
 		  $enhName = 'Choose a turn to deploy this unit:';
 		  $enhLimit = 100;	
 		  $enhPrice = 0; //no cost
 		  $enhPriceStep = 0; //no ocst
 		  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
 		  //technical ID, human readable name, number taken, maximum number to take, price for one, price increase for each further, is an option (rather than enhancement)
-	  }	 
+	  }	*/ 
 
 	  //Elite Crew: +5 Initiative, +2 Engine, +1 Sensors, +2 Reactor power, -1 Profile, -2 to critical results
 	  //cost: +40% of ship cost (second time: +60%)
@@ -437,7 +437,7 @@ class Enhancements{
 	  //Shadow fighter launched: -1 PRIMARY Structure, limit: hangar capacity
 	  $enhID = 'SHAD_FTRL';
 	  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
-		  $enhName = 'Fighter launched';
+		  $enhName = 'Spawn a Medium Fighter';
 		  //find total hangar capacity
 		  $capacity = 0;	  
 		  foreach ($ship->fighters as $name => $count){
@@ -1113,15 +1113,15 @@ class Enhancements{
 
 	  //Add option to delay the deployment of a ship, set as Enhancement so selection is remembered in the game itself.
 	  //DO NOT PLACE ANY OPTIONS (E.G. ENH[6] = TRUE) ALPHABETICALLY BEFORE THIS!	  	
-	  $enhID = 'DEPLOY';
-	  if(!in_array($enhID, $flight->enhancementOptionsDisabled)){ //option is not disabled
+	  /*$enhID = 'DEPLOY';
+	  if(!in_array($enhID, $flight->enhancementOptionsEnabled)){ //option is enabled
 		  $enhName = 'Choose which turn to deploy this unit:';
 		  $enhLimit = 100;	
 		  $enhPrice = 0; //no cost
 		  $enhPriceStep = 0; //no cost
 		  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
 		  //technical ID, human readable name, number taken, maximum number to take, price for one, price increase for each further, is an option (rather than enhancement)
-	  }	 
+	  }	 */
 
 	  //Elite Marines for Breaching Pods, cost: 40% craft price (round up), limit: 1	  	
 	  $enhID = 'ELT_MAR';	  
@@ -1252,7 +1252,7 @@ class Enhancements{
 	  //Shadow fighter deployed without carrier control: -2 OB, -3(15) Ini, cost: 0, limit: 1
 	  $enhID = 'SHAD_CTRL';	  
 	  if(in_array($enhID, $flight->enhancementOptionsEnabled)){ //option needs to be specifically enabled
-		  $enhName = 'Uncontrolled';
+		  $enhName = 'Uncontrolled Fighter';
 		  $enhLimit = 1;	
 		  $enhPrice = 0;	  
 		  $enhPriceStep = 0;
@@ -1427,17 +1427,17 @@ class Enhancements{
 			$enhDescription = $entry[1];
 			if($enhCount > 0) {
 				if($flight->enhancementTooltip != "") $flight->enhancementTooltip .= "<br>";
-				if($enhID == 'DEPLOY' && $enhCount > 1){ //Special type of Enhancement, clarify what it means.
-					$flight->enhancementTooltip .= "Flight deploys on Turn $enhCount";						
-				}else{				
-					$flight->enhancementTooltip .= "$enhDescription";
-					if ($enhCount>1) $flight->enhancementTooltip .= " (x$enhCount)";
-				}
+				//if($enhID == 'DEPLOY' && $enhCount > 1){ //Special type of Enhancement, clarify what it means.
+				//	$flight->enhancementTooltip .= "Flight deploys on Turn $enhCount";						
+				//}else{				
+				$flight->enhancementTooltip .= "$enhDescription";
+				if ($enhCount>1) $flight->enhancementTooltip .= " (x$enhCount)";
+				//}
 				switch ($enhID) { 
 					
-					case 'DEPLOY': //Add IFF system for Mine Launcher ships.
-						//Amend value fo turn that ship deploys on.
-						$flight->deploysOnTurn = $enhCount;
+					case 'DEPLOY':
+						//Amend value of turn that ship deploys on.
+						//$flight->deploysOnTurn = $enhCount;
 						break;	
 
 					case 'ELT_MAR'://Elite marines, mark every Marines system as Elite.
@@ -1567,18 +1567,18 @@ class Enhancements{
 			$enhDescription = $entry[1];
 			if($enhCount > 0) {
 				if($ship->enhancementTooltip != "") $ship->enhancementTooltip .= "<br>";
-				if($enhID == 'DEPLOY'){ //Special type of Enhancement, clarify what it means.
-					$ship->enhancementTooltip .= "Ship deploys on Turn $enhCount";						
-				}else{
-					$ship->enhancementTooltip .= "$enhDescription";
-					if ($enhCount>1) $ship->enhancementTooltip .= " (x$enhCount)";
-				}		
+				//if($enhID == 'DEPLOY'){ //Special type of Enhancement, clarify what it means.
+				//	$ship->enhancementTooltip .= "Ship deploys on Turn $enhCount";						
+				//}else{
+				$ship->enhancementTooltip .= "$enhDescription";
+				if ($enhCount>1) $ship->enhancementTooltip .= " (x$enhCount)";
+				//}		
 
 			        switch ($enhID) {	
 
-					case 'DEPLOY': //Add IFF system for Mine Launcher ships.
-						//Amend value fo turn that ship deploys on.
-						$ship->deploysOnTurn = $enhCount;
+					case 'DEPLOY':
+						//Amend value of turn that ship deploys on.
+						//$ship->deploysOnTurn = $enhCount;
 						break;						
 
 					case 'ELITE_CREW': //Elite Crew: +5 Initiative, +2 Engine, +1 Sensors, +2 Reactor power, -1 Profile, -2 to critical results, +1 to hit all weapons
@@ -1663,7 +1663,7 @@ class Enhancements{
 												
 					case 'IFF_SYS': //Add IFF system for Mine Launcher ships.
 						//Mark true
-						$ship->IFFSystem = true;
+						$ship->setIFFSystem();
 						break;
 								
 					case 'IMPR_ENG': //Improved Engine: +1 Engine output (strongest Engine), may be taken multiple times
@@ -2040,9 +2040,9 @@ class Enhancements{
 					switch ($enhID) {
 						
 						case 'DEPLOY': //Delayed Deployment marker
-							if($ship instanceof FighterFlight){
-								$strippedShip->deploysOnTurn = $ship->deploysOnTurn;
-							}
+							//if($ship instanceof FighterFlight){
+								//$strippedShip->deploysOnTurn = $ship->deploysOnTurn;
+							//}
 							break;
 						case 'ELITE_SW': //Elite Pilot: modify pivot cost, OB, profile and Initiative
 							if($ship instanceof FighterFlight){
@@ -2125,7 +2125,7 @@ class Enhancements{
 					switch ($enhID) {
 
 						case 'DEPLOY': //Delayed Deployment marker
-							$strippedShip->deploysOnTurn = $ship->deploysOnTurn;
+							//$strippedShip->deploysOnTurn = $ship->deploysOnTurn;
 							break;
 
 						case 'ELITE_CREW': //Elite crew: Initiative and Profiles modified

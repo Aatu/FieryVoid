@@ -7,6 +7,8 @@ class BaseShip {
     public $imagePath, $shipClass;
     public $systems = array();
     public $EW = array();
+    public array $structures = [];
+    public array $locations = [];
     public $fighters = array();
 	public $customFighter = array(); //array for fighters with special hangar requirements - see Balvarix/Rutarian for usage
     public $hitChart = array();
@@ -27,13 +29,14 @@ class BaseShip {
     public $phpclass;
     public $forwardDefense, $sideDefense;
     public $destroyed = false;
-    public $deploysOnTurn = 1; //Default turn to deploy.
+    //public $deploysOnTurn = 1; //Default turn to deploy.
     public $pointCost = 0;
     public $pointCostEnh = 0; //points spent on enhanements (in addition to crafts' own price), DOES NOT include cost of items being only technically enhancements (special missiles, Navigators...)
 	public $pointCostEnh2 = 0; //points spent on non-enhancements - separation actuallly exists only at fleet selection, afterwards it will be always 0 with points added to $pointCostEnh
 	public $combatValue = 100; //current combat value, as percentage of original
     public $faction = null;
-	public $factionAge = 1; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial 
+	public $factionAge = 1; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
+    public $isd = 0; 
     public $slot;
     public $unavailable = false;
     public $minesweeperbonus = 0;
@@ -69,10 +72,11 @@ class BaseShip {
     protected $VreeHitLocations = false; //Value to indicate that all gunfire from the same ship may not hit same side on Vree capital ships	
    
     //following values from DB
-    public $id, $userid, $name, $campaignX, $campaignY;
+    public $id, $userid, $name;
+    protected $campaignX, $campaignY; //Not used as far as I can tell, just null entries in db.    
     public $rolled = false;
     public $rolling = false;
-	public $EMHardened = false; //EM Hardening (Ipsha have it) - some weapons would check for this value!
+	protected $EMHardened = false; //EM Hardening (Ipsha have it) - some weapons would check for this value!
 	
 	public $ignoreManoeuvreMods = false;//New marker for factions like Mindriders that don't take penalties for pivoting etc	
 		
@@ -97,7 +101,7 @@ class BaseShip {
 	public $unitSize = 1; //typically ships are berthed in dedicated space, 1 per slot - but other arrangements are certainly possible.
 	
 	protected $adaptiveArmorController = null; //Adaptive Armor Controller object (if present)
-	public $IFFSystem = false;	    
+	protected $IFFSystem = false;   
 	    
         function __construct($id, $userid, $name, $slot){
             $this->id = (int)$id;
@@ -110,6 +114,18 @@ class BaseShip {
 		public function getAdvancedArmor(){
 			return $this->advancedArmor;    
 	    }
+
+		public function getEMHardened(){
+			return $this->EMHardened;    
+	    }
+
+		public function getIFFSystem(){
+			return $this->IFFSystem;    
+	    }
+       
+		public function setIFFSystem(){
+			$this->IFFSystem = true;    
+	    }            
 		
 		public function getAdaptiveArmorController(){
 			return $this->adaptiveArmorController;    
@@ -216,8 +232,23 @@ class BaseShip {
 		$enginePresent = false;
 		$scannerPresent = false;
 		
-		//destroyed ship gets no value
-		if($this->isDestroyed()) $effectiveValue = 0;
+		//destroyed ship gets no value UNLESS it successfully jumped to Hyperspace
+		if($this->isDestroyed()){
+            if(!$this instanceof FighterFlight && !$this->base && !$this->osat){            
+                $jumpEngine = $this->getSystemByName("JumpEngine");
+                // Check if the ship has a jump engine                
+                if ($jumpEngine) {                
+                    //Check if it's jumped, instead of being destroyed.
+                    if($jumpEngine->hasJumped()){                   
+                        //Do NOT zero $effectiveValue if ship has jumped.               
+                        $effectiveValue = $jumpEngine->getCVBeforeJump();                    
+                        return $effectiveValue;
+                    }    
+                }
+            }     
+            //No jump engine, or hasn't jumped, set value to 0 as normal.
+            $effectiveValue = 0;               
+        }    
 
 		/*moved
 		$cnc = $this->getSystemByName("CnC");
@@ -449,7 +480,7 @@ class BaseShip {
 		
 		return $totalMarines;
 	}
-	
+
 	
     public function stripForJson() {
         $strippedShip = new stdClass();
@@ -471,7 +502,7 @@ class BaseShip {
         $strippedShip->movement = $this->movement; 
         $strippedShip->faction = $this->faction; 
         $strippedShip->phpclass = $this->phpclass;
-        $strippedShip->deploysOnTurn = $this->deploysOnTurn;         
+        
         $strippedShip->systems = array_map( function($system) {return $system->stripForJson();}, $this->systems);
 		
 		$strippedShip->combatValue = $this->calculateCombatValue();
@@ -611,8 +642,8 @@ class BaseShip {
                 if(!$ship->isDestroyed()
                         && ($ship->faction == "Earth Alliance" || 
 			                $ship->faction == "Earth Alliance (defenses)" || 
-			                $ship->faction == "Earth Alliance (early)" ||
-							$this->faction == "Earth Alliance (custom)")
+			                $ship->faction == "Earth Alliance (Early)" ||
+							$ship->faction == "Earth Alliance (Custom)")
                         && ($this->userid == $ship->userid)
                         && ($ship instanceof Poseidon)
                         && ($this->id != $ship->id)){
@@ -622,30 +653,6 @@ class BaseShip {
 			return $this->iniativebonus;
         }               
 
-
-/*         private function doRaidersInitiativeBonus($gamedata){
-
-			$mod = 0;
-
-			if($gamedata->turn > 0 && $gamedata->phase >= 0 ){
-				$pixPos = $this->getCoPos();
-				//TODO: Better distance calculation
-				$ships = $gamedata->getShipsInDistance($this, 5);
-
-				foreach($gamedata->ships as $ship){
-					if(!$ship->isDestroyed()
-							&& ($ship->faction == "Raiders")
-							&& ($this->userid == $ship->userid)
-							&& ($ship instanceof LegionStarjammer)
-							&& ($this->id != $ship->id)){
-						//return ($this->iniativebonus+5);
-						$mod = 5;
-					}
-				}
-				return $this->iniativebonus + $mod; 
-			}  
-		 } */
- 
 
         private function doRaidersInitiativeBonus($gamedata){
 
@@ -673,7 +680,6 @@ class BaseShip {
         //    debug::log($this->phpclass."- bonus: ".$mod);
         return $this->iniativebonus + $mod*5;
     }
-
  
         
         private function doDilgarInitiativeBonus($gamedata){
@@ -1466,7 +1472,7 @@ class BaseShip {
         $trgtTurn = $turn - 1;
         $movement =  null;
         foreach ($this->movement as $move){ //should be sorted from oldest to newest...
-            if($move->type == "start") continue; //not a real move
+            if($move->type == "start" && $this->userid !== -5) continue; //not a real move, except for generated Terrain
             if( ($move->turn > $trgtTurn) && ($move->type!='deploy')) continue; //future move; but always include deployment!
             $movement = $move;
         }
@@ -1738,35 +1744,24 @@ public function getAllEWExceptDEW($turn){
         //If any of these conditions is true, indicates Terrain.
         if($this instanceof Terrain || $this->userid == -5 || $this->shipSizeClass == 5) return true;
 		return false; 
-	}//endof function isTerrain
+	}
 
-    public function getTurnDeployed($phase){
+    public function getTurnDeployed($gamedata){
 
-        if ($phase == -1 || $this->osat || $this->base || $this->isTerrain()) return 1; //Don't hide anything in Deployment Phase.  Bases, Terrain and OSATs never 'jump in'.
+        if ($this->osat || $this->base || $this->isTerrain()) return 1; //Bases, Terrain and OSATs never 'jump in'.
 
-        //$slot = $gamedata->getSlotById($this->slot);
-        //$depTurn = max($this->deploysOnTurn, $slot->depavailable);
-        $depTurn = $this->deploysOnTurn;
-
-        return $depTurn;
-
-	}//endof function getTurnDeployed  
-
-
-/*
-    public function notDeployedYet($gamedata){
-       
-        if($this->deploysOnTurn > $gamedata->turn) return true; //Ships can be set to deploy later.
-
-        //Now check entire slot.
         $slot = $gamedata->getSlotById($this->slot);
         $depTurn = $slot->depavailable;
 
-        if($depTurn > $gamedata->turn) return true;
+        if($slot->surrendered !== null){
+            if($slot->surrendered <= $gamedata->turn){ //Surrendered on this turn or before, no longer present in game.
+                $depTurn = 999; //Artifically high number, so surrendered ships are no longer considered by game! - DK
+            }
+        }    
+        
+        return $depTurn;           
+	} 
 
-        return false; 
-	}//endof function notDeployedYet
-*/
 
     public function getBearingOnPos($pos){ //returns relative angle from this unit to indicated coordinates
         $tf = $this->getFacingAngle(); //ship facing
@@ -1793,7 +1788,6 @@ public function getAllEWExceptDEW($turn){
     }
 
 
-
     public function doGetHitSectionBearing($relativeBearing){ //pick section hit from given bearing; return array with all data!
         $locs = $this->getLocations();
         $valid = array();
@@ -1813,7 +1807,6 @@ public function getAllEWExceptDEW($turn){
         $result = $this->doGetHitSectionBearing($relativeBearing);
         return $result;
     }
-
 
 
     public function doGetHitSection($shooter){   //pick section hit from given unit; return array with all data!

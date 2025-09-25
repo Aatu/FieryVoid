@@ -26,7 +26,8 @@ window.InitialPhaseStrategy = function () {
         gamedata.showCommitButton();
         gamedata.showSurrenderButton();
 
-        combatLog.showCurrent(); //Reset Combat Log printouts.       
+        combatLog.showCurrent(); //Reset Combat Log printouts.
+        fleetListManager.updateFleetList(); //marked destroyed/jumped ships               
         this.setPhaseHeader("INITIAL ORDERS");
         return this;
     };
@@ -39,6 +40,7 @@ window.InitialPhaseStrategy = function () {
     };
 
     InitialPhaseStrategy.prototype.onHexClicked = function (payload) {
+        PhaseStrategy.prototype.onHexClicked.call(this, payload);        
         if (!this.selectedShip) {
             return;
         }

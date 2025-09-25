@@ -77,7 +77,7 @@ createFleetList: function createFleetList(slot, template) {
     fleetlistentry.find(".fleetlistline").remove();
 
     // Create and append the header row
-    fleetlistline.html("<span><span class='shipname header'>Ship Name</span><span class='shipclass header'>Ship Class</span><span class='shiptype header'>Type</span><span class='initiative header'>Initiative</span><span class='value header'>Value (current/base)</span></span>");
+    fleetlistline.html("<span><span class='shipname header'>Ship Name</span><span class='shipclass header'>Ship Class</span><span class='shiptype header'>Type</span><span class='initiative header'>Initiative</span><span class='value header'>Current Value</span></span>");
     fleetlistline.appendTo(fleetlisttable);
 
     var totalBaseValue = 0;
@@ -120,7 +120,7 @@ createFleetList: function createFleetList(slot, template) {
         fleetlistline.html(
             "<span id='" + ship.id + "'>" +
             "<span class='shipname clickable' data-shipid='" + ship.id + "'>" + ship.name + "</span>" +
-            "<span class='shipclass'>" + ship.phpclass + "</span>" +
+            "<span class='shipclass'>" + ship.shipClass + "</span>" +
             "<span class='shiptype'>" + shiptype + "</span>" +
             "<span class='initiative'>" + shipManager.getIniativeOrder(ship) + "</span>" +
             "<span class='value'>" + currValue + '/' + baseValue + "CP</span>" +
@@ -130,17 +130,25 @@ createFleetList: function createFleetList(slot, template) {
         fleetlistline.appendTo(fleetlisttable);
     }
 
-    var turnTaken = "<span style='color:red'>&nbsp;(Not committed orders)</span>";
-    if (slot.waiting) turnTaken = "<span style='color:green'>&nbsp;(Orders committed)</span>";
+    var turnTaken = "<span style='color:orange'>&nbsp;&nbsp;[Waiting for Orders]</span>";
+    if(slot.surrendered !== null){
+        if(slot.surrendered <= gamedata.turn){ //Surrendered on this turn or before.
+            turnTaken = "<span style='color:red'>&nbsp;&nbsp;[Surrendered on Turn " + slot.surrendered + "]</span>"; //Check surrendered first.
+        }
+    }else if (slot.waiting){
+        turnTaken = "<span style='color:green;'>&nbsp;&nbsp;[Orders committed]</span>";
+    } 
+    
+    var deploys = "";
+    if(slot.depavailable > gamedata.turn) deploys = "<span style='color: #00b8e6'>[Deploys on Turn " + slot.depavailable + "]&nbsp;</span>";
 
-
-// Update fleet header with value totals
-fleetlistentry.find(".fleetheader").html(
-    "<span class='headername'>FLEET LIST - </span>" +
-    "<span class='playername'>" + slot.playername + 
-    ", fleet value: " + totalCurrValue + " / " + totalBaseValue + 
-    " CP <span class='turnTaken'>" + turnTaken + "</span></span>"
-);
+    // Update fleet header with value totals
+    fleetlistentry.find(".fleetheader").html(
+        deploys + "<span class='headername'>FLEET LIST - </span>" +
+        "<span class='playername'>" + slot.playername + 
+        " - Fleet Value: " + totalCurrValue + " / " + totalBaseValue + " CP" +
+         "<span class='turnTaken'>" + turnTaken + "</span>"
+    );
 
     // Add ship click handler
     $(".clickable", fleetlistentry).on("click", fleetListManager.doScrollToShip);
@@ -154,8 +162,8 @@ fleetlistentry.find(".fleetheader").html(
         if (!header.length) return; // Just in case something went wrong
 
         const html = slot.waiting
-            ? "<span style='color:green'>&nbsp;(Orders committed)</span>"
-            : "<span style='color:red'>&nbsp;(Not committed orders)</span>";
+            ? "<span style='color:green'>&nbsp;&nbsp;[Orders committed]</span>"
+            : "<span style='color:orange'>&nbsp;&nbsp;[Waiting for Orders]</span>";
 
         header.html(html);
     },
@@ -195,13 +203,18 @@ fleetlistentry.find(".fleetheader").html(
     updateFleetList: function updateFleetList() {
         for (var i in gamedata.ships) {
             var ship = gamedata.ships[i];
-
+            var name = ship.name;
             if (shipManager.isDestroyed(ship)) {
                 // Remove action listener and make everything italic to indicate the
                 // ship was destroyed.
                 $("#" + ship.id + " .shipname").removeClass("clickable");
-                $("#" + ship.id).addClass("destroyed");
-                $("#" + ship.id + " .initiative").html("Destroyed");
+                if(shipManager.hasJumpedNotDestroyed(ship)){
+                    $("#" + ship.id).addClass("jumped");
+                    $("#" + ship.id + " .initiative").html("Jumped");                     
+                } else {                
+                    $("#" + ship.id).addClass("destroyed");
+                    $("#" + ship.id + " .initiative").html("Destroyed");                    
+                }
             }
         }
     },

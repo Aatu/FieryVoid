@@ -6,7 +6,7 @@ class MovementGamePhase implements Phase
     {
         //Have to load new gamedata, because the old object does not have moves for ships that were just submitted
         foreach ($dbManager->getTacGamedata($gameData->forPlayer, $gameData->id)->ships as $ship) {
-            if ($ship->isDestroyed() || $ship->base || $ship->smallBase || $ship->isTerrain() || ($ship->getTurnDeployed($gameData->phase) > $gameData->turn))  {
+            if ($ship->isDestroyed() || $ship->base || $ship->smallBase || $ship->isTerrain() || ($ship->getTurnDeployed($gameData) > $gameData->turn))  {
                 continue;
             }
 
@@ -21,9 +21,9 @@ class MovementGamePhase implements Phase
         $dbManager->setPlayersWaitingStatusInGame($gameData->id, false);
 
         foreach($gameData->slots as $slot){
-            //if(!$gameData->areDeployedShipsSlot($slot->slot)){
-            if($slot->depavailable > $gameData->turn){
-                $dbManager->updatePlayerStatusSlot($gameData->id, $slot->playerid, $slot->slot, 3, $gameData->turn);
+            $minTurnDeploy = $gameData->getMinTurnDeployedSlot($slot->slot, $slot->depavailable);
+            if($minTurnDeploy > $gameData->turn || ($slot->surrendered !== null && $slot->surrendered <= $gameData->turn)){ //Slot has no units deployed or has surrendered.
+                $dbManager->updatePlayerSlotPhase($gameData->id, $slot->playerid, $slot->slot, 3, $gameData->turn);
             }     
         }   
                   
@@ -96,7 +96,7 @@ class MovementGamePhase implements Phase
         $firstship = null;
         foreach ($gameData->ships as $ship){
             if($ship->isTerrain()) continue; //Ignore terrain like asteroids.
-            if($ship->getTurnDeployed($gameData->phase) > $gameData->turn) continue;
+            if($ship->getTurnDeployed($gameData) > $gameData->turn) continue;
             if ($firstship == null)
                 $firstship = $ship;
 

@@ -1,8 +1,7 @@
 <?php
 class HyachAlichiTal extends HeavyCombatVessel{
-
+    public $HyachSpecialists;
     public $submarine = true;
-
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
 
@@ -17,7 +16,7 @@ class HyachAlichiTal extends HeavyCombatVessel{
         $this->gravitic = true;
         $this->limited = 33;
         $this->notes = "Stealth ship (see FAQ)";
-        $this->notes .= "<br>Turning in reverse costs +33% thrust";   
+        $this->notes .= "<br>Turning in reverse costs +33% thrust";
 		
         $this->fighters = array("assault shuttles"=>12);
 		

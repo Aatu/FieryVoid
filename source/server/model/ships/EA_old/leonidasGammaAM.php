@@ -5,7 +5,7 @@ class LeonidasGammaAM extends OSAT{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 150;
-		$this->faction = 'Earth Alliance (early)';//"EA defenses";
+        $this->faction = "Earth Alliance (Early)";
         $this->phpclass = "LeonidasGammaAM";
         $this->imagePath = "img/ships/hector.png";
         $this->shipClass = 'Leonidas Satellite (Gamma)';

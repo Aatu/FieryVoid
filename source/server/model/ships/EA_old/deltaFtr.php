@@ -5,9 +5,9 @@ class DeltaFtr extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 150;
-	$this->faction = "Earth Alliance (early)";
+        $this->faction = "Earth Alliance (Early)";
         $this->phpclass = "DeltaFtr";
-        $this->shipClass = "EA/BA Delta Multi-Role Light Fighters";
+        $this->shipClass = "Delta Multi-Role Light Fighters";
 	$this->imagePath = "img/ships/deltaV.png";
 	    $this->isd = 2158;
  		$this->unofficial = 'S'; //HRT design released after AoG demise

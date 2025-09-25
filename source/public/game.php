@@ -1,7 +1,6 @@
-<?php 
-    ob_start("ob_gzhandler"); 
-    include_once 'global.php';
-    
+<?php
+    require_once 'global.php'; // ✅ Critical dependency
+
 	$gameid = 1;
 	$thisplayer = -1;
 
@@ -40,7 +39,7 @@
     <link href="styles/shipTooltip.css" rel="stylesheet" type="text/css">
 <!--	<link href="styles/helper.css" rel="stylesheet" type="text/css">-->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
-    <script src="http://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
             integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU="
             crossorigin="anonymous"></script>
     <script src="client/lib/three.min.js"></script>
@@ -229,8 +228,8 @@
     <script src="client/model/weapon/aoe.js"></script>
     <script src="client/model/weapon/molecular.js"></script>
     <script src="client/model/weapon/antimatter.js"></script>
-    <script src="client/model/weapon/dualWeapon.js"></script>
-    <script src="client/model/weapon/duoWeapon.js"></script>
+    <!--<script src="client/model/weapon/dualWeapon.js"></script>-->
+    <!--<script src="client/model/weapon/duoWeapon.js"></script>-->
     <script src="client/model/weapon/gravitic.js"></script>
     <script src="client/model/weapon/missile.js"></script>
     <script src="client/model/weapon/ion.js"></script>
@@ -785,6 +784,3 @@
 
 </html>
 
-<?php 
-    ob_end_flush();
-?>

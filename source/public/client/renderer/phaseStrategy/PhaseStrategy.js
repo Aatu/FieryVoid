@@ -29,6 +29,8 @@ window.PhaseStrategy = function () {
         this.onDoneCallback = null;
 
         this.systemInfoState = null;
+        this._lastHoveredHex = null;
+        this._startHexRuler = null;
 
         this.uiManager = new window.UIManager($("body")[0]);
     }
@@ -201,14 +203,30 @@ window.PhaseStrategy = function () {
         }
     };
 
-    PhaseStrategy.prototype.onHexClicked = function (payload) {};
+    PhaseStrategy.prototype.onHexClicked = function (payload) {
+        if (gamedata.showLoS) { 
+            if(payload.button == 2){ //Right click, just clear and reset to this.selectedShip
+                this._startHexRuler = null; //reset.
+                mathlib.clearLosSprite();                 
+            }else{
+                this._startHexRuler = null; //reset start point on any other type of click
+                mathlib.clearLosSprite();                   
+                this._startHexRuler = payload.hex;
+            }    
+        }
+    };
 
     PhaseStrategy.prototype.onShipsClicked = function (ships, payload) {
         
         // Filter out ships that are not yours or your team's + are stealth ships + not detected + not deployed yet.
         const filteredShips = ships.filter(ship => 
-            !(shipManager.shouldBeHiddenTeam(ship))
+            !(shipManager.shouldBeHidden(ship))
         );
+
+        if (gamedata.showLoS) { 
+            this._startHexRuler = payload.hex;
+            mathlib.clearLosSprite();                   
+        }  
 
         if(filteredShips.length === 1){ //only one ship, we have to pretend the stealth ship(s) aren't on same hex!
             var ship = filteredShips[0];
@@ -223,21 +241,33 @@ window.PhaseStrategy = function () {
     };
 
     PhaseStrategy.prototype.onShipRightClicked = function (ship) {
-        if(shipManager.shouldBeHiddenTeam(ship)) return;  //Enemy, stealth equipped and undetected, or not deployed yet - DK May 2025
+
+        if(shipManager.shouldBeHidden(ship)) return;  //Stealth equipped and undetected enemy, or not deployed yet - DK May 2025
         
         if (this.gamedata.isMyShip(ship)) {
             this.setSelectedShip(ship);
         }
+        //Needs to have a separate method here, since this count as a hex clicked apparently.
+        if (gamedata.showLoS) {         
+            this._startHexRuler = null; //reset start point on right-clicking ship
+            mathlib.clearLosSprite();                   
+        }    
+
         this.shipWindowManager.open(ship);
     };
 
     PhaseStrategy.prototype.onShipClicked = function (ship, payload) {//30 June 2024 - DK - Added for Ally targeting.
-        if(shipManager.shouldBeHidden(ship)) return;  //Enemy, stealth equipped and undetected, or not deployed yet - DK May 2025
+        if(shipManager.shouldBeHidden(ship)) return;  //Stealth equipped and undetected enemy, or not deployed yet - DK May 2025
 
+        if (gamedata.showLoS) { 
+            this._startHexRuler = payload.hex;
+            mathlib.clearLosSprite();                   
+        }     
+        
 		if(this.gamedata.isMyShip(ship) && (!this.gamedata.canTargetAlly(ship))) {
-            this.selectShip(ship, payload);
+            this.selectShip(ship, payload);             
         } else {
-            this.targetShip(ship, payload);
+            this.targetShip(ship, payload);        
         }
     };
 
@@ -274,6 +304,7 @@ window.PhaseStrategy = function () {
 
         this.selectedShip = null;
         this.uiManager.hideWeaponList();
+        if(gamedata.showLoS) mathlib.clearLosSprite();        
     };
 
     PhaseStrategy.prototype.targetShip = function (ship, payload) {
@@ -299,6 +330,30 @@ window.PhaseStrategy = function () {
     PhaseStrategy.prototype.onMouseMoveEvent = function (payload) {
         var icons = getInterestingStuffInPosition.call(this, payload, this.gamedata.turn);
 
+        // Initialize _lastHoveredHex if null
+        if (!this._lastHoveredHex) this._lastHoveredHex = null;
+
+        if (gamedata.showLoS) {
+            // Only update _lastHoveredHex & showLoS if no icons (empty hex hover)
+            if (icons.length === 0) {
+                // Check if hex changed since last hover
+                if (
+                    !this._lastHoveredHex ||
+                    this._lastHoveredHex.q !== payload.hex.q ||
+                    this._lastHoveredHex.r !== payload.hex.r
+                ) {
+                    // Update with a copy of hex coords (avoid referencing the same object)
+                    this._lastHoveredHex = { q: payload.hex.q, r: payload.hex.r };
+
+                    mathlib.showLoS(this._startHexRuler, payload.hex);
+
+                }
+            } else {
+                // If hovering a ship, reset _lastHoveredHex so next hex hover triggers showLoS
+                this._lastHoveredHex = null;
+            }
+        }
+
         function doMouseOut() {
             if (this.currentlyMouseOveredIds) {
                 this.currentlyMouseOveredIds = null;
@@ -310,6 +365,9 @@ window.PhaseStrategy = function () {
             });
 
             this.onMouseOutShips(gamedata.ships, payload);
+
+            // Reset hovered hex to force rerun on next move
+            this._lastHoveredHex = null;
         }
 
         if (icons.length === 0 && this.currentlyMouseOveredIds !== null) {
@@ -344,36 +402,42 @@ window.PhaseStrategy = function () {
     PhaseStrategy.prototype.onMouseOutShips = function (ships, payload) {
         this.showAppropriateHighlight();
         this.showAppropriateEW();
+        
+        if(window.LosSprite) mathlib.clearLosSprite();
     };
 
-PhaseStrategy.prototype.onMouseOverShips = function (ships, payload) {
-    // Filter out ships that are not visible or shouldn't show tooltips
-    const visibleShips = ships.filter(ship => {
-        if(shipManager.shouldBeHidden(ship)) return false;  //Enemy, stealth equipped and undetected, or not deployed yet - DK May 2025
-        return true;
-    });
+    PhaseStrategy.prototype.onMouseOverShips = function (ships, payload) {
+        // Filter out ships that are not visible or shouldn't show tooltips
+        if(gamedata.showLoS) mathlib.showLoS(this._startHexRuler, payload.hex)
 
-    if (visibleShips.length === 0) return;
+        const visibleShips = ships.filter(ship => {
+            if(shipManager.shouldBeHidden(ship)) return false;  //Enemy, stealth equipped and undetected, or not deployed yet - DK May 2025
+            return true;
+        });
 
-    if (this.shipTooltip && this.shipTooltip.isForAnyOf(visibleShips)) {
-        return;
-    }
+        if (visibleShips.length === 0) return;
 
-    if (this.shipTooltip && this.shipTooltip.menu) {
-        return;
-    }
+        if (this.shipTooltip && this.shipTooltip.isForAnyOf(visibleShips)) {
+            return;
+        }
 
-    this.showShipTooltip(visibleShips, payload, null, true);
-};
+        if (this.shipTooltip && this.shipTooltip.menu) {
+            return;
+        }
+
+        this.showShipTooltip(visibleShips, payload, null, true);
+    };
 
     PhaseStrategy.prototype.onMouseOverShip = function (ship, payload) {
+        
+        if(gamedata.showLoS) mathlib.showLoS(this._startHexRuler, payload.hex);
 
         if(shipManager.shouldBeHidden(ship)) return;  //Enemy, stealth equipped and undetected, or not deployed yet - DK May 2025
 
         this.showAppropriateHighlight();
         this.showAppropriateEW();
         
-/*      //trying to allow hex targeting more easily where there are friendly units located.
+      //trying to allow hex targeting more easily where there are friendly units located.
         var menu = null;
         var hasHex = weaponManager.hasHexWeaponsSelected()
         if(hasHex && this.gamedata.isMyorMyTeamShip(ship)) {
@@ -385,16 +449,18 @@ PhaseStrategy.prototype.onMouseOverShips = function (ships, payload) {
                 menu = new ShipTooltipInitialOrdersMenu(this.selectedShip, ship, this.gamedata.turn, position);
             }
         }
-*/
+
         var icon = this.shipIconContainer.getById(ship.id);
         if (!this.shipTooltip || !this.shipTooltip.menu) {
-            this.showShipTooltip(ship, payload, null, true);            
-            //this.showShipTooltip(ship, payload, menu, true);
+            //this.showShipTooltip(ship, payload, null, true);            
+            if(!gamedata.isTerrain(ship.shipSizeClass, ship.userid)) this.showShipTooltip(ship, payload, menu, true);
         }
 
         if (this.shipTooltip && this.shipTooltip.ships.includes(ship) &&  this.shipTooltip.ships.length === 1) {
             this.shipTooltip.update(ship, this.selectedShip);
         }
+        
+
 
         this.showShipEW(ship);
         icon.showSideSprite(true);
@@ -761,10 +827,29 @@ PhaseStrategy.prototype.onMouseOverShips = function (ships, payload) {
         showAllBallisticLines.call(this, gamedata.ships.filter(function(ship){ return !gamedata.isMyOrTeamOneShip(ship) }), payload);
     };        
 
+    PhaseStrategy.prototype.onToggleLoS = function(payload) {
+        if (payload.up) return;
+
+        if (!gamedata.showLoS) {
+            gamedata.showLoS = true;
+            const hex = this._lastHoveredHex || { q: 0, r: 0 };
+            mathlib.showLoS(this._startHexRuler, hex);
+        } else {
+            gamedata.showLoS = false;
+            this._startHexRuler = null; //reset.            
+            mathlib.clearLosSprite();
+        }
+
+        window.dispatchEvent(new CustomEvent("LoSToggled"));
+    };
 
     PhaseStrategy.prototype.onToggleHexNumbers = function (payload) {
+
+        if (payload.up) return; // Prevent repeating on key hold or keyup
+
 	    var scene = webglScene.scene;
 		this.ballisticIconContainer.createHexNumbers(scene);
+        window.dispatchEvent(new CustomEvent("HexNumbersToggled"));
     }; 
 
     function toggleBallisticLines(ships, payload) {

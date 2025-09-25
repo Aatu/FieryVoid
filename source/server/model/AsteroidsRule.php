@@ -16,7 +16,7 @@ class AsteroidsRule implements JsonSerializable {
         return $this->numberOfAsteroids;
     }
 */
-    public function jsonSerialize() {
+    public function jsonSerialize(): mixed {
         return $this->numberOfAsteroids;
     }
 

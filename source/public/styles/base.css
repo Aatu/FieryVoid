@@ -44,9 +44,11 @@ a.link:hover
 }
 
 .subpanel{
-	padding:5px;
+	padding:2px;
 	background-color:#04161C;
 	border:1px solid #37465a;
+  	border-radius: 5px;	
+	margin-top: 2px;	
 }
 
 .panel.news {
@@ -62,6 +64,19 @@ a.link:hover
 	margin:0px auto 10px auto;
 }
 
+.panel.large.create{
+	width:1000px;
+	margin:0px auto 10px auto;
+	background: rgba(23, 39, 54, 0.9); 
+	border: 1px solid #215a7a;
+}
+
+.panel.large.lobby{
+	width:1300px;
+	margin:0px auto 10px auto;
+	background: rgba(23, 39, 54, 0.9); 
+	border: 1px solid #215a7a;
+}
 
 .panelheader{
 	font-size:20px;
@@ -71,13 +86,15 @@ a.link:hover
 .panelsubheader{
 	font-size:20px;
 /*	color:#496791; Seemed a bit too dark to read well - DK */
-	color:#6896d2;
+
+	color: #DEEBFF;	
 }
 
 .panelsmall {
-    font-size:14px; /* Reduces the font size to 80% of the original */
+    font-size:15px; 
 /*    color: #00caca;    Example color (cyan), choose your desired color */
-	color: #DEEBFF;
+    color: #81a7ec; 
+	font-weight: 525;
 }
 
 a{
@@ -101,9 +118,9 @@ a:hover{
     align-items: flex-start; /* Vertically aligns elements */
 }
 
-.depheightheader, .depheight {
+.depheightheader, .depwidthheader, .depheight {
     margin: 0; /* Reset margins */
-    margin-right: 10px; 
+    margin-right: 0px; 
 }
 
 span.clickable.close {
@@ -117,3 +134,8 @@ input[type="checkbox"] {
     position: relative;
     top: 2px;
 }
+
+input[type="checkbox"].yellow-tick:checked {
+    accent-color: yellow;
+}
+

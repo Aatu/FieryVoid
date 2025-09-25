@@ -9,8 +9,7 @@ class alanti extends OSAT{
         $this->phpclass = "alanti";
         $this->imagePath = "img/ships/AbbaiAlanti.png";
         $this->shipClass = 'Alanti Defense Satellite';
-        $this->canvasSize = 100;
-	    $this->unofficial = 'S'; //Semi-official - added as reasonably close to official.  Comm Disruptor has replaced Shield Projector.     
+        $this->canvasSize = 100;    
 
         $this->isd = 2230;
 

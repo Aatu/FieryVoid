@@ -36,15 +36,16 @@ class FireGamePhase implements Phase
 		
         $dbManager->setPlayersWaitingStatusInGame($servergamedata->id, false);
 
-        foreach($gameData->slots as $slot){
-            //$minTurnDeploy = $gameData->getMinTurnDeployedSlot($slot->slot); //Could change to depavailable if I set that during deployment.
-            //if($minTurnDeploy > $gameData->turn+1){ //Entire slot deploys after turn 1.
-            if($slot->depavailable > $gameData->turn+1){            
-                //Set lastphase, and lastTurn for slot to intial phase on next turn. 
-                $dbManager->updatePlayerStatusSlot($gameData->id, $slot->playerid, $slot->slot, 1, $gameData->turn+1);
-            }     
+       //Checks for late-deploying slots to see if next phases skipped - DK 
+       foreach($gameData->slots as $slot){           
+            if ($slot->depavailable == $gameData->turn+1){
+                //Slot is deploying next turn, ensure that database know it completed this Firing Phase
+                $dbManager->updatePlayerSlotPhase($gameData->id, $slot->playerid, $slot->slot, 3, $gameData->turn);                
+            }else {
+                //If not deploying next turn, set slot to skip that phase.  Manager::changeTurn always tries to create new Deplyment Phase.
+                $dbManager->updatePlayerSlotPhase($gameData->id, $slot->playerid, $slot->slot, -1, $gameData->turn+1);                
+            }        
         } 
-
     }
 
     public function process(TacGamedata $gameData, DBManager $dbManager, Array $ships)
@@ -65,9 +66,7 @@ class FireGamePhase implements Phase
                 $dbManager->submitFireorders($gameData->id, $ship->getAllFireOrders(), $gameData->turn, $gameData->phase);
             }
 
-        }
-		
-		
+        }		
 
         $dbManager->updatePlayerStatus($gameData->id, $gameData->forPlayer, $gameData->phase, $gameData->turn);
         $dbManager->setPlayerWaitingStatus($gameData->forPlayer, $gameData->id, true);

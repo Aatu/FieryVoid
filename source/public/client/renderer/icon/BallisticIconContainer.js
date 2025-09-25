@@ -71,13 +71,15 @@ window.BallisticIconContainer = function () {
     }
 
     function generateTerrainHexes(gamedata) {
-        if (gamedata.gamephase === -1) return;
+        if (gamedata.gamephase === -1) return; //Don't bother during Deployment phase.
 
         gamedata.ships.filter(ship => ship.Huge > 0).forEach(ship => {
             const position = shipManager.getShipPosition(ship);
-            const perimeterHexes = (ship.Huge === 2)
+            /*const perimeterHexes = (ship.Huge === 2)
                 ? mathlib.getPerimeterHexes(position, ship.Huge)
                 : mathlib.getNeighbouringHexes(position, ship.Huge);
+			*/
+			const perimeterHexes = mathlib.getPerimeterHexes(position, ship.Huge); //Position + radius passed.
 
             perimeterHexes.forEach(neighbour => {
                 const pos = this.coordinateConverter.fromHexToGame(neighbour);
@@ -99,14 +101,15 @@ window.BallisticIconContainer = function () {
     }
 
     function generateReinforcementHexes(gamedata) {
+ 		if(gamedata.gamephase == -1) return;
+
         gamedata.ships
-            .filter(ship => shipManager.getTurnDeployed(ship) > gamedata.turn)
-            .filter(ship => gamedata.isMyorMyTeamShip(ship))
+            .filter(ship => shipManager.getTurnDeployed(ship) == gamedata.turn && gamedata.turn > 1 && !shipManager.shouldBeHidden(ship))
             .forEach(ship => {
-                const pos = shipManager.getShipPosition(ship);
+				const pos = shipManager.movement.getPositionAtStartOfTurn(ship, gamedata.turn);
+
                 const posGame = this.coordinateConverter.fromHexToGame(pos);
-                const turnDeploys = shipManager.getTurnDeployed(ship);
-                const sprite = new BallisticSprite(posGame, "hexBlue", `Deploys on Turn ${turnDeploys}`);
+                const sprite = new BallisticSprite(posGame, "hexBlue", `Reinforcement`);
                 this.scene.add(sprite.mesh);
 
                 this.ballisticIcons.push({
@@ -121,12 +124,40 @@ window.BallisticIconContainer = function () {
                 });
             });
     }
+	
+
+	function generateSplashHexes(id, position, shooterid, targetid, size, type) {
+
+			let targetHex = this.coordinateConverter.fromGameToHex(position);
+			const perimeterHexes = mathlib.getPerimeterHexes(targetHex, size); //Position + radius passed.
+
+            perimeterHexes.forEach(neighbour => {
+                const pos = this.coordinateConverter.fromHexToGame(neighbour);
+                const sprite = new BallisticSprite(pos, type);
+				sprite.uniforms.opacity.value = 0.7; //Make them a bit less bright than main hex sprites.
+				
+                this.scene.add(sprite.mesh);
+
+                this.ballisticIcons.push({
+                    id: -4,
+                    shooterId: shooterid,
+                    targetId: targetid,
+                    launchPosition: neighbour,
+                    position: new hexagon.Offset(pos.x, pos.y),
+                    launchSprite: sprite,
+                    targetSprite: sprite,
+                    used: true,
+					splash: true
+                });
+            });
+    }
 
 
     function createOrUpdateBallistic(ballistic, iconContainer, turn, replay = false) {
         const icon = getBallisticIcon.call(this, ballistic.id);
-
-        if (icon && !['PersistentEffect', 'Split'].includes(ballistic.notes)) {
+		
+		//Sometimes need to force creation of hex sprites, e.g. for persistent effects or splash damage.
+        if (icon && !['PersistentEffect', 'Split'].includes(ballistic.notes) && !icon.splash) { 
             updateBallisticIcon.call(this, icon, ballistic, iconContainer, turn);
         } else {
             createBallisticIcon.call(this, ballistic, iconContainer, turn, this.scene, replay);
@@ -164,6 +195,21 @@ window.BallisticIconContainer = function () {
 			modeName = weapon?.firingModes?.[ballistic.firingMode] || null;
 		}
 
+		let targetPosition = null;
+		let targetIcon = null;
+		let splash = false;
+
+		if (ballistic.targetid === -1 && ballistic.x !== "null" && ballistic.y !== "null") {
+			targetPosition = this.coordinateConverter.fromHexToGame(new hexagon.Offset(ballistic.x, ballistic.y));
+		} else if (ballistic.targetid && ballistic.targetid !== -1) {
+			targetIcon = iconContainer.getById(ballistic.targetid);
+			targetPosition = { x: 0, y: 0 }; // placeholder — the mesh will handle it
+		}
+
+		if (!shooter.flight && weapon?.noTargetHexIcon) {
+			targetPosition = launchPosition;
+		}
+
 		// Mode-specific icon logic
 		if (modeName) {
 			const modeMap = {
@@ -184,38 +230,55 @@ window.BallisticIconContainer = function () {
 				targetType = match.type;
 				text = match.text || text;
 				textColour = match.color || textColour;
+
+			// Call splash hex generation for cases where weapon affects more than one hex
+			if (['Shredder', 'Energy Mine', 'Ion Storm', 'Jammer'].includes(modeName)) {
+				if (gamedata.thisplayer === shooter.userid || replay) {
+					let sizes = [];
+
+					switch (modeName) {
+						case 'Ion Storm':
+							sizes = [1, 2];
+							break;
+						case 'Jammer':
+							sizes = [5];
+							break;
+						default: // Shredder / Energy Mine
+							sizes = [1];
+					}
+
+					sizes.forEach(size => {
+						generateSplashHexes.call(
+							this,
+							ballistic.id,
+							targetPosition,
+							ballistic.shooterid,
+							ballistic.targetid,
+							size,
+							match.type
+						);
+					});
+
+					splash = true;
+				}
+			}
+			}
+
+			// Damage class-based override logic
+			if (ballistic.damageclass && modeName) {
+				switch (ballistic.damageclass) {
+					case 'MultiModeHex':
+						targetType = 'hexRed';
+						text = modeName;
+						textColour = '#e6140a';
+						break;
+					case 'support':
+						targetType = 'hexGreen';
+						iconImage = './img/allySupport.png';
+						break;
+				}
 			}
 		}
-
-		// Damage class-based override logic
-		if (ballistic.damageclass && modeName) {
-			switch (ballistic.damageclass) {
-				case 'MultiModeHex':
-					targetType = 'hexRed';
-					text = modeName;
-					textColour = '#e6140a';
-					break;
-				case 'support':
-					targetType = 'hexGreen';
-					iconImage = './img/allySupport.png';
-					break;
-			}
-		}
-
-		let targetPosition = null;
-		let targetIcon = null;
-
-		if (ballistic.targetid === -1 && ballistic.x !== "null" && ballistic.y !== "null") {
-			targetPosition = this.coordinateConverter.fromHexToGame(new hexagon.Offset(ballistic.x, ballistic.y));
-		} else if (ballistic.targetid && ballistic.targetid !== -1) {
-			targetIcon = iconContainer.getById(ballistic.targetid);
-			targetPosition = { x: 0, y: 0 }; // placeholder — the mesh will handle it
-		}
-
-		if (!shooter.flight && weapon?.noTargetHexIcon) {
-			targetPosition = launchPosition;
-		}
-
 		// LAUNCH SPRITE
 		let launchSprite = null;
 		if (
@@ -250,7 +313,8 @@ window.BallisticIconContainer = function () {
 			position: new hexagon.Offset(ballistic.x, ballistic.y),
 			launchSprite,
 			targetSprite,
-			used: true
+			used: true,
+			splash: true
 		});
 	}
 		
@@ -492,35 +556,41 @@ window.BallisticIconContainer = function () {
 
 	//Called during movement phase to recreate lines after a target ship moves.
     BallisticIconContainer.prototype.updateLinesForShip = function (ship, iconContainer) {
-        let visible = false;
 
-        this.ballisticLineIcons = this.ballisticLineIcons.filter(icon => {
-            if (icon.targetId === ship.id) {
-                if (icon.lineSprite.isVisible) visible = true;
-                this.scene.remove(icon.lineSprite.mesh);
-                icon.lineSprite.destroy();
-                return false;
+		var wasVisibleTarget = false; //Variable to track if destroyed lines were visible. If one was, they all were.
+		
+		this.ballisticLineIcons = this.ballisticLineIcons.filter((lineIcon) => {
+			// Destroy lines where the ship is the target.
+			if (lineIcon.targetId === ship.id) {
+			    if (lineIcon.lineSprite.isVisible) wasVisibleTarget = true;
+			    this.scene.remove(lineIcon.lineSprite.mesh);
+			    lineIcon.lineSprite.destroy();
+			    return false;
+			}else{		    
+		    	return true;
+			}
+		});
+
+		//Now recreate line using usual method.
+        var allBallistics = weaponManager.getAllFireOrdersForAllShipsForTurn(gamedata.turn, 'ballistic');			
+		allBallistics.forEach(function (ballistic) {
+			if (ship.id === ballistic.targetid) {				
+				createOrUpdateBallisticLines.call(this, ballistic, iconContainer, gamedata.turn);
+			}
+		}, this);
+
+		//Check if lines were visible and if so continue to show.
+        this.ballisticLineIcons.forEach(function (lineIcon) {
+            if (lineIcon.targetId === ship.id) {
+	            if(!wasVisibleTarget){
+	            	lineIcon.lineSprite.hide();
+	            	lineIcon.lineSprite.isVisible = false;	 	            
+            	}else{
+	            	lineIcon.lineSprite.show();
+	            	lineIcon.lineSprite.isVisible = true;	            		
+				}
             }
-            return true;
-        });
-
-        const allBallistics = weaponManager.getAllFireOrdersForAllShipsForTurn(gamedata.turn, 'ballistic');
-        allBallistics.forEach(ballistic => {
-            if (ballistic.targetid === ship.id) {
-                createOrUpdateBallisticLines.call(this, ballistic, iconContainer, gamedata.turn);
-            }
-        });
-
-        if (visible) {
-            this.ballisticLineIcons.forEach(icon => {
-                if (icon.targetId === ship.id && icon.lineSprite) {
-                    icon.lineSprite.show();
-                    icon.lineSprite.isVisible = true;
-                }
-            });
-        }
-
-        return this;
+        });        
     };
 
     function getBallisticLineIcon(id) {

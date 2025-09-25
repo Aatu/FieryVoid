@@ -1,6 +1,7 @@
 #replayUI {
     z-index:9999;
     border:1px solid #496791;
+    border-radius: 8px;
     color:#deebff;
     background-color:#0a3340;
     position:absolute;

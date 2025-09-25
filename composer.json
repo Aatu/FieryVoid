@@ -1,6 +1,5 @@
 {
   "require-dev": {
-    "theseer/autoload": "^1.22",
-    "phpunit/phpunit": "^6"
+    "theseer/autoload": "^1.29.3"
   }
 }

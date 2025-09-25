@@ -15,8 +15,6 @@ class pirocia extends StarBaseSixSections
 		$this->fighters = array("normal" => 36);
 		$this->isd = 2230;
 
-		
-	    $this->unofficial = 'S'; //Semi-official - added as reasonably close to official Pirocia, with Shield Projectors replaced with Comms Disruptors
      
 		$this->shipSizeClass = 3;
 		$this->Enormous = true;

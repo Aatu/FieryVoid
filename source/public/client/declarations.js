@@ -461,7 +461,7 @@ window.declarations = {
         }
     }
     //actual data
-    newText += gamedata.description;
+	newText += gamedata.description.replace(/\n/g, "<br>");
     
     //display text
     var targetDiv = document.getElementById("declarationsActual"); 

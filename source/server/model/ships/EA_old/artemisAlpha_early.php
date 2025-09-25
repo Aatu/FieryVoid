@@ -6,7 +6,7 @@ class ArtemisAlpha_early extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 475;
-        $this->faction = "Earth Alliance (early)";
+        $this->faction = "Earth Alliance (Early)";
         $this->phpclass = "ArtemisAlpha_early";
         $this->imagePath = "img/ships/artemis.png";
         $this->shipClass = "Artemis Heavy Frigate (Alpha)";

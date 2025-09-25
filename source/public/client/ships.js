@@ -516,7 +516,7 @@ window.shipManager = {
         return false;
     },
 
-	//Used by RelayAnimationStrategy to check if ship has jumped, if so different destroyed sprite
+	//Used by RelayAnimationStrategy/fleetList to check if ship has jumped, if so different destroyed sprite/entry
 	hasJumpedNotDestroyed: function (ship) {
 		var hasJumped = false;
 	    // Check if the ship has a jump engine
@@ -527,9 +527,9 @@ window.shipManager = {
 	        return false;
 	    }
 	    
-	    // Check if the jump engine is boosted
-	    var boostedJump = shipManager.power.isBoosted(ship, jumpEngine);
-	    if(!boostedJump) return false; //Hasn't boosted jump engine, it cannot have jumped.
+	   // Check if the jump engine is boosted
+	   //var boostedJump = shipManager.power.isBoosted(ship, jumpEngine);
+	   //if(!boostedJump) return false; //Hasn't boosted jump engine, it cannot have jumped.
 	    	
 		//Check damage entries, and remove Hyperspace jump entry, to see if ship was 'destroyed' by jumping not actual damage.	    
 		var struct = shipManager.systems.getStructureSystem(ship, 0);
@@ -567,21 +567,23 @@ window.shipManager = {
                 if (shipManager.systems.isDestroyed(ship, stru)) {
                     return true;
                 }
-
-                var react = shipManager.systems.getSystemByName(ship, "reactor");
-                if (shipManager.systems.isDestroyed(ship, react)) {
-                    return true;
-                }
+                if(!gamedata.isTerrain(ship.shipSizeClass, ship.userid)){
+                    var react = shipManager.systems.getSystemByName(ship, "reactor");
+                    if (shipManager.systems.isDestroyed(ship, react)) {
+                        return true;
+                    }
+                }    
             } else {
                 var stru = shipManager.systems.getStructureSystem(ship, 0);
                 if (shipManager.systems.isDestroyed(ship, stru)) {
                     return true;
                 }
-
-                var mainReactor = shipManager.systems.getSystemByNameInLoc(ship, "reactor", 0);
-                if (shipManager.systems.isDestroyed(ship, mainReactor)) {
-                    return true;
-                }
+                if(!gamedata.isTerrain(ship.shipSizeClass, ship.userid)){
+                    var mainReactor = shipManager.systems.getSystemByNameInLoc(ship, "reactor", 0);
+                    if (shipManager.systems.isDestroyed(ship, mainReactor)) {
+                        return true;
+                    }
+                }    
             }
         }
 
@@ -785,6 +787,7 @@ window.shipManager = {
 		return 1;
     },
 
+    //Only used for Deployment checks to prevent ships deploying on same hex (or now allow for later Deployments) - DK
     getShipsInSameHex: function getShipsInSameHex(ship, pos1) {
 
         if (!pos1) var pos1 = shipManager.getShipPosition(ship);
@@ -795,13 +798,32 @@ window.shipManager = {
 
             if (shipManager.isDestroyed(ship2)) continue;
 
-            //if (ship.id = ship2.d)
-            //  continue;
+            //Let's allow ships that deploy on later turns to deploy on same hex as existing units - DK
+            var depTurn = shipManager.getTurnDeployed(ship2);            
+            if (depTurn !== gamedata.turn && !ship2.Enormous) continue;
 
             var pos2 = shipManager.getShipPosition(ship2);
 
+            //But never let ships Deployment on unoccupied parts of Huge terrain.
+            if(ship2.Huge > 0 && ship2.Huge <= 3){ //Between 1 and 3, Moons basically - DK
+                //var s2pos = shipManager.getShipPosition(ship2);
+                var distance = pos1.distanceTo(pos2);
+                if(distance > 0 && distance <= ship2.Huge){ 
+                    shipsInHex.push(ship2);
+                    confirm.error("You cannot deploy on terrain.");                                         
+                }    
+            }
+
+            //if (ship.id = ship2.d)
+            //  continue;
+
             if (pos1.equals(pos2)) {
-                shipsInHex.push(ship2);
+                if(gamedata.isTerrain(ship2.shipSizeClass, ship2.userid)){
+                    shipsInHex.push(ship2);
+                    confirm.error("You cannot deploy on terrain.");  
+                }else{
+                    shipsInHex.push(ship2);
+                }    
             }
         }
 
@@ -977,39 +999,32 @@ window.shipManager = {
         return false;
     },
     
-    //Sometimes things SHOULDN'T be hidden from own team, e.g. right clicking on Reinforcements before they arrive.
-    shouldBeHiddenTeam: function(ship) {
-        var myTeam = gamedata.isMyorMyTeamShip(ship);     
-        if(shipManager.getTurnDeployed(ship) > gamedata.turn && !myTeam) return true; //Not deployed yet.
-        if(!myTeam && shipManager.isStealthShip(ship) && !shipManager.isDetected(ship)) return true; //Enemy, stealth ship and not currently detected. Always hide.        
-        return false;
-    },
-    
+
     getTurnDeployed: function getTurnDeployed(ship) {
-        //Don't hide anything in Deployment Phase.  
-        if (gamedata.gamephase == -1){
-            if(!ajaxInterface.submiting){ //We check ajaxInterface.submitting to make sure ship icons update after committing Deployment where whole slot is delayed.
-                return 1;
-            }else{
-                var slot = playerManager.getSlotById(ship.slot);
-                return Math.max(ship.deploysOnTurn, slot.depavailable);
-            }    
+          
+        if(ship.osat || ship.base || gamedata.isTerrain(ship.shipSizeClass, ship.userid)) {
+            return 1; //Bases and OSATs never 'jump in', returns Turn 1.
+        }else{    
+           //return Math.max(ship.deploysOnTurn, slot.depavailable);
+            var slot = playerManager.getSlotById(ship.slot);
+            var depTurn = slot.depavailable;
+
+        if(slot.surrendered !== null){
+            if(slot.surrendered <= gamedata.turn){ //Surrendered on this turn or before.
+                    depTurn = 999; //Artifically high number, so surrendered ships are no longer shown by game until one full team has surrendered! - DK
+            }
         }    
-        if(ship.osat || ship.base || gamedata.isTerrain(ship.shipSizeClass, ship.userid)) { //Bases and OSATs never 'jump in', it's no LoGH out there ;)
-            return 1;
-        }else{
-            return ship.deploysOnTurn;            
+            return depTurn;                       
         }     
     },    
- 
 
-    //True or false function, e.g. for possible use after Deployment Phase commit to reload window if needed (so icons appear correctly).
+
+    //True or false function, e.g. for possible use in Deployment Phase to show commit button in case needed.
     playerHasDeployedShips: function playerHasDeployedShips(playerid) {
        for (const ship of gamedata.ships) {
             if(ship.userid !== playerid) continue;
     
-            var slot = playerManager.getSlotById(ship.slot);
-            var deploys = Math.max(ship.deploysOnTurn, slot.depavailable);
+            var deploys = shipManager.getTurnDeployed(ship);
             if(deploys <= gamedata.turn) return true;
         }
         return false;         

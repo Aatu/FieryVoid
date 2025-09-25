@@ -310,7 +310,7 @@ class ShieldReinforcement extends Weapon{
 		if($this->isDestroyed($gamedata->turn)) return;
 		if($this->isOfflineOnTurn($gamedata->turn)) return;			
 		$ship = $this->getUnit();
-		$deployTurn = $ship->getTurnDeployed($gamedata->phase);
+		$deployTurn = $ship->getTurnDeployed($gamedata);
 		if($deployTurn > $gamedata->turn) return;  //Ship not deployed yet, don't fire weapon!
 
 	    // Get all firing orders for the current turn

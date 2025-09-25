@@ -136,8 +136,8 @@ CnC.prototype.constructor = CnC;
 
 CnC.prototype.initializationUpdate = function() {
     var ship = this.ship;
-    if(ship.factionAge > 2){
-        this.data["Marine Units"] = 'n/a';	
+    if(ship.factionAge > 2 || gamedata.isTerrain(ship.shipSizeClass, ship.userid)){
+        this.data["Marine Units"] = 'N/A';	
     } else {	
         this.data["Marine Units"] = this.marines || 0; // Ensure marines is defined
     }
@@ -331,11 +331,21 @@ AdaptiveArmorController.prototype.constructor = AdaptiveArmorController;
 
 AdaptiveArmorController.prototype.initializationUpdate = function () {
 	var ship = this.ship;
-	//var deployTurn = shipManager.getTurnDeployed(ship);
-	//this.deploymentTurn = deployTurn;
 
+	var deployTurn = 1;
+	if(gamedata.gamephase == -2){//Buying phase
+		var currSlot = playerManager.getSlotById(gamedata.selectedSlot);		
+		deployTurn = currSlot.depavailable;	
+	}else{
+		var currSlot = 0;
+		for(var i in gamedata.ships){
+			var checkShip = gamedata.ships[i];
+			if(ship.flightid == checkShip.id) ship = checkShip;
+		}		
+		deployTurn = shipManager.getTurnDeployed(ship);	
+	}	
 	//If a ship deploys later in game, it DOES get a chance to pre-allocate.
-	if(gamedata.turn <= shipManager.getTurnDeployed(ship) && this.pressignedReset == false)  {
+	if(gamedata.turn <= deployTurn && this.pressignedReset == false)  {
 		this.AApreallocated_used = 0 + this.AAtotal_used; //Reset but since propagation can still be done in previous turns, so add total used. 
 		this.data[" - Pre-assigned remaining"] =  this.AApreallocated - this.AApreallocated_used; //Update system data window.			
 		this.pressignedReset = true; //Only do this once.
