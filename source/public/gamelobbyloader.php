@@ -14,24 +14,22 @@ session_write_close();
 if (!$playerid) {
     http_response_code(401);
     echo json_encode(['error' => 'Not logged in.']);
-    ob_end_flush();
     exit;
 }
 
+$input = [];
 // Accept JSON POST body if present
 if ($_SERVER['REQUEST_METHOD'] === 'POST' &&
     strpos($_SERVER['CONTENT_TYPE'] ?? '', 'application/json') !== false) {
     $input = json_decode(file_get_contents('php://input'), true) ?? [];
-    $_POST = $input;
 }
 
 // Retrieve faction parameter from either GET or POST (POST preferred)
-$factionRequest = $_POST['faction'] ?? $_GET['faction'] ?? null;
+$factionRequest = $input['faction'] ?? $_POST['faction'] ?? $_GET['faction'] ?? null;
 
 if (!$factionRequest) {
     http_response_code(400);
     echo json_encode(['error' => 'Missing faction parameter']);
-    ob_end_flush();
     exit;
 }
 

@@ -6,14 +6,26 @@ window.ajaxInterface = {
     pollActive: false,
     pollcount: 0,
     submiting: false,
+    queue: [],
+    queuedFactions: new Set(), // track what’s already in queue    
+    currentFaction: null,
+    lastRequestTime: {},   // track last request time per faction
+    debounceDelay: 200,    // ms
 
+    processNext: function() {
+        if (ajaxInterface.submiting || this.queue.length === 0) return;
 
-    //NEW VERSION FOR PHP 8    
-    getShipsForFaction: function getShipsForFaction(factionRequest, getFactionShipsCallback) {
+        const { factionRequest, callback } = this.queue.shift();
+        this.queuedFactions.delete(factionRequest);
+        this.currentFaction = factionRequest;
+        ajaxInterface.submiting = true;
+
+        console.log("Requesting faction:", factionRequest);
+
         fetch('gamelobbyloader.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ faction: factionRequest })
+            body: JSON.stringify({ faction: String(factionRequest) })
         })
         .then(response => {
             if (!response.ok) throw new Error('Network response was not ok');
@@ -21,12 +33,66 @@ window.ajaxInterface = {
         })
         .then(data => {
             if (data.error) {
+                this.errorAjax(null, null, data.error);
+                return;
+            }
+            callback(data);
+        })
+        .catch(error => {
+            this.errorAjax(null, null, error.message);
+        })
+        .finally(() => {
+            ajaxInterface.submiting = false;
+            this.currentFaction = null;
+            this.processNext(); // strictly process one after the other
+        });
+    },
+
+
+    getShipsForFaction: function(factionRequest, callback) {
+        // skip if faction is currently processing
+        if (factionRequest === this.currentFaction) return;
+
+        // skip if faction is already queued
+        if (this.queuedFactions.has(factionRequest)) return;
+
+        this.queue.push({ factionRequest, callback });
+        this.queuedFactions.add(factionRequest);
+
+        // Only kick off if idle
+        if (!ajaxInterface.submiting) {
+            this.processNext();
+        }
+    },
+
+    //NEW VERSION FOR PHP 8   
+    /* 
+    getShipsForFaction: function getShipsForFaction(factionRequest, getFactionShipsCallback) {
+        if (ajaxInterface.submiting) return;
+
+        ajaxInterface.submiting = true;
+
+        fetch('gamelobbyloader.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ faction: factionRequest })
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('Network response was not ok');
+            ajaxInterface.submiting = false;            
+            return response.json();
+        })
+        .then(data => {
+            if (data.error) {
+                ajaxInterface.submiting = false;                
                 ajaxInterface.errorAjax(null, null, data.error);
                 return;
             }
+            ajaxInterface.submiting = false;            
             getFactionShipsCallback(data);
         })
         .catch(error => {
+            ajaxInterface.submiting = false;            
             ajaxInterface.errorAjax(null, null, error.message);
         });
     },
@@ -34,7 +100,7 @@ window.ajaxInterface = {
     react: function react() {
         alert("callback");
     },
-
+    */
 
     //New version - DK July 2025
     submitGamedata: function submitGamedata() {
@@ -224,8 +290,44 @@ window.ajaxInterface = {
 
         return saveData;
     },
+/*
+	reloadFactions: function reloadFactions(callback) {
+        if (ajaxInterface.submiting) return;
+        ajaxInterface.submiting = true;
 
+		$.ajax({
+			type: 'GET',
+			url: 'getFactions.php',
+			dataType: 'json',    // ✅ Expect JSON
+			cache: false,        // ✅ Avoid stale results in some browsers
+			timeout: 15000       // ✅ Network protection
+		})
+		.done(function (factions, textStatus, xhr) {		
+			ajaxInterface.submiting = false;  
+            // ✅ HTTP status check
+			if (xhr.status !== 200) {
+				console.error(`Failed to load factions. HTTP ${xhr.status}`);
+				window.location.reload(); // fallback
+				return;
+			}
 
+			// ✅ Validate JSON
+			if (!factions || typeof factions !== 'object') {
+				console.error("Invalid factions JSON received:", factions);
+				window.location.reload(); // fallback
+				return;
+			}
+			callback(factions);
+		})
+		.fail(function (xhr, textStatus, errorThrown) {		
+			//let message = errorThrown || textStatus || "Unknown network error";
+			//console.error("Failed to load factions:", message, xhr.responseText);
+            ajaxInterface.submiting = false;  
+			// ✅ Fallback to hard reload to recover
+			window.location.reload();
+		});
+	},    
+*/
 	getSavedFleets: function getSavedFleets(callback) {
         if (ajaxInterface.submiting) return;
         ajaxInterface.submiting = true;
