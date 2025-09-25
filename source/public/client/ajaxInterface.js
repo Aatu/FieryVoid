@@ -290,44 +290,7 @@ window.ajaxInterface = {
 
         return saveData;
     },
-/*
-	reloadFactions: function reloadFactions(callback) {
-        if (ajaxInterface.submiting) return;
-        ajaxInterface.submiting = true;
 
-		$.ajax({
-			type: 'GET',
-			url: 'getFactions.php',
-			dataType: 'json',    // ✅ Expect JSON
-			cache: false,        // ✅ Avoid stale results in some browsers
-			timeout: 15000       // ✅ Network protection
-		})
-		.done(function (factions, textStatus, xhr) {		
-			ajaxInterface.submiting = false;  
-            // ✅ HTTP status check
-			if (xhr.status !== 200) {
-				console.error(`Failed to load factions. HTTP ${xhr.status}`);
-				window.location.reload(); // fallback
-				return;
-			}
-
-			// ✅ Validate JSON
-			if (!factions || typeof factions !== 'object') {
-				console.error("Invalid factions JSON received:", factions);
-				window.location.reload(); // fallback
-				return;
-			}
-			callback(factions);
-		})
-		.fail(function (xhr, textStatus, errorThrown) {		
-			//let message = errorThrown || textStatus || "Unknown network error";
-			//console.error("Failed to load factions:", message, xhr.responseText);
-            ajaxInterface.submiting = false;  
-			// ✅ Fallback to hard reload to recover
-			window.location.reload();
-		});
-	},    
-*/
 	getSavedFleets: function getSavedFleets(callback) {
         if (ajaxInterface.submiting) return;
         ajaxInterface.submiting = true;
