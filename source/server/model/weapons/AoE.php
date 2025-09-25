@@ -81,7 +81,7 @@ public function calculateHit($gamedata, $fireOrder){
 
                 $target = $target->moveToDirection($direction, $dis);
 
-                $fireOrder->pubnotes .= " deviation from " . $fireOrder->x . ' ' . $fireOrder->y;
+                $fireOrder->pubnotes .= " Deviation from " . $fireOrder->x . ' ' . $fireOrder->y;
                 $fireOrder->x = $target->q;
                 $fireOrder->y = $target->r;
                 $fireOrder->pubnotes .= " to " . $fireOrder->x . ' ' . $fireOrder->y . '. ';
