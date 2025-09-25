@@ -130,7 +130,7 @@ public function calculateHit($gamedata, $fireOrder){
     public function getDamageMod($damage, $shooter, $target, $sourceHex, $gamedata)
     {
         $modifiedDmg = parent::getDamageMod($damage, $shooter, $target, $sourceHex, $gamedata);
-        if ($target->Enormous) $modifiedDmg = floor($modifiedDmg / 2);
+        if ($target->Enormous || $target->osat) $modifiedDmg = floor($modifiedDmg / 2);
         return $modifiedDmg;
     }
 
