@@ -43,7 +43,7 @@ class DrakhHeavyRaider extends LCV{
 	//$this->addPrimarySystem(new Scanner(4, 12, 4, 6));
 	$this->addPrimarySystem(new Engine(4, 12, 0, 7, 2));
 	
-	$this->addFrontSystem(new customPhaseDisruptor(3, 0, 0, 300, 60));
+	$this->addFrontSystem(new customPhaseDisruptor(3, 0, 0, 270, 90));
 	
 	$this->addPrimarySystem(new AbsorbtionShield(2,6,4,1,0,360));
 	$this->addPrimarySystem(new Structure( 4, 30));
