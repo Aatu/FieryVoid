@@ -81,25 +81,25 @@ class MoesarBase extends SmallStarBaseFourSections{
 			1=> array(
 				6 => "TAG:Ion Cannon",
 				9 => "TAG:Standard Particle Beam",
-				18 => "TAG:Outer Structure",
+				18 => "Outer Structure",
 				20 => "Primary",
 			),
 			2=> array(
 				6 => "TAG:Ion Cannon",
 				9 => "TAG:Standard Particle Beam",
-				18 => "TAG:Outer Structure",
+				18 => "Outer Structure",
 				20 => "Primary",
 			),	
 			3=> array(
 				6 => "TAG:Ion Cannon",
 				9 => "TAG:Standard Particle Beam",
-				18 => "TAG:Outer Structure",
+				18 => "Outer Structure",
 				20 => "Primary",
 			),
 			4=> array(
 				6 => "TAG:Ion Cannon",
 				9 => "TAG:Standard Particle Beam",
-				18 => "TAG:Outer Structure",
+				18 => "Outer Structure",
 				20 => "Primary",
 			),
 		);

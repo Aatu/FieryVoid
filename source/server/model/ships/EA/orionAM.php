@@ -73,6 +73,14 @@ class OrionAM extends StarBaseSixSections{
 			$min = 0 + ($i*60);
 			$max = 120 + ($i*60);
 
+			$struct = Structure::createAsOuter(4, 100,$min,$max);
+			$hangar = new Hangar(4, 6, 6);
+			$hangar->startArc = $min;
+			$hangar->endArc = $max;
+			$subReactor = new SubReactorUniversal(4, 20, 0, 0);
+			$subReactor->startArc = $min;
+			$subReactor->endArc = $max;
+
 			$systems = array(
 				new HvyParticleCannon(4, 12, 9, $min, $max),
 				new HeavyPulse(4, 6, 4, $min, $max),
@@ -80,9 +88,9 @@ class OrionAM extends StarBaseSixSections{
 				new QuadParticleBeam(4, 8, 4, $min, $max),
 				new InterceptorMKII(4, 4, 2, $min, $max),
 				new InterceptorMKII(4, 4, 2, $min, $max),
-				new Hangar(4, 6, 6),
-				new SubReactorUniversal(4, 20, 0, 0),
-				new Structure( 4, 100)
+				$hangar,
+				$subReactor,
+				$struct
 			);
 
 

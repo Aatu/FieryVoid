@@ -75,6 +75,17 @@ class KoratylAM extends StarBaseSixSections{
 			$min = 0 + ($i*60);
 			$max = 120 + ($i*60);
 
+			$struct = Structure::createAsOuter(4, 90,$min,$max);
+			$cargoBay = new CargoBay(4, 25);
+			$cargoBay->startArc = $min;
+			$cargoBay->endArc = $max;
+			$subReactor = new SubReactorUniversal(4, 25, 0, 0);
+			$subReactor->startArc = $min;
+			$subReactor->endArc = $max;
+			$hangar = new Hangar(4, 6);
+			$hangar->startArc = $min;
+			$hangar->endArc = $max;			
+
 			$systems = array(
 				new HeavyBolter(4, 10, 6, $min, $max),
 				new HeavyBolter(4, 10, 6, $min, $max),
@@ -84,10 +95,10 @@ class KoratylAM extends StarBaseSixSections{
 				new ScatterPulsar(4, 4, 2, $min, $max),
 				new AmmoMissileRackS(4, 0, 0, $min, $max, $ammoMagazine, true), //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
 				new AmmoMissileRackS(4, 0, 0, $min, $max, $ammoMagazine, true), //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
-				new SubReactorUniversal(4, 25, 0, 0),
-				new Hangar(4, 6, 6),
-				new CargoBay(4, 25),
-				new Structure(4, 90)
+				$subReactor,
+				$hangar,
+				$cargoBay,
+				$struct
 			);
 
 
@@ -98,9 +109,9 @@ class KoratylAM extends StarBaseSixSections{
 				4 => "TAG:Medium Laser",
 				6 => "TAG:Class-S Missile Rack",
 				8 => "TAG:Scatter Pulsar",
-				10 => "Cargo Bay",
-				11 => "Hangar",
-				13 => "Sub Reactor",
+				10 => "TAG:Cargo Bay",
+				11 => "TAG:Hangar",
+				13 => "TAG:Sub Reactor",
 				18 => "Structure",
 				20 => "Primary",
 			);

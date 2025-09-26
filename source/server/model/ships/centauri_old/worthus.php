@@ -22,18 +22,6 @@ class Worthus extends SmallStarBaseFourSections{
 		$this->sideDefense = 21;
 		$this->isd = 2001;
 		
-		/*replaced by TAGed versions!
-		$this->addFrontSystem(new Structure( 5, 108));
-		$this->addAftSystem(new Structure( 5, 108));
-		$this->addLeftSystem(new Structure( 5, 108));
-		$this->addRightSystem(new Structure( 5, 108));
-		*/
-		$this->addPrimarySystem(new Structure( 6, 140));//needs to be called first for some reason - static call apparently fails for the first time...
-		$this->addFrontSystem(Structure::createAsOuter(5, 108, 270,90));
-		$this->addAftSystem(Structure::createAsOuter(5, 108, 90, 270));
-		$this->addLeftSystem(Structure::createAsOuter(5, 108, 180, 360));
-		$this->addRightSystem(Structure::createAsOuter(5, 108, 0, 180));
-		
 		/* replaced with proper two C&Cs!
 		$this->addPrimarySystem(new ProtectedCnC(7, 50, 0, 0)); //2x 6/25 C&C originally
 		*/
@@ -124,6 +112,7 @@ class Worthus extends SmallStarBaseFourSections{
 			$this->addRightSystem(new CargoBay(5, 25));
 			$this->addRightSystem(new SubReactorUniversal(5, 25, 0, 0));
 		*/
+
 			$cargoBay = new CargoBay(5, 25);
 			$cargoBay->startArc = 0;
 			$cargoBay->endArc = 180;
@@ -133,7 +122,17 @@ class Worthus extends SmallStarBaseFourSections{
 			$subReactor->endArc = 180;
 			$this->addRightSystem($subReactor);
 		
-		
+		/*replaced by TAGed versions!
+		$this->addFrontSystem(new Structure( 5, 108));
+		$this->addAftSystem(new Structure( 5, 108));
+		$this->addLeftSystem(new Structure( 5, 108));
+		$this->addRightSystem(new Structure( 5, 108));
+		*/
+		$this->addPrimarySystem(new Structure( 6, 140));//needs to be called first for some reason - static call apparently fails for the first time...
+		$this->addFrontSystem(Structure::createAsOuter(5, 108, 270,90));
+		$this->addAftSystem(Structure::createAsOuter(5, 108, 90, 270));
+		$this->addLeftSystem(Structure::createAsOuter(5, 108, 180, 360));
+		$this->addRightSystem(Structure::createAsOuter(5, 108, 0, 180));		
 		
 		$this->hitChart = array(			
 			0=> array(

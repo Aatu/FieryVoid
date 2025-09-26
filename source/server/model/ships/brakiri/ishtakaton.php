@@ -93,7 +93,7 @@ class Ishtakaton extends StarBaseSixSections
                     8 => "TAG:Gravitic Cannon",                                                              
                     11 => "TAG:Cargo Bay",
                     12 => "TAG:Sub Reactor",
-                    18 => "TAG:Outer Structure",
+                    18 => "Outer Structure",
                     20 => "Primary",
 			);
 

@@ -96,7 +96,7 @@ class JaDan extends SmallStarBaseThreeSections{
 				9 => "TAG:Cargo Bay",				
 				10 => "TAG:Sub Reactor",				
 				11 => "TAG:Hangar",
-				18 => "TAG:Outer Structure",
+				18 => "Outer Structure",
 				20 => "Primary",
 			);
 
