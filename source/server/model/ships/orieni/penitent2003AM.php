@@ -23,13 +23,19 @@ class penitent2003AM extends SmallStarBaseFourSections{
 		$this->forwardDefense = 22;
 		$this->sideDefense = 22;
 		$this->isd = 2003;
-		
+
+		/*replaced by TAGed versions!			
 		$this->addPrimarySystem(new Structure(5, 150)); //needs to be called first for some reason - static call apparently fails for the first time...
 		$this->addFrontSystem(new Structure(5, 132));
 		$this->addAftSystem(new Structure(5, 132));
 		$this->addLeftSystem(new Structure(5, 132));
 		$this->addRightSystem(new Structure(5, 132));
-		
+		*/
+		$this->addPrimarySystem(new Structure( 5, 150));//needs to be called first for some reason - static call apparently fails for the first time...
+		$this->addFrontSystem(Structure::createAsOuter(5, 132, 270,90));
+		$this->addAftSystem(Structure::createAsOuter(5, 132, 90, 270));
+		$this->addLeftSystem(Structure::createAsOuter(5, 132, 180, 360));
+		$this->addRightSystem(Structure::createAsOuter(5, 132, 0, 180));			
 		
         //ammo magazine itself (AND its missile options)
         $ammoMagazine = new AmmoMagazine(96); //pass magazine capacity - 12 rounds per class-SO rack, 20 most other shipborne racks, 60 class-B rack and 80 Reload Rack
@@ -73,9 +79,22 @@ class penitent2003AM extends SmallStarBaseFourSections{
 		$this->addFrontSystem(new OrieniGatlingRG(5, 4, 1, 270, 90));
 		$this->addFrontSystem(new OrieniGatlingRG(5, 4, 1, 270, 90));
 		$this->addFrontSystem(new OrieniGatlingRG(5, 4, 1, 270, 90));
-		$this->addFrontSystem(new Hangar(5, 6));
-		$this->addFrontSystem(new CargoBay(5, 25));
-		$this->addFrontSystem(new SubReactorUniversal(5, 30, 0, 0));
+		//$this->addFrontSystem(new Hangar(5, 6));
+		//$this->addFrontSystem(new CargoBay(5, 25));
+		//$this->addFrontSystem(new SubReactorUniversal(5, 30, 0, 0));
+
+			$hangar = new Hangar(5, 6);
+			$hangar->startArc = 270;
+			$hangar->endArc = 90;
+			$this->addFrontSystem($hangar);
+			$cargoBay = new CargoBay(5, 25);
+			$cargoBay->startArc = 270;
+			$cargoBay->endArc = 90;
+			$this->addFrontSystem($cargoBay);
+			$subReactor = new SubReactorUniversal(5, 30, 0, 0);
+			$subReactor->startArc = 270;
+			$subReactor->endArc = 90;
+			$this->addFrontSystem($subReactor);
 
         $this->addAftSystem(new HeavyGausscannon(5, 10, 4, 90, 270));
         $this->addAftSystem(new HeavyGausscannon(5, 10, 4, 90, 270));
@@ -87,9 +106,22 @@ class penitent2003AM extends SmallStarBaseFourSections{
 		$this->addAftSystem(new OrieniGatlingRG(5, 4, 1, 90, 270));
 		$this->addAftSystem(new OrieniGatlingRG(5, 4, 1, 90, 270));
 		$this->addAftSystem(new OrieniGatlingRG(5, 4, 1, 90, 270));
-		$this->addAftSystem(new Hangar(5, 6));
-		$this->addAftSystem(new CargoBay(5, 25));
-		$this->addAftSystem(new SubReactorUniversal(5, 30, 0, 0));
+		//$this->addAftSystem(new Hangar(5, 6));
+		//$this->addAftSystem(new CargoBay(5, 25));
+		//$this->addAftSystem(new SubReactorUniversal(5, 30, 0, 0));
+
+			$hangar = new Hangar(5, 6);
+			$hangar->startArc = 90;
+			$hangar->endArc = 270;
+			$this->addAftSystem($hangar);
+			$cargoBay = new CargoBay(5, 25);
+			$cargoBay->startArc = 90;
+			$cargoBay->endArc = 270;
+			$this->addAftSystem($cargoBay);
+			$subReactor = new SubReactorUniversal(5, 30, 0, 0);
+			$subReactor->startArc = 90;
+			$subReactor->endArc = 270;
+			$this->addAftSystem($subReactor);
 
         $this->addLeftSystem(new HeavyGausscannon(5, 10, 4, 180, 360));
         $this->addLeftSystem(new HeavyGausscannon(5, 10, 4, 180, 360));
@@ -101,9 +133,22 @@ class penitent2003AM extends SmallStarBaseFourSections{
 		$this->addLeftSystem(new OrieniGatlingRG(5, 4, 1, 180, 360));
 		$this->addLeftSystem(new OrieniGatlingRG(5, 4, 1, 180, 360));
 		$this->addLeftSystem(new OrieniGatlingRG(5, 4, 1, 180, 360));
-		$this->addLeftSystem(new Hangar(5, 6));
-		$this->addLeftSystem(new CargoBay(5, 25));
-		$this->addLeftSystem(new SubReactorUniversal(5, 30, 0, 0));
+		//$this->addLeftSystem(new Hangar(5, 6));
+		//$this->addLeftSystem(new CargoBay(5, 25));
+		//$this->addLeftSystem(new SubReactorUniversal(5, 30, 0, 0));
+			
+			$hangar = new Hangar(5, 6);
+			$hangar->startArc = 180;
+			$hangar->endArc = 360;
+			$this->addLeftSystem($hangar);
+			$cargoBay = new CargoBay(5, 25);
+			$cargoBay->startArc = 180;
+			$cargoBay->endArc = 360;
+			$this->addLeftSystem($cargoBay);
+			$subReactor = new SubReactorUniversal(5, 30, 0, 0);
+			$subReactor->startArc = 180;
+			$subReactor->endArc = 360;
+			$this->addLeftSystem($subReactor);
 
         $this->addRightSystem(new HeavyGausscannon(5, 10, 4, 0, 180));
         $this->addRightSystem(new HeavyGausscannon(5, 10, 4, 0, 180));
@@ -115,10 +160,23 @@ class penitent2003AM extends SmallStarBaseFourSections{
 		$this->addRightSystem(new OrieniGatlingRG(5, 4, 1, 0, 180));
 		$this->addRightSystem(new OrieniGatlingRG(5, 4, 1, 0, 180));
 		$this->addRightSystem(new OrieniGatlingRG(5, 4, 1, 0, 180));
-		$this->addRightSystem(new Hangar(5, 6));
-		$this->addRightSystem(new CargoBay(5, 25));
-		$this->addRightSystem(new SubReactorUniversal(5, 30, 0, 0));
-
+		//$this->addRightSystem(new Hangar(5, 6));
+		//$this->addRightSystem(new CargoBay(5, 25));
+		//$this->addRightSystem(new SubReactorUniversal(5, 30, 0, 0));
+			
+			$hangar = new Hangar(5, 6);
+			$hangar->startArc = 0;
+			$hangar->endArc = 180;
+			$this->addRightSystem($hangar);
+			$cargoBay = new CargoBay(5, 25);
+			$cargoBay->startArc = 0;
+			$cargoBay->endArc = 180;
+			$this->addRightSystem($cargoBay);
+			$subReactor = new SubReactorUniversal(5, 30, 0, 0);
+			$subReactor->startArc = 0;
+			$subReactor->endArc = 180;
+			$this->addRightSystem($subReactor);
+		
 		$this->hitChart = array(			
 			0=> array(
 				9 => "Structure",
@@ -133,9 +191,9 @@ class penitent2003AM extends SmallStarBaseFourSections{
 				2 => "TAG:Class-SO Missile Rack",
 				4 => "TAG:Heavy Gauss Cannon",
 				7 => "TAG:Gatling Railgun",
-				9 => "Cargo Bay",
-				10 => "Sub Reactor",
-				11 => "Hangar",
+				9 => "TAG:Cargo Bay",
+				10 => "TAG:Sub Reactor",
+				11 => "TAG:Hangar",
 				18 => "Structure",
 				20 => "Primary",
 			),
@@ -143,9 +201,9 @@ class penitent2003AM extends SmallStarBaseFourSections{
 				2 => "TAG:Class-SO Missile Rack",
 				4 => "TAG:Heavy Gauss Cannon",
 				7 => "TAG:Gatling Railgun",
-				9 => "Cargo Bay",
-				10 => "Sub Reactor",
-				11 => "Hangar",
+				9 => "TAG:Cargo Bay",
+				10 => "TAG:Sub Reactor",
+				11 => "TAG:Hangar",
 				18 => "Structure",
 				20 => "Primary",
 			),	
@@ -153,9 +211,9 @@ class penitent2003AM extends SmallStarBaseFourSections{
 				2 => "TAG:Class-SO Missile Rack",
 				4 => "TAG:Heavy Gauss Cannon",
 				7 => "TAG:Gatling Railgun",
-				9 => "Cargo Bay",
-				10 => "Sub Reactor",
-				11 => "Hangar",
+				9 => "TAG:Cargo Bay",
+				10 => "TAG:Sub Reactor",
+				11 => "TAG:Hangar",
 				18 => "Structure",
 				20 => "Primary",
 			),
@@ -163,9 +221,9 @@ class penitent2003AM extends SmallStarBaseFourSections{
 				2 => "TAG:Class-SO Missile Rack",
 				4 => "TAG:Heavy Gauss Cannon",
 				7 => "TAG:Gatling Railgun",
-				9 => "Cargo Bay",
-				10 => "Sub Reactor",
-				11 => "Hangar",
+				9 => "TAG:Cargo Bay",
+				10 => "TAG:Sub Reactor",
+				11 => "TAG:Hangar",
 				18 => "Structure",
 				20 => "Primary",
 			),

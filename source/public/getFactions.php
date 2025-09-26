@@ -20,7 +20,6 @@ session_write_close(); // ✅ Release session lock immediately
 if (!$playerid) {
     http_response_code(401);
     echo json_encode(['error' => 'Unauthorized'], JSON_UNESCAPED_UNICODE);
-    if ($__fv_buffering) { ob_end_flush(); }
     exit;
 }
 

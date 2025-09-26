@@ -61,6 +61,11 @@ class Falaren extends StarBaseSixSections
 			$min = 0 + ($i*60);
 			$max = 120 + ($i*60);
 
+			$struct = Structure::createAsOuter(7, 120,$min,$max);
+			$subReactor = new SubReactorUniversal(7, 25, 0, 0);
+			$subReactor->startArc = $min;
+			$subReactor->endArc = $max;
+
 			$systems = array(
 				new MolecularFlayer(7, 8, 4, $min, $max),
 				new DestabilizerBeam(7, 10, 8, $min, $max),
@@ -69,8 +74,8 @@ class Falaren extends StarBaseSixSections
 				new FusionAgitator(7, 10, 4, $min, $max),
 				new FusionCannon(7, 8, 1, $min, $max),
 				new FusionCannon(7, 8, 1, $min, $max),				
-				new SubReactorUniversal(7, 25),
-				new Structure( 7, 120)
+				$subReactor,
+				$struct
 			);
 
 			$loc = $this->locations[$i];
@@ -80,7 +85,7 @@ class Falaren extends StarBaseSixSections
 					5 => "TAG:Fusion Cannon",                    
 					6 => "TAG:Fusion Agitator",                
 					8 => "TAG:Destabilizer Beam",
-                    9 => "Sub Reactor",
+                    9 => "TAG:Sub Reactor",
                     18 => "Structure",
                     20 => "Primary",
 			);

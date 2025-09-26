@@ -122,5 +122,4 @@ exit;
 
 	print($ret);
 
-	ob_end_flush();
 */

@@ -45,46 +45,105 @@ class Babylon5Refit extends StarBaseSixSections{
 		$this->addPrimarySystem(new EnergyMine(6, 5, 4, 0, 360));
 		$this->addPrimarySystem(new EnergyMine(6, 5, 4, 0, 360));
 
-		$this->addFrontSystem(new Hangar(5, 8));
-		$this->addFrontSystem(new CargoBay(5, 25));
-		$this->addFrontSystem(new SubReactorUniversal(5, 20, 0, 0));
+		//$this->addFrontSystem(new Hangar(5, 8));
+		//$this->addFrontSystem(new CargoBay(5, 25));
+		//$this->addFrontSystem(new SubReactorUniversal(5, 20, 0, 0));
 		$this->addFrontSystem(new InterceptorMkII(5, 4, 1, 300, 60));
 		$this->addFrontSystem(new InterceptorMkII(5, 4, 1, 300, 60));
 		$this->addFrontSystem(new StdParticleBeam(5, 4, 1, 300, 60));
 		$this->addFrontSystem(new StdParticleBeam(5, 4, 1, 300, 60));
-		
-        $this->addAftSystem(new CargoBay(5, 25));
-        $this->addAftSystem(new SubReactorUniversal(5, 20, 0, 0));
+
+			$hangar = new Hangar(5, 8);
+			$hangar->startArc = 300;
+			$hangar->endArc = 60;
+			$this->addFrontSystem($hangar);		
+			$cargoBay = new CargoBay(3, 25);
+			$cargoBay->startArc = 300;
+			$cargoBay->endArc = 60;
+			$this->addFrontSystem($cargoBay);
+			$subReactor = new SubReactorUniversal(3, 20, 0, 0);
+			$subReactor->startArc = 300;
+			$subReactor->endArc = 60;
+			$this->addFrontSystem($subReactor);			
+
+        //$this->addAftSystem(new CargoBay(5, 25));
+        //$this->addAftSystem(new SubReactorUniversal(5, 20, 0, 0));
         $this->addAftSystem(new InterceptorMkII(5, 4, 1, 120, 240));
         $this->addAftSystem(new InterceptorMkII(5, 4, 1, 120, 240));
         $this->addAftSystem(new StdParticleBeam(5, 4, 1, 120, 240));
         $this->addAftSystem(new StdParticleBeam(5, 4, 1, 120, 240));
+
+			$cargoBay = new CargoBay(3, 25);
+			$cargoBay->startArc = 120;
+			$cargoBay->endArc = 240;
+			$this->addAftSystem($cargoBay);
+			$subReactor = new SubReactorUniversal(3, 20, 0, 0);
+			$subReactor->startArc = 120;
+			$subReactor->endArc = 240;
+			$this->addAftSystem($subReactor);
 		
-		$this->addLeftFrontSystem(new SubReactorUniversal(5, 18, 0, 0));
-		$this->addLeftFrontSystem(new CargoBay(5, 25));
+		//$this->addLeftFrontSystem(new SubReactorUniversal(5, 18, 0, 0));
+		//$this->addLeftFrontSystem(new CargoBay(5, 25));
 		$this->addLeftFrontSystem(new InterceptorMkII(3, 5, 1, 240, 360));
 		$this->addLeftFrontSystem(new InterceptorMkII(3, 5, 1, 240, 360));
 		$this->addLeftFrontSystem(new QuadParticleBeam(5, 8, 4, 240, 360));
 
-		$this->addLeftAftSystem(new SubReactorUniversal(5, 18, 0, 0));
-		$this->addLeftAftSystem(new CargoBay(5, 25));
+			$cargoBay = new CargoBay(3, 25);
+			$cargoBay->startArc = 240;
+			$cargoBay->endArc = 360;
+			$this->addLeftFrontSystem($cargoBay);
+			$subReactor = new SubReactorUniversal(3, 20, 0, 0);
+			$subReactor->startArc = 240;
+			$subReactor->endArc = 360;
+			$this->addLeftFrontSystem($subReactor);
+
+		//$this->addLeftAftSystem(new SubReactorUniversal(5, 18, 0, 0));
+		//$this->addLeftAftSystem(new CargoBay(5, 25));
 		$this->addLeftAftSystem(new InterceptorMkII(5, 4, 1, 180, 300));
 		$this->addLeftAftSystem(new InterceptorMkII(5, 4, 1, 180, 300));
 		$this->addLeftAftSystem(new QuadParticleBeam(5, 8, 4, 180, 300));
 
-		$this->addRightFrontSystem(new SubReactorUniversal(5, 18, 0, 0));
-		$this->addRightFrontSystem(new CargoBay(5, 25));
+			$cargoBay = new CargoBay(3, 25);
+			$cargoBay->startArc = 180;
+			$cargoBay->endArc = 300;
+			$this->addLeftAftSystem($cargoBay);
+			$subReactor = new SubReactorUniversal(3, 20, 0, 0);
+			$subReactor->startArc = 180;
+			$subReactor->endArc = 300;
+			$this->addLeftAftSystem($subReactor);
+
+		//$this->addRightFrontSystem(new SubReactorUniversal(5, 18, 0, 0));
+		//$this->addRightFrontSystem(new CargoBay(5, 25));
 		$this->addRightFrontSystem(new InterceptorMkII(5, 4, 1, 0, 120));
 		$this->addRightFrontSystem(new InterceptorMkII(5, 4, 1, 0, 120));
 		$this->addRightFrontSystem(new QuadParticleBeam(5, 8, 4, 0, 120));
 
-		$this->addRightAftSystem(new SubReactorUniversal(5, 18, 0, 0));
-		$this->addRightAftSystem(new CargoBay(5, 25));
+			$cargoBay = new CargoBay(3, 25);
+			$cargoBay->startArc = 0;
+			$cargoBay->endArc = 120;
+			$this->addRightFrontSystem($cargoBay);
+			$subReactor = new SubReactorUniversal(3, 20, 0, 0);
+			$subReactor->startArc = 0;
+			$subReactor->endArc = 120;
+			$this->addRightFrontSystem($subReactor);
+
+		//$this->addRightAftSystem(new SubReactorUniversal(5, 18, 0, 0));
+		//$this->addRightAftSystem(new CargoBay(5, 25));
 		$this->addRightAftSystem(new InterceptorMkII(5, 4, 1, 60, 180));
 		$this->addRightAftSystem(new InterceptorMkII(5, 4, 1, 60, 180));
 		$this->addRightAftSystem(new QuadParticleBeam(5, 8, 4, 60, 180));
 
+			$cargoBay = new CargoBay(3, 25);
+			$cargoBay->startArc = 60;
+			$cargoBay->endArc = 180;
+			$this->addRightAftSystem($cargoBay);
+			$subReactor = new SubReactorUniversal(3, 20, 0, 0);
+			$subReactor->startArc = 60;
+			$subReactor->endArc = 180;
+			$this->addRightAftSystem($subReactor);
+
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
+		/*replaced by TAGed versions!	
         $this->addFrontSystem(new Structure( 5, 130));
         $this->addAftSystem(new Structure( 5, 130));
         $this->addLeftFrontSystem(new Structure( 5, 150));
@@ -92,6 +151,14 @@ class Babylon5Refit extends StarBaseSixSections{
         $this->addRightFrontSystem(new Structure( 5, 150));
         $this->addRightAftSystem(new Structure( 5, 150));        
 		$this->addPrimarySystem(new Structure( 6, 180));
+		*/
+		$this->addPrimarySystem(new Structure( 6, 180));//needs to be called first for some reason - static call apparently fails for the first time...
+		$this->addFrontSystem(Structure::createAsOuter(5, 130, 300, 60));
+		$this->addAftSystem(Structure::createAsOuter(5, 130, 120, 240));
+		$this->addLeftFrontSystem(Structure::createAsOuter(5, 150, 240, 360));
+		$this->addLeftAftSystem(Structure::createAsOuter(5, 150, 180, 300));
+		$this->addRightFrontSystem(Structure::createAsOuter(5, 150, 0, 120));
+		$this->addRightAftSystem(Structure::createAsOuter(5, 150, 60, 180));
 
 	//d20 hit chart
         $this->hitChart = array(

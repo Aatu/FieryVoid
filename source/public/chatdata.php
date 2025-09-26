@@ -17,7 +17,6 @@ session_write_close(); // allow concurrent AJAX
 if (!$playerid) {
     http_response_code(401);
     echo json_encode(['error' => 'Not logged in.'], JSON_UNESCAPED_UNICODE);
-    if ($__fv_buffering) { ob_end_flush(); }
     exit;
 }
 

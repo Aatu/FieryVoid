@@ -4,21 +4,6 @@ header('Content-Type: application/json; charset=utf-8');
 
 require_once 'global.php';
 
-/* //SAFER VERSION DEPENDING ON APACHE SETTINGS
-declare(strict_types=1);
-
-// ✅ Output compression (safe)
-if (!headers_sent() && !ini_get('zlib.output_compression')) {
-    ob_start('ob_gzhandler');
-} else {
-    ob_start();
-}
-
-header('Content-Type: application/json; charset=utf-8');
-
-require_once 'global.php';
-*/
-
 // --- Start session and immediately release lock for concurrent requests ---
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -32,7 +17,6 @@ $turn   = isset($_GET['turn'])   ? (int)$_GET['turn']   : 0;
 if ($gameid <= 0 || $turn < 0) {
     http_response_code(400);
     echo json_encode(['error' => 'Missing or invalid gameid/turn.'], JSON_UNESCAPED_UNICODE);
-    ob_end_flush();
     exit;
 }
 

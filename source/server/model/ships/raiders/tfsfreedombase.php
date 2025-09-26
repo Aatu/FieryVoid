@@ -42,23 +42,35 @@ class tfsfreedombase extends SmallStarBaseFourSections{
 		for ($i = 0; $i < sizeof($this->locations); $i++){
 			$min = 270 + ($i*90);
 			$max = 90 + ($i*90);
+
+			$struct = Structure::createAsOuter(5, 80,$min,$max);
+			$hangar = new Hangar(5, 7, 6);
+			$hangar->startArc = $min;
+			$hangar->endArc = $max;			
+			$cargoBay = new CargoBay(5, 36);
+			$cargoBay->startArc = $min;
+			$cargoBay->endArc = $max;
+			$subReactor = new SubReactorUniversal(5, 12, 0, 0);
+			$subReactor->startArc = $min;
+			$subReactor->endArc = $max;
+
 			$systems = array(
 				new StdParticleBeam(5, 4, 1, $min, $max),
 				new StdParticleBeam(5, 4, 1, $min, $max),
 				new ParticleCannon(5, 8, 7, $min, $max),
 				new ParticleCannon(5, 8, 7, $min, $max),
-				new Hangar(5, 7, 6),
-				new SubReactorUniversal(5, 12, 0, 0),
-				new CargoBay(5, 36),
-				new Structure(5, 80)
+				$hangar,
+				$subReactor,
+				$cargoBay,
+				$struct
 			);
 			$loc = $this->locations[$i];
 			$this->hitChart[$loc] = array(
 				1 => "TAG:Standard Particle Beam",
 				3 => "TAG:Particle Cannon",
-				8 => "Cargo Bay",
-				9 => "Hangar",
-				10 => "Sub Reactor",
+				8 => "TAG:Cargo Bay",
+				9 => "TAG:Hangar",
+				10 => "TAG:Sub Reactor",
 				18 => "Structure",
 				20 => "Primary",
 			);
