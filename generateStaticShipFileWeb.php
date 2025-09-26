@@ -75,5 +75,4 @@ file_put_contents("{$fileBase}.php", $includeText);
 //// ─── Output Result ─────────────────────────────────────────────────
 echo "<br/><br/><big>Ships generated for {$factionNo} factions!</big><br/>\n";
 
-ob_end_flush();
 exit;

@@ -80,6 +80,20 @@ class GromeMahkgarAM extends StarBaseSixSections{
 			$min = 0 + ($i*60);
 			$max = 120 + ($i*60);
 
+			$struct = Structure::createAsOuter(4, 180,$min,$max);
+			$hangar = new Hangar(4, 7, 6);
+			$hangar->startArc = $min;
+			$hangar->endArc = $max;
+			$cargoBay = new CargoBay(4, 30);
+			$cargoBay->startArc = $min;
+			$cargoBay->endArc = $max;
+			$subReactor = new SubReactorUniversal(4, 30, 0, 0);
+			$subReactor->startArc = $min;
+			$subReactor->endArc = $max;			
+			/*$strut = new ConnectionStrut(4);
+			$strut->startArc = $min;
+			$strut->endArc = $max;			
+			*/
 			$systems = array(
 				new AmmoHeavyRailGun(4, 12, 9, $min, $max, $ammoMagazine),
 				new AmmoMediumRailGun(4, 9, 6, $min, $max, $ammoMagazine),
@@ -88,11 +102,11 @@ class GromeMahkgarAM extends StarBaseSixSections{
 				new AmmoLightRailGun(4, 6, 3, $min, $max, $ammoMagazine),
 				new GromeFlakCannon(4, 4, 2, $min, $max),
 				new GromeFlakCannon(4, 4, 2, $min, $max),
-				new Hangar(4, 7, 6),
-				new CargoBay(4, 30),
-				new SubReactorUniversal(4, 30, 0, 0),
+				$hangar,
+				$cargoBay,
+				$subReactor,
 				new ConnectionStrut(4),
-				new Structure( 4, 180)
+				$struct //new Structure(4, 180)
 			);
 
 			$loc = $this->locations[$i];
@@ -102,9 +116,9 @@ class GromeMahkgarAM extends StarBaseSixSections{
 				4 => "TAG:Light Railgun",
 				6 => "TAG:Medium Railgun",
 				7 => "TAG:Heavy Railgun",
-				9 => "Cargo Bay",
-				10 => "Hangar",
-				11 => "Sub Reactor",
+				9 => "TAG:Cargo Bay",
+				10 => "TAG:Hangar",
+				11 => "TAG:Sub Reactor",
 				13 => "Connection Strut",
 				18 => "Structure",
 				20 => "Primary",

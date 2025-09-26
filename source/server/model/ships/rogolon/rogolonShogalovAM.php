@@ -42,32 +42,59 @@ class RogolonShogalovAM extends SmallStarBaseFourSections
 		$this->addPrimarySystem(new Catapult(3, 6));		
 		$this->addPrimarySystem(new CargoBay(4, 36));		
 
-		$this->addFrontSystem(new Catapult(3, 6));
+		//$this->addFrontSystem(new Catapult(3, 6));
 		$this->addFrontSystem(new AmmoMissileRackSO(3, 0, 0, 240, 60, $ammoMagazine, true)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
 		$this->addFrontSystem(new AmmoMissileRackSO(3, 0, 0, 300, 120, $ammoMagazine, true)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
 		$this->addFrontSystem(new HeavyPlasma(3, 8, 5, 300, 60));
+			
+			$catapult = new Catapult(3, 6);
+			$catapult->startArc = 270;
+			$catapult->endArc = 90;
+			$this->addFrontSystem($catapult);
 
-		$this->addAftSystem(new Catapult(3, 6));
+		//$this->addAftSystem(new Catapult(3, 6));
 		$this->addAftSystem(new AmmoMissileRackSO(3, 0, 0, 60, 240, $ammoMagazine, true)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
 		$this->addAftSystem(new AmmoMissileRackSO(3, 0, 0, 120, 300, $ammoMagazine, true)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
 		$this->addAftSystem(new HeavyPlasma(3, 8, 5, 120, 240));
+			
+			$catapult = new Catapult(3, 6);
+			$catapult->startArc = 90;
+			$catapult->endArc = 270;
+			$this->addAftSystem($catapult);
 
-		$this->addLeftSystem(new Catapult(3, 6));
+		//$this->addLeftSystem(new Catapult(3, 6));
 		$this->addLeftSystem(new AmmoMissileRackSO(3, 0, 0, 180, 360, $ammoMagazine, true)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
 		$this->addLeftSystem(new AmmoMissileRackSO(3, 0, 0, 180, 360, $ammoMagazine, true)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
 		$this->addLeftSystem(new HeavyPlasma(3, 8, 5, 210, 330));
+			
+			$catapult = new Catapult(3, 6);
+			$catapult->startArc = 180;
+			$catapult->endArc = 360;
+			$this->addLeftSystem($catapult);
 
-		$this->addRightSystem(new Catapult(3, 6));
+		//$this->addRightSystem(new Catapult(3, 6));
 		$this->addRightSystem(new AmmoMissileRackSO(3, 0, 0, 0, 180, $ammoMagazine, true)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
 		$this->addRightSystem(new AmmoMissileRackSO(3, 0, 0, 0, 180, $ammoMagazine, true)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
 		$this->addRightSystem(new HeavyPlasma(3, 8, 5, 30, 150));
+			
+			$catapult = new Catapult(3, 6);
+			$catapult->startArc = 0;
+			$catapult->endArc = 180;
+			$this->addRightSystem($catapult);
 
+		/*replaced by TAGed versions!		
 		$this->addFrontSystem(new Structure( 4, 70));
 		$this->addAftSystem(new Structure( 4, 70));
 		$this->addLeftSystem(new Structure( 4, 70));
 		$this->addRightSystem(new Structure( 4, 70));
-		$this->addPrimarySystem(new Structure( 4, 92));		
-		
+		$this->addPrimarySystem(new Structure( 4, 92));
+		*/		
+		$this->addPrimarySystem(new Structure( 4, 92));//needs to be called first for some reason - static call apparently fails for the first time...
+		$this->addFrontSystem(Structure::createAsOuter(4, 70, 270,90));
+		$this->addAftSystem(Structure::createAsOuter(4, 70, 90, 270));
+		$this->addLeftSystem(Structure::createAsOuter(4, 70, 180, 360));
+		$this->addRightSystem(Structure::createAsOuter(4, 70, 0, 180));
+
 		$this->hitChart = array(
 			0=> array(
 				10 => "Structure",
@@ -79,30 +106,30 @@ class RogolonShogalovAM extends SmallStarBaseFourSections
 				20 => "C&C",
 			),
 			1=> array(
-				2 => "Heavy Plasma Cannon",
-				5 => "Class-SO Missile Rack",
-				7 => "Catapult",
+				2 => "TAG:Heavy Plasma Cannon",
+				5 => "TAG:Class-SO Missile Rack",
+				7 => "TAG:Catapult",
 				18 => "Structure",
 				20 => "Primary",
 			),
 			2=> array(
-				2 => "Heavy Plasma Cannon",
-				5 => "Class-SO Missile Rack",
-				7 => "Catapult",
+				2 => "TAG:Heavy Plasma Cannon",
+				5 => "TAG:Class-SO Missile Rack",
+				7 => "TAG:Catapult",
 				18 => "Structure",
 				20 => "Primary",
 			),
 			3=> array(
-				2 => "Heavy Plasma Cannon",
-				5 => "Class-SO Missile Rack",
-				7 => "Catapult",
+				2 => "TAG:Heavy Plasma Cannon",
+				5 => "TAG:Class-SO Missile Rack",
+				7 => "TAG:Catapult",
 				18 => "Structure",
 				20 => "Primary",
 			),
 			4=> array(
-				2 => "Heavy Plasma Cannon",
-				5 => "Class-SO Missile Rack",
-				7 => "Catapult",
+				2 => "TAG:Heavy Plasma Cannon",
+				5 => "TAG:Class-SO Missile Rack",
+				7 => "TAG:Catapult",
 				18 => "Structure",
 				20 => "Primary",
 			),

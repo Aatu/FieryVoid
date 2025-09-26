@@ -43,8 +43,17 @@ class Watchtower extends SmallStarBaseFourSections{
 		$this->addPrimarySystem(new Structure( 5, 60));
 		
 		for ($i = 0; $i < sizeof($this->locations); $i++){
-			$min = 270 + ($i*90); //original design has 120-degree arcs (300..60), but it was just very bad and not worth the points
-			$max = 90 + ($i*90);
+			$min = 300 + ($i*90); 
+			$max = 60 + ($i*90);
+
+			$struct = Structure::createAsOuter(4, 60,$min,$max);			
+			$hangar = new Hangar(4, 6, 6);
+			$hangar->startArc = $min;
+			$hangar->endArc = $max;
+			$catapult = new Catapult(8, maxhealth: 8);
+			$catapult->startArc = $min;
+			$catapult->endArc = $max;
+
 			$systems = array(
 				new TwinArray(4, 6, 2, $min, $max),
 				new TwinArray(4, 6, 2, $min, $max),
@@ -53,16 +62,16 @@ class Watchtower extends SmallStarBaseFourSections{
 				new AssaultLaser(6, 6, 4, $min, $max),
 				new AssaultLaser(6, 6, 4, $min, $max),
 				new AssaultLaser(6, 6, 4, $min, $max),
-				new Catapult(3, 8),
-				new Hangar(4, 6, 6),
-				new Structure(4, 60)
+				$hangar,
+				$catapult,
+				$struct
 			);
 			$loc = $this->locations[$i];
 			$this->hitChart[$loc] = array(
-				4 => "Twin Array",
-				8 => "Assault Laser",
-				9 => "Hangar",
-				10 => "Catapult",
+				4 => "TAG:Twin Array",
+				8 => "TAG:Assault Laser",
+				9 => "TAG:Hangar",
+				10 => "TAG:Catapult",
 				18 => "Structure",
 				20 => "Primary",
 			);
@@ -76,17 +85,17 @@ class Watchtower extends SmallStarBaseFourSections{
         //Watchtower has atypical arcs, for a base!
 	public function getLocations(){        
             $locs = array();
-		/* changing to 180-degree-wide...
+		
             $locs[] = array("loc" => 1, "min" => 300, "max" => 60, "profile" => $this->forwardDefense);
             $locs[] = array("loc" => 2, "min" => 120, "max" => 240, "profile" => $this->forwardDefense);
             $locs[] = array("loc" => 3, "min" => 210, "max" => 330, "profile" => $this->forwardDefense);
             $locs[] = array("loc" => 4, "min" => 30, "max" => 150, "profile" => $this->forwardDefense);
-	    */
+	    /* for changing to 180-degree-wide...
 	    $locs[] = array("loc" => 1, "min" => 270, "max" => 90, "profile" => $this->forwardDefense);
             $locs[] = array("loc" => 2, "min" => 90, "max" => 270, "profile" => $this->forwardDefense);
             $locs[] = array("loc" => 3, "min" => 180, "max" => 360, "profile" => $this->forwardDefense);
             $locs[] = array("loc" => 4, "min" => 0, "max" => 180, "profile" => $this->forwardDefense);
-		
+		*/
 	    return $locs;
         }
 	

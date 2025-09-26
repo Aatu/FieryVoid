@@ -61,6 +61,11 @@ class CarranaAM extends SmallStarBaseThreeSections{
 			$min = 300 + ($i*120);
 			$max = 60 + ($i*120);
 
+			$struct = Structure::createAsOuter(4, 56,$min,$max);
+			$hangar = new Hangar(4, 6);
+			$hangar->startArc = $min;
+			$hangar->endArc = $max;
+
 			$systems = array(
 				new HeavyPlasmaBolter(4, 0, 0, $min, $max),
 				new AmmoMissileRackS(4, 0, 0, $min, $max, $ammoMagazine, true),
@@ -68,18 +73,17 @@ class CarranaAM extends SmallStarBaseThreeSections{
 				new LightParticleBeamShip(4, 2, 1, $min, $max),
 				new LightParticleBeamShip(4, 2, 1, $min, $max),
 				new LightParticleBeamShip(4, 2, 1, $min, $max),
-				new Hangar(4, 6),
-				new Structure( 4, 56)
+				$hangar,
+				$struct
 			);
-
 
 			$loc = $this->locations[$i];
 
 			$this->hitChart[$loc] = array(
-				4 => "Heavy Plasma Bolter",
-				7 => "Light Particle Beam",
-				10 => "Class-S Missile Rack",
-				12 => "Hangar",
+				4 => "TAG:Heavy Plasma Bolter",
+				7 => "TAG:Light Particle Beam",
+				10 => "TAG:Class-S Missile Rack",
+				12 => "TAG:Hangar",
 				18 => "Structure",
 				20 => "Primary",
 			);

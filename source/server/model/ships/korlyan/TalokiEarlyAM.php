@@ -70,9 +70,18 @@ class TalokiEarlyAM extends StarBaseSixSections{
         $this->addPrimarySystem(new AmmoMissileRackD(4, 0, 0, 0, 360, $ammoMagazine, false));
         $this->addPrimarySystem(new AmmoMissileRackD(4, 0, 0, 0, 360, $ammoMagazine, false));
 
-		$this->addFrontSystem(new Hangar(4, 14));
-		$this->addFrontSystem(new SubReactorUniversal(4, 20, 0, 0));
+		//$this->addFrontSystem(new Hangar(4, 14));
+		//$this->addFrontSystem(new SubReactorUniversal(4, 20, 0, 0));
 		$this->addFrontSystem(new ParticleCannon(4, 8, 7, 270, 90));
+
+			$hangar = new Hangar(4, 14);
+			$hangar->startArc = 300;
+			$hangar->endArc = 60;
+			$this->addFrontSystem($hangar);		
+			$subReactor = new SubReactorUniversal(4, 20, 0, 0);
+			$subReactor->startArc = 300;
+			$subReactor->endArc = 60;
+			$this->addFrontSystem($subReactor);	
 
 //		$TargeterA = new ProximityLaser(0, 1, 0, 270, 90, 'A');
 		$TargeterA = new ProximityLaser(0, 1, 0, 0, 360, 'A');		
@@ -92,9 +101,20 @@ class TalokiEarlyAM extends StarBaseSixSections{
 		$TargeterB->addTag("Front Proximity Laser");				
 		$this->addFrontSystem(new ParticleCannon(4, 8, 7, 270, 90));
 		
-		$this->addAftSystem(new Hangar(4, 14));
-		$this->addAftSystem(new SubReactorUniversal(4, 20, 0, 0));
+		//$this->addAftSystem(new Hangar(4, 14));
+		//$this->addAftSystem(new SubReactorUniversal(4, 20, 0, 0));
 		$this->addAftSystem(new ParticleCannon(4, 8, 7, 90, 270));
+
+
+			$hangar = new Hangar(4, 14);
+			$hangar->startArc = 120;
+			$hangar->endArc = 240;
+			$this->addAftSystem($hangar);		
+			$subReactor = new SubReactorUniversal(4, 20, 0, 0);
+			$subReactor->startArc = 120;
+			$subReactor->endArc = 240;
+			$this->addAftSystem($subReactor);	
+
 
 //		$TargeterC = new ProximityLaser(0, 1, 0, 90, 270, 'C');
 		$TargeterC = new ProximityLaser(0, 1, 0, 0, 360, 'C');		
@@ -114,7 +134,7 @@ class TalokiEarlyAM extends StarBaseSixSections{
 		$TargeterD->addTag("Aft Proximity Laser");				
 		$this->addAftSystem(new ParticleCannon(4, 8, 7, 90, 270));
 		
-		$this->addLeftFrontSystem(new SubReactorUniversal(4, 18, 0, 0));
+		//$this->addLeftFrontSystem(new SubReactorUniversal(4, 18, 0, 0));
         $this->addLeftFrontSystem(new StdParticleBeam(4, 4, 1, 240, 60));
         $this->addLeftFrontSystem(new StdParticleBeam(4, 4, 1, 240, 60));
         $this->addLeftFrontSystem(new StdParticleBeam(4, 4, 1, 240, 60));
@@ -125,8 +145,13 @@ class TalokiEarlyAM extends StarBaseSixSections{
         $this->addLeftFrontSystem(new AmmoMissileRackL(4, 0, 0, 240, 60, $ammoMagazine, true)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         $this->addLeftFrontSystem(new AmmoMissileRackL(4, 0, 0, 240, 60, $ammoMagazine, true)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         $this->addLeftFrontSystem(new AmmoMissileRackL(4, 0, 0, 240, 60, $ammoMagazine, true)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+	
+			$subReactor = new SubReactorUniversal(4, 18, 0, 0);
+			$subReactor->startArc = 240;
+			$subReactor->endArc = 360;
+			$this->addLeftFrontSystem($subReactor);	
 
-		$this->addLeftAftSystem(new SubReactorUniversal(4, 18, 0, 0));
+		//$this->addLeftAftSystem(new SubReactorUniversal(4, 18, 0, 0));
         $this->addLeftAftSystem(new StdParticleBeam(4, 4, 1, 120, 300));
         $this->addLeftAftSystem(new StdParticleBeam(4, 4, 1, 120, 300));
         $this->addLeftAftSystem(new StdParticleBeam(4, 4, 1, 120, 300));
@@ -138,7 +163,12 @@ class TalokiEarlyAM extends StarBaseSixSections{
         $this->addLeftAftSystem(new AmmoMissileRackL(4, 0, 0, 120, 300, $ammoMagazine, true)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         $this->addLeftAftSystem(new AmmoMissileRackL(4, 0, 0, 120, 300, $ammoMagazine, true)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
 
-		$this->addRightFrontSystem(new SubReactorUniversal(4, 18, 0, 0));
+			$subReactor = new SubReactorUniversal(4, 18, 0, 0);
+			$subReactor->startArc = 180;
+			$subReactor->endArc = 300;
+			$this->addLeftAftSystem($subReactor);	
+
+		//$this->addRightFrontSystem(new SubReactorUniversal(4, 18, 0, 0));
         $this->addRightFrontSystem(new StdParticleBeam(4, 4, 1, 300, 120));
         $this->addRightFrontSystem(new StdParticleBeam(4, 4, 1, 300, 120));
         $this->addRightFrontSystem(new StdParticleBeam(4, 4, 1, 300, 120));
@@ -150,7 +180,12 @@ class TalokiEarlyAM extends StarBaseSixSections{
         $this->addRightFrontSystem(new AmmoMissileRackL(4, 0, 0, 300, 120, $ammoMagazine, true)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         $this->addRightFrontSystem(new AmmoMissileRackL(4, 0, 0, 300, 120, $ammoMagazine, true)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
 
-		$this->addRightAftSystem(new SubReactorUniversal(4, 18, 0, 0));
+			$subReactor = new SubReactorUniversal(4, 18, 0, 0);
+			$subReactor->startArc = 0;
+			$subReactor->endArc = 120;
+			$this->addRightFrontSystem($subReactor);
+
+		//$this->addRightAftSystem(new SubReactorUniversal(4, 18, 0, 0));
         $this->addRightAftSystem(new StdParticleBeam(4, 4, 1, 60, 240));
         $this->addRightAftSystem(new StdParticleBeam(4, 4, 1, 60, 240));
         $this->addRightAftSystem(new StdParticleBeam(4, 4, 1, 60, 240));
@@ -161,8 +196,14 @@ class TalokiEarlyAM extends StarBaseSixSections{
         $this->addRightAftSystem(new AmmoMissileRackL(4, 0, 0, 60, 240, $ammoMagazine, true)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         $this->addRightAftSystem(new AmmoMissileRackL(4, 0, 0, 60, 240, $ammoMagazine, true)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         $this->addRightAftSystem(new AmmoMissileRackL(4, 0, 0, 60, 240, $ammoMagazine, true)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+
+			$subReactor = new SubReactorUniversal(4, 18, 0, 0);
+			$subReactor->startArc = 60;
+			$subReactor->endArc = 180;
+			$this->addRightAftSystem($subReactor);
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
+		/*replaced by TAGed versions!	
         $this->addFrontSystem(new Structure( 4, 150));
         $this->addAftSystem(new Structure( 4, 136));
         $this->addLeftFrontSystem(new Structure( 4, 180));
@@ -170,6 +211,14 @@ class TalokiEarlyAM extends StarBaseSixSections{
         $this->addRightFrontSystem(new Structure( 4, 180));
         $this->addRightAftSystem(new Structure( 4, 180));        
 		$this->addPrimarySystem(new Structure( 4, 182));
+		*/
+		$this->addPrimarySystem(new Structure( 4, 182));//needs to be called first for some reason - static call apparently fails for the first time...
+		$this->addFrontSystem(Structure::createAsOuter(4, 150, 300, 60));
+		$this->addAftSystem(Structure::createAsOuter(4, 136, 120, 240));
+		$this->addLeftFrontSystem(Structure::createAsOuter(4, 180, 240, 360));
+		$this->addLeftAftSystem(Structure::createAsOuter(4, 180, 180, 300));
+		$this->addRightFrontSystem(Structure::createAsOuter(4, 180, 0, 120));
+		$this->addRightAftSystem(Structure::createAsOuter(4, 180, 60, 180));
 
 	//d20 hit chart
         $this->hitChart = array(
@@ -186,8 +235,8 @@ class TalokiEarlyAM extends StarBaseSixSections{
                     2 => "Limpet Bore Torpedo",
 					4 => "TAG:Front Proximity Laser",
 					6 => "TAG:Particle Cannon",
-					7 => "Hangar",
-					8 => "Sub Reactor",
+					7 => "TAG:Hangar",
+					8 => "TAG:Sub Reactor",
                     18 => "Structure",
                     20 => "Primary",
            		 ),
@@ -195,36 +244,36 @@ class TalokiEarlyAM extends StarBaseSixSections{
                     2 => "Limpet Bore Torpedo",
 					4 => "TAG:Aft Proximity Laser",
 					6 => "Particle Cannon",
-					7 => "Hangar",
-					8 => "Sub Reactor",
+					7 => "TAG:Hangar",
+					8 => "TAG:Sub Reactor",
                     18 => "Structure",
                     20 => "Primary",
            		 ),
             31=> array(
                     3 => "TAG:Standard Particle Beam",
                     7 => "TAG:Class-L Missile Rack",
-					8 => "Sub Reactor",
+					8 => "TAG:Sub Reactor",
                     18 => "Structure",
                     20 => "Primary",
            		 ),
             32=> array(
                     3 => "TAG:Standard Particle Beam",
                     7 => "TAG:Class-L Missile Rack",
-					8 => "Sub Reactor",
+					8 => "TAG:Sub Reactor",
                     18 => "Structure",
                     20 => "Primary",
            		 ),
             41=> array(
                     3 => "TAG:Standard Particle Beam",
                     7 => "TAG:Class-L Missile Rack",
-					8 => "Sub Reactor",
+					8 => "TAG:Sub Reactor",
                     18 => "Structure",
                     20 => "Primary",
            		 ),
        		42=> array(
                     3 => "TAG:Standard Particle Beam",
                     7 => "TAG:Class-L Missile Rack",
-					8 => "Sub Reactor",
+					8 => "TAG:Sub Reactor",
                     18 => "Structure",
                     20 => "Primary",
             	),

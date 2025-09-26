@@ -81,7 +81,7 @@ public function calculateHit($gamedata, $fireOrder){
 
                 $target = $target->moveToDirection($direction, $dis);
 
-                $fireOrder->pubnotes .= " deviation from " . $fireOrder->x . ' ' . $fireOrder->y;
+                $fireOrder->pubnotes .= " Deviation from " . $fireOrder->x . ' ' . $fireOrder->y;
                 $fireOrder->x = $target->q;
                 $fireOrder->y = $target->r;
                 $fireOrder->pubnotes .= " to " . $fireOrder->x . ' ' . $fireOrder->y . '. ';
@@ -130,7 +130,7 @@ public function calculateHit($gamedata, $fireOrder){
     public function getDamageMod($damage, $shooter, $target, $sourceHex, $gamedata)
     {
         $modifiedDmg = parent::getDamageMod($damage, $shooter, $target, $sourceHex, $gamedata);
-        if ($target->Enormous) $modifiedDmg = floor($modifiedDmg / 2);
+        if ($target->Enormous || $target->osat) $modifiedDmg = floor($modifiedDmg / 2);
         return $modifiedDmg;
     }
 

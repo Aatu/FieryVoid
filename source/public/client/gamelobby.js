@@ -1881,46 +1881,9 @@ expandFaction: function expandFaction(event) {
 		}
 
 		ajaxInterface.submitSlotAction("takeslot", slotid, function () {
-			gamedata.reloadFactions();
-		});
+            window.updateTierFilter();			
+		});	
 	},
-
-	reloadFactions: function reloadFactions() {
-		$.ajax({
-			type: 'GET',
-			url: 'getFactions.php',
-			dataType: 'json',    // ✅ Expect JSON
-			cache: false,        // ✅ Avoid stale results in some browsers
-			timeout: 15000       // ✅ Network protection
-		})
-		.done(function (factions, textStatus, xhr) {		
-			// ✅ HTTP status check
-			if (xhr.status !== 200) {
-				console.error(`Failed to load factions. HTTP ${xhr.status}`);
-				location.reload(); // fallback
-				return;
-			}
-
-			// ✅ Validate JSON
-			if (!factions || typeof factions !== 'object') {
-				console.error("Invalid factions JSON received:", factions);
-				location.reload(); // fallback
-				return;
-			}
-
-			// ✅ Update UI
-			gamedata.parseFactions(factions);  // rebuild headers/groups
-		})
-		.fail(function (xhr, textStatus, errorThrown) {		
-			let message = errorThrown || textStatus || "Unknown network error";
-			console.error("Failed to load factions:", message, xhr.responseText);
-
-			// ✅ Fallback to hard reload to recover
-			location.reload();
-		});
-	},
-
-
 
     onLeaveSlotClicked: function onLeaveSlotClicked() {
         var slot = $(".slot").has($(this));
@@ -1936,7 +1899,7 @@ expandFaction: function expandFaction(event) {
 			
 		//ajaxInterface.submitSlotAction("leaveslot", slotid);
 		ajaxInterface.submitSlotAction("leaveslot", slotid, function () {
-			reloadFactions();
+            window.updateTierFilter();	
 		});
 
 

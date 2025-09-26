@@ -62,12 +62,18 @@ class gaimOutpost extends SmallStarBaseFourSections{
 		$this->addRightSystem(new PacketTorpedo(4, 6, 5, 30, 150));
 		$this->addRightSystem(new Bulkhead(0, 4));
 		$this->addRightSystem(new Bulkhead(0, 4));
-
+		/*replaced by TAGed versions!
 		$this->addFrontSystem(new Structure( 4, 60));
 		$this->addAftSystem(new Structure( 4, 60));
 		$this->addLeftSystem(new Structure( 4, 60));
 		$this->addRightSystem(new Structure( 4, 60));
 		$this->addPrimarySystem(new Structure( 5, 60));
+		*/
+		$this->addPrimarySystem(new Structure( 5, 60));//needs to be called first for some reason - static call apparently fails for the first time...
+		$this->addFrontSystem(Structure::createAsOuter(4, 60, 270,90));
+		$this->addAftSystem(Structure::createAsOuter(4, 60, 90, 270));
+		$this->addLeftSystem(Structure::createAsOuter(4, 60, 180, 360));
+		$this->addRightSystem(Structure::createAsOuter(4, 60, 0, 180));
 		
 		$this->hitChart = array(			
 			0=> array(

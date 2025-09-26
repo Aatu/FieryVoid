@@ -70,15 +70,26 @@ class OrionBetaAM extends StarBaseSixSections{
 			$min = 0 + ($i*60);
 			$max = 120 + ($i*60);
 
+			$struct = Structure::createAsOuter(3, 100,$min,$max);
+			$hangar = new Hangar(3, 6, 6);
+			$hangar->startArc = $min;
+			$hangar->endArc = $max;
+			$cargo = new CargoBay(3, 12);
+			$cargo->startArc = $min;
+			$cargo->endArc = $max;			
+			$subReactor = new SubReactorUniversal(3, 18, 0, 0);
+			$subReactor->startArc = $min;
+			$subReactor->endArc = $max;
+
 			$systems = array(
 				new Railgun(3, 9, 6, $min, $max),
 				new AmmoMissileRackSO(3, 0, 0, $min, $max, $ammoMagazine, true), //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
 				new InterceptorMKI(3, 4, 1, $min, $max),
 				new StdParticleBeam(3, 4, 1, $min, $max),
-				new Hangar(3, 6, 6),
-				new SubReactorUniversal(3, 18, 0, 0),
-				new CargoBay (3, 12),
-				new Structure( 3, 100)
+				$hangar,
+				$subReactor,
+				$cargo,
+				$struct
 			);
 
 

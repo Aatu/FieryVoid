@@ -66,6 +66,17 @@ class HyachUtaraTor extends StarBaseSixSections{
 			$min = 0 + ($i*60);
 			$max = 120 + ($i*60);
 
+			$struct = Structure::createAsOuter(5, 150,$min,$max);
+			$hangar = new Hangar(5, 8, 6);
+			$hangar->startArc = $min;
+			$hangar->endArc = $max;
+			$cargoBay = new CargoBay(5, 36);
+			$cargoBay->startArc = $min;
+			$cargoBay->endArc = $max;
+			$subReactor = new SubReactorUniversal(5, 35, 0, 0);
+			$subReactor->startArc = $min;
+			$subReactor->endArc = $max;	
+
 			$systems = array(
 				new SpinalLaser(5, 12, 12, ($min+30), ($max-30)),
 				new BlastLaser(5, 10, 5, $min, $max),
@@ -78,10 +89,10 @@ class HyachUtaraTor extends StarBaseSixSections{
 				new MediumLaser(5, 6, 5, $min, $max),
 				new Interdictor(5, 4, 1, $min, $max),
 				new Interdictor(5, 4, 1, $min, $max),
-				new Hangar(5, 8, 6),
-				new CargoBay(5, 36),
-				new SubReactorUniversal(5, 35, 0, 0),
-				new Structure( 5, 150)
+				$hangar,
+				$cargoBay,
+				$subReactor,
+				$struct //new Structure(5, 150)
 			);
 
 			$loc = $this->locations[$i];
@@ -92,9 +103,9 @@ class HyachUtaraTor extends StarBaseSixSections{
 				4 => "TAG:Medium Laser",
 				5 => "TAG:Maser",
 				6 => "TAG:Interdictor",
-				9 => "Cargo Bay",
-				10 => "Sub Reactor",
-				11 => "Hangar",
+				9 => "TAG:Cargo Bay",
+				10 => "TAG:Sub Reactor",
+				11 => "TAG:Hangar",
 				18 => "Structure",
 				20 => "Primary",
 			);
