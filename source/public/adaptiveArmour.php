@@ -2,7 +2,6 @@
 
 header('Content-Type: application/json; charset=utf-8');
 
-
 // --- Includes ---
 require_once 'global.php';
 require_once __DIR__ . '/server/lib/Debug.php'; // Ensure debug logging still works
@@ -15,7 +14,6 @@ $turn   = isset($_GET['turn'])   ? (int)$_GET['turn']   : 0;
 if ($gameid <= 0 || $shipid <= 0) {
     http_response_code(400);
     echo json_encode(['error' => 'Missing or invalid gameid/shipid.']);
-    ob_end_flush();
     exit;
 }
 

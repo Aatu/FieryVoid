@@ -7,13 +7,53 @@ window.ajaxInterface = {
     pollcount: 0,
     submiting: false,
 
+    //new variables for home screeen to manage ajax requests
+    submitingGames: false,        // defensive flag
+    currentRequest: null,         // currently processing
+    nextRequest: null,            // last queued while busy
+    lastRequestTimeGames: 0,      // track debounce
+    debounceDelayGames: 300,      // ms  
 
-    //NEW VERSION FOR PHP 8    
-    getShipsForFaction: function getShipsForFaction(factionRequest, getFactionShipsCallback) {
+    //new variables for Fleet Selection screeen to manage ajax requests        
+    currentFaction: null,   // currently processing
+    nextFaction: null,      // last requested while busy
+    lastClickTime: {},      // per-faction debounce
+    debounceDelay: 300,     // ms
+
+    getShipsForFaction: function(factionRequest, callback) {
+        const now = Date.now();
+
+        // Debounce: ignore if clicked too soon on the same faction
+        if (this.lastClickTime[factionRequest] &&
+            now - this.lastClickTime[factionRequest] < this.debounceDelay) {
+            return;
+        }
+        this.lastClickTime[factionRequest] = now;
+
+        // If already processing, just replace the pending request
+        if (this.submiting) {
+            this.nextFaction = { factionRequest, callback }; // overwrite intentionally
+            return;
+        }
+
+        // Already fetching this faction, ignore
+        if (factionRequest === this.currentFaction) return;
+
+        // Send immediately
+        this._sendRequest(factionRequest, callback);
+    },
+
+    _sendRequest: function(factionRequest, callback) {
+        this.currentFaction = factionRequest;
+        this.nextFaction = null;
+        this.submiting = true;
+
+        console.log("Requesting faction:", factionRequest);
+
         fetch('gamelobbyloader.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ faction: factionRequest })
+            body: JSON.stringify({ faction: String(factionRequest) })
         })
         .then(response => {
             if (!response.ok) throw new Error('Network response was not ok');
@@ -21,18 +61,24 @@ window.ajaxInterface = {
         })
         .then(data => {
             if (data.error) {
-                ajaxInterface.errorAjax(null, null, data.error);
-                return;
+                this.errorAjax(null, null, data.error);
+            } else {
+                callback(data);
             }
-            getFactionShipsCallback(data);
         })
-        .catch(error => {
-            ajaxInterface.errorAjax(null, null, error.message);
-        });
-    },
+        .catch(error => this.errorAjax(null, null, error.message))
+        .finally(() => {
+            // mark request finished
+            this.currentFaction = null;
+            this.submiting = false;
 
-    react: function react() {
-        alert("callback");
+            // If user clicked again while busy, run that latest request now
+            if (this.nextFaction) {
+                const { factionRequest: nextF, callback: nextCb } = this.nextFaction;
+                this.nextFaction = null; // clear buffer
+                this._sendRequest(nextF, nextCb);
+            }
+        });
     },
 
 
@@ -224,7 +270,6 @@ window.ajaxInterface = {
 
         return saveData;
     },
-
 
 	getSavedFleets: function getSavedFleets(callback) {
         if (ajaxInterface.submiting) return;
@@ -731,22 +776,6 @@ submitSlotAction: function submitSlotAction(action, slotid, callback) {
         ajaxInterface.poll = setTimeout(ajaxInterface.pollGamedata, time);
     },
 
-
-    startPollingGames: function startPollingGames() {
-        ajaxInterface.pollGames();
-    },
-
-    pollGames: function pollGames() {
-        if (gamedata.waiting === false) return;
-
-        if (!gamedata.animating) {
-
-            animation.animateWaiting();
-
-            ajaxInterface.requestAllGames();
-        }
-    },
-
     requestGamedata: function requestGamedata() {
         // prevent overlap if already running
         if (ajaxInterface.submiting) return;
@@ -774,10 +803,40 @@ submitSlotAction: function submitSlotAction(action, slotid, callback) {
         });
     },
 
-    requestAllGames: function requestAllGames() {
-        // prevent overlap if already running
-        if (ajaxInterface.submiting) return;
-        ajaxInterface.submiting = true;
+    // Polling entry point for home screen
+    pollGames: function() {
+        if (gamedata.waiting === false) return;
+        if (!gamedata.animating) {
+            animation.animateWaiting();
+            ajaxInterface.requestAllGames();
+        }
+    },
+
+    requestAllGames: function() {
+        const now = Date.now();
+
+        // Debounce rapid triggers
+        if (now - ajaxInterface.lastRequestTimeGames < ajaxInterface.debounceDelayGames) return;
+        ajaxInterface.lastRequestTimeGames = now;
+
+        // Defensive check: prevent overlap if already running
+        if (ajaxInterface.submitingGames) {
+            // Queue only the last requested call
+            ajaxInterface.nextRequest = {};
+            return;
+        }
+
+        // Mark as submitting (defensive)
+        ajaxInterface.submitingGames = true;
+        ajaxInterface.submiting = true;  // your original flag
+
+        // Send the AJAX request
+        ajaxInterface._sendGameRequest();
+    },
+
+    _sendGameRequest: function() {
+        ajaxInterface.currentRequest = {};  // placeholder for inflight request
+        ajaxInterface.nextRequest = null;
 
         $.ajax({
             type: 'GET',
@@ -786,12 +845,21 @@ submitSlotAction: function submitSlotAction(action, slotid, callback) {
             data: {},
             success: ajaxInterface.successRequest,
             error: ajaxInterface.errorAjax,
-            complete: function () {
-                // always clear flag, even on error/timeout
+            complete: () => {
+                // Clear flags when request finishes
+                ajaxInterface.submitingGames = false;
                 ajaxInterface.submiting = false;
-            }            
+                ajaxInterface.currentRequest = null;
+
+                // If a request was queued while this ran, send it now
+                if (ajaxInterface.nextRequest) {
+                    ajaxInterface.nextRequest = null;
+                    ajaxInterface._sendRequest();
+                }
+            }
         });
     },
+
 
     getFirePhaseGames: function getFirePhaseGames() {
 
@@ -929,6 +997,45 @@ submitSlotAction: function submitSlotAction(action, slotid, callback) {
 
         ajaxInterface.poll = setTimeout(ajaxInterface.pollGamedata, time);
     },
+
+
+    //NEW-OLD VERSION FOR PHP 8   
+    /* 
+    getShipsForFaction: function getShipsForFaction(factionRequest, getFactionShipsCallback) {
+        if (ajaxInterface.submiting) return;
+
+        ajaxInterface.submiting = true;
+
+        fetch('gamelobbyloader.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ faction: factionRequest })
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('Network response was not ok');
+            ajaxInterface.submiting = false;            
+            return response.json();
+        })
+        .then(data => {
+            if (data.error) {
+                ajaxInterface.submiting = false;                
+                ajaxInterface.errorAjax(null, null, data.error);
+                return;
+            }
+            ajaxInterface.submiting = false;            
+            getFactionShipsCallback(data);
+        })
+        .catch(error => {
+            ajaxInterface.submiting = false;            
+            ajaxInterface.errorAjax(null, null, error.message);
+        });
+    },
+
+    react: function react() {
+        alert("callback");
+    },
+    
+
     */
 
 };

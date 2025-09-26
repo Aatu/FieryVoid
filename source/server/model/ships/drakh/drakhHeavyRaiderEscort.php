@@ -45,8 +45,8 @@ class DrakhHeavyRaiderEscort extends LCV{
 		$this->addPrimarySystem($sensors);
 	$this->addPrimarySystem(new Engine(4, 12, 0, 7, 2));
 	
-	$this->addFrontSystem(new customLtPhaseDisruptorShip(3, 0, 0, 240, 30));
-	$this->addFrontSystem(new customLtPhaseDisruptorShip(3, 0, 0, 330, 120));
+	$this->addFrontSystem(new customLtPhaseDisruptorShip(3, 0, 0, 240, 60));
+	$this->addFrontSystem(new customLtPhaseDisruptorShip(3, 0, 0, 300, 120));
 	
 	$this->addPrimarySystem(new AbsorbtionShield(2,6,4,1,0,360));
 	$this->addPrimarySystem(new Structure( 4, 30));
