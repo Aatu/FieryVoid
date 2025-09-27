@@ -1,12 +1,12 @@
 <?php
-class OrestesAlpha extends BaseShip{
+class OrestesAlphaAM extends BaseShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 450;
         $this->faction = "Earth Alliance (Early)";
-		$this->phpclass = "OrestesAlpha";
+		$this->phpclass = "OrestesAlphaAM";
 		$this->imagePath = "img/ships/orestes.png";
 		$this->shipClass = "Orestes System Monitor (Alpha)";
 //	        $this->variantOf = "Orestes System Monitor (Epsilon)";
@@ -30,6 +30,12 @@ class OrestesAlpha extends BaseShip{
 
 		$this->iniativebonus = -10;
 
+        //ammo magazine itself (AND its missile options)
+        $ammoMagazine = new AmmoMagazine(32); //pass magazine capacity - 12 rounds per launcher
+        $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
+        $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 32); //add full load of basic missiles
+        $this->enhancementOptionsEnabled[] = 'AMMO_H';//add enhancement options for other missiles - Class-L
+
 		$this->addPrimarySystem(new Reactor(4, 16, 0, 0));
 		$this->addPrimarySystem(new CnC(4, 16, 0, 0));
 		$this->addPrimarySystem(new Scanner(4, 14, 2, 4));
@@ -39,16 +45,16 @@ class OrestesAlpha extends BaseShip{
 		$this->addPrimarySystem(new LtBlastCannon(3, 4, 1, 0, 360));
 
 		$this->addFrontSystem(new Thruster(3, 15, 0, 4, 1));
-		$this->addFrontSystem(new EWOMissileRack(3, 6, 0, 240, 60));
+		$this->addFrontSystem(new AmmoMissileRackO(3, 0, 0, 240, 60, $ammoMagazine, false));
 		$this->addFrontSystem(new LightLaser(3, 4, 3, 300, 60));
 		$this->addFrontSystem(new LightPlasma(2, 4, 2, 270, 90));
 		$this->addFrontSystem(new LightLaser(3, 4, 3, 300, 60));
-		$this->addFrontSystem(new EWOMissileRack(3, 6, 0, 300, 120));
+		$this->addFrontSystem(new AmmoMissileRackO(2, 0, 0, 300, 120, $ammoMagazine, false));
 
 		$this->addAftSystem(new Thruster(4, 16, 0, 4, 2));
-		$this->addAftSystem(new EWOMissileRack(3, 6, 0, 120, 300));
+		$this->addAftSystem(new AmmoMissileRackO(2, 0, 0, 120, 300, $ammoMagazine, false));
 		$this->addAftSystem(new LightPlasma(2, 4, 2, 90, 270));
-		$this->addAftSystem(new EWOMissileRack(3, 6, 0, 60, 240));
+		$this->addAftSystem(new AmmoMissileRackO(2, 0, 0, 60, 240, $ammoMagazine, false));
 
 		$this->addLeftSystem(new Thruster(3, 15, 0, 3, 3));
 		$this->addLeftSystem(new MedBlastCannon(3, 5, 2, 180, 360));

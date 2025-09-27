@@ -1222,7 +1222,7 @@ class EWOMissileRack extends MissileLauncher
     public $loadingtime = 3;
     public $iconPath = "missile1.png";
 
-    public $fireControl = array(1, 1, 1); // fighters, <mediums, <capitals 
+    public $fireControl = array(2, 2, 2); // fighters, <mediums, <capitals 
     
     public function getDamage($fireOrder)
     {

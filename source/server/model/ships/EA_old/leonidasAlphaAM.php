@@ -1,12 +1,12 @@
 <?php
-class LeonidasAlpha extends OSAT{
+class LeonidasAlphaAM extends OSAT{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 100;
         $this->faction = "Earth Alliance (Early)";
-        $this->phpclass = "LeonidasAlpha";
+        $this->phpclass = "LeonidasAlphaAM";
         $this->imagePath = "img/ships/hector.png";
         $this->shipClass = 'Leonidas Satellite (Alpha)';
  		$this->unofficial = 'S'; //HRT design released after AoG demise
@@ -23,8 +23,14 @@ class LeonidasAlpha extends OSAT{
         $this->pivotcost = 0;	
         $this->iniativebonus = 60;
 
-        $this->addFrontSystem(new EWOMissileRack(3, 6, 0, 270, 90, true));
-        $this->addFrontSystem(new EWOMissileRack(3, 6, 0, 270, 90, true));
+        //ammo magazine itself (AND its missile options)
+        $ammoMagazine = new AmmoMagazine(16); //pass magazine capacity - 12 rounds per launcher
+        $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
+        $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 16); //add full load of basic missiles
+        $this->enhancementOptionsEnabled[] = 'AMMO_H';//add enhancement options for other missiles - Class-L
+
+        $this->addFrontSystem(new AmmoMissileRackO(3, 0, 0, 270, 90, $ammoMagazine, true));
+        $this->addFrontSystem(new AmmoMissileRackO(3, 0, 0, 270, 90, $ammoMagazine, true));
         $this->addFrontSystem(new LtBlastCannon(2, 4, 1, 180, 360));
         $this->addFrontSystem(new LtBlastCannon(2, 4, 1, 0, 360));
         $this->addFrontSystem(new LtBlastCannon(2, 4, 1, 0, 180));
