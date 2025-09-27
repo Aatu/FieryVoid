@@ -25,7 +25,6 @@ spl_autoload_register(
                 'altarian' => '/server/model/ships/centauri/altarian.php',
                 'altarianmagnus' => '/server/model/ships/centauri/altarianmagnus.php',
                 'altaron' => '/server/model/ships/centauri/altaron.php',
-                'altarus' => '/server/model/ships/centauri/Altarus.php',
                 'aluin' => '/server/model/ships/yolu/aluin.php',
                 'alzara' => '/server/model/ships/centauri_raiders/alzara.php',
                 'amar' => '/server/model/ships/centauri/amar.php',
@@ -92,7 +91,6 @@ spl_autoload_register(
                 'balsavor' => '/server/model/ships/centauri_old/balsavor.php',
                 'balvarin' => '/server/model/ships/centauri/balvarin.php',
                 'balvarix' => '/server/model/ships/centauri/balvarix.php',
-                'balvarus' => '/server/model/ships/centauri/Balvarus.php',
                 'bamediumgunboat' => '/server/model/ships/beltalliance/baMediumGunboat.php',
                 'bamediumgunboatearly' => '/server/model/ships/beltalliance/baMediumGunboatEarly.php',
                 'bamediumgunboatpulse' => '/server/model/ships/beltalliance/baMediumGunboatPulse.php',
@@ -224,7 +222,6 @@ spl_autoload_register(
                 'damageentry' => '/server/model/BaseClasses.php',
                 'damagereductionremoved' => '/server/model/cricialClasses.php',
                 'dargan' => '/server/model/ships/centauri/dargan.php',
-                'darius' => '/server/model/ships/centauri/Darius.php',
                 'darkhawk' => '/server/model/ships/drazi/darkhawk.php',
                 //'darkhawkfull' => '/server/model/ships/drazi/darkhawkFull.php',
                 'darkner' => '/server/model/ships/centauri/darkner.php',
@@ -285,7 +282,6 @@ spl_autoload_register(
                 'egret1939' => '/server/model/ships/drazi_old/egret1939.php',
                 'electropulsegun' => '/server/model/weapons/specialWeapons.php',
                 'elintscanner' => '/server/model/systems/baseSystems.php',
-                'elutai' => '/server/model/ships/centauri/Elutai.php',
                 'elutarian' => '/server/model/ships/centauri/elutarian.php',
                 'embolter' => '/server/model/weapons/specialWeapons.php',
                 'emperorstransport' => '/server/model/ships/centauri/emperorsTransport.php',
@@ -3409,6 +3405,10 @@ spl_autoload_register(
 						//What If - Alternative design concepts
 						'dagkar_wi' => '/server/model/ships/whatif/dagkar_WI.php',	
 						'gquan_wi' => '/server/model/ships/whatif/gquan_WI.php',	
+						'altarus_wi' => '/server/model/ships/whatif/Altarus_WI.php',
+						'balvarus_wi' => '/server/model/ships/whatif/Balvarus_WI.php',
+						'darius_wi' => '/server/model/ships/whatif/Darius_WI.php',
+						'elutai_wi' => '/server/model/ships/whatif/Elutai_WI.php',
 						'vorchan_wi' => '/server/model/ships/whatif/vorchan_WI.php',
 						
 				// For the future
