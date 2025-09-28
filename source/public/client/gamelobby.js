@@ -161,6 +161,9 @@ window.gamedata = {
 		  case 'Torata Regency':
 			powerRating = 'Tier 1; League Faction';
 			break;
+		  case 'Torvalus Speculators':
+			powerRating = 'Tier Ancients';
+			break;			
 		  case 'Usuuth Coalition':
 			powerRating = 'Tier 3; Minor Faction';
 			break;
@@ -2452,7 +2455,7 @@ expandFaction: function expandFaction(event) {
 			confirm.warning(fleetname + " saved!. <br>(ID #" + response.listId + ")")
 		});
 	},
-
+/*
 	filterSavedFleet: function filterSavedFleet(cachedFleets) {
 			const slot = playerManager.getSlotById(gamedata.selectedSlot);
 			if(slot){ //sometimes slot hasn't been selected yet.
@@ -2471,14 +2474,14 @@ expandFaction: function expandFaction(event) {
 				return cachedFleets;				
 			}	
 	},		
-
+*/
     // Populate dropdown list
 	populateFleetDropdown: function populateFleetDropdown() {
 		fleetDropdownList.innerHTML = '';
 
-		let filteredFleets = gamedata.filterSavedFleet(cachedFleets);
+		//let filteredFleets = gamedata.filterSavedFleet(cachedFleets);
 
-		if (!filteredFleets || filteredFleets.length === 0) {
+		if (!cachedFleets || cachedFleets.length === 0) {
 			const empty = document.createElement('div');
 			empty.textContent = '< No saved fleets available >';
 			empty.style.textAlign = 'center';
@@ -2488,8 +2491,8 @@ expandFaction: function expandFaction(event) {
 		}
 
 		// Split fleets into user and default
-		const userFleets = filteredFleets.filter(f => f.userid !== 0);
-		const defaultFleets = filteredFleets.filter(f => f.userid === 0);
+		const userFleets = cachedFleets.filter(f => f.userid !== 0);
+		const defaultFleets = cachedFleets.filter(f => f.userid === 0);
 
 		// Helper to render a fleet item
 		const renderFleetItem = (fleet) => {
@@ -2591,7 +2594,7 @@ expandFaction: function expandFaction(event) {
 		// Add a divider if default fleets exist
 		if (defaultFleets.length > 0) {
 			const divider = document.createElement('div');
-			divider.textContent = '---------------------------------------------------------------------------';
+			divider.textContent = '-----------------------------------------------------------------------------------';
 			divider.style.textAlign = 'center';
 			divider.style.color = '#2b2b2bff';
 			divider.style.margin = '0px 0';
@@ -2604,20 +2607,53 @@ expandFaction: function expandFaction(event) {
 		}
 	},
 
+	checkFleetCost: function checkFleetCost(listId) {
+		var pointsAvailable = 0;
+
+		const slot = playerManager.getSlotById(gamedata.selectedSlot);
+		const fleet = cachedFleets.find(f => f.id === listId);	
+
+		if(slot){ //sometimes slot hasn't been selected yet.
+			var slotPoints = slot.points ?? 0;
+			var spentPoints = 0;
+			for (var i in gamedata.ships) {
+				var lship = gamedata.ships[i];
+				if (lship.slot != gamedata.selectedSlot) continue;
+				spentPoints += lship.pointCost;
+			}
+			pointsAvailable = slotPoints - spentPoints;
+		}		
+		if (!fleet) return false;		
+		if(fleet.points > pointsAvailable){
+			return false;
+		}else{
+			return true;				
+		}	
+	},	
+
 
     loadSavedFleet: function loadSavedFleet(listId) {
-		ajaxInterface.loadSavedFleet(listId, function(response) {
-			//console.log("AJAX response:", ships); // debug raw response
 
-			if (response.ships && Array.isArray(response.ships) && response.ships.length > 0) {
-				gamedata.doLoadFleet(response.ships);
-				fleetDropdownButton.textContent = 'Load a Saved Fleet';
-				//confirm.warning("Fleet loaded!");
-			} else {
-				console.error("Load failed:", ships);
-				confirm.warning("Failed to load fleet.");
-			}
-		});		 	
+		var canAfford = gamedata.checkFleetCost(listId);
+
+		if(canAfford){
+
+			ajaxInterface.loadSavedFleet(listId, function(response) {
+				//console.log("AJAX response:", ships); // debug raw response
+
+				if (response.ships && Array.isArray(response.ships) && response.ships.length > 0) {
+					gamedata.doLoadFleet(response.ships);
+					fleetDropdownButton.textContent = 'Load a Saved Fleet';
+					//confirm.warning("Fleet loaded!");
+				} else {
+					console.error("Load failed:", response.ships);
+					confirm.warning("Failed to load fleet.");
+				}
+			});		
+		}else{
+			confirm.warning("You cannot afford this fleet!");
+			return;				
+		}	 	
     },
 
     loadSavedFleetById: function loadSavedFleetById(listId) {
