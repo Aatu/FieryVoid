@@ -11,7 +11,7 @@ class Ishtakaton extends StarBaseSixSections
 		$this->phpclass = "Ishtakaton";
 		$this->shipClass = "Ishtakaton Techbase";
 		$this->imagePath = "img/ships/BrakiriIshtaka.png";
-		$this->canvasSize = 320;
+		$this->canvasSize = 280;
 		$this->fighters = array("normal" => 24);
 		$this->isd = 2256;
 		$this->notes = 'Im-Rehsa Technologies';//Corporation producing the design
