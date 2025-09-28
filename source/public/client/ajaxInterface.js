@@ -803,6 +803,10 @@ submitSlotAction: function submitSlotAction(action, slotid, callback) {
         });
     },
 
+    startPollingGames: function() {
+        this.pollGames();
+    },
+
     // Polling entry point for home screen
     pollGames: function() {
         if (gamedata.waiting === false) return;
