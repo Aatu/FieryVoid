@@ -11,7 +11,7 @@ class Urshtalu extends StarBaseSixSections
 		$this->phpclass = "Urshtalu";
 		$this->shipClass = "Urshtalu Starbase";
 		$this->imagePath = "img/ships/PakmaraUrshtalu.png";
-		$this->canvasSize = 310;
+		$this->canvasSize = 256;
 		$this->fighters = array("normal" => 36);
 		$this->isd = 2221;
 

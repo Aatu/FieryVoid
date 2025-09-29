@@ -11,7 +11,7 @@ class Tyllz extends StarBaseSixSections
 		$this->phpclass = "Tyllz";
 		$this->shipClass = "Tyllz Sector Trading Post";
 		$this->imagePath = "img/ships/VreeTyllz.png";
-		$this->canvasSize = 310;
+		$this->canvasSize = 256;
 		$this->fighters = array("normal" => 24);
 		$this->isd = 2252;
 
