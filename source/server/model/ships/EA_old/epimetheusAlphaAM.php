@@ -1,12 +1,12 @@
 <?php
-class EpimetheusAlpha extends BaseShip{
+class EpimetheusAlphaAM extends BaseShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 450;
         $this->faction = "Earth Alliance (Early)";
-        $this->phpclass = "EpimetheusAlpha";
+        $this->phpclass = "EpimetheusAlphaAM";
         $this->imagePath = "img/ships/epimetheus.png";
         $this->shipClass = "Epimetheus Jump Cruiser (Alpha)";
         $this->shipSizeClass = 3;
@@ -24,6 +24,12 @@ class EpimetheusAlpha extends BaseShip{
         $this->rollcost = 2;
         $this->pivotcost = 2;
         $this->iniativebonus = 0;
+
+        //ammo magazine itself (AND its missile options)
+        $ammoMagazine = new AmmoMagazine(16); //pass magazine capacity - 12 rounds per launcher
+        $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
+        $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 16); //add full load of basic missiles
+        $this->enhancementOptionsEnabled[] = 'AMMO_H';//add enhancement options for other missiles - Class-L
 
         $this->addPrimarySystem(new Reactor(4, 16, 0, 0));
         $this->addPrimarySystem(new CnC(4, 16, 0, 0));
@@ -47,11 +53,11 @@ class EpimetheusAlpha extends BaseShip{
         $this->addAftSystem(new MediumPlasma(3, 5, 3, 120, 240));
 
         $this->addLeftSystem(new Thruster(3, 11, 0, 3, 3));
-		$this->addLeftSystem(new EWOMissileRack(3, 6, 0, 240, 360));
+		$this->addLeftSystem(new AmmoMissileRackO(3, 0, 0, 240, 360, $ammoMagazine, false));
         $this->addLeftSystem(new MediumPlasma(3, 5, 3, 180, 360));
 
         $this->addRightSystem(new Thruster(3, 11, 0, 3, 4));
-		$this->addRightSystem(new EWOMissileRack(3, 6, 0, 0, 120));
+		$this->addRightSystem(new AmmoMissileRackO(3, 0, 0, 0, 120, $ammoMagazine, false));
         $this->addRightSystem(new MediumPlasma(3, 5, 3, 0, 180));
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
