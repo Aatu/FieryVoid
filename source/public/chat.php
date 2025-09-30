@@ -28,9 +28,15 @@ if (! isset($chatelement))
         _currentXhr: null,
 
         initChat: function(){
-            $(chat.chatElement + " .chatinput").on("keydown", chat.onKeyUp);
-            $(chat.chatElement + " .chatinput").on("focus", chat.onFocus);
-            $(chat.chatElement + " .chatinput").on("blur", chat.onBlur);
+$(chat.chatElement + " .chatinput").on("keydown", function(e){
+    chat.onKeyUp.call(this, e);
+});
+$(chat.chatElement + " .chatinput").on("focus", function(e){
+    chat.onFocus.call(this, e);
+});
+$(chat.chatElement + " .chatinput").on("blur", function(e){
+    chat.onBlur.call(this, e);
+});
             $(chat.chatElement).on('onshow', chat.resizeChat);
 
             var h = $(chat.chatElement + " .chatcontainer").height();
@@ -52,7 +58,103 @@ if (! isset($chatelement))
             });
         },
 
-        // ... keep other methods unchanged except where modified below ...
+        resizeChat: function(){
+            chat.setLastTimeChecked();
+            chat.removeNewMessageTag();
+            var h = $(chat.chatElement + " .chatcontainer").height();
+            $(chat.chatElement + " .chatMessages").css("height", (h-20)+"px");
+            var c = $(chat.chatElement + " .chatMessages");
+            c.scrollTop(c[0].scrollHeight);
+            chat.getLastTimeChecked();
+        },
+
+        onFocus: function(){
+            if (window.windowEvents) windowEvents.chatfocus = true;
+        },
+
+        onBlur: function(){
+            if (window.windowEvents) windowEvents.chatfocus = false;
+        },
+
+        onKeyUp: function(e){
+            e.stopPropagation();
+            if (e.keyCode == 13){
+                var input = $(this);
+                var value = input.val();
+                if (value.length === 0) return;
+
+                input.val("");
+                chat.submitChatMessage(value);
+            }
+        },
+
+        parseChatData: function(data){
+            var c = $(chat.chatElement + " .chatMessages");
+            var scroll = false;
+
+            for (var i in data){
+                var message = data[i];
+                var mine = message.userid == chat.playerid ? " mine" : "";
+                var ingame = chat.gameid == 0 ? '<span class="chatglobal"></span>' : '<span class="chatingame"></span>';
+
+                if(message.userid != chat.playerid){
+                    chat.lastTimeStamp = message.time;
+                }
+
+                var e = $('<div class="chatmessage">'+ingame+
+                          '<span class="chattime">('+message.time+')</span> '+
+                          '<span class="chatuser'+mine+'">'+message.username+': </span>'+
+                          '<span class="chattext">'+message.message+'</span></div>');
+                e.appendTo(c);
+                chat.lastid = message.id;
+                scroll = true;
+            }
+
+            if(chat.checkTimesForLightup(chat.lastTimeStamp, chat.lastTimeChecked)){
+                var thisChat = chat.gameid == 0 ? "globalChatTab" : "chatTab";
+                if(document.getElementById(thisChat) && 
+                   !document.getElementById(thisChat).classList.contains("selected")){
+                    document.getElementById(thisChat).classList.add("newMessage");
+                }
+            }
+
+            if(scroll) c.scrollTop(c[0].scrollHeight);
+        },
+
+        checkTimesForLightup: function(timeStamp, lastChecked){
+            if(!timeStamp || !lastChecked) return false;
+            return chat.compareTimes(chat.parseTime(timeStamp), chat.parseTime(lastChecked)) > 0;
+        },
+
+        parseTime: function(timeString){
+            return [
+                parseInt(timeString.substring(0,4)),
+                parseInt(timeString.substring(5,7)),
+                parseInt(timeString.substring(8,10)),
+                parseInt(timeString.substring(11,13)),
+                parseInt(timeString.substring(14,16)),
+                parseInt(timeString.substring(17))
+            ];
+        },
+
+        compareTimes: function(timeArray1, timeArray2){
+            for(var i in timeArray1){
+                if(timeArray1[i] > timeArray2[i]) return 1;
+                if(timeArray1[i] < timeArray2[i]) return -1;
+            }
+            return 0;
+        },
+
+        startPolling: function(){
+            if(chat.polling) return;
+            chat.polling = true;
+            setTimeout(chat.requestChatdata, 2000); //Set initial polling to 1 sec to load chat, then it'll go to 8secs.
+        },
+
+        removeNewMessageTag: function(){
+            var el = chat.gameid == 0 ? "globalChatTab" : "chatTab";
+            document.getElementById(el)?.classList.remove("newMessage");
+        },
 
         setLastTimeChecked: function(){
             if (!chat.polling) return;
@@ -66,7 +168,7 @@ if (! isset($chatelement))
             });
         },
 
-        getLastTimeChecked: function(){
+         getLastTimeChecked: function(){
             if (!chat.polling) return;
             chat._currentXhr = $.ajax({
                 type: 'GET',
@@ -76,6 +178,15 @@ if (! isset($chatelement))
                 success: chat.successGetLastTimeChecked,
                 error: function(){ setTimeout(chat.getLastTimeChecked, 8000); }
             });
+        },
+
+        successSetLastTimeChecked: function(data){
+            if(data.error) window.confirm.exception(data, function(){});
+        },
+
+        successGetLastTimeChecked: function(data){
+            if(data.error) window.confirm.exception(data, function(){});
+            else chat.lastTimeChecked = data.lastCheckGame;
         },
 
         submitChatMessage: function(message){
@@ -111,7 +222,7 @@ if (! isset($chatelement))
             chat.setLastTimeChecked();
         },
 
-        requestChatdata: function(){
+         requestChatdata: function(){
             if(chat.requesting || !chat.polling) return;
             chat.requesting = true;
             chat._currentXhr = $.ajax({
@@ -136,8 +247,13 @@ if (! isset($chatelement))
             }
         },
 
-        // rest of your methods...
-    };
+
+        successSubmit: function(data){
+            if(data.error) window.confirm.exception(data, function(){});
+        },
+
+    }
+
 
     // register DOM ready AFTER chat is defined
     jQuery(function(){
