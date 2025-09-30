@@ -28,15 +28,15 @@ if (! isset($chatelement))
         _currentXhr: null,
 
         initChat: function(){
-$(chat.chatElement + " .chatinput").on("keydown", function(e){
-    chat.onKeyUp.call(this, e);
-});
-$(chat.chatElement + " .chatinput").on("focus", function(e){
-    chat.onFocus.call(this, e);
-});
-$(chat.chatElement + " .chatinput").on("blur", function(e){
-    chat.onBlur.call(this, e);
-});
+            $(chat.chatElement + " .chatinput").on("keydown", function(e){
+                chat.onKeyUp.call(this, e);
+            });
+            $(chat.chatElement + " .chatinput").on("focus", function(e){
+                chat.onFocus.call(this, e);
+            });
+            $(chat.chatElement + " .chatinput").on("blur", function(e){
+                chat.onBlur.call(this, e);
+            });
             $(chat.chatElement).on('onshow', chat.resizeChat);
 
             var h = $(chat.chatElement + " .chatcontainer").height();
