@@ -15,40 +15,38 @@ window.ajaxInterface = {
     debounceDelayGames: 300,      // ms  
 
     //new variables for Fleet Selection screeen to manage ajax requests        
-    currentFaction: null,       // currently processing
-    nextFaction: null,          // last requested while busy
-    lastClickTime: {},          // track per-faction last click
-    debounceDelay: 300,         // ms
-
+    currentFaction: null,   // currently processing
+    nextFaction: null,      // last requested while busy
+    lastClickTime: {},      // per-faction debounce
+    debounceDelay: 300,     // ms
 
     getShipsForFaction: function(factionRequest, callback) {
         const now = Date.now();
 
-        // Debounce: ignore if clicked too soon after last click on this faction
-        if (ajaxInterface.lastClickTime[factionRequest] &&
-            now - ajaxInterface.lastClickTime[factionRequest] < ajaxInterface.debounceDelay) {
+        // Debounce: ignore if clicked too soon on the same faction
+        if (this.lastClickTime[factionRequest] &&
+            now - this.lastClickTime[factionRequest] < this.debounceDelay) {
             return;
         }
-        ajaxInterface.lastClickTime[factionRequest] = now;
+        this.lastClickTime[factionRequest] = now;
 
-        // Defensive check: if already marked submitting, do nothing
-        if (ajaxInterface.submiting) {
-            // save last requested faction to process after current finishes
-            ajaxInterface.nextFaction = { factionRequest, callback };
+        // If already processing, just replace the pending request
+        if (this.submiting) {
+            this.nextFaction = { factionRequest, callback }; // overwrite intentionally
             return;
         }
 
-        // Already processing this faction: do nothing
-        if (factionRequest === ajaxInterface.currentFaction) return;
+        // Already fetching this faction, ignore
+        if (factionRequest === this.currentFaction) return;
 
-        // No request in-flight, send immediately
+        // Send immediately
         this._sendRequest(factionRequest, callback);
     },
 
     _sendRequest: function(factionRequest, callback) {
-        ajaxInterface.currentFaction = factionRequest;
-        ajaxInterface.nextFaction = null;
-        ajaxInterface.submiting = true;   // defensive flag
+        this.currentFaction = factionRequest;
+        this.nextFaction = null;
+        this.submiting = true;
 
         console.log("Requesting faction:", factionRequest);
 
@@ -63,22 +61,22 @@ window.ajaxInterface = {
         })
         .then(data => {
             if (data.error) {
-                ajaxInterface.errorAjax(null, null, data.error);
+                this.errorAjax(null, null, data.error);
             } else {
                 callback(data);
             }
         })
-        .catch(error => ajaxInterface.errorAjax(null, null, error.message))
+        .catch(error => this.errorAjax(null, null, error.message))
         .finally(() => {
-            // Finished current request
-            ajaxInterface.currentFaction = null;
-            ajaxInterface.submiting = false; // clear defensive flag
+            // mark request finished
+            this.currentFaction = null;
+            this.submiting = false;
 
-            // If a request was queued during processing, send it now
-            if (ajaxInterface.nextFaction) {
-                const { factionRequest: nextF, callback: nextCb } = ajaxInterface.nextFaction;
-                ajaxInterface.nextFaction = null;
-                ajaxInterface._sendRequest(nextF, nextCb);
+            // If user clicked again while busy, run that latest request now
+            if (this.nextFaction) {
+                const { factionRequest: nextF, callback: nextCb } = this.nextFaction;
+                this.nextFaction = null; // clear buffer
+                this._sendRequest(nextF, nextCb);
             }
         });
     },
@@ -803,6 +801,10 @@ submitSlotAction: function submitSlotAction(action, slotid, callback) {
                 ajaxInterface.submiting = false;
             }
         });
+    },
+
+    startPollingGames: function() {
+        this.pollGames();
     },
 
     // Polling entry point for home screen
