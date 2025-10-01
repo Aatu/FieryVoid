@@ -3407,8 +3407,10 @@ spl_autoload_register(
 						'gquan_wi' => '/server/model/ships/whatif/gquan_WI.php',	
 						'altarus_wi' => '/server/model/ships/whatif/Altarus_WI.php',
 						'balvarus_wi' => '/server/model/ships/whatif/Balvarus_WI.php',
+						'dargarian_wi' => '/server/model/ships/whatif/Dargarian_WI.php',
 						'darius_wi' => '/server/model/ships/whatif/Darius_WI.php',
 						'elutai_wi' => '/server/model/ships/whatif/Elutai_WI.php',
+						'mograte_wi' => '/server/model/ships/whatif/Mograte_WI.php',
 						'vorchan_wi' => '/server/model/ships/whatif/vorchan_WI.php',
 						
 				// For the future
