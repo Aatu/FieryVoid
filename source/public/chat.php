@@ -10,10 +10,7 @@ if (! isset($chatelement))
 <link href="styles/chat.css" rel="stylesheet" type="text/css">
 <script>
 (function(){
-    jQuery(function(){
-        chat.initChat();
-    });
-
+    // Define chat first
     var chat = {
 
         polling: false,
@@ -27,10 +24,19 @@ if (! isset($chatelement))
         playerid: <?php print(isset($_SESSION["user"]) ? $_SESSION["user"] : '""') ?>,
         chatElement: <?php print("'$chatelement'") ?>,
 
+        // place to store current jqXhr so we can abort on unload
+        _currentXhr: null,
+
         initChat: function(){
-            $(chat.chatElement + " .chatinput").on("keydown", chat.onKeyUp);
-            $(chat.chatElement + " .chatinput").on("focus", chat.onFocus);
-            $(chat.chatElement + " .chatinput").on("blur", chat.onBlur);
+            $(chat.chatElement + " .chatinput").on("keydown", function(e){
+                chat.onKeyUp.call(this, e);
+            });
+            $(chat.chatElement + " .chatinput").on("focus", function(e){
+                chat.onFocus.call(this, e);
+            });
+            $(chat.chatElement + " .chatinput").on("blur", function(e){
+                chat.onBlur.call(this, e);
+            });
             $(chat.chatElement).on('onshow', chat.resizeChat);
 
             var h = $(chat.chatElement + " .chatcontainer").height();
@@ -38,8 +44,18 @@ if (! isset($chatelement))
             var c = $(chat.chatElement + " .chatMessages");
             c.scrollTop(c[0].scrollHeight);
 
+            // start polling only once
             chat.startPolling();
             chat.getLastTimeChecked();
+
+            // abort outstanding requests on navigation away
+            $(window).on('beforeunload.chat', function(){
+                if(chat._currentXhr && typeof chat._currentXhr.abort === "function"){
+                    try { chat._currentXhr.abort(); } catch(e){}
+                }
+                chat.polling = false;
+                chat.requesting = false;
+            });
         },
 
         resizeChat: function(){
@@ -141,7 +157,8 @@ if (! isset($chatelement))
         },
 
         setLastTimeChecked: function(){
-            $.ajax({
+            if (!chat.polling) return;
+            chat._currentXhr = $.ajax({
                 type: 'POST',
                 url: 'playerChatInfo.php',
                 dataType: 'json',
@@ -151,8 +168,9 @@ if (! isset($chatelement))
             });
         },
 
-        getLastTimeChecked: function(){
-            $.ajax({
+         getLastTimeChecked: function(){
+            if (!chat.polling) return;
+            chat._currentXhr = $.ajax({
                 type: 'GET',
                 url: 'playerChatInfo.php',
                 dataType: 'json',
@@ -173,27 +191,47 @@ if (! isset($chatelement))
 
         submitChatMessage: function(message){
             chat.message = message;
-            $.ajax({
-                type: 'POST',
-                url: 'chatdata.php',
-                dataType: 'json',
-                data: { gameid: chat.gameid, message: message },
-                success: chat.successSubmit,
-                error: function(){ $.ajax(this); }
-            });
+
+            // small retry limit and exponential backoff
+            var attempt = 0;
+            var maxAttempts = 4;
+
+            function doSend(delay){
+                if (!chat.polling) return; // avoid when shutting down
+                chat._currentXhr = $.ajax({
+                    type: 'POST',
+                    url: 'chatdata.php',
+                    dataType: 'json',
+                    data: { gameid: chat.gameid, message: message },
+                    success: function(data){
+                        chat.successSubmit(data);
+                    },
+                    error: function(jqXHR, textStatus){
+                        attempt++;
+                        if (attempt <= maxAttempts){
+                            // backoff: 500ms, 1000ms, 2000ms, 4000ms ...
+                            setTimeout(function(){ doSend(); }, 500 * Math.pow(2, attempt-1));
+                        } else {
+                            console.error("Failed to submit chat message after " + maxAttempts + " attempts: " + textStatus);
+                        }
+                    }
+                });
+            }
+            doSend();
+
             chat.setLastTimeChecked();
         },
 
-        requestChatdata: function(){
-            if(chat.requesting) return;
+         requestChatdata: function(){
+            if(chat.requesting || !chat.polling) return;
             chat.requesting = true;
-            $.ajax({
+            chat._currentXhr = $.ajax({
                 type: 'GET',
                 url: 'chatdata.php',
                 dataType: 'json',
                 data: { gameid: chat.gameid, lastid: chat.lastid },
                 success: chat.successRequest,
-                error: function(){ setTimeout(chat.requestChatdata, 8000); }
+                error: function(){ chat.requesting = false; setTimeout(chat.requestChatdata, 8000); }
             });
         },
 
@@ -201,18 +239,27 @@ if (! isset($chatelement))
             chat.requesting = false;
             if(data.error){
                 window.confirm.exception(data, function(){});
-                chat.requesting = true;
+                // don't block further polling; schedule next attempt
+                setTimeout(chat.requestChatdata, 8000);
             }else{
                 chat.parseChatData(data);
                 setTimeout(chat.requestChatdata, 8000);
             }
         },
 
+
         successSubmit: function(data){
             if(data.error) window.confirm.exception(data, function(){});
         },
 
     }
+
+
+    // register DOM ready AFTER chat is defined
+    jQuery(function(){
+        chat.initChat();
+    });
+
 })();
 </script>
 
