@@ -183,7 +183,7 @@ function buildCurves(shipIcon, turn) {
         return posChanged || facingChanged || headingChanged;
     });
 
-    if (moves.length <= 1) {
+    if (moves.length <= 0) {
         return [];
     }
 
@@ -268,10 +268,11 @@ function buildCurves(shipIcon, turn) {
             return { turnAngle: turn, startAngle: angleOld, endAngle: angleNew };
         }
 
-        return { turnAngle: buildTurn(endMove), startAngle: angleOld, endAngle: angleNew };
+        return { turnAngle: buildTurn(endMove, startFacing), startAngle: angleOld, endAngle: angleNew };
     }
 
-    function buildTurn(endMove) {
+    function buildTurn(endMove, startFacing) {
+        if(endMove.oldFacings.length == 0) endMove.oldFacings[0] = startFacing;
         var facings = endMove.oldFacings.concat(endMove.facing);
 
         var turn = 0;
