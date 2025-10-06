@@ -1446,7 +1446,7 @@ window.weaponManager = {
 
         debug && console.log("weaponManager target ship", ship, system);
 
-        if (shipManager.isDestroyed(selectedShip)) return;
+        if (shipManager.isDestroyed(selectedShip) || shipManager.isDisabled(selectedShip)) return;
         if(ship.Huge > 0) return; //Do not allow targeting of large muti-hex terrain.
 
         var blockedLosHex = weaponManager.getBlockedHexes();
@@ -1683,7 +1683,7 @@ window.weaponManager = {
 
 	    
     targetHex: function targetHex(selectedShip, hexpos) {
-        if (shipManager.isDestroyed(selectedShip)) return;
+        if (shipManager.isDestroyed(selectedShip) || shipManager.isDisabled(selectedShip)) return;
 
         var toUnselect = Array();
         for (var i in gamedata.selectedSystems) {

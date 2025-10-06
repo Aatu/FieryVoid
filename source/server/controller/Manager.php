@@ -1172,7 +1172,8 @@ class Manager{
                 }
             }
     
-            $ships[(int)($value["id"] ?? count($ships))] = $ship;
+            //$ships[(int)($value["id"] ?? count($ships))] = $ship;
+            $ships[$value["id"] ?? uniqid('ship_')] = $ship; //Apply a unique entry, as it seemed Loaded Fleets were overwriting a single ship sometimes.  
         }
     
         return $ships;

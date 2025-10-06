@@ -265,7 +265,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
     universe.</p>
     <p>Specific raider groups will be listed in the unit name, e.g. ‘Centauri Privateer’, meaning that  any unit without a faction prefix is considered a generic raider and can be fielded by any faction. 
         It is near-impossible to create a Fleet Checker for all of the various combinations within this faction, 
-        so a bit of player responsibility is required in order to choose an appropriate fleet. Summaries of the Raider groups in Fiery Void are listed below:</p>
+        so a bit of player responsibility is required in order to choose an appropriate fleet. Summaries of the Raider mini-Factions in Fiery Void are listed below:</p>
        <h5>Brakiri Shokhan</h5>
             <li>The Shokhan grew out of various Brakiri groups that did not integrate into the modern Brakiri society. Many Shokhan operate purely as raiders, 
                 but it is suspected that some receive outside support from Brakiri corporations or other entities and fulfill the role of privateers and sometimes mercenaries.</li>
@@ -287,13 +287,13 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             <li>The IML fields three unique units, the Attack Cruiser,  Armed Transport, and Missile Frigate along with variants of each.</li>
             <li>The IML use Armed Shuttles and Delta-Vs almost exclusively, but have restricted access to Star Snakes and Lellat fighters.</li>   
        <h5>Imperial Star Legion</h5>
-            <li>A raider group that supported the Army of Light int he Shadow War, but then had bigger plans for the future and wound up fighting the Minbari Protectorate.</li>
-            <li>They operate several converted hulls from the main powers including a Lias, two Tethys, a Kutai, a Mograth, two Vorchans, two Sho'Kos, and a Thentus.</li>
-            <li>The Junkyard Dogs primarily used ArmedShuttles, Delta-Vs, and Double-Vs but may also field a flight of Raziks or Goriths.</li>                                                         
-       <h5>Junkyard Dogs (JYD)</h5>
             <li>This group operates primarily within Centauri, Earth, and Narn space and in addition to generic raider hulls.</li>
             <li>The Legion has three unique hulls, the Starjammer, Gladius, and Augustus and is characterized by using heavy weapons and fielding fusion cannons.</li>
-            <li>The Legion operated all of the generic raider units at various times in their existence. The Legion uses Delta-Vs and Double-Vs fighters exclusively.</li>   
+            <li>The Legion operated all of the generic raider units at various times in their existence. The Legion uses Delta-Vs and Double-Vs fighters exclusively.</li>                                                                      
+       <h5>Junkyard Dogs (JYD)</h5>
+            <li>A raider group that supported the Army of Light in the Shadow War, but then had bigger plans for the future and wound up fighting the Minbari Protectorate.</li>
+            <li>They operate several converted hulls from the main powers including a Lias, two Tethys, a Kutai, a Mograth, two Vorchans, two Sho'Kos, and a Thentus.</li>
+            <li>The Junkyard Dogs primarily used ArmedShuttles, Delta-Vs, and Double-Vs but may also field a flight of Raziks or Goriths.</li>  
        <h5>Narn Privateers</h5>
             <li>Formed out of Narn elements considered too radical or unruly to integrate with the newly free Narn Regime, the Narn sent these privateers out to continue to strike at the Centauri. 
                 The more organized groups received greater support from the Narn Regime and fulfilled many missions ranging from traditional raiding to intelligence gathering.</li>
