@@ -753,7 +753,7 @@ submitSlotAction: function submitSlotAction(action, slotid, callback) {
                 time = 3000;
             } else if (phase === -2) {
                 // Phase -2 timings (customize as you like)
-                time = 5000;
+                time = 1000;
                 if (ajaxInterface.pollcount > 1) time = 10000;
                 if (ajaxInterface.pollcount > 3)  time = 20000;                
                 if (ajaxInterface.pollcount > 40) time = 30000;
@@ -801,6 +801,10 @@ submitSlotAction: function submitSlotAction(action, slotid, callback) {
                 ajaxInterface.submiting = false;
             }
         });
+    },
+
+    startPollingGames: function() {
+        this.pollGames();
     },
 
     // Polling entry point for home screen
