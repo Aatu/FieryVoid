@@ -183,8 +183,15 @@ function buildCurves(shipIcon, turn) {
         return posChanged || facingChanged || headingChanged;
     });
 
+    //Seems to rule out speed 0 units form being animated mainly.
     if (moves.length <= 1) {
-        return [];
+        if(gamedata.turn == 1 && moves.length == 1){
+            if(moves[0].oldFacings.length == 0){            
+                return [];
+            }
+        }else{
+            return [];
+        }    
     }
 
     return moves.map(function (move, i) {
@@ -268,10 +275,11 @@ function buildCurves(shipIcon, turn) {
             return { turnAngle: turn, startAngle: angleOld, endAngle: angleNew };
         }
 
-        return { turnAngle: buildTurn(endMove), startAngle: angleOld, endAngle: angleNew };
+        return { turnAngle: buildTurn(endMove, startFacing), startAngle: angleOld, endAngle: angleNew };
     }
 
-    function buildTurn(endMove) {
+    function buildTurn(endMove, startFacing) {
+        if(endMove.oldFacings.length == 0) endMove.oldFacings[0] = startFacing;
         var facings = endMove.oldFacings.concat(endMove.facing);
 
         var turn = 0;

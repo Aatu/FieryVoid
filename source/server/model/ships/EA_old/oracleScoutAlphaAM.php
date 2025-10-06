@@ -1,12 +1,12 @@
 <?php
-class OracleScoutAlpha extends BaseShip{
+class OracleScoutAlphaAM extends BaseShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 425;
         $this->faction = "Earth Alliance (Early)";
-        $this->phpclass = "OracleScoutAlpha";
+        $this->phpclass = "OracleScoutAlphaAM";
         $this->imagePath = "img/ships/oracle.png";
         $this->shipClass = "Oracle Explorer (Alpha)";
 //			$this->occurence = "common";
@@ -26,6 +26,12 @@ class OracleScoutAlpha extends BaseShip{
         $this->rollcost = 2;
         $this->pivotcost = 2;
         $this->iniativebonus = 0;
+
+        //ammo magazine itself (AND its missile options)
+        $ammoMagazine = new AmmoMagazine(8); //pass magazine capacity - 12 rounds per launcher
+        $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
+        $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 8); //add full load of basic missiles
+        $this->enhancementOptionsEnabled[] = 'AMMO_H';//add enhancement options for other missiles - Class-L
 		
         $this->addPrimarySystem(new Reactor(4, 16, 0, 0));
         $this->addPrimarySystem(new CnC(4, 20, 0, 0));
@@ -33,7 +39,7 @@ class OracleScoutAlpha extends BaseShip{
         $this->addPrimarySystem(new Engine(4, 12, 0, 6, 3));
         $this->addPrimarySystem(new JumpEngine(4, 20, 4, 30));
 		$this->addPrimarySystem(new Hangar(4, 3));
-		$this->addPrimarySystem(new EWOMissileRack(3, 6, 0, 0, 360));
+		$this->addPrimarySystem(new AmmoMissileRackO(3, 0, 0, 0, 360, $ammoMagazine, false));
 
 		$this->addFrontSystem(new Thruster(3, 8, 0, 2, 1));
 		$this->addFrontSystem(new Thruster(3, 8, 0, 2, 1));
