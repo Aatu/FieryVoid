@@ -185,7 +185,7 @@ function buildCurves(shipIcon, turn) {
 
     //Seems to rule out speed 0 units form being animated mainly.
     if (moves.length <= 1) {
-        if(gamedata.turn == 1 && moves.length == 1){
+        if(gamedata.turn == 1 && moves.length == 1){ //Turn 1 needs a special case so that Speed 0 pivots etc aren't skipped.
             if(moves[0].oldFacings.length == 0){            
                 return [];
             }
