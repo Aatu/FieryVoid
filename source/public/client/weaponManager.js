@@ -1450,6 +1450,16 @@ window.weaponManager = {
         if(ship.Huge > 0) return; //Do not allow targeting of large muti-hex terrain.
         if(!selectedShip.flight && shipManager.isDisabled(selectedShip)) return;
 
+        /*
+        if(selectedShip.faction == "Torvalus Speculators"){
+            var shadingField = shipManager.systems.getSystemByName(selectedShip, "ShadingField");
+            if(shadingField.shaded){
+                var html = "You cannot fire weapons on a turn when your Shading Field was active.";
+                confirm.warning(html);   
+                return; //Shading Field active this turn, ship cannot fire.   If one Field active on fighters, all should be.
+            }          
+        }
+        */
         var blockedLosHex = weaponManager.getBlockedHexes();
         var loSBlocked = false;
         /*
@@ -2268,14 +2278,16 @@ window.weaponManager = {
 
     getAllFireOrdersForLogPrint: function getAllFireOrdersForLogPrint(ships, turn) {
         var fires = [];
-		var toReturn = false;
-		
+        var toReturn = false;
+
+        // Collect all fire orders from all given ships
         ships.forEach(function (ship) {
             fires = fires.concat(weaponManager.getAllFireOrdersLog(ship));
         });
 
+        // ✅ Combined filter: only keep orders from the given turn that have been rolled
         fires = fires.filter(function (fireOrder) {
-            return fireOrder.turn == turn;
+            return fireOrder.turn == turn && fireOrder.rolled !== 0;
         });
 
         return fires;
