@@ -1884,7 +1884,8 @@ expandFaction: function expandFaction(event) {
 		}
 
 		ajaxInterface.submitSlotAction("takeslot", slotid, function () {
-            window.updateTierFilter();			
+            window.updateTierFilter();
+        	//ajaxInterface.startPollingGamedata();							
 		});	
 	},
 
@@ -1902,7 +1903,7 @@ expandFaction: function expandFaction(event) {
 			
 		//ajaxInterface.submitSlotAction("leaveslot", slotid);
 		ajaxInterface.submitSlotAction("leaveslot", slotid, function () {
-            window.updateTierFilter();	
+            window.updateTierFilter();
 		});
 
 
@@ -1914,8 +1915,11 @@ expandFaction: function expandFaction(event) {
 			}
 		}	
 		//Will count current slot, so we're looking for two or more.
-		if(hasOtherSlots <= 1) window.location = "games.php"; //Leave to main lobby if layer has not other slots here.
-
+		if(hasOtherSlots <= 1){
+			window.location = "games.php"; //Leave to main lobby if layer has not other slots here.
+		}else{ 
+        	ajaxInterface.startPollingGamedata();
+		}		
     },
 
     enableBuy: function enableBuy() {
@@ -2402,7 +2406,8 @@ expandFaction: function expandFaction(event) {
 	    confirm.confirm("Are you sure you wish to ready your fleet?", function () {
 			selectedSlot.lastphase = -2;			
 	        ajaxInterface.submitGamedata();
-			slotElement.addClass("ready");			
+			slotElement.addClass("ready");
+        	ajaxInterface.startPollingGamedata();						
 	    });
 
 	},
@@ -2699,15 +2704,23 @@ expandFaction: function expandFaction(event) {
 		});		 	
     },
 
-    doLoadFleet: function doLoadFleet(fleet) {
+	doLoadFleet: function doLoadFleet(fleet) {
+		if (!Array.isArray(fleet)) {
+			console.error("doLoadFleet: expected array, got", fleet);
+			return;
+		}
 
-		for(var i in fleet){
+		for (var i = 0; i < fleet.length; i++) {
 			var listShip = fleet[i];
+			if (!listShip) continue; // skip holes
+
 			var ship = new Ship(listShip);
 
-			ship.userid = gamedata.thisplayer;
-			ship.slot = gamedata.selectedSlot;//Will load as slot 1, assign here.
+			// make sure these are present and are the correct type
+			ship.userid = parseInt(gamedata.thisplayer, 10);
+			ship.slot   = parseInt(gamedata.selectedSlot, 10);
 			ship.loaded = true;
+			ship.systems = ship.systems.filter(sys => sys !== null && sys !== undefined);
 			
 			if(ship.flight){
 				ship.pointCost = ship.pointCost/6 * ship.flightSize;				
@@ -2716,13 +2729,7 @@ expandFaction: function expandFaction(event) {
 			if (ship.pointCostEnh !== 0) {
 				ship.pointCost = ship.pointCost + ship.pointCostEnh;			
 			}
-			/* //Fleet shouldn't load if it can't be afforded.
-			if (!gamedata.canAfford(ship)) {
-				$(".confirm").remove();
-				window.confirm.error("You cannot afford that ship!", function () {});
-				return;
-			}
-			*/
+
         	gamedata.updateFleet(ship);		
 		}
 	
