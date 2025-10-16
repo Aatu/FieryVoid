@@ -37,7 +37,7 @@
             $this->data["Special"] .= "Uninterceptable.";
             if($this->overloadable){
             	$this->data["Special"] .= "<br>Can be overcharged during Initial Orders to fire in Sustained mode AFTER a full recharge cycle.";
-                $this->data["Special"] .= '<br>When firing in Sustained mode, if the first shot hits, the next turns shot will hit automatically.';
+                $this->data["Special"] .= '<br>When firing in Sustained mode, if the first shot hits, the next turns shot will hit the same target automatically.';
                 $this->data["Special"] .= '<br>Subsequent Sustained shots ignore any armour/shields that have applied to first shot.';                             
             } 
 		}
@@ -475,7 +475,7 @@
                 $this->data["Special"] = 'Uninterceptable.';
                 $this->data["Special"] .= '<br>Can also fire in Piercing Mode.';
                 $this->data["Special"] .= "<br>Can be overcharged during Initial Orders to fire in Sustained mode AFTER a full recharge cycle.";
-                $this->data["Special"] .= '<br>When firing in Sustained mode, if the first shot hits, the next turns shot will hit automatically.';
+                $this->data["Special"] .= '<br>When firing in Sustained mode, if the first shot hits, the next turns shot will hit the same target automatically.';
                 $this->data["Special"] .= '<br>Subsequent Sustained shots ignore any armour/shields that have applied to first shot.';   			
             }
 
@@ -690,7 +690,7 @@
 			$this->data["Special"] = 'Uninterceptable.';
 			$this->data["Special"] .= '<br>Can also fire in Piercing Mode.';
             $this->data["Special"] .= "<br>Can be overcharged during Initial Orders to fire in Sustained mode AFTER a full recharge cycle.";
-            $this->data["Special"] .= '<br>When firing in Sustained mode, if the first shot hits, the next turns shot will hit automatically.';
+            $this->data["Special"] .= '<br>When firing in Sustained mode, if the first shot hits, the next turns shot will hit the same target automatically.';
             $this->data["Special"] .= '<br>Subsequent Sustained shots ignore any armour/shields that have applied to first shot(s).';   		
 		}
 
@@ -866,6 +866,104 @@
         public function setMaxDamage(){ $this->maxDamage = 58; }
     }
 
+   
+    class PowerLaser extends NeutronLaser{
+            public $name = "PowerLaser";
+            public $displayName = "Power Laser";
+            public $animation = "laser";
+            public $animationColor = array(255, 255, 0);
+
+            public $loadingtime = 2;
+            public $raking = 15;
+
+            public $priority = 7;
+            public $priorityArray = array(1=>7, 2=>2); //Piercing shots go early, to do damage while sections aren't detroyed yet!
+
+            public $firingModes = array(
+                1 => "Raking",
+                2 => "Piercing"
+            );
+        
+            public $damageTypeArray=array(1=>'Raking', 2=>'Piercing');
+            public $fireControlArray = array( 1=>array(4, 5, 6), 2=>array(null,1,2) ); //Raking and Piercing mode
+        
+            public $rangePenalty = 0.25;
+           
+
+            function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+                if ( $maxhealth == 0 ){
+                    $maxhealth = 15;
+                }
+                if ( $powerReq == 0 ){
+                    $powerReq = 7; 
+                }                   
+                parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+            }
+
+
+            public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+                $this->data["Special"] = 'Uninterceptable.';
+                $this->data["Special"] .= '<br>Can also fire in Piercing Mode.';
+                $this->data["Special"] .= "<br>Can be overcharged during Initial Orders to fire in Sustained mode AFTER a full recharge cycle.";
+                $this->data["Special"] .= '<br>When firing in Sustained mode, if the first shot hits, the next turns shot will hit the same target automatically.';
+                $this->data["Special"] .= '<br>Subsequent Sustained shots ignore any armour/shields that have applied to first shot.';   			
+            }
+
+            public function getDamage($fireOrder){ return Dice::d(10, 8)+18; }
+            public function setMinDamage(){ $this->minDamage = 26 ; }
+            public function setMaxDamage(){ $this->maxDamage = 98 ; }
+    }    
+
+
+    class MedPowerLaser extends NeutronLaser{
+            public $name = "MedPowerLaser";
+            public $displayName = "Medium Power Laser";
+            public $animation = "laser";
+            public $animationColor = array(255, 255, 0);
+
+            public $loadingtime = 2;
+            public $raking = 15;
+            public $priority = 5;
+            public $priorityArray = array(1=>5, 2=>2); //Piercing shots go early, to do damage while sections aren't detroyed yet!
+
+            public $firingModes = array(
+                1 => "Raking",
+                2 => "Piercing"
+            );
+        
+            public $damageTypeArray=array(1=>'Raking', 2=>'Piercing');
+            public $fireControlArray = array( 1=>array(3, 4, 5), 2=>array(null,0,1) ); //Raking and Piercing mode
+        
+            public $rangePenalty = 0.25;
+           
+
+            function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+                if ( $maxhealth == 0 ){
+                    $maxhealth = 9;
+                }
+                if ( $powerReq == 0 ){
+                    $powerReq = 5; 
+                }                   
+                parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+            }
+
+
+            public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+                $this->data["Special"] = 'Uninterceptable.';
+                $this->data["Special"] .= '<br>Can also fire in Piercing Mode.';
+                $this->data["Special"] .= "<br>Can be overcharged during Initial Orders to fire in Sustained mode AFTER a full recharge cycle.";
+                $this->data["Special"] .= '<br>When firing in Sustained mode, if the first shot hits, the next turns shot will hit the same target automatically.';
+                $this->data["Special"] .= '<br>Subsequent Sustained shots ignore any armour/shields that have applied to first shot.';   			
+            }
+
+            public function getDamage($fireOrder){ return Dice::d(10, 4)+10; }
+            public function setMinDamage(){ $this->minDamage = 14 ; }
+            public function setMaxDamage(){ $this->maxDamage = 50 ; }
+    }    
 
 
     class LaserLance extends HeavyLaser{
@@ -1605,7 +1703,7 @@ class LaserAccelerator extends Laser{
 
 
 	//Fighter-sized blast laser
-    class LtBlastLaser extends Weapon{  //this is NOT a Pulse weapon at all...
+    class LtBlastLaser extends Weapon{  
         public $name = "LtBlastLaser";
         public $displayName = "Light Blast Laser";
         public $iconPath = "improvedBlastLaser.png";
@@ -1640,6 +1738,41 @@ class LaserAccelerator extends Laser{
         public function setMaxDamage(){     $this->maxDamage = 17 /*- $this->dp*/;      }
 
     }
+
+   //Very deceptive name, this is Torvalus Fighter weapon so actually pretty heavy laser ;)
+    class UltralightLaser extends Laser{  
+        public $name = "UltralightLaser";
+        public $displayName = "UltralightLaser Laser";
+        public $iconPath = "PowerLaser.png";
+
+        public $animationColor = array(255, 255, 0);
+        public $animation = "laser";
+        public $animationExplosionScale = 0.2;        
+        public $uninterceptable = true;
+		
+		public $noPrimaryHits = true;//cannot penetrate to PRIMARY on outer hits
+        public $loadingtime = 2;
+		public $priority = 6;//VERY large fighter weapon
+        
+        public $rangePenalty = 1;
+        public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals 
+
+
+		public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+			$this->data["Special"] = 'Uninterceptable.'; 
+		}
+
+        function __construct($startArc, $endArc){
+            parent::__construct(0, 1, 0, $startArc, $endArc);
+        }
+        
+        public function getDamage($fireOrder){        return Dice::d(6,2)+5;   }
+        public function setMinDamage(){     $this->minDamage = 10 /*- $this->dp*/;      }
+        public function setMaxDamage(){     $this->maxDamage = 28 /*- $this->dp*/;      }
+
+    }
+
 
 class UnreliableBattleLaser extends BattleLaser{
 
