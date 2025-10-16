@@ -9,6 +9,15 @@ class DeploymentGamePhase implements Phase
         $dbManager->setPlayersWaitingStatusInGame($gameData->id, false);
         $dbManager->updateGamedata($gameData);
 
+        //Have to load new gamedata, because the old object does not have moves for ships that were just submitted
+        //foreach ($dbManager->getTacGamedata($gameData->forPlayer, $gameData->id)->ships as $ship) {
+        foreach ($gameData->ships as $ship) {            
+            if ($ship->isDestroyed() || $ship->base || $ship->smallBase || $ship->isTerrain() || ($ship->getTurnDeployed($gameData) > $gameData->turn))  {
+                continue;
+            }
+            if($ship->hasSpecialAbility("Stealth")) $ship->checkStealth($gameData); //Extra check needed at end of movement for Stealth ships like Torvalus.
+        }
+
         //Checks for late-deploying slots to see if next phases skipped - DK 
         foreach($gameData->slots as $slot){
             $minTurnDeploy = $gameData->getMinTurnDeployedSlot($slot->slot, $slot->depavailable);
@@ -28,7 +37,35 @@ class DeploymentGamePhase implements Phase
 		}		
 		foreach ($gameData->ships as $currShip){ //save system-specific information if necessary (separate loop - generate for all, THEN save for all!
 			$currShip->saveIndividualNotes($dbManager);
-		}
+        }
+
+        //New segment to allow boosting in Deployment Phase.
+        foreach ($ships as $ship){
+            if ($ship->userid != $gameData->forPlayer)
+                continue;
+
+            $powers = array();
+            // Can now boost Fighter Systems, so look for this.
+            if ($ship instanceof FighterFlight) {                
+                foreach ($ship->systems as $ftr) {
+                    foreach ($ftr->systems as $ftrsys) {                   
+                        if ($ftrsys->boostOtherPhases) {  //E.g. Not normal boost systems                                                                                      
+                            $powers = array_merge($powers, $ftrsys->power); 
+                        }
+                       
+                    }
+                }
+            }else{
+                foreach ($ship->systems as $system){
+                    if ($system->boostOtherPhases) {	                                  
+                        $powers = array_merge($powers, $system->power);
+                    }    
+                }
+            }    
+		
+            $dbManager->submitPower($gameData->id, $gameData->turn, $powers);
+        }
+        
 		
         foreach ($moves as $shipid=>$move)
         {
