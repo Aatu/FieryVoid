@@ -74,6 +74,7 @@ class Weapon extends ShipSystem
 	public $maxVariableShots = 0; //For front end to know how many shots weapon CAN fire for variable-shot weapons. 	  
 	public $canSplitShots = false; //For Front end to allow weapons to target different enemies in same firing round. 
 	public $canSplitShotsArray = array(); 
+    protected $multiModeSplit = false; //If you want the Front End to see this, pass it in strpForJson() in weapon :)
 
     public $overloadable = false;
 
@@ -173,7 +174,7 @@ class Weapon extends ShipSystem
 
     protected $firedDefensivelyAlready = 0; //marker used for weapons capable of firing multiple defensive shots, but suffering backlash once
 //	protected $autoHit = false;//To show 100% hit chance in front end - DK 			        
-//   	protected $autoHitArray = array();    
+//  protected $autoHitArray = array();    
 
 
 	//Weapons are repaired before "average system", but after really important things! 
@@ -1132,6 +1133,7 @@ class Weapon extends ShipSystem
         $rangePenalty = $rp["rp"];
 		*/
 
+        /*//Old Jinking logic
         if ($shooter instanceof FighterFlight) $jinkSelf = Movement::getJinking($shooter, $gamedata->turn);  //count own jinking always
 
         if ($target instanceof FighterFlight) {
@@ -1147,6 +1149,24 @@ class Weapon extends ShipSystem
 			$jinkTarget = 0;
 			$jinkSelf = 0;
 		}	
+        */
+        //New block to take into account jinking ships!
+        if ($shooter instanceof FighterFlight || $shooter->jinkinglimit > 0) $jinkSelf = Movement::getJinking($shooter, $gamedata->turn);  //count own jinking always
+
+        if ($target instanceof FighterFlight || $target->jinkinglimit > 0) {
+            if ((!($shooter instanceof FighterFlight)) || $this->ballistic) //non-fighters and ballistics always affected by jinking
+            {
+                $jinkTarget = Movement::getJinking($target, $gamedata->turn);
+            } elseif ($jinkSelf > 0 || mathlib::getDistance($shooter->getCoPos(), $target->getCoPos()) > 0) { //fighter direct fire unaffected at range 0
+                $jinkTarget = Movement::getJinking($target, $gamedata->turn);
+            }
+        }
+		// if jinking is ignored - make it so
+		if($this->ignoreJinking){
+			$jinkTarget = 0;
+			$jinkSelf = 0;
+		}	
+
 
         $dew = $target->getDEW($gamedata->turn);
         $bdew = EW::getBlanketDEW($gamedata, $target);
@@ -1919,7 +1939,7 @@ full Advanced Armor effects (by rules) for reference:
 			$this->onDamagedSystem($target, $system, $effects["dmgDealt"], $effects["armorPierced"], $gamedata, $fireOrder);//weapons that do effects on hitting something
 			$damage = $effects["dmgRemaining"];
 			if ($this->damageType == 'Raking'){ //note armor already pierced so further rakes have it easier. All Sustained weapons are currently raking, so they can use standard method here - DK
-				$armourIgnored = $armourIgnored + $effects["armorPierced"];
+				$armourIgnored = $armourIgnored + $effects["armorPierced"]; 
 				$fireOrder->armorIgnored[$system->id] = $armourIgnored;
 			}			
 			
@@ -2050,7 +2070,9 @@ full Advanced Armor effects (by rules) for reference:
 		if (isset($this->interceptArray[$i])) $this->intercept = $this->interceptArray[$i];  // DK		
 		if (isset($this->ballisticInterceptArray[$i])) $this->ballisticIntercept = $this->ballisticInterceptArray[$i];  // DK
         
-		if (isset($this->canSplitShotsArray[$i])) $this->canSplitShots = $this->canSplitShotsArray[$i];  // DK        
+		if (isset($this->canSplitShotsArray[$i])) $this->canSplitShots = $this->canSplitShotsArray[$i];  // DK
+		if (isset($this->autoFireOnlyArray[$i])) $this->autoFireOnly = $this->autoFireOnlyArray[$i];  // DK  
+		if (isset($this->canTargetAlliesArray[$i])) $this->canTargetAllies = $this->canTargetAlliesArray[$i];  // DK                          
 											    
     }//endof function changeFiringMode
 
