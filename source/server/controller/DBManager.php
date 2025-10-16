@@ -811,6 +811,7 @@ class DBManager
         }
     }
 
+/* //OLD VERSION - Oct 2025
     public function submitPower($gameid, $turn, $powers)
     {
 
@@ -833,6 +834,72 @@ class DBManager
             throw $e;
         }
 
+    }
+*/
+
+    //New version the normalises and prevents duplication to accommodate things like Fighter systems being boosted
+    public function submitPower($gameid, $turn, $powers)
+    {
+        try {
+            // --- SAFETY NORMALIZATION LAYER ---
+            $normalized = [];
+
+            foreach ($powers as $p) {
+                if (is_object($p)) {
+                    $normalized[] = $p;
+                } elseif (is_array($p)) {
+                    // Handle nested single-element array: [[PowerEntry]]
+                    if (count($p) === 1 && is_object(reset($p))) {
+                        $normalized[] = reset($p);
+                    } else {
+                        // Convert associative array to object
+                        $obj = (object)$p;
+                        error_log("[submitPower] Warning: Power entry was array, normalized. Contents: " . json_encode($p));
+                        $normalized[] = $obj;
+                    }
+                } else {
+                    // Unexpected type — log it and skip
+                    error_log("[submitPower] Warning: Invalid power entry type (" . gettype($p) . ")");
+                }
+            }
+
+            $powers = $normalized;
+            // --- END NORMALIZATION LAYER ---
+
+            // --- DEDUPLICATION LAYER ---
+            $seen = [];
+
+            foreach ($powers as $power) {
+                if (!is_object($power)) continue;
+
+                if (!property_exists($power, 'turn') || $power->turn != $turn) continue;
+
+                // Create a unique key per power entry
+                $key = $power->shipid . '-' . $power->systemid . '-' . $power->type . '-' . $turn;
+
+                if (isset($seen[$key])) {
+                    error_log("[submitPower] Skipping duplicate power entry for key: $key");
+                    continue;
+                }
+                $seen[$key] = true;
+                // --- END DEDUPLICATION ---
+
+                $sql = "INSERT INTO `tac_power` VALUES(
+                    null,
+                    " . (int)$power->shipid . ",
+                    " . (int)$gameid . ",
+                    " . (int)$power->systemid . ",
+                    " . (int)$power->type . ",
+                    " . (int)$turn . ",
+                    " . (int)$power->amount . "
+                )";
+
+                $this->update($sql);
+            }
+
+        } catch (Exception $e) {
+            throw $e;
+        }
     }
 
     public function insertSystemData($input)
@@ -2780,6 +2847,42 @@ class DBManager
             $stmt->close();
         }
     }
+
+    public function removePowerEntriesForTurn($gameid, $shipid, $systemid, $turn)
+    {
+
+        $stmt = $this->connection->prepare(
+            "DELETE FROM tac_power
+            WHERE gameid = ?
+            AND shipid = ?
+            AND systemid = ?
+            AND turn = ?"
+        );
+
+        if (!$stmt) {
+            throw new Exception("Prepare failed: " . $this->connection->error);
+        }
+
+        if (!$stmt->bind_param('iiii', $gameid, $shipid, $systemid, $turn)) {
+            throw new Exception("Bind failed: " . $stmt->error);
+        }
+
+        if (!$stmt->execute()) {
+            throw new Exception("Execute failed: " . $stmt->error);
+        }
+
+        // Check how many rows were actually deleted
+        if ($stmt->affected_rows === 0) {
+            // No row matched those IDs
+            error_log("No matching row found for gameid=$gameid, shipid=$shipid, systemid=$systemid, turn=$turn");
+        } else {
+            // At least one row was deleted
+            error_log("Deleted {$stmt->affected_rows} row(s) for gameid=$gameid, shipid=$shipid, systemid=$systemid, turn=$turn");
+        }
+
+        $stmt->close();
+    }
+
 
     public function getLastTimeChatChecked($userid, $gameid)
     {
