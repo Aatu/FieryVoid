@@ -208,6 +208,11 @@ window.AllWeaponFireAgainstShipAnimation = function () {
 
         var startTime = this.time + this.duration + time;
         var weapon = incomingFire.weapon;
+        
+        //Some multi-mode weapons needs their current values adjusted, so borrowing some code from changeFiringMode()
+	    if (!mathlib.arrayIsEmpty(weapon.animationExplosionScaleArray)) weapon.animationExplosionScale = weapon.animationExplosionScaleArray[incomingFire.firingMode];        
+	    if (!mathlib.arrayIsEmpty(weapon.noProjectileArray)) weapon.noProjectile = weapon.noProjectileArray[incomingFire.firingMode];        				
+
         var animationType = weapon.animationArray[incomingFire.firingMode] || weapon.animation;
         var animationColor = weapon.animationColorArray[incomingFire.firingMode] || weapon.animationColor;
 		var startLocationTime = startTime;
@@ -235,10 +240,13 @@ window.AllWeaponFireAgainstShipAnimation = function () {
 		if (weapon.noProjectile) { //Some weapon like Spark Field shouldn't have projectiles - DK - 4 Jan 24
 		    color = new THREE.Color((0 / 255, 0 / 255, 0 / 255));
             hasParticle = false;
-		} else {
-		    color = new THREE.Color(weapon.animationColor[0] / 255, weapon.animationColor[1] / 255, weapon.animationColor[2] / 255);
-		}
-	
+        } else {
+            color = new THREE.Color(
+                weapon.animationColor[0] / 255,
+                weapon.animationColor[1] / 255,
+                weapon.animationColor[2] / 255
+            );
+        }	
      
 
         switch (animationType) {
