@@ -5636,7 +5636,7 @@ class MindriderHangar extends ShipSystem{
 
 	    foreach (MindriderHangar::$hangarList as $hangar) {
 	        $hangarShip = $hangar->getUnit();
-	        if ($hangarShip->team != $thisShip->team) continue; // Not interested in non-friendly ships.
+	        if ($hangarShip->userid != $thisShip->userid) continue; // Not interested in non-friendly ships.
 	        if ($hangarShip->isDestroyed()) continue; // Ignore destroyed ships - destroyed Hangars are actually fine.
 
 	        $hangarCapacity += $hangar->output; // Add output of Hangar (e.g. how many Thought Projections ship can sustain).
@@ -5645,7 +5645,7 @@ class MindriderHangar extends ShipSystem{
 	    $activeThoughts = 0;
 
 	    foreach (MindriderHangar::$projectionList as $projection) {
-	        if ($projection->team != $thisShip->team) continue; // Not interested in non-friendly ships.
+	        if ($projection->userid != $thisShip->userid) continue; // Not interested in non-friendly ships.
 	        if ($projection->isDestroyed()) continue; // Ignore destroyed flights.
 
 	        foreach ($projection->systems as $ftr) {
@@ -5759,7 +5759,8 @@ class MindriderHangar extends ShipSystem{
 }//endof MindriderHangar
 
 
-/*	//Torvalus Shading Field - Can let them stealth but also works as a Jammer and EM Shield!
+
+	//Torvalus Shading Field - Can let them stealth but also works as a Jammer and EM Shield!
 	class ShadingField extends ShipSystem implements SpecialAbility, DefensiveSystem{    
 		public $name = "ShadingField";
 		public $displayName = "Shading Field";
@@ -5777,7 +5778,7 @@ class MindriderHangar extends ShipSystem{
 		public $maxBoostLevel = 1;
 		public $boostEfficiency = 0;		
 		public $boostOtherPhases = true; //To allow boosting in Deployment and Firing Phases.
-		private $shaded	= false; //To track in Front End whether system was ever boost this turn, since boost can be toggled during Firing Phase.			
+		public $shaded	= false; //To track in Front End whether system was ever boost this turn, since boost can be toggled during Firing Phase.			
 		
 		function __construct($armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc){
 			// shieldfactor is handled as output.
@@ -5795,17 +5796,20 @@ class MindriderHangar extends ShipSystem{
 		}
 
 		protected $possibleCriticals = array(
-				26=>array("OutputReduced1"));
+			26=>array("OutputReduced1")
+		);
 		
 		private function getBoostLevel($turn){
 			$boostLevel = 0;
+		
 			foreach ($this->power as $i){
-					if ($i->turn != $turn)
-							continue;
+					if ($i->turn != $turn) 
+							continue;							
 					if ($i->type == 2){
 							$boostLevel += $i->amount;
-					}
+					}				
 			}
+			
 			return $boostLevel;
 		}	
 
@@ -5817,31 +5821,24 @@ class MindriderHangar extends ShipSystem{
 		public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){
 			if($this->isDestroyed($turn-1) || $this->isOfflineOnTurn($turn))
 				return 0;
-			$ship = $this->getUnit();
-			$boost = $this->getBoostLevel($turn);
-			$output = $this->output; 
+			$output = $this->output;			 
 			$output += $this->outputMod; //outputMod itself is negative!
 
-			if($ship instanceof FighterFlight){
-				if($boost <= 0){
-					return 0; //Fighters and not boosted, no defence mod.	
-				}else{
-					return $output; //Boosted, hit mod applies!
+			if($target instanceof FighterFlight){
+				if($this->shaded <= 0){
+					return 0; //Fighters and not shaded, no defence mod.	
+				}else{					
+					return $output; //Shaded, hit mod applies!
 				} 			
 			}else{ //Is a ship!
-				if ($boost > 0) $output = $this->output *2; //If in Shading Mode, double hit mod.
+				if ($this->shaded > 0) $output = $output *2; //If in Shading Mode, double hit mod.			
 				return $output;				
 			}       
 		}
 		
 		public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon){
-			if($this->isDestroyed($turn-1) || $this->isOfflineOnTurn())
-				return 0;
-
-			$ship = $this->getUnit();			
-			if($ship instanceof FighterFlight) return 0; //Fighter never get damage mod. 		
-			//if ($this->checkIsFighterUnderShield($target, $shooter, $weapon))
-			//    return 0;
+			if($this->isDestroyed($turn-1) || $this->isOfflineOnTurn() || $target instanceof FighterFlight)
+				return 0;		
 			
 			if ($this->hasCritical('DamageReductionRemoved'))
 				return 0;
@@ -5855,9 +5852,10 @@ class MindriderHangar extends ShipSystem{
 				$unit = $this->getUnit();
 				if($unit instanceof FighterFlight){
 					$this->data["Special"] = "Jammer ability.";
-					$this->data["Special"] .= "<br>Can activate 'Shading Mode' on next turn, by boosting this system during Deployment or Firing Phase.";						
-					$this->data["Special"] .= "<br>When Shading is activated, this flight's defense ratings are reduced by 15 and it cannot be detected if it is over 15 hexes at the start or end of movement..";
-					$this->data["Special"] .= "<br>HOWEVER, ship cannot fire any weapons on a turn when Shading was active.";			
+					$this->data["Special"] .= "<br>Can activate 'Shading Mode' for the NEXT turn, by boosting this system during Deployment or Firing Phase.";						
+					$this->data["Special"] .= "<br>When Shading is activated, this flight's defense ratings are reduced by 15, and it cannot be detected if it is over 15 hexes at the start or end of movement..";
+					$this->data["Special"] .= "<br>HOWEVER, ship cannot fire any weapons on a turn when Shading was active.";
+					$this->data["Special"] .= "<br>This system also incorporates a small Jump Drive, with a 20 turn recharge.";									
 				}else{
 					$this->data["Special"] = "Jammer ability.";
 					$this->data["Special"] .= "<br>Provides EM Shield.";
@@ -5882,8 +5880,6 @@ class MindriderHangar extends ShipSystem{
 			$shooter = $args["shooter"];
 			$target = $args["target"];
 			
-			//if ($shooter->faction === $target->faction) return 0; //same-faction units ignore Jammer
-			
 			if (! ($shooter instanceof BaseShip) || ! ($target instanceof BaseShip)) 
 				throw new InvalidArgumentException("Wrong argument type for Jammer getSpecialAbilityValue");
 					
@@ -5896,7 +5892,7 @@ class MindriderHangar extends ShipSystem{
 			return $jammerValue;
 		}
 
-
+/*
 		public function generateIndividualNotes($gameData, $dbManager){ //dbManager is necessary for Initial phase only
 			$ship = $this->getUnit();
 			if ($ship instanceof FighterFlight) return; //Fighter units don't need notes, they can't be invisible/detected.
@@ -5907,42 +5903,24 @@ class MindriderHangar extends ShipSystem{
 
 			switch($gameData->phase){
 
-				case -1: //Deployment phase
-					/* //Moved to DeploymentGamePhase->advance
-					if($this->getBoostLevel($gameData->turn) > 0){  //Ship has boosted Shading Field during Deployment, check distance and LoS and stealth next turn if conditions met.
-						if($this->isDetected($ship, $gameData)){ //Cannot stealth							
-							//Prepare note for database!		
-							$notekey = 'detected';
-							$noteHuman = 'D-Ship detected';
-							$noteValue = 1;
-							$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
-						}else{ //Able to stealth
-							//Prepare note for database!		
-							$notekey = 'undetected';
-							$noteHuman = 'D-Ship undetected';
-							$noteValue = 1;
-							$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
-						}
-					}
-						*//*
-				break;	
-
 				case 4: //Post-Firing phase
 
 					if ($this->getBoostLevel($gameData->turn) > 0) {
 						if ($this->isDetected($ship, $gameData)) {
 							$notekey   = 'detected';
-							$noteHuman = '4-Ship detected';
+							$noteHuman = '4-detectedActive';
+							$noteValue = 1;								
 						} else {
 							$notekey   = 'undetected';
-							$noteHuman = '4-Ship undetected';
+							$noteHuman = '4-undetectedActive';
+							$noteValue = 1;							
 						}
 					} else {
 						$notekey   = 'detected';
-						$noteHuman = '4-Shading offline'; //Not boosted yet or was boosted and then turned off.
+						$noteHuman = '4-NotActive'; //Not boosted yet or was boosted and then turned off.
+						$noteValue = 0;						
 					}
 
-					$noteValue = 1;
 					$this->individualNotes[] = new IndividualNote(
 						-1,
 						TacGamedata::$currentGameID,
@@ -5958,25 +5936,30 @@ class MindriderHangar extends ShipSystem{
 						
 			}
 		} //endof function generateIndividualNotes	
-		
+*/		
 
 		public function onIndividualNotesLoaded($gamedata){
 			//Sort notes by turn, and then phase so latest detection note is always last.
 			$this->sortNotes();
-
 			foreach ($this->individualNotes as $currNote){ //Search all notes, they should be process in order so the latest event applies.
 				switch($currNote->notekey){
 					case 'detected': 
-						if($currNote->notevalue == 1) $this->detected = true;
+						$this->detected = true;
+						if($currNote->notevalue == 1){
+							$this->shaded = true;	
+						}else{
+							$this->shaded = false;								
+						} 
 					break;
 					case 'undetected': 
-						if($currNote->notevalue == 1) $this->detected = false;
+						$this->detected = false;						
+						if($currNote->notevalue == 1){
+							$this->shaded = true;	
+						}else{
+							$this->shaded = false;								
+						} 
 					break;								
 				}
-			}
-
-			if ($gamedata->phase ==1 && $this->getBoostLevel($gamedata->turn-1) > 0 || $this->getBoostLevel($gamedata->turn) > 0) {			
-				$this->shaded = true;	
 			}
 
 			//and immediately delete notes themselves, they're no longer needed (this will not touch the database, just memory!)
@@ -6002,7 +5985,7 @@ class MindriderHangar extends ShipSystem{
 				if($shadingChange == 0){
 					$this->removePowerEntriesForTurn($gamedata);
 					break;
-				}					
+				}									
 			}
 		} 
 		$this->individualNotesTransfer = array(); //empty, just in case
@@ -6012,29 +5995,32 @@ class MindriderHangar extends ShipSystem{
 		public function checkStealthNextPhase($gamedata){				
 				$ship = $this->getUnit();
 					if($gamedata->phase == 1){ 
-						$noteHuman1 = 'D-Ship detected';
-						$noteHuman2 = 'D-Ship undetected';						
-						$noteHuman3 = 'D-Shading offline';						
+						$noteHuman1 = 'D-detectedActive';
+						$noteHuman2 = 'D-undetectedActive';						
+						$noteHuman3 = 'D-NotActive';						
 					}else{
-						$noteHuman1 = '3-Ship detected';
-						$noteHuman2 = '3-Ship undetected';						
-						$noteHuman3 = '3-Shading offline';						
+						$noteHuman1 = '3-detectedActive';
+						$noteHuman2 = '3-undetectedActive';						
+						$noteHuman3 = '3-NotActive';						
 					}
+
 				//If we're checking during DeploymentGamePhase->Advance (actually Phase 1 at this point) we need to check last turn as well for boost, as this will not have been saved yet for current turn.					
 				if ($gamedata->phase ==1 && $this->getBoostLevel($gamedata->turn-1) > 0 || $this->getBoostLevel($gamedata->turn) > 0) {
 					if ($this->isDetected($ship, $gamedata)) {
 						$notekey   = 'detected';
 						$noteHuman = $noteHuman1;
+						$noteValue = 1;							
 					} else {
 						$notekey   = 'undetected';
 						$noteHuman = $noteHuman2;
+						$noteValue = 1;							
 					}
 				} else {
 					$notekey   = 'detected';
-					$noteHuman = $noteHuman3; //Not boosted yet or was boosted and then turned off.
+					$noteHuman = $noteHuman3; //Not shaded yet or was shaded and then turned off.
+					$noteValue = 0;						
 				}
 
-				$noteValue = 1;
 				$note = new IndividualNote(
 						-1,
 						$gamedata->id,
@@ -6086,7 +6072,7 @@ class MindriderHangar extends ShipSystem{
 		}
 
 	} //endof ShadingField
-*/
+
 
 
 /* Ammunition magazine
