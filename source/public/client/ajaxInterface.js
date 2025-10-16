@@ -387,50 +387,50 @@ window.ajaxInterface = {
 	},
 
 
-//New version for PHP8
-submitSlotAction: function submitSlotAction(action, slotid, callback) {
-    if (ajaxInterface.submiting) return;
-    ajaxInterface.submiting = true;
+    //New version for PHP8
+    submitSlotAction: function submitSlotAction(action, slotid, callback) {
+        if (ajaxInterface.submiting) return;
+        ajaxInterface.submiting = true;
 
-    $.ajax({
-        type: 'POST',
-        url: 'slot.php',
-        dataType: 'json', // ✅ Expect JSON
-        data: { 
-            action: action,
-            gameid: gamedata.gameid,
-            slotid: slotid 
-        },
-        timeout: 15000, // ✅ prevent hanging requests
-    })
-    .done(function (response, textStatus, xhr) {
-        ajaxInterface.submiting = false;
+        $.ajax({
+            type: 'POST',
+            url: 'slot.php',
+            dataType: 'json', // ✅ Expect JSON
+            data: { 
+                action: action,
+                gameid: gamedata.gameid,
+                slotid: slotid 
+            },
+            timeout: 15000, // ✅ prevent hanging requests
+        })
+        .done(function (response, textStatus, xhr) {
+            ajaxInterface.submiting = false;
 
-        // ✅ Handle HTTP-level errors first
-        if (xhr.status !== 200) {
-            console.error(`Slot action failed [${xhr.status}]`);
-            ajaxInterface.errorAjax(xhr, textStatus, response?.error || "Server error");
-            return;
-        }
+            // ✅ Handle HTTP-level errors first
+            if (xhr.status !== 200) {
+                console.error(`Slot action failed [${xhr.status}]`);
+                ajaxInterface.errorAjax(xhr, textStatus, response?.error || "Server error");
+                return;
+            }
 
-        // ✅ Handle application-level errors
-        if (response && response.error) {
-            console.warn("Slot action error:", response.error);
-            ajaxInterface.errorAjax(xhr, textStatus, response.error);
-            return;
-        }
+            // ✅ Handle application-level errors
+            if (response && response.error) {
+                console.warn("Slot action error:", response.error);
+                ajaxInterface.errorAjax(xhr, textStatus, response.error);
+                return;
+            }
 
-        // ✅ Normal success
-        ajaxInterface.successSubmit(response);
-        if (typeof callback === "function") callback(response);
-    })
-    .fail(function (xhr, textStatus, errorThrown) {
-        ajaxInterface.submiting = false;
-        let message = errorThrown || textStatus || "Unknown network error";
-        console.error("Slot action AJAX fail:", message, xhr.responseText);
-        ajaxInterface.errorAjax(xhr, textStatus, message);
-    });
-},
+            // ✅ Normal success
+            ajaxInterface.successSubmit(response);
+            if (typeof callback === "function") callback(response);
+        })
+        .fail(function (xhr, textStatus, errorThrown) {
+            ajaxInterface.submiting = false;
+            let message = errorThrown || textStatus || "Unknown network error";
+            console.error("Slot action AJAX fail:", message, xhr.responseText);
+            ajaxInterface.errorAjax(xhr, textStatus, message);
+        });
+    },
 
 
     construcGamedata: function construcGamedata() {
@@ -480,6 +480,14 @@ submitSlotAction: function submitSlotAction(action, slotid, callback) {
                             var fightersystem = system.systems[c];
                             var ammoArray = Array();
 
+                            //Some fighter systems CAN be boosted now
+                            for (var d = fightersystem.power.length - 1; d >= 0; d--) {
+                                var power = fightersystem.power[d];
+                                if (power.turn < gamedata.turn) {
+                                    fightersystem.power.splice(d, 1);
+                                }
+                            }
+
                             for (var b = fightersystem.fireOrders.length - 1; b >= 0; b--) {
                                 var fire = fightersystem.fireOrders[b];
                                 if (fire.turn < gamedata.turn) {
@@ -498,7 +506,7 @@ submitSlotAction: function submitSlotAction(action, slotid, callback) {
 							//changed to accomodate new variable for individual data transfer to server - in a generic way
                             //fighterSystems[c] = { 'id': fightersystem.id, 'fireOrders': fightersystem.fireOrders, 'ammo': ammoArray };
 							fightersystem.doIndividualNotesTransfer();
-							fighterSystems[c] = { 'id': fightersystem.id, 'fireOrders': fightersystem.fireOrders, 'ammo': ammoArray, "individualNotesTransfer": fightersystem.individualNotesTransfer };
+							fighterSystems[c] = { 'id': fightersystem.id, 'fireOrders': fightersystem.fireOrders, 'ammo': ammoArray, "individualNotesTransfer": fightersystem.individualNotesTransfer, 'power': fightersystem.power, };
                         }
 						//changed to accomodate new variable for individual data transfer to server - in a generic way
                         //systems[a] = { 'id': system.id, 'systems': fighterSystems };
@@ -725,7 +733,7 @@ submitSlotAction: function submitSlotAction(action, slotid, callback) {
             return;
         }
 
-        var dontPollYet = false;
+        var notReadiedYet = false;
         var time = 5000;  
 
         // detect environment
@@ -736,13 +744,12 @@ submitSlotAction: function submitSlotAction(action, slotid, callback) {
             for (var i in gamedata.slots) {
                 var slot = gamedata.slots[i];		
                 if(slot.playerid !== null && slot.playerid == gamedata.thisplayer && slot.lastphase == "-3"){
-                    dontPollYet = true;
+                    notReadiedYet = true; //Has not readied all slots yet.
                     break;       
                 }      
             }
         }
         
-        if(!dontPollYet || isLocal){
             if (!ajaxInterface.submiting) ajaxInterface.requestGamedata();
 
             ajaxInterface.pollcount++;
@@ -753,10 +760,15 @@ submitSlotAction: function submitSlotAction(action, slotid, callback) {
                 time = 3000;
             } else if (phase === -2) {
                 // Phase -2 timings (customize as you like)
-                time = 1000;
-                if (ajaxInterface.pollcount > 1) time = 10000;
-                if (ajaxInterface.pollcount > 3)  time = 20000;                
-                if (ajaxInterface.pollcount > 40) time = 30000;
+                if(notReadiedYet){
+                    time = 30000;
+                }else{
+                    time = 5000;
+                    if (ajaxInterface.pollcount > 1)  time = 10000;                       
+                    if (ajaxInterface.pollcount > 3)  time = 30000;                
+                    if (ajaxInterface.pollcount > 10) time = 60000;
+                    if (ajaxInterface.pollcount > 40) time = 1800000;                   
+                }
             } else {
                 // In-Game timings
                 time = 5000;
@@ -769,9 +781,7 @@ submitSlotAction: function submitSlotAction(action, slotid, callback) {
             if (ajaxInterface.pollcount > 300) {
                 return;
             }
-        }else{
-            time = 8000;        
-        }
+
 
         ajaxInterface.poll = setTimeout(ajaxInterface.pollGamedata, time);
     },
