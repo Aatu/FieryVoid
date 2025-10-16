@@ -6991,8 +6991,7 @@ class Marines extends Weapon{
 		$targetMove = $target->getLastMovement();
 		$targetSpeed = $targetMove->speed;
 		$speedDifference = abs($targetSpeed - $shooterSpeed);//Calculate absolute difference in speed.
-		if($shooter->faction == "Llort") $speedDifference -= 1;//Llort reduce speed difference by 1.
-		if($shooter->faction == "ZNexus Sal-bez Coalition") $speedDifference -= 1;//Llort reduce speed difference by 1.
+		if($shooter->faction == "Llort" || $shooter->faction == "ZNexus Sal-bez Coalition") $speedDifference -= 1;//Llort reduce speed difference by 1.
 			
 		$finalSpeedDifference = max(0, $speedDifference);//Llort bonus could make it -1...
 		
