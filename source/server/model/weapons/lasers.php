@@ -888,6 +888,14 @@
             public $fireControlArray = array( 1=>array(4, 5, 6), 2=>array(null,1,2) ); //Raking and Piercing mode
         
             public $rangePenalty = 0.25;
+
+            public $overloadable = true;
+        
+            public $extraoverloadshots = 2;        
+            public $extraoverloadshotsArray = array(1=>2, 2=>0); //extra shots from overload are relevant only for Raking mode!
+
+            private $sustainedTarget = array(); //To track for next turn which ship was fired at in Sustained Mode and whether it was hit.
+            private $sustainedSystemsHit = array(); //For tracking systems that were hit and how much armour they should be reduced by following turn if hit again.             
            
 
             function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
