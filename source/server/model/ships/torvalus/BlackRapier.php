@@ -50,7 +50,7 @@ class BlackRapier extends BaseShip{
         $this->addFrontSystem(new VolleyLaser(5, 0, 0, 240, 120));        
 
 		$this->addAftSystem(new GraviticThruster(5, 15, 0, 4, 2));
-        $this->addAftSystem(new MedPowerLaser(5, 0, 0, 270, 90));          
+        $this->addAftSystem(new MedPowerLaser(5, 0, 0, 90, 270));          
 
         $this->addLeftSystem(new PowerLaser(5, 0, 0, 270, 90));    		
         $this->addLeftSystem(new GraviticThruster(5, 13, 0, 3, 1));       

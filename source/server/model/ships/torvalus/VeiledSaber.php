@@ -46,6 +46,8 @@ class VeiledSaber extends MediumShip{
         $this->addPrimarySystem(new SelfRepair(5, 6, 4)); //armor, structure, output
 		$this->addPrimarySystem(new ShadingField(5, 16, 5, 4, 0, 360)); 
 		$this->addPrimarySystem(new TransverseDrive(5, 16, 5, 0, 360));
+		$this->addPrimarySystem(new GraviticThruster(5, 15, 0, 6, 3));
+		$this->addPrimarySystem(new GraviticThruster(5, 15, 0, 6, 4));		
         
         $this->addFrontSystem(new VolleyLaser(5, 0, 0, 240, 120));         
         $this->addFrontSystem(new VolleyLaser(5, 0, 0, 240, 120));         
