@@ -843,7 +843,7 @@ window.shipWindowManager = {
 							
 					} else {
 					*/	
-					shipWindowManager.setSystemData(ship, system, shipwindow);
+					//shipWindowManager.setSystemData(ship, system, shipwindow); //Removed duplicate entry 17.10.25
 					//}
 
 					//if (system.name == "scanner"){
