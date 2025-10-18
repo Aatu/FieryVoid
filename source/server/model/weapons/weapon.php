@@ -747,12 +747,33 @@ class Weapon extends ShipSystem
         if ($data)
             SystemData::addDataForSystem($this->id, 0, $ship->id, $data->toJSON());
     }
-
+/*
     public function getStartLoading()
     {
 //        return new WeaponLoading($this->getNormalLoad(), 0, 0, 0, $this->getLoadingTime(), $this->firingMode);
         return new WeaponLoading($this->getNormalLoad(), $this->overloadshots, 0, $this->overloadturns, $this->getLoadingTime(), $this->firingMode);
     }
+*/
+public function getStartLoading()
+{
+    $overloadTurns = $this->overloadturns;
+
+    // At game start, no power entries exist yet.
+    // If this weapon can overload and we're initializing (Turn 1 setup),
+    // start overloadturns at 1 so that Turn 1 displays correctly.
+    if ($overloadTurns === 0 && $this->overloadable) {
+        $overloadTurns = 1;
+    }
+
+    return new WeaponLoading(
+        $this->getNormalLoad(),
+        $this->overloadshots,
+        0,
+        $overloadTurns,
+        $this->getLoadingTime(),
+        $this->firingMode
+    );
+}
 
     public function setLoading($loading)
     {
