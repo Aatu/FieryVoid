@@ -913,6 +913,7 @@
             public function setSystemDataWindow($turn){
             parent::setSystemDataWindow($turn);
                 $this->data["Special"] = 'Uninterceptable.';
+				$this->data["Special"] .= "Does ".$this->raking." damage per rake.";                
                 $this->data["Special"] .= '<br>Can also fire in Piercing Mode.';
                 $this->data["Special"] .= "<br>Can be overcharged during Initial Orders to fire in Sustained mode AFTER a full recharge cycle.";
                 $this->data["Special"] .= '<br>When firing in Sustained mode, if the first shot hits, the next turns shot will hit the same target automatically.';
@@ -962,6 +963,7 @@
             public function setSystemDataWindow($turn){
             parent::setSystemDataWindow($turn);
                 $this->data["Special"] = 'Uninterceptable.';
+				$this->data["Special"] .= "Does ".$this->raking." damage per rake.";                   
                 $this->data["Special"] .= '<br>Can also fire in Piercing Mode.';
                 $this->data["Special"] .= "<br>Can be overcharged during Initial Orders to fire in Sustained mode AFTER a full recharge cycle.";
                 $this->data["Special"] .= '<br>When firing in Sustained mode, if the first shot hits, the next turns shot will hit the same target automatically.';
@@ -1750,7 +1752,7 @@ class LaserAccelerator extends Laser{
    //Very deceptive name, this is Torvalus Fighter weapon so actually pretty heavy laser ;)
     class UltralightLaser extends Laser{  
         public $name = "UltralightLaser";
-        public $displayName = "UltralightLaser Laser";
+        public $displayName = "Ultralight Laser";
         public $iconPath = "PowerLaser.png";
 
         public $animationColor = array(255, 255, 0);
