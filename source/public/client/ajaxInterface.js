@@ -761,7 +761,7 @@ window.ajaxInterface = {
             } else if (phase === -2) {
                 // Phase -2 timings (customize as you like)
                 if(notReadiedYet){
-                    time = 60000;
+                    time = 9000;
                 }else{
                     time = 9000;
                     if (ajaxInterface.pollcount > 1)  time = 15000;                       
