@@ -734,7 +734,7 @@ window.ajaxInterface = {
         }
 
         var notReadiedYet = false;
-        var time = 5000;  
+        var time = 8000;  
 
         // detect environment
         var isLocal = (location.hostname === "localhost" || location.hostname === "127.0.0.1");
@@ -763,7 +763,7 @@ window.ajaxInterface = {
                 if(notReadiedYet){
                     time = 60000;
                 }else{
-                    time = 5000;
+                    time = 8000;
                     if (ajaxInterface.pollcount > 1)  time = 15000;                       
                     if (ajaxInterface.pollcount > 3)  time = 30000;                
                     if (ajaxInterface.pollcount > 10) time = 60000;
@@ -771,7 +771,7 @@ window.ajaxInterface = {
                 }
             } else {
                 // In-Game timings
-                time = 5000;
+                time = 8000;
                 if (ajaxInterface.pollcount > 1)  time = 10000;
                 if (ajaxInterface.pollcount > 3)  time = 20000;
                 if (ajaxInterface.pollcount > 10) time = 60000;
