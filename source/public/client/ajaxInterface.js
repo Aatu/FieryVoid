@@ -750,7 +750,7 @@ window.ajaxInterface = {
             }
         }
         
-            if (!ajaxInterface.submiting) ajaxInterface.requestGamedata();
+            if (!ajaxInterface.submiting && !notReadiedYet) ajaxInterface.requestGamedata();
 
             ajaxInterface.pollcount++;
 
