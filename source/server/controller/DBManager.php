@@ -2883,7 +2883,7 @@ class DBManager
         $stmt->close();
     }
 
-
+/*
     public function getLastTimeChatChecked($userid, $gameid)
     {
         $lastTime = null;
@@ -2913,7 +2913,32 @@ class DBManager
 
         return $lastTime;
     }
+*/
+//New hopefully better function.
+public function getLastTimeChatChecked($userid, $gameid)
+{
+    $lastTime = null;
 
+    $stmt = $this->connection->prepare("
+        SELECT last_checked
+        FROM player_chat
+        WHERE playerid = ? AND gameid = ?
+    ");
+
+    if ($stmt) {
+        $stmt->bind_param('ii', $userid, $gameid);
+        $stmt->execute();
+        $stmt->bind_result($lastTimeChecked);
+        if ($stmt->fetch()) {
+            $lastTime = $lastTimeChecked;
+        }
+        $stmt->close();
+    }
+
+    return $lastTime;
+}
+
+/*
     public function setLastTimeChatChecked($userid, $gameid)
     {
         // First check if there is already an entry for this game and player
@@ -2970,7 +2995,50 @@ class DBManager
             $stmt->close();
         }
     }
+*/
+//new version
+public function setLastTimeChatChecked($userid, $gameid)
+{
+    $time = null;
 
+    // Check if an entry exists
+    $stmt = $this->connection->prepare("
+        SELECT last_checked
+        FROM player_chat
+        WHERE playerid = ? AND gameid = ?
+    ");
+
+    if ($stmt) {
+        $stmt->bind_param('ii', $userid, $gameid);
+        $stmt->execute();
+        $stmt->bind_result($time);
+        $stmt->fetch();
+        $stmt->close();
+    }
+
+    // Update if exists, otherwise insert
+    if ($time !== null) {
+        $stmt = $this->connection->prepare("
+            UPDATE player_chat
+            SET last_checked = NOW()
+            WHERE playerid = ? AND gameid = ?
+        ");
+    } else {
+        $stmt = $this->connection->prepare("
+            INSERT INTO player_chat (playerid, gameid, last_checked)
+            VALUES (?, ?, NOW())
+        ");
+    }
+
+    if ($stmt) {
+        $stmt->bind_param('ii', $userid, $gameid);
+        $stmt->execute();
+        $stmt->close();
+    }
+}
+
+
+/*
     public function submitChatMessage($userid, $message, $gameid = 0)
     {
 
@@ -2995,6 +3063,21 @@ class DBManager
             $stmt->close();
         }
     }
+*/
+//New verion
+public function submitChatMessage($userid, $message, $gameid = 0)
+{
+    $stmt = $this->connection->prepare("
+        INSERT INTO chat (userid, username, gameid, time, message)
+        VALUES (?, (SELECT username FROM player WHERE id = ?), ?, NOW(), ?)
+    ");
+
+    if ($stmt) {
+        $stmt->bind_param('iiis', $userid, $userid, $gameid, $message);
+        $stmt->execute();
+        $stmt->close();
+    }
+}
 
     public function getChatMessages($lastid, $gameid = 0)
     {

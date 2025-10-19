@@ -10,6 +10,9 @@ if (! isset($chatelement))
 <link href="styles/chat.css" rel="stylesheet" type="text/css">
 <script>
 (function(){
+
+    const POLL_INTERVAL = 8000;
+    const REQUEST_TIMEOUT = 7000;    
     // Define chat first
     var chat = {
 
@@ -20,8 +23,8 @@ if (! isset($chatelement))
         lastTimeStamp: "",
         focus: false,
         message: "",
-        gameid: <?php print($chatgameid) ?>,
-        playerid: <?php print(isset($_SESSION["user"]) ? $_SESSION["user"] : '""') ?>,
+        gameid: <?php print((int)$chatgameid); ?>,
+        playerid: <?php print(isset($_SESSION["user"]) ? (int)$_SESSION["user"] : 0); ?>,
         chatElement: <?php print("'$chatelement'") ?>,
 
         // place to store current jqXhr so we can abort on unload
@@ -109,6 +112,10 @@ if (! isset($chatelement))
                 chat.lastid = message.id;
                 scroll = true;
             }
+    // 🧹 Keep only last 100 messages to prevent DOM bloat
+    if (c.children().length > 100) {
+        c.children().slice(0, c.children().length - 100).remove();
+    }
 
             if(chat.checkTimesForLightup(chat.lastTimeStamp, chat.lastTimeChecked)){
                 var thisChat = chat.gameid == 0 ? "globalChatTab" : "chatTab";
@@ -164,18 +171,25 @@ if (! isset($chatelement))
                 dataType: 'json',
                 data: { gameid: chat.gameid },
                 success: chat.successSetLastTimeChecked,
-                error: function(){ setTimeout(chat.setLastTimeChecked, 8000); }
+                error: function(){ setTimeout(chat.setLastTimeChecked, POLL_INTERVAL * 2); }
             });
         },
 
-         getLastTimeChecked: function(){
+        getLastTimeChecked: function(){
             if (!chat.polling) return;
             chat._currentXhr = $.ajax({
                 type: 'GET',
                 url: 'playerChatInfo.php',
                 dataType: 'json',
                 data: { gameid: chat.gameid },
-                success: chat.successGetLastTimeChecked,
+                success: function(data){
+                    if(!data || data.error){
+                        if(data?.error) window.confirm.exception(data, function(){});
+                        setTimeout(chat.getLastTimeChecked, 8000);
+                        return;
+                    }
+                    chat.lastTimeChecked = data.lastCheckGame;
+                },
                 error: function(){ setTimeout(chat.getLastTimeChecked, 8000); }
             });
         },
@@ -222,18 +236,33 @@ if (! isset($chatelement))
             chat.setLastTimeChecked();
         },
 
-         requestChatdata: function(){
-            if(chat.requesting || !chat.polling) return;
-            chat.requesting = true;
-            chat._currentXhr = $.ajax({
-                type: 'GET',
-                url: 'chatdata.php',
-                dataType: 'json',
-                data: { gameid: chat.gameid, lastid: chat.lastid },
-                success: chat.successRequest,
-                error: function(){ chat.requesting = false; setTimeout(chat.requestChatdata, 8000); }
-            });
-        },
+
+requestChatdata: function(){
+  if(chat.requesting || !chat.polling) return;
+  chat.requesting = true;
+
+  if(chat._currentXhr && chat._currentXhr.readyState !== 4){
+    try { chat._currentXhr.abort(); } catch(e){}
+  }
+
+  chat._currentXhr = $.ajax({
+    type: 'GET',
+    url: 'chatdata.php',
+    dataType: 'json',
+    timeout: REQUEST_TIMEOUT,
+    data: { gameid: chat.gameid, lastid: chat.lastid },
+    success: function(data){
+      chat.requesting = false;
+      if(!chat.polling) return;
+      if(!data.error) chat.parseChatData(data);
+      setTimeout(chat.requestChatdata, POLL_INTERVAL);
+    },
+    error: function(){
+      chat.requesting = false;
+      if(chat.polling) setTimeout(chat.requestChatdata, POLL_INTERVAL * 2);
+    }
+  });
+},
 
         successRequest: function(data){
             chat.requesting = false;
@@ -250,9 +279,21 @@ if (! isset($chatelement))
 
         successSubmit: function(data){
             if(data.error) window.confirm.exception(data, function(){});
-        },
+        } // no comma here
 
+    }//endof Chat
+
+// Pause/resume polling when the tab visibility changes
+document.addEventListener("visibilitychange", function() {
+    if (document.hidden) {
+        chat.polling = false; // stop polling while tab is hidden
+    } else {
+        if (!chat.polling) {
+            chat.polling = true; // resume polling
+            chat.requestChatdata();
+        }
     }
+});
 
 
     // register DOM ready AFTER chat is defined
@@ -261,6 +302,7 @@ if (! isset($chatelement))
     });
 
 })();
+
 </script>
 
 <div class="chatcontainer">
