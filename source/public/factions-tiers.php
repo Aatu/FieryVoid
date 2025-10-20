@@ -85,8 +85,9 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
            <ul class="sub-list">
                 <li><a href="#mindriders">THE MINDRIDERS</a></li>             
                 <li><a href="#shadows">SHADOW ASSOCIATION</a></li>
-                <li><a href="#thirdspace">THIRDSPACE (Unofficial)</a></li>                   
-                <li><a href="#vorlons">VORLONS</a></li> 
+                <li><a href="#thirdspace">THIRDSPACE (Unofficial)</a></li> 
+                <li><a href="#torvalus">TORVALUS SPECULATORS</a></li>                                   
+                <li><a href="#vorlons">VORLON EMPIRE</a></li> 
             </ul>
         </li>
     </ul>       
@@ -926,9 +927,48 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
     <h5>Psychic Focus</h5>
         <li>In addition to boosting systems with power, the Thirdspace faction can channel their psychic energy (represented by EW points) into improving their weapon strength, self-repair systems and Psychic Field.</li>
     <a class="back-to-top" href="#top">↩ Back to Top</a>   
-    
-    
-    <h4 id="vorlons" style="">VORLONS</h4>
+   
+    <h4 id="torvalus" style="">TORVALUS SPECULATORS</h4>
+    <p>The Torvalus are known for their highly advanced stealth technology as well as their love for making cosmic gambles. Below is a list of systems used by the Torvalus, with short description of effect and any notable design differences from their original tabletop versions.</p>    
+    <h5>Laser Weaponry</h5>
+        <li>Torvalus weaponry is entirely Laser-based, making it uninterceptable.  Whilst these weapons do not have an particularly unusual abilities per se, their high damage, flexibility and low cooldowns makes them very effective.</li>
+    <h5>Shading Field</h5>
+        <li>The Shading Field operates the same as the Minbari's Jammer system (e.g. prevents weapons locks even when targeted with OEW), including against other Ancients as well as Younger Races.</li>
+        <li>In addition the Shading Field has two states, Normal Mode and Shading Mode, which are described below:</li>
+        <li>
+            <ul class="circle-list">
+                <li>Normal Mode- the Shading Field provides a 4-point EM Shield in all directions, which operates the same as Vorlon shields, but cannot be flown under by fighters.</li>
+                <li>Shading Mode- During Firing phase (and Deployment Phase) the Shading Field can be boosted to make its vessel 'Shaded' the FOLLOWING turn.  
+                    Whilst Shaded the vessel retains the Jammer effect, doubles the EM shield rating to on its defence profile and, if it is more than 15 hexes away from all enemy units, it becomes invisible to opponents.
+                    However, on a turn when a Torvalus ship is Shaded it will not be able to fire any of its weapons.</li> 
+            </ul>   
+        </li>
+        <li>Torvalus Stiletto Fighters have a smaller version of the Shading Field equipped.  this can also be toggled on and off during Firing/Deployment phases but does not provide the Jammer ability and does not reduce the profile of the fighter flight (by 3) unless they are Shaded.</li>         
+    <h5>Shade Modulator</h5>
+        <li>The Shade Modulator is a versatile Support Weapons found on the Veiled Scimitar, it has four different firing modes which are described below.</li> 
+        <li>
+            <ul class="circle-list">
+                <li>Blanket Shield Enhancement - The Modulator increases the shield rating of ever Shading Field within 3 hexes by 1 point at a cost of 4 capacity.</li>
+                <li>Individual Shield Enhancement - The Modulator increases the shield rating of a single ally by 1 point at a cost of 2 capacity.</li> 
+                <li>Blanket Shade Enhancement - The Modulator lowers the defensive profile of all Shaded allied ships within 15 hexes by 5% at a cost of 2 capacity.</li>
+                <li>Individual Shade Enhancement - The Modulator lowers the defensive profile of a single Shaded ally by 5% point at a cost of 1 capacity.</li>                                     
+            </ul>   
+        </li>   
+        <li>During the Firing Phase the Shade Modulator can be used on different allies in different modes, multiple times up to its maximum capacity.  For example, it could provide 1 point of Blanket Shield Enhancement, 
+        as well as 1 point of Individual Shield Enhancement and 2 points of Individual Shade Enhancement on the same turn.</li>
+        <li>Blanket firing modes are activated by clicking 'Select' when in that firing mode, whereas Individual modes require the targeting of a specific ally.</li>        
+    <h5>Transverse Drive</h5>
+        <li>Currently the Torvalus do not have access to a functional Transverse Drive in Fiery Void, it is planned to add this in a later patch.</li> 
+    <h5>Agile/Jinking Ships</h5>
+        <li>Torvalus ships are exceptionally maneuverable and this is reflected in even their largest ships having the Agile characteristic.  
+            In addition, their Medium Ships have the ability to jink, an ability normally reserved only to Fighters.</li>                                                       
+    <h5>Gravitic Drives</h5>
+        <li>Allows ships to undertake manoeuvres even while pivoted/pivoting using thrusters appropriate for their current orientation.  
+        Gravitic Thrusters also ignore the first "Efficiency Reduced" reduced critical they receive, increasing their resistance to damage.</li>                           
+    <a class="back-to-top" href="#top">↩ Back to Top</a>  
+
+
+    <h4 id="vorlons" style="">VORLON EMPIRE</h4>
     <p>Below is a list of systems used by the Vorlons, with short description of effect and any notable design differences from their original tabletop versions.</p>    
     <h5>Capital Ship Layout</h5>
         <li>In B5 Wars, Vorlon capital ships, Lightning Cannons are usually tied to both the forward and relevant side sections, to prevent them from easily falling off. 
@@ -1385,6 +1425,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
        <li>Ancients (see 'Ancients' section)</li>        
        <li>Alacan (with Rotia swarms)</li>
        <li>Earth Alliance when using Warlock Advanced Destroyer or Shadow Omega Destroyer,</li>
+       <li>Geoff,</li>         
        <li>Interstellar Alliance's all-White Star fleet,</li>
        <li>Narn Regime, where over 6 Energy Mines are taken,</li>
        <li>Sorithian, as they are simply too weak,</li>
