@@ -86,11 +86,11 @@ $games = json_encode(Manager::getTacGames($userid), JSON_NUMERIC_CHECK);
     <div class="resources">
       <h3>Latest Updates — September 2025</h3>
       <ul class="updates-list">
-        <li><strong>Saved Fleets (Beta)</strong> - You can now save fleets in Fleet Selection and load them using 'Load a Saved Fleet' dropdown, or their ID.</li>          
-        <li><strong>Splash Damage</strong> - Weapons which affect more than one hex will now display this visually e.g. Narn Energy Mines.</li>
-        <li><strong>Jumped Ships</strong> - When a ship jumps to hyperspace, the Info Tab will note this and display its Combat Value at the point of jump.</li>         
-        <li><strong>Ship Images</strong> - Several factions have received improvements to their ship sprites including Alacans, Markab and Vree.</li>                                 
-        <li><strong>General Fixes</strong> - Some minor optimisations, plus other small fixes. Thanks for the reports!</li>                                                    
+        <li><strong>Torvalus Speculators (Beta)</strong> - New Ancient Faction added, the Torvalus Speculators.</li>          
+        <li><strong>Server Stability Fixes</strong> - Hopefully means we will see less web page errors!</li>
+        <li><strong>Sustained Mode Fix</strong> - Sustained weapons should now overcharge correctly on Turn 1.</li>         
+        <li><strong>Ship Images</strong> - More factions have received improvements to their ship sprites including the Grome and Nova Starfury.</li>                                 
+        <li><strong>General Fixes</strong> - Many other small fixes. Thanks for the reports!</li>                                                    
         <!--<li><strong>6 Jun</strong> - Overlay colors, deployment zone tweaks, UI fixes. Pulsar mine fixed, tooltip/text readability improved.</li>-->
       </ul>
     </div>
