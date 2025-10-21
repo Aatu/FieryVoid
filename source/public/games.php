@@ -87,9 +87,9 @@ $games = json_encode(Manager::getTacGames($userid), JSON_NUMERIC_CHECK);
       <h3>Latest Updates — October 2025</h3>
       <ul class="updates-list">
         <li><strong>Torvalus Speculators (Beta)</strong> - New Ancient Faction added, the Torvalus Speculators.</li>          
-        <li><strong>Server Stability Fixes</strong> - Hopefully means we will see less web page errors!</li>
+        <li><strong>Server Stability Fixes</strong> - Hopefully this means less web page errors!</li>
         <li><strong>Sustained Mode Fix</strong> - Sustained weapons should now overcharge correctly on Turn 1.</li>         
-        <li><strong>Ship Images</strong> - More factions have received improvements to their ship sprites including the Grome and Nova Starfury.</li>                                 
+        <li><strong>Ship Images</strong> - More factions have received improvements to their ship sprites including the Grome and the Nova Starfury.</li>                                 
         <li><strong>General Fixes</strong> - Many other small fixes. Thanks for the reports!</li>                                                    
         <!--<li><strong>6 Jun</strong> - Overlay colors, deployment zone tweaks, UI fixes. Pulsar mine fixed, tooltip/text readability improved.</li>-->
       </ul>
