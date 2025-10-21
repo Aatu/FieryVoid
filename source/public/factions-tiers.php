@@ -934,26 +934,24 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         <li>Torvalus weaponry is entirely Laser-based, making it uninterceptable.  Whilst these weapons do not have an particularly unusual abilities per se, their high damage, flexibility and low cooldowns makes them very effective.</li>
     <h5>Shading Field</h5>
         <li>The Shading Field operates the same as the Minbari's Jammer system (e.g. prevents weapons locks even when targeted with OEW), including against other Ancients as well as Younger Races.</li>
-        <li>In addition the Shading Field has two states, Normal Mode and Shading Mode, which are described below:</li>
-        <li>
+        <li>In addition the Shading Field has two states, Normal Mode and Shading Mode, which are described below:
             <ul class="circle-list">
                 <li>Normal Mode- the Shading Field provides a 4-point EM Shield in all directions, which operates the same as Vorlon shields, but cannot be flown under by fighters.</li>
                 <li>Shading Mode- During Firing phase (and Deployment Phase) the Shading Field can be boosted to make its vessel 'Shaded' the FOLLOWING turn.  
                     Whilst Shaded the vessel retains the Jammer effect, doubles the EM shield rating to on its defence profile and, if it is more than 15 hexes away from all enemy units, it becomes invisible to opponents.
                     However, on a turn when a Torvalus ship is Shaded it will not be able to fire any of its weapons.</li> 
-            </ul>   
-        </li>
+            </ul>
+        </li>         
         <li>Torvalus Stiletto Fighters have a smaller version of the Shading Field equipped.  this can also be toggled on and off during Firing/Deployment phases but does not provide the Jammer ability and does not reduce the profile of the fighter flight (by 3) unless they are Shaded.</li>         
     <h5>Shade Modulator</h5>
-        <li>The Shade Modulator is a versatile Support Weapons found on the Veiled Scimitar, it has four different firing modes which are described below.</li> 
-        <li>
+        <li>The Shade Modulator is a versatile Support Weapons found on the Veiled Scimitar, it has four different firing modes which are described below. 
             <ul class="circle-list">
                 <li>Blanket Shield Enhancement - The Modulator increases the shield rating of ever Shading Field within 3 hexes by 1 point at a cost of 4 capacity.</li>
                 <li>Individual Shield Enhancement - The Modulator increases the shield rating of a single ally by 1 point at a cost of 2 capacity.</li> 
                 <li>Blanket Shade Enhancement - The Modulator lowers the defensive profile of all Shaded allied ships within 15 hexes by 5% at a cost of 2 capacity.</li>
                 <li>Individual Shade Enhancement - The Modulator lowers the defensive profile of a single Shaded ally by 5% point at a cost of 1 capacity.</li>                                     
-            </ul>   
-        </li>   
+            </ul>
+        </li>    
         <li>During the Firing Phase the Shade Modulator can be used on different allies in different modes, multiple times up to its maximum capacity.  For example, it could provide 1 point of Blanket Shield Enhancement, 
         as well as 1 point of Individual Shield Enhancement and 2 points of Individual Shade Enhancement on the same turn.</li>
         <li>Blanket firing modes are activated by clicking 'Select' when in that firing mode, whereas Individual modes require the targeting of a specific ally.</li>        
