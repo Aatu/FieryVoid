@@ -84,7 +84,7 @@ $games = json_encode(Manager::getTacGames($userid), JSON_NUMERIC_CHECK);
     </div>
 
     <div class="resources">
-      <h3>Latest Updates — September 2025</h3>
+      <h3>Latest Updates — October 2025</h3>
       <ul class="updates-list">
         <li><strong>Torvalus Speculators (Beta)</strong> - New Ancient Faction added, the Torvalus Speculators.</li>          
         <li><strong>Server Stability Fixes</strong> - Hopefully means we will see less web page errors!</li>
