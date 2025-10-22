@@ -165,7 +165,7 @@ if (! isset($chatelement))
 
         setLastTimeChecked: function(){
             if (!chat.polling) return;
-            chat._currentXhr = $.ajax({
+            chat._currentXhr = ajaxInterface.ajaxWithRetry({
                 type: 'POST',
                 url: 'playerChatInfo.php',
                 dataType: 'json',
@@ -177,7 +177,7 @@ if (! isset($chatelement))
 
         getLastTimeChecked: function(){
             if (!chat.polling) return;
-            chat._currentXhr = $.ajax({
+            chat._currentXhr = ajaxInterface.ajaxWithRetry({
                 type: 'GET',
                 url: 'playerChatInfo.php',
                 dataType: 'json',
@@ -212,7 +212,7 @@ if (! isset($chatelement))
 
             function doSend(delay){
                 if (!chat.polling) return; // avoid when shutting down
-                chat._currentXhr = $.ajax({
+                chat._currentXhr = ajaxInterface.ajaxWithRetry({
                     type: 'POST',
                     url: 'chatdata.php',
                     dataType: 'json',
@@ -245,7 +245,7 @@ requestChatdata: function(){
     try { chat._currentXhr.abort(); } catch(e){}
   }
 
-  chat._currentXhr = $.ajax({
+  chat._currentXhr = ajaxInterface.ajaxWithRetry({
     type: 'GET',
     url: 'chatdata.php',
     dataType: 'json',

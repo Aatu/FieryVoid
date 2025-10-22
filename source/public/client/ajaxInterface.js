@@ -81,6 +81,25 @@ window.ajaxInterface = {
         });
     },
 
+    ajaxWithRetry: function ajaxWithRetry(options, attempt = 1) {
+        const maxAttempts = 5;
+        const baseDelay = 200;
+
+        const jqXHR = $.ajax({
+            ...options,
+            error: function(xhr, status, error) {
+                if (xhr.status === 507 && attempt <= maxAttempts) {
+                    const delay = baseDelay * Math.pow(2, attempt) + Math.random() * 100;
+                    console.warn(`507 error, retrying in ${Math.round(delay)}ms (attempt ${attempt})`);
+                    setTimeout(() => ajaxInterface.ajaxWithRetry(options, attempt + 1), delay);
+                } else if (options.error) {
+                    options.error(xhr, status, error);
+                }
+            }
+        });
+
+        return jqXHR; // ⚠ critical
+    },
 
     //New version - DK July 2025
     submitGamedata: function submitGamedata() {
@@ -97,7 +116,7 @@ window.ajaxInterface = {
         }
 
         // ✅ Use JSON to avoid PHP array serialization quirks
-        $.ajax({
+        ajaxInterface.ajaxWithRetry({
             type: 'POST',
             url: 'gamedata.php',
             contentType: 'application/json; charset=utf-8', // ✅ send JSON body
@@ -149,7 +168,7 @@ window.ajaxInterface = {
         }
 
         // Send the POST request
-        $.ajax({
+        ajaxInterface.ajaxWithRetry({
             type: 'POST',
             url: 'saveFleet.php',
             contentType: 'application/json; charset=utf-8',
@@ -275,7 +294,7 @@ window.ajaxInterface = {
         if (ajaxInterface.submiting) return;
         ajaxInterface.submiting = true;
 
-		$.ajax({
+        ajaxInterface.ajaxWithRetry({
 			type: 'GET',
 			url: 'getSavedFleets.php',
 			dataType: 'json',
@@ -299,7 +318,7 @@ window.ajaxInterface = {
         if (ajaxInterface.submiting) return;
         ajaxInterface.submiting = true;
 
-        $.ajax({
+        ajaxInterface.ajaxWithRetry({
             type: 'POST', // POST to match PHP JSON reading
             url: 'loadSavedFleet.php',
             contentType: 'application/json; charset=utf-8',
@@ -325,7 +344,7 @@ window.ajaxInterface = {
         if (ajaxInterface.submiting) return;
         ajaxInterface.submiting = true;      
         // Send the POST request
-        $.ajax({
+        ajaxInterface.ajaxWithRetry({
             type: 'POST',
             url: 'changeAvailabilityFleet.php',
             contentType: 'application/json; charset=utf-8',
@@ -357,7 +376,7 @@ window.ajaxInterface = {
         if (ajaxInterface.submiting) return;
         ajaxInterface.submiting = true;        
         // Send the POST request
-        $.ajax({
+        ajaxInterface.ajaxWithRetry({
             type: 'POST',
             url: 'deleteSavedFleet.php',
             contentType: 'application/json; charset=utf-8',
@@ -392,7 +411,7 @@ window.ajaxInterface = {
         if (ajaxInterface.submiting) return;
         ajaxInterface.submiting = true;
 
-        $.ajax({
+        ajaxInterface.ajaxWithRetry({
             type: 'POST',
             url: 'slot.php',
             dataType: 'json', // ✅ Expect JSON
@@ -734,7 +753,7 @@ window.ajaxInterface = {
         }
 
         var notReadiedYet = false;
-        var time = 9000;  
+        var time = 8000;  
 
         // detect environment
         var isLocal = (location.hostname === "localhost" || location.hostname === "127.0.0.1");
@@ -761,9 +780,9 @@ window.ajaxInterface = {
             } else if (phase === -2) {
                 // Phase -2 timings (customize as you like)
                 if(notReadiedYet){
-                    time = 9000;
+                    time = 8000;
                 }else{
-                    time = 9000;
+                    time = 8000;
                     if (ajaxInterface.pollcount > 1)  time = 15000;                       
                     if (ajaxInterface.pollcount > 3)  time = 30000;                
                     if (ajaxInterface.pollcount > 10) time = 60000;
@@ -771,7 +790,7 @@ window.ajaxInterface = {
                 }
             } else {
                 // In-Game timings
-                time = 9000;
+                time = 7800;
                 if (ajaxInterface.pollcount > 1)  time = 12000;
                 if (ajaxInterface.pollcount > 3)  time = 30000;
                 if (ajaxInterface.pollcount > 10) time = 60000;
@@ -792,7 +811,7 @@ window.ajaxInterface = {
 
         ajaxInterface.submiting = true;
 
-        $.ajax({
+        ajaxInterface.ajaxWithRetry({
             type: 'GET',
             url: 'gamedata.php',
             dataType: 'json',
@@ -852,7 +871,7 @@ window.ajaxInterface = {
         ajaxInterface.currentRequest = {};  // placeholder for inflight request
         ajaxInterface.nextRequest = null;
 
-        $.ajax({
+        ajaxInterface.ajaxWithRetry({
             type: 'GET',
             url: 'allgames.php',
             dataType: 'json',
@@ -877,7 +896,7 @@ window.ajaxInterface = {
 
     getFirePhaseGames: function getFirePhaseGames() {
 
-        $.ajax({
+        ajaxInterface.ajaxWithRetry({
             type: 'GET',
             url: 'firePhaseGames.php',
             dataType: 'json',
