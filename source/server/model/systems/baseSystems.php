@@ -5851,13 +5851,12 @@ class MindriderHangar extends ShipSystem{
 		public function setSystemDataWindow($turn){
 				$unit = $this->getUnit();
 				if($unit instanceof FighterFlight){
-					$this->data["Special"] = "Jammer ability.";
-					$this->data["Special"] .= "<br>Can activate 'Shading Mode' for the NEXT turn, by boosting this system during Deployment or Firing Phase.";						
+					$this->data["Special"] = "<br>Can activate 'Shading Mode' for the NEXT turn, by boosting this system during Deployment or Firing Phase.";						
 					$this->data["Special"] .= "<br>When Shading is activated, this flight's defense ratings are reduced by 15, and it cannot be detected if it is over 15 hexes at the start or end of movement..";
-					$this->data["Special"] .= "<br>HOWEVER, ship cannot fire any weapons on a turn when Shading was active.";
+					$this->data["Special"] .= "<br>HOWEVER, the flight cannot fire any weapons on a turn when Shading was active.";
 					$this->data["Special"] .= "<br>This system also incorporates a small Jump Drive, with a 20 turn recharge.";									
 				}else{
-					$this->data["Special"] = "Jammer ability.";
+					$this->data["Special"] = "Jammer ability, even against Ancients.";
 					$this->data["Special"] .= "<br>Provides EM Shield.";
 					$this->data["Special"] .= "<br>Toggle 'Shading Mode' for NEXT turn by boosting/unboosting this system during Deployment or Firing Phases.";														
 					$this->data["Special"] .= "<br>When Shading is active, ship cannot be detected if it is over 15 hexes away from all enemy units at the start or end of movement.";
