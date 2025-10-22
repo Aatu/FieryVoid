@@ -1031,7 +1031,7 @@ window.shipManager = {
     },
 
 
-    //Called in various places to identify a ship as having stealth ability.
+    //Called in various places to identify a ship as having ability to be invisible to enemy.
     isStealthShip: function(ship) {
         //if(shipManager.hasSpecialAbility(ship, "Stealth") && (!ship.flight)) return true;
         //return false;
@@ -1046,7 +1046,7 @@ window.shipManager = {
 
 
     //Main Front End check on whether a stealth ship is detected or not, called in various places.
-    isDetected: function(ship) {
+    isDetected: function(ship) {         
         if(ship.faction == "Torvalus Speculators"){
             return shipManager.isDetectedTorvalus(ship);
         }
@@ -1059,7 +1059,7 @@ window.shipManager = {
         if (usedEW > 0){
             return true; //If so, revealed.
         }            
-
+        if(shipManager.isDestroyed(ship)) return true;//It's blown up, assume revealed.  
         if(gamedata.gamephase != 3) return false;  //Cannot only try to detect at start of Firing Phase
 
         // Check all enemy ships to see if any can detect this ship
@@ -1120,7 +1120,7 @@ window.shipManager = {
 
     isDetectedTorvalus: function(ship) {
         if(gamedata.gamephase == -1 && gamedata.turn == 1) return true;  //Do not hide in Turn 1 Deployment Phase.  
-
+        if(shipManager.isDestroyed(ship)) return true;//It's blown up, assume revealed.        
         var shadingField = shipManager.systems.getSystemByName(ship, "ShadingField");
         if(shadingField && shadingField.detected) return true; //Already detected.     
 
