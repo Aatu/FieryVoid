@@ -735,6 +735,10 @@ window.ajaxInterface = {
     },
 
     stopPolling: function stopPolling() {
+        if (ajaxInterface.poll) {
+            clearTimeout(ajaxInterface.poll);
+        }
+
         ajaxInterface.poll = null;
         ajaxInterface.pollcount = 0;
         ajaxInterface.pollActive = false;
@@ -752,35 +756,31 @@ window.ajaxInterface = {
             return;
         }
 
-        var notReadiedYet = false;
         var time = 8000;  
 
         // detect environment
         var isLocal = (location.hostname === "localhost" || location.hostname === "127.0.0.1");
         var phase = gamedata.gamephase;        
-
-        if(gamedata.gamephase == -2){
-            for (var i in gamedata.slots) {
-                var slot = gamedata.slots[i];		
-                if(slot.playerid !== null && slot.playerid == gamedata.thisplayer && slot.lastphase == "-3"){
-                    notReadiedYet = true; //Has not readied all slots yet.
-                    break;       
-                }      
-            }
-        }
         
-            if (!ajaxInterface.submiting && !notReadiedYet) ajaxInterface.requestGamedata();
-
-            ajaxInterface.pollcount++;
+        if (!ajaxInterface.submiting) ajaxInterface.requestGamedata();
+        ajaxInterface.pollcount++;
 
             // --- base timings depending on mode ---
             if (isLocal) {
                 // Local testing timings
                 time = 3000;
             } else if (phase === -2) {
+                var notReadiedYet = false;                
+                for (var i in gamedata.slots) {
+                    var slot = gamedata.slots[i];		
+                    if(slot.playerid !== null && slot.playerid == gamedata.thisplayer && slot.lastphase == "-3"){
+                        notReadiedYet = true; //Has not readied all slots yet.
+                        break;       
+                    }      
+                }                
                 // Phase -2 timings (customize as you like)
                 if(notReadiedYet){
-                    time = 8000;
+                    time = 60000;
                 }else{
                     time = 8000;
                     if (ajaxInterface.pollcount > 1)  time = 15000;                       
@@ -790,7 +790,7 @@ window.ajaxInterface = {
                 }
             } else {
                 // In-Game timings
-                time = 7800;
+                time = 8000;
                 if (ajaxInterface.pollcount > 1)  time = 12000;
                 if (ajaxInterface.pollcount > 3)  time = 30000;
                 if (ajaxInterface.pollcount > 10) time = 60000;
@@ -798,6 +798,7 @@ window.ajaxInterface = {
             }
 
             if (ajaxInterface.pollcount > 300) {
+                ajaxInterface.stopPolling();
                 return;
             }
 
