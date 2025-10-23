@@ -47,7 +47,7 @@ window.declarations = {
         dispShip.value = ship.pointCost;
         dispShip.EW = new Array();
         //now all EW entries...either own or incoming!
-        if (ship.flight){//for fighters, show jinking in all circumstances
+        if (ship.flight || ship.jinkinglimit > 0){//for fighters (or jinking ships), show jinking in all circumstances
 	  dispShip.flight = ship.flight;
 	  dispEWEntry = new dispEWNew();	
           dispEWEntry.name = 'jinking';

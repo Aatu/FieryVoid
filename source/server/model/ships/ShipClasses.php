@@ -60,7 +60,7 @@ class BaseShip {
 	public $halfPhaseThrust = 0; //needed for half phasing; equal to thrust from two BioThrusters on a given ship; 0 for ships that cannot half phase, eg. vast majority
     
 
-    public $jinkinglimit = 0; //just in case there will be a ship actually able to jink; NOT SUPPORTED!
+    public $jinkinglimit = 0; //Some ships can jink, e.g. Torvalus MCVs
 	
     public $enabledSpecialAbilities = array();
 
@@ -78,7 +78,8 @@ class BaseShip {
     public $rolling = false;
 	protected $EMHardened = false; //EM Hardening (Ipsha have it) - some weapons would check for this value!
 	
-	public $ignoreManoeuvreMods = false;//New marker for factions like Mindriders that don't take penalties for pivoting etc	
+	public $ignoreManoeuvreMods = false;//New marker for factions like Mindriders that don't take penalties for pivoting etc
+    public $trueStealth = false; //For ships that can actually be hidden, not just jammer from range.  Important for Front End.	
 		
 
     public $team;
@@ -870,6 +871,16 @@ class BaseShip {
         return false;
     }
 
+    public function checkStealth($gamedata)
+    {         
+        if($this->faction == "Torvalus Speculators"){
+            $shadingField = $this->getSystemByName("ShadingField");
+            if($shadingField) $shadingField->checkStealthNextPhase($gamedata);
+        }
+
+        return;
+    }    
+
     public function isElint()
     {
         //return $this->getSpecialAbilityValue("ELINT");
@@ -1206,22 +1217,11 @@ class BaseShip {
 		}
 
 	//by CLASS name
-    public function getSystemByName($name){
+    public function getSystemByName($name){        
         foreach ($this->systems as $system){
             if ($system instanceof $name){
                 return $system;
             }
-			/* no longer needed
-            else{
-                if($system instanceof Weapon && $system->duoWeapon){
-                    foreach($system->weapons as $weapon){
-                        if($weapon instanceof $name){
-                            return $weapon;
-                        }
-                    }
-                }
-            }
-			*/
         }
 
         return null;

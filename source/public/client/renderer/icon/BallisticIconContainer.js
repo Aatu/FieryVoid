@@ -222,7 +222,9 @@ window.BallisticIconContainer = function () {
 				'Ion Storm':       { type: 'hexPurple',text: 'Ion Field',      color: '#7f00ff' },
 				'Jammer':          { type: 'hexPurple',text: 'Jammer',         color: '#7f00ff' },
 				'Proximity Launcher': { type: 'hexRed',text: 'Proximity Laser',color: '#e6140a' },
-				'Thought Wave':    { type: 'hexPurple',text: 'Thought Wave',   color: '#bc3782' }
+				'Thought Wave':    { type: 'hexPurple',text: 'Thought Wave',   color: '#bc3782' },
+				'1-Blanket Shield':    { type: 'hexGreen',text: 'Shade Modulator',   color: '#008000'},
+				'3-Blanket Shade':    { type: 'hexYellow',text: 'Shade Modulator',   color: '#787800'},				
 			};
 
 			const match = modeMap[modeName];
@@ -232,7 +234,7 @@ window.BallisticIconContainer = function () {
 				textColour = match.color || textColour;
 
 			// Call splash hex generation for cases where weapon affects more than one hex
-			if (['Shredder', 'Energy Mine', 'Ion Storm', 'Jammer'].includes(modeName)) {
+			if (['Shredder', 'Energy Mine', 'Ion Storm', 'Jammer', '1-Blanket Shield', '3-Blanket Shade'].includes(modeName)) {
 				if (gamedata.thisplayer === shooter.userid || replay) {
 					let sizes = [];
 
@@ -243,6 +245,12 @@ window.BallisticIconContainer = function () {
 						case 'Jammer':
 							sizes = [5];
 							break;
+						case '1-Blanket Shield':
+							sizes = [3];
+							break;
+						case '3-Blanket Shade':
+							sizes = [5];
+							break;							
 						default: // Shredder / Energy Mine
 							sizes = [1];
 					}
@@ -457,10 +465,11 @@ window.BallisticIconContainer = function () {
 
 				case 'Sweeping':
 					type = 'purple';
-					if (weapon?.weaponClass === 'Gravitic') type = 'green';
-					else if (weapon?.weaponClass === 'Psychic') type = 'red';
+					if (weapon?.weaponClass === 'Particle') type = 'orange';					
 					else if (weapon?.weaponClass === 'Molecular' && !(weapon instanceof MolecularSlicerBeamL)) type = 'blue';
-					else if (weapon?.weaponClass === 'Particle') type = 'orange';
+					else if (weapon?.weaponClass === 'Gravitic') type = 'green';
+					else if (weapon?.weaponClass === 'Psychic') type = 'red';
+					else if (weapon?.weaponClass === 'Support') type = 'green';				
 					else if (weapon?.weaponClass === 'Electromagnetic') type = 'yellow';
 					break;
 			}
@@ -607,7 +616,7 @@ window.BallisticIconContainer = function () {
         } else if (type == "blue") {
             return "rgba(0,184,230)";
         } else if (type == "green") {
-            return "rgba(0, 204, 0)";
+            return "rgba(0, 128, 0)";
         } else if (type == "purple") {
             return "rgba(204, 51, 255)";
         } else if (type == "white") {

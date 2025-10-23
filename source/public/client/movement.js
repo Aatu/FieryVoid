@@ -140,7 +140,7 @@ shipManager.movement = {
 
     canJink: function canJink(ship, accel) {
         if (gamedata.gamephase != 2) return false;
-        if (!ship.flight) return false;
+        if (!ship.flight && ship.jinkinglimit <= 0) return false;
         if (accel == 0) return true;
         if (shipManager.movement.getRemainingEngineThrust(ship) <= 0) return false;
         var jinking = shipManager.movement.getJinking(ship);
@@ -216,6 +216,9 @@ shipManager.movement = {
         if (ship.flight || ship.osat) return false;
         if (shipManager.isDestroyed(ship) || shipManager.isAdrift(ship)) return false;
         if (shipManager.systems.isEngineDestroyed(ship)) return false;
+        if (ship.rollcost > shipManager.movement.getRemainingEngineThrust(ship)) {
+            return false;
+        }        
         var rolling = shipManager.movement.isRolling(ship);	
         if (!shipManager.movement.isRollingForIcon(ship) && rolling) return false; //Started rolling this movement phase, player should cancel instead.
 	    if (rolling) return true; //rolling ship should be always able to stop...
@@ -225,9 +228,7 @@ shipManager.movement = {
         if (shipManager.movement.isPivoting(ship) != "no" && !ship.gravitic) {
             return false;
         }
-        if (ship.rollcost > shipManager.movement.getRemainingEngineThrust(ship)) {
-            return false;
-        }
+
         return true;
     },
 
@@ -237,6 +238,9 @@ shipManager.movement = {
         if (ship.flight || ship.osat) return false;
         if (shipManager.isDestroyed(ship) || shipManager.isAdrift(ship)) return false;
         if (shipManager.systems.isEngineDestroyed(ship)) return false;
+        if (ship.rollcost > shipManager.movement.getRemainingEngineThrust(ship)) {
+            return false;
+        }        
         var rolling = shipManager.movement.isRolling(ship);	        	
         if (!shipManager.movement.isRollingForIcon(ship) && rolling) return false; //Started rolling this movement phase, player should cancel instead.        	
 	    if (rolling) return true; //rolling ship should be always able to stop...
@@ -247,9 +251,6 @@ shipManager.movement = {
         if (shipManager.movement.isPivoting(ship) == "no") return false;
         if(ship.gravitic) return false;
              
-        if (ship.rollcost > shipManager.movement.getRemainingEngineThrust(ship)) {
-            return false;
-        }
         return true;
     },
 
