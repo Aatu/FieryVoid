@@ -25,7 +25,7 @@ window.weaponManager = {
 
         if (gamedata.gamephase != 1 && system.ballistic) return;
 
-        if (weaponManager.hasFiringOrder(ship, system)) return;
+        if (weaponManager.hasFiringOrder(ship, system) && !system.multiModeSplit) return;
 
         if (gamedata.isMyShip(ship)) {
             //weaponManager.unSelectWeapon(ship, system); //do NOT do so - that would be much better for next mode change!
@@ -680,7 +680,8 @@ window.weaponManager = {
         var jink = 0;
         var dew = 0;
 
-        if (target.flight && shooter) {
+        //if (target.flight && shooter) {
+        if ((target.flight || target.jinkinglimit > 0) && shooter) {        
 			if (!shooter.flight) {
 				jink = shipManager.movement.getJinking(target);
 			} else {
@@ -697,7 +698,9 @@ window.weaponManager = {
 			if (weapon && weapon.ignoreJinking) { //some weapons do ignore Jinking completely
 				jink = 0;
 			}
-        } else {
+        }
+        
+        if(!target.flight) {
             dew = ew.getDefensiveEW(target);
         }
 
@@ -1450,7 +1453,7 @@ window.weaponManager = {
         if(ship.Huge > 0) return; //Do not allow targeting of large muti-hex terrain.
         if(!selectedShip.flight && shipManager.isDisabled(selectedShip)) return;
 
-        /*
+        
         if(selectedShip.faction == "Torvalus Speculators"){
             var shadingField = shipManager.systems.getSystemByName(selectedShip, "ShadingField");
             if(shadingField.shaded){
@@ -1459,7 +1462,7 @@ window.weaponManager = {
                 return; //Shading Field active this turn, ship cannot fire.   If one Field active on fighters, all should be.
             }          
         }
-        */
+        
         var blockedLosHex = weaponManager.getBlockedHexes();
         var loSBlocked = false;
         /*
@@ -1712,7 +1715,7 @@ window.weaponManager = {
                 continue;
             }
             
-            if (weapon.noHexTargeting) { //Prevent weapons like F-Rack targeting hexes when they shouldn’t be able to! DK 17.3.24
+            if (weapon.autoFireOnly) { 
                 continue;
             }
 
@@ -1784,7 +1787,10 @@ window.weaponManager = {
     },
 
     removeFiringOrder: function removeFiringOrder(ship, system) {
-
+        if(system.multiModeSplit){ //Divert to weapon function for these specific weapons.
+            system.removeAllMultiModeSplit(ship);
+            return;
+        }
         for (var i = system.fireOrders.length - 1; i >= 0; i--) {
             if (system.fireOrders[i].weaponid == system.id) {
                 system.fireOrders.splice(i, 1);
@@ -1798,6 +1804,10 @@ window.weaponManager = {
 
 	removeFiringOrderMulti: function removeFiringOrderMulti(ship, system, target = null, button = false) {
 
+        if(system.multiModeSplit){ //Divert to weapon function for these specific weapons.
+            system.removeMultiModeSplit(ship, target);
+            return;
+        }
 	    if (weaponManager.hasFiringOrder(ship, system)) {	    	    	
 	        // Remove the fire order for targeted ship
 	        if (button) {
@@ -1847,6 +1857,7 @@ window.weaponManager = {
 		if (shipManager.isDestroyed(ship) || shipManager.isAdrift(ship)) {
 			return;
 		}
+
         var array = [];
         var systems = [];
         if (ship.flight) {
@@ -1883,17 +1894,23 @@ window.weaponManager = {
                 }
             }
         }
-        /* Cleaned 19.8.25 - DK
-        if (system.duoWeapon) {
-            for (var i in system.weapons) {
-                if (weaponManager.hasFiringOrder(ship, system.weapons[i])) {
-                    return true;
+        return false;
+    },
+
+    hasOrderForMode: function hasOrderForMode(system) {
+        for (var i in system.fireOrders) {
+            var fire = system.fireOrders[i];
+            if (fire.weaponid == system.id && fire.turn == gamedata.turn && !fire.rolled) {
+                if ((gamedata.gamephase == 1 || gamedata.gamephase == 3) && system.ballistic || gamedata.gamephase == 3 && !system.ballistic) {
+                    if (fire.firingMode == system.firingMode) {
+                        return true;
+                    } 
                 }
             }
         }
-        */
         return false;
     },
+
 
     hasTargetedThisShip: function hasTargetedThisShip(target, system) {
         for (var i in system.fireOrders) {
@@ -2071,23 +2088,7 @@ window.weaponManager = {
     getAllFireOrdersFromSystem: function getAllFireOrdersFromSystem(system) {
         if (!system.weapon) return;
 
-        var fires = system.fireOrders;
-        /* Cleaned 19.8.25 - DK
-        if (system.dualWeapon || system.duoWeapon) {
-            for (var i in system.weapons) {
-                var weapon = system.weapons[i];
-
-                if (weapon.duoWeapon) {
-                    for (var index in weapon.weapons) {
-                        var subweapon = weapon.weapons[index];
-                        fires = fires.concat(weaponManager.getAllFireOrdersFromSystem(subweapon));
-                    }
-                } else {
-                    fires = fires.concat(weaponManager.getAllFireOrdersFromSystem(weapon));
-                }
-            }
-        }
-        */    
+        var fires = system.fireOrders; 
 
         return fires;
     },

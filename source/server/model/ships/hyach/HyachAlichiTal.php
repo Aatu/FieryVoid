@@ -28,7 +28,8 @@ class HyachAlichiTal extends HeavyCombatVessel{
         $this->rollcost = 2;
         $this->pivotcost = 3;
         $this->iniativebonus = 30;
-       
+
+		$this->trueStealth = true; //For ships that can actually be hidden, not just jammer from range.  Important for Front End.        
 		
         $this->isd = 2244;
 

@@ -144,7 +144,8 @@ window.ShipTooltip = function () {
 	*/
 	var toDisplay = '';
 	var rollPivotModifier = 0;
-	if (ship.flight === true && jinking > 0) toDisplay += 'Evasion: -' + jinking + ' to hit; ';
+	//if (ship.flight === true && jinking > 0) toDisplay += 'Evasion: -' + jinking + ' to hit; ';
+	if (jinking > 0) toDisplay += 'Evasion: -' + jinking + ' to hit; ';    //Ships can jink too now - DK Oct 2025
 	if (shipManager.movement.isPivoting(ship) !== 'no') toDisplay += 'Pivoting; ';
 	if (ship.agile && (!ship.flight)){
 		if (shipManager.movement.hasRolled(ship)){

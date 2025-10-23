@@ -95,7 +95,16 @@ class Enhancements{
 			foreach ( $unit->enhancementOptionsDisabled as $key=>$value){ 
 				if($value=='IMPR_SENS'){ unset($unit->enhancementOptionsDisabled[$key]); }									
 			}					
+			break;
+			
+		case 'TorvalusFighter':
+			Enhancements::blockStandardEnhancements($unit);
 			break;	
+
+		case 'TorvalusShip':
+			Enhancements::blockStandardEnhancements($unit);
+			$unit->enhancementOptionsEnabled[] = 'IMPR_SR';											
+			break;				
 			
 		case 'VorlonShip':
 			Enhancements::blockStandardEnhancements($unit);

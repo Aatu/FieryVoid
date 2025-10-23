@@ -122,6 +122,8 @@ window.EWIconContainer = function () {
             return;
         }
 
+        if((shipManager.shouldBeHidden(ship)) || (shipManager.shouldBeHidden(target))) return;
+
         var icon = getOEWIcon.call(this, ship, target, type);
         if (icon) {
             updateOEWIcon.call(this, icon, ship, target, amount, type);

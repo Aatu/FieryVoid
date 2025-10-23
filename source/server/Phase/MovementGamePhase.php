@@ -13,6 +13,7 @@ class MovementGamePhase implements Phase
             $lastmove = $ship->getLastMovement();
             $newMove = new MovementOrder(null, 'end', $lastmove->position, 0, 0, $lastmove->speed, $lastmove->heading, $lastmove->facing, false, $gameData->turn, 0, 0);
             $dbManager->submitMovement($gameData->id, $ship->id, $gameData->turn, [$newMove]);
+            if($ship->hasSpecialAbility("Stealth")) $ship->checkStealth($gameData); //Extra check needed at end of movement for Stealth ships like Torvalus.
         }
 
         $gameData->setPhase(3);

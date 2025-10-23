@@ -140,7 +140,7 @@ shipManager.movement = {
 
     canJink: function canJink(ship, accel) {
         if (gamedata.gamephase != 2) return false;
-        if (!ship.flight) return false;
+        if (!ship.flight && ship.jinkinglimit <= 0) return false;
         if (accel == 0) return true;
         if (shipManager.movement.getRemainingEngineThrust(ship) <= 0) return false;
         var jinking = shipManager.movement.getJinking(ship);

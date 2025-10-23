@@ -12,6 +12,7 @@
 		public $fighter = true;
 		public $systems = array();
 		protected $adaptiveArmorController = null; //Adaptive Armor Controller object (if present) - would be individual one for every fighter
+
 		
 		public $possibleCriticals = array();
 		
@@ -147,8 +148,15 @@
 		
 		$bonusCrit = $this->critRollMod + $ship->critRollMod;	//one-time penalty to dropout roll
 		$crits = array_values($crits); //in case some criticals were deleted!
-		
-		$dropOutBonus = $gamedata->getShipById($this->flightid)->getDropOutBonus();
+		$flight = $gamedata->getShipById($this->flightid);
+		$specialDropout = $flight->getSpecialDropout();
+
+		if($specialDropout){ //Certain factions, like Torvalus have conditional bonuses to dropout rolls! - DK Oct 2025
+			$dropOutBonus = $flight->getDropOutBonusSpecial($gamedata);	
+		}else{
+			$dropOutBonus = $flight->getDropOutBonus();
+		}
+
 		if (($d + $dropOutBonus + $bonusCrit) > $this->getRemainingHealth()){
 			$crit = new DisengagedFighter(-1, $ship->id, $this->id, "DisengagedFighter", $gamedata->turn);
 			$crit->updated = true;

@@ -525,7 +525,18 @@ window.ew = {
 	
 	getJammerValueFromTo: function getJammerValueFromTo(shooter, target) {
 		var jammerSystem = null;
-		var jammerValue = 0;		
+		var jammerValue = 0;
+        
+        if(target.faction == "Torvalus Speculators"){
+            if(target.flight) return 0; //Torvalus fighters do not get Jammer effect.
+			var shadingField = shipManager.systems.getSystemByName(target, "ShadingField");
+            if(!shipManager.systems.isDestroyed(target, shadingField) && !shipManager.power.isOffline(target, shadingField)){
+                return 1; //Not destroyed or offline
+            }else{
+                return 0; //Destroyed or offline
+            }                
+        }    
+
 		if (shooter.faction != target.faction) { //in-faction units ignore jammer (but not stealth!)
 			jammerSystem = shipManager.systems.getSystemByName(target, "jammer");				
 			if(jammerSystem != null) {
