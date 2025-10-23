@@ -16,7 +16,7 @@ window.helper = {
 	onClickHelpHide: function onClickHelpHide() {
 		if (document.getElementById('globalhelp').style.display != 'none') {
 			hidehelper = true;
-			$.ajax({
+        ajaxinterface.ajaxWithRetry({
 				type: 'POST',
 				url: 'helperdata.php',
 				dataType: 'text',
@@ -26,7 +26,7 @@ window.helper = {
 			});
 		} else {
 			hidehelper = false;
-			$.ajax({
+        ajaxinterface.ajaxWithRetry({
 				type: 'POST',
 				url: 'helperdata.php',
 				dataType: 'text',
@@ -56,7 +56,7 @@ window.helper = {
 	},
 
 	doUpdateHelpStatus: function doUpdateHelpStatus() {
-		$.ajax({
+        ajaxinterface.ajaxWithRetry({
 			type: 'GET',
 			url: 'helperdata.php',
 			dataType: 'text',
@@ -71,7 +71,7 @@ window.helper = {
 		window.helper.curphaseid = phaseid;
 		window.helper.curpageid = helppageid;
 		helpimg = 'img/vir2.jpg';
-		$.ajax({
+        ajaxinterface.ajaxWithRetry({
 			type: 'GET',
 			url: 'helperdata.php',
 			dataType: 'json',

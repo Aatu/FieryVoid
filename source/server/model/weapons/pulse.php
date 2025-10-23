@@ -1168,4 +1168,53 @@ class UltraPulseCannon extends Pulse{
 } //endof class UltraPulseCannon
 
 
+class VolleyLaser extends Pulse{
+        public $name = "VolleyLaser";
+        public $displayName = "Volley Laser";
+        public $animationColor = array(255, 255, 0);
+        public $animation = "bolt"; 	
+	
+        public $uninterceptable = true;
+        public $priority = 6;
+
+        public $grouping = 15;
+        public $maxpulses = 6;
+        protected $useDie = 3; //die used for base number of hits
+        public $loadingtime = 1;
+        
+        public $rangePenalty = 0.5;
+        public $fireControl = array(4, 5, 6); // fighters, <mediums, <capitals 
+        
+	    public $weaponClass = "Laser"; 
+   
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+        {
+        //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 9;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 4;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+		
+		
+        public function setSystemDataWindow($turn)
+        {
+            parent::setSystemDataWindow($turn);
+			if (!isset($this->data["Special"])) {
+				$this->data["Special"] = '';
+			}else{
+				$this->data["Special"] .= '<br>';
+			}
+			$this->data["Special"] .= "Uninterceptable.";      
+		}
+        
+        
+        public function getDamage($fireOrder){        return 15;   }
+
+} //VolleyLaser
+
+
 ?>

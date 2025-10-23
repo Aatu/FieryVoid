@@ -63,7 +63,7 @@ window.ShipTooltipBallisticsMenu = function () {
         
             // Set correct firing mode
             var modeIteration = ball.fireOrder.firingMode;
-            if (modeIteration != ball.weapon.firingMode) {
+            if (modeIteration != ball.weapon.firingMode && !ball.weapon.multiModeSplit) {
                 while (modeIteration != ball.weapon.firingMode) {
                     ball.weapon.changeFiringMode();
                 }
