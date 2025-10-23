@@ -313,7 +313,6 @@ ThirdspaceShield.prototype.getDefensiveHitChangeMod = function (target, shooter,
 };
 
 ThirdspaceShield.prototype.initializationUpdate = function() {
-	var ship = this.ship;	
 	this.outputDisplay = this.currentHealth;
 	
 	if (this.currentHealth == 0) {

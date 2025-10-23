@@ -1702,3 +1702,124 @@ ThoughtShieldGenerator.prototype.onTurnOn = function (ship) {
         }
     }
 };
+
+var ShadingField = function ShadingField(json, ship) {
+    ShipSystem.call(this, json, ship);
+    this.defensiveType = "Shield";  	
+};
+ShadingField.prototype = Object.create(ShipSystem.prototype);
+ShadingField.prototype.constructor = ShadingField;
+
+ShadingField.prototype.initializationUpdate = function () {
+	if(shipManager.power.isBoosted(this.ship, this)) {
+		this.outputDisplay = "SHADE";
+		this.boost = 1;
+	}else{
+		this.outputDisplay = this.output;
+		this.boost = 0;				
+	}
+		return this;
+}	
+
+ShadingField.prototype.getDefensiveHitChangeMod = function (target, shooter, weapon) {
+    if(target.flight){
+		if(this.shaded){
+			return this.output; //No modifiers for fighters, just return basic output.			
+		}else{
+			return 0;
+		}	
+	}else{	
+		return this.getOutput(target, this);
+	}	
+};
+
+ShadingField.prototype.hasMaxBoost = function () {
+    return true;
+};
+
+ShadingField.prototype.onBoostIncrease = function () {
+    this.boost = 1; 
+	var ship = this.ship;
+	if(ship.fighter){
+		var flight = gamedata.getShip(ship.flightid);//Need to conver tto full ship info.
+		//If you boost one Shading field in a flight, boost them all.
+		if(flight){
+			for (var i in flight.systems) {
+				var system = flight.systems[i]; //The fighter
+				if(!shipManager.systems.isDestroyed(ship, flight.systems[i])){		
+					for (var j in system.systems) {
+						var fighterSystem = system.systems[j];	//The fighter's systems.
+						if(fighterSystem.name == "ShadingField" && fighterSystem.id !== this.id){ //Is shading Field but not this one
+							if(!shipManager.power.isBoosted(flight, fighterSystem)){ //Is not boosted.
+								fighterSystem.boost = 1; //Set boost marker for notes.
+								shipManager.power.clickPlus(flight, fighterSystem);	//And boost.											
+							}					
+						}
+						
+					}
+				}		
+			}
+        webglScene.customEvent('SystemDataChanged', { ship: flight, system: this });			
+		}
+	}		
+};
+
+ShadingField.prototype.onBoostDecrease = function () {
+    this.boost = 0;
+	var ship = this.ship;
+	if(ship.fighter){
+		var flight = gamedata.getShip(ship.flightid);//Need to conver tto full ship info.
+		//If you boost one Shading field in a flight, boost them all.
+		if(flight){
+			for (var i in flight.systems) {
+				var system = flight.systems[i]; //The fighter
+				if(!shipManager.systems.isDestroyed(ship, flight.systems[i])){						
+					for (var j in system.systems) {
+						var fighterSystem = system.systems[j];	//The fighter's systems.
+						if(fighterSystem.name == "ShadingField" && fighterSystem.id !== this.id){ //Is shading Field but not this one
+							if(shipManager.power.isBoosted(flight, fighterSystem)){ //Is not boosted.
+								fighterSystem.boost = 0; //Set boost marker for notes.
+								shipManager.power.clickMinus(flight, fighterSystem);	//And boost.											
+							}					
+						}
+						
+					}
+				}		
+			}
+        webglScene.customEvent('SystemDataChanged', { ship: flight, system: this });			
+		}
+	}		 
+};
+
+ShadingField.prototype.doIndividualNotesTransfer = function () {
+
+	if(gamedata.gamephase == 3){	
+		var shaded = this.shaded; //Was shaded this turn.		
+   		this.individualNotesTransfer = Array();
+		if(this.boost == 0 && shaded){			
+    		this.individualNotesTransfer.push(this.boost);
+		}
+	}
+};
+
+ShadingField.prototype.getOutput = function(ship, system){
+	if (!system){
+		console.log("ERROR: getOutput system missing");
+		console.trace();
+	}
+		
+	if (shipManager.systems.isDestroyed(ship, system))
+		return 0;
+        
+	if (shipManager.power.isOffline(ship, system))
+		return 0;
+		
+	var output = system.output;
+	output = output + system.outputMod;	//Mod is negative.	
+	if(this.shaded && !ship.flight) output = output * 2; //Boosted ships get double output.	
+    output = Math.max(0,output); //output cannot be negative!
+
+    return output;
+};
+
+

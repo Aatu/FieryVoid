@@ -1009,9 +1009,8 @@ class Manager{
             $array = json_decode($json, true);
         }
 
-
         $ships = array();
-        $array = json_decode($json, true);
+        //$array = json_decode($json, true);
         if (!is_array($array)) return $ships;
     
         foreach ($array as $value) {
@@ -1161,6 +1160,42 @@ class Manager{
                             $fig->individualNotesTransfer = $fightersys["individualNotesTransfer"];
                             $fig->doIndividualNotesTransfer();
                         }
+
+                        //Some fighter systems CAN be boosted now
+                        // --- inside foreach ($system["systems"] as $fightersys) { ... }
+                        if (isset($fightersys["power"]) && is_array($fightersys["power"])) {
+                            $powers = []; // different name
+                            foreach ($fightersys["power"] as $p) {
+                                $powerEntry = new PowerManagementEntry(
+                                    $p["id"] ?? -1,
+                                    $p["shipid"] ?? -1,
+                                    $p["systemid"] ?? -1,
+                                    $p["type"] ?? "",
+                                    $p["turn"] ?? 0,
+                                    $p["amount"] ?? 0
+                                );
+                                $powers[] = $powerEntry;
+                            }
+                            $fig->setPower($powers);
+                        }
+
+                        //Some fighter systems CAN be boosted now
+                        // --- inside foreach ($system["systems"] as $fightersys) { ... }
+                        if (isset($fightersys["power"]) && is_array($fightersys["power"])) {
+                            $powers = []; // different name
+                            foreach ($fightersys["power"] as $p) {
+                                $powerEntry = new PowerManagementEntry(
+                                    $p["id"] ?? -1,
+                                    $p["shipid"] ?? -1,
+                                    $p["systemid"] ?? -1,
+                                    $p["type"] ?? "",
+                                    $p["turn"] ?? 0,
+                                    $p["amount"] ?? 0
+                                );
+                                $powers[] = $powerEntry;
+                            }
+                            $fig->setPower($powers);
+                        }
                     }
                 }
     
@@ -1193,6 +1228,12 @@ class Manager{
 		return $fireOrders;
     }    
 
-
+    public static function removePowerEntriesForTurn($gameid, $shipid, $systemid, $turn){              
+		self::$dbManager->removePowerEntriesForTurn($gameid, $shipid, $systemid, $turn);	
+    }
+  
+    public static function insertIndividualNote($note){                
+		self::$dbManager->insertIndividualNote($note);
+    }    
     
 }

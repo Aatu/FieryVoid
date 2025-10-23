@@ -60,6 +60,7 @@ class FighterFlight extends BaseShip
     public $team;
 
     protected $dropOutBonus = 0;
+	protected $specialDropout = false; //Has special rules for dropout.    
 
     public $movement = array();
 
@@ -134,6 +135,48 @@ class FighterFlight extends BaseShip
     public function getDropOutBonus()
     {
         return $this->dropOutBonus;
+    }
+
+    public function getSpecialDropout()
+    {
+        return $this->specialDropout;
+    }    
+
+    public function getDropOutBonusSpecial($gamedata)
+    {
+        $dropOutBonus = 0;
+
+        if ($this->faction === "Torvalus Speculators") {
+            $dropOutBonus = -100; // Artificially high as Stilettos don't drop out if still controlled.
+            $fighters = 0;
+            $controlCapacity = 0;
+
+            foreach ($gamedata->ships as $ship) {
+                if ($ship->userid !== $this->userid) continue; // Only friendly
+                if ($ship->faction !== "Torvalus Speculators") continue; // Only Torvalus
+                if ($ship->isDestroyed()) continue; // Skip destroyed
+
+                if ($ship instanceof FighterFlight) {
+                    foreach ($ship->systems as $ftr) {
+                        if ($ftr->isDestroyed()) continue;
+                        $fighters += 1;
+                    }
+                } else {
+                    $CnC = $ship->getSystemByName("CnC");
+                    if ($CnC && !$CnC->isDestroyed()) {
+                        if (!empty($ship->fighters["normal"])) {
+                            $controlCapacity += $ship->fighters["normal"];
+                        }
+                    }
+                }
+            }
+
+            if ($controlCapacity < $fighters) {
+                $dropOutBonus = 0; // No bonus if not enough control available
+            }
+        }
+
+        return $dropOutBonus;
     }
 
     public function getSystemById($id)
@@ -231,7 +274,7 @@ class FighterFlight extends BaseShip
 
 
     public function getSystemByName($name)
-    {
+    {          
         foreach ($this->systems as $fighter) {
             foreach ($fighter->systems as $fs) {
                 if ($fs->name == $name) return $fs;

@@ -1,5 +1,5 @@
 <?php
-
+/*
 header('Content-Type: application/json; charset=utf-8');
 
 require_once 'global.php';
@@ -80,12 +80,12 @@ if (!is_string($ret)) {
 
 echo $ret;
 exit;
+*/
 
 
 
 
-/*
-ob_start("ob_gzhandler"); 
+//ob_start("ob_gzhandler"); 
     include_once 'global.php';
 
     $ret = '{"error":"AJAX request is omitting required data"}';    
@@ -110,4 +110,4 @@ ob_start("ob_gzhandler");
 	}
     print($ret);
 ?>
-*/
+
