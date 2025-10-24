@@ -942,7 +942,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                     However, on a turn when a Torvalus ship is Shaded it will not be able to fire any of its weapons.</li> 
             </ul>
         </li>         
-        <li>Torvalus Stiletto Fighters have a smaller version of the Shading Field equipped.  this can also be toggled on and off during Firing/Deployment phases but does not provide the Jammer ability and does not reduce the profile of the fighter flight (by 3) unless they are Shaded.</li>         
+        <li>Torvalus Stiletto Fighters have a smaller version of the Shading Field equipped.  This can also be toggled on and off during Firing/Deployment phases but does not provide the Jammer ability and does not reduce the profile of the fighter flight (by 3) unless they are Shaded.</li>         
     <h5>Shade Modulator</h5>
         <li>The Shade Modulator is a versatile Support Weapons found on the Veiled Scimitar, it has four different firing modes which are described below. 
             <ul class="circle-list">
