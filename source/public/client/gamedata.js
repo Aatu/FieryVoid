@@ -1140,9 +1140,9 @@ window.gamedata = {
 
         //var allShips = gamedata.ships;
         var ships = gamedata.ships.filter(function(ship) {
-            return !shipManager.isDestroyed(ship) &&
-                   !gamedata.isTerrain(ship.shipSizeClass, ship.userid) &&
-                   !shipManager.shouldBeHidden(ship);
+            return !shipManager.isDestroyed(ship)
+                   && !gamedata.isTerrain(ship.shipSizeClass, ship.userid) 
+                   //&& !shipManager.shouldBeHidden(ship); //Moved to onScrollToShip() in Phase Strategy
         });
 
        

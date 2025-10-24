@@ -166,7 +166,11 @@ window.PhaseStrategy = function () {
 
     PhaseStrategy.prototype.onScrollToShip = function(payload) {
         var icon = this.shipIconContainer.getById(payload.shipId)
-        window.webglScene.moveCameraTo(icon.getPosition())
+        if(!shipManager.shouldBeHidden(icon.ship)){
+            window.webglScene.moveCameraTo(icon.getPosition())
+        }else{
+            return;
+        }    
     }
 
     PhaseStrategy.prototype.onScrollEvent = function (payload) {
