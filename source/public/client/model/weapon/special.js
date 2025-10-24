@@ -697,11 +697,93 @@ var SecondSight = function SecondSight(json, ship) {
 SecondSight.prototype = Object.create(Weapon.prototype);
 SecondSight.prototype.constructor = SecondSight;
 
+SecondSight.prototype.canToggle = function () { 
+    if(gamedata.gamephase == 3) return true;		
+	return false;	
+};
+	
+SecondSight.prototype.canActivate = function () { 
+	if(gamedata.gamephase == 3 && this.fireOrders.length == 0) return true;
+	return false; 
+};  
+
+
+//This creates Fire Orders for Modes 1 and 3.
+SecondSight.prototype.doActivate = function () { 
+
+		var ship = this.ship;
+		var fireid = ship.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
+		var position = shipManager.getShipPosition(ship);			
+
+		var fire = {
+			id: fireid,
+			type: 'normal',
+			shooterid: ship.id,
+			targetid: -1,
+			weaponid: this.id,
+			calledid: -1,
+			turn: gamedata.turn,
+			firingMode: this.firingMode,
+			shots: this.defaultShots,
+			x: position.q,
+			y: position.r,
+			damageclass: 'Electromagnetic',
+			chance: 100,
+			hitmod: 0,
+			notes: "Split" //Used to identify split targeting.
+		};
+				
+		// Push to arrays / fire orders
+		this.fireOrders.push(fire);
+	};   
+
+
 var ThoughtWave = function ThoughtWave(json, ship) {
     Weapon.call(this, json, ship);
 };
 ThoughtWave.prototype = Object.create(Weapon.prototype);
 ThoughtWave.prototype.constructor = ThoughtWave;
+
+ThoughtWave.prototype.canToggle = function () { 
+    if(gamedata.gamephase == 1) return true;		
+	return false;	
+};
+	
+ThoughtWave.prototype.canActivate = function () { 
+	if(gamedata.gamephase == 1 && this.fireOrders.length == 0) return true;
+	return false; 
+};  
+
+
+//This creates Fire Orders for Modes 1 and 3.
+ThoughtWave.prototype.doActivate = function () { 
+
+		var ship = this.ship;
+		var fireid = ship.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
+		var position = shipManager.getShipPosition(ship);			
+
+		var fire = {
+			id: fireid,
+			type: 'normal',
+			shooterid: ship.id,
+			targetid: -1,
+			weaponid: this.id,
+			calledid: -1,
+			turn: gamedata.turn,
+			firingMode: this.firingMode,
+			shots: this.defaultShots,
+			x: position.q,
+			y: position.r,
+			damageclass: 'Plasma',
+			chance: 100,
+			hitmod: 0,
+			notes: "Split" //Used to identify split targeting.
+		};
+				
+		// Push to arrays / fire orders
+		this.fireOrders.push(fire);
+	};  
+
 
 var GrapplingClaw = function GrapplingClaw(json, ship) {
     Weapon.call(this, json, ship);
