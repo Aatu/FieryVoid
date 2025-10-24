@@ -142,7 +142,7 @@ window.LaserEffect = function () {
         var startAndEnd = getStartAndEnd.call(this);
         return new LineSprite(startAndEnd.start, startAndEnd.end, widht, 201, color, opacity, {
             blending: THREE.AdditiveBlending,
-            texture: new THREE.TextureLoader().load("img/effect/laser18.png")
+            texture: new THREE.TextureLoader().load("img/effect/laser19.png")
         });
     }
 
