@@ -72,8 +72,9 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
     Note also that fighters usually start with empty magazine (although some missile entry is present, for technical reasons).</p>
 
     <p>Missiles do not use firing ships OEW and their built-in guidance package is usually combined into weapons' Fire control, rather than being kept separate.  Fighter missiles do benefit from the fighter's offensive bonus.</p>
-    <p style="margin-bottom: 0px;">Ammo listings usually mention ISD year for when that missile type becomes available (if two dates the first refers to Kor-Lyan only). This is not enforced by Fiery Void so players will need to do this themselves.</p>
-
+    <p>Ammo listings usually mention ISD year for when that missile type becomes available (if two dates the first refers to Kor-Lyan only). This is not enforced by Fiery Void so players will need to do this themselves.</p>
+    <p style="margin-bottom: 0px;">The table below summarises the base stats for different missile types.  Note - These stats can be modified by the type of launcher as well e.g. a L-Rack Missile Launcher would add +10 to the listed ranges below.</p>
+    
     <h4 id="shipbornemissiles" style="margin-top: 20px;  margin-bottom: 15px;">Shipborne Missiles:</h4>       
     <ul>    
       <li><strong>Class B - Basic Missile:</strong> - Range 20 - Damage 20 - Fire Control: +3/+3/+3,</li> 
