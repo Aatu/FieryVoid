@@ -800,9 +800,9 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             All shields on a ship must be reinforced equally, at a cost of 1 output per level of reinforcement per shield (e.g. reinforcing a Thoughtforce vessel with 4 shields by 3 levels would cost 12 output, 3 * 4).  
             Any unspent output will instead be used to reinforce the vessel equipped with the Shield Reinforcement system.</li>      
     <h5>Second Sight</h5>
-        <li>This weapon reduces the Initiative of all enemy ships on the following turn.  To fire the weapon simply target any hex during the Firing phase.</li>      
+        <li>This weapon reduces the Initiative of all enemy ships on the following turn.  To fire the weapon select it during during the Firing phase and press 'Select' button.</li>      
     <h5>Thought Wave</h5>
-        <li>Ballistic area effect weapon that's fired in Initial Orders turn by targeting any hex. 
+        <li>Ballistic area effect weapon that's fired in Initial Orders turn by selecting it and pressing the 'Select' button. 
             It will attempt to strike all non-Mindrider ships in the game and has a special calculation for both its Hit Chance and Damage:
                 <ul class="circle-list">
                     <li><strong>Hit Chance:</strong> - 15 + OEW + d20 roll - Range Penalty - DEW - Target's Initiative,</li>
