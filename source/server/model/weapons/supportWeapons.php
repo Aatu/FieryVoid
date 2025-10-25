@@ -545,7 +545,7 @@ class ShadeModulator extends Weapon{
 	public $rangeArray = array(1 => 3, 2=> 5, 3=> 15, 4=> 20);	
     public $canOffLine = true;    
 	protected $autoHit = true;//To show 100% hit chance in front end.
-	public $autoFireOnly = true; //this weapon cannot be fired by player
+	public $autoFireOnly = true; //this weapon cannot manually fire by player at a target, just activated
 	public $autoFireOnlyArray = array(1 => true, 2=> false, 3=> true, 4=> false);	
 	protected $canTargetAllies = true; //To allow front end to target allies.
 	protected $canTargetAlliesArray = array(1 => false, 2=> true, 3=> false, 4=> true); //To allow front end to target allies.
@@ -773,6 +773,10 @@ class TransverseDrive extends Weapon{
         $this->data["Special"] = "Transverse Drive not installed until Tuesday.";												
 		parent::setSystemDataWindow($turn);     
     }
+
+	public function getDamage($fireOrder){       return 0;   } //no actual damage
+	public function setMinDamage(){     $this->minDamage = 0 ;      }
+	public function setMaxDamage(){     $this->maxDamage = 0 ;      }
 
 }	
 
