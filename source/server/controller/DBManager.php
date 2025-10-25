@@ -598,6 +598,8 @@ class DBManager
                 teamid,
                 lastturn,
                 lastphase,
+                lastactivity,
+                submitLock,
                 name,
                 points,
                 depx,
@@ -617,6 +619,8 @@ class DBManager
                 ?,
                 ?,
                 ?,
+                now(),
+                null,
                 ?,
                 ?,
                 ?,
@@ -655,6 +659,68 @@ class DBManager
             $stmt->close();
         }
     }
+
+/* //Old version
+    public function createSlots($gameid, $input)
+    {
+        $slots = array();
+        if (is_array($input))
+            $slots = $input;
+        else
+            $slots[] = $input;
+
+        $stmt = $this->connection->prepare("
+            INSERT INTO 
+                tac_playeringame
+            VALUES
+            (
+                ?,
+                ?,
+                ?,
+                ?,
+                ?,
+                ?,
+                now(),
+                null,
+                ?,
+                ?,
+                ?,
+                ?,
+                ?,
+                ?,
+                ?,
+                ?,
+                false
+            )
+
+        ");
+
+        if ($stmt) {
+            foreach ($slots as $slot) {
+                $stmt->bind_param(
+                    'iiiiiisiiisiii',
+                    $gameid,
+                    $slot->slot,
+                    $slot->playerid,
+                    $slot->team,
+                    $slot->lastturn,
+                    $slot->lastphase,
+                    $slot->name,
+                    $slot->points,
+                    $slot->depx,
+                    $slot->depy,
+                    $slot->deptype,
+                    $slot->depwidth,
+                    $slot->depheight,
+                    $slot->depavailable
+                );
+                $stmt->execute();
+            }
+            $stmt->close();
+        }
+    }
+*/        
+
 
     public function createGame($gamename, $background, $slots, $userid, $gamespace, $description, $rules = '{}')
     {
