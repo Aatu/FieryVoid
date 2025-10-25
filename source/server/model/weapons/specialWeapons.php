@@ -7588,7 +7588,9 @@ class SecondSight extends Weapon{
 	public $noProjectile = true; //Marker for front end to make projectile invisible for weapons that shouldn't have one.  		
 
 	protected $autoHit = true;//To show 100% hit chance in front end.
-   	protected $noTargetHexIcon = true; //For Front End Hex icon display.	
+   	//protected $noTargetHexIcon = true; //For Front End Hex icon display.
+	
+	public $autoFireOnly = true; //this weapon cannot manually fire by player at a target, just activated	
 	
     protected $possibleCriticals = array();	
 	
@@ -7704,7 +7706,7 @@ class SecondSight extends Weapon{
 	
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);
-		$this->data["Special"] = 'Fire this weapon by targeting ANY hex during the Firing phase.';
+		$this->data["Special"] = 'Fire this weapon by clicking Select during the Firing phase.';
 		$this->data["Special"] .= '<br>Automatically reduces Initiative of ALL enemy units next turn.';		
 		$this->data["Special"] .= '<br>Enemy ships suffer a D6+2 (e.g. -15 to -40) Initiative penalty next turn.';	
 		$this->data["Special"] .= '<br>Ships equipped with Advanced Armor will only suffer -10 Initiatve penalty.';
@@ -7719,8 +7721,8 @@ class SecondSight extends Weapon{
     public function stripForJson() {
         $strippedSystem = parent::stripForJson();    
         $strippedSystem->autoHit = $this->autoHit;
-		$strippedSystem->noProjectile = $this->noProjectile; 
-		$strippedSystem->noTargetHexIcon = $this->noTargetHexIcon;		                                
+		//$strippedSystem->noProjectile = $this->noProjectile; 
+		//$strippedSystem->noTargetHexIcon = $this->noTargetHexIcon;		                                
         return $strippedSystem;
 	}    
  
@@ -7760,10 +7762,11 @@ class ThoughtWave extends Plasma{
 	public $noProjectile = true; //Marker for front end to make projectile invisible for weapons that shouldn't have one.
 	
 	public $firingModes = array(1=> "Thought Wave"); 	
+	public $autoFireOnly = true; //this weapon cannot manually fire by player at a target, just activated	
 
 	public $output = 15;//Is actually used as the base hit chance, but can be modified by critical hits.	
 	private $diceRollonTurn = null;	
-   	protected $noTargetHexIcon = true; //For Front End Hex icon display.	
+   	//protected $noTargetHexIcon = true; //For Front End Hex icon display.	
 
 
     protected $possibleCriticals = array(
@@ -7876,8 +7879,8 @@ class ThoughtWave extends Plasma{
         $hitLoc = $target->getHitSectionPos(mathlib::hexCoToPixel($launchPos), $fireOrder->turn);
 
         $fireOrder->chosenLocation = $hitLoc;
-        
-        $result = round($this->output - $rangePenalty + $oew - $dew - $initiative + $diceRoll);//basehit - rp + OEW - DEW - target ini + d20
+        $output = $this->getOutput();
+        $result = round($output - $rangePenalty + $oew - $dew - $initiative + $diceRoll);//basehit - rp + OEW - DEW - target ini + d20
         
 		if($result > 0){ //Automatically hits if calculation result is above 0.
         	$fireOrder->needed = 100;
@@ -7932,7 +7935,7 @@ class ThoughtWave extends Plasma{
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);
 		$this->data["Damage"] = 'Special';	
-		$this->data["Special"] = 'To fire this weapon, target ANY hex during the Initial Orders phase.';
+		$this->data["Special"] = 'Fire this weapon by clicking Select during  the Initial Orders phase.';
 		$this->data["Special"] .= '<br><br>The Thought Wave will always originate from the starting location of the firing ship (as per usual with ballistic weapons).';
 		$this->data["Special"] .= '<br>The Thought Wave will attempt to hit ALL non-Mindrider ships in the game in Firing Phase (even friendlies), using the following formula:';
 		$this->data["Special"] .= '<br> - (15 + OEW + d20) - (Range Penalty + DEW - Target Initiative/5)';
@@ -7946,13 +7949,14 @@ class ThoughtWave extends Plasma{
     public function setMinDamage(){     $this->minDamage = 0 ;      }
     public function setMaxDamage(){     $this->maxDamage = 0 ;      }
 
+	/*
  	public function stripForJson(){
 		$strippedSystem = parent::stripForJson();
 		$strippedSystem->noProjectile = $this->noProjectile;
-		$strippedSystem->noTargetHexIcon = $this->noTargetHexIcon;																			
+		//$strippedSystem->noTargetHexIcon = $this->noTargetHexIcon;																			
 		return $strippedSystem;
 	}         
-	
+	*/
 } //endof class ThoughtWave
 
 
