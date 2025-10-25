@@ -730,7 +730,7 @@ SecondSight.prototype.doActivate = function () {
 			damageclass: 'Electromagnetic',
 			chance: 100,
 			hitmod: 0,
-			notes: "Split" //Used to identify split targeting.
+			notes: "SecondSight" //Used to identify split targeting.
 		};
 				
 		// Push to arrays / fire orders
@@ -764,7 +764,7 @@ ThoughtWave.prototype.doActivate = function () {
 
 		var fire = {
 			id: fireid,
-			type: 'normal',
+			type: 'ballistic',
 			shooterid: ship.id,
 			targetid: -1,
 			weaponid: this.id,
@@ -777,7 +777,7 @@ ThoughtWave.prototype.doActivate = function () {
 			damageclass: 'Plasma',
 			chance: 100,
 			hitmod: 0,
-			notes: "Split" //Used to identify split targeting.
+			notes: "Thoughtwave" //Used to identify split targeting.
 		};
 				
 		// Push to arrays / fire orders
