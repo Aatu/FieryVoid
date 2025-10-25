@@ -40415,14 +40415,14 @@ var SystemInfoButtons = function (_React$Component) {
 			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 		}
 	}, {
-		key: "unactivate",
-		value: function unactivate(e) {
+		key: "deactivate",
+		value: function deactivate(e) {
 			e.stopPropagation();e.preventDefault();
 			var _props19 = this.props,
 			    ship = _props19.ship,
 			    system = _props19.system;
 
-			system.doUnactivate();
+			system.doDeactivate();
 			webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 		}
 
@@ -40867,7 +40867,7 @@ var SystemInfoButtons = function (_React$Component) {
 				canChangeFiringMode(ship, system) && getFiringModes(ship, system, this.changeFiringMode.bind(this), this.allChangeFiringMode.bind(this)),
 				canSelfIntercept(ship, system) && React.createElement(Button, { title: "Allow interception (RMB = All systems selected)", onClick: this.declareSelfIntercept.bind(this), onContextMenu: this.declareSelfInterceptAll.bind(this), img: "./img/selfIntercept.png" }),
 				canActivate(ship, system) && React.createElement(Button, { onClick: this.activate.bind(this), img: "./img/systemicons/Specialistclasses/select.png" }),
-				canUnactivate(ship, system) && React.createElement(Button, { onClick: this.unactivate.bind(this), img: "./img/systemicons/Specialistclasses/unselect.png" }),
+				canDeactivate(ship, system) && React.createElement(Button, { onClick: this.deactivate.bind(this), img: "./img/systemicons/Specialistclasses/unselect.png" }),
 				canAAdisplayCurrClass(ship, system) && React.createElement(Button, { title: getAAcurrClassName(ship, system), img: getAAcurrClassImg(ship, system) }),
 				canAAdisplayCurrClass(ship, system) && React.createElement(Button, { title: "Previous", onClick: this.prevCurrClass.bind(this), img: "./img/systemicons/Specialistclasses/iconPrev.png" }),
 				canAAdisplayCurrClass(ship, system) && React.createElement(Button, { title: "Next", onClick: this.nextCurrClass.bind(this), img: "./img/systemicons/AAclasses/iconNext.png" }),
@@ -41062,7 +41062,7 @@ var getSRicon = function getSRicon(ship, system) {
 };
 
 var canDoAnything = exports.canDoAnything = function canDoAnything(ship, system) {
-	return canOffline(ship, system) || canOnline(ship, system) || canOverload(ship, system) || canStopOverload(ship, system) || canBoost(ship, system) || canDeBoost(ship, system) || canAddShots(ship, system) || canReduceShots(ship, system) || canRemoveFireOrderMulti(ship, system) || canRemoveFireOrder(ship, system) || canChangeFiringMode(ship, system) || canSelfIntercept(ship, system) || canAA(ship, system) || canBFCP(ship, system) || canSpec(ship, system) || canTSShield(ship, system) || canThoughtShield(ship, system) || canTSShieldGen(ship, system) || canThoughtShieldGen(ship, system) || canSRdisplayCurrSystem(ship, system) || canToggle(ship, system);
+	return canOffline(ship, system) || canOnline(ship, system) || canOverload(ship, system) || canStopOverload(ship, system) || canBoost(ship, system) || canDeBoost(ship, system) || canAddShots(ship, system) || canReduceShots(ship, system) || canRemoveFireOrderMulti(ship, system) || canRemoveFireOrder(ship, system) || canChangeFiringMode(ship, system) || canSelfIntercept(ship, system) || canAA(ship, system) || canBFCP(ship, system) || canSpec(ship, system) || canTSShield(ship, system) || canThoughtShield(ship, system) || canTSShieldGen(ship, system) || canThoughtShieldGen(ship, system) || canSRdisplayCurrSystem(ship, system) || canActivate(ship, system) || canDeactivate(ship, system);
 };
 
 var canOffline = function canOffline(ship, system) {
@@ -41127,14 +41127,11 @@ var canSelfIntercept = function canSelfIntercept(ship, system) {
 	return system.weapon && weaponManager.canSelfInterceptSingle(ship, system);
 };
 
-var canToggle = function canToggle(ship, system) {
-	return system.canToggle();
-};
 var canActivate = function canActivate(ship, system) {
-	return canToggle(ship, system) && system.canActivate();
+	return system.canActivate();
 };
-var canUnactivate = function canUnactivate(ship, system) {
-	return canToggle(ship, system) && system.canUnactivate();
+var canDeactivate = function canDeactivate(ship, system) {
+	return system.canDeactivate();
 };
 
 var getFiringModes = function getFiringModes(ship, system, changeFiringMode, allChangeFiringMode) {
