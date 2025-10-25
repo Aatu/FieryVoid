@@ -1184,7 +1184,7 @@ class VolleyLaser extends Pulse{
         
         public $rangePenalty = 0.5;
         public $fireControl = array(4, 5, 6); // fighters, <mediums, <capitals 
-        
+        public $intercept = 3;        
 	    public $weaponClass = "Laser"; 
    
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
