@@ -2206,6 +2206,7 @@ class MinorThoughtPulsar extends LinkedWeapon{
     public $firingModes = array( 1 => "RoF", 2 => "Damage", 3 => "Hitchance", 4 => "1Combo1",  5 => "2Combo2");
 
 	public $bonusDamageShots = 0;//Effectively a counter for shots.
+	public $specialHitChanceCalculation = true;    
 
     function __construct($startArc, $endArc, $shots=1){
         $this->shots = $shots;
@@ -2320,7 +2321,7 @@ class MinorThoughtPulsar extends LinkedWeapon{
 					}else if($noOfBoosts == 4){//4 boosts
 						$this->createNewFireOrder($ship, $target, $gamedata, $originalFireOrder);//Add extra shot(3)
 						$this->bonusDamageShots += 3; //Then three boosts into damage.							
-					}else{//5 of more Boosts
+					}else{//5 or more Boosts
 						$this->createNewFireOrder($ship, $target, $gamedata, $originalFireOrder);//Add extra shot
 						$this->bonusDamageShots += 3; //Then three boosts into damage.
 						$OBBoost = 1*2;//Dump remaining into hitchance, ensure not a minus.						
