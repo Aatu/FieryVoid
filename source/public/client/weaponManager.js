@@ -941,6 +941,10 @@ window.weaponManager = {
 
         mod -= target.getHitChangeMod(shooter, weapon);
 
+		if (weapon.specialHitChanceCalculation){ //Does the weapon itself have any special mods?
+			mod += weapon.calculateSpecialHitChanceMod(shooter, target);
+		}
+
         if (shooter.flight===true) {
             //oew = shooter.offensivebonus;
 
@@ -991,10 +995,6 @@ window.weaponManager = {
                 //		console.log("osat turn -1");
                 mod -= 1;
             }
-
-			if (weapon.specialHitChanceCalculation){ //Does the weapon itself have any special mods?
-			    mod += weapon.calculateSpecialHitChanceMod(target);
-			}
 
 			if (shooter.toHitBonus != 0){ //Some ships have bonuses or minuses to hit on all weapons e.g. Elite Crew, Poor Crew and Markab Fervor 
 			    mod += shooter.toHitBonus;
