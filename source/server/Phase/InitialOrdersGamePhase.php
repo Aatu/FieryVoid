@@ -46,13 +46,66 @@ public function advance(TacGamedata $gameData, DBManager $dbManager)
         foreach ($ships as $ship){
             if ($ship->userid != $gameData->forPlayer)
                 continue;
-
+            /*
             $powers = array();
 
             foreach ($ship->systems as $system){
+                if ($system->boostOtherPhases) {
+                    if (!empty($system->power)) {
+                        // Peel off the last entry so we can save it later
+                        $lastPower = array_pop($system->power);
+
+                        // Remove any power entries saved during Initial Orders
+                        $system->removePowerEntriesForTurn($gameData);
+
+                        // Put the last entry back if you still want it in $system->power
+                        $system->power[] = $lastPower;
+                    }
+                }                    
                 $powers = array_merge($powers, $system->power);
             }
 		
+            $dbManager->submitPower($gameData->id, $gameData->turn, $powers);
+            */            
+            $powers = array();
+
+            // Can now boost Fighter Systems, so look for this.
+            if ($ship instanceof FighterFlight) {                
+                foreach ($ship->systems as $ftr) {
+                    foreach ($ftr->systems as $ftrsys) {                   
+                        if ($ftrsys->boostOtherPhases) {  //E.g. Not normal boost systems                     
+                            if (!empty($ftrsys->power)) {                            
+                                // Peel off the last entry so we can save it later
+                                $lastPower = array_pop($ftrsys->power);
+
+                                // Remove any power entries saved during Initial Orders
+                                $ftrsys->removePowerEntriesForTurn($gameData);
+
+                                // Put the last entry back in $ftrsys->power                                
+                                $ftrsys->power[] = $lastPower;
+                            }                         
+                        }
+                    $powers = array_merge($powers, $ftrsys->power);                        
+                    }
+                }
+            } else {
+                foreach ($ship->systems as $system){
+                    if ($system->boostOtherPhases) {
+                        if (!empty($system->power)) {
+                            // Peel off the last entry so we can save it later
+                            $lastPower = array_pop($system->power);
+
+                            // Remove any power entries saved during Initial Orders
+                            $system->removePowerEntriesForTurn($gameData);
+
+                            // Put the last entry back in $system->power
+                            $system->power[] = $lastPower;
+                        }
+                    }                    
+                $powers = array_merge($powers, $system->power);
+                }
+            }
+
             $dbManager->submitPower($gameData->id, $gameData->turn, $powers);
         }
 		

@@ -65,7 +65,46 @@ class FireGamePhase implements Phase
             if (Firing::validateFireOrders($ship->getAllFireOrders(), $gameData)){
                 $dbManager->submitFireorders($gameData->id, $ship->getAllFireOrders(), $gameData->turn, $gameData->phase);
             }
+            //New segment to allow boosting in Fire Orders Phase.
+            $powers = array();
+            //Can now bosot Fighter Systems, so look for this.
+            if($ship instanceof FighterFlight){                
+                foreach($ship->systems as $ftr) foreach($ftr->systems as $ftrsys){                   
+                    if ($ftrsys->boostOtherPhases) {                      
+                        if (!empty($ftrsys->power)) {                            
+                            // Peel off the last entry so we can save it later
+                            $lastPower = array_pop($ftrsys->power);
 
+                            // Remove any power entries saved during Initial Orders
+                            $ftrsys->removePowerEntriesForTurn($gameData);
+
+                            // Put the last entry back if you still want it in $system->power
+                            $ftrsys->power[] = $lastPower;
+                        }
+                        $powers = array_merge($powers, $ftrsys->power);
+                        $ftrsys->doIndividualNotesTransferGD($gameData);                           
+                    }                 
+                }
+            }else{
+                foreach ($ship->systems as $system){
+                    if ($system->boostOtherPhases) { //Needs speical treatment to prevent duplication of Power entries.
+                        if (!empty($system->power)) {
+                            // Peel off the last entry so we can save it later
+                            $lastPower = array_pop($system->power);
+
+                            // Remove any power entries saved during Initial Orders
+                            $system->removePowerEntriesForTurn($gameData);
+
+                            // Put the last entry back if you still want it in $system->power
+                            $system->power[] = $lastPower;
+                        }
+                        $powers = array_merge($powers, $system->power);
+                        $system->doIndividualNotesTransferGD($gameData);                      
+                    }                   
+                }
+            }
+                                
+            $dbManager->submitPower($gameData->id, $gameData->turn, $powers);
         }		
 
         $dbManager->updatePlayerStatus($gameData->id, $gameData->forPlayer, $gameData->phase, $gameData->turn);

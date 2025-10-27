@@ -538,7 +538,7 @@ window.shipManager = {
             var thisDamage = null;
             for (var i in struct.damage) {
                 thisDamage = struct.damage[i];
-                if (thisDamage.damageclass !== 'HyperspaceJump') totalDamage += thisDamage.damage; //Only count non-jump damage, as jumping destroys ship anyway.
+                if (thisDamage.damageclass !== 'HyperspaceJump') totalDamage += Math.max(0, thisDamage.damage - thisDamage.armour); //Only count non-jump damage, as jumping destroys ship anyway.
             }
             
         if(totalDamage < maxHealth) return true; //The other damage sustained has not destroyed this ship, jumping has.
@@ -1031,10 +1031,11 @@ window.shipManager = {
     },
 
 
-    //Called in various places to identify a ship as having stealth ability.
+    //Called in various places to identify a ship as having ability to be invisible to enemy.
     isStealthShip: function(ship) {
-        if(shipManager.hasSpecialAbility(ship, "Stealth") && (!ship.flight)) return true;
-        return false;
+        //if(shipManager.hasSpecialAbility(ship, "Stealth") && (!ship.flight)) return true;
+        //return false;
+        return ship.trueStealth;
     },
   
 
@@ -1045,8 +1046,11 @@ window.shipManager = {
 
 
     //Main Front End check on whether a stealth ship is detected or not, called in various places.
-    isDetected: function(ship) {
-        if(gamedata.gamephase == -1) return true;  //Do not hide in Deployment Phase.        
+    isDetected: function(ship) {         
+        if(ship.faction == "Torvalus Speculators"){
+            return shipManager.isDetectedTorvalus(ship);
+        }
+        if(gamedata.gamephase == -1 && gamedata.turn == 1) return true;  //Do not hide in Turn 1 Deployment Phase.          
         var stealthSystem = shipManager.systems.getSystemByName(ship, "stealth");
         if(stealthSystem && stealthSystem.detected) return true; //Already detected.
 
@@ -1055,7 +1059,7 @@ window.shipManager = {
         if (usedEW > 0){
             return true; //If so, revealed.
         }            
-
+        if(shipManager.isDestroyed(ship)) return true;//It's blown up, assume revealed.  
         if(gamedata.gamephase != 3) return false;  //Cannot only try to detect at start of Firing Phase
 
         // Check all enemy ships to see if any can detect this ship
@@ -1112,6 +1116,42 @@ window.shipManager = {
 
         // No one detected the ship
         return false;
+    },
+
+    isDetectedTorvalus: function(ship) {
+        if(gamedata.gamephase == -1 && gamedata.turn == 1) return true;  //Do not hide in Turn 1 Deployment Phase.  
+        if(shipManager.isDestroyed(ship)) return true;//It's blown up, assume revealed.        
+        var shadingField = shipManager.systems.getSystemByName(ship, "ShadingField");
+        if(shadingField && shadingField.detected) return true; //Already detected.     
+
+        if(gamedata.gamephase != 3) return false;  //Cannot only try to detect at start of Firing Phase (and Initial Phase should be handled on server via detected value).
+
+        // Check all enemy ships to see if any can detect this ship
+        for (const otherShip of gamedata.ships) {
+            if (otherShip.team === ship.team) continue; // Skip friendly ships
+            if (gamedata.isTerrain(otherShip.shipSizeClass, otherShip.userid)) continue; //Skip Terrain 
+            if(shipManager.isDestroyed(otherShip)) continue; //Skip destroyed
+
+            let totalDetection = 15; //Shading Field detection range is always 15.
+
+            // Get distance to the stealth ship and check line of sight
+            const distance = parseFloat(mathlib.getDistanceBetweenShipsInHex(ship, otherShip));
+            var loSBlocked = false;
+            var blockedLosHex = weaponManager.getBlockedHexes(); //Check if there are any hexes that block LoS
+            var shipPos= shipManager.getShipPosition(ship);
+            var otherShipPos= shipManager.getShipPosition(otherShip);                   
+            loSBlocked = mathlib.checkLineOfSight(shipPos, otherShipPos, blockedLosHex); // Defaults to false (LoS NOT blocked)            
+
+            // If within detection range, the ship is revealed
+            if (distance <= totalDetection && !loSBlocked) { //In range and LoS not blocked.
+                shadingField.detected = true;
+                return true; //Just return, if one ship can see the stealthed ship then all can.
+            }
+        }
+
+        // No one detected the ship
+        return false;
     }
+
 
 };

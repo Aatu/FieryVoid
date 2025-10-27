@@ -8,7 +8,7 @@ class NovaStarfury extends FighterFlight{
         $this->faction = "Earth Alliance";
         $this->phpclass = "NovaStarfury";
         $this->shipClass = "Starfury: Nova Heavy flight";
-        $this->imagePath = "img/ships/auroraStarfury.png";
+        $this->imagePath = "img/ships/novaSF.png";
 	    $this->isd = 2230;
         
         $this->forwardDefense = 8;
@@ -30,10 +30,10 @@ class NovaStarfury extends FighterFlight{
 
         for ($i = 0; $i < $toAdd; $i++){
             $armour = array(2, 2, 2, 2);
-            $fighter = new Fighter("novaStarfury", $armour, 12, $this->id);
+            $fighter = new Fighter("Nova Starfury", $armour, 12, $this->id);
             $fighter->displayName = "Nova";
-            $fighter->imagePath = "img/ships/auroraStarfury.png";
-            $fighter->iconPath = "img/ships/auroraStarfury_largei.png";
+            $fighter->imagePath = "img/ships/novaSF.png";
+            $fighter->iconPath = "img/ships/NovaSF_Large.png";
 
             $frontGun = new PairedParticleGun(330, 30, 4);
             $frontGun->displayName = "Uni-Pulse Cannon";

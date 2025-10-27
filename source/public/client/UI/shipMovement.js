@@ -489,7 +489,11 @@ UI.shipMovement.rollActiveElement.on("click touchstart", UI.shipMovement.rollCal
 
             var morejink = UI.shipMovement.morejinkElement;
             if (shipManager.movement.canJink(ship, 1)) {
-                dis += 10;
+                if(!ship.flight){
+                    dis += 20;
+                }else{
+                    dis += 10;
+                }    
                 UI.shipMovement.drawUIElement(morejink, pos.x, pos.y, 16, dis * 1.4, angle, "img/plus.png", "morejinkcanvas", 0);
             } else {
                 morejink.hide();

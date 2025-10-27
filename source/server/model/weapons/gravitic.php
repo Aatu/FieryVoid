@@ -553,7 +553,9 @@ class GraviticLance extends Raking{
         public $overloadable = false; //Not actually required and messes with stop overload button.
         public $alwaysoverloading = true;
         public $extraoverloadshots = 2;
+        public $extraoverloadshotsArray = array(1=>2, 2=>0, 3=>0);       
         public $overloadturns = 4;
+        public $overloadshots = 2;
 
         public $canSplitShots = false; //Allows Firing Mode 2 to split shots.
 		public $canSplitShotsArray = array(1=>false, 2=>false, 3=>true );

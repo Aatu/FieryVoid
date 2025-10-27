@@ -598,6 +598,8 @@ class DBManager
                 teamid,
                 lastturn,
                 lastphase,
+                lastactivity,
+                submitLock,
                 name,
                 points,
                 depx,
@@ -617,6 +619,8 @@ class DBManager
                 ?,
                 ?,
                 ?,
+                now(),
+                null,
                 ?,
                 ?,
                 ?,
@@ -655,6 +659,68 @@ class DBManager
             $stmt->close();
         }
     }
+
+/* //Old version
+    public function createSlots($gameid, $input)
+    {
+        $slots = array();
+        if (is_array($input))
+            $slots = $input;
+        else
+            $slots[] = $input;
+
+        $stmt = $this->connection->prepare("
+            INSERT INTO 
+                tac_playeringame
+            VALUES
+            (
+                ?,
+                ?,
+                ?,
+                ?,
+                ?,
+                ?,
+                now(),
+                null,
+                ?,
+                ?,
+                ?,
+                ?,
+                ?,
+                ?,
+                ?,
+                ?,
+                false
+            )
+
+        ");
+
+        if ($stmt) {
+            foreach ($slots as $slot) {
+                $stmt->bind_param(
+                    'iiiiiisiiisiii',
+                    $gameid,
+                    $slot->slot,
+                    $slot->playerid,
+                    $slot->team,
+                    $slot->lastturn,
+                    $slot->lastphase,
+                    $slot->name,
+                    $slot->points,
+                    $slot->depx,
+                    $slot->depy,
+                    $slot->deptype,
+                    $slot->depwidth,
+                    $slot->depheight,
+                    $slot->depavailable
+                );
+                $stmt->execute();
+            }
+            $stmt->close();
+        }
+    }
+*/        
+
 
     public function createGame($gamename, $background, $slots, $userid, $gamespace, $description, $rules = '{}')
     {
@@ -811,6 +877,7 @@ class DBManager
         }
     }
 
+/* //OLD VERSION - Oct 2025
     public function submitPower($gameid, $turn, $powers)
     {
 
@@ -833,6 +900,72 @@ class DBManager
             throw $e;
         }
 
+    }
+*/
+
+    //New version the normalises and prevents duplication to accommodate things like Fighter systems being boosted
+    public function submitPower($gameid, $turn, $powers)
+    {
+        try {
+            // --- SAFETY NORMALIZATION LAYER ---
+            $normalized = [];
+
+            foreach ($powers as $p) {
+                if (is_object($p)) {
+                    $normalized[] = $p;
+                } elseif (is_array($p)) {
+                    // Handle nested single-element array: [[PowerEntry]]
+                    if (count($p) === 1 && is_object(reset($p))) {
+                        $normalized[] = reset($p);
+                    } else {
+                        // Convert associative array to object
+                        $obj = (object)$p;
+                        error_log("[submitPower] Warning: Power entry was array, normalized. Contents: " . json_encode($p));
+                        $normalized[] = $obj;
+                    }
+                } else {
+                    // Unexpected type — log it and skip
+                    error_log("[submitPower] Warning: Invalid power entry type (" . gettype($p) . ")");
+                }
+            }
+
+            $powers = $normalized;
+            // --- END NORMALIZATION LAYER ---
+
+            // --- DEDUPLICATION LAYER ---
+            $seen = [];
+
+            foreach ($powers as $power) {
+                if (!is_object($power)) continue;
+
+                if (!property_exists($power, 'turn') || $power->turn != $turn) continue;
+
+                // Create a unique key per power entry
+                $key = $power->shipid . '-' . $power->systemid . '-' . $power->type . '-' . $turn;
+
+                if (isset($seen[$key])) {
+                    error_log("[submitPower] Skipping duplicate power entry for key: $key");
+                    continue;
+                }
+                $seen[$key] = true;
+                // --- END DEDUPLICATION ---
+
+                $sql = "INSERT INTO `tac_power` VALUES(
+                    null,
+                    " . (int)$power->shipid . ",
+                    " . (int)$gameid . ",
+                    " . (int)$power->systemid . ",
+                    " . (int)$power->type . ",
+                    " . (int)$turn . ",
+                    " . (int)$power->amount . "
+                )";
+
+                $this->update($sql);
+            }
+
+        } catch (Exception $e) {
+            throw $e;
+        }
     }
 
     public function insertSystemData($input)
@@ -2781,6 +2914,42 @@ class DBManager
         }
     }
 
+    public function removePowerEntriesForTurn($gameid, $shipid, $systemid, $turn)
+    {
+
+        $stmt = $this->connection->prepare(
+            "DELETE FROM tac_power
+            WHERE gameid = ?
+            AND shipid = ?
+            AND systemid = ?
+            AND turn = ?"
+        );
+
+        if (!$stmt) {
+            throw new Exception("Prepare failed: " . $this->connection->error);
+        }
+
+        if (!$stmt->bind_param('iiii', $gameid, $shipid, $systemid, $turn)) {
+            throw new Exception("Bind failed: " . $stmt->error);
+        }
+
+        if (!$stmt->execute()) {
+            throw new Exception("Execute failed: " . $stmt->error);
+        }
+
+        // Check how many rows were actually deleted
+        if ($stmt->affected_rows === 0) {
+            // No row matched those IDs
+            error_log("No matching row found for gameid=$gameid, shipid=$shipid, systemid=$systemid, turn=$turn");
+        } else {
+            // At least one row was deleted
+            error_log("Deleted {$stmt->affected_rows} row(s) for gameid=$gameid, shipid=$shipid, systemid=$systemid, turn=$turn");
+        }
+
+        $stmt->close();
+    }
+
+/*
     public function getLastTimeChatChecked($userid, $gameid)
     {
         $lastTime = null;
@@ -2810,7 +2979,32 @@ class DBManager
 
         return $lastTime;
     }
+*/
+//New hopefully better function.
+public function getLastTimeChatChecked($userid, $gameid)
+{
+    $lastTime = null;
 
+    $stmt = $this->connection->prepare("
+        SELECT last_checked
+        FROM player_chat
+        WHERE playerid = ? AND gameid = ?
+    ");
+
+    if ($stmt) {
+        $stmt->bind_param('ii', $userid, $gameid);
+        $stmt->execute();
+        $stmt->bind_result($lastTimeChecked);
+        if ($stmt->fetch()) {
+            $lastTime = $lastTimeChecked;
+        }
+        $stmt->close();
+    }
+
+    return $lastTime;
+}
+
+/*
     public function setLastTimeChatChecked($userid, $gameid)
     {
         // First check if there is already an entry for this game and player
@@ -2867,7 +3061,50 @@ class DBManager
             $stmt->close();
         }
     }
+*/
+//new version
+public function setLastTimeChatChecked($userid, $gameid)
+{
+    $time = null;
 
+    // Check if an entry exists
+    $stmt = $this->connection->prepare("
+        SELECT last_checked
+        FROM player_chat
+        WHERE playerid = ? AND gameid = ?
+    ");
+
+    if ($stmt) {
+        $stmt->bind_param('ii', $userid, $gameid);
+        $stmt->execute();
+        $stmt->bind_result($time);
+        $stmt->fetch();
+        $stmt->close();
+    }
+
+    // Update if exists, otherwise insert
+    if ($time !== null) {
+        $stmt = $this->connection->prepare("
+            UPDATE player_chat
+            SET last_checked = NOW()
+            WHERE playerid = ? AND gameid = ?
+        ");
+    } else {
+        $stmt = $this->connection->prepare("
+            INSERT INTO player_chat (playerid, gameid, last_checked)
+            VALUES (?, ?, NOW())
+        ");
+    }
+
+    if ($stmt) {
+        $stmt->bind_param('ii', $userid, $gameid);
+        $stmt->execute();
+        $stmt->close();
+    }
+}
+
+
+/*
     public function submitChatMessage($userid, $message, $gameid = 0)
     {
 
@@ -2892,6 +3129,21 @@ class DBManager
             $stmt->close();
         }
     }
+*/
+//New verion
+public function submitChatMessage($userid, $message, $gameid = 0)
+{
+    $stmt = $this->connection->prepare("
+        INSERT INTO chat (userid, username, gameid, time, message)
+        VALUES (?, (SELECT username FROM player WHERE id = ?), ?, NOW(), ?)
+    ");
+
+    if ($stmt) {
+        $stmt->bind_param('iiis', $userid, $userid, $gameid, $message);
+        $stmt->execute();
+        $stmt->close();
+    }
+}
 
     public function getChatMessages($lastid, $gameid = 0)
     {

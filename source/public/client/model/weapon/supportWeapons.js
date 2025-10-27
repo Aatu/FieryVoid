@@ -56,7 +56,7 @@ ShieldReinforcement.prototype.onBoostIncrease = function () {
 	}
 
 	return;	 		
-}    
+};   
 
 ShieldReinforcement.prototype.onBoostDecrease = function () { 
 
@@ -69,7 +69,7 @@ ShieldReinforcement.prototype.onBoostDecrease = function () {
 	}
 			
 	return;	   	
-}    
+};    
 
 ShieldReinforcement.prototype.checkReinforcement = function (shooter, target){
             
@@ -87,7 +87,7 @@ ShieldReinforcement.prototype.checkReinforcement = function (shooter, target){
 	    }
 	    
 	    return true;
-}
+};
 
 ShieldReinforcement.prototype.confirmReinforcement = function (shooter, target) {
 
@@ -134,3 +134,228 @@ ShieldReinforcement.prototype.doIndividualNotesTransfer = function () { //prepar
 		
 	return true;
 };
+
+var ShadeModulator = function ShadeModulator(json, ship) {
+    Weapon.call(this, json, ship); 
+};
+ShadeModulator.prototype = Object.create(Weapon.prototype);
+ShadeModulator.prototype.constructor = ShadeModulator;
+
+ShadeModulator.prototype.initBoostableInfo = function() {
+
+	this.outputDisplay = this.output;
+	//this.noHexTargeting = true; 
+		
+	if (this.output == 0) {
+		this.outputDisplay = '-'; //'0' is not shown properly!							
+	}
+
+	this.data["Capacity"] = this.outputDisplay;
+
+	return this;
+};
+
+ShadeModulator.prototype.hasMaxBoost = function () {
+    return true;
+};
+
+ShadeModulator.prototype.getMaxBoost = function () {
+    return this.maxBoostLevel;
+};
+
+ShadeModulator.prototype.onBoostIncrease = function () { 
+	this.output += 1;
+ 		
+};    
+
+ShadeModulator.prototype.onBoostDecrease = function () { 
+	this.output -= 1;
+
+};   
+
+
+	ShadeModulator.prototype.canToggle = function () { 
+		if(gamedata.gamephase == 3 && (this.firingMode == 1 || this.firingMode == 3)) return true;
+		return false;	
+	};
+	
+	ShadeModulator.prototype.canActivate = function () { 
+		if(gamedata.gamephase == 3 && (this.firingMode == 1 || this.firingMode == 3)){
+			return true;	
+		}
+		return false; 
+	};  
+
+
+	//This creates Fire Orders for Modes 1 and 3.
+	ShadeModulator.prototype.doActivate = function () { 
+
+		//Check capacity.
+		if(this.firingMode == 1 && this.output <= 3 || this.firingMode == 3 && this.output <= 1){
+			confirm.error("Shade Modulator does not have enough output.");		
+			return; //No more shots to allocated!
+		} 
+			var ship = this.ship;
+			var fireid = ship.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
+			var position = shipManager.getShipPosition(ship);			
+
+			var fire = {
+				id: fireid,
+				type: 'normal',
+				shooterid: ship.id,
+				targetid: -1,
+				weaponid: this.id,
+				calledid: -1,
+				turn: gamedata.turn,
+				firingMode: this.firingMode,
+				shots: this.defaultShots,
+				x: position.q,
+				y: position.r,
+				damageclass: 'Blanket',
+				chance: 100,
+				hitmod: 0,
+				notes: "Split" //Used to identify split targeting.
+				};
+				
+			// Push to arrays / fire orders
+			this.fireOrders.push(fire);
+
+			// Ensure counters exist
+			if (!this.blanketShield) this.blanketShield = 0;
+			if (!this.blanketShade) this.blanketShade = 0;
+
+			// Add tooltip note based on firing mode
+			if (this.firingMode == 1) {
+				this.output -= 4;
+				this.blanketShield += 1;
+				
+			} else {
+				this.output -= 2;
+				this.blanketShade += 1;			
+			}
+		
+			this.data["Blanket Shield Enhancement"] = this.blanketShield;	
+			this.data["Blanket Shade Enhancement"] = this.blanketShade;				
+
+	};   
+
+	//This creates Fire Orders for Modes 2 and 4.
+	ShadeModulator.prototype.doMultipleFireOrders = function (shooter, target, system) {
+
+		if(target.faction !== "Torvalus Speculators"){
+			confirm.error("Shade Modulator cannot target non-Toralus ships.");		
+			return; //No more shots to allocated!
+		} 
+
+		if(this.firingMode == 2 && target.flight){
+			confirm.error("Shade Modulator cannot target fighters for Shield Enhancement!");		
+			return; //No more shots to allocated!
+		} 
+
+		if(this.firingMode == 4){
+            var shadingField = shipManager.systems.getSystemByName(target, "ShadingField");
+            if(!shadingField.shaded){			
+				confirm.error("Shade Modulator can only target Shaded units for Shade Enhancement!");		
+				return; //No more shots to allocated!
+			}	
+		} 
+
+		//Don't add Firing Order and give player error message if they are out of capacity.
+		if(this.firingMode == 2 && this.output <= 1 || this.firingMode == 4 && this.output <= 0){
+			confirm.error("Shade Modulator does not have enough output.");		
+			return; //No more shots to allocated!
+		} 
+
+		if(this.firingMode == 2 || this.firingMode == 4){
+			for (var s = 0; s < this.guns; s++) {
+				var fireid = shooter.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
+
+				var fire = {
+					id: fireid,
+					type: 'normal',
+					shooterid: shooter.id,
+					targetid: target.id,
+					weaponid: this.id,
+					calledid: -1,
+					turn: gamedata.turn,
+					firingMode: this.firingMode,
+					shots: this.defaultShots,
+					x: "null",
+					y: "null",
+					damageclass: 'Sweeping',
+					chance: 100,
+					hitmod: 0,
+					notes: "Split" //Used to identify split targeting.
+					};
+				
+				if(this.firingMode == 2){
+					this.output -= 2;				
+				} else{
+					this.output -= 1;				
+				}	
+							
+				return fire;
+			}
+		}else{
+			return;
+		};
+	}		
+
+
+	ShadeModulator.prototype.removeMultiModeSplit = function (ship, target) {
+
+		for (var i = this.fireOrders.length - 1; i >= 0; i--) {
+	        var fireOrder = this.fireOrders[i];	
+			if(this.firingMode == fireOrder.firingMode){ //Find the latest fireOrder for this mode.
+
+	            this.fireOrders.splice(i, 1); // Remove the specific fire order
+				if(fireOrder.firingMode == 1){
+					this.output += 4;
+					this.blanketShield -= 1;
+					this.data["Blanket Shield Enhancement"] = this.blanketShield;															
+				} else if(fireOrder.firingMode == 2){
+					this.output += 2;				
+				} else if(fireOrder.firingMode == 3){
+					this.output += 2;
+					this.blanketShade -= 1;
+					this.data["Blanket Shade Enhancement"] = this.blanketShade;																
+				} else{
+					this.output += 1;						
+				}
+       		 	webglScene.customEvent('SystemDataChanged', { ship: ship, system: this });
+	                    
+	            break; // Exit the loop after removing one matching fire order and recalculating the rest (if required).
+			}	
+		}  
+    };
+
+	ShadeModulator.prototype.removeAllMultiModeSplit = function (ship) {
+
+		for (var i = this.fireOrders.length - 1; i >= 0; i--) {
+	        var fireOrder = this.fireOrders[i];	
+
+	            this.fireOrders.splice(i, 1); // Remove the specific fire order
+				if(fireOrder.firingMode == 1){
+					this.output += 4;	
+					this.blanketShield -= 1;
+					this.data["Blanket Shield Enhancement"] = this.blanketShield;														
+				} else if(fireOrder.firingMode == 2){
+					this.output += 2;				
+				} else if(fireOrder.firingMode == 3){
+					this.output += 2;
+					this.blanketShade -= 1;
+					this.data["Blanket Shade Enhancement"] = this.blanketShade;																
+				} else{
+					this.output += 1;						
+				}
+		}
+        webglScene.customEvent('SystemDataChanged', { ship: ship, system: this });
+    };
+
+
+var TransverseDrive = function TransverseDrive(json, ship) {
+    Weapon.call(this, json, ship); 
+};
+TransverseDrive.prototype = Object.create(Weapon.prototype);
+TransverseDrive.prototype.constructor = TransverseDrive;
+

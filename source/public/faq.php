@@ -113,39 +113,83 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         <h3 id="boarding" style="margin-top: 15px;">Boarding Actions & Marines</h3>
         <ul>
             <li>Many factions have access to Breaching Pods, which come equipped with a marines that can undertake boarding actions.</li>
-            <li>During the Firing Phase, Pods can attempt to attach to enemy ships in the same hex (and in arc) and deliver Marines to undertake a selection of missions (Sabotage, Capture Ship and Rescue).</li>
-            <li>Pods first roll to attach, but this is automatic if they are moving faster than the target ship so long as speed difference is not higher than pods thrust rating.  
-                If the target is moving faster, each point of speed difference is -10% chance to attach.  The Llort have +1 to attach rolls.</li>
-            <li>Once attached, the Pod will roll again to deliver the Marines, with a base chance of 50% to successfully boarding the vessel.  Unsuccessful marines may be lost or return safely their pod.</li>                           
-            
-            <li>A number of modifiers can apply to the delivery roll, summarised below:
+            <li>During the Firing Phase, Pods can attempt to attach to enemy ships in the same hex and deliver Marines to undertake a selection of missions (Sabotage, Capture Ship and Rescue).</li>
+            <li>Pods first roll to attach on a d10, but success is automatic if they are moving faster than the target ship and the speed difference is not higher than pods thrust rating. 
+                If the speed difference to target is greater than pod thrust rating it is unable to attach. 
+                If the target is moving faster, each point of speed difference is -10% chance to attach.  
+                Pods cannot attached to ships with Advanced Armor and certain factions like Llort have +1 to attach rolls.</li>
+            <br>                 
+            <li>Once attached, the Pod will roll a d10 again on the following table to try and deliver the Marines, with a base chance of 50% to successfully board the vessel.  
+                Unsuccessful marines may be lost or return safely their pod.</li>                           
+            <li><strong>DELIVERY TABLE (D10):</strong>
+                <ul class="circle-list">
+                    <li>1-5 - Marines successfully delivered.</li>
+                    <li>6-8 - Marines fended off, but return safely to their pod.</li>
+                    <li>9+ - Marines fended off, and were eliminated.</li>
+                </ul>
+            </li>            
+
+            <li>A number of modifiers can also apply to the delivery roll, summarised below:
                 <ul class="circle-list">
                     <li>+20% success - Yolu-specific bonus</li>
                     <li>+10% success - Elite marines / Llort / Target has Poor Crew / Directly boarding Primary section of target</li>
                     <li>-10% success - Narn or Gaim Defenders / Target has Elite Crew or Markab's Religious Fervor</li>
-                    <li>Fighter: Offensive Bonus</li>
                 </ul>
             </li>
-            <li>Marines that successfully board a vessel will then attempt to carry out their intended missions from the end of the following turn.  These rolls also can attract several modifiers:
+            <li>Marines that successfully board a vessel will then attempt to carry out their intended missions from the end of the following turn.  
+                These rolls also can attract several modifiers:
                 <ul class="circle-list">
                     <li>+10% success - Elite Marines / Target vessel has Poor Crew</li>
                     <li>-10% success - Narn or Gaim Defenders / Target has Elite Crew or Markab's Religious Fervor</li>
                     <li>For Sabotage and Rescue missions only - Additional -10% for every two turns that Marines are active aboard the enemy vessel.</li>
                 </ul>
             </li>
+            <br>             
             <li>Details of each of the three types of marine mission are summarised below:
                 <ul class="circle-list">
-                    <li><strong>Capture: </strong>Marines will fight the defending marine contingents directly (defenders are shown in CnC tooltip!).  
-                    This invovles two dice rolls, one to see if marines eliminate a defender (50% base chance) and a second to see if marines are eliminated (25% base chance).  
+                    <li><strong>CAPTURE: </strong>Marines will fight the defending marine contingents directly (defenders are shown in CnC tooltip!).  
+                    This has been simplified from Tabletop, and now only involves two dice rolls per attacker, one to see if marines eliminate a defender (50% base chance) and a second to see if marines are eliminated (25% base chance).  
                     If the attacking marines manage to defeat all defenders, the enemy ship is immediately be disabled for the remainder of the battle so long as there are still at least one attacking marine unit on board.
                     </li>
-                    <li><strong>Sabotage: </strong>Marines can either attempt to damage a specific system on an enemy ships (by making a called shot against it using the usual rules) or disrupt the ship more generally (e.g. minor damage to a Primary system, EW/Initiative/Thrust/Defence Profile penalties) by targeting it in the normal fashion.  
-                    In both cases, Marines that are successfully delivered will roll on a d10 the following turn to see how successful their mission has been.  
-                    Note - Marines which target a specific system and are successful in destroying it will then continue to Sabotage the ship generally providing they have not been eliminated.</li>
-                    <li><strong>Rescue: </strong>For scenarios only, Marines will attach their pod and attempt to board as normal.  Then, from the following turn, the Combat Log will provide players with updates on the progress of their Rescue mission.</li>
+                    <br>                     
+                    <li><strong>SABOTAGE: </strong>Marines can either attempt to damage a specific system on an enemy ships (by making a called shot against it using the usual rules) 
+                    or Wreak Havoc on the ship more generally (e.g. minor damage to a Primary system, EW/Initiative/Thrust/Defence Profile penalties) by targeting it in the normal fashion.</li>  
+                    <li>In both cases, Marines will roll on a d10 the following tables to see how successful their mission has been:</li>
+                    <li><strong>SABOTAGE TABLE (D10):</strong>
+                        <ul class="circle-list">
+                            <li>1 - Deal 3d6 damage to target system.</li>
+                            <li>2-3 - Deal 1d6 damage to target system, Marines not eliminated.</li>
+                            <li>4-5 - Deal 1d6 damage to target system, Marines eliminated.</li>
+                            <li>6-8 - No effect, Marines will try again next turn.</li>
+                            <li>9+ - No effect, Marines were eliminated.</li> 
+                        </ul>
+                    </li>                           
+                    <li><strong>WREAK HAVOC TABLE (D10):</strong>
+                        <ul class="circle-list">
+                            <li>1 - Deal 1d6 damage to a non-Structure system on Primary Hit Chart.</li>
+                            <li>2 - Reduce ship's Initiative by 5-30 next turn.</li>
+                            <li>3 - Reduce EW by 1d3 next turn.</li>
+                            <li>4 - Reduce ship's Initiative by 5-30 next turn.</li>
+                            <li>5 - Increase Defence Profiles of ship by 5 next turn.</li>
+                            <li>6-8 - No effect, Marines will try again next turn.</li>
+                            <li>9+ - No effect, Marines were eliminated.</li>                                                         
+                        </ul>
+                    </li>   
+                    <li>NOTE - Marines which target a specific system and are successful in destroying it will then move to a Wreak Havoc mission providing they have not been eliminated.</li>
+                    <br>                    
+                    <li><strong>RESCUE: </strong>For scenarios only, Marines will attach their pod and attempt to board as normal.  
+                    Then, from the following turn, the Combat Log will provide players with updates on the progress of their Rescue mission.</li>
+                    <li><strong>RESCUE TABLE:</strong>
+                        <ul class="circle-list">
+                            <li>1-2 - Rescue is successful, Marines survive.</li>
+                            <li>3-4 - Rescue is successful, but Marines eliminated.</li>
+                            <li>5-6 - Rescue fails this turn, Marines will try again next turn.</li>
+                            <li>7+ - Rescue fails, Marines were eliminated.</li> 
+                        </ul>
+                    </li>                      
                 </ul>
             </li>
-
+            <br>   
             <li>Note - Unlike Tabletop where Pods STAY attached to enemy units, this is not the case in FV and they are free to move the following turn.</li>
         </ul>
         <a class="back-to-top" href="#top">↩ Back to Top</a>

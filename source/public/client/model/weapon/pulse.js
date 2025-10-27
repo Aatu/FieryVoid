@@ -134,3 +134,8 @@ var TriopticPulsar = function TriopticPulsar(json, ship) {
 TriopticPulsar.prototype = Object.create(Pulse.prototype);
 TriopticPulsar.prototype.constructor = TriopticPulsar;
 
+var VolleyLaser = function VolleyLaser(json, ship) {
+    Pulse.call(this, json, ship);
+};
+VolleyLaser.prototype = Object.create(Pulse.prototype);
+VolleyLaser.prototype.constructor = VolleyLaser;

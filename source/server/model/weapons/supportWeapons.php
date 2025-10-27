@@ -500,4 +500,284 @@ class ShieldReinforcement extends Weapon{
 
 
 
+class ShadeModulator extends Weapon{
+	public $name = "ShadeModulator";
+	public $displayName = "Shade Modulator";
+	public $iconPath = "ShadeModulator.png";
+
+	public $damageType = "Raking"; //To prevent called shots
+	public $weaponClass = "Support";
+
+	public $uninterceptable = true; 
+	public $doNotIntercept = true;
+	public $priority = 1;
+		
+    public $useOEW = false;	
+	public $noLockPenalty = false;	        
+		
+	public $loadingtime = 1;	
+    public $fireControl = array(0, 0, 0); //No fire control per se, but gets automatic +3 points.		
+		
+	public $animation = "bolt";
+	public $animationArray = array(1 => "ball", 2=> "bolt", 3=> "ball", 4=> "bolt");		
+    public $animationColor = array(255, 255, 0);
+	public $animationColorArray = array(1=>array(0, 128, 0), 2=>array(0, 128, 0), 3=>array(255, 255, 0), 4=>array(255, 255, 0));
+	public $noProjectile = true; //Marker for front end to make projectile invisible for weapons that shouldn't have one.
+	public $noProjectileArray = array(1 => true, 2=> false, 3=> true, 4=> false); 	 		
+	public $output = 0;
+	public $outputDisplay = ''; //if not empty - overrides default on-icon display text		
+	public $animationExplosionScale = 0.4; //single hex explosion
+	public $animationExplosionScaleArray = array(1 => 3, 2=> 0.4, 3=> 5, 4=> 0.4);	
+	public $repairPriority = 5;		
+    public $boostable = true; //can be boosted for additional effect
+	public $boostEfficiency = 15; //cost to boost by 1
+    public $maxBoostLevel = 3; //maximum boost allowed - just technical limitation, rules dont set any maximum; 20 seems close enough to "unlimited" :)		
+ 
+	public $firingModes = array(
+			1 => "1-Blanket Shield",
+			2 => "2-Individual Shield",
+			3 => "3-Blanket Shade",
+			4 => "4-Individual Shade",						
+		);
+
+    public $rangePenalty = 0;
+    public $range = 3;
+	public $rangeArray = array(1 => 3, 2=> 5, 3=> 15, 4=> 20);	
+    public $canOffLine = true;    
+	protected $autoHit = true;//To show 100% hit chance in front end.
+	public $autoFireOnly = true; //this weapon cannot manually fire by player at a target, just activated
+	public $autoFireOnlyArray = array(1 => true, 2=> false, 3=> true, 4=> false);	
+	protected $canTargetAllies = true; //To allow front end to target allies.
+	protected $canTargetAlliesArray = array(1 => false, 2=> true, 3=> false, 4=> true); //To allow front end to target allies.
+
+	public $hextarget = true;
+	public $hextargetArray = array(1 => true, 2=> false, 3=> true, 4=> false);
+	public $canSplitShots = true;	
+	protected $multiModeSplit = true;
+
+	//These private variables are used to track fire orders, and firings to prevent Combat Log spam
+	private	$orderThisTurn = array(); //For Combat Logs entries
+	private $firedAlready = array(); //Prevent multiple firings at same ship for same mode.	 
+	 
+    function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $output){
+		if ( $maxhealth == 0 ) $maxhealth = 9;
+        if ( $powerReq == 0 ) $powerReq = 0;                           
+        parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        $this->startArc = $startArc;       	
+        $this->endArc = $endArc;
+        $this->output = $output;
+ 		$this->outputDisplay = $output;         
+    }
+
+		protected $possibleCriticals = array(
+			22=>array("OutputReduced1")
+		);
+
+		    		
+    public function setSystemDataWindow($turn){
+        parent::setSystemDataWindow($turn);
+		$this->data["Special"] = "Has four different firing modes used to enhance Shading Fields of Tovalus allies during Firing Phase.";
+		$this->data["Special"] .= "<br>Firing modes, effect and capacity cost are summarised below:";		 
+		$this->data["Special"] .= "<br> 1. Blanket Shield: Increases EM shield effect by 1 to allies within 3 hexes (4).";
+		$this->data["Special"] .= "<br> 2. Individual Shield: Increases EM shield effect by 1 to specific ally (2).";	
+		$this->data["Special"] .= "<br> 3. Blanket Shade: Lowers defence profiles by 5% to Shaded allies within 5 hexes (2).";	
+		$this->data["Special"] .= "<br> 4. Individual Shade: Lowers defence profiles by 5% to Shaded allies (1).";	
+		$this->data["Special"] .= "<br>Different firing modes can be used on same turn, with the only limit being system's capacity.";											 
+	}	
+
+
+	public function beforeFiringOrderResolution($gamedata)
+	{
+		if ($this->isDestroyed($gamedata->turn)) return;
+		if ($this->isOfflineOnTurn($gamedata->turn)) return;
+
+		$ship = $this->getUnit();
+		$deployTurn = $ship->getTurnDeployed($gamedata);
+		if ($deployTurn > $gamedata->turn) return; // Ship not deployed yet
+
+		$weaponFiringOrders = $this->getFireOrders($gamedata->turn);
+		if (empty($weaponFiringOrders)) return; // No fire orders
+
+		$alreadyBShield = [];
+		$alreadyBShade = [];
+
+		foreach ($weaponFiringOrders as $fireOrder) {
+			if (!isset($this->orderThisTurn[$fireOrder->targetid])) {
+				$this->orderThisTurn[$fireOrder->targetid] = [];
+			}
+			$this->orderThisTurn[$fireOrder->targetid][] = $fireOrder->firingMode;
+
+			switch ($fireOrder->firingMode) {
+
+				case 1:
+					$inRange = $gamedata->getShipsInDistance($ship, 3);
+					foreach ($inRange as $targetID => $target) {
+						if ($target->faction != "Torvalus Speculators") continue;
+						if ($target->team !== $ship->team) continue;						
+						if ($target instanceof FighterFlight) continue;
+						if ($target->isDestroyed()) continue;
+						if ($target->isTerrain()) continue;
+						if ($target->getTurnDeployed($gamedata) > $gamedata->turn) continue;
+						if (in_array($target->id, $alreadyBShield, true)) continue;
+
+						$alreadyBShield[] = $target->id;
+
+						$shadingField = $target->getSystemByName("ShadingField");
+						if (!$shadingField) continue;
+
+						$shadingField->output += 1;
+					}
+					break;
+
+				case 2:
+					$target = $gamedata->getShipById($fireOrder->targetid);
+					if (!$target) continue 2;
+					if ($target->faction != "Torvalus Speculators") continue 2;
+					if ($target instanceof FighterFlight) continue 2;
+					if (Mathlib::getDistanceHex($target, $ship) > 5) continue 2;
+
+					$shadingField = $target->getSystemByName("ShadingField");
+					if (!$shadingField) continue 2;
+
+					$shadingField->output += 1;
+					break;
+
+				case 3:
+					$inRange = $gamedata->getShipsInDistance($ship, 5);
+					foreach ($inRange as $targetID => $target) {
+						if ($target->faction != "Torvalus Speculators") continue;
+						if ($target->team !== $ship->team) continue;						
+						if ($target instanceof FighterFlight) continue;
+						if ($target->isDestroyed()) continue;
+						if ($target->isTerrain()) continue;
+						if ($target->getTurnDeployed($gamedata) > $gamedata->turn) continue;
+						if (in_array($target->id, $alreadyBShade, true)) continue;
+
+						$alreadyBShade[] = $target->id;
+
+						$shadingField = $target->getSystemByName("ShadingField");
+						if (!$shadingField || !$shadingField->shaded) continue;
+
+						$target->forwardDefense -= 1;
+						$target->sideDefense -= 1;
+					}
+					break;
+
+				case 4:
+					$target = $gamedata->getShipById($fireOrder->targetid);
+					if (!$target) continue 2;
+					if ($target->faction != "Torvalus Speculators") continue 2;
+					if (Mathlib::getDistanceHex($target, $ship) > 20) continue 2;
+
+					$shadingField = $target->getSystemByName("ShadingField");
+					if (!$shadingField || !$shadingField->shaded) continue 2;
+
+					$target->forwardDefense -= 1;
+					$target->sideDefense -= 1;
+					break;
+
+				default:
+					continue 2; // skip to next fire order safely
+			}
+		}
+	} // end of beforeFiringOrderResolution 
+
+		
+	public function calculateHitBase($gamedata, $fireOrder)
+	{
+		$targetId = $fireOrder->targetid;
+		if (!isset($this->orderThisTurn[$targetId])) return; //Safety
+
+		$counts = array_count_values($this->orderThisTurn[$targetId]);
+		$shieldAmount = $counts[$fireOrder->firingMode] ?? 0;
+		$shadeAmount = $shieldAmount*5;
+
+		if ($fireOrder->firingMode == 1 || $fireOrder->firingMode == 3) { 
+			// Blanket orders
+			$fireOrder->chosenLocation = 0; // recalc later
+			$fireOrder->updated = true;
+
+			if ($fireOrder->firingMode == 1) {
+				$fireOrder->pubnotes = "<br>Shade Modulator enhances EM Shields for allied Torvalus ships within 3 hexes by {$shieldAmount}.";
+			} else {
+				$fireOrder->pubnotes = "<br>Shade Modulator reduces the Defence Profiles of allied Shaded units within 15 hexes by {$shadeAmount}.";
+			}
+
+		} else { 
+			// Individual orders
+			$targetId = $fireOrder->targetid;
+			$fireOrder->needed = 100; //always true
+			$fireOrder->updated = true;	
+
+			if ($fireOrder->firingMode == 2) {
+				$fireOrder->pubnotes = "<br>Shade Modulator enhances EM Shield for target ship by {$shieldAmount}.";
+			} else if ($fireOrder->firingMode == 4) {
+				$fireOrder->pubnotes = "<br>Shade Modulator reduces Defence Profiles of target Shaded unit by {$shadeAmount}.";
+			}
+
+		}
+	}
+
+	public function fire($gamedata, $fireOrder)
+	{
+		// Safety check: make sure array exists
+		if (!isset($this->firedAlready)) {
+			$this->firedAlready = [];
+		}
+
+		// If already fired at this target, skip
+		if (!empty($this->firedAlready[$fireOrder->firingMode])) {
+			return;
+		}
+
+		if ($fireOrder->firingMode == 1 || $fireOrder->firingMode == 3) {
+			// Blanket firing modes (auto-hit, no roll)
+			$fireOrder->rolled = 1;
+			$fireOrder->shotshit = 1;
+			TacGamedata::$lastFiringResolutionNo++;
+			$fireOrder->resolutionOrder = TacGamedata::$lastFiringResolutionNo;
+		} else {
+			// Normal firing handled by parent
+			parent::fire($gamedata, $fireOrder);
+		}
+
+		// Mark this target as fired upon
+		$this->firedAlready[$fireOrder->firingMode] = true;
+	}
+			
+	public function getDamage($fireOrder){       return 0;   } //no actual damage
+	public function setMinDamage(){     $this->minDamage = 0 ;      }
+	public function setMaxDamage(){     $this->maxDamage = 0 ;      }
+
+    public function stripForJson() {
+        $strippedSystem = parent::stripForJson();    
+        $strippedSystem->autoHit = $this->autoHit; 
+        $strippedSystem->canTargetAllies = $this->canTargetAllies;
+        $strippedSystem->canTargetAlliesArray = $this->canTargetAlliesArray;
+        $strippedSystem->multiModeSplit = $this->multiModeSplit;
+        $strippedSystem->noProjectileArray = $this->noProjectileArray;							                                        
+        return $strippedSystem;
+	}	
+	
+	
+}//endof ShadeModulator
+
+
+class TransverseDrive extends Weapon{
+    public $name = "TransverseDrive";
+    public $displayName = "Transverse Drive";
+
+	public $autoFireOnly = true;
+
+     public function setSystemDataWindow($turn){
+        $this->data["Special"] = "Transverse Drive not installed until Tuesday.";												
+		parent::setSystemDataWindow($turn);     
+    }
+
+	public function getDamage($fireOrder){       return 0;   } //no actual damage
+	public function setMinDamage(){     $this->minDamage = 0 ;      }
+	public function setMaxDamage(){     $this->maxDamage = 0 ;      }
+
+}	
+
 ?>

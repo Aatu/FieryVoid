@@ -81,6 +81,25 @@ window.ajaxInterface = {
         });
     },
 
+    ajaxWithRetry: function ajaxWithRetry(options, attempt = 1) {
+        const maxAttempts = 5;
+        const baseDelay = 200;
+
+        const jqXHR = $.ajax({
+            ...options,
+            error: function(xhr, status, error) {
+                if (xhr.status === 507 && attempt <= maxAttempts) {
+                    const delay = baseDelay * Math.pow(2, attempt) + Math.random() * 100;
+                    console.warn(`507 error, retrying in ${Math.round(delay)}ms (attempt ${attempt})`);
+                    setTimeout(() => ajaxInterface.ajaxWithRetry(options, attempt + 1), delay);
+                } else if (options.error) {
+                    options.error(xhr, status, error);
+                }
+            }
+        });
+
+        return jqXHR; // ⚠ critical
+    },
 
     //New version - DK July 2025
     submitGamedata: function submitGamedata() {
@@ -97,7 +116,7 @@ window.ajaxInterface = {
         }
 
         // ✅ Use JSON to avoid PHP array serialization quirks
-        $.ajax({
+        ajaxInterface.ajaxWithRetry({
             type: 'POST',
             url: 'gamedata.php',
             contentType: 'application/json; charset=utf-8', // ✅ send JSON body
@@ -149,7 +168,7 @@ window.ajaxInterface = {
         }
 
         // Send the POST request
-        $.ajax({
+        ajaxInterface.ajaxWithRetry({
             type: 'POST',
             url: 'saveFleet.php',
             contentType: 'application/json; charset=utf-8',
@@ -275,7 +294,7 @@ window.ajaxInterface = {
         if (ajaxInterface.submiting) return;
         ajaxInterface.submiting = true;
 
-		$.ajax({
+        ajaxInterface.ajaxWithRetry({
 			type: 'GET',
 			url: 'getSavedFleets.php',
 			dataType: 'json',
@@ -299,7 +318,7 @@ window.ajaxInterface = {
         if (ajaxInterface.submiting) return;
         ajaxInterface.submiting = true;
 
-        $.ajax({
+        ajaxInterface.ajaxWithRetry({
             type: 'POST', // POST to match PHP JSON reading
             url: 'loadSavedFleet.php',
             contentType: 'application/json; charset=utf-8',
@@ -325,7 +344,7 @@ window.ajaxInterface = {
         if (ajaxInterface.submiting) return;
         ajaxInterface.submiting = true;      
         // Send the POST request
-        $.ajax({
+        ajaxInterface.ajaxWithRetry({
             type: 'POST',
             url: 'changeAvailabilityFleet.php',
             contentType: 'application/json; charset=utf-8',
@@ -357,7 +376,7 @@ window.ajaxInterface = {
         if (ajaxInterface.submiting) return;
         ajaxInterface.submiting = true;        
         // Send the POST request
-        $.ajax({
+        ajaxInterface.ajaxWithRetry({
             type: 'POST',
             url: 'deleteSavedFleet.php',
             contentType: 'application/json; charset=utf-8',
@@ -387,50 +406,50 @@ window.ajaxInterface = {
 	},
 
 
-//New version for PHP8
-submitSlotAction: function submitSlotAction(action, slotid, callback) {
-    if (ajaxInterface.submiting) return;
-    ajaxInterface.submiting = true;
+    //New version for PHP8
+    submitSlotAction: function submitSlotAction(action, slotid, callback) {
+        if (ajaxInterface.submiting) return;
+        ajaxInterface.submiting = true;
 
-    $.ajax({
-        type: 'POST',
-        url: 'slot.php',
-        dataType: 'json', // ✅ Expect JSON
-        data: { 
-            action: action,
-            gameid: gamedata.gameid,
-            slotid: slotid 
-        },
-        timeout: 15000, // ✅ prevent hanging requests
-    })
-    .done(function (response, textStatus, xhr) {
-        ajaxInterface.submiting = false;
+        ajaxInterface.ajaxWithRetry({
+            type: 'POST',
+            url: 'slot.php',
+            dataType: 'json', // ✅ Expect JSON
+            data: { 
+                action: action,
+                gameid: gamedata.gameid,
+                slotid: slotid 
+            },
+            timeout: 15000, // ✅ prevent hanging requests
+        })
+        .done(function (response, textStatus, xhr) {
+            ajaxInterface.submiting = false;
 
-        // ✅ Handle HTTP-level errors first
-        if (xhr.status !== 200) {
-            console.error(`Slot action failed [${xhr.status}]`);
-            ajaxInterface.errorAjax(xhr, textStatus, response?.error || "Server error");
-            return;
-        }
+            // ✅ Handle HTTP-level errors first
+            if (xhr.status !== 200) {
+                console.error(`Slot action failed [${xhr.status}]`);
+                ajaxInterface.errorAjax(xhr, textStatus, response?.error || "Server error");
+                return;
+            }
 
-        // ✅ Handle application-level errors
-        if (response && response.error) {
-            console.warn("Slot action error:", response.error);
-            ajaxInterface.errorAjax(xhr, textStatus, response.error);
-            return;
-        }
+            // ✅ Handle application-level errors
+            if (response && response.error) {
+                console.warn("Slot action error:", response.error);
+                ajaxInterface.errorAjax(xhr, textStatus, response.error);
+                return;
+            }
 
-        // ✅ Normal success
-        ajaxInterface.successSubmit(response);
-        if (typeof callback === "function") callback(response);
-    })
-    .fail(function (xhr, textStatus, errorThrown) {
-        ajaxInterface.submiting = false;
-        let message = errorThrown || textStatus || "Unknown network error";
-        console.error("Slot action AJAX fail:", message, xhr.responseText);
-        ajaxInterface.errorAjax(xhr, textStatus, message);
-    });
-},
+            // ✅ Normal success
+            ajaxInterface.successSubmit(response);
+            if (typeof callback === "function") callback(response);
+        })
+        .fail(function (xhr, textStatus, errorThrown) {
+            ajaxInterface.submiting = false;
+            let message = errorThrown || textStatus || "Unknown network error";
+            console.error("Slot action AJAX fail:", message, xhr.responseText);
+            ajaxInterface.errorAjax(xhr, textStatus, message);
+        });
+    },
 
 
     construcGamedata: function construcGamedata() {
@@ -480,6 +499,14 @@ submitSlotAction: function submitSlotAction(action, slotid, callback) {
                             var fightersystem = system.systems[c];
                             var ammoArray = Array();
 
+                            //Some fighter systems CAN be boosted now
+                            for (var d = fightersystem.power.length - 1; d >= 0; d--) {
+                                var power = fightersystem.power[d];
+                                if (power.turn < gamedata.turn) {
+                                    fightersystem.power.splice(d, 1);
+                                }
+                            }
+
                             for (var b = fightersystem.fireOrders.length - 1; b >= 0; b--) {
                                 var fire = fightersystem.fireOrders[b];
                                 if (fire.turn < gamedata.turn) {
@@ -498,7 +525,7 @@ submitSlotAction: function submitSlotAction(action, slotid, callback) {
 							//changed to accomodate new variable for individual data transfer to server - in a generic way
                             //fighterSystems[c] = { 'id': fightersystem.id, 'fireOrders': fightersystem.fireOrders, 'ammo': ammoArray };
 							fightersystem.doIndividualNotesTransfer();
-							fighterSystems[c] = { 'id': fightersystem.id, 'fireOrders': fightersystem.fireOrders, 'ammo': ammoArray, "individualNotesTransfer": fightersystem.individualNotesTransfer };
+							fighterSystems[c] = { 'id': fightersystem.id, 'fireOrders': fightersystem.fireOrders, 'ammo': ammoArray, "individualNotesTransfer": fightersystem.individualNotesTransfer, 'power': fightersystem.power, };
                         }
 						//changed to accomodate new variable for individual data transfer to server - in a generic way
                         //systems[a] = { 'id': system.id, 'systems': fighterSystems };
@@ -708,6 +735,10 @@ submitSlotAction: function submitSlotAction(action, slotid, callback) {
     },
 
     stopPolling: function stopPolling() {
+        if (ajaxInterface.poll) {
+            clearTimeout(ajaxInterface.poll);
+        }
+
         ajaxInterface.poll = null;
         ajaxInterface.pollcount = 0;
         ajaxInterface.pollActive = false;
@@ -725,53 +756,52 @@ submitSlotAction: function submitSlotAction(action, slotid, callback) {
             return;
         }
 
-        var dontPollYet = false;
-        var time = 5000;  
+        var time = 8000;  
 
         // detect environment
         var isLocal = (location.hostname === "localhost" || location.hostname === "127.0.0.1");
         var phase = gamedata.gamephase;        
-
-        if(gamedata.gamephase == -2){
-            for (var i in gamedata.slots) {
-                var slot = gamedata.slots[i];		
-                if(slot.playerid !== null && slot.playerid == gamedata.thisplayer && slot.lastphase == "-3"){
-                    dontPollYet = true;
-                    break;       
-                }      
-            }
-        }
         
-        if(!dontPollYet || isLocal){
-            if (!ajaxInterface.submiting) ajaxInterface.requestGamedata();
-
-            ajaxInterface.pollcount++;
+        if (!ajaxInterface.submiting) ajaxInterface.requestGamedata();
+        ajaxInterface.pollcount++;
 
             // --- base timings depending on mode ---
             if (isLocal) {
                 // Local testing timings
                 time = 3000;
             } else if (phase === -2) {
+                var notReadiedYet = false;                
+                for (var i in gamedata.slots) {
+                    var slot = gamedata.slots[i];		
+                    if(slot.playerid !== null && slot.playerid == gamedata.thisplayer && slot.lastphase == "-3"){
+                        notReadiedYet = true; //Has not readied all slots yet.
+                        break;       
+                    }      
+                }                
                 // Phase -2 timings (customize as you like)
-                time = 5000;
-                if (ajaxInterface.pollcount > 1) time = 10000;
-                if (ajaxInterface.pollcount > 3)  time = 20000;                
-                if (ajaxInterface.pollcount > 40) time = 30000;
+                if(notReadiedYet){
+                    time = 60000;
+                }else{
+                    time = 8000;
+                    if (ajaxInterface.pollcount > 1)  time = 15000;                       
+                    if (ajaxInterface.pollcount > 3)  time = 30000;                
+                    if (ajaxInterface.pollcount > 10) time = 60000;
+                    if (ajaxInterface.pollcount > 40) time = 1800000;                   
+                }
             } else {
                 // In-Game timings
-                time = 5000;
-                if (ajaxInterface.pollcount > 1)  time = 10000;
-                if (ajaxInterface.pollcount > 3)  time = 20000;
+                time = 8000;
+                if (ajaxInterface.pollcount > 1)  time = 12000;
+                if (ajaxInterface.pollcount > 3)  time = 30000;
                 if (ajaxInterface.pollcount > 10) time = 60000;
                 if (ajaxInterface.pollcount > 40) time = 1800000;
             }
 
             if (ajaxInterface.pollcount > 300) {
+                ajaxInterface.stopPolling();
                 return;
             }
-        }else{
-            time = 8000;        
-        }
+
 
         ajaxInterface.poll = setTimeout(ajaxInterface.pollGamedata, time);
     },
@@ -782,7 +812,7 @@ submitSlotAction: function submitSlotAction(action, slotid, callback) {
 
         ajaxInterface.submiting = true;
 
-        $.ajax({
+        ajaxInterface.ajaxWithRetry({
             type: 'GET',
             url: 'gamedata.php',
             dataType: 'json',
@@ -801,6 +831,10 @@ submitSlotAction: function submitSlotAction(action, slotid, callback) {
                 ajaxInterface.submiting = false;
             }
         });
+    },
+
+    startPollingGames: function() {
+        this.pollGames();
     },
 
     // Polling entry point for home screen
@@ -838,7 +872,7 @@ submitSlotAction: function submitSlotAction(action, slotid, callback) {
         ajaxInterface.currentRequest = {};  // placeholder for inflight request
         ajaxInterface.nextRequest = null;
 
-        $.ajax({
+        ajaxInterface.ajaxWithRetry({
             type: 'GET',
             url: 'allgames.php',
             dataType: 'json',
@@ -863,7 +897,7 @@ submitSlotAction: function submitSlotAction(action, slotid, callback) {
 
     getFirePhaseGames: function getFirePhaseGames() {
 
-        $.ajax({
+        ajaxInterface.ajaxWithRetry({
             type: 'GET',
             url: 'firePhaseGames.php',
             dataType: 'json',

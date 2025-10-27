@@ -44,6 +44,18 @@ ShipSystem.prototype.checkSelfInterceptSystem = function () {
 	return false;
 };  
 
+ShipSystem.prototype.canToggle = function () {
+	return false;
+}; 
+
+ShipSystem.prototype.canActivate = function () {
+	return false;
+};  
+
+ShipSystem.prototype.canUnactivate = function () {
+	return false;
+};  
+
 ShipSystem.prototype.isScanner = function () {
 				return false;
 };
@@ -220,14 +232,17 @@ Weapon.prototype.changeFiringMode = function () {
 	if (!mathlib.arrayIsEmpty(this.animationArray)) this.animation = this.animationArray[this.firingMode];
 	if (!mathlib.arrayIsEmpty(this.animationColorArray)) this.animationColor = this.animationColorArray[this.firingMode];
 	if (!mathlib.arrayIsEmpty(this.animationExplosionScaleArray)) this.animationExplosionScale = this.animationExplosionScaleArray[this.firingMode];
-		
+
 	if (!mathlib.arrayIsEmpty(this.startArcArray)) this.startArc = this.startArcArray[this.firingMode];
 	if (!mathlib.arrayIsEmpty(this.endArcArray)) this.endArc = this.endArcArray[this.firingMode];		
 	
 	if (!mathlib.arrayIsEmpty(this.ignoreJinkingArray)) this.ignoreJinking = this.ignoreJinkingArray[this.firingMode];		
 	if (!mathlib.arrayIsEmpty(this.ignoreAllEWArray)) this.ignoreAllEW = this.ignoreAllEWArray[this.firingMode];		
 	if (!mathlib.arrayIsEmpty(this.canSplitShotsArray)) this.canSplitShots = this.canSplitShotsArray[this.firingMode];
-		
+	if (!mathlib.arrayIsEmpty(this.autoFireOnlyArray)) this.autoFireOnly = this.autoFireOnlyArray[this.firingMode];
+	if (!mathlib.arrayIsEmpty(this.canTargetAlliesArray)) this.canTargetAllies = this.canTargetAlliesArray[this.firingMode];			
+	if (!mathlib.arrayIsEmpty(this.noProjectileArray)) this.noProjectile = this.noProjectileArray[this.firingMode];
+	
 	//Antimatter-specific
 	if (this instanceof AntimatterWeapon){
 		var updateDataPenalty = false; 
@@ -272,6 +287,15 @@ Weapon.prototype.getInterceptRating = function () {
 Weapon.prototype.shieldInteractionDefense = function (target, shooter, shield, mod) {
     return mod;
 };
+
+	Weapon.prototype.removeMultiModeSplit = function (ship, target) {
+		return;
+    };
+
+	Weapon.prototype.removeAllMultiModeSplit = function (ship, target) {
+		return;
+    };	
+
 
 var Ballistic = function Ballistic(json, ship) {
 				Weapon.call(this, json, ship);

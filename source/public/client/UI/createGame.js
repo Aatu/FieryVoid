@@ -236,17 +236,7 @@ window.createGame = {
             createGame.variableFlights = 1;
         } else createGame.variableFlights = 0;
     },
-/*
-    doMovementCheck: function doMovementCheck(data) {
-        var checkval = $("#movementcheck:checked").val();
 
-        if (checkval == "on") {
-            createGame.rules.initiativeCategories = 6;
-        } else {
-            delete createGame.rules.initiativeCategories;
-        }
-    },
-*/
 
 doDesperateCheck: function doDesperateCheck(data) {
     var checkval = $("#desperatecheck:checked").val();
@@ -293,24 +283,7 @@ doAsteroidsCheck: function () {
         delete createGame.rules.asteroids;
     }
 },
-/*
-doMoonsCheck: function () {
-    var checkval = $("#terraincheck:checked").val(); // use terraincheck instead
 
-    if (checkval == "on") {
-        $("#moonsDropdown").show();
-        var selectedValue = $("#moonsSelect").val();
-        createGame.rules.moons = parseInt(selectedValue, 10);
-
-        $("#moonsSelect").off('change').on('change', function () {
-            createGame.rules.moons = parseInt($(this).val(), 10);
-        });
-    } else {
-        $("#moonsDropdown").hide();
-        delete createGame.rules.moons;
-    }
-},
-*/
 
 doMoonsCheck: function () {
     const enabled = $("#terraincheck").is(":checked");
@@ -403,20 +376,6 @@ doMovementCheck: function doMovementCheck(data) {
 					slotData.depavailable = 1;
 				}
 			}
-			/*
-            createGame.slots[0].depx = -19;
-            createGame.slots[1].depx = 18;
-            createGame.slots[0].depy = 0;
-            createGame.slots[1].depy = 0;
-            createGame.slots[0].depwidth = 5;
-            createGame.slots[1].depwidth = 5;
-            createGame.slots[0].depheight = 30;
-            createGame.slots[1].depheight = 30;
-            createGame.slots[0].deptype = "box";
-            createGame.slots[1].deptype = "box";
-            createGame.slots[0].depavailable = 0;
-            createGame.slots[1].depavailable = 0;
-			*/
         } else {
             $(".gamespacedefinition .unlimitedspace").removeClass("invisible");
             $(".gamespacedefinition .limitedspace").addClass("invisible");
@@ -461,20 +420,6 @@ doMovementCheck: function doMovementCheck(data) {
         }
 
         createGame.drawMapPreview();
-		/*
-        createGame.slots[0].depx = -12;
-        createGame.slots[1].depx = 11;
-        createGame.slots[0].depy = 0;
-        createGame.slots[1].depy = 0;
-        createGame.slots[0].depwidth = 7;
-        createGame.slots[1].depwidth = 7;
-        createGame.slots[0].depheight = 30;
-        createGame.slots[1].depheight = 30;
-        createGame.slots[0].deptype = "box";
-        createGame.slots[1].deptype = "box";
-        createGame.slots[0].depavailable = 0;
-        createGame.slots[1].depavailable = 0;
-		*/
     },
 
 
@@ -551,20 +496,6 @@ doMovementCheck: function doMovementCheck(data) {
         }
 
         createGame.drawMapPreview();
-		/*
-        createGame.slots[0].depx = -19;
-        createGame.slots[1].depx = 18;
-        createGame.slots[0].depy = 0;
-        createGame.slots[1].depy = 0;
-        createGame.slots[0].depwidth = 5;
-        createGame.slots[1].depwidth = 5;
-        createGame.slots[0].depheight = 30;
-        createGame.slots[1].depheight = 30;
-        createGame.slots[0].deptype = "box";
-        createGame.slots[1].deptype = "box";
-        createGame.slots[0].depavailable = 0;
-        createGame.slots[1].depavailable = 0;
-		*/
     },
     
 	

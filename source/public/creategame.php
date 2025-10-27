@@ -350,7 +350,7 @@ print("<option value=\"".$i."\" ".$selected." >".$i."</option>");
                 	<span class="depheightheader">HEIGHT:</span>
                 	<input class="depheight tinySize" type="text" name="depheight" value="0">
                     <span>DEPLOYS ON TURN:</span>
-                    <input class ="depavailable tinySize" type="text" name="depavailable" value="0">                    
+                    <input class="depavailable tinySize" type="number" name="depavailable" value="1" min="1">                   
             		<!-- Add a Flexbox container here to align REMOVE SLOT to the right-->
             		<div class="flex-container">
                 	<span class="clickable close" style="color: #8bcaf2">REMOVE SLOT</span>            
