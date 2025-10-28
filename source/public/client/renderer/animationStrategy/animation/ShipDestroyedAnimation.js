@@ -10,37 +10,42 @@ window.ShipDestroyedAnimation = function () {
         this.currentOpacity = 1.0;
 
         this.animations = [];
-        this.explosionTriggered = false; // <-- new flag
+        this.explosionTriggered = false;
         this.emitterContainer = emitterContainer;
         this.movementAnimations = movementAnimations;
 
-        var cameraAnimation = new CameraPositionAnimation(
+        const cameraAnimation = new CameraPositionAnimation(
             FireAnimationHelper.getShipPositionAtTime(this.shipIcon, this.time, this.movementAnimations),
             this.time
         );
 
         this.animations.push(cameraAnimation);
-        this.duration = 4000; // same as explosion.getDuration()
+        this.duration = 4000; // match explosion duration
     }
 
     ShipDestroyedAnimation.prototype = Object.create(Animation.prototype);
 
     ShipDestroyedAnimation.prototype.render = function (now, total, last, delta, zoom, back, paused) {
-        this.animations.forEach(function (animation) {
-            animation.render(now, total, last, delta, zoom, back, paused);
-        });
+        this.animations.forEach(animation => animation.render(now, total, last, delta, zoom, back, paused));
 
-        // --- Trigger explosion only when time is reached ---
         if (!this.explosionTriggered && total >= this.time) {
             this.explosionTriggered = true;
 
+            const position = FireAnimationHelper.getShipPositionAtTime(this.shipIcon, this.time, this.movementAnimations);
+
+            // --- Trigger explosion visuals ---
             this.explosion = new ShipExplosion(this.emitterContainer, {
                 time: this.time,
-                position: FireAnimationHelper.getShipPositionAtTime(this.shipIcon, this.time, this.movementAnimations)
+                position: position
             });
+
+            // --- Trigger explosion sound ---
+            if (gamedata.playAudio) {
+                ShipDestroyedAnimation.playExplosionSound();
+            }
         }
 
-        // --- Handle fading ---
+        // --- Fadeout ---
         let opacity;
         if (total > this.fadeoutTime && total < this.fadeoutTime + this.fadeoutDuration) {
             opacity = 1 - (total - this.fadeoutTime) / this.fadeoutDuration;
@@ -53,6 +58,21 @@ window.ShipDestroyedAnimation = function () {
         if (this.currentOpacity !== opacity) {
             this.currentOpacity = opacity;
             this.shipIcon.setOpacity(opacity);
+        }
+    };
+
+    ShipDestroyedAnimation.playExplosionSound = function () {
+        if (!ShipDestroyedAnimation.cachedAudio) {
+            ShipDestroyedAnimation.cachedAudio = new Audio("/client/renderer/animationStrategy/animation/sound/ShipExplosionAudio.wav");
+            ShipDestroyedAnimation.cachedAudio.volume = 0.1;
+        }
+
+        try {
+            const explosionSound = ShipDestroyedAnimation.cachedAudio.cloneNode(true);
+            explosionSound.currentTime = 0;
+            explosionSound.play().catch(() => {});
+        } catch (e) {
+            console.warn("Explosion sound playback failed:", e);
         }
     };
 

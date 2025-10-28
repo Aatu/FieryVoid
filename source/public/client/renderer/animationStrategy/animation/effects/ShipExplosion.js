@@ -41,28 +41,6 @@ window.ShipExplosion = function () {
             });
         }
 
-        // --- Explosion sound effect ---
-        if (gamedata.playAudio) {
-            // Cache the audio file once for all ShipExplosions
-            if (!ShipExplosion.cachedAudio) {
-                ShipExplosion.cachedAudio = new Audio("/client/renderer/animationStrategy/animation/sound/ShipExplosionAudio.wav");
-                ShipExplosion.cachedAudio.volume = 0.5; // default volume
-            }
-
-            try {
-                // Delay playback by ~2 seconds (2000 ms)
-                setTimeout(() => {
-                    // Clone for simultaneous overlapping explosions
-                    const explosionSound = ShipExplosion.cachedAudio.cloneNode(true);
-                    explosionSound.volume =
-                        args.soundVolume !== undefined ? args.soundVolume : ShipExplosion.cachedAudio.volume;
-                    explosionSound.currentTime = 0;
-                    explosionSound.play().catch(() => {}); // handle autoplay restrictions
-                }, 500); // delay in milliseconds
-            } catch (e) {
-                console.warn("Explosion sound playback failed:", e);
-            }
-        }
     }
 
     ShipExplosion.prototype.getDuration = function () {
