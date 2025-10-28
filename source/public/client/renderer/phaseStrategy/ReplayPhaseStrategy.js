@@ -143,26 +143,45 @@ window.ReplayPhaseStrategy = function () {
     }
 
     //To reset audio when player clicks on Movement or Firing buttons in Replay, otherwise the sound only plays once.
-    function resetAudio() {
-        for (const animContainer of this.animationStrategy.animations) {
-            if (!animContainer.emitters) continue; // skip if no emitters
+function resetAudio() {
+    for (const animContainer of this.animationStrategy.animations) {
 
-            for (const reservation of animContainer.emitters[0].reservations) {
-                const anim = reservation.animation;
-                if (anim instanceof BoltEffect || anim instanceof MissileEffect || anim instanceof TorpedoEffect) {
-                    anim.playedLaunchSound = false;
-                    anim.playedImpactSound = false;
-                }                      
-            } 
+        // --- Handle emitter-based containers (Bolt/Missile/Torpedo effects) ---
+        if (animContainer.emitters?.length) {
+            const firstEmitter = animContainer.emitters[0];
+            if (firstEmitter?.reservations?.length) {
+                for (const reservation of firstEmitter.reservations) {
+                    const anim = reservation.animation;
+                    if (
+                        anim instanceof BoltEffect ||
+                        anim instanceof MissileEffect ||
+                        anim instanceof TorpedoEffect
+                    ) {
+                        anim.playedLaunchSound = false;
+                        anim.playedImpactSound = false;
+                    }
+                }
+            }
+            continue; // ✅ Skip to next animContainer (no need to check further)
         }
-        
-        for (const animContainer of this.animationStrategy.animations) {
-console.log(animContainer.constructor.name);
-console.log(AllWeaponFireAgainstShipAnimation === animContainer.constructor); // should be true            
-            if(animContainer instanceof AllWeaponFireAgainstShipAnimation) continue;
-            if (!animContainer.emitters) continue; // skip if no emitters
-        }    
+
+        // --- Handle AllWeaponFireAgainstShipAnimation-type containers ---
+        const isAllWeaponFire =
+            animContainer?.movementAnimations &&
+            animContainer?.shipIconContainer &&
+            animContainer?.particleEmitterContainer &&
+            animContainer?.logAnimation &&
+            !animContainer?.emitters; // exclude emitter-type entries
+
+        if (!isAllWeaponFire || animContainer.animations.length === 0) continue;
+
+        for (const effect of animContainer.animations) {
+            if (effect instanceof LaserEffect) {
+                effect.playedSound = false;
+            }
+        }
     }
+}
 
     function startReplayOrRequestGamedata() {
         if (this.replayTurn === this.gamedata.turn) {
