@@ -155,6 +155,13 @@ window.ReplayPhaseStrategy = function () {
                 }                      
             } 
         }
+        
+        for (const animContainer of this.animationStrategy.animations) {
+console.log(animContainer.constructor.name);
+console.log(AllWeaponFireAgainstShipAnimation === animContainer.constructor); // should be true            
+            if(animContainer instanceof AllWeaponFireAgainstShipAnimation) continue;
+            if (!animContainer.emitters) continue; // skip if no emitters
+        }    
     }
 
     function startReplayOrRequestGamedata() {
