@@ -131,13 +131,30 @@ window.ReplayPhaseStrategy = function () {
     function toMovementPhase() {
         this.animationStrategy.toMovementPhase();
         this.replayUI.activateButton('#pause');
+        resetAudio.call(this);
         this.animationStrategy.pause();
     }
 
     function toFiringPhase() {
         this.animationStrategy.toFiringPhase();
         this.replayUI.activateButton('#pause');
+        resetAudio.call(this);       
         this.animationStrategy.pause();
+    }
+
+    //To reset audio when player clicks on Movement or Firing buttons in Replay, otherwise the sound only plays once.
+    function resetAudio() {
+        for (const animContainer of this.animationStrategy.animations) {
+            if (!animContainer.emitters) continue; // skip if no emitters
+
+            for (const reservation of animContainer.emitters[0].reservations) {
+                const anim = reservation.animation;
+                if (anim instanceof BoltEffect || anim instanceof MissileEffect || anim instanceof TorpedoEffect) {
+                    anim.playedLaunchSound = false;
+                    anim.playedImpactSound = false;
+                }                      
+            } 
+        }
     }
 
     function startReplayOrRequestGamedata() {
