@@ -143,45 +143,67 @@ window.ReplayPhaseStrategy = function () {
     }
 
     //To reset audio when player clicks on Movement or Firing buttons in Replay, otherwise the sound only plays once.
-function resetAudio() {
-    for (const animContainer of this.animationStrategy.animations) {
+    function resetAudio() {
+        for (const animContainer of this.animationStrategy.animations) {
 
-        // --- Handle emitter-based containers (Bolt/Missile/Torpedo effects) ---
-        if (animContainer.emitters?.length) {
-            const firstEmitter = animContainer.emitters[0];
-            if (firstEmitter?.reservations?.length) {
-                for (const reservation of firstEmitter.reservations) {
-                    const anim = reservation.animation;
-                    if (
-                        anim instanceof BoltEffect ||
-                        anim instanceof MissileEffect ||
-                        anim instanceof TorpedoEffect
-                    ) {
-                        anim.playedLaunchSound = false;
-                        anim.playedImpactSound = false;
+            // --- 🏃 0. Skip pure movement animations (no audio at all) ---
+            const isMovementAnimation =
+                animContainer?.shipIcon &&
+                animContainer?.turnCurve &&
+                !animContainer?.emitters &&
+                !animContainer?.particleEmitterContainer &&
+                !animContainer?.movementAnimations;
+
+            if (isMovementAnimation) continue;
+
+            // --- 1. Handle emitter-based containers (Bolt/Missile/Torpedo) ---
+            if (animContainer.emitters?.length) {
+                const firstEmitter = animContainer.emitters[0];
+                if (firstEmitter?.reservations?.length) {
+                    for (const reservation of firstEmitter.reservations) {
+                        const anim = reservation.animation;
+                        if (
+                            anim instanceof BoltEffect ||
+                            anim instanceof MissileEffect ||
+                            anim instanceof TorpedoEffect
+                        ) {
+                            anim.playedLaunchSound = false;
+                            anim.playedImpactSound = false;
+                        }
                     }
                 }
+                continue;
             }
-            continue; // ✅ Skip to next animContainer (no need to check further)
-        }
 
-        // --- Handle AllWeaponFireAgainstShipAnimation-type containers ---
-        const isAllWeaponFire =
-            animContainer?.movementAnimations &&
-            animContainer?.shipIconContainer &&
-            animContainer?.particleEmitterContainer &&
-            animContainer?.logAnimation &&
-            !animContainer?.emitters; // exclude emitter-type entries
+            // --- 2. Handle AllWeaponFireAgainstShipAnimation containers ---
+            const isAllWeaponFire =
+                animContainer?.movementAnimations &&
+                animContainer?.shipIconContainer &&
+                animContainer?.particleEmitterContainer &&
+                animContainer?.logAnimation &&
+                !animContainer?.emitters;
 
-        if (!isAllWeaponFire || animContainer.animations.length === 0) continue;
+            // --- 3. Handle ShipDestroyedAnimation containers ---
+            const isShipDestruction =
+                animContainer instanceof ShipDestroyedAnimation ||
+                (
+                    animContainer?.shipIcon &&
+                    animContainer?.fadeoutTime &&
+                    typeof animContainer?.explosionTriggered === "boolean" &&
+                    !animContainer?.emitters
+                );
 
-        for (const effect of animContainer.animations) {
-            if (effect instanceof LaserEffect) {
-                effect.playedSound = false;
+            if (isAllWeaponFire) {
+                for (const effect of animContainer.animations) {
+                    if (effect instanceof LaserEffect) {
+                        effect.playedSound = false;
+                    }
+                }
+            } else if (isShipDestruction) {
+                animContainer.explosionTriggered = false;
             }
         }
     }
-}
 
     function startReplayOrRequestGamedata() {
         if (this.replayTurn === this.gamedata.turn) {
