@@ -77,6 +77,7 @@ class BaseShip {
     public $rolled = false;
     public $rolling = false;
 	protected $EMHardened = false; //EM Hardening (Ipsha have it) - some weapons would check for this value!
+	protected $MOLHardened = false; //Hardening against molecular weapons that can ignore armor for hardened advanced armor
 	
 	public $ignoreManoeuvreMods = false;//New marker for factions like Mindriders that don't take penalties for pivoting etc	
 		
@@ -95,6 +96,7 @@ class BaseShip {
 		public $enhancementTooltip = ""; //to be displayed with ship name / class	
 	
     public $advancedArmor = false; //set to true if ship is equipped with advanced armor!
+	public $hardAdvancedArmor = false; // set to true if ship is equipped with hardented advanced armor - GTS
 	
 	
 	public $hangarRequired = ''; //usually empty, but some ships (LCVs primarily) do require hangar space!	
@@ -114,9 +116,17 @@ class BaseShip {
 		public function getAdvancedArmor(){
 			return $this->advancedArmor;    
 	    }
+		
+		public function getHardAdvancedArmor(){   // GTS hardened advanced armor
+			return $this->hardAdvancedArmor;
+		}
 
 		public function getEMHardened(){
 			return $this->EMHardened;    
+	    }
+
+		public function getMOLHardened(){
+			return $this->MOLHardened;    
 	    }
 
 		public function getIFFSystem(){
@@ -1026,6 +1036,7 @@ class BaseShip {
 			if($this->minesweeperbonus > 0) $this->notes .= '<br>Minesweeper: ' . $this->minesweeperbonus;	
 			//Advanced Armor
 			if($this->advancedArmor) $this->notes .= '<br>Advanced Armor';
+			if($this->hardAdvancedArmor) $this->notes .= '<br>Hardened Advanced Armor';   // GTS Hardened advanced armor
 			//Improved/Advanced Sensors
 			/*hasSpecialAbility relies on data created in system->onConstructed, so not available here. Need to manually look for Sensors...
 			if($this->hasSpecialAbility("ImprovedSensors")) $this->notes .= '<br>Improved Sensors';

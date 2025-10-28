@@ -7,7 +7,7 @@ class Dargarian_WI extends BaseShip{
 		$this->pointCost = 700;
 		$this->faction = "ZWhatIF";
         $this->phpclass = "Dargarian_WI";
-        $this->imagePath = "img/ships/dargan.png";
+        $this->imagePath = "img/ships/dargarian.png";
         $this->shipClass = "Dargarian Trench Runner";
         $this->shipSizeClass = 3;
         $this->fighters = array("normal"=>12);

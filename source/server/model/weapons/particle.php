@@ -1021,6 +1021,7 @@
 			if(!$target instanceof FighterFlight){
 				//reduce armor of system hit
 				if (!$system->advancedArmor) { //Advanced Armor prevents armor reduction
+//				}elseif (!$system->hardAdvancedArmor){//hardened advanced armor prevents effect - GTS
 					$crit = new ArmorReduced(-1, $target->id, $system->id, "ArmorReduced", $gamedata->turn);
 					$crit->updated = true;
 					$crit->inEffect = false; //in effect only on next turn
@@ -2458,4 +2459,3 @@ class MinorThoughtPulsar extends LinkedWeapon{
 	
 	
 ?>
-

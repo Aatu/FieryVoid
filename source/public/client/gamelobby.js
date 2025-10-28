@@ -107,6 +107,9 @@ window.gamedata = {
 		  case 'Ipsha Baronies':
 			powerRating = 'Tier 3; League Faction';
 			break;
+		  case 'Kirishiac Lords':
+			powerRating = 'Tier Ancients';
+			break;
 		  case 'Kor-Lyan Kingdoms':
 			powerRating = 'Tier 1; League Faction';
 			break;

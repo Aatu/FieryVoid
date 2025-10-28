@@ -1750,6 +1750,7 @@ class TrekIon extends Weapon{
 	
     protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //make vulnerable to next critical
 		if ($system->advancedArmor) return;
+//		if ($system->hardAdvancedArmor) return;  // Hardened Advanced Armor - GTS
 		
       $dmg = $damage - $armour;
       if($dmg<=0) return; //no damage was actually done
@@ -1778,6 +1779,7 @@ class TrekIon extends Weapon{
 	//cause immediate but temporary power shortage
 	protected function causeTemporaryShortage($ship,$currTurn, $turns, $count){ //target ship, current turn, how long critical should last, how many criticals should be applied
 		if ($ship->advancedArmor) return;
+//		if ($system->hardAdvancedArmor) return;  // Hardened Advanced Armor - GTS
 		
 		$reactor = $ship->getSystemByName("Reactor");
 		$crit = new OutputReduced1(-1, $ship->id, $reactor->id, "OutputReduced1", $currTurn, $currTurn+$turns);

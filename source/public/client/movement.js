@@ -1355,8 +1355,25 @@ shipManager.movement = {
 			if (shipManager.power.isOffline(ship, currWeapon)) continue;			
 			//current boost
 			var currBoost = shipManager.power.getBoost(currWeapon);
+			if (currBoost > 0) 
+				currBoost = currWeapon.thrustPerBoost * currBoost;
+			rem -= currBoost;
+		}
+//		rem -= currBoost;
+
+		
+		//Added loop to look for Thrust-boosted weapons and deduct boost amount from Engine total.
+/*		var thrustWeaponList = shipManager.systems.getSystemListThrustBoosted(ship);
+		for (var i in thrustWeaponList) {
+			var currWeapon = thrustWeaponList[i];
+			//is it alive and powered up?
+			if (shipManager.systems.isDestroyed(ship, currWeapon)) continue; //Checks for destroyed and offline are ok!
+			if (shipManager.power.isOffline(ship, currWeapon)) continue;			
+			//current boost
+			var currBoost = shipManager.power.getBoost(currWeapon);
 			if (currBoost > 0) rem -= currBoost;
 		}
+*/
 
 			
         for (var i in ship.movement) {

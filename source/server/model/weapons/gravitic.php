@@ -803,7 +803,7 @@ class GraviticCutter extends Raking
         public $rangePenalty = 0.5;
         public $fireControl = array(-4, 2, 4); // fighters, <mediums, <capitals 
         
-	public $damageType = 'Raking'; 
+		public $damageType = 'Raking'; 
     	public $weaponClass = "Gravitic"; 
 	    
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
@@ -893,6 +893,393 @@ class GraviticCutter extends Raking
         }
     } //endof GraviticCutter
 
+
+
+
+class HypergravitonBlaster extends Weapon {
+        public $name = "HypergravitonBlaster";
+        public $displayName = "Hypergraviton Blaster";
+        public $iconPath = "HypergravitonBlaster.png";         
+
+        public $animation = "laser";
+        public $animationColor = array(250, 251, 196);
+
+        public $factionAge = 3;//Ancient weapon, which sometimes has consequences!
+
+        public $boostable = true;
+        public $boostEfficiency = 0;//Weapon is boosted by Thrust, not power.  Handled in Front-End in getRemainingEngineThrust
+        public $loadingtime = 1;
+        public $normalload = 2;
+        public $priority = 7;
+		
+        public $rangePenalty = 0.25;
+        public $fireControl = array(6, 6, 6); // fighters, <mediums, <capitals 
+        
+		public $raking = 20;
+		public $damageType = 'Raking'; 
+    	public $weaponClass = "Gravitic";
+		public $fireingModes = array(1=>"Raking");
+    	
+		protected $thrustBoosted = true;//Variable FRont End looks for to use thrust as boost. 
+	    protected $thrustPerBoost = 6; //Variable showing how much thrust is used per boost.
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+        {
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 30;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 15;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+			$this->data["Special"] = "20-point rakes.";
+			$this->data["Special"] .= "<br>May apply thrust to boost damage output.";
+			$this->data["Special"] .= "<br>Every 6 thrust applied adds 10 damage.";
+			$this->data["Special"] .= "<br>Can fire accelerated ROF for less damage.";
+			$this->data["Special"] .= "<br> - 1 turn: 5d10+40";
+			$this->data["Special"] .= "<br> - 2 turns: 10d10+80";
+            
+            parent::setSystemDataWindow($turn);
+        } 
+
+        protected function getBoostLevel($turn){
+            $boostLevel = 0;
+            foreach ($this->power as $i){
+                    if ($i->turn != $turn)
+                            continue;
+                    if ($i->type == 2){
+                            $boostLevel += $i->amount;
+                    }
+            }
+            return $boostLevel;
+        }
+	
+        public function getDamage($fireOrder){
+            $add = $this->getBoostLevel($fireOrder->turn);
+			switch($this->turnsloaded){
+				case 0:
+				case 1:
+					$dmg = Dice::d(10, 5) + 40 + ($add * 10);
+					return $dmg;
+					break;
+				default:
+					$dmg = Dice::d(10, 10) + 80 + ($add * 10);
+					return $dmg;
+					break;
+			}
+        }
+
+        public function getAvgDamage(){
+            $this->setMinDamage();
+            $this->setMaxDamage();
+
+            $min = $this->minDamage;
+            $max = $this->maxDamage;
+            $avg = round(($min+$max)/2);
+            return $avg;
+        }
+
+        public function setMinDamage(){
+            $turn = TacGamedata::$currentTurn;
+            $boost = $this->getBoostLevel($turn);
+			switch($this->turnsloaded){
+				case 1:
+					$this->minDamage = 45 + ($boost * 10);
+					break;
+				default:
+					$this->minDamage = 90 + ($boost *10);
+					break;
+			}
+        }   
+
+        public function setMaxDamage(){
+            $turn = TacGamedata::$currentTurn;
+            $boost = $this->getBoostLevel($turn);
+			switch($this->turnsloaded){
+				case 1:
+					$this->maxDamage = 90 + ($boost * 10);
+					break;
+				default:
+					$this->maxDamage = 180 + ($boost * 10);
+					break;
+			}
+				
+        }  
+
+		public function stripForJson(){
+			$strippedSystem = parent::stripForJson();
+			$strippedSystem->thrustBoosted = $this->thrustBoosted;
+			$strippedSystem->thrustPerBoost = $this->thrustPerBoost;													
+			return $strippedSystem;
+		}
+
+    } //endof HypergravitonBlaster
+
+
+
+class HypergravitonBeam extends Weapon {
+        public $name = "HypergravitonBeam";
+        public $displayName = "Hypergraviton Beam";
+        public $iconPath = "HypergravitonBeam.png";         
+
+        public $animation = "laser";
+        public $animationColor = array(250, 251, 196);
+
+        public $factionAge = 3;//Ancient weapon, which sometimes has consequences!
+
+        public $boostable = true;
+        public $boostEfficiency = 0;//Weapon is boosted by Thrust, not power.  Handled in Front-End in getRemainingEngineThrust
+        public $loadingtime = 1;
+        public $priority = 6;
+		
+        public $rangePenalty = 0.33;
+        public $fireControl = array(3, 4, 5); // fighters, <mediums, <capitals 
+        
+		public $raking = 15;
+		public $damageType = 'Raking'; 
+    	public $weaponClass = "Gravitic";
+    	
+		protected $thrustBoosted = true;//Variable FRont End looks for to use thrust as boost. 
+	    protected $thrustPerBoost = 4; //Variable showing how much thrust is used per boost.
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+        {
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 20;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 12;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+			$this->data["Special"] = "15-point rakes.";
+			$this->data["Special"] .= "<br>May apply thrust to boost damage output.";
+			$this->data["Special"] .= "<br>Every 4 thrust applied adds 5 damage.";
+            
+            parent::setSystemDataWindow($turn);
+        } 
+
+        protected function getBoostLevel($turn){
+            $boostLevel = 0;
+            foreach ($this->power as $i){
+                    if ($i->turn != $turn)
+                            continue;
+                    if ($i->type == 2){
+                            $boostLevel += $i->amount;
+                    }
+            }
+            return $boostLevel;
+        }
+	
+        public function getDamage($fireOrder){
+            $add = $this->getBoostLevel($fireOrder->turn);
+			$dmg = Dice::d(10, 4) + 20 + ($add * 5);
+            return $dmg;
+        }
+
+        public function getAvgDamage(){
+            $this->setMinDamage();
+            $this->setMaxDamage();
+
+            $min = $this->minDamage;
+            $max = $this->maxDamage;
+            $avg = round(($min+$max)/2);
+            return $avg;
+        }
+
+        public function setMinDamage(){
+            $turn = TacGamedata::$currentTurn;
+            $boost = $this->getBoostLevel($turn);
+            $this->minDamage = 24 + ($boost * 5);
+        }   
+
+        public function setMaxDamage(){
+            $turn = TacGamedata::$currentTurn;
+            $boost = $this->getBoostLevel($turn);
+            $this->maxDamage = 60 + ($boost * 5);
+        }  
+
+		public function stripForJson(){
+			$strippedSystem = parent::stripForJson();
+			$strippedSystem->thrustBoosted = $this->thrustBoosted;
+			$strippedSystem->thrustPerBoost = $this->thrustPerBoost;													
+			return $strippedSystem;
+		}
+
+    } //endof HypergravitonBeam
+
+
+
+class MedAntigravityBeam extends Gravitic{
+		public $name = "MedAntigravityBeam";
+        public $displayName = "Medium Antigravity Beam";
+        public $iconPath = "MedAntigravityBeam.png";
+        public $animation = "laser";
+        public $animationColor = array(250, 251, 196);
+
+        public $factionAge = 4;//Primordial weapon, which sometimes has consequences!
+
+        public $intercept = 2;
+		public $priority = 5; 		
+    	public $gunsArray = array(1=>1, 2=>2); //one mount, but two Beam shots!
+		
+        public $loadingtime = 1;
+		
+        public $rangePenaltyArray = array(1=>0.5, 2=>0.5);
+        public $fireControlArray = array( 1=>array(4, 3, 1), 2=>array(4, 3, 1) ); 
+
+        public $damageType = "Standard";
+		public $damageTypeArray = array(1=>'Standard', 2=>'Standard'); 
+		public $weaponClass = "Gravitic";
+		public $weaponClassArray = array(1=>'Gravitic', 2=>'Gravitic');
+		public $firingModes = array( 1 => "Single", 2=> "Dual Beams");
+		public $firingMode = 1;
+        public $canSplitShots = false; //Allows Firing Mode 2 to split shots.
+        public $canSplitShotsArray = array(1=>false, 2=>true );          
+
+		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){ //maxhealth and power reqirement are fixed; left option to override with hand-written values
+			if ( $maxhealth == 0 ) $maxhealth = 6;
+			if ( $powerReq == 0 ) $powerReq = 2;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);   
+			if (!isset($this->data["Special"])) {
+				$this->data["Special"] = '';
+			}else{
+				$this->data["Special"] .= '<br>';
+			}
+			$this->data["Special"] .= "Can fire as either:";  
+			$this->data["Special"] .= "<br> - A single medium antigravity beam (2d10+4)."; 
+			$this->data["Special"] .= "<br> - Split into two beams (1d10+2, each)."; 
+		}
+	
+		public function getDamage($fireOrder){
+			switch($this->firingMode){
+				case 1:
+					return Dice::d(10, 2)+4; //Medium Antigravity Beam
+					break;
+				case 2:
+					return Dice::d(10, 1)+2; //Split Beam
+					break;	
+			}
+		}
+
+ 		public function setMinDamage(){
+			switch($this->firingMode){
+				case 1:
+					$this->minDamage = 6; //Medium Antigravity Beam
+					break;
+				case 2:
+					$this->minDamage = 3; //Split Beam
+					break;	
+			}
+		}
+             
+        public function setMaxDamage(){
+			switch($this->firingMode){
+				case 1:
+					$this->maxDamage = 24; //Medium Antigravity Beam
+					break;
+				case 2:
+					$this->maxDamage = 12; //Split Beam
+					break;	
+			}
+		}
+		
+}//end of class MedAntigravityBeam
+
+
+
+class AntigravityBeam extends Gravitic{
+		public $name = "AntigravityBeam";
+        public $displayName = "Antigravity Beam";
+        public $iconPath = "AntigravityBeam.png";
+        public $animation = "laser";
+        public $animationColor = array(250, 251, 196);
+
+        public $factionAge = 3;//Primordial weapon, which sometimes has consequences!
+
+        public $intercept = 3;
+		public $priority = 5; 		
+    	public $gunsArray = array(1=>1, 2=>3); //one mount, but three Beam shots!
+		
+        public $loadingtime = 1;
+		
+        public $rangePenaltyArray = array(1=>0.5, 2=>0.5);
+        public $fireControlArray = array( 1=>array(5, 3, 1), 2=>array(5, 3, 1) ); 
+
+        public $damageType = "Standard";
+		public $damageTypeArray = array(1=>'Standard', 2=>'Standard'); 
+		public $weaponClass = "Gravitic";
+		public $weaponClassArray = array(1=>'Gravitic', 2=>'Gravitic');
+		public $firingModes = array( 1 => "Single", 2=> "Triple Beams");
+		public $firingMode = 1;
+        public $canSplitShots = false; //Allows Firing Mode 2 to split shots.
+        public $canSplitShotsArray = array(1=>false, 2=>true );          
+
+		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){ //maxhealth and power reqirement are fixed; left option to override with hand-written values
+			if ( $maxhealth == 0 ) $maxhealth = 6;
+			if ( $powerReq == 0 ) $powerReq = 3;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);   
+			if (!isset($this->data["Special"])) {
+				$this->data["Special"] = '';
+			}else{
+				$this->data["Special"] .= '<br>';
+			}
+			$this->data["Special"] .= "Can fire as either:";  
+			$this->data["Special"] .= "<br> - A single antigravity beam (3d10+6)."; 
+			$this->data["Special"] .= "<br> - Split into three beams (1d10+2, each)."; 
+		}
+	
+		public function getDamage($fireOrder){
+			switch($this->firingMode){
+				case 1:
+					return Dice::d(10, 3)+6; //Antigravity Beam
+					break;
+				case 2:
+					return Dice::d(10, 1)+2; //Split Beam
+					break;	
+			}
+		}
+
+ 		public function setMinDamage(){
+			switch($this->firingMode){
+				case 1:
+					$this->minDamage = 9; //Antigravity Beam
+					break;
+				case 2:
+					$this->minDamage = 3; //Split Beam
+					break;	
+			}
+		}
+             
+        public function setMaxDamage(){
+			switch($this->firingMode){
+				case 1:
+					$this->maxDamage = 36; //Antigravity Beam
+					break;
+				case 2:
+					$this->maxDamage = 12; //Split Beam
+					break;	
+			}
+		}
+		
+}//end of class AntigravityBeam
 
 
 ?>

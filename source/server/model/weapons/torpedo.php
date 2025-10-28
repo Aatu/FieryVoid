@@ -406,7 +406,7 @@
         
         public function getDamage($fireOrder){        return Dice::d(10, 3);   }
         public function setMinDamage(){     $this->minDamage = 3;      }
-        public function setMaxDamage(){     $this->maxDamage = 30;      }
+        public function setMaxDamage(){     $this->maxDamage = 30;      } 
     
     }//endof class PlasmaWaveTorpedo
 
@@ -526,10 +526,12 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
 		
 		//Ignores armor, nasty for flash damage on fighters.
 		public function getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos=null){
-		if ($system->advancedArmor){ //Negates Advanced armor's +2 bonus against ballistics and reduces by a further 2.
+		if (($system->advancedArmor) && (!$system->hardAdvancedArmor)){ //Negates Advanced armor's +2 bonus against ballistics and reduces by a further 2. No impact on hardened advanced armor
             $armour = parent::getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos);
             $armour = $armour-4;
             return $armour;
+		}elseif ($system->hardAdvancedArmor){
+			return (($armor/2)+2);
 		}else{					
 			return 0;
         }
@@ -556,6 +558,12 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
 			$effectIni = ceil($effectIni/2);  	
 			$effectPower = 0; //Reducing power in Vorlons can make it impossible for them to commit Initial Orders.		
 		}
+
+/*		if ($system->hardAdvancedArmor){		
+			$effectEW = ceil($effectEW/2);//Other Ancients are somewhat resistant to pyschic attack from Thirdspace Aliens, 50% effect.		
+			$effectIni = ceil($effectIni/2);  	
+			$effectPower = 0; //Reducing power in Vorlons can make it impossible for them to commit Initial Orders.		
+		}   */
 
 		if ($ship instanceof FighterFlight){  //No additional effect on fighters beyond flash damage.			
 			PsionicTorpedo::$alreadyAffected[$ship->id] = true;//mark affected already.	
@@ -597,7 +605,7 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
 			}else{
 				$this->data["Special"] .= '<br>';
 			}
-			$this->data["Special"] .= "<br>Ignores armor (Advanced Armor is treated as 2 points less).";	
+			$this->data["Special"] .= "<br>Ignores armor (Advanced Armor is treated as 2 points less, Hardened Avanced Armor is treated as half +2 for ballistics).";	
 			$this->data["Special"] .= "<br>Uses psychic energy to disrupt target next turn in the following ways:";
 			$this->data["Special"] .= "<br> - 1d2 penalty to EW,";
 			$this->data["Special"] .= "<br> - 1d3 penatly to Initiative,";
@@ -752,6 +760,11 @@ class LimpetBoreTorpedo extends Torpedo{
 			$fireOrder->pubnotes .= "<br> Limpet Bore cannot attach to advanced armor.";				
 			return; 	
 		}
+
+/*		if ($system->hardAdvancedArmor) {//no effect on Hardened Advanced Armor	
+			$fireOrder->pubnotes .= "<br> Limpet Bore cannot attach to hardened advanced armor.";				
+			return; 	
+		}  */
 
 		if ($system->id != $fireOrder->calledid) {//In case it ends up in general hit chart somehow.
 			$fireOrder->pubnotes .= "<br> Limpet Bore was not targeted at a system.";				

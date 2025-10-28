@@ -7,7 +7,7 @@
 */
 
 class WeaponEM  {	
-	public static function isTargetEMResistant($ship,$system = null){ //returns true if target has either AdvancedArmor or EM Hardening (which, for simplicity, in FV is treated as AA would be for EM weapons)
+	public static function isTargetEMResistant($ship,$system = null){ //returns true if target has Advanced Armor or EM Hardening (which, for simplicity, in FV is treated as AA would be for EM weapons)
 		if($ship){
 			$EMHardened = $ship->getEMHardened();
 			if($ship->advancedArmor) return true;
@@ -60,7 +60,8 @@ class PlasmaStream extends Plasma{
 	
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
 		parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
-		if (!$system->advancedArmor){//advanced armor prevents effect 
+		if (!$system->advancedArmor){//advanced armor prevents effect
+//		}elseif (!$system->hardAdvancedArmor){//hardened advanced armor prevents effect - GTS
 			$crit = new ArmorReduced(-1, $ship->id, $system->id, "ArmorReduced", $gamedata->turn);
 			$crit->updated = true;
 			$crit->inEffect = true; //in effect immediately, affecting further damage in the same turn!
@@ -235,10 +236,11 @@ class ShockCannon extends Weapon{
         public $animationExplosionScale = 0.15;
         public $trailLength = 30;
 	*/
+
 		public $priority = 4; //as antiship weapon, going early - actual damage is only to systems, and with armor ignoring it's worth dealing - but also as armor ignoring should let actual very light weapons go first
 		public $priorityAFArray = array(1=>2); //as antifighter weapon, going very early - instant dropout
 
-        public $loadingtime = 2;
+        public $loadingtime = 1;
 
         public $rangePenalty = 1;
         public $fireControl = array(3, 3, 3); // fighters, <=mediums, <=capitals
@@ -898,6 +900,7 @@ class StunBeam extends Weapon{
 		if ($system->isDestroyed()) return; //no point allocating
 		if ($ship->isDestroyed()) return; //no point allocating				
 		if ($system->advancedArmor) { //no effect on Advanced Armor but Ipsha etc still get affected.
+//		if ($system->hardAdvancedArmor) { //no effect on Advanced Armor but Ipsha etc still get affected.
 		$fireOrder->pubnotes .= "<br> Stun Beam has no effect on advanced armor.";				
 		return; 	
 		}
@@ -5282,6 +5285,12 @@ class PsychicField extends Weapon{ //Thirdspace weapons that operates similar to
 			$effecttohit = ceil($effecttohit/2);
 			$effectCrit = ceil($effectCrit/2);		
 			}
+
+/*		if ($system->hardAdvancedArmor){		
+			$effectIni = ceil($effectIni/2);  	//Other Ancients are somewhat resistant to pyschic attack from Thirdspace Aliens, 50% effect.	
+			$effecttohit = ceil($effecttohit/2);
+			$effectCrit = ceil($effectCrit/2);		
+			}   */
 	
 		if ($ship instanceof FighterFlight){  //place effect on first fighter, even if it's already destroyed!			
 			$firstFighter = $ship->getSampleFighter();
@@ -5558,6 +5567,7 @@ class PsychicFieldHandler{
 		protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //Unlikely to matter at Raking 20, but keep it in for thematic reasons!
 			parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);		
 			if ($system->advancedArmor) return; //no effect on Advanced Armor but Ipsha etc still get affected.
+//			if ($system->hardAdvancedArmor) return; //no effect on Advanced Armor but Ipsha etc still get affected.
 			//+1 to crit roll, +2 to dropout roll
 			$mod = 1;
 			if ($ship instanceof FighterFlight) $mod++;		
@@ -5696,6 +5706,7 @@ class PsionicLance extends Raking{
 		protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!
 				parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);		
 				if ($system->advancedArmor) return; //no effect on Advanced Armor		
+//				if ($system->hardAdvancedArmor) return; //no effect on Advanced Armor		
 				//+1 to crit roll, +2 to dropout roll
 				$mod = 1;
 				if ($ship instanceof FighterFlight) $mod++;		
@@ -5809,6 +5820,7 @@ class PsionicConcentrator extends Weapon{
 		parent::beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata);
  		//-1 power to ships for one turn.  
 		if ($target->advancedArmor) return; //no effect on Advanced Armor
+//		if ($target->hardAdvancedArmor) return; //no effect on Hardened Advanced Armor
 			 		     
 		$reactor = $target->getSystemByName("Reactor");
 		$mod = 1;//Easier to change later.
@@ -5824,6 +5836,7 @@ class PsionicConcentrator extends Weapon{
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!
 		parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);		
 		if ($system->advancedArmor) return; //no effect on Advanced Armor		
+//		if ($system->hardAdvancedArmor) return; //no effect on Hardened Advanced Armor		
 		//+1 to crit roll, +2 to dropout roll, 
 		$mod = 1;
 
@@ -6011,6 +6024,7 @@ class PsionicConcentratorLight extends Weapon{
 		parent::beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata);
  		//-1 power to ships for one turn.  
 		if ($target->advancedArmor) return; //no effect on Advanced Armor
+//		if ($target->hardAdvancedArmor) return; //no effect on Advanced Armor
 			 		     
 		$reactor = $target->getSystemByName("Reactor");
 		$mod = 1;//Easier to change later.
@@ -6026,6 +6040,7 @@ class PsionicConcentratorLight extends Weapon{
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!
 		parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);		
 		if ($system->advancedArmor) return; //no effect on Advanced Armor		
+//		if ($system->hardAdvancedArmor) return; //no effect on Advanced Armor		
 		//+1 to crit roll, +2 to dropout roll, 
 		$mod = 1;
 
@@ -7109,6 +7124,11 @@ class Marines extends Weapon{
 			$fireOrder->pubnotes .= "<br> Marines cannot attack systems with advanced armor.";				
 			return; 	
 		}
+
+/*		if ($system->hardAdvancedArmor) {//no effect on Hardened Advanced Armor for Younger Races equipped with this e.g. Shadow Omega.	
+			$fireOrder->pubnotes .= "<br> Marines cannot attack systems with hardened advanced armor.";				
+			return; 	
+		}   */
 		
 		//check if there are too many marines already on target ship.
 		if($this->checkMissionAmount($target, $gamedata, $fireOrder)){//If it returns true, there are too many attaching pods.							
@@ -7433,6 +7453,11 @@ class GrapplingClaw extends Weapon{
 			return; 	
 		}
 		
+/*		if ($system->hardAdvancedArmor) {//no effect on Hardened Advanced Armor for Younger Races equipped with this e.g. Shadow Omega.	
+			$fireOrder->pubnotes .= "<br> Marines cannot attack systems with advanced armor.";				
+			return; 	
+		}   */
+
 		//check if there are too many marines already on target ship.
 		if($this->checkMissionAmount($target, $gamedata, $fireOrder)){//If it returns true, there are too many attaching pods.							
 			$this->ammunition++;//Marines weren't eliminated.  Give ammunition back to weapon.
@@ -7645,6 +7670,7 @@ class SecondSight extends Weapon{
 			  
 			  $effectIni = Dice::d(6, 1)+2;
 			  if ($target->advancedArmor) $effectIni = 2;
+//			  if ($target->hardAdvancedArmor) $effectIni = 2;
 			  
 			  if ($target instanceof FighterFlight){  //place effect on first fighter, even if it's already destroyed!
 				  $firstFighter = $target->getSampleFighter();
@@ -7914,7 +7940,9 @@ class ThoughtWave extends Plasma{
 			$fireOrder->pubnotes .= ' Profile/Mod: ' . $defence . '/' . $mod . '. ';					
 					        	           
             if($target->advancedArmor){//Divide by 5 for AA
-				$damage = floor(floor($diceRoll/5) * ($defence + $mod)); //3d6 divide by 5, multiplied by defence profile.            	
+				$damage = floor(floor($diceRoll/5) * ($defence + $mod)); //3d6 divide by 5, multiplied by defence profile. 
+//			}elseif($target->hardAdvancedArmor){//Divide by 5 for HAA
+//				$damage = floor(floor($diceRoll/5) * ($defence + $mod)); //3d6 divide by 5, multiplied by defence profile. 
             }else{//Divide by 3 for everything else							
 				$damage = floor(floor($diceRoll/3) * ($defence + $mod)); //3d6 divide by 3, multiplied by defence profile.
 			}				

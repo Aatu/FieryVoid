@@ -15,6 +15,7 @@ class TechnicalTestbedFtr extends FighterFlight{
         
 		
 		$this->advancedArmor = true;
+		$this->hardAdvancedArmor = true;
 		
 		$this->forwardDefense = 70;
 		$this->sideDefense = 50;
@@ -39,8 +40,8 @@ class TechnicalTestbedFtr extends FighterFlight{
 
         for ($i = 0; $i < $toAdd; $i++){
 			
-			$armour = array(2, 2, 2, 2);
-			$fighter = new Fighter("TechnicalTestbedFtr", $armour, 10, $this->id);
+			$armour = array(4, 4, 4, 4);
+			$fighter = new Fighter("TechnicalTestbedFtr", $armour, 20, $this->id);
 			$fighter->displayName = "Testbed Fighter";
 			$fighter->imagePath = "img/ships/ShadowFighter.png";
 			$fighter->iconPath = "img/ships/ShadowFighter_LARGE.png";
