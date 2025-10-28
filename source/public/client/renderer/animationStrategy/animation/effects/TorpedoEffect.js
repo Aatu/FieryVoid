@@ -37,7 +37,7 @@ window.TorpedoEffect = function () {
         //this.noSound = args.noSound || !gamedata?.playAudio; 
         this.soundVolume = args.soundVolume ?? 0.1;
         this.playedLaunchSound = false;
-        this.playedExplosionSound = false;
+        this.playedImpactSound = false;
 
         // Cache reusable Audio objects globally
         if (!TorpedoEffect.cachedLaunchAudio) {
@@ -108,13 +108,13 @@ TorpedoEffect.prototype.render = function (now, total, last, delta, zoom) {
 
     // --- Play explosion sound ---
     const explosionTime = this.time + this.duration - 50; // slightly before impact
-    if (gamedata.playAudio && this.hit && !this.playedExplosionSound && total >= explosionTime) {
+    if (gamedata.playAudio && this.hit && !this.playedImpactSound && total >= explosionTime) {
         try {
             const explosionSound = TorpedoEffect.cachedExplosionAudio.cloneNode(true);
             explosionSound.volume = this.soundVolume;
             explosionSound.currentTime = 0;
             explosionSound.play().catch(() => {});
-            this.playedExplosionSound = true;
+            this.playedImpactSound = true;
         } catch (e) {
             console.warn("Torpedo explosion sound failed:", e);
         }
