@@ -24,7 +24,7 @@ window.gamedata = {
     gamespace: null,
     replay: false,
     showLoS: false,
-    playAudio: true,
+    playAudio: true, //To allow toggling of audio during Replay.
 
     mouseOverShipId: -1,
 
