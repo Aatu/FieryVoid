@@ -10,6 +10,77 @@ window.ShipDestroyedAnimation = function () {
         this.currentOpacity = 1.0;
 
         this.animations = [];
+        this.explosionTriggered = false; // <-- new flag
+        this.emitterContainer = emitterContainer;
+        this.movementAnimations = movementAnimations;
+
+        var cameraAnimation = new CameraPositionAnimation(
+            FireAnimationHelper.getShipPositionAtTime(this.shipIcon, this.time, this.movementAnimations),
+            this.time
+        );
+
+        this.animations.push(cameraAnimation);
+        this.duration = 4000; // same as explosion.getDuration()
+    }
+
+    ShipDestroyedAnimation.prototype = Object.create(Animation.prototype);
+
+    ShipDestroyedAnimation.prototype.render = function (now, total, last, delta, zoom, back, paused) {
+        this.animations.forEach(function (animation) {
+            animation.render(now, total, last, delta, zoom, back, paused);
+        });
+
+        // --- Trigger explosion only when time is reached ---
+        if (!this.explosionTriggered && total >= this.time) {
+            this.explosionTriggered = true;
+
+            this.explosion = new ShipExplosion(this.emitterContainer, {
+                time: this.time,
+                position: FireAnimationHelper.getShipPositionAtTime(this.shipIcon, this.time, this.movementAnimations)
+            });
+        }
+
+        // --- Handle fading ---
+        let opacity;
+        if (total > this.fadeoutTime && total < this.fadeoutTime + this.fadeoutDuration) {
+            opacity = 1 - (total - this.fadeoutTime) / this.fadeoutDuration;
+        } else if (total < this.fadeoutTime) {
+            opacity = 1;
+        } else {
+            opacity = 0;
+        }
+
+        if (this.currentOpacity !== opacity) {
+            this.currentOpacity = opacity;
+            this.shipIcon.setOpacity(opacity);
+        }
+    };
+
+    ShipDestroyedAnimation.prototype.getDuration = function () {
+        return this.duration;
+    };
+
+    ShipDestroyedAnimation.prototype.cleanUp = function () {
+        this.shipIcon.setOpacity(1);
+    };
+
+    return ShipDestroyedAnimation;
+}();
+
+
+/* //Old version without sound
+"use strict";
+
+window.ShipDestroyedAnimation = function () {
+    function ShipDestroyedAnimation(time, shipIcon, emitterContainer, movementAnimations) {
+        Animation.call(this);
+        this.time = time;
+        this.shipIcon = shipIcon;
+        this.fadeoutTime = time + 2100;
+        this.fadeoutDuration = 500;
+        this.currentOpacity = 1.0;
+
+        this.animations = [];
 
         var cameraAnimation = new CameraPositionAnimation(FireAnimationHelper.getShipPositionAtTime(this.shipIcon, this.time, movementAnimations), this.time);
 
@@ -58,3 +129,4 @@ window.ShipDestroyedAnimation = function () {
 
     return ShipDestroyedAnimation;
 }();
+*/

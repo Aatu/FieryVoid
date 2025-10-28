@@ -24,6 +24,7 @@ window.gamedata = {
     gamespace: null,
     replay: false,
     showLoS: false,
+    playAudio: true,
 
     mouseOverShipId: -1,
 
