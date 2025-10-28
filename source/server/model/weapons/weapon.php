@@ -74,6 +74,7 @@ class Weapon extends ShipSystem
 	public $maxVariableShots = 0; //For front end to know how many shots weapon CAN fire for variable-shot weapons. 	  
 	public $canSplitShots = false; //For Front end to allow weapons to target different enemies in same firing round. 
 	public $canSplitShotsArray = array(); 
+    protected $multiModeSplit = false; //If you want the Front End to see this, pass it in strpForJson() in weapon :)
 
     public $overloadable = false;
 
@@ -125,6 +126,7 @@ class Weapon extends ShipSystem
     public $guns = 1;
     public $gunsArray = array();
 
+
     // Used to indicate a parent in case of dualWeapons
     public $parentId = -1;
 
@@ -172,7 +174,7 @@ class Weapon extends ShipSystem
 
     protected $firedDefensivelyAlready = 0; //marker used for weapons capable of firing multiple defensive shots, but suffering backlash once
 //	protected $autoHit = false;//To show 100% hit chance in front end - DK 			        
-//   	protected $autoHitArray = array();    
+//  protected $autoHitArray = array();    
 
 
 	//Weapons are repaired before "average system", but after really important things! 
@@ -745,12 +747,33 @@ class Weapon extends ShipSystem
         if ($data)
             SystemData::addDataForSystem($this->id, 0, $ship->id, $data->toJSON());
     }
-
+/*
     public function getStartLoading()
     {
 //        return new WeaponLoading($this->getNormalLoad(), 0, 0, 0, $this->getLoadingTime(), $this->firingMode);
         return new WeaponLoading($this->getNormalLoad(), $this->overloadshots, 0, $this->overloadturns, $this->getLoadingTime(), $this->firingMode);
     }
+*/
+public function getStartLoading()
+{
+    $overloadTurns = $this->overloadturns;
+
+    // At game start, no power entries exist yet.
+    // If this weapon can overload and we're initializing (Turn 1 setup),
+    // start overloadturns at 1 so that Turn 1 displays correctly.
+    if ($overloadTurns === 0 && $this->overloadable) {
+        $overloadTurns = 1;
+    }
+
+    return new WeaponLoading(
+        $this->getNormalLoad(),
+        $this->overloadshots,
+        0,
+        $overloadTurns,
+        $this->getLoadingTime(),
+        $this->firingMode
+    );
+}
 
     public function setLoading($loading)
     {
@@ -1131,6 +1154,7 @@ class Weapon extends ShipSystem
         $rangePenalty = $rp["rp"];
 		*/
 
+        /*//Old Jinking logic
         if ($shooter instanceof FighterFlight) $jinkSelf = Movement::getJinking($shooter, $gamedata->turn);  //count own jinking always
 
         if ($target instanceof FighterFlight) {
@@ -1146,6 +1170,24 @@ class Weapon extends ShipSystem
 			$jinkTarget = 0;
 			$jinkSelf = 0;
 		}	
+        */
+        //New block to take into account jinking ships!
+        if ($shooter instanceof FighterFlight || $shooter->jinkinglimit > 0) $jinkSelf = Movement::getJinking($shooter, $gamedata->turn);  //count own jinking always
+
+        if ($target instanceof FighterFlight || $target->jinkinglimit > 0) {
+            if ((!($shooter instanceof FighterFlight)) || $this->ballistic) //non-fighters and ballistics always affected by jinking
+            {
+                $jinkTarget = Movement::getJinking($target, $gamedata->turn);
+            } elseif ($jinkSelf > 0 || mathlib::getDistance($shooter->getCoPos(), $target->getCoPos()) > 0) { //fighter direct fire unaffected at range 0
+                $jinkTarget = Movement::getJinking($target, $gamedata->turn);
+            }
+        }
+		// if jinking is ignored - make it so
+		if($this->ignoreJinking){
+			$jinkTarget = 0;
+			$jinkSelf = 0;
+		}	
+
 
         $dew = $target->getDEW($gamedata->turn);
         $bdew = EW::getBlanketDEW($gamedata, $target);
@@ -1790,11 +1832,13 @@ throw new Exception("getSystemArmourAdaptive! $ss");	*/
 				$pos = mathlib::hexCoToPixel($launchHex);
         }
         $armor = $system->getArmourBase($target, $shooter, $this->weaponClass, $pos);
+
         //$mod = $system->hasCritical("ArmorReduced", $gamedata->turn - 1);
 		$mod = $system->hasCritical("ArmorReduced", $gamedata->turn ); //$inEffect variable should distinguish effect that are not immediately in effect
         $armor -= $mod;
 
         $armor = max(0, $armor); //at least 0
+
         return $armor;
     }//endof function getSystemArmourBase
 
@@ -1865,47 +1909,6 @@ full Advanced Armor effects (by rules) for reference:
  - Tractor beams, gravitic shifters and the like will still function normally.
  - Ballistic weapons are anticipated by advanced armor due to their slower rate of approach. The armor’s value is considered 2 points higher versus any ballistic device (missile, torpedo, energy mine, etc.).
 */
-
-/*
-	protected function applyAdvancedArmor($system, $armour){
-		$returnArmour = $armour;
-		//only do this if target is actually protected by advanced or hardened advanced armor
-		//first check to see if this is hardened advanced armor as this impacts everything (even Ancients)
-		//if it is not hardened advanced armor then check that the target has advanced armor
-		//and firing WEAPON age is not very advanced (<3 - less than Ancient)
-		//Ancients themselves are not impacted by advanced armor
-		if ($system->hardAdvancedArmor){
-			if($this->ballistic){ //extra protection against ballistics
-				$returnArmour += 2;
-			}
-			if($this->weaponClass == 'Matter'){ //Matter weapons are affected by half of armor
-				$returnArmour += -2;
-			}
-			if($this->damageType == 'Flash'){ //Flash weapons treat armor as double
-				$returnArmour = floor($returnArmour*2);
-			}
-		}elseif( ($this->factionAge < 3) && ($system->advancedArmor)){
-			if($this->ballistic){ //extra protection against ballistics
-				$returnArmour += 2;
-			}
-			if($this->weaponClass == 'Matter'){ //slight vulnerability vs Matter
-				$returnArmour += -2;
-			}
-		}else{ //NO ADVANCED ARMOR (effectively) - apply effect explicitly tied to damage type
-			if($this->weaponClass == 'Matter'){ //Matter weapons ignore armor
-				$returnArmour = 0;
-			}
-			if($this->weaponClass == 'Plasma'){ //Plasma weapons ignore (better) half of armor
-				$returnArmour = floor($returnArmour/2);
-			}
-		}
-		$returnArmour = max(0,$returnArmour);
-		return $returnArmour;
-	}
-*/
-
-
-
 	protected function applyAdvancedArmor($system, $armour){
 		$returnArmour = $armour;
 		//only do this if target is actually protected by advanced armor
@@ -1918,22 +1921,6 @@ full Advanced Armor effects (by rules) for reference:
 			if($this->weaponClass == 'Matter'){ //slight vulnerability vs Matter
 				$returnArmour += -2;
 			}
-			if($this->damageType == 'Flash' && ($system->hardAdvancedArmor)){
-				$returnArmour = floor($returnArmour*2); 
-			}
-		}elseif($this->factionAge >= 3 && $system->hardAdvancedArmor){
-			if($this->ballistic){ //extra protection against ballistics
-				$returnArmour += 2;
-			}
-			if($this->weaponClass == 'Matter'){ //slight vulnerability vs Matter
-				$returnArmour = floor($returnArmour/2);
-			}
-			if($this->damageType == 'Flash'){
-				$returnArmour = floor($returnArmour*2);
-			}   
-//			if($this->weaponClass == 'Molecular'){
-//				$returnArmour = floor($returnArmour/2);
-//			}
 		}else{ //NO ADVANCED ARMOR (effectively) - apply effect explicitly tied to damage type
 			if($this->weaponClass == 'Matter'){ //Matter weapons ignore armor
 				$returnArmour = 0;
@@ -1945,9 +1932,6 @@ full Advanced Armor effects (by rules) for reference:
 		$returnArmour = max(0,$returnArmour);
 		return $returnArmour;
 	}
-
-
-
 
     protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location = null)
     {
@@ -1962,27 +1946,13 @@ full Advanced Armor effects (by rules) for reference:
 			// ...and doDamage should always call Complete
 
 
-
-
             //armor may be ignored for some reason... usually because of Raking mode :)
             $armourIgnored = 0;
             if (isset($fireOrder->armorIgnored[$system->id])) {
-				if ($system->hardAdvancedArmor) {
-					$armourEffective = floor($system->armour/2);
-					$armour = max(0,$armourEffective-$armourIgnored);
-				}else{
-					$armourIgnored = $fireOrder->armorIgnored[$system->id];
-					$armour = $armour - $armourIgnored;
-				}
+                $armourIgnored = $fireOrder->armorIgnored[$system->id];
+                $armour = $armour - $armourIgnored;
             }
             $armour = max($armour, 0);
-
-
-
-
-
-
-
 
 			//returned array: dmgDealt, dmgRemaining, armorPierced	
 			$damage = $this->beforeDamagedSystem($target, $system, $damage, $armour, $gamedata, $fireOrder);
@@ -1990,8 +1960,8 @@ full Advanced Armor effects (by rules) for reference:
 			$this->onDamagedSystem($target, $system, $effects["dmgDealt"], $effects["armorPierced"], $gamedata, $fireOrder);//weapons that do effects on hitting something
 			$damage = $effects["dmgRemaining"];
 			if ($this->damageType == 'Raking'){ //note armor already pierced so further rakes have it easier. All Sustained weapons are currently raking, so they can use standard method here - DK
-					$armourIgnored = $armourIgnored + $effects["armorPierced"];
-					$fireOrder->armorIgnored[$system->id] = $armourIgnored;
+				$armourIgnored = $armourIgnored + $effects["armorPierced"]; 
+				$fireOrder->armorIgnored[$system->id] = $armourIgnored;
 			}			
 			
             $damageWasDealt = true; //actual damage was done! might be relevant for overkill allocation
@@ -2121,7 +2091,9 @@ full Advanced Armor effects (by rules) for reference:
 		if (isset($this->interceptArray[$i])) $this->intercept = $this->interceptArray[$i];  // DK		
 		if (isset($this->ballisticInterceptArray[$i])) $this->ballisticIntercept = $this->ballisticInterceptArray[$i];  // DK
         
-		if (isset($this->canSplitShotsArray[$i])) $this->canSplitShots = $this->canSplitShotsArray[$i];  // DK        
+		if (isset($this->canSplitShotsArray[$i])) $this->canSplitShots = $this->canSplitShotsArray[$i];  // DK
+		if (isset($this->autoFireOnlyArray[$i])) $this->autoFireOnly = $this->autoFireOnlyArray[$i];  // DK  
+		if (isset($this->canTargetAlliesArray[$i])) $this->canTargetAllies = $this->canTargetAlliesArray[$i];  // DK                          
 											    
     }//endof function changeFiringMode
 

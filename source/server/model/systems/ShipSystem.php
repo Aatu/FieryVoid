@@ -15,6 +15,7 @@ class ShipSystem {
     public $boostable = false;
     public $boostEfficiency = null;
     public $maxBoostLevel = null;
+	public $boostOtherPhases = false; //To allow boosting in Deployment and Firing Phases.	
     public $power = array();
     public $fireOrders = array();
     public $canOffLine = false;
@@ -120,6 +121,9 @@ class ShipSystem {
 	
 	public function doIndividualNotesTransfer(){//optionally to be redefined if system can receive any private data from front endthat need immediate attention		
 	}
+
+	public function doIndividualNotesTransferGD($gamedata){
+	}		
 
     public function onConstructed($ship, $turn, $phase){
         if($ship->getAdvancedArmor()==true){
@@ -1336,6 +1340,17 @@ echo "halfArmour is: " . $halfArmour . "\n";
 		$returnArray["armorPierced"] = $effectiveArmor;
 		return $returnArray;
 	}
+
+	public function removePowerEntriesForTurn($gamedata){
+			$ship = $this->getUnit();
+			$systemid = $this->id;
+			Manager::removePowerEntriesForTurn($gamedata->id, $ship->id, $systemid, $gamedata->turn);
+	}
+		
+	//Safety fallback function, only applicable system is Torvalus Shading Field atm. 
+	public function checkStealthNextPhase($gamedata){				
+		return;				
+	}		
 
 }
 

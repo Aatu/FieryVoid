@@ -1410,14 +1410,7 @@
         public $displayName = "Quad Array";
         public $iconPath = "quadArray.png";
         public $animation = "bolt";
-	    /*
-        public $animationColor = array(255, 163, 26);
-        public $animationExplosionScale = 0.15;
-        public $trailColor = array(255, 163, 26);
-        public $projectilespeed = 12;
-        public $animationWidth = 3;
-        public $trailLength = 10;
-*/
+
         public $intercept = 2;
         public $priority = 4;
 
@@ -1450,7 +1443,7 @@
             $this->data["Special"] = "Can use 'Split' Firing Mode to target different enemy units."; 
             $this->data["Special"] .= '<br>If three or four shots are fired, gains May Overheat critical(s) next turn.';    
             $this->data["Special"] .= "<br>When weapon May Overheat, firing offensively causes a critical roll."; 
-            $this->data["Special"] .= "<br>This roll has +2 modifier for evey shot fired in current turn, but -2 if only one 'May Overheat' critical effect.";  
+            $this->data["Special"] .= "<br>This roll has +2 modifier for evey shot fired in current turn, and single -2 if only one 'May Overheat' critical effect.";  
             $this->data["Special"] .= "<br>Dual or Single shots do not cause overheating the following turn, nor will defensive fire unless 'Split' firing mode was used.";                               
         }
 
@@ -1476,23 +1469,7 @@
 			 $crits = array(); 
 			 $crits = $this->testCritical($shooter, $gamedata, $crits);//Added $shooter for ship variable.
 			}
-/*			
-			//Add any new crits for next turn. 
-			if($this->firingMode==1 || $shotsThisTurn == 4){//Quad 
-						$crit1 = new MayOverheat(-1, $fireOrder->shooterid, $this->id, "MayOverheat", $gamedata->turn, $gamedata->turn+1);
-				        $crit1->updated = true;
-						$crit1->newCrit = true; //force save even if crit is not for current turn
-				        $this->criticals[] =  $crit1;
-				        //Add second critical when 4 shots are fired.
-				        $crit2 = clone $crit1;
-				        $this->criticals[] =  $crit2;
-			}else if ($this->firingMode==2 || $shotsThisTurn == 3){//Triple 
-				$crit = new MayOverheat(-1, $fireOrder->shooterid, $this->id, "MayOverheat", $gamedata->turn, $gamedata->turn+1);
-				        $crit->updated = true;
-						$crit->newCrit = true; //force save even if crit is not for current turn
-				        $this->criticals[] =  $crit;
-			} 
-*/		 
+
 		}//end of function Fire
 
     public function criticalPhaseEffects($ship, $gamedata) { 

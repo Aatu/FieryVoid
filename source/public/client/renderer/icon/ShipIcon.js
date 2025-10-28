@@ -153,7 +153,8 @@ window.ShipIcon = function () {
 
     ShipIcon.prototype.consumeEW = function (ship) {
         var dew = ew.getDefensiveEW(ship);
-        if (ship.flight) {
+        //if (ship.flight) {
+        if (ship.flight || ship.jinkinglimit > 0) {        
             dew = shipManager.movement.getJinking(ship);
         }
 

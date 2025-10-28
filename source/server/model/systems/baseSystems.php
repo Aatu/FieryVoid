@@ -59,7 +59,6 @@ class Stealth extends ShipSystem implements SpecialAbility{
     public $specialAbilities = array("Jammer", "Stealth");
     public $primary = true;
 	public $detected = false;
-	//private $detectedOnTurn = false; //Used to track turn when ship is detected for notes.
     
     function __construct($armour, $maxhealth, $powerReq){
         parent::__construct($armour, $maxhealth, $powerReq, 1);
@@ -285,7 +284,7 @@ class Stealth extends ShipSystem implements SpecialAbility{
 
 		return false; //No other conditions were true, not detected.
 
-	}//endof isDetected()	
+	}
 
 
 	private function isUndetected($ship, $gameData) {		
@@ -336,44 +335,47 @@ class Stealth extends ShipSystem implements SpecialAbility{
 
 		parent::criticalPhaseEffects($ship, $gamedata); // Call parent to apply base effects.
 	
-		// If Hyach Computer or Scanner is destroyed on Stealth ships, profile is increased by 3/15% permanently.
-		if (!$ship instanceof FighterFlight && !$ship->isDestroyed()) {
-			$scannerDestroyedThisTurn = false;
-			$computerDestroyedThisTurn = false;
-			$scannerPreviouslyDestroyed = false;
-			$computerPreviouslyDestroyed = false;
-	
-			foreach ($ship->systems as $system) {
-				if ($system instanceof Scanner && $system->isDestroyed()) {
-					if ($system->wasDestroyedThisTurn($gamedata->turn)) {
-						$scannerDestroyedThisTurn = true;
-					} else {
-						$scannerPreviouslyDestroyed = true;
+		// If Hyach Computer or Scanner is destroyed on Hyach Stealth ships, profile is increased by 3/15% permanently.
+		if($ship->faction === "Hyach Gerontocracy"){
+			if (!$ship instanceof FighterFlight && !$ship->isDestroyed()) {
+				$scannerDestroyedThisTurn = false;
+				$computerDestroyedThisTurn = false;
+				$scannerPreviouslyDestroyed = false;
+				$computerPreviouslyDestroyed = false;
+		
+				foreach ($ship->systems as $system) {
+					if ($system instanceof Scanner && $system->isDestroyed()) {
+						if ($system->wasDestroyedThisTurn($gamedata->turn)) {
+							$scannerDestroyedThisTurn = true;
+						} else {
+							$scannerPreviouslyDestroyed = true;
+						}
+					}
+					if ($system instanceof HyachComputer && $system->isDestroyed()) {
+						if ($system->wasDestroyedThisTurn($gamedata->turn)) {
+							$computerDestroyedThisTurn = true;
+						} else {
+							$computerPreviouslyDestroyed = true;
+						}
 					}
 				}
-				if ($system instanceof HyachComputer && $system->isDestroyed()) {
-					if ($system->wasDestroyedThisTurn($gamedata->turn)) {
-						$computerDestroyedThisTurn = true;
-					} else {
-						$computerPreviouslyDestroyed = true;
-					}
-				}
-			}
-	
-			if (
-				($scannerDestroyedThisTurn || $computerDestroyedThisTurn) &&
-				!$scannerPreviouslyDestroyed && !$computerPreviouslyDestroyed
-			) {
-				$cnc = $ship->getSystemByName("CnC");
-				if ($cnc) {
-					for ($i = 0; $i < 3; $i++) {
-						$crit = new ProfileIncreased(-1, $ship->id, $cnc->id, 'ProfileIncreased', $gamedata->turn + 1);
-						$crit->updated = true;
-						$cnc->criticals[] = $crit;
+		
+				if (
+					($scannerDestroyedThisTurn || $computerDestroyedThisTurn) &&
+					!$scannerPreviouslyDestroyed && !$computerPreviouslyDestroyed
+				) {
+					$cnc = $ship->getSystemByName("CnC");
+					if ($cnc) {
+						for ($i = 0; $i < 3; $i++) {
+							$crit = new ProfileIncreased(-1, $ship->id, $cnc->id, 'ProfileIncreased', $gamedata->turn + 1);
+							$crit->updated = true;
+							$cnc->criticals[] = $crit;
+						}
 					}
 				}
 			}
 		}
+
 	}//endof function criticalPhaseEffects
 
 
@@ -2396,8 +2398,8 @@ class JumpEngine extends ShipSystem{
         $maxHealth = $struct->maxhealth;
         $totalDamage = 0;
         foreach ($struct->damage as $entry) {
-            if ($entry->damageclass !== 'HyperspaceJump') $totalDamage += $entry->damage; //Only count non-jump damage, as jumping destroys ship anyway.
-        }
+            if ($entry->damageclass !== 'HyperspaceJump') $totalDamage += max(0, $entry->damage - $entry->armour);  //Only count non-jump damage, as jumping destroys ship anyway.
+		}
              
         if($totalDamage < $maxHealth) return true; //The other damage sustained has not destroyed this ship, jumping has.
 		
@@ -5634,7 +5636,7 @@ class MindriderHangar extends ShipSystem{
 
 	    foreach (MindriderHangar::$hangarList as $hangar) {
 	        $hangarShip = $hangar->getUnit();
-	        if ($hangarShip->team != $thisShip->team) continue; // Not interested in non-friendly ships.
+	        if ($hangarShip->userid != $thisShip->userid) continue; // Not interested in non-friendly ships.
 	        if ($hangarShip->isDestroyed()) continue; // Ignore destroyed ships - destroyed Hangars are actually fine.
 
 	        $hangarCapacity += $hangar->output; // Add output of Hangar (e.g. how many Thought Projections ship can sustain).
@@ -5643,7 +5645,7 @@ class MindriderHangar extends ShipSystem{
 	    $activeThoughts = 0;
 
 	    foreach (MindriderHangar::$projectionList as $projection) {
-	        if ($projection->team != $thisShip->team) continue; // Not interested in non-friendly ships.
+	        if ($projection->userid != $thisShip->userid) continue; // Not interested in non-friendly ships.
 	        if ($projection->isDestroyed()) continue; // Ignore destroyed flights.
 
 	        foreach ($projection->systems as $ftr) {
@@ -5755,6 +5757,320 @@ class MindriderHangar extends ShipSystem{
     }	    	
 
 }//endof MindriderHangar
+
+
+
+	//Torvalus Shading Field - Can let them stealth but also works as a Jammer and EM Shield!
+	class ShadingField extends ShipSystem implements SpecialAbility, DefensiveSystem{    
+		public $name = "ShadingField";
+		public $displayName = "Shading Field";
+		public $specialAbilities = array("Jammer", "Stealth");
+		public $primary = true;
+		public $detected = true;
+		//defensive system
+		public $defensiveSystem = true;
+		public $tohitPenalty = 0;
+		public $damagePenalty = 0;
+		public $rangePenalty = 0;
+		public $range = 5;
+
+		public $boostable = true;
+		public $maxBoostLevel = 1;
+		public $boostEfficiency = 0;		
+		public $boostOtherPhases = true; //To allow boosting in Deployment and Firing Phases.
+		public $shaded	= false; //To track in Front End whether system was ever boost this turn, since boost can be toggled during Firing Phase.			
+		
+		function __construct($armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc){
+			// shieldfactor is handled as output.
+			parent::__construct($armour, $maxhealth, $powerReq, $shieldFactor);
+			
+			$this->startArc = (int)$startArc;
+			$this->endArc = (int)$endArc;
+		}
+		
+
+		public function onConstructed($ship, $turn, $phase){
+			parent::onConstructed($ship, $turn, $phase);
+			$this->tohitPenalty = $this->getOutput();
+			$this->damagePenalty = $this->getOutput();
+		}
+
+		protected $possibleCriticals = array(
+			26=>array("OutputReduced1")
+		);
+		
+		private function getBoostLevel($turn){
+			$boostLevel = 0;
+		
+			foreach ($this->power as $i){
+					if ($i->turn != $turn) 
+							continue;							
+					if ($i->type == 2){
+							$boostLevel += $i->amount;
+					}				
+			}
+			
+			return $boostLevel;
+		}	
+
+		public function getDefensiveType()
+		{
+			return "Shield";
+		}
+		
+		public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){
+			if($this->isDestroyed($turn-1) || $this->isOfflineOnTurn($turn))
+				return 0;
+			$output = $this->output;			 
+			$output += $this->outputMod; //outputMod itself is negative!
+
+			if($target instanceof FighterFlight){
+				if($this->shaded <= 0){
+					return 0; //Fighters and not shaded, no defence mod.	
+				}else{					
+					return $output; //Shaded, hit mod applies!
+				} 			
+			}else{ //Is a ship!
+				if ($this->shaded > 0) $output = $output *2; //If in Shading Mode, double hit mod.			
+				return $output;				
+			}       
+		}
+		
+		public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon){
+			if($this->isDestroyed($turn-1) || $this->isOfflineOnTurn() || $target instanceof FighterFlight)
+				return 0;		
+			
+			if ($this->hasCritical('DamageReductionRemoved'))
+				return 0;
+			
+			$output = $this->output;
+			$output += $this->outputMod; //outputMod itself is negative!
+			return $output;
+		}
+
+		public function setSystemDataWindow($turn){
+				$unit = $this->getUnit();
+				if($unit instanceof FighterFlight){
+					$this->data["Special"] = "<br>Can activate 'Shading Mode' for the NEXT turn, by boosting this system during Deployment or Firing Phase.";						
+					$this->data["Special"] .= "<br>When Shading is activated, this flight's defense ratings are reduced by 15, and it cannot be detected if it is over 15 hexes at the start or end of movement..";
+					$this->data["Special"] .= "<br>HOWEVER, the flight cannot fire any weapons on a turn when Shading was active.";
+					$this->data["Special"] .= "<br>This system also incorporates a small Jump Drive, with a 20 turn recharge.";									
+				}else{
+					$this->data["Special"] = "Jammer ability, even against Ancients.";
+					$this->data["Special"] .= "<br>Provides EM Shield.";
+					$this->data["Special"] .= "<br>Toggle 'Shading Mode' for NEXT turn by boosting/unboosting this system during Deployment or Firing Phases.";														
+					$this->data["Special"] .= "<br>When Shading is active, ship cannot be detected if it is over 15 hexes away from all enemy units at the start or end of movement.";
+					$this->data["Special"] .= "<br>EM Shield ratings are also doubled for hit chance modifier when Shaded.";									
+					$this->data["Special"] .= "<br>HOWEVER, ship cannot fire any weapons on a turn when Shading was active.";
+				}	
+		}	
+		
+		//args for Jammer ability are array("shooter", "target")
+		public function getSpecialAbilityValue($args)
+		{
+			$ship = $this->getUnit();
+			if($ship instanceof FighterFlight){
+				return 0; //Torvalus fighters don't get the Jammer effect.
+			}
+
+			if (!isset($args["shooter"]) || !isset($args["target"]))
+				throw new InvalidArgumentException("Missing arguments for Jammer getSpecialAbilityValue");
+			
+			$shooter = $args["shooter"];
+			$target = $args["target"];
+			
+			if (! ($shooter instanceof BaseShip) || ! ($target instanceof BaseShip)) 
+				throw new InvalidArgumentException("Wrong argument type for Jammer getSpecialAbilityValue");
+					
+			if(!$this->isDestroyed() && !$this->isOfflineOnTurn()){
+				$jammerValue = 1;
+			} else {
+				$jammerValue = 0; //never negative
+			}
+				
+			return $jammerValue;
+		}
+
+/*
+		public function generateIndividualNotes($gameData, $dbManager){ //dbManager is necessary for Initial phase only
+			$ship = $this->getUnit();
+			if ($ship instanceof FighterFlight) return; //Fighter units don't need notes, they can't be invisible/detected.
+			if($ship->isDestroyed()) return; //No point generating new notes if ship destroyed.
+			if($ship->getTurnDeployed($gameData) > $gameData->turn)	return; //Ship not deployed yet.		
+
+			$this->onIndividualNotesLoaded($gameData); //Check current detection status.
+
+			switch($gameData->phase){
+
+				case 4: //Post-Firing phase
+
+					if ($this->getBoostLevel($gameData->turn) > 0) {
+						if ($this->isDetected($ship, $gameData)) {
+							$notekey   = 'detected';
+							$noteHuman = '4-detectedActive';
+							$noteValue = 1;								
+						} else {
+							$notekey   = 'undetected';
+							$noteHuman = '4-undetectedActive';
+							$noteValue = 1;							
+						}
+					} else {
+						$notekey   = 'detected';
+						$noteHuman = '4-NotActive'; //Not boosted yet or was boosted and then turned off.
+						$noteValue = 0;						
+					}
+
+					$this->individualNotes[] = new IndividualNote(
+						-1,
+						TacGamedata::$currentGameID,
+						$gameData->turn,
+						$gameData->phase,
+						$ship->id,
+						$this->id,
+						$notekey,
+						$noteHuman,
+						$noteValue
+					);				
+				break;			
+						
+			}
+		} //endof function generateIndividualNotes	
+*/		
+
+		public function onIndividualNotesLoaded($gamedata){
+			//Sort notes by turn, and then phase so latest detection note is always last.
+			$this->sortNotes();
+			foreach ($this->individualNotes as $currNote){ //Search all notes, they should be process in order so the latest event applies.
+				switch($currNote->notekey){
+					case 'detected': 
+						$this->detected = true;
+						if($currNote->notevalue == 1){
+							$this->shaded = true;	
+						}else{
+							$this->shaded = false;								
+						} 
+					break;
+					case 'undetected': 
+						$this->detected = false;						
+						if($currNote->notevalue == 1){
+							$this->shaded = true;	
+						}else{
+							$this->shaded = false;								
+						} 
+					break;								
+				}
+			}
+
+			//and immediately delete notes themselves, they're no longer needed (this will not touch the database, just memory!)
+			$this->individualNotes = array();		
+		} //endof function onIndividualNotesLoaded
+
+
+		private function sortNotes() {
+			usort($this->individualNotes, function($a, $b) {
+				// Compare by turn first
+				if ($a->turn == $b->turn) {
+					// If turns are equal, compare by phase
+					return ($a->phase < $b->phase) ? -1 : 1;
+				}
+				return ($a->turn < $b->turn) ? -1 : 1;
+			});
+		}
+
+	public function doIndividualNotesTransferGD($gamedata){
+		//data received in variable individualNotesTransfer, further functions will look for it in currchangedAA
+		if(is_array($this->individualNotesTransfer)){			
+			foreach($this->individualNotesTransfer as $shadingChange){			
+				if($shadingChange == 0){
+					$this->removePowerEntriesForTurn($gamedata);
+					break;
+				}									
+			}
+		} 
+		$this->individualNotesTransfer = array(); //empty, just in case
+	}	
+
+
+		public function checkStealthNextPhase($gamedata){				
+				$ship = $this->getUnit();
+					if($gamedata->phase == 1){ 
+						$noteHuman1 = 'D-detectedActive';
+						$noteHuman2 = 'D-undetectedActive';						
+						$noteHuman3 = 'D-NotActive';						
+					}else{
+						$noteHuman1 = '3-detectedActive';
+						$noteHuman2 = '3-undetectedActive';						
+						$noteHuman3 = '3-NotActive';						
+					}
+
+				//If we're checking during DeploymentGamePhase->Advance (actually Phase 1 at this point) we need to check last turn as well for boost, as this will not have been saved yet for current turn.					
+				if ($gamedata->phase ==1 && $this->getBoostLevel($gamedata->turn-1) > 0 || $this->getBoostLevel($gamedata->turn) > 0) {
+					if ($this->isDetected($ship, $gamedata)) {
+						$notekey   = 'detected';
+						$noteHuman = $noteHuman1;
+						$noteValue = 1;							
+					} else {
+						$notekey   = 'undetected';
+						$noteHuman = $noteHuman2;
+						$noteValue = 1;							
+					}
+				} else {
+					$notekey   = 'detected';
+					$noteHuman = $noteHuman3; //Not shaded yet or was shaded and then turned off.
+					$noteValue = 0;						
+				}
+
+				$note = new IndividualNote(
+						-1,
+						$gamedata->id,
+						$gamedata->turn,
+						$gamedata->phase,
+						$ship->id,
+						$this->id,
+						$notekey,
+						$noteHuman,
+						$noteValue
+				);
+
+				Manager::insertIndividualNote($note);	
+					
+		}
+
+
+		private function isDetected($ship, $gameData) {
+	
+			$blockedHexes = $gameData->getBlockedHexes(); //Just do this once outside loop
+			$pos = $ship->getHexPos(); //Just do this once outside loop	
+
+			foreach ($gameData->ships as $otherShip) {
+				// Skip friendly ships
+				if($otherShip->team === $ship->team) continue;
+				if($otherShip->isTerrain()) continue; //Ignore Terrain
+				if($otherShip->isDestroyed()) continue; //Ignore destroyed enemy ships.
+
+				// If within detection range, and LoS not blocked the ship is detected
+				// Get distance to the stealth ship and check line of sight
+				$distance = mathlib::getDistanceHex($ship, $otherShip);
+				$otherPos = $otherShip->getHexPos(); //Just deployed ships aren't counting for this.          
+				$noLoS = !empty($blockedHexes) && Mathlib::checkLineOfSight($pos, $otherPos, $blockedHexes);
+
+				// If within detection range, and LoS not blocked the ship is detected
+				if($distance <= 15 && !$noLoS){
+					return true;
+				}		
+			}
+
+			return false;			
+		}	
+
+		public function stripForJson(){
+			$strippedSystem = parent::stripForJson();
+			$strippedSystem->detected = $this->detected;
+			$strippedSystem->shaded = $this->shaded;				        
+			return $strippedSystem;
+		}
+
+	} //endof ShadingField
 
 
 

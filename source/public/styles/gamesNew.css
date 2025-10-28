@@ -90,7 +90,7 @@ a:hover { text-decoration: underline; }
 .faction-panel a { margin-right: 5px; margin-left: 5px; font-size: 12px; color: #8bcaf2}
 .faction-panel p { margin-bottom: 5px; font-size: 14px;}
 .faction-panel ul  { list-style: disc inside; margin-bottom: 0px; margin-top: 5px; font-size: 13px; line-height: 1.8;}
-.faction-panel li  { margin-bottom: 0px; font-size: 14px; line-height: 1.8;}
+.faction-panel li  { margin-bottom: 0px; margin-left: 15px; font-size: 14px; line-height: 1.8;}
 .faction-panel .circle-list {
     list-style-type: circle;
 }

@@ -9,9 +9,18 @@ shipManager.power = {
 
 			if (ship.userid != gamedata.thisplayer) continue;
 
-			for (var a in ship.systems) {
-				shipManager.power.copyLastTurnPower(ship, ship.systems[a]);
-			}
+			if(ship.flight){
+				for (var i in ship.systems) {
+					var fighter = ship.systems[i]; //The fighter		
+					for (var j in fighter.systems) {
+						shipManager.power.copyLastTurnPower(ship, fighter.systems[j]);					
+					}
+				}		
+			}else{
+				for (var a in ship.systems) {
+					shipManager.power.copyLastTurnPower(ship, ship.systems[a]);
+				}
+			}	
 		}
 	},
 
@@ -537,8 +546,36 @@ shipManager.power = {
 
 		return boost;
 	},
+
+	getBoostOnTurn: function getBoostOnTurn(system, turn) {
+		var boost = 0;
+		for (var i in system.power) {
+			var power = system.power[i];
+			if (power.turn != turn) continue;
+
+			if (power.type == 2) {
+				boost += power.amount;
+			}
+		}
+
+		return boost;
+	},
+
 	
 	isBoosted: function(ship, system){
+
+		let turnToCheck = gamedata.turn;
+
+		//In later Deployment phases Boost won't show until after phase 1, so we look at previous turn.
+		if (gamedata.gamephase === -1 && gamedata.turn > 1) {
+			if(shipManager.getTurnDeployed(ship) !== gamedata.turn){
+				turnToCheck = gamedata.turn - 1;
+				return (shipManager.power.getBoostOnTurn(system, turnToCheck) > 0);
+			}					
+		}
+
+		if(system.shaded && gamedata.gamephase === 1) return true; //Specific case so things like enemy Torvalus show as Shaded on Phase 1.		
+
 		return (shipManager.power.getBoost(system)!==0); //is boosted if boost > 0
 	},
 
@@ -640,6 +677,9 @@ shipManager.power = {
 	},
 
 	canBoost: function canBoost(ship, system) {
+
+		if(shipManager.getTurnDeployed(ship) !== gamedata.turn && gamedata.gamephase == -1) return false; //Prevent Torvalus toggle of Stealth when they are not ship deploying.
+		if(shipManager.power.isOffline(ship, system)) return false;
 		return true;
 		/* no longer needed, I'm leaving the code in case in the future ideas change again
 		//can always boost reactor (to overload)!
@@ -656,6 +696,13 @@ shipManager.power = {
 			return false;
 		}
 		*/
+	},
+
+	canDeboost: function canDeboost(ship, system) {
+
+		if(shipManager.getTurnDeployed(ship) !== gamedata.turn && gamedata.gamephase == -1) return false; //Prevent Torvalus toggle of Stealth when they are not ship deploying.
+		if(shipManager.power.isOffline(ship, system)) return false;
+		return true;
 	},
 
 	canOverload: function canOverload(ship, system) {
@@ -774,7 +821,12 @@ shipManager.power = {
 
 	clickPlus: function clickPlus(ship, system) {
 
-		if (gamedata.gamephase !== 1) return;
+		//if (gamedata.gamephase !== 1) return;
+		const isBoostPhase =
+			(!system.boostOtherPhases && gamedata.gamephase === 1) ||
+			(system.boostOtherPhases && (gamedata.gamephase === -1 || gamedata.gamephase === 3));
+
+		if (!isBoostPhase) return;		
 
 		//if (system.name=="scanner" &&  ew.getUsedEW(ship) > 0){
 		/*no longer needed - EW allocation is checked before commit, so You can't attain illegal effects by boosting/deboosting with EW set
@@ -797,13 +849,18 @@ shipManager.power = {
 		shipManager.power.setBoost(ship, system);
 		system.onBoostIncrease(); //To apply conditions/effects when a system is actually boosted.		
 		shipWindowManager.setDataForSystem(ship, system);
-		shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
+		if(!ship.flight)shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
         webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 	},
 
 	clickMinus: function clickMinus(ship, system) {
 
-		if (gamedata.gamephase !== 1) return;
+		//if (gamedata.gamephase !== 1) return;
+		const isBoostPhase =
+			(!system.boostOtherPhases && gamedata.gamephase === 1) ||
+			(system.boostOtherPhases && (gamedata.gamephase === -1 || gamedata.gamephase === 3));
+
+		if (!isBoostPhase) return;			
 		
 		//if (system.name=="scanner" &&  ew.getUsedEW(ship) > 0){
 
@@ -816,7 +873,7 @@ shipManager.power = {
 		shipManager.power.unsetBoost(ship, system);
 		system.onBoostDecrease();		
 		shipWindowManager.setDataForSystem(ship, system);
-		shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
+		if(!ship.flight)shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
         webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 	},
 

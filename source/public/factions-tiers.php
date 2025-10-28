@@ -85,8 +85,9 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
            <ul class="sub-list">
                 <li><a href="#mindriders">THE MINDRIDERS</a></li>             
                 <li><a href="#shadows">SHADOW ASSOCIATION</a></li>
-                <li><a href="#thirdspace">THIRDSPACE (Unofficial)</a></li>                   
-                <li><a href="#vorlons">VORLONS</a></li> 
+                <li><a href="#thirdspace">THIRDSPACE (Unofficial)</a></li> 
+                <li><a href="#torvalus">TORVALUS SPECULATORS</a></li>                                   
+                <li><a href="#vorlons">VORLON EMPIRE</a></li> 
             </ul>
         </li>
     </ul>       
@@ -265,7 +266,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
     universe.</p>
     <p>Specific raider groups will be listed in the unit name, e.g. ‘Centauri Privateer’, meaning that  any unit without a faction prefix is considered a generic raider and can be fielded by any faction. 
         It is near-impossible to create a Fleet Checker for all of the various combinations within this faction, 
-        so a bit of player responsibility is required in order to choose an appropriate fleet. Summaries of the Raider groups in Fiery Void are listed below:</p>
+        so a bit of player responsibility is required in order to choose an appropriate fleet. Summaries of the Raider mini-Factions in Fiery Void are listed below:</p>
        <h5>Brakiri Shokhan</h5>
             <li>The Shokhan grew out of various Brakiri groups that did not integrate into the modern Brakiri society. Many Shokhan operate purely as raiders, 
                 but it is suspected that some receive outside support from Brakiri corporations or other entities and fulfill the role of privateers and sometimes mercenaries.</li>
@@ -287,13 +288,13 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             <li>The IML fields three unique units, the Attack Cruiser,  Armed Transport, and Missile Frigate along with variants of each.</li>
             <li>The IML use Armed Shuttles and Delta-Vs almost exclusively, but have restricted access to Star Snakes and Lellat fighters.</li>   
        <h5>Imperial Star Legion</h5>
-            <li>A raider group that supported the Army of Light int he Shadow War, but then had bigger plans for the future and wound up fighting the Minbari Protectorate.</li>
-            <li>They operate several converted hulls from the main powers including a Lias, two Tethys, a Kutai, a Mograth, two Vorchans, two Sho'Kos, and a Thentus.</li>
-            <li>The Junkyard Dogs primarily used ArmedShuttles, Delta-Vs, and Double-Vs but may also field a flight of Raziks or Goriths.</li>                                                         
-       <h5>Junkyard Dogs (JYD)</h5>
             <li>This group operates primarily within Centauri, Earth, and Narn space and in addition to generic raider hulls.</li>
             <li>The Legion has three unique hulls, the Starjammer, Gladius, and Augustus and is characterized by using heavy weapons and fielding fusion cannons.</li>
-            <li>The Legion operated all of the generic raider units at various times in their existence. The Legion uses Delta-Vs and Double-Vs fighters exclusively.</li>   
+            <li>The Legion operated all of the generic raider units at various times in their existence. The Legion uses Delta-Vs and Double-Vs fighters exclusively.</li>                                                                      
+       <h5>Junkyard Dogs (JYD)</h5>
+            <li>A raider group that supported the Army of Light in the Shadow War, but then had bigger plans for the future and wound up fighting the Minbari Protectorate.</li>
+            <li>They operate several converted hulls from the main powers including a Lias, two Tethys, a Kutai, a Mograth, two Vorchans, two Sho'Kos, and a Thentus.</li>
+            <li>The Junkyard Dogs primarily used ArmedShuttles, Delta-Vs, and Double-Vs but may also field a flight of Raziks or Goriths.</li>  
        <h5>Narn Privateers</h5>
             <li>Formed out of Narn elements considered too radical or unruly to integrate with the newly free Narn Regime, the Narn sent these privateers out to continue to strike at the Centauri. 
                 The more organized groups received greater support from the Narn Regime and fulfilled many missions ranging from traditional raiding to intelligence gathering.</li>
@@ -799,9 +800,9 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             All shields on a ship must be reinforced equally, at a cost of 1 output per level of reinforcement per shield (e.g. reinforcing a Thoughtforce vessel with 4 shields by 3 levels would cost 12 output, 3 * 4).  
             Any unspent output will instead be used to reinforce the vessel equipped with the Shield Reinforcement system.</li>      
     <h5>Second Sight</h5>
-        <li>This weapon reduces the Initiative of all enemy ships on the following turn.  To fire the weapon simply target any hex during the Firing phase.</li>      
+        <li>This weapon reduces the Initiative of all enemy ships on the following turn.  To fire the weapon select it during during the Firing phase and press 'Select' button.</li>      
     <h5>Thought Wave</h5>
-        <li>Ballistic area effect weapon that's fired in Initial Orders turn by targeting any hex. 
+        <li>Ballistic area effect weapon that's fired in Initial Orders turn by selecting it and pressing the 'Select' button. 
             It will attempt to strike all non-Mindrider ships in the game and has a special calculation for both its Hit Chance and Damage:
                 <ul class="circle-list">
                     <li><strong>Hit Chance:</strong> - 15 + OEW + d20 roll - Range Penalty - DEW - Target's Initiative,</li>
@@ -926,9 +927,46 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
     <h5>Psychic Focus</h5>
         <li>In addition to boosting systems with power, the Thirdspace faction can channel their psychic energy (represented by EW points) into improving their weapon strength, self-repair systems and Psychic Field.</li>
     <a class="back-to-top" href="#top">↩ Back to Top</a>   
-    
-    
-    <h4 id="vorlons" style="">VORLONS</h4>
+   
+    <h4 id="torvalus" style="">TORVALUS SPECULATORS</h4>
+    <p>The Torvalus are known for their highly advanced stealth technology as well as their love for making cosmic gambles. Below is a list of systems used by the Torvalus, with short description of effect and any notable design differences from their original tabletop versions.</p>    
+    <h5>Laser Weaponry</h5>
+        <li>Torvalus weaponry is entirely Laser-based, making it uninterceptable.  Whilst these weapons do not have an particularly unusual abilities per se, their high damage, flexibility and low cooldowns makes them very effective.</li>
+    <h5>Shading Field</h5>
+        <li>The Shading Field operates the same as the Minbari's Jammer system (e.g. prevents weapons locks even when targeted with OEW), including against other Ancients as well as Younger Races.</li>
+        <li>In addition the Shading Field has two states, Normal Mode and Shading Mode, which are described below:
+            <ul class="circle-list">
+                <li>Normal Mode- the Shading Field provides a 4-point EM Shield in all directions, which operates the same as Vorlon shields, but cannot be flown under by fighters.</li>
+                <li>Shading Mode- During Firing phase (and Deployment Phase) the Shading Field can be boosted to make its vessel 'Shaded' the FOLLOWING turn.  
+                    Whilst Shaded the vessel retains the Jammer effect, doubles the EM shield rating to on its defence profile and, if it is more than 15 hexes away from all enemy units, it becomes invisible to opponents.
+                    However, on a turn when a Torvalus ship is Shaded it will not be able to fire any of its weapons.</li> 
+            </ul>
+        </li>         
+        <li>Torvalus Stiletto Fighters have a smaller version of the Shading Field equipped.  This can also be toggled on and off during Firing/Deployment phases but does not provide the Jammer ability and does not reduce the profile of the fighter flight (by 3) unless they are Shaded.</li>         
+    <h5>Shade Modulator</h5>
+        <li>The Shade Modulator is a versatile Support Weapons found on the Veiled Scimitar, it has four different firing modes which are described below. 
+            <ul class="circle-list">
+                <li>Blanket Shield Enhancement - The Modulator increases the shield rating of ever Shading Field within 3 hexes by 1 point at a cost of 4 capacity.</li>
+                <li>Individual Shield Enhancement - The Modulator increases the shield rating of a single ally by 1 point at a cost of 2 capacity.</li> 
+                <li>Blanket Shade Enhancement - The Modulator lowers the defensive profile of all Shaded allied ships within 15 hexes by 5% at a cost of 2 capacity.</li>
+                <li>Individual Shade Enhancement - The Modulator lowers the defensive profile of a single Shaded ally by 5% point at a cost of 1 capacity.</li>                                     
+            </ul>
+        </li>    
+        <li>During the Firing Phase the Shade Modulator can be used on different allies in different modes, multiple times up to its maximum capacity.  For example, it could provide 1 point of Blanket Shield Enhancement, 
+        as well as 1 point of Individual Shield Enhancement and 2 points of Individual Shade Enhancement on the same turn.</li>
+        <li>Blanket firing modes are activated by clicking 'Select' when in that firing mode, whereas Individual modes require the targeting of a specific ally.</li>        
+    <h5>Transverse Drive</h5>
+        <li>Currently the Torvalus do not have access to a functional Transverse Drive in Fiery Void, it is planned to add this in a later patch.</li> 
+    <h5>Agile/Jinking Ships</h5>
+        <li>Torvalus ships are exceptionally maneuverable and this is reflected in even their largest ships having the Agile characteristic.  
+            In addition, their Medium Ships have the ability to jink, an ability normally reserved only to Fighters.</li>                                                       
+    <h5>Gravitic Drives</h5>
+        <li>Allows ships to undertake manoeuvres even while pivoted/pivoting using thrusters appropriate for their current orientation.  
+        Gravitic Thrusters also ignore the first "Efficiency Reduced" reduced critical they receive, increasing their resistance to damage.</li>                           
+    <a class="back-to-top" href="#top">↩ Back to Top</a>  
+
+
+    <h4 id="vorlons" style="">VORLON EMPIRE</h4>
     <p>Below is a list of systems used by the Vorlons, with short description of effect and any notable design differences from their original tabletop versions.</p>    
     <h5>Capital Ship Layout</h5>
         <li>In B5 Wars, Vorlon capital ships, Lightning Cannons are usually tied to both the forward and relevant side sections, to prevent them from easily falling off. 
@@ -1385,6 +1423,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
        <li>Ancients (see 'Ancients' section)</li>        
        <li>Alacan (with Rotia swarms)</li>
        <li>Earth Alliance when using Warlock Advanced Destroyer or Shadow Omega Destroyer,</li>
+       <li>Geoff,</li>         
        <li>Interstellar Alliance's all-White Star fleet,</li>
        <li>Narn Regime, where over 6 Energy Mines are taken,</li>
        <li>Sorithian, as they are simply too weak,</li>
