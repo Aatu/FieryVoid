@@ -143,7 +143,7 @@ window.ReplayPhaseStrategy = function () {
     }
 
     //To reset audio when player clicks on Movement or Firing buttons in Replay, otherwise the sound only plays once.
-    function resetAudio() {
+    function resetAudio(value = false) {
         for (const animContainer of this.animationStrategy.animations) {
 
             // --- 🏃 0. Skip pure movement animations (no audio at all) ---
@@ -167,8 +167,8 @@ window.ReplayPhaseStrategy = function () {
                             anim instanceof MissileEffect ||
                             anim instanceof TorpedoEffect
                         ) {
-                            anim.playedLaunchSound = false;
-                            anim.playedImpactSound = false;
+                            anim.playedLaunchSound = value;
+                            anim.playedImpactSound = value;
                         }
                     }
                 }
@@ -196,14 +196,32 @@ window.ReplayPhaseStrategy = function () {
             if (isAllWeaponFire) {
                 for (const effect of animContainer.animations) {
                     if (effect instanceof LaserEffect) {
-                        effect.playedSound = false;
+                        effect.playedSound = value;
                     }
                 }
             } else if (isShipDestruction) {
-                animContainer.explosionTriggered = false;
+                animContainer.explosionTriggered = value;
             }
         }
     }
+
+
+    ReplayPhaseStrategy.prototype.onToggleSound = function (payload) {
+        if (payload.up) return; // Prevent repeats
+
+        const now = Date.now();
+
+        if (gamedata.playAudio) {
+            // 🔇 Turn sound OFF            
+            gamedata.playAudio = false;
+        } else {
+            // 🔊 Turn sound ON            
+            gamedata.playAudio = true;
+              
+        }
+
+        window.dispatchEvent(new CustomEvent("soundToggled"));
+    };
 
     function startReplayOrRequestGamedata() {
         if (this.replayTurn === this.gamedata.turn) {

@@ -36631,8 +36631,9 @@ var _templateObject = _taggedTemplateLiteral(["\n    position: fixed;\n    right
     _templateObject4 = _taggedTemplateLiteral(["\n    background-image: url(\"./img/FEW.png\");\n"], ["\n    background-image: url(\"./img/FEW.png\");\n"]),
     _templateObject5 = _taggedTemplateLiteral(["\n    background-image: url(\"./img/ballisticTarget2.png\");\n"], ["\n    background-image: url(\"./img/ballisticTarget2.png\");\n"]),
     _templateObject6 = _taggedTemplateLiteral(["\n    background-image: url(\"./img/ballisticLaunch2.png\");\n"], ["\n    background-image: url(\"./img/ballisticLaunch2.png\");\n"]),
-    _templateObject7 = _taggedTemplateLiteral(["\n    background-image: url(\"./img/los1.png\");\n    filter: ", ";\n    border: 1px solid ", ";\n    border-right: none; /* keep this to preserve your original layout */\n    box-shadow: 0px 0px 0px black;        \n"], ["\n    background-image: url(\"./img/los1.png\");\n    filter: ", ";\n    border: 1px solid ", ";\n    border-right: none; /* keep this to preserve your original layout */\n    box-shadow: 0px 0px 0px black;        \n"]),
-    _templateObject8 = _taggedTemplateLiteral(["\n    background-image: url(\"./img/hexNumber.png\");\n    filter: ", ";\n    border: 1px solid ", ";\n    border-right: none; /* keep this to preserve your original layout */     \n"], ["\n    background-image: url(\"./img/hexNumber.png\");\n    filter: ", ";\n    border: 1px solid ", ";\n    border-right: none; /* keep this to preserve your original layout */     \n"]);
+    _templateObject7 = _taggedTemplateLiteral(["\n    background-image: url(\"./img/los1.png\");\n    filter: ", ";\n    border: 1px solid ", ";\n    border-right: none;\n    box-shadow: 0px 0px 0px black;\n"], ["\n    background-image: url(\"./img/los1.png\");\n    filter: ", ";\n    border: 1px solid ", ";\n    border-right: none;\n    box-shadow: 0px 0px 0px black;\n"]),
+    _templateObject8 = _taggedTemplateLiteral(["\n    background-image: url(\"./img/hexNumber.png\");\n    filter: ", ";\n    border: 1px solid ", ";\n    border-right: none;\n"], ["\n    background-image: url(\"./img/hexNumber.png\");\n    filter: ", ";\n    border: 1px solid ", ";\n    border-right: none;\n"]),
+    _templateObject9 = _taggedTemplateLiteral(["\n    background-image: ", ";\n    border-right: none;\n"], ["\n    background-image: ", ";\n    border-right: none;\n"]);
 
 var _react = require("react");
 
@@ -36664,7 +36665,9 @@ var EwButtons = function (_React$Component) {
 
         _this.state = {
             losToggled: false,
-            hexToggled: false
+            hexToggled: false,
+            soundToggled: true,
+            replayMode: gamedata.replay || false
         };
 
         _this.showFriendlyEW = _this.showFriendlyEW.bind(_this);
@@ -36672,33 +36675,41 @@ var EwButtons = function (_React$Component) {
         _this.toggleFriendlyBallisticLines = _this.toggleFriendlyBallisticLines.bind(_this);
         _this.toggleEnemyBallisticLines = _this.toggleEnemyBallisticLines.bind(_this);
         _this.toggleLoS = _this.toggleLoS.bind(_this);
-        _this.externalToggleLoS = _this.externalToggleLoS.bind(_this); // 🔁 bind this method too                       
+        _this.externalToggleLoS = _this.externalToggleLoS.bind(_this);
         _this.toggleHexNumbers = _this.toggleHexNumbers.bind(_this);
-        _this.externalToggleHexNumbers = _this.externalToggleHexNumbers.bind(_this); // 🔁 bind this method too
-
+        _this.externalToggleHexNumbers = _this.externalToggleHexNumbers.bind(_this);
+        _this.toggleSound = _this.toggleSound.bind(_this);
+        _this.externalToggleSound = _this.externalToggleSound.bind(_this);
         return _this;
     }
 
     _createClass(EwButtons, [{
         key: "componentDidMount",
         value: function componentDidMount() {
-            // 🔔 Listen for external toggle
+            var _this2 = this;
+
             window.addEventListener("LoSToggled", this.externalToggleLoS);
             window.addEventListener("HexNumbersToggled", this.externalToggleHexNumbers);
+            window.addEventListener("soundToggled", this.externalToggleSound);
+            // 👇 periodically check for replay mode change
+            this.replayCheck = setInterval(function () {
+                if (_this2.state.replayMode !== gamedata.replay) {
+                    _this2.setState({ replayMode: gamedata.replay });
+                }
+            }, 500);
         }
     }, {
         key: "componentWillUnmount",
         value: function componentWillUnmount() {
-            // 🧹 Clean up listener
             window.removeEventListener("LoSToggled", this.externalToggleLoS);
             window.removeEventListener("HexNumbersToggled", this.externalToggleHexNumbers);
+            window.removeEventListener("soundToggled", this.externalToggleSound);
+            clearInterval(this.replayCheck);
         }
     }, {
         key: "externalToggleLoS",
         value: function externalToggleLoS() {
-            this.setState({
-                losToggled: gamedata.showLoS
-            });
+            this.setState({ losToggled: gamedata.showLoS });
         }
     }, {
         key: "externalToggleHexNumbers",
@@ -36708,6 +36719,11 @@ var EwButtons = function (_React$Component) {
                     hexToggled: !prevState.hexToggled
                 };
             });
+        }
+    }, {
+        key: "externalToggleSound",
+        value: function externalToggleSound() {
+            this.setState({ soundToggled: gamedata.playAudio });
         }
     }, {
         key: "showFriendlyEW",
@@ -36732,26 +36748,32 @@ var EwButtons = function (_React$Component) {
     }, {
         key: "toggleLoS",
         value: function toggleLoS(up) {
-            if (up) return; // Optional: prevent onMouseUp firing if needed
+            if (up) return;
             var newValue = !this.state.losToggled;
             this.setState({ losToggled: newValue });
             webglScene.customEvent("ToggleLoS", { up: up });
-            // 🔔 Notify other components (like this one) of the toggle
             window.dispatchEvent(new CustomEvent("LoSToggled"));
         }
     }, {
         key: "toggleHexNumbers",
         value: function toggleHexNumbers(up) {
             if (up) return;
-
             var newValue = !this.state.hexToggled;
             this.setState({ hexToggled: newValue });
-
-            // 🔁 Keep external logic (like PhaseStrategy) in sync
             webglScene.customEvent("ToggleHexNumbers", { up: up });
-
-            // 🔔 Notify other components (like this one) of the toggle
             window.dispatchEvent(new CustomEvent("HexNumbersToggled"));
+        }
+
+        // 🎵 New Sound Toggle Function
+
+    }, {
+        key: "toggleSound",
+        value: function toggleSound() {
+            var newValue = !this.state.soundToggled;
+            this.setState({ soundToggled: newValue });
+
+            // Optionally call your audio manager or dispatch an event:
+            webglScene.customEvent("ToggleSound", { enabled: newValue });
         }
     }, {
         key: "render",
@@ -36771,12 +36793,8 @@ var EwButtons = function (_React$Component) {
                     onTouchStart: this.showEnemyEW.bind(this, false),
                     onTouchEnd: this.showEnemyEW.bind(this, true)
                 }),
-                _react2.default.createElement(FBButton, {
-                    onMouseDown: this.toggleFriendlyBallisticLines.bind(this, false)
-                }),
-                _react2.default.createElement(EBButton, {
-                    onMouseDown: this.toggleEnemyBallisticLines.bind(this, false)
-                }),
+                _react2.default.createElement(FBButton, { onMouseDown: this.toggleFriendlyBallisticLines.bind(this, false) }),
+                _react2.default.createElement(EBButton, { onMouseDown: this.toggleEnemyBallisticLines.bind(this, false) }),
                 _react2.default.createElement(LoSButton, {
                     toggled: this.state.losToggled,
                     onMouseDown: this.toggleLoS.bind(this, false)
@@ -36784,6 +36802,11 @@ var EwButtons = function (_React$Component) {
                 _react2.default.createElement(HexButton, {
                     toggled: this.state.hexToggled,
                     onMouseDown: this.toggleHexNumbers.bind(this, false)
+                }),
+                this.state.replayMode && _react2.default.createElement(SoundButton, {
+                    toggled: this.state.soundToggled,
+                    onMouseDown: this.toggleSound,
+                    title: this.state.soundToggled ? "Sound On" : "Sound Off"
                 })
             );
         }
@@ -36791,6 +36814,9 @@ var EwButtons = function (_React$Component) {
 
     return EwButtons;
 }(_react2.default.Component);
+
+// 🧩 Styled Components
+
 
 var Container = _styledComponents2.default.div.withConfig({
     displayName: "EwButtons__Container",
@@ -36804,17 +36830,194 @@ var FEWButton = MainButton.extend(_templateObject4);
 var EBButton = MainButton.extend(_templateObject5);
 var FBButton = MainButton.extend(_templateObject6);
 var LoSButton = MainButton.extend(_templateObject7, function (props) {
-    return props.toggled ? 'brightness(1.6) sepia(0.85) hue-rotate(60deg) saturate(4)' : 'none';
+    return props.toggled ? "brightness(1.6) sepia(0.85) hue-rotate(60deg) saturate(4)" : "none";
 }, function (props) {
-    return props.toggled ? 'limegreen' : '1px solid #496791';
+    return props.toggled ? "limegreen" : "#496791";
 });
 var HexButton = MainButton.extend(_templateObject8, function (props) {
-    return props.toggled ? 'brightness(1.6) sepia(0.85) hue-rotate(60deg) saturate(4)' : 'none';
+    return props.toggled ? "brightness(1.6) sepia(0.85) hue-rotate(60deg) saturate(4)" : "none";
 }, function (props) {
-    return props.toggled ? 'limegreen' : '1px solid #496791';
+    return props.toggled ? "limegreen" : "#496791";
+});
+
+// 🎧 New Sound Button Style
+var SoundButton = MainButton.extend(_templateObject9, function (props) {
+    return props.toggled ? 'url("./img/soundOn.png")' : 'url("./img/soundOff.png")';
 });
 
 exports.default = EwButtons;
+
+/* //Old version without audio
+import React from "react";
+import styled from "styled-components";
+import { ContainerRoundedRightSide, Clickable } from "../styled";
+
+class EwButtons extends React.Component {
+    constructor(props) {
+        super(props);
+
+    this.state = {
+        losToggled: false,
+        hexToggled: false
+    };
+
+        this.showFriendlyEW = this.showFriendlyEW.bind(this);
+        this.showEnemyEW = this.showEnemyEW.bind(this);
+        this.toggleFriendlyBallisticLines = this.toggleFriendlyBallisticLines.bind(this);
+        this.toggleEnemyBallisticLines = this.toggleEnemyBallisticLines.bind(this);
+        this.toggleLoS = this.toggleLoS.bind(this);
+        this.externalToggleLoS = this.externalToggleLoS.bind(this); // 🔁 bind this method too                       
+        this.toggleHexNumbers = this.toggleHexNumbers.bind(this);
+        this.externalToggleHexNumbers = this.externalToggleHexNumbers.bind(this); // 🔁 bind this method too
+                    
+    }
+
+    componentDidMount() {
+        // 🔔 Listen for external toggle
+        window.addEventListener("LoSToggled", this.externalToggleLoS); 
+        window.addEventListener("HexNumbersToggled", this.externalToggleHexNumbers);       
+    }
+
+    componentWillUnmount() {
+        // 🧹 Clean up listener
+        window.removeEventListener("LoSToggled", this.externalToggleLoS); 
+        window.removeEventListener("HexNumbersToggled", this.externalToggleHexNumbers);       
+    }
+
+    externalToggleLoS() {
+        this.setState({
+            losToggled: gamedata.showLoS
+        });
+    } 
+
+    externalToggleHexNumbers() {
+        this.setState((prevState) => ({
+            hexToggled: !prevState.hexToggled
+        }));
+    }
+
+    showFriendlyEW(up) {
+        webglScene.customEvent("ShowFriendlyEW", { up: up });
+    }
+
+    showEnemyEW(up) {
+        webglScene.customEvent("ShowEnemyEW", { up: up });
+    }
+
+    toggleFriendlyBallisticLines(up) {
+        webglScene.customEvent("ToggleFriendlyBallisticLines", { up: up });
+    }
+
+    toggleEnemyBallisticLines(up) {
+        webglScene.customEvent("ToggleEnemyBallisticLines", { up: up });
+    }
+
+    toggleLoS(up) {
+        if (up) return; // Optional: prevent onMouseUp firing if needed
+        const newValue = !this.state.losToggled;
+        this.setState({ losToggled: newValue });        
+        webglScene.customEvent("ToggleLoS", { up: up });
+        // 🔔 Notify other components (like this one) of the toggle
+        window.dispatchEvent(new CustomEvent("LoSToggled"));        
+    }
+
+    toggleHexNumbers(up) {
+        if (up) return;
+
+        const newValue = !this.state.hexToggled;
+        this.setState({ hexToggled: newValue });
+
+        // 🔁 Keep external logic (like PhaseStrategy) in sync
+        webglScene.customEvent("ToggleHexNumbers", { up: up });
+
+        // 🔔 Notify other components (like this one) of the toggle
+        window.dispatchEvent(new CustomEvent("HexNumbersToggled"));
+    }
+
+
+    render() {
+        return (
+            <Container>
+				<FEWButton 
+				    onMouseDown={this.showFriendlyEW.bind(this, false)}
+				    onMouseUp={this.showFriendlyEW.bind(this, true)}
+                    onTouchStart={this.showFriendlyEW.bind(this, false)}
+                    onTouchEnd={this.showFriendlyEW.bind(this, true)}                    
+				></FEWButton>
+				<EEWButton  
+				    onMouseDown={this.showEnemyEW.bind(this, false)}
+				    onMouseUp={this.showEnemyEW.bind(this, true)}
+                    onTouchStart={this.showEnemyEW.bind(this, false)}
+                    onTouchEnd={this.showEnemyEW.bind(this, true)}                     
+				></EEWButton>
+				<FBButton 
+				    onMouseDown={this.toggleFriendlyBallisticLines.bind(this, false)}
+				></FBButton>
+				<EBButton  
+				    onMouseDown={this.toggleEnemyBallisticLines.bind(this, false)}
+				></EBButton>
+				<LoSButton
+                    toggled={this.state.losToggled}  
+				    onMouseDown={this.toggleLoS.bind(this, false)}
+				></LoSButton>	                
+				<HexButton
+                    toggled={this.state.hexToggled}   
+				    onMouseDown={this.toggleHexNumbers.bind(this, false)}
+				></HexButton>				
+            </Container>
+        );
+    }
+}
+
+const Container = styled.div`
+    position: fixed;
+    right: 0;
+    top: 60px;
+    z-index: 4;
+`;
+
+const MainButton = ContainerRoundedRightSide.extend`
+    display: flex;
+    width: 45px;
+    height: 45px;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    border-right: none;
+    margin-top: 3px;
+    background-repeat: no-repeat;
+    background-size: cover;
+    ${Clickable}
+`;
+
+const EEWButton = MainButton.extend`
+    background-image: url("./img/EEW.png");
+`;
+const FEWButton = MainButton.extend`
+    background-image: url("./img/FEW.png");
+`;
+const EBButton = MainButton.extend`
+    background-image: url("./img/ballisticTarget2.png");
+`;
+const FBButton = MainButton.extend`
+    background-image: url("./img/ballisticLaunch2.png");
+`;
+const LoSButton = MainButton.extend`
+    background-image: url("./img/los1.png");
+    filter: ${props => props.toggled ? 'brightness(1.6) sepia(0.85) hue-rotate(60deg) saturate(4)' : 'none'};
+    border: 1px solid ${props => props.toggled ? 'limegreen' : '1px solid #496791'};
+    border-right: none; 
+    box-shadow: 0px 0px 0px black;        
+`;
+const HexButton = MainButton.extend`
+    background-image: url("./img/hexNumber.png");
+    filter: ${props => props.toggled ? 'brightness(1.6) sepia(0.85) hue-rotate(60deg) saturate(4)' : 'none'};
+    border: 1px solid ${props => props.toggled ? 'limegreen' : '1px solid #496791'};
+    border-right: none;    
+`;
+
+export default EwButtons;
+*/
 
 },{"../styled":72,"react":23,"styled-components":32}],59:[function(require,module,exports){
 "use strict";
@@ -37110,9 +37313,10 @@ var PlayerSettingsForm = function (_React$Component) {
                     React.createElement(
                         _styled.SubTitle,
                         null,
-                        "Visual"
+                        "Visual / Sound"
                     ),
-                    React.createElement(_common.InputAndLabel, { placeholder: "0", type: "number", label: "Zoom level to change to strategic view", onChange: this.getOnChange.call(this, "ZoomLevelToStrategic"), value: this.get.call(this, "ZoomLevelToStrategic") })
+                    React.createElement(_common.InputAndLabel, { placeholder: "0", type: "number", label: "Zoom level to change to strategic view", onChange: this.getOnChange.call(this, "ZoomLevelToStrategic"), value: this.get.call(this, "ZoomLevelToStrategic") }),
+                    React.createElement(_common.InputAndLabel, { label: "Key to toggle sound", onChange: function onChange() {}, onKeydown: this.getOnKeyDown.call(this, "ToggleSound"), value: this.getKey.call(this, "ToggleSound") })
                 )
             );
         }
