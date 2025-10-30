@@ -37313,10 +37313,15 @@ var PlayerSettingsForm = function (_React$Component) {
                     React.createElement(
                         _styled.SubTitle,
                         null,
-                        "Visual / Sound"
+                        "Sound"
                     ),
-                    React.createElement(_common.InputAndLabel, { placeholder: "0", type: "number", label: "Zoom level to change to strategic view", onChange: this.getOnChange.call(this, "ZoomLevelToStrategic"), value: this.get.call(this, "ZoomLevelToStrategic") }),
-                    React.createElement(_common.InputAndLabel, { label: "Key to toggle sound", onChange: function onChange() {}, onKeydown: this.getOnKeyDown.call(this, "ToggleSound"), value: this.getKey.call(this, "ToggleSound") })
+                    React.createElement(_common.InputAndLabel, { label: "Toggle sound in Replay", onChange: function onChange() {}, onKeydown: this.getOnKeyDown.call(this, "ToggleSound"), value: this.getKey.call(this, "ToggleSound") }),
+                    React.createElement(
+                        _styled.SubTitle,
+                        null,
+                        "Visual"
+                    ),
+                    React.createElement(_common.InputAndLabel, { placeholder: "0", type: "number", label: "Zoom level to change to strategic view", onChange: this.getOnChange.call(this, "ZoomLevelToStrategic"), value: this.get.call(this, "ZoomLevelToStrategic") })
                 )
             );
         }
