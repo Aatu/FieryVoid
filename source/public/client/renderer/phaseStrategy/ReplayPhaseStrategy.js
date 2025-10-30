@@ -175,6 +175,10 @@ window.ReplayPhaseStrategy = function () {
                 continue;
             }
 
+            if (animContainer instanceof ShipDestroyedAnimation || animContainer instanceof ShipJumpAnimation) {
+                animContainer.explosionTriggered = value;
+                continue;
+            }
             // --- 2. Handle AllWeaponFireAgainstShipAnimation containers ---
             const isAllWeaponFire =
                 animContainer?.movementAnimations &&
@@ -184,14 +188,14 @@ window.ReplayPhaseStrategy = function () {
                 !animContainer?.emitters;
 
             // --- 3. Handle ShipDestroyedAnimation containers ---
-            const isShipDestruction =
+            /*const isShipDestruction =
                 animContainer instanceof ShipDestroyedAnimation ||
                 (
                     animContainer?.shipIcon &&
                     animContainer?.fadeoutTime &&
                     typeof animContainer?.explosionTriggered === "boolean" &&
                     !animContainer?.emitters
-                );
+                );*/
 
             if (isAllWeaponFire) {
                 for (const effect of animContainer.animations) {
@@ -199,8 +203,6 @@ window.ReplayPhaseStrategy = function () {
                         effect.playedSound = value;
                     }
                 }
-            } else if (isShipDestruction) {
-                animContainer.explosionTriggered = value;
             }
         }
     }
