@@ -426,6 +426,7 @@
 		$crit = null;
 		
 		if (!$system->advancedArmor){
+//		}elseif (!$system->hardAdvancedArmor){//hardened advanced armor prevents effect - GTS
 			if ($system instanceof Fighter && !($ship->superheavy)){
 				$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
 				$crit->updated = true;
