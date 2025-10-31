@@ -1182,7 +1182,11 @@ class AncientPlasmaArc extends PlasmaStream {
         public function setMinDamage(){     $this->minDamage = 14 ;      }
         public function setMaxDamage(){     $this->maxDamage = 32 ;      }
 
-    }//endof ParticleCutter
+    }//endof AncientParticleCutter
+
+
+
+
 
 
 

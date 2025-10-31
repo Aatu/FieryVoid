@@ -77,7 +77,6 @@ class BaseShip {
     public $rolled = false;
     public $rolling = false;
 	protected $EMHardened = false; //EM Hardening (Ipsha have it) - some weapons would check for this value!
-	protected $MOLHardened = false; //Hardening against molecular weapons that can ignore armor for hardened advanced armor
 	
 	public $ignoreManoeuvreMods = false;//New marker for factions like Mindriders that don't take penalties for pivoting etc
     public $trueStealth = false; //For ships that can actually be hidden, not just jammer from range.  Important for Front End.	
@@ -124,10 +123,6 @@ class BaseShip {
 
 		public function getEMHardened(){
 			return $this->EMHardened;    
-	    }
-
-		public function getMOLHardened(){
-			return $this->MOLHardened;    
 	    }
 
 		public function getIFFSystem(){

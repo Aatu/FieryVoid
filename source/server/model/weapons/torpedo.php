@@ -559,12 +559,6 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
 			$effectPower = 0; //Reducing power in Vorlons can make it impossible for them to commit Initial Orders.		
 		}
 
-/*		if ($system->hardAdvancedArmor){		
-			$effectEW = ceil($effectEW/2);//Other Ancients are somewhat resistant to pyschic attack from Thirdspace Aliens, 50% effect.		
-			$effectIni = ceil($effectIni/2);  	
-			$effectPower = 0; //Reducing power in Vorlons can make it impossible for them to commit Initial Orders.		
-		}   */
-
 		if ($ship instanceof FighterFlight){  //No additional effect on fighters beyond flash damage.			
 			PsionicTorpedo::$alreadyAffected[$ship->id] = true;//mark affected already.	
 			return;
@@ -760,11 +754,6 @@ class LimpetBoreTorpedo extends Torpedo{
 			$fireOrder->pubnotes .= "<br> Limpet Bore cannot attach to advanced armor.";				
 			return; 	
 		}
-
-/*		if ($system->hardAdvancedArmor) {//no effect on Hardened Advanced Armor	
-			$fireOrder->pubnotes .= "<br> Limpet Bore cannot attach to hardened advanced armor.";				
-			return; 	
-		}  */
 
 		if ($system->id != $fireOrder->calledid) {//In case it ends up in general hit chart somehow.
 			$fireOrder->pubnotes .= "<br> Limpet Bore was not targeted at a system.";				
