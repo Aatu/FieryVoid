@@ -204,7 +204,7 @@ window.ShipIcon = function () {
     };
 
     ShipIcon.prototype.setSelected = function (value) {
-        if(this.ship.userid != -5){ //Don't show sprites for terrain.
+        if(!this.terrain){ // Don't show selection circle for terrain.
             if (value) {
                 this.ShipSelectedSprite.show();
                 if (!this.selected) {
