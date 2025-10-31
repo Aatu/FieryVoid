@@ -165,6 +165,67 @@ window.ReplayAnimationStrategy = function () {
         return time;
     }
 
+function animateWeaponFire(time, logAnimation) {
+
+    var shipList = [];
+    this.gamedata.ships.forEach(function (shp) { shipList.push(shp); });
+
+    shipList.sort(function (a, b) {
+        if (a.flight && !b.flight) return -1;
+        if (!a.flight && b.flight) return 1;
+        if (a.pointCost > b.pointCost) return 1;
+        if (a.pointCost < b.pointCost) return -1;
+        return 0;
+    });
+
+    var allHexBallistics = weaponManager.getAllHexTargetedBallistics();
+
+    shipList.forEach(function (ship) {
+        var perShipAnimation = new AllWeaponFireAgainstShipAnimation(
+            ship,
+            this.shipIconContainer,
+            this.emitterContainer,
+            this.gamedata,
+            time,
+            this.scene,
+            this.movementAnimations,
+            logAnimation
+        );
+        this.animations.push(perShipAnimation);
+
+        if (this.type === ReplayAnimationStrategy.type.INFORMATIVE) {
+            time += perShipAnimation.getDuration();
+        }
+
+        // 🔧 filter only this ship’s ballistics
+        var firesForThisShip = allHexBallistics.filter(function (f) {
+            return f && (f.shooter === ship || f.shooter === ship.id);
+        });
+
+        if (firesForThisShip.length > 0) {
+            var hexAnim = new HexTargetedWeaponFireAnimation(
+                time,
+                this.movementAnimations,
+                this.shipIconContainer,
+                this.turn,
+                this.emitterContainer,
+                logAnimation,
+                firesForThisShip   // ✅ pass per-ship fires
+            );
+
+            this.animations.push(hexAnim);
+
+            if (this.type === ReplayAnimationStrategy.type.INFORMATIVE) {
+                time += hexAnim.getDuration();
+            }
+        }
+
+    }, this);
+
+    return time;
+}
+
+    /*
     function animateWeaponFire(time, logAnimation) {
         var animation = new HexTargetedWeaponFireAnimation(time, this.movementAnimations, this.shipIconContainer, this.turn, this.emitterContainer, logAnimation);
         this.animations.push(animation);
@@ -206,7 +267,7 @@ window.ReplayAnimationStrategy = function () {
 
         return time;
     }
-
+    */
     function setMovementAnimationDuration(moveAnimation) {
         if (this.type === ReplayAnimationStrategy.type.INFORMATIVE) {
             moveAnimation.setDuration(moveAnimation.getLength() * this.moveHexDuration);

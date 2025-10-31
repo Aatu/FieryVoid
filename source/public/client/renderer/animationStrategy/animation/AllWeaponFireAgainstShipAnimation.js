@@ -276,7 +276,33 @@ window.AllWeaponFireAgainstShipAnimation = function () {
                 });
             //case "beam": //Marcin Sawicki: to me, beam would be the same as laser - calling this animation "bolt" instead! No actual in game change, "beam" will still lead here by "default" option
 		case "bolt":
+                return new BoltEffect(this.particleEmitterContainer, {
+                    size: 300 * weapon.animationExplosionScale,
+                    origin: weaponOrigin,
+                    target: getShotTargetVariance(getShipPositionAtTime.call(this, this.shipIcon, startTime), incomingFire, shotsFired),
+//                    color: new THREE.Color(animationColor[0] / 255, animationColor[1] / 255, animationColor[2] / 255),
+                    color: color,
+                    hit: hit,
+                    damage: damage,
+                    time: startTime,
+                    damagedNames: damagedNames,
+                    hasParticle: hasParticle,
+                    systemDestroyedEffect: this.systemDestroyedEffect
+                });              
             case "trail":
+                return new MissileEffect(this.particleEmitterContainer, {
+                    size: 300 * weapon.animationExplosionScale,
+                    origin: weaponOrigin,
+                    target: getShotTargetVariance(getShipPositionAtTime.call(this, this.shipIcon, startTime), incomingFire, shotsFired),
+//                    color: new THREE.Color(animationColor[0] / 255, animationColor[1] / 255, animationColor[2] / 255),
+                    color: color,
+                    hit: hit,
+                    damage: damage,
+                    time: startTime,
+                    damagedNames: damagedNames,
+                    hasParticle: hasParticle,
+                    systemDestroyedEffect: this.systemDestroyedEffect
+                });                  
             default:
                 return new BoltEffect(this.particleEmitterContainer, {
                     size: 300 * weapon.animationExplosionScale,

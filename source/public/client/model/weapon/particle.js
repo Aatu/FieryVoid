@@ -609,3 +609,50 @@ var MinorThoughtPulsar = function MinorThoughtPulsar(json, ship) {
 };
 MinorThoughtPulsar.prototype = Object.create(Particle.prototype);
 MinorThoughtPulsar.prototype.constructor = MinorThoughtPulsar;
+
+MinorThoughtPulsar.prototype.calculateSpecialHitChanceMod = function (shooter, target) {
+	var mod = 0;
+    var thrust = shipManager.movement.getRemainingEngineThrust(shooter);
+    var boostLevel = Math.floor(thrust/3);
+
+    switch(this.firingMode){
+
+        case 1:
+            if(boostLevel < 3){ //All put into extra shots, not hit chance mod.
+                return 0;
+            }else{
+                boostLevel = boostLevel - 2; //Deduct first two shots.
+                mod += boostLevel * 2; 
+            }    
+        break;
+
+        case 2:
+            if(boostLevel < 3){ //All put into extra damage, not hit chance mod.
+                return 0;
+            }else{
+                boostLevel = boostLevel - 2; //Deduct first two boosts.
+                mod += boostLevel * 2; 
+            }   
+        break;
+
+        case 3:
+            mod += boostLevel * 2; //All dumped into hit chance.
+        break;
+
+        case 4:
+            if(boostLevel < 5){ //All put into extra damage, not hit chance mod.
+                return 0;
+            }else{
+                boostLevel = boostLevel - 4; //Deduct first four boosts.
+                mod += boostLevel * 2; 
+            }  
+        break;
+
+        case 5: 
+            //Never boosts hit chance.
+        break;        
+        
+    }
+
+	return mod; 
+};

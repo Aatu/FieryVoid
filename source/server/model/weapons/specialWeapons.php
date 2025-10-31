@@ -7935,7 +7935,7 @@ class ThoughtWave extends Plasma{
 		$damage = 0;//Intialise.
 		
 		if($fireOrder->targetid != -1){//Direct fire shot.
-			$diceRoll = Dice::d(6, 3); // 13
+			$diceRoll = Dice::d(6, 3); //3-18
             $defence = $target->getHitSectionProfilePos(mathlib::hexCoToPixel($pos));//Base profile.
         	$mod = $target->getHitChanceMod($shooter, $pos, $gamedata->turn, $this); //Shields/E-web etc affect profile!
 			$fireOrder->pubnotes .= ' Damage Roll: ' . $diceRoll . '/18.';	
@@ -7951,8 +7951,8 @@ class ThoughtWave extends Plasma{
 		}
 		$fireOrder->pubnotes .= ' Damage before Mods: ' . $damage . '. ';
 		
-        $damage = $this->getDamageMod($damage, $shooter, $target, $pos, $gamedata); // -5           
-        $damage -= $target->getDamageMod($shooter, $pos, $gamedata->turn, $this);// -4
+        $damage = $this->getDamageMod($damage, $shooter, $target, $pos, $gamedata); //E.g. plasma -damage for range          
+        $damage -= $target->getDamageMod($shooter, $pos, $gamedata->turn, $this);// e.g. enemy shields.
 
 		$damageForLog = max(0,$damage);			
 		$fireOrder->pubnotes .= '  Final Damage: ' . $damageForLog . '.';
@@ -7966,7 +7966,7 @@ class ThoughtWave extends Plasma{
 		$this->data["Special"] = 'Fire this weapon by clicking Select during  the Initial Orders phase.';
 		$this->data["Special"] .= '<br><br>The Thought Wave will always originate from the starting location of the firing ship (as per usual with ballistic weapons).';
 		$this->data["Special"] .= '<br>The Thought Wave will attempt to hit ALL non-Mindrider ships in the game in Firing Phase (even friendlies), using the following formula:';
-		$this->data["Special"] .= '<br> - (15 + OEW + d20) - (Range Penalty + DEW - Target Initiative/5)';
+		$this->data["Special"] .= '<br> - (15 + OEW + d20) - (Range Penalty + DEW - Target Initiative/3)';
 		$this->data["Special"] .= '<br>If this formula returns a result above 0, the Thought Wave automatically hits, and deals (3D6/3) * (Profile/5) Flash damage (-' . $this->rangeDamagePenalty . ' per hex as per usual Plasma rules).';
 		$this->data["Special"] .= '<br>Advanced Armor changes this formula to (3d6/5) * (Profile/5), and Shields etc affect profile as normal for this calculation.';			
 		$this->data["Special"] .= '<br>Will only strike 1 fighter in a flight, but Flash damage may still affect other fighters.';
