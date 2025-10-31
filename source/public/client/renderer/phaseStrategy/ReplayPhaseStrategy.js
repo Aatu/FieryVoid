@@ -131,14 +131,99 @@ window.ReplayPhaseStrategy = function () {
     function toMovementPhase() {
         this.animationStrategy.toMovementPhase();
         this.replayUI.activateButton('#pause');
+        resetAudio.call(this);
         this.animationStrategy.pause();
     }
 
     function toFiringPhase() {
         this.animationStrategy.toFiringPhase();
         this.replayUI.activateButton('#pause');
+        resetAudio.call(this);       
         this.animationStrategy.pause();
     }
+
+    //To reset audio when player clicks on Movement or Firing buttons in Replay, otherwise the sound only plays once.
+    function resetAudio(value = false) {
+        for (const animContainer of this.animationStrategy.animations) {
+
+            // --- 🏃 0. Skip pure movement animations (no audio at all) ---
+            const isMovementAnimation =
+                animContainer?.shipIcon &&
+                animContainer?.turnCurve &&
+                !animContainer?.emitters &&
+                !animContainer?.particleEmitterContainer &&
+                !animContainer?.movementAnimations;
+
+            if (isMovementAnimation) continue;
+
+            // --- 1. Handle emitter-based containers (Bolt/Missile/Torpedo) ---
+            if (animContainer.emitters?.length) {
+                const firstEmitter = animContainer.emitters[0];
+                if (firstEmitter?.reservations?.length) {
+                    for (const reservation of firstEmitter.reservations) {
+                        const anim = reservation.animation;
+                        if (
+                            anim instanceof BoltEffect ||
+                            anim instanceof MissileEffect ||
+                            anim instanceof TorpedoEffect
+                        ) {
+                            anim.playedLaunchSound = value;
+                            anim.playedImpactSound = value;
+                        }
+                    }
+                }
+                continue;
+            }
+
+            if (animContainer instanceof ShipDestroyedAnimation || animContainer instanceof ShipJumpAnimation) {
+                animContainer.explosionTriggered = value;
+                continue;
+            }
+            // --- 2. Handle AllWeaponFireAgainstShipAnimation containers ---
+            const isAllWeaponFire =
+                animContainer?.movementAnimations &&
+                animContainer?.shipIconContainer &&
+                animContainer?.particleEmitterContainer &&
+                animContainer?.logAnimation &&
+                !animContainer?.emitters;
+
+            // --- 3. Handle ShipDestroyedAnimation containers ---
+            /*const isShipDestruction =
+                animContainer instanceof ShipDestroyedAnimation ||
+                (
+                    animContainer?.shipIcon &&
+                    animContainer?.fadeoutTime &&
+                    typeof animContainer?.explosionTriggered === "boolean" &&
+                    !animContainer?.emitters
+                );*/
+
+            if (isAllWeaponFire) {
+                for (const effect of animContainer.animations) {
+                    if (effect instanceof LaserEffect) {
+                        effect.playedSound = value;
+                    }
+                }
+            }
+        }
+    }
+
+
+    ReplayPhaseStrategy.prototype.onToggleSound = function (payload) {
+        if (payload.up) return; // Prevent repeats
+
+        const now = Date.now();
+
+        if (gamedata.playAudio) {
+            // 🔇 Turn sound OFF            
+            gamedata.playAudio = false;
+        } else {
+            // 🔊 Turn sound ON            
+            gamedata.playAudio = true;
+              
+        }
+
+        window.dispatchEvent(new CustomEvent("soundToggled"));
+    };
 
     function startReplayOrRequestGamedata() {
         if (this.replayTurn === this.gamedata.turn) {

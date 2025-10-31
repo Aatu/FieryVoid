@@ -150,6 +150,7 @@
     <script src="client/renderer/animationStrategy/animation/effects/Explosion.js"></script>
     <script src="client/renderer/animationStrategy/animation/effects/LaserEffect.js"></script>
     <script src="client/renderer/animationStrategy/animation/effects/BoltEffect.js"></script>
+    <script src="client/renderer/animationStrategy/animation/effects/MissileEffect.js"></script>    
     <script src="client/renderer/animationStrategy/animation/effects/TorpedoEffect.js"></script>
     <script src="client/renderer/animationStrategy/animation/effects/ShipExplosion.js"></script>
     <script src="client/renderer/animationStrategy/animation/effects/SystemDestroyedEffect.js"></script>

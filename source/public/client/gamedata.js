@@ -23,7 +23,9 @@ window.gamedata = {
     selectedSlot: null,
     gamespace: null,
     replay: false,
+    playAudio: true, //To allow toggling of audio during Replay.    
     showLoS: false,
+
 
     mouseOverShipId: -1,
 

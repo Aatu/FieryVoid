@@ -44,10 +44,10 @@ class Ashinta extends HeavyCombatVessel{
 //current layout: Aft row: Aft-firing weapons; next row: Front-firing weapons
         $this->addAftSystem(new FusionCannon(3, 8, 1, 180, 300));
         $this->addAftSystem(new FusionCannon(3, 8, 1, 120, 240));
-        $this->addAftSystem(new FusionCannon(3, 8, 1, 240, 0));
-        $this->addAftSystem(new FusionCannon(3, 8, 1, 240, 0));
         $this->addAftSystem(new FusionCannon(3, 8, 1, 0, 120));
         $this->addAftSystem(new FusionCannon(3, 8, 1, 0, 120));
+        $this->addAftSystem(new FusionCannon(3, 8, 1, 240, 0));
+        $this->addAftSystem(new FusionCannon(3, 8, 1, 240, 0));
         $this->addAftSystem(new FusionCannon(3, 8, 1, 120, 240));
         $this->addAftSystem(new FusionCannon(3, 8, 1, 60, 180));
         $this->addAftSystem(new GraviticThruster(4, 35, 0, 10, 2));

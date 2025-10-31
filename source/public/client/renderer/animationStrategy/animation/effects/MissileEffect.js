@@ -1,6 +1,6 @@
 "use strict";
 
-window.BoltEffect = function () {
+window.MissileEffect = function () {
     function BoltEffect(emitterContainer, args) {
         ParticleAnimation.call(this, emitterContainer);
         args = args || {};
@@ -30,12 +30,12 @@ window.BoltEffect = function () {
 
         // ---------------- AUDIO ----------------
         //this.noSound = args.noSound || !gamedata?.playAudio;
-        this.soundVolume = args.soundVolume ?? 0.05;
+        this.soundVolume = args.soundVolume ?? 0.1;
         this.playedLaunchSound = false;
         this.playedImpactSound = false;
 
         if (!BoltEffect.cachedLaunchAudio) {
-            BoltEffect.cachedLaunchAudio = new Audio("/client/renderer/animationStrategy/animation/sound/BoltAudio.wav");
+            BoltEffect.cachedLaunchAudio = new Audio("/client/renderer/animationStrategy/animation/sound/TorpedoAudio.wav");
         }
         if (!BoltEffect.cachedImpactAudio) {
             BoltEffect.cachedImpactAudio = new Audio("/client/renderer/animationStrategy/animation/sound/ExplosionAudio.wav");
