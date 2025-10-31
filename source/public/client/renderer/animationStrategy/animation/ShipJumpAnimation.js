@@ -27,7 +27,7 @@ window.ShipJumpAnimation = function () {
 
         // --- 🔊 Add sound support ---
         this.explosionTriggered = false;
-        this.sound = new Audio("/client/renderer/animationStrategy/animation/sound/ShipJumpAudio.wav");
+        this.sound = new Audio("client/renderer/animationStrategy/animation/sound/ShipJumpAudio.wav");
         this.sound.volume = 0.7;
     }
 
