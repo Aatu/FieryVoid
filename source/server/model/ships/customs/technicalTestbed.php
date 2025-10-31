@@ -22,15 +22,18 @@ class TechnicalTestbed extends MediumShip{
         $this->rollcost = 2;
         $this->pivotcost = 2;
         $this->iniativebonus = 30;
+
+		$this->advancedArmor = true;   
+		$this->hardAdvancedArmor = true;   
         
          
-        $this->addPrimarySystem(new Reactor(5, 20, 0, -30));
+        $this->addPrimarySystem(new Reactor(6, 20, 0, 0));
         $this->addPrimarySystem(new CnC(6, 16, 0, 0));
-        $this->addPrimarySystem(new Scanner(5, 16, 4, 7));
-        $this->addPrimarySystem(new Engine(5, 15, 0, 8, 2));
-        $this->addPrimarySystem(new Hangar(5, 2));
-        $this->addPrimarySystem(new Thruster(3, 13, 0, 5, 3));
-        $this->addPrimarySystem(new Thruster(3, 13, 0, 5, 4)); 
+        $this->addPrimarySystem(new Scanner(6, 16, 4, 7));
+        $this->addPrimarySystem(new Engine(6, 15, 0, 8, 2));
+        $this->addPrimarySystem(new Hangar(6, 2));
+        $this->addPrimarySystem(new Thruster(4, 13, 0, 5, 3));
+        $this->addPrimarySystem(new Thruster(4, 13, 0, 5, 4)); 
 	    
 	//ammo magazine itself
 	$ammoMagazine = new AmmoMagazine(6); //pass magazine capacity 
@@ -43,19 +46,19 @@ class TechnicalTestbed extends MediumShip{
 	    $this->enhancementOptionsEnabled[] = 'AMMO_P';//add enhancement options for other missiles - Class-P
         
         
-        $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
-        $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
-		/*
-        $this->addFrontSystem(new MediumPulse(3, 6, 3, 240, 0));
-        $this->addFrontSystem(new MediumPulse(3, 6, 3, 240, 0));
-        $this->addFrontSystem(new MediumPulse(3, 6, 3, 0, 120));
-        $this->addFrontSystem(new MediumPulse(3, 6, 3, 0, 120));
-		*/
-        $this->addFrontSystem(new InterceptorMkI(2, 4, 1, 270, 90));
-        //$this->addFrontSystem(new RailGun(4, 9, 6, 0, 0));
+        $this->addFrontSystem(new Thruster(6, 8, 0, 3, 1));
+        $this->addFrontSystem(new Thruster(6, 8, 0, 3, 1));
+		
+        $this->addFrontSystem(new MediumPulse(2, 6, 3, 240, 0));
+        $this->addFrontSystem(new MediumPulse(2, 6, 3, 240, 0));
+        $this->addFrontSystem(new MediumPulse(2, 6, 3, 0, 120));
+        $this->addFrontSystem(new MediumPulse(2, 6, 3, 0, 120));
+		
+        $this->addFrontSystem(new InterceptorMkI(1, 4, 1, 270, 90));
+        $this->addFrontSystem(new RailGun(4, 9, 6, 0, 0));
 		
         //$this->addAftSystem(new RailGun(4, 9, 6, 0, 0));   
-        $this->addAftSystem(new InterceptorMkI(2, 4, 1, 90, 270));
+//        $this->addAftSystem(new InterceptorMkI(2, 4, 1, 90, 270));
         $this->addAftSystem(new Thruster(4, 7, 0, 2, 2));
         $this->addAftSystem(new Thruster(4, 7, 0, 2, 2));
         $this->addAftSystem(new Thruster(4, 7, 0, 2, 2));
@@ -68,9 +71,9 @@ class TechnicalTestbed extends MediumShip{
         
 	    
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
-        $this->addFrontSystem(new Structure( 5, 48));
-        $this->addAftSystem(new Structure( 4, 42));
-        $this->addPrimarySystem(new Structure( 5, 50));
+        $this->addFrontSystem(new Structure( 8, 48));
+        $this->addAftSystem(new Structure( 6, 500));
+        $this->addPrimarySystem(new Structure( 6, 50));
         
         
         $this->hitChart = array(
@@ -92,12 +95,13 @@ class TechnicalTestbed extends MediumShip{
                         20 => "Primary",
                 ),
                 2=> array(
-                        6 => "Thruster",
+						20 => "Structure",
+ /*                       6 => "Thruster",
                         8 => "Class-S Missile Rack",
                         10 => "Railgun",
                         12 => "Interceptor MK I",
                         18 => "Structure",
-                        20 => "Primary",
+                        20 => "Primary", */
                 ),
         );
     }

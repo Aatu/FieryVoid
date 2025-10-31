@@ -11,7 +11,6 @@
 
     }
 
-
     class FusionCannon extends Molecular{
         public $name = "fusionCannon";
         public $displayName = "Fusion Cannon";
@@ -871,7 +870,7 @@ class SuperHeavyMolecularDisruptor extends Raking
 		public $canSplitShots = true; //Allows Firing Mode 1 to split shots.
 		public $canSplitShotsArray = array(1=>true, 2=>false, 3=>false );
 		public $specialHitChanceCalculation	= true;	 //To update targeting tooltip in Front End               	
-		
+
 		//Slicers are usually THE weapons of Shadow ships - hence higher repair priority
 		public $repairPriority = 6;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
     		
@@ -882,11 +881,16 @@ class SuperHeavyMolecularDisruptor extends Raking
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 		
-		/*Slicers ignore armor...*/
+
+		/*Slicers ignore armor, except against hardened advanced armor*/
 		public function getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos=null){
-			return 0;
+		$tempArmor = parent::getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos);
+			if ($system->hardAdvancedArmor) {
+				return $tempArmor / 2;
+			}else{
+				return 0;
+			}
         }
-        
 
 		public function calculateHitBase(TacGamedata $gamedata, FireOrder $fireOrder) {
 		    parent::calculateHitBase($gamedata, $fireOrder);

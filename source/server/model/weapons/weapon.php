@@ -126,7 +126,6 @@ class Weapon extends ShipSystem
     public $guns = 1;
     public $gunsArray = array();
 
-
     // Used to indicate a parent in case of dualWeapons
     public $parentId = -1;
 
@@ -1921,6 +1920,22 @@ full Advanced Armor effects (by rules) for reference:
 			if($this->weaponClass == 'Matter'){ //slight vulnerability vs Matter
 				$returnArmour += -2;
 			}
+			if($this->damageType == 'Flash' && ($system->hardAdvancedArmor)){
+				$returnArmour = floor($returnArmour*2); 
+			}
+		}elseif($this->factionAge >= 3 && $system->hardAdvancedArmor){
+			if($this->ballistic){ //extra protection against ballistics
+				$returnArmour += 2;
+			}
+			if($this->weaponClass == 'Matter'){ //slight vulnerability vs Matter
+				$returnArmour = floor($returnArmour/2);
+			}
+			if($this->damageType == 'Flash'){
+				$returnArmour = floor($returnArmour*2);
+			}   
+//			if($this->weaponClass == 'Molecular'){
+//				$returnArmour = floor($returnArmour/2);
+//			}
 		}else{ //NO ADVANCED ARMOR (effectively) - apply effect explicitly tied to damage type
 			if($this->weaponClass == 'Matter'){ //Matter weapons ignore armor
 				$returnArmour = 0;
@@ -2157,3 +2172,4 @@ class checkForSelfInterceptFire
 } //endof class checkForSelfInterceptFire
 
 
+ 

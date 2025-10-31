@@ -9,7 +9,7 @@ class technicalTargetDrone extends VreeCapital
 		$this->pointCost = 10;
 		$this->faction = "Custom Ships";
 		$this->phpclass = "technicalTargetDrone";
-		$this->imagePath = "img/ships/VreeXill.png";
+		$this->imagePath = "img/ships/kirishiacLordship2.png";
 		$this->canvasSize = 200;
 		$this->shipClass = "Target Drone - DO NOT USE";
 		$this->shipSizeClass = 3;
@@ -30,43 +30,24 @@ class technicalTargetDrone extends VreeCapital
 
 		$this->VreeHitLocations = false;
 
-
 		$this->addPrimarySystem(new Reactor(6, 18, 0, 0));
 		$this->addPrimarySystem(new Hangar(6, 1));
 		$this->addPrimarySystem(new CnC(6, 12, 0, 0));
 		$this->addPrimarySystem(new Scanner(6, 14, 9, 10));
         $this->addPrimarySystem(new Engine(6, 16, 0, 16, 2));
 		$this->addPrimarySystem(new JumpEngine(6, 10, 5, 24));	
-		
 
 		$this->addPrimarySystem(new GraviticThruster(5, 16, 0, 9, 3));	
         $this->addPrimarySystem(new GraviticThruster(5, 16, 0, 9, 1)); 
         $this->addPrimarySystem(new GraviticThruster(5, 16, 0, 9, 2));  
 		$this->addPrimarySystem(new GraviticThruster(5, 16, 0, 9, 4));	
-		
-		         			
-		$this->addPrimarySystem(new TestLaser(0, 0, 0, 0, 360));  		
-		$this->addPrimarySystem(new TestLaser(0, 0, 0, 0, 360));  	
-		
-		
-        $this->addFrontSystem(new AntiprotonGun(0, 0, 0, 0, 360));
-        $this->addFrontSystem(new AntiprotonGun(0, 0, 0, 0, 360));
-        $this->addAftSystem(new AntiprotonGun(0, 0, 0, 0, 360));
-        $this->addAftSystem(new AntiprotonGun(0, 0, 0, 0, 360));
-        $this->addLeftAftSystem(new AntiprotonGun(0, 0, 0, 0, 360));
-        $this->addLeftAftSystem(new AntiprotonGun(0, 0, 0, 0, 360));
-        $this->addRightFrontSystem(new AntiprotonGun(0, 0, 0, 0, 360));
-        $this->addRightFrontSystem(new AntiprotonGun(0, 0, 0, 0, 360));
-        $this->addRightAftSystem(new AntiprotonGun(0, 0, 0, 0, 360));
-        $this->addRightAftSystem(new AntiprotonGun(0, 0, 0, 0, 360));
-        $this->addLeftFrontSystem(new AntiprotonGun(0, 0, 0, 0, 360));
-        $this->addLeftFrontSystem(new AntiprotonGun(0, 0, 0, 0, 360));
-        $this->addPrimarySystem(new AntiprotonGun(0, 0, 0, 0, 360));
-        $this->addPrimarySystem(new AntiprotonGun(0, 0, 0, 0, 360));
-		$this->addPrimarySystem(new AntimatterShredder(0, 0, 0, 0, 360));  			
-		$this->addPrimarySystem(new AntimatterShredder(0, 0, 0, 0, 360));
-		
-	
+
+        $this->addFrontSystem(new HypergravitonBeam(5, 20, 12, 300, 60));	
+        $this->addFrontSystem(new MedAntigravityBeam(5, 6, 2, 210, 30));
+        $this->addFrontSystem(new AntigravityBeam(5, 6, 3, 270, 90));
+        $this->addFrontSystem(new MedAntigravityBeam(5, 6, 2, 330, 150));
+        $this->addFrontSystem(new UltraMatterCannon(5, 13, 7, 300, 60));
+
 		$structArmor = 0;
 		$structHP = 50;
 		
