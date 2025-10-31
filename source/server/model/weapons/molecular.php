@@ -250,7 +250,6 @@ class SuperHeavyMolecularDisruptor extends Raking
 		    parent::doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location);
 		    
 		    if ($system->advancedArmor) return; // advanced armor prevents effect
-//		    if ($system->hardAdvancedArmor) return; // advanced armor prevents effect
 		    
 		    if(!$this->alreadyReduced){ 
 		        //$struct = $target->getStructureSystem($location); //this caused problems if first rake penetrated!
@@ -258,7 +257,6 @@ class SuperHeavyMolecularDisruptor extends Raking
 		        $struct = $target->getStructureSystem($sectionFacing); 
 
 		        if ($struct->advancedArmor) return; // advanced armor prevents effect 
-//		        if ($struct->hardAdvancedArmor) return; // hardened advanced armor prevents effect 
 		        
 		        if(!$struct->isDestroyed($fireOrder->turn-1)){ // last turn Structure was still there...
 		            $this->alreadyReduced = true; // do this only for the first part of the shot that actually connects
@@ -419,7 +417,6 @@ class SuperHeavyMolecularDisruptor extends Raking
             $this->alreadyFlayed = true; //avoid doing that multiple times
             foreach ($target->systems as $system){
                 if ($system->advancedArmor) return;
-//                if ($system->hardAdvancedArmor) return;
                 if ($target->shipSizeClass<=1 || $system->location === $location){ //MCVs and smaller ships are one huge section technically
                     $crit = new ArmorReduced(-1, $target->id, $system->id, "ArmorReduced", $gamedata->turn);
                     $crit->updated = true;
@@ -653,7 +650,6 @@ class SuperHeavyMolecularDisruptor extends Raking
         protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location = null){
             parent::doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location);
 			if ($system->advancedArmor) return;
-//			if ($system->hardAdvancedArmor) return;
             if(!$this->alreadyReduced){ 
                 $this->alreadyReduced = true; 
                 if(LightMolecularDisrupterHandler::checkArmorReduction($target, $shooter)){ //static counting!
@@ -661,7 +657,6 @@ class SuperHeavyMolecularDisruptor extends Raking
 					$struct = $target->getStructureSystem($sectionFacing); 
                     //$struct = $target->getStructureSystem($location);
                     if ($struct->advancedArmor) return;
-//                    if ($struct->hardAdvancedArmor) return;
                     if(!$struct->isDestroyed($fireOrder->turn-1)){ //last turn Structure was still there...
                         $crit = new ArmorReduced(-1, $target->id, $struct->id, "ArmorReduced", $gamedata->turn);
                         $crit->updated = true;
@@ -711,7 +706,6 @@ class SuperHeavyMolecularDisruptor extends Raking
         protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location = null){
             parent::doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location);
 			if ($system->advancedArmor) return;
-//			if ($system->hardAdvancedArmor) return;
             if(!$this->alreadyReduced){ 
                 $this->alreadyReduced = true; 
                 if(LightMolecularDisrupterHandler::checkArmorReduction($target, $shooter)){ //static counting!
@@ -719,7 +713,6 @@ class SuperHeavyMolecularDisruptor extends Raking
 					$struct = $target->getStructureSystem($sectionFacing); 
                     //$struct = $target->getStructureSystem($location);
                     if ($struct->advancedArmor) return;
- //                   if ($struct->hardAdvancedArmor) return;
                     if(!$struct->isDestroyed($fireOrder->turn-1)){ //last turn Structure was still there...
                         $crit = new ArmorReduced(-1, $target->id, $struct->id, "ArmorReduced", $gamedata->turn);
                         $crit->updated = true;
@@ -889,30 +882,15 @@ class SuperHeavyMolecularDisruptor extends Raking
         }
 		
 
-
-	public static function isTargetSlicerResistant($ship,$system = null){ //returns true if target has Advanced Armor or EM Hardening (which, for simplicity, in FV is treated as AA would be for EM weapons)
-		if($ship){
-			if($ship->hardAdvancedArmor) return true;
-		}
-		return false;
-	}
-
-
-
 		/*Slicers ignore armor, except against hardened advanced armor*/
 		public function getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos=null){
 		$tempArmor = parent::getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos);
 			if ($system->hardAdvancedArmor) {
 				return $tempArmor / 2;
 			}else{
-				return0;
+				return 0;
 			}
         }
-
-
-
-
-        
 
 		public function calculateHitBase(TacGamedata $gamedata, FireOrder $fireOrder) {
 		    parent::calculateHitBase($gamedata, $fireOrder);
