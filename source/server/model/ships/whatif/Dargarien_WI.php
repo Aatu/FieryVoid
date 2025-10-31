@@ -1,14 +1,14 @@
 <?php
-class Dargarian_WI extends BaseShip{
+class Dargarien_WI extends BaseShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 700;
 		$this->faction = "ZWhatIF";
-        $this->phpclass = "Dargarian_WI";
-        $this->imagePath = "img/ships/dargarian.png";
-        $this->shipClass = "Dargarian Trench Runner";
+        $this->phpclass = "Dargarien_WI";
+        $this->imagePath = "img/ships/dargarian2.png";
+        $this->shipClass = "Dargarien Trench Runner";
         $this->shipSizeClass = 3;
         $this->fighters = array("normal"=>12);
 		$this->customFighter = array("Rutarian"=>12);

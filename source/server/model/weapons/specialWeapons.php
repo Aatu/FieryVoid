@@ -7,7 +7,7 @@
 */
 
 class WeaponEM  {	
-	public static function isTargetEMResistant($ship,$system = null){ //returns true if target has either AdvancedArmor or EM Hardening (which, for simplicity, in FV is treated as AA would be for EM weapons)
+	public static function isTargetEMResistant($ship,$system = null){ //returns true if target has Advanced Armor or EM Hardening (which, for simplicity, in FV is treated as AA would be for EM weapons)
 		if($ship){
 			$EMHardened = $ship->getEMHardened();
 			if($ship->advancedArmor) return true;
@@ -60,7 +60,7 @@ class PlasmaStream extends Plasma{
 	
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
 		parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
-		if (!$system->advancedArmor){//advanced armor prevents effect 
+		if (!$system->advancedArmor){//advanced armor prevents effect
 			$crit = new ArmorReduced(-1, $ship->id, $system->id, "ArmorReduced", $gamedata->turn);
 			$crit->updated = true;
 			$crit->inEffect = true; //in effect immediately, affecting further damage in the same turn!
@@ -235,10 +235,11 @@ class ShockCannon extends Weapon{
         public $animationExplosionScale = 0.15;
         public $trailLength = 30;
 	*/
+
 		public $priority = 4; //as antiship weapon, going early - actual damage is only to systems, and with armor ignoring it's worth dealing - but also as armor ignoring should let actual very light weapons go first
 		public $priorityAFArray = array(1=>2); //as antifighter weapon, going very early - instant dropout
 
-        public $loadingtime = 2;
+        public $loadingtime = 1;
 
         public $rangePenalty = 1;
         public $fireControl = array(3, 3, 3); // fighters, <=mediums, <=capitals
@@ -4472,12 +4473,9 @@ class VorlonLightningGun extends Weapon{
 			$criticalPhpClass = $critical->phpclass; //What type of crit was set on the original Lightning Gun
 			//Now set the same type of critical for the mirro gun
 			$mirrorCritical = new $criticalPhpClass(-1, $critical->shipid,$mirror->id, $criticalPhpClass, $critical->turn, $critical->turnend);
-////			$mirrorCritical->updated = true; 
-//			$mirrorCritical->newCrit = true; //Probably not needed
 			$mirror->setCritical($mirrorCritical); //And set it
 		}
 
-// add GTS
     //Overwrite repairCrtical() function in main Lightning Gun system with this.
     public function repairCritical($critDmg, $turn){
             //repair critical on Lightning Gun as usual.
@@ -4495,7 +4493,7 @@ class VorlonLightningGun extends Weapon{
                 break; //Matching critical repaired, break out of foreach loop and don't search for any more.
             }
         }
-    }//endof repairCritical() // end add GTS
+    }//endof repairCritical() 
 
 }//endof class VorlonLightningGun
 
@@ -5282,7 +5280,7 @@ class PsychicField extends Weapon{ //Thirdspace weapons that operates similar to
 			$effecttohit = ceil($effecttohit/2);
 			$effectCrit = ceil($effectCrit/2);		
 			}
-	
+
 		if ($ship instanceof FighterFlight){  //place effect on first fighter, even if it's already destroyed!			
 			$firstFighter = $ship->getSampleFighter();
 			if($firstFighter){
@@ -7108,7 +7106,7 @@ class Marines extends Weapon{
 			$fireOrder->pubnotes .= "<br> Marines cannot attack systems with advanced armor.";				
 			return; 	
 		}
-		
+
 		//check if there are too many marines already on target ship.
 		if($this->checkMissionAmount($target, $gamedata, $fireOrder)){//If it returns true, there are too many attaching pods.							
 			$this->ammunition++;//Marines weren't eliminated.  Give ammunition back to weapon.
@@ -7916,7 +7914,7 @@ class ThoughtWave extends Plasma{
 			$fireOrder->pubnotes .= ' Profile/Mod: ' . $defence . '/' . $mod . '. ';					
 					        	           
             if($target->advancedArmor){//Divide by 5 for AA
-				$damage = floor(floor($diceRoll/5) * ($defence + $mod)); //3d6 divide by 5, multiplied by defence profile.            	
+				$damage = floor(floor($diceRoll/5) * ($defence + $mod)); //3d6 divide by 5, multiplied by defence profile. 
             }else{//Divide by 3 for everything else							
 				$damage = floor(floor($diceRoll/3) * ($defence + $mod)); //3d6 divide by 3, multiplied by defence profile.
 			}				
