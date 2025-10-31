@@ -98,3 +98,9 @@ var UnreliableMatterCannon = function UnreliableMatterCannon(json, ship) {
 };
 UnreliableMatterCannon.prototype = Object.create(Matter.prototype);
 UnreliableMatterCannon.prototype.constructor = UnreliableMatterCannon;
+
+var UltraMatterCannon = function UltraMatterCannon(json, ship) {
+    Matter.call(this, json, ship);
+};
+UltraMatterCannon.prototype = Object.create(Matter.prototype);
+UltraMatterCannon.prototype.constructor = UltraMatterCannon;

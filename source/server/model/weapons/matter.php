@@ -795,5 +795,41 @@ class UnreliableMatterCannon extends MatterCannon{
 
 
 
+
+class UltraMatterCannon extends Matter{
+    /*Kirishiac Weapon*/
+        public $name = "UltraMatterCannon";
+        public $displayName = "Ultra Matter Cannon";
+		public $iconPath = "UltraMatterCannon.png";   
+        public $animation = "bolt";
+        public $animationColor = array(250, 250, 190);
+        public $priority = 9;   
+
+		public $factionAge = 3;//Ancient weapon, which sometimes has consequences!
+        public $loadingtime = 1;
+        
+        public $rangePenalty = 0.33;
+        public $fireControl = array(0, 5, 5); // fighters, <mediums, <capitals 
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+        {
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 13;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 7;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function getDamage($fireOrder){        return Dice::d(10, 5)+5;   }
+        public function setMinDamage(){     $this->minDamage = 10 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 55 ;      }
+} //UltraMatterCannon
+
+
+
+
 	
 ?>

@@ -37,6 +37,7 @@ class ShipSystem {
 	
     public $criticals = array();
 	public $advancedArmor = false; //indicates that system has advanced armor
+	public $hardAdvancedArmor = false; //indicates that system has hardened advanced armor
     
     protected $structureSystem;
 	
@@ -127,6 +128,9 @@ class ShipSystem {
     public function onConstructed($ship, $turn, $phase){
         if($ship->getAdvancedArmor()==true){
             $this->advancedArmor = true;
+        }
+        if($ship->getHardAdvancedArmor()==true){  // GTS Hardened Advanced Armor
+            $this->hardAdvancedArmor = true;
         }
         $this->structureSystem = $ship->getStructureSystem($this->location);
         $this->effectCriticals();
@@ -1266,7 +1270,16 @@ class ShipSystem {
 				$counts = array_count_values($intSustainedSystemsHit); // Count occurrences
 				
 				$armourPiercedAlready = isset($counts[$this->id]) ? $counts[$this->id] : 0; // Get count for $this->id				
-				$effectiveArmor = max(0, $effectiveArmor - $armourPiercedAlready); //Reduce armour by amount pierced n previous turns by Sustained shots.	
+//				$effectiveArmor = max(0, $effectiveArmor - $armourPiercedAlready); //Reduce armour by amount pierced n previous turns by Sustained shots.	
+
+                // GTS: hardened advanced armor check for sustained weapons
+				if($this->hardAdvancedArmor){
+					$halfArmour = floor($this->armour/2);
+					$effectiveArmor = max($halfArmour, $effectiveArmor - $armourPiercedAlready); //Reduce armour by amount pierced n previous turns by Sustained shots.
+				}else{
+					$effectiveArmor = max(0, $effectiveArmor - $armourPiercedAlready); //Reduce armour by amount pierced n previous turns by Sustained shots.
+				}
+
 			}        
 		}
 
