@@ -2837,6 +2837,7 @@ class GromeHvyRailgun extends Weapon{
 			case 1:	
 				parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);		
 				if ($system->advancedArmor) return; //no additional effect on Advanced Armor		
+//				if ($system->hardAdvancedArmor) return; //no additional effect on Hardened Advanced Armor - GTS
 				//+1 to dropout roll (in case we want to add later)
 				if ($ship instanceof FighterFlight)	{
 					$mod = 1;		
@@ -2868,6 +2869,7 @@ class GromeHvyRailgun extends Weapon{
 						
 			case 2:	
 				if ($system->advancedArmor) return; //no additional effect on Advanced Armor.
+//				if ($system->hardAdvancedArmor) return; //no additional effect on Hardened Advanced Armor - GTS
 				
 					$effectHit = 0; //Initialise.
 					$effectHit5 = $effectHit * 5;//For notes only.

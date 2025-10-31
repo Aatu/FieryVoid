@@ -1,5 +1,8 @@
 <?php
 // server_load_guard.php
+if (php_sapi_name() === 'cli-server' || strpos($_SERVER['HTTP_HOST'], 'localhost') !== false) {
+    return;
+}
 
 // ---- 1️⃣ SKIP LIGHTWEIGHT REQUESTS by adding them here.
 $ignoredScripts = [];

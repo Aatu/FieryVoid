@@ -3344,14 +3344,37 @@ spl_autoload_register(
                 'shadingfield' => '/server/model/systems/baseSystems.php',
                 'transversedrive' => '/server/model/weapons/supportWeapons.php',                    
 
-						
+
+				//Kirishiac
+				'ultramattercannon' => '/server/model/weapons/matter.php',								
+				'hypergravitonbeam' => '/server/model/weapons/gravitic.php',								
+				'hypergravitonblaster' => '/server/model/weapons/gravitic.php',								
+				'antigravitybeam' => '/server/model/weapons/gravitic.php',								
+				'medantigravitybeam' => '/server/model/weapons/gravitic.php',								
+				'glancingram' => '/server/model/weapons/matter.php',								
+
+//				'kirishiacconqueror' => '/server/model/ships/kirishiac/kirishiacConqueror.php',
+//				'kirishiackingship' => '/server/model/ships/kirishiac/kirishiacKingship.php',
+//				'kirishiaclordship' => '/server/model/ships/kirishiac/kirishiacLordship.php',
+//				'kirishiacwarrior' => '/server/model/ships/kirishiac/kirishiacWarrior.php',
+
+
 						//Development systems
+						'ancientmattergun' => '/server/model/weapons/customDevelopment.php',
+						'ancientplasmagun' => '/server/model/weapons/customDevelopment.php',
+						'ancientparticlegun' => '/server/model/weapons/customDevelopment.php',
+						'ancientparticlecannon' => '/server/model/weapons/customDevelopment.php',
+						'ancientantimatter' => '/server/model/weapons/customDevelopment.php',
+						'ancientiontorpedo' => '/server/model/weapons/customDevelopment.php',
+						'ancientburstbeam' => '/server/model/weapons/customDevelopment.php',
+						'ancientmoleculardisruptor' => '/server/model/weapons/customDevelopment.php',
+						'ancientparticlecutter' => '/server/model/weapons/customDevelopment.php',
 						'testgun' => '/server/model/weapons/customDevelopment.php',
 						'testgun2' => '/server/model/weapons/customDevelopment.php',
 						'plasmasiegecannon' => '/server/model/weapons/customDevelopment.php',
 						'impheavylaser' => '/server/model/weapons/customDevelopment.php',
 						'directemine' => '/server/model/weapons/customDevelopment.php',						
-					'testlaser' => '/server/model/weapons/customs.php',
+						'testlaser' => '/server/model/weapons/customs.php',
                         'terrain' => '/server/model/ships/ShipClasses.php',                    
 	    				'asteroids' => '/server/model/ships/terrain/asteroidS.php',                    
 	    				'asteroidm' => '/server/model/ships/terrain/asteroidM.php',  
@@ -3424,6 +3447,8 @@ spl_autoload_register(
 						'altarus_wi' => '/server/model/ships/whatif/Altarus_WI.php',
 						'balvarus_wi' => '/server/model/ships/whatif/Balvarus_WI.php',
 						'dargarian_wi' => '/server/model/ships/whatif/Dargarian_WI.php',
+						'dargarien_wi' => '/server/model/ships/whatif/Dargarien_WI.php',
+						'dargarion_wi' => '/server/model/ships/whatif/Dargarion_WI.php',
 						'darius_wi' => '/server/model/ships/whatif/Darius_WI.php',
 						'elutai_wi' => '/server/model/ships/whatif/Elutai_WI.php',
 						'mograte_wi' => '/server/model/ships/whatif/Mograte_WI.php',

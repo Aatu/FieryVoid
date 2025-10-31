@@ -259,3 +259,191 @@ GraviticCutter.prototype.hasMaxBoost = function () {
 GraviticCutter.prototype.getMaxBoost = function () {
     return this.maxBoostLevel;
 };
+
+var HypergravitonBeam = function HypergravitonBeam(json, ship) {
+    Gravitic.call(this, json, ship);
+};
+HypergravitonBeam.prototype = Object.create(Gravitic .prototype);
+HypergravitonBeam.prototype.constructor = HypergravitonBeam;
+
+HypergravitonBeam.prototype.initBoostableInfo = function () {
+    // Needed because it can change during initial phase
+    // because of adding extra power.
+
+    if (window.weaponManager.isLoaded(this)) {
+
+    } else {
+        var count = shipManager.power.getBoost(this);
+
+        for (var i = 0; i < count; i++) {
+            shipManager.power.unsetBoost(null, this);
+        }
+    }
+    return this;
+};
+
+HypergravitonBeam.prototype.clearBoost = function () {
+    for (var i in system.power) {
+        var power = system.power[i];
+        if (power.turn != gamedata.turn) continue;
+
+        if (power.type == 2) {
+            system.power.splice(i, 1);
+
+            return;
+        }
+    }
+};
+
+var HypergravitonBlaster = function HypergravitonBlaster(json, ship) {
+    Gravitic.call(this, json, ship);
+};
+HypergravitonBlaster.prototype = Object.create(Gravitic .prototype);
+HypergravitonBlaster.prototype.constructor = HypergravitonBlaster;
+
+HypergravitonBlaster.prototype.initBoostableInfo = function () {
+    // Needed because it can change during initial phase
+    // because of adding extra power.
+
+    if (window.weaponManager.isLoaded(this)) {
+
+    } else {
+        var count = shipManager.power.getBoost(this);
+
+        for (var i = 0; i < count; i++) {
+            shipManager.power.unsetBoost(null, this);
+        }
+    }
+    return this;
+};
+
+HypergravitonBlaster.prototype.clearBoost = function () {
+    for (var i in system.power) {
+        var power = system.power[i];
+        if (power.turn != gamedata.turn) continue;
+
+        if (power.type == 2) {
+            system.power.splice(i, 1);
+
+            return;
+        }
+    }
+};
+
+var MedAntigravityBeam = function MedAntigravityBeam(json, ship) {
+    Gravitic.call(this, json, ship);
+};
+MedAntigravityBeam.prototype = Object.create(Gravitic.prototype);
+MedAntigravityBeam.prototype.constructor = MedAntigravityBeam;
+
+MedAntigravityBeam.prototype.initializationUpdate = function() {
+	if(this.firingMode == 2){
+		this.data["Shots Remaining"] = this.guns - this.fireOrders.length;
+	} else {
+		delete this.data["Shots Remaining"];
+	}
+	return this;
+};
+
+MedAntigravityBeam.prototype.doMultipleFireOrders = function (shooter, target, system) {
+
+    var shotsOnTarget = 1; //we're only ever allocating one shot at a time for this weapon.
+
+    if (this.fireOrders.length > 0) {
+        if (this.fireOrders.length >= this.guns) {
+            // All guns already fired → retarget one gun by removing oldest fireorder.
+            this.fireOrders.splice(0, 1);
+        }
+    } 
+
+    var fireOrdersArray = []; // Store multiple fire orders
+
+    for (var s = 0; s < shotsOnTarget; s++) {
+        var fireid = shooter.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
+        var calledid = -1; //Raking, cannot called shot.       
+
+        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
+        if(chance < 1) continue;
+
+        var fire = {
+            id: fireid,
+            type: 'normal',
+            shooterid: shooter.id,
+            targetid: target.id,
+            weaponid: this.id,
+            calledid: calledid,
+            turn: gamedata.turn,
+            firingMode: this.firingMode,
+            shots: 1,
+            x: "null",
+            y: "null",
+            damageclass: 'Sweeping', 
+            chance: chance,
+            hitmod: 0,
+            notes: "Split"
+        };
+        
+        fireOrdersArray.push(fire); // Store each fire order
+    }
+    
+    return fireOrdersArray; // Return all fire orders
+};
+
+var AntigravityBeam = function AntigravityBeam(json, ship) {
+    Gravitic.call(this, json, ship);
+};
+AntigravityBeam.prototype = Object.create(Gravitic.prototype);
+AntigravityBeam.prototype.constructor = AntigravityBeam;
+
+AntigravityBeam.prototype.initializationUpdate = function() {
+	if(this.firingMode == 2){
+		this.data["Shots Remaining"] = this.guns - this.fireOrders.length;
+	} else {
+		delete this.data["Shots Remaining"];
+	}
+	return this;
+};
+
+AntigravityBeam.prototype.doMultipleFireOrders = function (shooter, target, system) {
+
+    var shotsOnTarget = 1; //we're only ever allocating one shot at a time for this weapon.
+
+    if (this.fireOrders.length > 0) {
+        if (this.fireOrders.length >= this.guns) {
+            // All guns already fired → retarget one gun by removing oldest fireorder.
+            this.fireOrders.splice(0, 1);
+        }
+    } 
+
+    var fireOrdersArray = []; // Store multiple fire orders
+
+    for (var s = 0; s < shotsOnTarget; s++) {
+        var fireid = shooter.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
+        var calledid = -1; //Raking, cannot called shot.       
+
+        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
+        if(chance < 1) continue;
+
+        var fire = {
+            id: fireid,
+            type: 'normal',
+            shooterid: shooter.id,
+            targetid: target.id,
+            weaponid: this.id,
+            calledid: calledid,
+            turn: gamedata.turn,
+            firingMode: this.firingMode,
+            shots: 1,
+            x: "null",
+            y: "null",
+            damageclass: 'Sweeping', 
+            chance: chance,
+            hitmod: 0,
+            notes: "Split"
+        };
+        
+        fireOrdersArray.push(fire); // Store each fire order
+    }
+    
+    return fireOrdersArray; // Return all fire orders
+};

@@ -7098,7 +7098,11 @@ class AmmoMissileX extends AmmoMissileTemplate{
 				$fireOrder->pubnotes .= "<br> No effect on ships with Advanced Armor.";				
 				return; //no effect on Advanced Armor
 			}
-				
+/*			if ($system->hardAdvancedArmor){  // GTS Hardened Advanced Armor
+				$fireOrder->pubnotes .= "<br> No effect on ships with Hardened Advanced Armor.";				
+				return; //no effect on Hardened Advanced Armor
+			}
+*/				
 			$effectSensors = Dice::d(6,1);//Strength of effect: 1d6
 			$fireOrder->pubnotes .= "<br> Sensors reduced by $effectSensors next turn.";
 
@@ -7277,6 +7281,7 @@ class AmmoMissileFD extends AmmoMissileTemplate{
     {	
 		if(!($ship instanceOf FighterFlight)) return;
 		if($system->advancedArmor) return;
+//		if($system->hardAdvancedArmor) return;  // GTS Hardened Advanced Armor
 		if($ship->superheavy){
 			$system->critRollMod+=3;
 		}else{

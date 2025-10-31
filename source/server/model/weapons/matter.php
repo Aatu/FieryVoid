@@ -795,5 +795,128 @@ class UnreliableMatterCannon extends MatterCannon{
 
 
 
+
+class UltraMatterCannon extends Matter{
+    /*Kirishiac Weapon*/
+        public $name = "UltraMatterCannon";
+        public $displayName = "Ultra Matter Cannon";
+		public $iconPath = "UltraMatterCannon.png";   
+        public $animation = "bolt";
+        public $animationColor = array(250, 250, 190);
+        public $priority = 9;   
+
+		public $factionAge = 3;//Ancient weapon, which sometimes has consequences!
+        public $loadingtime = 1;
+        
+        public $rangePenalty = 0.33;
+        public $fireControl = array(0, 5, 5); // fighters, <mediums, <capitals 
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+        {
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 13;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 7;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function getDamage($fireOrder){        return Dice::d(10, 5)+5;   }
+        public function setMinDamage(){     $this->minDamage = 10 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 55 ;      }
+} //UltraMatterCannon
+
+
+
+class GlancingRam extends Weapon{
+
+        public $name = "GlancingRam";
+        public $displayName = "Glancing Ram";
+        public $iconPath = "GlancingRam.png"; 		
+		
+        public $animationColorArray = array(1=>array(245, 245, 44), 2=>array(245, 245, 44));
+		public $animation = "trail";
+        public $priorityArray = array(1=>7, 2=>7); // Matter weapon
+
+		public $factionAge = 3;//Ancient weapon, which sometimes has consequences!
+
+		public $range = 0.1;
+        
+        public $loadingtimeArray = array(1=>1, 2=>1);
+        public $rangePenaltyArray = array(1=>0, 2=>0);
+		public $firingModes = array(1 =>'Glancing Ram', 2=>'Direct Ram');
+        
+        public $fireControlArray = array(1=>array(0, 0, 0), 2=>array(null, 0, 0)); // fighters, <mediums, <capitals
+        
+        public $damageTypeArray = array(1=>"Standard", 2=>"Standard"); //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+        public $weaponClassArray = array(1=>'Matter', 2=>'Matter');
+
+		function __construct($startArc, $endArc, $nrOfShots = 1){
+            $this->defaultShots = $nrOfShots;
+            $this->shots = $nrOfShots;
+            parent::__construct(0, 1, 0, $startArc, $endArc);
+        }
+
+		public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);
+			$this->data["Special"] = "Ignores armor, does not overkill.";
+			$this->data["Special"] .= "<br>Glancing Ram does 1d10 matter damage.";
+			$this->data["Special"] .= "<br>Direct Ram does damage equal to undestroyed structure.";
+			$this->data["Special"] .= "<br>If targeted system not destroyed, Warrior takes damage equal to twice the system's armor value.";
+			$this->data["Special"] .= "<br>If targeted system not destroyed, Warrior rolls for dropout at a +4 penalty.";
+			$this->data["Special"] .= "<br>Direct Ram may not be used against fighters.";
+		}
+
+		public function getDamage($fireOrder){
+        	switch($this->firingMode){ 
+            	case 1:
+                	return Dice::d(10, 1);
+			    			break;
+            	case 2:
+            	   	return Dice::d(10, 1);
+			    			break;
+        	}
+		}
+
+		public function setMinDamage(){
+				switch($this->firingMode){
+						case 1:
+								$this->minDamage = 1;
+								break;
+						case 2:
+								$this->minDamage = 1;
+								break;
+				}
+				$this->minDamageArray[$this->firingMode] = $this->minDamage;
+		}							
+		
+		public function setMaxDamage(){
+				switch($this->firingMode){
+						case 1:
+								$this->maxDamage = 10;
+								break;
+						case 2:
+								$this->maxDamage = 10;
+								break;
+				}
+				$this->maxDamageArray[$this->firingMode] = $this->maxDamage;
+		}
+
+		public function stripForJson(){
+			$strippedSystem = parent::stripForJson();
+			$strippedSystem->data = $this->data;
+			$strippedSystem->minDamage = $this->minDamage;
+			$strippedSystem->minDamageArray = $this->minDamageArray;
+			$strippedSystem->maxDamage = $this->maxDamage;
+			$strippedSystem->maxDamageArray = $this->maxDamageArray;				
+
+			return $strippedSystem;
+		}
+
+		
+    } // endof GlancingRam	
+
 	
 ?>
