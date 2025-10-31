@@ -63,7 +63,7 @@ window.ShipDestroyedAnimation = function () {
 
     ShipDestroyedAnimation.playExplosionSound = function () {
         if (!ShipDestroyedAnimation.cachedAudio) {
-            ShipDestroyedAnimation.cachedAudio = new Audio("/client/renderer/animationStrategy/animation/sound/ShipExplosionAudio.wav");
+            ShipDestroyedAnimation.cachedAudio = new Audio("client/renderer/animationStrategy/animation/sound/ShipExplosionAudio.wav");
             ShipDestroyedAnimation.cachedAudio.volume = 0.1;
         }
 
