@@ -215,10 +215,10 @@ class SystemInfoButtons extends React.Component {
 		system.doActivate();
 		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 	}	
-	unactivate(e) {
+	deactivate(e) {
         e.stopPropagation(); e.preventDefault();
 		const {ship, system} = this.props;
-		system.doUnactivate();
+		system.doDeactivate();
 		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 	}
 	
@@ -520,7 +520,7 @@ class SystemInfoButtons extends React.Component {
 				{canSelfIntercept(ship, system) && <Button title="Allow interception (RMB = All systems selected)" onClick={this.declareSelfIntercept.bind(this)} onContextMenu={this.declareSelfInterceptAll.bind(this)} img="./img/selfIntercept.png"></Button>}
 				
 				{canActivate(ship, system) && <Button onClick={this.activate.bind(this)} img="./img/systemicons/Specialistclasses/select.png"></Button>}
-				{canUnactivate(ship, system) && <Button onClick={this.unactivate.bind(this)} img="./img/systemicons/Specialistclasses/unselect.png"></Button>}		
+				{canDeactivate(ship, system) && <Button onClick={this.deactivate.bind(this)} img="./img/systemicons/Specialistclasses/unselect.png"></Button>}		
 
 				{canAAdisplayCurrClass(ship, system) && <Button title={getAAcurrClassName(ship,system)} img={getAAcurrClassImg(ship,system)}></Button>}
 				{canAAdisplayCurrClass(ship, system) && <Button title="Previous" onClick={this.prevCurrClass.bind(this)} img="./img/systemicons/Specialistclasses/iconPrev.png"></Button>}
@@ -642,7 +642,7 @@ export const canDoAnything = (ship, system) => canOffline(ship, system) || canOn
 	|| canRemoveFireOrder(ship, system) || canChangeFiringMode(ship, system)
 	|| canSelfIntercept(ship, system) || canAA(ship,system) || canBFCP(ship, system) || canSpec(ship,system) || canTSShield(ship,system) 
 	|| canThoughtShield(ship,system) || canTSShieldGen(ship,system) || canThoughtShieldGen(ship,system) 
-	|| canSRdisplayCurrSystem(ship,system) || canToggle(ship, system);
+	|| canSRdisplayCurrSystem(ship,system) || canActivate(ship, system) || canDeactivate(ship, system);
 
 const canOffline = (ship, system) => gamedata.gamephase === 1 && (system.canOffLine || system.powerReq > 0) && !shipManager.power.isOffline(ship, system) && !shipManager.power.getBoost(system) && !weaponManager.hasFiringOrder(ship, system);
 
@@ -689,9 +689,8 @@ const canChangeFiringMode = (ship, system) => system.weapon  && ((gamedata.gamep
 //can declare eligibility for interception: charged, recharge time >1 turn, intercept rating >0, no firing order
 const canSelfIntercept = (ship, system) => system.weapon && weaponManager.canSelfInterceptSingle(ship, system);
 
-const canToggle = (ship, system) => system.canToggle(); 
-const canActivate = (ship, system) => canToggle(ship, system) && system.canActivate();
-const canUnactivate = (ship, system) => canToggle(ship, system) && system.canUnactivate(); 
+const canActivate = (ship, system) => system.canActivate();
+const canDeactivate = (ship, system) => system.canDeactivate();  
 
 const getFiringModes = (ship, system, changeFiringMode, allChangeFiringMode) => {
 	if (system.parentId >= 0) {
