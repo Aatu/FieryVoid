@@ -1,7 +1,7 @@
 "use strict";
 
 window.HexTargetedWeaponFireAnimation = function () {
-
+/*
     function HexTargetedWeaponFireAnimation(time, movementAnimations, shipIconContainer, turn, particleEmitterContainer, logAnimation) {
 
         this.duration = 0;
@@ -25,6 +25,27 @@ window.HexTargetedWeaponFireAnimation = function () {
             this.duration += buildAnimation.call(this, fire, this.duration + this.time);
         }, this);
     }
+*/
+
+function HexTargetedWeaponFireAnimation(time, movementAnimations, shipIconContainer, turn, particleEmitterContainer, logAnimation, fires) {
+
+    this.duration = 0;
+    this.time = time || 0;
+    this.animations = [];
+    this.shipIconContainer = shipIconContainer;
+    this.movementAnimations = movementAnimations;
+    this.particleEmitterContainer = particleEmitterContainer;
+    this.turn = turn;
+    this.logAnimation = logAnimation;
+
+    // 🔧 Use the provided fires (per ship) if given, else fall back to global.
+    this.allFire = fires || weaponManager.getAllHexTargetedBallistics();
+
+    this.allFire.forEach(function (fire) {
+        this.logAnimation.addLogEntryFire(fire.fireOrder, this.time + this.duration);
+        this.duration += buildAnimation.call(this, fire, this.duration + this.time);
+    }, this);
+}
 
     HexTargetedWeaponFireAnimation.prototype = Object.create(Animation.prototype);
 

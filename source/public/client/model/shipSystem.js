@@ -44,15 +44,11 @@ ShipSystem.prototype.checkSelfInterceptSystem = function () {
 	return false;
 };  
 
-ShipSystem.prototype.canToggle = function () {
-	return false;
-}; 
-
 ShipSystem.prototype.canActivate = function () {
 	return false;
 };  
 
-ShipSystem.prototype.canUnactivate = function () {
+ShipSystem.prototype.canDeactivate = function () {
 	return false;
 };  
 

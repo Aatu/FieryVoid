@@ -691,24 +691,18 @@ var Marines = function Marines(json, ship) {
 Marines.prototype = Object.create(Weapon.prototype);
 Marines.prototype.constructor = Marines;
 
+
 var SecondSight = function SecondSight(json, ship) {
     Weapon.call(this, json, ship);
 };
 SecondSight.prototype = Object.create(Weapon.prototype);
 SecondSight.prototype.constructor = SecondSight;
-
-SecondSight.prototype.canToggle = function () { 
-    if(gamedata.gamephase == 3) return true;		
-	return false;	
-};
 	
 SecondSight.prototype.canActivate = function () { 
 	if(gamedata.gamephase == 3 && this.fireOrders.length == 0) return true;
 	return false; 
 };  
 
-
-//This creates Fire Orders for Modes 1 and 3.
 SecondSight.prototype.doActivate = function () { 
 
 		var ship = this.ship;
@@ -730,7 +724,7 @@ SecondSight.prototype.doActivate = function () {
 			damageclass: 'Electromagnetic',
 			chance: 100,
 			hitmod: 0,
-			notes: "SecondSight" //Used to identify split targeting.
+			notes: "SecondSight" 
 		};
 				
 		// Push to arrays / fire orders
@@ -743,19 +737,12 @@ var ThoughtWave = function ThoughtWave(json, ship) {
 };
 ThoughtWave.prototype = Object.create(Weapon.prototype);
 ThoughtWave.prototype.constructor = ThoughtWave;
-
-ThoughtWave.prototype.canToggle = function () { 
-    if(gamedata.gamephase == 1) return true;		
-	return false;	
-};
 	
 ThoughtWave.prototype.canActivate = function () { 
 	if(gamedata.gamephase == 1 && this.fireOrders.length == 0) return true;
 	return false; 
 };  
 
-
-//This creates Fire Orders for Modes 1 and 3.
 ThoughtWave.prototype.doActivate = function () { 
 
 		var ship = this.ship;
@@ -777,7 +764,7 @@ ThoughtWave.prototype.doActivate = function () {
 			damageclass: 'Plasma',
 			chance: 100,
 			hitmod: 0,
-			notes: "Thoughtwave" //Used to identify split targeting.
+			notes: "Thoughtwave" 
 		};
 				
 		// Push to arrays / fire orders

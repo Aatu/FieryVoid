@@ -250,7 +250,7 @@ AmmoMissileRackS.prototype.calculateSpecialRangePenalty = function (distance) { 
 }; 
 
  //For HARM Missile
-AmmoMissileRackS.prototype.calculateSpecialHitChanceMod = function (target) {
+AmmoMissileRackS.prototype.calculateSpecialHitChanceMod = function (shooter, target) {
 	var mod = 0;
 	mod = ew.getAllOEWandCCEW(target);
 	return mod; 

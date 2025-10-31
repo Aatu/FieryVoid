@@ -5858,7 +5858,7 @@ class MindriderHangar extends ShipSystem{
 				}else{
 					$this->data["Special"] = "Jammer ability, even against Ancients.";
 					$this->data["Special"] .= "<br>Provides EM Shield.";
-					$this->data["Special"] .= "<br>Toggle 'Shading Mode' for NEXT turn by boosting/unboosting this system during Deployment or Firing Phases.";														
+					$this->data["Special"] .= "<br>Toggle 'Shading Mode' for NEXT turn by boosting/unboosting this system during Deployment or CURRENT Firing Phase.";														
 					$this->data["Special"] .= "<br>When Shading is active, ship cannot be detected if it is over 15 hexes away from all enemy units at the start or end of movement.";
 					$this->data["Special"] .= "<br>EM Shield ratings are also doubled for hit chance modifier when Shaded.";									
 					$this->data["Special"] .= "<br>HOWEVER, ship cannot fire any weapons on a turn when Shading was active.";
@@ -5891,51 +5891,6 @@ class MindriderHangar extends ShipSystem{
 			return $jammerValue;
 		}
 
-/*
-		public function generateIndividualNotes($gameData, $dbManager){ //dbManager is necessary for Initial phase only
-			$ship = $this->getUnit();
-			if ($ship instanceof FighterFlight) return; //Fighter units don't need notes, they can't be invisible/detected.
-			if($ship->isDestroyed()) return; //No point generating new notes if ship destroyed.
-			if($ship->getTurnDeployed($gameData) > $gameData->turn)	return; //Ship not deployed yet.		
-
-			$this->onIndividualNotesLoaded($gameData); //Check current detection status.
-
-			switch($gameData->phase){
-
-				case 4: //Post-Firing phase
-
-					if ($this->getBoostLevel($gameData->turn) > 0) {
-						if ($this->isDetected($ship, $gameData)) {
-							$notekey   = 'detected';
-							$noteHuman = '4-detectedActive';
-							$noteValue = 1;								
-						} else {
-							$notekey   = 'undetected';
-							$noteHuman = '4-undetectedActive';
-							$noteValue = 1;							
-						}
-					} else {
-						$notekey   = 'detected';
-						$noteHuman = '4-NotActive'; //Not boosted yet or was boosted and then turned off.
-						$noteValue = 0;						
-					}
-
-					$this->individualNotes[] = new IndividualNote(
-						-1,
-						TacGamedata::$currentGameID,
-						$gameData->turn,
-						$gameData->phase,
-						$ship->id,
-						$this->id,
-						$notekey,
-						$noteHuman,
-						$noteValue
-					);				
-				break;			
-						
-			}
-		} //endof function generateIndividualNotes	
-*/		
 
 		public function onIndividualNotesLoaded($gamedata){
 			//Sort notes by turn, and then phase so latest detection note is always last.
