@@ -834,7 +834,7 @@ body.phase1 .shipwindow  .system.boosted .minus{
 	margin:auto;
 	background-repeat:no-repeat;
 	background-position:center;
-	
+    background-size: contain; /* makes the image fit entirely */	
 	
 }
 
