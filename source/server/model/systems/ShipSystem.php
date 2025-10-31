@@ -1274,9 +1274,7 @@ class ShipSystem {
 
                 // GTS: hardened advanced armor check for sustained weapons
 				if($this->hardAdvancedArmor){
-echo "hardAdvancedArmor is: " . $this->hardAdvancedArmor . "\n";
 					$halfArmour = floor($this->armour/2);
-echo "halfArmour is: " . $halfArmour . "\n";
 					$effectiveArmor = max($halfArmour, $effectiveArmor - $armourPiercedAlready); //Reduce armour by amount pierced n previous turns by Sustained shots.
 				}else{
 					$effectiveArmor = max(0, $effectiveArmor - $armourPiercedAlready); //Reduce armour by amount pierced n previous turns by Sustained shots.

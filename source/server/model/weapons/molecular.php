@@ -11,24 +11,6 @@
 
     }
 
-
-
-
-/*
-class WeaponMOL  {	
-	public static function isTargetMOLResistant($ship,$system = null){ //returns true if target has Hardened Advanced Armor
-		if($ship){
-			$MOLHardened = $ship->getMOLHardened();
-			if($ship->hardAdvancedArmor) return true;
-			if($MOLHardened) return true;
-		}else if ($system){
-			if($system->hardAdvancedArmor) return true;
-		}
-		return false;
-	}
-}
-*/
-
     class FusionCannon extends Molecular{
         public $name = "fusionCannon";
         public $displayName = "Fusion Cannon";
