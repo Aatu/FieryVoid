@@ -275,7 +275,8 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
 
         <h3 id="terrain" >Terrain</h3>
         <ul>
-            <li><b>Asteroids:</b> Added in Create Game or manually from Terrain faction list. They block line of sight and cause ramming damage to non-fighters moving through them (damage applies end of turn).</li>
+            <li><b>Asteroids:</b> Added in Create Game or manually from Terrain faction list. They block line of sight and cause 1d10 * Speed raking damage to non-fighters moving through them (applied at same time as other Ramming Attacks).  
+            If a ship ENDS its movement on an asteroid it will automatically ram it fully, as the Asteroid is an Enormous unit (see above).</li>
             <li><b>Manual Placement:</b> If you want to have full control over where Terrain is placed, you can create a new player slot for yourself at game creation and pick the terrain you want from the Terrain faction in Other.  
             Then, providing you have set an appropriately wide deployment zone, you can just place these like any other ship on Turn 1.</li>            
             <li><b>Moons:</b> Larger than asteroids (multiple hexes). Units moving into a moon's area automatically crash into it during the Firing Phase.</li>
