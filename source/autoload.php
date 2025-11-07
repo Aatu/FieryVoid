@@ -3342,8 +3342,10 @@ spl_autoload_register(
 				'volleylaser' => '/server/model/weapons/pulse.php',
 				'shademodulator' => '/server/model/weapons/supportWeapons.php',                 
                 'shadingfield' => '/server/model/systems/baseSystems.php',
-                'transversedrive' => '/server/model/weapons/supportWeapons.php',                    
-
+                'transversedrive' => '/server/model/weapons/supportWeapons.php',
+                
+                'increasedrecharge1' => '/server/model/cricialClasses.php',
+                'damagesystem' => '/server/model/cricialClasses.php',
 
 				//Kirishiac
 				'ultramattercannon' => '/server/model/weapons/matter.php',								
