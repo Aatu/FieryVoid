@@ -224,7 +224,8 @@ window.BallisticIconContainer = function () {
 				'Proximity Launcher': { type: 'hexRed',text: 'Proximity Laser',color: '#e6140a' },
 				'Thought Wave':    { type: 'hexPurple',text: 'Thought Wave',   color: '#bc3782' },
 				'1-Blanket Shield':    { type: 'hexGreen',text: 'Shade Modulator',   color: '#008000'},
-				'3-Blanket Shade':    { type: 'hexYellow',text: 'Shade Modulator',   color: '#787800'},				
+				'3-Blanket Shade':    { type: 'hexYellow',text: 'Shade Modulator',   color: '#787800'},
+				'Transverse Jump':    { type: 'hexBlue',text: 'Transverse Jump',   color: '#787800'},				
 			};
 
 			const match = modeMap[modeName];
@@ -445,7 +446,8 @@ window.BallisticIconContainer = function () {
 			const modeColorMap = {
 				'Shredder': 'blue',
 				'Defensive Plasma Web': 'green',
-				'Anti-Fighter Plasma Web': 'green'
+				'Anti-Fighter Plasma Web': 'green',
+				'Transverse Jump': 'blue'
 			};
 
 			if (modeColorMap[modeName]) {

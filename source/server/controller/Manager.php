@@ -1213,27 +1213,31 @@ class Manager{
     
         return $ships;
     }
-
-
+  
+    public static function insertIndividualNote($note){                
+		self::$dbManager->insertIndividualNote($note);
+    }  
+    
+    public static function insertSingleMovement($gameid, $shipid, $movement){                
+		self::$dbManager->insertMovement($gameid, $shipid, $movement);
+    }        
+    
     public static function insertSingleFiringOrder($gamedata, $fireOrder)
     {          
 		self::$dbManager->submitSingleFireorder($gamedata->id, $fireOrder);
 		
     }
     
-    
+    //Used by Pakmara Plasma Web to retrieve fire orders in workflow and get most recent id etc
     public static function retrieveFiringOrdersForWeapon($gamedata, $shooterid, $weaponid)
     {	
 		$fireOrders = self::$dbManager->getFireOrdersForWeapon($gamedata->id, $shooterid, $weaponid, $gamedata->turn);	
 		return $fireOrders;
     }    
 
+    //Used by systems that boost outside of Initial Orders to prevent duplication of power entries.
     public static function removePowerEntriesForTurn($gameid, $shipid, $systemid, $turn){              
 		self::$dbManager->removePowerEntriesForTurn($gameid, $shipid, $systemid, $turn);	
     }
-  
-    public static function insertIndividualNote($note){                
-		self::$dbManager->insertIndividualNote($note);
-    }    
-    
+
 }

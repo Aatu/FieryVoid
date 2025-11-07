@@ -5946,21 +5946,21 @@ class MindriderHangar extends ShipSystem{
 	}	
 
 
-		public function checkStealthNextPhase($gamedata){				
+		public function checkStealthNextPhase($gamedata, $range = 15){				
 				$ship = $this->getUnit();
 					if($gamedata->phase == 1){ 
 						$noteHuman1 = 'D-detectedActive';
 						$noteHuman2 = 'D-undetectedActive';						
 						$noteHuman3 = 'D-NotActive';						
 					}else{
-						$noteHuman1 = '3-detectedActive';
-						$noteHuman2 = '3-undetectedActive';						
-						$noteHuman3 = '3-NotActive';						
+						$noteHuman1 = '2-detectedActive';
+						$noteHuman2 = '2-undetectedActive';						
+						$noteHuman3 = '2-NotActive';						
 					}
 
 				//If we're checking during DeploymentGamePhase->Advance (actually Phase 1 at this point) we need to check last turn as well for boost, as this will not have been saved yet for current turn.					
 				if ($gamedata->phase ==1 && $this->getBoostLevel($gamedata->turn-1) > 0 || $this->getBoostLevel($gamedata->turn) > 0) {
-					if ($this->isDetected($ship, $gamedata)) {
+					if ($this->isDetected($ship, $gamedata, $range)) {
 						$notekey   = 'detected';
 						$noteHuman = $noteHuman1;
 						$noteValue = 1;							
@@ -5992,7 +5992,7 @@ class MindriderHangar extends ShipSystem{
 		}
 
 
-		private function isDetected($ship, $gameData) {
+		private function isDetected($ship, $gameData, $range) {
 	
 			$blockedHexes = $gameData->getBlockedHexes(); //Just do this once outside loop
 			$pos = $ship->getHexPos(); //Just do this once outside loop	
@@ -6010,7 +6010,7 @@ class MindriderHangar extends ShipSystem{
 				$noLoS = !empty($blockedHexes) && Mathlib::checkLineOfSight($pos, $otherPos, $blockedHexes);
 
 				// If within detection range, and LoS not blocked the ship is detected
-				if($distance <= 15 && !$noLoS){
+				if($distance <= $range && !$noLoS){
 					return true;
 				}		
 			}

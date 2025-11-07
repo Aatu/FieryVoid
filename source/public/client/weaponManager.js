@@ -610,6 +610,13 @@ window.weaponManager = {
         var shooterFacing = shipManager.getShipHeadingAngle(shooter);
         var targetCompassHeading = mathlib.getCompassHeadingOfPoint(shipManager.getShipPosition(shooter), position);
 
+        //Some weapons like Transverse Drive have special arcs, refer to weapon function to check these separately.
+        if(weapon.specialArcs){
+            var onArc =  weapon.isPosOnSpecialArc(shooter, position);
+            //confirm.error("Target hex is not in arc.");	          
+            return onArc;
+        }
+
         var arcs = shipManager.systems.getArcs(shooter, weapon);
         arcs.start = mathlib.addToDirection(arcs.start, shooterFacing);
         arcs.end = mathlib.addToDirection(arcs.end, shooterFacing);
@@ -2214,7 +2221,7 @@ window.weaponManager = {
         const shortLogTypes = [
             "HyperspaceJump", "JumpFailure", "SelfDestruct", "ContainmentBreach",
             "Reactor", "Sabotage", "WreakHavoc", "Capture", "Rescue", "LimpetBore", 
-            "MagazineExplosion", "NoHangar", "TerrainCollision", "HalfPhase"
+            "MagazineExplosion", "NoHangar", "TerrainCollision", "HalfPhase", "TranverseCrit"
         ];
     
         return shortLogTypes.includes(fire.damageclass);
