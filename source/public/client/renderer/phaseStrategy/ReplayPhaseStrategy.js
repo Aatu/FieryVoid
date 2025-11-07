@@ -165,7 +165,8 @@ window.ReplayPhaseStrategy = function () {
                         if (
                             anim instanceof BoltEffect ||
                             anim instanceof MissileEffect ||
-                            anim instanceof TorpedoEffect
+                            anim instanceof TorpedoEffect ||
+                            anim instanceof BlinkEffect
                         ) {
                             anim.playedLaunchSound = value;
                             anim.playedImpactSound = value;

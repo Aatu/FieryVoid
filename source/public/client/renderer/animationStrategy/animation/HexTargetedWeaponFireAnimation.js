@@ -98,6 +98,18 @@ function HexTargetedWeaponFireAnimation(time, movementAnimations, shipIconContai
         this.animations.push(cameraAnimation);
 
         switch (weapon.animation) {
+            //Could insert new animation/audio here for hex targeted weapons.
+            case 'blink':
+                shot = new BlinkEffect(this.particleEmitterContainer, {
+                    size: 20 * weapon.animationExplosionScale,
+                    origin: startPosition,
+                    target: endPosition,
+                    color: color,
+                    hit: hit,
+                    damage: 0,
+                    time: time
+                });
+            break;
             case 'ball':
             default:
                 shot = new TorpedoEffect(this.particleEmitterContainer, {
@@ -116,15 +128,15 @@ function HexTargetedWeaponFireAnimation(time, movementAnimations, shipIconContai
 
         this.animations.push(shot);
         if (hit || weapon instanceof ThoughtWave) {
-            var explosion = new Explosion(this.particleEmitterContainer, {
-                size: 60 * weapon.animationExplosionScale,
-                position: endPosition,
-                type: "emp",
-                color: new THREE.Color(weapon.animationColor[0] / 255, weapon.animationColor[1] / 255, weapon.animationColor[2] / 255), //Always use weapon colour - DK - 4 Jan 24
-                time: time + shot.getDuration()
-            });
-            this.animations.push(explosion);
-            duration += 1000;
+                var explosion = new Explosion(this.particleEmitterContainer, {
+                    size: 60 * weapon.animationExplosionScale,
+                    position: endPosition,
+                    type: "emp",
+                    color: new THREE.Color(weapon.animationColor[0] / 255, weapon.animationColor[1] / 255, weapon.animationColor[2] / 255), //Always use weapon colour - DK - 4 Jan 24
+                    time: time + shot.getDuration()
+                });
+                this.animations.push(explosion);
+                duration += 1000;  
         }
 
         return duration;
