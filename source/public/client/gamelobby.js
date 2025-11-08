@@ -432,7 +432,7 @@ window.gamedata = {
 	
 	/*checks fleet composition and displays alert with result*/
     checkChoices: function(){
-
+		/* //Do we need to block this
 		//block if player already has confirmed fleet (in any slot)
 		for (var i in gamedata.slots)  { //check all slots
 			var checkSlot = gamedata.slots[i];
@@ -444,7 +444,7 @@ window.gamedata = {
 				}
 			}
 		}
-
+		*/
 		var warningText = ""
 	    var checkResult = "";
 	    var problemFound = false;
