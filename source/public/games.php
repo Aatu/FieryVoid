@@ -101,6 +101,7 @@ $games = json_encode(Manager::getTacGames($userid), JSON_NUMERIC_CHECK);
     <div class="games-grid four-cols">
       <div>
         <h3>YOUR GAMES</h3>
+        <!--<div class="gamecontainer active subpanel"> Old version with subpanel -->
         <div class="gamecontainer active" style="background-color:#04161C;">
           <div class="notfound">No active games</div>
         </div>
