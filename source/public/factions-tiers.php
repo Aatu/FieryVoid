@@ -956,7 +956,21 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         as well as 1 point of Individual Shield Enhancement and 2 points of Individual Shade Enhancement on the same turn.</li>
         <li>Blanket firing modes are activated by clicking 'Select' when in that firing mode, whereas Individual modes require the targeting of a specific ally.</li>        
     <h5>Transverse Drive</h5>
-        <li>Currently the Torvalus do not have access to a functional Transverse Drive in Fiery Void, it is planned to add this in a later patch.</li> 
+        <li>This weapons fires in a special Pre-Firing phase, which will occur between Movement and Firing phases providing the Transverse Drive is fully charged.  
+            During this phase simply select a hex up to 3 hexes on a straight line to the selected ship and then commit your orders.  The ship will attempt a Transverse Jump before the Firing phase.</li>
+        <li>When attempting a Transverse Jump a number of things will then happen depending a d20 roll: 
+            <ul class="circle-list">
+                <li>1-16- The jump is successful and the Torvalus ship teleports to the new hex.</li>
+                <li>17 - The jump is successful but off-target, ship travels the number of hexes selected but 60 degrees counter-clockwise from intended direction.</li> 
+                <li>18 - The jump is successful but off-target, ship travels the number of hexes selected but 60 degrees clockwise from intended direction.</li> 
+                <li>19 - The jump is unsuccessful, nothing happens.</li>
+                <li>20 - The jump is unsuccessful, the ship does not move the Transverse Drive system has to roll for a critical hit.</li>                                                     
+            </ul>
+        </li>
+        <li>When a ship makes a transverse jump this also puts a strain on the Jump Drive (a separate system), and so a ship can suffer a catastrophic failure (e.g be destroyed) if the Jump Engine has sustained damage in the battle.
+            The chance of this failure is the % of the Jump Drive's health that has been lost.
+        </li>         
+        <li>Transverse Drive also has some interesting critical effects when damaged, including the effect whereby the ships Jump Drive takes d3 damage.</li>                      
     <h5>Agile/Jinking Ships</h5>
         <li>Torvalus ships are exceptionally maneuverable and this is reflected in even their largest ships having the Agile characteristic.  
             In addition, their Medium Ships have the ability to jink, an ability normally reserved only to Fighters.</li>                                                       

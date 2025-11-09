@@ -355,7 +355,7 @@ TransverseDrive.prototype = Object.create(Weapon.prototype);
 TransverseDrive.prototype.constructor = TransverseDrive;
 
 TransverseDrive.prototype.getDefensiveHitChangeMod = function (target, shooter, weapon) {
-	if(weapon.ballistic && this.fireOrders.length > 0){
+	if(weapon.ballistic && this.fireOrders.length > 0 && gamedata.gamephase == 3){
 		var fireOrder = this.fireOrders[0];
 
 		const notes = fireOrder.notes; // e.g. "shooter: 2,-2 target: 2,0 dis: 2"

@@ -84,13 +84,11 @@ $games = json_encode(Manager::getTacGames($userid), JSON_NUMERIC_CHECK);
     </div>
 
     <div class="resources">
-      <h3>Latest Updates — October 2025</h3>
+      <h3>Latest Updates — November 2025</h3>
       <ul class="updates-list">
-        <li><strong>Torvalus Speculators (Beta)</strong> - New Ancient Faction added, the Torvalus Speculators.</li>          
-        <li><strong>Server Stability Fixes</strong> - Hopefully this means less web page errors!</li>
-        <li><strong>Sound Effects</strong> - Sound effects added to Replays, these can be toggled on and off using button or by pressing 's'.</li>        
-        <li><strong>Sustained Mode Fix</strong> - Sustained weapons should now overcharge correctly on Turn 1.</li>         
-        <li><strong>Ship Images</strong> - More factions have received improvements to their ship sprites including Abbai, Grome and the Nova Starfury.</li>                                 
+        <li><strong>Torvalus Speculators</strong> - Transverse Drive added to complete final system for this new Ancient Faction.</li>          
+        <li><strong>Pre-Firing Phase</strong> - Whole new phase added to Fiery Void combat order, at the moment only Transverse Drive uses this to jump before Firing.</li>
+        <li><strong>LoS Ruler</strong> - Ship tooltips will no longer display while the Ruler tool is active, to help with visual clarity.</li>                                            
         <li><strong>General Fixes</strong> - Many other small fixes. Thanks for the reports!</li>                                                    
         <!--<li><strong>6 Jun</strong> - Overlay colors, deployment zone tweaks, UI fixes. Pulsar mine fixed, tooltip/text readability improved.</li>-->
       </ul>

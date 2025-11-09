@@ -767,7 +767,7 @@ class TransverseDrive extends Weapon implements SpecialAbility, DefensiveSystem{
     public $name = "TransverseDrive";
     public $displayName = "Transverse Drive";
 	public $noProjectile = true;	
-	public $specialAbilities = array("PreFire");
+	public $specialAbilities = array("PreFiring");
 	public $specialAbilityValue = true; //so it is actually recognized as special ability!  		
 	
 	public $damageType = "Standard"; //irrelevant, really
@@ -791,12 +791,12 @@ class TransverseDrive extends Weapon implements SpecialAbility, DefensiveSystem{
 	public $firingModes = array(
 		1 => "Transverse Jump"
 	);
+	public $preFires = true;
 	protected $shootsStraight = true; //Denotes for Front End to use Line Arcs, not circles.
 	protected $specialArcs = true;	//Denotes for Front End to redirect to weapon specific function to get arcs.			
 	public $repairPriority = 6;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
 	private $baseLoadingTime = 2; //Can be altered by a specific critical, so we need to remember it's base value.
-    	
-	//public $autoFireOnly = true;
+
 
 	public function onConstructed($ship, $turn, $phase){
 		parent::onConstructed($ship, $turn, $phase);
@@ -837,9 +837,7 @@ class TransverseDrive extends Weapon implements SpecialAbility, DefensiveSystem{
 		}
 
 		if(TacGamedata::$currentPhase == -1){ //Only adjust oading during Deployment loading of new turn.
-//echo "Value of critsLastTurn: " . $critsLastTurn . "\n";	//1		
-//echo "Value of this->loading->loading: " . $loading->loading . "\n"; //2
-//echo "Value of this->loading->loadingtime: " . $loading->loadingtime . "\n"; //2
+
 			if($loading->loadingtime == $loading->loading){ //If Transverse Drive was fully charged, keep it fully charged.
 				$this->turnsloaded = $loading->loading + $critsLastTurn;
 			}else{
@@ -874,7 +872,7 @@ class TransverseDrive extends Weapon implements SpecialAbility, DefensiveSystem{
 		// Find the first normal fire order
 		$hasFireOrder = null;
 		foreach ($firingOrders as $fireOrder) {
-			if ($fireOrder->type === 'normal') {
+			if ($fireOrder->type === 'prefiring') {
 				$hasFireOrder = $fireOrder;
 				break;
 			}
@@ -933,12 +931,10 @@ class TransverseDrive extends Weapon implements SpecialAbility, DefensiveSystem{
 		$shipPos = $ship->getHexPos(); 		
 		
         $rolled = Dice::d(20);
-//$rolled = 20; //Test value
 		
 		$targetPos = new OffsetCoordinate($fireOrder->x, $fireOrder->y);
         $dis = mathlib::getDistanceHex($shipPos, $targetPos); //How many hexes did player choose to jump. 
-//var_dump($targetPos);
-//echo "Value of dis: " . $dis . "\n"; 
+
 		//Then see what was rolled and create movement orders/crits accordingly.
 		if($rolled <= 16){	//E.g. 1-16 successful
 
@@ -959,7 +955,7 @@ class TransverseDrive extends Weapon implements SpecialAbility, DefensiveSystem{
         	$fireOrder->rolled = $rolled; 
 
 			$originalBearing = $ship->getBearingOnPos($targetPos); //0, 60, 120. 180, 240 or 300
-//echo "Value of originalBearing: " . $originalBearing . "\n"; 
+
 			if($rolled == 17){
 				$shipFacing = $ship->getFacingAngle();
 				$relative = Mathlib::addToDirection($originalBearing, -60);
@@ -967,8 +963,7 @@ class TransverseDrive extends Weapon implements SpecialAbility, DefensiveSystem{
 
 				// Get actual position in new direction
 				$newPos = Mathlib::moveInDirection($shipPos, $absoluteBearing, $dis);
-//echo "Value of relative: " . $relative . "\n"; 
-//echo "Value of absoluteBearing: " . $absoluteBearing . "\n"; 
+
 			    $fireOrder->pubnotes .= " Transverse Drive activates succesfully, but the direction travelled is changed by 60 degrees counter-clockwise.";											
 			}else{
 				$shipFacing = $ship->getFacingAngle();
@@ -976,12 +971,10 @@ class TransverseDrive extends Weapon implements SpecialAbility, DefensiveSystem{
 				$absoluteBearing = Mathlib::addToDirection($shipFacing, $relative); //Objective Bearing on map
 				// Get actual position in new direction
 				$newPos = Mathlib::moveInDirection($shipPos, $absoluteBearing, $dis);
-//echo "Value of relative: " . $relative . "\n"; 
-//echo "Value of absoluteBearing: " . $absoluteBearing . "\n"; 
+
 			    $fireOrder->pubnotes .= " Transverse Drive activates succesfully, but the direction travelled is changed by 60 degrees clockwise.";												
 			}
-//echo "Value of newPos: " . $rolled . "\n"; 			
-//var_dump($newPos);		
+		
 			$this->doTransverseJump($gamedata,$newPos, $ship, $dis);
 			
 			//Update fireOrder details with new targetPos		
@@ -1101,8 +1094,8 @@ class TransverseDrive extends Weapon implements SpecialAbility, DefensiveSystem{
 
 
      public function setSystemDataWindow($turn){
-        $this->data["Special"] = "Used to teleport 3 hexes in straight line during Firing Phase."; //Amend to Pre-Firing phase later.
-        $this->data["Special"] .= "Select weapon and choose hex you wish to move this ship, there is a 10% chance of deviating by +/- 60 degrees.";
+        $this->data["Special"] = "Used to teleport 3 hexes in straight line during Pre-Firing Phase."; 
+        $this->data["Special"] .= "Select weapon and choose hex you wish to move this ship, there is a 10% chance of deviating by +/- 60 degrees, and another 10% that jump will not be successful at all (potentially causing a critical hit too).";	
         $this->data["Special"] .= "Can cause catastrophic failure if Jump Drive has taken damage, in the same way as making a jump to hyperspace.";																		
 		parent::setSystemDataWindow($turn);     
     }
