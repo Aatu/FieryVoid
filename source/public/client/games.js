@@ -15,7 +15,7 @@ window.gamedata = {
 				var id = data[i].id;
 
 				var div = document.createElement("div");
-				div.className = "game slot clickable";
+				div.className = "game slot clickableGames";
 
 				var link = document.createElement("a");
 				link.setAttribute("href", "game.php?gameid=" + id); //Amended during PHP8 update - DK 25.6.25
@@ -50,7 +50,7 @@ window.gamedata = {
 
 	createGames: function createGames() {
 
-		var gamehtml = '<div class="game slot clickable" data-gameid="{gameid}"><span class="name">{gamename}</span><br><span class="value players">Players: {players}/{maxplayers}</span></div>';
+		var gamehtml = '<div class="game slot clickableGames" data-gameid="{gameid}"><span class="name">{gamename}</span><br><span class="value players">Players: {players}/{maxplayers}</span></div>';
 		var activefound = false;
 		var lobbyfound = false;
 		console.log("GAMES LOLS", this.games)

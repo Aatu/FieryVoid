@@ -325,6 +325,11 @@ line-height: 1.5;
 .btn:hover { opacity: 0.9; }
 .create-game-btn { margin-top: 15px; }
 
+.clickableGames{
+	cursor:pointer;
+  border: 1px solid #215a7a;  
+}
+
 .waitingForTurn
 {
   border:1px solid #84a5ce !important;
