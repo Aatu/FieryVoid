@@ -795,7 +795,7 @@ class TransverseDrive extends Weapon implements SpecialAbility, DefensiveSystem{
 	protected $shootsStraight = true; //Denotes for Front End to use Line Arcs, not circles.
 	protected $specialArcs = true;	//Denotes for Front End to redirect to weapon specific function to get arcs.			
 	public $repairPriority = 6;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
-	private $baseLoadingTime = 2; //Can be altered by a specific critical, so we need to remember it's base value.
+	private $baseLoadingTime = 2; //Can be altered by a IncreasedRecharge1 critical, so we need to remember it's base value.
 
 
 	public function onConstructed($ship, $turn, $phase){
@@ -808,16 +808,17 @@ class TransverseDrive extends Weapon implements SpecialAbility, DefensiveSystem{
             23 =>array("IncreasedRecharge1", "DamageSystem")
 		);
 
-	//We need a special approach here as loadingTime can be changed with crits.	
+	//Required to be overwritten in weapon for IncreasedRecharge1 crit to function. 
     public function getLoadingTime()
     {
-		$loadingTime = $this->baseLoadingTime; //2
+		$loadingTime = $this->baseLoadingTime;
 		$critPenalty = $this->hasCritical("IncreasedRecharge1");
 
 		$combinedLoadingTime = $loadingTime + $critPenalty;
         return $combinedLoadingTime;
     }
 
+	//Required to be overwritten in weapon for IncreasedRecharge1 crit to function. 
     public function setLoading($loading){
 		if (!$loading)
 			return;
@@ -857,7 +858,7 @@ class TransverseDrive extends Weapon implements SpecialAbility, DefensiveSystem{
 	}
 
 	public function getDefensiveType()	{
-		return "Blink"; //Should mean it works in parrallel with EM Shield effect of Shading Field
+		return "Blink"; //Different category so it works in parallel with EM Shield effect of Shading Field
 	}
 
 	public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon) {
@@ -930,7 +931,7 @@ class TransverseDrive extends Weapon implements SpecialAbility, DefensiveSystem{
         $ship = $gamedata->getShipById($fireOrder->shooterid); 
 		$shipPos = $ship->getHexPos(); 		
 		
-        $rolled = Dice::d(20);
+        $rolled = Dice::d(20); //Roll d20 to decide what happens during jump
 		
 		$targetPos = new OffsetCoordinate($fireOrder->x, $fireOrder->y);
         $dis = mathlib::getDistanceHex($shipPos, $targetPos); //How many hexes did player choose to jump. 
