@@ -101,19 +101,19 @@ $games = json_encode(Manager::getTacGames($userid), JSON_NUMERIC_CHECK);
     <div class="games-grid four-cols">
       <div>
         <h3>YOUR GAMES</h3>
-        <div class="gamecontainer active subpanel">
+        <div class="gamecontainer active" style="background-color:#04161C;">
           <div class="notfound">No active games</div>
         </div>
       </div>
       <div>
         <h3>JOIN GAMES</h3>
-        <div class="gamecontainer lobby subpanel">
+        <div class="gamecontainer lobby" style="background-color:#04161C;">
           <div class="notfound">No starting games</div>
         </div>
       </div>
       <div>
         <h3>RECENT ACTIVITY</h3>
-        <div id="fireList" class="gamecontainer fire subpanel">
+        <div id="fireList" class="gamecontainer fire" style="background-color:#04161C;">
         </div>
       </div>
       <div class="create-col">
