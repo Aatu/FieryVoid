@@ -689,7 +689,7 @@ const canChangeFiringMode = (ship, system) => system.weapon  && ((gamedata.gamep
 //can declare eligibility for interception: charged, recharge time >1 turn, intercept rating >0, no firing order
 const canSelfIntercept = (ship, system) => system.weapon && weaponManager.canSelfInterceptSingle(ship, system);
 
-const canActivate = (ship, system) => system.canActivate();
+const canActivate = (ship, system) => system.canActivate(); //Used to manually fire weapons/systems that don't need to target e.g. Second Sight/Thoughwave
 const canDeactivate = (ship, system) => system.canDeactivate();  
 
 const getFiringModes = (ship, system, changeFiringMode, allChangeFiringMode) => {

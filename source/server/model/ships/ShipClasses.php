@@ -884,7 +884,21 @@ class BaseShip {
         }
 
         return;
-    }    
+    }   
+    
+    public function hasPreFireWeaponsReady($gamedata)
+    {         
+        $readyToFire = false;
+        foreach($this->systems as $system){
+            if($system instanceof Weapon){
+                if($system->preFires && ($system->turnsloaded >= $system->loadingtime)){ //ready to fire!
+                    $readyToFire = true;
+                    break; //At least one weapon can pre fire, exit loop.
+                }    
+            }
+        }
+        return $readyToFire;
+    }        
 
     public function isElint()
     {

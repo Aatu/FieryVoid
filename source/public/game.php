@@ -162,6 +162,7 @@
     <script src="client/renderer/phaseStrategy/WaitingPhaseStrategy.js"></script>
     <script src="client/renderer/phaseStrategy/InitialPhaseStrategy.js"></script>
     <script src="client/renderer/phaseStrategy/MovementPhaseStrategy.js"></script>
+    <script src="client/renderer/phaseStrategy/PreFiringPhaseStrategy.js"></script>    
     <script src="client/renderer/phaseStrategy/FirePhaseStrategy.js"></script>
     <script src="client/renderer/phaseStrategy/ReplayPhaseStrategy.js"></script>
     <script src="client/renderer/terrain/StarField.js"></script>

@@ -62,6 +62,8 @@ window.phaseDirector = function () {
                 return activatePhaseStrategy.call(this, window.InitialPhaseStrategy, gamedata, scene);
             case 2:
                 return activatePhaseStrategy.call(this, window.MovementPhaseStrategy, gamedata, scene);
+            case 5:
+                return activatePhaseStrategy.call(this, window.PreFiringPhaseStrategy, gamedata, scene);                
             case 3:
                 return activatePhaseStrategy.call(this, window.FirePhaseStrategy, gamedata, scene);
             default:

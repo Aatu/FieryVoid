@@ -280,10 +280,11 @@ class Manager{
                 if($gamedata->turn == 1 && $gamedata->phase == -1) Manager::updateLateDeployments($gamedata);  
 
             }else{
+echo "Value of returningnull: " . $phase . "\n";                
                 return null;
             }
-
             self::$dbManager->endTransaction(false);
+//var_dump($gamedata);            
             return $gamedata;
         }catch(exception $e) {
             self::$dbManager->endTransaction(true);
@@ -746,6 +747,8 @@ class Manager{
                 $phase->process($gdS, self::$dbManager, $ships);
             }else if ($phase instanceof MovementGamePhase){
                 $phase->process($gdS, self::$dbManager, $ships, $activeship);
+            }else if ($phase instanceof PreFiringGamePhase){
+                $phase->process($gdS, self::$dbManager, $ships);                
             }else if ($phase instanceof FireGamePhase){
                 $phase->process($gdS, self::$dbManager, $ships);
             }
@@ -867,6 +870,8 @@ class Manager{
                         $phase->advance($gamedata, self::$dbManager);
                     } else if ($phase instanceof MovementGamePhase){
                         $phase->advance($gamedata, self::$dbManager);
+                    } else if ($phase instanceof PreFiringGamePhase){
+                        $phase->advance($gamedata, self::$dbManager);                        
                     } else if ($phase instanceof FireGamePhase){
                         $phase->advance($gamedata, self::$dbManager);
                         self::changeTurn($gamedata);
@@ -884,9 +889,11 @@ class Manager{
                     $phase->advance($gamedata, self::$dbManager);
                 } else if ($phase instanceof InitialOrdersGamePhase){
                     $phase->advance($gamedata, self::$dbManager);
-                }else if ($phase instanceof MovementGamePhase){
+                } else if ($phase instanceof MovementGamePhase){
                     $phase->advance($gamedata, self::$dbManager);
-                }else if ($phase instanceof FireGamePhase){
+                } else if ($phase instanceof PreFiringGamePhase){
+                    $phase->advance($gamedata, self::$dbManager);                     
+                } else if ($phase instanceof FireGamePhase){
                     $phase->advance($gamedata, self::$dbManager);
                     self::changeTurn($gamedata);
                 }

@@ -870,6 +870,12 @@ class DBManager
             if ($fire->type != "ballistic" && $phase == 1)
                 continue;
 
+  		    if (($fire->type == "prefiring") && ($phase != 5))
+                continue;
+
+            if ($fire->type != "prefiring" && $phase == 5)
+                continue;            
+
             $sql = "INSERT INTO `tac_fireorder` VALUES (null, '" . $fire->type . "', " . $fire->shooterid . ", " . $fire->targetid . ", " . $fire->weaponid . ", " . $fire->calledid . ", " . $fire->turn . ", "
                 . $fire->firingMode . ", " . $fire->needed . ", " . $fire->rolled . ", $gameid, '" . $fire->notes . "', " . $fire->shotshit . ", " . $fire->shots . ", '" . $fire->pubnotes . "', 0, '" . $fire->x . "', '" . $fire->y . "', '" . $fire->damageclass . "', '" . $fire->resolutionOrder . "')";
 

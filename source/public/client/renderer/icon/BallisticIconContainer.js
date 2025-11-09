@@ -181,11 +181,19 @@ window.BallisticIconContainer = function () {
 		let text = "";
 		let textColour = "";
 		let iconImage = null;
-		let launchPosition = this.coordinateConverter.fromHexToGame(
+
+		let launchPosition = null;
+		/*let launchPosition = this.coordinateConverter.fromHexToGame(
 			ballistic.type === 'normal'
 				? shooterIcon.getLastMovement().position
 				: shooterIcon.getFirstMovementOnTurn(turn).position
 		);
+		*/
+		if(ballistic.type === 'normal' || ballistic.type === 'prefiring'){
+			launchPosition = shooterIcon.getLastMovement().position;
+		}else{
+			launchPosition = shooterIcon.getFirstMovementOnTurn(turn).position;
+		}
 
 		let weapon = null;
 		let modeName = null;
@@ -294,6 +302,7 @@ window.BallisticIconContainer = function () {
 			!getByLaunchPosition(launchPosition, this.ballisticIcons) &&
 			ballistic.notes !== 'PersistentEffect' &&
 			ballistic.type !== 'normal' &&
+			ballistic.type !== 'prefiring' &&			
 			ballistic.damageclass !== 'support'
 		) {
 			const launchType = gamedata.isMyOrTeamOneShip(shooter) ? 'hexYellow' : 'hexOrange';
@@ -440,7 +449,7 @@ window.BallisticIconContainer = function () {
 		}
 
 		// Handle specific modeName cases
-		if (ballistic.type === 'normal') {
+		if (ballistic.type === 'normal' || ballistic.type === 'prefiring') {
 			launchPosition = this.coordinateConverter.fromHexToGame(shooterIcon.getLastMovement(turn)?.position);
 
 			const modeColorMap = {

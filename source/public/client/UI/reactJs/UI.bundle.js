@@ -39520,7 +39520,7 @@ var SystemIcon = function (_React$Component) {
 
             if (shipManager.isDestroyed(ship) || shipManager.isDestroyed(ship, system) /*|| shipManager.isAdrift(ship)*/) return; //should work with disabled ship after all!
 
-            if (system.weapon && gamedata.gamephase === 3 && !system.ballistic || gamedata.gamephase === 1 && system.ballistic) {
+            if (system.weapon && gamedata.gamephase === 3 && !system.ballistic && !system.preFires || gamedata.gamephase === 1 && system.ballistic || gamedata.gamephase === 5 && system.preFires) {
                 //cannoct SELECT weapon when unit is adrift though!
                 if (!shipManager.isAdrift(ship)) {
                     if (gamedata.isMyShip(ship)) {
@@ -41338,7 +41338,7 @@ var canSelfIntercept = function canSelfIntercept(ship, system) {
 
 var canActivate = function canActivate(ship, system) {
 	return system.canActivate();
-};
+}; //Used to manually fire weapons/systems that don't need to target e.g. Second Sight/Thoughwave
 var canDeactivate = function canDeactivate(ship, system) {
 	return system.canDeactivate();
 };

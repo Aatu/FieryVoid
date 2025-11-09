@@ -25,6 +25,8 @@ window.weaponManager = {
 
         if (gamedata.gamephase != 1 && system.ballistic) return;
 
+        if(gamedata.gamephase != 5 && system.preFires) return;
+
         if (weaponManager.hasFiringOrder(ship, system) && !system.multiModeSplit) return;
 
         if (gamedata.isMyShip(ship)) {
@@ -56,6 +58,8 @@ window.weaponManager = {
         if (gamedata.gamephase != 3 && !system.ballistic) return;
 
         if (gamedata.gamephase != 1 && system.ballistic) return;
+
+        if(gamedata.gamephase != 5 && system.preFires) return;        
 
         if (ship.userid == gamedata.thisplayer) {
             weaponManager.cancelFire(ship, system);
@@ -346,6 +350,7 @@ window.weaponManager = {
 			if (system.weapon) {
 				if (gamedata.gamephase != 3 && !system.ballistic) continue; //improper at this moment
 				if (gamedata.gamephase != 1 && system.ballistic) continue;	//improper at this moment
+				if (gamedata.gamephase != 5 && system.preFires) continue;	//improper at this moment                
 				if (weaponManager.hasFiringOrder(ship, system) && !system.canSplitShots) continue;//already declared, do not touch it!
 				
 				if (currentWasSelected){//unselect
@@ -1510,10 +1515,10 @@ window.weaponManager = {
                 debug && console.log("trying to fire in wrong phase for ballistic weapon");
                 continue;
             }
-            if (!weapon.ballistic && gamedata.gamephase != 3) {
+            if (!weapon.ballistic && gamedata.gamephase != 3 && (weapon.preFires && gamedata.gamephase != 5)) {
                 debug && console.log("trying to fire in wrong phase for normal weapon");
                 continue;
-            }
+            }    
 
             if (weapon.ballistic && system && (!weapon.overrideCallingRestrictions)) { //25.11.23 - Added last condition to allow Limpet Bore to make called shots as a ballsitic weapon.
                 debug && console.log("trying to call shot with ballistic");
@@ -1558,6 +1563,8 @@ window.weaponManager = {
             var type = 'normal';
             if (weapon.ballistic) {
                 type = 'ballistic';
+            }else if(gamedata.gamephase == 5){
+                type = 'prefiring';                
             }
 			
 			if (weapon.reinforceAmount != null){
@@ -1729,9 +1736,9 @@ window.weaponManager = {
             if (weapon.ballistic && gamedata.gamephase != 1) {
                 continue;
             }
-            if (!weapon.ballistic && gamedata.gamephase != 3) {
+            if (!weapon.ballistic && gamedata.gamephase != 3 && (weapon.preFires && gamedata.gamephase != 5)) { //
                 continue;
-            }
+            }          
 
             if (weaponManager.checkConflictingFireOrder(selectedShip, weapon)) {
                 continue;
@@ -1740,6 +1747,8 @@ window.weaponManager = {
             var type = 'normal';
             if (weapon.ballistic) {
                 type = 'ballistic';
+            }else if(gamedata.gamephase == 5){
+                type = 'prefiring';                
             }
 
             if (weaponManager.isPosOnWeaponArc(selectedShip, hexpos, weapon)) {
@@ -1894,7 +1903,7 @@ window.weaponManager = {
         for (var i in system.fireOrders) {
             var fire = system.fireOrders[i];
             if (fire.weaponid == system.id && fire.turn == gamedata.turn && !fire.rolled) {
-                if ((gamedata.gamephase == 1 || gamedata.gamephase == 3) && system.ballistic || gamedata.gamephase == 3 && !system.ballistic) {
+                if ((gamedata.gamephase == 1 || gamedata.gamephase == 3) && system.ballistic || gamedata.gamephase == 3 && !system.ballistic || gamedata.gamephase == 5 && system.preFires) {
                     if (fire.type == "selfIntercept") {
                         return "self";
                     } else return true;
@@ -1908,7 +1917,7 @@ window.weaponManager = {
         for (var i in system.fireOrders) {
             var fire = system.fireOrders[i];
             if (fire.weaponid == system.id && fire.turn == gamedata.turn && !fire.rolled) {
-                if ((gamedata.gamephase == 1 || gamedata.gamephase == 3) && system.ballistic || gamedata.gamephase == 3 && !system.ballistic) {
+                if ((gamedata.gamephase == 1 || gamedata.gamephase == 3) && system.ballistic || gamedata.gamephase == 3 && !system.ballistic  || gamedata.gamephase == 5 && system.preFires) {
                     if (fire.firingMode == system.firingMode) {
                         return true;
                     } 
@@ -1923,7 +1932,7 @@ window.weaponManager = {
         for (var i in system.fireOrders) {
             var fire = system.fireOrders[i];
             if (fire.weaponid == system.id && fire.turn == gamedata.turn && !fire.rolled && fire.targetid == target.id) {
-                if ((gamedata.gamephase == 1 || gamedata.gamephase == 3) && system.ballistic || gamedata.gamephase == 3 && !system.ballistic) {
+                if ((gamedata.gamephase == 1 || gamedata.gamephase == 3) && system.ballistic || gamedata.gamephase == 3 && !system.ballistic  || gamedata.gamephase == 5 && system.preFires) {
 					return true;
                 }
             }
@@ -2122,7 +2131,7 @@ window.weaponManager = {
         for (var i in fires) {
             var fire = fires[i];
             if (fire.weaponid == system.id && fire.turn == gamedata.turn && !fire.rolled) {
-                if (gamedata.gamephase == 1 && system.ballistic || gamedata.gamephase == 3 && !system.ballistic) fire.shots += mod;
+                if (gamedata.gamephase == 1 && system.ballistic || gamedata.gamephase == 3 && !system.ballistic  || gamedata.gamephase == 5 && system.preFires) fire.shots += mod;
             }
         }
 
@@ -2269,11 +2278,11 @@ window.weaponManager = {
 					toReturn = true;
 				}
 				//show hex-targeted direct fire as ballistics, too
-				if ((!toReturn) && (type == 'ballistic') && (fireOrder.type == 'normal') && (fireOrder.targetid == -1)) {
+				if ((!toReturn) && (type == 'ballistic') && (fireOrder.type == 'normal' || fireOrder.type == 'prefiring') && (fireOrder.targetid == -1)) {
 					toReturn = true;
 				}
 				//show split shot direct fire as ballistics, too
-				if ((!toReturn) && (type == 'ballistic') && (fireOrder.type == 'normal') && (fireOrder.damageclass == "Sweeping")) {
+				if ((!toReturn) && (type == 'ballistic') && (fireOrder.type == 'normal' || fireOrder.type == 'prefiring') && (fireOrder.damageclass == "Sweeping")) {
 					toReturn = true;
 				}				
 				return toReturn;

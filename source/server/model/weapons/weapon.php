@@ -128,7 +128,7 @@ class Weapon extends ShipSystem
 
     // Used to indicate a parent in case of dualWeapons
     public $parentId = -1;
-
+	public $preFires = false; //Denotes whether weapon fires in pre-firing phase on normal firing phase
     public $firingMode = 1;
     public $firingModes = array(1 => "Standard"); //just a convenient name for firing mode
     public $damageType = ""; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
@@ -820,7 +820,11 @@ public function getStartLoading()
             } else if (!$this->isOverloadingOnTurn(TacGamedata::$currentTurn)) {
                 return new WeaponLoading($this->getTurnsloaded(), 0, $this->getLoadedAmmo(), 0, $this->getLoadingTime(), $this->firingMode);
             }
-        }  else if ($phase == -1) {
+        } else if ($phase == 3) {
+            if ($this->preFires && $this->firedOnTurn(TacGamedata::$currentTurn)) {
+                return new WeaponLoading(0, 0, $this->getLoadedAmmo(), 0, $this->getLoadingTime(), $this->firingMode);
+            }
+        } else if ($phase == -1) {
             $weaponLoading = $this->calculateLoadingFromLastTurn($gamedata);
             $this->setLoading($weaponLoading);
 
