@@ -225,7 +225,9 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         <ul>
             <li>The Jump Drive system usually cannot be turned off unless seriously damaged, but some scenarios allow it.</li>
             <li>The game warns the player when attempting to deactivate this system improperly (e.g., without Desperate rules or 50%+ damage).</li>
-            <li>Ships equipped with Jump Drives can boost this system during Initial Orders to 'jump out' of the scenario at the end of the turn.  Doing will remove then from the rest of the scenario, and ships with damaged jump drives may be destroyed as they jump.  The latter situation will be reflected in the Combat Log for that turn.</li>            
+            <li>Ships equipped with Jump Drives can boost this system during Initial Orders to 'jump out' of the scenario at the end of the turn.  
+                Doing will remove then from the rest of the scenario, and ships with damaged jump drives may be destroyed as they jump (the chance of this is the % of the Jump Drive's health lost).  
+                The latter situation will be reflected in the Combat Log for that turn.</li>            
         </ul>
         <a class="back-to-top" href="#top">↩ Back to Top</a>
 
