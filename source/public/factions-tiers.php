@@ -971,7 +971,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             The chance of this failure is the % of the Jump Drive's health that has been lost.
         </li>
         <li>Additional effects of making a Transverse Jump is that all ballistic weapons will suffer a cumulative -20% chance to hit per hex travelled.  
-            However, the light produced by a jump makes the Shaded ships easier to detect and these will be revealed to enemy ships within 20 hexes instead of the usual 15 hexes.</li>                  
+            However, the light produced by a jump makes Shaded ships easier to detect and these will be revealed to enemy ships within 20 hexes instead of the usual 15 hexes at the start of the Firing Phase.</li>                  
         <li>Transverse Drive also has some interesting critical effects when damaged, including the effect whereby the ships Jump Drive takes d3 damage.</li>                      
     <h5>Agile/Jinking Ships</h5>
         <li>Torvalus ships are exceptionally maneuverable and this is reflected in even their largest ships having the Agile characteristic.  
