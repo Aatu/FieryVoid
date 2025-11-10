@@ -439,6 +439,23 @@ window.ShipIcon = function () {
         return movement;
     };
 
+    ShipIcon.prototype.getEndMovementOnTurn = function (turn) {
+        // Filter movements on the given turn that are of type 'end'
+        var movementsOnTurn = this.movements.filter(function(move) {
+            return move.turn === turn && move.type === 'end';
+        });
+
+        // Get the last one
+        var lastMovement = movementsOnTurn.pop();
+
+        // If none found, fallback to the last movement overall
+        if (!lastMovement) {
+            return this.getLastMovement();
+        }
+
+        return lastMovement;
+    };
+
 	ShipIcon.prototype.getLastMovementOnTurn = function (turn, ignore) {
 	    var movement = this.movements.filter(function (move) {
 	        return move.turn === turn;

@@ -236,49 +236,51 @@ window.BallisticIconContainer = function () {
 				'Transverse Jump':    { type: 'hexBlue',text: 'Transverse Jump',   color: '#787800'},				
 			};
 
+			if(modeName == 'Transverse Jump' && !shipManager.isDetectedTorvalus(shooter, 20) && !gamedata.isMyorMyTeamShip(shooter)) return;
+
 			const match = modeMap[modeName];
 			if (match) {
 				targetType = match.type;
 				text = match.text || text;
 				textColour = match.color || textColour;
 
-			// Call splash hex generation for cases where weapon affects more than one hex
-			if (['Shredder', 'Energy Mine', 'Ion Storm', 'Jammer', '1-Blanket Shield', '3-Blanket Shade'].includes(modeName)) {
-				if (gamedata.thisplayer === shooter.userid || replay) {
-					let sizes = [];
+				// Call splash hex generation for cases where weapon affects more than one hex
+				if (['Shredder', 'Energy Mine', 'Ion Storm', 'Jammer', '1-Blanket Shield', '3-Blanket Shade'].includes(modeName)) {
+					if (gamedata.thisplayer === shooter.userid || replay) {
+						let sizes = [];
 
-					switch (modeName) {
-						case 'Ion Storm':
-							sizes = [1, 2];
-							break;
-						case 'Jammer':
-							sizes = [5];
-							break;
-						case '1-Blanket Shield':
-							sizes = [3];
-							break;
-						case '3-Blanket Shade':
-							sizes = [5];
-							break;							
-						default: // Shredder / Energy Mine
-							sizes = [1];
+						switch (modeName) {
+							case 'Ion Storm':
+								sizes = [1, 2];
+								break;
+							case 'Jammer':
+								sizes = [5];
+								break;
+							case '1-Blanket Shield':
+								sizes = [3];
+								break;
+							case '3-Blanket Shade':
+								sizes = [5];
+								break;							
+							default: // Shredder / Energy Mine
+								sizes = [1];
+						}
+
+						sizes.forEach(size => {
+							generateSplashHexes.call(
+								this,
+								ballistic.id,
+								targetPosition,
+								ballistic.shooterid,
+								ballistic.targetid,
+								size,
+								match.type
+							);
+						});
+
+						splash = true;
 					}
-
-					sizes.forEach(size => {
-						generateSplashHexes.call(
-							this,
-							ballistic.id,
-							targetPosition,
-							ballistic.shooterid,
-							ballistic.targetid,
-							size,
-							match.type
-						);
-					});
-
-					splash = true;
 				}
-			}
 			}
 
 			// Damage class-based override logic

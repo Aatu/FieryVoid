@@ -69,6 +69,8 @@ function HexTargetedWeaponFireAnimation(time, movementAnimations, shipIconContai
 
         var weapon = fire.weapon;
         var shooter = fire.shooter;
+        if(shipManager.shouldBeHidden(shooter)) return;
+
         var startPosition = FireAnimationHelper.getShipPositionForFiring(this.shipIconContainer.getByShip(shooter), time, this.movementAnimations, weapon, this.turn);
         var endPosition = window.coordinateConverter.fromHexToGame(new hexagon.Offset(fire.fireOrder.x, fire.fireOrder.y));
 		
