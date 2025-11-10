@@ -86,10 +86,10 @@ $games = json_encode(Manager::getTacGames($userid), JSON_NUMERIC_CHECK);
     <div class="resources">
       <h3>Latest Updates — November 2025</h3>
       <ul class="updates-list">
-        <li><strong>Torvalus Speculators</strong> - Transverse Drive added to complete final system for this new Ancient Faction.</li>          
-        <li><strong>Pre-Firing Phase</strong> - Whole new phase added to Fiery Void combat order, at the moment only Transverse Drive uses this to jump before Firing.</li>
+        <li><strong>Torvalus Speculators</strong> - Transverse Drive added to complete final systems for Torvalus Faction.</li>          
+        <li><strong>Pre-Firing Phase</strong> - Whole new phase added to Fiery Void combat order, at the moment only Transverse Drive uses this feature, but more to follow!</li>
         <li><strong>LoS Ruler</strong> - Ship tooltips will no longer display while the Ruler tool is active, to help with visual clarity.</li>                                            
-        <li><strong>General Fixes</strong> - Many other small fixes. Thanks for the reports!</li>                                                    
+        <li><strong>General Fixes</strong> - Further Server Stability fixes, plus many other small fixes. Thanks for the reports!</li>                                                    
         <!--<li><strong>6 Jun</strong> - Overlay colors, deployment zone tweaks, UI fixes. Pulsar mine fixed, tooltip/text readability improved.</li>-->
       </ul>
     </div>
