@@ -967,9 +967,11 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                 <li>20 - The jump is unsuccessful, the ship does not move the Transverse Drive system has to roll for a critical hit.</li>                                                     
             </ul>
         </li>
-        <li>When a ship makes a transverse jump this also puts a strain on the Jump Drive (a separate system), and so a ship can suffer a catastrophic failure (e.g be destroyed) if the Jump Engine has sustained damage in the battle.
+        <li>When a ship makes a transverse jump it puts a strain on the Jump Drive (a separate system), and so a ship can suffer a catastrophic failure (e.g be destroyed) if the Jump Engine has sustained damage in the battle.
             The chance of this failure is the % of the Jump Drive's health that has been lost.
-        </li>         
+        </li>
+        <li>Additional effects of making a Transverse Jump is that all ballistic weapons will suffer a cumulative -20% chance to hit per hex travelled.  
+            However, the light produced by a jump makes the Shaded ships easier to detect and these will be revealed to enemy ships within 20 hexes instead of the usual 15 hexes.</li>                  
         <li>Transverse Drive also has some interesting critical effects when damaged, including the effect whereby the ships Jump Drive takes d3 damage.</li>                      
     <h5>Agile/Jinking Ships</h5>
         <li>Torvalus ships are exceptionally maneuverable and this is reflected in even their largest ships having the Agile characteristic.  
