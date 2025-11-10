@@ -360,7 +360,7 @@ window.gamedata = {
         h.appendTo("#fleet");
         gamedata.calculateFleet();
     },
-
+/*
     updateLoadedFleet: function updateLoadedFleet(ships) {
 		for(var k in ships){
 			var ship = ships[k]	
@@ -406,7 +406,7 @@ window.gamedata = {
 		}
         gamedata.calculateFleet();
     },
-
+*/
 	
 	/*returns ship variant as a single letter*/
 	variantLetter: function(ship){
@@ -2053,7 +2053,7 @@ expandFaction: function expandFaction(event) {
 
         $(".confirm").remove();
         gamedata.updateFleet(ship);
-		gamedata.populateFleetDropdown();		
+		//gamedata.populateFleetDropdown();		
     },
 
 
@@ -2197,7 +2197,7 @@ expandFaction: function expandFaction(event) {
 
         $(".confirm").remove();
         gamedata.updateFleet(ship);
-		gamedata.populateFleetDropdown();		
+		//gamedata.populateFleetDropdown();		
     },
 
 	
@@ -2348,7 +2348,7 @@ expandFaction: function expandFaction(event) {
 
         $(".confirm").remove();
         gamedata.updateFleet(ship);
-		gamedata.populateFleetDropdown();		
+		//gamedata.populateFleetDropdown();		
     },
 
 
@@ -2707,37 +2707,48 @@ expandFaction: function expandFaction(event) {
 		});		 	
     },
 
-	doLoadFleet: function doLoadFleet(fleet) {
-		if (!Array.isArray(fleet)) {
-			console.error("doLoadFleet: expected array, got", fleet);
-			return;
-		}
+doLoadFleet: function doLoadFleet(fleet) {
+	if (!Array.isArray(fleet)) {
+		console.error("doLoadFleet: expected array, got", fleet);
+		return;
+	}
 
-		for (var i = 0; i < fleet.length; i++) {
-			var listShip = fleet[i];
-			if (!listShip) continue; // skip holes
+	for (var i = 0; i < fleet.length; i++) {
+		var listShip = fleet[i];
+		if (!listShip) continue; // skip holes
 
-			var ship = new Ship(listShip);
+		var ship = new Ship(listShip);
 
-			// make sure these are present and are the correct type
-			ship.userid = parseInt(gamedata.thisplayer, 10);
-			ship.slot   = parseInt(gamedata.selectedSlot, 10);
-			ship.loaded = true;
+		// make sure these are present and are the correct type
+		ship.userid = parseInt(gamedata.thisplayer, 10);
+		ship.slot   = parseInt(gamedata.selectedSlot, 10);
+		ship.loaded = true;
+
+		if (ship.flight) {
+			// preserve original indexing for fighters
+			for (let j = 0; j < ship.systems.length; j++) {
+				if (ship.systems[j] === null || ship.systems[j] === undefined) {
+					delete ship.systems[j]; // leaves hole, preserves indices
+				}
+			}
+		} else {
+			// regular ships — safe to reindex
 			ship.systems = ship.systems.filter(sys => sys !== null && sys !== undefined);
-			
-			if(ship.flight){
-				ship.pointCost = ship.pointCost/6 * ship.flightSize;				
-			}
-			
-			if (ship.pointCostEnh !== 0) {
-				ship.pointCost = ship.pointCost + ship.pointCostEnh;			
-			}
-
-        	gamedata.updateFleet(ship);		
 		}
-	
-		gamedata.populateFleetDropdown();		
-    },
+
+		if (ship.flight) {
+			ship.pointCost = (ship.pointCost / 6) * ship.flightSize;
+		}
+
+		if (ship.pointCostEnh !== 0) {
+			ship.pointCost = ship.pointCost + ship.pointCostEnh;
+		}
+
+		gamedata.updateFleet(ship);
+	}
+
+	//gamedata.populateFleetDropdown();
+},
 
 
     changeFleetPublic: function changeFleetPublic(listId) {
