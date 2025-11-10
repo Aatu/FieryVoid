@@ -2732,7 +2732,7 @@ doLoadFleet: function doLoadFleet(fleet) {
 				}
 			}
 		} else {
-			// regular ships — safe to reindex
+			// regular ships — safe to reindex		
 			ship.systems = ship.systems.filter(sys => sys !== null && sys !== undefined);
 		}
 
@@ -2918,11 +2918,13 @@ doLoadFleet: function doLoadFleet(fleet) {
         return gamedata.allShips[actFaction].find(ship => ship.phpclass == actPhpclass);
     },
 
+	/* //Duplicate function?
     setShipsFromFaction: function setShipsFromFaction(faction, jsonShips) {
         gamedata.allShips[faction] = Object.keys(window.staticShips[faction]).map(function(shipClass) {
             return new Ship(window.staticShips[faction][shipClass]);
         })
     },
+	*/
 
     isTerrain: function isTerrain(shipSizeClass, userid) {    
         if(shipSizeClass == 5 || userid == -5) return true;

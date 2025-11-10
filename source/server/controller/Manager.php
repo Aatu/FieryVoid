@@ -279,12 +279,10 @@ class Manager{
                 //Line below skips deployment Phase on Turn 1 for late-deploying slots - DK                
                 if($gamedata->turn == 1 && $gamedata->phase == -1) Manager::updateLateDeployments($gamedata);  
 
-            }else{
-echo "Value of returningnull: " . $phase . "\n";                
+            }else{              
                 return null;
             }
-            self::$dbManager->endTransaction(false);
-//var_dump($gamedata);            
+            self::$dbManager->endTransaction(false);          
             return $gamedata;
         }catch(exception $e) {
             self::$dbManager->endTransaction(true);
@@ -522,6 +520,9 @@ echo "Value of returningnull: " . $phase . "\n";
                         $system->setAmmo($firingmode, $amount);
                     }
                 }
+				foreach ($ship->systems as $system){
+					$system->beforeTurn($ship, 0, 0);
+				}
 
                 $fleet[] = $ship; // store ship directly, no extra 'ship' key
             }
