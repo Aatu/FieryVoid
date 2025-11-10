@@ -1095,7 +1095,7 @@ class TransverseDrive extends Weapon implements SpecialAbility, DefensiveSystem{
 
 
      public function setSystemDataWindow($turn){
-        $this->data["Special"] = "Used to teleport 3 hexes in straight line during Pre-Firing Phase."; 
+        $this->data["Special"] = "Used to teleport up to 3 hexes in straight line during Pre-Firing Phase."; 
         $this->data["Special"] .= "<br>Select weapon and choose hex you wish to move this ship, there is a 10% chance of deviating by +/- 60 degrees, and another 10% that jump will not be successful at all (potentially causing a critical hit too).";	
         $this->data["Special"] .= "<br>Can cause catastrophic failure if Jump Drive has taken damage, in the same way as making a jump to hyperspace.";																		
 		parent::setSystemDataWindow($turn);     
