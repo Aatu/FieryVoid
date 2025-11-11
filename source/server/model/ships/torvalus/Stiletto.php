@@ -22,7 +22,7 @@ class Stiletto extends FighterFlight{
 		$this->sideDefense = 6;
 		$this->freethrust = 14;
 		$this->offensivebonus = 8;
-		$this->jinkinglimit = 10; //heavy fighter
+		$this->jinkinglimit = 10;
 		$this->turncost = 0.25;
 		$this->trueStealth = true; //For ships that can actually be hidden, not just jammer from range.  Important for Front End.	        
 		
