@@ -17,8 +17,8 @@ $maxIP = 8;            // max active requests per IP
 $maxWait = 6.0;        // max seconds to wait for a global slot
 $waitStep = 0.05 + (mt_rand(0, 50) / 1000.0); // 50ms base + 0–50ms jitter
 
-$ttlIP = 5;            // seconds for per-IP counter TTL
-$ttlGlobal = 5;         // fallback TTL for global counter
+$ttlIP = 10;            // seconds for per-IP counter TTL
+$ttlGlobal = 10;         // fallback TTL for global counter
 
 $keyGlobal = 'server_active_requests';
 $keyIP = 'server_ip_' . md5($_SERVER['REMOTE_ADDR']);
