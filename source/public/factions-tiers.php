@@ -932,7 +932,10 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
     <p>The Torvalus are known for their highly advanced stealth technology as well as their love for making cosmic gambles. Below is a list of systems used by the Torvalus, with short description of effect and any notable design differences from their original tabletop versions.</p>    
     <h5>Laser Weaponry</h5>
         <li>Torvalus weaponry is entirely Laser-based, making it uninterceptable.  Whilst these weapons do not have an particularly unusual abilities per se, their high damage, flexibility and low cooldowns makes them very effective.</li>
-    <h5>Shading Field</h5>
+        <h5>Shrouded Saber</h5>        
+        <li>This ship has an optional rule which allows it to bring up to 12 fighters into battle for the Torvalus.  
+            However, since meeting the 50% hangar requirement is more typically a hindrance to Torvalus fleet building the Shrouded Saber's hangar capacity is listed as 0 by default.</li>    
+        <h5>Shading Field</h5>
         <li>The Shading Field operates the same as the Minbari's Jammer system (e.g. prevents weapons locks even when targeted with OEW), including against other Ancients as well as Younger Races.</li>
         <li>In addition the Shading Field has two states, Normal Mode and Shading Mode, which are described below:
             <ul class="circle-list">
@@ -942,7 +945,8 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                     However, on a turn when a Torvalus ship is Shaded it will not be able to fire any of its weapons.</li> 
             </ul>
         </li>         
-        <li>Torvalus Stiletto Fighters have a smaller version of the Shading Field equipped.  This can also be toggled on and off during Firing/Deployment phases but does not provide the Jammer ability and does not reduce the profile of the fighter flight (by 3) unless they are Shaded.</li>         
+        <li>Torvalus Stiletto Fighters have a smaller version of the Shading Field equipped.  
+            This can also be toggled on and off during Firing/Deployment phases but it does not provide the Jammer ability and it does not reduce the profile of the fighter flight (by 3) unless they are Shaded.</li>         
     <h5>Shade Modulator</h5>
         <li>The Shade Modulator is a versatile Support Weapons found on the Veiled Scimitar, it has four different firing modes which are described below. 
             <ul class="circle-list">
@@ -960,7 +964,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             During this phase simply select a hex up to 3 hexes on a straight line to the selected ship and then commit your orders.  The ship will attempt a Transverse Jump before the Firing phase.</li>
         <li>When attempting a Transverse Jump a number of things will then happen depending a d20 roll: 
             <ul class="circle-list">
-                <li>1-16- The jump is successful and the Torvalus ship teleports to the new hex.</li>
+                <li>1-16 - The jump is successful and the Torvalus ship teleports to the new hex.</li>
                 <li>17 - The jump is successful but off-target, ship travels the number of hexes selected but 60 degrees counter-clockwise from intended direction.</li> 
                 <li>18 - The jump is successful but off-target, ship travels the number of hexes selected but 60 degrees clockwise from intended direction.</li> 
                 <li>19 - The jump is unsuccessful, nothing happens.</li>
