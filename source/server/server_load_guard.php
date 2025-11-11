@@ -15,7 +15,7 @@ if (!function_exists('apcu_fetch')) {
 $maxGlobal = 20;       // max active requests globally
 $maxIP = 8;            // max active requests per IP
 $maxWait = 5.0;        // max seconds to wait for a global slot
-$waitStep = 0.05;      // polling interval in seconds
+$waitStep = 0.05 + (mt_rand(0, 50) / 1000.0); // jittered polling interval
 
 $ttlIP = 10;            // seconds for per-IP counter TTL
 $ttlGlobal = 5;         // fallback TTL for global counter
@@ -49,7 +49,10 @@ if ($ipCount > $maxIP) {
 // ----------------------
 do {
     $count = apcu_fetch($keyGlobal);
-    if ($count === false) $count = 0;
+    if ($count === false || $count > ($maxGlobal + 2)) {
+        apcu_store($keyGlobal, 0, $ttlGlobal); // auto-reset if stuck
+        $count = 0;
+    }
 
     if ($count < $maxGlobal) {
         // Atomic increment: only succeed if current value is $count
