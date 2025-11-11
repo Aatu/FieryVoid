@@ -5,41 +5,38 @@
 // Protects against server overload and rapid F5/AJAX spamming
 // Requirements: APCu extension enabled
 
-if (!function_exists('apcu_fetch')) {
-    return; // APCu not available, skip guard
-}
+if (!function_exists('apcu_fetch')) return;
 
-// ----------------------
 // Configuration
-// ----------------------
-$maxGlobal = 20;       // max active requests globally
-$maxIP = 8;            // max active requests per IP
-$maxWait = 6.0;        // max seconds to wait for a global slot
-$waitStep = 0.05 + (mt_rand(0, 50) / 1000.0); // 50ms base + 0–50ms jitter
-
-$ttlIP = 10;            // seconds for per-IP counter TTL
-$ttlGlobal = 10;         // fallback TTL for global counter
-
+$maxGlobal = 20;
+$maxIP = 8;
+$maxWait = 4.0;
+$waitStep = 0.05 + (mt_rand(0, 50) / 1000.0);
+$ttlIP = 10;
+$ttlGlobal = 10;
 $keyGlobal = 'server_active_requests';
 $keyIP = 'server_ip_' . md5($_SERVER['REMOTE_ADDR']);
 
-$start = microtime(true);
-$locked = false;
-
-// ----------------------
-// Per-IP limiter
-// ----------------------
-$ipCount = apcu_inc($keyIP, 1, $exists);
-if (!$exists) {
-    // Key did not exist yet, create with TTL
-    apcu_store($keyIP, 1, $ttlIP);
+// Skip if APCu memory low
+$info = apcu_sma_info();
+if (($info['avail_mem'] ?? 1) < 1024 * 1024) {
+    header("HTTP/1.1 503 Service Unavailable");
+    echo json_encode(['error' => 'Server memory under pressure']);
+    exit;
 }
 
-// Reject if per-IP limit exceeded
+// Ensure keys exist
+if (apcu_fetch($keyGlobal) === false) apcu_store($keyGlobal, 0);
+if (apcu_fetch($keyIP) === false) apcu_store($keyIP, 0);
+
+// Per-IP limiter
+$ipCount = @apcu_inc($keyIP);
+if ($ipCount === false) $ipCount = 1; // fallback
+apcu_store($keyIP, $ipCount, $ttlIP);
+
 if ($ipCount > $maxIP) {
     apcu_dec($keyIP);
     header("HTTP/1.1 429 Too Many Requests");
-    header("Retry-After: $ttlIP");
     echo json_encode(['error' => 'Too many requests from your IP']);
     exit;
 }
@@ -84,6 +81,7 @@ register_shutdown_function(function() use ($keyGlobal, $keyIP) {
         if ($new <= 0) apcu_delete($keyIP);
     }
 });
+
 
 /*
 //Old server lock version, using server-side concurrency limiter, replaced with Redis method above 10.11.25 DK
