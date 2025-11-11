@@ -14,10 +14,10 @@ if (!function_exists('apcu_fetch')) {
 // ----------------------
 $maxGlobal = 20;       // max active requests globally
 $maxIP = 8;            // max active requests per IP
-$maxWait = 5.0;        // max seconds to wait for a global slot
-$waitStep = 0.05;      // polling interval in seconds
+$maxWait = 6.0;        // max seconds to wait for a global slot
+$waitStep = 0.05 + (mt_rand(0, 50) / 1000.0); // 50ms base + 0–50ms jitter
 
-$ttlIP = 10;            // seconds for per-IP counter TTL
+$ttlIP = 5;            // seconds for per-IP counter TTL
 $ttlGlobal = 5;         // fallback TTL for global counter
 
 $keyGlobal = 'server_active_requests';
@@ -78,16 +78,10 @@ if (!$locked) {
 // Release slots on shutdown
 // ----------------------
 register_shutdown_function(function() use ($keyGlobal, $keyIP) {
-    // Global counter
-    $g = apcu_fetch($keyGlobal);
-    if ($g !== false && $g > 0) {
-        apcu_dec($keyGlobal);
-    }
-
-    // Per-IP counter
-    $i = apcu_fetch($keyIP);
-    if ($i !== false && $i > 0) {
-        apcu_dec($keyIP);
+    if (($g = apcu_fetch($keyGlobal)) !== false && $g > 0) apcu_dec($keyGlobal);
+    if (($i = apcu_fetch($keyIP)) !== false && $i > 0) {
+        $new = apcu_dec($keyIP);
+        if ($new <= 0) apcu_delete($keyIP);
     }
 });
 
