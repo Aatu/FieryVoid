@@ -896,6 +896,10 @@ class BaseShip {
                     break; //At least one weapon can pre fire, exit loop.
                 }    
             }
+            /*else if($system->preFires){ //Only weapons in game atm
+                    $readyToFire = true;
+                    break; //At least one non-weapon system can pre fire, exit loop.            
+            }*/
         }
         return $readyToFire;
     }        

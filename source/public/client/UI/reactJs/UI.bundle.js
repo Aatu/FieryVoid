@@ -41296,11 +41296,12 @@ const canBoost = (ship, system) => system.boostable && gamedata.gamephase === 1 
 const canDeBoost = (ship, system) => gamedata.gamephase === 1 && Boolean(shipManager.power.getBoost(system));
 */
 var isBoostPhase = function isBoostPhase(system) {
-	if (system.boostOtherPhases) {
-		// Only in -1 or 3
-		return gamedata.gamephase === -1 || gamedata.gamephase === 3;
+	// If boostOtherPhases is an array, check if the current gamephase is included
+	if (system.boostOtherPhases.length > 0) {
+		return system.boostOtherPhases.includes(gamedata.gamephase);
 	}
-	// Default: only in 1
+
+	// Default: only in phase 1
 	return gamedata.gamephase === 1;
 };
 

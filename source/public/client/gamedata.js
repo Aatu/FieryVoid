@@ -699,6 +699,7 @@ window.gamedata = {
                     if (!myShips[ship].flight) {
                         for (var i = 0; i < myShips[ship].systems.length; i++) {
 							var currWeapon = myShips[ship].systems[i];
+                            if(currWeapon.preFires) continue;
 							if(!currWeapon.ballistic && currWeapon.weapon && (currWeapon.displayName != "Ramming Attack")){ //ballistic weapons ore of no interest now
 								if (currWeapon.fireOrders.length > 0) {
 									fired = 1;

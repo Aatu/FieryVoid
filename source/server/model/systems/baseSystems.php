@@ -5777,7 +5777,7 @@ class MindriderHangar extends ShipSystem{
 		public $boostable = true;
 		public $maxBoostLevel = 1;
 		public $boostEfficiency = 0;		
-		public $boostOtherPhases = true; //To allow boosting in Deployment and Firing Phases.
+		public $boostOtherPhases = array(-1, 3); //To allow boosting in Deployment and Firing Phases.
 		public $shaded	= false; //To track in Front End whether system was ever boost this turn, since boost can be toggled during Firing Phase.			
 		
 		function __construct($armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc){
