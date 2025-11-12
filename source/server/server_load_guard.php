@@ -5,38 +5,41 @@
 // Protects against server overload and rapid F5/AJAX spamming
 // Requirements: APCu extension enabled
 
-if (!function_exists('apcu_fetch')) return;
+if (!function_exists('apcu_fetch')) {
+    return; // APCu not available, skip guard
+}
 
+// ----------------------
 // Configuration
-$maxGlobal = 20;
-$maxIP = 8;
-$maxWait = 4.0;
-$waitStep = 0.05 + (mt_rand(0, 50) / 1000.0);
-$ttlIP = 10;
-$ttlGlobal = 10;
+// ----------------------
+$maxGlobal = 20;       // max active requests globally
+$maxIP = 8;            // max active requests per IP
+$maxWait = 5.0;        // max seconds to wait for a global slot
+$waitStep = 0.05;      // polling interval in seconds
+
+$ttlIP = 10;            // seconds for per-IP counter TTL
+$ttlGlobal = 5;         // fallback TTL for global counter
+
 $keyGlobal = 'server_active_requests';
 $keyIP = 'server_ip_' . md5($_SERVER['REMOTE_ADDR']);
 
-// Skip if APCu memory low
-$info = apcu_sma_info();
-if (($info['avail_mem'] ?? 1) < 1024 * 1024) {
-    header("HTTP/1.1 503 Service Unavailable");
-    echo json_encode(['error' => 'Server memory under pressure']);
-    exit;
+$start = microtime(true);
+$locked = false;
+
+// ----------------------
+// Per-IP limiter
+// ----------------------
+$ipCount = apcu_inc($keyIP, 1, $exists);
+if (!$exists) {
+    // Key did not exist yet, create with TTL
+    apcu_store($keyIP, 1, $ttlIP);
 }
 
-// Ensure keys exist
-if (apcu_fetch($keyGlobal) === false) apcu_store($keyGlobal, 0);
-if (apcu_fetch($keyIP) === false) apcu_store($keyIP, 0);
-
-// Per-IP limiter
-$ipCount = @apcu_inc($keyIP);
-if ($ipCount === false) $ipCount = 1; // fallback
-apcu_store($keyIP, $ipCount, $ttlIP);
-
+// Reject if per-IP limit exceeded
 if ($ipCount > $maxIP) {
     apcu_dec($keyIP);
     header("HTTP/1.1 429 Too Many Requests");
+    header("Retry-After: $ttlIP");
     echo json_encode(['error' => 'Too many requests from your IP']);
     exit;
 }
@@ -75,13 +78,18 @@ if (!$locked) {
 // Release slots on shutdown
 // ----------------------
 register_shutdown_function(function() use ($keyGlobal, $keyIP) {
-    if (($g = apcu_fetch($keyGlobal)) !== false && $g > 0) apcu_dec($keyGlobal);
-    if (($i = apcu_fetch($keyIP)) !== false && $i > 0) {
-        $new = apcu_dec($keyIP);
-        if ($new <= 0) apcu_delete($keyIP);
+    // Global counter
+    $g = apcu_fetch($keyGlobal);
+    if ($g !== false && $g > 0) {
+        apcu_dec($keyGlobal);
+    }
+
+    // Per-IP counter
+    $i = apcu_fetch($keyIP);
+    if ($i !== false && $i > 0) {
+        apcu_dec($keyIP);
     }
 });
-
 
 /*
 //Old server lock version, using server-side concurrency limiter, replaced with Redis method above 10.11.25 DK
