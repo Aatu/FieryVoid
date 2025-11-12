@@ -2048,6 +2048,7 @@ shipManager.movement = {
         var assignedarray = shipManager.movement.calculateAssignedThrust(ship, movement, overthrustCheck);
         var requiredThrust = movement.requiredThrust;
         var stillReq = requiredThrust.slice();
+        /* //Old code - DK 12.11.25
         var any = 0;
 
         for (var i in requiredThrust) {
@@ -2067,6 +2068,34 @@ shipManager.movement = {
         }
 
         stillReq[0] -= any;
+        */
+       
+        //New version
+        var pool = 0;
+
+        for (var i = 0; i < requiredThrust.length; i++) {
+            var req = requiredThrust[i];
+            var ass = assignedarray[i] || 0;
+
+            if (req == null) {
+                pool += ass;       // collect assigned thrust even if no requirement
+                stillReq[i] = null;
+                continue;
+            }
+
+            if (ass > req) {
+                stillReq[i] = 0;
+                pool += ass - req; // surplus contributes to the pool
+            } else {
+                stillReq[i] = req - ass;
+            }
+        }
+
+        // Reduce the flexible "any" requirement by the pool
+        if (stillReq[0] != null) {
+            stillReq[0] = Math.max(0, (stillReq[0] || 0) - pool);
+        }
+
 
         if (movement.type == "pivotright" || movement.type == "pivotleft") {
             var portDirection = shipManager.movement.thrusterDirectionRequired(ship,"port");
