@@ -932,9 +932,16 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
     <p>The Torvalus are known for their highly advanced stealth technology as well as their love for making cosmic gambles. Below is a list of systems used by the Torvalus, with short description of effect and any notable design differences from their original tabletop versions.</p>    
     <h5>Laser Weaponry</h5>
         <li>Torvalus weaponry is entirely Laser-based, making it uninterceptable.  Whilst these weapons do not have an particularly unusual abilities per se, their high damage, flexibility and low cooldowns makes them very effective.</li>
-        <h5>Shrouded Saber</h5>        
-        <li>This ship has an optional rule which allows it to bring up to 12 fighters into battle for the Torvalus.  
-            However, since meeting the 50% hangar requirement is more typically a hindrance to Torvalus fleet building the Shrouded Saber's hangar capacity is listed as 0 by default.</li>    
+        <h5>Hangar Requirements</h5>
+        <li>The Torvalus ships don't have hangars and therefore do not need to meet the normal 50% hangar requirement when building their fleet. 
+            Instead their Stiletto Drones simply operate independently but are immune to dropout whilst a ship with control capacity (and functioning CnC) is present.        
+            In scenarios where a certain percentage of fighters ARE required, use the following numbers as control/hangar capacity:
+            <ul class="circle-list">
+                <li>Dark Knife - 24 drones</li>
+                <li>Black Rapier - 6 drones</li>
+                <li>Shrouded Saber - 12 drones (Optional)</li>                  
+            </ul>
+        </li>    
         <h5>Shading Field</h5>
         <li>The Shading Field operates the same as the Minbari's Jammer system (e.g. prevents weapons locks even when targeted with OEW), including against other Ancients as well as Younger Races.</li>
         <li>In addition the Shading Field has two states, Normal Mode and Shading Mode, which are described below:
@@ -946,7 +953,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             </ul>
         </li>         
         <li>Torvalus Stiletto Fighters have a smaller version of the Shading Field equipped.  
-            This can also be toggled on and off during Firing/Deployment phases but it does not provide the Jammer ability and it does not reduce the profile of the fighter flight (by 3) unless they are Shaded.</li>         
+            This can also be toggled on and off during Firing/Deployment phases but it does not reduce the profile of the fighter flight (by 15) unless they are Shaded.</li>         
     <h5>Shade Modulator</h5>
         <li>The Shade Modulator is a versatile Support Weapons found on the Veiled Scimitar, it has four different firing modes which are described below. 
             <ul class="circle-list">

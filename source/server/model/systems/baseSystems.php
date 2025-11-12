@@ -5840,8 +5840,8 @@ class MindriderHangar extends ShipSystem{
 			if($this->isDestroyed($turn-1) || $this->isOfflineOnTurn() || $target instanceof FighterFlight)
 				return 0;		
 			
-			if ($this->hasCritical('DamageReductionRemoved'))
-				return 0;
+			//if ($this->hasCritical('DamageReductionRemoved'))
+			//	return 0;
 			
 			$output = $this->output;
 			$output += $this->outputMod; //outputMod itself is negative!
@@ -5851,8 +5851,9 @@ class MindriderHangar extends ShipSystem{
 		public function setSystemDataWindow($turn){
 				$unit = $this->getUnit();
 				if($unit instanceof FighterFlight){
-					$this->data["Special"] = "<br>Can activate 'Shading Mode' for the NEXT turn, by boosting this system during Deployment or Firing Phase.";						
-					$this->data["Special"] .= "<br>When Shading is activated, this flight's defense ratings are reduced by 15, and it cannot be detected if it is over 15 hexes at the start or end of movement..";
+					$this->data["Special"] = "Jammer ability, even against Ancients.";
+					$this->data["Special"] .= "<br>Can activate 'Shading Mode' for the NEXT turn, by boosting this system during Deployment or Firing Phase.";						
+					$this->data["Special"] .= "<br>When Shading is activated, this flight's defense ratings are reduced by 15, and it cannot be detected if it is over 15 hexes at the start or end of movement.";
 					$this->data["Special"] .= "<br>HOWEVER, the flight cannot fire any weapons on a turn when Shading was active.";
 					$this->data["Special"] .= "<br>This system also incorporates a small Jump Drive, with a 20 turn recharge.";									
 				}else{
@@ -5869,9 +5870,9 @@ class MindriderHangar extends ShipSystem{
 		public function getSpecialAbilityValue($args)
 		{
 			$ship = $this->getUnit();
-			if($ship instanceof FighterFlight){
-				return 0; //Torvalus fighters don't get the Jammer effect.
-			}
+			//if($ship instanceof FighterFlight){
+			//	return 0; //Torvalus fighters don't get the Jammer effect.
+			//}
 
 			if (!isset($args["shooter"]) || !isset($args["target"]))
 				throw new InvalidArgumentException("Missing arguments for Jammer getSpecialAbilityValue");

@@ -32,7 +32,7 @@ class ShroudedSaber extends MediumShip{
 		$this->trueStealth = true; //For ships that can actually be hidden, not just jammer from range.  Important for Front End.		
 		
 		//$this->fighters = array("normal"=>12); //Can optionally control 12
-		$this->notes = "Can optionally control 12 fighters";
+		$this->notes = "Can control 12 fighters";
         
 		/*Torvalus use their own enhancement set */		
 		Enhancements::nonstandardEnhancementSet($this, 'TorvalusShip');
