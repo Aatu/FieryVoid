@@ -81,29 +81,16 @@ window.ajaxInterface = {
         });
     },
 
-    //New version to work cleanly with APCu server guard approach
     ajaxWithRetry: function ajaxWithRetry(options, attempt = 1) {
         const maxAttempts = 5;
-        const baseDelay = 200; // fallback delay for 507 errors
-        const jitter = 100;    // small random offset to prevent sync storms
+        const baseDelay = 200;
 
         const jqXHR = $.ajax({
             ...options,
             error: function(xhr, status, error) {
-                const retryableCodes = [503, 429, 507];
-                if (retryableCodes.includes(xhr.status) && attempt <= maxAttempts) {
-                    // Try to read Retry-After header from server
-                    let delay = baseDelay * Math.pow(2, attempt) + Math.random() * jitter;
-
-                    const retryAfter = xhr.getResponseHeader("Retry-After");
-                    if (retryAfter !== null) {
-                        const retryMs = parseFloat(retryAfter) * 1000;
-                        if (!isNaN(retryMs)) {
-                            delay = retryMs + Math.random() * jitter; // add tiny jitter
-                        }
-                    }
-
-                    console.warn(`Server busy (${xhr.status}), retrying in ${Math.round(delay)}ms (attempt ${attempt})`);
+                if (xhr.status === 507 && attempt <= maxAttempts) {
+                    const delay = baseDelay * Math.pow(2, attempt) + Math.random() * 100;
+                    console.warn(`507 error, retrying in ${Math.round(delay)}ms (attempt ${attempt})`);
                     setTimeout(() => ajaxInterface.ajaxWithRetry(options, attempt + 1), delay);
                 } else if (options.error) {
                     options.error(xhr, status, error);
