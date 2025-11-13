@@ -1209,6 +1209,18 @@ window.gamedata = {
         }
     },    
 
+    hasSlotSurrendered: function hasSlotSurrendered(slotid){
+        var slot = playerManager.getSlotById(slotid);
+
+        if(slot.surrendered !== null){
+            if(slot.surrendered <= gamedata.turn){ //Surrendered on this turn or before.
+                return true;
+            }
+        } 
+        
+        return false;
+    },
+
     getPlayerNameById: function getPlayerNameById(id) {
         for (var i in gamedata.slots) {
             var slot = gamedata.slots[i];
@@ -1287,9 +1299,8 @@ window.gamedata = {
         var ships = gamedata.ships.filter(function(ship) {
             return !shipManager.isDestroyed(ship)
                    && !gamedata.isTerrain(ship.shipSizeClass, ship.userid) 
-                   //&& !shipManager.shouldBeHidden(ship); //Moved to onScrollToShip() in Phase Strategy
+                   && !gamedata.hasSlotSurrendered(ship.slot); //Remove surrendered ships
         });
-
        
 
         //ships.sort(shipManager.hasBetterInitive);
