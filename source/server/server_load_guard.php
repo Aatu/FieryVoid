@@ -62,7 +62,7 @@ do {
     }
 
     // Wait a short time before retrying
-    usleep((int)($waitStep * 2000000));
+    usleep((int)($waitStep * 1000000));
 } while ((microtime(true) - $start) < $maxWait);
 
 // If no slot acquired, reject politely
@@ -78,10 +78,16 @@ if (!$locked) {
 // Release slots on shutdown
 // ----------------------
 register_shutdown_function(function() use ($keyGlobal, $keyIP) {
-    if (($g = apcu_fetch($keyGlobal)) !== false && $g > 0) apcu_dec($keyGlobal);
-    if (($i = apcu_fetch($keyIP)) !== false && $i > 0) {
-        $new = apcu_dec($keyIP);
-        if ($new <= 0) apcu_delete($keyIP);
+    // Global counter
+    $g = apcu_fetch($keyGlobal);
+    if ($g !== false && $g > 0) {
+        apcu_dec($keyGlobal);
+    }
+
+    // Per-IP counter
+    $i = apcu_fetch($keyIP);
+    if ($i !== false && $i > 0) {
+        apcu_dec($keyIP);
     }
 });
 
