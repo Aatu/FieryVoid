@@ -2430,7 +2430,7 @@ expandFaction: function expandFaction(event) {
 			for(var i in mySlots) {
 				var slot = mySlots[i];
 				if (slot.lastphase >= "-2") { 
-					window.confirm.error("You have already confirmed a fleet for this game, you cannot now leave!", function () {});
+					window.confirm.error("You have already confirmed a fleet for this game, you cannot change teams now!", function () {});
 					return;
 				}else{
 					window.location = "gamelobby.php?gameid=" + gamedata.gameid + "&leave=true";					
