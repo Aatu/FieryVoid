@@ -50,7 +50,7 @@ window.gamedata = {
 
 	createGames: function createGames() {
 
-		var gamehtml = '<div class="game slot clickableGames" data-gameid="{gameid}"><span class="name">{gamename}</span><br><span class="value players">Players: {players}/{maxplayers}</span></div>';
+		var gamehtml = '<div class="game slot clickableGames" data-gameid="{gameid}"><span class="lobbyname">{gamename}</span><br><span class="value players">Players: {players}/{maxplayers}</span></div>';
 		var activefound = false;
 		var lobbyfound = false;
 		console.log("GAMES LOLS", this.games)
