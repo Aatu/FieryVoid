@@ -1492,6 +1492,71 @@ class DBManager
         return $gamedata;
     }
 
+
+    public function getPlayerGames($playerid) {
+        //$stmt = $this->connection->prepare("select g.id, g.name, pg.waiting from tac_playeringame pg join tac_game g on pg.gameid = g.id where g.status = 'ACTIVE' AND pg.playerid = ?");
+		//enhance to include game rules:
+        $stmt = $this->connection->prepare("
+            SELECT g.id, g.name, pg.waiting, g.gamespace, g.rules
+            FROM tac_playeringame pg
+            JOIN tac_game g ON pg.gameid = g.id
+            WHERE g.status = 'ACTIVE'
+            AND pg.playerid = ?
+            AND pg.surrendered IS NULL
+        ");  	    
+
+        $games = [];
+		
+		$nm = '';
+        if ($stmt) {
+            $stmt->bind_param('i', $playerid);
+            $stmt->bind_result($id, $gameName, $waiting, $gamespace, $rules);
+            $stmt->execute();
+			while ($stmt->fetch()) {
+				$nm = $gameName;
+                /*$nm .= ' <br><span class="gameRules">(';
+			    //gamespace and rules: add to name!    
+				if ($gamespace == '-1x-1'){ //open map
+					$nm .= 'Open';
+				}else{ //fixed map
+					$nm .= $gamespace;
+				}
+				if (strpos($rules, 'initiativeCategories')!==false){//simultaneous movement
+					$nm  .= ', Sim Mov';
+				}else{//standard movement
+					$nm  .= ', Std Mov';
+				}
+                if (strpos($rules, 'moons') !== false || strpos($rules, 'asteroids') !== false) {
+                    $nm .= ', Terrain';
+                }             
+				if (strpos($rules, 'desperate')!==false){
+					$nm  .= ', Desparate';
+				}
+
+                $nm .= ')</span>';
+                */
+				
+				//attempt to fix "no highlight" bug - do highlight a game if no player is listed as active
+                $games[] = ["id" => $id, "name" => $nm, "waiting" => $waiting, "status" => "ACTIVE"];
+            }
+            $stmt->close();
+        }
+		
+		//attempt to solve no highlight problem - do highlight the game if no player is listed as active
+				
+		foreach($games as $currLineId=>$currGameData) if($games[$currLineId]["waiting"] != 0){
+			//$games[$currLineId]["waiting"] = 0;
+			$currGameId = $games[$currLineId]["id"];
+			$sql = "SELECT DISTINCT slot FROM tac_playeringame WHERE gameid = $currGameId and waiting = 0 "; //are three players that are waiting for action?
+			$result = $this->query($sql);
+			if (($result == null) || (sizeof($result) == 0)){ //no such players do exist
+				$games[$currLineId]["waiting"] = 0;				
+			}
+		}
+        return $games;
+    }
+
+    /*
     public function getPlayerGames($playerid) {
         //$stmt = $this->connection->prepare("select g.id, g.name, pg.waiting from tac_playeringame pg join tac_game g on pg.gameid = g.id where g.status = 'ACTIVE' AND pg.playerid = ?");
 		//enhance to include game rules:
@@ -1526,8 +1591,8 @@ class DBManager
             $stmt->close();
         }
 		
-		/*attempt to solve no highlight problem - do highlight the game if no player is listed as active
-		*/		
+		//attempt to solve no highlight problem - do highlight the game if no player is listed as active
+				
 		foreach($games as $currLineId=>$currGameData) if($games[$currLineId]["waiting"] != 0){
 			//$games[$currLineId]["waiting"] = 0;
 			$currGameId = $games[$currLineId]["id"];
@@ -1539,7 +1604,7 @@ class DBManager
 		}
         return $games;
     }
-	
+	*/
     public function getPlayerName($playerid) {
 		$playerName = '';	
 		        
@@ -1552,6 +1617,51 @@ class DBManager
         return $playerName;
     }
 
+    public function getLobbyGames() {
+        //$stmt = $this->connection->prepare("select g.id as parentGameId, g.name, g.slots, (select count(gameid) from tac_playeringame where gameid = parentGameId ) as numberOfPlayers from tac_game g WHERE  g.status = 'LOBBY';");
+		//above always returns playerCount = number of slots, let's try different approach (Marcin Sawicki):
+		//$stmt = $this->connection->prepare("select g.id as parentGameId, g.name, g.slots, (select count(distinct playerid) from tac_playeringame where gameid = parentGameId and playerid > 0 ) as numberOfPlayers from tac_game g WHERE  g.status = 'LOBBY';");    
+		//enhance to include game rules
+		$stmt = $this->connection->prepare("select g.id as parentGameId, g.name, g.slots, g.gamespace, g.rules, (select count(distinct playerid) from tac_playeringame where gameid = parentGameId and playerid > 0 ) as numberOfPlayers from tac_game g WHERE  g.status = 'LOBBY';");    
+		
+        $games = [];
+		$nm = '';
+
+        if ($stmt) {
+            $stmt->bind_result($id, $gameName, $slots, $gamespace, $rules, $playerCount );
+			//$stmt->bind_result($id, $gameName, $slots, $playerCount );
+            $stmt->execute();
+            while ($stmt->fetch()) {
+				$nm = $gameName;
+                $nm .= ' <br><span class="gameRules">(';
+			//gamespace and rules: add to name!    
+				if ($gamespace == '-1x-1'){ //open map
+					$nm .= 'Open';
+				}else{ //fixed map
+					$nm .= $gamespace;
+				}
+				if (strpos($rules, 'initiativeCategories')!==false){//simultaneous movement
+					$nm  .= ', Sim Mov';
+				}else{//standard movement
+					$nm  .= ', Std Mov';
+				}
+                if (strpos($rules, 'moons') !== false || strpos($rules, 'asteroids') !== false) {
+                    $nm .= ', Terrain';
+                }             
+				if (strpos($rules, 'desperate')!==false){
+					$nm  .= ', Desparate';
+				}
+
+                $nm .= ')</span>';
+                $games[] = ["id" => $id, "name" => $nm, "slots" => $slots, "playerCount" => $playerCount, "status" => "LOBBY"];
+            }
+            $stmt->close();
+        }
+        return $games;
+
+    }
+    
+    /*
     public function getLobbyGames() {
         //$stmt = $this->connection->prepare("select g.id as parentGameId, g.name, g.slots, (select count(gameid) from tac_playeringame where gameid = parentGameId ) as numberOfPlayers from tac_game g WHERE  g.status = 'LOBBY';");
 		//above always returns playerCount = number of slots, let's try different approach (Marcin Sawicki):
@@ -1588,7 +1698,7 @@ class DBManager
         return $games;
 
     }
-
+    */        
     public function getTacGame($gameid, $playerid)
     {
          $sql = "SELECT * FROM `tac_game` where id = $gameid";

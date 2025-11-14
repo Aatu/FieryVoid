@@ -326,8 +326,37 @@ line-height: 1.5;
 .create-game-btn { margin-top: 15px; }
 
 .clickableGames{
+  font-size: 12px;   
+  font-weight: normal;  
 	cursor:pointer;
-  border: 1px solid #215a7a;  
+  border: 1px solid #215a7a; 
+}
+
+.gameRules {
+    /*color: #DEEBFF;*/
+    color: #84a5ce;
+    font-size: 11px; 
+  font-weight: normal;
+  margin-bottom: 0px;
+  margin-top: 0px                
+}
+
+.name {
+  /*color: #DEEBFF;*/
+  color: #DEEBFF;
+  font-size: 13px; 
+  font-weight: bold;
+  margin-bottom: 0px;
+  margin-top: 0px                
+}
+
+.players {
+    /*color: #DEEBFF;*/
+    color: #DEEBFF;
+    font-size: 12px; 
+  font-weight: normal;
+  margin-bottom: 0px;
+  margin-top: 0px                
 }
 
 .waitingForTurn
