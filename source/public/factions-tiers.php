@@ -844,7 +844,8 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         <li>Biothrusters have their own set of criticals (which reduce output) in place of regular thruster criticals.  The Bio-Drive cannot be boosted.</li>         
     <h5>Half Phasing</h5>
         <li>During the Movement Phase, Shadow ships can become semi-immaterial until the end of turn by Half-Phasing.</li>
-        <li>While Half-Phased ships become much more difficult to hit (-50% penalty to incoming gunfire) and less accurate itself (also -50% to hit). In addition, they cannot ram or get rammed at all, unless both ships are half-phasing.</li>
+        <li>While Half-Phased ships become much more difficult to hit (-20% penalty to hit from normal weapon fire, -40% from ballistics) but also becomes less accurate itself (-50% to hit on all shots). 
+            In addition, they cannot ram or get rammed at all, unless both ships are half-phasing.</li>
         <li>Performing Half-Phasing costs full thrust from two undamaged BioThrusters, as well as the presence of an online, undamaged  Phasing Drive. 
             Any damage to Phasing Drive during half-phasing destroys the ship.</li>
     <h5>Pilot</h5>
