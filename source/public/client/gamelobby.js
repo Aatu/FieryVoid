@@ -1873,13 +1873,14 @@ expandFaction: function expandFaction(event) {
 	clickTakeslot: function clickTakeslot() {
 		var slot = $(".slot").has($(this));
 		var slotid = slot.data("slotid");
+		var newSlot = playerManager.getSlotById(slotid);
 
 		// block if player already has confirmed fleet (in any slot)
 		for (var i in gamedata.slots)  { //check all slots
 			var checkSlot = gamedata.slots[i];
 			if (checkSlot.lastphase >= "-2") { //this slot has ready fleet
 				var player = playerManager.getPlayerInSlot(checkSlot);
-				if (player.id == gamedata.thisplayer && checkSlot == slot) {
+				if (player.id == gamedata.thisplayer &&  checkSlot.team !== newSlot.team) { //Player has a readied slot in another team
 					window.confirm.error("You have already confirmed your fleet for this game!", function () {});
 					return;
 				}
