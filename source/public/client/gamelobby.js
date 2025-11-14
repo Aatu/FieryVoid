@@ -1881,7 +1881,7 @@ expandFaction: function expandFaction(event) {
 			if (checkSlot.lastphase >= "-2") { //this slot has ready fleet
 				var player = playerManager.getPlayerInSlot(checkSlot);
 				if (player.id == gamedata.thisplayer &&  checkSlot.team !== newSlot.team) { //Player has a readied slot in another team
-					window.confirm.error("You have already confirmed your fleet for this game!", function () {});
+					window.confirm.error("You've confirmed a fleet for this game, you cannot change teams now!", function () {});
 					return;
 				}
 			}
@@ -2430,7 +2430,7 @@ expandFaction: function expandFaction(event) {
 			for(var i in mySlots) {
 				var slot = mySlots[i];
 				if (slot.lastphase >= "-2") { 
-					window.confirm.error("You have already confirmed a fleet for this game, you cannot change teams now!", function () {});
+					window.confirm.error("You have already confirmed a fleet for this game, you cannot now leave!", function () {});
 					return;
 				}else{
 					window.location = "gamelobby.php?gameid=" + gamedata.gameid + "&leave=true";					
