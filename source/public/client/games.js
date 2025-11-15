@@ -60,13 +60,13 @@ window.gamedata = {
 			if (game.status == "ACTIVE") {
 
 				if (gameDOM.length == 0) {
-					var html = gamehtml;
+					var html = '<div class="game slot clickableGames" data-gameid="{gameid}"><span class="activeName">{gamename}</span><br><span class="value players">Players: {players}/{maxplayers}</span></div>';
 					html = html.replace("{gameid}", game.id);
 					html = html.replace("{gamename}", game.name);
 
 					gameDOM = $(html);
 					gameDOM.find('.players').remove();
-
+					//gameDOM.addClass("activeName");
 					if (!game.waiting) gameDOM.addClass("waitingForTurn");
 
 					gameDOM.appendTo($('.gamecontainer.active'));

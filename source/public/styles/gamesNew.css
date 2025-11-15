@@ -327,25 +327,32 @@ line-height: 1.5;
 
 .clickableGames{
   font-size: 12px;   
-  font-weight: normal;  
+  font-weight: bold;  
 	cursor:pointer;
   border: 1px solid #215a7a; 
 }
 
-.gameRules {
-    /*color: #DEEBFF;*/
-    color: #84a5ce;
-    font-size: 11px; 
-  font-weight: normal;
-  margin-bottom: 0px;
-  margin-top: 0px                
+.activeName {
+  /*color: #DEEBFF;*/
+  color: #DEEBFF;
+  font-size: 13px; 
+  font-weight: bold;              
 }
 
 .lobbyname {
   /*color: #DEEBFF;*/
-  color: #DEEBFF;
+    color: #52b352;
   font-size: 13px; 
   font-weight: bold;
+  margin-bottom: 0px;
+  margin-top: 0px                
+}
+
+.gameRules {
+  /*color: #DEEBFF;*/
+  color: #84a5ce;
+  font-size: 11px; 
+  font-weight: normal;
   margin-bottom: 0px;
   margin-top: 0px                
 }
@@ -367,6 +374,8 @@ line-height: 1.5;
   -webkit-box-shadow: 0px 0px 1px #4a6a7a;
   box-shadow: 0px 0px 1px #4a6a7a;
 }
+
+
 
 .create-col .btn {
   display: block;
