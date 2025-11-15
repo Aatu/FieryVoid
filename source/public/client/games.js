@@ -66,7 +66,6 @@ window.gamedata = {
 
 					gameDOM = $(html);
 					gameDOM.find('.players').remove();
-					//gameDOM.addClass("activeName");
 					if (!game.waiting) gameDOM.addClass("waitingForTurn");
 
 					gameDOM.appendTo($('.gamecontainer.active'));
