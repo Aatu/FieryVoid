@@ -779,7 +779,7 @@ class TransverseDrive extends Weapon implements SpecialAbility, DefensiveSystem{
 	public $priority = 1;
 	public $factionAge = 3;//Ancient weapon, which sometimes has consequences!
 	
-	public $range = 3;//no point firing at further target with base 24 to hit!
+	public $range = 3;
 	public $loadingtime = 2;
     public $rangePenalty = 0;
 	
@@ -806,7 +806,7 @@ class TransverseDrive extends Weapon implements SpecialAbility, DefensiveSystem{
             18=>"IncreasedRecharge1",
             21=>"DamageSystem",
             23 =>array("IncreasedRecharge1", "DamageSystem")
-		);
+	);
 
 	//Required to be overwritten in weapon for IncreasedRecharge1 crit to function. 
     public function getLoadingTime()
