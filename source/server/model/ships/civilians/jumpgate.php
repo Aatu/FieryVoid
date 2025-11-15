@@ -10,6 +10,7 @@ class Jumpgate  extends BaseShip{
         $this->imagePath = "img/ships/JumpGate.png";
         $this->canvasSize = 200;
         $this->shipClass = "Fixed Jump Gate";
+        $this->variantOf = "OBSELETE";             
         $this->shipSizeClass = 3;
         $this->Enormous = false; //classify it as a Capital just so it doesn't auto-ram passing units!
 		$this->iniativebonus = -200; //no voluntary movement anyway

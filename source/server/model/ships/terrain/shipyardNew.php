@@ -1,20 +1,18 @@
 <?php
-class Shipyard extends BaseShip{
+class ShipyardNew extends Terrain{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 500;//Nominal value as important and costly structure, even if with zero actual combat value!
-		$this->faction = "Civilians";
-        $this->phpclass = "Shipyard";
+		$this->pointCost = 10;//Nominal value as important and costly structure, even if with zero actual combat value!
+		$this->faction = "Terrain";  
+        $this->phpclass = "shipyardNew";
         $this->imagePath = "img/ships/Shipyard.png";
         $this->canvasSize = 200;
         $this->shipClass = "Shipyard";
-        $this->variantOf = "OBSELETE";             
-        $this->shipSizeClass = 3;
         $this->Enormous = false; //classify it as a Capital just so it doesn't auto-ram passing units!
 		$this->iniativebonus = -200; //no voluntary movement anyway
-        $this->isd = 'Variable';
+        $this->isd = '2100';
 	            
 		$this->base = true;
 		$this->smallBase = true;
@@ -28,29 +26,17 @@ class Shipyard extends BaseShip{
         $this->accelcost = 99;
         $this->rollcost = 99;
         $this->pivotcost = 99;	
-	    
+
+        //Block all enhancements for Terrain units when bought
+		Enhancements::nonstandardEnhancementSet($this, 'Terrain');        
          
         $this->addPrimarySystem(new Reactor(6, 25, 0, 0));
         $this->addPrimarySystem(new CnC(6, 8, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 6, 2, 1));
-        $this->addPrimarySystem(new Hangar(3, 1, 1));
-		
-		//Structures are not displayed properly if there are no systems - using Vree Technical Structure system :)
-
-        $this->addFrontSystem(new StructureTechnical(0, 0, 0, 0));	
-
-        $this->addAftSystem(new StructureTechnical(0, 0, 0, 0));
-
-        $this->addLeftSystem(new StructureTechnical(0, 0, 0, 0));
-        
-        $this->addRightSystem(new StructureTechnical(0, 0, 0, 0));
-				
+        $this->addPrimarySystem(new Hangar(3, 4, 1));
+						
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
-        $this->addFrontSystem(new Structure(1, 150));
-        $this->addAftSystem(new Structure(1, 150));
-        $this->addLeftSystem(new Structure(1, 150));
-        $this->addRightSystem(new Structure(1, 150));
-        $this->addPrimarySystem(new Structure(2, 100));
+        $this->addPrimarySystem(new Structure(2, 500));
 
         $this->hitChart = array(
                 0=> array(
@@ -61,19 +47,9 @@ class Shipyard extends BaseShip{
                 		20 => "C&C",
                 ),
                 1=> array(
-                        18 => "Structure",
                         20 => "Primary",
                 ),
                 2=> array(
-                        18 => "Structure",
-                        20 => "Primary",
-                ),
-                3=> array(
-                        18 => "Structure",
-                        20 => "Primary",
-                ),
-                4=> array(
-                        18 => "Structure",
                         20 => "Primary",
                 ),
         );
