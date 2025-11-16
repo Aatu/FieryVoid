@@ -2326,7 +2326,7 @@ class JumpEngine extends ShipSystem{
 		$healthDiff = $maxhealth - $currHealth;
 	
 		// Calculate the percentage of health missing
-		$missingHealthPercentage = ($healthDiff / $maxhealth) * 100;
+		$missingHealthPercentage = round(($healthDiff / $maxhealth) * 100);
 
 		// Roll a D100
 		$d100Roll = Dice::d(100);

@@ -1040,7 +1040,7 @@ class TransverseDrive extends Weapon implements SpecialAbility, DefensiveSystem{
 			if($healthDiff == 0) return false; //Jump engine not damaged, just return.
 		
 			// Calculate the percentage of health missing
-			$missingHealthPercentage = ($healthDiff / $maxhealth) * 100;
+			$missingHealthPercentage = round(($healthDiff / $maxhealth) * 100);
 
 			// Roll a D100
 			$d100Roll = Dice::d(100);
