@@ -945,8 +945,10 @@ class GraviticShifter extends Weapon implements SpecialAbility{
      public function setSystemDataWindow($turn){
         $this->data["Special"] = "Used to change the facing of a target ship during Pre-Firing orders."; 
         $this->data["Special"] .= "<br>Select firing mode based on direction you wish to move ship and target a unit.";
+        $this->data["Special"] .= "<br>Only ONE Gravitic Shifter can be used on a ship per turn, any other attempts will automatically miss.";           
         $this->data["Special"] .= "<br>Has -15% chance to hit Ancient enemy units, or those with Gravitic drives.";        
-        $this->data["Special"] .= "<br>Can target allies, but has no effect on Enormous units.";	        		
+        $this->data["Special"] .= "<br>Can target allies.";
+        $this->data["Special"] .= "<br>No effect on Enormous units.";	        	        		
 		parent::setSystemDataWindow($turn);     
     }
 
@@ -960,6 +962,8 @@ class GraviticShifter extends Weapon implements SpecialAbility{
         }
             
         parent::calculateHitBase($gamedata, $fireOrder);
+        
+        GraviticShifter::$alreadyShifted[$fireOrder->targetid] = true; //Mark that a shot has been attempted against ship.
 
 		$target = $gamedata->getShipById($fireOrder->targetid);
         $shooter = $this->getUnit();
@@ -974,7 +978,6 @@ class GraviticShifter extends Weapon implements SpecialAbility{
         parent::fire($gamedata, $fireOrder); 
 		
         if($fireOrder->shotshit > 0){
-            GraviticShifter::$alreadyShifted[$fireOrder->targetid] = true;
             $fireOrder->pubnotes = "<br>Ship's facing is altered by a Gravitic Shifter.";                       
         }    
     }

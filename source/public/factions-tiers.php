@@ -367,7 +367,8 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                 Additionally, if fired at maximum boost, the weapon can suffer critical damage.</li>
         <h5>Gravitic Shifter</h5>
             <li>This weapon fires in the Pre-Firing phase of the game.  You can target an ally or an enemy to try and change their facing by 60 degrees clockwise or anti-clockwise (using appropriate firing mode). 
-                If the weapon hits then the target will be rotated before the Firing Phase occurs on that turn and therefore Gravitic Shifters can be used tactically to escape enemy firing arcs, or bring enemies into allied ships firing arcs.</li>                        
+                If the weapon hits then the target will be rotated before the Firing Phase occurs on that turn and therefore Gravitic Shifters can be used tactically to escape enemy firing arcs, or bring enemies into allied ships firing arcs. /section>
+                Note - Only ONE Gravitic Shifter can be used on a ship per turn, any other Shifter attempts will automatically miss.</li>                        
     <a class="back-to-top" href="#top">↩ Back to Top</a>
 
 
