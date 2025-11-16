@@ -35,7 +35,8 @@ spl_autoload_register(
                 'anroethas' => '/server/model/ships/hurr/anroethAS.php',
                 'antimatterconverter' => '/server/model/weapons/antimatter.php',
                 'alykent' => '/server/model/ships/brakiri/Alykent.php',
-                'ishtakaton' => '/server/model/ships/brakiri/ishtakaton.php',
+                //'ishtakaton' => '/server/model/ships/brakiri/ishtakaton.php',
+                'ishtaka' => '/server/model/ships/brakiri/ishtaka.php',                
                 'antoph' => '/server/model/ships/brakiri/antoph.php',
                 'antophearly' => '/server/model/ships/brakiri/antophEarly.php',
                 'antophupgrade' => '/server/model/ships/brakiri/antophUpgrade.php',
@@ -384,6 +385,7 @@ spl_autoload_register(
                 'gravitonbeam' => '/server/model/weapons/gravitic.php',
                 'gravitonpulsar' => '/server/model/weapons/gravitic.php',
                 'gravlance' => '/server/model/weapons/gravitic.php',
+                'graviticshifter' => '/server/model/weapons/gravitic.php',                
                 'greysharlin' => '/server/model/ships/minbari/greySharlin.php',
                 'gsten' => '/server/model/ships/narn/gsten.php',
                 'gstor' => '/server/model/ships/narn/gstor.php',
@@ -475,8 +477,8 @@ spl_autoload_register(
                 'jorthunl' => '/server/model/ships/dilgar/jorthunL.php',
                 'jorthunq' => '/server/model/ships/dilgar/jorthunQ.php',
                 'jumpengine' => '/server/model/systems/baseSystems.php',
-                //'jumpgate' => '/server/model/ships/civilians/jumpgate.php',
-                //'shipyard' => '/server/model/ships/civilians/Shipyard.php',
+                'jumpgate' => '/server/model/ships/civilians/jumpgate.php',
+                'shipyard' => '/server/model/ships/civilians/Shipyard.php',
                 'jumphawk' => '/server/model/ships/drazi/jumphawk.php',
                 'kabrik' => '/server/model/ships/brakiri/kabrik.php',
                 'kaliva' => '/server/model/ships/brakiri/kaliva.php',
@@ -1206,14 +1208,17 @@ spl_autoload_register(
                 'zzunoffnaston' => '/server/model/ships/narn/zzunoffNaston.php',
                 'zzunoffrongor' => '/server/model/ships/narn/zzunoffRongor.php',
                 'zzunoffronvar' => '/server/model/ships/narn/zzunoffRonvar.php',
-                'zzunoffshakaraton' => '/server/model/ships/brakiri/zzunoffShakaraton.php',
+                //'zzunoffshakaraton' => '/server/model/ships/brakiri/zzunoffShakaraton.php',
+                'shakara' => '/server/model/ships/brakiri/shakara.php',         
                 'zzunoffshokan' => '/server/model/ships/narn/zzunoffShokan.php',
                 //'zzunoffshokanelite' => '/server/model/ships/narn/zzunoffShokanElite.php',
                 'zzunoffshovok' => '/server/model/ships/narn/zzunoffShovok.php',
                 'zzunoffshovor' => '/server/model/ships/narn/zzunoffShovor.php',
                 'zzunoffshovorbolt' => '/server/model/ships/narn/zzunoffShovorBolt.php',
-                'zzunofftashkaton' => '/server/model/ships/brakiri/zzunoffTashkaton.php',
-                'zzunofftashkavaton' => '/server/model/ships/brakiri/zzunoffTashkavaton.php',
+                //'zzunofftashkaton' => '/server/model/ships/brakiri/zzunoffTashkaton.php',
+                'tashkat' => '/server/model/ships/brakiri/tashkat.php',                
+                //'zzunofftashkavaton' => '/server/model/ships/brakiri/zzunoffTashkavaton.php',
+                'tashkava' => '/server/model/ships/brakiri/tashkava.php',                   
                 'zzunofftdirk' => '/server/model/ships/narn/zzunoffTdirk.php',
                 'zzunofftdirkrefit' => '/server/model/ships/narn/zzunoffTdirkRefit.php',             
                 'zzunofftshon' => '/server/model/ships/narn/zzunoffTshon.php',
@@ -2503,18 +2508,7 @@ spl_autoload_register(
 				'vorlondreadnought' => '/server/model/ships/vorlons/vorlonDreadnought.php',
 				'vorlonheavydestroyer' => '/server/model/ships/vorlons/vorlonHeavyDestroyer.php',
 				'vorlonstrikecruiser' => '/server/model/ships/vorlons/vorlonStrikeCruiser.php',
-				
-				//old versions of capital ships, to be deleted when games are over
-				/*
-				'vorlonlightcruiserold' => '/server/model/ships/vorlons/vorlonLightCruiserOld.php',
-				'vorlonheavycruiserold' => '/server/model/ships/vorlons/vorlonHeavyCruiserOld.php',
-				'vorlonheavycarrierold' => '/server/model/ships/vorlons/vorlonHeavyCarrierOld.php',
-				'vorlondreadnoughtold' => '/server/model/ships/vorlons/vorlonDreadnoughtOld.php',
-				*/
-				
-				
-				
-				
+								
 				
 				//Descari
 				'dualplasmacannon' => '/server/model/weapons/plasma.php',

@@ -896,6 +896,120 @@ class GraviticCutter extends Raking
     } //endof GraviticCutter
 
 
+class GraviticShifter extends Weapon implements SpecialAbility{
+    public $name = "GraviticShifter";
+    public $displayName = "Gravitic Shifter";
+    public $animation = "bolt";
+    public $animationColor = array(99, 255, 00);	
+    public $animationExplosionScale = 0.3; //single hex explosion
+    public $priority = 1;    
+	public $specialAbilities = array("PreFiring");
+	public $specialAbilityValue = true; //so it is actually recognized as special ability!  		
+	public $damageType = "Standard"; //irrelevant, really
+	public $weaponClass = "Gravitic";
+	public $uninterceptable = true; //although I don't think a weapon exists that could intercept it...
+	public $doNotIntercept = true; //although I don't think a weapon exists that could intercept it...
+	public $loadingtime = 3;
+    public $rangePenalty = 1;
+    protected $canTargetAll = true; //Allows weapon to target allies AND enemies, pass to Front End in strpForJson()
+	public $firingModes = array(
+		1 => "Clockwise",
+        2 => "Anti-Clockwise"
+	);
+    public $fireControl = array(-3, 3, 5); // fighters, <mediums, <capitals 
+	public $preFires = true;
+    public $specialHitChanceCalculation = true;			
+	public $repairPriority = 6;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
+	    
+    protected $possibleCriticals = array(14 => "ReducedRange");
+	private static $alreadyShifted = array();	
+
+    function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+		if ( $maxhealth == 0 ){
+			$maxhealth = 6;
+		}
+		if ( $powerReq == 0 ){
+			$powerReq = 5;
+		}
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+    }
+	
+
+	public function getSpecialAbilityValue($args)
+    {
+		return $this->specialAbilityValue;
+	}
+
+     public function setSystemDataWindow($turn){
+        $this->data["Special"] = "Used to change the facing of a target ship during Pre-Firing orders."; 
+        $this->data["Special"] .= "<br>Select firing mode based on direction you wish to move ship and target a unit.";
+        $this->data["Special"] .= "<br>Has -15% chance to hit Ancient enemy units, or those with Gravitic drives.";        
+        $this->data["Special"] .= "<br>Can target allies, but has no effect on Enormous units.";	        		
+		parent::setSystemDataWindow($turn);     
+    }
+
+	public function calculateHitBase($gamedata, $fireOrder)
+	{       
+		if (isset(GraviticShifter::$alreadyShifted[$fireOrder->targetid])){
+            $fireOrder->needed = 0;
+            $fireOrder->updated = true; 
+            $fireOrder->pubnotes = "<br>Ship has already been affected by a Gravitic Shifter.";                         
+            return; //target already engaged by a previous Gravitic Shifter
+        }
+            
+        parent::calculateHitBase($gamedata, $fireOrder);
+
+		$target = $gamedata->getShipById($fireOrder->targetid);
+        $shooter = $this->getUnit();
+        if($shooter->team !== $target->team){ //Let's make penalty only for enemy units
+            if($target->gravitic || $target->factionAge >= 3){//Gravitic or Ancient
+                $fireOrder->needed -= 15; //+15% chance to miss.
+            }
+        }    
+	}    
+        
+    public function fire($gamedata, $fireOrder){                   
+        parent::fire($gamedata, $fireOrder); 
+		
+        if($fireOrder->shotshit > 0){
+            GraviticShifter::$alreadyShifted[$fireOrder->targetid] = true;
+            $fireOrder->pubnotes = "<br>Ship's facing is altered by a Gravitic Shifter.";                       
+        }    
+    }
+
+    protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
+        if($ship->Enormous) return; //No effect on Enormous units
+
+		$lastMove = $ship->getLastMovement();
+        $newFacing = $lastMove->facing; //Initialise as current facing.
+        
+
+        if($fireOrder->firingMode == 1){
+            $newFacing = MathLib::addToHexFacing($lastMove->facing , 1);
+        }else{
+            $newFacing = MathLib::addToHexFacing($lastMove->facing , -1);
+        }
+		
+		//Create new movement order for target.
+        $shift = new MovementOrder(null, "shift", new OffsetCoordinate($lastMove->position->q, $lastMove->position->r), 0, 0, $lastMove->speed, $lastMove->heading, $newFacing, false, $gamedata->turn, 0, 0);
+
+		//Add shifted movement order to database
+		Manager::insertSingleMovement($gamedata->id, $ship->id, $shift);	
+    }    
+
+	public function getDamage($fireOrder){       return 0;   } //no actual damage
+	public function setMinDamage(){     $this->minDamage = 0 ;      }
+	public function setMaxDamage(){     $this->maxDamage = 0 ;      }
+
+    public function stripForJson() {
+        $strippedSystem = parent::stripForJson();    
+        $strippedSystem->canTargetAll = $this->canTargetAll;	        											                                        
+        return $strippedSystem;
+	}	
+
+    } //endof GraviticShifter    
 
 
 class HypergravitonBlaster extends Weapon {
