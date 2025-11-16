@@ -21,7 +21,7 @@ window.weaponManager = {
         //throw new Error("Route trough phase strategy to get selected ship");
         if (!system) return;
 
-        if (gamedata.gamephase != 3 && !system.ballistic) return;
+        if (gamedata.gamephase != 3 && !system.ballistic && !system.preFires) return;
 
         if (gamedata.gamephase != 1 && system.ballistic) return;
 
@@ -2055,7 +2055,7 @@ window.weaponManager = {
     getAllFireOrdersForDisplayingAgainst: function getAllFireOrdersForDisplayingAgainst(target) {
         return gamedata.ships.reduce(function (fires, shooter) {
             return fires.concat(weaponManager.getAllFireOrders(shooter).filter(function (fire) {
-                return fire.targetid === target.id && (fire.type === "normal" || fire.type === "ballistic");
+                return fire.targetid === target.id && (fire.type === "normal" || fire.type === "ballistic" || fire.type === "prefiring");
             }));
         }, []).filter(function (fire) {
             return fire.rolled !== 0;
