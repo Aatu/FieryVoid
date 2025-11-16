@@ -41329,7 +41329,7 @@ var canRemoveFireOrder = function canRemoveFireOrder(ship, system) {
 };
 
 var canChangeFiringMode = function canChangeFiringMode(ship, system) {
-	return system.weapon && (gamedata.gamephase === 1 && system.ballistic || gamedata.gamephase === 3 && !system.ballistic) && (!weaponManager.hasFiringOrder(ship, system) || system.multiModeSplit) && Object.keys(system.firingModes).length > 1;
+	return system.weapon && (gamedata.gamephase === 1 && system.ballistic || gamedata.gamephase === 5 && system.preFires || gamedata.gamephase === 3 && !system.ballistic && !system.preFires) && (!weaponManager.hasFiringOrder(ship, system) || system.multiModeSplit) && Object.keys(system.firingModes).length > 1;
 };
 
 //can declare eligibility for interception: charged, recharge time >1 turn, intercept rating >0, no firing order
