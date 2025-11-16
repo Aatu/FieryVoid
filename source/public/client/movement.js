@@ -2048,11 +2048,11 @@ shipManager.movement = {
         var assignedarray = shipManager.movement.calculateAssignedThrust(ship, movement, overthrustCheck);
         var requiredThrust = movement.requiredThrust;
         var stillReq = requiredThrust.slice();
-        /* //Old code - DK 12.11.25
+        //Old code - DK 12.11.25
         var any = 0;
 
         for (var i in requiredThrust) {
-            var req = requiredThrust[i];
+            var req = requiredThrust[i] || 0;
             if (req == null) {
                 stillReq[i] = null;
                 continue;
@@ -2068,8 +2068,8 @@ shipManager.movement = {
         }
 
         stillReq[0] -= any;
-        */
-       
+        
+       /*
         //New version
         var pool = 0;
 
@@ -2095,7 +2095,7 @@ shipManager.movement = {
         if (stillReq[0] != null) {
             stillReq[0] = Math.max(0, (stillReq[0] || 0) - pool);
         }
-
+        */
 
         if (movement.type == "pivotright" || movement.type == "pivotleft") {
             var portDirection = shipManager.movement.thrusterDirectionRequired(ship,"port");
