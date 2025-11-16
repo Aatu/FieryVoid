@@ -176,6 +176,9 @@ class Weapon extends ShipSystem
     protected $autoHitArray = array(); //Need to pass in strpForJson    
 	protected $shootsStraight = true; //Denotes for Front End to use Line Arcs, not circles. Need to pass in strpForJson
 	protected $specialArcs = true;	//Denotes for Front End to redirect to weapon specific function to get arcs. Need to pass in strpForJson
+	protected $canTargetAllies = false; //To allow front end to target allies.
+	protected $canTargetAlliesArray = array(); //To allow front end to target allies.
+    protected $canTargetAll = false; //Allows weapon to target allies AND enemies, pass to Front End in strpForJson()
 
 	//Weapons are repaired before "average system", but after really important things! 
 	public $repairPriority = 5;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired

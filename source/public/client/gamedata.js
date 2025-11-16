@@ -240,7 +240,7 @@ window.gamedata = {
 
     canTargetAlly: function canTargetAlly(ship) {//30 June 2024 - DK - Added for Ally targeting.
         for (var i in gamedata.selectedSystems) {        	
-            if(gamedata.selectedSystems[i].canTargetAllies) return true;
+            if(gamedata.selectedSystems[i].canTargetAllies || gamedata.selectedSystems[i].canTargetAll) return true;
         }
     },
 
