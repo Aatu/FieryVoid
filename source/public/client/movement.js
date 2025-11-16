@@ -2053,11 +2053,12 @@ shipManager.movement = {
 
         for (var i in requiredThrust) {
             var req = requiredThrust[i]; //If null set to 0, to pick up where only 1 thrust reqd anywhere, and already assigned to a thruster
-            if (req == null) {
+            var ass = assignedarray[i];            
+            if (req == null && ass == null) {
                 stillReq[i] = null;
                 continue;
             }
-            var ass = assignedarray[i];
+
 
             if (ass > req) {
                 stillReq[i] = 0;
@@ -2104,7 +2105,7 @@ shipManager.movement = {
             var retroDirection = shipManager.movement.thrusterDirectionRequired(ship,"retro");
 
 
-            
+
             if (movement.type == "pivotright") { //clockwise
                 if (assignedarray[retroDirection] > 0 || assignedarray[portDirection] > 0) {
                     stillReq[mainDirection] = null;
