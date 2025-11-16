@@ -2052,12 +2052,12 @@ shipManager.movement = {
 
         for (var i in requiredThrust) {
             var req = requiredThrust[i]; //If null set to 0, to pick up where only 1 thrust reqd anywhere, and already assigned to a thruster
-            var ass = assignedarray[i];            
-            if (req == null && ass == null) {
+            var ass = assignedarray[i];      
+                  
+            if (req == null && ass == null) { //On rare occassions ass can have a value where req is null, preventing it from being added to any.
                 stillReq[i] = null;
                 continue;
             }
-
 
             if (ass > req) {
                 stillReq[i] = 0;
