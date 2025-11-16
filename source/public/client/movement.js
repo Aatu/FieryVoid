@@ -2052,7 +2052,7 @@ shipManager.movement = {
         var any = 0;
 
         for (var i in requiredThrust) {
-            var req = requiredThrust[i] || 0;
+            var req = requiredThrust[i] || 0; //If null set to 0, to pick up where only 1 thrust reqd anywhere, and already assigned to a thruster
             if (req == null) {
                 stillReq[i] = null;
                 continue;
@@ -2069,7 +2069,7 @@ shipManager.movement = {
 
         stillReq[0] -= any;
         
-       /*
+       /* //Failed fix to the any thrust not being updated when a gravitic ship was low speed and pivoting and tried to turn.
         //New version
         var pool = 0;
 
