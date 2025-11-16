@@ -365,9 +365,9 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         <h5>Gravitic Bolt / Gravitic Pulsar</h5>
             <li>These weapons can be boosted with power to increase damage and intercept rating. This does cause them to have a cooldown period equal to boost level used. 
                 Additionally, if fired at maximum boost, the weapon can suffer critical damage.</li>
-        <h5>Gravitic Shifter / Gravitic Mines</h5>
-            <li>These weapons are not yet available in Fiery Void.  However, some ships that were equipped with them are (e.g. Tashkat).  
-                Where this is the case these ship have been marked a 'Semi-Custom'</li>                        
+        <h5>Gravitic Shifter</h5>
+            <li>This weapon fires in the Pre-Firing phase of the game.  You can target an ally or an enemy to try and change their facing by 60 degrees clockwise or anti-clockwise (using appropriate firing mode). 
+                If the weapon hits then the target will be rotated before the Firing Phase occurs on that turn and therefore Gravitic Shifters can be used tactically to escape enemy firing arcs, or bring enemies into allied ships firing arcs.</li>                        
     <a class="back-to-top" href="#top">↩ Back to Top</a>
 
 
@@ -1448,8 +1448,8 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
     <h4 id="unbalanced" style="">UNBALANCED FLEETS</h4>
     <p>Of course, in a game as complex as Fiery Void, there was always going to be certain factions, or unit combinations, that are just too unbalanced to provide for a enjoyable pick-up game.  
         Below is a list that is considered by the community to fall into that category:</p>
-       <li>Ancients (see 'Ancients' section)</li>        
-       <li>Alacan (with Rotia swarms)</li>
+       <li>Ancients (see 'Ancients' section),</li>        
+       <li>Alacan (with Rotia swarms),</li>
        <li>Earth Alliance when using Warlock Advanced Destroyer or Shadow Omega Destroyer,</li>
        <li>Geoff,</li>         
        <li>Interstellar Alliance's all-White Star fleet,</li>
