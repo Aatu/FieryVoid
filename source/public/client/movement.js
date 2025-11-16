@@ -2048,7 +2048,6 @@ shipManager.movement = {
         var assignedarray = shipManager.movement.calculateAssignedThrust(ship, movement, overthrustCheck);
         var requiredThrust = movement.requiredThrust;
         var stillReq = requiredThrust.slice();
-        //Old code - DK 12.11.25
         var any = 0;
 
         for (var i in requiredThrust) {
@@ -2069,39 +2068,11 @@ shipManager.movement = {
         }
 
         stillReq[0] -= any;
-        
-       /* //Failed fix to the any thrust not being updated when a gravitic ship was low speed and pivoting and tried to turn.
-        //New version
-        var pool = 0;
-
-        for (var i = 0; i < requiredThrust.length; i++) {
-            var req = requiredThrust[i];
-            var ass = assignedarray[i] || 0;
-
-            if (req == null) {
-                pool += ass;       // collect assigned thrust even if no requirement
-                stillReq[i] = null;
-                continue;
-            }
-
-            if (ass > req) {
-                stillReq[i] = 0;
-                pool += ass - req; // surplus contributes to the pool
-            } else {
-                stillReq[i] = req - ass;
-            }
-        }
-
-        // Reduce the flexible "any" requirement by the pool
-        if (stillReq[0] != null) {
-            stillReq[0] = Math.max(0, (stillReq[0] || 0) - pool);
-        }
-        */
 
         if (movement.type == "pivotright" || movement.type == "pivotleft") {
-            var portDirection  = shipManager.movement.thrusterDirectionRequired(ship,"port");
-            var stbdDirection  = shipManager.movement.thrusterDirectionRequired(ship,"stbd");
-            var mainDirection  = shipManager.movement.thrusterDirectionRequired(ship,"main");
+            var portDirection = shipManager.movement.thrusterDirectionRequired(ship,"port");
+            var stbdDirection = shipManager.movement.thrusterDirectionRequired(ship,"stbd");
+            var mainDirection = shipManager.movement.thrusterDirectionRequired(ship,"main");
             var retroDirection = shipManager.movement.thrusterDirectionRequired(ship,"retro");
 
 
