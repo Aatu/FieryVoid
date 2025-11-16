@@ -2098,18 +2098,18 @@ shipManager.movement = {
         */
 
         if (movement.type == "pivotright" || movement.type == "pivotleft") {
-            var portDirection = shipManager.movement.thrusterDirectionRequired(ship,"port");
-            var stbdDirection = shipManager.movement.thrusterDirectionRequired(ship,"stbd");
-            var mainDirection = shipManager.movement.thrusterDirectionRequired(ship,"main");
+            var portDirection  = shipManager.movement.thrusterDirectionRequired(ship,"port");
+            var stbdDirection  = shipManager.movement.thrusterDirectionRequired(ship,"stbd");
+            var mainDirection  = shipManager.movement.thrusterDirectionRequired(ship,"main");
             var retroDirection = shipManager.movement.thrusterDirectionRequired(ship,"retro");
 
 
-
+            
             if (movement.type == "pivotright") { //clockwise
                 if (assignedarray[retroDirection] > 0 || assignedarray[portDirection] > 0) {
                     stillReq[mainDirection] = null;
                     stillReq[stbdDirection] = null;
-                }else if (assignedarray[mainDirection] > 0 || assignedarray[stbdDirection] > 0) {
+                } else if (assignedarray[mainDirection] > 0 || assignedarray[stbdDirection] > 0) {
                     stillReq[retroDirection] = null;
                     stillReq[portDirection] = null;
                 }
@@ -2117,7 +2117,7 @@ shipManager.movement = {
                 if (assignedarray[retroDirection] > 0 || assignedarray[stbdDirection] > 0) {
                     stillReq[mainDirection] = null;
                     stillReq[portDirection] = null;
-                }else if (assignedarray[mainDirection] > 0 || assignedarray[portDirection] > 0) {
+                } else if (assignedarray[mainDirection] > 0 || assignedarray[portDirection] > 0) {
                     stillReq[retroDirection] = null;
                     stillReq[stbdDirection] = null;
                 }
@@ -2327,10 +2327,10 @@ shipManager.movement = {
 			if(shipManager.movement.isPivotedPort(ship)){ //pivoted to Port means: Stbd is Retro, Main is Stbd, Port is Main, Retro is Port
 				switch(orientationRequired) {
 					case 1: 
-						orientationRequired = 4;
+						orientationRequired = 3;
 						break;
 					case 2: 
-						orientationRequired = 3;
+						orientationRequired = 4;
 						break;
 					case 3: 
 						orientationRequired = 1;
@@ -2342,10 +2342,10 @@ shipManager.movement = {
 			}else if (shipManager.movement.isPivotedStbd(ship)){//pivoted to Stbd means: Stbd is Main, Main is Port, Port is Retro, Retro is Stbd
 				switch(orientationRequired) {
 					case 1: 
-						orientationRequired = 3;
+						orientationRequired = 4;
 						break;
 					case 2: 
-						orientationRequired = 4;
+						orientationRequired = 3;
 						break;
 					case 3: 
 						orientationRequired = 2;
