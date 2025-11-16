@@ -348,7 +348,7 @@ window.weaponManager = {
 
 
 			if (system.weapon) {
-				if (gamedata.gamephase != 3 && !system.ballistic) continue; //improper at this moment
+				if (gamedata.gamephase != 3 && !system.ballistic && !system.preFires) continue; //improper at this moment
 				if (gamedata.gamephase != 1 && system.ballistic) continue;	//improper at this moment
 				if (gamedata.gamephase != 5 && system.preFires) continue;	//improper at this moment                
 				if (weaponManager.hasFiringOrder(ship, system) && !system.canSplitShots) continue;//already declared, do not touch it!
