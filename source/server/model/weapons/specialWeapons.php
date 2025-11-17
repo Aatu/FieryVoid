@@ -2781,7 +2781,8 @@ class RammingAttack extends Weapon{
 		if($fireOrder->damageclass == 'TerrainCollision'){		
 			$damage = 0;
 			$targetMove = $target->getLastMovement();
-			$targetSpeed = $targetMove->speed;						
+			$targetSpeed = $targetMove->speed;
+			if($target->factionAge >= 3) $targetSpeed = max(0, ($targetSpeed -2)); //Ancients have -2 to speed for this roll.						
 			$diceRoll = Dice::d(10,1);		
 			$damage = $targetSpeed * $diceRoll;				
 			return $damage;
