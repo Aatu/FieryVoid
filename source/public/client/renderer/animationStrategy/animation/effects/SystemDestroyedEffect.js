@@ -26,13 +26,17 @@ window.SystemDestroyedEffect = function () {
         this.destroyedTexts = {};
     };
 
-    SystemDestroyedEffect.prototype.add = function(position, names, time) {
+    SystemDestroyedEffect.prototype.add = function(position, names, time, type = 'destroyed') {
         names = [].concat(names);
+
+        var color = 'rgba(206, 19, 10, 1)';
+        if(type == 'crit') color = 'rgba(255, 129, 33, 0.7)';
+
         names.filter(Boolean).forEach(name => {
             this.destroyedTexts.push({
                 time: changeTimeIfNeccessary(position, time, this.destroyedTexts),
                 position: window.coordinateConverter.fromHexToGame(window.coordinateConverter.fromGameToHex(position)),
-                sprite: getSprite(name, position, this.scene)
+                sprite: getSprite(name, position, this.scene, color)
             });
         }, this)
     }
@@ -73,13 +77,13 @@ window.SystemDestroyedEffect = function () {
 
     const getKey = (position, time)  => time + '-' +position.x + '-' + position.y;
 
-    const getSprite = (name, position, scene) => {
+    const getSprite = (name, position, scene, color) => {
         let sprite = null;
 
         if (name.structure) {
-            sprite = new TextSprite(name.name.toUpperCase(), 'rgba(255, 100, 45, 1)', 500, {fontSize: '24px', size: 512})
+            sprite = new TextSprite(name.name.toUpperCase(), color, 500, {fontSize: '24px', size: 512})
         } else {
-            sprite = new TextSprite(name.name.toUpperCase(), 'rgba(255, 100, 45, 1)', 500, {fontSize: '18px', size: 512})
+            sprite = new TextSprite(name.name.toUpperCase(), color, 500, {fontSize: '18px', size: 512})
         }
 
         sprite.setPosition(position)

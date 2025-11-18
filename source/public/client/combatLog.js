@@ -4,6 +4,7 @@ window.combatLog = {
 
     displayedTurn: null,
     critsShown: {},
+    critAnimations: {}, //Just a convenient place to have this array for AllWeaponFireAgainstShipAnimation to use   
     logCache: {}, // key: turn number, value: processed fire order data
 
     onTurnStart: function onTurnStart() {
