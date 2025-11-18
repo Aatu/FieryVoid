@@ -989,7 +989,7 @@ class TransverseDrive extends Weapon implements SpecialAbility, DefensiveSystem{
 			if($jumpFailure) return;  //Ship blew up, no need to do transverse jump.
         	$fireOrder->rolled = $rolled; 
 
-			$fireOrder->pubnotes .= " Transverse Drive was unsuccesful!";						
+			$fireOrder->pubnotes .= " Transverse jump attempt was unsuccesful!";						
 			return;
 
 		} else if($rolled == 20){ //20- Fail with ForcedOfflineOneTurn Crit
@@ -1002,7 +1002,7 @@ class TransverseDrive extends Weapon implements SpecialAbility, DefensiveSystem{
 				$crits = array(); 
 				$crits = $this->testCritical($ship, $gamedata, $crits); //Need to force critical test outside normal routine
 			}	
-			$fireOrder->pubnotes .= " Transverse Drive was unsuccesful! Transverse Drive put on forced cooldown for one turn.";					
+			$fireOrder->pubnotes .= " Transverse Drive failed to jump and has rolled for potential critical effect.";					
 			return;
 		}	
 
