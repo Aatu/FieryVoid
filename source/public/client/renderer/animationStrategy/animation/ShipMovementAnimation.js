@@ -141,7 +141,7 @@ window.ShipMovementAnimation = function () {
 
         var done = length / current.length;
         result.animation = current;
-        result.done = done;
+        result.done = done || 0; //Added || 0 to prevent a bug when current.length was 0, not sure what caused it - DK Nov 2025
         return result;
     }
 /*
@@ -210,7 +210,7 @@ function buildCurves(shipIcon, turn) {
                 };
             } else {
                 // For Turn ≥ 2, getMovementsReplay already gave us the last prev-turn move
-                start = moves[i - 1] || null;
+                start = moves[i-1] || null;
             }
         } else {
             start = moves[i - 1];
@@ -278,36 +278,39 @@ function buildCurves(shipIcon, turn) {
         return { turnAngle: buildTurn(endMove, startFacing), startAngle: angleOld, endAngle: angleNew };
     }
 
-    function buildTurn(endMove, startFacing) {
-        if(endMove.oldFacings.length == 0) endMove.oldFacings[0] = startFacing;
-        var facings = endMove.oldFacings.concat(endMove.facing);
+function buildTurn(endMove, startFacing) {
 
-        var turn = 0;
-        var lastFacing = null;
+    // Build the correct sequence without mutating endMove
+    const sequence = [startFacing];
 
-        facings.forEach(function (facing) {
-            if (lastFacing === null) {
-                lastFacing = facing;
-                return;
-            }
-
-            var angleLast = mathlib.hexFacingToAngle(lastFacing);
-            var angleNew = mathlib.hexFacingToAngle(facing);
-
-            var right = mathlib.getAngleBetween(angleLast, angleNew, true);
-            var left = mathlib.getAngleBetween(angleLast, angleNew, false);
-
-            if (Math.abs(right) < Math.abs(left)) {
-                turn += right;
-            } else {
-                turn += left;
-            }
-
-            lastFacing = facing;
-        });
-
-        return turn;
+    if (Array.isArray(endMove.oldFacings) && endMove.oldFacings.length > 0) {
+        sequence.push(...endMove.oldFacings);
     }
+
+    sequence.push(endMove.facing);
+
+    let totalTurn = 0;
+    let lastFacing = null;
+
+    sequence.forEach(function (facing) {
+        if (lastFacing === null) {
+            lastFacing = facing;
+            return;
+        }
+
+        const angleLast = mathlib.hexFacingToAngle(lastFacing);
+        const angleNew = mathlib.hexFacingToAngle(facing);
+
+        const right = mathlib.getAngleBetween(angleLast, angleNew, true);
+        const left = mathlib.getAngleBetween(angleLast, angleNew, false);
+
+        totalTurn += Math.abs(right) < Math.abs(left) ? right : left;
+
+        lastFacing = facing;
+    });
+
+    return totalTurn;
+}
 
     function getMovementPoints(currentHex, nextHex, lastHex) {
 
