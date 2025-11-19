@@ -253,8 +253,11 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         <h3 id="stealth" >Stealth Ships</h3>
         <ul>
             <li>Stealth ships are invisible at long ranges until they reveal themselves or are detected.</li>
-            <li>They reveal themselves by using any EW ability except Defensive EW (DEW) or by firing weapons.</li>
-            <li>Detection ranges:
+            <li>They will automatically reveal themselves by using any EW ability except Defensive EW (DEW) or by firing their weapons.</li>
+            <li>They can also be detected once they get closer to an enemy vessel, providing there is line of sight available.  
+                Detection occurs at the start of the Firing Phase and is based on both ship type and sensor ratings. 
+                If an undetected stealth ship is within detection range at this point in the turn, it will become detected.
+                 Detection ranges are:
                 <ul class="circle-list">
                     <li>Base: 5x Sensor Rating</li>
                     <li>ELINT Ship: 3x Sensor Rating</li>
@@ -262,16 +265,18 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                     <li>Fighter: Offensive Bonus</li>
                 </ul>
             </li>
-            <li>ELINT ships can spend EW points on 'Detect Stealth' to increase detection by +2 per point.</li>
-            <li>Stealth ships can re-hide by breaking line of sight at the end of a turn and not firing weapons.</li>
+            <li>ELINT ships can spend EW points on 'Detect Stealth' to increase detection range by +2 per point invested in this way.</li>
+            <li>After being detected, Stealth ships can become undetected by breaking line of sight at the end of a turn and not firing weapons.</li>
             <li>If their scanner or computer system is destroyed, their defense increases by 15% for the battle.</li>
-            <li>Jammer ability applies:
+            <li>Stealth ships also receive the same benefits as Minbari Jammer-equipped ships from a certain distance:
                 <ul class="circle-list">
-                    <li>Ships: double range penalty beyond 12 hexes (4 for fighters, 24 for bases).</li>
-                    <li>Stealth fighters: no-lock bonus beyond 5 hexes, and ballistic launches restricted beyond 5 hexes.</li>
+                    <li>Ships: Double range penalty beyond 12 hexes (4 for fighters, 24 for bases).</li>
+                    <li>Stealth fighters: Double range penalty beyond 5 hexes, and ballistic launches restricted beyond 5 hexes.</li>
                 </ul>
             </li>
-            <li>Note: Stealth fighters cannot become fully invisible, only benefit from jammer/no-lock effects.</li>
+            <li>Stealth fighters cannot become fully invisible, only benefit from jammer/no-lock effects.</li>
+            <li>Note - These rules only cover the Stealth function for younger Bablyon 5 races, such as the Hyach.  
+                For details of other factions' stealth mechanics, such as the Torvalus, see individual faction notes in <a href="https://fieryvoid.eu/game/source/public/factions-tiers.php" target="_blank" rel="noopener noreferrer">Fiery Void: Factions & Tiers</a></li>            
         </ul>
         <a class="back-to-top" href="#top">↩ Back to Top</a>
 
