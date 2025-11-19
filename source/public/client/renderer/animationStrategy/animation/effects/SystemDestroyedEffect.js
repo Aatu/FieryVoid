@@ -36,7 +36,7 @@ window.SystemDestroyedEffect = function () {
             this.destroyedTexts.push({
                 time: changeTimeIfNeccessary(position, time, this.destroyedTexts),
                 position: window.coordinateConverter.fromHexToGame(window.coordinateConverter.fromGameToHex(position)),
-                sprite: getSprite(name, position, this.scene, color)
+                sprite: getSprite(name, position, this.scene, color, type)
             });
         }, this)
     }
@@ -77,13 +77,17 @@ window.SystemDestroyedEffect = function () {
 
     const getKey = (position, time)  => time + '-' +position.x + '-' + position.y;
 
-    const getSprite = (name, position, scene, color) => {
+    const getSprite = (name, position, scene, color, type) => {
         let sprite = null;
+        let size = '18px';
+        if(name.structure) size = '24px'; 
+        if(type == 'crit') size = '14px'; 
+
 
         if (name.structure) {
-            sprite = new TextSprite(name.name.toUpperCase(), color, 500, {fontSize: '24px', size: 512})
+            sprite = new TextSprite(name.name.toUpperCase(), color, 500, {fontSize: size, size: 512})
         } else {
-            sprite = new TextSprite(name.name.toUpperCase(), color, 500, {fontSize: '18px', size: 512})
+            sprite = new TextSprite(name.name.toUpperCase(), color, 500, {fontSize: size, size: 512})
         }
 
         sprite.setPosition(position)
