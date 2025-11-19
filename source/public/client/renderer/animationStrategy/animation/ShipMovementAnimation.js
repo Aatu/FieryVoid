@@ -133,16 +133,23 @@ window.ShipMovementAnimation = function () {
             length -= animation.length;
         });
 
-        if (!current) {
-            result.animation = this.hexAnimations[this.hexAnimations.length - 1];
-            result.done = 1;
-            return result;
-        }
+if (!current) {
+    result.animation = this.hexAnimations[this.hexAnimations.length - 1];
+    result.done = 1;
+    return result;
+}
 
-        var done = length / current.length;
-        result.animation = current;
-        result.done = done || 0; //Added || 0 to prevent a bug when current.length was 0, not sure what caused it - DK Nov 2025
-        return result;
+// --- FIX: handle zero-length animations safely ---
+if (current.length <= 0) {
+    result.animation = current;
+    result.done = 0;     // A zero-length animation is always "at the start"
+    return result;
+}
+
+var done = length / current.length;
+result.animation = current;
+result.done = isFinite(done) ? done : 0;
+return result;
     }
 /*
     function buildCurves(shipIcon, turn) {
