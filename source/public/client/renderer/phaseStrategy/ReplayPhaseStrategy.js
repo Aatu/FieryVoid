@@ -132,7 +132,8 @@ window.ReplayPhaseStrategy = function () {
         this.animationStrategy.toMovementPhase();
         this.replayUI.activateButton('#pause');
         resetAudio.call(this);
-        window.combatLog.critsShown = {}; //Empty crits shown array           
+        window.combatLog.critsShown = {}; //Empty crits shown array
+        window.combatLog.critAnimations = {}; //Empty crit animations shown array                          
         this.animationStrategy.pause();
     }
 
@@ -140,7 +141,8 @@ window.ReplayPhaseStrategy = function () {
         this.animationStrategy.toFiringPhase();
         this.replayUI.activateButton('#pause');
         resetAudio.call(this);
-        window.combatLog.critsShown = {}; //Empty crits shown array                     
+        window.combatLog.critsShown = {}; //Empty crits shown array
+        window.combatLog.critAnimations = {}; //Empty crit animations shown array                               
         this.animationStrategy.pause();
     }
 
