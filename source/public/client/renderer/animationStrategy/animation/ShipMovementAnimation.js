@@ -277,6 +277,38 @@ function buildCurves(shipIcon, turn) {
 
         return { turnAngle: buildTurn(endMove, startFacing), startAngle: angleOld, endAngle: angleNew };
     }
+/* //Old version
+    function buildTurn(endMove, startFacing) {
+        if(endMove.oldFacings.length == 0) endMove.oldFacings[0] = startFacing;
+        var facings = endMove.oldFacings.concat(endMove.facing);
+
+        var turn = 0;
+        var lastFacing = null;
+
+        facings.forEach(function (facing) {
+            if (lastFacing === null) {
+                lastFacing = facing;
+                return;
+            }
+
+            var angleLast = mathlib.hexFacingToAngle(lastFacing);
+            var angleNew = mathlib.hexFacingToAngle(facing);
+
+            var right = mathlib.getAngleBetween(angleLast, angleNew, true);
+            var left = mathlib.getAngleBetween(angleLast, angleNew, false);
+
+            if (Math.abs(right) < Math.abs(left)) {
+                turn += right;
+            } else {
+                turn += left;
+            }
+
+            lastFacing = facing;
+        });
+
+        return turn;
+    }
+*/
 
 function buildTurn(endMove, startFacing) {
 
@@ -330,6 +362,11 @@ function buildTurn(endMove, startFacing) {
         } else {
             controlBetween = 0.5;
             end = window.coordinateConverter.fromHexToGame(currentHex);
+
+            // If start and end would be identical, nudge end slightly to give curve length
+            if (!lastHex || lastHex.equals(currentHex)) {
+                end = { x: end.x + 0.001, y: end.y + 0.001 };
+            }
 
             var offset = this.shipIconContainer.getHexOffset(this.shipIcon);
             if (offset) {
