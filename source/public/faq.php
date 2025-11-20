@@ -32,7 +32,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
     <ul class = index-list>
         <li><a href="#general">GENERAL NOTES</a> </li>
         <li><a href="#differences">DIFFERENCES FROM BABYLON 5 WARS</a></li>                        
-        <li><a href="#mechanics">INFO ON ADVANCED MECHANICS</a>
+        <li><a href="#mechanics">ADVANCED MECHANICS</a>
            <ul class="sub-list">
                 <li><a href="#boarding">Boarding Actions & Marines</a></li>
                 <li><a href="#called">Called Shots</a></li>
@@ -276,7 +276,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             </li>
             <li>Stealth fighters cannot become fully invisible, only benefit from jammer/no-lock effects.</li>
             <li>Note - These rules only cover the Stealth function for younger Bablyon 5 races, such as the Hyach.  
-                For details of other factions' stealth mechanics, such as the Torvalus, see individual faction notes in <a href="https://fieryvoid.eu/game/source/public/factions-tiers.php" target="_blank" rel="noopener noreferrer">Fiery Void: Factions & Tiers</a></li>            
+                For details of other factions' stealth mechanics, such as the Torvalus, see individual faction notes in <a href="https://fieryvoid.eu/factions-tiers.php" target="_blank" rel="noopener noreferrer">Fiery Void: Factions & Tiers</a></li>            
         </ul>
         <a class="back-to-top" href="#top">↩ Back to Top</a>
 
