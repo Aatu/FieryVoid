@@ -964,7 +964,7 @@ shipManager.power = {
 			system.onTurnOff(ship);
 		}
 
-		shipManager.power.stopOverloading(ship, system);
+		if(system.overloadshots >= system.extraoverloadshots && system.overloadshots == 0) shipManager.power.stopOverloading(ship, system);
 		shipWindowManager.setDataForSystem(ship, system);
 		shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
 
@@ -1092,6 +1092,8 @@ shipManager.power = {
 		if (ship.userid != gamedata.thisplayer) return;
 
 		if (shipManager.power.isOffline(ship, system)) return;
+
+		if(system.overloadshots < system.extraoverloadshots && system.overloadshots !== 0) return;
 
 		shipManager.power.stopOverloading(ship, system);
 		shipWindowManager.setDataForSystem(ship, system);
