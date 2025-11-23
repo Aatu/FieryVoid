@@ -802,7 +802,29 @@ shipManager.power = {
 		}
 	},
 
+	/* //Old version - DK Nov 2025
 	isOverloading: function isOverloading(ship, system) {
+		if (system.alwaysoverloading) {
+			return true;
+		}
+
+		for (var i in system.power) {
+			var power = system.power[i];
+			if (power.turn != gamedata.turn) continue;
+
+			if (power.type == 3) {
+				return true;
+			}
+		}
+
+		return false;
+	},
+	*/
+
+	isOverloading: function isOverloading(ship, system) {
+
+		if(shipManager.power.isOfflineOnTurn(ship, system, gamedata.turn)) return false;
+
 		if (system.alwaysoverloading) {
 			return true;
 		}
@@ -964,7 +986,9 @@ shipManager.power = {
 			system.onTurnOff(ship);
 		}
 
-		if(system.overloadshots >= system.extraoverloadshots && system.overloadshots == 0) shipManager.power.stopOverloading(ship, system);
+		if(system.overloadshots == 0) { //To prevent stop overload AFTER an initial sustained shot is fired.
+			shipManager.power.stopOverloading(ship, system); 
+		}
 		shipWindowManager.setDataForSystem(ship, system);
 		shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
 
@@ -1091,9 +1115,9 @@ shipManager.power = {
 
 		if (ship.userid != gamedata.thisplayer) return;
 
-		//if (shipManager.power.isOffline(ship, system)) return;
+		if (shipManager.power.isOffline(ship, system)) return; //Let's allow overload status to be removed even if system offline (since it can be retained in certain circumstances)
 
-		if(system.overloadshots < system.extraoverloadshots && system.overloadshots !== 0) return;
+		if(system.overloadshots < system.extraoverloadshots && system.overloadshots !== 0) return; //To prevent stop overload AFTER an initial sustained shot is fired.
 
 		shipManager.power.stopOverloading(ship, system);
 		shipWindowManager.setDataForSystem(ship, system);
