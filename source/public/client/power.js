@@ -1115,7 +1115,7 @@ shipManager.power = {
 
 		if (ship.userid != gamedata.thisplayer) return;
 
-		if (shipManager.power.isOffline(ship, system)) return; //Let's allow overload status to be removed even if system offline (since it can be retained in certain circumstances)
+		if (shipManager.power.isOffline(ship, system)) return;
 
 		if(system.overloadshots < system.extraoverloadshots && system.overloadshots !== 0) return; //To prevent stop overload AFTER an initial sustained shot is fired.
 
