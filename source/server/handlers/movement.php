@@ -37,8 +37,9 @@
                 
             }else{
                 
-            $ship = $gamedata->ships[$gamedata->activeship];
-            $moves = $ships[$gamedata->activeship]->movement;   
+            //These parts are never used since validateMovement is only called during FireGamePhase, and it has a mistake in it anyway... DK - Nov 2025    
+                //$ship = $gamedata->ships[$gamedata->activeship];
+                //$moves = $ships[$gamedata->activeship]->movement;     
                 
             }
             

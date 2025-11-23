@@ -2326,7 +2326,7 @@ class JumpEngine extends ShipSystem{
 		$healthDiff = $maxhealth - $currHealth;
 	
 		// Calculate the percentage of health missing
-		$missingHealthPercentage = ($healthDiff / $maxhealth) * 100;
+		$missingHealthPercentage = round(($healthDiff / $maxhealth) * 100);
 
 		// Roll a D100
 		$d100Roll = Dice::d(100);
@@ -5777,7 +5777,7 @@ class MindriderHangar extends ShipSystem{
 		public $boostable = true;
 		public $maxBoostLevel = 1;
 		public $boostEfficiency = 0;		
-		public $boostOtherPhases = true; //To allow boosting in Deployment and Firing Phases.
+		public $boostOtherPhases = array(-1, 3); //To allow boosting in Deployment and Firing Phases.
 		public $shaded	= false; //To track in Front End whether system was ever boost this turn, since boost can be toggled during Firing Phase.			
 		
 		function __construct($armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc){
@@ -5840,8 +5840,8 @@ class MindriderHangar extends ShipSystem{
 			if($this->isDestroyed($turn-1) || $this->isOfflineOnTurn() || $target instanceof FighterFlight)
 				return 0;		
 			
-			if ($this->hasCritical('DamageReductionRemoved'))
-				return 0;
+			//if ($this->hasCritical('DamageReductionRemoved'))
+			//	return 0;
 			
 			$output = $this->output;
 			$output += $this->outputMod; //outputMod itself is negative!
@@ -5851,8 +5851,9 @@ class MindriderHangar extends ShipSystem{
 		public function setSystemDataWindow($turn){
 				$unit = $this->getUnit();
 				if($unit instanceof FighterFlight){
-					$this->data["Special"] = "<br>Can activate 'Shading Mode' for the NEXT turn, by boosting this system during Deployment or Firing Phase.";						
-					$this->data["Special"] .= "<br>When Shading is activated, this flight's defense ratings are reduced by 15, and it cannot be detected if it is over 15 hexes at the start or end of movement..";
+					$this->data["Special"] = "Jammer ability, even against Ancients.";
+					$this->data["Special"] .= "<br>Can activate 'Shading Mode' for the NEXT turn, by boosting this system during Deployment or Firing Phase.";						
+					$this->data["Special"] .= "<br>When Shading is activated, this flight's defense ratings are reduced by 15, and it cannot be detected if it is over 15 hexes at the start or end of movement.";
 					$this->data["Special"] .= "<br>HOWEVER, the flight cannot fire any weapons on a turn when Shading was active.";
 					$this->data["Special"] .= "<br>This system also incorporates a small Jump Drive, with a 20 turn recharge.";									
 				}else{
@@ -5869,9 +5870,9 @@ class MindriderHangar extends ShipSystem{
 		public function getSpecialAbilityValue($args)
 		{
 			$ship = $this->getUnit();
-			if($ship instanceof FighterFlight){
-				return 0; //Torvalus fighters don't get the Jammer effect.
-			}
+			//if($ship instanceof FighterFlight){
+			//	return 0; //Torvalus fighters don't get the Jammer effect.
+			//}
 
 			if (!isset($args["shooter"]) || !isset($args["target"]))
 				throw new InvalidArgumentException("Missing arguments for Jammer getSpecialAbilityValue");
@@ -5946,21 +5947,21 @@ class MindriderHangar extends ShipSystem{
 	}	
 
 
-		public function checkStealthNextPhase($gamedata){				
+		public function checkStealthNextPhase($gamedata, $range = 15){				
 				$ship = $this->getUnit();
 					if($gamedata->phase == 1){ 
 						$noteHuman1 = 'D-detectedActive';
 						$noteHuman2 = 'D-undetectedActive';						
 						$noteHuman3 = 'D-NotActive';						
 					}else{
-						$noteHuman1 = '3-detectedActive';
-						$noteHuman2 = '3-undetectedActive';						
-						$noteHuman3 = '3-NotActive';						
+						$noteHuman1 = '2-detectedActive';
+						$noteHuman2 = '2-undetectedActive';						
+						$noteHuman3 = '2-NotActive';						
 					}
 
 				//If we're checking during DeploymentGamePhase->Advance (actually Phase 1 at this point) we need to check last turn as well for boost, as this will not have been saved yet for current turn.					
 				if ($gamedata->phase ==1 && $this->getBoostLevel($gamedata->turn-1) > 0 || $this->getBoostLevel($gamedata->turn) > 0) {
-					if ($this->isDetected($ship, $gamedata)) {
+					if ($this->isDetected($ship, $gamedata, $range)) {
 						$notekey   = 'detected';
 						$noteHuman = $noteHuman1;
 						$noteValue = 1;							
@@ -5992,7 +5993,7 @@ class MindriderHangar extends ShipSystem{
 		}
 
 
-		private function isDetected($ship, $gameData) {
+		private function isDetected($ship, $gameData, $range) {
 	
 			$blockedHexes = $gameData->getBlockedHexes(); //Just do this once outside loop
 			$pos = $ship->getHexPos(); //Just do this once outside loop	
@@ -6010,7 +6011,7 @@ class MindriderHangar extends ShipSystem{
 				$noLoS = !empty($blockedHexes) && Mathlib::checkLineOfSight($pos, $otherPos, $blockedHexes);
 
 				// If within detection range, and LoS not blocked the ship is detected
-				if($distance <= 15 && !$noLoS){
+				if($distance <= $range && !$noLoS){
 					return true;
 				}		
 			}

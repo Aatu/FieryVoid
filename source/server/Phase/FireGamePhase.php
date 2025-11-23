@@ -70,7 +70,7 @@ class FireGamePhase implements Phase
             //Can now bosot Fighter Systems, so look for this.
             if($ship instanceof FighterFlight){                
                 foreach($ship->systems as $ftr) foreach($ftr->systems as $ftrsys){                   
-                    if ($ftrsys->boostOtherPhases) {                      
+                    if (is_array($ftrsys->boostOtherPhases) && in_array($gameData->phase, $ftrsys->boostOtherPhases)) {  //Prevent duplication                     
                         if (!empty($ftrsys->power)) {                            
                             // Peel off the last entry so we can save it later
                             $lastPower = array_pop($ftrsys->power);
@@ -87,7 +87,7 @@ class FireGamePhase implements Phase
                 }
             }else{
                 foreach ($ship->systems as $system){
-                    if ($system->boostOtherPhases) { //Needs speical treatment to prevent duplication of Power entries.
+                    if (is_array($system->boostOtherPhases) && in_array($gameData->phase, $system->boostOtherPhases)) {  //Prevent duplication
                         if (!empty($system->power)) {
                             // Peel off the last entry so we can save it later
                             $lastPower = array_pop($system->power);

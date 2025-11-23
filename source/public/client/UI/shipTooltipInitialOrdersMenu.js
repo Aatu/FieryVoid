@@ -74,11 +74,11 @@ window.ShipTooltipInitialOrdersMenu = function () {
 	    }, this); // Make sure to bind `this` so that `this.selectedShip` is correct
 	}
 
-	function hasSupportWeaponSelected() {//30 June 2024 - DK - Added for Split targeting.	
-	    return gamedata.selectedSystems.some((system) => {
-	        return system.canTargetAllies === true;
-	    });
-	}
+    function hasSupportWeaponSelected() {
+        return gamedata.selectedSystems.some(system => {
+            return system.canTargetAllies === true || system.canTargetAll === true;
+        });
+    }
 
     function addCCEW() {
         var entry = ew.getEntryByTargetAndType(this.selectedShip, null, "CCEW", this.turn);

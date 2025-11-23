@@ -85,7 +85,7 @@ window.MovementPhaseStrategy = function () {
         }
 
         var menu = new ShipTooltipMenu(this.selectedShip, ship, this.gamedata.turn);
-        this.showShipTooltip(ship, payload, menu, false);
+        if (!gamedata.showLoS) this.showShipTooltip(ship, payload, menu, false);
     };
 
     MovementPhaseStrategy.prototype.setSelectedShip = function (ship) {
