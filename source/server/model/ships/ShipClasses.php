@@ -465,6 +465,18 @@ class BaseShip {
 	} //endOf function calculateCombatValueOld
 
 
+    public function checkLineOfSight($shooterPos, $targetPos, $gamedata) {
+        $blockedLosHex = $gamedata->getBlockedHexes();
+
+        $noLoS = false;
+        if (!empty($blockedLosHex)) {            
+            $noLoS = Mathlib::checkLineOfSight($shooterPos, $targetPos, $blockedLosHex);
+        }
+        
+        return $noLoS;
+    }
+
+
 	public function howManyMarines(){
 		$marines = 0;
 		$rammingFactor = $this->getRammingFactor();
