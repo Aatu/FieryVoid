@@ -1091,7 +1091,7 @@ shipManager.power = {
 
 		if (ship.userid != gamedata.thisplayer) return;
 
-		if (shipManager.power.isOffline(ship, system)) return;
+		//if (shipManager.power.isOffline(ship, system)) return;
 
 		if(system.overloadshots < system.extraoverloadshots && system.overloadshots !== 0) return;
 
