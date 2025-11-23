@@ -348,8 +348,53 @@ ShadeModulator.prototype.removeAllMultiModeSplit = function (ship) {
 
 
 var TransverseDrive = function TransverseDrive(json, ship) {
-    Weapon.call(this, json, ship); 
+    Weapon.call(this, json, ship);
+    this.defensiveType = "Blink"; 	 
 };
 TransverseDrive.prototype = Object.create(Weapon.prototype);
 TransverseDrive.prototype.constructor = TransverseDrive;
 
+TransverseDrive.prototype.getDefensiveHitChangeMod = function (target, shooter, weapon) {
+	if(weapon.ballistic && this.fireOrders.length > 0 && gamedata.gamephase == 3){
+		var fireOrder = this.fireOrders[0];
+
+		const notes = fireOrder.notes; // e.g. "shooter: 2,-2 target: 2,0 dis: 2"
+
+		// Default distance
+		let dis = 0;
+
+		// Try to extract the number after "dis:"
+		const match = notes.match(/dis:\s*(\d+)/);
+
+		if (match) {
+			dis = parseInt(match[1], 10);
+		}
+
+		const mod = dis * 4;
+		return mod;		
+	}else{
+		return 0;
+	}
+
+};
+
+TransverseDrive.prototype.isPosOnSpecialArc = function (shooter, target) {
+    var shooterPos = shipManager.getShipPosition(shooter);
+    var heading = mathlib.getCompassHeadingOfPoint(shooterPos, target);
+
+    // The 6 hex directions
+    const hexDirections = [0, 60, 120, 180, 240, 300];
+    const tolerance = 0.5; // degrees
+
+    // Check if heading is within tolerance of any hex direction
+    for (let dir of hexDirections) {
+        let delta = Math.abs(heading - dir);
+        // wrap around 360
+        delta = delta > 180 ? 360 - delta : delta;
+
+        if (delta <= tolerance) {
+            return true;
+        }
+    }
+    return false;
+};

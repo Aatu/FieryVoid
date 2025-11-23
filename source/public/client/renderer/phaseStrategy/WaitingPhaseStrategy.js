@@ -38,7 +38,7 @@ window.WaitingPhaseStrategy = function () {
 
     WaitingPhaseStrategy.prototype.selectShip = function (ship, payload) {
         var menu = new ShipTooltipMenu(this.selectedShip, ship, this.gamedata.turn);
-        this.showShipTooltip(ship, payload, menu, false);
+        if (!gamedata.showLoS) this.showShipTooltip(ship, payload, menu, false);
     };
 
     WaitingPhaseStrategy.prototype.targetShip = function (ship, payload) {

@@ -548,7 +548,7 @@ class GromeFlakCannon extends Weapon{
 					$rolled = Dice::d(100);
 					$fireOrder->rolled = $rolled; ///and auto-hit ;)
 					$fireOrder->shotshit++;
-					$fireOrder->pubnotes .= "Interception applied to all weapons on target unit that are firing at Flak Cannon-firing ship. ";
+					$fireOrder->pubnotes .= "<br>Interception applied to all weapons on target unit that are firing at Flak Cannon-firing ship. ";
 
 					$fireOrder->rolled = max(1, $fireOrder->rolled);//Marks that fire order has been handled, just in case it wasn't marked yet!
 					TacGamedata::$lastFiringResolutionNo++;    //note for further shots

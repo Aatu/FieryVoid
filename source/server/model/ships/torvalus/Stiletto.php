@@ -22,14 +22,15 @@ class Stiletto extends FighterFlight{
 		$this->sideDefense = 6;
 		$this->freethrust = 14;
 		$this->offensivebonus = 8;
-		$this->jinkinglimit = 10; //heavy fighter
+		$this->jinkinglimit = 10;
 		$this->turncost = 0.25;
 		$this->trueStealth = true; //For ships that can actually be hidden, not just jammer from range.  Important for Front End.	        
 		
 	    $this->advancedArmor = true; 
         $this->gravitic = true;
-		//$this->critRollMod = -4; //dropout roll bonus 
-        $this->maxFlightSize = 6;//this is very powerful craft, let's not overdo on its durability, limit flight size to 6
+		$this->hangarRequired = '';
+
+        $this->maxFlightSize = 6;
 		$this->specialDropout = true; //Has special rules for dropout.  		
 		$this->iniativebonus = 24*5;
 		$this->populate();

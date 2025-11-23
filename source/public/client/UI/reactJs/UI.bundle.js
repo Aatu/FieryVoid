@@ -39520,7 +39520,7 @@ var SystemIcon = function (_React$Component) {
 
             if (shipManager.isDestroyed(ship) || shipManager.isDestroyed(ship, system) /*|| shipManager.isAdrift(ship)*/) return; //should work with disabled ship after all!
 
-            if (system.weapon && gamedata.gamephase === 3 && !system.ballistic || gamedata.gamephase === 1 && system.ballistic) {
+            if (system.weapon && gamedata.gamephase === 3 && !system.ballistic && !system.preFires || gamedata.gamephase === 1 && system.ballistic || gamedata.gamephase === 5 && system.preFires) {
                 //cannoct SELECT weapon when unit is adrift though!
                 if (!shipManager.isAdrift(ship)) {
                     if (gamedata.isMyShip(ship)) {
@@ -41296,11 +41296,12 @@ const canBoost = (ship, system) => system.boostable && gamedata.gamephase === 1 
 const canDeBoost = (ship, system) => gamedata.gamephase === 1 && Boolean(shipManager.power.getBoost(system));
 */
 var isBoostPhase = function isBoostPhase(system) {
-	if (system.boostOtherPhases) {
-		// Only in -1 or 3
-		return gamedata.gamephase === -1 || gamedata.gamephase === 3;
+	// If boostOtherPhases is an array, check if the current gamephase is included
+	if (system.boostOtherPhases.length > 0) {
+		return system.boostOtherPhases.includes(gamedata.gamephase);
 	}
-	// Default: only in 1
+
+	// Default: only in phase 1
 	return gamedata.gamephase === 1;
 };
 
@@ -41328,7 +41329,7 @@ var canRemoveFireOrder = function canRemoveFireOrder(ship, system) {
 };
 
 var canChangeFiringMode = function canChangeFiringMode(ship, system) {
-	return system.weapon && (gamedata.gamephase === 1 && system.ballistic || gamedata.gamephase === 3 && !system.ballistic) && (!weaponManager.hasFiringOrder(ship, system) || system.multiModeSplit) && Object.keys(system.firingModes).length > 1;
+	return system.weapon && (gamedata.gamephase === 1 && system.ballistic || gamedata.gamephase === 5 && system.preFires || gamedata.gamephase === 3 && !system.ballistic && !system.preFires) && (!weaponManager.hasFiringOrder(ship, system) || system.multiModeSplit) && Object.keys(system.firingModes).length > 1;
 };
 
 //can declare eligibility for interception: charged, recharge time >1 turn, intercept rating >0, no firing order
@@ -41338,7 +41339,7 @@ var canSelfIntercept = function canSelfIntercept(ship, system) {
 
 var canActivate = function canActivate(ship, system) {
 	return system.canActivate();
-};
+}; //Used to manually fire weapons/systems that don't need to target e.g. Second Sight/Thoughwave
 var canDeactivate = function canDeactivate(ship, system) {
 	return system.canDeactivate();
 };

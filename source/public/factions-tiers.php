@@ -365,9 +365,10 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         <h5>Gravitic Bolt / Gravitic Pulsar</h5>
             <li>These weapons can be boosted with power to increase damage and intercept rating. This does cause them to have a cooldown period equal to boost level used. 
                 Additionally, if fired at maximum boost, the weapon can suffer critical damage.</li>
-        <h5>Gravitic Shifter / Gravitic Mines</h5>
-            <li>These weapons are not yet available in Fiery Void.  However, some ships that were equipped with them are (e.g. Tashkat).  
-                Where this is the case these ship have been marked a 'Semi-Custom'</li>                        
+        <h5>Gravitic Shifter</h5>
+            <li>This weapon fires in the Pre-Firing phase of the game.  You can target an ally or an enemy to try and change their facing by 60 degrees clockwise or anti-clockwise (using appropriate firing mode). 
+                If the weapon hits then the target will be rotated before the Firing Phase occurs on that turn and therefore Gravitic Shifters can be used tactically to escape enemy firing arcs, or bring enemies into allied ships firing arcs. /section>
+                Note - Only ONE Gravitic Shifter can be used on a ship per turn, any other Shifter attempts will automatically miss.</li>                        
     <a class="back-to-top" href="#top">↩ Back to Top</a>
 
 
@@ -844,7 +845,8 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         <li>Biothrusters have their own set of criticals (which reduce output) in place of regular thruster criticals.  The Bio-Drive cannot be boosted.</li>         
     <h5>Half Phasing</h5>
         <li>During the Movement Phase, Shadow ships can become semi-immaterial until the end of turn by Half-Phasing.</li>
-        <li>While Half-Phased ships become much more difficult to hit (-50% penalty to incoming gunfire) and less accurate itself (also -50% to hit). In addition, they cannot ram or get rammed at all, unless both ships are half-phasing.</li>
+        <li>While Half-Phased ships become much more difficult to hit (-20% penalty to hit from normal weapon fire, -40% from ballistics) but also becomes less accurate itself (-50% to hit on all shots). 
+            In addition, they cannot ram or get rammed at all, unless both ships are half-phasing.</li>
         <li>Performing Half-Phasing costs full thrust from two undamaged BioThrusters, as well as the presence of an online, undamaged  Phasing Drive. 
             Any damage to Phasing Drive during half-phasing destroys the ship.</li>
     <h5>Pilot</h5>
@@ -932,7 +934,17 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
     <p>The Torvalus are known for their highly advanced stealth technology as well as their love for making cosmic gambles. Below is a list of systems used by the Torvalus, with short description of effect and any notable design differences from their original tabletop versions.</p>    
     <h5>Laser Weaponry</h5>
         <li>Torvalus weaponry is entirely Laser-based, making it uninterceptable.  Whilst these weapons do not have an particularly unusual abilities per se, their high damage, flexibility and low cooldowns makes them very effective.</li>
-    <h5>Shading Field</h5>
+        <h5>Hangar Requirements</h5>
+        <li>The Torvalus ships don't have hangars and therefore do not need to meet the normal 50% hangar requirement when building their fleet. 
+            Instead their Stiletto Drones simply operate independently but are immune to dropout whilst a ship with control capacity (and functioning CnC) is present.        
+            In scenarios where a certain percentage of fighters ARE required, use the following numbers as control/hangar capacity:
+            <ul class="circle-list">
+                <li>Dark Knife - 24 drones</li>
+                <li>Black Rapier - 6 drones</li>
+                <li>Shrouded Saber - 12 drones (Optional)</li>                  
+            </ul>
+        </li>    
+        <h5>Shading Field</h5>
         <li>The Shading Field operates the same as the Minbari's Jammer system (e.g. prevents weapons locks even when targeted with OEW), including against other Ancients as well as Younger Races.</li>
         <li>In addition the Shading Field has two states, Normal Mode and Shading Mode, which are described below:
             <ul class="circle-list">
@@ -942,7 +954,8 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                     However, on a turn when a Torvalus ship is Shaded it will not be able to fire any of its weapons.</li> 
             </ul>
         </li>         
-        <li>Torvalus Stiletto Fighters have a smaller version of the Shading Field equipped.  This can also be toggled on and off during Firing/Deployment phases but does not provide the Jammer ability and does not reduce the profile of the fighter flight (by 3) unless they are Shaded.</li>         
+        <li>Torvalus Stiletto Fighters have a smaller version of the Shading Field equipped.  
+            This can also be toggled on and off during Firing/Deployment phases but it does not reduce the profile of the fighter flight (by 15) unless they are Shaded.</li>         
     <h5>Shade Modulator</h5>
         <li>The Shade Modulator is a versatile Support Weapons found on the Veiled Scimitar, it has four different firing modes which are described below. 
             <ul class="circle-list">
@@ -956,7 +969,23 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         as well as 1 point of Individual Shield Enhancement and 2 points of Individual Shade Enhancement on the same turn.</li>
         <li>Blanket firing modes are activated by clicking 'Select' when in that firing mode, whereas Individual modes require the targeting of a specific ally.</li>        
     <h5>Transverse Drive</h5>
-        <li>Currently the Torvalus do not have access to a functional Transverse Drive in Fiery Void, it is planned to add this in a later patch.</li> 
+        <li>This weapons fires in a special Pre-Firing phase, which will occur between Movement and Firing phases providing the Transverse Drive is fully charged.  
+            During this phase simply select a hex up to 3 hexes on a straight line to the selected ship and then commit your orders.  The ship will attempt a Transverse Jump before the Firing phase.</li>
+        <li>When attempting a Transverse Jump a number of things will then happen depending a d20 roll: 
+            <ul class="circle-list">
+                <li>1-16 - The jump is successful and the Torvalus ship teleports to the new hex.</li>
+                <li>17 - The jump is successful but off-target, ship travels the number of hexes selected but 60 degrees counter-clockwise from intended direction.</li> 
+                <li>18 - The jump is successful but off-target, ship travels the number of hexes selected but 60 degrees clockwise from intended direction.</li> 
+                <li>19 - The jump is unsuccessful, nothing happens.</li>
+                <li>20 - The jump is unsuccessful, the ship does not move the Transverse Drive system has to roll for a critical hit.</li>                                                     
+            </ul>
+        </li>
+        <li>When a ship makes a transverse jump it puts a strain on the Jump Drive (a separate system), and so a ship can suffer a catastrophic failure (e.g be destroyed) if the Jump Engine has sustained damage in the battle.
+            The chance of this failure is the % of the Jump Drive's health that has been lost.
+        </li>
+        <li>Additional effects of making a Transverse Jump is that all ballistic weapons will suffer a cumulative -20% chance to hit per hex travelled.  
+            However, the light produced by a jump makes Shaded ships easier to detect and these will be revealed to enemy ships within 20 hexes instead of the usual 15 hexes at the start of the Firing Phase.</li>                  
+        <li>Transverse Drive also has some interesting critical effects when damaged, including the effect whereby the ships Jump Drive takes d3 damage.</li>                      
     <h5>Agile/Jinking Ships</h5>
         <li>Torvalus ships are exceptionally maneuverable and this is reflected in even their largest ships having the Agile characteristic.  
             In addition, their Medium Ships have the ability to jink, an ability normally reserved only to Fighters.</li>                                                       
@@ -1420,8 +1449,8 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
     <h4 id="unbalanced" style="">UNBALANCED FLEETS</h4>
     <p>Of course, in a game as complex as Fiery Void, there was always going to be certain factions, or unit combinations, that are just too unbalanced to provide for a enjoyable pick-up game.  
         Below is a list that is considered by the community to fall into that category:</p>
-       <li>Ancients (see 'Ancients' section)</li>        
-       <li>Alacan (with Rotia swarms)</li>
+       <li>Ancients (see 'Ancients' section),</li>        
+       <li>Alacan (with Rotia swarms),</li>
        <li>Earth Alliance when using Warlock Advanced Destroyer or Shadow Omega Destroyer,</li>
        <li>Geoff,</li>         
        <li>Interstellar Alliance's all-White Star fleet,</li>

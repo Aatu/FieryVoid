@@ -510,6 +510,209 @@ class Firing
     } //endof function isLegalIntercept
 
 
+    public static function preparePreFiring($gamedata){
+	//additional call for weapons needing extra preparation
+        foreach ($gamedata->ships as $ship){
+            foreach ($ship->systems as $system){
+                $system->beforeFiringOrderResolution($gamedata);
+            }
+        }
+
+        $ambiguousFireOrders  = array();
+        foreach ($gamedata->ships as $ship){
+            foreach($ship->getAllFireOrders($gamedata->turn) as $fire){
+                //Remove ballistic and potential intercepts from firing pool
+                if ($fire->type === "intercept" || $fire->type === "selfIntercept" || $fire->type === "ballistic"){
+                    continue;
+                }
+
+                $weapon = $ship->getSystemById($fire->weaponid);
+                if (!($weapon instanceof Weapon)){ //this isn't a weapon after all...
+                    continue;
+                }		
+               
+		        $weapon->changeFiringMode($fire->firingMode); //For Chaff Missile
+		
+		    
+                $fire->priority = $weapon->priority;
+				//take different AF priority into account!
+				if($fire->targetid !== -1){ //actually directed at an unit!
+					$target = $gamedata->getShipById($fire->targetid); 
+					if ($target instanceof FighterFlight){
+						$fire->priority = $weapon->priorityAF;
+					}
+				}	
+				
+                if($weapon->isTargetAmbiguous($gamedata, $fire)){
+                    $ambiguousFireOrders[] = $fire;
+                }else{
+                    $weapon->calculateHitBase($gamedata, $fire);
+                }
+            }
+                     
+        }
+
+        //calculate hit chances for ambiguous firing!
+        foreach($ambiguousFireOrders as $fireOrder){
+            $ship = $gamedata->getShipById($fireOrder->shooterid);
+            $weapon = $ship->getSystemById($fireOrder->weaponid);
+            $weapon->calculateHitBase($gamedata, $fireOrder);
+        }
+
+    }//endof function preparePreFiring	    
+
+
+public static function firePreFiringWeapons($gamedata){	
+        //$rammingOrders  = array();
+
+        /*//Ramming Orders first, not needed in pre-Firing atm but could be added later.  
+        // Still, they would just be normal pre-firing at that point unless they happen before (or after) movement weapons.
+        foreach ($gamedata->ships as $ship){		           
+            
+            //Now fire Ramming Orders before other weapons while we're looking through ships in this section.    
+            foreach($ship->getAllFireOrders($gamedata->turn) as $fire){
+                if ($fire->turn != $gamedata->turn){
+                    continue;
+                }
+
+                $weapon = $ship->getSystemById($fire->weaponid);
+                if (!$weapon->isRammingAttack) continue; //Only interested in Ramming Attacks!
+
+                $rammingOrders[] = $fire;
+            }
+            
+        }    
+        
+        usort($rammingOrders, [self::class, 'compareFiringOrders']);
+
+        foreach ($rammingOrders as $ramming){
+            $ship = $gamedata->getShipById($ramming->shooterid);
+            self::fire($ship, $ramming, $gamedata);
+        }        
+        */
+        $fireOrders  = array();  //Array for non-ramming ship fire.      
+        //Now fire ship weapons.
+        foreach ($gamedata->ships as $ship){	
+
+            if ($ship instanceof FighterFlight) continue; //No fighter attacks handled here now that Ramming Attacks are handled above - DK 03.25      
+            if($ship->isDestroyed()) continue; //Ship could be destroyed by ramming now.
+
+            foreach($ship->getAllFireOrders($gamedata->turn) as $fire){
+                //Remove ballisitic and potential intercepts from firing pool, normal types don#t exist yet.
+                if ($fire->type === "intercept" || $fire->type === "selfIntercept"  || $fire->type === "ballistic"){
+                    continue;
+                }
+//echo "Value of fire->type: " . $fire->type . "\n";
+                $weapon = $ship->getSystemById($fire->weaponid);
+                if (!($weapon instanceof Weapon)) continue; //...just in case...               
+                if($weapon->isDestroyed($gamedata->turn) && !$weapon->ballistic) continue; //now individual weapons can be destroyed by Ramming before firing, but not ballistics.                
+                if ($weapon->isRammingAttack) continue; //Ramming Attacks have already been resolved.
+
+                //$fire->priority = $weapon->priority; //fire order priority already set, and may differ from basic weapon priority!
+                $fireOrders[] = $fire;
+            }
+            
+        }
+        usort($fireOrders, [self::class, 'compareFiringOrders']);
+//var_dump($fireOrders);
+        //Now fire ship weapons.
+        foreach ($fireOrders as $fire){
+            $ship = $gamedata->getShipById($fire->shooterid);
+            //$wpn = $ship->getSystemById($fire->weaponid);
+            //$p = $wpn->priority;
+            // debug::log("resolve --- Ship: ".$ship->shipClass.", id: ".$fire->shooterid." wpn: ".$wpn->displayName.", priority: ".$p." versus: ".$fire->targetid);
+            self::fire($ship, $fire, $gamedata);
+        }
+
+        // From here on, only fighter units are left.
+
+	    //FIRE fighters at fighters
+        $chosenfires = array();
+        foreach ($gamedata->ships as $ship) {
+            // Remember: ballistics that have been fired must still be
+            // resolved! So don't continue on destroyed units/fighters.
+            if (!($ship instanceof FighterFlight)) {
+                continue;
+            }
+
+            foreach($ship->getAllFireOrders($gamedata->turn) as $fire){
+                if ($fire->turn != $gamedata->turn){
+                    continue;
+                }
+
+                //Remove ballisitic and potential intercepts from firing pool
+                if ($fire->type === "intercept" || $fire->type === "selfIntercept"  || $fire->type === "ballistic"){
+                    continue;
+                }
+
+                $weapon = $ship->getSystemById($fire->weaponid);
+
+                //ramming attacks are already allocated!
+                if ($weapon->isRammingAttack) continue;
+                    
+                //ballistic weapons will still reach their targets, but direct fire from fighters previously destroyed will not happen
+                if ( (!$weapon->ballistic) && ($ship->getFighterBySystem($weapon->id)->isDestroyed()) ) continue;
+
+                $chosenfires[] = $fire;
+            }
+        }
+        usort($chosenfires, [self::class, 'compareFiringOrders']);
+
+        foreach ($chosenfires as $fire){
+            $shooter = $gamedata->getShipById($fire->shooterid);
+            $target = $gamedata->getShipById($fire->targetid);
+            if ( ($target == null) || ($target instanceof FighterFlight) ) {
+                self::fire($shooter, $fire, $gamedata);
+            }
+        }
+
+        //FIRE fighters at ships
+        $chosenfires = array();
+        foreach ($gamedata->ships as $ship) {
+                // Remember: ballistics that have been fired must still be
+                // resolved! So don't continue on destroyed units/fighters.
+                if (!($ship instanceof FighterFlight)) {
+                    continue;
+                }
+
+            foreach($ship->getAllFireOrders($gamedata->turn) as $fire){
+                if ($fire->turn != $gamedata->turn){
+                    continue;
+                }
+
+                //Remove ballisitic and potential intercepts from firing pool
+                if ($fire->type === "intercept" || $fire->type === "selfIntercept"  || $fire->type === "ballistic"){
+                    continue;
+                }
+
+                $weapon = $ship->getSystemById($fire->weaponid);
+
+                //ramming attacks are already allocated!
+                if ($weapon->isRammingAttack) continue;
+
+                //ballistic weapons will still reach their targets, but direct fire from fighters previously destroyed will not happen
+                if ( (!$weapon->ballistic) && ($ship->getFighterBySystem($weapon->id)->isDestroyed()) ) continue;
+
+                $chosenfires[] = $fire;
+            }
+        }
+        usort($chosenfires, [self::class, 'compareFiringOrders']);
+
+        //FIRE rest of fighters
+        foreach ($chosenfires as $fire){
+            $shooter = $gamedata->getShipById($fire->shooterid);
+            $target = $gamedata->getShipById($fire->targetid);
+            if  ( ($target != null) && (!($target instanceof FighterFlight)) ) {
+                self::fire($shooter, $fire, $gamedata);
+            }
+        }
+
+    } //endof method firePreFiringWeapons
+
+
+
+
+
     /*Marcin Sawicki: count hit chances for starting fire phase fire*/
     public static function prepareFiring($gamedata){
 	//additional call for weapons needing extra preparation
@@ -519,14 +722,13 @@ class Firing
             }
         }
 
-
-
         $ambiguousFireOrders  = array();
         foreach ($gamedata->ships as $ship){
             foreach($ship->getAllFireOrders($gamedata->turn) as $fire){
-                if ($fire->type === "intercept" || $fire->type === "selfIntercept"){
+                if ($fire->type === "intercept" || $fire->type === "selfIntercept" || $fire->type === "prefiring"){
                     continue;
                 }
+
                 $weapon = $ship->getSystemById($fire->weaponid);
                 if (!($weapon instanceof Weapon)){ //this isn't a weapon after all...
                     continue;
@@ -590,9 +792,9 @@ class Firing
         }
     } //endof function compareFiringOrders
 
+    
 
-
-	/*actual firing of weapons
+	/*actual firing of weapons in normal Firing Phase
 	Marcin Sawicki, October 2017: at this stage, assume all necessary calculations (hit chance, target section), and only raw rolling remains!
 	*/
     public static function fireWeapons($gamedata){	
@@ -666,7 +868,7 @@ class Firing
             if($ship->isDestroyed()) continue; //Ship could be destroyed by ramming now.
 
             foreach($ship->getAllFireOrders($gamedata->turn) as $fire){
-                if ($fire->type === "intercept" || $fire->type === "selfIntercept"){
+                if ($fire->type === "intercept" || $fire->type === "selfIntercept" || $fire->type === "prefiring"){
                     continue;
                 }
 

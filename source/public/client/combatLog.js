@@ -3,6 +3,8 @@
 window.combatLog = {
 
     displayedTurn: null,
+    critsShown: {},
+    critAnimations: {}, //Just a convenient place to have this array for AllWeaponFireAgainstShipAnimation to use   
     logCache: {}, // key: turn number, value: processed fire order data
 
     onTurnStart: function onTurnStart() {
@@ -148,6 +150,8 @@ window.combatLog = {
         html += '<span class="notes"> ' + fire.notes + '</span>';
         //  html += damagehtml;
         html += '</span></div>';
+        var criticalshtml = ""; //Needs to be outside of damage block below to prevent overwriting.
+
 
         if (damages.length > 0) {
             html += "<ul>";
@@ -173,19 +177,43 @@ window.combatLog = {
                     totaldam += damageDone; //d.damage-d.armour;
                     armour += damageStopped; //d.armour;
                     var system = shipManager.systems.getSystem(gamedata.getShip(d.shipid), d.systemid);
+                    var comma = ",";
+
+                    //New section to create critical entries when damage is done but system no destroyed.
+                    var firstCrit = "";                    
+                    var hasCrit = shipManager.criticals.sufferedCritThisTurn(system, d.turn);
+
+                    if(hasCrit && damageDone > 0){
+                        if (criticalshtml.length == 0) {
+                            firstCrit = " System criticals: ";
+                            comma = "";
+                        }
+                        if (!combatLog.critsShown[system.ship.id]?.includes(system.id)) {
+                            criticalshtml += firstCrit + '<span class="critical">' + comma + ' ' + shipManager.systems.getDisplayName(system) + '</span>';
+                        }
+
+                        if (!combatLog.critsShown[system.ship.id]) {
+                            combatLog.critsShown[system.ship.id] = [];
+                        }
+                        if (!combatLog.critsShown[system.ship.id].includes(system.id)) {
+                            combatLog.critsShown[system.ship.id].push(system.id);
+                        }                     
+                    }  
+
 
                     if (!d.destroyed) {
                         continue;
                     }
 
-                    var first = "";
-                    var comma = ",";
+                    var firstDam = "";
+
                     if (damagehtml.length == 0) {
-                        first = " Systems destroyed: ";
+                        firstDam = " Systems destroyed: ";
                         comma = "";
                     }
 
-                    damagehtml += first + '<span class="damage">' + comma + ' ' + shipManager.systems.getDisplayName(system) + '</span>';
+                    damagehtml += firstDam + '<span class="damage">' + comma + ' ' + shipManager.systems.getDisplayName(system) + '</span>';                   
+                    
                 }
 
                 //if (totaldam > 0){ //display fire orders that did no damage, too! - MS
@@ -194,8 +222,13 @@ window.combatLog = {
                 if(fire.damageclass == "HyperspaceJump") continue; //Do not show damage to Primary Structure when jumping to Hyperspace. 
 
                 html += '<li><span class="shiplink victim" data-id="' + ship.id + '" >' + victim.name + '</span> damaged for ' + totaldam + ' (total armour mitigation: ' + armour + ').</li>';
+
+                if (criticalshtml.length > 1) {
+                    html += '<li>' + criticalshtml + '</li>';                                       
+                }
+                
                 if (damagehtml.length > 1) {
-                    html += '<li>' + damagehtml + '</li>';
+                    html += '<li>' + damagehtml + '</li>';                                     
                 }
                 //}
             }
@@ -275,6 +308,7 @@ window.combatLog = {
         $(html).prependTo("#log");
     },
 
+    /*
     logCriticals: function logCriticals(ship, string) {
 
         var html = '<div class="logentry">';
@@ -284,7 +318,8 @@ window.combatLog = {
 
         $(html).prependTo("#log");
     },
-
+    */
+    
     logMoves: function logMoves(ship) {
 
         var e = $('.logentry.' + ship.id + ' .move.t' + gamedata.turn);
@@ -456,6 +491,7 @@ window.combatLog = {
     
         // Show the LogActual div
         document.getElementById('LogActual').style.display = 'block'; // Set to 'block' or 'inline-block' depending on your layout
+        combatLog.critsShown = {}; //Empty crti tracker for next print.
     }
 
 };

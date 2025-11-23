@@ -146,6 +146,18 @@ window.AllWeaponFireAgainstShipAnimation = function () {
         }
 
         let destroyedNames = getSystemNamesDestroyed(incomingFire);
+        let criticalNames = getSystemNamesCriticals(incomingFire);
+        
+        for(var i in criticalNames){
+            var crit = criticalNames[i];
+            if (!window.combatLog.critAnimations[crit.shipid]) {
+                window.combatLog.critAnimations[crit.shipid] = [];
+            }
+            if (!window.combatLog.critAnimations[crit.shipid].includes(crit.systemid)) {
+                window.combatLog.critAnimations[crit.shipid].push(crit.systemid);
+            }               
+        }
+
         while (hits--) {
             var damageData = divideDamage(systemsDestroyed, structuresDestroyed, hits);
             systemsDestroyed = damageData.systemsDestroyed;
@@ -153,10 +165,11 @@ window.AllWeaponFireAgainstShipAnimation = function () {
             var damage = damageData.damage;
 
             var picked = destroyedNames;
+            var critNames = criticalNames;
             destroyedNames = [];
-            
+            criticalNames = [];            
 
-            duration = addAnimation.call(this, incomingFire, duration, true, timeInterval * shotsFired + extraStartTime, shotsFired, damage, picked);
+            duration = addAnimation.call(this, incomingFire, duration, true, timeInterval * shotsFired + extraStartTime, shotsFired, damage, picked, critNames);
             shotsFired++;
         }
 
@@ -192,8 +205,8 @@ window.AllWeaponFireAgainstShipAnimation = function () {
     }
 */
 
-    function addAnimation(incomingFire, duration, hit, time, shotsFired, damage, damagedNames) {
-        var animation = buildAnimation.call(this, incomingFire, hit, time, shotsFired, damage, damagedNames);
+    function addAnimation(incomingFire, duration, hit, time, shotsFired, damage, damagedNames, critNames) {
+        var animation = buildAnimation.call(this, incomingFire, hit, time, shotsFired, damage, damagedNames, critNames);
 
 
         if (duration < animation.getDuration()) {
@@ -204,7 +217,7 @@ window.AllWeaponFireAgainstShipAnimation = function () {
         return duration;
     }
 
-    function buildAnimation(incomingFire, hit, time, shotsFired, damage, damagedNames) {
+    function buildAnimation(incomingFire, hit, time, shotsFired, damage, damagedNames, critNames) {
 
         var startTime = this.time + this.duration + time;
         var weapon = incomingFire.weapon;
@@ -259,6 +272,7 @@ window.AllWeaponFireAgainstShipAnimation = function () {
                     time: startTime,
                     damage: damage,
                     damagedNames: damagedNames,
+                    critNames: critNames,                    
                     systemDestroyedEffect: this.systemDestroyedEffect
                 });
             case "torpedo":
@@ -272,6 +286,7 @@ window.AllWeaponFireAgainstShipAnimation = function () {
                     damage: damage,
                     time: startTime,
                     damagedNames: damagedNames,
+                    critNames: critNames,                     
                     systemDestroyedEffect: this.systemDestroyedEffect
                 });
             //case "beam": //Marcin Sawicki: to me, beam would be the same as laser - calling this animation "bolt" instead! No actual in game change, "beam" will still lead here by "default" option
@@ -286,6 +301,7 @@ window.AllWeaponFireAgainstShipAnimation = function () {
                     damage: damage,
                     time: startTime,
                     damagedNames: damagedNames,
+                    critNames: critNames,                     
                     hasParticle: hasParticle,
                     systemDestroyedEffect: this.systemDestroyedEffect
                 });              
@@ -300,6 +316,7 @@ window.AllWeaponFireAgainstShipAnimation = function () {
                     damage: damage,
                     time: startTime,
                     damagedNames: damagedNames,
+                    critNames: critNames,                     
                     hasParticle: hasParticle,
                     systemDestroyedEffect: this.systemDestroyedEffect
                 });                  
@@ -314,6 +331,7 @@ window.AllWeaponFireAgainstShipAnimation = function () {
                     damage: damage,
                     time: startTime,
                     damagedNames: damagedNames,
+                    critNames: critNames,                     
                     hasParticle: hasParticle,
                     systemDestroyedEffect: this.systemDestroyedEffect
                 });         
@@ -338,6 +356,31 @@ function getSystemNamesDestroyed(incomingFire) {
             name: shipManager.systems.getDisplayName(damage.system),
             structure: damage.system instanceof Structure
         }));
+}
+
+function getSystemNamesCriticals(incomingFire) {
+    const turn = incomingFire.fireOrder.turn;
+
+    const critSystems = incomingFire.damagesCaused
+        .filter(damage =>
+            shipManager.criticals.sufferedCritThisTurn(damage.system, turn)
+        )
+        .filter(damage => {
+            // If list does not exist for this ship, no duplicates yet
+            const shown = window.combatLog.critAnimations[damage.system.ship.id] || [];
+
+            // Skip if already shown
+            if (shown.includes(damage.system.id)) return false;
+
+            return true; // keep it
+        })
+        .map(damage => ({
+            name: shipManager.systems.getDisplayName(damage.system),
+            shipid: damage.system.ship.id,
+            systemid: damage.system.id
+        }));
+
+    return critSystems;
 }
 
     function getShipPositionAtTime(icon, time) {

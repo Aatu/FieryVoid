@@ -822,11 +822,20 @@ shipManager.power = {
 	clickPlus: function clickPlus(ship, system) {
 
 		//if (gamedata.gamephase !== 1) return;
-		const isBoostPhase =
-			(!system.boostOtherPhases && gamedata.gamephase === 1) ||
-			(system.boostOtherPhases && (gamedata.gamephase === -1 || gamedata.gamephase === 3));
+		
+		let isBoostPhase = false;
 
-		if (!isBoostPhase) return;		
+		// Check if boostOtherPhases is defined as an array
+		if (system.boostOtherPhases.length > 0) {
+			isBoostPhase = system.boostOtherPhases.includes(gamedata.gamephase);
+
+		// Fallback: default boost phase (1)
+		} else if (gamedata.gamephase === 1) {
+			isBoostPhase = true;
+		}
+
+		// Stop here if not a boostable phase
+		if (!isBoostPhase) return;	
 
 		//if (system.name=="scanner" &&  ew.getUsedEW(ship) > 0){
 		/*no longer needed - EW allocation is checked before commit, so You can't attain illegal effects by boosting/deboosting with EW set
@@ -856,11 +865,19 @@ shipManager.power = {
 	clickMinus: function clickMinus(ship, system) {
 
 		//if (gamedata.gamephase !== 1) return;
-		const isBoostPhase =
-			(!system.boostOtherPhases && gamedata.gamephase === 1) ||
-			(system.boostOtherPhases && (gamedata.gamephase === -1 || gamedata.gamephase === 3));
+		let isBoostPhase = false;
 
-		if (!isBoostPhase) return;			
+		// Check if boostOtherPhases is defined as an array
+		if (system.boostOtherPhases.length > 0) {
+			isBoostPhase = system.boostOtherPhases.includes(gamedata.gamephase);
+
+		// Fallback: default boost phase (1)
+		} else if (gamedata.gamephase === 1) {
+			isBoostPhase = true;
+		}
+
+		// Stop here if not a boostable phase
+		if (!isBoostPhase) return;		
 		
 		//if (system.name=="scanner" &&  ew.getUsedEW(ship) > 0){
 

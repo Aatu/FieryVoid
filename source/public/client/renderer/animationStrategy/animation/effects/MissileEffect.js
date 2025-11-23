@@ -77,6 +77,7 @@ window.MissileEffect = function () {
 
         if (args.systemDestroyedEffect) {
             args.systemDestroyedEffect.add(this.target, args.damagedNames, this.time + this.duration);
+            args.systemDestroyedEffect.add(this.target, args.critNames, this.time + this.duration, 'crit');             
         }
     }
 

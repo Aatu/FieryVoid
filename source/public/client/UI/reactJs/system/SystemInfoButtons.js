@@ -658,11 +658,12 @@ const canBoost = (ship, system) => system.boostable && gamedata.gamephase === 1 
 const canDeBoost = (ship, system) => gamedata.gamephase === 1 && Boolean(shipManager.power.getBoost(system));
 */
 const isBoostPhase = (system) => {
-    if (system.boostOtherPhases) {
-        // Only in -1 or 3
-        return gamedata.gamephase === -1 || gamedata.gamephase === 3;
+    // If boostOtherPhases is an array, check if the current gamephase is included
+    if (system.boostOtherPhases.length > 0) {
+        return system.boostOtherPhases.includes(gamedata.gamephase);
     }
-    // Default: only in 1
+
+    // Default: only in phase 1
     return gamedata.gamephase === 1;
 };
 
@@ -684,12 +685,12 @@ const canReduceShots = (ship, system) => system.weapon && system.canChangeShots 
 const canRemoveFireOrderMulti = (ship, system) => system.weapon && weaponManager.hasOrderForMode(system) && system.canSplitShots;
 const canRemoveFireOrder = (ship, system) => system.weapon && weaponManager.hasFiringOrder(ship, system);
 
-const canChangeFiringMode = (ship, system) => system.weapon  && ((gamedata.gamephase === 1 && system.ballistic) || (gamedata.gamephase === 3 && !system.ballistic)) && (!weaponManager.hasFiringOrder(ship, system) || system.multiModeSplit) && (Object.keys(system.firingModes).length > 1);
+const canChangeFiringMode = (ship, system) => system.weapon  && ((gamedata.gamephase === 1 && system.ballistic) || (gamedata.gamephase === 5 && system.preFires) || (gamedata.gamephase === 3 && !system.ballistic && !system.preFires)) && (!weaponManager.hasFiringOrder(ship, system) || system.multiModeSplit) && (Object.keys(system.firingModes).length > 1);
 
 //can declare eligibility for interception: charged, recharge time >1 turn, intercept rating >0, no firing order
 const canSelfIntercept = (ship, system) => system.weapon && weaponManager.canSelfInterceptSingle(ship, system);
 
-const canActivate = (ship, system) => system.canActivate();
+const canActivate = (ship, system) => system.canActivate(); //Used to manually fire weapons/systems that don't need to target e.g. Second Sight/Thoughwave
 const canDeactivate = (ship, system) => system.canDeactivate();  
 
 const getFiringModes = (ship, system, changeFiringMode, allChangeFiringMode) => {

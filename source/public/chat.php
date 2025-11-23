@@ -155,7 +155,7 @@ if (! isset($chatelement))
         startPolling: function(){
             if(chat.polling) return;
             chat.polling = true;
-            setTimeout(chat.requestChatdata, 2000); //Set initial polling to 1 sec to load chat, then it'll go to 8secs.
+            setTimeout(chat.requestChatdata, 3000); //Set initial polling to 1 sec to load chat, then it'll go to 8secs.
         },
 
         removeNewMessageTag: function(){

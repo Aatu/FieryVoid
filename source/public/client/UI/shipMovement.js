@@ -342,68 +342,98 @@ UI.shipMovement.rollActiveElement.on("click touchstart", UI.shipMovement.rollCal
             } else {
                 turnPivotRight.hide();
             }
-/*
-            dis = 60;
-            angle = mathlib.addToDirection(shipHeading, -90);
-            var pivotleft = UI.shipMovement.pivotleftElement;
-            if (shipManager.movement.canPivot(ship, false)) {
-                var icon = "img/pivotleft.png";
-                if (shipManager.movement.isEndingPivot(ship, false)) icon = "img/pivotleft_active.png";
-                UI.shipMovement.drawUIElement(pivotleft, pos.x, pos.y, s, dis * 1.4, angle, icon, "pivotleftcanvas", shipHeading);
-            } else {
+
+        dis = 60;
+
+        //Pivot Right
+        angle = mathlib.addToDirection(shipHeading, -90);
+        var pivotleft = UI.shipMovement.pivotleftElement;
+        var pivotLeftActive = UI.shipMovement.pivotLeftActiveElement;
+
+        if (shipManager.movement.canPivot(ship, false)) {
+            if (shipManager.movement.isEndingPivot(ship, false)) {
+                // Active pivot state (Stop Pivoting)
                 pivotleft.hide();
-            }
-*/
-			dis = 60;
-			angle = mathlib.addToDirection(shipHeading, -90);
-			var pivotleft = UI.shipMovement.pivotleftElement;
-			if (shipManager.movement.canPivot(ship, false)) {
-			    var icon = "img/pivotleft.png";
-			    if (shipManager.movement.isEndingPivot(ship, false)) {
-			        icon = "img/pivotleft_active.png";
-			        // Show the "Stop Pivoting" active icon
-			        UI.shipMovement.pivotleftElement.hide();  // Hide the regular pivot icon
-			        UI.shipMovement.pivotLeftActiveElement.show();  // Show the active pivot icon
-			    } else {
-			        // Show the regular pivot icon
-			        UI.shipMovement.pivotleftElement.show();
-			        UI.shipMovement.pivotLeftActiveElement.hide();
-			    }
-			    UI.shipMovement.drawUIElement(pivotleft, pos.x, pos.y, s, dis * 1.4, angle, icon, "pivotleftcanvas", shipHeading);
-			} else {
-			    pivotleft.hide();
-			    UI.shipMovement.pivotLeftActiveElement.hide();  // Hide both if pivoting is not allowed
-			}
-/*
-            angle = mathlib.addToDirection(shipHeading, 90);
-            var pivotright = UI.shipMovement.pivotrightElement;
-            if (shipManager.movement.canPivot(ship, true)) {
-                var icon = "img/pivotright.png";
-                if (shipManager.movement.isEndingPivot(ship, true)) icon = "img/pivotright_active.png";
-                UI.shipMovement.drawUIElement(pivotright, pos.x, pos.y, s, dis * 1.4, angle, icon, "pivotrightcanvas", shipHeading);
+
+                // Draw and show the active icon at the same position
+                UI.shipMovement.drawUIElement(
+                    pivotLeftActive,
+                    pos.x,
+                    pos.y,
+                    s,
+                    dis * 1.4,
+                    angle,
+                    "img/pivotleft_active.png",
+                    "pivotLeftActiveCanvas",
+                    shipHeading
+                );
+                pivotLeftActive.show();
             } else {
-                pivotright.hide();
+                // Normal pivot state
+                pivotLeftActive.hide();
+
+                UI.shipMovement.drawUIElement(
+                    pivotleft,
+                    pos.x,
+                    pos.y,
+                    s,
+                    dis * 1.4,
+                    angle,
+                    "img/pivotleft.png",
+                    "pivotleftcanvas",
+                    shipHeading
+                );
+                pivotleft.show();
             }
-*/
-            angle = mathlib.addToDirection(shipHeading, 90);
-			var pivotright = UI.shipMovement.pivotrightElement;
-			if (shipManager.movement.canPivot(ship, true)) {
-			    var icon = "img/pivotright.png";
-			    if (shipManager.movement.isEndingPivot(ship, true)) {
-			        icon = "img/pivotright_active.png";
-			        // Show the "Stop Pivoting" active icon
-			        UI.shipMovement.pivotrightElement.hide();  // Hide the regular pivot icon
-			        UI.shipMovement.pivotRightActiveElement.show();  // Show the active pivot icon
-			    } else {
-			        // Show the regular pivot icon
-			        UI.shipMovement.pivotrightElement.show();
-			        UI.shipMovement.pivotRightActiveElement.hide();
-			    }
-			    UI.shipMovement.drawUIElement(pivotright, pos.x, pos.y, s, dis * 1.4, angle, icon, "pivotrightcanvas", shipHeading);
-			} else {
-			    pivotright.hide();
-			    UI.shipMovement.pivotRightActiveElement.hide();  // Hide both if pivoting is not allowed
-			}
+        } else {
+            pivotleft.hide();
+            pivotLeftActive.hide();
+        }
+
+        //Pivot Right
+        angle = mathlib.addToDirection(shipHeading, 90);
+        var pivotright = UI.shipMovement.pivotrightElement;
+        var pivotRightActive = UI.shipMovement.pivotRightActiveElement;
+
+        if (shipManager.movement.canPivot(ship, true)) {
+            if (shipManager.movement.isEndingPivot(ship, true)) {
+                // Active pivot state (Stop Pivoting)
+                pivotright.hide();
+
+                // Draw and show the active icon at the same position
+                UI.shipMovement.drawUIElement(
+                    pivotRightActive,
+                    pos.x,
+                    pos.y,
+                    s,
+                    dis * 1.4,
+                    angle,
+                    "img/pivotright_active.png",
+                    "pivotRightActiveCanvas",
+                    shipHeading
+                );
+                pivotRightActive.show();
+            } else {
+                // Normal pivot state
+                pivotRightActive.hide();
+
+                UI.shipMovement.drawUIElement(
+                    pivotright,
+                    pos.x,
+                    pos.y,
+                    s,
+                    dis * 1.4,
+                    angle,
+                    "img/pivotright.png",
+                    "pivotrightcanvas",
+                    shipHeading
+                );
+                pivotright.show();
+            }
+        } else {
+            pivotright.hide();
+            pivotRightActive.hide();
+        }
 
             // Base Rotation
             var rotateleft = UI.shipMovement.rotateleftElement;

@@ -73,7 +73,7 @@ public function advance(TacGamedata $gameData, DBManager $dbManager)
             if ($ship instanceof FighterFlight) {                
                 foreach ($ship->systems as $ftr) {
                     foreach ($ftr->systems as $ftrsys) {                   
-                        if ($ftrsys->boostOtherPhases) {  //E.g. Not normal boost systems                     
+                    if (is_array($ftrsys->boostOtherPhases) && in_array($gameData->phase, $ftrsys->boostOtherPhases)) {  //Prevent duplication                    
                             if (!empty($ftrsys->power)) {                            
                                 // Peel off the last entry so we can save it later
                                 $lastPower = array_pop($ftrsys->power);
@@ -90,7 +90,7 @@ public function advance(TacGamedata $gameData, DBManager $dbManager)
                 }
             } else {
                 foreach ($ship->systems as $system){
-                    if ($system->boostOtherPhases) {
+                    if (is_array($system->boostOtherPhases) && in_array($gameData->phase, $system->boostOtherPhases)) {  //Prevent duplication
                         if (!empty($system->power)) {
                             // Peel off the last entry so we can save it later
                             $lastPower = array_pop($system->power);
