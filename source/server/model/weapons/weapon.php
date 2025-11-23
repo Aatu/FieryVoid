@@ -828,16 +828,16 @@ public function getStartLoading()
                 return new WeaponLoading(0, 0, $this->getLoadedAmmo(), 0, $this->getLoadingTime(), $this->firingMode);
             }
         } else if ($phase == -1) {
-            $weaponLoading = $this->calculateLoadingFromLastTurn($gamedata);
+            $weaponLoading = $this->calculateLoadingFromLastTurn($gamedata);                   
             $this->setLoading($weaponLoading);
 
             if ($this->overloadshots === -1) {
                 return new WeaponLoading(0, 0, $this->getLoadedAmmo(), 0, $this->getLoadingTime(), $this->firingMode);
             } else {
-                $newloading = $this->getTurnsloaded() + 1;
+                $newloading = $this->getTurnsloaded() + 1;            
                 if ($newloading > $normalload)
                     $newloading = $normalload;
-
+ 
                 $newExtraShots = $this->overloadshots;
                 $overloading = $this->overloadturns + 1;
                 if ($overloading >= $normalload && $newExtraShots == 0)
@@ -888,9 +888,9 @@ public function getStartLoading()
             //cannot save the extra shots from everload -> lose loading and cooldown
             if ($this->overloadshots > 0 && $this->overloadshots < $this->extraoverloadshots) {
                 if ($this->isOverloadingOnTurn(TacGamedata::$currentTurn)) {
-                    return new WeaponLoading(1, 0, $this->getLoadedAmmo(), 1, $this->getLoadingTime(), $this->firingMode);
+                    return new WeaponLoading(0, 0, $this->getLoadedAmmo(), 1, $this->getLoadingTime(), $this->firingMode);
                 } else {
-                    return new WeaponLoading(1, 0, $this->getLoadedAmmo(), 0, $this->getLoadingTime(), $this->firingMode);
+                    return new WeaponLoading(0, 0, $this->getLoadedAmmo(), 0, $this->getLoadingTime(), $this->firingMode);
                 }
             }
         }
