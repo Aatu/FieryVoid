@@ -616,24 +616,15 @@ class Weapon extends ShipSystem
 		//re-create damage arrays, so they reflect loading time...
 		foreach ($this->firingModes as $i => $modeName) {
 			$this->changeFiringMode($i);
-			$this->setMinDamage();
-			$this->minDamageArray[$i] = $this->minDamage;
-			$this->setMaxDamage();
-			$this->maxDamageArray[$i] = $this->maxDamage;
+			//$this->setMinDamage();
+			//$this->minDamageArray[$i] = $this->minDamage;
+			//$this->setMaxDamage();
+			//$this->maxDamageArray[$i] = $this->maxDamage;
 			//set AF priority, too!
 			$this->setPriorityAF(); 
 			$this->priorityAFArray[$i] = $this->priorityAF;
 		} 
-        
-        //We just reset damage arrays, so need to now reapply any Damage Reduced critical effects for System Data Window to display correctly.
-        $this->dp = 0; //Initialise again.
-        foreach ($this->criticals as $crit) { //Are there any appropriate crits?
-            if ($crit instanceof ReducedDamage) $this->dp++;
-        }
-        //Ammo weapons do NOT have their damage values reset by the above fragment, so we have to exclude them from this application of crits or it'll duplicate.
-        if($this->dp > 0){       
-            $this->effectCriticalDamgeReductions($this->dp, true ); //Reapply any critical effect to damage values using same method as onConstructed()             
-        } 
+
 		$this->changeFiringMode(1); //reset mode to basic
             
         if ($this->damageType != '') $this->data["Damage type"] = $this->damageType;
@@ -1853,7 +1844,7 @@ throw new Exception("getSystemArmourAdaptive! $ss");	*/
     /*returns modified damage, NOT damage modifier*/
     /*this is different function that getDamageMod of unit!*/
     protected function getDamageMod($damage, $shooter, $target, $pos, $gamedata)
-    {
+    {               
         $damage = $damage - $damage * $this->dp; //$dp is fraction of shot that gets wasted!
 
         if ($this->rangeDamagePenalty > 0) {
@@ -1888,9 +1879,9 @@ throw new Exception("getSystemArmourAdaptive! $ss");	*/
 
 
     protected function getFinalDamage($shooter, $target, $pos, $gamedata, $fireOrder)
-    {
-        $damage = $this->getDamage($fireOrder);
-        $damage = $this->getDamageMod($damage, $shooter, $target, $pos, $gamedata);     
+    {          
+        $damage = $this->getDamage($fireOrder);      
+        $damage = $this->getDamageMod($damage, $shooter, $target, $pos, $gamedata);                
         $damage -= $target->getDamageMod($shooter, $pos, $gamedata->turn, $this);
 		
 		/* first attempt of StarTrek shield
