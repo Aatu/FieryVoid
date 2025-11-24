@@ -18,6 +18,8 @@ class PhaseFactory
                 return new InitialOrdersGamePhase();
             case 2:
                 return new MovementGamePhase();
+            case 5: //Note - added later so out of normal order.
+                return new PreFiringGamePhase();                
             case 3:
                 return new FireGamePhase();
             default:

@@ -802,7 +802,29 @@ shipManager.power = {
 		}
 	},
 
+	/* //Old version - DK Nov 2025
 	isOverloading: function isOverloading(ship, system) {
+		if (system.alwaysoverloading) {
+			return true;
+		}
+
+		for (var i in system.power) {
+			var power = system.power[i];
+			if (power.turn != gamedata.turn) continue;
+
+			if (power.type == 3) {
+				return true;
+			}
+		}
+
+		return false;
+	},
+	*/
+
+	isOverloading: function isOverloading(ship, system) {
+
+		if(shipManager.power.isOfflineOnTurn(ship, system, gamedata.turn)) return false;
+
 		if (system.alwaysoverloading) {
 			return true;
 		}
@@ -822,11 +844,20 @@ shipManager.power = {
 	clickPlus: function clickPlus(ship, system) {
 
 		//if (gamedata.gamephase !== 1) return;
-		const isBoostPhase =
-			(!system.boostOtherPhases && gamedata.gamephase === 1) ||
-			(system.boostOtherPhases && (gamedata.gamephase === -1 || gamedata.gamephase === 3));
+		
+		let isBoostPhase = false;
 
-		if (!isBoostPhase) return;		
+		// Check if boostOtherPhases is defined as an array
+		if (system.boostOtherPhases.length > 0) {
+			isBoostPhase = system.boostOtherPhases.includes(gamedata.gamephase);
+
+		// Fallback: default boost phase (1)
+		} else if (gamedata.gamephase === 1) {
+			isBoostPhase = true;
+		}
+
+		// Stop here if not a boostable phase
+		if (!isBoostPhase) return;	
 
 		//if (system.name=="scanner" &&  ew.getUsedEW(ship) > 0){
 		/*no longer needed - EW allocation is checked before commit, so You can't attain illegal effects by boosting/deboosting with EW set
@@ -856,11 +887,19 @@ shipManager.power = {
 	clickMinus: function clickMinus(ship, system) {
 
 		//if (gamedata.gamephase !== 1) return;
-		const isBoostPhase =
-			(!system.boostOtherPhases && gamedata.gamephase === 1) ||
-			(system.boostOtherPhases && (gamedata.gamephase === -1 || gamedata.gamephase === 3));
+		let isBoostPhase = false;
 
-		if (!isBoostPhase) return;			
+		// Check if boostOtherPhases is defined as an array
+		if (system.boostOtherPhases.length > 0) {
+			isBoostPhase = system.boostOtherPhases.includes(gamedata.gamephase);
+
+		// Fallback: default boost phase (1)
+		} else if (gamedata.gamephase === 1) {
+			isBoostPhase = true;
+		}
+
+		// Stop here if not a boostable phase
+		if (!isBoostPhase) return;		
 		
 		//if (system.name=="scanner" &&  ew.getUsedEW(ship) > 0){
 
@@ -947,7 +986,9 @@ shipManager.power = {
 			system.onTurnOff(ship);
 		}
 
-		shipManager.power.stopOverloading(ship, system);
+		if(system.overloadshots == 0) { //To prevent stop overload AFTER an initial sustained shot is fired.
+			shipManager.power.stopOverloading(ship, system); 
+		}
 		shipWindowManager.setDataForSystem(ship, system);
 		shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
 
@@ -1075,6 +1116,8 @@ shipManager.power = {
 		if (ship.userid != gamedata.thisplayer) return;
 
 		if (shipManager.power.isOffline(ship, system)) return;
+
+		if(system.overloadshots < system.extraoverloadshots && system.overloadshots !== 0) return; //To prevent stop overload AFTER an initial sustained shot is fired.
 
 		shipManager.power.stopOverloading(ship, system);
 		shipWindowManager.setDataForSystem(ship, system);

@@ -2,6 +2,90 @@
 
 class MovementGamePhase implements Phase
 {
+
+    public function advance(TacGamedata $gameData, DBManager $dbManager)
+    {
+        // Store slots that have at least one ship ready to prefire
+        $preFiringSlots = [];
+
+        // Load fresh gamedata (to include newly submitted moves)
+        $latestgameData = $dbManager->getTacGamedata($gameData->forPlayer, $gameData->id);
+
+        foreach ($latestgameData->ships as $ship) {
+            // Skip destroyed, terrain, or undeployed ships
+            if (
+                $ship->isDestroyed() ||
+                $ship->base || $ship->smallBase ||
+                $ship->isTerrain() ||
+                ($ship->getTurnDeployed($gameData) > $gameData->turn)
+            ) {
+                continue;
+            }
+
+            // Submit a dummy "end" move so the ship has a completed movement order for this turn
+            $lastMove = $ship->getLastMovement();
+            $newMove = new MovementOrder(
+                null,
+                'end',
+                $lastMove->position,
+                0,
+                0,
+                $lastMove->speed,
+                $lastMove->heading,
+                $lastMove->facing,
+                false,
+                $gameData->turn,
+                0,
+                0
+            );
+            $dbManager->submitMovement($gameData->id, $ship->id, $gameData->turn, [$newMove]);
+
+            // Perform post-move stealth check for ships with that ability (e.g. Torvalus)
+            if ($ship->hasSpecialAbility("Stealth")) {
+                $ship->checkStealth($gameData);
+            }
+
+            // Track slots that have pre-firing ships ready to shoot
+            if ($ship->hasSpecialAbility("PreFiring") && $ship->hasPreFireWeaponsReady($gameData)) {
+                $preFiringSlots[$ship->slot] = true; // use associative key to ensure uniqueness
+            }
+        }
+
+        // Update game phase to Pre-Firing
+        $gameData->setPhase(5);
+        $gameData->setActiveship(-1);
+        $dbManager->updateGamedata($gameData);
+        $dbManager->setPlayersWaitingStatusInGame($gameData->id, false);
+
+        // Identify slots that have no pre-firing ships
+        $preFiringSlotIds = array_keys($preFiringSlots);
+        $allSlotIds = array_map(fn($s) => $s->slot, $gameData->slots);
+        $slotsToSkip = array_diff($allSlotIds, $preFiringSlotIds);
+
+        // Mark slots as completed for phase 5 if:
+        // - They have no deployed units
+        // - They have surrendered
+        // - They have no pre-firing ships
+        foreach ($gameData->slots as $slot) {
+            $minTurnDeploy = $gameData->getMinTurnDeployedSlot($slot->slot, $slot->depavailable);
+
+            // Skip slot if undeployed or surrendered
+            if (
+                $minTurnDeploy > $gameData->turn ||
+                ($slot->surrendered !== null && $slot->surrendered <= $gameData->turn)
+            ) {
+                $dbManager->updatePlayerSlotPhase($gameData->id, $slot->playerid, $slot->slot, 5, $gameData->turn);
+                continue;
+            }
+
+            // Skip slot if it has no pre-firing ships
+            if (in_array($slot->slot, $slotsToSkip, true)) {
+                $dbManager->updatePlayerSlotPhase($gameData->id, $slot->playerid, $slot->slot, 5, $gameData->turn);
+            }
+        }
+    }
+
+    /* //old version of Advance
     public function advance(TacGamedata $gameData, DBManager $dbManager)
     {
         //Have to load new gamedata, because the old object does not have moves for ships that were just submitted
@@ -25,10 +109,11 @@ class MovementGamePhase implements Phase
             $minTurnDeploy = $gameData->getMinTurnDeployedSlot($slot->slot, $slot->depavailable);
             if($minTurnDeploy > $gameData->turn || ($slot->surrendered !== null && $slot->surrendered <= $gameData->turn)){ //Slot has no units deployed or has surrendered.
                 $dbManager->updatePlayerSlotPhase($gameData->id, $slot->playerid, $slot->slot, 3, $gameData->turn);
-            }     
+            }
         }   
                   
     }
+    */
 
 	/*old version - before changes - in case of need of rollback*/
     public function process_bak(TacGamedata $gameData, DBManager $dbManager, Array $ships)

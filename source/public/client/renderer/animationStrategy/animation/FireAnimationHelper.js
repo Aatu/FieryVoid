@@ -7,6 +7,10 @@ window.FireAnimationHelper = {
             return window.coordinateConverter.fromHexToGame(icon.getFirstMovementOnTurn(turn).position);
         }
 
+        if (weapon.preFires) {
+            return window.coordinateConverter.fromHexToGame(icon.getEndMovementOnTurn(turn).position);
+        }        
+
         return FireAnimationHelper.getShipPositionAtTime(icon, time, movementAnimations);
     },
 

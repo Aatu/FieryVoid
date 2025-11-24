@@ -35,7 +35,8 @@ spl_autoload_register(
                 'anroethas' => '/server/model/ships/hurr/anroethAS.php',
                 'antimatterconverter' => '/server/model/weapons/antimatter.php',
                 'alykent' => '/server/model/ships/brakiri/Alykent.php',
-                'ishtakaton' => '/server/model/ships/brakiri/ishtakaton.php',
+                //'ishtakaton' => '/server/model/ships/brakiri/ishtakaton.php',
+                'ishtaka' => '/server/model/ships/brakiri/ishtaka.php',                
                 'antoph' => '/server/model/ships/brakiri/antoph.php',
                 'antophearly' => '/server/model/ships/brakiri/antophEarly.php',
                 'antophupgrade' => '/server/model/ships/brakiri/antophUpgrade.php',
@@ -384,6 +385,7 @@ spl_autoload_register(
                 'gravitonbeam' => '/server/model/weapons/gravitic.php',
                 'gravitonpulsar' => '/server/model/weapons/gravitic.php',
                 'gravlance' => '/server/model/weapons/gravitic.php',
+                'graviticshifter' => '/server/model/weapons/gravitic.php',                
                 'greysharlin' => '/server/model/ships/minbari/greySharlin.php',
                 'gsten' => '/server/model/ships/narn/gsten.php',
                 'gstor' => '/server/model/ships/narn/gstor.php',
@@ -766,6 +768,7 @@ spl_autoload_register(
                 'playerslotfromjson' => '/server/model/BaseClasses.php',
                 'pointpulsar' => '/server/model/weapons/pulse.php',
                 'powermanagemententry' => '/server/model/BaseClasses.php',
+                'prefiringgamephase' => '/server/Phase/PreFiringGamePhase.php',                
                 'preyhawk' => '/server/model/ships/drazi/preyhawk.php',
                 'primus' => '/server/model/ships/centauri/primus.php',
                 'primusmaximus' => '/server/model/ships/centauri/primusMaximus.php',
@@ -824,10 +827,10 @@ spl_autoload_register(
                 'rogolonshogalovam' => '/server/model/ships/rogolon/rogolonShogalovAM.php',
                 'rogolontascoam' => '/server/model/ships/rogolon/rogolonTascoAM.php',
                 'rogolontolov' => '/server/model/ships/rogolon/rogolonTolov.php',
-				'rogolontolovam' => '/server/model/ships/rogolon/rogolonTolovAM.php',
+				//'rogolontolovam' => '/server/model/ships/rogolon/rogolonTolovAM.php',
                 'rogolontovin' => '/server/model/ships/rogolon/rogolonTovin.php',
                 'rogolontovinam' => '/server/model/ships/rogolon/rogolonTovinAM.php',
-				'rogolontolovam' => '/server/model/ships/rogolon/rogolonTolovAM.php',
+				//'rogolontolovam' => '/server/model/ships/rogolon/rogolonTolovAM.php',
 				'rogolontussova' => '/server/model/ships/rogolon/rogolonTussova.php',
                 'rogolonvasturshf' => '/server/model/ships/rogolon/rogolonVasturSHF.php',
                 'rogolonvostorshf' => '/server/model/ships/rogolon/rogolonVostorSHF.php',
@@ -1205,14 +1208,17 @@ spl_autoload_register(
                 'zzunoffnaston' => '/server/model/ships/narn/zzunoffNaston.php',
                 'zzunoffrongor' => '/server/model/ships/narn/zzunoffRongor.php',
                 'zzunoffronvar' => '/server/model/ships/narn/zzunoffRonvar.php',
-                'zzunoffshakaraton' => '/server/model/ships/brakiri/zzunoffShakaraton.php',
+                //'zzunoffshakaraton' => '/server/model/ships/brakiri/zzunoffShakaraton.php',
+                'shakara' => '/server/model/ships/brakiri/shakara.php',         
                 'zzunoffshokan' => '/server/model/ships/narn/zzunoffShokan.php',
                 //'zzunoffshokanelite' => '/server/model/ships/narn/zzunoffShokanElite.php',
                 'zzunoffshovok' => '/server/model/ships/narn/zzunoffShovok.php',
                 'zzunoffshovor' => '/server/model/ships/narn/zzunoffShovor.php',
                 'zzunoffshovorbolt' => '/server/model/ships/narn/zzunoffShovorBolt.php',
-                'zzunofftashkaton' => '/server/model/ships/brakiri/zzunoffTashkaton.php',
-                'zzunofftashkavaton' => '/server/model/ships/brakiri/zzunoffTashkavaton.php',
+                //'zzunofftashkaton' => '/server/model/ships/brakiri/zzunoffTashkaton.php',
+                'tashkat' => '/server/model/ships/brakiri/tashkat.php',                
+                //'zzunofftashkavaton' => '/server/model/ships/brakiri/zzunoffTashkavaton.php',
+                'tashkava' => '/server/model/ships/brakiri/tashkava.php',                   
                 'zzunofftdirk' => '/server/model/ships/narn/zzunoffTdirk.php',
                 'zzunofftdirkrefit' => '/server/model/ships/narn/zzunoffTdirkRefit.php',             
                 'zzunofftshon' => '/server/model/ships/narn/zzunoffTshon.php',
@@ -2502,18 +2508,7 @@ spl_autoload_register(
 				'vorlondreadnought' => '/server/model/ships/vorlons/vorlonDreadnought.php',
 				'vorlonheavydestroyer' => '/server/model/ships/vorlons/vorlonHeavyDestroyer.php',
 				'vorlonstrikecruiser' => '/server/model/ships/vorlons/vorlonStrikeCruiser.php',
-				
-				//old versions of capital ships, to be deleted when games are over
-				/*
-				'vorlonlightcruiserold' => '/server/model/ships/vorlons/vorlonLightCruiserOld.php',
-				'vorlonheavycruiserold' => '/server/model/ships/vorlons/vorlonHeavyCruiserOld.php',
-				'vorlonheavycarrierold' => '/server/model/ships/vorlons/vorlonHeavyCarrierOld.php',
-				'vorlondreadnoughtold' => '/server/model/ships/vorlons/vorlonDreadnoughtOld.php',
-				*/
-				
-				
-				
-				
+								
 				
 				//Descari
 				'dualplasmacannon' => '/server/model/weapons/plasma.php',
@@ -2522,17 +2517,12 @@ spl_autoload_register(
 				'lightplasmabolter' => '/server/model/weapons/plasma.php',
 				'lightparticlebolt' => '/server/model/weapons/particle.php',
 				'rulpa' => '/server/model/ships/descari/Rulpa.php',
-//				'rulthar' => '/server/model/ships/descari/Rulthar.php',
-//				'rultharfull' => '/server/model/ships/descari/RultharFull.php',
 				'rulpassa' => '/server/model/ships/descari/Rulpassa.php',
 				'scorava' => '/server/model/ships/descari/Scorava.php',
 				'lightplasmabolterfighter' => '/server/model/weapons/plasma.php',
-//				'scoravarefitted' => '/server/model/ships/descari/Scoravarefitted.php',
-//				'scoravalaser' => '/server/model/ships/descari/Scoravalaser.php',
 				'zftrnoscor' => '/server/model/ships/descari/ZFtrNoscor.php',
 				'zftrnoscha' => '/server/model/ships/descari/ZFtrNoscha.php',
 				'rulnar' => '/server/model/ships/descari/Rulnar.php',
-//				'scorota' => '/server/model/ships/descari/Scorota.php',
 				'croscotu' => '/server/model/ships/descari/Croscotu.php',
 				'croscotuearly' => '/server/model/ships/descari/CroscotuEarly.php',
 				'croscoturefit'	=> '/server/model/ships/descari/CroscotuRefit.php',
@@ -3342,8 +3332,10 @@ spl_autoload_register(
 				'volleylaser' => '/server/model/weapons/pulse.php',
 				'shademodulator' => '/server/model/weapons/supportWeapons.php',                 
                 'shadingfield' => '/server/model/systems/baseSystems.php',
-                'transversedrive' => '/server/model/weapons/supportWeapons.php',                    
-
+                'transversedrive' => '/server/model/weapons/supportWeapons.php',
+                
+                'increasedrecharge1' => '/server/model/cricialClasses.php',
+                'damagesystem' => '/server/model/cricialClasses.php',
 
 				//Kirishiac
 				'ultramattercannon' => '/server/model/weapons/matter.php',								
@@ -3376,18 +3368,21 @@ spl_autoload_register(
 						'directemine' => '/server/model/weapons/customDevelopment.php',						
 						'testlaser' => '/server/model/weapons/customs.php',
                         'terrain' => '/server/model/ships/ShipClasses.php',                    
-	    				'asteroids' => '/server/model/ships/terrain/asteroidS.php',                    
-	    				'asteroidm' => '/server/model/ships/terrain/asteroidM.php',  
-	    				'asteroidl' => '/server/model/ships/terrain/asteroidL.php', 
-	    				'moonsmall' => '/server/model/ships/terrain/moonSmall.php',  
-	    				'moon' => '/server/model/ships/terrain/moon.php',
-                        'moonlarge' => '/server/model/ships/terrain/moonLarge.php',
+	    				//'asteroids' => '/server/model/ships/terrain/asteroidS.php',                    
+	    				//'asteroidm' => '/server/model/ships/terrain/asteroidM.php',  
+	    				//'asteroidl' => '/server/model/ships/terrain/asteroidL.php', 
+	    				//'moonsmall' => '/server/model/ships/terrain/moonSmall.php',  
+	    				//'moon' => '/server/model/ships/terrain/moon.php',
+
                         //New terrain without Rectors. 
+                        'moonlarge' => '/server/model/ships/terrain/moonLarge.php',
 	    				'asteroidsnew' => '/server/model/ships/terrain/asteroidSNew.php',                    
 	    				'asteroidmnew' => '/server/model/ships/terrain/asteroidMNew.php',  
 	    				'asteroidlnew' => '/server/model/ships/terrain/asteroidLNew.php', 
 	    				'moonsmallnew' => '/server/model/ships/terrain/moonSmallNew.php',  
-	    				'moonnew' => '/server/model/ships/terrain/moonNew.php',                           
+	    				'moonnew' => '/server/model/ships/terrain/moonNew.php',
+	    				'shipyardnew' => '/server/model/ships/terrain/shipyardNew.php',
+	    				'jumpgatenew' => '/server/model/ships/terrain/jumpgateNew.php',                                                                                
 
 				//Marine Boarding Actions
 				'marines' => '/server/model/weapons/specialWeapons.php',

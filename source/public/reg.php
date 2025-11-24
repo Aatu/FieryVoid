@@ -62,8 +62,13 @@ if (isset($_POST["user"]) && isset($_POST["pass"]) && isset($_POST["pass2"])){
     <body  style="background: url('./img/maps/20.Pillars.jpg') no-repeat center center fixed; background-size: cover;">
 <!--        <div class="helphide" style="float:right"> <div id="helphideimg"></div>
         </div>-->
-        <img src="img/logo.png">
-        
+
+<header class="pageheader">
+  <img src="img/logo.png" alt="Fiery Void Logo" class="logo">    
+  <div class="top-right-row">
+    <a href="index.php">Back to Login</a>
+  </div>
+</header>    
 		<div class="reg-panel">
             <div class="resources" style="font-weight: bold;  font-size: 1.1em;">Register your account below:</div>
 

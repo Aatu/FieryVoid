@@ -705,6 +705,10 @@ body {
 	color:#c54120;
 }
 
+#log .critical{
+	color:rgba(255, 166, 0, 0.781);
+}
+
 #log .shiplink{
 	color:#deebff;
 }

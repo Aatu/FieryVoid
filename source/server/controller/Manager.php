@@ -279,11 +279,10 @@ class Manager{
                 //Line below skips deployment Phase on Turn 1 for late-deploying slots - DK                
                 if($gamedata->turn == 1 && $gamedata->phase == -1) Manager::updateLateDeployments($gamedata);  
 
-            }else{
+            }else{              
                 return null;
             }
-
-            self::$dbManager->endTransaction(false);
+            self::$dbManager->endTransaction(false);          
             return $gamedata;
         }catch(exception $e) {
             self::$dbManager->endTransaction(true);
@@ -521,6 +520,9 @@ class Manager{
                         $system->setAmmo($firingmode, $amount);
                     }
                 }
+				foreach ($ship->systems as $system){
+					$system->beforeTurn($ship, 0, 0);
+				}
 
                 $fleet[] = $ship; // store ship directly, no extra 'ship' key
             }
@@ -746,6 +748,8 @@ class Manager{
                 $phase->process($gdS, self::$dbManager, $ships);
             }else if ($phase instanceof MovementGamePhase){
                 $phase->process($gdS, self::$dbManager, $ships, $activeship);
+            }else if ($phase instanceof PreFiringGamePhase){
+                $phase->process($gdS, self::$dbManager, $ships);                
             }else if ($phase instanceof FireGamePhase){
                 $phase->process($gdS, self::$dbManager, $ships);
             }
@@ -867,6 +871,8 @@ class Manager{
                         $phase->advance($gamedata, self::$dbManager);
                     } else if ($phase instanceof MovementGamePhase){
                         $phase->advance($gamedata, self::$dbManager);
+                    } else if ($phase instanceof PreFiringGamePhase){
+                        $phase->advance($gamedata, self::$dbManager);                        
                     } else if ($phase instanceof FireGamePhase){
                         $phase->advance($gamedata, self::$dbManager);
                         self::changeTurn($gamedata);
@@ -884,9 +890,11 @@ class Manager{
                     $phase->advance($gamedata, self::$dbManager);
                 } else if ($phase instanceof InitialOrdersGamePhase){
                     $phase->advance($gamedata, self::$dbManager);
-                }else if ($phase instanceof MovementGamePhase){
+                } else if ($phase instanceof MovementGamePhase){
                     $phase->advance($gamedata, self::$dbManager);
-                }else if ($phase instanceof FireGamePhase){
+                } else if ($phase instanceof PreFiringGamePhase){
+                    $phase->advance($gamedata, self::$dbManager);                     
+                } else if ($phase instanceof FireGamePhase){
                     $phase->advance($gamedata, self::$dbManager);
                     self::changeTurn($gamedata);
                 }
@@ -1213,27 +1221,31 @@ class Manager{
     
         return $ships;
     }
-
-
+  
+    public static function insertIndividualNote($note){                
+		self::$dbManager->insertIndividualNote($note);
+    }  
+    
+    public static function insertSingleMovement($gameid, $shipid, $movement){                
+		self::$dbManager->insertMovement($gameid, $shipid, $movement);
+    }        
+    
     public static function insertSingleFiringOrder($gamedata, $fireOrder)
     {          
 		self::$dbManager->submitSingleFireorder($gamedata->id, $fireOrder);
 		
     }
     
-    
+    //Used by Pakmara Plasma Web to retrieve fire orders in workflow and get most recent id etc
     public static function retrieveFiringOrdersForWeapon($gamedata, $shooterid, $weaponid)
     {	
 		$fireOrders = self::$dbManager->getFireOrdersForWeapon($gamedata->id, $shooterid, $weaponid, $gamedata->turn);	
 		return $fireOrders;
     }    
 
+    //Used by systems that boost outside of Initial Orders to prevent duplication of power entries.
     public static function removePowerEntriesForTurn($gameid, $shipid, $systemid, $turn){              
 		self::$dbManager->removePowerEntriesForTurn($gameid, $shipid, $systemid, $turn);	
     }
-  
-    public static function insertIndividualNote($note){                
-		self::$dbManager->insertIndividualNote($note);
-    }    
-    
+
 }
