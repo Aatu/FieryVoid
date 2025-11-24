@@ -2268,7 +2268,13 @@ expandFaction: function expandFaction(event) {
 		$('.ship.bought.shipid_' + id).remove();
 
 		var baseShip = gamedata.getShipByType(ship.phpclass);
-		ship.systems = baseShip.systems; //reset systems to default to default values
+		if(baseShip) {
+			ship.systems = baseShip.systems; //reset systems to default to default values
+		}else{ //Loaded fleets may not have their faction set yet when editing, so do this now.
+			gamedata.setShipsFromFaction(ship.faction, ship);
+			baseShip = gamedata.getShipByType(ship.phpclass);
+			ship.systems = baseShip.systems; //reset systems to default to default values						
+		}	
 
 		//Now clear enhancements markers, so these get updated again when ship window next opened.
 		if(ship.flight){
