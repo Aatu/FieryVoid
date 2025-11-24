@@ -533,7 +533,7 @@ class BaseShip {
 		}
 
 		//Push Specialists updates to Ship variables when used
-		if ($this->getSystemByName("HyachSpecialists")){ //Does ship have Specialists system?
+		if ($this->hasSpecialAbility("HyachSpecialists")){ //Does ship have Specialists system?
 			$specialists = $this->HyachSpecialists;
 			$specAllocatedArray = $specialists->specAllocatedCount;
 			foreach ($specAllocatedArray as $specsUsed=>$specValue){
@@ -563,7 +563,7 @@ class BaseShip {
             }
         }
 
-		if($this->getSystemByName("MindriderEngine")){//Mind's Eye Contraction needs a few more values to got to Front End.
+		if($this->hasSpecialAbility("MindriderEngine")){//Mind's Eye Contraction needs a few more values to got to Front End.
 			$strippedShip->forwardDefense = $this->forwardDefense; 
         	$strippedShip->sideDefense = $this->sideDefense;
 		    $strippedShip->Enormous = $this->Enormous; 

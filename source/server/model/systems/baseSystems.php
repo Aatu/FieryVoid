@@ -1201,7 +1201,7 @@ class Engine extends ShipSystem implements SpecialAbility {
 }//endof Engine class
 
 
-class MindriderEngine extends Engine{
+class MindriderEngine extends Engine implements SpecialAbility{
     public $name = "engine";
 
 	public $contraction = 0;
@@ -1210,8 +1210,15 @@ class MindriderEngine extends Engine{
     public $primary = true;
     public $boostable = true;
     public $outputType = "thrust";	
-	
+    public $specialAbilities = array("MindriderEngine"); //Front end looks for this.
+	public $specialAbilityValue = true; //so it is actually recognized as special ability!    		
 	// this method generates additional non-standard information in the form of individual system notes, in this case: - Initial phase: check setting changes made by user, convert to notes.	
+	
+	public function getSpecialAbilityValue($args)
+    {
+		return $this->specialAbilityValue;
+	}
+	
 	public function doIndividualNotesTransfer(){
 
 		$contractionOnTurn = 0;	
@@ -2882,7 +2889,7 @@ public function onIndividualNotesLoaded($gamedata)
 
 
 //this system contains entirety of Specialists management
-class HyachSpecialists extends ShipSystem{
+class HyachSpecialists extends ShipSystem implements SpecialAbility{
     public $name = "hyachSpecialists";
     public $displayName = "Specialists";
     public $primary = true; 
@@ -2890,7 +2897,8 @@ class HyachSpecialists extends ShipSystem{
 	public $isTargetable = false; //cannot be targeted ever!
     public $iconPath = "Specialists.png";
 	protected $doCountForCombatValue = false; //don't count when estimating remaining combat value
-	
+    public $specialAbilities = array("HyachSpecialists"); //Front end looks for this.
+	public $specialAbilityValue = true; //so it is actually recognized as special ability!    			
 	public $specTotal = 0; //How many Specialists does this ship have.
 	public $specTotalSelected = 0;	//How many Specialists have been selected.
 	public $specTotal_used = 0; //How many Specialists have been used.
@@ -2918,6 +2926,11 @@ class HyachSpecialists extends ShipSystem{
         parent::__construct( 0, 1, 0, $specTotal ); //$armour, $maxhealth, $powerReq, $output
 		$this->specTotal = $specTotal;
     }
+
+	public function getSpecialAbilityValue($args)
+    {
+		return $this->specialAbilityValue;
+	}
 
     public static function sortCriticalsByRepairPriority($a, $b){ //For Repair Specialists
 		//priority, then cost, then ID!
