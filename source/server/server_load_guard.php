@@ -47,21 +47,21 @@ if ($ipCount > $maxIP) {
 // ----------------------
 // Global limiter (atomic)
 // ----------------------
+// Ensure key exists for CAS to function
+apcu_add($keyGlobal, 0, $ttlGlobal);
+
+// Global limiter (atomic)
 do {
     $count = apcu_fetch($keyGlobal);
     if ($count === false) $count = 0;
 
     if ($count < $maxGlobal) {
-        // Atomic increment: only succeed if current value is $count
         if (apcu_cas($keyGlobal, $count, $count + 1)) {
-            // Successfully acquired a global slot
             $locked = true;
             break;
         }
-        // else another request updated it, retry immediately
     }
 
-    // Wait a short time before retrying
     usleep((int)($waitStep * 2000000));
 } while ((microtime(true) - $start) < $maxWait);
 
