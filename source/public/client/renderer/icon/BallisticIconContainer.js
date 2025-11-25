@@ -181,11 +181,19 @@ window.BallisticIconContainer = function () {
 		let text = "";
 		let textColour = "";
 		let iconImage = null;
-		let launchPosition = this.coordinateConverter.fromHexToGame(
+
+		let launchPosition = null;
+		/*let launchPosition = this.coordinateConverter.fromHexToGame(
 			ballistic.type === 'normal'
 				? shooterIcon.getLastMovement().position
 				: shooterIcon.getFirstMovementOnTurn(turn).position
 		);
+		*/
+		if(ballistic.type === 'normal' || ballistic.type === 'prefiring'){
+			launchPosition = shooterIcon.getLastMovement().position;
+		}else{
+			launchPosition = shooterIcon.getFirstMovementOnTurn(turn).position;
+		}
 
 		let weapon = null;
 		let modeName = null;
@@ -224,8 +232,11 @@ window.BallisticIconContainer = function () {
 				'Proximity Launcher': { type: 'hexRed',text: 'Proximity Laser',color: '#e6140a' },
 				'Thought Wave':    { type: 'hexPurple',text: 'Thought Wave',   color: '#bc3782' },
 				'1-Blanket Shield':    { type: 'hexGreen',text: 'Shade Modulator',   color: '#008000'},
-				'3-Blanket Shade':    { type: 'hexYellow',text: 'Shade Modulator',   color: '#787800'},				
+				'3-Blanket Shade':    { type: 'hexYellow',text: 'Shade Modulator',   color: '#787800'},
+				'Transverse Jump':    { type: 'hexBlue',text: 'Transverse Jump',   color: '#787800'},				
 			};
+
+			if(modeName == 'Transverse Jump' && !shipManager.isDetectedTorvalus(shooter, 20) && !gamedata.isMyorMyTeamShip(shooter)) return;
 
 			const match = modeMap[modeName];
 			if (match) {
@@ -233,43 +244,43 @@ window.BallisticIconContainer = function () {
 				text = match.text || text;
 				textColour = match.color || textColour;
 
-			// Call splash hex generation for cases where weapon affects more than one hex
-			if (['Shredder', 'Energy Mine', 'Ion Storm', 'Jammer', '1-Blanket Shield', '3-Blanket Shade'].includes(modeName)) {
-				if (gamedata.thisplayer === shooter.userid || replay) {
-					let sizes = [];
+				// Call splash hex generation for cases where weapon affects more than one hex
+				if (['Shredder', 'Energy Mine', 'Ion Storm', 'Jammer', '1-Blanket Shield', '3-Blanket Shade'].includes(modeName)) {
+					if (gamedata.thisplayer === shooter.userid || replay) {
+						let sizes = [];
 
-					switch (modeName) {
-						case 'Ion Storm':
-							sizes = [1, 2];
-							break;
-						case 'Jammer':
-							sizes = [5];
-							break;
-						case '1-Blanket Shield':
-							sizes = [3];
-							break;
-						case '3-Blanket Shade':
-							sizes = [5];
-							break;							
-						default: // Shredder / Energy Mine
-							sizes = [1];
+						switch (modeName) {
+							case 'Ion Storm':
+								sizes = [1, 2];
+								break;
+							case 'Jammer':
+								sizes = [5];
+								break;
+							case '1-Blanket Shield':
+								sizes = [3];
+								break;
+							case '3-Blanket Shade':
+								sizes = [5];
+								break;							
+							default: // Shredder / Energy Mine
+								sizes = [1];
+						}
+
+						sizes.forEach(size => {
+							generateSplashHexes.call(
+								this,
+								ballistic.id,
+								targetPosition,
+								ballistic.shooterid,
+								ballistic.targetid,
+								size,
+								match.type
+							);
+						});
+
+						splash = true;
 					}
-
-					sizes.forEach(size => {
-						generateSplashHexes.call(
-							this,
-							ballistic.id,
-							targetPosition,
-							ballistic.shooterid,
-							ballistic.targetid,
-							size,
-							match.type
-						);
-					});
-
-					splash = true;
 				}
-			}
 			}
 
 			// Damage class-based override logic
@@ -293,6 +304,7 @@ window.BallisticIconContainer = function () {
 			!getByLaunchPosition(launchPosition, this.ballisticIcons) &&
 			ballistic.notes !== 'PersistentEffect' &&
 			ballistic.type !== 'normal' &&
+			ballistic.type !== 'prefiring' &&			
 			ballistic.damageclass !== 'support'
 		) {
 			const launchType = gamedata.isMyOrTeamOneShip(shooter) ? 'hexYellow' : 'hexOrange';
@@ -439,13 +451,14 @@ window.BallisticIconContainer = function () {
 		}
 
 		// Handle specific modeName cases
-		if (ballistic.type === 'normal') {
+		if (ballistic.type === 'normal' || ballistic.type === 'prefiring') {
 			launchPosition = this.coordinateConverter.fromHexToGame(shooterIcon.getLastMovement(turn)?.position);
 
 			const modeColorMap = {
 				'Shredder': 'blue',
 				'Defensive Plasma Web': 'green',
-				'Anti-Fighter Plasma Web': 'green'
+				'Anti-Fighter Plasma Web': 'green',
+				'Transverse Jump': 'blue'
 			};
 
 			if (modeColorMap[modeName]) {

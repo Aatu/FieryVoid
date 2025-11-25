@@ -55,7 +55,8 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                 <li><a href="#jinking">Jinking</a></li>
             </ul>
         </li>
-        <li><a href="#firing-phase">Phase 3: Firing Orders</a>  
+        <li><a href="#prefiring-phase">Phase 3: Pre-Firing Orders</a></li>          
+        <li><a href="#firing-phase">Phase 4: Firing Orders</a>  
             <ul class="sub-list">
                 <li><a href="#selectingweapons">Selecting Weapons</a></li>
                 <li><a href="#hitchances">Hit Chances</a></li>
@@ -193,6 +194,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
     <ul>
     <li><b>Initial Orders</b>: Adjust power, assign EW, fire ballistic weapons,</li>
     <li><b>Movement</b>: Move ships e.g. accel/decel, move, slide, turn, pivot and/or roll,</li>
+    <li><b>Pre-Firing Orders</b>: Some special weapons fire before others, triggering this phase.</li>    
     <li><b>Fire Orders</b>: Assign weapons to fire.</li>
     </ul>
 
@@ -328,13 +330,23 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
     <a class="back-to-top" href="#top">↩ Back to Top</a>
 
 
-    <h3 id="firing-phase">PHASE 3: FIRING ORDERS</h3>
+
+    <h3 id="prefiring-phase">PHASE 3: PRE-FIRING ORDERS</h3> 
+
+    <p>Some special weapons, such as the Torvalus' Transverse Drive, actually fire before all other weapons.  
+      If one of your ships has a system like this, and it's ready to fire, then you will automatically be given the chance to do so in Pre-Firing Orders.
+      The actual firing of these weapons is the same as the process below for Firing Phase, but the effects of weapons in Pre-Firing will fully occur before anyone gets to fire anything else.</p>
+    
+    <a class="back-to-top" href="#top">↩ Back to Top</a>    
+
+
+    <h3 id="firing-phase">PHASE 4: FIRING ORDERS</h3>
 
     <h3 id="howtofire">How to Fire:</h3>
 
     <h4 id="selectingweapons">Selecting Weapons to Fire:</h4>
     <ul>    
-      <li>Pull up one fo you ship of fighter flights SCS with right-click as usual.  Hovering over an weapon in the SCS will display its firing arc around the ship, including its maximum effective range.  This allows you to easily select which weapons to fire at particular targets.</li> 
+      <li>Pull up details for one of your ships of fighter flights SCS with right-click as usual.  Hovering over an weapon in the SCS will display its firing arc around the ship, including its maximum effective range.  This allows you to easily select which weapons to fire at particular targets.</li> 
       <li>Click one or more weapons once each – the icons will be highlighted blue.  Alternatively, right-click on a weapon and all active weapons of that name will be selected.</li> 
     </ul>
 

@@ -2051,12 +2051,13 @@ shipManager.movement = {
         var any = 0;
 
         for (var i in requiredThrust) {
-            var req = requiredThrust[i];
-            if (req == null) {
+            var req = requiredThrust[i]; //If null set to 0, to pick up where only 1 thrust reqd anywhere, and already assigned to a thruster
+            var ass = assignedarray[i];      
+                  
+            if (req == null && ass == null) { //On rare occassions ass can have a value where req is null, preventing it from being added to any.
                 stillReq[i] = null;
                 continue;
             }
-            var ass = assignedarray[i];
 
             if (ass > req) {
                 stillReq[i] = 0;
@@ -2073,11 +2074,14 @@ shipManager.movement = {
             var stbdDirection = shipManager.movement.thrusterDirectionRequired(ship,"stbd");
             var mainDirection = shipManager.movement.thrusterDirectionRequired(ship,"main");
             var retroDirection = shipManager.movement.thrusterDirectionRequired(ship,"retro");
+
+
+
             if (movement.type == "pivotright") { //clockwise
                 if (assignedarray[retroDirection] > 0 || assignedarray[portDirection] > 0) {
                     stillReq[mainDirection] = null;
                     stillReq[stbdDirection] = null;
-                }else if (assignedarray[mainDirection] > 0 || assignedarray[stbdDirection] > 0) {
+                } else if (assignedarray[mainDirection] > 0 || assignedarray[stbdDirection] > 0) {
                     stillReq[retroDirection] = null;
                     stillReq[portDirection] = null;
                 }
@@ -2085,7 +2089,7 @@ shipManager.movement = {
                 if (assignedarray[retroDirection] > 0 || assignedarray[stbdDirection] > 0) {
                     stillReq[mainDirection] = null;
                     stillReq[portDirection] = null;
-                }else if (assignedarray[mainDirection] > 0 || assignedarray[portDirection] > 0) {
+                } else if (assignedarray[mainDirection] > 0 || assignedarray[portDirection] > 0) {
                     stillReq[retroDirection] = null;
                     stillReq[stbdDirection] = null;
                 }
@@ -2295,10 +2299,10 @@ shipManager.movement = {
 			if(shipManager.movement.isPivotedPort(ship)){ //pivoted to Port means: Stbd is Retro, Main is Stbd, Port is Main, Retro is Port
 				switch(orientationRequired) {
 					case 1: 
-						orientationRequired = 4;
+						orientationRequired = 3;
 						break;
 					case 2: 
-						orientationRequired = 3;
+						orientationRequired = 4;
 						break;
 					case 3: 
 						orientationRequired = 1;
@@ -2310,10 +2314,10 @@ shipManager.movement = {
 			}else if (shipManager.movement.isPivotedStbd(ship)){//pivoted to Stbd means: Stbd is Main, Main is Port, Port is Retro, Retro is Stbd
 				switch(orientationRequired) {
 					case 1: 
-						orientationRequired = 3;
+						orientationRequired = 4;
 						break;
 					case 2: 
-						orientationRequired = 4;
+						orientationRequired = 3;
 						break;
 					case 3: 
 						orientationRequired = 2;

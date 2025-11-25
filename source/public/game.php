@@ -152,6 +152,7 @@
     <script src="client/renderer/animationStrategy/animation/effects/BoltEffect.js"></script>
     <script src="client/renderer/animationStrategy/animation/effects/MissileEffect.js"></script>    
     <script src="client/renderer/animationStrategy/animation/effects/TorpedoEffect.js"></script>
+    <script src="client/renderer/animationStrategy/animation/effects/BlinkEffect.js"></script>    
     <script src="client/renderer/animationStrategy/animation/effects/ShipExplosion.js"></script>
     <script src="client/renderer/animationStrategy/animation/effects/SystemDestroyedEffect.js"></script>
     <script src="client/renderer/animationStrategy/animation/effects/ShipJumpPoint.js"></script>  
@@ -161,6 +162,7 @@
     <script src="client/renderer/phaseStrategy/WaitingPhaseStrategy.js"></script>
     <script src="client/renderer/phaseStrategy/InitialPhaseStrategy.js"></script>
     <script src="client/renderer/phaseStrategy/MovementPhaseStrategy.js"></script>
+    <script src="client/renderer/phaseStrategy/PreFiringPhaseStrategy.js"></script>    
     <script src="client/renderer/phaseStrategy/FirePhaseStrategy.js"></script>
     <script src="client/renderer/phaseStrategy/ReplayPhaseStrategy.js"></script>
     <script src="client/renderer/terrain/StarField.js"></script>

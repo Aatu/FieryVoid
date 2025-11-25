@@ -325,6 +325,47 @@ line-height: 1.5;
 .btn:hover { opacity: 0.9; }
 .create-game-btn { margin-top: 15px; }
 
+.clickableGames{
+  font-size: 12px;   
+  font-weight: bold;  
+	cursor:pointer;
+  border: 1px solid #215a7a; 
+}
+
+.activeName {
+  /*color: #DEEBFF;*/
+  color: #DEEBFF;
+  font-size: 13px; 
+  font-weight: bold;              
+}
+
+.lobbyname {
+  /*color: #DEEBFF;*/
+    color: #52b352;
+  font-size: 13px; 
+  font-weight: bold;
+  margin-bottom: 0px;
+  margin-top: 0px                
+}
+
+.gameRules {
+  /*color: #DEEBFF;*/
+  color: #84a5ce;
+  font-size: 12px; 
+  font-weight: normal;
+  margin-bottom: 0px;
+  margin-top: 0px                
+}
+
+.players {
+    /*color: #DEEBFF;*/
+    color: #DEEBFF;
+    font-size: 12px; 
+  font-weight: normal;
+  margin-bottom: 0px;
+  margin-top: 0px                
+}
+
 .waitingForTurn
 {
   border:1px solid #84a5ce !important;
@@ -333,6 +374,8 @@ line-height: 1.5;
   -webkit-box-shadow: 0px 0px 1px #4a6a7a;
   box-shadow: 0px 0px 1px #4a6a7a;
 }
+
+
 
 .create-col .btn {
   display: block;

@@ -48,6 +48,8 @@ window.LogAnimation = function () {
                 //window.combatLog.removeMoves(entry.movement);
             }
         });
+        window.combatLog.critsShown = {}; //Empty crits shown array
+        window.combatLog.critAnimations = {}; //Empty crit animations shown array                         
     };
 
     function tryToHideNext() {

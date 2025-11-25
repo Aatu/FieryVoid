@@ -240,7 +240,7 @@ window.gamedata = {
 
     canTargetAlly: function canTargetAlly(ship) {//30 June 2024 - DK - Added for Ally targeting.
         for (var i in gamedata.selectedSystems) {        	
-            if(gamedata.selectedSystems[i].canTargetAllies) return true;
+            if(gamedata.selectedSystems[i].canTargetAllies || gamedata.selectedSystems[i].canTargetAll) return true;
         }
     },
 
@@ -573,8 +573,8 @@ window.gamedata = {
                 gamedata.doCommit
             );
 
-        //CHECK for NO DIRECT FIRE            
-        }else if (gamedata.gamephase == 3) {
+        //CHECK for NO PRE FIRE            
+        }else if (gamedata.gamephase == 5) {
                 var myShips = [];
 
                 for (var ship in gamedata.ships) {
@@ -598,6 +598,108 @@ window.gamedata = {
                     if (!myShips[ship].flight) {
                         for (var i = 0; i < myShips[ship].systems.length; i++) {
 							var currWeapon = myShips[ship].systems[i];
+                            if(currWeapon.preFires){
+                                if(!currWeapon.ballistic && currWeapon.weapon && (currWeapon.displayName != "Ramming Attack")){ //ballistic weapons ore of no interest now
+                                    if (currWeapon.fireOrders.length > 0) {
+                                        fired = 1;
+                                        if (currWeapon.canSplitShots && currWeapon.fireOrders.length < currWeapon.guns) {
+                                            hasShotsLeft = true;
+                                        }
+                                        break;
+                                    }
+                                    if ( weaponManager.isLoaded(currWeapon) && (!shipManager.systems.isDestroyed(myShips[ship], currWeapon))
+                                    && ( !weaponManager.checkOutOfAmmo(myShips[ship],currWeapon) ) //check for ammo (if relevant - GTS
+                                    ){ //non-ballistic weapon ready to fire
+                                        hasReadyGuns = true;
+                                    }
+                                }
+                            }    
+                        }
+                        if ((fired == 0) && hasReadyGuns) { //no gun was fired, and there are ready guns
+                            hasNoFO.push(myShips[ship]);
+                        }
+                        if (hasShotsLeft) { //Some shots used, but not all.
+                            hasSplitFO.push(myShips[ship]);
+                        }
+                    } else if (myShips[ship].flight) {
+                        for (var i = 0; i < myShips[ship].systems.length; i++) {
+                            if (typeof myShips[ship].systems[i] != "undefined") {
+                                for (var j = 0; j < myShips[ship].systems[i].systems.length; j++) {
+                                    if (typeof myShips[ship].systems[i].systems[j] != "undefined") {
+										var currWeapon = myShips[ship].systems[i].systems[j];
+                                        if(currWeapon.preFires){                                        
+                                            if(!currWeapon.ballistic && currWeapon.weapon && (currWeapon.displayName != "Ramming Attack")){ //ballistic weapons ore of no interest now
+                                                if (currWeapon.fireOrders.length > 0) {
+                                                    fired = 1;
+                                                    break;
+                                                }																		
+                                                if (weaponManager.isLoaded(currWeapon) && (!shipManager.systems.isDestroyed(myShips[ship], myShips[ship].systems[i]))
+                                                    && ( !weaponManager.checkOutOfAmmo(myShips[ship],currWeapon) ) //check for ammo (if relevant											
+                                                ){ //non-ballistic weapon ready to fire
+                                                    hasReadyGuns = true;
+                                                }
+                                            }
+                                        }    
+                                    }
+                                }
+                            }
+                        }
+                        if ((fired == 0) && hasReadyGuns) { //no gun was fired, and there are ready guns
+                            hasNoFO.push(myShips[ship]);
+                        }
+                    }
+                }
+
+                if (hasNoFO.length == 0 && hasSplitFO.length ==0) { //Has no ships with no fireOrders at all.
+                    confirm.confirm("Are you sure you wish to COMMIT YOUR FIRE ORDERS?", gamedata.doCommit);
+                } else {
+                    var html = '';
+                    if (hasNoFO.length > 0){
+                        html += "You have not assigned any fire orders for the following ships: ";
+                        html += "<br>";
+                        for (var ship in hasNoFO) {
+                            //html += hasNoFO[ship].name + " (" + hasNoFO[ship].shipClass + ")";
+                            html += '<span class="ship-name">' + hasNoFO[ship].name + ' (' + hasNoFO[ship].shipClass + ')</span>'; 
+                            html += "<br>";
+                        }
+                    }    
+                    if (hasSplitFO.length > 0){
+                        html += "<br>";
+                        html += "The following ships have weapons with unused shots: ";
+                        html += "<br>";
+                        for (var ship in hasSplitFO) {
+                            //html += hasSplitFO[ship].name + " (" + hasSplitFO[ship].shipClass + ")";
+                            html += '<span class="ship-name">' + hasSplitFO[ship].name + ' (' + hasSplitFO[ship].shipClass + ')</span>';                             
+                            html += "<br>";
+                        }
+                    }    
+                    confirm.confirm(html + "<br>Are you sure you wish to COMMIT YOUR FIRE ORDERS?", gamedata.doCommit);
+                }
+            }else if (gamedata.gamephase == 3) {
+                var myShips = [];
+
+                for (var ship in gamedata.ships) {
+                    if (gamedata.ships[ship].userid == gamedata.thisplayer) {
+                        if (!shipManager.isDestroyed(gamedata.ships[ship]) && !gamedata.isTerrain(gamedata.ships[ship].shipSizeClass, gamedata.ships[ship].userid)) {
+                            var deployTurn = shipManager.getTurnDeployed(gamedata.ships[ship]);
+                            if(deployTurn <= gamedata.turn){   //Don't bother checking for ships that haven't deployed yet. 
+                                myShips.push(gamedata.ships[ship]);
+                            } 
+                        }
+                    }
+                }
+
+                var hasNoFO = [];
+                var hasSplitFO = [];
+
+                for (var ship in myShips) {
+                    var fired = 0;
+                    var hasReadyGuns = false;
+                    var hasShotsLeft = false; //For split shot weapons that might not have used al their shots.
+                    if (!myShips[ship].flight) {
+                        for (var i = 0; i < myShips[ship].systems.length; i++) {
+							var currWeapon = myShips[ship].systems[i];
+                            if(currWeapon.preFires) continue;
 							if(!currWeapon.ballistic && currWeapon.weapon && (currWeapon.displayName != "Ramming Attack")){ //ballistic weapons ore of no interest now
 								if (currWeapon.fireOrders.length > 0) {
 									fired = 1;
@@ -947,7 +1049,46 @@ window.gamedata = {
 			}	        	        	
 			        	
 			ajaxInterface.submitGamedata();
-        } else if (gamedata.gamephase == 3) { //firing phase
+        } else if (gamedata.gamephase == 5) { //pre-firing phase
+		
+		//check ammo magazine, there miiight be ammo weapons in Pre-Firing?		
+		//ammo usage check - AmmoMagazine equipped units
+		var myShips = [];
+		    for (var ship in gamedata.ships) {
+                if (gamedata.ships[ship].userid == gamedata.thisplayer) {
+                    if (!shipManager.isDestroyed(gamedata.ships[ship]) && !gamedata.isTerrain(gamedata.ships[ship].shipSizeClass, gamedata.ships[ship].userid)) {
+                        var deployTurn = shipManager.getTurnDeployed(gamedata.ships[ship]);
+                        if(deployTurn <= gamedata.turn){   //Don't bother checking for ships that haven't deployed yet. 
+                            myShips.push(gamedata.ships[ship]);
+                        } 
+                    }
+                }
+		    }				
+		var ammoMagazineError = [];
+		for (var shipID in myShips) { //actually this will check for fighters, too
+			var currShip = myShips[shipID];
+			//check for every magazine on board!
+			for (var i in currShip.systems) if(currShip.systems[i].name == 'ammoMagazine') {
+        			var currMagazine = currShip.systems[i];
+				var checkResult = currMagazine.doVerifyAmmoUsage(currShip);
+				if(!checkResult) ammoMagazineError.push(currShip);
+			}
+		}
+		if (ammoMagazineError.length > 0) {
+			var ammoMagError = "The following units are trying to fire more ordnance than available (see Ammunition Magazine):<br>";
+			for (var shipID in ammoMagazineError) {
+			    //ammoMagError += ammoMagazineError[shipID].name + " (" + ammoMagazineError[shipID].shipClass + ")";
+                ammoMagError += '<span class="ship-name">' + ammoMagazineError[shipID].name + ' (' + ammoMagazineError[shipID].shipClass + ')</span>'; 
+			    ammoMagError += "<br>";
+			}
+                	ammoMagError += "You need to reduce number of shots (or change mode) before you can commit the turn.";
+			window.confirm.error(ammoMagError, function () {});
+			return false;
+		    }  
+		
+		
+            ajaxInterface.submitGamedata();
+        }else if (gamedata.gamephase == 3) { //firing phase
 		
 			//prevent Vorlons from borrowing future power for firing 
 			//Capacitor-equipped ships cannot commit firing with negative power balance (they actively use power in this phase, AND they don't have any legal option of achieving negative balance by other means)
@@ -1068,6 +1209,18 @@ window.gamedata = {
         }
     },    
 
+    hasSlotSurrendered: function hasSlotSurrendered(slotid){
+        var slot = playerManager.getSlotById(slotid);
+
+        if(slot.surrendered !== null){
+            if(slot.surrendered <= gamedata.turn){ //Surrendered on this turn or before.
+                return true;
+            }
+        } 
+        
+        return false;
+    },
+
     getPlayerNameById: function getPlayerNameById(id) {
         for (var i in gamedata.slots) {
             var slot = gamedata.slots[i];
@@ -1082,7 +1235,9 @@ window.gamedata = {
 
         if (gamedata.gamephase == 2) return "MOVEMENT ORDERS:";
 
-        if (gamedata.gamephase == 3) return "FIRE ORDERS";
+        if (gamedata.gamephase == 5) return "PRE-FIRING ORDERS";          
+
+        if (gamedata.gamephase == 3) return "FIRE ORDERS";     
 
         if (gamedata.gamephase == 4) return "FINAL ORDERS";
 
@@ -1144,9 +1299,8 @@ window.gamedata = {
         var ships = gamedata.ships.filter(function(ship) {
             return !shipManager.isDestroyed(ship)
                    && !gamedata.isTerrain(ship.shipSizeClass, ship.userid) 
-                   //&& !shipManager.shouldBeHidden(ship); //Moved to onScrollToShip() in Phase Strategy
+                   && !gamedata.hasSlotSurrendered(ship.slot); //Remove surrendered ships
         });
-
        
 
         //ships.sort(shipManager.hasBetterInitive);

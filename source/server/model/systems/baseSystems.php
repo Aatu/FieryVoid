@@ -1201,7 +1201,7 @@ class Engine extends ShipSystem implements SpecialAbility {
 }//endof Engine class
 
 
-class MindriderEngine extends Engine{
+class MindriderEngine extends Engine implements SpecialAbility{
     public $name = "engine";
 
 	public $contraction = 0;
@@ -1210,8 +1210,15 @@ class MindriderEngine extends Engine{
     public $primary = true;
     public $boostable = true;
     public $outputType = "thrust";	
-	
+    public $specialAbilities = array("MindriderEngine"); //Front end looks for this.
+	public $specialAbilityValue = true; //so it is actually recognized as special ability!    		
 	// this method generates additional non-standard information in the form of individual system notes, in this case: - Initial phase: check setting changes made by user, convert to notes.	
+	
+	public function getSpecialAbilityValue($args)
+    {
+		return $this->specialAbilityValue;
+	}
+	
 	public function doIndividualNotesTransfer(){
 
 		$contractionOnTurn = 0;	
@@ -1568,7 +1575,7 @@ class ElintScanner extends Scanner implements SpecialAbility{
 		$this->data["Special"] .= '<br>';
 	}
         $this->data["Special"] .= "Allows additional Sensor operations:";
-        $this->data["Special"] .= "<br> - SOEW: indicated friendly ship gets half of ElInt ships' OEW bonus. Target must be within 30 hexes of Scout at the moment of firing, supported ships at both declaration and firing.";		     
+        $this->data["Special"] .= "<br> - SOEW: gives friendly ships half of ELINT ships' OEW bonus against targets. Targets must be within 30 hexes of ELINT at the moment of firing, friendly ships at both declaration and firing.  Requires line of sight to target and friendly ship at firing.";		     
         $this->data["Special"] .= "<br> - SDEW: boosts target's DEW (by 1 for 2 points allocated). Range 30 hexes (at both declaration and firing).";		     
         $this->data["Special"] .= "<br> - Blanket Protection: all friendly units within 20 hexes (incl. fighters) get +1 DEW per 4 points allocated. Cannot combine with other ElInt activities.";		     
         $this->data["Special"] .= "<br> - Disruption: Reduces target enemy ships' OEW and CCEW by 1 per 3 points allocated (split evenly between targets, CCEW being counted as one target; cannot bring OEW on a target below 0). Range 30 hexes (at both declaration and firing).";	
@@ -2326,7 +2333,7 @@ class JumpEngine extends ShipSystem{
 		$healthDiff = $maxhealth - $currHealth;
 	
 		// Calculate the percentage of health missing
-		$missingHealthPercentage = ($healthDiff / $maxhealth) * 100;
+		$missingHealthPercentage = round(($healthDiff / $maxhealth) * 100);
 
 		// Roll a D100
 		$d100Roll = Dice::d(100);
@@ -2882,7 +2889,7 @@ public function onIndividualNotesLoaded($gamedata)
 
 
 //this system contains entirety of Specialists management
-class HyachSpecialists extends ShipSystem{
+class HyachSpecialists extends ShipSystem implements SpecialAbility{
     public $name = "hyachSpecialists";
     public $displayName = "Specialists";
     public $primary = true; 
@@ -2890,7 +2897,8 @@ class HyachSpecialists extends ShipSystem{
 	public $isTargetable = false; //cannot be targeted ever!
     public $iconPath = "Specialists.png";
 	protected $doCountForCombatValue = false; //don't count when estimating remaining combat value
-	
+    public $specialAbilities = array("HyachSpecialists"); //Front end looks for this.
+	public $specialAbilityValue = true; //so it is actually recognized as special ability!    			
 	public $specTotal = 0; //How many Specialists does this ship have.
 	public $specTotalSelected = 0;	//How many Specialists have been selected.
 	public $specTotal_used = 0; //How many Specialists have been used.
@@ -2918,6 +2926,11 @@ class HyachSpecialists extends ShipSystem{
         parent::__construct( 0, 1, 0, $specTotal ); //$armour, $maxhealth, $powerReq, $output
 		$this->specTotal = $specTotal;
     }
+
+	public function getSpecialAbilityValue($args)
+    {
+		return $this->specialAbilityValue;
+	}
 
     public static function sortCriticalsByRepairPriority($a, $b){ //For Repair Specialists
 		//priority, then cost, then ID!
@@ -5777,7 +5790,7 @@ class MindriderHangar extends ShipSystem{
 		public $boostable = true;
 		public $maxBoostLevel = 1;
 		public $boostEfficiency = 0;		
-		public $boostOtherPhases = true; //To allow boosting in Deployment and Firing Phases.
+		public $boostOtherPhases = array(-1, 3); //To allow boosting in Deployment and Firing Phases.
 		public $shaded	= false; //To track in Front End whether system was ever boost this turn, since boost can be toggled during Firing Phase.			
 		
 		function __construct($armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc){
@@ -5840,8 +5853,8 @@ class MindriderHangar extends ShipSystem{
 			if($this->isDestroyed($turn-1) || $this->isOfflineOnTurn() || $target instanceof FighterFlight)
 				return 0;		
 			
-			if ($this->hasCritical('DamageReductionRemoved'))
-				return 0;
+			//if ($this->hasCritical('DamageReductionRemoved'))
+			//	return 0;
 			
 			$output = $this->output;
 			$output += $this->outputMod; //outputMod itself is negative!
@@ -5851,8 +5864,9 @@ class MindriderHangar extends ShipSystem{
 		public function setSystemDataWindow($turn){
 				$unit = $this->getUnit();
 				if($unit instanceof FighterFlight){
-					$this->data["Special"] = "<br>Can activate 'Shading Mode' for the NEXT turn, by boosting this system during Deployment or Firing Phase.";						
-					$this->data["Special"] .= "<br>When Shading is activated, this flight's defense ratings are reduced by 15, and it cannot be detected if it is over 15 hexes at the start or end of movement..";
+					$this->data["Special"] = "Jammer ability, even against Ancients.";
+					$this->data["Special"] .= "<br>Can activate 'Shading Mode' for the NEXT turn, by boosting this system during Deployment or Firing Phase.";						
+					$this->data["Special"] .= "<br>When Shading is activated, this flight's defense ratings are reduced by 15, and it cannot be detected if it is over 15 hexes at the start or end of movement.";
 					$this->data["Special"] .= "<br>HOWEVER, the flight cannot fire any weapons on a turn when Shading was active.";
 					$this->data["Special"] .= "<br>This system also incorporates a small Jump Drive, with a 20 turn recharge.";									
 				}else{
@@ -5869,9 +5883,9 @@ class MindriderHangar extends ShipSystem{
 		public function getSpecialAbilityValue($args)
 		{
 			$ship = $this->getUnit();
-			if($ship instanceof FighterFlight){
-				return 0; //Torvalus fighters don't get the Jammer effect.
-			}
+			//if($ship instanceof FighterFlight){
+			//	return 0; //Torvalus fighters don't get the Jammer effect.
+			//}
 
 			if (!isset($args["shooter"]) || !isset($args["target"]))
 				throw new InvalidArgumentException("Missing arguments for Jammer getSpecialAbilityValue");
@@ -5946,21 +5960,21 @@ class MindriderHangar extends ShipSystem{
 	}	
 
 
-		public function checkStealthNextPhase($gamedata){				
+		public function checkStealthNextPhase($gamedata, $range = 15){				
 				$ship = $this->getUnit();
 					if($gamedata->phase == 1){ 
 						$noteHuman1 = 'D-detectedActive';
 						$noteHuman2 = 'D-undetectedActive';						
 						$noteHuman3 = 'D-NotActive';						
 					}else{
-						$noteHuman1 = '3-detectedActive';
-						$noteHuman2 = '3-undetectedActive';						
-						$noteHuman3 = '3-NotActive';						
+						$noteHuman1 = '2-detectedActive';
+						$noteHuman2 = '2-undetectedActive';						
+						$noteHuman3 = '2-NotActive';						
 					}
 
 				//If we're checking during DeploymentGamePhase->Advance (actually Phase 1 at this point) we need to check last turn as well for boost, as this will not have been saved yet for current turn.					
 				if ($gamedata->phase ==1 && $this->getBoostLevel($gamedata->turn-1) > 0 || $this->getBoostLevel($gamedata->turn) > 0) {
-					if ($this->isDetected($ship, $gamedata)) {
+					if ($this->isDetected($ship, $gamedata, $range)) {
 						$notekey   = 'detected';
 						$noteHuman = $noteHuman1;
 						$noteValue = 1;							
@@ -5992,7 +6006,7 @@ class MindriderHangar extends ShipSystem{
 		}
 
 
-		private function isDetected($ship, $gameData) {
+		private function isDetected($ship, $gameData, $range) {
 	
 			$blockedHexes = $gameData->getBlockedHexes(); //Just do this once outside loop
 			$pos = $ship->getHexPos(); //Just do this once outside loop	
@@ -6010,7 +6024,7 @@ class MindriderHangar extends ShipSystem{
 				$noLoS = !empty($blockedHexes) && Mathlib::checkLineOfSight($pos, $otherPos, $blockedHexes);
 
 				// If within detection range, and LoS not blocked the ship is detected
-				if($distance <= 15 && !$noLoS){
+				if($distance <= $range && !$noLoS){
 					return true;
 				}		
 			}

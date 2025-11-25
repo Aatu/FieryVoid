@@ -287,18 +287,29 @@ var VorlonDischargeCannon = function VorlonDischargeCannon(json, ship) {
 };
 VorlonDischargeCannon.prototype = Object.create(VorlonDischargeGun.prototype);
 VorlonDischargeCannon.prototype.constructor = VorlonDischargeCannon;
-/*
+
 VorlonDischargeCannon.prototype.initializationUpdate = function() {
     // Needed because it can change power consumption during firing phase, depending on power and number of shots being changed
 	this.powerReq = 0;
-	var isFiring = weaponManager.hasFiringOrder(this.ship, this);
-    if (isFiring) {
-		var firing = weaponManager.getFiringOrder(this.ship, this);
-		this.powerReq = 5*firing.shots*firing.firingMode;		
-	}
+    if(gamedata.gamephase == 3){     
+        var isFiring = weaponManager.hasFiringOrder(this.ship, this);
+        this.data["Shots Remaining"] = 4 - this.fireOrders.length;
+
+        this.data["Defensive Shots"] = 0;
+        if (isFiring) {
+            for (var i in this.fireOrders) {
+                var fireOrder = this.fireOrders[i];
+                if(fireOrder.type == "selfIntercept") this.data["Defensive Shots"]++; 
+
+                //var firing = weaponManager.getFiringOrder(this.ship, this);
+                this.powerReq += 5*fireOrder.firingMode;        
+            } 
+         
+        }
+    }
     return this;
 };
-*/
+
 var VorlonLightningCannon = function VorlonLightningCannon(json, ship) {
     Weapon.call(this, json, ship);
 };
