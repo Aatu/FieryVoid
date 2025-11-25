@@ -15,7 +15,8 @@ class ShipSystem {
     public $boostable = false;
     public $boostEfficiency = null;
     public $maxBoostLevel = null;
-	public $boostOtherPhases = false; //To allow boosting in Deployment and Firing Phases.	
+	public $boostOtherPhases = array(); //To allow boosting in other Phases by listing phase number in this array.	
+	//public $preFires = false; //Denotes whether weapon fires in pre-firing phase on normal firing phase
     public $power = array();
     public $fireOrders = array();
     public $canOffLine = false;

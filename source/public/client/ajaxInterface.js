@@ -100,6 +100,28 @@ window.ajaxInterface = {
 
         return jqXHR; // ⚠ critical
     },
+    
+    /* //Replaced version 10.11.25 - DK
+    ajaxWithRetry: function ajaxWithRetry(options, attempt = 1) {
+        const maxAttempts = 5;
+        const baseDelay = 200;
+
+        const jqXHR = $.ajax({
+            ...options,
+            error: function(xhr, status, error) {
+                if (xhr.status === 507 && attempt <= maxAttempts) {
+                    const delay = baseDelay * Math.pow(2, attempt) + Math.random() * 100;
+                    console.warn(`507 error, retrying in ${Math.round(delay)}ms (attempt ${attempt})`);
+                    setTimeout(() => ajaxInterface.ajaxWithRetry(options, attempt + 1), delay);
+                } else if (options.error) {
+                    options.error(xhr, status, error);
+                }
+            }
+        });
+
+        return jqXHR; // ⚠ critical
+    },
+    */
 
     //New version - DK July 2025
     submitGamedata: function submitGamedata() {

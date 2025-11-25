@@ -1048,7 +1048,7 @@ window.shipManager = {
     //Main Front End check on whether a stealth ship is detected or not, called in various places.
     isDetected: function(ship) {         
         if(ship.faction == "Torvalus Speculators"){
-            return shipManager.isDetectedTorvalus(ship);
+            return shipManager.isDetectedTorvalus(ship, 15);
         }
         if(gamedata.gamephase == -1 && gamedata.turn == 1) return true;  //Do not hide in Turn 1 Deployment Phase.          
         var stealthSystem = shipManager.systems.getSystemByName(ship, "stealth");
@@ -1118,7 +1118,7 @@ window.shipManager = {
         return false;
     },
 
-    isDetectedTorvalus: function(ship) {
+    isDetectedTorvalus: function(ship, detection = 15) {
         if(gamedata.gamephase == -1 && gamedata.turn == 1) return true;  //Do not hide in Turn 1 Deployment Phase.  
         if(shipManager.isDestroyed(ship)) return true;//It's blown up, assume revealed.        
         var shadingField = shipManager.systems.getSystemByName(ship, "ShadingField");
@@ -1132,7 +1132,7 @@ window.shipManager = {
             if (gamedata.isTerrain(otherShip.shipSizeClass, otherShip.userid)) continue; //Skip Terrain 
             if(shipManager.isDestroyed(otherShip)) continue; //Skip destroyed
 
-            let totalDetection = 15; //Shading Field detection range is always 15.
+            let totalDetection = detection; //Shading Field detection range is always 15.
 
             // Get distance to the stealth ship and check line of sight
             const distance = parseFloat(mathlib.getDistanceBetweenShipsInHex(ship, otherShip));

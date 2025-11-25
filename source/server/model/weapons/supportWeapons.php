@@ -763,20 +763,407 @@ class ShadeModulator extends Weapon{
 }//endof ShadeModulator
 
 
-class TransverseDrive extends Weapon{
+class TransverseDrive extends Weapon implements SpecialAbility, DefensiveSystem{
     public $name = "TransverseDrive";
     public $displayName = "Transverse Drive";
+	public $noProjectile = true;	
+	public $specialAbilities = array("PreFiring");
+	public $specialAbilityValue = true; //so it is actually recognized as special ability!  		
+	
+	public $damageType = "Standard"; //irrelevant, really
+	public $weaponClass = "Particle";
+	public $hextarget = true;
+	public $hidetarget = false;
+	public $uninterceptable = true; //although I don't think a weapon exists that could intercept it...
+	public $doNotIntercept = true; //although I don't think a weapon exists that could intercept it...
+	public $priority = 1;
+	public $factionAge = 3;//Ancient weapon, which sometimes has consequences!
+	
+	public $range = 3;
+	public $loadingtime = 2;
+    public $rangePenalty = 0;
+	
+	public $animation = "blink";
+	public $animationColor = array(255, 255, 0);
+	public $animationExplosionScale = 0.3; //single hex explosion
+	public $animationExplosionType = "AoE";
+	
+	public $firingModes = array(
+		1 => "Transverse Jump"
+	);
+	public $preFires = true;
+	protected $shootsStraight = true; //Denotes for Front End to use Line Arcs, not circles.
+	protected $specialArcs = true;	//Denotes for Front End to redirect to weapon specific function to get arcs.			
+	public $repairPriority = 6;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
+	private $baseLoadingTime = 2; //Can be altered by a IncreasedRecharge1 critical, so we need to remember it's base value.
 
-	public $autoFireOnly = true;
+
+	public function onConstructed($ship, $turn, $phase){
+		parent::onConstructed($ship, $turn, $phase);
+	}
+
+    protected $possibleCriticals = array(
+            18=>"IncreasedRecharge1",
+            21=>"DamageSystem",
+            23 =>array("IncreasedRecharge1", "DamageSystem")
+	);
+
+	//Required to be overwritten in weapon for IncreasedRecharge1 crit to function. 
+    public function getLoadingTime()
+    {
+		$loadingTime = $this->baseLoadingTime;
+		$critPenalty = $this->hasCritical("IncreasedRecharge1");
+
+		$combinedLoadingTime = $loadingTime + $critPenalty;
+        return $combinedLoadingTime;
+    }
+
+	//Required to be overwritten in weapon for IncreasedRecharge1 crit to function. 
+    public function setLoading($loading){
+		if (!$loading)
+			return;
+
+		$this->overloadturns = $loading->overloading;
+		$this->overloadshots = $loading->extrashots;
+
+		$critsLastTurn = 0;
+
+		$critPenalty = $this->hasCritical("IncreasedRecharge1");
+		if($critPenalty > 0){		
+			foreach($this->criticals as $crit){
+				if ($crit->phpclass === "IncreasedRecharge1" && $crit->turn == TacGamedata::$currentTurn-1) {
+					$critsLastTurn++;	
+				}
+			}
+		}
+
+		if(TacGamedata::$currentPhase == -1){ //Only adjust oading during Deployment loading of new turn.
+
+			if($loading->loadingtime == $loading->loading){ //If Transverse Drive was fully charged, keep it fully charged.
+				$this->turnsloaded = $loading->loading + $critsLastTurn;
+			}else{
+				$this->turnsloaded = $loading->loading;	//Else, it wasn't fully charged so keep number of turns loaded the same, just loadingtime ceiling increases.
+			} 
+		}else{
+			$this->turnsloaded = $loading->loading;			
+		}	
+
+        $this->loadingtime = $loading->loadingtime;
+        $this->firingMode = $loading->firingmode;
+    }
+
+	public function getSpecialAbilityValue($args)
+    {
+		return $this->specialAbilityValue;
+	}
+
+	public function getDefensiveType()	{
+		return "Blink"; //Different category so it works in parallel with EM Shield effect of Shading Field
+	}
+
+	public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon) {
+		// Only applies to ballistic weapons
+		if (!$weapon->ballistic) {
+			return 0;
+		}
+
+		// Retrieve fire orders for this turn
+		$firingOrders = $this->getFireOrders($turn);
+
+		// Find the first normal fire order
+		$hasFireOrder = null;
+		foreach ($firingOrders as $fireOrder) {
+			if ($fireOrder->type === 'prefiring') {
+				$hasFireOrder = $fireOrder;
+				break;
+			}
+		}
+
+		// No transverse jump, return 0
+		if ($hasFireOrder === null) {
+			return 0;
+		}
+
+		if($hasFireOrder->shotshit == 1){ //Transverse jump was successful!
+			// Extract the 'dis' value from fire order notes (example: "shooter: 2,-2 target: 2,0 dis: 2")
+			$notes = $hasFireOrder->notes;
+			$dis = 0; // default value
+
+			if (preg_match('/dis:\s*(\d+)/', $notes, $matches)) {
+				$dis = (int)$matches[1];
+			}
+
+			// Multiply distance by 4 to get the modifier
+			$mod = $dis * 4;
+
+			return $mod;
+		}else{
+			return 0;
+		}	
+	}
+
+	public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon){
+		return 0;
+	}
+
+	public function calculateHitBase($gamedata, $fireOrder)
+	{
+		//reduce by distance...
+		$shooter = $gamedata->getShipById($fireOrder->shooterid);
+		$firingPos = $shooter->getHexPos();
+		if ($fireOrder->targetid != -1) { //for some reason ship was targeted!
+			$targetship = $gamedata->getShipById($fireOrder->targetid);
+			//insert correct target coordinates: target ships' position!
+			$targetPos = $targetship->getHexPos();
+			$fireOrder->x = $targetPos->q;
+			$fireOrder->y = $targetPos->r;
+			$fireOrder->targetid = -1; //correct the error
+		}
+		$targetPos = new OffsetCoordinate($fireOrder->x, $fireOrder->y);
+		$dis = mathlib::getDistanceHex($firingPos, $targetPos);
+		$fireOrder->needed = 100;
+		$fireOrder->notes .=  "shooter: " . $firingPos->q . "," . $firingPos->r . " target: " . $targetPos->q . "," . $targetPos->r . " dis: $dis ";
+		$fireOrder->updated = true;
+	}
+	
+    public function fire($gamedata, $fireOrder){ 
+
+        $ship = $gamedata->getShipById($fireOrder->shooterid); 
+		$shipPos = $ship->getHexPos(); 		
+		
+        $rolled = Dice::d(20); //Roll d20 to decide what happens during jump
+		
+		$targetPos = new OffsetCoordinate($fireOrder->x, $fireOrder->y);
+        $dis = mathlib::getDistanceHex($shipPos, $targetPos); //How many hexes did player choose to jump. 
+
+		//Then see what was rolled and create movement orders/crits accordingly.
+		if($rolled <= 16){	//E.g. 1-16 successful
+
+			//need to find and test Jump Engine too
+			$jumpFailure = $this->checkJumpEngine($ship, $gamedata); //Will return false if jump successful.
+			if($jumpFailure) return;  //Ship blew up, no need to do transverse jump.
+        	$fireOrder->rolled = $rolled; 
+			$fireOrder->shotshit++; //Mark hit.
+
+			$this->doTransverseJump($gamedata,$targetPos, $ship, $dis);
+			$fireOrder->pubnotes .= " Transverse Drive activates succesfully and moves ship to new hex.";			
+		} else if($rolled >= 17 && $rolled <= 18){  //17 - Success but towards a different counterclockwise/clockwise hex facings.
+			$newPos = null;
+
+			//need to find and test Jump Engine too
+			$jumpFailure = $this->checkJumpEngine($ship, $gamedata); //Will return false if jump successful.
+			if($jumpFailure) return;  //Ship blew up, no need to do transverse jump.
+        	$fireOrder->rolled = $rolled; 
+
+			$originalBearing = $ship->getBearingOnPos($targetPos); //0, 60, 120. 180, 240 or 300
+
+			if($rolled == 17){
+				$shipFacing = $ship->getFacingAngle();
+				$relative = Mathlib::addToDirection($originalBearing, -60);
+				$absoluteBearing = Mathlib::addToDirection($shipFacing, $relative);
+
+				// Get actual position in new direction
+				$newPos = Mathlib::moveInDirection($shipPos, $absoluteBearing, $dis);
+
+			    $fireOrder->pubnotes .= " Transverse Drive activates succesfully, but the direction travelled is changed by 60 degrees counter-clockwise.";											
+			}else{
+				$shipFacing = $ship->getFacingAngle();
+				$relative = Mathlib::addToDirection($originalBearing, 60); //Bearing from ship heading.
+				$absoluteBearing = Mathlib::addToDirection($shipFacing, $relative); //Objective Bearing on map
+				// Get actual position in new direction
+				$newPos = Mathlib::moveInDirection($shipPos, $absoluteBearing, $dis);
+
+			    $fireOrder->pubnotes .= " Transverse Drive activates succesfully, but the direction travelled is changed by 60 degrees clockwise.";												
+			}
+		
+			$this->doTransverseJump($gamedata,$newPos, $ship, $dis);
+			
+			//Update fireOrder details with new targetPos		
+			$fireOrder->x = $newPos->q;
+			$fireOrder->y = $newPos->r;
+        	$fireOrder->updated = true;
+			$fireOrder->shotshit++; //Mark hit.	
+
+		} else if($rolled == 19){ //19 - Fail, test jump engine for explosion then return.
+			$jumpFailure = $this->checkJumpEngine($ship, $gamedata);
+			if($jumpFailure) return;  //Ship blew up, no need to do transverse jump.
+        	$fireOrder->rolled = $rolled; 
+
+			$fireOrder->pubnotes .= " Transverse jump attempt was unsuccesful!";						
+			return;
+
+		} else if($rolled == 20){ //20- Fail with ForcedOfflineOneTurn Crit
+			$jumpFailure = $this->checkJumpEngine($ship, $gamedata);
+			if($jumpFailure) return;  //Ship blew up, no need to do transverse jump.
+        	$fireOrder->rolled = $rolled; 
+
+			if(!$jumpFailure){
+				//Force cooldown as crit failue, if ship didn't blow up :)
+				$crits = array(); 
+				$crits = $this->testCritical($ship, $gamedata, $crits); //Need to force critical test outside normal routine
+			}	
+			$fireOrder->pubnotes .= " Transverse Drive failed to jump and has rolled for potential critical effect.";					
+			return;
+		}	
+
+	} //endof function fire	
+
+	private function doTransverseJump($gamedata, $targetPos, $ship, $distance){
+	
+		$lastMove = $ship->getLastMovement();
+		
+		//Create new movement orders to $targetPos.
+        $transverseJump = new MovementOrder(null, "blink", new OffsetCoordinate($targetPos->q, $targetPos->r), 0, 0, $lastMove->speed, $lastMove->heading, $lastMove->facing, false, $gamedata->turn, $distance, 0);
+
+		//Add Tranverse movement order to database
+		Manager::insertSingleMovement($gamedata->id, $ship->id, $transverseJump);		
+
+		//Check for detection in 20 hexes.
+		$shadingField = $ship->getSystemByName("ShadingField");
+		if($shadingField){ //Shading Field exists.
+			if(!$shadingField->detected && $shadingField->shaded){ //Currently undetected and Shaded.
+				$shadingField->checkStealthNextPhase($gamedata, 20);
+			} 
+		}		
+	}
+
+	public function checkJumpEngine($ship, $gamedata)
+	{
+		$primaryStruct = $ship->getStructureSystem(0); //If ship is otherwise destroyed also don't jump.
+		if($primaryStruct->isDestroyed()) return;
+		$jumpEngine = $ship->getSystemByName("JumpEngine");
+		if($jumpEngine){
+			$currHealth = $jumpEngine->getRemainingHealth();
+			$maxhealth = $jumpEngine->maxhealth;
+			$healthDiff = $maxhealth - $currHealth;
+
+			if($healthDiff == 0) return false; //Jump engine not damaged, just return.
+		
+			// Calculate the percentage of health missing
+			$missingHealthPercentage = round(($healthDiff / $maxhealth) * 100);
+
+			// Roll a D100
+			$d100Roll = Dice::d(100);
+	
+			// Determine if the jump fails
+			$jumpFailure = $missingHealthPercentage > 0 && $d100Roll <= $missingHealthPercentage;
+
+			if($jumpFailure){ //Jump engine has suffered catastrophic failure!
+				// Try to create the fire order for logs
+				$rammingSystem = $ship->getSystemByName("RammingAttack");
+				$fireOrderType = 'JumpFailure';
+				$pubNotes = " Damage to the Jump Drive causes the ship to be destroyed during Transverse jump (" . $missingHealthPercentage . "% chance of failure, rolled " . $d100Roll .")";
+			
+				if ($rammingSystem) {
+					$newFireOrder = new FireOrder(
+						-1, "normal", $ship->id, $ship->id,
+						$rammingSystem->id, -1, $gamedata->turn, 1,
+						100, 100, 1, 1, 0,
+						0, 0, $fireOrderType, 10001
+					);
+					$newFireOrder->pubnotes = $pubNotes;
+					$newFireOrder->addToDB = true;
+					$rammingSystem->fireOrders[] = $newFireOrder;
+				}
+
+				// Destroy the primary structure
+				$primaryStruct = $jumpEngine->unit->getStructureSystem(0);
+				if ($primaryStruct) {
+					$remaining = $primaryStruct->getRemainingHealth();
+					$damageEntry = new DamageEntry(
+						-1, $ship->id, -1, $gamedata->turn,
+						$primaryStruct->id, $remaining, 0, 0, -1, true, false,
+						"", $fireOrderType
+					);
+					$damageEntry->updated = true;
+					$primaryStruct->damage[] = $damageEntry;
+			
+					if ($rammingSystem) {
+						// Add extra data to damage entry
+						$damageEntry->shooterid = $ship->id;
+						$damageEntry->weaponid = $rammingSystem->id;
+					}
+				}
+
+				return true;	
+			}
+		}
+		
+		return false; //Jump was safe despite damage.		
+
+	}
+
 
      public function setSystemDataWindow($turn){
-        $this->data["Special"] = "Transverse Drive not installed until Tuesday.";												
+        $this->data["Special"] = "Used to teleport up to 3 hexes in straight line during Pre-Firing Phase."; 
+        $this->data["Special"] .= "<br>Select weapon and choose hex you wish to move this ship, there is a 10% chance of deviating by +/- 60 degrees, and another 10% that jump will not be successful at all (potentially causing a critical hit too).";	
+        $this->data["Special"] .= "<br>Can cause catastrophic failure if Jump Drive has taken damage, in the same way as making a jump to hyperspace.";
+        $this->data["Special"] .= "<br>Ballistic weapons targeting this ship suffer a cumulative -20% to hit for each hex jumped.";	
+        $this->data["Special"] .= "<br>The light produced by a Transverse Jump makes Shaded ships easier to detect, they will be revealed to enemies within 20 hexes, instead of the usual 15 at start of Firing phase.";		
 		parent::setSystemDataWindow($turn);     
     }
+
+	public function criticalPhaseEffects($ship, $gamedata) {	
+
+		parent::criticalPhaseEffects($ship, $gamedata); // Call parent to apply base effects.
+	
+		foreach($this->criticals as $critical){
+			if ($critical->phpclass === "DamageSystem" && $critical->turn == $gamedata->turn) {			
+				$jumpEngine = $ship->getSystemByName("JumpEngine");
+				if($jumpEngine->isDestroyed()) return; //No point damaging if destroyed.
+
+				$damage = Dice::d(3);	//Deal d3 damage.			
+
+				if ($jumpEngine) { //Jump engine exists!
+					//We can use Transverse Drive instead of Ramming Attack, as we KNOW it exists in this case.
+					$newFireOrder = new FireOrder(
+						-1, "normal", $ship->id, $ship->id,
+						$this->id, -1, $gamedata->turn, 1,
+						100, 100, 1, 1, 0,
+						0, 0, 'TranverseCrit', 10001
+					);
+					$newFireOrder->pubnotes = " Jump Drive takes " . $damage ." from a critical hit to the Transverse Drive.";
+					$newFireOrder->addToDB = true;
+					$this->fireOrders[] = $newFireOrder;
+
+
+
+					$remaining = $jumpEngine->getRemainingHealth();
+					$destroyed = false;
+					if($damage >= $remaining) $destroyed = true; //Will destroyed
+
+					$damageEntry = new DamageEntry(
+						-1, $ship->id, -1, $gamedata->turn,
+						$jumpEngine->id, $damage, 0, 0, -1, $destroyed, false,
+						"", 'Particle'
+					);
+					$damageEntry->updated = true;
+					$jumpEngine->damage[] = $damageEntry;
+			
+
+					// Add extra data to damage entry
+					$damageEntry->shooterid = $ship->id;
+					$damageEntry->weaponid = $this->id; 
+				}				
+
+			}
+		}
+
+	}//endof function criticalPhaseEffects
+
 
 	public function getDamage($fireOrder){       return 0;   } //no actual damage
 	public function setMinDamage(){     $this->minDamage = 0 ;      }
 	public function setMaxDamage(){     $this->maxDamage = 0 ;      }
+
+    public function stripForJson() {
+        $strippedSystem = parent::stripForJson();    
+        $strippedSystem->shootsStraight = $this->shootsStraight;
+        $strippedSystem->specialArcs = $this->specialArcs;
+        $strippedSystem->loadingtime = $this->loadingtime;	//With certain crits this can change for this weapon!											                                        
+        return $strippedSystem;
+	}	
+
 
 }	
 

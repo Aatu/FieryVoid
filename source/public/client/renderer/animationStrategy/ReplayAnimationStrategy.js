@@ -165,6 +165,115 @@ window.ReplayAnimationStrategy = function () {
         return time;
     }
 
+    function animateWeaponFire(time, logAnimation) {
+        var shipList = [];
+        this.gamedata.ships.forEach(function (shp) { shipList.push(shp); });
+
+        shipList.sort(function (a, b) {
+            if (a.flight && !b.flight) return -1;
+            if (!a.flight && b.flight) return 1;
+            if (a.pointCost > b.pointCost) return 1;
+            if (a.pointCost < b.pointCost) return -1;
+            return 0;
+        });
+
+        var allHexBallistics = weaponManager.getAllHexTargetedBallistics();
+
+        // Collect prefiring animations separately
+        var prefireAnimations = [];
+
+        // First pass: collect all prefire animations across all ships
+        shipList.forEach(function (ship) {
+            var firesForThisShip = allHexBallistics.filter(function (f) {
+                return f && (f.shooter === ship || f.shooter === ship.id);
+            });
+
+            if (firesForThisShip.length > 0) {
+                var prefires = firesForThisShip.filter(f => f.fireOrder?.type === "prefiring");
+                if (prefires.length > 0) {
+                    prefireAnimations.push(new HexTargetedWeaponFireAnimation(
+                        time, // same shared start time for all prefires
+                        this.movementAnimations,
+                        this.shipIconContainer,
+                        this.turn,
+                        this.emitterContainer,
+                        logAnimation,
+                        prefires
+                    ));
+                }
+            }
+        }, this);
+
+        // 🔹 Run all prefires right after movement (simultaneous)
+        prefireAnimations.forEach(anim => {
+            this.animations.push(anim);
+        });
+
+        // Optional: advance time just by longest prefire duration, not cumulative
+        if (this.type === ReplayAnimationStrategy.type.INFORMATIVE) {
+            let maxPrefire = 0;
+            prefireAnimations.forEach(a => {
+                maxPrefire = Math.max(maxPrefire, a.getDuration());
+            });
+            time += maxPrefire;
+        }
+
+        // Second pass: normal firing animations (as before)
+        shipList.forEach(function (ship) {
+            var perShipAnimation = new AllWeaponFireAgainstShipAnimation(
+                ship,
+                this.shipIconContainer,
+                this.emitterContainer,
+                this.gamedata,
+                time,
+                this.scene,
+                this.movementAnimations,
+                logAnimation
+            );
+
+            this.animations.push(perShipAnimation);
+            if (this.type === ReplayAnimationStrategy.type.INFORMATIVE) {
+                time += perShipAnimation.getDuration();
+            }
+
+            var firesForThisShip = allHexBallistics.filter(function (f) {
+                return f && (f.shooter === ship || f.shooter === ship.id);
+            });
+
+            var normals = firesForThisShip.filter(f => f.fireOrder?.type !== "prefiring");
+
+            if (normals.length > 0) {
+                var hexAnim = new HexTargetedWeaponFireAnimation(
+                    time,
+                    this.movementAnimations,
+                    this.shipIconContainer,
+                    this.turn,
+                    this.emitterContainer,
+                    logAnimation,
+                    normals
+                );
+
+                this.animations.push(hexAnim);
+
+                if (this.type === ReplayAnimationStrategy.type.INFORMATIVE) {
+                    time += hexAnim.getDuration();
+                }
+            }
+
+        }, this);
+
+        return time;
+    }
+
+    function setMovementAnimationDuration(moveAnimation) {
+        if (this.type === ReplayAnimationStrategy.type.INFORMATIVE) {
+            moveAnimation.setDuration(moveAnimation.getLength() * this.moveHexDuration);
+        } else {
+            moveAnimation.setDuration(this.moveAnimationDuration);
+        }
+    }
+
+/* //Old version before Pre-Firing - DK Nov 2025
 function animateWeaponFire(time, logAnimation) {
 
     var shipList = [];
@@ -224,8 +333,9 @@ function animateWeaponFire(time, logAnimation) {
 
     return time;
 }
+*/
 
-    /*
+    /* //Even OLDER version from before Zero changed it I think
     function animateWeaponFire(time, logAnimation) {
         var animation = new HexTargetedWeaponFireAnimation(time, this.movementAnimations, this.shipIconContainer, this.turn, this.emitterContainer, logAnimation);
         this.animations.push(animation);
@@ -268,13 +378,6 @@ function animateWeaponFire(time, logAnimation) {
         return time;
     }
     */
-    function setMovementAnimationDuration(moveAnimation) {
-        if (this.type === ReplayAnimationStrategy.type.INFORMATIVE) {
-            moveAnimation.setDuration(moveAnimation.getLength() * this.moveHexDuration);
-        } else {
-            moveAnimation.setDuration(this.moveAnimationDuration);
-        }
-    }
 
     return ReplayAnimationStrategy;
 }();

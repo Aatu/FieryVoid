@@ -215,22 +215,6 @@ class Mathlib{
     } 
  
 
-    /*
-    private static function doLinesIntersect($p1, $p2, $p3, $p4) {
-        $d1 = ['x' => $p2['x'] - $p1['x'], 'y' => $p2['y'] - $p1['y']];
-        $d2 = ['x' => $p4['x'] - $p3['x'], 'y' => $p4['y'] - $p3['y']];
-        
-        $denom = self::crossProduct($d1, $d2);
-        if ($denom == 0) return false; // Parallel lines
-    
-        $t = self::crossProduct(['x' => $p3['x'] - $p1['x'], 'y' => $p3['y'] - $p1['y']], $d2) / $denom;
-        $u = self::crossProduct(['x' => $p3['x'] - $p1['x'], 'y' => $p3['y'] - $p1['y']], $d1) / $denom;
-        
-        return $t >= 0 && $t <= 1 && $u >= 0 && $u <= 1;
-    }
-    */
-
-
     private static function crossProduct($a, $b) {
         return $a['x'] * $b['y'] - $a['y'] * $b['x'];
     }
@@ -249,11 +233,6 @@ class Mathlib{
 
     private static function doLinesIntersect($p1, $p2, $p3, $p4) {
         $EPSILON = 1e-10;
-        /*
-        function crossProduct($a, $b) {
-            return $a['x'] * $b['y'] - $a['y'] * $b['x'];
-        }
-        */
 
         $d1 = self::subtract($p2, $p1);
         $d2 = self::subtract($p4, $p3);
@@ -404,63 +383,66 @@ class Mathlib{
     }
 
 
-    /*
-    public static function getNeighbouringHexes($position, $radius = 1) {
-        if($radius == 1){    
-            $isOddRow = $position->r % 2 !== 0;    
-            $neighborOffsets = $isOddRow 
-                ? [
-                    [+1,  0], // Right
-                    [-1,  0], // Left
-                    [-1, +1], // Upper left
-                    [-1, -1], // Lower left
-                    [0, +1],  // Upper right (shifted)
-                    [0, -1]   // Lower right (shifted)
-                ]
-                : [
-                    [+1,  0], // Right
-                    [-1,  0], // Left
-                    [+1, +1], // Upper right
-                    [+1, -1], // Lower right
-                    [0, +1],  // Upper left (shifted)
-                    [0, -1]   // Lower left (shifted)
-                ];
-        
-            // Generate neighboring hexes
-            $neighbors = array_map(function($offset) use ($position) {
-                return [
-                    'q' => $position->q + $offset[0],
-                    'r' => $position->r + $offset[1]
-                ];
-            }, $neighborOffsets);
+    //Variable to help fetch the neighbour hexes of a given hex.
+private static $neighbours = [
+    [ // even rows (r & 1 == 0)
+        ['q' =>  1, 'r' =>  0],   // 0: east
+        ['q' =>  1, 'r' => -1],   // 1: southeast
+        ['q' =>  0, 'r' => -1],   // 2: southwest
+        ['q' => -1, 'r' =>  0],   // 3: west
+        ['q' =>  0, 'r' =>  1],   // 4: northwest
+        ['q' =>  1, 'r' =>  1],   // 5: northeast
+    ],
+    [ // odd rows (r & 1 == 1)
+        ['q' =>  1, 'r' =>  0],   // 0: east
+        ['q' =>  0, 'r' => -1],   // 1: southeast
+        ['q' => -1, 'r' => -1],   // 2: southwest
+        ['q' => -1, 'r' =>  0],   // 3: west
+        ['q' => -1, 'r' =>  1],   // 4: northwest
+        ['q' =>  0, 'r' =>  1],   // 5: northeast
+    ],
+];
 
-            return $neighbors;
-        }else if($radius == 2){
-            //Radius 2.
-            $isOddRow = $position->r % 2 !== 0;    
-            $neighborOffsets = $isOddRow 
-                ? [[+1, 0], [-1, 0], [-1, +1], [-1, -1], [0, +1], [0, -1],
-                [+2, 0], [+1, -1], [+1, -2], [0, -2], [-1, -2], [-2, -1], 
-                [-2, 0], [-2, +1], [-1, +2], [0, +2], [+1, +2], [+1, +1]]
+    /**
+     * Move a position in a given bearing (degrees) by a distance (in hexes).
+     * @param OffsetCoordinate $pos        starting position (object with q and r)
+     * @param float|int $bearing direction in degrees (0, 60, 120, 180, 240, 300)
+     * @param int $distance      number of hexes to move
+     * @return OffsetCoordinate            new position after movement
+     */
+    public static function moveInDirection($pos, $bearing, $distance) {
+        $current = new OffsetCoordinate($pos->q, $pos->r);
+        $direction = self::bearingToDirectionIndex($bearing);
 
-                : [[+1, 0], [-1, 0], [+1, +1], [+1, -1], [0, +1], [0, -1], 
-                [+2, 0], [+2, -1], [+1, -2], [0, -2], [-1, -2], [-1, -1], 
-                [-2, 0], [-1, +1], [-1, +2], [0, +2], [+1, +2], [+2, +1]];
+        for ($i = 0; $i < $distance; $i++) {
+            $neighbourSet = self::$neighbours[$current->r & 1];
+            $offset = $neighbourSet[$direction] ?? null;
+            if (!$offset) break;
 
-            // Generate neighboring hexes
-            $neighbors = array_map(function($offset) use ($position) {
-                return [
-                    'q' => $position->q + $offset[0],
-                    'r' => $position->r + $offset[1]
-                ];
-            }, $neighborOffsets);
+            $current = new OffsetCoordinate(
+                $current->q + $offset['q'],
+                $current->r + $offset['r']
+            );
+        }
 
-            return $neighbors;
-        }    
-    }    
-    */
+        return $current;
+    }
 
-
+    /**
+     * Convert bearing in degrees → neighbour index 0–5.  This might actually exist somewhere already, but it was convenient to have it nearby moveInDirection() above
+     */
+private static function bearingToDirectionIndex($bearing) {
+    $bearing = (($bearing % 360) + 360) % 360;
+    $map = [
+        0   => 0,
+        60  => 1,
+        120 => 2,
+        180 => 3,
+        240 => 4,
+        300 => 5,
+    ];
+    return $map[$bearing] ?? 0;
+}
     
 /* //OLD METHOD OF pixelCoToHex() WHICH DIDN@T SEEM TO WORK CORRECTLY ANYWAY - DK 02.25
     //ATTENTION, this is bloody magic! (I don't really know how it works)

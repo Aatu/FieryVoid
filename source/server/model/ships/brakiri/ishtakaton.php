@@ -10,6 +10,7 @@ class Ishtakaton extends StarBaseSixSections
 		$this->faction = "Brakiri Syndicracy";
 		$this->phpclass = "Ishtakaton";
 		$this->shipClass = "Ishtakaton Techbase";
+        $this->variantOf = "OBSELETE";		
 		$this->imagePath = "img/ships/BrakiriIshtaka.png";
 		$this->canvasSize = 280;
 		$this->fighters = array("normal" => 24);

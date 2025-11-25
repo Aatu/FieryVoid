@@ -9,6 +9,7 @@ class zzunoffTashkaton extends BaseShip{
         $this->phpclass = "zzunoffTashkaton";
         $this->imagePath = "img/ships/tashkat.png"; 
         $this->shipClass = "Tashkaton Advanced Cruiser";
+        $this->variantOf = "OBSELETE";		
         $this->shipSizeClass = 3;
 
         $this->limited = 33;

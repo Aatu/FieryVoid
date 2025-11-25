@@ -70,11 +70,11 @@ window.ShipTooltipFireMenu = function () {
         });
     }
 
-	function hasSupportWeaponSelected() {//30 June 2024 - DK - Added for Ally targeting.
-	    return gamedata.selectedSystems.some((system) => {
-	        return system.canTargetAllies === true;
-	    });
-	}
+    function hasSupportWeaponSelected() {
+        return gamedata.selectedSystems.some(system => {
+            return system.canTargetAllies === true || system.canTargetAll === true;
+        });
+    }
 
     return ShipTooltipFireMenu;
 }();

@@ -128,7 +128,7 @@ class Weapon extends ShipSystem
 
     // Used to indicate a parent in case of dualWeapons
     public $parentId = -1;
-
+	public $preFires = false; //Denotes whether weapon fires in pre-firing phase on normal firing phase
     public $firingMode = 1;
     public $firingModes = array(1 => "Standard"); //just a convenient name for firing mode
     public $damageType = ""; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
@@ -172,9 +172,13 @@ class Weapon extends ShipSystem
     protected $possibleCriticals = array(14 => "ReducedRange", 19 => "ReducedDamage", 25 => array("ReducedRange", "ReducedDamage"));
 
     protected $firedDefensivelyAlready = 0; //marker used for weapons capable of firing multiple defensive shots, but suffering backlash once
-//	protected $autoHit = false;//To show 100% hit chance in front end - DK 			        
-//  protected $autoHitArray = array();    
-
+	protected $autoHit = false;//To show 100% hit chance in front end, Need to pass in strpForJson			        
+    protected $autoHitArray = array(); //Need to pass in strpForJson    
+	protected $shootsStraight = true; //Denotes for Front End to use Line Arcs, not circles. Need to pass in strpForJson
+	protected $specialArcs = true;	//Denotes for Front End to redirect to weapon specific function to get arcs. Need to pass in strpForJson
+	protected $canTargetAllies = false; //To allow front end to target allies.
+	protected $canTargetAlliesArray = array(); //To allow front end to target allies.
+    protected $canTargetAll = false; //Allows weapon to target allies AND enemies, pass to Front End in strpForJson()
 
 	//Weapons are repaired before "average system", but after really important things! 
 	public $repairPriority = 5;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
@@ -612,24 +616,15 @@ class Weapon extends ShipSystem
 		//re-create damage arrays, so they reflect loading time...
 		foreach ($this->firingModes as $i => $modeName) {
 			$this->changeFiringMode($i);
-			$this->setMinDamage();
-			$this->minDamageArray[$i] = $this->minDamage;
-			$this->setMaxDamage();
-			$this->maxDamageArray[$i] = $this->maxDamage;
+			//$this->setMinDamage();
+			//$this->minDamageArray[$i] = $this->minDamage;
+			//$this->setMaxDamage();
+			//$this->maxDamageArray[$i] = $this->maxDamage;
 			//set AF priority, too!
 			$this->setPriorityAF(); 
 			$this->priorityAFArray[$i] = $this->priorityAF;
 		} 
-        
-        //We just reset damage arrays, so need to now reapply any Damage Reduced critical effects for System Data Window to display correctly.
-        $this->dp = 0; //Initialise again.
-        foreach ($this->criticals as $crit) { //Are there any appropriate crits?
-            if ($crit instanceof ReducedDamage) $this->dp++;
-        }
-        //Ammo weapons do NOT have their damage values reset by the above fragment, so we have to exclude them from this application of crits or it'll duplicate.
-        if($this->dp > 0){       
-            $this->effectCriticalDamgeReductions($this->dp, true ); //Reapply any critical effect to damage values using same method as onConstructed()             
-        } 
+
 		$this->changeFiringMode(1); //reset mode to basic
             
         if ($this->damageType != '') $this->data["Damage type"] = $this->damageType;
@@ -819,17 +814,21 @@ public function getStartLoading()
             } else if (!$this->isOverloadingOnTurn(TacGamedata::$currentTurn)) {
                 return new WeaponLoading($this->getTurnsloaded(), 0, $this->getLoadedAmmo(), 0, $this->getLoadingTime(), $this->firingMode);
             }
-        }  else if ($phase == -1) {
-            $weaponLoading = $this->calculateLoadingFromLastTurn($gamedata);
+        } else if ($phase == 3) {
+            if ($this->preFires && $this->firedOnTurn(TacGamedata::$currentTurn)) {
+                return new WeaponLoading(0, 0, $this->getLoadedAmmo(), 0, $this->getLoadingTime(), $this->firingMode);
+            }
+        } else if ($phase == -1) {
+            $weaponLoading = $this->calculateLoadingFromLastTurn($gamedata);                   
             $this->setLoading($weaponLoading);
 
             if ($this->overloadshots === -1) {
                 return new WeaponLoading(0, 0, $this->getLoadedAmmo(), 0, $this->getLoadingTime(), $this->firingMode);
             } else {
-                $newloading = $this->getTurnsloaded() + 1;
+                $newloading = $this->getTurnsloaded() + 1;            
                 if ($newloading > $normalload)
                     $newloading = $normalload;
-
+ 
                 $newExtraShots = $this->overloadshots;
                 $overloading = $this->overloadturns + 1;
                 if ($overloading >= $normalload && $newExtraShots == 0)
@@ -854,35 +853,35 @@ public function getStartLoading()
 
 
         if ($this->firedOnTurn($gamedata->turn -1)) {
-		if ($this->firedUsingMode($gamedata->turn -1)==1) {//only basic mode counts for sustaining! otherwise shot was just not sustained 
-		     if ($this->overloadshots > 0) {
-			$newExtraShots = $this->overloadshots - 1;
-			//if you have extra shots use them
-			if ($newExtraShots === 0) {
-			    //if extra shots are reduced to zero, go to cooldown
-			    //return new WeaponLoading(0, -1, $this->getLoadedAmmo(), 0, $this->getLoadingTime(), $this->firingMode);
-				//...which SHOULD mean - go to normal loading and throw a crit forcing shutdown ! 	
-				//proper loading calculation below, critical here would not be saved - it needs to be thrown right after firing
-				return new WeaponLoading(0, 0, $this->getLoadedAmmo(), 0, $this->getLoadingTime(), $this->firingMode);
-			} else {
-			    //if you didn't use the last extra shot, keep on going.
-			    return new WeaponLoading($this->getTurnsloaded(), $newExtraShots, $this->getLoadedAmmo(), $this->overloadturns, $this->getLoadingTime(), $this->firingMode);
-			}
-		    } else {
-			//Situation normal, no overloading -> lose loading
-			return new WeaponLoading(0, 0, $this->getLoadedAmmo(), 0, $this->getLoadingTime(), $this->firingMode);
-		    }
-		} else {
-		    //Situation normal, no overloading -> lose loading
-		    return new WeaponLoading(0, 0, $this->getLoadedAmmo(), 0, $this->getLoadingTime(), $this->firingMode);
-		}
+            if ($this->firedUsingMode($gamedata->turn -1)==1) {//only basic mode counts for sustaining! otherwise shot was just not sustained 
+                if ($this->overloadshots > 0) {
+                    $newExtraShots = $this->overloadshots - 1;
+                    //if you have extra shots use them
+                    if ($newExtraShots === 0) {
+                        //if extra shots are reduced to zero, go to cooldown
+                        //return new WeaponLoading(0, -1, $this->getLoadedAmmo(), 0, $this->getLoadingTime(), $this->firingMode);
+                        //...which SHOULD mean - go to normal loading and throw a crit forcing shutdown ! 	
+                        //proper loading calculation below, critical here would not be saved - it needs to be thrown right after firing
+                        return new WeaponLoading(0, 0, $this->getLoadedAmmo(), 0, $this->getLoadingTime(), $this->firingMode);
+                    } else {
+                        //if you didn't use the last extra shot, keep on going.
+                        return new WeaponLoading($this->getTurnsloaded(), $newExtraShots, $this->getLoadedAmmo(), $this->overloadturns, $this->getLoadingTime(), $this->firingMode);
+                    }
+                } else {
+                    //Situation normal, no overloading -> lose loading
+                    return new WeaponLoading(0, 0, $this->getLoadedAmmo(), 0, $this->getLoadingTime(), $this->firingMode);
+                }
+            } else {
+                //Situation normal, no overloading -> lose loading
+                return new WeaponLoading(0, 0, $this->getLoadedAmmo(), 0, $this->getLoadingTime(), $this->firingMode);
+            }
         } else {
             //cannot save the extra shots from everload -> lose loading and cooldown
             if ($this->overloadshots > 0 && $this->overloadshots < $this->extraoverloadshots) {
                 if ($this->isOverloadingOnTurn(TacGamedata::$currentTurn)) {
-                    return new WeaponLoading(1, 0, $this->getLoadedAmmo(), 1, $this->getLoadingTime(), $this->firingMode);
+                    return new WeaponLoading(0, 0, $this->getLoadedAmmo(), 1, $this->getLoadingTime(), $this->firingMode);
                 } else {
-                    return new WeaponLoading(1, 0, $this->getLoadedAmmo(), 0, $this->getLoadingTime(), $this->firingMode);
+                    return new WeaponLoading(0, 0, $this->getLoadedAmmo(), 0, $this->getLoadingTime(), $this->firingMode);
                 }
             }
         }
@@ -1845,7 +1844,7 @@ throw new Exception("getSystemArmourAdaptive! $ss");	*/
     /*returns modified damage, NOT damage modifier*/
     /*this is different function that getDamageMod of unit!*/
     protected function getDamageMod($damage, $shooter, $target, $pos, $gamedata)
-    {
+    {               
         $damage = $damage - $damage * $this->dp; //$dp is fraction of shot that gets wasted!
 
         if ($this->rangeDamagePenalty > 0) {
@@ -1880,9 +1879,9 @@ throw new Exception("getSystemArmourAdaptive! $ss");	*/
 
 
     protected function getFinalDamage($shooter, $target, $pos, $gamedata, $fireOrder)
-    {
-        $damage = $this->getDamage($fireOrder);
-        $damage = $this->getDamageMod($damage, $shooter, $target, $pos, $gamedata);     
+    {          
+        $damage = $this->getDamage($fireOrder);      
+        $damage = $this->getDamageMod($damage, $shooter, $target, $pos, $gamedata);                
         $damage -= $target->getDamageMod($shooter, $pos, $gamedata->turn, $this);
 		
 		/* first attempt of StarTrek shield

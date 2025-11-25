@@ -465,6 +465,18 @@ class BaseShip {
 	} //endOf function calculateCombatValueOld
 
 
+    public function checkLineOfSight($shooterPos, $targetPos, $gamedata) {
+        $blockedLosHex = $gamedata->getBlockedHexes();
+
+        $noLoS = false;
+        if (!empty($blockedLosHex)) {            
+            $noLoS = Mathlib::checkLineOfSight($shooterPos, $targetPos, $blockedLosHex);
+        }
+        
+        return $noLoS;
+    }
+
+
 	public function howManyMarines(){
 		$marines = 0;
 		$rammingFactor = $this->getRammingFactor();
@@ -521,7 +533,7 @@ class BaseShip {
 		}
 
 		//Push Specialists updates to Ship variables when used
-		if ($this->getSystemByName("HyachSpecialists")){ //Does ship have Specialists system?
+		if ($this->hasSpecialAbility("HyachSpecialists")){ //Does ship have Specialists system?
 			$specialists = $this->HyachSpecialists;
 			$specAllocatedArray = $specialists->specAllocatedCount;
 			foreach ($specAllocatedArray as $specsUsed=>$specValue){
@@ -551,7 +563,7 @@ class BaseShip {
             }
         }
 
-		if($this->getSystemByName("MindriderEngine")){//Mind's Eye Contraction needs a few more values to got to Front End.
+		if($this->hasSpecialAbility("MindriderEngine")){//Mind's Eye Contraction needs a few more values to got to Front End.
 			$strippedShip->forwardDefense = $this->forwardDefense; 
         	$strippedShip->sideDefense = $this->sideDefense;
 		    $strippedShip->Enormous = $this->Enormous; 
@@ -884,7 +896,25 @@ class BaseShip {
         }
 
         return;
-    }    
+    }   
+    
+    public function hasPreFireWeaponsReady($gamedata)
+    {         
+        $readyToFire = false;
+        foreach($this->systems as $system){
+            if($system instanceof Weapon){
+                if($system->preFires && ($system->turnsloaded >= $system->loadingtime)){ //ready to fire!
+                    $readyToFire = true;
+                    break; //At least one weapon can pre fire, exit loop.
+                }    
+            }
+            /*else if($system->preFires){ //Only weapons in game atm
+                    $readyToFire = true;
+                    break; //At least one non-weapon system can pre fire, exit loop.            
+            }*/
+        }
+        return $readyToFire;
+    }        
 
     public function isElint()
     {

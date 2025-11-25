@@ -43,6 +43,17 @@ window.shipManager.criticals = {
         return false;
     },
 
+    //Called by CombatLog to see if damage has caused a critical hit
+    sufferedCritThisTurn: function sufferedCritThisTurn(system, turn) {
+        for (var i in system.criticals) {
+            var crit = system.criticals[i];
+            if (crit.turn == turn){ //Could also add a check to exempt some crit types if they are causing confusion in Log
+                return true;
+            }
+        }
+        return false;
+    },
+
 
     getCritical: function getCritical(system, name) {
         for (var i in system.criticals) {

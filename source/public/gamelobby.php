@@ -60,6 +60,7 @@
 <!--		<script src="client/helper.js"></script>-->
         <script src="client/gamelobby.js"></script>
 		<script src="client/ajaxInterface.js"></script>
+		<script src="client/lobbyEnhancements.js"></script>        
 		<script src="client/player.js"></script>
         <script src="client/ships.js"></script>
         <script src="client/criticals.js"></script>

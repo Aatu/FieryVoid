@@ -528,7 +528,7 @@ window.ew = {
 		var jammerValue = 0;
         
         if(target.faction == "Torvalus Speculators"){
-            if(target.flight) return 0; //Torvalus fighters do not get Jammer effect.
+            //if(target.flight) return 0; //Torvalus fighters do not get Jammer effect.
 			var shadingField = shipManager.systems.getSystemByName(target, "ShadingField");
             if(!shipManager.systems.isDestroyed(target, shadingField) && !shipManager.power.isOffline(target, shadingField)){
                 return 1; //Not destroyed or offline
@@ -602,6 +602,25 @@ window.ew = {
 
 			jammerValue = ew.getJammerValueFromTo(elint,target);
 			if (jammerValue>0) continue; //no lock-on negates SOEW, if any
+
+                //Check for Line of sight - DK Nov 2025
+                var blockedLosHex = weaponManager.getBlockedHexes();
+                var loSBlockedshooter = false;
+                var loSBlockedtarget = false;
+
+                if (blockedLosHex && blockedLosHex.length > 0) {
+                    var sPosELINT = shipManager.getShipPosition(elint);
+                    var sPosShooter = shipManager.getShipPosition(ship);
+                    var sPosTarget = shipManager.getShipPosition(target);                    
+
+                    loSBlockedtarget = mathlib.checkLineOfSight(sPosELINT, sPosTarget, blockedLosHex);
+                    if(loSBlockedtarget) continue; //Line of sight blocked to one of the relevant units, skip.  
+
+                    loSBlockedshooter = mathlib.checkLineOfSight(sPosELINT, sPosShooter, blockedLosHex);
+                    if(loSBlockedshooter) continue; //Line of sight blocked to one of the relevant units, skip.                                       
+                }
+
+
 
 			if(shipManager.hasSpecialAbility(elint, "ConstrainedEW")){//Mindrider ships have less efficient ELINT abilities - DK 19.07.24.
  	           	var foew = ew.getEWByType("OEW", elint, target) * 0.33;

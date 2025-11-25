@@ -130,6 +130,20 @@ var GraviticCannon = function GraviticCannon(json, ship) {
 GraviticCannon.prototype = Object.create(Gravitic.prototype);
 GraviticCannon.prototype.constructor = GraviticCannon;
 
+var GraviticShifter = function GraviticShifter(json, ship) {
+    Gravitic.call(this, json, ship);
+};
+GraviticShifter.prototype = Object.create(Gravitic.prototype);
+GraviticShifter.prototype.constructor = GraviticShifter;
+
+GraviticShifter.prototype.calculateSpecialHitChanceMod = function (shooter, target) {
+	var mod = 0;
+    if(shooter.team !== target.team){
+        if(target.gravitic || target.factionAge >= 3) mod = -3;
+    }    
+	return mod; 
+};
+
 var LightGraviticBolt = function LightGraviticBolt(json, ship) {
     Gravitic.call(this, json, ship);
 };
