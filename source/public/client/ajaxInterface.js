@@ -79,64 +79,63 @@ window.ajaxInterface = {
         });
     },
 
-    ajaxWithRetry: function ajaxWithRetry(options, attempt = 1) {
-        const maxAttempts = 5;
-        const baseDelay = 200;
+ajaxWithRetry: function(options, attempt = 1) {
 
-        let externalResolve, externalReject;
+    const maxAttempts = 5;
+    const baseDelay = 200;
 
-        // Create a "jQXHR-like" promise wrapper
-        const wrapper = new Promise((resolve, reject) => {
-            externalResolve = resolve;
-            externalReject = reject;
+    const deferred = $.Deferred(); // <-- We return this!
+
+    // Chain execution onto the queue
+    ajaxInterface.requestQueue = ajaxInterface.requestQueue.then(() => {
+
+        return new Promise((resolve) => {
+
+            const ajaxCall = () => {
+
+                const jq = $.ajax({
+                    ...options,
+
+                    success: function(data, textStatus, xhr) {
+                        if (options.success) options.success(data, textStatus, xhr);
+                        deferred.resolve(data, textStatus, xhr); // forward correctly
+                        resolve();
+                    },
+
+                    error: function(xhr, textStatus, errorThrown) {
+                        if (xhr && xhr.status === 507 && attempt < maxAttempts) {
+                            const delay = baseDelay * Math.pow(2, attempt) + Math.random() * 50;
+
+                            console.warn(`Retrying in ${delay}ms (attempt ${attempt})`);
+
+                            setTimeout(() => {
+                                ajaxInterface.ajaxWithRetry(options, attempt + 1)
+                                    .done((d, s, x) => deferred.resolve(d, s, x))
+                                    .fail((x, s, e) => deferred.reject(x, s, e))
+                                    .always(() => resolve());
+                            }, delay);
+                            return;
+                        }
+
+                        if (options.error) options.error(xhr, textStatus, errorThrown);
+                        deferred.reject(xhr, textStatus, errorThrown);
+                        resolve();
+                    },
+
+                    complete: function(xhr, status) {
+                        if (options.complete) options.complete(xhr, status);
+                    }
+                });
+
+            };
+
+            ajaxCall();
         });
 
-        // Add jQuery-style API
-        wrapper.done = function(fn) { wrapper.then(fn); return wrapper; };
-        wrapper.fail = function(fn) { wrapper.catch(fn); return wrapper; };
-        wrapper.always = function(fn) { wrapper.finally(fn); return wrapper; };
+    });
 
-        // Queue inside pipeline
-        ajaxInterface.requestQueue = ajaxInterface.requestQueue.then(() => {
-
-            return new Promise((resolveQueue) => {
-
-                function makeAjaxCall() {
-                    const jqxhr = $.ajax(options)
-                        .done((data) => {
-                            externalResolve(data);     // resolve user promise
-                        })
-                        .fail((xhr, status, err) => {
-
-                            // Retriable?
-                            if (xhr.status === 507 && attempt < maxAttempts) {
-                                const delay = baseDelay * Math.pow(2, attempt) +
-                                            Math.random() * 50;
-
-                                console.warn(`Retry in ${delay}ms (attempt ${attempt})`);
-
-                                return setTimeout(() =>
-                                    ajaxWithRetry(options, attempt + 1)
-                                        .then(externalResolve)
-                                        .catch(externalReject)
-                                        .finally(resolveQueue)
-                                , delay);
-                            }
-
-                            // Final failure
-                            externalReject(err || status);
-                        })
-                        .always(() => {
-                            resolveQueue(); // allow next request in queue
-                        });
-                }
-
-                makeAjaxCall();
-            });
-        });
-
-        return wrapper; // critical!
-    },
+    return deferred.promise(); // <-- This makes .done/.fail work
+},
     
     /* //Replaced version 25.11.25 - DK
     _sendRequest: function(factionRequest, callback) {
