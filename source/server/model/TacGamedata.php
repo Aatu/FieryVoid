@@ -136,7 +136,7 @@ class TacGamedata {
             $ship->onConstructed($this->turn, $this->phase, $this);
         }
     }
-   
+
     public function markUnavailableShips()
     {
         if ($this->phase < 0)
@@ -347,8 +347,9 @@ class TacGamedata {
         
         foreach ($slots as $slot)
         {
-            if ($slot->lastturn < $this->turn || $slot->lastphase < $this->phase)
-            return false;
+            if ($slot->lastturn < $this->turn || $slot->lastphase < $this->phase || $slot->lastphase == 5 && $this->phase == 3){ 
+                    return false;
+            }
         }
         
         return true;
@@ -616,16 +617,20 @@ class TacGamedata {
                 $fire = $system->fireOrders[$i]; 
                 $weapon = $ship->getSystemById($fire->weaponid);
                 
-                if ($fire->turn == $this->turn && !$weapon->ballistic && $this->phase == 3){
+                if ($fire->turn == $this->turn && !$weapon->ballistic && $this->phase == 3 && !$weapon->preFires){
                     unset($system->fireOrders[$i]);
                 }
                 if ($fire->turn == $this->turn && $weapon->ballistic && $this->phase == 1){
                     unset($system->fireOrders[$i]);
                 }
+
+                if ($fire->turn == $this->turn && $weapon->preFires && $this->phase == 5){
+                    unset($system->fireOrders[$i]);
+                }                
                
 				$weapon->changeFiringMode($fire->firingMode); //Select the current mode so the correct variables are considered, important for Stealth missile.                
 
-                if ($fire->turn == $this->turn && $weapon->hidetarget && $this->phase < 4 && $ship->userid != $this->forPlayer){
+                if ($fire->turn == $this->turn && $weapon->hidetarget && $this->phase < 6 && $ship->userid != $this->forPlayer){ //Change to <6 to prevent hidden orders appearing during pre-firing - DK Nov 2025
                     $fire->targetid = -1;
                     $fire->x = "null";
                     $fire->y = "null";
@@ -717,7 +722,7 @@ private function setWaiting() {
 
     foreach ($slots as $slot) {
 
-        if ($this->phase === -1 || $this->phase === 1 || $this->phase === 3 || $this->phase === 4) {
+        if ($this->phase === -1 || $this->phase === 1 || $this->phase === 3 || $this->phase === 4 || $this->phase === 5) {
             // If even one slot hasn't finished this turn+phase, player isn't done
             if (!($slot->lastturn == $this->turn && $slot->lastphase == $this->phase)) {
                 $this->waiting = false;

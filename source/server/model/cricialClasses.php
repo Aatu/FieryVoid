@@ -582,4 +582,23 @@ class ControlsStuck extends Critical{
     }
 } 
 
+class DamageSystem extends Critical{
+	//Sometimes a critical effect is to actually cause damage to a system, the idea here is create a critical on that turn and then resolve the actual damage in CriticalPhaseEffects() on same turn.
+    public $description = "Damage a system";  
+	public $repairPriority = 0;//Can't repair.'       
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){  	
+    parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turn, true );
+    }
+} 
+
+class IncreasedRecharge1 extends Critical{
+    //This one requires quite a bit of work within the weapon class to work properly, see Transverse Drive for an example.
+    public $description = "Weapon recharge increased by one turn";
+	public $repairPriority = 6;//0-9; lower = lower priority, 0 means it's irrepairable    
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
+		parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
+    }
+}
+
+
 ?>

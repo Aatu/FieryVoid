@@ -133,16 +133,23 @@ window.ShipMovementAnimation = function () {
             length -= animation.length;
         });
 
-        if (!current) {
-            result.animation = this.hexAnimations[this.hexAnimations.length - 1];
-            result.done = 1;
-            return result;
-        }
+if (!current) {
+    result.animation = this.hexAnimations[this.hexAnimations.length - 1];
+    result.done = 1;
+    return result;
+}
 
-        var done = length / current.length;
-        result.animation = current;
-        result.done = done;
-        return result;
+// --- FIX: handle zero-length animations safely ---
+if (current.length <= 0) {
+    result.animation = current;
+    result.done = 0;     // A zero-length animation is always "at the start"
+    return result;
+}
+
+var done = length / current.length;
+result.animation = current;
+result.done = isFinite(done) ? done : 0;
+return result;
     }
 /*
     function buildCurves(shipIcon, turn) {
@@ -210,7 +217,7 @@ function buildCurves(shipIcon, turn) {
                 };
             } else {
                 // For Turn ≥ 2, getMovementsReplay already gave us the last prev-turn move
-                start = moves[i - 1] || null;
+                start = moves[i-1] || null;
             }
         } else {
             start = moves[i - 1];
@@ -277,7 +284,7 @@ function buildCurves(shipIcon, turn) {
 
         return { turnAngle: buildTurn(endMove, startFacing), startAngle: angleOld, endAngle: angleNew };
     }
-
+/* //Old version
     function buildTurn(endMove, startFacing) {
         if(endMove.oldFacings.length == 0) endMove.oldFacings[0] = startFacing;
         var facings = endMove.oldFacings.concat(endMove.facing);
@@ -308,6 +315,41 @@ function buildCurves(shipIcon, turn) {
 
         return turn;
     }
+*/
+
+function buildTurn(endMove, startFacing) {
+
+    // Build the correct sequence without mutating endMove
+    const sequence = [startFacing];
+
+    if (Array.isArray(endMove.oldFacings) && endMove.oldFacings.length > 0) {
+        sequence.push(...endMove.oldFacings);
+    }
+
+    sequence.push(endMove.facing);
+
+    let totalTurn = 0;
+    let lastFacing = null;
+
+    sequence.forEach(function (facing) {
+        if (lastFacing === null) {
+            lastFacing = facing;
+            return;
+        }
+
+        const angleLast = mathlib.hexFacingToAngle(lastFacing);
+        const angleNew = mathlib.hexFacingToAngle(facing);
+
+        const right = mathlib.getAngleBetween(angleLast, angleNew, true);
+        const left = mathlib.getAngleBetween(angleLast, angleNew, false);
+
+        totalTurn += Math.abs(right) < Math.abs(left) ? right : left;
+
+        lastFacing = facing;
+    });
+
+    return totalTurn;
+}
 
     function getMovementPoints(currentHex, nextHex, lastHex) {
 
@@ -327,6 +369,11 @@ function buildCurves(shipIcon, turn) {
         } else {
             controlBetween = 0.5;
             end = window.coordinateConverter.fromHexToGame(currentHex);
+
+            // If start and end would be identical, nudge end slightly to give curve length
+            if (!lastHex || lastHex.equals(currentHex)) {
+                end = { x: end.x + 0.001, y: end.y + 0.001 };
+            }
 
             var offset = this.shipIconContainer.getHexOffset(this.shipIcon);
             if (offset) {

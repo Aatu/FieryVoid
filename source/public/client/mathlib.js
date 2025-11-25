@@ -551,70 +551,7 @@ window.mathlib = {
 
 		return line;
 	},
-/*
-	//Returns 7 or 19 hexes around central position e.g. radius of 1 or 2
-	getNeighbouringHexes: function getNeighbouringHexes(position, radius = 1) {
-		if(radius == 1){
-			let isOddRow = position.r % 2 !== 0; //Test hexes ODD (-1,-11) EVEN (-2,-12)
-			let neighborOffsets = isOddRow 
-				? [ 
-					[+1,  0], // Right {q: 0, r: -11}
-					[-1,  0], // Left {q: -2, r: -11}
-					[ -1, +1], // Upper left {q: -2, r: -10}
-					[ -1, -1], // Lower Left {q: -2, r: -12}
-					[0, +1], // Upper Right (shifted) {q: -1, r: -10}
-					[0, -1]  // Lower Right (shifted) {q: -1, r: -12}
-				]
-				: [
-					[+1,  0], // Right {q: -1, r: -12}
-					[-1,  0], // Left {q: -3, r: -12}
-					[+1, +1], // Upper right {q: -1, r: -11}
-					[+1, -1], // Down right {q: -1, r: -13}
-					[0, +1], // Upper Left (shifted) {q: -2, r: -11}
-					[0, -1]  // Lower Left (shifted) {q: -2, r: -13}
-				];
 
-			// Generate neighboring hexes
-			return neighborOffsets.map(offset => ({
-				q: position.q + offset[0],
-				r: position.r + offset[1]
-			}));
-		}else if(radius == 2){
-			//Radius 2.
-			let isOddRow = position.r % 2 !== 0;
-			let neighborOffsets = isOddRow 
-				? [[+1, 0], [-1, 0], [-1, +1], [-1, -1], [0, +1], [0, -1],
-				[+2, 0], [+1, -1], [+1, -2], [0, -2], [-1, -2], [-2, -1], 
-				[-2, 0], [-2, +1], [-1, +2], [0, +2], [+1, +2], [+1, +1]]
-
-				: [[+1, 0], [-1, 0], [+1, +1], [+1, -1], [0, +1], [0, -1], 
-				[+2, 0], [+2, -1], [+1, -2], [0, -2], [-1, -2], [-1, -1], 
-				[-2, 0], [-1, +1], [-1, +2], [0, +2], [+1, +2], [+2, +1]];
-
-			return neighborOffsets.map(offset => ({
-				q: position.q + offset[0],
-				r: position.r + offset[1]
-			}));
-		}
-
-    },
-
-	//Returns exterior 12 hexes around central position e.g. radius of 2
-	getPerimeterHexes: function getPerimeterHexes(position, radius = 2) {
-			let isOddRow = position.r % 2 !== 0;
-			let neighborOffsets = isOddRow 
-				? [[+2, 0], [+1, -1], [+1, -2], [0, -2], [-1, -2], [-2, -1], 
-				[-2, 0], [-2, +1], [-1, +2], [0, +2], [+1, +2], [+1, +1]]
-
-				: [[+2, 0], [+2, -1], [+1, -2], [0, -2], [-1, -2], [-1, -1], 
-				[-2, 0], [-1, +1], [-1, +2], [0, +2], [+1, +2], [+2, +1]];
-	
-			return neighborOffsets.map(offset => ({
-				q: position.q + offset[0],
-				r: position.r + offset[1]
-			}));
-	}
-*/
 
 // parity-aware 6 neighbours for your odd-row offset system
 offsetNeighbors: function offsetNeighbors(pos) {

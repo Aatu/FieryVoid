@@ -62,7 +62,7 @@ $games = json_encode(Manager::getTacGames($userid), JSON_NUMERIC_CHECK);
 <main class="container">
   <section class="news-panel">
     <h2>Welcome to <strong>Fiery Void!</strong></h2>
-    <p class="lead">An adaptation of the “Babylon 5 Wars” tabletop game, by Agents of Gaming!</p>
+    <p class="lead">A free-to-play adaptation of the “Babylon 5 Wars” tabletop game, by Agents of Gaming!</p>
 
 <div class="resources">
   <h3>Get Started</h3>
@@ -77,21 +77,21 @@ $games = json_encode(Manager::getTacGames($userid), JSON_NUMERIC_CHECK);
       <h3>Rules & Info</h3>
       <div class="links">     
         <div><a href="./factions-tiers.php" target="_blank" rel="noopener noreferrer">Fiery Void: Factions & Tiers:</a> Overview of Fiery Void factions and their relative strengths.</div>
-        <div><a href="./faq.php" target="_blank" rel="noopener noreferrer">Fiery Void FAQ:</a> Aide Memoire of specific rules and the differences from Babylon 5 Wars.</div>
+        <div><a href="./faq.php" target="_blank" rel="noopener noreferrer">Fiery Void FAQ:</a> Aide Memoire of specific rules and differences from Babylon 5 Wars.</div>
         <div><a href="./ammo-options-enhancements.php" target="_blank" rel="noopener noreferrer">Ammo, Options & Enhancements:</a> Details of all the extras available to Fiery Void units e.g. Missiles.</div>
         <div><a href="http://b5warsvault.wikidot.com/" target="_blank" rel="noopener noreferrer">Babylon 5 Wars Vault:</a> Huge repository of Babylon 5 Wars rules and info!</div>
       </div> 
     </div>
 
     <div class="resources">
-      <h3>Latest Updates — October 2025</h3>
+      <h3>Latest Updates — November 2025</h3>
       <ul class="updates-list">
-        <li><strong>Torvalus Speculators (Beta)</strong> - New Ancient Faction added, the Torvalus Speculators.</li>          
-        <li><strong>Server Stability Fixes</strong> - Hopefully this means less web page errors!</li>
-        <li><strong>Sound Effects</strong> - Sound effects added to Replays, these can be toggled on and off using button or by pressing 's'.</li>        
-        <li><strong>Sustained Mode Fix</strong> - Sustained weapons should now overcharge correctly on Turn 1.</li>         
-        <li><strong>Ship Images</strong> - More factions have received improvements to their ship sprites including Abbai, Grome and the Nova Starfury.</li>                                 
-        <li><strong>General Fixes</strong> - Many other small fixes. Thanks for the reports!</li>                                                    
+        <li><strong>Torvalus Speculators</strong> - Transverse Drive added, alongside some rebalancing, to complete the release of the new Torvalus Faction.</li>
+        <li><strong>Gravitic Shifter</strong> - Brakiri Gravitic Shifter added to relevant ships, and semi-custom versions removed.</li>                    
+        <li><strong>Pre-Firing Phase</strong> - New game phase added to Fiery Void's combat order.  Currently, only Transverse Drive and Gravitic Shifters use this feature.</li>
+        <li><strong>Critical hits</strong> - Critical hits are now displayed in Combat Log and Replay animations.
+        <li><strong>LoS Ruler</strong> - Ship tooltips will no longer display while the Ruler tool is active, to help with visual clarity.</li>                                            
+        <li><strong>General Fixes</strong> - Further Server Stability fixes, plus many, many other small fixes. Thanks for all the reports!</li>                                                    
         <!--<li><strong>6 Jun</strong> - Overlay colors, deployment zone tweaks, UI fixes. Pulsar mine fixed, tooltip/text readability improved.</li>-->
       </ul>
     </div>
@@ -103,19 +103,20 @@ $games = json_encode(Manager::getTacGames($userid), JSON_NUMERIC_CHECK);
     <div class="games-grid four-cols">
       <div>
         <h3>YOUR GAMES</h3>
-        <div class="gamecontainer active subpanel">
+        <!--<div class="gamecontainer active subpanel"> Old version with subpanel -->
+        <div class="gamecontainer active" style="background-color:#04161C; border-radius: 5px;">
           <div class="notfound">No active games</div>
         </div>
       </div>
       <div>
         <h3>JOIN GAMES</h3>
-        <div class="gamecontainer lobby subpanel">
+        <div class="gamecontainer lobby" style="background-color:#04161C; border-radius: 5px;">
           <div class="notfound">No starting games</div>
         </div>
       </div>
       <div>
         <h3>RECENT ACTIVITY</h3>
-        <div id="fireList" class="gamecontainer fire subpanel">
+        <div id="fireList" class="gamecontainer fire" style="background-color:#04161C; border-radius: 5px;">
         </div>
       </div>
       <div class="create-col">

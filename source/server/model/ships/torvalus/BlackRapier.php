@@ -30,7 +30,8 @@ class BlackRapier extends BaseShip{
 
 		$this->trueStealth = true; //For ships that can actually be hidden, not just jammer from range.  Important for Front End.		
 		
-		$this->fighters = array("normal"=>6);
+		//$this->fighters = array("normal"=>6);
+		$this->notes = "Can control 6 fighters";		
         
 		/*Torvalus use their own enhancement set */		
 		Enhancements::nonstandardEnhancementSet($this, 'TorvalusShip');

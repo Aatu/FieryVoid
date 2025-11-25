@@ -76,6 +76,7 @@ window.LaserEffect = function () {
 
         if (args.systemDestroyedEffect) {
             args.systemDestroyedEffect.add(this.target, args.damagedNames, this.time + Math.random() * this.duration);
+            args.systemDestroyedEffect.add(this.target, args.critNames, this.time + Math.random() * this.duration, 'crit');            
         }
 
         // --- Cached laser sound setup ---

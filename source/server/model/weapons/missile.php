@@ -1291,31 +1291,6 @@ class AmmoMissileRackS extends Weapon{
 		$strippedSystem->mineRangeArray = $this->mineRangeArray;				
 		return $strippedSystem;
 	} 
-	
-    public function effectCriticalDamgeReductions($dp, $repeat = false){
-		if($repeat) return; //Damage Reduced crit has already been applied in onConstructed() for this type of weapon, don't apply again!
-
-        //damage penalty: 20% of variance or straight 2, whichever is bigger; hold that as a fraction, however! - low rolls should be affected lefss than high ones, after all        
-        foreach ($this->firingModes as $dmgMode => $modeName) {
-            $variance = $this->maxDamageArray[$dmgMode] - $this->minDamageArray[$dmgMode];
-            $mod = $dp * max(2, 0.2 * $variance);
-        
-            $avgDmg = ($this->maxDamageArray[$dmgMode] + $this->minDamageArray[$dmgMode]) / 2;
-        
-            if ($avgDmg > 0) {
-                $this->dpArray[$dmgMode] = $mod / $avgDmg;
-            } else {
-                $this->dpArray[$dmgMode] = 1;
-            }
-        
-            $this->dpArray[$dmgMode] = min(0.9, $this->dpArray[$dmgMode]);
-        
-            $this->minDamageArray[$dmgMode] = floor($this->minDamageArray[$dmgMode] * (1 - $this->dpArray[$dmgMode]));
-            $this->maxDamageArray[$dmgMode] = floor($this->maxDamageArray[$dmgMode] * (1 - $this->dpArray[$dmgMode]));
-        }
-    }
-
-
 
 	//actually use getDamage() method of ammo!
     public function getDamage($fireOrder)

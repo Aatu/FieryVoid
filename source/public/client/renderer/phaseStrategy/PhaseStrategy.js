@@ -240,7 +240,7 @@ window.PhaseStrategy = function () {
                 this.onShipClicked(ship, payload);
             }    
         }else{
-            if(filteredShips.length > 0) this.showSelectFromShips(filteredShips, payload); //More than 1, but not 0.  Prevents graphic from appearing and indicating where hidden ships are.
+            if(filteredShips.length > 0 && !gamedata.showLoS) this.showSelectFromShips(filteredShips, payload); //More than 1, but not 0.  Prevents graphic from appearing and indicating where hidden ships are.
         }
     };
 
@@ -279,8 +279,10 @@ window.PhaseStrategy = function () {
         this.setSelectedShip(ship);
         this.showAppropriateHighlight();
         this.showAppropriateEW();
-        var menu = new ShipTooltipMenu(this.selectedShip, ship, this.gamedata.turn);
-        this.showShipTooltip(ship, payload, menu, false);
+        if (!gamedata.showLoS){
+            var menu = new ShipTooltipMenu(this.selectedShip, ship, this.gamedata.turn); //Don't show tooltip if ruler is on, as it blocks vision
+            this.showShipTooltip(ship, payload, menu, false);
+        }    
     };
 
     PhaseStrategy.prototype.setSelectedShip = function (ship) {
@@ -429,7 +431,7 @@ window.PhaseStrategy = function () {
             return;
         }
 
-        this.showShipTooltip(visibleShips, payload, null, true);
+        if (!gamedata.showLoS) this.showShipTooltip(visibleShips, payload, null, true);
     };
 
     PhaseStrategy.prototype.onMouseOverShip = function (ship, payload) {
@@ -457,7 +459,7 @@ window.PhaseStrategy = function () {
         var icon = this.shipIconContainer.getById(ship.id);
         if (!this.shipTooltip || !this.shipTooltip.menu) {
             //this.showShipTooltip(ship, payload, null, true);            
-            if(!gamedata.isTerrain(ship.shipSizeClass, ship.userid)) this.showShipTooltip(ship, payload, menu, true);
+            if(!gamedata.isTerrain(ship.shipSizeClass, ship.userid) && !gamedata.showLoS) this.showShipTooltip(ship, payload, menu, true);
         }
 
         if (this.shipTooltip && this.shipTooltip.ships.includes(ship) &&  this.shipTooltip.ships.length === 1) {

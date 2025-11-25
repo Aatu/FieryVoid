@@ -125,11 +125,22 @@
                 if (!$elint->getEWbyType("SOEW", $gamedata->turn, $ship)) 
                     continue;
 
-				$jammerValue = $target->getSpecialAbilityValue("Jammer", array("shooter" => $elint, "target" => $target));
+                $jammerValue = $target->getSpecialAbilityValue("Jammer", array("shooter" => $elint, "target" => $target));
 				if ($jammerValue>0) {
-					return 40;
+					//return 40; //No sure why we returned 40, seems like an error - DK Nov 2025
 					continue; //no lock-on negates SOEW, if any
-				}
+				}                
+
+                //Check line of sight between ELINT and target/shooter
+                $elintPos = $elint->getHexPos();
+                $shooterPos = $ship->getHexPos();
+                $targetPos = $target->getHexPos();                
+
+                $losBlockedTarget  = $elint->checkLineOfSight($elintPos, $targetPos, $gamedata); //Defaults false e.g. line of sight NOT blocked.
+                if($losBlockedTarget) continue; //Line of sight blocked to one of the relevant units, skip.         
+
+                $losBlockedShooter  = $elint->checkLineOfSight($elintPos, $shooterPos, $gamedata); //Defaults false e.g. line of sight NOT blocked.
+                if($losBlockedShooter) continue; //Line of sight blocked to one of the relevant units, skip.                                       
 
 				if($elint->hasSpecialAbility("ConstrainedEW")){//Mindrider ships have less efficient ELINT abilities - DK 19.07.24.
 				    $foew = $elint->getEWByType("OEW", $gamedata->turn, $target) * 0.33;
