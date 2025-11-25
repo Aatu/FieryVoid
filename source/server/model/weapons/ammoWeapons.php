@@ -692,7 +692,7 @@ class AmmoHShellScatter extends AmmoTemplateDirectWeapons{
     public $animationExplosionScale = 0.4; //0 means it will be set automatically by standard constructor, based on average damage yield    
 
     //Adding Pulse variables
-	public $maxpulses = 6; //
+	public $maxpulses = 4; //
     public $grouping = 25;
 	
     function __construct(){}
@@ -750,7 +750,7 @@ class AmmoMShellScatter extends AmmoTemplateDirectWeapons{
     public $animationExplosionScale = 0.3; //0 means it will be set automatically by standard constructor, based on average damage yield    
 
     //Adding Pulse variables
-	public $maxpulses = 6; //
+	public $maxpulses = 4; //
     public $grouping = 25;
 	
     function __construct(){}
@@ -808,7 +808,7 @@ class AmmoLShellScatter extends AmmoTemplateDirectWeapons{
     public $animationExplosionScale = 0.2; //0 means it will be set automatically by standard constructor, based on average damage yield    
 
     //Adding Pulse variables
-	public $maxpulses = 6; //
+	public $maxpulses = 4; //
     public $grouping = 25;
 	
     function __construct(){}
