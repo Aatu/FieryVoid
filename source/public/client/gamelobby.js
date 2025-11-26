@@ -2270,10 +2270,12 @@ expandFaction: function expandFaction(event) {
 		var baseShip = gamedata.getShipByType(ship.phpclass);
 		if(baseShip) {
 			ship.systems = baseShip.systems; //reset systems to default to default values
+			ship.notes = baseShip.notes; //reset notes to default to default values				
 		}else{ //Loaded fleets may not have their faction set yet when editing, so do this now.
 			gamedata.setShipsFromFaction(ship.faction, ship);
 			baseShip = gamedata.getShipByType(ship.phpclass);
-			ship.systems = baseShip.systems; //reset systems to default to default values						
+			ship.systems = baseShip.systems; //reset systems to default to default values
+			ship.notes = baseShip.notes; //reset notes to default to default values						
 		}	
 
 		//Now clear enhancements markers, so these get updated again when ship window next opened.
@@ -2787,7 +2789,7 @@ doLoadFleet: function doLoadFleet(fleet) {
 	//gamedata.populateFleetDropdown();
 },
 
-
+	//To change the availability of a saved fleet
     changeFleetPublic: function changeFleetPublic(listId) {
 		ajaxInterface.changeFleetPublic(listId, function(response) {
 			//console.log("AJAX response:", ships); // debug raw response
