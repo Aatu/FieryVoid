@@ -756,7 +756,10 @@ class GraviticLance extends Raking{
 				break;
 			case 2:
 				return Dice::d(10, 5)+12; //Beam
-				break;	
+				break;
+			case 3:
+				return Dice::d(10, 5)+12; //Beam
+				break;	                	
 		}
 	}
         public function setMinDamage(){ 
@@ -766,7 +769,10 @@ class GraviticLance extends Raking{
 				break;
 			case 2:
 				$this->minDamage = 17; //Beam
-				break;	
+				break;
+			case 3:
+				$this->minDamage = 17; //Beam
+				break;	                	
 		}
 		$this->minDamageArray[$this->firingMode] = $this->minDamage;
 	}
@@ -777,7 +783,10 @@ class GraviticLance extends Raking{
 				break;
 			case 2:
 				$this->maxDamage = 62; //Graviton Beam
-				break;	
+				break;
+			case 3:
+				$this->maxDamage = 62; //Graviton Beam
+				break;	                	
 		}
 		$this->maxDamageArray[$this->firingMode] = $this->maxDamage;
 	}	
