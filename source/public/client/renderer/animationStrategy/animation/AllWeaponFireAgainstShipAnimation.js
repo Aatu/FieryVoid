@@ -367,6 +367,7 @@ function getSystemNamesCriticals(incomingFire) {
         )
         .filter(damage => {
             // If list does not exist for this ship, no duplicates yet
+            if(!damage.system.ship) return false;  //Means it's a fighter, just ignore.
             const shown = window.combatLog.critAnimations[damage.system.ship.id] || [];
 
             // Skip if already shown
