@@ -25,20 +25,24 @@ window.infowindow = {
                 h.html(gamedata.getPhasename());
             }
 
+            if (gamedata.gamephase == 5) {
+                h.html("TURN " + gamedata.turn + ": " + gamedata.getPhasename());
+            }
+
             if (gamedata.gamephase == 4) {
-                h.html("TURN " + gamedata.turn + ", " + gamedata.getPhasename());
+                h.html("TURN " + gamedata.turn + ": " + gamedata.getPhasename());
             }
 
             if (gamedata.gamephase == 3) {
-                h.html("TURN " + gamedata.turn + ", " + gamedata.getPhasename());
+                h.html("TURN " + gamedata.turn + ": " + gamedata.getPhasename());
             }
 
             if (gamedata.gamephase == 2) {
-                h.html("TURN " + gamedata.turn + ", " + gamedata.getPhasename());// + " " + gamedata.getActiveShipName());
+                h.html("TURN " + gamedata.turn + ": " + gamedata.getPhasename());// + " " + gamedata.getActiveShipName());
             }
 
             if (gamedata.gamephase == 1) {
-                h.html("TURN " + gamedata.turn + ", " + gamedata.getPhasename());
+                h.html("TURN " + gamedata.turn + ": " + gamedata.getPhasename());
             }
         }
 
