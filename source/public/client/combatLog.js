@@ -188,6 +188,7 @@ window.combatLog = {
                             firstCrit = " System criticals: ";
                             comma = "";
                         }
+                        if(!system.ship) continue; //Means it's a fighter, just ignore.
                         if (!combatLog.critsShown[system.ship.id]?.includes(system.id)) {
                             criticalshtml += firstCrit + '<span class="critical">' + comma + ' ' + shipManager.systems.getDisplayName(system) + '</span>';
                         }

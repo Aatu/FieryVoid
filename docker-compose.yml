@@ -7,6 +7,7 @@ services:
       - "3306:3306"
     volumes:
       - .:/usr/src/fieryvoid
+      - mariadb_data:/var/lib/mysql
     networks:
       - default
 
@@ -17,6 +18,7 @@ services:
       - .:/usr/src/current
       - composer:/usr/src/fieryvoid/vendor
       - composercache:/root/.composer
+      - bashhistory:/root/.bash_history_volume
     networks:
       - default
     develop:
@@ -44,4 +46,8 @@ volumes:
   composer:
     external: false
   composercache:
+    external: false
+  mariadb_data:
+    external: false
+  bashhistory:
     external: false
