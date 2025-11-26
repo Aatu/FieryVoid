@@ -2268,16 +2268,22 @@ expandFaction: function expandFaction(event) {
 		$('.ship.bought.shipid_' + id).remove();
 
 		var baseShip = gamedata.getShipByType(ship.phpclass);
-		if(baseShip) {
-			ship.systems = baseShip.systems; //reset systems to default to default values
-		}else{ //Loaded fleets may not have their faction set yet when editing, so do this now.
-			gamedata.setShipsFromFaction(ship.faction, ship);
+		if(!baseShip) {
+			gamedata.setShipsFromFaction(ship.faction, ship); //Loaded fleets may not have their faction set yet when editing, so do this now.
 			baseShip = gamedata.getShipByType(ship.phpclass);
-			ship.systems = baseShip.systems; //reset systems to default to default values						
 		}	
+
+		ship.systems = baseShip.systems; //reset systems to default to default values
+		ship.notes = baseShip.notes; //reset notes to default to default values
+		ship.forwardDefense = baseShip.forwardDefense;
+		ship.sideDefense = baseShip.sideDefense;
 
 		//Now clear enhancements markers, so these get updated again when ship window next opened.
 		if(ship.flight){
+			ship.freethrust = baseShip.freethrust;
+			ship.hasNavigator = baseShip.hasNavigator;
+			ship.iniativebonus = baseShip.iniativebonus;	
+			ship.offensivebonus = baseShip.offensivebonus;								
 			lobbyEnhancements.resetEnhancementMarkersFighter(ship);
 		}else{
 			lobbyEnhancements.resetEnhancementMarkersShip(ship);
@@ -2787,7 +2793,7 @@ doLoadFleet: function doLoadFleet(fleet) {
 	//gamedata.populateFleetDropdown();
 },
 
-
+	//To change the availability of a saved fleet
     changeFleetPublic: function changeFleetPublic(listId) {
 		ajaxInterface.changeFleetPublic(listId, function(response) {
 			//console.log("AJAX response:", ships); // debug raw response
