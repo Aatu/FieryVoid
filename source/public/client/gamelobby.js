@@ -2201,6 +2201,26 @@ expandFaction: function expandFaction(event) {
 		//gamedata.populateFleetDropdown();		
     },
 
+    copyShip: function copyShip(copiedShip) {
+
+
+		var shipClass = copiedShip.phpclass;
+		var newShip;
+		
+		if(copiedShip.loaded){
+			newShip = new Ship(copiedShip);		
+		}else{
+			newShip = gamedata.getShipByType(shipClass);
+		}	
+		
+		newShip.name = copiedShip.name;
+		newShip.pointCost = copiedShip.pointCost;
+		newShip.flightSize = copiedShip.flightSize;
+		newShip.enhancementOptions = copiedShip.enhancementOptions ? [...copiedShip.enhancementOptions] : [],	
+
+        window.confirm.showShipEdit(newShip, gamedata.doCopyShip);
+    },	
+
 	
     editShip: function editShip(ship) {
         var slotid = gamedata.selectedSlot;
@@ -2246,6 +2266,28 @@ expandFaction: function expandFaction(event) {
 			}
 		}
 		$('.ship.bought.shipid_' + id).remove();
+
+		var baseShip = gamedata.getShipByType(ship.phpclass);
+		if(!baseShip) {
+			gamedata.setShipsFromFaction(ship.faction, ship); //Loaded fleets may not have their faction set yet when editing, so do this now.
+			baseShip = gamedata.getShipByType(ship.phpclass);
+		}	
+
+		ship.systems = baseShip.systems; //reset systems to default to default values
+		ship.notes = baseShip.notes; //reset notes to default to default values
+		ship.forwardDefense = baseShip.forwardDefense;
+		ship.sideDefense = baseShip.sideDefense;
+
+		//Now clear enhancements markers, so these get updated again when ship window next opened.
+		if(ship.flight){
+			ship.freethrust = baseShip.freethrust;
+			ship.hasNavigator = baseShip.hasNavigator;
+			ship.iniativebonus = baseShip.iniativebonus;	
+			ship.offensivebonus = baseShip.offensivebonus;								
+			lobbyEnhancements.resetEnhancementMarkersFighter(ship);
+		}else{
+			lobbyEnhancements.resetEnhancementMarkersShip(ship);
+		}
 
 		var name = $(".confirm input").val();
 		ship.name = name;
@@ -2751,7 +2793,7 @@ doLoadFleet: function doLoadFleet(fleet) {
 	//gamedata.populateFleetDropdown();
 },
 
-
+	//To change the availability of a saved fleet
     changeFleetPublic: function changeFleetPublic(listId) {
 		ajaxInterface.changeFleetPublic(listId, function(response) {
 			//console.log("AJAX response:", ships); // debug raw response

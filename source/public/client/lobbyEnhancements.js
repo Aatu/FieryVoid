@@ -25,13 +25,13 @@ window.lobbyEnhancements  = {
 			if (enhCount > 1) ship.enhancementTooltip += ` (x${enhCount})`;	
 
 			switch (enhID) {
-				case 'DEPLOY': // Delayed
+				/*case 'DEPLOY': // Delayed
 					if(!ship.deployEnh && enhCount > 1){
 							ship.notes += "<br>Deploys on Turn " + enhCount + "";
 						}
 						ship.deployEnh = true;
 				break;		
-
+				*/
 				case 'ELITE_CREW':
 					if(!ship.eliteEnh){
 						ship.forwardDefense -= enhCount;
@@ -848,14 +848,14 @@ window.lobbyEnhancements  = {
 					if (enhCount > 1) flight.enhancementTooltip += ` (x${enhCount})`;	
 		
 					switch (enhID) {
-
+						/*
 						case 'DEPLOY': // Expert Motivator
 							if(!flight.deployEnh && enhCount > 1){
 								flight.notes += "<br>Deploys on Turn " + enhCount + "";
 							}
 							flight.deployEnh = true;
 						break;
-
+						*/
 						case 'ELT_MAR': // Elite marines, mark every Marines system as Elite.
 							if(!flight.elMarEnhFlight){
 								flight.systems.forEach(ftr => {
@@ -1119,5 +1119,366 @@ window.lobbyEnhancements  = {
 		
 	},//end of setEnhancementsFighter()	
 
+
+	resetEnhancementMarkersShip: function resetEnhancementMarkersShip(ship){
+
+		for (let entry of ship.enhancementOptions) {
+			let enhID = entry[0];
+			//We're just finding the relevant enh and reseting update marker, as during Edit process all systems stats will be reset to defaults.
+			switch (enhID) {		
+					case 'ELITE_CREW':
+						ship.eliteEnh = false;	
+					break;
+
+					case 'ELT_MRN':
+						ship.elMrnEnhShip = false;
+					break;					
+								
+					case 'EXT_MRN':
+						ship.exMrnEnhShip = false;
+					break;
+
+					case 'HANG_F'://Hangar Conversion to Fighter slot, no actual need to change anything here.  
+						ship.hangFEnh = false;
+					break;	
+
+					case 'HANG_AS'://Hangar Conversion to Assault Shuttle slot, no actual need to change anything here.  
+						ship.hangASEnh = false;	
+					break;	
+							
+					case 'IFF_SYS':
+						ship.iffEnh = false;					
+					break;
+			
+					case 'IMPR_ENG':
+						ship.engEnh = false;	
+					break;
+			
+					case 'IMPR_PSY':
+						ship.psyEnh = false;
+					break;
+			
+					case 'IMPR_REA':
+						ship.reaEnh = false;							
+					break;
+			
+					case 'IMPR_SENS':
+						ship.sensEnh = false;							
+					break;
+			
+					case 'IMPR_SR':
+						ship.srEnh = false;
+					break;
+			
+					case 'IMPR_THSD':
+						ship.thsdEnh = false;
+					break;
+			
+					case 'IMPR_TS':
+						ship.tsEnh = false;					
+					break;
+			
+					case 'IPSH_EETH':
+						ship.eethEnh = false;					
+					break;
+			
+					case 'IPSH_ESSAN':
+						ship.essanEnh = false;
+					break;
+			
+					case 'MARK_FERV':
+						ship.fervEnh = false;									
+					break;
+			
+					case 'POOR_CREW':
+						ship.poorEnh = false;	
+					break;
+			
+					case 'SHAD_DIFF':
+						ship.diffEnh = false;	
+					break;
+			
+					case 'SHAD_FTRL':
+						ship.ftrlEnh = false;	
+					break;
+
+					case 'SPARK_CURT':
+						ship.sparkEnh = false;	
+					break;
+				
+					case 'SLUGGISH':
+						ship.slugEnh = false;
+					break;
+				
+					case 'VOR_AMETHS': // Vorlon Amethyst Skin (for ship)
+						ship.amethsEnh = false;	
+					break;
+				
+					case 'VOR_AZURS': // Vorlon Azure Skin (for ship) - +1 Shield rating
+						ship.azursEnh = false;	
+					break;
+				
+					case 'VOR_CRIMS': // Vorlon Crimson Skin (for ship) - Power Capacitor gains +2 storage points and +1 recharge point
+						ship.crimsEnh = false;	
+					break;
+				
+					case 'VULN_CRIT': // Vulnerable to Criticals: +1 Crit roll mod
+						ship.vulnEnh = false;
+					break;				
+					// Add more cases as necessary				
+			}
+
+				// Ammo magazine is necessary for some options
+				let ammoMagazine = null;
+				for (let magazine of ship.systems) {
+					if (magazine.name === 'ammoMagazine') {
+						ammoMagazine = magazine;
+						break;
+					}
+				}
+				//If there's a magazine, let's check if any missiles were bought!
+				if(ammoMagazine != null) {			
+		
+					switch (enhID) {
+
+						case 'AMMO_B': //Basic Missile - Shouldn't ever be purchasable an an enhancement, but here we are.					
+							ship.ammoBEnh =  false;
+						break;
+
+						case 'AMMO_L': //Long Range Missile
+							ship.ammoLEnh =  false;
+						break;
+
+						case 'AMMO_H': //Heavy Missile
+							ship.ammoHEnh =  false;
+						break;
+
+						case 'AMMO_F': //Flash Missile
+							ship.ammoFEnh =  false;
+						break;
+
+						case 'AMMO_A': //Antifighter Missile
+							ship.ammoAEnh =  false;
+						break;
+
+						case 'AMMO_P': //Piercing Missile
+							ship.ammoPEnh =  false;
+						break;
+
+						case 'AMMO_D': //Light Missile						
+							ship.ammoDEnh =  false;
+						break;	
+
+						case 'AMMO_I': //Interceptor Missile 						
+							ship.ammoIEnh =  false;
+						break;
+
+						case 'AMMO_C': //Chaff Missile						
+							ship.ammoCEnh =  false;
+						break;	
+
+						case 'AMMO_J': //Jammer Missile						
+							ship.ammoJEnh =  false;
+						break;
+
+						case 'AMMO_K': //Starburst Missile						
+							ship.ammoKEnh =  false;
+						break;		
+
+						case 'AMMO_M': //Multiwarhead Missile						
+							ship.ammoMEnh =  false;					
+						break;
+
+						case 'AMMO_KK': //Kinetic Missile						
+							ship.ammoKKEnh =  false;
+						break;
+
+						case 'AMMO_S': //Stealth Missile						
+							ship.ammoSEnh =  false;
+						break;	
+
+						case 'AMMO_X': //HARM Missile						
+							ship.ammoXEnh =  false;
+						break;
+
+						case 'MINE_BLB': //Ballistic Launcher Basic Mine										
+							ship.ammoBLBEnh =  false;						
+						break;
+
+						case 'MINE_BLH': //Ballistic Launcher Heavy Mine						
+							ship.ammoBLHEnh =  false;
+						break;
+
+						case 'MINE_BLW': //Ballistic Launcher Wide-Range Mine						
+							ship.ammoBLWEnh =  false;							
+						break;
+
+						case 'MINE_MLB': //Abbai Mine Launcher Basic Mine													
+							ship.ammoMLBEnh =  false;						
+						break;	
+
+						case 'MINE_MLW': //Abbai Mine Launcher Wide-Ranged Mine						
+							ship.ammoMLWEnh =  false;	
+						break;
+
+						//AMMO TYPES FOR DIRECT FIRE WEAPONS					
+						case 'SHELL_HBSC': //Standard Ammo for Heavy Railgun						
+							ship.shellHBEnh =  false;
+						break;
+
+						case 'SHELL_MBSC': //Standard Ammo for Medium Railgun						
+							ship.shellMBEnh =  false;
+						break;	
+
+						case 'SHELL_LBSC': //Standard Ammo for Light Railgun						
+							ship.shellLBEnh =  false;
+						break;	
+
+						case 'SHELL_HFLH': //Flash Ammo for Heavy Railgun						
+							ship.ammoHFEnh =  false;
+						break;	
+
+						case 'SHELL_MFLH': //Flash Ammo for Medium Railgun						
+							ship.ammoMFEnh =  false;
+						break;	
+
+						case 'SHELL_LFLH': //Flash Ammo for Light Railgun						
+							ship.ammoLFEnh =  false;
+						break;	
+
+						case 'SHELL_HSCT': //Scatter Ammo for Heavy Railgun						
+							ship.ammoHSEnh =  false;
+						break;	
+
+						case 'SHELL_MSCT': //Scatter Ammo for Medium Railgun						
+							ship.ammoMSEnh =  false;
+						break;	
+
+						case 'SHELL_LSCT': //Scatter Ammo for Light Railgun						
+							ship.ammoLSEnh =  false;
+						break;
+
+						case 'SHELL_HHVY': //Heavy Ammo for Heavy Railgun						
+							ship.ammoHHEnh =  false;
+						break;
+
+						case 'SHELL_MHVY': //Heavy Ammo for Medium Railgun						
+							ship.ammoMHEnh =  false;
+						break;
+								
+						case 'SHELL_LHVY': //Heavy Ammo for Light Railgun						
+							ship.ammoLHEnh =  false;
+						break;																												
+						
+						case 'SHELL_HLR': //Long Range Ammo for Heavy Railgun						
+							ship.ammoHLREnh =  false;
+						break;		
+
+						case 'SHELL_MLR': //Long Range Ammo for Medium Railgun						
+							ship.ammoMLREnh =  false;
+						break;		
+
+						case 'SHELL_HULR': //Ultra Long Range Ammo for Heavy Railgun						
+							ship.ammoHULREnh =  false;
+						break;	
+					}//endof ammo listings.
+
+				}//endof if(ammoMagazine) check.	
+
+		}
+	},
+
+	resetEnhancementMarkersFighter: function resetEnhancementMarkersFighter(flight){
+
+			for (let entry of flight.enhancementOptions) {
+				// ID, readableName, numberTaken, limit, price, priceStep
+				let enhID = entry[0];	
+		
+					switch (enhID) {
+						/*
+						case 'DEPLOY': // Expert Motivator
+							if(!flight.deployEnh && enhCount > 1){
+								flight.notes += "<br>Deploys on Turn " + enhCount + "";
+							}
+							flight.deployEnh = true;
+						break;
+						*/
+						case 'ELT_MAR': // Elite marines, mark every Marines system as Elite.
+							flight.elMarEnhFlight = false;	
+						break;
+		
+						case 'ELITE_SW': // Elite Pilot (SW)
+							flight.swEnh = false;
+						break;
+		
+						case 'EXP_MOTIV': // Expert Motivator
+							flight.motivEnh = false;
+						break;
+		
+						case 'EXT_AMMO': // Extra ammo
+							flight.exAmmoEnh = false;	
+						break;
+		
+						case 'EXT_HAMMO': // Extra heavy ammo
+							flight.exHAmmoEnh = false;							
+						break;
+		
+						case 'EXT_MAR': // Extra marines	
+							flight.exMarEnhFlight = false;								
+						break;
+		
+						case 'FTR_FERV': // Markab Religious Fervor
+							flight.fervEnhFlight = false;
+						break;
+		
+						case 'IMPR_OB': // Improved Targeting Computer
+							flight.obEnh = false;
+						break;
+		
+						case 'IMPR_THR': // Improved Thrust
+							flight.thrEnh = false;
+						break;						
+		
+						case 'NAVIGATOR': // Navigator
+							flight.navEnh = false;
+						break;
+		
+						case 'POOR_TRAIN': // Poor Training
+							flight.poorTrEnh = false;							
+						break;
+		
+						case 'SHAD_CTRL': // Shadow fighter deployed without carrier control
+							flight.shadCtrlEnh = false;								
+						break;
+		
+						case 'VOR_AZURF': // Vorlon Azure Skin Coloring
+							flight.azurfEnh = false;		
+						break;		
+					
+						//consumable ammunition - add to ALL missile magazines on flight!
+						case 'AMMO_FB': //Basic Fighter Missile
+							flight.fbEnh = false;	
+						break;
+
+						case 'AMMO_FH': //Heavy Fighter Missile
+							flight.fhEnh = false;	
+						break;
+
+						case 'AMMO_FL': //Long Range Fighter Missile
+							flight.flEnh = false;	
+						break;
+
+						case 'AMMO_FY': //Dogfight Fighter Missile
+							flight.fyEnh = false;	
+						break;
+
+						case 'AMMO_FD': //Dropout Fighter Missile
+							flight.fdEnh = false;
+						break;					
+
+					}//end of swtich function
+				}
+				
+	}	
 };
 

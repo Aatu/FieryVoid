@@ -616,24 +616,15 @@ class Weapon extends ShipSystem
 		//re-create damage arrays, so they reflect loading time...
 		foreach ($this->firingModes as $i => $modeName) {
 			$this->changeFiringMode($i);
-			$this->setMinDamage();
-			$this->minDamageArray[$i] = $this->minDamage;
-			$this->setMaxDamage();
-			$this->maxDamageArray[$i] = $this->maxDamage;
+			//$this->setMinDamage();
+			//$this->minDamageArray[$i] = $this->minDamage;
+			//$this->setMaxDamage();
+			//$this->maxDamageArray[$i] = $this->maxDamage;
 			//set AF priority, too!
 			$this->setPriorityAF(); 
 			$this->priorityAFArray[$i] = $this->priorityAF;
 		} 
-        
-        //We just reset damage arrays, so need to now reapply any Damage Reduced critical effects for System Data Window to display correctly.
-        $this->dp = 0; //Initialise again.
-        foreach ($this->criticals as $crit) { //Are there any appropriate crits?
-            if ($crit instanceof ReducedDamage) $this->dp++;
-        }
-        //Ammo weapons do NOT have their damage values reset by the above fragment, so we have to exclude them from this application of crits or it'll duplicate.
-        if($this->dp > 0){       
-            $this->effectCriticalDamgeReductions($this->dp, true ); //Reapply any critical effect to damage values using same method as onConstructed()             
-        } 
+
 		$this->changeFiringMode(1); //reset mode to basic
             
         if ($this->damageType != '') $this->data["Damage type"] = $this->damageType;
@@ -828,16 +819,16 @@ public function getStartLoading()
                 return new WeaponLoading(0, 0, $this->getLoadedAmmo(), 0, $this->getLoadingTime(), $this->firingMode);
             }
         } else if ($phase == -1) {
-            $weaponLoading = $this->calculateLoadingFromLastTurn($gamedata);
+            $weaponLoading = $this->calculateLoadingFromLastTurn($gamedata);                   
             $this->setLoading($weaponLoading);
 
             if ($this->overloadshots === -1) {
                 return new WeaponLoading(0, 0, $this->getLoadedAmmo(), 0, $this->getLoadingTime(), $this->firingMode);
             } else {
-                $newloading = $this->getTurnsloaded() + 1;
+                $newloading = $this->getTurnsloaded() + 1;            
                 if ($newloading > $normalload)
                     $newloading = $normalload;
-
+ 
                 $newExtraShots = $this->overloadshots;
                 $overloading = $this->overloadturns + 1;
                 if ($overloading >= $normalload && $newExtraShots == 0)
@@ -888,9 +879,9 @@ public function getStartLoading()
             //cannot save the extra shots from everload -> lose loading and cooldown
             if ($this->overloadshots > 0 && $this->overloadshots < $this->extraoverloadshots) {
                 if ($this->isOverloadingOnTurn(TacGamedata::$currentTurn)) {
-                    return new WeaponLoading(1, 0, $this->getLoadedAmmo(), 1, $this->getLoadingTime(), $this->firingMode);
+                    return new WeaponLoading(0, 0, $this->getLoadedAmmo(), 1, $this->getLoadingTime(), $this->firingMode);
                 } else {
-                    return new WeaponLoading(1, 0, $this->getLoadedAmmo(), 0, $this->getLoadingTime(), $this->firingMode);
+                    return new WeaponLoading(0, 0, $this->getLoadedAmmo(), 0, $this->getLoadingTime(), $this->firingMode);
                 }
             }
         }
@@ -1853,7 +1844,7 @@ throw new Exception("getSystemArmourAdaptive! $ss");	*/
     /*returns modified damage, NOT damage modifier*/
     /*this is different function that getDamageMod of unit!*/
     protected function getDamageMod($damage, $shooter, $target, $pos, $gamedata)
-    {
+    {               
         $damage = $damage - $damage * $this->dp; //$dp is fraction of shot that gets wasted!
 
         if ($this->rangeDamagePenalty > 0) {
@@ -1888,9 +1879,9 @@ throw new Exception("getSystemArmourAdaptive! $ss");	*/
 
 
     protected function getFinalDamage($shooter, $target, $pos, $gamedata, $fireOrder)
-    {
-        $damage = $this->getDamage($fireOrder);
-        $damage = $this->getDamageMod($damage, $shooter, $target, $pos, $gamedata);     
+    {          
+        $damage = $this->getDamage($fireOrder);      
+        $damage = $this->getDamageMod($damage, $shooter, $target, $pos, $gamedata);                
         $damage -= $target->getDamageMod($shooter, $pos, $gamedata->turn, $this);
 		
 		/* first attempt of StarTrek shield

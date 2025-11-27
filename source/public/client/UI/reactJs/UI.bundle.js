@@ -41288,7 +41288,7 @@ var canOverload = function canOverload(ship, system) {
 } /*&& shipManager.power.canOverload(ship, system)*/;
 
 var canStopOverload = function canStopOverload(ship, system) {
-	return gamedata.gamephase === 1 && system.weapon && system.overloadable && shipManager.power.isOverloading(ship, system);
+	return gamedata.gamephase === 1 && system.weapon && system.overloadable && shipManager.power.isOverloading(ship, system) && (system.overloadshots >= system.extraoverloadshots || system.overloadshots == 0);
 };
 /*
 const canBoost = (ship, system) => system.boostable && gamedata.gamephase === 1 && shipManager.power.canBoost(ship, system) && (!system.isScanner() || system.id == shipManager.power.getHighestSensorsId(ship));

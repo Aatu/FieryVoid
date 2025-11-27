@@ -7,42 +7,137 @@ window.ajaxInterface = {
     pollcount: 0,
     submiting: false,
 
-    //new variables for home screeen to manage ajax requests
-    submitingGames: false,        // defensive flag
-    currentRequest: null,         // currently processing
-    nextRequest: null,            // last queued while busy
-    lastRequestTimeGames: 0,      // track debounce
-    debounceDelayGames: 300,      // ms  
+    // Home screen
+    submitingGames: false,
+    currentRequest: null,
+    nextRequest: null,
+    lastRequestTimeGames: 0,
+    debounceDelayGames: 300,
 
-    //new variables for Fleet Selection screeen to manage ajax requests        
-    currentFaction: null,   // currently processing
-    nextFaction: null,      // last requested while busy
-    lastClickTime: {},      // per-faction debounce
-    debounceDelay: 300,     // ms
+    // Fleet selection
+    currentFaction: null,
+    nextFaction: null,
+    lastClickTime: {},
+    debounceDelay: 300,
+
+    // GLOBAL AJAX SERIAL QUEUE 🔥
+    requestQueue: Promise.resolve(),
 
     getShipsForFaction: function(factionRequest, callback) {
         const now = Date.now();
 
-        // Debounce: ignore if clicked too soon on the same faction
         if (this.lastClickTime[factionRequest] &&
             now - this.lastClickTime[factionRequest] < this.debounceDelay) {
             return;
         }
         this.lastClickTime[factionRequest] = now;
 
-        // If already processing, just replace the pending request
         if (this.submiting) {
-            this.nextFaction = { factionRequest, callback }; // overwrite intentionally
+            this.nextFaction = { factionRequest, callback };
             return;
         }
 
-        // Already fetching this faction, ignore
         if (factionRequest === this.currentFaction) return;
 
-        // Send immediately
         this._sendRequest(factionRequest, callback);
     },
 
+    _sendRequest: function(factionRequest, callback) {
+        this.currentFaction = factionRequest;
+        this.nextFaction = null;
+        this.submiting = true;
+
+        ajaxInterface.ajaxWithRetry({
+            type: 'POST',
+            url: 'gamelobbyloader.php',
+            dataType: 'json',
+            contentType: 'application/json',
+            data: JSON.stringify({ faction: String(factionRequest) }),
+
+            success: (data) => {
+                if (data.error) {
+                    this.errorAjax(null, null, data.error);
+                } else {
+                    callback(data);
+                }
+            },
+
+            error: (xhr, status, error) => {
+                this.errorAjax(xhr, status, error);
+            },
+
+            complete: () => {
+                this.currentFaction = null;
+                this.submiting = false;
+
+                if (this.nextFaction) {
+                    const { factionRequest: nextF, callback: nextCb } = this.nextFaction;
+                    this.nextFaction = null;
+                    this._sendRequest(nextF, nextCb);
+                }
+            }
+        });
+    },
+
+ajaxWithRetry: function(options, attempt = 1) {
+
+    const maxAttempts = 5;
+    const baseDelay = 200;
+
+    const deferred = $.Deferred(); // <-- We return this!
+
+    // Chain execution onto the queue
+    ajaxInterface.requestQueue = ajaxInterface.requestQueue.then(() => {
+
+        return new Promise((resolve) => {
+
+            const ajaxCall = () => {
+
+                const jq = $.ajax({
+                    ...options,
+
+                    success: function(data, textStatus, xhr) {
+                        if (options.success) options.success(data, textStatus, xhr);
+                        deferred.resolve(data, textStatus, xhr); // forward correctly
+                        resolve();
+                    },
+
+                    error: function(xhr, textStatus, errorThrown) {
+                        if (xhr && xhr.status === 507 && attempt < maxAttempts) {
+                            const delay = baseDelay * Math.pow(2, attempt) + Math.random() * 50;
+
+                            console.warn(`Retrying in ${delay}ms (attempt ${attempt})`);
+
+                            setTimeout(() => {
+                                ajaxInterface.ajaxWithRetry(options, attempt + 1)
+                                    .done((d, s, x) => deferred.resolve(d, s, x))
+                                    .fail((x, s, e) => deferred.reject(x, s, e))
+                                    .always(() => resolve());
+                            }, delay);
+                            return;
+                        }
+
+                        if (options.error) options.error(xhr, textStatus, errorThrown);
+                        deferred.reject(xhr, textStatus, errorThrown);
+                        resolve();
+                    },
+
+                    complete: function(xhr, status) {
+                        if (options.complete) options.complete(xhr, status);
+                    }
+                });
+
+            };
+
+            ajaxCall();
+        });
+
+    });
+
+    return deferred.promise(); // <-- This makes .done/.fail work
+},
+    
+    /* //Replaced version 25.11.25 - DK
     _sendRequest: function(factionRequest, callback) {
         this.currentFaction = factionRequest;
         this.nextFaction = null;
@@ -81,27 +176,6 @@ window.ajaxInterface = {
         });
     },
 
-    ajaxWithRetry: function ajaxWithRetry(options, attempt = 1) {
-        const maxAttempts = 5;
-        const baseDelay = 200;
-
-        const jqXHR = $.ajax({
-            ...options,
-            error: function(xhr, status, error) {
-                if (xhr.status === 507 && attempt <= maxAttempts) {
-                    const delay = baseDelay * Math.pow(2, attempt) + Math.random() * 100;
-                    console.warn(`507 error, retrying in ${Math.round(delay)}ms (attempt ${attempt})`);
-                    setTimeout(() => ajaxInterface.ajaxWithRetry(options, attempt + 1), delay);
-                } else if (options.error) {
-                    options.error(xhr, status, error);
-                }
-            }
-        });
-
-        return jqXHR; // ⚠ critical
-    },
-    
-    /* //Replaced version 10.11.25 - DK
     ajaxWithRetry: function ajaxWithRetry(options, attempt = 1) {
         const maxAttempts = 5;
         const baseDelay = 200;

@@ -89,7 +89,7 @@ $games = json_encode(Manager::getTacGames($userid), JSON_NUMERIC_CHECK);
         <li><strong>Torvalus Speculators</strong> - Transverse Drive added, alongside some rebalancing, to complete the release of the new Torvalus Faction.</li>
         <li><strong>Gravitic Shifter</strong> - Brakiri Gravitic Shifter added to relevant ships, and semi-custom versions removed.</li>                    
         <li><strong>Pre-Firing Phase</strong> - New game phase added to Fiery Void's combat order.  Currently, only Transverse Drive and Gravitic Shifters use this feature.</li>
-        <li><strong>Critical hits</strong> Critical hits are now displayed in Combat Log and Replay animations.
+        <li><strong>Critical hits</strong> - Critical hits are now displayed in Combat Log and Replay animations.
         <li><strong>LoS Ruler</strong> - Ship tooltips will no longer display while the Ruler tool is active, to help with visual clarity.</li>                                            
         <li><strong>General Fixes</strong> - Further Server Stability fixes, plus many, many other small fixes. Thanks for all the reports!</li>                                                    
         <!--<li><strong>6 Jun</strong> - Overlay colors, deployment zone tweaks, UI fixes. Pulsar mine fixed, tooltip/text readability improved.</li>-->

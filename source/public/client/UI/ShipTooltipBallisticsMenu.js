@@ -81,8 +81,10 @@ window.ShipTooltipBallisticsMenu = function () {
             // Build hitchance list manually, based on number of ballistics.
             let hitchanceList = [];
             for (let i = 0; i < ballistics.length; i++) {
-                let hc = ballistics[i].fireOrder.chance;
-                hitchanceList.push(hc);
+                if(ball.weapon.id == ballistics[i].fireOrder.weaponid && ball.shooter.id == ballistics[i].fireOrder.shooterid){
+                    let hc = ballistics[i].fireOrder.chance ?? ballistics[i].fireOrder.needed;
+                    hitchanceList.push(hc);
+                }    
             }
         
             const minHitchance = Math.min(...hitchanceList);
@@ -99,7 +101,19 @@ window.ShipTooltipBallisticsMenu = function () {
 			var hitchance = weaponManager.calculataBallisticHitChange(ballisticEntry);
 			var hitchanceNormalMode = ball.fireOrder.chance ?? ball.fireOrder.needed;	//Fireorder hitchance as locked in by Normal mode weapons.
             var hitChanceLow = hitchance + ball.fireOrder.hitmod;	//To show the difference between lowest and highest hitchances in tooltip.
-            *
+            */
+
+/*
+            if(gamedata.replay){ //Replay is a bit weird with hit chances for normal split weapons.  So adjust here.
+                hitchance = weaponManager.calculateHitChange(ball.shooter, target, weapon, calledid)
+                if (ball.fireOrder.type == "normal" && amount > 1 && hitchance !== hitchanceNormalMode) {
+                    jQuery(".hitchange", ballElement).html('- Between: ' + hitchance + '% - ' + hitchanceNormalMode + '%');
+                } else if (ball.fireOrder.type == "normal") {
+                    jQuery(".hitchange", ballElement).html('- Approx: ' + hitchanceNormalMode + '%');
+                } else {
+                    jQuery(".hitchange", ballElement).html('- Approx: ' + hitchance + '%');
+                }
+            }else{      
 
 			if(ball.fireOrder.type == "normal" && amount > 1 && ball.fireOrder.hitmod){ //Method only works during targeting Normal types, not in Replay :(
 				var hitChanceLow = hitchance + ball.fireOrder.hitmod;	//To show the difference between lowest and highest hitchances in tooltip.	
