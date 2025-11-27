@@ -150,7 +150,6 @@ window.combatLog = {
         html += '<span class="notes"> ' + fire.notes + '</span>';
         //  html += damagehtml;
         html += '</span></div>';
-        var criticalshtml = ""; //Needs to be outside of damage block below to prevent overwriting.
 
 
         if (damages.length > 0) {
@@ -160,6 +159,7 @@ window.combatLog = {
                 var victim = damages[i].ship;
                 var totaldam = 0;
                 var armour = 0;
+                var criticalshtml = ""; //Needs to be outside of damage block below to prevent overwriting.                
                 var damagehtml = "";
                 for (var a in damages[i].damages) {
                    
