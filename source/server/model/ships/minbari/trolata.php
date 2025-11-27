@@ -34,7 +34,7 @@ class Trolata extends BaseShip{
         // weapons arguments: armor, health, power, start arc, end arc
         $this->addFrontSystem(new FusionCannon(3, 8, 1, 300, 60));
         $this->addFrontSystem(new NeutronLaser(4, 10, 6, 300, 60));
-        $this->addFrontSystem(new GraviticThruster(6, 16, 0, 5, 1));
+        $this->addFrontSystem(new GraviticThruster(6, 20, 0, 5, 1));
         $this->addFrontSystem(new NeutronLaser(4, 10, 6, 300, 60));
         $this->addFrontSystem(new FusionCannon(3, 8, 1, 300, 60));
 
