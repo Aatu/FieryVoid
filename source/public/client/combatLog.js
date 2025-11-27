@@ -386,6 +386,7 @@ window.combatLog = {
         return; 
     },    
 
+    /*
     fetchAndShowCombatLog: function fetchAndShowCombatLog() {
         var turn = this.displayedTurn;
     
@@ -417,7 +418,40 @@ window.combatLog = {
             error: ajaxInterface.errorAjax
         });
     },
+    */
 
+//New version using ajaxWithRetry()
+fetchAndShowCombatLog: function fetchAndShowCombatLog() {
+    var turn = this.displayedTurn;
+
+    // Check if this turn's data is already cached
+    if (combatLog.logCache[turn]) {
+        combatLog.showLog(combatLog.logCache[turn]);
+        return;
+    }
+
+    ajaxInterface.ajaxWithRetry({
+        type: 'GET',
+        url: 'replay.php',
+        dataType: 'json',
+        data: {
+            turn: turn,
+            gameid: gamedata.gameid,
+            time: new Date().getTime() // prevent browser caching
+        },
+        success: function (data) {
+            var allFireOrders = combatLog.groupByShipAndWeapon(
+                weaponManager.getAllFireOrdersForLogPrint(data.ships, data.turn)
+            );
+
+            // Store in cache
+            combatLog.logCache[turn] = allFireOrders;
+
+            combatLog.showLog(allFireOrders);
+        }.bind(this),
+        error: ajaxInterface.errorAjax
+    });
+},    
 
     groupByShipAndWeapon: function groupByShipAndWeapon(incomingFire) {
         const grouped = {};
