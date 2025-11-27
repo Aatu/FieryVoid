@@ -293,6 +293,7 @@ window.ReplayPhaseStrategy = function () {
         requestReplayGamedata.call(this);
     }
 
+    /*
     function requestReplayGamedata() {
         startLoading.call(this);
 
@@ -315,7 +316,41 @@ window.ReplayPhaseStrategy = function () {
             error: ajaxInterface.errorAjax
         });
     }            
+*/
+//New version to use ajaxWithRetry()
+function requestReplayGamedata() {
+    startLoading.call(this);
 
+    ajaxInterface.ajaxWithRetry({
+        type: 'GET',
+        url: 'replay.php',
+        dataType: 'json',
+        data: {
+            turn: this.replayTurn,
+            gameid: this.gamedata.gameid,
+            time: new Date().getTime()
+        },
+        success: function (data) {
+            gamedata.parseServerData(data);
+
+            // New section so ballisticIcons render during Replay
+            this.allBallistics = weaponManager.getAllFireOrdersForAllShipsForTurn(
+                gamedata.turn,
+                'ballistic'
+            );
+
+            this.ballisticIconContainer.consumeGamedata(
+                this.gamedata,
+                this.shipIconContainer,
+                this.allBallistics
+            );
+        }.bind(this),
+        error: ajaxInterface.errorAjax,
+        complete: function () {
+            stopLoading.call(this);
+        }.bind(this)
+    });
+}
 
     function requestPlayableGamedata() {
         startLoading.call(this);
