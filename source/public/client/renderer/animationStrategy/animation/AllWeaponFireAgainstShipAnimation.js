@@ -2,7 +2,7 @@
 
 window.AllWeaponFireAgainstShipAnimation = function () {
 
-    function AllWeaponFireAgainstShipAnimation(ship, shipIconContainer, particleEmitterContainer, gamedata, time, scene, movementAnimations, logAnimation) {
+    function AllWeaponFireAgainstShipAnimation(ship, shipIconContainer, particleEmitterContainer, gamedata, time, scene, movementAnimations, logAnimation, prefire = false) {
         Animation.call(this);
 
         this.gamedata = gamedata;
@@ -16,8 +16,11 @@ window.AllWeaponFireAgainstShipAnimation = function () {
         this.movementAnimations = movementAnimations;
         this.logAnimation = logAnimation;
 
-        this.incomingFire = groupByShipAndWeapon(weaponManager.getAllFireOrdersForDisplayingAgainst(ship));
-
+        if(!prefire){
+            this.incomingFire = groupByShipAndWeapon(weaponManager.getAllFireOrdersForDisplayingAgainst(ship));
+        }else{
+            this.incomingFire = groupByShipAndWeapon(weaponManager.getAllPreFireOrdersForDisplayingAgainst(ship));            
+        }    
         this.animations = [];
 
         if (this.incomingFire.length === 0) {
@@ -361,19 +364,14 @@ function getSystemNamesDestroyed(incomingFire) {
 function getSystemNamesCriticals(incomingFire) {
     const turn = incomingFire.fireOrder.turn;
 
-    const critSystems = incomingFire.damagesCaused
+    const critSystemsRaw = incomingFire.damagesCaused
         .filter(damage =>
             shipManager.criticals.sufferedCritThisTurn(damage.system, turn)
         )
         .filter(damage => {
-            // If list does not exist for this ship, no duplicates yet
-            if(!damage.system.ship) return false;  //Means it's a fighter, just ignore.
+            if (!damage.system.ship) return false; // skip fighters
             const shown = window.combatLog.critAnimations[damage.system.ship.id] || [];
-
-            // Skip if already shown
-            if (shown.includes(damage.system.id)) return false;
-
-            return true; // keep it
+            return !shown.includes(damage.system.id);
         })
         .map(damage => ({
             name: shipManager.systems.getDisplayName(damage.system),
@@ -381,7 +379,19 @@ function getSystemNamesCriticals(incomingFire) {
             systemid: damage.system.id
         }));
 
-    return critSystems;
+    // --- NEW: remove duplicates inside this single incomingFire processing ---
+    const unique = [];
+    const seen = new Set();
+
+    for (const crit of critSystemsRaw) {
+        const key = crit.shipid + "-" + crit.systemid;
+        if (!seen.has(key)) {
+            seen.add(key);
+            unique.push(crit);
+        }
+    }
+
+    return unique;
 }
 
     function getShipPositionAtTime(icon, time) {

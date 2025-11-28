@@ -2059,6 +2059,7 @@ expandFaction: function expandFaction(event) {
 
 
     copyShip: function copyShip(copiedShip) {
+
         var slotid = gamedata.selectedSlot;
         var selectedSlot = playerManager.getSlotById(slotid);
         if (selectedSlot.lastphase >= "-2") {
@@ -2066,21 +2067,18 @@ expandFaction: function expandFaction(event) {
             return false;
         }
 
-        $(".confirm").remove();
-
-		var shipClass = copiedShip.phpclass;
-		var newShip;
-		
-		if(copiedShip.loaded){
-			newShip = new Ship(copiedShip);		
-		}else{
-			newShip = gamedata.getShipByType(shipClass);
+		var newShip = gamedata.getShipByType(copiedShip.phpclass);
+		if(!newShip) {
+			gamedata.setShipsFromFaction(copiedShip.faction, copiedShip); //Loaded fleets may not have their faction set yet when editing, so do this now.
+			newShip = gamedata.getShipByType(copiedShip.phpclass);
 		}	
-		
+
 		newShip.name = copiedShip.name;
 		newShip.pointCost = copiedShip.pointCost;
 		newShip.flightSize = copiedShip.flightSize;
 		newShip.enhancementOptions = copiedShip.enhancementOptions ? [...copiedShip.enhancementOptions] : [],	
+
+		$(".confirm").remove();
 
         window.confirm.showShipEdit(newShip, gamedata.doCopyShip);
     },	
@@ -2096,19 +2094,12 @@ expandFaction: function expandFaction(event) {
 
         if (!gamedata.canAfford(ship)) {		
             $(".confirm").remove();
-            window.confirm.error("You cannot afford those edits!", function () {});
+            window.confirm.error("You cannot afford this ship!", function () {});
             return;
         }
 
-		//Now generate a new ship to reset Enhancements applied in ship window etc (otherwise they don't update!)
-		if(ship.loaded){
-			for(var e in ship.enhancementOptions){
-				ship.enhancementOptions[e][2] = 0; //Need to reset manually for loaded ships.
-				ship.pointCostEnh = 0;				
-			}
-		}else{
-			ship = gamedata.getShipByType(ship.phpclass);			
-		}		
+		ship = gamedata.getShipByType(ship.phpclass); //Faction already set if not already when we called copyShip()			
+
 		var name = $(".confirm input").val();
 		ship.name = name;
 		ship.pointCost = newPointCost;	
@@ -2200,26 +2191,6 @@ expandFaction: function expandFaction(event) {
         gamedata.updateFleet(ship);
 		//gamedata.populateFleetDropdown();		
     },
-
-    copyShip: function copyShip(copiedShip) {
-
-
-		var shipClass = copiedShip.phpclass;
-		var newShip;
-		
-		if(copiedShip.loaded){
-			newShip = new Ship(copiedShip);		
-		}else{
-			newShip = gamedata.getShipByType(shipClass);
-		}	
-		
-		newShip.name = copiedShip.name;
-		newShip.pointCost = copiedShip.pointCost;
-		newShip.flightSize = copiedShip.flightSize;
-		newShip.enhancementOptions = copiedShip.enhancementOptions ? [...copiedShip.enhancementOptions] : [],	
-
-        window.confirm.showShipEdit(newShip, gamedata.doCopyShip);
-    },	
 
 	
     editShip: function editShip(ship) {
