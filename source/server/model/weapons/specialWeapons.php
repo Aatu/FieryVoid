@@ -5170,12 +5170,12 @@ class PsychicField extends Weapon{ //Thirdspace weapons that operates similar to
 		    $this->animationExplosionScale = $this->getAoE($turn);
 		    $this->range = $this->range + $boostlevel;
 		      parent::setSystemDataWindow($turn);  
-		      $this->data["Special"] = "Automatically affects all enemy units in Range.  Cannot be fired manually."; 
-		      $this->data["Special"] .= "<br>Reduces Fighters' Initiative (5-15 pts), and Hit Chances (5-10%) next turn.";  
-		      $this->data["Special"] .= "<br>Reduces Ships' Hit Chances (5-10%) next turn if hits Structure, or causes potential critical on other systems.";  		      
-		      $this->data["Special"] .= "<br>Can be boosted three times using EW, with each boost adding +1 Range, +1 Damage and +5 to Initiative / Hit Chance penalties."; 
-		      $this->data["Special"] .= "<br>Multiple overlapping Psychic Fields will only cause one (the strongest) attack on a particular target.";
-		      $this->data["Special"] .= "<br>Does not affect friendly units. Only 50% effective against Advanced Armor.";
+		      $this->data["Special"] = "Automatically affects all enemy units in Range."; 
+		      $this->data["Special"] .= "<br>Reduces Fighters' Initiative (by 5-15), and Hit Chances (5-10%) next turn.";  
+		      $this->data["Special"] .= "<br>Reduces Ships' Hit Chances (5-10%) next turn if hits Structure, and critical rolls on other systems.";  		      
+		      $this->data["Special"] .= "<br>Can be boosted 3 times using EW, adding +1 Range, +1 Damage and +5 to Initiative / Hit Chance penalties per boost."; 
+		      $this->data["Special"] .= "<br>Multiple overlapping Psychic Fields will only cause the strongest to effect a particular target.";
+		      $this->data["Special"] .= "<br>Does not affect friendly units.";
 		      $this->data["Special"] .= "<br>Only 50% effective against Advanced Armor."; 		        		       
 	    }	//endof function setSystemDataWindow
 	
