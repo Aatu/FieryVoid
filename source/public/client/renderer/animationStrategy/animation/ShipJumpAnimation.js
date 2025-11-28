@@ -36,7 +36,7 @@ window.ShipJumpAnimation = function () {
     ShipJumpAnimation.prototype.render = function (now, total, last, delta, zoom, back, paused) {
 
         // --- 🔊 Play sound once when jump starts ---
-        if (!this.explosionTriggered && total >= this.time) {
+        if (!this.explosionTriggered && total >= this.time && gamedata.playAudio) {
             this.sound.currentTime = 0;
             this.sound.play().catch(() => {});
             this.explosionTriggered = true;

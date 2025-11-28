@@ -79,11 +79,166 @@ window.ReplayAnimationStrategy = function () {
         this.movementPhaseStartTime = time;
         time = animateMovement.call(this, time);
         this.firingPhaseStartTime = time;
+        time = animateWeaponPreFire.call(this, time, logAnimation);        
         time = animateWeaponFire.call(this, time, logAnimation);
         time = animateShipDestruction.call(this, time, logAnimation);
         time += 100;
 
         this.endTime = time;
+    }
+
+    function animateMovement(time) {
+        this.gamedata.ships.forEach(function (ship) {
+
+            // Filter out enemy stealth ships that are undetected
+            if (!gamedata.isMyorMyTeamShip(ship)) {
+                if (shipManager.isStealthShip(ship) && !shipManager.isDetected(ship)) {
+                    return; // Skip this ship
+                }
+            }
+
+            var icon = this.shipIconContainer.getByShip(ship);
+
+            var animation = new ShipMovementAnimation(icon, this.turn, this.shipIconContainer);
+            setMovementAnimationDuration.call(this, animation);
+
+            if (animation.getLength() > 0) {
+                var cameraAnimation = new CameraPositionAnimation(animation.getStartPosition(), time, 0);
+                this.animations.push(cameraAnimation);
+                time += cameraAnimation.getDuration();
+            }
+
+            animation.setTime(time);
+            this.animations.push(animation);
+            this.movementAnimations[ship.id] = animation;
+
+            if (this.type === ReplayAnimationStrategy.type.INFORMATIVE) {
+                time += animation.getDuration();
+            }
+        }, this);
+
+        return time;
+    }
+
+    function animateWeaponPreFire(time, logAnimation) {
+        var shipList = [];
+        this.gamedata.ships.forEach(function (shp) { shipList.push(shp); });
+
+        shipList.sort(function (a, b) {
+            if (a.flight && !b.flight) return -1;
+            if (!a.flight && b.flight) return 1;
+            if (a.pointCost > b.pointCost) return 1;
+            if (a.pointCost < b.pointCost) return -1;
+            return 0;
+        });
+
+        shipList.forEach(function (ship) {
+            var perShipAnimation = new AllWeaponFireAgainstShipAnimation(
+                ship,
+                this.shipIconContainer,
+                this.emitterContainer,
+                this.gamedata,
+                time,
+                this.scene,
+                this.movementAnimations,
+                logAnimation,
+                true
+            );
+
+            this.animations.push(perShipAnimation);
+
+            if (this.type === ReplayAnimationStrategy.type.INFORMATIVE) {
+                time += perShipAnimation.getDuration();
+            }
+
+            var allHexBallistics = weaponManager.getAllHexTargetedBallistics();            
+            var firesForThisShip = allHexBallistics.filter(function (f) {
+                return f && (f.shooter === ship || f.shooter === ship.id);
+            });
+
+            var hexes = firesForThisShip.filter(f => f.fireOrder?.type == "prefiring");
+
+            if (hexes.length > 0) {
+                var hexAnim = new HexTargetedWeaponFireAnimation(
+                    time,
+                    this.movementAnimations,
+                    this.shipIconContainer,
+                    this.turn,
+                    this.emitterContainer,
+                    logAnimation,
+                    hexes
+                );
+
+                this.animations.push(hexAnim);
+
+                if (this.type === ReplayAnimationStrategy.type.INFORMATIVE) {
+                    time += hexAnim.getDuration();
+                }
+            }
+
+        }, this);
+
+        return time;
+    }
+
+    
+    function animateWeaponFire(time, logAnimation) {
+        var shipList = [];
+        this.gamedata.ships.forEach(function (shp) { shipList.push(shp); });
+
+        shipList.sort(function (a, b) {
+            if (a.flight && !b.flight) return -1;
+            if (!a.flight && b.flight) return 1;
+            if (a.pointCost > b.pointCost) return 1;
+            if (a.pointCost < b.pointCost) return -1;
+            return 0;
+        });
+
+        shipList.forEach(function (ship) {
+            var perShipAnimation = new AllWeaponFireAgainstShipAnimation(
+                ship,
+                this.shipIconContainer,
+                this.emitterContainer,
+                this.gamedata,
+                time,
+                this.scene,
+                this.movementAnimations,
+                logAnimation
+            );
+
+            this.animations.push(perShipAnimation);
+            if (this.type === ReplayAnimationStrategy.type.INFORMATIVE) {
+                time += perShipAnimation.getDuration();
+            }
+
+            var allHexBallistics = weaponManager.getAllHexTargetedBallistics();            
+            var firesForThisShip = allHexBallistics.filter(function (f) {
+                return f && (f.shooter === ship || f.shooter === ship.id);
+            });
+
+            var normals = firesForThisShip.filter(f => f.fireOrder?.type !== "prefiring");
+
+            if (normals.length > 0) {
+                var hexAnim = new HexTargetedWeaponFireAnimation(
+                    time,
+                    this.movementAnimations,
+                    this.shipIconContainer,
+                    this.turn,
+                    this.emitterContainer,
+                    logAnimation,
+                    normals
+                );
+
+                this.animations.push(hexAnim);
+
+                if (this.type === ReplayAnimationStrategy.type.INFORMATIVE) {
+                    time += hexAnim.getDuration();
+                }
+            }
+
+        }, this);
+
+        return time;
     }
 
     function animateShipDestruction(time, logAnimation) {
@@ -127,139 +282,6 @@ window.ReplayAnimationStrategy = function () {
             }, this);
 
             this.shipIconContainer.getByShip(ship).hideFighters(fightersToHide);
-        }, this);
-
-        return time;
-    }
-
-    function animateMovement(time) {
-        this.gamedata.ships.forEach(function (ship) {
-
-            // Filter out enemy stealth ships that are undetected
-            if (!gamedata.isMyorMyTeamShip(ship)) {
-                if (shipManager.isStealthShip(ship) && !shipManager.isDetected(ship)) {
-                    return; // Skip this ship
-                }
-            }
-
-            var icon = this.shipIconContainer.getByShip(ship);
-
-            var animation = new ShipMovementAnimation(icon, this.turn, this.shipIconContainer);
-            setMovementAnimationDuration.call(this, animation);
-
-            if (animation.getLength() > 0) {
-                var cameraAnimation = new CameraPositionAnimation(animation.getStartPosition(), time, 0);
-                this.animations.push(cameraAnimation);
-                time += cameraAnimation.getDuration();
-            }
-
-            animation.setTime(time);
-            this.animations.push(animation);
-            this.movementAnimations[ship.id] = animation;
-
-            if (this.type === ReplayAnimationStrategy.type.INFORMATIVE) {
-                time += animation.getDuration();
-            }
-        }, this);
-
-        return time;
-    }
-
-    function animateWeaponFire(time, logAnimation) {
-        var shipList = [];
-        this.gamedata.ships.forEach(function (shp) { shipList.push(shp); });
-
-        shipList.sort(function (a, b) {
-            if (a.flight && !b.flight) return -1;
-            if (!a.flight && b.flight) return 1;
-            if (a.pointCost > b.pointCost) return 1;
-            if (a.pointCost < b.pointCost) return -1;
-            return 0;
-        });
-
-        var allHexBallistics = weaponManager.getAllHexTargetedBallistics();
-
-        // Collect prefiring animations separately
-        var prefireAnimations = [];
-
-        // First pass: collect all prefire animations across all ships
-        shipList.forEach(function (ship) {
-            var firesForThisShip = allHexBallistics.filter(function (f) {
-                return f && (f.shooter === ship || f.shooter === ship.id);
-            });
-
-            if (firesForThisShip.length > 0) {
-                var prefires = firesForThisShip.filter(f => f.fireOrder?.type === "prefiring");
-                if (prefires.length > 0) {
-                    prefireAnimations.push(new HexTargetedWeaponFireAnimation(
-                        time, // same shared start time for all prefires
-                        this.movementAnimations,
-                        this.shipIconContainer,
-                        this.turn,
-                        this.emitterContainer,
-                        logAnimation,
-                        prefires
-                    ));
-                }
-            }
-        }, this);
-
-        // 🔹 Run all prefires right after movement (simultaneous)
-        prefireAnimations.forEach(anim => {
-            this.animations.push(anim);
-        });
-
-        // Optional: advance time just by longest prefire duration, not cumulative
-        if (this.type === ReplayAnimationStrategy.type.INFORMATIVE) {
-            let maxPrefire = 0;
-            prefireAnimations.forEach(a => {
-                maxPrefire = Math.max(maxPrefire, a.getDuration());
-            });
-            time += maxPrefire;
-        }
-
-        // Second pass: normal firing animations (as before)
-        shipList.forEach(function (ship) {
-            var perShipAnimation = new AllWeaponFireAgainstShipAnimation(
-                ship,
-                this.shipIconContainer,
-                this.emitterContainer,
-                this.gamedata,
-                time,
-                this.scene,
-                this.movementAnimations,
-                logAnimation
-            );
-
-            this.animations.push(perShipAnimation);
-            if (this.type === ReplayAnimationStrategy.type.INFORMATIVE) {
-                time += perShipAnimation.getDuration();
-            }
-
-            var firesForThisShip = allHexBallistics.filter(function (f) {
-                return f && (f.shooter === ship || f.shooter === ship.id);
-            });
-
-            var normals = firesForThisShip.filter(f => f.fireOrder?.type !== "prefiring");
-
-            if (normals.length > 0) {
-                var hexAnim = new HexTargetedWeaponFireAnimation(
-                    time,
-                    this.movementAnimations,
-                    this.shipIconContainer,
-                    this.turn,
-                    this.emitterContainer,
-                    logAnimation,
-                    normals
-                );
-
-                this.animations.push(hexAnim);
-
-                if (this.type === ReplayAnimationStrategy.type.INFORMATIVE) {
-                    time += hexAnim.getDuration();
-                }
-            }
-
         }, this);
 
         return time;
