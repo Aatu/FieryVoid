@@ -464,8 +464,8 @@ class TacGamedata {
 	    $closestDistance = 100; // Initialize with a large value
 
 	    foreach ($this->ships as $ship){
-	        if ($ship->unavailable)
-	            continue;
+	        if ($ship->unavailable) continue;
+	        if ($ship->isTerrain()) continue;            
 
 	        $distance = Mathlib::getDistanceHex($ship->getHexPos(), $pos);
 
@@ -503,8 +503,8 @@ class TacGamedata {
 	    $closestDistance = 100; // Initialize with a large value
 
 	    foreach ($this->ships as $ship){
-	        if ($ship->unavailable)
-	            continue;
+	        if ($ship->unavailable) continue;
+	        if ($ship->isTerrain()) continue;  
 
 			if ($ship->team == $shooter->team)	        
 				continue;
