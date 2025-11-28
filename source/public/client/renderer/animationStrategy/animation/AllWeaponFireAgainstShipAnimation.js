@@ -2,7 +2,7 @@
 
 window.AllWeaponFireAgainstShipAnimation = function () {
 
-    function AllWeaponFireAgainstShipAnimation(ship, shipIconContainer, particleEmitterContainer, gamedata, time, scene, movementAnimations, logAnimation) {
+    function AllWeaponFireAgainstShipAnimation(ship, shipIconContainer, particleEmitterContainer, gamedata, time, scene, movementAnimations, logAnimation, prefire = false) {
         Animation.call(this);
 
         this.gamedata = gamedata;
@@ -16,8 +16,11 @@ window.AllWeaponFireAgainstShipAnimation = function () {
         this.movementAnimations = movementAnimations;
         this.logAnimation = logAnimation;
 
-        this.incomingFire = groupByShipAndWeapon(weaponManager.getAllFireOrdersForDisplayingAgainst(ship));
-
+        if(!prefire){
+            this.incomingFire = groupByShipAndWeapon(weaponManager.getAllFireOrdersForDisplayingAgainst(ship));
+        }else{
+            this.incomingFire = groupByShipAndWeapon(weaponManager.getAllPreFireOrdersForDisplayingAgainst(ship));            
+        }    
         this.animations = [];
 
         if (this.incomingFire.length === 0) {
