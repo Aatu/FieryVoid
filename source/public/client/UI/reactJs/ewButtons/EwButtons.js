@@ -11,7 +11,7 @@ class EwButtons extends React.Component {
             losToggled: false,
             hexToggled: false,
             soundToggled: true,
-            replayMode: gamedata.replay || false
+            replayMode: this.getReplayMode() 
         };
 
         this.showFriendlyEW = this.showFriendlyEW.bind(this);
@@ -26,16 +26,21 @@ class EwButtons extends React.Component {
         this.externalToggleSound = this.externalToggleSound.bind(this);        
     }
 
+    getReplayMode() {
+        return gamedata.replay || !gamedata.isPlayerInGame();
+    }
+
     componentDidMount() {
         window.addEventListener("LoSToggled", this.externalToggleLoS);
         window.addEventListener("HexNumbersToggled", this.externalToggleHexNumbers);
         window.addEventListener("soundToggled", this.externalToggleSound);
         // 👇 periodically check for replay mode change
         this.replayCheck = setInterval(() => {
-            if (this.state.replayMode !== gamedata.replay) {
-                this.setState({ replayMode: gamedata.replay });
+            const replayValue = this.getReplayMode();
+            if (this.state.replayMode !== replayValue) {
+                this.setState({ replayMode: replayValue });
             }
-        }, 500);                        
+        }, 500);                      
     }
 
     componentWillUnmount() {
