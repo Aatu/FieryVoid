@@ -2052,10 +2052,51 @@ window.weaponManager = {
         });
     },
 
+    getAllPreFireOrdersForDisplayingAgainst: function getAllPreFireOrdersForDisplayingAgainst(target) {
+        return gamedata.ships.reduce(function (fires, shooter) {
+            return fires.concat(weaponManager.getAllFireOrders(shooter).filter(function (fire) {
+                return fire.targetid === target.id && (fire.type === "prefiring");
+            }));
+        }, []).filter(function (fire) {
+            return fire.rolled !== 0;
+        }).map(function (fireOrder) {
+            var shooter = gamedata.getShip(fireOrder.shooterid);
+            return {
+                id: fireOrder.id,
+                fireOrder: fireOrder,
+                shots: fireOrder.shots,
+                hits: fireOrder.shotshit,
+                firingMode: fireOrder.firingMode,
+                shooter: shooter,
+                weapon: shipManager.systems.getSystem(shooter, fireOrder.weaponid),
+                targetSystem: shipManager.systems.getSystem(target, fireOrder.calledid),
+                damagesCaused: weaponManager.getDamagesCausedBy(fireOrder).reduce(function (damages, damage) {
+                    return damages.concat(damage.damages);
+                }, []).map(function (damage) {
+                    return {
+                        armour: damage.armour,
+                        damage: damage.damage,
+                        damageclass: damage.damageclass,
+                        destroyed: damage.destroyed,
+                        system: shipManager.systems.getSystem( gamedata.getShip(damage.shipid), damage.systemid)
+                    };
+                }),
+            };
+        }).sort(function (obj1, obj2) {
+            if (obj1.weapon.priority !== obj2.weapon.priority) {
+                return obj1.weapon.priority - obj2.weapon.priority;
+            } else {
+                var $val = obj1.shooter.id - obj2.shooter.id;
+                if ($val === 0) $val = obj1.id - obj2.id;
+                return $val;
+            }
+        });
+    },
+
     getAllFireOrdersForDisplayingAgainst: function getAllFireOrdersForDisplayingAgainst(target) {
         return gamedata.ships.reduce(function (fires, shooter) {
             return fires.concat(weaponManager.getAllFireOrders(shooter).filter(function (fire) {
-                return fire.targetid === target.id && (fire.type === "normal" || fire.type === "ballistic" || fire.type === "prefiring");
+                return fire.targetid === target.id && (fire.type === "normal" || fire.type === "ballistic");
             }));
         }, []).filter(function (fire) {
             return fire.rolled !== 0;
