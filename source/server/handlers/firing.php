@@ -514,7 +514,7 @@ class Firing
 	//additional call for weapons needing extra preparation
         foreach ($gamedata->ships as $ship){
             foreach ($ship->systems as $system){
-                $system->beforeFiringOrderResolution($gamedata);
+                if($system->preFires) $system->beforeFiringOrderResolution($gamedata);
             }
         }
 
@@ -718,7 +718,7 @@ public static function firePreFiringWeapons($gamedata){
 	//additional call for weapons needing extra preparation
         foreach ($gamedata->ships as $ship){
             foreach ($ship->systems as $system){
-                $system->beforeFiringOrderResolution($gamedata);
+                if (!$system->preFires) $system->beforeFiringOrderResolution($gamedata);
             }
         }
 
