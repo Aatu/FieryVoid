@@ -514,7 +514,7 @@ class Firing
 	//additional call for weapons needing extra preparation
         foreach ($gamedata->ships as $ship){
             foreach ($ship->systems as $system){
-                if($system->preFires) $system->beforeFiringOrderResolution($gamedata);
+                $system->beforePreFiringOrderResolution($gamedata);
             }
         }
 
@@ -563,10 +563,9 @@ class Firing
 
 
 public static function firePreFiringWeapons($gamedata){	
-        //$rammingOrders  = array();
+        $rammingOrders  = array();
 
-        /*//Ramming Orders first, not needed in pre-Firing atm but could be added later.  
-        // Still, they would just be normal pre-firing at that point unless they happen before (or after) movement weapons.
+        //Ramming Orders first
         foreach ($gamedata->ships as $ship){		           
             
             //Now fire Ramming Orders before other weapons while we're looking through ships in this section.    
@@ -589,7 +588,7 @@ public static function firePreFiringWeapons($gamedata){
             $ship = $gamedata->getShipById($ramming->shooterid);
             self::fire($ship, $ramming, $gamedata);
         }        
-        */
+        
         $fireOrders  = array();  //Array for non-ramming ship fire.      
         //Now fire ship weapons.
         foreach ($gamedata->ships as $ship){	
@@ -602,7 +601,7 @@ public static function firePreFiringWeapons($gamedata){
                 if ($fire->type === "intercept" || $fire->type === "selfIntercept"  || $fire->type === "ballistic"){
                     continue;
                 }
-//echo "Value of fire->type: " . $fire->type . "\n";
+
                 $weapon = $ship->getSystemById($fire->weaponid);
                 if (!($weapon instanceof Weapon)) continue; //...just in case...               
                 if($weapon->isDestroyed($gamedata->turn) && !$weapon->ballistic) continue; //now individual weapons can be destroyed by Ramming before firing, but not ballistics.                
@@ -614,7 +613,7 @@ public static function firePreFiringWeapons($gamedata){
             
         }
         usort($fireOrders, [self::class, 'compareFiringOrders']);
-//var_dump($fireOrders);
+
         //Now fire ship weapons.
         foreach ($fireOrders as $fire){
             $ship = $gamedata->getShipById($fire->shooterid);
@@ -718,7 +717,7 @@ public static function firePreFiringWeapons($gamedata){
 	//additional call for weapons needing extra preparation
         foreach ($gamedata->ships as $ship){
             foreach ($ship->systems as $system){
-                if (!$system->preFires) $system->beforeFiringOrderResolution($gamedata);
+                $system->beforeFiringOrderResolution($gamedata);
             }
         }
 

@@ -2428,22 +2428,21 @@ class RammingAttack extends Weapon{
 		  $this->data["Special"] .= "<br>Immobile objects do have ramming attack for technical purposes, but won't use it offensively.";
 	}	
 	
-	
 	/*
 	//fill gamedata variable, which might otherwise be left out!
 	public function beforeFiringOrderResolution($gamedata){
 		$this->gamedata = $gamedata;
 	}
 	*/
-	
-	 //Create firing orders for collisions, then find Enormous units on the same hex (other than self), create automatic attacks vs them
-	public function beforeFiringOrderResolution($gamedata){
+
+	//Here we will check for collisions with Terrain in PRE-FIRING phase
+	public function beforePreFiringOrderResolution($gamedata){
 		$shooter = $this->getUnit();
 		$deployTurn = $shooter->getTurnDeployed($gamedata);
-		if($deployTurn > $gamedata->turn) return;  //Ship not deployed yet, don't ram anything!			
-
+		if($deployTurn > $gamedata->turn) return;  //Ship not deployed yet, don't ram anything!	
+	
 		//First let's check if any units moved through this Terrain unit and create appropriate fireOrders.		
-		if(($shooter->isTerrain()) && !$shooter->isDestroyed()){ //This userid denotes shooter unit is terrain e.g. Asteroids.
+		if($shooter->isTerrain() && !$shooter->isDestroyed()){ //This userid denotes shooter unit is terrain e.g. Asteroids.
 			$relevantShips = array();
 
 			//Make a list of relevant ships e.g. this ship and enemy fighters in the game.
@@ -2456,7 +2455,7 @@ class RammingAttack extends Weapon{
 			}
 
 			$terrrainPosition = $shooter->getHexPos();
-			$collisiontargets = $this->checkForCollisions($relevantShips,  $gamedata, $terrrainPosition);
+			$collisiontargets = $this->checkForCollisions($relevantShips,  $gamedata, $terrrainPosition, $shooter);
 
 			foreach($collisiontargets as $targetid=>$location){
 				$target = $gamedata->getShipById($targetid);
@@ -2469,10 +2468,10 @@ class RammingAttack extends Weapon{
 				
 					foreach ($target->systems as $fighter) {                          
 						$newFireOrder = new FireOrder(
-							-1, "normal", $shooter->id, $target->id,
+							-1, "prefiring", $shooter->id, $target->id,
 							$this->id, $fighter->id, $gamedata->turn, 1,
 							0, 0, 1, 0, 0,
-							$targetMovement->position->q, $targetMovement->position->r, $type, 10001
+							$targetMovement->position->q, $targetMovement->position->r, $type, -1
 						);
 						$newFireOrder->chosenLocation = $location;                
 				
@@ -2486,15 +2485,15 @@ class RammingAttack extends Weapon{
 					}       
 				}else{						
 					$newFireOrder = new FireOrder(
-						-1, "normal", $shooter->id, $target->id,
+						-1, "prefiring", $shooter->id, $target->id,
 						$this->id, -1, $gamedata->turn, 1,
 						0, 0, 1, 0, 0,
-						$targetMovement->position->q, $targetMovement->position->r, $type, 10001
+						$targetMovement->position->q, $targetMovement->position->r, $type, -1
 					);
 					$newFireOrder->chosenLocation = $location;				
 					$newFireOrder->pubnotes = "<br>COLLISION! Ship collided with terrain during its movement!";
 					$newFireOrder->addToDB = true;
-					$this->fireOrders[] = $newFireOrder;
+					$this->fireOrders[] = $newFireOrder;			
 				}	
 			}	
 		}
@@ -2510,7 +2509,7 @@ class RammingAttack extends Weapon{
 			if(!$target->Enormous) continue; //auto-ram Enormous units
 			if($targetID == $shooter->id) continue; //do not ram self
 			if($target->isDestroyed()) continue; //destroyed unit does not ram... and neither is rammed
-			$deployTurn = $target->getTurnDeployed($gamedata);
+			//$deployTurn = $target->getTurnDeployed($gamedata);
 			if($deployTurn > $gamedata->turn) continue;  //Ship not deployed yet, don't ram it!			
 			//don’t repeat manual ramming order
 			$alreadyDeclared = false;
@@ -2520,19 +2519,18 @@ class RammingAttack extends Weapon{
 			If($alreadyDeclared) continue;
 			//unit on the same hex is Enormous, not self, not destroyed, has deployed and not being rammed by this unit already – auto-ram it!
 			$movementThisTurn = $shooter->getLastTurnMovement($gamedata->turn+1);
-			$fire = new FireOrder(-1, 'normal', $shooter->id, $targetID, $this->id, -1, $gamedata->turn,
-				1, 0, 0, 1, 0, 0, $movementThisTurn->position->q,  $movementThisTurn->position->r, $this->weaponClass
+			$fire = new FireOrder(-1, 'prefiring', $shooter->id, $targetID, $this->id, -1, $gamedata->turn,
+				1, 0, 0, 1, 0, 0, $movementThisTurn->position->q,  $movementThisTurn->position->r, 'TerrainCrash'
 			);
 			$fire->addToDB = true;		
 			$this->fireOrders[] = $fire;
 			
 		}
+	}	
 
-	} //endof public function beforeFiringOrderResolution
-
-	private function checkForCollisions($relevantShips, $gamedata, $terrainPosition){
+	private function checkForCollisions($relevantShips, $gamedata, $terrainPosition, $thisShip){
 	    $collisiontargets = array(); // Initialize array for fighters to be fired at.	
-		$thisShip = $this->getUnit();
+		//$thisShip = $this->getUnit();
 		
 		if ($thisShip->Huge > 0) { //Terrain occupies more than just 1 hex!  Need to check all of its hexes.
 			// Add code that calls a new function, and replicates check below for all hexes within radius.
@@ -2649,6 +2647,102 @@ class RammingAttack extends Weapon{
 		return 0; // Should not happen but return default if so.
 	} //endof getCollisionLocation()
 
+	//Create firing orders for collisions, then find Enormous units on the same hex (other than self), create automatic attacks vs them
+	//Moved to beforePreFiringOrderResolution() above	 
+	public function beforeFiringOrderResolution($gamedata){
+		/*
+		$shooter = $this->getUnit();
+		$deployTurn = $shooter->getTurnDeployed($gamedata);
+		if($deployTurn > $gamedata->turn) return;  //Ship not deployed yet, don't ram anything!			
+		//Moved to beforePreFiringOrderResolution() above
+		//First let's check if any units moved through this Terrain unit and create appropriate fireOrders.		
+		if(($shooter->isTerrain()) && !$shooter->isDestroyed()){ //This userid denotes shooter unit is terrain e.g. Asteroids.
+			$relevantShips = array();
+
+			//Make a list of relevant ships e.g. this ship and enemy fighters in the game.
+			foreach($gamedata->ships as $ship){
+				if($ship->isDestroyed()) continue; //Ignore destroyed ships
+				if($ship->isTerrain()) continue;	//Don't add other terrain.
+				if($ship->getTurnDeployed($gamedata) > $gamedata->turn)	continue; //Ship not deployed yet.		
+				if ($ship instanceof FighterFlight && $shooter->Huge == 0) continue; //Not doing fighters except for very large terrain, assume they can fly around as per other auto-ram check for Enormous units.	
+				$relevantShips[] = $ship;			
+			}
+
+			$terrrainPosition = $shooter->getHexPos();
+			$collisiontargets = $this->checkForCollisions($relevantShips,  $gamedata, $terrrainPosition);
+
+			foreach($collisiontargets as $targetid=>$location){
+				$target = $gamedata->getShipById($targetid);
+				$type = "TerrainCollision";
+				if($shooter->Huge > 0 ) $type = "TerrainCrash"; //Larger Terrain, like Moons.
+				$targetMovement = $target->getLastTurnMovement($gamedata->turn+1);
+
+				if ($target instanceof FighterFlight && $type === "TerrainCrash") {
+					$first = true; // Flag to track the first entry
+				
+					foreach ($target->systems as $fighter) {                          
+						$newFireOrder = new FireOrder(
+							-1, "normal", $shooter->id, $target->id,
+							$this->id, $fighter->id, $gamedata->turn, 1,
+							0, 0, 1, 0, 0,
+							$targetMovement->position->q, $targetMovement->position->r, $type, 10001
+						);
+						$newFireOrder->chosenLocation = $location;                
+				
+						if ($first) {
+							$newFireOrder->pubnotes = "<br>COLLISION! A fighter unit collided with terrain during its movement!";
+							$first = false; // Set flag to false after first iteration
+						}
+				
+						$newFireOrder->addToDB = true;
+						$this->fireOrders[] = $newFireOrder;
+					}       
+				}else{						
+					$newFireOrder = new FireOrder(
+						-1, "normal", $shooter->id, $target->id,
+						$this->id, -1, $gamedata->turn, 1,
+						0, 0, 1, 0, 0,
+						$targetMovement->position->q, $targetMovement->position->r, $type, 10001
+					);
+					$newFireOrder->chosenLocation = $location;				
+					$newFireOrder->pubnotes = "<br>COLLISION! Ship collided with terrain during its movement!";
+					$newFireOrder->addToDB = true;
+					$this->fireOrders[] = $newFireOrder;
+				}	
+			}	
+		}
+		
+		if($this->autoFireOnly) return;//ramming attack on some units (eg. immobile ones) is for technical purposes only!	
+		$this->gamedata = $gamedata;//fill gamedata variable, which might otherwise be left out!
+		
+		if($shooter instanceof FighterFlight) return; //fighters do not auto-ram; in tabletop they would make skin dance roll instead, but its success chance would be very high and it carries additional benefit if successful
+		if($shooter->isDestroyed()) return; //destroyed unit does not ram
+		$targetList = $gamedata->getShipsInDistance($shooter);
+		$alreadyFiringAt = $this->getFireOrders($gamedata->turn);
+		foreach($targetList as $targetID=>$target){
+			if(!$target->Enormous) continue; //auto-ram Enormous units
+			if($targetID == $shooter->id) continue; //do not ram self
+			if($target->isDestroyed()) continue; //destroyed unit does not ram... and neither is rammed
+			//$deployTurn = $target->getTurnDeployed($gamedata);
+			if($deployTurn > $gamedata->turn) continue;  //Ship not deployed yet, don't ram it!			
+			//don’t repeat manual ramming order
+			$alreadyDeclared = false;
+			foreach ($alreadyFiringAt as $existingFiringOrder){
+				if($existingFiringOrder->targetid == $targetID) $alreadyDeclared = true;
+			}
+			If($alreadyDeclared) continue;
+			//unit on the same hex is Enormous, not self, not destroyed, has deployed and not being rammed by this unit already – auto-ram it!
+			$movementThisTurn = $shooter->getLastTurnMovement($gamedata->turn+1);
+			$fire = new FireOrder(-1, 'normal', $shooter->id, $targetID, $this->id, -1, $gamedata->turn,
+				1, 0, 0, 1, 0, 0, $movementThisTurn->position->q,  $movementThisTurn->position->r, $this->weaponClass
+			);
+			$fire->addToDB = true;		
+			$this->fireOrders[] = $fire;
+			
+		}
+		*/
+	} //endof public function beforeFiringOrderResolution
+
 
 	public function calculateHitBase($gamedata, $fireOrder)
 	{
@@ -2725,8 +2819,12 @@ class RammingAttack extends Weapon{
 
 			$this->damage($target, $shooter, $fireOrder,  $gamedata, $damage);
 			if($fireOrder->id < 0 && $fireOrder->damageclass != 'TerrainCollision'){ //for automatic firing orders return damage will not be correctly assigned; create a virtual firing order for this damage to be displayed unless is a collision during movement.
+				//Auto-ramming will generally occur in PreFiring Phase now, since there's little movement after that.
+				$fireType = "prefiring";
+				if($gamedata->phase == 3) $fireType = "normal";
+
 				$newFireOrder = new FireOrder(
-					-1, "normal", $shooter->id, $target->id,
+					-1, $fireType, $shooter->id, $target->id,
 					$this->id, -1, $gamedata->turn, 1, 
 					100, 100, 1, 1, 0,
 					0,0,'AutoRam',10000
