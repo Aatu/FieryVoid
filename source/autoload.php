@@ -804,6 +804,7 @@ spl_autoload_register(
                 'reducediniative' => '/server/model/cricialClasses.php',
                 'reducediniativeoneturn' => '/server/model/cricialClasses.php',
                 'reducedrange' => '/server/model/cricialClasses.php',
+                'reducedrangevalue' => '/server/model/cricialClasses.php',               
                 'reloadrack' => '/server/model/weapons/missile.php',
                 'repeatergun' => '/server/model/weapons/particle.php',
                 'resha' => '/server/model/ships/balosian/resha.php',
