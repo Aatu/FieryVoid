@@ -153,9 +153,8 @@ PakmaraPlasmaWeb.prototype.constructor =  PakmaraPlasmaWeb;
 
 PakmaraPlasmaWeb.prototype.initializationUpdate = function () {
     if(this.firingMode == 2){
-        var baseRange =  this.rangeArray[2]; //This is just a convenient place to find the base value before we amend.  Prevents duplication.
         const rangeCrit = shipManager.criticals.countCriticalOnTurn(this, "ReducedRangeValue", gamedata.turn);
-        this.range = Math.max(0, baseRange - rangeCrit); //Never go below 0.
+        if(rangeCrit > 0) this.range = 1;
         this.data['Range'] = this.range;   
     }    
 	return this;
