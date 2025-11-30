@@ -12,7 +12,7 @@ class KalavarEarlyAM extends OSAT{
 			$this->occurence = "common";
 			$this->variantOf = 'Kalavar Orbital Satellite (2240)';
         $this->isd = 2220;
- 		$this->unofficial = 'S'; //design released after AoG demise
+		$this->unofficial = true; 
         
         $this->forwardDefense = 10;
         $this->sideDefense = 10;

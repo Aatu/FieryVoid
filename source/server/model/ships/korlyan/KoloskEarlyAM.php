@@ -14,7 +14,7 @@ class KoloskEarlyAM extends BaseShip{
 			$this->variantOf = 'Koskova Battlecruiser';
         $this->shipSizeClass = 3;
 		$this->canvasSize = 160; //img has 200px per side
- 		$this->unofficial = 'S'; //design released after AoG demise
+		$this->unofficial = true; 
 
 		$this->isd = 2239;
         $this->fighters = array("assault shuttles"=>2);
