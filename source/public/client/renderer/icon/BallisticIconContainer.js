@@ -495,7 +495,7 @@ window.BallisticIconContainer = function () {
 			launchPosition,
 			targetPosition,
 			3 * this.zoomScale,
-			-3,
+			-2,
 			getLineColorByType(type),
 			0.5
 		);
