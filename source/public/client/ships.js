@@ -994,6 +994,7 @@ window.shipManager = {
 
     //Generic function called from various front end functions.  Checks if ships should be shown/interactable or not.
     shouldBeHidden: function(ship) {    
+        if(!gamedata.replay && shipManager.isDestroyed(ship)) return true; //Prevents lots of things from happening when a ship collides and dies to Terrain.
         if(shipManager.getTurnDeployed(ship) > gamedata.turn) return true; //Not deployed yet.
         if(!gamedata.isMyorMyTeamShip(ship) && shipManager.isStealthShip(ship) && !shipManager.isDetected(ship)) return true; //Enemy, stealth ship and not currently detected
         return false;
