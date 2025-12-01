@@ -650,22 +650,140 @@ var ProximityLaser = function ProximityLaser(json, ship) {
 ProximityLaser.prototype = Object.create(Weapon.prototype);
 ProximityLaser.prototype.constructor = ProximityLaser;
 
-ProximityLaser.prototype.getFiringHex = function(shooter, weapon){ //Need to calculate hit chance from where Launcher targets.	
-	var sPosLaunch; 
-    var launcher = this.launcher;
-    var ship = this.ship;
-    //var launcherOrder = weaponManager.getFiringOrder(ship, launcher)
-    var launcherOrder = launcher.fireOrders[0] || weaponManager.getFiringOrder(ship, launcher);
+var ProximityLaserNew = function ProximityLaserNew(json, ship) {
+    Weapon.call(this, json, ship);
+};
+ProximityLaserNew.prototype = Object.create(Weapon.prototype);
+ProximityLaserNew.prototype.constructor = ProximityLaserNew;
 
-	   	if (launcherOrder)	{	// check that launcher has firing orders.  
-			sPosLaunch = new hexagon.Offset(launcherOrder.x, launcherOrder.y); 
-		} else{
-		    sPosLaunch = shipManager.movement.getPositionAtStartOfTurn(shooter, gamedata.turn); 	
-		}	
+ProximityLaserNew.prototype.initializationUpdate = function() {
+    if (this.fireOrders.length > 0) {
+        this.hextarget = false;
+        this.startArc = 0; //Hex target has arc, laser shot does not.
+        this.endArc = 360;
+    }else{
+        this.hextarget = true;
+        this.startArc = this.startArcArray[0]; //Use Arc arrays to reset to default
+        this.endArc = this.endArcArray[0];                
+    } 
+
+    return this;
+};
+
+ProximityLaserNew.prototype.getFiringHex = function(shooter, weapon, ballistic = null){ //Need to calculate hit chance from where Launcher targets.	
+    var sPosLaunch;     
+    /*if(ballistic !== null){ //This is a query from BallisticIconContainer
+        var launcherOrder = this.fireOrders[0];          
+        if(ballistic.damageclass == 'Targeter'){ //Initial Hex Targeting
+            sPosLaunch = shipManager.movement.getPositionAtStartOfTurn(shooter, gamedata.turn); 
+        }else{ //Laser targeting
+            sPosLaunch = new hexagon.Offset(launcherOrder.x, launcherOrder.y); 
+        }
+        
+    }else{ //Normal query from targeting methods
+    */    
+        if (this.fireOrders.length > 1) {	//A hex has been targted, firing hex changes to those coordinates
+            var sPosLaunch; 
+            //var launcher = this.launcher;
+            //var ship = this.ship;
+            //var launcherOrder = weaponManager.getFiringOrder(ship, launcher)
+            var launcherOrder = this.fireOrders[0];       
+            //var launcherOrder = launcher.fireOrders[0] || weaponManager.getFiringOrder(ship, launcher);
+
+                if (launcherOrder)	{	// check that launcher has firing orders.  
+                    sPosLaunch = new hexagon.Offset(launcherOrder.x, launcherOrder.y); 
+                } else{
+                    sPosLaunch = shipManager.movement.getPositionAtStartOfTurn(shooter, gamedata.turn);            	
+                }
+        }else{ //Lasers not locked in yet, use firing ship position.
+            sPosLaunch = shipManager.movement.getPositionAtStartOfTurn(shooter, gamedata.turn); 
+        }
+   // }    
+
 	return sPosLaunch;
 	
-	};
-		
+};
+
+
+ProximityLaserNew.prototype.doMultipleHexFireOrders = function (shooter, hexpos) {
+    
+    var shotsOnTarget = 1; //we're only ever allocating one shot at a time for this weapon in Split mode.
+
+    if (this.fireOrders.length > 1) {
+        return;
+    } 
+
+    var fireOrdersArray = []; // Store multiple fire orders
+
+    for (var s = 0; s < shotsOnTarget; s++) {
+            var fireid = shooter.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
+            var fire = {
+                id: fireid,
+                type: 'ballistic',
+                shooterid: shooter.id,
+                targetid: -1,
+                weaponid: this.id,
+                calledid: -1,
+                turn: gamedata.turn,
+                firingMode: this.firingMode,
+                shots: this.defaultShots,
+                x: hexpos.q,
+                y: hexpos.r,
+                damageclass: 'Targeter', 
+                notes: "split"                
+            };
+        this.fireOrders.push(fire);
+    }
+
+    this.hextarget = false;
+
+    return fireOrdersArray; // Return all fire orders
+};  
+
+ProximityLaserNew.prototype.doMultipleFireOrders = function (shooter, target, system) {
+    
+    var shotsOnTarget = 1; //we're only ever allocating one shot at a time for this weapon in Split mode.
+
+    if (this.fireOrders.length > 1) {
+        return;
+    } 
+
+    var fireOrdersArray = []; // Store multiple fire orders
+
+    for (var s = 0; s < shotsOnTarget; s++) {
+        var fireid = shooter.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
+        var calledid = -1; //No called shots.     
+
+        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
+        if(chance < 1) continue;
+
+        var fire = {
+            id: fireid,
+            type: 'ballistic',
+            shooterid: shooter.id,
+            targetid: target.id,
+            weaponid: this.id,
+            calledid: calledid,
+            turn: gamedata.turn,
+            firingMode: this.firingMode,
+            shots: 1,
+            x: "null",
+            y: "null",
+            damageclass: 'Laser', 
+            chance: chance,
+            hitmod: 0,
+            notes: "Split"
+        };
+        
+        fireOrdersArray.push(fire); // Store each fire order
+    }
+
+
+    //weaponManager.unSelectWeapon(shooter, this); //If that was second shot, unselect
+
+    return fireOrdersArray; // Return all fire orders
+};    
+
 var GromeTargetingArray = function GromeTargetingArray(json, ship) {
     Weapon.call(this, json, ship);
 };
