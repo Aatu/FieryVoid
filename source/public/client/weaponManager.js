@@ -1585,9 +1585,10 @@ window.weaponManager = {
                         if (fire.length > 0) weapon.fireOrders.push(...fire);
                         var finishedFiring = weapon.checkFinished(); //Split weapons should unselect after they've used all their shots.
 						if(finishedFiring){
-                            toUnselect.push(weapon);
+                            toUnselect.push(weapon); //Normal method
+                        }else{
+						    splitTargeted.push(weapon); //Not finished, to be added to toUnselect aray at correct time below. 	  
                         }     
-						splitTargeted.push(weapon); //To be added to toUnselect aray at corect time below. 	                    
         				webglScene.customEvent('SystemDataChanged', { ship: ship, system: weapon });      				
                     }else{
 	                    weaponManager.removeFiringOrder(selectedShip, weapon);
@@ -1781,9 +1782,13 @@ window.weaponManager = {
                         var fire = weapon.doMultipleHexFireOrders(selectedShip, hexpos);
                         if (!Array.isArray(fire)) fire = fire ? [fire] : []; // Ensure fire is an array or an empty one                       
                         if (fire.length > 0) weapon.fireOrders.push(...fire);
-						//toUnselect.push(weapon); //It's actually easier to target if you don't! 
-						splitTargeted.push(weapon); //To be added to toUnselect aray at corect time below. 	                    
-        				//webglScene.customEvent('SystemDataChanged', { ship: ship, system: weapon });      				
+                        var finishedFiring = weapon.checkFinished(); //Split weapons should unselect after they've used all their shots.
+						if(finishedFiring){
+                            toUnselect.push(weapon); //Normal method
+                        }else{
+						    splitTargeted.push(weapon); //Not finished, to be added to toUnselect aray at correct time below. 	  
+                        }                      
+        				webglScene.customEvent('SystemDataChanged', { ship: selectedShip, system: weapon });      				
                     }else{                    
                     
                         weaponManager.removeFiringOrder(selectedShip, weapon);
