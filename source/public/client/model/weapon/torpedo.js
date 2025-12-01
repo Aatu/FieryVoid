@@ -24,12 +24,6 @@ BallisticTorpedo.prototype.initializationUpdate = function() {
 
 BallisticTorpedo.prototype.doMultipleFireOrders = function (shooter, target, system) {
 	
-/* //Can be used to restruct only one shot against a ship.
-	var fireOrders = this.fireOrders;
-	for (var i = fireOrders.length - 1; i >= 0; i--) {
-		if(target.shipSizeClass >= 0 && target.id === fireOrders[i].targetid && this.firingMode == 1) return; //Ships cannot be targeted more than once in normal firing mode.
-	}	
-*/		
 	//Don't add Firing Order and give player error message if they are out of ammo.
 	if(this.data["Number of shots"] <= 0){
 		confirm.error("A Ballistic Torpedo launcher does not have enough ammo to target another shot.");		
@@ -43,13 +37,6 @@ BallisticTorpedo.prototype.doMultipleFireOrders = function (shooter, target, sys
 
 	    var damageClass = this.data["Weapon type"].toLowerCase();
 	    var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
-/*
-//Ballisitic Torpedo is, unsurprisingly, always a ballistic weapon :)
-	    if ((chance < 1)&&(!this.ballistic)) {//now ballistics can be launched when hit chance is 0 or less - important for Packet Torpedo!
-		    //debug && console.log("Can't fire, change < 0");
-		    continue;
-	    }
-*/
 
 	    var fire = {
 	        id: fireid,

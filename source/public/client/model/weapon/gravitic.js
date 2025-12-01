@@ -182,6 +182,9 @@ GraviticLance.prototype.doMultipleFireOrders = function (shooter, target, system
         shotsOnTarget--; //Reduce guns to 1, one shot is already locked and we don't want to target 3 :)        
     }
     */
+
+	if(this.firingMode == 3 && this.fireOrders.length > 1) return;  
+
     var shotsOnTarget = 1;  
     var fireOrdersArray = []; // Store multiple fire orders
 
@@ -368,13 +371,15 @@ MedAntigravityBeam.prototype.initializationUpdate = function() {
 MedAntigravityBeam.prototype.doMultipleFireOrders = function (shooter, target, system) {
 
     var shotsOnTarget = 1; //we're only ever allocating one shot at a time for this weapon.
-
+    /*
     if (this.fireOrders.length > 0) {
         if (this.fireOrders.length >= this.guns) {
             // All guns already fired → retarget one gun by removing oldest fireorder.
             this.fireOrders.splice(0, 1);
         }
     } 
+    */
+	if(this.firingMode == 2 && this.fireOrders.length > 1) return; 
 
     var fireOrdersArray = []; // Store multiple fire orders
 
@@ -407,6 +412,11 @@ MedAntigravityBeam.prototype.doMultipleFireOrders = function (shooter, target, s
     }
     
     return fireOrdersArray; // Return all fire orders
+};
+
+MedAntigravityBeam.prototype.checkFinished = function () {
+	if(this.firingMode == 2 && this.fireOrders.length > 1) return true;    
+    return false;
 };
 
 var AntigravityBeam = function AntigravityBeam(json, ship) {
@@ -427,13 +437,15 @@ AntigravityBeam.prototype.initializationUpdate = function() {
 AntigravityBeam.prototype.doMultipleFireOrders = function (shooter, target, system) {
 
     var shotsOnTarget = 1; //we're only ever allocating one shot at a time for this weapon.
-
+    /*
     if (this.fireOrders.length > 0) {
         if (this.fireOrders.length >= this.guns) {
             // All guns already fired → retarget one gun by removing oldest fireorder.
             this.fireOrders.splice(0, 1);
         }
     } 
+    */
+	if(this.firingMode == 2 && this.fireOrders.length > 2) return; 
 
     var fireOrdersArray = []; // Store multiple fire orders
 
@@ -466,4 +478,9 @@ AntigravityBeam.prototype.doMultipleFireOrders = function (shooter, target, syst
     }
     
     return fireOrdersArray; // Return all fire orders
+};
+
+AntigravityBeam.prototype.checkFinished = function () {
+	if(this.firingMode == 2 && this.fireOrders.length > 1) return true;    
+    return false;
 };
