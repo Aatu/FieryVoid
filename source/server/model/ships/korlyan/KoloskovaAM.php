@@ -17,7 +17,7 @@ class KoloskovaAM extends MediumShip{
 
 	    $this->notes = 'Antiquated Sensors (cannot be boosted).';
 	    $this->notes .= '<br>Atmospheric Capable';
-		$this->notes .= "Showdowns-9";        
+		$this->notes .= "<br>Showdowns-9";        
         
         $this->forwardDefense = 13;
         $this->sideDefense = 14;
