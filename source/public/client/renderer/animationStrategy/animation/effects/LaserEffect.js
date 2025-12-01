@@ -23,7 +23,7 @@ window.LaserEffect = function () {
 
         if (!this.hit) {
             const targetPos = this.target instanceof ShipIcon ? this.target.getPosition() : this.target;
-            this.target = mathlib.getPointBetween(this.shooter.getPosition(), targetPos, Math.random() * 0.1 + 2.5);
+            this.target = mathlib.getPointBetween(this.weaponOrigin, targetPos, Math.random() * 0.1 + 2.5);
         }
 
         this.scene = scene;
