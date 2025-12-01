@@ -10,7 +10,7 @@ class KalavarAM extends OSAT{
         $this->imagePath = "img/ships/korlyan_kalavar.png";
         $this->shipClass = "Kalavar Orbital Satellite (2240)";
         $this->isd = 2240;
-        
+			$this->variantOf = 'OBSELETE';        
         $this->forwardDefense = 10;
         $this->sideDefense = 10;
         

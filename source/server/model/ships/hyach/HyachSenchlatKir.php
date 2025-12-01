@@ -9,7 +9,7 @@ class HyachSenchlatKir extends HeavyCombatVessel{
         $this->phpclass = "HyachSenchlatKir";
         $this->imagePath = "img/ships/HyachSenchlatKam.png";           
         $this->shipClass = "Senchlat Kir Ballistic Cruiser";
-			$this->variantOf = 'Senchlat Kam Light Cruiser';
+			$this->variantOf = 'OBSELETE';
 			$this->occurence = "rare";
         $this->gravitic = true;
 

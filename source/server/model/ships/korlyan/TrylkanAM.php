@@ -10,7 +10,7 @@ class TrylkanAM extends HeavyCombatVessel{
         $this->imagePath = "img/ships/korlyan_solyrn2.png";
         $this->shipClass = "Trylkan Ballistic Destroyer";
 			$this->occurence = "uncommon";
-			$this->variantOf = 'Solyrn Missile Destroyer';			
+			$this->variantOf = 'OBSELETE';			
         $this->limited = 10;
 	    $this->isd = 2251;
 

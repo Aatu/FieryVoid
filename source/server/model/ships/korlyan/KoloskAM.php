@@ -10,7 +10,7 @@ class KoloskAM extends BaseShip{
         $this->imagePath = "img/ships/korlyan_koskova3.png";
         $this->shipClass = "Kolosk Proximity Cruiser";
 			$this->occurence = "uncommon";
-			$this->variantOf = 'Koskova Battlecruiser';
+			$this->variantOf = 'OBSELETE';
         $this->shipSizeClass = 3;
 		$this->canvasSize = 160; //img has 200px per side
 
