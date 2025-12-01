@@ -206,7 +206,7 @@ spl_autoload_register(
                 'customgatlingmattergunheavy' => '/server/model/weapons/customs.php',
 				
                 'customheavypolaritypulsar' => '/server/model/weapons/customs.php',		    
-                'customheavymattercannon' => '/server/model/weapons/customs.php',
+                //'customheavymattercannon' => '/server/model/weapons/customs.php',
                 'customlightmattercannon' => '/server/model/weapons/customs.php',
                 'customlightmattercannonf' => '/server/model/weapons/customs.php',
                 'customltphasedisruptor' => '/server/model/weapons/customs.php',
@@ -2395,7 +2395,7 @@ spl_autoload_register(
                 'toratagoltharcc' => '/server/model/ships/torata/torataGoltharCC.php',
 				'toratadartocca' => '/server/model/ships/torata/torataDartocCA.php',
 				'toratalatracce' => '/server/model/ships/torata/torataLatracCE.php',
-                'toratagoltharcc' => '/server/model/ships/torata/torataGoltharCC.php',
+                //'toratagoltharcc' => '/server/model/ships/torata/torataGoltharCC.php',
                 'torataheltakaclog' => '/server/model/ships/torata/torataHeltakaCLog.php',
 				'torataheltakaclogpods' => '/server/model/ships/torata/torataHeltakaCLogPods.php',		
                 'toratatoglatmonitor' => '/server/model/ships/torata/torataToglatMonitor.php',	
@@ -2887,7 +2887,7 @@ spl_autoload_register(
 				//units						
 				'hyachalichikav' => '/server/model/ships/hyach/HyachAlichiKav.php',
 				'hyachalichital' => '/server/model/ships/hyach/HyachAlichiTal.php',
-				'hyachalichikav' => '/server/model/ships/hyach/HyachAlichiKav.php',
+				//'hyachalichikav' => '/server/model/ships/hyach/HyachAlichiKav.php',
 				'hyachdartha' => '/server/model/ships/hyach/HyachDartha.php',
 				'hyachdovoch' => '/server/model/ships/hyach/HyachDovoch.php',				
 				'hyachdoskva' => '/server/model/ships/hyach/HyachDoskva.php',
@@ -2902,29 +2902,29 @@ spl_autoload_register(
 				'hyachokathkur' => '/server/model/ships/hyach/HyachOkathKur.php',
 				'hyachsenchlatkam' => '/server/model/ships/hyach/HyachSenchlatKam.php',
 				'hyachsenchlatkes' => '/server/model/ships/hyach/HyachSenchlatKes.php',
-				'hyachsenchlatkir' => '/server/model/ships/hyach/HyachSenchlatKir.php',
+				'hyachsenchlatkir' => '/server/model/ships/hyach/HyachSenchlatKir.php', //OBSELETE	
 				'hyachtachilakor' => '/server/model/ships/hyach/HyachTachilaKor.php',
 				'hyachtakaltikal' => '/server/model/ships/hyach/HyachTakaltiKal.php',
 				'hyachtakaltikam' => '/server/model/ships/hyach/HyachTakaltiKam.php',
 				'hyachuruthakal' => '/server/model/ships/hyach/HyachUruthaKal.php',
 				'hyachutarator' => '/server/model/ships/hyach/HyachUtaraTor.php',
-
+				'hyachsenchlatkirnew' => '/server/model/ships/hyach/HyachSenchlatKirNew.php',
 
 				//Kor-Lyan
 				'axor' => '/server/model/ships/korlyan/Axor.php',
 				'cokra' => '/server/model/ships/korlyan/Cokra.php',
 				'fenja' => '/server/model/ships/korlyan/Fenja.php',
-				'kalavaram' => '/server/model/ships/korlyan/KalavarAM.php',
-				'kalavarearlyam' => '/server/model/ships/korlyan/KalavarEarlyAM.php',
+				'kalavaram' => '/server/model/ships/korlyan/KalavarAM.php', //OBSELETE	
+				'kalavarearlyam' => '/server/model/ships/korlyan/KalavarEarlyAM.php', //OBSELETE	
 				'kalavaroriginalam' => '/server/model/ships/korlyan/KalavarOriginalAM.php',
 				'kaltiam' => '/server/model/ships/korlyan/KaltiAM.php',
-				'koloskam' => '/server/model/ships/korlyan/KoloskAM.php',
-				'koloskearlyam' => '/server/model/ships/korlyan/KoloskEarlyAM.php',
+				'koloskam' => '/server/model/ships/korlyan/KoloskAM.php', //OBSELETE	
+				'koloskearlyam' => '/server/model/ships/korlyan/KoloskEarlyAM.php', //OBSELETE	
 				'koloskovaam' => '/server/model/ships/korlyan/KoloskovaAM.php',
 				'koshaam' => '/server/model/ships/korlyan/KoshaAM.php',
 				'koshaearlyam' => '/server/model/ships/korlyan/KoshaEarlyAM.php',
-				'koskovaam' => '/server/model/ships/korlyan/KoskovaAM.php',
-				'koskovaearlyam' => '/server/model/ships/korlyan/KoskovaEarlyAM.php',
+				'koskovaam' => '/server/model/ships/korlyan/KoskovaAM.php', //OBSELETE	
+				'koskovaearlyam' => '/server/model/ships/korlyan/KoskovaEarlyAM.php', //OBSELETE	
 				'leklantam' => '/server/model/ships/korlyan/LeklantAM.php',
 				'leklantearlyam' => '/server/model/ships/korlyan/LeklantEarlyAM.php',
 				'lekra' => '/server/model/ships/korlyan/Lekra.php',
@@ -2934,20 +2934,31 @@ spl_autoload_register(
 				'raklaviam' => '/server/model/ships/korlyan/RaklaviAM.php',
 				'solyrnam' => '/server/model/ships/korlyan/SolyrnAM.php',
 				'soskaam' => '/server/model/ships/korlyan/SoskaAM.php',
-				'talokiam' => '/server/model/ships/korlyan/TalokiAM.php',				
-				'talokiearlyam' => '/server/model/ships/korlyan/TalokiEarlyAM.php',
+				'talokiam' => '/server/model/ships/korlyan/TalokiAM.php',	//OBSELETE			
+				'talokiearlyam' => '/server/model/ships/korlyan/TalokiEarlyAM.php', //OBSELETE	
 				'talokioriginalam' => '/server/model/ships/korlyan/TalokiOriginalAM.php',
 				'vaklaram' => '/server/model/ships/korlyan/VaklarAM.php',			
-				'trylkanam' => '/server/model/ships/korlyan/TrylkanAM.php',
+				'trylkanam' => '/server/model/ships/korlyan/TrylkanAM.php', //OBSELETE	
 				'verlokaam' => '/server/model/ships/korlyan/VerlokaAM.php',								
+                //New versions of KL ships with remade PRoximity Laser, leaving the old ones above for a while to prevent games breaking.
+				'kalavaramnew' => '/server/model/ships/korlyan/KalavarAMNew.php',	
+				'kalavarearlyamnew' => '/server/model/ships/korlyan/KalavarEarlyAMNew.php',	
+				'koloskamnew' => '/server/model/ships/korlyan/KoloskAMNew.php',	
+				'koloskearlyamnew' => '/server/model/ships/korlyan/KoloskEarlyAMNew.php',	
+				'koskovaamnew' => '/server/model/ships/korlyan/KoskovaAMNew.php',	
+				'koskovaearlyamnew' => '/server/model/ships/korlyan/KoskovaEarlyAMNew.php',
+				'talokiamnew' => '/server/model/ships/korlyan/TalokiAMNew.php',	                		
+				'talokiearlyamnew' => '/server/model/ships/korlyan/TalokiEarlyAMNew.php',	        
+				'trylkanamnew' => '/server/model/ships/korlyan/TrylkanAMNew.php',                                                                                                                        
 
 
                 'tmphitreduction' => '/server/model/cricialClasses.php',
 				'limpetbore' => '/server/model/cricialClasses.php',                
 				'limpetboretravelling' => '/server/model/cricialClasses.php', 
 				
-         		'proximitylaser' => '/server/model/weapons/specialWeapons.php',
-         		'proximitylaserlauncher' => '/server/model/weapons/specialWeapons.php',         		 
+         		'proximitylaser' => '/server/model/weapons/specialWeapons.php',  //OBSELETE
+         		'proximitylaserlauncher' => '/server/model/weapons/specialWeapons.php', //OBSELETE
+         		'proximitylasernew' => '/server/model/weapons/specialWeapons.php',                      		 
          		'multidefenselauncher' => '/server/model/weapons/customNexus.php', //missile racks themselves
          		'limpetboretorpedo' => '/server/model/weapons/torpedo.php', 				
          		'limpetboretorpedobase' => '/server/model/weapons/torpedo.php',
