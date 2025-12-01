@@ -75,6 +75,11 @@ BallisticTorpedo.prototype.doMultipleFireOrders = function (shooter, target, sys
 	}
 };
 
+BallisticTorpedo.prototype.checkFinished = function () {
+	if(this.fireOrders.length == this.turnsloaded) return true; 
+    return false;
+};
+
 var IonTorpedo = function IonTorpedo(json, ship) {
     Torpedo.call(this, json, ship);
 };

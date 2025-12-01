@@ -65,6 +65,11 @@ TwinArray.prototype.doMultipleFireOrders = function (shooter, target, system) {
     return fireOrdersArray; // Return all fire orders
 };
 
+TwinArray.prototype.checkFinished = function () {
+	if(this.firingMode == 2 && this.fireOrders.length > 1) return true;    
+    return false;
+};
+
 var QuadArray = function QuadArray(json, ship) {
     Particle.call(this, json, ship);
 };
@@ -124,6 +129,11 @@ QuadArray.prototype.doMultipleFireOrders = function (shooter, target, system) {
     return fireOrdersArray; // Return all fire orders
 };
 
+QuadArray.prototype.checkFinished = function () {
+	if(this.firingMode == 5 && this.fireOrders.length > 3) return true;   
+    return false;
+};
+
 var HeavyArray = function HeavyArray(json, ship) {
     Particle.call(this, json, ship);
 };
@@ -181,6 +191,11 @@ HeavyArray.prototype.doMultipleFireOrders = function (shooter, target, system) {
     }
     
     return fireOrdersArray; // Return all fire orders
+};
+
+HeavyArray.prototype.checkFinished = function () {
+	if(this.firingMode == 2 && this.fireOrders.length > 1) return true;    
+    return false;
 };
 
 var HeavyParticleBeam = function HeavyParticleBeam(json, ship) {
@@ -252,6 +267,11 @@ QuadParticleBeam.prototype.doMultipleFireOrders = function (shooter, target, sys
     }
     
     return fireOrdersArray; // Return all fire orders
+};
+
+QuadParticleBeam.prototype.checkFinished = function () {
+	if(this.firingMode == 2 && this.fireOrders.length > 3) return true;    
+    return false;
 };
 
 var AdvParticleBeam = function AdvParticleBeam(json, ship) {

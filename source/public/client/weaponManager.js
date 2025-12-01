@@ -1370,6 +1370,8 @@ window.weaponManager = {
 	    if(!weaponManager.canSelfInterceptSingle(ship, weapon)) return; //last check whether weapon is eligible for that!
         if(weapon.canSplitShots) { //Discharge Gun/Slicers use their own logic here, so diverge to their own methods.
             weapon.doMultipleSelfIntercept(ship);
+            var outOfShots = weapon.checkFinished();
+            if(outOfShots) weaponManager.unSelectWeapon(ship, weapon);
             return;
         }
 	    var fireid = ship.id + "_" + weapon.id + "_" + (weapon.fireOrders.length + 1);
@@ -1581,7 +1583,10 @@ window.weaponManager = {
                         var fire = weapon.doMultipleFireOrders(selectedShip, ship, system);
                         if (!Array.isArray(fire)) fire = fire ? [fire] : []; // Ensure fire is an array or an empty one                       
                         if (fire.length > 0) weapon.fireOrders.push(...fire);
-						//toUnselect.push(weapon); //It's actually easier to target if you don't! 
+                        var finishedFiring = weapon.checkFinished(); //Split weapons should unselect after they've used all their shots.
+						if(finishedFiring){
+                            toUnselect.push(weapon);
+                        }     
 						splitTargeted.push(weapon); //To be added to toUnselect aray at corect time below. 	                    
         				webglScene.customEvent('SystemDataChanged', { ship: ship, system: weapon });      				
                     }else{

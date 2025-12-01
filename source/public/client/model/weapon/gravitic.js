@@ -174,14 +174,15 @@ GraviticLance.prototype.initializationUpdate = function() {
 
 GraviticLance.prototype.doMultipleFireOrders = function (shooter, target, system) {
 
-    var shotsOnTarget = this.guns; // Default guns initially.  We never want teh palyer to miss firing a shot for such a powerful weapon (and it can't intercept).
+    /*var shotsOnTarget = this.guns; // Default guns initially.  We never want teh palyer to miss firing a shot for such a powerful weapon (and it can't intercept).
     if (this.fireOrders.length == 2) { // Two shots have been locked in, remove the first.
         this.fireOrders.splice(0, 1); // Remove the first fire order.
         shotsOnTarget--; //Reduce guns to 1, the one currently being retargeted!
     }else if(this.fireOrders.length == 1){
         shotsOnTarget--; //Reduce guns to 1, one shot is already locked and we don't want to target 3 :)        
     }
-
+    */
+    var shotsOnTarget = 1;  
     var fireOrdersArray = []; // Store multiple fire orders
 
     for (var s = 0; s < shotsOnTarget; s++) {
@@ -213,6 +214,11 @@ GraviticLance.prototype.doMultipleFireOrders = function (shooter, target, system
     }
     
     return fireOrdersArray; // Return all fire orders
+};
+
+GraviticLance.prototype.checkFinished = function () {
+	if(this.firingMode == 3 && this.fireOrders.length > 1) return true;    
+    return false;
 };
 
 var GraviticCutter = function GraviticCutter(json, ship) {

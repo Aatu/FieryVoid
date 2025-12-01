@@ -258,7 +258,7 @@ VorlonDischargeGun.prototype.checkSelfInterceptSystem = function() {
 
 VorlonDischargeGun.prototype.doMultipleSelfIntercept = function(ship) {
 
-    for (var s = 0; s < this.data["Shots Remaining"]; s++) {    
+    for (var s = 0; s < 1; s++) {    
         var fireid = ship.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
         var fire = {
         id: fireid,
@@ -279,6 +279,11 @@ VorlonDischargeGun.prototype.doMultipleSelfIntercept = function(ship) {
         this.fireOrders.push(fire);
     } 
     webglScene.customEvent('SystemDataChanged', { ship: ship, system: this });   
+};
+
+VorlonDischargeGun.prototype.checkFinished = function () {
+	if(this.fireOrders.length > 3) return true;
+    return false;
 };
 
 
@@ -310,6 +315,11 @@ VorlonDischargeCannon.prototype.initializationUpdate = function() {
     return this;
 };
 
+VorlonDischargeCannon.prototype.checkFinished = function () {
+	if(this.fireOrders.length > 3) return true;
+    return false;
+};
+
 var VorlonLightningCannon = function VorlonLightningCannon(json, ship) {
     Weapon.call(this, json, ship);
 };
@@ -332,7 +342,6 @@ var VorlonLtDischargeGun = function VorlonLtDischargeGun(json, ship) {
 };
 VorlonLtDischargeGun.prototype = Object.create(Weapon.prototype);
 VorlonLtDischargeGun.prototype.constructor = VorlonLtDischargeGun;
-
 
 
 var VorlonLightningGun = function VorlonLightningGun(json, ship) {
@@ -454,6 +463,12 @@ PsionicConcentrator.prototype.doMultipleFireOrders = function (shooter, target, 
     }
     
     return fireOrdersArray; // Return all fire orders
+};
+
+PsionicConcentrator.prototype.checkFinished = function () {
+	if(this.firingMode == 1 && this.fireOrders.length > 3) return true;
+	if(this.firingMode == 2 && this.fireOrders.length > 1) return true;    
+    return false;
 };
 
 var PsionicConcentratorLight = function PsionicConcentratorLight(json, ship) {
@@ -650,6 +665,7 @@ var ProximityLaser = function ProximityLaser(json, ship) {
 ProximityLaser.prototype = Object.create(Weapon.prototype);
 ProximityLaser.prototype.constructor = ProximityLaser;
 
+
 var ProximityLaserNew = function ProximityLaserNew(json, ship) {
     Weapon.call(this, json, ship);
 };
@@ -777,12 +793,17 @@ ProximityLaserNew.prototype.doMultipleFireOrders = function (shooter, target, sy
         
         fireOrdersArray.push(fire); // Store each fire order
     }
+        //shipWindowManager.setDataForSystem(ship, weapon);
+    
 
-
-    //weaponManager.unSelectWeapon(shooter, this); //If that was second shot, unselect
 
     return fireOrdersArray; // Return all fire orders
 };    
+
+ProximityLaserNew.prototype.checkFinished = function () {
+	if(this.fireOrders.length > 1) return true;
+    return false;
+};
 
 var GromeTargetingArray = function GromeTargetingArray(json, ship) {
     Weapon.call(this, json, ship);

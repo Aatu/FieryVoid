@@ -236,6 +236,27 @@ MolecularSlicerBeamL.prototype.recalculateFireOrders = function (shooter, fireOr
 
 };
 
+MolecularSlicerBeamL.prototype.checkFinished = function () {
+	var shots = 0; //Initialise
+	
+	switch(this.turnsloaded){
+		case 1:
+			shots = 4;
+		break;
+		case 2:
+			shots = 6;		
+		break;
+		case 3:
+			shots = 8;		
+		break;		
+		default:
+			shots = 8;		
+		break;
+	}	
+	if(this.fireOrders.length > shots) return true;    
+    return false;
+};
+
 var MolecularSlicerBeamM = function MolecularSlicerBeamM(json, ship) {
     MolecularSlicerBeamL.call(this, json, ship);
 };
@@ -262,6 +283,27 @@ MolecularSlicerBeamM.prototype.initializationUpdate = function() {
 
 	this.data["Remaining shots"] = shots - this.fireOrders.length;
 	return this;
+};
+
+MolecularSlicerBeamM.prototype.checkFinished = function () {
+	var shots = 0; //Initialise
+	
+	switch(this.turnsloaded){
+		case 1:
+			shots = 8;
+		break;
+		case 2:
+			shots = 12;		
+		break;
+		case 3:
+			shots = 16;		
+		break;		
+		default:
+			shots = 16;		
+		break;
+	}	
+	if(this.fireOrders.length > shots) return true;    
+    return false;
 };
 
 var MolecularSlicerBeamH = function MolecularSlicerBeamH(json, ship) {
@@ -292,6 +334,27 @@ MolecularSlicerBeamH.prototype.initializationUpdate = function() {
 	return this;
 };
 
+MolecularSlicerBeamH.prototype.checkFinished = function () {
+	var shots = 0; //Initialise
+	
+	switch(this.turnsloaded){
+		case 1:
+			shots = 8;
+		break;
+		case 2:
+			shots = 16;		
+		break;
+		case 3:
+			shots = 24;		
+		break;		
+		default:
+			shots = 24;		
+		break;
+	}	
+	if(this.fireOrders.length > shots) return true;    
+    return false;
+};
+
 var MultiphasedCutterL = function MultiphasedCutterL(json, ship) {
     Weapon.call(this, json, ship);
 };
@@ -311,6 +374,11 @@ MultiphasedCutter.prototype.initializationUpdate = function() {
 		delete this.data["Shots Remaining"];
 	}
 	return this;
+};
+
+MultiphasedCutter.prototype.checkFinished = function () {
+	if(this.fireOrders.length > 2) return true;
+    return false;
 };
 
 MultiphasedCutter.prototype.doMultipleFireOrders = function (shooter, target, system) {
