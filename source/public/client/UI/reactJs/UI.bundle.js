@@ -36667,7 +36667,7 @@ var EwButtons = function (_React$Component) {
             losToggled: false,
             hexToggled: false,
             soundToggled: true,
-            replayMode: gamedata.replay || false
+            replayMode: _this.getReplayMode()
         };
 
         _this.showFriendlyEW = _this.showFriendlyEW.bind(_this);
@@ -36684,6 +36684,11 @@ var EwButtons = function (_React$Component) {
     }
 
     _createClass(EwButtons, [{
+        key: "getReplayMode",
+        value: function getReplayMode() {
+            return gamedata.replay || !gamedata.isPlayerInGame();
+        }
+    }, {
         key: "componentDidMount",
         value: function componentDidMount() {
             var _this2 = this;
@@ -36693,8 +36698,9 @@ var EwButtons = function (_React$Component) {
             window.addEventListener("soundToggled", this.externalToggleSound);
             // 👇 periodically check for replay mode change
             this.replayCheck = setInterval(function () {
-                if (_this2.state.replayMode !== gamedata.replay) {
-                    _this2.setState({ replayMode: gamedata.replay });
+                var replayValue = _this2.getReplayMode();
+                if (_this2.state.replayMode !== replayValue) {
+                    _this2.setState({ replayMode: replayValue });
                 }
             }, 500);
         }
