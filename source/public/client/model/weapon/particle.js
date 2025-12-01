@@ -624,6 +624,11 @@ TelekineticCutter.prototype.doMultipleFireOrders = function (shooter, target, sy
     return fireOrdersArray; // Return all fire orders
 };
 
+TelekineticCutter.prototype.checkFinished = function () {
+	if(this.firingMode == 2 && this.fireOrders.length > 1) return true;    
+    return false;
+};
+
 var MinorThoughtPulsar = function MinorThoughtPulsar(json, ship) {
     Particle.call(this, json, ship);
 };
