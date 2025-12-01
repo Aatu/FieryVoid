@@ -17,7 +17,8 @@ class KoshaAM extends BaseShip{
 		$this->isd = 2219;
         $this->fighters = array("assault shuttles"=>2);
 
-	    $this->notes = 'Atmospheric Capable.';
+	    $this->notes = 'Atmospheric Capable';
+		$this->notes .= "Showdowns-9";		
         
         $this->forwardDefense = 14;
         $this->sideDefense = 16;
