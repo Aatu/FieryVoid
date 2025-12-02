@@ -669,6 +669,21 @@ var ProximityLaser = function ProximityLaser(json, ship) {
 ProximityLaser.prototype = Object.create(Weapon.prototype);
 ProximityLaser.prototype.constructor = ProximityLaser;
 
+ProximityLaser.prototype.getFiringHex = function(shooter, weapon){ //Need to calculate hit chance from where Launcher targets.	
+	var sPosLaunch; 
+    var launcher = this.launcher;
+    var ship = this.ship;
+    //var launcherOrder = weaponManager.getFiringOrder(ship, launcher)
+    var launcherOrder = launcher.fireOrders[0] || weaponManager.getFiringOrder(ship, launcher);
+
+	   	if (launcherOrder)	{	// check that launcher has firing orders.  
+			sPosLaunch = new hexagon.Offset(launcherOrder.x, launcherOrder.y); 
+		} else{
+		    sPosLaunch = shipManager.movement.getPositionAtStartOfTurn(shooter, gamedata.turn); 	
+		}	
+	return sPosLaunch;
+	
+	};
 
 var ProximityLaserNew = function ProximityLaserNew(json, ship) {
     Weapon.call(this, json, ship);
@@ -690,26 +705,11 @@ ProximityLaserNew.prototype.initializationUpdate = function() {
     return this;
 };
 
-ProximityLaserNew.prototype.getFiringHex = function(shooter, weapon, ballistic = null){ //Need to calculate hit chance from where Launcher targets.	
-    var sPosLaunch;     
-    /*if(ballistic !== null){ //This is a query from BallisticIconContainer
-        var launcherOrder = this.fireOrders[0];          
-        if(ballistic.damageclass == 'Targeter'){ //Initial Hex Targeting
-            sPosLaunch = shipManager.movement.getPositionAtStartOfTurn(shooter, gamedata.turn); 
-        }else{ //Laser targeting
-            sPosLaunch = new hexagon.Offset(launcherOrder.x, launcherOrder.y); 
-        }
-        
-    }else{ //Normal query from targeting methods
-    */    
+ProximityLaserNew.prototype.getFiringHex = function(shooter, weapon){ //Need to calculate hit chance from where Launcher targets.	
+    var sPosLaunch;       
         if (this.fireOrders.length > 1) {	//A hex has been targted, firing hex changes to those coordinates
             var sPosLaunch; 
-            //var launcher = this.launcher;
-            //var ship = this.ship;
-            //var launcherOrder = weaponManager.getFiringOrder(ship, launcher)
             var launcherOrder = this.fireOrders[0];       
-            //var launcherOrder = launcher.fireOrders[0] || weaponManager.getFiringOrder(ship, launcher);
-
                 if (launcherOrder)	{	// check that launcher has firing orders.  
                     sPosLaunch = new hexagon.Offset(launcherOrder.x, launcherOrder.y); 
                 } else{
@@ -718,7 +718,6 @@ ProximityLaserNew.prototype.getFiringHex = function(shooter, weapon, ballistic =
         }else{ //Lasers not locked in yet, use firing ship position.
             sPosLaunch = shipManager.movement.getPositionAtStartOfTurn(shooter, gamedata.turn); 
         }
-   // }    
 
 	return sPosLaunch;
 	
