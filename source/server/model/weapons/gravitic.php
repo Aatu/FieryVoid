@@ -526,7 +526,7 @@ class GraviticLance extends Raking{
 	    public $iconPath = "graviticLance.png";
 	
 	//visual display - will it be enough to ensure correct animations?...
-	    public $animationArray = array(1=>'laser', 2=>'laser');
+	    public $animationArray = array(1=>'laser', 2=>'laser', 3=>'laser');
         public $animationColor = array(99, 255, 00);
 	/*
         public $animationWidthArray = array(1=>6, 2=>4);
