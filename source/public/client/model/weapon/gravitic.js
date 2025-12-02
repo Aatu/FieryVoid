@@ -144,6 +144,20 @@ GraviticShifter.prototype.calculateSpecialHitChanceMod = function (shooter, targ
 	return mod; 
 };
 
+var GravityNet = function GravityNet(json, ship) {
+    Gravitic.call(this, json, ship);
+};
+GravityNet.prototype = Object.create(Gravitic.prototype);
+GravityNet.prototype.constructor = GravityNet;
+
+GravityNet.prototype.calculateSpecialHitChanceMod = function (shooter, target) {
+	var mod = 0;
+    if(shooter.team !== target.team){
+        if(target.gravitic || target.factionAge >= 3) mod = -3;
+    }    
+	return mod; 
+};
+
 var LightGraviticBolt = function LightGraviticBolt(json, ship) {
     Gravitic.call(this, json, ship);
 };

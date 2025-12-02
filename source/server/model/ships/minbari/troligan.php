@@ -43,9 +43,9 @@ class Troligan extends BaseShip{
         $this->addAftSystem(new GravityNet(6, 8, 5, 120, 240));
         $this->addAftSystem(new FusionCannon(3, 8, 1, 120, 240));         
 
-        $this->ddLeftSyste(new GravityNet(5, 8, 5, 240, 0));
+        $this->addLeftSystem(new GravityNet(5, 8, 5, 240, 0));
         $this->addLeftSystem(new FusionCannon(3, 8, 1, 240, 0));
-        $this->ddLeftSyste(new FusionCannon(3, 8, 1, 180, 300));
+        $this->addLeftSystem(new FusionCannon(3, 8, 1, 180, 300));
         $this->addLeftSystem(new GraviticThruster(6, 14, 0, 4, 3));
         
         $this->addRightSystem(new GravityNet(5, 8, 5, 0, 120));

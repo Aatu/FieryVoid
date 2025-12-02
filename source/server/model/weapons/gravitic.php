@@ -1033,33 +1033,33 @@ class GraviticShifter extends Weapon implements SpecialAbility{
 
     } //endof GraviticShifter    
 
-class GravityNet extends Weapon implements implements SpecialAbility{
+class GravityNet extends Weapon implements SpecialAbility{
     public $name = "GravityNet";
     public $displayName = "Gravity Net";
-    //public $animation = "bolt";
-    //public $animationColor = array(99, 255, 00);	
-    //public $animationExplosionScale = 0.3; //single hex explosion
-    //public $priority = 1;    
+    public $animation = "Torpedo";
+    public $animationColor = array(0, 255, 255);	
+    public $animationExplosionScale = 0.3; //single hex explosion
+    public $priority = 1;    
 	public $specialAbilities = array("PreFiring");
 	public $specialAbilityValue = true; //so it is actually recognized as special ability!  		
 	public $damageType = "Standard"; //irrelevant, really
 	public $weaponClass = "Gravitic";
-	//public $uninterceptable = true; //although I don't think a weapon exists that could intercept it...
-	//public $doNotIntercept = true; //although I don't think a weapon exists that could intercept it...
+	public $uninterceptable = true; //although I don't think a weapon exists that could intercept it...
+	public $doNotIntercept = true; //although I don't think a weapon exists that could intercept it...
 	public $loadingtime = 2;
     public $rangePenalty = 1;
     protected $canTargetAll = true; //Allows weapon to target allies AND enemies, pass to Front End in strpForJson()
-	//public $firingModes = array(
-		//1 => "Clockwise",
-       // 2 => "Anti-Clockwise"
-	//);
+	public $firingModes = array(
+	    1 => "Clockwise",
+        2 => "Anti-Clockwise"
+	);
     public $fireControl = array(1, 2, 3); // fighters, <mediums, <capitals 
 	public $preFires = true;
-    //public $specialHitChanceCalculation = true;			
-	//public $repairPriority = 6;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
+    public $specialHitChanceCalculation = true;			
+	public $repairPriority = 6;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
 	    
     protected $possibleCriticals = array(14 => "ReducedRange");
-	//private static $alreadyShifted = array();	
+	private static $alreadyShifted = array();	
 
     function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
 
@@ -1080,18 +1080,18 @@ class GravityNet extends Weapon implements implements SpecialAbility{
 	}
 
      public function setSystemDataWindow($turn){
-        $this->data["Special"] = "Used to change the facing of a target ship during Pre-Firing orders."; 
-        $this->data["Special"] .= "<br>Select firing mode based on direction you wish to move ship and target a unit.";
-        $this->data["Special"] .= "<br>Only ONE Gravitic Shifter can be used on a ship per turn, any other attempts will automatically miss.";           
-        $this->data["Special"] .= "<br>Has -15% chance to hit Ancient enemy units, or those with Gravitic drives.";        
-        $this->data["Special"] .= "<br>Can target allies.";
-        $this->data["Special"] .= "<br>No effect on Enormous units.";	        	        		
+        $this->data["Special"] = "A Gravity Net. How much gravity could a gravity net, net if a gravity net could net gravity?"; 
+        //$this->data["Special"] .= "<br>Select firing mode based on direction you wish to move ship and target a unit.";
+        //$this->data["Special"] .= "<br>Only ONE Gravitic Shifter can be used on a ship per turn, any other attempts will automatically miss.";           
+        //$this->data["Special"] .= "<br>Has -15% chance to hit Ancient enemy units, or those with Gravitic drives.";        
+        //$this->data["Special"] .= "<br>Can target allies.";
+        //$this->data["Special"] .= "<br>No effect on Enormous units.";	        	        		
 		parent::setSystemDataWindow($turn);     
     }
 
 	public function calculateHitBase($gamedata, $fireOrder)
 	{       
-		if (isset(GraviticShifter::$alreadyShifted[$fireOrder->targetid])){
+		if (isset(GravityNet::$alreadyShifted[$fireOrder->targetid])){
             $fireOrder->needed = 0;
             $fireOrder->updated = true; 
             $fireOrder->pubnotes = "<br>Ship has already been affected by a Gravitic Shifter.";                         
@@ -1100,7 +1100,7 @@ class GravityNet extends Weapon implements implements SpecialAbility{
             
         parent::calculateHitBase($gamedata, $fireOrder);
         
-        GraviticShifter::$alreadyShifted[$fireOrder->targetid] = true; //Mark that a shot has been attempted against ship.
+        GravityNet::$alreadyShifted[$fireOrder->targetid] = true; //Mark that a shot has been attempted against ship.
 
 		$target = $gamedata->getShipById($fireOrder->targetid);
         $shooter = $this->getUnit();
