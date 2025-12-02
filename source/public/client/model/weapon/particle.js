@@ -650,7 +650,7 @@ var MinorThoughtPulsar = function MinorThoughtPulsar(json, ship) {
 MinorThoughtPulsar.prototype = Object.create(Particle.prototype);
 MinorThoughtPulsar.prototype.constructor = MinorThoughtPulsar;
 
-MinorThoughtPulsar.prototype.calculateSpecialHitChanceMod = function (shooter, target) {
+MinorThoughtPulsar.prototype.calculateSpecialHitChanceMod = function (shooter, target, calledid) {
 	var mod = 0;
     var thrust = shipManager.movement.getRemainingEngineThrust(shooter);
     var boostLevel = Math.floor(thrust/3);

@@ -212,7 +212,7 @@ MolecularSlicerBeamL.prototype.doMultipleFireOrders = function (shooter, target,
 	}
 };
 
-MolecularSlicerBeamL.prototype.calculateSpecialHitChanceMod = function (shooter, target) {
+MolecularSlicerBeamL.prototype.calculateSpecialHitChanceMod = function (shooter, target, calledid) {
 	var mod = 0;
 	if(this.firingMode == 1){
 		//Check fireOrders length and deduct (length -1 *5)

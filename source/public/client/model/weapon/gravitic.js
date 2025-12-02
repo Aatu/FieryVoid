@@ -136,7 +136,7 @@ var GraviticShifter = function GraviticShifter(json, ship) {
 GraviticShifter.prototype = Object.create(Gravitic.prototype);
 GraviticShifter.prototype.constructor = GraviticShifter;
 
-GraviticShifter.prototype.calculateSpecialHitChanceMod = function (shooter, target) {
+GraviticShifter.prototype.calculateSpecialHitChanceMod = function (shooter, target, calledid) {
 	var mod = 0;
     if(shooter.team !== target.team){
         if(target.gravitic || target.factionAge >= 3) mod = -3;
