@@ -956,7 +956,7 @@ window.weaponManager = {
         mod -= target.getHitChangeMod(shooter, weapon);
 
 		if (weapon.specialHitChanceCalculation){ //Does the weapon itself have any special mods?
-			mod += weapon.calculateSpecialHitChanceMod(shooter, target);
+			mod += weapon.calculateSpecialHitChanceMod(shooter, target, calledid);
 		}
 
         if (shooter.flight===true) {
