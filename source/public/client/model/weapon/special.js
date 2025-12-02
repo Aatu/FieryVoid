@@ -210,12 +210,16 @@ VorlonDischargeGun.prototype.initializationUpdate = function() {
 VorlonDischargeGun.prototype.doMultipleFireOrders = function (shooter, target, system) {
 
     var shotsOnTarget = 1; //we're only ever allocating one shot at a time for this weapon.
-
+    /*
     if (this.fireOrders.length > 0) {
         if (this.fireOrders.length >= this.guns) {
             // All guns already fired → retarget one gun by removing oldest fireorder.
             this.fireOrders.splice(0, 1);
         }
+    } 
+    */
+    if (this.fireOrders.length > 3) {
+        return;
     } 
 
     var fireOrdersArray = []; // Store multiple fire orders
@@ -252,7 +256,7 @@ VorlonDischargeGun.prototype.doMultipleFireOrders = function (shooter, target, s
 };
 
 VorlonDischargeGun.prototype.checkSelfInterceptSystem = function() {
-    if(this.data["Shots Remaining"] <= 0) return false;
+	if(this.fireOrders.length > 3) return false;
     return true;
 };
 
@@ -412,14 +416,17 @@ PsionicConcentrator.prototype.initializationUpdate = function() {
 PsionicConcentrator.prototype.doMultipleFireOrders = function (shooter, target, system) {
 
     var shotsOnTarget = 1; //we're only ever allocating one shot at a time for this weapon in Split mode.
-
+    /*
     if (this.fireOrders.length > 0) {
         if (this.fireOrders.length >= this.guns) {
             // All guns already fired → retarget one gun by removing oldest fireorder.
             this.fireOrders.splice(0, 1);
         }
     } 
-
+    */
+	if(this.firingMode == 1 && this.fireOrders.length > 3) return;
+	if(this.firingMode == 2 && this.fireOrders.length > 1) return; 
+    
     var fireOrdersArray = []; // Store multiple fire orders
 
     for (var s = 0; s < shotsOnTarget; s++) {
@@ -427,9 +434,6 @@ PsionicConcentrator.prototype.doMultipleFireOrders = function (shooter, target, 
         var calledid = -1; 
 
         if (system) {
-            //check if weapon is eligible for called shot!
-//            if (!weaponManager.canWeaponCall(weapon)) continue; //Psi Concentrator IS eligible, no need to check.
-
             // When the system is a subsystem, make all damage go through the parent.
             while (system.parentId > 0) {
                 system = shipManager.systems.getSystem(ship, system.parentId);

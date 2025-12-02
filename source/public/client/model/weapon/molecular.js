@@ -253,7 +253,7 @@ MolecularSlicerBeamL.prototype.checkFinished = function () {
 			shots = 8;		
 		break;
 	}	
-	if(this.fireOrders.length > shots) return true;    
+	if(this.fireOrders.length == shots) return true;    
     return false;
 };
 
@@ -302,7 +302,7 @@ MolecularSlicerBeamM.prototype.checkFinished = function () {
 			shots = 16;		
 		break;
 	}	
-	if(this.fireOrders.length > shots) return true;    
+	if(this.fireOrders.length == shots) return true;    
     return false;
 };
 
@@ -351,7 +351,7 @@ MolecularSlicerBeamH.prototype.checkFinished = function () {
 			shots = 24;		
 		break;
 	}	
-	if(this.fireOrders.length > shots) return true;    
+	if(this.fireOrders.length == shots) return true;    
     return false;
 };
 
@@ -384,13 +384,16 @@ MultiphasedCutter.prototype.checkFinished = function () {
 MultiphasedCutter.prototype.doMultipleFireOrders = function (shooter, target, system) {
 
     var shotsOnTarget = 1; //we're only ever allocating one shot at a time for this weapon.
-
+	/*
     if (this.fireOrders.length > 0) {
         if (this.fireOrders.length >= this.guns) {
             // All guns already fired → retarget one gun by removing oldest fireorder.
             this.fireOrders.splice(0, 1);
         }
     } 
+	*/
+
+	if(this.fireOrders.length > 2) return;
 
     var fireOrdersArray = []; // Store multiple fire orders
 

@@ -24,13 +24,16 @@ TwinArray.prototype.initializationUpdate = function() {
 TwinArray.prototype.doMultipleFireOrders = function (shooter, target, system) {
 
     var shotsOnTarget = 1; //we're only ever allocating one shot at a time for this weapon.
-
+    /*
     if (this.fireOrders.length > 0) {
         if (this.fireOrders.length >= this.guns) {
             // All guns already fired → retarget one gun by removing oldest fireorder.
             this.fireOrders.splice(0, 1);
         }
     } 
+    */
+
+	if(this.firingMode == 2 && this.fireOrders.length > 1) return; 
 
     var fireOrdersArray = []; // Store multiple fire orders
 
@@ -88,13 +91,16 @@ QuadArray.prototype.initializationUpdate = function() {
 QuadArray.prototype.doMultipleFireOrders = function (shooter, target, system) {
 
     var shotsOnTarget = 1; //we're only ever allocating one shot at a time for this weapon.
-
+    /*
     if (this.fireOrders.length > 0) {
         if (this.fireOrders.length >= this.guns) {
             // All guns already fired → retarget one gun by removing oldest fireorder.
             this.fireOrders.splice(0, 1);
         }
     } 
+    */
+
+	if(this.firingMode == 2 && this.fireOrders.length > 3) return; 
 
     var fireOrdersArray = []; // Store multiple fire orders
 
@@ -152,13 +158,16 @@ HeavyArray.prototype.initializationUpdate = function() {
 HeavyArray.prototype.doMultipleFireOrders = function (shooter, target, system) {
 
     var shotsOnTarget = 1; //we're only ever allocating one shot at a time for this weapon.
-
+    /*
     if (this.fireOrders.length > 0) {
         if (this.fireOrders.length >= this.guns) {
             // All guns already fired → retarget one gun by removing oldest fireorder.
             this.fireOrders.splice(0, 1);
         }
     } 
+    */
+
+	if(this.firingMode == 2 && this.fireOrders.length > 1) return; 
 
     var fireOrdersArray = []; // Store multiple fire orders
 
@@ -228,13 +237,16 @@ QuadParticleBeam.prototype.initializationUpdate = function() {
 QuadParticleBeam.prototype.doMultipleFireOrders = function (shooter, target, system) {
 
     var shotsOnTarget = 1; //we're only ever allocating one shot at a time for this weapon.
-
+    /*
     if (this.fireOrders.length > 0) {
         if (this.fireOrders.length >= this.guns) {
             // All guns already fired → retarget one gun by removing oldest fireorder.
             this.fireOrders.splice(0, 1);
         }
     } 
+    */
+
+	if(this.firingMode == 2 && this.fireOrders.length > 3) return; 
 
     var fireOrdersArray = []; // Store multiple fire orders
 
@@ -583,13 +595,16 @@ TelekineticCutter.prototype.initializationUpdate = function() {
 TelekineticCutter.prototype.doMultipleFireOrders = function (shooter, target, system) {
 
     var shotsOnTarget = 1; //we're only ever allocating one shot at a time for this weapon.
-
+    /*
     if (this.fireOrders.length > 0) {
         if (this.fireOrders.length >= this.guns) {
             // All guns already fired → retarget one gun by removing oldest fireorder.
             this.fireOrders.splice(0, 1);
         }
     } 
+    */
+
+	if(this.firingMode == 2 && this.fireOrders.length > 1) return; 
 
     var fireOrdersArray = []; // Store multiple fire orders
 
@@ -622,6 +637,11 @@ TelekineticCutter.prototype.doMultipleFireOrders = function (shooter, target, sy
     }
     
     return fireOrdersArray; // Return all fire orders
+};
+
+TelekineticCutter.prototype.checkFinished = function () {
+	if(this.firingMode == 2 && this.fireOrders.length > 1) return true;    
+    return false;
 };
 
 var MinorThoughtPulsar = function MinorThoughtPulsar(json, ship) {
