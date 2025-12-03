@@ -543,12 +543,13 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                 </ul>
             </li>                
         <h5>Proximity Laser</h5>
-            <li>A ballistic weapon that uses a separate launcher system to target the hex where its main laser attack will fire from.  </li>
-            <li>Use the paired 'Proximity Launcher' system (each pairing will have a unique letter assigned to the end of their name) to target the hex you wish to fire from, 
-                then target the enemy ship with the ‘Proximity Laser’ system.</li>
-            <li>The Launcher will automatically hit and then the laser attack will be made as normal as if it originated from that hex, and not the firing ship.  
-                If you do not fire the Launcher at the same time as the Laser, the shot will automatically miss.
-                You can use the Ballistic Lines function to help you see how you've targeted this weapon.</li>
+            <li>A ballistic weapon that uses a separate launcher system to target the hex from which its main laser attack will then fire.</li>
+            <li>To use this ability, first select the Proximity Laser system and target the hex from where you want the laser to fire from at an enemy target.  
+                Then, without unselecting the same weapon, target the enemy ship with the Proximity Laser.</li>
+            <li>The weapon will always automatically hit the intial hex targeted and then the laser attack will be made as normal as if originating from that hex, and not the firing ship.  
+                It's highly recommended that you can use the Ballistic Lines button when targeting this weapon.</li>
+                <li>The Proximity Laser does not use OEW but also does not suffer from having no lock on the enemy vessel it targets.  Range penalties are calculated from the hex targeted to the enemy unit you've target. You cannot target hexes for the initial shot that you do not have line of Sight to,
+                    and if there is no line of sight between target hex and enemy vessel at the end of movement then the laser shot will automatically miss.</li>
         <h5>Limpet Bore Torpedo</h5>
             <li>A ballistic weapon that can only fire as Called Shot but can target any system on an enemy ship, including those that are not on facing sections.</li>
             <li>If the torpedo hits, it will attach to the target system and try to damage it by adding a critical effect. 

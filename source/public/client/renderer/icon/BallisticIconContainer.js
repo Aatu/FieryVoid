@@ -230,6 +230,7 @@ window.BallisticIconContainer = function () {
 				'Ion Storm':       { type: 'hexPurple',text: 'Ion Field',      color: '#7f00ff' },
 				'Jammer':          { type: 'hexPurple',text: 'Jammer',         color: '#7f00ff' },
 				'Proximity Launcher': { type: 'hexRed',text: 'Proximity Laser',color: '#e6140a' },
+				'Proximity Laser': { type: 'hexRed',text: 'Proximity Laser',color: '#e6140a' },				
 				'Thought Wave':    { type: 'hexPurple',text: 'Thought Wave',   color: '#bc3782' },
 				'1-Blanket Shield':    { type: 'hexGreen',text: 'Shade Modulator',   color: '#008000'},
 				'3-Blanket Shade':    { type: 'hexYellow',text: 'Shade Modulator',   color: '#787800'},
@@ -402,7 +403,7 @@ window.BallisticIconContainer = function () {
 
 	//To create ballistic lines between launches and targets.
 	function createBallisticLineIcon(ballistic, iconContainer, turn, scene, replay = false) {
-
+		//if(ballistic.damageclass == 'Targeter') return;
 		if (ballistic.targetid === -1 && ballistic.x == "null" && ballistic.y == "null") return; // Skip creation of enemy hidden weapons, can cause visual bugs.
 
 		const shooterIcon = iconContainer.getById(ballistic.shooterid);
@@ -445,9 +446,10 @@ window.BallisticIconContainer = function () {
 
 		// Override for special launcher hex logic
 		if (weapon?.hasSpecialLaunchHexCalculation) {
-			const launcherHex = weaponManager.getFiringHex(shooter, weapon);
+			const launcherHex = weaponManager.getFiringHex(shooter, weapon);			
 			launchPosition = this.coordinateConverter.fromHexToGame(launcherHex);
 			type = 'red';
+			if(ballistic.damageclass == 'Targeter') type = 'yellow';			
 		}
 
 		// Handle specific modeName cases
@@ -492,7 +494,7 @@ window.BallisticIconContainer = function () {
 			launchPosition,
 			targetPosition,
 			3 * this.zoomScale,
-			-3,
+			-2,
 			getLineColorByType(type),
 			0.5
 		);

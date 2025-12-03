@@ -19,7 +19,7 @@ class PreFiringGamePhase implements Phase
 		}
 		
 
-        $dbManager->submitFireorders($servergamedata->id, $servergamedata->getNewFireOrders(), $servergamedata->turn, 3);
+        $dbManager->submitFireorders($servergamedata->id, $servergamedata->getNewFireOrders(), $servergamedata->turn, 5); //Picks up any new firing orders from beforePreFiringOrderResolution()
         $dbManager->updateFireOrders($servergamedata->getUpdatedFireOrders());
 
         $dbManager->submitDamages($servergamedata->id, $servergamedata->turn, $servergamedata->getNewDamages()); //Potentially damaging weapons could be added later.

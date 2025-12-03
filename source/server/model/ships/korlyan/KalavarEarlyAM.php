@@ -10,9 +10,9 @@ class KalavarEarlyAM extends OSAT{
         $this->imagePath = "img/ships/korlyan_kalavar.png";
         $this->shipClass = "Kalavar Orbital Satellite (2220)";
 			$this->occurence = "common";
-			$this->variantOf = 'Kalavar Orbital Satellite (2240)';
+			$this->variantOf = 'OBSELETE';
         $this->isd = 2220;
- 		$this->unofficial = 'S'; //design released after AoG demise
+		//$this->unofficial = true; 
         
         $this->forwardDefense = 10;
         $this->sideDefense = 10;

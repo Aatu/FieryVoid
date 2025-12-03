@@ -9,7 +9,7 @@ class TalokiAM extends StarBaseSixSections{
 		$this->phpclass = "TalokiAM";
 		$this->shipClass = "Taloki Starbase (2240)";
 		$this->fighters = array("assault shuttles"=>4, "normal"=>24);
-
+			$this->variantOf = 'OBSELETE';
         $this->isd = 2240;
 		$this->shipSizeClass = 3; //Enormous is not implemented
         $this->Enormous = true;

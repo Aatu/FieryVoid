@@ -14,7 +14,7 @@ class LeklantEarlyAM extends BaseShip{
 			$this->variantOf = 'Leklant Scout Cruiser';
         $this->shipSizeClass = 3;
 		$this->canvasSize = 160; //img has 200px per side
- 		$this->unofficial = 'S'; //design released after AoG demise
+		$this->unofficial = true; 
 
         $this->limited = 33;
 
