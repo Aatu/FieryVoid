@@ -351,7 +351,7 @@ window.ShipIcon = function () {
 
             lastMovement = movement;
         });
-
+        this.preFireMovements = []; //reset
         Object.values(movements)
             .filter(m => m.type === 'shift')
             .forEach(m => {

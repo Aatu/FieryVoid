@@ -147,6 +147,25 @@ window.ReplayAnimationStrategy = function () {
 
             this.animations.push(perShipAnimation);
 
+            var preFireMovements = perShipAnimation.shipIcon.preFireMovements;
+            var fireOrders = perShipAnimation.incomingFire;
+            if(preFireMovements.length > 0){    
+                for( var i in preFireMovements){
+                    var movement = preFireMovements[i];
+                        for(var k in fireOrders){
+                            var subOrders = fireOrders[k];
+                            for(var l in subOrders){
+                                var subOrder = subOrders[l];                             
+                                if(movement.value == subOrder.id){
+
+                                }
+                            }    
+                        }
+
+
+                }
+            }    
+
             if (this.type === ReplayAnimationStrategy.type.INFORMATIVE) {
                 time += perShipAnimation.getDuration();
             }
