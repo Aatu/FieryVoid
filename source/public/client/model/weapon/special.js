@@ -210,12 +210,16 @@ VorlonDischargeGun.prototype.initializationUpdate = function() {
 VorlonDischargeGun.prototype.doMultipleFireOrders = function (shooter, target, system) {
 
     var shotsOnTarget = 1; //we're only ever allocating one shot at a time for this weapon.
-
+    /*
     if (this.fireOrders.length > 0) {
         if (this.fireOrders.length >= this.guns) {
             // All guns already fired → retarget one gun by removing oldest fireorder.
             this.fireOrders.splice(0, 1);
         }
+    } 
+    */
+    if (this.fireOrders.length > 3) {
+        return;
     } 
 
     var fireOrdersArray = []; // Store multiple fire orders
@@ -252,13 +256,13 @@ VorlonDischargeGun.prototype.doMultipleFireOrders = function (shooter, target, s
 };
 
 VorlonDischargeGun.prototype.checkSelfInterceptSystem = function() {
-    if(this.data["Shots Remaining"] <= 0) return false;
+	if(this.fireOrders.length > 3) return false;
     return true;
 };
 
 VorlonDischargeGun.prototype.doMultipleSelfIntercept = function(ship) {
 
-    for (var s = 0; s < this.data["Shots Remaining"]; s++) {    
+    for (var s = 0; s < 1; s++) {    
         var fireid = ship.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
         var fire = {
         id: fireid,
@@ -279,6 +283,11 @@ VorlonDischargeGun.prototype.doMultipleSelfIntercept = function(ship) {
         this.fireOrders.push(fire);
     } 
     webglScene.customEvent('SystemDataChanged', { ship: ship, system: this });   
+};
+
+VorlonDischargeGun.prototype.checkFinished = function () {
+	if(this.fireOrders.length > 3) return true;
+    return false;
 };
 
 
@@ -310,6 +319,11 @@ VorlonDischargeCannon.prototype.initializationUpdate = function() {
     return this;
 };
 
+VorlonDischargeCannon.prototype.checkFinished = function () {
+	if(this.fireOrders.length > 3) return true;
+    return false;
+};
+
 var VorlonLightningCannon = function VorlonLightningCannon(json, ship) {
     Weapon.call(this, json, ship);
 };
@@ -332,7 +346,6 @@ var VorlonLtDischargeGun = function VorlonLtDischargeGun(json, ship) {
 };
 VorlonLtDischargeGun.prototype = Object.create(Weapon.prototype);
 VorlonLtDischargeGun.prototype.constructor = VorlonLtDischargeGun;
-
 
 
 var VorlonLightningGun = function VorlonLightningGun(json, ship) {
@@ -403,14 +416,17 @@ PsionicConcentrator.prototype.initializationUpdate = function() {
 PsionicConcentrator.prototype.doMultipleFireOrders = function (shooter, target, system) {
 
     var shotsOnTarget = 1; //we're only ever allocating one shot at a time for this weapon in Split mode.
-
+    /*
     if (this.fireOrders.length > 0) {
         if (this.fireOrders.length >= this.guns) {
             // All guns already fired → retarget one gun by removing oldest fireorder.
             this.fireOrders.splice(0, 1);
         }
     } 
-
+    */
+	if(this.firingMode == 1 && this.fireOrders.length > 3) return;
+	if(this.firingMode == 2 && this.fireOrders.length > 1) return; 
+    
     var fireOrdersArray = []; // Store multiple fire orders
 
     for (var s = 0; s < shotsOnTarget; s++) {
@@ -418,9 +434,6 @@ PsionicConcentrator.prototype.doMultipleFireOrders = function (shooter, target, 
         var calledid = -1; 
 
         if (system) {
-            //check if weapon is eligible for called shot!
-//            if (!weaponManager.canWeaponCall(weapon)) continue; //Psi Concentrator IS eligible, no need to check.
-
             // When the system is a subsystem, make all damage go through the parent.
             while (system.parentId > 0) {
                 system = shipManager.systems.getSystem(ship, system.parentId);
@@ -454,6 +467,12 @@ PsionicConcentrator.prototype.doMultipleFireOrders = function (shooter, target, 
     }
     
     return fireOrdersArray; // Return all fire orders
+};
+
+PsionicConcentrator.prototype.checkFinished = function () {
+	if(this.firingMode == 1 && this.fireOrders.length > 3) return true;
+	if(this.firingMode == 2 && this.fireOrders.length > 1) return true;    
+    return false;
 };
 
 var PsionicConcentratorLight = function PsionicConcentratorLight(json, ship) {
@@ -665,7 +684,130 @@ ProximityLaser.prototype.getFiringHex = function(shooter, weapon){ //Need to cal
 	return sPosLaunch;
 	
 	};
-		
+
+var ProximityLaserNew = function ProximityLaserNew(json, ship) {
+    Weapon.call(this, json, ship);
+};
+ProximityLaserNew.prototype = Object.create(Weapon.prototype);
+ProximityLaserNew.prototype.constructor = ProximityLaserNew;
+
+ProximityLaserNew.prototype.initializationUpdate = function() {
+    if (this.fireOrders.length > 0) {
+        this.hextarget = false;
+        this.startArc = 0; //Hex target has arc, laser shot does not.
+        this.endArc = 360;
+    }else{
+        this.hextarget = true;
+        this.startArc = this.startArcArray[0]; //Use Arc arrays to reset to default
+        this.endArc = this.endArcArray[0];                
+    } 
+
+    return this;
+};
+
+ProximityLaserNew.prototype.getFiringHex = function(shooter, weapon){ //Need to calculate hit chance from where Launcher targets.	
+    var sPosLaunch;       
+        if (this.fireOrders.length > 1) {	//A hex has been targted, firing hex changes to those coordinates
+            var sPosLaunch; 
+            var launcherOrder = this.fireOrders[0];       
+                if (launcherOrder)	{	// check that launcher has firing orders.  
+                    sPosLaunch = new hexagon.Offset(launcherOrder.x, launcherOrder.y); 
+                } else{
+                    sPosLaunch = shipManager.movement.getPositionAtStartOfTurn(shooter, gamedata.turn);            	
+                }
+        }else{ //Lasers not locked in yet, use firing ship position.
+            sPosLaunch = shipManager.movement.getPositionAtStartOfTurn(shooter, gamedata.turn); 
+        }
+
+	return sPosLaunch;
+	
+};
+
+
+ProximityLaserNew.prototype.doMultipleHexFireOrders = function (shooter, hexpos) {
+    
+    var shotsOnTarget = 1; //we're only ever allocating one shot at a time for this weapon in Split mode.
+
+    if (this.fireOrders.length > 1) {
+        return;
+    } 
+
+    var fireOrdersArray = []; // Store multiple fire orders
+
+    for (var s = 0; s < shotsOnTarget; s++) {
+            var fireid = shooter.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
+            var fire = {
+                id: fireid,
+                type: 'ballistic',
+                shooterid: shooter.id,
+                targetid: -1,
+                weaponid: this.id,
+                calledid: -1,
+                turn: gamedata.turn,
+                firingMode: this.firingMode,
+                shots: this.defaultShots,
+                x: hexpos.q,
+                y: hexpos.r,
+                damageclass: 'Targeter', 
+                notes: "split"                
+            };
+        this.fireOrders.push(fire);
+    }
+
+    this.hextarget = false;
+
+    return fireOrdersArray; // Return all fire orders
+};  
+
+ProximityLaserNew.prototype.doMultipleFireOrders = function (shooter, target, system) {
+    
+    var shotsOnTarget = 1; //we're only ever allocating one shot at a time for this weapon in Split mode.
+
+    if (this.fireOrders.length > 1) {
+        return;
+    } 
+
+    var fireOrdersArray = []; // Store multiple fire orders
+
+    for (var s = 0; s < shotsOnTarget; s++) {
+        var fireid = shooter.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
+        var calledid = -1; //No called shots.     
+
+        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
+        if(chance < 1) continue;
+
+        var fire = {
+            id: fireid,
+            type: 'ballistic',
+            shooterid: shooter.id,
+            targetid: target.id,
+            weaponid: this.id,
+            calledid: calledid,
+            turn: gamedata.turn,
+            firingMode: this.firingMode,
+            shots: 1,
+            x: "null",
+            y: "null",
+            damageclass: 'Laser', 
+            chance: chance,
+            hitmod: 0,
+            notes: "Split"
+        };
+        
+        fireOrdersArray.push(fire); // Store each fire order
+    }
+        //shipWindowManager.setDataForSystem(ship, weapon);
+    
+
+
+    return fireOrdersArray; // Return all fire orders
+};    
+
+ProximityLaserNew.prototype.checkFinished = function () {
+	if(this.fireOrders.length > 1) return true;
+    return false;
+};
+
 var GromeTargetingArray = function GromeTargetingArray(json, ship) {
     Weapon.call(this, json, ship);
 };

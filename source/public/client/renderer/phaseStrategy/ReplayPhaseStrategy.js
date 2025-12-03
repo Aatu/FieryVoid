@@ -315,9 +315,35 @@ window.ReplayPhaseStrategy = function () {
             }.bind(this),
             error: ajaxInterface.errorAjax
         });
-    }            
+    } 
+
+    function requestPlayableGamedata() {
+        startLoading.call(this);
+
+        jQuery.ajax({
+            type: 'GET',
+            url: 'gamedata.php',
+            dataType: 'json',
+            data: {
+                turn: -1,
+                phase: 0,
+                activeship: -1,
+                gameid: gamedata.gameid,
+                playerid: gamedata.thisplayer || -1,
+                time: new Date().getTime(),
+                force: true
+            },
+            success: function (data) {
+                gamedata.replay = false;
+                stopLoading.call(this);
+                gamedata.parseServerData(data);
+            }.bind(this),
+            error: ajaxInterface.errorAjax
+        });
+    }    
+    
 */
-//New version to use ajaxWithRetry()
+//New versions to use ajaxWithRetry()
 function requestReplayGamedata() {
     startLoading.call(this);
 
@@ -352,30 +378,33 @@ function requestReplayGamedata() {
     });
 }
 
-    function requestPlayableGamedata() {
-        startLoading.call(this);
+function requestPlayableGamedata() {
+    startLoading.call(this);
 
-        jQuery.ajax({
-            type: 'GET',
-            url: 'gamedata.php',
-            dataType: 'json',
-            data: {
-                turn: -1,
-                phase: 0,
-                activeship: -1,
-                gameid: gamedata.gameid,
-                playerid: gamedata.thisplayer || -1,
-                time: new Date().getTime(),
-                force: true
-            },
-            success: function (data) {
-                gamedata.replay = false;
-                stopLoading.call(this);
-                gamedata.parseServerData(data);
-            }.bind(this),
-            error: ajaxInterface.errorAjax
-        });
-    }
+    ajaxInterface.ajaxWithRetry({
+        type: 'GET',
+        url: 'gamedata.php',
+        dataType: 'json',
+        data: {
+            turn: -1,
+            phase: 0,
+            activeship: -1,
+            gameid: gamedata.gameid,
+            playerid: gamedata.thisplayer || -1,
+            time: new Date().getTime(),
+            force: true
+        },
+        success: function (data) {
+            gamedata.replay = false;
+            gamedata.parseServerData(data);
+        }.bind(this),
+        error: ajaxInterface.errorAjax,
+        complete: function () {
+            stopLoading.call(this);
+        }.bind(this)
+    });
+}
+
 
     function startLoading() {
         this.loading = true;
