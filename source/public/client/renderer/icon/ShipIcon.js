@@ -13,6 +13,7 @@ window.ShipIcon = function () {
         this.imagePath = ship.imagePath;
         this.ship = ship;
         this.movements = null;
+        this.preFireMovements = [];
         this.defaultPosition = null;
         this.mesh = null;
         this.size = ship.canvasSize;
@@ -328,6 +329,7 @@ window.ShipIcon = function () {
         //Replacement code below
         Object.values(movements)
             .filter(movement => movement.type !== 'start')
+            .filter(movement => movement.type !== 'shift')            
             .filter(movement => movement.commit)
             .forEach(movement => {
 
@@ -349,6 +351,15 @@ window.ShipIcon = function () {
 
             lastMovement = movement;
         });
+
+        Object.values(movements)
+            .filter(m => m.type === 'shift')
+            .forEach(m => {
+                if (!this.preFireMovements.some(existing => existing.id === m.id)) {
+                    if(m.turn == gamedata.turn) this.preFireMovements.push(m);
+                }
+            });
+
 
        this.movements = movesByHexAndTurn;
     };
