@@ -1,16 +1,16 @@
 <?php
-class TrylkanAM extends HeavyCombatVessel{
+class TrylkanAMNew extends HeavyCombatVessel{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
 	
 		$this->pointCost = 525;
 		$this->faction = "Kor-Lyan Kingdoms";
-        $this->phpclass = "TrylkanAM";
+        $this->phpclass = "TrylkanAMNew";
         $this->imagePath = "img/ships/korlyan_solyrn2.png";
         $this->shipClass = "Trylkan Ballistic Destroyer";
 			$this->occurence = "uncommon";
-			$this->variantOf = 'OBSELETE';			
+			$this->variantOf = 'Solyrn Missile Destroyer';			
         $this->limited = 10;
 	    $this->isd = 2251;
 
@@ -31,13 +31,11 @@ class TrylkanAM extends HeavyCombatVessel{
         
 		$this->IFFSystem = false; 
       
-	//ammo magazine itself (AND its missile options)
-	$ammoMagazine = new AmmoMagazine(144); //pass magazine capacity. 80 Intercept and up to 64 Mines 
+	    //ammo magazine itself (AND its missile options)
+	    $ammoMagazine = new AmmoMagazine(144); //pass magazine capacity. 80 Intercept and up to 64 Mines 
 	    $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
 	    $ammoMagazine->addAmmoEntry(new AmmoMissileI(), 80); //add full load of Interceptor missiles  	      
-	    $ammoMagazine->addAmmoEntry(new AmmoBLMineB(), 0); //add full load of basic missiles
-//	    $ammoMagazine->addAmmoEntry(new AmmoBLMineW(), 0); //add full load of basic missiles 
-//	    $ammoMagazine->addAmmoEntry(new AmmoBLMineH(), 0); //add full load of basic missiles 
+	    $ammoMagazine->addAmmoEntry(new AmmoBLMineB(), 0); 
 
 	    $this->enhancementOptionsEnabled[] = 'AMMO_A';//add enhancement options for other missiles - Class-A
 	    $this->enhancementOptionsEnabled[] = 'AMMO_C';//add enhancement options for other missiles - Class-C
@@ -59,9 +57,11 @@ class TrylkanAM extends HeavyCombatVessel{
         $this->addFrontSystem(new Thruster(4, 18, 0, 6, 1));
         $this->addFrontSystem(new AmmoMissileRackD(2, 0, 0, 240, 60, $ammoMagazine, false));
 		$this->addFrontSystem(new BallisticMineLauncher(3, 0, 0, 300, 60, $ammoMagazine, false));
+		$this->addFrontSystem(new ProximityLaserNew(3, 0, 0, 240, 60));
+		$this->addFrontSystem(new ProximityLaserNew(3, 0, 0, 300, 120));        
 		$this->addFrontSystem(new BallisticMineLauncher(3, 0, 0, 300, 60, $ammoMagazine, false));
 		
-//		$TargeterA = new ProximityLaser(3, 0, 0, 240, 60, 'A');
+        /*
 		$TargeterA = new ProximityLaser(3, 0, 0, 0, 360, 'A');
 		$LauncherA = new ProximityLaserLauncher(0, 1, 0, 240, 60, 'A'); 
 		$TargeterA->addLauncher($LauncherA);
@@ -69,14 +69,13 @@ class TrylkanAM extends HeavyCombatVessel{
 		$this->addFrontSystem($LauncherA);		
 		$TargeterA->addTag("Front Proximity Laser");		
 
-//		$TargeterB = new ProximityLaser(3, 0, 0, 300, 120, 'B');
 		$TargeterB = new ProximityLaser(3, 0, 0, 0, 360, 'B');		
 		$LauncherB = new ProximityLaserLauncher(0, 1, 0, 300, 120, 'B'); 
 		$TargeterB->addLauncher($LauncherB);
 		$this->addFrontSystem($TargeterB);		
 		$this->addFrontSystem($LauncherB);		
 		$TargeterB->addTag("Front Proximity Laser");
-		
+        */
         $this->addFrontSystem(new AmmoMissileRackD(2, 0, 0, 300, 120, $ammoMagazine, false));//$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
 
 		
@@ -108,7 +107,7 @@ class TrylkanAM extends HeavyCombatVessel{
                 1=> array(
                         4 => "Thruster",
                         6 => "Ballistic Mine Launcher",
-                        8 => "TAG:Front Proximity Laser",
+                        8 => "Proximity Laser",
                         10 => "Class-D Missile Rack",
                         18 => "Structure",
                         20 => "Primary",

@@ -19,7 +19,8 @@ class SoskaAM extends BaseShip{
 		$this->isd = 2230;
         $this->fighters = array("assault shuttles"=>2);
 
-	    $this->notes = 'Atmospheric Capable.';
+	    $this->notes = 'Atmospheric Capable';
+		$this->notes .= "<br>Showdowns-9";		
         
         $this->forwardDefense = 14;
         $this->sideDefense = 16;

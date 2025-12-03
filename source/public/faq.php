@@ -250,7 +250,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         <a class="back-to-top" href="#top">↩ Back to Top</a>
 
 
-        <h3 id="stealth" >Stealth Ships</h3>
+        <h3 id="stealth" >Hyach Stealth Ships</h3>
         <ul>
             <li>Stealth ships are invisible at long ranges until they reveal themselves or are detected.</li>
             <li>They will automatically reveal themselves by using any EW ability except Defensive EW (DEW) or by firing their weapons.</li>
@@ -266,7 +266,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                 </ul>
             </li>
             <li>ELINT ships can spend EW points on 'Detect Stealth' to increase detection range by +2 per point invested in this way.</li>
-            <li>After being detected, Stealth ships can become undetected by breaking line of sight at the end of a turn and not firing weapons.</li>
+            <li>After being detected, Stealth ships can become undetected by breaking line of sight with ALL enemy vessels at the end of a turn and not firing any weapons.</li>
             <li>If their scanner or computer system is destroyed, their defense increases by 15% for the battle.</li>
             <li>Stealth ships also receive the same benefits as Minbari Jammer-equipped ships from a certain distance:
                 <ul class="circle-list">

@@ -1,16 +1,16 @@
 <?php
-class KoloskAM extends BaseShip{
+class KoloskAMNew extends BaseShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 850;
 		$this->faction = "Kor-Lyan Kingdoms";
-        $this->phpclass = "KoloskAM";
+        $this->phpclass = "KoloskAMNew";
         $this->imagePath = "img/ships/korlyan_koskova3.png";
         $this->shipClass = "Kolosk Proximity Cruiser";
 			$this->occurence = "uncommon";
-			$this->variantOf = 'OBSELETE';
+			$this->variantOf = 'Koskova Battlecruiser';
         $this->shipSizeClass = 3;
 		$this->canvasSize = 160; //img has 200px per side
 
@@ -62,33 +62,38 @@ class KoloskAM extends BaseShip{
 
         $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1)); 
         $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));
-
-//		$TargeterA = new ProximityLaser(3, 0, 0, 300, 60, 'A');
+		
+		/*
 		$TargeterA = new ProximityLaser(3, 0, 0, 0, 360, 'A');
 		$LauncherA = new ProximityLaserLauncher(0, 1, 0, 300, 60, 'A'); 
-		$TargeterA->addLauncher($LauncherA);
-        $this->addFrontSystem(new AmmoMissileRackF(3, 0, 0, 240, 60, $ammoMagazine, false));   
+		$TargeterA->addLauncher($LauncherA);  
 		$this->addFrontSystem($LauncherA);
-		$TargeterA->addTag("Front Proximity Laser");		
-
-//		$TargeterB = new ProximityLaser(3, 0, 0, 300, 60, 'B');
+		$TargeterA->addTag("Front Proximity Laser");
+		*/		
+        $this->addFrontSystem(new AmmoMissileRackF(3, 0, 0, 240, 60, $ammoMagazine, false)); 
+		/*
 		$TargeterB = new ProximityLaser(3, 0, 0, 0, 360, 'B');		
 		$LauncherB = new ProximityLaserLauncher(0, 1, 0, 300, 60, 'B'); 
 		$TargeterB->addLauncher($LauncherB);
 		$this->addFrontSystem($TargeterA);
 		$this->addFrontSystem($LauncherB);
 		$TargeterB->addTag("Front Proximity Laser");		
+		
 
-//		$TargeterC = new ProximityLaser(3, 0, 0, 300, 60, 'C');
 		$TargeterC = new ProximityLaser(3, 0, 0, 0, 360, 'C');		
 		$LauncherC = new ProximityLaserLauncher(0, 1, 0, 300, 60, 'C'); 
 		$TargeterC->addLauncher($LauncherC);
-        $this->addFrontSystem(new AmmoMissileRackF(3, 0, 0, 300, 120, $ammoMagazine, false));
+
 		$this->addFrontSystem($LauncherC);
 		$this->addFrontSystem($TargeterB);		
 		$this->addFrontSystem($TargeterC);
 		$TargeterC->addTag("Front Proximity Laser");		            
+		*/
 
+        $this->addFrontSystem(new AmmoMissileRackF(3, 0, 0, 300, 120, $ammoMagazine, false));
+		$this->addFrontSystem(new ProximityLaserNew(3, 0, 0, 300, 60));
+		$this->addFrontSystem(new ProximityLaserNew(3, 0, 0, 300, 60));
+		$this->addFrontSystem(new ProximityLaserNew(3, 0, 0, 300, 60));				
         $this->addAftSystem(new Thruster(4, 7, 0, 2, 2));
         $this->addAftSystem(new Thruster(4, 16, 0, 6, 2));
         $this->addAftSystem(new Thruster(4, 7, 0, 2, 2));
@@ -96,27 +101,29 @@ class KoloskAM extends BaseShip{
         $this->addAftSystem(new AmmoMissileRackD(2, 0, 0, 60, 240, $ammoMagazine, false));
 
         $this->addLeftSystem(new AmmoMissileRackD(4, 0, 0, 240, 60, $ammoMagazine, false));
-
-//		$TargeterD = new ProximityLaser(3, 0, 0, 240, 60, 'D');
+		$this->addLeftSystem(new ProximityLaserNew(3, 0, 0, 240, 60));	
+		/*
 		$TargeterD = new ProximityLaser(3, 0, 0, 0, 360, 'D');		
 		$LauncherD = new ProximityLaserLauncher(0, 1, 0, 240, 60, 'D'); 
 		$TargeterD->addLauncher($LauncherD);
 		$this->addLeftSystem($TargeterD);
-		$this->addLeftSystem($LauncherD);        
+		$this->addLeftSystem($LauncherD); 
+		*/       
         $this->addLeftSystem(new AmmoMissileRackF(3, 0, 0, 180, 360, $ammoMagazine, false));
         $this->addLeftSystem(new Thruster(4, 15, 0, 5, 3));
 
         $this->addRightSystem(new AmmoMissileRackD(4, 0, 0, 300, 120, $ammoMagazine, false));
-
-//		$TargeterE = new ProximityLaser(3, 0, 0, 300, 120, 'E');
+		$this->addRightSystem(new ProximityLaserNew(3, 0, 0, 300, 120));	
+		/*
 		$TargeterE = new ProximityLaser(3, 0, 0, 0, 360, 'E');		
 		$LauncherE = new ProximityLaserLauncher(0, 1, 0, 300, 120, 'E'); 
 		$TargeterE->addLauncher($LauncherE);
 		$this->addRightSystem($TargeterE);
 		$this->addRightSystem($LauncherE);
+		*/
         $this->addRightSystem(new AmmoMissileRackF(3, 0, 0, 0, 180, $ammoMagazine, false));
         $this->addRightSystem(new Thruster(4, 15, 0, 5, 4));
-        
+		
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure(5, 48));
         $this->addAftSystem(new Structure(5, 45));
@@ -138,7 +145,7 @@ class KoloskAM extends BaseShip{
 			),
 			1=> array(
 					4 => "Thruster",
-					7 => "TAG:Front Proximity Laser",
+					7 => "Proximity Laser",
 					10 => "Class-F Missile Rack",
 					18 => "Structure",
 					20 => "Primary",
@@ -152,7 +159,7 @@ class KoloskAM extends BaseShip{
 			3=> array(
 					5 => "Thruster",
 					7 => "Class-F Missile Rack",
-					9 => "Proximity Laser D",
+					9 => "Proximity Laser",
 					11 => "Class-D Missile Rack",
 					18 => "Structure",
 					20 => "Primary",
@@ -160,7 +167,7 @@ class KoloskAM extends BaseShip{
 			4=> array(
 					5 => "Thruster",
 					7 => "Class-F Missile Rack",
-					9 => "Proximity Laser E",
+					9 => "Proximity Laser",
 					11 => "Class-D Missile Rack",
 					18 => "Structure",
 					20 => "Primary",

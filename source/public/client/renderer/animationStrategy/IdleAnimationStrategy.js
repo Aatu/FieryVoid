@@ -19,9 +19,9 @@ window.IdleAnimationStrategy = function () {
 
             if (turnDestroyed !== null && turnDestroyed < this.turn) {
                 icon.hide();
-            } else if (turnDestroyed === null && destroyed) {
+            } else if (turnDestroyed === null && destroyed) {      
                 icon.hide();
-            } else if (shipManager.shouldBeHidden(ship)) { //Stealth or not deployed yet.
+            } else if (shipManager.shouldBeHidden(ship)) { //Stealth or not deployed yet or died to Terrain collisions.
                 icon.hide();
             } else {
                 icon.show();

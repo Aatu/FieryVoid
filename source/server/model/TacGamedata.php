@@ -618,7 +618,9 @@ class TacGamedata {
                 $weapon = $ship->getSystemById($fire->weaponid);
                 
                 if ($fire->turn == $this->turn && !$weapon->ballistic && $this->phase == 3 && !$weapon->preFires){
-                    unset($system->fireOrders[$i]);
+                    if($fire->damageclass != 'TerrainCrash' && $fire->damageclass != 'TerrainCollision' && $fire->damageclass != 'AutoRam'){ //RammingAttack isn't PreFire, but we won't THESE fireorders to be passed to Front End for Replay.
+                        unset($system->fireOrders[$i]);
+                    }    
                 }
                 if ($fire->turn == $this->turn && $weapon->ballistic && $this->phase == 1){
                     unset($system->fireOrders[$i]);

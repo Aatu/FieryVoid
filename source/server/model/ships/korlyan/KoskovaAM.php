@@ -11,7 +11,7 @@ class KoskovaAM extends BaseShip{
         $this->shipClass = "Koskova Battlecruiser";
         $this->shipSizeClass = 3;
 		$this->canvasSize = 160; //img has 200px per side
-
+			$this->variantOf = 'OBSELETE';
 		$this->isd = 2255;
         $this->fighters = array("assault shuttles"=>2);
 

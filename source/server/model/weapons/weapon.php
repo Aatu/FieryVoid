@@ -1369,7 +1369,7 @@ public function getStartLoading()
 		}
 
         //Check Line of Sight has been maintained by ship for Ballistic weapons after launch (Fighters checked separately above).
-        if($this->ballistic && (!$shooter instanceof FighterFlight)){
+        if($this->ballistic && (!$shooter instanceof FighterFlight) && !$this->hasSpecialLaunchHexCalculation){
             if(!$firecontrol <= 0){ //No point checking for LoS if FC is a 0 or lower anyway!
                 $losBlocked  = $this->checkLineOfSight($pos, $targetPos, $gamedata); //Defaults false e.g. line of sight NOT blocked.
                
