@@ -279,6 +279,10 @@ Weapon.prototype.getInterceptRating = function () {
 				return this.intercept;
 };
 
+Weapon.prototype.checkFinished = function () {
+	return false;
+};
+
 //weapon that has special interaction with shield - eg. Phasing Pulse Cannon - redefines this
 Weapon.prototype.shieldInteractionDefense = function (target, shooter, shield, mod) {
     return mod;

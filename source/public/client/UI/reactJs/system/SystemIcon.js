@@ -132,7 +132,7 @@ class SystemIcon extends React.Component{
         let {system, ship} = this.props;
 		system = shipManager.systems.initializeSystem(system);
 
-		if (gamedata.waiting) return;
+		if (gamedata.waiting || gamedata.replay) return;
 
 		if (shipManager.isDestroyed(ship) || shipManager.isDestroyed(ship, system) /*|| shipManager.isAdrift(ship)*/) return;//should work with disabled ship after all!
 		
