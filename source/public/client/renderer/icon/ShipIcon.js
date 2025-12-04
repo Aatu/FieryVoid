@@ -329,7 +329,9 @@ window.ShipIcon = function () {
         //Replacement code below
         Object.values(movements)
             .filter(movement => movement.type !== 'start')
-            //.filter(movement => movement.type !== 'prefire')            
+            // During replay, exclude preFire moves from the main movement path – they will
+            // be animated separately in ReplayAnimationStrategy, after the relevant weapon hits.
+            .filter(movement => !(gamedata.replay && movement.type === 'prefire'))
             .filter(movement => movement.commit)
             .forEach(movement => {
 

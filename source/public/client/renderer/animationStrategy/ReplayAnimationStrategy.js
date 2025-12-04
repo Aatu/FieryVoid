@@ -152,23 +152,58 @@ window.ReplayAnimationStrategy = function () {
             var preFireMoveTime = time + perShipAnimation.getDuration(); // Start after weapon fire animation
 
             if (preFireMovements.length > 0) {
-                for (var i in preFireMovements) {
-                    var movement = preFireMovements[i]; //Look through movements identified as prefire
-                    for (var k in fireOrders) {
-                        var subOrders = fireOrders[k];
-                        for (var l in subOrders) { //Now check through fireorder, so see if we can find a matching value.
-                            var subOrder = subOrders[l];
-                            if (movement.value == subOrder.id) { //In this batch of fireorders against this ship, there is a prefire move. 
-                                /*// Create a movement animation for this preFire movement
-                                var preFireMoveAnimation = //I don't know the best way to create this without disrupting normal movement animations! 
 
-                                preFireMoveAnimation.setTime(preFireMoveTime);
-                                this.animations.push(preFireMoveAnimation);
+                // Base starting state is the ship's end-of-movement position on this turn
+                var startBase = perShipAnimation.shipIcon.getEndMovementOnTurn(this.turn);
+                if (!startBase) {
+                    startBase = perShipAnimation.shipIcon.getLastMovementOnTurn(this.turn);
+                }
 
-                                if (this.type === ReplayAnimationStrategy.type.INFORMATIVE) {
-                                    preFireMoveTime += preFireMoveAnimation.getDuration();
+                if (startBase) {
+                    var currentStartState = {
+                        position: new hexagon.Offset(startBase.position),
+                        facing: startBase.facing,
+                        heading: startBase.heading
+                    };
+
+                    for (var i in preFireMovements) {
+                        var movement = preFireMovements[i]; // Look through movements identified as preFire
+
+                        // Try to find a matching fire order for this movement.id
+                        var scheduled = false;
+                        for (var k in fireOrders) {
+                            var subOrders = fireOrders[k];
+                            for (var l in subOrders) { // Now check through fireorders to see if we can find a matching value.
+                                var subOrder = subOrders[l];
+                                if (movement.value == subOrder.id) { // In this batch of fireorders against this ship, there is a preFire move. 
+
+                                    var endState = {
+                                        position: new hexagon.Offset(movement.position),
+                                        facing: movement.facing,
+                                        heading: movement.heading
+                                    };
+
+                                    var preFireMoveAnimation = new PreFireMovementAnimation(
+                                        perShipAnimation.shipIcon,
+                                        currentStartState,
+                                        endState,
+                                        preFireMoveTime,
+                                        this.moveHexDuration * 2 // Short but visible
+                                    );
+
+                                    this.animations.push(preFireMoveAnimation);
+
+                                    if (this.type === ReplayAnimationStrategy.type.INFORMATIVE) {
+                                        preFireMoveTime += preFireMoveAnimation.getDuration();
+                                    }
+
+                                    currentStartState = endState;
+                                    scheduled = true;
+                                    break;
                                 }
-                                    */
+                            }
+                            if (scheduled) {
+                                break;
                             }
                         }
                     }
@@ -322,6 +357,70 @@ window.ReplayAnimationStrategy = function () {
             moveAnimation.setDuration(this.moveAnimationDuration);
         }
     }
+
+    /**
+     * Simple, self-contained animation that moves a single ship icon from one
+     * movement state to another (both taken from replay movement data).
+     *
+     * It does NOT alter the underlying per-turn ShipMovementAnimation – it simply
+     * overrides position/facing for its own time window, so non-preFire movement
+     * animations and other phases remain unaffected.
+     */
+    function PreFireMovementAnimation(shipIcon, startState, endState, startTime, duration) {
+        Animation.call(this);
+
+        this.shipIcon = shipIcon;
+        this.startState = startState;
+        this.endState = endState;
+        this.time = startTime || 0;
+        this.duration = duration || 400;
+    }
+
+    PreFireMovementAnimation.prototype = Object.create(Animation.prototype);
+
+    PreFireMovementAnimation.prototype.getDuration = function () {
+        return this.duration;
+    };
+
+    PreFireMovementAnimation.prototype.setTime = function (time) {
+        this.time = time;
+    };
+
+    PreFireMovementAnimation.prototype.render = function (now, total, last, delta, zoom, back, paused) {
+
+        // Outside our time window → let other animations control the icon.
+        if (total < this.time) {
+            return;
+        }
+
+        var endTime = this.time + this.duration;
+
+        var t = 1;
+        if (endTime > this.time) {
+            t = (total - this.time) / (endTime - this.time);
+        }
+
+        if (t < 0) t = 0;
+        if (t > 1) t = 1;
+
+        // Interpolate position between the two hexes.
+        var startPos = window.coordinateConverter.fromHexToGame(this.startState.position);
+        var endPos = window.coordinateConverter.fromHexToGame(this.endState.position);
+        var pos = mathlib.getPointBetween(startPos, endPos, t);
+
+        // Simple linear interpolation of facing / heading in hex-angle space.
+        var startFacingAngle = mathlib.hexFacingToAngle(this.startState.facing);
+        var endFacingAngle = mathlib.hexFacingToAngle(this.endState.facing);
+        var facingAngle = startFacingAngle + (endFacingAngle - startFacingAngle) * t;
+
+        var startHeadingAngle = mathlib.hexFacingToAngle(this.startState.heading);
+        var endHeadingAngle = mathlib.hexFacingToAngle(this.endState.heading);
+        var headingAngle = startHeadingAngle + (endHeadingAngle - startHeadingAngle) * t;
+
+        this.shipIcon.setPosition(pos);
+        this.shipIcon.setFacing(-facingAngle);
+        this.shipIcon.setHeading(-headingAngle);
+    };
 
     /* //Old version before Pre-Firing - DK Nov 2025
     function animateWeaponFire(time, logAnimation) {
