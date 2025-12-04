@@ -79,7 +79,7 @@ window.ReplayAnimationStrategy = function () {
         this.movementPhaseStartTime = time;
         time = animateMovement.call(this, time);
         this.firingPhaseStartTime = time;
-        time = animateWeaponPreFire.call(this, time, logAnimation);        
+        time = animateWeaponPreFire.call(this, time, logAnimation);
         time = animateWeaponFire.call(this, time, logAnimation);
         time = animateShipDestruction.call(this, time, logAnimation);
         time += 100;
@@ -149,28 +149,37 @@ window.ReplayAnimationStrategy = function () {
 
             var preFireMovements = perShipAnimation.shipIcon.preFireMovements;
             var fireOrders = perShipAnimation.incomingFire;
-            if(preFireMovements.length > 0){    
-                for( var i in preFireMovements){
-                    var movement = preFireMovements[i];
-                        for(var k in fireOrders){
-                            var subOrders = fireOrders[k];
-                            for(var l in subOrders){
-                                var subOrder = subOrders[l];                             
-                                if(movement.value == subOrder.id){
+            var preFireMoveTime = time + perShipAnimation.getDuration(); // Start after weapon fire animation
 
+            if (preFireMovements.length > 0) {
+                for (var i in preFireMovements) {
+                    var movement = preFireMovements[i]; //Look through movements identified as prefire
+                    for (var k in fireOrders) {
+                        var subOrders = fireOrders[k];
+                        for (var l in subOrders) { //Now check through fireorder, so see if we can find a matching value.
+                            var subOrder = subOrders[l];
+                            if (movement.value == subOrder.id) { //In this batch of fireorders against this ship, there is a prefire move. 
+                                /*// Create a movement animation for this preFire movement
+                                var preFireMoveAnimation = //I don't know the best way to create this without disrupting normal movement animations! 
+
+                                preFireMoveAnimation.setTime(preFireMoveTime);
+                                this.animations.push(preFireMoveAnimation);
+
+                                if (this.type === ReplayAnimationStrategy.type.INFORMATIVE) {
+                                    preFireMoveTime += preFireMoveAnimation.getDuration();
                                 }
-                            }    
+                                    */
+                            }
                         }
-
-
+                    }
                 }
-            }    
-
-            if (this.type === ReplayAnimationStrategy.type.INFORMATIVE) {
-                time += perShipAnimation.getDuration();
             }
 
-            var allHexBallistics = weaponManager.getAllHexTargetedBallistics();            
+            if (this.type === ReplayAnimationStrategy.type.INFORMATIVE) {
+                time = Math.max(time + perShipAnimation.getDuration(), preFireMoveTime);
+            }
+
+            var allHexBallistics = weaponManager.getAllHexTargetedBallistics();
             var firesForThisShip = allHexBallistics.filter(function (f) {
                 return f && (f.shooter === ship || f.shooter === ship.id);
             });
@@ -200,7 +209,7 @@ window.ReplayAnimationStrategy = function () {
         return time;
     }
 
-    
+
     function animateWeaponFire(time, logAnimation) {
         var shipList = [];
         this.gamedata.ships.forEach(function (shp) { shipList.push(shp); });
@@ -230,7 +239,7 @@ window.ReplayAnimationStrategy = function () {
                 time += perShipAnimation.getDuration();
             }
 
-            var allHexBallistics = weaponManager.getAllHexTargetedBallistics();            
+            var allHexBallistics = weaponManager.getAllHexTargetedBallistics();
             var firesForThisShip = allHexBallistics.filter(function (f) {
                 return f && (f.shooter === ship || f.shooter === ship.id);
             });
@@ -264,14 +273,14 @@ window.ReplayAnimationStrategy = function () {
         this.gamedata.ships.filter(function (ship) {
             return shipManager.getTurnDestroyed(ship) === this.turn && !ship.flight;
         }, this).forEach(function (ship) {
-			var jumped = shipManager.hasJumpedNotDestroyed(ship);
-			if(jumped){
-				var animation = new ShipJumpAnimation(time, this.shipIconContainer.getByShip(ship), this.emitterContainer, this.movementAnimations);
-                logAnimation.addLogEntryDestroyed(ship, time, true);                   	
-			}else{
-            	var animation = new ShipDestroyedAnimation(time, this.shipIconContainer.getByShip(ship), this.emitterContainer, this.movementAnimations);
-                logAnimation.addLogEntryDestroyed(ship, time, false);                
-			}
+            var jumped = shipManager.hasJumpedNotDestroyed(ship);
+            if (jumped) {
+                var animation = new ShipJumpAnimation(time, this.shipIconContainer.getByShip(ship), this.emitterContainer, this.movementAnimations);
+                logAnimation.addLogEntryDestroyed(ship, time, true);
+            } else {
+                var animation = new ShipDestroyedAnimation(time, this.shipIconContainer.getByShip(ship), this.emitterContainer, this.movementAnimations);
+                logAnimation.addLogEntryDestroyed(ship, time, false);
+            }
             time += animation.getDuration();
             this.animations.push(animation);
         }, this);
@@ -279,7 +288,7 @@ window.ReplayAnimationStrategy = function () {
         this.gamedata.ships.filter(function (ship) {
             var turnDestroyed = shipManager.getTurnDestroyed(ship);
             var destroyed = shipManager.isDestroyed(ship);
-        
+
             // Hide if:
             // - destroyed this or a previous turn
             // - OR is an undetected stealth ship
@@ -314,67 +323,67 @@ window.ReplayAnimationStrategy = function () {
         }
     }
 
-/* //Old version before Pre-Firing - DK Nov 2025
-function animateWeaponFire(time, logAnimation) {
-
-    var shipList = [];
-    this.gamedata.ships.forEach(function (shp) { shipList.push(shp); });
-
-    shipList.sort(function (a, b) {
-        if (a.flight && !b.flight) return -1;
-        if (!a.flight && b.flight) return 1;
-        if (a.pointCost > b.pointCost) return 1;
-        if (a.pointCost < b.pointCost) return -1;
-        return 0;
-    });
-
-    var allHexBallistics = weaponManager.getAllHexTargetedBallistics();
-
-    shipList.forEach(function (ship) {
-        var perShipAnimation = new AllWeaponFireAgainstShipAnimation(
-            ship,
-            this.shipIconContainer,
-            this.emitterContainer,
-            this.gamedata,
-            time,
-            this.scene,
-            this.movementAnimations,
-            logAnimation
-        );
-        this.animations.push(perShipAnimation);
-
-        if (this.type === ReplayAnimationStrategy.type.INFORMATIVE) {
-            time += perShipAnimation.getDuration();
-        }
-
-        // 🔧 filter only this ship’s ballistics
-        var firesForThisShip = allHexBallistics.filter(function (f) {
-            return f && (f.shooter === ship || f.shooter === ship.id);
+    /* //Old version before Pre-Firing - DK Nov 2025
+    function animateWeaponFire(time, logAnimation) {
+    
+        var shipList = [];
+        this.gamedata.ships.forEach(function (shp) { shipList.push(shp); });
+    
+        shipList.sort(function (a, b) {
+            if (a.flight && !b.flight) return -1;
+            if (!a.flight && b.flight) return 1;
+            if (a.pointCost > b.pointCost) return 1;
+            if (a.pointCost < b.pointCost) return -1;
+            return 0;
         });
-
-        if (firesForThisShip.length > 0) {
-            var hexAnim = new HexTargetedWeaponFireAnimation(
-                time,
-                this.movementAnimations,
+    
+        var allHexBallistics = weaponManager.getAllHexTargetedBallistics();
+    
+        shipList.forEach(function (ship) {
+            var perShipAnimation = new AllWeaponFireAgainstShipAnimation(
+                ship,
                 this.shipIconContainer,
-                this.turn,
                 this.emitterContainer,
-                logAnimation,
-                firesForThisShip   // ✅ pass per-ship fires
+                this.gamedata,
+                time,
+                this.scene,
+                this.movementAnimations,
+                logAnimation
             );
-
-            this.animations.push(hexAnim);
-
+            this.animations.push(perShipAnimation);
+    
             if (this.type === ReplayAnimationStrategy.type.INFORMATIVE) {
-                time += hexAnim.getDuration();
+                time += perShipAnimation.getDuration();
             }
-        }
-
-    }, this);
-
-    return time;
-}
-*/
+    
+            // 🔧 filter only this ship’s ballistics
+            var firesForThisShip = allHexBallistics.filter(function (f) {
+                return f && (f.shooter === ship || f.shooter === ship.id);
+            });
+    
+            if (firesForThisShip.length > 0) {
+                var hexAnim = new HexTargetedWeaponFireAnimation(
+                    time,
+                    this.movementAnimations,
+                    this.shipIconContainer,
+                    this.turn,
+                    this.emitterContainer,
+                    logAnimation,
+                    firesForThisShip   // ✅ pass per-ship fires
+                );
+    
+                this.animations.push(hexAnim);
+    
+                if (this.type === ReplayAnimationStrategy.type.INFORMATIVE) {
+                    time += hexAnim.getDuration();
+                }
+            }
+    
+        }, this);
+    
+        return time;
+    }
+    */
 
     /* //Even OLDER version from before Zero changed it I think
     function animateWeaponFire(time, logAnimation) {
@@ -392,7 +401,7 @@ function animateWeaponFire(time, logAnimation) {
         
         //now sort - fighters first!
         shipList.sort(function(a, b){
-	    if (a.flight && !b.flight){//fighters always before ships
+        if (a.flight && !b.flight){//fighters always before ships
                 return -1;
               }else if (!a.flight && b.flight){
                 return 1;
@@ -403,9 +412,9 @@ function animateWeaponFire(time, logAnimation) {
               }
               else return 0;
         });
-	    
-	    
-	    
+        
+        
+        
         //this.gamedata.ships.forEach(function (ship, i) 
         shipList.forEach(function (ship, i) {
             var animation = new AllWeaponFireAgainstShipAnimation(ship, this.shipIconContainer, this.emitterContainer, this.gamedata, time, this.scene, this.movementAnimations, logAnimation);

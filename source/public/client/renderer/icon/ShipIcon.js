@@ -1,4 +1,4 @@
-'use strict';
+﻿'use strict';
 
 window.ShipIcon = function () {
 
@@ -329,7 +329,7 @@ window.ShipIcon = function () {
         //Replacement code below
         Object.values(movements)
             .filter(movement => movement.type !== 'start')
-            .filter(movement => movement.type !== 'shift')            
+            //.filter(movement => movement.type !== 'prefire')            
             .filter(movement => movement.commit)
             .forEach(movement => {
 
@@ -353,7 +353,7 @@ window.ShipIcon = function () {
         });
         this.preFireMovements = []; //reset
         Object.values(movements)
-            .filter(m => m.type === 'shift')
+            .filter(m => m.type === 'prefire')
             .forEach(m => {
                 if (!this.preFireMovements.some(existing => existing.id === m.id)) {
                     if(m.turn == gamedata.turn) this.preFireMovements.push(m);
