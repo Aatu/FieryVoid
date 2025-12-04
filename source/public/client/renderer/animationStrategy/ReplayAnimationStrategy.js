@@ -234,8 +234,56 @@ window.ReplayAnimationStrategy = function () {
 
                 this.animations.push(hexAnim);
 
+                var hexAnimEndTime = time + hexAnim.getDuration();
+                var hexPreFireMoveTime = hexAnimEndTime;
+
+                // Hex-targeted preFire orders cause the shooting ship to teleport/move.
+                // If this ship has preFire movements, animate them after the hex animation.
+                var shooterIcon = this.shipIconContainer.getByShip(ship);
+                if (shooterIcon && shooterIcon.preFireMovements && shooterIcon.preFireMovements.length > 0) {
+                    // Get the starting state for this ship (end of normal movement on this turn)
+                    var startBase = shooterIcon.getEndMovementOnTurn(this.turn);
+                    if (!startBase) {
+                        startBase = shooterIcon.getLastMovementOnTurn(this.turn);
+                    }
+                    if (startBase) {
+                        var currentStartState = {
+                            position: new hexagon.Offset(startBase.position),
+                            facing: startBase.facing,
+                            heading: startBase.heading
+                        };
+
+                        // Animate all preFire movements for this ship
+                        for (var i in shooterIcon.preFireMovements) {
+                            var movement = shooterIcon.preFireMovements[i];
+                            
+                            var endState = {
+                                position: new hexagon.Offset(movement.position),
+                                facing: movement.facing,
+                                heading: movement.heading
+                            };
+
+                            var preFireMoveAnimation = new PreFireMovementAnimation(
+                                shooterIcon,
+                                currentStartState,
+                                endState,
+                                hexPreFireMoveTime,
+                                this.moveHexDuration * 2 // Short but visible
+                            );
+
+                            this.animations.push(preFireMoveAnimation);
+
+                            if (this.type === ReplayAnimationStrategy.type.INFORMATIVE) {
+                                hexPreFireMoveTime += preFireMoveAnimation.getDuration();
+                            }
+
+                            currentStartState = endState;
+                        }
+                    }
+                }
+
                 if (this.type === ReplayAnimationStrategy.type.INFORMATIVE) {
-                    time += hexAnim.getDuration();
+                    time = Math.max(hexAnimEndTime, hexPreFireMoveTime);
                 }
             }
 
@@ -420,6 +468,11 @@ window.ReplayAnimationStrategy = function () {
         this.shipIcon.setPosition(pos);
         this.shipIcon.setFacing(-facingAngle);
         this.shipIcon.setHeading(-headingAngle);
+    };
+
+    PreFireMovementAnimation.prototype.cleanUp = function (scene) {
+        // No persistent resources to clean up - this animation only manipulates
+        // the shipIcon which is managed elsewhere
     };
 
     /* //Old version before Pre-Firing - DK Nov 2025

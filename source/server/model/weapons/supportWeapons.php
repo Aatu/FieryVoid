@@ -1013,7 +1013,7 @@ class TransverseDrive extends Weapon implements SpecialAbility, DefensiveSystem{
 		$lastMove = $ship->getLastMovement();
 		
 		//Create new movement orders to $targetPos.
-        $transverseJump = new MovementOrder(null, "blink", new OffsetCoordinate($targetPos->q, $targetPos->r), 0, 0, $lastMove->speed, $lastMove->heading, $lastMove->facing, false, $gamedata->turn, $distance, 0);
+        $transverseJump = new MovementOrder(null, "prefire", new OffsetCoordinate($targetPos->q, $targetPos->r), 0, 0, $lastMove->speed, $lastMove->heading, $lastMove->facing, false, $gamedata->turn, $distance, 0);
 
 		//Add Tranverse movement order to database
 		Manager::insertSingleMovement($gamedata->id, $ship->id, $transverseJump);		
