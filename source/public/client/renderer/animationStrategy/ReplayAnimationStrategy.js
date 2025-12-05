@@ -188,7 +188,7 @@ window.ReplayAnimationStrategy = function () {
                                         currentStartState,
                                         endState,
                                         preFireMoveTime,
-                                        this.moveHexDuration * 2 // Short but visible
+                                        this.moveHexDuration // Short but visible
                                     );
 
                                     this.animations.push(preFireMoveAnimation);
@@ -268,7 +268,7 @@ window.ReplayAnimationStrategy = function () {
                                 currentStartState,
                                 endState,
                                 hexPreFireMoveTime,
-                                this.moveHexDuration * 2 // Short but visible
+                                this.moveHexDuration * 1.5 // Short but visible
                             );
 
                             this.animations.push(preFireMoveAnimation);
