@@ -1049,17 +1049,20 @@ class GravityNet extends Weapon implements SpecialAbility{
 	public $loadingtime = 2;
     public $rangePenalty = 1;
     protected $canTargetAll = true; //Allows weapon to target allies AND enemies, pass to Front End in strpForJson()
-	public $firingModes = array(
-	    1 => "Clockwise",
-        2 => "Anti-Clockwise"
-	);
+	//public $firingModes = array(
+	    //1 => "Clockwise",
+        //2 => "Anti-Clockwise"
+	//);
     public $fireControl = array(1, 2, 3); // fighters, <mediums, <capitals 
+    public $firingModes = array(
+		1 => "Gravity Net Move"
+	);
 	public $preFires = true;
     public $specialHitChanceCalculation = true;			
 	public $repairPriority = 6;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
 	    
     protected $possibleCriticals = array(14 => "ReducedRange");
-	private static $alreadyShifted = array();	
+	//private static $alreadyNetted = array();	
 
     function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
 
@@ -1072,7 +1075,6 @@ class GravityNet extends Weapon implements SpecialAbility{
 		}
 		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
     }
-	
 
 	public function getSpecialAbilityValue($args)
     {
@@ -1089,20 +1091,9 @@ class GravityNet extends Weapon implements SpecialAbility{
 		parent::setSystemDataWindow($turn);     
     }
 
-	public function calculateHitBase($gamedata, $fireOrder)
-	{       
-		if (isset(GravityNet::$alreadyShifted[$fireOrder->targetid])){
-            $fireOrder->needed = 0;
-            $fireOrder->updated = true; 
-            $fireOrder->pubnotes = "<br>Ship has already been affected by a Gravitic Shifter.";                         
-            return; //target already engaged by a previous Gravitic Shifter
-        }
-            
+	public function calculateHitBase($gamedata, $fireOrder){         
         parent::calculateHitBase($gamedata, $fireOrder);
-        
-        GravityNet::$alreadyShifted[$fireOrder->targetid] = true; //Mark that a shot has been attempted against ship.
-
-		$target = $gamedata->getShipById($fireOrder->targetid);
+        $target = $gamedata->getShipById($fireOrder->targetid);
         $shooter = $this->getUnit();
         if($shooter->team !== $target->team){ //Let's make penalty only for enemy units
             if($target->gravitic || $target->factionAge >= 3){//Gravitic or Ancient
@@ -1110,21 +1101,22 @@ class GravityNet extends Weapon implements SpecialAbility{
             }
         }    
 	}    
-        
+    
     public function fire($gamedata, $fireOrder){                   
-        parent::fire($gamedata, $fireOrder); 
-		
-        if($fireOrder->firingMode == 1){
-            $direction = "clockwise";
-        }else{
-            $direction = "anti-clockwise";      
-        }
-
+        parent::fire($gamedata, $fireOrder); 		
         if($fireOrder->shotshit > 0){
-            $fireOrder->pubnotes = "<br>Ship has been forced to turn 60 degrees " . $direction . " by a Gravitic Shifter.";                       
+            $fireOrder->pubnotes = "<br>Ship has been forced to move by a Gravity Net.";  
+              
         }    
     }
+    
+    protected function beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata)
+    {
+        Debug::log(json_encode($target));
+    }
 
+
+    /*
     protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
         if($ship->Enormous) return; //No effect on Enormous units
 
@@ -1147,7 +1139,8 @@ class GravityNet extends Weapon implements SpecialAbility{
 
 		//Add shifted movement order to database
 		Manager::insertSingleMovement($gamedata->id, $ship->id, $shift);	
-    }    
+    }   
+        */ 
 
 	public function getDamage($fireOrder){       return 0;   } //no actual damage
 	public function setMinDamage(){     $this->minDamage = 0 ;      }
