@@ -484,7 +484,7 @@ window.weaponManager = {
                         loSBlocked = mathlib.checkLineOfSight(sPosShooter, sPosTarget, blockedLosHex);
                     }
 
-                    if(weapon.hasSpecialLaunchHexCalculation) loSBlocked = false;
+                    if(weapon.ignoresLoS) loSBlocked = false;
 
                     var value = weapon.firingMode;
                     value = weapon.firingModes[value];
@@ -1120,7 +1120,7 @@ window.weaponManager = {
 		}       
 
         // Check Line of Sight for Ballistic weapons after launch (Fighters checked separately above)
-        if (weapon.ballistic && (!shooter.flight) && !weapon.hasSpecialLaunchHexCalculation) {
+        if (weapon.ballistic && (!shooter.flight) && !weapon.ignoresLoS) {
             if (!(firecontrol <= 0)) { // No point checking for LoS if FC is 0 or lower
                 var loSBlocked = false;
                 var blockedLosHex = weaponManager.getBlockedHexes(); //Check if there are any hexes that block LoS                   
@@ -1503,7 +1503,7 @@ window.weaponManager = {
                 loSBlocked = mathlib.checkLineOfSight(sPosShooter, sPosTarget, blockedLosHex);
             }
 
-            if(loSBlocked && !weapon.hasSpecialLaunchHexCalculation) continue;
+            if(loSBlocked && !weapon.ignoresLoS) continue;
 
             if (shipManager.systems.isDestroyed(selectedShip, weapon) || !weaponManager.isLoaded(weapon)) {
                 debug && console.log("Weapon destroyed or not loaded");
@@ -1771,7 +1771,7 @@ window.weaponManager = {
                     loSBlocked = mathlib.checkLineOfSight(sPosShooter, hexpos, blockedLosHex);
                 }
 
-                if(loSBlocked){
+                if(loSBlocked && !weapon.ignoresLoS){
                     confirm.error("No line of sight between firing ship and target hex.");	
                     return; //End work if no line of sight.
                 }

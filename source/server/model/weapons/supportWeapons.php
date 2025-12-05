@@ -796,7 +796,7 @@ class TransverseDrive extends Weapon implements SpecialAbility, DefensiveSystem{
 	protected $specialArcs = true;	//Denotes for Front End to redirect to weapon specific function to get arcs.			
 	public $repairPriority = 6;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
 	private $baseLoadingTime = 2; //Can be altered by a IncreasedRecharge1 critical, so we need to remember it's base value.
-
+    public $ignoresLoS = true;
 
 	public function onConstructed($ship, $turn, $phase){
 		parent::onConstructed($ship, $turn, $phase);
@@ -1160,7 +1160,7 @@ class TransverseDrive extends Weapon implements SpecialAbility, DefensiveSystem{
         $strippedSystem = parent::stripForJson();    
         $strippedSystem->shootsStraight = $this->shootsStraight;
         $strippedSystem->specialArcs = $this->specialArcs;
-        $strippedSystem->loadingtime = $this->loadingtime;	//With certain crits this can change for this weapon!											                                        
+        $strippedSystem->loadingtime = $this->loadingtime;	//With certain crits this can change for this weapon!													                                        
         return $strippedSystem;
 	}	
 
