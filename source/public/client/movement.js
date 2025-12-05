@@ -1291,7 +1291,7 @@ shipManager.movement = {
             if (!accel){ //!accel means it's deceleration instead
                 reqThrusterName = "retro";  
             }
-            var requiredThruster = shipManager.movement.thrusterDirectionRequired(ship,reqThrusterName);
+            var requiredThruster = shipManager.movement.thrusterDirectionRequired(ship,reqThrusterName, true);
             requiredThrust[requiredThruster] = ship.accelcost;
         }
 
@@ -2247,7 +2247,7 @@ shipManager.movement = {
       
       DIRECTION may be text ("port","stbd","main","retro")
     */
-    thrusterDirectionRequired: function thrusterDirectionRequired(ship,direction) {
+    thrusterDirectionRequired: function thrusterDirectionRequired(ship,direction, accel = false) {
         var orientationRequired = shipManager.movement.directionNoFromName(direction);
         
         if (orientationRequired>2 && shipManager.movement.isRolled(ship)){ //rolled reverses side requirements
@@ -2299,10 +2299,10 @@ shipManager.movement = {
 			if(shipManager.movement.isPivotedPort(ship)){ //pivoted to Port means: Stbd is Retro, Main is Stbd, Port is Main, Retro is Port
 				switch(orientationRequired) {
 					case 1: 
-						orientationRequired = 3;
+                        orientationRequired = accel ? 4 : 3;
 						break;
 					case 2: 
-						orientationRequired = 4;
+                        orientationRequired = accel ? 3 : 4;
 						break;
 					case 3: 
 						orientationRequired = 1;
@@ -2314,10 +2314,10 @@ shipManager.movement = {
 			}else if (shipManager.movement.isPivotedStbd(ship)){//pivoted to Stbd means: Stbd is Main, Main is Port, Port is Retro, Retro is Stbd
 				switch(orientationRequired) {
 					case 1: 
-						orientationRequired = 4;
+                        orientationRequired = accel ? 3 : 4;
 						break;
 					case 2: 
-						orientationRequired = 3;
+                        orientationRequired = accel ? 4 : 3;
 						break;
 					case 3: 
 						orientationRequired = 2;
