@@ -81,6 +81,7 @@ class MovementGamePhase implements Phase
             // Skip slot if it has no pre-firing ships
             if (in_array($slot->slot, $slotsToSkip, true)) {
                 $dbManager->updatePlayerSlotPhase($gameData->id, $slot->playerid, $slot->slot, 5, $gameData->turn);
+                $dbManager->setPlayerWaitingStatus($slot->playerid, $gameData->id, true); //Set waiting to prevent game highlighting in lobby               
             }
         }
     }
