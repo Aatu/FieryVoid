@@ -1547,7 +1547,7 @@ class DBManager
 		foreach($games as $currLineId=>$currGameData) if($games[$currLineId]["waiting"] != 0){
 			//$games[$currLineId]["waiting"] = 0;
 			$currGameId = $games[$currLineId]["id"];
-			$sql = "SELECT DISTINCT slot FROM tac_playeringame WHERE gameid = $currGameId and waiting = 0 "; //are three players that are waiting for action?
+			$sql = "SELECT DISTINCT slot FROM tac_playeringame WHERE gameid = $currGameId and waiting = 0 "; //are there players that are waiting for action?
 			$result = $this->query($sql);
 			if (($result == null) || (sizeof($result) == 0)){ //no such players do exist
 				$games[$currLineId]["waiting"] = 0;				
