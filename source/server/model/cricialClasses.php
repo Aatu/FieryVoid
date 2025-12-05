@@ -294,7 +294,7 @@ class ShipDisabled extends Critical{
     parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
     }
 }
-
+//Reduces $rangePenalty
 class ReducedRange extends Critical{
     public $description = "Range penalty increased.";
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
@@ -317,14 +317,13 @@ class ReducedRangeAntimatter extends Critical{
     }
 }
 
-//PlasmaWeb has special ReducedRange critical, code is probably fine but not been activated in plasma.js yet...
-/*
-class ReducedRangePlasmaWeb extends Critical{
+//Reduces $range
+class ReducedRangeValue extends Critical{
     public $description = "Offensive mode range reduced.";//decrease range by 2
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
             parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
     }
-} */
+} 
 
 //Antimatter has special ReducedDamage critical
 class ReducedDamageAntimatter extends Critical{

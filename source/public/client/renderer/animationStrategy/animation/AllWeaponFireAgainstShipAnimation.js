@@ -15,12 +15,13 @@ window.AllWeaponFireAgainstShipAnimation = function () {
         this.scene = scene;
         this.movementAnimations = movementAnimations;
         this.logAnimation = logAnimation;
+        this.prefire = prefire;
 
-        if(!prefire){
+        if (!prefire) {
             this.incomingFire = groupByShipAndWeapon(weaponManager.getAllFireOrdersForDisplayingAgainst(ship));
-        }else{
-            this.incomingFire = groupByShipAndWeapon(weaponManager.getAllPreFireOrdersForDisplayingAgainst(ship));            
-        }    
+        } else {
+            this.incomingFire = groupByShipAndWeapon(weaponManager.getAllPreFireOrdersForDisplayingAgainst(ship));
+        }
         this.animations = [];
 
         if (this.incomingFire.length === 0) {
@@ -29,7 +30,7 @@ window.AllWeaponFireAgainstShipAnimation = function () {
 
         this.systemDestroyedEffect = new SystemDestroyedEffect(scene)
         this.animations.push(this.systemDestroyedEffect)
-	 
+
         var cameraAnimation = new CameraPositionAnimation(getShipPositionAtTime.call(this, this.shipIconContainer.getByShip(ship), this.time), this.time);
         this.animations.push(cameraAnimation);
         this.duration += cameraAnimation.getDuration();
@@ -77,8 +78,8 @@ window.AllWeaponFireAgainstShipAnimation = function () {
     };
 
     function groupByShipAndWeapon(incomingFire) {
-        var grouped = {};        
-        
+        var grouped = {};
+
         incomingFire.forEach(function (fire) {
             var key = fire.shooter.id + "-" + fire.weapon.constructor.name + "-" + fire.firingMode + '-' + fire.calledid; //split called shots as well!
             if (grouped[key]) {
@@ -87,32 +88,32 @@ window.AllWeaponFireAgainstShipAnimation = function () {
                 grouped[key] = [fire];
             }
         });
-        
+
         //can't sort main array directly...
-        var groupedKeys = Object.keys(grouped);        
-        groupedKeys.sort(function (a, b){ 
+        var groupedKeys = Object.keys(grouped);
+        groupedKeys.sort(function (a, b) {
             //compare first object in both groups - every group should contain only fire by one shooter from one weapon, and by default at one target
             var obj1 = grouped[a][0];
             var obj2 = grouped[b][0];
-			//Marcin Sawicki September 2019: use actual firing resolution order if possible! Same weapons firing at same target should have consecutive resolution more or less	
-	      if (obj1.fireOrder.resolutionOrder > obj2.fireOrder.resolutionOrder){ //shots resolved earlier displayed earlier
-		      return 1;
-	      }else if (obj1.fireOrder.resolutionOrder < obj2.fireOrder.resolutionOrder){ 
-		      return -1;
-	      }		  
-            else if(obj1.shooter.flight && !obj2.shooter.flight){ //fighters after ships
-                return 1;                   
-            }else if(!obj1.shooter.flight && obj2.shooter.flight){ //fighters after ships
-                return -1;                   
-            }else if (obj1.weapon.priority !== obj2.weapon.priority){
-                return obj1.weapon.priority-obj2.weapon.priority; 
+            //Marcin Sawicki September 2019: use actual firing resolution order if possible! Same weapons firing at same target should have consecutive resolution more or less	
+            if (obj1.fireOrder.resolutionOrder > obj2.fireOrder.resolutionOrder) { //shots resolved earlier displayed earlier
+                return 1;
+            } else if (obj1.fireOrder.resolutionOrder < obj2.fireOrder.resolutionOrder) {
+                return -1;
+            }
+            else if (obj1.shooter.flight && !obj2.shooter.flight) { //fighters after ships
+                return 1;
+            } else if (!obj1.shooter.flight && obj2.shooter.flight) { //fighters after ships
+                return -1;
+            } else if (obj1.weapon.priority !== obj2.weapon.priority) {
+                return obj1.weapon.priority - obj2.weapon.priority;
             }
             else {
                 var val = obj1.shooter.id - obj2.shooter.id;
                 if (val == 0) val = obj1.id - obj2.id;
                 return val;
-            } 
-        });        
+            }
+        });
         return groupedKeys.map(function (key) {
             return grouped[key];
         });
@@ -150,15 +151,15 @@ window.AllWeaponFireAgainstShipAnimation = function () {
 
         let destroyedNames = getSystemNamesDestroyed(incomingFire);
         let criticalNames = getSystemNamesCriticals(incomingFire);
-        
-        for(var i in criticalNames){
+
+        for (var i in criticalNames) {
             var crit = criticalNames[i];
             if (!window.combatLog.critAnimations[crit.shipid]) {
                 window.combatLog.critAnimations[crit.shipid] = [];
             }
             if (!window.combatLog.critAnimations[crit.shipid].includes(crit.systemid)) {
                 window.combatLog.critAnimations[crit.shipid].push(crit.systemid);
-            }               
+            }
         }
 
         while (hits--) {
@@ -170,7 +171,7 @@ window.AllWeaponFireAgainstShipAnimation = function () {
             var picked = destroyedNames;
             var critNames = criticalNames;
             destroyedNames = [];
-            criticalNames = [];            
+            criticalNames = [];
 
             duration = addAnimation.call(this, incomingFire, duration, true, timeInterval * shotsFired + extraStartTime, shotsFired, damage, picked, critNames);
             shotsFired++;
@@ -183,30 +184,30 @@ window.AllWeaponFireAgainstShipAnimation = function () {
 
         return timeInterval * shotsFired + duration;
     }
-/*
-    function pickAmountOfSystems(names, hitsLeft) {
-
-        let amount = names.length / hitsLeft;
-
-        if (amount < 1 && amount > 0 && Math.random() > 0.7) {
-            amount = 1;
-        }
-
-
-        let picked = [];
-
-        const remaining = names.filter(name => {
-            if (amount > 0 && !name.structure) {
-                amount--;
-                picked.push(name);
-                return false;
+    /*
+        function pickAmountOfSystems(names, hitsLeft) {
+    
+            let amount = names.length / hitsLeft;
+    
+            if (amount < 1 && amount > 0 && Math.random() > 0.7) {
+                amount = 1;
             }
-
-            return true;
-        })
-        return {remaining, picked}
-    }
-*/
+    
+    
+            let picked = [];
+    
+            const remaining = names.filter(name => {
+                if (amount > 0 && !name.structure) {
+                    amount--;
+                    picked.push(name);
+                    return false;
+                }
+    
+                return true;
+            })
+            return {remaining, picked}
+        }
+    */
 
     function addAnimation(incomingFire, duration, hit, time, shotsFired, damage, damagedNames, critNames) {
         var animation = buildAnimation.call(this, incomingFire, hit, time, shotsFired, damage, damagedNames, critNames);
@@ -224,37 +225,39 @@ window.AllWeaponFireAgainstShipAnimation = function () {
 
         var startTime = this.time + this.duration + time;
         var weapon = incomingFire.weapon;
-        
+
         //Some multi-mode weapons needs their current values adjusted, so borrowing some code from changeFiringMode()
-	    if (!mathlib.arrayIsEmpty(weapon.animationExplosionScaleArray)) weapon.animationExplosionScale = weapon.animationExplosionScaleArray[incomingFire.firingMode];        
-	    if (!mathlib.arrayIsEmpty(weapon.noProjectileArray)) weapon.noProjectile = weapon.noProjectileArray[incomingFire.firingMode];        				
+        if (!mathlib.arrayIsEmpty(weapon.animationExplosionScaleArray)) weapon.animationExplosionScale = weapon.animationExplosionScaleArray[incomingFire.firingMode];
+        if (!mathlib.arrayIsEmpty(weapon.noProjectileArray)) weapon.noProjectile = weapon.noProjectileArray[incomingFire.firingMode];
 
         var animationType = weapon.animationArray[incomingFire.firingMode] || weapon.animation;
         var animationColor = weapon.animationColorArray[incomingFire.firingMode] || weapon.animationColor;
-		var startLocationTime = startTime;
-		if (weapon.ballistic && (!weapon.hasSpecialLaunchHexCalculation && incomingFire.fireOrder.targetid !== incomingFire.fireOrder.shooterid)) {//Some weapons target own ship e.g. Shield Reinforcement)) {
-			startLocationTime = 0;
-		}
-			
-		var weaponOrigin;			
-		if (weapon.hasSpecialLaunchHexCalculation && weapon.launcher.fireOrders && weapon.launcher.fireOrders.length > 0) {	//Weapons like proximity laser use a paired launcher weapon to originate the shot from somewhere OTHER than shooter.	
-		    weaponOrigin = window.coordinateConverter.fromHexToGame(new hexagon.Offset(weapon.launcher.fireOrders[0].x, weapon.launcher.fireOrders[0].y));//Convert launcher target to weapon origin.
-		}else if (weapon.specialPosNoLauncher && weapon.fireOrders.targetid != -1){ //BL Launcher - So that Mine comes from hex it lands in.
-			weaponOrigin = window.coordinateConverter.fromHexToGame(new hexagon.Offset(weapon.fireOrders[0].x, weapon.fireOrders[0].y));		
-		}else { //Everything else
-		    weaponOrigin = getShipPositionAtTime.call(this, this.shipIconContainer.getByShip(incomingFire.shooter), startLocationTime);
-		}
+        var startLocationTime = startTime;
+        if (weapon.ballistic && (!weapon.hasSpecialLaunchHexCalculation && incomingFire.fireOrder.targetid !== incomingFire.fireOrder.shooterid)) {//Some weapons target own ship e.g. Shield Reinforcement)) {
+            startLocationTime = 0;
+        }
+
+        var weaponOrigin;
+        //if (weapon.hasSpecialLaunchHexCalculation && weapon.launcher.fireOrders && weapon.launcher.fireOrders.length > 0) {	//Weapons like proximity laser use a paired launcher weapon to originate the shot from somewhere OTHER than shooter.	
+        //    weaponOrigin = window.coordinateConverter.fromHexToGame(new hexagon.Offset(weapon.launcher.fireOrders[0].x, weapon.launcher.fireOrders[0].y));//Convert launcher target to weapon origin.
+        if (weapon.hasSpecialLaunchHexCalculation) {	//Weapons like proximity laser use a paired launcher weapon to originate the shot from somewhere OTHER than shooter.	
+            weaponOrigin = window.coordinateConverter.fromHexToGame(new hexagon.Offset(weapon.fireOrders[0].x, weapon.fireOrders[0].y));//First fire order for Prox. laser is hextargeted, use this as origin.		
+        } else if (weapon.specialPosNoLauncher && weapon.fireOrders.targetid != -1) { //BL Launcher - So that Mine comes from hex it lands in.
+            weaponOrigin = window.coordinateConverter.fromHexToGame(new hexagon.Offset(weapon.fireOrders[0].x, weapon.fireOrders[0].y));
+        } else { //Everything else
+            weaponOrigin = getShipPositionAtTime.call(this, this.shipIconContainer.getByShip(incomingFire.shooter), startLocationTime);
+        }
         //We don't want any explosions when this fireOrder type gets animated.  Separate animation at end of turn will show jump.				
-        if(incomingFire.fireOrder.damageclass == "HyperspaceJump"){ 
+        if (incomingFire.fireOrder.damageclass == "HyperspaceJump") {
             damage = 0;
             hit = false;
         }
-           
+
         //Standardise color method and let noProjectile marker work here too - DK 01/25
-        var color;	
+        var color;
         var hasParticle = true; //Extra variable for Bolt Effect, to remove particle if needed e.g. rammingAttack       	
-		if (weapon.noProjectile) { //Some weapon like Spark Field shouldn't have projectiles - DK - 4 Jan 24
-		    color = new THREE.Color((0 / 255, 0 / 255, 0 / 255));
+        if (weapon.noProjectile) { //Some weapon like Spark Field shouldn't have projectiles - DK - 4 Jan 24
+            color = new THREE.Color((0 / 255, 0 / 255, 0 / 255));
             hasParticle = false;
         } else {
             color = new THREE.Color(
@@ -262,139 +265,143 @@ window.AllWeaponFireAgainstShipAnimation = function () {
                 weapon.animationColor[1] / 255,
                 weapon.animationColor[2] / 255
             );
-        }	
-     
+        }
+
 
         switch (animationType) {
             case "laser":
                 return new LaserEffect(weapon, weaponOrigin, this.shipIconContainer.getByShip(incomingFire.shooter), getShipPositionAtTime.call(this, this.shipIcon, startLocationTime), this.scene, {
-                    size: 100 * weapon.animationExplosionScale,		
-//                    color: new THREE.Color(animationColor[0] / 255, animationColor[1] / 255, animationColor[2] / 255),
+                    size: 100 * weapon.animationExplosionScale,
+                    //                    color: new THREE.Color(animationColor[0] / 255, animationColor[1] / 255, animationColor[2] / 255),
                     color: color,
                     hit: hit,
                     time: startTime,
                     damage: damage,
                     damagedNames: damagedNames,
-                    critNames: critNames,                    
+                    critNames: critNames,
                     systemDestroyedEffect: this.systemDestroyedEffect
                 });
             case "torpedo":
                 return new TorpedoEffect(this.particleEmitterContainer, {
                     size: 150 * weapon.animationExplosionScale,
                     origin: weaponOrigin,
-		    target: getShotTargetVariance(getShipPositionAtTime.call(this, this.shipIcon, startTime), incomingFire, shotsFired),
-//                    color: new THREE.Color(animationColor[0] / 255, animationColor[1] / 255, animationColor[2] / 255),
+                    target: getShotTargetVariance(getShipPositionAtTime.call(this, this.shipIcon, startTime), incomingFire, shotsFired),
+                    //                    color: new THREE.Color(animationColor[0] / 255, animationColor[1] / 255, animationColor[2] / 255),
                     color: color,
                     hit: hit,
                     damage: damage,
                     time: startTime,
                     damagedNames: damagedNames,
-                    critNames: critNames,                     
+                    critNames: critNames,
                     systemDestroyedEffect: this.systemDestroyedEffect
                 });
             //case "beam": //Marcin Sawicki: to me, beam would be the same as laser - calling this animation "bolt" instead! No actual in game change, "beam" will still lead here by "default" option
-		case "bolt":
+            case "bolt":
                 return new BoltEffect(this.particleEmitterContainer, {
                     size: 300 * weapon.animationExplosionScale,
                     origin: weaponOrigin,
                     target: getShotTargetVariance(getShipPositionAtTime.call(this, this.shipIcon, startTime), incomingFire, shotsFired),
-//                    color: new THREE.Color(animationColor[0] / 255, animationColor[1] / 255, animationColor[2] / 255),
+                    //                    color: new THREE.Color(animationColor[0] / 255, animationColor[1] / 255, animationColor[2] / 255),
                     color: color,
                     hit: hit,
                     damage: damage,
                     time: startTime,
                     damagedNames: damagedNames,
-                    critNames: critNames,                     
+                    critNames: critNames,
                     hasParticle: hasParticle,
                     systemDestroyedEffect: this.systemDestroyedEffect
-                });              
+                });
             case "trail":
                 return new MissileEffect(this.particleEmitterContainer, {
                     size: 300 * weapon.animationExplosionScale,
                     origin: weaponOrigin,
                     target: getShotTargetVariance(getShipPositionAtTime.call(this, this.shipIcon, startTime), incomingFire, shotsFired),
-//                    color: new THREE.Color(animationColor[0] / 255, animationColor[1] / 255, animationColor[2] / 255),
+                    //                    color: new THREE.Color(animationColor[0] / 255, animationColor[1] / 255, animationColor[2] / 255),
                     color: color,
                     hit: hit,
                     damage: damage,
                     time: startTime,
                     damagedNames: damagedNames,
-                    critNames: critNames,                     
+                    critNames: critNames,
                     hasParticle: hasParticle,
                     systemDestroyedEffect: this.systemDestroyedEffect
-                });                  
+                });
             default:
                 return new BoltEffect(this.particleEmitterContainer, {
                     size: 300 * weapon.animationExplosionScale,
                     origin: weaponOrigin,
                     target: getShotTargetVariance(getShipPositionAtTime.call(this, this.shipIcon, startTime), incomingFire, shotsFired),
-//                    color: new THREE.Color(animationColor[0] / 255, animationColor[1] / 255, animationColor[2] / 255),
+                    //                    color: new THREE.Color(animationColor[0] / 255, animationColor[1] / 255, animationColor[2] / 255),
                     color: color,
                     hit: hit,
                     damage: damage,
                     time: startTime,
                     damagedNames: damagedNames,
-                    critNames: critNames,                     
+                    critNames: critNames,
                     hasParticle: hasParticle,
                     systemDestroyedEffect: this.systemDestroyedEffect
-                });         
+                });
         }
     }
-/*
+    /*
+        function getSystemNamesDestroyed(incomingFire) {
+            return incomingFire.damagesCaused.filter(damage => damage.destroyed)
+                .map(damage => ({
+                    name: shipManager.systems.getDisplayName(damage.system),
+                    structure: damage.system instanceof Structure
+                }));
+        }
+    */
     function getSystemNamesDestroyed(incomingFire) {
+        if (incomingFire.fireOrder.damageclass === "HyperspaceJump") {
+            return; // Return nothing if "HyperspaceJump", we don't want the text showing Primary Structure to show.
+        }
+
         return incomingFire.damagesCaused.filter(damage => damage.destroyed)
             .map(damage => ({
                 name: shipManager.systems.getDisplayName(damage.system),
                 structure: damage.system instanceof Structure
             }));
     }
-*/
-function getSystemNamesDestroyed(incomingFire) {
-    if (incomingFire.fireOrder.damageclass === "HyperspaceJump") {
-        return; // Return nothing if "HyperspaceJump", we don't want the text showing Primary Structure to show.
-    }
 
-    return incomingFire.damagesCaused.filter(damage => damage.destroyed)
-        .map(damage => ({
-            name: shipManager.systems.getDisplayName(damage.system),
-            structure: damage.system instanceof Structure
-        }));
-}
+    function getSystemNamesCriticals(incomingFire) {
+        const turn = incomingFire.fireOrder.turn;
 
-function getSystemNamesCriticals(incomingFire) {
-    const turn = incomingFire.fireOrder.turn;
+        const critSystemsRaw = incomingFire.damagesCaused
+            .filter(damage =>
+                shipManager.criticals.sufferedCritThisTurn(damage.system, turn)
+            )
+            .filter(damage => {
+                if (!damage.system.ship) return false; // skip fighters
+                const shown = window.combatLog.critAnimations[damage.system.ship.id] || [];
+                return !shown.includes(damage.system.id);
+            })
+            .map(damage => ({
+                name: shipManager.systems.getDisplayName(damage.system),
+                shipid: damage.system.ship.id,
+                systemid: damage.system.id
+            }));
 
-    const critSystemsRaw = incomingFire.damagesCaused
-        .filter(damage =>
-            shipManager.criticals.sufferedCritThisTurn(damage.system, turn)
-        )
-        .filter(damage => {
-            if (!damage.system.ship) return false; // skip fighters
-            const shown = window.combatLog.critAnimations[damage.system.ship.id] || [];
-            return !shown.includes(damage.system.id);
-        })
-        .map(damage => ({
-            name: shipManager.systems.getDisplayName(damage.system),
-            shipid: damage.system.ship.id,
-            systemid: damage.system.id
-        }));
+        // --- NEW: remove duplicates inside this single incomingFire processing ---
+        const unique = [];
+        const seen = new Set();
 
-    // --- NEW: remove duplicates inside this single incomingFire processing ---
-    const unique = [];
-    const seen = new Set();
-
-    for (const crit of critSystemsRaw) {
-        const key = crit.shipid + "-" + crit.systemid;
-        if (!seen.has(key)) {
-            seen.add(key);
-            unique.push(crit);
+        for (const crit of critSystemsRaw) {
+            const key = crit.shipid + "-" + crit.systemid;
+            if (!seen.has(key)) {
+                seen.add(key);
+                unique.push(crit);
+            }
         }
-    }
 
-    return unique;
-}
+        return unique;
+    }
 
     function getShipPositionAtTime(icon, time) {
+        if (!this.prefire && icon.preFireMovements && icon.preFireMovements.length > 0) {
+            var lastMove = icon.preFireMovements[icon.preFireMovements.length - 1];
+            return window.coordinateConverter.fromHexToGame(lastMove.position);
+        }
         return FireAnimationHelper.getShipPositionAtTime(icon, time, this.movementAnimations);
     }
 

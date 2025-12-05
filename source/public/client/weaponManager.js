@@ -484,6 +484,8 @@ window.weaponManager = {
                         loSBlocked = mathlib.checkLineOfSight(sPosShooter, sPosTarget, blockedLosHex);
                     }
 
+                    if(weapon.ignoresLoS) loSBlocked = false;
+
                     var value = weapon.firingMode;
                     value = weapon.firingModes[value];
                     var keys = Object.keys(weapon.firingModes);
@@ -954,7 +956,7 @@ window.weaponManager = {
         mod -= target.getHitChangeMod(shooter, weapon);
 
 		if (weapon.specialHitChanceCalculation){ //Does the weapon itself have any special mods?
-			mod += weapon.calculateSpecialHitChanceMod(shooter, target);
+			mod += weapon.calculateSpecialHitChanceMod(shooter, target, calledid);
 		}
 
         if (shooter.flight===true) {
@@ -1118,7 +1120,7 @@ window.weaponManager = {
 		}       
 
         // Check Line of Sight for Ballistic weapons after launch (Fighters checked separately above)
-        if (weapon.ballistic && (!shooter.flight)) {
+        if (weapon.ballistic && (!shooter.flight) && !weapon.ignoresLoS) {
             if (!(firecontrol <= 0)) { // No point checking for LoS if FC is 0 or lower
                 var loSBlocked = false;
                 var blockedLosHex = weaponManager.getBlockedHexes(); //Check if there are any hexes that block LoS                   
@@ -1368,6 +1370,8 @@ window.weaponManager = {
 	    if(!weaponManager.canSelfInterceptSingle(ship, weapon)) return; //last check whether weapon is eligible for that!
         if(weapon.canSplitShots) { //Discharge Gun/Slicers use their own logic here, so diverge to their own methods.
             weapon.doMultipleSelfIntercept(ship);
+            var outOfShots = weapon.checkFinished();
+            if(outOfShots) weaponManager.unSelectWeapon(ship, weapon);
             return;
         }
 	    var fireid = ship.id + "_" + weapon.id + "_" + (weapon.fireOrders.length + 1);
@@ -1499,7 +1503,7 @@ window.weaponManager = {
                 loSBlocked = mathlib.checkLineOfSight(sPosShooter, sPosTarget, blockedLosHex);
             }
 
-            if(loSBlocked) continue;
+            if(loSBlocked && !weapon.ignoresLoS) continue;
 
             if (shipManager.systems.isDestroyed(selectedShip, weapon) || !weaponManager.isLoaded(weapon)) {
                 debug && console.log("Weapon destroyed or not loaded");
@@ -1579,8 +1583,12 @@ window.weaponManager = {
                         var fire = weapon.doMultipleFireOrders(selectedShip, ship, system);
                         if (!Array.isArray(fire)) fire = fire ? [fire] : []; // Ensure fire is an array or an empty one                       
                         if (fire.length > 0) weapon.fireOrders.push(...fire);
-						//toUnselect.push(weapon); //It's actually easier to target if you don't! 
-						splitTargeted.push(weapon); //To be added to toUnselect aray at corect time below. 	                    
+                        var finishedFiring = weapon.checkFinished(); //Split weapons should unselect after they've used all their shots.
+						if(finishedFiring){
+                            toUnselect.push(weapon); //Normal method
+                        }else{
+						    splitTargeted.push(weapon); //Not finished, to be added to toUnselect aray at correct time below. 	  
+                        }     
         				webglScene.customEvent('SystemDataChanged', { ship: ship, system: weapon });      				
                     }else{
 	                    weaponManager.removeFiringOrder(selectedShip, weapon);
@@ -1625,7 +1633,7 @@ window.weaponManager = {
 	                            chance: chance
 	                        };
 	                        weapon.fireOrders.push(fire);
-				toUnselect.push(weapon);
+				            toUnselect.push(weapon);
 	                    }
 					}
 		    //Marcin Sawicki: moving this statement so only weapons actually declared are unselected
@@ -1715,6 +1723,7 @@ window.weaponManager = {
         if(!selectedShip.flight && shipManager.isDisabled(selectedShip)) return;        
 
         var toUnselect = Array();
+        var splitTargeted = [];        
         for (var i in gamedata.selectedSystems) {
             var weapon = gamedata.selectedSystems[i];
 
@@ -1762,34 +1771,49 @@ window.weaponManager = {
                     loSBlocked = mathlib.checkLineOfSight(sPosShooter, hexpos, blockedLosHex);
                 }
 
-                if(loSBlocked){
+                if(loSBlocked && !weapon.ignoresLoS){
                     confirm.error("No line of sight between firing ship and target hex.");	
                     return; //End work if no line of sight.
                 }
 
                 if (weapon.range === 0 || shipManager.getShipPosition(selectedShip).distanceTo(hexpos) <= weapon.range) {
-                    weaponManager.removeFiringOrder(selectedShip, weapon);
-                    for (var s = 0; s < weapon.guns; s++) {
+                    
+                    if(weapon.canSplitShots){
+                        var fire = weapon.doMultipleHexFireOrders(selectedShip, hexpos);
+                        if (!Array.isArray(fire)) fire = fire ? [fire] : []; // Ensure fire is an array or an empty one                       
+                        if (fire.length > 0) weapon.fireOrders.push(...fire);
+                        var finishedFiring = weapon.checkFinished(); //Split weapons should unselect after they've used all their shots.
+						if(finishedFiring){
+                            toUnselect.push(weapon); //Normal method
+                        }else{
+						    splitTargeted.push(weapon); //Not finished, to be added to toUnselect aray at correct time below. 	  
+                        }                      
+        				webglScene.customEvent('SystemDataChanged', { ship: selectedShip, system: weapon });      				
+                    }else{                    
+                    
+                        weaponManager.removeFiringOrder(selectedShip, weapon);
+                        for (var s = 0; s < weapon.guns; s++) {
 
-                        var fireid = selectedShip.id + "_" + weapon.id + "_" + (weapon.fireOrders.length + 1);
-                        var fire = {
-                            id: fireid,
-                            type: type,
-                            shooterid: selectedShip.id,
-                            targetid: -1,
-                            weaponid: weapon.id,
-                            calledid: -1,
-                            turn: gamedata.turn,
-                            firingMode: weapon.firingMode,
-                            shots: weapon.defaultShots,
-                            x: hexpos.q,
-                            y: hexpos.r,
-                            damageclass: weapon.data["Weapon type"].toLowerCase()
-                        };
-                        weapon.fireOrders.push(fire);
+                            var fireid = selectedShip.id + "_" + weapon.id + "_" + (weapon.fireOrders.length + 1);
+                            var fire = {
+                                id: fireid,
+                                type: type,
+                                shooterid: selectedShip.id,
+                                targetid: -1,
+                                weaponid: weapon.id,
+                                calledid: -1,
+                                turn: gamedata.turn,
+                                firingMode: weapon.firingMode,
+                                shots: weapon.defaultShots,
+                                x: hexpos.q,
+                                y: hexpos.r,
+                                damageclass: weapon.data["Weapon type"].toLowerCase()
+                            };
+                            weapon.fireOrders.push(fire);
+                        }
+
+                        toUnselect.push(weapon);
                     }
-
-                    toUnselect.push(weapon);
                 }
             }
         }
@@ -1798,7 +1822,7 @@ window.weaponManager = {
             weaponManager.unSelectWeapon(selectedShip, toUnselect[i]);
         }
 
-        
+		toUnselect.push(...splitTargeted); //We don't want to unselect, but want these weapons passed to onHexTargeted - DK 01.25        
         webglScene.customEvent('HexTargeted', {shooter: selectedShip, hexagon: hexpos})
     },
 

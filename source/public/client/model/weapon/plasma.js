@@ -151,6 +151,15 @@ var PakmaraPlasmaWeb = function  PakmaraPlasmaWeb(json, ship) {
 PakmaraPlasmaWeb.prototype = Object.create(Weapon.prototype);
 PakmaraPlasmaWeb.prototype.constructor =  PakmaraPlasmaWeb;
 
+PakmaraPlasmaWeb.prototype.initializationUpdate = function () {
+    if(this.firingMode == 2){
+        const rangeCrit = shipManager.criticals.countCriticalOnTurn(this, "ReducedRangeValue", gamedata.turn);
+        if(rangeCrit > 0) this.range = 1;
+        this.data['Range'] = this.range;   
+    }    
+	return this;
+}	
+
 PakmaraPlasmaWeb.prototype.clearBoost = function () {
     for (var i in system.power) {
         var power = system.power[i];

@@ -1323,7 +1323,7 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 	protected $autoHit = true;//To show 100% hit chance in front end.				
 
     protected $possibleCriticals = array(
-            17=>array("OutputReduced1", "ReducedDamage"));  //Provding Outputreduced1 works then replace reduced range from TT with reduced damage for Offensive mode
+            17=>array("OutputReduced1", "ReducedRangeValue"));  //Provding Outputreduced1 works then replace reduced range from TT with reduced damage for Offensive mode
 
     function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
 		if ( $maxhealth == 0 ) $maxhealth = 4;

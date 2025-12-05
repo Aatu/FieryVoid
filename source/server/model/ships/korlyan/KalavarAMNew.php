@@ -1,16 +1,16 @@
 <?php
-class KalavarAM extends OSAT{
+class KalavarAMNew extends OSAT{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 250;
 		$this->faction = "Kor-Lyan Kingdoms";
-        $this->phpclass = "KalavarAM";
+        $this->phpclass = "KalavarAMNew";
         $this->imagePath = "img/ships/korlyan_kalavar.png";
         $this->shipClass = "Kalavar Orbital Satellite (2240)";
         $this->isd = 2240;
-			$this->variantOf = 'OBSELETE';        
+        
         $this->forwardDefense = 10;
         $this->sideDefense = 10;
         
@@ -45,21 +45,23 @@ class KalavarAM extends OSAT{
         $this->addPrimarySystem(new Scanner(3, 5, 2, 4)); 
 
 
-//		$TargeterA = new ProximityLaser(0, 1, 0, 180, 360, 'A');
+        /*
 		$TargeterA = new ProximityLaser(0, 1, 0, 0, 360, 'A');		
 		$LauncherA = new ProximityLaserLauncher(3, 0, 0, 180, 360, 'A'); 
 		$TargeterA->addLauncher($LauncherA);
 		$this->addAftSystem($TargeterA);
 		$this->addAftSystem($LauncherA);
+        */
+		$this->addAftSystem(new ProximityLaserNew(3, 0, 0, 180, 360));   
         $this->addAftSystem(new Thruster(4, 6, 0, 0, 2));
-
-//		$TargeterB = new ProximityLaser(0, 1, 0, 0, 180, 'B');
+		$this->addAftSystem(new ProximityLaserNew(3, 0, 0, 0, 180));   
+        /*
 		$TargeterB = new ProximityLaser(0, 1, 0, 0, 360, 'B');		
 		$LauncherB = new ProximityLaserLauncher(3, 0, 0, 0, 180, 'B'); 
 		$TargeterB->addLauncher($LauncherB);
 		$this->addAftSystem($TargeterB);
 		$this->addAftSystem($LauncherB);	
-        
+        */
         $this->addFrontSystem(new AmmoMissileRackF(3, 0, 0, 270, 90, $ammoMagazine, true));
         $this->addFrontSystem(new AmmoMissileRackD(2, 0, 0, 0, 360, $ammoMagazine, true));
         $this->addFrontSystem(new AmmoMissileRackF(3, 0, 0, 270, 90, $ammoMagazine, true));
