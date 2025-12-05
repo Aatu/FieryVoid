@@ -696,10 +696,12 @@ ProximityLaserNew.prototype.initializationUpdate = function() {
         this.hextarget = false;
         this.startArc = 0; //Hex target has arc, laser shot does not.
         this.endArc = 360;
+        this.ignoresLoS = true;
     }else{
         this.hextarget = true;
         this.startArc = this.startArcArray[0]; //Use Arc arrays to reset to default
-        this.endArc = this.endArcArray[0];                
+        this.endArc = this.endArcArray[0]; 
+        this.ignoresLoS = false;                       
     } 
 
     return this;
