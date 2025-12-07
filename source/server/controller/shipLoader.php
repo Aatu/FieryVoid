@@ -69,12 +69,7 @@
         if (!is_dir(dirname(self::$factionMapCacheFile))) {
              mkdir(dirname(self::$factionMapCacheFile), 0777, true);
         }
-        
-        $json = json_encode($map);
-        if ($json !== false) {
-            file_put_contents(self::$factionMapCacheFile, $json);
-        }
-        
+        file_put_contents(self::$factionMapCacheFile, json_encode($map));
         return $map;
     }
 

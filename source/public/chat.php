@@ -172,7 +172,7 @@ if (! isset($chatelement))
                 data: { gameid: chat.gameid },
                 success: chat.successSetLastTimeChecked,
                 error: function(){ setTimeout(chat.setLastTimeChecked, POLL_INTERVAL * 2); }
-            }).fail(() => {});
+            });
         },
 
         getLastTimeChecked: function(){
@@ -191,7 +191,7 @@ if (! isset($chatelement))
                     chat.lastTimeChecked = data.lastCheckGame;
                 },
                 error: function(){ setTimeout(chat.getLastTimeChecked, 8000); }
-            }).fail(() => {});
+            });
         },
 
         successSetLastTimeChecked: function(data){
@@ -229,7 +229,7 @@ if (! isset($chatelement))
                             console.error("Failed to submit chat message after " + maxAttempts + " attempts: " + textStatus);
                         }
                     }
-                }).fail(() => {});
+                });
             }
             doSend();
 
@@ -261,7 +261,7 @@ requestChatdata: function(){
       chat.requesting = false;
       if(chat.polling) setTimeout(chat.requestChatdata, POLL_INTERVAL * 2);
     }
-  }).fail(() => {});
+  });
 },
 
         successRequest: function(data){

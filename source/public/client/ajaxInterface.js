@@ -76,22 +76,19 @@ window.ajaxInterface = {
                     this._sendRequest(nextF, nextCb);
                 }
             }
-        }).fail(() => { /* Cleanly handle rejection to prevent console noise */ });
+        });
     },
 
     ajaxWithRetry: function (options) {
         const deferred = $.Deferred();
 
         // Chain execution onto the queue
-        // Robust pattern: Catch previous errors so the chain continues, then execute current task.
-        ajaxInterface.requestQueue = ajaxInterface.requestQueue
-            .catch(() => { /* Ignore previous error to keep queue alive */ })
-            .then(() => {
-                // Return the promise so the queue waits for this task to complete (success or fail)
-                return this._doAjaxWithRetry(options, 1)
-                    .done(function () { deferred.resolveWith(this, arguments); })
-                    .fail(function () { deferred.rejectWith(this, arguments); });
-            });
+        ajaxInterface.requestQueue = ajaxInterface.requestQueue.then(() => {
+            // Logic: The queue waits for this promise to resolve (success or final failure)
+            return this._doAjaxWithRetry(options, 1)
+                .done(function () { deferred.resolveWith(this, arguments); })
+                .fail(function () { deferred.rejectWith(this, arguments); });
+        });
 
         return deferred.promise();
     },
@@ -835,11 +832,6 @@ window.ajaxInterface = {
     },
 
     errorAjax: function errorAjax(jqXHR, textStatus, errorThrown) {
-        // Suppress generic "error" status which often happens during safe retries or aborted requests
-        if (textStatus === "error" || jqXHR.status === 507 || jqXHR.status === 0) {
-            console.warn("Suppressed AJAX error popup:", textStatus, errorThrown);
-            return;
-        }
         console.dir(jqXHR);
         console.dir(errorThrown);
         window.confirm.exception({ error: "AJAX error: " + textStatus }, function () { });
