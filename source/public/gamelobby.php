@@ -1038,7 +1038,12 @@ if ($asteroids == false && $moons == false) {
         </span>
     </div>   
     </main>	                                     
-	</body>
+	
+<div id="global-blocking-overlay" class="blocking-overlay" style="display:none;">
+    <span>TRANSMITTING ORDERS...<br>Do not close window</span>
+</div>
+</body>
+
 
 
 

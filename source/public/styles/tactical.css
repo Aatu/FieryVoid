@@ -983,3 +983,24 @@ body {
         max-height: calc(100vh - 130px);
     }
 }
+
+/* Blocking UI Overlay */
+.blocking-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 100000; /* Above everything */
+    display: flex; /* Flex to center content, hidden by JS via inline style */
+    align-items: center;
+    justify-content: center;
+    color: #b34119; /* Standard alert color */
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center;
+    pointer-events: auto; /* Catch all clicks */
+    cursor: wait;
+}
+
