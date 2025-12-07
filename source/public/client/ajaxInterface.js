@@ -209,7 +209,6 @@ window.ajaxInterface = {
         if (ajaxInterface.submiting) return;
 
         ajaxInterface.submiting = true;
-        $("#global-blocking-overlay").show().css("display", "flex"); // Show overlay
 
         // ✅ Build the payload using your existing function
         const gd = ajaxInterface.construcGamedata();
@@ -229,7 +228,6 @@ window.ajaxInterface = {
             timeout: 15000,                                 // ✅ prevent long hangs
             success: function (response) {
                 ajaxInterface.submiting = false;
-                $("#global-blocking-overlay").hide(); // Hide overlay
 
                 if (response && response.error) {
                     console.error("Submit failed:", response);
@@ -240,7 +238,6 @@ window.ajaxInterface = {
             },
             error: function (xhr, status, error) {
                 ajaxInterface.submiting = false;
-                $("#global-blocking-overlay").hide(); // Hide overlay
                 ajaxInterface.errorAjax(xhr, status, error);
             }
         });
@@ -252,7 +249,6 @@ window.ajaxInterface = {
     submitSavedFleet: function submitSavedFleet(fleetname, isPublic, callback) {
         if (ajaxInterface.submiting) return;
         ajaxInterface.submiting = true;
-        $("#global-blocking-overlay").show().css("display", "flex");
         // Build the payload using your existing function
         const saveData = ajaxInterface.constructSavedShips(fleetname, isPublic);
 
@@ -400,7 +396,6 @@ window.ajaxInterface = {
     getSavedFleets: function getSavedFleets(callback) {
         if (ajaxInterface.submiting) return;
         ajaxInterface.submiting = true;
-        $("#global-blocking-overlay").show().css("display", "flex");
 
         ajaxInterface.ajaxWithRetry({
             type: 'GET',
@@ -411,14 +406,12 @@ window.ajaxInterface = {
         })
             .done(function (response) {
                 ajaxInterface.submiting = false;
-                $("#global-blocking-overlay").hide();
                 if (!response || !response.fleets) return callback([]);
 
                 callback(response.fleets);
             })
             .fail(function (xhr, textStatus, errorThrown) {
                 ajaxInterface.submiting = false;
-                $("#global-blocking-overlay").hide();
                 console.error("Failed to load fleets:", errorThrown || textStatus);
                 callback([]);
             });
@@ -427,7 +420,6 @@ window.ajaxInterface = {
     loadSavedFleet: function loadSavedFleet(listId, callback) {
         if (ajaxInterface.submiting) return;
         ajaxInterface.submiting = true;
-        $("#global-blocking-overlay").show().css("display", "flex");
 
         ajaxInterface.ajaxWithRetry({
             type: 'POST', // POST to match PHP JSON reading
@@ -440,13 +432,11 @@ window.ajaxInterface = {
         })
             .done(function (response) {
                 ajaxInterface.submiting = false;
-                $("#global-blocking-overlay").hide();
                 if (!response || !response.ships) return callback([]);
                 callback(response);
             })
             .fail(function (xhr, textStatus, errorThrown) {
                 ajaxInterface.submiting = false;
-                $("#global-blocking-overlay").hide();
                 console.error("Failed to load fleet:", textStatus, errorThrown);
                 callback([]);
             });
@@ -456,7 +446,6 @@ window.ajaxInterface = {
     changeFleetPublic: function changeFleetPublic(id, callback) {
         if (ajaxInterface.submiting) return;
         ajaxInterface.submiting = true;
-        $("#global-blocking-overlay").show().css("display", "flex");
         // Send the POST request
         ajaxInterface.ajaxWithRetry({
             type: 'POST',
@@ -467,7 +456,6 @@ window.ajaxInterface = {
             timeout: 15000,
             success: function (response) {
                 ajaxInterface.submiting = false;
-                $("#global-blocking-overlay").hide();
 
                 if (response && response.error) {
                     console.error("Submit failed:", response);
@@ -481,7 +469,6 @@ window.ajaxInterface = {
             },
             error: function (xhr, status, error) {
                 ajaxInterface.submiting = false;
-                $("#global-blocking-overlay").hide();
                 ajaxInterface.errorAjax(xhr, status, error);
             }
         });
@@ -491,7 +478,6 @@ window.ajaxInterface = {
     deleteSavedFleet: function deleteSavedFleet(id, callback) {
         if (ajaxInterface.submiting) return;
         ajaxInterface.submiting = true;
-        $("#global-blocking-overlay").show().css("display", "flex");
         // Send the POST request
         ajaxInterface.ajaxWithRetry({
             type: 'POST',
@@ -527,7 +513,6 @@ window.ajaxInterface = {
     submitSlotAction: function submitSlotAction(action, slotid, callback) {
         if (ajaxInterface.submiting) return;
         ajaxInterface.submiting = true;
-        $("#global-blocking-overlay").show().css("display", "flex");
 
         ajaxInterface.ajaxWithRetry({
             type: 'POST',
@@ -542,7 +527,6 @@ window.ajaxInterface = {
         })
             .done(function (response, textStatus, xhr) {
                 ajaxInterface.submiting = false;
-                $("#global-blocking-overlay").hide();
 
                 // ✅ Handle HTTP-level errors first
                 if (xhr.status !== 200) {
@@ -564,7 +548,6 @@ window.ajaxInterface = {
             })
             .fail(function (xhr, textStatus, errorThrown) {
                 ajaxInterface.submiting = false;
-                $("#global-blocking-overlay").hide();
                 let message = errorThrown || textStatus || "Unknown network error";
                 console.error("Slot action AJAX fail:", message, xhr.responseText);
                 ajaxInterface.errorAjax(xhr, textStatus, message);
@@ -1193,15 +1176,3 @@ window.ajaxInterface = {
     */
 
 };
-
-/*
-window.addEventListener('beforeunload', function (e) {
-    if (window.ajaxInterface && (window.ajaxInterface.submiting || window.ajaxInterface.submitingGames)) {
-        // Cancel the event
-        e.preventDefault();
-        // Chrome requires returnValue to be set
-        e.returnValue = 'Game data is being submitted. Please wait.';
-        return e.returnValue;
-    }
-});
-*/
