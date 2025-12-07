@@ -1,15 +1,15 @@
 <?php
-class HyachSenchlatKir extends HeavyCombatVessel{
+class HyachSenchlatKirNew extends HeavyCombatVessel{
     public $HyachSpecialists;
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
 
         $this->pointCost = 800;
         $this->faction = "Hyach Gerontocracy";
-        $this->phpclass = "HyachSenchlatKir";
+        $this->phpclass = "HyachSenchlatKirNew";
         $this->imagePath = "img/ships/HyachSenchlatKam.png";           
         $this->shipClass = "Senchlat Kir Ballistic Cruiser";
-			$this->variantOf = 'OBSELETE';
+			$this->variantOf = 'Senchlat Kam Light Cruiser';
 			$this->occurence = "rare";
         $this->gravitic = true;
 
@@ -39,6 +39,7 @@ class HyachSenchlatKir extends HeavyCombatVessel{
 			$this->addPrimarySystem( $HyachSpecialists );	
 
         $this->addFrontSystem(new GraviticThruster(4, 9, 0, 3, 1));
+        /*
 			$TargeterA = new ProximityLaser(3, 0, 0, 0, 360, 'A');
 			$LauncherA = new ProximityLaserLauncher(0, 1, 0, 240, 60, 'A'); 
 			$TargeterA->addLauncher($LauncherA);
@@ -50,9 +51,15 @@ class HyachSenchlatKir extends HeavyCombatVessel{
 			$TargeterB->addLauncher($LauncherB);
 			$this->addFrontSystem($TargeterB);
 			$this->addFrontSystem($LauncherB);
-		$TargeterB->addTag("Front Proximity Laser");				
+		$TargeterB->addTag("Front Proximity Laser");
+        */
+		$this->addFrontSystem(new ProximityLaserNew(3, 0, 0, 240, 60));
+		$this->addFrontSystem(new ProximityLaserNew(3, 0, 0, 300, 60));        				
         $this->addFrontSystem(new Interdictor(2, 4, 1, 270, 90));
         $this->addFrontSystem(new Maser(2, 6, 3, 270, 90));
+		$this->addFrontSystem(new ProximityLaserNew(3, 0, 0, 300, 60));
+		$this->addFrontSystem(new ProximityLaserNew(3, 0, 0, 300, 120));        
+        /*
 			$TargeterC = new ProximityLaser(3, 0, 0, 0, 360, 'C');
 			$LauncherC = new ProximityLaserLauncher(0, 1, 0, 300, 60, 'C'); 
 			$TargeterC->addLauncher($LauncherC);
@@ -64,23 +71,30 @@ class HyachSenchlatKir extends HeavyCombatVessel{
 			$TargeterD->addLauncher($LauncherD);
 			$this->addFrontSystem($TargeterD);
 			$this->addFrontSystem($LauncherD);
-		$TargeterD->addTag("Front Proximity Laser");				
+		$TargeterD->addTag("Front Proximity Laser");	
+        */			
         $this->addFrontSystem(new GraviticThruster(4, 9, 0, 3, 1));
 
+        /* 
 			$TargeterE = new ProximityLaser(3, 0, 0, 0, 360, 'E');
 			$LauncherE = new ProximityLaserLauncher(0, 1, 0, 120, 300, 'E'); 
 			$TargeterE->addLauncher($LauncherE);
 			$this->addAftSystem($TargeterE);
 			$this->addAftSystem($LauncherE);
-		$TargeterE->addTag("Aft Proximity Laser");				
+		$TargeterE->addTag("Aft Proximity Laser");	
+        */	
+		$this->addAftSystem(new ProximityLaserNew(3, 0, 0, 120, 300));         		
         $this->addAftSystem(new GraviticThruster(4, 32, 0, 10, 2));
         $this->addAftSystem(new Interdictor(2, 4, 1, 90, 270));
+		$this->addAftSystem(new ProximityLaserNew(3, 0, 0, 60, 240));         
+        /*
 			$TargeterF = new ProximityLaser(3, 0, 0, 0, 360, 'F');
 			$LauncherF = new ProximityLaserLauncher(0, 1, 0, 60, 240, 'F'); 
 			$TargeterF->addLauncher($LauncherF);
 			$this->addAftSystem($TargeterF);
 			$this->addAftSystem($LauncherF);
-		$TargeterF->addTag("Aft Proximity Laser");				
+		$TargeterF->addTag("Aft Proximity Laser");
+        */				
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 4, 64));
@@ -100,7 +114,7 @@ class HyachSenchlatKir extends HeavyCombatVessel{
             ),
             1=> array(
                     5 => "Thruster",
-					7 => "TAG:Front Proximity Laser",
+					7 => "Proximity Laser",
                     8 => "Maser",
                     9 => "Interdictor",
                     18 => "Structure",
@@ -108,7 +122,7 @@ class HyachSenchlatKir extends HeavyCombatVessel{
             ),
             2=> array(
                     5 => "Thruster",
-					7 => "TAG:Aft Proximity Laser",                    
+					7 => "Proximity Laser",                    
 					8 => "Maser",
 					9 => "Interdictor",
                     18 => "Structure",

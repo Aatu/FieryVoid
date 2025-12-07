@@ -111,7 +111,8 @@ class Weapon extends ShipSystem
 //	protected $overrideCallingRestrictions = false; //when set to true overrides default Called Shot setting (e.g., make a ballistic do a called shot)
 //	protected $canOnlyCalledShot = false;	
 	protected $hasSpecialLaunchHexCalculation = false; //Weapons like Proximty Laser use a separate launcher system to determine point of shot.
-	public $canModesIntercept = false;	//Some missile launchers can have Interceptor missiles. variable for Front End so it knows to use weapon-specific function to search for intercept rating across firing modes e.g. Interceptor Missile on missile launcher.
+    public $ignoresLoS = false;
+    public $canModesIntercept = false;	//Some missile launchers can have Interceptor missiles. variable for Front End so it knows to use weapon-specific function to search for intercept rating across firing modes e.g. Interceptor Missile on missile launcher.
 		
     public $shots = 1;
     public $shotsArray = array();
@@ -1369,7 +1370,7 @@ public function getStartLoading()
 		}
 
         //Check Line of Sight has been maintained by ship for Ballistic weapons after launch (Fighters checked separately above).
-        if($this->ballistic && (!$shooter instanceof FighterFlight)){
+        if($this->ballistic && (!$shooter instanceof FighterFlight) && !$this->hasSpecialLaunchHexCalculation){
             if(!$firecontrol <= 0){ //No point checking for LoS if FC is a 0 or lower anyway!
                 $losBlocked  = $this->checkLineOfSight($pos, $targetPos, $gamedata); //Defaults false e.g. line of sight NOT blocked.
                

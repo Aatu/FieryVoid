@@ -434,20 +434,16 @@ class QuadPulsar extends Pulse{
 	    
         public $animation = "bolt";	    
         public $animationColor = array(190, 75, 20);
-	    /*
-        public $trailLength = 13;
-        public $animationWidth = 4;
-        public $projectilespeed = 16;
-        public $animationExplosionScale = 0.17;
-        public $animationColor =  array(175, 225, 175);
-        public $trailColor = array(110, 225, 110);
-	*/
+
         public $guns = 3; //always 3, completely separate (not Pulse!) shots
         public $maxpulses = 3;
         public $grouping = 0;
         public $loadingtime = 2;
         public $normalload = 2;
-	    
+		public $firingModes = array(
+			1 => "Normal",
+            2 => "Split"
+		);
         public $priority = 5; //medium standard shots - if called shots are used, they should be prioritized independently of base weapon priority
         
         public $calledShotMod = -4; //instead of usual -8
@@ -459,6 +455,9 @@ class QuadPulsar extends Pulse{
 	    
 	    public $damageType = "Standard"; 
 	    public $weaponClass = "Particle"; 
+        public $canSplitShots = false;        
+        public $canSplitShotsArray = array(1 => false, 2 => true);
+        public $specialHitChanceCalculation = true;
 	    
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
         {
@@ -468,9 +467,20 @@ class QuadPulsar extends Pulse{
 	    
         public function setSystemDataWindow($turn){            
             parent::setSystemDataWindow($turn);		
-		$this->data["Special"] = "Called shot penalty halved";
+            $this->data["Special"] = "Fires three shots.";
+            $this->data["Special"] .= "<br>Can use 'Split' Firing Mode to target shots separately, but all shots must be against the same unit.";		    
+            $this->data["Special"] .= "<br>Called shot penalty halved agaisnt ship systems.";
+            $this->data["Special"] .= "<br>No called shot penalty against fighters.";            
         }
-        
+
+	public function calculateHitBase($gamedata, $fireOrder){
+
+		$target = $gamedata->getShipById($fireOrder->targetid);        
+        if($fireOrder->calledid !== -1 && $target instanceof FighterFlight) $this->calledShotMod = 0; //If called shot on fighter, 0 called shot mod.
+
+		parent::calculateHitBase($gamedata, $fireOrder);
+	}        
+
         public function getDamage($fireOrder){
             return 10 /*- $this->dp*/;
         }

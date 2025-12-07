@@ -1007,15 +1007,15 @@ class GraviticShifter extends Weapon implements SpecialAbility{
         if($fireOrder->firingMode == 1){
             $newFacing = MathLib::addToHexFacing($lastMove->facing , 1);
             $newHeading = MathLib::addToHexFacing($lastMove->heading , 1);
-            $type = "turnRight";
+            //$type = "turnRight";
         }else{
             $newFacing = MathLib::addToHexFacing($lastMove->facing , -1);
             $newHeading = MathLib::addToHexFacing($lastMove->heading , -1);
-            $type = "turnLeft";                        
+            //$type = "turnLeft";                        
         }
 		
 		//Create new movement order for target.
-        $shift = new MovementOrder(null, $type, new OffsetCoordinate($lastMove->position->q, $lastMove->position->r), 0, 0, $lastMove->speed, $newHeading, $newFacing, false, $gamedata->turn, 0, 0);
+        $shift = new MovementOrder(null, "prefire", new OffsetCoordinate($lastMove->position->q, $lastMove->position->r), 0, 0, $lastMove->speed, $newHeading, $newFacing, false, $gamedata->turn, $fireOrder->id, 0);
 
 		//Add shifted movement order to database
 		Manager::insertSingleMovement($gamedata->id, $ship->id, $shift);	

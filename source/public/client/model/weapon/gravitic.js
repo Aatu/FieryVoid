@@ -136,7 +136,7 @@ var GraviticShifter = function GraviticShifter(json, ship) {
 GraviticShifter.prototype = Object.create(Gravitic.prototype);
 GraviticShifter.prototype.constructor = GraviticShifter;
 
-GraviticShifter.prototype.calculateSpecialHitChanceMod = function (shooter, target) {
+GraviticShifter.prototype.calculateSpecialHitChanceMod = function (shooter, target, calledid) {
 	var mod = 0;
     if(shooter.team !== target.team){
         if(target.gravitic || target.factionAge >= 3) mod = -3;
@@ -174,14 +174,18 @@ GraviticLance.prototype.initializationUpdate = function() {
 
 GraviticLance.prototype.doMultipleFireOrders = function (shooter, target, system) {
 
-    var shotsOnTarget = this.guns; // Default guns initially.  We never want teh palyer to miss firing a shot for such a powerful weapon (and it can't intercept).
+    /*var shotsOnTarget = this.guns; // Default guns initially.  We never want teh palyer to miss firing a shot for such a powerful weapon (and it can't intercept).
     if (this.fireOrders.length == 2) { // Two shots have been locked in, remove the first.
         this.fireOrders.splice(0, 1); // Remove the first fire order.
         shotsOnTarget--; //Reduce guns to 1, the one currently being retargeted!
     }else if(this.fireOrders.length == 1){
         shotsOnTarget--; //Reduce guns to 1, one shot is already locked and we don't want to target 3 :)        
     }
+    */
 
+	if(this.firingMode == 3 && this.fireOrders.length > 1) return;  
+
+    var shotsOnTarget = 1;  
     var fireOrdersArray = []; // Store multiple fire orders
 
     for (var s = 0; s < shotsOnTarget; s++) {
@@ -213,6 +217,11 @@ GraviticLance.prototype.doMultipleFireOrders = function (shooter, target, system
     }
     
     return fireOrdersArray; // Return all fire orders
+};
+
+GraviticLance.prototype.checkFinished = function () {
+	if(this.firingMode == 3 && this.fireOrders.length > 1) return true;    
+    return false;
 };
 
 var GraviticCutter = function GraviticCutter(json, ship) {
@@ -362,13 +371,15 @@ MedAntigravityBeam.prototype.initializationUpdate = function() {
 MedAntigravityBeam.prototype.doMultipleFireOrders = function (shooter, target, system) {
 
     var shotsOnTarget = 1; //we're only ever allocating one shot at a time for this weapon.
-
+    /*
     if (this.fireOrders.length > 0) {
         if (this.fireOrders.length >= this.guns) {
             // All guns already fired → retarget one gun by removing oldest fireorder.
             this.fireOrders.splice(0, 1);
         }
     } 
+    */
+	if(this.firingMode == 2 && this.fireOrders.length > 1) return; 
 
     var fireOrdersArray = []; // Store multiple fire orders
 
@@ -401,6 +412,11 @@ MedAntigravityBeam.prototype.doMultipleFireOrders = function (shooter, target, s
     }
     
     return fireOrdersArray; // Return all fire orders
+};
+
+MedAntigravityBeam.prototype.checkFinished = function () {
+	if(this.firingMode == 2 && this.fireOrders.length > 1) return true;    
+    return false;
 };
 
 var AntigravityBeam = function AntigravityBeam(json, ship) {
@@ -421,13 +437,15 @@ AntigravityBeam.prototype.initializationUpdate = function() {
 AntigravityBeam.prototype.doMultipleFireOrders = function (shooter, target, system) {
 
     var shotsOnTarget = 1; //we're only ever allocating one shot at a time for this weapon.
-
+    /*
     if (this.fireOrders.length > 0) {
         if (this.fireOrders.length >= this.guns) {
             // All guns already fired → retarget one gun by removing oldest fireorder.
             this.fireOrders.splice(0, 1);
         }
     } 
+    */
+	if(this.firingMode == 2 && this.fireOrders.length > 2) return; 
 
     var fireOrdersArray = []; // Store multiple fire orders
 
@@ -460,4 +478,9 @@ AntigravityBeam.prototype.doMultipleFireOrders = function (shooter, target, syst
     }
     
     return fireOrdersArray; // Return all fire orders
+};
+
+AntigravityBeam.prototype.checkFinished = function () {
+	if(this.firingMode == 2 && this.fireOrders.length > 1) return true;    
+    return false;
 };
