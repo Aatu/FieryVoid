@@ -784,10 +784,7 @@
 </div>
 
 <div id="global-blocking-overlay" class="blocking-overlay" style="display:none;">
-    <span>
-        TRANSMITTING ORDERS...<br>
-        <span class="blocking-warning">Do not close window</span>
-    </span>
+    <span>TRANSMITTING ORDERS...<br>Do not close window</span>
 </div>
 </body>
 
