@@ -23,7 +23,7 @@ window.ajaxInterface = {
     // GLOBAL AJAX SERIAL QUEUE 🔥
     requestQueue: Promise.resolve(),
 
-    getShipsForFaction: function (factionRequest, callback) {
+    getShipsForFaction: function(factionRequest, callback) {
         const now = Date.now();
 
         if (this.lastClickTime[factionRequest] &&
@@ -42,7 +42,7 @@ window.ajaxInterface = {
         this._sendRequest(factionRequest, callback);
     },
 
-    _sendRequest: function (factionRequest, callback) {
+    _sendRequest: function(factionRequest, callback) {
         this.currentFaction = factionRequest;
         this.nextFaction = null;
         this.submiting = true;
@@ -79,71 +79,64 @@ window.ajaxInterface = {
         });
     },
 
-    ajaxWithRetry: function (options, attempt = 1) {
+ajaxWithRetry: function(options, attempt = 1) {
 
-        const maxAttempts = 5;
-        const baseDelay = 200;
+    const maxAttempts = 5;
+    const baseDelay = 200;
 
-        const deferred = $.Deferred(); // <-- We return this!
+    const deferred = $.Deferred(); // <-- We return this!
 
-        // Chain execution onto the queue
-        ajaxInterface.requestQueue = ajaxInterface.requestQueue.then(() => {
+    // Chain execution onto the queue
+    ajaxInterface.requestQueue = ajaxInterface.requestQueue.then(() => {
 
-            return new Promise((resolve) => {
+        return new Promise((resolve) => {
 
-                const ajaxCall = () => {
+            const ajaxCall = () => {
 
-                    const jq = $.ajax({
-                        ...options,
+                const jq = $.ajax({
+                    ...options,
 
-                        success: function (data, textStatus, xhr) {
-                            if (options.success) options.success(data, textStatus, xhr);
-                            deferred.resolve(data, textStatus, xhr);
-                            // Release queue slot (no retry needed)
-                            resolve();
-                        },
+                    success: function(data, textStatus, xhr) {
+                        if (options.success) options.success(data, textStatus, xhr);
+                        deferred.resolve(data, textStatus, xhr); // forward correctly
+                        resolve();
+                    },
 
-                        error: function (xhr, textStatus, errorThrown) {
-                            if (xhr && xhr.status === 507 && attempt < maxAttempts) {
-                                const delay = baseDelay * Math.pow(2, attempt) + Math.random() * 50;
+                    error: function(xhr, textStatus, errorThrown) {
+                        if (xhr && xhr.status === 507 && attempt < maxAttempts) {
+                            const delay = baseDelay * Math.pow(2, attempt) + Math.random() * 50;
 
-                                console.warn(`[ajaxWithRetry] HTTP 507 - Retrying in ${Math.round(delay)}ms (attempt ${attempt}/${maxAttempts})`);
+                            console.warn(`Retrying in ${delay}ms (attempt ${attempt})`);
 
-                                setTimeout(() => {
-                                    ajaxInterface.ajaxWithRetry(options, attempt + 1)
-                                        .done((d, s, x) => deferred.resolve(d, s, x))
-                                        .fail((x, s, e) => deferred.reject(x, s, e))
-                                        .always(() => {
-                                            // CRITICAL: Only release queue slot after retry completes
-                                            resolve();
-                                        });
-                                }, delay);
-                                // Don't fall through - queue slot released by retry's .always()
-                                return;
-                            }
-
-                            // Not retrying - handle as final error
-                            if (options.error) options.error(xhr, textStatus, errorThrown);
-                            deferred.reject(xhr, textStatus, errorThrown);
-                            // Release queue slot
-                            resolve();
-                        },
-
-                        complete: function (xhr, status) {
-                            if (options.complete) options.complete(xhr, status);
+                            setTimeout(() => {
+                                ajaxInterface.ajaxWithRetry(options, attempt + 1)
+                                    .done((d, s, x) => deferred.resolve(d, s, x))
+                                    .fail((x, s, e) => deferred.reject(x, s, e))
+                                    .always(() => resolve());
+                            }, delay);
+                            return;
                         }
-                    });
 
-                };
+                        if (options.error) options.error(xhr, textStatus, errorThrown);
+                        deferred.reject(xhr, textStatus, errorThrown);
+                        resolve();
+                    },
 
-                ajaxCall();
-            });
+                    complete: function(xhr, status) {
+                        if (options.complete) options.complete(xhr, status);
+                    }
+                });
 
+            };
+
+            ajaxCall();
         });
 
-        return deferred.promise(); // <-- This makes .done/.fail work
-    },
+    });
 
+    return deferred.promise(); // <-- This makes .done/.fail work
+},
+    
     /* //Replaced version 25.11.25 - DK
     _sendRequest: function(factionRequest, callback) {
         this.currentFaction = factionRequest;
@@ -266,7 +259,7 @@ window.ajaxInterface = {
         }
 
         if (!Array.isArray(shipsArray) || shipsArray.length === 0) {
-            window.confirm.error("You must have at least one ship before saving!", function () { });
+            window.confirm.error("You must have at least one ship before saving!", function () {});
             return; // stop execution
         }
 
@@ -278,7 +271,7 @@ window.ajaxInterface = {
             dataType: 'json',
             data: JSON.stringify(saveData),
             timeout: 15000,
-            success: function (response) {
+            success: function(response) {
                 ajaxInterface.submiting = false;
 
                 if (response && response.error) {
@@ -293,7 +286,7 @@ window.ajaxInterface = {
                     }
                 }
             },
-            error: function (xhr, status, error) {
+            error: function(xhr, status, error) {
                 ajaxInterface.submiting = false;
                 ajaxInterface.errorAjax(xhr, status, error);
             }
@@ -318,8 +311,8 @@ window.ajaxInterface = {
                 'userid': ship.userid,
                 'id': ship.id,
                 'name': ship.name,
-                'pointCostEnh': Math.round(ship.pointCostEnh),
-                'pointCostEnh2': Math.round(ship.pointCostEnh2)
+				'pointCostEnh': Math.round(ship.pointCostEnh),
+				'pointCostEnh2': Math.round(ship.pointCostEnh2)
             };
 
             newShip.systems = Array();
@@ -338,20 +331,20 @@ window.ajaxInterface = {
                         for (var c in system.systems) {
                             var fightersystem = system.systems[c];
                             var ammoArray = Array();
-
+  
                             if (fightersystem.missileArray != null) {
                                 for (var index in fightersystem.missileArray) {
                                     var amount = fightersystem.missileArray[index].amount;
                                     ammoArray[index] = amount;
-                                    newShip.pointCostEnh2 += fightersystem.missileArray[index].cost * amount * ship.flightSize;
+                                    newShip.pointCostEnh2 += fightersystem.missileArray[index].cost * amount * ship.flightSize;                                    
                                 }
                             }
-
-                            //fightersystem.doIndividualNotesTransfer();
-                            fighterSystems[c] = { 'id': fightersystem.id, 'fireOrders': fightersystem.fireOrders, 'ammo': ammoArray, "individualNotesTransfer": fightersystem.individualNotesTransfer };
+							
+							//fightersystem.doIndividualNotesTransfer();
+							fighterSystems[c] = { 'id': fightersystem.id, 'fireOrders': fightersystem.fireOrders, 'ammo': ammoArray, "individualNotesTransfer": fightersystem.individualNotesTransfer };
                         }
-                        //system.doIndividualNotesTransfer();
-                        systems[a] = { 'id': system.id, 'systems': fighterSystems, "individualNotesTransfer": system.individualNotesTransfer };
+						//system.doIndividualNotesTransfer();
+						systems[a] = { 'id': system.id, 'systems': fighterSystems, "individualNotesTransfer": system.individualNotesTransfer };
                     } else {
                         var ammoArray = Array();
                         var fires = Array();
@@ -364,8 +357,8 @@ window.ajaxInterface = {
                                 newShip.pointCostEnh2 += system.missileArray[index].cost * amount;
                             }
                         }
-                        //system.doIndividualNotesTransfer();
-                        systems[a] = { 'id': system.id, 'power': system.power, 'fireOrders': fires, 'ammo': ammoArray, "individualNotesTransfer": system.individualNotesTransfer };
+						//system.doIndividualNotesTransfer();
+						systems[a] = { 'id': system.id, 'power': system.power, 'fireOrders': fires, 'ammo': ammoArray, "individualNotesTransfer": system.individualNotesTransfer };
                     }
                 }
 
@@ -374,7 +367,7 @@ window.ajaxInterface = {
                 if (ship.flight) {
                     newShip.flightSize = ship.flightSize;
                 }
-
+                
                 //unit enhancements
                 newShip.enhancementOptions = ship.enhancementOptions;
 
@@ -393,29 +386,29 @@ window.ajaxInterface = {
         return saveData;
     },
 
-    getSavedFleets: function getSavedFleets(callback) {
+	getSavedFleets: function getSavedFleets(callback) {
         if (ajaxInterface.submiting) return;
         ajaxInterface.submiting = true;
 
         ajaxInterface.ajaxWithRetry({
-            type: 'GET',
-            url: 'getSavedFleets.php',
-            dataType: 'json',
-            cache: false,
-            timeout: 15000
-        })
-            .done(function (response) {
-                ajaxInterface.submiting = false;
-                if (!response || !response.fleets) return callback([]);
+			type: 'GET',
+			url: 'getSavedFleets.php',
+			dataType: 'json',
+			cache: false,
+			timeout: 15000
+		})
+		.done(function(response) {
+            ajaxInterface.submiting = false;            
+			if (!response || !response.fleets) return callback([]);
 
-                callback(response.fleets);
-            })
-            .fail(function (xhr, textStatus, errorThrown) {
-                ajaxInterface.submiting = false;
-                console.error("Failed to load fleets:", errorThrown || textStatus);
-                callback([]);
-            });
-    },
+			callback(response.fleets);
+		})
+		.fail(function(xhr, textStatus, errorThrown) {
+            ajaxInterface.submiting = false;            
+			console.error("Failed to load fleets:", errorThrown || textStatus);
+			callback([]);
+		});
+	},
 
     loadSavedFleet: function loadSavedFleet(listId, callback) {
         if (ajaxInterface.submiting) return;
@@ -430,31 +423,31 @@ window.ajaxInterface = {
             cache: false,
             timeout: 15000
         })
-            .done(function (response) {
-                ajaxInterface.submiting = false;
-                if (!response || !response.ships) return callback([]);
-                callback(response);
-            })
-            .fail(function (xhr, textStatus, errorThrown) {
-                ajaxInterface.submiting = false;
-                console.error("Failed to load fleet:", textStatus, errorThrown);
-                callback([]);
-            });
+        .done(function(response) {
+            ajaxInterface.submiting = false;             
+			if (!response || !response.ships) return callback([]);
+            callback(response);
+        })
+        .fail(function(xhr, textStatus, errorThrown) {
+            ajaxInterface.submiting = false;             
+            console.error("Failed to load fleet:", textStatus, errorThrown);
+            callback([]);
+        });
     },
 
 
     changeFleetPublic: function changeFleetPublic(id, callback) {
         if (ajaxInterface.submiting) return;
-        ajaxInterface.submiting = true;
+        ajaxInterface.submiting = true;      
         // Send the POST request
         ajaxInterface.ajaxWithRetry({
             type: 'POST',
             url: 'changeAvailabilityFleet.php',
             contentType: 'application/json; charset=utf-8',
             dataType: 'json',
-            data: JSON.stringify({ id: id }),
+            data: JSON.stringify({id: id}),
             timeout: 15000,
-            success: function (response) {
+            success: function(response) {
                 ajaxInterface.submiting = false;
 
                 if (response && response.error) {
@@ -467,26 +460,26 @@ window.ajaxInterface = {
                     callback(response);
                 }
             },
-            error: function (xhr, status, error) {
+            error: function(xhr, status, error) {
                 ajaxInterface.submiting = false;
                 ajaxInterface.errorAjax(xhr, status, error);
             }
         });
-    },
+	},
 
 
     deleteSavedFleet: function deleteSavedFleet(id, callback) {
         if (ajaxInterface.submiting) return;
-        ajaxInterface.submiting = true;
+        ajaxInterface.submiting = true;        
         // Send the POST request
         ajaxInterface.ajaxWithRetry({
             type: 'POST',
             url: 'deleteSavedFleet.php',
             contentType: 'application/json; charset=utf-8',
             dataType: 'json',
-            data: JSON.stringify({ id: id }),
+            data: JSON.stringify({id: id}),
             timeout: 15000,
-            success: function (response) {
+            success: function(response) {
                 ajaxInterface.submiting = false;
 
                 if (response && response.error) {
@@ -501,12 +494,12 @@ window.ajaxInterface = {
                     }
                 }
             },
-            error: function (xhr, status, error) {
+            error: function(xhr, status, error) {
                 ajaxInterface.submiting = false;
                 ajaxInterface.errorAjax(xhr, status, error);
             }
         });
-    },
+	},
 
 
     //New version for PHP8
@@ -518,40 +511,40 @@ window.ajaxInterface = {
             type: 'POST',
             url: 'slot.php',
             dataType: 'json', // ✅ Expect JSON
-            data: {
+            data: { 
                 action: action,
                 gameid: gamedata.gameid,
-                slotid: slotid
+                slotid: slotid 
             },
             timeout: 15000, // ✅ prevent hanging requests
         })
-            .done(function (response, textStatus, xhr) {
-                ajaxInterface.submiting = false;
+        .done(function (response, textStatus, xhr) {
+            ajaxInterface.submiting = false;
 
-                // ✅ Handle HTTP-level errors first
-                if (xhr.status !== 200) {
-                    console.error(`Slot action failed [${xhr.status}]`);
-                    ajaxInterface.errorAjax(xhr, textStatus, response?.error || "Server error");
-                    return;
-                }
+            // ✅ Handle HTTP-level errors first
+            if (xhr.status !== 200) {
+                console.error(`Slot action failed [${xhr.status}]`);
+                ajaxInterface.errorAjax(xhr, textStatus, response?.error || "Server error");
+                return;
+            }
 
-                // ✅ Handle application-level errors
-                if (response && response.error) {
-                    console.warn("Slot action error:", response.error);
-                    ajaxInterface.errorAjax(xhr, textStatus, response.error);
-                    return;
-                }
+            // ✅ Handle application-level errors
+            if (response && response.error) {
+                console.warn("Slot action error:", response.error);
+                ajaxInterface.errorAjax(xhr, textStatus, response.error);
+                return;
+            }
 
-                // ✅ Normal success
-                ajaxInterface.successSubmit(response);
-                if (typeof callback === "function") callback(response);
-            })
-            .fail(function (xhr, textStatus, errorThrown) {
-                ajaxInterface.submiting = false;
-                let message = errorThrown || textStatus || "Unknown network error";
-                console.error("Slot action AJAX fail:", message, xhr.responseText);
-                ajaxInterface.errorAjax(xhr, textStatus, message);
-            });
+            // ✅ Normal success
+            ajaxInterface.successSubmit(response);
+            if (typeof callback === "function") callback(response);
+        })
+        .fail(function (xhr, textStatus, errorThrown) {
+            ajaxInterface.submiting = false;
+            let message = errorThrown || textStatus || "Unknown network error";
+            console.error("Slot action AJAX fail:", message, xhr.responseText);
+            ajaxInterface.errorAjax(xhr, textStatus, message);
+        });
     },
 
 
@@ -567,8 +560,8 @@ window.ajaxInterface = {
                 'slot': ship.slot,
                 'id': ship.id,
                 'name': ship.name,
-                'pointCostEnh': Math.round(ship.pointCostEnh),
-                'pointCostEnh2': Math.round(ship.pointCostEnh2)
+				'pointCostEnh': Math.round(ship.pointCostEnh),
+				'pointCostEnh2': Math.round(ship.pointCostEnh2)
             };
             newShip.movement = Array();
             newShip.EW = Array();
@@ -621,19 +614,19 @@ window.ajaxInterface = {
                                 for (var index in fightersystem.missileArray) {
                                     var amount = fightersystem.missileArray[index].amount;
                                     ammoArray[index] = amount;
-                                    newShip.pointCostEnh2 += fightersystem.missileArray[index].cost * amount * ship.flightSize;
+                                    newShip.pointCostEnh2 += fightersystem.missileArray[index].cost * amount * ship.flightSize;  
                                 }
                             }
-
-                            //changed to accomodate new variable for individual data transfer to server - in a generic way
+							
+							//changed to accomodate new variable for individual data transfer to server - in a generic way
                             //fighterSystems[c] = { 'id': fightersystem.id, 'fireOrders': fightersystem.fireOrders, 'ammo': ammoArray };
-                            fightersystem.doIndividualNotesTransfer();
-                            fighterSystems[c] = { 'id': fightersystem.id, 'fireOrders': fightersystem.fireOrders, 'ammo': ammoArray, "individualNotesTransfer": fightersystem.individualNotesTransfer, 'power': fightersystem.power, };
+							fightersystem.doIndividualNotesTransfer();
+							fighterSystems[c] = { 'id': fightersystem.id, 'fireOrders': fightersystem.fireOrders, 'ammo': ammoArray, "individualNotesTransfer": fightersystem.individualNotesTransfer, 'power': fightersystem.power, };
                         }
-                        //changed to accomodate new variable for individual data transfer to server - in a generic way
+						//changed to accomodate new variable for individual data transfer to server - in a generic way
                         //systems[a] = { 'id': system.id, 'systems': fighterSystems };
-                        system.doIndividualNotesTransfer();
-                        systems[a] = { 'id': system.id, 'systems': fighterSystems, "individualNotesTransfer": system.individualNotesTransfer };
+						system.doIndividualNotesTransfer();
+						systems[a] = { 'id': system.id, 'systems': fighterSystems, "individualNotesTransfer": system.individualNotesTransfer };
                     } else {
                         var fires = Array();
                         var ammoArray = Array();
@@ -660,13 +653,13 @@ window.ajaxInterface = {
                             for (var index in system.missileArray) {
                                 var amount = system.missileArray[index].amount;
                                 ammoArray[index] = amount;
-                                newShip.pointCostEnh2 += system.missileArray[index].cost * amount;
+                                newShip.pointCostEnh2 += system.missileArray[index].cost * amount;                                  
                             }
                         }
-                        //changed to accomodate new variable for individual data transfer to server - in a generic way
+						//changed to accomodate new variable for individual data transfer to server - in a generic way
                         //systems[a] = { 'id': system.id, 'power': system.power, 'fireOrders': fires, 'ammo': ammoArray };
-                        system.doIndividualNotesTransfer();
-                        systems[a] = { 'id': system.id, 'power': system.power, 'fireOrders': fires, 'ammo': ammoArray, "individualNotesTransfer": system.individualNotesTransfer };
+						system.doIndividualNotesTransfer();
+						systems[a] = { 'id': system.id, 'power': system.power, 'fireOrders': fires, 'ammo': ammoArray, "individualNotesTransfer": system.individualNotesTransfer };
                     }
                 }
 
@@ -675,7 +668,7 @@ window.ajaxInterface = {
                 if (ship.flight) {
                     newShip.flightSize = ship.flightSize;
                 }
-
+                
                 //unit enhancements
                 newShip.enhancementOptions = ship.enhancementOptions;
 
@@ -744,7 +737,7 @@ window.ajaxInterface = {
                         systems[a] = { 'id': system.id, 'systems': fighterSystems };
                     } else {
                         var fires = Array();
-                        /* Cleaned 19.8.25 - DK	                        
+        				/* Cleaned 19.8.25 - DK	                        
                         if (system.dualWeapon) {
                             for (var c in system.weapons) {
                                 var weapon = system.weapons[c];
@@ -757,14 +750,14 @@ window.ajaxInterface = {
                                 fires = fires.concat(weapon.fireOrders);
                             }
                         } else {
-                        */
-                        for (var b = system.fireOrders.length - 1; b >= 0; b--) {
-                            var fire = system.fireOrders[b];
-                            if (fire.turn < gamedata.turn) {
-                                system.fireOrders.splice(b, 1);
+                        */    
+                            for (var b = system.fireOrders.length - 1; b >= 0; b--) {
+                                var fire = system.fireOrders[b];
+                                if (fire.turn < gamedata.turn) {
+                                    system.fireOrders.splice(b, 1);
+                                }
                             }
-                        }
-                        fires = system.fireOrders;
+                            fires = system.fireOrders;
                         //}
 
                         for (var b = system.power.length - 1; b >= 0; b--) {
@@ -801,7 +794,7 @@ window.ajaxInterface = {
     successSubmit: function successSubmit(data) {
         ajaxInterface.submiting = false;
         if (data.error) {
-            window.confirm.exception(data, function () { });
+            window.confirm.exception(data, function () {});
             gamedata.waiting = false;
         } else {
             gamedata.parseServerData(data);
@@ -811,7 +804,7 @@ window.ajaxInterface = {
     successRequest: function successRequest(data) {
         ajaxInterface.submiting = false;
         if (data && data.error) {
-            window.confirm.exception(data, function () { });
+            window.confirm.exception(data, function () {});
             gamedata.waiting = false;
         } else {
             //gamedata.parseServerData(data);
@@ -822,7 +815,7 @@ window.ajaxInterface = {
     errorAjax: function errorAjax(jqXHR, textStatus, errorThrown) {
         console.dir(jqXHR);
         console.dir(errorThrown);
-        window.confirm.exception({ error: "AJAX error: " + textStatus }, function () { });
+        window.confirm.exception({ error: "AJAX error: " + textStatus }, function () {});
     },
 
     startPollingGamedata: function startPollingGamedata() {
@@ -859,51 +852,51 @@ window.ajaxInterface = {
             return;
         }
 
-        var time = 8000;
+        var time = 8000;  
 
         // detect environment
         var isLocal = (location.hostname === "localhost" || location.hostname === "127.0.0.1");
-        var phase = gamedata.gamephase;
-
+        var phase = gamedata.gamephase;        
+        
         if (!ajaxInterface.submiting) ajaxInterface.requestGamedata();
         ajaxInterface.pollcount++;
 
-        // --- base timings depending on mode ---
-        if (isLocal) {
-            // Local testing timings
-            time = 3000;
-        } else if (phase === -2) {
-            var notReadiedYet = false;
-            for (var i in gamedata.slots) {
-                var slot = gamedata.slots[i];
-                if (slot.playerid !== null && slot.playerid == gamedata.thisplayer && slot.lastphase == "-3") {
-                    notReadiedYet = true; //Has not readied all slots yet.
-                    break;
+            // --- base timings depending on mode ---
+            if (isLocal) {
+                // Local testing timings
+                time = 3000;
+            } else if (phase === -2) {
+                var notReadiedYet = false;                
+                for (var i in gamedata.slots) {
+                    var slot = gamedata.slots[i];		
+                    if(slot.playerid !== null && slot.playerid == gamedata.thisplayer && slot.lastphase == "-3"){
+                        notReadiedYet = true; //Has not readied all slots yet.
+                        break;       
+                    }      
+                }                
+                // Phase -2 timings (customize as you like)
+                if(notReadiedYet){
+                    time = 60000;
+                }else{
+                    time = 8000;
+                    if (ajaxInterface.pollcount > 1)  time = 15000;                       
+                    if (ajaxInterface.pollcount > 3)  time = 30000;                
+                    if (ajaxInterface.pollcount > 10) time = 60000;
+                    if (ajaxInterface.pollcount > 40) time = 1800000;                   
                 }
-            }
-            // Phase -2 timings (customize as you like)
-            if (notReadiedYet) {
-                time = 30000;
             } else {
-                time = 6000;
-                if (ajaxInterface.pollcount > 1) time = 8000;
-                if (ajaxInterface.pollcount > 3) time = 15000;
+                // In-Game timings
+                time = 8000;
+                if (ajaxInterface.pollcount > 1)  time = 12000;
+                if (ajaxInterface.pollcount > 3)  time = 30000;
                 if (ajaxInterface.pollcount > 10) time = 60000;
                 if (ajaxInterface.pollcount > 40) time = 1800000;
             }
-        } else {
-            // In-Game timings
-            time = 6000;
-            if (ajaxInterface.pollcount > 1) time = 8000;
-            if (ajaxInterface.pollcount > 3) time = 15000;
-            if (ajaxInterface.pollcount > 10) time = 60000;
-            if (ajaxInterface.pollcount > 40) time = 1800000;
-        }
 
-        if (ajaxInterface.pollcount > 300) {
-            ajaxInterface.stopPolling();
-            return;
-        }
+            if (ajaxInterface.pollcount > 300) {
+                ajaxInterface.stopPolling();
+                return;
+            }
 
 
         ajaxInterface.poll = setTimeout(ajaxInterface.pollGamedata, time);
@@ -936,12 +929,12 @@ window.ajaxInterface = {
         });
     },
 
-    startPollingGames: function () {
+    startPollingGames: function() {
         this.pollGames();
     },
 
     // Polling entry point for home screen
-    pollGames: function () {
+    pollGames: function() {
         if (gamedata.waiting === false) return;
         if (!gamedata.animating) {
             animation.animateWaiting();
@@ -949,7 +942,7 @@ window.ajaxInterface = {
         }
     },
 
-    requestAllGames: function () {
+    requestAllGames: function() {
         const now = Date.now();
 
         // Debounce rapid triggers
@@ -971,7 +964,7 @@ window.ajaxInterface = {
         ajaxInterface._sendGameRequest();
     },
 
-    _sendGameRequest: function () {
+    _sendGameRequest: function() {
         ajaxInterface.currentRequest = {};  // placeholder for inflight request
         ajaxInterface.nextRequest = null;
 
@@ -991,7 +984,7 @@ window.ajaxInterface = {
                 // If a request was queued while this ran, send it now
                 if (ajaxInterface.nextRequest) {
                     ajaxInterface.nextRequest = null;
-                    ajaxInterface._sendGameRequest();
+                    ajaxInterface._sendRequest();
                 }
             }
         });
