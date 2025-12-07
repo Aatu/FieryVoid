@@ -1004,3 +1004,10 @@ body {
     cursor: wait;
 }
 
+.blocking-warning {
+    color:#deebff;       /* example */
+    font-weight: bold; /* example */
+    font-size: 16px;     /* example */
+    opacity: 0.8;
+}
+
