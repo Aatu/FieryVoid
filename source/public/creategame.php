@@ -38,6 +38,7 @@
         <script src="client/mathlib.js"></script>
         <script src="client/UI/confirm.js"></script>
         <script src="client/UI/createGame.js"></script>
+        <script src="client/ajaxInterface.js"></script>        
 	</head>
 	<body class="creategame">
   <header class="pageheader">
