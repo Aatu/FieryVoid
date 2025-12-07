@@ -108,14 +108,18 @@ ajaxWithRetry: function(options, attempt = 1) {
 
                             console.warn(`Retrying in ${delay}ms (attempt ${attempt})`);
 
-                            setTimeout(() => {
-                                ajaxInterface.ajaxWithRetry(options, attempt + 1)
-                                    .done((d, s, x) => deferred.resolve(d, s, x))
-                                    .fail((x, s, e) => deferred.reject(x, s, e))
-                                    .always(() => resolve());
-                            }, delay);
-                            return;
-                        }
+                                setTimeout(() => {
+                                    ajaxInterface.ajaxWithRetry(options, attempt + 1)
+                                        .done((d, s, x) => deferred.resolve(d, s, x))
+                                        .fail((x, s, e) => deferred.reject(x, s, e))
+                                        .always(() => {
+                                            // CRITICAL: Only release queue slot after retry completes
+                                            resolve();
+                                        });
+                                }, delay);
+                                // Don't fall through - queue slot released by retry's .always()
+                                return;
+                            }
 
                         if (options.error) options.error(xhr, textStatus, errorThrown);
                         deferred.reject(xhr, textStatus, errorThrown);
@@ -878,17 +882,17 @@ ajaxWithRetry: function(options, attempt = 1) {
                 if(notReadiedYet){
                     time = 60000;
                 }else{
-                    time = 8000;
-                    if (ajaxInterface.pollcount > 1)  time = 15000;                       
-                    if (ajaxInterface.pollcount > 3)  time = 30000;                
+                    time = 6000;
+                    if (ajaxInterface.pollcount > 1)  time = 8000;                       
+                    if (ajaxInterface.pollcount > 3)  time = 15000;                
                     if (ajaxInterface.pollcount > 10) time = 60000;
                     if (ajaxInterface.pollcount > 40) time = 1800000;                   
                 }
             } else {
                 // In-Game timings
-                time = 8000;
+                time = 6000;
                 if (ajaxInterface.pollcount > 1)  time = 12000;
-                if (ajaxInterface.pollcount > 3)  time = 30000;
+                if (ajaxInterface.pollcount > 3)  time = 15000;
                 if (ajaxInterface.pollcount > 10) time = 60000;
                 if (ajaxInterface.pollcount > 40) time = 1800000;
             }
@@ -984,7 +988,7 @@ ajaxWithRetry: function(options, attempt = 1) {
                 // If a request was queued while this ran, send it now
                 if (ajaxInterface.nextRequest) {
                     ajaxInterface.nextRequest = null;
-                    ajaxInterface._sendRequest();
+                    ajaxInterface._sendGameRequest();
                 }
             }
         });
