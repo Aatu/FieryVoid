@@ -148,62 +148,71 @@ window.ajaxInterface = {
 
 
 
+
     ajaxWithRetry: function (options, attempt = 1) {
-        const maxAttempts = 5;
-        const baseDelay = 200;
         const deferred = $.Deferred();
 
-        // Chain execution onto the queue
+        // Chain execution onto the queue - only the initial request goes through queue
         ajaxInterface.requestQueue = ajaxInterface.requestQueue.then(() => {
             return new Promise((resolve) => {
-                let isRetrying = false;
-
-                // Internal retry function - stays within the same queue slot
-                const attemptRequest = (currentAttempt) => {
-                    isRetrying = false;
-
-                    $.ajax({
-                        ...options,
-
-                        success: function (data, textStatus, xhr) {
-                            if (options.success) options.success(data, textStatus, xhr);
-                            deferred.resolve(data, textStatus, xhr);
-                            resolve(); // Release queue slot
-                        },
-
-                        error: function (xhr, textStatus, errorThrown) {
-                            // Retry on 507 if attempts remain
-                            if (xhr && xhr.status === 507 && currentAttempt < maxAttempts) {
-                                const delay = baseDelay * Math.pow(2, currentAttempt) + Math.random() * 50;
-                                console.warn(`507 error, retrying in ${Math.round(delay)}ms (attempt ${currentAttempt}/${maxAttempts})`);
-                                isRetrying = true;
-                                setTimeout(() => attemptRequest(currentAttempt + 1), delay);
-                                // Keep queue slot held during retries - don't resolve yet
-                                return;
-                            }
-
-                            // Final failure - call error handler and release slot
-                            if (options.error) options.error(xhr, textStatus, errorThrown);
-                            deferred.reject(xhr, textStatus, errorThrown);
-                            resolve(); // Release queue slot
-                        },
-
-                        complete: function (xhr, status) {
-                            // Only call complete when not retrying
-                            if (!isRetrying && options.complete) {
-                                options.complete(xhr, status);
-                            }
-                        }
-                    });
-                };
-
-                // Start the first attempt
-                attemptRequest(attempt);
+                // Call internal method that handles the actual request and retries
+                ajaxInterface._doAjaxWithRetry(options, attempt)
+                    .done(function () { deferred.resolveWith(this, arguments); })
+                    .fail(function () { deferred.rejectWith(this, arguments); })
+                    .always(() => resolve()); // Queue resolved when complete (success or fail)
             });
         });
 
         return deferred.promise();
     },
+
+    // Internal method - handles the actual AJAX call and retries (bypasses queue)
+    _doAjaxWithRetry: function (options, attempt) {
+        const maxAttempts = 5;
+        const baseDelay = 200;
+        const deferred = $.Deferred();
+        let isRetrying = false;
+
+        $.ajax({
+            ...options,
+
+            success: function (data, textStatus, xhr) {
+                if (options.success) options.success(data, textStatus, xhr);
+                deferred.resolve(data, textStatus, xhr);
+            },
+
+            error: function (xhr, textStatus, errorThrown) {
+                // Retry on 507 if attempts remain
+                if (xhr && xhr.status === 507 && attempt < maxAttempts) {
+                    const delay = baseDelay * Math.pow(2, attempt) + Math.random() * 50;
+                    console.warn(`507 error, retrying in ${Math.round(delay)}ms (attempt ${attempt}/${maxAttempts})`);
+                    isRetrying = true;
+
+                    setTimeout(() => {
+                        // RECURSION: Call self directly, bypassing the queue
+                        ajaxInterface._doAjaxWithRetry(options, attempt + 1)
+                            .done(function () { deferred.resolveWith(this, arguments); })
+                            .fail(function () { deferred.rejectWith(this, arguments); });
+                    }, delay);
+                    return;
+                }
+
+                // Final failure - call error handler and release slot
+                if (options.error) options.error(xhr, textStatus, errorThrown);
+                deferred.reject(xhr, textStatus, errorThrown);
+            },
+
+            complete: function (xhr, status) {
+                // Only call complete when not retrying
+                if (!isRetrying && options.complete) {
+                    options.complete(xhr, status);
+                }
+            }
+        });
+
+        return deferred.promise();
+    },
+
 
 
 
