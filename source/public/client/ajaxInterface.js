@@ -54,31 +54,83 @@ window.ajaxInterface = {
 
         if (factionRequest === this.currentFaction) return;
 
+        // Check client-side cache first
+        const cacheKey = 'fv_ships_' + factionRequest;
+        try {
+            const cached = sessionStorage.getItem(cacheKey);
+            if (cached) {
+                const parsed = JSON.parse(cached);
+                // Cache is valid for the session, serve immediately
+                callback(parsed);
+                return;
+            }
+        } catch (e) {
+            // Cache read failed, proceed with request
+            console.warn('Cache read failed:', e);
+        }
+
         this._sendRequest(factionRequest, callback);
     },
 
     _sendRequest: function (factionRequest, callback) {
+        // Validate faction before sending request
+        if (!factionRequest) {
+            console.warn('_sendRequest called with empty faction, ignoring');
+            this.submiting = false;
+            return;
+        }
+
         this.currentFaction = factionRequest;
         this.nextFaction = null;
         this.submiting = true;
 
-        ajaxInterface.ajaxWithRetry({
+        // Use direct AJAX (not ajaxWithRetry) - faction loading has its own queue management
+        $.ajax({
             type: 'POST',
             url: 'gamelobbyloader.php',
             dataType: 'json',
             contentType: 'application/json',
             data: JSON.stringify({ faction: String(factionRequest) }),
+            timeout: 15000,
 
             success: (data) => {
                 if (data.error) {
                     this.errorAjax(null, null, data.error);
                 } else {
+                    // Try to cache the response for future use
+                    const cacheKey = 'fv_ships_' + factionRequest;
+                    try {
+                        const jsonData = JSON.stringify(data);
+                        sessionStorage.setItem(cacheKey, jsonData);
+                    } catch (e) {
+                        // Quota exceeded - try clearing old faction caches first
+                        if (e.name === 'QuotaExceededError') {
+                            try {
+                                for (let i = sessionStorage.length - 1; i >= 0; i--) {
+                                    const key = sessionStorage.key(i);
+                                    if (key && key.startsWith('fv_ships_')) {
+                                        sessionStorage.removeItem(key);
+                                    }
+                                }
+                                sessionStorage.setItem(cacheKey, JSON.stringify(data));
+                            } catch (e2) {
+                                // Still too large - silently skip caching
+                            }
+                        }
+                    }
                     callback(data);
                 }
             },
 
             error: (xhr, status, error) => {
-                this.errorAjax(xhr, status, error);
+                // Silently ignore transient errors - user can try again
+                const ignoredStatuses = [400, 503, 507];
+                if (xhr && ignoredStatuses.includes(xhr.status)) {
+                    console.log('Faction load issue (status ' + xhr.status + '), try again');
+                    // Don't call errorAjax for transient errors
+                } else {
+                    this.errorAjax(xhr, status, error);
+                }
             },
 
             complete: () => {
@@ -94,67 +146,66 @@ window.ajaxInterface = {
         });
     },
 
-    ajaxWithRetry: function (options, attempt = 1) {
 
+
+    ajaxWithRetry: function (options, attempt = 1) {
         const maxAttempts = 5;
         const baseDelay = 200;
-
-        const deferred = $.Deferred(); // <-- We return this!
+        const deferred = $.Deferred();
 
         // Chain execution onto the queue
         ajaxInterface.requestQueue = ajaxInterface.requestQueue.then(() => {
-
             return new Promise((resolve) => {
+                let isRetrying = false;
 
-                const ajaxCall = () => {
+                // Internal retry function - stays within the same queue slot
+                const attemptRequest = (currentAttempt) => {
+                    isRetrying = false;
 
-                    const jq = $.ajax({
+                    $.ajax({
                         ...options,
 
                         success: function (data, textStatus, xhr) {
                             if (options.success) options.success(data, textStatus, xhr);
-                            deferred.resolve(data, textStatus, xhr); // forward correctly
-                            resolve();
+                            deferred.resolve(data, textStatus, xhr);
+                            resolve(); // Release queue slot
                         },
 
                         error: function (xhr, textStatus, errorThrown) {
-                            if (xhr && xhr.status === 507 && attempt < maxAttempts) {
-                                const delay = baseDelay * Math.pow(2, attempt) + Math.random() * 50;
-
-                                console.warn(`Retrying in ${delay}ms (attempt ${attempt})`);
-
-                                setTimeout(() => {
-                                    ajaxInterface.ajaxWithRetry(options, attempt + 1)
-                                        .done((d, s, x) => deferred.resolve(d, s, x))
-                                        .fail((x, s, e) => deferred.reject(x, s, e))
-                                        .always(() => {
-                                            // CRITICAL: Only release queue slot after retry completes
-                                            resolve();
-                                        });
-                                }, delay);
-                                // Don't fall through - queue slot released by retry's .always()
+                            // Retry on 507 if attempts remain
+                            if (xhr && xhr.status === 507 && currentAttempt < maxAttempts) {
+                                const delay = baseDelay * Math.pow(2, currentAttempt) + Math.random() * 50;
+                                console.warn(`507 error, retrying in ${Math.round(delay)}ms (attempt ${currentAttempt}/${maxAttempts})`);
+                                isRetrying = true;
+                                setTimeout(() => attemptRequest(currentAttempt + 1), delay);
+                                // Keep queue slot held during retries - don't resolve yet
                                 return;
                             }
 
+                            // Final failure - call error handler and release slot
                             if (options.error) options.error(xhr, textStatus, errorThrown);
                             deferred.reject(xhr, textStatus, errorThrown);
-                            resolve();
+                            resolve(); // Release queue slot
                         },
 
                         complete: function (xhr, status) {
-                            if (options.complete) options.complete(xhr, status);
+                            // Only call complete when not retrying
+                            if (!isRetrying && options.complete) {
+                                options.complete(xhr, status);
+                            }
                         }
                     });
-
                 };
 
-                ajaxCall();
+                // Start the first attempt
+                attemptRequest(attempt);
             });
-
         });
 
-        return deferred.promise(); // <-- This makes .done/.fail work
+        return deferred.promise();
     },
+
+
 
     /* //Replaced version 25.11.25 - DK
     _sendRequest: function(factionRequest, callback) {
