@@ -1037,7 +1037,16 @@ if ($asteroids == false && $moons == false) {
             <span class="totalUnitCostAmount"></span>
         </span>
     </div>   
-    </main>	                                     
+    </main>	
+    
+<div id="global-blocking-overlay" class="blocking-overlay" style="display:none;">
+    <span>
+        TRANSMITTING ORDERS...<br>
+        <span class="blocking-warning">Do not close window</span>
+    </span>
+
+</div>    
+
 	</body>
 
 
