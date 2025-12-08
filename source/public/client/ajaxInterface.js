@@ -1044,7 +1044,7 @@ window.ajaxInterface = {
 
         // Mark as submitting (defensive)
         ajaxInterface.submitingGames = true;
-        ajaxInterface.submiting = true;  // your original flag
+        //ajaxInterface.submiting = true;  // your original flag
 
         // Send the AJAX request
         ajaxInterface._sendGameRequest();
@@ -1064,7 +1064,7 @@ window.ajaxInterface = {
             complete: () => {
                 // Clear flags when request finishes
                 ajaxInterface.submitingGames = false;
-                ajaxInterface.submiting = false;
+                //ajaxInterface.submiting = false;
                 ajaxInterface.currentRequest = null;
 
                 // If a request was queued while this ran, send it now
