@@ -143,7 +143,7 @@ window.ajaxInterface = {
                     this._sendRequest(nextF, nextCb);
                 }
             }
-        });
+        }).fail(() => { /* Cleanly handle rejection to prevent console noise */ });
     },
 
 
