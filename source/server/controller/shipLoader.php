@@ -21,10 +21,11 @@
 			
 			// Check for cached mapping (skip if debug mode or local server)
 			$isLocal = in_array($_SERVER['SERVER_NAME'], array('localhost', '127.0.0.1'));
-			if (!$isLocal && !isset($_GET['debug']) && file_exists($cacheFile) && (time() - filemtime($cacheFile)) < $cacheMaxAge) {
+			if (!$isLocal && file_exists($cacheFile) && (time() - filemtime($cacheFile)) < $cacheMaxAge) {
 				$cached = @unserialize(file_get_contents($cacheFile));
 				if ($cached !== false) {
 					self::$factionDirMap = $cached;
+				
 					return self::$factionDirMap;
 				}
 			}
@@ -114,7 +115,7 @@
 			
 			// Check if valid cache exists (skip if debug mode or local server)
 			$isLocal = in_array($_SERVER['SERVER_NAME'], array('localhost', '127.0.0.1'));
-			if (!$isLocal && !isset($_GET['debug']) && file_exists($cacheFile) && (time() - filemtime($cacheFile)) < $cacheMaxAge) {
+			if (!$isLocal && file_exists($cacheFile) && (time() - filemtime($cacheFile)) < $cacheMaxAge) {
 				$cached = @unserialize(file_get_contents($cacheFile));
 				if ($cached !== false) {
 					return $cached;
