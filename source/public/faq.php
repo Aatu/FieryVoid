@@ -316,11 +316,11 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         </ul>
         <a class="back-to-top" href="#top">↩ Back to Top</a>
 
-        <h3 id="useful" >Disclaimer</h3>
+        <h3 id="disclaimer" >Disclaimer</h3>
         <ul>
-            <li>This project is a non-commercial, fan-made adaptation inspired by Babylon 5 Wars, originally published by Agents of Gaming under license from Warner Bros. 
+            <p>This project is a non-commercial, fan-made adaptation inspired by Babylon 5 Wars, originally published by Agents of Gaming under license from Warner Bros. 
                 This website, its content, and the associated game are not affiliated with, authorized by, endorsed by, or connected in any way to Warner Bros., Agents of Gaming, or any other rights holders. 
-                ‘Babylon 5’ and all related names, logos, and material are trademarks and/or copyrighted properties of their respective owners..</li>
+                ‘Babylon 5’ and all related names, logos, and material are trademarks and/or copyrighted properties of their respective owners..</p>
         </ul>
         <a class="back-to-top" href="#top">↩ Back to Top</a>        
 
