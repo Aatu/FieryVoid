@@ -20,7 +20,12 @@
 			$cacheMaxAge = 3600; // 1 hour
 			
 			// Check for cached mapping (skip if debug mode or local server)
-			$isLocal = in_array($_SERVER['SERVER_NAME'], array('localhost', '127.0.0.1'));
+if (php_sapi_name() === 'cli') {
+    $isLocal = true; // or false, depending on your intention
+} else {
+    $serverName = $_SERVER['SERVER_NAME'] ?? '';
+    $isLocal = in_array($serverName, ['localhost', '127.0.0.1']);
+}
 			if (!$isLocal && file_exists($cacheFile) && (time() - filemtime($cacheFile)) < $cacheMaxAge) {
 				$cached = @unserialize(file_get_contents($cacheFile));
 				if ($cached !== false) {
@@ -114,7 +119,12 @@
 			$cacheMaxAge = 300; // 5 minutes
 			
 			// Check if valid cache exists (skip if debug mode or local server)
-			$isLocal = in_array($_SERVER['SERVER_NAME'], array('localhost', '127.0.0.1'));
+if (php_sapi_name() === 'cli') {
+    $isLocal = true; // or false, depending on your intention
+} else {
+    $serverName = $_SERVER['SERVER_NAME'] ?? '';
+    $isLocal = in_array($serverName, ['localhost', '127.0.0.1']);
+}
 			if (!$isLocal && file_exists($cacheFile) && (time() - filemtime($cacheFile)) < $cacheMaxAge) {
 				$cached = @unserialize(file_get_contents($cacheFile));
 				if ($cached !== false) {
