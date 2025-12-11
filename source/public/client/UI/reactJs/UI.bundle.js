@@ -37194,7 +37194,8 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _templateObject = _taggedTemplateLiteral(["\n    width: 50px;\n    height: 50px;\n    position: absolute;\n    right: 0;\n    top: 0;\n    z-index: 9999999;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    font-size: 46px;\n    padding-left: 5px;\n    ", "\n"], ["\n    width: 50px;\n    height: 50px;\n    position: absolute;\n    right: 0;\n    top: 0;\n    z-index: 9999999;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    font-size: 46px;\n    padding-left: 5px;\n    ", "\n"]),
     _templateObject2 = _taggedTemplateLiteral(["\n    position: relative;\n    max-width: 100%;\n    width: 800px;\n    margin: 30px auto;\n    display: flex;\n    flex-direction: column;\n"], ["\n    position: relative;\n    max-width: 100%;\n    width: 800px;\n    margin: 30px auto;\n    display: flex;\n    flex-direction: column;\n"]),
-    _templateObject3 = _taggedTemplateLiteral(["\n    padding: 0 10px 0 10px;\n    margin: 5px 0 5px 0;\n    color: #6689ba;\n"], ["\n    padding: 0 10px 0 10px;\n    margin: 5px 0 5px 0;\n    color: #6689ba;\n"]);
+    _templateObject3 = _taggedTemplateLiteral(["\n    padding: 0 10px 0 10px;\n    margin: 5px 0 5px 0;\n    color: #6689ba;\n"], ["\n    padding: 0 10px 0 10px;\n    margin: 5px 0 5px 0;\n    color: #6689ba;\n"]),
+    _templateObject4 = _taggedTemplateLiteral(["\n    font-size: 0.9rem;\n    opacity: 0.7;\n    margin-top: 20px;\n    text-align: center;\n    line-height: 1.3;\n"], ["\n    font-size: 0.9rem;\n    opacity: 0.7;\n    margin-top: 20px;\n    text-align: center;\n    line-height: 1.3;\n"]);
 
 var _react = require("react");
 
@@ -37327,7 +37328,12 @@ var PlayerSettingsForm = function (_React$Component) {
                         null,
                         "Visual"
                     ),
-                    React.createElement(_common.InputAndLabel, { placeholder: "0", type: "number", label: "Zoom level to change to strategic view", onChange: this.getOnChange.call(this, "ZoomLevelToStrategic"), value: this.get.call(this, "ZoomLevelToStrategic") })
+                    React.createElement(_common.InputAndLabel, { placeholder: "0", type: "number", label: "Zoom level to change to strategic view", onChange: this.getOnChange.call(this, "ZoomLevelToStrategic"), value: this.get.call(this, "ZoomLevelToStrategic") }),
+                    React.createElement(
+                        Disclaimer,
+                        null,
+                        "Fiery Void is an unofficial fan-made game inspired by Agent of Gaming's 'Babylon 5 Wars'. It is not endorsed by, affiliated with, or licensed by Warner Bros. or any other rights holders."
+                    )
                 )
             );
         }
@@ -37371,6 +37377,11 @@ var Paragraph = _styledComponents2.default.p.withConfig({
     displayName: "PlayerSettingsForm__Paragraph",
     componentId: "o1ml8x-1"
 })(_templateObject3);
+
+var Disclaimer = _styledComponents2.default.p.withConfig({
+    displayName: "PlayerSettingsForm__Disclaimer",
+    componentId: "o1ml8x-2"
+})(_templateObject4);
 
 var keyCodes = {
     48: "0",

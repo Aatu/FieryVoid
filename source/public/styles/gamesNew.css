@@ -539,7 +539,15 @@ line-height: 1.5;
     border-bottom: 2px solid #215a7a;                       
 }
 
-
+.site-disclaimer {
+    text-align: center;
+    font-size: 0.9rem;
+    opacity: 0.7;
+    margin: 40px auto 20px;
+    max-width: 1400px;
+    line-height: 1.4;
+    color: #ddd;
+}
 
 /* Utility */
 kbd { background: #1b2530; padding: 2px 4px; border-radius: 3px; }

@@ -10,7 +10,7 @@ class TorataToglatMonitor extends BaseShip{
 		$this->shipClass = "Toglat System Monitor";
 		$this->phpclass = "TorataToglatMonitor";
 		$this->imagePath = "img/ships/TorataToglat.png";
-		$this->canvasSize = 200;
+		$this->canvasSize = 190;
 		$this->shipSizeClass = 3;
 		$this->isd = 2242;
 
