@@ -11,7 +11,7 @@ class TorataAtlacCRV extends MediumShip
 		$this->phpclass = "TorataAtlacCRV";
 		$this->imagePath = "img/ships/TorataAtlac.png";
 		$this->shipClass = "Atlac Corvette";
-		$this->canvasSize = 100;
+		$this->canvasSize = 125;
 		$this->isd = 2243;
 
 		$this->forwardDefense = 13;

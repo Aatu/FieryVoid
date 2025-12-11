@@ -1642,8 +1642,138 @@ Nonetheless two copies of Particle Projector lines now exist in FV, in customNex
         public function setMaxDamage(){     $this->maxDamage = 10 ;      }
         
     }//End of Light Particle Projector
-	
-	
+
+    
+/* //Started to think about making PentagonArray pulse against fighters   
+class PentagonArray extends Raking{
+	public $name = "PentagonArray";
+	public $displayName = "Pentagon Array";
+	public $iconPath = "PentagonArray.png";
+	//public $animation = "bolt";
+	public $animation = "laser"; //by the fluff it's five LPBs firing a hail of bolts, but damage is rolled and resolved as a single raking attack - so beam animation seems more appropriate
+	public $animationColor = array(255, 153, 51);
+
+	public $rakes = array();
+	public $priority = 8; //light Raking weapon, effectively
+	public $loadingtime = 1;
+	public $rangePenalty = 1; //-1 per hex
+	public $fireControl = array(3, 3, 3); // fighters, <mediums, <capitals
+	public $intercept = 5; //interception of -5
+		
+	public $firingModes = array(1=>'Raking');
+
+	public $damageType = "Raking"; 
+	public $weaponClass = "Particle";
+
+    public $grouping = 0;
+    public $maxpulses = 5;
+    public $maxpulsesArray = array();
+    public $rof = 4;
+
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		if ( $maxhealth == 0 ) $maxhealth = 8;
+		if ( $powerReq == 0 ) $powerReq = 5;
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+	}
+
+	public function getRakeSize(){
+			$rakesize = array_shift($this->rakes);
+			$rakesize = max(1,$rakesize);//return 1 if no rakes remain
+			return $rakesize;
+	}
+
+    public function fire($gamedata, $fireOrder){
+        $target = $gamedata->getShipById($fireOrder->targetid);        
+        if($target instanceof FighterFlight){
+            $this->damageType = 'Pulse';
+            $fireOrder->damageClass = 'Fighter';                        
+        }
+
+        parent::fire($gamedata, $fireOrder);
+    }    
+
+	public function getDamage($fireOrder){
+        $damage = 0;
+        if($fireOrder->damageClass == 'Fighter'){
+            $damage = Dice::d(10);
+        }else{
+            $this->rakes = array();
+            $damage = 0;
+            $rake = Dice::d(10);
+            $damage+=$rake;
+            $this->rakes[] = $rake;
+            $rake = Dice::d(10);
+            $damage+=$rake;
+            $this->rakes[] = $rake;
+            $rake = Dice::d(10);
+            $damage+=$rake;
+            $this->rakes[] = $rake;
+            $rake = Dice::d(10);
+            $damage+=$rake;
+            $this->rakes[] = $rake;
+            $rake = Dice::d(10);
+            $damage+=$rake;
+            $this->rakes[] = $rake;
+        }    
+		return $damage;
+	}			
+		
+	public function setMinDamage(){
+		$this->minDamage = 5;
+	}
+
+	public function setMaxDamage(){
+		$this->maxDamage = 50;
+	}
+
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+		$this->data["Special"] = "Causes always 5 rakes, each dealing 1d10 damage.";
+		$this->data["Special"] .= "<br>Can sweep multiple fighters, but single rake will not overkill into another fighter."; //simplification, every rake should be assigned separately - but FV wouldn't actually recognize benefit of spreading damage among multiple fighters unless toughness+armor>=10 (eg. Tzymm and larger)
+	}
+
+	//if target is fighter and damage was already dealt (eg. it's overkill):
+	// - account for rake size (single rake cannot overkill)
+	// - account for shields (again - separate fighter is NOT same shield pierced)
+	protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location = null)
+    {
+        
+		if ($damageWasDealt && ($target instanceof FighterFlight)) {
+			//account for proper rake size
+			$acceptedDamage = 0;
+			$tryingDamage = 0;
+			for($i=4;$i>=0;$i--){//starting with last possible rake and going backwards 
+				if (isset($this->rakes[$i])){
+					$tryingDamage += $this->rakes[$i];
+					if ($tryingDamage <= $damage){ //damage fits remaining rakes
+						$acceptedDamage = $tryingDamage;
+					} else {//too much!
+						$tryingDamage = 1000; //just in case
+						break; //don't check further rakes, obviously
+					}
+				}
+			}			
+			$damage = $acceptedDamage; //this much damage fits remaining rake sizes! any more was part of rake already allocated to previous fighter
+			//account for target fighter's shields (and similar damage-reducing mechanisms that affect entire shot)
+			$damage -= $target->getDamageMod($shooter, $pos, $gamedata->turn, $this);
+			$damage = max(0,$damage);
+		}
+		//then standard :)
+		parent::doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location );
+    } //function doDamage
+    
+	//this weapon CAN overkill into another fighter in flight!
+	/*protected function getOverkillSystem($target, $shooter, $system, $fireOrder, $gamedata, $damageWasDealt, $location = null){
+		if ($target instanceof FighterFlight){//if target is fighter flight (usually no overkill), overkill into another fighter instead
+			$newTarget = $target->getHitSystem($shooter, $fireOrder, $this, $gamedata, $location);
+			return $newTarget;
+		}else{ //standard
+			return parent::getOverkillSystem($target, $shooter, $system, $fireOrder, $gamedata, $damageWasDealt, $location);
+		}
+	}
+    *//*
+} //end of class PentagonArray
+*/
 	
 class PentagonArray extends Raking{
 	public $name = "PentagonArray";
@@ -1652,11 +1782,6 @@ class PentagonArray extends Raking{
 	//public $animation = "bolt";
 	public $animation = "laser"; //by the fluff it's five LPBs firing a hail of bolts, but damage is rolled and resolved as a single raking attack - so beam animation seems more appropriate
 	public $animationColor = array(255, 153, 51);
-	/*
-	public $animationWidth = 3;	
-	public $animationWidth2 = 0.2;
-	public $animationExplosionScale = 0.2;
-	*/
 
 	public $rakes = array();
 	public $priority = 8; //light Raking weapon, effectively
@@ -1700,10 +1825,7 @@ class PentagonArray extends Raking{
 		$rake = Dice::d(10);
 		$damage+=$rake;
 		$this->rakes[] = $rake;
-/*just a test with forced rake size		
-$this->rakes = array(6,6,6,6,6);
-$damage = 30;		
-*/
+
 		return $damage;
 	}			
 		
@@ -1761,7 +1883,7 @@ $damage = 30;
 	}
 
 } //end of class PentagonArray
-	
+
 	
 	
 	

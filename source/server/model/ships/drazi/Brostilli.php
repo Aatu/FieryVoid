@@ -68,7 +68,7 @@ class Brostilli extends SmallStarBaseFourSections
 			$hangar = new Hangar(5,  8);
 			$hangar->startArc = 270;
 			$hangar->endArc = 90;
-			$this->addFrontSystem($catapult);						
+			$this->addFrontSystem($hangar);						
 			$subReactor = new SubReactorUniversal(5, 38, 0, 0);
 			$subReactor->startArc = 270;
 			$subReactor->endArc = 90;
@@ -96,7 +96,7 @@ class Brostilli extends SmallStarBaseFourSections
 			$hangar = new Hangar(5,  8);
 			$hangar->startArc = 90;
 			$hangar->endArc = 270;
-			$this->addAftSystem($catapult);						
+			$this->addAftSystem($hangar);						
 			$subReactor = new SubReactorUniversal(5, 38, 0, 0);
 			$subReactor->startArc = 90;
 			$subReactor->endArc = 270;
@@ -124,7 +124,7 @@ class Brostilli extends SmallStarBaseFourSections
 			$hangar = new Hangar(5,  8);
 			$hangar->startArc = 180;
 			$hangar->endArc = 360;
-			$this->addLeftSystem($catapult);						
+			$this->addLeftSystem($hangar);						
 			$subReactor = new SubReactorUniversal(5, 38, 0, 0);
 			$subReactor->startArc = 180;
 			$subReactor->endArc = 360;
@@ -152,7 +152,7 @@ class Brostilli extends SmallStarBaseFourSections
 			$hangar = new Hangar(5,  8);
 			$hangar->startArc = 0;
 			$hangar->endArc = 180;
-			$this->addRightSystem($catapult);						
+			$this->addRightSystem($hangar);						
 			$subReactor = new SubReactorUniversal(5, 38, 0, 0);
 			$subReactor->startArc = 0;
 			$subReactor->endArc = 180;

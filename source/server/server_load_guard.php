@@ -86,7 +86,7 @@ register_shutdown_function(function() use ($keyGlobal, $keyIP) {
 });
 
 /*
-//Old server lock version, using server-side concurrency limiter, replaced with Redis method above 10.11.25 DK
+//Old server lock version, using server-side concurrency limiter
 // ---- 1️⃣ SKIP LIGHTWEIGHT REQUESTS by adding them here.
 $ignoredScripts = [];
 
