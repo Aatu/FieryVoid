@@ -37332,7 +37332,7 @@ var PlayerSettingsForm = function (_React$Component) {
                     React.createElement(
                         Disclaimer,
                         null,
-                        "Fiery Void is an unofficial fan-made adaptation inspired by Agents of Gaming's 'Babylon 5 Wars'. It is not endorsed by, affiliated with, or licensed by Warner Bros. or any other rights holders."
+                        "Fiery Void is an unofficial fan-made game inspired by Babylon 5 Wars. It is not endorsed by or affiliated with any official rights holders. All trademarks remain the property of their respective owners."
                     )
                 )
             );

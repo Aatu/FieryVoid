@@ -67,7 +67,7 @@ class PlayerSettingsForm extends React.Component {
                 <InputAndLabel label={"Toggle sound in Replay"} onChange={() => { }} onKeydown={this.getOnKeyDown.call(this, "ToggleSound")} value={this.getKey.call(this, "ToggleSound")} />     
                 <SubTitle>Visual</SubTitle>                           
                 <InputAndLabel placeholder="0" type="number" label={"Zoom level to change to strategic view"} onChange={this.getOnChange.call(this, "ZoomLevelToStrategic")} value={this.get.call(this, "ZoomLevelToStrategic")} />
-                <Disclaimer>Fiery Void is an unofficial fan-made adaptation inspired by Agents of Gaming's 'Babylon 5 Wars'. It is not endorsed by, affiliated with, or licensed by Warner Bros. or any other rights holders.</Disclaimer>                 
+                <Disclaimer>Fiery Void is an unofficial fan-made game inspired by Babylon 5 Wars. It is not endorsed by or affiliated with any official rights holders. All trademarks remain the property of their respective owners.</Disclaimer>                 
             </SubContainer>
         </Backdrop>)
     }
