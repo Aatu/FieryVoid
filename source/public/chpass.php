@@ -74,6 +74,13 @@
 			</form>
 		</div>
 
+<footer class="site-disclaimer" style="margin-top: 1000px ">
+  <p>
+DISCLAIMER — Fiery Void is an unofficial, fan-created work based on concepts from Agents of Gaming’s Babylon 5 Wars. 
+It is not affiliated with, endorsed by, or sponsored by Warner Bros., its subsidiaries, or any official rights holders. 
+All trademarks and copyrights remain the property of their respective owners.
+  </p>
+</footer>
 
 	</body>
 </html>
