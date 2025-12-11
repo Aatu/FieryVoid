@@ -43,7 +43,8 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                 <li><a href="#savedfleets">Saved Fleets</a></li>                                    
                 <li><a href="#stealth">Stealth Ships</a></li>
                 <li><a href="#terrain">Terrain</a></li>  
-                <li><a href="#useful">Useful Controls</a></li>                                                    
+                <li><a href="#useful">Useful Controls</a></li>
+                <li><a href="#disclaimer">Disclaimer</a></li>                                                                      
             </ul>     
       </li>                                                                 
         <!-- Add more sections here -->
@@ -315,7 +316,24 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         </ul>
         <a class="back-to-top" href="#top">↩ Back to Top</a>
 
+        <h3 id="disclaimer" >Disclaimer</h3>
+        <ul>
+            <p>This project is a non-commercial, fan-made adaptation inspired by Babylon 5 Wars, originally published by Agents of Gaming under license from Warner Bros. 
+                This website, its content, and the associated game are not affiliated with, authorized by, endorsed by, or connected in any way to Warner Bros., Agents of Gaming, or any other rights holders. 
+                ‘Babylon 5’ and all related names, logos, and material are trademarks and/or copyrighted properties of their respective owners..</p>
+        </ul>
+        <a class="back-to-top" href="#top">↩ Back to Top</a>        
+
   </section>
 </main>
+
+<footer class="site-disclaimer">
+  <p>
+DISCLAIMER — Fiery Void is an unofficial, fan-created work based on concepts from Agents of Gaming’s Babylon 5 Wars. 
+It is not affiliated with, endorsed by, or sponsored by Warner Bros., its subsidiaries, or any official rights holders. 
+All trademarks and copyrights remain the property of their respective owners.
+  </p>
+</footer>
+
 </body>
 </html>
