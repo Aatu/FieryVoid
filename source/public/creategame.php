@@ -200,73 +200,52 @@ print("<option value=\"".$i."\" ".$selected." >".$i."</option>");
             <option value="48">Zounds (48)</option>
         </select>
     </div>
-<!--
     <div class="slot" id="moonsDropdown" style="display:none;">
-        <label for="moonsSelect">SELECT NUMBER OF MOONS:</label>
-        <select id="moonsSelect" name="moonsCategories">
-            <option value="0">None</option>           
-            <option value="1">One Small</option>
-            <option value="2">Two Small</option> 
-            <option value="3">Three Small</option>
-            <option value="4">Four Small</option>                                    
-            <option value="5">One Medium</option>
-            <option value="6">Two Medium</option>
-            <option value="7">Three Medium</option>                         
-            <option value="8">One Medium / One Small</option>
-            <option value="9">One Medium / Two Small</option>
-            <option value="10">One Medium / Three Small</option>
-            <option value="11">One Large / One Small</option>
-            <option value="12">One Large / One Medium</option>
-            <option value="13">One Large / One Medium / One Small</option>                                               
+        <label for="moonsSmallSelect">SMALL MOONS:</label>
+        <select id="moonsSmallSelect" name="moonsSmall">
+            <option value="0">None</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>        
+        </select>
+        <br>
+        <label for="moonsMediumSelect">MEDIUM MOONS:</label>
+        <select id="moonsMediumSelect" name="moonsMedium">
+            <option value="0">None</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>        
+        </select>
+        <br>
+        <label for="moonsLargeSelect">LARGE MOONS:</label>
+        <select id="moonsLargeSelect" name="moonsLarge">
+            <option value="0">None</option>
+            <option value="1">1</option>
+            <option value="2">2</option>        
         </select>
     </div>
-</div>
--->
-
-<div class="slot" id="moonsDropdown" style="display:none;">
-    <label for="moonsSmallSelect">SMALL MOONS:</label>
-    <select id="moonsSmallSelect" name="moonsSmall">
-        <option value="0">None</option>
-        <option value="1">1</option>
-        <option value="2">2</option>
-        <option value="3">3</option>
-        <option value="4">4</option>
-        <option value="5">5</option>        
-    </select>
-    <br>
-    <label for="moonsMediumSelect">MEDIUM MOONS:</label>
-    <select id="moonsMediumSelect" name="moonsMedium">
-        <option value="0">None</option>
-        <option value="1">1</option>
-        <option value="2">2</option>
-        <option value="3">3</option>
-        <option value="4">4</option>        
-    </select>
-    <br>
-    <label for="moonsLargeSelect">LARGE MOONS:</label>
-    <select id="moonsLargeSelect" name="moonsLarge">
-        <option value="0">None</option>
-        <option value="1">1</option>
-        <option value="2">2</option>        
-    </select>
-</div>
+</div>    
 
 
-<div id="desperate" class="subpanel movementspacecontainer">
-    <div class="slot">
-        <div>
-            <input id="desperatecheck" type="checkbox" name="desperatecheck">USE 'DESPERATE' SCENARIO RULES
+    <div id="desperate" class="subpanel movementspacecontainer">
+        <div class="slot">
+            <div>
+                <input id="desperatecheck" type="checkbox" name="desperatecheck">USE 'DESPERATE' SCENARIO RULES
+            </div>    
         </div>
-     </div>
-    <div class="slot" id="desperateDropdown" style="display:none;">
-        <label for="desperateSelect">DESPERATE RULES APPLY TO:</label>
-        <select id="desperateSelect" name="desperateCategories">
-            <option value="-1">Both teams</option>
-            <option value="1">Team 1</option>
-            <option value="2">Team 2</option>
-        </select>
+        
+        <div class="slot" id="desperateDropdown" style="display:none;">
+            <label for="desperateSelect">DESPERATE RULES APPLY TO:</label>
+            <select id="desperateSelect" name="desperateCategories">
+                <option value="-1">Both teams</option>
+                <option value="1">Team 1</option>
+                <option value="2">Team 2</option>
+            </select>
+        </div>
     </div>
-</div>
                 <div class="createsubheader">TEAM 1:</div>
                 <div id="team1" class="subpanel slotcontainer">
                     
@@ -303,27 +282,27 @@ print("<option value=\"".$i."\" ".$selected." >".$i."</option>");
 
 
 
-<!--        <div id="gamespacetemplatecontainer">
-            <div class="slot" >
-                <div>
-                    <input id="gamespacecheck" type="checkbox" name="fixedgamespace">USE LIMITED GAME SPACE
-                </div>
-                <div class="gamespacedefinition" style="height:24px;vertical-align:middle;position:relative">
-                    <span class="smallSize headerSpan">GAME SPACE SIZE:</span>
-                    <span class="unlimitedspace">
-                        <span>Unlimited</span>
-                    </span>
-                    <span class="limitedspace invisible">
-                        <span>Width:</span>
-                        <input class ="spacex tinySize" data-validation="^-{0,1}[0-9]+$" data-default ="0" type="text" name="spacex" value="0">
-                        <span>Height:</span>
-                        <input class ="spacey tinySize" data-validation="^-{0,1}[0-9]+$" data-default ="0" type="text" name="spacey" value="0">     
-	   
+        <!--        <div id="gamespacetemplatecontainer">
+                <div class="slot" >
+                    <div>
+                        <input id="gamespacecheck" type="checkbox" name="fixedgamespace">USE LIMITED GAME SPACE
+                    </div>
+                    <div class="gamespacedefinition" style="height:24px;vertical-align:middle;position:relative">
+                        <span class="smallSize headerSpan">GAME SPACE SIZE:</span>
+                        <span class="unlimitedspace">
+                            <span>Unlimited</span>
+                        </span>
+                        <span class="limitedspace invisible">
+                            <span>Width:</span>
+                            <input class ="spacex tinySize" data-validation="^-{0,1}[0-9]+$" data-default ="0" type="text" name="spacex" value="0">
+                            <span>Height:</span>
+                            <input class ="spacey tinySize" data-validation="^-{0,1}[0-9]+$" data-default ="0" type="text" name="spacey" value="0">     
+        
 
-                    </span>
+                        </span>
+                    </div>
                 </div>
-            </div>
-        </div> -->
+            </div> -->
         
         <div id="slottemplatecontainer" style="display:none;">
             <div class="slot" >
@@ -362,7 +341,7 @@ print("<option value=\"".$i."\" ".$selected." >".$i."</option>");
                 </div>
             </div>
         </div>
-    </section>
+        </section>
 
         <div id="globalchat" class="panel large create" style="height:200px;">
         <?php 
