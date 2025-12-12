@@ -24,7 +24,8 @@ $fileBase = __DIR__ . '/source/public/static/ships';
 $factionNo = 0;
 
 //// ─── Fetch All Factions ─────────────────────────────────────────────
-$allFactions = ShipLoader::getAllFactions();
+//$allFactions = ShipLoader::getAllFactions();
+$allFactions = ShipLoader::getAllFactionsStatic(); //Changed to static method - 12.12.25
 if (!$allFactions) {
     exit("<b>Error:</b> No factions found.");
 }
@@ -33,7 +34,8 @@ if (!$allFactions) {
 foreach ($allFactions as $factionName) {
     $data = [];
 
-    $shipsCurr = ShipLoader::getAllShips($factionName);
+    //$shipsCurr = ShipLoader::getAllShips($factionName);
+    $shipsCurr = ShipLoader::getAllShipsStatic($factionName); //Changed to static method - 12.12.25   
     echo "<br/><br/><strong>$factionName</strong>:<br/>\n";
 
     foreach ($shipsCurr as $factionKey => $shipsOfFaction) {
