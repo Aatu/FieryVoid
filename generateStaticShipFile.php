@@ -87,6 +87,7 @@ $fileName = $fileBase . '.php';
 $includeText = '';
 for ($i=0;$i<=$factionNo;$i++){
 	$includeText .= '<script src="static/ships' . $i . '.js"></script>';
+	//$includeText .= '<script defer src="static/ships' . $i . '.js"></script>' . PHP_EOL;   Alternative defer method that's slower but more stable - DK 	
 }
 file_put_contents($fileName, $includeText);
 
