@@ -1299,7 +1299,8 @@ window.gamedata = {
         var ships = gamedata.ships.filter(function(ship) {
             return !shipManager.isDestroyed(ship)
                    && !gamedata.isTerrain(ship.shipSizeClass, ship.userid) 
-                   && !gamedata.hasSlotSurrendered(ship.slot); //Remove surrendered ships
+                   && !gamedata.hasSlotSurrendered(ship.slot)
+                   && shipManager.getTurnDeployed(ship) >= gamedata.turn;
         });
        
 
