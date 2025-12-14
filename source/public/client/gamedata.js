@@ -1300,7 +1300,7 @@ window.gamedata = {
             return !shipManager.isDestroyed(ship)
                    && !gamedata.isTerrain(ship.shipSizeClass, ship.userid) 
                    && !gamedata.hasSlotSurrendered(ship.slot)
-                   && shipManager.getTurnDeployed(ship) >= gamedata.turn;
+                   && shipManager.getTurnDeployed(ship) <= gamedata.turn;
         });
        
 
