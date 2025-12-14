@@ -1291,7 +1291,7 @@ class MindriderEngine extends Engine implements SpecialAbility{
 					//Need to temporarily lower/raise shield on turn Contraction happens.  Will reset at end of turn based on Generator value.
 					foreach ($this->individualNotes as $currNote) {
 						if($currNote->turn == $gamedata->turn){
-							$system->applyContraction($ship, $gamedata, -$currNote->notevalue);					
+							$system->absorbDamage($ship, $gamedata, -$currNote->notevalue);					
 						}
 					}
 				}

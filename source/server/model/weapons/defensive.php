@@ -1084,19 +1084,6 @@ class ThoughtShield extends Shield implements DefensiveSystem {
 			$this->damage[] = $damageEntry;
 		}
 		
-		public function applyContraction($ship, $gamedata, $value){
-			//Check if Contraction has already been applied this turn
-			foreach($this->damage as $damage){
-				if($damage->turn != $gamedata->turn) continue;
-				if($damage->damageclass == "Contraction") return; //Already applied
-			}
-
-			//If not, apply it
-			$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $value, 0, 0, -1, false, false, "Contraction", "Contraction");
-			$damageEntry->updated = true;
-			$this->damage[] = $damageEntry;
-		}
-		
 
 		private function checkShieldDeduction($gamedata, $fireOrder){
 			$deductShieldRating = true;
@@ -1279,21 +1266,9 @@ class ThoughtShield extends Shield implements DefensiveSystem {
 				
 		//actual change(damage) entry
 		if($damageValue != 0){
-			//Check for duplicate application
-			$alreadyApplied = false;
-			foreach($this->damage as $damage){
-				if($damage->turn != $gamedata->turn) continue;
-				if($damage->damageclass == "shieldChange"){
-					$alreadyApplied = true;
-					break;
-				}
-			}
-			
-			if(!$alreadyApplied){
-				$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $damageValue, 0, 0, -1, false, false, 'shieldChange', 'shieldChange');
-				$damageEntry->updated = true;
-				$this->damage[] = $damageEntry;	
-			}
+		$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $damageValue, 0, 0, -1, false, false, 'shieldChange', 'shieldChange');
+		$damageEntry->updated = true;
+		$this->damage[] = $damageEntry;	
 		}	
         //and immediately delete notes themselves, they're no longer needed (this will not touch the database, just memory!)
         $this->individualNotes = array();
