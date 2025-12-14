@@ -723,7 +723,7 @@ const getFiringModes = (ship, system, changeFiringMode, allChangeFiringMode) => 
 		}
 		
 		var textTitle = "set mode " + firingMode + " (R = mass)"; 
-		return <Button title={textTitle} onClick={changeFiringMode} onContextMenu={allChangeFiringMode}  img={img}>{firingMode.substring(0, 1)}</Button>;
+		return <Button title={textTitle} onClick={changeFiringMode} onContextMenu={allChangeFiringMode}  img={img}>{firingMode.substring(0, system.modeLetters)}</Button>;
 	}
 }
 
@@ -747,7 +747,7 @@ const getFiringModesCurr = (ship, system) => {
 		}
 		
 		var textTitle = "current mode: " + firingMode; 
-		return <Button title={textTitle} img={img}>{firingMode.substring(0, 1)}</Button>;
+		return <Button title={textTitle} img={img}>{firingMode.substring(0, system.modeLetters)}</Button>;
 	}
 } //endof getFiringModesCurr
 
