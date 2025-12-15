@@ -37332,7 +37332,7 @@ var PlayerSettingsForm = function (_React$Component) {
                     React.createElement(
                         Disclaimer,
                         null,
-                        "Fiery Void is an unofficial fan-made game inspired by Agent of Gaming's 'Babylon 5 Wars'. It is not endorsed by, affiliated with, or licensed by Warner Bros. or any other rights holders."
+                        "Fiery Void is an unofficial fan-made game inspired by Babylon 5 Wars. It is not endorsed by or affiliated with any official rights holders. All trademarks remain the property of their respective owners."
                     )
                 )
             );
@@ -41394,7 +41394,7 @@ var getFiringModes = function getFiringModes(ship, system, changeFiringMode, all
 		return React.createElement(
 			Button,
 			{ title: textTitle, onClick: changeFiringMode, onContextMenu: allChangeFiringMode, img: img },
-			firingMode.substring(0, 1)
+			firingMode.substring(0, system.modeLetters)
 		);
 	}
 };
@@ -41422,7 +41422,7 @@ var getFiringModesCurr = function getFiringModesCurr(ship, system) {
 		return React.createElement(
 			Button,
 			{ title: textTitle, img: img },
-			firingMode.substring(0, 1)
+			firingMode.substring(0, system.modeLetters)
 		);
 	}
 }; //endof getFiringModesCurr
