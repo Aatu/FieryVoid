@@ -412,8 +412,12 @@ window.shipWindowManager = {
 				notes.push("&nbsp;limited: " + ship.limited + "%");
 			}
 
-			if (ship.variantOf != '') {
-				notes.push("&nbsp;" + ship.occurence + ' variant of ' + ship.variantOf);
+			if (ship.variantOf !== '') {
+				const occ = ship.occurence
+					? ship.occurence.charAt(0).toUpperCase() + ship.occurence.slice(1)
+					: '';
+
+				notes.push("&nbsp;" + occ + ' variant of ' + ship.variantOf);
 			}
 
 			if (ship.isd != '') {

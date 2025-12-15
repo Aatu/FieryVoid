@@ -16,8 +16,9 @@ $factionTest = ShipLoader::getAllShips("Minbari");
 
 
 //$ships = ShipLoader::getAllShips(null);
-$allFactions = ShipLoader::getAllFactions();
 
+//$allFactions = ShipLoader::getAllFactions(); 
+$allFactions = ShipLoader::getAllFactionsStatic(); //Changed to static method - 12.12.25
 
 /* original - everything in one file
 foreach ($ships as $faction) {
@@ -46,8 +47,9 @@ $factionNo = 0;
 foreach($allFactions as $factionName){
 	$data = [];
 	
-	$shipsCurr = ShipLoader::getAllShips($factionName);
-	
+	//$shipsCurr = ShipLoader::getAllShips($factionName);
+	$shipsCurr = ShipLoader::getAllShipsStatic($factionName); //Changed to static method - 12.12.25
+
 	print($factionName);
 	print("\n");
 
@@ -85,6 +87,7 @@ $fileName = $fileBase . '.php';
 $includeText = '';
 for ($i=0;$i<=$factionNo;$i++){
 	$includeText .= '<script src="static/ships' . $i . '.js"></script>';
+	//$includeText .= '<script defer src="static/ships' . $i . '.js"></script>' . PHP_EOL;   Alternative defer method that's slower but more stable - DK 	
 }
 file_put_contents($fileName, $includeText);
 
