@@ -583,11 +583,15 @@ window.ShipIcon = function () {
                     { x: 0.5, y: Math.sqrt(3) / 2 },          // 300°
                 ];
                 // Arc start/end relative to ship's facing
-                let arcStart = arcs.start; // 0..360 relative to ship forward
-                let arcEnd = arcs.end;
-                //let arcStart = 120; // 0..360 relative to ship forward
-                //let arcEnd   = 240;    
-                if (arcEnd < arcStart) arcEnd += 360;
+                let arcStart = arcs.start % 360;
+                let arcEnd   = arcs.end   % 360;
+                
+                if (arcStart === arcEnd) {
+                    arcStart = 0;
+                    arcEnd = 360;
+                } else if (arcEnd <= arcStart) {
+                    arcEnd += 360;
+                }
 
                 // Helper to create rounded rectangle
                 function createRoundedRectShape(width, height, radius) {

@@ -1644,31 +1644,33 @@ Nonetheless two copies of Particle Projector lines now exist in FV, in customNex
     }//End of Light Particle Projector
 
     
-/* //Started to think about making PentagonArray pulse against fighters   
+ //New version that switches to Pulse damage against fighters - DK Dec 25  
 class PentagonArray extends Raking{
 	public $name = "PentagonArray";
 	public $displayName = "Pentagon Array";
 	public $iconPath = "PentagonArray.png";
-	//public $animation = "bolt";
-	public $animation = "laser"; //by the fluff it's five LPBs firing a hail of bolts, but damage is rolled and resolved as a single raking attack - so beam animation seems more appropriate
+	public $animation = "bolt";
+	//public $animation = "laser"; //by the fluff it's five LPBs firing a hail of bolts, but damage is rolled and resolved as a single raking attack - so beam animation seems more appropriate
 	public $animationColor = array(255, 153, 51);
+    public $animationExplosionScale = 0.2; //The potential damage makes this a bit too big, set manually
 
 	public $rakes = array();
-	public $priority = 8; //light Raking weapon, effectively
+	public $priority = 6; //light Raking weapon, effectively
 	public $loadingtime = 1;
 	public $rangePenalty = 1; //-1 per hex
-	public $fireControl = array(3, 3, 3); // fighters, <mediums, <capitals
+	public $fireControl = array(3, 3, 3); // fighters, <mediums, capitals
 	public $intercept = 5; //interception of -5
 		
-	public $firingModes = array(1=>'Raking');
+	public $firingModes = array(1=>'Raking'); //Actually switch to Pulse against fighters!
 
-	public $damageType = "Raking"; 
+	public $damageType = "Raking"; //Actually switch to Pulse against fighters!
 	public $weaponClass = "Particle";
 
     public $grouping = 0;
     public $maxpulses = 5;
-    public $maxpulsesArray = array();
-    public $rof = 4;
+    public $rof = 1;
+    private $targetedFighters = false; //tracks if fighters were targetd for damage roll.
+    private $fighterArmourIgnored = array(); //Tracks armour already dealt with when doing pulse damage to fighters
 
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
 		if ( $maxhealth == 0 ) $maxhealth = 8;
@@ -1682,11 +1684,15 @@ class PentagonArray extends Raking{
 			return $rakesize;
 	}
 
+	public function rollPulses($turn, $needed, $rolled){
+		return 5; //Always 5 pulses/rakes against fighters
+	}
+
     public function fire($gamedata, $fireOrder){
         $target = $gamedata->getShipById($fireOrder->targetid);        
         if($target instanceof FighterFlight){
             $this->damageType = 'Pulse';
-            $fireOrder->damageClass = 'Fighter';                        
+            $this->targetedFighters = true;                        
         }
 
         parent::fire($gamedata, $fireOrder);
@@ -1694,7 +1700,7 @@ class PentagonArray extends Raking{
 
 	public function getDamage($fireOrder){
         $damage = 0;
-        if($fireOrder->damageClass == 'Fighter'){
+        if($this->targetedFighters){
             $damage = Dice::d(10);
         }else{
             $this->rakes = array();
@@ -1717,6 +1723,60 @@ class PentagonArray extends Raking{
         }    
 		return $damage;
 	}			
+
+	protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location = null)
+    {
+		if ($system->getRemainingHealth() > 0) { //Vree Structure systems are considered not there despite not being formally destroyed
+            $damage = floor($damage);//make sure damage is a whole number, without fractions!
+            $armour = $this->getSystemArmourComplete($target, $system, $gamedata, $fireOrder, $pos); //handles standard and Adaptive armor, as well as Advanced armor and weapon class modifiers
+			// ...if armor-related modifications are needed, they should extend appropriate method (Complete or Base, as Adaptive should not be affected)
+			// ...and doDamage should always call Complete
+
+
+            //armor may be ignored for some reason... usually because of Raking mode :)
+            $armourIgnored = 0;
+            $fighterArmourIgnored = 0;
+            if (isset($fireOrder->armorIgnored[$system->id])) {
+                $armourIgnored = $fireOrder->armorIgnored[$system->id];
+                $armour = $armour - $armourIgnored;
+            }
+
+            //Against fighters we have to keep a separate tracker since it hits in Pulse mode. 	
+            if ($target instanceof FighterFlight) {		
+                if (isset($this->fighterArmourIgnored[$system->id])) {		
+                    $fighterArmourIgnored = $this->fighterArmourIgnored[$system->id];
+                    $armour = $armour - $fighterArmourIgnored;          
+                }        
+            }     
+
+            $armour = max($armour, 0);
+
+			//returned array: dmgDealt, dmgRemaining, armorPierced	
+			$damage = $this->beforeDamagedSystem($target, $system, $damage, $armour, $gamedata, $fireOrder);
+			$effects = $system->assignDamageReturnOverkill($target, $shooter, $this, $gamedata, $fireOrder, $damage, $armour, $pos, $damageWasDealt); //Also applies armor pierced for sustained shots  - DK 02.25
+			$this->onDamagedSystem($target, $system, $effects["dmgDealt"], $effects["armorPierced"], $gamedata, $fireOrder);//weapons that do effects on hitting something
+			$damage = $effects["dmgRemaining"];
+			if ($this->damageType == 'Raking'){ //note armor already pierced so further rakes have it easier. All Sustained weapons are currently raking, so they can use standard method here - DK
+				$armourIgnored = $armourIgnored + $effects["armorPierced"]; 
+				$fireOrder->armorIgnored[$system->id] = $armourIgnored;
+			}			
+
+            if ($target instanceof FighterFlight) {	 //note armor for the separate fighter tracker - DK
+				$fighterArmourIgnored = $fighterArmourIgnored + $effects["armorPierced"]; 
+				$this->fighterArmourIgnored[$system->id] = $fighterArmourIgnored;
+			}	
+
+            $damageWasDealt = true; //actual damage was done! might be relevant for overkill allocation
+        }
+
+        if (($damage > 0) || (!$damageWasDealt)) {//overkilling!
+            $overkillSystem = $this->getOverkillSystem($target, $shooter, $system, $fireOrder, $gamedata, $damageWasDealt, $location);
+            if ($overkillSystem != null)
+                $this->doDamage($target, $shooter, $overkillSystem, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location);
+        }
+
+    } //function doDamage
+
 		
 	public function setMinDamage(){
 		$this->minDamage = 5;
@@ -1729,52 +1789,12 @@ class PentagonArray extends Raking{
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);
 		$this->data["Special"] = "Causes always 5 rakes, each dealing 1d10 damage.";
-		$this->data["Special"] .= "<br>Can sweep multiple fighters, but single rake will not overkill into another fighter."; //simplification, every rake should be assigned separately - but FV wouldn't actually recognize benefit of spreading damage among multiple fighters unless toughness+armor>=10 (eg. Tzymm and larger)
-	}
+		$this->data["Special"] .= "<br>Against fighters weapon deals damage in Pulse mode, with 5 pulses causing 1d10 damage each."; 
+	}    
 
-	//if target is fighter and damage was already dealt (eg. it's overkill):
-	// - account for rake size (single rake cannot overkill)
-	// - account for shields (again - separate fighter is NOT same shield pierced)
-	protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location = null)
-    {
-        
-		if ($damageWasDealt && ($target instanceof FighterFlight)) {
-			//account for proper rake size
-			$acceptedDamage = 0;
-			$tryingDamage = 0;
-			for($i=4;$i>=0;$i--){//starting with last possible rake and going backwards 
-				if (isset($this->rakes[$i])){
-					$tryingDamage += $this->rakes[$i];
-					if ($tryingDamage <= $damage){ //damage fits remaining rakes
-						$acceptedDamage = $tryingDamage;
-					} else {//too much!
-						$tryingDamage = 1000; //just in case
-						break; //don't check further rakes, obviously
-					}
-				}
-			}			
-			$damage = $acceptedDamage; //this much damage fits remaining rake sizes! any more was part of rake already allocated to previous fighter
-			//account for target fighter's shields (and similar damage-reducing mechanisms that affect entire shot)
-			$damage -= $target->getDamageMod($shooter, $pos, $gamedata->turn, $this);
-			$damage = max(0,$damage);
-		}
-		//then standard :)
-		parent::doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location );
-    } //function doDamage
-    
-	//this weapon CAN overkill into another fighter in flight!
-	/*protected function getOverkillSystem($target, $shooter, $system, $fireOrder, $gamedata, $damageWasDealt, $location = null){
-		if ($target instanceof FighterFlight){//if target is fighter flight (usually no overkill), overkill into another fighter instead
-			$newTarget = $target->getHitSystem($shooter, $fireOrder, $this, $gamedata, $location);
-			return $newTarget;
-		}else{ //standard
-			return parent::getOverkillSystem($target, $shooter, $system, $fireOrder, $gamedata, $damageWasDealt, $location);
-		}
-	}
-    *//*
 } //end of class PentagonArray
-*/
-	
+
+/* //OLD VERSION - Keep until I'm sure new version works ok!	
 class PentagonArray extends Raking{
 	public $name = "PentagonArray";
 	public $displayName = "Pentagon Array";
@@ -1883,7 +1903,7 @@ class PentagonArray extends Raking{
 	}
 
 } //end of class PentagonArray
-
+*/
 	
 	
 	

@@ -132,6 +132,7 @@ class Weapon extends ShipSystem
 	public $preFires = false; //Denotes whether weapon fires in pre-firing phase on normal firing phase
     public $firingMode = 1;
     public $firingModes = array(1 => "Standard"); //just a convenient name for firing mode
+    public $modeLetters = 1;//Default to show only first letter of alt firing modes.  Up to 3 letter looks ok.
     public $damageType = ""; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
     public $damageTypeArray = array();
     public $weaponClass = "Particle"; //MANDATORY (first letter upcase) weapon class - overrides $this->data["Weapon type"] if set! Make Particle default to prevent AA bugs when "" passed.
