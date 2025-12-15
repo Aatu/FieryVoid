@@ -158,6 +158,90 @@ GravityNet.prototype.calculateSpecialHitChanceMod = function (shooter, target) {
 	return mod; 
 };
 
+GravityNet.prototype.doMultipleFireOrders = function (shooter, target, system) {
+    
+    var shotsOnTarget = 1; //we're only ever allocating one shot at a time for this weapon in Split mode.
+
+    if (this.fireOrders.length > 1) {
+        return;
+    } 
+
+    var fireOrdersArray = []; // Store multiple fire orders
+
+    for (var s = 0; s < shotsOnTarget; s++) {
+        var fireid = shooter.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
+        var calledid = -1; //No called shots.     
+
+        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
+        if(chance < 1) continue;
+
+        var fire = {
+            id: fireid,
+            type: 'ballistic',
+            shooterid: shooter.id,
+            targetid: target.id,
+            weaponid: this.id,
+            calledid: calledid,
+            turn: gamedata.turn,
+            firingMode: this.firingMode,
+            shots: 1,
+            x: "null",
+            y: "null",
+            damageclass: 'Laser', 
+            chance: chance,
+            hitmod: 0,
+            notes: "Split"
+        };
+        
+        fireOrdersArray.push(fire); // Store each fire order
+    }
+        //shipWindowManager.setDataForSystem(ship, weapon);
+    
+
+
+    return fireOrdersArray; // Return all fire orders
+};    
+
+GravityNet.prototype.doMultipleHexFireOrders = function (shooter, hexpos) {
+    
+    var shotsOnTarget = 1; //we're only ever allocating one shot at a time for this weapon in Split mode.
+
+    if (this.fireOrders.length > 1) {
+        return;
+    } 
+
+    var fireOrdersArray = []; // Store multiple fire orders
+
+    for (var s = 0; s < shotsOnTarget; s++) {
+            var fireid = shooter.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
+            var fire = {
+                id: fireid,
+                type: 'ballistic',
+                shooterid: shooter.id,
+                targetid: -1,
+                weaponid: this.id,
+                calledid: -1,
+                turn: gamedata.turn,
+                firingMode: this.firingMode,
+                shots: this.defaultShots,
+                x: hexpos.q,
+                y: hexpos.r,
+                damageclass: 'Targeter', 
+                notes: "split"                
+            };
+        this.fireOrders.push(fire);
+    }
+
+    this.hextarget = false;
+
+    return fireOrdersArray; // Return all fire orders
+};  
+
+GravityNet.prototype.checkFinished = function () {
+	if(this.fireOrders.length > 1) return true;
+    return false;
+};
+
 var LightGraviticBolt = function LightGraviticBolt(json, ship) {
     Gravitic.call(this, json, ship);
 };

@@ -1039,7 +1039,10 @@ class GravityNet extends Weapon implements SpecialAbility{
     public $animation = "Torpedo";
     public $animationColor = array(0, 255, 255);	
     public $animationExplosionScale = 0.3; //single hex explosion
-    public $priority = 1;    
+    public $priority = 1; 
+	public $hextarget = true; //Added
+	public $hidetarget = true;
+	public $ballistic = true;   
 	public $specialAbilities = array("PreFiring");
 	public $specialAbilityValue = true; //so it is actually recognized as special ability!  		
 	public $damageType = "Standard"; //irrelevant, really
@@ -1048,16 +1051,10 @@ class GravityNet extends Weapon implements SpecialAbility{
 	public $doNotIntercept = true; //although I don't think a weapon exists that could intercept it...
 	public $loadingtime = 2;
     public $rangePenalty = 1;
-    protected $canTargetAll = true; //Allows weapon to target allies AND enemies, pass to Front End in strpForJson()
-	//public $firingModes = array(
-	    //1 => "Clockwise",
-        //2 => "Anti-Clockwise"
-	//);
+    protected $canTargetAll = true; //Allows weapon to target allies AND enemies, pass to Front End in strpForJson()	
     public $fireControl = array(1, 2, 3); // fighters, <mediums, <capitals 
-    public $firingModes = array(
-		1 => "Gravity Net Move"
-	);
 	public $preFires = true;
+    public $canSplitShots = true; //this might not be needed
     public $specialHitChanceCalculation = true;			
 	public $repairPriority = 6;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
 	    
@@ -1112,7 +1109,15 @@ class GravityNet extends Weapon implements SpecialAbility{
     
     protected function beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata)
     {
-        Debug::log(json_encode($target));
+        $lastMove = $target->getLastMovement();
+        Debug::log(json_encode($pos, true));
+        
+        //Create new movement order for target.
+        //$id, $type, OffsetCoordinate $position, $xOffset, $yOffset, $speed, $heading, $facing, $pre, $turn, $value, $at_initiative)
+        $gravTranslation = new MovementOrder(null, "prefire", new OffsetCoordinate(0, 1), 0, 0, $lastMove->speed, $lastMove->heading, $lastMove->facing, false, $gamedata->turn, 0, 0);
+
+		//Add shifted movement order to database
+		Manager::insertSingleMovement($gamedata->id, $target->id, $gravTranslation);
     }
 
 
