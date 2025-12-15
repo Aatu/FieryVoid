@@ -517,26 +517,26 @@ HeavyPsionicLance.prototype.initBoostableInfo = function () {
     }	
 
     this.data.Boostlevel = shipManager.power.getBoost(this);	
-	
+	//Manually set system data window
     switch (shipManager.power.getBoost(this)) {
         case 0:
-            this.data["Damage"] = '66 - 120';
+            this.data["Damage"] = '66-120';
             this.data["Boostlevel"] = '0';
             break;
         case 1:
-            this.data["Damage"] = '76 - 148';
+            this.data["Damage"] = '76-148';
             this.data["Boostlevel"] = '1';
             break;
         case 2:
-            this.data["Damage"] = '86 - 176';
+            this.data["Damage"] = '86-176';
             this.data["Boostlevel"] = '2';
             break;
         case 3:
-            this.data["Damage"] = '96 - 204';
+            this.data["Damage"] = '96-204';
             this.data["Boostlevel"] = '3';
             break;
         default:
-            this.data["Damage"] = '66 - 120';
+            this.data["Damage"] = '66-120';
             this.data["Boostlevel"] = '0';
             break;
 	}
@@ -582,19 +582,19 @@ PsionicLance.prototype.initBoostableInfo = function () {
     	
     switch (shipManager.power.getBoost(this)) {
         case 0:
-            this.data["Damage"] = '38 - 65';
+            this.data["Damage"] = '38-65';
             this.data["Boostlevel"] = '0';
             break;
         case 1:
-            this.data["Damage"] = '40 - 85';
+            this.data["Damage"] = '40-85';
             this.data["Boostlevel"] = '1';
             break;
         case 2:
-            this.data["Damage"] = '42 - 105';
+            this.data["Damage"] = '42-105';
             this.data["Boostlevel"] = '2';
             break;
         default:
-            this.data["Damage"] = '38 - 65';
+            this.data["Damage"] = '38-65';
             this.data["Boostlevel"] = '0';
             break;
     }
