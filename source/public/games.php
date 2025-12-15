@@ -84,15 +84,15 @@ $games = json_encode(Manager::getTacGames($userid), JSON_NUMERIC_CHECK);
     </div>
 
     <div class="resources">
-      <h3>Latest Updates — November 2025</h3>
+      <h3>Latest Updates — December 2025</h3>
       <ul class="updates-list">
         <li><strong>Torvalus Speculators</strong> - Transverse Drive added to complete the release of the new Torvalus Faction.</li>
-        <li><strong>Gravitic Shifter</strong> - Brakiri Gravitic Shifter added to relevant ships, and semi-custom versions removed.</li>
-        <li><strong>Proximity Laser Rework</strong> - Now remade as a single weapon, but with all the same boomarang energy as before!</li>                                    
-        <li><strong>Pre-Firing Phase</strong> - New game phase added to Fiery Void's combat order.  Currently, only Transverse Drive and Gravitic Shifters use this feature.</li>
+        <li><strong>Pre-Firing Phase</strong> - New game phase added to Fiery Void's combat order.  Currently, only Transverse Drive and Gravitic Shifters use this feature.</li>          
+        <li><strong>Shadow Slicers</strong> - Firing modes simplified, Heavy Slicer now has TT accurate firing arcs.</li>
+        <li><strong>Pentagon Array</strong> - Reworked to be same as tabletop e.g. Pulse mode against fighters.</li>                                    
         <li><strong>Critical hits</strong> - Critical hits are now displayed in Combat Log and Replay animations.
         <li><strong>Terrain Collisions</strong> - Terrain collisions will now occur, and cause damage, before the Firing Phase.</li>                                            
-        <li><strong>General Fixes</strong> - Further Server Stability fixes, plus many, many other small fixes. Thanks for all the reports!</li>                                                    
+        <li><strong>General Fixes</strong> - Thought Shield fixes, plus many other small fixes. Thanks for all the reports!</li>                                                    
         <!--<li><strong>6 Jun</strong> - Overlay colors, deployment zone tweaks, UI fixes. Pulsar mine fixed, tooltip/text readability improved.</li>-->
       </ul>
     </div>
@@ -139,7 +139,7 @@ $games = json_encode(Manager::getTacGames($userid), JSON_NUMERIC_CHECK);
 <footer class="site-disclaimer">
   <p>
 DISCLAIMER — Fiery Void is an unofficial, fan-created work based on concepts from Agents of Gaming’s Babylon 5 Wars. 
-It is not affiliated with, endorsed by, or sponsored by Warner Bros., its subsidiaries, or any official rights holders. 
+It is not affiliated with, endorsed by, or sponsored by any official rights holders. 
 All trademarks and copyrights remain the property of their respective owners.
   </p>
 </footer>

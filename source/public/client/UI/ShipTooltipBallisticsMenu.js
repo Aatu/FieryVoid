@@ -79,16 +79,44 @@ window.ShipTooltipBallisticsMenu = function () {
             var hitchanceNormalMode = ball.fireOrder.chance ?? ball.fireOrder.needed;
         
             // Build hitchance list manually, based on number of ballistics.
-            let hitchanceList = [];
+            /*let hitchanceList = [];
             for (let i = 0; i < ballistics.length; i++) {
                 if(ball.weapon.id == ballistics[i].fireOrder.weaponid && ball.shooter.id == ballistics[i].fireOrder.shooterid){
                     let hc = ballistics[i].fireOrder.chance ?? ballistics[i].fireOrder.needed;
                     hitchanceList.push(hc);
                 }    
             }
-        
-            const minHitchance = Math.min(...hitchanceList);
-            const maxHitchance = Math.max(...hitchanceList);
+            */
+            let hitchanceLists = {};   // { firingMode: [hc, hc, ...] }
+
+            for (let i = 0; i < ballistics.length; i++) {
+                const b = ballistics[i];
+
+                if (ball.weapon.id === b.fireOrder.weaponid &&
+                    ball.shooter.id === b.fireOrder.shooterid) {
+
+                    const mode = b.fireOrder.firingMode;
+                    const hc = b.fireOrder.chance ?? b.fireOrder.needed;
+
+                    // Create the array if it doesn't exist yet
+                    if (!hitchanceLists[mode]) {
+                        hitchanceLists[mode] = [];
+                    }
+
+                    // Push the hit chance into the array for this firing mode
+                    hitchanceLists[mode].push(hc);
+                }
+            }
+
+            // Get the list for this ballistic’s firing mode
+            const mode = ball.fireOrder.firingMode;
+            const list = hitchanceLists[mode] ?? [];   // fallback empty array
+
+            // Compute min/max safely
+            const minHitchance = list.length > 0 ? Math.min(...list) : null;
+            const maxHitchance = list.length > 0 ? Math.max(...list) : null;
+            //const minHitchance = Math.min(...hitchanceList);
+            //const maxHitchance = Math.max(...hitchanceList);
         
             if (ball.fireOrder.type == "normal" && amount > 1 && minHitchance !== maxHitchance) {
                 jQuery(".hitchange", ballElement).html('- Between: ' + minHitchance + '% - ' + hitchanceNormalMode + '%');

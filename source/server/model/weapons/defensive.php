@@ -818,9 +818,9 @@ class ThirdspaceShield extends Shield implements DefensiveSystem { //defensive v
 			return $this->getTotalDamage();
 		}
 
-		public function setShields($ship,$turn,$value){
+		public function setShields($ship,$turn, $phase, $value){
 			$damageEntry = new DamageEntry(-1, $ship->id, -1, $turn, $this->id, $value, 0, 0, -1, false, false, "SetShield!", "ThirdspaceShield");
-			$damageEntry->updated = true;
+			if($phase == 4) $damageEntry->updated = true; //Don't duplicate a damage save in PreFiring phase.
 			$this->damage[] = $damageEntry;
 		}
 
@@ -960,7 +960,7 @@ class ThirdspaceShield extends Shield implements DefensiveSystem { //defensive v
 			
 			$adjustment = $currentRating - $startRating;
 					    	
-			$this->setShields($ship, $gamedata->turn, $adjustment);
+			$this->setShields($ship, $gamedata->turn, $gamedata->phase, $adjustment);
 		}
 
 		
@@ -973,7 +973,7 @@ class ThirdspaceShield extends Shield implements DefensiveSystem { //defensive v
 		//actual change(damage) entry
 		if($damageValue != 0){
 			$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $damageValue, 0, 0, -1, false, false, 'shieldChange', 'shieldChange');
-			$damageEntry->updated = true;
+			if($gamedata->phase == 4) $damageEntry->updated = true; //Don't duplicate a damage save in PreFiring phase.
 			$this->damage[] = $damageEntry;	
 		}	
         //and immediately delete notes themselves, they're no longer needed (this will not touch the database, just memory!)
@@ -1068,19 +1068,32 @@ class ThoughtShield extends Shield implements DefensiveSystem {
 			return $this->getTotalDamage();
 		}
 
-		public function setShields($ship,$turn,$adjustment){//On Turn 1, reduce shields to their correct starting amount.
+		public function applyContraction($ship, $gamedata, $value){
+			//Check if Contraction has already been applied this turn
+			foreach($this->damage as $damage){
+				if($damage->turn != $gamedata->turn) continue;
+				if($damage->damageclass == "Contraction") return; //Already applied
+			}
+
+			//If not, apply it
+			$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $value, 0, 0, -1, false, false, "Contraction", "Contraction");
+			if($gamedata->phase == 4) $damageEntry->updated = true; //Don't duplicate a damage save in PreFiring phase.
+			$this->damage[] = $damageEntry;
+		}
+
+		public function setShields($ship,$turn, $phase, $adjustment){//On Turn 1, reduce shields to their correct starting amount.
 			//For Mind's Eye, need to adjust on Turn 1 if Contraction is used to change shields.
 			$mindriderEngine = $ship->getSystemByName("MindriderEngine");			    
 			if($mindriderEngine) $adjustment -= $mindriderEngine->contraction;		
 
 			$damageEntry = new DamageEntry(-1, $ship->id, -1, $turn, $this->id, $adjustment, 0, 0, -1, false, false, "SetShield!", "ThoughtShield");
-			$damageEntry->updated = true;
+			if($phase == 4) $damageEntry->updated = true; //Don't duplicate a damage save in PreFiring phase.
 			$this->damage[] = $damageEntry;
 		}
 		
 		public function absorbDamage($ship,$gamedata,$value, $fireOrderid = -1){ //or dissipate, with negative value
 			$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $value, 0, 0, -1, false, false, "Absorb/Regenerate!", "ThoughtShield");
-			$damageEntry->updated = true;
+			if($gamedata->phase == 4) $damageEntry->updated = true; //Don't duplicate a damage save in PreFiring phase.
 			$this->damage[] = $damageEntry;
 		}
 		
@@ -1254,7 +1267,7 @@ class ThoughtShield extends Shield implements DefensiveSystem {
 				}			
 			}
 			//Actually adjust shields		    	
-			$this->setShields($ship, $gamedata->turn, $adjustment);
+			$this->setShields($ship, $gamedata->turn, $gamedata->phase, $adjustment);
 		}
 		
 		//Now make any manual readjustments the player has made to shield strengths					
@@ -1267,7 +1280,7 @@ class ThoughtShield extends Shield implements DefensiveSystem {
 		//actual change(damage) entry
 		if($damageValue != 0){
 		$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $damageValue, 0, 0, -1, false, false, 'shieldChange', 'shieldChange');
-		$damageEntry->updated = true;
+		if($gamedata->phase == 4) $damageEntry->updated = true; //Don't duplicate a damage save in PreFiring phase.
 		$this->damage[] = $damageEntry;	
 		}	
         //and immediately delete notes themselves, they're no longer needed (this will not touch the database, just memory!)

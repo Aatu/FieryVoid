@@ -848,15 +848,14 @@ class SuperHeavyMolecularDisruptor extends Raking
 
 		public $factionAge = 3;//Ancient weapon, which sometimes has consequences!
 		
-		public $firingModes = array(1 =>'Sweeping', 2=>'3Split', 3=>'6Split');
-		
+		//public $firingModes = array(1 =>'Sweeping', 2=>'3Split', 3=>'6Split');
+		public $firingModes = array(1 =>'Sweeping');
         public $loadingtime = 1;
 		public $normalload = 3;
 		
         public $rangePenalty = 0.33;//-1/3 hexes
         public $fireControl = array(2, 4, 6); // fighters, <=mediums, <=capitals 
-        public $fireControlArray = array(1=>array(2, 4, 6), 2=>array(null, 3, 5), 3=>array(null, 2, 4) );
-        public $gunsArray = array(1=>1, 2=>3, 3=>6 );
+        //public $fireControlArray = array(1=>array(2, 4, 6), 2=>array(null, 3, 5), 3=>array(null, 2, 4) );
 
 		public $priority = 7;//heavy Raking weapon - with armor-ignoring 
 		public $uninterceptable = true;
@@ -868,7 +867,7 @@ class SuperHeavyMolecularDisruptor extends Raking
         //New variables to allow sweeping split shots.
         public $maxVariableShots = 8; //Default value, will be amended in front end anyway.
 		public $canSplitShots = true; //Allows Firing Mode 1 to split shots.
-		public $canSplitShotsArray = array(1=>true, 2=>false, 3=>false );
+		//public $canSplitShotsArray = array(1=>true, 2=>false, 3=>false );
 		public $specialHitChanceCalculation	= true;	 //To update targeting tooltip in Front End               	
 
 		//Slicers are usually THE weapons of Shadow ships - hence higher repair priority
@@ -896,19 +895,17 @@ class SuperHeavyMolecularDisruptor extends Raking
 		    parent::calculateHitBase($gamedata, $fireOrder);
 
 		    // Amend fireOrder->needed based on number of shots and their order in array
-		    $noOfShots = is_array($this->fireOrders) ? count($this->fireOrders) : 1; // Default to 1 if undefined
-
 		    if ($fireOrder->firingMode == 1) {        
 		        $hitmod = 0; // Initialize
 
 		        // Find the position of THIS fireOrder in the array
 		        $index = 0; // Initialize index
-		        foreach ($this->fireOrders as $key => $splitShots) {
+		        foreach ($this->fireOrders as $i => $splitShots) {
 		            if ($splitShots->id === $fireOrder->id) {
 		                // Found the current fireOrder
+                        $index = $i;
 		                break; // Exit the loop
 		            }
-		            $index++;
 		        }
 
 		        // Use $index to adjust the hitmod or fireOrder->needed as necessary
@@ -921,16 +918,15 @@ class SuperHeavyMolecularDisruptor extends Raking
 		public function setSystemDataWindow($turn){			
 			parent::setSystemDataWindow($turn);   
 			$this->data["Special"] = "Uninterceptable. Ignores armor.";
-			$this->data["Special"] .= "<br>May choose to split shots between multiple targets in Sweeping Mode (default), damage will be evenly distributed across all targets (rolled separately, rounded down).";
-			$this->data["Special"] .= "<br>Ships can only be targetd once, but fighters can be targeted as many times as you wish.";			  			  
-			$this->data["Special"] .= "<br>Can fire accelerated for less damage:";  
+			$this->data["Special"] .= "<br>May target multiple enemies, damage will be evenly distributed across all targets.";
+            $this->data["Special"] .= "<br>Can fire accelerated for less damage:";  
 			$this->data["Special"] .= "<br> - 1 turn: 4d10+4"; 
 			$this->data["Special"] .= "<br> - 2 turns: 6d10+6"; 
 			$this->data["Special"] .= "<br> - 3 turns: 8d10+8"; 
-			$this->data["Special"] .= "<br>Can also split fire into 3 separate shots (at -1 FC) or 6 shots (-2 FC) against a single ship (not fighters). Each shot will do appropriate portion of regular damage (rolled separately, rounded down).";  
+			//$this->data["Special"] .= "<br>Can also split fire into 3 separate shots (at -1 FC) or 6 shots (-2 FC) against a single ship (not fighters). Each shot will do appropriate portion of regular damage (rolled separately, rounded down).";  
 		}
 		
-		
+		/*
 		public function getDivider(){ //by how much damage should be divided - depends on mode
 			$divider = 1;
 			switch($this->firingMode){
@@ -946,7 +942,7 @@ class SuperHeavyMolecularDisruptor extends Raking
 			}
 			return $divider;
 		}
-		
+		*/
 
 		public function getDamage($fireOrder) {
 		    $dmg = 0;
@@ -968,9 +964,9 @@ class SuperHeavyMolecularDisruptor extends Raking
 		    // Adjust damage based on firing mode
 		    if ($fireOrder->firingMode == 1 && $noOfShots > 0) {
 		        $dmg = floor($dmg / $noOfShots);
-		    } elseif ($this->getDivider() > 0) {
+		    } /*elseif ($this->getDivider() > 0) {
 		        $dmg = floor($dmg / $this->getDivider());
-		    }
+		    }*/
 
 		    return $dmg;
 		}
@@ -987,7 +983,7 @@ class SuperHeavyMolecularDisruptor extends Raking
                     $this->minDamage = 16 ;  
                     break;
             }
-			$this->minDamage = floor($this->minDamage/$this->getDivider()) ;   
+			//$this->minDamage = floor($this->minDamage/$this->getDivider()) ;   
 		}
              
         public function setMaxDamage(){
@@ -1002,7 +998,7 @@ class SuperHeavyMolecularDisruptor extends Raking
                     $this->maxDamage = 88 ;  
                     break;
             }
-			$this->maxDamage = floor($this->maxDamage/$this->getDivider()) ;   
+			//$this->maxDamage = floor($this->maxDamage/$this->getDivider()) ;   
 		}
 
 		public function stripForJson(){
@@ -1025,13 +1021,14 @@ class SuperHeavyMolecularDisruptor extends Raking
 		public $iconPath = "MolecularSlicerBeamM.png";		   
     	public $animationExplosionScale = 0.25; //Manually set, as high-strength of Slicer makes split shots a little too large.
 		
-		public $firingModes = array(1 =>'Sweeping', 2=>'3Split', 3=>'6Split', 4=>'9Split');
-		
+		//public $firingModes = array(1 =>'Sweeping', 2=>'3Split', 3=>'6Split', 4=>'9Split');
+		public $firingModes = array(1 =>'Sweeping');		
         public $rangePenalty = 0.33;//-1/3 hexes
         public $fireControl = array(4, 6, 8); // fighters, <=mediums, <=capitals 
-        public $fireControlArray = array(1=>array(4, 6, 8), 2=>array(null, 5, 7), 3=>array(null, 4, 6), 4=>array(null, 3, 5) );
-        public $gunsArray = array(1=>1, 2=>3, 3=>6, 4=>9 );
-
+        //public $fireControlArray = array(1=>array(4, 6, 8), 2=>array(null, 5, 7), 3=>array(null, 4, 6), 4=>array(null, 3, 5) );
+        //public $fireControlArray = array(1=>array(4, 6, 8));        
+        //public $gunsArray = array(1=>1, 2=>3, 3=>6, 4=>9 );
+        //public $gunsArray = array(1=>1);
 		public $priority = 7;//heavy Raking weapon - with armor-ignoring 
 
 		public $raking = 15;
@@ -1041,7 +1038,8 @@ class SuperHeavyMolecularDisruptor extends Raking
         //New variables to allow sweeping split shots.
         public $maxVariableShots = 16; //Default value, will be amended in front end anyway.
 		public $canSplitShots = true; //Allows Firing Mode 1 to split shots.
-		public $canSplitShotsArray = array(1=>true, 2=>false, 3=>false, 4=>false );
+		//public $canSplitShotsArray = array(1=>true, 2=>false, 3=>false, 4=>false );
+        public $canSplitShotsArray = array(1=>true);
 		public $specialHitChanceCalculation	= true;	 //To update targeting tooltip in Front End 		
 		
 
@@ -1049,22 +1047,21 @@ class SuperHeavyMolecularDisruptor extends Raking
             if ( $maxhealth == 0 ) $maxhealth = 15;
             if ( $powerReq == 0 ) $powerReq = 12;
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-        }
-		
-	
+        }	
 	    
 		public function setSystemDataWindow($turn){			
 			parent::setSystemDataWindow($turn);   
 			$this->data["Special"] = "Uninterceptable. Ignores armor. 15-point rakes.";  
-			$this->data["Special"] .= "<br>May choose to split shots between multiple targets in Sweeping Mode (default), damage will be evenly distributed across all targets (rolled separately, rounded down).";
-			$this->data["Special"] .= "<br>Ships can only be targetd once, but fighters can be targeted as many times as you wish.";
-			$this->data["Special"] .= "<br> - 1 turn: 8d10+12"; 
+			$this->data["Special"] .= "<br>May target multiple enemies, damage will be evenly distributed across all targets.";
+			//$this->data["Special"] .= "<br>Ships can only be targeted once, but fighters can be targeted as many times as you wish.";
+			$this->data["Special"] .= "<br>Can fire accelerated for less damage:"; 
+            $this->data["Special"] .= "<br> - 1 turn: 8d10+12"; 
 			$this->data["Special"] .= "<br> - 2 turns: 12d10+24"; 
 			$this->data["Special"] .= "<br> - 3 turns: 16d10+36"; 
-			$this->data["Special"] .= "<br>Can also split fire into 3 separate shots (at -1 FC), 6 shots (-2 FC) or 9 shots (-3 FC) against a single ship (not fighters). Each shot will do appropriate portion of regular damage (rolled separately, rounded down).";   
+			//$this->data["Special"] .= "<br>Can also split fire into 3 separate shots (at -1 FC), 6 shots (-2 FC) or 9 shots (-3 FC) against a single ship (not fighters). Each shot will do appropriate portion of regular damage (rolled separately, rounded down).";   
 		}
  		
-		
+		/*
 		public function getDivider(){ //by how much damage should be divided - depends on mode
 			$divider = 1;
 			switch($this->firingMode){
@@ -1083,7 +1080,7 @@ class SuperHeavyMolecularDisruptor extends Raking
 			}
 			return $divider;
 		}
-		
+		*/
 
 		public function getDamage($fireOrder) {
 		    $dmg = 0;
@@ -1105,9 +1102,9 @@ class SuperHeavyMolecularDisruptor extends Raking
 		    // Adjust damage based on firing mode
 		    if ($fireOrder->firingMode == 1 && $noOfShots > 0) {
 		        $dmg = floor($dmg / $noOfShots);
-		    } elseif ($this->getDivider() > 0) {
+		    } /*elseif ($this->getDivider() > 0) {
 		        $dmg = floor($dmg / $this->getDivider());
-		    }
+		    }*/
 
 		    return $dmg;
 		}
@@ -1124,7 +1121,7 @@ class SuperHeavyMolecularDisruptor extends Raking
                     $this->minDamage = 16+36 ;  
                     break;
             }
-			$this->minDamage = floor($this->minDamage/$this->getDivider()) ;   
+			//$this->minDamage = floor($this->minDamage/$this->getDivider()) ;   
 		}
              
         public function setMaxDamage(){
@@ -1139,15 +1136,188 @@ class SuperHeavyMolecularDisruptor extends Raking
                     $this->maxDamage = 160+36 ;  
                     break;
             }
-			$this->maxDamage = floor($this->maxDamage/$this->getDivider()) ;   
+			//$this->maxDamage = floor($this->maxDamage/$this->getDivider()) ;   
 		}
 		
 	}//endof class MolecularSlicerBeamM
 
 
+    class MolecularSlicerBeamH extends MolecularSlicerBeamL{
+		public $name = "MolecularSlicerBeamH";
+        public $displayName = "Heavy Slicer Beam";
+		public $iconPath = "MolecularSlicerBeamH.png";		   
+    	public $animationExplosionScale = 0.3; //Manually set, as high-strength of Slicer makes split shots a little too large.		
+		//public $firingModes = array(1=>'FP - Front Piercing', 2 =>'FR - Front Raking', 3=>'RP - Rear Piercing', 4=>'RR - Rear Raking');
+        public $firingModes = array(1=>'Piercing', 2 =>'Raking');        
+	    public $modeLetters = 1;	
+        public $rangePenalty = 0.33;//-1/3 hexes
+        public $fireControl = array(0, 2, 4); // fighters, <=mediums, <=capitals 
+        public $fireControlArray = array(1=>array(0,2,4), 2=>array(4, 6, 8), 3=>array(0,2,4), 4=>array(4, 6, 8));
+
+		public $priority = 2;//primary mode being Piercing! otherwise heavy Raking weapon - with armor-ignoring 
+		public $priorityArray = array(1=>2, 2=>3, 3=>2, 4=>3);
+
+		public $raking = 15;
+        public $damageType = "Piercing"; 
+        public $damageTypeArray = array(1=>"Piercing", 2=>"Raking", 3=>"Piercing", 4=>"Raking");
+        public $weaponClass = "Molecular"; 
+        public $startArcArray = array(); 
+        public $endArcArray = array();        
+
+        //New variables to allow sweeping split shots.
+        public $maxVariableShots = 24; //Default value, will be amended in front end anyway.
+		public $canSplitShots = true; //Allows weapon to split shots.
+        public $canSplitShotsArray = array(1=>true, 2=>true, 3=>true, 4=>true);
+	    protected $multiModeSplit = true; //Can split shots across different modes 
+		public $specialHitChanceCalculation	= true;	 //To update targeting tooltip in Front End 		
+		
+
+		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $startArc2 = null, $endArc2 = null){			
+            if ( $maxhealth == 0 ) $maxhealth = 18;
+            if ( $powerReq == 0 ) $powerReq = 16;
+            $this->startArcArray[1] = $startArc; //Normal arcs
+            $this->endArcArray[1] = $endArc;
+            $this->startArcArray[2] = $startArc;
+            $this->endArcArray[2] = $endArc; 
+
+            if($startArc2 !== null || $endArc2 !== null){      
+                $this->startArcArray[3] = $startArc2; //Set rear arcs manually
+                $this->endArcArray[3] = $endArc2; 
+                $this->startArcArray[4] = $startArc2;
+                $this->endArcArray[4] = $endArc2;  
+                $this->firingModes = array(1=>'FP - Front Piercing', 2 =>'FR - Front Raking', 3=>'RP - Rear Piercing', 4=>'RR - Rear Raking');
+                $this->modeLetters = 2;                           
+            }                                   
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+		
+		//if charged for 3 turns and mode is Piercing - set doOverkill; otherwise unset it
+		public function changeFiringMode($newMode){
+			parent::changeFiringMode($newMode); 
+			if (($this->turnsloaded >=3) && ($this->firingMode ==1 || $this->firingMode == 3)){
+				$this->doOverkill=true;
+			}else{
+				$this->doOverkill=false;
+			}				
+		}
+	    
+		public function setSystemDataWindow($turn){			
+			parent::setSystemDataWindow($turn);   
+			$this->data["Special"] = "Uninterceptable. Ignores armor. 15-point rakes.";
+			$this->data["Special"] .= "<br>Full power (3 turns armed) can be fired ONLY in Piercing mode, but it will become Piercing(Standard), with ability to overkill.  Raking Mode can still be used (at 2 turns output)";           
+			$this->data["Special"] .= "<br>May choose to split shots between multiple targets, damage will be evenly distributed across all targets.";
+			if(count($this->firingModes) > 2){
+                $this->data["Special"] .= "<br>Alternative firing modes allow this weapon to also fire in rear arcs, and can be combined with split shots in forward arcs.";			  			  
+            }    
+			$this->data["Special"] .= "<br>Can fire accelerated for less damage:";  
+			$this->data["Special"] .= "<br> - 1 turn: 8d10+12"; 
+			$this->data["Special"] .= "<br> - 2 turns: 16d10+24"; 
+			$this->data["Special"] .= "<br> - 3 turns: 24d10+36"; 
+        }
+  
+		public function calculateHitBase(TacGamedata $gamedata, FireOrder $fireOrder) {
+		    Weapon::calculateHitBase($gamedata, $fireOrder); //Don't call direct parent, duplicates some hitmods
+    
+		    $hitmod = 0; // Initialize
+		    // Find the position of THIS fireOrder in the array
+		    $index = 0; // Initialize index
+		    foreach ($this->fireOrders as $i => $splitShots) {
+		        if ($splitShots->id === $fireOrder->id) {
+		            $index = $i;
+		            break; // Exit the loop
+		        }
+		    }
+		    // Use $index to adjust the hitmod or fireOrder->needed as necessary
+		    // Example: Modify hitmod based on shot position
+		    $hitmod = $index * 5; // Example logic (adjust as needed) 
+		    $fireOrder->needed -= $hitmod; // Modify fireOrder->needed based on hitmod 		     
+            
+            //If piercing mode used on less than full charge, should use Raking Fire Control, so add +20%
+            if($this->turnsloaded < 3 && ($fireOrder->firingMode == 1 || $fireOrder->firingMode == 3)){
+                $fireOrder->needed += 20; // Modify fireOrder->needed based on hitmod              
+            }            
+            
+		}  
 
 
-	/*Molecular Slicer Beam - primary weapon of large Shadow ships. Heavy variety (found only on slow-grown primordial ships).*/
+		public function getDamage($fireOrder){
+			$dmg = 0;
+		    $noOfShots = is_array($this->fireOrders) ? count($this->fireOrders) : 1; // Default to 1 if undefined			
+			$loadedtime = $this->turnsloaded;
+			if($this->firingMode == 1 || $this->firingMode == 3){//cannot use 3-turns power for shots other than Piercing
+				$loadedtime = min(2,$loadedtime);
+			}
+            switch($loadedtime){
+                case 1:
+                    $dmg = Dice::d(10,8)+12;
+					break;
+                case 2:
+                    $dmg = Dice::d(10,16)+24;
+					break;
+				case 3: //if actual 3 turns - remember to set weapon to overkilling in Piercing mode!
+				default: //3 turns
+                    $dmg = Dice::d(10,24)+36;			
+					break;
+            }
+		    // Adjust damage based on firing mode
+		    if ($noOfShots > 0) {
+		        $dmg = floor($dmg / $noOfShots);
+		    }
+
+		    return $dmg;
+		    
+		}	
+		        
+        public function setMinDamage(){
+			$loadedtime = $this->turnsloaded;
+			if($this->firingMode == 1 || $this->firingMode == 3){//cannot use 3-turns power for shots other than Piercing
+				$loadedtime = min(2,$loadedtime);
+			}
+            switch($loadedtime){
+                case 1:
+                    $this->minDamage = 8+12 ;
+                    break;
+                case 2:
+                    $this->minDamage = 16+24 ;  
+                    break;
+                default:
+                    $this->minDamage = 24+36 ;  
+                    break;
+            }
+			//$this->minDamage = floor($this->minDamage/$this->getDivider()) ;   
+		}
+             
+        public function setMaxDamage(){
+			$loadedtime = $this->turnsloaded;
+			if($this->firingMode == 1 || $this->firingMode == 3){//cannot use 3-turns power for shots other than Piercing
+				$loadedtime = min(2,$loadedtime);
+			}
+            switch($loadedtime){
+                case 1:
+                    $this->maxDamage = 80+12 ;
+                    break;
+                case 2:
+                    $this->maxDamage = 160+24 ;  
+                    break;
+                default:
+                    $this->maxDamage = 240+36 ;  
+                    break;
+            }
+			//$this->maxDamage = floor($this->maxDamage/$this->getDivider()) ;   
+		}
+
+
+    public function stripForJson() {
+        $strippedSystem = parent::stripForJson();    
+        $strippedSystem->multiModeSplit = $this->multiModeSplit;						                                        
+        return $strippedSystem;
+	}	        
+		
+	}//endof class MolecularSlicerBeamH
+
+
+	/*
+    //OLD VERSION - Molecular Slicer Beam - primary weapon of large Shadow ships. Heavy variety (found only on slow-grown primordial ships).
     class MolecularSlicerBeamH extends MolecularSlicerBeamL{
 		public $name = "MolecularSlicerBeamH";
         public $displayName = "Heavy Slicer Beam";
@@ -1181,7 +1351,7 @@ class SuperHeavyMolecularDisruptor extends Raking
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 		
-		/*if charged for 3 turns and mode is Piercing - set doOverkill; otherwise unset it*/
+		//if charged for 3 turns and mode is Piercing - set doOverkill; otherwise unset it
 		public function changeFiringMode($newMode){
 			parent::changeFiringMode($newMode); 
 			if (($this->turnsloaded >=3) && ($this->firingMode==1)){
@@ -1297,7 +1467,7 @@ class SuperHeavyMolecularDisruptor extends Raking
 		}
 		
 	}//endof class MolecularSlicerBeamH
-
+*/
 	
 //PREVIOUS SLICER CODE
 	/*Molecular Slicer Beam - primary weapon of large Shadow ships. Light variety.*/

@@ -13,7 +13,7 @@ class ThirdspaceCarrier extends BaseShip{
 	    $this->isd = 'Ancient';
 		$this->factionAge = 4;
 		$this->unofficial = true;
-		$this->canvasSize = 650;
+		$this->canvasSize = 550;
 			$this->variantOf = "Eldritch Battleship";
 			$this->occurence = "uncommon";											    
 	    

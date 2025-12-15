@@ -20,12 +20,12 @@
 			$cacheMaxAge = 3600; // 1 hour
 			
 			// Check for cached mapping (skip if debug mode or local server)
-if (php_sapi_name() === 'cli') {
-    $isLocal = true; // or false, depending on your intention
-} else {
-    $serverName = $_SERVER['SERVER_NAME'] ?? '';
-    $isLocal = in_array($serverName, ['localhost', '127.0.0.1']);
-}
+			if (php_sapi_name() === 'cli') {
+				$isLocal = true; // or false, depending on your intention
+			} else {
+				$serverName = $_SERVER['SERVER_NAME'] ?? '';
+				$isLocal = in_array($serverName, ['localhost', '127.0.0.1']);
+			}
 			if (!$isLocal && file_exists($cacheFile) && (time() - filemtime($cacheFile)) < $cacheMaxAge) {
 				$cached = @unserialize(file_get_contents($cacheFile));
 				if ($cached !== false) {
@@ -119,12 +119,12 @@ if (php_sapi_name() === 'cli') {
 			$cacheMaxAge = 300; // 5 minutes
 			
 			// Check if valid cache exists (skip if debug mode or local server)
-if (php_sapi_name() === 'cli') {
-    $isLocal = true; // or false, depending on your intention
-} else {
-    $serverName = $_SERVER['SERVER_NAME'] ?? '';
-    $isLocal = in_array($serverName, ['localhost', '127.0.0.1']);
-}
+			if (php_sapi_name() === 'cli') {
+				$isLocal = true; // or false, depending on your intention
+			} else {
+				$serverName = $_SERVER['SERVER_NAME'] ?? '';
+				$isLocal = in_array($serverName, ['localhost', '127.0.0.1']);
+			}
 			if (!$isLocal && file_exists($cacheFile) && (time() - filemtime($cacheFile)) < $cacheMaxAge) {
 				$cached = @unserialize(file_get_contents($cacheFile));
 				if ($cached !== false) {
@@ -184,13 +184,13 @@ if (php_sapi_name() === 'cli') {
 			
 			return $factions;
 		}
-	}
+	//}
 	
-	/*
-	class ShipLoader{
+	 //Old version before caching, keep using for static files - DK Dec 2025
+	//class ShipLoader{
 	
 	
-		public static function getShipClassnames(){
+		public static function getShipClassnamesStatic(){
 			$dir = dirname(__DIR__) ."/model/ships/";
 			$handle = opendir($dir);
 			$list = array();
@@ -212,8 +212,8 @@ if (php_sapi_name() === 'cli') {
 			return $list;
 		}
 		
-		public static function getAllShips($faction){
-			$names = self::getShipClassnames();
+		public static function getAllShipsStatic($faction){
+			$names = self::getShipClassnamesStatic();
 			$ships = array();
             		$count = 0;
 			foreach ($names as $name){
@@ -242,8 +242,8 @@ if (php_sapi_name() === 'cli') {
 			return $ships;
 		}
 		
-		public static function getAllFactions(){
-			$names = self::getShipClassnames();
+		public static function getAllFactionsStatic(){
+			$names = self::getShipClassnamesStatic();
 			$factions = array();
 			$factionSet = array();
 			$count = 0;
@@ -262,6 +262,6 @@ if (php_sapi_name() === 'cli') {
 			return $factions;
 		}
 	}	
-*/	
+	
 
 ?>
