@@ -92,7 +92,7 @@ $games = json_encode(Manager::getTacGames($userid), JSON_NUMERIC_CHECK);
         <li><strong>Pentagon Array</strong> - Reworked to be same as tabletop e.g. Pulse mode against fighters.</li>                                    
         <li><strong>Critical hits</strong> - Critical hits are now displayed in Combat Log and Replay animations.
         <li><strong>Terrain Collisions</strong> - Terrain collisions will now occur, and cause damage, before the Firing Phase.</li>                                            
-        <li><strong>General Fixes</strong> - Further Server Stability fixes, plus many, many other small fixes. Thanks for all the reports!</li>                                                    
+        <li><strong>General Fixes</strong> - Thought Shield fixes, plus many other small fixes. Thanks for all the reports!</li>                                                    
         <!--<li><strong>6 Jun</strong> - Overlay colors, deployment zone tweaks, UI fixes. Pulsar mine fixed, tooltip/text readability improved.</li>-->
       </ul>
     </div>
