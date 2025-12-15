@@ -932,7 +932,7 @@ class TransverseDrive extends Weapon implements SpecialAbility, DefensiveSystem{
 		$shipPos = $ship->getHexPos(); 		
 		
         $rolled = Dice::d(20); //Roll d20 to decide what happens during jump
-        //$rolled = 19; //For debugging
+        //$rolled = 20; //For debugging
 
 		$targetPos = new OffsetCoordinate($fireOrder->x, $fireOrder->y);
         $dis = mathlib::getDistanceHex($shipPos, $targetPos); //How many hexes did player choose to jump. 
@@ -993,7 +993,7 @@ class TransverseDrive extends Weapon implements SpecialAbility, DefensiveSystem{
 			$fireOrder->pubnotes .= " Transverse jump attempt was unsuccesful!";						
 			return;
 
-		} else if($rolled == 20){ //20- Fail with ForcedOfflineOneTurn Crit
+		} else if($rolled >= 20){ //20- Fail with ForcedOfflineOneTurn Crit
 			$jumpFailure = $this->checkJumpEngine($ship, $gamedata);
 			//if($jumpFailure) return;  //Ship blew up, no need to do transverse jump.
         	$fireOrder->rolled = $rolled; 
@@ -1085,7 +1085,7 @@ class TransverseDrive extends Weapon implements SpecialAbility, DefensiveSystem{
 						// Or if it matches the centre position directly
 						if (
 							!empty($match) || 
-							($transverseJump->q == $terrainPosition->q && $transverseJump->position->r == $terrainPosition->r)
+							($transverseJump->position->q == $terrainPosition->q && $transverseJump->position->r == $terrainPosition->r)
 						) {
 							// Prevent duplicate ship IDs
 						if (!isset($collisiontargets[$crashShip->id])) {
