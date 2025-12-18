@@ -618,14 +618,23 @@ class Weapon extends ShipSystem
 		//re-create damage arrays, so they reflect loading time...
 		foreach ($this->firingModes as $i => $modeName) {
 			$this->changeFiringMode($i);
-			//$this->setMinDamage();
-			//$this->minDamageArray[$i] = $this->minDamage;
-			//$this->setMaxDamage();
-			//$this->maxDamageArray[$i] = $this->maxDamage;
+			$this->setMinDamage();
+			$this->minDamageArray[$i] = $this->minDamage;
+			$this->setMaxDamage();
+			$this->maxDamageArray[$i] = $this->maxDamage;
 			//set AF priority, too!
 			$this->setPriorityAF(); 
 			$this->priorityAFArray[$i] = $this->priorityAF;
 		} 
+
+        //re-apply damage penalties, if any!
+        $dp = 0;
+        foreach ($this->criticals as $crit) {
+            if ($crit instanceof ReducedDamage) $dp++;
+        }
+        if ($dp > 0) {
+            $this->effectCriticalDamgeReductions($dp);
+        }
 
 		$this->changeFiringMode(1); //reset mode to basic
             
