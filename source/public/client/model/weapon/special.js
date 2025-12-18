@@ -190,8 +190,6 @@ VorlonDischargeGun.prototype.initializationUpdate = function() {
 	this.powerReq = 0;
     if(gamedata.gamephase == 3){     
         var isFiring = weaponManager.hasFiringOrder(this.ship, this);
-        this.data["Shots Remaining"] = 4 - this.fireOrders.length;
-
         this.data["Defensive Shots"] = 0;
         if (isFiring) {
             for (var i in this.fireOrders) {
@@ -203,6 +201,7 @@ VorlonDischargeGun.prototype.initializationUpdate = function() {
             } 
          
         }
+        this.data["Shots Remaining"] = 4 - this.fireOrders.length;
     }
     return this;
 };
@@ -210,14 +209,7 @@ VorlonDischargeGun.prototype.initializationUpdate = function() {
 VorlonDischargeGun.prototype.doMultipleFireOrders = function (shooter, target, system) {
 
     var shotsOnTarget = 1; //we're only ever allocating one shot at a time for this weapon.
-    /*
-    if (this.fireOrders.length > 0) {
-        if (this.fireOrders.length >= this.guns) {
-            // All guns already fired → retarget one gun by removing oldest fireorder.
-            this.fireOrders.splice(0, 1);
-        }
-    } 
-    */
+
     if (this.fireOrders.length > 3) {
         return;
     } 
@@ -302,8 +294,6 @@ VorlonDischargeCannon.prototype.initializationUpdate = function() {
 	this.powerReq = 0;
     if(gamedata.gamephase == 3){     
         var isFiring = weaponManager.hasFiringOrder(this.ship, this);
-        this.data["Shots Remaining"] = 4 - this.fireOrders.length;
-
         this.data["Defensive Shots"] = 0;
         if (isFiring) {
             for (var i in this.fireOrders) {
@@ -315,6 +305,7 @@ VorlonDischargeCannon.prototype.initializationUpdate = function() {
             } 
          
         }
+        this.data["Shots Remaining"] = 4 - this.fireOrders.length;
     }
     return this;
 };
