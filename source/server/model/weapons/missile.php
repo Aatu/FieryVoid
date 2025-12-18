@@ -1308,6 +1308,17 @@ class AmmoMissileRackS extends Weapon{
 			return 0;	
 		}
     }
+
+    public function setMinDamage(){
+        if(isset($this->ammoClassesUsed[$this->firingMode])){
+             $this->minDamage = $this->ammoClassesUsed[$this->firingMode]->minDamage;
+        }
+    }
+    public function setMaxDamage(){
+         if(isset($this->ammoClassesUsed[$this->firingMode])){
+             $this->maxDamage = $this->ammoClassesUsed[$this->firingMode]->maxDamage;
+        }       
+    }
 	
 
 	/*some missiles have special effects on impact*/
