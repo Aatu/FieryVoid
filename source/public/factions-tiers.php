@@ -861,11 +861,11 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         <li> Uninterceptable, armour-gnoring with a high FC and good range, it has very high damage output and can literally cut ships apart when fully charged.  
             It has a number of other traits too, some of which has been simplified for Fiery Void.</li>
         <li>The most powerful version of this weapon, the Heavy Slicer found only on Primordial ships uses Piercing damage as its default mode - which can even overkill at full power so that its damage potential isn’t wasted. 
-            The Raking damage mode is capped at 2-turns charge level.</li>
+            The Raking damage mode is capped at 2-turns charge level.  The Heavy Slicer on the Shadow Battlecruiser has both forward and rear arcs, you can access these by using Firing Modes and can split your sweeping fire between both forward and rear arcs.</li>
         <li>All other Slicers use Sweeping Mode as their default, which allows them to target as many different enemies as it has damage dice 
             e.g. 8D10 would allow for 8 separate shots. Simply select the weapon and choose who you want to target in this mode, although each ship can only be targeted once (whilst fighter flights can be targeted multiple times). 
             When splitting shots, the weapon will attract a cumulative -5% penalty for every additional shot after the first.</li>
-        <li>Slicers in FV also have alternative firing modes with a preset number of shots (3, 6 or 9) which can be used to target several shots at a single ship.</li>                                                                 
+        <li>Slicers may spend 1d10 damage to gain -10 intercept, this is cumulative and suffers no degradation.  Click the 'Self-Intercept' green shield icon to assign each 1d10, and use ship tooltip to track defensive fire.";   .</li>                                                                 
     <h5>Phasing Pulse Cannon</h5>
         <li>Pulse weapons that completely ignore any kind of shield or shield-like defense used by Younger races. 
             Note that EM shields, like those used on the White Star, are treated as Ancient even when used on Younger Race ships.</li>      
