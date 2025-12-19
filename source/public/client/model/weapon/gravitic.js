@@ -211,7 +211,7 @@ GravityNet.prototype.doMultipleFireOrders = function (shooter, target, system) {
 
         var fire = {
             id: fireid,
-            type: 'ballistic',
+            type: 'gravitic',
             shooterid: shooter.id,
             targetid: target.id,
             weaponid: this.id,
@@ -221,7 +221,7 @@ GravityNet.prototype.doMultipleFireOrders = function (shooter, target, system) {
             shots: 1,
             x: "null",
             y: "null",
-            damageclass: 'Translocation', 
+            damageclass: 'gravNetTarget', 
             chance: chance,
             hitmod: 0,
             notes: "Split"
@@ -249,7 +249,7 @@ GravityNet.prototype.doMultipleHexFireOrders = function (shooter, hexpos) {
             var fireid = shooter.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
             var fire = {
                 id: fireid,
-                type: 'ballistic',
+                type: 'gravitic',
                 shooterid: shooter.id,
                 targetid: -1,
                 weaponid: this.id,
@@ -259,7 +259,7 @@ GravityNet.prototype.doMultipleHexFireOrders = function (shooter, hexpos) {
                 shots: this.defaultShots,
                 x: hexpos.q,
                 y: hexpos.r,
-                damageclass: 'gravNetTargeter', 
+                damageclass: 'gravNetDestination', 
                 notes: "split"                
             };
         this.fireOrders.push(fire);

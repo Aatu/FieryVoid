@@ -1098,14 +1098,14 @@ class GravityNet extends Weapon implements SpecialAbility{
 		    $launchPos = null; // Initialize $launchPos outside the loop
 			//$launcherFireOrders = $this->launcher->getFireOrders($gamedata->turn);
 			
-			if($fireOrder->damageclass == 'gravNetTargeter'){
+			if($fireOrder->damageclass == 'gravNetTarget'){
 				$launchPos = parent::getFiringHex($gamedata, $fireOrder); //Use normal method for hex targeted launcher.
 			}else{				
 				$allFireOrders = $this->getFireOrders($gamedata->turn);
 				$launcherFireOrder = 1; //second fire order is always grav translocation hex target.	
 
 				foreach($allFireOrders as $fireOrderCheck){
-					if ($fireOrderCheck->damageclass == 'gravNetTargeter'){
+					if ($fireOrderCheck->damageclass == 'gravNetTarget'){
 						$launcherFireOrder = $fireOrderCheck;					
 						break;						
 					}				
