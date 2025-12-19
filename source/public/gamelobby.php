@@ -54,7 +54,8 @@
         <script src="static/ships.js"></script>
 		-->
 <?php		
-	include 'static/ships.php';
+	//include 'static/ships.php'; //Changed how staticships are loaded to help with HTTP Protocol errors - DK Dec 2025
+
 ?>
 		
 <!--		<script src="client/helper.js"></script>-->
