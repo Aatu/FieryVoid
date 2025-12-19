@@ -261,6 +261,33 @@
 			
 			return $factions;
 		}
+		    
+		//New function to suppoort new method for how staticships are loaded to help with HTTP Protocol errors - DK Dec 2025
+		public static function getShipsByClass($classNames){
+			$ships = array();
+            $classNames = array_unique($classNames);
+            
+			foreach ($classNames as $name){
+				if (class_exists($name)){
+					$ship = new $name(0, 0, "", 0, 0, false, false, array());
+                    
+                    foreach ($ship->systems as $system){
+						$system->beforeTurn($ship, 0, 0);
+					}
+        
+					//enhancements (for fleet selection)
+					Enhancements::setEnhancementOptions($ship);
+					
+					if (!isset($ships[$ship->faction])){
+						$ships[$ship->faction] = array();
+					}
+					
+					$ships[$ship->faction][$ship->phpclass] = $ship;
+				}
+			}
+			
+			return $ships;
+		}
 	}	
 	
 

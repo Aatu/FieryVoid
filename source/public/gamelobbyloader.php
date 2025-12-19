@@ -34,8 +34,31 @@ if (!$factionRequest) {
 }
 
 try {
+    //Changed how staticships are loaded to help with HTTP Protocol errors - DK Dec 2025
+    // 1. Try serving from static cache
+    $cleanFaction = str_replace(['..', '/', '\\'], '', $factionRequest);
+    $jsonPath = __DIR__ . '/static/json/' . $cleanFaction . '.json';
+
+    if (file_exists($jsonPath)) {
+        // Serve static file directly
+        header('X-Source: Static');
+        
+        // Enable Browser Caching (1 hour) to prevent constant redownloads
+        header('Cache-Control: public, max-age=3600');
+        header('Expires: ' . gmdate('D, d M Y H:i:s', time() + 3600) . ' GMT');
+        header('Pragma: cache');
+        
+        if (!ob_start("ob_gzhandler")) ob_start(); //Try gzip, fall back to default
+        
+        echo file_get_contents($jsonPath);
+        ob_end_flush();
+        exit;
+    }
+
+    // 2. Fallback to dynamic generation e.g. old method
     $ships = ShipLoader::getAllShips($factionRequest);
     echo json_encode($ships, JSON_NUMERIC_CHECK | JSON_PARTIAL_OUTPUT_ON_ERROR | JSON_UNESCAPED_UNICODE);
+
 } catch (Throwable $e) {
     $logid = Debug::error($e);
     http_response_code(500);

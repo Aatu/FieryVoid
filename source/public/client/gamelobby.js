@@ -1636,7 +1636,7 @@ window.gamedata = {
 			var ship;
 			var shipV;
 			var shipDisplayName;
-			var shipList = jsonShips[faction];
+			var shipList = Object.values(jsonShips[faction]);
 			var pointCostFull = '';
 			var powerRating = gamedata.getPowerRating(faction);
 			var isCustomFaction = powerRating.toLowerCase().includes("custom");
@@ -1650,12 +1650,18 @@ window.gamedata = {
 			gamedata.setShipsFromFaction(faction, shipList);
 
 			//show separately: immobile objects (bases/OSATs), every ship size, fighters
+			//show separately: immobile objects (bases/OSATs), every ship size, fighters
 			var sizeClassHeaders = ['Fighters', 'Medium Ships', 'Heavy Ships', 'Capital Ships', 'Immobile Structures'];
 			for (var desiredSize = 4; desiredSize >= 0; desiredSize--) {
+				// Create a fragment for this size category
+				var fragment = document.createDocumentFragment();
+
 				//display header
 				h = $('<div class="shipsizehdr" data-faction="' + faction + '"><span class="shiptype">' + sizeClassHeaders[desiredSize] + ':</span></div>');
-				h.appendTo(targetNode);
-				for (var index = 0; index < jsonShips[faction].length; index++) {
+				// Convert jquery object to raw DOM node for fragment
+				fragment.appendChild(h[0]);
+
+				for (var index = 0; index < shipList.length; index++) {
 					ship = shipList[index];
 					isCustomShip = isCustomFaction || ship.unofficial === true;
 					let customShipHighlight = (!isCustomFaction && ship.unofficial === true) ? ' highlight-custom-ship' : '';
@@ -1684,9 +1690,9 @@ window.gamedata = {
 					$(".addship", h).on("click", this.buyShip.bind(this, ship.phpclass));
 					$(".showship", h).on("click", gamedata.onShipContextMenu.bind(this, ship.phpclass, faction, ship.id, false));
 
-					h.appendTo(targetNode);
+					fragment.appendChild(h[0]);
 					//search for variants of the base design above...
-					for (var indexV = 0; indexV < jsonShips[faction].length; indexV++) {
+					for (var indexV = 0; indexV < shipList.length; indexV++) {
 						shipV = shipList[indexV];
 						if (shipV.variantOf != ship.shipClass) continue;//that's not a variant of current base ship
 						isCustomShip = isCustomFaction || shipV.unofficial === true;
@@ -1705,9 +1711,13 @@ window.gamedata = {
 						$(".addship", h).on("click", this.buyShip.bind(this, shipV.phpclass));
 						$(".showship", h).on("click", gamedata.onShipContextMenu.bind(this, shipV.phpclass, faction, ship.id, false));
 
-						h.appendTo(targetNode);
+						fragment.appendChild(h[0]);
 					} //end of variant
 				} //end of base design
+
+				// Append the entire fragment for this size class to the DOM at once
+				targetNode.appendChild(fragment);
+
 			} //end of size
 
 
@@ -2068,7 +2078,7 @@ window.gamedata = {
 
 		var newShip = gamedata.getShipByType(copiedShip.phpclass);
 		if (!newShip) {
-			gamedata.setShipsFromFaction(copiedShip.faction, copiedShip); //Loaded fleets may not have their faction set yet when editing, so do this now.
+			gamedata.setShipsFromFaction(copiedShip.faction, [copiedShip]); //Loaded fleets may not have their faction set yet when editing, so do this now.
 			newShip = gamedata.getShipByType(copiedShip.phpclass);
 		}
 
@@ -2239,7 +2249,7 @@ window.gamedata = {
 
 		var baseShip = gamedata.getShipByType(ship.phpclass);
 		if (!baseShip) {
-			gamedata.setShipsFromFaction(ship.faction, ship); //Loaded fleets may not have their faction set yet when editing, so do this now.
+			gamedata.setShipsFromFaction(ship.faction, [ship]); //Loaded fleets may not have their faction set yet when editing, so do this now.
 			baseShip = gamedata.getShipByType(ship.phpclass);
 		}
 
@@ -2903,13 +2913,13 @@ window.gamedata = {
 		return gamedata.getShip(id);
 	},
 
-
+	/*
 	setShipsFromFaction: function setShipsFromFaction(faction, jsonShips) {
 		gamedata.allShips[faction] = Object.keys(window.staticShips[faction]).map(function (shipClass) {
 			return new Ship(window.staticShips[faction][shipClass]);
 		})
 	},
-
+	*/
 
 	getShip: function getShip(phpclass, faction) {
 		var actPhpclass;
@@ -2931,13 +2941,12 @@ window.gamedata = {
 		return gamedata.allShips[actFaction].find(ship => ship.phpclass == actPhpclass);
 	},
 
-	/* //Duplicate function?
 	setShipsFromFaction: function setShipsFromFaction(faction, jsonShips) {
-		gamedata.allShips[faction] = Object.keys(window.staticShips[faction]).map(function(shipClass) {
-			return new Ship(window.staticShips[faction][shipClass]);
+		var ships = Array.isArray(jsonShips) ? jsonShips : Object.values(jsonShips);
+		gamedata.allShips[faction] = ships.map(function (ship) {
+			return new Ship(ship);
 		})
 	},
-	*/
 
 	isTerrain: function isTerrain(shipSizeClass, userid) {
 		if (shipSizeClass == 5 || userid == -5) return true;
