@@ -1041,8 +1041,7 @@ class GravityNet extends Weapon implements SpecialAbility{
     public $animationExplosionScale = 0.3; //single hex explosion
     public $priority = 1; 
 	public $hextarget = false; //Toggle to switch between hexTarget and normalTarget modes
-	public $hidetarget = true;
-	public $ballistic = true;   
+	public $hidetarget = true;   
 	public $specialAbilities = array("PreFiring");
 	public $specialAbilityValue = true; //so it is actually recognized as special ability!  		
 	public $damageType = "Standard"; //irrelevant, really
@@ -1055,7 +1054,7 @@ class GravityNet extends Weapon implements SpecialAbility{
     public $fireControl = array(1, 2, 3); // fighters, <mediums, <capitals 
 	public $preFires = true;
     public $canSplitShots = true;
-    protected $hasSpecialLaunchHexCalculation = true;
+    //protected $hasSpecialLaunchHexCalculation = true;
     public $specialHitChanceCalculation = true;			
 	public $repairPriority = 6;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
 
