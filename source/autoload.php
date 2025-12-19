@@ -3448,18 +3448,21 @@ spl_autoload_register(
 						'gquell_noew' => '/server/model/ships/customs/gquell_noew.php',	
 
 
-						//What If - Alternative design concepts
+						//Fred's custom Centauri
+						'altarus' => '/server/model/ships/centauri/Altarus.php',
+						'balvarus' => '/server/model/ships/centauri/Balvarus.php',
+						'dargarian' => '/server/model/ships/centauri/Dargarian.php',
+						'darius' => '/server/model/ships/centauri/Darius.php',
+						'elutai' => '/server/model/ships/centauri/Elutai.php',
+						'jara' => '/server/model/ships/centauri/Jara.php',
+                        'mograte' => '/server/model/ships/centauri/Mograte.php',
+						'vorcharian' => '/server/model/ships/centauri/Vorcharian.php',
+
+                        //What If - Alternate design concepts
 						'dagkar_wi' => '/server/model/ships/whatif/dagkar_WI.php',	
 						'gquan_wi' => '/server/model/ships/whatif/gquan_WI.php',	
-						'altarus_wi' => '/server/model/ships/whatif/Altarus_WI.php',
-						'balvarus_wi' => '/server/model/ships/whatif/Balvarus_WI.php',
-						'dargarian_wi' => '/server/model/ships/whatif/Dargarian_WI.php',
-						'dargarien_wi' => '/server/model/ships/whatif/Dargarien_WI.php',
-						'dargarion_wi' => '/server/model/ships/whatif/Dargarion_WI.php',
-						'darius_wi' => '/server/model/ships/whatif/Darius_WI.php',
-						'elutai_wi' => '/server/model/ships/whatif/Elutai_WI.php',
-						'mograte_wi' => '/server/model/ships/whatif/Mograte_WI.php',
 						'vorchan_wi' => '/server/model/ships/whatif/vorchan_WI.php',
+
 						
 				// For the future
 				'hvyassaultlaser' => '/server/model/weapons/lasers.php',
