@@ -190,8 +190,6 @@ VorlonDischargeGun.prototype.initializationUpdate = function() {
 	this.powerReq = 0;
     if(gamedata.gamephase == 3){     
         var isFiring = weaponManager.hasFiringOrder(this.ship, this);
-        this.data["Shots Remaining"] = 4 - this.fireOrders.length;
-
         this.data["Defensive Shots"] = 0;
         if (isFiring) {
             for (var i in this.fireOrders) {
@@ -203,6 +201,7 @@ VorlonDischargeGun.prototype.initializationUpdate = function() {
             } 
          
         }
+        this.data["Shots Remaining"] = 4 - this.fireOrders.length;
     }
     return this;
 };
@@ -210,14 +209,7 @@ VorlonDischargeGun.prototype.initializationUpdate = function() {
 VorlonDischargeGun.prototype.doMultipleFireOrders = function (shooter, target, system) {
 
     var shotsOnTarget = 1; //we're only ever allocating one shot at a time for this weapon.
-    /*
-    if (this.fireOrders.length > 0) {
-        if (this.fireOrders.length >= this.guns) {
-            // All guns already fired → retarget one gun by removing oldest fireorder.
-            this.fireOrders.splice(0, 1);
-        }
-    } 
-    */
+
     if (this.fireOrders.length > 3) {
         return;
     } 
@@ -302,8 +294,6 @@ VorlonDischargeCannon.prototype.initializationUpdate = function() {
 	this.powerReq = 0;
     if(gamedata.gamephase == 3){     
         var isFiring = weaponManager.hasFiringOrder(this.ship, this);
-        this.data["Shots Remaining"] = 4 - this.fireOrders.length;
-
         this.data["Defensive Shots"] = 0;
         if (isFiring) {
             for (var i in this.fireOrders) {
@@ -315,6 +305,7 @@ VorlonDischargeCannon.prototype.initializationUpdate = function() {
             } 
          
         }
+        this.data["Shots Remaining"] = 4 - this.fireOrders.length;
     }
     return this;
 };
@@ -517,26 +508,26 @@ HeavyPsionicLance.prototype.initBoostableInfo = function () {
     }	
 
     this.data.Boostlevel = shipManager.power.getBoost(this);	
-	
+	//Manually set system data window
     switch (shipManager.power.getBoost(this)) {
         case 0:
-            this.data["Damage"] = '66 - 120';
+            this.data["Damage"] = '66-120';
             this.data["Boostlevel"] = '0';
             break;
         case 1:
-            this.data["Damage"] = '76 - 148';
+            this.data["Damage"] = '76-148';
             this.data["Boostlevel"] = '1';
             break;
         case 2:
-            this.data["Damage"] = '86 - 176';
+            this.data["Damage"] = '86-176';
             this.data["Boostlevel"] = '2';
             break;
         case 3:
-            this.data["Damage"] = '96 - 204';
+            this.data["Damage"] = '96-204';
             this.data["Boostlevel"] = '3';
             break;
         default:
-            this.data["Damage"] = '66 - 120';
+            this.data["Damage"] = '66-120';
             this.data["Boostlevel"] = '0';
             break;
 	}
@@ -582,19 +573,19 @@ PsionicLance.prototype.initBoostableInfo = function () {
     	
     switch (shipManager.power.getBoost(this)) {
         case 0:
-            this.data["Damage"] = '38 - 65';
+            this.data["Damage"] = '38-65';
             this.data["Boostlevel"] = '0';
             break;
         case 1:
-            this.data["Damage"] = '40 - 85';
+            this.data["Damage"] = '40-85';
             this.data["Boostlevel"] = '1';
             break;
         case 2:
-            this.data["Damage"] = '42 - 105';
+            this.data["Damage"] = '42-105';
             this.data["Boostlevel"] = '2';
             break;
         default:
-            this.data["Damage"] = '38 - 65';
+            this.data["Damage"] = '38-65';
             this.data["Boostlevel"] = '0';
             break;
     }
