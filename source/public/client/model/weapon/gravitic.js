@@ -158,6 +158,40 @@ GravityNet.prototype.calculateSpecialHitChanceMod = function (shooter, target) {
 	return mod; 
 };
 
+GravityNet.prototype.initializationUpdate = function() {
+    if (this.fireOrders.length > 0) {
+        this.hextarget = true;
+        this.startArc = 0; //Gravnet shot has arc, translocation does not.
+        this.endArc = 360;
+        this.ignoresLoS = false;
+    }else{
+        this.hextarget = false;
+        //this.startArc = this.startArcArray[0]; //Use Arc arrays to reset to default
+        //this.endArc = this.endArcArray[0]; 
+        this.ignoresLoS = false;                       
+    } 
+
+    return this;
+};
+
+GravityNet.prototype.getFiringHex = function(shooter, weapon){ 	
+    var sPosLaunch;   
+        if (this.fireOrders.length > 0) {	
+            var sPosLaunch; 
+            var gravHexFireOrder = this.fireOrders[1];//get grav net translocation target hex fireorder
+                if (gravHexFireOrder){	// check that launcher has firing orders.  
+                    sPosLaunch = new hexagon.Offset(gravHexFireOrder.x, gravHexFireOrder.y);  
+                } else{
+                    sPosLaunch = shipManager.movement.getPositionAtStartOfTurn(shooter, gamedata.turn);                                                   	
+                }
+        }else{ //Lasers not locked in yet, use firing ship position.
+            sPosLaunch = shipManager.movement.getPositionAtStartOfTurn(shooter, gamedata.turn); 
+        }
+
+	return sPosLaunch;
+	
+};
+
 GravityNet.prototype.doMultipleFireOrders = function (shooter, target, system) {
     
     var shotsOnTarget = 1; //we're only ever allocating one shot at a time for this weapon in Split mode.
@@ -187,7 +221,7 @@ GravityNet.prototype.doMultipleFireOrders = function (shooter, target, system) {
             shots: 1,
             x: "null",
             y: "null",
-            damageclass: 'Laser', 
+            damageclass: 'Translocation', 
             chance: chance,
             hitmod: 0,
             notes: "Split"
@@ -195,10 +229,9 @@ GravityNet.prototype.doMultipleFireOrders = function (shooter, target, system) {
         
         fireOrdersArray.push(fire); // Store each fire order
     }
-        //shipWindowManager.setDataForSystem(ship, weapon);
+
+    this.hextarget = true; //switch gravNet from shipTarget mode to hexTarget mode.
     
-
-
     return fireOrdersArray; // Return all fire orders
 };    
 
@@ -226,13 +259,11 @@ GravityNet.prototype.doMultipleHexFireOrders = function (shooter, hexpos) {
                 shots: this.defaultShots,
                 x: hexpos.q,
                 y: hexpos.r,
-                damageclass: 'Targeter', 
+                damageclass: 'gravNetTargeter', 
                 notes: "split"                
             };
         this.fireOrders.push(fire);
-    }
-
-    this.hextarget = false;
+    }   
 
     return fireOrdersArray; // Return all fire orders
 };  
