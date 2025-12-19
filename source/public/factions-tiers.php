@@ -74,7 +74,8 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                 <li><a href="#descari">DESCARI COMMITTEES</a></li>
                 <li><a href="#drakh">THE DRAKH (Unofficial)</a></li>                
                 <li><a href="#llort">THE LLORT</a></li>
-                <li><a href="#markab">MARKAB THEOCRACY</a></li>               
+                <li><a href="#markab">MARKAB THEOCRACY</a></li>
+                <li><a href="#minbariProt">MINBARI PROTECTORATE</a></li>                               
                 <li><a href="#rogolon">ROGOLON DYNASTY</a></li>    
                 <li><a href="#smallraces">SMALL RACES</a></li>  
                 <li><a href="#usuuth">USUUTH COALITION</a></li>
@@ -218,16 +219,6 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             <li>White Stars may be used as ISA/Army of Light/White Star Fleet as well. Such a fleet is NOT tournament legal, and for good reason - but may be an interesting scenario piece (or challenge). 
             It's also far too strong to be used in regular pickup battles without asking you opponenet first!
             When used in this way, only White Stars (and any Combat Flyers they can carry) can be deployed.  Be warned though - in skilled hands such a fleet is simply overwhelming.</li>                                                                         
-
-
-    <h4 id="minbari" style="">MINBARI PROTECTORATE</h4>
-    <p>This is a part of the Minbari Federation, but consists of several non-Minbari members that are overseen by the Federation. They have a degree of autonomy, 
-    including providing local defense to their worlds.</p>
-    <p>The Protectorate uses older Minbari hulls with the notable difference being that units do not come equipped with the Jammer system. 
-    The Tinashi is their most modern hull along with a handful of Nials.</p>
-    <p>The Protectorate generally uses the Tishat medium fighter. Their fleet options are rather limited based on the number of hulls and lacking ways to bring fighters outside a Morshin carrier. 
-    Their one noted conflict is the Pseudo-War with the Imperial Star Legion raider group.</p>                                                                   
-    <a class="back-to-top" href="#top">↩ Back to Top</a>
 
 
     <h4 id="narn" style="">NARN REGIME</h4>
@@ -726,6 +717,15 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             You should also select the Religious Fervor for all your Markab ships, or none of them since it’s intended as a fleet-wide effect.</li>                                        
     <a class="back-to-top" href="#top">↩ Back to Top</a>   
 
+    <h4 id="minbariProt" style="">MINBARI PROTECTORATE</h4>
+    <p>This is a part of the Minbari Federation, but consists of several non-Minbari members that are overseen by the Federation. They have a degree of autonomy, 
+    including providing local defense to their worlds.</p>
+    <p>The Protectorate uses older Minbari hulls with the notable difference being that units do not come equipped with the Jammer system. 
+    The Tinashi is their most modern hull along with a handful of Nials.</p>
+    <p>The Protectorate generally uses the Tishat medium fighter. Their fleet options are rather limited based on the number of hulls and lacking ways to bring fighters outside a Morshin carrier. 
+    Their one noted conflict is the Pseudo-War with the Imperial Star Legion raider group.</p>                                                                   
+    <a class="back-to-top" href="#top">↩ Back to Top</a>
+        
 
     <h4 id="rogolons" style="">ROGOLON DYNASTY</h4>
     <p>No special rules or systems.  Notable mainly for the complete absence of anti-fighter weaponry on their ships.</p>                                             
