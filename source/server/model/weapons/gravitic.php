@@ -1040,7 +1040,7 @@ class GravityNet extends Weapon implements SpecialAbility{
     public $animationColor = array(0, 255, 255);	
     public $animationExplosionScale = 0.3; //single hex explosion
     public $priority = 1; 
-	public $hextarget = true; //Added
+	public $hextarget = false; //Toggle to switch between hexTarget and normalTarget modes
 	public $hidetarget = true;
 	public $ballistic = true;   
 	public $specialAbilities = array("PreFiring");
@@ -1054,9 +1054,14 @@ class GravityNet extends Weapon implements SpecialAbility{
     protected $canTargetAll = true; //Allows weapon to target allies AND enemies, pass to Front End in strpForJson()	
     public $fireControl = array(1, 2, 3); // fighters, <mediums, <capitals 
 	public $preFires = true;
-    public $canSplitShots = true; //this might not be needed
+    public $canSplitShots = true;
+    protected $hasSpecialLaunchHexCalculation = true;
     public $specialHitChanceCalculation = true;			
 	public $repairPriority = 6;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
+
+    public $firingModes = array(
+		1 => "Grav Net"
+	);
 	    
     protected $possibleCriticals = array(14 => "ReducedRange");
 	//private static $alreadyNetted = array();	
@@ -1087,6 +1092,47 @@ class GravityNet extends Weapon implements SpecialAbility{
         //$this->data["Special"] .= "<br>No effect on Enormous units.";	        	        		
 		parent::setSystemDataWindow($turn);     
     }
+
+    public function getFiringHex($gamedata, $fireOrder) {
+			//if($this->launcher){	//Check that Proximity Laser have a Launcher (it always should)
+
+		    $launchPos = null; // Initialize $launchPos outside the loop
+			//$launcherFireOrders = $this->launcher->getFireOrders($gamedata->turn);
+			
+			if($fireOrder->damageclass == 'gravNetTargeter'){
+				$launchPos = parent::getFiringHex($gamedata, $fireOrder); //Use normal method for hex targeted launcher.
+			}else{				
+				$allFireOrders = $this->getFireOrders($gamedata->turn);
+				$launcherFireOrder = 1; //second fire order is always grav translocation hex target.	
+
+				foreach($allFireOrders as $fireOrderCheck){
+					if ($fireOrderCheck->damageclass == 'gravNetTargeter'){
+						$launcherFireOrder = $fireOrderCheck;					
+						break;						
+					}				
+				}	
+			
+				if($launcherFireOrder){				       	
+						// Sometimes player might target ship after all...
+						if ($launcherFireOrder->targetid != -1) {
+							$targetship = $gamedata->getShipById($launcherFireOrder->targetid);
+							$movement = $targetship->getLastTurnMovement($launcherFireOrder->turn);
+							$launcherFireOrder->x = $movement->position->q;
+							$launcherFireOrder->y = $movement->position->r;
+							$launcherFireOrder->targetid = -1; // Correct the error
+						}
+
+					$target = new OffsetCoordinate($launcherFireOrder->x, $launcherFireOrder->y);
+					$launchPos = $target; 	            
+					//break;				       
+				}
+
+				//Check in case something went wrong, in which case use default to prevent error.	
+				if($launchPos == null || $launcherFireOrder == null) $launchPos = parent::getFiringHex($gamedata, $fireOrder); //Go back to normal function if returning null for some reason.
+			}
+
+		    return $launchPos;
+		} //endof getFiringHex
 
 	public function calculateHitBase($gamedata, $fireOrder){         
         parent::calculateHitBase($gamedata, $fireOrder);
