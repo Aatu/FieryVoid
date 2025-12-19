@@ -235,6 +235,7 @@ window.BallisticIconContainer = function () {
 				'1-Blanket Shield': { type: 'hexGreen', text: 'Shade Modulator', color: '#008000' },
 				'3-Blanket Shade': { type: 'hexYellow', text: 'Shade Modulator', color: '#787800' },
 				'Transverse Jump': { type: 'hexBlue', text: 'Transverse Jump', color: '#787800' },
+				'Gravity Net': { type: 'hexGreen', text: 'Gravity Net', color: '#008000' },
 			};
 
 			if (modeName == 'Transverse Jump' && !shipManager.isDetectedTorvalus(shooter, 20) && !gamedata.isMyorMyTeamShip(shooter)) return;

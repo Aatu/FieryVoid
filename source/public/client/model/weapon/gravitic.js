@@ -211,7 +211,7 @@ GravityNet.prototype.doMultipleFireOrders = function (shooter, target, system) {
 
         var fire = {
             id: fireid,
-            type: 'gravitic',
+            type: 'prefiring',
             shooterid: shooter.id,
             targetid: target.id,
             weaponid: this.id,
@@ -249,7 +249,7 @@ GravityNet.prototype.doMultipleHexFireOrders = function (shooter, hexpos) {
             var fireid = shooter.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
             var fire = {
                 id: fireid,
-                type: 'gravitic',
+                type: 'prefiring',
                 shooterid: shooter.id,
                 targetid: -1,
                 weaponid: this.id,

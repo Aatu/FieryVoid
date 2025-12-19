@@ -1059,7 +1059,7 @@ class GravityNet extends Weapon implements SpecialAbility{
 	public $repairPriority = 6;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
 
     public $firingModes = array(
-		1 => "Grav Net"
+		1 => "Gravity Net"
 	);
 	    
     protected $possibleCriticals = array(14 => "ReducedRange");
