@@ -932,7 +932,8 @@ class TransverseDrive extends Weapon implements SpecialAbility, DefensiveSystem{
 		$shipPos = $ship->getHexPos(); 		
 		
         $rolled = Dice::d(20); //Roll d20 to decide what happens during jump
-		
+        //$rolled = 20; //For debugging
+
 		$targetPos = new OffsetCoordinate($fireOrder->x, $fireOrder->y);
         $dis = mathlib::getDistanceHex($shipPos, $targetPos); //How many hexes did player choose to jump. 
 
@@ -986,15 +987,15 @@ class TransverseDrive extends Weapon implements SpecialAbility, DefensiveSystem{
 
 		} else if($rolled == 19){ //19 - Fail, test jump engine for explosion then return.
 			$jumpFailure = $this->checkJumpEngine($ship, $gamedata);
-			if($jumpFailure) return;  //Ship blew up, no need to do transverse jump.
+			//if($jumpFailure) return;  //Ship blew up, no need to do transverse jump.
         	$fireOrder->rolled = $rolled; 
 
 			$fireOrder->pubnotes .= " Transverse jump attempt was unsuccesful!";						
 			return;
 
-		} else if($rolled == 20){ //20- Fail with ForcedOfflineOneTurn Crit
+		} else if($rolled >= 20){ //20- Fail with ForcedOfflineOneTurn Crit
 			$jumpFailure = $this->checkJumpEngine($ship, $gamedata);
-			if($jumpFailure) return;  //Ship blew up, no need to do transverse jump.
+			//if($jumpFailure) return;  //Ship blew up, no need to do transverse jump.
         	$fireOrder->rolled = $rolled; 
 
 			if(!$jumpFailure){
@@ -1024,8 +1025,156 @@ class TransverseDrive extends Weapon implements SpecialAbility, DefensiveSystem{
 			if(!$shadingField->detected && $shadingField->shaded){ //Currently undetected and Shaded.
 				$shadingField->checkStealthNextPhase($gamedata, 20);
 			} 
+		}	
+		
+		//Check for collision now, incase has jumping into a Terrain hex etc.
+		//$rammingAttack = $ship->getSystemByName("RammingAttack");	
+		$crashableShips = array();
+		$shipPoS = $targetPos;
+
+		foreach($gamedata->ships as $otherShip){
+			if($otherShip->isDestroyed()) continue; //Ignore destroyed ships
+			if(!$otherShip->isTerrain() && !$otherShip->Enormous) continue;	//Don't add non-Terrain or non-Enormous units
+			if($otherShip->getTurnDeployed($gamedata) > $gamedata->turn) continue; //Ship not deployed yet.	Shouldn't happen for Enormous units...
+			$dist = mathlib::getDistance($transverseJump->getCoPos(), $otherShip->getCoPos());									
+			if($dist <= 8) $crashableShips[] = $otherShip;	//You can only jump 3 hexes, and max terrain radiius is 3, but let's add a 2 hex buffer to future proof.		
+		}
+
+		foreach($crashableShips as $crashShip){		
+			$crashShipPoS = $crashShip->getHexPos();			
+			$collision = $this->checkForCollisions($ship, $transverseJump,  $gamedata, $crashShipPoS, $crashShip);
+
+			if(!empty($collision)){
+				foreach($collision as $crashShipId=>$location){ //Should only be one					
+					$crashShip = $gamedata->getShipById($crashShipId);
+					$rammingAttack = $crashShip->getSystemByName("RammingAttack");										
+					$fire = new FireOrder(-1, 'prefiring', $crashShip->id, $ship->id, $rammingAttack->id, -1, $gamedata->turn,
+						1, 100, 100, 1, 0, 0, $shipPoS->q,  $shipPoS->r, 'TerrainCrash', -1
+					);
+					$fire->chosenLocation = $location;							
+					$fire->addToDB = true;		
+					$this->fireOrders[] = $fire;
+					$rammingAttack->fire($gamedata, $fire);					
+				}		
+			}			
+
 		}		
+
 	}
+
+	private function checkForCollisions($ship, $transverseJump, $gamedata, $terrainPosition, $crashShip){
+	    $collisiontargets = array(); // Initialize array
+		
+		if ($crashShip->Huge > 0) { //Terrain occupies more than just 1 hex!  Need to check all of its hexes.
+			// Add code that calls a new function, and replicates check below for all hexes within radius.
+			$radiusHexes = mathlib::getNeighbouringHexes($terrainPosition, $crashShip->Huge);
+                
+			$startMove = $ship->getLastTurnMovement($gamedata->turn);
+			$previousPosition = $startMove->position; //This will change as we go through movements, but need to initialise as where the ship starts this turn.
+			$previousFacing = $startMove->getFacingAngle();
+		
+			//foreach ($ship->movement as $shipMove) {
+				//if ($shipMove->turn == $gamedata->turn) {
+					//if ($shipMove->type == "prefire") { //Only interested in moves that cause ship to Transverse Jump, normal ram checks catch others.
+							
+						// Check if shipMove position matches any position in $radiusHexes
+						$match = array_filter($radiusHexes, function($hex) use ($transverseJump) {
+							return $hex['q'] == $transverseJump->position->q && $hex['r'] == $transverseJump->position->r;
+						});
+		
+						// Or if it matches the centre position directly
+						if (
+							!empty($match) || 
+							($transverseJump->position->q == $terrainPosition->q && $transverseJump->position->r == $terrainPosition->r)
+						) {
+							// Prevent duplicate ship IDs
+						if (!isset($collisiontargets[$crashShip->id])) {
+								$relativeBearing = $this->getTempBearing($previousPosition, $terrainPosition, $ship, $previousFacing);
+								$location = $this->getCollisionLocation($relativeBearing, $ship);
+								$collisiontargets[$crashShip->id] = $location; // Add to array to be targeted.
+							}
+						}
+					//}
+		
+					//$previousPosition = $transverseJump->position;
+					//$previousFacing = $transverseJump->getFacingAngle();
+				//}
+			//}	
+		}else{					
+			// Now check other movements in the turn.
+			$startMove = $ship->getLastTurnMovement($gamedata->turn);	//initialise as last move in previous turn, in case first move takes ship in asteroid.				
+			$previousPosition = $startMove->position; //This will change as we go through movements, but need to initialise as where the ship starts this turn.			 
+			$previousFacing = $startMove->getFacingAngle();			
+
+			//foreach ($ship->movement as $shipMove) {
+				//if ($shipMove->turn == $gamedata->turn) {
+			
+				//if ($shipMove->type == "prefire") { //Only interested in moves that cause ship to Transverse Jump, normal ram checks catch others.				
+					// Check if the position matches the asteroids, e.g. zero distance.
+					if ($terrainPosition->q == $transverseJump->position->q && $terrainPosition->r == $transverseJump->position->r) {
+						$relativeBearing = $this->getTempBearing($previousPosition, $terrainPosition, $ship, $previousFacing);
+						$location = $this->getCollisionLocation($relativeBearing, $ship);
+						$collisiontargets[$crashShip->id] = $location; // Add to array to be targeted.
+					}
+				//}
+			
+				/*// If the movement type is "end", and ship on Asteroid coordinates, remove the ship from collision targets as auto-ram chance with Enormous units will do the work here.
+				if ($shipMove->type == "end" && 
+					isset($collisiontargets[$ship->id]) &&
+					$terrainPosition->q == $shipMove->position->q &&
+					$terrainPosition->r == $shipMove->position->r) {
+					unset($collisiontargets[$ship->id]); // Remove from collision targets.
+				}*/
+
+				//$previousPosition = $transverseJump->position;
+				//$previousFacing = $transverseJump->getFacingAngle();
+
+				//}
+			//}
+		}
+
+	    return $collisiontargets;		
+		
+	}//end of checkForCollisions()		
+
+
+	private function getTempBearing($shipPosition, $asteroidPosition, $ship, $facing){
+		$relativeBearing = 0;	
+		$oPos = mathlib::hexCoToPixel($shipPosition);//Convert to pixel format		
+		$tPos = mathlib::hexCoToPixel($asteroidPosition); //Convert to pixel format
+				
+		$compassHeading = mathlib::getCompassHeadingOfPoint($oPos, $tPos);//Get heading using pixel formats.
+        $relativeBearing =  Mathlib::addToDirection($compassHeading, -$facing);//relative bearing, compass - current facing.
+       
+        if( Movement::isRolled($ship) ){ //if ship is rolled, mirror relative bearing.  Not really needed, since arcs don't actually change.  
+            if( $relativeBearing !== 0 ) { //mirror of 0 is 0
+                $relativeBearing = 360-$relativeBearing;
+            }
+        }        
+
+		return round($relativeBearing);//Round and return!
+	}
+
+
+	private function getCollisionLocation($relativeBearing, $target) {
+		foreach ($target->getLocations() as $location) {
+			$min = $location["min"];
+			$max = $location["max"];
+			
+			// Normal range check
+			if ($min < $max && $relativeBearing >= $min && $relativeBearing < $max) {
+				return $location["loc"];
+			}
+			
+			// Wrap-around range check (e.g., 330-30)
+			if ($min > $max && ($relativeBearing >= $min || $relativeBearing < $max)) {
+				return $location["loc"];
+			}
+		}
+		
+		return 0; // Should not happen but return default if so.
+	} //endof getCollisionLocation()
+
 
 	public function checkJumpEngine($ship, $gamedata)
 	{

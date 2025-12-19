@@ -54,7 +54,8 @@
         <script src="static/ships.js"></script>
 		-->
 <?php		
-	include 'static/ships.php';
+	//include 'static/ships.php'; //Changed how staticships are loaded to help with HTTP Protocol errors - DK Dec 2025
+
 ?>
 		
 <!--		<script src="client/helper.js"></script>-->
@@ -1037,7 +1038,25 @@ if ($asteroids == false && $moons == false) {
             <span class="totalUnitCostAmount"></span>
         </span>
     </div>   
-    </main>	                                     
+    </main>	
+    
+<div id="global-blocking-overlay" class="blocking-overlay" style="display:none;">
+    <span>
+        TRANSMITTING ORDERS...<br>
+        <span class="blocking-warning">Do not close window</span>
+    </span>
+
+</div>    
+
+<footer class="site-disclaimer">
+  <p>
+DISCLAIMER — Fiery Void is an unofficial, fan-created work based on concepts from Agents of Gaming’s Babylon 5 Wars. 
+It is not affiliated with, endorsed by, or sponsored by any official rights holders. 
+All trademarks and copyrights remain the property of their respective owners.
+  </p>
+</footer>
+
+
 	</body>
 
 

@@ -48,9 +48,17 @@
 	<!-- replaced by php include below
     <script src="static/ships.js"></script>
 	-->
-<?php		
-	include 'static/ships.php';
-?>
+    <?php		
+        //include 'static/ships.php'; //Changed how staticships are loaded to help with HTTP Protocol errors - DK Dec 2025
+        $shipClasses = [];
+        if(isset($serverdata) && isset($serverdata->ships)){
+            foreach($serverdata->ships as $ship){
+                $shipClasses[] = $ship->phpclass;
+            }
+        }
+        $staticShips = ShipLoader::getShipsByClass($shipClasses);
+        echo '<script>window.staticShips = ' . json_encode($staticShips) . ';</script>';
+    ?>
     <script>
         window.Config = {
             HEX_SIZE: 50
@@ -781,6 +789,13 @@
     </div>
     
         
+</div>
+
+<div id="global-blocking-overlay" class="blocking-overlay" style="display:none;">
+    <span>
+        TRANSMITTING ORDERS...<br>
+        <span class="blocking-warning">Do not close window</span>
+    </span>
 </div>
 
 </body>

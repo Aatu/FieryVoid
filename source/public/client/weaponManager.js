@@ -1417,6 +1417,30 @@ window.weaponManager = {
 		}
     },	
 
+    //Some split shots weapons add self-intercepts at beginning of fireorders, this lets us check if such an order exists - DK
+    canRemInterceptSingle: function canRemInterceptSingle(ship, weapon) {
+        if (gamedata.gamephase != 3 ) return false;//declaration in firing phase only
+        if (!weapon.weapon) return false;//only weapons can intercept ;)        
+		for (var i = 0; i < weapon.fireOrders.length; i++) { 
+            if (weapon.fireOrders[i].type == "selfIntercept") {
+                return true; //An order found
+            }
+        }
+        return false;
+    },    
+
+    //Some split shots weapons add self-intercepts at beginning of fireorders, this lets us remove them without deleting all offensive orders - DK
+    removeSelfInterceptSingle: function removeSelfInterceptSingle(ship, weapon) {
+		for (var i = 0; i < weapon.fireOrders.length; i++) { 
+            if (weapon.fireOrders[i].type == "selfIntercept") {
+                weapon.fireOrders.splice(i, 1);
+                break; //we are only remove one order
+            }
+        }
+        weapon.recalculateForIntercept(false); //Slicers need this to adjust hit chance for other shots, perhaps other will in future too. 
+        webglScene.customEvent('SystemDataChanged', { ship: ship, system: weapon });
+    },
+
 
     setSelfIntercept: function setSelfIntercept(ship, valid) {
         for (var weapon in valid) {

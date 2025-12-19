@@ -14,3 +14,4 @@ doc
 nano*
 *.log
 /node_modules
+/source/public/static

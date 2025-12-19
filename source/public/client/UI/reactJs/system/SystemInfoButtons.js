@@ -199,14 +199,28 @@ class SystemInfoButtons extends React.Component {
             		return;
 		}		
 		weaponManager.onDeclareSelfInterceptSingle(ship, system);
-		webglScene.customEvent('CloseSystemInfo');
+		if(system.canSplitShots) var finished = system.checkFinished(); //Do not close system info buttons if player can still selfintercept
+		if(finished) webglScene.customEvent('CloseSystemInfo');
 	}	
 	/*declare all similar undeclared weapons for defensive fire this turn*/
 	declareSelfInterceptAll(e) {
         e.stopPropagation(); e.preventDefault();
 		const {ship, system} = this.props;
 		weaponManager.onDeclareSelfInterceptSingleAll(ship,system);
-		webglScene.customEvent('CloseSystemInfo');
+		if(weapon.canSplitShots) var finished = weapon.checkFinished();
+		if(finished) webglScene.customEvent('CloseSystemInfo');
+	}	
+
+	/*declare this weapon to be eligible for defensive fire this turn*/
+	remSelfIntercept(e) {
+        	e.stopPropagation(); e.preventDefault();
+		const {ship, system} = this.props;
+		if (!canRemIntercept(ship, system)) {
+            		return;
+		}		
+		weaponManager.removeSelfInterceptSingle(ship, system);
+		//if(system.canSplitShots) var finished = system.checkFinished(); //Do not close system info buttons if player can still selfintercept
+		//if(finished) webglScene.customEvent('CloseSystemInfo');
 	}	
 
 	activate(e) {
@@ -512,13 +526,14 @@ class SystemInfoButtons extends React.Component {
                 {canBoost(ship, system) && <Button title="Boost" onClick={this.boost.bind(this)} img="./img/plussquare.png"></Button>}
                 {canAddShots(ship, system) && <Button title="More shots"onClick={this.addShots.bind(this)} img="./img/plussquare.png"></Button>}
                 {canReduceShots(ship, system) && <Button title="Less shots" onClick={this.reduceShots.bind(this)} img="./img/minussquare.png"></Button>}
-				{canRemoveFireOrderMulti(ship, system) && <Button title="Remove a fire order" onClick={this.removeFireOrderMulti.bind(this)} img="./img/unfiringSmall.png"></Button>}
+				{canRemoveFireOrderMulti(ship, system) && <Button title="Remove last fire order" onClick={this.removeFireOrderMulti.bind(this)} img="./img/unfiringSmall.png"></Button>}
 				{canRemoveFireOrder(ship, system) && <Button title="Remove all fire orders (RMB = All weapons selected)" onClick={this.removeFireOrder.bind(this)} onContextMenu={this.removeFireOrderAll.bind(this)} img="./img/firing.png"></Button>}
 				
 				{canChangeFiringMode(ship, system) && getFiringModesCurr(ship, system)}
 				{canChangeFiringMode(ship, system) && getFiringModes(ship, system, this.changeFiringMode.bind(this), this.allChangeFiringMode.bind(this))}
-				{canSelfIntercept(ship, system) && <Button title="Allow interception (RMB = All systems selected)" onClick={this.declareSelfIntercept.bind(this)} onContextMenu={this.declareSelfInterceptAll.bind(this)} img="./img/selfIntercept.png"></Button>}
-				
+				{canSelfIntercept(ship, system) && <Button title="Allow interception (RMB = All systems selected)" onClick={this.declareSelfIntercept.bind(this)} onContextMenu={this.declareSelfInterceptAll.bind(this)} img="./img/addSelfIntercept.png"></Button>}
+				{canRemIntercept(ship, system) && <Button title="Remove an intercept order" onClick={this.remSelfIntercept.bind(this)} onContextMenu={this.remSelfIntercept.bind(this)} img="./img/remSelfIntercept.png"></Button>}				
+
 				{canActivate(ship, system) && <Button onClick={this.activate.bind(this)} img="./img/systemicons/Specialistclasses/select.png"></Button>}
 				{canDeactivate(ship, system) && <Button onClick={this.deactivate.bind(this)} img="./img/systemicons/Specialistclasses/unselect.png"></Button>}		
 
@@ -640,7 +655,7 @@ export const canDoAnything = (ship, system) => canOffline(ship, system) || canOn
 	|| canOverload(ship, system) || canStopOverload(ship, system) || canBoost(ship, system) 
 	|| canDeBoost(ship, system) || canAddShots(ship, system) || canReduceShots(ship, system) || canRemoveFireOrderMulti(ship, system)
 	|| canRemoveFireOrder(ship, system) || canChangeFiringMode(ship, system)
-	|| canSelfIntercept(ship, system) || canAA(ship,system) || canBFCP(ship, system) || canSpec(ship,system) || canTSShield(ship,system) 
+	|| canSelfIntercept(ship, system) || canRemIntercept(ship, system) || canAA(ship,system) || canBFCP(ship, system) || canSpec(ship,system) || canTSShield(ship,system) 
 	|| canThoughtShield(ship,system) || canTSShieldGen(ship,system) || canThoughtShieldGen(ship,system) 
 	|| canSRdisplayCurrSystem(ship,system) || canActivate(ship, system) || canDeactivate(ship, system);
 
@@ -689,6 +704,7 @@ const canChangeFiringMode = (ship, system) => system.weapon  && ((gamedata.gamep
 
 //can declare eligibility for interception: charged, recharge time >1 turn, intercept rating >0, no firing order
 const canSelfIntercept = (ship, system) => system.weapon && weaponManager.canSelfInterceptSingle(ship, system);
+const canRemIntercept = (ship, system) => system.weapon && system.canSplitShots && weaponManager.canRemInterceptSingle(ship, system);
 
 const canActivate = (ship, system) => system.canActivate(); //Used to manually fire weapons/systems that don't need to target e.g. Second Sight/Thoughwave
 const canDeactivate = (ship, system) => system.canDeactivate();  
@@ -723,7 +739,7 @@ const getFiringModes = (ship, system, changeFiringMode, allChangeFiringMode) => 
 		}
 		
 		var textTitle = "set mode " + firingMode + " (R = mass)"; 
-		return <Button title={textTitle} onClick={changeFiringMode} onContextMenu={allChangeFiringMode}  img={img}>{firingMode.substring(0, 1)}</Button>;
+		return <Button title={textTitle} onClick={changeFiringMode} onContextMenu={allChangeFiringMode}  img={img}>{firingMode.substring(0, system.modeLetters)}</Button>;
 	}
 }
 
@@ -747,7 +763,7 @@ const getFiringModesCurr = (ship, system) => {
 		}
 		
 		var textTitle = "current mode: " + firingMode; 
-		return <Button title={textTitle} img={img}>{firingMode.substring(0, 1)}</Button>;
+		return <Button title={textTitle} img={img}>{firingMode.substring(0, system.modeLetters)}</Button>;
 	}
 } //endof getFiringModesCurr
 

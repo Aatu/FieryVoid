@@ -1,10 +1,9 @@
 <?php
 declare(strict_types=1);
-// Optimised version: Bundles all ships into one file to avoid HTTP/2 request overload
-// 12.2025 - Refactored to generate single shipsCombined.js
+
 /**
  * generateStaticShipFileWeb.php
- * Generates static JS files for all ships, BUNDLED into one file.
+ * Generates static JS files for all ships, split per faction.
  * Updated for PHP 8 + Apache + Brotli/Gzip
  */
 
@@ -22,22 +21,13 @@ require_once __DIR__ . '/source/public/global.php';
 
 //// ─── Config ────────────────────────────────────────────────────────
 $fileBase = __DIR__ . '/source/public/static/ships';
-$combinedFile = $fileBase . 'Combined.js';
+$factionNo = 0;
 
 //// ─── Fetch All Factions ─────────────────────────────────────────────
 //$allFactions = ShipLoader::getAllFactions();
 $allFactions = ShipLoader::getAllFactionsStatic(); //Changed to static method - 12.12.25
 if (!$allFactions) {
     exit("<b>Error:</b> No factions found.");
-}
-
-// Initialize combined file with empty object
-file_put_contents($combinedFile, 'window.staticShips = {};' . PHP_EOL);
-
-// Ensure JSON directory exists
-$jsonDir = __DIR__ . '/source/public/static/json';
-if (!is_dir($jsonDir)) {
-    mkdir($jsonDir, 0777, true);
 }
 
 //// ─── Generate Per-Faction JS Files ──────────────────────────────────
@@ -63,25 +53,29 @@ foreach ($allFactions as $factionName) {
     // Free memory after each faction
     unset($shipsCurr);
 
-    // Append this faction to the combined file
-    $chunk = 'window.staticShips["' . $factionName . '"]=' . json_encode($data, JSON_PARTIAL_OUTPUT_ON_ERROR | JSON_UNESCAPED_UNICODE) . ';' . PHP_EOL;
-    file_put_contents($combinedFile, $chunk, FILE_APPEND);
-
-    // Save pure JSON for server-side caching (Game Lobby)
-    $jsonPath = $jsonDir . '/' . $factionName . '.json';
-    $jsonPayload = [$factionName => $data];
-    file_put_contents($jsonPath, json_encode($jsonPayload, JSON_NUMERIC_CHECK | JSON_PARTIAL_OUTPUT_ON_ERROR | JSON_UNESCAPED_UNICODE));
+    // Write faction file
+    $factionNo++;
+    $fileName = "{$fileBase}{$factionNo}.js";
+    $varBase = "window.staticShips[\"{$factionName}\"]=";
+    file_put_contents($fileName, $varBase . json_encode($data, JSON_PARTIAL_OUTPUT_ON_ERROR | JSON_UNESCAPED_UNICODE) . ';');
 
     unset($data); // Free memory
 }
 
 //// ─── Base Files ─────────────────────────────────────────────────────
 
-// PHP file includes the single bundled JS file
-$includeText = '<script src="static/shipsCombined.js"></script>';
+// JS file 0 initializes the variable
+file_put_contents("{$fileBase}0.js", 'window.staticShips = {};');
+
+// PHP file includes all JS files sequentially
+$includeText = '';
+for ($i = 0; $i <= $factionNo; $i++) {
+    $includeText .= '<script src="static/ships' . $i . '.js"></script>' . PHP_EOL;
+    //$includeText .= '<script defer src="static/ships' . $i . '.js"></script>' . PHP_EOL;   Alternative defer method that's slower but more stable - DK 
+}
 file_put_contents("{$fileBase}.php", $includeText);
 
 //// ─── Output Result ─────────────────────────────────────────────────
-echo "<br/><br/><big>Ships generated (Bundled)!</big><br/>\n";
+echo "<br/><br/><big>Ships generated for {$factionNo} factions!</big><br/>\n";
 
 exit;
