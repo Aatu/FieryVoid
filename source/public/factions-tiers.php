@@ -862,10 +862,13 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             It has a number of other traits too, some of which has been simplified for Fiery Void.</li>
         <li>The most powerful version of this weapon, the Heavy Slicer found only on Primordial ships uses Piercing damage as its default mode - which can even overkill at full power so that its damage potential isn’t wasted. 
             The Raking damage mode is capped at 2-turns charge level.  The Heavy Slicer on the Shadow Battlecruiser has both forward and rear arcs, you can access these by using Firing Modes and can split your sweeping fire between both forward and rear arcs.</li>
-        <li>All other Slicers use Sweeping Mode as their default, which allows them to target as many different enemies as it has damage dice 
-            e.g. 8D10 would allow for 8 separate shots. Simply select the weapon and choose who you want to target in this mode, although each ship can only be targeted once (whilst fighter flights can be targeted multiple times). 
-            When splitting shots, the weapon will attract a cumulative -5% penalty for every additional shot after the first.</li>
-        <li>Slicers may spend 1d10 damage to gain -10 intercept, this is cumulative and suffers no degradation.  Click the 'Self-Intercept' green shield icon to assign each 1d10, and use ship tooltip to track defensive fire.";   .</li>                                                                 
+        <li>All other Slicers use Sweeping Mode as their default, which allows them to target as many different enemies as it has damage dice, assigning a number of d10 target dice to each shot up to their maximum amount. Simply select the weapon and choose who you want to target in this mode, although each ship can only be targeted once (whilst fighter flights can be targeted multiple times). 
+            When splitting shots, the weapon will attract a cumulative -5% penalty for every additional shot after the first, as well as any modifier for defensive shots (see below).</li>
+        <li>Slicers may spend 1d10 damage to gain -10 intercept by clicking the 'Self-Intercept' green shield icon, this is cumulative and suffers no degradation. 
+            For each click on Self Intercept you will commit 1d10 to intercepting as well as increase the number of DIFFERENT shots you can intercept. 
+            If you choose to fire offensively, or select any amount self intercept dice, but do not use all your available dice, then any unspent dice will also be added to the self intercept total.  You can use ship tooltip to track defensive fire and remaining dice.  
+            NOTE - During Firing Phase, each self intercept order counts as a 'shot' for the purposes of the -5% penalty detailed above.  
+            However, if during fire resolution, your intercepts are used against fewer different incoming shots than you had committed self intercepts orders, the hit chances of your offensive shots will improve accordingly (but never get worse).";   .</li>                                                                 
     <h5>Phasing Pulse Cannon</h5>
         <li>Pulse weapons that completely ignore any kind of shield or shield-like defense used by Younger races. 
             Note that EM shields, like those used on the White Star, are treated as Ancient even when used on Younger Race ships.</li>      
