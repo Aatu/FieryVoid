@@ -868,14 +868,29 @@ class SuperHeavyMolecularDisruptor extends Raking
 		//Slicers are usually THE weapons of Shadow ships - hence higher repair priority
 		public $repairPriority = 6;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
         private $damageDice = array();   
-        private $maxDiceArray = array(1 => 4, 2 => 6, 3=> 8); //Helpful array so we only need to write beforeFiringResolution() in MolecularSlicerL and it just extends.		
+        private $maxDiceArray = array(1 => 4, 2 => 6, 3=> 8);
+        private $interceptsAllowed = 0; //Increased by selfIntercept orders which is how we track the number of unique incoming fires we can intercept.
+        private $uniqueIntercepts = array();		
 
 		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){			
             if ( $maxhealth == 0 ) $maxhealth = 10;
             if ( $powerReq == 0 ) $powerReq = 10;
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
-		
+
+	 		    
+		public function setSystemDataWindow($turn){			
+			parent::setSystemDataWindow($turn);   
+			$this->data["Special"] = "Uninterceptable. Ignores armor.";
+			$this->data["Special"] .= "<br>May choose to split shots between multiple targets, allocating a number to d10 damage dice to each one.";
+			$this->data["Special"] .= "<br>Each shot after the first attracts a cumulative -5% to hit modifier.";            
+            $this->data["Special"] .= "<br>Can fire accelerated for less damage:";  
+			$this->data["Special"] .= "<br> - 1 turn: 4d10+4"; 
+			$this->data["Special"] .= "<br> - 2 turns: 6d10+6"; 
+			$this->data["Special"] .= "<br> - 3 turns: 8d10+8"; 
+			$this->data["Special"] .= "<br>May spend 1d10 dice to gain -10 intercept, this is cumulative and suffers no degradation.";
+			$this->data["Special"] .= "<br>Each self-intercept dice committed increases the number of shots Slicer may intercept, as well as the total interception amount.";                            
+        }        
 
 		/*Slicers ignore armor, except against hardened advanced armor*/
 		public function getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos=null){
@@ -905,85 +920,73 @@ class SuperHeavyMolecularDisruptor extends Raking
                 }
             
                 if($order->type == "selfIntercept"){ //Defensive shot.
-                    $diceUsed += 1; //Add intercept orders                  
+                    $diceUsed += 1; //Add intercept orders  
+                    $this->interceptsAllowed += 1; //Add intercept orders                                      
                 }                   
             } 
 
             if($diceUsed > 0){ //A shot was fired or Slicer was set to selfIntercept                            
                 $spareDice = $maxDice - $diceUsed;
-                $ship = $this->getUnit();
                 while ($spareDice > 0){
+                    $this->guns++; //Add a new gun to increase intercept shots by 1                                
+                    $spareDice -= 1;                 
+                } 
+             
+                if($this->interceptsAllowed == 0){
+                    //Offensive shot fired, but no selfINtercept declared.  Let's make one for the spare dice.
+                    $ship = $this->getUnit();                      
                     $interceptFireOrder = new FireOrder( -1, "selfIntercept", $ship->id, $ship->id,
                         $this->id, -1, $gamedata->turn, 1,
                         0, 0, 1, 0, 0, null, null
                     );
                     $interceptFireOrder->addToDB = true;
                     $this->fireOrders[] = $interceptFireOrder;
-                    $this->guns++;                                
-                    $spareDice -= 1;
-                }                
-            }    
+                    $this->interceptsAllowed = 1;                                      
+                }                                       
+            }   
 
         }
 
 		public function calculateHitBase(TacGamedata $gamedata, FireOrder $fireOrder) {
 		    parent::calculateHitBase($gamedata, $fireOrder);
+    
+		    $hitmod = 0; // Initialize
+		    // Find the position of THIS fireOrder in the array
+		    $index = 0; // Initialize index
 
-		    // Amend fireOrder->needed based on number of shots and their order in array
-		    if ($fireOrder->firingMode == 1) {        
-		        $hitmod = 0; // Initialize
-
-		        // Find the position of THIS fireOrder in the array
-		        $index = 0; // Initialize index
-		        foreach ($this->fireOrders as $i => $splitShots) {
-		            if ($splitShots->id === $fireOrder->id) {
-		                // Found the current fireOrder
-                        $index = $i;
-		                break; // Exit the loop
-		            }
+		    foreach ($this->fireOrders as $i => $splitShots) {
+		        if ($splitShots->id === $fireOrder->id) {
+		            $index = $i;
+                    break;
 		        }
+            }    
 
-		        // Use $index to adjust the hitmod or fireOrder->needed as necessary
-		        // Example: Modify hitmod based on shot position
-		        $hitmod = $index * 5; // Example logic (adjust as needed)
-		        $fireOrder->needed -= $hitmod; // Modify fireOrder->needed based on hitmod
-		    }            
-		}
-	 		    
-		public function setSystemDataWindow($turn){			
-			parent::setSystemDataWindow($turn);   
-			$this->data["Special"] = "Uninterceptable. Ignores armor.";
-			$this->data["Special"] .= "<br>May choose to split shots between multiple targets, allocating a number to d10 damage dice to each one.";
-			$this->data["Special"] .= "<br>Each shot after the first attracts a cumulative -5% to hit modifier.";            
-            $this->data["Special"] .= "<br>Can fire accelerated for less damage:";  
-			$this->data["Special"] .= "<br> - 1 turn: 4d10+4"; 
-			$this->data["Special"] .= "<br> - 2 turns: 6d10+6"; 
-			$this->data["Special"] .= "<br> - 3 turns: 8d10+8"; 
-			$this->data["Special"] .= "<br> - May spend 1d10 damage to gain -10 intercept, this is cumulative and suffers no degradation.";               
-        }
-		
-		/*
-		public function getDivider(){ //by how much damage should be divided - depends on mode
-			$divider = 1;
-			switch($this->firingMode){
-					case 2:
-							$divider = 3;
-							break;
-					case 3:
-							$divider = 6;
-							break;
-					default:
-							$divider = 1;
-							break;
-			}
-			return $divider;
-		}
-		*/
+		    // Use $index to adjust the hitmod or fireOrder->needed as necessary
+		    // Example: Modify hitmod based on shot position                     
+		    $hitmod = $index * 5; // Example logic (adjust as needed)             
+		    $fireOrder->needed -= $hitmod; // Modify fireOrder->needed based on hitmod 		            
+            
+		}  
 
     public function getInterceptionMod($gamedata, $intercepted){
         //Slicers can freely combine their self-intercepts into a single strong intercept or multiple small ones. 
-        //Therefore, two self-intercepts at -10 would always be -20 e.g. no degradation. 
-        return $this->intercept * 5;
+        //Therefore, two self-intercepts at -10 would always be -20 e.g. no degradation.        
+
+        foreach ($this->fireOrders as $order){ //Need to  extract normal types from list fo fireOrder objects.        
+            if($order->type == "intercept"){ //A previous intercept
+                if(!(in_array($order->targetid, $this->uniqueIntercepts, true))) { //An intercept order with a targetid we haven't saved yet.
+                    $this->uniqueIntercepts[] = $order->targetid;
+                }
+            }           
+        }
+        $noOfIntercepts = count($this->uniqueIntercepts);        
+
+        if($noOfIntercepts <= $this->interceptsAllowed){ //Still headroom to intercept based on number of selfIntercept orders committed by player.
+            return $this->intercept * 5;
+        }else{
+            return 0;
+        }
+
     }//endof  getInterceptionMod
 
 	public function getDamage($fireOrder) {
@@ -1022,7 +1025,25 @@ class SuperHeavyMolecularDisruptor extends Raking
         return $finalDmg;    		      
 	}
 
-/*
+
+
+		/*
+		public function getDivider(){ //by how much damage should be divided - depends on mode
+			$divider = 1;
+			switch($this->firingMode){
+					case 2:
+							$divider = 3;
+							break;
+					case 3:
+							$divider = 6;
+							break;
+					default:
+							$divider = 1;
+							break;
+			}
+			return $divider;
+		}
+		
 		public function getDamage($fireOrder) {
 			//$dmg = 0;
             $diceMod = 0;	
@@ -1134,7 +1155,9 @@ class SuperHeavyMolecularDisruptor extends Raking
         public $canSplitShotsArray = array(1=>true);
 		public $specialHitChanceCalculation	= true;	 //To update targeting tooltip in Front End 		
         private $damageDice = array();   		
-        private $maxDiceArray = array(1 => 8, 2 => 12, 3=> 16); //Helpful array so we only need to use beforeFiringResolution() in MolecularSlicerL and it just extends.	
+        private $maxDiceArray = array(1 => 8, 2 => 12, 3=> 16);	
+        private $interceptsAllowed = 0; //Increased by selfIntercept orders which is how we track the number of unique incoming fires we can intercept.
+        private $uniqueIntercepts = array();	
 
 		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){			
             if ( $maxhealth == 0 ) $maxhealth = 15;
@@ -1151,7 +1174,8 @@ class SuperHeavyMolecularDisruptor extends Raking
             $this->data["Special"] .= "<br> - 1 turn: 8d10+12"; 
 			$this->data["Special"] .= "<br> - 2 turns: 12d10+24"; 
 			$this->data["Special"] .= "<br> - 3 turns: 16d10+36";
-			$this->data["Special"] .= "<br> - May spend 1d10 damage to gain -10 intercept, this is cumulative and suffers no degradation.";                
+			$this->data["Special"] .= "<br>May spend 1d10 dice to gain -10 intercept, this is cumulative and suffers no degradation.";
+			$this->data["Special"] .= "<br>Each self-intercept dice committed increases the number of shots Slicer may intercept, as well as the total interception amount.";               
         }
 
         public function beforeFiringOrderResolution($gamedata){ 
@@ -1173,26 +1197,53 @@ class SuperHeavyMolecularDisruptor extends Raking
                 }
             
                 if($order->type == "selfIntercept"){ //Defensive shot.
-                    $diceUsed += 1; //Add intercept orders                  
+                    $diceUsed += 1; //Add intercept orders  
+                    $this->interceptsAllowed += 1; //Add intercept orders                                      
                 }                   
             } 
-            
-            if($diceUsed > 0){ //A shot was fired or Slicer was set to selfIntercept         
+
+            if($diceUsed > 0){ //A shot was fired or Slicer was set to selfIntercept                            
                 $spareDice = $maxDice - $diceUsed;
-                $ship = $this->getUnit();
                 while ($spareDice > 0){
+                    $this->guns++; //Add a new gun to increase intercept shots by 1                                
+                    $spareDice -= 1;                 
+                } 
+             
+                if($this->interceptsAllowed == 0){
+                //Offensive shot fired, but no selfINtercept declared.  Let's make one for the spare dice.
+                    $ship = $this->getUnit();                      
                     $interceptFireOrder = new FireOrder( -1, "selfIntercept", $ship->id, $ship->id,
                         $this->id, -1, $gamedata->turn, 1,
                         0, 0, 1, 0, 0, null, null
                     );
                     $interceptFireOrder->addToDB = true;
                     $this->fireOrders[] = $interceptFireOrder;
-                    $this->guns++;                                
-                    $spareDice -= 1;
-                }
+                    $this->interceptsAllowed = 1;                                      
+                }                                       
             }    
 
         }
+
+    public function getInterceptionMod($gamedata, $intercepted){
+        //Slicers can freely combine their self-intercepts into a single strong intercept or multiple small ones. 
+        //Therefore, two self-intercepts at -10 would always be -20 e.g. no degradation.        
+
+        foreach ($this->fireOrders as $order){ //Need to  extract normal types from list fo fireOrder objects.        
+            if($order->type == "intercept"){ //A previous intercept
+                if(!(in_array($order->targetid, $this->uniqueIntercepts, true))) { //An intercept order with a targetid we haven't saved yet.
+                    $this->uniqueIntercepts[] = $order->targetid;
+                }
+            }           
+        }
+        $noOfIntercepts = count($this->uniqueIntercepts); 
+
+        if($noOfIntercepts <= $this->interceptsAllowed){ //Still headroom to intercept based on number of selfIntercept orders committed by player.
+            return $this->intercept * 5;
+        }else{
+            return 0;
+        }
+
+    }//endof  getInterceptionMod
 
 	public function getDamage($fireOrder) {
 		$damDice = 0;        
@@ -1290,8 +1341,10 @@ class SuperHeavyMolecularDisruptor extends Raking
 	    protected $multiModeSplit = true; //Can split shots across different modes 
 		public $specialHitChanceCalculation	= true;	 //To update targeting tooltip in Front End
         private $damageDice = array();  
-        private $maxDiceArray = array(1=> 8, 2=> 16, 3=> 24); //Helpful array so we only need to use beforeFiringResolution() in MolecularSlicerL and it just extends.	         			
-		
+        private $maxDiceArray = array(1=> 8, 2=> 16, 3=> 24);         			
+        private $interceptsAllowed = 0; //Increased by selfIntercept orders which is how we track the number of unique incoming fires we can intercept.
+        private $uniqueIntercepts = array();	
+
 
 		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $startArc2 = null, $endArc2 = null){			
             if ( $maxhealth == 0 ) $maxhealth = 18;
@@ -1335,7 +1388,8 @@ class SuperHeavyMolecularDisruptor extends Raking
 			$this->data["Special"] .= "<br> - 1 turn: 8d10+12"; 
 			$this->data["Special"] .= "<br> - 2 turns: 16d10+24"; 
 			$this->data["Special"] .= "<br> - 3 turns: 24d10+36";
-			$this->data["Special"] .= "<br> - May spend 1d10 damage to gain -10 intercept, this is cumulative and suffers no degradation.";             
+			$this->data["Special"] .= "<br>May spend 1d10 dice to gain -10 intercept, this is cumulative and suffers no degradation.";
+			$this->data["Special"] .= "<br>Each self-intercept dice committed increases the number of shots Slicer may intercept, as well as the total interception amount.";             
         }
 
         public function beforeFiringOrderResolution($gamedata){ 
@@ -1363,24 +1417,30 @@ class SuperHeavyMolecularDisruptor extends Raking
                 }
             
                 if($order->type == "selfIntercept"){ //Defensive shot.
-                    $diceUsed += 1; //Add intercept orders                  
+                    $diceUsed += 1; //Add intercept orders  
+                    $this->interceptsAllowed += 1; //Add intercept orders                                      
                 }                   
             } 
 
             if($diceUsed > 0){ //A shot was fired or Slicer was set to selfIntercept                            
                 $spareDice = $maxDice - $diceUsed;
-                $ship = $this->getUnit();
                 while ($spareDice > 0){
+                    $this->guns++; //Add a new gun to increase intercept shots by 1                                
+                    $spareDice -= 1;                 
+                } 
+             
+                if($this->interceptsAllowed == 0){
+                    //Offensive shot fired, but no selfINtercept declared.  Let's make one for the spare dice.
+                    $ship = $this->getUnit();                      
                     $interceptFireOrder = new FireOrder( -1, "selfIntercept", $ship->id, $ship->id,
                         $this->id, -1, $gamedata->turn, 1,
                         0, 0, 1, 0, 0, null, null
                     );
                     $interceptFireOrder->addToDB = true;
                     $this->fireOrders[] = $interceptFireOrder;
-                    $this->guns++;                                
-                    $spareDice -= 1;
-                }               
-            }    
+                    $this->interceptsAllowed = 1;                                      
+                }                                       
+            }   
  
         }        
 
@@ -1408,6 +1468,26 @@ class SuperHeavyMolecularDisruptor extends Raking
             
 		}  
 
+    public function getInterceptionMod($gamedata, $intercepted){
+        //Slicers can freely combine their self-intercepts into a single strong intercept or multiple small ones. 
+        //Therefore, two self-intercepts at -10 would always be -20 e.g. no degradation.        
+
+        foreach ($this->fireOrders as $order){ //Need to  extract normal types from list fo fireOrder objects.        
+            if($order->type == "intercept"){ //A previous intercept
+                if(!(in_array($order->targetid, $this->uniqueIntercepts, true))) { //An intercept order with a targetid we haven't saved yet.
+                    $this->uniqueIntercepts[] = $order->targetid;
+                }
+            }           
+        }
+        $noOfIntercepts = count($this->uniqueIntercepts);        
+
+        if($noOfIntercepts <= $this->interceptsAllowed){ //Still headroom to intercept based on number of selfIntercept orders committed by player.
+            return $this->intercept * 5;
+        }else{
+            return 0;
+        }
+
+    }//endof  getInterceptionMod        
 
 	public function getDamage($fireOrder) {
 		$damDice = 0;        
