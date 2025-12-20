@@ -310,12 +310,16 @@ MolecularSlicerBeamL.prototype.doMultipleFireOrders = function (shooter, target,
 
 	if (inputs.length === 1 && inputs[0].id === this.id) {
 		if (target.flight) {
-			confirm.askForMultipleValues("Allocate damage and shots for Molecular Slicer", inputs, onConfirm);
+			confirm.askForMultipleValues("Allocate damage dice (d10) and number of shots", inputs, onConfirm);
 		} else {
-			confirm.askForMultipleValues("How many d10 damage dice do you want to use? (Max: " + inputs[0].max + ")", inputs, onConfirm);
+			confirm.askForMultipleValues("How many damage dice (d10) do you want to use?", inputs, onConfirm);
 		}
 	} else {
-		confirm.askForMultipleValues("Allocate d10 damage dice for Molecular Slicers", inputs, onConfirm);
+		if (target.flight) {
+			confirm.askForMultipleValues("Allocate damage dice (d10) and number of shots", inputs, onConfirm);
+		} else {
+			confirm.askForMultipleValues("Allocate damage dice (d10) for Molecular Slicers", inputs, onConfirm);
+		}			
 	}
 
 	return [];

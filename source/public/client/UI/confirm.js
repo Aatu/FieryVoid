@@ -1437,10 +1437,10 @@ window.confirm = {
             var input = $('<input type="number" class="multiConfirmInput multi-value-input main-input" data-id="' + item.id + '" value="' + initialValue + '" min="1" ' + maxAttr + '>').appendTo(inputWrapper);
 
             if (item.multiplier) {
-                $('<span style="margin-left:10px; color:#DEFBFF;">x</span>').appendTo(inputWrapper);
+                $('<span class="multi-value-max" style="margin-left:5px; color:#DEFBFF;">dice</span>').appendTo(inputWrapper);
                 // Multiplier input (count)
                 var countInput = $('<input type="number" class="multiConfirmInput multi-value-input mult-input" data-id="' + item.id + '_mult" value="1" min="1" style="width:50px;">').appendTo(inputWrapper);
-
+                $('<span class="multi-value-max" style="margin-left:5px; color:#DEFBFF;">shots</span>').appendTo(inputWrapper);
                 input.on("change", function () {
                     var val = parseInt($(this).val());
                     var count = parseInt(countInput.val());
