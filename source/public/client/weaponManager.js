@@ -500,9 +500,11 @@ window.weaponManager = {
                         $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="losBlocked"> HEX TARGETED</span></div>').appendTo(f);
                     } else {
                         // LOS is not blocked, not hex targeted, show normal hit chance info, check Sweeping weapons first.
+                        /* //Old blocker for slicer code when it tried to target same ship multiple times.  Fine to do now - DK - Dec 2025
                         if (value === "Sweeping" && ship.shipSizeClass >= 0 && weaponManager.hasTargetedThisShip(ship, weapon)) {
                             $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="hitchange"> CANNOT TARGET AGAIN</span></div>').appendTo(f);
-                        } else if (calledid != null && !weaponManager.canWeaponCall(weapon)) {
+                        } else if */
+                        if (calledid != null && !weaponManager.canWeaponCall(weapon)) {
                             $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="hitchange"> CANNOT CALL SHOT</span></div>').appendTo(f);
                         } else if (keys.length > 1) {
                             $('<div><span class="weapon">' + weapon.displayName + '<span class="firingMode"> (' + value + ')</span><span class="hitchange"> - Approx: ' + weaponManager.calculateHitChange(selectedShip, ship, weapon, calledid) + '%</span></div>').appendTo(f);
