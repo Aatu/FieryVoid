@@ -1422,34 +1422,112 @@ window.confirm = {
 
         inputs.forEach(function (item) {
             var row = $('<div class="multi-value-row"></div>');
-            $('<span class="multi-value-label"><span class="multi-value-name">' + item.label + '</span> <span class="multi-value-max">(Max: ' + item.max + ')</span></span>').appendTo(row);
+            var maxDisplay = item.max;
+            if (item.multiplier) {
+                // If multiplier is on, max refers to TOTAL pool.
+                maxDisplay = item.max;
+            }
+            $('<span class="multi-value-label"><span class="multi-value-name">' + item.label + '</span> <span class="multi-value-max">(Max: ' + maxDisplay + ')</span></span>').appendTo(row);
 
-            var initialValue = (item.value !== undefined) ? item.value : (item.max || 1);
+            var initialValue = (item.value !== undefined) ? item.value : (item.multiplier ? 1 : (item.max || 1));
             var maxAttr = (item.max !== undefined) ? 'max="' + item.max + '"' : '';
-            var input = $('<input type="number" class="multiConfirmInput multi-value-input" data-id="' + item.id + '" value="' + initialValue + '" min="1" ' + maxAttr + '>').appendTo(row);
 
-            if (item.max !== undefined) {
+            var inputWrapper = $('<div style="display:flex; align-items:center;"></div>').appendTo(row);
+
+            var input = $('<input type="number" class="multiConfirmInput multi-value-input main-input" data-id="' + item.id + '" value="' + initialValue + '" min="1" ' + maxAttr + '>').appendTo(inputWrapper);
+
+            if (item.multiplier) {
+                $('<span style="margin-left:10px; color:#DEFBFF;">x</span>').appendTo(inputWrapper);
+                // Multiplier input (count)
+                var countInput = $('<input type="number" class="multiConfirmInput multi-value-input mult-input" data-id="' + item.id + '_mult" value="1" min="1" style="width:50px;">').appendTo(inputWrapper);
+
                 input.on("change", function () {
                     var val = parseInt($(this).val());
-                    if (val > item.max) $(this).val(item.max);
-                    if (val < 1) $(this).val(1);
+                    var count = parseInt(countInput.val());
+                    if (val < 1) { val = 1; $(this).val(1); }
+
+                    // If val * count > max, reduce count
+                    if (val * count > item.max) {
+                        count = Math.floor(item.max / val);
+                        if (count < 1) count = 1; // Should not happen if val <= max
+                        countInput.val(count);
+                    }
+                    // Also ensure val itself isn't > max (if count is 1)
+                    if (val > item.max) {
+                        val = item.max;
+                        $(this).val(val);
+                        countInput.val(1);
+                    }
                 });
+
+                countInput.on("change", function () {
+                    var count = parseInt($(this).val());
+                    var val = parseInt(input.val());
+                    if (count < 1) { count = 1; $(this).val(1); }
+
+                    // If val * count > max, reduce val (damage per shot) ?
+                    // Or reduce count? Let's cap count based on val.
+                    var maxCount = Math.floor(item.max / val);
+                    if (count > maxCount) {
+                        count = maxCount;
+                        $(this).val(count);
+                    }
+                });
+            } else {
+                if (item.max !== undefined) {
+                    // Cap on input (typing) as well as change
+                    input.on("input change keyup", function () {
+                        var val = parseInt($(this).val());
+                        var max = parseInt($(this).attr("max")); // Use attr as source of truth if updated, or item.max
+
+                        if (!isNaN(max)) {
+                            if (val > max) $(this).val(max);
+                            if (val < 1 && $(this).val() !== "") $(this).val(1);
+                        }
+                    });
+                }
             }
+
+            // Store reference to multiplier config on the row/input for retrieval?
+            input.data("hasMultiplier", !!item.multiplier);
+
             row.appendTo(container);
         });
 
         $(".confirmok", e).on("click", function () {
             var results = {};
             var valid = true;
-            $(".multiConfirmInput", e).each(function () {
+            $(".multiConfirmInput.main-input", e).each(function () {
                 var id = $(this).data("id");
                 var val = parseInt($(this).val());
                 var max = parseInt($(this).attr("max"));
+                var hasMult = $(this).data("hasMultiplier");
 
                 if (isNaN(val) || val < 1) val = 1;
-                if (!isNaN(max) && val > max) val = max;
 
-                results[id] = val;
+                if (hasMult) {
+                    var multInput = $(this).siblings(".mult-input"); // Use traversal for safety
+                    var count = parseInt(multInput.val());
+                    if (isNaN(count)) count = 1;
+
+                    // Final safeguard
+                    if (val * count > max && !isNaN(max)) {
+                        // Clamp count?
+                        count = Math.floor(max / val);
+                        if (count < 1) count = 1;
+                    }
+
+                    results[id] = { value: val, count: count };
+                } else {
+                    if (!isNaN(max) && val > max) val = max;
+                    results[id] = val; // Keep legacy format for non-mult inputs? Or Standardize?
+                    // Previous implementation returned raw value.
+                    // Implementation plan says: "return data structure capable of handling multiplier"
+                    // IF I change this to always object, I break existing `L` logic unless I update it.
+                    // `L` expects `val` as number.
+                    // I'll keep it as number for non-mult, and object for mult.
+                    // `molecular.js` will handle the type check.
+                }
             });
 
             callback(results);

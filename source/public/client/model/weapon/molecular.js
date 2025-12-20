@@ -222,9 +222,9 @@ MolecularSlicerBeamL.prototype.doMultipleFireOrders = function (shooter, target,
 	for (var i in systems) {
 		var sys = systems[i];
 		if (sys instanceof MolecularSlicerBeamL) {
-			if(weaponManager.isOnWeaponArc(shooter, target, sys)){
+			if (weaponManager.isOnWeaponArc(shooter, target, sys)) {
 				slicers.push(sys);
-			} 
+			}
 		}
 	}
 
@@ -241,13 +241,15 @@ MolecularSlicerBeamL.prototype.doMultipleFireOrders = function (shooter, target,
 		// Ammo check
 		var remaining = slicer.data["Max number of Dice"] - slicer.getShotsUsed();
 		if (remaining <= 0) {
-			// Let's filter out empty ones silently if group, or error if all empty.
+			// Skip empty
 		} else {
+			var isFlight = target.flight;
 			inputs.push({
 				id: slicer.id,
 				label: slicer.displayName,
 				max: remaining,
-				value: remaining // Default to max
+				value: isFlight ? 1 : remaining,
+				multiplier: isFlight
 			});
 		}
 	}
@@ -281,21 +283,37 @@ MolecularSlicerBeamL.prototype.doMultipleFireOrders = function (shooter, target,
 			}
 
 			if (weapon) {
+				// Calculate hit chance again? Or reuse?
+				// Reuse logic from loop below?
 				// We need to calculate chance for EACH weapon.
-				var fireid = shooter.id + "_" + weapon.id + "_" + (weapon.fireOrders.length + 1);
-				var calledid = -1;
-				var chance = window.weaponManager.calculateHitChange(shooter, target, weapon, calledid);
 
+				var fireid, calledid, chance;
+				var shotsToFire = 1;
+				var damagePerShot = val;
+
+				if (typeof val === 'object') {
+					damagePerShot = val.value;
+					shotsToFire = val.count;
+				}
+
+				calledid = -1;
+				chance = window.weaponManager.calculateHitChange(shooter, target, weapon, calledid);
 				if (chance < 1) continue;
 
-				weapon.resolveFireOrder(val, shooter, target, fireid, calledid, chance);
+				for (var k = 0; k < shotsToFire; k++) {
+					fireid = shooter.id + "_" + weapon.id + "_" + (weapon.fireOrders.length + 1);
+					weapon.resolveFireOrder(damagePerShot, shooter, target, fireid, calledid, chance);
+				}
 			}
 		}
 	};
 
 	if (inputs.length === 1 && inputs[0].id === this.id) {
-		// Use the multi-dialog anyway for consistency.
-		confirm.askForMultipleValues("Allocate d10 damage dice for this shot", inputs, onConfirm);
+		if (target.flight) {
+			confirm.askForMultipleValues("Allocate damage and shots for Molecular Slicer", inputs, onConfirm);
+		} else {
+			confirm.askForMultipleValues("How many d10 damage dice do you want to use? (Max: " + inputs[0].max + ")", inputs, onConfirm);
+		}
 	} else {
 		confirm.askForMultipleValues("Allocate d10 damage dice for Molecular Slicers", inputs, onConfirm);
 	}
