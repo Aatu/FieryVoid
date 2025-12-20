@@ -861,14 +861,12 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         <li> Uninterceptable, armour-gnoring with a high FC and good range, it has very high damage output and can literally cut ships apart when fully charged.  
             It has a number of other traits too, some of which has been simplified for Fiery Void.</li>
         <li>The most powerful version of this weapon, the Heavy Slicer found only on Primordial ships uses Piercing damage as its default mode - which can even overkill at full power so that its damage potential isn’t wasted. 
-            The Raking damage mode is capped at 2-turns charge level.  The Heavy Slicer on the Shadow Battlecruiser has both forward and rear arcs, you can access these by using Firing Modes and can split your sweeping fire between both forward and rear arcs.</li>
+            The Raking damage mode is capped at 2-turns charge level.</li>
         <li>All other Slicers use Sweeping Mode as their default, which allows them to target as many different enemies as it has damage dice, assigning a number of d10 target dice to each shot up to their maximum amount. Simply select the weapon and choose who you want to target in this mode, although each ship can only be targeted once (whilst fighter flights can be targeted multiple times). 
             When splitting shots, the weapon will attract a cumulative -5% penalty for every additional shot after the first, as well as any modifier for defensive shots (see below).</li>
-        <li>Slicers may spend 1d10 damage to gain -10 intercept by clicking the 'Self-Intercept' green shield icon, this is cumulative and suffers no degradation. 
-            For each click on Self Intercept you will commit 1d10 to intercepting as well as increase the number of DIFFERENT shots you can intercept. 
-            If you choose to fire offensively, or select any amount self intercept dice, but do not use all your available dice, then any unspent dice will also be added to the self intercept total.  You can use ship tooltip to track defensive fire and remaining dice.  
-            NOTE - During Firing Phase, each self intercept order counts as a 'shot' for the purposes of the -5% penalty detailed above.  
-            However, if during fire resolution, your intercepts are used against fewer different incoming shots than you had committed self intercepts orders, the hit chances of your offensive shots will improve accordingly (but never get worse).";   .</li>                                                                 
+        <li>Slicers may commit 1d10 damage dice to gain -10 intercept by clicking the 'Self-Intercept' green shield icon, each self-intercept dice committed in this way increases the number of different shots Slicer may intercept, as well as the total interception amount. 
+            If you choose to fire offensively, or select any amount self intercept dice, but do not use all your available dice, then any unspent dice will also be added to the self intercept total (but will NOT increase the number of different shots you can intercept).  You can use ship tooltip to track defensive fire and remaining dice.  
+            NOTE - Each self intercept dice commited counts as a 'shot' for the purposes of the -5% penalty detailed above.";   .</li>                                                                 
     <h5>Phasing Pulse Cannon</h5>
         <li>Pulse weapons that completely ignore any kind of shield or shield-like defense used by Younger races. 
             Note that EM shields, like those used on the White Star, are treated as Ancient even when used on Younger Race ships.</li>      
@@ -880,10 +878,10 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
     <h5>Primordial Variants</h5>
         <li>These are ships with Primordial and Additional Tendril enhancements added as standard, as neither of these options is available in FV.</li>      
     <h5>Primordial Battle Cruiser</h5>
-        <li>This ship differs from modern, quick-grown, Shadow vessels in a few ways, which have mandated some changes for FV:
+        <li>This ship differs from modern, quick-grown, Shadow vessels in a few ways:
             <ul class="circle-list">
-                <li>Most important is primary weapon firing arc: in tabletop it's split into a large forward arc and smaller aft arc. In FV such a split is not yet possible, so no aft firing arc is present - Instead the Forward arc has been widened to 180 degrees as compensation,</li>
-                <li>6 separate Energy Diffusers would have been difficult to set up on PRIMARY in a clear way - therefore they've been moved to appropriate sides hit charts adjusted.</li>                   
+                <li>Most important is primary weapon firing arc: The Heavy Slicer on the Shadow Battlecruiser has both forward and rear arcs, you can access these by using Firing Modes and can split your sweeping fire between both forward and rear arcs.</li>
+                <li>Six separate Energy Diffusers would have been difficult to set up on PRIMARY in a clear way - therefore in FV they've been moved to appropriate sides and hit charts adjusted.</li>                   
             </ul>            
         </li> 
     <h5>Destroyer</h5>
