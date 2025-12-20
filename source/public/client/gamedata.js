@@ -703,7 +703,7 @@ window.gamedata = {
 							if(!currWeapon.ballistic && currWeapon.weapon && (currWeapon.displayName != "Ramming Attack")){ //ballistic weapons ore of no interest now
 								if (currWeapon.fireOrders.length > 0) {
 									fired = 1;
-                                    if (currWeapon.canSplitShots && currWeapon.fireOrders.length < currWeapon.guns) {
+                                    if (currWeapon.canSplitShots && (currWeapon.fireOrders.length < currWeapon.guns || (currWeapon instanceof MolecularSlicerBeamL && currWeapon.data["Remaining Dice"] > 0))) {
                                         hasShotsLeft = true;
                                     }
 									break;

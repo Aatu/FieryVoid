@@ -872,7 +872,8 @@ class SuperHeavyMolecularDisruptor extends Raking
 
 		//Slicers are usually THE weapons of Shadow ships - hence higher repair priority
 		public $repairPriority = 6;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
-        private $damageRoll = 0; //Save a single damage amount when splitting shots     		
+        private $damageDice = array();   
+        private $maxDiceArray = array(1 => 4, 2 => 6, 3=> 8); //Helpful array so we only need to write beforeFiringResolution() in MolecularSlicerL and it just extends.		
 
 		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){			
             if ( $maxhealth == 0 ) $maxhealth = 10;
@@ -893,10 +894,51 @@ class SuperHeavyMolecularDisruptor extends Raking
 
         public function beforeFiringOrderResolution($gamedata){ 
             $this->guns = 0;          
-            //Search fireOrders, then add +1 gun for each order like this so that intercept algorithms allow it any selfIntercepts
+            $diceUsed = 0;
+            $maxDice = $this->maxDiceArray[$this->turnsloaded];            
+            /*
+            switch($this->turnsloaded){
+                case 1:
+                    $maxDice = $this->maxDiceArray[1];                    
+                    break;
+                case 2:
+                     $maxDice = $this->maxDiceArray[2];    
+                    break;
+                case 3: //if actual 3 turns - remember to set weapon to overkilling in Piercing mode!
+                default: //3 turns
+		            $maxDice = $this->maxDiceArray[3];                     		
+                    break;
+            }
+            */        
+            //Search fireOrders
             foreach ($this->fireOrders as $order) {
-                    $this->guns++;
-            }                                  
+                //Add +1 gun for each order like this so that intercept algorithms allow it any selfIntercepts                
+                $this->guns++;
+            
+                if($order->type == "normal"){ //Offensive shot.
+                    $this->damageDice[$order->id] = $order->shots; //Dice number is passed from front end as $order->shots variable.
+                    $diceUsed += $order->shots; //Dice number is passed from front end as $order->shots variable.                    
+                    $order->shots = 1; //Set to a single shot after capturing dice used for this shot.
+                }
+            
+                if($order->type == "selfIntercept"){ //Defensive shot.
+                    $diceUsed += 1; //Add intercept orders                  
+                }                   
+            } 
+         
+            $spareDice = $maxDice - $diceUsed;
+			$ship = $this->getUnit();
+            while ($spareDice > 0){
+				$interceptFireOrder = new FireOrder( -1, "selfIntercept", $ship->id, $ship->id,
+					$this->id, -1, $gamedata->turn, 1,
+					0, 0, 1, 0, 0, null, null
+				);
+				$interceptFireOrder->addToDB = true;
+				$this->fireOrders[] = $interceptFireOrder;
+                $this->guns++;                                
+                $spareDice -= 1;
+            }
+
         }
 
 		public function calculateHitBase(TacGamedata $gamedata, FireOrder $fireOrder) {
@@ -926,7 +968,7 @@ class SuperHeavyMolecularDisruptor extends Raking
 		public function setSystemDataWindow($turn){			
 			parent::setSystemDataWindow($turn);   
 			$this->data["Special"] = "Uninterceptable. Ignores armor.";
-			$this->data["Special"] .= "<br>May target multiple enemies, damage will be evenly distributed across all targets.";
+			$this->data["Special"] .= "<br>May choose to split shots between multiple targets, allocating a number to d10 damage dice to each one.";
 			$this->data["Special"] .= "<br>Each shot after the first attracts a cumulative -5% to hit modifier.";            
             $this->data["Special"] .= "<br>Can fire accelerated for less damage:";  
 			$this->data["Special"] .= "<br> - 1 turn: 4d10+4"; 
@@ -960,6 +1002,48 @@ class SuperHeavyMolecularDisruptor extends Raking
         return $this->intercept * 5;
     }//endof  getInterceptionMod
 
+	public function getDamage($fireOrder) {
+		$damDice = 0;        
+        $nonDiceDam = 0;	
+        $noOfShots = 0;
+
+        //Count number of non-intercept orders    
+        foreach ($this->fireOrders as $fOrder) {
+            if($fOrder->type == "normal"){ //Only count offensive shots for this.
+                $noOfShots++; //Add to shots total
+                //Now retrieve saved details of dice used that we input in beforeFiringOrderResolution()
+                foreach($this->damageDice as $id => $dice){
+                    if($id == $fireOrder->id) $damDice = $dice;
+                }
+            }    
+        }
+//echo "Value of name: " . $this->name . "\n";         
+//echo "Value of fireOrder: " . $fireOrder->id . "\n";   
+//var_dump($this->damageDice);      
+	    // Determine base damage based on turns loaded          
+        switch($this->turnsloaded){
+            case 1:
+                $nonDiceDam = 4;                    
+                break;
+            case 2:
+                $nonDiceDam = 6;                     
+                break;
+            case 3: 
+            default: //3 turns
+                $nonDiceDam = 8;                     		
+                break;
+        } 
+        
+//echo "Value of damDice: " . $damDice . "\n";
+//echo "Value of noOfShots: " . $noOfShots . "\n";  
+        $nonDiceDam = floor($nonDiceDam/$noOfShots); //Split non-dice damage equally between offensve shots this turn.
+//echo "Value of nonDiceDam: " . $nonDiceDam . "\n";            
+        $finalDmg = Dice::d(10, $damDice) + $nonDiceDam;
+    
+        return $finalDmg;    		      
+	}
+
+/*
 		public function getDamage($fireOrder) {
 			//$dmg = 0;
             $diceMod = 0;	
@@ -1005,7 +1089,8 @@ class SuperHeavyMolecularDisruptor extends Raking
 		    return $finalDmg;    		    
 			   
 		}
-		
+*/                    
+
         public function setMinDamage(){
             switch($this->turnsloaded){
                 case 1:
@@ -1076,7 +1161,8 @@ class SuperHeavyMolecularDisruptor extends Raking
 		//public $canSplitShotsArray = array(1=>true, 2=>false, 3=>false, 4=>false );
         public $canSplitShotsArray = array(1=>true);
 		public $specialHitChanceCalculation	= true;	 //To update targeting tooltip in Front End 		
-        private $damageRoll = 0; //Save a single damage amount when splitting shots 		
+        private $damageDice = array();   		
+        private $maxDiceArray = array(1 => 8, 2 => 12, 3=> 16); //Helpful array so we only need to use beforeFiringResolution() in MolecularSlicerL and it just extends.	
 
 		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){			
             if ( $maxhealth == 0 ) $maxhealth = 15;
@@ -1087,7 +1173,7 @@ class SuperHeavyMolecularDisruptor extends Raking
 		public function setSystemDataWindow($turn){			
 			parent::setSystemDataWindow($turn);   
 			$this->data["Special"] = "Uninterceptable. Ignores armor. 15-point rakes.";  
-			$this->data["Special"] .= "<br>May target multiple enemies, damage will be evenly distributed across all targets.";
+			$this->data["Special"] .= "<br>May choose to split shots between multiple targets, allocating a number to d10 damage dice to each one.";
 			$this->data["Special"] .= "<br>Each shot after the first attracts a cumulative -5% to hit modifier.";   
 			$this->data["Special"] .= "<br>Can fire accelerated for less damage:"; 
             $this->data["Special"] .= "<br> - 1 turn: 8d10+12"; 
@@ -1116,7 +1202,7 @@ class SuperHeavyMolecularDisruptor extends Raking
 			}
 			return $divider;
 		}
-		*/
+		
 
 		public function getDamage($fireOrder) {
 			//$dmg = 0;
@@ -1160,10 +1246,103 @@ class SuperHeavyMolecularDisruptor extends Raking
                 $finalDmg = $this->damageRoll;               
             }
 
-		    return $finalDmg;    		    
-			   
+		    return $finalDmg;    		      
 		}
-        
+*/  
+
+        public function beforeFiringOrderResolution($gamedata){ 
+            $this->guns = 0;          
+            $diceUsed = 0;
+            $maxDice = $this->maxDiceArray[$this->turnsloaded];            
+            /*
+            switch($this->turnsloaded){
+                case 1:
+                    $maxDice = $this->maxDiceArray[1];                    
+                    break;
+                case 2:
+                     $maxDice = $this->maxDiceArray[2];    
+                    break;
+                case 3: //if actual 3 turns - remember to set weapon to overkilling in Piercing mode!
+                default: //3 turns
+		            $maxDice = $this->maxDiceArray[3];                     		
+                    break;
+            }
+            */       
+
+            //Search fireOrders
+            foreach ($this->fireOrders as $order) {
+                //Add +1 gun for each order like this so that intercept algorithms allow it any selfIntercepts                
+                $this->guns++;
+            
+                if($order->type == "normal"){ //Offensive shot.
+                    $this->damageDice[$order->id] = $order->shots; //Dice number is passed from front end as $order->shots variable.
+                    $diceUsed += $order->shots; //Dice number is passed from front end as $order->shots variable.                    
+                    $order->shots = 1; //Set to a single shot after capturing dice used for this shot.
+                }
+            
+                if($order->type == "selfIntercept"){ //Defensive shot.
+                    $diceUsed += 1; //Add intercept orders                  
+                }                   
+            } 
+         
+            $spareDice = $maxDice - $diceUsed;
+			$ship = $this->getUnit();
+            while ($spareDice > 0){
+				$interceptFireOrder = new FireOrder( -1, "selfIntercept", $ship->id, $ship->id,
+					$this->id, -1, $gamedata->turn, 1,
+					0, 0, 1, 0, 0, null, null
+				);
+				$interceptFireOrder->addToDB = true;
+				$this->fireOrders[] = $interceptFireOrder;
+                $this->guns++;                                
+                $spareDice -= 1;
+            }
+
+        }
+
+	public function getDamage($fireOrder) {
+		$damDice = 0;        
+        $nonDiceDam = 0;	
+        $noOfShots = 0;
+
+        //Count number of non-intercept orders    
+        foreach ($this->fireOrders as $fOrder) {
+            if($fOrder->type == "normal"){ //Only count offensive shots for this.
+                $noOfShots++; //Add to shots total
+                //Now retrieve saved details of dice used that we input in beforeFiringOrderResolution()
+                foreach($this->damageDice as $id => $dice){
+                    if($id == $fireOrder->id) $damDice = $dice;
+                }
+            }    
+        }
+//echo "Value of name: " . $this->name . "\n"; 
+//echo "Value of fireOrder: " . $fireOrder->id . "\n";   
+//var_dump($this->damageDice);      
+	    // Determine base damage based on turns loaded          
+        switch($this->turnsloaded){
+            case 1:
+                $nonDiceDam = 12;                    
+                break;
+            case 2:
+                $nonDiceDam = 24;                     
+                break;
+            case 3: 
+            default: //3 turns
+                $nonDiceDam = 36;                     		
+                break;
+        }
+
+         
+//echo "Value of damDice: " . $damDice . "\n";
+//echo "Value of noOfShots: " . $noOfShots . "\n";  
+        $nonDiceDam = floor($nonDiceDam/$noOfShots); //Split non-dice damage equally between offensve shots this turn.
+//echo "Value of nonDiceDam: " . $nonDiceDam . "\n";            
+        $finalDmg = Dice::d(10, $damDice) + $nonDiceDam;
+    
+        return $finalDmg;    		      
+	}
+
+    
         public function setMinDamage(){
             switch($this->turnsloaded){
                 case 1:
@@ -1225,7 +1404,8 @@ class SuperHeavyMolecularDisruptor extends Raking
         public $canSplitShotsArray = array(1=>true, 2=>true, 3=>true, 4=>true);
 	    protected $multiModeSplit = true; //Can split shots across different modes 
 		public $specialHitChanceCalculation	= true;	 //To update targeting tooltip in Front End
-        private $damageRoll = 0; //Save a single damage amount when splitting shots 		
+        private $damageDice = array();  
+        private $maxDiceArray = array(1=> 8, 2=> 16, 3=> 24); //Helpful array so we only need to use beforeFiringResolution() in MolecularSlicerL and it just extends.	         			
 		
 
 		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $startArc2 = null, $endArc2 = null){			
@@ -1261,7 +1441,7 @@ class SuperHeavyMolecularDisruptor extends Raking
 			parent::setSystemDataWindow($turn);   
 			$this->data["Special"] = "Uninterceptable. Ignores armor. 15-point rakes.";
 			$this->data["Special"] .= "<br>Full power (3 turns armed) can be fired ONLY in Piercing mode, but it will become Piercing(Standard), with ability to overkill.  Raking Mode can still be used (at 2 turns output)";           
-			$this->data["Special"] .= "<br>May choose to split shots between multiple targets, damage will be evenly distributed across all targets.";
+			$this->data["Special"] .= "<br>May choose to split shots between multiple targets, allocating a number to d10 damage dice to each one.";
 			$this->data["Special"] .= "<br>Each shot after the first attracts a cumulative -5% to hit modifier.";   			
             if(count($this->firingModes) > 2){
                 $this->data["Special"] .= "<br>Alternative firing modes allow this weapon to also fire in rear arcs, and can be combined with split shots in forward arcs.";			  			  
@@ -1272,7 +1452,57 @@ class SuperHeavyMolecularDisruptor extends Raking
 			$this->data["Special"] .= "<br> - 3 turns: 24d10+36";
 			$this->data["Special"] .= "<br> - May spend 1d10 damage to gain -10 intercept, this is cumulative and suffers no degradation.";             
         }
-  
+
+        public function beforeFiringOrderResolution($gamedata){ 
+            $this->guns = 0;          
+            $diceUsed = 0;
+            $maxDice = $this->maxDiceArray[$this->turnsloaded];            
+            /*
+            switch($this->turnsloaded){
+                case 1:
+                    $maxDice = $this->maxDiceArray[1];                    
+                    break;
+                case 2:
+                     $maxDice = $this->maxDiceArray[2];    
+                    break;
+                case 3: //if actual 3 turns - remember to set weapon to overkilling in Piercing mode!
+                default: //3 turns
+		            $maxDice = $this->maxDiceArray[3];                     		
+                    break;
+            }
+            */       
+
+            //Search fireOrders
+            foreach ($this->fireOrders as $order) {
+                //Add +1 gun for each order like this so that intercept algorithms allow it any selfIntercepts                
+                $this->guns++;
+            
+                if($order->type == "normal"){ //Offensive shot.
+                    $this->damageDice[$order->id] = $order->shots; //Dice number is passed from front end as $order->shots variable.
+                    $diceUsed += $order->shots; //Dice number is passed from front end as $order->shots variable.                    
+                    $order->shots = 1; //Set to a single shot after capturing dice used for this shot.
+                }
+            
+                if($order->type == "selfIntercept"){ //Defensive shot.
+                    $diceUsed += 1; //Add intercept orders                  
+                }                   
+            } 
+         
+            $spareDice = $maxDice - $diceUsed;
+			$ship = $this->getUnit();
+            while ($spareDice > 0){
+				$interceptFireOrder = new FireOrder( -1, "selfIntercept", $ship->id, $ship->id,
+					$this->id, -1, $gamedata->turn, 1,
+					0, 0, 1, 0, 0, null, null
+				);
+				$interceptFireOrder->addToDB = true;
+				$this->fireOrders[] = $interceptFireOrder;
+                $this->guns++;                                
+                $spareDice -= 1;
+            }
+
+        }        
+
 		public function calculateHitBase(TacGamedata $gamedata, FireOrder $fireOrder) {
 		    Weapon::calculateHitBase($gamedata, $fireOrder); //Don't call direct parent, duplicates some hitmods
     
@@ -1297,7 +1527,7 @@ class SuperHeavyMolecularDisruptor extends Raking
             
 		}  
 
-
+/*
 		public function getDamage($fireOrder){
 			//$dmg = 0;
             $diceMod = 0;	
@@ -1346,7 +1576,55 @@ class SuperHeavyMolecularDisruptor extends Raking
 
 		    return $finalDmg;    		    
 		}	
-		        
+*/
+
+	public function getDamage($fireOrder) {
+		$damDice = 0;        
+        $nonDiceDam = 0;	
+        $noOfShots = 0;
+        $loadedtime = $this->turnsloaded;
+
+		if($this->firingMode == 2 || $this->firingMode == 4){//cannot use 3-turns power for shots other than Piercing
+			$loadedtime = min(2,$loadedtime);
+		}
+//echo "Value of name: " . $this->name . "\n"; 
+//var_dump($this->damageDice); 
+//echo "Value of fireOrder: " . $fireOrder->id . "\n";    
+        //Count number of non-intercept orders    
+        foreach ($this->fireOrders as $fOrder) {
+            if($fOrder->type == "normal"){ //Only count offensive shots for this.
+                $noOfShots++; //Add to shots total
+                //Now retrieve saved details of dice used that we input in beforeFiringOrderResolution()
+                foreach($this->damageDice as $id => $dice){
+                    if($id == $fireOrder->id) $damDice = $dice;
+                }
+            }    
+        }
+     
+	    // Determine base damage based on turns loaded          
+        switch($loadedtime){
+            case 1:
+                $nonDiceDam = 12;                    
+                break;
+            case 2:
+                $nonDiceDam = 24;                     
+                break;
+            case 3: 
+            default: //3 turns
+                $nonDiceDam = 36;                     		
+                break;
+        } 
+           
+//echo "Value of damDice: " . $damDice . "\n";
+//echo "Value of noOfShots: " . $noOfShots . "\n";  
+        $nonDiceDam = floor($nonDiceDam/$noOfShots); //Split non-dice damage equally between offensve shots this turn.
+//echo "Value of nonDiceDam: " . $nonDiceDam . "\n";            
+        $finalDmg = Dice::d(10, $damDice) + $nonDiceDam;
+    
+        return $finalDmg;    		      
+	}
+
+
         public function setMinDamage(){
 			$loadedtime = $this->turnsloaded;
 			if($this->firingMode == 2 || $this->firingMode == 4){//cannot use 3-turns power for shots other than Piercing

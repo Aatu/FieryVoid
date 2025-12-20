@@ -4,7 +4,7 @@ window.confirm = {
 
     whtml: '<div class="confirm"><div class="ui"><div class="confirmok"></div><div class="confirmcancel"></div></div></div>',
 
-    showConfirmOkCancel: function showConfirmOkCancel(message, okcb, cancelcb) {},
+    showConfirmOkCancel: function showConfirmOkCancel(message, okcb, cancelcb) { },
 
     getMissileOptions: function getMissileOptions(ship) {
         var returnArray = new Array();
@@ -144,13 +144,13 @@ window.confirm = {
 
         //	console.log(flightSize, fighterCost, missileAmount, launchers, missileCost);
 
-        var totalCost = flightSize * (fighterCost + launchers * missileAmount * missileCost)-initialMissilesCost;
+        var totalCost = flightSize * (fighterCost + launchers * missileAmount * missileCost) - initialMissilesCost;
 
         //add enhancement cost	   
         var enhCost = 0;
         var enhNo = 0;
         var target = $(".selectAmount.shpenh" + enhNo);
-        while(typeof target.data("enhPrice") != 'undefined'){ //as long as there are enhancements defined...
+        while (typeof target.data("enhPrice") != 'undefined') { //as long as there are enhancements defined...
             enhCost += target.data("enhCost");
             //go to next enhancement
             enhNo++;
@@ -172,11 +172,11 @@ window.confirm = {
         var max = $(".totalUnitCostAmount").data("maxSize");
 
         if (current < max) {
-		if (current < 6){ //allow 1-6 in flight, then by 3s!				
-			flightSize.html(Math.floor(current) + 1);
-		}else{
-			flightSize.html(Math.floor(current) + 3);
-		}
+            if (current < 6) { //allow 1-6 in flight, then by 3s!				
+                flightSize.html(Math.floor(current) + 1);
+            } else {
+                flightSize.html(Math.floor(current) + 3);
+            }
         } else return;
 
         confirm.getTotalCost();
@@ -188,83 +188,83 @@ window.confirm = {
         var flightSize = $(".fighterAmount");
         var current = flightSize.html();
         var max = $(".totalUnitCostAmount").data("maxSize");
-		
+
         if (current > 6) { //allow 1-6 in flight, then by 3s!	
-		flightSize.html(Math.floor(current) - 3);
-        } else if (current > 1){ 
-		flightSize.html(Math.floor(current) - 1);
-	} else return;
+            flightSize.html(Math.floor(current) - 3);
+        } else if (current > 1) {
+            flightSize.html(Math.floor(current) - 1);
+        } else return;
 
         confirm.getTotalCost();
     },
 
-    
 
-    doOnPlusEnhancement: function(e){
-        e.stopPropagation();  
 
-        var button = $(this);
-        var enhNo = button.data("enhNo");
-        var target = $(".selectAmount.shpenh" + enhNo);
-            
-        var noTaken = target.data("count");
-        var enhLimit = target.data("max");	
-        var enhPrice = target.data("enhPrice");	
-        var enhPriceStep = target.data("enhPriceStep");	
-
-        if(noTaken < enhLimit){ //increase possible
-            var newCount = noTaken+1;
-            target.data("count", newCount);
-            target.html(newCount);
-            var cost = enhPrice + (noTaken*enhPriceStep); //base value, plus additional price charged for further levels
-            var newCost = target.data("enhCost")+cost;	
-            target.data("enhCost", newCost);
-            
-            //options cost - remembering they're included in enhancements cost as well!
-            if (target.data("enhIsOption")){
-                cost = enhPrice + (noTaken*enhPriceStep); //base value, plus additional price charged for further levels
-                newCost = target.data("enhOptionCost")+cost;		
-                target.data("enhOptionCost", newCost);
-            }
-            
-            confirm.getTotalCost();
-        }
-    },
-
-    doOnMinusEnhancement: function(e){
-        e.stopPropagation();  
+    doOnPlusEnhancement: function (e) {
+        e.stopPropagation();
 
         var button = $(this);
         var enhNo = button.data("enhNo");
         var target = $(".selectAmount.shpenh" + enhNo);
-            
-        var noTaken = target.data("count");
-        var enhLimit = target.data("max");	
-        var enhPrice = target.data("enhPrice");	
-        var enhPriceStep = target.data("enhPriceStep");	
 
-        if(noTaken > 0){ //decrease possible
-            var newCount = noTaken-1;
+        var noTaken = target.data("count");
+        var enhLimit = target.data("max");
+        var enhPrice = target.data("enhPrice");
+        var enhPriceStep = target.data("enhPriceStep");
+
+        if (noTaken < enhLimit) { //increase possible
+            var newCount = noTaken + 1;
             target.data("count", newCount);
             target.html(newCount);
-            var cost = enhPrice + (newCount*enhPriceStep); //base value, plus additional price charged for further levels
-            var newCost = target.data("enhCost")-cost;		
+            var cost = enhPrice + (noTaken * enhPriceStep); //base value, plus additional price charged for further levels
+            var newCost = target.data("enhCost") + cost;
             target.data("enhCost", newCost);
-            
+
             //options cost - remembering they're included in enhancements cost as well!
-            if (target.data("enhIsOption")){
-                cost = enhPrice + (newCount*enhPriceStep); //base value, plus additional price charged for further levels
-                newCost = target.data("enhOptionCost")-cost;		
+            if (target.data("enhIsOption")) {
+                cost = enhPrice + (noTaken * enhPriceStep); //base value, plus additional price charged for further levels
+                newCost = target.data("enhOptionCost") + cost;
                 target.data("enhOptionCost", newCost);
             }
-            
+
             confirm.getTotalCost();
         }
     },
-	
+
+    doOnMinusEnhancement: function (e) {
+        e.stopPropagation();
+
+        var button = $(this);
+        var enhNo = button.data("enhNo");
+        var target = $(".selectAmount.shpenh" + enhNo);
+
+        var noTaken = target.data("count");
+        var enhLimit = target.data("max");
+        var enhPrice = target.data("enhPrice");
+        var enhPriceStep = target.data("enhPriceStep");
+
+        if (noTaken > 0) { //decrease possible
+            var newCount = noTaken - 1;
+            target.data("count", newCount);
+            target.html(newCount);
+            var cost = enhPrice + (newCount * enhPriceStep); //base value, plus additional price charged for further levels
+            var newCost = target.data("enhCost") - cost;
+            target.data("enhCost", newCost);
+
+            //options cost - remembering they're included in enhancements cost as well!
+            if (target.data("enhIsOption")) {
+                cost = enhPrice + (newCount * enhPriceStep); //base value, plus additional price charged for further levels
+                newCost = target.data("enhOptionCost") - cost;
+                target.data("enhOptionCost", newCost);
+            }
+
+            confirm.getTotalCost();
+        }
+    },
+
 
     // Helper function to select all text on focus
-    selectAllTextOnFocus: function() {
+    selectAllTextOnFocus: function () {
         var range = document.createRange();
         range.selectNodeContents(this);
         var sel = window.getSelection();
@@ -314,14 +314,14 @@ window.confirm = {
     preventNonNumericInput: function preventNonNumericInput(e) {
         // Allow only numbers, backspace, delete, arrows, and enter
         if (
-            (e.key >= "0" && e.key <= "9") || 
+            (e.key >= "0" && e.key <= "9") ||
             ["Backspace", "Delete", "ArrowLeft", "ArrowRight", "Enter"].includes(e.key)
         ) {
             return;
         }
         e.preventDefault();
-    },   
-    
+    },
+
     // Helper function to handle mouse wheel changes
     handleMouseWheel: function handleMouseWheel(e) {
         e.preventDefault();
@@ -343,7 +343,7 @@ window.confirm = {
         $(this).text(value);
         $(this).data('value', value);
         $(this).trigger('input'); // Simulate an input change
-    },    
+    },
 
     handleMouseWheelFighter: function handleMouseWheelFighter(e) {
         e.preventDefault();
@@ -374,17 +374,17 @@ window.confirm = {
 
         $elem.text(current);
         confirm.getTotalCost();
-    },    
+    },
 
-    handleMouseWheelMissile: function(e) {
+    handleMouseWheelMissile: function (e) {
         e.preventDefault();
         e.stopPropagation();
 
-        var $amt   = $(this);
+        var $amt = $(this);
         var current = $amt.data('value');
-        var min     = $amt.data('min');
-        var max     = $amt.data('max');
-        var dir     = (e.originalEvent.deltaY < 0) ? +1 : -1;
+        var min = $amt.data('min');
+        var max = $amt.data('max');
+        var dir = (e.originalEvent.deltaY < 0) ? +1 : -1;
 
         // adjust by 1 missile per wheel‑click
         current = current + dir;
@@ -410,63 +410,63 @@ window.confirm = {
         var missileOptions = confirm.getMissileOptions(ship);
 
         //if (variableSize || missileOptions.length > 0 || ship.superheavy) {
-            var totalTemplate = $(".totalUnitCost");
-            var totalItem = totalTemplate.clone(true).prependTo(e);
+        var totalTemplate = $(".totalUnitCost");
+        var totalItem = totalTemplate.clone(true).prependTo(e);
 
-	    //allow maximum flight size pre-set in design...
-	    if (ship.maxFlightSize!=0){
-		    $(".totalUnitCostAmount").data("maxSize", ship.maxFlightSize);
-	    }else{
-		    if (ship.jinkinglimit > 9) {
-			$(".totalUnitCostAmount").data("maxSize", 12);
-		    } else $(".totalUnitCostAmount").data("maxSize", 9);
-	    }
-	    
-		var pointCost = ship.pointCost;
-		if (ship.maxFlightSize==3){ //for single-unit flight cost is for a fighter; for usual 6+ flight, for 6 craft (and 6 craft will be set)
-			//but for 3-strong flight cost is still set for 6-strong flight...
-			pointCost = pointCost/2;
-		}
-			
-		//ship.pointCost
-            $(".totalUnitCostText", totalItem).html("Total cost");
-            $(".totalUnitCostAmount", totalItem).html(pointCost);
-            $(".totalUnitCostAmount", totalItem).data("value", pointCost);
+        //allow maximum flight size pre-set in design...
+        if (ship.maxFlightSize != 0) {
+            $(".totalUnitCostAmount").data("maxSize", ship.maxFlightSize);
+        } else {
+            if (ship.jinkinglimit > 9) {
+                $(".totalUnitCostAmount").data("maxSize", 12);
+            } else $(".totalUnitCostAmount").data("maxSize", 9);
+        }
 
-            $(totalItem).show();
-		
-            $(".totalUnitCostAmount").data("value", pointCost);	    
+        var pointCost = ship.pointCost;
+        if (ship.maxFlightSize == 3) { //for single-unit flight cost is for a fighter; for usual 6+ flight, for 6 craft (and 6 craft will be set)
+            //but for 3-strong flight cost is still set for 6-strong flight...
+            pointCost = pointCost / 2;
+        }
+
+        //ship.pointCost
+        $(".totalUnitCostText", totalItem).html("Total cost");
+        $(".totalUnitCostAmount", totalItem).html(pointCost);
+        $(".totalUnitCostAmount", totalItem).data("value", pointCost);
+
+        $(totalItem).show();
+
+        $(".totalUnitCostAmount").data("value", pointCost);
         //}
-	    
-        
-    //ship enhancements
-        for(var i in ship.enhancementOptions){
+
+
+        //ship enhancements
+        for (var i in ship.enhancementOptions) {
             //enhancementOption: ID,readableName,numberTaken,limit,price,priceStep	
             var enhancement = ship.enhancementOptions[i];
             var enhID = enhancement[0];
             var enhName = enhancement[1];
-            var enhLimit = enhancement[3];		
+            var enhLimit = enhancement[3];
             var enhPrice = enhancement[4];
             var enhPriceStep = enhancement[5];
-		    var enhIsOption = enhancement[6];
+            var enhIsOption = enhancement[6];
 
             var template = $(".missileSelectItem");
             var item = template.clone(true).prependTo(e);
 
             var selectAmountItem = $(".selectAmount", item);
 
-                selectAmountItem.html("0");
-                selectAmountItem.attr("contenteditable", "true"); // Make it editable - DK 12.5.25
-                selectAmountItem.addClass("shpenh"+i);
-                selectAmountItem.data('enhID', enhID);
-                selectAmountItem.data('count', 0);
-                selectAmountItem.data('enhCost', 0);
-                selectAmountItem.data('min', 0);
-                selectAmountItem.data('max', enhLimit);
-                selectAmountItem.data('enhPrice', enhPrice);
-                selectAmountItem.data('enhPriceStep', enhPriceStep);
-                //selectAmountItem.data('launchers', confirm.getLaunchersPerFighter(ship));
-                //selectAmountItem.data("firingMode", i);
+            selectAmountItem.html("0");
+            selectAmountItem.attr("contenteditable", "true"); // Make it editable - DK 12.5.25
+            selectAmountItem.addClass("shpenh" + i);
+            selectAmountItem.data('enhID', enhID);
+            selectAmountItem.data('count', 0);
+            selectAmountItem.data('enhCost', 0);
+            selectAmountItem.data('min', 0);
+            selectAmountItem.data('max', enhLimit);
+            selectAmountItem.data('enhPrice', enhPrice);
+            selectAmountItem.data('enhPriceStep', enhPriceStep);
+            //selectAmountItem.data('launchers', confirm.getLaunchersPerFighter(ship));
+            //selectAmountItem.data("firingMode", i);
 
             // New fucntions to allow player to free type/mousewheel in number fields for enhancements/ammo - DK 12.5.25
             selectAmountItem.on("focus", confirm.selectAllTextOnFocus);
@@ -474,54 +474,54 @@ window.confirm = {
             selectAmountItem.on("input", confirm.handleInputChange);
 
             selectAmountItem.on("keydown", confirm.preventNonNumericInput);
-            
+
             selectAmountItem.on("wheel", confirm.handleMouseWheel);
 
-        var slotid = gamedata.selectedSlot;
-        var slot = playerManager.getSlotById(slotid);
-        //var deployTurn = Math.max(1, slot.depavailable); 
+            var slotid = gamedata.selectedSlot;
+            var slot = playerManager.getSlotById(slotid);
+            //var deployTurn = Math.max(1, slot.depavailable); 
 
-        //Add (OPTION) at the beginning of name of options (to differentiate them from enhancements)
-        if(enhIsOption) enhName = " <span style='color:rgb(224, 185, 57) ;'>(OPTION)</span> " + enhName; 
-		//if(enhIsOption && enhID != 'DEPLOY') enhName = " <span style='color:rgb(224, 185, 57) ;'>(OPTION)</span> " + enhName;
+            //Add (OPTION) at the beginning of name of options (to differentiate them from enhancements)
+            if (enhIsOption) enhName = " <span style='color:rgb(224, 185, 57) ;'>(OPTION)</span> " + enhName;
+            //if(enhIsOption && enhID != 'DEPLOY') enhName = " <span style='color:rgb(224, 185, 57) ;'>(OPTION)</span> " + enhName;
 
-        /*if(enhIsOption && enhID == 'DEPLOY'){
-            selectAmountItem.html(deployTurn);
-            selectAmountItem.data('min', deployTurn);
-            enhName = " <span style='color:rgb(95, 206, 95);' >(DEPLOYMENT)</span> " + enhName;
-        } */
+            /*if(enhIsOption && enhID == 'DEPLOY'){
+                selectAmountItem.html(deployTurn);
+                selectAmountItem.data('min', deployTurn);
+                enhName = " <span style='color:rgb(95, 206, 95);' >(DEPLOYMENT)</span> " + enhName;
+            } */
 
-        const ammoTypes = ['(HEAVY AMMO)', '(MEDIUM AMMO)', '(LIGHT AMMO)', '(AMMO)'];
-        for (const type of ammoTypes) {
-            if (enhName.includes(type)) {
-                enhName = enhName.replace(type, '').trim();
-                enhName = ` <span style="color:rgb(106, 195, 255);">${type}</span> ` + enhName;
-                break; // Assuming only one ammo type appears in the string
+            const ammoTypes = ['(HEAVY AMMO)', '(MEDIUM AMMO)', '(LIGHT AMMO)', '(AMMO)'];
+            for (const type of ammoTypes) {
+                if (enhName.includes(type)) {
+                    enhName = enhName.replace(type, '').trim();
+                    enhName = ` <span style="color:rgb(106, 195, 255);">${type}</span> ` + enhName;
+                    break; // Assuming only one ammo type appears in the string
+                }
             }
-        }    
 
-        var nameExpanded = enhName;
-        //if(enhID != 'DEPLOY'){
+            var nameExpanded = enhName;
+            //if(enhID != 'DEPLOY'){
             nameExpanded = nameExpanded + ' (';
-			if(enhLimit>1) nameExpanded += 'up to ' + enhLimit + ' levels, ';
-			nameExpanded += enhPrice + 'pts';
-			//+ ' (up to ' + enhLimit + ' levels, ' + enhPrice + 'PV ';
-            if((enhPriceStep!=0) && (enhLimit>1)){
-                nameExpanded = nameExpanded + ' plus ' + enhPriceStep + 'pts per level';		
+            if (enhLimit > 1) nameExpanded += 'up to ' + enhLimit + ' levels, ';
+            nameExpanded += enhPrice + 'pts';
+            //+ ' (up to ' + enhLimit + ' levels, ' + enhPrice + 'PV ';
+            if ((enhPriceStep != 0) && (enhLimit > 1)) {
+                nameExpanded = nameExpanded + ' plus ' + enhPriceStep + 'pts per level';
             }
             nameExpanded = nameExpanded + ')';
-        //}    
+            //}    
             $(".selectText", item).html(nameExpanded);
             $(item).show();
 
-                    var plusButton = $(".plusButton", item);
-                    plusButton.data("enhNo", i); 
+            var plusButton = $(".plusButton", item);
+            plusButton.data("enhNo", i);
             var minusButton = $(".minusButton", item);
-                    minusButton.data("enhNo", i);
+            minusButton.data("enhNo", i);
 
 
-            $(".plusButton", item).on("click",confirm.doOnPlusEnhancement);
-            $(".minusButton", item).on("click",confirm.doOnMinusEnhancement);
+            $(".plusButton", item).on("click", confirm.doOnPlusEnhancement);
+            $(".minusButton", item).on("click", confirm.doOnMinusEnhancement);
         }
         $('<div class="missileselect"><label>Here you may select any available Ammo, Options, and Enhancements.<br><span>(NOTE - For fighter flights, all fighters in flight will be similarly outfitted)</span></label></div>').prependTo(e);
 
@@ -545,13 +545,13 @@ window.confirm = {
                 selectAmountItem.data('initialValue', 0); // store initial value for diff calculation                
                 selectAmountItem.data('min', 0);
 
-				
+
                 //if (ship.superheavy) {
-				if (ship.maxFlightSize<3) { //here it's question of single vs multiple craft per flight, not of being superheavy
+                if (ship.maxFlightSize < 3) { //here it's question of single vs multiple craft per flight, not of being superheavy
                     $(".selectText", item).html(missileOption[0] + ' (maximum amount: ' + missileOption[1] / 6 / (missileOption[3] / 6) + ', cost: ' + missileOption[2] + ')');
                     $(item).show();
 
-                    selectAmountItem.data('max', Math.round( missileOption[1] / 6 / (missileOption[3] / 6) ));
+                    selectAmountItem.data('max', Math.round(missileOption[1] / 6 / (missileOption[3] / 6)));
                     selectAmountItem.data('cost', missileOption[2]);
                     selectAmountItem.data('launchers', confirm.getLaunchersPerFighter(ship));
                     selectAmountItem.data("firingMode", i);
@@ -578,10 +578,10 @@ window.confirm = {
             //$(".missileSelectItem .selectButtons .plusButton", e).on("click", confirm.doOnPlusMissile);
             //$(".missileSelectItem .selectButtons .minusButton", e).on("click", confirm.doOnMinusMissile);
             //change for enhancements:
-            $(".plusButton", item).on("click",confirm.doOnPlusMissile);
-            $(".minusButton", item).on("click",confirm.doOnMinusMissile);
+            $(".plusButton", item).on("click", confirm.doOnPlusMissile);
+            $(".minusButton", item).on("click", confirm.doOnMinusMissile);
             // **NEW**: bind wheel to our new handler
-            selectAmountItem.on("wheel", confirm.handleMouseWheelMissile);            
+            selectAmountItem.on("wheel", confirm.handleMouseWheelMissile);
         }
 
         if (variableSize) {
@@ -595,46 +595,46 @@ window.confirm = {
             var selectAmountItem = $(".selectAmount", item);
             selectAmountItem.removeClass("selectAmount").addClass("fighterAmount");
 
-	    //special treatment for flight size 3 - as it's less than default 6...
-	    if (ship.maxFlightSize==3){
-            	selectAmountItem.html("3");
-	    }else{//default 
-            	selectAmountItem.html("6");
-	    }
+            //special treatment for flight size 3 - as it's less than default 6...
+            if (ship.maxFlightSize == 3) {
+                selectAmountItem.html("3");
+            } else {//default 
+                selectAmountItem.html("6");
+            }
             selectAmountItem.data('pV', Math.floor(ship.pointCost / 6));
 
             selectAmountItem.on("wheel", confirm.handleMouseWheelFighter);
             $(".fighterSelectItem .selectButtons .plusButton", e).on("click", confirm.increaseFlightSize);
             $(".fighterSelectItem .selectButtons .minusButton", e).on("click", confirm.decreaseFlightSize);
         }
-	    
-	/* try to make default unit name other than nameless */
-	var nameCore = ship.shipClass;
-	var nameNumber = gamedata.lastShipNumber + 1;
-	var fullName = '';//by default: nameCore + ' #' + number ; name cannot be repeated!
-	var accepted = false;
-	var exists = false;
-	while (accepted != true){
-		fullName = nameCore + ' #' +nameNumber;
-		//check whether such a name doesn't yet exist...
-		exists = false;
-		for (var i in gamedata.ships) {
-            		var currShip = gamedata.ships[i];
-            		if (currShip.name == fullName) exists = true;
-        	}
-		if (exists == true){
-			nameNumber++;
-		}else{
-			accepted=true;
-		}
-	}	    
-	gamedata.lastShipNumber = nameNumber;
-	/*end of preparing default name*/
-	    $('<label>Name your new ' + ship.shipClass + ':</label><input type="text" style="text-align:center" name="shipname" value="' + fullName + '"></input><br>').prependTo(e);
-		
-	    /* old, with Nameless default
+
+        /* try to make default unit name other than nameless */
+        var nameCore = ship.shipClass;
+        var nameNumber = gamedata.lastShipNumber + 1;
+        var fullName = '';//by default: nameCore + ' #' + number ; name cannot be repeated!
+        var accepted = false;
+        var exists = false;
+        while (accepted != true) {
+            fullName = nameCore + ' #' + nameNumber;
+            //check whether such a name doesn't yet exist...
+            exists = false;
+            for (var i in gamedata.ships) {
+                var currShip = gamedata.ships[i];
+                if (currShip.name == fullName) exists = true;
+            }
+            if (exists == true) {
+                nameNumber++;
+            } else {
+                accepted = true;
+            }
+        }
+        gamedata.lastShipNumber = nameNumber;
+        /*end of preparing default name*/
+        $('<label>Name your new ' + ship.shipClass + ':</label><input type="text" style="text-align:center" name="shipname" value="' + fullName + '"></input><br>').prependTo(e);
+
+        /* old, with Nameless default
         $('<label>Name your new ' + ship.shipClass + ':</label><input type="text" style="text-align:center" name="shipname" value="Nameless"></input><br>').prependTo(e);
-		*/
+        */
         //$('<div class="message"><span>Name your new '+ship.shipClass+'</span></div>').prependTo(e);
         $(".confirmok", e).on("click", callback);
         $(".confirmcancel", e).on("click", function () {
@@ -712,7 +712,7 @@ window.confirm = {
         confirm.getTotalCost();
     },
 
-    
+
     showShipEdit: function showShipEdit(ship, callback) {
         var e = $(this.whtml);
 
@@ -731,65 +731,65 @@ window.confirm = {
         var missileOptions = confirm.getMissileOptions(ship);
 
         //if (variableSize || missileOptions.length > 0 || ship.superheavy) {
-            var totalTemplate = $(".totalUnitCost");
-            var totalItem = totalTemplate.clone(true).prependTo(e);
+        var totalTemplate = $(".totalUnitCost");
+        var totalItem = totalTemplate.clone(true).prependTo(e);
 
-	    //allow maximum flight size pre-set in design...
-	    if (ship.maxFlightSize!=0){
-		    $(".totalUnitCostAmount").data("maxSize", ship.maxFlightSize);
-	    }else{
-		    if (ship.jinkinglimit > 9) {
-			$(".totalUnitCostAmount").data("maxSize", 12);
-		    } else $(".totalUnitCostAmount").data("maxSize", 9);
-	    }
-	    
-		var pointCost = ship.pointCost;
+        //allow maximum flight size pre-set in design...
+        if (ship.maxFlightSize != 0) {
+            $(".totalUnitCostAmount").data("maxSize", ship.maxFlightSize);
+        } else {
+            if (ship.jinkinglimit > 9) {
+                $(".totalUnitCostAmount").data("maxSize", 12);
+            } else $(".totalUnitCostAmount").data("maxSize", 9);
+        }
+
+        var pointCost = ship.pointCost;
         /*
-		if (ship.maxFlightSize==3){ //for single-unit flight cost is for a fighter; for usual 6+ flight, for 6 craft (and 6 craft will be set)
-			//but for 3-strong flight cost is still set for 6-strong flight...
-			pointCost = pointCost/2;
-		}     
+        if (ship.maxFlightSize==3){ //for single-unit flight cost is for a fighter; for usual 6+ flight, for 6 craft (and 6 craft will be set)
+            //but for 3-strong flight cost is still set for 6-strong flight...
+            pointCost = pointCost/2;
+        }     
         */
-		//ship.pointCost
-            $(".totalUnitCostText", totalItem).html("Total cost");
-            $(".totalUnitCostAmount", totalItem).html(pointCost);
-            $(".totalUnitCostAmount", totalItem).data("value", pointCost);
+        //ship.pointCost
+        $(".totalUnitCostText", totalItem).html("Total cost");
+        $(".totalUnitCostAmount", totalItem).html(pointCost);
+        $(".totalUnitCostAmount", totalItem).data("value", pointCost);
 
-            $(totalItem).show();
-		
-            $(".totalUnitCostAmount").data("value", pointCost);	    
+        $(totalItem).show();
+
+        $(".totalUnitCostAmount").data("value", pointCost);
         //}
-	    
-        
-    //ship enhancements
-        for(var i in ship.enhancementOptions){
+
+
+        //ship enhancements
+        for (var i in ship.enhancementOptions) {
             //enhancementOption: ID,readableName,numberTaken,limit,price,priceStep	
             var enhancement = ship.enhancementOptions[i];
             var enhID = enhancement[0];
             var enhCount = enhancement[2];
             var enhName = enhancement[1];
-            var enhLimit = enhancement[3];		
+            var enhLimit = enhancement[3];
             var enhPrice = enhancement[4];
             var enhPriceStep = enhancement[5];
-		    var enhIsOption = enhancement[6];
+            var enhIsOption = enhancement[6];
 
             var template = $(".missileSelectItem");
             var item = template.clone(true).prependTo(e);
 
             var selectAmountItem = $(".selectAmount", item);
-                    selectAmountItem.attr("contenteditable", "true"); // Make it editable - DK 12.5.25
-                selectAmountItem.html(enhCount);
-                selectAmountItem.addClass("shpenh"+i);
-                selectAmountItem.data('enhID', enhID);
-                selectAmountItem.data('count', enhCount);
-                selectAmountItem.data('enhCost', 0);
-                selectAmountItem.data('min', 0);
-                selectAmountItem.data('max', enhLimit);
-                selectAmountItem.data('enhPrice', enhPrice);
-                selectAmountItem.data('enhPriceStep', enhPriceStep);
-                
-                //selectAmountItem.data('launchers', confirm.getLaunchersPerFighter(ship));
-                //selectAmountItem.data("firingMode", i);
+            selectAmountItem.attr("contenteditable", "true"); // Make it editable - DK 12.5.25
+            selectAmountItem.html(enhCount);
+            selectAmountItem.addClass("shpenh" + i);
+            selectAmountItem.data('enhID', enhID);
+            selectAmountItem.data('count', enhCount);
+            selectAmountItem.data('enhCost', 0);
+            selectAmountItem.data('min', 0);
+            selectAmountItem.data('max', enhLimit);
+            selectAmountItem.data('enhPrice', enhPrice);
+            selectAmountItem.data('enhPriceStep', enhPriceStep);
+
+            //selectAmountItem.data('launchers', confirm.getLaunchersPerFighter(ship));
+            //selectAmountItem.data("firingMode", i);
 
             // New fucntions to allow player to free type in number fields for enhancements/ammo - DK 12.5.25
             selectAmountItem.on("focus", confirm.selectAllTextOnFocus);
@@ -800,42 +800,42 @@ window.confirm = {
 
             selectAmountItem.on("wheel", confirm.handleMouseWheel);
 
-        var slotid = gamedata.selectedSlot;
-        var slot = playerManager.getSlotById(slotid);        
+            var slotid = gamedata.selectedSlot;
+            var slot = playerManager.getSlotById(slotid);
 
-        //add (OPTION) at the beginning of name of options (to differentiate them from enhancements)
-        if(enhIsOption) enhName = " <span style='color:rgb(224, 185, 57) ;'>(OPTION)</span> " + enhName; 
+            //add (OPTION) at the beginning of name of options (to differentiate them from enhancements)
+            if (enhIsOption) enhName = " <span style='color:rgb(224, 185, 57) ;'>(OPTION)</span> " + enhName;
 
-        const ammoTypes = ['(HEAVY AMMO)', '(MEDIUM AMMO)', '(LIGHT AMMO)', '(AMMO)'];
-        for (const type of ammoTypes) {
-            if (enhName.includes(type)) {
-                enhName = enhName.replace(type, '').trim();
-                enhName = ` <span style="color:rgb(106, 195, 255);">${type}</span> ` + enhName;
-                break; // Assuming only one ammo type appears in the string
+            const ammoTypes = ['(HEAVY AMMO)', '(MEDIUM AMMO)', '(LIGHT AMMO)', '(AMMO)'];
+            for (const type of ammoTypes) {
+                if (enhName.includes(type)) {
+                    enhName = enhName.replace(type, '').trim();
+                    enhName = ` <span style="color:rgb(106, 195, 255);">${type}</span> ` + enhName;
+                    break; // Assuming only one ammo type appears in the string
+                }
             }
-        }       
-                
-        var nameExpanded = enhName;
+
+            var nameExpanded = enhName;
             nameExpanded = nameExpanded + ' (';
-			if(enhLimit>1) nameExpanded += 'up to ' + enhLimit + ' levels, ';
-			nameExpanded += enhPrice + 'pts';
-			//+ ' (up to ' + enhLimit + ' levels, ' + enhPrice + 'PV ';
-            if((enhPriceStep!=0) && (enhLimit>1)){
-                nameExpanded = nameExpanded + ' plus ' + enhPriceStep + 'pts per level';		
+            if (enhLimit > 1) nameExpanded += 'up to ' + enhLimit + ' levels, ';
+            nameExpanded += enhPrice + 'pts';
+            //+ ' (up to ' + enhLimit + ' levels, ' + enhPrice + 'PV ';
+            if ((enhPriceStep != 0) && (enhLimit > 1)) {
+                nameExpanded = nameExpanded + ' plus ' + enhPriceStep + 'pts per level';
             }
-            nameExpanded = nameExpanded + ')';  
+            nameExpanded = nameExpanded + ')';
 
             $(".selectText", item).html(nameExpanded);
             $(item).show();
 
-                    var plusButton = $(".plusButton", item);
-                    plusButton.data("enhNo", i); 
+            var plusButton = $(".plusButton", item);
+            plusButton.data("enhNo", i);
             var minusButton = $(".minusButton", item);
-                    minusButton.data("enhNo", i);
+            minusButton.data("enhNo", i);
 
 
-            $(".plusButton", item).on("click",confirm.doOnPlusEnhancement);
-            $(".minusButton", item).on("click",confirm.doOnMinusEnhancement);
+            $(".plusButton", item).on("click", confirm.doOnPlusEnhancement);
+            $(".minusButton", item).on("click", confirm.doOnMinusEnhancement);
         }
         $('<div class="missileselect"><label>Here you may select any available Ammo, Options, and Enhancements.<br><span>(NOTE - For fighter flights, all fighters in flight will be similarly outfitted)</span></label></div>').prependTo(e);
 
@@ -891,53 +891,53 @@ window.confirm = {
             $('<div class="missileselect"><label>This fighter type can carry fighter missiles.<br>\
                     Please select the amount you wish to purchase PER MISSILE LAUNCHER.<br></label>').prependTo(e);
 
-            $(".plusButton", item).on("click",confirm.doOnPlusMissile);
-            $(".minusButton", item).on("click",confirm.doOnMinusMissile);
-            selectAmountItem.on("wheel", confirm.handleMouseWheelMissile);            
+            $(".plusButton", item).on("click", confirm.doOnPlusMissile);
+            $(".minusButton", item).on("click", confirm.doOnMinusMissile);
+            selectAmountItem.on("wheel", confirm.handleMouseWheelMissile);
         }
 
-                if (variableSize) {
-                    var template = $(".missileSelectItem");
-                    var item = template.clone(true).prependTo(e);
-                    item.addClass("fighterSelectItem");
+        if (variableSize) {
+            var template = $(".missileSelectItem");
+            var item = template.clone(true).prependTo(e);
+            item.addClass("fighterSelectItem");
 
-                    $(".selectText", item).html("Number of fighters in this flight:");
-                    $(item).show();
+            $(".selectText", item).html("Number of fighters in this flight:");
+            $(item).show();
 
-                    var selectAmountItem = $(".selectAmount", item);
-                    selectAmountItem.removeClass("selectAmount").addClass("fighterAmount");
+            var selectAmountItem = $(".selectAmount", item);
+            selectAmountItem.removeClass("selectAmount").addClass("fighterAmount");
 
-                    selectAmountItem.html(ship.flightSize);
+            selectAmountItem.html(ship.flightSize);
 
-                    selectAmountItem.data('pV', Math.floor(ship.pointCost / ship.flightSize));
+            selectAmountItem.data('pV', Math.floor(ship.pointCost / ship.flightSize));
 
-                    selectAmountItem.on("wheel", confirm.handleMouseWheelFighter);
-                    $(".fighterSelectItem .selectButtons .plusButton", e).on("click", confirm.increaseFlightSize);
-                    $(".fighterSelectItem .selectButtons .minusButton", e).on("click", confirm.decreaseFlightSize);
-                }
-                
-                $('<label>Edit your ' + ship.shipClass + ':</label><input type="text" style="text-align:center" name="shipname" value="' + ship.name + '"></input><br>').prependTo(e);
+            selectAmountItem.on("wheel", confirm.handleMouseWheelFighter);
+            $(".fighterSelectItem .selectButtons .plusButton", e).on("click", confirm.increaseFlightSize);
+            $(".fighterSelectItem .selectButtons .minusButton", e).on("click", confirm.decreaseFlightSize);
+        }
 
-                $(".confirmok", e).on("click", callback);
+        $('<label>Edit your ' + ship.shipClass + ':</label><input type="text" style="text-align:center" name="shipname" value="' + ship.name + '"></input><br>').prependTo(e);
 
-                $(".confirmcancel", e).on("click", function () {
-                    console.log("remove");
-                    $(".confirm").remove();
-                });
+        $(".confirmok", e).on("click", callback);
 
-                $(".confirmok", e).data("ship", ship);
-                $(".confirmok", e).data("originalShipData", originalShipData);
+        $(".confirmcancel", e).on("click", function () {
+            console.log("remove");
+            $(".confirm").remove();
+        });
+
+        $(".confirmok", e).data("ship", ship);
+        $(".confirmok", e).data("originalShipData", originalShipData);
 
 
 
         var a = e.appendTo("body");
         a.fadeIn(250);
-        },
+    },
 
 
     getVariableSize: function getVariableSize(ship) {
         //if (ship.flight && !ship.superheavy) { //superheavy is no longer a good marker
-	if (ship.flight && ship.maxFlightSize!=1) { //max flight size = 1 indicates single superheavy fighter
+        if (ship.flight && ship.maxFlightSize != 1) { //max flight size = 1 indicates single superheavy fighter
             return true;
         } else return false;
     },
@@ -951,62 +951,62 @@ window.confirm = {
         var missileOptions = confirm.getMissileOptions(ship);
 
         //if (variableSize || missileOptions.length > 0 || ship.superheavy) {
-            var totalTemplate = $(".totalUnitCost");
-            var totalItem = totalTemplate.clone(true).prependTo(e);
+        var totalTemplate = $(".totalUnitCost");
+        var totalItem = totalTemplate.clone(true).prependTo(e);
 
-	    //allow maximum flight size pre-set in design...
-	    if (ship.maxFlightSize!=0){
-		    $(".totalUnitCostAmount").data("maxSize", ship.maxFlightSize);
-	    }else{
-		    if (ship.jinkinglimit > 9) {
-			$(".totalUnitCostAmount").data("maxSize", 12);
-		    } else $(".totalUnitCostAmount").data("maxSize", 9);
-	    }
-	    
-		var pointCost = ship.pointCost;
-		if (ship.maxFlightSize==3){ //for single-unit flight cost is for a fighter; for usual 6+ flight, for 6 craft (and 6 craft will be set)
-			//but for 3-strong flight cost is still set for 6-strong flight...
-			pointCost = pointCost/2;
-		}
-			
+        //allow maximum flight size pre-set in design...
+        if (ship.maxFlightSize != 0) {
+            $(".totalUnitCostAmount").data("maxSize", ship.maxFlightSize);
+        } else {
+            if (ship.jinkinglimit > 9) {
+                $(".totalUnitCostAmount").data("maxSize", 12);
+            } else $(".totalUnitCostAmount").data("maxSize", 9);
+        }
+
+        var pointCost = ship.pointCost;
+        if (ship.maxFlightSize == 3) { //for single-unit flight cost is for a fighter; for usual 6+ flight, for 6 craft (and 6 craft will be set)
+            //but for 3-strong flight cost is still set for 6-strong flight...
+            pointCost = pointCost / 2;
+        }
+
 
         $(".totalUnitCostText", totalItem).html("Total cost");
         $(".totalUnitCostAmount", totalItem).html(pointCost);
         $(".totalUnitCostAmount", totalItem).data("value", pointCost);
 
         $(totalItem).show();
-		
-        $(".totalUnitCostAmount").data("value", pointCost);	    
 
-	    
+        $(".totalUnitCostAmount").data("value", pointCost);
+
+
         //ship enhancements
-        for(var i in ship.enhancementOptions){
+        for (var i in ship.enhancementOptions) {
             //enhancementOption: ID,readableName,numberTaken,limit,price,priceStep	
             var enhancement = ship.enhancementOptions[i];
             var enhID = enhancement[0];
             var enhName = enhancement[1];
-            var enhLimit = enhancement[3];		
+            var enhLimit = enhancement[3];
             var enhPrice = enhancement[4];
             var enhPriceStep = enhancement[5];
-		    var enhIsOption = enhancement[6];
+            var enhIsOption = enhancement[6];
 
             var template = $(".missileSelectItem");
             var item = template.clone(true).prependTo(e);
 
             var selectAmountItem = $(".selectAmount", item);
 
-                selectAmountItem.html("0");
-                selectAmountItem.attr("contenteditable", "true"); // Make it editable - DK 12.5.25
-                selectAmountItem.addClass("shpenh"+i);
-                selectAmountItem.data('enhID', enhID);
-                selectAmountItem.data('count', 0);
-                selectAmountItem.data('enhCost', 0);
-                selectAmountItem.data('min', 0);
-                selectAmountItem.data('max', enhLimit);
-                selectAmountItem.data('enhPrice', enhPrice);
-                selectAmountItem.data('enhPriceStep', enhPriceStep);
-                //selectAmountItem.data('launchers', confirm.getLaunchersPerFighter(ship));
-                //selectAmountItem.data("firingMode", i);
+            selectAmountItem.html("0");
+            selectAmountItem.attr("contenteditable", "true"); // Make it editable - DK 12.5.25
+            selectAmountItem.addClass("shpenh" + i);
+            selectAmountItem.data('enhID', enhID);
+            selectAmountItem.data('count', 0);
+            selectAmountItem.data('enhCost', 0);
+            selectAmountItem.data('min', 0);
+            selectAmountItem.data('max', enhLimit);
+            selectAmountItem.data('enhPrice', enhPrice);
+            selectAmountItem.data('enhPriceStep', enhPriceStep);
+            //selectAmountItem.data('launchers', confirm.getLaunchersPerFighter(ship));
+            //selectAmountItem.data("firingMode", i);
 
             // New fucntions to allow player to free type/mousewheel in number fields for enhancements/ammo - DK 12.5.25
             selectAmountItem.on("focus", confirm.selectAllTextOnFocus);
@@ -1014,45 +1014,45 @@ window.confirm = {
             selectAmountItem.on("input", confirm.handleInputChange);
 
             selectAmountItem.on("keydown", confirm.preventNonNumericInput);
-            
+
             selectAmountItem.on("wheel", confirm.handleMouseWheel);
 
-        var slotid = gamedata.selectedSlot;
-        var slot = playerManager.getSlotById(slotid);
+            var slotid = gamedata.selectedSlot;
+            var slot = playerManager.getSlotById(slotid);
 
-        //Add (OPTION) at the beginning of name of options (to differentiate them from enhancements)
-        if(enhIsOption) enhName = " <span style='color:rgb(224, 185, 57) ;'>(OPTION)</span> " + enhName; 
+            //Add (OPTION) at the beginning of name of options (to differentiate them from enhancements)
+            if (enhIsOption) enhName = " <span style='color:rgb(224, 185, 57) ;'>(OPTION)</span> " + enhName;
 
-        const ammoTypes = ['(HEAVY AMMO)', '(MEDIUM AMMO)', '(LIGHT AMMO)', '(AMMO)'];
-        for (const type of ammoTypes) {
-            if (enhName.includes(type)) {
-                enhName = enhName.replace(type, '').trim();
-                enhName = ` <span style="color:rgb(106, 195, 255);">${type}</span> ` + enhName;
-                break; // Assuming only one ammo type appears in the string
+            const ammoTypes = ['(HEAVY AMMO)', '(MEDIUM AMMO)', '(LIGHT AMMO)', '(AMMO)'];
+            for (const type of ammoTypes) {
+                if (enhName.includes(type)) {
+                    enhName = enhName.replace(type, '').trim();
+                    enhName = ` <span style="color:rgb(106, 195, 255);">${type}</span> ` + enhName;
+                    break; // Assuming only one ammo type appears in the string
+                }
             }
-        }    
 
-        var nameExpanded = enhName;
+            var nameExpanded = enhName;
             nameExpanded = nameExpanded + ' (';
-			if(enhLimit>1) nameExpanded += 'up to ' + enhLimit + ' levels, ';
-			nameExpanded += enhPrice + 'pts';
-			//+ ' (up to ' + enhLimit + ' levels, ' + enhPrice + 'PV ';
-            if((enhPriceStep!=0) && (enhLimit>1)){
-                nameExpanded = nameExpanded + ' plus ' + enhPriceStep + 'pts per level';		
+            if (enhLimit > 1) nameExpanded += 'up to ' + enhLimit + ' levels, ';
+            nameExpanded += enhPrice + 'pts';
+            //+ ' (up to ' + enhLimit + ' levels, ' + enhPrice + 'PV ';
+            if ((enhPriceStep != 0) && (enhLimit > 1)) {
+                nameExpanded = nameExpanded + ' plus ' + enhPriceStep + 'pts per level';
             }
             nameExpanded = nameExpanded + ')';
-   
+
             $(".selectText", item).html(nameExpanded);
             $(item).show();
 
-                    var plusButton = $(".plusButton", item);
-                    plusButton.data("enhNo", i); 
+            var plusButton = $(".plusButton", item);
+            plusButton.data("enhNo", i);
             var minusButton = $(".minusButton", item);
-                    minusButton.data("enhNo", i);
+            minusButton.data("enhNo", i);
 
 
-            $(".plusButton", item).on("click",confirm.doOnPlusEnhancement);
-            $(".minusButton", item).on("click",confirm.doOnMinusEnhancement);
+            $(".plusButton", item).on("click", confirm.doOnPlusEnhancement);
+            $(".minusButton", item).on("click", confirm.doOnMinusEnhancement);
         }
         $('<div class="missileselect"><label>Here you may select any available Ammo, Options, and Enhancements.<br><span>(NOTE - For fighter flights, all fighters in flight will be similarly outfitted)</span></label></div>').prependTo(e);
 
@@ -1076,13 +1076,13 @@ window.confirm = {
                 selectAmountItem.data('initialValue', 0); // store initial value for diff calculation                
                 selectAmountItem.data('min', 0);
 
-				
+
                 //if (ship.superheavy) {
-				if (ship.maxFlightSize<3) { //here it's question of single vs multiple craft per flight, not of being superheavy
+                if (ship.maxFlightSize < 3) { //here it's question of single vs multiple craft per flight, not of being superheavy
                     $(".selectText", item).html(missileOption[0] + ' (maximum amount: ' + missileOption[1] / 6 / (missileOption[3] / 6) + ', cost: ' + missileOption[2] + ')');
                     $(item).show();
 
-                    selectAmountItem.data('max', Math.round( missileOption[1] / 6 / (missileOption[3] / 6) ));
+                    selectAmountItem.data('max', Math.round(missileOption[1] / 6 / (missileOption[3] / 6)));
                     selectAmountItem.data('cost', missileOption[2]);
                     selectAmountItem.data('launchers', confirm.getLaunchersPerFighter(ship));
                     selectAmountItem.data("firingMode", i);
@@ -1109,10 +1109,10 @@ window.confirm = {
             //$(".missileSelectItem .selectButtons .plusButton", e).on("click", confirm.doOnPlusMissile);
             //$(".missileSelectItem .selectButtons .minusButton", e).on("click", confirm.doOnMinusMissile);
             //change for enhancements:
-            $(".plusButton", item).on("click",confirm.doOnPlusMissile);
-            $(".minusButton", item).on("click",confirm.doOnMinusMissile);
+            $(".plusButton", item).on("click", confirm.doOnPlusMissile);
+            $(".minusButton", item).on("click", confirm.doOnMinusMissile);
             // **NEW**: bind wheel to our new handler
-            selectAmountItem.on("wheel", confirm.handleMouseWheelMissile);            
+            selectAmountItem.on("wheel", confirm.handleMouseWheelMissile);
         }
 
         if (variableSize) {
@@ -1126,46 +1126,46 @@ window.confirm = {
             var selectAmountItem = $(".selectAmount", item);
             selectAmountItem.removeClass("selectAmount").addClass("fighterAmount");
 
-	    //special treatment for flight size 3 - as it's less than default 6...
-	    if (ship.maxFlightSize==3){
-            	selectAmountItem.html("3");
-	    }else{//default 
-            	selectAmountItem.html("6");
-	    }
+            //special treatment for flight size 3 - as it's less than default 6...
+            if (ship.maxFlightSize == 3) {
+                selectAmountItem.html("3");
+            } else {//default 
+                selectAmountItem.html("6");
+            }
             selectAmountItem.data('pV', Math.floor(ship.pointCost / 6));
 
             selectAmountItem.on("wheel", confirm.handleMouseWheelFighter);
             $(".fighterSelectItem .selectButtons .plusButton", e).on("click", confirm.increaseFlightSize);
             $(".fighterSelectItem .selectButtons .minusButton", e).on("click", confirm.decreaseFlightSize);
         }
-	    
+
         /* try to make default unit name other than nameless */
         var nameCore = ship.shipClass;
         var nameNumber = gamedata.lastShipNumber + 1;
         var fullName = '';//by default: nameCore + ' #' + number ; name cannot be repeated!
         var accepted = false;
         var exists = false;
-        while (accepted != true){
-            fullName = nameCore + ' #' +nameNumber;
+        while (accepted != true) {
+            fullName = nameCore + ' #' + nameNumber;
             //check whether such a name doesn't yet exist...
             exists = false;
             for (var i in gamedata.ships) {
-                        var currShip = gamedata.ships[i];
-                        if (currShip.name == fullName) exists = true;
-                }
-            if (exists == true){
-                nameNumber++;
-            }else{
-                accepted=true;
+                var currShip = gamedata.ships[i];
+                if (currShip.name == fullName) exists = true;
             }
-        }	    
+            if (exists == true) {
+                nameNumber++;
+            } else {
+                accepted = true;
+            }
+        }
         gamedata.lastShipNumber = nameNumber;
         /*end of preparing default name*/
-	    $('<label>Name your new ' + ship.shipClass + ':</label><input type="text" style="text-align:center" name="shipname" value="' + fullName + '"></input><br>').prependTo(e);
-		
-	    /* old, with Nameless default
+        $('<label>Name your new ' + ship.shipClass + ':</label><input type="text" style="text-align:center" name="shipname" value="' + fullName + '"></input><br>').prependTo(e);
+
+        /* old, with Nameless default
         $('<label>Name your new ' + ship.shipClass + ':</label><input type="text" style="text-align:center" name="shipname" value="Nameless"></input><br>').prependTo(e);
-		*/
+        */
         //$('<div class="message"><span>Name your new '+ship.shipClass+'</span></div>').prependTo(e);
         $(".confirmok", e).on("click", callback);
         $(".confirmcancel", e).on("click", function () {
@@ -1246,7 +1246,7 @@ window.confirm = {
 
     showSaveFleet: function showSaveFleet(callback) {
         var e = $(this.whtml);
-        
+
         /*
         var points = 0;
         for (var i in gamedata.ships) {
@@ -1314,17 +1314,17 @@ window.confirm = {
         a.fadeIn(250);
     },
 
-	//New window type, simplies provide a wanring to players about a specific action they are taking, does not prevent any.
-	warning: function warning(msg) {
-	    var e = $('<div class="confirm error"><div class="ui"><div class="confirmok" style="margin:auto;"></div></div></div>');
-	    $('<span>' + msg + '</span>').prependTo(e);
+    //New window type, simplies provide a wanring to players about a specific action they are taking, does not prevent any.
+    warning: function warning(msg) {
+        var e = $('<div class="confirm error"><div class="ui"><div class="confirmok" style="margin:auto;"></div></div></div>');
+        $('<span>' + msg + '</span>').prependTo(e);
 
-	    $(".confirmok", e).on("click", function() {
-	        e.remove(); // Remove the warning dialog
-	    });
+        $(".confirmok", e).on("click", function () {
+            e.remove(); // Remove the warning dialog
+        });
 
-	    e.appendTo("body").fadeIn(250);
-	},
+        e.appendTo("body").fadeIn(250);
+    },
 
 
     confirmWithOptions: function confirmWithOptions(msg, trueOptionString, falseOptionString, callback) {
@@ -1410,6 +1410,59 @@ window.confirm = {
         b.fadeTo(1000, 0.5);
         var a = e.appendTo("body");
         a.fadeIn(250);
+    },
+
+
+
+    askForMultipleValues: function (msg, inputs, callback) {
+        var e = $('<div class="confirm error multi-value-confirm"><div class="ui"><div class="confirmok"></div><div class="confirmcancel"></div></div></div>');
+        $('<div class="multi-value-header">' + msg + '</div>').prependTo(e);
+
+        var container = $('<div class="multi-value-container"></div>').insertAfter(e.find('.multi-value-header'));
+
+        inputs.forEach(function (item) {
+            var row = $('<div class="multi-value-row"></div>');
+            $('<span class="multi-value-label"><span class="multi-value-name">' + item.label + '</span> <span class="multi-value-max">(Max: ' + item.max + ')</span></span>').appendTo(row);
+
+            var initialValue = (item.value !== undefined) ? item.value : (item.max || 1);
+            var maxAttr = (item.max !== undefined) ? 'max="' + item.max + '"' : '';
+            var input = $('<input type="number" class="multiConfirmInput multi-value-input" data-id="' + item.id + '" value="' + initialValue + '" min="1" ' + maxAttr + '>').appendTo(row);
+
+            if (item.max !== undefined) {
+                input.on("change", function () {
+                    var val = parseInt($(this).val());
+                    if (val > item.max) $(this).val(item.max);
+                    if (val < 1) $(this).val(1);
+                });
+            }
+            row.appendTo(container);
+        });
+
+        $(".confirmok", e).on("click", function () {
+            var results = {};
+            var valid = true;
+            $(".multiConfirmInput", e).each(function () {
+                var id = $(this).data("id");
+                var val = parseInt($(this).val());
+                var max = parseInt($(this).attr("max"));
+
+                if (isNaN(val) || val < 1) val = 1;
+                if (!isNaN(max) && val > max) val = max;
+
+                results[id] = val;
+            });
+
+            callback(results);
+            $(".confirm").remove();
+        });
+
+        $(".confirmcancel", e).on("click", function () {
+            $(".confirm").remove();
+        });
+
+        var a = e.appendTo("body");
+        a.fadeIn(250);
+        $(".multiConfirmInput", e).first().focus();
     }
 
 };

@@ -1,25 +1,25 @@
-
 .confirm {
-	padding:10px 10px 10px 10px;
-    background-color:black;
-	border-radius: 5px 5px 5px 5px;
+    padding: 10px 10px 10px 10px;
+    border: 1px solid #496791;
+    background-color: black;
+    border-radius: 5px 5px 5px 5px;
     -moz-border-radius: 5px 5px 5px 5px;
     -webkit-border-radius: 5px;
-	position:fixed;
-    width:555px;
+    position: fixed;
+    width: 555px;
     max-width: 100%;
     max-height: 100%;
-	left:50%;
-	top:50%;
-	opacity: 1;
-	z-index:999999;
-	display:none;
+    left: 50%;
+    top: 50%;
+    opacity: 1;
+    z-index: 999999;
+    display: none;
     text-align: center;
     transform: translate(-50%, -50%);
-    overflow-y: scroll;
+    overflow-y: auto;
 }
 
-.confirm .missileselect{
+.confirm .missileselect {
     border: 1px solid #DEEBFF;
     color: #DEEBFF;
     padding: 3px 5px;
@@ -32,27 +32,27 @@
     box-shadow: 0px 0px 15px #0099ff;
 }
 
-.confirm .missileSelectItem{
+.confirm .missileSelectItem {
     /*padding-left: 5em;*/
 }
 
-.missileSelectItem{
+.missileSelectItem {
     text-align: left;
     vertical-align: middle;
 }
 
-.missileSelectItem .selectText{
+.missileSelectItem .selectText {
     padding-left: 10px;
     display: inline-block;
     width: 75%;
 }
 
-.missileSelectItem .selectButtons{
+.missileSelectItem .selectButtons {
     vertical-align: middle;
     display: inline-block;
 }
 
-.missileSelectItem .selectAmount{
+.missileSelectItem .selectAmount {
     display: inline-block;
     width: 7%;
     border: 1px solid #496791;
@@ -61,7 +61,7 @@
     text-align: right;
 }
 
-.fighterAmount{
+.fighterAmount {
     display: inline-block;
     width: 7%;
     border: 1px solid #496791;
@@ -70,7 +70,7 @@
     text-align: right;
 }
 
-.totalUnitCost .totalUnitCostText{
+.totalUnitCost .totalUnitCostText {
     font-style: italic;
     font-weight: bold;
     display: inline-block;
@@ -79,7 +79,7 @@
     width: 62%;
 }
 
-.totalUnitCost .totalUnitCostAmount{
+.totalUnitCost .totalUnitCostAmount {
     display: inline-block;
     width: 7%;
     border: 1px solid #496791;
@@ -88,65 +88,97 @@
     text-align: right;
 }
 
-.missileSelectItem table{
+.missileSelectItem table {
     border-spacing: 0px;
     empty-cells: show;
     display: inline-block;
 }
 
 
-.missileSelectItem .minusButton{
+.missileSelectItem .minusButton {
     display: inline-block;
-    border:1px solid #496791;
-    width:12px;
-    height:12px;
-    position:relative;
-    background-image:url(../img/minussquare.png);
-    cursor:pointer;
+    border: 1px solid #496791;
+    width: 12px;
+    height: 12px;
+    position: relative;
+    background-image: url(../img/minussquare.png);
+    cursor: pointer;
 }
 
-.missileSelectItem .plusButton{
+.missileSelectItem .plusButton {
     display: inline-block;
-    border:1px solid #496791;
-    width:12px;
-    height:12px;
-    position:relative;
-    background-image:url(../img/plussquare.png);
-    cursor:pointer;
+    border: 1px solid #496791;
+    width: 12px;
+    height: 12px;
+    position: relative;
+    background-image: url(../img/plussquare.png);
+    cursor: pointer;
 }
 
-.confirm .missileSelectItem .combo input {width:92px; background-color:#cfc;height:1.5em;z-index:0;}
-.confirm .missileSelectItem .combo ul {padding:1px;border:2px solid #ccc;width: 89px;background-color:#cfc;position:absolute;right:3px;top:1.5em;display:none;z-index:1;}
-.confirm .missileSelectItem .combo li {display:block; width: 100%;}
-.confirm .missileSelectItem .combo {position:relative;width:190px;text-align:left;padding:0;margin:0;}
-.confirm .missileSelectItem .combo * {padding:0;margin:0;}
+.confirm .missileSelectItem .combo input {
+    width: 92px;
+    background-color: #cfc;
+    height: 1.5em;
+    z-index: 0;
+}
 
-.confirm.error{
-	color:#b34119;
-	font-family: arial;
-	font-size:16px;
+.confirm .missileSelectItem .combo ul {
+    padding: 1px;
+    border: 2px solid #ccc;
+    width: 89px;
+    background-color: #cfc;
+    position: absolute;
+    right: 3px;
+    top: 1.5em;
+    display: none;
+    z-index: 1;
+}
+
+.confirm .missileSelectItem .combo li {
+    display: block;
+    width: 100%;
+}
+
+.confirm .missileSelectItem .combo {
+    position: relative;
+    width: 190px;
+    text-align: left;
+    padding: 0;
+    margin: 0;
+}
+
+.confirm .missileSelectItem .combo * {
+    padding: 0;
+    margin: 0;
+}
+
+.confirm.error {
+    border: 1px solid #000000;    
+    color: #b34119;
+    font-family: arial;
+    font-size: 16px;
 }
 
 .confirm.error .ship-name {
     color: rgba(255, 255, 255, 0.692);
 }
 
-.confirm h2{
-    font-size:22px;
-    margin:10px;
+.confirm h2 {
+    font-size: 22px;
+    margin: 10px;
 }
 
-.ui{
-	
-	color:white;
-	text-decoration:none;
-	margin:10px 0px 0px 10px;
-	position:relative;
-	
+.ui {
+
+    color: white;
+    text-decoration: none;
+    margin: 10px 0px 0px 10px;
+    position: relative;
+
 }
 
-.ui .confirmok{
-	background-image: url("../img/ok.png");
+.ui .confirmok {
+    background-image: url("../img/ok.png");
     cursor: pointer;
     height: 30px;
     width: 30px;
@@ -154,23 +186,23 @@
 
 
 
-.ui .confirmcancel{
-	position:absolute;
-	right:10px;
-	top:0px;
-	background-image: url("../img/cancel.png");
+.ui .confirmcancel {
+    position: absolute;
+    right: 10px;
+    top: 0px;
+    background-image: url("../img/cancel.png");
     cursor: pointer;
     height: 30px;
     width: 30px;
 }
 
-.ui .confirmokoption{
+.ui .confirmokoption {
     border: 1px solid #496791;
     border-radius: 5px;
     background-color: #0a3340;
-    color:#DEFBFF;
+    color: #DEFBFF;
     font-family: arial;
-    font-size:16px;
+    font-size: 16px;
     cursor: pointer;
     height: 30px;
     line-height: 30px;
@@ -180,16 +212,16 @@
 
 
 
-.ui .confirmcanceloption{
+.ui .confirmcanceloption {
     border: 1px solid #496791;
     border-radius: 5px;
     background-color: #0a3340;
-    color:#DEFBFF;
+    color: #DEFBFF;
     font-family: arial;
-    font-size:16px;
-    position:absolute;
-    right:10px;
-    top:0px;
+    font-size: 16px;
+    position: absolute;
+    right: 10px;
+    top: 0px;
     cursor: pointer;
     height: 30px;
     line-height: 30px;
@@ -197,30 +229,121 @@
     width: 180px;
 }
 
-.ui .surrender{
-    position:absolute;
-	left:175px;
-	top:0px;
+.ui .surrender {
+    position: absolute;
+    left: 175px;
+    top: 0px;
 }
 
-.surrender{
-	background-image: url("../img/surrender_icon.png");
-    background-size:cover;
+.surrender {
+    background-image: url("../img/surrender_icon.png");
+    background-size: cover;
     cursor: pointer;
     height: 30px;
     width: 30px;
 }
 
-.ui span{
-	cursor:pointer;
-}
-.ui span:hover{
-	text-decoration:underline;
+.ui span {
+    cursor: pointer;
 }
 
-.confirm input{
-	margin-left:10px;
+.ui span:hover {
+    text-decoration: underline;
 }
 
-@media only screen and (max-width: 1024px) {
+.confirm input {
+    margin-left: 10px;
+}
+
+@media only screen and (max-width: 1024px) {}
+
+/* Multi-value input dialog styles */
+.confirm.multi-value-confirm {
+    background: rgba(10, 15, 20, 0.95);
+    border: 1px solid #6a0080;
+    box-shadow: 0 0 5px rgba(0, 153, 255, 0.3);
+    color: #DEFBFF;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    padding: 15px;
+    width: auto !important;
+    /* Override inline width if needed */
+    min-width: 400px;
+}
+
+.confirm.multi-value-confirm .multi-value-header {
+    font-size: 16px;
+    /*font-weight: bold;*/
+    color: #e14dff;
+    margin-bottom: 15px;
+    /*text-transform: uppercase;*/
+    letter-spacing: 1px;
+    text-shadow: 0 0 5px rgba(85, 196, 255, 0.5);
+    border-bottom: 1px solid rgba(73, 103, 145, 0.5);
+    padding-bottom: 10px;
+}
+
+.confirm.multi-value-confirm .multi-value-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.confirm.multi-value-confirm .multi-value-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 5px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+    border: 1px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.confirm.multi-value-confirm .multi-value-row:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: #000000;
+}
+
+.confirm.multi-value-confirm .multi-value-label {
+    font-size: 14px;
+    color: #DEFBFF;
+    text-align: right;
+    flex: 1;
+    margin-right: 15px;
+}
+
+.confirm.multi-value-confirm .multi-value-input {
+    width: 60px;
+    background: #0a151f;
+    border: 1px solid #6a0080;
+    font-size: 14px;
+    color: #ffffff;
+    padding: 5px;
+    text-align: center;
+    font-family: 'Consolas', monospace;
+    font-weight: bold;
+    border-radius: 3px;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.confirm.multi-value-confirm .multi-value-input:focus {
+    border-color: #6a0080;
+    border: 1px solid #6a0080;    
+    box-shadow: 0 0 15px rgba(191, 0, 230, 0.75);
+    color: #ffffff;
+    background: #000;
+}
+
+.confirm.multi-value-confirm .multi-value-name {
+    font-weight: bold;
+    color: #DEFBFF;
+}
+
+.confirm.multi-value-confirm .multi-value-max {
+    font-size: 14px;
+    color: #DEFBFF;
+    opacity: 0.8;
+    /*margin-left: 5px;*/
 }
