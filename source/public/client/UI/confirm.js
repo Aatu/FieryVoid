@@ -1460,18 +1460,19 @@ window.confirm = {
                     }
                 });
 
-                countInput.on("change", function () {
+                countInput.on("input change keyup", function () {
                     var count = parseInt($(this).val());
                     var val = parseInt(input.val());
-                    if (count < 1) { count = 1; $(this).val(1); }
+                    if (isNaN(val) || val < 1) val = 1;
 
-                    // If val * count > max, reduce val (damage per shot) ?
-                    // Or reduce count? Let's cap count based on val.
+                    // Let's cap count based on val.
                     var maxCount = Math.floor(item.max / val);
+
                     if (count > maxCount) {
                         count = maxCount;
                         $(this).val(count);
                     }
+                    if (count < 1 && $(this).val() !== "") $(this).val(1);
                 });
             } else {
                 if (item.max !== undefined) {
