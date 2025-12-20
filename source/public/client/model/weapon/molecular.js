@@ -297,10 +297,12 @@ MolecularSlicerBeamL.prototype.doMultipleFireOrders = function (shooter, target,
 				}
 
 				calledid = -1;
+				//Check valid shot?
 				chance = window.weaponManager.calculateHitChange(shooter, target, weapon, calledid);
 				if (chance < 1) continue;
 
 				for (var k = 0; k < shotsToFire; k++) {
+					chance = window.weaponManager.calculateHitChange(shooter, target, weapon, calledid);
 					fireid = shooter.id + "_" + weapon.id + "_" + (weapon.fireOrders.length + 1);
 					weapon.resolveFireOrder(damagePerShot, shooter, target, fireid, calledid, chance);
 				}
@@ -319,7 +321,7 @@ MolecularSlicerBeamL.prototype.doMultipleFireOrders = function (shooter, target,
 			confirm.askForMultipleValues("Allocate damage dice (d10) and number of shots", inputs, onConfirm);
 		} else {
 			confirm.askForMultipleValues("Allocate damage dice (d10) for Molecular Slicers", inputs, onConfirm);
-		}			
+		}
 	}
 
 	return [];
