@@ -892,8 +892,7 @@ class SuperHeavyMolecularDisruptor extends Raking
             $diceUsed = 0;
             $loadedDice = $this->maxDiceArray[$this->turnsloaded] ?? 4;            
 
-            $maxDice = min($this->maxDiceArray[3], $loadedDice);            
- 
+            $maxDice = min($this->maxDiceArray[3], $loadedDice);              
             //Search fireOrders
             foreach ($this->fireOrders as $order) {
                 //Add +1 gun for each order like this so that intercept algorithms allow it any selfIntercepts                
@@ -909,19 +908,21 @@ class SuperHeavyMolecularDisruptor extends Raking
                     $diceUsed += 1; //Add intercept orders                  
                 }                   
             } 
-         
-            $spareDice = $maxDice - $diceUsed;
-			$ship = $this->getUnit();
-            while ($spareDice > 0){
-				$interceptFireOrder = new FireOrder( -1, "selfIntercept", $ship->id, $ship->id,
-					$this->id, -1, $gamedata->turn, 1,
-					0, 0, 1, 0, 0, null, null
-				);
-				$interceptFireOrder->addToDB = true;
-				$this->fireOrders[] = $interceptFireOrder;
-                $this->guns++;                                
-                $spareDice -= 1;
-            }
+
+            if($diceUsed > 0){ //A shot was fired or Slicer was set to selfIntercept                            
+                $spareDice = $maxDice - $diceUsed;
+                $ship = $this->getUnit();
+                while ($spareDice > 0){
+                    $interceptFireOrder = new FireOrder( -1, "selfIntercept", $ship->id, $ship->id,
+                        $this->id, -1, $gamedata->turn, 1,
+                        0, 0, 1, 0, 0, null, null
+                    );
+                    $interceptFireOrder->addToDB = true;
+                    $this->fireOrders[] = $interceptFireOrder;
+                    $this->guns++;                                
+                    $spareDice -= 1;
+                }                
+            }    
 
         }
 
@@ -959,8 +960,7 @@ class SuperHeavyMolecularDisruptor extends Raking
 			$this->data["Special"] .= "<br> - 2 turns: 6d10+6"; 
 			$this->data["Special"] .= "<br> - 3 turns: 8d10+8"; 
 			$this->data["Special"] .= "<br> - May spend 1d10 damage to gain -10 intercept, this is cumulative and suffers no degradation.";               
-			//$this->data["Special"] .= "<br>Can also split fire into 3 separate shots (at -1 FC) or 6 shots (-2 FC) against a single ship (not fighters). Each shot will do appropriate portion of regular damage (rolled separately, rounded down).";  
-		}
+        }
 		
 		/*
 		public function getDivider(){ //by how much damage should be divided - depends on mode
@@ -1176,19 +1176,21 @@ class SuperHeavyMolecularDisruptor extends Raking
                     $diceUsed += 1; //Add intercept orders                  
                 }                   
             } 
-         
-            $spareDice = $maxDice - $diceUsed;
-			$ship = $this->getUnit();
-            while ($spareDice > 0){
-				$interceptFireOrder = new FireOrder( -1, "selfIntercept", $ship->id, $ship->id,
-					$this->id, -1, $gamedata->turn, 1,
-					0, 0, 1, 0, 0, null, null
-				);
-				$interceptFireOrder->addToDB = true;
-				$this->fireOrders[] = $interceptFireOrder;
-                $this->guns++;                                
-                $spareDice -= 1;
-            }
+            
+            if($diceUsed > 0){ //A shot was fired or Slicer was set to selfIntercept         
+                $spareDice = $maxDice - $diceUsed;
+                $ship = $this->getUnit();
+                while ($spareDice > 0){
+                    $interceptFireOrder = new FireOrder( -1, "selfIntercept", $ship->id, $ship->id,
+                        $this->id, -1, $gamedata->turn, 1,
+                        0, 0, 1, 0, 0, null, null
+                    );
+                    $interceptFireOrder->addToDB = true;
+                    $this->fireOrders[] = $interceptFireOrder;
+                    $this->guns++;                                
+                    $spareDice -= 1;
+                }
+            }    
 
         }
 
@@ -1364,20 +1366,22 @@ class SuperHeavyMolecularDisruptor extends Raking
                     $diceUsed += 1; //Add intercept orders                  
                 }                   
             } 
-         
-            $spareDice = $maxDice - $diceUsed;
-			$ship = $this->getUnit();
-            while ($spareDice > 0){
-				$interceptFireOrder = new FireOrder( -1, "selfIntercept", $ship->id, $ship->id,
-					$this->id, -1, $gamedata->turn, 1,
-					0, 0, 1, 0, 0, null, null
-				);
-				$interceptFireOrder->addToDB = true;
-				$this->fireOrders[] = $interceptFireOrder;
-                $this->guns++;                                
-                $spareDice -= 1;
-            }
 
+            if($diceUsed > 0){ //A shot was fired or Slicer was set to selfIntercept                            
+                $spareDice = $maxDice - $diceUsed;
+                $ship = $this->getUnit();
+                while ($spareDice > 0){
+                    $interceptFireOrder = new FireOrder( -1, "selfIntercept", $ship->id, $ship->id,
+                        $this->id, -1, $gamedata->turn, 1,
+                        0, 0, 1, 0, 0, null, null
+                    );
+                    $interceptFireOrder->addToDB = true;
+                    $this->fireOrders[] = $interceptFireOrder;
+                    $this->guns++;                                
+                    $spareDice -= 1;
+                }               
+            }    
+ 
         }        
 
 		public function calculateHitBase(TacGamedata $gamedata, FireOrder $fireOrder) {
