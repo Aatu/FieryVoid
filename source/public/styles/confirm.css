@@ -1,6 +1,6 @@
 .confirm {
     padding: 10px 10px 10px 10px;
-    border: 1px solid #496791;
+    border: 1px solid #defbff44;   
     background-color: black;
     border-radius: 5px 5px 5px 5px;
     -moz-border-radius: 5px 5px 5px 5px;
@@ -153,7 +153,7 @@
 }
 
 .confirm.error {
-    border: 1px solid #000000;    
+    border: 1px solid #defbff44;    
     color: #b34119;
     font-family: arial;
     font-size: 16px;
@@ -260,8 +260,8 @@
 /* Multi-value input dialog styles */
 .confirm.multi-value-confirm {
     background: rgba(10, 15, 20, 0.95);
-    border: 1px solid #6a0080;
-    box-shadow: 0 0 5px rgba(0, 153, 255, 0.3);
+    border: 2px solid #6a0080;
+    box-shadow: 0 0 1px rgba(0, 153, 255, 0.3);
     color: #DEFBFF;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     padding: 15px;
@@ -331,7 +331,7 @@
 .confirm.multi-value-confirm .multi-value-input:focus {
     border-color: #6a0080;
     border: 1px solid #6a0080;    
-    box-shadow: 0 0 15px rgba(191, 0, 230, 0.75);
+    box-shadow: 0 0 10px rgba(191, 0, 230, 0.75);
     color: #ffffff;
     background: #000;
 }

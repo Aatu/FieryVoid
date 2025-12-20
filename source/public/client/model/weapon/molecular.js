@@ -222,7 +222,9 @@ MolecularSlicerBeamL.prototype.doMultipleFireOrders = function (shooter, target,
 	for (var i in systems) {
 		var sys = systems[i];
 		if (sys instanceof MolecularSlicerBeamL) {
-			slicers.push(sys);
+			if(weaponManager.isOnWeaponArc(shooter, target, sys)){
+				slicers.push(sys);
+			} 
 		}
 	}
 
@@ -231,21 +233,14 @@ MolecularSlicerBeamL.prototype.doMultipleFireOrders = function (shooter, target,
 	for (var i in slicers) {
 		var slicer = slicers[i];
 
-		// Mode check (mostly for H)
+		// Mode check (for Heavy Slicer)
 		if (!slicer.isLegalToFireMode(shooter)) {
-			// Error is handled inside isLegalToFireMode usually? 
-			// Better to show generic error here if not.
-			// Actually H.isLegalToFireMode calls confirm.error.
 			return [];
 		}
 
 		// Ammo check
 		var remaining = slicer.data["Max number of Dice"] - slicer.getShotsUsed();
 		if (remaining <= 0) {
-			// Just skip full/empty ones? Or show error if ONLY one?
-			// If manual firing, presumably user wants to fire.
-			// If mixed full/empty, maybe just include valid ones?
-			// Original logic showed error and returned. 
 			// Let's filter out empty ones silently if group, or error if all empty.
 		} else {
 			inputs.push({
@@ -286,10 +281,7 @@ MolecularSlicerBeamL.prototype.doMultipleFireOrders = function (shooter, target,
 			}
 
 			if (weapon) {
-				// Calculate hit chance again? Or reuse?
-				// Reuse logic from loop below?
 				// We need to calculate chance for EACH weapon.
-
 				var fireid = shooter.id + "_" + weapon.id + "_" + (weapon.fireOrders.length + 1);
 				var calledid = -1;
 				var chance = window.weaponManager.calculateHitChange(shooter, target, weapon, calledid);
@@ -302,7 +294,6 @@ MolecularSlicerBeamL.prototype.doMultipleFireOrders = function (shooter, target,
 	};
 
 	if (inputs.length === 1 && inputs[0].id === this.id) {
-		// Single case optimization/legacy feeling not strictly needed but good for consistency?
 		// Use the multi-dialog anyway for consistency.
 		confirm.askForMultipleValues("Allocate d10 damage dice for this shot", inputs, onConfirm);
 	} else {
@@ -330,8 +321,6 @@ MolecularSlicerBeamL.prototype.resolveFireOrder = function (dice, shooter, targe
 		hitmod: 5,
 		notes: "Split"
 	};
-
-	//this.maxVariableShots -= fire.shots; // Not really used but keeping for consistency if needed or removing if unused. Removing seems safer as logic changed.
 
 	this.fireOrders.push(fire);
 
@@ -697,14 +686,6 @@ MultiphasedCutter.prototype.checkFinished = function () {
 MultiphasedCutter.prototype.doMultipleFireOrders = function (shooter, target, system) {
 
 	var shotsOnTarget = 1; //we're only ever allocating one shot at a time for this weapon.
-	/*
-	if (this.fireOrders.length > 0) {
-		if (this.fireOrders.length >= this.guns) {
-			// All guns already fired → retarget one gun by removing oldest fireorder.
-			this.fireOrders.splice(0, 1);
-		}
-	} 
-	*/
 
 	if (this.fireOrders.length > 2) return;
 
