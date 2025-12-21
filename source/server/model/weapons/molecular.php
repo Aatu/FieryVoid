@@ -867,9 +867,9 @@ class SuperHeavyMolecularDisruptor extends Raking
 
 		//Slicers are usually THE weapons of Shadow ships - hence higher repair priority
 		public $repairPriority = 6;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
+        protected $overrideCallingRestrictions = true;
         private $damageDice = array();   
         private $maxDiceArray = array(1 => 4, 2 => 6, 3=> 8);
-        private $interceptsAllowed = 0; //Increased by selfIntercept orders which is how we track the number of unique incoming fires we can intercept.
         private $uniqueIntercepts = array();		
 
 		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){			
@@ -906,6 +906,7 @@ class SuperHeavyMolecularDisruptor extends Raking
             $this->guns = 0;          
             $diceUsed = 0;
             $loadedDice = $this->maxDiceArray[$this->turnsloaded] ?? 4;            
+            //$interceptsAllowed = 0;
 
             $maxDice = min($this->maxDiceArray[3], $loadedDice);              
             //Search fireOrders
@@ -921,7 +922,7 @@ class SuperHeavyMolecularDisruptor extends Raking
             
                 if($order->type == "selfIntercept"){ //Defensive shot.
                     $diceUsed += 1; //Add intercept orders  
-                    $this->interceptsAllowed += 1; //Add intercept orders                                      
+                    //$interceptsAllowed += 1; //Add intercept orders                                      
                 }                   
             } 
 
@@ -932,7 +933,8 @@ class SuperHeavyMolecularDisruptor extends Raking
                     $spareDice -= 1;                 
                 } 
              
-                if($this->interceptsAllowed == 0){
+                /* //Removed because it was giving slicers a free intercept (e.g. without -5% hit chance), or it was adding -5% hitchance after firing orders committed.
+                if($interceptsAllowed == 0){
                     //Offensive shot fired, but no selfINtercept declared.  Let's make one for the spare dice.
                     $ship = $this->getUnit();                      
                     $interceptFireOrder = new FireOrder( -1, "selfIntercept", $ship->id, $ship->id,
@@ -940,15 +942,18 @@ class SuperHeavyMolecularDisruptor extends Raking
                         0, 0, 1, 0, 0, null, null
                     );
                     $interceptFireOrder->addToDB = true;
-                    $this->fireOrders[] = $interceptFireOrder;
-                    $this->interceptsAllowed = 1;                                      
-                }                                       
+                    $this->fireOrders[] = $interceptFireOrder;                                    
+                } */                                      
             }   
 
         }
 
 		public function calculateHitBase(TacGamedata $gamedata, FireOrder $fireOrder) {
-		    parent::calculateHitBase($gamedata, $fireOrder);
+            //If called shot on fighter, 0 called shot mod since Slicers can freely select which fighter to hit.		    
+            $target = $gamedata->getShipById($fireOrder->targetid);        
+            if($fireOrder->calledid !== -1 && $target instanceof FighterFlight) $this->calledShotMod = 0; 		    
+            
+            parent::calculateHitBase($gamedata, $fireOrder);
     
 		    $hitmod = 0; // Initialize
 		    // Find the position of THIS fireOrder in the array
@@ -971,17 +976,20 @@ class SuperHeavyMolecularDisruptor extends Raking
     public function getInterceptionMod($gamedata, $intercepted){
         //Slicers can freely combine their self-intercepts into a single strong intercept or multiple small ones. 
         //Therefore, two self-intercepts at -10 would always be -20 e.g. no degradation.        
+        $allowedIntercepts = 0; //Counter for how many individual intercepts can be made
 
         foreach ($this->fireOrders as $order){ //Need to  extract normal types from list fo fireOrder objects.        
             if($order->type == "intercept"){ //A previous intercept
                 if(!(in_array($order->targetid, $this->uniqueIntercepts, true))) { //An intercept order with a targetid we haven't saved yet.
                     $this->uniqueIntercepts[] = $order->targetid;
                 }
+            }else if($order->type == "selfIntercept"){
+                $allowedIntercepts++;               
             }           
         }
         $noOfIntercepts = count($this->uniqueIntercepts);        
 
-        if($noOfIntercepts <= $this->interceptsAllowed){ //Still headroom to intercept based on number of selfIntercept orders committed by player.
+        if($noOfIntercepts <= $allowedIntercepts){ //Still headroom to intercept based on number of selfIntercept orders committed by player.
             return $this->intercept * 5;
         }else{
             return 0;
@@ -1127,7 +1135,8 @@ class SuperHeavyMolecularDisruptor extends Raking
 			$strippedSystem->minDamage = $this->minDamage;
 			$strippedSystem->minDamageArray = $this->minDamageArray;
 			$strippedSystem->maxDamage = $this->maxDamage;
-			$strippedSystem->maxDamageArray = $this->maxDamageArray;				
+			$strippedSystem->maxDamageArray = $this->maxDamageArray;
+			$strippedSystem->overrideCallingRestrictions = $this->overrideCallingRestrictions;	            				
 			return $strippedSystem;
 		}
 
@@ -1156,7 +1165,6 @@ class SuperHeavyMolecularDisruptor extends Raking
 		public $specialHitChanceCalculation	= true;	 //To update targeting tooltip in Front End 		
         private $damageDice = array();   		
         private $maxDiceArray = array(1 => 8, 2 => 12, 3=> 16);	
-        private $interceptsAllowed = 0; //Increased by selfIntercept orders which is how we track the number of unique incoming fires we can intercept.
         private $uniqueIntercepts = array();	
 
 		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){			
@@ -1182,7 +1190,7 @@ class SuperHeavyMolecularDisruptor extends Raking
             $this->guns = 0;          
             $diceUsed = 0;
             $loadedDice = $this->maxDiceArray[$this->turnsloaded] ?? 8;            
-
+            //$interceptsAllowed = 0;
             $maxDice = min($this->maxDiceArray[3], $loadedDice);               
 
             //Search fireOrders
@@ -1198,7 +1206,7 @@ class SuperHeavyMolecularDisruptor extends Raking
             
                 if($order->type == "selfIntercept"){ //Defensive shot.
                     $diceUsed += 1; //Add intercept orders  
-                    $this->interceptsAllowed += 1; //Add intercept orders                                      
+                    //$interceptsAllowed += 1; //Add intercept orders                                      
                 }                   
             } 
 
@@ -1209,7 +1217,8 @@ class SuperHeavyMolecularDisruptor extends Raking
                     $spareDice -= 1;                 
                 } 
              
-                if($this->interceptsAllowed == 0){
+                /*
+                if($interceptsAllowed == 0){
                 //Offensive shot fired, but no selfINtercept declared.  Let's make one for the spare dice.
                     $ship = $this->getUnit();                      
                     $interceptFireOrder = new FireOrder( -1, "selfIntercept", $ship->id, $ship->id,
@@ -1217,9 +1226,9 @@ class SuperHeavyMolecularDisruptor extends Raking
                         0, 0, 1, 0, 0, null, null
                     );
                     $interceptFireOrder->addToDB = true;
-                    $this->fireOrders[] = $interceptFireOrder;
-                    $this->interceptsAllowed = 1;                                      
-                }                                       
+                    $this->fireOrders[] = $interceptFireOrder;                                
+                } 
+                */                                          
             }    
 
         }
@@ -1227,17 +1236,20 @@ class SuperHeavyMolecularDisruptor extends Raking
     public function getInterceptionMod($gamedata, $intercepted){
         //Slicers can freely combine their self-intercepts into a single strong intercept or multiple small ones. 
         //Therefore, two self-intercepts at -10 would always be -20 e.g. no degradation.        
+        $allowedIntercepts = 0; //Counter for how many individual intercepts can be made
 
         foreach ($this->fireOrders as $order){ //Need to  extract normal types from list fo fireOrder objects.        
             if($order->type == "intercept"){ //A previous intercept
                 if(!(in_array($order->targetid, $this->uniqueIntercepts, true))) { //An intercept order with a targetid we haven't saved yet.
                     $this->uniqueIntercepts[] = $order->targetid;
                 }
+            }else if($order->type == "selfIntercept"){
+                $allowedIntercepts++;               
             }           
         }
-        $noOfIntercepts = count($this->uniqueIntercepts); 
+        $noOfIntercepts = count($this->uniqueIntercepts);        
 
-        if($noOfIntercepts <= $this->interceptsAllowed){ //Still headroom to intercept based on number of selfIntercept orders committed by player.
+        if($noOfIntercepts <= $allowedIntercepts){ //Still headroom to intercept based on number of selfIntercept orders committed by player.
             return $this->intercept * 5;
         }else{
             return 0;
@@ -1342,7 +1354,6 @@ class SuperHeavyMolecularDisruptor extends Raking
 		public $specialHitChanceCalculation	= true;	 //To update targeting tooltip in Front End
         private $damageDice = array();  
         private $maxDiceArray = array(1=> 8, 2=> 16, 3=> 24);         			
-        private $interceptsAllowed = 0; //Increased by selfIntercept orders which is how we track the number of unique incoming fires we can intercept.
         private $uniqueIntercepts = array();	
 
 
@@ -1382,7 +1393,7 @@ class SuperHeavyMolecularDisruptor extends Raking
 			$this->data["Special"] .= "<br>May choose to split shots between multiple targets, allocating a number to d10 damage dice to each one.";
 			$this->data["Special"] .= "<br>Each shot after the first attracts a cumulative -5% to hit modifier.";   			
             if(count($this->firingModes) > 2){
-                $this->data["Special"] .= "<br>Alternative firing modes allow this weapon to also fire in rear arcs, and can be combined with split shots in forward arcs.";			  			  
+                $this->data["Special"] .= "<br>Weapon can also fire in rear arcs (150..210), and can be combined with split shots in forward arcs.";			  			  
             }    
 			$this->data["Special"] .= "<br>Can fire accelerated for less damage:";  
 			$this->data["Special"] .= "<br> - 1 turn: 8d10+12"; 
@@ -1396,7 +1407,7 @@ class SuperHeavyMolecularDisruptor extends Raking
             $this->guns = 0;          
             $diceUsed = 0;
             $maxDice = 0;         
-            
+            //$interceptsAllowed = 0;           
             $loadedDice = $this->maxDiceArray[$this->turnsloaded] ?? 8;
 
             if ($this->firingMode == 2 || $this->firingMode == 4) {
@@ -1418,7 +1429,7 @@ class SuperHeavyMolecularDisruptor extends Raking
             
                 if($order->type == "selfIntercept"){ //Defensive shot.
                     $diceUsed += 1; //Add intercept orders  
-                    $this->interceptsAllowed += 1; //Add intercept orders                                      
+                    //$interceptsAllowed += 1; //Add intercept orders                                      
                 }                   
             } 
 
@@ -1429,22 +1440,25 @@ class SuperHeavyMolecularDisruptor extends Raking
                     $spareDice -= 1;                 
                 } 
              
-                if($this->interceptsAllowed == 0){
-                    //Offensive shot fired, but no selfINtercept declared.  Let's make one for the spare dice.
+                /*if($interceptsAllowed == 0){
+                    //Offensive shot fired, but no selfIntercept declared.  Let's make one for the spare dice.
                     $ship = $this->getUnit();                      
                     $interceptFireOrder = new FireOrder( -1, "selfIntercept", $ship->id, $ship->id,
                         $this->id, -1, $gamedata->turn, 1,
                         0, 0, 1, 0, 0, null, null
                     );
                     $interceptFireOrder->addToDB = true;
-                    $this->fireOrders[] = $interceptFireOrder;
-                    $this->interceptsAllowed = 1;                                      
-                }                                       
+                    $this->fireOrders[] = $interceptFireOrder;                                     
+                } */                                      
             }   
  
         }        
 
 		public function calculateHitBase(TacGamedata $gamedata, FireOrder $fireOrder) {
+            //If called shot on fighter, 0 called shot mod since Slicers can freely select which fighter to hit.		    
+            $target = $gamedata->getShipById($fireOrder->targetid);        
+            if($fireOrder->calledid !== -1 && $target instanceof FighterFlight) $this->calledShotMod = 0; 
+
 		    Weapon::calculateHitBase($gamedata, $fireOrder); //Don't call direct parent, duplicates some hitmods
     
 		    $hitmod = 0; // Initialize
@@ -1471,23 +1485,26 @@ class SuperHeavyMolecularDisruptor extends Raking
     public function getInterceptionMod($gamedata, $intercepted){
         //Slicers can freely combine their self-intercepts into a single strong intercept or multiple small ones. 
         //Therefore, two self-intercepts at -10 would always be -20 e.g. no degradation.        
+        $allowedIntercepts = 0;
 
         foreach ($this->fireOrders as $order){ //Need to  extract normal types from list fo fireOrder objects.        
             if($order->type == "intercept"){ //A previous intercept
                 if(!(in_array($order->targetid, $this->uniqueIntercepts, true))) { //An intercept order with a targetid we haven't saved yet.
                     $this->uniqueIntercepts[] = $order->targetid;
                 }
+            }else if($order->type == "selfIntercept"){
+                $allowedIntercepts++;               
             }           
         }
         $noOfIntercepts = count($this->uniqueIntercepts);        
 
-        if($noOfIntercepts <= $this->interceptsAllowed){ //Still headroom to intercept based on number of selfIntercept orders committed by player.
+        if($noOfIntercepts <= $allowedIntercepts){ //Still headroom to intercept based on number of selfIntercept orders committed by player.
             return $this->intercept * 5;
         }else{
             return 0;
         }
 
-    }//endof  getInterceptionMod        
+    }//endof  getInterceptionMod   
 
 	public function getDamage($fireOrder) {
 		$damDice = 0;        
