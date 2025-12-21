@@ -173,30 +173,32 @@ GravityNet.prototype.initializationUpdate = function() {
 
     return this;
 };
-
+/*
 GravityNet.prototype.getFiringHex = function(shooter, weapon){ 	
-    var sPosLaunch;   
+    var $gravNetFiringHex;   
+
+
         if (this.fireOrders.length > 0) {	
-            var sPosLaunch; 
-            var gravHexFireOrder = this.fireOrders[1];//get grav net translocation target hex fireorder
-                if (gravHexFireOrder){	// check that launcher has firing orders.  
-                    sPosLaunch = new hexagon.Offset(gravHexFireOrder.x, gravHexFireOrder.y);  
+            var $gravNetTarget; //Target of grav net which will be used as shooter for grav net target hex.
+            var gravNetTargetFireOrder = this.fireOrders[0];//get fireorder of grav net firing ship (So we can use it's hex as fireing hex)
+                if (gravHexFireOrder){	// check that the grav net firing ship set a fire order  
+                    gravNetMovePos = new hexagon.Offset(gravHexFireOrder.x, gravHexFireOrder.y);  
                 } else{
-                    sPosLaunch = shipManager.movement.getPositionAtStartOfTurn(shooter, gamedata.turn);                                                   	
+                    gravNetMovePos = shipManager.movement.getPositionAtStartOfTurn(shooter, gamedata.turn);                                                   	
                 }
         }else{ //Lasers not locked in yet, use firing ship position.
-            sPosLaunch = shipManager.movement.getPositionAtStartOfTurn(shooter, gamedata.turn); 
+            gravNetMovePos = shipManager.movement.getPositionAtStartOfTurn(shooter, gamedata.turn); 
         }
 
-	return sPosLaunch;
-	
+    return gravNetMovePos;	
 };
+*/
 
 GravityNet.prototype.doMultipleFireOrders = function (shooter, target, system) {
     
     var shotsOnTarget = 1; //we're only ever allocating one shot at a time for this weapon in Split mode.
 
-    if (this.fireOrders.length > 1) {
+    if (this.fireOrders.length > 0) {
         return;
     } 
 
@@ -221,7 +223,7 @@ GravityNet.prototype.doMultipleFireOrders = function (shooter, target, system) {
             shots: 1,
             x: "null",
             y: "null",
-            damageclass: 'gravNetTarget', 
+            damageclass: 'gravitic', 
             chance: chance,
             hitmod: 0,
             notes: "Split"
@@ -242,6 +244,21 @@ GravityNet.prototype.doMultipleHexFireOrders = function (shooter, hexpos) {
     if (this.fireOrders.length > 1) {
         return;
     } 
+    
+    //get gravNetTargetHex to check range and LOS for gravNetTargetMovementHex
+    //Target of grav net which will be used as shooter for grav net target hex.
+    var gravNetTargetFireOrder = this.fireOrders[0];//get fireorder of grav net firing ship (So we can use it's hex as fireing hex), this should always be the first fire order
+    if (gravNetTargetFireOrder){	// check that the grav net firing ship set a fire order
+        var range = 6;
+        var targetShip = gamedata.getShip(gravNetTargetFireOrder.targetid);
+        var targetShipHex = shipManager.getShipPosition(targetShip);
+        var targetMoveHex = hexpos;
+        var dist = targetShipHex.distanceTo(targetMoveHex);     
+        
+        if(dist >6){
+            return;
+        }
+    }  
 
     var fireOrdersArray = []; // Store multiple fire orders
 
@@ -259,10 +276,10 @@ GravityNet.prototype.doMultipleHexFireOrders = function (shooter, hexpos) {
                 shots: this.defaultShots,
                 x: hexpos.q,
                 y: hexpos.r,
-                damageclass: 'gravNetDestination', 
+                damageclass: 'gravNetMoveHex', 
                 notes: "split"                
             };
-        this.fireOrders.push(fire);
+        fireOrdersArray.push(fire);
     }   
 
     return fireOrdersArray; // Return all fire orders

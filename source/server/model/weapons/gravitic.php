@@ -1092,26 +1092,25 @@ class GravityNet extends Weapon implements SpecialAbility{
 		parent::setSystemDataWindow($turn);     
     }
 
+    /*
     public function getFiringHex($gamedata, $fireOrder) {
-			//if($this->launcher){	//Check that Proximity Laser have a Launcher (it always should)
 
-		    $launchPos = null; // Initialize $launchPos outside the loop
-			//$launcherFireOrders = $this->launcher->getFireOrders($gamedata->turn);
+		    $gravNetShooter = null; // Initialize $launchPos outside the loop
 			
-			if($fireOrder->damageclass == 'gravNetTarget'){
-				$launchPos = parent::getFiringHex($gamedata, $fireOrder); //Use normal method for hex targeted launcher.
+			if($fireOrder->damageclass == 'gravitic'){
+				$gravNetShooter = parent::getFiringHex($gamedata, $fireOrder); //Use normal method to get firingHex for gravity net shot itself into target (shooter's location)
 			}else{				
 				$allFireOrders = $this->getFireOrders($gamedata->turn);
-				$launcherFireOrder = 1; //second fire order is always grav translocation hex target.	
+				$gravNetMovePosOrder = null; //second fire order is always grav net move target.	
 
-				foreach($allFireOrders as $fireOrderCheck){
-					if ($fireOrderCheck->damageclass == 'gravNetTarget'){
-						$launcherFireOrder = $fireOrderCheck;					
+				foreach($allFireOrders as $fireOrderCheck){ //make sure gravNetMovePosOrder is correct order in allFireOrders
+					if ($fireOrderCheck->damageclass == 'gravNetMoveHex'){
+						$gravNetMovePosOrder = $fireOrderCheck;					
 						break;						
 					}				
 				}	
 			
-				if($launcherFireOrder){				       	
+				if($gravNetMovePosOrder){				       	
 						// Sometimes player might target ship after all...
 						if ($launcherFireOrder->targetid != -1) {
 							$targetship = $gamedata->getShipById($launcherFireOrder->targetid);
@@ -1130,41 +1129,64 @@ class GravityNet extends Weapon implements SpecialAbility{
 				if($launchPos == null || $launcherFireOrder == null) $launchPos = parent::getFiringHex($gamedata, $fireOrder); //Go back to normal function if returning null for some reason.
 			}
 
-		    return $launchPos;
+		    return $gravNetMovePos;
 		} //endof getFiringHex
+        */
 
 	public function calculateHitBase($gamedata, $fireOrder){         
-        parent::calculateHitBase($gamedata, $fireOrder);
-        $target = $gamedata->getShipById($fireOrder->targetid);
-        $shooter = $this->getUnit();
-        if($shooter->team !== $target->team){ //Let's make penalty only for enemy units
-            if($target->gravitic || $target->factionAge >= 3){//Gravitic or Ancient
-                $fireOrder->needed -= 15; //+15% chance to miss.
+        
+        if($fireOrder->damageclass == 'gravNetMoveHex'){
+				$fireOrder->needed = 100; //always true
+				$fireOrder->updated = true;
+        }else{
+            parent::calculateHitBase($gamedata, $fireOrder);
+
+            if($fireOrder->targetid != -1){
+                    $target = $gamedata->getShipById($fireOrder->targetid);
+                $shooter = $this->getUnit();
+                if($shooter->team !== $target->team){ //Let's make penalty only for enemy units
+                    if($target->gravitic || $target->factionAge >= 3){//Gravitic or Ancient
+                        $fireOrder->needed -= 15; //+15% chance to miss.
+                    }
+                }    
             }
-        }    
+        }
 	}    
     
     public function fire($gamedata, $fireOrder){                   
         parent::fire($gamedata, $fireOrder); 		
         if($fireOrder->shotshit > 0){
-            $fireOrder->pubnotes = "<br>Ship has been forced to move by a Gravity Net.";  
-              
+            $fireOrder->pubnotes = "<br>Ship has been forced to move by a Gravity Net.";               
         }    
     }
     
-    protected function beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata)
-    {
-        $lastMove = $target->getLastMovement();
-        Debug::log(json_encode($pos, true));
-        
-        //Create new movement order for target.
-        //$id, $type, OffsetCoordinate $position, $xOffset, $yOffset, $speed, $heading, $facing, $pre, $turn, $value, $at_initiative)
-        $gravTranslation = new MovementOrder(null, "prefire", new OffsetCoordinate(0, 1), 0, 0, $lastMove->speed, $lastMove->heading, $lastMove->facing, false, $gamedata->turn, 0, 0);
+    protected function beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata){   
+        if($fireOrder->damageclass == 'gravitic'){ //should only process the actually grav net first fireOrder (pertains to actual shot) and then get gravNetPos from 2nd hexTarget order
+				$allFireOrders = $this->getFireOrders($gamedata->turn);
+                $gravNetMovePosOrder = null; //var to hold grav net move position order, ie the hexTarget order.
+                $gravNetMovePos = null; //var to hold grav net move target hex.
 
-		//Add shifted movement order to database
-		Manager::insertSingleMovement($gamedata->id, $target->id, $gravTranslation);
+                foreach($allFireOrders as $fireOrderCheck){ //make sure gravNetMovePosOrder is correct order in allFireOrders
+					if ($fireOrderCheck->damageclass == 'gravNetMoveHex'){
+						$gravNetMovePosOrder = $fireOrderCheck;					
+						break;
+                    }
+                } 
+
+                $xpos =$gravNetMovePosOrder->x; //get x coord for movement
+                $ypos = $gravNetMovePosOrder->y; //get y coord for movement
+                $orderID = $gravNetMovePosOrder->id;
+                //Debug::log(json_encode($xpos, true));
+
+                $lastMove = $target->getLastMovement(); //get target ship's last movement to ensure heading, speed and facing are conserved. 
+                //Create new movement order to target ship to grav net target hex.
+                //$id, $type, OffsetCoordinate $position, $xOffset, $yOffset, $speed, $heading, $facing, $pre, $turn, $value, $at_initiative)
+                $gravNetMove = new MovementOrder(null, "prefire", new OffsetCoordinate($xpos, $ypos), 0, 0, $lastMove->speed, $lastMove->heading, $lastMove->facing, false, $gamedata->turn, $orderID, 0);
+
+                //Add shifted movement order to database
+                Manager::insertSingleMovement($gamedata->id, $target->id, $gravNetMove);
+        }     
     }
-
 
     /*
     protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
