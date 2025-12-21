@@ -596,6 +596,14 @@ MolecularSlicerBeamH.prototype.initializationUpdate = function () {
 			maxDam = 276;
 			break;
 	}
+
+	this.fireControl = this.fireControlArray[this.firingMode]; //reset 
+
+	//Piercing Mode at 1 or 2 turn charge doesn't get -20% hitchance
+	if(this.turnsloaded < 3 && (this.firingMode == 1 || this.firingMode == 3)){		
+		this.data["Fire control (fighter/med/cap)"] = '20/30/40';         
+	}		
+
 	this.data["Max number of Dice"] = shots;
 
 	if (gamedata.gamephase == 3) {
