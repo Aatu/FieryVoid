@@ -1809,7 +1809,9 @@ window.weaponManager = {
                     if (weapon.canSplitShots) {
                         var fire = weapon.doMultipleHexFireOrders(selectedShip, hexpos);
                         if (!Array.isArray(fire)) fire = fire ? [fire] : []; // Ensure fire is an array or an empty one                       
-                        if (fire.length > 0) weapon.fireOrders.push(...fire);
+                        if (fire.length === 0) continue;
+                        
+                        weapon.fireOrders.push(...fire);
                         var finishedFiring = weapon.checkFinished(); //Split weapons should unselect after they've used all their shots.
                         if (finishedFiring) {
                             toUnselect.push(weapon); //Normal method
