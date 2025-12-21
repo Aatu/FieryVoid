@@ -152,6 +152,21 @@ MolecularSlicerBeamL.prototype.getShotsUsed = function () {
 	return shotsUsed;
 };
 
+MolecularSlicerBeamL.prototype.checkForWastedShots = function () {
+	var hasIntercept = false;
+
+	for (var i = 0; i < this.fireOrders.length; i++) {
+		if(this.fireOrders[i].type == "selfIntercept"){
+		hasIntercept = true;	
+		break;
+		}
+	}	
+	
+	if(this.data["Remaining Dice"] > 0 && hasIntercept == true) return false
+
+	return true;
+};
+
 MolecularSlicerBeamL.prototype.initializationUpdate = function () {
 	var shots = 0; //Initialise	
 	var minDam = 0;
@@ -296,7 +311,21 @@ MolecularSlicerBeamL.prototype.doMultipleFireOrders = function (shooter, target,
 					shotsToFire = val.count;
 				}
 
-				calledid = -1;
+	            if (system && target.flight) { //Slicers CAN target individual fighters!
+	                //check if weapon is eligible for called shot!
+	                //if (!weaponManager.canWeaponCall(weapon)) continue;
+
+	                // When the system is a subsystem, make all damage go through
+                    // the parent.
+                    while (system.parentId > 0) {
+	                    system = shipManager.systems.getSystem(ship, system.parentId);
+	                }
+
+	                calledid = system.id;
+	            }else{
+					calledid = -1;
+				}	
+
 				//Check valid shot?
 				chance = window.weaponManager.calculateHitChange(shooter, target, weapon, calledid);
 				if (chance < 1) continue;
@@ -354,6 +383,9 @@ MolecularSlicerBeamL.prototype.resolveFireOrder = function (dice, shooter, targe
 	if (this.checkFinished()) {
 		weaponManager.unSelectWeapon(this.ship, this);
 	}
+	var weaponArray = [] //onShipTargeted() expects an array, so convert.
+	weaponArray.push(this);
+    webglScene.customEvent('ShipTargeted', {shooter: this.ship, target: target, weapons: weaponArray})	
 };
 
 MolecularSlicerBeamL.prototype.checkSelfInterceptSystem = function () {
@@ -391,11 +423,14 @@ MolecularSlicerBeamL.prototype.doMultipleSelfIntercept = function (ship) {
 
 MolecularSlicerBeamL.prototype.calculateSpecialHitChanceMod = function (shooter, target, calledid) {
 	var mod = 0;
-	if (this.firingMode == 1) {
-		//Check fireOrders length and deduct (length -1 *5)
-		var currentShots = this.fireOrders.length; //
-		mod -= Math.max(0, currentShots); //This is called when considering the NEXT shot.  So can just use current length as mod.
-	}
+	//Check fireOrders length and deduct (length -1 *5)
+	var currentShots = this.fireOrders.length; //
+	mod -= Math.max(0, currentShots); //This is called when considering the NEXT shot.  So can just use current length as mod.
+
+    if(target.flight && calledid !== null){ //Has fireorder against fighter unit, and is a called shot
+        mod += 8; //CalledShotmod is -8, so just compensate for that.            
+    }
+
 	return mod;
 };
 
@@ -582,6 +617,11 @@ MolecularSlicerBeamH.prototype.initializationUpdate = function () {
 		this.data["Remaining Dice"] = shots - shotsUsed;
 	}
 
+	if(this.turnsloaded == 3 && (this.firingMode == 2 || this.firingMode == 4)){
+		minDam = 40;
+		maxDam = 184;		
+	}
+
 	this.data["Damage"] = "" + minDam + "-" + maxDam;
 
 	return this;
@@ -594,6 +634,10 @@ MolecularSlicerBeamH.prototype.calculateSpecialHitChanceMod = function (shooter,
 	mod -= Math.max(0, currentShots); //This is called when considering the NEXT shot.  So can just use current length as mod.
 
 	if (this.turnsloaded < 3 && (this.firingMode == 1 || this.firingMode == 3)) mod += 4;
+
+    if(target.flight && calledid !== null){ //Has fireorder against fighter unit, and is a called shot
+        mod += 8; //CalledShotmod is -8, so just compensate for that.            
+    }
 
 	return mod;
 };
