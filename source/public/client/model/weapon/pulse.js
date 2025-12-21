@@ -139,7 +139,7 @@ PointPulsar.prototype.doMultipleFireOrders = function (shooter, target, system) 
 PointPulsar.prototype.calculateSpecialHitChanceMod = function (shooter, target, calledid) {
 	var mod = 0;
     //    var fireOrder = this.fireOrders[i];
-        if(target.flight && calledid !== null){ //Has fireorder against fighter unit, and is a called shot
+        if(target.flight &&  calledid && calledid !== -1){ //Has fireorder against fighter unit, and is a called shot
             mod += 4; //CalledShotmod is -4, so just compensate for that.            
         }
 

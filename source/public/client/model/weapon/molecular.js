@@ -427,7 +427,7 @@ MolecularSlicerBeamL.prototype.calculateSpecialHitChanceMod = function (shooter,
 	var currentShots = this.fireOrders.length; //
 	mod -= Math.max(0, currentShots); //This is called when considering the NEXT shot.  So can just use current length as mod.
 
-    if(target.flight && calledid !== null){ //Has fireorder against fighter unit, and is a called shot
+    if(target.flight &&  calledid && calledid !== -1){ //Has fireorder against fighter unit, and is a called shot
         mod += 8; //CalledShotmod is -8, so just compensate for that.            
     }
 
@@ -643,7 +643,7 @@ MolecularSlicerBeamH.prototype.calculateSpecialHitChanceMod = function (shooter,
 
 	if (this.turnsloaded < 3 && (this.firingMode == 1 || this.firingMode == 3)) mod += 4;
 
-    if(target.flight && calledid !== null){ //Has fireorder against fighter unit, and is a called shot
+    if(target.flight &&  calledid && calledid !== -1){ //Has fireorder against fighter unit, and is a called shot
         mod += 8; //CalledShotmod is -8, so just compensate for that.            
     }
 
