@@ -865,8 +865,9 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         <li>All other Slicers use Sweeping Mode as their default, which allows them to target as many different enemies as it has damage dice, assigning a number of d10 target dice to each shot up to their maximum amount. Simply select the weapon and choose who you want to target in this mode, although each ship can only be targeted once (whilst fighter flights can be targeted multiple times). 
             When splitting shots, the weapon will attract a cumulative -5% penalty for every additional shot after the first, as well as any modifier for defensive shots (see below).</li>
         <li>Slicers may commit 1d10 damage dice to gain -10 intercept by clicking the 'Self-Intercept' green shield icon, each self-intercept dice committed in this way increases the number of different shots Slicer may intercept, as well as the total interception amount. 
-            If you choose to fire offensively, or select any amount self intercept dice, but do not use all your available dice, then any unspent dice will also be added to the self intercept total (but will NOT increase the number of different shots you can intercept).  You can use ship tooltip to track defensive fire and remaining dice.  
-            NOTE - Each self intercept dice commited counts as a 'shot' for the purposes of the -5% penalty detailed above.";   .</li>                                                                 
+            If you choose to fire offensively, or select any amount self-intercept dice, but do not use all your available dice, then any unspent dice will be added to intercept so long as you committed as least ONE self-intercept dice.  You can use ship tooltip to track defensive fire and remaining dice.  
+            NOTE - Each self intercept dice commited counts as a 'shot' for the purposes of the -5% penalty detailed above.".</li>
+            <li>Slicer can make Called Shots against fighters without any penalty.</li>                                                                 
     <h5>Phasing Pulse Cannon</h5>
         <li>Pulse weapons that completely ignore any kind of shield or shield-like defense used by Younger races. 
             Note that EM shields, like those used on the White Star, are treated as Ancient even when used on Younger Race ships.</li>      
