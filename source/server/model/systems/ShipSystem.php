@@ -935,7 +935,7 @@ class ShipSystem {
 		if($this->powerReq > 0){
 			$this->data["Power used"] = $this->powerReq;
 		} else {
-			$this->data["Power used"] = 'none';
+			$this->data["Power used"] = 'None';
 		}
 	    
 		/* no longer needed, info available in Notes
