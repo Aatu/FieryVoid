@@ -48,7 +48,7 @@ $games = json_encode(Manager::getTacGames($userid), JSON_NUMERIC_CHECK);
   </script>
 </head>
 
-<body  style="background: url('./img/maps/6.NebulaGreen.jpg') no-repeat center center fixed; background-size: cover;">
+<body  style="background: url('./img/webBackgrounds/SantaBattle.png') no-repeat center center fixed; background-size: cover;">
 <header class="pageheader">
   <img src="img/logo.png" alt="Fiery Void Logo" class="logo">
   <div class="top-right-row">
@@ -86,10 +86,9 @@ $games = json_encode(Manager::getTacGames($userid), JSON_NUMERIC_CHECK);
     <div class="resources">
       <h3>Latest Updates — December 2025</h3>
       <ul class="updates-list">
-        <li><strong>Torvalus Speculators</strong> - Transverse Drive added to complete the release of the new Torvalus Faction.</li>
-        <li><strong>Pre-Firing Phase</strong> - New game phase added to Fiery Void's combat order.  Currently, only Transverse Drive and Gravitic Shifters use this feature.</li>          
-        <li><strong>Shadow Slicers</strong> - Firing modes simplified, added ability to spent damage on interception, and Heavy Slicer given rear firing arc.</li>
-        <li><strong>Pentagon Array</strong> - Reworked to be same as tabletop e.g. Pulse mode against fighters.</li>                                    
+      <li style="color: #cc0000ff;"><strong>Merry Christmas from Fiery Void!</strong></li>            
+        <li><strong>Torvalus Speculators</strong> - Transverse Drive added to complete the release of the new Torvalus Faction.</li>       
+        <li><strong>Shadow Slicers</strong> - Can now assign damage dice to shots/intercept.</li>                                  
         <li><strong>Critical hits</strong> - Critical hits are now displayed in Combat Log and Replay animations.
         <li><strong>Terrain Collisions</strong> - Terrain collisions will now occur, and cause damage, before the Firing Phase.</li>                                            
         <li><strong>General Fixes</strong> - Server performance/stability updates, plus many other small fixes. Thanks for all the reports!</li>                                                    

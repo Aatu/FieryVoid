@@ -123,7 +123,7 @@ window.gamedata = {
 				powerRating = 'Tier 1; Major Faction';
 				break;
 			case 'Minbari Protectorate':
-				powerRating = 'Tier 1; Major Faction';
+				powerRating = 'Tier 1; Minor Faction';
 				break;
 			case 'Mindriders':
 				powerRating = 'Tier Ancients';

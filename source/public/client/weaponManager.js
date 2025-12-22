@@ -9,7 +9,7 @@ window.weaponManager = {
     ramWarning: false,
 
     getWeaponCurrentLoading: function getWeaponCurrentLoading(weapon) {
-		/*obsolete
+        /*obsolete
         if (weapon.duoWeapon) {
             var returnArray = new Array(weapon.weapons[1].getTurnsloaded(), weapon.weapons[2].getTurnsloaded());
             return returnArray;
@@ -25,7 +25,7 @@ window.weaponManager = {
 
         if (gamedata.gamephase != 1 && system.ballistic) return;
 
-        if(gamedata.gamephase != 5 && system.preFires) return;
+        if (gamedata.gamephase != 5 && system.preFires) return;
 
         if (weaponManager.hasFiringOrder(ship, system) && !system.multiModeSplit) return;
 
@@ -42,9 +42,9 @@ window.weaponManager = {
                 system.changeFiringMode();
                 shipWindowManager.setDataForSystem(ship, system);
             }
-            
+
             webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
-			
+
         }
     },
 
@@ -59,11 +59,11 @@ window.weaponManager = {
 
         if (gamedata.gamephase != 1 && system.ballistic) return;
 
-        if(gamedata.gamephase != 5 && system.preFires) return;        
+        if (gamedata.gamephase != 5 && system.preFires) return;
 
         if (ship.userid == gamedata.thisplayer) {
             weaponManager.cancelFire(ship, system);
-        }    
+        }
         /* Cleaned 19.8.25 - DK		            
         if (ship.userid == gamedata.thisplayer) {
             if (!system.duoWeapon) {
@@ -80,7 +80,7 @@ window.weaponManager = {
                 }
             }
         }
-        */    
+        */
     },
 
     cancelFire: function cancelFire(ship, system) {
@@ -175,7 +175,7 @@ window.weaponManager = {
                     weaponManager.unSelectWeapon(ship, subweapon);
                 }
             }
-            */    
+            */
         }
 
         shipWindowManager.setDataForSystem(ship, weapon);
@@ -245,8 +245,8 @@ window.weaponManager = {
     },
 
 
-	//checks whether a shipborne weapon has ran out of ammo
-	checkOutOfAmmoShip: function checkOutOfAmmoShip(ship, weapon) {
+    //checks whether a shipborne weapon has ran out of ammo
+    checkOutOfAmmoShip: function checkOutOfAmmoShip(ship, weapon) {
         if (ship.flight) {
             return weaponManager.checkOutOfAmmo(ship, weapon);
         }
@@ -273,9 +273,9 @@ window.weaponManager = {
             return;
         }
 
-		if (!weaponManager.isLoaded(weapon))
+        if (!weaponManager.isLoaded(weapon))
             return;
-            
+
         if (shipManager.power.isOffline(ship, weapon)) {
             return;
         }
@@ -301,11 +301,11 @@ window.weaponManager = {
                 }
             }
         }
-        shipWindowManager.setDataForSystem(ship, weapon);   
+        shipWindowManager.setDataForSystem(ship, weapon);
         webglScene.customEvent('WeaponSelected', { ship: ship, weapon: weapon });
         //Moved to AFTER onWeaponSelected() in Fire phase strategy, to prevent prevent error when selecting a weapon and friendly fighter flight is selected unit - DK 6.25        
-        gamedata.selectedSystems.push(weapon); 
-     
+        gamedata.selectedSystems.push(weapon);
+
     },
 
     isSelectedWeapon: function isSelectedWeapon(weapon) {
@@ -314,10 +314,10 @@ window.weaponManager = {
         return false;
     },
 
-    selectAllWeapons: function selectAllWeapons(ship, system) {        
-		if (!gamedata.isMyShip(ship)) {
-			return;
-		}        
+    selectAllWeapons: function selectAllWeapons(ship, system) {
+        if (!gamedata.isMyShip(ship)) {
+            return;
+        }
         var array = [];
         var systems = [];
         if (ship.flight) {
@@ -328,39 +328,39 @@ window.weaponManager = {
         } else {
             systems = ship.systems.filter(system => system.weapon);
         }
-        
-        array = systems.filter(function(weapon) {return weapon.displayName === system.displayName});
-		
-		var currentWasSelected = weaponManager.isSelectedWeapon(system); //all others affected weapons will have state set the same as current! 
 
-		for (var i = 0; i < array.length; i++) {
-			var system = array[i];
+        array = systems.filter(function (weapon) { return weapon.displayName === system.displayName });
 
-			if (gamedata.waiting) return;
+        var currentWasSelected = weaponManager.isSelectedWeapon(system); //all others affected weapons will have state set the same as current! 
 
-			if (shipManager.isDestroyed(ship) || shipManager.isAdrift(ship)) {
-				return;
-			}
+        for (var i = 0; i < array.length; i++) {
+            var system = array[i];
 
-			if (system.destroyed) {
-				continue;
-			}
+            if (gamedata.waiting) return;
+
+            if (shipManager.isDestroyed(ship) || shipManager.isAdrift(ship)) {
+                return;
+            }
+
+            if (system.destroyed) {
+                continue;
+            }
 
 
-			if (system.weapon) {
-				if (gamedata.gamephase != 3 && !system.ballistic && !system.preFires) continue; //improper at this moment
-				if (gamedata.gamephase != 1 && system.ballistic) continue;	//improper at this moment
-				if (gamedata.gamephase != 5 && system.preFires) continue;	//improper at this moment                
-				if (weaponManager.hasFiringOrder(ship, system) && !system.canSplitShots) continue;//already declared, do not touch it!
-				
-				if (currentWasSelected){//unselect
-					if (weaponManager.isSelectedWeapon(system)) weaponManager.unSelectWeapon(ship, system);
-				} else {//select
-					if (!weaponManager.isSelectedWeapon(system)) weaponManager.selectWeapon(ship, system);
-				}
-			}
+            if (system.weapon) {
+                if (gamedata.gamephase != 3 && !system.ballistic && !system.preFires) continue; //improper at this moment
+                if (gamedata.gamephase != 1 && system.ballistic) continue;	//improper at this moment
+                if (gamedata.gamephase != 5 && system.preFires) continue;	//improper at this moment                
+                if (weaponManager.hasFiringOrder(ship, system) && !system.canSplitShots) continue;//already declared, do not touch it!
 
-		}
+                if (currentWasSelected) {//unselect
+                    if (weaponManager.isSelectedWeapon(system)) weaponManager.unSelectWeapon(ship, system);
+                } else {//select
+                    if (!weaponManager.isSelectedWeapon(system)) weaponManager.selectWeapon(ship, system);
+                }
+            }
+
+        }
     },
 
     targetingShipTooltip: function targetingShipTooltip(selectedShip, ship, e, calledid) {
@@ -410,63 +410,63 @@ window.weaponManager = {
             }
             $('<div><span class="weapon">' + html + '</span></div>').appendTo(f);
         }
-/* //Oldest method before I added check for Sweeping Mode to not retarget ships.  Just in case ;)
-        for (var i in gamedata.selectedSystems) {
-            var weapon = gamedata.selectedSystems[i];
-            if (weaponManager.isOnWeaponArc(selectedShip, ship, weapon)) {
-                if (weaponManager.checkIsInRange(selectedShip, ship, weapon)) {
-                    var value = weapon.firingMode;
-                    value = weapon.firingModes[value];
-					var keys = Object.keys(weapon.firingModes);                    
-                    if (calledid != null && !weaponManager.canWeaponCall(weapon)) {
-                        //called shot, weapon not eligible!
-                        $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="hitchange"> CANNOT CALL SHOT</span></div>').appendTo(f);
-                    } else if (keys.length > 1){//DK - Added to better display Firing Mode info on targeting enemy ship.
-                        $('<div><span class="weapon">' + weapon.displayName + '<span class="firingMode"> (' + value + ')</span><span class="hitchange"> - Approx: ' + weaponManager.calculateHitChange(selectedShip, ship, weapon, calledid) + '%</span></div>').appendTo(f);                      
-					} else {
-                        $('<div><span class="weapon">' + weapon.displayName + '</span><span class="hitchange"> - Approx: ' + weaponManager.calculateHitChange(selectedShip, ship, weapon, calledid) + '%</span></div>').appendTo(f);
+        /* //Oldest method before I added check for Sweeping Mode to not retarget ships.  Just in case ;)
+                for (var i in gamedata.selectedSystems) {
+                    var weapon = gamedata.selectedSystems[i];
+                    if (weaponManager.isOnWeaponArc(selectedShip, ship, weapon)) {
+                        if (weaponManager.checkIsInRange(selectedShip, ship, weapon)) {
+                            var value = weapon.firingMode;
+                            value = weapon.firingModes[value];
+                            var keys = Object.keys(weapon.firingModes);                    
+                            if (calledid != null && !weaponManager.canWeaponCall(weapon)) {
+                                //called shot, weapon not eligible!
+                                $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="hitchange"> CANNOT CALL SHOT</span></div>').appendTo(f);
+                            } else if (keys.length > 1){//DK - Added to better display Firing Mode info on targeting enemy ship.
+                                $('<div><span class="weapon">' + weapon.displayName + '<span class="firingMode"> (' + value + ')</span><span class="hitchange"> - Approx: ' + weaponManager.calculateHitChange(selectedShip, ship, weapon, calledid) + '%</span></div>').appendTo(f);                      
+                            } else {
+                                $('<div><span class="weapon">' + weapon.displayName + '</span><span class="hitchange"> - Approx: ' + weaponManager.calculateHitChange(selectedShip, ship, weapon, calledid) + '%</span></div>').appendTo(f);
+                            }
+                        } else {
+                            $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="hitchange"> NOT IN RANGE</span></div>').appendTo(f);
+                        }
+                    } else {
+                        $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="notInArc"> NOT IN ARC </span></div>').appendTo(f);
                     }
-                } else {
-                    $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="hitchange"> NOT IN RANGE</span></div>').appendTo(f);
                 }
-            } else {
-                $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="notInArc"> NOT IN ARC </span></div>').appendTo(f);
-            }
-        }
-    },
-*/
+            },
+        */
 
-/*
-		//Not quite as old version, before I added the Line of Sight check.
-        for (var i in gamedata.selectedSystems) {
-		    var weapon = gamedata.selectedSystems[i];
-		    if (weaponManager.isOnWeaponArc(selectedShip, ship, weapon)) {
-		        if (weaponManager.checkIsInRange(selectedShip, ship, weapon)) {
-		            var value = weapon.firingMode;
-		            value = weapon.firingModes[value];
-		            var keys = Object.keys(weapon.firingModes);
-
-		            // Priority check for "Sweeping" firing mode
-		            if (value === "Sweeping" && ship.shipSizeClass >= 0 && weaponManager.hasTargetedThisShip(ship, weapon)) {
-		                $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="hitchange"> CANNOT TARGET AGAIN</span></div>').appendTo(f);
-		            } else if (calledid != null && !weaponManager.canWeaponCall(weapon)) {
-		                // Called shot, weapon not eligible!
-		                $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="hitchange"> CANNOT CALL SHOT</span></div>').appendTo(f);
-		            } else if (keys.length > 1) {
-		                // Display Firing Mode info when there are multiple firing modes
-		                $('<div><span class="weapon">' + weapon.displayName + '<span class="firingMode"> (' + value + ')</span><span class="hitchange"> - Approx: ' + weaponManager.calculateHitChange(selectedShip, ship, weapon, calledid) + '%</span></div>').appendTo(f);
-		            } else {
-		                // Default case to display the weapon info without firing mode
-		                $('<div><span class="weapon">' + weapon.displayName + '</span><span class="hitchange"> - Approx: ' + weaponManager.calculateHitChange(selectedShip, ship, weapon, calledid) + '%</span></div>').appendTo(f);
-		            }
-		        } else {
-		            $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="hitchange"> NOT IN RANGE</span></div>').appendTo(f);
-		        }
-		    } else {
-		        $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="notInArc"> NOT IN ARC </span></div>').appendTo(f);
-		    }
-		}
-*/
+        /*
+                //Not quite as old version, before I added the Line of Sight check.
+                for (var i in gamedata.selectedSystems) {
+                    var weapon = gamedata.selectedSystems[i];
+                    if (weaponManager.isOnWeaponArc(selectedShip, ship, weapon)) {
+                        if (weaponManager.checkIsInRange(selectedShip, ship, weapon)) {
+                            var value = weapon.firingMode;
+                            value = weapon.firingModes[value];
+                            var keys = Object.keys(weapon.firingModes);
+        
+                            // Priority check for "Sweeping" firing mode
+                            if (value === "Sweeping" && ship.shipSizeClass >= 0 && weaponManager.hasTargetedThisShip(ship, weapon)) {
+                                $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="hitchange"> CANNOT TARGET AGAIN</span></div>').appendTo(f);
+                            } else if (calledid != null && !weaponManager.canWeaponCall(weapon)) {
+                                // Called shot, weapon not eligible!
+                                $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="hitchange"> CANNOT CALL SHOT</span></div>').appendTo(f);
+                            } else if (keys.length > 1) {
+                                // Display Firing Mode info when there are multiple firing modes
+                                $('<div><span class="weapon">' + weapon.displayName + '<span class="firingMode"> (' + value + ')</span><span class="hitchange"> - Approx: ' + weaponManager.calculateHitChange(selectedShip, ship, weapon, calledid) + '%</span></div>').appendTo(f);
+                            } else {
+                                // Default case to display the weapon info without firing mode
+                                $('<div><span class="weapon">' + weapon.displayName + '</span><span class="hitchange"> - Approx: ' + weaponManager.calculateHitChange(selectedShip, ship, weapon, calledid) + '%</span></div>').appendTo(f);
+                            }
+                        } else {
+                            $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="hitchange"> NOT IN RANGE</span></div>').appendTo(f);
+                        }
+                    } else {
+                        $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="notInArc"> NOT IN ARC </span></div>').appendTo(f);
+                    }
+                }
+        */
         var blockedLosHex = weaponManager.getBlockedHexes(); //Are there any blocked hexes, no point checking if no.
         var loSBlocked = false; //Default to LoS not blocked.
 
@@ -484,25 +484,27 @@ window.weaponManager = {
                         loSBlocked = mathlib.checkLineOfSight(sPosShooter, sPosTarget, blockedLosHex);
                     }
 
-                    if(weapon.ignoresLoS) loSBlocked = false;
+                    if (weapon.ignoresLoS) loSBlocked = false;
 
                     var value = weapon.firingMode;
                     value = weapon.firingModes[value];
                     var keys = Object.keys(weapon.firingModes);
 
-                    if(ship.Huge > 0){ //Cannot Target larger terrain.
+                    if (ship.Huge > 0) { //Cannot Target larger terrain.
                         $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="losBlocked"> CANNOT TARGET</span></div>').appendTo(f);
-                    }else if (loSBlocked) {
+                    } else if (loSBlocked) {
                         // LOS is blocked - only display the blocked message
                         $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="losBlocked"> LINE OF SIGHT BLOCKED</span></div>').appendTo(f);
-                    }else if (weapon.hextarget) {
+                    } else if (weapon.hextarget) {
                         // Don't show hit chance if targeting the hex.
                         $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="losBlocked"> HEX TARGETED</span></div>').appendTo(f);
                     } else {
                         // LOS is not blocked, not hex targeted, show normal hit chance info, check Sweeping weapons first.
+                        /* //Old blocker for slicer code when it tried to target same ship multiple times.  Fine to do now - DK - Dec 2025
                         if (value === "Sweeping" && ship.shipSizeClass >= 0 && weaponManager.hasTargetedThisShip(ship, weapon)) {
                             $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="hitchange"> CANNOT TARGET AGAIN</span></div>').appendTo(f);
-                        } else if (calledid != null && !weaponManager.canWeaponCall(weapon)) {
+                        } else if */
+                        if (calledid != null && !weaponManager.canWeaponCall(weapon)) {
                             $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="hitchange"> CANNOT CALL SHOT</span></div>').appendTo(f);
                         } else if (keys.length > 1) {
                             $('<div><span class="weapon">' + weapon.displayName + '<span class="firingMode"> (' + value + ')</span><span class="hitchange"> - Approx: ' + weaponManager.calculateHitChange(selectedShip, ship, weapon, calledid) + '%</span></div>').appendTo(f);
@@ -518,18 +520,18 @@ window.weaponManager = {
             }
         }
 
-	},
+    },
 
 
     canWeaponCall: function canWeaponCall(weapon) {
         //is this weapon eleigible for calling precision shot?...
         //Standard or Pulse, not Ballistic!
-		//18 August 2022 (Geoffrey Stano) - With Marcin's input a new flag was created "overrideCallingRestrictions"
-		//which can be used to specifically override the no ballistic called shots with the four lines below updated
-//		if (weapon.ballistic || weapon.hextarget) return false;
-		if (weapon.hextarget) return false;
-		if (weapon.overrideCallingRestrictions) return true; //weapon feature specifically overriden to allow called shot
-		if (weapon.ballistic) return false; //ballistic weapons cannot do called shots
+        //18 August 2022 (Geoffrey Stano) - With Marcin's input a new flag was created "overrideCallingRestrictions"
+        //which can be used to specifically override the no ballistic called shots with the four lines below updated
+        //		if (weapon.ballistic || weapon.hextarget) return false;
+        if (weapon.hextarget) return false;
+        if (weapon.overrideCallingRestrictions) return true; //weapon feature specifically overriden to allow called shot
+        if (weapon.ballistic) return false; //ballistic weapons cannot do called shots
         if (weapon.damageType == 'Standard' || weapon.damageType == 'Pulse') return true;
         return false;
     },
@@ -538,41 +540,41 @@ window.weaponManager = {
         /*Marcin Sawicki, new version $outerSections-based - October 2017*/
         var sectionEligible = false; //section that system is mounted on is eligible for caled shots
         if (!shooter) return false;
-		if (system.isTargetable != true) return false; //cannot be targeted by called shots under any conditions
+        if (system.isTargetable != true) return false; //cannot be targeted by called shots under any conditions
 
         if (target.flight) return true; //allow called shots at fighters (in effect it will affect particular fighter, not fighter system)
-      
-		//Added fragment below to allow Limpet Bore Torpedo to target any exterior system, no other weapon should meet criteria at this time - DK - 16 Apr 2024
-  		for (var i in gamedata.selectedSystems) {
-           var shooterSystem = gamedata.selectedSystems[i];
-           if (shooterSystem.weapon && shooterSystem.canTargetAllExtSections && (system.location != 0 || system.location == 0 && system.isPrimaryTargetable)) return true;            
-		}                  	
+
+        //Added fragment below to allow Limpet Bore Torpedo to target any exterior system, no other weapon should meet criteria at this time - DK - 16 Apr 2024
+        for (var i in gamedata.selectedSystems) {
+            var shooterSystem = gamedata.selectedSystems[i];
+            if (shooterSystem.weapon && shooterSystem.canTargetAllExtSections && (system.location != 0 || system.location == 0 && system.isPrimaryTargetable)) return true;
+        }
 
         var shooterCompassHeading = mathlib.getCompassHeadingOfShip(target, shooter);
         var targetFacing = shipManager.getShipHeadingAngle(target);
 
         for (var i = 0; i < target.outerSections.length; i++) {
             var currSectionData = target.outerSections[i];
-			var arcFrom = 0;
-			var arcTo = 0;
+            var arcFrom = 0;
+            var arcTo = 0;
             if (system.location == currSectionData.loc) {
-				
-				if (shipManager.movement.isRolled(target)) {
-					arcTo = mathlib.addToDirection(currSectionData.min, currSectionData.min * -2);
-					arcFrom = mathlib.addToDirection(currSectionData.max, currSectionData.max * -2);
-				} else { //ship NOT rolled
-					arcFrom = currSectionData.min;
-					arcTo = currSectionData.max;
-				}
+
+                if (shipManager.movement.isRolled(target)) {
+                    arcTo = mathlib.addToDirection(currSectionData.min, currSectionData.min * -2);
+                    arcFrom = mathlib.addToDirection(currSectionData.max, currSectionData.max * -2);
+                } else { //ship NOT rolled
+                    arcFrom = currSectionData.min;
+                    arcTo = currSectionData.max;
+                }
                 if (mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(arcFrom, targetFacing), mathlib.addToDirection(arcTo, targetFacing))) {
                     if (currSectionData.call == true) return true;
                 }
 
-				/*old version - not taking Rolled state into account
+                /*old version - not taking Rolled state into account
                 if (mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(currSectionData.min, targetFacing), mathlib.addToDirection(currSectionData.max, targetFacing))) {
                     if (currSectionData.call == true) return true;
                 }
-				*/
+                */
                 sectionEligible = currSectionData.call;
             }
             //"loc" => $curr['loc'], "min" => $curr['min'], "max" => $curr['max'], "call" => $call
@@ -592,7 +594,7 @@ window.weaponManager = {
     }, //endof function canCalledshot
 
 
-	
+
     getTargetableThruster: function getTargetableThruster(shooter, target) {
         var targetFacing = shipManager.getShipHeadingAngle(target);
         var shooterCompassHeading = mathlib.getCompassHeadingOfShip(target, shooter);
@@ -618,8 +620,8 @@ window.weaponManager = {
         var targetCompassHeading = mathlib.getCompassHeadingOfPoint(shipManager.getShipPosition(shooter), position);
 
         //Some weapons like Transverse Drive have special arcs, refer to weapon function to check these separately.
-        if(weapon.specialArcs){
-            var onArc =  weapon.isPosOnSpecialArc(shooter, position);
+        if (weapon.specialArcs) {
+            var onArc = weapon.isPosOnSpecialArc(shooter, position);
             //confirm.error("Target hex is not in arc.");	          
             return onArc;
         }
@@ -642,34 +644,34 @@ window.weaponManager = {
         var oPos = shipManager.getShipPosition(shooter);
         var tPos = shipManager.getShipPosition(target);
 
-		/*if two ships are at same hex, then their relative position depends on THIS TURN Ini;
-		and it should on PREVIOUS turn Ini... this may affect ability to launch missiles. 
-		Hence at range 0 missile launch is always allowed, no matter the arc.
-		*/
+        /*if two ships are at same hex, then their relative position depends on THIS TURN Ini;
+        and it should on PREVIOUS turn Ini... this may affect ability to launch missiles. 
+        Hence at range 0 missile launch is always allowed, no matter the arc.
+        */
         if (weapon.ballistic && oPos.equals(tPos)) return true;
-		
-		
+
+
         return mathlib.isInArc(targetCompassHeading, arcs.start, arcs.end);
     },
 
     calculateRangePenalty: function calculateRangePenalty(distance, weapon) {
         var rangePenalty = 0;
-        
-		if (weapon.specialRangeCalculation){
-			rangePenalty = weapon.calculateSpecialRangePenalty(distance);
-		}else{ //standard calculation
-			rangePenalty = weapon.rangePenalty * distance;
-		}
+
+        if (weapon.specialRangeCalculation) {
+            rangePenalty = weapon.calculateSpecialRangePenalty(distance);
+        } else { //standard calculation
+            rangePenalty = weapon.rangePenalty * distance;
+        }
         return rangePenalty;
     },
 
-	/*Marcin Sawicki, September 2019: simplified to using calculateHitChange instead*/
-	calculataBallisticHitChange: function calculataBallisticHitChange(ball, calledid) {
-		var shooter = gamedata.getShip(ball.shooterid);
-        	var weapon = shipManager.systems.getSystem(shooter, ball.weaponid);
-        	var target = gamedata.getShip(ball.targetid);
-		return weaponManager.calculateHitChange(shooter, target, weapon, calledid);
-	},//endof calculataBallisticHitChange
+    /*Marcin Sawicki, September 2019: simplified to using calculateHitChange instead*/
+    calculataBallisticHitChange: function calculataBallisticHitChange(ball, calledid) {
+        var shooter = gamedata.getShip(ball.shooterid);
+        var weapon = shipManager.systems.getSystem(shooter, ball.weaponid);
+        var target = gamedata.getShip(ball.targetid);
+        return weaponManager.calculateHitChange(shooter, target, weapon, calledid);
+    },//endof calculataBallisticHitChange
 
     getInterception: function getInterception(ball) {
 
@@ -695,26 +697,26 @@ window.weaponManager = {
         var dew = 0;
 
         //if (target.flight && shooter) {
-        if ((target.flight || target.jinkinglimit > 0) && shooter) {        
-			if (!shooter.flight) {
-				jink = shipManager.movement.getJinking(target);
-			} else {
-				if (shooter) {
-					var sPosHex = shipManager.getShipPosition(shooter);
-					var tPosHex = shipManager.getShipPosition(target);
+        if ((target.flight || target.jinkinglimit > 0) && shooter) {
+            if (!shooter.flight) {
+                jink = shipManager.movement.getJinking(target);
+            } else {
+                if (shooter) {
+                    var sPosHex = shipManager.getShipPosition(shooter);
+                    var tPosHex = shipManager.getShipPosition(target);
 
-					if ( (weapon.ballistic) || (!sPosHex.equals(tPosHex)) || (shipManager.movement.getJinking(shooter) > 0) ) { //same hex direct fire ignores jinking
-						jink = shipManager.movement.getJinking(target);
-					}
-				}
-			}
-			
-			if (weapon && weapon.ignoreJinking) { //some weapons do ignore Jinking completely
-				jink = 0;
-			}
+                    if ((weapon.ballistic) || (!sPosHex.equals(tPosHex)) || (shipManager.movement.getJinking(shooter) > 0)) { //same hex direct fire ignores jinking
+                        jink = shipManager.movement.getJinking(target);
+                    }
+                }
+            }
+
+            if (weapon && weapon.ignoreJinking) { //some weapons do ignore Jinking completely
+                jink = 0;
+            }
         }
-        
-        if(!target.flight) {
+
+        if (!target.flight) {
             dew = ew.getDefensiveEW(target);
         }
 
@@ -730,30 +732,30 @@ window.weaponManager = {
             sdew = 0;
         }
 
-		//advanced sensors: negates BDEW and SDEW, unless target is unit of advanced race
-		if ( shooter && (target.factionAge < 3) && (shipManager.hasSpecialAbility(shooter, "AdvancedSensors")) ){
-			bdew = 0;
-			sdew = 0;
-		}	
-		
-		//some weapons do ignore EW completely
-		if (weapon && weapon.ignoreAllEW) {
+        //advanced sensors: negates BDEW and SDEW, unless target is unit of advanced race
+        if (shooter && (target.factionAge < 3) && (shipManager.hasSpecialAbility(shooter, "AdvancedSensors"))) {
+            bdew = 0;
+            sdew = 0;
+        }
+
+        //some weapons do ignore EW completely
+        if (weapon && weapon.ignoreAllEW) {
             dew = 0;
             bdew = 0;
             sdew = 0;
-		}
-		
-		//half-phasing target is more difficult to hit
-		var halfphase = 0;
-		if(shooter && weapon){ //consider half-phasing in calculations for a particular shot, but not in base profile
-			if (shipManager.movement.isHalfPhased(target)){
-				halfphase = 4; //basic penalty induced by half-phasing target
-				//ballistics double the penalty
-				if (weapon && weapon.ballistic) halfphase = 8;
-			}
-			//if firing unit is itself half phasing, that's -10
-			if (shooter && shipManager.movement.isHalfPhased(shooter)) halfphase = 10;
-		}
+        }
+
+        //half-phasing target is more difficult to hit
+        var halfphase = 0;
+        if (shooter && weapon) { //consider half-phasing in calculations for a particular shot, but not in base profile
+            if (shipManager.movement.isHalfPhased(target)) {
+                halfphase = 4; //basic penalty induced by half-phasing target
+                //ballistics double the penalty
+                if (weapon && weapon.ballistic) halfphase = 8;
+            }
+            //if firing unit is itself half phasing, that's -10
+            if (shooter && shipManager.movement.isHalfPhased(shooter)) halfphase = 10;
+        }
 
         return base - dew - jink - bdew - sdew - halfphase;
     },
@@ -761,23 +763,23 @@ window.weaponManager = {
 
     /*calculate hit chance for ramming attack - different procedure*/
     /*also, it would be a bit different (simplified) from B5Wars original*/
-    calculateRamChance: function(shooter, target, weapon, calledid){
+    calculateRamChance: function (shooter, target, weapon, calledid) {
         if (calledid > 0) return 0;//can't call ramming attack!
         if ((!shooter.flight) && (target.flight)) return 0;//ship has no chance to ram a fighter!
         var hitChance = 8; //base: 40%
-		
-		//half-phased and non-half-phased ship cannot ram each other
-		var shooterHalfphased = shipManager.movement.isHalfPhased(shooter);
-		var targetHalfphased = shipManager.movement.isHalfPhased(target);
-		if (shooterHalfphased != targetHalfphased) return 0;
 
-        if (target.Enormous) hitChance+=6;//+6 vs Enormous units
-        if (shooter.Enormous) hitChance+=6;//+6 if ramming unit is Enormous
-        if ((target.shipSizeClass >= 3) && (shooter.shipSizeClass <3))hitChance += 2;//+2 if target is Capital and ramming unit is not
-        if ((shooter.shipSizeClass >= 3) && (target.shipSizeClass <3))hitChance -= 2;//-2 if shooter is Capital and rammed unit is not
-        if ((shooter.flight) && (!target.flight))hitChance += 4;//+4 for fighter trying to ram a ship
+        //half-phased and non-half-phased ship cannot ram each other
+        var shooterHalfphased = shipManager.movement.isHalfPhased(shooter);
+        var targetHalfphased = shipManager.movement.isHalfPhased(target);
+        if (shooterHalfphased != targetHalfphased) return 0;
+
+        if (target.Enormous) hitChance += 6;//+6 vs Enormous units
+        if (shooter.Enormous) hitChance += 6;//+6 if ramming unit is Enormous
+        if ((target.shipSizeClass >= 3) && (shooter.shipSizeClass < 3)) hitChance += 2;//+2 if target is Capital and ramming unit is not
+        if ((shooter.shipSizeClass >= 3) && (target.shipSizeClass < 3)) hitChance -= 2;//-2 if shooter is Capital and rammed unit is not
+        if ((shooter.flight) && (!target.flight)) hitChance += 4;//+4 for fighter trying to ram a ship
         var targetSpeed = Math.abs(shipManager.movement.getSpeed(target)); //I think speed cannot be negative, but just in case ;)
-        switch(targetSpeed) {
+        switch (targetSpeed) {
             case 0: //+5 if the target is not moving.
                 hitChance += 5;
                 break;
@@ -793,7 +795,7 @@ window.weaponManager = {
                 hitChance += 1;
                 break;
             default: //this means >5; ‐1 for every 5 points of speed (or fraction thereof) that the target is moving faster than 5.
-                hitChance -= Math.ceil((targetSpeed-5)/5);
+                hitChance -= Math.ceil((targetSpeed - 5) / 5);
         }
         //‐1 for every level of jinking the ramming or target unit is using
         hitChance -= shipManager.movement.getJinking(shooter);
@@ -801,135 +803,135 @@ window.weaponManager = {
 
         //fire control: usually 0, but units specifically designed for ramming may have some bonus!
         hitChance += weaponManager.getFireControl(target, weapon);
-	    
-		//range penalty - based on ramming units' speed (typical ramming has no range penalty, but HKs do!
-		var ownSpeed = Math.abs(shipManager.movement.getSpeed(shooter));    
-		var rangePenalty = weapon.rangePenalty * ownSpeed;
-		hitChance -= rangePenalty;
-	
+
+        //range penalty - based on ramming units' speed (typical ramming has no range penalty, but HKs do!
+        var ownSpeed = Math.abs(shipManager.movement.getSpeed(shooter));
+        var rangePenalty = weapon.rangePenalty * ownSpeed;
+        hitChance -= rangePenalty;
+
         hitChance = Math.round(hitChance * 5); //convert d20->d100
         return hitChance;
     }, //endof calculateRamChance
 
 
     //calculate hit chance for Boarding Action - different procedure
-    calculateBoardingAction: function calculateBoardingAction(shooter, target, weapon){
+    calculateBoardingAction: function calculateBoardingAction(shooter, target, weapon) {
         if (target.flight || target.userid == -5) return 0;//Cannot board fighters or terrain, null FC stops this but showing 0% is more informative for players!
-		var jinking = shipManager.movement.getJinking(shooter); //Raider pods can jink, but can't attach at same time.
- 		if(jinking > 0) return 0;		
- 			       	
+        var jinking = shipManager.movement.getJinking(shooter); //Raider pods can jink, but can't attach at same time.
+        if (jinking > 0) return 0;
+
         var hitChance = 20; //base: 100%
-        
+
         //fire control: should be 0, but units specifically designed for boarding may have some bonus!
-        hitChance += weaponManager.getFireControl(target, weapon);        
+        hitChance += weaponManager.getFireControl(target, weapon);
 
         var targetSpeed = Math.abs(shipManager.movement.getSpeed(target)); //I think speed cannot be negative, but just in case ;)
-		var ownSpeed = Math.abs(shipManager.movement.getSpeed(shooter)); 
-		var speedDifference = Math.abs(targetSpeed - ownSpeed); //keep it a positive number. 		
-		var freeThrust = shooter.freethrust;
-		
-		if(shooter.flight){	//Breaching Pods.	
-			if(speedDifference > freeThrust) return 0;//Not enough thrust to compensate for speed difference, automatic miss.		
-	          		
-			if(targetSpeed > ownSpeed){//Target is moving faster, what are chances to attach?
-				var speedChance = speedDifference*2;//Each point of speed differnece equates to 10% chance to miss.
-				var newHitchance = hitChance - speedChance;//Take current hitChance, and remove speed difference penalty.
-	        	hitChance = Math.round(newHitchance * 5);//Convert to % value			
-				return hitChance;			
-			}else{
-	        	hitChance = Math.round(hitChance * 5);	//Convert to % value				
-				return hitChance;
-			}			
-		}else{ //Grapple Ships
-        	if (target.iniative > shooter.iniative) return 0;//Cannot grapple ships which rolled equal or higher initiative than you.		
-			if(speedDifference > 0){//Check Speed difference
-				var speedChance = speedDifference;//Each point of speed difference equates to 5% chance to miss.
-				var newHitchance = hitChance - speedChance;//Take current hitChance, and remove speed difference penalty.
-				if(target.Enormous) $newHitchance += 2;//You can't attach to Enormous Units without auto-ramming, but at least you get a bonus :)
-	        	hitChance = Math.round(newHitchance * 5);//Convert to % value			
-				return hitChance;			
-			}else{
-	        	hitChance = Math.round(hitChance * 5);	//Convert to % value				
-				return hitChance;
-			}			
-		}
+        var ownSpeed = Math.abs(shipManager.movement.getSpeed(shooter));
+        var speedDifference = Math.abs(targetSpeed - ownSpeed); //keep it a positive number. 		
+        var freeThrust = shooter.freethrust;
+
+        if (shooter.flight) {	//Breaching Pods.	
+            if (speedDifference > freeThrust) return 0;//Not enough thrust to compensate for speed difference, automatic miss.		
+
+            if (targetSpeed > ownSpeed) {//Target is moving faster, what are chances to attach?
+                var speedChance = speedDifference * 2;//Each point of speed differnece equates to 10% chance to miss.
+                var newHitchance = hitChance - speedChance;//Take current hitChance, and remove speed difference penalty.
+                hitChance = Math.round(newHitchance * 5);//Convert to % value			
+                return hitChance;
+            } else {
+                hitChance = Math.round(hitChance * 5);	//Convert to % value				
+                return hitChance;
+            }
+        } else { //Grapple Ships
+            if (target.iniative > shooter.iniative) return 0;//Cannot grapple ships which rolled equal or higher initiative than you.		
+            if (speedDifference > 0) {//Check Speed difference
+                var speedChance = speedDifference;//Each point of speed difference equates to 5% chance to miss.
+                var newHitchance = hitChance - speedChance;//Take current hitChance, and remove speed difference penalty.
+                if (target.Enormous) $newHitchance += 2;//You can't attach to Enormous Units without auto-ramming, but at least you get a bonus :)
+                hitChance = Math.round(newHitchance * 5);//Convert to % value			
+                return hitChance;
+            } else {
+                hitChance = Math.round(hitChance * 5);	//Convert to % value				
+                return hitChance;
+            }
+        }
 
     }, //endof calculateBoardingAction
 
 
-	getFiringHex: function getFiringHex(shooter, weapon){
+    getFiringHex: function getFiringHex(shooter, weapon) {
         var sPosLaunch = null;
-        
- 				if (weapon.hasSpecialLaunchHexCalculation){ //Does weapon have a different method of determining point of shot e.g. Proximity Laser?
-					sPosLaunch = weapon.getFiringHex(shooter, weapon);
-				}else{
-					if (weapon.ballistic){	 //standard ballistic calculation						
-						sPosLaunch = shipManager.movement.getPositionAtStartOfTurn(shooter, gamedata.turn);	
-					} else { //Direct fire
-						sPosLaunch= shipManager.getShipPosition(shooter);
-					}
-		}	      
-		return sPosLaunch;
-	},
+
+        if (weapon.hasSpecialLaunchHexCalculation) { //Does weapon have a different method of determining point of shot e.g. Proximity Laser?
+            sPosLaunch = weapon.getFiringHex(shooter, weapon);
+        } else {
+            if (weapon.ballistic) {	 //standard ballistic calculation						
+                sPosLaunch = shipManager.movement.getPositionAtStartOfTurn(shooter, gamedata.turn);
+            } else { //Direct fire
+                sPosLaunch = shipManager.getShipPosition(shooter);
+            }
+        }
+        return sPosLaunch;
+    },
 
     calculateHitChange: function calculateHitChange(shooter, target, weapon, calledid) {
 
-		if(weapon.autoHit) return 100; //Some weapons always hit, let's just show 100% chance to prevent confusion at firing. DK - 12 Apr 2024
+        if (weapon.autoHit) return 100; //Some weapons always hit, let's just show 100% chance to prevent confusion at firing. DK - 12 Apr 2024
 
         if (weapon.isRammingAttack) {
-			return weaponManager.calculateRamChance(shooter, target, weapon, calledid);
-		}
-		if(weapon.isBoardingAction){
-			return weaponManager.calculateBoardingAction(shooter, target, weapon);			
-		}
+            return weaponManager.calculateRamChance(shooter, target, weapon, calledid);
+        }
+        if (weapon.isBoardingAction) {
+            return weaponManager.calculateBoardingAction(shooter, target, weapon);
+        }
 
         //New check for sustained weapons, to see if they will auto-hit/auto-miss targets from previous turn.  If conditions not true, normal routine. 
         if (shipManager.power.isOverloading(shooter, weapon)) {
             if (weapon.sustainedTarget && Object.keys(weapon.sustainedTarget).length > 0) { // We only care if an overload weapon fired last turn and therefore has a targetId stored in sustainedTarget.
                 // Now check it's Firing Mode 1, not a different target, and wasn't a miss.
                 if (weapon.firingMode !== 1) return 0; // Wrong firing mode selected for a sustained shot.
-                
+
                 if (!weapon.sustainedTarget.hasOwnProperty(target.id)) {
                     return 0; // Auto miss - Wrong target
-                } else if (weapon.sustainedTarget[target.id] === 1) { 
+                } else if (weapon.sustainedTarget[target.id] === 1) {
                     return 100; // Auto-hit!
                 }
-            }    
-        }		
+            }
+        }
 
-		//Weapons like Mass Drivers have special criteria for targets and shooter speed etc.
-		if(weapon.targetsImmobile){ //Target must be en
-			var ownSpeed = shipManager.movement.getSpeed(shooter);
-			var targetSpeed = shipManager.movement.getSpeed(target);
-			if(!target.Enormous || ownSpeed > 0 || targetSpeed > 0)	return 0;	
-		}
-			
-	    var defence = 0;
-	    var distance = 0;
-	    if (weapon.ballistic){		    
-		var sPosLaunch = weaponManager.getFiringHex(shooter, weapon); 	
-//		var sPosLaunch = shipManager.movement.getPositionAtStartOfTurn(shooter, gamedata.turn); //OLD METHOD of getting pos.		    
-		var sPosTarget = shipManager.getShipPosition(target);
-		defence = weaponManager.getShipDefenceValuePos(sPosLaunch, target);
-	        distance = sPosLaunch.distanceTo(sPosTarget).toFixed(2); 
-	    }else{    
-        	defence = weaponManager.getShipDefenceValue(shooter, target);
-			distance = mathlib.getDistanceBetweenShipsInHex(shooter, target).toFixed(2);
-	    } 	    
+        //Weapons like Mass Drivers have special criteria for targets and shooter speed etc.
+        if (weapon.targetsImmobile) { //Target must be en
+            var ownSpeed = shipManager.movement.getSpeed(shooter);
+            var targetSpeed = shipManager.movement.getSpeed(target);
+            if (!target.Enormous || ownSpeed > 0 || targetSpeed > 0) return 0;
+        }
+
+        var defence = 0;
+        var distance = 0;
+        if (weapon.ballistic) {
+            var sPosLaunch = weaponManager.getFiringHex(shooter, weapon);
+            //		var sPosLaunch = shipManager.movement.getPositionAtStartOfTurn(shooter, gamedata.turn); //OLD METHOD of getting pos.		    
+            var sPosTarget = shipManager.getShipPosition(target);
+            defence = weaponManager.getShipDefenceValuePos(sPosLaunch, target);
+            distance = sPosLaunch.distanceTo(sPosTarget).toFixed(2);
+        } else {
+            defence = weaponManager.getShipDefenceValue(shooter, target);
+            distance = mathlib.getDistanceBetweenShipsInHex(shooter, target).toFixed(2);
+        }
         //var rangePenalty = weaponManager.calculateRangePenalty(distance, weapon); //moved lower
-	    
+
         //console.log("dis: " + dis + " disInHex: " + disInHex + " rangePenalty: " + rangePenalty);
-		
-		//check whether target moved out of range - then set to 0!
-		var maxDistance = Math.max(weapon.range, weapon.distanceRange);
-		if ( (maxDistance>0) && (maxDistance<distance) ){ //range is limited and shorter than current distance to target
-			return 0;
-		}
+
+        //check whether target moved out of range - then set to 0!
+        var maxDistance = Math.max(weapon.range, weapon.distanceRange);
+        if ((maxDistance > 0) && (maxDistance < distance)) { //range is limited and shorter than current distance to target
+            return 0;
+        }
 
         var baseDef = weaponManager.calculateBaseHitChange(target, defence, shooter, weapon);
-        
+
         //The correct defence profiles are now passed from the server side - DK 5/5/2025
-		//if(!target.flight) baseDef += shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(target, "cnC"), "ProfileIncreased");		
+        //if(!target.flight) baseDef += shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(target, "cnC"), "ProfileIncreased");		
 
         var soew = 0;
         var dist = 0;
@@ -937,29 +939,29 @@ window.weaponManager = {
 
         if (weapon.useOEW) {
             oew = ew.getTargetingEW(shooter, target);
-			soew = ew.getSupportedOEW(shooter, target);
-			dist = ew.getDistruptionEW(shooter);
+            soew = ew.getSupportedOEW(shooter, target);
+            dist = ew.getDistruptionEW(shooter);
             oew -= dist;
             if (oew < 1) { //1 point requires to get a lock on target
-				soew = 0;//no lock-on negates SOEW!
-			} 
+                soew = 0;//no lock-on negates SOEW!
+            }
             if (oew < 0) {
-				oew = 0;//OEW cannot be negative
-			} 			
-		} else {
-			oew = 0;
-			soew = 0;
+                oew = 0;//OEW cannot be negative
+            }
+        } else {
+            oew = 0;
+            soew = 0;
         }
 
         var mod = 0;
 
         mod -= target.getHitChangeMod(shooter, weapon);
 
-		if (weapon.specialHitChanceCalculation){ //Does the weapon itself have any special mods?
-			mod += weapon.calculateSpecialHitChanceMod(shooter, target, calledid);
-		}
+        if (weapon.specialHitChanceCalculation) { //Does the weapon itself have any special mods?
+            mod += weapon.calculateSpecialHitChanceMod(shooter, target, calledid);
+        }
 
-        if (shooter.flight===true) {
+        if (shooter.flight === true) {
             //oew = shooter.offensivebonus;
 
             //Abbai critical...
@@ -967,42 +969,42 @@ window.weaponManager = {
             var firstFighter = shooter.systems[1];
             var OBcrit = shipManager.criticals.hasCritical(firstFighter, "tmpsensordown");
             oew = shooter.offensivebonus - OBcrit;
-			if (weapon.ballistic){ //for ballistics, if there is no Navigator, use OB only if target is in weapon arc!
+            if (weapon.ballistic) { //for ballistics, if there is no Navigator, use OB only if target is in weapon arc!
                 var shooterLoSBlocked = false;
                 var blockedLosHex = weaponManager.getBlockedHexes(); //Check if there are any hexes that block LoS                
                 if (blockedLosHex && blockedLosHex.length > 0) { //If so, are they blocking this shot? 
-                    var shooterPos= shipManager.getShipPosition(shooter);
-                    shooterLoSBlocked = mathlib.checkLineOfSight(shooterPos, sPosTarget, blockedLosHex);                    
-                }   				
+                    var shooterPos = shipManager.getShipPosition(shooter);
+                    shooterLoSBlocked = mathlib.checkLineOfSight(shooterPos, sPosTarget, blockedLosHex);
+                }
                 // If no navigator and out of arc, or if LoS is blocked, set oew to 0
                 if ((!shooter.hasNavigator && !weaponManager.isOnWeaponArc(shooter, target, weapon)) || shooterLoSBlocked) {
                     oew = 0;
                 }
-			}		
+            }
             oew = Math.max(0, oew); //OBCrit cannot bring Offensive Bonus below 0
-			if(oew == 0) soew = 0;
+            if (oew == 0) soew = 0;
 
-			if (!weapon.ignoreJinking) {
-				mod -= shipManager.movement.getJinking(shooter);
-			}
+            if (!weapon.ignoreJinking) {
+                mod -= shipManager.movement.getJinking(shooter);
+            }
 
             if (shipManager.movement.hasCombatPivoted(shooter) && (!shooter.ignoreManoeuvreMods)) mod--;
         } else {
-			if (shooter.agile === true){
-				if (shipManager.movement.hasRolled(shooter)) {
-					//		console.log("is rolling -3");
-					if(!shooter.ignoreManoeuvreMods) mod -= 3;
-				}
-			} else {
-				if (shipManager.movement.isRolling(shooter)) {
-					//		console.log("is rolling -3");
-					if(!shooter.ignoreManoeuvreMods) mod -= 3;
-				}
-			}
+            if (shooter.agile === true) {
+                if (shipManager.movement.hasRolled(shooter)) {
+                    //		console.log("is rolling -3");
+                    if (!shooter.ignoreManoeuvreMods) mod -= 3;
+                }
+            } else {
+                if (shipManager.movement.isRolling(shooter)) {
+                    //		console.log("is rolling -3");
+                    if (!shooter.ignoreManoeuvreMods) mod -= 3;
+                }
+            }
 
             if (shipManager.movement.hasPivotedForShooting(shooter)) {
                 //		console.log("pivoting");
-                if(!shooter.ignoreManoeuvreMods) mod -= 3;
+                if (!shooter.ignoreManoeuvreMods) mod -= 3;
             }
 
             if (shooter.osat && shipManager.movement.hasTurned(shooter)) {
@@ -1010,9 +1012,9 @@ window.weaponManager = {
                 mod -= 1;
             }
 
-			if (shooter.toHitBonus != 0){ //Some ships have bonuses or minuses to hit on all weapons e.g. Elite Crew, Poor Crew and Markab Fervor 
-			    mod += shooter.toHitBonus;
-			}
+            if (shooter.toHitBonus != 0) { //Some ships have bonuses or minuses to hit on all weapons e.g. Elite Crew, Poor Crew and Markab Fervor 
+                mod += shooter.toHitBonus;
+            }
 
             if (!shooter.osat) {
                 mod -= shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(shooter, "cnC"), "PenaltyToHit");
@@ -1023,101 +1025,101 @@ window.weaponManager = {
         if (calledid > 0) {
             mod += weapon.calledShotMod;
             if (target.base) mod += weapon.calledShotMod; //double penalty vs bases!
-			//Add bonus to hit Aegis SensorPod?
+            //Add bonus to hit Aegis SensorPod?
             var calledSystem = shipManager.systems.getSystem(target, calledid);
-            if(calledSystem.calledShotBonus != null) mod += calledSystem.calledShotBonus;               	
+            if (calledSystem.calledShotBonus != null) mod += calledSystem.calledShotBonus;
         }
 
         var ammo = weapon.getAmmo(null);
         if (ammo) mod += ammo.hitChanceMod;
 
-	    /*replac ed by lock penalty to allow half lock...
+        /*replac ed by lock penalty to allow half lock...
         if (oew < 1 && !shooter.flight) {
             rangePenalty = rangePenalty * 2;
         } else*/
-		var noLockPenalty = 0;
-		var noLockMod = 0;
-		if (oew < 0.5){
-			noLockPenalty = 1;
-		}else if (oew < 1){ //OEW beteen 0.5 and 1 is achievable for targets of Distortion EW
-			noLockPenalty = 0.5;
-		}
-		//noLockMod =  rangePenalty * noLockPenalty; //moved lower   
+        var noLockPenalty = 0;
+        var noLockMod = 0;
+        if (oew < 0.5) {
+            noLockPenalty = 1;
+        } else if (oew < 1) { //OEW beteen 0.5 and 1 is achievable for targets of Distortion EW
+            noLockPenalty = 0.5;
+        }
+        //noLockMod =  rangePenalty * noLockPenalty; //moved lower   
         var jammermod = 0;
-		//if (shooter.faction != target.faction){ //moved to getJammerValueFromTo!
-		
-			jammermod = ew.getJammerValueFromTo(shooter,target); //accounts for both jammer and stealth!
-			/* replaced by code above
-            var jammer = shipManager.systems.getSystemByName(target, "jammer");
-            var stealth = shipManager.systems.getSystemByName(target, "stealth");
-            if (jammer && !shipManager.power.isOffline(target, jammer)) jammermod = rangePenalty * shipManager.systems.getOutput(target, jammer);		
-            if (stealth && mathlib.getDistanceBetweenShipsInHex(shooter, target) > 5) jammermod = rangePenalty;
-			*/
-			if (jammermod > 0){
-				soew = 0;//jammer negates SOEW
-			}
-			/* moved lower
-			jammermod = jammermod * rangePenalty; //actual reduction
-		
-			jammermod = jammermod - noLockMod; //noLock does the same thing as Jammer, but cannot be overcame by sensors
-			if (jammermod < 0) jammermod = 0; //cannot reduce below 0
-			*/
+        //if (shooter.faction != target.faction){ //moved to getJammerValueFromTo!
+
+        jammermod = ew.getJammerValueFromTo(shooter, target); //accounts for both jammer and stealth!
+        /* replaced by code above
+        var jammer = shipManager.systems.getSystemByName(target, "jammer");
+        var stealth = shipManager.systems.getSystemByName(target, "stealth");
+        if (jammer && !shipManager.power.isOffline(target, jammer)) jammermod = rangePenalty * shipManager.systems.getOutput(target, jammer);		
+        if (stealth && mathlib.getDistanceBetweenShipsInHex(shooter, target) > 5) jammermod = rangePenalty;
+        */
+        if (jammermod > 0) {
+            soew = 0;//jammer negates SOEW
+        }
+        /* moved lower
+        jammermod = jammermod * rangePenalty; //actual reduction
 	
-	/*already taken care of by ew.getJammerValueFromTo
-	   if (jammermod > 0){	 //else Improved Sensors do nothing
-		//Improved/Advanced Sensors bonus; hasSpecialAbility isn't working correctly on fighter, ability is not propagated beyond system level - possibly needs correction
-		if (shipManager.hasSpecialAbility(shooter, "AdvancedSensors") || shipManager.systems.getSystemByName(shooter, "fighteradvsensors")){
-			jammermod = 0; //Advanced Sensors negate Jammer
-		} else if (shipManager.hasSpecialAbility(shooter, "ImprovedSensors") || shipManager.systems.getSystemByName(shooter, "fighterimprsensors")){
-			jammermod = jammermod / 2; //Improved Sensors halve Jammer effect
-		}
-	   }
-	   */
-	   
-	   if(weapon.ignoreAllEW){
-			noLockPenalty = 0;
-			jammermod = 0;
-			oew = 0;
-			soew = 0;
-		}
-	   
-	   var rangePenalty = weaponManager.calculateRangePenalty(distance, weapon);
-	   if (!weapon.noLockPenalty) { jammermod =0; noLockPenalty = 0; }
-	   /*and now nolock and jammer mods...*/
-	   if ((jammermod>0) || (noLockPenalty>0)){
-		   if (weapon.doubleRangeIfNoLock){//multiply range - eg. Antimatter!
-				var modifiedDistance = distance * (1+noLockPenalty);
-				noLockMod =  weaponManager.calculateRangePenalty(modifiedDistance, weapon) -rangePenalty ;
-				modifiedDistance = distance * (1+jammermod);
-				jammermod = weaponManager.calculateRangePenalty(modifiedDistance, weapon) -rangePenalty ;
-		   }else{ //multiply penalty - standard!
-				noLockMod =  rangePenalty * noLockPenalty;
-				jammermod = jammermod * rangePenalty; //change multiplier into actual reduction
-		   }
-			jammermod = jammermod - noLockMod; //noLock does the same thing as Jammer, but cannot be overcame by sensors
-			if (jammermod < 0) jammermod = 0; //cannot reduce below 0
-	   }
-		
-			//jammer and jinking do not stack
-            if (target.flight) {
-                var jinking = shipManager.movement.getJinking(target);
-                if (jinking > jammermod) {
-                    jammermod = 0;
-                } else {
-                    jammermod = jammermod - jinking;
-                }
+        jammermod = jammermod - noLockMod; //noLock does the same thing as Jammer, but cannot be overcame by sensors
+        if (jammermod < 0) jammermod = 0; //cannot reduce below 0
+        */
+
+        /*already taken care of by ew.getJammerValueFromTo
+           if (jammermod > 0){	 //else Improved Sensors do nothing
+            //Improved/Advanced Sensors bonus; hasSpecialAbility isn't working correctly on fighter, ability is not propagated beyond system level - possibly needs correction
+            if (shipManager.hasSpecialAbility(shooter, "AdvancedSensors") || shipManager.systems.getSystemByName(shooter, "fighteradvsensors")){
+                jammermod = 0; //Advanced Sensors negate Jammer
+            } else if (shipManager.hasSpecialAbility(shooter, "ImprovedSensors") || shipManager.systems.getSystemByName(shooter, "fighterimprsensors")){
+                jammermod = jammermod / 2; //Improved Sensors halve Jammer effect
             }
-        
+           }
+           */
+
+        if (weapon.ignoreAllEW) {
+            noLockPenalty = 0;
+            jammermod = 0;
+            oew = 0;
+            soew = 0;
+        }
+
+        var rangePenalty = weaponManager.calculateRangePenalty(distance, weapon);
+        if (!weapon.noLockPenalty) { jammermod = 0; noLockPenalty = 0; }
+        /*and now nolock and jammer mods...*/
+        if ((jammermod > 0) || (noLockPenalty > 0)) {
+            if (weapon.doubleRangeIfNoLock) {//multiply range - eg. Antimatter!
+                var modifiedDistance = distance * (1 + noLockPenalty);
+                noLockMod = weaponManager.calculateRangePenalty(modifiedDistance, weapon) - rangePenalty;
+                modifiedDistance = distance * (1 + jammermod);
+                jammermod = weaponManager.calculateRangePenalty(modifiedDistance, weapon) - rangePenalty;
+            } else { //multiply penalty - standard!
+                noLockMod = rangePenalty * noLockPenalty;
+                jammermod = jammermod * rangePenalty; //change multiplier into actual reduction
+            }
+            jammermod = jammermod - noLockMod; //noLock does the same thing as Jammer, but cannot be overcame by sensors
+            if (jammermod < 0) jammermod = 0; //cannot reduce below 0
+        }
+
+        //jammer and jinking do not stack
+        if (target.flight) {
+            var jinking = shipManager.movement.getJinking(target);
+            if (jinking > jammermod) {
+                jammermod = 0;
+            } else {
+                jammermod = jammermod - jinking;
+            }
+        }
+
 
         var firecontrol = weaponManager.getFireControl(target, weapon);
-        
-		if (shipManager.hasSpecialAbility(shooter,"HyachComputer")) { //To check for any bonuses from Hyach Coputer BFCP.
-			var bonusfirecontrol = 0;
-			var computer = shipManager.systems.getSystemByName(shooter, "hyachComputer");		
-			var	FCIndex = weaponManager.getFireControlIndex(target); //Find out FC category of the target (0, 1 or 2)
-			bonusfirecontrol = computer.getFCAllocated(FCIndex);  //Use FCIndex to check if Computer has any BFCP allocated to that FC category.
-			firecontrol += bonusfirecontrol; //Add to firecontrol.					
-		}       
+
+        if (shipManager.hasSpecialAbility(shooter, "HyachComputer")) { //To check for any bonuses from Hyach Coputer BFCP.
+            var bonusfirecontrol = 0;
+            var computer = shipManager.systems.getSystemByName(shooter, "hyachComputer");
+            var FCIndex = weaponManager.getFireControlIndex(target); //Find out FC category of the target (0, 1 or 2)
+            bonusfirecontrol = computer.getFCAllocated(FCIndex);  //Use FCIndex to check if Computer has any BFCP allocated to that FC category.
+            firecontrol += bonusfirecontrol; //Add to firecontrol.					
+        }
 
         // Check Line of Sight for Ballistic weapons after launch (Fighters checked separately above)
         if (weapon.ballistic && (!shooter.flight) && !weapon.ignoresLoS) {
@@ -1125,20 +1127,20 @@ window.weaponManager = {
                 var loSBlocked = false;
                 var blockedLosHex = weaponManager.getBlockedHexes(); //Check if there are any hexes that block LoS                   
                 loSBlocked = mathlib.checkLineOfSight(sPosLaunch, sPosTarget, blockedLosHex); // Defaults to false (LoS NOT blocked)
-                
+
                 if (loSBlocked) { // Line of Sight is blocked!
-                    if (weapon instanceof AmmoMissileRackS) { 
+                    if (weapon instanceof AmmoMissileRackS) {
                         // Only zero LAUNCHER FC on AmmoMissileLaunchers; missiles have their own guidance (bonus)
-                        if (weapon.hasOwnProperty('basicFC') && Array.isArray(weapon.basicFC) && weapon.basicFC.length > 0) {                          
+                        if (weapon.hasOwnProperty('basicFC') && Array.isArray(weapon.basicFC) && weapon.basicFC.length > 0) {
                             firecontrol -= weapon.basicFC[weaponManager.getFireControlIndex(target)];
-                        }                       
-                    } else { 
+                        }
+                    } else {
                         // Everything else (e.g., torpedoes) just has its FC zeroed
                         firecontrol = 0; // Null weapon firecontrol when no Line of Sight
                     }
                 }
-            }    
-        }         
+            }
+        }
 
         var goal = baseDef - jammermod - noLockMod - rangePenalty + oew + soew + firecontrol + mod;
         var hitChance = Math.round(goal / 20 * 100);
@@ -1153,20 +1155,20 @@ window.weaponManager = {
         if (target.shipSizeClass >= 0) {
             return weapon.fireControl[1];
         }
-		if (target.mine == true) {
-			return weapon.fireControl[1];
-		}
+        if (target.mine == true) {
+            return weapon.fireControl[1];
+        }
 
         return weapon.fireControl[0];
     },
 
     getFireControlIndex: function getFireControlIndex(target) {
-        if (target.shipSizeClass >= 2) return 2;  
+        if (target.shipSizeClass >= 2) return 2;
         if (target.shipSizeClass >= 0) return 1;
-        if (target.shipSizeClass < 0) return 0;     	
+        if (target.shipSizeClass < 0) return 0;
     },
 
-    
+
     // 'position' should be in HEX coordinate
     getShipDefenceValuePos: function getShipDefenceValuePos(position, target) {
         var targetFacing = shipManager.getShipHeadingAngle(target);
@@ -1239,7 +1241,7 @@ window.weaponManager = {
 
         return target.sideDefense;
     },
-	
+
     targetBallistic: function targetBallistic(ship, ball) {
         console.log("target Ballistics", ship, ball);
 
@@ -1309,7 +1311,7 @@ window.weaponManager = {
     canSelfIntercept: function canSelfIntercept(ship) {
         for (var i in gamedata.selectedSystems) {
             var weapon = gamedata.selectedSystems[i];
-		var loadingTimeActual = Math.max(weapon.loadingtime,weapon.normalload);//Accelerator (or multi-mode) weapons may have loading time of 1, yet reach full potential only after longer charging 
+            var loadingTimeActual = Math.max(weapon.loadingtime, weapon.normalload);//Accelerator (or multi-mode) weapons may have loading time of 1, yet reach full potential only after longer charging 
             if (weaponManager.isLoaded(weapon) && weapon.intercept >= 1 && loadingTimeActual > 1) {
                 return true;
             }
@@ -1327,8 +1329,8 @@ window.weaponManager = {
             if (weaponManager.hasFiringOrder(ship, weapon)) {
                 weaponManager.removeFiringOrder(ship, weapon);
             }
-		
-		var loadingTimeActual = Math.max(weapon.loadingtime,weapon.normalload);//Accelerator (or multi-mode) weapons may have loading time of 1, yet reach full potential only after longer charging
+
+            var loadingTimeActual = Math.max(weapon.loadingtime, weapon.normalload);//Accelerator (or multi-mode) weapons may have loading time of 1, yet reach full potential only after longer charging
             if (weaponManager.isLoaded(weapon) && weapon.intercept >= 1 && loadingTimeActual > 1) {
                 valid.push(weapon);
             } else invalid.push(weapon);
@@ -1350,53 +1352,53 @@ window.weaponManager = {
         });
     },
 
-	/*check whether a long-recharge weapon is eligible for interception*/
+    /*check whether a long-recharge weapon is eligible for interception*/
     canSelfInterceptSingle: function checkSelfIntercept(ship, weapon) {
-	if (gamedata.gamephase != 3 ) return false;//declaration in firing phase only
-	if (!weapon.weapon) return false;//only weapons can intercept ;)
-		var loadingTimeActual = Math.max(weapon.loadingtime,weapon.normalload);//Accelerator (or multi-mode) weapons may have loading time of 1, yet reach full potential only after longer charging
-	if ( (weapon.intercept < 1) && !(weaponManager.canWeaponInterceptAtAll(weapon)) || (loadingTimeActual <= 1) ) return false;//cannot intercept or quick to recharge anyway and will be auto-assigned
-	if (weapon.ballistic && !(weaponManager.canWeaponInterceptAtAll(weapon))) return false;//no interception using ballistic weapons    
-	if (weaponManager.hasFiringOrder(ship, weapon) && !weapon.canSplitShots) return false;//already declared and can't split shots.
-	if (!weaponManager.isLoaded(weapon)) return false;//not ready to fire
-    if(weapon.canSplitShots){
-        var canSelfIntercept = weapon.checkSelfInterceptSystem(); //Look to weapon itself now, to see if any special criteria should apply.
-        if(!canSelfIntercept) return false;
-    }
-	return true;
-    },	
-	
+        if (gamedata.gamephase != 3) return false;//declaration in firing phase only
+        if (!weapon.weapon) return false;//only weapons can intercept ;)
+        var loadingTimeActual = Math.max(weapon.loadingtime, weapon.normalload);//Accelerator (or multi-mode) weapons may have loading time of 1, yet reach full potential only after longer charging
+        if ((weapon.intercept < 1) && !(weaponManager.canWeaponInterceptAtAll(weapon)) || (loadingTimeActual <= 1)) return false;//cannot intercept or quick to recharge anyway and will be auto-assigned
+        if (weapon.ballistic && !(weaponManager.canWeaponInterceptAtAll(weapon))) return false;//no interception using ballistic weapons    
+        if (weaponManager.hasFiringOrder(ship, weapon) && !weapon.canSplitShots) return false;//already declared and can't split shots.
+        if (!weaponManager.isLoaded(weapon)) return false;//not ready to fire
+        if (weapon.canSplitShots) {
+            var canSelfIntercept = weapon.checkSelfInterceptSystem(); //Look to weapon itself now, to see if any special criteria should apply.
+            if (!canSelfIntercept) return false;
+        }
+        return true;
+    },
+
     onDeclareSelfInterceptSingle: function onDeclareSelfInterceptSingle(ship, weapon) {
-	    if(!weaponManager.canSelfInterceptSingle(ship, weapon)) return; //last check whether weapon is eligible for that!
-        if(weapon.canSplitShots) { //Discharge Gun/Slicers use their own logic here, so diverge to their own methods.
+        if (!weaponManager.canSelfInterceptSingle(ship, weapon)) return; //last check whether weapon is eligible for that!
+        if (weapon.canSplitShots) { //Discharge Gun/Slicers use their own logic here, so diverge to their own methods.
             weapon.doMultipleSelfIntercept(ship);
             var outOfShots = weapon.checkFinished();
-            if(outOfShots) weaponManager.unSelectWeapon(ship, weapon);
+            if (outOfShots) weaponManager.unSelectWeapon(ship, weapon);
             return;
         }
-	    var fireid = ship.id + "_" + weapon.id + "_" + (weapon.fireOrders.length + 1);
-	    var fire = {
-		id: fireid,
-		type: "selfIntercept",
-		shooterid: ship.id,
-		targetid: ship.id,
-		weaponid: weapon.id,
-		calledid: -1,
-		turn: gamedata.turn,
-		firingMode: weapon.firingMode,
-		shots: weapon.defaultShots,
-		x: "null",
-		y: "null",
-		addToDB: true,
-		damageclass: weapon.data["Weapon type"].toLowerCase()
-	    };
-	    weapon.fireOrders.push(fire);
-	    weaponManager.unSelectWeapon(ship, weapon);
+        var fireid = ship.id + "_" + weapon.id + "_" + (weapon.fireOrders.length + 1);
+        var fire = {
+            id: fireid,
+            type: "selfIntercept",
+            shooterid: ship.id,
+            targetid: ship.id,
+            weaponid: weapon.id,
+            calledid: -1,
+            turn: gamedata.turn,
+            firingMode: weapon.firingMode,
+            shots: weapon.defaultShots,
+            x: "null",
+            y: "null",
+            addToDB: true,
+            damageclass: weapon.data["Weapon type"].toLowerCase()
+        };
+        weapon.fireOrders.push(fire);
+        weaponManager.unSelectWeapon(ship, weapon);
     },
-	
-	/*declare self-intercept for all similar undeclared weapons*/
+
+    /*declare self-intercept for all similar undeclared weapons*/
     onDeclareSelfInterceptSingleAll: function onDeclareSelfInterceptSingleAll(ship, weapon) {
-		var allWeapons = [];
+        var allWeapons = [];
         if (ship.flight) {
             allWeapons = ship.systems
                 .map(fighter => fighter.systems)
@@ -1405,33 +1407,33 @@ window.weaponManager = {
         } else {
             allWeapons = ship.systems.filter(system => system.weapon);
         }
-		var similarWeapons = new Array();
-		for (var i = 0; i < allWeapons.length; i++) {
-			if (weapon.displayName === allWeapons[i].displayName) { //this will include this particular system too, of course
-				similarWeapons.push(allWeapons[i]);
-			}
-		}
-		for (var i = 0; i < similarWeapons.length; i++) {
-			var otherWeapon = similarWeapons[i];
-			weaponManager.onDeclareSelfInterceptSingle(ship, otherWeapon); //will check whether weapon is actually eligible for such declaration
-		}
-    },	
+        var similarWeapons = new Array();
+        for (var i = 0; i < allWeapons.length; i++) {
+            if (weapon.displayName === allWeapons[i].displayName) { //this will include this particular system too, of course
+                similarWeapons.push(allWeapons[i]);
+            }
+        }
+        for (var i = 0; i < similarWeapons.length; i++) {
+            var otherWeapon = similarWeapons[i];
+            weaponManager.onDeclareSelfInterceptSingle(ship, otherWeapon); //will check whether weapon is actually eligible for such declaration
+        }
+    },
 
     //Some split shots weapons add self-intercepts at beginning of fireorders, this lets us check if such an order exists - DK
     canRemInterceptSingle: function canRemInterceptSingle(ship, weapon) {
-        if (gamedata.gamephase != 3 ) return false;//declaration in firing phase only
+        if (gamedata.gamephase != 3) return false;//declaration in firing phase only
         if (!weapon.weapon) return false;//only weapons can intercept ;)        
-		for (var i = 0; i < weapon.fireOrders.length; i++) { 
+        for (var i = 0; i < weapon.fireOrders.length; i++) {
             if (weapon.fireOrders[i].type == "selfIntercept") {
                 return true; //An order found
             }
         }
         return false;
-    },    
+    },
 
     //Some split shots weapons add self-intercepts at beginning of fireorders, this lets us remove them without deleting all offensive orders - DK
     removeSelfInterceptSingle: function removeSelfInterceptSingle(ship, weapon) {
-		for (var i = 0; i < weapon.fireOrders.length; i++) { 
+        for (var i = 0; i < weapon.fireOrders.length; i++) {
             if (weapon.fireOrders[i].type == "selfIntercept") {
                 weapon.fireOrders.splice(i, 1);
                 break; //we are only remove one order
@@ -1471,18 +1473,18 @@ window.weaponManager = {
     },
 
 
-    canWeaponInterceptAtAll: function canWeaponInterceptAtAll(weapon){
+    canWeaponInterceptAtAll: function canWeaponInterceptAtAll(weapon) {
         var canIntercept = false;
-		var loadingTimeActual = Math.max(weapon.loadingtime,weapon.normalload);//Accelerator (or multi-mode) weapons may have loading time of 1, yet reach full potential only after longer charging
-   
-		if (weapon.canModesIntercept && (loadingTimeActual > 1)){ //Could weapon have alternative modes with Intercept Rating, and would need to use Self Intercept?
-			canIntercept = weapon.canWeaponInterceptAtAll(weapon);//Call to weapon function to check modes for intercept ratings.
-		}
+        var loadingTimeActual = Math.max(weapon.loadingtime, weapon.normalload);//Accelerator (or multi-mode) weapons may have loading time of 1, yet reach full potential only after longer charging
 
-    	return canIntercept;    	
+        if (weapon.canModesIntercept && (loadingTimeActual > 1)) { //Could weapon have alternative modes with Intercept Rating, and would need to use Self Intercept?
+            canIntercept = weapon.canWeaponInterceptAtAll(weapon);//Call to weapon function to check modes for intercept ratings.
+        }
+
+        return canIntercept;
     },
-	
-	
+
+
     //system is for called shot!
     targetShip: function targetShip(selectedShip, ship, system) {
         var debug = false;
@@ -1490,19 +1492,19 @@ window.weaponManager = {
         debug && console.log("weaponManager target ship", ship, system);
 
         if (shipManager.isDestroyed(selectedShip)) return;
-        if(ship.Huge > 0) return; //Do not allow targeting of large muti-hex terrain.
-        if(!selectedShip.flight && shipManager.isDisabled(selectedShip)) return;
+        if (ship.Huge > 0) return; //Do not allow targeting of large muti-hex terrain.
+        if (!selectedShip.flight && shipManager.isDisabled(selectedShip)) return;
 
-        
-        if(selectedShip.faction == "Torvalus Speculators"){
+
+        if (selectedShip.faction == "Torvalus Speculators") {
             var shadingField = shipManager.systems.getSystemByName(selectedShip, "ShadingField");
-            if(shadingField.shaded){
+            if (shadingField.shaded) {
                 var html = "You cannot fire weapons on a turn when your Shading Field was active.";
-                confirm.warning(html);   
+                confirm.warning(html);
                 return; //Shading Field active this turn, ship cannot fire.   If one Field active on fighters, all should be.
-            }          
+            }
         }
-        
+
         var blockedLosHex = weaponManager.getBlockedHexes();
         var loSBlocked = false;
         /*
@@ -1523,11 +1525,11 @@ window.weaponManager = {
             if (blockedLosHex && blockedLosHex.length > 0 && !loSBlocked) {
                 var sPosShooter = weaponManager.getFiringHex(selectedShip, weapon);
                 var sPosTarget = shipManager.getShipPosition(ship);
-                    
+
                 loSBlocked = mathlib.checkLineOfSight(sPosShooter, sPosTarget, blockedLosHex);
             }
 
-            if(loSBlocked && !weapon.ignoresLoS) continue;
+            if (loSBlocked && !weapon.ignoresLoS) continue;
 
             if (shipManager.systems.isDestroyed(selectedShip, weapon) || !weaponManager.isLoaded(weapon)) {
                 debug && console.log("Weapon destroyed or not loaded");
@@ -1546,19 +1548,19 @@ window.weaponManager = {
             if (!weapon.ballistic && gamedata.gamephase != 3 && (weapon.preFires && gamedata.gamephase != 5)) {
                 debug && console.log("trying to fire in wrong phase for normal weapon");
                 continue;
-            }    
+            }
 
             if (weapon.ballistic && system && (!weapon.overrideCallingRestrictions)) { //25.11.23 - Added last condition to allow Limpet Bore to make called shots as a ballsitic weapon.
                 debug && console.log("trying to call shot with ballistic");
                 continue;
             }
-            
-            if ((!system) && weapon.canOnlyCalledShot){ //25.11.23 - New statement to make sure Limpet Bore can ONLY make Called Shots.
+
+            if ((!system) && weapon.canOnlyCalledShot) { //25.11.23 - New statement to make sure Limpet Bore can ONLY make Called Shots.
                 debug && console.log("trying to target ship with weapon that can only target systems");
                 continue;
             }
 
-            if (!gamedata.isMyOrTeamOneShip(ship) && weapon.weaponClass == 'Support'){ //30.06.24 - New statement to stop players supporting enemies!
+            if (!gamedata.isMyOrTeamOneShip(ship) && weapon.weaponClass == 'Support') { //30.06.24 - New statement to stop players supporting enemies!
                 debug && console.log("trying to target enemy ship with a support weapon");
                 continue;
             }
@@ -1591,76 +1593,79 @@ window.weaponManager = {
             var type = 'normal';
             if (weapon.ballistic) {
                 type = 'ballistic';
-            }else if(gamedata.gamephase == 5){
-                type = 'prefiring';                
+            } else if (gamedata.gamephase == 5) {
+                type = 'prefiring';
             }
-			
-			if (weapon.reinforceAmount != null){
-				if(!weapon.checkReinforcement(selectedShip, ship)) return;
-			}
-			
+
+            if (weapon.reinforceAmount != null) {
+                if (!weapon.checkReinforcement(selectedShip, ship)) return;
+            }
+
             if (weaponManager.isOnWeaponArc(selectedShip, ship, weapon)) {
                 debug && console.log("is on arc");
                 if (weaponManager.checkIsInRange(selectedShip, ship, weapon)) {
                     debug && console.log("is in range");
-                    if(weapon.canSplitShots){
+                    if (weapon.canSplitShots) {
                         var fire = weapon.doMultipleFireOrders(selectedShip, ship, system);
                         if (!Array.isArray(fire)) fire = fire ? [fire] : []; // Ensure fire is an array or an empty one                       
-                        if (fire.length > 0) weapon.fireOrders.push(...fire);
+
+                        if (fire.length === 0) continue;
+
+                        weapon.fireOrders.push(...fire);
                         var finishedFiring = weapon.checkFinished(); //Split weapons should unselect after they've used all their shots.
-						if(finishedFiring){
+                        if (finishedFiring) {
                             toUnselect.push(weapon); //Normal method
-                        }else{
-						    splitTargeted.push(weapon); //Not finished, to be added to toUnselect aray at correct time below. 	  
-                        }     
-        				webglScene.customEvent('SystemDataChanged', { ship: ship, system: weapon });      				
-                    }else{
-	                    weaponManager.removeFiringOrder(selectedShip, weapon);
-	                    for (var s = 0; s < weapon.guns; s++) {
-	                        var fireid = selectedShip.id + "_" + weapon.id + "_" + (weapon.fireOrders.length + 1);
-	                        var calledid = -1;
+                        } else {
+                            splitTargeted.push(weapon); //Not finished, to be added to toUnselect aray at correct time below. 	  
+                        }
+                        webglScene.customEvent('SystemDataChanged', { ship: ship, system: weapon });
+                    } else {
+                        weaponManager.removeFiringOrder(selectedShip, weapon);
+                        for (var s = 0; s < weapon.guns; s++) {
+                            var fireid = selectedShip.id + "_" + weapon.id + "_" + (weapon.fireOrders.length + 1);
+                            var calledid = -1;
 
-	                        if (system) {
-	                            //check if weapon is eligible for called shot!
-	                            if (!weaponManager.canWeaponCall(weapon)) continue;
+                            if (system) {
+                                //check if weapon is eligible for called shot!
+                                if (!weaponManager.canWeaponCall(weapon)) continue;
 
-	                            // When the system is a subsystem, make all damage go through
-	                            // the parent.
-	                            while (system.parentId > 0) {
-	                                system = shipManager.systems.getSystem(ship, system.parentId);
-	                            }
+                                // When the system is a subsystem, make all damage go through
+                                // the parent.
+                                while (system.parentId > 0) {
+                                    system = shipManager.systems.getSystem(ship, system.parentId);
+                                }
 
-	                            calledid = system.id;
-	                        }
+                                calledid = system.id;
+                            }
 
-	                        var damageClass = weapon.data["Weapon type"].toLowerCase();
-	                        var chance = weaponManager.calculateHitChange(selectedShip, ship, weapon, calledid);
+                            var damageClass = weapon.data["Weapon type"].toLowerCase();
+                            var chance = weaponManager.calculateHitChange(selectedShip, ship, weapon, calledid);
 
-	                        if ((chance < 1)&&(!weapon.ballistic)) {//now ballistics can be launched when hit chance is 0 or less - important for Packet Torpedo!
-	                            //debug && console.log("Can't fire, change < 0");
-	                            continue;
-	                        }
+                            if ((chance < 1) && (!weapon.ballistic)) {//now ballistics can be launched when hit chance is 0 or less - important for Packet Torpedo!
+                                //debug && console.log("Can't fire, change < 0");
+                                continue;
+                            }
 
-	                        var fire = {
-	                            id: fireid,
-	                            type: type,
-	                            shooterid: selectedShip.id,
-	                            targetid: ship.id,
-	                            weaponid: weapon.id,
-	                            calledid: calledid,
-	                            turn: gamedata.turn,
-	                            firingMode: weapon.firingMode,
-	                            shots: weapon.defaultShots,
-	                            x: "null",
-	                            y: "null",
-	                            damageclass: damageClass,
-	                            chance: chance
-	                        };
-	                        weapon.fireOrders.push(fire);
-				            toUnselect.push(weapon);
-	                    }
-					}
-		    //Marcin Sawicki: moving this statement so only weapons actually declared are unselected
+                            var fire = {
+                                id: fireid,
+                                type: type,
+                                shooterid: selectedShip.id,
+                                targetid: ship.id,
+                                weaponid: weapon.id,
+                                calledid: calledid,
+                                turn: gamedata.turn,
+                                firingMode: weapon.firingMode,
+                                shots: weapon.defaultShots,
+                                x: "null",
+                                y: "null",
+                                damageclass: damageClass,
+                                chance: chance
+                            };
+                            weapon.fireOrders.push(fire);
+                            toUnselect.push(weapon);
+                        }
+                    }
+                    //Marcin Sawicki: moving this statement so only weapons actually declared are unselected
                     //toUnselect.push(weapon);
                 }
             }
@@ -1670,31 +1675,31 @@ window.weaponManager = {
             weaponManager.unSelectWeapon(selectedShip, toUnselect[i]);
         }
 
-		toUnselect.push(...splitTargeted); //We don't want to unselect, but want these weapons passed to onShipTargeted - DK 01.25
-        webglScene.customEvent('ShipTargeted', {shooter: selectedShip, target: ship, weapons: toUnselect})
-        
+        toUnselect.push(...splitTargeted); //We don't want to unselect, but want these weapons passed to onShipTargeted - DK 01.25
+        webglScene.customEvent('ShipTargeted', { shooter: selectedShip, target: ship, weapons: toUnselect })
+
         //Reset Movement UI after moment of targeting, to prevent cancel of last Combat Pivot AFTER locking target! - DK 10.24
-        if(gamedata.gamephase == 3 && selectedShip.flight){
+        if (gamedata.gamephase == 3 && selectedShip.flight) {
             webglScene.customEvent("ShipMovementChanged", { ship: ship }); //Redraw movement for Combat Pivots         	 	
         }
-		
-		//Add new warning for when people ignore tooltip and try to ram when they possibly shouldn't - DK 10/24
+
+        //Add new warning for when people ignore tooltip and try to ram when they possibly shouldn't - DK 10/24
         //No warning for ships designed to ram or if desperate rules apply!
-        if (weapon.isRammingAttack && !weapon.designedToRam) { 
+        if (weapon.isRammingAttack && !weapon.designedToRam) {
             // No warning for ships designed to ram or if desperate rules apply
-            if (gamedata.rules.desperate === undefined || 
+            if (gamedata.rules.desperate === undefined ||
                 (gamedata.rules.desperate !== ship.team && gamedata.rules.desperate !== -1)) {
-                if(!weaponManager.ramWarning){
+                if (!weaponManager.ramWarning) {
                     var html = "WARNING - Ramming Attacks should only be used in scenarios where they are specifically permitted.";
                     weaponManager.ramWarning = true;
-                    confirm.warning(html);                    
-                }    
+                    confirm.warning(html);
+                }
             }
         }
-		
+
     },
 
-	    
+
     checkIsInRange: function checkIsInRange(shooter, target, weapon) {
         var range = weapon.range;
         var distance = mathlib.getDistanceBetweenShipsInHex(shooter, target).toFixed(2);
@@ -1708,46 +1713,45 @@ window.weaponManager = {
         if (range === 0) return true;
 
         var jammer = shipManager.systems.getSystemByName(target, "jammer");
-		if (jammer || stealthSystem)
-		{
+        if (jammer || stealthSystem) {
 
-//			if (!shipManager.power.isOfflineOnTurn(target, jammer, (gamedata.turn-1) )){ //Amended this section to accommodate Hyach Stealth ships - DK 18.3.24
-				/*Improved/Advanced Sensors effect*/
-				var jammerValue = 0;
-					if (jammer && (!shipManager.power.isOfflineOnTurn(target, jammer, (gamedata.turn-1) ))) {//Jammer exists and was enabled last turn.
-						jammerValue = shipManager.systems.getOutput(target, jammer);
-					}
-				var stealthValue = 0;
-                var stealthDistance = 12; //Default for ships
-                if(shooter.flight) stealthDistance = 4; //Fighters
-                if(shooter.base) stealthDistance = 24; //Bases
+            //			if (!shipManager.power.isOfflineOnTurn(target, jammer, (gamedata.turn-1) )){ //Amended this section to accommodate Hyach Stealth ships - DK 18.3.24
+            /*Improved/Advanced Sensors effect*/
+            var jammerValue = 0;
+            if (jammer && (!shipManager.power.isOfflineOnTurn(target, jammer, (gamedata.turn - 1)))) {//Jammer exists and was enabled last turn.
+                jammerValue = shipManager.systems.getOutput(target, jammer);
+            }
+            var stealthValue = 0;
+            var stealthDistance = 12; //Default for ships
+            if (shooter.flight) stealthDistance = 4; //Fighters
+            if (shooter.base) stealthDistance = 24; //Bases
 
-				if (stealthSystem && (distance > stealthDistance) && target.shipSizeClass >= 0){
-				    stealthValue = shipManager.systems.getOutput(target, stealthSystem);
-				} 
-					
-				if(stealthValue > jammerValue) jammerValue = stealthValue;//larger value is used
-				
-				if (shipManager.hasSpecialAbility(shooter,"AdvancedSensors") || shipManager.systems.getSystemByName(shooter, "fighteradvsensors")) {
-					jammerValue = 0; //negated
-				} else if (shipManager.hasSpecialAbility(shooter,"ImprovedSensors") || shipManager.systems.getSystemByName(shooter, "fighterimprsensors")) {
-					jammerValue = jammerValue * 0.5; //halved
-				}
-				range = range / (1+jammerValue);
-				//range = range / (shipManager.systems.getOutput(target, jammer)+1);
-	//		}
-		}
+            if (stealthSystem && (distance > stealthDistance) && target.shipSizeClass >= 0) {
+                stealthValue = shipManager.systems.getOutput(target, stealthSystem);
+            }
+
+            if (stealthValue > jammerValue) jammerValue = stealthValue;//larger value is used
+
+            if (shipManager.hasSpecialAbility(shooter, "AdvancedSensors") || shipManager.systems.getSystemByName(shooter, "fighteradvsensors")) {
+                jammerValue = 0; //negated
+            } else if (shipManager.hasSpecialAbility(shooter, "ImprovedSensors") || shipManager.systems.getSystemByName(shooter, "fighterimprsensors")) {
+                jammerValue = jammerValue * 0.5; //halved
+            }
+            range = range / (1 + jammerValue);
+            //range = range / (shipManager.systems.getOutput(target, jammer)+1);
+            //		}
+        }
 
         return distance <= range;
     },
 
-	    
+
     targetHex: function targetHex(selectedShip, hexpos) {
         if (shipManager.isDestroyed(selectedShip)) return;
-        if(!selectedShip.flight && shipManager.isDisabled(selectedShip)) return;        
+        if (!selectedShip.flight && shipManager.isDisabled(selectedShip)) return;
 
         var toUnselect = Array();
-        var splitTargeted = [];        
+        var splitTargeted = [];
         for (var i in gamedata.selectedSystems) {
             var weapon = gamedata.selectedSystems[i];
 
@@ -1761,8 +1765,8 @@ window.weaponManager = {
             if (!weapon.hextarget) {
                 continue;
             }
-            
-            if (weapon.autoFireOnly) { 
+
+            if (weapon.autoFireOnly) {
                 continue;
             }
 
@@ -1771,7 +1775,7 @@ window.weaponManager = {
             }
             if (!weapon.ballistic && gamedata.gamephase != 3 && (weapon.preFires && gamedata.gamephase != 5)) { //
                 continue;
-            }          
+            }
 
             if (weaponManager.checkConflictingFireOrder(selectedShip, weapon)) {
                 continue;
@@ -1780,8 +1784,8 @@ window.weaponManager = {
             var type = 'normal';
             if (weapon.ballistic) {
                 type = 'ballistic';
-            }else if(gamedata.gamephase == 5){
-                type = 'prefiring';                
+            } else if (gamedata.gamephase == 5) {
+                type = 'prefiring';
             }
 
             if (weaponManager.isPosOnWeaponArc(selectedShip, hexpos, weapon)) {
@@ -1791,30 +1795,32 @@ window.weaponManager = {
                 var loSBlocked = false;
                 if (blockedLosHex && blockedLosHex.length > 0) {
                     var sPosShooter = weaponManager.getFiringHex(selectedShip, weapon);
-                    
+
                     loSBlocked = mathlib.checkLineOfSight(sPosShooter, hexpos, blockedLosHex);
                 }
 
-                if(loSBlocked && !weapon.ignoresLoS){
-                    confirm.error("No line of sight between firing ship and target hex.");	
+                if (loSBlocked && !weapon.ignoresLoS) {
+                    confirm.error("No line of sight between firing ship and target hex.");
                     return; //End work if no line of sight.
                 }
 
                 if (weapon.range === 0 || shipManager.getShipPosition(selectedShip).distanceTo(hexpos) <= weapon.range) {
-                    
-                    if(weapon.canSplitShots){
+
+                    if (weapon.canSplitShots) {
                         var fire = weapon.doMultipleHexFireOrders(selectedShip, hexpos);
                         if (!Array.isArray(fire)) fire = fire ? [fire] : []; // Ensure fire is an array or an empty one                       
-                        if (fire.length > 0) weapon.fireOrders.push(...fire);
+                        if (fire.length === 0) continue;
+                        
+                        weapon.fireOrders.push(...fire);
                         var finishedFiring = weapon.checkFinished(); //Split weapons should unselect after they've used all their shots.
-						if(finishedFiring){
+                        if (finishedFiring) {
                             toUnselect.push(weapon); //Normal method
-                        }else{
-						    splitTargeted.push(weapon); //Not finished, to be added to toUnselect aray at correct time below. 	  
-                        }                      
-        				webglScene.customEvent('SystemDataChanged', { ship: selectedShip, system: weapon });      				
-                    }else{                    
-                    
+                        } else {
+                            splitTargeted.push(weapon); //Not finished, to be added to toUnselect aray at correct time below. 	  
+                        }
+                        webglScene.customEvent('SystemDataChanged', { ship: selectedShip, system: weapon });
+                    } else {
+
                         weaponManager.removeFiringOrder(selectedShip, weapon);
                         for (var s = 0; s < weapon.guns; s++) {
 
@@ -1846,12 +1852,12 @@ window.weaponManager = {
             weaponManager.unSelectWeapon(selectedShip, toUnselect[i]);
         }
 
-		toUnselect.push(...splitTargeted); //We don't want to unselect, but want these weapons passed to onHexTargeted - DK 01.25        
-        webglScene.customEvent('HexTargeted', {shooter: selectedShip, hexagon: hexpos})
+        toUnselect.push(...splitTargeted); //We don't want to unselect, but want these weapons passed to onHexTargeted - DK 01.25        
+        webglScene.customEvent('HexTargeted', { shooter: selectedShip, hexagon: hexpos })
     },
 
     removeFiringOrder: function removeFiringOrder(ship, system) {
-        if(system.multiModeSplit){ //Divert to weapon function for these specific weapons.
+        if (system.multiModeSplit) { //Divert to weapon function for these specific weapons.
             system.removeAllMultiModeSplit(ship);
             return;
         }
@@ -1862,65 +1868,65 @@ window.weaponManager = {
         }
 
         webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
-        
-        if(gamedata.gamephase == 3 && ship.flight)	webglScene.customEvent("ShipMovementChanged", { ship: ship }); //Redraw movement for Combat Pivots       
+
+        if (gamedata.gamephase == 3 && ship.flight) webglScene.customEvent("ShipMovementChanged", { ship: ship }); //Redraw movement for Combat Pivots       
     },
 
-	removeFiringOrderMulti: function removeFiringOrderMulti(ship, system, target = null, button = false) {
+    removeFiringOrderMulti: function removeFiringOrderMulti(ship, system, target = null, button = false) {
 
-        if(system.multiModeSplit){ //Divert to weapon function for these specific weapons.
+        if (system.multiModeSplit) { //Divert to weapon function for these specific weapons.
             system.removeMultiModeSplit(ship, target);
             return;
         }
-	    if (weaponManager.hasFiringOrder(ship, system)) {	    	    	
-	        // Remove the fire order for targeted ship
-	        if (button) {
-	            // When a tooltip button is pressed on targeted enemy ship, check for a matching fireOrder and remove
-	            for (var i = system.fireOrders.length - 1; i >= 0; i--) {
-	                var fireOrder = system.fireOrders[i];
-	                // Check if the fire order's target matches the provided target
-	                if (fireOrder.targetid == target?.id) {
-						if (fireOrder.hitmod > 0) { //Slicers have cumulative hitmod on split shots, when a fireOrder is removed all orders are reclaculated.
-						    system.recalculateFireOrders(ship, i);
-						}	                	
-	                	
-	                    system.fireOrders.splice(i, 1); // Remove the specific fire order
-	                    system.maxVariableShots++; // Increment your counter
-	                    webglScene.customEvent('SplitOrderRemoved', { shooter: ship, target: target });
-	                    
-	                    break; // Exit the loop after removing one matching fire order and recalculating the rest (if required).
-	                }	                      
-	            }
-	        } else {
-	            // Default case: Remove only the LAST fire order. No need to adjust hitMod as it's the last order anyway.'
-	            var lastFireOrder = system.fireOrders[system.fireOrders.length - 1];
-	            if (lastFireOrder.weaponid == system.id && lastFireOrder.turn == gamedata.turn) {
-	                system.fireOrders.pop(); // Remove the last firing order
-	                system.maxVariableShots++; // Increment your counter
-	                var targetShip = gamedata.getShip(lastFireOrder.targetid);
-	                webglScene.customEvent('SplitOrderRemoved', { shooter: ship, target: targetShip });	                
-	            }	            
-	        }
-	    
-	    }
+        if (weaponManager.hasFiringOrder(ship, system)) {
+            // Remove the fire order for targeted ship
+            if (button) {
+                // When a tooltip button is pressed on targeted enemy ship, check for a matching fireOrder and remove
+                for (var i = system.fireOrders.length - 1; i >= 0; i--) {
+                    var fireOrder = system.fireOrders[i];
+                    // Check if the fire order's target matches the provided target
+                    if (fireOrder.targetid == target?.id) {
+                        if (fireOrder.hitmod > 0) { //Slicers have cumulative hitmod on split shots, when a fireOrder is removed all orders are reclaculated.
+                            system.recalculateFireOrders(ship, i);
+                        }
 
-	    // Trigger custom event to notify of system data changes - call ballisticIconContianer.consumeGamedata()
-	    webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+                        system.fireOrders.splice(i, 1); // Remove the specific fire order
+                        system.maxVariableShots++; // Increment your counter
+                        webglScene.customEvent('SplitOrderRemoved', { shooter: ship, target: target });
 
-	    // Handle redraw for ship movement in combat phase
-	    if (gamedata.gamephase == 3 && ship.flight) {
-	        webglScene.customEvent("ShipMovementChanged", { ship: ship });
-	    }
-	},
+                        break; // Exit the loop after removing one matching fire order and recalculating the rest (if required).
+                    }
+                }
+            } else {
+                // Default case: Remove only the LAST fire order. No need to adjust hitMod as it's the last order anyway.'
+                var lastFireOrder = system.fireOrders[system.fireOrders.length - 1];
+                if (lastFireOrder.weaponid == system.id && lastFireOrder.turn == gamedata.turn) {
+                    system.fireOrders.pop(); // Remove the last firing order
+                    system.maxVariableShots++; // Increment your counter
+                    var targetShip = gamedata.getShip(lastFireOrder.targetid);
+                    webglScene.customEvent('SplitOrderRemoved', { shooter: ship, target: targetShip });
+                }
+            }
 
-    
-	removeFiringOrderAll: function removeFiringOrderAll(ship, system) { //remove firing orders for ALL similar weapons that have them
-		if (!gamedata.isMyShip(ship)) {
-			return;
-		} 
-		if (shipManager.isDestroyed(ship) || shipManager.isAdrift(ship)) {
-			return;
-		}
+        }
+
+        // Trigger custom event to notify of system data changes - call ballisticIconContianer.consumeGamedata()
+        webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+
+        // Handle redraw for ship movement in combat phase
+        if (gamedata.gamephase == 3 && ship.flight) {
+            webglScene.customEvent("ShipMovementChanged", { ship: ship });
+        }
+    },
+
+
+    removeFiringOrderAll: function removeFiringOrderAll(ship, system) { //remove firing orders for ALL similar weapons that have them
+        if (!gamedata.isMyShip(ship)) {
+            return;
+        }
+        if (shipManager.isDestroyed(ship) || shipManager.isAdrift(ship)) {
+            return;
+        }
 
         var array = [];
         var systems = [];
@@ -1932,21 +1938,21 @@ window.weaponManager = {
         } else {
             systems = ship.systems.filter(system => system.weapon);
         }
-        
-        array = systems.filter(function(weapon) {return weapon.displayName === system.displayName});
-		
-		for (var i = 0; i < array.length; i++) {
-			var weapon = array[i];
-			if (!weaponManager.hasFiringOrder(ship, weapon)) continue;//does not have any declared firing orders
-			weaponManager.removeFiringOrder(ship,weapon);
-		}
-		
+
+        array = systems.filter(function (weapon) { return weapon.displayName === system.displayName });
+
+        for (var i = 0; i < array.length; i++) {
+            var weapon = array[i];
+            if (!weaponManager.hasFiringOrder(ship, weapon)) continue;//does not have any declared firing orders
+            weaponManager.removeFiringOrder(ship, weapon);
+        }
+
         webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
-        
-        if(gamedata.gamephase == 3 && ship.flight)	webglScene.customEvent("ShipMovementChanged", { ship: ship }); //Redraw movement for Combat Pivots         
+
+        if (gamedata.gamephase == 3 && ship.flight) webglScene.customEvent("ShipMovementChanged", { ship: ship }); //Redraw movement for Combat Pivots         
     },
 
-	    
+
     hasFiringOrder: function hasFiringOrder(ship, system) {
         for (var i in system.fireOrders) {
             var fire = system.fireOrders[i];
@@ -1965,10 +1971,10 @@ window.weaponManager = {
         for (var i in system.fireOrders) {
             var fire = system.fireOrders[i];
             if (fire.weaponid == system.id && fire.turn == gamedata.turn && !fire.rolled) {
-                if ((gamedata.gamephase == 1 || gamedata.gamephase == 3) && system.ballistic || gamedata.gamephase == 3 && !system.ballistic  || gamedata.gamephase == 5 && system.preFires) {
+                if ((gamedata.gamephase == 1 || gamedata.gamephase == 3) && system.ballistic || gamedata.gamephase == 3 && !system.ballistic || gamedata.gamephase == 5 && system.preFires) {
                     if (fire.firingMode == system.firingMode) {
                         return true;
-                    } 
+                    }
                 }
             }
         }
@@ -1980,16 +1986,16 @@ window.weaponManager = {
         for (var i in system.fireOrders) {
             var fire = system.fireOrders[i];
             if (fire.weaponid == system.id && fire.turn == gamedata.turn && !fire.rolled && fire.targetid == target.id) {
-                if ((gamedata.gamephase == 1 || gamedata.gamephase == 3) && system.ballistic || gamedata.gamephase == 3 && !system.ballistic  || gamedata.gamephase == 5 && system.preFires) {
-					return true;
+                if ((gamedata.gamephase == 1 || gamedata.gamephase == 3) && system.ballistic || gamedata.gamephase == 3 && !system.ballistic || gamedata.gamephase == 5 && system.preFires) {
+                    return true;
                 }
             }
         }
         return false;
     },
-	    
+
     shipHasFiringOrder: function shipHasFiringOrder(ship) {
-		for (var i in ship.systems) {
+        for (var i in ship.systems) {
             if (ship.flight) {
                 var fighter = ship.systems[i];
                 for (var a in fighter.systems) {
@@ -1999,21 +2005,21 @@ window.weaponManager = {
                 }
             } else {
                 var system = ship.systems[i];
-				var hasOrder = weaponManager.hasFiringOrder(ship, system);
-				if (hasOrder) return true;
+                var hasOrder = weaponManager.hasFiringOrder(ship, system);
+                if (hasOrder) return true;
             }
         }
-		return false;
+        return false;
     },
 
-	    
+
     canCombatTurn: function canCombatTurn(ship) {
         var fires = weaponManager.getAllFireOrders(ship);
         for (var i in fires) {
             var fire = fires[i];
             var weapon = shipManager.systems.getSystem(ship, fire.weaponid);
-			//Added Persistent effect check below, as was preventing cancel moves when non-ballistic Plasma Web generated a plasma cloud in Intial Orders - DK 09.24 
-            if (fire.turn == gamedata.turn && !fire.rolled && !weapon.ballistic && fire.notes != 'PersistentEffect') { 
+            //Added Persistent effect check below, as was preventing cancel moves when non-ballistic Plasma Web generated a plasma cloud in Intial Orders - DK 09.24 
+            if (fire.turn == gamedata.turn && !fire.rolled && !weapon.ballistic && fire.notes != 'PersistentEffect') {
                 return false;
             }
         }
@@ -2021,7 +2027,7 @@ window.weaponManager = {
         return true;
     },
 
-	    
+
     getFiringOrder: function getFiringOrder(ship, system) {
         var fires = weaponManager.getAllFireOrders(ship);
         for (var i in fires) {
@@ -2032,7 +2038,7 @@ window.weaponManager = {
         return false;
     },
 
-	    
+
     getAllFireOrders: function getAllFireOrders(ship) {
         var fires = new Array();
         for (var i in ship.systems) {
@@ -2052,7 +2058,7 @@ window.weaponManager = {
         return fires;
     },
 
-	    
+
     getAllBallisticsAgainst: function getAllBallisticsAgainst(ships, hex) {
         ships = [].concat(ships);
 
@@ -2069,7 +2075,7 @@ window.weaponManager = {
                 return targetingShip; // || targetingHex;
             }));
         }, []).filter(function (fire) {
-			return fire.type === "ballistic" || (fire.type === "normal" && fire.damageclass === "Sweeping"); //Ballistics and Shadow Slicers
+            return fire.type === "ballistic" || (fire.type === "normal" && fire.damageclass === "Sweeping"); //Ballistics and Shadow Slicers
         }).map(function (fireOrder) {
             var shooter = gamedata.getShip(fireOrder.shooterid);
             return {
@@ -2126,7 +2132,7 @@ window.weaponManager = {
                         damage: damage.damage,
                         damageclass: damage.damageclass,
                         destroyed: damage.destroyed,
-                        system: shipManager.systems.getSystem( gamedata.getShip(damage.shipid), damage.systemid)
+                        system: shipManager.systems.getSystem(gamedata.getShip(damage.shipid), damage.systemid)
                     };
                 }),
             };
@@ -2167,7 +2173,7 @@ window.weaponManager = {
                         damage: damage.damage,
                         damageclass: damage.damageclass,
                         destroyed: damage.destroyed,
-                        system: shipManager.systems.getSystem( gamedata.getShip(damage.shipid), damage.systemid)
+                        system: shipManager.systems.getSystem(gamedata.getShip(damage.shipid), damage.systemid)
                     };
                 }),
                 intercepts: weaponManager.getInterceptingFiringOrders(fireOrder.id).map(function (intercept) {
@@ -2193,7 +2199,7 @@ window.weaponManager = {
     getAllFireOrdersFromSystem: function getAllFireOrdersFromSystem(system) {
         if (!system.weapon) return;
 
-        var fires = system.fireOrders; 
+        var fires = system.fireOrders;
 
         return fires;
     },
@@ -2220,7 +2226,7 @@ window.weaponManager = {
         for (var i in fires) {
             var fire = fires[i];
             if (fire.weaponid == system.id && fire.turn == gamedata.turn && !fire.rolled) {
-                if (gamedata.gamephase == 1 && system.ballistic || gamedata.gamephase == 3 && !system.ballistic  || gamedata.gamephase == 5 && system.preFires) fire.shots += mod;
+                if (gamedata.gamephase == 1 && system.ballistic || gamedata.gamephase == 3 && !system.ballistic || gamedata.gamephase == 5 && system.preFires) fire.shots += mod;
             }
         }
 
@@ -2266,16 +2272,16 @@ window.weaponManager = {
 
     isLoaded: function isLoaded(weapon) {
         return weapon.loadingtime <= weapon.turnsloaded || weapon.loadingtime <= weapon.overloadturns;
-    },	
+    },
     isLoadedAlternate: function isLoaded(weapon) {
-		//check if ANY mode's loading time is satisfied
-		var shortestLoad = 999;
-		for (var currTime in weapon.loadingtimeArray){
-			if(shortestLoad > weapon.loadingtimeArray[currTime]){
-				shortestLoad = weapon.loadingtimeArray[currTime];
-			}
-		}
-        return shortestLoad <= weapon.turnsloaded ;
+        //check if ANY mode's loading time is satisfied
+        var shortestLoad = 999;
+        for (var currTime in weapon.loadingtimeArray) {
+            if (shortestLoad > weapon.loadingtimeArray[currTime]) {
+                shortestLoad = weapon.loadingtimeArray[currTime];
+            }
+        }
+        return shortestLoad <= weapon.turnsloaded;
     },
 
     getFireOrderById: function getFireOrderById(id) {
@@ -2295,7 +2301,7 @@ window.weaponManager = {
         return weapon;
     },
 
-	/*no longer used!
+    /*no longer used!
     canRam: function canRam(ship) {
         if (ship.hasOwnProperty("hunterkiller")) {}
     },
@@ -2318,39 +2324,39 @@ window.weaponManager = {
     doShortLogText: function doShortLogText(fire) {
         const shortLogTypes = [
             "HyperspaceJump", "JumpFailure", "SelfDestruct", "ContainmentBreach",
-            "Reactor", "Sabotage", "WreakHavoc", "Capture", "Rescue", "LimpetBore", 
+            "Reactor", "Sabotage", "WreakHavoc", "Capture", "Rescue", "LimpetBore",
             "MagazineExplosion", "NoHangar", "TerrainCollision", "HalfPhase", "TranverseCrit"
         ];
-    
+
         return shortLogTypes.includes(fire.damageclass);
     },
 
     getBlockedHexes: function getBlockedHexes() {
         var blockedHexes = [];
-    
+
         for (var i in gamedata.ships) {
             var ship = gamedata.ships[i];
-    
+
             if (ship.Enormous && !shipManager.isDestroyed(ship)) { // Only enormous or Huge units block LoS.
                 var position = shipManager.getShipPosition(ship);
                 blockedHexes.push(position);
-            
+
                 if (ship.Huge > 0) { // Occupies more than 1 hex
-                    var neighbourHexes = mathlib.getNeighbouringHexes(position, ship.Huge);                  
+                    var neighbourHexes = mathlib.getNeighbouringHexes(position, ship.Huge);
                     // Add surrounding hexes directly
                     blockedHexes.push(...neighbourHexes);
                 }
             }
         }
-    
+
         return blockedHexes;
     },
 
 
     getAllFireOrdersForAllShipsForTurn: function getAllFireOrdersForAllShipsForTurn(turn, type) {
         var fires = [];
-		var toReturn = false;
-		
+        var toReturn = false;
+
         gamedata.ships.forEach(function (ship) {
             fires = fires.concat(weaponManager.getAllFireOrders(ship));
         });
@@ -2360,21 +2366,21 @@ window.weaponManager = {
         });
 
         if (type) {
-            fires = fires.filter(function (fireOrder) { 
-				//attempt to show hex-targeted non-ballistics as well
-				toReturn = false;
-				if ( fireOrder.type == type) {
-					toReturn = true;
-				}
-				//show hex-targeted direct fire as ballistics, too
-				if ((!toReturn) && (type == 'ballistic') && (fireOrder.type == 'normal' || fireOrder.type == 'prefiring') && (fireOrder.targetid == -1)) {
-					toReturn = true;
-				}
-				//show split shot direct fire as ballistics, too
-				if ((!toReturn) && (type == 'ballistic') && (fireOrder.type == 'normal' || fireOrder.type == 'prefiring') && (fireOrder.damageclass == "Sweeping")) {
-					toReturn = true;
-				}				
-				return toReturn;
+            fires = fires.filter(function (fireOrder) {
+                //attempt to show hex-targeted non-ballistics as well
+                toReturn = false;
+                if (fireOrder.type == type) {
+                    toReturn = true;
+                }
+                //show hex-targeted direct fire as ballistics, too
+                if ((!toReturn) && (type == 'ballistic') && (fireOrder.type == 'normal' || fireOrder.type == 'prefiring') && (fireOrder.targetid == -1)) {
+                    toReturn = true;
+                }
+                //show split shot direct fire as ballistics, too
+                if ((!toReturn) && (type == 'ballistic') && (fireOrder.type == 'normal' || fireOrder.type == 'prefiring') && (fireOrder.damageclass == "Sweeping")) {
+                    toReturn = true;
+                }
+                return toReturn;
                 //return fireOrder.type == type;
             });
         }

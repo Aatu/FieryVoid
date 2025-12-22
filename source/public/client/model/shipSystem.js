@@ -300,6 +300,10 @@ Weapon.prototype.recalculateForIntercept = function (add) {
 	return;
 };
 
+Weapon.prototype.checkForWastedShots = function () {
+	return false;
+};
+
 var Ballistic = function Ballistic(json, ship) {
 	Weapon.call(this, json, ship);
 };

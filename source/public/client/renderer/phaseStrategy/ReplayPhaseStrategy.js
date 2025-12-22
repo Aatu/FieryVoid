@@ -33,7 +33,7 @@ window.ReplayPhaseStrategy = function () {
         this.shipIconContainer.consumeGamedata(this.gamedata);
         this.ewIconContainer.consumeGamedata(this.gamedata);
         this.shipWindowManager = shipWindowManager;
-
+        gamedata.replay = true;
         this.createReplayUI();
         
         startReplayOrRequestGamedata.call(this);
@@ -51,6 +51,7 @@ window.ReplayPhaseStrategy = function () {
 
     ReplayPhaseStrategy.prototype.deactivate = function () {
         PhaseStrategy.prototype.deactivate.call(this, true);
+        gamedata.replay = false;        
         document.getElementById('combatLogContainer').style.display = 'block'; //Show print Log buttons
         return this;
     };
@@ -358,7 +359,7 @@ function requestReplayGamedata() {
         },
         success: function (data) {
             gamedata.parseServerData(data);
-
+            gamedata.replay = true;
             // New section so ballisticIcons render during Replay
             this.allBallistics = weaponManager.getAllFireOrdersForAllShipsForTurn(
                 gamedata.turn,
