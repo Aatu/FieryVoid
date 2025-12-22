@@ -74,7 +74,8 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                 <li><a href="#descari">DESCARI COMMITTEES</a></li>
                 <li><a href="#drakh">THE DRAKH (Unofficial)</a></li>                
                 <li><a href="#llort">THE LLORT</a></li>
-                <li><a href="#markab">MARKAB THEOCRACY</a></li>               
+                <li><a href="#markab">MARKAB THEOCRACY</a></li>
+                <li><a href="#minbariProt">MINBARI PROTECTORATE</a></li>                               
                 <li><a href="#rogolon">ROGOLON DYNASTY</a></li>    
                 <li><a href="#smallraces">SMALL RACES</a></li>  
                 <li><a href="#usuuth">USUUTH COALITION</a></li>
@@ -218,16 +219,6 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             <li>White Stars may be used as ISA/Army of Light/White Star Fleet as well. Such a fleet is NOT tournament legal, and for good reason - but may be an interesting scenario piece (or challenge). 
             It's also far too strong to be used in regular pickup battles without asking you opponenet first!
             When used in this way, only White Stars (and any Combat Flyers they can carry) can be deployed.  Be warned though - in skilled hands such a fleet is simply overwhelming.</li>                                                                         
-
-
-    <h4 id="minbari" style="">MINBARI PROTECTORATE</h4>
-    <p>This is a part of the Minbari Federation, but consists of several non-Minbari members that are overseen by the Federation. They have a degree of autonomy, 
-    including providing local defense to their worlds.</p>
-    <p>The Protectorate uses older Minbari hulls with the notable difference being that units do not come equipped with the Jammer system. 
-    The Tinashi is their most modern hull along with a handful of Nials.</p>
-    <p>The Protectorate generally uses the Tishat medium fighter. Their fleet options are rather limited based on the number of hulls and lacking ways to bring fighters outside a Morshin carrier. 
-    Their one noted conflict is the Pseudo-War with the Imperial Star Legion raider group.</p>                                                                   
-    <a class="back-to-top" href="#top">↩ Back to Top</a>
 
 
     <h4 id="narn" style="">NARN REGIME</h4>
@@ -726,6 +717,15 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             You should also select the Religious Fervor for all your Markab ships, or none of them since it’s intended as a fleet-wide effect.</li>                                        
     <a class="back-to-top" href="#top">↩ Back to Top</a>   
 
+    <h4 id="minbariProt" style="">MINBARI PROTECTORATE</h4>
+    <p>This is a part of the Minbari Federation, but consists of several non-Minbari members that are overseen by the Federation. They have a degree of autonomy, 
+    including providing local defense to their worlds.</p>
+    <p>The Protectorate uses older Minbari hulls with the notable difference being that units do not come equipped with the Jammer system. 
+    The Tinashi is their most modern hull along with a handful of Nials.</p>
+    <p>The Protectorate generally uses the Tishat medium fighter. Their fleet options are rather limited based on the number of hulls and lacking ways to bring fighters outside a Morshin carrier. 
+    Their one noted conflict is the Pseudo-War with the Imperial Star Legion raider group.</p>                                                                   
+    <a class="back-to-top" href="#top">↩ Back to Top</a>
+        
 
     <h4 id="rogolons" style="">ROGOLON DYNASTY</h4>
     <p>No special rules or systems.  Notable mainly for the complete absence of anti-fighter weaponry on their ships.</p>                                             
@@ -861,11 +861,13 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         <li> Uninterceptable, armour-gnoring with a high FC and good range, it has very high damage output and can literally cut ships apart when fully charged.  
             It has a number of other traits too, some of which has been simplified for Fiery Void.</li>
         <li>The most powerful version of this weapon, the Heavy Slicer found only on Primordial ships uses Piercing damage as its default mode - which can even overkill at full power so that its damage potential isn’t wasted. 
-            The Raking damage mode is capped at 2-turns charge level.  The Heavy Slicer on the Shadow Battlecruiser has both forward and rear arcs, you can access these by using Firing Modes and can split your sweeping fire between both forward and rear arcs.</li>
-        <li>All other Slicers use Sweeping Mode as their default, which allows them to target as many different enemies as it has damage dice 
-            e.g. 8D10 would allow for 8 separate shots. Simply select the weapon and choose who you want to target in this mode, although each ship can only be targeted once (whilst fighter flights can be targeted multiple times). 
-            When splitting shots, the weapon will attract a cumulative -5% penalty for every additional shot after the first.</li>
-        <li>Slicers may spend 1d10 damage to gain -10 intercept, this is cumulative and suffers no degradation.  Click the 'Self-Intercept' green shield icon to assign each 1d10, and use ship tooltip to track defensive fire.";   .</li>                                                                 
+            The Raking damage mode is capped at 2-turns charge level.</li>
+        <li>All other Slicers use Sweeping Mode as their default, which allows them to target as many different enemies as it has damage dice, assigning a number of d10 target dice to each shot up to their maximum amount. Simply select the weapon and choose who you want to target in this mode, although each ship can only be targeted once (whilst fighter flights can be targeted multiple times). 
+            When splitting shots, the weapon will attract a cumulative -5% penalty for every additional shot after the first, as well as any modifier for defensive shots (see below).</li>
+        <li>Slicers may commit 1d10 damage dice to gain -10 intercept by clicking the 'Self-Intercept' green shield icon, each self-intercept dice committed in this way increases the number of different shots Slicer may intercept, as well as the total interception amount. 
+            If you choose to fire offensively, or select any amount self-intercept dice, but do not use all your available dice, then any unspent dice will be added to intercept so long as you committed as least ONE self-intercept dice.  You can use ship tooltip to track defensive fire and remaining dice.  
+            NOTE - Each self intercept dice commited counts as a 'shot' for the purposes of the -5% penalty detailed above.".</li>
+            <li>Slicer can make Called Shots against fighters without any penalty.</li>                                                                 
     <h5>Phasing Pulse Cannon</h5>
         <li>Pulse weapons that completely ignore any kind of shield or shield-like defense used by Younger races. 
             Note that EM shields, like those used on the White Star, are treated as Ancient even when used on Younger Race ships.</li>      
@@ -877,10 +879,10 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
     <h5>Primordial Variants</h5>
         <li>These are ships with Primordial and Additional Tendril enhancements added as standard, as neither of these options is available in FV.</li>      
     <h5>Primordial Battle Cruiser</h5>
-        <li>This ship differs from modern, quick-grown, Shadow vessels in a few ways, which have mandated some changes for FV:
+        <li>This ship differs from modern, quick-grown, Shadow vessels in a few ways:
             <ul class="circle-list">
-                <li>Most important is primary weapon firing arc: in tabletop it's split into a large forward arc and smaller aft arc. In FV such a split is not yet possible, so no aft firing arc is present - Instead the Forward arc has been widened to 180 degrees as compensation,</li>
-                <li>6 separate Energy Diffusers would have been difficult to set up on PRIMARY in a clear way - therefore they've been moved to appropriate sides hit charts adjusted.</li>                   
+                <li>Most important is primary weapon firing arc: The Heavy Slicer on the Shadow Battlecruiser has both forward and rear arcs, you can access these by using Firing Modes and can split your sweeping fire between both forward and rear arcs.</li>
+                <li>Six separate Energy Diffusers would have been difficult to set up on PRIMARY in a clear way - therefore in FV they've been moved to appropriate sides and hit charts adjusted.</li>                   
             </ul>            
         </li> 
     <h5>Destroyer</h5>

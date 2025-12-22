@@ -90,7 +90,7 @@ PointPulsar.prototype.doMultipleFireOrders = function (shooter, target, system) 
 
     for (var i in this.fireOrders){
         var thisOrder = this.fireOrders[i];
-        if(thisOrder.targetid !== target.id) return; //trying to hit a different target!
+        if(thisOrder.targetid !== target.id && thisOrder.type !== "selfIntercept") return; //trying to hit a different target!
     }
 
     var fireOrdersArray = []; // Store multiple fire orders
@@ -139,11 +139,41 @@ PointPulsar.prototype.doMultipleFireOrders = function (shooter, target, system) 
 PointPulsar.prototype.calculateSpecialHitChanceMod = function (shooter, target, calledid) {
 	var mod = 0;
     //    var fireOrder = this.fireOrders[i];
-        if(target.flight && calledid !== null){ //Has fireorder against fighter unit, and is a called shot
+        if(target.flight &&  calledid && calledid !== -1){ //Has fireorder against fighter unit, and is a called shot
             mod += 4; //CalledShotmod is -4, so just compensate for that.            
         }
 
 	return mod; 
+};
+
+PointPulsar.prototype.checkSelfInterceptSystem = function() {
+	if(this.fireOrders.length > 2) return false;
+    return true;
+};
+
+PointPulsar.prototype.doMultipleSelfIntercept = function(ship) {
+
+    for (var s = 0; s < 1; s++) {    
+        var fireid = ship.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
+        var fire = {
+        id: fireid,
+        type: "selfIntercept",
+        shooterid: ship.id,
+        targetid: ship.id,
+        weaponid: this.id,
+        calledid: -1,
+        turn: gamedata.turn,
+        firingMode: 1, //So that powerReqd display accurately always.
+        shots: 1,
+        x: "null",
+        y: "null",
+        addToDB: true,
+        damageclass: this.data["Weapon type"].toLowerCase()
+        };
+
+        this.fireOrders.push(fire);
+    } 
+    webglScene.customEvent('SystemDataChanged', { ship: ship, system: this });   
 };
 
 var PairedLightBoltCannon = function PairedLightBoltCannon(json, ship) {
