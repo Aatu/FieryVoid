@@ -7,7 +7,7 @@ class Darius extends HeavyCombatVessel{
         $this->pointCost = 500;
         $this->faction = "Centauri Republic";
         $this->phpclass = "Darius";
-        $this->imagePath = "img/ships/darkner.png";
+        $this->imagePath = "img/ships/Darius.png";
         $this->shipClass = "Darius Fast Attack Frigate";
 			$this->variantOf = "Darkner Fast Attack Frigate";
 			$this->occurence = "uncommon";

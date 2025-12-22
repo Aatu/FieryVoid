@@ -879,7 +879,6 @@ class SuperHeavyMolecularDisruptor extends Raking
             if ( $powerReq == 0 ) $powerReq = 10;
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
-		
 
 		/*Slicers ignore armor, except against hardened advanced armor*/
 		public function getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos=null){

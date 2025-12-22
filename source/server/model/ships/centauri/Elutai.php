@@ -7,7 +7,7 @@ class Elutai extends HeavyCombatVessel{
         $this->pointCost = 575;
         $this->faction = "Centauri Republic";
         $this->phpclass = "Elutai";
-        $this->imagePath = "img/ships/kutai.png";
+        $this->imagePath = "img/ships/Elutai.png";
         $this->shipClass = "Elutai Bombardment Destroyer";
 			$this->variantOf = "Kutai Gunship";
 			$this->occurence = "rare";

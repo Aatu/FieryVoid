@@ -7,7 +7,7 @@ class Mograte extends MediumShip{
 	$this->pointCost = 490;
 	$this->faction = "Centauri Republic";
         $this->phpclass = "Mograte";
-        $this->imagePath = "img/ships/mograth.png";
+        $this->imagePath = "img/ships/Mograte.png";
         $this->shipClass = "Mograte Skirmisher";
         $this->agile = true;
         $this->canvasSize = 100;

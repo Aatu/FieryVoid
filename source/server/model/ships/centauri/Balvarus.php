@@ -8,7 +8,7 @@ class Balvarus extends BaseShip{
 	$this->pointCost = 600;
 	$this->faction = "Centauri Republic";
         $this->phpclass = "Balvarus";
-        $this->imagePath = "img/ships/balvarin.png";
+        $this->imagePath = "img/ships/Balvarus.png";
         $this->shipClass = "Balvarus Assault Carrier";
     		$this->variantOf = "Balvarin Carrier";
     		$this->occurence = "uncommon";

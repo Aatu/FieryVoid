@@ -7,7 +7,7 @@ class Altarus extends HeavyCombatVessel{
         $this->pointCost = 420;
         $this->faction = "Centauri Republic";
         $this->phpclass = "Altarus";
-        $this->imagePath = "img/ships/altarian.png";
+        $this->imagePath = "img/ships/Altarus.png";
         $this->shipClass = "Altarus Assault Carrier";
 			$this->variantOf = "Altarian Destroyer";
 			$this->occurence = "uncommon";
