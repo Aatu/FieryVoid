@@ -7,11 +7,13 @@ class Darius extends HeavyCombatVessel{
         $this->pointCost = 500;
         $this->faction = "Centauri Republic";
         $this->phpclass = "Darius";
-        $this->imagePath = "img/ships/Darius.png";
+        $this->imagePath = "img/ships/Darius3.png";
         $this->shipClass = "Darius Fast Attack Frigate";
 			$this->variantOf = "Darkner Fast Attack Frigate";
-			$this->occurence = "uncommon";
+			$this->occurence = "rare";
 		$this->unofficial = true;
+
+	    $this->notes = 'Common variant if part of a House Valheru only force.';
         
         $this->forwardDefense = 13;
         $this->sideDefense = 13;

@@ -7,13 +7,15 @@ class Mograte extends MediumShip{
 	$this->pointCost = 490;
 	$this->faction = "Centauri Republic";
         $this->phpclass = "Mograte";
-        $this->imagePath = "img/ships/Mograte.png";
+        $this->imagePath = "img/ships/Mograte3.png";
         $this->shipClass = "Mograte Skirmisher";
         $this->agile = true;
         $this->canvasSize = 100;
-        $this->occurence = "uncommon";
+        $this->occurence = "rare";
         $this->variantOf = "Mograth Frigate";
 		$this->unofficial = true;
+
+	    $this->notes = 'Common variant if part of a House Valheru only force.';
         
         $this->forwardDefense = 12;
         $this->sideDefense = 12;

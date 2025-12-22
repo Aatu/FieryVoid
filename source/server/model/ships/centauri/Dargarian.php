@@ -16,6 +16,8 @@ class Dargarian extends BaseShip{
 		$this->customFighter = array("Rutarian"=>12);
         $this->limited = 10;
 		$this->unofficial = true;
+
+	    $this->notes = 'Common variant if part of a House Valheru only force.';
 	    
 	    $this->isd = 2258;
         

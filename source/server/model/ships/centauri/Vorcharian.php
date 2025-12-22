@@ -10,8 +10,10 @@ class Vorcharian extends HeavyCombatVessel{
         $this->imagePath = "img/ships/vorcharian.png";
         $this->shipClass = "Vorcharian Warship";
 			$this->variantOf = "Vorchan Warship";
-			$this->occurence = "uncommon";
+			$this->occurence = "rare";
  		$this->unofficial = true;
+
+	    $this->notes = 'Common variant if part of a House Valheru only force.';
        
         $this->forwardDefense = 12;
         $this->sideDefense = 14;

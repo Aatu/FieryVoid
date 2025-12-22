@@ -265,20 +265,13 @@
 
 
 //half a Heavy Array ;)
-    class HeavyParticleBeam extends HeavyArray{
+    class HeavyParticleBeam extends Particle{
         public $name = "HeavyParticleBeam";
         public $displayName = "Heavy Particle Beam";
-	    
-        public $guns = 1; //main difference - single mount
-	    
-	    /* inherited
         public $animation = "bolt";
-        public $animationColor = array(255, 163, 26);
-        public $trailColor = array(255, 163, 26);
-        public $animationExplosionScale = 0.25;
-        public $projectilespeed = 20;
-        public $animationWidth = 4;
-        public $trailLength = 15;
+        public $iconPath = "HeavyParticleBeam.png";        
+
+        public $guns = 1; //main difference - single mount
 
         public $intercept = 2;
 
@@ -287,19 +280,17 @@
 
         public $rangePenalty = 1;
         public $fireControl = array(2, 3, 4); // fighters, <mediums, <capitals
-	*/
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
-		if ( $maxhealth == 0 ) $maxhealth = 4;
-		if ( $powerReq == 0 ) $powerReq = 2;
+			if ( $maxhealth == 0 ) $maxhealth = 4;
+			if ( $powerReq == 0 ) $powerReq = 2;
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
-	    /* inherited
         public function getDamage($fireOrder){        return Dice::d(10, 2)+6;   }
         public function setMinDamage(){     $this->minDamage = 8 ;      }
         public function setMaxDamage(){     $this->maxDamage = 26 ;      }
-*/
+
     }
 
 

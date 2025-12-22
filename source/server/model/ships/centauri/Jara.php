@@ -10,10 +10,12 @@ class Jara extends MediumShip{
         $this->imagePath = "img/ships/jara.png";
         $this->shipClass = "Jara Skirmisher";
 			$this->variantOf = "Haven Patrol Boat";
-			$this->occurence = "common";
+			$this->occurence = "rare";
         $this->agile = true;
         $this->canvasSize = 100;
 		$this->unofficial = true;
+
+	    $this->notes = 'Common variant if part of a House Valheru only force.';
 	    
 	    $this->isd = 2150;
         

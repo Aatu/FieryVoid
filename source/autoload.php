@@ -3358,21 +3358,21 @@ spl_autoload_register(
 
 //				'kirishiacconqueror' => '/server/model/ships/kirishiac/kirishiacConqueror.php',
 //				'kirishiackingship' => '/server/model/ships/kirishiac/kirishiacKingship.php',
-				'kirishiaclordship' => '/server/model/ships/kirishiac/kirishiacLordship.php',
+//				'kirishiaclordship' => '/server/model/ships/kirishiac/kirishiacLordship.php',
 //				'kirishiacwarrior' => '/server/model/ships/kirishiac/kirishiacWarrior.php',
 //				'kirishiacwarriortest' => '/server/model/ships/kirishiac/kirishiacWarriorTest.php',
 
 
 						//Development systems
-						'ancientmattergun' => '/server/model/weapons/customDevelopment.php',
-						'ancientplasmagun' => '/server/model/weapons/customDevelopment.php',
-						'ancientparticlegun' => '/server/model/weapons/customDevelopment.php',
-						'ancientparticlecannon' => '/server/model/weapons/customDevelopment.php',
-						'ancientantimatter' => '/server/model/weapons/customDevelopment.php',
-						'ancientiontorpedo' => '/server/model/weapons/customDevelopment.php',
-						'ancientburstbeam' => '/server/model/weapons/customDevelopment.php',
-						'ancientmoleculardisruptor' => '/server/model/weapons/customDevelopment.php',
-						'ancientparticlecutter' => '/server/model/weapons/customDevelopment.php',
+//						'ancientmattergun' => '/server/model/weapons/customDevelopment.php',
+//						'ancientplasmagun' => '/server/model/weapons/customDevelopment.php',
+//						'ancientparticlegun' => '/server/model/weapons/customDevelopment.php',
+//						'ancientparticlecannon' => '/server/model/weapons/customDevelopment.php',
+//						'ancientantimatter' => '/server/model/weapons/customDevelopment.php',
+//						'ancientiontorpedo' => '/server/model/weapons/customDevelopment.php',
+//						'ancientburstbeam' => '/server/model/weapons/customDevelopment.php',
+//						'ancientmoleculardisruptor' => '/server/model/weapons/customDevelopment.php',
+//						'ancientparticlecutter' => '/server/model/weapons/customDevelopment.php',
 						'testgun' => '/server/model/weapons/customDevelopment.php',
 						'testgun2' => '/server/model/weapons/customDevelopment.php',
 						'plasmasiegecannon' => '/server/model/weapons/customDevelopment.php',
@@ -3451,11 +3451,13 @@ spl_autoload_register(
 						//Fred's custom Centauri
 						'altarus' => '/server/model/ships/centauri/Altarus.php',
 						'balvarus' => '/server/model/ships/centauri/Balvarus.php',
+						'corvax' => '/server/model/ships/centauri/Corvax.php',
 						'dargarian' => '/server/model/ships/centauri/Dargarian.php',
 						'darius' => '/server/model/ships/centauri/Darius.php',
 						'elutai' => '/server/model/ships/centauri/Elutai.php',
 						'jara' => '/server/model/ships/centauri/Jara.php',
                         'mograte' => '/server/model/ships/centauri/Mograte.php',
+                        'primo' => '/server/model/ships/centauri/Primo.php',
 						'vorcharian' => '/server/model/ships/centauri/Vorcharian.php',
 
                         //What If - Alternate design concepts
