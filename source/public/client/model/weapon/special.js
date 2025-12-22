@@ -744,7 +744,7 @@ ProximityLaserNew.prototype.doMultipleHexFireOrders = function (shooter, hexpos)
                 damageclass: 'Targeter', 
                 notes: "split"                
             };
-        this.fireOrders.push(fire);
+        fireOrdersArray.push(fire); // Store fire order
     }
 
     this.hextarget = false;

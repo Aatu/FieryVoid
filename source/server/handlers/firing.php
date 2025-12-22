@@ -438,12 +438,23 @@ class Firing
             $relativeBearing = $interceptingShip->getBearingOnUnit($shooter);
         }
 
-		
+        //New arc check that checks split arcs like Heavy Slicer as well = DK Dec 2025
+        if (!mathlib::isInAnyArc(
+            $relativeBearing,
+            $weapon->startArc,
+            $weapon->endArc,
+            $weapon->startArcArray ?? [],
+            $weapon->endArcArray ?? []
+        )) {
+            return false;
+        }		
 
+        /* //Old check for just main arcs
         if (!mathlib::isInArc($relativeBearing, $weapon->startArc, $weapon->endArc)) {
             //Debug::log("Fire is not on weapon arc\n");
             return false;
         }
+        */
 
 		//added for Vorlon weapons, also used for Interceptor missile.
 		if(!$weapon->canInterceptAtAll($gd, $fire, $shooter, $target, $interceptingShip, $firingweapon)) return false; //some weapons do have exotic rules whether they can intercept at all
