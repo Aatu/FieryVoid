@@ -74,6 +74,7 @@ spl_autoload_register(
                 'baescortcarrierlcv' => '/server/model/ships/beltalliance/baEscortCarrierLCV.php',
                 'baescortcarrierearly' => '/server/model/ships/beltalliance/baEscortCarrierEarly.php',
                 'baescortcarrierrefit' => '/server/model/ships/beltalliance/baEscortCarrierRefit.php',
+                'badeltavftr' => '/server/model/ships/beltalliance/baDeltaVFtr.php',
                 'baheavygunboat' => '/server/model/ships/beltalliance/baHeavyGunboat.php',
                 'baheavygunboatearly' => '/server/model/ships/beltalliance/baHeavyGunboatEarly.php',
                 'baheavygunboatpulse' => '/server/model/ships/beltalliance/baHeavyGunboatPulse.php',
