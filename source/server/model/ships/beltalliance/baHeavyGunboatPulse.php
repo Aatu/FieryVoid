@@ -7,7 +7,7 @@ class BAHeavyGunboatPulse extends HeavyCombatVessel{
         $this->pointCost = 490;
         $this->faction = "Belt Alliance";
         $this->phpclass = "BAHeavyGunboatPulse";
-        $this->imagePath = "img/ships/BAHeavyGunboat.png";
+        $this->imagePath = "img/ships/BAHeavyGunboat2.png";
         $this->shipClass = "BA Heavy Gunboat (Pulse)";
         $this->fighters = array("heavy"=>6); //external racks 
 

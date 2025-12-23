@@ -1178,9 +1178,9 @@ class AncientPlasmaArc extends PlasmaStream {
             return true;
         }  
 
-        public function getDamage($fireOrder){ return Dice::d(10, 2)+12;   }
-        public function setMinDamage(){     $this->minDamage = 14 ;      }
-        public function setMaxDamage(){     $this->maxDamage = 32 ;      }
+        public function getDamage($fireOrder){ return 30 ;  }
+        public function setMinDamage(){     $this->minDamage = 30 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 30 ;      }
 
     }//endof AncientParticleCutter
 

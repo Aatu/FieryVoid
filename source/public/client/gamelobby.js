@@ -179,74 +179,74 @@ window.gamedata = {
 			case 'Yolu Confederation':
 				powerRating = 'Tier 1; Minor Faction';
 				break;
-			case 'ZBSG Colonials':
+			case 'BSG Colonials':
 				powerRating = 'Tier 2; Custom faction';
 				break;
-			case 'ZEscalation Blood Sword Raiders':
+			case 'Escalation Wars Blood Sword Raiders':
 				powerRating = 'Tier 3; Custom faction';
 				break;
-			case 'ZEscalation Civilian':
+			case 'Escalation Wars Civilian':
 				powerRating = 'Tier Other, Custom';
 				break;
-			case 'ZEscalation Chouka Raider':
+			case 'Escalation Wars Chouka Raider':
 				powerRating = 'Tier 2; Not balanced, Custom faction';
 				break;
-			case 'ZEscalation Chouka Theocracy':
+			case 'Escalation Wars Chouka Theocracy':
 				powerRating = 'Tier 2; Custom faction';
 				break;
-			case 'ZEscalation Circasian Empire':
+			case 'Escalation Wars Circasian Empire':
 				powerRating = 'Tier 2; Custom faction';
 				break;
-			case 'ZEscalation Kastan Monarchy':
+			case 'Escalation Wars Kastan Monarchy':
 				powerRating = 'Tier 2; Custom faction';
 				break;
-			case "ZEscalation Sshel'ath Alliance":
+			case "Escalation Wars Sshel'ath Alliance":
 				powerRating = 'Tier 2; Custom faction';
 				break;
-			case 'ZNexus Brixadii Clans (early)':
+			case 'Nexus Brixadii Clans (early)':
 				powerRating = 'Tier 3; Custom faction';
 				break;
-			case 'ZNexus Brixadii Clans':
+			case 'Nexus Brixadii Clans':
 				powerRating = 'Tier 2; Custom faction';
 				break;
-			case 'ZNexus Support Units':
+			case 'Nexus Support Units':
 				powerRating = 'Tier 3; Designs for scenarios, Custom';
 				break;
-			case 'ZNexus Craytan Union (early)':
+			case 'Nexus Craytan Union (early)':
 				powerRating = 'Tier 3; Custom faction';
 				break;
-			case 'ZNexus Craytan Union':
+			case 'Nexus Craytan Union':
 				powerRating = 'Tier 2; Custom faction';
 				break;
-			case 'ZNexus Dalithorn Commonwealth (early)':
+			case 'Nexus Dalithorn Commonwealth (early)':
 				powerRating = 'Tier 3; Custom faction';
 				break;
-			case 'ZNexus Dalithorn Commonwealth':
+			case 'Nexus Dalithorn Commonwealth':
 				powerRating = 'Tier 2; Custom faction';
 				break;
-			case 'ZNexus Makar Federation (early)':
+			case 'Nexus Makar Federation (early)':
 				powerRating = 'Tier 3; Custom faction, Playtest';
 				break;
-			case 'ZNexus Makar Federation':
+			case 'Nexus Makar Federation':
 				powerRating = 'Tier 2; Custom faction, Playtest';
 				break;
-			case 'ZNexus Sal-bez Coalition (early)':
+			case 'Nexus Sal-bez Coalition (early)':
 				powerRating = 'Tier 3; Custom faction';
 				break;
-			case 'ZNexus Sal-bez Coalition':
+			case 'Nexus Sal-bez Coalition':
 				powerRating = 'Tier 2; Custom faction';
 				break;
-			case 'ZNexus Velrax Republic (Early)':
+			case 'Nexus Velrax Republic (early)':
 				powerRating = 'Tier 3; Custom faction';
 				break;
-			case 'ZNexus Velrax Republic':
+			case 'Nexus Velrax Republic':
 				powerRating = 'Tier 2; Custom faction';
 				break;
-			case 'ZPlaytest 12 Colonies of Kobol':
+			case '12 Colonies of Kobol':
 				powerRating = 'Tier 1; Custom faction, Playtest';
 				break;
-			case 'ZPlaytest BSG Cylons':
-				powerRating = 'Tier 2; Custom faction';
+			case 'BSG Cylons':
+				powerRating = 'Tier 2; Custom faction, Playtest';
 				break;
 			case 'ZStarTrek (TOS) Federation':
 				powerRating = 'Tier 2; Custom faction';
@@ -260,13 +260,13 @@ window.gamedata = {
 			case 'ZStarWars':
 				powerRating = 'Tier 2, Custom faction';
 				break;
-			case 'ZStarWars Clone Wars (Playtest)':
-				powerRating = 'Tier 2, Custom faction';
+			case 'Star Wars Clone Wars':
+				powerRating = 'Tier 2, Custom faction, Playtest';
 				break;
 			case 'ZTrek Playtest Other Factions':
 				powerRating = 'Tier 2; Custom faction';
 				break;
-			case 'ZWhatIF':
+			case 'What If':
 				powerRating = 'Tier 1; Custom faction';
 				break;
 			default:
