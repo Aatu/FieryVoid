@@ -7,7 +7,7 @@ class BACloseEscortEarly extends MediumShip{
         $this->pointCost = 240;
         $this->faction = "Belt Alliance";
         $this->phpclass = "BACloseEscortEarly";
-        $this->imagePath = "img/ships/BACloseEscort.png";
+        $this->imagePath = "img/ships/BACloseEscort2.png";
         $this->shipClass = "BA Close Escort (early)";
 			$this->occurence = "common";
 			$this->variantOf = 'BA Close Escort';

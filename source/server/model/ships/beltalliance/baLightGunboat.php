@@ -7,7 +7,7 @@ class BALightGunboat extends LCV{
         $this->pointCost = 200;
         $this->faction = "Belt Alliance";
         $this->phpclass = "BALightGunboat";
-        $this->imagePath = "img/ships/BALightGunboat.png";
+        $this->imagePath = "img/ships/BALightGunboat2.png";
         $this->shipClass = "BA Light Gunboat";
         $this->occurence = "common";
 

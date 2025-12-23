@@ -7,7 +7,7 @@ class BASurveyShip extends BaseShip{
         $this->pointCost = 400;
         $this->faction = "Belt Alliance";
         $this->phpclass = "BASurveyShip";
-        $this->imagePath = "img/ships/BASurveyShip.png";
+        $this->imagePath = "img/ships/BASurveyShip2.png";
         $this->shipClass = "BA Survey Ship";
         $this->shipSizeClass = 3;
 

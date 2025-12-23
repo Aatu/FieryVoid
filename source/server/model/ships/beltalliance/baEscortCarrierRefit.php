@@ -7,7 +7,7 @@ class BAEscortCarrierRefit extends HeavyCombatVessel{
         $this->pointCost = 320;
         $this->faction = "Belt Alliance";
         $this->phpclass = "BAEscortCarrierRefit";
-        $this->imagePath = "img/ships/BAEscortCarrier.png";
+        $this->imagePath = "img/ships/BAEscortCarrier2.png";
         $this->shipClass = "BA Escort Carrier (refit)";
         $this->fighters = array("normal"=>12, "heavy"=>12); //"heavy" are external racks
 
