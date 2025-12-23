@@ -7,7 +7,7 @@ class BAScoutCarrier extends BaseShip{
         $this->pointCost = 430;
         $this->faction = "Belt Alliance";
         $this->phpclass = "BAScoutCarrier";
-        $this->imagePath = "img/ships/BASurveyShip.png";
+        $this->imagePath = "img/ships/BASurveyShip2.png";
         $this->shipClass = "BA Scout Carrier";
         $this->shipSizeClass = 3;
         $this->fighters = array("medium"=>12);

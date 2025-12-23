@@ -7,7 +7,7 @@ class BAEscortCarrierLCV extends HeavyCombatVessel{
         $this->pointCost = 350;
         $this->faction = "Belt Alliance";
         $this->phpclass = "BAEscortCarrierLCV";
-        $this->imagePath = "img/ships/BAEscortCarrier.png";
+        $this->imagePath = "img/ships/BAEscortCarrier2.png";
         $this->shipClass = "BA Escort LCV Carrier";
 			$this->variantOf = "BA Escort Carrier";
         $this->occurence = "common";

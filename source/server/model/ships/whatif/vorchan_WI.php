@@ -5,7 +5,7 @@ class Vorchan_WI extends HeavyCombatVesselLeftRight{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 525;
-	$this->faction = "ZWhatIF";
+	$this->faction = "What If";
         $this->phpclass = "Vorchan_WI";
         $this->imagePath = "img/ships/vorchan.png";
         $this->shipClass = "Centauri Vorchan Warship";

@@ -8,7 +8,7 @@ class BASentinelFtr extends FighterFlight{
 	$this->faction = "Belt Alliance";
     $this->phpclass = "BASentinelFtr";
     $this->shipClass = "BA Sentinel Fighters";
-	$this->imagePath = "img/ships/deltaV.png";
+	$this->imagePath = "img/ships/BASentinel.png";
 
         $this->isd = 2261;
         
@@ -33,8 +33,8 @@ class BASentinelFtr extends FighterFlight{
 		$armour = array(2, 1, 1, 1);
 		$fighter = new Fighter("Sentinel", $armour, 8, $this->id);
 		$fighter->displayName = "Sentinel";
-		$fighter->imagePath = "img/ships/deltaV.png";
-		$fighter->iconPath = "img/ships/deltaV_large.png";
+		$fighter->imagePath = "img/ships/BASentinel.png";
+		$fighter->iconPath = "img/ships/BASentinel_Large.png";
 			
             $frontGun = new PairedParticleGun(330, 30, 2);
             $frontGun->displayName = "Light Particle Gun";

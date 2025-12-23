@@ -7,7 +7,7 @@ class BAMediumGunboatPulse extends MediumShip{
         $this->pointCost = 385;
         $this->faction = "Belt Alliance";
         $this->phpclass = "BAMediumGunboatPulse";
-        $this->imagePath = "img/ships/BAMediumGunboat.png";
+        $this->imagePath = "img/ships/BAMediumGunboat2.png";
         $this->shipClass = "BA Medium Gunboat (Pulse)";
 
         $this->occurence = "common";
