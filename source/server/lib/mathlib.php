@@ -140,7 +140,34 @@ class Mathlib{
     
         
     }
-    
+
+    public static function isInAnyArc($direction, $start, $end, array $startArcArray = [], array $endArcArray = []){
+        // First: check the primary arc
+        if (self::isInArc($direction, $start, $end)) {
+            return true;
+        }
+
+        // If either array is empty, nothing more to check
+        if (empty($startArcArray) || empty($endArcArray)) {
+            return false;
+        }
+
+        // Iterate over matching arc pairs
+        foreach ($startArcArray as $key => $startArc) {
+
+            // Skip if no matching end arc
+            if (!isset($endArcArray[$key])) {
+                continue;
+            }
+
+            if (self::isInArc($direction, $startArc, $endArcArray[$key])) {
+                return true;
+            }
+        }
+
+        return false;
+    }    
+
     public static function getPointInDirection( $r, $a, $cx, $cy){
             
         $x = $cx + $r * cos($a* pi() / 180);
