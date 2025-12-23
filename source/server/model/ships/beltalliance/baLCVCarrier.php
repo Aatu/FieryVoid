@@ -7,7 +7,7 @@ class BALCVCarrier extends BaseShip{
         $this->pointCost = 320;
         $this->faction = "Belt Alliance";
         $this->phpclass = "BALCVCarrier";
-        $this->imagePath = "img/ships/BASurveyShip.png";
+        $this->imagePath = "img/ships/BALCVCarrier2.png";
         $this->shipClass = "BA LCV Carrier";
         $this->shipSizeClass = 3;
         $this->fighters = array("medium"=>12, "LCVs"=>4); //part of cargo bays dropped for LCV rails, and also no ElInt Sensors (and a bit weaker Sensors, too)

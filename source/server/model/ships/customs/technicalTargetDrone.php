@@ -6,7 +6,7 @@ class technicalTargetDrone extends VreeCapital
 	function __construct($id, $userid, $name,  $slot)
 	{
 		parent::__construct($id, $userid, $name,  $slot);
-		$this->pointCost = 10;
+		$this->pointCost = 5;
 		$this->faction = "Custom Ships";
 		$this->phpclass = "technicalTargetDrone";
 		$this->imagePath = "img/ships/kirishiacLordship2.png";
@@ -42,11 +42,21 @@ class technicalTargetDrone extends VreeCapital
         $this->addPrimarySystem(new GraviticThruster(5, 16, 0, 9, 2));  
 		$this->addPrimarySystem(new GraviticThruster(5, 16, 0, 9, 4));	
 
-        $this->addFrontSystem(new HypergravitonBeam(5, 20, 12, 300, 60));	
-        $this->addFrontSystem(new MedAntigravityBeam(5, 6, 2, 210, 30));
-        $this->addFrontSystem(new AntigravityBeam(5, 6, 3, 270, 90));
-        $this->addFrontSystem(new MedAntigravityBeam(5, 6, 2, 330, 150));
-        $this->addFrontSystem(new UltraMatterCannon(5, 13, 7, 300, 60));
+        $this->addFrontSystem(new AncientMatterGun(5, 10, 5, 300, 60));	
+        $this->addFrontSystem(new AncientPlasmaGun(5, 10, 5, 300, 60));	
+        $this->addFrontSystem(new AncientParticleGun(5, 10, 5, 300, 60));	
+        $this->addFrontSystem(new AncientParticleCannon(5, 10, 5, 300, 60));	
+        $this->addFrontSystem(new AncientAntimatter(5, 10, 5, 300, 60));	
+        $this->addFrontSystem(new AncientIonTorpedo(5, 10, 5, 300, 60));	
+        $this->addFrontSystem(new AncientBurstBeam(5, 10, 5, 300, 60));	
+        $this->addFrontSystem(new AncientMolecularDisruptor(5, 10, 5, 300, 60));	
+        $this->addFrontSystem(new AncientShockCannon(5, 10, 5, 300, 60));	
+        $this->addFrontSystem(new AncientParticleCutter(5, 10, 5, 300, 60));	
+        $this->addFrontSystem(new AncientPlasmaArc(5, 10, 5, 300, 60));	
+        $this->addFrontSystem(new HeavyParticleBeam(5, 10, 5, 300, 60));	
+        $this->addFrontSystem(new RailGun(4, 9, 6, 0, 360));
+        $this->addFrontSystem(new PlasmaWaveTorpedo(4, 7, 4, 300, 60));
+        $this->addFrontSystem(new MolecularSlicerBeamL(5, 0, 0, 300, 60));	
 
 		$structArmor = 0;
 		$structHP = 50;

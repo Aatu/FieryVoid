@@ -7,7 +7,7 @@ class BAEscortCarrierEarly extends HeavyCombatVessel{
         $this->pointCost = 340;
         $this->faction = "Belt Alliance";
         $this->phpclass = "BAEscortCarrierEarly";
-        $this->imagePath = "img/ships/BAEscortCarrier.png";
+        $this->imagePath = "img/ships/BAEscortCarrier2.png";
         $this->shipClass = "BA Escort Carrier (early)";
 			$this->occurence = "common";
 			$this->variantOf = 'BA Escort Carrier';
