@@ -7,13 +7,15 @@ class Altarus extends HeavyCombatVessel{
         $this->pointCost = 420;
         $this->faction = "Centauri Republic";
         $this->phpclass = "Altarus";
-        $this->imagePath = "img/ships/altarian.png";
+        $this->imagePath = "img/ships/Altarus4.png";
         $this->shipClass = "Altarus Assault Carrier";
 			$this->variantOf = "Altarian Destroyer";
-			$this->occurence = "uncommon";
+			$this->occurence = "rare";
         $this->isd = 2150;
         $this->fighters = array("medium"=>12, "LCVs"=>2); //12 in main hangar, 1 LCV per rail
 		$this->unofficial = true;
+
+	    $this->notes = 'Common variant if part of a House Valheru only force.';
         
         $this->forwardDefense = 14;
         $this->sideDefense = 15;

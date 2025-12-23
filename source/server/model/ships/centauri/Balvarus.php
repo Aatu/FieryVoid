@@ -8,14 +8,16 @@ class Balvarus extends BaseShip{
 	$this->pointCost = 600;
 	$this->faction = "Centauri Republic";
         $this->phpclass = "Balvarus";
-        $this->imagePath = "img/ships/balvarin.png";
+        $this->imagePath = "img/ships/Balvarus3.png";
         $this->shipClass = "Balvarus Assault Carrier";
-			$this->variantOf = "Balvarin Carrier";
-			$this->occurence = "uncommon";
+    		$this->variantOf = "Balvarin Carrier";
+    		$this->occurence = "rare";
         $this->shipSizeClass = 3;
         $this->fighters = array("medium"=>24, "LCVs"=>4); //24 in main hangar, 2 LCVs per rail
 		$this->unofficial = true;
 	    $this->isd = 2205;
+
+	    $this->notes = 'Common variant if part of a House Valheru only force.';
 
         $this->forwardDefense = 16;
         $this->sideDefense = 16;

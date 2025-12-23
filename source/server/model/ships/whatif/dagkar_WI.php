@@ -5,7 +5,7 @@ class Dagkar_WI extends MediumShip{
         parent::__construct($id, $userid, $name,  $movement);
         
         $this->pointCost = 525;
-        $this->faction = "ZWhatIF";
+        $this->faction = "What If";
         $this->phpclass = "Dagkar_WI";
         $this->imagePath = "img/ships/dagkar.png";
         $this->shipClass = "Narn Dag'Kar Torpedo Frigate";

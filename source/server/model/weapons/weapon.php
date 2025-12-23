@@ -1974,8 +1974,13 @@ full Advanced Armor effects (by rules) for reference:
             //armor may be ignored for some reason... usually because of Raking mode :)
             $armourIgnored = 0;
             if (isset($fireOrder->armorIgnored[$system->id])) {
-                $armourIgnored = $fireOrder->armorIgnored[$system->id];
-                $armour = $armour - $armourIgnored;
+                if ($system->hardAdvancedArmor){
+					$armourEffective = floor($system->armour/2);
+					$armour = max(0,$armourEffective-$armourIgnored);
+                }else{
+                    $armourIgnored = $fireOrder->armorIgnored[$system->id];
+                    $armour = $armour - $armourIgnored;
+                }
             }
             $armour = max($armour, 0);
 
