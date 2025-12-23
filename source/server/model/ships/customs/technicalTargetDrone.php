@@ -42,17 +42,19 @@ class technicalTargetDrone extends VreeCapital
         $this->addPrimarySystem(new GraviticThruster(5, 16, 0, 9, 2));  
 		$this->addPrimarySystem(new GraviticThruster(5, 16, 0, 9, 4));	
 
-//        $this->addFrontSystem(new AncientMatterGun(5, 10, 5, 300, 60));	
-//        $this->addFrontSystem(new AncientPlasmaGun(5, 10, 5, 300, 60));	
-//        $this->addFrontSystem(new AncientParticleGun(5, 10, 5, 300, 60));	
-//        $this->addFrontSystem(new AncientParticleCannon(5, 10, 5, 300, 60));	
-//        $this->addFrontSystem(new AncientAntimatter(5, 10, 5, 300, 60));	
-//        $this->addFrontSystem(new AncientIonTorpedo(5, 10, 5, 300, 60));	
-//        $this->addFrontSystem(new AncientBurstBeam(5, 10, 5, 300, 60));	
-//        $this->addFrontSystem(new AncientMolecularDisruptor(5, 10, 5, 300, 60));	
-//        $this->addFrontSystem(new AncientShockCannon(5, 10, 5, 300, 60));	
-//        $this->addFrontSystem(new AncientParticleCutter(5, 10, 5, 300, 60));	
-//        $this->addFrontSystem(new AncientPlasmaArc(5, 10, 5, 300, 60));	
+        $this->addFrontSystem(new AncientMatterGun(5, 10, 5, 300, 60));	
+        $this->addFrontSystem(new AncientPlasmaGun(5, 10, 5, 300, 60));	
+        $this->addFrontSystem(new AncientParticleGun(5, 10, 5, 300, 60));	
+        $this->addFrontSystem(new AncientParticleCannon(5, 10, 5, 300, 60));	
+        $this->addFrontSystem(new AncientAntimatter(5, 10, 5, 300, 60));	
+        $this->addFrontSystem(new AncientIonTorpedo(5, 10, 5, 300, 60));	
+        $this->addFrontSystem(new AncientBurstBeam(5, 10, 5, 300, 60));	
+        $this->addFrontSystem(new AncientMolecularDisruptor(5, 10, 5, 300, 60));	
+        $this->addFrontSystem(new AncientShockCannon(5, 10, 5, 300, 60));	
+        $this->addFrontSystem(new AncientParticleCutter(5, 10, 5, 300, 60));	
+        $this->addFrontSystem(new AncientPlasmaArc(5, 10, 5, 300, 60));	
+        $this->addFrontSystem(new HeavyParticleBeam(5, 10, 5, 300, 60));	
+        $this->addFrontSystem(new RailGun(4, 9, 6, 0, 360));
         $this->addFrontSystem(new PlasmaWaveTorpedo(4, 7, 4, 300, 60));
         $this->addFrontSystem(new MolecularSlicerBeamL(5, 0, 0, 300, 60));	
 
