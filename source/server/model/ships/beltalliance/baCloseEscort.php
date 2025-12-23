@@ -7,7 +7,7 @@ class BACloseEscort extends MediumShip{
         $this->pointCost = 250;
         $this->faction = "Belt Alliance";
         $this->phpclass = "BACloseEscort";
-        $this->imagePath = "img/ships/BACloseEscort.png";
+        $this->imagePath = "img/ships/BACloseEscort2.png";
         $this->shipClass = "BA Close Escort";
 
         $this->isd = 2235;
