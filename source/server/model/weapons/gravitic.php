@@ -1162,57 +1162,36 @@ class GravityNet extends Weapon implements SpecialAbility{
     
     protected function beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata){   
         if($fireOrder->damageclass == 'gravitic'){ //should only process the actually grav net first fireOrder (pertains to actual shot) and then get gravNetPos from 2nd hexTarget order
-				$allFireOrders = $this->getFireOrders($gamedata->turn);
-                $gravNetMovePosOrder = null; //var to hold grav net move position order, ie the hexTarget order.
-                $gravNetMovePos = null; //var to hold grav net move target hex.
-
-                foreach($allFireOrders as $fireOrderCheck){ //make sure gravNetMovePosOrder is correct order in allFireOrders
-					if ($fireOrderCheck->damageclass == 'gravNetMoveHex'){
-						$gravNetMovePosOrder = $fireOrderCheck;					
-						break;
-                    }
-                } 
-
-                $xpos =$gravNetMovePosOrder->x; //get x coord for movement
-                $ypos = $gravNetMovePosOrder->y; //get y coord for movement
-                $orderID = $gravNetMovePosOrder->id;
-                //Debug::log(json_encode($xpos, true));
-
-                $lastMove = $target->getLastMovement(); //get target ship's last movement to ensure heading, speed and facing are conserved. 
-                //Create new movement order to target ship to grav net target hex.
-                //$id, $type, OffsetCoordinate $position, $xOffset, $yOffset, $speed, $heading, $facing, $pre, $turn, $value, $at_initiative)
-                $gravNetMove = new MovementOrder(null, "prefire", new OffsetCoordinate($xpos, $ypos), 0, 0, $lastMove->speed, $lastMove->heading, $lastMove->facing, false, $gamedata->turn, $orderID, 0);
-
-                //Add shifted movement order to database
-                Manager::insertSingleMovement($gamedata->id, $target->id, $gravNetMove);
+		    $this->doGravityNetMove($target, $gamedata);
         }     
     }
 
-    /*
-    protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
-        if($ship->Enormous) return; //No effect on Enormous units
+    private function doGravityNetMove($target, $gamedata){
+        $allFireOrders = $this->getFireOrders($gamedata->turn);
+        $gravNetMovePosOrder = null; //var to hold grav net move position order, ie the hexTarget order.
+        $gravNetMovePos = null; //var to hold grav net move target hex.
 
-		$lastMove = $ship->getLastMovement();
-        $newFacing = $lastMove->facing; //Initialise as current facing.
-        $newHeading = $lastMove->heading; //Initialise as current heading. 
+            foreach($allFireOrders as $fireOrderCheck){ //make sure gravNetMovePosOrder is correct order in allFireOrders
+                if ($fireOrderCheck->damageclass == 'gravNetMoveHex'){
+                    $gravNetMovePosOrder = $fireOrderCheck;					
+                    break;
+                }
+            } 
 
-        if($fireOrder->firingMode == 1){
-            $newFacing = MathLib::addToHexFacing($lastMove->facing , 1);
-            $newHeading = MathLib::addToHexFacing($lastMove->heading , 1);
-            $type = "turnRight";
-        }else{
-            $newFacing = MathLib::addToHexFacing($lastMove->facing , -1);
-            $newHeading = MathLib::addToHexFacing($lastMove->heading , -1);
-            $type = "turnLeft";                        
-        }
-		
-		//Create new movement order for target.
-        $shift = new MovementOrder(null, $type, new OffsetCoordinate($lastMove->position->q, $lastMove->position->r), 0, 0, $lastMove->speed, $newHeading, $newFacing, false, $gamedata->turn, 0, 0);
+        $xpos = $gravNetMovePosOrder->x; //get x coord for movement
+        $ypos = $gravNetMovePosOrder->y; //get y coord for movement
+        $orderID = $gravNetMovePosOrder->id;
+        //Debug::log(json_encode($xpos, true));
 
-		//Add shifted movement order to database
-		Manager::insertSingleMovement($gamedata->id, $ship->id, $shift);	
-    }   
-        */ 
+        $lastMove = $target->getLastMovement(); //get target ship's last movement to ensure heading, speed and facing are conserved. 
+        //Create new movement order to target ship to grav net target hex.
+        //$id, $type, OffsetCoordinate $position, $xOffset, $yOffset, $speed, $heading, $facing, $pre, $turn, $value, $at_initiative)
+        $gravNetMove = new MovementOrder(null, "prefire", new OffsetCoordinate($xpos, $ypos), 0, 0, $lastMove->speed, $lastMove->heading, $lastMove->facing, false, $gamedata->turn, $orderID, 0);
+
+        //Add shifted movement order to database
+        Manager::insertSingleMovement($gamedata->id, $target->id, $gravNetMove);
+
+    }
 
 	public function getDamage($fireOrder){       return 0;   } //no actual damage
 	public function setMinDamage(){     $this->minDamage = 0 ;      }
@@ -1223,9 +1202,47 @@ class GravityNet extends Weapon implements SpecialAbility{
         $strippedSystem->canTargetAll = $this->canTargetAll;	        											                                        
         return $strippedSystem;
 	}	
+    
+    public function generateIndividualNotes($gameData, $dbManager){ //dbManager is necessary for Initial phase only
+		$ship = $this->getUnit();
+
+        switch($gameData->phase){
+					
+				case 2: //Movement phase
+                    //roll a D6 to determine how far THIS gravity net can move a ship	                    				
+                    $currentResult = Dice::d(6, 1); //dice size, number of rolls, determined max move for gravity net
+                    $notekey = 'Gravity Net Max Move';
+					$noteHuman = 'Gravity Net Max Move: '.strval($currentResult);
+					$notevalue = $currentResult;
+                    $this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$notevalue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
+					if($ship->userid == $gameData->forPlayer){ //only own ships, otherwise bad things may happen!
+						//load existing data first - at this point ship is rudimentary, without data from database!
+						$listNotes = $dbManager->getIndividualNotesForShip($gameData, $gameData->turn, $ship->id);	
+						
+                        
+                        /*
+                        foreach ($listNotes as $currNote){
+							if($currNote->systemid==$this->id){//note is intended for this system!
+								$this->addIndividualNote($currNote);	 								
+							}
+						}
+						$this->onIndividualNotesLoaded($gameData);		
+
+						$changeValue = $this->changeThisTurn;//Extract change value for shield this turn.													
+				
+						if($changeValue != 0){												
+							$notekey = 'contract';
+							$noteHuman = 'Contraction value has been changed';
+							$notevalue = $changeValue;
+							$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$notevalue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue         
+						}	
+                            */				
+					}													
+			break;	       
+        }
 
     } //endof GravityNet
-
+}
 
 class HypergravitonBlaster extends Weapon {
         public $name = "HypergravitonBlaster";

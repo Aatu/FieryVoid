@@ -161,7 +161,7 @@ GravityNet.prototype.calculateSpecialHitChanceMod = function (shooter, target) {
 GravityNet.prototype.initializationUpdate = function() {
     if (this.fireOrders.length > 0) {
         this.hextarget = true;
-        this.startArc = 0; //Gravnet shot has arc, translocation does not.
+        this.startArc = 0; //Gravnet shot has arc, gravity net move target does not.
         this.endArc = 360;
         this.ignoresLoS = false;
     }else{
@@ -195,7 +195,6 @@ GravityNet.prototype.getFiringHex = function(shooter, weapon){
 */
 
 GravityNet.prototype.doMultipleFireOrders = function (shooter, target, system) {
-    
     var shotsOnTarget = 1; //we're only ever allocating one shot at a time for this weapon in Split mode.
 
     if (this.fireOrders.length > 0) {
@@ -227,8 +226,7 @@ GravityNet.prototype.doMultipleFireOrders = function (shooter, target, system) {
             chance: chance,
             hitmod: 0,
             notes: "Split"
-        };
-        
+        };        
         fireOrdersArray.push(fire); // Store each fire order
     }
 
@@ -243,47 +241,53 @@ GravityNet.prototype.doMultipleHexFireOrders = function (shooter, hexpos) {
 
     if (this.fireOrders.length > 1) {
         return;
-    } 
-    
-    //get gravNetTargetHex to check range and LOS for gravNetTargetMovementHex
-    //Target of grav net which will be used as shooter for grav net target hex.
-    var gravNetTargetFireOrder = this.fireOrders[0];//get fireorder of grav net firing ship (So we can use it's hex as fireing hex), this should always be the first fire order
-    if (gravNetTargetFireOrder){	// check that the grav net firing ship set a fire order
-        var range = 6;
-        var targetShip = gamedata.getShip(gravNetTargetFireOrder.targetid);
-        var targetShipHex = shipManager.getShipPosition(targetShip);
-        var targetMoveHex = hexpos;
-        var dist = targetShipHex.distanceTo(targetMoveHex);     
-        
-        if(dist >6){
-            return;
-        }
-    }  
+    }         
+    var targetMoveHexValid = this.validateTargetMoveHex(hexpos, 6);
 
     var fireOrdersArray = []; // Store multiple fire orders
 
-    for (var s = 0; s < shotsOnTarget; s++) {
-            var fireid = shooter.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
-            var fire = {
-                id: fireid,
-                type: 'prefiring',
-                shooterid: shooter.id,
-                targetid: -1,
-                weaponid: this.id,
-                calledid: -1,
-                turn: gamedata.turn,
-                firingMode: this.firingMode,
-                shots: this.defaultShots,
-                x: hexpos.q,
-                y: hexpos.r,
-                damageclass: 'gravNetMoveHex', 
-                notes: "split"                
-            };
-        fireOrdersArray.push(fire);
-    }   
-
+    if(targetMoveHexValid){
+        for (var s = 0; s < shotsOnTarget; s++) {
+                var fireid = shooter.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
+                var fire = {
+                    id: fireid,
+                    type: 'prefiring',
+                    shooterid: shooter.id,
+                    targetid: -1,
+                    weaponid: this.id,
+                    calledid: -1,
+                    turn: gamedata.turn,
+                    firingMode: this.firingMode,
+                    shots: this.defaultShots,
+                    x: hexpos.q,
+                    y: hexpos.r,
+                    damageclass: 'gravNetMoveHex', 
+                    notes: "split"                
+                };
+            fireOrdersArray.push(fire);
+        }   
+    }
     return fireOrdersArray; // Return all fire orders
 };  
+
+GravityNet.prototype.validateTargetMoveHex = function(hexpos, maxmoverange){ //function to validate desired target movement hex, will check LOS from target ship to move hex and range.
+
+    //get gravNetTargetHex to check range and LOS for gravNetTargetMovementHex
+    //Target of grav net which will be used as shooter for grav net target hex.
+    var valid = false; //default to false
+    var gravNetTargetFireOrder = this.fireOrders[0];//get fireorder of grav net firing ship (So we can use it's hex as fireing hex), this should always be the first fire order
+    if (gravNetTargetFireOrder){	// check that the grav net firing ship set a fire order
+        var targetShip = gamedata.getShip(gravNetTargetFireOrder.targetid);
+        var targetShipHex = shipManager.getShipPosition(targetShip);
+        var targetMoveHex = hexpos;
+        var dist = targetShipHex.distanceTo(targetMoveHex);
+        if(dist <= maxmoverange){
+            valid = true;
+        }
+    }
+    return valid;
+};     
+        
 
 GravityNet.prototype.checkFinished = function () {
 	if(this.fireOrders.length > 1) return true;
