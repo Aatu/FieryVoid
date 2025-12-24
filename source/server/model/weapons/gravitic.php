@@ -1054,7 +1054,11 @@ class GravityNet extends Weapon implements SpecialAbility{
     public $fireControl = array(1, 2, 3); // fighters, <mediums, <capitals 
 	public $preFires = true;
     public $canSplitShots = true;
+    
     //protected $hasSpecialLaunchHexCalculation = true;
+    public $moveDistance = "";
+    public $showHexagonArc = true; 
+
     public $specialHitChanceCalculation = true;			
 	public $repairPriority = 6;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
 
@@ -1192,16 +1196,6 @@ class GravityNet extends Weapon implements SpecialAbility{
         Manager::insertSingleMovement($gamedata->id, $target->id, $gravNetMove);
 
     }
-
-	public function getDamage($fireOrder){       return 0;   } //no actual damage
-	public function setMinDamage(){     $this->minDamage = 0 ;      }
-	public function setMaxDamage(){     $this->maxDamage = 0 ;      }
-
-    public function stripForJson() {
-        $strippedSystem = parent::stripForJson();    
-        $strippedSystem->canTargetAll = $this->canTargetAll;	        											                                        
-        return $strippedSystem;
-	}	
     
     public function generateIndividualNotes($gameData, $dbManager){ //dbManager is necessary for Initial phase only
 		$ship = $this->getUnit();
@@ -1209,39 +1203,43 @@ class GravityNet extends Weapon implements SpecialAbility{
         switch($gameData->phase){
 					
 				case 2: //Movement phase
-                    //roll a D6 to determine how far THIS gravity net can move a ship	                    				
-                    $currentResult = Dice::d(6, 1); //dice size, number of rolls, determined max move for gravity net
-                    $notekey = 'Gravity Net Max Move';
-					$noteHuman = 'Gravity Net Max Move: '.strval($currentResult);
-					$notevalue = $currentResult;
-                    $this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$notevalue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
-					if($ship->userid == $gameData->forPlayer){ //only own ships, otherwise bad things may happen!
+                    if($ship->userid == $gameData->forPlayer){ //only own ships, otherwise bad things may happen!
 						//load existing data first - at this point ship is rudimentary, without data from database!
 						$listNotes = $dbManager->getIndividualNotesForShip($gameData, $gameData->turn, $ship->id);	
-						
-                        
-                        /*
-                        foreach ($listNotes as $currNote){
-							if($currNote->systemid==$this->id){//note is intended for this system!
-								$this->addIndividualNote($currNote);	 								
-							}
-						}
-						$this->onIndividualNotesLoaded($gameData);		
-
-						$changeValue = $this->changeThisTurn;//Extract change value for shield this turn.													
-				
-						if($changeValue != 0){												
-							$notekey = 'contract';
-							$noteHuman = 'Contraction value has been changed';
-							$notevalue = $changeValue;
-							$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$notevalue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue         
-						}	
-                            */				
-					}													
-			break;	       
+						//roll a D6 to determine how far THIS gravity net can move a ship	                    				
+                        $currentResult = Dice::d(6, 1); //dice size, number of rolls, determined max move for gravity net
+                        $notekey = 'gravityNetMove';
+                        $noteHuman = 'Gravity Net Max Move: '.strval($currentResult);
+                        $notevalue = $currentResult;
+                        $this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$notevalue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
+                    }  
+		break;	       
         }
+    }
 
-    } //endof GravityNet
+    public function onIndividualNotesLoaded($gameData){ //get the current turns gravity net max movement value
+        foreach ($this->individualNotes as $currNote) {
+                if ($currNote->turn == $gameData->turn) {               
+                    if ($currNote->notekey == 'gravityNetMove') {
+                        $this->moveDistance = $currNote->notevalue; 
+                    }
+                }
+            }
+    }
+
+	public function getDamage($fireOrder){       return 0;   } //no actual damage
+	public function setMinDamage(){     $this->minDamage = 0 ;      }
+	public function setMaxDamage(){     $this->maxDamage = 0 ;      }
+
+    public function stripForJson() {
+        $strippedSystem = parent::stripForJson(); 
+        $strippedSystem->showHexagonArc = $this->showHexagonArc;  
+        $strippedSystem->canTargetAll = $this->canTargetAll;
+        $strippedSystem->canTargetAll = $this->canTargetAll;
+        $strippedSystem->moveDistance = $this->moveDistance;                                        
+        return $strippedSystem;
+	}	
+     //endof GravityNet
 }
 
 class HypergravitonBlaster extends Weapon {

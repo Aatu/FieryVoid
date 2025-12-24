@@ -159,11 +159,16 @@ GravityNet.prototype.calculateSpecialHitChanceMod = function (shooter, target) {
 };
 
 GravityNet.prototype.initializationUpdate = function() {
+
+    if(gamedata.gamephase == 5){ //update weapon notes field to show this gravity net's max movement distance for this turn (only show in PreFire phase even though calced at end of ships movment in movement phase)
+        this.data["Move Distance"] = this.moveDistance;
+    } 
     if (this.fireOrders.length > 0) {
         this.hextarget = true;
         this.startArc = 0; //Gravnet shot has arc, gravity net move target does not.
         this.endArc = 360;
         this.ignoresLoS = false;
+        
     }else{
         this.hextarget = false;
         //this.startArc = this.startArcArray[0]; //Use Arc arrays to reset to default
@@ -173,6 +178,12 @@ GravityNet.prototype.initializationUpdate = function() {
 
     return this;
 };
+
+GravityNet.prototype.getMoveDistance = function(){
+    
+}
+
+
 /*
 GravityNet.prototype.getFiringHex = function(shooter, weapon){ 	
     var $gravNetFiringHex;   
@@ -242,7 +253,7 @@ GravityNet.prototype.doMultipleHexFireOrders = function (shooter, hexpos) {
     if (this.fireOrders.length > 1) {
         return;
     }         
-    var targetMoveHexValid = this.validateTargetMoveHex(hexpos, 6);
+    var targetMoveHexValid = this.validateTargetMoveHex(hexpos, this.moveDistance);
 
     var fireOrdersArray = []; // Store multiple fire orders
 
@@ -286,8 +297,7 @@ GravityNet.prototype.validateTargetMoveHex = function(hexpos, maxmoverange){ //f
         }
     }
     return valid;
-};     
-        
+};             
 
 GravityNet.prototype.checkFinished = function () {
 	if(this.fireOrders.length > 1) return true;
