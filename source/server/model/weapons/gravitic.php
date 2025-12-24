@@ -1217,14 +1217,21 @@ class GravityNet extends Weapon implements SpecialAbility{
         }
     }
 
-    public function onIndividualNotesLoaded($gameData){ //get the current turns gravity net max movement value
-        foreach ($this->individualNotes as $currNote) {
-                if ($currNote->turn == $gameData->turn) {               
-                    if ($currNote->notekey == 'gravityNetMove') {
-                        $this->moveDistance = $currNote->notevalue; 
+    public function onIndividualNotesLoaded($gameData){     
+        switch($gameData->phase){
+            case 1:
+                $this->moveDistance = "TBD"; //set moveDistance back to TBD until next prefire phase.
+
+            case 5: //get the current turns gravity net max movement value in PreFile phase   
+            foreach ($this->individualNotes as $currNote) {
+                    if ($currNote->turn == $gameData->turn) {               
+                        if ($currNote->notekey == 'gravityNetMove') {
+                            $this->moveDistance = $currNote->notevalue; 
+                        }
                     }
-                }
-            }
+                }                
+        break;
+        }
     }
 
 	public function getDamage($fireOrder){       return 0;   } //no actual damage

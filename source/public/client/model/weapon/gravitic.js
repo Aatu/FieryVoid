@@ -160,7 +160,7 @@ GravityNet.prototype.calculateSpecialHitChanceMod = function (shooter, target) {
 
 GravityNet.prototype.initializationUpdate = function() {
 
-    if(gamedata.gamephase == 5){ //update weapon notes field to show this gravity net's max movement distance for this turn (only show in PreFire phase even though calced at end of ships movment in movement phase)
+    if(gamedata.gamephase == 1 || gamedata.gamephase == 5){ //update weapon notes field to show this gravity net's max movement distance for this turn (only show in PreFire phase even though calced at end of ships movment in movement phase)
         this.data["Move Distance"] = this.moveDistance;
     } 
     if (this.fireOrders.length > 0) {
