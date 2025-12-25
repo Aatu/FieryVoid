@@ -522,7 +522,11 @@ class BaseShip {
         $strippedShip->phpclass = $this->phpclass;
         
         $strippedShip->systems = array_map( function($system) {return $system->stripForJson();}, $this->systems);
-		
+
+        //With changes to how we cache ships, we sadly have to re-do this each time. DK - Dec 2025
+        $this->notesFill();
+		$strippedShip->notes = $this->notes;                
+
 		$strippedShip->combatValue = $this->calculateCombatValue();
 		$strippedShip->pointCostEnh = $this->pointCostEnh;
 		
@@ -981,7 +985,7 @@ class BaseShip {
 			}
 		}
 
-			$this->notesFill(); //add miscellanous info to notes!
+			//$this->notesFill(); //add miscellanous info to notes! //Moved to strpForJson after cache changes - DK DEc 2025
 	   }//endof adding PRIMARY Structure (with specials attached)
 	   
             $this->addSystem($system, 0);
@@ -996,9 +1000,9 @@ class BaseShip {
 		
 		/* fill notes with information contained in various attributes, not so readily accessible to player*/
 		protected function notesFill($sampleFighter = null){
-			if (TacGamedata::$currentTurn >= 1){ //in later turns notes will be displayed from pre-compiled cache! no point generating them every time
-				return;
-			}
+			//if (TacGamedata::$currentTurn >= 1){ //in later turns notes will be displayed from pre-compiled cache! no point generating them every time
+			//	return;
+			//}
 			//add to Notes information about miscellanous attributes
 			if($this->notes!='')$this->notes .= '<br>';
 				//faction age - if older than Young
