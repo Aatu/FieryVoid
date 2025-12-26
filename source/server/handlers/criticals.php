@@ -55,20 +55,22 @@ class Criticals{
 					if ($system->isDamagedOnTurn($gamedata->turn)){       
 						$crits = $system->testCritical($ship, $gamedata, $crits);
 					}
+				
+					if($system instanceof Weapon){
+						//for last segment of Sustained shot - force shutdown!
+						if(!$system->isOfflineOnTurn()){
+							$newExtraShots = $system->overloadshots - 1; 	
+							if( $newExtraShots == 0 ) {
+								$crit = new ForcedOfflineOneTurn(-1, $ship->id, $system->id, "ForcedOfflineOneTurn", $gamedata->turn);
+								$crit->updated = true;
+								$crit->newCrit = true; //force save even if crit is not for current turn
+								$system->criticals[] =  $crit;
+							}
+						}	
+					}					
+				
 				}
-
-				if($system instanceof Weapon){
-					//for last segment of Sustained shot - force shutdown!
-					if(!$system->isDestroyed() && !$system->isOfflineOnTurn()){
-						$newExtraShots = $system->overloadshots - 1; 	
-						if( $newExtraShots == 0 ) {
-							$crit = new ForcedOfflineOneTurn(-1, $ship->id, $system->id, "ForcedOfflineOneTurn", $gamedata->turn);
-							$crit->updated = true;
-							$crit->newCrit = true; //force save even if crit is not for current turn
-							$system->criticals[] =  $crit;
-						}
-					}	
-				}					
+				
 
 				$system->criticalPhaseEffects($ship, $gamedata); //hook for Critical phase effects
 				
