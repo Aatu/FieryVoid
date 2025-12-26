@@ -31,6 +31,7 @@ window.ShipIcon = function () {
         this.weaponArcs = [];
         this.hidden = false;
         this.BDEWSprite = null;
+        this.shipHexagonSpritesMap = new Map();
         this.NotMovedSprite = null;
 
         this.selected = false;
@@ -686,7 +687,6 @@ window.ShipIcon = function () {
                     this.weaponArcs.push(hexMesh);
                 }
                 */
-
             } else { //Normal circular weapon arcs
                 var geometry = new THREE.CircleGeometry(dis, 32, mathlib.degreeToRadian(arcStart), mathlib.degreeToRadian(arcLength));
                 var material = new THREE.MeshBasicMaterial({ color: new THREE.Color("rgb(20,80,128)"), opacity: 0.5, transparent: true });
@@ -706,7 +706,6 @@ window.ShipIcon = function () {
             this.mesh.remove(arc);
         }, this);
     };
-
     /* //Old method for displaying BDEW as a circle - DK 12.2.25
         ShipIcon.prototype.showBDEW = function () {
     
@@ -772,6 +771,44 @@ window.ShipIcon = function () {
         this.mesh.remove(this.BDEWSprite);
         this.BDEWSprite = null;
     };
+
+    ShipIcon.prototype.showHexagonAroundShip = function(size, system){  //add hexagon around ship then add it to an array of hexagons around ship tied to unqiue system-currently only used for Gravity Net, so this would be that gravity net
+       
+        var hexDistance = window.coordinateConverter.getHexDistance();
+        var dis = (size + 0.6) * hexDistance; //Need the extra 0.6 just to cover the 20th hex visually - DK
+        var color = new THREE.Color(160 / 255, 250 / 255, 100 / 255);
+
+        // Create a hexagon shape
+        var hexShape = new THREE.Shape();
+        for (let i = 0; i < 6; i++) {
+            let angle = (i * Math.PI) / 3; // 60-degree increments
+            let x = dis * Math.cos(angle);
+            let y = dis * Math.sin(angle);
+            if (i === 0) {
+                hexShape.moveTo(x, y);
+            } else {
+                hexShape.lineTo(x, y);
+            }
+        }
+        hexShape.closePath();
+
+        var geometry = new THREE.ShapeGeometry(hexShape);
+        var material = new THREE.MeshBasicMaterial({ color: color, opacity: 0.2, transparent: true });
+        var hexagon = new THREE.Mesh(geometry, material);
+        hexagon.position.z = -1;
+
+
+        this.shipHexagonSpritesMap.set(system, hexagon); //Map with Key:Value
+        this.mesh.add(this.shipHexagonSpritesMap.get(system));        
+
+        return null;
+    };
+
+    ShipIcon.prototype.hideHexagonAroundShip = function(system){
+        this.mesh.remove(this.shipHexagonSpritesMap.get(system));
+        this.shipHexagonSpritesMap.delete(system);
+    }
+
 
     ShipIcon.prototype.positionAndFaceIcon = function (offset) {
         var movement = this.getLastMovement();

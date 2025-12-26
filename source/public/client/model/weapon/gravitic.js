@@ -159,8 +159,7 @@ GravityNet.prototype.calculateSpecialHitChanceMod = function (shooter, target) {
 };
 
 GravityNet.prototype.initializationUpdate = function() {
-
-    if(gamedata.gamephase == 1 || gamedata.gamephase == 5){ //update weapon notes field to show this gravity net's max movement distance for this turn (only show in PreFire phase even though calced at end of ships movment in movement phase)
+    if(gamedata.gamephase == 1 || gamedata.gamephase == 5){ //update weapon data field to show this gravity net's max movement distance or return to TBD
         this.data["Move Distance"] = this.moveDistance;
     } 
     if (this.fireOrders.length > 0) {
@@ -168,6 +167,7 @@ GravityNet.prototype.initializationUpdate = function() {
         this.startArc = 0; //Gravnet shot has arc, gravity net move target does not.
         this.endArc = 360;
         this.ignoresLoS = false;
+
         
     }else{
         this.hextarget = false;
@@ -175,7 +175,7 @@ GravityNet.prototype.initializationUpdate = function() {
         //this.endArc = this.endArcArray[0]; 
         this.ignoresLoS = false;                       
     } 
-
+    
     return this;
 };
 
@@ -206,6 +206,7 @@ GravityNet.prototype.getFiringHex = function(shooter, weapon){
 */
 
 GravityNet.prototype.doMultipleFireOrders = function (shooter, target, system) {
+    webglScene.customEvent("GravityNetTarget", {ship: target, system: this});
     var shotsOnTarget = 1; //we're only ever allocating one shot at a time for this weapon in Split mode.
 
     if (this.fireOrders.length > 0) {
@@ -237,7 +238,8 @@ GravityNet.prototype.doMultipleFireOrders = function (shooter, target, system) {
             chance: chance,
             hitmod: 0,
             notes: "Split"
-        };        
+        }; 
+        this.target = target; //store current target to this gravity net object.       
         fireOrdersArray.push(fire); // Store each fire order
     }
 
@@ -276,7 +278,8 @@ GravityNet.prototype.doMultipleHexFireOrders = function (shooter, hexpos) {
                     notes: "split"                
                 };
             fireOrdersArray.push(fire);
-        }   
+        }  
+        webglScene.customEvent("GravityNetMoveTarget", {ship: this.target, system: this}); 
     }
     return fireOrdersArray; // Return all fire orders
 };  

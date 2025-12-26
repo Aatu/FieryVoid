@@ -1220,7 +1220,7 @@ class GravityNet extends Weapon implements SpecialAbility{
     public function onIndividualNotesLoaded($gameData){     
         switch($gameData->phase){
             case 1:
-                $this->moveDistance = "TBD"; //set moveDistance back to TBD until next prefire phase.
+                $this->moveDistance = "TBD: PreFirePhase"; //set moveDistance back to TBD: PreFirePhase until next prefire phase, then display newly rolled value.
 
             case 5: //get the current turns gravity net max movement value in PreFile phase   
             foreach ($this->individualNotes as $currNote) {
