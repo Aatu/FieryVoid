@@ -776,7 +776,7 @@ window.ShipIcon = function () {
        
         var hexDistance = window.coordinateConverter.getHexDistance();
         var dis = (size + 0.6) * hexDistance; //Need the extra 0.6 just to cover the 20th hex visually - DK
-        var color = new THREE.Color(160 / 255, 250 / 255, 100 / 255);
+        var color = new THREE.Color(25 / 255, 125 / 255, 25 / 255);
 
         // Create a hexagon shape
         var hexShape = new THREE.Shape();
