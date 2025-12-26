@@ -615,7 +615,8 @@ const canBFCPdecrease = (ship,system) => canBFCP(ship,system) && system.canDecre
 const canBFCPpropagate = (ship,system) => canBFCP(ship,system) && system.canPropagate()!='';
 
 //can do something with Hyach Specialists
-const canSpec = (ship, system) => (gamedata.gamephase === 1) && system.name === 'hyachSpecialists';
+//const canSpec = (ship, system) => (gamedata.gamephase === 1) && system.name === 'hyachSpecialists';
+const canSpec = (ship, system) => system.name === 'hyachSpecialists';
 const canSpecdisplayCurrClass = (ship,system) => canSpec(ship,system) && system.getCurrClass()!='';
 const getSpeccurrClassImg = (ship,system) => './img/systemicons/Specialistclasses/'+system.getCurrClass()+'.png'; 
 const getSpeccurrClassName = (ship,system) => system.getCurrClass();

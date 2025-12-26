@@ -2946,7 +2946,7 @@ class HyachSpecialists extends ShipSystem implements SpecialAbility{
 	    // Example array from Front End:
 	    //     "Defence" => array(1, 2),
 	    //     "Engine" => array(1, 0)  );
-	    
+
 	    // Data received in variable individualNotesTransfer, further functions will look for it in currchangedSpec
 	    if (is_array($this->individualNotesTransfer)) {
 	        foreach ($this->individualNotesTransfer as $specType => $specValues) {
@@ -2968,11 +2968,33 @@ class HyachSpecialists extends ShipSystem implements SpecialAbility{
 //	 this method generates additional non-standard informaction in the form of individual system notes in this case: 
 //	 - Initial phase: check setting changes made by user, convert to notes	
     public function generateIndividualNotes($gameData, $dbManager){ //dbManager is necessary for Initial phase only
+		$this->doIndividualNotesTransfer();
 		$ship = $this->getUnit();	
 		
 		switch($gameData->phase){
-								
-				case 1: //Initial phase
+			
+				case -1:
+
+					foreach ($this->currSelectedSpec as $specialistType) {//Take Front end data on deployment turn and generate available Specs.
+						$notekey = 'available;' . $specialistType; //Make those Specialist Types available for rest of game.
+						$noteHuman = 'Specialist available';
+						$noteValue = 1; //Max Specialists is always 1, value not actually used for this type of note.
+						$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
+					}
+					break;
+			case 1: //Initial phase 
+				//check for specific commands from UI...
+				if($this->currSelectedSpec){ //player made a selection!
+					foreach($this->currSelectedSpec as $specialistType){
+						//create note...
+						$notekey = 'available;' . $specialistType; //Make those Specialist Types available for rest of game.
+						$noteHuman = 'Specialist available';
+						$noteValue = 1; //Max Specialists is always 1, value not actually used for this type of note.
+						$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
+
+					}
+				}
+			
 
 					if($ship->userid == $gameData->forPlayer){ //only own ships, otherwise bad things may happen!
 						//load existing data first - at this point ship is rudimentary, without data from database!
@@ -2984,7 +3006,7 @@ class HyachSpecialists extends ShipSystem implements SpecialAbility{
 						}
 						$this->onIndividualNotesLoaded($gameData);
 
-					
+						/*
 						foreach ($this->currSelectedSpec as $specialistType) {//Take Front end data on deployment turn and generate available Specs.
 
 							$notekey = 'available;' . $specialistType; //Make those Specialist Types available for rest of game.
@@ -2992,7 +3014,7 @@ class HyachSpecialists extends ShipSystem implements SpecialAbility{
 							$noteValue = 1; //Max Specialists is always 1, value not actually used for this type of note.
 							$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
 						}
-						
+						*/
 
 															
 						foreach($this->currchangedSpec as $specialistType){//Take Front end data and generate used Specs.
@@ -3322,13 +3344,13 @@ class HyachSpecialists extends ShipSystem implements SpecialAbility{
 			$specUsed = $this->allocatedSpec[$specialistType];
 			$this->data[' - '.$specialistType] =  $specValue;
 		}
-		if (TacGamedata::$currentPhase != 1  && ($this->specAllocatedCount)){ 		
-			$this->data["Specialists used this turn"] = ''; // List which Specialists were actually used this turn.
+		if (TacGamedata::$currentPhase != -1  && ($this->specAllocatedCount)){ 		
+			$this->data["Specialists Used This Turn"] = ''; // List which Specialists were actually used this turn.
 			foreach($this->specAllocatedCount as $specialistType => $specValue) {
-			    $this->data["Specialists used this turn"] .= $specialistType . ', ';
+			    $this->data["Specialists Used This Turn"] .= $specialistType . ', ';
 			}
 		}
-	if 	(TacGamedata::$currentTurn == 1 && TacGamedata::$currentPhase == 1){	//Show all Specialist info on Turn 1 Initial Orders.
+	if 	($turn == 1 && TacGamedata::$currentPhase == -1){	//Show all Specialist info on Turn 1 Initial Orders.
 	        $this->data["Special"] = "Technical system for Specialist management.";
 	        $this->data["Special"] .= "<br>On the Turn this ship deploys, select which Specialists this ship will have available.";        	   
 	        $this->data["Special"] .= "<br>Activate Specialist(s) by clicking their '+' button during Initial Orders."; 
@@ -3343,7 +3365,7 @@ class HyachSpecialists extends ShipSystem implements SpecialAbility{
 			$this->data["Special"] .= "<br>  - Targeting: All weapons +3% to hit.";
 			$this->data["Special"] .= "<br>  - Thruster: No thruster limits and Engine Efficiency improved.";
 			$this->data["Special"] .= "<br>  - Weapon: All weapons +3 damage this turn.";								 
-	    }else{ //After Initials Orders on Turn 1, reduce data so that it just shows relevant info on Specialists selected.
+	    }else{ //After Deployment on Turn 1, reduce data so that it just shows relevant info on Specialists selected.
 	        $this->data["Special"] = "Technical system used for Specialist management.";       	   
 	        $this->data["Special"] .= "<br>Activate Specialist(s) by clicking their '+' button during Initial Orders."; 
 	        $this->data["Special"] .= "<br>Each Specialists can be used once, with these effects on the turn they are used:";

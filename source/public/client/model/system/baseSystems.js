@@ -706,7 +706,7 @@ HyachSpecialists.prototype.initializationUpdate = function () {
 
 HyachSpecialists.prototype.getCurrClass = function () {
 	var ship = this.ship;	
- 	if ((gamedata.turn === shipManager.getTurnDeployed(ship)) && this.specCurrClass == ''){
+ 	if ((gamedata.turn === shipManager.getTurnDeployed(ship)) && gamedata.gamephase == -1 && this.specCurrClass == ''){
 		var classes = Object.keys(this.allSpec);
 		if (classes.length>0){
 			this.specCurrClass = classes[0];
@@ -723,7 +723,7 @@ HyachSpecialists.prototype.nextCurrClass = function () { //get next class for di
 	this.getCurrClass();
     if (this.specCurrClass == '') return ''; //this would mean there are no classes whatsover!
 	var ship = this.ship;    	
-	if (gamedata.turn === shipManager.getTurnDeployed(ship)){
+	if (gamedata.turn === shipManager.getTurnDeployed(ship) && gamedata.gamephase == -1){
 		var classes = Object.keys(this.allSpec);
 		var currId = -1;	
 		for (var i = 0; i < classes.length; i++) {
@@ -753,7 +753,7 @@ HyachSpecialists.prototype.prevCurrClass = function () { //get previous class fo
 	this.getCurrClass();
     if (this.specCurrClass == '') return ''; //this would mean there are no classes whatsover!
 	var ship = this.ship;    	
-	if (gamedata.turn === shipManager.getTurnDeployed(ship)){
+	if (gamedata.turn === shipManager.getTurnDeployed(ship) && gamedata.gamephase == -1){
 		var classes = Object.keys(this.allSpec);
 		var currId = -1;	
 		for (var i = 0; i < classes.length; i++) {
@@ -784,7 +784,7 @@ HyachSpecialists.prototype.canSelect = function () { //check if can increase rat
 	this.getCurrClass();
     if (this.specCurrClass == '') return false; //this would mean there are no Specialist classes whatsover!
 	var ship = this.ship;
-	if (gamedata.turn != shipManager.getTurnDeployed(ship)) return false;//Can only be selected on turn the ship deploys.
+	if ((gamedata.gamephase !== -1) || gamedata.turn != shipManager.getTurnDeployed(ship)) return false;//Can only be selected in deployment phase on turn the ship deploys.
 
 	var totalSpecSelected = Object.values(this.availableSpec).reduce((accumulator, currentValue) => accumulator + currentValue, 0); 
 	if (totalSpecSelected >= this.specTotal) return false;
@@ -800,7 +800,7 @@ HyachSpecialists.prototype.canSelect = function () { //check if can increase rat
 HyachSpecialists.prototype.canUnselect = function () { //can unselect Specialists on turn the ship deploys.
 	this.getCurrClass();
 	var ship = this.ship;	
-	if (gamedata.turn != shipManager.getTurnDeployed(ship)) return false;	
+	if ((gamedata.gamephase !== -1) || gamedata.turn != shipManager.getTurnDeployed(ship)) return false;//Can only be selected in deployment phase on turn the ship deploys.
 	if (this.specCurrClass == '') return false; //this would mean there are no Specialists whatsover!
 		
 	if (this.currSelectedSpec[this.specCurrClass]) return true;	//If it's filled, you can unselect.
@@ -810,6 +810,7 @@ HyachSpecialists.prototype.canUnselect = function () { //can unselect Specialist
 
 HyachSpecialists.prototype.canUse = function () { //check if can increase rating for current class; can do if preallocated points are unused or allocated points are less than available 
 	//always needs to check that allocated are less than maximum and allocated total is less than total maximum
+	if(gamedata.gamephase == -1) return false;	
 	this.getCurrClass();
     if (this.specCurrClass == '') return false; //this would mean there are no Specialist classes whatsover!
 
@@ -833,6 +834,7 @@ HyachSpecialists.prototype.canUse = function () { //check if can increase rating
 };			
 	
 HyachSpecialists.prototype.canDecrease = function () { //can decrease if something was increased
+	if(gamedata.gamephase == -1) return false;
 	this.getCurrClass();
 	if (this.specCurrClass == '') return false; //this would mean there are no Specialists whatsover!
 	if (!this.availableSpec[this.specCurrClass]) return false; //Not selected, can't increase or decrease on Turn 1.
@@ -1025,9 +1027,9 @@ HyachSpecialists.prototype.refreshData = function () {
         if (!this.specAllocatedCount[currType]) this.specAllocatedCount[currType] = 0; //Will show 1 if selected but not used, 0 if selected and used.
         this.data[entryName] = this.availableSpec[currType] - this.specAllocatedCount[currType];
 
-		if (this.availableSpec[currType] == 0 && (gamedata.turn == shipManager.getTurnDeployed(ship)) && gamedata.gamephase == 1) { //This way it's removed form list on Turn 1 whenever it's deselected.
+		if (this.availableSpec[currType] == 0 && (gamedata.turn == shipManager.getTurnDeployed(ship)) && gamedata.gamephase == -1) { //This way it's removed form list on Turn 1 whenever it's deselected.
 			delete this.data[entryName]; 
-			}       
+		}       
         
         if (this.specIncreased[currType]) { //add entry showing which Specialists are being used this turn.
             usedSpecialists += currType + (i < classes.length - 1 ? ', ' : ''); // Add comma and space.
@@ -1039,30 +1041,36 @@ HyachSpecialists.prototype.refreshData = function () {
     }
 
     var totalSpecSelected = Object.values(this.availableSpec).reduce((accumulator, currentValue) => accumulator + currentValue, 0);
-    if ((gamedata.turn == shipManager.getTurnDeployed(ship)) && gamedata.gamephase == 1) { //Show Specialists selected in Turn 1 Initial Orders only, then change to showing Specilists used.
+    if ((gamedata.turn == shipManager.getTurnDeployed(ship)) && gamedata.gamephase == -1) { //Show Specialists selected in Turn 1 Initial Orders only, then change to showing Specilists used.
         this.data["Specialists"] = totalSpecSelected + '/' + this.specTotal;
     } else {
         this.data["Specialists"] = this.specTotal - this.specTotal_used;
     }
 
     // If usedSpecialists is empty, set it to 'NONE'
-    if (usedSpecialists === '') {
-        usedSpecialists = 'None';
-    }
+    //if (usedSpecialists === '') {
+	//	delete this.data["Specialists Used This Turn"];
+    //}
 
     // Update the line containing "Specialists to be used this turn:" if it exists
-    var specialIndex = -1;
-    this.data["Special"].split('<br>').forEach((line, index) => {
-        if (line.includes('Specialists to be used this turn:')) {
-            specialIndex = index;
-        }
-    });
+    //var specialIndex = -1;
+    //this.data["Special"].split('<br>').forEach((line, index) => {
+        //if (line.includes('Specialists to be used this turn:')) {
+         //   specialIndex = index;
+        //}
+    //});
     
-    if (specialIndex !== -1) {
-        this.data["Special"] = this.data["Special"].split('<br>').slice(0, specialIndex).join('<br>') + '<br>Specialists to be used this turn: ' + usedSpecialists + '<br>';
-    } else {
-        this.data["Special"] += '<br>Specialists to be used this turn: ' + usedSpecialists + '<br>';
-    }
+    //if (specialIndex !== -1) {
+    //    this.data["Specialists Used This Turn"] = this.data["Special"].split('<br>').slice(0, specialIndex).join('<br>') + '<br>Specialists to be used this turn: ' + usedSpecialists + '<br>';
+    //} else {
+
+    // If usedSpecialists is empty, set it to 'NONE'
+    if (usedSpecialists !== '') {
+    	this.data["Specialists Used This Turn"] = usedSpecialists;
+	}else{	
+		delete this.data["Specialists Used This Turn"];
+    }	
+    //}
 };
 
 HyachSpecialists.prototype.doIndividualNotesTransfer = function () {

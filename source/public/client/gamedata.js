@@ -804,7 +804,26 @@ window.gamedata = {
     doCommit: function doCommit() {
         UI.shipMovement.hide();
 
-        if (gamedata.gamephase == 1) {
+        //DEPLOYMENT PHASE
+        if (gamedata.gamephase == -1) {
+            shipNames = shipManager.systems.getUnusedSpecialists();        	
+
+            if (shipNames.length > 0) {
+                var specialistsError = "The following ships have not selected Specialists:<br>";
+                
+                for (var i in shipNames) {
+                    var shipName = shipNames[i];
+                    //specialistsError += "- " + shipName + "<br>";
+                    specialistsError += '<span class="ship-name">- ' + shipName + '</span><br>'; 
+                }
+                specialistsError += "<br>You need to choose Specialists for these ships.";
+                window.confirm.error(specialistsError, function () {});
+                return false;                
+			}	
+        ajaxInterface.submitGamedata();
+                
+        //INITIAL ORDERS    
+        }else if (gamedata.gamephase == 1) {
             //        	ajaxInterface.fastpolling=true;
             var shipNames = shipManager.power.getShipsNegativePower();
 
@@ -866,7 +885,7 @@ window.gamedata = {
                 window.confirm.error(tooManyBFCPError, function () {});
                 return false;
             }		
-
+            /*
             shipNames = shipManager.systems.getUnusedSpecialists();        	
 
             if (shipNames.length > 0) {
@@ -881,7 +900,7 @@ window.gamedata = {
                 window.confirm.error(specialistsError, function () {});
                 return false;                
 			}		
-
+            */
             shipNames = shipManager.systems.checkShieldGenValue();
 
             if (shipNames.length > 0) {
@@ -1019,6 +1038,8 @@ window.gamedata = {
 		
 
             ajaxInterface.submitGamedata();
+
+
         } else if (gamedata.gamephase == 2) {
         	
 			var pivotShips = shipManager.checkConstantPivot();        	
@@ -1159,9 +1180,9 @@ window.gamedata = {
             ajaxInterface.submitGamedata();
         } else if (gamedata.gamephase == 4) {
             ajaxInterface.submitGamedata();
-        } else if (gamedata.gamephase == -1) {
-            ajaxInterface.submitGamedata();
-        }
+        } //else if (gamedata.gamephase == -1) {
+            //ajaxInterface.submitGamedata();
+        //}
     },
 
 
