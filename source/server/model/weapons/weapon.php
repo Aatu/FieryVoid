@@ -1622,7 +1622,7 @@ public function getStartLoading()
             }
         }
 	    /*
-        //MOVED TO CRITICALS.PHP to CAPTURE SUSTAINED WEAPONS THAT DIDN@T FIRE THEIR SECOND SHOT - DK - Dec 2025
+        //MOVED TO CRITICALS.PHP to CAPTURE SUSTAINED WEAPONS THAT DIDN@T FIRE THEIR LAST SHOT - DK - Dec 2025
 		//for last segment of Sustained shot - force shutdown!
 		$newExtraShots = $this->overloadshots - 1; 	
 		if( $newExtraShots == 0 ) {
