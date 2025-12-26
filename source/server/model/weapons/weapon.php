@@ -1621,7 +1621,8 @@ public function getStartLoading()
                 }
             }
         }
-	    
+	    /*
+        //MOVED TO CRITICALS.PHP to CAPTURE SUSTAINED WEAPONS THAT DIDN@T FIRE THEIR SECOND SHOT - DK - Dec 2025
 		//for last segment of Sustained shot - force shutdown!
 		$newExtraShots = $this->overloadshots - 1; 	
 		if( $newExtraShots == 0 ) {
@@ -1630,7 +1631,7 @@ public function getStartLoading()
 			$crit->newCrit = true; //force save even if crit is not for current turn
 			$this->criticals[] =  $crit;
 		}
-
+        */
         $fireOrder->rolled = max(1, $fireOrder->rolled);//Marks that fire order has been handled, just in case it wasn't marked yet!
 		TacGamedata::$lastFiringResolutionNo++;    //note for further shots
 		$fireOrder->resolutionOrder = TacGamedata::$lastFiringResolutionNo;//mark order in which firing was handled!
