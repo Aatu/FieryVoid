@@ -1039,15 +1039,15 @@ window.gamedata = {
 
             ajaxInterface.submitGamedata();
 
-
+        //MOVEMENT PHASE    
         } else if (gamedata.gamephase == 2) {
-        	
+			var active = gamedata.getActiveShips();         	
 			var pivotShips = shipManager.checkConstantPivot();        	
 
 			if (pivotShips.length > 0) {
 				
 			    // Get the active ships array
-			    var active = gamedata.getActiveShips();            	
+			    //var active = gamedata.getActiveShips();            	
 			    var mustPivotError = "The following ships must pivot during their movement<br>";
 
 			    // Check if any of the ship ids exist in the active array
@@ -1068,9 +1068,31 @@ window.gamedata = {
 			        return false;
 			    }
 			}	        	        	
-			        	
+
+            //Hyach Specialist can actually reduce Thurst below zero through toggling - DK
+            var negThrustError = "The following ships have insufficient Engine Thrust:<br>";
+			var foundTShip = false; //Toggle to show error or not
+
+			for (var i in active) {
+			    var tShip = active[i];
+			        
+			    if (shipManager.movement.hasNegativeThrust(tShip)) {
+			        foundTShip = true;
+                    negThrustError += '<span class="ship-name">- ' + tShip.name + '</span><br>'; 
+			    }
+			}
+
+			if (foundTShip) {
+                negThrustError += "<br>You need to lower channelled thrust before you can commit the turn.";
+			    window.confirm.error(negThrustError, function () {});
+			    return false;
+			}
+
 			ajaxInterface.submitGamedata();
-        } else if (gamedata.gamephase == 5) { //pre-firing phase
+
+        
+        //PRE FIRING PHASE        
+        } else if (gamedata.gamephase == 5) { 
 		
 		//check ammo magazine, there miiight be ammo weapons in Pre-Firing?		
 		//ammo usage check - AmmoMagazine equipped units
