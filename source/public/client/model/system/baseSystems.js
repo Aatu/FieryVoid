@@ -826,7 +826,8 @@ HyachSpecialists.prototype.canUse = function () { //check if can increase rating
 
 		if(gamedata.gamephase !== 1 && 
 		(this.specCurrClass == 'Computer' || 
-		this.specCurrClass == 'Power' || 
+		this.specCurrClass == 'Power' ||
+		this.specCurrClass == 'Repair' || 		 
 		this.specCurrClass == 'Sensor')) return false; //Can only use on Initial Orders	
 
 		if((gamedata.gamephase !== 1 && gamedata.gamephase !== 2) && 
@@ -956,8 +957,8 @@ HyachSpecialists.prototype.doUse = function () { //Mark Specialist as used.
 			}
 
 			if (strongestSystem && strongestValue > 0) {
-				strongestSystem.baseOutput = strongestSystem.output; //Save for any potential reversal				
-				var specialistBoost = Math.floor(strongestSystem.baseOutput * 0.25);
+				strongestSystem.baseOutput1 = strongestSystem.output; //Save for any potential reversal				
+				var specialistBoost = Math.floor(strongestSystem.baseOutput1 * 0.25);
 				strongestSystem.output += specialistBoost;
 			}				
 			break;
@@ -975,8 +976,8 @@ HyachSpecialists.prototype.doUse = function () { //Mark Specialist as used.
 			}
 
 			if (strongestSystem && strongestValue > 0) {
-				strongestSystem.baseOutput = strongestSystem.output; //Save for any potential reversal				
-				var specialistBoost = Math.floor(strongestSystem.baseOutput * 0.1);
+				strongestSystem.baseOutput2 = strongestSystem.output; //Save for any potential reversal				
+				var specialistBoost = Math.floor(strongestSystem.baseOutput2 * 0.1);
 				strongestSystem.output += specialistBoost;
 			}		
 
@@ -1105,7 +1106,7 @@ HyachSpecialists.prototype.doDecrease = function () { //decrease Specialist allo
 			}
 
 			if (strongestSystem && strongestValue > 0) {			
-				var specialistBoost = Math.floor(strongestSystem.baseOutput * 0.25);
+				var specialistBoost = Math.floor(strongestSystem.baseOutput1 * 0.25);
 				strongestSystem.output -= specialistBoost; //Revert to saved value in memory
 			}					
 			break;		
@@ -1123,7 +1124,7 @@ HyachSpecialists.prototype.doDecrease = function () { //decrease Specialist allo
 			}
 
 			if (strongestSystem && strongestValue > 0) {
-				var specialistBoost = Math.floor(strongestSystem.baseOutput * 0.1);
+				var specialistBoost = Math.floor(strongestSystem.baseOutput2 * 0.1);
 				strongestSystem.output -= specialistBoost;
 			}		
 
