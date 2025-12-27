@@ -315,7 +315,7 @@ class Weapon extends ShipSystem
 			}
 		//Hyach Specialists sometimes require additional info to be sent to front end.
 		$ship = $this->unit;
-		if ($ship->hasSpecialAbility("HyachSpecialists")){ //Does ship have Specialists system?
+		if ($ship->getSystemByName("HyachSpecialists")){ //Does ship have Specialists system?
 			$specialists = $ship->HyachSpecialists;
 			$specAllocatedArray = $specialists->specAllocatedCount;
 			foreach ($specAllocatedArray as $specsUsed=>$specValue){
