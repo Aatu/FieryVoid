@@ -83,7 +83,7 @@ class ShipSystem {
 		
 		//Hyach Specialists sometimes require additional info to be sent to front end.
 		$ship = $this->unit;
-		if ($ship->getSystemByName("HyachSpecialists")){ //Does ship have Specialists system?
+		if ($ship->hasSpecialAbility("HyachSpecialists")){ //Does ship have Specialists system?
 			$specialists = $ship->HyachSpecialists;
 			$specAllocatedArray = $specialists->specAllocatedCount;
 			foreach ($specAllocatedArray as $specsUsed=>$specValue){
@@ -93,7 +93,7 @@ class ShipSystem {
 			}
 		}	
 
-		if($ship->getSystemByName("MindriderEngine")){ //Mind's Eye Contraction CAN increase armour!
+		if ($ship->hasSpecialAbility("MindriderEngine")){ //Mind's Eye Contraction CAN increase armour!
 			$strippedSystem->armour = $this->armour;
 		}			
 							
