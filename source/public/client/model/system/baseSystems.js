@@ -819,7 +819,8 @@ HyachSpecialists.prototype.canUse = function () { //check if can increase rating
 		if (this.availableSpec[this.specCurrClass] < 1) return false; //Not selected, can't increase or decrease on Turn 1.
 
 		if(gamedata.gamephase !== 1 && 
-		(this.specCurrClass == 'Power' || 
+		(this.specCurrClass == 'Computer' || 
+		this.specCurrClass == 'Power' || 
 		this.specCurrClass == 'Sensor')) return false; //Can only use on Initial Orders	
 
 		if((gamedata.gamephase !== 1 || gamedata.gamephase !== 2) && 
