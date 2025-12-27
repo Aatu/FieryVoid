@@ -2973,18 +2973,46 @@ class HyachSpecialists extends ShipSystem implements SpecialAbility{
 		
 		switch($gameData->phase){
 			
-				case -1:
-
+			case -1:
+				if (!empty($this->currSelectedSpec)) {
 					foreach ($this->currSelectedSpec as $specialistType) {//Take Front end data on deployment turn and generate available Specs.
 						$notekey = 'available;' . $specialistType; //Make those Specialist Types available for rest of game.
 						$noteHuman = 'Specialist available';
 						$noteValue = 1; //Max Specialists is always 1, value not actually used for this type of note.
 						$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
 					}
-					break;
-			case 1: //Initial phase 
+				}	
+				break;
+
+			case 1: //Initial phase
+
+				if($ship->userid == $gameData->forPlayer){ //only own ships, otherwise bad things may happen!
+					//load existing data first - at this point ship is rudimentary, without data from database!
+					$listNotes = $dbManager->getIndividualNotesForShip($gameData, $gameData->turn, $ship->id);	
+					foreach ($listNotes as $currNote){
+						if($currNote->systemid==$this->id){//note is intended for this system!
+							$this->addIndividualNote($currNote);
+						}
+					}
+					$this->onIndividualNotesLoaded($gameData);
+					
+					if (!empty($this->currchangedSpec)) {																				
+						foreach($this->currchangedSpec as $specialistType){//Take Front end data and generate used Specs.
+							$notekey = 'allocated;' . $specialistType;
+							$noteHuman = 'Specialist Used';
+							$noteValue = 1; //Max Specialists is always 1, value not actually used for this type of note.
+							$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
+						}
+					}
+	
+				}
+				break;							
+						
+			case 2: //Movement
+			case 5: //Pre-Firing
+			case 3: //Firing						 
 				//check for specific commands from UI...
-				if($this->currSelectedSpec){ //player made a selection!
+				/*if($this->currSelectedSpec){ //player made a selection!
 					foreach($this->currSelectedSpec as $specialistType){
 						//create note...
 						$notekey = 'available;' . $specialistType; //Make those Specialist Types available for rest of game.
@@ -2993,19 +3021,19 @@ class HyachSpecialists extends ShipSystem implements SpecialAbility{
 						$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
 
 					}
-				}
+				}*/
 			
+					
 
-					if($ship->userid == $gameData->forPlayer){ //only own ships, otherwise bad things may happen!
 						//load existing data first - at this point ship is rudimentary, without data from database!
-						$listNotes = $dbManager->getIndividualNotesForShip($gameData, $gameData->turn, $ship->id);	
+					/*	$listNotes = $dbManager->getIndividualNotesForShip($gameData, $gameData->turn, $ship->id);	
 						foreach ($listNotes as $currNote){
 							if($currNote->systemid==$this->id){//note is intended for this system!
 								$this->addIndividualNote($currNote);
 							}
 						}
 						$this->onIndividualNotesLoaded($gameData);
-
+					*/
 						/*
 						foreach ($this->currSelectedSpec as $specialistType) {//Take Front end data on deployment turn and generate available Specs.
 
@@ -3016,7 +3044,8 @@ class HyachSpecialists extends ShipSystem implements SpecialAbility{
 						}
 						*/
 
-															
+				if($ship->userid == $gameData->forPlayer){ //only own ships, otherwise bad things may happen!
+				if (!empty($this->currchangedSpec)) {																				
 						foreach($this->currchangedSpec as $specialistType){//Take Front end data and generate used Specs.
 
 							$notekey = 'allocated;' . $specialistType;
@@ -3025,9 +3054,12 @@ class HyachSpecialists extends ShipSystem implements SpecialAbility{
 							$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
 						}
 					}
-					
-				break;
 				}
+				break;
+				
+			default:	
+			break;				
+		}
 			
 	} //endof function generateIndividualNotes
 	
@@ -3188,7 +3220,7 @@ class HyachSpecialists extends ShipSystem implements SpecialAbility{
 										usort($critList, [self::class, 'sortCriticalsByRepairPriority']);			
 										foreach ($critList as $critDmg){ //repairable criticals of current system
 											if ($critRepairs > 0){//Can still repair!
-//												if ($critDmg->phpclass == )
+
 												$critDmg->turnend = $gamedata->turn-1;//actual repair. Use previous turn so it disappears after Intitial Orders (but would effect then, time to repair etc.
 												$critDmg->forceModify = true; //actually save the repair...
 												$critDmg->updated = true; //actually save the repair cd!...
