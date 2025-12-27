@@ -2847,7 +2847,7 @@ public function onIndividualNotesLoaded($gamedata)
         $this->output = $this->output - $lostBFCP; //Adjust output based on damage taken, -1 point per 5 damage.
          
 		$this->data["Bonus Fire Control Points (BFCP)"] = $this->BFCPtotal_used . '/' . $this->output;
-		$this->data[" - per Fire Control category"] =  $this->BFCPpertype;
+		$this->data["Max Per Category"] =  $this->BFCPpertype;
 		foreach($this->allocatedBFCP as $FCType=>$BFCPallocated){
 			$this->data[' - '.$FCType] =  $BFCPallocated . '/' . $this->BFCPpertype;
 		}

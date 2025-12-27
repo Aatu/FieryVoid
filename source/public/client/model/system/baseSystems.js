@@ -546,6 +546,12 @@ var HyachComputer = function HyachComputer(json, ship) {
 HyachComputer.prototype = Object.create(ShipSystem.prototype);
 HyachComputer.prototype.constructor = HyachComputer;
 
+HyachComputer.prototype.initializationUpdate = function () {
+	this.data["Max Per Category"] = this.BFCPpertype;
+
+	return this;
+}	
+
 HyachComputer.prototype.getCurrClass = function () { //get current FC class for display; if none, find first!
     if (this.currClass == ''){
 		var classes = Object.keys(this.allocatedBFCP); //Allocated is always the same for HC, so can serve same purpose as availableAA did.
@@ -823,7 +829,7 @@ HyachSpecialists.prototype.canUse = function () { //check if can increase rating
 		this.specCurrClass == 'Power' || 
 		this.specCurrClass == 'Sensor')) return false; //Can only use on Initial Orders	
 
-		if((gamedata.gamephase !== 1 || gamedata.gamephase !== 2) && 
+		if((gamedata.gamephase !== 1 && gamedata.gamephase !== 2) && 
 		(this.specCurrClass == 'Engine' || 
 		this.specCurrClass == 'Maneuvering' || 
 		this.specCurrClass == 'Thruster')) return false; //Can only use on Initial Orders or Movement phase.	
@@ -919,6 +925,7 @@ HyachSpecialists.prototype.doUse = function () { //Mark Specialist as used.
 				if (system instanceof HyachComputer) {
 					system.output += 2;
 					system.BFCPpertype += 1; //Increase amount per category
+					system.refreshData();
 				}
 			}
 			break;
@@ -930,12 +937,13 @@ HyachSpecialists.prototype.doUse = function () { //Mark Specialist as used.
 			for (var i in ship.systems) {
 				var system = ship.systems[i];							
 			if (typeof system.intercept === "number" && system.intercept > 0) {
-					system.intercept += 2;
+					var newIntercept = (system.intercept + 2) * 5;
+					system.data["Intercept"] = "-" + newIntercept;
 				}	
 			}				
 			break;
 				
-		case'Engine'://Make front-end changes to Computer Output in Initial Orders phase.
+		case'Engine':
 			var strongestSystem = null;
 			var strongestValue = -1;
 
@@ -948,12 +956,13 @@ HyachSpecialists.prototype.doUse = function () { //Mark Specialist as used.
 			}
 
 			if (strongestSystem && strongestValue > 0) {
-				var specialistBoost = Math.floor(strongestValue * 0.25);
+				strongestSystem.baseOutput = strongestSystem.output; //Save for any potential reversal				
+				var specialistBoost = Math.floor(strongestSystem.baseOutput * 0.25);
 				strongestSystem.output += specialistBoost;
 			}				
 			break;
 				
-		case'Maneuvering'://Make front-end changes to Computer Output in Initial Orders phase.
+		case'Maneuvering':
 			var strongestSystem = null;
 			var strongestValue = -1;
 
@@ -966,7 +975,8 @@ HyachSpecialists.prototype.doUse = function () { //Mark Specialist as used.
 			}
 
 			if (strongestSystem && strongestValue > 0) {
-				var specialistBoost = Math.floor(strongestValue * 0.1);
+				strongestSystem.baseOutput = strongestSystem.output; //Save for any potential reversal				
+				var specialistBoost = Math.floor(strongestSystem.baseOutput * 0.1);
 				strongestSystem.output += specialistBoost;
 			}		
 
@@ -1008,7 +1018,7 @@ HyachSpecialists.prototype.doUse = function () { //Mark Specialist as used.
 			}
 			break;
 
-		case 'Targeting'://Make front-end changes to Computer Output in Initial Orders phase.
+		case 'Targeting':
 			ship.toHitBonus += 0.6;	
 			break;
 
@@ -1020,12 +1030,12 @@ HyachSpecialists.prototype.doUse = function () { //Mark Specialist as used.
 					system.boostEfficiency -= 1;
 				}
 				if (system instanceof Thruster) {
-					system.boostEfficiency += 50; //Increase by nominal amount, 50 allows for any amount of thrust
+					system.output += 50; //Increase by nominal amount, 50 allows for any amount of thrust
 				}
 			}
 			break;
 
-		case 'Weapon'://Make front-end changes to Computer Output in Initial Orders phase.
+		case 'Weapon':
 			for (var i in ship.systems) {
 				var system = ship.systems[i];
 				if (system instanceof Weapon) {
@@ -1064,6 +1074,7 @@ HyachSpecialists.prototype.doDecrease = function () { //decrease Specialist allo
 				if (system instanceof HyachComputer) {
 					system.output -= 2;
 					system.BFCPpertype -= 1; //Increase amount per category
+					system.refreshData();
 				}
 			}
 			break;
@@ -1075,12 +1086,13 @@ HyachSpecialists.prototype.doDecrease = function () { //decrease Specialist allo
 			for (var i in ship.systems) {
 				var system = ship.systems[i];							
 			if (typeof system.intercept === "number" && system.intercept > 0) {
-					system.intercept -= 2;
+					var newIntercept = system.intercept * 5; 
+					system.data["Intercept"] = "-" + newIntercept;
 				}	
 			}				
 			break;
 						
-		case'Engine'://Make front-end changes to Computer Output in Initial Orders phase.
+		case'Engine':
 			var strongestSystem = null;
 			var strongestValue = -1;
 
@@ -1092,13 +1104,13 @@ HyachSpecialists.prototype.doDecrease = function () { //decrease Specialist allo
 				}
 			}
 
-			if (strongestSystem && strongestValue > 0) {
-				var specialistBoost = Math.floor(strongestValue * 0.25);
-				strongestSystem.output -= specialistBoost;
+			if (strongestSystem && strongestValue > 0) {			
+				var specialistBoost = Math.floor(strongestSystem.baseOutput * 0.25);
+				strongestSystem.output -= specialistBoost; //Revert to saved value in memory
 			}					
 			break;		
 
-		case'Maneuvering'://Make front-end changes to Computer Output in Initial Orders phase.	
+		case'Maneuvering':	
 			var strongestSystem = null;
 			var strongestValue = -1;
 
@@ -1111,7 +1123,7 @@ HyachSpecialists.prototype.doDecrease = function () { //decrease Specialist allo
 			}
 
 			if (strongestSystem && strongestValue > 0) {
-				var specialistBoost = Math.floor(strongestValue * 0.1);
+				var specialistBoost = Math.floor(strongestSystem.baseOutput * 0.1);
 				strongestSystem.output -= specialistBoost;
 			}		
 
@@ -1153,7 +1165,7 @@ HyachSpecialists.prototype.doDecrease = function () { //decrease Specialist allo
 			}
 			break;
 
-		case 'Targeting'://Make front-end changes to Computer Output in Initial Orders phase.
+		case 'Targeting':
 			ship.toHitBonus -= 0.6;	
 			break;
 
@@ -1165,12 +1177,12 @@ HyachSpecialists.prototype.doDecrease = function () { //decrease Specialist allo
 					system.boostEfficiency += 1;
 				}
 				if (system instanceof Thruster) {
-					system.boostEfficiency -= 50; //Increase by nominal amount, 50 allows for any amount of thrust
+					system.output -= 50; //Increase by nominal amount, 50 allows for any amount of thrust
 				}
 			}
 			break;
 
-		case 'Weapon'://Make front-end changes to Computer Output in Initial Orders phase.
+		case 'Weapon':
 			for (var i in ship.systems) {
 				var system = ship.systems[i];
 				if (system instanceof Weapon) {
@@ -1243,6 +1255,8 @@ HyachSpecialists.prototype.refreshData = function () {
 	}else{	
 		delete this.data["Specialists Used This Turn"];
     }	
+	
+	webglScene.customEvent('SystemDataChanged', { ship: ship, system: this });
     //}
 };
 
