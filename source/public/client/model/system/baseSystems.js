@@ -928,7 +928,7 @@ HyachSpecialists.prototype.doUse = function () { //Mark Specialist as used.
 				
 			for (var i in ship.systems) {
 				var system = ship.systems[i];							
-				if (system.intercept > 0){
+			if (typeof system.intercept === "number" && system.intercept > 0) {
 					system.intercept += 2;
 				}	
 			}				
@@ -936,50 +936,47 @@ HyachSpecialists.prototype.doUse = function () { //Mark Specialist as used.
 				
 		case'Engine'://Make front-end changes to Computer Output in Initial Orders phase.
 			var strongestSystem = null;
-			var strongestValue = -1;	
+			var strongestValue = -1;
 
 			for (var i in ship.systems) {
 				var system = ship.systems[i];
-				if (system instanceof Engine) {			
-				    if (system.output > strongestValue) {
-				        strongestValue = system.output;
-			            strongestSystem = system;
-
-				        if (strongestValue > 0) { // Engine actually exists to be enhanced!
-				            specialistBoost = floor(strongestSystem.output * 0.25);
-				            strongestSystem.output += specialistBoost;
-			            }	
-					} 
+				if (system instanceof Engine && system.output > strongestValue) {
+					strongestValue = system.output;
+					strongestSystem = system;
 				}
-			}					
+			}
+
+			if (strongestSystem && strongestValue > 0) {
+				var specialistBoost = Math.floor(strongestValue * 0.25);
+				strongestSystem.output += specialistBoost;
+			}				
 			break;
 				
 		case'Maneuvering'://Make front-end changes to Computer Output in Initial Orders phase.
 			var strongestSystem = null;
-			var strongestValue = -1;	
+			var strongestValue = -1;
 
 			for (var i in ship.systems) {
 				var system = ship.systems[i];
-				if (system instanceof Engine) {			
-				    if (system.output > strongestValue) {
-				        strongestValue = system.output;
-			            strongestSystem = system;
-
-				        if (strongestValue > 0) { // Engine actually exists to be enhanced!
-				            specialistBoost = floor(strongestSystem.output * 0.10);
-				            strongestSystem.output += specialistBoost;
-			            }	
-					} 
+				if (system instanceof Engine && system.output > strongestValue) {
+					strongestValue = system.output;
+					strongestSystem = system;
 				}
-			}				
-			
-			if (ship.turncost == 0) ship.turncost = 0;
+			}
+
+			if (strongestSystem && strongestValue > 0) {
+				var specialistBoost = Math.floor(strongestValue * 0.1);
+				strongestSystem.output += specialistBoost;
+			}		
+
+			ship.turncost = Math.round(ship.turncost * 100) / 100;
+			ship.turndelaycost = Math.round(ship.turndelaycost * 100) / 100;
+
 			if (ship.turncost  == 0.5) ship.turncost = 0.25;
 			if (ship.turncost  == 0.66) ship.turncost = 0.33;
 			if (ship.turncost  == 1) ship.turncost = 0.5;
 			if (ship.turncost  == 1.5) ship.turncost = 0.75;
-
-			if (ship.turndelaycost == 0) ship.turndelaycost  = 0;        
+     
 			if (ship.turndelaycost  == 0.5) ship.turndelaycost  = 0.25;
 			if (ship.turndelaycost  == 0.66) ship.turndelaycost  = 0.33;
 			if (ship.turndelaycost  == 1) ship.turndelaycost  = 0.5;
@@ -1031,8 +1028,11 @@ HyachSpecialists.prototype.doUse = function () { //Mark Specialist as used.
 			for (var i in ship.systems) {
 				var system = ship.systems[i];
 				if (system instanceof Weapon) {
-					if(system.minDamage > 0) minDam = system.minDamage + 3;
-					if(system.maxDamage > 0) maxDam = system.maxDamage + 3;
+					var minDam = system.minDamage;
+					var maxDam = system.maxDamage;
+
+					if (minDam > 0) minDam += 3;
+					if (maxDam > 0) maxDam += 3;
 					system.data["Damage"] = "" + minDam + "-" + maxDam;						
 				}
 			}		
@@ -1073,7 +1073,7 @@ HyachSpecialists.prototype.doDecrease = function () { //decrease Specialist allo
 					
 			for (var i in ship.systems) {
 				var system = ship.systems[i];							
-				if (system.intercept > 0){
+			if (typeof system.intercept === "number" && system.intercept > 0) {
 					system.intercept -= 2;
 				}	
 			}				
@@ -1081,50 +1081,47 @@ HyachSpecialists.prototype.doDecrease = function () { //decrease Specialist allo
 						
 		case'Engine'://Make front-end changes to Computer Output in Initial Orders phase.
 			var strongestSystem = null;
-			var strongestValue = -1;	
+			var strongestValue = -1;
 
 			for (var i in ship.systems) {
 				var system = ship.systems[i];
-				if (system instanceof Engine) {			
-				    if (system.output > strongestValue) {
-				        strongestValue = system.output;
-			            strongestSystem = system;
-
-				        if (strongestValue > 0) { // Engine actually exists to be enhanced!
-				            specialistBoost = floor(strongestSystem.output * 0.25);
-				            strongestSystem.output -= specialistBoost;
-			            }	
-					} 
+				if (system instanceof Engine && system.output > strongestValue) {
+					strongestValue = system.output;
+					strongestSystem = system;
 				}
+			}
+
+			if (strongestSystem && strongestValue > 0) {
+				var specialistBoost = Math.floor(strongestValue * 0.25);
+				strongestSystem.output -= specialistBoost;
 			}					
 			break;		
 
-		case'Maneuvering'://Make front-end changes to Computer Output in Initial Orders phase.
+		case'Maneuvering'://Make front-end changes to Computer Output in Initial Orders phase.	
 			var strongestSystem = null;
-			var strongestValue = -1;	
+			var strongestValue = -1;
 
 			for (var i in ship.systems) {
 				var system = ship.systems[i];
-				if (system instanceof Engine) {			
-				    if (system.output > strongestValue) {
-				        strongestValue = system.output;
-			            strongestSystem = system;
-
-				        if (strongestValue > 0) { // Engine actually exists to be enhanced!
-				            specialistBoost = floor(strongestSystem.output * 0.10);
-				            strongestSystem.output -= specialistBoost;
-			            }	
-					} 
+				if (system instanceof Engine && system.output > strongestValue) {
+					strongestValue = system.output;
+					strongestSystem = system;
 				}
-			}				
-			
-			if (ship.turncost == 0) ship.turncost = 0;
+			}
+
+			if (strongestSystem && strongestValue > 0) {
+				var specialistBoost = Math.floor(strongestValue * 0.1);
+				strongestSystem.output -= specialistBoost;
+			}		
+
+			ship.turncost = Math.round(ship.turncost * 100) / 100;
+			ship.turndelaycost = Math.round(ship.turndelaycost * 100) / 100;			
+
 			if (ship.turncost  == 0.25) ship.turncost = 0.5;
 			if (ship.turncost  == 0.33) ship.turncost = 0.66;
 			if (ship.turncost  == 0.5) ship.turncost = 1;
 			if (ship.turncost  == 0.75) ship.turncost = 1.5;
-
-			if (ship.turndelaycost == 0) ship.turndelaycost  = 0;        
+       
 			if (ship.turndelaycost  == 0.25) ship.turndelaycost  = 0.5;
 			if (ship.turndelaycost  == 0.33) ship.turndelaycost  = 0.66;
 			if (ship.turndelaycost  == 0.5) ship.turndelaycost  = 1;
@@ -1176,8 +1173,9 @@ HyachSpecialists.prototype.doDecrease = function () { //decrease Specialist allo
 			for (var i in ship.systems) {
 				var system = ship.systems[i];
 				if (system instanceof Weapon) {
-					if(system.minDamage > 0) minDam = system.minDamage;
-					if(system.maxDamage > 0) maxDam = system.maxDamage;
+					var minDam = system.minDamage;
+					var maxDam = system.maxDamage;
+
 					system.data["Damage"] = "" + minDam + "-" + maxDam;						
 				}
 			}		
