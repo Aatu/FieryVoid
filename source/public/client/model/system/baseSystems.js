@@ -903,144 +903,141 @@ HyachSpecialists.prototype.doUse = function () { //Mark Specialist as used.
 	this.getCurrClass();
 	if (this.specCurrClass == '') return false; //this would mean there are no Specialist classes whatsover!
 
-		this.currAllocatedSpec[this.specCurrClass] = 'allocated';
-		this.specAllocatedCount[this.specCurrClass] = 1;	//Just for Status Window.
-		this.specTotal_used++;
-		this.specIncreased[this.specCurrClass] = true;
-		this.specDecreased[this.specCurrClass] = false;		
+	this.currAllocatedSpec[this.specCurrClass] = 'allocated';
+	this.specAllocatedCount[this.specCurrClass] = 1;	//Just for Status Window.
+	this.specTotal_used++;
+	this.specIncreased[this.specCurrClass] = true;
+	this.specDecreased[this.specCurrClass] = false;		
 
-		var ship = this.ship;		
+	var ship = this.ship;		
 
-		switch(this.specCurrClass){
-			case'Computer'://Make front-end changes to Computer Output
-				for (var i in ship.systems) {
-					var system = ship.systems[i];
-
-					if (system instanceof HyachComputer) {
-						system.output += 2;
-						system.BFCPpertype += 1; //Increase amount per category
-					}
+	switch(this.specCurrClass){
+		case'Computer'://Make front-end changes to Computer Output
+			for (var i in ship.systems) {
+				var system = ship.systems[i];
+				if (system instanceof HyachComputer) {
+					system.output += 2;
+					system.BFCPpertype += 1; //Increase amount per category
 				}
-				break;
+			}
+			break;
 
-			case'Defence'://Make front-end changes to Defence
-				ship.forwardDefense -= 2;
-				ship.sideDefense -= 2;
-					
-				for (var i in ship.systems) {
-					var system = ship.systems[i];							
-					if (system.intercept > 0){
-						system.intercept += 2;
-					}	
-				}				
-				break;
-			
-			
-			case'Engine'://Make front-end changes to Computer Output in Initial Orders phase.
-				var strongestSystem = null;
-				var strongestValue = -1;	
-
-				for (var i in ship.systems) {
-					var system = ship.systems[i];
-					if (system instanceof Engine) {			
-					    if (system.output > strongestValue) {
-					        strongestValue = system.output;
-				            strongestSystem = system;
-
-					        if (strongestValue > 0) { // Engine actually exists to be enhanced!
-					            specialistBoost = floor(strongestSystem.output * 0.25);
-					            strongestSystem.output += specialistBoost;
-				            }	
-						} 
-					}
-				}					
-				break;
+		case'Defence'://Make front-end changes to Defence
+			ship.forwardDefense -= 2;
+			ship.sideDefense -= 2;
 				
+			for (var i in ship.systems) {
+				var system = ship.systems[i];							
+				if (system.intercept > 0){
+					system.intercept += 2;
+				}	
+			}				
+			break;
+				
+		case'Engine'://Make front-end changes to Computer Output in Initial Orders phase.
+			var strongestSystem = null;
+			var strongestValue = -1;	
 
-			case'Maneuvering'://Make front-end changes to Computer Output in Initial Orders phase.
-				var strongestSystem = null;
-				var strongestValue = -1;	
+			for (var i in ship.systems) {
+				var system = ship.systems[i];
+				if (system instanceof Engine) {			
+				    if (system.output > strongestValue) {
+				        strongestValue = system.output;
+			            strongestSystem = system;
 
-				for (var i in ship.systems) {
-					var system = ship.systems[i];
-					if (system instanceof Engine) {			
-					    if (system.output > strongestValue) {
-					        strongestValue = system.output;
-				            strongestSystem = system;
+				        if (strongestValue > 0) { // Engine actually exists to be enhanced!
+				            specialistBoost = floor(strongestSystem.output * 0.25);
+				            strongestSystem.output += specialistBoost;
+			            }	
+					} 
+				}
+			}					
+			break;
+				
+		case'Maneuvering'://Make front-end changes to Computer Output in Initial Orders phase.
+			var strongestSystem = null;
+			var strongestValue = -1;	
 
-					        if (strongestValue > 0) { // Engine actually exists to be enhanced!
-					            specialistBoost = floor(strongestSystem.output * 0.10);
-					            strongestSystem.output += specialistBoost;
-				            }	
-						} 
-					}
-				}				
+			for (var i in ship.systems) {
+				var system = ship.systems[i];
+				if (system instanceof Engine) {			
+				    if (system.output > strongestValue) {
+				        strongestValue = system.output;
+			            strongestSystem = system;
+
+				        if (strongestValue > 0) { // Engine actually exists to be enhanced!
+				            specialistBoost = floor(strongestSystem.output * 0.10);
+				            strongestSystem.output += specialistBoost;
+			            }	
+					} 
+				}
+			}				
 			
-				if (ship.turncost == 0) ship.turncost = 0;
-				if (ship.turncost  == 0.5) ship.turncost = 0.25;
-				if (ship.turncost  == 0.66) ship.turncost = 0.33;
-				if (ship.turncost  == 1) ship.turncost = 0.5;
-				if (ship.turncost  == 1.5) ship.turncost = 0.75;
+			if (ship.turncost == 0) ship.turncost = 0;
+			if (ship.turncost  == 0.5) ship.turncost = 0.25;
+			if (ship.turncost  == 0.66) ship.turncost = 0.33;
+			if (ship.turncost  == 1) ship.turncost = 0.5;
+			if (ship.turncost  == 1.5) ship.turncost = 0.75;
 
-				if (ship.turndelaycost == 0) ship.turndelaycost  = 0;        
-				if (ship.turndelaycost  == 0.5) ship.turndelaycost  = 0.25;
-				if (ship.turndelaycost  == 0.66) ship.turndelaycost  = 0.33;
-				if (ship.turndelaycost  == 1) ship.turndelaycost  = 0.5;
-				if (ship.turndelaycost  == 1.5) ship.turndelaycost  = 0.75;
+			if (ship.turndelaycost == 0) ship.turndelaycost  = 0;        
+			if (ship.turndelaycost  == 0.5) ship.turndelaycost  = 0.25;
+			if (ship.turndelaycost  == 0.66) ship.turndelaycost  = 0.33;
+			if (ship.turndelaycost  == 1) ship.turndelaycost  = 0.5;
+			if (ship.turndelaycost  == 1.5) ship.turndelaycost  = 0.75;
 
-				break;			
+			break;			
 
-			case'Power'://Make front-end changes to Power output in Initial Orders phase.
-				var powerBoost = 0;
-				for (var i in ship.systems) {
-					var system = ship.systems[i];
-						if (system instanceof Reactor) {
-							if (ship.shipSizeClass >= 3) powerBoost = 12;//Capital or larger	
-							if (ship.shipSizeClass == 2) powerBoost = 10;//HCV						
-							if (ship.shipSizeClass <= 1) powerBoost = 8;//MCV or lower							
-							system.output += powerBoost;
-						}	
-				}
-				break;
+		case'Power'://Make front-end changes to Power output in Initial Orders phase.
+			var powerBoost = 0;
+			for (var i in ship.systems) {
+				var system = ship.systems[i];
+					if (system instanceof Reactor) {
+						if (ship.shipSizeClass >= 3) powerBoost = 12;//Capital or larger	
+						if (ship.shipSizeClass == 2) powerBoost = 10;//HCV						
+						if (ship.shipSizeClass <= 1) powerBoost = 8;//MCV or lower							
+						system.output += powerBoost;
+					}	
+			}
+			break;
 			
-			case'Sensor'://Make front-end changes to Scanner output in Initial Orders phase.
-				for (var i in ship.systems) {
-					var system = ship.systems[i];
+		case'Sensor'://Make front-end changes to Scanner output in Initial Orders phase.
+			for (var i in ship.systems) {
+				var system = ship.systems[i];
 
-					if (system instanceof Scanner) {
-						system.output += 1;
-					}
+				if (system instanceof Scanner) {
+					system.output += 1;
 				}
-				break;
+			}
+			break;
 
-			case 'Targeting'://Make front-end changes to Computer Output in Initial Orders phase.
-				ship.toHitBonus += 0.6;	
-				break;
+		case 'Targeting'://Make front-end changes to Computer Output in Initial Orders phase.
+			ship.toHitBonus += 0.6;	
+			break;
 
-			case 'Thruster': //Make front-end changes to Engine efficiency in Initial Orders phase.
-				for (var i in ship.systems) {
-					var system = ship.systems[i];
+		case 'Thruster': //Make front-end changes to Engine efficiency in Initial Orders phase.
+			for (var i in ship.systems) {
+				var system = ship.systems[i];
 
-					if (system instanceof Engine) {
-						system.boostEfficiency -= 1;
-					}
-					if (system instanceof Thruster) {
-						system.boostEfficiency += 50; //Increase by nominal amount, 50 allows for any amount of thrust
-					}
+				if (system instanceof Engine) {
+					system.boostEfficiency -= 1;
 				}
-				break;
+				if (system instanceof Thruster) {
+					system.boostEfficiency += 50; //Increase by nominal amount, 50 allows for any amount of thrust
+				}
+			}
+			break;
 
-			case 'Weapon'://Make front-end changes to Computer Output in Initial Orders phase.
-				for (var i in ship.systems) {
-					var system = ship.systems[i];
-					if (system instanceof Weapon) {
-						if(system.minDamage > 0) minDam = system.minDamage + 3;
-						if(system.maxDamage > 0) maxDam = system.maxDamage + 3;
-						system.data["Damage"] = "" + minDam + "-" + maxDam;						
-					}
-				}		
-				break;
-		}			
+		case 'Weapon'://Make front-end changes to Computer Output in Initial Orders phase.
+			for (var i in ship.systems) {
+				var system = ship.systems[i];
+				if (system instanceof Weapon) {
+					if(system.minDamage > 0) minDam = system.minDamage + 3;
+					if(system.maxDamage > 0) maxDam = system.maxDamage + 3;
+					system.data["Damage"] = "" + minDam + "-" + maxDam;						
+				}
+			}		
+			break;
+	}			
 						
 	this.refreshData();
 
@@ -1050,144 +1047,142 @@ HyachSpecialists.prototype.doDecrease = function () { //decrease Specialist allo
 	this.getCurrClass();
 	if (this.specCurrClass == '') return false; //this would mean there are no Specialist classes whatsover!
 
-		this.currAllocatedSpec[this.specCurrClass] = "";
-		this.specAllocatedCount[this.specCurrClass] = 0;//Just for Status Window.
-		this.specDecreased[this.specCurrClass] = true;
-		this.specIncreased[this.specCurrClass] = false;		
+	this.currAllocatedSpec[this.specCurrClass] = "";
+	this.specAllocatedCount[this.specCurrClass] = 0;//Just for Status Window.
+	this.specDecreased[this.specCurrClass] = true;
+	this.specIncreased[this.specCurrClass] = false;		
 					
-		this.specTotal_used--;	
-				var ship = this.ship;		
+	this.specTotal_used--;	
+	var ship = this.ship;		
 
-		switch(this.specCurrClass){
-			case'Computer'://Make front-end changes to Computer Output
-				for (var i in ship.systems) {
-					var system = ship.systems[i];
+	switch(this.specCurrClass){
+		case'Computer'://Make front-end changes to Computer Output
+			for (var i in ship.systems) {
+				var system = ship.systems[i];
 
-					if (system instanceof HyachComputer) {
-						system.output -= 2;
-						system.BFCPpertype -= 1; //Increase amount per category
-					}
+				if (system instanceof HyachComputer) {
+					system.output -= 2;
+					system.BFCPpertype -= 1; //Increase amount per category
 				}
-				break;
+			}
+			break;
 
-			case'Defence'://Make front-end changes to Defence
-				ship.forwardDefense += 2;
-				ship.sideDefense += 2;
+		case'Defence'://Make front-end changes to Defence
+			ship.forwardDefense += 2;
+			ship.sideDefense += 2;
 					
-				for (var i in ship.systems) {
-					var system = ship.systems[i];							
-					if (system.intercept > 0){
-						system.intercept -= 2;
+			for (var i in ship.systems) {
+				var system = ship.systems[i];							
+				if (system.intercept > 0){
+					system.intercept -= 2;
+				}	
+			}				
+			break;
+						
+		case'Engine'://Make front-end changes to Computer Output in Initial Orders phase.
+			var strongestSystem = null;
+			var strongestValue = -1;	
+
+			for (var i in ship.systems) {
+				var system = ship.systems[i];
+				if (system instanceof Engine) {			
+				    if (system.output > strongestValue) {
+				        strongestValue = system.output;
+			            strongestSystem = system;
+
+				        if (strongestValue > 0) { // Engine actually exists to be enhanced!
+				            specialistBoost = floor(strongestSystem.output * 0.25);
+				            strongestSystem.output -= specialistBoost;
+			            }	
+					} 
+				}
+			}					
+			break;		
+
+		case'Maneuvering'://Make front-end changes to Computer Output in Initial Orders phase.
+			var strongestSystem = null;
+			var strongestValue = -1;	
+
+			for (var i in ship.systems) {
+				var system = ship.systems[i];
+				if (system instanceof Engine) {			
+				    if (system.output > strongestValue) {
+				        strongestValue = system.output;
+			            strongestSystem = system;
+
+				        if (strongestValue > 0) { // Engine actually exists to be enhanced!
+				            specialistBoost = floor(strongestSystem.output * 0.10);
+				            strongestSystem.output -= specialistBoost;
+			            }	
+					} 
+				}
+			}				
+			
+			if (ship.turncost == 0) ship.turncost = 0;
+			if (ship.turncost  == 0.25) ship.turncost = 0.5;
+			if (ship.turncost  == 0.33) ship.turncost = 0.66;
+			if (ship.turncost  == 0.5) ship.turncost = 1;
+			if (ship.turncost  == 0.75) ship.turncost = 1.5;
+
+			if (ship.turndelaycost == 0) ship.turndelaycost  = 0;        
+			if (ship.turndelaycost  == 0.25) ship.turndelaycost  = 0.5;
+			if (ship.turndelaycost  == 0.33) ship.turndelaycost  = 0.66;
+			if (ship.turndelaycost  == 0.5) ship.turndelaycost  = 1;
+			if (ship.turndelaycost  == 0.75) ship.turndelaycost  = 1.5;
+
+			break;			
+
+		case'Power'://Make front-end changes to Power output in Initial Orders phase.
+			var powerBoost = 0;
+			for (var i in ship.systems) {
+				var system = ship.systems[i];
+					if (system instanceof Reactor) {
+						if (ship.shipSizeClass >= 3) powerBoost = 12;//Capital or larger	
+						if (ship.shipSizeClass == 2) powerBoost = 10;//HCV						
+						if (ship.shipSizeClass <= 1) powerBoost = 8;//MCV or lower							
+						system.output -= powerBoost;
 					}	
-				}				
-				break;
+			}
+			break;
 			
-			
-			case'Engine'://Make front-end changes to Computer Output in Initial Orders phase.
-				var strongestSystem = null;
-				var strongestValue = -1;	
+		case'Sensor'://Make front-end changes to Scanner output in Initial Orders phase.
+			for (var i in ship.systems) {
+				var system = ship.systems[i];
 
-				for (var i in ship.systems) {
-					var system = ship.systems[i];
-					if (system instanceof Engine) {			
-					    if (system.output > strongestValue) {
-					        strongestValue = system.output;
-				            strongestSystem = system;
-
-					        if (strongestValue > 0) { // Engine actually exists to be enhanced!
-					            specialistBoost = floor(strongestSystem.output * 0.25);
-					            strongestSystem.output -= specialistBoost;
-				            }	
-						} 
-					}
-				}					
-				break;
-				
-
-			case'Maneuvering'://Make front-end changes to Computer Output in Initial Orders phase.
-				var strongestSystem = null;
-				var strongestValue = -1;	
-
-				for (var i in ship.systems) {
-					var system = ship.systems[i];
-					if (system instanceof Engine) {			
-					    if (system.output > strongestValue) {
-					        strongestValue = system.output;
-				            strongestSystem = system;
-
-					        if (strongestValue > 0) { // Engine actually exists to be enhanced!
-					            specialistBoost = floor(strongestSystem.output * 0.10);
-					            strongestSystem.output -= specialistBoost;
-				            }	
-						} 
-					}
-				}				
-			
-				if (ship.turncost == 0) ship.turncost = 0;
-				if (ship.turncost  == 0.25) ship.turncost = 0.5;
-				if (ship.turncost  == 0.33) ship.turncost = 0.66;
-				if (ship.turncost  == 0.5) ship.turncost = 1;
-				if (ship.turncost  == 0.75) ship.turncost = 1.5;
-
-				if (ship.turndelaycost == 0) ship.turndelaycost  = 0;        
-				if (ship.turndelaycost  == 0.25) ship.turndelaycost  = 0.5;
-				if (ship.turndelaycost  == 0.33) ship.turndelaycost  = 0.66;
-				if (ship.turndelaycost  == 0.5) ship.turndelaycost  = 1;
-				if (ship.turndelaycost  == 0.75) ship.turndelaycost  = 1.5;
-
-				break;			
-
-			case'Power'://Make front-end changes to Power output in Initial Orders phase.
-				var powerBoost = 0;
-				for (var i in ship.systems) {
-					var system = ship.systems[i];
-						if (system instanceof Reactor) {
-							if (ship.shipSizeClass >= 3) powerBoost = 12;//Capital or larger	
-							if (ship.shipSizeClass == 2) powerBoost = 10;//HCV						
-							if (ship.shipSizeClass <= 1) powerBoost = 8;//MCV or lower							
-							system.output -= powerBoost;
-						}	
+				if (system instanceof Scanner) {
+					system.output -= 1;
 				}
-				break;
-			
-			case'Sensor'://Make front-end changes to Scanner output in Initial Orders phase.
-				for (var i in ship.systems) {
-					var system = ship.systems[i];
+			}
+			break;
 
-					if (system instanceof Scanner) {
-						system.output -= 1;
-					}
+		case 'Targeting'://Make front-end changes to Computer Output in Initial Orders phase.
+			ship.toHitBonus -= 0.6;	
+			break;
+
+		case 'Thruster': //Make front-end changes to Engine efficiency in Initial Orders phase.
+			for (var i in ship.systems) {
+				var system = ship.systems[i];
+
+				if (system instanceof Engine) {
+					system.boostEfficiency += 1;
 				}
-				break;
-
-			case 'Targeting'://Make front-end changes to Computer Output in Initial Orders phase.
-				ship.toHitBonus -= 0.6;	
-				break;
-
-			case 'Thruster': //Make front-end changes to Engine efficiency in Initial Orders phase.
-				for (var i in ship.systems) {
-					var system = ship.systems[i];
-
-					if (system instanceof Engine) {
-						system.boostEfficiency += 1;
-					}
-					if (system instanceof Thruster) {
-						system.boostEfficiency -= 50; //Increase by nominal amount, 50 allows for any amount of thrust
-					}
+				if (system instanceof Thruster) {
+					system.boostEfficiency -= 50; //Increase by nominal amount, 50 allows for any amount of thrust
 				}
-				break;
+			}
+			break;
 
-			case 'Weapon'://Make front-end changes to Computer Output in Initial Orders phase.
-				for (var i in ship.systems) {
-					var system = ship.systems[i];
-					if (system instanceof Weapon) {
-						if(system.minDamage > 0) minDam = system.minDamage;
-						if(system.maxDamage > 0) maxDam = system.maxDamage;
-						system.data["Damage"] = "" + minDam + "-" + maxDam;						
-					}
-				}		
-				break;
-		}			
+		case 'Weapon'://Make front-end changes to Computer Output in Initial Orders phase.
+			for (var i in ship.systems) {
+				var system = ship.systems[i];
+				if (system instanceof Weapon) {
+					if(system.minDamage > 0) minDam = system.minDamage;
+					if(system.maxDamage > 0) maxDam = system.maxDamage;
+					system.data["Damage"] = "" + minDam + "-" + maxDam;						
+				}
+			}		
+			break;
+	}			
 						
 	this.refreshData();
 };
