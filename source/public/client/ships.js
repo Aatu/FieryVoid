@@ -903,7 +903,9 @@ window.shipManager = {
 
         return false;
     },
-
+    
+    
+    /* Replcaedd with more efficient version, fully remove if no issues - DK - Dec 2025 
     checkConstantPivot: function checkConstantPivot() {
 		var pivotShips = [];
 		var counter = 0;
@@ -937,7 +939,7 @@ window.shipManager = {
 		
 		return pivotShips;
     },
-
+    */
 
     isEscorting: function isEscorting(ship, target) {
         if (!ship.flight) return false;

@@ -1040,9 +1040,59 @@ window.gamedata = {
             ajaxInterface.submitGamedata();
 
         //MOVEMENT PHASE    
-        } else if (gamedata.gamephase == 2) {
-			var active = gamedata.getActiveShips();         	
-			var pivotShips = shipManager.checkConstantPivot();        	
+        } else if (gamedata.gamephase == 2) {     	
+
+			var mustPivotError = "The following ships must pivot during their movement<br>";
+			var foundPShip = false; //Toggle to show error or not
+            //Hyach Specialist can actually reduce Thurst below zero through toggling - DK
+            var negThrustError = "The following ships have insufficient engine thrust:<br>";
+			var foundTShip = false; //Toggle to show error or not
+
+			var active = gamedata.getActiveShips();  
+
+			for (var i in active) {
+			    var pShip = active[i];
+
+			    if (pShip.mustPivot){
+                    if (pShip.unavailable) continue;
+                    if (pShip.userid != gamedata.thisplayer) continue;					
+                    if (shipManager.isDestroyed(pShip)) continue;
+                    var deployTurn = shipManager.getTurnDeployed(pShip);
+                    if(deployTurn > gamedata.turn) continue;  //Don't bother checking for ships that haven't deployed yet.
+
+                    var pivoted = shipManager.movement.hasPivoted(pShip) 
+                    if(!pivoted.left && !pivoted.right){
+			            foundPShip = true;
+                        mustPivotError += '<span class="ship-name">- ' + pShip.name + '</span><br>'; 
+                    }    
+                }
+
+			    var tShip = active[i];
+			    
+                //Limited thrust check to Hyach Specialist now for efficiency, but we can expand it as needed - DK
+			    if (shipManager.hasSpecialAbility(tShip, "HyachSpecialists") && shipManager.movement.hasNegativeThrust(tShip)) {
+			        foundTShip = true;
+                    negThrustError += '<span class="ship-name">- ' + tShip.name + '</span><br>'; 
+			    }
+
+			}
+
+			if (foundPShip) {
+			    mustPivotError += "<br>You need to order them to pivot.";
+			    window.confirm.error(mustPivotError, function () {});
+		        return false;
+			}            
+
+			if (foundTShip) {
+                negThrustError += "<br>You need to lower channelled thrust before you can commit the turn.";
+			    window.confirm.error(negThrustError, function () {});
+			    return false;
+			}
+
+			ajaxInterface.submitGamedata();            
+            
+            /* //Old version of mustPivot check.  Remove if no issues - DK - Dec 2025
+            var pivotShips = shipManager.checkConstantPivot();        	
 
 			if (pivotShips.length > 0) {
 				
@@ -1068,28 +1118,7 @@ window.gamedata = {
 			        return false;
 			    }
 			}	        	        	
-
-            //Hyach Specialist can actually reduce Thurst below zero through toggling - DK
-            var negThrustError = "The following ships have insufficient Engine Thrust:<br>";
-			var foundTShip = false; //Toggle to show error or not
-
-			for (var i in active) {
-			    var tShip = active[i];
-			        
-			    if (shipManager.movement.hasNegativeThrust(tShip)) {
-			        foundTShip = true;
-                    negThrustError += '<span class="ship-name">- ' + tShip.name + '</span><br>'; 
-			    }
-			}
-
-			if (foundTShip) {
-                negThrustError += "<br>You need to lower channelled thrust before you can commit the turn.";
-			    window.confirm.error(negThrustError, function () {});
-			    return false;
-			}
-
-			ajaxInterface.submitGamedata();
-
+            */
         
         //PRE FIRING PHASE        
         } else if (gamedata.gamephase == 5) { 
@@ -1131,7 +1160,9 @@ window.gamedata = {
 		
 		
             ajaxInterface.submitGamedata();
-        }else if (gamedata.gamephase == 3) { //firing phase
+
+        //FIRING PHASE
+        }else if (gamedata.gamephase == 3) { 
 		
 			//prevent Vorlons from borrowing future power for firing 
 			//Capacitor-equipped ships cannot commit firing with negative power balance (they actively use power in this phase, AND they don't have any legal option of achieving negative balance by other means)
