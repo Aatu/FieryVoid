@@ -809,7 +809,18 @@ class BaseShip {
             $system->generateIndividualNotes($gamedata, $dbManager);
         }
 	}
-	
+
+    //Used in FireGamePhase->process to generate extra notes for Hyach Specialists, but could have other applications - DK - 27.12.25
+	public function generateAdditionalNotes($gameData, $dbManager) {
+        
+        if($gameData->phase == 3){        
+            $specialists = $this->getSystemByName("HyachSpecialists");
+            if ($specialists){ //Does ship have Specialists system?            
+                $specialists->generateIndividualNotes($gameData, $dbManager); //Generate notes for Specialists system
+                $this->saveIndividualNotes($dbManager); //Save ship notes. 
+            }
+        }
+    }                
 	
 	/*calls systems to act on notes just loaded if necessary*/
 	public function onIndividualNotesLoaded($gamedata) {
