@@ -3091,7 +3091,7 @@ class HyachSpecialists extends ShipSystem implements SpecialAbility{
 						                $strongestSystem->output += $specialistBoost;
 						            }	
 								} 
-								
+								/*
 								$critList = array();							
 								foreach($system->criticals as $critDmg) {
 											if($critDmg->repairPriority<1) continue;//if critical cannot be repaired
@@ -3115,7 +3115,8 @@ class HyachSpecialists extends ShipSystem implements SpecialAbility{
 												}
 											}
 										}
-									}																	
+									}
+									*/																		
 							}
 						}
 					$this->specAllocatedCount[$explodedKey[1]] = 1;//To show it has been used this turn in system info tooltip.
@@ -3338,7 +3339,7 @@ class HyachSpecialists extends ShipSystem implements SpecialAbility{
         parent::setSystemDataWindow($turn);            
 		$this->data["Specialists"] =  $this->specTotal - $this->specTotal_used; 		
 		foreach($this->availableSpec as $specialistType=>$specValue){
-			$specUsed = $this->allocatedSpec[$specialistType];
+			//$specUsed = $this->allocatedSpec[$specialistType];
 			$this->data[' - '.$specialistType] =  $specValue;
 		}
 		if (TacGamedata::$currentPhase != -1 && !empty($this->specAllocatedCount)) {
@@ -3357,7 +3358,7 @@ class HyachSpecialists extends ShipSystem implements SpecialAbility{
 	        $this->data["Special"] .= "<br>Each Specialist can be used once, with these effects on the turn they are used:";
 			$this->data["Special"] .= "<br>  - Computer: +2 BFCP, +1 BFCP per type."; 
 			$this->data["Special"] .= "<br>  - Defence: Profiles lowered by 10%, all intercept ratings +10%."; 
-			$this->data["Special"] .= "<br>  - Engine: +25% Thrust, remove an Engine critical."; 
+			$this->data["Special"] .= "<br>  - Engine: +25% Thrust."; 
 			$this->data["Special"] .= "<br>  - Maneuvering: +10% thrust, Halves Turn Cost / Delay.";
 			$this->data["Special"] .= "<br>  - Sensor: +1 EW, remove a Scanner critical.";
 			$this->data["Special"] .= "<br>  - Power: +8 to 12 power, remove a Reactor critical.";
@@ -3372,7 +3373,7 @@ class HyachSpecialists extends ShipSystem implements SpecialAbility{
 				foreach($this->allocatedSpec as $specialistType => $specValue) {
 					if ($specialistType == 'Computer') $this->data["Special"] .= '<br>  -  '.$specialistType . ': +2 BFCP, +1 BFCP per type.';
 					if ($specialistType == 'Defence') $this->data["Special"] .= '<br>  -  '.$specialistType . ': Profiles lowered by 10%, intercept ratings +10%.';
-					if ($specialistType == 'Engine') $this->data["Special"] .= '<br>  -  '.$specialistType . ': +25% Thrust, remove an Engine critical.';
+					if ($specialistType == 'Engine') $this->data["Special"] .= '<br>  -  '.$specialistType . ': +25% Thrust.';
 					if ($specialistType == 'Maneuvering') $this->data["Special"] .= '<br>  -  '.$specialistType . ': +10% thrust, Halves Turn Cost / Delay.';
 					if ($specialistType == 'Repair') $this->data["Special"] .= '<br>  -  '.$specialistType . ' :Remove two critical effects.';
 					if ($specialistType == 'Sensor') $this->data["Special"] .= '<br>  -  '.$specialistType . ' :+1 EW, removes Scanner critical.';
