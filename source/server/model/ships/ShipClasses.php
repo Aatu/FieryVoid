@@ -609,8 +609,8 @@ class BaseShip {
                 return $this->doPakmaraInitiativeBonus($gamedata);
             }
 		   if($this->faction == "Hyach Gerontocracy"){
-		                return $this->doHyachInitiativeBonus($gamedata);
-		        }            
+		        return $this->doHyachInitiativeBonus($gamedata);
+		    }            
 			if(($this->faction == "Gaim Intelligence") && ($this instanceOf gaimMoas)){  //GTS
                 return $this->doGaimInitiativeBonus($gamedata);
             }
