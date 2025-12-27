@@ -691,20 +691,11 @@ HyachComputer.prototype.canIncreaseAnything = function () { //returns true if an
 };//Endof HyachComputer
 
 
-
 var HyachSpecialists = function HyachSpecialists(json, ship) {
 	ShipSystem.call(this, json, ship);
 };
 HyachSpecialists.prototype = Object.create(ShipSystem.prototype);
 HyachSpecialists.prototype.constructor = HyachSpecialists;
-
-HyachSpecialists.prototype.initializationUpdate = function () {
-	//var ship = this.ship;
-	//var deployTurn = shipManager.getTurnDeployed(ship);
-	//this.deploymentTurn = deployTurn;
-
-	return this;
-}
 
 HyachSpecialists.prototype.getCurrClass = function () {
 	var ship = this.ship;
@@ -885,19 +876,6 @@ HyachSpecialists.prototype.doUnselect = function () { //can unslect Specialists 
 		this.specDecreased[this.specCurrClass] = true;
 		this.specIncreased[this.specCurrClass] = false;
 		this.currAllocatedSpec[this.specCurrClass] = "";
-		/*
-		if (this.specCurrClass == 'Thruster'){ //Make front-end changes to Engine efficiency in Initial Orders phase.
-			var ship = this.ship;
-
-				for (var i in ship.systems) {
-					var system = ship.systems[i];
-
-					if (system instanceof Engine) {
-						system.boostEfficiency += 1;
-					}			
-				}
-		}
-		*/
 	}
 
 	this.refreshData();
