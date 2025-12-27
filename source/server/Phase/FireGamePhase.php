@@ -103,7 +103,13 @@ class FireGamePhase implements Phase
                     }                   
                 }
             }
-                                
+
+            //Sadly we might have to have a quick condition here to catch any ships that have used their Specialists in phase 3, otherwise notes aren't created before firing.
+            //Always generate and save individual notes. hasSpecialAbility check fails here as onConstructed hasn't run.
+            if ($ship->getSystemByName("HyachSpecialists")){ //Does ship have Specialists system?            
+                $ship->generateIndividualNotes($gameData, $dbManager);
+                $ship->saveIndividualNotes($dbManager);     
+            }    
             $dbManager->submitPower($gameData->id, $gameData->turn, $powers);
         }		
 
