@@ -269,7 +269,7 @@
                 <input id="createGameData" type="hidden" name="data" value="">
 
                 <div style="text-align: right; margin-top: 10px; padding-bottom: 1px;">
-                    <button type="submit" class="btn btn-success-create create-game-btn" style="position: static; margin-top: 0; float: none;">
+                    <button type="submit" class="btn btn-create-submit create-game-btn" style="position: static; margin-top: 0; float: none;">
                         Create Game
                     </button>
                 </div>                  

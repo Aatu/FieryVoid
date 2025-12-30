@@ -461,7 +461,7 @@ a:hover {
   /* vertically center the text */
 }
 
-.btn-success-create {
+.btn-create-submit {
   background: #3c7a3c;
   color: white;
   font-size: 1.2em;
@@ -476,38 +476,50 @@ a:hover {
   padding: 5px;
 }
 
-.btn-success-lobby {
-
-  left: 8px;
-  bottom: 8px;
+.btn-success-create {
   background: #3c7a3c;
   color: white;
   font-size: 1.2em;
   border: 1px solid #66b266;
-  width: 120px;
+  width: 150px;
   text-align: center;
   box-sizing: border-box;
-  height: 24px;
-  /* or whatever height you prefer */
-  line-height: 13px;
-  /* vertically center the text */
+  height: 30px;
+  line-height: normal;
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  padding: 5px;
+}
+
+.btn-success-lobby {
+  background: #3c7a3c;
+  color: white;
+  border: 1px solid #66b266;
+  text-align: center;
+  box-sizing: border-box;
+
+  font-size: 1.1em;
+  width: 120px;
+  min-width: 90px;
+  height: auto;
+  line-height: normal;
+  padding: 5px 10px;
 }
 
 .btn-primary-lobby {
-  bottom: 8px;
   background: #215a7a;
   color: white;
-  width: 120px;
-  font-size: 1.2em;
   border: 1px solid #7298a7;
-
   text-align: center;
   box-sizing: border-box;
-  height: 24px;
-  /* or whatever height you prefer */
-  line-height: 13px;
-  /* vertically center the text */
 
+  font-size: 1.1em;
+  width: 120px;
+  min-width: 90px;
+  height: auto;
+  line-height: normal;
+  padding: 5px 10px;
 }
 
 .button-container {
@@ -521,17 +533,18 @@ a:hover {
 .btn-secondary-lobby {
   background: #215a7a;
   color: white;
-  font-size: 1.1em;
   border: 1px solid #7298a7;
-  width: 120px;
   text-align: center;
   box-sizing: border-box;
-  height: 20px;
-  /* or whatever height you prefer */
-  line-height: 9px;
-  /* vertically center the text */
   margin-top: 10px;
   margin-right: 5px;
+
+  font-size: 1.0em;
+  width: 120px;
+  min-width: 90px;
+  height: auto;
+  line-height: normal;
+  padding: 5px 10px;
 }
 
 .btn:hover {
