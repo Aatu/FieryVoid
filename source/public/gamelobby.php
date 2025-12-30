@@ -670,7 +670,7 @@ if ($asteroids == false && $moons == false) {
 
 			
         <div style="text-align: right; margin-top: 8px;">
-            <a href="files/FV_FleetChecker.txt" title="Details of fleet composition rules" target="_blank">Fleet Checker rules</a>
+            <a href="files/FV_FleetChecker.txt" title="Details of fleet composition rules" target="_blank" style="font-size: 14px;">Fleet Checker rules</a>
             &nbsp;            
             <span class="btn btn-primary-lobby checkbutton">CHECK</span>
             &nbsp;&nbsp;

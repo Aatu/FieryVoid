@@ -15,7 +15,7 @@ body {
   */
   color: #e0e7ef;
   line-height: 1.5;
-  font-size: 14px;
+  /*font-size: 14px;/*
 }
 
 a {
@@ -499,7 +499,7 @@ a:hover {
   text-align: center;
   box-sizing: border-box;
 
-  font-size: 1.1em;
+  font-size: 1.2em;
   width: 120px;
   min-width: 90px;
   height: auto;
