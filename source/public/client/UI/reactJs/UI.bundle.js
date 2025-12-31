@@ -39382,7 +39382,7 @@ var isOffline = function isOffline(ship, system) {
 };
 
 var isBoosted = function isBoosted(ship, system) {
-    return shipManager.power.isBoosted(ship, system);
+    return shipManager.power.isBoosted(ship, system) || system.active;
 };
 
 var getStructureLeft = function getStructureLeft(ship, system) {
@@ -41046,29 +41046,36 @@ var canOverload = function canOverload(ship, system) {
 var canStopOverload = function canStopOverload(ship, system) {
 	return gamedata.gamephase === 1 && system.weapon && system.overloadable && shipManager.power.isOverloading(ship, system) && (system.overloadshots >= system.extraoverloadshots || system.overloadshots == 0);
 };
-/*
-const canBoost = (ship, system) => system.boostable && gamedata.gamephase === 1 && shipManager.power.canBoost(ship, system) && (!system.isScanner() || system.id == shipManager.power.getHighestSensorsId(ship));
-
-const canDeBoost = (ship, system) => gamedata.gamephase === 1 && Boolean(shipManager.power.getBoost(system));
-*/
-var isBoostPhase = function isBoostPhase(system) {
-	// If boostOtherPhases is an array, check if the current gamephase is included
-	if (system.boostOtherPhases.length > 0) {
-		return system.boostOtherPhases.includes(gamedata.gamephase);
-	}
-
-	// Default: only in phase 1
-	return gamedata.gamephase === 1;
-};
 
 var canBoost = function canBoost(ship, system) {
-	return system.boostable && isBoostPhase(system) && shipManager.power.canBoost(ship, system) && (!system.isScanner() || system.id === shipManager.power.getHighestSensorsId(ship));
+	return system.boostable && gamedata.gamephase === 1 && shipManager.power.canBoost(ship, system) && (!system.isScanner() || system.id == shipManager.power.getHighestSensorsId(ship));
 };
 
 var canDeBoost = function canDeBoost(ship, system) {
-	return isBoostPhase(system) && shipManager.power.canDeboost(ship, system) && Boolean(shipManager.power.getBoost(system));
+	return gamedata.gamephase === 1 && Boolean(shipManager.power.getBoost(system));
+};
+/* Code for boosting systems in other phases.  Not longer need anymore since Shading Field got converted to notes
+const isBoostPhase = (system) => {
+    // If boostOtherPhases is an array, check if the current gamephase is included
+    if (system.boostOtherPhases.length > 0) {
+        return system.boostOtherPhases.includes(gamedata.gamephase);
+    }
+
+    // Default: only in phase 1
+    return gamedata.gamephase === 1;
 };
 
+const canBoost = (ship, system) =>
+    system.boostable &&
+    isBoostPhase(system) &&
+    shipManager.power.canBoost(ship, system) &&
+    (!system.isScanner() || system.id === shipManager.power.getHighestSensorsId(ship));
+
+const canDeBoost = (ship, system) =>
+    isBoostPhase(system) && 
+	shipManager.power.canDeboost(ship, system) && 
+	Boolean(shipManager.power.getBoost(system));
+*/
 var canAddShots = function canAddShots(ship, system) {
 	return system.weapon && system.canChangeShots && weaponManager.hasFiringOrder(ship, system) && weaponManager.getFiringOrder(ship, system).shots < system.maxVariableShots;
 };
