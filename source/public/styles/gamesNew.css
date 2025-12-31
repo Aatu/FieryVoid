@@ -15,7 +15,7 @@ body {
   */
   color: #e0e7ef;
   line-height: 1.5;
-  /*font-size: 14px;/*
+  font-size: 14px;
 }
 
 a {
@@ -946,6 +946,7 @@ kbd {
     width: 100%;
     padding: 10px 15px;
     margin-top: 15px;
+    font-size: 14px;
   }
 
   .faq-panel {
@@ -957,7 +958,7 @@ kbd {
     /* keep 4 equal-width columns */
     gap: 3px;
     /* minimal gap between columns */
-    font-size: 0.9em;
+    font-size: 1em;
     /* slightly smaller text */
   }
 
@@ -1080,4 +1081,4 @@ input[type=number] {
     text-align: left;
     margin-top: 0;
   }
-}
+}}
