@@ -32,7 +32,7 @@ class VeiledSaber extends MediumShip{
 		$this->iniativebonus = 16 *5;
 
 		$this->trueStealth = true; //For ships that can actually be hidden, not just jammer from range.  Important for Front End.		
-        
+		$this->canPreOrder = true;        
 		/*Torvalus use their own enhancement set */		
 		Enhancements::nonstandardEnhancementSet($this, 'TorvalusShip');
 		

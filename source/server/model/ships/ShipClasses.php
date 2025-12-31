@@ -86,6 +86,7 @@ class BaseShip {
     private $expectedDamage = array(); //loc=>dam; damage the unit is expected to take this turn (at outer locations), to decide where to take ambiguous shots
     
     public $slotid;
+    public $canPreOrder = false; //Marker for ships equipped with systems that are used every turn in Deployment/Pre-Orders Phase.
 
     public $movement = array();
     	    
