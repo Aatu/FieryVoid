@@ -1860,19 +1860,24 @@ ShadingField.prototype = Object.create(ShipSystem.prototype);
 ShadingField.prototype.constructor = ShadingField;
 
 ShadingField.prototype.initializationUpdate = function () {
-	if (shipManager.power.isBoosted(this.ship, this)) {
+	if (this.active) {
 		this.outputDisplay = "SHADE";
-		this.boost = 1;
 	} else {
 		this.outputDisplay = this.output;
-		this.boost = 0;
 	}
+	var power = this.powerReq;
+	
+	if(power == 0){
+		this.data["Power Used"] = 'None';
+	}else{
+		this.data["Power Used"] = this.powerReq;		
+	}	
 	return this;
 }
 
 ShadingField.prototype.getDefensiveHitChangeMod = function (target, shooter, weapon) {
 	if (target.flight) {
-		if (this.shaded) {
+		if (this.active) {
 			return this.output; //No modifiers for fighters, just return basic output.			
 		} else {
 			return 0;
@@ -1882,12 +1887,19 @@ ShadingField.prototype.getDefensiveHitChangeMod = function (target, shooter, wea
 	}
 };
 
-ShadingField.prototype.hasMaxBoost = function () {
-	return true;
+ShadingField.prototype.canActivate = function () {
+	if(gamedata.gamephase == -1 && !this.active) return true;
+	
+	return false;
 };
 
-ShadingField.prototype.onBoostIncrease = function () {
-	this.boost = 1;
+ShadingField.prototype.canDeactivate = function () {
+	if(gamedata.gamephase == -1 && this.active) return true;
+	
+	return false;
+};
+
+ShadingField.prototype.doActivate = function () {
 	var ship = this.ship;
 	if (ship.fighter) {
 		var flight = gamedata.getShip(ship.flightid);//Need to conver tto full ship info.
@@ -1898,10 +1910,9 @@ ShadingField.prototype.onBoostIncrease = function () {
 				if (!shipManager.systems.isDestroyed(ship, flight.systems[i])) {
 					for (var j in system.systems) {
 						var fighterSystem = system.systems[j];	//The fighter's systems.
-						if (fighterSystem.name == "ShadingField" && fighterSystem.id !== this.id) { //Is shading Field but not this one
-							if (!shipManager.power.isBoosted(flight, fighterSystem)) { //Is not boosted.
-								fighterSystem.boost = 1; //Set boost marker for notes.
-								shipManager.power.clickPlus(flight, fighterSystem);	//And boost.											
+						if (fighterSystem.name == "ShadingField") { //Is shading Field but not this one
+							if (!fighterSystem.active) { //Is not boosted.
+								fighterSystem.active = true; //Set boost marker for notes.										
 							}
 						}
 
@@ -1910,11 +1921,12 @@ ShadingField.prototype.onBoostIncrease = function () {
 			}
 			webglScene.customEvent('SystemDataChanged', { ship: flight, system: this });
 		}
+	}else{
+		this.active = true;
 	}
 };
 
-ShadingField.prototype.onBoostDecrease = function () {
-	this.boost = 0;
+ShadingField.prototype.doDeactivate = function () {
 	var ship = this.ship;
 	if (ship.fighter) {
 		var flight = gamedata.getShip(ship.flightid);//Need to conver tto full ship info.
@@ -1925,10 +1937,9 @@ ShadingField.prototype.onBoostDecrease = function () {
 				if (!shipManager.systems.isDestroyed(ship, flight.systems[i])) {
 					for (var j in system.systems) {
 						var fighterSystem = system.systems[j];	//The fighter's systems.
-						if (fighterSystem.name == "ShadingField" && fighterSystem.id !== this.id) { //Is shading Field but not this one
-							if (shipManager.power.isBoosted(flight, fighterSystem)) { //Is not boosted.
-								fighterSystem.boost = 0; //Set boost marker for notes.
-								shipManager.power.clickMinus(flight, fighterSystem);	//And boost.											
+						if (fighterSystem.name == "ShadingField") { //Is shading Field but not this one
+							if (fighterSystem.active) { //Is not boosted.
+								fighterSystem.active = false; //Set boost marker for notes.										
 							}
 						}
 
@@ -1937,16 +1948,18 @@ ShadingField.prototype.onBoostDecrease = function () {
 			}
 			webglScene.customEvent('SystemDataChanged', { ship: flight, system: this });
 		}
+	}else{
+		this.active = false;
 	}
 };
 
 ShadingField.prototype.doIndividualNotesTransfer = function () {
 
-	if (gamedata.gamephase == 3) {
-		var shaded = this.shaded; //Was shaded this turn.		
+	if (gamedata.gamephase == -1) {
+		var active = this.active; //Was shaded this turn.		
 		this.individualNotesTransfer = Array();
-		if (this.boost == 0 && shaded) {
-			this.individualNotesTransfer.push(this.boost);
+		if (active) {
+			this.individualNotesTransfer.push(1);
 		}
 	}
 };
@@ -1965,7 +1978,7 @@ ShadingField.prototype.getOutput = function (ship, system) {
 
 	var output = system.output;
 	output = output + system.outputMod;	//Mod is negative.	
-	if (this.shaded && !ship.flight) output = output * 2; //Boosted ships get double output.	
+	if (this.active && !ship.flight) output = output * 2; //Boosted ships get double output.	
 	output = Math.max(0, output); //output cannot be negative!
 
 	return output;
