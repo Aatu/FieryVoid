@@ -104,3 +104,9 @@ var UltraMatterCannon = function UltraMatterCannon(json, ship) {
 };
 UltraMatterCannon.prototype = Object.create(Matter.prototype);
 UltraMatterCannon.prototype.constructor = UltraMatterCannon;
+
+var SniperCannon = function SniperCannon(json, ship) {
+    Matter.call(this, json, ship);
+};
+SniperCannon.prototype = Object.create(Matter.prototype);
+SniperCannon.prototype.constructor = SniperCannon;

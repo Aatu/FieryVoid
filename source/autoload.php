@@ -3450,6 +3450,9 @@ spl_autoload_register(
 
 
 						//Fred's custom Centauri
+						'ftrdefensegun' => '/server/model/weapons/customs.php',
+						'snipercannon' => '/server/model/weapons/matter.php',
+
 						'altarus' => '/server/model/ships/centauri/Altarus.php',
 						'balvarus' => '/server/model/ships/centauri/Balvarus.php',
 						'corvax' => '/server/model/ships/centauri/Corvax.php',
@@ -3457,9 +3460,14 @@ spl_autoload_register(
 						'darius' => '/server/model/ships/centauri/Darius.php',
 						'elutai' => '/server/model/ships/centauri/Elutai.php',
 						'jara' => '/server/model/ships/centauri/Jara.php',
+                        'maximillian' => '/server/model/ships/centauri/Maximillian.php',
                         'mograte' => '/server/model/ships/centauri/Mograte.php',
+                        'octuran' => '/server/model/ships/centauri/Octuran.php',
                         'primo' => '/server/model/ships/centauri/Primo.php',
+                        'rizek' => '/server/model/ships/centauri/Rizek.php',
+                        'rotas' => '/server/model/ships/centauri/Rotas.php',
 						'vorcharian' => '/server/model/ships/centauri/Vorcharian.php',
+						'vorchariand' => '/server/model/ships/centauri/VorcharianD.php',
 
                         //What If - Alternate design concepts
 						'dagkar_wi' => '/server/model/ships/whatif/dagkar_WI.php',	

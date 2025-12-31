@@ -2987,4 +2987,49 @@ class GromeHvyRailgun extends Weapon{
 
 
 
+
+    class FtrDefenseGun extends Weapon{
+        public $name = "FtrDefenseGun";
+        public $displayName = "Defense Gun";
+		public $iconPath = "sentinelPointDefense.png";
+
+        public $loadingtime = 1;
+        public $priority = 1; //will never fire anyway except defensively, purely a defensive system
+		public $autoFireOnly = true; //this weapon cannot be fired by player
+
+        public $rangePenalty = 2; //irrelevant
+        public $fireControl = array(null, null, null); // fighters, <mediums, <capitals
+
+		public $firingMode = 'Intercept'; //firing mode - just a name essentially
+		public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+    	public $weaponClass = "Particle"; //not important really
+        
+        public function setSystemDataWindow($turn){			
+            parent::setSystemDataWindow($turn);        
+            $this->data["Special"] = "Can only fire to intercept ballistics.";            
+		}
+		
+        public $ballisticIntercept = true; //can intercept ballistic weapons only
+        public $intercept = 4;
+        
+		function __construct($startArc, $endArc, $nrOfShots = 1){
+            $this->defaultShots = $nrOfShots;
+            $this->shots = $nrOfShots;
+            parent::__construct(0, 1, 0, $startArc, $endArc);
+        }
+
+        public function getDamage($fireOrder){        return 0;   }
+        public function setMinDamage(){     $this->minDamage = 0 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 0 ;      }
+
+		
+	} //end of FtrDefenseGun
+
+
+
+
+
+
+
+
 ?>

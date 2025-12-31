@@ -829,6 +829,47 @@ class UltraMatterCannon extends Matter{
 } //UltraMatterCannon
 
 
+    class SniperCannon extends Matter{
+        public $name = "SniperCannon";
+        public $displayName = "Sniper Cannon";        
+	    public $iconPath = "SniperCannon.png";
+		
+        public $animation = "torpedo";
+        public $animationColor = array(192, 192, 192);
+        
+        public $loadingtime = 4;
+
+        public $priority = 2; //Piercing shots go early, to do damage while sections aren't detroyed yet!
+        
+        public $firingModes = array(
+            1 => "Piercing"
+        );
+        public $damageType = 'Piercing';
+        public $weaponClass = "Matter"; //MANDATORY (first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
+                
+        public $rangePenalty = 0.25; //-1/4 hexes
+        public $fireControl = array(null, 4, 6); // fighters, <mediums, <capitals 
+    
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 12;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 10;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+        public function getDamage($fireOrder){
+			return Dice::d(10, 4)+30;   
+		}
+        public function setMinDamage(){     $this->minDamage = 34 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 70 ;      }
+        
+    } //endof class SniperCannon
+
+
 
 
 	

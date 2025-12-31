@@ -68,14 +68,14 @@ class Elutai extends HeavyCombatVessel{
                 ),
                 1=> array(
                     4 => "Thruster",
-                    9 => "BallisticTorpedo",
+                    9 => "Ballistic Torpedo",
                     11 => "GuardianArray",
                     18 => "Structure",
                     20 => "Primary",
                 ),
                 2=> array(
                     4 => "Thruster",
-                    7 => "BallisticTorpedo",
+                    7 => "Ballistic Torpedo",
                     9 => "GuardianArray",
 					18 => "Structure",
                     20 => "Primary",

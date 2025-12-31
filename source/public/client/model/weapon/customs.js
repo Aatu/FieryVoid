@@ -236,3 +236,8 @@ var TestLaser = function TestLaser(json, ship) {
 TestLaser.prototype = Object.create(Weapon.prototype);
 TestLaser.prototype.constructor = TestLaser;
 
+var FtrDefenseGun = function FtrDefenseGun(json, ship) {
+    Weapon.call(this, json, ship);
+};
+FtrDefenseGun.prototype = Object.create(Weapon.prototype);
+FtrDefenseGun.prototype.constructor = FtrDefenseGun;
