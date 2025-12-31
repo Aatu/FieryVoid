@@ -952,13 +952,13 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         <li>In addition the Shading Field has two states, Normal Mode and Shading Mode, which are described below:
             <ul class="circle-list">
                 <li>Normal Mode- the Shading Field provides a 4-point EM Shield in all directions, which operates the same as Vorlon shields, but cannot be flown under by fighters.</li>
-                <li>Shading Mode- During Firing phase (and Deployment Phase) the Shading Field can be boosted to make its vessel 'Shaded' the FOLLOWING turn.  
+                <li>Shading Mode - During Deployment and Pre-Turn Order phases the Shading Field can be activated to make its vessel 'Shaded' that turn.  
                     Whilst Shaded the vessel retains the Jammer effect, doubles the EM shield rating to on its defence profile and, if it is more than 15 hexes away from all enemy units, it becomes invisible to opponents.
                     However, on a turn when a Torvalus ship is Shaded it will not be able to fire any of its weapons.</li> 
             </ul>
         </li>         
         <li>Torvalus Stiletto Fighters have a smaller version of the Shading Field equipped.  
-            This can also be toggled on and off during Firing/Deployment phases but it does not reduce the profile of the fighter flight (by 15) unless they are Shaded.</li>         
+            This can also be toggled on and off during Deployment and Pre-Turn Order phases but onl provides the Jammer effect in Normal Made.  In Shading Mode it reduces the profile of the fighter flight (by 15) and cannot be detected from more that 15 hexes away like ships.</li>         
     <h5>Shade Modulator</h5>
         <li>The Shade Modulator is a versatile Support Weapons found on the Veiled Scimitar, it has four different firing modes which are described below. 
             <ul class="circle-list">
