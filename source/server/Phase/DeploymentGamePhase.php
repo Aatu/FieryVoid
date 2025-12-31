@@ -39,7 +39,7 @@ class DeploymentGamePhase implements Phase
 			$currShip->saveIndividualNotes($dbManager);
         }
 
-        //New segment to allow boosting in Deployment Phase.
+        /*//Attempted segment when boosting in other phases was allowed
         foreach ($ships as $ship){
             if ($ship->userid != $gameData->forPlayer)
                 continue;
@@ -64,7 +64,8 @@ class DeploymentGamePhase implements Phase
             }    
 		
             $dbManager->submitPower($gameData->id, $gameData->turn, $powers);
-        }
+            
+        }*/
         
 		
         foreach ($moves as $shipid=>$move)
