@@ -1021,18 +1021,18 @@ window.shipManager = {
         }     
     },    
 
-
     //True or false function, e.g. for possible use in Deployment Phase to show commit button in case needed.
-    playerHasDeployedShips: function playerHasDeployedShips(playerid) {
-       for (const ship of gamedata.ships) {
+    playerHasDeployedAllShips: function playerHasDeployedAllShips(playerid) {
+        var hasDeployed = true;       
+       
+        for (const ship of gamedata.ships) {
             if(ship.userid !== playerid) continue;
     
             var deploys = shipManager.getTurnDeployed(ship);
-            if(deploys <= gamedata.turn) return true;
+            if(deploys >= gamedata.turn) hasDeployed = false;
         }
-        return false;         
+        return hasDeployed;         
     },
-
 
     //Called in various places to identify a ship as having ability to be invisible to enemy.
     isStealthShip: function(ship) {
