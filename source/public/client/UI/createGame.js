@@ -221,12 +221,12 @@ window.createGame = {
             const h = parseInt(data.depheight) || 0;
 
             // Deployment color based on team
-            let color = team === 1 ? "rgba(200, 50, 50, 0.4)" : "rgba(50, 50, 200, 0.4)";
-            let borderColor = team === 1 ? "#ff6666" : "#6666ff";
+            let color = team === 1 ? "rgba(200, 50, 50, 0.4)" : "rgba(50, 200, 50, 0.4)";
+            let borderColor = team === 1 ? "#ff6666" : "#66ff66";
 
             if (team > 2) {
-                color = "rgba(50, 200, 50, 0.4)";
-                borderColor = "#66ff66";
+                color = "rgba(50, 50, 200, 0.4)";
+                borderColor = "#6666ff";
             }
 
             ctx.fillStyle = color;
@@ -254,17 +254,17 @@ window.createGame = {
             // If y=10, drawY should be CenterY - 10*scale - h/2*scale
             const drawY = offsetY + ((mapHeight / 2) - y - (h / 2)) * scale;
 
-            ctx.fillRect(drawX, drawY, w * scale, h * scale);
-            ctx.strokeRect(drawX, drawY, w * scale, h * scale);
+            ctx.fillRect(drawX +4, drawY, w * scale, h * scale);
+            ctx.strokeRect(drawX+4, drawY, w * scale, h * scale);
 
             // Draw slot number/TeamID
             ctx.save();
             ctx.fillStyle = "white";
-            ctx.font = "bold 12px Arial";
+            ctx.font = "bold 14px Arial";
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
             // Center of the box
-            ctx.fillText(team, drawX + (w * scale) / 2, drawY + (h * scale) / 2);
+            ctx.fillText(team, drawX+4 + (w * scale) / 2, drawY + (h * scale) / 2);
             ctx.restore();
         });
     },
