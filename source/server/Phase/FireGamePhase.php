@@ -37,11 +37,12 @@ class FireGamePhase implements Phase
         $dbManager->setPlayersWaitingStatusInGame($servergamedata->id, false);
 
        //Checks for late-deploying slots to see if next phases skipped - DK 
-       foreach($gameData->slots as $slot){           
-            if ($slot->depavailable == $gameData->turn+1){
+       foreach($gameData->slots as $slot){   
+            $doDeployment = $gameData->checkDeploymentPhaseForPlayer($slot->playerid);                
+            if ($slot->depavailable == $gameData->turn+1 || $doDeployment){
                 //Slot is deploying next turn, ensure that database know it completed this Firing Phase
-                $dbManager->updatePlayerSlotPhase($gameData->id, $slot->playerid, $slot->slot, 3, $gameData->turn);                
-            }else {
+                $dbManager->updatePlayerSlotPhase($gameData->id, $slot->playerid, $slot->slot, 3, $gameData->turn);               
+            } else {
                 //If not deploying next turn, set slot to skip that phase.  Manager::changeTurn always tries to create new Deplyment Phase.
                 $dbManager->updatePlayerSlotPhase($gameData->id, $slot->playerid, $slot->slot, -1, $gameData->turn+1);                
             }        
@@ -65,7 +66,7 @@ class FireGamePhase implements Phase
             if (Firing::validateFireOrders($ship->getAllFireOrders(), $gameData)){
                 $dbManager->submitFireorders($gameData->id, $ship->getAllFireOrders(), $gameData->turn, $gameData->phase);
             }
-            //New segment to allow boosting in Fire Orders Phase.
+            /*//Attempted segment when boosting in other phases was allowed
             $powers = array();
             //Can now bosot Fighter Systems, so look for this.
             if($ship instanceof FighterFlight){                
@@ -104,10 +105,11 @@ class FireGamePhase implements Phase
                 }
             }
 
-            //Sadly we have to add a quick process here to catch things like ships that have used their Specialists in Phase 3, otherwise notes aren't created before firing.
-            $ship->generateAdditionalNotes($gameData, $dbManager);
-
             $dbManager->submitPower($gameData->id, $gameData->turn, $powers);
+            */
+            
+            //Sadly we have to add a quick process here to catch things like ships that have used their Specialists in Phase 3, otherwise notes aren't created before firing.
+            $ship->generateAdditionalNotes($gameData, $dbManager);            
         }		
 
         $dbManager->updatePlayerStatus($gameData->id, $gameData->forPlayer, $gameData->phase, $gameData->turn);
