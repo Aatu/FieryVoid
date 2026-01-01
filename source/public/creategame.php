@@ -174,28 +174,50 @@
         
             <div class="scenario-row">
                 <label for="req">FLEET REQUIREMENTS:</label>
-                <input type="text" id="req" value="Pass the fleet checker / Other">
+                <select id="req">
+                    <option value="Pass the fleet checker">Pass the fleet checker</option>
+                    <option value="Other">Other</option>
+                </select>
+                <input type="text" id="req_custom" class="scenario-custom-input" style="display:none;" placeholder="Enter requirements...">
             </div>
             <div class="scenario-row">
                 <label for="tier">EXPECTED POWER LEVEL:</label>
-                <input type="text" id="tier" value="Tier 1 / Tier 2 / Tier 3 / Ancient / Other">
+                <select id="tier">
+                    <option value="Tier 1">Tier 1</option>
+                    <option value="Tier 2">Tier 2</option>
+                    <option value="Tier 3">Tier 3</option>
+                    <option value="Ancient">Ancient</option>
+                    <option value="Other">Other</option>
+                </select>
+                <input type="text" id="tier_custom" class="scenario-custom-input" style="display:none;" placeholder="Enter power level...">
             </div>
             <div class="scenario-row">
                 <label for="forbidden">FORBIDDEN FACTIONS:</label>
-                <input type="text" id="forbidden" value="None">
+                <input type="text" id="forbidden" value="None" class="forbiddenText">
             </div>                
             <div class="scenario-row">
                 <label for="customfactions">CUSTOM FACTIONS / UNITS:</label>
-                <input type="text" id="customfactions" value="Allowed / Not allowed">
+                <select id="customfactions">
+                    <option value="Allowed">Allowed</option>
+                    <option value="Not allowed">Not allowed</option>
+                </select>
             </div>
             <div class="scenario-row">
                 <label for="enhancements">ENHANCEMENTS:</label>
-                <input type="text" id="enhancements" value="Allowed / Up to 100 points / Not allowed">
+                <select id="enhancements">
+                    <option value="Allowed">Allowed</option>
+                    <option value="Up to X points">Up to X points</option>
+                    <option value="Not allowed">Not allowed</option>
+                </select>
+                <input type="text" id="enhancements_custom" class="scenario-custom-input" style="display:none;" placeholder="Enter enhancement points allowed e.g. 100">
             </div>
     
             <div class="scenario-row">
                 <label for="borders">MAP BORDERS:</label>
-                <input type="text" id="borders" value="Unit leaving map is destroyed / Unit ending movement out of map is destroyed">
+                <select id="borders">
+                    <option value="Unit leaving map is destroyed">Unit leaving map is destroyed</option>
+                    <option value="Unit ending movement out of map is destroyed">Unit ending movement out of map is destroyed</option>
+                </select>
             </div>
             <div class="scenario-row">
                 <label for="called">CALLED SHOTS:</label>
@@ -206,11 +228,17 @@
             </div>
             <div class="scenario-row">
                 <label for="victory">VICTORY CONDITIONS:</label>
-                <input type="text" id="victory" value="Last unit on map / Last ship on map / More forces remaining after Turn 12">
+                <select id="victory">
+                    <option value="Last unit on map">Last unit on map</option>
+                    <option value="Last ship on map">Last ship on map</option>
+                    <option value="More forces remaining after Turn 12">More forces remaining after Turn 12</option>
+                    <option value="Other">Other</option>                    
+                </select>
+                <input type="text" id="victory_custom" class="scenario-custom-input" style="display:none;" placeholder="Enter victory conditions...">
             </div>
-            <div class="scenario-row">
+            <div class="scenario-row additional">
                 <label for="other">ADDITIONAL INFO:</label>
-                <textarea id="other" rows="3" style="width: 100%; resize: vertical;"></textarea>
+                <textarea id="other" rows="3"></textarea>
             </div>     
         </div>
     </section>
@@ -261,7 +289,7 @@
             <div class="map-preview-column">
                 <!--<div class="split-header"><span>DEPLOYMENT ZONE PREVIEW:</span></div>-->
                 <div id="mapPreviewContainer" class="mapPreviewContainer">
-                    <canvas id="mapPreview" width="545" height="390" style="border: 1px solid #215a7a; border-radius: 4px;"></canvas>
+                    <canvas id="mapPreview" width="545" height="390" class="mapPreviewContainerBox"></canvas>
                 </div>
             </div>
         </div>
@@ -300,7 +328,7 @@
                 </div>
                 
                 <div class="create-row2">
-                    <label class="smallSize">DEPLOYMENT:</label>
+                    <label class="smallSize">Deployment:</label>
                     <label>x:</label>
                     <input class="depx tinySize" data-validation="^-{0,1}[0-9]+$" data-default="0" type="number" name="depx" value="0">
                     

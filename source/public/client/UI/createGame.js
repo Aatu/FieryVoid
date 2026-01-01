@@ -40,6 +40,29 @@ jQuery(function ($) {
 
     }, { passive: false });
 
+    // Scenario Custom Input Logic
+    const scenarioCustoms = [
+        { id: 'req', trigger: 'Other' },
+        { id: 'tier', trigger: 'Other' },
+        { id: 'enhancements', trigger: 'Up to X points' },
+        { id: 'victory', trigger: 'Other' }
+    ];
+
+    scenarioCustoms.forEach(item => {
+        $(`#${item.id}`).on('change', function () {
+            const val = $(this).val();
+            if (val === item.trigger) {
+                $(`#${item.id}_custom`).show().focus();
+            } else {
+                $(`#${item.id}_custom`).hide();
+            }
+        });
+        // Init state
+        if ($(`#${item.id}`).val() === item.trigger) {
+            $(`#${item.id}_custom`).show();
+        }
+    });
+
     // Use body delegation for dynamic elements if needed, though structure suggests static buttons for adding slots
     $(".addslotbutton").on("click", createGame.createNewSlot);
     // Delegate close button click since slots are dynamic
@@ -573,7 +596,19 @@ window.createGame = {
         for (const field of fields) {
             const el = document.getElementById(field.id);
             if (el) {
-                const value = el.value.trim();
+                let value = el.value.trim();
+
+                // Check for custom input override
+                const customEl = document.getElementById(field.id + '_custom');
+                if (customEl && customEl.style.display !== 'none') {
+                    const customVal = customEl.value.trim();
+                    if (field.id === 'enhancements') {
+                        value = `Up to ${customVal}pts allowed`;
+                    } else {
+                        value = customVal;
+                    }
+                }
+
                 result += `${field.label}: ${value}\n`;
             }
         }
