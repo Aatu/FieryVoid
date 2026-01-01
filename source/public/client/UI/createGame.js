@@ -1,7 +1,7 @@
 "use strict";
 
 jQuery(function ($) {
-    $("#mapselect").on("change", createGame.mapSelect);
+    $("#backgroundSelect").on("change", createGame.mapSelect);
     createGame.mapSelect();
 
     $("body").on("change", "input", createGame.inputChange);
@@ -110,7 +110,7 @@ window.createGame = {
 
     mapSelect: function mapSelect() {
         $("#default_option").remove();
-        const val = $("#mapselect").val();
+        const val = $("#backgroundSelect").val();
         $("body").css("background-image", "url(img/maps/" + val + ")");
     },
 
@@ -617,12 +617,12 @@ window.createGame = {
 
     setData: function setData() {
         var gamename = $("#gamename").val();
-        var background = $("#mapselect").val();
+        var background = $("#backgroundSelect").val();
         var description = createGame.getScenarioDescriptionFromFields();
         var gamespace = "-1x-1";
         var flight = "";
 
-        if ($("#gamespacecheck:checked").val() == "on") {
+        if ($("#mapDimensionsSelect").val() !== "unlimited") {
             gamespace = "" + createGame.gamespace_data.width + "x" + createGame.gamespace_data.height;
         }
 

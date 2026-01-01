@@ -188,8 +188,8 @@
   text-align: center;
 }
 
-.mapPreviewContainerBox{
-  border: 3px solid #215a7a; 
+.mapPreviewContainerBox {
+  border: 3px solid #215a7a;
   border-radius: 4px;
 }
 
@@ -270,29 +270,41 @@
   vertical-align: middle;
 }
 
+.gameNameSelectContainer,
+.backgroundSelectContainer {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
 .gamename {
   margin-left: 0px;
   margin-top: 5px;
   margin-bottom: 10px;
+  text-align: center;
 }
 
 .gameNameSelect,
-.background{
+.background {
   margin-left: 0px;
   margin-top: 5px;
-  margin-bottom: 10px;  
+  margin-bottom: 10px;
   width: 145px !important;
   box-sizing: border-box;
   flex-shrink: 0;
-  vertical-align: middle;  
+  vertical-align: middle;
 }
 
-.backgroundSelect{
+.mapSelect {
   font-size: 14px;
   width: 200px;
   display: inline-block;
   box-sizing: border-box;
-  flex-shrink: 0;  
+  flex-shrink: 0;
+  vertical-align: middle;
+  margin-left: 0px;
+  margin-top: 5px;
+  margin-bottom: 10px;
 }
 
 .scenario-form {
@@ -349,7 +361,7 @@
   /* Fix width calculation */
 }
 
-.scenario-row .forbiddenText{
+.scenario-row .forbiddenText {
   padding-left: 8px;
 }
 
@@ -364,7 +376,7 @@
   /* Indent below label */
   min-width: 470px !important;
   width: 470px;
-  flex-basis: auto; 
+  flex-basis: auto;
   /* Force new line and fill width minus indent */
   box-sizing: border-box;
 }

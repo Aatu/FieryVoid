@@ -12,7 +12,7 @@
 	$defaultGameName = 'GAME NAME' . $_SESSION["user"];	
 	$playerName = Manager::getPlayerName($_SESSION["user"]);
 	//if ($playerName != '')	
-		$defaultGameName = 'Game of ' . $playerName;
+		$defaultGameName = ucfirst($playerName) . "'s Game";
 
 	if (isset($_POST["docreate"]) && isset($_POST["data"])){
 		$id = Manager::createGame($_SESSION["user"], $_POST["data"]);
@@ -56,21 +56,24 @@
       <div class="panelheader"><span>CREATE YOUR GAME</span></div>
 			
         <div class="split-header" style = "margin-top: 10px">GAME OPTIONS:</div>
-            <div class="mapSelectContainer">
+            <div class="gameNameSelectContainer">
                 <label for="gamename" class="gameNameSelect">GAME NAME:</label>
 			    <input id="gamename" class="gamename" type="text" name="gamename" value="<?php print($defaultGameName); ?>">
             </div>    
         
         <!--<div class="split-header">BACKGROUND & GAME OPTIONS:</div>	-->					
         <!--<div class="createheader">CHOOSE A BACKGROUND:</div>-->
-            <div class="mapSelectContainer">
+            <div class="backgroundSelectContainer">
                 <label for="backgroundSelect" class="background">BACKGROUND:</label>        
-				 <select id="mapselect" class="backgroundSelect" name="background">
+				 <select id="backgroundSelect" class="mapSelect" name="background">
 					<!--<option id="default_option" value="default">select ...</option>-->
 					<?php
 						natsort($maps); // Natural sort: sorts "1", "2", ..., "10", "11"
-						foreach ($maps as $name){							
-							print("<option value=\"".$name."\">".$name."</option>");
+						foreach ($maps as $name){
+                            $displayName = $name;
+                            $displayName = preg_replace('/^\d+\./', '', $displayName);
+                            $displayName = preg_replace('/\.[^.]+$/', '', $displayName);
+							print("<option value=\"".$name."\">".$displayName."</option>");
 						}
 					
 					?>
