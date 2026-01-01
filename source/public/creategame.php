@@ -33,6 +33,7 @@
         <link href="styles/confirm.css" rel="stylesheet" type="text/css">
         <link href="styles/lobby.css" rel="stylesheet" type="text/css">
         <link href="styles/gamesNew.css" rel="stylesheet" type="text/css">        
+        <link href="styles/createGame.css" rel="stylesheet" type="text/css">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
 <!--		<script src="client/helper.js"></script>-->
         <script src="client/mathlib.js"></script>
@@ -50,16 +51,17 @@
   </header>
 
   <main class="container">
-    <section class="panel large create">
+      <form id="createGameForm" method="post">
+      <section class="panel large create">
       <div class="panelheader"><span>CREATE YOUR GAME</span></div>
-			<form id="createGameForm" method="post">
 			
-        <div class="createheader" style = "margin-top: 10px">GAME NAME:</div>
+        <div class="split-header" style = "margin-top: 10px">GAME NAME:</div>
 
-				<input id="gamename" style= "margin-left: 0px" type="text" name="gamename" value="<?php print($defaultGameName); ?>">
-						
-        <div class="createheader">CHOOSE A BACKGROUND:</div>
-				<select id="mapselect" name="background" style= "margin-left: 0px">
+				<input id="gamename" class="gamename" type="text" name="gamename" value="<?php print($defaultGameName); ?>">
+        
+        <div class="split-header">BACKGROUND & GAME OPTIONS:</div>						
+        <!--<div class="createheader">CHOOSE A BACKGROUND:</div>-->
+				 <select id="mapselect" class="backgroundSelect" name="background"> <label for="background">CHOOSE A BACKGROUND</label>
 					<!--<option id="default_option" value="default">select ...</option>-->
 					<?php
 						natsort($maps); // Natural sort: sorts "1", "2", ..., "10", "11"
@@ -71,15 +73,13 @@
 				</select>
         
 
-        <div class="createheader">GAME OPTIONS:</div>
-
         <div id="simultaenousMovement" class="settings-group movementspacecontainer">
             <div>
                 <input id="movementcheck" type="checkbox" name="movementcheck"> <label for="movementcheck" class="clickable">USE SIMULTANEOUS MOVEMENT</label>
             </div>
-            <div id="movementDropdown" style="display:none; margin-top:5px;">
-                <label for="initiativeSelect">NUMBER OF INITIATIVE GROUPS:</label>
-                <select id="initiativeSelect" name="initiativeCategories">
+            <div id="movementDropdown" class="movementDropdown">
+                <label for="initiativeSelect">Number of Initiative Groups:</label>
+                <select id="initiativeSelect" name="initiativeCategories" class="initiativeCategories">
                     <!-- Dropdown options from 1 to 12 -->
         <?php 
         for($i=1;$i<=12;$i++){ 
@@ -102,10 +102,10 @@
                 <input id="terraincheck" type="checkbox" name="terraincheck"> <label for="terraincheck" class="clickable">ADD TERRAIN</label>
             </div>
 
-            <div id="asteroidsDropdown" style="display:none; margin-top:5px; margin-bottom:5px;">
-                <div style="display:flex; align-items:center;">
-                    <label for="asteroidsSelect" style="display:inline-block; width: 210px; margin: 0;">NUMBER OF ASTEROIDS:</label>
-                    <select id="asteroidsSelect" name="asteroidsCategories" style="width: 150px;">
+            <div id="asteroidsDropdown" class="terrainDropdowns">
+                <div class="asteroidsDropdown">
+                    <label for="asteroidsSelect" class="asteroidsSelect">Number of Asteroids:</label>
+                    <select id="asteroidsSelect" name="asteroidsCategories" class="asteroidsCategories">
                         <option value="0">None</option>              
                         <option value="3">Few (3)</option>
                         <option value="6">Several (6)</option>
@@ -117,10 +117,10 @@
                     </select>
                 </div>
             </div>
-            <div id="moonsDropdown" style="display:none; margin-top:10px;">
-                <div style="margin-bottom:5px; display:flex; align-items:center;">
-                    <label for="moonsSmallSelect" style="width: 210px; margin-bottom: 10px; display:inline-block;">SMALL MOONS:</label>
-                    <select id="moonsSmallSelect" name="moonsSmall" style="width: 150px;">
+            <div id="moonsDropdown" class="terrainDropdowns">
+                <div class="moonsDropdown">
+                    <label for="moonsSmallSelect" class="moonsSelect">Small Moons:</label>
+                    <select id="moonsSmallSelect" name="moonsSmall" class="moonsSmallSelect">
                         <option value="0">None</option>
                         <option value="1">1</option>
                         <option value="2">2</option>
@@ -129,9 +129,9 @@
                         <option value="5">5</option>        
                     </select>
                 </div>
-                <div style="margin-bottom:5px; display:flex; align-items:center;">
-                    <label for="moonsMediumSelect" style="width: 210px; margin-bottom: 10px; display:inline-block;">MEDIUM MOONS:</label>
-                    <select id="moonsMediumSelect" name="moonsMedium" style="width: 150px;">
+                <div class="moonsDropdown">
+                    <label for="moonsMediumSelect" class="moonsSelect">Medium Moons:</label>
+                    <select id="moonsMediumSelect" name="moonsMedium" class="moonsMediumSelect">
                         <option value="0">None</option>
                         <option value="1">1</option>
                         <option value="2">2</option>
@@ -139,9 +139,9 @@
                         <option value="4">4</option>        
                     </select>
                 </div>
-                <div style="margin-bottom:5px; display:flex; align-items:center;">
-                    <label for="moonsLargeSelect" style="width: 210px; margin-bottom: 10px; display:inline-block;">LARGE MOONS:</label>
-                    <select id="moonsLargeSelect" name="moonsLarge" style="width: 150px;">
+                <div class="moonsDropdown">
+                    <label for="moonsLargeSelect" class="moonsSelect">Large Moons:</label>
+                    <select id="moonsLargeSelect" name="moonsLarge" class="moonsLargeSelect">
                         <option value="0">None</option>
                         <option value="1">1</option>
                         <option value="2">2</option>        
@@ -156,9 +156,9 @@
                 <input id="desperatecheck" type="checkbox" name="desperatecheck"> <label for="desperatecheck" class="clickable">USE 'DESPERATE' SCENARIO RULES</label>
             </div>    
             
-            <div id="desperateDropdown" style="display:none; margin-top:5px;">
-                <label for="desperateSelect">DESPERATE RULES APPLY TO:</label>
-                <select id="desperateSelect" name="desperateCategories">
+            <div id="desperateDropdown" class="desperateDropdown">
+                <label for="desperateSelect">Apply to:</label>
+                <select id="desperateSelect" name="desperateCategories"  class="desparateSelect">
                     <option value="-1">Both teams</option>
                     <option value="1">Team 1</option>
                     <option value="2">Team 2</option>
@@ -213,30 +213,33 @@
                 <textarea id="other" rows="3" style="width: 100%; resize: vertical;"></textarea>
             </div>     
         </div>
+    </section>
 
+    <section class="panel large create" style="margin-top: 15px;">
         <!-- Moved Game Space Here (Below Scenario Description) -->
-        <div class="split-header" style="margin-top: 20px;">GAME SPACE:</div>
+        <div class="split-header">MAP LAYOUT AND TEAMS:</div>
         <div id="gamespace" class="settings-group gamespacecontainer">
-            <div>
-                <input id="gamespacecheck" type="checkbox" name="fixedgamespace" checked> <label for="gamespacecheck" class="clickable">SET MAP BOUNDARIES</label>
+            <div class="mapSelectContainer">
+                <label for="mapDimensionsSelect" class="mapDimensionsSelect">CHOOSE MAP:</label>
+                <select id="mapDimensionsSelect" name="mapdimensions" class="mapSelect">
+                    <option value="custom">Custom</option>
+                    <option value="knifefight">Knife Fight (30x24)</option>
+                    <option value="standard" selected>Standard (42x30)</option>
+                    <option value="baseassault">Base Assault (60x40)</option>
+                    <option value="unlimited">Unlimited</option>                    
+                </select>
             </div>
             <div class="gamespacedefinition">
-                <span class="smallSize headerSpan">MAP DIMENSIONS:</span>
+                <span class="mapDimensions">MAP SIZE:</span>
                 <span class="unlimitedspace">
-                    <span>NO BOUNDARIES</span>
+                    <span>No Boundaries</span>
                 </span>
                 <span class="limitedspace invisible">
-                    <span>WIDTH:</span>
+                    <span>Width:</span>
                     <input class ="spacex tinySize" data-validation="^-{0,1}[0-9]+$" data-default ="0" type="number" name="spacex" value="0">
-                    <span>HEIGHT:</span>
+                    <span>Height:</span>
                     <input class ="spacey tinySize" data-validation="^-{0,1}[0-9]+$" data-default ="0" type="number" name="spacey" value="0">   
-                    &nbsp;&nbsp;
-                    <span style="margin-left: 20px;">PRESETS:</span>
-                    <span class="clickable setsizeknifefight" style="text-decoration: underline; color: #8bcaf2; cursor:pointer;" title="30x24">KNIFE FIGHT</span>
-                    &nbsp;/&nbsp;				    
-                    <span class="clickable setsizestandard" style="text-decoration: underline; color: #8bcaf2; cursor:pointer;" title="42x30">STANDARD</span>
-                    &nbsp;/&nbsp;
-                    <span class="clickable setswitchsizebaseassault" style="text-decoration: underline; color: #8bcaf2; cursor:pointer;" title="60x40">BASE ASSAULT</span>
+
                 </span>
             </div>
         </div>
@@ -247,18 +250,18 @@
             <div class="slots-column">
                 <div class="createsubheader" style="margin-top:0;">TEAM 1:</div>
                 <div id="team1" class="subpanel slotcontainer" style="border:none; background:transparent;"></div>
-                <div><span class="clickable addslotbutton team1" style="margin-left: 5px; margin-top:5px; color: #8bcaf2">ADD SLOT</span></div>
+                <div><span class="clickable addslotbutton team1" class="add-slot">ADD SLOT</span></div>
                 
                 <div class="createsubheader">TEAM 2:</div>
                 <div id="team2" class="subpanel slotcontainer" style="border:none; background:transparent;"></div>
-                <div><span class="clickable addslotbutton team2" style="margin-left: 5px; margin-top:5px; color: #8bcaf2">ADD SLOT</span></div>
+                <div><span class="clickable addslotbutton team2" class="add-slot">ADD SLOT</span></div>
             </div>
 
             <!-- Right Column: Map Preview -->
             <div class="map-preview-column">
-                <div class="split-header"><span>DEPLOYMENT ZONE PREVIEW:</span></div>
-                <div id="mapPreviewContainer" style="margin-top: 10px;  margin-bottom: 20px; text-align: center;">
-                    <canvas id="mapPreview" width="420" height="300" style="border: 1px solid #215a7a; border-radius: 4px;"></canvas>
+                <!--<div class="split-header"><span>DEPLOYMENT ZONE PREVIEW:</span></div>-->
+                <div id="mapPreviewContainer" class="mapPreviewContainer">
+                    <canvas id="mapPreview" width="545" height="390" style="border: 1px solid #215a7a; border-radius: 4px;"></canvas>
                 </div>
             </div>
         </div>
@@ -274,48 +277,48 @@
                     </button>
                 </div>                  
 				
-			</form>
-			
-		</div>
+
         
 
         <!-- Template for Slots (Hidden) -->
         <div id="slottemplatecontainer" style="display:none;">
             <div class="slot-card slot">
                 <div class="header-row">
-                    <span class="header-title">SLOT</span>
-                    <span class="clickable close remove-btn">REMOVE SLOT</span>
+                    <div style="display:flex; align-items:center;">
+                        <label class="slotName">SLOT NAME:</label>
+                        <input class="name mediumSize" type="text" name="name" value="BLUE" style="min-width: 150px;">
+                    </div>
+                    <span class="clickable close remove-btn">Remove Slot</span>
                 </div>
                 <div class="create-row">
-                    <label>NAME:</label>
-                    <input class="name mediumSize" type="text" name="name" value="BLUE">
                     
-                    <label>POINTS:</label>
+                    <label>Points:</label>
                     <input class="points smallSize" type="number" name="points" value="0">
                     
-                    <label>DEPLOYS ON TURN:</label>
+                    <label>Deploys on Turn:</label>
                     <input class="depavailable tinySize" type="number" name="depavailable" value="1" min="1">
                 </div>
                 
-                <div class="create-row" style="margin-top: 5px; border-top: 1px dashed #215a7a; padding-top: 5px;">
+                <div class="create-row2">
                     <label class="smallSize">DEPLOYMENT:</label>
-                    <label>X:</label>
+                    <label>x:</label>
                     <input class="depx tinySize" data-validation="^-{0,1}[0-9]+$" data-default="0" type="number" name="depx" value="0">
                     
-                    <label>Y:</label>
+                    <label>y:</label>
                     <input class="depy tinySize" type="number" name="depy" value="1">
                     
-                    <label class="depwidthheader">WIDTH:</label>
+                    <label class="depwidthheader">Width:</label>
                     <input class="depwidth tinySize" type="number" name="depwidth" value="0">
                     
-                    <label class="depheightheader">HEIGHT:</label>
+                    <label class="depheightheader">Height:</label>
                     <input class="depheight tinySize" type="number" name="depheight" value="0">
                 </div>
             </div>
         </div>
         </section>
+      </form>
 
-        <div id="globalchat" class="panel large create" style="height:200px;">
+        <div id="globalchat" class="panel large create" style="height:200px; margin-top: 15px;">
         <?php 
             $chatgameid = 0;
             $chatelement = "#globalchat";

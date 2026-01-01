@@ -41,7 +41,7 @@ a:hover {
 }
 
 .container {
-  max-width: 1300px;
+  max-width: 1200px;
   margin: 20px auto;
   padding: 0 20px;
 }
@@ -311,16 +311,7 @@ a:hover {
   margin: 0px auto 10px auto;
 }
 
-.panel.large.create {
-  width: 1300px;
-  /* Widened to fit split view */
-  max-width: 100%;
-  margin: 0px auto 10px auto;
-  background: rgba(23, 39, 54, 0.9);
-  border: 1px solid #215a7a;
-  box-sizing: border-box;
-  /* Ensure padding doesn't overflow */
-}
+
 
 /* Typography & Panels */
 .news-panel h2 {
@@ -436,7 +427,7 @@ a:hover {
 .btn-secondary {
   background: #215a7a;
   color: white;
-  font-size: 1.2em;
+  font-size: 1em;
   border: 1px solid #7298a7;
   width: 200px;
   text-align: center;
@@ -450,7 +441,7 @@ a:hover {
 .btn-success {
   background: #3c7a3c;
   color: white;
-  font-size: 1.2em;
+  font-size: 1em;
   border: 1px solid #66b266;
   width: 200px;
   text-align: center;
@@ -461,20 +452,7 @@ a:hover {
   /* vertically center the text */
 }
 
-.btn-create-submit {
-  background: #3c7a3c;
-  color: white;
-  font-size: 1.2em;
-  border: 1px solid #66b266;
-  width: 150px;
-  text-align: center;
-  box-sizing: border-box;
-  height: 30px;
-  line-height: normal;
-  margin-top: 20px;
-  float: right;
-  padding: 5px;
-}
+
 
 .btn-success-create {
   background: #3c7a3c;
@@ -499,8 +477,8 @@ a:hover {
   text-align: center;
   box-sizing: border-box;
 
-  font-size: 1.2em;
-  width: 120px;
+  font-size: 1em;
+  width: 140px;
   min-width: 90px;
   height: auto;
   line-height: normal;
@@ -514,8 +492,8 @@ a:hover {
   text-align: center;
   box-sizing: border-box;
 
-  font-size: 1.1em;
-  width: 120px;
+  font-size: 1em;
+  width: 140px;
   min-width: 90px;
   height: auto;
   line-height: normal;
@@ -551,9 +529,7 @@ a:hover {
   opacity: 0.9;
 }
 
-.create-game-btn {
-  margin-top: 15px;
-}
+
 
 .clickableGames {
   font-size: 12px;
@@ -679,136 +655,10 @@ a:hover {
 }
 
 /*Create Game/Game Lobby form*/
-.scenario-form {
-  margin-top: 5px;
-  margin-bottom: 0px;
-  padding: 5px;
-  background: rgba(23, 39, 54, 0.00);
-}
-
-/* New Split Layout Styles */
-.scenario-preview-wrapper {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-  align-items: flex-start;
-}
-
-.scenario-preview-wrapper .scenario-form {
-  flex: 1;
-  /* Grow to fill available space */
-  min-width: 300px;
-  /* Minimum width before wrapping */
-}
-
-.scenario-preview-wrapper .map-preview-column {
-  flex: 0 0 450px;
-  /* Fixed width for the preview column */
-  max-width: 100%;
-}
+/*Create Game/Game Lobby form - Removed scenario styles to createGame.css */
 
 
-.scenario-row {
-  display: flex;
-  align-items: center;
-  margin-bottom: 10px;
-}
 
-.scenario-row label {
-  flex: 0 0 150px;
-  font-weight: bold;
-  font-size: 14px;
-}
-
-.scenario-row input,
-.scenario-row select,
-.scenario-row textarea {
-  flex: initial;
-  padding: 5px;
-  font-size: 14px;
-  background-color: #0c1a28;
-  color: #DEEBFF;
-  border: 1px solid #215a7a;
-  border-radius: 4px;
-  width: -moz-fit-content;
-  width: fit-content;
-  min-width: 500px;
-}
-
-/* Applied globally to createGame inputs for consistency in dark theme */
-input[type="text"],
-input[type="number"],
-select,
-textarea {
-  background-color: #0c1a28;
-  color: #DEEBFF;
-  border: 1px solid #215a7a;
-  padding: 4px;
-  border-radius: 3px;
-  font-size: 14px;
-}
-
-input[type="text"]:focus,
-input[type="number"]:focus,
-select:focus,
-textarea:focus {
-  outline: none;
-  border-color: #8bcaf2;
-  box-shadow: 0 0 3px #215a7a;
-}
-
-
-.scenario-description {
-  white-space: normal;
-  background: rgba(23, 39, 54, 0.00);
-  color: #DEEBFF;
-  padding: 5px 10px 10px 0px;
-  border-radius: 6px;
-  line-height: 1.6;
-  font-family: sans-serif;
-}
-
-.scenario-description strong {
-  color: #DEEBFF;
-}
-
-
-.gamespacedefinition {
-  height: 24px;
-  position: relative;
-  margin-top: 5px;
-  margin-bottom: 0px;
-}
-
-.createheader {
-  color: #DEEBFF;
-  display: block;
-  font-size: 1.17em;
-  margin-block-start: 0.5em;
-  margin-block-end: 0.5em;
-  margin-inline-start: 0px;
-  margin-inline-end: 0px;
-  font-weight: bold;
-  unicode-bidi: isolate;
-  margin-top: 20px;
-  margin-bottom: 10px;
-  border-bottom: 2px solid #215a7a;
-}
-
-.createsubheader {
-  color: #e0e7ef;
-  display: block;
-  font-size: 1.17em;
-  margin-block-start: 0.5em;
-  margin-block-end: 0.5em;
-  margin-inline-start: 0px;
-  margin-inline-end: 0px;
-  font-weight: bold;
-  unicode-bidi: isolate;
-  margin-top: 15px;
-  margin-bottom: 5px;
-  margin-left: 5px;
-}
 
 .lobbyheader {
   color: #DEEBFF;
@@ -844,70 +694,7 @@ kbd {
 }
 
 /* Slot Card Styling */
-.slot-card {
-  background: #0f2538;
-  border: 1px solid #215a7a;
-  border-radius: 5px;
-  padding: 10px;
-  margin-bottom: 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  position: relative;
-  font-size: 14px;
-}
-
-.slot-card .header-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid #215a7a;
-  padding-bottom: 5px;
-  margin-bottom: 5px;
-}
-
-.slot-card .header-title {
-  font-weight: bold;
-  color: #8bcaf2;
-  text-transform: uppercase;
-}
-
-.slot-card .create-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 10px;
-  padding-top: 10px;
-}
-
-.slot-card label {
-  font-size: 14px;
-  color: #a0b8c8;
-
-}
-
-.slot-card .remove-btn {
-  color: #DEEBFF !important;
-  cursor: pointer;
-  font-size: 12px;
-  border: 2px solid #215a7a;
-  padding: 2px 2px;
-  border-radius: 3px;
-  transition: background 0.2s;
-  margin-top: -5px !important;
-}
-
-.slot-card .remove-btn:hover {
-  background: rgba(229, 115, 115, 0.2);
-}
-
-.settings-group {
-  border: 1px solid #215a7a;
-  background: #0b1e2e;
-  padding: 10px;
-  margin-bottom: 15px;
-  border-radius: 4px;
-}
+/* Slot card and settings moved to createGame.css */
 
 
 
@@ -1012,73 +799,9 @@ kbd {
 }
 
 /* Hide HTML5 Up/Down arrows from input[type=number] */
-input[type=number]::-webkit-inner-spin-button,
-input[type=number]::-webkit-outer-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-input[type=number] {
-  -moz-appearance: textfield;
-  /* Firefox */
-  appearance: textfield;
-}
+/* Number input styling moved to createGame.css */
 
 /* Header Alignment Class - applied to both columns */
-.split-header {
-  margin-top: 5px;
-  margin-bottom: 15px;
-  color: #DEEBFF;
-  display: block;
-  font-size: 1.17em;
-  font-weight: bold;
-  border-bottom: 2px solid #215a7a;
-  text-transform: uppercase;
-  text-align: left;
-  /* Default left */
-}
+/* Split header and slots wrapper moved to createGame.css */
 
-.map-preview-column .split-header {
-  text-align: center;
-  margin-top: 15px;
-  /* Center only for map preview */
-}
-
-/* Slots and Map Split Layout */
-.slots-map-wrapper {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-  /* align-items: stretch; implied default */
-  margin-top: 20px;
-}
-
-.slots-map-wrapper .slots-column {
-  flex: 1;
-  min-width: 300px;
-}
-
-.slots-map-wrapper .map-preview-column {
-  flex: 0 0 450px;
-  max-width: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-@media screen and (max-width: 900px) {
-  .slots-map-wrapper {
-    flex-direction: column;
-  }
-
-  .slots-map-wrapper .map-preview-column {
-    flex: 1;
-    width: 100%;
-    order: -1;
-  }
-
-  .slots-map-wrapper .map-preview-column .split-header {
-    text-align: left;
-    margin-top: 0;
-  }
-}}
+/* Removed slots-map-wrapper media query */

@@ -65,19 +65,14 @@ jQuery(function ($) {
     });
 
     // Bind checkbox events
-    $("#gamespacecheck").on("click", createGame.doGameSpaceCheck);
-    // $("#gamespacecheck").on("click", createGame.doFlightCheck); // Seems redundant or wrong to bind flight check to gamespace check, but keeping if it was intended logic, though likely flightSizeCheck was intended. However, flightSizeCheck is commented out in HTML.
+    $("#mapDimensionsSelect").on("change", createGame.onMapDimensionsChange);
 
     $("#movementcheck").on("click", createGame.doMovementCheck);
     $("#desperatecheck").on("click", createGame.doDesperateCheck);
     $("#terraincheck").on("click", createGame.doTerrainCheck);
 
-    $(".setsizeknifefight").on("click", createGame.doSwitchSizeKnifeFight);
-    $(".setswitchsizebaseassault").on("click", createGame.doSwitchSizeBaseAssault);
-    $(".setsizestandard").on("click", createGame.doSwitchSizeStandard);
-
     createGame.createSlotsFromArray();
-    createGame.doGameSpaceCheck(); //let's run proper map size setting right at the start
+    createGame.onMapDimensionsChange(); // Run on load
     createGame.drawMapPreview();
 });
 
@@ -118,12 +113,14 @@ window.createGame = {
 
         if (inputname == "spacex") {
             createGame.gamespace_data.width = parseInt(value);
+            $("#mapDimensionsSelect").val("custom");
             createGame.drawMapPreview();
             return;
         }
 
         if (inputname == "spacey") {
             createGame.gamespace_data.height = parseInt(value);
+            $("#mapDimensionsSelect").val("custom");
             createGame.drawMapPreview();
             return;
         }
@@ -152,7 +149,7 @@ window.createGame = {
         const ctx = canvas.getContext("2d");
         if (!ctx) return;
 
-        const isLimited = $("#gamespacecheck").is(":checked");
+        const isLimited = $("#mapDimensionsSelect").val() !== "unlimited";
 
         // Use fixed width/height if unlimited is selected
         const mapWidth = isLimited ? (createGame.gamespace_data.width || 1) : 84;
@@ -179,7 +176,7 @@ window.createGame = {
         ctx.fillStyle = "#050a10";
         ctx.fillRect(offsetX, offsetY, mapWidth * scale, mapHeight * scale);
 
-        ctx.strokeStyle = "#215a7a";
+        ctx.strokeStyle = "#deebffaf";
         ctx.lineWidth = 2;
         ctx.strokeRect(offsetX, offsetY, mapWidth * scale, mapHeight * scale);
 
@@ -221,8 +218,8 @@ window.createGame = {
             const h = parseInt(data.depheight) || 0;
 
             // Deployment color based on team
-            let color = team === 1 ? "rgba(200, 50, 50, 0.4)" : "rgba(50, 200, 50, 0.4)";
-            let borderColor = team === 1 ? "#ff6666" : "#66ff66";
+            let color = team === 1 ? "rgba(50, 200, 50, 0.4)" : "rgba(200, 50, 50, 0.4)";
+            let borderColor = team === 1 ? "#66ff66" : "#ff6666";
 
             if (team > 2) {
                 color = "rgba(50, 50, 200, 0.4)";
@@ -254,8 +251,8 @@ window.createGame = {
             // If y=10, drawY should be CenterY - 10*scale - h/2*scale
             const drawY = offsetY + ((mapHeight / 2) - y - (h / 2)) * scale;
 
-            ctx.fillRect(drawX +4, drawY, w * scale, h * scale);
-            ctx.strokeRect(drawX+4, drawY, w * scale, h * scale);
+            ctx.fillRect(drawX + 6, drawY, w * scale, h * scale);
+            ctx.strokeRect(drawX + 6, drawY, w * scale, h * scale);
 
             // Draw slot number/TeamID
             ctx.save();
@@ -264,7 +261,7 @@ window.createGame = {
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
             // Center of the box
-            ctx.fillText(team, drawX+4 + (w * scale) / 2, drawY + (h * scale) / 2);
+            ctx.fillText(team, drawX + 6 + (w * scale) / 2, drawY + (h * scale) / 2);
             ctx.restore();
         });
     },
@@ -364,43 +361,20 @@ window.createGame = {
     },
 
 
-    doGameSpaceCheck: function doGameSpaceCheck(data) {
-        var checkval = $("#gamespacecheck:checked").val();
+    onMapDimensionsChange: function () {
+        const val = $("#mapDimensionsSelect").val();
 
-        if (checkval == "on") {
-            $(".gamespacedefinition .unlimitedspace").addClass("invisible");
-            $(".gamespacedefinition .limitedspace").removeClass("invisible");
-            createGame.gamespace_data.width = 42;
-            createGame.gamespace_data.height = 30;
-            $(".spacex").val(createGame.gamespace_data.width);
-            $(".spacey").val(createGame.gamespace_data.height);
-            $(".deptype").val("box");
-
-            // When setting defaults, update team 1 and team 2 slots effectively
-            // Note: This logic assumes hardcoded IDs 1 and 2 exist, which they usually do
-            // But we should probably just update the JS data model and then push to UI
-
-            // Helper to update a slot in the array
-            const updateSlotInArray = (team, updates) => {
-                for (let slot of createGame.slots) {
-                    if (slot.team == team) {
-                        Object.assign(slot, updates);
-                    }
-                }
-            };
-
-            const team1Defaults = { depx: -19, depy: 0, depwidth: 5, depheight: 30, deptype: "box" };
-            const team2Defaults = { depx: 18, depy: 0, depwidth: 5, depheight: 30, deptype: "box" };
-
-            updateSlotInArray(1, team1Defaults);
-            updateSlotInArray(2, team2Defaults);
-
-            // Refresh UI from Data
-            createGame.refreshSlotsUI();
-
-        } else {
+        if (val === "unlimited") {
             $(".gamespacedefinition .unlimitedspace").removeClass("invisible");
             $(".gamespacedefinition .limitedspace").addClass("invisible");
+        } else {
+            $(".gamespacedefinition .unlimitedspace").addClass("invisible");
+            $(".gamespacedefinition .limitedspace").removeClass("invisible");
+
+            if (val === "standard") createGame.doSwitchSizeStandard();
+            else if (val === "knifefight") createGame.doSwitchSizeKnifeFight();
+            else if (val === "baseassault") createGame.doSwitchSizeBaseAssault();
+            // custom: do nothing, just show fields
         }
 
         createGame.drawMapPreview();
