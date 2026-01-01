@@ -55,13 +55,17 @@
       <section class="panel large create">
       <div class="panelheader"><span>CREATE YOUR GAME</span></div>
 			
-        <div class="split-header" style = "margin-top: 10px">GAME NAME:</div>
-
-				<input id="gamename" class="gamename" type="text" name="gamename" value="<?php print($defaultGameName); ?>">
+        <div class="split-header" style = "margin-top: 10px">GAME OPTIONS:</div>
+            <div class="mapSelectContainer">
+                <label for="gamename" class="gameNameSelect">GAME NAME:</label>
+			    <input id="gamename" class="gamename" type="text" name="gamename" value="<?php print($defaultGameName); ?>">
+            </div>    
         
-        <div class="split-header">BACKGROUND & GAME OPTIONS:</div>						
+        <!--<div class="split-header">BACKGROUND & GAME OPTIONS:</div>	-->					
         <!--<div class="createheader">CHOOSE A BACKGROUND:</div>-->
-				 <select id="mapselect" class="backgroundSelect" name="background"> <label for="background">CHOOSE A BACKGROUND</label>
+            <div class="mapSelectContainer">
+                <label for="backgroundSelect" class="background">BACKGROUND:</label>        
+				 <select id="mapselect" class="backgroundSelect" name="background">
 					<!--<option id="default_option" value="default">select ...</option>-->
 					<?php
 						natsort($maps); // Natural sort: sorts "1", "2", ..., "10", "11"
@@ -71,6 +75,7 @@
 					
 					?>
 				</select>
+            </div>    
         
 
         <div id="simultaenousMovement" class="settings-group movementspacecontainer">

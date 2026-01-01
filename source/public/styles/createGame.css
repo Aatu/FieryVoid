@@ -276,9 +276,23 @@
   margin-bottom: 10px;
 }
 
-.backgroundSelect {
+.gameNameSelect,
+.background{
+  margin-left: 0px;
   margin-top: 5px;
-  margin-bottom: 15px;
+  margin-bottom: 10px;  
+  width: 145px !important;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  vertical-align: middle;  
+}
+
+.backgroundSelect{
+  font-size: 14px;
+  width: 200px;
+  display: inline-block;
+  box-sizing: border-box;
+  flex-shrink: 0;  
 }
 
 .scenario-form {
