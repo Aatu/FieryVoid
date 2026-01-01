@@ -1054,11 +1054,11 @@ class GravityNet extends Weapon implements SpecialAbility{
     public $fireControl = array(1, 2, 3); // fighters, <mediums, <capitals 
 	public $preFires = true;
     public $canSplitShots = true;
+    private static $alreadyGravityNetMoved = array();//Array to track which targets have already been moved by a gravity net so only the first hit on a target performs the gravity net move.
     
     //protected $hasSpecialLaunchHexCalculation = true;
     public $moveDistance = "";
-    public $showHexagonArc = true;
-    public $processHit = true; //varible to allow toggle of whether the hit from this wep is processed. This allows for multi gravnet shots to be made into target but only the one that hits with the highest move amount is processed. 
+    public $showHexagonArc = true; 
 
     public $specialHitChanceCalculation = true;			
 	public $repairPriority = 6;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
@@ -1068,7 +1068,6 @@ class GravityNet extends Weapon implements SpecialAbility{
 	);
 	    
     protected $possibleCriticals = array(14 => "ReducedRange");
-	//private static $alreadyNetted = array();	
 
     function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
 
@@ -1080,7 +1079,7 @@ class GravityNet extends Weapon implements SpecialAbility{
 			$powerReq = 5;
 		}
 		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-        GravityNetHandler::addGravityNet($this);//so all gravity nets are accessible together.
+        GravityNetHandler::addGravityNet($this);//so all Targeting Array are accessible together.
     }
 
 	public function getSpecialAbilityValue($args)
@@ -1098,49 +1097,7 @@ class GravityNet extends Weapon implements SpecialAbility{
 		parent::setSystemDataWindow($turn);     
     }
 
-    /*
-    public function getFiringHex($gamedata, $fireOrder) {
-
-		    $gravNetShooter = null; // Initialize $launchPos outside the loop
-			
-			if($fireOrder->damageclass == 'gravitic'){
-				$gravNetShooter = parent::getFiringHex($gamedata, $fireOrder); //Use normal method to get firingHex for gravity net shot itself into target (shooter's location)
-			}else{				
-				$allFireOrders = $this->getFireOrders($gamedata->turn);
-				$gravNetMovePosOrder = null; //second fire order is always grav net move target.	
-
-				foreach($allFireOrders as $fireOrderCheck){ //make sure gravNetMovePosOrder is correct order in allFireOrders
-					if ($fireOrderCheck->damageclass == 'gravNetMoveHex'){
-						$gravNetMovePosOrder = $fireOrderCheck;					
-						break;						
-					}				
-				}	
-			
-				if($gravNetMovePosOrder){				       	
-						// Sometimes player might target ship after all...
-						if ($launcherFireOrder->targetid != -1) {
-							$targetship = $gamedata->getShipById($launcherFireOrder->targetid);
-							$movement = $targetship->getLastTurnMovement($launcherFireOrder->turn);
-							$launcherFireOrder->x = $movement->position->q;
-							$launcherFireOrder->y = $movement->position->r;
-							$launcherFireOrder->targetid = -1; // Correct the error
-						}
-
-					$target = new OffsetCoordinate($launcherFireOrder->x, $launcherFireOrder->y);
-					$launchPos = $target; 	            
-					//break;				       
-				}
-
-				//Check in case something went wrong, in which case use default to prevent error.	
-				if($launchPos == null || $launcherFireOrder == null) $launchPos = parent::getFiringHex($gamedata, $fireOrder); //Go back to normal function if returning null for some reason.
-			}
-
-		    return $gravNetMovePos;
-		} //endof getFiringHex
-        */
-
-	public function calculateHitBase($gamedata, $fireOrder){         
-        
+	public function calculateHitBase($gamedata, $fireOrder){            
         if($fireOrder->damageclass == 'gravNetMoveHex'){
 				$fireOrder->needed = 100; //always true
 				$fireOrder->updated = true;
@@ -1161,36 +1118,38 @@ class GravityNet extends Weapon implements SpecialAbility{
 
     public function fire($gamedata, $fireOrder){                   
         parent::fire($gamedata, $fireOrder); 		
-        if($fireOrder->shotshit > 0){
+        if($fireOrder->shotshit > 0){            
             $fireOrder->pubnotes = "<br>Ship has been forced to move by a Gravity Net.";               
         }    
     }
     
     protected function beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata){ 
-        //only process the move for the grav net with the largest move distance for a given target  
-          foreach(GravityNetHandler::$gravityNets as $checkedGravityNet){//loop through each gravity net, see if checkedGravityNet hit the same target and has longer move range then current gravity net.
-
-            }
-
-        if($fireOrder->damageclass == 'gravitic'){ //should only process the grav net's first fireOrder (pertains to actual shot) and then get gravNetPos from 2nd hexTarget order		    
+        if($fireOrder->damageclass == 'gravitic'){ //should only process the grav net's first fireOrder (pertains to actual shot) and then get gravNetPos from 2nd hexTarget order         
             
-          
-            
+            /*
+            if (isset(GravityNet::$alreadyGravityNetMoved[$fireOrder->targetid])){ //check if targetid is in already gravity net moved array.                
+                $fireOrder->updated = true; 
+                $fireOrder->pubnotes = "<br>Ship has already been moved by a Gravity Net.";                         
+                    return; //target already moved by a previous Gravity Net
+            }               
+            GravityNet::$alreadyGravityNetMoved[$fireOrder->targetid] = true; //mark target as already gravity net moved. 
+            */
+            GravityNetHandler::getGravityNetsOnTarget($target);         
             $this->doGravityNetMove($target, $gamedata);
-        }     
-    
+        }   
     }
+
     private function doGravityNetMove($target, $gamedata){
         $allFireOrders = $this->getFireOrders($gamedata->turn);
         $gravNetMovePosOrder = null; //var to hold grav net move position order, ie the hexTarget order.
         $gravNetMovePos = null; //var to hold grav net move target hex.
 
-            foreach($allFireOrders as $fireOrderCheck){ //make sure gravNetMovePosOrder is correct order in allFireOrders
-                if ($fireOrderCheck->damageclass == 'gravNetMoveHex'){
-                    $gravNetMovePosOrder = $fireOrderCheck;					
-                    break;
-                }
-            } 
+        foreach($allFireOrders as $fireOrderCheck){ //make sure gravNetMovePosOrder is correct order in allFireOrders
+            if ($fireOrderCheck->damageclass == 'gravNetMoveHex'){
+                $gravNetMovePosOrder = $fireOrderCheck;					
+                break;
+            }
+        } 
 
         $xpos = $gravNetMovePosOrder->x; //get x coord for movement
         $ypos = $gravNetMovePosOrder->y; //get y coord for movement
@@ -1204,7 +1163,6 @@ class GravityNet extends Weapon implements SpecialAbility{
 
         //Add shifted movement order to database
         Manager::insertSingleMovement($gamedata->id, $target->id, $gravNetMove);
-
     }
     
     public function generateIndividualNotes($gameData, $dbManager){ //dbManager is necessary for Initial phase only
@@ -1259,16 +1217,34 @@ class GravityNet extends Weapon implements SpecialAbility{
      //endof GravityNet
 }
 
-class GravityNetHandler(){ //Used to 
-    public $name = "GravityNetHandler";
-	private static $gravityNets = array();
-	
+class GravityNetHandler{
+	public $name = "GravityNetHandler";
+	private static $gravityNets = array();	
 	
 	//should be called by every Targeting Array on creation!
 	public static function addGravityNet($weapon){
-		GravityNetHandler::$gravityNets[] = $weapon;		
+		self::$gravityNets[] = $weapon;		
 	}
 
+    public static function getGravityNetsOnTarget($target){
+        foreach(self::$gravityNets as $gravityNet){
+            //Debug::log(json_encode("START FIRE ORDERS", true));
+            //Debug::log(json_encode($gravityNet->fireOrders, true));
+            //Debug::log(json_encode("START TARGET", true));
+            //Debug::log(json_encode($target, true));
+            foreach($gravityNet->fireOrders as $fireOrder){
+                $fireOrderTargetid = $fireOrder->targetid;//current fireorder targetid
+                $currTargetid = $target->id; //current gravity net's targetid
+                if($fireOrderTargetid == $currTargetid){ //make sure the fire order is the "gravity net target order and not the hexTarget order                    
+                    Debug::log(json_encode("Target Found!", true));
+                }
+            }
+        }
+    }
+
+	public static function sortByMoveDistance(){ //sort gravity nets by move distance potential    
+    }
+	  
 }
 
 class HypergravitonBlaster extends Weapon {
