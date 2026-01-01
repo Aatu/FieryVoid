@@ -358,6 +358,7 @@
   width: fit-content;
   min-width: 500px;
   box-sizing: border-box;
+  text-align: center;  
   /* Fix width calculation */
 }
 
