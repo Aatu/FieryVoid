@@ -229,7 +229,7 @@
     position:absolute;
     right:5px;          /* sits to the left of the 10px icon at right:5px */
     top:1px;             /* align vertically with the icon */
-    font-size:11px;
+    font-size:13px;
     color:#8bcaf2;
     cursor:pointer;      /* so it feels clickable like the icon */
 	/*text-decoration:underline;  */  
