@@ -373,13 +373,14 @@
 
 .scenario-custom-input {
   margin-top: 10px;
-  margin-left: 250px;
+  margin-left: 320px;
   /* Indent below label */
-  min-width: 470px !important;
-  width: 470px;
+  min-width: 400px !important;
+  width: 400px;
   flex-basis: auto;
   /* Force new line and fill width minus indent */
   box-sizing: border-box;
+  text-align: right !important;    
 }
 
 /* Fix selector to target textarea in additional row */

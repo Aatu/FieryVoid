@@ -95,7 +95,7 @@
 
 .takeslot{
     color:red;
-    font-weight: bold; /* Makes the text bold */    
+    /*font-weight: bold;*/    
 }
 
 .taken .takeslot{
@@ -297,7 +297,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 2px 6px;
+    padding: 5px 5px;
     border: 1px solid #7298a7;
     border-radius: 4px;
     background: #215a7a;
@@ -306,8 +306,13 @@
     color: #DEEBFF;
     user-select: none; /* optional, prevents text selection */
     position: relative; /* allow ::after to be absolutely positioned */
-    font-size: 1.1em;    
+    font-size: 14px;    
     text-decoration: bold;
+    height: auto;
+    text-align: center;
+    box-sizing: border-box;
+    width: 120px;
+    line-height: normal;  
 }
 
 /* Arrow for the dropdown button */
