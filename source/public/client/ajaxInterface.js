@@ -54,6 +54,9 @@ window.ajaxInterface = {
 
         if (factionRequest === this.currentFaction) return;
 
+        // Caching disabled to fix ship display issues. 
+        // Relies on HTTP Caching (ETag/304) implemented in gamelobbyloader.php
+        /*
         // Check client-side cache first
         const cacheKey = 'fv_ships_' + factionRequest;
         try {
@@ -68,6 +71,7 @@ window.ajaxInterface = {
             // Cache read failed, proceed with request
             console.warn('Cache read failed:', e);
         }
+        */
 
         this._sendRequest(factionRequest, callback);
     },
