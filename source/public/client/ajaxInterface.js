@@ -989,8 +989,8 @@ window.ajaxInterface = {
         } else {
             // In-Game timings
             time = 6000;
-            if (ajaxInterface.pollcount > 1) time = 12000;
-            if (ajaxInterface.pollcount > 3) time = 15000;
+            if (ajaxInterface.pollcount > 1) time = 8000;
+            if (ajaxInterface.pollcount > 3) time = 10000;
             if (ajaxInterface.pollcount > 10) time = 60000;
             if (ajaxInterface.pollcount > 40) time = 1800000;
         }
