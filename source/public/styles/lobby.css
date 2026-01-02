@@ -96,7 +96,8 @@
 .takeslot{
     color:red;
     font-weight: bold;
-    vertical-align: middle;   
+    margin-bottom: 5px;
+    margin-left: -5px;    
 }
 
 .taken .takeslot{
