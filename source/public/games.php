@@ -84,14 +84,14 @@ $games = json_encode(Manager::getTacGames($userid), JSON_NUMERIC_CHECK);
     </div>
 
     <div class="resources">
-      <h3>Latest Updates — December 2025</h3>
+      <h3>Latest Updates — January 2026</h3>
       <ul class="updates-list">
-      <li style="color: #cc0000ff;"><strong>Merry Christmas from Fiery Void!</strong></li>            
-        <li><strong>Torvalus Speculators</strong> - Transverse Drive added to complete the release of the new Torvalus Faction.</li>       
-        <li><strong>Shadow Slicers</strong> - Can now assign damage dice to shots/intercept.</li>                                  
-        <li><strong>Critical hits</strong> - Critical hits are now displayed in Combat Log and Replay animations.
-        <li><strong>Terrain Collisions</strong> - Terrain collisions will now occur, and cause damage, before the Firing Phase.</li>                                            
-        <li><strong>General Fixes</strong> - Server performance/stability updates, plus many other small fixes. Thanks for all the reports!</li>                                                    
+        <!--<li style="color: #cc0000ff;"><strong>Merry Christmas from Fiery Void!</strong></li>-->            
+        <li><strong>Create Game Screen</strong> - First phase of Create Game screen refresh is complete, let me know what you think on Discord!</li>         
+        <li><strong>Torvalus Shading Field</strong> - Shading Fields now toggle on/off during Deployment phase and the new Pre-Orders phase, which occurs at the start of every turn.</li>       
+        <li><strong>Hyach Specialists</strong> - Specialists now selected during Deployment Phase and some can now be activated in Movement/Firing Phases.</li>                                  
+        <li><strong>Sustained Weapons</strong> - Sustained weapons now display their current target in weapon tooltip after firing their first shot.</li>                                            
+        <li><strong>General Fixes</strong> - More server performance/stability updates, plus other small fixes. Thanks for all the reports!</li>                                                    
         <!--<li><strong>6 Jun</strong> - Overlay colors, deployment zone tweaks, UI fixes. Pulsar mine fixed, tooltip/text readability improved.</li>-->
       </ul>
     </div>
