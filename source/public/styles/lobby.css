@@ -98,6 +98,7 @@
     font-weight: bold;
     margin-bottom: 5px;
     margin-left: -5px;    
+    vertical-align: auto;
 }
 
 .taken .takeslot{
@@ -229,7 +230,7 @@
 */
 .leaveslot{
     position:absolute;
-    right:5px;          /* sits to the left of the 10px icon at right:5px */
+    right:3px;          /* sits to the left of the 10px icon at right:5px */
     top:1px;             /* align vertically with the icon */
     cursor:pointer;      /* so it feels clickable like the icon */
     color: #DEEBFF !important;
