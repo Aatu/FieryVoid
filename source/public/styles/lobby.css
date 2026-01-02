@@ -95,7 +95,8 @@
 
 .takeslot{
     color:red;
-    /*font-weight: bold;*/    
+    font-weight: bold;
+    vertical-align: middle;   
 }
 
 .taken .takeslot{
@@ -229,11 +230,15 @@
     position:absolute;
     right:5px;          /* sits to the left of the 10px icon at right:5px */
     top:1px;             /* align vertically with the icon */
-    font-size:13px;
-    color:#8bcaf2;
     cursor:pointer;      /* so it feels clickable like the icon */
-	/*text-decoration:underline;  */  
-    /* optional: font-weight: bold; */
+    color: #DEEBFF !important;
+    cursor: pointer;
+    font-size: 11px;
+    border: 1px solid #215a7a;
+    padding: 2px 4px;
+    border-radius: 3px;
+    transition: background 0.2s;
+    margin-top: 2px !important;
 }
 
 .value{
