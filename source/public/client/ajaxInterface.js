@@ -88,14 +88,15 @@ window.ajaxInterface = {
         this.nextFaction = null;
         this.submiting = true;
 
-        // Use direct AJAX (not ajaxWithRetry) - faction loading has its own queue management
-        $.ajax({
+        // Use _doAjaxWithRetry to handle transient 507 errors
+        this._doAjaxWithRetry({
             type: 'POST',
             url: 'gamelobbyloader.php',
             dataType: 'json',
             contentType: 'application/json',
             data: JSON.stringify({ faction: String(factionRequest) }),
             timeout: 15000,
+            retryCodes: [400, 503, 507], // Explicitly retry these codes for faction loading
 
             success: (data) => {
                 if (data.error) {
@@ -147,7 +148,7 @@ window.ajaxInterface = {
                     this._sendRequest(nextF, nextCb);
                 }
             }
-        }).fail(() => { /* Cleanly handle rejection to prevent console noise */ });
+        });
     },
 
 
@@ -186,10 +187,12 @@ window.ajaxInterface = {
             },
 
             error: function (xhr, textStatus, errorThrown) {
-                // Retry on 507 if attempts remain
-                if (xhr && xhr.status === 507 && attempt < maxAttempts) {
+                // Retry if status matches allowed codes and attempts remain
+                const retryCodes = options.retryCodes || [507];
+
+                if (xhr && retryCodes.includes(xhr.status) && attempt < maxAttempts) {
                     const delay = baseDelay * Math.pow(2, attempt) + Math.random() * 50;
-                    console.warn(`507 error, retrying in ${Math.round(delay)}ms (attempt ${attempt}/${maxAttempts})`);
+                    console.warn(`${xhr.status} error, retrying in ${Math.round(delay)}ms (attempt ${attempt}/${maxAttempts})`);
                     isRetrying = true;
 
                     setTimeout(() => {
