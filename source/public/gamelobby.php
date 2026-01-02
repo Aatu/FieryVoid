@@ -536,7 +536,7 @@ if ($asteroids == false && $moons == false) {
 			-->
 			
             <div class="button-container">
-                <span class="btn btn-secondary-lobby leave">Leave Game</span>
+                <span class="btn btn-secondary-lobby-leaveGame">Leave Game</span>
             </div>
 			
 		</div>
@@ -591,7 +591,7 @@ if ($asteroids == false && $moons == false) {
 
         <div style="display:flex; align-items:center; margin-left:auto; font-size:12px; gap:6px;">
             <label style="margin-left: 5px; margin-top: 0px; display:flex; align-items:center;">
-                <span style="margin-right: 2px; font-size: 12px;">Load Fleet by #ID:</span>
+                <span class="Load-Fleet-by-ID">Load Fleet by #ID:</span>
                 <input type="text" id="fleetIdInput" value="" class="fleetIdInput">
             </label>
 

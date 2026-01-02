@@ -286,6 +286,8 @@
     display:inline;
 }
 
+
+
 .fleet-dropdown-container {
     position: relative;
     margin-left: auto;
@@ -306,12 +308,12 @@
     color: #DEEBFF;
     user-select: none; /* optional, prevents text selection */
     position: relative; /* allow ::after to be absolutely positioned */
-    font-size: 14px;    
+    font-size: 13px;    
     text-decoration: bold;
     height: auto;
     text-align: center;
     box-sizing: border-box;
-    width: 120px;
+    width: 150px;
     line-height: normal;  
 }
 
@@ -343,6 +345,11 @@
     box-shadow: 0 2px 6px rgba(0,0,0,0.15);
     font-size: 12px;
     color: #000000ff;
+}
+
+.Load-Fleet-by-ID{
+    margin-right: 2px; 
+    font-size: 14px;    
 }
 
 .fleetIdInput{
