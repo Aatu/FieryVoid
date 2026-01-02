@@ -188,7 +188,7 @@ window.ajaxInterface = {
 
             error: function (xhr, textStatus, errorThrown) {
                 // Retry if status matches allowed codes and attempts remain
-                const retryCodes = options.retryCodes || [507];
+                const retryCodes = options.retryCodes || [503, 507];
 
                 if (xhr && retryCodes.includes(xhr.status) && attempt < maxAttempts) {
                     const delay = baseDelay * Math.pow(2, attempt) + Math.random() * 50;
@@ -949,6 +949,15 @@ window.ajaxInterface = {
 
         // detect environment
         var isLocal = (location.hostname === "localhost" || location.hostname === "127.0.0.1");
+
+        // OPTIMIZATION: Throttling for background tabs
+        if (document.hidden && !isLocal) {
+            if (!ajaxInterface.submiting) ajaxInterface.requestGamedata();
+            // Slow down to 1 minute, don't increment pollcount (pause decay)
+            ajaxInterface.poll = setTimeout(ajaxInterface.pollGamedata, 60000);
+            return;
+        }
+
         var phase = gamedata.gamephase;
 
         if (!ajaxInterface.submiting) ajaxInterface.requestGamedata();
@@ -1011,6 +1020,7 @@ window.ajaxInterface = {
                 activeship: gamedata.activeship,
                 gameid: gamedata.gameid,
                 playerid: gamedata.thisplayer,
+                last_time: gamedata.lastUpdateTimestamp || 0,
                 time: Date.now()
             },
             success: ajaxInterface.successRequest,

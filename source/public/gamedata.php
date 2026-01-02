@@ -21,6 +21,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' &&
     }
 }
 
+// APCu Fast Poll: Check if we can exit early without touching DB
+if (function_exists('apcu_fetch') && isset($_POST['gameid']) && isset($_POST['last_time'])) {
+    $gameid = $_POST['gameid'];
+    $serverTime = apcu_fetch("game_{$gameid}_last_update");
+    if ($serverTime && $serverTime <= $_POST['last_time']) {
+         echo "{}";
+         exit;
+    }
+}
+
 try {
     if (isset($_POST["gameid"])) {
         if (!$playerid) {
