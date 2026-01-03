@@ -65,7 +65,7 @@
         <!--<div class="createheader">CHOOSE A BACKGROUND:</div>-->
             <div class="backgroundSelectContainer">
                 <label for="backgroundSelect" class="background">BACKGROUND:</label>        
-				 <select id="backgroundSelect" class="mapSelect" name="background">
+				 <select id="backgroundSelect" class="backgroundSelect" name="background">
 					<!--<option id="default_option" value="default">select ...</option>-->
 					<?php
 						natsort($maps); // Natural sort: sorts "1", "2", ..., "10", "11"

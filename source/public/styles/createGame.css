@@ -295,17 +295,7 @@
   vertical-align: middle;
 }
 
-.mapSelect {
-  font-size: 14px;
-  width: 200px;
-  display: inline-block;
-  box-sizing: border-box;
-  flex-shrink: 0;
-  vertical-align: middle;
-  margin-left: 0px;
-  margin-top: 5px;
-  margin-bottom: 10px;
-}
+
 
 .scenario-form {
   margin-top: 5px;
@@ -454,12 +444,24 @@ input[type=number] {
   margin-bottom: 10px;
 }
 
-.mapSelect {
+.mapSelect{
+  width: 300px !important;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  text-align: center;
+  vertical-align: middle;
+  font-size: 14px;
+  margin-bottom: 5px;
+}
+
+.backgroundSelect {
   width: 200px !important;
   box-sizing: border-box;
   flex-shrink: 0;
   text-align: center;
   vertical-align: middle;
+  font-size: 14px;
+  margin-bottom: 5px;
 }
 
 .mapDimensionsSelect {
@@ -474,7 +476,7 @@ input[type=number] {
 
 .mapDimensions {
   font-size: 14px;
-  width: 150px;
+  width: 190px;
   display: inline-block;
   box-sizing: border-box;
   flex-shrink: 0;
@@ -483,6 +485,7 @@ input[type=number] {
 .gamespacedefinition {
   display: flex;
   align-items: center;
+
 }
 
 .gamespacedefinition input.tinySize {
@@ -499,6 +502,7 @@ input[type=number] {
   justify-content: space-between;
   align-items: center;
   box-sizing: border-box;
+  gap: 15px;  
 }
 
 
