@@ -81,6 +81,8 @@
                         ?>
                     </select>
                 </div>    
+
+
             
                 <div id="simultaenousMovement" class="settings-group movementspacecontainer">
                     <div>
@@ -173,6 +175,11 @@
                         </select>
                     </div>
                 </div>
+
+                <div class="settings-group movementspacecontainer">
+                     <input id="unlimitedPointsCheck" type="checkbox" name="unlimitedPointsCheck"> <label for="unlimitedPointsCheck" class="clickable">UNLIMITED POINTS</label>
+                </div>
+
             </div>
             
             <!-- Scenario Description (Right Column) -->
@@ -329,7 +336,9 @@
                 <div class="create-row">
                     
                     <label>Points:</label>
-                    <input class="points smallSize" type="number" name="points" value="0">
+                    <label>Points:</label>
+                    <input class="points smallSize" type="text" data-validation="^[0-9]+$" name="points" value="0">
+                    <span class="unlimited-label" style="display:none; font-weight:bold; color:#DEEBFF; margin-left:5px; padding: 5px;">Unlimited</span>
                     
                     <label>Deploys on Turn:</label>
                     <input class="depavailable tinySize" type="number" name="depavailable" value="1" min="1">

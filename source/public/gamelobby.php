@@ -550,10 +550,12 @@ if ($asteroids == false && $moons == false) {
         <div>
             <span class="panelsubheader current">0</span>
             <span class="panelsubheader">/</span>
-            <span class="panelsubheader max">0</span><span class="panelsubheader">pts</span>
-            <span class="panelsmall" style="margin-left: 5px;">(</span>
-            <span class="panelsmall remaining">0</span><span class="panelsmall">pts left</span>
-            <span class="panelsmall">)</span>
+            <span class="panelsubheader max">0</span><span class="panelsubheader max-points-units">pts</span>
+            <span class="remaining-points-container">
+                <span class="panelsmall" style="margin-left: 5px;">(</span>
+                <span class="panelsmall remaining">0</span><span class="panelsmall remaining-points-units">pts left</span>
+                <span class="panelsmall">)</span>
+            </span>
         </div>
     </div>
 
@@ -769,8 +771,10 @@ if ($asteroids == false && $moons == false) {
         <div class="system regular">
             <div class="systemcontainer">
                 <div class="icon">
-                    <div class="efficiency value"></div>
-                    <div class="iconmask"></div>
+                    <div class="slot_data two">
+                        <span class="label">POINTS:</span>
+                        <span class="value"><?php print($slot->points == -1 ? '<span class="unlimited-points-text">Unlimited</span>' : $slot->points); ?></span>
+                    </div>
                     <div class="UI">
                         <div class="button stopoverload"></div>
                         <div class="button overload"></div>

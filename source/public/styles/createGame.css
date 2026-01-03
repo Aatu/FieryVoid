@@ -197,7 +197,7 @@
 .settings-group {
   border: 1px solid #215a7a;
   background: #0b1e2e;
-  padding: 10px;
+  padding: 8px;
   margin-bottom: 10px;
   border-radius: 4px;
 }
@@ -355,6 +355,8 @@
   padding-left: 8px;
 }
 
+
+
 .scenario-row {
   flex-wrap: wrap;
   /* Allow wrapping for custom inputs */
@@ -377,7 +379,7 @@
   width: 400px;
   /* Match others, or use 80% if intended */
   resize: vertical;
-  text-align: left;  
+  text-align: left;
 }
 
 /* Global inputs for Create Game only */

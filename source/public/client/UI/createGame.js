@@ -11,7 +11,11 @@ jQuery(function ($) {
     // Mousewheel support for number inputs
     // We use a non-passive listener on the document to ensure we can preventDefault() the scroll
     document.addEventListener("wheel", function (e) {
-        if (e.target.tagName !== 'INPUT' || e.target.type !== 'number') return;
+        // Support standard number inputs AND our special .points text input
+        const isNumberInput = (e.target.tagName === 'INPUT' && e.target.type === 'number');
+        const isPointsInput = (e.target.tagName === 'INPUT' && $(e.target).hasClass('points'));
+
+        if (!isNumberInput && !isPointsInput) return;
         if (document.activeElement !== e.target) return; // Only if focused
 
         e.preventDefault();
@@ -60,6 +64,31 @@ jQuery(function ($) {
         // Init state
         if ($(`#${item.id}`).val() === item.trigger) {
             $(`#${item.id}_custom`).show();
+        }
+    });
+
+    // UNLIMITED POINTS LOGIC
+    $("#unlimitedPointsCheck").on("change", function () {
+        const isUnlimited = $(this).is(":checked");
+
+        if (isUnlimited) {
+            $(".points").hide();
+            $(".unlimited-label").show(); // Show our custom label
+
+            // Force update data model for all slots
+            createGame.slots.forEach(slot => {
+                slot.points = -1;
+            });
+
+        } else {
+            $(".points").show();
+            $(".unlimited-label").hide();
+
+            // Reset visual and model
+            $(".points").each(function () {
+                $(this).val("3000"); // Standard default visual
+                $(this).trigger("change"); // Trigger change to update model
+            });
         }
     });
 
@@ -486,6 +515,23 @@ window.createGame = {
 
         actual.data("slotid", data.id);
         actual.addClass("slotid_" + data.id);
+
+        // Disable points input if unlimited
+        if (data.points == -1) {
+            actual.find("[name='points']").hide();
+            // Ensure label exists if not in template (it might be added to template later, but safe to add if missing)
+            if (actual.find(".unlimited-label").length === 0) {
+                actual.find("[name='points']").after('<span class="unlimited-label" style="display:inline-block; font-weight:bold; color:#DEEBFF; margin-left:5px;">Unlimited</span>');
+            } else {
+                actual.find(".unlimited-label").show();
+            }
+        } else {
+            // For standard slots, ensure label is hidden if it exists
+            if (actual.find(".unlimited-label").length === 0) {
+                actual.find("[name='points']").after('<span class="unlimited-label" style="display:none; font-weight:bold; color:#DEEBFF; margin-left:5px;">Unlimited</span>');
+            }
+        }
+
         createGame.setSlotData(data);
     },
 
@@ -494,7 +540,12 @@ window.createGame = {
         // Note: We used to just use class selectors, but now we have Inputs with Names.
         // We can use [name='...']
         slot.find("[name='name']").val(data.name);
-        slot.find("[name='points']").val(data.points);
+
+        // Only update points if NOT unlimited (to avoid overwriting infinity symbol with -1)
+        if (data.points != -1) {
+            slot.find("[name='points']").val(data.points);
+        }
+
         slot.find("[name='depx']").val(data.depx);
         slot.find("[name='depy']").val(data.depy);
         slot.find("[name='depwidth']").val(data.depwidth);
@@ -519,7 +570,7 @@ window.createGame = {
             id: createGame.slotid,
             team: team,
             name: "TEAM " + team,
-            points: 3500,
+            points: $("#unlimitedPointsCheck").is(":checked") ? -1 : 3500,
             depx: 0,
             depy: 0,
             deptype: "box",
