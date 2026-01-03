@@ -5,6 +5,13 @@
 }
 
 .unlimited-points-text {
+    font-size: 14px;
+    /* Adjustable size for lobby unlimited points text */
+    font-weight: bold;
+    vertical-align: middle;
+}
+
+.unlimited-points-text2 {
     font-size: 18px;
     /* Adjustable size for lobby unlimited points text */
     font-weight: bold;

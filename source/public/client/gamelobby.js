@@ -1297,7 +1297,7 @@ window.gamedata = {
 		var maxPoints = selectedSlot.points;
 
 		if (maxPoints == -1) {
-			$('.max').html('<span class="unlimited-points-text">Unlimited</span>');
+			$('.max').html('<span class="unlimited-points-text2">Unlimited</span>');
 			$('.max-points-units').hide();
 			$('.remaining-points-container').hide();
 		} else {
@@ -1884,7 +1884,7 @@ window.gamedata = {
 	setSlotData: function setSlotData(data) {
 		var slot = $(".slot.slotid_" + data.slot);
 		$(".name", slot).html(data.name);
-		$(".points", slot).html(data.points == -1 ? '<span class="unlimited-points-text">Unlimited</span>' : data.points);
+		$(".points", slot).html(data.points == -1 ? '<span class="unlimited-points-text">UNLIMITED</span>' : data.points);
 
 		$(".depx", slot).html(data.depx);
 		$(".depy", slot).html(data.depy);

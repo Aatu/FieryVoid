@@ -773,7 +773,7 @@ if ($asteroids == false && $moons == false) {
                 <div class="icon">
                     <div class="slot_data two">
                         <span class="label">POINTS:</span>
-                        <span class="value"><?php print($slot->points == -1 ? '<span class="unlimited-points-text">Unlimited</span>' : $slot->points); ?></span>
+                        <span class="value"><?php print($slot->points == -1 ? '<span class="unlimited-points-text">UNLIMITED</span>' : $slot->points); ?></span>
                     </div>
                     <div class="UI">
                         <div class="button stopoverload"></div>
