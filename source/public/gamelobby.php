@@ -536,7 +536,7 @@ if ($asteroids == false && $moons == false) {
 			-->
 			
             <div class="button-container">
-                <span class="btn btn-secondary-lobby-leaveGame">Leave Game</span>
+                <span class="btn btn-secondary-lobby-leaveGame leave">Leave Game</span>
             </div>
 			
 		</div>
