@@ -119,6 +119,7 @@
     margin-bottom: 5px;
     margin-left: -5px;
     vertical-align: auto;
+    font-size: 14px !important;
 }
 
 .taken .takeslot {
