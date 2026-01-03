@@ -534,7 +534,7 @@ input[type=number] {
 .game-options-wrapper {
   display: flex;
   flex-wrap: wrap;
-  gap: 70px;
+  gap: 75px;
   align-items: flex-start;
   padding: 10px;
 }
@@ -546,6 +546,7 @@ input[type=number] {
   /* Minimum width before wrapping */
   display: flex;
   flex-direction: column;
+  margin-left: 5px;
 }
 
 /* Ensure scenario form behaves as a column */
@@ -562,7 +563,7 @@ input[type=number] {
 /* Adjust split-header within columns to align top */
 .options-column .split-header,
 .game-options-wrapper .scenario-form .split-header {
-  margin-top: 0;
+  margin-top: 10px;
 }
 
 /* Responsive adjustments */
