@@ -377,6 +377,7 @@
   width: 400px;
   /* Match others, or use 80% if intended */
   resize: vertical;
+  text-align: left;  
 }
 
 /* Global inputs for Create Game only */
