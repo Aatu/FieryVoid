@@ -48,7 +48,7 @@ $games = json_encode(Manager::getTacGames($userid), JSON_NUMERIC_CHECK);
   </script>
 </head>
 
-<body  style="background: url('./img/webBackgrounds/faq.jpg') no-repeat center center fixed; background-size: cover;">
+<body  style="background: url('./img/maps/21.PurpleNebula.jpg') no-repeat center center fixed; background-size: cover;">
 <header class="pageheader">
   <img src="img/logo.png" alt="Fiery Void Logo" class="logo">
   <div class="top-right-row">
