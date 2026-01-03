@@ -64,21 +64,6 @@ window.PhaseStrategy = function () {
         return true;
     }
 
-    PhaseStrategy.prototype.onGravityNetTarget = function(payload){ //When a gravity designates a target add a hexagon equal to move range around target ship. 
-        var ship = payload.ship;
-        var system = payload.system;        
-        var icon = this.shipIconContainer.getByShip(ship);
-        var hexagonSize = system.moveDistance;
-        icon.showHexagonAroundShip(hexagonSize, system);
-    };
-
-    PhaseStrategy.prototype.onGravityNetMoveTarget = function(payload){ //When a gravity designates a move target location for its target, remove the hexgon(equal to move range)
-        var ship = payload.ship;    
-        var system = payload.system;    
-        var icon = this.shipIconContainer.getByShip(ship);        
-        icon.hideHexagonAroundShip(system);
-    };
-
     PhaseStrategy.prototype.showSystemInfo = function(ship, system, element, menu) {
         if (this.systemInfoState && this.systemInfoState.menu && !menu) {
             return;
@@ -824,7 +809,7 @@ window.PhaseStrategy = function () {
         if (this.shipTooltip && this.shipTooltip.ships.includes(payload.target) &&  this.shipTooltip.ships.length === 1) {
             this.shipTooltip.update(payload.target, this.selectedShip);
         }
-
+        
         this.shipWindowManager.update();
     };
 

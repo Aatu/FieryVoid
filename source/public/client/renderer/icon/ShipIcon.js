@@ -809,6 +809,11 @@ window.ShipIcon = function () {
         this.shipHexagonSpritesMap.delete(system);
     }
 
+    ShipIcon.prototype.hideHexagonArcs = function () {
+        this.shipHexagonSpritesMap.forEach(function (system, arc, map) {
+            this.mesh.remove(system);
+        }, this);
+    };
 
     ShipIcon.prototype.positionAndFaceIcon = function (offset) {
         var movement = this.getLastMovement();

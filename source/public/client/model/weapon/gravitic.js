@@ -164,49 +164,21 @@ GravityNet.prototype.initializationUpdate = function() {
     } 
     if (this.fireOrders.length > 0) {
         this.hextarget = true;
-        this.startArc = 0; //Gravnet shot has arc, gravity net move target does not.
-        this.endArc = 360;
         this.ignoresLoS = false;
 
         
     }else{
         this.hextarget = false;
-        //this.startArc = this.startArcArray[0]; //Use Arc arrays to reset to default
-        //this.endArc = this.endArcArray[0]; 
-        this.ignoresLoS = false;                       
+        this.ignoresLoS = false; 
+        if(this.target){   
+            webglScene.customEvent("RemoveGravityNetHexagon", {ship: this.target, system: this});
+        }                
     } 
-    
+
     return this;
 };
 
-GravityNet.prototype.getMoveDistance = function(){
-    
-}
-
-
-/*
-GravityNet.prototype.getFiringHex = function(shooter, weapon){ 	
-    var $gravNetFiringHex;   
-
-
-        if (this.fireOrders.length > 0) {	
-            var $gravNetTarget; //Target of grav net which will be used as shooter for grav net target hex.
-            var gravNetTargetFireOrder = this.fireOrders[0];//get fireorder of grav net firing ship (So we can use it's hex as fireing hex)
-                if (gravHexFireOrder){	// check that the grav net firing ship set a fire order  
-                    gravNetMovePos = new hexagon.Offset(gravHexFireOrder.x, gravHexFireOrder.y);  
-                } else{
-                    gravNetMovePos = shipManager.movement.getPositionAtStartOfTurn(shooter, gamedata.turn);                                                   	
-                }
-        }else{ //Lasers not locked in yet, use firing ship position.
-            gravNetMovePos = shipManager.movement.getPositionAtStartOfTurn(shooter, gamedata.turn); 
-        }
-
-    return gravNetMovePos;	
-};
-*/
-
 GravityNet.prototype.doMultipleFireOrders = function (shooter, target, system) {
-    webglScene.customEvent("GravityNetTarget", {ship: target, system: this});
     var shotsOnTarget = 1; //we're only ever allocating one shot at a time for this weapon in Split mode.
 
     if (this.fireOrders.length > 0) {
@@ -243,6 +215,7 @@ GravityNet.prototype.doMultipleFireOrders = function (shooter, target, system) {
         fireOrdersArray.push(fire); // Store each fire order
     }
 
+    webglScene.customEvent("AddGravityNetHexagon", {ship: target, system: this});
     this.hextarget = true; //switch gravNet from shipTarget mode to hexTarget mode.
     
     return fireOrdersArray; // Return all fire orders
@@ -279,12 +252,12 @@ GravityNet.prototype.doMultipleHexFireOrders = function (shooter, hexpos) {
                 };
             fireOrdersArray.push(fire);
         }  
-        webglScene.customEvent("GravityNetMoveTarget", {ship: this.target, system: this}); 
+        webglScene.customEvent("RemoveGravityNetHexagon", {ship: this.target, system: this}); 
     }
     return fireOrdersArray; // Return all fire orders
 };  
 
-GravityNet.prototype.validateTargetMoveHex = function(hexpos, maxmoverange){ //function to validate desired target movement hex, will check LOS from target ship to move hex and range.
+GravityNet.prototype.validateTargetMoveHex = function(hexpos, maxmoverange){ //function to validate desired target movement hex, will check LOS from target ship to move hex and range and make sure no collisions occur.
 
     //get gravNetTargetHex to check range and LOS for gravNetTargetMovementHex
     //Target of grav net which will be used as shooter for grav net target hex.
@@ -295,10 +268,15 @@ GravityNet.prototype.validateTargetMoveHex = function(hexpos, maxmoverange){ //f
         var targetShipHex = shipManager.getShipPosition(targetShip);
         var targetMoveHex = hexpos;
         var dist = targetShipHex.distanceTo(targetMoveHex);
-        if(dist <= maxmoverange){
-            valid = true;
-        }
+        if(dist <= maxmoverange){            
+            var blockedHexes = weaponManager.getBlockedHexes();
+            var loSBlocked = mathlib.checkLineOfSight(targetShipHex, targetMoveHex, blockedHexes);
+            if(!loSBlocked && !blockedHexes.some(blocked => blocked.q === targetMoveHex.q && blocked.r === targetMoveHex.r)){//make sure hexpos is a not a blocked hex and LOS is not blocked      
+                valid = true ;  
+            }    
+        }                 
     }
+
     return valid;
 };             
 
