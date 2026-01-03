@@ -63,6 +63,14 @@ jQuery(function ($) {
         }
     });
 
+    // BLOCK INVALID CHARS FOR ENHANCEMENTS (INTEGERS ONLY)
+    $("#enhancements_custom").on("keydown", function (e) {
+        // Prevent characters that are invalid for a positive integer: 'e', 'E', '.', '+', '-'
+        if (["e", "E", "+", "-", "."].includes(e.key)) {
+            e.preventDefault();
+        }
+    });
+
     // Use body delegation for dynamic elements if needed, though structure suggests static buttons for adding slots
     $(".addslotbutton").on("click", createGame.createNewSlot);
     // Delegate close button click since slots are dynamic

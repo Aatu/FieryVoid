@@ -55,199 +55,199 @@
       <section class="panel large create">
       <div class="panelheader"><span>CREATE YOUR GAME</span></div>
 			
-        <div class="split-header" style = "margin-top: 10px">GAME OPTIONS:</div>
-            <div class="gameNameSelectContainer">
-                <label for="gamename" class="gameNameSelect">GAME NAME:</label>
-			    <input id="gamename" class="gamename" type="text" name="gamename" value="<?php print($defaultGameName); ?>">
-            </div>    
-        
-        <!--<div class="split-header">BACKGROUND & GAME OPTIONS:</div>	-->					
-        <!--<div class="createheader">CHOOSE A BACKGROUND:</div>-->
-            <div class="backgroundSelectContainer">
-                <label for="backgroundSelect" class="background">BACKGROUND:</label>        
-				 <select id="backgroundSelect" class="backgroundSelect" name="background">
-					<!--<option id="default_option" value="default">select ...</option>-->
-					<?php
-						natsort($maps); // Natural sort: sorts "1", "2", ..., "10", "11"
-						foreach ($maps as $name){
-                            $displayName = $name;
-                            $displayName = preg_replace('/^\d+\./', '', $displayName);
-                            $displayName = preg_replace('/\.[^.]+$/', '', $displayName);
-							print("<option value=\"".$name."\">".$displayName."</option>");
-						}
-					
-					?>
-				</select>
-            </div>    
-        
-
-        <div id="simultaenousMovement" class="settings-group movementspacecontainer">
-            <div>
-                <input id="movementcheck" type="checkbox" name="movementcheck"> <label for="movementcheck" class="clickable">USE SIMULTANEOUS MOVEMENT</label>
-            </div>
-            <div id="movementDropdown" class="movementDropdown">
-                <label for="initiativeSelect">Number of Initiative Groups:</label>
-                <select id="initiativeSelect" name="initiativeCategories" class="initiativeCategories">
-                    <!-- Dropdown options from 1 to 12 -->
-        <?php 
-        for($i=1;$i<=12;$i++){ 
-            $selected = '';
+        <div class="game-options-wrapper">
+            <div class="options-column">
+                <div class="split-header" style = "margin-top: 10px">GAME OPTIONS:</div>
+                <div class="gameNameSelectContainer">
+                    <label for="gamename" class="gameNameSelect">GAME NAME:</label>
+                    <input id="gamename" class="gamename" type="text" name="gamename" value="<?php print($defaultGameName); ?>">
+                </div>    
             
-            if($i==SimultaneousMovementRule::$defaultNoOfCategories){ //is this value set as default?
-                $selected = 'selected';
-            }
+                <!--<div class="split-header">BACKGROUND & GAME OPTIONS:</div>	-->					
+                <!--<div class="createheader">CHOOSE A BACKGROUND:</div>-->
+                <div class="backgroundSelectContainer">
+                    <label for="backgroundSelect" class="background">BACKGROUND:</label>        
+                    <select id="backgroundSelect" class="backgroundSelect" name="background">
+                        <!--<option id="default_option" value="default">select ...</option>-->
+                        <?php
+                            natsort($maps); // Natural sort: sorts "1", "2", ..., "10", "11"
+                            foreach ($maps as $name){
+                                $displayName = $name;
+                                $displayName = preg_replace('/^\d+\./', '', $displayName);
+                                $displayName = preg_replace('/\.[^.]+$/', '', $displayName);
+                                print("<option value=\"".$name."\">".$displayName."</option>");
+                            }
+                        
+                        ?>
+                    </select>
+                </div>    
             
-        print("<option value=\"".$i."\" ".$selected." >".$i."</option>");
-        }          
-              
-        ?>
-                </select>
-            </div>
-        </div>
+                <div id="simultaenousMovement" class="settings-group movementspacecontainer">
+                    <div>
+                        <input id="movementcheck" type="checkbox" name="movementcheck"> <label for="movementcheck" class="clickable">USE SIMULTANEOUS MOVEMENT</label>
+                    </div>
+                    <div id="movementDropdown" class="movementDropdown">
+                        <label for="initiativeSelect">Number of Initiative Groups:</label>
+                        <select id="initiativeSelect" name="initiativeCategories" class="initiativeCategories">
+                            <!-- Dropdown options from 1 to 12 -->
+                <?php 
+                for($i=1;$i<=12;$i++){ 
+                    $selected = '';
+                    
+                    if($i==SimultaneousMovementRule::$defaultNoOfCategories){ //is this value set as default?
+                        $selected = 'selected';
+                    }
+                    
+                print("<option value=\"".$i."\" ".$selected." >".$i."</option>");
+                }          
+                    
+                ?>
+                        </select>
+                    </div>
+                </div>
 
-        <div id="terrain" class="settings-group movementspacecontainer">
-            <div>
-                <input id="terraincheck" type="checkbox" name="terraincheck"> <label for="terraincheck" class="clickable">ADD TERRAIN</label>
-            </div>
+                <div id="terrain" class="settings-group movementspacecontainer">
+                    <div>
+                        <input id="terraincheck" type="checkbox" name="terraincheck"> <label for="terraincheck" class="clickable">ADD TERRAIN</label>
+                    </div>
 
-            <div id="asteroidsDropdown" class="terrainDropdowns">
-                <div class="asteroidsDropdown">
-                    <label for="asteroidsSelect" class="asteroidsSelect">Number of Asteroids:</label>
-                    <select id="asteroidsSelect" name="asteroidsCategories" class="asteroidsCategories">
-                        <option value="0">None</option>              
-                        <option value="3">Few (3)</option>
-                        <option value="6">Several (6)</option>
-                        <option value="12">Pack (12)</option>
-                        <option value="18">Lots (18)</option>
-                        <option value="24">Horde (24)</option>
-                        <option value="36">Swarm (36)</option>
-                        <option value="48">Zounds (48)</option>
-                    </select>
+                    <div id="asteroidsDropdown" class="terrainDropdowns">
+                        <div class="asteroidsDropdown">
+                            <label for="asteroidsSelect" class="asteroidsSelect">Number of Asteroids:</label>
+                            <select id="asteroidsSelect" name="asteroidsCategories" class="asteroidsCategories">
+                                <option value="0">None</option>              
+                                <option value="3">Few (3)</option>
+                                <option value="6">Several (6)</option>
+                                <option value="12">Pack (12)</option>
+                                <option value="18">Lots (18)</option>
+                                <option value="24">Horde (24)</option>
+                                <option value="36">Swarm (36)</option>
+                                <option value="48">Zounds (48)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="moonsDropdown" class="terrainDropdowns">
+                        <div class="moonsDropdown">
+                            <label for="moonsSmallSelect" class="moonsSelect">Small Moons:</label>
+                            <select id="moonsSmallSelect" name="moonsSmall" class="moonsSmallSelect">
+                                <option value="0">None</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>        
+                            </select>
+                        </div>
+                        <div class="moonsDropdown">
+                            <label for="moonsMediumSelect" class="moonsSelect">Medium Moons:</label>
+                            <select id="moonsMediumSelect" name="moonsMedium" class="moonsMediumSelect">
+                                <option value="0">None</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>        
+                            </select>
+                        </div>
+                        <div class="moonsDropdown">
+                            <label for="moonsLargeSelect" class="moonsSelect">Large Moons:</label>
+                            <select id="moonsLargeSelect" name="moonsLarge" class="moonsLargeSelect">
+                                <option value="0">None</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>        
+                            </select>
+                        </div>
+                    </div>
+                </div>    
+
+                <div id="desperate" class="settings-group movementspacecontainer">
+                    <div>
+                        <input id="desperatecheck" type="checkbox" name="desperatecheck"> <label for="desperatecheck" class="clickable">USE 'DESPERATE' SCENARIO RULES</label>
+                    </div>    
+                    
+                    <div id="desperateDropdown" class="desperateDropdown">
+                        <label for="desperateSelect">Apply to:</label>
+                        <select id="desperateSelect" name="desperateCategories"  class="desparateSelect">
+                            <option value="-1">Both teams</option>
+                            <option value="1">Team 1</option>
+                            <option value="2">Team 2</option>
+                        </select>
+                    </div>
                 </div>
             </div>
-            <div id="moonsDropdown" class="terrainDropdowns">
-                <div class="moonsDropdown">
-                    <label for="moonsSmallSelect" class="moonsSelect">Small Moons:</label>
-                    <select id="moonsSmallSelect" name="moonsSmall" class="moonsSmallSelect">
-                        <option value="0">None</option>
-                        <option value="1">1</option>
-                        <option value="2">2</option>
-                        <option value="3">3</option>
-                        <option value="4">4</option>
-                        <option value="5">5</option>        
-                    </select>
-                </div>
-                <div class="moonsDropdown">
-                    <label for="moonsMediumSelect" class="moonsSelect">Medium Moons:</label>
-                    <select id="moonsMediumSelect" name="moonsMedium" class="moonsMediumSelect">
-                        <option value="0">None</option>
-                        <option value="1">1</option>
-                        <option value="2">2</option>
-                        <option value="3">3</option>
-                        <option value="4">4</option>        
-                    </select>
-                </div>
-                <div class="moonsDropdown">
-                    <label for="moonsLargeSelect" class="moonsSelect">Large Moons:</label>
-                    <select id="moonsLargeSelect" name="moonsLarge" class="moonsLargeSelect">
-                        <option value="0">None</option>
-                        <option value="1">1</option>
-                        <option value="2">2</option>        
-                    </select>
-                </div>
-            </div>
-        </div>    
-
-
-        <div id="desperate" class="settings-group movementspacecontainer">
-            <div>
-                <input id="desperatecheck" type="checkbox" name="desperatecheck"> <label for="desperatecheck" class="clickable">USE 'DESPERATE' SCENARIO RULES</label>
-            </div>    
             
-            <div id="desperateDropdown" class="desperateDropdown">
-                <label for="desperateSelect">Apply to:</label>
-                <select id="desperateSelect" name="desperateCategories"  class="desparateSelect">
-                    <option value="-1">Both teams</option>
-                    <option value="1">Team 1</option>
-                    <option value="2">Team 2</option>
-                </select>
-            </div>
-        </div>
-
+            <!-- Scenario Description (Right Column) -->
+            <div class="scenario-form">
+                <div class="split-header">SCENARIO DESCRIPTION:</div>
+            
+                <div class="scenario-row">
+                    <label for="req">FLEET REQUIREMENTS:</label>
+                    <select id="req">
+                        <option value="Pass the fleet checker">Pass the fleet checker</option>
+                        <option value="Other">Other</option>
+                    </select>
+                    <input type="text" id="req_custom" class="scenario-custom-input" style="display:none;" placeholder="Enter requirements...">
+                </div>
+                <div class="scenario-row">
+                    <label for="tier">EXPECTED POWER LEVEL:</label>
+                    <select id="tier">
+                        <option value="Tier 1">Tier 1</option>
+                        <option value="Tier 2">Tier 2</option>
+                        <option value="Tier 3">Tier 3</option>
+                        <option value="Ancient">Ancient</option>
+                        <option value="Other">Other</option>
+                    </select>
+                    <input type="text" id="tier_custom" class="scenario-custom-input" style="display:none;" placeholder="Enter power level...">
+                </div>
+                <div class="scenario-row">
+                    <label for="forbidden">FORBIDDEN FACTIONS:</label>
+                    <input type="text" id="forbidden" value="None" class="forbiddenText">
+                </div>                
+                <div class="scenario-row">
+                    <label for="customfactions">CUSTOM FACTIONS / UNITS:</label>
+                    <select id="customfactions">
+                        <option value="Allowed">Allowed</option>
+                        <option value="Not allowed">Not allowed</option>
+                    </select>
+                </div>
+                <div class="scenario-row">
+                    <label for="enhancements">ENHANCEMENTS:</label>
+                    <select id="enhancements">
+                        <option value="Allowed">Allowed</option>
+                        <option value="Up to X points">Up to X points</option>
+                        <option value="Not allowed">Not allowed</option>
+                    </select>
+                    <input type="number" min="0" step="1" data-validation="^[0-9]+$" id="enhancements_custom" class="scenario-custom-input" style="display:none;" placeholder="Enter points...">
+                </div>
         
-        
-        <!-- Scenario Description (Full Width) -->
-        <div class="scenario-form" style="margin-top: 20px;">
-            <div class="split-header">SCENARIO DESCRIPTION:</div>
-        
-            <div class="scenario-row">
-                <label for="req">FLEET REQUIREMENTS:</label>
-                <select id="req">
-                    <option value="Pass the fleet checker">Pass the fleet checker</option>
-                    <option value="Other">Other</option>
-                </select>
-                <input type="text" id="req_custom" class="scenario-custom-input" style="display:none;" placeholder="Enter requirements...">
+                <div class="scenario-row">
+                    <label for="borders">MAP BORDERS:</label>
+                    <select id="borders">
+                        <option value="Unit leaving map is destroyed">Unit leaving map is destroyed</option>
+                        <option value="Unit ending movement out of map is destroyed">Unit ending movement out of map is destroyed</option>
+                    </select>
+                </div>
+                <div class="scenario-row">
+                    <label for="called">CALLED SHOTS:</label>
+                    <select id="called">
+                        <option value="Allowed" selected>Allowed</option>
+                        <option value="Not allowed">Not allowed</option>
+                    </select>
+                </div>
+                <div class="scenario-row">
+                    <label for="victory">VICTORY CONDITIONS:</label>
+                    <select id="victory">
+                        <option value="Last unit on map">Last unit on map</option>
+                        <option value="Last ship on map">Last ship on map</option>
+                        <option value="More forces remaining after Turn 12">More forces remaining after Turn 12</option>
+                        <option value="Other">Other</option>                    
+                    </select>
+                    <input type="text" id="victory_custom" class="scenario-custom-input" style="display:none;" placeholder="Enter victory conditions...">
+                </div>
+                <div class="scenario-row additional">
+                    <label for="other">ADDITIONAL INFO:</label>
+                    <textarea id="other" rows="3"></textarea>
+                </div>     
             </div>
-            <div class="scenario-row">
-                <label for="tier">EXPECTED POWER LEVEL:</label>
-                <select id="tier">
-                    <option value="Tier 1">Tier 1</option>
-                    <option value="Tier 2">Tier 2</option>
-                    <option value="Tier 3">Tier 3</option>
-                    <option value="Ancient">Ancient</option>
-                    <option value="Other">Other</option>
-                </select>
-                <input type="text" id="tier_custom" class="scenario-custom-input" style="display:none;" placeholder="Enter power level...">
-            </div>
-            <div class="scenario-row">
-                <label for="forbidden">FORBIDDEN FACTIONS:</label>
-                <input type="text" id="forbidden" value="None" class="forbiddenText">
-            </div>                
-            <div class="scenario-row">
-                <label for="customfactions">CUSTOM FACTIONS / UNITS:</label>
-                <select id="customfactions">
-                    <option value="Allowed">Allowed</option>
-                    <option value="Not allowed">Not allowed</option>
-                </select>
-            </div>
-            <div class="scenario-row">
-                <label for="enhancements">ENHANCEMENTS:</label>
-                <select id="enhancements">
-                    <option value="Allowed">Allowed</option>
-                    <option value="Up to X points">Up to X points</option>
-                    <option value="Not allowed">Not allowed</option>
-                </select>
-                <input type="text" id="enhancements_custom" class="scenario-custom-input" style="display:none;" placeholder="Enter enhancement points allowed e.g. 100">
-            </div>
-    
-            <div class="scenario-row">
-                <label for="borders">MAP BORDERS:</label>
-                <select id="borders">
-                    <option value="Unit leaving map is destroyed">Unit leaving map is destroyed</option>
-                    <option value="Unit ending movement out of map is destroyed">Unit ending movement out of map is destroyed</option>
-                </select>
-            </div>
-            <div class="scenario-row">
-                <label for="called">CALLED SHOTS:</label>
-                <select id="called">
-                    <option value="Allowed" selected>Allowed</option>
-                    <option value="Not allowed">Not allowed</option>
-                </select>
-            </div>
-            <div class="scenario-row">
-                <label for="victory">VICTORY CONDITIONS:</label>
-                <select id="victory">
-                    <option value="Last unit on map">Last unit on map</option>
-                    <option value="Last ship on map">Last ship on map</option>
-                    <option value="More forces remaining after Turn 12">More forces remaining after Turn 12</option>
-                    <option value="Other">Other</option>                    
-                </select>
-                <input type="text" id="victory_custom" class="scenario-custom-input" style="display:none;" placeholder="Enter victory conditions...">
-            </div>
-            <div class="scenario-row additional">
-                <label for="other">ADDITIONAL INFO:</label>
-                <textarea id="other" rows="3"></textarea>
-            </div>     
         </div>
     </section>
 

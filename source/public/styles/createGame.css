@@ -2,7 +2,7 @@
 
 /* Panel Sizing */
 .panel.large.create {
-  width: 1300px;
+  width: 1600px;
   /* Widened to fit split view */
   max-width: 100%;
   margin: 0px auto 10px auto;
@@ -344,11 +344,10 @@
   color: #DEEBFF;
   border: 1px solid #215a7a;
   border-radius: 4px;
-  width: -moz-fit-content;
-  width: fit-content;
-  min-width: 500px;
+  width: 400px;
+  min-width: 300px;
   box-sizing: border-box;
-  text-align: center;  
+  text-align: center;
   /* Fix width calculation */
 }
 
@@ -363,19 +362,19 @@
 
 .scenario-custom-input {
   margin-top: 10px;
-  margin-left: 320px;
+  margin-left: 370px;
   /* Indent below label */
-  min-width: 400px !important;
-  width: 400px;
+  min-width: 250px !important;
+  width: 250px !important;
   flex-basis: auto;
   /* Force new line and fill width minus indent */
   box-sizing: border-box;
-  text-align: right !important;    
+  text-align: right !important;
 }
 
 /* Fix selector to target textarea in additional row */
 .scenario-row.additional textarea {
-  width: 500px;
+  width: 400px;
   /* Match others, or use 80% if intended */
   resize: vertical;
 }
@@ -444,7 +443,7 @@ input[type=number] {
   margin-bottom: 10px;
 }
 
-.mapSelect{
+.mapSelect {
   width: 300px !important;
   box-sizing: border-box;
   flex-shrink: 0;
@@ -502,7 +501,7 @@ input[type=number] {
   justify-content: space-between;
   align-items: center;
   box-sizing: border-box;
-  gap: 15px;  
+  gap: 15px;
 }
 
 
@@ -529,4 +528,52 @@ input[type=number] {
 #team1 .slot-card:first-child .remove-btn,
 #team2 .slot-card:first-child .remove-btn {
   display: none !important;
+}
+
+/* Restructured Layout for Game Options and Scenario Description */
+.game-options-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 70px;
+  align-items: flex-start;
+  padding: 10px;
+}
+
+.options-column {
+  flex: 0 0 450px;
+  /* Fixed wider width */
+  min-width: 300px;
+  /* Minimum width before wrapping */
+  display: flex;
+  flex-direction: column;
+}
+
+/* Ensure scenario form behaves as a column */
+.game-options-wrapper .scenario-form {
+  flex: 1;
+  min-width: 400px;
+  margin-top: 0 !important;
+  /* Override inline style or previous margin */
+  background: transparent;
+  /* Seamless look */
+  padding: 0;
+}
+
+/* Adjust split-header within columns to align top */
+.options-column .split-header,
+.game-options-wrapper .scenario-form .split-header {
+  margin-top: 0;
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 1100px) {
+  .game-options-wrapper {
+    flex-direction: column;
+  }
+
+  .options-column,
+  .game-options-wrapper .scenario-form {
+    width: 100%;
+    flex: none;
+  }
 }
