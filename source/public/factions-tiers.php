@@ -227,7 +227,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             <li>A hex-targeted weapon, which causes heavy damage to everything on hex hit and splash to everything in adjacent hexes, including allied units.  Devastating against fighters, and when used en masse (6+ Energy Mine launchers can easily saturate an area).</li>
             <li>Opponents will not be able to see where you have targeted your Energy Mines until after firing is resolved, just the fact that they've been launched. Launched mines also have a 25% chance to scatter or dissipate harmlessly.</li> 
         <h5>Pulsar Mines</h5>
-            <li>An automated short-range weapon that fires at passing fighters.  The weapon will automatically track enemy fighters during the Movement Phase, and attack any that came within arc and range during their movement in the Firing Phase.  It can fire up to 18 shots per turn.</li> 
+            <li>An automated short-range weapon that fires at passing fighters.  The weapon will automatically track enemy fighters during the Movement Phase, and attack any that came within arc and range before the Firing Phase begins.  Each Pulsar Mine can fire up to 18 shots per turn.</li> 
     <a class="back-to-top" href="#top">↩ Back to Top</a>            
 
 
@@ -455,9 +455,10 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             <li>The Hyach player is free to distribute these points as desired among the three fire control categories (capital ships/heavy combat vessels, medium ships, and fighters/shuttles) each turn, but cannot allocate more than two to any given category.</li>    
         <h5>Hyach Specialists</h5>
             <li>Some Hyach crewmen receive special training as Specialists. In addition to their usual functions at their posts, they can provide their singular expertise at key moments in battle.</li>
-            <li>Ships with at least one Specialist slot on-board must select these on the first turn the ship is deployed.  
-                To do so, in Initial Orders use the 'Specialists' technical system to equip Specialists on each applicable ship, up to their maximum allowance. 
-                Only one of each Specialist type can be picked per ship. You can then use Specialist on any Initial Orders phase (including the turn they were selected) using the + button on the Specialist System.</li>
+            <li>Ships with at least one Specialist slot on-board must select these on the turn the ship is deployed.  
+                To do so, in Deployment phase use the 'Specialists' technical system to select Specialists on each applicable ship, up to their maximum allowance. 
+                Only one of each Specialist type can be picked per ship. You can then use your Specialists using the + button on the Specialist System in the game phase you want to use them. 
+                Note, different Specialists can be used at different times e.g. Power/Sensor Specialists can only be used in Initail Orders phase, whereas Thruster/Engine Specialists could also be used in Movement Phase and Targeting/Weapon Specilists could be used in any phase up to Firing.</li>
             <li>Specialists come in a range of different types,and these have been summarised below:
                 <ul class="circle-list">
                     <li><strong>Computer:</strong> Generates two extra Bonus Fire Control Points (BFCP) this turn.</li>
