@@ -853,6 +853,23 @@ private function setWaiting() {
       
         return $blockedHexes;
     } //endof function getBlockedHexes
+
+    
+    public function getEnormousHexes() {
+        $enormousHexes = [];
+        
+        foreach ($this->ships as $ship) {
+            if($ship->isDestroyed()) continue;
+
+            if ($ship->Enormous) { // Only enormous units block LoS
+                $position = $ship->getHexPos(); 
+                $enormousHexes[] = $position;
+            }    
+
+        }
+      
+        return $enormousHexes;
+    } //endof function enormousHexes    
            
 
     public function getMinTurnDeployedSlot($slotid, $depavailable) {
