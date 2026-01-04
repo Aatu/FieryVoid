@@ -536,7 +536,7 @@ if ($asteroids == false && $moons == false) {
 			-->
 			
             <div class="button-container">
-                <span class="btn btn-secondary-lobby-leaveGame leave">Leave Game</span>
+                <span class="btn btn-secondary-lobby leave">Leave Game</span>
             </div>
 			
 		</div>
@@ -771,10 +771,8 @@ if ($asteroids == false && $moons == false) {
         <div class="system regular">
             <div class="systemcontainer">
                 <div class="icon">
-                    <div class="slot_data two">
-                        <span class="label">POINTS:</span>
-                        <span class="value"><?php print($slot->points == -1 ? '<span class="unlimited-points-text">UNLIMITED</span>' : $slot->points); ?></span>
-                    </div>
+                    <div class="efficiency value"></div>
+                    <div class="iconmask"></div>
                     <div class="UI">
                         <div class="button stopoverload"></div>
                         <div class="button overload"></div>
