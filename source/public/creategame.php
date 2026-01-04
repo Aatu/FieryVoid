@@ -197,7 +197,8 @@
                 <div class="scenario-row">
                     <label for="tier">EXPECTED POWER LEVEL:</label>
                     <select id="tier">
-                        <option value="Tier 1">Tier 1</option>
+                        <option value="Any">Any</option>                        
+                        <option value="Tier 1" selected>Tier 1</option>
                         <option value="Tier 2">Tier 2</option>
                         <option value="Tier 3">Tier 3</option>
                         <option value="Ancient">Ancient</option>
@@ -213,7 +214,7 @@
                     <label for="customfactions">CUSTOM FACTIONS / UNITS:</label>
                     <select id="customfactions">
                         <option value="Allowed">Allowed</option>
-                        <option value="Not allowed">Not allowed</option>
+                        <option value="Not allowed" selected>Not allowed</option>
                     </select>
                 </div>
                 <div class="scenario-row">
@@ -229,8 +230,8 @@
                 <div class="scenario-row">
                     <label for="borders">MAP BORDERS:</label>
                     <select id="borders">
-                        <option value="Unit leaving map is destroyed">Unit leaving map is destroyed</option>
                         <option value="Unit ending movement out of map is destroyed">Unit ending movement out of map is destroyed</option>
+                        <option value="Unit leaving map is destroyed">Unit leaving map is destroyed</option>
                     </select>
                 </div>
                 <div class="scenario-row">
