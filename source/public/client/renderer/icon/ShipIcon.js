@@ -505,6 +505,7 @@ window.ShipIcon = function () {
         return null;
     };
 
+
     ShipIcon.prototype.showWeaponArc = function (ship, weapon) {
         var hexDistance = window.coordinateConverter.getHexDistance();
 
@@ -772,36 +773,79 @@ window.ShipIcon = function () {
         this.BDEWSprite = null;
     };
 
-    ShipIcon.prototype.showHexagonAroundShip = function(size, system){  //add hexagon around ship then add it to an array of hexagons around ship tied to unqiue system-currently only used for Gravity Net, so this would be that gravity net
-       
+    ShipIcon.prototype.showHexagonAroundShip = function(shooter, shooterIcon, target, system, size) {
         var hexDistance = window.coordinateConverter.getHexDistance();
-        var dis = (size + 0.6) * hexDistance; //Need the extra 0.6 just to cover the 20th hex visually - DK
-        var color = new THREE.Color(25 / 255, 125 / 255, 25 / 255);
+        var systemArcs = shipManager.systems.getArcs(shooter, system);
+        
+        // 1. Arc Math (relative to the shooter's orientation)
+            /*
+             var dis = weapon.rangePenalty === 0 ? hexDistance * weapon.range : 50 / weapon.rangePenalty * hexDistance;
+            var arcs = shipManager.systems.getArcs(ship, weapon);
+            var arcLength = arcs.start === arcs.end ? 360 : mathlib.getArcLength(arcs.start, arcs.end);
+            var arcStart = mathlib.addToDirection(0, arcLength * -0.5);
+            var arcFacing = mathlib.addToDirection(arcs.end, arcLength * -0.5);
+            */       
 
-        // Create a hexagon shape
+        // 2. Setup the Hexagon Geometry
+        var dis = (size + 0.6) * hexDistance;
         var hexShape = new THREE.Shape();
         for (let i = 0; i < 6; i++) {
-            let angle = (i * Math.PI) / 3; // 60-degree increments
+            let angle = (i * Math.PI) / 3;
             let x = dis * Math.cos(angle);
             let y = dis * Math.sin(angle);
-            if (i === 0) {
-                hexShape.moveTo(x, y);
-            } else {
-                hexShape.lineTo(x, y);
-            }
+            if (i === 0) hexShape.moveTo(x, y);
+            else hexShape.lineTo(x, y);
         }
         hexShape.closePath();
 
-        var geometry = new THREE.ShapeGeometry(hexShape);
-        var material = new THREE.MeshBasicMaterial({ color: color, opacity: 0.2, transparent: true });
-        var hexagon = new THREE.Mesh(geometry, material);
-        hexagon.position.z = -1;
+        var plane1 = new THREE.Plane();
+        var plane2 = new THREE.Plane();
+        var shooterRotation = shooterIcon.mesh.rotation.z;
 
+        // Normalize angles to 0 -> 2PI range
+        const TWO_PI = Math.PI * 2;
+        var offset = 0;
+        var angleStart = mathlib.degreeToRadian(systemArcs.start + offset) + shooterRotation;
+        var angleEnd = mathlib.degreeToRadian(systemArcs.end + offset) + shooterRotation;
+        var isLargeArc = false;
+        if(angleStart-angleEnd != 360){ //360 edge case needs isLargeArc to be false
+            // Calculate the angular span
+            var span = angleEnd - angleStart;
+            while (span < 0) span += TWO_PI;
+            //while (span > TWO_PI) span -= TWO_PI;
+            isLargeArc = span < Math.PI;
+        }
 
-        this.shipHexagonSpritesMap.set(system, hexagon); //Map with Key:Value
-        this.mesh.add(this.shipHexagonSpritesMap.get(system));        
+        var shooterWorldPos = new THREE.Vector3();
+        shooterIcon.mesh.getWorldPosition(shooterWorldPos);
 
-        return null;
+        var normal1 = new THREE.Vector3(Math.cos(angleStart + Math.PI/2), -Math.sin(angleStart + Math.PI/2), 0);
+        plane1.setFromNormalAndCoplanarPoint(normal1, shooterWorldPos);        
+
+        var normal2 = new THREE.Vector3(Math.cos(angleEnd - Math.PI/2), -Math.sin(angleEnd - Math.PI/2), 0);
+        plane2.setFromNormalAndCoplanarPoint(normal2, shooterWorldPos);
+
+        var hexMaterial = new THREE.MeshBasicMaterial({ 
+            color: new THREE.Color(0.1, 0.5, 0.1), 
+            opacity: 0.3, 
+            transparent: true,
+            side: THREE.DoubleSide,
+            clippingPlanes: [plane1, plane2],
+            clipIntersection: !isLargeArc
+        });
+
+        // 5. Create and Attach to TARGET
+        var hexagon = new THREE.Mesh(new THREE.ShapeGeometry(hexShape), hexMaterial);       
+        hexagon.position.set(0, 0, -1); 
+        this.mesh.add(hexagon);
+        this.shipHexagonSpritesMap.set(system, hexagon);
+        /*
+        //plane/arc helpers to troubleshoot arc placement.
+        var helper1 = new THREE.PlaneHelper(plane1, 1000, 0xff0000); // Red
+        var helper2 = new THREE.PlaneHelper(plane2, 1000, 0x00ff00); // Green
+        shooterIcon.mesh.parent.add(helper1);
+        shooterIcon.mesh.parent.add(helper2);
+        */
     };
 
     ShipIcon.prototype.hideHexagonAroundShip = function(system){

@@ -117,18 +117,20 @@ window.PreFiringPhaseStrategy = function () {
     };
 
     PreFiringPhaseStrategy.prototype.onAddGravityNetHexagon = function(payload){ //When a gravity designates a target add a hexagon equal to move range around target ship. 
-        var ship = payload.ship;
+        var shooter = payload.shooter;
+        var target = payload.target;        
         var system = payload.system;        
-        var icon = this.shipIconContainer.getByShip(ship);
+        var shooterIcon = this.shipIconContainer.getByShip(shooter);
+        var targetIcon = this.shipIconContainer.getByShip(target);
         var hexagonSize = system.moveDistance;
-        icon.showHexagonAroundShip(hexagonSize, system);
+        targetIcon.showHexagonAroundShip(shooter, shooterIcon, target, system, hexagonSize);
     };  
 
     PreFiringPhaseStrategy.prototype.onRemoveGravityNetHexagon = function(payload){ //When a gravity designates a move target location for its target, remove the hexgon(equal to move range)
-        var ship = payload.ship;    
+        var target = payload.target;    
         var system = payload.system;    
-        var icon = this.shipIconContainer.getByShip(ship);        
-        icon.hideHexagonAroundShip(system);
+        var iconTarget = this.shipIconContainer.getByShip(target);        
+        iconTarget.hideHexagonAroundShip(system);
     };
 
     return PreFiringPhaseStrategy;
